@@ -57,21 +57,21 @@ public class TokenList extends ModelList<ReducedToken>
   public TokenList.Iterator _getIterator() {
     return new TokenList.Iterator();
   }
-  
+
   public class Iterator extends ModelList<ReducedToken>.Iterator {
-    
+
     private int _offset;
-  
+
     public Iterator() {
       ((ModelList<ReducedToken>)TokenList.this).super();
       _offset = 0;
     }
-    
+
     Iterator(Iterator that) {
       ((ModelList<ReducedToken>)TokenList.this).super(that);
       _offset = that.getBlockOffset();
     }
-    
+
     /**
      * Makes a fresh copy of this TokenList.Iterator.
      * copy() returns a ModelList<ReducedToken>.Iterator copy
@@ -83,29 +83,29 @@ public class TokenList extends ModelList<ReducedToken>
     public TokenList.Iterator _copy() {
       return new Iterator(this);
     }
-    
+
     public void setTo(TokenList.Iterator that) {
       super.setTo(that);
       _offset = that.getBlockOffset();
     }
-    
+
     public int getBlockOffset() {
       return _offset;
     }
-    
+
     public void setBlockOffset(int offset) {
       _offset = offset;
     }
-    
+
     /**
     * Returns the current commented/quoted state at the cursor.
     * @return FREE|INSIDE_BLOCK_COMMENT|INSIDE_LINE_COMMENT|INSIDE_SINGLE_QUOTE|
     * INSIDE_DOUBLE_QUOTE
     */
     public ReducedModelState getStateAtCurrent() {
-      
+
       ReducedModelState state = FREE;
-      
+
       if (atFirstItem() || atStart() || TokenList.this.isEmpty()) {
         state = FREE;
       }
@@ -142,8 +142,8 @@ public class TokenList extends ModelList<ReducedToken>
       }
       return state;
     }
-    
-    
+
+
     /**
     * Handles the details of the case where a brace is inserted into a gap.
     * Do not call this unless the current token is a gap!
@@ -160,7 +160,7 @@ public class TokenList extends ModelList<ReducedToken>
       this.next(); // now pointing at second half of gap
       this.setBlockOffset(0);
     }
-  
+
     /**
     * Helper function to _insertBrace.
     * Handles the details of the case where brace is inserted between two
@@ -171,7 +171,7 @@ public class TokenList extends ModelList<ReducedToken>
       this.next();
       this.setBlockOffset(0);
     }
-    
+
     /**
     * Splits the current brace if it is a multiple character brace and
     * fulfills certain conditions.
@@ -201,7 +201,7 @@ public class TokenList extends ModelList<ReducedToken>
             // change current Brace to only be first character
             current().setType(first);
             ReducedModelState oldState = current().getState();
-            
+
             // then put a new brace after the current one
             next();
             insert( Brace.MakeBrace(second, oldState) );
@@ -209,8 +209,8 @@ public class TokenList extends ModelList<ReducedToken>
             prev();
           }
     }
-    
-    
+
+
     /**
     * The walk function.
     * Walks along the list on which ReducedModel is based from the current
@@ -221,20 +221,20 @@ public class TokenList extends ModelList<ReducedToken>
       if (this.atStart()) {
         this.next();
       }
-      
+
       // If there's no text after here, nothing to update!
       if (this.atEnd()) {
         return;
       }
-      
+
       ReducedModelState curState = this.getStateAtCurrent();
       // Free if at the beginning
       while (!this.atEnd()) {
         curState = curState.update(this);
       }
     }
-    
-    
+
+
     /**
     * Updates the BraceReduction to reflect cursor movement.
     * Negative values move left from the cursor, positive values move
@@ -244,7 +244,7 @@ public class TokenList extends ModelList<ReducedToken>
     public void move(int count) {
       _offset = _move(count, _offset);
     }
-    
+
     /**
     * Helper function for move(int).
     * @param count the number of chars to move.  Negative values move back,
@@ -258,9 +258,9 @@ public class TokenList extends ModelList<ReducedToken>
       if (count == 0) {
         return retval;
       }
-      
+
       TokenList.Iterator it = this._copy();
-      
+
       //make copy of cursor and return new iterator?
       if (count > 0) {
         retval = it._moveRight(count, currentOffset);
@@ -272,7 +272,7 @@ public class TokenList extends ModelList<ReducedToken>
       it.dispose();
       return retval;
     }
-    
+
     /**
     * Helper function that performs forward moves.
     * <ol>
@@ -307,7 +307,7 @@ public class TokenList extends ModelList<ReducedToken>
       }
       return count + currentOffset; //returns the offset
     }
-    
+
     /**
     * Helper function that performs forward moves.
     * <ol>
@@ -327,14 +327,14 @@ public class TokenList extends ModelList<ReducedToken>
         if (!this.atStart()) //make sure list not empty
           currentOffset = this.current().getSize();
       }
-      
+
       if (this.atStart()) {
         throw new IllegalArgumentException("At Start");
       }
       while (count > currentOffset) {
         count = count - currentOffset;
         this.prev();
-        
+
         if (this.atStart()) {
           if (count > 0) {
             throw new IllegalArgumentException("At Start");
@@ -370,7 +370,7 @@ public class TokenList extends ModelList<ReducedToken>
       copyCursor.dispose();
       return;
     }
-    
+
     /**
     * Helper function for delete.
     * If deleting forward, move delTo the distance forward and call
@@ -385,7 +385,7 @@ public class TokenList extends ModelList<ReducedToken>
     */
     private int _delete(int count, TokenList.Iterator copyCursor)
     {
-      
+
       // Guarrantees that it's possible to delete count characters
       if (count >0) {
         try {
@@ -407,7 +407,7 @@ public class TokenList extends ModelList<ReducedToken>
       }
       return this.deleteRight(copyCursor);
     }
-    
+
     /**
     * Gets rid of extra text.
     * Because collapse cannot get rid of all deletion text as some may be
@@ -439,8 +439,8 @@ public class TokenList extends ModelList<ReducedToken>
         throw new IllegalArgumentException("Cannot clip left.");
       }
     }
-    
-    
+
+
     /**
     * Gets rid of extra text.
     * Because collapse cannot get rid of all deletion text as some may be
@@ -474,7 +474,7 @@ public class TokenList extends ModelList<ReducedToken>
         throw new IllegalArgumentException("Cannot clip left.");
       }
     }
-    
+
     /**
     * Deletes from offset in delFrom to endOffset in delTo.
     * Uses ModelList's collapse function to facilitate quick deletion.
@@ -482,22 +482,22 @@ public class TokenList extends ModelList<ReducedToken>
     int deleteRight(TokenList.Iterator delTo)
     {
       this.collapse(delTo);
-      
+
       // if both pointing to same item, and it's a gap
       if (this.eq(delTo) && this.current().isGap()) {
         // inside gap
         this.current().shrink(delTo.getBlockOffset()-this.getBlockOffset());
         return this.getBlockOffset();
       }
-      
-      
+
+
       //if brace is multiple char it must be a comment because the above if
       //test guarrantees it can't be a gap.
       if (!this.eq(delTo)) {
         this.clipLeft();
       }
       delTo.clipRight();
-      
+
       if (!this.atStart()) {
         this.prev();
       }
@@ -511,10 +511,10 @@ public class TokenList extends ModelList<ReducedToken>
         delToSizeCurr = delTo.current().getSize();
         delToTypeCurr = delTo.current().getType();
       }
-      
+
       //get info on previous item.
       delTo.prev(); //get stats on previous item
-      
+
       int delToSizePrev;
       String delToTypePrev;
       if (delTo.atStart()) { //no previous item, can't be at end
@@ -527,15 +527,15 @@ public class TokenList extends ModelList<ReducedToken>
         delToTypePrev = delTo.current().getType();
       }
       delTo.next(); //put delTo back on original node
-            
+
       int temp = _calculateOffset(delToSizePrev,delToTypePrev,
                                   delToSizeCurr, delToTypeCurr,
                                   delTo);
       this.setTo(delTo);
       return temp;
     }
-    
-    
+
+
     /**
     *By contrasting the delTo token after the walk to what it was before the
     *walk we can see how it has changed and where the offset should go.
@@ -550,8 +550,8 @@ public class TokenList extends ModelList<ReducedToken>
     {
       int offset;
       int delToSizeChange = delTo.current().getSize();
-      String delToTypeChange = delTo.current().getType();
-      
+//      String delToTypeChange = delTo.current().getType();
+
       //1)if there was a gap previous to the gap at delTo delTo should be
       //augmented by its size, and that size is the offset.
       //2)if the gap was not preceeded by a gap then it would not need to
@@ -564,12 +564,12 @@ public class TokenList extends ModelList<ReducedToken>
       }
       //this means that the item at the end formed a double brace with the
       //item that the delete left preceeding it. /dddddd*
-      
+
       //the final item shrunk. This can only happen if the starting item
       //stole one of its braces: /ddddd*/
       //or if it was a double brace that had to get broken because it was
       //now commented or no longer has an open block
-      
+
       //EXAMPLES: /*___*/  becoming */
       //          /*___*/  delete the first star, through the spaces to get
       //                   /*/
@@ -577,7 +577,7 @@ public class TokenList extends ModelList<ReducedToken>
       //         //*__\n// becoming ////   , the // is broken
       //THIS MUST HAVE THE previous items size and type passed in from
       //before the update. This way we know how it's changing too.
-      
+
       // In this if clause, special characters are initially separated by some text
       // (represented here as ellipses), and when the text is deleted, the special
       // characters come together.  Sometimes, this breaks up the second token if
@@ -591,7 +591,7 @@ public class TokenList extends ModelList<ReducedToken>
             // /...// => //-/
             (delToTypeCurr.equals("//") &&
              _checkPrevEquals(delTo,"//")))) ||
-          
+
           ((delToTypePrev.equals("*")) &&
            // *.../* => */-*
            ((delToTypeCurr.equals("/*") &&
@@ -599,7 +599,7 @@ public class TokenList extends ModelList<ReducedToken>
             // *...// => */-/
             (delToTypeCurr.equals("//") &&
              _checkPrevEquals(delTo,"*/")))) ||
-          
+
           ((delToTypePrev.equals("\\")) &&
            // \...\\ => \\-\
            ((delToTypeCurr.equals("\\\\") &&
@@ -622,11 +622,11 @@ public class TokenList extends ModelList<ReducedToken>
                   delTo.current().getType().equals("/*")) ||
                  (delToTypeCurr.equals("/") &&
                   delTo.current().getType().equals("//")))) ||
-               
+
                ((delToTypePrev.equals("*")) &&
                 ((delToTypeCurr.equals("/") &&
                   delTo.current().getType().equals("*/")))) ||
-               
+
                ((delToTypePrev.equals("\\")) &&
                 ((delToTypeCurr.equals("\\") &&
                   delTo.current().getType().equals("\\\\")) ||
@@ -643,7 +643,7 @@ public class TokenList extends ModelList<ReducedToken>
       }
       return offset;
     }
-    
+
     /**
     * Checks if the previous token is of a certain type.
     * @param delTo the cursor for calling prevItem on
@@ -658,10 +658,10 @@ public class TokenList extends ModelList<ReducedToken>
       }
       return delTo.prevItem().getType().equals(match);
     }
-   
+
     public String toString() {
       return ""+ this.current();
     }
-    
+
   }
 }

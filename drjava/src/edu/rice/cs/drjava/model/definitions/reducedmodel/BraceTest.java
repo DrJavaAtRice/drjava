@@ -4,7 +4,7 @@
  * at http://sourceforge.net/projects/drjava
  *
  * Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)
- * 
+ *
  * DrJava is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -49,7 +49,7 @@ import  junit.extensions.*;
  * @version $Id$
  */
 public final class BraceTest extends TestCase implements ReducedModelStates {
- 
+
   protected Brace rparen;
   protected Brace lparen;
 
@@ -90,9 +90,8 @@ public final class BraceTest extends TestCase implements ReducedModelStates {
    * Tests the failure to make a Brace with a non-special character.
    */
   public void testMakeBraceFailure() {
-    Brace brace;
     try {
-      brace = Brace.MakeBrace("k", FREE);
+      Brace.MakeBrace("k", FREE);
     } catch (BraceException e) {
       assertEquals("Invalid brace type \"k\"", e.getMessage());
     }

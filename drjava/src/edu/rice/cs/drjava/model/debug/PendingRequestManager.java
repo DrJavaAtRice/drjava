@@ -60,12 +60,12 @@ import java.util.Vector;
 public class PendingRequestManager {
   private JPDADebugger _manager;
   private Hashtable<String, Vector<DocumentDebugAction>> _pendingActions;
-  
+
   public PendingRequestManager(JPDADebugger manager) {
     _manager = manager;
     _pendingActions = new Hashtable<String, Vector<DocumentDebugAction>>();
   }
-  
+
   /**
    * Called if a breakpoint is set before its class is prepared
    * @param action The DebugAction that is pending
@@ -76,7 +76,7 @@ public class PendingRequestManager {
     actions = _pendingActions.get(className);
     if (actions == null) {
       actions = new Vector<DocumentDebugAction>();
-      
+
       // only create a ClassPrepareRequest once per class
       ClassPrepareRequest request =
         _manager.getEventRequestManager().createClassPrepareRequest();
@@ -86,10 +86,10 @@ public class PendingRequestManager {
       request.enable();
       //System.out.println("Creating prepareRequest in class " + className);
     }
-    actions.addElement(action);
+    actions.add(action);
     _pendingActions.put(className, actions);
   }
-  
+
   /**
    * Called if a breakpoint is set and removed before its class is prepared
    * @param action The DebugAction that was set and removed
@@ -101,13 +101,13 @@ public class PendingRequestManager {
     if (actions == null) {
       return;
     }
-    actions.removeElement(action);
+    actions.remove(action);
     // check if the vector is empty
     if (actions.size() == 0) {
       _pendingActions.remove(className);
     }
   }
-  
+
   /**
    * Called by the EventHandler whenever a ClassPrepareEvent occurs.
    * This will take the event, get the class that was prepared, lookup
@@ -128,13 +128,13 @@ public class PendingRequestManager {
     //DrJava.consoleOut().println("equals getReferenceType: " +
     //                   rt.equals(_manager.getReferenceType(rt.name())));
     String className = rt.name();
-    
+
     // crop off the $ if there is one and anything after it
     int indexOfDollar = className.indexOf('$');
     if (indexOfDollar > 1) {
       className = className.substring(0, indexOfDollar);
     }
-    
+
     // Get the pending actions for this class (and inner classes)
     Vector<DocumentDebugAction> actions = _pendingActions.get(className);
     Vector<DocumentDebugAction> failedActions =
@@ -145,14 +145,14 @@ public class PendingRequestManager {
       // since we're not interested in this class.
       return;
     }
-    else if (actions.isEmpty()) { 
+    else if (actions.isEmpty()) {
       // any actions that were waiting for this class to be prepared have been
       // removed
       _manager.getEventRequestManager().deleteEventRequest(event.request());
       return;
     }
     for (int i = 0; i < actions.size(); i++) {
-      int lineNumber = actions.elementAt(i).getLineNumber();
+      int lineNumber = actions.get(i).getLineNumber();
       if (lineNumber != DebugAction.ANY_LINE) {
         try {
           List lines = rt.locationsOfLine(lineNumber);
@@ -171,33 +171,35 @@ public class PendingRequestManager {
       try {
         Vector<ReferenceType> refTypes = new Vector<ReferenceType>();
         refTypes.add(rt);
-        if (!actions.elementAt(i).createRequests(refTypes)) {
+        // next line was in condition for if
+        actions.get(i).createRequests(refTypes);
+//        if (!) {
           // if no request created, skip this action
           //i++;
-        }
-        else {
+//        }
+//        else {
           // Experiment: try never removing the action or event request.
           //  This way, multiple classloads of this class will always have
           //  the DebugActions set properly
           /*
-            
+
           // if request created, remove the current action and keep i here
-          actions.removeElementAt(i);
+          actions.remove(i);
           // check if the vector is empty
           if (actions.size() == 0) {
             _pendingActions.remove(className);
             _manager.getEventRequestManager().deleteEventRequest(event.request());
           }
         */
-        }
+//        }
       }
       catch (DebugException e) {
-        failedActions.addElement(actions.elementAt(i));
+        failedActions.add(actions.get(i));
         //i++;
        // DrJava.consoleOut().println("Exception preparing request!! " + e);
       }
     }
-    
+
     // For debugging purposes
     /*
     List l = _manager.getEventRequestManager().breakpointRequests();

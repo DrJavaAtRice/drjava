@@ -4,7 +4,7 @@
  * at http://sourceforge.net/projects/drjava
  *
  * Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)
- * 
+ *
  * DrJava is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -47,7 +47,7 @@ import java.util.Vector;
 /**
  * Represents a configurable option in DrJava that has a static (programmatic) type of T.
  * Classes can magically extend this class and the entire rest of the Configuration magic
- * typing framework will work for it.  Named subclasses aren't even necessary -- but 
+ * typing framework will work for it.  Named subclasses aren't even necessary -- but
  * may be convenient in order to re-use code.  For example, to make an anonymous class
  * that handled options of static type Integer, with the name "indent.level", you use the
  * following code:
@@ -60,26 +60,26 @@ import java.util.Vector;
  * </pre>
  * the above example is simple because Integers (like most Java(tm) standard-lib data-type
  * classes) have handy toString() / parsing methods/constructors.
- * 
+ *
  * @version $Id$
  */
 public abstract class Option<T> extends OptionParser<T> implements FormatStrategy<T> {
-  
-  
+
+
   /**
    * a hashtable that maps Configuration Objects to a list of listeners for this
    * particular option.  Part of the magic inner workings of this package.
    */
   final Hashtable<Configuration,Vector<OptionListener<T>>> listeners=
     new Hashtable<Configuration,Vector<OptionListener<T>>>();
-  
-  /** 
+
+  /**
    * constructor that takes in a name and default value
    * @param name the name of this option (eg. "indent.level");
    * @param def the default value for this option (eg. "2")
    */
   public Option(String name, T def) { super(name,def); }
-  
+
   /**
    * the ability to format a statically typed T value to a String.  Since T is an Object,
    * the default implementation uses the .toString() method.
@@ -87,23 +87,23 @@ public abstract class Option<T> extends OptionParser<T> implements FormatStrateg
    * @throws NullPointerException if value is null
    */
   public String format(T value) { return value.toString(); }
-  
+
   public String getDefaultString() { return format(getDefault()); }
-  
+
   // PACKAGE PRIVATE MAGIC STUFF
   // this package-private magic stuff makes all of the config "magic" types work.
   // basically, it's achieved via a double-dispatch stunt, so that the type information
   // is saved.
-  
-  /** 
+
+  /**
    * uses format() and getOption() so that any changes in format will automatically
    * be applied to getString().
    */
   String getString(DefaultOptionMap om) {
     return format(getOption(om));
   }
-  
-  
+
+
   /**
    * Sends an OptionEvent to all OptionListeners who have registered on this Option.
    */
@@ -113,10 +113,10 @@ public abstract class Option<T> extends OptionParser<T> implements FormatStrateg
     OptionEvent<T> e = new OptionEvent<T>(this,val);
     int size = v.size();
     for(int i = 0; i < size; i++) {
-      v.elementAt(i).optionChanged(e);
+      v.get(i).optionChanged(e);
     }
   }
-  
+
   /** magic listener-bag adder */
   void addListener(Configuration c, OptionListener<T> l) {
     Vector<OptionListener<T>> v = listeners.get(c);
@@ -124,14 +124,14 @@ public abstract class Option<T> extends OptionParser<T> implements FormatStrateg
       v = new Vector<OptionListener<T>>();
       listeners.put(c,v);
     }
-    v.addElement(l);
+    v.add(l);
   }
-  
+
   /** magic listener-bag remover */
   void removeListener(Configuration c, OptionListener<T> l) {
     Vector<OptionListener<T>> v = listeners.get(c);
     if(v==null) return;
-    if(v.removeElement(l) && v.size() == 0) {
+    if(v.remove(l) && v.size() == 0) {
       listeners.remove(c);
     }
   }

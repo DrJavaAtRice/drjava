@@ -4,7 +4,7 @@
  * at http://sourceforge.net/projects/drjava
  *
  * Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)
- * 
+ *
  * DrJava is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -94,7 +94,7 @@ public final class IndentTest extends TestCase {
 
   /**
    * put your documentation comment here
-   * @return 
+   * @return
    */
   public static Test suite() {
     return  new TestSuite(IndentTest.class);
@@ -117,7 +117,7 @@ public final class IndentTest extends TestCase {
       "*/\n" +
       "\n";
 
-    String indented = 
+    String indented =
       "  foo();\n" +     // (skip this line)
       "  // foo\n" +     // align to start of statement
       "  /**\n" +     // start of statement
@@ -135,7 +135,7 @@ public final class IndentTest extends TestCase {
     doc.indentLines(9, doc.getLength());
     _assertContents(indented, doc);
   }
-  
+
   /**
    * Test case for SourceForge bug# 681203.
    */
@@ -165,7 +165,7 @@ public final class IndentTest extends TestCase {
     doc._indentLine(Indenter.ENTER_KEY_PRESS);
     _assertContents(starAdded, doc);
   }
-    
+
   /**
    * Test case for SourceForge bug# 681203.
    */
@@ -199,7 +199,7 @@ public final class IndentTest extends TestCase {
     doc._indentLine(Indenter.ENTER_KEY_PRESS);
     _assertContents(starAdded, doc);
   }
-  
+
   /**
    * Regression test for paren phrases.
    */
@@ -217,7 +217,7 @@ public final class IndentTest extends TestCase {
       "foo() +\n" +
       "z\n" +
       "];\n";
-      
+
     String indented =
       "foo(i,\n" +
       "    j.\n" +     // new paren phrase
@@ -231,13 +231,13 @@ public final class IndentTest extends TestCase {
       "              foo() +\n" +     // not new phrase
       "            z\n" +     // new phrase
       "              ];\n";     // not new phrase (debatable)
-    
+
     doc.insertString(0, text, null);
     _assertContents(text, doc);
     doc.indentLines(0, doc.getLength());
     _assertContents(indented, doc);
   }
-  
+
   /**
    * Regression test for braces.
    */
@@ -255,10 +255,10 @@ public final class IndentTest extends TestCase {
      "/* comment */ }\n" +
      "class Bar {\n" +
      "/* comment\n" +
-     "*/ }\n" + 
+     "*/ }\n" +
      "int i;\n" +
      "}\n";
-     
+
    String indented =
      "{\n" +
      "  class Foo\n" +     // After open brace
@@ -276,13 +276,13 @@ public final class IndentTest extends TestCase {
      "  int i;\n" +     // After close brace
      "}\n";
 
-   
+
    doc.insertString(0, text, null);
    _assertContents(text, doc);
    doc.indentLines(0, doc.getLength());
    _assertContents(indented, doc);
  }
-  
+
   /**
    * Regression test for arrays.
    */
@@ -292,18 +292,18 @@ public final class IndentTest extends TestCase {
      "{\n"  +
      "1,\n" +
      "2,\n" +
-     "3},\n" + 
+     "3},\n" +
      "{\n" +
      "4,\n" +
      "5}\n" +
      "};\n";
-     
+
    String indented =
      "int[2][] a ={\n" +
      "  {\n"  +
      "    1,\n" +
      "    2,\n" +
-     "    3},\n" + 
+     "    3},\n" +
      "  {\n" +
      "    4,\n" +
      "    5}\n" +
@@ -311,13 +311,13 @@ public final class IndentTest extends TestCase {
 
 
 
-   
+
    doc.insertString(0, text, null);
    _assertContents(text, doc);
    doc.indentLines(0, doc.getLength());
    _assertContents(indented, doc);
  }
-  
+
   /**
    * Regression test for common cases.
    */
@@ -329,7 +329,7 @@ public final class IndentTest extends TestCase {
       "     extends F\n" +
       " {\n" +
       "   }";
-      
+
     String indented =
       "int x;\n" +
       "int y;\n" +
@@ -337,13 +337,13 @@ public final class IndentTest extends TestCase {
       "  extends F\n" +
       "{\n" +
       "}";
-    
+
     doc.insertString(0, text, null);
     _assertContents(text, doc);
     doc.indentLines(0, doc.getLength());
     _assertContents(indented, doc);
   }
-  
+
   /**
    * Regression test for switch statements.
    */
@@ -358,7 +358,7 @@ public final class IndentTest extends TestCase {
       "bar();\n" +
       "break;\n" +
       "}\n";
-      
+
     String indented =
       "switch (x) {\n" +
       "  case 1:\n" +     // Starting new statement after brace
@@ -369,14 +369,14 @@ public final class IndentTest extends TestCase {
       "    bar();\n" +     // Not new stmt
       "    break;\n" +     // Indent to prev stmt
       "}\n";     // Close brace
-    
-    
+
+
     doc.insertString(0, text, null);
     _assertContents(text, doc);
     doc.indentLines(0, doc.getLength());
     _assertContents(indented, doc);
   }
-  
+
   /**
    * Regression test for ternary operators.
    */
@@ -394,7 +394,7 @@ public final class IndentTest extends TestCase {
       "test4 = (x ?\n" +
       "y :\n" +
       "z);\n";
-      
+
     String indented =
       "test1 = x ? y : z;\n" +     // ternary on one line
       "test2 = x ? y :\n" +     // ? and : on one line
@@ -408,14 +408,14 @@ public final class IndentTest extends TestCase {
       "test4 = (x ?\n" +     // ternary in paren
       "           y :\n" +     // : with ? in paren stmt
       "           z);\n";     // in ternary in paren
-    
-    
+
+
     doc.insertString(0, text, null);
     _assertContents(text, doc);
     doc.indentLines(0, doc.getLength());
     _assertContents(indented, doc);
   }
-  
+
   /**
    * put your documentation comment here
    * @exception BadLocationException
@@ -521,7 +521,6 @@ public final class IndentTest extends TestCase {
    * @exception BadLocationException
    */
   public void testEndOfBlockComment () throws BadLocationException {
-    BraceReduction rm = doc.getReduced();
     doc.insertString(0, "\n{\n  hello;\n /*\n hello\n */", null);
     doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
     _assertContents("\n{\n  hello;\n /*\n hello\n */", doc);
@@ -532,7 +531,6 @@ public final class IndentTest extends TestCase {
    * @exception BadLocationException
    */
   public void testAfterBlockComment () throws BadLocationException {
-    BraceReduction rm = doc.getReduced();
     doc.insertString(0, "\n{\n  hello;\n  /*\n  hello\n  */\nhello", null);
     doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
     _assertContents("\n{\n  hello;\n  /*\n  hello\n  */\n  hello", doc);
@@ -543,7 +541,6 @@ public final class IndentTest extends TestCase {
    * @exception BadLocationException
    */
   public void testAfterBlockComment3 () throws BadLocationException {
-    BraceReduction rm = doc.getReduced();
     doc.insertString(0, "\n{\n  hello;\n  /*\n  hello\n  grr*/\nhello", null);
     doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
     _assertContents("\n{\n  hello;\n  /*\n  hello\n  grr*/\n  hello", doc);
@@ -554,7 +551,6 @@ public final class IndentTest extends TestCase {
    * @exception BadLocationException
    */
   public void testAfterBlockComment4 () throws BadLocationException {
-    BraceReduction rm = doc.getReduced();
     doc.insertString(0, "\n{\n  hello;\n /*\n  hello\n */ hello", null);
     doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
     _assertContents("\n{\n  hello;\n /*\n  hello\n  */ hello", doc);
@@ -565,7 +561,6 @@ public final class IndentTest extends TestCase {
    * @exception BadLocationException
    */
   public void testAfterBlockComment2 () throws BadLocationException {
-    BraceReduction rm = doc.getReduced();
     doc.insertString(0, "\n{\n  hello;\n  /*\n  hello\n  */ (\nhello", null);
     doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
     _assertContents("\n{\n  hello;\n  /*\n  hello\n  */ (\n      hello", doc);
@@ -676,7 +671,6 @@ public final class IndentTest extends TestCase {
    */
   public void testStartSimple () throws BadLocationException {
     // just paren
-    BraceReduction rm = doc.getReduced();
     doc.insertString(0, "abcde", null);
     doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
     _assertContents("abcde", doc);
@@ -688,7 +682,6 @@ public final class IndentTest extends TestCase {
    */
   public void testStartSpaceIndent () throws BadLocationException {
     // just paren
-    BraceReduction rm = doc.getReduced();
     doc.insertString(0, "  abcde", null);
     doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
     _assertContents("abcde", doc);
@@ -700,7 +693,6 @@ public final class IndentTest extends TestCase {
    */
   public void testStartBrace () throws BadLocationException {
     // just paren
-    BraceReduction rm = doc.getReduced();
     doc.insertString(0, "public class temp \n {", null);
     doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
     _assertContents("public class temp \n{", doc);
@@ -712,7 +704,6 @@ public final class IndentTest extends TestCase {
    */
   public void testEndBrace () throws BadLocationException {
     // just paren
-    BraceReduction rm = doc.getReduced();
     doc.insertString(0, "public class temp \n{ \n  }", null);
     doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
     _assertContents("public class temp \n{ \n}", doc);
@@ -724,7 +715,6 @@ public final class IndentTest extends TestCase {
    */
   public void testInsideClass () throws BadLocationException {
     // just paren
-    BraceReduction rm = doc.getReduced();
     doc.insertString(0, "public class temp \n{ \ntext here", null);
     doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
     _assertContents("public class temp \n{ \n  text here", doc);
@@ -736,7 +726,6 @@ public final class IndentTest extends TestCase {
    */
   public void testInsideClassWithBraceSets () throws BadLocationException {
     // just paren
-    BraceReduction rm = doc.getReduced();
     doc.insertString(0, "public class temp \n{  ()\ntext here", null);
     doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
     _assertContents("public class temp \n{  ()\n  text here", doc);
@@ -748,7 +737,6 @@ public final class IndentTest extends TestCase {
    */
   public void testIgnoreBraceOnSameLine () throws BadLocationException {
     // just paren
-    BraceReduction rm = doc.getReduced();
     doc.insertString(0, "public class temp \n{  ()\n{text here", null);
     doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
     _assertContents("public class temp \n{  ()\n  {text here", doc);
@@ -771,7 +759,6 @@ public final class IndentTest extends TestCase {
    */
   public void testWeird () throws BadLocationException {
     // just paren
-    BraceReduction rm = doc.getReduced();
     doc.insertString(0, "hello\n", null);
     doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
     _assertContents("hello\n  ", doc);
@@ -783,7 +770,6 @@ public final class IndentTest extends TestCase {
    */
   public void testWierd2 () throws BadLocationException {
     // just paren
-    BraceReduction rm = doc.getReduced();
     doc.insertString(0, "hello", null);
     doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
     _assertContents("hello", doc);
@@ -795,7 +781,6 @@ public final class IndentTest extends TestCase {
    */
   public void testMotion () throws BadLocationException {
     // just paren
-    BraceReduction rm = doc.getReduced();
     doc.insertString(0, "hes{\n{abcde", null);
     doc.insertString(11, "\n{", null);
     // hes{\n{abcde\n{#
@@ -812,7 +797,6 @@ public final class IndentTest extends TestCase {
    */
   public void testNextCharIsNewline () throws BadLocationException {
     // just paren
-    BraceReduction rm = doc.getReduced();
     doc.insertString(0, "hes{\n{abcde", null);
     doc.insertString(11, "\n{", null);
     // hes{\n{abcde\n{#
@@ -829,7 +813,6 @@ public final class IndentTest extends TestCase {
    */
   public void testFor () throws BadLocationException {
     // just paren
-    BraceReduction rm = doc.getReduced();
     doc.insertString(0, "for(;;)\n", null);
     doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
     _assertContents("for(;;)\n  ", doc);
@@ -841,7 +824,6 @@ public final class IndentTest extends TestCase {
    */
   public void testFor2 () throws BadLocationException {
     // just paren
-    BraceReduction rm = doc.getReduced();
     doc.insertString(0, "{\n  for(;;)\n", null);
     doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
     _assertContents("{\n  for(;;)\n    ", doc);
@@ -853,7 +835,6 @@ public final class IndentTest extends TestCase {
    */
   public void testOpenParen () throws BadLocationException {
     // just paren
-    BraceReduction rm = doc.getReduced();
     doc.insertString(0, "hello(\n", null);
     doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
     _assertContents("hello(\n      ", doc);
@@ -865,7 +846,6 @@ public final class IndentTest extends TestCase {
    */
   public void testPrintString () throws BadLocationException {
     // just paren
-    BraceReduction rm = doc.getReduced();
     doc.insertString(0, "Sys.out(\"hello\"\n", null);
     doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
     _assertContents("Sys.out(\"hello\"\n          ", doc);
@@ -877,7 +857,6 @@ public final class IndentTest extends TestCase {
    */
   public void testOpenBracket () throws BadLocationException {
     // just paren
-    BraceReduction rm = doc.getReduced();
     doc.insertString(0, "hello[\n", null);
     doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
     _assertContents("hello[\n      ", doc);
@@ -889,7 +868,6 @@ public final class IndentTest extends TestCase {
    */
   public void testSquigglyAlignment () throws BadLocationException {
     // just paren
-    BraceReduction rm = doc.getReduced();
     doc.insertString(0, "{\n  }", null);
     doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
     _assertContents("{\n}", doc);
@@ -901,7 +879,6 @@ public final class IndentTest extends TestCase {
    */
   public void testSpaceBrace () throws BadLocationException {
     // just paren
-    BraceReduction rm = doc.getReduced();
     doc.insertString(0, "   {\n", null);
     doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
     _assertContents("   {\n     ", doc);
@@ -935,7 +912,6 @@ public final class IndentTest extends TestCase {
    */
   public void testEnter () throws BadLocationException {
     // just paren
-    BraceReduction rm = doc.getReduced();
     doc.insertString(0, "\n\n", null);
     doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
     _assertContents("\n\n", doc);
@@ -947,7 +923,6 @@ public final class IndentTest extends TestCase {
    */
   public void testEnter2 () throws BadLocationException {
     // just paren
-    BraceReduction rm = doc.getReduced();
     doc.insertString(0, "\n", null);
     doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
     _assertContents("\n", doc);
@@ -959,7 +934,6 @@ public final class IndentTest extends TestCase {
    */
   public void testNotRecognizeComments () throws BadLocationException {
     // just paren
-    BraceReduction rm = doc.getReduced();
     doc.insertString(0, "\nhello //bal;\n", null);
     doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
     _assertContents("\nhello //bal;\n  ", doc);
@@ -971,7 +945,6 @@ public final class IndentTest extends TestCase {
    */
   public void testNotRecognizeComments2 () throws BadLocationException {
     // just paren
-    BraceReduction rm = doc.getReduced();
     doc.insertString(0, "\nhello; /*bal*/\n ", null);
     doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
     _assertContents("\nhello; /*bal*/\n", doc);
@@ -983,7 +956,6 @@ public final class IndentTest extends TestCase {
    */
   public void testBlockIndent () throws BadLocationException {
     // just paren
-    BraceReduction rm = doc.getReduced();
     doc.insertString(0, "hello\n{\n{\n  {", null);
     doc.indentLines(8, 13);
     _assertContents("hello\n{\n  {\n    {", doc);
@@ -996,7 +968,6 @@ public final class IndentTest extends TestCase {
    * @exception BadLocationException
    */
   public void testBlockIndent2 () throws BadLocationException {
-    BraceReduction rm = doc.getReduced();
     doc.insertString(0, "  x;\n  y;\n", null);
     doc.indentLines(0, doc.getLength());
     _assertContents("x;\ny;\n", doc);
@@ -1007,7 +978,6 @@ public final class IndentTest extends TestCase {
    * @exception BadLocationException
    */
   public void testIndentInsideCommentBlock () throws BadLocationException {
-    BraceReduction rm = doc.getReduced();
     doc.insertString(0, "hello\n{\n/*{\n{\n*/\nhehe", null);
     doc.indentLines(0, 21);
     _assertContents("hello\n{\n  /*{\n   {\n   */\n  hehe", doc);
@@ -1019,7 +989,6 @@ public final class IndentTest extends TestCase {
    */
   public void testSecondLineProblem () throws BadLocationException {
     // just paren
-    BraceReduction rm = doc.getReduced();
     doc.insertString(0, "\n", null);
     doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
     _assertContents("\n", doc);
@@ -1031,7 +1000,6 @@ public final class IndentTest extends TestCase {
    */
   public void testSecondLineProblem2 () throws BadLocationException {
     // just paren
-    BraceReduction rm = doc.getReduced();
     doc.insertString(0, "a\n", null);
     doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
     _assertContents("a\n  ", doc);
@@ -1043,7 +1011,6 @@ public final class IndentTest extends TestCase {
    */
   public void testSmallFileProblem () throws BadLocationException {
     // just paren
-    BraceReduction rm = doc.getReduced();
     doc.insertString(0, "\n\n", null);
     doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
     _assertContents("\n\n", doc);
@@ -1060,7 +1027,7 @@ public final class IndentTest extends TestCase {
       "}\n" +
       "void x() {\n" +
       "\n" +
-      "}\n" + 
+      "}\n" +
       "\n" +
       "}\n" +
       ");\n";
@@ -1071,12 +1038,12 @@ public final class IndentTest extends TestCase {
       "  }\n" +
       "  void x() {\n" +
       "    \n" +
-      "  }\n" + 
+      "  }\n" +
       "  \n" +
       "}\n" +
       ");\n";
-    
-    
+
+
     doc.insertString(0, text, null);
     _assertContents(text, doc);
     doc.indentLines(0, doc.getLength());
@@ -1116,14 +1083,14 @@ public final class IndentTest extends TestCase {
     doc.indentLines(0, doc.getLength());
     _assertContents(indented, doc);
     doc.remove(0,doc.getLength() - 1);
-    
+
     text =
       "{\n" +
       "while (a < 5)\n" +
       "while (b < 5){\n" +
       "System.out.println(a + b);";
     indented =
-      "{\n" + 
+      "{\n" +
       "  while (a < 5)\n" +
       "    while (b < 5){\n" +
       "      System.out.println(a + b);";
@@ -1132,7 +1099,7 @@ public final class IndentTest extends TestCase {
     doc.indentLines(0, doc.getLength());
     _assertContents(indented, doc);
     doc.remove(0,doc.getLength() - 1);
-    
+
     text =
       "while (a < 5)\n" +
       "while (b < 5);\n" +
@@ -1146,17 +1113,17 @@ public final class IndentTest extends TestCase {
     doc.indentLines(0, doc.getLength());
     _assertContents(indented, doc);
     doc.remove(0,doc.getLength() - 1);
-    
-    text = 
+
+    text =
       "do\n" +
-      "do\n" + 
-      "x=5;\n" + 
+      "do\n" +
+      "x=5;\n" +
       "while(false);\n" +
       "while(false);\n";
-    indented = 
+    indented =
       "do\n" +
-      "  do\n" + 
-      "    x=5;\n" + 
+      "  do\n" +
+      "    x=5;\n" +
       "  while(false);\n" +
       "while(false);\n";
     doc.insertString(0, text, null);
@@ -1166,51 +1133,51 @@ public final class IndentTest extends TestCase {
     doc.remove(0,doc.getLength() - 1);
   }
  */
-  
+
   public void testLiveUpdateOfIndentLevel() throws BadLocationException {
-    
+
     String text =
       "int[2][] a ={\n" +
       "{\n"  +
       "1,\n" +
       "2,\n" +
-      "3},\n" + 
+      "3},\n" +
       "{\n" +
       "4,\n" +
       "5}\n" +
       "};\n";
-    
+
     String indentedBefore =
       "int[2][] a ={\n" +
       "  {\n"  +
       "    1,\n" +
       "    2,\n" +
-      "    3},\n" + 
+      "    3},\n" +
       "  {\n" +
       "    4,\n" +
       "    5}\n" +
       "};\n";
 
     String indentedAfter =
-      "int[2][] a ={\n" + 
-      "        {\n" + 
-      "                1,\n" + 
-      "                2,\n" + 
-      "                3},\n" + 
-      "        {\n" + 
-      "                4,\n" + 
-      "                5}\n" + 
+      "int[2][] a ={\n" +
+      "        {\n" +
+      "                1,\n" +
+      "                2,\n" +
+      "                3},\n" +
+      "        {\n" +
+      "                4,\n" +
+      "                5}\n" +
       "};\n";
-    
+
     doc.insertString(0, text, null);
     _assertContents(text, doc);
     doc.indentLines(0, doc.getLength());
     _assertContents(indentedBefore, doc);
     DrJava.getConfig().setSetting(OptionConstants.INDENT_LEVEL, new Integer(8));
     doc.indentLines(0, doc.getLength());
-    _assertContents(indentedAfter, doc);   
+    _assertContents(indentedAfter, doc);
   }
-  
+
   /**
    * tests that an if statment nested in a switch will be indented properly
    * @throws BadLocationException
@@ -1237,19 +1204,19 @@ public final class IndentTest extends TestCase {
       "    }\n" +
       "    break;\n" +
       "}\n";
-    
+
     doc.insertString(0, text, null);
     _assertContents(text, doc);
     doc.indentLines(0, doc.getLength());
     _assertContents(indented, doc);
   }
-  
+
   /**
    * Tests a list of files when indented match their correct indentations
    */
   public void testIndentationFromFile() throws IOException {
     File directory = new File("testFiles");
-    
+
     File[] unindentedFiles = {new File(directory, "IndentSuccesses.indent")
          /*, new File(directory, "IndentProblems.indent")*/};
     File[] correctFiles = {new File(directory, "IndentSuccessesCorrect.indent")
@@ -1273,7 +1240,7 @@ public final class IndentTest extends TestCase {
       fail("_indentAndCompare should have failed for IndentProblems.indent");
     }
   }
-  
+
 
   /**
    * tests that an if statment nested in a switch will be indented properly
@@ -1310,29 +1277,29 @@ public final class IndentTest extends TestCase {
     _assertContents(indented, doc);
   }
 */
-  private void _assertContents(String expected, Document document) 
+  private void _assertContents(String expected, Document document)
     throws BadLocationException
   {
-    assertEquals("document contents", expected, 
+    assertEquals("document contents", expected,
                  document.getText(0, document.getLength()));
   }
 
-  private void _assertIndentInfo(IndentInfo ii, 
+  private void _assertIndentInfo(IndentInfo ii,
                                  String braceType,
                                  int distToNewline,
                                  int distToBrace,
-                                 int distToPrevNewline) 
+                                 int distToPrevNewline)
   {
     assertEquals("indent info: brace type",
                  braceType, ii.braceType);
-    assertEquals("indent info: dist to new line", 
+    assertEquals("indent info: dist to new line",
                  distToNewline, ii.distToNewline);
     assertEquals("indent info: dist to brace",
                  distToBrace, ii.distToBrace);
-    assertEquals("indent info: dist to prev new line", 
+    assertEquals("indent info: dist to prev new line",
                  distToPrevNewline, ii.distToPrevNewline);
   }
-  
+
   /**
    * copies fromFile to toFile, assuming both files exist
    */
@@ -1342,12 +1309,12 @@ public final class IndentTest extends TestCase {
     String newText = FileOps.readFileAsString(toFile);
     assertEquals("File copy verify", text, newText);
   }
-  
+
   /**
    * indents one file, compares it to the other, reindents and recompares
    * to make sure indent(x) = indent(indent(x))
    */
-  private void _indentAndCompare(File unindented, File correct) 
+  private void _indentAndCompare(File unindented, File correct)
     throws IOException
   {
     File test = null;
@@ -1359,24 +1326,24 @@ public final class IndentTest extends TestCase {
       _fileCompare(test, correct);
       IndentFiles.main(new String[] {"-silent", test.toString()});
       _fileCompare(test, correct);
-    } 
+    }
     finally {
       if (test != null) {
         test.delete();
       }
     }
-    
+
   }
 
   /**
-   * @throws AssertionFailedError if the files are not identical 
+   * @throws AssertionFailedError if the files are not identical
    */
   private void _fileCompare(File test, File correct) throws IOException {
     FileReader fr = new FileReader(correct);
     FileReader fr2 = new FileReader(test);
     BufferedReader correctBufferedReader = new BufferedReader(fr);
     BufferedReader testBufferedReader = new BufferedReader(fr2);
-    
+
     String correctString = correctBufferedReader.readLine();
     String testString = testBufferedReader.readLine();
     int lineNo = 1;
@@ -1388,26 +1355,26 @@ public final class IndentTest extends TestCase {
     }
     assertTrue("Indented file longer than expected", correctString == null);
     assertTrue("Indented file shorter than expected", testString == null);
-    
+
     testBufferedReader.close();
     correctBufferedReader.close();
     fr.close();
     fr2.close();
   }
- 
+
 /*
   public void testNoParameters() throws BadLocationException
   {
     IndentRuleAction _action = new ActionBracePlus("");
-    
-    String _text = 
+
+    String _text =
       "method(\n"+
       ")\n";
-    
-    String _aligned = 
+
+    String _aligned =
       "method(\n"+
       "      )\n";
-    
+
     doc.insertString(0, _text, null);
     _action.indentLine(doc, 0); // Does nothing.
     assertEquals("START has no brace.", _text.length(), doc.getLength());
@@ -1420,19 +1387,19 @@ public final class IndentTest extends TestCase {
     assertEquals("Line aligned to open paren.", _aligned.length(), doc.getLength());
   }
 */
-/*  
+/*
   public void testArrayInit() throws BadLocationException
   {
     IndentRuleAction _action = new ActionBracePlus("");
-    
-    String _text = 
+
+    String _text =
       "int[] ar = new int[] {\n"+
       "1,1,1,1,1,1,1,1,1 };";
-    
-    String _aligned = 
+
+    String _aligned =
       "int[] ar = new int[] {\n"+
       "                      1,1,1,1,1,1,1,1,1 };";
-    
+
     doc.insertString(0, _text, null);
     _action.indentLine(doc, 0); // Does nothing.
     assertEquals("START has no brace.", _text.length(), doc.getLength());
@@ -1444,20 +1411,20 @@ public final class IndentTest extends TestCase {
     _assertContents(_aligned, doc);
     assertEquals("Line aligned to open paren.", _aligned.length(), doc.getLength());
   }
-*/  
+*/
 /*
   public void testArrayInitNewline() throws BadLocationException
   {
     IndentRuleAction _action = new ActionBracePlus("");
-    
-    String _text = 
+
+    String _text =
       "int[] ar = new int[] { 1,1,1,\n"+
       "1,1,1,1,1,1 };";
-    
-    String _aligned = 
+
+    String _aligned =
       "int[] ar = new int[] { 1,1,1,\n"+
       "                       1,1,1,1,1,1 };";
-    
+
     doc.insertString(0, _text, null);
     _action.indentLine(doc, 0); // Does nothing.
     assertEquals("START has no brace.", _text.length(), doc.getLength());
@@ -1474,15 +1441,15 @@ public final class IndentTest extends TestCase {
   public void testArrayInitBraceNewline() throws BadLocationException
   {
     IndentRuleAction _action = new ActionBracePlus("");
-    
-    String _text = 
+
+    String _text =
       "int[] blah = new int[] {1, 2, 3\n"+
       "};";
-    
-    String _aligned = 
+
+    String _aligned =
       "int[] blah = new int[] {1, 2, 3\n"+
       "                        };";
-    
+
     doc.insertString(0, _text, null);
     _action.indentLine(doc, 0); // Does nothing.
     assertEquals("START has no brace.", _text.length(), doc.getLength());
@@ -1499,12 +1466,12 @@ public final class IndentTest extends TestCase {
   public void testArrayInitAllNewline() throws BadLocationException
   {
     IndentRuleAction _action = new ActionBracePlus("");
-    
-    String _text = 
+
+    String _text =
       "int[] blah = new int[]\n"+
       "{4, 5, 6};";
-    
-    String _aligned = 
+
+    String _aligned =
       "int[] blah = new int[]\n"+
       "  {4, 5, 6};";
 
@@ -1519,5 +1486,5 @@ public final class IndentTest extends TestCase {
     _assertContents(_aligned, doc);
     assertEquals("Line aligned to open paren.", _aligned.length(), doc.getLength());
   }
-*/  
+*/
 }

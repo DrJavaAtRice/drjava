@@ -4,7 +4,7 @@
  * at http://sourceforge.net/projects/drjava
  *
  * Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)
- * 
+ *
  * DrJava is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -48,87 +48,87 @@ import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 
 /**
  * Test class according to the JUnit protocol. Tests the question
- * that determines whether or not the last block or expression list 
- * opened previous to the start of the current line was opened 
- * by one of the characters '(' or '['. 
+ * that determines whether or not the last block or expression list
+ * opened previous to the start of the current line was opened
+ * by one of the characters '(' or '['.
  * This questions corresponds to rule 11 in our decision tree.
  * @version $Id$
  */
-public final class QuestionBraceIsParenOrBracketTest extends IndentRulesTestCase 
+public final class QuestionBraceIsParenOrBracketTest extends IndentRulesTestCase
 {
     // PRE: We are not inside a multiline comment.
- 
+
     private String _text;
 
     private final IndentRuleQuestion _rule = new QuestionBraceIsParenOrBracket(null, null);
-    
+
     public void setUp() { super.setUp(); }
-    
-    public void testParen() throws BadLocationException 
+
+    public void testParen() throws BadLocationException
     {
       int i;
-      
-      /* (1) */ 
-      
+
+      /* (1) */
+
       _text = "boolean method(int[] a, String b)";
       _setDocText(_text);
-      
+
       for (i = 0; i < _text.length(); i++)
         assertTrue("START has no brace.", !_rule.applyRule(_doc, i, Indenter.OTHER));
-      
-      /* (2) */ 
-      
-      _text = 
+
+      /* (2) */
+
+      _text =
         "boolean method\n" +
         "    (int[] a, String b)";
-      
+
       _setDocText(_text);
-      
+
       for (i = 0; i < _text.length(); i++)
         assertTrue("START has no brace.", !_rule.applyRule(_doc, i, Indenter.OTHER));
-      
-      /* (3) */ 
-      
-      _text = 
+
+      /* (3) */
+
+      _text =
         "boolean method(\n" +
         "    int[] a, String b)";
-      
+
       _setDocText(_text);
-      
+
       for (i = 0; i < 16; i++)
         assertTrue("START has no brace.", !_rule.applyRule(_doc, i, Indenter.OTHER));
-      
+
       // For any position past the '\n' character, the rule applies:
-      
+
       for (i = 16; i < _text.length(); i++)
         assertTrue("START's brace is an open paren.", _rule.applyRule(_doc, i, Indenter.OTHER));
-      
-      /* (4) */ 
-      
-      _text = 
+
+      /* (4) */
+
+      _text =
         "if (<cond>) {\n" +
         "    if (\n" +
         "        <cond>) { ... }}";
-      
+
       _setDocText(_text);
-      
+
       for (i = 0; i < 23; i++)
         assertTrue("START has no brace.", !_rule.applyRule(_doc, i, Indenter.OTHER));
-      
+
       // For any position past the second '\n' character, the rule applies:
-      
+
       for (i = 23; i < _text.length(); i++)
         assertTrue("START's brace is an open paren.", _rule.applyRule(_doc, i, Indenter.OTHER));
-      
-      /* (5) */ 
-      
-      _text = 
+
+      /* (5) */
+
+      _text =
         "method(\n" +
         "       array1, foo(array1[x]))\n" +
         " <other stuff>";
-      
+
       _setDocText(_text);
-      
+
       assertTrue("START has no brace.", !_rule.applyRule(_doc, 0, Indenter.OTHER));
       assertTrue("START has no brace", !_rule.applyRule(_doc, 7, Indenter.OTHER));
       assertTrue("START's brace is an open paren.", _rule.applyRule(_doc, 8, Indenter.OTHER));
@@ -139,46 +139,46 @@ public final class QuestionBraceIsParenOrBracketTest extends IndentRulesTestCase
     public void testBracket() throws BadLocationException
     {
       int i;
-      
-      /* (1) */ 
-      
-      _text = 
+
+      /* (1) */
+
+      _text =
         "boolean method(int[\n" +
         "                   ELTS]\n" +
         "               a, String b)";
-      
+
       _setDocText(_text);
-      
+
       for (i = 0; i < 20; i++)
         assertTrue("START has no brace.", !_rule.applyRule(_doc, i, Indenter.OTHER));
-      
+
       // For any position past the first '\n' character, the rule applies:
-      
+
       for (i = 20; i < 29; i++)
         assertTrue("START's brace is an open bracket.", _rule.applyRule(_doc, i, Indenter.OTHER));
-      
+
       for (i = 29; i < _text.length(); i++)
         assertTrue("START's brace is an open paren.", _rule.applyRule(_doc, i, Indenter.OTHER));
-      
-      /* (2) */ 
-      
+
+      /* (2) */
+
       _text = "array1[i]\n" +
         "       [j]";
-      
+
       _setDocText(_text);
-      
+
       for (i = 0; i < _text.length(); i++)
         assertTrue("START has no brace.", !_rule.applyRule(_doc, i, Indenter.OTHER));
-      
-      /* (3) */ 
-      
-      _text = 
+
+      /* (3) */
+
+      _text =
         "array1[\n" +
         "           i][\n" +
         "              j]";
-      
-      _setDocText(_text); 
-      
+
+      _setDocText(_text);
+
       assertTrue("START's paren is an open bracket.", _rule.applyRule(_doc, 8, Indenter.OTHER));
       assertTrue("START's paren is an open bracket.", _rule.applyRule(_doc, 22, Indenter.OTHER));
       assertTrue("START's paren is an open bracket.", _rule.applyRule(_doc, 23, Indenter.OTHER));
@@ -186,48 +186,46 @@ public final class QuestionBraceIsParenOrBracketTest extends IndentRulesTestCase
 
     public void testCurly() throws BadLocationException
     {
-      int i;
-      
-      /* (1) */ 
-      
-      _text = 
+      /* (1) */
+
+      _text =
         "class X extends Base\n" +
         "{\n" +
         "}";
-      
+
       _setDocText(_text);
-      
+
       assertTrue("START has no brace.", !_rule.applyRule(_doc, 0, Indenter.OTHER));
       assertTrue("START has no brace.", !_rule.applyRule(_doc, 20, Indenter.OTHER));
       assertTrue("START is curly brace.", !_rule.applyRule(_doc, 21, Indenter.OTHER));
       assertTrue("START is close brace.", !_rule.applyRule(_doc, 23, Indenter.OTHER));
-      
-      /* (2) */ 
-      
-      _text = 
+
+      /* (2) */
+
+      _text =
         "class X extends Base\n" +
         "{\n" +
         "    int bla() { return 44; }\n" +
         "}";
-      
+
       _setDocText(_text);
-      
+
       assertTrue("START has no brace.", !_rule.applyRule(_doc, 0, Indenter.OTHER));
       assertTrue("START has no brace.", !_rule.applyRule(_doc, 20, Indenter.OTHER));
       assertTrue("START is curly brace.", !_rule.applyRule(_doc, 21, Indenter.OTHER));
       assertTrue("START's brace is curly brace.", !_rule.applyRule(_doc, 23, Indenter.OTHER));
       assertTrue("START is close curly brace.", !_rule.applyRule(_doc, _text.length() - 1, Indenter.OTHER));
-      
-      /* (3) */ 
-      
-      _text = 
+
+      /* (3) */
+
+      _text =
         "class X extends Base\n" +
         "{}\n" +
         "class Y extends Base\n" +
         "{}";
-      
+
       _setDocText(_text);
-      
+
       assertTrue("START has no brace.", !_rule.applyRule(_doc, 0, Indenter.OTHER));
       assertTrue("START has no brace.", !_rule.applyRule(_doc, 20, Indenter.OTHER));
       assertTrue("START is open curly brace.", !_rule.applyRule(_doc, 21, Indenter.OTHER));
@@ -236,7 +234,7 @@ public final class QuestionBraceIsParenOrBracketTest extends IndentRulesTestCase
     }
 }
 
-  
+
 
 
 

@@ -54,40 +54,40 @@ import java.lang.reflect.*;
 import edu.rice.cs.util.UnexpectedException;
 
 /**
- * This class is an extension to DynamicJavaAdapter that allows us to 
- * process expressions involving the "this" keyword correctly in the 
- * current debug interpreter context. This allows users to debug outer 
- * classes and their fields using the usual Java syntax of outerclass.this. 
- * This is done by holding on to the class name of "this" and by translating 
- * references to outer instance classes to field accesses in the form 
+ * This class is an extension to DynamicJavaAdapter that allows us to
+ * process expressions involving the "this" keyword correctly in the
+ * current debug interpreter context. This allows users to debug outer
+ * classes and their fields using the usual Java syntax of outerclass.this.
+ * This is done by holding on to the class name of "this" and by translating
+ * references to outer instance classes to field accesses in the form
  * "this.this$N.this$N-1...".
- * 
+ *
  * @version $Id$
  */
-public class JavaDebugInterpreter extends DynamicJavaAdapter {  
+public class JavaDebugInterpreter extends DynamicJavaAdapter {
   /**
    * This interpreter's name.
    */
   protected final String _name;
-  
+
   /**
    * The class name of the "this" object for the currently
    * suspended thread.
    */
   protected String _thisClassName;
-  
+
   /**
    * The name of the package containing _this, if any.
    */
   protected String _thisPackageName;
-  
+
   /**
    * Extends IdentityVisitor to convert all instances
-   * of ThisExpressions in the tree to either 
+   * of ThisExpressions in the tree to either
    * QualifiedName or an ObjectFieldAccess
    */
   protected Visitor _translationVisitor;
-  
+
   /**
    * Creates a new debug interpreter.
    * @param name the name of the interpreter
@@ -98,7 +98,7 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
     setClassName(className);
     _translationVisitor = makeTranslationVisitor();
   }
-  
+
   /**
    * Processes the tree before evaluating it.
    * The translation visitor visits each node in the tree
@@ -108,19 +108,19 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
    */
   public Node processTree(Node node) {
     return (Node) node.acceptVisitor(_translationVisitor);
-  }  
-  
+  }
+
   public GlobalContext makeGlobalContext(TreeInterpreter i) {
-    return new GlobalContext(i) {  
+    return new GlobalContext(i) {
       public boolean exists(String name) {
-        return (super.exists(name)) || 
+        return (super.exists(name)) ||
           (_getObjectFieldAccessForField(name, this) != null) ||
           (_getStaticFieldAccessForField(name, this) != null) ||
           (_getReferenceTypeForField(name, this) != null);
       }
     };
   }
-  
+
   /**
    * Returns whether the given className corresponds to a class
    * that is anonymous or has an anonymous enclosing class.
@@ -128,32 +128,34 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
    * @return whether the class is anonymous
    */
   private boolean hasAnonymous(String className) {
-    StringTokenizer st = new StringTokenizer(className, "$");     
+    StringTokenizer st = new StringTokenizer(className, "$");
     while (st.hasMoreElements()) {
       String currToken = st.nextToken();
       try {
-        Integer anonymousNum = Integer.valueOf(currToken);
+//        Integer anonymousNum =
+          Integer.valueOf(currToken);
         return true;
       }
       catch(NumberFormatException nfe) {
+        // fall through to false because the token cannot be parsed
       }
     }
     return false;
   }
-  
+
   /**
    * Returns the fully qualified class name for "this".
    * It will append the package name onto the class name
    * if there is a package name.
    */
-  private String _getFullyQualifiedClassNameForThis() {    
+  private String _getFullyQualifiedClassNameForThis() {
     String cName = _thisClassName;
     if (!_thisPackageName.equals("")) {
       cName = _thisPackageName + "." + cName;
     }
     return cName;
   }
-  
+
   private Class _loadClassForThis(Context context) {
     try {
       return context.lookupClass(_getFullyQualifiedClassNameForThis());
@@ -162,7 +164,7 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
       throw new UnexpectedException(e);
     }
   }
-  
+
   /**
    * Given a field, looks at enclosing classes until it finds
    * one that contains the field. It returns the ObjectFieldAccess
@@ -180,14 +182,13 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
     int numDollars = _getNumDollars(_thisClassName);
     Expression expr = null;
     Expression newExpr = null;
-    
+
     // Check if this has an anonymous inner class
-    if (hasAnonymous(_thisClassName)) { 
+    if (hasAnonymous(_thisClassName)) {
       // Get the class
       Class c = _loadClassForThis(context);
-      Field[] fields = c.getDeclaredFields();    
-      int numToWalk;
-      String outerClassName = null;
+      Field[] fields = c.getDeclaredFields();
+
       // Check for a field that begins with this$
       for (int i = 0; i < fields.length; i++) {
         if (fields[i].getName().startsWith("this$")) {
@@ -198,7 +199,7 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
         }
       }
     }
-    for (int i = 0; i <= numDollars; i++) {          
+    for (int i = 0; i <= numDollars; i++) {
       expr = _buildObjectFieldAccess(i, numDollars);
       newExpr = new ObjectFieldAccess(expr, field);
       try {
@@ -219,10 +220,10 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
         }
       }
     }
-    
+
     return null;
   }
-  
+
   /**
    * Given a method, looks at enclosing classes until it finds
    * one that contains the method. It returns the ObjectMethodCall
@@ -238,14 +239,13 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
     String methodName = method.getMethodName();
     List args = method.getArguments();
     Expression expr = null;
-    
+
     // Check if this has an anonymous inner class
-    if (hasAnonymous(_thisClassName)) { 
+    if (hasAnonymous(_thisClassName)) {
       // Get the class
       Class c = _loadClassForThis(context);
-      Field[] fields = c.getDeclaredFields();    
-      int numToWalk;
-      String outerClassName = null;
+      Field[] fields = c.getDeclaredFields();
+
       // Check for a field that begins with this$
       for (int i = 0; i < fields.length; i++) {
         if (fields[i].getName().startsWith("this$")) {
@@ -256,7 +256,7 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
         }
       }
     }
-    for (int i = 0; i <= numDollars; i++) {          
+    for (int i = 0; i <= numDollars; i++) {
       expr = _buildObjectFieldAccess(i, numDollars);
       expr = new ObjectMethodCall(expr, methodName, args, null, 0, 0, 0, 0);
       try {
@@ -269,17 +269,17 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
       }
     }
     return null;
-  } 
-  
+  }
+
   /**
-   * Given a field in a static context, looks at enclosing classes until it 
+   * Given a field in a static context, looks at enclosing classes until it
    * finds one that contains the field. It returns the StaticFieldAccess
    * that represents the field.
    * @param field the name of the field
    * @param context the context
    * @return the StaticFieldAccess that represents the field or null
    * if it cannot find the field in any enclosing class.
-   */  
+   */
   protected StaticFieldAccess _getStaticFieldAccessForField(String field, Context context) {
     TypeChecker tc = makeTypeChecker(context);
     int numDollars = _getNumDollars(_thisClassName);
@@ -298,21 +298,21 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
       }
       catch (ExecutionError e2) {
         // try an outer class
-        index = currClass.lastIndexOf("$");       
+        index = currClass.lastIndexOf("$");
       }
     }
     return null;
-  }  
-  
+  }
+
   /**
-   * Given a method in a static context, looks at enclosing classes until it 
+   * Given a method in a static context, looks at enclosing classes until it
    * finds one that contains the method. It returns the StaticMethodCall
    * that represents the method.
    * @param method the method
    * @param context the context
    * @return the StaticMethodCall that represents the method or null
    * if it cannot find the method in any enclosing class.
-   */  
+   */
   protected StaticMethodCall _getStaticMethodCallForFunction(MethodCall method, Context context) {
     TypeChecker tc = makeTypeChecker(context);
     int numDollars = _getNumDollars(_thisClassName);
@@ -333,28 +333,28 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
       }
       catch (ExecutionError e2) {
         // try an outer class
-        index = currClass.lastIndexOf("$");       
+        index = currClass.lastIndexOf("$");
       }
     }
     return null;
   }
-  
+
   /**
    * Given the name of an not fully qualified outer class, return the fully qualified
    * ReferenceType that corresponds to that class. This is called when the user
    * references a static field of an outer class.
    * @param field the name of the not fully qualified outer class
    * @param context the context
-   * @return the ReferenceType that represents the field(in this case, 
+   * @return the ReferenceType that represents the field(in this case,
    * really a class) or null if it cannot load the corresponding class in the
    * class loader.
-   */  
+   */
   protected ReferenceType _getReferenceTypeForField(String field, Context context) {
     TypeChecker tc = makeTypeChecker(context);
     int index = _indexOfWithinBoundaries(_getFullyQualifiedClassNameForThis(), field);
     if (index != -1) {
       // field may be of form outerClass$innerClass or
-      // package.innerClass. 
+      // package.innerClass.
       // We want to match the inner most class.
       int lastDollar = field.lastIndexOf("$");
       int lastDot = field.lastIndexOf(".");
@@ -388,8 +388,8 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
       return null;
     }
   }
-  
-  
+
+
   /**
    * Sets the class name of "this", parsing out the package name.
    */
@@ -403,7 +403,7 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
     }
     _thisClassName = className.substring(indexLastDot + 1, className.length());
   }
-  
+
   /**
    * Helper method to convert a ThisExpression to a QualifiedName.
    * Allows us to redefine "this" in a debug interpreter.
@@ -419,7 +419,7 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
                              node.getBeginLine(), node.getBeginColumn(),
                              node.getEndLine(), node.getEndColumn());
   }
-  
+
   /**
    * Helper method to convert a ThisExpression to a FieldAccess.
    * Allows us to access fields of outer classes in a debug interpreter.
@@ -438,7 +438,7 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
       return _buildObjectFieldAccess(numToWalk, numDollars);
     }
   }
-  
+
   /**
    * Builds a ThisExpression that has no class name.
    * @return an unqualified ThisExpression
@@ -447,7 +447,7 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
     LinkedList ids = new LinkedList();
     return new ThisExpression(ids, "", 0, 0, 0, 0);
   }
-  
+
   /**
    * Helper method to build an ObjectFieldAccess for a ThisExpression
    * given the number of classes to walk and the number of dollars.
@@ -455,7 +455,7 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
    * @param numDollars numer of dollars in _thisClassName
    * @return a QualifiedName is numtoWalk is zero or an ObjectFieldAccess
    */
-  private Expression _buildObjectFieldAccess(int numToWalk, int numDollars) {     
+  private Expression _buildObjectFieldAccess(int numToWalk, int numDollars) {
     if (numToWalk == 0) {
       return _convertThisToName(buildUnqualifiedThis());
     }
@@ -463,7 +463,7 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
       return new ObjectFieldAccess(_buildObjectFieldAccess(numToWalk - 1, numDollars), "this$" + (numDollars - numToWalk));
     }
   }
-  
+
   /**
    * Returns the index of subString within string if the substring is
    * either bounded by the ends of string or by $'s.
@@ -494,7 +494,7 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
       }
     }
   }
-  
+
   /**
    * Returns the number of dollar characters in
    * a given String.
@@ -510,7 +510,7 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
     }
     return numDollars;
   }
-  
+
   /**
    * Checks if the className passed in is a valid className.
    * @param classname the className of the ThisExpression
@@ -531,7 +531,7 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
         className = className.substring(index, className.length());
       }
     }
-    
+
     className = className.replace('.', '$');
     int indexWithBoundaries = _indexOfWithinBoundaries(_thisClassName, className);
     if ((hasPackage && indexWithBoundaries != 0) ||
@@ -539,10 +539,10 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
       return -1;
     }
     else {
-      return _getNumDollars(_thisClassName.substring(indexWithBoundaries + className.length()));      
+      return _getNumDollars(_thisClassName.substring(indexWithBoundaries + className.length()));
     }
   }
-  
+
   /**
    * Converts the ThisExpression to a QualifiedName
    * if it has no class name or an ObjectFieldAccess
@@ -554,11 +554,11 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
     if (node.getClassName().equals("")) {
       return _convertThisToName(node);
     }
-    else {      
+    else {
       return _convertThisToObjectFieldAccess(node);
     }
   }
-  
+
   /**
    * Makes an anonymous IdentityVisitor that overrides
    * visit for a ThisExpresssion to convert it to
@@ -580,7 +580,7 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
       }
     };
   }
-  
+
 //  private Class _getClassForType(Type type, Context context) {
 //    Class c = (Class)type.getProperty(NodeProperties.TYPE);
 //    if (c != null) {
@@ -607,7 +607,7 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
 //      return java.lang.reflect.Array.newInstance(c, 0).getClass();
 //    }
 //  }
-        
+
   /**
    * Factory method to make a new NameChecker that tries to find the
    * right scope for QualifiedNames.
@@ -617,7 +617,7 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
    * right hand side of a VariableDeclaration.
    * @return visitor the visitor
    */
-  public NameVisitorExtension makeNameVisitor(final Context nameContext, 
+  public NameVisitorExtension makeNameVisitor(final Context nameContext,
                                               final Context typeContext) {
     return new NameVisitorExtension(nameContext, typeContext) {
       //        try {
@@ -631,7 +631,7 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
       //            Class oldClass = (Class)nameContext.get(name);
       //            Class newClass = _getClassForType(type, nameContext);
       //            if (oldClass.equals(newClass)) {
-      //              // This is a redefinition of the same variable 
+      //              // This is a redefinition of the same variable
       //              // with the same type. Allow the user to do
       //              // this so make a new SimpleAssignExpression
       //              Identifier id = new Identifier(name);
@@ -649,7 +649,7 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
           return super.visit(node);
         }
         catch(ExecutionError e) {
-          // This error is thrown only if this QualifiedName is not 
+          // This error is thrown only if this QualifiedName is not
           // a local variable or a class
           List ids = node.getIdentifiers();
           Iterator iter = ids.iterator();
@@ -684,7 +684,7 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
             }
           }
           // Didn't find this field in any outer class. Throw original exception.
-          throw e;          
+          throw e;
         }
       }
       public Object visit(ObjectMethodCall node) {
@@ -712,7 +712,7 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
               return smc;
             }
             else {
-              return method;                  
+              return method;
             }
           }
         }
@@ -722,7 +722,7 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
       }
     };
   }
-  
+
   /**
    * Factory method to make a new TypeChecker that treats "this" as a variable.
    * @param context the context

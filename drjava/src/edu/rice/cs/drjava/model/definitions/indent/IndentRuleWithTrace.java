@@ -90,7 +90,7 @@ public abstract class IndentRuleWithTrace implements IndentRule{
  trace = new Vector<String>();
       }
       startOver = terminus;
-      trace.addElement(ruleName + " " + direction);
+      trace.add(ruleName + " " + direction);
     }
   }
 

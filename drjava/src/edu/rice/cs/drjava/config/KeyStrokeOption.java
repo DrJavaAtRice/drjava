@@ -52,7 +52,7 @@ import java.util.Hashtable;
  * Class representing all configuration options with values of type KeyStroke.
  */
 public class KeyStrokeOption extends Option<KeyStroke> {
-  
+
   /**
    * Storage for keystrokes.
    * TODO: Should this be synchronized?
@@ -64,7 +64,7 @@ public class KeyStrokeOption extends Option<KeyStroke> {
    */
   public KeyStrokeOption(String key, KeyStroke def) {
     super(key,def); }
-  
+
   // This sets up the hashtable that has key-value pairs consisting of
   // ascii codes and Strings that describe the ascii character and are
   // in the form that KeyStroke.getKeyStroke(String s) requires.
@@ -83,8 +83,8 @@ public class KeyStrokeOption extends Option<KeyStroke> {
       throw new UnexpectedException(iae);
     }
   }
-  
-  
+
+
   /**
    * @param s The String to be parsed, must be the string representation of
    * the KeyStroke to be created. Uses the method KeyStroke.getKeyStroke(String s)
@@ -96,7 +96,7 @@ public class KeyStrokeOption extends Option<KeyStroke> {
     if (s.equals("<none>")) {
       return NULL_KEYSTROKE;
     }
-    
+
     // Replace "command" with "meta" (OS X)
     int cIndex = s.indexOf("command");
     if (cIndex > -1) {
@@ -105,7 +105,7 @@ public class KeyStrokeOption extends Option<KeyStroke> {
       sb.append(s.substring(cIndex + "command".length(), s.length()));
       s = sb.toString();
     }
-    
+
     // Replace "option" with "alt" (OS X)
     int oIndex = s.indexOf("option");
     if (oIndex > -1) {
@@ -114,7 +114,7 @@ public class KeyStrokeOption extends Option<KeyStroke> {
       sb.append(s.substring(oIndex + "option".length(), s.length()));
       s = sb.toString();
     }
-    
+
     KeyStroke ks = KeyStroke.getKeyStroke(s);
     if (ks == null) {
       throw new OptionParseException(name, s,
@@ -122,7 +122,7 @@ public class KeyStrokeOption extends Option<KeyStroke> {
     }
     return ks;
   }
-  
+
   /**
    * @param k The instance of class KeyStroke to be formatted.
    * @return A String representing the KeyStroke "k".
@@ -174,7 +174,7 @@ public class KeyStrokeOption extends Option<KeyStroke> {
       if (k.isOnKeyRelease()) {
         buf.append("released ");
       }
-      String key = (String) keys.get(new Integer(k.getKeyCode()));
+      String key = keys.get(new Integer(k.getKeyCode()));
       if (key == null) {
         throw new IllegalArgumentException("Invalid keystroke");
       }

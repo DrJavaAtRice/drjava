@@ -4,7 +4,7 @@
  * at http://sourceforge.net/projects/drjava
  *
  * Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)
- * 
+ *
  * DrJava is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -39,7 +39,7 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.definitions.reducedmodel;
 
-/** 
+/**
  * This class acts as the representation of a brace in the reduced
  * view.  It also includes information about the gap of plaintext
  * preceding the actual brace before the previous brace or the start
@@ -56,7 +56,7 @@ class Brace extends ReducedToken implements ReducedModelStates {
    * @see String
    */
   public static final String[] braces =  {
-    "{", "}", "(", ")", "[", "]", "/*", "*/", "//", "\n", "/", "*", "\"", "\"", 
+    "{", "}", "(", ")", "[", "]", "/*", "*/", "//", "\n", "/", "*", "\"", "\"",
     "'", "'", "\\\\", "\\", "\\'", "\\\"", ""
   };
   public static final String BLK_CMT_BEG = "/*";
@@ -83,7 +83,7 @@ class Brace extends ReducedToken implements ReducedModelStates {
     int index = findBrace(type);
     if (index == braces.length) {
       throw  new BraceException("Invalid brace type \"" + type + "\"");
-    } 
+    }
     else {
       return  new Brace(index, state);
     }
@@ -136,7 +136,7 @@ class Brace extends ReducedToken implements ReducedModelStates {
    */
   public void flip() {
     if (isOpen())
-      _type += 1; 
+      _type += 1;
     else if(_type < braces.length - 1)
       _type -= 1;
   }
@@ -172,15 +172,14 @@ class Brace extends ReducedToken implements ReducedModelStates {
   }
 
   /**
-   * Reset the type of this brace. 
+   * Reset the type of this brace.
    * @param type the new String type for the brace
    */
   public void setType(String type) {
-    String oldType = braces[_type];
     int index = findBrace(type);
     if (index == braces.length) {
       throw  new BraceException("Invalid brace type \"" + type + "\"");
-    } 
+    }
     else {
       _type = index;
     }
@@ -220,11 +219,11 @@ class Brace extends ReducedToken implements ReducedModelStates {
   public boolean isDoubleQuote() {
     return  this.getType().equals(DOUBLE_QUOTE);
   }
-  
+
   public boolean isSingleQuote() {
     return this.getType().equals(SINGLE_QUOTE);
   }
-    
+
 
   /**
    * @return true if this is a line comment delimiter
@@ -259,7 +258,7 @@ class Brace extends ReducedToken implements ReducedModelStates {
    */
   public boolean isMultipleCharBrace() {
     return  (isLineComment() || isBlockCommentStart() ||
-             isBlockCommentEnd() ||              
+             isBlockCommentEnd() ||
              isDoubleEscapeSequence());
   }
 
@@ -330,7 +329,7 @@ class Brace extends ReducedToken implements ReducedModelStates {
   public void shrink(int delta) {
     throw  new RuntimeException("Braces can't shrink.");
   }
- 
+
 }
 
 

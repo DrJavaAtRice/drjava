@@ -95,7 +95,7 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
   private static final String ABC_TEST =
     "public class ABCTest extends junit.framework.TestCase {\n" +
     "  public void testABC() {\n" +
-    "    new ABC().elementAt(0);\n" +
+    "    new ABC().get(0);\n" +
     "  }\n" +
     "}";
 

@@ -278,7 +278,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
        * @param row the current row
        */
       private void _setThreadCellFont(int row) {
-        DebugThreadData currThread = _threads.elementAt(row);
+        DebugThreadData currThread = _threads.get(row);
         if (currThread.getUniqueID() == _currentThreadID &&
             currThread.isSuspended()) {
           setFont(getFont().deriveFont(Font.BOLD));
@@ -364,7 +364,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
     private void _setWatchCellFont(int row) {
       int numWatches = _watches.size();
       if (row < numWatches) {
-        DebugWatchData currWatch = _watches.elementAt(row);
+        DebugWatchData currWatch = _watches.get(row);
         if (currWatch.isChanged()) {
           setFont(getFont().deriveFont(Font.BOLD));
         }
@@ -386,7 +386,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
     public int getColumnCount() { return _columnNames.length; }
     public Object getValueAt(int row, int col) {
       if (row < _watches.size()) {
-        DebugWatchData watch = _watches.elementAt(row);
+        DebugWatchData watch = _watches.get(row);
         switch(col) {
           case 0: return watch.getName();
           case 1: return watch.getValue();
@@ -450,7 +450,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
     public int getColumnCount() { return _columnNames.length; }
     
     public Object getValueAt(int row, int col) {
-      DebugStackData frame = _stackFrames.elementAt(row);
+      DebugStackData frame = _stackFrames.get(row);
       switch(col) {
         case 0: return frame.getMethod();
         case 1: return new Integer(frame.getLine());
@@ -485,7 +485,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
     }
     
     public Object getValueAt(int row, int col) {
-      DebugThreadData threadData  = _threads.elementAt(row);
+      DebugThreadData threadData  = _threads.get(row);
       switch(col) {
         case 0: return threadData.getName();
         case 1: return threadData.getStatus();
@@ -716,7 +716,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
     if (row == -1) {
       row = 0;  // if there is no selected index, just return the first element
     }
-    return _threads.elementAt(row);
+    return _threads.get(row);
   }
 
   /**
@@ -724,14 +724,14 @@ public class DebugPanel extends JPanel implements OptionConstants {
    * @return the highlighted stack element
    */
   public DebugStackData getSelectedStackItem() {
-    return _stackFrames.elementAt(_stackTable.getSelectedRow());
+    return _stackFrames.get(_stackTable.getSelectedRow());
   }
 
   /**
    * @return the selected watch
    */
   public DebugWatchData getSelectedWatch() {
-    return _watches.elementAt(_watchTable.getSelectedRow());
+    return _watches.get(_watchTable.getSelectedRow());
   }
 
   /**
@@ -1062,7 +1062,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
     }
 
     protected void _showPopup(MouseEvent e) {
-      _threadInPopup = _threads.elementAt(_lastRow);
+      _threadInPopup = _threads.get(_lastRow);
       if (_threadInPopup.isSuspended()) {
          _threadSuspendedPopupMenu.show(e.getComponent(), e.getX(), e.getY());
       }
@@ -1072,7 +1072,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
     }
 
     protected void _action() {
-      _threadInPopup = _threads.elementAt(_lastRow);
+      _threadInPopup = _threads.get(_lastRow);
       _selectCurrentThread();
     }
   }
@@ -1091,7 +1091,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
 
     protected void _action() {
       try {
-        _debugger.scrollToSource(_stackFrames.elementAt(_lastRow));
+        _debugger.scrollToSource(_stackFrames.get(_lastRow));
       }
       catch (DebugException de) {
         _frame._showDebugError(de);

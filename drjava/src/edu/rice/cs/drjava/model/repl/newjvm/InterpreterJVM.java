@@ -85,18 +85,18 @@ public class InterpreterJVM extends AbstractSlaveJVM
   private static final boolean printMessages = false;
   /** Singleton instance of this class. */
   public static final InterpreterJVM ONLY = new InterpreterJVM();
-  
+
   /** String to append to error messages when no stack trace is available. */
   public static final String EMPTY_TRACE_TEXT = "";
   //public static final String EMPTY_TRACE_TEXT = "  at (the interactions window)";
-  
+
 
   /** Remote reference to the MainJVM class in DrJava's primary JVM. */
   private MainJVMRemoteI _mainJVM;
-  
+
   /** Metadata encapsulating the default interpreter. */
   private InterpreterData _defaultInterpreter;
-  
+
   /** Maps names to interpreters with metadata. */
   private Hashtable<String,InterpreterData> _interpreters;
 
@@ -110,18 +110,18 @@ public class InterpreterJVM extends AbstractSlaveJVM
    * List contains unqiue entries.
    */
   private Vector<String> _classpath;
-  
+
   /** Responsible for running JUnit tests in this JVM. */
   private JUnitTestManager _junitTestManager;
-  
+
   /** Interactions processor, currently a pre-processor **/
   private InteractionsProcessorI _interactionsProcessor;
-  
+
   /**
    * Whether to display an error message if a reset fails.
    */
   private boolean _messageOnResetFailure;
-  
+
   /**
    * Private constructor; use the singleton ONLY instance.
    */
@@ -132,7 +132,7 @@ public class InterpreterJVM extends AbstractSlaveJVM
     _interactionsProcessor = new InteractionsProcessor();
     _messageOnResetFailure = true;
   }
-  
+
   /**
    * Resets this InterpreterJVM to its default state.
    */
@@ -142,7 +142,7 @@ public class InterpreterJVM extends AbstractSlaveJVM
     _interpreters = new Hashtable<String,InterpreterData>();
     _classpath = new Vector<String>();
     _junitTestManager = new JUnitTestManager(this);
-    
+
     // do an interpretation to get the interpreter loaded fully
     try {
       _activeInterpreter.getInterpreter().interpret("0");
@@ -157,7 +157,7 @@ public class InterpreterJVM extends AbstractSlaveJVM
     //javax.swing.JOptionPane.showMessageDialog(null, s);
     _log.logTime(s);
   }
-  
+
   /**
    * Actions to perform when this JVM is started (through its superclass,
    * AbstractSlaveJVM).
@@ -207,7 +207,7 @@ public class InterpreterJVM extends AbstractSlaveJVM
         }
       }
     }));
-    
+
     // On Windows, any frame or dialog opened from Interactions pane will
     // appear *behind* DrJava's frame, unless a previous frame or dialog
     // is shown here.  Not sure what the difference is, but this hack
@@ -232,7 +232,7 @@ public class InterpreterJVM extends AbstractSlaveJVM
   public void interpret(String s) {
     interpret(s, _activeInterpreter);
   }
-  
+
   /**
    * Interprets the given string of source code in the interpreter with the
    * given name.
@@ -244,7 +244,7 @@ public class InterpreterJVM extends AbstractSlaveJVM
   public void interpret(String s, String interpreterName) {
     interpret(s, getInterpreter(interpreterName));
   }
-  
+
   /**
    * Interprets the given string of source code with the given interpreter.
    * The result is returned to MainJVM via the interpretResult method.
@@ -259,11 +259,11 @@ public class InterpreterJVM extends AbstractSlaveJVM
           interpreter.setInProgress(true);
           try {
             _dialog("to interp: " + s);
-            
+
             String s1 = _interactionsProcessor.preProcess(s);
             Object result = interpreter.getInterpreter().interpret(s1);
             String resultString = String.valueOf(result);
-            
+
             if (result == Interpreter.NO_RESULT) {
               //return new VoidResult();
               //_dialog("void interp ret: " + resultString);
@@ -280,7 +280,7 @@ public class InterpreterJVM extends AbstractSlaveJVM
           catch (ExceptionReturnedException e) {
             Throwable t = e.getContainedException();
             _dialog("interp exception: " + t);
-            
+
             //_dialog("before call to threwException");
             //return new ExceptionResult(t.getClass().getName(),
             //                           t.getMessage(),
@@ -321,8 +321,8 @@ public class InterpreterJVM extends AbstractSlaveJVM
     thread.setDaemon(true);
     thread.start();
   }
-  
-  private String _processReturnValue(Object o) {    
+
+  private String _processReturnValue(Object o) {
     if (o instanceof String) {
       return "\"" + o + "\"";
     }
@@ -333,7 +333,7 @@ public class InterpreterJVM extends AbstractSlaveJVM
       return o.toString();
     }
   }
-    
+
     /**
    * Gets the string representation of the value of a variable in the current interpreter.
    * @param var the name of the variable
@@ -352,20 +352,20 @@ public class InterpreterJVM extends AbstractSlaveJVM
         else if (value instanceof koala.dynamicjava.interpreter.UninitializedObject) {
           return null;
         }
-        else {          
-          return _processReturnValue(value);   
+        else {
+          return _processReturnValue(value);
         }
       }
       catch (IllegalStateException e) {
         // variable was not defined
         return null;
-      }   
+      }
     }
     else {
       return null;
     }
   }
-  
+
   /**
    * Gets the class name of a variable in the current interpreter.
    * @param var the name of the variable
@@ -380,19 +380,19 @@ public class InterpreterJVM extends AbstractSlaveJVM
           return "null";
         }
         else {
-          return c.getName(); 
+          return c.getName();
         }
       }
       catch (IllegalStateException e) {
         // variable was not defined
         return null;
-      }    
+      }
     }
     else {
       return null;
     }
   }
-  
+
   /**
    * Notifies that an assignment has been made in the given interpreter.
    * Does not notify on declarations.
@@ -411,17 +411,17 @@ public class InterpreterJVM extends AbstractSlaveJVM
       _log.logTime("notifyAssignment: " + re.toString());
     }
   }*/
-  
+
   /**
    * Adds a classpath to the given interpreter.
    * @param interpreter the interpreter
    */
   protected void _addClasspath(JavaInterpreter interpreter) {
     for (int i=0; i < _classpath.size(); i++) {
-      interpreter.addClassPath(_classpath.elementAt(i));
+      interpreter.addClassPath(_classpath.get(i));
     }
   }
-  
+
   /**
    * Adds a named DynamicJavaAdapter to the list of interpreters.
    * Presets it to contain the current accumulated classpath.
@@ -434,7 +434,7 @@ public class InterpreterJVM extends AbstractSlaveJVM
     _addClasspath(interpreter);
     addInterpreter(name, interpreter);
   }
-  
+
   /**
    * Adds a named JavaDebugInterpreter to the list of interpreters.
    * @param name the unique name for the interpreter
@@ -449,7 +449,7 @@ public class InterpreterJVM extends AbstractSlaveJVM
     _addClasspath(interpreter);
     addInterpreter(name, interpreter);
   }
-  
+
   /**
    * Adds a named interpreter to the list of interpreters.
    * @param name the unique name for the interpreter
@@ -462,7 +462,7 @@ public class InterpreterJVM extends AbstractSlaveJVM
     }
     _interpreters.put(name, new InterpreterData(interpreter));
   }
-  
+
   /**
    * Removes the interpreter with the given name, if it exists.
    * @param name Name of the interpreter to remove
@@ -470,7 +470,7 @@ public class InterpreterJVM extends AbstractSlaveJVM
   public void removeInterpreter(String name) {
     _interpreters.remove(name);
   }
-  
+
   /**
    * Returns the interpreter (with metadata) with the given name
    * @param name the unique name of the desired interpreter
@@ -485,7 +485,7 @@ public class InterpreterJVM extends AbstractSlaveJVM
        throw new IllegalArgumentException("Interpreter '" + name + "' does not exist.");
      }
    }
-   
+
    /**
     * Returns the Java interpreter with the given name
     * @param name the unique name of the desired interpreter
@@ -513,11 +513,11 @@ public class InterpreterJVM extends AbstractSlaveJVM
    * @return Whether the new interpreter is currently in progress
    * with an interaction
    */
-   public boolean setActiveInterpreter(String name) {   
+   public boolean setActiveInterpreter(String name) {
      _activeInterpreter = getInterpreter(name);
      return _activeInterpreter.isInProgress();
    }
-  
+
   /**
    * Sets the default interpreter to be active.
    * @return Whether the new interpreter is currently in progress
@@ -527,7 +527,7 @@ public class InterpreterJVM extends AbstractSlaveJVM
     _activeInterpreter = _defaultInterpreter;
     return _activeInterpreter.isInProgress();
   }
-  
+
   /**
    * Gets the hashtable containing the named interpreters.  Package private
    * for testing purposes.
@@ -536,7 +536,7 @@ public class InterpreterJVM extends AbstractSlaveJVM
   Hashtable<String,InterpreterData> getInterpreters() {
     return _interpreters;
   }
-  
+
   /**
    * Returns the current active interpreter.  Package private; for tests only.
    */
@@ -576,11 +576,11 @@ public class InterpreterJVM extends AbstractSlaveJVM
 
     // OK, now we crop off everything after the first "koala.dynamicjava." or
     //  "edu.rice.cs.drjava.", if there is one.
-    
+
     //  First, find the index of an occurrence.
     int index = -1;
     for (int i=0; i < traceItems.size(); i++) {
-      String item = (String) traceItems.get(i);
+      String item = traceItems.get(i);
       item = item.trim();
       if (item.startsWith("at edu.rice.cs.drjava.") ||
           item.startsWith("at koala.dynamicjava."))
@@ -589,7 +589,7 @@ public class InterpreterJVM extends AbstractSlaveJVM
         break;
       }
     }
-    
+
     // Now crop off the rest
     if (index > -1) {
       while (traceItems.size() > index) {
@@ -602,7 +602,7 @@ public class InterpreterJVM extends AbstractSlaveJVM
     if (traceItems.isEmpty()) {
       traceItems.add(EMPTY_TRACE_TEXT);
     }
-    
+
 
     // OK, now rebuild string
     StringBuffer buf = new StringBuffer();
@@ -622,7 +622,7 @@ public class InterpreterJVM extends AbstractSlaveJVM
 
     return buf.toString();
   }
-  
+
   // ---------- Java-specific methods ----------
 
   /**
@@ -636,18 +636,18 @@ public class InterpreterJVM extends AbstractSlaveJVM
     if (_classpath.contains(s)) {
       return;
     }
-    
+
     //_dialog("add classpath: " + s);
     if (_classpath.contains(s)) {
       // Don't add it again
       return;
     }
-    
+
     // Add to the default interpreter, if it is a JavaInterpreter
     if (_defaultInterpreter.getInterpreter() instanceof JavaInterpreter) {
       ((JavaInterpreter)_defaultInterpreter.getInterpreter()).addClassPath(s);
     }
-    
+
     // Add to any named JavaInterpreters to be consistent
     Enumeration<InterpreterData> interpreters = _interpreters.elements();
     while (interpreters.hasMoreElements()) {
@@ -656,18 +656,18 @@ public class InterpreterJVM extends AbstractSlaveJVM
         ((JavaInterpreter)interpreter).addClassPath(s);
       }
     }
-    
+
     // Keep this entry on the accumulated classpath
-    _classpath.addElement(s);
+    _classpath.add(s);
   }
-  
+
   /**
    * Returns a copy of the list of unique entries on the classpath.
    */
   public Vector<String> getAugmentedClasspath() {
     return _classpath;
   }
-  
+
   /**
    * Returns the accumulated classpath in use by all Java interpreters,
    * in the form of a path-separator delimited string.
@@ -675,7 +675,7 @@ public class InterpreterJVM extends AbstractSlaveJVM
   public String getClasspathString() {
     StringBuffer cp = new StringBuffer();
     for (int i=0; i < _classpath.size(); i++) {
-      cp.append(_classpath.elementAt(i));
+      cp.append(_classpath.get(i));
       cp.append(System.getProperty("path.separator"));
     }
     return cp.toString();
@@ -691,14 +691,14 @@ public class InterpreterJVM extends AbstractSlaveJVM
       ((JavaInterpreter)active).setPackageScope(s);
     }
   }
-  
+
   /**
    * @param show Whether to show a message if a reset operation fails.
    */
   public void setShowMessageOnResetFailure(boolean show) {
     _messageOnResetFailure = show;
   }
-  
+
   /**
    * This method is called if the interpreterJVM cannot
    * be exited (likely because of its having a
@@ -709,7 +709,7 @@ public class InterpreterJVM extends AbstractSlaveJVM
       String msg = "The interactions pane could not be reset:\n" + th;
       javax.swing.JOptionPane.showMessageDialog(null, msg);
     }
-    
+
     try {
       _mainJVM.quitFailed(th);
     }
@@ -718,10 +718,10 @@ public class InterpreterJVM extends AbstractSlaveJVM
       _log.logTime("quitFailed: " + re.toString());
     }
   }
-  
-  
+
+
   // ---------- JUnit methods ----------
-  
+
   /**
    * Runs a JUnit Test class in the Interpreter JVM.
    * @param classNames the class names to run in a test
@@ -733,7 +733,7 @@ public class InterpreterJVM extends AbstractSlaveJVM
                                    boolean isTestAll) throws RemoteException {
     return _junitTestManager.runTest(classNames, files, isTestAll);
   }
-  
+
   /**
    * Notifies the main JVM if JUnit is invoked on a non TestCase class.
    * @param isTestAll whether or not it was a use of the test all button
@@ -747,7 +747,7 @@ public class InterpreterJVM extends AbstractSlaveJVM
       _log.logTime("nonTestCase: " + re.toString());
     }
   }
-  
+
   /**
    * Notifies that a suite of tests has started running.
    * @param numTests The number of tests in the suite to be run.
@@ -761,7 +761,7 @@ public class InterpreterJVM extends AbstractSlaveJVM
       _log.logTime("testSuiteStarted: " + re.toString());
     }
   }
-  
+
   /**
    * Notifies that a particular test has started.
    * @param testName The name of the test being started.
@@ -775,7 +775,7 @@ public class InterpreterJVM extends AbstractSlaveJVM
       _log.logTime("testStarted" + re.toString());
     }
   }
-  
+
   /**
    * Notifies that a particular test has ended.
    * @param testName The name of the test that has ended.
@@ -792,7 +792,7 @@ public class InterpreterJVM extends AbstractSlaveJVM
       _log.logTime("testEnded: " + re.toString());
     }
   }
-  
+
   /**
    * Notifies that a full suite of tests has finished running.
    * @param errors The array of errors from all failed tests in the suite.
@@ -822,7 +822,7 @@ public class InterpreterJVM extends AbstractSlaveJVM
       return null;
     }
   }
-  
+
   public void junitJVMReady() {
   }
 }
@@ -839,17 +839,17 @@ class InterpreterData {
     _interpreter = interpreter;
     _inProgress = false;
   }
-  
+
   /** Gets the interpreter. */
   public Interpreter getInterpreter() {
     return _interpreter;
   }
-  
+
   /** Returns whether this interpreter is currently in progress with an interaction. */
   public boolean isInProgress() {
     return _inProgress;
   }
-  
+
   /** Sets whether this interpreter is currently in progress. */
   public void setInProgress(boolean inProgress) {
     _inProgress = inProgress;

@@ -48,13 +48,13 @@ import java.util.StringTokenizer;
  * @version $Id$
  */
 public class VectorOption<T> extends Option<Vector<T>> {
-  
+
   protected ParseStrategy<T> parser;
   protected FormatStrategy<T> formatter;
   public final String header;
   public final char delim;
   public final String footer;
-  
+
   /**
    * @param key The name of this option.
    * @param parser the parsing strategy for an element in this option
@@ -69,12 +69,12 @@ public class VectorOption<T> extends Option<Vector<T>> {
     this.delim = delim;
     this.footer = footer;
   }
-  
+
   public VectorOption(String key, Option<T> strategy, String header,
                       char delim, String footer, Vector<T> def) {
     this(key, strategy, strategy, header, delim, footer,def);
   }
-  
+
   /**
    * Defaults the "header", "footer", and "delim" fields
    * to open bracket, close bracket, and comma, repsectively.
@@ -85,7 +85,7 @@ public class VectorOption<T> extends Option<Vector<T>> {
   public VectorOption(String key, Option<T> option, Vector<T> def) {
     this(key,option,option,"[",',',"]",def);
   }
-  
+
   /**
    * @param s The String to be parsed.
    * @return An instance of Vector<T> represented by "s".
@@ -96,7 +96,7 @@ public class VectorOption<T> extends Option<Vector<T>> {
     s= s.trim();
     int startFirstElement = header.length();
     int startFooter = s.length() - footer.length();
-    
+
     if (startFooter < startFirstElement ||
         !s.startsWith(header) ||
         !s.endsWith(footer)) {
@@ -107,16 +107,16 @@ public class VectorOption<T> extends Option<Vector<T>> {
     s = s.substring(startFirstElement, startFooter);
     String d = String.valueOf(delim);
     StringTokenizer st = new StringTokenizer(s,d,true);
-    
+
     Vector<T> res = new Vector<T>();
     boolean sawDelim = st.hasMoreTokens();
-    
+
     while(st.hasMoreTokens()) {
       String token = st.nextToken();
       boolean isDelim = token.equals(d);
-      
+
       if(!isDelim) {
-        res.addElement(parser.parse(token));
+        res.add(parser.parse(token));
       } else if(sawDelim) { // isDelim & sawDelim (two delims in a row)
         throw new OptionParseException(name, s,
                                        "Argument contains delimiter with no preceding list element.");
@@ -129,7 +129,7 @@ public class VectorOption<T> extends Option<Vector<T>> {
     }
     return res;
   }
-  
+
   /**
    * @param v The Vector to be formatted.
    * @return A String representing "v". The overall String
@@ -139,17 +139,17 @@ public class VectorOption<T> extends Option<Vector<T>> {
    */
   public String format(Vector<T> v) {
     StringBuffer res = new StringBuffer(header);
-    
+
     int size = v.size();
     int i = 0;
     while (i < size) {
-      res.append(formatter.format(v.elementAt(i)));
+      res.append(formatter.format(v.get(i)));
       i++;
       if (i < size) res.append(delim);
     }
     return res.append(footer).toString();
   }
-  
- 
+
+
 }
-  
+

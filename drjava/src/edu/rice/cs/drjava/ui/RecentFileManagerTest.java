@@ -137,7 +137,7 @@ public final class RecentFileManagerTest extends TestCase {
     assertEquals("number of recent files", 1, vector.size());
     assertEquals("text of recent file",
                  FOO_TEXT,
-                 FileOps.readFileAsString(vector.elementAt(0)));
+                 FileOps.readFileAsString(vector.get(0)));
   }
   
   /**
@@ -156,17 +156,17 @@ public final class RecentFileManagerTest extends TestCase {
     assertEquals("number of recent files", 2, vector.size());
     assertEquals("text of most-recent file",
                  FOO_TEXT,
-                 FileOps.readFileAsString(vector.elementAt(0)));
+                 FileOps.readFileAsString(vector.get(0)));
     assertEquals("text of second-most recent file",
                  BAR_TEXT,
-                 FileOps.readFileAsString(vector.elementAt(1)));
+                 FileOps.readFileAsString(vector.get(1)));
     _rfm.updateMax(1);
     _rfm.numberItems();
     vector = _rfm.getFileVector();
     assertEquals("number of recent files", 1, vector.size());
     assertEquals("text of recent file",
                  FOO_TEXT,
-                 FileOps.readFileAsString(vector.elementAt(0)));
+                 FileOps.readFileAsString(vector.get(0)));
     
   }
   
@@ -181,17 +181,17 @@ public final class RecentFileManagerTest extends TestCase {
     _rfm.updateOpenFiles(tempFile);
     _rfm.updateOpenFiles(tempFile2);
     Vector<File> vector = _rfm.getFileVector();
-    assertEquals("tempFile2 should be at top", vector.elementAt(0), tempFile2);
+    assertEquals("tempFile2 should be at top", vector.get(0), tempFile2);
     
     // Remove top
     _rfm.removeIfInList(tempFile2);
     assertEquals("number of recent files", 1, vector.size());
-    assertEquals("tempFile should be at top", vector.elementAt(0), tempFile);
+    assertEquals("tempFile should be at top", vector.get(0), tempFile);
     
     // Remove non-existant entry
     _rfm.removeIfInList(tempFile2);
     assertEquals("number of recent files", 1, vector.size());
-    assertEquals("tempFile should still be at top", vector.elementAt(0), tempFile);
+    assertEquals("tempFile should still be at top", vector.get(0), tempFile);
     
     // Remove top again
     _rfm.removeIfInList(tempFile);
@@ -211,12 +211,12 @@ public final class RecentFileManagerTest extends TestCase {
     _rfm.updateOpenFiles(tempFile);
     Vector<File> vector = _rfm.getFileVector();
     
-    assertEquals("tempFile should be at top", vector.elementAt(0), tempFile);
+    assertEquals("tempFile should be at top", vector.get(0), tempFile);
     
     // Re-open tempFile2
     _rfm.updateOpenFiles(tempFile2);
     vector = _rfm.getFileVector();
-    assertEquals("tempFile2 should be at top", vector.elementAt(0), tempFile2);
+    assertEquals("tempFile2 should be at top", vector.get(0), tempFile2);
     
     
     // Re-open tempFile with a different path
@@ -228,7 +228,7 @@ public final class RecentFileManagerTest extends TestCase {
     
     _rfm.updateOpenFiles(sameFile);
     vector = _rfm.getFileVector();
-    assertEquals("sameFile should be at top", vector.elementAt(0), sameFile);
+    assertEquals("sameFile should be at top", vector.get(0), sameFile);
     assertEquals("should only have two files", 2, vector.size());
     assertTrue("should not contain tempFile", !(vector.contains(tempFile)));
   }

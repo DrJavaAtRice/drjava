@@ -4,7 +4,7 @@
  * at http://sourceforge.net/projects/drjava
  *
  * Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)
- * 
+ *
  * DrJava is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -50,14 +50,13 @@ import java.awt.Dimension;
 public class SplashScreen extends JWindow {
   public static final String SPLASH_ICON = "splash.png";
   private ImageIcon _icon;
-  
+
   /**
    * Creates a new splash screen, but does not display it.  Display the
    * splash screen using show() and close it with dispose().
    */
   public SplashScreen() {
     _icon = MainFrame.getIcon(SPLASH_ICON);
-    JWindow splash = new JWindow();
     getContentPane().add(new JLabel(_icon, SwingConstants.CENTER));
     setSize(_icon.getIconWidth(), _icon.getIconHeight());
     Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();

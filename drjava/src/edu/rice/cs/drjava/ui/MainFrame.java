@@ -91,7 +91,7 @@ import edu.rice.cs.util.text.DocumentAdapterException;
  * @version $Id$
  */
 public class MainFrame extends JFrame implements OptionConstants {
-  
+
   private static final int INTERACTIONS_TAB = 0;
   //private static final int COMPILE_TAB = 1;
   //private static final int OUTPUT_TAB = 2;
@@ -123,7 +123,7 @@ public class MainFrame extends JFrame implements OptionConstants {
    * TODO: should this be synchronized?
    */
   private Hashtable<OpenDefinitionsDocument, JScrollPane> _defScrollPanes;
-  
+
   /**
    * The currently displayed DefinitionsPane.
    */
@@ -134,10 +134,10 @@ public class MainFrame extends JFrame implements OptionConstants {
    */
   private String _fileTitle = "";
 
-  
+
   // These fields should be final but can't be, as the code is currently
   // organized, because they are set in helper methods, not the constructor
-  
+
   // Tabbed panel fields
   private JTabbedPane _tabbedPane;
   private CompilerErrorPanel _compilerErrorPanel;
@@ -152,7 +152,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   private JavadocErrorPanel _javadocErrorPanel;
   private FindReplaceDialog _findReplace;
   private LinkedList<TabbedPanel> _tabs;
-  
+
   /**
    * Panel to hold both InteractionsPane and its sync message.
    * TO DO: move sync message into the pane itself.
@@ -162,18 +162,18 @@ public class MainFrame extends JFrame implements OptionConstants {
    * Label to display message if Interactions are out of sync with Definitions.
    */
   private JLabel _syncStatus;
-  
+
   // Status bar fields
   private JPanel _statusBar;
   private JLabel _fileNameField;
   private JLabel _currLocationField;
   private PositionListener _posListener;
-  
+
   // Split panes for layout
   private JSplitPane _docSplitPane;
   private JSplitPane _debugSplitPane;
   private JSplitPane _mainSplit;
-  
+
   private JList _docList;
   private JButton _compileButton;
   private JButton _closeButton;
@@ -181,7 +181,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   private JButton _redoButton;
   private JToolBar _toolBar;
   private JFileChooser _interactionsHistoryChooser;
-  
+
   // Menu fields
   private JMenuBar _menuBar;
   private JMenu _fileMenu;
@@ -204,17 +204,17 @@ public class MainFrame extends JFrame implements OptionConstants {
   private JPopupMenu _docPanePopupMenu;
   private JPopupMenu _interactionsPanePopupMenu;
   private JPopupMenu _consolePanePopupMenu;
-  
+
   // Cached frames and dialogs
   private ConfigFrame _configFrame;
   private HelpFrame _helpFrame;
   private AboutDialog _aboutDialog;
-  
+
   /**
    * Keeps track of the recent files list in the File menu.
    */
   private RecentFileManager _recentFileManager;
-  
+
   /**
    * Timer to display "Stepping..." message if a step takes longer than
    * a certain amount of time.  All accesses must be synchronized on it.
@@ -226,12 +226,12 @@ public class MainFrame extends JFrame implements OptionConstants {
    * if there is one.  If there is none, this is null.
    */
   private HighlightManager.HighlightInfo _currentThreadLocationHighlight = null;
-  
+
   /**
    * Table to map breakpoints to their corresponding highlight objects.
    */
   private gj.util.Hashtable<Breakpoint, HighlightManager.HighlightInfo> _breakpointHighlights;
- 
+
   /**
    * Whether to display a prompt message before quitting.
    */
@@ -243,7 +243,7 @@ public class MainFrame extends JFrame implements OptionConstants {
    * from which we opened.
    */
   private JFileChooser _openChooser;
-  
+
   /**
    * For saving files.
    * We have a persistent dialog to keep track of the last directory
@@ -286,8 +286,8 @@ public class MainFrame extends JFrame implements OptionConstants {
       return (rc == JOptionPane.YES_OPTION);
     }
   };
-  
-  
+
+
   /**
    * Provides the view's contribution to the Javadoc interaction.
    */
@@ -329,7 +329,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       _open();
     }
   };
-  
+
   /**
    * Closes the current active document, prompting to save if necessary.
    */
@@ -370,10 +370,10 @@ public class MainFrame extends JFrame implements OptionConstants {
   private Action _revertAction = new AbstractAction("Revert to Saved") {
     public void actionPerformed(ActionEvent ae) {
       String title = "Revert to Saved?";
-      
+
       String message = "Are you sure you want to revert the current " +
         "file to the version on disk?";
-      
+
       int rc = JOptionPane.showConfirmDialog(MainFrame.this,
                                              message,
                                              title,
@@ -383,16 +383,16 @@ public class MainFrame extends JFrame implements OptionConstants {
       }
     }
   };
-  
+
   /** Reverts all open documents.
    * (not working yet)
   private Action _revertAllAction = new AbstractAction("Revert All to Saved") {
     public void actionPerformed(ActionEvent ae) {
       String title = "Revert All to Saved?";
-      
+
       String message = "Are you sure you want to revert all open " +
         "files to the versions on disk?";
-      
+
       int rc = JOptionPane.showConfirmDialog(MainFrame.this,
                                              message,
                                              title,
@@ -432,7 +432,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       _pageSetup();
     }
   };
-  
+
   /** Compiles all open documents. */
   private Action _compileAllAction = new AbstractAction("Compile All Documents") {
     public void actionPerformed(ActionEvent ae) {
@@ -446,7 +446,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       _compile();
     }
   };
-  
+
   /** Finds and runs the main method of the current document, if it exists. */
   private Action _runAction = new AbstractAction("Run Document's Main Method") {
     public void actionPerformed(ActionEvent ae) {
@@ -488,7 +488,7 @@ public class MainFrame extends JFrame implements OptionConstants {
         }
       }
   };
-  
+
   /** Runs Javadoc on the current document. */
   private Action _javadocCurrentAction = new AbstractAction("Preview Javadoc for Current Document") {
     public void actionPerformed(ActionEvent ae) {
@@ -628,7 +628,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       _currentDefPane.indent();
     }
   };
-  
+
   /**
    * Action for commenting out a block of text using wing comments.
    */
@@ -644,7 +644,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       doc.commentLines(start, end);
     }
   };
-  
+
   /**
    * Action for un-commenting a block of commented text.
    */
@@ -660,8 +660,8 @@ public class MainFrame extends JFrame implements OptionConstants {
       doc.uncommentLines(start, end);
     }
   };
-  
-  
+
+
   /** Clears DrJava's output console. */
   private Action _clearConsoleAction = new AbstractAction("Clear Console") {
     public void actionPerformed(ActionEvent ae) {
@@ -693,7 +693,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       int rc = dialog.show();
       if (rc == JOptionPane.YES_OPTION) {
         _doResetInteractions();
-      
+
         if (dialog.getCheckBoxValue()) {
           DrJava.getConfig().setSetting(INTERACTIONS_RESET_PROMPT, Boolean.FALSE);
         }
@@ -703,7 +703,7 @@ public class MainFrame extends JFrame implements OptionConstants {
 
   private void _doResetInteractions() {
     _tabbedPane.setSelectedIndex(INTERACTIONS_TAB);
-    
+
     // Lots of work, so use another thread
     final SwingWorker worker = new SwingWorker() {
       public Object construct() {
@@ -722,12 +722,12 @@ public class MainFrame extends JFrame implements OptionConstants {
       String classpath = "";
       Vector<String> classpathElements = _model.getClasspath();
       for(int i = 0; i < classpathElements.size(); i++) {
-        classpath += classpathElements.elementAt(i);
+        classpath += classpathElements.get(i);
         if (i + 1 < classpathElements.size()) {
           classpath += "\n";
         }
       }
-      
+
       new ScrollableDialog(MainFrame.this, "Interactions Classpath",
                            "Current Interpreter Classpath", classpath).show();
     }
@@ -743,7 +743,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       _helpFrame.show();
     }
   };
-  
+
   /** Pops up an info dialog. */
   private Action _aboutAction = new AbstractAction("About") {
     public void actionPerformed(ActionEvent ae) {
@@ -768,21 +768,21 @@ public class MainFrame extends JFrame implements OptionConstants {
       _model.setPreviousActiveDocument();
     }
   };
-  
+
   /** Switches focus to next pane. */
   private Action _switchToNextPaneAction =  new AbstractAction("Next Pane") {
     public void actionPerformed(ActionEvent ae) {
       _switchPaneFocus(true);
     }
   };
-  
+
   /** Switches focus to previous pane. */
   private Action _switchToPreviousPaneAction =  new AbstractAction("Previous Pane") {
     public void actionPerformed(ActionEvent ae) {
       _switchPaneFocus(false);
     }
   };
-  
+
   /**
    * This takes a component and gives it focus, showing it if
    * it's a tab. The interactionsPane and consolePane are wrapped
@@ -800,9 +800,9 @@ public class MainFrame extends JFrame implements OptionConstants {
     showTab(c);
     c.requestFocus();
   }
-  
+
   /**
-   * This method allows the user to cycle through the definitions 
+   * This method allows the user to cycle through the definitions
    * pane and all of the open tabs.
    * @param next true if we want to go to the next pane, false if the previous
    */
@@ -812,10 +812,10 @@ public class MainFrame extends JFrame implements OptionConstants {
     if (next) {
       if (_currentDefPane.hasFocus()) {
         // switch to the first tab if there is one
-        if (numTabs > 0) {          
+        if (numTabs > 0) {
           _switchToPane(_tabbedPane.getComponentAt(0));
         }
-      }     
+      }
       else if (numTabs == selectedIndex + 1) {
         // we're at the last tab, switch to the current def pane
         _switchToPane(_currentDefPane);
@@ -828,10 +828,10 @@ public class MainFrame extends JFrame implements OptionConstants {
     else {
       if (_currentDefPane.hasFocus()) {
         // switch to the last tab if there is one
-        if (numTabs > 0) {          
+        if (numTabs > 0) {
           _switchToPane(_tabbedPane.getComponentAt(numTabs - 1));
         }
-      }     
+      }
       else if (selectedIndex == 0) {
         // we're at the first tab, switch to the current def pane
         _switchToPane(_currentDefPane);
@@ -854,7 +854,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       _configFrame.toFront();
     }
   };
-  
+
   /** Enables the debugger */
   private Action _toggleDebuggerAction = new AbstractAction("Debug Mode") {
     public void actionPerformed(ActionEvent ae) {
@@ -921,7 +921,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       debuggerClearAllBreakpoints();
     }
   };
-  
+
   /** Cuts from the caret to the end of the current line to the clipboard. */
   protected Action _cutLineAction = new AbstractAction("Cut Line") {
     public void actionPerformed(ActionEvent ae) {
@@ -941,17 +941,16 @@ public class MainFrame extends JFrame implements OptionConstants {
       }
     }
   };
-  
+
   /** Deletes text from the caret to the end of the current line. */
   protected Action _clearLineAction = new AbstractAction("Clear Line") {
     public void actionPerformed(ActionEvent ae) {
       ActionMap _actionMap = _currentDefPane.getActionMap();
-      int oldCol = _model.getActiveDocument().getDocument().getCurrentCol();
       _actionMap.get(DefaultEditorKit.selectionEndLineAction).actionPerformed(ae);
       _actionMap.get(DefaultEditorKit.deleteNextCharAction).actionPerformed(ae);
     }
   };
-  
+
   /**
    * Moves the caret to the "intelligent" beginning of the line.
    * @see #_getBeginLinePos
@@ -962,7 +961,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       _currentDefPane.setCaretPosition(beginLinePos);
     }
   };
-  
+
   /**
    * Selects to the "intelligent" beginning of the line.
    * @see #_getBeginLinePos
@@ -973,7 +972,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       _currentDefPane.moveCaretPosition(beginLinePos);
     }
   };
-  
+
   /**
    * Returns the "intelligent" beginning of line.  If the caret is to
    * the right of the first non-whitespace character, the position of the
@@ -994,7 +993,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       throw new UnexpectedException(ble);
     }
   }
-  
+
   /**
    * Interprets the commands in a file in the interactions window
    */
@@ -1002,7 +1001,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     public void actionPerformed(ActionEvent ae) {
       // Show interactions tab
       _tabbedPane.setSelectedIndex(INTERACTIONS_TAB);
-      
+
       _interactionsHistoryChooser.setDialogTitle("Load Interactions History");
       FileOpenSelector selector = new FileOpenSelector() {
         public File[] getFiles() throws OperationCanceledException {
@@ -1038,7 +1037,7 @@ public class MainFrame extends JFrame implements OptionConstants {
         return;
       }
       String history = _model.getHistoryAsStringWithSemicolons();
-      
+
       // Edit the history
       if (resp == 0) {
         history = (new HistorySaveDialog(MainFrame.this)).editHistory(history);
@@ -1046,7 +1045,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       if (history == null) {
         return; // save cancelled
       }
-      
+
       _interactionsHistoryChooser.setDialogTitle("Save Interactions History");
       FileSaveSelector selector = new FileSaveSelector() {
         public File getFile() throws OperationCanceledException {
@@ -1066,7 +1065,7 @@ public class MainFrame extends JFrame implements OptionConstants {
           return true;
         }
       };
-      
+
       try {
         _model.saveHistory(selector, history);
       }
@@ -1077,7 +1076,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       _interactionsPane.requestFocus();
     }
   };
-  
+
   /**
    * Clears the commands in the interaction history
    */
@@ -1088,7 +1087,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       _interactionsPane.requestFocus();
     }
   };
-  
+
   /** How DrJava responds to window events. */
   private WindowListener _windowCloseListener = new WindowAdapter() {
     public void windowActivated(WindowEvent ev) {}
@@ -1131,23 +1130,23 @@ public class MainFrame extends JFrame implements OptionConstants {
   public MainFrame() {
     // Cache the config object, since we use it a zillion times.
     final Configuration config = DrJava.getConfig();
-    
+
     // Platform-specific UI setup.
     PlatformFactory.ONLY.beforeUISetup();
-    
+
     // create position listener for line numbers in status bar
     _posListener = new PositionListener();
     _setUpStatusBar();
 
     // create our model
     _model = new SingleDisplayModel();
-    
+
     // Ensure that DefinitionsPane uses the correct EditorKit!
     //   This has to be stored as a static field on DefinitionsPane because
     //   the JEditorPane constructor uses it before we get a chance to
     //   assign it to an instance field...
     DefinitionsPane.setEditorKit(_model.getEditorKit());
-    
+
     if (_model.getDebugger().isAvailable()) {
       // add listener to debug manager
       _model.getDebugger().addListener(new UIDebugListener());
@@ -1160,7 +1159,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     });
     _debugStepTimer.setRepeats(false);
 
-    
+
     // Working directory is default place to start
     File workDir = config.getSetting(WORKING_DIRECTORY);
     if (workDir == FileOption.NULL_FILE) {
@@ -1179,8 +1178,8 @@ public class MainFrame extends JFrame implements OptionConstants {
     _interactionsHistoryChooser = new JFileChooser();
     _interactionsHistoryChooser.setCurrentDirectory(workDir);
     _interactionsHistoryChooser.setFileFilter(new InteractionsHistoryFilter());
-    
-    
+
+
     //set up the hourglass cursor
     setGlassPane(new GlassPane());
     this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
@@ -1188,7 +1187,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     // Set up listeners
     this.addWindowListener(_windowCloseListener);
     _model.addListener(new ModelListener());
-    
+
     _defScrollPanes = new Hashtable<OpenDefinitionsDocument, JScrollPane>();
 
     // Create tabs before DefPane
@@ -1202,7 +1201,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     KeyBindingManager.Singleton.setMainFrame(this);
     KeyBindingManager.Singleton.setActionMap(_currentDefPane.getActionMap());
     _setUpKeyBindingMaps();
-    
+
     _posListener.updateLocation();
 
     // Need to set undo/redo actions to point to the initial def pane
@@ -1220,7 +1219,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _setUpToolBar();
     _setUpDocumentSelector();
     _setUpContextMenus();
-    
+
     _recentFileManager = new RecentFileManager(_fileMenu.getItemCount() - 2,
                                                _fileMenu,
                                                this);
@@ -1233,7 +1232,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     int height = config.getSetting(WINDOW_HEIGHT).intValue();
     setBounds(0, 0, width, height);
     setSize(width, height);
-    
+
     // suggested from zaq@nosi.com, to keep the frame on the screen!
     Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
     Dimension frameSize = this.getSize();
@@ -1253,24 +1252,24 @@ public class MainFrame extends JFrame implements OptionConstants {
 
     _setUpPanes();
     updateFileTitle();
-    
+
     _promptBeforeQuit = config.getSetting(QUIT_PROMPT).booleanValue();
 
     // Set the fonts
     _setMainFont();
     Font doclistFont = config.getSetting(FONT_DOCLIST);
     _docList.setFont(doclistFont);
-    
+
     // Set the colors
     _updateNormalColor();
     _updateBackgroundColor();
-    
+
     // Add OptionListeners for the colors.
     config.addOptionListener
       (DEFINITIONS_NORMAL_COLOR, new NormalColorOptionListener());
     config.addOptionListener
       (DEFINITIONS_BACKGROUND_COLOR, new BackgroundColorOptionListener());
-    
+
     // Add option listeners for changes to config options
     config.addOptionListener
       (FONT_MAIN, new MainFontOptionListener());
@@ -1358,10 +1357,10 @@ public class MainFrame extends JFrame implements OptionConstants {
         }
       }
     });
-    
+
     // Initialize breakpoint highlights hashtable, for easy removal of highlights
     _breakpointHighlights = new gj.util.Hashtable<Breakpoint, HighlightManager.HighlightInfo>();
-    
+
     // Set cached frames and dialogs to null until they are created
     _configFrame = null;
     _helpFrame = null;
@@ -1369,13 +1368,13 @@ public class MainFrame extends JFrame implements OptionConstants {
 
     // If any errors occurred while parsing config file, show them
     _showConfigException();
-    
+
     KeyBindingManager.Singleton.setShouldCheckConflict(false);
-    
+
     // Platform-specific UI setup.
     PlatformFactory.ONLY.afterUISetup(_aboutAction, _editPreferencesAction, _quitAction);
   }
-  
+
   /**
    * Releases any resources this frame is using to prepare it to
    * be garbage collected.  Should only be called from tests.
@@ -1384,7 +1383,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _model.dispose();
     super.dispose();
   }
-  
+
   /**
    * @return The model providing the logic for this view.
    */
@@ -1405,7 +1404,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   JButton getCloseButton() {
     return _closeButton;
   }
-  
+
   /**
    * For testing purposes.
    * @return The frame's compileAll button (Package private accessor)
@@ -1413,7 +1412,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   JButton getCompileAllButton() {
     return _compileButton;
   }
-  
+
   /**
    * Make the cursor an hourglass.
    */
@@ -1461,7 +1460,7 @@ public class MainFrame extends JFrame implements OptionConstants {
                  "in your classpath when you start DrJava.");
       _setDebugMenuItemsEnabled(false);
     }
-    
+
   }
 
   /**
@@ -1479,13 +1478,13 @@ public class MainFrame extends JFrame implements OptionConstants {
     _setDebugMenuItemsEnabled(false);
     _hideDebuggerPanel();
   }
-  
+
   private void _showDebuggerPanel() {
     _debugSplitPane.setTopComponent(_docSplitPane);
     _mainSplit.setTopComponent(_debugSplitPane);
     _debugPanel.updateData();
   }
-  
+
   private void _hideDebuggerPanel() {
     _mainSplit.setTopComponent(_docSplitPane);
   }
@@ -1537,9 +1536,9 @@ public class MainFrame extends JFrame implements OptionConstants {
       jfc.setSelectedFile(selection);
       jfc.setSelectedFile(null);
     }
-    
+
     OpenDefinitionsDocument active = _model.getActiveDocument();
-    
+
     // Fill in class name
     //if (active.isUntitled()) {
     try {
@@ -1562,7 +1561,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   public DefinitionsPane getCurrentDefPane() {
     return _currentDefPane;
   }
-  
+
   /**
    * Returns the currently shown error panel if there is one.
    * Otherwise returns null.
@@ -1583,7 +1582,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   public boolean isCompilerTabSelected() {
     return _tabbedPane.getSelectedComponent() == _compilerErrorPanel;
   }
-  
+
   /**
    * Returns whether the test output tab is currently showing.
    */
@@ -1597,7 +1596,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   public boolean isJavadocTabSelected() {
     return _tabbedPane.getSelectedComponent() == _javadocErrorPanel;
   }
-  
+
   /**
    * Makes sure save and compile buttons and menu items
    * are enabled and disabled appropriately after document
@@ -1659,7 +1658,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       }
       // Always switch to doc
       _model.setActiveDocument(openDoc);
-      
+
       // Prompt to revert if modified
       if (openDoc.isModifiedSinceSave()) {
         String title = "Revert to Saved?";
@@ -1796,7 +1795,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       _showIOError(ioe);
     }
   }
-  
+
   /**
   private void _revertAll() {
     try {
@@ -1810,7 +1809,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
   }
   */
-  
+
   private void _quit() {
     if (_promptBeforeQuit) {
       String title = "Quit DrJava?";
@@ -1828,10 +1827,10 @@ public class MainFrame extends JFrame implements OptionConstants {
         }
       }
     }
-    
+
     _recentFileManager.saveRecentFiles();
     _storePositionInfo();
-        
+
     // Save recent files, but only if there wasn't a problem at startup
     // (Don't want to overwrite a custom config file with a simple typo.)
     if (!DrJava.getConfig().hadStartupException()) {
@@ -1844,26 +1843,26 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
     _model.quit();
   }
-  
+
   /**
    * Stores the current position and size info for window and panes to the
    * config framework.
    */
   private void _storePositionInfo() {
     Configuration config = DrJava.getConfig();
-    
+
     // Window size.
     Dimension size = getSize();
     config.setSetting(WINDOW_HEIGHT, new Integer(size.height));
     config.setSetting(WINDOW_WIDTH, new Integer(size.width));
-    
+
     // Panel heights.
     config.setSetting(DEBUG_PANEL_HEIGHT, new Integer(_debugPanel.getHeight()));
 //    config.setSetting(TABS_HEIGHT,
 //       new Integer(_mainSplit.getHeight() - _mainSplit.getDividerLocation()));
-  
+
     // Doc list width.
-    config.setSetting(DOC_LIST_WIDTH, 
+    config.setSetting(DOC_LIST_WIDTH,
                       new Integer(_docSplitPane.getDividerLocation()));
   }
 
@@ -1884,9 +1883,9 @@ public class MainFrame extends JFrame implements OptionConstants {
     };
     worker.start();
   }
-  
+
   private void _compileAll() {
-    
+
     final SwingWorker worker = new SwingWorker() {
       public Object construct() {
         try {
@@ -1902,9 +1901,9 @@ public class MainFrame extends JFrame implements OptionConstants {
       }
     };
     worker.start();
-    
+
   }
-  
+
   /**
    * Internal helper method to run the main method of the current document in
    * the interactions pane.
@@ -2011,7 +2010,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   void debuggerToggleBreakpoint() {
     if (inDebugMode()) {
       OpenDefinitionsDocument doc = _model.getActiveDocument();
-      
+
       boolean isUntitled = doc.getDocument().isUntitled();
       if (isUntitled) {
         JOptionPane.showMessageDialog(this,
@@ -2021,7 +2020,7 @@ public class MainFrame extends JFrame implements OptionConstants {
                                       JOptionPane.ERROR_MESSAGE);
         return;
       }
-      
+
       boolean isModified = doc.isModifiedSinceSave();
       if (isModified  && !_currentDefPane.hasWarnedAboutModified() &&
           DrJava.getConfig().getSetting(WARN_BREAKPOINT_OUT_OF_SYNC).booleanValue()) {
@@ -2051,9 +2050,9 @@ public class MainFrame extends JFrame implements OptionConstants {
           default:
             throw new RuntimeException("Invalid rc from showConfirmDialog: " + rc);
         }
-        
+
       }
-           
+
       try {
         Debugger debugger = _model.getDebugger();
         debugger.toggleBreakpoint(doc,
@@ -2066,13 +2065,13 @@ public class MainFrame extends JFrame implements OptionConstants {
       }
     }
   }
-  
+
 
   /*
   private void _getText(String name) {
     _field = name;
   }*/
-  
+
   /**
    * Adds a watch to a given variable or field
    *
@@ -2097,7 +2096,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       debugger.addWatch(_field);
     }
   }*/
-  
+
   /**
    * Displays all breakpoints currently set in the debugger
    *
@@ -2133,12 +2132,12 @@ public class MainFrame extends JFrame implements OptionConstants {
       // Couldn't find the document, so ignore the FME
     }
   }
-  
+
   void _showFileNotFoundError(FileNotFoundException fnf) {
     _showError(fnf, "File Not Found",
                "The specified file was not found on disk.");
   }
-  
+
   void _showIOError(IOException ioe) {
     _showError(ioe, "Input/output error",
                "An I/O exception occurred during the last operation.");
@@ -2169,7 +2168,7 @@ public class MainFrame extends JFrame implements OptionConstants {
                                   title,
                                   JOptionPane.ERROR_MESSAGE);
   }
-  
+
   /**
    * Check if any errors occurred while parsing the config file,
    * and display a message if necessary.
@@ -2185,7 +2184,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
   }
 
-  
+
   /**
    * Shows a brief warning to the user, to inform him/her that the file he/she is
    * debugging has been modified since its last save and should probably be saved
@@ -2261,7 +2260,7 @@ public class MainFrame extends JFrame implements OptionConstants {
         File[] chosen = fc.getSelectedFiles();
         if (chosen == null)
             throw new UnexpectedException(new OperationCanceledException(), "filechooser returned null file");
-        
+
         // Following code reviewed for bug 70902-- JVF
         // If this is a single-selection dialog, getSelectedFiles() will always
         // return a zero-size array -- handle it differently.
@@ -2280,7 +2279,7 @@ public class MainFrame extends JFrame implements OptionConstants {
         else {
           return chosen;
         }
-        
+
       default:                  // impossible since rc must be one of these
         throw new UnexpectedException(new OperationCanceledException(), "filechooser returned bad rc " + choice);
     }
@@ -2320,7 +2319,7 @@ public class MainFrame extends JFrame implements OptionConstants {
         //Rectangle endRect = _defPane.modelToView(to - 1);
         Point endPoint = new Point(0, startRectY+viewHeight/2-1);
         startRect.add(endPoint);
-      
+
         _currentDefPane.scrollRectToVisible(startRect);
 
         //Commented out this call because it would be impossible to
@@ -2346,7 +2345,7 @@ public class MainFrame extends JFrame implements OptionConstants {
    * (Allows pane and listener to be garbage collected...)
    */
   private void _removeErrorListener(OpenDefinitionsDocument doc) {
-    JScrollPane scroll = (JScrollPane) _defScrollPanes.get(doc);
+    JScrollPane scroll = _defScrollPanes.get(doc);
     if (scroll != null) {
       DefinitionsPane pane = (DefinitionsPane) scroll.getViewport().getView();
       pane.removeCaretListener(pane.getErrorCaretListener());
@@ -2380,7 +2379,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _setUpAction(_printAction, "Print", "Print the current document");
     _setUpAction(_pageSetupAction, "Page Setup", "PageSetup", "Change the printer settings");
     _setUpAction(_printPreviewAction, "Print Preview", "PrintPreview", "Preview how the document will be printed");
-    
+
     _setUpAction(_quitAction, "Quit", "Quit", "Quit DrJava");
 
     _setUpAction(_undoAction, "Undo", "Undo previous command");
@@ -2396,19 +2395,19 @@ public class MainFrame extends JFrame implements OptionConstants {
     cutAction.putValue(Action.NAME, "Cut");
     copyAction.putValue(Action.NAME, "Copy");
     pasteAction.putValue(Action.NAME, "Paste");
-    
+
     _setUpAction(_indentLinesAction, "Indent Lines", "Indent all selected lines");
     _setUpAction(_commentLinesAction, "Comment Lines", "Comment out all selected lines");
     _setUpAction(_uncommentLinesAction, "Uncomment Lines", "Uncomment all selected lines");
 
     _setUpAction(_findReplaceAction, "Find", "Find or replace text in the document");
     _setUpAction(_gotoLineAction, "Go to line", "Go to a line number in the document");
-    
+
     _setUpAction(_switchToPrevAction, "Back", "Switch to the previous document");
     _setUpAction(_switchToNextAction, "Forward", "Switch to the next document");
     _setUpAction(_switchToPreviousPaneAction, "Previous Pane", "Switch focus to the previous pane");
     _setUpAction(_switchToNextPaneAction, "Next Pane", "Switch focus to the next pane");
-    
+
     _setUpAction(_editPreferencesAction, "Preferences", "Edit configurable settings in DrJava");
 
     _setUpAction(_junitAction, "Test Current", "Run JUnit over the current document");
@@ -2416,20 +2415,20 @@ public class MainFrame extends JFrame implements OptionConstants {
     _setUpAction(_javadocAllAction, "Javadoc", "Create and save Javadoc for the packages of all open documents");
     _setUpAction(_javadocCurrentAction, "Preview Javadoc Current", "Preview the Javadoc for the current document");
     _setUpAction(_runAction, "Run Document", "Run the main method of the current document");
-    
+
     _setUpAction(_loadHistoryAction, "Load History", "Load a history of interactions from a file");
     _setUpAction(_saveHistoryAction, "Save History", "Save the history of interactions to a file");
     _setUpAction(_clearHistoryAction, "Clear History", "Clear the current history of interactions");
-    
+
     //_setUpAction(_abortInteractionAction, "Break", "Abort the current interaction");
     _setUpAction(_resetInteractionsAction, "Reset", "Reset the Interactions Pane");
     _setUpAction(_viewInteractionsClasspathAction, "View Interactions Classpath", "Display the classpath in use by the Interactions Pane");
     _setUpAction(_copyInteractionToDefinitionsAction, "Lift Current Interaction", "Copy the current interaction into the Definitions Pane");
-    
+
     _setUpAction(_clearConsoleAction, "Clear Console", "Clear all text in the Console Pane");
     _setUpAction(_showDebugConsoleAction, "Show DrJava Debug Console", "<html>Show a console for debugging DrJava<br>" +
                  "(with \"mainFrame\", \"model\", and \"config\" variables defined)</html>");
-    
+
     _setUpAction(_toggleDebuggerAction, "Debug Mode", "Enable or disable DrJava's debugger");
     _setUpAction(_toggleBreakpointAction, "Toggle Breakpoint", "Set or clear a breakpoint on the current line");
     _setUpAction(_clearAllBreakpointsAction, "Clear Breakpoints", "Clear all breakpoints in all classes");
@@ -2437,10 +2436,10 @@ public class MainFrame extends JFrame implements OptionConstants {
     _setUpAction(_stepIntoDebugAction, "Step Into", "Step into the current line or method call");
     _setUpAction(_stepOverDebugAction, "Step Over", "Step over the current line or method call");
     _setUpAction(_stepOutDebugAction, "Step Out", "Step out of the current method");
-    
+
     _setUpAction(_helpAction, "Help", "Show documentation on how to use DrJava");
     _setUpAction(_aboutAction, "About", "About DrJava");
-    
+
   }
 
   private void _setUpAction(Action a, String name, String icon, String shortDesc) {
@@ -2452,7 +2451,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   private void _setUpAction(Action a, String icon, String shortDesc) {
     _setUpAction(a, icon, icon, shortDesc);
   }
-  
+
 
   /**
    * Returns the icon with the given name.
@@ -2464,7 +2463,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   private ImageIcon _getIcon(String name) {
     return getIcon(name);
   }
-  
+
   public static ImageIcon getIcon(String name) {
     URL url = MainFrame.class.getResource(ICON_PATH + name);
     if (url != null) {
@@ -2498,7 +2497,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _menuBar.add(_helpMenu);
     setJMenuBar(_menuBar);
   }
-  
+
   /**
    * Adds an Action as a menu item to the given menu, using the
    * specified configurable keystroke.
@@ -2532,7 +2531,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       //KeyBindingManager.Singleton.addListener(opt, item);
     }
   }
-  
+
   /**
    * Creates and returns a file menu.  Side effects: sets values for
    * _saveMenuItem.
@@ -2565,7 +2564,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _addMenuItem(fileMenu, _pageSetupAction, KEY_PAGE_SETUP);
     _addMenuItem(fileMenu, _printPreviewAction, KEY_PRINT_PREVIEW);
     _addMenuItem(fileMenu, _printAction, KEY_PRINT);
-    
+
     // Quit
     fileMenu.addSeparator();
     _addMenuItem(fileMenu, _quitAction, KEY_QUIT);
@@ -2577,13 +2576,12 @@ public class MainFrame extends JFrame implements OptionConstants {
    * Creates and returns a edit menu.
    */
   private JMenu _setUpEditMenu(int mask) {
-    JMenuItem tmpItem;
     JMenu editMenu = new JMenu("Edit");
     editMenu.setMnemonic(KeyEvent.VK_E);
     // Undo, redo
     _addMenuItem(editMenu, _undoAction, KEY_UNDO);
     _addMenuItem(editMenu, _redoAction, KEY_REDO);
-      
+
     // Cut, copy, paste, select all
     editMenu.addSeparator();
     _addMenuItem(editMenu, cutAction, KEY_CUT);
@@ -2598,23 +2596,23 @@ public class MainFrame extends JFrame implements OptionConstants {
     editItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_TAB, 0));
     _addMenuItem(editMenu, _commentLinesAction, KEY_COMMENT_LINES);
     _addMenuItem(editMenu, _uncommentLinesAction, KEY_UNCOMMENT_LINES);
-    
+
     // Find/replace, goto
     editMenu.addSeparator();
     _addMenuItem(editMenu, _findReplaceAction, KEY_FIND_REPLACE);
     _addMenuItem(editMenu, _gotoLineAction, KEY_GOTO_LINE);
-      
+
     // Next, prev doc
     editMenu.addSeparator();
     _addMenuItem(editMenu, _switchToPrevAction, KEY_PREVIOUS_DOCUMENT);
     _addMenuItem(editMenu, _switchToNextAction, KEY_NEXT_DOCUMENT);
     _addMenuItem(editMenu, _switchToPreviousPaneAction, KEY_PREVIOUS_PANE);
     _addMenuItem(editMenu, _switchToNextPaneAction, KEY_NEXT_PANE);
-    
+
     // access to configurations GUI
     editMenu.addSeparator();
     _addMenuItem(editMenu, _editPreferencesAction, KEY_PREFERENCES);
-    
+
     // Add the menus to the menu bar
     return editMenu;
   }
@@ -2623,10 +2621,9 @@ public class MainFrame extends JFrame implements OptionConstants {
    * Creates and returns a tools menu.
    */
   private JMenu _setUpToolsMenu(int mask) {
-    JMenuItem tmpItem;
     JMenu toolsMenu = new JMenu("Tools");
     toolsMenu.setMnemonic(KeyEvent.VK_T);
-    
+
     // Compile, Test, Javadoc
     _addMenuItem(toolsMenu, _compileAllAction, KEY_COMPILE_ALL);
     _addMenuItem(toolsMenu, _compileAction, KEY_COMPILE);
@@ -2635,11 +2632,11 @@ public class MainFrame extends JFrame implements OptionConstants {
     _addMenuItem(toolsMenu, _javadocAllAction, KEY_JAVADOC_ALL);
     _addMenuItem(toolsMenu, _javadocCurrentAction, KEY_JAVADOC_CURRENT);
     toolsMenu.addSeparator();
-    
+
     // Run
     _addMenuItem(toolsMenu, _runAction, KEY_RUN);
     toolsMenu.addSeparator();
-    
+
     _addMenuItem(toolsMenu, _loadHistoryAction, KEY_LOAD_HISTORY);
     _addMenuItem(toolsMenu, _saveHistoryAction, KEY_SAVE_HISTORY);
     _addMenuItem(toolsMenu, _clearHistoryAction, KEY_CLEAR_HISTORY);
@@ -2668,7 +2665,6 @@ public class MainFrame extends JFrame implements OptionConstants {
    * Creates and returns a debug menu.
    */
   private JMenu _setUpDebugMenu(int mask) {
-    JMenuItem tempItem;
     JMenu debugMenu = new JMenu("Debugger");
     debugMenu.setMnemonic(KeyEvent.VK_D);
     // Enable debugging item
@@ -2680,10 +2676,10 @@ public class MainFrame extends JFrame implements OptionConstants {
 
     _addMenuItem(debugMenu, _toggleBreakpointAction, KEY_DEBUG_BREAKPOINT_TOGGLE);
     //_printBreakpointsMenuItem = debugMenu.add(_printBreakpointsAction);
-    //_clearAllBreakpointsMenuItem = 
+    //_clearAllBreakpointsMenuItem =
     _addMenuItem(debugMenu, _clearAllBreakpointsAction, KEY_DEBUG_CLEAR_ALL_BREAKPOINTS);
     debugMenu.addSeparator();
-    
+
     //_addMenuItem(debugMenu, _suspendDebugAction, KEY_DEBUG_SUSPEND);
     _addMenuItem(debugMenu, _resumeDebugAction, KEY_DEBUG_RESUME);
     _addMenuItem(debugMenu, _stepIntoDebugAction, KEY_DEBUG_STEP_INTO);
@@ -2714,7 +2710,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     if (_debugPanel != null)
       _debugPanel.disableButtons();
   }
-  
+
   /**
    * Enables and disables the appropriate menu items in the debug menu
    * depending upon the state of the current thread
@@ -2746,7 +2742,7 @@ public class MainFrame extends JFrame implements OptionConstants {
    */
   JButton _createManualToolbarButton(Action a) {
     final JButton ret;
-    
+
     Font buttonFont = DrJava.getConfig().getSetting(FONT_TOOLBAR);
 
     // Check whether icons should be shown
@@ -2796,7 +2792,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     boolean useText = DrJava.getConfig().getSetting(TOOLBAR_TEXT_ENABLED).booleanValue();
     boolean useIcons = DrJava.getConfig().getSetting(TOOLBAR_ICONS_ENABLED).booleanValue();
     Font buttonFont = DrJava.getConfig().getSetting(FONT_TOOLBAR);
-    
+
     final JButton result = new JButton(a) {
       public boolean isFocusTraversable() {
         return false;
@@ -2829,13 +2825,13 @@ public class MainFrame extends JFrame implements OptionConstants {
     _toolBar.add(_createToolbarButton(_saveAction));
     _closeButton = _createToolbarButton(_closeAction);
     _toolBar.add(_closeButton);
-    
+
     // Cut, copy, paste
     _toolBar.addSeparator();
     _toolBar.add(_createToolbarButton(cutAction));
     _toolBar.add(_createToolbarButton(copyAction));
     _toolBar.add(_createToolbarButton(pasteAction));
-    
+
     // Undo, redo
     // Simple workaround, for now, for bug # 520742:
     // Undo/Redo button text in JDK 1.3
@@ -2846,7 +2842,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _toolBar.add(_undoButton);
     _redoButton = _createManualToolbarButton(_redoAction);
     _toolBar.add(_redoButton);
-    
+
     // Find
     _toolBar.addSeparator();
     _toolBar.add(_createToolbarButton(_findReplaceAction));
@@ -2860,7 +2856,7 @@ public class MainFrame extends JFrame implements OptionConstants {
 
     // Junit
     _toolBar.addSeparator();
-    
+
     _toolBar.add(_createToolbarButton(_junitAllAction));
     _toolBar.add(_createToolbarButton(_javadocAllAction));
 
@@ -2875,14 +2871,17 @@ public class MainFrame extends JFrame implements OptionConstants {
    * TOOLBAR_TEXT_ENABLED, or FONT_TOOLBAR (name, style, text)
    */
   private void _updateToolbarButtons() {
-    
+
     Component[] buttons = _toolBar.getComponents();
-    Font toolbarFont = DrJava.getConfig().getSetting(FONT_TOOLBAR);    
+
+    Font toolbarFont = DrJava.getConfig().getSetting(FONT_TOOLBAR);
     boolean iconsEnabled = DrJava.getConfig().getSetting(TOOLBAR_ICONS_ENABLED).booleanValue();
     boolean textEnabled = DrJava.getConfig().getSetting(TOOLBAR_TEXT_ENABLED).booleanValue();
 
     for (int i = 0; i< buttons.length; i++) {
+
       if (buttons[i] instanceof JButton) {
+
         JButton b = (JButton) buttons[i];
         Action a = b.getAction();
 
@@ -2890,7 +2889,7 @@ public class MainFrame extends JFrame implements OptionConstants {
         /*
         if (a == null) {
           ActionListener[] al = b.getActionListeners(); // 1.4 only
-            
+
           for (int j=0; j<al.length; j++) {
             if (al[j] instanceof Action) {
               a = (Action) al[j];
@@ -2901,7 +2900,7 @@ public class MainFrame extends JFrame implements OptionConstants {
         */
 
         b.setFont(toolbarFont);
-                   
+
         if (a == null) {
           if (b == _undoButton) {
             a = _undoAction;
@@ -2924,7 +2923,7 @@ public class MainFrame extends JFrame implements OptionConstants {
             b.setIcon(null);
           }
         }
-          
+
         if (b.getText() == "") {
           if (textEnabled) {
             b.setText( (String) a.getValue(Action.DEFAULT));
@@ -2937,27 +2936,27 @@ public class MainFrame extends JFrame implements OptionConstants {
         }
       }
     }
-        
+
     // Correct the vertical height of the buttons.
     _fixToolbarHeights();
   }
-  
+
   /**
    * Ensures that all toolbar buttons have the same height.
    */
   private void _fixToolbarHeights() {
     Component[] buttons = _toolBar.getComponents();
-    
+
     // First, find the maximum height of all the buttons.
     int max = 0;
     for (int i = 0; i< buttons.length; i++) {
       // We only care about the JButtons.
       if (buttons[i] instanceof JButton) {
         JButton b = (JButton) buttons[i];
-        
+
         // reset any preferred size we have set
         b.setPreferredSize(null);
-        
+
         // get the preferred height, since that's what we want to use
         Dimension d = b.getPreferredSize();
         int cur = (int) d.getHeight();
@@ -2966,24 +2965,24 @@ public class MainFrame extends JFrame implements OptionConstants {
         }
       }
     }
-    
+
     // Now set all button heights to the max.
     for (int i = 0; i< buttons.length; i++) {
       // We only care about the JButtons.
       if (buttons[i] instanceof JButton) {
         JButton b = (JButton) buttons[i];
         Dimension d = new Dimension((int) b.getPreferredSize().getWidth(), max);
-        
+
         // JToolBar inexplicably uses the max size
         // also set preferred size for consistency
         b.setPreferredSize(d);
         b.setMaximumSize(d);
       }
     }
-    
+
     // _toolbar.revalidate();
   }
-  
+
   /**
    * Sets up the status bar with the filename field.
    */
@@ -3027,7 +3026,7 @@ public class MainFrame extends JFrame implements OptionConstants {
 
   private void _setUpTabs() {
     _compilerErrorPanel = new CompilerErrorPanel(_model, this);
-    
+
     _consoleController = new ConsoleController(_model.getConsoleDocument(),
                                                _model.getSwingConsoleDocument());
     _consolePane = _consoleController.getPane();
@@ -3061,33 +3060,33 @@ public class MainFrame extends JFrame implements OptionConstants {
           _consolePane.requestFocus();
         }
         // Update error highlights?
-        if (_currentDefPane != null) {          
+        if (_currentDefPane != null) {
           int pos = _currentDefPane.getCaretPosition();
           _currentDefPane.removeErrorHighlight();
           _currentDefPane.getErrorCaretListener().updateHighlight(pos);
         }
       }
     });
-    
+
     //_interactionsWithSyncPanel = new JPanel(new BorderLayout());
     //_syncStatus = new JLabel("Testing");
     //_interactionsWithSyncPanel.add(new BorderlessScrollPane(_interactionsPane),
     //                               BorderLayout.CENTER);
     //_interactionsWithSyncPanel.add(_syncStatus, BorderLayout.SOUTH);
-                                    
+
     _tabbedPane.add("Interactions", _interactionsScroll);
     _tabbedPane.add("Console", _consoleScroll);
-    
+
     _tabs = new LinkedList<TabbedPanel>();
 
     _tabs.addLast(_compilerErrorPanel);
     _tabs.addLast(_junitErrorPanel);
     _tabs.addLast(_javadocErrorPanel);
     _tabs.addLast(_findReplace);
-    
+
     // Show compiler output pane by default
     showTab(_compilerErrorPanel);
-    
+
     _tabbedPane.setSelectedIndex(0);
   }
 
@@ -3179,26 +3178,26 @@ public class MainFrame extends JFrame implements OptionConstants {
 
     // add a listener to update line and column.
     pane.addCaretListener( _posListener );
-    
+
     // Add to a scroll pane
     JScrollPane scroll = new BorderlessScrollPane(pane,
                                                   JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
                                                   JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
     //scroll.setBorder(null); // removes all default borders (MacOS X installs default borders)
-    
+
     // can be used to make sure line wrapping occurs
     /*scroll.getViewport().addChangeListener(new ChangeListener() {
       public void stateChanged(ChangeEvent e) {
         pane.setSize(scroll.getViewport().getWidth(), pane.getHeight());
       }
     });*/
-    
+
     if (DrJava.getConfig().getSetting(LINEENUM_ENABLED).booleanValue()) {
       scroll.setRowHeaderView( new LineEnumRule(pane));
     }
-    
+
     _defScrollPanes.put(doc, scroll);
-    
+
     return scroll;
   }
 
@@ -3211,19 +3210,18 @@ public class MainFrame extends JFrame implements OptionConstants {
                                JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 
     // DefinitionsPane
-    JScrollPane defScroll = (JScrollPane)
-      _defScrollPanes.get(_model.getActiveDocument());
+    JScrollPane defScroll = _defScrollPanes.get(_model.getActiveDocument());
 
     // Try to create debug panel (see if JSwat is around)
     if (_model.getDebugger().isAvailable()) {
       try {
         _debugPanel = new DebugPanel(this);
-        
+
         // Set the panel's size.
-        int debugHeight = 
+        int debugHeight =
           DrJava.getConfig().getSetting(DEBUG_PANEL_HEIGHT).intValue();
         Dimension debugMinSize = _debugPanel.getMinimumSize();
-        
+
         // TODO: check bounds compared to entire window.
         if ((debugHeight > debugMinSize.height)) {
           debugMinSize.height = debugHeight;
@@ -3242,7 +3240,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     } else {
       _debugPanel = null;
     }
-    
+
     // Overall layout
     _docSplitPane = new BorderlessSplitPane(JSplitPane.HORIZONTAL_SPLIT,
                                             true,
@@ -3263,15 +3261,15 @@ public class MainFrame extends JFrame implements OptionConstants {
     // Also, according to the Swing docs, we need to set these dividers AFTER
     // we have shown the window. How annoying.
 //    int tabHeight = DrJava.getConfig().getSetting(TABS_HEIGHT).intValue();
-    
+
     // 2*getHeight()/3
     _mainSplit.setDividerLocation(_mainSplit.getHeight() - 132);
 //    _mainSplit.setDividerLocation(_mainSplit.getHeight() - tabHeight);
     _mainSplit.setOneTouchExpandable(true);
     _debugSplitPane.setOneTouchExpandable(true);
-    
+
     int docListWidth = DrJava.getConfig().getSetting(DOC_LIST_WIDTH).intValue();
-    
+
     // TODO: Check bounds.
     _docSplitPane.setDividerLocation(docListWidth);
     _docSplitPane.setOneTouchExpandable(true);
@@ -3282,32 +3280,31 @@ public class MainFrame extends JFrame implements OptionConstants {
    * for the current active document.
    */
   void _switchDefScrollPane() {
-  
+
     // demoted to package private protection to test the disabling editing while
     // compiling functionality.
-    
+
     // Sync caret with location before switching
     _currentDefPane.getOpenDocument().
       syncCurrentLocationWithDefinitions( _currentDefPane.getCaretPosition() );
-    
+
     // Remove any error highlighting in the old def pane
     _currentDefPane.removeErrorHighlight();
 
-    JScrollPane scroll =
-      (JScrollPane) _defScrollPanes.get(_model.getActiveDocument());
+    JScrollPane scroll = _defScrollPanes.get(_model.getActiveDocument());
     if (scroll == null) {
       throw new UnexpectedException(new Exception(
                                                   "Current definitions scroll pane not found."));
     }
 
     int oldLocation = _docSplitPane.getDividerLocation();
-    
+
     // Following line should fix "Dancing UI" bug
     // scroll.setPreferredSize(_docSplitPane.getRightComponent().getPreferredSize());
-    
+
     _docSplitPane.setRightComponent(scroll);
     _docSplitPane.setDividerLocation(oldLocation);
-    
+
     // if the current def pane is uneditable, that means
     // we arrived here from a compile with errors.  We're
     // guaranteed to make it editable again when we
@@ -3325,23 +3322,22 @@ public class MainFrame extends JFrame implements OptionConstants {
     // reset the undo/redo menu items
     _undoAction.setDelegatee(_currentDefPane.getUndoAction());
     _redoAction.setDelegatee(_currentDefPane.getRedoAction());
-    
+
     if(inDebugMode()) {
       _updateDebugStatus();
     }
   }
-  
+
   /**
    * Addresses the Mac OS X bug where the scrollbars are disabled in
    * one document after opening another document.
    */
   private void _reenableScrollBar() {
-    JScrollPane scroll = (JScrollPane)
-      _defScrollPanes.get(_model.getActiveDocument());
+    JScrollPane scroll = _defScrollPanes.get(_model.getActiveDocument());
     if (scroll == null) {
       throw new UnexpectedException(new Exception("Current definitions scroll pane not found."));
     }
-    
+
     JScrollBar oldbar = scroll.getVerticalScrollBar();
     JScrollBar newbar = scroll.createVerticalScrollBar();
     newbar.setMinimum(oldbar.getMinimum());
@@ -3351,7 +3347,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     newbar.setEnabled(true);
     newbar.revalidate();
     scroll.setVerticalScrollBar(newbar);
-    
+
     // This needs to be repeated for the horizontal scrollbar
     oldbar = scroll.getHorizontalScrollBar();
     newbar = scroll.createHorizontalScrollBar();
@@ -3364,7 +3360,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     scroll.setHorizontalScrollBar(newbar);
     scroll.revalidate();
   }
-  
+
   /**
    * Returns a JRadioButtonMenuItem that looks like a JCheckBoxMenuItem.
    * This is a workaround for a known bug on OS X's version of Java.
@@ -3375,22 +3371,21 @@ public class MainFrame extends JFrame implements OptionConstants {
   private JMenuItem _newCheckBoxMenuItem(Action action) {
     String RADIO_ICON_KEY = "RadioButtonMenuItem.checkIcon";
     String CHECK_ICON_KEY = "CheckBoxMenuItem.checkIcon";
-    JRadioButtonMenuItem radio1, radio2, radio3;
-    
+
     // Store the default radio button icon to put back later
     Object radioIcon = UIManager.get(RADIO_ICON_KEY);
-    
+
     // Replace radio button's checkIcon with that of JCheckBoxMenuItem
     // so that our menu item looks like a checkbox
     UIManager.put(RADIO_ICON_KEY, UIManager.get(CHECK_ICON_KEY));
     JRadioButtonMenuItem pseudoCheckBox = new JRadioButtonMenuItem(action);
-    
+
     // Put original radio button checkIcon back.
     UIManager.put(RADIO_ICON_KEY, radioIcon);
 
     return pseudoCheckBox;
   }
-  
+
   /**
    * Sets the current directory to be that of the given file.
    */
@@ -3440,9 +3435,9 @@ public class MainFrame extends JFrame implements OptionConstants {
    * @param f is a Font object
    */
   private void _setMainFont() {
-    
+
     Font f = DrJava.getConfig().getSetting(FONT_MAIN);
-    
+
     Iterator scrollPanes = _defScrollPanes.values().iterator();
     while (scrollPanes.hasNext()) {
       JScrollPane scroll = (JScrollPane) scrollPanes.next();
@@ -3455,90 +3450,90 @@ public class MainFrame extends JFrame implements OptionConstants {
         }
       }
     }
-    
+
     // Update Interactions Pane
     _interactionsPane.setFont(f);
     _interactionsController.setDefaultFont(f);
-    
+
     // Update Console Pane
     _consolePane.setFont(f);
     _consoleController.setDefaultFont(f);
-    
+
     _findReplace.setFieldFont(f);
     _compilerErrorPanel.setListFont(f);
     _junitErrorPanel.setListFont(f);
     _javadocErrorPanel.setListFont(f);
   }
-  
+
   /**
    * Updates the text color for the doc list.
    */
   private void _updateNormalColor() {
     // Get the new value.
     Color norm = DrJava.getConfig().getSetting(DEFINITIONS_NORMAL_COLOR);
-    
+
     // Change the text (foreground) color for the doc list.
     _docList.setForeground(norm);
-    
+
     // We also need to immediately repaint the foremost scroll pane.
     _repaintLineNums();
   }
-  
+
   /**
    * Updates the background color for the doc list.
    */
   private void _updateBackgroundColor() {
     // Get the new value.
     Color back = DrJava.getConfig().getSetting(DEFINITIONS_BACKGROUND_COLOR);
-    
+
     // Change the background color for the doc list.
     _docList.setBackground(back);
-    
+
     // We also need to immediately repaint the foremost scroll pane.
     _repaintLineNums();
   }
-  
+
   /**
    * Updates the font and colors of the line number display.
    */
   private void _updateLineNums() {
     if (DrJava.getConfig().getSetting(LINEENUM_ENABLED).booleanValue()) {
       Iterator<JScrollPane> it = _defScrollPanes.values().iterator();
-      
+
       // Iterate over all definitions scroll panes.
       while (it.hasNext()) {
         // Update the font for all line number displays.
         JScrollPane spane = it.next();
-        
+
         LineEnumRule ler = (LineEnumRule) spane.getRowHeader().getView();
         ler.updateFont();
         ler.revalidate();
       }
-      
+
       // We also need to immediately repaint the foremost scroll pane.
       _repaintLineNums();
     }
   }
-  
+
   /**
    * Repaints the line numbers on the active scroll pane.
    */
   private void _repaintLineNums() {
     JScrollPane front = _defScrollPanes.get(_model.getActiveDocument());
     JViewport rhvport = front.getRowHeader();
-    
+
     if (rhvport != null) {
       Component view = rhvport.getView();
       view.repaint();
     }
   }
-  
+
   /**
    *  Update the row header (line number enumeration) for the definitions scroll pane
    */
-  private void _updateDefScrollRowHeader() {    
+  private void _updateDefScrollRowHeader() {
     boolean ruleEnabled = DrJava.getConfig().getSetting(LINEENUM_ENABLED).booleanValue();
-    
+
     Iterator scrollPanes = _defScrollPanes.values().iterator();
     while (scrollPanes.hasNext()) {
       JScrollPane scroll = (JScrollPane) scrollPanes.next();
@@ -3557,7 +3552,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       }
     }
   }
-  
+
   /**
    * Removes the current highlight
    */
@@ -3567,7 +3562,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
     _currentThreadLocationHighlight = null;
   }
-  
+
   /**
    * Disable any step timer
    */
@@ -3578,7 +3573,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       }
     }
   }
-  
+
   /**
    * Checks if debugPanel's status bar displays the DEBUGGER_OUT_OF_SYNC message
    * but the current document is in sync.  Clears the debugPanel's status bar in
@@ -3617,7 +3612,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     };
     SwingUtilities.invokeLater(doCommand);
   }
-  
+
   /**
    * Ensures that the interactions pane is editable after an interaction completes.
    */
@@ -3633,7 +3628,7 @@ public class MainFrame extends JFrame implements OptionConstants {
          _removeThreadLocationHighlight();
          }
          */
-        
+
         _interactionsPane.setCursor(Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR));
         _interactionsPane.setEditable(true);
         _interactionsController.moveToEnd();
@@ -3644,7 +3639,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     };
     SwingUtilities.invokeLater(doCommand);
   }
-  
+
 
   /**
    * Blocks access to DrJava while the hourglass cursor is on
@@ -3660,12 +3655,12 @@ public class MainFrame extends JFrame implements OptionConstants {
       super.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
     }
   }
-  
+
   /**
    * Listens to events from the debugger.
    */
   private class UIDebugListener implements DebugListener {
-    
+
     public void debuggerStarted() {
       // Only change GUI from event-dispatching thread
       Runnable doCommand = new Runnable() {
@@ -3675,10 +3670,10 @@ public class MainFrame extends JFrame implements OptionConstants {
       };
       SwingUtilities.invokeLater(doCommand);
     }
-    
+
     public void debuggerShutdown() {
       _disableStepTimer();
-      
+
       // Only change GUI from event-dispatching thread
       Runnable doCommand = new Runnable() {
         public void run() {
@@ -3694,10 +3689,10 @@ public class MainFrame extends JFrame implements OptionConstants {
       };
       SwingUtilities.invokeLater(doCommand);
     }
-    
+
     public void currThreadSet(DebugThreadData dtd) {
     }
-    
+
     public void threadLocationUpdated(final OpenDefinitionsDocument doc,
                                       final int lineNumber,
                                       final boolean shouldHighlight) {
@@ -3715,11 +3710,11 @@ public class MainFrame extends JFrame implements OptionConstants {
             }
           };
           _currentDefPane.addSetSizeListener(setSizeListener);
-          
+
           if (!_model.getActiveDocument().equals(doc)) {
             _model.setActiveDocument(doc);
           }
-          
+
           // this block occurs if the documents is already open and as such
           // has a positive size
           if (_currentDefPane.getSize().getWidth() > 0 &&
@@ -3744,9 +3739,9 @@ public class MainFrame extends JFrame implements OptionConstants {
 
           if (doc.isModifiedSinceSave() &&
               !_currentDefPane.hasWarnedAboutModified()) {
-            
+
             _showDebuggingModifiedFileWarning();
-            
+
             //no need to update flag, because previous method call will do it
             //_hasWarnedAboutModified = true;
           }
@@ -3754,18 +3749,17 @@ public class MainFrame extends JFrame implements OptionConstants {
           _interactionsPane.requestFocus();
           showTab(_interactionsPane);
           _updateDebugStatus();
-          
+
         }
       };
       SwingUtilities.invokeLater(doCommand);
     }
-    
+
     public void breakpointSet(final Breakpoint bp) {
       // Only change GUI from event-dispatching thread
       Runnable doCommand = new Runnable() {
         public void run() {
-          JScrollPane scroll =
-            (JScrollPane) _defScrollPanes.get(bp.getDocument());
+          JScrollPane scroll = _defScrollPanes.get(bp.getDocument());
           if (scroll == null) {
             throw new UnexpectedException(new Exception("Breakpoint set in a closed document."));
           }
@@ -3779,10 +3773,10 @@ public class MainFrame extends JFrame implements OptionConstants {
       };
       SwingUtilities.invokeLater(doCommand);
     }
-    
+
     public void breakpointReached(Breakpoint bp) {
     }
-    
+
     public void breakpointRemoved(final Breakpoint bp) {
       // Only change GUI from event-dispatching thread
       /*Runnable doCommand = new Runnable() {
@@ -3794,12 +3788,12 @@ public class MainFrame extends JFrame implements OptionConstants {
         }
       };
       SwingUtilities.invokeLater(doCommand);*/
-      
+
       HighlightManager.HighlightInfo highlight = _breakpointHighlights.get(bp);
       if (highlight != null) highlight.remove();
       _breakpointHighlights.remove(bp);
     }
-    
+
     /**
      * Called when a step is requested on the current thread.
      */
@@ -3811,10 +3805,10 @@ public class MainFrame extends JFrame implements OptionConstants {
         }
       }
     }
-    
+
     public void currThreadSuspended() {
       _disableStepTimer();
-      
+
       // Only change GUI from event-dispatching thread
       Runnable doCommand = new Runnable() {
         public void run() {
@@ -3823,7 +3817,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       };
       SwingUtilities.invokeLater(doCommand);
     }
-    
+
     public void currThreadResumed() {
       // Only change GUI from event-dispatching thread
       Runnable doCommand = new Runnable() {
@@ -3834,13 +3828,13 @@ public class MainFrame extends JFrame implements OptionConstants {
       };
       SwingUtilities.invokeLater(doCommand);
     }
-    
+
     public void threadStarted() {
     }
-    
+
     public void currThreadDied() {
       _disableStepTimer();
-      
+
       // Only change GUI from event-dispatching thread
       Runnable doCommand = new Runnable() {
         public void run() {
@@ -3865,7 +3859,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       };
       SwingUtilities.invokeLater(doCommand);
     }
-    
+
     public void nonCurrThreadDied() {
     }
   }
@@ -3971,7 +3965,7 @@ public class MainFrame extends JFrame implements OptionConstants {
         _fileClosed(doc);
       }
     }
-    
+
     /** Does the work of closing a file */
     private void _fileClosed(OpenDefinitionsDocument doc){
       _removeErrorListener(doc);
@@ -3986,12 +3980,12 @@ public class MainFrame extends JFrame implements OptionConstants {
       _currentDefPane.setPositionAndScroll(0);
       if (inDebugMode()) _updateDebugStatus();
     }
-    
+
     public void undoableEditHappened() {
       _currentDefPane.getUndoAction().updateUndoState();
       _currentDefPane.getRedoAction().updateRedoState();
     }
-    
+
     // NOTE: Not necessarily called from event-dispatching thread...
     //  Should figure out how to deal with invokeLater here.
     public void activeDocumentChanged(final OpenDefinitionsDocument active) {
@@ -3999,26 +3993,26 @@ public class MainFrame extends JFrame implements OptionConstants {
       // (This can be called from other threads...)
       //Runnable doCommand = new Runnable() {
       // public void run() {
-      
+
       _switchDefScrollPane();
-      
+
       boolean isModified = active.isModifiedSinceSave();
       boolean canCompile = (!isModified && !active.isUntitled());
       _saveAction.setEnabled(!canCompile);
       _revertAction.setEnabled(!active.isUntitled());
-      
-      // Update error highlights          
+
+      // Update error highlights
       int pos = _currentDefPane.getCaretPosition();
       _currentDefPane.getErrorCaretListener().updateHighlight(pos);
-      
+
       // Update FileChoosers' directory
       _setCurrentDirectory(active);
-      
+
       // Update title and position
       updateFileTitle();
       _currentDefPane.requestFocus();
       _posListener.updateLocation();
-      
+
       // Check if modified (but only if we're not closing all files)
       if (!_model.isClosingAllFiles()) {
         try {
@@ -4031,7 +4025,7 @@ public class MainFrame extends JFrame implements OptionConstants {
           _showIOError(e);
         }
       }
-      
+
       // Change Find/Replace to the new defpane
       if (_findReplace.isDisplayed()) {
         _findReplace.stopListening();
@@ -4043,7 +4037,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       //};
       //SwingUtilities.invokeLater(doCommand);
     }
-    
+
     public void interactionStarted() {
       _disableInteractionsPane();
       _runAction.setEnabled(false);
@@ -4053,11 +4047,11 @@ public class MainFrame extends JFrame implements OptionConstants {
       _enableInteractionsPane();
       _runAction.setEnabled(true);
     }
-    
+
     public void interactionErrorOccurred(int offset, int length){
       _interactionsPane.highlightError(offset, length);
     }
-    
+
     /**
      * Called when the active interpreter is changed.
      * @param inProgress Whether the new interpreter is currently in progress
@@ -4090,14 +4084,14 @@ public class MainFrame extends JFrame implements OptionConstants {
       };
       SwingUtilities.invokeLater(doCommand);
     }
-    
+
     public void runStarted(final OpenDefinitionsDocument doc) {
       // Only change GUI from event-dispatching thread
       SwingUtilities.invokeLater(new Runnable() {
         public void run() {
           // Make sure that this document is the active one.
           _model.setActiveDocument(doc);
-          
+
           // Switch to the interactions pane to show results.
           showTab(_interactionsPane);
         }
@@ -4115,7 +4109,7 @@ public class MainFrame extends JFrame implements OptionConstants {
           }
           hourglassOff();
         }
-        
+
       });
     }
 
@@ -4131,9 +4125,9 @@ public class MainFrame extends JFrame implements OptionConstants {
         }
       });
     }
-    
+
     //public void junitRunning() {}
-    
+
     public void junitSuiteStarted(final int numTests) {
       SwingUtilities.invokeLater(new Runnable() {
         public void run() {
@@ -4141,11 +4135,11 @@ public class MainFrame extends JFrame implements OptionConstants {
         }
       });
     }
-  
+
     public void junitTestStarted(final String name) {
       _junitErrorPanel.getErrorListPane().testStarted(name); // this does nothing!
     }
-  
+
     public void junitTestEnded(final String name, final boolean wasSuccessful,
                                final boolean causedError) {
       // syncUI...?
@@ -4172,13 +4166,13 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
 
     public void javadocStarted() {
-      
+
       // Only change GUI from event-dispatching thread
       Runnable doCommand = new Runnable() {
         public void run() {
           // if we don't lock edits, our error highlighting might break
           MainFrame.this.hourglassOn();
-          
+
           showTab(_javadocErrorPanel);
           _javadocErrorPanel.setJavadocInProgress();
           _javadocAllAction.setEnabled(false);
@@ -4199,7 +4193,7 @@ public class MainFrame extends JFrame implements OptionConstants {
           _javadocAllAction.setEnabled(true);
           _javadocCurrentAction.setEnabled(true);
           _javadocErrorPanel.reset();
-          
+
           // Display the results.
 //             System.out.println("did we get this far?");
           if (success) {
@@ -4220,7 +4214,7 @@ public class MainFrame extends JFrame implements OptionConstants {
               File index = new File(destDir, filename);
               URL address = index.getAbsoluteFile().toURL();
               if (!PlatformFactory.ONLY.openURL(address)) {
-                JavadocFrame _javadocFrame = 
+                JavadocFrame _javadocFrame =
                   new JavadocFrame(destDir, className, allDocs);
                 _javadocFrame.show();
               }
@@ -4231,7 +4225,7 @@ public class MainFrame extends JFrame implements OptionConstants {
             catch (IllegalStateException ise) {
               // JavadocFrame couldn't find any output files!
               // Display a message.
-              String msg = 
+              String msg =
                 "Javadoc completed successfully, but did not produce any HTML files.\n" +
                 "Please ensure that your access level in Preferences is appropriate.";
               JOptionPane.showMessageDialog(MainFrame.this, msg,
@@ -4254,7 +4248,7 @@ public class MainFrame extends JFrame implements OptionConstants {
             String msg = "The interactions window was terminated by a call " +
               "to System.exit(" + status + ").\n" +
               "The interactions window will now be restarted.";
-            
+
             String title = "Interactions terminated by System.exit(" + status + ")";
 
             ConfirmCheckBoxDialog dialog =
@@ -4270,11 +4264,11 @@ public class MainFrame extends JFrame implements OptionConstants {
         SwingUtilities.invokeLater(doCommand);
       }
     }
-    
+
     public void interpreterResetFailed(Throwable t) {
       interpreterReady();
     }
-    
+
     public void interpreterResetting() {
       // Only change GUI from event-dispatching thread
       Runnable doCommand = new Runnable() {
@@ -4316,7 +4310,7 @@ public class MainFrame extends JFrame implements OptionConstants {
 
     public void consoleReset() {
     }
-    
+
     public void saveBeforeCompile() {
       _saveAllBeforeProceeding
         ("To compile, you must first save ALL modified files.\n" +
@@ -4347,7 +4341,7 @@ public class MainFrame extends JFrame implements OptionConstants {
          ALWAYS_SAVE_BEFORE_JUNIT,
          "Always save and compile before testing with JUnit");
     }*/
-    
+
     public void saveBeforeJavadoc() {
       _saveAllBeforeProceeding
         ("To run Javadoc, you must first save ALL modified files.\n" +
@@ -4355,7 +4349,7 @@ public class MainFrame extends JFrame implements OptionConstants {
          ALWAYS_SAVE_BEFORE_JAVADOC,
          "Always save before running Javadoc");
     }
-    
+
     /**
      * Not currently used.
     public void saveBeforeDebug() {
@@ -4365,7 +4359,7 @@ public class MainFrame extends JFrame implements OptionConstants {
          ALWAYS_SAVE_BEFORE_DEBUG,
          "Always save and compile before debugging");
     }*/
-  
+
     /**
      * Helper method shared by all "saveBeforeX" methods.
      * @param message a prompt message to be displayed to the user
@@ -4416,7 +4410,7 @@ public class MainFrame extends JFrame implements OptionConstants {
         "test  harness  over  the currently open document.  In order for\n" +
         "that  to  work,  the  current  document  must  be a valid JUnit\n" +
         "TestCase, i.e., a subclass of junit.framework.TestCase.\n\n" +
-        
+
         "Make  sure  the current  document  has been saved and  compiled\n" +
         "before using the Test button.\n\n" +
 
@@ -4483,13 +4477,13 @@ public class MainFrame extends JFrame implements OptionConstants {
      * document to a newer version saved on file.
      */
     public boolean shouldRevertFile(OpenDefinitionsDocument doc) {
-      
+
       String fname;
-      
+
       if (! _model.getActiveDocument().equals(doc)) {
         _model.setActiveDocument(doc);
       }
-      
+
       try {
         File file = doc.getFile();
         fname = file.getName();
@@ -4502,14 +4496,14 @@ public class MainFrame extends JFrame implements OptionConstants {
         // File was deleted, but use the same name anyway
         fname = fme.getFile().getName();
       }
-      
+
       String text = fname + " has changed on disk. Would you like to " +
       "reload it?\nThis will discard any changes you have made.";
       int rc = JOptionPane.showConfirmDialog(MainFrame.this,
                                              text,
                                              fname + " Modified on Disk",
                                              JOptionPane.YES_NO_OPTION);
-      
+
       switch (rc) {
         case JOptionPane.YES_OPTION:
           return true;
@@ -4523,7 +4517,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       }
     }
   }
- 
+
 
   /**
    * Prints a display label for each item in the document list.
@@ -4551,8 +4545,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   }
 
   public JViewport getDefViewport() {
-    JScrollPane defScroll = (JScrollPane)
-      _defScrollPanes.get(_model.getActiveDocument());
+    JScrollPane defScroll = _defScrollPanes.get(_model.getActiveDocument());
     return defScroll.getViewport();
   }
 
@@ -4562,7 +4555,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _tabbedPane.setSelectedIndex(0);
     _currentDefPane.requestFocus();
   }
-  
+
   /**
    * Shows the components passed in in the appropriate place in the tabbedPane depending on the position of
    * the component in the _tabs list.
@@ -4571,7 +4564,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   public void showTab(Component c) {
     int numVisible = 0;
     TabbedPanel tp;
-    
+
     // This retarded method doesn't work for our two always-on tabs,
     // so here's a temporary kludge.
     if (c == _interactionsPane) {
@@ -4582,7 +4575,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
     else {
       for (int i = 0; i < _tabs.size(); i++) {
-        tp = (TabbedPanel)_tabs.get(i);
+        tp = _tabs.get(i);
         if (tp == c) {
           // 2 right now is a magic number for the number of tabs always visible
           // interactions & console
@@ -4598,7 +4591,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       }
     }
   }
-  
+
   private void _setDividerLocation() {
     int divLocation = _mainSplit.getHeight() -
       _mainSplit.getDividerSize() -
@@ -4606,7 +4599,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     if (_mainSplit.getDividerLocation() > divLocation)
       _mainSplit.setDividerLocation(divLocation);
   }
-  
+
   private void _warnFileOpen() {
     // If we'd like to change to an error message for this, instead
     // of a warning, change both incidents of WARNING to ERROR.
@@ -4616,8 +4609,8 @@ public class MainFrame extends JFrame implements OptionConstants {
        "File Open Warning",
        JOptionPane.WARNING_MESSAGE);
   }
-  
-  
+
+
   private boolean _verifyOverwrite() {
     Object[] options = {"Yes","No"};
     int n = JOptionPane.showOptionDialog
@@ -4631,9 +4624,9 @@ public class MainFrame extends JFrame implements OptionConstants {
        options[1]);
     if (n==JOptionPane.YES_OPTION){ return true;}
     else {return false;}
-    
+
   }
-  
+
   boolean inDebugMode() {
     Debugger dm = _model.getDebugger();
     if (dm.isAvailable()) {
@@ -4643,7 +4636,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       return false;
     }
   }
-  
+
   /**
    * Builds the Hashtables in KeyBindingManager that are used to keep track
    * of key-bindings and allows for live updating, conflict resolution, and
@@ -4651,15 +4644,15 @@ public class MainFrame extends JFrame implements OptionConstants {
    */
   private void _setUpKeyBindingMaps() {
     ActionMap _actionMap = _currentDefPane.getActionMap();
-    
+
     KeyBindingManager.Singleton.put(KEY_BACKWARD, _actionMap.get(DefaultEditorKit.backwardAction),null, "Backward");
     KeyBindingManager.Singleton.addShiftAction(KEY_BACKWARD,
                                                DefaultEditorKit.selectionBackwardAction);
-    
+
     KeyBindingManager.Singleton.put(KEY_BEGIN_DOCUMENT, _actionMap.get(DefaultEditorKit.beginAction), null, "Begin Document");
     KeyBindingManager.Singleton.addShiftAction(KEY_BEGIN_DOCUMENT,
                                                DefaultEditorKit.selectionBeginAction);
-    
+
     //KeyBindingManager.Singleton.put(KEY_BEGIN_LINE, _actionMap.get(DefaultEditorKit.beginLineAction), null, "Begin Line");
     KeyBindingManager.Singleton.put(KEY_BEGIN_LINE, _beginLineAction,
                                     null, "Begin Line");
@@ -4667,43 +4660,43 @@ public class MainFrame extends JFrame implements OptionConstants {
     //                                           DefaultEditorKit.selectionBeginLineAction);
     KeyBindingManager.Singleton.addShiftAction(KEY_BEGIN_LINE,
                                                _selectionBeginLineAction);
-    
+
     KeyBindingManager.Singleton.put(KEY_PREVIOUS_WORD,
                                     _actionMap.get(DefaultEditorKit.previousWordAction), null, "Previous Word");
     KeyBindingManager.Singleton.addShiftAction(KEY_PREVIOUS_WORD,
                                                DefaultEditorKit.selectionPreviousWordAction);
-    
-    
+
+
     KeyBindingManager.Singleton.put(KEY_DOWN,
                                     _actionMap.get(DefaultEditorKit.downAction), null, "Down");
     KeyBindingManager.Singleton.addShiftAction(KEY_DOWN,
                                                DefaultEditorKit.selectionDownAction);
-    
+
     KeyBindingManager.Singleton.put(KEY_END_DOCUMENT,
                                     _actionMap.get(DefaultEditorKit.endAction), null, "End Document");
     KeyBindingManager.Singleton.addShiftAction(KEY_END_DOCUMENT,
                                                DefaultEditorKit.selectionEndAction);
-    
+
     KeyBindingManager.Singleton.put(KEY_END_LINE,
                                     _actionMap.get(DefaultEditorKit.endLineAction), null, "End Line");
     KeyBindingManager.Singleton.addShiftAction(KEY_END_LINE,
                                                DefaultEditorKit.selectionEndLineAction);
-    
+
     KeyBindingManager.Singleton.put(KEY_NEXT_WORD,
                                     _actionMap.get(DefaultEditorKit.nextWordAction), null, "Next Word");
     KeyBindingManager.Singleton.addShiftAction(KEY_NEXT_WORD,
                                                DefaultEditorKit.selectionNextWordAction);
-    
+
     KeyBindingManager.Singleton.put(KEY_FORWARD,
                                     _actionMap.get(DefaultEditorKit.forwardAction), null, "Forward");
     KeyBindingManager.Singleton.addShiftAction(KEY_FORWARD,
                                                DefaultEditorKit.selectionForwardAction);
-    
+
     KeyBindingManager.Singleton.put(KEY_UP,
                                     _actionMap.get(DefaultEditorKit.upAction), null, "Up");
     KeyBindingManager.Singleton.addShiftAction(KEY_UP,
                                                DefaultEditorKit.selectionUpAction);
-    
+
     // These last methods have no default selection methods
     KeyBindingManager.Singleton.put(KEY_PAGE_DOWN,
                                     _actionMap.get(DefaultEditorKit.pageDownAction), null, "Page Down");
@@ -4731,8 +4724,8 @@ public class MainFrame extends JFrame implements OptionConstants {
         _findReplace.findNext();
         _currentDefPane.requestFocus();
       }
-    }, null, "Find Next");    
-    
+    }, null, "Find Next");
+
     // For now, _switchToPreviousPaneAction only switches the focus from the interactions pane to the definitions pane.
     // Change this when the behavior is updated. Same for _switchToNextPaneAction.
     KeyBindingManager.Singleton.put(KEY_PREVIOUS_PANE, _switchToPreviousPaneAction,
@@ -4740,7 +4733,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     KeyBindingManager.Singleton.put(KEY_NEXT_PANE, _switchToNextPaneAction,
                                     null, "Switch Focus To Next Pane");
   }
-  
+
   /**
    * @param listener The ComponentListener to add to the open documents list
    * This method allows for testing of the dancing UI (See MainFrameTest.testDancingUI()).
@@ -4748,7 +4741,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   public void addComponentListenerToOpenDocumentsList(ComponentListener listener){
     _docSplitPane.getLeftComponent().addComponentListener(listener);
   }
-  
+
   /**
    * The OptionListener for FONT_MAIN
    */
@@ -4757,7 +4750,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       _setMainFont();
     }
   }
-  
+
   /**
    * The OptionListener for FONT_LINE_NUMBERS
    */
@@ -4776,7 +4769,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       _docList.setFont(doclistFont);
     }
   }
-  
+
   /**
    *  The OptionListener for FONT_TOOLBAR
    */
@@ -4785,7 +4778,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       _updateToolbarButtons();
     }
   }
-  
+
   /**
    *  The OptionListener for DEFINITIONS_NORMAL_COLOR
    */
@@ -4794,7 +4787,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       _updateNormalColor();
     }
   }
-  
+
   /**
    *  The OptionListener for DEFINITIONS_BACKGROUND_COLOR
    */
@@ -4803,7 +4796,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       _updateBackgroundColor();
     }
   }
-  
+
   /**
    *  The OptionListener for TOOLBAR options
    */
@@ -4820,7 +4813,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       _setCurrentDirectory(oce.value);
     }
   }
-  
+
   /**
    *  The OptionListener for LINEENUM_ENABLED
    */
@@ -4829,7 +4822,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       _updateDefScrollRowHeader();
     }
   }
-  
+
   /**
    * The OptionListener for QUIT_PROMPT
    */
@@ -4838,7 +4831,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       _promptBeforeQuit = oce.value.booleanValue();
     }
   }
-  
+
   /**
    * The OptionListener for RECENT_FILES_MAX_SIZE
    */

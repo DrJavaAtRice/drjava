@@ -4,7 +4,7 @@
  * at http://sourceforge.net/projects/drjava
  *
  * Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)
- * 
+ *
  * DrJava is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -57,7 +57,7 @@ public class InteractionsDocument extends ConsoleDocument {
 
   /** Default banner. */
   public static final String DEFAULT_BANNER = "Welcome to DrJava.\n";
-  
+
   /** Default prompt. */
   public static final String DEFAULT_PROMPT = "> ";
 
@@ -66,13 +66,13 @@ public class InteractionsDocument extends ConsoleDocument {
 
   /** Style for debugger messages */
   public static final String DEBUGGER_STYLE = "debugger";
-  
+
   /**
    * String to print when the document is reset.
    * Defaults to "Welcome to DrJava."
    */
   protected String _banner;
-  
+
   /**
    * Command-line history. It's not reset when the interpreter is reset.
    */
@@ -85,7 +85,7 @@ public class InteractionsDocument extends ConsoleDocument {
   public InteractionsDocument(DocumentAdapter document) {
     this(document, new History());
   }
-  
+
   /**
    * Reset the document on startup.  Uses a history with the given
    * maximum size.  This history will not use the config framework.
@@ -104,22 +104,22 @@ public class InteractionsDocument extends ConsoleDocument {
   public InteractionsDocument(DocumentAdapter document, History history) {
     super(document);
     _history = history;
-    
+
     _hasPrompt = true;
     _banner = DEFAULT_BANNER;
     _prompt = DEFAULT_PROMPT;
-    
+
     reset();
   }
-  
-  
+
+
   /**
    * Accessor for the banner, which is printed when the document resets.
    */
   public String getBanner() {
     return _banner;
   }
-  
+
   /**
    * Sets the string to use for the banner when the document resets.
    * @param banner String to be printed when the document resets.
@@ -127,7 +127,7 @@ public class InteractionsDocument extends ConsoleDocument {
   public void setBanner(String banner) {
     _banner = banner;
   }
-  
+
   /**
    * Lets this document know whether an interaction is in progress.
    * @param inProgress whether an interaction is in progress
@@ -142,8 +142,8 @@ public class InteractionsDocument extends ConsoleDocument {
   public boolean inProgress() {
     return !_hasPrompt;
   }
-  
-  /** 
+
+  /**
    * Resets the document to a clean state.  Does not reset the history.
    */
   public void reset() {
@@ -172,21 +172,21 @@ public class InteractionsDocument extends ConsoleDocument {
       throw new UnexpectedException(ble);
     }
   }
-  
+
   /**
    * Accessor method for the history of commands.
    */
   public History getHistory() {
     return _history;
   }
-  
+
   /**
    * Adds the given text to the history of commands.
    */
   public void addToHistory(String text) {
     _history.add(text);
   }
-  
+
   /**
    * Saves the unedited version of the current history to a file
    * @param selector File to save to
@@ -264,7 +264,7 @@ public class InteractionsDocument extends ConsoleDocument {
   public boolean hasHistoryNext() {
     return _history.hasNext();
   }
-  
+
   /**
    * Gets the previous interaction in the history and
    * replaces whatever is on the current
@@ -317,18 +317,18 @@ public class InteractionsDocument extends ConsoleDocument {
           "edu.rice.cs.drjava.model.repl.InteractionsException".equals(exceptionClass)) {
         exceptionClass = "Error";
       }
-      
-      insertText(getDocLength(), 
+
+      insertText(getDocLength(),
                  exceptionClass + ": " + message + "\n", styleName);
 
       // An example stack trace:
       //
-      // java.lang.IllegalMonitorStateException: 
+      // java.lang.IllegalMonitorStateException:
       // at java.lang.Object.wait(Native Method)
       // at java.lang.Object.wait(Object.java:425)
       if (! stackTrace.trim().equals("")) {
         BufferedReader reader=new BufferedReader(new StringReader(stackTrace));
-        
+
         String line;
         // a line is parsable if it has ( then : then ), with some
         // text between each of those
@@ -395,12 +395,12 @@ public class InteractionsDocument extends ConsoleDocument {
       //writeUnlock();
     }
   }
-  
+
   public void appendSyntaxErrorResult(String message,
                                       int startRow,
                                       int startCol,
                                       int endRow,
-                                      int endCol, 
+                                      int endCol,
                                       String styleName )
   {
     //writeLock();
@@ -409,9 +409,9 @@ public class InteractionsDocument extends ConsoleDocument {
       if (null == message || "null".equals(message)) {
         message = "";
       }
-      
-      
-      
+
+
+
      insertText( getDocLength(), message + "\n" , styleName );
     }
 

@@ -4,7 +4,7 @@
  * at http://sourceforge.net/projects/drjava
  *
  * Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)
- * 
+ *
  * DrJava is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -68,17 +68,17 @@ public class ReducedModelControl implements BraceReduction {
   ReducedModelBrace rmb;
   ReducedModelComment rmc;
   int _offset;
-  
+
   public  ReducedModelControl() {
     rmb = new ReducedModelBrace(this);
     rmc = new ReducedModelComment();
   }
-  
+
   public synchronized void insertChar(char ch) {
     rmb.insertChar(ch);
     rmc.insertChar(ch);
   }
-  
+
   /**
   * <P>Updates the BraceReduction to reflect cursor movement.
   * Negative values move left from the cursor, positive values move
@@ -89,7 +89,7 @@ public class ReducedModelControl implements BraceReduction {
     rmb.move(count);
     rmc.move(count);
   }
-  
+
   /**
   * <P>Update the BraceReduction to reflect text deletion.</P>
   * @param count indicates the size and direction of text deletion.
@@ -100,8 +100,8 @@ public class ReducedModelControl implements BraceReduction {
     rmb.delete(count);
     rmc.delete(count);
   }
-  
-  
+
+
   /**
   * <P>Finds the closing brace that matches the next significant
   * brace iff that brace is an open brace.</P>
@@ -122,7 +122,7 @@ public class ReducedModelControl implements BraceReduction {
   public synchronized int balanceBackward() {
     return rmb.balanceBackward();
   }
-  
+
   /**
   *This function returns the state at the relDistance, where relDistance
   *is relative to the last time it was called. You can reset the last
@@ -131,7 +131,7 @@ public class ReducedModelControl implements BraceReduction {
   public synchronized ReducedModelState stateAtRelLocation(int relDistance) {
     return rmc.stateAtRelLocation(relDistance);
   }
-  
+
   /**
   *This function resets the location of the walker in the comment list to
   *where the current cursor is. This allows the walker to keep walking and
@@ -155,12 +155,12 @@ public class ReducedModelControl implements BraceReduction {
    */
   public synchronized ReducedToken currentToken() {
     // check the reduced comment model for specials
-    ReducedToken rmcToken = rmc.current();    
+    ReducedToken rmcToken = rmc.current();
     if (!rmcToken.isGap()) {
         return rmcToken;
     }
     // check the reduced brace model for braces
-    ReducedToken rmbToken = rmb.current();    
+    ReducedToken rmbToken = rmb.current();
     if (!rmbToken.isGap()) {
       rmbToken.setState(rmc.getStateAtCurrent());
       return rmbToken;
@@ -187,14 +187,14 @@ public class ReducedModelControl implements BraceReduction {
     ReducedToken rmcToken = rmc.current();
     if (!rmcToken.isGap())
       return rmcToken.getType();
-    
+
     ReducedToken rmbToken = rmb.current();
     if (!rmbToken.isGap()) {
       return rmbToken.getType();
     }
     return ""; //a gap
   }
-    
+
   /**
    * Gets the size of the current token.
    * It checks both the brace and comment sub-models to find the size
@@ -206,7 +206,7 @@ public class ReducedModelControl implements BraceReduction {
   int getSize() {
     return getSize(rmb.current(),rmc.current());
   }
-  
+
   int getSize(ReducedToken rmbToken, ReducedToken rmcToken) {
     int rmb_offset = rmb.getBlockOffset();
     int rmc_offset = rmc.getBlockOffset();
@@ -221,9 +221,9 @@ public class ReducedModelControl implements BraceReduction {
       size = rmc_offset;
       _offset = size;
     }
-    
+
     if (rmb_size - rmb_offset < rmc_size - rmc_offset) {
-      size += (rmb_size - rmb_offset);      
+      size += (rmb_size - rmb_offset);
     }
     else {
       size += (rmc_size - rmc_offset);
@@ -255,7 +255,7 @@ public class ReducedModelControl implements BraceReduction {
       rmb.prev();
       if (rmc._cursor.atStart()) //because in place now.
         return;
-      
+
       if (rmc.current().getSize() < rmb.current().getSize())
         size = -rmc.current().getSize();
       else
@@ -265,12 +265,12 @@ public class ReducedModelControl implements BraceReduction {
       move (size);
       return;
     }
-    
+
     if (rmb.getBlockOffset() < rmc.getBlockOffset()) {
       rmb.prev();
       size = rmb.current().getSize() + rmb.getBlockOffset();
       rmb.next();
-      if (size < rmc.getBlockOffset()) 
+      if (size < rmc.getBlockOffset())
         move(-size);
       else
         move(-rmc.getBlockOffset());
@@ -285,12 +285,12 @@ public class ReducedModelControl implements BraceReduction {
       rmc.prev();
       size = rmc.current().getSize() + rmc.getBlockOffset();
       rmc.next();
-      if (size < rmb.getBlockOffset()) 
+      if (size < rmb.getBlockOffset())
         move(-size);
       else
         move(-rmb.getBlockOffset());
     }
-    
+
   }
 
   /**
@@ -299,11 +299,11 @@ public class ReducedModelControl implements BraceReduction {
   public synchronized ReducedToken prevItem() {
     int rmbOffset = rmb.getBlockOffset();
     int rmcOffset = rmc.getBlockOffset();
-    
+
     prev();
     ReducedToken temp = currentToken();
     next();
-    
+
     rmb.setBlockOffset(rmbOffset);
     rmc.setBlockOffset(rmcOffset);
     return temp;
@@ -327,7 +327,7 @@ public class ReducedModelControl implements BraceReduction {
    * Determines if the cursor is at the end of the reduced model.
    */
   boolean atEnd() {
-    return (rmb._cursor.atEnd() || rmc._cursor.atEnd());      
+    return (rmb._cursor.atEnd() || rmc._cursor.atEnd());
   }
 
   /**
@@ -383,7 +383,7 @@ public class ReducedModelControl implements BraceReduction {
     rmc.getDistToCurrentBraceNewline(braceInfo);
     return braceInfo;
   }
-  
+
   /**
    * Gets distance to end of line on the line previous.
    */
@@ -400,10 +400,10 @@ public class ReducedModelControl implements BraceReduction {
    * location and current location + end.
    * This should collapse adjoining blocks with the same status into one.
    * @param start The starting location of the area we want to get status of.
-   *              The reduced model is already at this position, but the 
+   *              The reduced model is already at this position, but the
    *              parameter is needed to determine the absolute positions
    *              needed in the HighlightStatus objects we return.
-   * @param length How far should we generate info for?             
+   * @param length How far should we generate info for?
    */
   public synchronized Vector<HighlightStatus> getHighlightStatus(final int start,
                                                     final int length)
@@ -415,7 +415,7 @@ public class ReducedModelControl implements BraceReduction {
     int curLength;
 
     TokenList.Iterator cursor = rmc._cursor._copy();
-    int ct = rmc._tokens.listenerCount();
+//    int ct = rmc._tokens.listenerCount();
     curLocation = start;
     curLength = cursor.current().getSize() - rmc.getBlockOffset();
     curState = cursor.current().getHighlightState();
@@ -449,7 +449,7 @@ public class ReducedModelControl implements BraceReduction {
     vec.add(new HighlightStatus(curLocation, curLength, curState));
 
     cursor.dispose();
-    
+
     return vec;
   }
 }

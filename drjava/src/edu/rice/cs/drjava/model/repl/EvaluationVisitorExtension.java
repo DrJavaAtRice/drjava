@@ -4,7 +4,7 @@
  * at http://sourceforge.net/projects/drjava
  *
  * Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)
- * 
+ *
  * DrJava is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -57,21 +57,19 @@ import koala.dynamicjava.util.*;
  *   <LI>Returns Interpreter.NO_RESULT if the computation
  *       had no result. (This is instead of returning null, which
  *       DynamicJava does.</LI>
- * </OL>     
+ * </OL>
  *
  * @version $Id$
  */
 
 public class EvaluationVisitorExtension extends EvaluationVisitor {
   private Context _context;
-  public EvaluationVisitorExtension(Context ctx) {    
+  public EvaluationVisitorExtension(Context ctx) {
     super(ctx);
     _context = ctx;
   }
 
   private void _checkInterrupted(Node node) {
-    String className = node.getClass().getName();
-
     // An interesting and arcane Thread fact: There are two different
     // methods to check if a Thread is interrupted. (See the javadocs.)
     // Thread.isInterrupted() gets the status but doesn't reset it,
@@ -144,12 +142,12 @@ public class EvaluationVisitorExtension extends EvaluationVisitor {
     super.visit(node);
     return Interpreter.NO_RESULT;
   }
-  
+
   public Object visit(Literal node) {
     _checkInterrupted(node);
     return super.visit(node);
   }
-  
+
   /**
    * Overrides EvaluationVisitor to enforce a proper type check at
    * runtime. It combines code from the actual visit code in
@@ -159,20 +157,20 @@ public class EvaluationVisitorExtension extends EvaluationVisitor {
   public Object visit(VariableDeclaration node) {
     _checkInterrupted(node);
     Class c = NodeProperties.getType(node.getType());
-    
+
     if (node.getInitializer() != null) {
       Object o = performCast(c, node.getInitializer().acceptVisitor(this));
-      
+
       // Forces a runtime type-check on the cast.
       String name = node.getName();
-      
+
       if (!(c.isPrimitive()                     ||
             o == null                          ||
             c.isAssignableFrom(o.getClass()))) {
         Exception e = new ClassCastException(name);
         throw new CatchedExceptionError(e, node);
       }
-      
+
       if (node.isFinal()) {
         _context.setConstant(node.getName(), o);
       } else {
@@ -187,7 +185,7 @@ public class EvaluationVisitorExtension extends EvaluationVisitor {
     }
     return Interpreter.NO_RESULT;
   }
-  
+
   public Object visit(ObjectFieldAccess node) {
     _checkInterrupted(node);
     return super.visit(node);
@@ -211,7 +209,7 @@ public class EvaluationVisitorExtension extends EvaluationVisitor {
     _checkInterrupted(node);
     return super.visit(node);
   }
-  
+
   public Object visit(SuperFieldAccess node) {
     _checkInterrupted(node);
     return super.visit(node);
@@ -233,7 +231,7 @@ public class EvaluationVisitorExtension extends EvaluationVisitor {
       buf.append(".");
       buf.append(m.getName());
       buf.append("(");
-      
+
       boolean first = true;
       Class[] params = m.getParameterTypes();
       for (int i = 0; i < params.length; i++) {
@@ -246,7 +244,7 @@ public class EvaluationVisitorExtension extends EvaluationVisitor {
 
         buf.append(params[i].getName());
       }
-      
+
       buf.append(")");
       buf.append(" is not a static method.");
 
@@ -254,7 +252,7 @@ public class EvaluationVisitorExtension extends EvaluationVisitor {
     }
 
     Object ret = super.visit(node);
-    
+
     // workaround to not return null for void returns
     if (m.getReturnType().equals(Void.TYPE)) {
       return Interpreter.NO_RESULT;
@@ -530,7 +528,7 @@ public class EvaluationVisitorExtension extends EvaluationVisitor {
   public Object visit(EmptyStatement node) {
     return Interpreter.NO_RESULT;
   }
-  
+
   protected static Object performCast(Class tc, Object o) {
     return EvaluationVisitor.performCast(tc, o);
   }

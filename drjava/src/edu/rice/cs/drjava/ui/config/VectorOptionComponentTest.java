@@ -69,7 +69,7 @@ public final class VectorOptionComponentTest extends TestCase {
   public void testCancelDoesNotChangeConfig() {
 
     Vector<File> testVector = new Vector<File>();
-    testVector.addElement(new File("test"));
+    testVector.add(new File("test"));
     
     _option.setValue(testVector);
     _option.resetToCurrent(); // should reset to the original.
@@ -83,7 +83,7 @@ public final class VectorOptionComponentTest extends TestCase {
   
   public void testApplyDoesChangeConfig() {
     Vector<File> testVector = new Vector<File>();
-    testVector.addElement(new File("blah"));
+    testVector.add(new File("blah"));
     
     _option.setValue(testVector);
     _option.updateConfig();
@@ -95,7 +95,7 @@ public final class VectorOptionComponentTest extends TestCase {
   
   public void testApplyThenResetDefault() {
     Vector<File> testVector = new Vector<File>();
-    testVector.addElement(new File("blah"));
+    testVector.add(new File("blah"));
     
     _option.setValue(testVector);
     _option.updateConfig();
@@ -117,7 +117,7 @@ public final class VectorOptionComponentTest extends TestCase {
     if (v1.size() == v2.size()) {
       
       for (int i=0; i<v1.size(); i++) {
-        if (!v1.elementAt(i).equals( v2.elementAt(i))) return false;
+        if (!v1.get(i).equals( v2.get(i))) return false;
       }
       return true;
     }

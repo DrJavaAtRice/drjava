@@ -113,7 +113,7 @@ public class Step extends DebugAction<StepRequest> implements OptionConstants {
       
     
     // Add this request (the only one) to the list
-    _requests.addElement(request);
+    _requests.add(request);
   }
   
   public String toString() {

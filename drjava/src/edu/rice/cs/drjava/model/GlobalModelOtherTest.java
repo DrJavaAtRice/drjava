@@ -381,7 +381,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase
     
     // Add directory 1 to extra classpath and close doc1
     Vector<File> cp = new Vector<File>();
-    cp.addElement(dir1);
+    cp.add(dir1);
     DrJava.getConfig().setSetting(EXTRA_CLASSPATH, cp);
     _model.closeFile(doc1);
     
@@ -719,7 +719,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase
 
     // Add new directory to classpath through Config
     Vector<File> cp = new Vector<File>();
-    cp.addElement(new File(tempPath + "a"));
+    cp.add(new File(tempPath + "a"));
     DrJava.getConfig().setSetting(EXTRA_CLASSPATH, cp);
     
     result = interpret("new DrJavaTestFoo().getClass().getName()");

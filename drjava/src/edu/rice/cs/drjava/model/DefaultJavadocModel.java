@@ -67,17 +67,17 @@ import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
  * @version $Id$
  */
 public class DefaultJavadocModel implements JavadocModel {
-  
+
   /**
    * Used by CompilerErrorModel to open documents that have errors.
    */
   private IGetDocuments _getter;
-  
+
   /**
    * The error model containing all current Javadoc errors.
    */
   private CompilerErrorModel _javadocErrorModel;
-  
+
   /**
    * Constructor.
    * @param getter Source of documents for this JavadocModel
@@ -86,7 +86,7 @@ public class DefaultJavadocModel implements JavadocModel {
     _getter = getter;
     _javadocErrorModel = new CompilerErrorModel<CompilerError>(new CompilerError[0]);
   }
-  
+
   /**
    * Accessor for the Javadoc error model.
    * @return the CompilerErrorModel managing Javadoc errors.
@@ -94,14 +94,14 @@ public class DefaultJavadocModel implements JavadocModel {
   public CompilerErrorModel getJavadocErrorModel() {
     return _javadocErrorModel;
   }
-  
+
   /**
    * Clears all current Javadoc errors.
    */
   public void resetJavadocErrors() {
     _javadocErrorModel = new CompilerErrorModel<CompilerError>(new CompilerError[0]);
   }
-  
+
   /**
    * Suggests a default location for generating Javadoc, based on the given
    * document's source root.  (Appends JavadocModel.SUGGESTED_DIR_NAME to
@@ -119,20 +119,20 @@ public class DefaultJavadocModel implements JavadocModel {
       return null;
     }
   }
-  
-  
+
+
   // -------------------- Javadoc All Documents --------------------
-  
+
   /**
    * Javadocs all open documents, after ensuring that all are saved.
    * The user provides a destination, and the gm provides the package info.
-   * 
+   *
    * @param select a command object for selecting a directory and warning a user
    *        about bad input
    * @param saver a command object for saving a document (if it moved/changed)
    * @param classpath a collection of classpath elements to be used by Javadoc
    * @param listener an object to be notified of start and end events, etc.
-   * 
+   *
    * @throws IOException if there is a problem manipulating files
    */
   public void javadocAll(DirectorySelector select, final FileSaveSelector saver,
@@ -144,32 +144,32 @@ public class DefaultJavadocModel implements JavadocModel {
     if (_getter.hasModifiedDocuments()) {
       listener.saveBeforeJavadoc();
     }
-    
+
     if (_getter.hasModifiedDocuments()) {
       // if any files haven't been saved after we told our
       // listeners to do so, don't proceed with the rest
       // of the operation.
       return;
     }
-    
+
     // Make sure that there is at least one saved document.
     List<OpenDefinitionsDocument> docs = _getter.getDefinitionsDocuments();
-    
+
     boolean noneYet = true;
     int numDocs = docs.size();
     for (int i = 0; (noneYet && (i < numDocs)); i++) {
       OpenDefinitionsDocument doc = docs.get(i);
       noneYet = doc.isUntitled();
     }
-    
+
     // If there are no saved files, ignore the javadoc command.
     if (noneYet) {
       return;
     }
-    
+
     Configuration config = DrJava.getConfig();
     File destDir = config.getSetting(OptionConstants.JAVADOC_DESTINATION);
-    
+
     // Get the destination directory via the DirectorySelector, if appropriate.
     try {
       if (destDir.equals(FileOption.NULL_FILE)) {
@@ -182,7 +182,7 @@ public class DefaultJavadocModel implements JavadocModel {
         // Otherwise, tell the command object to prefer the config's default.
         destDir = select.getDirectory(destDir);
       }
-        
+
       // Make sure the destination is usable.
       while (!destDir.exists() || !destDir.isDirectory() || !destDir.canWrite()) {
         if (!destDir.exists()) {
@@ -224,7 +224,7 @@ public class DefaultJavadocModel implements JavadocModel {
       // If the user cancels anywhere, silently return.
       return;
     }
-    
+
     // Start a new thread to do the work.
     final File destDirF = destDir;
     final String[] classpathArray = classpath.toArray(new String[0]);
@@ -234,11 +234,11 @@ public class DefaultJavadocModel implements JavadocModel {
       }
     }.start();
   }
-  
+
   /**
    * This method handles most of the logic of performing a Javadoc operation,
    * once we know that it won't be canceled.
-   * 
+   *
    * @param destDir the destination directory for the doc files
    * @param saver a command object for saving a document (if it moved/changed)
    * @param classpath an array of classpath elements to be used by Javadoc
@@ -251,9 +251,9 @@ public class DefaultJavadocModel implements JavadocModel {
     if (!_ensureValidToolsJar(listener)) {
       return;
     }
-    
+
     String destDir = destDirFile.getAbsolutePath();
-    
+
     // Accumulate a set of arguments to JavaDoc - package or file names.
     HashSet<String> docUnits = new HashSet<String>();  // units to send to Javadoc (packages or files)
     HashSet<File> sourceRootSet = new HashSet<File>();  // set of unique source roots for open files
@@ -268,19 +268,19 @@ public class DefaultJavadocModel implements JavadocModel {
     for (int i = 0; i < docs.size(); i++) {
       OpenDefinitionsDocument doc = docs.get(i);
       File file = null;
-      
+
       try {
         // This will throw an IllegalStateException if no file can be found
         file = _getFileFromDocument(doc, saver);
-        
+
         // File shouldn't be null here, but just in case...
         if (file == null) {
           throw new IllegalStateException("No file for this document.");
         }
-        
+
         File sourceRoot = doc.getSourceRoot();
         String pack = doc.getPackageName();
-        
+
         if (pack.equals("")) {
           // No package name for this file
           if (!defaultRoots.contains(sourceRoot)) {
@@ -289,7 +289,7 @@ public class DefaultJavadocModel implements JavadocModel {
             // But don't do it if we've already done it for this directory.
             defaultRoots.add(sourceRoot);
             File[] javaFiles = sourceRoot.listFiles(FileOps.JAVA_FILE_FILTER);
-            
+
             for (int j = 0; j < javaFiles.length; j++) {
               docUnits.add(javaFiles[j].getAbsolutePath());
             }
@@ -303,7 +303,7 @@ public class DefaultJavadocModel implements JavadocModel {
           int index = pack.indexOf('.');
           if (docAll && index != -1) {
             // We need to doc all packages from the root level down.
-            
+
             // TODO: write a unit test for a package name w/ no dot!
             //  (This was broken before, but it works now)
             topLevelPack = pack.substring(0, index);
@@ -344,25 +344,25 @@ public class DefaultJavadocModel implements JavadocModel {
          return;
       }
     }
-    
+
     // Don't attempt to create Javadoc if no files are open, or if open file is unnamed.
     if (docUnits.size() == 0) {
       return;
     }
-    
+
     // Build the source path.
     StringBuffer sourcePath = new StringBuffer();
     String separator = System.getProperty("path.separator");
     sourceRootSet.addAll(defaultRoots);
-    File[] sourceRoots = (File[]) sourceRootSet.toArray(new File[0]);
+    File[] sourceRoots = sourceRootSet.toArray(new File[0]);
     for(int a = 0 ; a  < sourceRoots.length; a++) {
       if (a != 0) {
         sourcePath.append(separator);
       }
       sourcePath.append(sourceRoots[a].getAbsolutePath());
     }
-    
-    
+
+
     // Generate all command line arguments
     ArrayList<String> args = _buildCommandLineArgs(docUnits, destDir,
                                                    sourcePath.toString(),
@@ -371,21 +371,21 @@ public class DefaultJavadocModel implements JavadocModel {
     // Run the actual Javadoc process
     _runJavadoc(args, classpath, destDirFile, listener, true);
   }
-  
-  
-  
+
+
+
   // -------------------- Javadoc Current Document --------------------
-  
+
   /**
    * Generates Javadoc for the given document only, after ensuring it is saved.
    * Saves the output to a temporary directory, which is provided in the
    * javadocEnded event on the provided listener.
-   * 
+   *
    * @param doc Document to generate Javadoc for
    * @param saver a command object for saving the document (if it moved/changed)
    * @param classpath a collection of classpath elements to be used by Javadoc
    * @param listener an object to be notified of start and end events, etc.
-   * 
+   *
    * @throws IOException if there is a problem manipulating files
    */
   public void javadocDocument(final OpenDefinitionsDocument doc,
@@ -399,19 +399,19 @@ public class DefaultJavadocModel implements JavadocModel {
     if (doc.isUntitled() || doc.isModifiedSinceSave()) {
       listener.saveBeforeJavadoc();
     }
-    
+
     // Make sure it is saved
     if (doc.isUntitled() || doc.isModifiedSinceSave()) {
       // The user didn't save, so don't generate Javadoc
       return;
     }
-    
+
     // Try to get the file from the document
     final File file = _getFileFromDocument(doc, saver);
-    
+
     // Generate to a temporary directory
     final File destDir = FileOps.createTempDirectory("DrJava-javadoc");
-    
+
     // Start a new thread to do the work.
     final String[] classpathArray = classpath.toArray(new String[0]);
     new Thread("DrJava Javadoc Thread") {
@@ -420,11 +420,11 @@ public class DefaultJavadocModel implements JavadocModel {
       }
     }.start();
   }
-  
+
   /**
    * Handles most of the logic for generating Javadoc for a single file,
    * once we know that it won't be canceled.
-   * 
+   *
    * @param destDirFile the destination directory for the doc files
    * @param docFile the file of the document
    * @param document the document to javadoc
@@ -442,7 +442,7 @@ public class DefaultJavadocModel implements JavadocModel {
     if (!_ensureValidToolsJar(listener)) {
       return;
     }
-    
+
     // Generate all command line arguments
     String destDir = destDirFile.getAbsolutePath();
     ArrayList<String> args = _buildCommandLineArgs(docFile, destDir, classpath);
@@ -450,25 +450,25 @@ public class DefaultJavadocModel implements JavadocModel {
     // Run the actual Javadoc process
     _runJavadoc(args, classpath, destDirFile, listener, false);
   }
-  
-  
-  
+
+
+
   // -------------------- Helper Methods --------------------
-  
+
   /**
    * Ensures that a valid version of tools.jar is being used for our classpath.
    * Ends the process with an error and returns false if not.
-   * 
+   *
    * Using JDK 1.4 with a 1.3 tools.jar is invalid, but using JDK 1.3 with
    * a 1.4 tools.jar is ok.
-   * 
+   *
    * @param listener listener to fire the error event on
    */
   private boolean _ensureValidToolsJar(JavadocListener listener) {
     PlatformSupport platform = PlatformFactory.ONLY;
     String version = platform.getJavaSpecVersion();
     if (!"1.3".equals(version) && platform.has13ToolsJar()) {
-      String msg = 
+      String msg =
         "There is an incompatible version of tools.jar on your\n" +
         "classpath, so Javadoc cannot run.\n" +
         "(tools.jar is version 1.3, JDK is version " + version + ")";
@@ -478,7 +478,7 @@ public class DefaultJavadocModel implements JavadocModel {
     }
     return true;
   }
-  
+
   /**
    * Tell the listeners that we're starting to generate Javadoc,
    * start a new process to actually generate it, and then tell
@@ -500,22 +500,22 @@ public class DefaultJavadocModel implements JavadocModel {
     try {
       // Notify all listeners that Javadoc is starting.
       listener.javadocStarted();
-      
-      result = _javadoc_1_3((String[]) args.toArray(new String[0]), classpath);
-      
+
+      result = _javadoc_1_3(args.toArray(new String[0]), classpath);
+
       // If success and we're generating current, make sure the temp
       //  directory gets deleted on exit.
       if (result && !allDocs) {
         FileOps.deleteDirectoryOnExit(destDirFile);
       }
-      
+
       // Notify all listeners that we're done.
       listener.javadocEnded(result, destDirFile, allDocs);
     }
     catch (Throwable e) {
       // This fires javadocEnded, showing the error
       _showCompilerError(e.getMessage(), null, listener);
-    } 
+    }
   }
 
   /**
@@ -523,11 +523,11 @@ public class DefaultJavadocModel implements JavadocModel {
    * from 1.3 on, assuming com.sun.tools.javadoc is in the classpath (generally
    * found in the same tools.jar that is needed for using the debugger).
    * [ed. this line is no longer true] - OR javadoc is in the path.
-   * 
+   *
    * TODO: this should be moved to the platform specific area of the code base
    * when we develop the 1.4 javadoc process, which doesn't need to start a new
    * JVM.  (Of course, it can be a fallback for 1.4 also.)
-   * 
+   *
    * @param args the command-line arguments for Javadoc
    * @param classpath an array of classpath elements to use in the Javadoc JVM
    * @return true if Javadoc succeeded in building the HTML, otherwise false
@@ -536,19 +536,19 @@ public class DefaultJavadocModel implements JavadocModel {
     throws IOException, ClassNotFoundException, InterruptedException {
     final String JAVADOC_CLASS = "com.sun.tools.javadoc.Main";
     Process javadocProcess;
-    
+
     // We must use this classpath nonsense to make sure our new Javadoc JVM
     // can see everything the interactions pane can see.
     javadocProcess =  ExecJVM.runJVM(JAVADOC_CLASS, args, classpath, new String[0]);
-    
+
     //System.err.println("javadoc started with args:\n" + Arrays.asList(args));
-    
+
     /* waitFor() call appears to block indefinitely in 1.4.1, because
      * the process will block if output buffers get full.
      * Yes, this is extremely retarded.
      */
 //     value = javadocProcess.waitFor();
-    
+
     // We have to use a busy-wait and vent output buffers.
     LinkedList<String> outLines = new LinkedList<String>();
     LinkedList<String> errLines = new LinkedList<String>();
@@ -568,21 +568,21 @@ public class DefaultJavadocModel implements JavadocModel {
     }
     ExecJVM.ventBuffers(javadocProcess, outLines, errLines);
 //    System.err.println("Javadoc process completed.");
-     
+
     // Unfortunately, javadoc returns 1 for normal errors and for exceptions.
     // We cannot tell them apart without parsing.
 
     ArrayList<CompilerError> errors = _extractErrors(outLines);
     errors.addAll(_extractErrors(errLines));
-  
+
     _javadocErrorModel = new CompilerErrorModel
-      ((CompilerError[])(errors.toArray(new CompilerError[errors.size()])), _getter);
+      (errors.toArray(new CompilerError[errors.size()]), _getter);
 //    System.out.println("built Javadoc error model");
-    
+
     // Returns true if no "real" errors have occurred.
     return _javadocErrorModel.hasOnlyWarnings();
   }
-  
+
   /**
    * Reads through a LinkedList of text lines, looking for Javadoc errors.
    * This code will detect Exceptions and Errors thrown during generation of
@@ -595,29 +595,29 @@ public class DefaultJavadocModel implements JavadocModel {
   private ArrayList<CompilerError> _extractErrors(LinkedList lines) {
     // Javadoc never produces more than 100 errors, so this will never auto-expand.
     ArrayList<CompilerError> errors = new ArrayList<CompilerError>(100);
-    
+
     final String ERROR_INDICATOR = "Error: ";
     final String EXCEPTION_INDICATOR = "Exception: ";
     final String BAD_FLAG_INDICATOR = "invalid flag:";
     while (lines.size() > 0) {
 //         System.out.println("[javadoc raw error] " + output);
-      
+
       String output = (String) lines.removeFirst();
-      
+
       // Check for the telltale signs of a thrown exception or error.
       int errStart;
       errStart = output.indexOf(ERROR_INDICATOR);
-      
+
       // If we haven't found an error, look for an exception.
       if (errStart == -1) {
         errStart = output.indexOf(EXCEPTION_INDICATOR);
       }
-      
+
       // If we haven't found either, look for a bad flag report.
       if (errStart == -1) {
         errStart = output.indexOf(BAD_FLAG_INDICATOR);
       }
-            
+
       if (errStart != -1) {
         // If we found one, put the entirety of stderr in one CompilerError.
         StringBuffer buf = new StringBuffer(60 * lines.size());
@@ -638,10 +638,10 @@ public class DefaultJavadocModel implements JavadocModel {
         }
       }
     }
-    
+
     return errors;
   }
-  
+
   /**
    * Parse a line of text written by Javadoc to stderr in order to see if it
    * lists a specific file (and optionally, a line number) and error message.
@@ -657,25 +657,25 @@ public class DefaultJavadocModel implements JavadocModel {
     if (line == null) {
       return null;
     }
-    
+
     final String JAVA_INDICATOR = ".java:";
     final String GJ_INDICATOR = ".gj:";
-    
+
     CompilerError error = null;
-    
+
     // if the line doesn't have a file and a line number, it is context printed out for a previous error.
     // We can ignore it, becuase the user gets this when they click the error message in our GUI.
     int errStart = line.indexOf(JAVA_INDICATOR);
-    
+
     // Also look for a GJ file extension.
     if (errStart == -1) {
       errStart = line.indexOf(GJ_INDICATOR);
     }
-    
+
     if (errStart != -1) {
       // filename is everything up to and including the '.java'
       String filename = line.substring(0, errStart+5);
-      
+
       // line number is all contiguous number characters after the colon
       int lineno = -1;
       StringBuffer linenoString = new StringBuffer();
@@ -696,16 +696,16 @@ public class DefaultJavadocModel implements JavadocModel {
       } else {
         pos = errStart;
       }
-      
+
       // error message is everything after the colon and space that are after the line number
       String errMessage = line.substring(pos+2);
-      
+
       // check to see if the first word in the error message is "warning"
       boolean isWarning = false;
       if (errMessage.substring(0, 7).equalsIgnoreCase("warning")) {
         isWarning = true;
       }
-      
+
       if (lineno >= 0) {
         error = new CompilerError(new File(filename), lineno, 0, errMessage, isWarning);
       } else {
@@ -714,17 +714,17 @@ public class DefaultJavadocModel implements JavadocModel {
     }
     return error;
   }
-  
-  
-  
+
+
+
   /**
    * Attempts to get the file from the given document.
    * If the file has moved, we use the given FileSaveSelector to let the user save it
    * in a new location.
-   * 
+   *
    * @param doc OpenDefinitionsDocument from which to get the file
    * @param aver FileSaveSelector to allow the user to save the file if it has moved.
-   * 
+   *
    * @throws IllegalStateException if the doc has no file (hasn't been saved)
    * @throws IOException if the file can't be saved after it was moved
    */
@@ -756,13 +756,13 @@ public class DefaultJavadocModel implements JavadocModel {
       }
     }
   }
-  
+
   /**
    * Treats the given message as a Javadoc error, firing the
    * end event necessary to show the error.  The javadocStarted() event
    * <i>must</i> have already been fired, and Javadoc generation must
    * halt after calling this method.
-   * 
+   *
    * @param msg Message to display as an error
    * @param f File that caused the error
    * @param listener JavadocListener to notify of start and end
@@ -773,14 +773,14 @@ public class DefaultJavadocModel implements JavadocModel {
     _javadocErrorModel = new CompilerErrorModel(errors, _getter);
     listener.javadocEnded(false, null, false);
   }
-  
+
   /**
    * Builds a list of command line arguments to pass to the new process
    * when generating Javadoc for a collection of files or packages.
-   * 
+   *
    * The list includes arguments to set the sourcepath and to
    * link against online library documentation.
-   * 
+   *
    * @param docUnits All files or packages to include in the Javadoc
    * @param destDir Destination directory to pass
    * @param sourcePath Full sourcepath to pass
@@ -797,14 +797,14 @@ public class DefaultJavadocModel implements JavadocModel {
     args.addAll(docUnits);
     return args;
   }
-  
+
   /**
    * Builds a list of command line arguments to pass to the new process
    * when generating Javadoc for a single file.
-   * 
+   *
    * The list does not include arguments for source path or
    * online links to documentation.
-   * 
+   *
    * @param docUnits All files or packages to include in the Javadoc
    * @param destDir Destination directory to pass
    * @param sourcePath Full sourcepath to pass
@@ -820,11 +820,11 @@ public class DefaultJavadocModel implements JavadocModel {
     args.add(file.getAbsolutePath());
     return args;
   }
-  
+
   /**
-   * Adds all the basic command line arguments to the args list, for 
+   * Adds all the basic command line arguments to the args list, for
    * generating Javadoc for either a single or collection of files.
-   * 
+   *
    * @param args List of arguments
    * @param destDir Destination directory to pass
    * @param sourcePath Full sourcepath to pass, or the empty string (NOT NULL).
@@ -850,7 +850,7 @@ public class DefaultJavadocModel implements JavadocModel {
     }
     args.add("-d");
     args.add(destDir);
-    
+
     // Add classpath
     args.add("-classpath");
     StringBuffer cp = new StringBuffer();
@@ -860,12 +860,12 @@ public class DefaultJavadocModel implements JavadocModel {
       cp.append(sep);
     }
     args.add(cp.toString());
-    
+
     // Add custom args specified by the user
     String custom = config.getSetting(OptionConstants.JAVADOC_CUSTOM_PARAMS);
     args.addAll(ArgumentTokenizer.tokenize(custom));
   }
-  
+
   /**
    * Adds command line arguments for links to online library documentation
    * to the given list of command line arguments.
@@ -883,7 +883,7 @@ public class DefaultJavadocModel implements JavadocModel {
       args.add(config.getSetting(OptionConstants.JAVADOC_1_4_LINK));
     }
   }
-  
+
   /**
    * Adds command line arguments for generating a single Javadoc file,
    * suppressing most of the navigation on the page.

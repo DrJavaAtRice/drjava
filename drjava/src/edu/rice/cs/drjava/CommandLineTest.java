@@ -64,7 +64,7 @@ public final class CommandLineTest extends TestCase {
    * The MainFrame we're working with.
    */
   private MainFrame _mf;
-  
+
   /**
    * Files that exist, and the filenames that represent them.
    */
@@ -87,7 +87,7 @@ public final class CommandLineTest extends TestCase {
   private final String nof1_name;
   private final String nof2_name;
   private final String nof3_name;
-  
+
   /**
    * Constructor.  Sets up test files for us to use:
    * - three files that exist and can be opened
@@ -118,7 +118,7 @@ public final class CommandLineTest extends TestCase {
       FileWriter fw3 = new FileWriter(f3);
       fw3.write(f3_contents,0,f3_contents.length());
       fw3.close();
-      
+
       nof1 = File.createTempFile("DrJava-test", ".java");
       nof1_name = nof1.getAbsolutePath();
       nof1.delete();
@@ -138,13 +138,13 @@ public final class CommandLineTest extends TestCase {
   public void setUp() {
     _mf = new MainFrame();
   }
-  
+
   public void tearDown() {
     _mf.dispose();
     _mf = null;
     System.gc();
   }
-  
+
   /**
    * Tests DrJava with no command line arguments.
    * Should open a new, untitled document.
@@ -209,16 +209,16 @@ public final class CommandLineTest extends TestCase {
     assertEquals("Do the contents of file 1 match?",
                  f1_contents,
                  doc1.getDocument().getText(0,f1_contents.length()));
-    
-    OpenDefinitionsDocument doc2 = (OpenDefinitionsDocument)docs.get(1);
+
+    OpenDefinitionsDocument doc2 = docs.get(1);
     assertEquals("Correct length of file 2?",
                  f2_contents.length(),
                  doc2.getDocument().getLength());
     assertEquals("Do the contents of file 2 match?",
                  f2_contents,
                  doc2.getDocument().getText(0,f2_contents.length()));
-    
-    OpenDefinitionsDocument doc3 = (OpenDefinitionsDocument)docs.get(2);
+
+    OpenDefinitionsDocument doc3 = docs.get(2);
     assertEquals("Correct length of file 3?",
                  f3_contents.length(),
                  doc3.getDocument().getLength());
@@ -253,7 +253,7 @@ public final class CommandLineTest extends TestCase {
     assertEquals("Do the contents of file 1 match?",
                  f2_contents,
                  doc1.getDocument().getText(0,f2_contents.length()));
-    
+
     OpenDefinitionsDocument doc2 = docs.get(1);
     assertEquals("Correct length of file 2?",
                  f3_contents.length(),
@@ -261,7 +261,7 @@ public final class CommandLineTest extends TestCase {
     assertEquals("Do the contents of file 2 match?",
                  f3_contents,
                  doc2.getDocument().getText(0,f3_contents.length()));
-    
+
     OpenDefinitionsDocument doc3 = docs.get(2);
     assertEquals("Correct length of file 3?",
                  f1_contents.length(),
@@ -273,9 +273,9 @@ public final class CommandLineTest extends TestCase {
     assertEquals("Is the last document the active one?",
                  doc3,
                  _mf.getModel().getActiveDocument());
-    
+
   }
-  
+
   /**
    * Test duplicate files.
    */
@@ -297,7 +297,7 @@ public final class CommandLineTest extends TestCase {
     assertEquals("Do the contents of file 1 match?",
                  f1_contents,
                  doc1.getDocument().getText(0,f1_contents.length()));
-    
+
     OpenDefinitionsDocument doc2 = docs.get(1);
     assertEquals("Correct length of file 2?",
                  f2_contents.length(),
@@ -305,11 +305,11 @@ public final class CommandLineTest extends TestCase {
     assertEquals("Do the contents of file 2 match?",
                  f2_contents,
                  doc2.getDocument().getText(0,f2_contents.length()));
-    
+
     assertEquals("Is the last document the active one?",
                  doc2,
                  _mf.getModel().getActiveDocument());
-    
+
   }
 
   /**
@@ -339,7 +339,7 @@ public final class CommandLineTest extends TestCase {
       FileOps.deleteDirectory(newDirectory);
     }
   }
-  
+
   /**
    * Tests paths with "." and ".." in them.  Windows will blow up if you
    * use one in a JFileChooser without converting it to a canonical filename.
@@ -347,8 +347,8 @@ public final class CommandLineTest extends TestCase {
   public void testDotPaths() {
     String funnyName = "DrJava_automatically_deletes_this";
     File newDirectory = mkTempDir(funnyName);
-    
-    assertTrue("child directory created OK", 
+
+    assertTrue("child directory created OK",
                new File(newDirectory, "childDir").mkdir());
 
     File relativeFile = new File(newDirectory, "./X.java");
@@ -367,24 +367,24 @@ public final class CommandLineTest extends TestCase {
       FileOps.deleteDirectory(newDirectory);
     }
   }
-  
-  
+
+
   /**
    * Helper for testRelativeFile and testDotPaths.
    */
   private File mkTempDir(String funnyName) {
     // OK, we have to create a directory with a hard-coded name in the
-    // current working directory, so we'll make it strange. If this 
+    // current working directory, so we'll make it strange. If this
     // directory happens to exist, it'll be deleted.
     File newDirectory = new File(funnyName);
     if (newDirectory.exists()) {
       FileOps.deleteDirectory(newDirectory);
     }
-    
+
     assertTrue("directory created OK", newDirectory.mkdir());
     return newDirectory;
   }
-  
+
   /**
    * Helper for testRelativeFile and testDotPaths.
    */
@@ -393,24 +393,24 @@ public final class CommandLineTest extends TestCase {
     FileOps.writeStringToFile(relativeFile,
                               "package " + funnyName + "; class X {}");
     assertTrue("file exists", relativeFile.exists());
-    
+
     String path = relativeFile.getPath();
     DrJava.openCommandLineFiles(_mf, new String[] { path });
-    
+
     List<OpenDefinitionsDocument> docs = _mf.getModel().getDefinitionsDocuments();
     assertEquals("Number of open documents", 1, docs.size());
-    
+
     OpenDefinitionsDocument doc = docs.get(0);
-    
+
     assertEquals("OpenDefDoc file is the right one and is canonical",
                  relativeFile.getCanonicalFile(),
                  doc.getFile());
-    
+
     // The source root should be the current directory (as
     // a canonical path, of course).
     File root = doc.getSourceRoot();
     assertEquals("source root", new File("").getCanonicalFile(), root);
-    
+
     // Close this doc to clean up after ourselves for the next check.
     _mf.getModel().closeFile(doc);
   }

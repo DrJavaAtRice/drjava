@@ -74,22 +74,22 @@ public class JUnitTestRunner extends TestRunner {
    * Class loader that uses DrJava's classpath. Overrides the super class' loader.
    */
   private TestSuiteLoader _classLoader;
-  
+
   /**
    * The JUnit TestResult being accumulated.
    */
   private TestResult _result;
-  
+
   /**
    * The current number of errors in the result.
    */
   private int _errorCount;
-  
+
   /**
    * The current number of failures in the result.
    */
   private int _failureCount;
-  
+
   /**
    * Constructor
    */
@@ -105,30 +105,30 @@ public class JUnitTestRunner extends TestRunner {
       public void println() {
       }
     };
-    
+
     _errorCount = 0;
     _failureCount = 0;
   }
-  
+
   public TestResult doRun(Test suite) {
-    
+
     // Reset all bookkeeping
     _errorCount = 0;
     _failureCount = 0;
     _jmc.testSuiteStarted(suite.countTestCases());
-    
+
     // Run the test
     _result = createTestResult();
     _result.addListener(this);
-    long startTime = System.currentTimeMillis();
+//    long startTime = System.currentTimeMillis();
     suite.run(_result);
-    long endTime = System.currentTimeMillis();
-    long runTime = endTime - startTime;
-    //fPrinter.print(result, runTime);
+//    long endTime = System.currentTimeMillis();
+//    long runTime = endTime - startTime;
+//    fPrinter.print(result, runTime);
 
     return _result;
   }
-  
+
   /**
    * Overrides method in super class to always return a
    * reloading test suite loader.
@@ -144,11 +144,11 @@ public class JUnitTestRunner extends TestRunner {
   protected PrintStream getWriter() {
     return _writer;
   }
-  
+
   protected PrintStream writer() {
     return getWriter();
   }
-  
+
   /**
    * Called by JUnit when a test is started.
    */

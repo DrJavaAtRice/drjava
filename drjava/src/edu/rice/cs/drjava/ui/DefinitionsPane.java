@@ -76,13 +76,13 @@ import edu.rice.cs.drjava.model.debug.Breakpoint;
  * @version $Id$
  */
 public class DefinitionsPane extends JEditorPane implements OptionConstants {
-  
+
   /**
    * This field NEEDS to be set by setEditorKit() BEFORE any DefinitonsPanes
    * are created.
    */
   private static DefinitionsEditorKit EDITOR_KIT;
-  
+
   /**
    * Our parent window.
    */
@@ -98,65 +98,65 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
    * when the document within this defpane has been modified since its last save.
    */
   private boolean _hasWarnedAboutModified = false;
-  
+
   /**
    * Our current paren/brace/bracket matching highlight.
    */
   private HighlightManager.HighlightInfo _matchHighlight = null;
-  
+
   /**
    * Used by the centering source mechanism to ensure paints
    */
   private boolean _updatePending = false;
-  
+
   /**
    * Whether to draw text as antialiased.
    */
   private boolean _antiAliasText = false;
-  
+
   /**
    * Paren/brace/bracket matching highlight color.
    */
   public static DefaultHighlighter.DefaultHighlightPainter
     MATCH_PAINTER;
-    
+
   static {
     Color highColor = DrJava.getConfig().getSetting(DEFINITIONS_MATCH_COLOR);
-    
-    MATCH_PAINTER = 
+
+    MATCH_PAINTER =
       new DefaultHighlighter.DefaultHighlightPainter(highColor);
   }
-  
+
   /**
    * Our current compiler error matching highlight.
    */
   private HighlightManager.HighlightInfo _errorHighlightTag = null;
-  
+
   /**
    * Highlight painter for selected errors in the defs doc.
    */
   public static DefaultHighlighter.DefaultHighlightPainter
     ERROR_PAINTER =
     new DefaultHighlighter.DefaultHighlightPainter(DrJava.getConfig().getSetting(COMPILER_ERROR_COLOR));
-  
+
   /**
    *  Highlight painter for breakpoints
    */
-  public static DefaultHighlighter.DefaultHighlightPainter 
+  public static DefaultHighlighter.DefaultHighlightPainter
     BREAKPOINT_PAINTER =
     new DefaultHighlighter.DefaultHighlightPainter(DrJava.getConfig().getSetting(DEBUG_BREAKPOINT_COLOR));
-  
+
   /**
    * Highlight painter for thread's current location
    */
-  public static DefaultHighlighter.DefaultHighlightPainter 
+  public static DefaultHighlighter.DefaultHighlightPainter
     THREAD_PAINTER =
     new DefaultHighlighter.DefaultHighlightPainter(DrJava.getConfig().getSetting(DEBUG_THREAD_COLOR));
-  
+
   /**
-   * The OptionListener for DEFINITIONS_MATCH_COLOR 
+   * The OptionListener for DEFINITIONS_MATCH_COLOR
    */
-  private class MatchColorOptionListener implements OptionListener<Color> { 
+  private class MatchColorOptionListener implements OptionListener<Color> {
     public void optionChanged(OptionEvent<Color> oce) {
       MATCH_PAINTER = new DefaultHighlighter.DefaultHighlightPainter(oce.value);
       if (_matchHighlight != null) {
@@ -167,11 +167,11 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
       }
     }
   }
-  
+
   /**
    * The OptionListener for COMPILER_ERROR_COLOR
    */
-  private class ErrorColorOptionListener implements OptionListener<Color> { 
+  private class ErrorColorOptionListener implements OptionListener<Color> {
     public void optionChanged(OptionEvent<Color> oce) {
       ERROR_PAINTER = new DefaultHighlighter.DefaultHighlightPainter(oce.value);
       if (_errorHighlightTag != null) {
@@ -182,34 +182,34 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
       }
     }
   }
-  
+
   /**
-   * The OptionListener for DEBUG_BREAKPOINT_COLOR 
+   * The OptionListener for DEBUG_BREAKPOINT_COLOR
    */
-  private class BreakpointColorOptionListener implements OptionListener<Color> { 
+  private class BreakpointColorOptionListener implements OptionListener<Color> {
     public void optionChanged(OptionEvent<Color> oce) {
       BREAKPOINT_PAINTER = new DefaultHighlighter.DefaultHighlightPainter(oce.value);
     }
   }
-  
+
   /**
-   * The OptionListener for DEBUG_THREAD_COLOR 
+   * The OptionListener for DEBUG_THREAD_COLOR
    */
-  private class ThreadColorOptionListener implements OptionListener<Color> { 
+  private class ThreadColorOptionListener implements OptionListener<Color> {
     public void optionChanged(OptionEvent<Color> oce) {
       THREAD_PAINTER = new DefaultHighlighter.DefaultHighlightPainter(oce.value);
     }
   }
-  
+
   /**
-   * The OptionListener for TEXT_ANTIALIAS 
+   * The OptionListener for TEXT_ANTIALIAS
    */
-  private class AntiAliasOptionListener implements OptionListener<Boolean> { 
+  private class AntiAliasOptionListener implements OptionListener<Boolean> {
     public void optionChanged(OptionEvent<Boolean> oce) {
       _antiAliasText = oce.value.booleanValue();
     }
   }
-  
+
   /**
    * Listens to any undoable events in the document, and adds them
    * to the undo manager.  Must be done in the view because the edits are
@@ -225,13 +225,13 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
       _doc.getDocument().getUndoManager().addEdit(undo);
     }
   };
-  
+
   /**
    * The menu item for the "Toggle Breakpoint" option. Stored in field so that it may be enabled and
    * disabled depending on Debug Mode
    */
   private JMenuItem _toggleBreakpointMenuItem;
-  
+
   /**
    * The menu item for the "Add Watch" option. Stored in field so that it may be enabled and
    * disabled depending on Debug Mode
@@ -242,19 +242,19 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
    * The contextual popup menu for the Definitions Pane.
    */
   private JPopupMenu _popMenu;
-  
+
   /**
    * The mouse adapter for handling a popup menu
    */
   private PopupMenuMouseAdapter _popupMenuMA;
-  
+
   /**
    * Listens to caret to highlight errors as appropriate.
    */
   private ErrorCaretListener _errorListener;
-  
+
   private ActionListener _setSizeListener = null;
-  
+
   /**
    * Looks for changes in the caret position to see if a paren/brace/bracket
    * highlight is needed.
@@ -275,8 +275,8 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
         _updateMatchHighlight();
       } catch (BadLocationException ex) {}
     }
-  };  
-  
+  };
+
   /**
    * Updates the highlight if there is any.
    * @exception BadLocationException
@@ -288,19 +288,18 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
       // Found a matching open brace to this close brace
       from = to - from;
       _addHighlight(from, to);
-      Highlighter.Highlight[] _lites = getHighlighter().getHighlights();
+//      Highlighter.Highlight[] _lites = getHighlighter().getHighlights();
     }
-    /** Not ready yet...
-    else {
-      // Try to match a close brace to this open brace
-      from = _doc.balanceForward();
-      if (from > -1) {
-        from = to + from;
-        _addHighlight(to, from);
-        Highlighter.Highlight[] _lites = getHighlighter().getHighlights();
-      }
-    }
-    */
+    // TODO: finish this
+//    else {
+//      // Try to match a close brace to this open brace
+//      from = _doc.balanceForward();
+//      if (from > -1) {
+//        from = to + from;
+//        _addHighlight(to, from);
+//        Highlighter.Highlight[] _lites = getHighlighter().getHighlights();
+//      }
+//    }
   }
 
   /**
@@ -312,7 +311,7 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
   private void _addHighlight(int from, int to) {
     _matchHighlight = _highlightManager.addHighlight(from, to, MATCH_PAINTER);
   }
-  
+
   /**
    * Removes the previous highlight so document is cleared when caret position changes.
    */
@@ -328,7 +327,7 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
    * An action to handle indentation spawned by pressing the tab key.
    */
   private class IndentKeyActionTab extends AbstractAction {
-    /** 
+    /**
      * Handle the key typed event from the text field.
      */
     public void actionPerformed(ActionEvent e) {
@@ -353,12 +352,12 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
      * The default action to take when the specified key is pressed.
      */
     private final Action _defaultAction;
-    
+
     /**
      * Whether to perform the indent if the caret is in a String or comment.
      */
     private final boolean _indentNonCode;
-    
+
     /**
      * Creates an IndentKeyAction which only invokes indent if the caret
      * is in code, and not Strings or comments.
@@ -385,7 +384,7 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
     protected int getIndentReason(){
       return Indenter.OTHER;
     }
-    
+
     /**
      * Handle the "key typed" event from the text field.
      * Calls the default action to make sure the right things happen, then makes
@@ -393,7 +392,7 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
      */
     public void actionPerformed(ActionEvent e) {
       _defaultAction.actionPerformed(e);
-      
+
       // Only indent if in code
       _doc.syncCurrentLocationWithDefinitions(getCaretPosition());
       ReducedModelState state = _doc.getDocument().getStateAtCurrent();
@@ -415,7 +414,7 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
    * regular text keys.
    */
   private Action _indentKeyActionLine =
-    new IndentKeyAction("\n", 
+    new IndentKeyAction("\n",
                         (Action) this.getActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0)),
                         true /* indent non-code, too */ ) {
       /* overriding this method is important so that pressing the enter key causes
@@ -438,9 +437,9 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
   /**
    * Takes in any keyboard input, checks to see if it is in the keyToActionMap
    * in KeybindingManager, if so executes the action, otherwise checks if it
-   * contains the current platform's menu shortcut modifier and if so, ignores 
-   * that command (this disallows the execution of the UI's default 
-   * actions such as cut/copy/paste/select all), otherwise does whatever 
+   * contains the current platform's menu shortcut modifier and if so, ignores
+   * that command (this disallows the execution of the UI's default
+   * actions such as cut/copy/paste/select all), otherwise does whatever
    * normally would be done
    */
   public void processKeyEvent(KeyEvent e) {
@@ -457,22 +456,22 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
       e.consume();
     }
     else {
-      // The following conditional fixes bug 676586 by ignoring typed events when the meta key is down 
+      // The following conditional fixes bug 676586 by ignoring typed events when the meta key is down
       if (((e.getModifiers() & InputEvent.META_MASK) != 0) && e.getKeyCode() == KeyEvent.VK_UNDEFINED) {
         return;
       }
-      
-      // The following conditional fixes ease of use issue 693253 by checking if a typed event is 
-      // shift-delete or shift-backspace and then performing a delete or backspace operation, 
+
+      // The following conditional fixes ease of use issue 693253 by checking if a typed event is
+      // shift-delete or shift-backspace and then performing a delete or backspace operation,
       // respectively
       if ((e.getModifiers() & InputEvent.SHIFT_MASK) != 0) {
         int newModifiers = e.getModifiers() & ~(InputEvent.SHIFT_MASK);
-        
+
         KeyStroke newKs = KeyStroke.getKeyStroke(ks.getKeyCode(), newModifiers, ks.isOnKeyRelease());
         String name = KeyBindingManager.Singleton.getName(newKs);
 
         if (name != null && (name.equals("Delete Previous") || name.equals("Delete Next"))) {
-          // We are unsure about the third and fourth arguments (e and e.getSource()); we simply 
+          // We are unsure about the third and fourth arguments (e and e.getSource()); we simply
           // reuse the original values
           SwingUtilities.notifyAction(KeyBindingManager.Singleton.get(newKs), newKs, e, e.getSource(), newModifiers);
           e.consume();
@@ -483,11 +482,11 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
       // backspace deletes twice without this check, overrides other keystrokes
       // that use the mask modifier
       if (((ks.getModifiers() & mask) == 0) && ks.getKeyChar() != '\010') {
-        super.processKeyEvent(e);       
+        super.processKeyEvent(e);
       }
     }
   }
-  
+
   /**
    * Sets the editor kit that will be used by all DefinitionsPanes.
    * @param editorKit The editor kit to use for new DefinitionsPanes.
@@ -495,7 +494,7 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
   public static void setEditorKit(DefinitionsEditorKit editorKit) {
     EDITOR_KIT = editorKit;
   }
-  
+
   /**
    * Constructor.  Sets up all the defaults.
    * @param mf the parent window
@@ -511,39 +510,39 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
     setContentType("text/java");
     //setFont(new Font("Courier", 0, 12));
     Font mainFont = DrJava.getConfig().getSetting(FONT_MAIN);
-    setFont(mainFont);    
-    
+    setFont(mainFont);
+
     //setSize(new Dimension(1024, 1000));
     setEditable(true);
 
     // add actions for indent key
     Keymap ourMap = addKeymap("INDENT_KEYMAP", getKeymap());
-    ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), 
-                                 (Action) _indentKeyActionLine);
+    ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0),
+                                 _indentKeyActionLine);
     ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_TAB, 0),
-                                 (Action) _indentKeyActionTab);
+                                 _indentKeyActionTab);
     ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke('}'),
-                                 (Action) _indentKeyActionSquiggly);
-    ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke('{'), 
-                                 (Action) _indentKeyActionOpenSquiggly);
+                                 _indentKeyActionSquiggly);
+    ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke('{'),
+                                 _indentKeyActionOpenSquiggly);
     ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke(':'),
-                                 (Action) _indentKeyActionColon);
+                                 _indentKeyActionColon);
     setKeymap(ourMap);
-                      
+
     //this.setEditorKit(new StyledEditorKit());
-    
+
     // Add listener that checks if position in the document has changed.
     // If it has changed, check and see if we should be highlighting matching braces.
     this.addCaretListener(_matchListener);
-    
+
     if (CodeStatus.DEVELOPMENT) {
       _antiAliasText = DrJava.getConfig().getSetting(TEXT_ANTIALIAS).booleanValue();
     }
-    
+
     // Setup the color listeners.
     new ForegroundColorListener(this);
     new BackgroundColorListener(this);
-    
+
     DrJava.getConfig().addOptionListener( OptionConstants.DEFINITIONS_MATCH_COLOR,
                                     new MatchColorOptionListener());
     DrJava.getConfig().addOptionListener( OptionConstants.COMPILER_ERROR_COLOR,
@@ -556,17 +555,17 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
       DrJava.getConfig().addOptionListener( OptionConstants.TEXT_ANTIALIAS,
                                            new AntiAliasOptionListener());
     }
-        
+
     createPopupMenu();
-      
+
     //Add listener to components that can bring up popup menus.
     _popupMenuMA = new PopupMenuMouseAdapter();
     this.addMouseListener( _popupMenuMA );
-      
+
     _highlightManager = new HighlightManager(this);
-     
+
   }
-  
+
   /**
    * Enable anti-aliased text by overriding paintComponent.
    */
@@ -590,19 +589,19 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
     super.setCaretPosition(pos);
     _doc.getDocument().setCurrentLocation(pos);
   }
-  
+
   /**
    *  Creates the popup menu for the DefinitionsPane
    */
   private void createPopupMenu() {
     // Create the popup menu.
     _popMenu = new JPopupMenu();
-    
+
     _popMenu.add(_mainFrame.cutAction);
     _popMenu.add(_mainFrame.copyAction);
     _popMenu.add(_mainFrame.pasteAction);
     _popMenu.addSeparator();
-    
+
     JMenuItem indentItem = new JMenuItem("Indent Line(s)");
     indentItem.addActionListener(new AbstractAction() {
       public void actionPerformed(ActionEvent ae) {
@@ -610,7 +609,7 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
       }
     });
     _popMenu.add(indentItem);
-    
+
     JMenuItem commentLinesItem = new JMenuItem("Comment Line(s)");
     commentLinesItem.addActionListener ( new AbstractAction() {
       public void actionPerformed( ActionEvent ae) {
@@ -619,7 +618,7 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
       }
     });
     _popMenu.add(commentLinesItem);
-    
+
     JMenuItem uncommentLinesItem = new JMenuItem("Uncomment Line(s)");
     uncommentLinesItem.addActionListener ( new AbstractAction() {
       public void actionPerformed( ActionEvent ae) {
@@ -628,10 +627,10 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
       }
     });
     _popMenu.add(uncommentLinesItem);
-    
+
     if (_mainFrame.getModel().getDebugger().isAvailable()) {
       _popMenu.addSeparator();
-      
+
       // Breakpoint
       JMenuItem breakpointItem = new JMenuItem("Toggle Breakpoint");
       breakpointItem.addActionListener( new AbstractAction() {
@@ -644,24 +643,24 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
       _toggleBreakpointMenuItem = _popMenu.add(breakpointItem);
       _toggleBreakpointMenuItem.setEnabled(false);
     }
-   
-    
+
+
   }
-  
+
   /*
    * The private MouseAdapter for responding to various clicks concerning the popup menu
    */
   private class PopupMenuMouseAdapter extends RightClickMouseAdapter {
-    
+
     private MouseEvent _lastMouseClick = null;
-    
+
     public void mousePressed(MouseEvent e) {
       super.mousePressed(e);
 
       _lastMouseClick = e;
 
-      // if not in the selected area, 
-      if ((viewToModel(e.getPoint()) < getSelectionStart()) || 
+      // if not in the selected area,
+      if ((viewToModel(e.getPoint()) < getSelectionStart()) ||
           (viewToModel(e.getPoint()) > getSelectionEnd()) ) {
         //move caret to clicked position, deselecting previous selection
         setCaretPosition(viewToModel(e.getPoint()));
@@ -686,22 +685,22 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
       return _lastMouseClick;
     }
   }
-  
+
   /**
    *  Comments out the lines contained within the given selection.
    */
   private void _commentLines() {
     _doc.commentLinesInDefinitions(getSelectionStart(), getSelectionEnd());
   }
-  
+
   /**
    *  Uncomments the lines contained within the given selection.
    */
   private void _uncommentLines() {
     _doc.uncommentLinesInDefinitions(getSelectionStart(), getSelectionEnd());
   }
-  
-  
+
+
   /**
    * @return the undo action
    */
@@ -729,7 +728,7 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
   public HighlightManager getHighlightManager() {
     return _highlightManager;
   }
-    
+
   /**
    * Set the caret position and also scroll to make sure the location is
    * visible.
@@ -790,7 +789,7 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
   }
 
   /**
-   * Removes the previous compiler error highlight from the document after 
+   * Removes the previous compiler error highlight from the document after
    * the cursor has moved.
    */
   public void removeErrorHighlight() {
@@ -803,22 +802,22 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
   public boolean hasWarnedAboutModified() {
     return _hasWarnedAboutModified;
   }
-  
+
   public void hasWarnedAboutModified( boolean hasWarned) {
     _hasWarnedAboutModified = hasWarned;
   }
-  
+
   public void addBreakpointHighlight( Breakpoint bp ) {
     /*
     int lineStart = getStartPosFromLineNumber(bp.getLineNumber());
     int lineEnd = _doc.getLineEndPos(lineStart);
-        
+
     _highlightManager.addHighlight(lineStart, lineEnd, _breakpointHighlighter);
     */
   }
 
   public void removeBreakpointHighlight( Breakpoint bp) {
-    
+
   }
 
   /**
@@ -829,12 +828,12 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
     _resetUndo();
   }
 
-  public int getCurrentLine() { 
+  public int getCurrentLine() {
     try {
       int pos = getCaretPosition();
       FontMetrics metrics = getFontMetrics(getFont());
       Rectangle startRect = modelToView(pos);
-      if (startRect == null) { 
+      if (startRect == null) {
         return 1;
       }
       //top left position is (3,3), so font size<=6 will be off
@@ -845,7 +844,7 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
       throw new UnexpectedException(e);
     }
   }
-  
+
   public int getCurrentCol() {
     return _doc.getDocument().getCurrentCol();
   }
@@ -855,50 +854,49 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
       _setSizeListener.actionPerformed(null);
     }
   }
-  
+
   public void addSetSizeListener(ActionListener listener) {
     _setSizeListener = listener;
-  } 
+  }
   public void removeSetSizeListener() {
     _setSizeListener = null;
   }
-  
+
   public void centerViewOnOffset(int offset) {
     try {
       FontMetrics metrics = getFontMetrics(getFont());
-      int length = _doc.getDocument().getLength();
       double viewWidth = _mainFrame.getDefViewport().getWidth();
       double viewHeight = _mainFrame.getDefViewport().getHeight();
       // Scroll to make sure this item is visible
       // Centers the selection in the viewport
       Rectangle startRect;
       startRect = this.modelToView(offset);
-      
+
       if (startRect != null) {
         int startRectX = (int)startRect.getX();
         int startRectY = (int)startRect.getY();
-        startRect.setLocation(startRectX-(int)(viewWidth/2), 
+        startRect.setLocation(startRectX-(int)(viewWidth/2),
                               startRectY-(int)(viewHeight/2));
-        Point endPoint = new Point(startRectX+(int)(viewWidth/2), 
-                                   startRectY+(int)(viewHeight/2 + 
+        Point endPoint = new Point(startRectX+(int)(viewWidth/2),
+                                   startRectY+(int)(viewHeight/2 +
                                                     metrics.getHeight()/2));
-        
+
         // Add the end rect onto the start rect to make a rectangle
         // that encompasses the entire selection
-        startRect.add(endPoint);     
-      
+        startRect.add(endPoint);
+
         this.scrollRectToVisible(startRect);
       }
       removeSetSizeListener();
-        
+
       setCaretPosition(offset);
     }
-    
+
     catch (BadLocationException e) {
       throw new UnexpectedException(e);
     }
-  }   
-  
+  }
+
   public void centerViewOnLine(int lineNumber) {
     FontMetrics metrics = getFontMetrics(getFont());
     Point p = new Point(0, metrics.getHeight() * (lineNumber));
@@ -942,7 +940,7 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
     if (_redoAction == null) {
       _redoAction = new RedoAction();
     }
-    
+
     _doc.getDocument().resetUndoManager();
 
     getDocument().addUndoableEditListener(_undoListener);
@@ -980,7 +978,7 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
    */
   public void indent(final int reason) {
     final int key = _doc.getDocument().getUndoManager().startCompoundEdit();
-    
+
     /**
      * Because indent() is a function called directly by the Keymap,
      * it does not go through the regular insertString channels and thus
@@ -993,22 +991,19 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
     _doc.syncCurrentLocationWithDefinitions(getCaretPosition());
     final int selStart = getSelectionStart();
     final int selEnd = getSelectionEnd();
-    
+
 //    final SwingWorker worker = new SwingWorker() {
 //      public Object construct() {
         _mainFrame.hourglassOn();
-        
+
 //        // Use a progress monitor to show a progress dialog only if necessary.
         ProgressMonitor pm = null; //new ProgressMonitor(_mainFrame, "Indenting...",
 //                                                 null, 0, selEnd - selEnd);
-//        
+//
 //        pm.setProgress(0);
 //        // 3 seconds before displaying the progress bar.
 //        pm.setMillisToDecideToPopup(3000);
-        
-          // Show a wait cursor for reasonable sized blocks
-        boolean showWaitCursor = selEnd > (selStart + 100);
-        
+
         // XXX: Temporary hack because of slow indent...
         //  Prompt if more than 10000 characters to be indented
         boolean doIndent = true;
@@ -1023,37 +1018,48 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
              null,
              options,
              options[1]);
-          if (n == JOptionPane.NO_OPTION) { doIndent = false; }
+          switch (n) {
+            case JOptionPane.CANCEL_OPTION:
+            case JOptionPane.CLOSED_OPTION:
+            case JOptionPane.NO_OPTION:
+              doIndent = false;
+              break;
+            default:
+              doIndent = true;
+              break;
+          }
         }
-        
+
         // Do the indent
-        try {
-          _doc.indentLinesInDefinitions(selStart, selEnd, reason, pm);
-          //      _indentLines(reason, pm);
-          
-          _doc.getDocument().getUndoManager().endCompoundEdit(key);
-        }
-        catch (OperationCanceledException oce) {
-          // if canceled, undo the indent
+        if (doIndent) {
+          try {
+            _doc.indentLinesInDefinitions(selStart, selEnd, reason, pm);
+            //      _indentLines(reason, pm);
+
+            _doc.getDocument().getUndoManager().endCompoundEdit(key);
+          }
+          catch (OperationCanceledException oce) {
+            // if canceled, undo the indent
 //          _doc.getDocument().getUndoManager().undo(key);
-          throw new UnexpectedException(oce);
-        }
-        finally {
-          setCaretPosition(_doc.getCurrentDefinitionsLocation());
+            throw new UnexpectedException(oce);
+          }
+          finally {
+            setCaretPosition(_doc.getCurrentDefinitionsLocation());
 //          pm.close();
-        }
-        
-        _mainFrame.hourglassOff();
+          }
+
+          _mainFrame.hourglassOff();
 //        return null;
 //      }
 //    };
 //    worker.start();
-  }
+        }
+      }
 
   /**
    * Updates the UI to a new look and feel.
    * Need to update the contained popup menu as well.
-   * 
+   *
    * Currently, we don't support changing the look and feel
    * on the fly, so this is disabled.
    *
@@ -1082,12 +1088,12 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
      */
     public void actionPerformed(ActionEvent e) {
       try {
-        UndoableEdit edit = _doc.getDocument().getNextUndo();
+//        UndoableEdit edit = _doc.getDocument().getNextUndo();
 //         int pos = -1;
 //         if (edit != null && edit instanceof UndoWithPosition) {
 //           pos = ((UndoWithPosition)edit).getPosition();
 //         }
-//         
+//
 //         if (pos > -1) {
 //           //centerViewOnOffset(pos);
 //           setCaretPosition(pos);
@@ -1139,13 +1145,13 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
      */
     public void actionPerformed(ActionEvent e) {
       try {
-        UndoableEdit edit = _doc.getDocument().getNextRedo();
+//        UndoableEdit edit = _doc.getDocument().getNextRedo();
 //         int pos = -1;
 //         if (edit instanceof UndoWithPosition) {
 //           pos = ((UndoWithPosition)edit).getPosition();
 //         }
          _doc.getDocument().getUndoManager().redo();
-         
+
 //         if (pos > -1) {
 //           //centerViewOnOffset(pos);
 //           setCaretPosition(pos);
@@ -1174,7 +1180,7 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
       }
     }
   }
-  
+
   /**
    * Wrapper for UndoableEdit that pairs UndoableEdits with their
    * caret positions
@@ -1182,59 +1188,59 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
   private class UndoWithPosition implements UndoableEdit {
     private UndoableEdit _undo;
     private int _pos;
-    
+
     public UndoWithPosition(UndoableEdit undo, int pos) {
       _undo = undo;
       _pos = pos;
     }
-    
+
     public int getPosition() {
       return _pos;
     }
-    
+
     public boolean addEdit(UndoableEdit ue) {
       return _undo.addEdit(ue);
     }
-    
+
     public boolean canRedo() {
       return _undo.canRedo();
     }
-    
+
     public boolean canUndo() {
       return _undo.canUndo();
     }
-    
+
     public void die() {
       _undo.die();
     }
-    
+
     public String getPresentationName() {
       return _undo.getPresentationName();
     }
-    
+
     public String getUndoPresentationName() {
       return _undo.getUndoPresentationName();
     }
-    
+
     public String getRedoPresentationName() {
       return _undo.getRedoPresentationName();
     }
-    
+
     public boolean isSignificant() {
       return _undo.isSignificant();
     }
-    
+
     public void redo() {
       _undo.redo();
       if(_pos > -1) {
         setCaretPosition(_pos);
       }
     }
-    
+
     public boolean replaceEdit(UndoableEdit ue) {
       return _undo.replaceEdit(ue);
     }
-    
+
     public void undo() {
       if(_pos > -1) {
         setCaretPosition(_pos);

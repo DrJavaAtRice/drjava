@@ -55,14 +55,14 @@ public class TestDocGetter extends DummyGetDocuments {
    * Storage for documents and File keys.
    */
   HashMap<File, OpenDefinitionsDocument> docs;
-  
+
   /**
    * Convenience constructor for no-documents case.
    */
   public TestDocGetter() {
     this(new File[0], new String[0]);
   }
-  
+
   /**
    * Primary constructor, builds OpenDefDocs from Strings.
    * @param files the keys to use when getting OpenDefDocs
@@ -72,9 +72,9 @@ public class TestDocGetter extends DummyGetDocuments {
     if (files.length != texts.length) {
       throw new IllegalArgumentException("Argument arrays must match in size.");
     }
-    
+
     docs = new HashMap<File, OpenDefinitionsDocument>(texts.length * 2);
-    
+
     EventNotifier en = new EventNotifier();
     for (int i = 0; i < texts.length; i++) {
       DefinitionsDocument doc = new DefinitionsDocument(en);
@@ -88,12 +88,12 @@ public class TestDocGetter extends DummyGetDocuments {
       docs.put(files[i], new TestOpenDoc(doc));
     }
   }
-  
+
   public OpenDefinitionsDocument getDocumentForFile(File file)
     throws IOException, OperationCanceledException {
     // Try to find the key in docs.
     if (docs.containsKey(file)) {
-      return (OpenDefinitionsDocument) docs.get(file);
+      return docs.get(file);
     }
     else {
       throw new IllegalStateException("TestDocGetter can't open new files!");
@@ -108,14 +108,14 @@ public class TestDocGetter extends DummyGetDocuments {
     TestOpenDoc(DefinitionsDocument doc) {
       _doc = doc;
     }
-    
+
     /**
      * This is the only method that we care about.
      */
     public DefinitionsDocument getDocument() {
       return _doc;
     }
-    
+
     /**
      * Okay, I lied.  We need this one, too.
      */

@@ -83,7 +83,7 @@ public class CompilerRegistry {
     "edu.rice.cs.drjava.model.compiler.JSR14FromSetLocation",
     "edu.rice.cs.drjava.model.compiler.GJv6FromClasspath"
   };
-  
+
   /** Singleton instance. */
   public static final CompilerRegistry ONLY = new CompilerRegistry();
 
@@ -95,7 +95,7 @@ public class CompilerRegistry {
 
   /** The active compiler. Must never be null. */
   private CompilerInterface _activeCompiler = NoCompilerAvailable.ONLY;
-  
+
   /** Private constructor due to singleton. */
   private CompilerRegistry() {
     _baseClassLoader = getClass().getClassLoader();
@@ -179,8 +179,7 @@ public class CompilerRegistry {
       availableCompilers.add(NoCompilerAvailable.ONLY);
     }
 
-    return (CompilerInterface[])
-           availableCompilers.toArray(new CompilerInterface[0]);
+    return availableCompilers.toArray(new CompilerInterface[0]);
   }
 
   public boolean isNoCompilerAvailable() {
@@ -227,7 +226,7 @@ public class CompilerRegistry {
       return NoCompilerAvailable.ONLY;
     }
   }
-  
+
 
   private void _registerDefaultCompilers() {
     for (int i = 0; i < DEFAULT_COMPILERS.length; i++) {

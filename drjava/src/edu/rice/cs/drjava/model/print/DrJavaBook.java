@@ -62,7 +62,7 @@ public class DrJavaBook implements Pageable {
   public static Font PRINT_FONT = new Font("Monospaced", Font.PLAIN, 9);
   public static Font FOOTER_FONT = new Font("Monospaced", Font.PLAIN, 8);
   public static Font LINE_FONT = new Font("Monospaced", Font.ITALIC, 8);
-  public float LINE_NUMBER_WIDTH;
+  public float LINE_NUM_WIDTH;
 
   private static FontRenderContext DEFAULT_FRC = new FontRenderContext(null, false, true);
 
@@ -76,7 +76,7 @@ public class DrJavaBook implements Pageable {
     _filename = filename;
 
     TextLayout textl = new TextLayout("XXX ", LINE_FONT, DEFAULT_FRC);
-    LINE_NUMBER_WIDTH = (float) textl.getAdvance();
+    LINE_NUM_WIDTH = textl.getAdvance();
 
     setUpPagePrinters(text);
   }
@@ -134,7 +134,7 @@ public class DrJavaBook implements Pageable {
           pageNumber = new TextLayout("" + reallinenum, LINE_FONT, DEFAULT_FRC);
 
         // add this TextLayout to the PagePrinter
-        thisPagePrinter.add(measurer.nextLayout((float) _format.getImageableWidth() - LINE_NUMBER_WIDTH), pageNumber);
+        thisPagePrinter.add(measurer.nextLayout((float) _format.getImageableWidth() - LINE_NUM_WIDTH), pageNumber);
 
         linenum++;
         // Create a new PagePrinter, if necessary

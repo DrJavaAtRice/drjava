@@ -65,6 +65,7 @@ import edu.rice.cs.drjava.CodeStatus;
  * @version $Id$
  */
 public final class DebugTest extends DebugTestCase implements OptionConstants {
+
   /**
    * Constructor.
    * @param  String name
@@ -72,6 +73,7 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
   public DebugTest(String name) {
     super(name);
   }
+
 
   /**
    * Tests startup and shutdown, ensuring that all appropriate fields are
@@ -84,7 +86,7 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
     if (printMessages) System.out.println("----testStartupAndShutdown----");
     DebugTestListener debugListener = new DebugStartAndStopListener();
     _debugger.addListener(debugListener);
-    
+
     // Start debugger
     synchronized(_notifierLock) {
       _debugger.startup();
@@ -100,7 +102,7 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
                   _debugger.getEventRequestManager());
     assertNotNull("PendingRequestManager should not be null after startup",
                   _debugger.getPendingRequestManager());
-    
+
     // Shutdown the debugger
     synchronized(_notifierLock) {
       _debugger.shutdown();
@@ -109,7 +111,7 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
     }
     debugListener.assertDebuggerStartedCount(1);
     debugListener.assertDebuggerShutdownCount(1);  //fires
-    
+
     // Start debugger again without resetting
     synchronized(_notifierLock) {
       _debugger.startup();
@@ -118,7 +120,7 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
     }
     debugListener.assertDebuggerStartedCount(2);  //fires
     debugListener.assertDebuggerShutdownCount(1);
-    
+
     // Reset interactions (which shuts down debugger)
     InterpretListener resetListener = new InterpretListener() {
       public void interpreterChanged(boolean inProgress) {
@@ -152,8 +154,8 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
     resetListener.assertInterpreterReadyCount(1);  //fires
     debugListener.assertDebuggerStartedCount(2);
     debugListener.assertDebuggerShutdownCount(2);  //fires
-    
-    
+
+
     // Start debugger again after reset
     synchronized(_notifierLock) {
       _debugger.startup();
@@ -162,7 +164,7 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
     }
     debugListener.assertDebuggerStartedCount(3);  //fires
     debugListener.assertDebuggerShutdownCount(2);
-    
+
     // Shutdown the debugger
     synchronized(_notifierLock) {
       _debugger.shutdown();
@@ -171,11 +173,11 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
     }
     debugListener.assertDebuggerStartedCount(3);
     debugListener.assertDebuggerShutdownCount(3);  //fires
-    
+
     _debugger.removeListener(debugListener);
   }
-  
-  
+
+
   /**
    * Test that when two threads are suspended setCurrentThread can be used
    * to switch between them in the debugger
@@ -184,17 +186,17 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
     if (printMessages) System.out.println("----testMultiThreadedSetCurrentThread----");
     BreakpointTestListener debugListener = new BreakpointTestListener();
     _debugger.addListener(debugListener);
-    
+
     // Start up
     OpenDefinitionsDocument doc = _startupDebugger("Monkey.java",
                                                    MONKEY_CLASS);
-    
+
     // Set two breakpoints
     int index = MONKEY_CLASS.indexOf("System.out.println(\"I\'m a thread! Yeah!\");");
     _debugger.toggleBreakpoint(doc,index,11);
     index = MONKEY_CLASS.indexOf("System.out.println(\"James likes bananas!\");");
     _debugger.toggleBreakpoint(doc,index,17);
-    
+
     // Run the main() method, hitting both breakpoints in different threads
     synchronized(_notifierLock) {
       interpretIgnoreResult("java Monkey");
@@ -208,14 +210,14 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
       _waitForNotifies(2);  // updated, suspended
       _notifierLock.wait();
     }
-    
+
     DebugThreadData thread1 = new DebugThreadData(_debugger.getThreadAt(1));
     DebugThreadData thread2 = new DebugThreadData(_debugger.getCurrentThread());
-    
+
     // make sure threads have switched places
     assertTrue(thread1.getUniqueID() == threadA.getUniqueID());
     assertTrue(thread2.getUniqueID() == threadB.getUniqueID());
-    
+
     // Shut down
     _shutdownAndWaitForInteractionEnded();
     _debugger.removeListener(debugListener);
@@ -223,7 +225,7 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
 
   /**
    * Tests that setCurrentThread works for multiple threads
-   * 
+   *
    * This test has been commented out because we do not support setting the
    * current thread to be an unsuspended thread right now
    *
@@ -231,14 +233,14 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
     if (printMessages) System.out.println("----testMultiThreadedSetCurrentThread----");
     BreakpointTestListener debugListener = new BreakpointTestListener();
     _debugger.addListener(debugListener);
-    
+
     // Start up
     OpenDefinitionsDocument doc = _startupDebugger("Suspender.java",
                                                    SUSPEND_CLASS);
-    
+
     int index = SUSPEND_CLASS.indexOf("int a = 1;");
     _debugger.toggleBreakpoint(doc,index,5);
-    
+
     // Run the main() method, hitting breakpoints
     synchronized(_notifierLock) {
       interpretIgnoreResult("java Suspender");
@@ -267,7 +269,7 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
     }
     // Ensure thread suspended
     debugListener.assertCurrThreadSuspendedCount(2);  //fires
-    
+
     // Shut down
     _shutdownWithoutSuspendedInteraction();
     _debugger.removeListener(debugListener);
@@ -280,25 +282,25 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
     if (printMessages) System.out.println("----testMultiThreadedBreakpointsAndStep----");
     BreakpointTestListener debugListener = new BreakpointTestListener();
     _debugger.addListener(debugListener);
-    
+
     // Start up
     OpenDefinitionsDocument doc = _startupDebugger("Monkey.java",
                                                    MONKEY_CLASS);
-    
+
     // Set breakpoints
     int index = MONKEY_CLASS.indexOf("System.out.println(\"I\'m a thread! Yeah!\");");
     _debugger.toggleBreakpoint(doc,index,11);
     index = MONKEY_CLASS.indexOf("System.out.println(\"I just woke up.  I\'m a big boy now.\");");
     _debugger.toggleBreakpoint(doc,index,16);
     debugListener.assertBreakpointSetCount(2);
-    
+
     // Run the main method, hitting breakpoints
     synchronized(_notifierLock) {
       interpretIgnoreResult("java Monkey");
       _waitForNotifies(6);  // (suspended, updated, breakpointReached) x 2
       _notifierLock.wait();
     }
-    
+
     DebugThreadData thread = new DebugThreadData(_debugger.getCurrentThread());
     // Resumes one thread, finishing it and switching to the next break point
     synchronized(_notifierLock) {
@@ -308,18 +310,18 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
                             // switch to the next thread
       _notifierLock.wait();
     }
-    
+
     DebugThreadData thread2 = new DebugThreadData(_debugger.getCurrentThread());
     assertTrue("testMultiThreadedBreakPoint thread references should not be equal",
                !thread.getName().equals(thread2.getName()));
-    
+
     // Ensure breakpoint is hit
     debugListener.assertBreakpointReachedCount(2);  //fires
     debugListener.assertThreadLocationUpdatedCount(3);  //fires
     debugListener.assertCurrThreadSuspendedCount(3);  //fires
     debugListener.assertCurrThreadResumedCount(1);
     _debugger.removeListener(debugListener);
-    
+
     if (printMessages) {
       System.out.println("Testing stepping...");
     }
@@ -333,11 +335,11 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
     }
     stepTestListener.assertStepRequestedCount(1);
     _debugger.removeListener(stepTestListener);
-    
+
     DebugThreadData thread3 = new DebugThreadData(_debugger.getCurrentThread());
     assertEquals("testMultiThreadedBreakPoint thread references should be equal",
                  thread2.getName(), thread3.getName());
-    
+
     // Resume until finished, waiting for interpret call to end
     _debugger.addListener(debugListener);
     InterpretListener interpretListener = new InterpretListener();
@@ -350,14 +352,14 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
     }
     interpretListener.assertInteractionEndCount(1);
     _model.removeListener(interpretListener);
-    
+
     // Shut down
     _shutdownWithoutSuspendedInteraction();
     _debugger.removeListener(debugListener);
   }
-  
-  
-  
+
+
+
   /**
    * Tests that breakpoints behave correctly.
    */
@@ -365,24 +367,24 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
     if (printMessages) System.out.println("----testBreakpoints----");
     BreakpointTestListener debugListener = new BreakpointTestListener();
     _debugger.addListener(debugListener);
-    
+
     // Start up
     OpenDefinitionsDocument doc = _startupDebugger("DrJavaDebugClass.java",
                                                    DEBUG_CLASS);
-    
+
    // Add breakpoint before class is loaded
     _debugger.toggleBreakpoint(doc,DEBUG_CLASS.indexOf("bar();"),4);
     debugListener.assertBreakpointSetCount(1);
-    
+
     // Run the foo() method, hitting breakpoint
     synchronized(_notifierLock) {
       interpretIgnoreResult("new DrJavaDebugClass().foo()");
       _waitForNotifies(3);  // suspended, updated, breakpointReached
       _notifierLock.wait();
     }
-    
+
     if (printMessages) System.out.println("----After breakpoint:\n" + getInteractionsText());
-      
+
     // Ensure breakpoint is hit
     debugListener.assertBreakpointReachedCount(1);  //fires
     debugListener.assertThreadLocationUpdatedCount(1);  //fires
@@ -391,15 +393,15 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
     debugListener.assertCurrThreadDiedCount(0);
     assertInteractionsContains("Foo Line 1");
     assertInteractionsDoesNotContain("Bar Line 1");
-    
+
     if (printMessages) System.out.println("adding another breakpoint");
-    
+
     // Set another breakpoint (after is class loaded)
     _debugger.toggleBreakpoint(doc,
        DEBUG_CLASS.indexOf("System.out.println(\"Bar Line 2\")"), 9);
     debugListener.assertBreakpointSetCount(2);
-    
-    
+
+
     // Resume until next breakpoint
     synchronized(_notifierLock) {
       if (printMessages) System.out.println("resuming");
@@ -415,7 +417,7 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
     debugListener.assertCurrThreadDiedCount(0);
     assertInteractionsContains("Bar Line 1");
     assertInteractionsDoesNotContain("Bar Line 2");
-    
+
     // Resume until finished, waiting for interpret call to end
     InterpretListener interpretListener = new InterpretListener();
     _model.addListener(interpretListener);
@@ -428,14 +430,14 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
     }
     interpretListener.assertInteractionEndCount(1);
     _model.removeListener(interpretListener);
-    
+
     if (printMessages) System.out.println("----After second resume:\n" + getInteractionsText());
     debugListener.assertCurrThreadResumedCount(2);  //fires (no waiting)
     debugListener.assertBreakpointReachedCount(2);
     debugListener.assertThreadLocationUpdatedCount(2);
     debugListener.assertCurrThreadSuspendedCount(2);
     assertInteractionsContains("Foo Line 3");
-    
+
     // Shut down
     _shutdownWithoutSuspendedInteraction();
     _model.removeListener(interpretListener);
@@ -453,24 +455,24 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
     if (printMessages) System.out.println("----testBreakpointsWithSameNamePrefix----");
     BreakpointTestListener debugListener = new BreakpointTestListener();
     _debugger.addListener(debugListener);
-    
+
     // Start up
     OpenDefinitionsDocument doc = _startupDebugger("DrJavaDebugClass.java",
                                                    DEBUG_CLASS);
-    
+
    // Add breakpoint in DrJavaDebugClass before class is loaded
     _debugger.toggleBreakpoint(doc,DEBUG_CLASS.indexOf("Bar Line 1"),8);
     debugListener.assertBreakpointSetCount(1);
-    
+
     // Run the baz() method, hitting breakpoint
     synchronized(_notifierLock) {
       interpretIgnoreResult("new DrJavaDebugClass2().baz()");
       _waitForNotifies(3);  // suspended, updated, breakpointReached
       _notifierLock.wait();
     }
-    
+
     if (printMessages) System.out.println("----After breakpoint:\n" + getInteractionsText());
-      
+
     // Ensure breakpoint is hit
     debugListener.assertBreakpointReachedCount(1);  //fires
     debugListener.assertThreadLocationUpdatedCount(1);  //fires
@@ -479,7 +481,7 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
     debugListener.assertCurrThreadDiedCount(0);
     assertInteractionsContains("Baz Line 1");
     assertInteractionsDoesNotContain("Bar Line 1");
-    
+
     // Resume until finished, waiting for interpret call to end
     InterpretListener interpretListener = new InterpretListener();
     _model.addListener(interpretListener);
@@ -492,20 +494,20 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
     }
     interpretListener.assertInteractionEndCount(1);
     _model.removeListener(interpretListener);
-    
+
     if (printMessages) System.out.println("----After second resume:\n" + getInteractionsText());
     debugListener.assertCurrThreadResumedCount(1);  //fires (no waiting)
     debugListener.assertBreakpointReachedCount(1);
     debugListener.assertThreadLocationUpdatedCount(1);
     debugListener.assertCurrThreadSuspendedCount(1);
     assertInteractionsContains("Bar Line 2");
-    
+
     // Shut down
     _shutdownWithoutSuspendedInteraction();
     _model.removeListener(interpretListener);
     _debugger.removeListener(debugListener);
   }
-  
+
   /**
    * Tests that breakpoints and steps behave correctly.
    */
@@ -517,22 +519,22 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
     // Start up
     OpenDefinitionsDocument doc = _startupDebugger("DrJavaDebugClass.java",
                                                    DEBUG_CLASS);
-    
+
     // Add a breakpoint
     _debugger.toggleBreakpoint(doc,DEBUG_CLASS.indexOf("bar();"),4);
     debugListener.assertBreakpointSetCount(1);
-    
+
     // Run the foo() method, hitting breakpoint
     synchronized(_notifierLock) {
       interpretIgnoreResult("new DrJavaDebugClass().foo()");
       _waitForNotifies(3);  // suspended, updated, breakpointReached
       _notifierLock.wait();
     }
-    
+
     if (printMessages) {
       System.out.println("----After breakpoint:\n" + getInteractionsText());
     }
-      
+
     // Ensure breakpoint is hit
     debugListener.assertBreakpointReachedCount(1);  //fires
     debugListener.assertThreadLocationUpdatedCount(1);  //fires
@@ -555,14 +557,14 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
     debugListener.assertBreakpointReachedCount(1);
     debugListener.assertCurrThreadDiedCount(0);
     assertInteractionsDoesNotContain("Bar Line 1");
-    
+
     // Step to next line
     synchronized(_notifierLock) {
       _asyncStep(Debugger.STEP_OVER);
       _waitForNotifies(2);  // suspended, updated
       _notifierLock.wait();
     }
-    
+
     if (printMessages) System.out.println("****"+getInteractionsText());
     debugListener.assertStepRequestedCount(2);  // fires (don't wait)
     debugListener.assertCurrThreadResumedCount(2); // fires (don't wait)
@@ -572,7 +574,7 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
     debugListener.assertBreakpointReachedCount(1);
     assertInteractionsContains("Bar Line 1");
     assertInteractionsDoesNotContain("Bar Line 2");
-    
+
     // Step to next line
     synchronized(_notifierLock) {
       _asyncStep(Debugger.STEP_OVER);
@@ -587,7 +589,7 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
     debugListener.assertBreakpointReachedCount(1);
     assertInteractionsContains("Bar Line 2");
     assertInteractionsDoesNotContain("Foo Line 3");
-    
+
     // Step twice to print last line in Foo
     synchronized(_notifierLock) {
       _asyncStep(Debugger.STEP_OVER);
@@ -606,8 +608,8 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
     debugListener.assertCurrThreadSuspendedCount(6);  //fires
     debugListener.assertBreakpointReachedCount(1);
     assertInteractionsContains("Foo Line 3");
-    
-    
+
+
     // Step again to finish, waiting for interpret call to end
     InterpretListener interpretListener = new InterpretListener();
     _model.addListener(interpretListener);
@@ -619,7 +621,7 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
     }
     interpretListener.assertInteractionEndCount(1);
     _model.removeListener(interpretListener);
-    
+
     debugListener.assertStepRequestedCount(6);  // fires (don't wait)
     debugListener.assertCurrThreadDiedCount(1);
 
@@ -627,34 +629,34 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
     _shutdownWithoutSuspendedInteraction();
     _debugger.removeListener(debugListener);
   }
-  
+
   /**
    * Tests that stepping out of a method behaves correctly.
    */
   public synchronized void testStepOut() throws Exception {
-    if (printMessages) { 
+    if (printMessages) {
       System.out.println("----testStepOut----");
     }
     StepTestListener debugListener = new StepTestListener();
     _debugger.addListener(debugListener);
-    
+
     // Start up
     OpenDefinitionsDocument doc = _startupDebugger("DrJavaDebugClass.java",
                                                    DEBUG_CLASS);
-    
+
     // Set breakpoint
     _debugger.toggleBreakpoint(doc,DEBUG_CLASS.indexOf("bar();"),4);
     debugListener.assertBreakpointSetCount(1);
-    
+
     // Run the foo() method, hitting breakpoint
     synchronized(_notifierLock) {
       interpretIgnoreResult("new DrJavaDebugClass().foo()");
       _waitForNotifies(3);  // suspended, updated, breakpointReached
       _notifierLock.wait();
     }
-    
+
     if (printMessages) System.out.println("----After breakpoint:\n" + getInteractionsText());
-      
+
     // Ensure breakpoint is hit
     debugListener.assertBreakpointReachedCount(1);  // fires
     debugListener.assertThreadLocationUpdatedCount(1);  // fires
@@ -677,14 +679,14 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
     debugListener.assertBreakpointReachedCount(1);
     debugListener.assertCurrThreadDiedCount(0);
     assertInteractionsDoesNotContain("Bar Line 1");
-    
+
     // Step out of method
     synchronized(_notifierLock) {
       _asyncStep(Debugger.STEP_OUT);
       _waitForNotifies(2);  // suspended, updated
       _notifierLock.wait();
     }
-    
+
     if (printMessages) System.out.println("****"+getInteractionsText());
     debugListener.assertStepRequestedCount(2);  // fires (don't wait)
     debugListener.assertCurrThreadResumedCount(2); // fires (don't wait)
@@ -694,12 +696,12 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
     debugListener.assertBreakpointReachedCount(1);
     assertInteractionsContains("Bar Line 2");
     assertInteractionsDoesNotContain("Foo Line 3");
-    
+
     // Shut down
     _shutdownAndWaitForInteractionEnded();
     _debugger.removeListener(debugListener);
   }
-  
+
   /**
    * Tests that stepping works in a public class with a package
    */
@@ -707,28 +709,28 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
     if (printMessages) System.out.println("----testStepOverWithPackage----");
     StepTestListener debugListener = new StepTestListener();
     _debugger.addListener(debugListener);
-    
+
     // Create the file in an "a" sub-directory
     File aDir = new File(_tempDir, "a");
     aDir.mkdir();
     File file = new File(aDir, "DrJavaDebugClassWithPackage.java");
-    
+
     // Start up
     OpenDefinitionsDocument doc = _startupDebugger(file, DEBUG_CLASS_WITH_PACKAGE);
-    
+
     // Add a breakpoint
     _debugger.toggleBreakpoint(doc,DEBUG_CLASS_WITH_PACKAGE.indexOf("foo line 1"), 4);
     debugListener.assertBreakpointSetCount(1);
-    
+
     // Run the foo() method, hitting breakpoint
     synchronized(_notifierLock) {
       interpretIgnoreResult("new a.DrJavaDebugClassWithPackage().foo()");
       _waitForNotifies(3);  // suspended, updated, breakpointReached
       _notifierLock.wait();
     }
-    
+
     if (printMessages) System.out.println("----After breakpoint:\n" + getInteractionsText());
-      
+
     // Ensure breakpoint is hit
     debugListener.assertBreakpointReachedCount(1);  //fires
     debugListener.assertThreadLocationUpdatedCount(1);  //fires
@@ -751,14 +753,14 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
     debugListener.assertCurrThreadDiedCount(0);
     assertInteractionsContains("foo line 1");
     assertInteractionsDoesNotContain("foo line 2");
-    
+
     // Step over again
     synchronized(_notifierLock) {
       _asyncStep(Debugger.STEP_OVER);
       _waitForNotifies(2);  // suspended, updated
       _notifierLock.wait();
     }
-    
+
     if (printMessages) System.out.println("****"+getInteractionsText());
     debugListener.assertStepRequestedCount(2);  // fires (don't wait)
     debugListener.assertCurrThreadResumedCount(2); // fires (don't wait)
@@ -767,7 +769,7 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
     debugListener.assertCurrThreadSuspendedCount(3);  // fires
     debugListener.assertBreakpointReachedCount(1);
     assertInteractionsContains("foo line 2");
-    
+
     // Resume until finished, waiting for interpret call to finish
     InterpretListener interpretListener = new InterpretListener();
     _model.addListener(interpretListener);
@@ -786,13 +788,12 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
     debugListener.assertThreadLocationUpdatedCount(3);
     debugListener.assertCurrThreadSuspendedCount(3);
 
-   
+
     // Shut down
     _shutdownWithoutSuspendedInteraction();
     _debugger.removeListener(debugListener);
   }
-  
-  
+
   /**
    * Tests the utility function to get a relative directory for a package.
    */
@@ -800,7 +801,7 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
     String class1 = "edu.rice.cs.drjava.model.MyTest";
     String class2 = "MyTest";
     String sep = System.getProperty("file.separator");
-    
+
     assertEquals("package dir with package",
                  "edu" + sep + "rice" + sep + "cs" + sep +
                  "drjava" + sep + "model" + sep,

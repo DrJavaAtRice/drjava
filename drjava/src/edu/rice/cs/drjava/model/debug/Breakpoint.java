@@ -60,22 +60,22 @@ import com.sun.jdi.request.*;
  * BreakpointRequest
  */
 public class Breakpoint extends DocumentDebugAction<BreakpointRequest> {
-  
+
    private Position _startPos;
    private Position _endPos;
-   
+
   /**
    * @throws DebugException if the document does not have a file
    */
   public Breakpoint(OpenDefinitionsDocument doc, int offset, int lineNumber, JPDADebugger manager)
     throws DebugException {
-    
+
     super(manager, doc, offset);
     _suspendPolicy = EventRequest.SUSPEND_EVENT_THREAD;
     _lineNumber = lineNumber;
-    
+
     DefinitionsDocument defDoc = doc.getDocument();
-    
+
     try {
       _startPos = defDoc.createPosition(defDoc.getLineStartPos(offset));
       _endPos = defDoc.createPosition( defDoc.getLineEndPos(offset));
@@ -83,10 +83,10 @@ public class Breakpoint extends DocumentDebugAction<BreakpointRequest> {
     catch (BadLocationException ble) {
       throw new UnexpectedException(ble);
     }
-    
+
     _initializeRequests(_manager.getReferenceTypes(_className, _lineNumber));
   }
-  
+
   /**
    * Creates appropriate EventRequests from the EventRequestManager and
    * stores them in the _requests field.
@@ -99,13 +99,13 @@ public class Breakpoint extends DocumentDebugAction<BreakpointRequest> {
   {
     try {
       for (int i=0; i < refTypes.size(); i++) {
-        ReferenceType rt = refTypes.elementAt(i);
-        
+        ReferenceType rt = refTypes.get(i);
+
         if (!rt.isPrepared()) {
           // Not prepared, so skip this one
           continue;
         }
-        
+
         // Get locations for the line number, use the first
         List lines = rt.locationsOfLine(_lineNumber);
         if (lines.size() == 0) {
@@ -115,14 +115,14 @@ public class Breakpoint extends DocumentDebugAction<BreakpointRequest> {
         Location loc = (Location) lines.get(0);
         BreakpointRequest request =
           _manager.getEventRequestManager().createBreakpointRequest(loc);
-        _requests.addElement(request);
+        _requests.add(request);
       }
     }
     catch (AbsentInformationException aie) {
       throw new DebugException("Could not find line number: " + aie);
     }
   }
-  
+
   /**
    * Accessor for the offset of this breakpoint's start position
    * @return the start offset
@@ -130,7 +130,7 @@ public class Breakpoint extends DocumentDebugAction<BreakpointRequest> {
   public int getStartOffset() {
     return _startPos.getOffset();
   }
-  
+
   /**
    * Accessor for the offset of this breakpoint's end position
    * @return the end offset
@@ -138,15 +138,15 @@ public class Breakpoint extends DocumentDebugAction<BreakpointRequest> {
   public int getEndOffset(){
     return _endPos.getOffset();
   }
-  
+
   public String toString() {
     if (_requests.size() > 0) {
       // All BreakpointRequests are identical-- one copy for each loaded
       //  class.  So just print info from the first one, and how many there are.
       return "Breakpoint[class: " + getClassName() +
         ", lineNumber: " + getLineNumber() +
-        ", method: " + _requests.elementAt(0).location().method() +
-        ", codeIndex: " + _requests.elementAt(0).location().codeIndex() +
+        ", method: " + _requests.get(0).location().method() +
+        ", codeIndex: " + _requests.get(0).location().codeIndex() +
         ", numRefTypes: " + _requests.size() + "]";
     }
     else {

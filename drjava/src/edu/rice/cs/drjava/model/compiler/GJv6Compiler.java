@@ -56,9 +56,9 @@ import edu.rice.cs.util.UnexpectedException;
  * @version $Id$
  */
 public class GJv6Compiler implements CompilerInterface{
-  
+
   private String _extraClassPath = "";
-  
+
   /** Singleton instance. */
   public static final CompilerInterface ONLY = new GJv6Compiler();
 
@@ -108,7 +108,7 @@ public class GJv6Compiler implements CompilerInterface{
     newclasspath.append(_extraClassPath);
 
     options.put("-classpath", newclasspath.toString());
-    
+
     _compiler = JavaCompiler.make(_compilerLog, options);
   }
 
@@ -124,7 +124,7 @@ public class GJv6Compiler implements CompilerInterface{
     File[] sourceRoots = new File[] { sourceRoot };
     return compile(sourceRoots, files);
   }
-  
+
   /**
    * Compile the given files.
    * @param files Source files to compile.
@@ -167,7 +167,7 @@ public class GJv6Compiler implements CompilerInterface{
     return getName();
   }
 
-  
+
   /**
    * Allows us to set the extra classpath for the compilers without referencing the
    * config object in a loaded class file
@@ -175,14 +175,14 @@ public class GJv6Compiler implements CompilerInterface{
   public void setExtraClassPath( String extraClassPath) {
       _extraClassPath = extraClassPath;
   }
-  
+
   /**
    * Sets whether to allow assertions in Java 1.4.
    */
   public void setAllowAssertions(boolean allow) {
     // Nothing to do: GJ is Java 1.3, and has no assertions
   }
-  
+
   /**
    * This method allows us to set the JSR14 collections path across a class loader.
    * (cannot cast a loaded class to a subclass, so all compiler interfaces must have this method)
@@ -190,7 +190,7 @@ public class GJv6Compiler implements CompilerInterface{
   public void addToBootClassPath( File cp) {
     throw new UnexpectedException( new Exception("Method only implemented in JSR14Compiler"));
   }
-  
+
   /**
    * Utility method for getting a properly formatted
    * string with several source paths from an array of files.
@@ -205,7 +205,7 @@ public class GJv6Compiler implements CompilerInterface{
     }
     return roots.toString();
   }
-  
+
   /**
    * put your documentation comment here
    */
@@ -260,7 +260,7 @@ public class GJv6Compiler implements CompilerInterface{
      * @return
      */
     public CompilerError[] getErrors() {
-      return  (CompilerError[])_errors.toArray(new CompilerError[0]);
+      return _errors.toArray(new CompilerError[0]);
     }
   }
 }

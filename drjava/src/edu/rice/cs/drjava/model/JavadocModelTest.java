@@ -54,7 +54,7 @@ import junit.framework.TestCase;
  * @version $Id$
  */
 public class JavadocModelTest extends TestCase {
-  
+
   /**
    * Tests that a simple suggestion can be made for the destination directory.
    */
@@ -66,73 +66,73 @@ public class JavadocModelTest extends TestCase {
         return file;
       }
     };
-    
+
     File suggestion = jModel.suggestJavadocDestination(doc);
     File expected = new File(file, JavadocModel.SUGGESTED_DIR_NAME);
     assertEquals("simple suggested destination", expected, suggestion);
   }
-  
+
   /**
    * Tests that a no suggestion can be made for the destination directory
    * if there is no valid source root.
    */
   public void testNoSuggestedDirectory() {
     JavadocModel jModel = new DefaultJavadocModel(new DummyGetDocuments());
-    final File file = new File(System.getProperty("user.dir"));
+//    final File file = new File(System.getProperty("user.dir"));
     OpenDefinitionsDocument doc = new DummyOpenDefDoc() {
       public File getSourceRoot() throws InvalidPackageException {
         throw new InvalidPackageException(-1, "invalid package");
       }
     };
-    
+
     File suggestion = jModel.suggestJavadocDestination(doc);
     assertNull("suggestion should be null", suggestion);
   }
-  
+
   public void testFileDefaultPackage() {
-    
+
   }
-  
+
   public void testFileOnePackage() {
-    
+
   }
-  
-  public void testFilesOnePackage() { 
-    
+
+  public void testFilesOnePackage() {
+
   }
-  
+
   public void testFilesMultiplePackages() {
-    
+
   }
-  
+
   public void testWarnings() {
-    
+
   }
-  
+
   public void testErrors() {
-    
+
   }
-  
+
   public void testSaveFirst() {
-    
+
   }
-  
+
   public void testPromptForDestination() {
-    
+
   }
-  
+
   public void testExtractErrors() {
-    
+
   }
-  
+
   public void testParseLine() {
-    
+
   }
-  
+
   /**
    * Be sure to test: -tag require:a:"Require:"
    */
   public void testCustomArguments() {
-    
+
   }
 }

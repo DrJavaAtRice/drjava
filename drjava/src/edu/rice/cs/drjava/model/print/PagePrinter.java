@@ -100,12 +100,12 @@ public class PagePrinter implements Printable {
 
     // loop over the TextLayouts, printing out each one and the line number
     for (int i=0; i<_textLayouts.size(); i++) {
-      TextLayout layout = (TextLayout) _textLayouts.get(i);
-      TextLayout lineNumber = (TextLayout) _lineNumbers.get(i);
+      TextLayout layout = _textLayouts.get(i);
+      TextLayout lineNumber = _lineNumbers.get(i);
 
       y += layout.getAscent();
       lineNumber.draw(g2d, 0, y);
-      layout.draw(g2d, _parent.LINE_NUMBER_WIDTH, y);
+      layout.draw(g2d, _parent.LINE_NUM_WIDTH, y);
       y += layout.getLeading();
     }
 

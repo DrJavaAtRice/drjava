@@ -99,10 +99,10 @@ import edu.rice.cs.drjava.platform.PlatformFactory;
  */
 public class DefaultGlobalModel implements GlobalModel, OptionConstants,
   JUnitModelCallback {
-  
+
   static final String DOCUMENT_OUT_OF_SYNC_MSG =
     "Current document is out of sync with the Interactions Pane and should be recompiled!\n";
-  
+
   // ----- FIELDS -----
 
   /**
@@ -110,19 +110,19 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
    * to notify them of some event.
    */
   protected final EventNotifier _notifier = new EventNotifier();
-  
+
   // ---- Definitions fields ----
-  
+
   /**
    * Factory for new definitions documents and views.
    */
   private final DefinitionsEditorKit _editorKit = new DefinitionsEditorKit(_notifier);
-  
+
   /**
    * ListModel for storing all OpenDefinitionsDocuments.
    */
   private final DefaultListModel _definitionsDocs = new DefaultListModel();
-  
+
   /**
    * The instance of the indent decision tree used by Definitions documents.
    */
@@ -144,32 +144,32 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       }
     });
   }
-  
-  
+
+
   // ---- Interpreter fields ----
-  
+
   /**
    * RMI interface to the Interactions JVM.
    * Final, but set differently in the two constructors.
    * Package private so we can access it from test cases.
    */
   final MainJVM _interpreterControl;
-  
+
   /**
    * Interface between the InteractionsDocument and the JavaInterpreter,
    * which runs in a separate JVM.
    */
   protected DefaultInteractionsModel _interactionsModel;
-  
-  
+
+
   // ---- Compiler Fields ----
-  
+
   /**
    * Lock to prevent multiple threads from accessing the compiler at the
    * same time.
    */
   private Object _compilerLock = new Object();
-  
+
   private CompilerErrorModel _compilerErrorModel = new CompilerErrorModel<CompilerError>(new CompilerError[0], this);
 
   /**
@@ -177,52 +177,52 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
    * with and without files.
    */
   private int _numErrors = 0;
-  
+
   /**
    * Whether or not to reset the interactions JVM after compiling.
    * Should only be false in test cases.
    */
   //private boolean _resetAfterCompile = true;
-  
-  
+
+
   // ---- JUnit Fields ----
 
   private JUnitErrorModel _junitErrorModel = new JUnitErrorModel(new JUnitError[0], this, false);
-  
+
   /**
    * If a JUnit test is currently running, this is the OpenDefinitionsDocument
    * being tested.  Otherwise this is null.
    */
 //  private OpenDefinitionsDocument _docBeingTested = null;
   private boolean _isTestInProgress = false;
-  
-  
+
+
   // ---- Javadoc Fields ----
-  
+
   private JavadocModel _javadocModel = new DefaultJavadocModel(this);
-  
+
   // ---- Debugger Fields ----
-  
+
   /**
    * Interface to the integrated debugger.  If the JPDA classes are not
    * available, this is set NoDebuggerAvailable.ONLY.
    */
   private Debugger _debugger = NoDebuggerAvailable.ONLY;
-  
+
   /**
    * Port used by the debugger to connect to the Interactions JVM.
    * Uniquely created in getDebugPort().
    */
 //  private int _debugPort = -1;
 
-  
+
   // ---- Input/Output Document Fields ----
-  
+
   /**
    * The document adapter used in the Interactions model.
    */
   private final SwingDocumentAdapter _interactionsDocAdapter;
-  
+
   /**
    * The document used to display System.out and System.err,
    * and to read from System.in.
@@ -238,13 +238,13 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
    * The document used to display JUnit test results.
    */
   private final StyledDocument _junitDoc = new DefaultStyledDocument();
-  
+
   /**
    * A lock object to prevent print calls to System.out or System.err
    * from flooding the JVM, ensuring the UI remains responsive.
    */
   private final Object _systemWriterLock = new Object();
-  
+
   /**
    * Number of milliseconds to wait after each println, to prevent
    * the JVM from being flooded with print calls.
@@ -261,16 +261,16 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
    */
   private InputListener _inputListener;
 
-  
+
   // ----- CONSTRUCTORS -----
-  
+
   /**
    * Constructs a new GlobalModel.
    * Creates a new MainJVM and starts its Interpreter JVM.
    */
   public DefaultGlobalModel() {
     //this(new MainJVM());
-    
+
     _interpreterControl = new MainJVM();
     _interactionsDocAdapter = new SwingDocumentAdapter();
     _interactionsModel =
@@ -285,15 +285,15 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     _inputListener = NoInputListener.ONLY;
 
     _createDebugger();
-    
+
     _registerOptionListeners();
-    
-    
+
+
     // Perhaps do this in another thread to allow startup to continue...
     _interpreterControl.startInterpreterJVM();
     resetInteractionsClasspath();
   }
-  
+
   /**
    * Constructor.  Initializes all the documents, but take the interpreter
    * from the given previous model. This is used only for test cases,
@@ -305,7 +305,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
    *
   public DefaultGlobalModel(DefaultGlobalModel other) {
     this(other._interpreterControl);
-    
+
     _interpreterControl.reset();
     try {
       _interactionsModel.setDebugPort(other.getDebugPort());
@@ -317,7 +317,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       throw new UnexpectedException(ioe);
     }
   }*/
-  
+
   /**
    * Constructs a new GlobalModel with the given MainJVM to act as an
    * RMI interface to the Interpreter JVM.  Does not attempt to start
@@ -338,14 +338,14 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     _inputListener = NoInputListener.ONLY;
 
     _createDebugger();
-    
+
     _registerOptionListeners();
   }*/
 
 
-  
+
   // ----- METHODS -----
-  
+
   /**
    * Add a listener to this global model.
    * @param listener a listener that reacts on events generated by the GlobalModel
@@ -363,7 +363,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
   }
 
   // getter methods for the private fields
-  
+
   public EventNotifier getNotifier() {
     return _notifier;
   }
@@ -371,7 +371,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
   public DefinitionsEditorKit getEditorKit() {
     return _editorKit;
   }
-  
+
   /**
    * @return the interactions model.
    */
@@ -397,7 +397,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
   public CompilerErrorModel getJavadocErrorModel() {
     return _javadocModel.getJavadocErrorModel();
   }
-  
+
   public ConsoleDocument getConsoleDocument() {
     return _consoleDoc;
   }
@@ -524,7 +524,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     // This code is duplicated in MainFrame._setCurrentDirectory(File) for safety.
     final File file = (com.getFiles())[0].getCanonicalFile();
     OpenDefinitionsDocument odd = _openFile(file);
-    
+
     // Make sure this is on the classpath
     try {
       File classpath = odd.getSourceRoot();
@@ -533,7 +533,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     catch (InvalidPackageException e) {
       // Invalid package-- don't add it to classpath
     }
-    
+
     return odd;
   }
 
@@ -548,18 +548,18 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
   {
     final File[] files = com.getFiles();
     OpenDefinitionsDocument retDoc = null;
-    
+
     if (files == null) {
       throw new IOException("No Files returned from FileSelector");
     }
 
     AlreadyOpenException storedAOE = null;
-    
+
     for (int i=0; i < files.length; i++) {
       if (files[i] == null) {
         throw new IOException("File name returned from FileSelector is null");
       }
-        
+
       try {
         //always return last opened Doc
         retDoc = _openFile(files[i].getAbsoluteFile());
@@ -586,9 +586,9 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       throw new IOException("No Files returned from FileChooser");
     }
   }
-  
+
   //----------------------- End ILoadDocuments Methods -----------------------//
- 
+
   /**
    * Saves all open files, prompting for names if necessary.
    * When prompting (ie, untitled document), set that document as active.
@@ -680,10 +680,10 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
         //  then we have no security manager.  Just exit cleanly.
         System.exit(0);
       }
-        
+
     }
   }
-  
+
   /**
    * Prepares this model to be thrown away.  Never called in
    * practice outside of quit(); only used in tests.
@@ -697,7 +697,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
   }
 
   //----------------------- Specified by IGetDocuments -----------------------//
-  
+
   public OpenDefinitionsDocument getDocumentForFile(File file)
     throws IOException
   {
@@ -706,7 +706,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     if (doc == null) {
       // If not, open and return it
       final File f = file;
-      
+
       // TODO: Is this class construction overhead really necessary?
       FileOpenSelector selector = new FileOpenSelector() {
         public File getFile() throws OperationCanceledException {
@@ -730,7 +730,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     }
     return doc;
   }
-  
+
   /**
    * Iterates over OpenDefinitionsDocuments, looking for this file.
    * TODO: This is not very efficient!
@@ -738,7 +738,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
   public boolean isAlreadyOpen(File file) {
     return (_getOpenDocument(file) != null);
   }
-  
+
   /**
    * Simply returns a reference to our internal ListModel.
    * TODO: Protect this object from untrusted code!
@@ -747,7 +747,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
   public ListModel getDefinitionsDocs() {
     return _definitionsDocs;
   }
-  
+
   /**
    * Returns a collection of all documents currently open for editing.
    * This is equivalent to the results of getDocumentForFile for the set
@@ -758,14 +758,14 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     ArrayList<OpenDefinitionsDocument> docs =
       new ArrayList<OpenDefinitionsDocument>(_definitionsDocs.size());
     java.util.Enumeration en = _definitionsDocs.elements();
-  
+
     while (en.hasMoreElements()) {
       docs.add((OpenDefinitionsDocument) en.nextElement());
     }
-  
+
     return docs;
   }
-  
+
   //----------------------- End IGetDocuments Methods -----------------------//
 
   /**
@@ -781,7 +781,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
   }
 
   /**
-   * Clears and resets the interactions pane. Also clears the console 
+   * Clears and resets the interactions pane. Also clears the console
    * if the option is indicated (on by default).
    * Bug #576179 pointed out that this needs to end any threads that were
    * running in the interactions JVM, so we completely restart the JVM now.
@@ -799,13 +799,13 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     if ((_debugger.isAvailable()) && (_debugger.isReady())) {
       _debugger.shutdown();
     }
-    
+
     _interactionsModel.resetInterpreter();
     if (DrJava.getConfig().getSetting(OptionConstants.RESET_CLEAR_CONSOLE).booleanValue()) {
       resetConsole();
     }
     //_restoreInteractionsState();
-    
+
     /* Old approach.  (Didn't kill leftover interactions threads)
     _interpreterControl.reset();
     _restoreInteractionsState();
@@ -843,14 +843,14 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
   public void loadHistory(FileOpenSelector selector) throws IOException {
     _interactionsModel.loadHistory(selector);
   }
-  
+
   /**
    * Clears the interactions history
    */
   public void clearHistory() {
     _interactionsModel.getDocument().clearHistory();
   }
-  
+
   /**
    * Saves the unedited version of the current history to a file
    * @param selector File to save to
@@ -872,21 +872,21 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
   {
     _interactionsModel.getDocument().saveHistory(selector, editedVersion);
   }
- 
+
   /**
    * Returns the entire history as a String with semicolons as needed
    */
   public String getHistoryAsStringWithSemicolons() {
     return _interactionsModel.getDocument().getHistoryAsStringWithSemicolons();
   }
-  
+
   /**
    * Returns the entire history as a String
    */
   public String getHistoryAsString() {
     return _interactionsModel.getDocument().getHistoryAsString();
   }
-  
+
   /**
    * Registers OptionListeners.  Factored out code from the two constructors
    */
@@ -899,7 +899,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     Boolean makeBackups = DrJava.getConfig().getSetting(BACKUP_FILES);
     FileOps.DefaultFileSaver.setBackupsEnabled(makeBackups.booleanValue());
   }
-  
+
   /**
    * Appends a string to the given document using a particular attribute set.
    * Also waits for a small amount of time (WRITE_DELAY) to prevent any one
@@ -913,7 +913,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     synchronized(_systemWriterLock) {
       try {
         doc.insertBeforeLastPrompt(s, style);
-        
+
         // Wait to prevent being flooded with println's
         _systemWriterLock.wait(WRITE_DELAY);
       }
@@ -922,8 +922,8 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       }
     }
   }
-  
- 
+
+
   /**
    * Prints System.out to the DrJava console.
    */
@@ -956,7 +956,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       insertBeforeLastPrompt(s + "\n", InteractionsDocument.DEBUGGER_STYLE);
   }
 
-  
+
   /**
    * Blocks until the interpreter has registered.
    */
@@ -1011,7 +1011,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
   public Vector<String> getClasspath() {
     return _interpreterControl.getClasspath();
   }
-  
+
   /**
    * Gets an array of all sourceRoots for the open definitions
    * documents, without duplicates. Note that if any of the open
@@ -1044,7 +1044,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     }
     /*
     File workDir = DrJava.getConfig().getSetting(WORKING_DIRECTORY);
-        
+
     if (workDir == FileOption.NULL_FILE) {
       workDir = new File( System.getProperty("user.dir"));
     }
@@ -1053,9 +1053,9 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     }
     roots.add(workDir);*/
 
-    return (File[]) roots.toArray(new File[0]);
+    return roots.toArray(new File[0]);
   }
-  
+
   /**
    * Sets whether or not the Interactions JVM will be reset after
    * a compilation succeeds.  This should ONLY be used in tests!
@@ -1064,7 +1064,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
   void setResetAfterCompile(boolean shouldReset) {
     _resetAfterCompile = shouldReset;
   }*/
-  
+
   /**
    * Compiles all open documents, after ensuring that all are saved.
    *
@@ -1081,7 +1081,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       if (hasModifiedDocuments()) {
         _notifier.saveBeforeCompile();
       }
-      
+
       if (hasModifiedDocuments()) {
         // if any files haven't been saved after we told our
         // listeners to do so, don't proceed with the rest
@@ -1101,14 +1101,14 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
             // No file for this document; skip it
           }
         }
-        File[] files = (File[]) filesToCompile.toArray(new File[0]);
-        
+        File[] files = filesToCompile.toArray(new File[0]);
+
         _notifier.notifyListeners(new EventNotifier.Notifier() {
           public void notifyListener(GlobalModelListener l) {
             l.compileStarted();
           }
         });
-        
+
         try {
           // Compile the files
           _compileFiles(sourceRoots, files);
@@ -1125,7 +1125,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
               l.compileEnded();
             }
           });
-          
+
           // Only clear interactions if there were no errors
           if (_numErrors == 0) {
             if (/*_resetAfterCompile && */
@@ -1146,12 +1146,12 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
    * @param files An array of all files to be compiled
    */
   protected void _compileFiles(File[] sourceRoots, File[] files) throws IOException {
-    
+
     CompilerError[] errors = new CompilerError[0];
-    
+
     CompilerInterface compiler
       = CompilerRegistry.ONLY.getActiveCompiler();
-      
+
     if (files.length > 0) {
       errors = compiler.compile(sourceRoots, files);
     }
@@ -1217,7 +1217,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
   public Debugger getDebugger() {
     return _debugger;
   }
-  
+
   /**
    * Returns an available port number to use for debugging the interactions JVM.
    * @throws IOException if unable to get a valid port number.
@@ -1225,7 +1225,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
   public int getDebugPort() throws IOException {
     return _interactionsModel.getDebugPort();
   }
-  
+
   /**
    * Checks if any open definitions documents have been modified
    * since last being saved.
@@ -1272,14 +1272,14 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
   public File getSourceFileFromPaths(String filename, Vector<File> paths) {
     File f = null;
     for (int i = 0; i < paths.size(); i++) {
-      f = _getSourceFileFromPath(filename, paths.elementAt(i));
+      f = _getSourceFileFromPath(filename, paths.get(i));
       if (f != null) {
         return f;
       }
     }
     return null;
   }
-  
+
   /**
    * Gets the file named filename from the given path, if it exists.
    * Returns null if it's not there.
@@ -1309,7 +1309,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       });
     }
   }
-  
+
   /**
    * Called to indicate that a suite of tests has started running.
    * @param numTests The number of tests in the suite to be run.
@@ -1323,7 +1323,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       });
     }
   }
-  
+
   /**
    * Called when a particular test is started.
    * @param testName The name of the test being started.
@@ -1337,7 +1337,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       });
     }
   }
-  
+
   /**
    * Called when a particular test has ended.
    * @param testName The name of the test that has ended.
@@ -1357,7 +1357,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       });
     }
   }
-  
+
   /**
    * Called when a full suite of tests has finished running.
    * @param errors The array of errors from all failed tests in the suite.
@@ -1374,7 +1374,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       }
     }
   }
-  
+
   /**
    * Returns the document currently being tested (with JUnit) if there is
    * one, otherwise null.
@@ -1382,9 +1382,9 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
   public OpenDefinitionsDocument getDocBeingTested() {
     return _docBeingTested;
   }*/
-    
+
   // ---------- DefinitionsDocumentHandler inner class ----------
-  
+
   /**
    * Inner class to handle operations on each of the open
    * DefinitionsDocuments by the GlobalModel.
@@ -1437,7 +1437,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     public String getFirstTopLevelClassName() throws ClassNameNotFoundException {
       return _doc.getFirstTopLevelClassName();
     }
-    
+
     /**
      * Returns whether this document is currently untitled
      * (indicating whether it has a file yet or not).
@@ -1456,14 +1456,14 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     public File getFile() throws IllegalStateException, FileMovedException {
       return _doc.getFile();
     }
-    
+
     /**
      * Returns the name of this file, or "(untitled)" if no file.
      */
     public String getFilename() {
       return _doc.getFilename();
     }
-    
+
     // TODO: Move this to where it can be static.
     private class TrivialFSS implements FileSaveSelector {
       private File _file;
@@ -1494,7 +1494,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     public boolean saveFile(FileSaveSelector com) throws IOException {
       FileSaveSelector realCommand;
       final File file;
-      
+
       if (!isModifiedSinceSave() && !isUntitled()) {
         // Don't need to save.
         //  Return true, since the save wasn't "canceled"
@@ -1546,16 +1546,16 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
         final OpenDefinitionsDocument openDoc = this;
         final File file = com.getFile();
         final OpenDefinitionsDocument otherDoc = _getOpenDocument(file);
-        
+
         // Check if file is already open in another document
         if ( otherDoc != null && openDoc != otherDoc ) {
           // Can't save over an open document
           com.warnFileOpen();
         }
-        
+
         // If the file exists, make sure it's ok to overwrite it
         else if (!file.exists() || com.verifyOverwrite()) {
-          
+
           // Correct the case of the filename (in Windows)
           if (! file.getCanonicalFile().getName().equals(file.getName())) {
             file.renameTo(file);
@@ -1572,7 +1572,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
               }
             }
           });
-          
+
           _doc.resetModification();
           _doc.setFile(file);
           _doc.setCachedClassFile(null);
@@ -1592,9 +1592,9 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
             // Invalid package-- don't add to classpath
           }
         }
-        
+
         return true;
-        
+
       }
       catch (OperationCanceledException oce) {
         // Thrown by com.getFile() if the user cancels.
@@ -1609,7 +1609,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
      */
     public void preparePrintJob() throws BadLocationException,
       FileMovedException {
-      
+
       String filename = "(untitled)";
       try {
         filename = _doc.getFile().getAbsolutePath();
@@ -1669,7 +1669,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
         if (hasModifiedDocuments()) {
           _notifier.saveBeforeCompile();
         }
-        
+
         if (hasModifiedDocuments()) {
           // if any files haven't been saved after we told our
           // listeners to do so, don't proceed with the rest
@@ -1679,16 +1679,16 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
           try {
             File file = _doc.getFile();
             File[] files = new File[] { file };
-            
+
             try {
               _notifier.notifyListeners(new EventNotifier.Notifier() {
                 public void notifyListener(GlobalModelListener l) {
                   l.compileStarted();
                 }
               });
-              
+
               File[] sourceRoots = new File[] { getSourceRoot() };
-              
+
               _compileFiles(sourceRoots, files);
             }
             catch (Throwable e) {
@@ -1699,7 +1699,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
             finally {
               // Fire a compileEnded event
               _notifier.compileEnded();
-              
+
               // Only clear interactions if there were no errors
               if (_numErrors == 0 && _interactionsModel.interpreterUsed()) {
 //                  && _resetAfterCompile) {
@@ -1713,7 +1713,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
         }
       }
     }
-  
+
     /**
      * Runs the main method in this document in the interactions pane.
      * Demands that the definitions be saved and compiled before proceeding.
@@ -1730,7 +1730,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
         // Prompt to save and compile if any document is modified.
         if (hasModifiedDocuments()) {
           _notifier.saveBeforeRun();
-          
+
           // If the user chose to cancel, abort the run.
           if (hasModifiedDocuments()) {
             return;
@@ -1775,10 +1775,10 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
             iDoc.insertBeforeLastPrompt(DOCUMENT_OUT_OF_SYNC_MSG, InteractionsDocument.ERROR_STYLE);
           }
           iDoc.insertText(iDoc.getDocLength(), "java " + className, null);
-        
+
           // Notify listeners that the file is about to be run.
           _notifier.runStarted(this);
-        
+
           // Finally, execute the new interaction.
           _interactionsModel.interpretCurrentInteraction();
         }
@@ -1803,7 +1803,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       synchronized(_compilerLock) {
         //JUnit started, so throw out all JUnitErrorModels now, regardless of whether
         //  the tests succeed, etc.
-        
+
         // if a test is running, don't start another one
 //        if (_docBeingTested != null) {
         if (_isTestInProgress) {
@@ -1835,7 +1835,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
           ArrayList<OpenDefinitionsDocument> thisList = new ArrayList<OpenDefinitionsDocument>();
           thisList.add(this);
           _notifier.junitStarted(thisList);
-          
+
           try {
             getJUnitDocument().remove(0, getJUnitDocument().getLength() - 1);
           }
@@ -1843,7 +1843,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
             nonTestCase(false);
             return;
           }
-          
+
           String testFilename = testFile.getName();
           if (testFilename.toLowerCase().endsWith(".java")) {
             testFilename = testFilename.substring(0, testFilename.length() - 5);
@@ -1896,7 +1896,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
         }
       }
     }
-    
+
     /**
      * Generates Javadoc for this document, saving the output to a temporary
      * directory.  The location is provided to the javadocEnded event on
@@ -1925,7 +1925,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     public boolean isModifiedOnDisk() {
       return _doc.isModifiedOnDisk();
     }
-  
+
     /**
      * Checks if the document is modified. If not, searches for the class file
      * corresponding to this document and compares the timestamps of the
@@ -1937,21 +1937,21 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
         _doc.setClassFileInSync(false);
         return false;
       }
-      
+
       // Look for cached class file
       File classFile = _doc.getCachedClassFile();
       if (classFile == null) {
         // Not cached, so locate the file
         classFile = _locateClassFile();
         _doc.setCachedClassFile(classFile);
-        
+
         if (classFile == null) {
           // couldn't find the class file
           _doc.setClassFileInSync(false);
           return false;
         }
       }
-      
+
       // compare timestamps
       File sourceFile = null;
       try {
@@ -1973,7 +1973,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
         return true;
       }
     }
-    
+
     /**
      * Returns the class file for this source document, if one could be found.
      * Looks in the source root directories of the open documents, the
@@ -1987,19 +1987,19 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
         // replace periods with the System's file separator
         className = StringOps.replace(className, ".", ps);
         String filename = className + ".class";
-        
+
         // Check source root set (open files)
         File[] sourceRoots = getSourceRootSet();
         Vector<File> roots = new Vector<File>();
         // Add the current document to the beginning of the roots Vector
         try {
-          roots.addElement(getSourceRoot());
+          roots.add(getSourceRoot());
         }
         catch (InvalidPackageException ipe) {
           try {
             File f = getFile().getParentFile();
             if (f != null) {
-              roots.addElement(f);
+              roots.add(f);
             }
           }
           catch (IllegalStateException ise) {
@@ -2009,16 +2009,16 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
             // Moved, but we'll add the old file to the set anyway
             File root = fme.getFile().getParentFile();
             if (root != null) {
-              roots.addElement(root);
+              roots.add(root);
             }
           }
         }
-        
+
         for (int i=0; i < sourceRoots.length; i++) {
-          roots.addElement(sourceRoots[i]);
+          roots.add(sourceRoots[i]);
         }
         File classFile = getSourceFileFromPaths(filename, roots);
-        
+
         if (classFile == null) {
           // Class not on source root set, check system classpath
           String cp = System.getProperty("java.class.path");
@@ -2027,20 +2027,20 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
           for (int i = 0; i < cp.length();) {
             int nextSeparator = cp.indexOf(pathSeparator, i);
             if (nextSeparator == -1) {
-              cpVector.addElement(new File(cp.substring(i, cp.length())));
+              cpVector.add(new File(cp.substring(i, cp.length())));
               break;
             }
-            cpVector.addElement(new File(cp.substring(i, nextSeparator)));
+            cpVector.add(new File(cp.substring(i, nextSeparator)));
             i = nextSeparator + 1;
           }
           classFile = getSourceFileFromPaths(filename, cpVector);
         }
-        
+
         if (classFile == null) {
           // not on system classpath, check interactions classpath
           classFile = getSourceFileFromPaths(filename, DrJava.getConfig().getSetting(EXTRA_CLASSPATH));
         }
-        
+
         return classFile;
       }
       catch (ClassNameNotFoundException cnnfe) {
@@ -2048,8 +2048,8 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
         return null;
       }
     }
-    
-      
+
+
     /**
      * Determines if the defintions document has been changed
      * by an outside program. If the document has changed,
@@ -2060,7 +2060,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     public boolean revertIfModifiedOnDisk() throws IOException{
       final OpenDefinitionsDocument doc = this;
       if (isModifiedOnDisk()) {
-        
+
         boolean shouldRevert = _notifier.pollListeners(new EventNotifier.Poller() {
           public boolean poll(GlobalModelListener l) {
             return l.shouldRevertFile(doc);
@@ -2075,14 +2075,14 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
         return false;
       }
     }
-    
+
     public void revertFile() throws IOException {
 
       //need to remove old, possibly invalid breakpoints
       removeFromDebugger();
-      
+
       final OpenDefinitionsDocument doc = this;
-      
+
       try {
         File file = doc.getFile();
         //this line precedes the .remove() so that a document with an invalid
@@ -2090,18 +2090,18 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
 
         FileReader reader = new FileReader(file);
         DefinitionsDocument tempDoc = doc.getDocument();
-        
+
         tempDoc.remove(0,tempDoc.getLength());
-        
+
 
         _editorKit.read(reader, tempDoc, 0);
         reader.close(); // win32 needs readers closed explicitly!
-        
+
         tempDoc.resetModification();
         doc.checkIfClassFileInSync();
-        
+
         syncCurrentLocationWithDefinitions(0);
-        
+
         _notifier.notifyListeners(new EventNotifier.Notifier() {
           public void notifyListener(GlobalModelListener l) {
             l.fileReverted(doc);
@@ -2175,7 +2175,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     public int balanceBackward() {
       return _doc.balanceBackward();
     }
-    
+
     /**
      * Forwarding method to find the match for the open brace
      * immediately to the right, assuming there is such a brace.
@@ -2242,56 +2242,56 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
      */
     public Breakpoint getBreakpointAt( int offset) {
       //return _breakpoints.get(new Integer(lineNumber));
-      
+
       for (int i =0; i<_breakpoints.size(); i++) {
-        Breakpoint bp = _breakpoints.elementAt(i);
+        Breakpoint bp = _breakpoints.get(i);
         if (offset >= bp.getStartOffset() && offset <= bp.getEndOffset()) {
           return bp;
         }
       }
       return null;
     }
-    
+
     /**
      * Inserts the given Breakpoint into the list, sorted by region
      * @param breakpoint the Breakpoint to be inserted
      */
     public void addBreakpoint( Breakpoint breakpoint) {
       //_breakpoints.put( new Integer(breakpoint.getLineNumber()), breakpoint);
-      
+
       for (int i=0; i<_breakpoints.size();i++) {
-        Breakpoint bp = _breakpoints.elementAt(i);
+        Breakpoint bp = _breakpoints.get(i);
         int oldStart = bp.getStartOffset();
         int newStart = breakpoint.getStartOffset();
-        
+
         if ( newStart < oldStart) {
           // Starts before, add here
-          _breakpoints.insertElementAt(breakpoint, i);
+          _breakpoints.add(i, breakpoint);
           return;
         }
         if ( newStart == oldStart) {
           // Starts at the same place
           int oldEnd = bp.getEndOffset();
           int newEnd = breakpoint.getEndOffset();
-          
+
           if ( newEnd < oldEnd) {
             // Ends before, add here
-            _breakpoints.insertElementAt(breakpoint, i);
+            _breakpoints.add(i, breakpoint);
             return;
           }
         }
       }
-      _breakpoints.addElement(breakpoint);
+      _breakpoints.add(breakpoint);
     }
-    
+
     /**
      * Remove the given Breakpoint from our list (but not the debug manager)
      * @param breakpoint the Breakpoint to be removed.
      */
-    public void removeBreakpoint( Breakpoint breakpoint) {
-      _breakpoints.removeElement( breakpoint);
+    public void removeBreakpoint(Breakpoint breakpoint) {
+      _breakpoints.remove(breakpoint);
     }
-    
+
     /**
      * Returns a Vector<Breakpoint> that contains all of the Breakpoint objects
      * in this document.
@@ -2299,15 +2299,15 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     public Vector<Breakpoint> getBreakpoints() {
       return _breakpoints;
     }
-    
+
     /**
      * Tells the document to remove all breakpoints (without removing them
      * from the debug manager).
      */
     public void clearBreakpoints() {
-      _breakpoints.removeAllElements();
+      _breakpoints.clear();
     }
-    
+
     /**
      * Called to indicate the document is being closed, so to remove
      * all related state from the debug manager.
@@ -2316,7 +2316,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       if (_debugger.isAvailable() && (_debugger.isReady())) {
         try {
           while (_breakpoints.size() > 0) {
-            _debugger.removeBreakpoint(_breakpoints.elementAt(0));
+            _debugger.removeBreakpoint(_breakpoints.get(0));
           }
         }
         catch (DebugException de) {
@@ -2328,7 +2328,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
         clearBreakpoints();
       }
     }
-  
+
     /**
      * Finds the root directory of the source files.
      * @return The root directory of the source files,
@@ -2341,7 +2341,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     {
       return _getSourceRoot(_doc.getPackageName());
     }
-    
+
     /**
      * Gets the name of the package this source file claims it's in (with the
      * package keyword). It does this by minimally parsing the source file
@@ -2383,7 +2383,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
         throw new InvalidPackageException(-1, "File has been moved or deleted " +
                                           "from its previous location. Please save.");
       }
-      
+
       if (packageName.equals("")) {
         return sourceFile.getParentFile();
       }
@@ -2407,20 +2407,20 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       try {
         File parentDir = sourceFile.getCanonicalFile();
         while (!packageStack.empty()) {
-          String part = (String) packageStack.pop();
+          String part = packageStack.pop();
           parentDir = parentDir.getParentFile();
-          
+
           if (parentDir == null) {
             throw new RuntimeException("parent dir is null?!");
           }
-          
+
           // Make sure the package piece matches the directory name
           if (! part.equals(parentDir.getName())) {
             String msg = "The source file " + sourceFile.getAbsolutePath() +
               " is in the wrong directory or in the wrong package. " +
               "The directory name " + parentDir.getName() +
               " does not match the package component " + part + ".";
-            
+
             throw new InvalidPackageException(-1, msg);
           }
         }
@@ -2467,7 +2467,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
   public void resetJavadocErrors() {
     _javadocModel.resetJavadocErrors();
   }
-  
+
   /**
    * Suggests a default location for generating Javadoc, based on the given
    * document's source root.  (Appends JavadocModel.SUGGESTED_DIR_NAME to
@@ -2479,7 +2479,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
   public File suggestJavadocDestination(OpenDefinitionsDocument doc) {
     return _javadocModel.suggestJavadocDestination(doc);
   }
-  
+
   /**
    * Javadocs all open documents, after ensuring that all are saved.
    */
@@ -2490,7 +2490,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
   {
     _javadocModel.javadocAll(select, saver, classpath, listener);
   }
-  
+
   /**
    * Generates Javadoc for the given document only, after ensuring it is saved.
    */
@@ -2502,7 +2502,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
   {
     _javadocModel.javadocDocument(doc, saver, classpath, listener);
   }
-  
+
   /**
    * Sorts the given array of CompilerErrors and divides it into groups
    * based on the file, giving each group to the appropriate
@@ -2511,7 +2511,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
   private void _distributeErrors(CompilerError[] errors)
     throws IOException {
     resetCompilerErrors();
-    
+
     // Store number of errors
     _numErrors = errors.length;
 
@@ -2606,7 +2606,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
         throw new AlreadyOpenException(openDoc);
       }
       DefinitionsDocument tempDoc = (DefinitionsDocument) _editorKit.createNewDocument();
-      
+
       FileReader reader = new FileReader(file);
       _editorKit.read(reader, tempDoc, 0);
       reader.close(); // win32 needs readers closed explicitly!
@@ -2679,7 +2679,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
         _interactionsModel.addToClassPath(en.nextElement().getAbsolutePath());
       }
     }
-    
+
     File[] sourceRoots = getSourceRootSet();
     for (int i = 0; i < sourceRoots.length; i++) {
       _interactionsModel.addToClassPath(sourceRoots[i].getAbsolutePath());
@@ -2693,7 +2693,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
 //    if (_docBeingTested != null) {
     if (_isTestInProgress) {
       JUnitError[] errors = new JUnitError[1];
-      String fileName = null;
+//      String fileName = null;
 //      try {
 //        fileName = _docBeingTested.getDocument().getFile().getAbsolutePath();
 //      }

@@ -4,7 +4,7 @@
  * at http://sourceforge.net/projects/drjava
  *
  * Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)
- * 
+ *
  * DrJava is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -74,7 +74,7 @@ public final class JavaInterpreterTest extends TestCase {
 
   /**
    * put your documentation comment here
-   * @return 
+   * @return
    */
   public static Test suite() {
     return  new TestSuite(JavaInterpreterTest.class);
@@ -87,22 +87,22 @@ public final class JavaInterpreterTest extends TestCase {
   private void tester(Pair[] cases) throws ExceptionReturnedException {
     for (int i = 0; i < cases.length; i++) {
       Object out = _interpreter.interpret(cases[i].first());
-      assertEquals(cases[i].first() + " interpretation wrong!", cases[i].second(), 
+      assertEquals(cases[i].first() + " interpretation wrong!", cases[i].second(),
           out);
     }
   }
 
-  /** 
+  /**
    * Make sure interpreting simple constants works.
    * Note that strings and characters are quoted.
    */
   public void testConstants() throws ExceptionReturnedException {
     Pair[] cases = new Pair[] {
-      Pair.make("5", new Integer(5)), Pair.make("1356", new Integer(1356)), Pair.make("true", 
-          Boolean.TRUE), Pair.make("false", Boolean.FALSE), Pair.make("\'c\'", "'" + new Character('c') + "'"), 
-          Pair.make("1.345", new Double(1.345)), Pair.make("\"buwahahahaha!\"", 
-          new String("\"buwahahahaha!\"")), Pair.make("\"yah\\\"eh\\\"\"", new String("\"yah\"eh\"\"")), 
-          Pair.make("'\\''", "'" + new Character('\'') + "'"), 
+      Pair.make("5", new Integer(5)), Pair.make("1356", new Integer(1356)), Pair.make("true",
+          Boolean.TRUE), Pair.make("false", Boolean.FALSE), Pair.make("\'c\'", "'" + new Character('c') + "'"),
+          Pair.make("1.345", new Double(1.345)), Pair.make("\"buwahahahaha!\"",
+          new String("\"buwahahahaha!\"")), Pair.make("\"yah\\\"eh\\\"\"", new String("\"yah\"eh\"\"")),
+          Pair.make("'\\''", "'" + new Character('\'') + "'"),
     };
     tester(cases);
   }
@@ -111,28 +111,28 @@ public final class JavaInterpreterTest extends TestCase {
   public void testBooleanOps() throws ExceptionReturnedException {
     Pair[] cases = new Pair[] {
       //and
-      Pair.make("true && false", Boolean.FALSE), Pair.make("true && true", 
-          Boolean.TRUE), 
+      Pair.make("true && false", Boolean.FALSE), Pair.make("true && true",
+          Boolean.TRUE),
       //or
-      Pair.make("true || true", Boolean.TRUE), Pair.make("false || true", Boolean.TRUE), 
-          Pair.make("false || false", Boolean.FALSE), 
+      Pair.make("true || true", Boolean.TRUE), Pair.make("false || true", Boolean.TRUE),
+          Pair.make("false || false", Boolean.FALSE),
       // not
-      Pair.make("!true", Boolean.FALSE), Pair.make("!false", Boolean.TRUE), 
+      Pair.make("!true", Boolean.FALSE), Pair.make("!false", Boolean.TRUE),
           //equals
-      Pair.make("true == true", Boolean.TRUE), Pair.make("false == true", Boolean.FALSE), 
-          Pair.make("false == false", Boolean.TRUE), 
+      Pair.make("true == true", Boolean.TRUE), Pair.make("false == true", Boolean.FALSE),
+          Pair.make("false == false", Boolean.TRUE),
       // xor
-      Pair.make("false ^ false", new Boolean(false ^ false)), Pair.make("false ^ true ", 
+      Pair.make("false ^ false", new Boolean(false ^ false)), Pair.make("false ^ true ",
           new Boolean(false ^ true))
     };
     tester(cases);
   }
-  
+
   /** Tests short circuiting */
   public void testShortCircuit() throws ExceptionReturnedException {
     Pair[] cases = new Pair[] {
       Pair.make("false && (3 == 1/0)", Boolean.FALSE),
-        Pair.make("true || (1/0 != 43)", Boolean.TRUE)        
+        Pair.make("true || (1/0 != 43)", Boolean.TRUE)
     };
     tester(cases);
   }
@@ -143,44 +143,44 @@ public final class JavaInterpreterTest extends TestCase {
   public void testIntegerOps() throws ExceptionReturnedException {
     Pair[] cases = new Pair[] {
       // plus
-      Pair.make("5+6", new Integer(5 + 6)), 
+      Pair.make("5+6", new Integer(5 + 6)),
       // minus
-      Pair.make("6-5", new Integer(6 - 5)), 
+      Pair.make("6-5", new Integer(6 - 5)),
       // times
-      Pair.make("6*5", new Integer(6*5)), 
+      Pair.make("6*5", new Integer(6*5)),
       // divide
-      Pair.make("6/5", new Integer(6/5)), 
+      Pair.make("6/5", new Integer(6/5)),
       // modulo
-      Pair.make("6%5", new Integer(6%5)), 
+      Pair.make("6%5", new Integer(6%5)),
       // bit and
-      Pair.make("6&5", new Integer(6 & 5)), 
+      Pair.make("6&5", new Integer(6 & 5)),
       // bit or
-      Pair.make("6 | 5", new Integer(6 | 5)), 
+      Pair.make("6 | 5", new Integer(6 | 5)),
       // bit xor
-      Pair.make("6^5", new Integer(6 ^ 5)), 
+      Pair.make("6^5", new Integer(6 ^ 5)),
       // bit complement
-      Pair.make("~6", new Integer(~6)), 
+      Pair.make("~6", new Integer(~6)),
       // unary plus
-      Pair.make("+5", new Integer(+5)), 
+      Pair.make("+5", new Integer(+5)),
       // unary minus
-      Pair.make("-5", new Integer(-5)), 
+      Pair.make("-5", new Integer(-5)),
       // left shift
-      Pair.make("400 << 5", new Integer(400 << 5)), 
+      Pair.make("400 << 5", new Integer(400 << 5)),
       // right shift
-      Pair.make("400 >> 5", new Integer(400 >> 5)), 
+      Pair.make("400 >> 5", new Integer(400 >> 5)),
       // unsigned right shift
-      Pair.make("400 >>> 5", new Integer(400 >>> 5)), 
+      Pair.make("400 >>> 5", new Integer(400 >>> 5)),
       // less than
-      Pair.make("5 < 4", new Boolean(5 < 4)), 
+      Pair.make("5 < 4", new Boolean(5 < 4)),
       // less than or equal to
-      Pair.make("4 <= 4", new Boolean(4 <= 4)), Pair.make("4 <= 5", new Boolean(4 <= 5)), 
+      Pair.make("4 <= 4", new Boolean(4 <= 4)), Pair.make("4 <= 5", new Boolean(4 <= 5)),
           // greater than
-      Pair.make("5 > 4", new Boolean(5 > 4)), Pair.make("5 > 5", new Boolean(5 > 5)), 
+      Pair.make("5 > 4", new Boolean(5 > 4)), Pair.make("5 > 5", new Boolean(5 > 5)),
           // greater than or equal to
-      Pair.make("5 >= 4", new Boolean(5 >= 4)), Pair.make("5 >= 5", new Boolean(5 >= 5)), 
+      Pair.make("5 >= 4", new Boolean(5 >= 4)), Pair.make("5 >= 5", new Boolean(5 >= 5)),
           // equal to
       Pair.make("5 == 5", new Boolean(5 == 5)), Pair.make("5 == 6", new Boolean(
-          5 == 6)), 
+          5 == 6)),
       // not equal to
       Pair.make("5 != 6", new Boolean(5 != 6)), Pair.make("5 != 5", new Boolean(
           5 != 5))
@@ -194,31 +194,31 @@ public final class JavaInterpreterTest extends TestCase {
   public void testDoubleOps() throws ExceptionReturnedException {
     Pair[] cases = new Pair[] {
       // less than
-      Pair.make("5.6 < 6.7", new Boolean(5.6 < 6.7)), 
+      Pair.make("5.6 < 6.7", new Boolean(5.6 < 6.7)),
       // less than or equal to
-      Pair.make("5.6 <= 5.6", new Boolean(5.6 <= 5.6)), 
+      Pair.make("5.6 <= 5.6", new Boolean(5.6 <= 5.6)),
       // greater than
-      Pair.make("5.6 > 4.5", new Boolean(5.6 > 4.5)), 
+      Pair.make("5.6 > 4.5", new Boolean(5.6 > 4.5)),
       // greater than or equal to
-      Pair.make("5.6 >= 56.4", new Boolean(5.6 >= 56.4)), 
+      Pair.make("5.6 >= 56.4", new Boolean(5.6 >= 56.4)),
       // equal to
-      Pair.make("5.4 == 5.4", new Boolean(5 == 5)), 
+      Pair.make("5.4 == 5.4", new Boolean(5 == 5)),
       // not equal to
-      Pair.make("5.5 != 5.5", new Boolean(5 != 5)), 
+      Pair.make("5.5 != 5.5", new Boolean(5 != 5)),
       // unary plus
-      Pair.make("+5.6", new Double(+5.6)), 
+      Pair.make("+5.6", new Double(+5.6)),
       // unary minus
-      Pair.make("-5.6", new Double(-5.6)), 
+      Pair.make("-5.6", new Double(-5.6)),
       // times
-      Pair.make("5.6 * 4.5", new Double(5.6*4.5)), 
+      Pair.make("5.6 * 4.5", new Double(5.6*4.5)),
       // divide
-      Pair.make("5.6 / 3.4", new Double(5.6/3.4)), 
+      Pair.make("5.6 / 3.4", new Double(5.6/3.4)),
       // modulo
-      Pair.make("5.6 % 3.4", new Double(5.6%3.4)), 
+      Pair.make("5.6 % 3.4", new Double(5.6%3.4)),
       // plus
-      Pair.make("5.6 + 6.7", new Double(5.6 + 6.7)), 
+      Pair.make("5.6 + 6.7", new Double(5.6 + 6.7)),
       // minus
-      Pair.make("4.5 - 3.4", new Double(4.5 - 3.4)), 
+      Pair.make("4.5 - 3.4", new Double(4.5 - 3.4)),
     };
     tester(cases);
   }
@@ -229,10 +229,10 @@ public final class JavaInterpreterTest extends TestCase {
   public void testStringOps() throws ExceptionReturnedException {
     Pair[] cases = new Pair[] {
       // concatenation
-      Pair.make("\"yeah\" + \"and\"", new String("\"yeah" + "and\"")), 
+      Pair.make("\"yeah\" + \"and\"", new String("\"yeah" + "and\"")),
       // equals
-      Pair.make("\"yeah\".equals(\"yeah\")", new Boolean("yeah".equals("yeah"))), 
-    
+      Pair.make("\"yeah\".equals(\"yeah\")", new Boolean("yeah".equals("yeah"))),
+
     };
     tester(cases);
   }
@@ -254,19 +254,19 @@ public final class JavaInterpreterTest extends TestCase {
    */
   public void testSemicolon() throws ExceptionReturnedException {
     Pair[] cases = new Pair[] {
-      Pair.make("'c' == 'c'", new Boolean('c' == 'c')), 
-      Pair.make("'c' == 'c';", JavaInterpreter.NO_RESULT), 
-      Pair.make("String s = \"hello\"", JavaInterpreter.NO_RESULT), 
-      Pair.make("String x = \"hello\";", JavaInterpreter.NO_RESULT), 
+      Pair.make("'c' == 'c'", new Boolean('c' == 'c')),
+      Pair.make("'c' == 'c';", JavaInterpreter.NO_RESULT),
+      Pair.make("String s = \"hello\"", JavaInterpreter.NO_RESULT),
+      Pair.make("String x = \"hello\";", JavaInterpreter.NO_RESULT),
       Pair.make("char c = 'c'", JavaInterpreter.NO_RESULT),
       Pair.make("Character d = new Character('d')", JavaInterpreter.NO_RESULT),
-      Pair.make("s", "\"hello\""), Pair.make("s;", JavaInterpreter.NO_RESULT), 
+      Pair.make("s", "\"hello\""), Pair.make("s;", JavaInterpreter.NO_RESULT),
       Pair.make("x", "\"hello\""), Pair.make("x;", JavaInterpreter.NO_RESULT),
       Pair.make("c", "'c'"), Pair.make("d", "'d'")
     };
     tester(cases);
   }
-  
+
   /**
    * Tests that null can be used in instanceof expressions.
    */
@@ -277,7 +277,7 @@ public final class JavaInterpreterTest extends TestCase {
     };
     tester(cases);
   }
-  
+
   /**
    * Tests simple variable definitions which broke the initial implementation
    * of variable redefinition (tested by testVariableRedefinition).
@@ -285,18 +285,18 @@ public final class JavaInterpreterTest extends TestCase {
   public void testVariableDefinition() throws ExceptionReturnedException {
     _interpreter.interpret("int a = 5;");
     _interpreter.interpret("int b = a;");
-    
+
     _interpreter.interpret("int c = a++;");
   }
-  
+
   /**
    * Tests that variable declarations with errors will not allow the interpreter
-   * to not define the variable. This will get rid of annoying "Error: 
-   * Redefinition of 'variable'" messages after fixing the error. Note that if 
-   * the error occurs during the evaluation of the right hand side then the 
-   * variable is defined. This is for two reasons: The compiler would have 
-   * accepted this variable declaration so that no more variables could have 
-   * been defined with the same name afterwards, and we don't know how to make 
+   * to not define the variable. This will get rid of annoying "Error:
+   * Redefinition of 'variable'" messages after fixing the error. Note that if
+   * the error occurs during the evaluation of the right hand side then the
+   * variable is defined. This is for two reasons: The compiler would have
+   * accepted this variable declaration so that no more variables could have
+   * been defined with the same name afterwards, and we don't know how to make
    * sure the evaluation doesn't return errors without actually evaluating which
    * may have side-effects.
    */
@@ -336,7 +336,7 @@ public final class JavaInterpreterTest extends TestCase {
       fail("These interpret statements shouldn't cause errors");
     }
     // test error in EvaluationVisitor
-    
+
     // Integer.getInteger("somebadproperty") should be null
     try {
       _interpreter.interpret("String z = new String(Integer.getInteger(\"somebadproperty\").toString());");
@@ -346,56 +346,53 @@ public final class JavaInterpreterTest extends TestCase {
     }
     try {
       _interpreter.interpret("String z = \"z\";");
-      fail("variable redefinition should have failed");      
+      fail("variable redefinition should have failed");
     }
     catch (ExceptionReturnedException e) {
     }
   }
-  
+
   /**
    * Ensure that the interpreter rejects assignments where the right type
    * is not a subclass of the left type.
    */
   public void testIncompatibleAssignment() throws ExceptionReturnedException {
-    Object out = null;
     try {
-      out = _interpreter.interpret("Integer i = new Object()");
+      _interpreter.interpret("Integer i = new Object()");
       fail("incompatible assignment should have failed");
     }
     catch (ExceptionReturnedException e) {
       // Correct; it should fail
     }
     try {
-      out = _interpreter.interpret("Integer i2 = (Integer)new Object();");
+      _interpreter.interpret("Integer i2 = (Integer)new Object();");
       fail("incompatible assignment should have failed");
     }
     catch (ExceptionReturnedException e) {
       // Correct; it should fail
     }
-    
+
     // Check that a correct assignment doesn't fail
     _interpreter.interpret("Object o = new Integer(3)");
   }
 
  /**
-  * Tests the operation of the TypeCheckerExtension by performing the 
-  * operations ((false) ? 2/0 : 1) and ((false) ? 2%0 : 1), which should 
+  * Tests the operation of the TypeCheckerExtension by performing the
+  * operations ((false) ? 2/0 : 1) and ((false) ? 2%0 : 1), which should
   * not throw Exceptions in the Java interpreter.
   */
   public void testTypeCheckerExtension() {
-    Object out = null;
-    
     try{
-      out = _interpreter.interpret("(false) ? 2/0 : 1 ");
+      _interpreter.interpret("(false) ? 2/0 : 1 ");
     }
     catch(ExceptionReturnedException e){
       if( e.getContainedException() instanceof ArithmeticException ){
         fail("testTypeCheckerExtension failed to prevent short circuit DivideByZeroException");
       }
     }
-    
+
     try{
-      out = _interpreter.interpret("(false) ? 2%0 : 1 ");
+      _interpreter.interpret("(false) ? 2%0 : 1 ");
     }
     catch(ExceptionReturnedException e){
       if( e.getContainedException() instanceof ArithmeticException ){
@@ -403,15 +400,13 @@ public final class JavaInterpreterTest extends TestCase {
       }
     }
   }
-  
+
   /**
-  * Tests the operation of the EvaluationVisitorExtension by 
-  * Performing a computation with no results (interpreter 
+  * Tests the operation of the EvaluationVisitorExtension by
+  * Performing a computation with no results (interpreter
   * should return NO_RESULT and not null)
   */
-  public void testEvaluationVisitorExtensionNO_RESULT() {   
-    boolean passed = false;
-    
+  public void testEvaluationVisitorExtensionNO_RESULT() {
     try{
       Object out = _interpreter.interpret("true;");
       assertEquals("testEvaluationVisitorExtension", JavaInterpreter.NO_RESULT, out);
@@ -420,7 +415,7 @@ public final class JavaInterpreterTest extends TestCase {
       fail("testEvaluationVisitorExtension Exception returned for none exceptional code!" + e);
     }
   }
-  
+
   /**
    * Tests that a variable can be defined in the interpreter by an external source.
    */
@@ -434,7 +429,7 @@ public final class JavaInterpreterTest extends TestCase {
     assertEquals("incremented externally defined variable x",
                  new Integer(4), _interpreter.interpret("++x"));
   }
-  
+
   /**
    * Tests that the value of a variable can be queried externally.
    */
@@ -443,17 +438,17 @@ public final class JavaInterpreterTest extends TestCase {
     // Get value of variable externally
     assertEquals("external query for x",
                  new Integer(7), _interpreter.getVariable("x"));
-    
+
     // Undefined variable
     try {
-      Object o = _interpreter.getVariable("undefined");
+      _interpreter.getVariable("undefined");
       fail("Should have thrown IllegalStateException");
     }
     catch (IllegalStateException e) {
       // good, that's what we want
     }
   }
-  
+
   /**
    * Tests that a constant can be defined in the interpreter by an external source.
    */
@@ -467,7 +462,7 @@ public final class JavaInterpreterTest extends TestCase {
       // correct, it should fail
     }
   }
-  
+
   /**
    * Tests that a call to user-defined void method returns NO_RESULT, instead of null.
    * This test does not pass, it is currently broken.
@@ -500,7 +495,7 @@ class Pair {
    * put your documentation comment here
    * @param first
    * @param second
-   * @return 
+   * @return
    */
   public static Pair make(String first, Object second) {
     return  new Pair(first, second);
@@ -508,7 +503,7 @@ class Pair {
 
   /**
    * put your documentation comment here
-   * @return 
+   * @return
    */
   public String first() {
     return  this._first;
@@ -516,7 +511,7 @@ class Pair {
 
   /**
    * put your documentation comment here
-   * @return 
+   * @return
    */
   public Object second() {
     return  this._second;

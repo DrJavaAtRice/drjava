@@ -65,17 +65,17 @@ import edu.rice.cs.drjava.ui.KeyBindingManager.KeyStrokeData;
  * @version $Id$
  */
 public class ConfigFrame extends JFrame {
-  
+
   private static final int FRAME_WIDTH = 750;
   private static final int FRAME_HEIGHT = 500;
-  
+
   private MainFrame _mainFrame;
-  
+
   private JSplitPane _splitPane;
   private JTree _tree;
   private DefaultTreeModel _treeModel;
   private PanelTreeNode _rootNode;
-  
+
   private JButton _okButton;
   private JButton _applyButton;
   private JButton _cancelButton;
@@ -83,13 +83,13 @@ public class ConfigFrame extends JFrame {
   private JPanel _mainPanel;
   private JFileChooser _fileOptionChooser;
   private JFileChooser _browserChooser;
-  
+
   /**
    * Sets up the frame and displays it.
    */
   public ConfigFrame(MainFrame frame) {
     super("Preferences");
-    
+
     _mainFrame = frame;
 
     File workDir = _getWorkDir();
@@ -98,22 +98,22 @@ public class ConfigFrame extends JFrame {
     _fileOptionChooser.setApproveButtonText("Select");
     _fileOptionChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
     _fileOptionChooser.setFileFilter(ClasspathFilter.ONLY);
-    
+
     _browserChooser = new JFileChooser(workDir);
     _browserChooser.setDialogTitle("Select Web Browser");
     _browserChooser.setApproveButtonText("Select");
     _browserChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-    
+
     _createTree();
     _createPanels();
-    
+
     _mainPanel= new JPanel();
     _mainPanel.setLayout(new BorderLayout());
     _tree.addTreeSelectionListener(new PanelTreeSelectionListener());
-        
+
     Container cp = getContentPane();
     cp.setLayout(new BorderLayout());
-    
+
     // Select the first panel by default
     if (_rootNode.getChildCount() != 0) {
       PanelTreeNode firstChild = (PanelTreeNode)_rootNode.getChildAt(0);
@@ -122,7 +122,7 @@ public class ConfigFrame extends JFrame {
       _tree.expandPath(path);
       _tree.setSelectionPath(path);
     }
-    
+
     JScrollPane treeScroll = new JScrollPane(_tree);
     JPanel treePanel = new JPanel();
     treePanel.setLayout(new BorderLayout());
@@ -137,7 +137,7 @@ public class ConfigFrame extends JFrame {
                                 _mainPanel);
     cp.add(_splitPane, BorderLayout.CENTER);
     */
-    
+
     _okButton = new JButton("OK");
     _okButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
@@ -150,7 +150,7 @@ public class ConfigFrame extends JFrame {
         if (successful) ConfigFrame.this.hide();
       }
     });
-    
+
     _applyButton = new JButton("Apply");
     _applyButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
@@ -161,14 +161,14 @@ public class ConfigFrame extends JFrame {
         catch (IOException ioe) {}
       }
     });
-    
+
     _cancelButton = new JButton("Cancel");
     _cancelButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         cancel();
       }
     });
-    
+
     /* Now always saves settings...
     _saveSettingsButton = new JButton("Save Settings");
     _saveSettingsButton.setToolTipText("Save all settings to disk for future sessions.");
@@ -193,8 +193,8 @@ public class ConfigFrame extends JFrame {
 
     cp.add(bottom, BorderLayout.SOUTH);
 
-    
-    
+
+
     // Set all dimensions ----
     setSize(FRAME_WIDTH, FRAME_HEIGHT);
     // suggested from zaq@nosi.com, to keep the frame on the screen!
@@ -211,24 +211,24 @@ public class ConfigFrame extends JFrame {
     this.setSize(frameSize);
     this.setLocation((screenSize.width - frameSize.width) / 2,
                      (screenSize.height - frameSize.height) / 2);
-    int width = getWidth() / 4;
-    //System.out.println("width: " + getWidth());
-    //System.out.println("width for divider: " + width);
-    //_splitPane.setDividerLocation(width);
-    //_mainPanel.setPreferredSize(new Dimension(getWidth() - width,
-    //                                          _splitPane.getHeight()));
+//    int width = getWidth() / 4;
+//    System.out.println("width: " + getWidth());
+//    System.out.println("width for divider: " + width);
+//    _splitPane.setDividerLocation(width);
+//    _mainPanel.setPreferredSize(new Dimension(getWidth() - width,
+//                                              _splitPane.getHeight()));
     addWindowListener(new WindowAdapter() {
       public void windowClosing(java.awt.event.WindowEvent e) {
         cancel();
       }
     });
-    
+
     // Make sure each row is expanded (this is harder than it seems...)
     _tree.expandRow(0);
     _tree.expandRow(1);
     _tree.expandRow(2);
   }
-  
+
   /**
    * Returns the current working directory, or the user's current directory
    * if none is set.
@@ -252,7 +252,7 @@ public class ConfigFrame extends JFrame {
     // returns false if the update did not succeed
     return _rootNode.update();
   }
-  
+
   /**
    * Resets the field of each option in the Preferences window to its actual
    * stored value.
@@ -260,7 +260,7 @@ public class ConfigFrame extends JFrame {
   public void resetToCurrent() {
     _rootNode.resetToCurrent();
   }
-  
+
   /**
    * Resets the frame and hides it.
    */
@@ -268,7 +268,7 @@ public class ConfigFrame extends JFrame {
     resetToCurrent();
     ConfigFrame.this.hide();
   }
-  
+
   /**
    * Write the configured option values to disk.
    */
@@ -290,7 +290,7 @@ public class ConfigFrame extends JFrame {
     }
     return successful;
   }
- 
+
   /**
    * Sets the given ConfigPanel as the visible panel.
    */
@@ -300,14 +300,14 @@ public class ConfigFrame extends JFrame {
     _mainPanel.add(cf, BorderLayout.CENTER);
     _mainPanel.revalidate();
     _mainPanel.repaint();
-    
+
   }
-  
+
   /**
    * Creates the JTree to display preferences categories.
    */
   private void _createTree() {
-   
+
     _rootNode = new PanelTreeNode("Preferences");
     _treeModel = new DefaultTreeModel(_rootNode);
     _tree = new JTree(_treeModel);
@@ -315,15 +315,15 @@ public class ConfigFrame extends JFrame {
     _tree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
     _tree.setShowsRootHandles(true);
     _tree.setRootVisible(false);
-    
+
     DefaultTreeCellRenderer dtcr = new DefaultTreeCellRenderer();
     dtcr.setLeafIcon(null);
     dtcr.setOpenIcon(null);
     dtcr.setClosedIcon(null);
     _tree.setCellRenderer(dtcr);
-    
+
   }
-  
+
   /**
    * Creates an individual panel, adds it to the JTree and the list of panels, and
    *  returns the tree node.
@@ -335,14 +335,14 @@ public class ConfigFrame extends JFrame {
     PanelTreeNode ptNode = new PanelTreeNode(t);
     //parent.add(ptNode);
     _treeModel.insertNodeInto(ptNode, parent, parent.getChildCount());
-    
+
     // Make sure tree node is visible
     TreeNode[] pathArray = ptNode.getPath();
     TreePath path = new TreePath(pathArray);
 //     System.out.println("path has class " + pathArray.getClass());
 //     System.out.println("last path compenent has class " + path.getLastPathComponent().getClass());
     _tree.expandPath(path);
-    
+
     return ptNode;
   }
   /**
@@ -355,7 +355,7 @@ public class ConfigFrame extends JFrame {
 //  private PanelTreeNode _createPanel(ConfigPanel c, PanelTreeNode parent) {
 //    PanelTreeNode ptNode = new PanelTreeNode(c);
 //    parent.add(ptNode);
-//    
+//
 //    return ptNode;
 //  }
   /**
@@ -367,37 +367,37 @@ public class ConfigFrame extends JFrame {
   private PanelTreeNode _createPanel(String t) {
     return _createPanel(t, _rootNode);
   }
-  
-  
+
+
   /**
    * Creates all of the panels contained within the frame.
    */
   private void _createPanels() {
-    
+
     PanelTreeNode resourceLocNode = _createPanel("Resource Locations");
     _setupResourceLocPanel(resourceLocNode.getPanel());
-    
+
     PanelTreeNode displayNode = _createPanel("Display Options");
     _setupDisplayPanel(displayNode.getPanel());
-    
+
     PanelTreeNode fontNode = _createPanel("Fonts", displayNode);
     _setupFontPanel(fontNode.getPanel());
 
     PanelTreeNode colorNode = _createPanel("Colors", displayNode);
     _setupColorPanel(colorNode.getPanel());
-    
+
     PanelTreeNode keystrokesNode = _createPanel("Key Bindings");
     _setupKeyBindingsPanel(keystrokesNode.getPanel());
-    
+
     PanelTreeNode debugNode = _createPanel("Debugger");
     _setupDebugPanel(debugNode.getPanel());
-    
+
     PanelTreeNode javadocNode = _createPanel("Javadoc");
     _setupJavadocPanel(javadocNode.getPanel());
-    
+
     PanelTreeNode notificationsNode = _createPanel("Notifications");
     _setupNotificationsPanel(notificationsNode.getPanel());
-    
+
     PanelTreeNode miscNode = _createPanel("Miscellaneous");
     _setupMiscPanel(miscNode.getPanel());
 
@@ -405,7 +405,7 @@ public class ConfigFrame extends JFrame {
     //DrJava.consoleOut().println("expanding path...");
     //_tree.expandPath(new TreePath(fontNode.getPath()));
   }
-  
+
   /**
    * Add all of the components for the Resource Locations panel of the preferences window.
    */
@@ -418,7 +418,7 @@ public class ConfigFrame extends JFrame {
                               "This is not necessary if a default browser is available on your system.",
                               _browserChooser);
     panel.addComponent(browserLoc);
-    
+
     StringOptionComponent browserCommand =
       new StringOptionComponent(OptionConstants.BROWSER_STRING,
                               "Web Browser Command", this,
@@ -426,7 +426,7 @@ public class ConfigFrame extends JFrame {
                               "The string <code>&lt;URL&gt;</code> will be replaced with the URL address.<br>" +
                               "This is not necessary if a default browser is available on your system.");
     panel.addComponent(browserCommand);
-    
+
     FileOptionComponent javacLoc =
       new FileOptionComponent(OptionConstants.JAVAC_LOCATION,
                               "Tools.jar Location", this,
@@ -452,11 +452,11 @@ public class ConfigFrame extends JFrame {
                                                  "Extra Classpath", this,
                                                  "<html>Any directories or jar files to add to the classpath<br>"+
                                                  "of the Compiler and Interactions Pane.</html>"));
-    
-    
+
+
     panel.displayComponents();
   }
-  
+
   /**
    * Add all of the components for the Display Options panel of the preferences window.
    */
@@ -465,7 +465,7 @@ public class ConfigFrame extends JFrame {
     panel.addComponent(new ForcedChoiceOptionComponent(OptionConstants.LOOK_AND_FEEL,
                                                        "Look and Feel", this,
                                                        "Changes the general appearance of DrJava."));
-    
+
     //ToolbarOptionComponent is a degenerate option component
     panel.addComponent(new ToolbarOptionComponent("Toolbar Buttons", this,
                                                   "How to display the toolbar buttons."));
@@ -474,7 +474,7 @@ public class ConfigFrame extends JFrame {
                                                   "Whether to show line numbers on the left side of the Definitions Pane."));
     panel.displayComponents();
   }
-   
+
   /**
    * Add all of the components for the Font panel of the preferences window.
    */
@@ -495,7 +495,7 @@ public class ConfigFrame extends JFrame {
     }
     panel.displayComponents();
   }
-  
+
   /**
    * Adds all of the components for the Color panel of the preferences window.
    */
@@ -532,7 +532,7 @@ public class ConfigFrame extends JFrame {
                                                 "The color for System.in in the Interactions Pane."));
     panel.displayComponents();
   }
-  
+
   /**
    * Adds all of the components for the Key Bindings panel of the preferences window.
    */
@@ -548,14 +548,14 @@ public class ConfigFrame extends JFrame {
       tmpKsd = (KeyStrokeData) e.nextElement();
       if (tmpKsd.getOption() != null) {
         // Get the tooltip, or default to its name, if none
-        KeyStroke ks = tmpKsd.getKeyStroke();
-        //Action a = KeyBindingManager.Singleton.get(ks);
+//        KeyStroke ks = tmpKsd.getKeyStroke();
+//        Action a = KeyBindingManager.Singleton.get(ks);
         Action a = tmpKsd.getAction();
         String desc = (String) a.getValue(Action.SHORT_DESCRIPTION);
         if ((desc == null) || (desc.equals(""))) {
           desc = tmpKsd.getName();
         }
-        
+
         tmpKsoc = new KeyStrokeOptionComponent((KeyStrokeOption)tmpKsd.getOption(),
                                                tmpKsd.getName(), this, desc);
         if (tmpKsoc != null) {
@@ -571,7 +571,7 @@ public class ConfigFrame extends JFrame {
     }
     panel.displayComponents();
   }
-  
+
   /**
    * Add all of the components for the Debugger panel of the preferences window.
    */
@@ -589,7 +589,7 @@ public class ConfigFrame extends JFrame {
         "See the user documentation for more details.\n";
         panel.addComponent(new LabelComponent(howto, this));
     }
-    
+
     VectorOptionComponent sourcePath =
       new VectorOptionComponent(OptionConstants.DEBUG_SOURCEPATH,
                                 "Sourcepath", this,
@@ -614,10 +614,10 @@ public class ConfigFrame extends JFrame {
                                                  "<html>Any classes that the debuggger should not step into.<br>" +
                                                  "Should be a comma-separated list of fully-qualified class names.<br>" +
                                                  "To exclude a package, specify <code>packagename.*</code> in the list.</html>"));
-    
+
     panel.displayComponents();
   }
-  
+
   /**
    * Add all of the components for the Javadoc panel of the preferences window.
    */
@@ -639,25 +639,25 @@ public class ConfigFrame extends JFrame {
       (new StringOptionComponent(OptionConstants.JAVADOC_1_4_LINK,
                                  "Javadoc 1.4 URL", this,
                                  "The URL to the Java 1.4 API, for generating links to library classes."));
-    
+
     panel.addComponent
       (new FileOptionComponent(OptionConstants.JAVADOC_DESTINATION,
                                "Default Destination Directory", this,
                                "Optional default directory for saving Javadoc documentation.",
                                _fileOptionChooser));
-    
+
     panel.addComponent
       (new StringOptionComponent(OptionConstants.JAVADOC_CUSTOM_PARAMS,
                                  "Custom Javadoc Parameters", this,
                                  "Any extra flags or parameters to pass to Javadoc."));
-    
+
     panel.addComponent
       (new BooleanOptionComponent(OptionConstants.JAVADOC_FROM_ROOTS,
                                   "Generate Javadoc From Source Roots", this,
                                   "<html>Whether 'Javadoc All' should generate Javadoc for all packages<br>" +
                                   "in an open document's source tree, rather than just the document's<br>" +
                                   "own package and sub-packages.</html>"));
-    
+
     panel.displayComponents();
   }
 
@@ -678,20 +678,20 @@ public class ConfigFrame extends JFrame {
                                                   "Prompt if Interactions Pane Exits Unexpectedly", this,
                                                   "<html>Whether DrJava should show a dialog box if a program<br>" +
                                                   "in the Interactions Pane exits without the user clicking Reset.</html>"));
-    
+
     // Javadoc
     panel.addComponent(new BooleanOptionComponent(OptionConstants.JAVADOC_PROMPT_FOR_DESTINATION,
                                                   "Prompt for Javadoc Destination", this,
                                                   "<html>Whether Javadoc should always prompt the user<br>" +
                                                   "to select a destination directory.</html>"));
-    
+
 
     // Save before X
     panel.addComponent(new BooleanOptionComponent(OptionConstants.ALWAYS_SAVE_BEFORE_COMPILE,
                                                   "Automatically Save Before Compiling", this,
                                                   "<html>Whether DrJava should automatically save before<br>" +
                                                   "recompiling or ask the user each time.</html>"));
-    
+
     // TODO: this is dev-only until the sync issues with interactions are worked out
 //    if (CodeStatus.DEVELOPMENT) {
 //      panel.addComponent(new BooleanOptionComponent(OptionConstants.ALWAYS_SAVE_BEFORE_RUN, "Automatically Save and Compile Before Running Main Method", this,
@@ -709,7 +709,7 @@ public class ConfigFrame extends JFrame {
                                                   "Automatically Save Before Generating Javadoc", this,
                                                   "<html>Whether DrJava should automatically save before<br>" +
                                                   "generating Javadoc or ask the user each time.</html>"));
-    
+
     // Warnings
     panel.addComponent(new BooleanOptionComponent(OptionConstants.WARN_BREAKPOINT_OUT_OF_SYNC,
                                                   "Warn on Breakpoint if Out of Sync", this,
@@ -747,13 +747,13 @@ public class ConfigFrame extends JFrame {
                               dirChooser);
     workDir.setFileFilter(new DirectoryFilter());
     panel.addComponent(workDir);
-    
+
     panel.addComponent(new IntegerOptionComponent(OptionConstants.HISTORY_MAX_SIZE, "Size of Interactions History", this,
                                                   "The number of interactions to remember in the history."));
     panel.addComponent(new IntegerOptionComponent(OptionConstants.RECENT_FILES_MAX_SIZE, "Recent Files List Size", this,
                                                   "<html>The number of files to remember in<br>" +
                                                   "the recently used files list in the File menu.</html>"));
-    
+
     panel.addComponent(new BooleanOptionComponent(OptionConstants.AUTO_CLOSE_COMMENTS, "Automatically Close Block Comments", this,
                                                   "<html>Automatically inserts a closing comment tag (\"*/\")<br>" +
                                                   "when the enter key is pressed after typing a new<br>" +
@@ -765,23 +765,23 @@ public class ConfigFrame extends JFrame {
                                                   "the user modifies, saved with a '~' at the end of the filename.</html>"));
     panel.addComponent(new BooleanOptionComponent(OptionConstants.RESET_CLEAR_CONSOLE, "Clear Console After Interactions Reset", this,
                                                   "Whether to clear the Console output after resetting the Interactions Pane."));
-    
+
     panel.displayComponents();
   }
-  
+
   /**
    * Private class to handle rendering of tree nodes, each of which
    * corresponds to a ConfigPanel.
    */
   private class PanelTreeNode extends DefaultMutableTreeNode {
-    
+
     private ConfigPanel _panel;
-    
+
     public PanelTreeNode(String t) {
       super(t);
       _panel = new ConfigPanel(t);
     }
-      
+
     public PanelTreeNode(ConfigPanel c) {
       super(c.getTitle());
       _panel = c;
@@ -789,7 +789,7 @@ public class ConfigFrame extends JFrame {
     public ConfigPanel getPanel() {
       return _panel;
     }
-    
+
     /**
      * Tells its panel to update, and tells all of its child nodes to update their panels.
      * @return whether the update succeeded.
@@ -819,24 +819,24 @@ public class ConfigFrame extends JFrame {
           return false;
         }
       }
-      
+
       return true;
     }
-    
+
     /**
      * Tells its panel to reset its displayed value to the currently set value
      * for this component, and tells all of its children to reset their panels.
      */
     public void resetToCurrent() {
       _panel.resetToCurrent();
-      
+
       Enumeration childNodes = this.children();
       while (childNodes.hasMoreElements()) {
         ((PanelTreeNode)childNodes.nextElement()).resetToCurrent();
       }
     }
   }
-  
+
   private class PanelTreeSelectionListener implements TreeSelectionListener {
     public void valueChanged(TreeSelectionEvent e) {
       Object o = _tree.getLastSelectedPathComponent();

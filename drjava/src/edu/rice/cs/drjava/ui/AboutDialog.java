@@ -60,13 +60,13 @@ import java.util.Map;
  * @version $Id$
  */
 public class AboutDialog extends JDialog implements ActionListener {
-  
+
   private static ImageInfo CSLOGO = new ImageInfo("RiceCS.gif",new Color(0x423585)),
     SF = new ImageInfo("SourceForge.gif",Color.black),
     DRJAVA = new ImageInfo("DrJava.png",new Color(0xCCCCFF));
 
   private final JButton _okButton = new JButton("OK");
-  
+
   public AboutDialog(JFrame owner) {
     super(owner, "About DrJava", true); // (changed to non-modal for now)
 
@@ -78,7 +78,7 @@ public class AboutDialog extends JDialog implements ActionListener {
     // suggested from zaq@nosi.com, to keep the frame on the screen!
     //System.out.println("Dialog created...");
   }
-  
+
   public void show() {
     // suggested from zaq@nosi.com, to keep the frame on the screen!
     Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
@@ -87,7 +87,7 @@ public class AboutDialog extends JDialog implements ActionListener {
                      (screenSize.height - frameSize.height) / 2);
     super.show();
   }
-  
+
   public void buildGUI(Container cp) {
     cp.setLayout(new BorderLayout());
     JLabel drjava = createImageLabel(DRJAVA,JLabel.LEFT);
@@ -110,7 +110,7 @@ public class AboutDialog extends JDialog implements ActionListener {
     cp.add(createBottomBar(),BorderLayout.SOUTH);
     cp.add(tabs,BorderLayout.CENTER);
   }
-  
+
   private static JComponent createSysPropTab() {
     java.util.Properties props = System.getProperties();
     int size = props.size();
@@ -138,13 +138,13 @@ public class AboutDialog extends JDialog implements ActionListener {
     propTab.add(scroller,BorderLayout.CENTER);
     return propTab;
   }
-  
+
   private static void addTab(JTabbedPane tabs, String title,
                              JComponent tab) {
     wrapBorder(tab,new EmptyBorder(5,6,6,5));
     tabs.addTab(title,tab);
   }
-  
+
   public static JComponent createCopyrightTab() {
     JPanel panel = new JPanel(new BorderLayout());
 
@@ -156,13 +156,13 @@ public class AboutDialog extends JDialog implements ActionListener {
     sb.append(COPYRIGHT);
     JComponent copy = createTextScroller(sb.toString());
     wrapBorder(copy,new EmptyBorder(0,0,5,0));
-    
+
     // deal with logos now (calibrate size)
     LogoList logos = new LogoList();
     logos.addLogo(createBorderedLabel(CSLOGO,new EmptyBorder(5,5,5,5)));
     logos.addLogo(createBorderedLabel(SF,null));
     logos.resizeLogos();
-    
+
     // add to panel
     JPanel logoPanel = new JPanel();
     logoPanel.setLayout(new BoxLayout(logoPanel,BoxLayout.X_AXIS));
@@ -176,18 +176,18 @@ public class AboutDialog extends JDialog implements ActionListener {
     panel.add(copy,BorderLayout.CENTER);
     return panel;
   }
-  
+
   private static class LogoList extends java.util.LinkedList<JPanel> {
     private int width = Integer.MIN_VALUE;
     private int height = Integer.MIN_VALUE;
     private void addLogo(JPanel logo) {
       if(logo == null) return;
       Dimension d = logo.getMinimumSize();
-      width = (int) Math.max(width,d.width);
-      height = (int) Math.max(height,d.height);
+      width = Math.max(width,d.width);
+      height = Math.max(height,d.height);
       add(logo);
     }
-    
+
     private void resizeLogos() {
       java.util.Iterator it = iterator();
       Dimension d = new Dimension(width,height);
@@ -199,7 +199,7 @@ public class AboutDialog extends JDialog implements ActionListener {
       }
     }
   }
-  
+
   public static JPanel createBorderedLabel(ImageInfo info,
                                            EmptyBorder pad) {
     JLabel label = createImageLabel(info,JLabel.CENTER);
@@ -212,7 +212,7 @@ public class AboutDialog extends JDialog implements ActionListener {
     panel.add(label);
     return panel;
   }
-      
+
   public static JLabel createImageLabel(ImageInfo info, int align) {
     ImageIcon icon = MainFrame.getIcon(info.name);
     if(icon==null) return null;
@@ -221,7 +221,7 @@ public class AboutDialog extends JDialog implements ActionListener {
     label.setBackground(info.color);
     return label;
   }
-  
+
   public static JTextArea createTextArea(String text) {
     JTextArea textArea = new JTextArea(text);
     textArea.setEditable(false);
@@ -230,11 +230,11 @@ public class AboutDialog extends JDialog implements ActionListener {
     textArea.setCaretPosition(0);
     return textArea;
   }
-  
+
   public static JScrollPane createTextScroller(String text) {
     return new BorderlessScrollPane(createTextArea(text));
   }
-  
+
   private JPanel createBottomBar() {
     JPanel panel = new JPanel(new BorderLayout());
     _okButton.addActionListener(this);
@@ -242,11 +242,11 @@ public class AboutDialog extends JDialog implements ActionListener {
     wrapBorder(panel,new EmptyBorder(5,5,5,5));
     return panel;
   }
-  
+
   public void actionPerformed(ActionEvent e) {
     hide();
   }
-  
+
   public static final String COPYRIGHT = "Copyright \u00a9 2001-2002 JavaPLT group"+
     " at Rice University (javaplt@rice.edu)\n\nSee http://drjava.sourceforge.net for"+
     " more information on DrJava or to obtain the latest version of the program or its source code.\n\n"+
@@ -279,7 +279,7 @@ public class AboutDialog extends JDialog implements ActionListener {
     " window based on a \"read-eval-print loop\", which allows programmers to develop, test, and debug"+
     " Java programs in an interactive, incremental fashion.\n\n"+
     "Home Page: http://drjava.sourceforge.net\nPaper: http://drjava.sf.net/papers/drjava-paper.shtml";
-  
+
   public static class ImageInfo {
     private final String name;
     private final Color color;
@@ -291,7 +291,7 @@ public class AboutDialog extends JDialog implements ActionListener {
 
   public static String getGPL() {
     if(initGPL) return GPL;
-    
+
     try {
       InputStream is = AboutDialog.class.getResourceAsStream("/edu/rice/cs/LICENSE");
       if(is!=null) {
@@ -299,7 +299,7 @@ public class AboutDialog extends JDialog implements ActionListener {
         StringBuffer sb = new StringBuffer();
         for(String s = r.readLine(); s != null; s = r.readLine()) {
           int lastSig = s.length()-1; // the last char index
-          
+
           while(lastSig >= 0 && Character.isWhitespace(s.charAt(lastSig))) {
             lastSig--;
           }
@@ -318,11 +318,11 @@ public class AboutDialog extends JDialog implements ActionListener {
     catch(Exception e) {
       GPL = null;
     }
-    
+
     initGPL = true;
     return GPL;
   }
-  
+
   private static void wrapBorder(JComponent c, Border b) {
     c.setBorder(new CompoundBorder(b,c.getBorder()));
   }

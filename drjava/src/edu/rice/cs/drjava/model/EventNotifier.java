@@ -48,16 +48,16 @@ import edu.rice.cs.util.ReaderWriterLock;
 /**
  * Keeps track of all listeners to the model, and has the ability
  * to notify them of some event.
- * 
+ *
  * All methods in this class must use the synchronization methods
  * provided by ReaderWriterLock.  This ensures that multiple notifications
  * (reads) can occur simultaneously, but only one thread can be adding
  * or removing listeners (writing) at a time, and no reads can occur
  * during a write.
- * 
+ *
  * <i>No</i> methods on this class should be synchronized using traditional
  * Java synchronization!
- * 
+ *
  * @version $Id$
  */
 public class EventNotifier implements GlobalModelListener {
@@ -68,17 +68,17 @@ public class EventNotifier implements GlobalModelListener {
    * access it at once.
    */
   private final Vector<GlobalModelListener> _listeners;
-  
+
   /**
    * Provides synchronization primitives for solving the readers/writers
    * problem.  In EventNotifier, adding and removing listeners are considered
    * write operations, and all notifications are considered read operations.
-   * 
+   *
    * Multiple reads are allowed simultaneously, but only one write can occur
    * at a time, and no reads can occur during a write.
    */
   private final ReaderWriterLock _lock;
-  
+
   /**
    * Creates a new EventNotifier with an empty list of listeners.
    */
@@ -86,9 +86,9 @@ public class EventNotifier implements GlobalModelListener {
     _listeners = new Vector<GlobalModelListener>();
     _lock = new ReaderWriterLock();
   }
-  
+
   // -------------------- WRITER METHODS --------------------
-  
+
   /**
    * Add a listener to the model.
    * @param listener a listener that reacts on events
@@ -96,13 +96,13 @@ public class EventNotifier implements GlobalModelListener {
   public void addListener(GlobalModelListener listener) {
     _lock.startWrite();
     try {
-      _listeners.addElement(listener);
+      _listeners.add(listener);
     }
     finally {
       _lock.endWrite();
     }
   }
-  
+
   /**
    * Remove a listener from the model.
    * @param listener a listener that reacts on events
@@ -110,29 +110,29 @@ public class EventNotifier implements GlobalModelListener {
   public void removeListener(GlobalModelListener listener) {
     _lock.startWrite();
     try {
-      _listeners.removeElement(listener);
+      _listeners.remove(listener);
     }
     finally {
       _lock.endWrite();
     }
   }
-  
+
   /**
    * Removes all listeners from this notifier.
    */
   public void removeAllListeners() {
     _lock.startWrite();
     try {
-      _listeners.removeAllElements();
+      _listeners.clear();
     }
     finally {
       _lock.endWrite();
     }
   }
-  
-  
+
+
   // -------------------- READER METHODS --------------------
-  
+
   /**
    * Lets the listeners know some event has taken place.
    * @param EventNotifier n tells the listener what happened
@@ -149,7 +149,7 @@ public class EventNotifier implements GlobalModelListener {
       _lock.endRead();
     }
   }
-  
+
   /**
    * Allows the GlobalModel to ask its listeners a yes/no question and
    * receive a response.
@@ -161,7 +161,7 @@ public class EventNotifier implements GlobalModelListener {
     _lock.startRead();
     try {
       boolean poll = true;
-      
+
       int size = _listeners.size();
       for(int i = 0; (poll && (i < size)); i++) {
         poll = poll && p.poll(_listeners.get(i));
@@ -172,24 +172,24 @@ public class EventNotifier implements GlobalModelListener {
       _lock.endRead();
     }
   }
-  
+
   /**
    * Class model for notifying listeners of an event.
    */
   public abstract static class Notifier {
     public abstract void notifyListener(GlobalModelListener l);
   }
-  
+
   /**
    * Class model for asking listeners a yes/no question.
    */
   public abstract static class Poller {
     public abstract boolean poll(GlobalModelListener l);
   }
-  
-  
-  
-  
+
+
+
+
   /**
    * Called when a file's main method is about to be run.
    */
@@ -221,7 +221,7 @@ public class EventNotifier implements GlobalModelListener {
       _lock.endRead();
     }
   }
-  
+
   /**
    * Called when the active interpreter is changed.
    * @param inProgress Whether the new interpreter is currently in progress
@@ -239,7 +239,7 @@ public class EventNotifier implements GlobalModelListener {
       _lock.endRead();
     }
   }
-  
+
   /**
    * Called to indicate that a suite of tests has started running.
    * @param numTests The number of tests in the suite to be run.
@@ -256,7 +256,7 @@ public class EventNotifier implements GlobalModelListener {
       _lock.endRead();
     }
   }
-  
+
   /**
    * Called when the interactions window generates a syntax error.
    *
@@ -275,7 +275,7 @@ public class EventNotifier implements GlobalModelListener {
       _lock.endRead();
     }
   }
-  
+
   /**
    * Called after a new document is created.
    */
@@ -291,7 +291,7 @@ public class EventNotifier implements GlobalModelListener {
       _lock.endRead();
     }
   }
-  
+
   /**
    * Called when an interaction has finished running.
    */
@@ -307,7 +307,7 @@ public class EventNotifier implements GlobalModelListener {
       _lock.endRead();
     }
   }
-  
+
   /**
    * Called when the console window is reset.
    */
@@ -323,7 +323,7 @@ public class EventNotifier implements GlobalModelListener {
       _lock.endRead();
     }
   }
-  
+
   /**
    * Called after the current document is saved.
    */
@@ -339,7 +339,7 @@ public class EventNotifier implements GlobalModelListener {
       _lock.endRead();
     }
   }
-  
+
   /**
    * Called when a particular test is started.
    * @param testName The name of the test being started.
@@ -356,7 +356,7 @@ public class EventNotifier implements GlobalModelListener {
       _lock.endRead();
     }
   }
-  
+
   /**
    * Called after a file is opened and read into the current document.
    */
@@ -372,7 +372,7 @@ public class EventNotifier implements GlobalModelListener {
       _lock.endRead();
     }
   }
-  
+
   /**
    * Called when the interactionsJVM has begun resetting.
    */
@@ -388,7 +388,7 @@ public class EventNotifier implements GlobalModelListener {
       _lock.endRead();
     }
   }
-  
+
   /**
    * Called after Javadoc is started by the GlobalModel.
    */
@@ -404,7 +404,7 @@ public class EventNotifier implements GlobalModelListener {
       _lock.endRead();
     }
   }
-  
+
   /**
    * Called after a document is closed.
    */
@@ -420,7 +420,7 @@ public class EventNotifier implements GlobalModelListener {
       _lock.endRead();
     }
   }
-  
+
   /**
    * Called when a particular test has ended.
    * @param testName The name of the test that has ended.
@@ -440,7 +440,7 @@ public class EventNotifier implements GlobalModelListener {
       _lock.endRead();
     }
   }
-  
+
   /**
    * Called after a document is reverted.
    */
@@ -456,7 +456,7 @@ public class EventNotifier implements GlobalModelListener {
       _lock.endRead();
     }
   }
-  
+
   /**
    * Called after Javadoc is finished.
    * @param success whether the Javadoc operation generated proper output
@@ -476,7 +476,7 @@ public class EventNotifier implements GlobalModelListener {
       _lock.endRead();
     }
   }
-  
+
   /**
    * Called when the interactions window is reset.
    */
@@ -492,7 +492,7 @@ public class EventNotifier implements GlobalModelListener {
       _lock.endRead();
     }
   }
-  
+
   /**
    * Called if the interpreter reset failed.
    * @param t Throwable explaining why the reset failed.
@@ -510,7 +510,7 @@ public class EventNotifier implements GlobalModelListener {
       _lock.endRead();
     }
   }
-  
+
   /**
    * Called when trying to test a non-TestCase class.
    * @param isTestAll whether or not it was a use of the test all button
@@ -527,7 +527,7 @@ public class EventNotifier implements GlobalModelListener {
       _lock.endRead();
     }
   }
-  
+
   /**
    * Called when an undoable edit occurs.
    */
@@ -543,7 +543,7 @@ public class EventNotifier implements GlobalModelListener {
       _lock.endRead();
     }
   }
-  
+
   /**
    * Called when the interactions JVM was closed by System.exit
    * or by being aborted. Immediately after this the interactions
@@ -562,7 +562,7 @@ public class EventNotifier implements GlobalModelListener {
       _lock.endRead();
     }
   }
-  
+
   /**
    * Called to ask the listener if it is OK to abandon the current
    * document.
@@ -581,7 +581,7 @@ public class EventNotifier implements GlobalModelListener {
       _lock.endRead();
     }
   }
-  
+
   /**
    * Called after JUnit is finished running tests.
    */
@@ -597,7 +597,7 @@ public class EventNotifier implements GlobalModelListener {
       _lock.endRead();
     }
   }
-  
+
   /**
    * Called after a compile is started by the GlobalModel.
    */
@@ -613,7 +613,7 @@ public class EventNotifier implements GlobalModelListener {
       _lock.endRead();
     }
   }
-  
+
   /**
    * Called to ask the listener if it is OK to revert the current
    * document to a newer version saved on file.
@@ -632,7 +632,7 @@ public class EventNotifier implements GlobalModelListener {
       _lock.endRead();
     }
   }
-  
+
   /**
    * Called after an interaction is started by the GlobalModel.
    */
@@ -648,7 +648,7 @@ public class EventNotifier implements GlobalModelListener {
       _lock.endRead();
     }
   }
-  
+
   /**
    * Called when a compile has finished running.
    */
@@ -664,7 +664,7 @@ public class EventNotifier implements GlobalModelListener {
       _lock.endRead();
     }
   }
-  
+
   /**
    * Called to demand that all files be saved before compiling.
    * It is up to the caller of this method to check if the documents have been
@@ -682,7 +682,7 @@ public class EventNotifier implements GlobalModelListener {
       _lock.endRead();
     }
   }
-  
+
   /**
    * Called to demand that all files be saved before running the main method of
    * a document. It is up to the caller of this method to check if the documents
@@ -702,7 +702,7 @@ public class EventNotifier implements GlobalModelListener {
       _lock.endRead();
     }
   }*/
-  
+
   /**
    * Called to demand that all files be saved before running JUnit tests.
    * It is up to the caller of this method to check if the documents have been
@@ -722,7 +722,7 @@ public class EventNotifier implements GlobalModelListener {
       _lock.endRead();
     }
   }*/
-  
+
   /**
    * Called before attempting Javadoc, to give users a chance to save.
    * Do not continue with Javadoc if the user doesn't save!
@@ -739,7 +739,7 @@ public class EventNotifier implements GlobalModelListener {
       _lock.endRead();
     }
   }
-  
+
   /**
    * Called to demand that all files be saved before starting the debugger.
    * It is up to the caller of this method to check if the documents have been

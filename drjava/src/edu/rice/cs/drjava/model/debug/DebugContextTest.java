@@ -40,16 +40,16 @@ public final class DebugContextTest extends DebugTestCase {
     if (printMessages)  System.out.println("----testDebugSourcePath----");
     StepTestListener debugListener = new StepTestListener();
     _debugger.addListener(debugListener);
-  
+
     // Start up
     OpenDefinitionsDocument doc = _startupDebugger("DrJavaDebugClass.java",
                                                    DEBUG_CLASS);
     Vector<File> path = new Vector<File>();
     path.addElement(_tempDir);  // directory where doc's file is saved
-    
+
     // Add a breakpoint
     _debugger.toggleBreakpoint(doc,DEBUG_CLASS.indexOf("bar();"),4);
-   
+
     // Run the foo() method, hitting breakpoint
     synchronized(_notifierLock) {
       interpretIgnoreResult("new DrJavaDebugClass().foo()");
@@ -58,7 +58,7 @@ public final class DebugContextTest extends DebugTestCase {
     }
     // Source is highlighted because document is stored in breakpoint
     debugListener.assertThreadLocationUpdatedCount(1);  // fires
-    
+
     // Step into bar() method
     synchronized(_notifierLock){
       _asyncStep(Debugger.STEP_INTO);
@@ -68,12 +68,12 @@ public final class DebugContextTest extends DebugTestCase {
     // Source is highlighted because file is in source root set
     debugListener.assertStepRequestedCount(1);  // fires (don't wait)
     debugListener.assertThreadLocationUpdatedCount(2);  // fires
-    
-    
+
+
     // Close file so it won't be in source root set
     _model.closeFile(doc);
     debugListener.assertBreakpointRemovedCount(1);
-    
+
     // Step to next line
     synchronized(_notifierLock) {
       _asyncStep(Debugger.STEP_OVER);
@@ -83,12 +83,12 @@ public final class DebugContextTest extends DebugTestCase {
     // Source is not highlighted
     debugListener.assertStepRequestedCount(2);  // fires (don't wait)
     debugListener.assertThreadLocationUpdatedCount(2);  // doesn't fire
-   
+
     synchronized(_debugger) {
       // Add _tempDir to our sourcepath
       DrJava.getConfig().setSetting(OptionConstants.DEBUG_SOURCEPATH, path);
     }
-    
+
     // Step to next line
     synchronized(_notifierLock) {
       _asyncStep(Debugger.STEP_OVER);
@@ -98,12 +98,12 @@ public final class DebugContextTest extends DebugTestCase {
     // Source is highlighted because file is now on sourcepath
     debugListener.assertStepRequestedCount(3);  // fires (don't wait)
     debugListener.assertThreadLocationUpdatedCount(3);  // fires
-    
+
     // Shut down
     _shutdownAndWaitForInteractionEnded();
     _debugger.removeListener(debugListener);
   }
-  
+
   /**
    * Tests that breakpoints behave correctly in non-public classes.
    */
@@ -121,16 +121,16 @@ public final class DebugContextTest extends DebugTestCase {
     // Add a breakpoint
     _debugger.toggleBreakpoint(doc,DEBUG_CLASS.indexOf("Baz Line 1"),14);
     debugListener.assertBreakpointSetCount(1);
-    
+
     // Run the baz() method, hitting breakpoint
     synchronized(_notifierLock) {
       interpretIgnoreResult("new DrJavaDebugClass2().baz()");
       _waitForNotifies(3);  // suspended, updated, breakpointReached
       _notifierLock.wait();
     }
-    
+
     if (printMessages) System.out.println("----After breakpoint:\n" + getInteractionsText());
-    
+
     // Ensure breakpoint is hit
     debugListener.assertBreakpointReachedCount(1);  //fires
     debugListener.assertThreadLocationUpdatedCount(1);  //fires
@@ -138,21 +138,21 @@ public final class DebugContextTest extends DebugTestCase {
     debugListener.assertCurrThreadResumedCount(0);
     debugListener.assertCurrThreadDiedCount(0);
     assertInteractionsDoesNotContain("Baz Line 1");
-    
+
     if (printMessages) System.out.println("adding another breakpoint");
-    
+
     // Set another breakpoint (after is class loaded)
     _debugger.toggleBreakpoint(doc,
        DEBUG_CLASS.indexOf("System.out.println(\"Bar Line 2\")"), 9);
     debugListener.assertBreakpointSetCount(2);
-    
+
     // Step to next line
     synchronized(_notifierLock) {
       _asyncStep(Debugger.STEP_OVER);
       _waitForNotifies(2);  // suspended, updated
       _notifierLock.wait();
     }
-    
+
     if (printMessages) System.out.println("****"+getInteractionsText());
     debugListener.assertStepRequestedCount(1);  // fires (don't wait)
     debugListener.assertCurrThreadResumedCount(1); // fires (don't wait)
@@ -162,7 +162,7 @@ public final class DebugContextTest extends DebugTestCase {
     debugListener.assertBreakpointReachedCount(1);
     assertInteractionsContains("Baz Line 1");
     assertInteractionsDoesNotContain("Bar Line 1");
-    
+
     // Resume until next breakpoint
     synchronized(_notifierLock) {
       if (printMessages) System.out.println("resuming");
@@ -192,19 +192,19 @@ public final class DebugContextTest extends DebugTestCase {
     }
     interpretListener.assertInteractionEndCount(1);
     _model.removeListener(interpretListener);
-    
+
     if (printMessages) System.out.println("----After second resume:\n" + getInteractionsText());
     debugListener.assertCurrThreadResumedCount(3);  //fires (no waiting)
     debugListener.assertBreakpointReachedCount(2);
     debugListener.assertThreadLocationUpdatedCount(3);
     debugListener.assertCurrThreadSuspendedCount(3);
     assertInteractionsContains("Bar Line 2");
-    
+
     // Shut down
     _shutdownWithoutSuspendedInteraction();
     _debugger.removeListener(debugListener);
   }
-  
+
   /**
    * Tests that stepping into a breakpoint works.
    */
@@ -214,27 +214,27 @@ public final class DebugContextTest extends DebugTestCase {
     }
     StepTestListener debugListener = new StepTestListener();
     _debugger.addListener(debugListener);
-    
+
     // Start up
     OpenDefinitionsDocument doc = _startupDebugger("DrJavaDebugClass.java",
                                                    DEBUG_CLASS);
-    
+
     // Add a breakpoint
     _debugger.toggleBreakpoint(doc,DEBUG_CLASS.indexOf("Foo Line 1"), 3);
     _debugger.toggleBreakpoint(doc,DEBUG_CLASS.indexOf("bar();\n"), 4);
     debugListener.assertBreakpointSetCount(2);
-    
+
     // Run the foo() method, hitting breakpoint
     synchronized(_notifierLock) {
       interpretIgnoreResult("new DrJavaDebugClass().foo()");
       _waitForNotifies(3);  // suspended, updated, breakpointReached
       _notifierLock.wait();
     }
-    
+
     if (printMessages) {
       System.out.println("----After breakpoint:\n" + getInteractionsText());
     }
-      
+
     // Ensure breakpoint is hit
     debugListener.assertBreakpointReachedCount(1);  //fires
     debugListener.assertThreadLocationUpdatedCount(1);  //fires
@@ -256,14 +256,14 @@ public final class DebugContextTest extends DebugTestCase {
     debugListener.assertBreakpointReachedCount(1);
     debugListener.assertCurrThreadDiedCount(0);
     assertInteractionsContains("Foo Line 1");
-    
+
     // Step over again
     synchronized(_notifierLock) {
       _asyncStep(Debugger.STEP_OVER);
       _waitForNotifies(2);  // suspended, updated
       _notifierLock.wait();
     }
-    
+
     if (printMessages) {
       System.out.println("****"+getInteractionsText());
     }
@@ -273,7 +273,7 @@ public final class DebugContextTest extends DebugTestCase {
     debugListener.assertCurrThreadDiedCount(0);
     debugListener.assertCurrThreadSuspendedCount(3);  // fires
     debugListener.assertBreakpointReachedCount(1);
-    
+
     // Resume until finished, waiting for interpret call to finish
     InterpretListener interpretListener = new InterpretListener();
     _model.addListener(interpretListener);
@@ -294,11 +294,11 @@ public final class DebugContextTest extends DebugTestCase {
     debugListener.assertThreadLocationUpdatedCount(3);
     debugListener.assertCurrThreadSuspendedCount(3);
 
-   
+
     // Close doc and make sure breakpoints are removed
     _model.closeFile(doc);
     debugListener.assertBreakpointRemovedCount(2);  //fires (no waiting)
-    
+
     // Shutdown the debugger
     if (printMessages) {
       System.out.println("Shutting down...");
@@ -308,7 +308,7 @@ public final class DebugContextTest extends DebugTestCase {
       _waitForNotifies(1);  // shutdown
       _notifierLock.wait();
     }
-    
+
     debugListener.assertDebuggerShutdownCount(1);  //fires
     if (printMessages) {
       System.out.println("Shut down.");
@@ -329,7 +329,7 @@ public final class DebugContextTest extends DebugTestCase {
     // Start up
     OpenDefinitionsDocument doc = _startupDebugger("DrJavaDebugStaticField.java",
                                                    CLASS_WITH_STATIC_FIELD);
-    
+
     // Set a breakpoint
     _debugger.toggleBreakpoint(doc,CLASS_WITH_STATIC_FIELD.indexOf("System.out.println"), 4);
     debugListener.assertBreakpointSetCount(1);
@@ -348,7 +348,7 @@ public final class DebugContextTest extends DebugTestCase {
      if (printMessages) {
       System.out.println("----After breakpoint:\n" + getInteractionsText());
     }
-      
+
     // Ensure breakpoint is hit
     debugListener.assertBreakpointReachedCount(2);  //fires
     debugListener.assertThreadLocationUpdatedCount(2);  //fires
@@ -374,7 +374,7 @@ public final class DebugContextTest extends DebugTestCase {
     assertInteractionsContains("x == 5");
     assertEquals("x retains correct value after step", "5", interpret("DrJavaDebugStaticField.x"));
     assertEquals("this has correct value for x after step", "5", interpret("this.x"));
-    
+
     // Step over again
     synchronized(_notifierLock) {
       _asyncStep(Debugger.STEP_OVER);
@@ -425,7 +425,7 @@ public final class DebugContextTest extends DebugTestCase {
     // Start up
     OpenDefinitionsDocument doc = _startupDebugger("Monkey.java",
                                                    MONKEY_WITH_INNER_CLASS);
-    
+
     // Set a breakpoint
     _debugger.toggleBreakpoint(doc,MONKEY_WITH_INNER_CLASS.indexOf("innerMethodFoo = 12;"), 10);
     _debugger.toggleBreakpoint(doc,MONKEY_WITH_INNER_CLASS.indexOf("System.out.println(\"localVar = \" + localVar);"), 32);
@@ -444,7 +444,7 @@ public final class DebugContextTest extends DebugTestCase {
     _debugger.addWatch("asdf");
     _debugger.addWatch("nullString");
     _debugger.addWatch("localVar");
-    
+
     if (printMessages) {
       System.out.println("first step");
     }
@@ -460,30 +460,30 @@ public final class DebugContextTest extends DebugTestCase {
     debugListener.assertCurrThreadSuspendedCount(2);  // fires
     debugListener.assertBreakpointReachedCount(1);
     debugListener.assertCurrThreadDiedCount(0);
-    
+
     Vector<DebugWatchData> watches = _debugger.getWatches();
-    assertEquals("watch name incorrect", "foo", watches.elementAt(0).getName());
-    assertEquals("watch name incorrect", "innerFoo", watches.elementAt(1).getName());
-    assertEquals("watch name incorrect", "innerInnerFoo", watches.elementAt(2).getName());
-    assertEquals("watch name incorrect", "innerMethodFoo", watches.elementAt(3).getName());
-    assertEquals("watch name incorrect", "asdf", watches.elementAt(4).getName());
-    assertEquals("watch name incorrect", "nullString", watches.elementAt(5).getName());
-    assertEquals("watch value incorrect", "6", watches.elementAt(0).getValue());
-    assertEquals("watch value incorrect", "8", watches.elementAt(1).getValue());
-    assertEquals("watch value incorrect", "10", watches.elementAt(2).getValue());
-    assertEquals("watch value incorrect", "12", watches.elementAt(3).getValue());
-    assertEquals("watch value incorrect", DebugWatchData.NO_VALUE, watches.elementAt(4).getValue());
-    assertEquals("watch value incorrect", "null", watches.elementAt(5).getValue());
-    assertEquals("watch type incorrect", "java.lang.String", watches.elementAt(5).getType());
+    assertEquals("watch name incorrect", "foo", watches.get(0).getName());
+    assertEquals("watch name incorrect", "innerFoo", watches.get(1).getName());
+    assertEquals("watch name incorrect", "innerInnerFoo", watches.get(2).getName());
+    assertEquals("watch name incorrect", "innerMethodFoo", watches.get(3).getName());
+    assertEquals("watch name incorrect", "asdf", watches.get(4).getName());
+    assertEquals("watch name incorrect", "nullString", watches.get(5).getName());
+    assertEquals("watch value incorrect", "6", watches.get(0).getValue());
+    assertEquals("watch value incorrect", "8", watches.get(1).getValue());
+    assertEquals("watch value incorrect", "10", watches.get(2).getValue());
+    assertEquals("watch value incorrect", "12", watches.get(3).getValue());
+    assertEquals("watch value incorrect", DebugWatchData.NO_VALUE, watches.get(4).getValue());
+    assertEquals("watch value incorrect", "null", watches.get(5).getValue());
+    assertEquals("watch type incorrect", "java.lang.String", watches.get(5).getType());
 
     interpret("innerFoo = 0");
     watches = _debugger.getWatches();
-    assertEquals("watch name incorrect", "innerFoo", watches.elementAt(1).getName());
-    assertEquals("watch value incorrect", "0", watches.elementAt(1).getValue());
+    assertEquals("watch name incorrect", "innerFoo", watches.get(1).getName());
+    assertEquals("watch value incorrect", "0", watches.get(1).getValue());
 
     interpret("innerFoo = 8");
-    assertEquals("watch name incorrect", "innerFoo", watches.elementAt(1).getName());
-    assertEquals("watch value incorrect", "8", watches.elementAt(1).getValue());
+    assertEquals("watch name incorrect", "innerFoo", watches.get(1).getName());
+    assertEquals("watch value incorrect", "8", watches.get(1).getValue());
 
     if (printMessages) {
       System.out.println("second step");
@@ -500,7 +500,7 @@ public final class DebugContextTest extends DebugTestCase {
     debugListener.assertCurrThreadSuspendedCount(3);  // fires
     debugListener.assertBreakpointReachedCount(1);
     debugListener.assertCurrThreadDiedCount(0);
-   
+
     if (printMessages) {
       System.out.println("third step");
     }
@@ -516,7 +516,7 @@ public final class DebugContextTest extends DebugTestCase {
     debugListener.assertCurrThreadSuspendedCount(4);  // fires
     debugListener.assertBreakpointReachedCount(1);
     debugListener.assertCurrThreadDiedCount(0);
-    
+
     if (printMessages) {
       System.out.println("fourth step");
     }
@@ -532,7 +532,7 @@ public final class DebugContextTest extends DebugTestCase {
     debugListener.assertCurrThreadSuspendedCount(5);  // fires
     debugListener.assertBreakpointReachedCount(1);
     debugListener.assertCurrThreadDiedCount(0);
-    
+
     if (printMessages) {
       System.out.println("fifth step");
     }
@@ -548,22 +548,22 @@ public final class DebugContextTest extends DebugTestCase {
     debugListener.assertCurrThreadSuspendedCount(6);  // fires
     debugListener.assertBreakpointReachedCount(1);
     debugListener.assertCurrThreadDiedCount(0);
-    
+
     watches = _debugger.getWatches();
-    assertEquals("watch name incorrect", "foo", watches.elementAt(0).getName());
-    assertEquals("watch name incorrect", "innerFoo", watches.elementAt(1).getName());
-    assertEquals("watch name incorrect", "innerInnerFoo", watches.elementAt(2).getName());
-    assertEquals("watch name incorrect", "innerMethodFoo", watches.elementAt(3).getName());
-    assertEquals("watch name incorrect", "asdf", watches.elementAt(4).getName());
-    assertEquals("watch name incorrect", "nullString", watches.elementAt(5).getName());
-    assertEquals("watch value incorrect", "7", watches.elementAt(0).getValue());
-    assertEquals("watch value incorrect", "9", watches.elementAt(1).getValue());
-    assertEquals("watch value incorrect", "11", watches.elementAt(2).getValue());
-    assertEquals("watch value incorrect", "13", watches.elementAt(3).getValue());
-    assertEquals("watch value incorrect", DebugWatchData.NO_VALUE, watches.elementAt(4).getValue());
-    assertEquals("watch value incorrect", "null", watches.elementAt(5).getValue());
-    assertEquals("watch type incorrect", "java.lang.String", watches.elementAt(5).getType());
-    
+    assertEquals("watch name incorrect", "foo", watches.get(0).getName());
+    assertEquals("watch name incorrect", "innerFoo", watches.get(1).getName());
+    assertEquals("watch name incorrect", "innerInnerFoo", watches.get(2).getName());
+    assertEquals("watch name incorrect", "innerMethodFoo", watches.get(3).getName());
+    assertEquals("watch name incorrect", "asdf", watches.get(4).getName());
+    assertEquals("watch name incorrect", "nullString", watches.get(5).getName());
+    assertEquals("watch value incorrect", "7", watches.get(0).getValue());
+    assertEquals("watch value incorrect", "9", watches.get(1).getValue());
+    assertEquals("watch value incorrect", "11", watches.get(2).getValue());
+    assertEquals("watch value incorrect", "13", watches.get(3).getValue());
+    assertEquals("watch value incorrect", DebugWatchData.NO_VALUE, watches.get(4).getValue());
+    assertEquals("watch value incorrect", "null", watches.get(5).getValue());
+    assertEquals("watch type incorrect", "java.lang.String", watches.get(5).getType());
+
     if (printMessages) {
       System.out.println("sixth step");
     }
@@ -579,23 +579,23 @@ public final class DebugContextTest extends DebugTestCase {
     debugListener.assertCurrThreadSuspendedCount(7);  // fires
     debugListener.assertBreakpointReachedCount(1);
     debugListener.assertCurrThreadDiedCount(0);
-    
+
     // Test watches in a static context.
     watches = _debugger.getWatches();
-    assertEquals("watch name incorrect", "foo", watches.elementAt(0).getName());
-    assertEquals("watch name incorrect", "innerFoo", watches.elementAt(1).getName());
-    assertEquals("watch name incorrect", "innerInnerFoo", watches.elementAt(2).getName());
-    assertEquals("watch name incorrect", "innerMethodFoo", watches.elementAt(3).getName());
-    assertEquals("watch name incorrect", "asdf", watches.elementAt(4).getName());
-    assertEquals("watch name incorrect", "nullString", watches.elementAt(5).getName());
-    assertEquals("watch value incorrect", "7", watches.elementAt(0).getValue());
-    assertEquals("watch value incorrect", DebugWatchData.NO_VALUE, watches.elementAt(1).getValue());
-    assertEquals("watch value incorrect", DebugWatchData.NO_VALUE, watches.elementAt(2).getValue());
-    assertEquals("watch value incorrect", DebugWatchData.NO_VALUE, watches.elementAt(3).getValue());
-    assertEquals("watch value incorrect", DebugWatchData.NO_VALUE, watches.elementAt(4).getValue());
-    assertEquals("watch value incorrect", DebugWatchData.NO_VALUE, watches.elementAt(5).getValue());
-    assertEquals("watch type incorrect", DebugWatchData.NO_TYPE, watches.elementAt(5).getType());
-    
+    assertEquals("watch name incorrect", "foo", watches.get(0).getName());
+    assertEquals("watch name incorrect", "innerFoo", watches.get(1).getName());
+    assertEquals("watch name incorrect", "innerInnerFoo", watches.get(2).getName());
+    assertEquals("watch name incorrect", "innerMethodFoo", watches.get(3).getName());
+    assertEquals("watch name incorrect", "asdf", watches.get(4).getName());
+    assertEquals("watch name incorrect", "nullString", watches.get(5).getName());
+    assertEquals("watch value incorrect", "7", watches.get(0).getValue());
+    assertEquals("watch value incorrect", DebugWatchData.NO_VALUE, watches.get(1).getValue());
+    assertEquals("watch value incorrect", DebugWatchData.NO_VALUE, watches.get(2).getValue());
+    assertEquals("watch value incorrect", DebugWatchData.NO_VALUE, watches.get(3).getValue());
+    assertEquals("watch value incorrect", DebugWatchData.NO_VALUE, watches.get(4).getValue());
+    assertEquals("watch value incorrect", DebugWatchData.NO_VALUE, watches.get(5).getValue());
+    assertEquals("watch type incorrect", DebugWatchData.NO_TYPE, watches.get(5).getType());
+
     // Resumes one thread, finishing it and switching to the next break point
     synchronized(_notifierLock) {
       _asyncResume();
@@ -607,22 +607,22 @@ public final class DebugContextTest extends DebugTestCase {
     debugListener.assertThreadLocationUpdatedCount(8);  // fires
     debugListener.assertCurrThreadSuspendedCount(8);  // fires
     debugListener.assertBreakpointReachedCount(2);
-    debugListener.assertCurrThreadDiedCount(0);    
-    
+    debugListener.assertCurrThreadDiedCount(0);
+
     // Test watching a final local variable of an outer class
     watches = _debugger.getWatches();
-    assertEquals("watch name incorrect", "localVar", watches.elementAt(6).getName());
-    assertEquals("watch value incorrect", "11", watches.elementAt(6).getValue());
-    
+    assertEquals("watch name incorrect", "localVar", watches.get(6).getName());
+    assertEquals("watch value incorrect", "11", watches.get(6).getValue());
+
     // Close doc and make sure breakpoints are removed
     _model.closeFile(doc);
     debugListener.assertBreakpointRemovedCount(2);  //fires (no waiting)
-    
+
     // Shut down
     _shutdownAndWaitForInteractionEnded();
     _debugger.removeListener(debugListener);
   }
-  
+
   /**
    * Tests that watches can correctly see the values of local
    * variables, fields and fields of outer classes.
@@ -637,7 +637,7 @@ public final class DebugContextTest extends DebugTestCase {
     // Start up
     OpenDefinitionsDocument doc = _startupDebugger("MonkeyStaticStuff.java",
                                                    MONKEY_STATIC_STUFF);
-    
+
     // Set a breakpoint
     int index = MONKEY_STATIC_STUFF.indexOf("System.out.println(MonkeyInner.MonkeyTwoDeep.twoDeepFoo);");
     _debugger.toggleBreakpoint(doc,
@@ -656,37 +656,37 @@ public final class DebugContextTest extends DebugTestCase {
     _debugger.addWatch("twoDeepFoo");
     _debugger.addWatch("threeDeepFoo");
     _debugger.addWatch("asdf");
-    
+
     Vector<DebugWatchData> watches = _debugger.getWatches();
-    assertEquals("watch name incorrect", "foo", watches.elementAt(0).getName());
-    assertEquals("watch name incorrect", "innerFoo", watches.elementAt(1).getName());
-    assertEquals("watch name incorrect", "twoDeepFoo", watches.elementAt(2).getName());
-    assertEquals("watch name incorrect", "threeDeepFoo", watches.elementAt(3).getName());
-    assertEquals("watch name incorrect", "asdf", watches.elementAt(4).getName());
-    assertEquals("watch value incorrect", "6", watches.elementAt(0).getValue());
-    assertEquals("watch value incorrect", "8", watches.elementAt(1).getValue());
-    assertEquals("watch value incorrect", "13", watches.elementAt(2).getValue());
-    assertEquals("watch value incorrect", "18", watches.elementAt(3).getValue());
-    assertEquals("watch value incorrect", DebugWatchData.NO_VALUE, watches.elementAt(4).getValue());
+    assertEquals("watch name incorrect", "foo", watches.get(0).getName());
+    assertEquals("watch name incorrect", "innerFoo", watches.get(1).getName());
+    assertEquals("watch name incorrect", "twoDeepFoo", watches.get(2).getName());
+    assertEquals("watch name incorrect", "threeDeepFoo", watches.get(3).getName());
+    assertEquals("watch name incorrect", "asdf", watches.get(4).getName());
+    assertEquals("watch value incorrect", "6", watches.get(0).getValue());
+    assertEquals("watch value incorrect", "8", watches.get(1).getValue());
+    assertEquals("watch value incorrect", "13", watches.get(2).getValue());
+    assertEquals("watch value incorrect", "18", watches.get(3).getValue());
+    assertEquals("watch value incorrect", DebugWatchData.NO_VALUE, watches.get(4).getValue());
 
     interpret("innerFoo = 0");
     watches = _debugger.getWatches();
-    assertEquals("watch name incorrect", "innerFoo", watches.elementAt(1).getName());
-    assertEquals("watch value incorrect", "0", watches.elementAt(1).getValue());
+    assertEquals("watch name incorrect", "innerFoo", watches.get(1).getName());
+    assertEquals("watch value incorrect", "0", watches.get(1).getValue());
 
     interpret("innerFoo = 8");
-    assertEquals("watch name incorrect", "innerFoo", watches.elementAt(1).getName());
-    assertEquals("watch value incorrect", "8", watches.elementAt(1).getValue());
-    
+    assertEquals("watch name incorrect", "innerFoo", watches.get(1).getName());
+    assertEquals("watch value incorrect", "8", watches.get(1).getValue());
+
     // Shut down
     _shutdownAndWaitForInteractionEnded();
     _debugger.removeListener(debugListener);
   }
-  
+
   /**
    * Tests that watches can correctly see the values of final local
    * variables and method parameters from enclosing classes.
-   * 
+   *
    * Note:  Some final local variables are inlined by the compiler
    * (even in debug mode), so they are unavailable to the debugger.
    */
@@ -696,7 +696,7 @@ public final class DebugContextTest extends DebugTestCase {
     }
     StepTestListener debugListener = new StepTestListener();
     _debugger.addListener(debugListener);
-    
+
     // Start up
     OpenDefinitionsDocument doc = _startupDebugger("InnerClassWithLocalVariables.java",
                                                    INNER_CLASS_WITH_LOCAL_VARS);
@@ -715,27 +715,27 @@ public final class DebugContextTest extends DebugTestCase {
     _debugger.addWatch("numArgs");
     _debugger.addWatch("args");
     _debugger.addWatch("inlined");
-    
+
     // Check watch values
     Vector<DebugWatchData> watches = _debugger.getWatches();
     assertEquals("numArgs watch value incorrect",
-                 "1", watches.elementAt(0).getValue());
-    String argsWatch = (String)watches.elementAt(1).getValue();
-    assertTrue("args watch value incorrect", 
+                 "1", watches.get(0).getValue());
+    String argsWatch = watches.get(1).getValue();
+    assertTrue("args watch value incorrect",
                argsWatch.indexOf("java.lang.String") != -1);
 
     // unfortunately, inlined variable can't be seen
-    assertEquals("watch value incorrect", DebugWatchData.NO_VALUE, watches.elementAt(2).getValue());
+    assertEquals("watch value incorrect", DebugWatchData.NO_VALUE, watches.get(2).getValue());
 
     // Shut down
     _shutdownAndWaitForInteractionEnded();
     _debugger.removeListener(debugListener);
   }
-  
+
   /**
    * Tests that watches can correctly see the values of final local
    * variables and method parameters from enclosing classes.
-   * 
+   *
    * Note:  Some final local variables are inlined by the compiler
    * (even in debug mode), so they are unavailable to the debugger.
    */
@@ -745,7 +745,7 @@ public final class DebugContextTest extends DebugTestCase {
     }
     StepTestListener debugListener = new StepTestListener();
     _debugger.addListener(debugListener);
-    
+
     // Start up
     OpenDefinitionsDocument doc = _startupDebugger("DrJavaThreadDeathTest.java",
                                                    THREAD_DEATH_CLASS);
