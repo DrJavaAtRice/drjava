@@ -2665,7 +2665,8 @@ public class MainFrame extends JFrame implements OptionConstants {
    * Switch to the JScrollPane containing the DefinitionsPane
    * for the current active document.
    */
-  private void _switchDefScrollPane() {    
+  private void _switchDefScrollPane() {
+    
     // Sync caret with location before switching
     _currentDefPane.getOpenDocument().
       syncCurrentLocationWithDefinitions( _currentDefPane.getCaretPosition() );
@@ -2684,8 +2685,21 @@ public class MainFrame extends JFrame implements OptionConstants {
     
     _docSplitPane.setRightComponent(scroll);
     _docSplitPane.setDividerLocation(oldLocation);
-    _currentDefPane = (DefinitionsPane) scroll.getViewport().getView();
-
+    
+    // if the current def pane is uneditable, that means
+    // we arrived here from a compile with errors.  We're
+    // guaranteed to make it editable again when we 
+    // return from the compilation, so we take the state
+    // with us.  We guarantee only one definitions pane
+    // is un-editable at any time.
+    if ( _currentDefPane.isEditable() ){
+      _currentDefPane = (DefinitionsPane) scroll.getViewport().getView();
+    }
+    else {
+      _currentDefPane.setEditable(true);
+      _currentDefPane = (DefinitionsPane) scroll.getViewport().getView();
+      _currentDefPane.setEditable(false);
+    }
     // reset the undo/redo menu items
     _undoAction.setDelegatee(_currentDefPane.getUndoAction());
     _redoAction.setDelegatee(_currentDefPane.getRedoAction());    
@@ -3146,6 +3160,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       // (This can be called from other threads...)
       //Runnable doCommand = new Runnable() {
       // public void run() {
+      
           _switchDefScrollPane();
           
           boolean isModified = active.isModifiedSinceSave();
@@ -3250,12 +3265,13 @@ public class MainFrame extends JFrame implements OptionConstants {
       // Only change GUI from event-dispatching thread
       Runnable doCommand = new Runnable() {
         public void run() {
-          hourglassOff();
           updateErrorListeners();
           _errorPanel.reset();
           _junitPanel.reset();
           if (inDebugMode()) _updateDebugStatus();
+          hourglassOff();
         }
+        
       };
       SwingUtilities.invokeLater(doCommand);
     }
