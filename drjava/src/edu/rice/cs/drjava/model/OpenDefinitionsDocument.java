@@ -132,6 +132,17 @@ public interface OpenDefinitionsDocument extends Document, Finalizable<Definitio
   public File getFile() throws IllegalStateException, FileMovedException;
 
   /**
+   * Returns true if the file exists on disk, or if the user has located it on disk. Returns false if the file has been moved or deleted
+   */
+  public boolean fileExists();
+  
+  /**
+   * If the file exists, returns true. If it does not exist, prompts the user to look it up.
+   * returns true if the user decides to choose a file, false otherwise
+   */
+  public boolean verifyExists();  
+  
+  /**
    * Returns the name of this file, or "(untitled)" if no file.
    */
   public String getFilename();

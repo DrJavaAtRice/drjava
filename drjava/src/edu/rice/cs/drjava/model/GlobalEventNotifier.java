@@ -818,4 +818,19 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
       _lock.endRead();
     }
   }
+  
+  // ----- Cache -----
+  public void documentNotFound(OpenDefinitionsDocument d, File f) {
+    _lock.startRead();
+    try {
+      int size = _listeners.size();
+      for(int i = 0; i < size; i++) {
+        _listeners.get(i).documentNotFound(d,f);
+      }
+    }
+    finally {
+      _lock.endRead();
+    } 
+  }
+  
 }

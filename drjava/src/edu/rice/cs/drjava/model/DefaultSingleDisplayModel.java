@@ -169,8 +169,12 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel
    * @param doc Document to set as active
    */
   public void setActiveDocument(OpenDefinitionsDocument doc) {
-    _documentNavigator.setActiveDoc(getIDocGivenODD(doc));
-    //    _setActiveDoc(getIDocGivenODD(doc));
+    try {
+      _documentNavigator.setActiveDoc(getIDocGivenODD(doc));
+      //    _setActiveDoc(getIDocGivenODD(doc));
+    } catch(DocumentClosedException dce) {
+      //noop
+    }
   }
   
   public Container getDocCollectionWidget() {
@@ -403,7 +407,7 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel
     }
   
   private void _setActiveDoc(INavigatorItem idoc) {
-      //Hashtable<INavigatorItem, OpenDefinitionsDocument> docs = getDefinitionsDocumentsTable();
+    //Hashtable<INavigatorItem, OpenDefinitionsDocument> docs = getDefinitionsDocumentsTable();
     
 /**
  * Here to help track down memory leaks
@@ -417,6 +421,7 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel
 //    System.out.println(Runtime.getRuntime().freeMemory());
     
     _activeDocument = super.getODDGivenIDoc(idoc);
+    try {
     _activeDocument.checkIfClassFileInSync();
     
 //    _documentNavigator.setActiveDoc(idoc);
@@ -433,6 +438,9 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel
         }
       }
     });
+    } catch(DocumentClosedException dce) {
+      //noop
+    }
   }
   
 

@@ -161,5 +161,10 @@ public interface GlobalModelListener extends InteractionsListener,
    * called when the project runnability changed (ie, when the main file is set/unset)
    */
   public void projectRunnableChanged();
+  
+  /**
+   * Called when the a document, already opened, is brought back into the cache, and it no longer exists on disk or cannot be accessed
+   */
+  public void documentNotFound(OpenDefinitionsDocument d, File f);
 }
 

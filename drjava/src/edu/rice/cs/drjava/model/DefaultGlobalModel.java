@@ -1208,22 +1208,37 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
    * @return the next Document
    */
   public Document getNextDocument(Document doc) {
-    Iterator<OpenDefinitionsDocument> odds = _documentsRepos.valuesIterator();
-    INavigatorItem item = getIDocGivenODD(getODDForDocument(doc));
-    INavigatorItem nextitem = _documentNavigator.getNext(item);
-    if(nextitem == item){
-      // we're at the end, so we need to rewind
-      // and return doc at the very beginning
-      int i = -1;
-      do{
-        item=nextitem;
-        nextitem = _documentNavigator.getPrevious(item);
-        i++;
-      }while(nextitem != item);
-      return getODDGivenIDoc(nextitem);
-    }else{
-      return getODDGivenIDoc(nextitem);
+    try {
+      Iterator<OpenDefinitionsDocument> odds = _documentsRepos.valuesIterator();
+      INavigatorItem item = getIDocGivenODD(getODDForDocument(doc));
+      INavigatorItem nextitem = _documentNavigator.getNext(item);
+      if(nextitem == item){
+        // we're at the end, so we need to rewind
+        // and return doc at the very beginning
+        int i = -1;
+        do{
+          item=nextitem;
+          nextitem = _documentNavigator.getPrevious(item);
+          i++;
+        }while(nextitem != item);
+        return getNextDocHelper(nextitem); //getODDGivenIDoc(nextitem);
+      }else{
+        return getNextDocHelper(nextitem); //getODDGivenIDoc(nextitem);
+      }
+    } catch(DocumentClosedException dce) {
+      return getNextDocument(doc);
     }
+  }
+  
+  private Document getNextDocHelper(INavigatorItem nextItem) {
+    OpenDefinitionsDocument nextDoc = getODDGivenIDoc(nextItem);
+    if(nextDoc.fileExists() || nextDoc.isUntitled()) 
+      return nextDoc;
+    
+    Document toReturn = getNextDocument(nextDoc);
+    if(nextDoc.verifyExists())
+      return nextDoc;
+    return toReturn;
   }
 
   /**
@@ -1233,22 +1248,37 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
    * @return the previous Document
    */
   public Document getPrevDocument(Document doc) {
-    Iterator<OpenDefinitionsDocument> odds = _documentsRepos.valuesIterator();
-    INavigatorItem item = getIDocGivenODD(getODDForDocument(doc));
-    INavigatorItem nextitem = _documentNavigator.getPrevious(item);
-    if(nextitem == item){
-      // we're at the end, so we need to rewind
-      // and return doc at the very beginning
-      int i = -1;
-      do{
-        item=nextitem;
-        nextitem = _documentNavigator.getNext(item);
-        i++;
-      }while(nextitem != item);
-      return getODDGivenIDoc(nextitem);
-    }else{
-      return getODDGivenIDoc(nextitem);
+    try {
+      Iterator<OpenDefinitionsDocument> odds = _documentsRepos.valuesIterator();
+      INavigatorItem item = getIDocGivenODD(getODDForDocument(doc));
+      INavigatorItem nextitem = _documentNavigator.getPrevious(item);
+      if(nextitem == item){
+        // we're at the end, so we need to rewind
+        // and return doc at the very beginning
+        int i = -1;
+        do{
+          item=nextitem;
+          nextitem = _documentNavigator.getNext(item);
+          i++;
+        }while(nextitem != item);
+        return getPrevDocHelper(nextitem);//getODDGivenIDoc(nextitem);
+      }else{
+        return getPrevDocHelper(nextitem);//getODDGivenIDoc(nextitem);
+      }
+    } catch(DocumentClosedException dce) {
+      return getPrevDocument(doc);
     }
+  }
+  
+  private Document getPrevDocHelper(INavigatorItem nextItem) {
+    OpenDefinitionsDocument nextDoc = getODDGivenIDoc(nextItem);
+    if(nextDoc.fileExists() || nextDoc.isUntitled()) 
+      return nextDoc;
+    
+    Document toReturn = getPrevDocument(nextDoc);
+    if(nextDoc.verifyExists())
+      return nextDoc;
+    return toReturn;
   }
 
   public int getDocumentCount() {
@@ -1900,6 +1930,8 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     }
     
     
+    
+    
     /**
      * Gets the definitions document being handled.
      * @return document being handled
@@ -1908,21 +1940,28 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       try{
         return _cache.get(this);
       }catch(FileMovedException e){
-        System.out.println("DefaultGlobalModel: 1430: FileMovedException should be handled by something.");
+//        System.out.println("DefaultGlobalModel: 1430: FileMovedException should be handled by box that fixes everything.");
       }catch(IOException e){
-        System.out.println("DefaultGlobalModel: 1432: IOException should be handled by something.");
+//        System.out.println("DefaultGlobalModel: 1432: IOException should be handled by box that fixes everything.");
+      }
+      try {
+        _notifier.documentNotFound(this,_file);
+        _documentNavigator.refreshDocument(getIDocGivenODD(this), _file.getCanonicalFile().getParent());
+      } catch(IOException ioe) {
+        throw new UnexpectedException(ioe);
       }
       
-      
-      try{
-        File tempFile = _file;
-        setFile(null);
-        _cache.update(this, makeReconstructor());
-        _cache.get(this).insertString(0, "\"Error loading document from file: " + tempFile + "\"", null);
-        return _cache.get(this);
-      }catch(Exception e){
-        throw new UnexpectedException(e);
-      }
+      return getDocument();
+
+//      try{
+//        File tempFile = _file;
+//        setFile(null);
+//        _cache.update(this, makeReconstructor());
+//        _cache.get(this).insertString(0, "\"Error loading document from file: " + tempFile + "\"", null);
+//        return _cache.get(this);
+//      }catch(Exception e){
+//        throw new UnexpectedException(e);
+//      }
     }
 
     /** 
@@ -1960,6 +1999,45 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
           throw new FileMovedException(_file,
                                        "This document's file has been moved or deleted.");
         }
+    }
+    
+    /**
+     * Returns true if the file exists on disk. Returns false if the file has been moved or deleted
+     */
+    public boolean fileExists() {
+      try {        
+        getFile();
+        return true;
+      } 
+      catch(IllegalStateException ise) {
+      } 
+      catch(FileMovedException fme) {
+      }
+      return false;
+    }
+    
+    /**
+     * Returns true if the file exists on disk. Prompts the user otherwise
+     */
+    public boolean verifyExists() {
+      if(! fileExists()) {
+        
+        try {
+          //prompt the user to find it
+          try {
+            _notifier.documentNotFound(this,_file);
+            _documentNavigator.refreshDocument(getIDocGivenODD(this), _file.getCanonicalFile().getParent());
+          } catch(IOException ioe) {
+            throw new UnexpectedException(ioe);
+          }
+          
+          return true;
+        } 
+        catch(DocumentClosedException dce) {
+          return false;
+        }
+      }
+      return true; //if file exists
     }
 
     /**

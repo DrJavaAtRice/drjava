@@ -97,7 +97,6 @@ import edu.rice.cs.util.*;
 
 /**
  * DrJava's main window.
- * @version $Id$
  */
 public class MainFrame extends JFrame implements OptionConstants {
 
@@ -2490,17 +2489,19 @@ public class MainFrame extends JFrame implements OptionConstants {
     int rc = _saveChooser.showSaveDialog(this);
     if (rc == JFileChooser.APPROVE_OPTION) {
       File file = _saveChooser.getSelectedFile();
-      _saveProjectHelper(file);
-      try {
-        if (file.getCanonicalPath().endsWith(".pjt")) {
-          _openProjectHelper(file);
+      if(!file.exists() || _verifyOverwrite()) {
+        _saveProjectHelper(file);
+        try {
+          if (file.getCanonicalPath().endsWith(".pjt")) {
+            _openProjectHelper(file);
+          }
+          else {
+            _openProjectHelper(new File(file.getCanonicalPath() + ".pjt"));
+          }
         }
-        else {
-          _openProjectHelper(new File(file.getCanonicalPath() + ".pjt"));
+        catch (IOException e) {
+          throw new UnexpectedException(e);
         }
-      }
-      catch (IOException e) {
-        throw new UnexpectedException(e);
       }
     }
   }
@@ -4982,7 +4983,7 @@ public class MainFrame extends JFrame implements OptionConstants {
    * Inner class to listen to all events in the model.
    */
   private class ModelListener implements SingleDisplayModelListener {
-    
+   
     public void fileNotFound(File f){
       _showFileNotFoundError(new FileNotFoundException("File " + f + " cannot be found"));
     }
@@ -5757,6 +5758,34 @@ public class MainFrame extends JFrame implements OptionConstants {
         _runProjectAction.setEnabled(true);
       }else{
         _runProjectAction.setEnabled(false);
+      }
+    }
+    
+    public void documentNotFound(OpenDefinitionsDocument d, File f) {
+           
+      String text = "File " + f.getAbsolutePath() +
+        "\ncould not be found on disk!  It was probably moved\n" +
+        "or deleted.  Would you like to try to find it?";
+      int rc = JOptionPane.showConfirmDialog(MainFrame.this,
+                                             text,
+                                             "File Moved or Deleted",
+                                             JOptionPane.YES_NO_OPTION);
+      if (rc == JOptionPane.YES_OPTION) {
+        try {
+          File[] opened = _openSelector.getFiles(); 
+          d.setFile(opened[0]);
+        } catch(OperationCanceledException oce) {
+          //If canceled, prompt the user again
+          documentNotFound(d,f);
+          return;
+        }
+      }
+      else{
+        //Close the file that wasn't found
+        LinkedList<OpenDefinitionsDocument> l = new LinkedList<OpenDefinitionsDocument>();
+        l.add(d);
+        closeFiles(l);
+        throw new DocumentClosedException(d,"Document in " + f + "closed unexpectedly");
       }
     }
   }

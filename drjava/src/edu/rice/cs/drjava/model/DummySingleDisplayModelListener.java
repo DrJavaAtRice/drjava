@@ -299,4 +299,6 @@ public class DummySingleDisplayModelListener implements SingleDisplayModelListen
   public void javadocEnded(boolean success, File destDir, boolean allDocs) { }
   
   public void activeDocumentChanged(OpenDefinitionsDocument active) { }
+  
+  public void documentNotFound(OpenDefinitionsDocument d, File f) { }
 }

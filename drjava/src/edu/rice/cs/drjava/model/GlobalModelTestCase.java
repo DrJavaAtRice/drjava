@@ -1008,6 +1008,10 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     public void filePathContainsPound() {
       listenerFail("filePathContainsPound fired unexpectedly");
     }
+    
+    public void documentNotFound(OpenDefinitionsDocument d, File f) {
+      listenerFail("documentNotFound fired unexpectedly");
+    }
   }
 
 

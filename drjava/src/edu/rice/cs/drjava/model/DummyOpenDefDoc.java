@@ -152,6 +152,20 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
   }
   
   /**
+   * Returns true if the file exists on disk. Returns false if the file has been moved or deleted
+   */
+  public boolean fileExists() {
+    throw new UnsupportedOperationException("Dummy method");
+  }
+  
+  /**
+   * Returns true if the file exists on disk. Prompts the user otherwise
+   */
+  public boolean verifyExists() {
+    throw new UnsupportedOperationException("Dummy method");
+  }
+  
+  /**
    * Method cleanUpPrintJob
    *
    */
