@@ -248,7 +248,7 @@ public class DefinitionsDocumentTest extends TestCase {
 
 				// {}""/*1bcnrqu */jl/}()
 				defModel.insertString(6,"1",null);
-				assertEquals("0.1",true,defModel.hasHighlightChanged());
+				assertEquals("0.1",false,defModel.hasHighlightChanged());
 
 				actual = defModel.getHighLightInformation();
 				expected = new Vector<StateBlock>();
@@ -262,7 +262,7 @@ public class DefinitionsDocumentTest extends TestCase {
 																					 StateBlock.DEFAULT_COLOR));
 
 				defModel.insertString(9,"2",null);
-				assertEquals("0.1",true,defModel.hasHighlightChanged());
+				assertEquals("0.1",false,defModel.hasHighlightChanged());
 
 				actual = defModel.getHighLightInformation();
 				expected = new Vector<StateBlock>();

@@ -421,6 +421,11 @@ public class ReducedModelControl implements BraceReduction
 		{
 			return -1;
 		}
+
+	public boolean hasHighlightChanged()
+		{
+			return rmc.hasHighlightChanged();
+		}
 }
 
 

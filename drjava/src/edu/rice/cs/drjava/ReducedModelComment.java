@@ -52,7 +52,7 @@ public class ReducedModelComment
   /** a relative offset within the current ReducedToken */
   int _offset;
   int _walkerOffset;
-
+	boolean _highlightChanged;
   /**
    * Constructor.  Creates a new reduced model with the cursor
 	 * at the start of a blank "page."
@@ -64,6 +64,7 @@ public class ReducedModelComment
 			_walker = _cursor.copy();
 			// we should be pointing to the head of the list
 			_offset = 0;
+			_highlightChanged = false;
     }
 
 	/**
@@ -175,6 +176,7 @@ public class ReducedModelComment
    */
 	public void insertOpenSquiggly()
 		{
+			_highlightChanged = false;
 			insertGap(1);
 		}
 
@@ -184,6 +186,7 @@ public class ReducedModelComment
    */
   public void insertClosedSquiggly()
 		{
+			_highlightChanged = false;
 			insertGap(1);
 		}
   /**
@@ -192,6 +195,7 @@ public class ReducedModelComment
    */
   public void insertOpenParen()
 		{
+			_highlightChanged = false;
 			insertGap(1);
 		}
 
@@ -201,6 +205,7 @@ public class ReducedModelComment
    */
   public void insertClosedParen()
 		{
+			_highlightChanged = false;
 			insertGap(1);
 		}
 	
@@ -210,6 +215,7 @@ public class ReducedModelComment
    */
   public void insertOpenBracket()
 		{
+			_highlightChanged = false;
 			insertGap(1);
 		}
 
@@ -219,6 +225,7 @@ public class ReducedModelComment
    */
   public void insertClosedBracket()
 		{
+			_highlightChanged = false;
 			insertGap(1);
 		}
 	
@@ -251,6 +258,7 @@ public class ReducedModelComment
    */
   public void insertStar()
 		{
+			_highlightChanged = false;
 			//check if empty
 			if (_braces.isEmpty())
 				{
@@ -264,9 +272,7 @@ public class ReducedModelComment
 			if (_cursor.atEnd())
 				{
 					_checkPreviousInsertStar(_cursor);
-					return;
-				}
-		 
+				}		 
 			//if inside a double character brace, break it.
 			else if ((_offset > 0) && _cursor.current().isMultipleCharBrace())
 				{
@@ -299,6 +305,7 @@ public class ReducedModelComment
 				{
 					_checkPreviousInsertStar(_cursor);
 				}
+			_highlightChanged = true;
 			return;
 		}
 	
@@ -363,6 +370,7 @@ public class ReducedModelComment
    */
   public void insertSlash()
 		{
+			_highlightChanged = false;
 			//check if empty
 			if (_braces.isEmpty())
 				{
@@ -376,9 +384,7 @@ public class ReducedModelComment
 			if (_cursor.atEnd())
 				{
 					_checkPreviousInsertSlash(_cursor);
-					return;
-				}
-			
+				}			
 			//if inside a double character brace, break it.
 			else if ((_offset > 0) && _cursor.current().isMultipleCharBrace())
 				{
@@ -412,6 +418,7 @@ public class ReducedModelComment
 				{
 					_checkPreviousInsertSlash(_cursor);
 				}
+			_highlightChanged = true;
 			return;
 		}
 
@@ -476,6 +483,7 @@ public class ReducedModelComment
    */
 	public void insertNewline()
 		{
+			_highlightChanged = false;
 			if (_cursor.atStart())
 				{
 					_insertNewEndOfLine();
@@ -503,6 +511,7 @@ public class ReducedModelComment
 				{
 					_insertNewEndOfLine();
 				}
+			_highlightChanged = true;
 			return;
 		}
 
@@ -544,6 +553,7 @@ public class ReducedModelComment
    */
   public void insertQuote()
 		{
+			_highlightChanged = false;
 			if (_cursor.atStart())
 				{
 					_insertNewQuote();
@@ -572,6 +582,7 @@ public class ReducedModelComment
 				{
 					_insertNewQuote();
 				}
+			_highlightChanged = true;
 			return;
 		}
 
@@ -640,7 +651,8 @@ public class ReducedModelComment
 	 */
 	public void insertBackSlash()
 		{			
-		 //check if empty
+			_highlightChanged = false;
+			//check if empty
 			if (_braces.isEmpty())
 				{
 					_insertNewBrace("\\",_cursor);//now pointing to tail.
@@ -653,9 +665,7 @@ public class ReducedModelComment
 			if (_cursor.atEnd())
 				{
 					_checkPreviousInsertBackSlash(_cursor);
-					return;
 				}
-			
 			//if inside a double character brace, break it.
 			else if ((_offset > 0) && _cursor.current().isMultipleCharBrace())
 				{
@@ -689,6 +699,7 @@ public class ReducedModelComment
 				{
 					_checkPreviousInsertBackSlash(_cursor);
 				}
+			_highlightChanged = true;
 			return;
 		}
 
@@ -737,6 +748,7 @@ public class ReducedModelComment
    */
   public void insertGap( int length )
 		{
+			_highlightChanged = false;
 			//0 - a
 			if (_cursor.atStart())
 				{
@@ -776,6 +788,8 @@ public class ReducedModelComment
 					
 					_breakComment(_cursor); //leaves us inside comment
 					_insertNewGap(length); //inserts gap and goes to next item
+					_highlightChanged = true;
+					return;
 				}
 			
 			//1
@@ -1567,6 +1581,7 @@ public class ReducedModelComment
    */
   public void delete( int count )
 		{
+			_highlightChanged = false;
 			if (count == 0)
 				return;
 			ModelList<ReducedToken>.Iterator copyCursor = _cursor.copy();
@@ -1574,6 +1589,7 @@ public class ReducedModelComment
 			// to = _cursor.copy()
 			_offset = _delete(count, _offset, _cursor, copyCursor);
 			copyCursor.dispose();
+			_highlightChanged = true;
 			return;
 		}
 
@@ -1974,7 +1990,11 @@ public class ReducedModelComment
 
 			return;
 		}
-	
+
+	public boolean hasHighlightChanged()
+		{
+			return _highlightChanged;
+		}
 }
 
 

@@ -39,15 +39,14 @@ public class DefinitionsDocument extends DefaultStyledDocument
   public void insertString(int offset, String str, AttributeSet a)
     throws BadLocationException
   {
-
-
     int locationChange = offset - _currentLocation;
 		int strLength = str.length();
 		int prevSize;		//stores the size of the item prev when insert begins.
 		int reducedOffset;
 		ModelList<ReducedToken>.Iterator mark;
 		Vector<StateBlock> newStates = new Vector<StateBlock>();
-
+		_modifiedHighlights = false;
+		
 		//1)adjust location
     _reduced.move(locationChange);
 
@@ -56,10 +55,12 @@ public class DefinitionsDocument extends DefaultStyledDocument
 			{
 				char curChar = str.charAt(i);
 				_addCharToReducedView(curChar);
+				_modifiedHighlights = _modifiedHighlights ||
+					_reduced.hasHighlightChanged();
 			}
 
 		_currentLocation = offset + strLength;
-
+		
     super.insertString(offset, str, a);
 		_modifiedSinceSave = true;
 		
@@ -133,6 +134,7 @@ public class DefinitionsDocument extends DefaultStyledDocument
 		
     super.remove(offset, len);
     _modifiedSinceSave = true;
+		_modifiedHighlights = true;
 		
 		newStates = _reduced.generateHighlights(offset,0);		
 		updateCurrentHighlights(newStates);
@@ -157,8 +159,7 @@ public class DefinitionsDocument extends DefaultStyledDocument
 	 */
 	public boolean hasHighlightChanged()
 		{
-			return true;
-			//return  _modifiedHighlights;
+			return  _modifiedHighlights;
 		}
 
 	public Vector<StateBlock> getHighLightInformation()
@@ -176,22 +177,35 @@ public class DefinitionsDocument extends DefaultStyledDocument
 		}
 
 	private void updateStyles() {
+		Vector<StateBlock> changedStates = getHighLightInformation();
+		//int startOfInterimText = changedStates.elementAt(0).location;
+		if (styleUpdater != null) {
+			//styleUpdater._breakLocation = startOfInterimText;
+			//styleUpdater.interrupt();
+			try { styleUpdater.join(); }
+			catch (InterruptedException ex) {}
+		}
+		
 		if (hasHighlightChanged()) {
-			Vector<StateBlock> changedStates = getHighLightInformation();
-			int startOfInterimText = changedStates.elementAt(0).location;
-			if (styleUpdater != null) {
-				styleUpdater._breakLocation = startOfInterimText;
-				styleUpdater.interrupt();
-				try { styleUpdater.join(); }
-				catch (InterruptedException ex) {}
-			}
-			styleUpdater = new StyleUpdateThread(this, changedStates);				
-			styleUpdater.start();
-			
+				styleUpdater = new StyleUpdateThread(this, changedStates);				
+				styleUpdater.start();
 		}
 		else {
-			return;
+			Vector<StateBlock> subset = new Vector<StateBlock>();
+			int i = 0;
+			StateBlock update = changedStates.elementAt(i);
+			while ((i < changedStates.size()) &&
+						 (update.location < _currentLocation) )
+				{
+					update = changedStates.elementAt(i);
+					subset.addElement(update);
+					i++;
+				}	
+
+			styleUpdater = new StyleUpdateThread(this, subset);
+			styleUpdater.start();
 		}
+
 	}
 
 	public int getCurrentLocation()

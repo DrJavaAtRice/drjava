@@ -18,7 +18,6 @@ public class StyleUpdateThread extends Thread {
 	}
 
 	public void run() {
-		MainFrame._status.setText("Updating highlight information...");
 		SimpleAttributeSet attributes = new SimpleAttributeSet();
 		//int startOfInterimText = _changedStates.elementAt(0).location;
 		// Paint all affected text yellow as interim color.
@@ -28,10 +27,9 @@ public class StyleUpdateThread extends Thread {
 //													 attributes,
 //													 false);
 		//synchronized(this) {
-				try {sleep(150);}
-				catch (InterruptedException ex) {}
+//		try {sleep(150);}
+//		catch (InterruptedException ex) {}
 //			}
-
 		for (int i = 0; i < _changedStates.size(); i++) {
 			StateBlock currentSB = _changedStates.elementAt(i);
 			if (currentSB.location >= _breakLocation) {
@@ -39,11 +37,9 @@ public class StyleUpdateThread extends Thread {
 			}
 			StyleConstants.setForeground(attributes, currentSB.state);
 			_doc.setCharacterAttributes(currentSB.location,
-														 currentSB.size,
-														 attributes,
-														 false);
-			MainFrame._status.setText("");
-
+																	currentSB.size,
+																	attributes,
+																	false);			
 		}
 	}
 }

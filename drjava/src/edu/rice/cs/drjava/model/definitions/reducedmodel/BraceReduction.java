@@ -152,6 +152,8 @@ public interface BraceReduction
 	public int getDistToPrevLine();
 
 	public String simpleString();
+
+	public boolean hasHighlightChanged();
 }
 
 
