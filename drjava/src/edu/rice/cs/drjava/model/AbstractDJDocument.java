@@ -76,23 +76,26 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
   protected int _indent = 2;
   
   /**
-   * The reduced model of the document that handles most of the
-   * document logic and keeps track of state.  Should ONLY be referenced from
-   * this class, and all references to it MUST be synchronized.
+   * The reduced model of the document (stored in field _reduced) handles most of the
+   * document logic and keeps track of state.  This field together with _currentLocation
+   * function as a virtual object for purposes of synchronization.  All operations that
+   * access or modify this virtual object should be synchronized on _reduced.
    */
   protected BraceReduction _reduced = new ReducedModelControl();
   /** The absolute character offset in the document. */
   protected int _currentLocation = 0;
   
-  
+  /* The fields helperCache, _helperCacheHistory, and _cacheInUse function as
+   * a virtual object with synchronization on operations that access or modify
+   * any of these fields.  The helperCache object serves as the lock.
+   */
   
   /**
    * Caches calls to the reduced model to speed up indent performance.
    * Must be cleared every time document is changed.  Use by calling
    * _checkCache and _storeInCache.
    */
-  private final Hashtable<String, Object> _helperCache =
-    new Hashtable<String, Object>();
+  private final Hashtable<String, Object> _helperCache = new Hashtable<String, Object>();
   
   /**
    * Keeps track of the order of elements added to the helper method cache,
@@ -133,16 +136,10 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
    */
   private final Indenter _indenter;
   
-  
   // Saved here to allow the listener to be removed easily
   // This is needed to allow for garbage collection
   private OptionListener<Integer> _listener1;
   private OptionListener<Boolean> _listener2;
-  
-  
-  
-  
-  
   
   
   //-------- CONSTRUCTORS --------
@@ -158,11 +155,6 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
   }
   
   
-  
-  
-  
-  
-  
   //-------- METHODS ---------
   
   /**
@@ -175,7 +167,7 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
    * @return the indent level
    */
   public int getIndent() {
-    throwErrorHuh();
+    // throwErrorHuh();
     return _indent;
   }
   
@@ -184,7 +176,7 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
    * @param indent the size of indent that you want for the document
    */
   public void setIndent(final int indent) {
-    throwErrorHuh();
+    // throwErrorHuh();
     DrJava.getConfig().setSetting(INDENT_LEVEL,new Integer(indent));
     this._indent = indent;
   }
@@ -275,14 +267,16 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
    * Return all highlight status info for text between start and end.
    * This should collapse adjoining blocks with the same status into one.
    */
-  public synchronized Vector<HighlightStatus> getHighlightStatus(int start, int end) {
+  public Vector<HighlightStatus> getHighlightStatus(int start, int end) {
     // First move the reduced model to the start
     //    int oldLocation = _currentLocation;
-    setCurrentLocation(start);
+    Vector<HighlightStatus> v;
+    synchronized (_reduced) {
+      setCurrentLocation(start);
     
-    // Now ask reduced model for highlight status for chars till end
-    Vector<HighlightStatus> v =
-      _reduced.getHighlightStatus(start, end - start);
+      // Now ask reduced model for highlight status for chars till end
+      v = _reduced.getHighlightStatus(start, end - start);
+    }
     
     // Go through and find any NORMAL blocks
     // Within them check for keywords
@@ -320,7 +314,7 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
    * @return the index into the vector of the last processed element
    */
   private int _highlightKeywords(Vector<HighlightStatus> v, int i) {
-    throwErrorHuh();
+    // throwErrorHuh();
     // Basically all non-alphanumeric chars are delimiters
     final String delimiters = " \t\n\r{}()[].+-/*;:=!@#$%^&*~<>?,\"`'<>|";
     final HighlightStatus original = v.get(i);
@@ -363,10 +357,12 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
         //right now keywords incl prim types, so must put this first
         state = HighlightStatus.TYPE;
         process = true;
-      } else if (_keywords.contains(token)) {
+      } 
+      else if (_keywords.contains(token)) {
         state = HighlightStatus.KEYWORD;
         process = true;
-      } else if (_isNum(token)) {
+      } 
+      else if (_isNum(token)) {
         state = HighlightStatus.NUMBER;
         process = true;
       }
@@ -374,10 +370,7 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
       if (process) {
         // first check if we had any text before the token
         if (length != 0) {
-          HighlightStatus newStat =
-            new HighlightStatus(start,
-                                length,
-                                original.getState());
+          HighlightStatus newStat = new HighlightStatus(start, length, original.getState());
           v.add(index, newStat);
           index++;
           start += length;
@@ -386,9 +379,7 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
         
         // Now pull off the keyword
         int keywordLength = token.length();
-        v.add(index, new HighlightStatus(start,
-                                         keywordLength,
-                                         state));
+        v.add(index, new HighlightStatus(start, keywordLength, state));
         index++;
         // Move start to the end of the keyword
         start += keywordLength;
@@ -400,10 +391,7 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
     }
     // Now check if there was any text left after the keywords.
     if (length != 0) {
-      HighlightStatus newStat =
-        new HighlightStatus(start,
-                            length,
-                            original.getState());
+      HighlightStatus newStat = new HighlightStatus(start, length, original.getState());
       v.add(index, newStat);
       index++;
       length = 0;
@@ -418,14 +406,12 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
    * @return true if x is a parseable number
    */
   private boolean _isNum(String x) {
-    throwErrorHuh();
+    // throwErrorHuh();
     try {
       Double.parseDouble(x);
       return true;
       
-    } catch (NumberFormatException e) {
-      return false;
-    }
+    } catch (NumberFormatException e) {  return false; }
   }
   
   /**
@@ -434,7 +420,7 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
    * anything else that begins with a capitalized character
    */
   private boolean _isType(String x) {
-    throwErrorHuh();
+    // throwErrorHuh();
     if (_primTypes.contains(x)) return true;
     
     try {
@@ -448,7 +434,7 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
    * Returns whether the given text only has spaces.
    */
   private boolean _hasOnlySpaces(String text) {
-    throwErrorHuh();
+    // throwErrorHuh();
     return (text.trim().length() == 0);
   }
   
@@ -472,6 +458,27 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
    */
   protected abstract void _styleChanged(); 
   
+  /** Clears the memoizing cache for read operations on the document.  This 
+   * operation must be done before the document is modified since the contents 
+   * of this cache are invalidated by any modification to the document.
+   */
+  protected void clearCache() {
+    synchronized (_helperCache) {
+      if (_cacheInUse) _clearCache();
+    }
+  }
+  
+  /**
+   * Clears the helper method cache.
+   * Should be called every time the document is modified.
+   */
+  private void _clearCache() {
+    // throwErrorHuh();
+    _helperCache.clear();
+    _helperCacheHistory.clear();
+    _cacheInUse = false;
+  }
+    
   
   /**
    * Add a character to the underlying reduced model. ONLY called from already synchronized
@@ -479,11 +486,12 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
    * @param curChar the character to be added.
    */
   private void _addCharToReducedModel(char curChar) {
-    throwErrorHuh();
-    // Clear the helper method cache
-    if (_cacheInUse) _clearCache();
+    // throwErrorHuh();
     
-    _reduced.insertChar(curChar);
+    clearCache();
+    synchronized (_reduced) {
+      _reduced.insertChar(curChar);
+    }
   }
   
   /**
@@ -493,7 +501,7 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
    * @return where the cursor is as the number of characters into the document
    */
   public int getCurrentLocation() {
-    throwErrorHuh();
+    // throwErrorHuh();
     return  _currentLocation;
   }
   
@@ -502,29 +510,33 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
    * @param loc the new absolute location
    */
   public void setCurrentLocation(int loc) {
-    throwErrorHuh();
-    move(loc - _currentLocation);
+    // throwErrorHuh();
+    synchronized (_reduced) {
+      move(loc - _currentLocation);
+    }
   }
   
   /**
    * The actual cursor movement logic.  Helper for setCurrentLocation(int).
    * @param dist the distance from the current location to the new location.
    */
-  public synchronized void move(int dist) {
-    throwErrorHuh();
+  public void move(int dist) {
+    // throwErrorHuh();
     //if (_currentLocation != _reduced.absOffset()) {
     //  DrJava.consoleOut().println("DefDoc.currentLocation: " + _currentLocation);
     //  DrJava.consoleOut().println("Reduced location: " + _reduced.absOffset());
     //}
     
-    int newLoc = _currentLocation + dist;
-    if (newLoc < 0) {
-      //      throw new RuntimeException("location < 0?! oldLoc=" + _currentLocation + " dist=" +
-      //                                  dist);
-      throw new IllegalStateException("Tried to cursor to a negative location");
+    synchronized (_reduced) {
+      int newLoc = _currentLocation + dist;
+      if (newLoc < 0) {
+        //      throw new RuntimeException("location < 0?! oldLoc=" + _currentLocation + " dist=" +
+        //                                  dist);
+        throw new IllegalStateException("Tried to cursor to a negative location");
+      }
+      _currentLocation = newLoc;
+      _reduced.move(dist);
     }
-    _currentLocation = newLoc;
-    _reduced.move(dist);
   }
   
   /**
@@ -533,9 +545,11 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
    * @return the relative distance backwards to the offset before
    *         the matching brace.
    */
-  public synchronized int balanceBackward() {
-    throwErrorHuh();
-    return _reduced.balanceBackward();
+  public int balanceBackward() {
+    // throwErrorHuh();
+    synchronized (_reduced) {
+      return _reduced.balanceBackward();
+    }
   }
   
   /**
@@ -545,8 +559,10 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
    *         the matching brace.
    */
   public synchronized int balanceForward() {
-    throwErrorHuh();
-    return _reduced.balanceForward();
+    // throwErrorHuh();
+    synchronized (_reduced) {
+      return _reduced.balanceForward();
+    }
   }
   
   
@@ -556,7 +572,7 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
    * @return The reduced model of this document.
    */
   public synchronized BraceReduction getReduced() {
-    throwErrorHuh();
+    // throwErrorHuh();
     return _reduced;
   }
   
@@ -564,36 +580,43 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
   /**
    * Returns the indent information for the current location.
    */
-  public synchronized IndentInfo getIndentInformation() {
-    throwErrorHuh();
+  public IndentInfo getIndentInformation() {
+    // throwErrorHuh();
     // Check cache
     String key = "getIndentInformation:" + _currentLocation;
+
     IndentInfo cached = (IndentInfo) _checkCache(key);
-    if (cached != null) {
-      return cached;
+    if (cached != null) return cached;
+    // throwErrorHuh();
+    
+    IndentInfo info;
+    synchronized (_reduced) {
+      info = _reduced.getIndentInformation();
     }
-    throwErrorHuh(); // necessary? Corky 10/5/04
-    IndentInfo info = _reduced.getIndentInformation();
     _storeInCache(key, info);
     return info;
   }
   
-  public synchronized ReducedModelState stateAtRelLocation(int dist){
-    throwErrorHuh();
-    return _reduced.moveWalkerGetState(dist);
+  public ReducedModelState stateAtRelLocation(int dist){
+    // throwErrorHuh();
+    synchronized (_reduced) {
+      return _reduced.moveWalkerGetState(dist);
+    }
   }
   
-  public synchronized ReducedModelState getStateAtCurrent(){
-    throwErrorHuh();
-    return _reduced.getStateAtCurrent();
+  public ReducedModelState getStateAtCurrent(){
+    // throwErrorHuh();
+    synchronized (_reduced) {
+      return _reduced.getStateAtCurrent();
+    }
   }
   
   public synchronized void resetReducedModelLocation() {
-    throwErrorHuh();
-    _reduced.resetLocation();
+    // throwErrorHuh();
+    synchronized (_reduced) {
+      _reduced.resetLocation();
+    }
   }
-  
-  
   
   /**
    * 
@@ -607,7 +630,7 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
    * of document is reached.
    */
   public int findPrevDelimiter(int pos, char[] delims) throws BadLocationException {
-    throwErrorHuh();
+    // throwErrorHuh();
     return findPrevDelimiter(pos, delims, true);
   }
   
@@ -623,76 +646,75 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
    * @return position of first matching delimiter, or ERROR_INDEX if beginning
    * of document is reached.
    */
-  public synchronized int findPrevDelimiter(int pos, char[] delims, boolean skipParenPhrases)
-    throws BadLocationException
-  {
-    throwErrorHuh();
+  public int findPrevDelimiter(final int pos, final char[] delims, final boolean skipParenPhrases)
+    throws BadLocationException {
+    // throwErrorHuh();
     // Check cache
     String key = "findPrevDelimiter:" + pos;
-    for (int i=0; i < delims.length; i++) {
-      key += ":" + delims[i];
-    }
+    for (int i = 0; i < delims.length; i++) { key += ":" + delims[i]; }
     key += ":" + skipParenPhrases;
     Integer cached = (Integer) _checkCache(key);
-    if (cached != null) {
-      return cached.intValue();
-    }
+    if (cached != null) return cached.intValue();
     
-    int j, i;
-    char c;
+    int reducedPos = pos;
+    int i;  // index of for loop below
     String text = getText(DOCSTART, pos);
     
-    final int origLocation = _currentLocation;
-    // Move reduced model to location pos
-    _reduced.move(pos - origLocation);
-    int reducedPos = pos;
-    
-    // Walk backwards from specificed position
-    for (i = pos-1; i >= DOCSTART; i--) {
-      c = text.charAt(i);
-      // Check if character is one of the delimiters
-      for (j = 0; j < delims.length; j++) {
-        if (c == delims[j]) {
+    synchronized (_reduced) {
+      
+      final int origLocation = _currentLocation;
+      // Move reduced model to location pos
+      _reduced.move(pos - origLocation);  // reduced model points to pos == reducedPos
+      
+      // Walk backwards from specificed position
+      for (i = pos-1; i >= DOCSTART; i--) {
+        /* Invariant: reduced model points to reducedPos, text[i+1:pos] contains no valid delims, 
+         * DOCSTART <= i < reducedPos <= pos */
+        // Check if ith character is one of the delimiters
+        if (match(text.charAt(i),delims)) {
+           
           // Move reduced model to walker's location
-          _reduced.move(i - reducedPos);
-          reducedPos = i;
+          _reduced.move(i - reducedPos);  // reduced model points to i
+          reducedPos = i;                 // reduced model points to reducedPos
           
-          // Check if matching char is in comment or quotes
+          // Check if matching char should be ignored because it is within a comment, 
+          // quotes, or ignored paren phrase
           ReducedModelState state = _reduced.getStateAtCurrent();
-          if (!state.equals(ReducedModelState.FREE)
-                || _isStartOfComment(text, i)
-                || ((i > 0) && _isStartOfComment(text, i - 1))) {
-            // Ignore matching char
-          } else {
-            // Found a matching char, check if we should ignore it
-            if (skipParenPhrases && posInParenPhrase()) {
-              // In a paren phrase, so ignore
-            }
-            else {
-              // Return position of matching char
-              _reduced.move(origLocation - i);
-              _storeInCache(key, new Integer(i));
-              return i;
-            }
-          }
-          //_reduced.move(pos - i);
+          if (!state.equals(ReducedModelState.FREE) || _isStartOfComment(text, i)
+                || ((i > 0) && _isStartOfComment(text, i - 1))
+                || (skipParenPhrases && posInParenPhrase())) {
+            continue; // ignore matching char
+          } 
+          break;  // found valid matching char
         }
       }
+      /* Invariant: same as for loop except that DOCSTART-1 <= i <= reducedPos <= pos */
+      
+        // Restore the state of the reduced model;
+        _reduced.move(origLocation - reducedPos);
     }
-    _reduced.move(origLocation - reducedPos);
     
-    _storeInCache(key, new Integer(ERROR_INDEX));
-    return ERROR_INDEX;
+    // Return position of matching char or ERROR_INDEX 
+    
+    if (i == DOCSTART-1) reducedPos = ERROR_INDEX; // No matching char was found
+    
+    _storeInCache(key, new Integer(reducedPos));
+    return reducedPos;  
   }
   
+  private static boolean match(char c, char[] delims) {
+    for (char d : delims) { if (c == d) return true; } // Found matching delimiter
+    return false;
+  }
+        
   /**
    * This function finds the given character in the same statement as the given
    * position, and before the given position.  It is used by QuestionExistsCharInStmt and
    * QuestionExistsCharInPrevStmt
    */
   public boolean findCharInStmtBeforePos(char findChar, int position){
-    throwErrorHuh();
-    if(position == DefinitionsDocument.ERROR_INDEX) {
+    // throwErrorHuh();
+    if (position == DefinitionsDocument.ERROR_INDEX) {
       // Should not happen
       throw new UnexpectedException(new
                                       IllegalArgumentException("Argument endChar to " +
@@ -735,76 +757,73 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
   }
   
   /**
-   * Finds the position of the first non-whitespace character before pos.
-   * NB: Skips comments and all whitespace, including newlines
+   * Finds the position of the first non-whitespace, non-comment character before pos.
+   * Skips comments and all whitespace, including newlines.
    * @param pos Position to start from
    * @param whitespace chars considered as white space
    * @return position of first non-whitespace character before pos,
    * or ERROR_INDEX if begining of document is reached
    */
-  public synchronized int findPrevCharPos(int pos, char[] whitespace)
-    throws BadLocationException
-  {
-    throwErrorHuh();
+  public int findPrevCharPos(int pos, char[] whitespace)
+    throws BadLocationException {
+    // throwErrorHuh();
     // Check cache
     String key = "findPrevCharPos:" + pos;
-    for (int i=0; i < whitespace.length; i++) {
-      key += ":" + whitespace[i];
-    }
+    for (int i = 0; i < whitespace.length; i++) { key += ":" + whitespace[i]; }
     Integer cached = (Integer) _checkCache(key);
-    if (cached != null) {
-      return cached.intValue();
-    }
-
-    int j, i;
-    char c;
-    String text = getText(0, pos);
-
-    final int origLocation = _currentLocation;
-    // Move reduced model to location pos
-    _reduced.move(pos - origLocation);
+    if (cached != null)  return cached.intValue();
+    
     int reducedPos = pos;
-
-    // Walk backward from specified position
-    for (i = pos-1; i >= 0; i--) {
-      boolean isWhitespace = false;
-      c = text.charAt(i);
-      // Check if character is whitespace
-      for (j = 0; j < whitespace.length; j++) {
-        if (c == whitespace[j]) {
-          isWhitespace = true;
+    int i = pos - 1;
+    String text = getText(0, pos);
+    
+    synchronized(_reduced) {
+      
+      final int origLocation = _currentLocation;
+      // Move reduced model to location pos
+      _reduced.move(pos - origLocation);  // reduced model points to pos == reducedPos
+      
+      // Walk backward from specified position
+      
+      while (i >= 0) { 
+        /* Invariant: reduced model points to reducedPos, i < reducedPos <= pos, 
+         * text[i+1:pos-1] contains invalid chars */
+        
+        if (match(text.charAt(i), whitespace)) {
+          // ith char is whitespace
+          i--;
+          continue;
         }
-      }
-      if (!isWhitespace) {
-        // Move reduced model to walker's location
+        
+        // Found a non-whitespace char;  move reduced model to location i
         _reduced.move(i - reducedPos);
-        reducedPos = i;
-
-        // Check if matching char is in comment
-        if((_reduced.getStateAtCurrent().equals(ReducedModelState.INSIDE_LINE_COMMENT)) ||
-           (_reduced.getStateAtCurrent().equals(ReducedModelState.INSIDE_BLOCK_COMMENT))) {
-          // Ignore matching char
+        reducedPos = i;                  // reduced model points to i == reducedPos
+        
+        // Check if matching char is within a comment (not including opening two characters)
+        if ((_reduced.getStateAtCurrent().equals(ReducedModelState.INSIDE_LINE_COMMENT)) ||
+            (_reduced.getStateAtCurrent().equals(ReducedModelState.INSIDE_BLOCK_COMMENT))) {
+          i--;
+          continue;
         }
-        else {
-          if(_isEndOfComment(text, i)) {
-            // Move i past the start of comment characters
-            // and continue searching
-            i = i - 1;
-            _reduced.move(-1);
-            reducedPos = i;
-          }
-          else {
-            // Return position of matching char
-            _reduced.move(origLocation - i);
-            _storeInCache(key, new Integer(i));
-            return i;
-          }
+        
+        if (_isEndOfComment(text, i)) { /* char is second character is opening comment market */  
+          // Move i past the first comment character and continue searching
+          i = i - 2;
+          continue;
         }
+        
+        // Found valid previous character
+        break;
       }
+      
+      /* Exit invariant same as for loop except that i <= reducedPos because at break i = reducedPos */
+      _reduced.move(origLocation - reducedPos);
     }
-    _reduced.move(origLocation - reducedPos);
-    _storeInCache(key, new Integer(ERROR_INDEX));
-    return ERROR_INDEX;
+    
+    int result = reducedPos;
+    if (i < 0) result = ERROR_INDEX;
+    _storeInCache(key, new Integer(result));
+    return result;
   }
   
   /**
@@ -815,9 +834,9 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
    * @param key Name of the method and arguments
    */
   protected Object _checkCache(String key) {
-    throwErrorHuh();
+    // throwErrorHuh();
     //_helperCache.put(key+"|time", new Long(System.currentTimeMillis()));
-    Object result = _helperCache.get(key);
+    Object result = _helperCache.get(key);  /* already synchronized by Hashtable */
     //if (result != null) DrJava.consoleOut().println("Using cache for " + key);
     return result;
   }
@@ -830,54 +849,28 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
    * @param result Result of the method call
    */
   protected void _storeInCache(String key, Object result) {
-    throwErrorHuh();
-    _cacheInUse = true;
-    
-    // Prevent going over max size
-    if (_helperCache.size() >= MAX_CACHE_SIZE) {
-      if (_helperCacheHistory.size() > 0) {
-        _helperCache.remove( _helperCacheHistory.get(0) );
-        _helperCacheHistory.remove(0);
+    // throwErrorHuh();
+    synchronized (_helperCache) {
+      
+      _cacheInUse = true;
+      
+      // Prevent going over max size
+      if (_helperCache.size() >= MAX_CACHE_SIZE) {
+        if (_helperCacheHistory.size() > 0) {
+          _helperCache.remove( _helperCacheHistory.get(0) );
+          _helperCacheHistory.remove(0);
+        }
+        else {
+          // Shouldn't happen
+          throw new RuntimeException("Cache larger than cache history!");
+        }
       }
-      else {
-        // Shouldn't happen
-        throw new RuntimeException("Cache larger than cache history!");
+      Object prev = _helperCache.put(key, result);
+      // Add to history if the insert increased the size of the table
+      if (prev == null) {
+        _helperCacheHistory.add(key);
       }
     }
-    Object prev = _helperCache.put(key, result);
-    // Add to history if the insert increased the size of the table
-    if (prev == null) {
-      _helperCacheHistory.add(key);
-    }
-    
-    /*
-     long end = System.currentTimeMillis();
-     Long start = (Long)_helperCache.get(key+"|time");
-     if (start != null) {
-     _helperCache.remove(key+"|time");
-     long delay = end - start.longValue();
-     if (delay > maxHelpDelay) {
-     maxHelpDelay = delay;
-     maxKey = key;
-     //DrJava.consoleOut().println("   Longest: " + maxHelpDelay + "ms from " + maxKey +
-     //                            ", line " + getCurrentLine());
-     }
-     }
-     else {
-     DrJava.consoleOut().println("  CACHE MISS: " + key);
-     }
-     */
-  }
-  
-  /**
-   * Clears the helper method cache.
-   * Should be called every time the document is modified.
-   */
-  protected void _clearCache() {
-    throwErrorHuh();
-    _helperCache.clear();
-    _helperCacheHistory.clear();
-    _cacheInUse = false;
   }
   
   /**
@@ -886,7 +879,7 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
    * @param selEnd the offset of the last character of the region to indent
    */
   public void indentLines(int selStart, int selEnd){
-    throwErrorHuh();
+    // throwErrorHuh();
     try {
       indentLines(selStart, selEnd, Indenter.OTHER, null);
     }
@@ -907,7 +900,7 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
   public void indentLines(int selStart, int selEnd,
                           int reason, ProgressMonitor pm)
     throws OperationCanceledException {
-    throwErrorHuh();
+    // throwErrorHuh();
     //long start = System.currentTimeMillis();
     try {
       // Begins a compound edit.
@@ -955,10 +948,9 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
    * (indent logic may vary slightly based on the trigger action)
    * @param pm used to display progress, null if no reporting is desired
    */
-  private synchronized void _indentBlock(final int start, final int end,
-                                         int reason, ProgressMonitor pm)
+  private void _indentBlock(final int start, final int end, int reason, ProgressMonitor pm)
     throws OperationCanceledException {
-    throwErrorHuh();
+    // throwErrorHuh();
     //DrJava.consoleOut().println("indenting block of " + (end-start));
     try {
       // Keep marker at the end. This Position will be the
@@ -1007,8 +999,12 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
    * Indents a line using the Indenter decision tree.  Public for testing purposes
    */
   public boolean _indentLine(int reason) {
-    throwErrorHuh();
-    return _indenter.indent(this, reason);
+    // throwErrorHuh();
+    writeLock();
+    try {
+      return _indenter.indent(this, reason);
+    }
+    finally { writeUnlock(); }
   }
 
   
@@ -1022,7 +1018,7 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
    * @param currPos A position on the current line
    */
   public int getIntelligentBeginLinePos(int currPos) throws BadLocationException {
-    throwErrorHuh();
+    // throwErrorHuh();
     int firstChar = getLineStartPos(currPos);
     String prefix = getText(firstChar, currPos-firstChar);
     
@@ -1055,7 +1051,7 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
    * @param pos Cursor position
    */
   public String getIndentOfCurrStmt(int pos) throws BadLocationException {
-    throwErrorHuh();
+    // throwErrorHuh();
     char[] delims = {';', '{', '}'};
     char[] whitespace = {' ', '\t', '\n',','};
     return getIndentOfCurrStmt(pos, delims, whitespace);
@@ -1068,7 +1064,7 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
    * @param pos Cursor position
    */
   public String getIndentOfCurrStmt(int pos, char[] delims) throws BadLocationException {
-    throwErrorHuh();
+    // throwErrorHuh();
     char[] whitespace = {' ', '\t', '\n',','};
     return getIndentOfCurrStmt(pos, delims, whitespace);
   }
@@ -1081,7 +1077,7 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
    * @param whitespace characters to skip when looking for beginning of next statement
    */
   public String getIndentOfCurrStmt(int pos, char[] delims, char[] whitespace) throws BadLocationException {
-    throwErrorHuh();
+    // throwErrorHuh();
     // Check cache
     String key = "getIndentOfCurrStmt:" + pos;
     for (int i=0; i < delims.length; i++) {
@@ -1174,8 +1170,8 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
    * @param findChar Character to search for
    * @return true if this node's rule holds.
    */
-  public synchronized int findCharOnLine(int pos, char findChar) {
-    throwErrorHuh();
+  public int findCharOnLine(int pos, char findChar) {
+    // throwErrorHuh();
     // Check cache
     String key = "findCharOnLine:" + pos + ":" + findChar;
     Integer cached = (Integer) _checkCache(key);
@@ -1183,54 +1179,48 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
       return cached.intValue();
     }
     
-    int here = _currentLocation;
-    int lineStart = this.getLineStartPos(pos);
-    int lineEnd = this.getLineEndPos(pos);
-    String lineText;
+    int i, result;
     
-    try {
-      lineText = this.getText(lineStart, lineEnd - lineStart);
-    } catch(BadLocationException e) {
-      // Should not be here
-      throw new UnexpectedException(e);
-    }
-    
-    int i = lineText.indexOf(findChar, 0);
-    
-    // Move to start of line
-    /*
-     _reduced.move(lineStart - here);
-     int reducedPos = lineStart;
-     int prevI = 0;
-     */
-    
-    while(i != -1) {
-      // Move reduced model to walker's location
-      int matchIndex = i + lineStart;
-      _reduced.move(matchIndex - here);
-      //int dist = i - prevI;
-      //_reduced.move(dist);
-      //reducedPos = reducedPos + dist;
+    synchronized (_reduced) {
+      int here = _currentLocation;
+      int lineStart = this.getLineStartPos(pos);
+      int lineEnd = this.getLineEndPos(pos);
+      String lineText;
       
-      // Check if matching char is in comment or quotes
-      if (!_reduced.getStateAtCurrent().equals(ReducedModelState.FREE)) {
-        // Ignore matching char
-      } else {
-        // Return position of matching char
-        //_reduced.move(here - reducedPos);
-        _reduced.move(here - matchIndex);
-        _storeInCache(key, new Integer(matchIndex));
-        return matchIndex;
+      try {
+        lineText = this.getText(lineStart, lineEnd - lineStart);
+      } catch(BadLocationException e) {
+        // Should not be here
+        throw new UnexpectedException(e);
       }
-      _reduced.move(here - matchIndex);
       
-      //prevI = i;
-      i = lineText.indexOf(findChar, i+1);
+      i = lineText.indexOf(findChar, 0);
+      
+      int matchIndex = 0;  // dummy value required by javac; program behavior does not depend on this value.
+      
+      while (i != -1) {
+        /* Invariant: reduced model points to original location (here), lineText[0:i-1] does not contain valid findChar */
+        // Move reduced model to location of ith char
+        matchIndex = i + lineStart;
+        _reduced.move(matchIndex - here);
+        
+        // Check if matching char is in comment or quotes
+        if (_reduced.getStateAtCurrent().equals(ReducedModelState.FREE)) {
+          // Found matching char
+          _reduced.move(here - matchIndex);  // Restore reduced model
+          break;
+        } 
+        
+        // matching character is not valid, try again
+        _reduced.move(here - matchIndex);  // Restore reduced model
+        i = lineText.indexOf(findChar, i+1);
+      }
+      
+      result = matchIndex;
+      if (i == -1) result = ERROR_INDEX;
     }
-    
-    //_reduced.move(here - reducedPos);
-    _storeInCache(key, new Integer(ERROR_INDEX));
-    return ERROR_INDEX;
+    _storeInCache(key, new Integer(result));
+    return result;
   }
   
   /**
@@ -1240,32 +1230,30 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
    * @param pos Any position on the current line
    * @return position of the beginning of this line
    */
-  public synchronized int getLineStartPos(int pos) {
-    throwErrorHuh();
-    if (pos < 0 || pos > getLength()) {
-      return -1;
-    }
+  public int getLineStartPos(final int pos) {
+    // throwErrorHuh();
+    if (pos < 0 || pos > getLength()) return -1;
     // Check cache
     String key = "getLineStartPos:" + pos;
     Integer cached = (Integer) _checkCache(key);
-    if (cached != null) {
-      return cached.intValue();
+    if (cached != null) return cached.intValue();
+    
+    int dist;
+    synchronized (_reduced) {
+      int location = _currentLocation;
+      _reduced.move(pos - location);
+      dist = _reduced.getDistToPreviousNewline(0);
+      _reduced.move(location - pos);
     }
     
-    int location = _currentLocation;
-    _reduced.move(pos - location);
-    int dist = _reduced.getDistToPreviousNewline(0);
-    _reduced.move(location - pos);
-    if(dist == -1) {
-      // If no previous newline was found
-      // return DOCSTART
+    if (dist == -1) {
+      // No previous newline was found; return DOCSTART
       _storeInCache(key, new Integer(DOCSTART));
       return DOCSTART;
     }
-    else {
-      _storeInCache(key, new Integer(pos - dist));
-      return pos - dist;
-    }
+    
+    _storeInCache(key, new Integer(pos - dist));
+    return pos - dist;
   }
   
   /**
@@ -1274,23 +1262,22 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
    * @param pos Any position on the current line
    * @return position of the end of this line
    */
-  public synchronized int getLineEndPos(int pos) {
-    throwErrorHuh();
-    if (pos < 0 || pos > getLength()) {
-      return -1;
-    }
+  public int getLineEndPos(final int pos) {
+    // throwErrorHuh();
+    if (pos < 0 || pos > getLength()) return -1;
     
     // Check cache
     String key = "getLineEndPos:" + pos;
     Integer cached = (Integer) _checkCache(key);
-    if (cached != null) {
-      return cached.intValue();
-    }
+    if (cached != null) return cached.intValue();
     
-    int location = _currentLocation;
-    _reduced.move(pos - location);
-    int dist = _reduced.getDistToNextNewline();
-    _reduced.move(location - pos);
+    int dist;
+    synchronized (_reduced) {
+      int location = _currentLocation;
+      _reduced.move(pos - location);
+      dist = _reduced.getDistToNextNewline();
+      _reduced.move(location - pos);
+    }
     _storeInCache(key, new Integer(pos + dist));
     return pos + dist;
   }
@@ -1304,7 +1291,7 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
    * of the line if no non-whitespace character is found.
    */
   public int getLineFirstCharPos(int pos) throws BadLocationException {
-    throwErrorHuh();
+    // throwErrorHuh();
     // Check cache
     String key = "getLineFirstCharPos:" + pos;
     Integer cached = (Integer) _checkCache(key);
@@ -1341,7 +1328,7 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
    * or ERROR_INDEX if end of document is reached
    */
   public int getFirstNonWSCharPos(int pos) throws BadLocationException {
-    throwErrorHuh();
+    // throwErrorHuh();
     char[] whitespace = {' ', '\t', '\n'};
     return getFirstNonWSCharPos(pos, whitespace, false);
   }
@@ -1355,7 +1342,7 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
    */
   public int getFirstNonWSCharPos(int pos, boolean acceptComments)
     throws BadLocationException {
-    throwErrorHuh();
+    // throwErrorHuh();
     char[] whitespace = {' ', '\t', '\n'};
     return getFirstNonWSCharPos(pos, whitespace, acceptComments);
   }
@@ -1369,22 +1356,16 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
    * @return position of first non-whitespace character after pos,
    * or ERROR_INDEX if end of document is reached
    */
-  public synchronized int getFirstNonWSCharPos
-    (int pos, char[] whitespace, boolean acceptComments) throws BadLocationException
-  {
-    throwErrorHuh();
+  public int getFirstNonWSCharPos(int pos, char[] whitespace, boolean acceptComments) 
+    throws BadLocationException {
+    // throwErrorHuh();
     // Check cache
     String key = "getFirstNonWSCharPos:" + pos;
-    for (int i=0; i < whitespace.length; i++) {
-      key += ":" + whitespace[i];
-    }
+    for (int i = 0; i < whitespace.length; i++) { key += ":" + whitespace[i]; }
     Integer cached = (Integer) _checkCache(key);
-    if (cached != null) {
-      return cached.intValue();
-    }
+    if (cached != null)  return cached.intValue();
     
-    int j, i;
-    char c;
+    int i = pos;
     int endPos = getLength();
     
     // Get text from pos to end of document
@@ -1398,79 +1379,60 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
     //int iter = 0;
     
     // Walk forward from specificed position
-    for (i = pos; i != endPos; i++) {
-      //iter++;
-      boolean isWhitespace = false;
-      c = text.charAt(i - pos);
+    while (i < endPos) {
+      
       // Check if character is whitespace
-      for (j = 0; j < whitespace.length && !isWhitespace; j++) {
-        if (c == whitespace[j]) {
-          isWhitespace = true;
-        }
+      if (match(text.charAt(i-pos), whitespace)) {
+        i++;
+        continue;
       }
-      if (!isWhitespace) {
-        // Move reduced model to walker's location
-        _reduced.move(i - reducedPos);
-        reducedPos = i;
-        
-        // Check if non-ws char is in comment, and we want to ignore them.
-        if (!acceptComments &&
-            ((_reduced.getStateAtCurrent().equals(ReducedModelState.INSIDE_LINE_COMMENT)) ||
-             (_reduced.getStateAtCurrent().equals(ReducedModelState.INSIDE_BLOCK_COMMENT))))
-        {
-          // Ignore non-ws char
-          
-          // Move to next token?  (requires making getBlockOffset public)
-          //  doesn't work yet
-          //          int tokenSize = _reduced.currentToken().getSize();
-          //          int offset = _reduced.getBlockOffset();
-          //          //DrJava.consoleOut().println("     token len: " + tokenSize +
-          //          //                            ", offset: " + offset);
-          //          //DrJava.consoleOut().println("     token before: " + _reduced.currentToken().getState());
-          //          _reduced.move(tokenSize - offset);
-          //          i += tokenSize - offset;
-          //          //DrJava.consoleOut().println("     token after: " + _reduced.currentToken().getState());
-          
-        }
-        else {
-          if(!acceptComments && _isStartOfComment(text, i - pos)) {
-            // Move i past the start of comment characters
-            // and continue searching
-            i = i + 1;
-            _reduced.move(1);
-            reducedPos = i;
-          }
-          else {
-            // Return position of matching char
-            _reduced.move(origLocation - i);
-            _storeInCache(key, new Integer(i));
-            return i;
-          }
-        }
+      // Found a non whitespace character
+      // Move reduced model to walker's location
+      _reduced.move(i - reducedPos);  // reduced model points to location i
+      reducedPos = i;                 // reduced mdoel points to location reducedPos
+      
+      // Check if non-ws char is within comment and if we want to ignore them.
+      if (!acceptComments &&
+          ((_reduced.getStateAtCurrent().equals(ReducedModelState.INSIDE_LINE_COMMENT)) ||
+           (_reduced.getStateAtCurrent().equals(ReducedModelState.INSIDE_BLOCK_COMMENT)))) {
+        i++;
+        continue;
       }
+      
+      // Check if non-ws char is part of comment opening market and if we want to ignore them
+      if (!acceptComments && _isStartOfComment(text, i - pos)) {
+        // ith char is first char in comment open market; skip past this marker
+        // and continue searching
+        i = i + 2;
+        continue;
+      }
+      
+      // Return position of matching char
+      break;
     }
-    //DrJava.consoleOut().println("getFirstNonWS iterations: " + iter);
-    
     _reduced.move(origLocation - reducedPos);
-    _storeInCache(key, new Integer(ERROR_INDEX));
-    return ERROR_INDEX;
+    
+    int result = reducedPos;
+    if (i == endPos) result = ERROR_INDEX;
+    
+    _storeInCache(key, new Integer(result));
+    return result;
   }
   
   
   public int findPrevNonWSCharPos(int pos) throws BadLocationException {
-    throwErrorHuh();
+    // throwErrorHuh();
     char[] whitespace = {' ', '\t', '\n'};
     return findPrevCharPos(pos, whitespace);
   }
-  
   
   /**
    * Helper method for getFirstNonWSCharPos
    * Determines whether the current character is the start
    * of a comment: "/*" or "//"
    */
-  protected boolean _isStartOfComment(String text, int pos) {
-    throwErrorHuh();
+  protected static boolean _isStartOfComment(String text, int pos) {
+    // throwErrorHuh();
     char currChar = text.charAt(pos);
     if(currChar == '/') {
       try {
@@ -1490,8 +1452,8 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
    * of a comment: "*\/" or a hanging "//"
    * @return true if (pos-1,pos) == '*\/' or '//'
    */
-  protected boolean _isEndOfComment(String text, int pos) {
-    throwErrorHuh();
+  protected static boolean _isEndOfComment(String text, int pos) {
+    // throwErrorHuh();
     char currChar = text.charAt(pos);
     if(currChar == '/') {
       try {
@@ -1511,19 +1473,21 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
    * @param pos the position we're looking at
    * @return true if pos is immediately inside parentheses
    */
-  public synchronized boolean posInParenPhrase(int pos) {
-    throwErrorHuh();
+  public boolean posInParenPhrase(int pos) {
+    // throwErrorHuh();
     // Check cache
     String key = "posInParenPhrase:" + pos;
     Boolean cached = (Boolean) _checkCache(key);
-    if (cached != null) {
-      return cached.booleanValue();
-    }
+    if (cached != null) return cached.booleanValue();
 
-    int here = _currentLocation;
-    _reduced.move(pos - here);
-    boolean inParenPhrase = posInParenPhrase();
-    _reduced.move(here - pos);
+    boolean inParenPhrase;
+    
+    synchronized (_reduced) {
+      int here = _currentLocation;
+      _reduced.move(pos - here);
+      inParenPhrase = posInParenPhrase();
+      _reduced.move(here - pos);
+    }
 
     _storeInCache(key, new Boolean(inParenPhrase));
     return inParenPhrase;
@@ -1533,9 +1497,12 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
    * Returns true if the reduced model's current position is inside a paren phrase.
    * @return true if pos is immediately inside parentheses
    */
-  public synchronized boolean posInParenPhrase() {
-    throwErrorHuh();
-    IndentInfo info = _reduced.getIndentInformation();
+  public boolean posInParenPhrase() {
+    // throwErrorHuh();
+    IndentInfo info;
+    synchronized (_reduced) {
+      info = _reduced.getIndentInformation();
+    }
     return info.braceTypeCurrent.equals(IndentInfo.openParen);
   }
 
@@ -1544,20 +1511,22 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
    * @param pos the position we're looking at
    * @return true if pos is immediately inside a paren/brace/etc
    */
-  protected synchronized boolean posNotInBlock(int pos) {
-    throwErrorHuh();
+  protected boolean posNotInBlock(int pos) {
+    // throwErrorHuh();
     // Check cache
     String key = "posNotInBlock:" + pos;
     Boolean cached = (Boolean) _checkCache(key);
-    if (cached != null) {
-      return cached.booleanValue();
-    }
+    if (cached != null) return cached.booleanValue();
 
-    int here = _currentLocation;
-    _reduced.move(pos - here);
-    IndentInfo info = _reduced.getIndentInformation();
-    boolean notInParenPhrase = info.braceTypeCurrent.equals(IndentInfo.noBrace);
-    _reduced.move(here - pos);
+    boolean notInParenPhrase;
+    
+    synchronized (_reduced) {
+      int here = _currentLocation;
+      _reduced.move(pos - here);
+      IndentInfo info = _reduced.getIndentInformation();
+      notInParenPhrase = info.braceTypeCurrent.equals(IndentInfo.noBrace);
+      _reduced.move(here - pos);
+    }
     _storeInCache(key, new Boolean(notInParenPhrase));
     return notInParenPhrase;
   }
@@ -1569,7 +1538,7 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
    * @return the number of whitespace characters
    */
   public int getWhiteSpace() {
-    throwErrorHuh();
+    // throwErrorHuh();
     try {
       return  getWhiteSpaceBetween(0, getLength() - _currentLocation);
     } catch (BadLocationException e) {
@@ -1586,7 +1555,7 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
    * @exception BadLocationException
    */
   private int getWhiteSpaceBetween(int relStart, int relEnd) throws BadLocationException {
-    throwErrorHuh();
+    // throwErrorHuh();
     String text = this.getText(_currentLocation - relStart, Math.abs(relStart -
         relEnd));
     int i = 0;
@@ -1603,7 +1572,7 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
    * non-whitespace character
    */
   public void setTab(String tab, int pos) {
-    throwErrorHuh();
+    // throwErrorHuh();
     try {
       int startPos = getLineStartPos(pos);
       int firstNonWSPos = getLineFirstCharPos(pos);
@@ -1650,9 +1619,9 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
   protected void insertUpdate(AbstractDocument.DefaultDocumentEvent chng,
                               AttributeSet attr)
   {
-    throwErrorHuh();
+    // throwErrorHuh();
     // Clear the helper method cache
-    if (_cacheInUse) _clearCache();
+    clearCache();
 
     super.insertUpdate(chng, attr);
 
@@ -1689,9 +1658,9 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
    * @see CommandUndoableEdit
    */
   protected void removeUpdate(AbstractDocument.DefaultDocumentEvent chng) {
-    throwErrorHuh();
+    // throwErrorHuh();
     // Clear the helper method cache
-    if (_cacheInUse) _clearCache();
+    clearCache();
 
     try {
       final int offset = chng.getOffset();
@@ -1722,9 +1691,9 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
    * of the insert; that is done in {@link #insertUpdate}.
    */
   public void insertString(int offset, String str, AttributeSet a) throws BadLocationException {
-    throwErrorHuh();
+    // throwErrorHuh();
     // Clear the helper method cache
-    if (_cacheInUse) _clearCache();
+    clearCache();
 
     super.insertString(offset,str,a);
   }
@@ -1735,9 +1704,9 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
    * in {@link #removeUpdate}.
    */
   public void remove(int offset, int len) throws BadLocationException {
-    throwErrorHuh();
+    // throwErrorHuh();
     // Clear the helper method cache
-    if (_cacheInUse) _clearCache();
+    clearCache();
     
     super.remove(offset, len);
   }
@@ -1765,7 +1734,7 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
     
     public void run() {
       // adjust location to the start of the text to input
-      synchronized(AbstractDJDocument.this){
+      synchronized(_reduced){
         _reduced.move(_offset - _currentLocation);  
         // loop over string, inserting characters into reduced model
         for (int i = 0; i < _text.length(); i++) {
@@ -1791,7 +1760,7 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
       setCurrentLocation(_offset);
       
       // (don't move the cursor... I hope this doesn't break too much)
-      synchronized(AbstractDJDocument.this){
+      synchronized (_reduced){
         _reduced.delete(_length);
       }
       _styleChanged();

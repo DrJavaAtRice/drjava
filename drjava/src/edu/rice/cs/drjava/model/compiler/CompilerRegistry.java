@@ -311,7 +311,7 @@ public class CompilerRegistry {
    *                   the exception is thrown just to indicate failure.
    */
   private CompilerInterface _instantiateCompiler(String name) throws Throwable {
-    Class clazz = _baseClassLoader.loadClass(name);
+    Class<?> clazz = _baseClassLoader.loadClass(name);
     return createCompiler(clazz);
   }
 

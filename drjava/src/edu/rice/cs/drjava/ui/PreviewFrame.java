@@ -101,7 +101,7 @@ public class PreviewFrame extends JFrame {
     private JSpinnerChanger(Class spinnerClass, JComponent spinnerObj)
       throws Exception {
       spinner = spinnerObj;
-      setValueMethod = spinnerClass.getMethod("setValue", new Class[] {
+      setValueMethod = spinnerClass.getMethod("setValue", new Class<?>[] {
         Object.class
       });
     }
@@ -300,12 +300,12 @@ public class PreviewFrame extends JFrame {
     //_pageTextField.setAction(_goToPageAction);
     // _goToPageAction.putValue(Action.SHORT_DESCRIPTION, "Goto Page");
     try {
-      Class spinnerClass = Class.forName("javax.swing.JSpinner");
+      Class<?> spinnerClass = Class.forName("javax.swing.JSpinner");
       final JComponent spinner = (JComponent) spinnerClass.newInstance();
       final Method getter = spinnerClass.getMethod("getValue",new Class[0]);
       Object model = callMethod(spinner,spinnerClass,"getModel",null,null);
-      Class modelClass = model.getClass();
-      Class[] ca = new Class[] {Comparable.class};
+      Class<?> modelClass = model.getClass();
+      Class<?>[] ca = new Class<?>[] {Comparable.class};
       Object[] aa = new Object[] {new Integer(1)};
       callMethod(model,modelClass,"setMinimum",ca,aa);
       aa[0] = new Integer(_print.getNumberOfPages());
@@ -352,8 +352,8 @@ public class PreviewFrame extends JFrame {
     }
   }
 
-  private static Object callMethod(Object rec, Class c, String name,
-                                   Class[] ca,
+  private static Object callMethod(Object rec, Class<?> c, String name,
+                                   Class<?>[] ca,
                                    Object[] args) throws Exception {
     Method m = c.getMethod(name,ca);
     return m.invoke(rec,args);

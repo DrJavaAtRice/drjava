@@ -71,29 +71,18 @@ public class InteractionsDocumentAdapter extends AbstractDJDocument {
    */
   private boolean _toClear = false;
   
-  protected void throwErrorHuh() {
-    //Do nothing
-  }
+  protected void throwErrorHuh() { /* Do nothing */ }
   
-  protected int startCompoundEdit() {
-    //Do nothing
-    return 0;
-  }
+  protected int startCompoundEdit() { return 0; /* Do nothing */ }
   
-  protected void endCompoundEdit(int key) {
-    //Do nothing
-  }
+  protected void endCompoundEdit(int key) { /* Do nothing */ }
 
-  protected void endLastCompoundEdit() {
-    //Do nothing
-  }
+  protected void endLastCompoundEdit() { /* Do nothing */ }
   
   protected void addUndoRedo(AbstractDocument.DefaultDocumentEvent chng, Runnable undoCommand, Runnable doCommand) {
     //Do nothing
   }
-  protected void _styleChanged() {
-    //Do nothing 
-  }
+  protected void _styleChanged() { /* Do nothing */ }
   
   /**
    * Returns a new indenter.
@@ -130,9 +119,7 @@ public class InteractionsDocumentAdapter extends AbstractDJDocument {
   /**
    * package protected accessor method used for test cases
    */
-  List<Pair<Pair<Integer, Integer>, String>> getStylesList() {
-    return _stylesList;
-  }
+  List<Pair<Pair<Integer, Integer>, String>> getStylesList() { return _stylesList; }
   
   /**
    * Attempts to set the coloring on the graphics based upon the content of the styles list

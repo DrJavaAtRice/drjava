@@ -211,7 +211,7 @@ public class DynamicJavaAdapter implements JavaInterpreter {
    * @param name Name of the variable
    * @return class of the variable
    */
-  public Class getVariableClass(String name) {
+  public Class<?> getVariableClass(String name) {
     return _djInterpreter.getVariableClass(name);
   }
 
@@ -223,7 +223,7 @@ public class DynamicJavaAdapter implements JavaInterpreter {
    * @param value Value to assign
    * @param type the type of the variable
    */
-  public void defineVariable(String name, Object value, Class type) {
+  public void defineVariable(String name, Object value, Class<?> type) {
     if (type == null) {
       type = java.lang.Object.class;
     }
@@ -549,7 +549,7 @@ public class DynamicJavaAdapter implements JavaInterpreter {
      * @param value Value to assign
      */
     public void defineConstant(String name, Object value) {
-      Class c = (value == null) ? null : value.getClass();
+      Class<?> c = (value == null) ? null : value.getClass();
       nameVisitorContext.defineConstant(name, c);
       checkVisitorContext.defineConstant(name, c);
       evalVisitorContext.defineConstant(name, value);
@@ -561,7 +561,7 @@ public class DynamicJavaAdapter implements JavaInterpreter {
      * @param value boolean to assign
      */
     public void defineConstant(String name, boolean value) {
-      Class c = boolean.class;
+      Class<?> c = boolean.class;
       nameVisitorContext.defineConstant(name, c);
       checkVisitorContext.defineConstant(name, c);
       evalVisitorContext.defineConstant(name, new Boolean(value));
@@ -573,7 +573,7 @@ public class DynamicJavaAdapter implements JavaInterpreter {
      * @param value byte to assign
      */
     public void defineConstant(String name, byte value) {
-      Class c = byte.class;
+      Class<?> c = byte.class;
       nameVisitorContext.defineConstant(name, c);
       checkVisitorContext.defineConstant(name, c);
       evalVisitorContext.defineConstant(name, new Byte(value));
@@ -585,7 +585,7 @@ public class DynamicJavaAdapter implements JavaInterpreter {
      * @param value char to assign
      */
     public void defineConstant(String name, char value) {
-      Class c = char.class;
+      Class<?> c = char.class;
       nameVisitorContext.defineConstant(name, c);
       checkVisitorContext.defineConstant(name, c);
       evalVisitorContext.defineConstant(name, new Character(value));
@@ -597,7 +597,7 @@ public class DynamicJavaAdapter implements JavaInterpreter {
      * @param value double to assign
      */
     public void defineConstant(String name, double value) {
-      Class c = double.class;
+      Class<?> c = double.class;
       nameVisitorContext.defineConstant(name, c);
       checkVisitorContext.defineConstant(name, c);
       evalVisitorContext.defineConstant(name, new Double(value));
@@ -609,7 +609,7 @@ public class DynamicJavaAdapter implements JavaInterpreter {
      * @param value float to assign
      */
     public void defineConstant(String name, float value) {
-      Class c = float.class;
+      Class<?> c = float.class;
       nameVisitorContext.defineConstant(name, c);
       checkVisitorContext.defineConstant(name, c);
       evalVisitorContext.defineConstant(name, new Float(value));
@@ -621,7 +621,7 @@ public class DynamicJavaAdapter implements JavaInterpreter {
      * @param value int to assign
      */
     public void defineConstant(String name, int value) {
-      Class c = int.class;
+      Class<?> c = int.class;
       nameVisitorContext.defineConstant(name, c);
       checkVisitorContext.defineConstant(name, c);
       evalVisitorContext.defineConstant(name, new Integer(value));
@@ -633,7 +633,7 @@ public class DynamicJavaAdapter implements JavaInterpreter {
      * @param value long to assign
      */
     public void defineConstant(String name, long value) {
-      Class c = long.class;
+      Class<?> c = long.class;
       nameVisitorContext.defineConstant(name, c);
       checkVisitorContext.defineConstant(name, c);
       evalVisitorContext.defineConstant(name, new Long(value));
@@ -644,7 +644,7 @@ public class DynamicJavaAdapter implements JavaInterpreter {
      * @param value short to assign
      */
     public void defineConstant(String name, short value) {
-      Class c = short.class;
+      Class<?> c = short.class;
       nameVisitorContext.defineConstant(name, c);
       checkVisitorContext.defineConstant(name, c);
       evalVisitorContext.defineConstant(name, new Short(value));
@@ -711,13 +711,11 @@ public class DynamicJavaAdapter implements JavaInterpreter {
   }
   
   
-  protected Class loadClass(String name, boolean resolve) throws ClassNotFoundException{
-    Class clazz;
+  protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException{
+    Class<?> clazz;
     
     // check the cache
-    if (classes.containsKey(name)) {
-      clazz = (Class) classes.get(name);
-    }
+    if (classes.containsKey(name)) clazz = (Class<?>) classes.get(name);
     else {
       try {
         clazz = _stickyLoader.loadClass(name);
@@ -730,9 +728,7 @@ public class DynamicJavaAdapter implements JavaInterpreter {
       }
     }
     
-    if (resolve) {
-      resolveClass(clazz);
-    }
+    if (resolve) resolveClass(clazz);
     
     return clazz;
   }

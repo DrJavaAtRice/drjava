@@ -166,9 +166,9 @@ public class DrJavaTestCaseClassLoader extends TestCaseClassLoader {
   * 2nd. checks if it should be loaded by system
   * 3rd. try to load the class myself
   */
- public synchronized Class loadClass(String name, boolean resolve)
+ public synchronized Class<?> loadClass(String name, boolean resolve)
   throws ClassNotFoundException {
-  Class c= findLoadedClass(name);
+  Class<?> c= findLoadedClass(name);
   if (c != null)
    return c;
   //

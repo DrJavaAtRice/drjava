@@ -58,15 +58,11 @@ public class AlreadyOpenException extends Exception {
    * already open.
    * @param doc the currently open document
    */
-  public AlreadyOpenException(OpenDefinitionsDocument doc) {
-    _openDoc = doc;
-  }
+  public AlreadyOpenException(OpenDefinitionsDocument doc) { _openDoc = doc; }
 
   /**
    * @return the currently open document for the requested file
    */
-  public OpenDefinitionsDocument getOpenDocument() {
-    return _openDoc;
-  }
+  public OpenDefinitionsDocument getOpenDocument() { return _openDoc; }
 
 }

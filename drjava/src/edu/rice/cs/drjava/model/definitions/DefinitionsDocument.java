@@ -243,7 +243,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
    * this function is for use by the OpenDefinitionsDocument. This will lock the Document.
    */
   public void aquireWriteLock(){
-    throwErrorHuh();
+    // throwErrorHuh();
     writeLock();
   }
   
@@ -251,7 +251,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
    * this function is for use by the OpenDefinitionsDocument. This will release the lock to the Document.
    */
   public void releaseWriteLock(){
-    throwErrorHuh();
+    // throwErrorHuh();
     writeUnlock();
   }
   
@@ -259,7 +259,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
    * this function is for use by the OpenDefinitionsDocument. This will lock the Document.
    */
   public void aquireReadLock(){
-    throwErrorHuh();
+    // throwErrorHuh();
     readLock();
   }
   
@@ -267,7 +267,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
    * this function is for use by the OpenDefinitionsDocument. This will release the lock to the Document.
    */
   public void releaseReadLock(){
-    throwErrorHuh();
+    // throwErrorHuh();
     readUnlock();
   }
    
@@ -298,7 +298,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   
   protected void _styleChanged() 
   {
-    throwErrorHuh();
+    // throwErrorHuh();
     int length = getLength() - _currentLocation;
     //DrJava.consoleErr().println("Changed: " + _currentLocation + ", " + length);
     DocumentEvent evt = new DefaultDocumentEvent(_currentLocation,
@@ -380,7 +380,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
    * @return the qualified class name
    */
   public String getQualifiedClassName() throws ClassNameNotFoundException {
-    throwErrorHuh();
+    // throwErrorHuh();
     return _getPackageQualifier() + getFirstTopLevelClassName();
   }
 
@@ -389,7 +389,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
    * the given position.
    */
   public String getQualifiedClassName(int pos) throws ClassNameNotFoundException {
-    throwErrorHuh();
+    // throwErrorHuh();
     return _getPackageQualifier() + getEnclosingTopLevelClassName(pos);
   }
 
@@ -399,7 +399,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
    * string if no package name is found.
    */
   protected String _getPackageQualifier() {
-    throwErrorHuh();
+    // throwErrorHuh();
     String packageName = "";
     try {
       packageName = this.getPackageName();
@@ -414,22 +414,22 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   }
 
   public void setClassFileInSync(boolean inSync) {
-    throwErrorHuh();
+    // throwErrorHuh();
     _classFileInSync = inSync;
   }
 
   public boolean getClassFileInSync() {
-    throwErrorHuh();
+    // throwErrorHuh();
     return _classFileInSync;
   }
 
   public void setCachedClassFile(File classFile) {
-    throwErrorHuh();
+    // throwErrorHuh();
     _classFile = classFile;
   }
 
   public File getCachedClassFile() {
-    throwErrorHuh();
+    // throwErrorHuh();
     return _classFile;
   }
 
@@ -441,7 +441,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   public void insertString(int offset, String str, AttributeSet a)
     throws BadLocationException
   {
-    throwErrorHuh();
+    // throwErrorHuh();
     
     // If _removeTabs is set to true, remove all tabs from str.
     // It is a current invariant of the tabification functionality that
@@ -465,7 +465,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
    * in {@link #removeUpdate}.
    */
   public void remove(int offset, int len) throws BadLocationException {
-    throwErrorHuh();
+    // throwErrorHuh();
 
     if (!_modifiedSinceSave) {
       _modifiedSinceSave = true;
@@ -482,9 +482,9 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
    * @return a String will all the tabs converted to spaces
    */
   String _removeTabs(final String source) {
-    throwErrorHuh();
+    // throwErrorHuh();
     // Clear the helper method cache
-    if (_cacheInUse) _clearCache();
+    clearCache();
 
     return source.replace('\t', ' ');
   }
@@ -516,7 +516,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
    * Now it actually does this.
    */
   public void setModifiedSinceSave() {
-    throwErrorHuh();
+    // throwErrorHuh();
     _modifiedSinceSave = _undoManager.isModified();
 //    System.out.println("DefinitionsDocument: set modified? " + _modifiedSinceSave);
   }
@@ -526,7 +526,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
    * so that it knows it's no longer in a modified state.
    */
   public void resetModification() {
-    throwErrorHuh();
+    // throwErrorHuh();
     try {
       writeLock();
       _modifiedSinceSave = false;
@@ -542,7 +542,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
    * @return true if the document has been modified
    */
   public boolean isModifiedSinceSave() {
-    throwErrorHuh();
+    // throwErrorHuh();
     try {
       readLock();
       return  _modifiedSinceSave;
@@ -558,7 +558,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
    * Uses a 0 based index.
    */
   public int getCurrentCol() {
-    throwErrorHuh();
+    // throwErrorHuh();
     int here = getCurrentLocation();
     int startOfLine = getLineStartPos(here);
     return here - startOfLine;
@@ -569,7 +569,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
    * Uses a 1 based index.
    */
   public int getCurrentLine() {
-    throwErrorHuh();
+    // throwErrorHuh();
     int here = getCurrentLocation();
     if ( _cachedLocation > getLength() ){
       // we can't know the last line number after a delete.
@@ -607,7 +607,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
    * from the previous location in the document.
    **/
   private int _getRelativeLine(){
-    throwErrorHuh();
+    // throwErrorHuh();
     int count=0;
     int currLoc = getCurrentLocation();
 
@@ -645,7 +645,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
    * @return the offset of the first character in the given line number
    */
   public int getOffset(int lineNum) {
-    throwErrorHuh();
+    // throwErrorHuh();
 
     try {
       if (lineNum < 0) {
@@ -690,7 +690,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
    * Returns true iff tabs are to removed on text insertion.
    */
   public boolean tabsRemoved() {
-    throwErrorHuh();
+    // throwErrorHuh();
     return _tabsRemoved;
   }
 
@@ -702,7 +702,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
    * @param selEnd the document offset for the end of the selection
    */
   public void commentLines(int selStart, int selEnd) {
-    throwErrorHuh();
+    // throwErrorHuh();
     try {
       //int key = _undoManager.startCompoundEdit();  //Uncommented in regards to the FrenchKeyBoardFix
       if (selStart == selEnd) {
@@ -728,8 +728,8 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
    * @param start Position in document to start commenting from
    * @param end Position in document to end commenting at
    */
-  private synchronized void _commentBlock(final int start, final int end) {
-    throwErrorHuh();
+  private void _commentBlock(final int start, final int end) {
+    // throwErrorHuh();
     //DrJava.consoleOut().println("commenting out block of " + (end-start));
     try {
       // Keep marker at the end. This Position will be the
@@ -738,13 +738,14 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
       final Position endPos = this.createPosition(end);
       // Iterate, line by line, until we get to/past the end
       int walker = start;
+ 
       while (walker < endPos.getOffset()) {
         setCurrentLocation(walker);
         // Keep pointer to walker position that will stay current
         // regardless of how commentLine changes things
         Position walkerPos = this.createPosition(walker);
         // Comment out current line
-        _commentLine();
+        _commentLine();  // must be atomic
 
         // Move back to walker spot
         setCurrentLocation(walkerPos.getOffset());
@@ -765,11 +766,11 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
    * Comments out a single line with wing comments -- "// ".
    */
   private void _commentLine() {
-    throwErrorHuh();
+    // throwErrorHuh();
     // Insert "// " at the beginning of the line.
     // Using null for AttributeSet follows convention in this class.
     try {
-      insertString(getCurrentLocation() - getCurrentCol(), "//", null);
+      insertString(getCurrentLocation() - getCurrentCol(), "//", null);   // insertString is already atomic
     } catch (BadLocationException e) {
       // Should not happen
       throw new UnexpectedException(e);
@@ -783,36 +784,40 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
    * @param selEnd the document offset for the end of the selection
    */
   public void uncommentLines(int selStart, int selEnd) {
-    throwErrorHuh();
-    try {
-      //int key = _undoManager.startCompoundEdit(); //commented out for FrenchKeyBoardFix
-      if (selStart == selEnd) {
-        Position oldCurrentPosition = createPosition(_currentLocation);
-        _uncommentLine();
-        //int caretPos = getCaretPosition();
-        //_doc().setCurrentLocation(caretPos);
-        setCurrentLocation(oldCurrentPosition.getOffset());
+    // throwErrorHuh();
+    synchronized (_reduced) {
+      try {
+        //int key = _undoManager.startCompoundEdit(); //commented out for FrenchKeyBoardFix
+        if (selStart == selEnd) {
+          Position oldCurrentPosition = createPosition(_currentLocation);
+          _uncommentLine();
+          //int caretPos = getCaretPosition();
+          //_doc().setCurrentLocation(caretPos);
+          setCurrentLocation(oldCurrentPosition.getOffset());
+        }
+        else {
+          _uncommentBlock(selStart, selEnd);
+        }
+        //_undoManager.endCompoundEdit(key); //Commented out for FrenchKeyBoardFix, Replaced with endLastCompoundEdit();
+        _undoManager.endLastCompoundEdit();
       }
-      else {
-        _uncommentBlock(selStart, selEnd);
+      catch (BadLocationException e) {
+        throw new UnexpectedException(e);
       }
-      //_undoManager.endCompoundEdit(key); //Commented out for FrenchKeyBoardFix, Replaced with endLastCompoundEdit();
-      _undoManager.endLastCompoundEdit();
-    }
-    catch (BadLocationException e) {
-      throw new UnexpectedException(e);
     }
   }
 
   /**
    * Uncomments all lines between and including the lines containing
-   * points start and end.
+   * points start and end.  Only called from a thread already holding
+   * a lock on _reduced.
    * @param start Position in document to start commenting from
    * @param end Position in document to end commenting at
    */
-  private synchronized void _uncommentBlock(final int start, final int end) {
-    throwErrorHuh();
+  private void _uncommentBlock(final int start, final int end) {
+    // throwErrorHuh();
     //DrJava.consoleOut().println("uncommenting block of " + (end-start));
+    
     try {
       // Keep marker at the end. This Position will be the
       // correct endpoint no matter how we change the doc
@@ -827,7 +832,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
         Position walkerPos = this.createPosition(walker);
         // uncomment current line
         _uncommentLine();
-
+        
         // Move back to walker spot
         setCurrentLocation(walkerPos.getOffset());
         walker = walkerPos.getOffset();
@@ -846,9 +851,10 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   /**
    * Uncomments a single line.  This simply looks for a leading "//".
    * Also indents the line, once the comments have been removed.
+   * Only called in threads already holding lock on _reduced 
    */
-  private synchronized void _uncommentLine() {
-    throwErrorHuh();
+  private void _uncommentLine() {
+    // throwErrorHuh();
     try {
       // Look for "//" at the beginning of the line, and remove it.
       int curCol = getCurrentCol();
@@ -1031,26 +1037,27 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   /**
    * Goes to a particular line in the document.
    */
-  public synchronized void gotoLine(int line) {
-    throwErrorHuh();
+  public void gotoLine(int line) {
+    // throwErrorHuh();
     int dist;
-    if (line < 0) {
-     return;
-    }
+    if (line < 0) return;
     int actualLine =1;
-    setCurrentLocation(0);
-    for (int i = 1; (i < line) && (_currentLocation < getLength()); i++) {
-      dist = _reduced.getDistToNextNewline();
-      if (_currentLocation + dist < getLength()) {
-        dist++;
+    
+    synchronized (_reduced) {
+      setCurrentLocation(0);
+      for (int i = 1; (i < line) && (_currentLocation < getLength()); i++) {
+        dist = _reduced.getDistToNextNewline();
+        if (_currentLocation + dist < getLength()) {
+          dist++;
+        }
+        actualLine++;
+        move(dist);
       }
-      actualLine++;
-      move(dist);
+      _cachedLineNum = actualLine;
+      _cachedLocation = _currentLocation;
+      _cachedPrevLineLoc = getLineStartPos(_currentLocation);
+      _cachedNextLineLoc = getLineEndPos(_currentLocation);
     }
-    _cachedLineNum = actualLine;
-    _cachedLocation = _currentLocation;
-    _cachedPrevLineLoc = getLineStartPos(_currentLocation);
-    _cachedNextLineLoc = getLineEndPos(_currentLocation);
   }
 
   /**
@@ -1066,109 +1073,108 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
    *                                    <TT>package</TT> statement but the
    *                                    defined package does not match or exist.
    */
-  public synchronized String getPackageName() throws InvalidPackageException {
-    throwErrorHuh();
+  public String getPackageName() throws InvalidPackageException {
+    // throwErrorHuh();
     // Where we'll build up the package name we find
     StringBuffer buf = new StringBuffer();
-
-    int oldLocation = getCurrentLocation();
-
-    try {
-      setCurrentLocation(0);
-      final int docLength = getLength();
-      final String text = getText(0, docLength);
-//      System.out.println("oldlocation: " + oldLocation + ", doclength: " + docLength + ", text: \"" + text + "\"");
-      // The location of the first non-whitespace character that
-      // is not inside quote or comment.
-      int firstNormalLocation = 0;
-      while ((firstNormalLocation < docLength)) {
-        setCurrentLocation(firstNormalLocation);
-
-        if (_reduced.currentToken().getHighlightState() ==
-            HighlightStatus.NORMAL)
+    
+    synchronized (_reduced) {
+      int oldLocation = getCurrentLocation();
+      
+      try {
+        
+        setCurrentLocation(0);
+        final int docLength = getLength();
+        final String text = getText(0, docLength);
+        //      System.out.println("oldlocation: " + oldLocation + ", doclength: " + docLength + ", text: \"" + text + "\"");
+        // The location of the first non-whitespace character that
+        // is not inside quote or comment.
+        int firstNormalLocation = 0;
+        while ((firstNormalLocation < docLength)) {
+          setCurrentLocation(firstNormalLocation);
+          
+          if (_reduced.currentToken().getHighlightState() == HighlightStatus.NORMAL) {
+            // OK, it's normal -- so if it's not whitespace, we found the spot
+            char curChar = text.charAt(firstNormalLocation);
+            if (!Character.isWhitespace(curChar)) {
+              break;
+            }
+          }
+          
+          firstNormalLocation++;
+        }
+        
+        // Now there are two possibilities: firstNormalLocation is at
+        // the first spot of a non-whitespace character that's NORMAL,
+        // or it's at the end of the document.
+        if (firstNormalLocation == docLength) return "";
+        
+        final int strlen = "package".length();
+        
+        final int endLocation = firstNormalLocation + strlen;
+        
+        if ((firstNormalLocation + strlen > docLength) ||
+            ! text.substring(firstNormalLocation, endLocation).equals("package"))
         {
-          // OK, it's normal -- so if it's not whitespace, we found the spot
-          char curChar = text.charAt(firstNormalLocation);
-          if (!Character.isWhitespace(curChar)) {
-            break;
+          // the first normal text is not "package" or there is not enough
+          // text for there to be a package statement.
+          // thus, there is no valid package statement.
+          return "";
+        }
+        
+        // OK, we must have found a package statement.
+        // Now let's find the semicolon. Again, the semicolon must be free.
+        int afterPackage = firstNormalLocation + strlen;
+        
+        int semicolonLocation = afterPackage;
+        do {
+          semicolonLocation = text.indexOf(";", semicolonLocation + 1);
+          
+          if (semicolonLocation == -1) {
+            throw new InvalidPackageException(firstNormalLocation,
+                                              "No semicolon found to terminate " +
+                                              "package statement!");
+          }
+          
+          setCurrentLocation(semicolonLocation);
+        }
+        while (_reduced.currentToken().getHighlightState() !=
+               HighlightStatus.NORMAL);
+        
+        // Now we have semicolon location. We'll gather text in between one
+        // character at a time for simplicity. It's inefficient (I think?)
+        // but it's easy, and there shouldn't be much text between
+        // "package" and ";" anyhow.
+        for (int walk = afterPackage + 1; walk < semicolonLocation; walk++) {
+          setCurrentLocation(walk);
+          
+          if (_reduced.currentToken().getHighlightState() ==
+              HighlightStatus.NORMAL)
+          {
+            char curChar = text.charAt(walk);
+            
+            if (! Character.isWhitespace(curChar)) {
+              buf.append(curChar);
+            }
           }
         }
-
-        firstNormalLocation++;
-      }
-
-      // Now there are two possibilities: firstNormalLocation is at
-      // the first spot of a non-whitespace character that's NORMAL,
-      // or it's at the end of the document.
-      if (firstNormalLocation == docLength) {
-        return "";
-      }
-
-      final int strlen = "package".length();
-
-      final int endLocation = firstNormalLocation + strlen;
-
-      if ((firstNormalLocation + strlen > docLength) ||
-          ! text.substring(firstNormalLocation, endLocation).equals("package"))
-      {
-        // the first normal text is not "package" or there is not enough
-        // text for there to be a package statement.
-        // thus, there is no valid package statement.
-        return "";
-      }
-
-      // OK, we must have found a package statement.
-      // Now let's find the semicolon. Again, the semicolon must be free.
-      int afterPackage = firstNormalLocation + strlen;
-
-      int semicolonLocation = afterPackage;
-      do {
-        semicolonLocation = text.indexOf(";", semicolonLocation + 1);
-
-        if (semicolonLocation == -1) {
+        
+        String toReturn = buf.toString();
+        if (toReturn.equals("")) {
           throw new InvalidPackageException(firstNormalLocation,
-                                            "No semicolon found to terminate " +
-                                            "package statement!");
+                                            "Package name was not specified " +
+                                            "after the package keyword!");
         }
-
-        setCurrentLocation(semicolonLocation);
+        
+        return toReturn;
       }
-      while (_reduced.currentToken().getHighlightState() !=
-             HighlightStatus.NORMAL);
-
-      // Now we have semicolon location. We'll gather text in between one
-      // character at a time for simplicity. It's inefficient (I think?)
-      // but it's easy, and there shouldn't be much text between
-      // "package" and ";" anyhow.
-      for (int walk = afterPackage + 1; walk < semicolonLocation; walk++) {
-        setCurrentLocation(walk);
-
-        if (_reduced.currentToken().getHighlightState() ==
-            HighlightStatus.NORMAL)
-        {
-          char curChar = text.charAt(walk);
-
-          if (! Character.isWhitespace(curChar)) {
-            buf.append(curChar);
-          }
-        }
+      catch (BadLocationException ble) {
+        throw new UnexpectedException(ble);
       }
-
-      String toReturn = buf.toString();
-      if (toReturn.equals("")) {
-        throw new InvalidPackageException(firstNormalLocation,
-                                          "Package name was not specified " +
-                                          "after the package keyword!");
+      finally {
+        setCurrentLocation(0);
+        setCurrentLocation(oldLocation);
       }
-
-      return toReturn;
-    }
-    catch (BadLocationException ble) {
-      throw new UnexpectedException(ble);
-    }
-    finally {
-      setCurrentLocation(0);
-      setCurrentLocation(oldLocation);
     }
   }
 
@@ -1178,54 +1184,54 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
    * @return Name of enclosing class or interface
    * @throws ClassNameNotFoundException if no enclosing class found
    */
-  public synchronized String getEnclosingTopLevelClassName(int pos) throws
-    ClassNameNotFoundException
-  {
-    throwErrorHuh();
-    int oldLocation = getCurrentLocation();
-
-    try {
-      setCurrentLocation(pos);
-
-      IndentInfo info = getIndentInformation();
-
-      // Find top level open brace
-      int topLevelBracePos = -1;
-      String braceType = info.braceTypeCurrent;
-      while (!braceType.equals(IndentInfo.noBrace)) {
-        if (braceType.equals(IndentInfo.openSquiggly)) {
-          topLevelBracePos = getCurrentLocation() - info.distToBraceCurrent;
+  public String getEnclosingTopLevelClassName(int pos) throws
+    ClassNameNotFoundException {
+    // throwErrorHuh();
+    
+    synchronized (_reduced) {
+      int oldLocation = getCurrentLocation();
+      
+      try {
+        setCurrentLocation(pos);
+        
+        IndentInfo info = getIndentInformation();
+        
+        // Find top level open brace
+        int topLevelBracePos = -1;
+        String braceType = info.braceTypeCurrent;
+        while (!braceType.equals(IndentInfo.noBrace)) {
+          if (braceType.equals(IndentInfo.openSquiggly)) {
+            topLevelBracePos = getCurrentLocation() - info.distToBraceCurrent;
+          }
+          move(-info.distToBraceCurrent);
+          info = getIndentInformation();
+          braceType = info.braceTypeCurrent;
         }
-        move(-info.distToBraceCurrent);
-        info = getIndentInformation();
-        braceType = info.braceTypeCurrent;
-      }
-      if (topLevelBracePos == -1) {
-        // No top level brace was found, so we can't find a top level class name
+        if (topLevelBracePos == -1) {
+          // No top level brace was found, so we can't find a top level class name
+          setCurrentLocation(oldLocation);
+          throw new ClassNameNotFoundException("no top level brace found");
+        }
+        
+        char[] delims = {'{', '}', ';'};
+        int prevDelimPos = findPrevDelimiter(topLevelBracePos, delims);
+        if (prevDelimPos == ERROR_INDEX) {
+          // Search from start of doc
+          prevDelimPos = DOCSTART;
+        }
+        else {
+          prevDelimPos++;
+        }
         setCurrentLocation(oldLocation);
-        throw new ClassNameNotFoundException("no top level brace found");
+        
+        // Parse out the class name
+        return getNextTopLevelClassName(prevDelimPos, topLevelBracePos);
       }
-
-      char[] delims = {'{', '}', ';'};
-      int prevDelimPos = findPrevDelimiter(topLevelBracePos, delims);
-      if (prevDelimPos == ERROR_INDEX) {
-        // Search from start of doc
-        prevDelimPos = DOCSTART;
+      catch (BadLocationException ble) {
+        // All positions here should be legal
+        throw new UnexpectedException(ble);
       }
-      else {
-        prevDelimPos++;
-      }
-      setCurrentLocation(oldLocation);
-
-      // Parse out the class name
-      return getNextTopLevelClassName(prevDelimPos, topLevelBracePos);
-    }
-    catch (BadLocationException ble) {
-      // All positions here should be legal
-      throw new UnexpectedException(ble);
-    }
-    finally {
-      setCurrentLocation(oldLocation);
+      finally { setCurrentLocation(oldLocation); }
     }
   }
 
@@ -1237,15 +1243,14 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
    * @throws ClassNameNotFoundException if no top level class found
    */
   public String getFirstTopLevelClassName() throws ClassNameNotFoundException {
-    throwErrorHuh();
+    // throwErrorHuh();
     return getNextTopLevelClassName(0, getLength());
   }
 
   // note: need to update this to work with pos
   public String getNextTopLevelClassName(int startPos, int endPos)
-    throws ClassNameNotFoundException
-  {
-    throwErrorHuh();
+    throws ClassNameNotFoundException {
+    // throwErrorHuh();
     // Where we'll build up the package name we find
     int oldLocation = getCurrentLocation();
 
@@ -1348,50 +1353,53 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
    * @return index of the keyword, or -1 if the keyword is not found or
    * not followed by whitespace
    */
-  private synchronized int _findKeywordAtToplevel(String keyword,
+  private int _findKeywordAtToplevel(String keyword,
                                                   String text,
                                                   int textOffset) {
-    throwErrorHuh();
-    int oldLocation = getCurrentLocation();
-
-    int index = 0;
-    boolean done = false;
-
-    while (!done) {
-      index = text.indexOf(keyword, index);
-      if (index == -1) {  //not found
-        done = true;
-        break;
-      }
-      else {
-        //found a match, check quality
-        setCurrentLocation(textOffset + index);
-
-        // check that the keyword is not in a comment and is followed by whitespace
-        ReducedToken rt = _reduced.currentToken();
-        int indexPastKeyword = index + keyword.length();
-        if (indexPastKeyword < text.length()) {
-          if (rt.getState() == ReducedModelStates.FREE &&
-              Character.isWhitespace(text.charAt(indexPastKeyword))) {
-            //if (!_isCommentedOrSpace(index,text)) {
-            done = true;
-            if (!posNotInBlock(index)) { //in a paren phrase, gone too far
-              index = -1;
+    // throwErrorHuh();
+    
+    synchronized (_reduced) {
+      int oldLocation = getCurrentLocation();
+      
+      int index = 0;
+      boolean done = false;
+      
+      while (!done) {
+        index = text.indexOf(keyword, index);
+        if (index == -1) {  //not found
+          done = true;
+          break;
+        }
+        else {
+          //found a match, check quality
+          setCurrentLocation(textOffset + index);
+          
+          // check that the keyword is not in a comment and is followed by whitespace
+          ReducedToken rt = _reduced.currentToken();
+          int indexPastKeyword = index + keyword.length();
+          if (indexPastKeyword < text.length()) {
+            if (rt.getState() == ReducedModelStates.FREE &&
+                Character.isWhitespace(text.charAt(indexPastKeyword))) {
+              //if (!_isCommentedOrSpace(index,text)) {
+              done = true;
+              if (!posNotInBlock(index)) { //in a paren phrase, gone too far
+                index = -1;
+              }
+            }
+            else {
+              index++;  //move past so we can search again
             }
           }
           else {
-            index++;  //move past so we can search again
+            // No space found past the keyword
+            index = -1;
+            done = true;
           }
         }
-        else {
-          // No space found past the keyword
-          index = -1;
-          done = true;
-        }
       }
+      setCurrentLocation(oldLocation);
+      return index;
     }
-    setCurrentLocation(oldLocation);
-    return index;
   }
   /**
    * Appending any information for the reduced model from each undo command
@@ -1425,7 +1433,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
    * @return _undoManager
    */
   public CompoundUndoManager getUndoManager() {
-    throwErrorHuh();
+    // throwErrorHuh();
     return _undoManager;
   }
 
@@ -1433,7 +1441,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
    * resets the undo manager
    */
   public void resetUndoManager() {
-    throwErrorHuh();
+    // throwErrorHuh();
     _undoManager = new CompoundUndoManager(_notifier);
     _undoManager.setLimit(UNDO_LIMIT);
   }
@@ -1442,7 +1450,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
    * public accessor for the next undo action
    */
   public UndoableEdit getNextUndo() {
-    throwErrorHuh();
+    // throwErrorHuh();
     return _undoManager.getNextUndo();
   }
 
@@ -1450,7 +1458,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
    * public accessor for the next undo action
    */
   public UndoableEdit getNextRedo() {
-    throwErrorHuh();
+    // throwErrorHuh();
     return _undoManager.getNextRedo();
   }
 
@@ -1459,7 +1467,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
    * Informs this document's undo manager that the document has been saved.
    */
   public void documentSaved(){
-    throwErrorHuh();
+    // throwErrorHuh();
     _undoManager.documentSaved();
   }
   

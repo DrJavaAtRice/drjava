@@ -147,7 +147,7 @@ class DefaultPlatform implements PlatformSupport {
   public boolean has13ToolsJar() {
     // Javadoc's Main class should not have an execute(String[]) method.
     try {
-      Class main = Class.forName("com.sun.tools.javadoc.Main");
+      Class<?> main = Class.forName("com.sun.tools.javadoc.Main");
       return !_javadocMainHasExecuteMethod(main);
     }
     catch (Throwable t) {
@@ -161,7 +161,7 @@ class DefaultPlatform implements PlatformSupport {
   public boolean has14ToolsJar() {
     // Javadoc's Main class should have an execute(String[]) method.
     try {
-      Class main = Class.forName("com.sun.tools.javadoc.Main");
+      Class<?> main = Class.forName("com.sun.tools.javadoc.Main");
       return _javadocMainHasExecuteMethod(main);
     }
     catch (Throwable t) {

@@ -103,7 +103,7 @@ public class CompilerProxy implements CompilerInterface {
                                                      _useOldLoader);
 
     try {
-      Class c = loader.loadClass(_className);
+      Class<?> c = loader.loadClass(_className);
       _realCompiler = CompilerRegistry.createCompiler(c);
 
       _realCompiler.setBuildDirectory(_buildDir);

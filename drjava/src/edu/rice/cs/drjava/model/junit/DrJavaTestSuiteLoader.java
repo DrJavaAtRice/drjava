@@ -69,11 +69,11 @@ public class DrJavaTestSuiteLoader implements TestSuiteLoader, OptionConstants {
     _loader = new DrJavaTestCaseClassLoader(classpath);
   }
 
-  public Class load(String className) throws ClassNotFoundException {
+  public Class<?> load(String className) throws ClassNotFoundException {
     return _loader.loadClass(className, true);
   }
 
-  public Class reload(Class c) throws ClassNotFoundException {
+  public Class<?> reload(Class c) throws ClassNotFoundException {
     return load(c.getName());
   }
 }

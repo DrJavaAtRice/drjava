@@ -160,7 +160,7 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
     return cName;
   }
 
-  private Class _loadClassForThis(Context context) {
+  private Class<?> _loadClassForThis(Context context) {
     try {
       return context.lookupClass(_getFullyQualifiedClassNameForThis());
     }
@@ -185,7 +185,7 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
     // Check if this has an anonymous inner class
     if (hasAnonymous(_thisClassName)) {
       // Get the class
-      Class c = _loadClassForThis(context);
+      Class<?> c = _loadClassForThis(context);
       Field[] fields = c.getDeclaredFields();
 
       // Check for a field that begins with this$
@@ -241,7 +241,7 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
     // Check if this has an anonymous inner class
     if (hasAnonymous(_thisClassName)) {
       // Get the class
-      Class c = _loadClassForThis(context);
+      Class<?> c = _loadClassForThis(context);
       Field[] fields = c.getDeclaredFields();
 
       // Check for a field that begins with this$
@@ -578,7 +578,7 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
   }
 
 //  private Class _getClassForType(Type type, Context context) {
-//    Class c = (Class)type.getProperty(NodeProperties.TYPE);
+//    Class c = (ClassProperty(NodeProperties.TYPE);
 //    if (c != null) {
 //      return c;
 //    }
@@ -731,7 +731,7 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
        * Visits a QualifiedName, returning our class if it is "this"
        * @param node the node to visit
        */
-      public Class visit(QualifiedName node) {
+      public Class<?> visit(QualifiedName node) {
         String var = node.getRepresentation();
         if ("this".equals(var)) {
           //            String cName = _thisClassName.replace('$', '.');
@@ -739,7 +739,7 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
           //              cName = _thisPackageName + "." + cName;
           //            }
           //            Class c = context.lookupClass(cName);
-          Class c = _loadClassForThis(context);
+          Class<?> c = _loadClassForThis(context);
           node.setProperty(NodeProperties.TYPE, c);
           node.setProperty(NodeProperties.MODIFIER, context.getModifier(node));
           return c;
@@ -755,7 +755,7 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
        * Visits a QualifiedName, returning our class if it is "this"
        * @param node the node to visit
        */
-      public Class visit(QualifiedName node) {
+      public Class<?> visit(QualifiedName node) {
         String var = node.getRepresentation();
         if ("this".equals(var)) {
           //            String cName = _thisClassName.replace('$', '.');
@@ -763,7 +763,7 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
           //              cName = _thisPackageName + "." + cName;
           //            }
           //            Class c = context.lookupClass(cName);
-          Class c = _loadClassForThis(context);
+          Class<?> c = _loadClassForThis(context);
           node.setProperty(NodeProperties.TYPE, c);
           node.setProperty(NodeProperties.MODIFIER, context.getModifier(node));
           return c;

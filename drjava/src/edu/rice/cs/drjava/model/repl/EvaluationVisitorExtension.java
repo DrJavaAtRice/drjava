@@ -290,7 +290,7 @@ public class EvaluationVisitorExtension extends EvaluationVisitor {
       buf.append("(");
 
       boolean first = true;
-      Class[] params = m.getParameterTypes();
+      Class<?>[] params = m.getParameterTypes();
       for (int i = 0; i < params.length; i++) {
         if (first) {
           first = false;
