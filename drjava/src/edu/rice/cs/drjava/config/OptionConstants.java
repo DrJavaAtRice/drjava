@@ -512,6 +512,18 @@ public interface OptionConstants extends ConfigurationTool {
     new NonNegativeIntegerOption("recent.files.max.size", new Integer(5));
   
   /**
+   * Whether to prompt when the interactions pane is unexpectedly reset.
+   */
+  public static final BooleanOption INTERACTIONS_EXIT_PROMPT =
+    new BooleanOption("interactions.exit.prompt", new Boolean(true));
+  
+  /**
+   * Whether to prompt before quitting DrJava.
+   */
+  public static final BooleanOption QUIT_PROMPT =
+    new BooleanOption("quit.prompt", new Boolean(true));
+  
+  /**
    * A vector containing the most recently used files
    */
   public static final VectorOption<File> RECENT_FILES = 

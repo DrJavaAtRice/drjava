@@ -205,6 +205,7 @@ public class JUnitPanel extends TabbedPanel
       _errorListPane.updateListPane(testsHaveRun);
     }
     _resetEnabledStatus();
+    _errorListPane.setCaretPosition(0);
   }
 
   private void _showAllErrors() {
@@ -582,6 +583,15 @@ public class JUnitPanel extends TabbedPanel
       DefaultStyledDocument doc = new DefaultStyledDocument();
       _checkSync(doc);
       int errorNum = 0;
+      
+      // Print how many errors
+      StringBuffer numErrMsg = new StringBuffer("" + _numErrors);
+      numErrMsg.append(" test");
+      if (_numErrors > 1) {
+        numErrMsg.append("s");
+      }
+      numErrMsg.append(" failed:\n");
+      doc.insertString(doc.getLength(), numErrMsg.toString(), BOLD_ATTRIBUTES);
 
       // Show errors for each file
       JUnitErrorModel errorModel = _docBeingTested.getJUnitErrorModel();

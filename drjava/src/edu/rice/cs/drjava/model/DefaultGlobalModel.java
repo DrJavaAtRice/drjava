@@ -98,100 +98,175 @@ import junit.runner.ReloadingTestSuiteLoader;
  * @version $Id$
  */
 public class DefaultGlobalModel implements GlobalModel, OptionConstants {
+  
+  /**
+   * Factory for new definitions documents and views.
+   */
   private final DefinitionsEditorKit _editorKit = new DefinitionsEditorKit();
+  
+  /**
+   * ListModel for storing all OpenDefinitionsDocuments.
+   */
   private final DefaultListModel _definitionsDocs = new DefaultListModel();
+  
+  /**
+   * The document used to interact with the repl.
+   */
   private final InteractionsDocument _interactionsDoc
     = new InteractionsDocument();
+  
+  /**
+   * The document used to display System.out and System.err.
+   */
   private final StyledDocument _consoleDoc = new DefaultStyledDocument();
+  
+  /**
+   * The document used to display JUnit test results.
+   */
   private final StyledDocument _junitDoc = new DefaultStyledDocument();
+
+  /**
+   * All GlobalModelListeners that are listening to this model.
+   * All accesses should be synchronized on this field.
+   */
   private final LinkedList _listeners = new LinkedList();
+  
+  /**
+   * A PageFormat object for printing.
+   */
   private PageFormat _pageFormat = new PageFormat();
 
-  // blank final, set differently in the two constructors
-  // package private to allow access from test cases
+  /**
+   * RMI interface to the Interactions JVM.
+   * Final, but set differently in the two constructors.
+   * Package private so we can access it from test cases.
+   * All accesses should be synchronized on _interpreterLock.
+   */
   final MainJVM _interpreterControl;
 
-  private CompilerError[] _compilerErrorsWithoutFiles;
-  private int _numErrors;
+  /**
+   * An array of all current compiler errors which do not have files.
+   * Errors with files are stored on their respective OpenDefinitionsDocuments.
+   */
+  private CompilerError[] _compilerErrorsWithoutFiles = new CompilerError[0];
+  
+  /**
+   * The total number of current compiler errors, including both errors
+   * with and without files.
+   */
+  private int _numErrors = 0;
 
-  // Debug manager (null if not available)
+  /**
+   * Interface to the integrated debugger.  If the JPDA classes are not
+   * available, this is set to null.
+   * TO DO:  Would be nice to have a DebugManager interface and a
+   *   DebugManagerUnavailable class instead of using null as a value...
+   */
   private DebugManager _debugManager = null;
+  
+  /**
+   * Port used by the debugger to connect to the Interactions JVM.
+   * Uniquely created in getDebugPort().
+   */
   private int _debugPort = -1;
   
-  // Used to prevent multiple threads from accessing the compiler at the same time
+  /**
+   * Lock to prevent multiple threads from accessing the compiler at the
+   * same time.
+   */
   private Object _compilerLock = new Object();
-  // Used to prevent multiple threads from accessing the interpreter at the same time
+
+  /**
+   * Lock to prevent multiple threads from accessing the interpreter at
+   * the same time.
+   */
   private Object _interpreterLock = new Object();
   
-  // Keeps track of the OpenDefinitionsDocument that we are testing
+  /**
+   * If a JUnit test is currently running, this is the OpenDefinitionsDocument
+   * being tested.  Otherwise this is null.
+   */
   private OpenDefinitionsDocument _docBeingTested = null;
 
+  /**
+   * The instance of the indent decision tree used by Definitions documents.
+   */
   public static final Indenter INDENTER;
-
   static {
+    // Statically create the indenter from the config values
     int ind = DrJava.CONFIG.getSetting(OptionConstants.INDENT_LEVEL).intValue();
     INDENTER = new Indenter(ind);
-    DrJava.CONFIG.addOptionListener( OptionConstants.INDENT_LEVEL, 
+    DrJava.CONFIG.addOptionListener(OptionConstants.INDENT_LEVEL, 
                                     new OptionListener<Integer>() {
       public void optionChanged(OptionEvent<Integer> oce) {
         INDENTER.buildTree(DrJava.CONFIG.getSetting(OptionConstants.INDENT_LEVEL).intValue());
-      }  
+      }
     });
   }
 
-  public static final String EXIT_CALLED_MESSAGE
-    = "The interaction was aborted by a call to System.exit.";
-
-  public static final AttributeSet SYSTEM_OUT_STYLE
+  /**
+   * Attributes for System.out output in the console document.
+   */
+  public static final AttributeSet SYSTEM_OUT_CONSOLE_STYLE
     = SimpleAttributeSet.EMPTY;
 
-  public static final AttributeSet SYSTEM_ERR_STYLE = _getErrStyle();
-  private static AttributeSet _getErrStyle() {
-    SimpleAttributeSet s = new SimpleAttributeSet(SYSTEM_OUT_STYLE);
+  /**
+   * Attributes for System.err output in the console document.
+   */
+  public static final AttributeSet SYSTEM_ERR_CONSOLE_STYLE = _getConsoleErrStyle();
+  private static AttributeSet _getConsoleErrStyle() {
+    SimpleAttributeSet s = new SimpleAttributeSet(SYSTEM_OUT_CONSOLE_STYLE);
     s.addAttribute(StyleConstants.Foreground, Color.red);
     return s;
   }
 
+  /**
+   * Attributes for System.out output in the interactions document.
+   */
   public static final AttributeSet SYSTEM_OUT_INTERACTIONS_STYLE
-    = _getOutInsideInteractionsStyle();
-  
-  public static final AttributeSet SYSTEM_ERR_INTERACTIONS_STYLE
-    = _getErrStyle();
-
-  public static final AttributeSet DEBUG_STYLE
-    = _getDebugStyle();
-
-  private static AttributeSet _getOutInsideInteractionsStyle() {
-    SimpleAttributeSet s = new SimpleAttributeSet(SYSTEM_OUT_STYLE);
+    = _getInteractionsOutStyle();
+  private static AttributeSet _getInteractionsOutStyle() {
+    SimpleAttributeSet s = new SimpleAttributeSet(SYSTEM_OUT_CONSOLE_STYLE);
     s.addAttribute(StyleConstants.Foreground, Color.green.darker().darker());
     return s;
   }
   
+  /**
+   * Attributes for System.err output in the interactions document.
+   */
+  public static final AttributeSet SYSTEM_ERR_INTERACTIONS_STYLE
+    = _getConsoleErrStyle();
+
+  /**
+   * Attributes for debug messages in the interactions document.
+   */
+  public static final AttributeSet DEBUG_STYLE
+    = _getDebugStyle();
   private static AttributeSet _getDebugStyle() {
-    SimpleAttributeSet s = new SimpleAttributeSet(SYSTEM_OUT_STYLE);
+    SimpleAttributeSet s = new SimpleAttributeSet(SYSTEM_OUT_CONSOLE_STYLE);
     s.addAttribute(StyleConstants.Foreground, Color.blue.darker());
     s.addAttribute(StyleConstants.Bold, new Boolean(true));
     return s;
   }
   
+  /**
+   * Attributes for error messages in the interactions document.
+   */
   public static final AttributeSet INTERACTIONS_ERR_STYLE
     = _getInteractionsErrStyle();
-  
   private static AttributeSet _getInteractionsErrStyle() {
-    SimpleAttributeSet s = new SimpleAttributeSet(SYSTEM_OUT_STYLE);
+    SimpleAttributeSet s = new SimpleAttributeSet(SYSTEM_OUT_CONSOLE_STYLE);
     s.addAttribute(StyleConstants.Foreground, Color.red.darker());
     s.addAttribute(StyleConstants.Bold, new Boolean(true));
     return s;
   }
   
+  
   /**
-   * Constructor.  Initializes all the documents and the interpreter.
+   * Constructs a new GlobalModel.
    */
-  public DefaultGlobalModel()
-  {
-    _compilerErrorsWithoutFiles = new CompilerError[0];
-    _numErrors = 0;
-
+  public DefaultGlobalModel() {
+    // Create the interpreter
     try {
       _interpreterControl = new MainJVM(this);
       _resetInteractionsClasspath();
@@ -202,6 +277,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
 
     _createDebugger();
     
+    // Listen to any relevant config options
     DrJava.CONFIG.addOptionListener(EXTRA_CLASSPATH, new ExtraClasspathOptionListener());
   }
 
@@ -211,15 +287,16 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
    * since there is substantial overhead to initializing the interpreter.
    *
    * Reset the interpreter for good measure since it's an old one.
+   * (NOTE: I'm not sure this is still correct or effective any more,
+   *   now that we're always restarting the JVM.  Needs to be looked at...)
    */
-  public DefaultGlobalModel(DefaultGlobalModel other)
-  {
-    _compilerErrorsWithoutFiles = new CompilerError[0];
-    _numErrors = 0;
-
+  public DefaultGlobalModel(DefaultGlobalModel other) {
+    // Take interpreter from old model
     _interpreterControl = other._interpreterControl;
     _interpreterControl.setModel(this);
     _interpreterControl.reset();
+
+    // Create debugger, but use same port as before
     _createDebugger();
     try {
       _debugPort = other.getDebugPort();
@@ -230,6 +307,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
       throw new UnexpectedException(ioe);
     }
     
+    // Listen to any relevant config options
     DrJava.CONFIG.addOptionListener(EXTRA_CLASSPATH, new ExtraClasspathOptionListener());
   }
 
@@ -283,18 +361,24 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
     _pageFormat = format;
   }
 
-  /** Errors without associated files */
+  /**
+   * Returns an array of all current compiler errors which do not have files.
+   * All other errors are stored on their respective OpenDefinitionsDocuments.
+   */
   public CompilerError[] getCompilerErrorsWithoutFiles() {
     return _compilerErrorsWithoutFiles;
   }
-  /** Total number of current errors */
+
+  /**
+   * Returns the current total number of errors, both with and without files.
+   */
   public int getNumErrors() {
     return _numErrors;
   }
 
+
   /**
-   * Creates a new document in the definitions pane and
-   * adds it to the list of open documents.
+   * Creates a new definitions document and adds it to the list.
    * @return The new open document
    */
   public OpenDefinitionsDocument newFile() {
@@ -766,6 +850,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
             text += currString + ";\n";
         }
       }
+      clearCurrentInteraction();
       _docAppend(_interactionsDoc, text, null);
       //  _docAppend(_interactionsDoc, currString, null);
       _interactionsDoc.setInProgress(true);
@@ -826,12 +911,12 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
  
   /** Prints System.out to the DrJava console. */
   public void systemOutPrint(String s) {
-    _docAppend(_consoleDoc, s, SYSTEM_OUT_STYLE);
+    _docAppend(_consoleDoc, s, SYSTEM_OUT_CONSOLE_STYLE);
   }
 
   /** Prints System.err to the DrJava console. */
   public void systemErrPrint(String s) {
-    _docAppend(_consoleDoc, s, SYSTEM_ERR_STYLE);
+    _docAppend(_consoleDoc, s, SYSTEM_ERR_CONSOLE_STYLE);
   }
 
   /** Called when the repl prints to System.out. */
@@ -2125,13 +2210,15 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
 
   /**
    * Resets the compiler error state to have no errors.
+   * Also resets the JUnit error state.
    */
   public void resetCompilerErrors() {
-    // Reset CompilerErrorModels
+    // Reset CompilerErrorModels (and JUnitErrorModels)
     for (int i = 0; i < _definitionsDocs.getSize(); i++) {
       OpenDefinitionsDocument doc = (OpenDefinitionsDocument)
         _definitionsDocs.getElementAt(i);
       doc.setCompilerErrorModel(new CompilerErrorModel());
+      doc.setJUnitErrorModel(new JUnitErrorModel());
     }
     _numErrors = 0;
   }
@@ -2373,7 +2460,9 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
    * Called when the interactions reset process begins. This will diabled the
    * reset and make the interactions pane uneditable.
    */
-  public void interactionsResetting() {    
+  public void interactionsResetting() {
+    _interactionsDoc.insertBeforeLastPrompt("Resetting Interactions...\n",
+                                            INTERACTIONS_ERR_STYLE);
     notifyListeners(new EventNotifier() {
       public void notifyListener(GlobalModelListener l) {
       l.interactionsResetting();

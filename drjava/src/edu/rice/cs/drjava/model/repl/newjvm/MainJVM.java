@@ -222,7 +222,7 @@ public class MainJVM extends UnicastRemoteObject implements MainJVMRemoteI {
         return;
       }
       _timerThread.disable();
-      _interpreterJVM = remote;    
+      _interpreterJVM = remote;
       // _model may be null if we're running a test on this
       if (_model != null) {
         _model.interactionsReady();
@@ -324,8 +324,6 @@ public class MainJVM extends UnicastRemoteObject implements MainJVMRemoteI {
 
       String className = InterpreterJVM.class.getName();
       String[] args = new String[] { getIdentifier() };
-      // headless AWT in Java 1.3 on MacOS-X
-      // (headless AWT is not supposed to be available until 1.4)
       String[] jvmargs;
       if (debugPort > -1) {
         jvmargs = new String[] {
@@ -339,7 +337,7 @@ public class MainJVM extends UnicastRemoteObject implements MainJVMRemoteI {
         };
       }
       else {
-        jvmargs = new String[] { /*"-Dcom.apple.backgroundOnly=true"*/ };
+        jvmargs = new String[] {};
       }
       
       //System.out.println("starting interpreter... " + jvmargs[1]);
@@ -350,7 +348,7 @@ public class MainJVM extends UnicastRemoteObject implements MainJVMRemoteI {
       try {
         //DrJava.consoleOut().println("In MainJVM: starting interpreter jvm");
         _interpreterProcess = ExecJVM.
-            runJVMPropogateClassPath(className, args, jvmargs);//classpath, jvmargs);
+            runJVMPropogateClassPath(className, args, jvmargs);
         //DrJava.consoleOut().println("In MainJVM: started interpreter jvm " +i);
         
         // Start a thread to wait for the interpreter to die and to fire

@@ -46,6 +46,7 @@ import javax.swing.*;
 import java.util.*;
 import java.io.*;
 
+import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.drjava.model.FileSaveSelector;
 
@@ -61,7 +62,7 @@ public class InteractionsDocument extends DefaultStyledDocument {
   private boolean _inProgress = false;
 
   /** Index in the document of the first place that is editable. */
-  int frozenPos = 0;
+  private int _frozenPos = 0;
 
   /**
    * Command-line history. It's not reset when the interpreter is reset.
@@ -93,7 +94,7 @@ public class InteractionsDocument extends DefaultStyledDocument {
     }
     catch (BadLocationException ble) {}
 
-    frozenPos = getLength();
+    _frozenPos = getLength();
     */
   }
 
@@ -101,7 +102,7 @@ public class InteractionsDocument extends DefaultStyledDocument {
    * Returns the first location in the document where editing is allowed.
    */
   public int getFrozenPos() {
-    return frozenPos;
+    return _frozenPos;
   }
 
   /**
@@ -111,7 +112,7 @@ public class InteractionsDocument extends DefaultStyledDocument {
   public void insertString(int offs, String str, AttributeSet a)
     throws BadLocationException
   {
-    if (offs < frozenPos) {
+    if (offs < _frozenPos) {
       Toolkit.getDefaultToolkit().beep();
     } 
     else {
@@ -134,11 +135,11 @@ public class InteractionsDocument extends DefaultStyledDocument {
         pos = getLength();
       }
       else {
-        pos = frozenPos - PROMPT.length();
+        pos = _frozenPos - PROMPT.length();
       }
 
       super.insertString(pos, s, a);
-      frozenPos += s.length();
+      _frozenPos += s.length();
     }
     catch (BadLocationException ble) {
       throw new UnexpectedException(ble);
@@ -150,7 +151,7 @@ public class InteractionsDocument extends DefaultStyledDocument {
    * @exception BadLocationException
    */
   public void remove(int offs, int len) throws BadLocationException {
-    if (offs < frozenPos) {
+    if (offs < _frozenPos) {
       Toolkit.getDefaultToolkit().beep();
     } 
     else {
@@ -165,6 +166,7 @@ public class InteractionsDocument extends DefaultStyledDocument {
       super.insertString(0, BANNER, null);
       prompt();
       _history.moveEnd();
+      setInProgress(false);
     } catch (BadLocationException e) {
       throw new UnexpectedException(e);
     }
@@ -173,7 +175,7 @@ public class InteractionsDocument extends DefaultStyledDocument {
   public void prompt() {
     try {
       super.insertString(getLength(), PROMPT, null);
-      frozenPos = getLength();
+      _frozenPos = getLength();
     } catch (BadLocationException e) {
       throw new UnexpectedException(e);
     }
@@ -204,7 +206,7 @@ public class InteractionsDocument extends DefaultStyledDocument {
 
   public String getCurrentInteraction() {
     try {
-      return getText(frozenPos, getLength() - frozenPos);
+      return getText(_frozenPos, getLength() - _frozenPos);
     }
     catch (BadLocationException e) {
       throw new UnexpectedException(e);
@@ -223,7 +225,7 @@ public class InteractionsDocument extends DefaultStyledDocument {
   private void _clearCurrentInteractionText() {
     try {
       // Delete old value of current line
-      remove(frozenPos, getLength() - frozenPos);
+      remove(_frozenPos, getLength() - _frozenPos);
     }
     catch (BadLocationException ble) {
       throw new UnexpectedException(ble);

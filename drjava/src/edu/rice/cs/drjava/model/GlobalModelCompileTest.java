@@ -611,7 +611,7 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
    * in sync after compiling and is out of sync after modifying and even saving it.
    */
   public void testClassFileSynchronization()
-    throws BadLocationException, IOException
+    throws BadLocationException, IOException, InterruptedException
   {
     final OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
     final File file = tempFile();
@@ -627,10 +627,7 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
                !doc.checkIfClassFileInSync());
 
     // Have to wait 1 second so file will have a different timestamp
-    try {
-      Thread.sleep(1000);
-    }
-    catch (InterruptedException ie) {}
+    Thread.sleep(1000);
 
     doc.saveFile(new FileSelector(file));
     assertTrue("should not be in sync after save", 
@@ -638,7 +635,34 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
     
     // Make sure .class exists
     File compiled = classForJava(file, "DrJavaTestFoo");
-    assertTrue(_name() + "Class file doesn't exist after compile", compiled.exists());
+    assertTrue(_name() + " Class file should exist after compile", compiled.exists());
+  }
+  
+  /**
+   * Ensure that renaming a file makes it out of sync with its class file.
+   */
+  public void testClassFileSynchronizationAfterRename()
+    throws BadLocationException, IOException, IllegalStateException,
+    InterruptedException
+  {
+    final OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
+    final File file = tempFile();
+    final File file2 = tempFile(2);
+    
+    doc.saveFile(new FileSelector(file));
+    assertTrue("should not be in sync before compile", 
+               !doc.checkIfClassFileInSync());
+    doc.startCompile();
+    assertTrue("should be in sync after compile", 
+               doc.checkIfClassFileInSync());
+    
+    // Have to wait 1 second so file will have a different timestamp
+    Thread.sleep(1000);
+    
+    // Rename to a different file
+    doc.saveFileAs(new FileSelector(file2));
+    assertTrue("should not be in sync after renaming",
+               !doc.checkIfClassFileInSync());
   }
   
    /**
