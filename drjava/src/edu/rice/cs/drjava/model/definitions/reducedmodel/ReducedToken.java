@@ -190,62 +190,62 @@ public abstract class ReducedToken implements ReducedModelStates {
   public abstract boolean isBlockCommentStart();
 
   /**
-   * put your documentation comment here
-   * @return
+   * Returns whether this is the end of a block comment
+   * @return boolean
    */
   public abstract boolean isBlockCommentEnd();
 
   /**
-   * put your documentation comment here
-   * @return
+   * Returns whether this is a new line
+   * @return boolean
    */
   public abstract boolean isNewline();
 
   /**
-   * put your documentation comment here
-   * @return
+   * Returns whether this is a slash
+   * @return boolean
    */
   public abstract boolean isSlash();
 
   /**
-   * put your documentation comment here
-   * @return
+   * Returns whether this is a star
+   * @return boolean
    */
   public abstract boolean isStar();
 
   /**
-   * put your documentation comment here
-   * @return
+   * Returns whether this is a double quote
+   * @return boolean
    */
   public abstract boolean isDoubleQuote();
 
   /**
-   * put your documentation comment here
-   * @return
+   * Returns whether this is a single quote
+   * @return boolean
    */
   public abstract boolean isSingleQuote();
 
   /**
-   * put your documentation comment here
-   * @return
+   * Returns whether this is a double escape sequence
+   * @return boolean
    */
   public abstract boolean isDoubleEscapeSequence();
 
   /**
-   * put your documentation comment here
-   * @return
+   * Returns whether this is a double escape
+   * @return boolean
    */
   public abstract boolean isDoubleEscape();
 
   /**
-   * put your documentation comment here
-   * @return
+   * Returns whether this is an escaped single quote
+   * @return boolean
    */
   public abstract boolean isEscapedSingleQuote();
 
   /**
-   * put your documentation comment here
-   * @return
+   * Return whether this is an escaped double quote
+   * @return boolean
    */
   public abstract boolean isEscapedDoubleQuote();
 

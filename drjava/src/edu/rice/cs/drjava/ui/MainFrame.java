@@ -420,6 +420,18 @@ public class MainFrame extends JFrame implements OptionConstants {
       _runProject();
     }
   };
+  
+  private Action _jarProjectAction = new AbstractAction("Create Jar File from Project") {
+    public void actionPerformed(ActionEvent ae) {
+      new SwingWorker() {
+        public Object construct() {
+          new JarOptionsDialog(MainFrame.this, MainFrame.this.getModel()).show();
+          return null;
+        }
+      }.start();
+    }
+  };
+                                                          
 
   /**
    * Sets the document in the definitions pane to a new templated junit test class.
@@ -2585,6 +2597,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       _junitOpenProjectFilesAction.setEnabled(true);
       _compileOpenProjectAction.setEnabled(true);
       _compileProjectAction.setEnabled(true);
+      _jarProjectAction.setEnabled(true);
       if(_model.getBuildDirectory() != null){
         _cleanAction.setEnabled(true);
       }
@@ -2593,7 +2606,20 @@ public class MainFrame extends JFrame implements OptionConstants {
       _compileButton.setToolTipText("<html>Compile all documents in the project.<br>External files are excluded.</html>");
     }
   }
-  
+
+  /**
+   * Jars all of the files in a project together
+   */
+/*  private void _jarProject() {
+    final SwingWorker worker = new SwingWorker() {
+          public Object construct() {
+            _model.jarAll();
+            return null;
+          }
+        };
+        worker.start();
+  }*/
+
   /**
    * Signals the model to close the project, then
    * closes all open files.  It also restores the
@@ -2619,6 +2645,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       _saveProjectAction.setEnabled(false);
       _projectPropertiesAction.setEnabled(false);
       _junitProjectAction.setEnabled(false);
+      _jarProjectAction.setEnabled(false);
       _junitOpenProjectFilesAction.setEnabled(false);
       _compileOpenProjectAction.setEnabled(false);
       _compileProjectAction.setEnabled(false);
@@ -3385,7 +3412,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     };
     worker.start();
   }
-  
+  //***********
   private void _compileAll() {
     final SwingWorker worker = new SwingWorker() {
       public Object construct() {
@@ -3403,7 +3430,6 @@ public class MainFrame extends JFrame implements OptionConstants {
     };
     worker.start();
   }
-
   
   private void _runProject(){
     if (_model.isProjectActive()){
@@ -3935,6 +3961,9 @@ public class MainFrame extends JFrame implements OptionConstants {
     _setUpAction(_runProjectAction, "Run","Run the project's main method");
     _runProjectAction.setEnabled(false);
     
+    _setUpAction(_jarProjectAction, "Jar", "Create a jar archive from this project");
+    _jarProjectAction.setEnabled(false);
+    
     _setUpAction(_saveAllAction, "Save All", "SaveAll", "Save all open documents");
 
     _setUpAction(_cleanAction, "Clean", "Clean Build directory");
@@ -4280,6 +4309,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     projectMenu.add(_cleanAction);
     projectMenu.add(_compileOpenProjectAction);
     projectMenu.add(_compileProjectAction);
+    projectMenu.add(_jarProjectAction);
     _addMenuItem(projectMenu, _runProjectAction, KEY_RUN_MAIN);
     projectMenu.add(_junitOpenProjectFilesAction);
     projectMenu.add(_junitProjectAction);

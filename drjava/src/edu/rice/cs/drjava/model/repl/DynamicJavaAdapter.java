@@ -136,15 +136,15 @@ public class DynamicJavaAdapter implements JavaInterpreter {
     catch (ExitingNotAllowedException enae) {
       return JavaInterpreter.NO_RESULT;
     }
-    catch (Throwable ie) {
-      //System.err.print(new Date() + ": ");
-      //System.err.println(ie);
-      //ie.printStackTrace();
-      //System.err.println("\n");
-      //throw new RuntimeException(ie.toString());
-
-      throw new ExceptionReturnedException(ie);
-    }
+//    catch (Throwable ie) {
+//      System.err.print(new Date() + ": ");
+//      System.err.println(ie);
+//      ie.printStackTrace();
+//      System.err.println("\n");
+//      throw new RuntimeException(ie.toString());
+//
+////      throw new ExceptionReturnedException(ie);
+//    }
   }
 
   public List<Node> parse(String input) {
@@ -533,6 +533,7 @@ public class DynamicJavaAdapter implements JavaInterpreter {
         return result;
       }
       catch (ExecutionError e) {
+        //e.printStackTrace(); // For Loop....
         throw new InterpreterException(e);
       }
       catch (ParseError e) {

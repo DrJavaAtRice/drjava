@@ -86,6 +86,10 @@ public class ProjectPropertiesFrame extends JFrame {
   private DirectorySelectorComponent _builtDirSelector;
   private DirectorySelectorComponent _jarMainClassSelector;
   
+  private FileSelectorComponent _jarFileSelector;
+  private FileSelectorComponent _manifestFileSelector;
+  
+  
   /**
    * Sets up the frame and displays it.
    */
@@ -249,6 +253,7 @@ public class ProjectPropertiesFrame extends JFrame {
     c.gridwidth = 1;
     c.insets = labelInsets;
     
+    // Build Directory
     JLabel label = new JLabel("Build Directory");
     label.setToolTipText("<html>The directory the class files will be compiled into.<br>"+
                          "If not specified, the class files will be compiled into<br>"+
@@ -267,6 +272,7 @@ public class ProjectPropertiesFrame extends JFrame {
     c.gridwidth = 1;
     c.insets = labelInsets;
 
+    // Main Document file
     JLabel classLabel = new JLabel("Main Document");
     classLabel.setToolTipText("<html>The project document containing the<br>" + 
                               "<code>main</code>method for the entire project</html>");
@@ -281,8 +287,41 @@ public class ProjectPropertiesFrame extends JFrame {
     gridbag.setConstraints(mainClassPanel, c);
     panel.add(mainClassPanel);
      
-     
-    
+//    // Jar output file
+//    c.weightx = 0.0;
+//    c.gridwidth = 1;
+//    c.insets = labelInsets;
+//
+//    JLabel jarLabel = new JLabel("Jar File");
+//    classLabel.setToolTipText("The file that the jar is to be written to");
+//    gridbag.setConstraints(jarLabel, c);
+//    panel.add(jarLabel);
+//
+//    c.weightx = 1.0;
+//    c.gridwidth = GridBagConstraints.REMAINDER;
+//    c.insets = compInsets;
+//
+//    JPanel jarFilePanel = _jarFileSelector();
+//    gridbag.setConstraints(jarFilePanel, c);
+//    panel.add(jarFilePanel);
+//
+//    // Jar manifest file
+//    c.weightx = 0.0;
+//    c.gridwidth = 1;
+//    c.insets = labelInsets;
+//
+//    JLabel manifestLabel = new JLabel("Jar Manifest File");
+//    classLabel.setToolTipText("The manifest file that the jar is to be used to create the jar file");
+//    gridbag.setConstraints(manifestLabel, c);
+//    panel.add(manifestLabel);
+//
+//    c.weightx = 1.0;
+//    c.gridwidth = GridBagConstraints.REMAINDER;
+//    c.insets = compInsets;
+//
+//    JPanel manifestFilePanel = _manifestFileSelector();
+//    gridbag.setConstraints(manifestFilePanel, c);
+//    panel.add(manifestFilePanel);
   }
   
   public JPanel _builtDirectoryPanel() {
@@ -350,6 +389,47 @@ public class ProjectPropertiesFrame extends JFrame {
     _jarMainClassSelector = new DirectorySelectorComponent(this,chooser,20,12f);
     //toReturn.add(_builtDirSelector, BorderLayout.EAST);
     return _jarMainClassSelector;
+  }
+
+  public JPanel _manifestFileSelector(){
+    JFileChooser fileChooser = new JFileChooser(_mainFrame.getModel().getProjectFile().getParentFile());
+    fileChooser.setDialogTitle("Select Output jar File");
+    fileChooser.setApproveButtonText("Select");
+    fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+    fileChooser.setMultiSelectionEnabled(false);
+    _manifestFileSelector = new FileSelectorComponent(this,fileChooser,20,12f);
+    _manifestFileSelector.setFileFilter(new FileFilter(){
+      public boolean accept(File f){
+        return f.getName().endsWith(".jar") || f.isDirectory();
+      }
+      public String getDescription(){
+        return "Java Archive Files (*.jar)";
+      }
+      
+    });
+    //toReturn.add(_builtDirSelector, BorderLayout.EAST);
+    return _manifestFileSelector;
+  }
+  
+  public JPanel _jarFileSelector(){
+    JFileChooser fileChooser = new JFileChooser(_mainFrame.getModel().getProjectFile().getParentFile());
+    fileChooser.setDialogTitle("Select Manifest File");
+    fileChooser.setApproveButtonText("Select");
+    fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+    fileChooser.setMultiSelectionEnabled(false);
+    _jarFileSelector = new FileSelectorComponent(this,fileChooser,20,12f);
+    _jarFileSelector.setFileFilter(new FileFilter(){
+      public boolean accept(File f){
+        return f.getName().endsWith(".jar") || f.isDirectory();
+      }
+      public String getDescription(){
+        return "Java Archive Files (*.jar)";
+      }
+      
+    });
+    //toReturn.add(_builtDirSelector, BorderLayout.EAST);
+
+    return _jarFileSelector;
   }
   
   public void setVisible(boolean vis){

@@ -684,7 +684,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
 
       public boolean isProjectActive() { return true; }
       
-      public boolean isInProjectPath(OpenDefinitionsDocument doc){
+      public boolean isInProjectPath(OpenDefinitionsDocument doc) {
         File projectRoot = projectFile.getParentFile();
         if(doc.isUntitled()) return false;
         // If the file does not exist, we still want to tell if it's in the correct
@@ -938,7 +938,13 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
         }
         getJUnitModel().junitAll(los, lof);
       }
-
+      
+      /**
+       * Jars all the files in this project
+       */
+      public void jarAll() {
+        //********************************
+      }
     };
   }
   
@@ -998,7 +1004,12 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
       public void cleanBuildDirectory() throws FileMovedException, IOException{
         //System.out.println("not cleaning");
       }
-
+      /**
+       * Jars all the open files
+       */
+      public void jarAll() {
+        
+      }
     };
   }
   
@@ -4226,6 +4237,15 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
       Boolean value = oe.value;
       FileOps.DefaultFileSaver.setBackupsEnabled(value.booleanValue());
     }
+  }
+  
+  
+  // TODO: This function should probably be moved to a better location
+  /**
+   * Jar the current documents or the current project
+   */
+  public void jarAll() {
+    getFileGroupingState().jarAll();
   }
 }
 

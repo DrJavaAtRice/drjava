@@ -140,4 +140,9 @@ public interface FileGroupingState {
    * cleans the build directory
    */
   public void cleanBuildDirectory() throws FileMovedException, IOException;
+  
+  /**
+   * Jars all the open documents or the current project
+   */
+  public void jarAll();
 }
