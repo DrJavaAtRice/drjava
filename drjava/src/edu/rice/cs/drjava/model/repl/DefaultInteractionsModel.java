@@ -48,10 +48,8 @@ import edu.rice.cs.drjava.model.EventNotifier;
 import edu.rice.cs.drjava.model.GlobalModelListener;
 import edu.rice.cs.drjava.model.repl.History.HistorySizeOptionListener;
 import edu.rice.cs.drjava.model.repl.newjvm.MainJVM;
+import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.text.*;
-
-import java.io.StringWriter;
-import java.io.PrintWriter;
 
 /**
  * Interactions model which can notify GlobalModelListeners on events.
@@ -241,11 +239,11 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
    */
   protected void _notifyInterpreterResetFailed(Throwable t) {
     // Print the exception to the console
-    StringWriter sw = new StringWriter();
-    PrintWriter pw = new PrintWriter(sw);
-    t.printStackTrace(pw);
-    _model.systemErrPrint(sw.toString());
-    
+//    StringWriter sw = new StringWriter();
+//    PrintWriter pw = new PrintWriter(sw);
+//    t.printStackTrace(pw);
+//    _model.systemErrPrint(sw.toString());
+    _model.systemErrPrint(StringOps.getStackTrace(t));
     _notifier.notifyListeners(new EventNotifier.Notifier() {
       public void notifyListener(GlobalModelListener l) {
         l.interpreterResetFailed();

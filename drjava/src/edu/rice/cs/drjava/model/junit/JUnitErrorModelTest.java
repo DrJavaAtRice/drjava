@@ -53,7 +53,7 @@ import edu.rice.cs.util.*;
 import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.model.compiler.*;
 import edu.rice.cs.util.UnexpectedException;
-import edu.rice.cs.drjava.model.GlobalModelJUnitTest.TestShouldSucceedListener;
+import edu.rice.cs.drjava.model.GlobalModelJUnitTest.JUnitTestListener;
 
 /**
  * A test on the GlobalModel for JUnit testing.
@@ -77,7 +77,7 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
     "  } \n" +
     "}";
 
-    private static final String NONPUBLIC_TEXT =
+  private static final String NONPUBLIC_TEXT =
     "import junit.framework.*; " + 
     "public class NonPublic extends TestCase { " +
     "  public NonPublic(String name) { super(name); } " +
@@ -86,7 +86,19 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
     "  } " +
     "}";
     
-    
+  private static final String ABC_CLASS_ONE =
+    "class ABC extends java.util.Vector {}\n";
+  
+  private static final String ABC_CLASS_TWO =
+    "class ABC extends java.util.ArrayList {}\n";
+  
+  private static final String ABC_TEST =
+    "public class ABCTest extends junit.framework.TestCase {\n" +
+    "  public void testABC() {\n" +
+    "    new ABC().elementAt(0);\n" +
+    "  }\n" +
+    "}";
+
   /**
    * Constructor.
    */
@@ -113,7 +125,7 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
     final File file = new File(_tempDir, "MonkeyTestFail.java");
     doc.saveFile(new FileSelector(file));
     
-    TestShouldSucceedListener listener = new TestShouldSucceedListener();
+    JUnitTestListener listener = new JUnitTestListener();
     _model.addListener(listener);
     // Interactions are not reset because interpreter wasn't used
     doc.startCompile();
@@ -148,7 +160,46 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
                  true
                  );
     //_model.setResetAfterCompile(true);
+  }
+
+  /**
+   * Tests that a VerifyError is reported as an error, rather than
+   * simply causing JUnit to blow up.  Note that this test will hang if
+   * the error is not reported correctly, because the JUnitTestManager will
+   * blow up in the other JVM and never notify us that it's finished.
+   */
+  public void testVerifyErrorHandledCorrectly() throws Exception {
+    OpenDefinitionsDocument doc = setupDocument(ABC_CLASS_ONE);
+    final File file = new File(_tempDir, "ABC1.java");
+    doc.saveFile(new FileSelector(file));
     
+    OpenDefinitionsDocument doc2 = setupDocument(ABC_TEST);
+    final File file2 = new File(_tempDir, "ABCTest.java");
+    doc2.saveFile(new FileSelector(file2));
+    
+    // Compile the correct ABC and the test
+    //  (won't reset because the interactions pane has not been used)
+    _model.compileAll();
+    
+    OpenDefinitionsDocument doc3 = setupDocument(ABC_CLASS_TWO);
+    final File file3 = new File(_tempDir, "ABC2.java");
+    doc3.saveFile(new FileSelector(file3));
+    
+    // Compile the incorrect ABC
+    doc3.startCompile();
+    
+    // Run the test: a VerifyError will be thrown.
+    JUnitTestListener listener = new JUnitTestListener();
+    _model.addListener(listener);
+    synchronized(listener) {
+      doc2.startJUnit();
+      listener.wait();
+    }
+    
+    assertEquals("test case has one error reported",
+                 1,
+                 _model.getJUnitErrorModel().getNumErrors());
+    _model.removeListener(listener);
   }
 }
 

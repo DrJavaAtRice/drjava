@@ -1315,7 +1315,21 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
 //    private JUnitErrorModel _junitErrorModel;
     private DrJavaBook _book;
     private Vector<Breakpoint> _breakpoints;
-    
+
+//    boolean _shouldRun;
+//    private GlobalModelListener _notifyListener = new DummySingleDisplayModelListener() {
+//      public synchronized void interpreterReady() {
+//        notify();
+//      }
+//      public synchronized void interperterResetting() {
+//        notify();
+//        _shouldRun = false;
+//      }
+//      public synchronized void interactionEnded() {
+//        notify();
+//      }
+//    };
+
     /**
      * Constructor.  Initializes this handler's document.
      * @param doc DefinitionsDocument to manage
@@ -1358,15 +1372,13 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
      * @return the file for this document
      * @exception IllegalStateException if no file exists
      */
-    public File getFile()
-      throws IllegalStateException, FileMovedException
-    {
+    public File getFile() throws IllegalStateException, FileMovedException {
       return _doc.getFile();
     }
     
     /**
      * Returns the name of this file, or "(untitled)" if no file.
-   */
+     */
     public String getFilename() {
       return _doc.getFilename();
     }
@@ -1659,7 +1671,10 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
           }
         }
         // If no document is modified, still compile the current doc.
-        this.startCompile();
+        // compile only if class file out of sync
+        if (!checkIfClassFileInSync()) {
+          startCompile();
+        }
         
         // Make sure that the compiler is done before continuing.
         synchronized(_compilerLock) {
@@ -1667,16 +1682,34 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
           if (!_compilerErrorModel.hasOnlyWarnings()) {
             return;
           }
-          
-          // Then clear the current interaction and replace it with a "java X" line.
-          InteractionsDocument iDoc = _interactionsModel.getDocument();
+        }
+        // Then clear the current interaction and replace it with a "java X" line.
+        InteractionsDocument iDoc = _interactionsModel.getDocument();
+//        if (iDoc.inProgress()) {
+//          addListener(_notifyListener);
+//          _shouldRun = true;
+//          synchronized(_notifyListener) {
+//            try {
+//              _notifyListener.wait();
+//            }
+//            catch(InterruptedException ie) {
+//            }
+//          }
+//          removeListener(_notifyListener);
+//          if (!_shouldRun) {
+//            // The interactions pane was reset during another interaction.
+//            //  Don't run the main method.
+//            return;
+//          }
+//        }
+        synchronized (_interpreterControl) {
           iDoc.clearCurrentInput();
         
           iDoc.insertText(iDoc.getDocLength(), "java " + className, null);
-          
+        
           // Notify listeners that the file is about to be run.
           _notifier.runStarted(this);
-          
+        
           // Finally, execute the new interaction.
           _interactionsModel.interpretCurrentInteraction();
         }
@@ -1817,11 +1850,11 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       return _doc.isModifiedOnDisk();
     }
   
-  /**
-   * Checks if the document is modified. If not, searches for the class file
-   * corresponding to this document and compares the timestamps of the
-   * class file to that of the source file.
-   */
+    /**
+     * Checks if the document is modified. If not, searches for the class file
+     * corresponding to this document and compares the timestamps of the
+     * class file to that of the source file.
+     */
     public boolean checkIfClassFileInSync() {
       // If modified, then definitely out of sync
       if(isModifiedSinceSave()) {

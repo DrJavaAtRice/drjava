@@ -50,6 +50,7 @@ import java.util.Arrays;
 import edu.rice.cs.drjava.*;
 import edu.rice.cs.drjava.model.repl.newjvm.InterpreterJVM;
 import edu.rice.cs.util.UnexpectedException;
+import edu.rice.cs.util.StringOps;
 
 /**
  * Runs in the InterpreterJVM. Runs tests given a classname and formats the 
@@ -71,7 +72,7 @@ public class JUnitTestManager {
   }
   
   public void runTest(final String className, final String fileName) {
-    Thread t = new Thread() {
+    Thread t = new Thread("JUnit Test Thread") {
       public void run() {
         try {
           if (!_isTestCase(className)) {
@@ -103,7 +104,10 @@ public class JUnitTestManager {
           _jvm.testSuiteFinished(errors);
         }
         catch (Throwable t) {
-          t.printStackTrace();
+          JUnitError[] errors = new JUnitError[1];
+          errors[0] = new JUnitError(new File(fileName), -1, -1, t.getMessage(),
+                                    false, className, StringOps.getStackTrace(t));
+          _jvm.testSuiteFinished(errors);
         }
       }
     };
@@ -147,8 +151,9 @@ public class JUnitTestManager {
     failure.thrownException().printStackTrace(pWriter);
         
     String classNameAndTest = className + "." + testName;
-    
-    int lineNum = _lineNumber( sWriter.toString(), classNameAndTest);
+    String stackTrace = StringOps.getStackTrace(failure.thrownException());
+
+    int lineNum = _lineNumber(stackTrace, classNameAndTest);
 //    if (lineNum > -1) _errorsWithPos++;
     
     String exception =  (isError) ? 
@@ -157,8 +162,7 @@ public class JUnitTestManager {
       
       return new JUnitError(new File(fileName), lineNum, 0, exception,
                             ! (failure.thrownException() instanceof AssertionFailedError),
-                            testName,
-                            sWriter.toString());
+                            testName, stackTrace);
   }
 
   /**

@@ -141,7 +141,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     OpenDefinitionsDocument doc = setupDocument(MONKEYTEST_PASS_TEXT);
     final File file = new File(_tempDir, "MonkeyTestPass.java");
     doc.saveFile(new FileSelector(file));
-    TestShouldSucceedListener listener = new TestShouldSucceedListener();
+    JUnitTestListener listener = new JUnitTestListener();
     _model.addListener(listener);
     if (printMessages) System.out.println("before compile");
     // Doesn't reset interactions because interpreter is not used
@@ -170,7 +170,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     OpenDefinitionsDocument doc = setupDocument(MONKEYTEST_FAIL_TEXT);
     final File file = new File(_tempDir, "MonkeyTestFail.java");
     doc.saveFile(new FileSelector(file));
-    TestShouldSucceedListener listener = new TestShouldSucceedListener();
+    JUnitTestListener listener = new JUnitTestListener();
     _model.addListener(listener);
     if (printMessages) System.out.println("before compile");
     // Doesn't reset interactions because interpreter is not used
@@ -199,7 +199,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     OpenDefinitionsDocument doc = setupDocument(MONKEYTEST_ERROR_TEXT);
     final File file = new File(_tempDir, "MonkeyTestError.java");
     doc.saveFile(new FileSelector(file));
-    TestShouldSucceedListener listener = new TestShouldSucceedListener();
+    JUnitTestListener listener = new JUnitTestListener();
     _model.addListener(listener);
     if (printMessages) System.out.println("before compile");
     // Doesn't reset interactions because interpreter is not used
@@ -230,7 +230,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     final File file = new File(_tempDir, "NonTestCase.java");
     doc.saveFile(new FileSelector(file));
     
-    TestShouldSucceedListener listener = new TestShouldSucceedListener() {
+    JUnitTestListener listener = new JUnitTestListener() {
       public void nonTestCase() { nonTestCaseCount++; }
     };
     
@@ -267,7 +267,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     final File file = new File(_tempDir, "NonPublic.java");
     doc.saveFile(new FileSelector(file));
     
-    TestShouldSucceedListener listener = new TestShouldSucceedListener();
+    JUnitTestListener listener = new JUnitTestListener();
     
     _model.addListener(listener);
     
@@ -327,7 +327,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     final File file = new File(_tempDir, "MonkeyTestPass.java");
     doc.saveFile(new FileSelector(file));
     
-    TestShouldSucceedListener listener = new TestShouldSucceedListener() {
+    JUnitTestListener listener = new JUnitTestListener() {
       public void nonTestCase() {
         nonTestCaseCount++;
       }
@@ -428,7 +428,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     OpenDefinitionsDocument doc = setupDocument(MONKEYTEST_PASS_TEXT);
     final File file = new File(_tempDir, "MonkeyTestPass.java");
     doc.saveFile(new FileSelector(file));
-    TestShouldSucceedListener listener = new TestShouldSucceedListener(true);
+    JUnitTestListener listener = new JUnitTestListener(true);
     _model.addListener(listener);
     if (printMessages) System.out.println("before compile");
     // Doesn't reset interactions because interpreter is not used
@@ -448,7 +448,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
                  _model.getJUnitErrorModel().getNumErrors());
     doc.saveFile(new FileSelector(file));
     
-    listener = new TestShouldSucceedListener();
+    listener = new JUnitTestListener();
     _model.addListener(listener);
     synchronized(listener) {
       doc.startJUnit();
@@ -461,11 +461,11 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     _model.removeListener(listener);
   }
   
-  public static class TestShouldSucceedListener extends CompileShouldSucceedListener {
-    public TestShouldSucceedListener() {
+  public static class JUnitTestListener extends CompileShouldSucceedListener {
+    public JUnitTestListener() {
       super(false);  // don't reset interactions after compile by default
     }
-    public TestShouldSucceedListener(boolean shouldResetAfterCompile) {
+    public JUnitTestListener(boolean shouldResetAfterCompile) {
       super(shouldResetAfterCompile);
     }
     public void junitStarted(OpenDefinitionsDocument odd) {

@@ -56,6 +56,7 @@ import edu.rice.cs.drjava.model.junit.JUnitError;
 import edu.rice.cs.drjava.model.junit.JUnitModelCallback;
 import edu.rice.cs.drjava.model.debug.DebugModelCallback;
 import edu.rice.cs.util.Log;
+import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.newjvm.*;
 
 /**
@@ -705,12 +706,9 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
    * the Interpreter JVM.
    */
   private void _threwException(Throwable t) {
-    StringWriter writer = new StringWriter();
-    t.printStackTrace(new PrintWriter(writer));
-
     _interactionsModel.replThrewException(t.getClass().getName(),
                                           t.getMessage(),
-                                          writer.toString());
+                                          StringOps.getStackTrace(t));
   }
 
   /**

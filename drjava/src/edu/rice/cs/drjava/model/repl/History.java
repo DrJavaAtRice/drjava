@@ -46,6 +46,7 @@ import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.CodeStatus;
 import edu.rice.cs.drjava.ui.InteractionsHistoryFilter;
+import edu.rice.cs.drjava.platform.PlatformFactory;
 import java.io.*;
 import javax.swing.*;
 
@@ -241,14 +242,16 @@ public class History implements OptionConstants {
           c = new File(c.getAbsolutePath() + "." +
                        InteractionsHistoryFilter.HIST_EXTENSION);
         }
-        FileOps.DefaultFileSaver saver =
-          new FileOps.DefaultFileSaver(c) {
+        FileOps.DefaultFileSaver saver = new FileOps.DefaultFileSaver(c) {
           public void saveTo(OutputStream os) throws IOException {
             
             OutputStreamWriter osw = new OutputStreamWriter(os);
             BufferedWriter bw = new BufferedWriter(osw);
-            bw.write(HISTORY_FORMAT_VERSION_2 + editedVersion, 0,
-                     HISTORY_FORMAT_VERSION_2.length() + editedVersion.length());
+            String file = HISTORY_FORMAT_VERSION_2 + editedVersion;
+            if (PlatformFactory.ONLY.isWindowsPlatform()) {
+              file = file.replaceAll("\n", System.getProperty("line.separator"));
+            }
+            bw.write(file, 0, file.length());
             bw.close();
           }
         };

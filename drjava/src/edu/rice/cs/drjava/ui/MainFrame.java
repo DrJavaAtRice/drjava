@@ -1764,7 +1764,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   private void debuggerSuspend() throws DebugException {
     if (inDebugMode())
       _model.getDebugger().suspend();
-  }/
+  }*/
 
   /**
    * Resumes the debugger's current execution
@@ -2376,8 +2376,10 @@ public class MainFrame extends JFrame implements OptionConstants {
     // Compile, Compile all, Run Main Method
     _addMenuItem(toolsMenu, _compileAllAction, KEY_COMPILE_ALL);
     _addMenuItem(toolsMenu, _compileAction, KEY_COMPILE);
-    _addMenuItem(toolsMenu, _runAction, KEY_RUN);
-    toolsMenu.add(_junitAction);
+    if (CodeStatus.DEVELOPMENT) {
+      _addMenuItem(toolsMenu, _runAction, KEY_RUN);
+    }
+    _addMenuItem(toolsMenu, _junitAction, KEY_TEST);
     toolsMenu.add(_javadocAction);
     toolsMenu.addSeparator();
     
@@ -2805,7 +2807,9 @@ public class MainFrame extends JFrame implements OptionConstants {
     docPanePopupMenu.add(_printPreviewAction);
     docPanePopupMenu.addSeparator();
     docPanePopupMenu.add(_compileAction);
-    docPanePopupMenu.add(_runAction);
+    if (CodeStatus.DEVELOPMENT) {
+      docPanePopupMenu.add(_runAction);
+    }
     docPanePopupMenu.add(_junitAction);
     _docList.addMouseListener(new RightClickMouseAdapter() {
       protected void _popupAction(MouseEvent e) {
@@ -3741,7 +3745,6 @@ public class MainFrame extends JFrame implements OptionConstants {
       Runnable doCommand = new Runnable() {
         public void run() {
           _compilerErrorPanel.reset();
-          _junitErrorPanel.reset();
           if (inDebugMode()) {
             _model.getActiveDocument().checkIfClassFileInSync();
             _updateDebugStatus();
@@ -3894,6 +3897,7 @@ public class MainFrame extends JFrame implements OptionConstants {
             dm.shutdown();
           }
           _resetInteractionsAction.setEnabled(false);
+          _junitAction.setEnabled(false);
           _interactionsPane.setEditable(false);
           _interactionsPane.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
           if (_model.getDebugger().isAvailable()) {
@@ -3909,6 +3913,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       Runnable doCommand = new Runnable() {
         public void run() {
           interactionEnded();
+          _junitAction.setEnabled(true);
           _resetInteractionsAction.setEnabled(true);
           if (_model.getDebugger().isAvailable()) {
             _toggleDebuggerAction.setEnabled(true);

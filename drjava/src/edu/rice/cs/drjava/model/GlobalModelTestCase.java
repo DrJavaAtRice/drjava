@@ -641,10 +641,8 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
      * end of the given failure message.
      */
     public void listenerFail(String message) {
-      StringWriter sw = new StringWriter();
-      PrintWriter pw = new PrintWriter(sw);
-      _startupTrace.printStackTrace(pw);
-      String header = "\nTestListener creation stack trace:\n" + sw.toString();
+      String header = "\nTestListener creation stack trace:\n" +
+        StringOps.getStackTrace(_startupTrace);
       GlobalModelTestCase.listenerFail(header + message);
     }
     

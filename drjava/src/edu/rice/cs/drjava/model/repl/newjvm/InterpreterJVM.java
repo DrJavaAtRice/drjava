@@ -54,6 +54,7 @@ import edu.rice.cs.util.newjvm.*;
 import edu.rice.cs.util.Log;
 import edu.rice.cs.util.OutputStreamRedirector;
 import edu.rice.cs.util.InputStreamRedirector;
+import edu.rice.cs.util.StringOps;
 import edu.rice.cs.drjava.platform.PlatformFactory;
 import edu.rice.cs.drjava.model.junit.JUnitTestManager;
 import edu.rice.cs.drjava.model.junit.JUnitError;
@@ -477,12 +478,8 @@ public class InterpreterJVM extends AbstractSlaveJVM
    * stack trace frames directly, instead of having to parse this!
    */
   public static String getStackTrace(Throwable t) {
-    StringWriter writer = new StringWriter();
-    t.printStackTrace(new PrintWriter(writer));
-
     //_dialog("before creating reader");
-    BufferedReader reader
-      = new BufferedReader(new StringReader(writer.toString()));
+    BufferedReader reader = new BufferedReader(new StringReader(StringOps.getStackTrace(t)));
 
     //_dialog("after creating reader");
     LinkedList<String> traceItems = new LinkedList<String>();

@@ -329,6 +329,13 @@ public interface OptionConstants {
                         KeyStroke.getKeyStroke(KeyEvent.VK_F5, 0));
   
   /**
+   * The key binding for testing the current document
+   */
+  public static final KeyStrokeOption KEY_TEST =
+    new KeyStrokeOption("key.test",
+                        KeyStroke.getKeyStroke(KeyEvent.VK_T, mask));
+  
+  /**
    * The key binding for openning the preferences dialog
    */
   public static final KeyStrokeOption KEY_RUN =
@@ -572,7 +579,7 @@ public interface OptionConstants {
    * The lowest access level of classes and members to include in the javadoc.
    */
   public static final ForcedChoiceOption JAVADOC_ACCESS_LEVEL =
-    new ForcedChoiceOption("javadoc.access.level", "protected", accessLevelChoices);
+    new ForcedChoiceOption("javadoc.access.level", "private", accessLevelChoices);
   
   /**
    * Possible options for Javadoc system class documentation links.
