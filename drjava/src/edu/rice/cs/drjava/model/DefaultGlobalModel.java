@@ -256,7 +256,25 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
    * Creates a new MainJVM and starts its Interpreter JVM.
    */
   public DefaultGlobalModel() {
-    this(new MainJVM());
+    //this(new MainJVM());
+    
+    _interpreterControl = new MainJVM();
+    _interactionsDocAdapter = new SwingDocumentAdapter();
+    _interactionsModel =
+      new DefaultInteractionsModel(this, _interpreterControl,
+                                   _interactionsDocAdapter);
+    _interpreterControl.setInteractionsModel(_interactionsModel);
+    _interpreterControl.setJUnitModel(this);  // to be replaced by JUnitModel
+
+    _consoleDocAdapter = new SwingDocumentAdapter();
+    _consoleDoc = new ConsoleDocument(_consoleDocAdapter);
+
+    _inputListener = NoInputListener.ONLY;
+
+    _createDebugger();
+    
+    _registerOptionListeners();
+    
     
     // Perhaps do this in another thread to allow startup to continue...
     _interpreterControl.startInterpreterJVM();
@@ -271,7 +289,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
    * Reset the interpreter for good measure since it's an old one.
    * (NOTE: I'm not sure this is still correct or effective any more,
    *   now that we're always restarting the JVM.  Needs to be looked at...)
-   */
+   *
   public DefaultGlobalModel(DefaultGlobalModel other) {
     this(other._interpreterControl);
     
@@ -285,14 +303,14 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       //  We shouldn't ever get an IOException here.
       throw new UnexpectedException(ioe);
     }
-  }
+  }*/
   
   /**
    * Constructs a new GlobalModel with the given MainJVM to act as an
    * RMI interface to the Interpreter JVM.  Does not attempt to start
    * the InterpreterJVM.
    * @param control RMI interface to the Interpreter JVM
-   */
+   *
   public DefaultGlobalModel(MainJVM control) {
     _interpreterControl = control;
     _interactionsDocAdapter = new SwingDocumentAdapter();
@@ -309,7 +327,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     _createDebugger();
     
     _registerOptionListeners();
-  }
+  }*/
 
 
   

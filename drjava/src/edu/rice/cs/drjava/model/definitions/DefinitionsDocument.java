@@ -2002,7 +2002,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
    * @param tab number of indents, i.e., level of nesting
    * @param distToPrevNewline distance to end of previous line
    * @exception BadLocationException
-   */
+   *
   void tab(int tab, int distToPrevNewline) throws BadLocationException {
     if (distToPrevNewline == -1) {
       distToPrevNewline = _currentLocation;
@@ -2023,7 +2023,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
     else {
       remove(_currentLocation - distToPrevNewline, currentTab - tab);
     }
-  }
+  }*/
   
   /**
    * Sets the text between the previous newline and the first non-whitespace

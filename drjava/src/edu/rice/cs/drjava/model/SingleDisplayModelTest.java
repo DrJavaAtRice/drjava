@@ -84,7 +84,8 @@ public final class SingleDisplayModelTest extends GlobalModelTestCase {
    * Instantiates the SingleDisplayModel to be used in the test cases.
    */
   protected void createModel() {
-    _model = new SingleDisplayModel(_originalModel);
+    //_model = new SingleDisplayModel(_originalModel);
+    _model = new SingleDisplayModel();
   }
   
   /**

@@ -171,6 +171,60 @@ public final class DefinitionsPaneTest extends TestCase {
                                              shiftDeleteCode));
     _assertDocumentContents(doc, "ts", "Did not delete on shift+delete");
   }
+  
+  /**
+   * Tests that typing a brace in a string/comment does not cause an indent.
+   */
+  public void testTypeBraceNotInCode() throws BadLocationException {
+    DefinitionsPane definitions = _frame.getCurrentDefPane();
+    DefinitionsDocument doc = definitions.getOpenDocument().getDocument();
+    _assertDocumentEmpty(doc, "before testing");
+    doc.insertString(0, "  \"", null);
+    
+    definitions.setCaretPosition(3);
+    // The following is the sequence of key events for a left brace
+    definitions.processKeyEvent(new KeyEvent(definitions, 
+                                             KeyEvent.KEY_TYPED, 
+                                             (new Date()).getTime(),
+                                             0,
+                                             KeyEvent.VK_UNDEFINED, '{'));
+    _assertDocumentContents(doc, "  \"{", "Brace should not indent in a string");
+  }
+  
+  /**
+   * Tests that typing Enter in a string/comment does cause an indent.
+   * This behavior works in practice, but I can't get the test to work.
+   * 
+   * If we use definitions.processKeyEvent, the caret position is not
+   * updated, so the " * " is not inserted.  If we try to dispatchEvent
+   * from the EventDispatchingThread, it hangs...?
+   *
+  public void testTypeEnterNotInCode() throws BadLocationException, 
+    InterruptedException, java.lang.reflect.InvocationTargetException {
+    final DefinitionsPane definitions = _frame.getCurrentDefPane();
+    _frame.show();
+    DefinitionsDocument doc = definitions.getOpenDocument().getDocument();
+    _assertDocumentEmpty(doc, "before testing");
+    doc.insertString(0, "/**", null);
+    
+    definitions.setCaretPosition(3);
+    // The following is the sequence of key events for Enter
+    SwingUtilities.invokeAndWait(new Runnable() {
+      public void run() {
+        definitions.dispatchEvent(new KeyEvent(definitions, 
+                                               KeyEvent.KEY_PRESSED, 
+                                               (new Date()).getTime(),
+                                               0,
+                                               KeyEvent.VK_ENTER));
+        definitions.dispatchEvent(new KeyEvent(definitions, 
+                                               KeyEvent.KEY_RELEASED, 
+                                               (new Date()).getTime(),
+                                               0,
+                                               KeyEvent.VK_ENTER));
+      }
+    });
+    _assertDocumentContents(doc, "/**\n * ", "Enter should indent in a comment");
+  }*/
 
   /**
    * Tests that a simulated key press with the meta modifier is correct

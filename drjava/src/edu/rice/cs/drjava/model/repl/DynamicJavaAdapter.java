@@ -381,11 +381,16 @@ public class DynamicJavaAdapter implements JavaInterpreter {
       // We have to reinitialize these variables because they automatically
       // fetch pointers to classLoader in their constructors.
       nameVisitorContext = new GlobalContext(this);
-      nameVisitorContext.setAdditionalClassLoaderContainer(classLoader);
+      ClassLoaderContainer clc = new ClassLoaderContainer() {
+        public ClassLoader getClassLoader() {
+          return classLoader;
+        }
+      };
+      nameVisitorContext.setAdditionalClassLoaderContainer(clc);
       checkVisitorContext = new GlobalContext(this);
-      checkVisitorContext.setAdditionalClassLoaderContainer(classLoader);
+      checkVisitorContext.setAdditionalClassLoaderContainer(clc);
       evalVisitorContext = new GlobalContext(this);
-      evalVisitorContext.setAdditionalClassLoaderContainer(classLoader);
+      evalVisitorContext.setAdditionalClassLoaderContainer(clc);
       //System.err.println("set loader: " + classLoader);
       
     }

@@ -77,6 +77,15 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     "  } " +
     "}";
   
+  private static final String MONKEYTEST_ERROR_TEXT =
+    "import junit.framework.*; " + 
+    "public class MonkeyTestError extends TestCase { " +
+    "  public MonkeyTestError(String name) { super(name); } " +
+    "  public void testThrowsError() { " +
+    "    throw new Error(\"This is an error.\"); " +
+    "  } " +
+    "}";
+  
   private static final String MONKEYTEST_COMPILEERROR_TEXT =
     "import junit.framework.*; " + 
     "public class MonkeyTestCompileError extends TestCase { " +
@@ -149,6 +158,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     assertEquals("test case should have no errors reported",
                  0,
                  _model.getJUnitErrorModel().getNumErrors());
+    _model.removeListener(listener);
   }
   
   /**
@@ -176,6 +186,37 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     assertEquals("test case has one error reported",
                  1,
                  _model.getJUnitErrorModel().getNumErrors());
+    _model.removeListener(listener);
+  }
+  
+  /**
+   * Tests that a test class which throws a *real* Error (not an Exception)
+   * is handled correctly.
+   */
+  public void testRealError() throws Exception {
+    if (printMessages) System.out.println("----testRealError-----");
+    
+    OpenDefinitionsDocument doc = setupDocument(MONKEYTEST_ERROR_TEXT);
+    final File file = new File(_tempDir, "MonkeyTestError.java");
+    doc.saveFile(new FileSelector(file));
+    TestShouldSucceedListener listener = new TestShouldSucceedListener();
+    _model.addListener(listener);
+    if (printMessages) System.out.println("before compile");
+    // Doesn't reset interactions because interpreter is not used
+    doc.startCompile();
+    if (printMessages) System.out.println("after compile");
+    synchronized(listener) {
+      doc.startJUnit();
+      if (printMessages) System.out.println("waiting for test");
+      listener.wait();
+    }
+    if (printMessages) System.out.println("after test");
+    
+    assertEquals("test case has one error reported",
+                 1,
+                 _model.getJUnitErrorModel().getNumErrors());
+    listener.assertJUnitEndCount(1);
+    _model.removeListener(listener);
   }
  
   /**
@@ -212,6 +253,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     listener.assertJUnitSuiteStartedCount(0);
     listener.assertJUnitTestStartedCount(0);
     listener.assertJUnitTestEndedCount(0);
+    _model.removeListener(listener);
   }
   
   /**
@@ -250,6 +292,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     assertEquals("test case has one error reported",
                  1,
                  _model.getJUnitErrorModel().getNumErrors());
+    _model.removeListener(listener);
   }
   
   public void testDoNotRunJUnitIfFileHasBeenMoved() throws Exception {
@@ -271,6 +314,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
       //JUnit should not have started, because the documents file is not
       // where it should be on the disk.
     }
+    _model.removeListener(listener);
   }
   
   /**
@@ -301,6 +345,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     listener.assertJUnitSuiteStartedCount(0);
     listener.assertJUnitTestStartedCount(0);
     listener.assertJUnitTestEndedCount(0);
+    _model.removeListener(listener);
   }
   
   /**
@@ -413,6 +458,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     assertEquals("test case should have no errors reported after saving",
                  0,
                  _model.getJUnitErrorModel().getNumErrors());
+    _model.removeListener(listener);
   }
   
   public static class TestShouldSucceedListener extends CompileShouldSucceedListener {

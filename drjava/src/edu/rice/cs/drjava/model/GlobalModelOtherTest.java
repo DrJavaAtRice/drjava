@@ -197,7 +197,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase
       listener.wait();
     }
     _model.removeListener(listener);
-    interpretIgnoreResult("edu.rice.cs.drjava.DrJava.disableSecurityManager();");
+    interpret("edu.rice.cs.drjava.DrJava.disableSecurityManager();");
 
     listener.assertInteractionsResettingCount(1);
     listener.assertInteractionsResetFailedCount(1);

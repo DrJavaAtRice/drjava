@@ -245,21 +245,21 @@ public class InterpreterJVM extends AbstractSlaveJVM
   /**
    * Interprets the given string of source code with the given interpreter.
    * The result is returned to MainJVM via the interpretResult method.
-   * @param s Source code to interpret.
+   * @param input Source code to interpret.
    * @param interpreter The interpreter (plus metadata) to use
    */
-  public synchronized void interpret(final String s, final InterpreterData interpreter) {
-    Thread thread = new Thread("interpret thread: " + s) {
+  public synchronized void interpret(final String input, final InterpreterData interpreter) {
+    Thread thread = new Thread("interpret thread: " + input) {
       public void run() {
+        String s = input;
         try {
           interpreter.setInProgress(true);
           try {
             _dialog("to interp: " + s);
             
-            // Processor disabled until bug 750605 fixed
-            //String s1 = _interactionsProcessor.preProcess(s);
+            String s1 = _interactionsProcessor.preProcess(s);
             Object result = interpreter.getInterpreter().interpret(s);
-            //String s2 = _interactionsProcessor.postProcess(s1, result);
+            String s2 = _interactionsProcessor.postProcess(s1, result);
             
             if (result == Interpreter.NO_RESULT) {
               //return new VoidResult();
@@ -286,14 +286,14 @@ public class InterpreterJVM extends AbstractSlaveJVM
                                                          t.getMessage(),
                                                          getStackTrace(t)));
           }
-//           catch (ParseException pe) {
-//             // A ParseException indicates a syntax error in the input window
-//             _mainJVM.interpretResult( new SyntaxErrorResult( pe, s ) );
-//           }
-//           catch (TokenMgrError tme) {
-//             // A TokenMgrError indicates some lexical difficulty with input.
-//             _mainJVM.interpretResult( new SyntaxErrorResult( tme, s ) );
-//           }
+          catch (ParseException pe) {
+            // A ParseException indicates a syntax error in the input window
+            _mainJVM.interpretResult( new SyntaxErrorResult( pe, s ) );
+          }
+          catch (TokenMgrError tme) {
+            // A TokenMgrError indicates some lexical difficulty with input.
+            _mainJVM.interpretResult( new SyntaxErrorResult( tme, s ) );
+          }
           catch (Throwable t) {
             // A user's toString method might throw anything, so we need to be careful
             //_dialog("thrown by toString: " + t);

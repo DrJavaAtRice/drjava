@@ -122,11 +122,11 @@ public class SingleDisplayModel extends DefaultGlobalModel {
    * Creates a SingleDisplayModel using the Interactions JVM from
    * the given model.  (Useful in test cases.)
    * @param other A model with a valid Interactions JVM to use.
-   */
+   *
   public SingleDisplayModel(DefaultGlobalModel other) {
     super(other);
     _init();
-  }
+  }*/
 
   /**
    * Initiates this SingleDisplayModel.  Should only be called

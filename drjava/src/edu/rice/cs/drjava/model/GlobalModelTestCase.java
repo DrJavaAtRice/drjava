@@ -73,8 +73,8 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
    * the prototype global model to hold the interpreter. This prevents
    * us from having to re-invoke the interpreter every time!
    */
-  protected static final DefaultGlobalModel _originalModel =
-    new DefaultGlobalModel();
+  //protected static final DefaultGlobalModel _originalModel =
+  //  new DefaultGlobalModel();
 
   protected DefaultGlobalModel _model;
   protected File _tempDir;
@@ -144,8 +144,8 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
    * Instantiates the GlobalModel to be used in the test cases.
    */
   protected void createModel() {
-    _model = new DefaultGlobalModel(_originalModel);
-    //_model = new DefaultGlobalModel();
+    //_model = new DefaultGlobalModel(_originalModel);
+    _model = new DefaultGlobalModel();
   }
   
   /**
@@ -559,6 +559,8 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
    * subclass and override one or more methods.
    */
   public static class TestListener implements GlobalModelListener {
+    /** Remembers when this listener was created. */
+    protected Exception _startupTrace;
     protected int newCount;
     protected int openCount;
     protected int closeCount;
@@ -589,6 +591,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     protected int undoableEditCount;
     
     public TestListener() {
+      _startupTrace = new Exception();
       resetCounts();
     }
 
@@ -621,6 +624,18 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       fileRevertedCount = 0;
       shouldRevertFileCount = 0;
       undoableEditCount = 0;
+    }
+
+    /**
+     * Appends the stack trace from the listener's creation to the
+     * end of the given failure message.
+     */
+    public void listenerFail(String message) {
+      StringWriter sw = new StringWriter();
+      PrintWriter pw = new PrintWriter(sw);
+      _startupTrace.printStackTrace(pw);
+      String header = "\nTestListener creation stack trace:\n" + sw.toString();
+      GlobalModelTestCase.listenerFail(header + message);
     }
     
     public void assertAbandonCount(int i) {

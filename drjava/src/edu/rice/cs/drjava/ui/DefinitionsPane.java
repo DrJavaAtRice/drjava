@@ -60,6 +60,7 @@ import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.definitions.DefinitionsEditorKit;
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 import edu.rice.cs.drjava.model.definitions.indent.Indenter;
+import edu.rice.cs.drjava.model.definitions.reducedmodel.ReducedModelState;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.CodeStatus;
@@ -380,10 +381,29 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
      * The default action to take when the specified key is pressed.
      */
     private final Action _defaultAction;
-
+    
+    /**
+     * Whether to perform the indent if the caret is in a String or comment.
+     */
+    private final boolean _indentNonCode;
+    
+    /**
+     * Creates an IndentKeyAction which only invokes indent if the caret
+     * is in code, and not Strings or comments.
+     */
     IndentKeyAction(String key, Action defaultAction) {
+      this(key, defaultAction, false);
+    }
+
+    /**
+     * @param key Name of the key, for debugging purposes
+     * @param defaultAction Action to perform in addition to indenting
+     * @param onlyIndentCode Whether to indent Strings and comments
+     */
+    IndentKeyAction(String key, Action defaultAction, boolean indentNonCode) {
       _key = key;
       _defaultAction = defaultAction;
+      _indentNonCode = indentNonCode;
     }
 
     /**
@@ -402,7 +422,13 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
     public void actionPerformed(ActionEvent e) {
       int key = _doc.getDocument().getUndoManager().startCompoundEdit();
       _defaultAction.actionPerformed(e);
-      indent(getIndentReason());
+      
+      // Only indent if in code
+      _doc.syncCurrentLocationWithDefinitions(getCaretPosition());
+      ReducedModelState state = _doc.getDocument().getStateAtCurrent();
+      if (state.equals(ReducedModelState.FREE) || _indentNonCode) {
+        indent(getIndentReason());
+      }
       _doc.getDocument().getUndoManager().endCompoundEdit(key);
     }
   }
@@ -420,13 +446,14 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
    */
   private Action _indentKeyActionLine =
     new IndentKeyAction("\n", 
-                        (Action) this.getActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0))) {
-      /* overwriting this method is important so that pressing the enter key causes
+                        (Action) this.getActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0)),
+                        true /* indent non-code, too */ ) {
+      /* overriding this method is important so that pressing the enter key causes
        * different indentation than pressing other keys, for bug 681203
        */
-      protected int getIndentReason(){
-     return Indenter.ENTER_KEY_PRESS;
-      }
+    protected int getIndentReason(){
+      return Indenter.ENTER_KEY_PRESS;
+    }
   };
 
   /**
