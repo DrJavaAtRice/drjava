@@ -262,11 +262,38 @@ public class MainFrame extends JFrame implements OptionConstants {
    */
   private JFileChooser _saveChooser;
 
+
+  /**
+   * filter for regular java files (.java and .j)
+   */
+  private javax.swing.filechooser.FileFilter _javaSourceFilter = new JavaSourceFilter();
+  
+  /**
+   * filter for drjava project files (.pjt)
+   */
+  private javax.swing.filechooser.FileFilter _projectFilter = new javax.swing.filechooser.FileFilter(){
+    public boolean accept(File f) {
+      if( f.isDirectory() || f.getPath().endsWith(PROJECT_FILE_EXTENSION) ) {
+        return true;
+      }
+      else {
+        return false;
+      }
+    }
+    
+    public String getDescription() {
+      return "DrJava Project Files (*.pjt)";
+    }
+  };
+  
+  
   /**
    * Returns the files to open to the model (command pattern).
    */
   private FileOpenSelector _openSelector = new FileOpenSelector() {
     public File[] getFiles() throws OperationCanceledException {
+      _openChooser.removeChoosableFileFilter(_projectFilter);
+      _openChooser.setFileFilter(_javaSourceFilter);
       return getOpenFiles(_openChooser);
     }
   };
@@ -276,23 +303,12 @@ public class MainFrame extends JFrame implements OptionConstants {
    */
   private FileOpenSelector _openProjectSelector = new FileOpenSelector() {
     public File[] getFiles() throws OperationCanceledException {
-      javax.swing.filechooser.FileFilter filter = _openChooser.getFileFilter();
-      _openChooser.setFileFilter(new javax.swing.filechooser.FileFilter(){
-        public boolean accept(File f) {
-          if( f.isDirectory() || f.getPath().endsWith(PROJECT_FILE_EXTENSION) ) {
-            return true;
-          }
-          else {
-            return false;
-          }
-        }
-        
-        public String getDescription() {
-          return "DrJava Project Files (*.pjt)";
-        }
-      });
+      _openChooser.removeChoosableFileFilter(_javaSourceFilter);
+      _openChooser.setFileFilter(_projectFilter);
       File[] retFiles = getOpenFiles(_openChooser);
-      _openChooser.setFileFilter(filter);
+      _openChooser.removeChoosableFileFilter(_projectFilter);
+      _openChooser.setFileFilter(_javaSourceFilter);
+      
       return retFiles;
     }
   };
@@ -1338,11 +1354,11 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
     _openChooser = new JFileChooser();
     _openChooser.setCurrentDirectory(workDir);
-    _openChooser.setFileFilter(new JavaSourceFilter());
+    _openChooser.setFileFilter(_javaSourceFilter);
     _openChooser.setMultiSelectionEnabled(true);
     _saveChooser = new JFileChooser();
     _saveChooser.setCurrentDirectory(workDir);
-    _saveChooser.setFileFilter(new JavaSourceFilter());
+    _saveChooser.setFileFilter(_javaSourceFilter);
     _interactionsHistoryChooser = new JFileChooser();
     _interactionsHistoryChooser.setCurrentDirectory(workDir);
     _interactionsHistoryChooser.setFileFilter(new InteractionsHistoryFilter());
@@ -1789,6 +1805,9 @@ public class MainFrame extends JFrame implements OptionConstants {
       // Don't set selected file
     }
 
+    _saveChooser.removeChoosableFileFilter(_projectFilter);
+    _saveChooser.removeChoosableFileFilter(_javaSourceFilter);
+    _saveChooser.setFileFilter(_javaSourceFilter);
     int rc = jfc.showSaveDialog(this);
     return getChosenFile(jfc, rc);
   }
@@ -2153,6 +2172,9 @@ public class MainFrame extends JFrame implements OptionConstants {
     
     
     // This redundant-looking hack is necessary for JDK 1.3.1 on Mac OS X!
+    _saveChooser.removeChoosableFileFilter(_projectFilter);
+    _saveChooser.removeChoosableFileFilter(_javaSourceFilter);
+    _saveChooser.setFileFilter(_projectFilter);
     File selection = _saveChooser.getSelectedFile();
     if (selection != null) {
       _saveChooser.setSelectedFile(selection.getParentFile());

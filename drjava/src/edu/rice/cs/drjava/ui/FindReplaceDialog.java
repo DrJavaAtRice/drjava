@@ -103,6 +103,7 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
   };
 
   public void requestFocus() {
+    System.out.println("findField has requested focus");
     super.requestFocus();
     _findField.requestFocus();
     _findField.selectAll();
@@ -127,6 +128,7 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
    */
   public void beginListeningTo(DefinitionsPane defPane) {
     if(_defPane==null) {
+      requestFocus();
       _displayed = true;
       _defPane = defPane;
       _defPane.addCaretListener(_caretListener);
@@ -615,15 +617,15 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
   /**
    * Shows the dialog and sets the focus appropriately.
    */
-  /*public void show() {
-   //super.show();
-   System.err.println("*** Called show ***");
-   if (!_open)
-   _frame.installFindReplaceDialog(this);
-   _updateMachine();
-   _findField.requestFocus();
-   _findField.selectAll();
-   }*/
+//  public void show() {
+//   //super.show();
+//   System.err.println("*** Called show ***");
+////   if (!isVisible())
+//     _frame.installFindReplaceDialog(this);
+//     _updateMachine();
+//     _findField.requestFocus();
+//     _findField.selectAll();
+//   }
 
   /**
    * This method is used to select the item that has been inserted in a
