@@ -1623,7 +1623,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     
     final SwingWorker worker = new SwingWorker() {
       public Object construct() {
-        try {          
+        try {
           _model.compileAll();
         }
         catch (FileMovedException fme) {
@@ -1781,6 +1781,14 @@ public class MainFrame extends JFrame implements OptionConstants {
     if (inDebugMode()) {
       try {
         _model.getDebugger().step(flag);
+      }
+      catch (IllegalStateException ise) {
+        // This may happen if the user if stepping very frequently,
+        // and is even more likely if they are using both hotkeys
+        // and UI buttons. Ignore it in this case. 
+        // Hopefully, there are no other situations where
+        // the user can be trying to step while there are no
+        // suspended threads.
       }
       catch (DebugException de) {
         _showError(de, "Debugger Error",

@@ -87,6 +87,12 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
   private static final boolean printMessages = false;
   
   /**
+   * The maximum number of times to call invokeMethod
+   * to avoid ObjectCollectedExceptions.
+   */
+  private static final int MAXINVOKETRIES = 5;
+  
+  /**
    * Reference to DrJava's model.
    */
   private DefaultGlobalModel _model;
@@ -176,6 +182,10 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     _interpreterJVM = null;
     _eventHandlerError = null;
     _log = new Log("DebuggerLog", false);
+  }
+  
+  protected VirtualMachine getVM() {
+    return _vm;
   }
   
   /**
@@ -768,6 +778,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
       _copyVariablesFromInterpreter();
     }
     try {
+      removeCurrentDebugInterpreter();
       currThreadResumed();
     }
     catch(DebugException e) {  //??
@@ -806,8 +817,8 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
   private synchronized void _stepHelper(int flag, boolean shouldNotify)
     throws DebugException
   {
-    if (_suspendedThreads.size() <= 0) {
-      throw new IllegalStateException("Cannot step if no threads are suspended.");
+    if (_suspendedThreads.size() <= 0 || _runningThread != null) {
+      throw new IllegalStateException("Cannot step if the current thread is not suspended.");
     }
 
     if (printMessages) System.out.println("About to peek...");
@@ -815,7 +826,9 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     ThreadReference thread = _suspendedThreads.peek();
     if (printMessages) System.out.println("Stepping " + thread.toString());
     
-    // copy the variables back into the thread from the appropriate interpreter
+    // Copy the variables back into the thread from the appropriate interpreter.
+    // We do this before stepping since DrJava will hang if you try to copy back
+    // variables after creating the step request.
     _runningThread = thread;
     _copyVariablesFromInterpreter();
     
@@ -1592,18 +1605,33 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     Method m = _getMethod(_interpreterJVM.referenceType(),
                           "getJavaInterpreter");
     
-    LinkedList args = new LinkedList();
-    args.add(_vm.mirrorOf(interpreterName)); // make the String a JDI Value
-    if( printMessages ) { 
-      System.out.println("Invoking " + m.toString() + " on " + args.toString());
-      System.out.println("Thread is " + threadRef.toString() + " <suspended = " + threadRef.isSuspended() + ">");
-    }
-    ObjectReference tmpInterpreter = (ObjectReference)
-      _interpreterJVM.invokeMethod(threadRef, m, args, 
-                                   ObjectReference.INVOKE_SINGLE_THREADED);
     
-    if( printMessages ) System.out.println("Returning...");
-    return tmpInterpreter;
+    // invokeMethod would throw an ObjectCollectedException if the StringReference 
+    // declared by _vm.mirrorOf(name) had been garbage collected before 
+    // invokeMethod could execute. This happened infrequently so by trying this
+    // multiple times, the chance of failure each time should be acceptably low.
+    
+    int tries = 0;
+    while (tries < MAXINVOKETRIES) {      
+      LinkedList args = new LinkedList();
+      args.add(_vm.mirrorOf(interpreterName)); // make the String a JDI Value
+      if( printMessages ) { 
+        System.out.println("Invoking " + m.toString() + " on " + args.toString());
+        System.out.println("Thread is " + threadRef.toString() + " <suspended = " + threadRef.isSuspended() + ">");
+      }
+      
+      try {
+        ObjectReference tmpInterpreter = (ObjectReference) _interpreterJVM.invokeMethod(threadRef, m, args, 
+                                     ObjectReference.INVOKE_SINGLE_THREADED);
+        if( printMessages ) System.out.println("Returning...");        
+        return tmpInterpreter;
+      }
+      catch (ObjectCollectedException oce) {
+        tries++;
+      }
+    }
+    throw new DebugException("The debugInterpreter: " + interpreterName + " could not be obtained from interpreterJVM");
+    
   }
   
   /**
@@ -1621,18 +1649,19 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
   /**
    * Copy the current selected thread's visible variables (those in scope) into
    * an interpreter's environment and then switch the Interactions window's
-   * interpreter to that interpreter
+   * interpreter to that interpreter.
    */
-  private void _dumpVariablesIntoInterpreterAndSwitch() throws DebugException {
+  private void _dumpVariablesIntoInterpreterAndSwitch() throws DebugException, AbsentInformationException {
     if (printMessages) {
       System.out.println("dumpVariablesIntoInterpreterAndSwitch");
     }
     try {
       ThreadReference suspendedThreadRef = _suspendedThreads.peek();
-      
+ 
       // Name the new interpreter based on this thread
       String interpreterName = _getUniqueThreadName(suspendedThreadRef);
       _model.getInteractionsModel().addDebugInterpreter(interpreterName);
+      ObjectReference debugInterpreter = _getDebugInterpreter(interpreterName);
       StackFrame frame = suspendedThreadRef.frame(0);
       if (printMessages) {
         System.out.println("frame = suspendedThreadRef.frame(0);");
@@ -1640,7 +1669,10 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
       
       List vars = frame.visibleVariables();
       Iterator varsIterator = vars.iterator();
-      ObjectReference debugInterpreter = _getDebugInterpreter(interpreterName);
+      
+      if (printMessages) {
+        System.out.println("got visibleVariables");
+      }
       
       // Define each variable
       while(varsIterator.hasNext()){
@@ -1672,12 +1704,9 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     }
     catch(InvalidTypeException exc){
       throw new DebugException(exc.toString());
-    }    
-    catch(AbsentInformationException e2){
-      throw new DebugException(e2.toString());
     }
-    catch(IncompatibleThreadStateException e){
-      throw new DebugException(e.toString());
+    catch(IncompatibleThreadStateException e2){
+      throw new DebugException(e2.toString());
     }
     catch(ClassNotLoadedException e3){
       throw new DebugException(e3.toString());
@@ -1711,14 +1740,30 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     ClassNotLoadedException, InvocationException, DebugException 
   {
     ReferenceType rtDebugInterpreter = debugInterpreter.referenceType();
-    List args = new LinkedList();
-    args.add(_vm.mirrorOf(name));
-    args.add(val);
     Method method2Call = _getDefineVariableMethod(rtDebugInterpreter,  val);
     
-    /* System.out.println("Calling " + method2Call.toString() + "with " + args.get(0).toString()); */
-    debugInterpreter.invokeMethod(suspendedThreadRef, method2Call, args, 
-                                  ObjectReference.INVOKE_SINGLE_THREADED);
+    // invokeMethod would throw an ObjectCollectedException if the StringReference 
+    // declared by _vm.mirrorOf(name) had been garbage collected before 
+    // invokeMethod could execute. This happened infrequently so by trying this
+    // multiple times, the chance of failure each time should be acceptably low.
+     
+    int tries = 0;
+    while (tries < MAXINVOKETRIES) {
+      List args = new LinkedList();
+      args.add(_vm.mirrorOf(name));
+      args.add(val);
+      
+      /* System.out.println("Calling " + method2Call.toString() + "with " + args.get(0).toString()); */
+      try {
+        debugInterpreter.invokeMethod(suspendedThreadRef, method2Call, args, 
+                                      ObjectReference.INVOKE_SINGLE_THREADED);
+        return;
+      }
+      catch (ObjectCollectedException oce) {
+        tries++;
+      }
+    }
+    throw new DebugException("The variable: " + name + " could not be defined in the debug interpreter");
   }
   
   /**
@@ -1726,14 +1771,21 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
    */
   synchronized void currThreadSuspended() {
     try {
+      try {
       // copy the variables in scope into an interpreter
       // and switch the current interpreter to that interpreter
-      _dumpVariablesIntoInterpreterAndSwitch();
+        _dumpVariablesIntoInterpreterAndSwitch();
+      }
+      catch(AbsentInformationException aie){
+        // an AbsentInformationException can be thrown if the user does not
+        // compile the classes to be debugged with the -g flag
+        printMessage("No debug information available for this class.\nMake sure to compile classes to be debugged with the -g flag.");
+      }          
       _switchToSuspendedThread();
     }
-    catch(DebugException ex){
-      throw new UnexpectedException(ex);
-    }    
+    catch(DebugException de) {
+      throw new UnexpectedException(de);
+    }
   }
 
   /**
@@ -1741,6 +1793,9 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
    * top of the _suspendedThreads stack.
    */
   private void _switchToSuspendedThread() throws DebugException {
+    if (printMessages) {
+      System.out.println("_switchToSuspendedThread()");
+    }
     _runningThread = null;
     _updateWatches();
     notifyListeners(new EventNotifier() {
@@ -1805,7 +1860,13 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     IncompatibleThreadStateException, AbsentInformationException, 
     InvocationException
   {
-    String typeSignature = localVar.type().signature();
+    String typeSignature;
+    try {
+      typeSignature = localVar.type().signature();
+    }
+    catch (ClassNotLoadedException cnle) {
+      return v;
+    }
     Method m = null;
     ObjectReference ref = (ObjectReference)v;
     ReferenceType rt = ref.referenceType();
@@ -1844,7 +1905,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
   
   /**
    * Copies the variables in the current interpreter back into the Thread 
-   * it refers to
+   * it refers to.
    */
   private void _copyBack(ThreadReference threadRef)
     throws InvalidTypeException, ClassNotLoadedException, 
@@ -1861,20 +1922,41 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     
     // Get each variable from the stack frame
     while(varsIterator.hasNext()) {
+      if( printMessages ) System.out.println("Iterating through vars");        
       LocalVariable localVar = (LocalVariable)varsIterator.next();
-      if( printMessages ) DrJava.consoleOut().println("Copying " + localVar.name());
-      List args = new LinkedList();
-      args.add(_vm.mirrorOf(localVar.name()));
-      if( printMessages ) DrJava.consoleOut().println("Getting getVariableMethod()");
       Method method2Call = _getGetVariableMethod(rtInterpreter);
-      if( printMessages ) DrJava.consoleOut().println("Invoking " + method2Call.name());
-      Value v = interpreter.invokeMethod(threadRef, method2Call, args, 
-                                         ObjectReference.INVOKE_SINGLE_THREADED);
-      if (v != null) {
-        v = _convertToActualType(threadRef, localVar, v);
+      
+      // invokeMethod would throw an ObjectCollectedException if the StringReference 
+      // declared by _vm.mirrorOf(name) had been garbage collected before 
+      // invokeMethod could execute. This happened infrequently so by trying this
+      // multiple times, the chance of failure each time should be acceptably low.
+      
+      int tries = 0;
+      while (tries < MAXINVOKETRIES) {    
+        List args = new LinkedList();          
+        args.add(_vm.mirrorOf(localVar.name()));
+        try {
+          Value v = interpreter.invokeMethod(threadRef, method2Call, args, 
+                                             ObjectReference.INVOKE_SINGLE_THREADED);
+          if (v != null) {
+            v = _convertToActualType(threadRef, localVar, v);
+          }
+          frame = threadRef.frame(0);           
+          frame.setValue(localVar, v);
+          break;
+        }
+        catch (ObjectCollectedException oce) {
+          if (printMessages) System.out.println("Got ObjectCollectedException");
+          tries++;
+        }        
+        catch (ClassNotLoadedException cnle) {
+          printMessage("Could not update the value of '" + localVar.name() + "' (class not loaded)");
+          break;
+        }
       }
-      frame = threadRef.frame(0);
-      frame.setValue(localVar, v);
+      if (tries >= MAXINVOKETRIES)
+        throw new DebugException("The value of the variable: " + localVar.name() + " could not be obtained from interpreterJVM");
+      
     }
   }
   
@@ -1890,7 +1972,9 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
       throw new DebugException(exc.toString());
     }    
     catch(AbsentInformationException e2) {
-      throw new DebugException(e2.toString());
+      //throw new DebugException(e2.toString());
+      // Silently fail for now to ignore the AbsentInformationException that
+      // we should have noticed when first suspending on this line (see currThreadSuspended).
     }
     catch(IncompatibleThreadStateException e) {
       throw new DebugException(e.toString());
@@ -1904,14 +1988,10 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
   }
   
   /**
-   * Notifies all listeners that the current thread has been resumed.
-   * Precondition: Assumes that the current thread hasn't yet been resumed
+   * This method is called to remove the current debug interpreter upon resuming
+   * the current thread.
    */
-  synchronized void currThreadResumed() throws DebugException {
-    if (printMessages) {
-      System.out.println("In currThreadResumed()");
-    }
-    
+  private void removeCurrentDebugInterpreter() throws DebugException {
     // switch to next interpreter on the stack
     if (_suspendedThreads.isEmpty()) {
       ((DefaultInteractionsModel)_model.getInteractionsModel()).setToDefaultInterpreter();
@@ -1920,12 +2000,19 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
       ThreadReference threadRef = _suspendedThreads.peek();
       _switchToInterpreterForThreadReference(threadRef);
     }
-    
-    if (printMessages) {
-      System.out.println("Out of _copyBack()");
-    }
     String oldInterpreterName = _getUniqueThreadName(_runningThread);
     ((DefaultInteractionsModel)_model.getInteractionsModel()).removeInterpreter(oldInterpreterName);
+  }
+  
+  /**
+   * Notifies all listeners that the current thread has been resumed.
+   * Precondition: Assumes that the current thread hasn't yet been resumed
+   */
+  synchronized void currThreadResumed() throws DebugException {
+    if (printMessages) {
+      System.out.println("In currThreadResumed()");
+    }
+    
     notifyListeners(new EventNotifier() {
       public void notifyListener(DebugListener l) {
         l.currThreadResumed();
