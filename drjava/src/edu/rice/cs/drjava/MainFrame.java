@@ -64,8 +64,11 @@ public class MainFrame extends JFrame {
      * @param ae
      */
     public void actionPerformed(ActionEvent ae) {
-      final String message = "DrJava, brought to you by the Java PLT " + "research group at Rice University.\n"
-          + "http://www.cs.rice.edu/~javaplt/drjava\n\n" + "Version: " + Version.BUILD_TIME;
+      final String message = "DrJava, brought to you by the Java PLT "
+                           + "research group at Rice University.\n"
+                           + "http://www.cs.rice.edu/~javaplt/drjava\n\n" 
+                           + "Version: " 
+                           + Version.BUILD_TIME;
       JOptionPane.showMessageDialog(MainFrame.this, message);
     }
   };

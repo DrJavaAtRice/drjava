@@ -9,8 +9,7 @@ import gj.util.Vector;
  * @author JavaPLT
  */
 
-public interface BraceReduction
-{
+public interface BraceReduction {
 
   /**
    * Get the absolute character offset of the document represented by BraceReduction.

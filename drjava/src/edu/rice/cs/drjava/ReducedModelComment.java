@@ -4,30 +4,31 @@ import gj.util.Stack;
 import gj.util.Vector;
 
 /**
-* @version $Id$
-* This class provides an implementation of the BraceReduction
-* interface for brace matching.  In order to correctly match, this class
-* keeps track of what is commented (line and block) and what is inside
-* double quotes and keeps this in mind when matching.
-* To avoid unnecessary complication, this class maintains a few
-* invariants for its consistent states, i.e., between top-level
-* function calls.
-* <ol>
-* <li> The cursor offset is never at the end of a brace.  If movement
-* or insertion puts it there, the cursor is updated to point to the 0
-* offset of the next brace.
-* <li> Quoting information is invalid inside valid comments.  When part
-* of the document becomes uncommented, the reduced model must update the
-* quoting information linearly in the newly revealed code.
-* <li> Quote shadowing and comment shadowing are mutually exclusive.
-* <li> There is no nesting of comment open characters. If // is encountered
-*      in the middle of a comment, it is treated as two separate slashes.
-*      Similar for /*.
-* </ol>
-* @author Mike Yantosca, Jonathan Bannet
-*/
+ * @version $Id$
+ * This class provides an implementation of the BraceReduction
+ * interface for brace matching.  In order to correctly match, this class
+ * keeps track of what is commented (line and block) and what is inside
+ * single and double quotes and keeps this in mind when matching.
+ * To avoid unnecessary complication, this class maintains a few
+ * invariants for its consistent states, i.e., between top-level
+ * function calls.
+ * <ol>
+ * <li> The cursor offset is never at the end of a brace.  If movement
+ * or insertion puts it there, the cursor is updated to point to the 0
+ * offset of the next brace.
+ * <li> Quoting information is invalid inside valid comments.  When part
+ * of the document becomes uncommented, the reduced model must update the
+ * quoting information linearly in the newly revealed code.
+ * <li> Quote shadowing and comment shadowing are mutually exclusive.
+ * <li> There is no nesting of comment open characters. If // is encountered
+ *      in the middle of a comment, it is treated as two separate slashes.
+ *      Similar for /*.
+ * </ol>
+ * @author Mike Yantosca, Jonathan Bannet
+ */
 
-public class ReducedModelComment {
+public class ReducedModelComment implements ReducedModelStates {
+
   /**
   * The character that represents the cursor in toString().
   * @see #toString()
@@ -131,7 +132,7 @@ public class ReducedModelComment {
       case '*': insertStar(); break;
       case '/': insertSlash(); break;
       case '\n': insertNewline(); break;
-      case '\"': insertQuote(); break;
+      case '\"': insertDoubleQuote(); break;
       case '\\': insertBackSlash(); break;
       default:
         _insertGap(1); break;
@@ -223,7 +224,7 @@ public class ReducedModelComment {
   {
     if ( !copyCursor.atStart()  && !copyCursor.atFirstItem()) {
       if (copyCursor.prevItem().getType().equals("/") &&
-          (copyCursor.prevItem().getState() == ReducedToken.FREE)) 
+          (copyCursor.prevItem().getState() == FREE)) 
       {
             copyCursor.prevItem().setType("/*");
             _updateBasedOnCurrentState();
@@ -329,24 +330,24 @@ public class ReducedModelComment {
   {
     if (!copyCursor.atStart()  && !copyCursor.atFirstItem()) {
       if (copyCursor.prevItem().getType().equals("/") &&
-          (copyCursor.prevItem().getState() == ReducedToken.FREE))
+          (copyCursor.prevItem().getState() == FREE))
       {
         copyCursor.prevItem().setType("//");
         _updateBasedOnCurrentState();
         return;
       }
       // if we're after a star, 
-      else if ((getStateAtCurrent() == ReducedToken.INSIDE_BLOCK_COMMENT)
+      else if ((getStateAtCurrent() == INSIDE_BLOCK_COMMENT)
                && copyCursor.prevItem().getType().equals("*"))
                  
       {
         copyCursor.prevItem().setType("*/");
-        copyCursor.prevItem().setState(ReducedToken.FREE);
+        copyCursor.prevItem().setState(FREE);
         _updateBasedOnCurrentState();
         return;
       }
     }
-    //here we know the / unites with nothing behind it.
+    //Here we know the / unites with nothing behind it.
     _insertNewBrace("/",copyCursor); //leaving us after the brace.
     copyCursor.prev();
     _updateBasedOnCurrentState();
@@ -385,7 +386,7 @@ public class ReducedModelComment {
       _insertNewEndOfLine();
     }
     else if ((_offset > 0) && _cursor.current().isMultipleCharBrace()) {
-      _splitCurrentIfCommentBlock(true,true, _cursor);
+      _splitCurrentIfCommentBlock(true, true, _cursor);
       _cursor.next();
       _cursor.insert(Brace.MakeBrace("\n", getStateAtCurrent()));
       _cursor.prev();
@@ -438,12 +439,12 @@ public class ReducedModelComment {
   * </OL>
   * @return a Vector of highlighting information after the cursor
   */
-  public void insertQuote() {
+  public void insertDoubleQuote() {
     if (_cursor.atStart()) {
-      _insertNewQuote();
+      _insertNewDoubleQuote();
     }
     else if (_cursor.atEnd()) {
-      _insertNewQuote();
+      _insertNewDoubleQuote();
     }
     else if ((_offset > 0) && _cursor.current().isMultipleCharBrace()) {
       _splitCurrentIfCommentBlock(true,true, _cursor);
@@ -460,16 +461,16 @@ public class ReducedModelComment {
       _insertBraceToGap("\"", _cursor);
     }
     else {
-      _insertNewQuote();
+      _insertNewDoubleQuote();
     }
     return;
   }
   
   /**
-  * Helper function for insertQuote.
+  * Helper function for insertDoubleQuote.
   */
-  private void _insertNewQuote() {
-    String insert = _getQuoteType();
+  private void _insertNewDoubleQuote() {
+    String insert = _getDoubleQuoteType();
     
     _insertNewBrace(insert, _cursor);
     _cursor.prev();
@@ -479,12 +480,12 @@ public class ReducedModelComment {
   }
   
   /**
-  * Helper function for insertQuote.  Returns text for either
+  * Helper function for insertDoubleQuote.  Returns text for either
   * a regular (") or escaped (\") quote.  In the case where a backslash
   * precedes the point of insertion, it removes the backslash and returns
   * the text for an escaped quote.
   */
-  private String _getQuoteType() {
+  private String _getDoubleQuoteType() {
     if (_cursor.atStart() || _cursor.atFirstItem()) {
       return "\"";
     }
@@ -602,8 +603,7 @@ public class ReducedModelComment {
       copyCursor.next();
     }
   }
-  
-  
+
   /**
   * Inserts a block of non-brace text into the reduced model.
   * <OL>
@@ -652,7 +652,7 @@ public class ReducedModelComment {
                                            _offset);
       }
       _breakComment(_cursor); //leaves us inside comment
-      _insertNewGap(length); //inserts gap and goes to next item
+      _insertNewGap(length);  //inserts gap and goes to next item
       return;
     }
     
@@ -689,36 +689,37 @@ public class ReducedModelComment {
   
   /**
   * Returns the current commented/quoted state at the cursor.
-  * @return FREE|INSIDE_BLOCK_COMMENT|INSIDE_LINE_COMMENT|INSIDE_QUOTE
+  * @return FREE|INSIDE_BLOCK_COMMENT|INSIDE_LINE_COMMENT|INSIDE_SINGLE_QUOTE|
+  * INSIDE_DOUBLE_QUOTE
   */
   private int _getStateAtCurrentHelper(ModelList<ReducedToken>.Iterator temp) {
     
-    int state = ReducedToken.FREE;
+    int state = FREE;
     
     if (temp.atFirstItem() || temp.atStart() || _braces.isEmpty()) {
-      state = ReducedToken.FREE;
+      state = FREE;
     }
     else if ( temp.prevItem().isLineComment() ||
              (temp.prevItem().getState() ==
-              ReducedToken.INSIDE_LINE_COMMENT))
+              INSIDE_LINE_COMMENT))
     {
-      state = ReducedToken.INSIDE_LINE_COMMENT;
+      state = INSIDE_LINE_COMMENT;
     }
     else if ( temp.prevItem().isBlockCommentStart() ||
              (temp.prevItem().getState() ==
-              ReducedToken.INSIDE_BLOCK_COMMENT)) 
+              INSIDE_BLOCK_COMMENT)) 
     {
-      state = ReducedToken.INSIDE_BLOCK_COMMENT;
+      state = INSIDE_BLOCK_COMMENT;
     }
-    else if ( (temp.prevItem().isQuote() &&
+    else if ( (temp.prevItem().isDoubleQuote() &&
                temp.prevItem().isOpen()) ||
              (temp.prevItem().getState() ==
-              ReducedToken.INSIDE_QUOTE))
+              INSIDE_DOUBLE_QUOTE))
     {
-      state = ReducedToken.INSIDE_QUOTE;
+      state = INSIDE_DOUBLE_QUOTE;
     }
     else {
-      state = ReducedToken.FREE;
+      state = FREE;
     }
     return state;
   }
@@ -919,16 +920,16 @@ public class ReducedModelComment {
     // Free if at the beginning     
     while (!copyCursor.atEnd()) {
       switch (curState) {
-        case Brace.FREE:
+        case FREE:
           curState = _updateFree(copyCursor);
         break;
-        case Brace.INSIDE_QUOTE:
-          curState = _updateInsideQuote(copyCursor);
+        case INSIDE_DOUBLE_QUOTE:
+          curState = _updateInsideDoubleQuote(copyCursor);
         break;
-        case Brace.INSIDE_BLOCK_COMMENT:
+        case INSIDE_BLOCK_COMMENT:
           curState = _updateInsideBlockComment(copyCursor);
         break;
-        case Brace.INSIDE_LINE_COMMENT:
+        case INSIDE_LINE_COMMENT:
           curState = _updateInsideLineComment(copyCursor);
         break;
         default:
@@ -953,7 +954,7 @@ public class ReducedModelComment {
    *        and keep the cursor on that Brace.
    *   <li> If current brace = //, go to next then call updateLineComment.<BR>
    *        If current brace = /*, go to next then call updateBlockComment.<BR>
-   *        If current brace = ", go to next then call updateInsideQuote.<BR>
+   *        If current brace = ", go to next then call updateInsideDoubleQuote.<BR>
    *        Else, mark current brace as FREE, go to the next brace, and recur.
    * </ol>
    */
@@ -985,16 +986,16 @@ public class ReducedModelComment {
     }
     else if (type.equals("//")) {
       // open comment blocks are not set commented, they're set free
-      copyCursor.current().setState(Brace.FREE);
+      copyCursor.current().setState(FREE);
       copyCursor.next();
-      return Brace.INSIDE_LINE_COMMENT;
+      return INSIDE_LINE_COMMENT;
       //_updateInsideLineComment(copyCursor);
     }
     else if (type.equals("/*")) {
       // open comment blocks are not set commented, they're set free
-      copyCursor.current().setState(Brace.FREE);
+      copyCursor.current().setState(FREE);
       copyCursor.next();
-      return Brace.INSIDE_BLOCK_COMMENT;
+      return INSIDE_BLOCK_COMMENT;
       //_updateInsideBlockComment(copyCursor);
     }
     else if (type.equals("\"")) {
@@ -1002,15 +1003,15 @@ public class ReducedModelComment {
       if (copyCursor.current().isClosed()) {
         copyCursor.current().flip();
       }
-      copyCursor.current().setState(Brace.FREE);
+      copyCursor.current().setState(FREE);
       copyCursor.next();
-      return Brace.INSIDE_QUOTE;
-      //_updateInsideQuote(copyCursor);
+      return INSIDE_DOUBLE_QUOTE;
+      //_updateInsideDoubleQuote(copyCursor);
     }
     else {
-      copyCursor.current().setState(Brace.FREE);
+      copyCursor.current().setState(FREE);
       copyCursor.next();
-      return Brace.FREE;
+      return FREE;
       //_updateFree(copyCursor);
     }
   }
@@ -1024,10 +1025,10 @@ public class ReducedModelComment {
    *       The cursor will be on the first of the two new braces.
    *  <li> If current brace = \n or ", mark current brace FREE, next(), and
    *       go to updateFree.
-   *       Else, mark current brace as INSIDE_QUOTE, go to next brace, recur.
+   *       Else, mark current brace as INSIDE_DOUBLE_QUOTE, go to next brace, recur.
    * </ol>   
    */
-  private int _updateInsideQuote(ModelList<ReducedToken>.Iterator copyCursor) {
+  private int _updateInsideDoubleQuote(ModelList<ReducedToken>.Iterator copyCursor) {
     if (copyCursor.atEnd()) {
       return -1;
     }
@@ -1040,9 +1041,9 @@ public class ReducedModelComment {
     String type = copyCursor.current().getType();
     
     if (type.equals("\n")) {
-      copyCursor.current().setState(Brace.FREE);
+      copyCursor.current().setState(FREE);
       copyCursor.next();
-      return Brace.FREE;
+      return FREE;
       //_updateFree(copyCursor);
     }
     else if (type.equals("\"")) {
@@ -1050,16 +1051,16 @@ public class ReducedModelComment {
       if (copyCursor.current().isOpen())
         copyCursor.current().flip();
       
-      copyCursor.current().setState(Brace.FREE);
+      copyCursor.current().setState(FREE);
       copyCursor.next();
-      return Brace.FREE;
+      return FREE;
       //_updateFree(copyCursor);
     }
     else {
-      copyCursor.current().setState(Brace.INSIDE_QUOTE);
+      copyCursor.current().setState(INSIDE_DOUBLE_QUOTE);
       copyCursor.next();
-      return Brace.INSIDE_QUOTE;
-      //_updateInsideQuote(copyCursor);
+      return INSIDE_DOUBLE_QUOTE;
+      //_updateInsideDoubleQuote(copyCursor);
     }
   }
   
@@ -1091,15 +1092,15 @@ public class ReducedModelComment {
     String type = copyCursor.current().getType();
     
     if (type.equals("\n")) {
-      copyCursor.current().setState(Brace.FREE);
+      copyCursor.current().setState(FREE);
       copyCursor.next();
-      return Brace.FREE;
+      return FREE;
       //_updateFree(copyCursor);
     }
     else {
-      copyCursor.current().setState(Brace.INSIDE_LINE_COMMENT);
+      copyCursor.current().setState(INSIDE_LINE_COMMENT);
       copyCursor.next();
-      return Brace.INSIDE_LINE_COMMENT;
+      return INSIDE_LINE_COMMENT;
       //_updateInsideLineComment(copyCursor);
     }
   }
@@ -1138,16 +1139,16 @@ public class ReducedModelComment {
     
     String type = copyCursor.current().getType();
     if (type.equals("*/")) {
-      copyCursor.current().setState(Brace.FREE);
+      copyCursor.current().setState(FREE);
       copyCursor.next();
-      return Brace.FREE;
+      return FREE;
       //_updateFree(copyCursor);
     }
     
     else {
-      copyCursor.current().setState(Brace.INSIDE_BLOCK_COMMENT);
+      copyCursor.current().setState(INSIDE_BLOCK_COMMENT);
       copyCursor.next();
-      return Brace.INSIDE_BLOCK_COMMENT;
+      return INSIDE_BLOCK_COMMENT;
       //_updateInsideBlockComment(copyCursor);
     }
   }
@@ -1184,7 +1185,7 @@ public class ReducedModelComment {
         copyCursor.current().setType("/");
         copyCursor.prev();
         copyCursor.current().setType("*/");
-        copyCursor.current().setState(ReducedToken.FREE);
+        copyCursor.current().setState(FREE);
         return true;
       }
       else if ((copyCursor.current().getType().equals("/*")) &&
@@ -1193,7 +1194,7 @@ public class ReducedModelComment {
         copyCursor.current().setType("*");
         copyCursor.prev();
         copyCursor.current().setType("*/");
-        copyCursor.current().setState(ReducedToken.FREE);
+        copyCursor.current().setState(FREE);
         return true;
       }
       else if ((copyCursor.current().getType().equals("/*")) &&
@@ -1202,7 +1203,7 @@ public class ReducedModelComment {
         copyCursor.current().setType("*");
         copyCursor.prev();
         copyCursor.current().setType("//");
-        copyCursor.current().setState(ReducedToken.FREE);
+        copyCursor.current().setState(FREE);
         return true;
       }
       else if ((copyCursor.current().getType().equals("//")) &&
@@ -1211,7 +1212,7 @@ public class ReducedModelComment {
         copyCursor.current().setType("/");
         copyCursor.prev();
         copyCursor.current().setType("//");
-        copyCursor.current().setState(ReducedToken.FREE);
+        copyCursor.current().setState(FREE);
         return true;
       }
       else if ((copyCursor.current().getType().equals("")) &&
@@ -1232,7 +1233,7 @@ public class ReducedModelComment {
         copyCursor.current().setType("\\");
         copyCursor.prev();
         copyCursor.current().setType("\\\\");
-        copyCursor.current().setState(ReducedToken.FREE);
+        copyCursor.current().setState(FREE);
         return true;
       } // \-\"
       else if ((copyCursor.current().getType().equals("\\\"")) &&
@@ -1241,7 +1242,7 @@ public class ReducedModelComment {
         copyCursor.current().setType("\"");
         copyCursor.prev();
         copyCursor.current().setType("\\\\");
-        copyCursor.current().setState(ReducedToken.FREE);
+        copyCursor.current().setState(FREE);
         return true;
       }
       // delete the first Brace and augment the second
@@ -1806,7 +1807,7 @@ public class ReducedModelComment {
     while ((!copyCursor.atStart()) &&
            (!(copyCursor.current().getType().equals("\n"))))
            {
-             //  copyCursor.current().getState() == ReducedToken.FREE))){
+             //  copyCursor.current().getState() == FREE))){
              walkcount += copyCursor.current().getSize();
              copyCursor.prev();
            }
@@ -1875,7 +1876,7 @@ public class ReducedModelComment {
     while ((!copyCursor.atEnd()) &&
            (!(copyCursor.current().getType().equals("\n")))) 
     {
-      //copyCursor.current().getState() == ReducedToken.FREE))){
+      //copyCursor.current().getState() == FREE))){
       walkcount += copyCursor.current().getSize();
       copyCursor.next();
     }

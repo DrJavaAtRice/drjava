@@ -8,7 +8,8 @@ import  junit.extensions.*;
 /**
  * @version $Id$
  */
-public class BraceTest extends TestCase {
+public class BraceTest extends TestCase implements ReducedModelStates {
+ 
   protected Brace rparen;
   protected Brace lparen;
 
@@ -24,8 +25,8 @@ public class BraceTest extends TestCase {
    * Set up Braces for testing.
    */
   public void setUp() {
-    lparen = Brace.MakeBrace("(", ReducedToken.FREE);
-    rparen = Brace.MakeBrace(")", ReducedToken.FREE);
+    lparen = Brace.MakeBrace("(", FREE);
+    rparen = Brace.MakeBrace(")", FREE);
   }
 
   /**
@@ -40,7 +41,7 @@ public class BraceTest extends TestCase {
    * Tests the successful construction of a Brace using the MakeBrace method.
    */
   public void testMakeBraceSuccess() {
-    Brace brace = Brace.MakeBrace("{", ReducedToken.FREE);
+    Brace brace = Brace.MakeBrace("{", FREE);
     assertEquals("{", brace.getType());
     assertEquals(1, brace.getSize());
   }
@@ -51,7 +52,7 @@ public class BraceTest extends TestCase {
   public void testMakeBraceFailure() {
     Brace brace;
     try {
-      brace = Brace.MakeBrace("k", ReducedToken.FREE);
+      brace = Brace.MakeBrace("k", FREE);
     } catch (BraceException e) {
       assertEquals("Invalid brace type \"k\"", e.getMessage());
     }
@@ -70,12 +71,12 @@ public class BraceTest extends TestCase {
    */
   public void testIsShadowed() {
     assertTrue("#0.0", !lparen.isShadowed());
-    lparen.setState(ReducedToken.INSIDE_QUOTE);
-    assertEquals("#0.0.1", ReducedToken.INSIDE_QUOTE, lparen.getState());
+    lparen.setState(INSIDE_DOUBLE_QUOTE);
+    assertEquals("#0.0.1", INSIDE_DOUBLE_QUOTE, lparen.getState());
     assertTrue("#0.1", lparen.isShadowed());
-    rparen.setState(ReducedToken.INSIDE_BLOCK_COMMENT);
+    rparen.setState(INSIDE_BLOCK_COMMENT);
     assertTrue("#0.2", rparen.isShadowed());
-    rparen.setState(ReducedToken.FREE);
+    rparen.setState(FREE);
     assertTrue("#0.3", !rparen.isShadowed());
   }
 
@@ -84,9 +85,9 @@ public class BraceTest extends TestCase {
    */
   public void testIsQuoted() {
     assertTrue("#0.0", !lparen.isQuoted());
-    lparen.setState(ReducedToken.INSIDE_QUOTE);
+    lparen.setState(INSIDE_DOUBLE_QUOTE);
     assertTrue("#0.1", lparen.isQuoted());
-    lparen.setState(ReducedToken.INSIDE_BLOCK_COMMENT);
+    lparen.setState(INSIDE_BLOCK_COMMENT);
     assertTrue("#0.2", !lparen.isQuoted());
   }
 
@@ -95,9 +96,9 @@ public class BraceTest extends TestCase {
    */
   public void testIsCommented() {
     assertTrue("#0.0", !lparen.isCommented());
-    lparen.setState(ReducedToken.INSIDE_BLOCK_COMMENT);
+    lparen.setState(INSIDE_BLOCK_COMMENT);
     assertTrue("#0.1", lparen.isCommented());
-    lparen.setState(ReducedToken.INSIDE_QUOTE);
+    lparen.setState(INSIDE_DOUBLE_QUOTE);
     assertTrue("#0.2", !lparen.isCommented());
   }
 
@@ -131,8 +132,8 @@ public class BraceTest extends TestCase {
    * Test isMatch(Brace) method.
    */
   public void testIsMatch() {
-    Brace bracket = Brace.MakeBrace("]", ReducedToken.FREE);
-    Brace dummy = Brace.MakeBrace("", ReducedToken.FREE);
+    Brace bracket = Brace.MakeBrace("]", FREE);
+    Brace dummy = Brace.MakeBrace("", FREE);
     assertTrue(lparen.isMatch(rparen));
     assertTrue(!lparen.isMatch(bracket));
     assertTrue(!lparen.isMatch(dummy));

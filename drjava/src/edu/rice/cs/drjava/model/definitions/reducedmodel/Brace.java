@@ -7,19 +7,25 @@ package  edu.rice.cs.drjava;
  * preceding the actual brace before the previous brace or the start
  * of the file.
  */
-class Brace extends ReducedToken {
+class Brace extends ReducedToken implements ReducedModelStates {
   /**
+   * An array of the special characters that signify areas of text other than gaps.
+   * This really isn't the best datastructure to hold this information; there is
+   * more structure to the elements than a flat array. Specifically, matching
+   * characters are placed next to each other (except for the trailing elements,
+   * which have no matches). Notice that single and double quotes match themselves.
    * @see String
    */
   public static final String[] braces =  {
     "{", "}", "(", ")", "[", "]", "/*", "*/", "//", "\n", "/", "*", "\"", "\"", 
-        "\\\\", "\\\"", "\\", ""
+    "'", "'", "\\\\", "\\\"", "\\", ""
   };
   public static final String BLK_CMT_BEG = "/*";
   public static final String BLK_CMT_END = "*/";
   public static final String EOLN = "\n";
   public static final String LINE_CMT = "//";
-  public static final String QUOTE = "\"";
+  public static final String SINGLE_QUOTE = "'";
+  public static final String DOUBLE_QUOTE = "\"";
   public static final String STAR = "*";
   public static final String SLASH = "/";
 
@@ -173,9 +179,14 @@ class Brace extends ReducedToken {
   /**
    * @return true if this is a quote
    */
-  public boolean isQuote() {
-    return  this.getType().equals(QUOTE);
+  public boolean isDoubleQuote() {
+    return  this.getType().equals(DOUBLE_QUOTE);
   }
+  
+  public boolean isSingleQuote() {
+    return this.getType().equals(SINGLE_QUOTE);
+  }
+    
 
   /**
    * @return true if this is a line comment delimiter

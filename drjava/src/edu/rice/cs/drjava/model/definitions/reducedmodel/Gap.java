@@ -147,8 +147,16 @@ class Gap extends ReducedToken {
    * put your documentation comment here
    * @return 
    */
-  public boolean isQuote() {
+  public boolean isDoubleQuote() {
     return  false;
+  }
+  
+  /**
+   * put your documentation comment here
+   * @return 
+   */
+  public boolean isSingleQuote() {
+    return false;
   }
 
   /**

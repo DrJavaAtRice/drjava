@@ -95,7 +95,9 @@ class ColoringView extends WrappedPlainView {
    * @returns the x coordinate at the end of the range
    * @exception BadLocationException if the range is invalid
    */
-  protected int drawUnselectedText(Graphics g, int x, int y, int p0, int p1) throws BadLocationException {
+  protected int drawUnselectedText(Graphics g, int x, int y, int p0, int p1) 
+    throws BadLocationException 
+  {
     /*
      DrJava.consoleErr().println("drawUnselected: " + p0 + "-" + p1 + 
      " doclen=" + _doc.getLength() +" x="+x+" y="+y);

@@ -26,7 +26,7 @@ import gj.util.Vector;
  * </ol>
  * @author Mike Yantosca, Jonathan Bannet
  */
-public class ReducedModelBrace {
+public class ReducedModelBrace implements ReducedModelStates {
   
   /**
    * The character that represents the cursor in toString().
@@ -242,7 +242,7 @@ public class ReducedModelBrace {
    * @param length size of gap to insert
    */
   private void _insertNewGap(int length) {
-    _cursor.insert(new Gap(length,ReducedToken.FREE));
+    _cursor.insert(new Gap(length,FREE));
     _cursor.next();
     _offset = 0;
   }
@@ -296,8 +296,8 @@ public class ReducedModelBrace {
                                  ModelList<ReducedToken>.Iterator copyCursor)
   {
     copyCursor.current().shrink(_offset);
-    copyCursor.insert(Brace.MakeBrace(text, ReducedToken.FREE));
-    copyCursor.insert(new Gap(_offset, ReducedToken.FREE));
+    copyCursor.insert(Brace.MakeBrace(text, FREE));
+    copyCursor.insert(new Gap(_offset, FREE));
     copyCursor.next(); // now pointing at new brace
     copyCursor.next(); // now pointing at second half of gap
     _offset = 0;
@@ -311,7 +311,7 @@ public class ReducedModelBrace {
   private void _insertNewBrace(String text,
                                ModelList<ReducedToken>.Iterator copyCursor)
   {
-    copyCursor.insert(Brace.MakeBrace(text, ReducedToken.FREE));
+    copyCursor.insert(Brace.MakeBrace(text, FREE));
     copyCursor.next();
     _offset = 0;
   }
@@ -655,7 +655,7 @@ public class ReducedModelBrace {
     
     while (!copyCursor.atStart()) {
       if (!copyCursor.current().isGap()) {
-        if (stateAtRelLocation(-relDistance) == ReducedToken.FREE) {
+        if (stateAtRelLocation(-relDistance) == FREE) {
           copyCursor.dispose();
           return dist + copyCursor.current().getSize();
         }
@@ -695,7 +695,7 @@ public class ReducedModelBrace {
     while (!copyCursor.atEnd() ){
       if (!copyCursor.current().isGap()) {
         if (stateAtRelLocation(relDistance) ==
-            ReducedToken.FREE){
+            FREE){
               copyCursor.dispose();
               return dist;
             }
@@ -737,7 +737,7 @@ public class ReducedModelBrace {
     // here we check to make sure there is an open significant brace
     // immediately to the right of the cursor
     if (!iter.atEnd() && openBraceImmediatelyRight()) {
-      if (stateAtRelLocation(relDistance) == ReducedToken.FREE) {
+      if (stateAtRelLocation(relDistance) == FREE) {
         relDistance = 0;
         // initialize the distance and the stack with the first brace,
         // the one we are balancing
@@ -752,7 +752,7 @@ public class ReducedModelBrace {
         //    so we abort
         while (!iter.atEnd() && !braceStack.isEmpty()) {
           if (!iter.current().isGap()) {
-            if (stateAtRelLocation(relDistance) == ReducedToken.FREE) {
+            if (stateAtRelLocation(relDistance) == FREE) {
               if (iter.current().isClosedBrace()) {
                 ReducedToken popped = braceStack.pop();
                 if (!iter.current().isMatch(popped)) {
@@ -834,7 +834,7 @@ public class ReducedModelBrace {
     // here we check to make sure there is an open significant brace
     // immediately to the right of the cursor
     if (iter.current().isClosedBrace()) {
-      if(stateAtRelLocation(-relDistance) == ReducedToken.FREE) {
+      if(stateAtRelLocation(-relDistance) == FREE) {
         // initialize the distance and the stack with the first brace,
         // the one we are balancing
         
@@ -862,7 +862,7 @@ public class ReducedModelBrace {
     while (!iter.atStart() && !braceStack.isEmpty()) {
       if (!iter.current().isGap()) {
         if (stateAtRelLocation(-relDistance) ==
-            ReducedToken.FREE) {
+            FREE) {
               // open
               if (iter.current().isOpenBrace()) {
                 ReducedToken popped = braceStack.pop();
@@ -963,8 +963,7 @@ public class ReducedModelBrace {
       
       if (!iter.current().isGap()) {
         
-        if (stateAtRelLocation(-relDistance) ==
-            ReducedToken.FREE) {
+        if (stateAtRelLocation(-relDistance) == FREE) {
               // open
               if (iter.current().isOpenBrace()) {
                 if (braceStack.isEmpty()) {

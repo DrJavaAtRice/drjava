@@ -8,9 +8,8 @@ import  junit.extensions.*;
 /**
  * @version $Id$
  */
-public class BackSlashTest extends TestCase {
-  private static final int INSIDE_QUOTE = ReducedToken.INSIDE_QUOTE;
-  private static final int FREE = ReducedToken.FREE;
+public class BackSlashTest extends TestCase implements ReducedModelStates {
+
   protected ReducedModelControl model0;
   protected ReducedModelControl model1;
   protected ReducedModelControl model2;
@@ -62,7 +61,7 @@ public class BackSlashTest extends TestCase {
     model1.move(-2);
     // "#\"
     assertEquals("#0.0", "\\\"", model1.currentToken().getType());
-    assertEquals("#0.1", INSIDE_QUOTE, stateOfCurrentToken(model1));
+    assertEquals("#0.1", INSIDE_DOUBLE_QUOTE, stateOfCurrentToken(model1));
     model1.move(2);
     model1.insertChar('\"');
     model1.move(-1);
@@ -77,19 +76,19 @@ public class BackSlashTest extends TestCase {
     model1.move(-2);
     // "\"""#\\
     assertEquals("#2.0", "\\\\", model1.currentToken().getType());
-    assertEquals("#2.1", INSIDE_QUOTE, stateOfCurrentToken(model1));
+    assertEquals("#2.1", INSIDE_DOUBLE_QUOTE, stateOfCurrentToken(model1));
     model1.move(2);
     model1.insertChar('\\');
     model1.move(-1);
     // "\"""\\#\
     assertEquals("#3.0", "\\", model1.currentToken().getType());
-    assertEquals("#3.1", INSIDE_QUOTE, stateOfCurrentToken(model1));
+    assertEquals("#3.1", INSIDE_DOUBLE_QUOTE, stateOfCurrentToken(model1));
     model1.move(1);
     model1.insertChar('\"');
     model1.move(-1);
     // "\"""\\\#"
     assertEquals("#4.0", "\\\"", model1.currentToken().getType());
-    assertEquals("#4.1", INSIDE_QUOTE, stateOfCurrentToken(model1));
+    assertEquals("#4.1", INSIDE_DOUBLE_QUOTE, stateOfCurrentToken(model1));
   }
 
   /**
@@ -103,7 +102,7 @@ public class BackSlashTest extends TestCase {
     model1.move(-1);
     model1.insertChar('\\');
     assertEquals("#0.0", "\\\"", model1.currentToken().getType());
-    assertEquals("#0.1", INSIDE_QUOTE, stateOfCurrentToken(model1));
+    assertEquals("#0.1", INSIDE_DOUBLE_QUOTE, stateOfCurrentToken(model1));
     assertEquals("#0.2", 1, model1.getBlockOffset());
     model1.move(1);     
     model1.insertChar('\"');
@@ -117,7 +116,7 @@ public class BackSlashTest extends TestCase {
     model1.move(-1);
     model1.insertChar('\\');
     assertEquals("#2.0", "\\\\", model1.currentToken().getType());
-    assertEquals("#2.1", INSIDE_QUOTE, stateOfCurrentToken(model1));
+    assertEquals("#2.1", INSIDE_DOUBLE_QUOTE, stateOfCurrentToken(model1));
     assertEquals("#2.2", 6, model1.absOffset());
     model1.move(-2);
     model1.insertChar('{');
@@ -133,7 +132,7 @@ public class BackSlashTest extends TestCase {
     assertTrue("#4.2", model1.currentToken().isClosed());
     model1.insertChar('\\');
     assertEquals("#5.0", "\\\"", model1.currentToken().getType());
-    assertEquals("#5.1", INSIDE_QUOTE, stateOfCurrentToken(model1));
+    assertEquals("#5.1", INSIDE_DOUBLE_QUOTE, stateOfCurrentToken(model1));
     assertEquals("#5.2", 1, model1.getBlockOffset());
   }
 
@@ -299,7 +298,7 @@ public class BackSlashTest extends TestCase {
     model0.move(-2);
     // "\"""\"""#\""
     assertEquals("#1.0", "\\\"", model0.currentToken().getType());
-    assertEquals("#1.1", INSIDE_QUOTE, stateOfCurrentToken(model0));
+    assertEquals("#1.1", INSIDE_DOUBLE_QUOTE, stateOfCurrentToken(model0));
     model0.move(-1);
     assertEquals("#1.2", "\"", model0.currentToken().getType());
     assertEquals("#1.3", FREE, stateOfCurrentToken(model0));
@@ -308,7 +307,7 @@ public class BackSlashTest extends TestCase {
     model0.insertChar('\\');
     // "\"""\"""\#\""
     assertEquals("#2.0", "\\\\", model0.currentToken().getType());
-    assertEquals("#2.1", INSIDE_QUOTE, stateOfCurrentToken(model0));
+    assertEquals("#2.1", INSIDE_DOUBLE_QUOTE, stateOfCurrentToken(model0));
     assertEquals("#2.2", 10, model0.absOffset());
     model0.move(-2);
     assertEquals("#2.3", "\"", model0.currentToken().getType());
@@ -322,11 +321,11 @@ public class BackSlashTest extends TestCase {
     model0.insertChar('\"');
     // "\"""\"""\"#\""
     assertEquals("#3.0", "\\\"", model0.currentToken().getType());
-    assertEquals("#3.1", INSIDE_QUOTE, stateOfCurrentToken(model0));
+    assertEquals("#3.1", INSIDE_DOUBLE_QUOTE, stateOfCurrentToken(model0));
     assertEquals("#3.2", 11, model0.absOffset());
     model0.move(-2);
     assertEquals("#3.3", "\\\"", model0.currentToken().getType());
-    assertEquals("#3.4", INSIDE_QUOTE, stateOfCurrentToken(model0));
+    assertEquals("#3.4", INSIDE_DOUBLE_QUOTE, stateOfCurrentToken(model0));
     model0.move(4);
     assertEquals("#3.5", "\"", model0.currentToken().getType());
     assertEquals("#3.6", FREE, stateOfCurrentToken(model0));

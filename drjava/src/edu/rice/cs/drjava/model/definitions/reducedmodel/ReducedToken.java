@@ -5,12 +5,8 @@ import  java.awt.Color;
 /**
  * @version $Id$
  */
-abstract class ReducedToken {
+abstract class ReducedToken implements ReducedModelStates {
   protected int _state;
-  public static final int FREE = 0;
-  public static final int INSIDE_QUOTE = 1;
-  public static final int INSIDE_BLOCK_COMMENT = 2;
-  public static final int INSIDE_LINE_COMMENT = 4;
 
   /**
    * put your documentation comment here
@@ -60,7 +56,7 @@ abstract class ReducedToken {
         || type.equals("*/") || (_state == INSIDE_BLOCK_COMMENT)) {
       return  HighlightStatus.COMMENTED;
     }
-    if ((type.equals("\"") && (_state == FREE)) || (_state == INSIDE_QUOTE)) {
+    if ((type.equals("\"") && (_state == FREE)) || (_state == INSIDE_DOUBLE_QUOTE)) {
       return  HighlightStatus.QUOTED;
     }
     return  HighlightStatus.NORMAL;
@@ -89,7 +85,7 @@ abstract class ReducedToken {
    * @return true if the brace is inside quotes.
    */
   public boolean isQuoted() {
-    return  _state == INSIDE_QUOTE;
+    return  _state == INSIDE_DOUBLE_QUOTE;
   }
 
   /**
@@ -168,8 +164,14 @@ abstract class ReducedToken {
    * put your documentation comment here
    * @return 
    */
-  public abstract boolean isQuote();
+  public abstract boolean isDoubleQuote();
 
+  /**
+   * put your documentation comment here
+   * @return 
+   */
+  public abstract boolean isSingleQuote();
+  
   /**
    * put your documentation comment here
    * @return 
