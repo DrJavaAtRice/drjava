@@ -66,6 +66,7 @@ public class IndentFiles {
   public static void main(String[] args) {
     Vector<String> filenames = new Vector<String>();
     int indentLevel = 2;
+    boolean silent = false;
     if (args.length < 1) {
       _displayUsage();
     }
@@ -81,12 +82,15 @@ public class IndentFiles {
             _displayUsage();
             System.exit(-1);
           }
-        } 
+        }
+        else if (arg.equals("-silent")) {
+          silent = true;
+        }
         else {
           filenames.addElement(arg);
         }
       }
-      indentFiles(filenames, indentLevel);
+      indentFiles(filenames, indentLevel, silent);
     }
   }
 
@@ -96,7 +100,7 @@ public class IndentFiles {
   private static void _displayUsage() {
     System.out.println(
       "Usage:" +
-      "  java edu.rice.cs.drjava.IndentFile [-indent N] [filenames]\n" +
+      "  java edu.rice.cs.drjava.IndentFile [-indent N] [-silent] [filenames]\n" +
       "  Where N is the number of spaces in an indentation level");
   }
   
@@ -105,18 +109,24 @@ public class IndentFiles {
    * saving the new copy of each one.
    * @param filenames Vector of filenames of files to be indented
    * @param indentLevel The number of spaces to use for a level of indentation
+   * @param silent Whether to print any output to System.out
    */
-  public static void indentFiles(Vector<String> filenames, int indentLevel) {
+  public static void indentFiles(Vector<String> filenames, 
+                                 int indentLevel,
+                                 boolean silent)
+  {
     System.setProperty("java.awt.headless", "true"); // attempt headless AWT
     //System.out.println("Using Headless AWT: "+isHeadless());
     
     Indenter indenter = new Indenter(indentLevel);
-    System.out.println("DrJava - Indenting files:");
+    if (!silent) System.out.println("DrJava - Indenting files:");
     for (int i = 0; i < filenames.size(); i++) {
       String fname = filenames.elementAt(i);
       File file = new File(fname);
-      System.out.print("  " + fname + " ... ");
-      System.out.flush();
+      if (!silent) { 
+        System.out.print("  " + fname + " ... ");
+        System.out.flush();
+      }
       try {
         String fileContents = FileOps.readFileAsString(file);
         DefinitionsDocument doc = new DefinitionsDocument(indenter);
@@ -126,23 +136,25 @@ public class IndentFiles {
         docLen = doc.getLength();
         fileContents = doc.getText(0, docLen);
         FileOps.writeStringToFile(file, fileContents);
-        System.out.println("done.");
+        if (!silent) System.out.println("done.");
       }
       catch (Exception e) {
-        System.out.println("ERROR!");
-        System.out.println("  Exception: " + e.toString());
-        e.printStackTrace(System.out);
-        System.out.println();
+        if (!silent) {
+          System.out.println("ERROR!");
+          System.out.println("  Exception: " + e.toString());
+          e.printStackTrace(System.out);
+          System.out.println();
+        }
       }
       System.gc();
     }
-    System.out.println();
+    if (!silent) System.out.println();
   }
 
   /**
    * Java versions 1.4 or above should have this implemented.  
    * Return false, if earlier version.
-   */
+   *
   private static boolean isHeadless() {
     try {
       Method isHeadless = java.awt.GraphicsEnvironment.class.getMethod("isHeadless", new Class[0]);
@@ -151,5 +163,5 @@ public class IndentFiles {
     catch(Exception e) {
       return false;
     }
-  }
+  }*/
 }

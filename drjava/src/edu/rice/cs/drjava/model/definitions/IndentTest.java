@@ -1243,15 +1243,15 @@ public class IndentTest extends TestCase {
   /**
    * Tests a list of files when indented match their correct indentations
    */
-  public void testIndentationFromFile() throws IOException{
+  public void testIndentationFromFile() throws IOException {
     File directory = new File("testFiles");
     
     File[] unindentedFiles = {new File(directory, "IndentSuccesses.indent")
-			      /*, new File(directory, "IndentProblems.indent")*/};
+         /*, new File(directory, "IndentProblems.indent")*/};
     File[] correctFiles = {new File(directory, "IndentSuccessesCorrect.indent")
-			   /*, new File(directory, "IndentProblemsCorrect.indent")*/};
+      /*, new File(directory, "IndentProblemsCorrect.indent")*/};
 
-    for(int x = 0; x < correctFiles.length; x++){
+    for(int x = 0; x < correctFiles.length; x++) {
       _indentAndCompare(unindentedFiles[x], correctFiles[x]);
     }
 
@@ -1260,11 +1260,12 @@ public class IndentTest extends TestCase {
     boolean threwAFE = false;
     try {
       _indentAndCompare(new File(directory, "IndentProblems.indent"),
-			new File(directory, "IndentProblemsCorrect.indent"));
-    } catch(AssertionFailedError afe){
+                        new File(directory, "IndentProblemsCorrect.indent"));
+    }
+    catch(AssertionFailedError afe) {
       threwAFE = true;
     }
-    if (!threwAFE){
+    if (!threwAFE) {
       fail("_indentAndCompare should have failed for IndentProblems.indent");
     }
   }
@@ -1328,38 +1329,41 @@ public class IndentTest extends TestCase {
                  distToPrevNewline, ii.distToPrevNewline);
   }
   
-  /*
+  /**
    * copies fromFile to toFile, assuming both files exist
    */
-  private void _copyFile(File fromFile, File toFile) throws IOException{
+  private void _copyFile(File fromFile, File toFile) throws IOException {
     String text = FileOps.readFileAsString(fromFile);
     FileOps.writeStringToFile(toFile, text);
     String newText = FileOps.readFileAsString(toFile);
     assertEquals("File copy verify", text, newText);
   }
   
-  /*
+  /**
    * indents one file, compares it to the other, reindents and recompares
    * to make sure indent(x) = indent(indent(x))
    */
-  private void _indentAndCompare(File unindented, File correct) throws IOException{
+  private void _indentAndCompare(File unindented, File correct) 
+    throws IOException
+  {
     File test = null;
     try {
       test = File.createTempFile("test", ".java");
       _copyFile(unindented, test);
-      IndentFiles.main(new String[] {test.toString()});
+      IndentFiles.main(new String[] {"-silent", test.toString()});
       _fileCompare(test, correct);
-      IndentFiles.main(new String[] {test.toString()});
+      IndentFiles.main(new String[] {"-silent", test.toString()});
       _fileCompare(test, correct);
-    } finally {
-      if (test != null){
+    } 
+    finally {
+      if (test != null) {
         test.delete();
       }
     }
     
   }
 
-  /*
+  /**
    * @throws AssertionFailedError if the files are not identical 
    */
   private void _fileCompare(File test, File correct) throws IOException {
@@ -1371,7 +1375,7 @@ public class IndentTest extends TestCase {
     String correctString = correctBufferedReader.readLine();
     String testString = testBufferedReader.readLine();
     int lineNo = 1;
-    while(correctString != null && testString != null){
+    while (correctString != null && testString != null) {
       assertEquals("File: " + correct + " line: " + lineNo, correctString, testString);
       correctString = correctBufferedReader.readLine();
       testString = testBufferedReader.readLine();
