@@ -208,7 +208,7 @@ public class DefinitionsView extends JEditorPane
 		_openChooser.setFileFilter(new JavaSourceFilter());
 		_saveChooser = new JFileChooser(System.getProperty("user.dir"));
 				
-
+		//add actions for indent keay
 		Keymap ourMap = addKeymap("INDENT_KEYMAP", getKeymap());
 		
 		ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0),

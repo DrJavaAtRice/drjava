@@ -227,7 +227,7 @@ public class MainFrame extends JFrame
 		{
 			public void actionPerformed(ActionEvent ae)
 			{
-				_definitionsView.findReplace();
+				//_definitionsView.findReplace();
 			}
 		};
 	
@@ -364,20 +364,23 @@ public class MainFrame extends JFrame
     Action pasteAction = new DefaultEditorKit.PasteAction();
     pasteAction.putValue(Action.NAME, "Paste");
 
-    tmpItem = _editMenu.add(_definitionsView.getUndoAction());
-		tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Z,
-																									ActionEvent.CTRL_MASK));		
-    tmpItem = _editMenu.add(_definitionsView.getRedoAction());
-		tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R,
-																									ActionEvent.CTRL_MASK));
-    _editMenu.addSeparator();
-    _editMenu.add(cutAction);
-    _editMenu.add(copyAction);
-    _editMenu.add(pasteAction);
-    _editMenu.addSeparator();
-    tmpItem = _editMenu.add(_findReplaceAction);
-		tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F,
-																									ActionEvent.CTRL_MASK));
+		/*The undo/redo menus and key action
+    //tmpItem = _editMenu.add(_definitionsView.getUndoAction());
+		//tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Z,
+		//																							ActionEvent.CTRL_MASK));		
+    //tmpItem = _editMenu.add(_definitionsView.getRedoAction());
+		//tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R,
+		//																							ActionEvent.CTRL_MASK));
+
+		*/
+		_editMenu.addSeparator();
+		_editMenu.add(cutAction);
+		_editMenu.add(copyAction);
+		_editMenu.add(pasteAction);
+		_editMenu.addSeparator();
+    //tmpItem = _editMenu.add(_findReplaceAction);
+		//tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F,
+		//																							ActionEvent.CTRL_MASK));
 		_editMenu.add(_clearOutputAction);
 
 
@@ -407,17 +410,25 @@ public class MainFrame extends JFrame
     
     _interactionsView = new InteractionsView();
     // Split2 has output view and the interactions view
+		/*
+			OLD WAY OF SPLITTING SCREEN!!!!!!!!!
+			
     JSplitPane split2 = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
                                        true,
                                        new JScrollPane(_outputView),
-                                       new JScrollPane(_interactionsView));
-
+                                        new JScrollPane(_interactionsView));
+		
     // Create split pane with defs and split2
     JSplitPane split1 = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
                                        true,
                                        new JScrollPane(_definitionsView),
                                        split2);
-
+		*/
+		JSplitPane split1 = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
+                                       true,
+                                       new JScrollPane(_definitionsView),
+																			 new JScrollPane(_interactionsView));
+		
     /*
 		JSplitPane split3 = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
 																			 true,
@@ -439,7 +450,7 @@ public class MainFrame extends JFrame
     // Also, according to the Swing docs, we need to set these dividers AFTER
     // we have shown the window. How annoying.
     split1.setDividerLocation(200);
-    split2.setDividerLocation(50);
+    //split2.setDividerLocation(50);
 
     updateFileTitle("Untitled");
   }
