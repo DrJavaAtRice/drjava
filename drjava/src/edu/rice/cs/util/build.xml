@@ -23,6 +23,14 @@
 
   <property name="manifest" value="manifest" />
 
+  <!-- Stable and development targets not used in util. -->
+  <target name="development">
+  </target>
+
+  <!-- Stable and development targets not used in util. -->
+  <target name="stable">
+  </target>
+
   <!-- include standard build file parts -->
   &build-common;
 
