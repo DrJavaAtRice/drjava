@@ -346,6 +346,7 @@ public class DefinitionsView extends JEditorPane
     }
   }
 
+
 		public void findReplace () {
 				FindReplaceDialog box = new FindReplaceDialog(_mainFrame, this);
 		}

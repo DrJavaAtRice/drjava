@@ -34,6 +34,7 @@ abstract class ReducedToken
 				return INSIDE_BLOCK_COMMENT;
 			if (type.equals("\"") && (_state == FREE))
 				return INSIDE_QUOTE;
+			
 			return _state;
 		}
 	

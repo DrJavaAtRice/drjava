@@ -138,59 +138,53 @@ public class ReducedModel implements BraceReduction
    * Inserts an open brace ({) into the reduced model.
 	 * @return a Vector of highlighting information after the cursor
    */
-	public Vector<StateBlock> insertOpenSquiggly()
+	public void insertOpenSquiggly()
 		{
 			_insertBrace("{");
-			return SBVectorFactory.generate(_cursor.copy(),_offset);
 		}
 
   /**
    * Inserts a closed brace (}) into the reduced model.
 	 * @return a Vector of highlighting information after the cursor
    */
-  public Vector<StateBlock> insertClosedSquiggly()
+  public void insertClosedSquiggly()
 		{
 			_insertBrace("}");
-			return SBVectorFactory.generate(_cursor.copy(),_offset);
 		}
   /**
    * Inserts an open parenthesis (() into the reduced model.
 	 * @return a Vector of highlighting information after the cursor
    */
-  public Vector<StateBlock> insertOpenParen()
+  public void insertOpenParen()
 		{
 			_insertBrace("(");
-			return SBVectorFactory.generate(_cursor.copy(),_offset);
 		}
 
   /**
    * Inserts a closed parenthesis ()) into the reduced model.
 	 * @return a Vector of highlighting information after the cursor
    */
-  public Vector<StateBlock> insertClosedParen()
+  public void insertClosedParen()
 		{
 			_insertBrace(")");
-			return SBVectorFactory.generate(_cursor.copy(),_offset);
 		}
 	
   /**
    * Inserts an open bracket ([) into the reduced model.
 	 * @return a Vector of highlighting information after the cursor
    */
-  public Vector<StateBlock> insertOpenBracket()
+  public void insertOpenBracket()
 		{
 			_insertBrace("[");
-			return SBVectorFactory.generate(_cursor.copy(),_offset);
 		}
 
   /**
    * Inserts a closed bracket (]) into the reduced model.
 	 * @return a Vector of highlighting information after the cursor
    */
-  public Vector<StateBlock> insertClosedBracket()
+  public void insertClosedBracket()
 		{
 			_insertBrace("]");
-			return SBVectorFactory.generate(_cursor.copy(),_offset);
 		}
 	
   /**
@@ -220,13 +214,13 @@ public class ReducedModel implements BraceReduction
 	 * </OL>
 	 * @return a Vector of highlighting information after the cursor
    */
-  public Vector<StateBlock> insertStar()
+  public void insertStar()
 		{
 			//check if empty
 			if (_braces.isEmpty())
 				{
 					_insertNewBrace("*",_cursor);//now pointing to tail.
-					return SBVectorFactory.generate(_cursor.copy(),_offset);
+					return;
 				}
 			//check if at start
 			if (_cursor.atStart())
@@ -235,7 +229,7 @@ public class ReducedModel implements BraceReduction
 			if (_cursor.atEnd())
 				{
 					_checkPreviousInsertStar(_cursor);
-					return SBVectorFactory.generate(_cursor.copy(),_offset);
+					return;
 				}
 		 
 			//if inside a double character brace, break it.
@@ -270,7 +264,7 @@ public class ReducedModel implements BraceReduction
 				{
 					_checkPreviousInsertStar(_cursor);
 				}
-			return SBVectorFactory.generate(_cursor.copy(),_offset);
+			return;
 		}
 	
 
@@ -332,13 +326,13 @@ public class ReducedModel implements BraceReduction
 	 * </OL>
 	 * @return a Vector of highlighting information after the cursor
    */
-  public Vector<StateBlock> insertSlash()
+  public void insertSlash()
 		{
 			//check if empty
 			if (_braces.isEmpty())
 				{
 					_insertNewBrace("/",_cursor);//now pointing to tail.
-					return SBVectorFactory.generate(_cursor.copy(),_offset);
+					return;
 				}
 			//check if at start
 			if (_cursor.atStart())
@@ -347,7 +341,7 @@ public class ReducedModel implements BraceReduction
 			if (_cursor.atEnd())
 				{
 					_checkPreviousInsertSlash(_cursor);
-					return SBVectorFactory.generate(_cursor.copy(),_offset);
+					return;
 				}
 			
 			//if inside a double character brace, break it.
@@ -383,7 +377,7 @@ public class ReducedModel implements BraceReduction
 				{
 					_checkPreviousInsertSlash(_cursor);
 				}
-			return SBVectorFactory.generate(_cursor.copy(),_offset);
+			return;
 		}
 
 	
@@ -445,7 +439,7 @@ public class ReducedModel implements BraceReduction
 	 * </OL>
 	 * @return a Vector of highlighting information after the cursor
    */
-	public Vector<StateBlock> insertNewline()
+	public void insertNewline()
 		{
 			if (_cursor.atStart())
 				{
@@ -474,7 +468,7 @@ public class ReducedModel implements BraceReduction
 				{
 					_insertNewEndOfLine();
 				}
-			return SBVectorFactory.generate(_cursor.copy(),_offset);
+			return;
 		}
 
 	private void _insertNewEndOfLine()
@@ -513,7 +507,7 @@ public class ReducedModel implements BraceReduction
 	 * </OL>
 	 * @return a Vector of highlighting information after the cursor
    */
-  public Vector<StateBlock> insertQuote()
+  public void insertQuote()
 		{
 			if (_cursor.atStart())
 				{
@@ -543,7 +537,7 @@ public class ReducedModel implements BraceReduction
 				{
 					_insertNewQuote();
 				}
-			return SBVectorFactory.generate(_cursor.copy(),_offset);	
+			return;
 		}
 
 	/**
@@ -609,13 +603,13 @@ public class ReducedModel implements BraceReduction
 	 * </OL>
 	 * @return a Vector of highlighting information after the cursor
 	 */
-	public Vector<StateBlock> insertBackSlash()
+	public void insertBackSlash()
 		{			
 		 //check if empty
 			if (_braces.isEmpty())
 				{
 					_insertNewBrace("\\",_cursor);//now pointing to tail.
-					return SBVectorFactory.generate(_cursor.copy(),_offset);
+					return;
 				}
 			//check if at start
 			if (_cursor.atStart())
@@ -624,7 +618,7 @@ public class ReducedModel implements BraceReduction
 			if (_cursor.atEnd())
 				{
 					_checkPreviousInsertBackSlash(_cursor);
-					return SBVectorFactory.generate(_cursor.copy(),_offset);
+					return;
 				}
 			
 			//if inside a double character brace, break it.
@@ -660,7 +654,7 @@ public class ReducedModel implements BraceReduction
 				{
 					_checkPreviousInsertBackSlash(_cursor);
 				}
-			return SBVectorFactory.generate(_cursor.copy(),_offset);
+			return;
 		}
 
 	/**
@@ -706,7 +700,7 @@ public class ReducedModel implements BraceReduction
 	 *  <li> between two braces: insert new gap
    * @param length the length of the inserted text
    */
-  public Vector<StateBlock> insertGap( int length )
+  public void insertGap( int length )
 		{
 			//0 - a
 			if (_cursor.atStart())
@@ -767,9 +761,12 @@ public class ReducedModel implements BraceReduction
 				{
 					_insertNewGap(length); //inserts a gap and goes to the next item
 				}
-			return SBVectorFactory.generate(_cursor.copy(),_offset);
+			return;
 		}
 
+  public ModelList<ReducedToken>.Iterator makeCopyCursor() {
+		return _cursor.copy();
+	}
 	/**
 	 *Wrapper for getStateAtCurrentHelper that returns the current state for
 	 *some iterator. This function passes _cursor to the _getStateAtCurrent
@@ -1509,15 +1506,15 @@ public class ReducedModel implements BraceReduction
    * values delete text to the right.
 	 * Always move count spaces to make sure we can delete.
    */
-  public Vector<StateBlock> delete( int count )
+  public void delete( int count )
 		{
 			if (count == 0)
-				return SBVectorFactory.generate(_cursor.copy(),_offset);;
+				return;
 			ModelList<ReducedToken>.Iterator copyCursor = _cursor.copy();
 			// from = the _cursor
 			// to = _cursor.copy()
 			_offset = _delete(count, _offset, _cursor, copyCursor);
-			return SBVectorFactory.generate(_cursor.copy(),_offset);
+			return;
 		}
 
 	/**
