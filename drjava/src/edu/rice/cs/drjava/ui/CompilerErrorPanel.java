@@ -162,8 +162,14 @@ public class CompilerErrorPanel extends TabbedPanel
     _compilerChoiceBox.setSelectedItem(_model.getActiveCompiler());
     _compilerChoiceBox.addItemListener(new ItemListener() {
       public void itemStateChanged(ItemEvent e) {
-        _model.setActiveCompiler((CompilerInterface)
-                                 _compilerChoiceBox.getSelectedItem());
+        CompilerInterface compiler = (CompilerInterface)
+          _compilerChoiceBox.getSelectedItem();
+        if (compiler != null) {
+          _model.setActiveCompiler(compiler);
+        }
+        else {
+          _model.setActiveCompiler(NoCompilerAvailable.ONLY);
+        }
         _model.resetCompilerErrors();
         _frame.updateErrorListeners();
         _compileHasOccurred = false;

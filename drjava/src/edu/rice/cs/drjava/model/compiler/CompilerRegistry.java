@@ -143,7 +143,7 @@ public class CompilerRegistry {
           //DrJava.consoleOut().println("ok.");
 
           // can't use getActiveCompiler() because it will call back to
-          // getAvailableCompiler, forming an infinite recursion!!
+          // getAvailableCompilers, forming an infinite recursion!!
           if (_activeCompiler == NoCompilerAvailable.ONLY) {
             //System.err.println("\tset to active.");
             _activeCompiler = compiler;
@@ -178,12 +178,19 @@ public class CompilerRegistry {
   /**
    * Sets which compiler is the "active" compiler.
    *
-   * @param compiler Compiler to set active.
+   * @param compiler Compiler to set active.  Cannot be null.
+   * @throws IllegalArgumentException if compiler is null.
    *
    * @see #getActiveCompiler
    */
   public void setActiveCompiler(CompilerInterface compiler) {
-    _activeCompiler = compiler;
+    if (compiler == null) {
+      // Can't let active compiler be null
+      throw new IllegalArgumentException("Cannot set active compiler to null.");
+    }
+    else {
+      _activeCompiler = compiler;
+    }
   }
 
   /**

@@ -229,4 +229,17 @@ public class CompilerRegistryTest extends TestCase {
 
     return compilers;
   }
+  
+  /**
+   * Ensure that the active compiler in the registry cannot be set to null.
+   */
+  public void testCannotSetCompilerToNull() {
+    try {
+      _registry.setActiveCompiler(null);
+      fail("Setting active compiler to null should have caused an exception!");
+    }
+    catch (IllegalArgumentException e) {
+      // Good-- exception was thrown.
+    }
+  }
 }
