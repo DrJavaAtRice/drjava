@@ -148,6 +148,18 @@ public final class SourceInfo {
     _endColumn = endColumn;
   }
 
+  /**
+   * Constructs an empty SourceInfo.
+   */
+  public SourceInfo()
+  {
+    _file = new File("");
+    _startLine = -1;
+    _startColumn = -1;
+    _endLine = -1;
+    _endColumn = -1;
+  }
+
   final public File getFile() { return _file; }
   final public String getFilename() { return _file.getName(); }
   final public int getStartLine() { return _startLine; }
