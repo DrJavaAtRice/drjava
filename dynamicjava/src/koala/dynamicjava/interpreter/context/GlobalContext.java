@@ -635,7 +635,7 @@ public class GlobalContext extends VariableContext implements Context {
    */
   public Method lookupMethod(Node prefix, String mname, Class[] params)
     throws NoSuchMethodException {
-    Class  c = (Class)NodeProperties.getType(prefix);
+    Class  c = NodeProperties.getType(prefix);
     Method m = ReflectionUtilities.lookupMethod(c, mname, params);
     setAccessFlag(m);
     if (m.getName().equals("clone")) {
@@ -675,7 +675,7 @@ public class GlobalContext extends VariableContext implements Context {
       Iterator<FormalParameter> it2 = l.iterator();
       int i = 0;
       while (it2.hasNext()) {
-        p[i++] = (Class)NodeProperties.getType(it2.next());
+        p[i++] = NodeProperties.getType(it2.next());
       }
 
       if (ReflectionUtilities.hasCompatibleSignatures(p, params)) {

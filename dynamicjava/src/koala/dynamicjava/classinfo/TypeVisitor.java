@@ -46,12 +46,12 @@ public class TypeVisitor extends VisitorObject<ClassInfo> {
    * The class finder for this class
    */
   private ClassFinder classFinder;
-  
+
   /**
    * The context
    */
   private ClassInfo context;
-  
+
   /**
    * Creates a new type visitor
    * @param cf  the class finder
@@ -61,7 +61,7 @@ public class TypeVisitor extends VisitorObject<ClassInfo> {
     classFinder = cf;
     context     = ctx;
   }
-  
+
   /**
    * Visits a PrimitiveType
    * @param node the node to visit
@@ -70,7 +70,7 @@ public class TypeVisitor extends VisitorObject<ClassInfo> {
   public ClassInfo visit(PrimitiveType node) {
     return new JavaClassInfo(node.getValue());
   }
-  
+
   /**
    * Visits a ReferenceType
    * @param node the node to visit
@@ -80,7 +80,7 @@ public class TypeVisitor extends VisitorObject<ClassInfo> {
   public ClassInfo visit(ReferenceType node) {
     return lookupClass(node.getRepresentation(), context);
   }
-  
+
   /**
    * Visits a ArrayType
    * @param node the node to visit
@@ -88,10 +88,10 @@ public class TypeVisitor extends VisitorObject<ClassInfo> {
    * @exception NoClassDefFoundError if the class cannot be loaded
    */
   public ClassInfo visit(ArrayType node) {
-    ClassInfo ci = (ClassInfo)node.getElementType().acceptVisitor(this);
+    ClassInfo ci = node.getElementType().acceptVisitor(this);
     return ci.getArrayType();
   }
-  
+
   /**
    * Looks for a class from its name
    * @param s the name of the class to find

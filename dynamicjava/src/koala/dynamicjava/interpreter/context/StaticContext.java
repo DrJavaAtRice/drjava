@@ -51,12 +51,12 @@ public class StaticContext extends GlobalContext {
    * The declaring class of the method
    */
   protected Class declaringClass;
-  
+
   /**
    * The default qualifier
    */
   protected Node defaultQualifier;
-  
+
   /**
    * Creates a new context
    * @param i  the interpreter
@@ -69,7 +69,7 @@ public class StaticContext extends GlobalContext {
     importationManager = im;
     defaultQualifier   = new ReferenceType(c.getName());
   }
-  
+
   /**
    * Creates a new context
    * @param i  the interpreter
@@ -81,7 +81,7 @@ public class StaticContext extends GlobalContext {
     declaringClass   = c;
     defaultQualifier = new ReferenceType(c.getName());
   }
-  
+
   /**
    * Tests whether a variable is defined in this context
    * @param name the name of the entry
@@ -90,7 +90,7 @@ public class StaticContext extends GlobalContext {
   public boolean isDefined(String name) {
     return isDefinedVariable(name) || fieldExists(name);
   }
-  
+
   /**
    * Looks for a field
    * @param fc the field class
@@ -109,7 +109,7 @@ public class StaticContext extends GlobalContext {
     setAccessFlag(f);
     return f;
   }
-  
+
   /**
    * Creates the tree that is associated with the given name
    * @param node the current node
@@ -135,7 +135,7 @@ public class StaticContext extends GlobalContext {
       }
     }
   }
-  
+
   /**
    * Returns the default qualifier for this context
    * @param node the current node
@@ -143,7 +143,7 @@ public class StaticContext extends GlobalContext {
   public Node getDefaultQualifier(Node node) {
     return defaultQualifier;
   }
-  
+
   /**
    * Returns the modifier that match the given node
    * @param node a tree node
@@ -152,7 +152,7 @@ public class StaticContext extends GlobalContext {
     return new SuperFieldModifier((Field)node.getProperty(NodeProperties.FIELD),
                                   node);
   }
-  
+
   /**
    * Looks for a method
    * @param prefix the method prefix
@@ -162,7 +162,7 @@ public class StaticContext extends GlobalContext {
    */
   public Method lookupMethod(Node prefix, String mname, Class[] params)
     throws NoSuchMethodException {
-    Class  c = (Class)NodeProperties.getType(prefix);
+    Class  c = NodeProperties.getType(prefix);
     Method m = null;
     try {
       m = ReflectionUtilities.lookupMethod(c, mname, params);
@@ -181,7 +181,7 @@ public class StaticContext extends GlobalContext {
       }
     }
   }
-  
+
   /**
    * Looks for a field in the super class
    * @param node the current node
@@ -196,7 +196,7 @@ public class StaticContext extends GlobalContext {
     setAccessFlag(result);
     return result;
   }
-  
+
   /**
    * Looks for a class
    * @param cname the class name
@@ -224,7 +224,7 @@ public class StaticContext extends GlobalContext {
       throw e;
     }
   }
-  
+
   /**
    * Defines a MethodDeclaration as a function
    * @param node the function declaration
@@ -232,7 +232,7 @@ public class StaticContext extends GlobalContext {
   public void defineFunction(MethodDeclaration node) {
     throw new IllegalStateException("internal.error");
   }
-  
+
   /**
    * Defines a class from its syntax tree
    * @param node the class declaration
@@ -240,7 +240,7 @@ public class StaticContext extends GlobalContext {
   public void defineClass(TypeDeclaration node) {
     throw new ExecutionError("not.implemented");
   }
-  
+
   /**
    * Sets the properties of a ClassAllocation node
    * @param node the allocation node
@@ -253,48 +253,48 @@ public class StaticContext extends GlobalContext {
     String cname = dname + "$" + classCount++;
     FieldDeclaration fd;
     ConstructorDeclaration csd;
-    
+
     // Create the reference to the declaring class
     fd = new FieldDeclaration(Modifier.PUBLIC | Modifier.STATIC,
                               CLASS_TYPE,
                               "declaring$Class$Reference$0",
                               new TypeExpression(new ReferenceType(dname)));
     memb.add(fd);
-    
+
     // Add the reference to the final local variables map
     memb.add(LOCALS);
-    
+
     // Create the reference to the final local variables map
     fd = new FieldDeclaration(Modifier.PUBLIC | Modifier.STATIC,
                               OBJECT_ARRAY_ARRAY,
                               "local$Variables$Class$0",
                               createClassArrayInitializer());
     memb.add(fd);
-    
+
     // Create the constructor
     List<FormalParameter> params = new LinkedList<FormalParameter>();
     List<Node> stmts = new LinkedList<Node>();
-    
+
     // Add the final local variables map parameter
     params.add(new FormalParameter(false, MAP_TYPE, "param$0"));
-    
+
     // Add the other parameters
     List<Expression> superArgs = new LinkedList<Expression>();
     for (int i = 0; i < args.length; i++) {
-      params.add(new FormalParameter(false, 
+      params.add(new FormalParameter(false,
                                      TreeUtilities.classToType(args[i]),
                                      "param$" + (i + 1)));
       List<IdentifierToken> l = new LinkedList<IdentifierToken>();
       l.add(new Identifier("param$" + (i + 1)));
       superArgs.add(new QualifiedName(l));
     }
-    
+
     // Create the explicit constructor invocation
     ConstructorInvocation ci = null;
     if (superArgs.size() > 0) {
       ci = new ConstructorInvocation(null, superArgs, true);
     }
-    
+
     // Add the outer instance reference initialization statement
     List<IdentifierToken> p1 = new LinkedList<IdentifierToken>();
     p1.add(new Identifier("local$Variables$Reference$0"));
@@ -302,7 +302,7 @@ public class StaticContext extends GlobalContext {
     p2.add(new Identifier("param$0"));
     stmts.add(new SimpleAssignExpression(new QualifiedName(p1),
                                          new QualifiedName(p2)));
-    
+
     csd = new ConstructorDeclaration(Modifier.PUBLIC,
                                      cname,
                                      params,
@@ -310,7 +310,7 @@ public class StaticContext extends GlobalContext {
                                      ci,
                                      stmts);
     memb.add(csd);
-    
+
     // Set the inheritance
     ReferenceType ext = null;
     List<ReferenceType> impl = null;
@@ -324,19 +324,19 @@ public class StaticContext extends GlobalContext {
       l.add(new Identifier(c.getName()));
       ext = new ReferenceType(l);
     }
-    
+
     // Create the class
     TypeDeclaration type = new ClassDeclaration(Modifier.PUBLIC,
                                                 cname,
                                                 ext,
                                                 impl,
                                                 memb);
-    
+
     type.setProperty(TreeClassInfo.ANONYMOUS_DECLARING_CLASS,
                      new JavaClassInfo(declaringClass));
-    
+
     Class cl = new TreeCompiler(interpreter).compileTree(this, type);
-    
+
     // Update the argument types
     Class[] tmp = new Class[args.length+1];
     tmp[0] = Map.class;
@@ -353,7 +353,7 @@ public class StaticContext extends GlobalContext {
     node.setProperty(NodeProperties.TYPE, cl);
     return cl;
   }
-  
+
   /**
    * Looks for a super method
    * @param node the current node
@@ -369,12 +369,12 @@ public class StaticContext extends GlobalContext {
                                            "super$" + mname,
                                            params);
     } catch (NoSuchMethodException e) {
-      m = ReflectionUtilities.lookupMethod(declaringClass, mname, params); 
+      m = ReflectionUtilities.lookupMethod(declaringClass, mname, params);
     }
     setAccessFlag(m);
     return m;
   }
-  
+
   /**
    * Whether a simple identifier is a class
    * @param name the identifier
@@ -397,7 +397,7 @@ public class StaticContext extends GlobalContext {
     }
     return result;
   }
-  
+
   /**
    * Sets the access flag of a member
    */
@@ -408,7 +408,7 @@ public class StaticContext extends GlobalContext {
     String  pkg     = importationManager.getCurrentPackage();
     String  mp      = getPackageName(c);
     boolean samePkg = pkg.equals(mp);
-    
+
     if (Modifier.isPublic(cmods) || samePkg) {
       if (Modifier.isPublic(mods)) {
         ((AccessibleObject)m).setAccessible(true);
@@ -419,7 +419,7 @@ public class StaticContext extends GlobalContext {
       } else if (!Modifier.isPrivate(mods)) {
         if (samePkg) {
           ((AccessibleObject)m).setAccessible(true);
-        }               
+        }
       } else {
         if (declaringClass == c || isInnerClass(declaringClass, c)) {
           ((AccessibleObject)m).setAccessible(true);
@@ -427,7 +427,7 @@ public class StaticContext extends GlobalContext {
       }
     }
   }
-  
+
   /**
    * Is c1 an inner class of c2?
    */
@@ -457,7 +457,7 @@ public class StaticContext extends GlobalContext {
     }
     return false;
   }
-  
+
   /**
    * Whether the given name represents a field in this context
    * @param name the field name

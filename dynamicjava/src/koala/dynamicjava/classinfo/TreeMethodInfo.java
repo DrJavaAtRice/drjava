@@ -81,7 +81,7 @@ public class TreeMethodInfo implements MethodInfo {
     public TreeMethodInfo(MethodDeclaration f, ClassFinder cf, ClassInfo dc) {
         methodTree     = f;
         classFinder    = cf;
-	declaringClass = dc;
+  declaringClass = dc;
         typeVisitor    = new TypeVisitor(classFinder, declaringClass);
     }
 
@@ -89,7 +89,7 @@ public class TreeMethodInfo implements MethodInfo {
      * Returns the method declaration
      */
     public MethodDeclaration getMethodDeclaration() {
-	return methodTree;
+  return methodTree;
     }
 
     /**
@@ -104,7 +104,7 @@ public class TreeMethodInfo implements MethodInfo {
      * of the method represented by this object
      */
     public ClassInfo getReturnType() {
-        return (ClassInfo)methodTree.getReturnType().acceptVisitor(typeVisitor);
+        return methodTree.getReturnType().acceptVisitor(typeVisitor);
     }
 
     /**
@@ -120,18 +120,18 @@ public class TreeMethodInfo implements MethodInfo {
      * by this object
      */
     public ClassInfo[] getParameterTypes() {
-	if (parameters == null) {
-	    List        ls = methodTree.getParameters();
-	    Iterator    it = ls.iterator();
-	    parameters     = new ClassInfo[ls.size()];
-	    int         i  = 0;
+  if (parameters == null) {
+      List        ls = methodTree.getParameters();
+      Iterator    it = ls.iterator();
+      parameters     = new ClassInfo[ls.size()];
+      int         i  = 0;
 
-	    while (it.hasNext()) {
-		FormalParameter fp = (FormalParameter)it.next();
-		parameters[i++] = (ClassInfo)fp.getType().acceptVisitor(typeVisitor);
-	    }
-	}
-	return (ClassInfo[])parameters.clone();
+      while (it.hasNext()) {
+    FormalParameter fp = (FormalParameter)it.next();
+    parameters[i++] = fp.getType().acceptVisitor(typeVisitor);
+      }
+  }
+  return parameters.clone();
     }
 
     /**
@@ -139,7 +139,7 @@ public class TreeMethodInfo implements MethodInfo {
      * the exceptions declared to be thrown by the underlying method
      */
     public ClassInfo[] getExceptionTypes() {
-	if (exceptions == null) {
+  if (exceptions == null) {
             List        ls = methodTree.getExceptions();
             Iterator    it = ls.iterator();
             exceptions     = new ClassInfo[ls.size()];
@@ -148,7 +148,7 @@ public class TreeMethodInfo implements MethodInfo {
                 exceptions[i++] = lookupClass((String)it.next(), declaringClass);
             }
         }
-	return (ClassInfo[])exceptions.clone();
+  return exceptions.clone();
     }
 
     /**
@@ -168,15 +168,15 @@ public class TreeMethodInfo implements MethodInfo {
      * @exception NoClassDefFoundError if the class cannot be loaded
      */
     protected ClassInfo lookupClass(String s, ClassInfo c) {
-	try {
-	    if (c == null) {
-		return classFinder.lookupClass(s, c);
-	    } else {
-		return classFinder.lookupClass(s);
-	    }
-	} catch (ClassNotFoundException e) {
-	    throw new NoClassDefFoundError(e.getMessage());
-	}
+  try {
+      if (c == null) {
+    return classFinder.lookupClass(s, c);
+      } else {
+    return classFinder.lookupClass(s);
+      }
+  } catch (ClassNotFoundException e) {
+      throw new NoClassDefFoundError(e.getMessage());
+  }
     }
 
 }

@@ -90,15 +90,15 @@ public class JavaMethodInfo implements MethodInfo {
      * by this object
      */
     public ClassInfo[] getParameterTypes() {
-	if (parameters == null) {
-	    Class[] pcs = javaMethod.getParameterTypes();
-	    parameters  = new ClassInfo[pcs.length];
+  if (parameters == null) {
+      Class[] pcs = javaMethod.getParameterTypes();
+      parameters  = new ClassInfo[pcs.length];
 
-	    for (int i = 0; i < pcs.length; i++) {
-		parameters[i] = new JavaClassInfo(pcs[i]);
-	    }
-	}
-        return (ClassInfo[])parameters.clone();
+      for (int i = 0; i < pcs.length; i++) {
+    parameters[i] = new JavaClassInfo(pcs[i]);
+      }
+  }
+        return parameters.clone();
     }
 
     /**
@@ -106,15 +106,15 @@ public class JavaMethodInfo implements MethodInfo {
      * the exceptions declared to be thrown by the underlying method
      */
     public ClassInfo[] getExceptionTypes() {
-	if (exceptions == null) {
-	    Class[] ecs = javaMethod.getExceptionTypes();
-	    exceptions  = new ClassInfo[ecs.length];
+  if (exceptions == null) {
+      Class[] ecs = javaMethod.getExceptionTypes();
+      exceptions  = new ClassInfo[ecs.length];
 
-	    for (int i = 0; i < ecs.length; i++) {
-		exceptions[i] = new JavaClassInfo(ecs[i]);
-	    }
-	}
-        return (ClassInfo[])exceptions.clone();
+      for (int i = 0; i < ecs.length; i++) {
+    exceptions[i] = new JavaClassInfo(ecs[i]);
+      }
+  }
+        return exceptions.clone();
     }
 
     /**

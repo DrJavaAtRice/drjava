@@ -318,7 +318,7 @@
          fork="on"
          optimize="off">
     <compilerarg value="-J-Xbootclasspath/p:${jsr14_classpath}"/>
-    <compilerarg value="-Xlint:deprecation,dep-ann,unchecked"/>
+<!--    <compilerarg value="-Xlint:deprecation,dep-ann,unchecked"/>-->
   </javac>
 </target>
 
@@ -328,7 +328,7 @@
      enabled.
 
      This version works with JDK 1.4.2 and JSR-14 v2.2, v2.3
--->
+
 <target name="checked-compile" depends="init">
   <mkdir dir="${built}"/>
   <javac srcdir="${srcroot}"
@@ -344,11 +344,14 @@
     <compilerarg value="-J-Xbootclasspath/p:${jsr14_classpath}"/>
   </javac>
 </target>
+-->
+
 
 <!-- Checked Compile. Identical to Compile with Generic Warning Checking
      enabled.
 
      This version works with JDK 1.4.2 and JSR-14 v2.4
+-->
 <target name="checked-compile" depends="init">
   <mkdir dir="${built}"/>
   <javac srcdir="${srcroot}"
@@ -366,7 +369,7 @@
     <compilerarg value="-Xlint"/>
   </javac>
 </target>
--->
+
 
 
 

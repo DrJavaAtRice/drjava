@@ -54,46 +54,46 @@ public class TreeInterpreter implements Interpreter {
    * The parser
    */
   protected ParserFactory parserFactory;
-  
+
   /**
    * The library finder
    */
   protected LibraryFinder libraryFinder = new LibraryFinder();
-  
+
   /**
    * The class loader
    */
   protected TreeClassLoader classLoader;
-  
+
   /**
    * The methods
    */
   protected static Map<String,MethodDescriptor> methods = new HashMap<String,MethodDescriptor>();
   List<String> localMethods = new LinkedList<String>();
-  
+
   /**
    * The explicit constructor call parameters
    */
-  protected static Map<String,ConstructorParametersDescriptor> constructorParameters = 
+  protected static Map<String,ConstructorParametersDescriptor> constructorParameters =
     new HashMap<String,ConstructorParametersDescriptor>();
-  
+
   List<String> localConstructorParameters = new LinkedList<String>();
-  
+
   /**
    * Used to generate classes
    */
   protected static int nClass;
-  
+
   protected Context nameVisitorContext;
   protected Context checkVisitorContext;
   protected Context evalVisitorContext;
-  
+
   /**
    * Track the state of calls to 'setAccessible'
    * @see setAccessible(boolean)
    */
   protected boolean accessible;
-  
+
   /**
    * Creates a new interpreter
    * @param pf the parser factory
@@ -101,7 +101,7 @@ public class TreeInterpreter implements Interpreter {
   public TreeInterpreter(ParserFactory pf) {
     this(pf, null);
   }
-  
+
   /**
    * Creates a new interpreter
    * @param pf the parser factory
@@ -117,7 +117,7 @@ public class TreeInterpreter implements Interpreter {
     evalVisitorContext  = new GlobalContext(this);
     evalVisitorContext.setAdditionalClassLoaderContainer(classLoader);
   }
-  
+
   /**
    * Runs the interpreter
    * @param is    the reader from which the statements are read
@@ -130,12 +130,12 @@ public class TreeInterpreter implements Interpreter {
       List<Node> statements = p.parseStream();
       ListIterator<Node> it = statements.listIterator();
       Object result = null;
-      
+
       while (it.hasNext()) {
         Node n = it.next();
         result = interpret(n);
       }
-      
+
       return result;
     } catch (ExecutionError e) {
       throw new InterpreterException(e);
@@ -143,7 +143,7 @@ public class TreeInterpreter implements Interpreter {
       throw new InterpreterException(e);
     }
   }
-  
+
   /**
    * Runs the interpreter
    * @param is    the input stream from which the statements are read
@@ -153,7 +153,7 @@ public class TreeInterpreter implements Interpreter {
   public Object interpret(InputStream is, String fname) throws InterpreterException {
     return interpret(new InputStreamReader(is), fname);
   }
-  
+
   /**
    * Runs the interpreter
    * @param fname the name of a file to interpret
@@ -162,12 +162,12 @@ public class TreeInterpreter implements Interpreter {
   public Object interpret(String fname) throws InterpreterException, IOException {
     return interpret(new FileReader(fname), fname);
   }
-  
+
   /**
    * Parses a script and creates the associated syntax trees.
    * @param is    the reader from which the statements are read
    * @param fname the name of the parsed stream
-   * @return list of statements 
+   * @return list of statements
    */
   public List<Node> buildStatementList (Reader r, String fname) throws InterpreterException {
     List<Node> resultingList;
@@ -175,7 +175,7 @@ public class TreeInterpreter implements Interpreter {
       SourceCodeParser    p = parserFactory.createParser(r, fname);
       List<Node> statements = p.parseStream();
       ListIterator<Node> it = statements.listIterator();
-      
+
       resultingList = new ArrayList<Node>();
       while (it.hasNext()) {
         Node n = it.next();
@@ -186,17 +186,17 @@ public class TreeInterpreter implements Interpreter {
         resultingList.add(n);
         TypeChecker tc = new TypeChecker(checkVisitorContext);
         n.acceptVisitor(tc);
-        
+
         evalVisitorContext.defineVariables
           (checkVisitorContext.getCurrentScopeVariables());
       }
-      
+
       return resultingList;
     } catch (ParseError e) {
       throw new InterpreterException(e);
     }
   }
-  
+
   /**
    * Runs the interpreter on a statement list.
    * @param statements the statement list to evaluate
@@ -207,13 +207,13 @@ public class TreeInterpreter implements Interpreter {
     try {
       ListIterator<Node> it = statements.listIterator();
       Object result = null;
-      
+
       while (it.hasNext()) {
         Node n = it.next();
         EvaluationVisitor ev = new EvaluationVisitor(evalVisitorContext);
         result = n.acceptVisitor(ev);
       }
-      
+
       return result;
     } catch (ExecutionError e) {
       throw new InterpreterException(e);
@@ -221,7 +221,7 @@ public class TreeInterpreter implements Interpreter {
       throw new InterpreterException(e);
     }
   }
-  
+
   /**
    * Defines a variable in the interpreter environment
    * @param name  the variable's name
@@ -234,7 +234,7 @@ public class TreeInterpreter implements Interpreter {
     checkVisitorContext.define(name, c);
     evalVisitorContext.define(name, value);
   }
-  
+
   /**
    * Defines a variable in the interpreter environment
    * @param name  the variable's name
@@ -244,7 +244,7 @@ public class TreeInterpreter implements Interpreter {
   public void defineVariable(String name, Object value) {
     defineVariable(name, value, (value == null) ? null : value.getClass());
   }
-  
+
   /**
    * Defines a boolean variable in the interpreter environment
    * @param name  the variable's name
@@ -257,7 +257,7 @@ public class TreeInterpreter implements Interpreter {
     checkVisitorContext.define(name, c);
     evalVisitorContext.define(name, new Boolean(value));
   }
-  
+
   /**
    * Defines a byte variable in the interpreter environment
    * @param name  the variable's name
@@ -270,7 +270,7 @@ public class TreeInterpreter implements Interpreter {
     checkVisitorContext.define(name, c);
     evalVisitorContext.define(name, new Byte(value));
   }
-  
+
   /**
    * Defines a short variable in the interpreter environment
    * @param name  the variable's name
@@ -283,7 +283,7 @@ public class TreeInterpreter implements Interpreter {
     checkVisitorContext.define(name, c);
     evalVisitorContext.define(name, new Short(value));
   }
-  
+
   /**
    * Defines a char variable in the interpreter environment
    * @param name  the variable's name
@@ -296,7 +296,7 @@ public class TreeInterpreter implements Interpreter {
     checkVisitorContext.define(name, c);
     evalVisitorContext.define(name, new Character(value));
   }
-  
+
   /**
    * Defines an int variable in the interpreter environment
    * @param name  the variable's name
@@ -309,7 +309,7 @@ public class TreeInterpreter implements Interpreter {
     checkVisitorContext.define(name, c);
     evalVisitorContext.define(name, new Integer(value));
   }
-  
+
   /**
    * Defines an long variable in the interpreter environment
    * @param name  the variable's name
@@ -322,7 +322,7 @@ public class TreeInterpreter implements Interpreter {
     checkVisitorContext.define(name, c);
     evalVisitorContext.define(name, new Long(value));
   }
-  
+
   /**
    * Defines an float variable in the interpreter environment
    * @param name  the variable's name
@@ -335,7 +335,7 @@ public class TreeInterpreter implements Interpreter {
     checkVisitorContext.define(name, c);
     evalVisitorContext.define(name, new Float(value));
   }
-  
+
   /**
    * Defines an double variable in the interpreter environment
    * @param name  the variable's name
@@ -348,7 +348,7 @@ public class TreeInterpreter implements Interpreter {
     checkVisitorContext.define(name, c);
     evalVisitorContext.define(name, new Double(value));
   }
-  
+
   /**
    * Sets the value of a variable
    * @param name  the variable's name
@@ -363,7 +363,7 @@ public class TreeInterpreter implements Interpreter {
       throw new IllegalStateException(name);
     }
   }
-  
+
   /**
    * Gets the value of a variable
    * @param name  the variable's name
@@ -372,7 +372,7 @@ public class TreeInterpreter implements Interpreter {
   public Object getVariable(String name) {
     return evalVisitorContext.get(name);
   }
-  
+
   /**
    * Gets the class of a variable
    * @param name  the variable's name
@@ -381,7 +381,7 @@ public class TreeInterpreter implements Interpreter {
   public Class getVariableClass(String name) {
     return (Class)checkVisitorContext.get(name);
   }
-  
+
   /**
    * Returns the defined variable names
    * @return a set of strings
@@ -389,18 +389,18 @@ public class TreeInterpreter implements Interpreter {
   public Set getVariableNames() {
     return evalVisitorContext.getCurrentScopeVariableNames();
   }
-  
+
   public void setAccessible(boolean accessible) {
     this.accessible = accessible;
     nameVisitorContext.setAccessible(accessible);
     checkVisitorContext.setAccessible(accessible);
     evalVisitorContext.setAccessible(accessible);
   }
-  
+
   public boolean getAccessible() {
     return accessible;
   }
-  
+
   /**
    * Returns the defined class names
    * @return a set of strings
@@ -408,7 +408,7 @@ public class TreeInterpreter implements Interpreter {
   public Set getClassNames() {
     return classLoader.getClassNames();
   }
-  
+
   /**
    * Adds a class search path
    * @param path the path to add
@@ -419,7 +419,7 @@ public class TreeInterpreter implements Interpreter {
     } catch (MalformedURLException e) {
     }
   }
-  
+
   /**
    * Adds a class search URL
    * @param url the url to add
@@ -427,7 +427,7 @@ public class TreeInterpreter implements Interpreter {
   public void addClassURL(URL url) {
     classLoader.addURL(url);
   }
-  
+
   /**
    * Adds a library search path
    * @param path the path to add
@@ -435,7 +435,7 @@ public class TreeInterpreter implements Interpreter {
   public void addLibraryPath(String path) {
     libraryFinder.addPath(path);
   }
-  
+
   /**
    * Adds a library file suffix
    * @param s the suffix to add
@@ -443,7 +443,7 @@ public class TreeInterpreter implements Interpreter {
   public void addLibrarySuffix(String s) {
     libraryFinder.addSuffix(s);
   }
-  
+
   /**
    * Loads an interpreted class
    * @param s the fully qualified name of the class to load
@@ -452,7 +452,7 @@ public class TreeInterpreter implements Interpreter {
   public Class loadClass(String name) throws ClassNotFoundException {
     return new TreeCompiler(this).compile(name);
   }
-  
+
   /**
    * Converts an array of bytes into an instance of the class Class
    * @exception ClassFormatError if the class cannot be defined
@@ -460,35 +460,35 @@ public class TreeInterpreter implements Interpreter {
   public Class defineClass(String name, byte[] code) {
     return classLoader.defineClass(name, code);
   }
-  
+
   /**
    * Gets the class loader
    */
   public ClassLoader getClassLoader() {
     return classLoader;
   }
-  
+
   /**
    * Gets the library finder
    */
   public LibraryFinder getLibraryFinder() {
     return libraryFinder;
   }
-  
+
   /**
    * Gets the parser factory
    */
   public ParserFactory getParserFactory() {
     return parserFactory;
   }
-  
+
   /**
    * Returns the class of the execution exception
    */
   public Class getExceptionClass() {
     return CatchedExceptionError.class;
   }
-  
+
   /**
    * Registers a method.
    * @param sig    the method's signature
@@ -501,7 +501,7 @@ public class TreeInterpreter implements Interpreter {
     localMethods.add(sig);
     methods.put(sig, new MethodDescriptor(md, im));
   }
-  
+
   /**
    * Interprets the body of a method
    * @param key the key used to find the body of a method
@@ -509,7 +509,7 @@ public class TreeInterpreter implements Interpreter {
    * @param params the arguments
    */
   public static Object invokeMethod(String key, Object obj, Object[] params) {
-    MethodDescriptor md = (MethodDescriptor)methods.get(key);
+    MethodDescriptor md = methods.get(key);
     Class c = null;
     try {
       c = Class.forName(key.substring(0, key.lastIndexOf('#')),
@@ -518,10 +518,10 @@ public class TreeInterpreter implements Interpreter {
       // Should never append
       e.printStackTrace();
     }
-    
+
     return md.interpreter.interpretMethod(c, md, obj, params);
   }
-  
+
   /**
    * Interprets the body of a method
    * @param c the declaring class of the method
@@ -537,46 +537,46 @@ public class TreeInterpreter implements Interpreter {
     List<FormalParameter> mparams = meth.getParameters();
     List<Node>              stmts = meth.getBody().getStatements();
     String                   name = meth.getName();
-    
+
     Context               context = null;
-    
+
     if (Modifier.isStatic(md.method.getAccessFlags())) {
       if (md.variables == null) {
         md.importationManager.setClassLoader(classLoader);
-        
+
         // pass 1: names resolution
         Context ctx = new StaticContext(this, c, md.importationManager);
         ctx.setAdditionalClassLoaderContainer(classLoader);
         NameVisitor nv = new NameVisitor(ctx);
-        
+
         ListIterator<FormalParameter> it1 = mparams.listIterator();
         while (it1.hasNext()) {
           it1.next().acceptVisitor(nv);
         }
-        
+
         ListIterator<Node> it2 = stmts.listIterator();
         while (it2.hasNext()) {
           Node o = it2.next().acceptVisitor(nv);
           if (o != null) it2.set(o);
         }
-        
+
         // pass 2: type checking
         ctx = new StaticContext(this, c, md.importationManager);
         ctx.setAdditionalClassLoaderContainer(classLoader);
         TypeChecker tc = new TypeChecker(ctx);
-        
+
         it1 = mparams.listIterator();
         while (it1.hasNext()) {
           it1.next().acceptVisitor(tc);
         }
-        
+
         it2 = stmts.listIterator();
         while (it2.hasNext()) {
           it2.next().acceptVisitor(tc);
         }
-        
+
         md.variables = ctx.getCurrentScopeVariables();
-        
+
         // Test of the additional context existence
         if (!name.equals("<clinit>") &&
             !name.equals("<init>")) {
@@ -586,22 +586,22 @@ public class TreeInterpreter implements Interpreter {
           }
         }
       }
-      
+
       // pass 3: evaluation
       context = new StaticContext(this, c, md.variables);
     } else {
       if (md.variables == null) {
         md.importationManager.setClassLoader(classLoader);
-        
+
         // pass 1: names resolution
         Context ctx1 = new MethodContext(this, c, c, md.importationManager);
         ctx1.setAdditionalClassLoaderContainer(classLoader);
         NameVisitor nv1 = new NameVisitor(ctx1);
-        
+
         Context ctx2 = new MethodContext(this, c, c, md.importationManager);
         ctx2.setAdditionalClassLoaderContainer(classLoader);
         NameVisitor nv2 = new NameVisitor(ctx2);
-        
+
         // Initializes the context with the outerclass variables
         Object[][] cc = null;
         try {
@@ -615,13 +615,13 @@ public class TreeInterpreter implements Interpreter {
           }
         } catch (Exception e) {
         }
-        
+
         // Visit the parameters and the body of the method
         ListIterator<FormalParameter> it1 = mparams.listIterator();
         while (it1.hasNext()) {
           it1.next().acceptVisitor(nv1);
         }
-        
+
         ListIterator<Node> it2 = stmts.listIterator();
         while (it2.hasNext()) {
           Node n = it2.next();
@@ -633,16 +633,16 @@ public class TreeInterpreter implements Interpreter {
           }
           if (o != null) it2.set(o);
         }
-        
+
         // pass 2: type checking
         ctx1 = new MethodContext(this, c, c, md.importationManager);
         ctx1.setAdditionalClassLoaderContainer(classLoader);
         TypeChecker tc1 = new TypeChecker(ctx1);
-        
+
         ctx2 = new MethodContext(this, c, c, md.importationManager);
         ctx2.setAdditionalClassLoaderContainer(classLoader);
         TypeChecker tc2 = new TypeChecker(ctx2);
-        
+
         // Initializes the context with outerclass variables
         if (cc != null) {
           for (int i = 0; i < cc.length; i++) {
@@ -652,25 +652,25 @@ public class TreeInterpreter implements Interpreter {
             }
           }
         }
-        
+
         // Visit the parameters and the body of the method
         it1 = mparams.listIterator();
         while (it1.hasNext()) {
           it1.next().acceptVisitor(tc1);
         }
-        
+
         it2 = stmts.listIterator();
         while (it2.hasNext()) {
-          Node n = (Node)it2.next();
+          Node n = it2.next();
           if (n.hasProperty(NodeProperties.INSTANCE_INITIALIZER)) {
             n.acceptVisitor(tc2);
           } else {
             n.acceptVisitor(tc1);
           }
         }
-        
+
         md.variables = ctx1.getCurrentScopeVariables();
-        
+
         // Test of the additional context existence
         if (!name.equals("<clinit>") &&
             !name.equals("<init>")) {
@@ -680,20 +680,20 @@ public class TreeInterpreter implements Interpreter {
           }
         }
       }
-      
+
       // pass 3: evaluation
       context = new MethodContext(this, c, obj, md.variables);
     }
-    
+
     context.setAdditionalClassLoaderContainer(classLoader);
-    
+
     // Set the arguments values
     Iterator<FormalParameter> it1  = mparams.iterator();
     int i = 0;
     while (it1.hasNext()) {
       context.set(it1.next().getName(), params[i++]);
     }
-    
+
     // Set the final local variables values
     if (md.contextField != null) {
       Map vars = null;
@@ -711,10 +711,10 @@ public class TreeInterpreter implements Interpreter {
         }
       }
     }
-    
+
     EvaluationVisitor ev = new EvaluationVisitor(context);
     Iterator<Node> it3 = stmts.iterator();
-    
+
     try {
       while (it3.hasNext()) {
         it3.next().acceptVisitor(ev);
@@ -724,7 +724,7 @@ public class TreeInterpreter implements Interpreter {
     }
     return null;
   }
-  
+
   /**
    * Registers a constructor arguments
    */
@@ -733,10 +733,10 @@ public class TreeInterpreter implements Interpreter {
                                            List<Expression>      exprs,
                                            ImportationManager    im) {
     localConstructorParameters.add(sig);
-    constructorParameters.put(sig, 
+    constructorParameters.put(sig,
                               new ConstructorParametersDescriptor(params, exprs, im));
   }
-  
+
   /**
    * This method is used to implement constructor invocation.
    * @param key  the key used to find the informations about the constructor
@@ -745,8 +745,7 @@ public class TreeInterpreter implements Interpreter {
    *         followed by the new values of the constructor arguments
    */
   public static Object[] interpretArguments(String key, Object[] args) {
-    ConstructorParametersDescriptor cpd = 
-      (ConstructorParametersDescriptor)constructorParameters.get(key);
+    ConstructorParametersDescriptor cpd = constructorParameters.get(key);
     Class c = null;
     try {
       c = Class.forName(key.substring(0, key.lastIndexOf('#')),
@@ -755,10 +754,10 @@ public class TreeInterpreter implements Interpreter {
       // Should never append
       e.printStackTrace();
     }
-    
+
     return cpd.interpreter.interpretArguments(c, cpd, args);
   }
-  
+
   /**
    * This method is used to implement constructor invocation.
    * @param c the declaring class of the constructor
@@ -772,12 +771,12 @@ public class TreeInterpreter implements Interpreter {
                                         Object[] args) {
     if (cpd.variables == null) {
       cpd.importationManager.setClassLoader(classLoader);
-      
+
       Context ctx = new StaticContext(this, c, cpd.importationManager);
       ctx.setAdditionalClassLoaderContainer(classLoader);
       NameVisitor nv = new NameVisitor(ctx);
       TypeChecker tc = new TypeChecker(ctx);
-      
+
       // Check the parameters
       if (cpd.parameters != null) {
         ListIterator<FormalParameter> it = cpd.parameters.listIterator();
@@ -785,7 +784,7 @@ public class TreeInterpreter implements Interpreter {
          it.next().acceptVisitor(tc);
         }
       }
-      
+
       if (cpd.arguments != null) {
         ListIterator<Expression> it = cpd.arguments.listIterator();
         while (it.hasNext()) {
@@ -795,7 +794,7 @@ public class TreeInterpreter implements Interpreter {
             it.set((Expression) res);   //This cast is a guess /**/
           }
         }
-        // FIX THIS CODE !!!  The mutation and typing are abominations. /**/ 
+        // FIX THIS CODE !!!  The mutation and typing are abominations. /**/
         it = cpd.arguments.listIterator();
         while (it.hasNext()) {
           it.next().acceptVisitor(tc);
@@ -803,10 +802,10 @@ public class TreeInterpreter implements Interpreter {
       }
       cpd.variables = ctx.getCurrentScopeVariables();
     }
-    
+
     Context ctx = new StaticContext(this, c, cpd.variables);
     ctx.setAdditionalClassLoaderContainer(classLoader);
-    
+
     // Set the arguments values
     if (cpd.parameters != null) {
       Iterator<FormalParameter> it  = cpd.parameters.iterator();
@@ -815,22 +814,22 @@ public class TreeInterpreter implements Interpreter {
         ctx.set(it.next().getName(), args[i++]);
       }
     }
-    
+
     Object[] result = new Object[0];
-    
+
     if (cpd.arguments != null) {
       EvaluationVisitor ev = new EvaluationVisitor(ctx);
       ListIterator<Expression> it = cpd.arguments.listIterator();
-      result = new Object[cpd.arguments.size()];  
+      result = new Object[cpd.arguments.size()];
       int i = 0;
       while (it.hasNext()) {
         result[i++] = it.next().acceptVisitor(ev);
       }
     }
-    
+
     return result;
   }
-  
+
   /**
    * Called before the destruction of the interpreter
    */
@@ -844,7 +843,7 @@ public class TreeInterpreter implements Interpreter {
       constructorParameters.remove(it.next());
     }
   }
-  
+
   /**
    * Used to store the information about dynamically
    * created methods
@@ -853,9 +852,9 @@ public class TreeInterpreter implements Interpreter {
     Set                variables;
     MethodDeclaration  method;
     ImportationManager importationManager;
-    TreeInterpreter    interpreter;    
+    TreeInterpreter    interpreter;
     Field              contextField;
-    
+
     /**
      * Creates a new descriptor
      */
@@ -865,7 +864,7 @@ public class TreeInterpreter implements Interpreter {
       interpreter        = TreeInterpreter.this;
     }
   }
-  
+
   /**
    * Used to store the information about explicit constructors
    * invocation
@@ -875,8 +874,8 @@ public class TreeInterpreter implements Interpreter {
     List<FormalParameter> parameters;
     List<Expression>      arguments;
     ImportationManager    importationManager;
-    TreeInterpreter       interpreter;    
-    
+    TreeInterpreter       interpreter;
+
     /**
      * Creates a new descriptor
      */
@@ -898,13 +897,13 @@ public class TreeInterpreter implements Interpreter {
     NameVisitor nv = new NameVisitor(nameVisitorContext);
     Node o = AST.acceptVisitor(nv);
     if (o != null) AST = o;
-    
+
     TypeChecker tc = new TypeChecker(checkVisitorContext);
     AST.acceptVisitor(tc);
-    
+
     evalVisitorContext.defineVariables
       (checkVisitorContext.getCurrentScopeVariables());
-    
+
     EvaluationVisitor ev = new EvaluationVisitor(evalVisitorContext);
     return AST.acceptVisitor(ev);
   }

@@ -43,7 +43,7 @@
  * 
 END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava;
+package koala;
 
 import java.util.Date;
 import java.text.SimpleDateFormat;

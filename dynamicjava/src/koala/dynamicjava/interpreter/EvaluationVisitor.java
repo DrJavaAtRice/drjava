@@ -51,7 +51,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
    * The current context
    */
   private Context context;
-  
+
   /**
    * Creates a new visitor
    * @param ctx the current context
@@ -59,7 +59,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
   public EvaluationVisitor(Context ctx) {
     context = ctx;
   }
-  
+
   /**
    * Visits a WhileStatement
    * @param node the node to visit
@@ -84,7 +84,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
     }
     return null;
   }
-  
+
   /**
    * Visits a ForStatement
    * @param node the node to visit
@@ -93,7 +93,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
     try {
       Set vars = (Set)node.getProperty(NodeProperties.VARIABLES);
       context.enterScope(vars);
-      
+
       // Interpret the initialization expressions
       if (node.getInitialization() != null) {
         Iterator<Node> it = node.getInitialization().iterator();
@@ -101,7 +101,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
           it.next().acceptVisitor(this);
         }
       }
-      
+
       // Interpret the loop
       try {
         Expression cond   = node.getCondition();
@@ -136,7 +136,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
     }
     return null;
   }
-  
+
   /**
    * Visits a DoStatement
    * @param node the node to visit
@@ -146,7 +146,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
       // Interpret the loop
       do {
         try {
-          node.getBody().acceptVisitor(this);     
+          node.getBody().acceptVisitor(this);
         } catch (ContinueException e) {
           // 'continue' statement management
           if (e.isLabeled() && !node.hasLabel(e.getLabel())) {
@@ -162,7 +162,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
     }
     return null;
   }
-  
+
   /**
    * Visits a SwitchStatement
    * @param node the node to visit
@@ -170,14 +170,14 @@ public class EvaluationVisitor extends VisitorObject<Object> {
   public Object visit(SwitchStatement node) {
     try {
       boolean processed = false;
-      
+
       // Evaluate the choice expression
       Object o = node.getSelector().acceptVisitor(this);
       if (o instanceof Character) {
         o = new Integer(((Character)o).charValue());
       }
       Number n = (Number)o;
-      
+
       // Search for the matching label
       ListIterator it = node.getBindings().listIterator();
       ListIterator dit = null;
@@ -193,7 +193,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
         } else {
           dit = node.getBindings().listIterator(it.nextIndex() - 1);
         }
-        
+
         if (l != null && n.intValue() == l.intValue()) {
           processed = true;
           // When a matching label is found, interpret all the
@@ -213,7 +213,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
           }
         }
       }
-      
+
       if (!processed && dit != null) {
         SwitchBlock sc = (SwitchBlock)dit.next();
         for(;;) {
@@ -238,7 +238,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
     }
     return null;
   }
-  
+
   /**
    * Visits a LabeledStatement
    * @param node the node to visit
@@ -254,7 +254,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
     }
     return null;
   }
-  
+
   /**
    * Visits a SynchronizedStatement
    * @param node the node to visit
@@ -265,7 +265,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
     }
     return null;
   }
-  
+
   /**
    * Visits a BreakStatement
    * @param node the node to visit
@@ -273,7 +273,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
   public Object visit(BreakStatement node) {
     throw new BreakException("unexpected.break", node.getLabel());
   }
-  
+
   /**
    * Visits a ContinueStatement
    * @param node the node to visit
@@ -281,7 +281,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
   public Object visit(ContinueStatement node) {
     throw new ContinueException("unexpected.continue", node.getLabel());
   }
-  
+
   /**
    * Visits a TryStatement
    * @param node the node to visit
@@ -297,7 +297,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
       } else if (e instanceof CatchedExceptionError) {
         t = ((CatchedExceptionError)e).getException();
       }
-      
+
       // Find the exception handler
       Iterator it = node.getCatchStatements().iterator();
       while (it.hasNext()) {
@@ -305,17 +305,17 @@ public class EvaluationVisitor extends VisitorObject<Object> {
         Class c = NodeProperties.getType(cs.getException().getType());
         if (c.isAssignableFrom(t.getClass())) {
           handled = true;
-          
+
           // Define the exception in a new scope
           context.enterScope();
           context.define(cs.getException().getName(), t);
-          
+
           // Interpret the handler
           cs.getBlock().acceptVisitor(this);
           break;
         }
       }
-      
+
       if (!handled) {
         if (e instanceof Error) {
           throw (Error)e;
@@ -330,7 +330,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
       if (handled) {
         context.leaveScope();
       }
-      
+
       // Interpret the 'finally' block
       Node n;
       if ((n = node.getFinallyBlock()) != null) {
@@ -339,7 +339,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
     }
     return null;
   }
-  
+
   /**
    * Visits a ThrowStatement
    * @param node the node to visit
@@ -347,7 +347,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
   public Object visit(ThrowStatement node) {
     throw new ThrownException((Throwable)node.getExpression().acceptVisitor(this));
   }
-  
+
   /**
    * Visits a ReturnStatement
    * @param node the node to visit
@@ -361,7 +361,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
       throw new ReturnException("return.statement", node);
     }
   }
-  
+
   /**
    * Visits a IfThenStatement
    * @param node the node to visit
@@ -372,7 +372,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
     }
     return null;
   }
-  
+
   /**
    * Visits a IfThenElseStatement
    * @param node the node to visit
@@ -385,7 +385,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
     }
     return null;
   }
-  
+
   /**
    * Visits a BlockStatement
    * @param node the node to visit
@@ -395,7 +395,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
       // Enter a new scope and define the local variables
       Set vars = (Set)node.getProperty(NodeProperties.VARIABLES);
       context.enterScope(vars);
-      
+
       // Interpret the statements
       Iterator it = node.getStatements().iterator();
       while (it.hasNext()) {
@@ -407,7 +407,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
     }
     return null;
   }
-  
+
   /**
    * Visits a Literal
    * @param node the node to visit
@@ -415,17 +415,17 @@ public class EvaluationVisitor extends VisitorObject<Object> {
   public Object visit(Literal node) {
     return node.getValue();
   }
-  
+
   /**
    * Visits a VariableDeclaration
    * @param node the node to visit
    */
   public Object visit(VariableDeclaration node) {
     Class c = NodeProperties.getType(node.getType());
-    
+
     if (node.getInitializer() != null) {
       Object o = performCast(c, node.getInitializer().acceptVisitor(this));
-      
+
       if (node.isFinal()) {
         context.setConstant(node.getName(), o);
       } else {
@@ -440,17 +440,17 @@ public class EvaluationVisitor extends VisitorObject<Object> {
     }
     return null;
   }
-  
+
   /**
    * Visits an ObjectFieldAccess
    * @param node the node to visit
    */
   public Object visit(ObjectFieldAccess node) {
     Class c = NodeProperties.getType(node.getExpression());
-    
+
     // Evaluate the object
     Object obj  = node.getExpression().acceptVisitor(this);
-    
+
     if (!c.isArray()) {
       Field f = (Field)node.getProperty(NodeProperties.FIELD);
       // Relax the protection for members
@@ -469,36 +469,36 @@ public class EvaluationVisitor extends VisitorObject<Object> {
       return new Integer(Array.getLength(obj));
     }
   }
-  
+
   /**
    * Visits an ObjectMethodCall
    * @param node the node to visit
    */
   public Object visit(ObjectMethodCall node) {
     Expression exp = node.getExpression();
-    
+
     // Evaluate the receiver first
     Object obj  = exp.acceptVisitor(this);
-    
+
     if (node.hasProperty(NodeProperties.METHOD)) {
       Method   m    = (Method)node.getProperty(NodeProperties.METHOD);
       Class[]  typs = m.getParameterTypes();
-      
+
       // Relax the protection for members?
       if (context.getAccessible()) {
         m.setAccessible(true);
       }
-      
+
       List<Expression> larg = node.getArguments();
       Object[] args = Constants.EMPTY_OBJECT_ARRAY;
-      
+
       // Fill the arguments
       if (larg != null) {
         args = new Object[larg.size()];
         Iterator<Expression> it = larg.iterator();
         int      i  = 0;
         while (it.hasNext()) {
-          Object p  = ((Expression)it.next()).acceptVisitor(this);
+          Object p  = it.next().acceptVisitor(this);
           args[i] = performCast(typs[i], p);
           i++;
         }
@@ -506,20 +506,20 @@ public class EvaluationVisitor extends VisitorObject<Object> {
       // Invoke the method
       try {
         return m.invoke(obj, args);
-      } 
+      }
       catch (InvocationTargetException e) {
         if (e.getTargetException() instanceof Error) {
           throw (Error)e.getTargetException();
-        } 
+        }
         else if (e.getTargetException() instanceof RuntimeException) {
           throw (RuntimeException)e.getTargetException();
         }
         throw new ThrownException(e.getTargetException(), node);
-      } 
+      }
       catch (Exception e) {
         throw new CatchedExceptionError(e, node);
       }
-    } 
+    }
     else {
       // If the 'method' property is not set, the object must be
       // an array and the called method must be 'clone'.
@@ -535,7 +535,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
       return result;
     }
   }
-  
+
   /**
    * Visits a StaticFieldAccess
    * @param node the node to visit
@@ -548,7 +548,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
       throw new CatchedExceptionError(e, node);
     }
   }
-  
+
   /**
    * Visits a SuperFieldAccess
    * @param node the node to visit
@@ -561,7 +561,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
       throw new CatchedExceptionError(e, node);
     }
   }
-  
+
   /**
    * Visits a SuperMethodCall
    * @param node the node to visit
@@ -570,7 +570,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
     Method   m     = (Method)node.getProperty(NodeProperties.METHOD);
     List<Expression> larg  = node.getArguments();
     Object[] args  = Constants.EMPTY_OBJECT_ARRAY;
-    
+
     // Fill the arguments
     if (larg != null) {
       Iterator<Expression> it = larg.iterator();
@@ -581,7 +581,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
         i++;
       }
     }
-    
+
     // Invoke the method
     try {
       return m.invoke(context.getHiddenArgument(), args);
@@ -596,7 +596,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
       throw new CatchedExceptionError(e, node);
     }
   }
-  
+
   /**
    * Visits a StaticMethodCall
    * @param node the node to visit
@@ -605,7 +605,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
     Method   m    = (Method)node.getProperty(NodeProperties.METHOD);
     List<Expression> larg = node.getArguments();
     Object[] args = Constants.EMPTY_OBJECT_ARRAY;
-    
+
     // Fill the arguments
     if (larg != null) {
       args = new Object[larg.size()];
@@ -616,7 +616,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
         i++;
       }
     }
-    
+
     // Invoke the method
     try {
       return m.invoke(null, args);
@@ -631,7 +631,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
       throw new CatchedExceptionError(e, node);
     }
   }
-  
+
   /**
    * Visits a SimpleAssignExpression
    * @param node the node to visit
@@ -645,7 +645,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
     mod.modify(context, val);
     return val;
   }
-  
+
   /**
    * Visits a QualifiedName
    * @param node the node to visit
@@ -660,7 +660,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
     }
     return result;
   }
-  
+
   /**
    * Visits a TypeExpression
    * @param node the node to visit
@@ -668,7 +668,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
   public Object visit(TypeExpression node) {
     return node.getProperty(NodeProperties.VALUE);
   }
-  
+
   /**
    * Visits a SimpleAllocation
    * @param node the node to visit
@@ -676,7 +676,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
   public Object visit(SimpleAllocation node) {
     List<Expression> larg = node.getArguments();
     Object[] args = Constants.EMPTY_OBJECT_ARRAY;
-    
+
     // Fill the arguments
     if (larg != null) {
       args = new Object[larg.size()];
@@ -686,10 +686,10 @@ public class EvaluationVisitor extends VisitorObject<Object> {
         args[i++] = it.next().acceptVisitor(this);
       }
     }
-    
+
     return context.invokeConstructor(node, args);
   }
-  
+
   /**
    * Visits an ArrayAllocation
    * @param node the node to visit
@@ -699,7 +699,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
     if (node.getInitialization() != null) {
       return node.getInitialization().acceptVisitor(this);
     }
-    
+
     // Evaluate the size expressions
     int[]    dims = new int[node.getSizes().size()];
     Iterator<Expression> it = node.getSizes().iterator();
@@ -708,7 +708,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
       Number n = (Number)it.next().acceptVisitor(this);
       dims[i++] = n.intValue();
     }
-    
+
     // Create the array
     if (node.getDimension() != dims.length) {
       Class c = NodeProperties.getComponentType(node);
@@ -718,7 +718,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
       return Array.newInstance(NodeProperties.getComponentType(node), dims);
     }
   }
-  
+
   /**
    * Visits a ArrayInitializer
    * @param node the node to visit
@@ -726,7 +726,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
   public Object visit(ArrayInitializer node) {
     Object result = Array.newInstance(NodeProperties.getType(node.getElementType()),
                                       node.getCells().size());
-    
+
     Iterator<Expression> it = node.getCells().iterator();
     int      i  = 0;
     while (it.hasNext()) {
@@ -735,7 +735,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
     }
     return result;
   }
-  
+
   /**
    * Visits an ArrayAccess
    * @param node the node to visit
@@ -748,7 +748,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
     }
     return Array.get(t, ((Number)o).intValue());
   }
-  
+
   /**
    * Visits a InnerAllocation
    * @param node the node to visit
@@ -756,14 +756,14 @@ public class EvaluationVisitor extends VisitorObject<Object> {
   public Object visit(InnerAllocation node) {
     Constructor cons = (Constructor)node.getProperty(NodeProperties.CONSTRUCTOR);
     Class       c    = NodeProperties.getType(node);
-    
+
     List<Expression> larg = node.getArguments();
     Object[]    args = null;
-    
+
     if (larg != null) {
       args = new Object[larg.size() + 1];
       args[0] = node.getExpression().acceptVisitor(this);
-      
+
       Iterator<Expression> it = larg.iterator();
       int      i  = 1;
       while (it.hasNext()) {
@@ -772,7 +772,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
     } else {
       args = new Object[] { node.getExpression().acceptVisitor(this) };
     }
-    
+
     // Invoke the constructor
     try {
       return cons.newInstance(args);
@@ -787,7 +787,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
       throw new CatchedExceptionError(e, node);
     }
   }
-  
+
   /**
    * Visits a ClassAllocation
    * @param node the node to visit
@@ -795,7 +795,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
   public Object visit(ClassAllocation node) {
     List<Expression> larg = node.getArguments();
     Object[]    args = Constants.EMPTY_OBJECT_ARRAY;
-    
+
     // Fill the arguments
     if (larg != null) {
       args = new Object[larg.size()];
@@ -805,10 +805,10 @@ public class EvaluationVisitor extends VisitorObject<Object> {
         args[i++] = it.next().acceptVisitor(this);
       }
     }
-    
+
     return context.invokeConstructor(node, args);
   }
-  
+
   /**
    * Visits a NotExpression
    * @param node the node to visit
@@ -826,7 +826,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
       }
     }
   }
-  
+
   /**
    * Visits a ComplementExpression
    * @param node the node to visit
@@ -838,7 +838,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
     } else {
       Class  c = NodeProperties.getType(node);
       Object o = node.getExpression().acceptVisitor(this);
-      
+
       if (o instanceof Character) {
         o = new Integer(((Character)o).charValue());
       }
@@ -849,7 +849,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
       }
     }
   }
-  
+
   /**
    * Visits a PlusExpression
    * @param node the node to visit
@@ -864,7 +864,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
          node.getExpression().acceptVisitor(this));
     }
   }
-  
+
   /**
    * Visits a MinusExpression
    * @param node the node to visit
@@ -879,7 +879,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
          node.getExpression().acceptVisitor(this));
     }
   }
-  
+
   /**
    * Visits a AddExpression
    * @param node the node to visit
@@ -895,7 +895,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
          node.getRightExpression().acceptVisitor(this));
     }
   }
-  
+
   /**
    * Visits an AddAssignExpression
    * @param node the node to visit
@@ -904,21 +904,21 @@ public class EvaluationVisitor extends VisitorObject<Object> {
     Node   left = node.getLeftExpression();
     LeftHandSideModifier mod = NodeProperties.getModifier(left);
     Object lhs = mod.prepare(this, context);
-    
+
     // Perform the operation
     Object result = InterpreterUtilities.add
       (NodeProperties.getType(node),
        lhs,
        node.getRightExpression().acceptVisitor(this));
-    
+
     // Cast the result
     result = performCast(NodeProperties.getType(left), result);
-    
+
     // Modify the variable and return
     mod.modify(context, result);
     return result;
   }
-  
+
   /**
    * Visits a SubtractExpression
    * @param node the node to visit
@@ -934,7 +934,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
          node.getRightExpression().acceptVisitor(this));
     }
   }
-  
+
   /**
    * Visits an SubtractAssignExpression
    * @param node the node to visit
@@ -943,21 +943,21 @@ public class EvaluationVisitor extends VisitorObject<Object> {
     Node   left = node.getLeftExpression();
     LeftHandSideModifier mod = NodeProperties.getModifier(left);
     Object lhs = mod.prepare(this, context);
-    
+
     // Perform the operation
     Object result = InterpreterUtilities.subtract
       (NodeProperties.getType(node),
        lhs,
        node.getRightExpression().acceptVisitor(this));
-    
+
     // Cast the result
     result = performCast(NodeProperties.getType(left), result);
-    
+
     // Modify the variable and return
     mod.modify(context, result);
     return result;
   }
-  
+
   /**
    * Visits a MultiplyExpression
    * @param node the node to visit
@@ -973,7 +973,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
          node.getRightExpression().acceptVisitor(this));
     }
   }
-  
+
   /**
    * Visits an MultiplyAssignExpression
    * @param node the node to visit
@@ -982,21 +982,21 @@ public class EvaluationVisitor extends VisitorObject<Object> {
     Node   left = node.getLeftExpression();
     LeftHandSideModifier mod = NodeProperties.getModifier(left);
     Object lhs = mod.prepare(this, context);
-    
+
     // Perform the operation
     Object result = InterpreterUtilities.multiply
       (NodeProperties.getType(node),
        lhs,
        node.getRightExpression().acceptVisitor(this));
-    
+
     // Cast the result
     result = performCast(NodeProperties.getType(left), result);
-    
+
     // Modify the variable and return
     mod.modify(context, result);
     return result;
   }
-  
+
   /**
    * Visits a DivideExpression
    * @param node the node to visit
@@ -1012,7 +1012,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
          node.getRightExpression().acceptVisitor(this));
     }
   }
-  
+
   /**
    * Visits an DivideAssignExpression
    * @param node the node to visit
@@ -1021,21 +1021,21 @@ public class EvaluationVisitor extends VisitorObject<Object> {
     Node   left = node.getLeftExpression();
     LeftHandSideModifier mod = NodeProperties.getModifier(left);
     Object lhs = mod.prepare(this, context);
-    
+
     // Perform the operation
     Object result = InterpreterUtilities.divide
       (NodeProperties.getType(node),
        lhs,
        node.getRightExpression().acceptVisitor(this));
-    
+
     // Cast the result
     result = performCast(NodeProperties.getType(left), result);
-    
+
     // Modify the variable and return
     mod.modify(context, result);
     return result;
   }
-  
+
   /**
    * Visits a RemainderExpression
    * @param node the node to visit
@@ -1051,7 +1051,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
          node.getRightExpression().acceptVisitor(this));
     }
   }
-  
+
   /**
    * Visits an RemainderAssignExpression
    * @param node the node to visit
@@ -1060,21 +1060,21 @@ public class EvaluationVisitor extends VisitorObject<Object> {
     Node   left = node.getLeftExpression();
     LeftHandSideModifier mod = NodeProperties.getModifier(left);
     Object lhs = mod.prepare(this, context);
-    
+
     // Perform the operation
     Object result = InterpreterUtilities.remainder
       (NodeProperties.getType(node),
        lhs,
        node.getRightExpression().acceptVisitor(this));
-    
+
     // Cast the result
     result = performCast(NodeProperties.getType(left), result);
-    
+
     // Modify the variable and return
     mod.modify(context, result);
     return result;
   }
-  
+
   /**
    * Visits an EqualExpression
    * @param node the node to visit
@@ -1092,7 +1092,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
                                           rn.acceptVisitor(this));
     }
   }
-  
+
   /**
    * Visits a NotEqualExpression
    * @param node the node to visit
@@ -1110,7 +1110,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
                                              rn.acceptVisitor(this));
     }
   }
-  
+
   /**
    * Visits a LessExpression
    * @param node the node to visit
@@ -1126,7 +1126,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
                                            rn.acceptVisitor(this));
     }
   }
-  
+
   /**
    * Visits a LessOrEqualExpression
    * @param node the node to visit
@@ -1142,7 +1142,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
                                               rn.acceptVisitor(this));
     }
   }
-  
+
   /**
    * Visits a GreaterExpression
    * @param node the node to visit
@@ -1158,7 +1158,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
                                               rn.acceptVisitor(this));
     }
   }
-  
+
   /**
    * Visits a GreaterOrEqualExpression
    * @param node the node to visit
@@ -1174,7 +1174,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
                                                  rn.acceptVisitor(this));
     }
   }
-  
+
   /**
    * Visits a InstanceOfExpression
    * @param node the node to visit
@@ -1182,10 +1182,10 @@ public class EvaluationVisitor extends VisitorObject<Object> {
   public Object visit(InstanceOfExpression node) {
     Object v = node.getExpression().acceptVisitor(this);
     Class  c = NodeProperties.getType(node.getReferenceType());
-    
+
     return (c.isInstance(v)) ? Boolean.TRUE : Boolean.FALSE;
   }
-  
+
   /**
    * Visits a ConditionalExpression
    * @param node the node to visit
@@ -1203,7 +1203,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
       }
     }
   }
-  
+
   /**
    * Visits a PostIncrement
    * @param node the node to visit
@@ -1212,14 +1212,14 @@ public class EvaluationVisitor extends VisitorObject<Object> {
     Node exp = node.getExpression();
     LeftHandSideModifier mod = NodeProperties.getModifier(exp);
     Object v = mod.prepare(this, context);
-    
+
     mod.modify(context,
                InterpreterUtilities.add(NodeProperties.getType(node),
                                         v,
                                         InterpreterUtilities.ONE));
     return v;
   }
-  
+
   /**
    * Visits a PreIncrement
    * @param node the node to visit
@@ -1228,14 +1228,14 @@ public class EvaluationVisitor extends VisitorObject<Object> {
     Node exp = node.getExpression();
     LeftHandSideModifier mod = NodeProperties.getModifier(exp);
     Object v = mod.prepare(this, context);
-    
+
     mod.modify(context,
                v = InterpreterUtilities.add(NodeProperties.getType(node),
                                             v,
                                             InterpreterUtilities.ONE));
     return v;
   }
-  
+
   /**
    * Visits a PostDecrement
    * @param node the node to visit
@@ -1244,14 +1244,14 @@ public class EvaluationVisitor extends VisitorObject<Object> {
     Node exp = node.getExpression();
     LeftHandSideModifier mod = NodeProperties.getModifier(exp);
     Object v = mod.prepare(this, context);
-    
+
     mod.modify(context,
                InterpreterUtilities.subtract(NodeProperties.getType(node),
                                              v,
                                              InterpreterUtilities.ONE));
     return v;
   }
-  
+
   /**
    * Visits a PreDecrement
    * @param node the node to visit
@@ -1260,14 +1260,14 @@ public class EvaluationVisitor extends VisitorObject<Object> {
     Node exp = node.getExpression();
     LeftHandSideModifier mod = NodeProperties.getModifier(exp);
     Object v = mod.prepare(this, context);
-    
+
     mod.modify(context,
                v = InterpreterUtilities.subtract(NodeProperties.getType(node),
                                                  v,
                                                  InterpreterUtilities.ONE));
     return v;
   }
-  
+
   /**
    * Visits a CastExpression
    * @param node the node to visit
@@ -1276,7 +1276,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
     return performCast(NodeProperties.getType(node),
                        node.getExpression().acceptVisitor(this));
   }
-  
+
   /**
    * Visits a BitAndExpression
    * @param node the node to visit
@@ -1292,7 +1292,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
          node.getRightExpression().acceptVisitor(this));
     }
   }
-  
+
   /**
    * Visits a BitAndAssignExpression
    * @param node the node to visit
@@ -1301,21 +1301,21 @@ public class EvaluationVisitor extends VisitorObject<Object> {
     Node   left = node.getLeftExpression();
     LeftHandSideModifier mod = NodeProperties.getModifier(left);
     Object lhs = mod.prepare(this, context);
-    
+
     // Perform the operation
     Object result = InterpreterUtilities.bitAnd
       (NodeProperties.getType(node),
        lhs,
        node.getRightExpression().acceptVisitor(this));
-    
+
     // Cast the result
     result = performCast(NodeProperties.getType(left), result);
-    
+
     // Modify the variable and return
     NodeProperties.getModifier(left).modify(context, result);
     return result;
   }
-  
+
   /**
    * Visits a ExclusiveOrExpression
    * @param node the node to visit
@@ -1331,7 +1331,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
          node.getRightExpression().acceptVisitor(this));
     }
   }
-  
+
   /**
    * Visits a ExclusiveOrAssignExpression
    * @param node the node to visit
@@ -1340,21 +1340,21 @@ public class EvaluationVisitor extends VisitorObject<Object> {
     Node   left = node.getLeftExpression();
     LeftHandSideModifier mod = NodeProperties.getModifier(left);
     Object lhs = mod.prepare(this, context);
-    
+
     // Perform the operation
     Object result = InterpreterUtilities.xOr
       (NodeProperties.getType(node),
        lhs,
        node.getRightExpression().acceptVisitor(this));
-    
+
     // Cast the result
     result = performCast(NodeProperties.getType(left), result);
-    
+
     // Modify the variable and return
     mod.modify(context, result);
     return result;
   }
-  
+
   /**
    * Visits a BitOrExpression
    * @param node the node to visit
@@ -1370,7 +1370,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
          node.getRightExpression().acceptVisitor(this));
     }
   }
-  
+
   /**
    * Visits a BitOrAssignExpression
    * @param node the node to visit
@@ -1379,21 +1379,21 @@ public class EvaluationVisitor extends VisitorObject<Object> {
     Node   left = node.getLeftExpression();
     LeftHandSideModifier mod = NodeProperties.getModifier(left);
     Object lhs = mod.prepare(this, context);
-    
+
     // Perform the operation
     Object result = InterpreterUtilities.bitOr
       (NodeProperties.getType(node),
        lhs,
        node.getRightExpression().acceptVisitor(this));
-    
+
     // Cast the result
     result = performCast(NodeProperties.getType(left), result);
-    
+
     // Modify the variable and return
     mod.modify(context, result);
     return result;
   }
-  
+
   /**
    * Visits a ShiftLeftExpression
    * @param node the node to visit
@@ -1409,7 +1409,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
          node.getRightExpression().acceptVisitor(this));
     }
   }
-  
+
   /**
    * Visits a ShiftLeftAssignExpression
    * @param node the node to visit
@@ -1418,21 +1418,21 @@ public class EvaluationVisitor extends VisitorObject<Object> {
     Node   left = node.getLeftExpression();
     LeftHandSideModifier mod = NodeProperties.getModifier(left);
     Object lhs = mod.prepare(this, context);
-    
+
     // Perform the operation
     Object result = InterpreterUtilities.shiftLeft
       (NodeProperties.getType(node),
        lhs,
        node.getRightExpression().acceptVisitor(this));
-    
+
     // Cast the result
     result = performCast(NodeProperties.getType(left), result);
-    
+
     // Modify the variable and return
     mod.modify(context, result);
     return result;
   }
-  
+
   /**
    * Visits a ShiftRightExpression
    * @param node the node to visit
@@ -1448,7 +1448,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
          node.getRightExpression().acceptVisitor(this));
     }
   }
-  
+
   /**
    * Visits a ShiftRightAssignExpression
    * @param node the node to visit
@@ -1457,21 +1457,21 @@ public class EvaluationVisitor extends VisitorObject<Object> {
     Node   left = node.getLeftExpression();
     LeftHandSideModifier mod = NodeProperties.getModifier(left);
     Object lhs = mod.prepare(this, context);
-    
+
     // Perform the operation
     Object result = InterpreterUtilities.shiftRight
       (NodeProperties.getType(node),
        lhs,
        node.getRightExpression().acceptVisitor(this));
-    
+
     // Cast the result
     result = performCast(NodeProperties.getType(left), result);
-    
+
     // Modify the variable and return
     mod.modify(context, result);
     return result;
   }
-  
+
   /**
    * Visits a UnsignedShiftRightExpression
    * @param node the node to visit
@@ -1487,7 +1487,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
          node.getRightExpression().acceptVisitor(this));
     }
   }
-  
+
   /**
    * Visits a UnsignedShiftRightAssignExpression
    * @param node the node to visit
@@ -1496,21 +1496,21 @@ public class EvaluationVisitor extends VisitorObject<Object> {
     Node   left = node.getLeftExpression();
     LeftHandSideModifier mod = NodeProperties.getModifier(left);
     Object lhs = mod.prepare(this, context);
-    
+
     // Perform the operation
     Object result = InterpreterUtilities.unsignedShiftRight
       (NodeProperties.getType(node),
        lhs,
        node.getRightExpression().acceptVisitor(this));
-    
+
     // Cast the result
     result = performCast(NodeProperties.getType(left), result);
-    
+
     // Modify the variable and return
     mod.modify(context, result);
     return result;
   }
-  
+
   /**
    * Visits an AndExpression
    * @param node the node to visit
@@ -1525,7 +1525,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
     }
     return Boolean.FALSE;
   }
-  
+
   /**
    * Visits an OrExpression
    * @param node the node to visit
@@ -1540,7 +1540,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
     }
     return Boolean.TRUE;
   }
-  
+
   /**
    * Visits a FunctionCall
    * @param node the node to visit
@@ -1548,7 +1548,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
   public Object visit(FunctionCall node) {
     MethodDeclaration md;
     md = (MethodDeclaration)node.getProperty(NodeProperties.FUNCTION);
-    
+
     // Enter a new scope and define the parameters as local variables
     Context c = new GlobalContext(context.getInterpreter());
     if (node.getArguments() != null) {
@@ -1563,7 +1563,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
         }
       }
     }
-    
+
     // Do the type checking of the body if needed
     Node body = md.getBody();
     if (!body.hasProperty("visited")) {
@@ -1572,18 +1572,18 @@ public class EvaluationVisitor extends VisitorObject<Object> {
         (ImportationManager)md.getProperty(NodeProperties.IMPORTATION_MANAGER);
       Context ctx = new GlobalContext(context.getInterpreter());
       ctx.setImportationManager(im);
-      
+
       NameVisitor nv = new NameVisitor(ctx);
       Iterator<FormalParameter> it = md.getParameters().iterator();
       while (it.hasNext()) {
         it.next().acceptVisitor(nv);
       }
       body.acceptVisitor(nv);
-      
+
       ctx = new GlobalContext(context.getInterpreter());
       ctx.setImportationManager(im);
       ctx.setFunctions((List<MethodDeclaration>)md.getProperty(NodeProperties.FUNCTIONS)); /**/  //Why does this work???
-      
+
       TypeChecker tc = new TypeChecker(ctx);
       it = md.getParameters().iterator();
       while (it.hasNext()) {
@@ -1591,7 +1591,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
       }
       body.acceptVisitor(tc);
     }
-    
+
     // Interpret the body of the function
     try {
       body.acceptVisitor(new EvaluationVisitor(c));
@@ -1600,7 +1600,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
     }
     return null;
   }
-  
+
   /**
    * Performs a dynamic cast. This method acts on primitive wrappers.
    * @param tc the target class
@@ -1608,7 +1608,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
    */
   protected static Object performCast(Class tc, Object o) {
     Class ec = (o != null) ? o.getClass() : null;
-    
+
     if (tc != ec && tc.isPrimitive() && ec != null) {
       if (tc != char.class && ec == Character.class) {
         o = new Integer(((Character)o).charValue());

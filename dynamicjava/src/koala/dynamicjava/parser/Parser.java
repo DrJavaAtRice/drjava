@@ -2815,7 +2815,7 @@ public class Parser implements ParserConstants {
       }
 
       if (list.size() != 0) {
-        Node n = (Node)list.get(list.size() - 1);
+        Node n = list.get(list.size() - 1);
         el = n.getEndLine();
         ec = n.getEndColumn();
       }
@@ -7487,7 +7487,7 @@ public class Parser implements ParserConstants {
     RightAngledBracket();
       GenericTypesEnv = GenericTypesEnv.extend(TypeParamsMap); // push the map of typename/typeparam to the generic types env
       TypeParamsMap = new HashMap<String, TypeParameter>(); // flush old map
-      {if (true) return (TypeParameter[]) list.toArray(new TypeParameter[0]);}
+      {if (true) return list.toArray(new TypeParameter[0]);}
     throw new Error("Missing return statement in function");
   }
 
@@ -7513,7 +7513,7 @@ public class Parser implements ParserConstants {
                               list.add(temp);
     }
     RightAngledBracket();
-      {if (true) return (TypeParameter[]) list.toArray(new TypeParameter[0]);}
+      {if (true) return list.toArray(new TypeParameter[0]);}
     throw new Error("Missing return statement in function");
   }
 

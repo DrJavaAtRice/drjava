@@ -76,7 +76,7 @@ public class TreeFieldInfo implements FieldInfo {
     public TreeFieldInfo(FieldDeclaration f, ClassFinder cf, ClassInfo dc) {
         fieldTree      = f;
         classFinder    = cf;
-	declaringClass = dc;
+  declaringClass = dc;
         typeVisitor    = new TypeVisitor(classFinder, declaringClass);
     }
 
@@ -84,7 +84,7 @@ public class TreeFieldInfo implements FieldInfo {
      * Returns the field declaration
      */
     public FieldDeclaration getFieldDeclaration() {
-	return fieldTree;
+  return fieldTree;
     }
 
     /**
@@ -98,9 +98,9 @@ public class TreeFieldInfo implements FieldInfo {
      * Returns the type of the underlying field
      */
     public ClassInfo getType() {
-	if (type == null) {
-	    type = (ClassInfo)fieldTree.getType().acceptVisitor(typeVisitor);
-	}
+  if (type == null) {
+      type = fieldTree.getType().acceptVisitor(typeVisitor);
+  }
         return type;
     }
 

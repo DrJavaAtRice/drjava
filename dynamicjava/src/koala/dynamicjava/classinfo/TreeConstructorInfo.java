@@ -46,32 +46,32 @@ public class TreeConstructorInfo implements ConstructorInfo {
    * The abstract syntax tree of this constructor
    */
   private ConstructorDeclaration constructorTree;
-  
+
   /**
    * The class finder for this class
    */
   private ClassFinder classFinder;
-  
+
   /**
    * The parameters types
    */
   private ClassInfo[] parameters;
-  
+
   /**
    * The exception types
    */
   private ClassInfo[] exceptions;
-  
+
   /**
    * The declaring class
    */
   private ClassInfo declaringClass;
-  
+
   /**
    * A visitor to load type infos
    */
   private TypeVisitor typeVisitor;
-  
+
   /**
    * Creates a new class info
    * @param f  the constructor tree
@@ -84,21 +84,21 @@ public class TreeConstructorInfo implements ConstructorInfo {
     declaringClass  = dc;
     typeVisitor     = new TypeVisitor(classFinder, declaringClass);
   }
-  
+
   /**
    * Returns the constructor declaration
    */
   public ConstructorDeclaration getConstructorDeclaration() {
     return constructorTree;
   }
-  
+
   /**
    * Returns the modifiers for the constructor represented by this object
    */
   public int getModifiers() {
     return constructorTree.getAccessFlags();
   }
-  
+
   /**
    * Returns an array of class infos that represent the parameter
    * types, in declaration order, of the constructor represented
@@ -110,15 +110,15 @@ public class TreeConstructorInfo implements ConstructorInfo {
       Iterator    it = ls.iterator();
       parameters     = new ClassInfo[ls.size()];
       int         i  = 0;
-      
+
       while (it.hasNext()) {
         FormalParameter fp = (FormalParameter)it.next();
-        parameters[i++] = (ClassInfo)fp.getType().acceptVisitor(typeVisitor);
+        parameters[i++] = fp.getType().acceptVisitor(typeVisitor);
       }
     }
-    return (ClassInfo[])parameters.clone();
+    return parameters.clone();
   }
-  
+
   /**
    * Returns an array of Class infos that represent the types of
    * the exceptions declared to be thrown by the underlying constructor
@@ -133,9 +133,9 @@ public class TreeConstructorInfo implements ConstructorInfo {
         exceptions[i++] = lookupClass((String)it.next(), declaringClass);
       }
     }
-    return (ClassInfo[])exceptions.clone();
+    return exceptions.clone();
   }
-  
+
   /**
    * Indicates whether some other object is "equal to" this one
    */
@@ -145,7 +145,7 @@ public class TreeConstructorInfo implements ConstructorInfo {
     }
     return constructorTree.equals(((TreeConstructorInfo)obj).constructorTree);
   }
-  
+
   /**
    * Looks for a class from its name
    * @param s the name of the class to find
@@ -163,5 +163,5 @@ public class TreeConstructorInfo implements ConstructorInfo {
       throw new NoClassDefFoundError(e.getMessage());
     }
   }
-  
+
 }

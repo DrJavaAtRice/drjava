@@ -43,7 +43,7 @@
  * 
 END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava;
+package koala;
 
 /**
  * Contains the constant that specifies whether any new features should be used

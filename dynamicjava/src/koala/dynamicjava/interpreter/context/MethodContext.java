@@ -50,7 +50,7 @@ public class MethodContext extends StaticContext {
    * The "this" identifier
    */
   protected final static Identifier thisIdentifier = new Identifier("this");
-  
+
   /**
    * Creates a new context
    * @param i   the interpreter
@@ -61,13 +61,13 @@ public class MethodContext extends StaticContext {
   public MethodContext(Interpreter i, Class c, Object obj, ImportationManager im) {
     super(i, c, im);
     importationManager = im;
-    
+
     List<IdentifierToken> l = new LinkedList<IdentifierToken>();
     l.add(thisIdentifier);
     defaultQualifier = new QualifiedName(l);
     setConstant("this", obj);
   }
-  
+
   /**
    * Creates a new context
    * @param i   the interpreter
@@ -77,13 +77,13 @@ public class MethodContext extends StaticContext {
    */
   public MethodContext(Interpreter i, Class c, Object obj, Set fp) {
     super(i, c, fp);
-    
+
     List<IdentifierToken> l = new LinkedList<IdentifierToken>();
     l.add(thisIdentifier);
     defaultQualifier = new QualifiedName(l);
     setConstant("this", obj);
   }
-  
+
   /**
    * Returns the default qualifier for this context
    * @param s the qualifier of 'this'
@@ -110,7 +110,7 @@ public class MethodContext extends StaticContext {
       }
     }
   }
-  
+
   /**
    * Creates the tree that is associated with the given name
    * @param node the current node
@@ -142,14 +142,14 @@ public class MethodContext extends StaticContext {
       }
     }
   }
-  
+
   /**
    * Returns the default argument to pass to methods in this context
    */
   public Object getHiddenArgument() {
     return get("this");
   }
-  
+
   /**
    * Sets the properties of a SimpleAllocation node
    * @param node  the allocation node
@@ -191,13 +191,13 @@ public class MethodContext extends StaticContext {
         throw new CatchedExceptionError(e, node);
       }
     }
-    
+
     // Set the properties of this node
     node.setProperty(NodeProperties.TYPE,        c);
     node.setProperty(NodeProperties.CONSTRUCTOR, cons);
     return c;
   }
-  
+
   /**
    * Invokes a constructor
    * @param node the SimpleAllocation node
@@ -205,7 +205,7 @@ public class MethodContext extends StaticContext {
    */
   public Object invokeConstructor(SimpleAllocation node, Object[] args) {
     Constructor cons = (Constructor)node.getProperty(NodeProperties.CONSTRUCTOR);
-    
+
     if (node.hasProperty(NodeProperties.INNER_ALLOCATION)) {
       Object[] t = new Object[args.length + 1];
       t[0] = getHiddenArgument();
@@ -232,7 +232,7 @@ public class MethodContext extends StaticContext {
       }
       args = t;
     }
-    
+
     try {
       return cons.newInstance(args);
     } catch (InvocationTargetException e) {
@@ -244,7 +244,7 @@ public class MethodContext extends StaticContext {
       throw new CatchedExceptionError(e, node);
     }
   }
-  
+
   /**
    * Sets the properties of a ClassAllocation node
    * @param node the allocation node
@@ -258,56 +258,56 @@ public class MethodContext extends StaticContext {
     FieldDeclaration       fd;
     ConstructorDeclaration csd;
     ReferenceType          otype = new ReferenceType(dname);
-    
+
     // Create the reference to the declaring class
     fd = new FieldDeclaration(Modifier.PUBLIC | Modifier.STATIC,
                               CLASS_TYPE,
                               "declaring$Class$Reference$0",
                               new TypeExpression(otype));
     memb.add(fd);
-    
+
     // create the reference to the declaring instance
     fd = new FieldDeclaration(Modifier.PUBLIC, otype, "this$0", null);
     memb.add(fd);
-    
+
     // Add the reference to the final local variables map
     memb.add(LOCALS);
-    
+
     // Create the reference to the final local variables map
     fd = new FieldDeclaration(Modifier.PUBLIC | Modifier.STATIC,
                               OBJECT_ARRAY_ARRAY,
                               "local$Variables$Class$0",
                               createClassArrayInitializer());
     memb.add(fd);
-    
+
     // Create the constructor
     List<FormalParameter> params = new LinkedList<FormalParameter>();
     List<Node> stmts = new LinkedList<Node>();
-    
+
     // Add the outer instance parameter
     params.add(new FormalParameter(false, otype, "param$0"));
-    
+
     // Add the final local variables map parameter
     params.add(new FormalParameter(false, MAP_TYPE, "param$1"));
-    
+
     // Add the other parameters
     List<Expression> superArgs = new LinkedList<Expression>();
     for (int i = 0; i < args.length; i++) {
-      params.add(new FormalParameter(false, 
+      params.add(new FormalParameter(false,
                                      TreeUtilities.classToType(args[i]),
                                      "param$" + (i + 2)));
       List<IdentifierToken> l = new LinkedList<IdentifierToken>();
       l.add(new Identifier("param$" + (i + 2)));
       superArgs.add(new QualifiedName(l));
     }
-    
+
     // Create the explicit constructor invocation
     ConstructorInvocation ci = null;
     if (superArgs.size() > 0) {
       ci = new ConstructorInvocation(null, superArgs, true);
     }
-    
-    
+
+
     // Add the outer instance reference initialization statement
     List<IdentifierToken> p1 = new LinkedList<IdentifierToken>();
     p1.add(new Identifier("this$0"));
@@ -315,7 +315,7 @@ public class MethodContext extends StaticContext {
     p2.add(new Identifier("param$0"));
     stmts.add(new SimpleAssignExpression(new QualifiedName(p1),
                                          new QualifiedName(p2)));
-    
+
     // Add the outer instance reference initialization statement
     p1 = new LinkedList<IdentifierToken>();
     p1.add(new Identifier("local$Variables$Reference$0"));
@@ -323,7 +323,7 @@ public class MethodContext extends StaticContext {
     p2.add(new Identifier("param$1"));
     stmts.add(new SimpleAssignExpression(new QualifiedName(p1),
                                          new QualifiedName(p2)));
-    
+
     csd = new ConstructorDeclaration(Modifier.PUBLIC,
                                      cname,
                                      params,
@@ -331,7 +331,7 @@ public class MethodContext extends StaticContext {
                                      ci,
                                      stmts);
     memb.add(csd);
-    
+
     // Set the inheritance clause
     ReferenceType ext = null;
     List<ReferenceType> impl = null;
@@ -345,19 +345,19 @@ public class MethodContext extends StaticContext {
       l.add(new Identifier(c.getName()));
       ext = new ReferenceType(l);
     }
-    
+
     // Create the class
     TypeDeclaration type = new ClassDeclaration(Modifier.PUBLIC,
                                                 cname,
                                                 ext,
                                                 impl,
                                                 memb);
-    
+
     type.setProperty(TreeClassInfo.ANONYMOUS_DECLARING_CLASS,
                      new JavaClassInfo(declaringClass));
-    
+
     Class cl = new TreeCompiler(interpreter).compileTree(this, type);
-    
+
     // Update the argument types
     Class[] tmp = new Class[args.length+2];
     tmp[0] = declaringClass;
@@ -375,7 +375,7 @@ public class MethodContext extends StaticContext {
     node.setProperty(NodeProperties.TYPE, cl);
     return cl;
   }
-  
+
   /**
    * Invokes a constructor
    * @param node the ClassAllocation node
@@ -383,7 +383,7 @@ public class MethodContext extends StaticContext {
    */
   public Object invokeConstructor(ClassAllocation node, Object[] args) {
     Constructor cons = (Constructor)node.getProperty(NodeProperties.CONSTRUCTOR);
-    
+
     Object[] t = new Object[args.length + 2];
     t[0] = getHiddenArgument();
     t[1] = getConstants();
@@ -391,7 +391,7 @@ public class MethodContext extends StaticContext {
       t[i] = args[i - 2];
     }
     args = t;
-    
+
     try {
       return cons.newInstance(args);
     } catch (InvocationTargetException e) {
@@ -403,7 +403,7 @@ public class MethodContext extends StaticContext {
       throw new CatchedExceptionError(e, node);
     }
   }
-  
+
   /**
    * Looks for a method
    * @param prefix the method prefix
@@ -413,7 +413,7 @@ public class MethodContext extends StaticContext {
    */
   public Method lookupMethod(Node prefix, String mname, Class[] params)
     throws NoSuchMethodException {
-    Class  c = (Class)NodeProperties.getType(prefix);
+    Class  c = NodeProperties.getType(prefix);
     Method m = null;
     try {
       m = ReflectionUtilities.lookupMethod(c, mname, params);
@@ -444,7 +444,7 @@ public class MethodContext extends StaticContext {
       }
     }
   }
-  
+
   /**
    * Tests whether an class is an inner class of another
    * @param ic the possibly inner class
@@ -461,7 +461,7 @@ public class MethodContext extends StaticContext {
     } while ((oc = oc.getSuperclass()) != null);
     return false;
   }
-  
+
   /**
    * Finds the name of the reference to an outerclass in the given class
    */

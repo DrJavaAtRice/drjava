@@ -62,7 +62,7 @@ import java.net.MalformedURLException;
 
 public class TreeClassLoader extends SecureClassLoader
   implements ClassLoaderContainer {
-  
+
   /**
    * The default value for the {@link java.security.CodeSource} URL.
    * May be overriden by setting the system property with name given by
@@ -70,7 +70,7 @@ public class TreeClassLoader extends SecureClassLoader
    */
   public static String DEFAULT_CODE_SOURCE_URL =
     "http://koala.ilog.fr/djava/javadoc/koala/dynamicjava/interpreter/TreeClassLoader.html";
-  
+
   /**
    * Name of the system property to define the value for the URL
    * of the {@link java.security.CodeSource} assigned to classes
@@ -82,7 +82,7 @@ public class TreeClassLoader extends SecureClassLoader
    */
   public static String CODE_SOURCE_URL_PROPERTY =
     "koala.dynamicjava.interpreter.TreeClassLoader.codesource.url";
-  
+
   /**
    * The code source for classes defined by instances of
    * <code>TreeClassLoader</code>. Initializes when <code>TreeClassLoader</code>
@@ -92,7 +92,7 @@ public class TreeClassLoader extends SecureClassLoader
    * @see #CODE_SOURCE_URL_PROPERTY
    */
   protected static CodeSource codeSource;
-  
+
   /**
    * Initializes the code source.
    */
@@ -112,27 +112,27 @@ public class TreeClassLoader extends SecureClassLoader
       throw new RuntimeException(mfue.getMessage());
     }
   }
-  
+
   /**
    * The place where the interpreted classes are stored
    */
   protected Map<String,Class> classes = new HashMap<String,Class>(11);
-  
+
   /**
    * The syntax trees
    */
   protected Map<String,Node> trees = new HashMap<String,Node>(11);
-  
+
   /**
    * The interpreter
    */
   protected Interpreter interpreter;
-  
+
   /**
    * The auxiliary class loader
    */
   protected ClassLoader classLoader;
-  
+
   /**
    * Creates a new class loader
    * @param i the object used to interpret the classes
@@ -140,7 +140,7 @@ public class TreeClassLoader extends SecureClassLoader
   public TreeClassLoader(Interpreter i) {
     this(i, null);
   }
-  
+
   /**
    * Creates a new class loader
    * @param i the object used to interpret the classes
@@ -149,9 +149,9 @@ public class TreeClassLoader extends SecureClassLoader
   public TreeClassLoader(Interpreter i, ClassLoader cl) {
     super(i.getClass().getClassLoader());
     interpreter   = i;
-    classLoader   = cl; 
+    classLoader   = cl;
   }
-  
+
   /**
    * Converts an array of bytes into an instance of class Class and
    * links this class.
@@ -164,7 +164,7 @@ public class TreeClassLoader extends SecureClassLoader
     trees.remove(name);
     return c;
   }
-  
+
   /**
    * Returns the additional class loader that is used for loading
    * classes from the net.
@@ -173,21 +173,21 @@ public class TreeClassLoader extends SecureClassLoader
   public ClassLoader getClassLoader() {
     return classLoader;
   }
-  
+
   /**
    * Whether a class was defined by this class loader
    */
   public boolean hasDefined(String name) {
     return classes.containsKey(name);
   }
-  
+
   /**
    * Returns the names of the defined classes in a set
    */
   public Set getClassNames() {
     return classes.keySet();
   }
-  
+
   /**
    * Adds a class syntax tree to the list of the loaded trees
    * @param name the name of the type
@@ -196,14 +196,14 @@ public class TreeClassLoader extends SecureClassLoader
   public void addTree(String name, TypeDeclaration node) {
     trees.put(name, node);
   }
-  
+
   /**
    * Gets a tree
    */
   public TypeDeclaration getTree(String name) {
     return (TypeDeclaration)trees.get(name);
   }
-  
+
   /**
    * Adds an URL in the class path
    */
@@ -214,7 +214,7 @@ public class TreeClassLoader extends SecureClassLoader
       classLoader = new URLClassLoader(new URL[] { url }, classLoader);
     }
   }
-  
+
   /**
    * Finds the specified class.
    *
@@ -224,16 +224,16 @@ public class TreeClassLoader extends SecureClassLoader
    */
   protected Class findClass(String name) throws ClassNotFoundException {
     if (classes.containsKey(name)) {
-      return (Class)classes.get(name);
+      return classes.get(name);
     }
-    
+
     try {
       if (classLoader != null) {
         return Class.forName(name, true, classLoader);
       }
     } catch (ClassNotFoundException e) {
     }
-    
+
     return interpreter.loadClass(name);
   }
 }

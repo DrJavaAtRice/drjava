@@ -4,25 +4,25 @@
  * http://sourceforge.net/projects/drjava/ or http://www.drjava.org/
  *
  * DrJava Open Source License
- * 
+ *
  * Copyright (C) 2001-2003 JavaPLT group at Rice University (javaplt@rice.edu)
  * All rights reserved.
  *
  * Developed by:   Java Programming Languages Team
  *                 Rice University
  *                 http://www.cs.rice.edu/~javaplt/
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a 
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
- * to deal with the Software without restriction, including without 
- * limitation the rights to use, copy, modify, merge, publish, distribute, 
- * sublicense, and/or sell copies of the Software, and to permit persons to 
- * whom the Software is furnished to do so, subject to the following 
+ * to deal with the Software without restriction, including without
+ * limitation the rights to use, copy, modify, merge, publish, distribute,
+ * sublicense, and/or sell copies of the Software, and to permit persons to
+ * whom the Software is furnished to do so, subject to the following
  * conditions:
- * 
- *     - Redistributions of source code must retain the above copyright 
+ *
+ *     - Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimers.
- *     - Redistributions in binary form must reproduce the above copyright 
+ *     - Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimers in the
  *       documentation and/or other materials provided with the distribution.
  *     - Neither the names of DrJava, the JavaPLT, Rice University, nor the
@@ -32,15 +32,15 @@
  *       use the term "DrJava" as part of their names without prior written
  *       permission from the JavaPLT group.  For permission, write to
  *       javaplt@rice.edu.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
- * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR 
- * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, 
- * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR 
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+ * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  * OTHER DEALINGS WITH THE SOFTWARE.
- * 
+ *
 END_COPYRIGHT_BLOCK*/
 
 
@@ -98,22 +98,22 @@ public class ConstantPool {
   private final static byte CONSTANT_METHODREF           = 10;
   private final static byte CONSTANT_INTERFACEMETHODREF  = 11;
   private final static byte CONSTANT_NAMEANDTYPE         = 12;
-  
+
   /**
    * The constants
    */
   private Map<Object,Info> constants;
-  
+
   /**
    * The constant count
    */
   private short count;
-  
+
   /**
    * The constants sorted in a list
    */
   List<Info> constantList;
-  
+
   /**
    * Creates a new constant pool
    */
@@ -122,14 +122,14 @@ public class ConstantPool {
     count        = 1;
     constantList = new LinkedList<Info>();
   }
-  
+
   /**
    * Returns the constant pool count according to the JVM Spec.
    */
   public short getCount() {
     return count;
   }
-  
+
   /**
    * Adds a constant to the pool. If the constant is already present
    * in the pool, do nothing.
@@ -137,13 +137,13 @@ public class ConstantPool {
    * @return the index of the constant in the pool
    */
   public short put(Integer cst) {
-    Info info = (Info)constants.get(cst);
+    Info info = constants.get(cst);
     if (info == null) {
       info = new IntegerInfo(cst);
     }
     return info.index;
   }
-  
+
   /**
    * Adds a constant to the pool. If the constant is already present
    * in the pool, do nothing.
@@ -151,13 +151,13 @@ public class ConstantPool {
    * @return the index of the constant in the pool
    */
   public short put(Long cst) {
-    Info info = (Info)constants.get(cst);
+    Info info = constants.get(cst);
     if (info == null) {
       info = new LongInfo(cst);
     }
     return info.index;
   }
-  
+
   /**
    * Adds a constant to the pool. If the constant is already present
    * in the pool, do nothing.
@@ -165,13 +165,13 @@ public class ConstantPool {
    * @return the index of the constant in the pool
    */
   public short put(Float cst) {
-    Info info = (Info)constants.get(cst);
+    Info info = constants.get(cst);
     if (info == null) {
       info = new FloatInfo(cst);
     }
     return info.index;
   }
-  
+
   /**
    * Adds a constant to the pool. If the constant is already present
    * in the pool, do nothing.
@@ -179,13 +179,13 @@ public class ConstantPool {
    * @return the index of the constant in the pool
    */
   public short put(Double cst) {
-    Info info = (Info)constants.get(cst);
+    Info info = constants.get(cst);
     if (info == null) {
       info = new DoubleInfo(cst);
     }
     return info.index;
   }
-  
+
   /**
    * Adds a constant to the pool. If the constant is already present
    * in the pool, do nothing.
@@ -193,13 +193,13 @@ public class ConstantPool {
    * @return the index of the constant in the pool
    */
   public short put(ConstantString cst) {
-    Info info = (Info)constants.get(cst);
+    Info info = constants.get(cst);
     if (info == null) {
       info = new StringInfo(cst);
     }
     return info.index;
   }
-  
+
   /**
    * Adds a constant to the pool. If the constant is already present
    * in the pool, do nothing.
@@ -207,13 +207,13 @@ public class ConstantPool {
    * @return the index of the constant in the pool
    */
   public short put(ClassIdentifier cst) {
-    Info info = (Info)constants.get(cst);
+    Info info = constants.get(cst);
     if (info == null) {
       info = new ClassInfo(cst);
     }
     return info.index;
   }
-  
+
   /**
    * Adds a constant to the pool. If the constant is already present
    * in the pool, do nothing.
@@ -221,13 +221,13 @@ public class ConstantPool {
    * @return the index of the constant in the pool
    */
   public short put(FieldIdentifier cst) {
-    Info info = (Info)constants.get(cst);
+    Info info = constants.get(cst);
     if (info == null) {
       info = new FieldInfo(cst);
     }
     return info.index;
   }
-  
+
   /**
    * Adds a constant to the pool. If the constant is already present
    * in the pool, do nothing.
@@ -235,13 +235,13 @@ public class ConstantPool {
    * @return the index of the constant in the pool
    */
   public short put(MethodIdentifier cst) {
-    Info info = (Info)constants.get(cst);
+    Info info = constants.get(cst);
     if (info == null) {
       info = new MethodInfo(cst);
     }
     return info.index;
   }
-  
+
   /**
    * Adds a constant to the pool. If the constant is already present
    * in the pool, do nothing.
@@ -249,20 +249,20 @@ public class ConstantPool {
    * @return the index of the constant in the pool
    */
   public short put(InterfaceMethodIdentifier cst) {
-    Info info = (Info)constants.get(cst);
+    Info info = constants.get(cst);
     if (info == null) {
       info = new InterfaceMethodInfo(cst);
     }
     return info.index;
   }
-  
+
   /**
    * Writes the content of this pool to the given output stream
    */
   public void write(OutputStream out) throws IOException {
     write(new DataOutputStream(out));
   }
-  
+
   /**
    * Writes the content of this pool to the given output stream
    */
@@ -273,7 +273,7 @@ public class ConstantPool {
       ((Info)it.next()).write(out);
     }
   }
-  
+
   /**
    * Adds a constant to the pool. If the constant is already present
    * in the pool, do nothing.
@@ -284,13 +284,13 @@ public class ConstantPool {
    */
   short putNameAndType(String name, String type, String[] params) {
     NameAndTypeKey ntk = new NameAndTypeKey(name, type, params);
-    Info info = (Info)constants.get(ntk);
+    Info info = constants.get(ntk);
     if (info == null) {
       info = new NameAndTypeInfo(ntk);
     }
     return info.index;
   }
-  
+
   /**
    * Adds a constant to the pool. If the constant is already present
    * in the pool, do nothing.
@@ -298,20 +298,20 @@ public class ConstantPool {
    * @return the index of the constant in the pool
    */
   short putUTF8(String cst) {
-    Info info = (Info)constants.get(cst);
+    Info info = constants.get(cst);
     if (info == null) {
       info = new UTF8Info(cst);
     }
     return info.index;
   }
-  
+
   /**
    * Returns the entry at the given position in the pool
    */
   Info get(short i) {
-    return (Info)constantList.get(i);
+    return constantList.get(i);
   }
-  
+
   /**
    * This class is used to store info in the pool
    */
@@ -320,7 +320,7 @@ public class ConstantPool {
      * The index of the constant in the pool
      */
     short index;
-    
+
     /**
      * Initializes the object
      */
@@ -330,20 +330,20 @@ public class ConstantPool {
       constants.put(cst, this);
       constantList.add(this);
     }
-    
+
     /**
      * Returns the index increment for this type of info
      */
     short getIndexIncrement() {
       return 1;
     }
-    
+
     /**
      * Writes the constant information to the specified stream
      */
     abstract void write(DataOutputStream out) throws IOException;
   }
-  
+
   /**
    * This class is used to store integer constants in the pool
    */
@@ -352,7 +352,7 @@ public class ConstantPool {
      * The value of the constant
      */
     Integer value;
-    
+
     /**
      * Creates a new integer constant information object
      */
@@ -360,7 +360,7 @@ public class ConstantPool {
       super(v);
       value = v;
     }
-    
+
     /**
      * Writes the constant information to the specified stream
      */
@@ -369,7 +369,7 @@ public class ConstantPool {
       out.writeInt(value.intValue());
     }
   }
-  
+
   /**
    * This class is used to store long constants in the pool
    */
@@ -378,7 +378,7 @@ public class ConstantPool {
      * The value of the constant
      */
     Long value;
-    
+
     /**
      * Creates a new long constant information object
      */
@@ -386,14 +386,14 @@ public class ConstantPool {
       super(v);
       value = v;
     }
-    
+
     /**
      * Returns the index increment for this type of info
      */
     short getIndexIncrement() {
       return 2;
     }
-    
+
     /**
      * Writes the constant information to the specified stream
      */
@@ -402,7 +402,7 @@ public class ConstantPool {
       out.writeLong(value.longValue());
     }
   }
-  
+
   /**
    * This class is used to store float constants in the pool
    */
@@ -411,7 +411,7 @@ public class ConstantPool {
      * The value of the constant
      */
     Float value;
-    
+
     /**
      * Creates a new float constant information object
      */
@@ -419,7 +419,7 @@ public class ConstantPool {
       super(v);
       value = v;
     }
-    
+
     /**
      * Writes the constant information to the specified stream
      */
@@ -428,7 +428,7 @@ public class ConstantPool {
       out.writeFloat(value.floatValue());
     }
   }
-  
+
   /**
    * This class is used to store double constants in the pool
    */
@@ -437,7 +437,7 @@ public class ConstantPool {
      * The value of the constant
      */
     Double value;
-    
+
     /**
      * Creates a new double constant information object
      */
@@ -445,14 +445,14 @@ public class ConstantPool {
       super(v);
       value = v;
     }
-    
+
     /**
      * Returns the index increment for this type of info
      */
     short getIndexIncrement() {
       return 2;
     }
-    
+
     /**
      * Writes the constant information to the specified stream
      */
@@ -461,7 +461,7 @@ public class ConstantPool {
       out.writeDouble(value.doubleValue());
     }
   }
-  
+
   /**
    * This class is used to store string constants in the pool
    */
@@ -470,7 +470,7 @@ public class ConstantPool {
      * The UTF8 index
      */
     int UTF8Index;
-    
+
     /**
      * Creates a new string constant information object
      */
@@ -478,7 +478,7 @@ public class ConstantPool {
       super(v);
       UTF8Index = putUTF8(v.getValue());
     }
-    
+
     /**
      * Writes the constant information to the specified stream
      */
@@ -487,7 +487,7 @@ public class ConstantPool {
       out.writeShort(UTF8Index);
     }
   }
-  
+
   /**
    * This class is used to store class constants in the pool
    */
@@ -496,7 +496,7 @@ public class ConstantPool {
      * The UTF8 index
      */
     int UTF8Index;
-    
+
     /**
      * Creates a new class constant information object
      */
@@ -504,7 +504,7 @@ public class ConstantPool {
       super(v);
       UTF8Index = putUTF8(v.getValue());
     }
-    
+
     /**
      * Writes the constant information to the specified stream
      */
@@ -513,7 +513,7 @@ public class ConstantPool {
       out.writeShort(UTF8Index);
     }
   }
-  
+
   /**
    * This class is used to store field constants in the pool
    */
@@ -522,12 +522,12 @@ public class ConstantPool {
      * The declaring class index
      */
     int classIndex;
-    
+
     /**
      * The name and type info index
      */
     int nameAndTypeIndex;
-    
+
     /**
      * Creates a new field constant information object
      */
@@ -536,7 +536,7 @@ public class ConstantPool {
       classIndex       = put(new ClassIdentifier(v.getDeclaringClass()));
       nameAndTypeIndex = putNameAndType(v.getName(), v.getType(), null);
     }
-    
+
     /**
      * Writes the constant information to the specified stream
      */
@@ -546,7 +546,7 @@ public class ConstantPool {
       out.writeShort(nameAndTypeIndex);
     }
   }
-  
+
   /**
    * This class is used to store method constants in the pool
    */
@@ -555,12 +555,12 @@ public class ConstantPool {
      * The method declaring class
      */
     int classIndex;
-    
+
     /**
      * The name and type info index
      */
     int nameAndTypeIndex;
-    
+
     /**
      * Creates a new method constant information object
      */
@@ -570,7 +570,7 @@ public class ConstantPool {
       nameAndTypeIndex = putNameAndType(v.getName(), v.getType(),
                                         v.getParameters());
     }
-    
+
     /**
      * Writes the constant information to the specified stream
      */
@@ -580,7 +580,7 @@ public class ConstantPool {
       out.writeShort(nameAndTypeIndex);
     }
   }
-  
+
   /**
    * This class is used to store interface method constants in the pool
    */
@@ -589,12 +589,12 @@ public class ConstantPool {
      * The method declaring class
      */
     int classIndex;
-    
+
     /**
      * The name and type info index
      */
     int nameAndTypeIndex;
-    
+
     /**
      * Creates a new method constant information object
      */
@@ -604,7 +604,7 @@ public class ConstantPool {
       nameAndTypeIndex = putNameAndType(v.getName(), v.getType(),
                                         v.getParameters());
     }
-    
+
     /**
      * Writes the constant information to the specified stream
      */
@@ -614,7 +614,7 @@ public class ConstantPool {
       out.writeShort(nameAndTypeIndex);
     }
   }
-  
+
   /**
    * This class is used to store name and type constants in the pool
    */
@@ -623,12 +623,12 @@ public class ConstantPool {
      * The name
      */
     int nameIndex;
-    
+
     /**
      * The type of the field
      */
     int typeIndex;
-    
+
     /**
      * Creates a new class constant information object
      */
@@ -637,7 +637,7 @@ public class ConstantPool {
       nameIndex = putUTF8(v.name);
       typeIndex = putUTF8(v.type);
     }
-    
+
     /**
      * Writes the constant information to the specified stream
      */
@@ -647,7 +647,7 @@ public class ConstantPool {
       out.writeShort(typeIndex);
     }
   }
-  
+
   /**
    * This class is used to store UTF8 constants in the pool
    */
@@ -656,7 +656,7 @@ public class ConstantPool {
      * The value of the constant
      */
     String value;
-    
+
     /**
      * Creates a new string constant information object
      */
@@ -664,7 +664,7 @@ public class ConstantPool {
       super(v);
       value = v;
     }
-    
+
     /**
      * Writes the constant information to the specified stream
      */
@@ -673,19 +673,19 @@ public class ConstantPool {
       out.writeUTF(value);
     }
   }
-  
+
   /**
    * This class is used as a key to store a name and type info in the map
    */
   static class NameAndTypeKey {
     String   name;
     String   type;
-    
+
     NameAndTypeKey(String n, String t, String[] p) {
       name = n;
       type = JVMUtilities.createMethodDescriptor(t, p);
     }
-    
+
     public boolean equals(Object other) {
       if (other == null || !(other instanceof NameAndTypeKey)) {
         return false;
@@ -693,7 +693,7 @@ public class ConstantPool {
       NameAndTypeKey fk = (NameAndTypeKey)other;
       return name.equals(fk.name) && type.equals(fk.type);
     }
-    
+
     public int hashCode() {
       return name.hashCode() + type.hashCode();
     }
