@@ -83,7 +83,7 @@ public class MainFrame extends JFrame {
   private OutputPane _outputPane;
   private InteractionsPane _interactionsPane;
   
-  private JTextField _fileNameField;
+  private JLabel _fileNameField;
   private JTabbedPane _tabbedPane;
   private JSplitPane _docSplitPane;
   private JList _docList;
@@ -819,8 +819,9 @@ public class MainFrame extends JFrame {
    * Sets up the status bar with the filename field.
    */
   private void _setUpStatusBar() {
-    _fileNameField = new JTextField();
-    _fileNameField.setEditable(false);
+    _fileNameField = new JLabel();
+    _fileNameField.setFont(_fileNameField.getFont().deriveFont(Font.PLAIN));
+    _fileNameField.setBorder(new javax.swing.border.EmptyBorder(2,2,2,2));
     getContentPane().add(_fileNameField, BorderLayout.SOUTH);
   }
 
