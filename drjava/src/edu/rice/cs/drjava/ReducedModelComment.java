@@ -455,7 +455,6 @@ public class ReducedModelComment implements ReducedModelStates {
   * @param length the length of the inserted text
   */
   public void _insertGap(int length) {
-    //0 - a
     if (_cursor.atStart()) {
       if (_gapToRight()) {
         _cursor.next();
@@ -465,7 +464,6 @@ public class ReducedModelComment implements ReducedModelStates {
         _insertNewGap(length);//inserts gap and goes to next item
       }
     }
-    //0 - b
     else if (_cursor.atEnd()) {
       if (_gapToLeft()) {
         _augmentGapToLeft(length);
@@ -476,17 +474,25 @@ public class ReducedModelComment implements ReducedModelStates {
         _insertNewGap(length); //inserts gap and moves to next item
       }
     }
-    
-    //5
     //offset should never be greater than 1 here because JAVA only has 2
-    //char comments
-    else if (_cursor.current().isMultipleCharBrace() && (_offset > 0)) {
-      if (_offset > 1) {
-        throw new IllegalArgumentException("OFFSET TOO BIG:  " +
-                                           _offset);
-      }
-      _breakComment(_cursor);
-      _insertNewGap(length);  //inserts gap and goes to next item
+    //char comments  
+    else if (_cursor.current().isMultipleCharBrace() && (_offset > 0)) {    
+      if (_offset > 1) {      
+        throw new IllegalArgumentException("OFFSET TOO BIG:  " + _offset);  
+      }    
+      _splitCurrentIfCommentBlock(true, true, _cursor);      
+      _cursor.next();
+      _insertNewGap(length);  //inserts gap and goes to next item  
+      // we have to go back two tokens; we don't want to use move because it could
+      // throw us past start if there was only one character before us and we went
+      // the usual 2 spaces before.  There would have to be a check and a branch
+      // depending on conditions that way.
+      _cursor.prev();
+      _cursor.prev();
+      _updateBasedOnCurrentState();   
+      // restore cursor state
+      _cursor.next();
+      _cursor.next();
       return;
     }
     
@@ -650,38 +656,7 @@ public class ReducedModelComment implements ReducedModelStates {
     _offset = 0;
   }
   
-  /**
-   * Breaks a multiple char brace apart and performs an update on the
-   * following ReducedTokens.
-   * _breakComment only works on multiple character braces.
-   * Given a multiple character brace of size 2 (/ /, / *, * /, \", \\),
-   * get the first and second characters in the brace and call them first
-   * and second.
-   *
-   * <OL>
-   *  <li> Set the type of the brace to the second character.
-   *  <li> Set the state using getStateAtCurrent().
-   *  <li> Insert a new brace of the type denoted by the first character.
-   *  <li> Move next and walk.  We have to move next so we don't unite
-   *       the newly split braces.
-   * </OL>
-   */
-  private void _breakComment(ModelList<ReducedToken>.Iterator copyCursor) {
-    if (copyCursor.current().isMultipleCharBrace()) {
-      String type = copyCursor.current().getType();
-      String first = type.substring(0,1);
-      String second = type.substring(1,2);
-      copyCursor.current().setType(second);
-      copyCursor.current().setState(getStateAtCurrent());
-      copyCursor.insert(Brace.MakeBrace(first, getStateAtCurrent()));
-      copyCursor.next();
-      _updateBasedOnCurrentState();
-    }
-    else {
-      throw new RuntimeException("_breakComment miscalled!");
-    }      
-  }
-  
+
   
   /**
   * USE RULES:
@@ -1428,6 +1403,7 @@ public class ReducedModelComment implements ReducedModelStates {
                                int delToSizeCurr, String delToTypeCurr,
                                ModelList<ReducedToken>.Iterator delTo)
   {      
+    int offset;
     int delToSizeChange = delTo.current().getSize();
     String delToTypeChange = delTo.current().getType();
     
@@ -1456,88 +1432,71 @@ public class ReducedModelComment implements ReducedModelStates {
     //         //*__\n// becoming ////   , the // is broken
     //THIS MUST HAVE THE previous items size and type passed in from
     //before the update. This way we know how it's changing too.
-    
-    // case of /
-    if (delToTypePrev.equals("/")) {
-      //  /-/* becoming //-*
-      if(delToTypeCurr.equals("/*") && 
-         _checkPrevEquals(delTo,"//")) { //because pointer will be at *
-           delTo.prev();
-           return 1;
-         }
-      else if (delToTypeCurr.equals("//") &&
-               _checkPrevEquals(delTo,"//")) {
-                 delTo.prev();
-                 return 1;
-               }
-      else if (delToTypeCurr.equals("*/") && //changed
-               delTo.current().getType().equals("/*")) {                    
-                 return 1;
-               }
-      else if (delToTypeCurr.equals("*") &&
-               delTo.current().getType().equals("/*")) {
-                 return 1;
-               }
-      else if (delToTypeCurr.equals("/") &&
-               delTo.current().getType().equals("//")) {
-                 return 1;
-               }
+         
+    // In this if clause, special characters are initially separated by some text
+    // (represented here as ellipses), and when the text is deleted, the special
+    // characters come together.  Sometimes, this breaks up the second token if
+    // it is a multiple character brace.  Each in-line comment demonstrates
+    // the individual case that occurs and for which we check with this if.
+    // In this branch, both the cursor is off and the offset is also not correct.
+    if (((delToTypePrev.equals("/")) &&
+         // /.../* => //-*
+         ((delToTypeCurr.equals("/*") && 
+           _checkPrevEquals(delTo,"//")) ||
+          // /...// => //-/
+          (delToTypeCurr.equals("//") &&
+           _checkPrevEquals(delTo,"//")))) ||
+        
+        ((delToTypePrev.equals("*")) &&
+         // *.../* => */-*
+         ((delToTypeCurr.equals("/*") && 
+           _checkPrevEquals(delTo,"*/")) ||
+          // *...// => */-/
+          (delToTypeCurr.equals("//") &&
+           _checkPrevEquals(delTo,"*/")))) ||
+        
+        ((delToTypePrev.equals("\\")) &&
+         // \...\\ => \\-\
+         ((delToTypeCurr.equals("\\\\") && 
+           _checkPrevEquals(delTo,"\\")) ||
+          // \...\' => \\-'
+          (delToTypeCurr.equals("\\'") &&
+           _checkPrevEquals(delTo,"'")) ||
+          // \...\" => \\-"
+          (delToTypeCurr.equals("\\\"") &&
+           _checkPrevEquals(delTo,"\""))))) {
+             delTo.prev();
+             offset = 1;
+           }
+    // In this branch, the cursor is on the right token, but the offset is not correct. 
+    else if (((delToTypePrev.equals("/")) &&
+              // /-*/
+              ((delToTypeCurr.equals("*/") && 
+                delTo.current().getType().equals("/*")) ||
+               (delToTypeCurr.equals("*") &&
+                delTo.current().getType().equals("/*")) ||
+               (delToTypeCurr.equals("/") &&
+                delTo.current().getType().equals("//")))) ||
+             
+             ((delToTypePrev.equals("*")) &&
+              ((delToTypeCurr.equals("/") &&
+                delTo.current().getType().equals("*/")))) ||
+             
+             ((delToTypePrev.equals("\\")) &&
+              ((delToTypeCurr.equals("\\") &&
+                delTo.current().getType().equals("\\\\")) ||
+               (delToTypeCurr.equals("'") &&
+                delTo.current().getType().equals("\\'")) ||
+               (delToTypeCurr.equals("\"") &&
+                delTo.current().getType().equals("\\\""))))) {
+                  offset = 1;
+                }
+    // otherwise, we're on the right token and our offset is correct 
+    // because no recombinations occurred
+    else {
+      offset = 0;
     }
-    //case of *
-    else if (delToTypePrev.equals("*")) {
-      //  /-/* becoming //-*
-      if(delToTypeCurr.equals("/*") && 
-         _checkPrevEquals(delTo,"*/")) { //because pointer will be at *
-           delTo.prev();
-           return 1;
-         }
-      else if (delToTypeCurr.equals("//") &&
-               _checkPrevEquals(delTo,"*/")) {
-                 delTo.prev();
-                 return 1;
-               }
-      else if (delToTypeCurr.equals("/") &&
-               delTo.current().getType().equals("*/")) {
-                 return 1;              
-               }
-    }
-    else if (delToTypePrev.equals("\\")){
-      if(delToTypeCurr.equals("\\\\") && 
-         _checkPrevEquals(delTo,"\\")) { //because pointer will be at *
-           delTo.prev();
-           return 1;
-         }
-      else if (delToTypeCurr.equals("\\'") &&
-               _checkPrevEquals(delTo,"'")) {
-                 delTo.prev();
-                 return 1;
-               }      
-      else if (delToTypeCurr.equals("\\\"") &&
-               _checkPrevEquals(delTo,"\"")) {
-                 delTo.prev();
-                 return 1;
-               }
-      else if (delToTypeCurr.equals("\\") &&
-               delTo.current().getType().equals("\\\\")) 
-               {
-                 return 1;
-               }
-
-      else if (delToTypeCurr.equals("'") &&
-               delTo.current().getType().equals("\\'"))
-               {
-                 return 1;
-               }
-
-      else if (delToTypeCurr.equals("\"") &&
-               delTo.current().getType().equals("\\\""))
-               {
-                 return 1;
-               }
-      
-    }
-    
-    return 0;
+    return offset;
   }
   
   /**
