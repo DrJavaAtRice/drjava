@@ -343,7 +343,7 @@ public class DrJava implements OptionConstants {
     if (jsr14 != FileOption.NULL_FILE) {
       try {
         JarFile jsr14jar = new JarFile(jsr14);
-        String fs = System.getProperty("file.separator");
+        String fs = "/"; // In jar files, the file separator is always '/'
         String checkClass = "com" + fs + "sun" + fs + "tools" + fs + "javac" + fs + "comp" + fs + "Check.class";
         if (jsr14jar.getJarEntry(checkClass) != null) {
           return true;
