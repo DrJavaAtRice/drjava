@@ -314,9 +314,9 @@ public class MainFrame extends JFrame implements OptionConstants {
       _openChooser.resetChoosableFileFilters();
       _openChooser.setFileFilter(_projectFilter);
       File[] retFiles = getOpenFiles(_openChooser);
-      _openChooser.removeChoosableFileFilter(_projectFilter);
-      
-      _openChooser.addChoosableFileFilter(_projectFilter);
+      _openChooser.removeChoosableFileFilter(_projectFilter);      // why both???
+                                                                   //         ???
+      _openChooser.addChoosableFileFilter(_projectFilter);         //         ???
       _openChooser.setFileFilter(_javaSourceFilter);
       return retFiles;
     }
@@ -1956,7 +1956,10 @@ public class MainFrame extends JFrame implements OptionConstants {
   }
 
   private void _open() {
-    open(_openSelector);
+    if(_openChooser.getFileFilter().equals(_projectFilter))
+      openProject(_openSelector);
+    else
+      open(_openSelector);
   }
   
   /**
@@ -1978,9 +1981,13 @@ public class MainFrame extends JFrame implements OptionConstants {
    * project
    */
   private void _openProject() {
+    openProject(_openProjectSelector);
+  }
+  
+  private void openProject(FileOpenSelector projectSelector) {
     try {
       hourglassOn();
-      final File[] file = _openProjectSelector.getFiles();
+      final File[] file = projectSelector.getFiles();
       if( file.length < 1 ) {
         throw new IllegalStateException("Open project file selection not canceled but no project file was selected.");
       }

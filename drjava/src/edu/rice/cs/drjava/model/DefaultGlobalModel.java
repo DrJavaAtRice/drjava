@@ -662,7 +662,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
 
     return odd;
   }
-
+  
   /**
    * Note that .getFile called on the returned OpenDefinitionsDocument
    * is guaranteed to return an absolute path, as this method makes
@@ -679,11 +679,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     return _openFiles(files);
     
   }
-
   
-  /**
-   * Refactored code to allow for recursive call if project file is being opened
-   */
   private OpenDefinitionsDocument _openFiles(File[] files) 
   throws IOException, OperationCanceledException, AlreadyOpenException {
     AlreadyOpenException storedAOE = null;
@@ -693,20 +689,15 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       if (files[i] == null) {
         throw new IOException("File name returned from FileSelector is null");
       }
-      if(files[i].getName().endsWith(".pjt")) {
-        retDoc = _openFiles(openProject(files[i]));
+      try {
+        //always return last opened Doc
+        retDoc = _openFile(files[i].getAbsoluteFile());
       }
-      else {
-        try {
-          //always return last opened Doc
-          retDoc = _openFile(files[i].getAbsoluteFile());
-        }
-        catch (AlreadyOpenException aoe) {
-          retDoc = aoe.getOpenDocument();
-          //Remember the first AOE
-          if (storedAOE == null) {
-            storedAOE = aoe;
-          }
+      catch (AlreadyOpenException aoe) {
+        retDoc = aoe.getOpenDocument();
+        //Remember the first AOE
+        if (storedAOE == null) {
+          storedAOE = aoe;
         }
       }
     }
