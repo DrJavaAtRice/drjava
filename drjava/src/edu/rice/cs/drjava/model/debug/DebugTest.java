@@ -1480,7 +1480,16 @@ public final class DebugTest extends DebugTestCase
     assertEquals("watch value incorrect", "10", watches.elementAt(2).getValue());
     assertEquals("watch value incorrect", "12", watches.elementAt(3).getValue());
     assertEquals("watch value incorrect", DebugWatchData.NO_VALUE, watches.elementAt(4).getValue());
-    
+
+    interpret("innerFoo = 0");
+    watches = _debugger.getWatches();
+    assertEquals("watch name incorrect", "innerFoo", watches.elementAt(1).getName());
+    assertEquals("watch value incorrect", "0", watches.elementAt(1).getValue());
+
+    interpret("innerFoo = 8");
+    assertEquals("watch name incorrect", "innerFoo", watches.elementAt(1).getName());
+    assertEquals("watch value incorrect", "8", watches.elementAt(1).getValue());
+
     if (printMessages) {
       System.out.println("second step");
     }
