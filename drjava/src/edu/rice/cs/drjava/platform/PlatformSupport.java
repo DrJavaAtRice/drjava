@@ -44,6 +44,7 @@ import javax.swing.Action;
 /**
  * Central interface for all platform-specific code in DrJava.
  * A default platform-neutral implementation is provided in DefaultPlatform.
+ * @version $Id$
  * @see DefaultPlatform
  */
 public interface PlatformSupport {

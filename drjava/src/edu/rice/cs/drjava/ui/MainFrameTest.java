@@ -42,10 +42,13 @@ package edu.rice.cs.drjava.ui;
 import  junit.framework.*;
 import  junit.extensions.*;
 
+import java.awt.*;
+import java.awt.datatransfer.*;
 import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.text.*;
 import java.rmi.registry.Registry;
+import java.io.IOException;
 
 import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.model.definitions.*;
@@ -129,6 +132,84 @@ public class MainFrameTest extends TestCase {
     doc = pane.getOpenDocument().getDocument();
     assertEquals("Location of old document", 3, doc.getCurrentLocation());
   }
+  
+  /**
+   * Tests that the clipboard is unmodified after a "clear line" action.
+   * NOTE: Commented out for commit because of failures, despite proper behavior in GUI.
+   *       This may not work unless the textpane is visible.
+   *
+  public void testClearLine()
+    throws BadLocationException, UnsupportedFlavorException, IOException {
+    // First, copy some data out of the main document.
+    DefinitionsPane pane = _frame.getCurrentDefPane();
+    DefinitionsDocument doc = pane.getOpenDocument().getDocument();
+    doc.insertString(0, "abcdefg", null);
+    pane.setCaretPosition(5);
+    
+    ActionMap actionMap = pane.getActionMap();
+    actionMap.get(DefaultEditorKit.selectionEndLineAction).actionPerformed
+      (new ActionEvent(this, 0, "SelectionEndLine"));
+    _frame.cutAction.actionPerformed(new ActionEvent(this, 0, "Cut"));
+    
+    // Get a copy of the current clipboard.
+    Clipboard clip = Toolkit.getDefaultToolkit().getSystemClipboard();
+    Transferable contents = clip.getContents(null);
+    String data = (String) contents.getTransferData(DataFlavor.stringFlavor);
+    
+    // Trigger the Clear Line action from a new position.
+    pane.setCaretPosition(2);
+    _frame._clearLineAction.actionPerformed
+      (new ActionEvent(this, 0, "Clear Line"));
+    
+    // Verify that the clipboard contents are still the same.
+    contents = clip.getContents(null);
+    String newData = (String) contents.getTransferData(DataFlavor.stringFlavor);
+    assertEquals("Clipboard contents should be unchanged after Clear Line.",
+                 data, newData);
+    
+    // Verify that the document text is what we expect.
+    assertEquals("Current line of text should be truncated by Clear Line.",
+                 "ab", doc.getText(0, doc.getLength()));
+  }
+  */
+  
+  /**
+   * Tests that the clipboard is modified after a "cut line" action.
+   * NOTE: Commented out for commit because of failures, despite proper behavior in GUI.
+   *       This may not work unless the textpane is visible.
+   *
+  public void testCutLine()
+    throws BadLocationException, UnsupportedFlavorException, IOException {
+    // First, copy some data out of the main document.
+    DefinitionsPane pane = _frame.getCurrentDefPane();
+    DefinitionsDocument doc = pane.getOpenDocument().getDocument();
+    doc.insertString(0, "abcdefg", null);
+    pane.setCaretPosition(5);
+    
+    ActionMap actionMap = pane.getActionMap();
+    actionMap.get(DefaultEditorKit.selectionEndLineAction).actionPerformed
+      (new ActionEvent(this, 0, "SelectionEndLine"));
+    _frame.cutAction.actionPerformed(new ActionEvent(this, 0, "Cut"));
+    
+    // Get a copy of the current clipboard.
+    
+    // Trigger the Cut Line action from a new position.
+    pane.setCaretPosition(2);
+    _frame._cutLineAction.actionPerformed
+      (new ActionEvent(this, 0, "Cut Line"));
+    
+    // Verify that the clipboard contents are what we expect.
+    Clipboard clip = Toolkit.getDefaultToolkit().getSystemClipboard();
+    Transferable contents = clip.getContents(null);
+    String data = (String) contents.getTransferData(DataFlavor.stringFlavor);
+    assertEquals("Clipboard contents should be changed after Cut Line.",
+                 "cdefg", data);
+    
+    // Verify that the document text is what we expect.
+    assertEquals("Current line of text should be truncated by Cut Line.",
+                 "ab", doc.getText(0, doc.getLength()));
+  }
+  */
 
   /**
    * Make sure that the InteractionsPane is displaying the correct

@@ -271,6 +271,21 @@ public interface OptionConstants {
                         KeyStroke.getKeyStroke(KeyEvent.VK_TAB, mask)); */
   
   /**
+   * The key binding for commenting out lines
+   */
+  public static final KeyStrokeOption KEY_COMMENT_LINES =
+    new KeyStrokeOption("key.comment.lines", 
+                        KeyStroke.getKeyStroke(KeyEvent.VK_SLASH, mask));
+  
+  /**
+   * The key binding for un-commenting lines
+   */
+  public static final KeyStrokeOption KEY_UNCOMMENT_LINES =
+    new KeyStrokeOption("key.uncomment.lines", 
+                        KeyStroke.getKeyStroke(KeyEvent.VK_SLASH,
+                                               (mask | InputEvent.ALT_MASK)));
+    
+  /**
    * The key binding for selecting previous document
    */
   public static final KeyStrokeOption KEY_PREVIOUS_DOCUMENT =
@@ -407,11 +422,20 @@ public interface OptionConstants {
   public static final KeyStrokeOption KEY_PAGE_UP =
     new KeyStrokeOption("key.page.up", 
                         KeyStroke.getKeyStroke(KeyEvent.VK_PAGE_UP, 0));
+  
   /**
    * The key binding for cutting a line
    */
   public static final KeyStrokeOption KEY_CUT_LINE =
     new KeyStrokeOption("key.cut.line", 
+                        KeyStroke.getKeyStroke(KeyEvent.VK_K, 
+                                               (mask | InputEvent.ALT_MASK)));
+  
+  /**
+   * The key binding for clearing a line, emacs-style
+   */
+  public static final KeyStrokeOption KEY_CLEAR_LINE =
+    new KeyStrokeOption("key.clear.line", 
                         KeyStroke.getKeyStroke(KeyEvent.VK_K, mask));
   
   /**

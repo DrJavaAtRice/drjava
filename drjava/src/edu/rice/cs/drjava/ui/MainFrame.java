@@ -497,6 +497,32 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
   };
   
+  /**
+   * Action for commenting out a block of text using wing comments.
+   */
+  private Action _commentLinesAction = new AbstractAction("Comment Out Line(s)")
+  {
+    public void actionPerformed(ActionEvent ae) {
+      // Delegate everything to the DefinitionsDocument.
+      int start = _currentDefPane.getSelectionStart();
+      int end = _currentDefPane.getSelectionEnd();
+      _model.getActiveDocument().getDocument().commentLines(start, end);
+    }
+  };
+  
+  /**
+   * Action for un-commenting a block of commented text.
+   */
+  private Action _unCommentLinesAction = new AbstractAction("Uncomment Line(s)")
+  {
+    public void actionPerformed(ActionEvent ae) {
+      // Delegate everything to the DefinitionsDocument.
+      int start = _currentDefPane.getSelectionStart();
+      int end = _currentDefPane.getSelectionEnd();
+      _model.getActiveDocument().getDocument().unCommentLines(start, end);
+    }
+  };
+  
   
   /** Clears DrJava's output console. */
   private Action _clearOutputAction = new AbstractAction("Clear Console") {
@@ -664,8 +690,29 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
   };
   
-  /** Cuts from the caret to the end of the line to the clipboard. */
-  private Action _cutLineAction = new AbstractAction("Cut Line")
+  /** Cuts from the caret to the end of the current line to the clipboard. */
+  protected Action _cutLineAction = new AbstractAction("Cut Line")
+  {
+    public void actionPerformed(ActionEvent ae) {
+      ActionMap _actionMap = _currentDefPane.getActionMap();
+      int oldCol = _model.getActiveDocument().getDocument().getCurrentCol();
+      _actionMap.get(DefaultEditorKit.selectionEndLineAction).actionPerformed(ae);
+      // if oldCol is equal to the current column, then selectionEndLine did
+      // nothing, so we're at the end of the line and should remove the newline
+      // character
+      if (oldCol == _model.getActiveDocument().getDocument().getCurrentCol()) {
+        // Puts newline character on the clipboard also, not just content as before.
+        _actionMap.get(DefaultEditorKit.selectionForwardAction).actionPerformed(ae);
+        cutAction.actionPerformed(ae);
+      }
+      else {
+        cutAction.actionPerformed(ae);
+      }
+    }
+  };
+  
+  /** Deletes text from the caret to the end of the current line. */
+  protected Action _clearLineAction = new AbstractAction("Clear Line")
   {
     public void actionPerformed(ActionEvent ae) {
       ActionMap _actionMap = _currentDefPane.getActionMap();
@@ -678,7 +725,10 @@ public class MainFrame extends JFrame implements OptionConstants {
         _actionMap.get(DefaultEditorKit.deleteNextCharAction).actionPerformed(ae);
       }
       else {
+        java.awt.datatransfer.Clipboard clip = Toolkit.getDefaultToolkit().getSystemClipboard();
+        java.awt.datatransfer.Transferable contents = clip.getContents(null);
         cutAction.actionPerformed(ae);
+        clip.setContents(contents, null);
       }
     }
   };
@@ -2063,10 +2113,12 @@ public class MainFrame extends JFrame implements OptionConstants {
     _addMenuItem(editMenu, pasteAction, KEY_PASTE);
     _addMenuItem(editMenu, _selectAllAction, KEY_SELECT_ALL);
 
-    // Indent lines
+    // Indent lines, comment lines
     editMenu.addSeparator();
     //_addMenuItem(editMenu, _indentLinesAction, KEY_INDENT);
     editMenu.add(_indentLinesAction);
+    _addMenuItem(editMenu, _commentLinesAction, KEY_COMMENT_LINES);
+    _addMenuItem(editMenu, _unCommentLinesAction, KEY_UNCOMMENT_LINES);
     
     // Find/replace, goto
     editMenu.addSeparator();
@@ -3625,6 +3677,12 @@ public class MainFrame extends JFrame implements OptionConstants {
                                     _actionMap.get(DefaultEditorKit.pageUpAction), null, "Page Up");
     KeyBindingManager.Singleton.put(KEY_CUT_LINE, 
                                     _cutLineAction, null, "Cut Line");
+    KeyBindingManager.Singleton.put(KEY_CLEAR_LINE, 
+                                    _clearLineAction, null, "Clear Line");
+    KeyBindingManager.Singleton.put(KEY_COMMENT_LINES, 
+                                    _commentLinesAction, null, "Comment Out Line(s)");
+    KeyBindingManager.Singleton.put(KEY_UNCOMMENT_LINES, 
+                                    _unCommentLinesAction, null, "Uncomment Line(s)");
     KeyBindingManager.Singleton.put(KEY_DELETE_PREVIOUS, 
                                     _actionMap.get(DefaultEditorKit.deletePrevCharAction), null, "Delete Previous");
     KeyBindingManager.Singleton.put(KEY_DELETE_NEXT, 

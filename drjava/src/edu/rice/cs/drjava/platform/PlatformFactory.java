@@ -42,6 +42,7 @@ package edu.rice.cs.drjava.platform;
 /**
  * Factory class for accessing the appropriate platform-specific implementation
  * of the PlatformSupport interface.
+ * @version $Id$
  * @see PlatformSupport
  */
 public class PlatformFactory {

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist SYSTEM "file://localhost/System/Library/DTDs/PropertyList.dtd">
-<plist version="0.9">
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
 <dict>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>English</string>
@@ -32,8 +32,8 @@
 		<dict>
 			<key>com.apple.hw.accellist</key>
 			<string>ATIRage128_8388608,ATIRage128_16777216,ATIRadeon_16777216,ATIRage128_33554432,ATIRadeon_33554432,ATIRadeon8500_67108864,NVidia11_33554432,NVidia20_67108864,NVidia20_134217728</string>
-			<key>com.apple.macos.useScreenMenuBar</key>
-			<string>true</string>
+			<key>com.apple.mrj.application.JVMVersion</key>
+			<string>1.3+</string>
 			<key>com.apple.mrj.application.apple.menu.about.name</key>
 			<string>DrJava</string>
 			<key>com.apple.mrj.application.classloading.verbose</key>

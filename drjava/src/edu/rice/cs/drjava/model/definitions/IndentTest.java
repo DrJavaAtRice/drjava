@@ -131,6 +131,68 @@ public class IndentTest extends TestCase {
   }
   
   /**
+   * Test case for SourceForge bug# 681203.
+   * NOTE: This test is commented out because the bug is still open, but it
+   *       doesn't disrupt normal editing operations.
+   */
+//   public void testOnBeginCommentLine() throws BadLocationException {
+//     _text = 
+//       "/**\n" + 
+//       " comments here blah blah\n" +
+//       " */";
+//
+//     _aligned = 
+//       "/**\n" +
+//       " * comments here blah blah\n" +
+//       " */";
+// 
+//     _setDocText(_text);
+//     _doc.indentLines(0, 0); // Does nothing.
+//     System.out.println(_doc.getText(0, _doc.getLength()));
+//     assertEquals("First line is already properly indented.", _text.length(), _doc.getLength());
+//     _doc.indentLines(_doc.getLength()-2, _doc.getLength()); // Does nothing.
+//     assertEquals("Last line is already properly indented.", _text.length(), _doc.getLength());
+//     _doc.indentLines(0, _doc.getLength()); // Aligns second line.
+//     System.out.println(_aligned);
+//     System.out.println(_doc.getText(0, _doc.getLength()));
+//     
+//     assertEquals("Second line indented with asterisk.", _aligned, _doc.getText(0, _doc.getLength()));
+//   }
+    
+  /**
+   * Test case for SourceForge bug# 681203.
+   * NOTE: This test is commented out because the bug is still open, but it
+   *       doesn't disrupt normal editing operations.
+   */
+//   public void testNotOnBeginCommentLine() throws BadLocationException {
+// 
+//     _text = 
+//       "/**\n" +
+//       " * other comments\n" +
+//       "comments here blah blah\n" +
+//       " */";
+//
+//     _aligned = 
+//       "/**\n" +
+//       " * other comments\n" +
+//       " * comments here blah blah\n" +
+//       " */";
+//  
+//     _setDocText(_text);
+//     _doc.indentLines(0, 0); // Does nothing.
+//     assertEquals("First line is already properly indented.", _text.length(), _doc.getLength());
+//     _doc.indentLines(0, 5); // Does nothing.
+//     assertEquals("Second line is already properly indented.", _text.length(), _doc.getLength());
+//     _doc.indentLines(_doc.getLength()-2, _doc.getLength()); // Does nothing.
+//     assertEquals("Last line is already properly indented.", _text.length(), _doc.getLength());
+//     _doc.indentLines(0, _doc.getLength()); // Aligns third line.
+//     System.out.println(_aligned);
+//     System.out.println(_doc.getText(0, _doc.getLength()));
+//     
+//     assertEquals("Third line indented with asterisk.", _aligned, _doc.getText(0, _doc.getLength()));
+//   }
+  
+  /**
    * Regression test for paren phrases.
    */
   public void testIndentParenPhrases() throws BadLocationException {

@@ -44,6 +44,7 @@ import javax.swing.*;
 /**
  * Default platform-neutral implementation of PlatformSupport.  Most implementations
  * will extend this class to inherit default behaviors.
+ * @version $Id$
  */
 class DefaultPlatform implements PlatformSupport {
   /**

@@ -522,7 +522,23 @@ public class DefinitionsPane extends JEditorPane
     });
     _popMenu.add(indentItem);
     
-    if (_mainFrame.getModel().getDebugger() != null) {
+    JMenuItem commentLinesItem = new JMenuItem("Comment Out Line(s)");
+    commentLinesItem.addActionListener ( new AbstractAction() {
+      public void actionPerformed( ActionEvent ae) {
+        _commentLines();
+      }
+    });
+    _popMenu.add(commentLinesItem);
+    
+    JMenuItem unCommentLinesItem = new JMenuItem("Uncomment Line(s)");
+    unCommentLinesItem.addActionListener ( new AbstractAction() {
+      public void actionPerformed( ActionEvent ae) {
+        _unCommentLines();
+      }
+    });
+    _popMenu.add(unCommentLinesItem);
+    
+    if (_mainFrame.getModel().getDebugger().isAvailable()) {
       _popMenu.addSeparator();
       
       // Breakpoint
@@ -591,6 +607,20 @@ public class DefinitionsPane extends JEditorPane
    */
   private void _indentLines() {
     _doc.indentLinesInDefinitions(getSelectionStart(), getSelectionEnd());
+  }
+  
+  /**
+   *  Comments out the lines contained within the given selection.
+   */
+  private void _commentLines() {
+    _doc.commentLinesInDefinitions(getSelectionStart(), getSelectionEnd());
+  }
+  
+  /**
+   *  Uncomments the lines contained within the given selection.
+   */
+  private void _unCommentLines() {
+    _doc.unCommentLinesInDefinitions(getSelectionStart(), getSelectionEnd());
   }
   
   
@@ -892,7 +922,7 @@ public class DefinitionsPane extends JEditorPane
     // Show a wait cursor for reasonable sized blocks
     boolean showWaitCursor = selEnd > (selStart + 100);
 
-    // Temporary hack because of slow indent...
+    // XXX: Temporary hack because of slow indent...
     //  Prompt if more than 10000 characters to be indented
     boolean doIndent = true;
     if (selEnd > (selStart + 10000)) {

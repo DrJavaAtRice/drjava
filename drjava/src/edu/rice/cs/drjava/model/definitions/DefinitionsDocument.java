@@ -684,7 +684,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
   /**
    * Get the current location of the cursor in the document.
    * Unlike the usual swing document model, which is stateless, because of our implementation
-   * of the underlying reduced model, we need to keep track fo the current location.
+   * of the underlying reduced model, we need to keep track of the current location.
    * @return where the cursor is as the number of characters into the document
    */
   public int getCurrentLocation() {
@@ -1589,6 +1589,182 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
    */
   private void _indentLine() {
     _indenter.indent(this);
+  }
+  
+  /**
+   * Comments out all lines between selStart and selEnd, inclusive.
+   * The current cursor position is maintained after the operation.
+   * @param selStart the document offset for the start of the selection
+   * @param selEnd the document offset for the end of the selection
+   */
+  public void commentLines(int selStart, int selEnd) {
+    try {
+      if (selStart == selEnd) {
+        Position oldCurrentPosition = createPosition(_currentLocation);
+        _commentLine();
+        //int caretPos = getCaretPosition();
+        //_doc().setCurrentLocation(caretPos);
+        setCurrentLocation(oldCurrentPosition.getOffset());
+      }
+      else {
+        _commentBlock(selStart, selEnd);
+      }
+    }
+    catch (BadLocationException e) {
+      throw new UnexpectedException(e);
+    }
+  }
+  
+  /**
+   * Comments out the lines between and including the lines containing
+   * points start and end, using wing comments -- "// ".
+   * @param start Position in document to start commenting from
+   * @param end Position in document to end commenting at
+   */
+  private synchronized void _commentBlock(final int start, final int end) {
+    //DrJava.consoleOut().println("commenting out block of " + (end-start));
+    try {
+      // Keep marker at the end. This Position will be the
+      // correct endpoint no matter how we change the doc
+      // doing the indentLine calls.
+      final Position endPos = this.createPosition(end);
+      // Iterate, line by line, until we get to/past the end
+      int walker = start;
+      while (walker < endPos.getOffset()) {
+        setCurrentLocation(walker);
+        // Keep pointer to walker position that will stay current
+        // regardless of how commentLine changes things
+        Position walkerPos = this.createPosition(walker);
+        // Comment out current line
+        _commentLine();
+        
+        // Move back to walker spot
+        setCurrentLocation(walkerPos.getOffset());
+        walker = walkerPos.getOffset();
+        // Adding 1 makes us point to the first character AFTER the next newline.
+        // We don't actually move yet. That happens at the top of the loop,
+        // after we check if we're past the end.
+        walker += _reduced.getDistToNextNewline() + 1;
+        //DrJava.consoleOut().println("progress: " + (100*(walker-start)/(end-start)));
+      }
+    } catch (BadLocationException e) {
+      // Should not happen
+      throw new UnexpectedException(e);
+    }
+  }
+  
+  /**
+   * Comments out a single line with wing comments -- "// ".
+   */
+  private void _commentLine() {
+    // Insert "// " at the beginning of the line.
+    // Using null for AttributeSet follows convention in this class.
+    try {
+      insertString(getCurrentLocation() - getCurrentCol(), "// ", null);
+    } catch (BadLocationException e) {
+      // Should not happen
+      throw new UnexpectedException(e);
+    }
+  }
+  
+  /**
+   * Uncomments all lines between selStart and selEnd, inclusive.
+   * The current cursor position is maintained after the operation.
+   * @param selStart the document offset for the start of the selection
+   * @param selEnd the document offset for the end of the selection
+   */
+  public void unCommentLines(int selStart, int selEnd) {
+    try {
+      if (selStart == selEnd) {
+        Position oldCurrentPosition = createPosition(_currentLocation);
+        _unCommentLine();
+        //int caretPos = getCaretPosition();
+        //_doc().setCurrentLocation(caretPos);
+        setCurrentLocation(oldCurrentPosition.getOffset());
+      }
+      else {
+        _unCommentBlock(selStart, selEnd);
+      }
+    }
+    catch (BadLocationException e) {
+      throw new UnexpectedException(e);
+    }
+  }
+  
+  /**
+   * Uncomments all lines between and including the lines containing
+   * points start and end.
+   * @param start Position in document to start commenting from
+   * @param end Position in document to end commenting at
+   */
+  private synchronized void _unCommentBlock(final int start, final int end) {
+    //DrJava.consoleOut().println("uncommenting block of " + (end-start));
+    try {
+      // Keep marker at the end. This Position will be the
+      // correct endpoint no matter how we change the doc
+      // doing the indentLine calls.
+      final Position endPos = this.createPosition(end);
+      // Iterate, line by line, until we get to/past the end
+      int walker = start;
+      while (walker < endPos.getOffset()) {
+        setCurrentLocation(walker);
+        // Keep pointer to walker position that will stay current
+        // regardless of how commentLine changes things
+        Position walkerPos = this.createPosition(walker);
+        // unComment current line
+        _unCommentLine();
+        
+        // Move back to walker spot
+        setCurrentLocation(walkerPos.getOffset());
+        walker = walkerPos.getOffset();
+        // Adding 1 makes us point to the first character AFTER the next newline.
+        // We don't actually move yet. That happens at the top of the loop,
+        // after we check if we're past the end.
+        walker += _reduced.getDistToNextNewline() + 1;
+        //DrJava.consoleOut().println("progress: " + (100*(walker-start)/(end-start)));
+      }
+    } catch (BadLocationException e) {
+      // Should not happen
+      throw new UnexpectedException(e);
+    }
+  }
+  
+  /**
+   * Uncomments a single line.  This simply looks for a leading "//".
+   * Also indents the line, once the comments have been removed.
+   */
+  private void _unCommentLine() {
+    try {
+      // Look for "//" at the beginning of the line, and remove it.
+      int curCol = getCurrentCol();
+      int lineStart = getCurrentLocation() - curCol;
+      String text = getText(lineStart, curCol + _reduced.getDistToNextNewline());
+      int pos = text.indexOf("//");
+      
+//      System.out.println("" + getCurrentLocation() + " " + curCol + " " 
+//                           + text + " " + pos + " " + _reduced.getDistToNextNewline());
+      
+      // Look for any non-whitespace chars before the "//" on the line.
+      boolean goodWing = true;
+      for (int i = pos-1; ((i >= 0) && goodWing); i--) {
+        char c = text.charAt(i);
+        // If a previous char is not whitespace, we're not looking at a wing comment.
+        if (!((c == ' ') || (c == ' ') || (c == ' '))) {
+          goodWing = false;
+        }
+      }
+      
+      // If a wing comment wasn't found, or if the wings aren't the first
+      // non-whitespace characters on the line, do nothing.
+      if ((pos >= 0) && goodWing) {
+        // Otherwise, remove the wings and indent.
+        remove(lineStart + pos, 2);
+        _indentLine();
+      }
+    } catch (BadLocationException e) {
+      // Should not happen
+      throw new UnexpectedException(e);
+    }
   }
   
   /**

@@ -242,6 +242,18 @@ public interface OpenDefinitionsDocument {
   public void indentLinesInDefinitions(int selStart, int selEnd);
 
   /**
+   * A forwarding method to comment out the current line or selection
+   * in the definitions.
+   */
+  public void commentLinesInDefinitions(int selStart, int selEnd);
+
+  /**
+   * A forwarding method to un-comment the current line or selection
+   * in the definitions.
+   */
+  public void unCommentLinesInDefinitions(int selStart, int selEnd);
+
+  /**
    * Create a find and replace mechanism starting at the current
    * character offset in the definitions.
    */
