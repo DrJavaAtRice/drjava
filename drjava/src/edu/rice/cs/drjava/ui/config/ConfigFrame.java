@@ -797,6 +797,8 @@ public class ConfigFrame extends JFrame {
                                                   "Whether to clear the Console output after resetting the Interactions Pane."));
     panel.addComponent(new BooleanOptionComponent(OptionConstants.ALLOW_PRIVATE_ACCESS, "Allow Access of Private Members in Interactions Pane", this,
                                                   "Whether to allow users to access private (and protected) fields and methods."));
+    panel.addComponent(new BooleanOptionComponent(OptionConstants.SHOW_SOURCE_WHEN_SWITCHING, "Show sample of source code when fast switching", this,
+                                                  "Whether to show a sample of the source code under the document's filename when fast switching documents."));
     panel.addComponent(new StringOptionComponent(OptionConstants.JVM_ARGS, "JVM Args for Interactions", this,
                                                  "The command-line arguments to pass to the Interactions JVM."));
 

@@ -248,7 +248,12 @@ public interface OptionConstants {
   public static final BooleanOption WINDOW_STORE_POSITION =
     new BooleanOption("window.store.position", Boolean.TRUE);
 
-
+  /**
+   * whether a sample of the source code will be show when fast switching documents
+   */
+  public static final BooleanOption SHOW_SOURCE_WHEN_SWITCHING = 
+    new BooleanOption("show.source.for.fast.switch", Boolean.TRUE);
+  
   /**
    * The current look and feel.
    */

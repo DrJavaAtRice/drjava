@@ -59,6 +59,7 @@ import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.model.definitions.DefinitionsEditorKit;
 import edu.rice.cs.drjava.model.repl.InteractionsEditorKit;
+import edu.rice.cs.drjava.CodeStatus;
 
 public class RecentDocFrame extends JWindow{
   // MainFrame
@@ -95,16 +96,59 @@ public class RecentDocFrame extends JWindow{
       updateFontColor();
     }
   };
-
+  
+  private OptionListener<Boolean> _antialiasListener = new OptionListener<Boolean>(){
+    public void optionChanged(OptionEvent<Boolean> oce){
+      updateFontColor();
+    }
+  };
+  
+  private OptionListener<Boolean> _showSourceListener = new OptionListener<Boolean>(){
+    public void optionChanged(OptionEvent<Boolean> oce){
+      _showSource = oce.value;
+    }
+  };
+  
+  /* if the pane should antialias itself */
+  boolean _antiAliasText = false;
+  
+  /* if we should show source code when switching */
+  boolean _showSource;
+  
   public RecentDocFrame(MainFrame f){
     super();
     _frame = f;
     _current = 0;
-    _label = new JLabel("...");
+    _label = new JLabel("..."){
+      // Enable anti-aliased text by overriding paintComponent.
+      protected void paintComponent(Graphics g) {
+        if (CodeStatus.DEVELOPMENT) {
+          if (_antiAliasText && g instanceof Graphics2D) {
+            Graphics2D g2d = (Graphics2D)g;
+            g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
+                                 RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+            System.out.println("anti-alias!");
+          }
+        }
+        super.paintComponent(g);
+      }
+    };
     _panel = new JPanel();
-
     _scroller = new JScrollPane();
-    _textpane = new JTextPane();
+    _textpane = new JTextPane(){
+      // Enable anti-aliased text by overriding paintComponent.
+      protected void paintComponent(Graphics g) {
+        if (CodeStatus.DEVELOPMENT) {
+          if (_antiAliasText && g instanceof Graphics2D) {
+            Graphics2D g2d = (Graphics2D)g;
+            g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
+                                 RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+            System.out.println("anti-alias!");
+          }
+        }
+        super.paintComponent(g);
+      }
+    };
     
     _textpane.setText("...");
     _scroller.getViewport().add(_textpane);
@@ -119,9 +163,12 @@ public class RecentDocFrame extends JWindow{
     getContentPane().add(_panel);
     pack();
     updateFontColor();
+    _showSource = DrJava.getConfig().getSetting(OptionConstants.SHOW_SOURCE_WHEN_SWITCHING);
     DrJava.getConfig().addOptionListener(OptionConstants.DEFINITIONS_BACKGROUND_COLOR, _colorListener);
     DrJava.getConfig().addOptionListener(OptionConstants.DEFINITIONS_NORMAL_COLOR, _colorListener);
     DrJava.getConfig().addOptionListener(OptionConstants.FONT_MAIN, _fontListener);
+    DrJava.getConfig().addOptionListener(OptionConstants.TEXT_ANTIALIAS, _antialiasListener);
+    DrJava.getConfig().addOptionListener(OptionConstants.SHOW_SOURCE_WHEN_SWITCHING, _showSourceListener);
   }
 
   
@@ -129,9 +176,15 @@ public class RecentDocFrame extends JWindow{
     Font  mainFont = DrJava.getConfig().getSetting(OptionConstants.FONT_MAIN);
     Color backColor = DrJava.getConfig().getSetting(OptionConstants.DEFINITIONS_BACKGROUND_COLOR);
     Color fontColor = DrJava.getConfig().getSetting(OptionConstants.DEFINITIONS_NORMAL_COLOR);
+    /* make it bigger */
+    Font titleFont = mainFont.deriveFont((float) (mainFont.getSize() + 3));
+    if (CodeStatus.DEVELOPMENT) {
+      _antiAliasText = DrJava.getConfig().getSetting(OptionConstants.TEXT_ANTIALIAS).booleanValue();
+    }
+    
     _label.setForeground(fontColor);
     _panel.setBackground(backColor);
-    _label.setFont(mainFont);
+    _label.setFont(titleFont);
     _textpane.setForeground(fontColor);
     _textpane.setFont(mainFont);;
     _textpane.setBackground(backColor);
@@ -183,7 +236,7 @@ public class RecentDocFrame extends JWindow{
         if(_scroller.getPreferredSize().getHeight() > 200){
           _scroller.setPreferredSize(new Dimension((int)_scroller.getPreferredSize().getWidth(), 200));
         }
-        _scroller.setVisible(true);
+        _scroller.setVisible(_showSource);
       }else{
         _scroller.setVisible(false);
       }
