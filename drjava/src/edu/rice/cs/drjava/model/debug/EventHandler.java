@@ -118,9 +118,13 @@ public class EventHandler extends Thread {
   private void _handleBreakpointEvent(BreakpointEvent e) {
     //System.out.println("Breakpoint reached");
     _manager.setCurrentThread(e.thread());
+    //DrJava.consoleOut().println("----EH: Notifying thread suspended on breakpoint");
     _manager.currThreadSuspended();
+    //DrJava.consoleOut().println("----EH: Scrolling to source");
     _manager.scrollToSource(e);
+    //DrJava.consoleOut().println("----EH: Notifying breakpoint reached");
     _manager.reachedBreakpoint((BreakpointRequest)e.request());
+    //DrJava.consoleOut().println("----EH: Done with breakpoint event");
     //((LocatableEvent) e).thread().suspend();
   }
   

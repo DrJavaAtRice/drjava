@@ -140,10 +140,10 @@ public class DefinitionsPane extends JEditorPane
   private JMenuItem _toggleBreakpointMenuItem;
   
   /**
-   * The menu item for the "Add Watchpoint" option. Stored in field so that it may be enabled and
+   * The menu item for the "Add Watch" option. Stored in field so that it may be enabled and
    * disabled depending on Debug Mode
    */
-  private JMenuItem _addWatchpointMenuItem;
+  //private JMenuItem _addWatchMenuItem;
 
   /**
    * The contextual popup menu for the Definitions Pane.
@@ -460,23 +460,25 @@ public class DefinitionsPane extends JEditorPane
         public void actionPerformed( ActionEvent ae ) {
           //Make sure that the breakpoint is set on the *clicked* line, if within a selection block.
           setCaretPosition(viewToModel(_popupMenuMA.getLastMouseClick().getPoint()));
-          _mainFrame.toggleBreakpoint();
+          _mainFrame.debuggerToggleBreakpoint();
         }
       });
       _toggleBreakpointMenuItem = _popMenu.add(breakpointItem);
       _toggleBreakpointMenuItem.setEnabled(false);
       
-      // Watchpoint
-      JMenuItem watchpointItem = new JMenuItem("Add Watchpoint");
-      watchpointItem.addActionListener( new AbstractAction() {
+      // Watch
+      /*
+      JMenuItem watchItem = new JMenuItem("Add Watch");
+      watchItem.addActionListener( new AbstractAction() {
         public void actionPerformed( ActionEvent ae ) {
-          //Make sure that the watchpoint is set on the *clicked* line, if within a selection block.
+          //Make sure that the watch is set on the *clicked* line, if within a selection block.
           setCaretPosition(viewToModel(_popupMenuMA.getLastMouseClick().getPoint()));
-          _mainFrame.addWatchpoint();
+          _mainFrame.debuggerAddWatch();
         }
       });
-      _addWatchpointMenuItem = _popMenu.add(watchpointItem);
-      _addWatchpointMenuItem.setEnabled(false);
+      _addWatchMenuItem = _popMenu.add(watchItem);
+      _addWatchMenuItem.setEnabled(false);
+      */
     }
    
     /*
@@ -610,10 +612,10 @@ public class DefinitionsPane extends JEditorPane
       if (_toggleBreakpointMenuItem != null) {
         _toggleBreakpointMenuItem.setEnabled(_mainFrame.inDebugMode());
       }
-      //Don't show the "Add Watchpoint" option in the contextual menu, if the JMenuItem is null.
-      if (_addWatchpointMenuItem != null) {
-        _addWatchpointMenuItem.setEnabled(_mainFrame.inDebugMode());
-      }
+      //Don't show the "Add Watch" option in the contextual menu, if the JMenuItem is null.
+      //if (_addWatchMenuItem != null) {
+      //  _addWatchMenuItem.setEnabled(_mainFrame.inDebugMode());
+      //}
       
     }
     
@@ -833,6 +835,7 @@ public class DefinitionsPane extends JEditorPane
   
   public void centerViewOnOffset(int offset) {
     //DrJava.consoleOut().println("beginning of centerViewOnOffset");
+
     try {
       FontMetrics metrics = getFontMetrics(getFont());
       int length = _doc.getDocument().getLength();
@@ -841,27 +844,28 @@ public class DefinitionsPane extends JEditorPane
       // Scroll to make sure this item is visible
       // Centers the selection in the viewport
       /*setCaretPosition(offset);
-      JScrollPane parent = (JScrollPane)this.getParent().getParent();
-      JScrollBar scrollBar = parent.getVerticalScrollBar();
-      scrollBar.setValue(scrollBar.getValue() + (int)viewHeight/2);
-      */
+       JScrollPane parent = (JScrollPane)this.getParent().getParent();
+       JScrollBar scrollBar = parent.getVerticalScrollBar();
+       scrollBar.setValue(scrollBar.getValue() + (int)viewHeight/2);
+       */
       // modelToView will return null if this doesn't yet have positive size
       Rectangle startRect;// = this.modelToView(offset);
       /*if (startRect == null) {
-        this.update(this.getGraphics());
-        startRect = this.modelToView(offset);
-      }*/
+       this.update(this.getGraphics());
+       startRect = this.modelToView(offset);
+       }*/
       //if (startRect == null) {
       //_forceRepaint();
       //repaint();
       /*this.invalidate();
-      java.awt.Toolkit.getDefaultToolkit().sync();
-      this.paint(this.getGraphics());
-      this.validate();*/
+       java.awt.Toolkit.getDefaultToolkit().sync();
+       this.paint(this.getGraphics());
+       this.validate();*/
       //if (!_mainFrame.isValid())
       //startRect = this.modelToView(offset);
       //if (startRect == null)
       //  _forceRepaint();
+      //DrJava.consoleOut().println("calling model to view");
       startRect = this.modelToView(offset);
       
       int startRectX = (int)startRect.getX();
@@ -875,17 +879,17 @@ public class DefinitionsPane extends JEditorPane
       
       // trying to scroll this way, instead of using scrollRectToVisible
       /*int caretPosAtBottom = this.viewToModel(endPoint);
-      if (caretPosAtBottom >= length)
-        caretPosAtBottom = length - 1;
-      //this.setCaretPosition(caretPosAtBottom);
-      //this.paintImmediately(_mainFrame.getDefViewport().getViewRect());
-      //_forceRepaint();
-      //this.setCaretPosition(offset);*/
+       if (caretPosAtBottom >= length)
+       caretPosAtBottom = length - 1;
+       //this.setCaretPosition(caretPosAtBottom);
+       //this.paintImmediately(_mainFrame.getDefViewport().getViewRect());
+       //_forceRepaint();
+       //this.setCaretPosition(offset);*/
       /*System.out.println("bottom: " + caretPosAtBottom + " offset: " + offset + 
-                         " length: " + length + " metrics: " + metrics.getHeight() +
-                         " viewheight: " + viewHeight + " startRectY: "+startRectY +
-                         " endPoint: " + endPoint.getY());
-      */
+       " length: " + length + " metrics: " + metrics.getHeight() +
+       " viewheight: " + viewHeight + " startRectY: "+startRectY +
+       " endPoint: " + endPoint.getY());
+       */
       // Add the end rect onto the start rect to make a rectangle
       // that encompasses the entire selection
       startRect.add(endPoint);     
@@ -896,14 +900,16 @@ public class DefinitionsPane extends JEditorPane
       
       //_mainFrame.invalidate();
       //_mainFrame.repaint();
-      this.revalidate();
-      this.repaint();
+      ///this.revalidate();
+      ///this.repaint();
       removeSetSizeListener();
     }
+    
     catch (BadLocationException e) {
       throw new UnexpectedException(e);
     }
-    
+
+    //DrJava.consoleOut().println("done with centerViewOnOffset");
   }
   /*
   private void _forceRepaint() {

@@ -15,7 +15,6 @@
   <!-- Chapter: Intro -->
   <chapter id="intro">
     <title>Introduction</title>
-    <para>Note: This documentation is being updated to reflect new features, and is not completely consistent yet.  This draft contains useful notes for using the Debugger, which will be refined before the next stable release.</para>
 
     <para>DrJava is a pedagogic programming environment for Java, intended to help students focus more on program design than on the features of a complicated development environment.  It provides an Interactions window based on a "read-eval-print loop", which allows programmers to develop, test, and debug Java programs in an interactive, incremental fashion.</para>
     <simplelist>
@@ -64,8 +63,8 @@
       <title>License</title>
       <para>DrJava is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.</para>
       <para>DrJava is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.</para>
-      <para>The full text of the license is available from <ulink url="http://www.gnu.org">www.gnu.org.</ulink>.</para>
-      <para>DrJava incorporates DynamicJava (available at <ulink url="http://koala.ilog.fr/djava">http://koala.ilog.fr/djava</ulink>), which is licensed under these terms:</para>
+      <para>The full text of the license is available from www.gnu.org.</para>
+      <para>DrJava incorporates DynamicJava (available at http://koala.ilog.fr/djava), which is licensed under these terms:</para>
       <para>DynamicJava - Copyright (c) 1999 Dyade</para>
       <para>Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:</para>
       <para>The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.</para>

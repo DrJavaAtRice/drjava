@@ -30,6 +30,9 @@
   <!-- put javadoc in this directory if generating private javadoc -->
   <property name="private_javadoc_dir" value="${srcroot}/../javadoc/${ant.project.name}" />
 
+  <!-- put documentation html in this directory -->
+  <property name="doc_dir" value="${built}/edu/rice/cs/drjava/docs" />
+
   <property name="jarfile" value="${srcroot}/../drjava.jar" />
   <property name="manifest" value="manifest" />
 

@@ -100,7 +100,7 @@ public class DebugManager {
   /**
    * Vector of all current Watches
    */
-  private Vector<WatchpointData> _watchpoints;
+  private Vector<WatchData> _watches;
   
   /**
    * Keeps track of any DebugActions whose classes have not yet been
@@ -131,7 +131,7 @@ public class DebugManager {
     _thread = null;
     _listeners = new LinkedList();
     _breakpoints = new Vector<Breakpoint>();
-    _watchpoints = new Vector<WatchpointData>();
+    _watches = new Vector<WatchData>();
     _pendingRequestManager = new PendingRequestManager(this);
   }
 
@@ -205,6 +205,7 @@ public class DebugManager {
       //DrJava.consoleOut().println("Shutting down...");
       
       removeAllBreakpoints();
+      removeAllWatches();
       try {
         _vm.dispose();
       }
@@ -284,7 +285,7 @@ public class DebugManager {
     
     // Get all classes that match this name
     List classes = _vm.classesByName(className);
-    //System.out.println("Num of classes found: " + classes.size());
+    //DrJava.consoleOut().println("Num of classes found: " + classes.size());
     ReferenceType ref = null;
     
     // Assume first one is correct, for now
@@ -331,6 +332,8 @@ public class DebugManager {
    * Suspends execution of the currently running document.
    */
   public synchronized void suspend() {
+    if (!isReady()) return;
+    
     if (_thread == null)
       DrJava.consoleOut().println("Suspend called while _thread was null");
     _thread.suspend();
@@ -341,6 +344,8 @@ public class DebugManager {
    * Resumes execution of the currently loaded document.
    */
   public synchronized void resume() {
+    if (!isReady()) return;
+    
     if (_thread == null)
       DrJava.consoleOut().println("Resume called while _thread was null");
     _thread.resume();
@@ -355,19 +360,16 @@ public class DebugManager {
    * StepRequest.STEP_OUT
    */
   public synchronized void step(int flag) throws DebugException {
+    if (!isReady()) return;
+    
     if (_thread == null) {
       throw new DebugException("Must have a thread to step.");
     }
-    //if (!_thread.isSuspended()) 
-      //DrJava.consoleOut().println("Current thread is not suspended while trying to create a step request!");    
+
     // don't allow the creation of a new StepRequest if there's already one on
     // the current thread
     List steps = _eventManager.stepRequests();    
     for (int i = 0; i < steps.size(); i++) {
-      //DrJava.consoleOut().println("creating a new step: event thread: " + 
-      //                            ((StepRequest)steps.get(i)).thread() + 
-      //                            " current thread: " +
-      //                            _thread);
       if (((StepRequest)steps.get(i)).thread().equals(_thread)) {
         DrJava.consoleOut().println("There's already a StepRequest on the current thread");
         DrJava.consoleOut().println("suspendCount: " + _thread.suspendCount());
@@ -382,12 +384,47 @@ public class DebugManager {
   
 
   /**
-   * Adds a watchpoint to the given field at the given line in the given
-   * document.
+   * Adds a watch on the given field or variable.
    * @param field the name of the field we will watch
    */
-  public synchronized void addWatchpoint(String field) {   
-    _watchpoints.addElement(new WatchpointData(field));//new Watchpoint (doc, field, lineNum, this));
+  public synchronized void addWatch(String field) {
+    if (!isReady()) return;
+    
+    _watches.addElement(new WatchData(field));
+  }
+  
+  /**
+   * Removes any watches on the given field or variable.
+   * @param field the name of the field we will watch
+   */
+  public synchronized void removeWatch(String field) {
+    if (!isReady()) return;
+    
+    for (int i=0; i < _watches.size(); i++) {
+      WatchData watch = _watches.elementAt(i);
+      if (watch.getName().equals(field)) {
+        _watches.removeElementAt(i);
+      }
+    }
+  }
+  
+  /**
+   * Removes the watch at the given index.
+   * @param index Index of the watch to remove
+   */
+  public synchronized void removeWatch(int index) {
+    if (!isReady()) return;
+    
+    if (index < _watches.size()) {
+      _watches.removeElementAt(index);
+    }
+  }
+  
+  /**
+   * Removes all watches on existing fields and variables.
+   */
+  public synchronized void removeAllWatches() {
+    _watches = new Vector<WatchData>();
   }
   
 
@@ -400,7 +437,9 @@ public class DebugManager {
    */
   public synchronized void toggleBreakpoint(OpenDefinitionsDocument doc, 
                                             int offset, int lineNum)
-    throws DebugException {  
+    throws DebugException
+  {
+    if (!isReady()) return;
     
     Breakpoint breakpoint = doc.getBreakpointAt(offset);
     if (breakpoint == null) {
@@ -418,10 +457,9 @@ public class DebugManager {
    */
   public synchronized void setBreakpoint(final Breakpoint breakpoint)
   {
+    if (!isReady()) return;
+    
     //System.out.println("setting: " + breakpoint);
-    /*
-    if (breakpoint.getRequest() != null)
-      _breakpoints.put(breakpoint.getRequest(), breakpoint);*/
     _breakpoints.addElement(breakpoint);
     breakpoint.getDocument().addBreakpoint(breakpoint);
     
@@ -440,6 +478,8 @@ public class DebugManager {
   * @param className the name of the class the BP is being removed from.
   */
   public synchronized void removeBreakpoint(final Breakpoint breakpoint) {
+    if (!isReady()) return;
+    
     //System.out.println("unsetting: " + breakpoint);
     _breakpoints.removeElement(breakpoint);
     
@@ -527,19 +567,20 @@ public class DebugManager {
   }
   
   /**
-   * Returns the Vector of WatchpointData
+   * Returns all currently watched fields and variables.
    */
-  public synchronized Vector<WatchpointData> getWatchpoints() {
-    return _watchpoints;
+  public synchronized Vector<WatchData> getWatches() {
+    return _watches;
   }
   
   /**
-   * Returns a Vector of ThreadReference that contains all of the vm's threads
+   * Returns all of the vm's current threads
    * or null if the vm is null
+   * TO DO: CAN'T RETURN ThreadReference!
    */
-  public synchronized Vector<ThreadReference> getThreads() {
-    if (_vm == null)
-      return null;
+  public synchronized Vector<ThreadReference> getCurrentThreads() {
+    if (!isReady()) return null;
+
     Iterator iter = _vm.allThreads().iterator();
     Vector<ThreadReference> threads = new Vector<ThreadReference>();
     while (iter.hasNext()) {
@@ -549,24 +590,28 @@ public class DebugManager {
   }
   
   /**
-   * Returns a Vector of StackFrame for the current thread or null if the 
-   * curretn thread is null
+   * Returns a Vector of StackFrames for the current thread or null if the 
+   * current thread is null
+   * TO DO: CAN'T RETURN StackFrame!
+   * TO DO: Config option for hiding DrJava subset of stack trace
    */
-  public synchronized Vector<StackFrame> getFrames() {
-    if (_thread == null || !_thread.isSuspended()) 
+  public synchronized Vector<StackFrame> getCurrentStackFrames() {
+    if (!isReady() || (_thread == null) || !_thread.isSuspended()) {
       return null;
+    }
+    
     Iterator iter = null;
     try {
       iter = _thread.frames().iterator();
+      Vector<StackFrame> frames = new Vector<StackFrame>();
+      while (iter.hasNext()) {
+        frames.addElement((StackFrame)iter.next());
+      }
+      return frames;
     }
     catch (IncompatibleThreadStateException itse) {
       return null;
     }
-    Vector<StackFrame> frames = new Vector<StackFrame>();
-    while (iter.hasNext()) {
-      frames.addElement((StackFrame)iter.next());
-    }
-    return frames;
   }
   
   /**
@@ -575,6 +620,7 @@ public class DebugManager {
    * @param e should be a LocatableEvent
    */
   synchronized void scrollToSource(LocatableEvent e) {
+    //DrJava.consoleOut().println("DM: scrolling to source...");
     Location location = e.location();
     OpenDefinitionsDocument doc = null;
     
@@ -637,18 +683,21 @@ public class DebugManager {
 
       final OpenDefinitionsDocument docF = doc;
       final Location locationF = location;
-        
+      
+      //DrJava.consoleOut().println("DM: notifying thread location updated...");
       notifyListeners(new EventNotifier() {
         public void notifyListener(DebugListener l) {
           l.threadLocationUpdated(docF, locationF.lineNumber());
         }
       });
+      //DrJava.consoleOut().println("DM: done notifying");
     }
     else {
       //DrJava.consoleOut().println("couldn't open file to scroll to");
       String className = location.declaringType().name();
       printMessage("  (Source for " + className + " not found.)");
     }
+    //DrJava.consoleOut().println("DM: done scrolling");
   }
   
   /**
@@ -680,7 +729,7 @@ public class DebugManager {
     _model.printDebugMessage(message);
   }
 
-  private void _updateWatchpoints() {
+  private void _updateWatches() {
     int stackIndex = 0;
     StackFrame currFrame = null;
     List frames = null;
@@ -689,6 +738,7 @@ public class DebugManager {
     }
     catch (IncompatibleThreadStateException itse) {
       DrJava.consoleOut().println("Thread has not been suspended");
+      return;
     }
     currFrame = (StackFrame) frames.get(stackIndex);
     stackIndex++;
@@ -696,23 +746,23 @@ public class DebugManager {
     ReferenceType rt = location.declaringType();
     //DrJava.consoleOut().println("stack frame: " + frames);
     //DrJava.consoleOut().println("all fields: " + rt.allFields());
-    for (int i = 0; i < _watchpoints.size(); i++) {
-      WatchpointData currWatchpoint = _watchpoints.elementAt(i);
-      String currName = currWatchpoint.getName();
-      Object currValue = currWatchpoint.getValue();
+    for (int i = 0; i < _watches.size(); i++) {
+      WatchData currWatch = _watches.elementAt(i);
+      String currName = currWatch.getName();
+      Object currValue = currWatch.getValue();
       // check for "this"
       if (currName.equals("this")) {
         ObjectReference obj = currFrame.thisObject();
         if (obj != null) {
-          currWatchpoint.setValue(obj);
-          currWatchpoint.setType(obj.type());
+          currWatch.setValue(obj);
+          currWatch.setType(obj.type());
         }
         else {
-          currWatchpoint.setValue(null);
-          currWatchpoint.setType(null);
+          currWatch.setValue(null);
+          currWatch.setType(null);
         }
         continue;
-      }          
+      } 
       //List frames = null;
       LocalVariable localVar = null;
       try {
@@ -740,8 +790,8 @@ public class DebugManager {
           else {
             // There is no $ in the className, we're at the outermost class and the
             // field still was not found
-            currWatchpoint.setValue(null);
-            currWatchpoint.setType(null);
+            currWatch.setValue(null);
+            currWatch.setType(null);
             break;
           }
           rt = (ReferenceType)_vm.classesByName(className).get(0);
@@ -750,13 +800,13 @@ public class DebugManager {
         if (field != null) {
           // check if the field is static
           if (field.isStatic()) {
-            currWatchpoint.setValue(rt.getValue(field));
+            currWatch.setValue(rt.getValue(field));
             try {
-              currWatchpoint.setType(field.type());
+              currWatch.setType(field.type());
             }
             catch (ClassNotLoadedException cnle) {
               DrJava.consoleOut().println("Class not loaded");
-              currWatchpoint.setType(null);
+              currWatch.setType(null);
             }
           }
           else {
@@ -777,57 +827,49 @@ public class DebugManager {
             }
             if (stackIndex < frames.size() && outerFrame.thisObject() != null) { 
               // then we found the right stack frame
-              currWatchpoint.setValue(outerFrame.thisObject().getValue(field));
+              currWatch.setValue(outerFrame.thisObject().getValue(field));
               try {
-                currWatchpoint.setType(field.type());
+                currWatch.setType(field.type());
               }
               catch (ClassNotLoadedException cnle) {
                 DrJava.consoleOut().println("Class not loaded");
-                currWatchpoint.setType(null);
+                currWatch.setType(null);
               }
             }
             else {
-              currWatchpoint.setValue(null);
-              currWatchpoint.setType(null);
+              currWatch.setValue(null);
+              currWatch.setType(null);
             }
           }
         }
       }
       else {
-        currWatchpoint.setValue(currFrame.getValue(localVar));
+        currWatch.setValue(currFrame.getValue(localVar));
         try {
-          currWatchpoint.setType(localVar.type());
+          currWatch.setType(localVar.type());
         }
         catch (ClassNotLoadedException cnle) {
           DrJava.consoleOut().println("Class not loaded");
-          currWatchpoint.setType(null);
+          currWatch.setType(null);
         }
       }
     }
   }
-  
-  private void _displayWatchpoints() {
-    for (int i = 0; i < _watchpoints.size(); i ++) {
-      WatchpointData currWatchpoint = _watchpoints.elementAt(i);  
-      if (currWatchpoint.getChanged()) {
-      }
-      else {
-      }
-    }
-  }
+
   
   /**
    * Notifies all listeners that the current thread has been suspended.
    */
   synchronized void currThreadSuspended() {
     //DrJava.consoleOut().println("DM: thread suspended (show)");
-    _updateWatchpoints();
-    _displayWatchpoints();
+    _updateWatches();
+    //_displayWatchpoints();
     notifyListeners(new EventNotifier() {
       public void notifyListener(DebugListener l) {
         l.currThreadSuspended();
       }
     });
+    //DrJava.consoleOut().println("done notifying currThreadSuspended...");
   }
   
   
@@ -911,13 +953,16 @@ public class DebugManager {
     public abstract void notifyListener(DebugListener l);
   }
   
-  public class WatchpointData {
-    String _name;
-    Object _value;
-    Type _type;
-    boolean _changed;
+  /**
+   * Class for keeping track of watched fields and variables.
+   */
+  public class WatchData {
+    private String _name;
+    private Object _value;
+    private Type _type;
+    private boolean _changed;
     
-    public WatchpointData(String name) {
+    public WatchData(String name) {
       _name = name;
       _value = null;
       _type = null;
@@ -945,11 +990,14 @@ public class DebugManager {
         if (!value.equals(_value)) {
           _changed = true;
         }
-        else
+        else {
           _changed = false;
+        }
       }
-      else
+      else {
+        // Value is null-- don't mark it as changed
         _changed = false;
+      }
       _value = value;
     }
     

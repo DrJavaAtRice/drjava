@@ -35,10 +35,15 @@
  * present version of DrJava depends on these classes, so you'd want to
  * remove the dependency first!)
  *
-END_COPYRIGHT_BLOCK*/
+ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.ui;
 
+
+/**
+ * FIXME: We CANNOT import JDI classes anywhere outside of model/debug,
+ * or DrJava might crash if they aren't on the classpath!
+ */
 import com.sun.jdi.*;
 
 import gj.util.Vector;
@@ -66,30 +71,23 @@ import edu.rice.cs.drjava.model.debug.*;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.config.OptionConstants;
 
-/**
-import com.bluemarsh.jswat.*;
-import com.bluemarsh.jswat.ui.*;
-import com.bluemarsh.jswat.view.*;
-*/
-
 /** 
  * Panel for displaying the debugger input and output in MainFrame.
  * @version $Id$
  */
 public class DebugPanel extends JPanel implements OptionConstants {
-  private static final int SPLIT_DIVIDER_SIZE = 12;
-
+  
   private JSplitPane _tabsPane;
   private JTabbedPane _leftPane;
   private JTabbedPane _rightPane;
   
   private JTable _watchTable;
-  private DefaultMutableTreeNode _breakpointNode;
+  private DefaultMutableTreeNode _breakpointRootNode;
   private DefaultTreeModel _bpTreeModel;
   private JTree _bpTree;
   private JTable _stackTable;
   private JTable _threadTable;
-    
+  
   private final SingleDisplayModel _model;
   private final MainFrame _frame;
   private final DebugManager _debugger;
@@ -101,21 +99,25 @@ public class DebugPanel extends JPanel implements OptionConstants {
   private JButton _stepOverButton;
   private JButton _stepOutButton;
   
-  private Vector<DebugManager.WatchpointData> _watchpoints;
+  private Vector<DebugManager.WatchData> _watches;
   private Vector<ThreadReference> _threads;
-  private Vector<StackFrame> _frames;
-
-  public DebugPanel( SingleDisplayModel model, MainFrame frame, DebugManager debugger) {
+  private Vector<StackFrame> _stackFrames;
+  
+  /**
+   * Constructs a new panel to display debugging information when the
+   * DebugManager is active.
+   */
+  public DebugPanel( MainFrame frame ) {
     
     this.setLayout(new BorderLayout());
     
-    _model = model;
     _frame = frame;
-    _debugger = debugger;
-    //this.updateData();
-    _watchpoints = _debugger.getWatchpoints();
-    _threads = _debugger.getThreads();
-    _frames = _debugger.getFrames();
+    _model = frame.getModel();
+    _debugger = _model.getDebugManager();
+    
+    _watches = _debugger.getWatches();
+    _threads = _debugger.getCurrentThreads();
+    _stackFrames = _debugger.getCurrentStackFrames();
     _leftPane = new JTabbedPane();
     _rightPane = new JTabbedPane();
     
@@ -125,7 +127,6 @@ public class DebugPanel extends JPanel implements OptionConstants {
                                true,
                                _leftPane,
                                _rightPane);
-    _tabsPane.setDividerSize(SPLIT_DIVIDER_SIZE);
     _tabsPane.setOneTouchExpandable(true);
     _tabsPane.setDividerLocation((int)(_frame.getWidth()/2.5));
     
@@ -133,24 +134,61 @@ public class DebugPanel extends JPanel implements OptionConstants {
     
     _buttonPanel = new JPanel(new BorderLayout());
     _setupButtonPanel();
-    this.add(_buttonPanel, BorderLayout.EAST);    
+    this.add(_buttonPanel, BorderLayout.EAST);
+    
+    _debugger.addListener(new DebugPanelListener());
   }
   
-  public void updateData() {
-    _watchpoints = _debugger.getWatchpoints();
-    _threads = _debugger.getThreads();
-    _frames = _debugger.getFrames();
+  /**
+   * Causes all display tables to update their information from the debug manager.
+   * @param updateThreads Whether to check for current stack trace and threads
+   */
+  public void updateData(boolean updateStack) {
+    //DrJava.consoleOut().println("updating data...");
+    
+    if (_debugger.isReady()) {
+      _watches = _debugger.getWatches();
+      if (updateStack) {
+        // Get threads and stack (thread suspended)
+        _threads = _debugger.getCurrentThreads();
+        _stackFrames = _debugger.getCurrentStackFrames();
+      }
+      else {
+        // Empty tables (thread resumed)
+        _threads = new Vector<ThreadReference>();
+        _stackFrames = new Vector<StackFrame>();
+      }
+    }
+    else {
+      // Clean up if debugger dies
+      _watches = new Vector<DebugManager.WatchData>();
+      _threads = new Vector<ThreadReference>();
+      _stackFrames = new Vector<StackFrame>();
+      // also clear breakpoint tree?
+    }
+
+    //DrJava.consoleOut().println("firing events...");
     
     ((AbstractTableModel)_watchTable.getModel()).fireTableDataChanged();
     ((AbstractTableModel)_stackTable.getModel()).fireTableDataChanged();
     ((AbstractTableModel)_threadTable.getModel()).fireTableDataChanged();
+    
+    //DrJava.consoleOut().println("done firing events...");
   }
   
   
+  /**
+   * Creates the tabbed panes in the debug panel.
+   */
   public void _setupTabPanes() {
     
-    _breakpointNode = new DefaultMutableTreeNode("Breakpoints");
-    _bpTreeModel = new DefaultTreeModel(_breakpointNode);
+    // Watches table
+    _watchTable = new JTable( new WatchTableModel());
+    _leftPane.addTab("Watches", new JScrollPane(_watchTable));
+    
+    // Breakpoint tree
+    _breakpointRootNode = new DefaultMutableTreeNode("Breakpoints");
+    _bpTreeModel = new DefaultTreeModel(_breakpointRootNode);
     _bpTree = new JTree(_bpTreeModel);
     _bpTree.setEditable(false);
     _bpTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
@@ -158,110 +196,160 @@ public class DebugPanel extends JPanel implements OptionConstants {
     _bpTree.setRootVisible(false);
     _bpTree.putClientProperty("JTree.lineStyle", "Angled");
     _bpTree.setScrollsOnExpand(true);
-    
+    // Breakpoint tree cell renderer
     DefaultTreeCellRenderer dtcr = new DefaultTreeCellRenderer();
     dtcr.setLeafIcon(null);
     dtcr.setOpenIcon(null);
     dtcr.setClosedIcon(null);
     _bpTree.setCellRenderer(dtcr);
-        
+    
     _leftPane.addTab("Breakpoints", new JScrollPane(_bpTree));
     
-    
-    _watchTable = new JTable( new WatchTableModel());
-    _leftPane.addTab("Watches", new JScrollPane(_watchTable));
-    
+    // Stack table
     _stackTable = new JTable( new StackTableModel());
     _rightPane.addTab("Stack", new JScrollPane(_stackTable));
     
+    // Thread table (maybe only show if debug.show.threads is enabled?)
     _threadTable = new JTable( new ThreadTableModel());
     _rightPane.addTab("Threads", new JScrollPane(_threadTable));
     
   }
   
-  
+  /**
+   * A table for displaying the watched variables and fields.
+   */
   public class WatchTableModel extends AbstractTableModel {
-   
-    private String[] _columnNames = {"Identifier", "Value", "Type"};
+    
+    private String[] _columnNames = {"Name", "Value", "Type"};
     
     public String getColumnName(int col) { 
-        return _columnNames[col]; 
+      return _columnNames[col]; 
     }
-    public int getRowCount() { return _watchpoints.size(); }
+    public int getRowCount() { return _watches.size() + 1; }
     public int getColumnCount() { return _columnNames.length; }
-    public Object getValueAt(int row, int col) { 
-      DebugManager.WatchpointData watchpoint = _watchpoints.elementAt(row);
-      switch(col) {
-        case 0: return watchpoint.getName();
-        case 1: return watchpoint.getValue();
-        case 2: return watchpoint.getType();
+    public Object getValueAt(int row, int col) {
+      if (row < _watches.size()) {
+        DebugManager.WatchData watch = _watches.elementAt(row);
+        switch(col) {
+          case 0: return watch.getName();
+          case 1: return watch.getValue();
+          case 2: return watch.getType();
+        }
+        return null;
       }
-      return null;
+      else {
+        // Last row blank
+        return "";
+      }
     }
     public boolean isCellEditable(int row, int col) { 
-      return false; 
-    }
-  }
-
-  public class StackTableModel extends AbstractTableModel {
-   
-    private String[] _columnNames = {"#", "Method", "Line"};
-    
-    public String getColumnName(int col) { 
-        return _columnNames[col]; 
-    }
-    public int getRowCount() { 
-      if (_frames == null)
-        return 0;
-      return _frames.size(); }
-    public int getColumnCount() { return _columnNames.length; }
-    public Object getValueAt(int row, int col) { 
-      StackFrame frame = _frames.elementAt(row);
-      switch(col) {
-        case 0: return new Integer(row);
-        case 1: return frame.location().declaringType().name() + "." + frame.location().method().name();
-        case 2: return new Integer (frame.location().lineNumber());
+      // First col for entering new values
+      if (col == 0) {
+        return true;
       }
-      return null;
+      else {
+        return false;
+      }
     }
-    public boolean isCellEditable(int row, int col) { 
-      return false; 
+    public void setValueAt(Object value, int row, int col) {
+      if ((value == null) || (value.equals(""))) {
+        // Remove value
+        //DrJava.consoleOut().println("removing value at index " + row);
+        _debugger.removeWatch(row);
+      }
+      else {
+        // Add value
+        //DrJava.consoleOut().println("setting value: " + value);
+        _debugger.addWatch(String.valueOf(value));
+      }
+      fireTableCellUpdated(row, col);
     }
   }
   
-   public class ThreadTableModel extends AbstractTableModel {
-   
-    private String[] _columnNames = {"ID", "Name", "Status"};
+  /**
+   * A table for displaying the current stack trace.
+   */
+  public class StackTableModel extends AbstractTableModel {
+    
+    private String[] _columnNames = {"Method", "Line"};  // Do we need #?
     
     public String getColumnName(int col) { 
       return _columnNames[col]; 
     }
     public int getRowCount() { 
-      if (_threads == null)
+      if (_stackFrames == null) {
         return 0;
-      return _threads.size(); }
+      }
+      return _stackFrames.size();
+    }
     public int getColumnCount() { return _columnNames.length; }
+    
+    public Object getValueAt(int row, int col) { 
+      StackFrame frame = _stackFrames.elementAt(row);
+      String method = "(unknown)";
+      String line = "(unknown)";
+      if (_debugger.isReady()) {
+        method = frame.location().declaringType().name() + "." +
+          frame.location().method().name();
+        line = "" + frame.location().lineNumber();
+      }
+      switch(col) {
+        //case 0: return new Integer(row);
+        case 0: return method;
+        case 1: return line;
+      }
+      return null;
+    }
+    public boolean isCellEditable(int row, int col) { 
+      return false; 
+    }
+  }
+  
+  /**
+   * A table for displaying all current threads.
+   */
+  public class ThreadTableModel extends AbstractTableModel {
+    
+    private String[] _columnNames = {"Name", "Status"};
+    
+    public String getColumnName(int col) { 
+      return _columnNames[col]; 
+    }
+    public int getRowCount() { 
+      if (_threads == null) {
+        return 0;
+      }
+      return _threads.size();
+    }
+    public int getColumnCount() { return _columnNames.length; }
+    
     public Object getValueAt(int row, int col) { 
       ThreadReference threadRef  = _threads.elementAt(row);
-      switch(col) {
-        case 0: return new Long(threadRef.uniqueID());
-        case 1: return threadRef.name();
-        case 2: switch (threadRef.status()) {
+      String name = "(unknown)";
+      String status = "(unknown)";
+      if (_debugger.isReady()) {
+        name = threadRef.name();
+        switch (threadRef.status()) {
           case ThreadReference.THREAD_STATUS_MONITOR: 
-            return "MONITOR";
+            status = "MONITOR"; break;
           case ThreadReference.THREAD_STATUS_NOT_STARTED:
-            return "NOT STARTED";
+            status = "NOT STARTED"; break;
           case ThreadReference.THREAD_STATUS_RUNNING:
-            return "RUNNING";
+            status = "RUNNING"; break;
           case ThreadReference.THREAD_STATUS_SLEEPING:
-            return "SLEEPING";
+            status = "SLEEPING"; break;
           case ThreadReference.THREAD_STATUS_UNKNOWN:
-            return "UNKNOWN";
+            status = "UNKNOWN"; break;
           case ThreadReference.THREAD_STATUS_WAIT:
-            return "WAIT";
+            status = "WAIT"; break;
           case ThreadReference.THREAD_STATUS_ZOMBIE:
-            return "ZOMBIE";
+            status = "ZOMBIE"; break;
         }
+      }
+      switch(col) {
+        //case 0: return new Long(threadRef.uniqueID());
+        case 0: return name;
+        case 1: return status;
       }
       
       return null;
@@ -269,638 +357,271 @@ public class DebugPanel extends JPanel implements OptionConstants {
     public boolean isCellEditable(int row, int col) { 
       return false; 
     }
-   }
-   
-   
-   private void _setupButtonPanel() {
-     JPanel mainButtons = new JPanel();
-     JPanel closeButtonPanel = new JPanel(new BorderLayout());
-     mainButtons.setLayout( new GridLayout(0,1));
-    
-     Action resumeAction = new AbstractAction( "Resume" ) {
-       public void actionPerformed(ActionEvent ae) {
-         _debugger.resume();
-       }
-     };
-     _resumeButton = new JButton(resumeAction);
-    
-     Action stepIntoAction = new AbstractAction( "Step Into" ) {
-       public void actionPerformed(ActionEvent ae) {
-         try {
-           _debugger.step(DebugManager.STEP_INTO);
-         }
-         catch (DebugException de) {}
-       }
-     };
-     _stepIntoButton = new JButton(stepIntoAction);
-    
-     Action stepOverAction = new AbstractAction( "Step Over" ) {
-       public void actionPerformed(ActionEvent ae) {
-         try {
-           _debugger.step(DebugManager.STEP_OVER);
-         }
-         catch (DebugException de) {}
-       }
-     };
-     _stepOverButton = new JButton(stepOverAction);
-    
-     Action stepOutAction = new AbstractAction( "Step Out" ) {
-       public void actionPerformed(ActionEvent ae) {
-         try {
-           _debugger.step(DebugManager.STEP_OUT);
-         }
-         catch (DebugException de) {}
-       }
-     };
-     _stepOutButton = new JButton(stepOutAction);
-    
-     Action closeAction = new AbstractAction( "X" ) {
-       public void actionPerformed(ActionEvent ae) {
-         _debugger.shutdown();
-       }
-     };
-     _closeButton = new JButton(closeAction);
-     
-     closeButtonPanel.add(_closeButton, BorderLayout.NORTH);
-     mainButtons.add(_resumeButton);
-     mainButtons.add(_stepIntoButton);
-     mainButtons.add(_stepOverButton);
-     mainButtons.add(_stepOutButton);     
-     disableButtons();
-     _buttonPanel.add(mainButtons, BorderLayout.CENTER);
-     _buttonPanel.add(closeButtonPanel, BorderLayout.EAST);
-   }
-   
-   public void breakpointAdded(Breakpoint bp) {
-     
-     DefaultMutableTreeNode bpDoc = new DefaultMutableTreeNode(bp.getClassName());
-     
-     Enumeration documents = _breakpointNode.children();
-     while (documents.hasMoreElements()) {
-       DefaultMutableTreeNode doc = (DefaultMutableTreeNode)documents.nextElement();
-       if (doc.getUserObject().equals(bpDoc.getUserObject())) {
-         //DrJava.consoleOut().println("matched, classname: " + bpDoc.getUserObject());
-         DefaultMutableTreeNode newBreakpoint = new DefaultMutableTreeNode(new Integer(bp.getLineNumber()));
-         _bpTreeModel.insertNodeInto(newBreakpoint,
-                                     doc,
-                                     doc.getChildCount());
-                                     
-         _bpTree.scrollPathToVisible(new TreePath(newBreakpoint.getPath()));
-         
-         return;
-       }
-     }
-     _bpTreeModel.insertNodeInto(bpDoc,
-                                 _breakpointNode,
-                                 _breakpointNode.getChildCount());
-                                
-     _bpTreeModel.insertNodeInto(new DefaultMutableTreeNode(new Integer(bp.getLineNumber())),
-                                 bpDoc,
-                                 bpDoc.getChildCount());
-     
-     TreePath pathToNewBreakpoint = 
-       new TreePath(((DefaultMutableTreeNode)bpDoc.getChildAt(bpDoc.getChildCount() - 1)).getPath());
-     
-     _bpTree.scrollPathToVisible(pathToNewBreakpoint);
-     _bpTree.setSelectionPath(pathToNewBreakpoint);
-   }
-   
-   /**
-    * Enables and disables the appropriate buttons depending on if the current
-    * thread has been suspended or resumed
-    * @param isSuspended indicates if the current thread has been suspended
-    */
-   public void setThreadDependentButtons(boolean isSuspended) {
-     _resumeButton.setEnabled(isSuspended);
-     _stepIntoButton.setEnabled(isSuspended);
-     _stepOverButton.setEnabled(isSuspended);
-     _stepOutButton.setEnabled(isSuspended);
-   }
-   
-   public void disableButtons() {
-     _resumeButton.setEnabled(false);
-     _stepIntoButton.setEnabled(false);
-     _stepOverButton.setEnabled(false);
-     _stepOutButton.setEnabled(false);
-   }
-     
-   public void breakpointRemoved(Breakpoint bp) {
-     
-     DefaultMutableTreeNode bpDoc = new DefaultMutableTreeNode(bp.getClassName());
-     
-     Enumeration documents = _breakpointNode.children();
-     while (documents.hasMoreElements()) {
-       DefaultMutableTreeNode doc = (DefaultMutableTreeNode)documents.nextElement();
-       if (doc.getUserObject().equals(bpDoc.getUserObject())) {
-         // have to remove the correct line number
-         //DrJava.consoleOut().println("matched, classname: " + bpDoc.getUserObject());
-         Enumeration lineNumbers = doc.children();
-         while (lineNumbers.hasMoreElements()) {
-           DefaultMutableTreeNode lineNumber = 
-             (DefaultMutableTreeNode)lineNumbers.nextElement();
-           if (lineNumber.getUserObject().equals(new Integer (bp.getLineNumber()))) {
-             //DrJava.consoleOut().println("matched, lineNumber: " + bp.getLineNumber());
-             //doc.remove(lineNumber);
-             _bpTreeModel.removeNodeFromParent(lineNumber);
-             if (doc.getChildCount() == 0) {
-               // this document has no more breakpoints, remove it
-               //_breakpointNode.remove(doc);
-               _bpTreeModel.removeNodeFromParent(doc);
-             }        
-             //_bpTree.scrollPathToVisible(new TreePath(childNode.getPath()));
-             //_bpTreeModel.reload();
-             return;
-           }
-         }
-       }
-     }    
-   }
-   
-   public void breakpointReached(Breakpoint bp) {
-     DefaultMutableTreeNode bpDoc = new DefaultMutableTreeNode(bp.getClassName());
-     
-     Enumeration documents = _breakpointNode.children();
-     while (documents.hasMoreElements()) {
-       DefaultMutableTreeNode doc = (DefaultMutableTreeNode)documents.nextElement();
-       if (doc.getUserObject().equals(bpDoc.getUserObject())) {
-         // have to remove the correct line number
-         //DrJava.consoleOut().println("matched, classname: " + bpDoc.getUserObject());
-         Enumeration lineNumbers = doc.children();
-         while (lineNumbers.hasMoreElements()) {
-           DefaultMutableTreeNode lineNumber = 
-             (DefaultMutableTreeNode)lineNumbers.nextElement();
-           if (lineNumber.getUserObject().equals(new Integer (bp.getLineNumber()))) {
-             //DrJava.consoleOut().println("matched, lineNumber: " + bp.getLineNumber());
-             
-             //DefaultMutableTreeNode hitBreakpoint = new DefaultMutableTreeNode(new Integer(bp.getLineNumber()));
-             TreePath pathToNewBreakpoint = new TreePath(lineNumber.getPath());
-             
-             _bpTree.scrollPathToVisible(pathToNewBreakpoint);
-             _bpTree.setSelectionPath(pathToNewBreakpoint);
-             //DrJava.consoleOut().println("Set selection to new hit breakpoint.");
-           }
-         }
-       }
-     }
-   }
-   
-   
-/*
-  private static final String BANNER_TEXT = "JSwat Debugger Console\n\n";
-
-  private final SingleDisplayModel _model;
-  private final MainFrame _frame;
-  private final DebugManager _debugger;
-  
-  private final Hashtable _jswatProperties;
-  //private final UIAdapter _uiAdapter;
-
-  private final StyledDocument _outputDoc;
-  private final JScrollPane _scrollPane;
-  private final JTextPane _outputPane;
-  private final JTextField _inputField; 
-  
-  private final DebugLogger _logger;
-
-    //  private Object _curBreakpointTag=null; // currently highlighted line
-    //  private int    _curBP;                 // and its associated tag.
-   
-*/
-  /**
-   * Action performed when the Enter key is pressed.
-   *
-  private ActionListener _performAction = new ActionListener() {
-    public void actionPerformed(ActionEvent e) {
-      _performCommand();
-    }
-  };*/                                                             
-
-  /**
-   * Highlighter
-   */
-  /** Highlight painter for selected list items. */
-    //  private static final DefaultHighlighter.DefaultHighlightPainter
-    //    _breakpointHighlightPainter
-    //      = new DefaultHighlighter.DefaultHighlightPainter(new Color(255,155,155));
-
-  /**
-   * Highlighter for active breakpoint.
-   */
-  /** Highlight painter for selected list items. */
-    //  private static final DefaultHighlighter.DefaultHighlightPainter
-    //    _activeBreakpointHighlightPainter
-    //      = new DefaultHighlighter.DefaultHighlightPainter(new Color(255,155,155));
-    
-  /**
-   * Constructor.
-   * @param model SingleDisplayModel in which we are running
-   * @param frame MainFrame in which we are displayed
-   *
-  public DebugPanel(SingleDisplayModel model, MainFrame frame) {
-    _model = model;
-    _frame = frame;
-    _debugger = _model.getDebugManager();
-    
-    _jswatProperties = new Hashtable();
-    //_uiAdapter = new DebugPanelUIAdapter();
-    
-    // Set up layout of panel
-    setLayout(new BorderLayout());
-
-    _outputDoc = _model.getDebugDocument();  
-    _outputPane = new JTextPane(_outputDoc);
-    _outputPane.setEditable(false);
-    _scrollPane = new BorderlessScrollPane(_outputPane,
-                                           JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
-                                           JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-    _scrollPane.setBorder(null); // removes all default borders
-    
-    _inputField = new JTextField();
-      
-    // Add the fields to the panel
-    add(_scrollPane, BorderLayout.CENTER);
-    // Only add input field in advanced mode
-    if (CodeStatus.DEVELOPMENT) {
-      //boolean advancedMode = 
-      //  DrJava.CONFIG.getSetting(DEBUGGER_ADVANCED).booleanValue();
-      //if (advancedMode) {
-        add(_inputField, BorderLayout.SOUTH);
-        
-        // Listen for enter key
-        _inputField.addActionListener(_performAction);
-      //}
-    }
-    
-    _logger = new DebugLogger(System.err);
-    reset();
-  }*/
-  
-  /**
-   * Returns the UIAdapter used by JSwat.
-   *
-  public UIAdapter getUIAdapter() {
-    return _uiAdapter;
-  }*/
-  
-  /**
-   * Sets the font for displaying text.
-   * @param f Font to be used for input and output
-   *
-  public void setFonts(Font f) {
-    _outputPane.setFont(f);
-    _inputField.setFont(f);
-  }*/
-  
-  /**
-   * Sends the command currently in the inField to the JSwat debugger.
-   * (Specific to JSwat, used in Advanced mode.)
-   *
-  private void _performCommand() {
-    String cmd = _inputField.getText().trim();
-    if (!cmd.equals("")) {
-      _inputField.setText("");
-      _appendString(cmd + "\n");
-
-      // Execute command
-      //_model.getDebugManager().performCommand(cmd);
-    }
-  }*/
-  
-  /**
-   * Appends the given string to the output document and scrolls
-   * to the end.
-   *
-  private void _appendString(String s) {
-    try {
-      _outputDoc.insertString(_outputDoc.getLength(), s, null);
-
-      // Scroll to end
-      _outputPane.setCaretPosition(_outputPane.getText().length());
-    }
-    catch (BadLocationException e) {
-      // Can't happen: getLength() and endPos are always legal
-    }
-    _outputPane.repaint();
-  }*/
-  
-  /**
-   * Resets the output document by removing all text and inserting the banner.
-   *
-  public void reset() {
-    try {
-      _outputDoc.remove(0, _outputDoc.getLength());
-    }
-    catch (BadLocationException e) {
-      // Can't happen: 0 and getLength() are always legal
-    }
-    
-    _appendString(BANNER_TEXT);
-  }*/
-  
- 
-
-  /**
-   * A Writer which writes to the output pane.
-   */
-  //private class DebugLogger extends BufferedWriter {
-  //  public DebugLogger(OutputStream os) {
-  //    super(new PrintWriter(os));
-  //  }
-    
-    /**
-     * Writes a line to the output document.
-     *
-    public void write(String s) {
-      _appendString(s);
-    }*/
-  //}
-  
-  /**
-   * A UIAdapter for JSwat, to be used for displaying JSwat's status.
-   */
-  //class DebugPanelUIAdapter implements UIAdapter {
-    
-    /**
-     * Construct the appropriate user interface and connect all
-     * the pieces together. The result should be a fully
-     * functional interface that is ready to be used.
-     *
-    public void buildInterface() {
-      //DrJava.consoleErr().println("DP: building interface...");
-      _debugger.attachLogWriter(_logger);
-    }*/
-    
-    /**
-     * Indicate if this interface adapter has the ability to find
-     * a string in the currently selected source view.
-     *
-     * @return  true if the ability exists, false otherwise.
-     *
-    public boolean canFindString() {
-      // False for now, but we can use Find/Replace later
-      return false;
-    }*/
-    
-    /**
-     * Indicate if this interface adapter has the ability to show
-     * source files in a manner appropriate for the user to read.
-     *
-     * @return  true if the ability exists, false otherwise.
-     *
-    public boolean canShowFile() {
-      //DrJava.consoleErr().println("DP: saying that I can show a file...");
-      return true;
-    }*/
-    
-    /**
-     * Indicate if this interface adapter has the ability to show
-     * the status in a manner appropriate for the user to view.
-     *
-     * @return  true if the ability exists, false otherwise.
-     *
-    public boolean canShowStatus() {
-      return false;
-    }*/
-    
-    /**
-     * Deconstruct the user interface such that all components
-     * are made invisible and prepared for non-use.
-     *
-    public void destroyInterface() {
-    }*/
-    
-    /**
-     * This is called when there are no more open Sessions. The
-     * adapter should take the appropriate action at this time.
-     * In most cases that will be to exit the JVM.
-     *
-    public void exit() {
-      _frame.hideDebugger();
-    }*/
-    
-    /**
-     * Search for the given string in the currently selected source view.
-     * The search should continue from the last successful match, and
-     * wrap around to the beginning when the end is reached.
-     *
-     * @param  query       string to look for.
-     * @param  ignoreCase  true to ignore case.
-     * @return  true if string was found.
-     * @exception  NoOpenViewException
-     *             Thrown if there is no view to be searched.
-     *
-    public boolean findString(String query, boolean ignoreCase)
-      throws NoOpenViewException {
-      
-      return false;
-    }*/
-    
-    /**
-     * Searches for the property with the specified key in the property
-     * list. The method returns null if the property is not found.
-     *
-     * @param  key  the property key.
-     * @return  the value in the property list with the specified key value.
-     *
-    public Object getProperty(String key) {
-      return _jswatProperties.get(key);
-    }*/
-    
-    /**
-     * Retrieves the currently active view in JSwat.
-     *
-     * @return  selected view, or null if none selected.
-     *
-    public JSwatView getSelectedView() {
-      return null;
-    }*/
-    
-    /**
-     * Called when the Session initialization has completed.
-     *
-    public void initComplete() {
-      //DrJava.consoleErr().println("DP: init complete...");
-    }*/
-    
-    /**
-     * Refresh the display to reflect changes in the program.
-     * Generally this means refreshing the panels.
-     *
-    public void refreshDisplay() {
-      //DrJava.consoleErr().println("DP: refreshing display...");
-      _outputPane.repaint();
-      _inputField.repaint();
-    }*/
-    
-    /**
-     * Save any settings to the appropriate places, the program
-     * is about the terminate.
-     *
-    public void saveSettings() {
-    }*/
-    
-    /**
-     * Stores the given value in the properties list with the given
-     * key as a reference. If the value is null, then the key and
-     * value will be removed from the properties.
-     *
-     * @param  key    the key to be placed into this property list.
-     * @param  value  the value corresponding to key, or null to remove
-     *                the key and value from the properties.
-     * @return  previous value stored using this key.
-     *
-    public Object setProperty(String key, Object value) {
-      if (value == null) {
-        return _jswatProperties.remove(value);
-      }
-      else {
-        return _jswatProperties.put(key, value);
-      }
-    }*/
-    
-    /**
-     * Show the given file in the appropriate view and make the
-     * given line visible in that view.
-     *
-     * @param  src    source to be displayed.
-     * @param  line   one-based line to be made visible, or zero for
-     *                a reasonable default.
-     * @param  count  number of lines to display, or zero for a
-     *                reasonable default. Some adapters will ignore
-     *                this value if, for instance, they utilize a
-     *                scrollable view.
-     * @return  true if successful, false if error.
-     *
-    public boolean showFile(SourceSource src, int line, int count) {
-      //DrJava.consoleErr().println("DP: showFile()...");
-      if (src instanceof FileSource) {
-        try {
-          File file = ((FileSource)src).getFile();
-          if (file.exists()) {
-       //            DrJava.consoleOut().println("DebugPanel: file: " + file.getName());
-            OpenDefinitionsDocument doc = _model.getDocumentForFile(file);
-            _model.setActiveDocument(doc);     
-     //            DrJava.consoleErr().println("Showing line " + line);     
-            if (line > 0) {
- 
-        //if (_curBP>0 && line != _curBP) // remove existing bp
-//  _frame.getCurrentDefPane().getHighlighter().removeHighlight(_curBreakpointTag);
-
-  //     _curBreakpointTag = highlightLine(line, _activeBreakpointHighlightPainter);
-    //   _curBP = line;
-   
-       // _frame.getCurrentDefPane().setCaretPosition(doc.getDocument().getCurrentLocation());
-       
-            }
-            _inputField.grabFocus();
-            return true;
-          }
-          else {
-            String name = file.getName();
-            if ((name.length() > 5) && 
-                (name.substring(name.length() - 5).equals(".java"))) {
-              if (name.lastIndexOf(".",name.length() - 6) != -1)
-                name = name.substring(name.lastIndexOf(".",name.length() - 6));
-            }
-            else {
-              if (name.lastIndexOf(".") == -1)
-                name = name + ".java";
-              else
-                name = name.substring(name.lastIndexOf(".")) + ".java";
-            }
-            file = new File(name);
-            if (file.exists()) {
-              //DrJava.consoleOut().println("DebugPanel: file: " + file.getName());
-              //DrJava.consoleOut().println(" NEEDED HACK.");
-              OpenDefinitionsDocument doc = _model.getDocumentForFile(file);
-              _model.setActiveDocument(doc);
-       //              DrJava.consoleErr().println("Showing line " + line);
-              if (line > 0) {
-    // no highlighting
-//  if (_curBP>0 && line != _curBP) // remove existing bp
-//    _frame.getCurrentDefPane().getHighlighter().removeHighlight(_curBreakpointTag);
-
-//           _curBreakpointTag = highlightLine(line, _activeBreakpointHighlightPainter);
-//         _curBP = line;
-    
-         // _frame.getCurrentDefPane().setCaretPosition(doc.getDocument().getCurrentLocation());
-
-              }
-              _inputField.grabFocus();
-              return true;
-            }
-            else {
-              //DrJava.consoleOut().println("DebugPanel: file: " + file.getName());
-              //DrJava.consoleOut().println("  didn't exist.");
-            }
-          }
-        }
-        catch (Exception e) {
-          // ACK: clean this up
-          DrJava.consoleErr().println("DebugPanel: Error showing file: " + e);
-          e.printStackTrace();
-          return false;
-        }
-      }
-      return false;
-    }*/
-    
-    /**
-     * Show a status message in a reasonable location.
-     *
-     * @param  status  message to be shown to the user.
-     *
-    public void showStatus(String status) {
-    }*/
-  //}
-
-  /**
-    * Highlights the given line.
-    * @param  line  the line to highlight
-    * @param  brush the highlighter to use.
-    *
-    * @return the highlight tag for removal later (Object)
-    */
-    /*
-  public Object highlightLine(int line, DefaultHighlighter.DefaultHighlightPainter brush) {
-      
-      OpenDefinitionsDocument doc = _model.getActiveDocument();
-      doc.syncCurrentLocationWithDefinitions(doc.getDocument().getCurrentLocation());
-      doc.gotoLine(line);
-      
-      int curPos = doc.getDocument().getCurrentLocation();
-      int startPos = doc.getDocument().getLineStartPos(curPos);
-      int endPos = doc.getDocument().getLineEndPos(curPos);
-      Object o=null;      
-      try {
-     o = _frame.getCurrentDefPane().getHighlighter().addHighlight(startPos,
-               endPos,
-               brush);
-      } catch (BadLocationException badBadLocation) { System.err.println("DebugPanel.highlightLine() Got a ble."); }
-      return o;
   }
-
-    */
   
-   /**
-    * Highlights the given region (not used right now)
-    *
-    * @param  start  the start pos of region to highlight
-    * @param  start  the end pos of region to highlight    
-    * @param  brush  the highlighter to use.
-    *
-    * @return the highlight tag for removal later (Object)
-    */
-
-    /*
-  public Object highlightRegion(int start, int end, DefaultHighlighter.DefaultHighlightPainter brush) {
- Object o=null;      
- try {
-     o = _frame.getCurrentDefPane().getHighlighter().addHighlight(start,
-          end,
-          brush);
-      } catch (BadLocationException badBadLocation) { System.err.println("DebugPanel.highlightRegion() Got a ble."); }
- return o;
- } */
-}
+  /**
+   * Creates the buttons for controlling the debugger.
+   */
+  private void _setupButtonPanel() {
+    JPanel mainButtons = new JPanel();
+    JPanel closeButtonPanel = new JPanel(new BorderLayout());
+    mainButtons.setLayout( new GridLayout(0,1));
     
+    Action resumeAction = new AbstractAction( "Resume" ) {
+      public void actionPerformed(ActionEvent ae) {
+        _frame.debuggerResume();
+      }
+    };
+    _resumeButton = new JButton(resumeAction);
+    
+    Action stepIntoAction = new AbstractAction( "Step Into" ) {
+      public void actionPerformed(ActionEvent ae) {
+        _frame.debuggerStep(DebugManager.STEP_INTO);
+      }
+    };
+    _stepIntoButton = new JButton(stepIntoAction);
+    
+    Action stepOverAction = new AbstractAction( "Step Over" ) {
+      public void actionPerformed(ActionEvent ae) {
+        _frame.debuggerStep(DebugManager.STEP_OVER);
+      }
+    };
+    _stepOverButton = new JButton(stepOverAction);
+    
+    Action stepOutAction = new AbstractAction( "Step Out" ) {
+      public void actionPerformed(ActionEvent ae) {
+        _frame.debuggerStep(DebugManager.STEP_OUT);
+      }
+    };
+    _stepOutButton = new JButton(stepOutAction);
+    
+    Action closeAction = new AbstractAction( "X" ) {
+      public void actionPerformed(ActionEvent ae) {
+        _frame.debuggerToggle();
+      }
+    };
+    _closeButton = new JButton(closeAction);
+    
+    closeButtonPanel.add(_closeButton, BorderLayout.NORTH);
+    mainButtons.add(_resumeButton);
+    mainButtons.add(_stepIntoButton);
+    mainButtons.add(_stepOverButton);
+    mainButtons.add(_stepOutButton);     
+    disableButtons();
+    _buttonPanel.add(mainButtons, BorderLayout.CENTER);
+    _buttonPanel.add(closeButtonPanel, BorderLayout.EAST);
+  }
+  
+  /**
+   * Listens to events from the debug manager to keep the panel updated.
+   */
+  class DebugPanelListener implements DebugListener {
+  
+    /**
+     * Called when debugger mode has been enabled.
+     */
+    public void debuggerStarted() {}
+    
+    /**
+     * Called when debugger mode has been disabled.
+     */
+    public void debuggerShutdown() {}
+    
+    /**
+     * Called when the given line is reached by the current thread in the 
+     * debugger, to request that the line be displayed.
+     * @param doc Document to display
+     * @param lineNumber Line to display or highlight
+     */
+    public void threadLocationUpdated(OpenDefinitionsDocument doc, int lineNumber) {}
+    
+    /**
+     * Called when a breakpoint is set in a document.
+     * Adds the breakpoint to the tree of breakpoints.
+     * @param bp the breakpoint
+     */
+    public void breakpointSet(final Breakpoint bp) {
+      // Only change GUI from event-dispatching thread
+      Runnable doCommand = new Runnable() {
+        public void run() {
+          DefaultMutableTreeNode bpDocNode = new DefaultMutableTreeNode(bp.getClassName());
+          
+          // Look for matching document node
+          Enumeration documents = _breakpointRootNode.children();
+          while (documents.hasMoreElements()) {
+            DefaultMutableTreeNode doc = (DefaultMutableTreeNode)documents.nextElement();
+            if (doc.getUserObject().equals(bpDocNode.getUserObject())) {
+              //DrJava.consoleOut().println("matched, classname: " + bpDoc.getUserObject());
+              
+              // Create a new breakpoint in this node
+              // TO DO: Sort by line number!
+              DefaultMutableTreeNode newBreakpoint = 
+                new DefaultMutableTreeNode(new Integer(bp.getLineNumber()));
+              _bpTreeModel.insertNodeInto(newBreakpoint,
+                                          doc,
+                                          doc.getChildCount());
+              
+              // Make sure this node is visible
+              _bpTree.scrollPathToVisible(new TreePath(newBreakpoint.getPath()));
+              return;
+            }
+          }
+          
+          // No matching document node was found, so create one
+          _bpTreeModel.insertNodeInto(bpDocNode,
+                                      _breakpointRootNode,
+                                      _breakpointRootNode.getChildCount());
+          DefaultMutableTreeNode newBreakpoint = 
+            new DefaultMutableTreeNode(new Integer(bp.getLineNumber()));
+          _bpTreeModel.insertNodeInto(newBreakpoint,
+                                      bpDocNode,
+                                      bpDocNode.getChildCount());
+          
+          // Make visible
+          TreePath pathToNewBreakpoint = new TreePath(newBreakpoint.getPath());
+          _bpTree.scrollPathToVisible(pathToNewBreakpoint);
+          //_bpTree.setSelectionPath(pathToNewBreakpoint);
+        }
+      };
+      SwingUtilities.invokeLater(doCommand);
+    }
+    
+    /**
+     * Called when a breakpoint is reached during execution.
+     * @param bp the breakpoint
+     */
+    public void breakpointReached(final Breakpoint bp) {
+      // Only change GUI from event-dispatching thread
+      Runnable doCommand = new Runnable() {
+        public void run() {
+          DefaultMutableTreeNode bpDoc = new DefaultMutableTreeNode(bp.getClassName());
+          
+          // Find the document node for this breakpoint
+          Enumeration documents = _breakpointRootNode.children();
+          while (documents.hasMoreElements()) {
+            DefaultMutableTreeNode doc = (DefaultMutableTreeNode)documents.nextElement();
+            if (doc.getUserObject().equals(bpDoc.getUserObject())) {
+              //DrJava.consoleOut().println("matched, classname: " + bpDoc.getUserObject());
+              
+              // Find the correct line number node for this breakpoint
+              Enumeration lineNumbers = doc.children();
+              while (lineNumbers.hasMoreElements()) {
+                DefaultMutableTreeNode lineNumber = 
+                  (DefaultMutableTreeNode)lineNumbers.nextElement();
+                if (lineNumber.getUserObject().equals(new Integer(bp.getLineNumber()))) {
+                  //DrJava.consoleOut().println("matched, lineNumber: " + bp.getLineNumber());
+                  
+                  // Select the node which has been hit
+                  TreePath pathToNewBreakpoint = new TreePath(lineNumber.getPath());
+                  _bpTree.scrollPathToVisible(pathToNewBreakpoint);
+                  _bpTree.setSelectionPath(pathToNewBreakpoint);
+                  //DrJava.consoleOut().println("Set selection to new hit breakpoint.");
+                }
+              }
+            }
+          }
+        }
+      };
+      SwingUtilities.invokeLater(doCommand);
+    }
+    
+    /**
+     * Called when a breakpoint is removed from a document.
+     * Removes the breakpoint from the tree of breakpoints.
+     * @param bp the breakpoint
+     */
+    public void breakpointRemoved(final Breakpoint bp) {
+      // Only change GUI from event-dispatching thread
+      Runnable doCommand = new Runnable() {
+        public void run() {
+          DefaultMutableTreeNode bpDocNode = new DefaultMutableTreeNode(bp.getClassName());
+          
+          // Find the document node for this breakpoint
+          Enumeration documents = _breakpointRootNode.children();
+          while (documents.hasMoreElements()) {
+            DefaultMutableTreeNode doc = (DefaultMutableTreeNode)documents.nextElement();
+            if (doc.getUserObject().equals(bpDocNode.getUserObject())) {
+              //DrJava.consoleOut().println("matched, classname: " + bpDoc.getUserObject());
+              
+              // Find the correct line number node for this breakpoint
+              Enumeration lineNumbers = doc.children();
+              while (lineNumbers.hasMoreElements()) {
+                DefaultMutableTreeNode lineNumber = 
+                  (DefaultMutableTreeNode)lineNumbers.nextElement();
+                if (lineNumber.getUserObject().equals(new Integer(bp.getLineNumber()))) {
+                  //DrJava.consoleOut().println("matched, lineNumber: " + bp.getLineNumber());
+                  _bpTreeModel.removeNodeFromParent(lineNumber);
+                  if (doc.getChildCount() == 0) {
+                    // this document has no more breakpoints, remove it
+                    _bpTreeModel.removeNodeFromParent(doc);
+                  }        
+                  return;
+                }
+              }
+            }
+          }
+        }
+      };
+      SwingUtilities.invokeLater(doCommand);
+    }
+    
+    /**
+     * Called when the current thread is suspended
+     */
+    public void currThreadSuspended() {
+      // Only change GUI from event-dispatching thread
+      Runnable doCommand = new Runnable() {
+        public void run() {
+          //DrJava.consoleOut().println("starting DP.currThreadSuspended...");
+          updateData(true);
+          //DrJava.consoleOut().println("done with DP.currThreadSuspended...");
+        }
+      };
+      SwingUtilities.invokeLater(doCommand);
+    }
+    
+    /**
+     * Called when the current thread is resumed
+     */
+    public void currThreadResumed() {
+      // Only change GUI from event-dispatching thread
+      Runnable doCommand = new Runnable() {
+        public void run() {
+          updateData(false);
+        }
+      };
+      SwingUtilities.invokeLater(doCommand);
+    }
+    
+    /**
+     * Called when the current thread dies
+     */
+    public void currThreadDied() {
+      // Only change GUI from event-dispatching thread
+      Runnable doCommand = new Runnable() {
+        public void run() {
+          updateData(false);
+        }
+      };
+      SwingUtilities.invokeLater(doCommand);
+    }
+  }
+  
+
+  
+  /**
+   * Enables and disables the appropriate buttons depending on if the current
+   * thread has been suspended or resumed
+   * @param isSuspended indicates if the current thread has been suspended
+   */
+  public void setThreadDependentButtons(boolean isSuspended) {
+    _resumeButton.setEnabled(isSuspended);
+    _stepIntoButton.setEnabled(isSuspended);
+    _stepOverButton.setEnabled(isSuspended);
+    _stepOutButton.setEnabled(isSuspended);
+  }
+  public void disableButtons() {
+    setThreadDependentButtons(false);
+  }
+}
+

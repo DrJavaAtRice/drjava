@@ -500,6 +500,12 @@ public interface OptionConstants extends ConfigurationTool {
     new ClasspathOption().evaluate("debug.sourcepath");
   
   /**
+   * Whether all current threads should be displayed when a thread suspends
+   */    
+  public static final BooleanOption DEBUG_SHOW_THREADS =
+    new BooleanOption("debug.show.threads", new Boolean(false));
+  
+  /**
    * Whether stepping should step through Java's source files
    */    
   public static final BooleanOption DEBUG_STEP_JAVA =

@@ -101,7 +101,7 @@ public class UncaughtExceptionWindow extends JFrame {
     
     _okPanel = new JPanel(new BorderLayout());
     _okPanel.add(_okButton, BorderLayout.SOUTH);
-    _okPanel.setBackground(Color.gray.brighter());
+    _okPanel.setBackground(new Color(204,204,204));
     
     _topPanel = new JPanel(new BorderLayout());
     _topPanel.add(_exceptionInfo, BorderLayout.CENTER);

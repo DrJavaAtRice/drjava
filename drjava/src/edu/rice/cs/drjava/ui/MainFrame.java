@@ -83,7 +83,7 @@ import edu.rice.cs.util.swing.HighlightManager;
  * @version $Id$
  */
 public class MainFrame extends JFrame implements OptionConstants {
-  private String _field;
+  //private String _field;
   
   private static final int INTERACTIONS_TAB = 0;
   //private static final int COMPILE_TAB = 1;
@@ -94,7 +94,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   private static final int GUI_WIDTH = 800;
   private static final int GUI_HEIGHT = 700;
   private static final int DOC_LIST_WIDTH = 150;
-  private static final int SPLIT_DIVIDER_SIZE = 15;
+  //private static final int SPLIT_DIVIDER_SIZE = 10;
 
   private static final String ICON_PATH = "/edu/rice/cs/drjava/ui/icons/";
 
@@ -156,6 +156,7 @@ public class MainFrame extends JFrame implements OptionConstants {
  
   private ConfigFrame _configFrame;
   private RecentFileManager _recentFileManager;
+  private HelpFrame _helpFrame;
   
   private HighlightManager.HighlightInfo _currentThreadLocationHighlight = null;
   
@@ -502,6 +503,16 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
   };
 
+  /** Shows the user documentation. */
+  private Action _helpAction = new AbstractAction("Help") {
+    public void actionPerformed(ActionEvent ae) {
+      if (_helpFrame == null) {
+        _helpFrame = new HelpFrame();
+      }
+      _helpFrame.show();
+    }
+  };
+  
   /** Pops up an info dialog. */
   private Action _aboutAction = new AbstractAction("About") {
     public void actionPerformed(ActionEvent ae) {
@@ -541,25 +552,25 @@ public class MainFrame extends JFrame implements OptionConstants {
     new AbstractAction("Debug Mode")
   {
     public void actionPerformed(ActionEvent ae) {
-      toggleDebugger();
+      debuggerToggle();
     }
   };
 
-  /** Runs the debugger on the current document */
+  /** Runs the debugger on the current document
   private Action _runDebuggerAction =
     new AbstractAction("Run Current Document in Debugger")
   {
     public void actionPerformed(ActionEvent ae) {
       _runDebugger();
     }
-  };
+  };*/
 
   /** Resumes debugging */
   private Action _resumeDebugAction =
     new AbstractAction("Resume Debugger")
   {
     public void actionPerformed(ActionEvent ae) {
-      _resumeDebugger();
+      debuggerResume();
     }
   };
 
@@ -568,7 +579,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     new AbstractAction("Step Into")
   {
     public void actionPerformed(ActionEvent ae) {
-      _debugStep(DebugManager.STEP_INTO);
+      debuggerStep(DebugManager.STEP_INTO);
     }
   };
 
@@ -577,7 +588,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     new AbstractAction("Step Over")
   {
     public void actionPerformed(ActionEvent ae) {
-      _debugStep(DebugManager.STEP_OVER);
+      debuggerStep(DebugManager.STEP_OVER);
     }
   };
 
@@ -586,7 +597,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     new AbstractAction("Step Out")
   {
     public void actionPerformed(ActionEvent ae) {
-      _debugStep(DebugManager.STEP_OUT);
+      debuggerStep(DebugManager.STEP_OUT);
     }
   };
 
@@ -604,25 +615,25 @@ public class MainFrame extends JFrame implements OptionConstants {
     new AbstractAction("Toggle Breakpoint on Current Line")
   {
     public void actionPerformed(ActionEvent ae) {
-      toggleBreakpoint();
+      debuggerToggleBreakpoint();
     }
   };
 
-  /** Prints all breakpoints */
+  /** Prints all breakpoints
   private Action _printBreakpointsAction =
     new AbstractAction("Display All Breakpoints")
   {
     public void actionPerformed(ActionEvent ae) {
       _printBreakpoints();
     }
-  };
+  };*/
 
   /** Clears all breakpoints */
   private Action _clearAllBreakpointsAction =
     new AbstractAction("Clear All Breakpoints")
   {
     public void actionPerformed(ActionEvent ae) {
-      _clearAllBreakpoints();
+      debuggerClearAllBreakpoints();
     }
   };
   
@@ -870,6 +881,8 @@ public class MainFrame extends JFrame implements OptionConstants {
     
     // Set the configuration frame to null
     _configFrame = null;
+    
+    _helpFrame = null;
       
     // If any errors occurred while parsing config file, show them
     _showConfigException();
@@ -895,7 +908,7 @@ public class MainFrame extends JFrame implements OptionConstants {
    * Toggles whether the debugger is enabled or disabled,
    * and updates the display accordingly.
    */
-  public void toggleDebugger() {
+  public void debuggerToggle() {
     // Make sure the debugger is available
     DebugManager debugger = _model.getDebugManager();
     if (debugger == null) return;
@@ -955,18 +968,31 @@ public class MainFrame extends JFrame implements OptionConstants {
   }
   
   private void _showDebuggerPanel() {
+    _debugSplitPane.setTopComponent(_docSplitPane);
+    _mainSplit.setTopComponent(_debugSplitPane);
+    //System.out.println("split max: " + _debugSplitPane.getMaximumDividerLocation());
+    //System.out.println("debug min: " + _debugPanel.getMinimumSize().getHeight());
+    //_debugSplitPane.setDividerLocation(_debugSplitPane.getMaximumDividerLocation() -
+    //                                   _debugPanel.getMinimumSize().getHeight());
+    
+    /**
     _debugSplitPane.setDividerSize(SPLIT_DIVIDER_SIZE);
     int height = _debugSplitPane.getTopComponent().getHeight();
     // int debugHeight = _debugPanel.getPreferredSize().getHeight();
     _debugSplitPane.setDividerLocation(height - 150);  // height-debugHeight
+    */
   }
   
   private void _hideDebuggerPanel() {
+    _mainSplit.setTopComponent(_docSplitPane);
+    
+    /**
     _debugSplitPane.setDividerSize(0);
     int height = _mainSplit.getDividerLocation();
     //System.out.println("height of mainSplit.top: " + height);
     //System.out.println("mainSplit.dividerLoc: " + _mainSplit.getDividerLocation());
     _debugSplitPane.setDividerLocation(height);
+    */
   }
 
 
@@ -1240,35 +1266,19 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
   }
 
-  /**
-   * Runs the debugger on the currently active document
-   */
-  private void _runDebugger() {
-    /*
-    OpenDefinitionsDocument doc = _model.getActiveDocument();
-    try{
-      _model.getDebugManager().start(doc);
-    }
-    catch (ClassNotFoundException cnfe){
-      // catch the "Class Not Found exception"; must be some kind of no-compile
-      // issue
-      _showClassNotFoundError(cnfe);
-    }
-    */
-  }
   
   /**
    * Suspends the current execution of the debugger
-   */
-  private void _debugSuspend(){
+   *
+  private void debuggerSuspend() {
     if (inDebugMode())
       _model.getDebugManager().suspend();
-  }
+  }/
 
   /**
    * Resumes the debugger's current execution
    */
-  private void _resumeDebugger() {
+  void debuggerResume() {
     if (inDebugMode()) {
       _model.getDebugManager().resume();
       if (_currentThreadLocationHighlight != null) {
@@ -1281,7 +1291,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   /**
    * Steps in the debugger
    */
-  private void _debugStep(int flag) {
+  void debuggerStep(int flag) {
     if (inDebugMode()) {
       try {
         _model.getDebugManager().step(flag);
@@ -1293,36 +1303,11 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
   }
 
-  /**
-   * Steps next in the debugger
-   *
-  private void _debugStepOver(){
-    try {
-      _model.getDebugManager().stepOver(_model.getActiveDocument());
-    }
-    catch (DebugException de) {
-      _showError(de, "Debugger Error",
-                 "Could not create a step request.");
-    }
-  }*/
-
-  /**
-   * Steps out in the debugger
-   *
-  private void _debugStepOut() {
-    try {
-      _model.getDebugManager().stepOut(_model.getActiveDocument());
-    }
-    catch (DebugException de) {
-      _showError(de, "Debugger Error",
-                 "Could not create a step request.");
-    }
-  }  */
 
   /**
    * Toggles a breakpoint on the current line
    */
-  void toggleBreakpoint() {
+  void debuggerToggleBreakpoint() {
     if (inDebugMode()) {
       OpenDefinitionsDocument doc = _model.getActiveDocument();
       try {
@@ -1338,14 +1323,16 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
   }
   
+
+  /*
   private void _getText(String name) {
     _field = name;
-  }
+  }*/
   
   /**
-   * Adds a watchpoint on the current line
-   */
-  void addWatchpoint() {
+   * Adds a watch to a given variable or field
+   *
+  void debuggerAddWatch() {
     if (inDebugMode()) {
       //final String field;
       OpenDefinitionsDocument doc = _model.getActiveDocument();
@@ -1363,21 +1350,21 @@ public class MainFrame extends JFrame implements OptionConstants {
       getFieldDialog.setLocation(300,300);
       getFieldDialog.show();
       DebugManager debugger = _model.getDebugManager();
-      debugger.addWatchpoint(_field);
+      debugger.addWatch(_field);
     }
-  }
+  }*/
   
   /**
    * Displays all breakpoints currently set in the debugger
-   */
-  private void _printBreakpoints() {
+   *
+  void _printBreakpoints() {
     _model.getDebugManager().printBreakpoints();
-  }
+  }*/
 
   /**
    * Clears all breakpoints from the debugger
    */
-  private void _clearAllBreakpoints() {
+  void debuggerClearAllBreakpoints() {
     _model.getDebugManager().removeAllBreakpoints();
   }
 
@@ -1614,7 +1601,9 @@ public class MainFrame extends JFrame implements OptionConstants {
     _setUpAction(_switchToNextAction, "Forward", "Next Document");
 
     _setUpAction(_findReplaceAction, "Find", "Find/Replace");
-    _setUpAction(_aboutAction, "About", "About");
+    
+    _setUpAction(_helpAction, "Help", "Show the User Documentation");
+    _setUpAction(_aboutAction, "About", "About DrJava");
 
     _setUpAction(_undoAction, "Undo", "Undo previous command");
     _setUpAction(_redoAction, "Redo", "Redo last undo");
@@ -1912,22 +1901,11 @@ public class MainFrame extends JFrame implements OptionConstants {
     _debuggerEnabledMenuItem.setSelected(false);
     debugMenu.add(_debuggerEnabledMenuItem);
 
-    /*debugMenu.add(new AbstractAction( "Turn on debugger") {
-      public void actionPerformed(ActionEvent ae) {
-        try {
-        _model.getDebugManager().startup();
-        }
-        catch (DebugException de) {
-          // couldn't load DM
-        }
-      }
-    });*/
-    
     debugMenu.addSeparator(); // breakpoints section
 
     _addMenuItem(debugMenu, _toggleBreakpointAction, KEY_DEBUG_BREAKPOINT_TOGGLE);
     //_toggleBreakpointMenuItem = debugMenu.add(_toggleBreakpointAction);
-    _printBreakpointsMenuItem = debugMenu.add(_printBreakpointsAction);
+    //_printBreakpointsMenuItem = debugMenu.add(_printBreakpointsAction);
     _clearAllBreakpointsMenuItem = debugMenu.add(_clearAllBreakpointsAction);
 
     debugMenu.addSeparator(); // debug actions
@@ -1959,7 +1937,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _stepOverDebugAction.setEnabled(false);
     _stepOutDebugAction.setEnabled(false);
     _toggleBreakpointAction.setEnabled(enabled);
-    _printBreakpointsAction.setEnabled(enabled);
+    //_printBreakpointsAction.setEnabled(enabled);
     _clearAllBreakpointsAction.setEnabled(enabled);
     if (_debugPanel != null)
       _debugPanel.disableButtons();
@@ -1985,6 +1963,7 @@ public class MainFrame extends JFrame implements OptionConstants {
    */
   private JMenu _setUpHelpMenu(int mask) {
     JMenu helpMenu = new JMenu("Help");
+    helpMenu.add(_helpAction);
     helpMenu.add(_aboutAction);
     return helpMenu;
   }
@@ -2340,7 +2319,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     // Try to create debug panel (see if JSwat is around)
     if (_model.getDebugManager() != null) {
       try {
-        _debugPanel = new DebugPanel(_model, this, _model.getDebugManager());
+        _debugPanel = new DebugPanel(this);
       }
       catch(NoClassDefFoundError e) {
         // Don't use the debugger
@@ -2355,14 +2334,12 @@ public class MainFrame extends JFrame implements OptionConstants {
                                             true,
                                             listScroll,
                                             defScroll);
-    _debugSplitPane = new BorderlessSplitPane(JSplitPane.VERTICAL_SPLIT,
-                                              true,
-                                              _docSplitPane,
-                                              _debugPanel);
+    _debugSplitPane = new BorderlessSplitPane(JSplitPane.VERTICAL_SPLIT, true);
+    _debugSplitPane.setBottomComponent(_debugPanel);
     _mainSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
-                                      true,
-                                      _debugSplitPane,
-                                      _tabbedPane);
+                                true,
+                                _docSplitPane,
+                                _tabbedPane);
     _mainSplit.setResizeWeight(1.0);
     _debugSplitPane.setResizeWeight(1.0);
     getContentPane().add(_mainSplit, BorderLayout.CENTER);
@@ -2372,10 +2349,8 @@ public class MainFrame extends JFrame implements OptionConstants {
     // Also, according to the Swing docs, we need to set these dividers AFTER
     // we have shown the window. How annoying.
     _mainSplit.setDividerLocation(2*getHeight()/3);
-    _mainSplit.setDividerSize(getHeight()/60);
+    //_mainSplit.setDividerSize(getHeight()/60);
     _mainSplit.setOneTouchExpandable(true);
-    _hideDebuggerPanel();
-    
     _debugSplitPane.setOneTouchExpandable(true);
     _docSplitPane.setDividerLocation(DOC_LIST_WIDTH);
     _docSplitPane.setOneTouchExpandable(true);   
@@ -2560,102 +2535,154 @@ public class MainFrame extends JFrame implements OptionConstants {
   private class UIDebugListener implements DebugListener {
     
     public void debuggerStarted() {
-      showDebugger();
+      // Only change GUI from event-dispatching thread
+      Runnable doCommand = new Runnable() {
+        public void run() {
+          showDebugger();
+        }
+      };
+      SwingUtilities.invokeLater(doCommand);
     }
     
     public void debuggerShutdown() {
-      hideDebugger();
-      if (_currentThreadLocationHighlight != null) {
-        _currentThreadLocationHighlight.remove();
-      }
-      _currentThreadLocationHighlight = null;
-    }
-    
-    public void threadLocationUpdated(OpenDefinitionsDocument doc, 
-                                      final int lineNumber) {
-      ActionListener setSizeListener = new ActionListener() {
-        public void actionPerformed(ActionEvent ae) {
-          _currentDefPane.centerViewOnLine(lineNumber);
-          _docList.revalidate();
-          _docList.repaint();
-          _docSplitPane.revalidate();
-          _docSplitPane.repaint();
+      // Only change GUI from event-dispatching thread
+      Runnable doCommand = new Runnable() {
+        public void run() {
+          hideDebugger();
+          if (_currentThreadLocationHighlight != null) {
+            _currentThreadLocationHighlight.remove();
+          }
+          _currentThreadLocationHighlight = null;
         }
       };
-      _currentDefPane.addSetSizeListener(setSizeListener);
-      if (!_model.getActiveDocument().equals(doc)) {
-        //DrJava.consoleOut().println("Don't need to setActiveDocument here");
-        _model.setActiveDocument(doc);
-      }
-      
-      if (_currentDefPane.getSize().getWidth() > 0 &&
-          _currentDefPane.getSize().getHeight() > 0) {
-        _currentDefPane.centerViewOnLine(lineNumber); 
-        _docList.revalidate();
-        _docList.repaint();
-        _docSplitPane.revalidate();
-        _docSplitPane.repaint();
-      }
-
-      if (_currentThreadLocationHighlight != null) {
-        _currentThreadLocationHighlight.remove();
-        _currentThreadLocationHighlight = null;
-        _currentDefPane.revalidate();
-        _currentDefPane.repaint();
-      }
-      DefinitionsDocument defDoc = doc.getDocument();
-      int startOffset = defDoc.getOffset(lineNumber);
-      _currentThreadLocationHighlight = _currentDefPane.getHighlightManager().addHighlight(startOffset,
-                                                         defDoc.getLineEndPos(startOffset),
-                                                         DefinitionsPane.THREAD_PAINTER);
+      SwingUtilities.invokeLater(doCommand);
     }
     
-    public void breakpointSet(Breakpoint bp) {
-      _model.setActiveDocument(bp.getDocument());
-      _currentDefPane.getHighlightManager().addHighlight(bp.getStartOffset(),
-                                                         bp.getEndOffset(),
-                                                         DefinitionsPane.BREAKPOINT_PAINTER);
-      _debugPanel.breakpointAdded(bp);
+    public void threadLocationUpdated(final OpenDefinitionsDocument doc, 
+                                      final int lineNumber) {
+      // Only change GUI from event-dispatching thread
+      Runnable doCommand = new Runnable() {
+        public void run() {
+          //DrJava.consoleOut().println("MF: thread location updated");
+          
+          ActionListener setSizeListener = new ActionListener() {
+            public void actionPerformed(ActionEvent ae) {
+              //DrJava.consoleOut().println("MF: in setSizeListener.actionPerformed");
+              _currentDefPane.centerViewOnLine(lineNumber);
+              _docList.revalidate();
+              _docList.repaint();
+              _docSplitPane.revalidate();
+              _docSplitPane.repaint();
+            }
+          };
+          _currentDefPane.addSetSizeListener(setSizeListener);
+          
+          if (!_model.getActiveDocument().equals(doc)) {
+            //DrJava.consoleOut().println("Don't need to setActiveDocument here");
+            _model.setActiveDocument(doc);
+          }
+      
+          if (_currentDefPane.getSize().getWidth() > 0 &&
+              _currentDefPane.getSize().getHeight() > 0) {
+            //DrJava.consoleOut().println("MF: centering view");
+            _currentDefPane.centerViewOnLine(lineNumber); 
+            //_docList.revalidate();
+            //_docList.repaint();
+            //_docSplitPane.revalidate();
+            //_docSplitPane.repaint();
+          }
+
+          if (_currentThreadLocationHighlight != null) {
+            _currentThreadLocationHighlight.remove();
+            _currentThreadLocationHighlight = null;
+            //_currentDefPane.revalidate();
+            //_currentDefPane.repaint();
+          }
+          DefinitionsDocument defDoc = doc.getDocument();
+          int startOffset = defDoc.getOffset(lineNumber);
+          int endOffset = defDoc.getLineEndPos(startOffset);
+          _currentThreadLocationHighlight = 
+            _currentDefPane.getHighlightManager().addHighlight(startOffset,
+                                                               endOffset,
+                                                               DefinitionsPane.THREAD_PAINTER);
+          //DrJava.consoleOut().println("MF: done with thread loc update");
+        }
+      };
+      SwingUtilities.invokeLater(doCommand);
+    }
+    
+    public void breakpointSet(final Breakpoint bp) {
+      // Only change GUI from event-dispatching thread
+      Runnable doCommand = new Runnable() {
+        public void run() {
+          _model.setActiveDocument(bp.getDocument());
+          _currentDefPane.getHighlightManager().addHighlight(bp.getStartOffset(),
+                                                             bp.getEndOffset(),
+                                                             DefinitionsPane.BREAKPOINT_PAINTER);
+        }
+      };
+      SwingUtilities.invokeLater(doCommand);
     }
     
     public void breakpointReached(Breakpoint bp) {
-      _debugPanel.breakpointReached(bp);
     }
     
-    public void breakpointRemoved(Breakpoint bp) {
-      _model.setActiveDocument(bp.getDocument());
-      _currentDefPane.getHighlightManager().removeHighlight(bp.getStartOffset(),
-                                                            bp.getEndOffset(),
-                                                            DefinitionsPane.BREAKPOINT_PAINTER);
-      _debugPanel.breakpointRemoved(bp);
+    public void breakpointRemoved(final Breakpoint bp) {
+      // Only change GUI from event-dispatching thread
+      Runnable doCommand = new Runnable() {
+        public void run() {
+          _model.setActiveDocument(bp.getDocument());
+          _currentDefPane.getHighlightManager().removeHighlight(bp.getStartOffset(),
+                                                                bp.getEndOffset(),
+                                                                DefinitionsPane.BREAKPOINT_PAINTER);
+        }
+      };
+      SwingUtilities.invokeLater(doCommand);
     }
     
     public void currThreadSuspended() {
-      //DrJava.consoleOut().println("showing resume, etc");
-      _setThreadDependentDebugMenuItems(true);
-      _debugPanel.updateData();
+      // Only change GUI from event-dispatching thread
+      Runnable doCommand = new Runnable() {
+        public void run() {
+          //DrJava.consoleOut().println("showing resume, etc");
+          _setThreadDependentDebugMenuItems(true);
+          //DrJava.consoleOut().println("done with MF.currThreadSuspended...");
+        }
+      };
+      SwingUtilities.invokeLater(doCommand);
     }
     
     public void currThreadResumed() {
-      //DrJava.consoleOut().println("hiding resume, etc");
-      _setThreadDependentDebugMenuItems(false);
+      // Only change GUI from event-dispatching thread
+      Runnable doCommand = new Runnable() {
+        public void run() {
+          //DrJava.consoleOut().println("hiding resume, etc");
+          _setThreadDependentDebugMenuItems(false);
+        }
+      };
+      SwingUtilities.invokeLater(doCommand);
     }
     
     public void currThreadDied() {
-      if (_currentThreadLocationHighlight != null) {
-        _currentThreadLocationHighlight.remove();
-        _currentThreadLocationHighlight = null;
-        _currentDefPane.revalidate();
-        _currentDefPane.repaint();
-      }
-      if (inDebugMode()) {
-        _setDebugMenuItemsEnabled(true);
-        _debugPanel.updateData();
-      }
+      // Only change GUI from event-dispatching thread
+      Runnable doCommand = new Runnable() {
+        public void run() {
+          if (_currentThreadLocationHighlight != null) {
+            _currentThreadLocationHighlight.remove();
+            _currentThreadLocationHighlight = null;
+            //_currentDefPane.revalidate();
+            //_currentDefPane.repaint();
+          }
+          if (inDebugMode()) {
+            _setDebugMenuItemsEnabled(true);
+          }
 
-      // Make sure we're at the prompt
-      // (This should really be fixed in InteractionsPane, not here.)
-      _interactionsPane.setCaretPosition(_model.getInteractionsFrozenPos());
+          // Make sure we're at the prompt
+          // (This should really be fixed in InteractionsPane, not here.)
+          _interactionsPane.setCaretPosition(_model.getInteractionsFrozenPos());
+        }
+      };
+      SwingUtilities.invokeLater(doCommand);
     }
   }
 
@@ -2677,18 +2704,14 @@ public class MainFrame extends JFrame implements OptionConstants {
       }
     }
 
-    public void fileOpened(OpenDefinitionsDocument doc) {     
+    public void fileOpened(final OpenDefinitionsDocument doc) { 
       // Fix OS X scrollbar bug before switching
-      _reenableScrollBar();   
+      _reenableScrollBar();
       _createDefScrollPane(doc);
-
-      //OpenDefinitionsDocument doc = _model.getActiveDocument();
-      //String filename = _model.getDisplayFilename(doc);
+      
       if (CodeStatus.DEVELOPMENT) {
         _recentFileManager.updateOpenFiles(doc.getFile());
       }
-      //System.out.println("adding: " + filename + "into pos: " + _recentFileMenuPos);
-      //_fileMenu.insert(new JMenuItem("1. " + filename),_recentFileMenuPos++);
     }
 
     public void fileClosed(OpenDefinitionsDocument doc) {
@@ -2700,61 +2723,54 @@ public class MainFrame extends JFrame implements OptionConstants {
       _saveAction.setEnabled(false);
       _currentDefPane.setPositionAndScroll(0);
     }
-    public void activeDocumentChanged(OpenDefinitionsDocument active) {
-      _switchDefScrollPane();
-
-      boolean isModified = active.isModifiedSinceSave();
-      boolean canCompile = (!isModified && !active.isUntitled());
-      _saveAction.setEnabled(isModified);
-      _revertAction.setEnabled(!active.isUntitled());
-
-      // Update error highlights
-      _errorPanel.getErrorListPane().selectNothing();
-      _junitPanel.getJUnitErrorListPane().selectNothing();
-      
-      int pos = _currentDefPane.getCaretPosition();
-      _currentDefPane.getErrorCaretListener().updateHighlight(pos);
-      _currentDefPane.getJUnitErrorCaretListener().updateHighlight(pos);
-     
-      // Update FileChoosers' directory
-      _setCurrentDirectory(active);
-
-      // Update title and position
-      updateFileTitle();
-      _currentDefPane.requestFocus();
-      _posListener.updateLocation();
-      
-      // Check if modified (but only if we're not closing all files)
-      if (!_model.isClosingAllFiles()) {
-        try {
-          active.revertIfModifiedOnDisk();
-        } catch (IOException e) {
-          _showIOError(e);
-        }
-      }
-      
-      // Change Find/Replace to the new defpane
-      if (_findReplace.isDisplayed()) {
-        _findReplace.stopListening();
-        _findReplace.beginListeningTo(_currentDefPane);
-        //uninstallFindReplaceDialog(_findReplace);
-        //installFindReplaceDialog(_findReplace);
-      }
+    public void activeDocumentChanged(final OpenDefinitionsDocument active) {
+      // Only change GUI from event-dispatching thread
+      // (This can be called from other threads...)
+      //Runnable doCommand = new Runnable() {
+      // public void run() {
+          _switchDefScrollPane();
+          
+          boolean isModified = active.isModifiedSinceSave();
+          boolean canCompile = (!isModified && !active.isUntitled());
+          _saveAction.setEnabled(isModified);
+          _revertAction.setEnabled(!active.isUntitled());
+          
+          // Update error highlights
+          _errorPanel.getErrorListPane().selectNothing();
+          _junitPanel.getJUnitErrorListPane().selectNothing();
+          
+          int pos = _currentDefPane.getCaretPosition();
+          _currentDefPane.getErrorCaretListener().updateHighlight(pos);
+          _currentDefPane.getJUnitErrorCaretListener().updateHighlight(pos);
+          
+          // Update FileChoosers' directory
+          _setCurrentDirectory(active);
+          
+          // Update title and position
+          updateFileTitle();
+          _currentDefPane.requestFocus();
+          _posListener.updateLocation();
+          
+          // Check if modified (but only if we're not closing all files)
+          if (!_model.isClosingAllFiles()) {
+            try {
+              active.revertIfModifiedOnDisk();
+            } catch (IOException e) {
+              _showIOError(e);
+            }
+          }
+          
+          // Change Find/Replace to the new defpane
+          if (_findReplace.isDisplayed()) {
+            _findReplace.stopListening();
+            _findReplace.beginListeningTo(_currentDefPane);
+            //uninstallFindReplaceDialog(_findReplace);
+            //installFindReplaceDialog(_findReplace);
+          }
+      //  }
+      //};
+      //SwingUtilities.invokeLater(doCommand);
     }
-    /*
-    public void activeDocumentChanged(OpenDefinitionsDocument active, int lineNumber) {
-      activeDocumentChanged(active);
-      try { 
-        Thread.sleep(1000);
-      }
-      catch( InterruptedException ie) {
-      }
-      _currentDefPane.centerViewOnLine(lineNumber);
-      _docList.revalidate();
-      _docList.repaint();
-      _docSplitPane.revalidate();
-      _docSplitPane.repaint();
-    }*/
     
     public void interactionStarted() {
       _interactionsPane.setEditable(false);

@@ -123,8 +123,8 @@ public class PendingRequestManager {
    */
   public void classPrepared (ClassPrepareEvent event) throws DebugException {
     ReferenceType rt = event.referenceType(); 
-    //System.out.println("In classPrepared. rt: " + rt);
-    //System.out.println("equals getReferenceType: " + 
+    //DrJava.consoleOut().println("In classPrepared. rt: " + rt);
+    //DrJava.consoleOut().println("equals getReferenceType: " + 
     //                   rt.equals(_manager.getReferenceType(rt.name())));
     String className = rt.name();
     
@@ -135,7 +135,7 @@ public class PendingRequestManager {
     }
     Vector<DebugAction> actions = _pendingActions.get(className);
     Vector<DebugAction> failedActions = new Vector<DebugAction>();
-    //System.out.println("actions: " + actions);
+    //DrJava.consoleOut().println("pending actions: " + actions);
     if (actions == null) {
       // any actions that were waiting for this class to be prepared have been
       // removed
