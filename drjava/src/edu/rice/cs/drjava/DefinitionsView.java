@@ -20,6 +20,7 @@ import javax.swing.text.Document;
 import javax.swing.text.StyledEditorKit;
 import javax.swing.text.DefaultEditorKit;
 import javax.swing.text.EditorKit;
+import javax.swing.text.BadLocationException;
 
 import java.io.File;
 import java.io.IOException;
@@ -28,6 +29,8 @@ import java.io.FileWriter;
 
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.Toolkit;
+
 import java.awt.event.ActionEvent;
 
 public class DefinitionsView extends JEditorPane
@@ -344,28 +347,75 @@ public class DefinitionsView extends JEditorPane
   }
 
 		public void findReplace () {
-				System.out.println("going to make box");
-				FindReplaceDialog box = new FindReplaceDialog(this);
-				System.out.println("made box");				
+				FindReplaceDialog box = new FindReplaceDialog(_mainFrame, this);
 		}
 
 		public int findText (String fWord) {
-				System.out.println("find");
-				return 0;
-		}
-		public int findNextText (String fWord, int currentPosition) {
-				System.out.println("findnext");
-				return 0;
+				System.out.println("find " + fWord);
+				return findNextText(fWord, 0);
 		}
 
+		public int findNextText (String fWord, int currentPosition) {
+				System.out.println("findnext " + fWord);
+				String text = "";
+				try {
+						text = _doc().getText(0, _doc().getLength());
+				} catch (BadLocationException WillNeverHappen){}
+						
+				int place = text.indexOf(fWord, currentPosition);
+
+				if (place == -1) {
+						Toolkit.getDefaultToolkit().beep();
+				} else {
+						_selectWord(place, fWord.length());
+				}
+				return place;
+		}
+
+		/** Replaces first word that matches fWord.  Invariant: word has been found.
+		 */
 		public int replaceText(String fWord, String rWord, int currentPosition) {
-				System.out.println("replace");
-				return 0;
+				try {
+						String text = "";
+												
+						text = _doc().getText(0, _doc().getLength());
+												
+						int place = text.indexOf(fWord, currentPosition);
+						if (place == -1)
+								return -1;
+						
+						_doc().remove(place, fWord.length());
+						_doc().insertString(place, rWord, null);
+						_selectWord(place, rWord.length());
+						return place + rWord.length();
+				} catch (BadLocationException WillNeverHappen){
+						System.out.println("HOLY MOTHER OF JESUS");
+						return 0;
+				}
 		}
 		
 		public int replaceAllText(String fWord, String rWord, int currentPosition) {
-				System.out.println("replaceall");
+				_replaceAllText(fWord, rWord, currentPosition, _doc().getLength());
+				//insert confirm
+				_replaceAllText(fWord, rWord, 0, currentPosition);
 				return 0;
+		}
+
+		private void _replaceAllText(String fWord, String rWord, int start, int end) {
+				int position = start;
+				while (position < end) {
+						int tmp = findNextText(fWord, position);
+						if ((tmp == -1) || (tmp >= end))
+								break;
+						else
+								position = replaceText(fWord, rWord, tmp);
+				}
+		}
+
+		private void _selectWord(int place, int wordLength) {
+	 			setCaretPosition(place);
+				moveCaretPosition(place + wordLength);
+				return;
 		}
 
 }
