@@ -101,7 +101,7 @@
     </antcall>
 
     <!-- give group permissions to write over the javadoc -->
-    <chmod perm="g+w,a+rX" dir="${public_javadoc_dir}" />
+    <chmod perm="g+w,a+rX" dir="${public_javadoc_dir}" type="both" />
 
     <!-- Create distribution jar.
          We modify property jarfile for this call to put the jar in
