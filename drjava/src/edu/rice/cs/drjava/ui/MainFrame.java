@@ -1572,10 +1572,11 @@ public class MainFrame extends JFrame {
                                       true,
                                       _docSplitPane,
                                       _tabbedPane);
+    split.setResizeWeight(1.0);
     getContentPane().add(split, BorderLayout.CENTER);
-    // This is annoyingly order-dependent. Since split2 contains split1,
-    // we need to get split2's divider set up first to give split1 an overall
-    // size. Then we can set split1's divider. Ahh, Swing.
+    // This is annoyingly order-dependent. Since split contains _docSplitPane,
+    // we need to get split's divider set up first to give _docSplitPane an
+    // overall size. Then we can set _docSplitPane's divider. Ahh, Swing.
     // Also, according to the Swing docs, we need to set these dividers AFTER
     // we have shown the window. How annoying.
     split.setDividerLocation(2*getHeight()/3);
