@@ -33,6 +33,7 @@ by Brian Stoler (bstoler@rice.edu)
    * ~/sf/src/edu/rice/cs/lib/gj-util.jar
    * ~/sf/src/edu/rice/cs/lib/dynamicjava.jar
    * ~/sf/src/edu/rice/cs/lib/compilers-jsr14v1_0.jar
+   * ~/sf/src/edu/rice/cs/lib/compilers-jsr14v1_2.jar
    * The tools.jar file in your JDK's lib directory
 
 That should be it! Make sure all the environment variables are exported if
