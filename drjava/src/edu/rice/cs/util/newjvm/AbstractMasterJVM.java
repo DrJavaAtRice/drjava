@@ -159,7 +159,6 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/
     if (_slave != null) {
       throw new IllegalStateException("slave nonnull in invoke: " + _slave);
     }
-    
     _startupInProgress = true;
     Thread t = new Thread() {
       public void run() {

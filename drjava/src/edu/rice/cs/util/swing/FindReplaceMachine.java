@@ -66,7 +66,17 @@ public class FindReplaceMachine {
   private boolean _found;
   private boolean _wrapped;
   private boolean _matchCase;
-  private boolean _searchBackwards;
+  private boolean _searchBackwards;  
+  // The last word that was found. This is set to null by the 
+  // FindReplaceDialog if the caret is updated. We keep this
+  // so we know to ignore finding this instance of the word
+  // if the user toggles the _searchBackwards flag and has not
+  // moved the caret.
+  private String _lastFindWord;
+  // Set to true if we should skip the first instance of the
+  // word that we find (if the user toggled _searchBackwards 
+  // under certain circumstances).
+  private boolean _skipOneFind;
 
   /**
    * Constructor.
@@ -84,6 +94,22 @@ public class FindReplaceMachine {
     _findWord = "";
     _replaceWord = "";
     _matchCase = true;
+    _lastFindWord = null;
+    _skipOneFind = false;
+  }
+  
+  /**
+   * Called when the current position is updated in the document
+   * and therefore we do not want to skip the instance of the 
+   * findWord we are on if the user toggles _searchBackwards
+   */
+  public void positionChanged() {
+    _lastFindWord = null;
+    _skipOneFind = false;
+  }
+  
+  public void setLastFindWord() {
+    _lastFindWord = _findWord;
   }
 
   public boolean getSearchBackwards() {
@@ -91,6 +117,15 @@ public class FindReplaceMachine {
   }
 
   public void setSearchBackwards(boolean searchBackwards) {
+    if (_searchBackwards != searchBackwards) {
+      int len = _findWord.length();
+      // If we switch from searching forward to searching backwards,
+      // isOnMatch is true, and _findword is the same as the _lastFindWord,
+      // we know the user just found _findWord, so skip one find.
+      if (isOnMatch() && _findWord.equals(_lastFindWord)) {
+        _skipOneFind = true;
+      }
+    }        
     this._searchBackwards = searchBackwards;
   }
 
@@ -222,6 +257,16 @@ public class FindReplaceMachine {
    */
   public FindResult findNext() {
     try {
+      if (_skipOneFind) {
+        int wordLength = _lastFindWord.length();
+        if (!_searchBackwards) {
+          setPosition(getCurrentOffset() + wordLength);
+        }
+        else {
+          setPosition(getCurrentOffset() - wordLength);
+        }
+        positionChanged();  
+      }
       int start, len;
       String findWord = this._findWord;
       // get the search space in the document
@@ -251,7 +296,8 @@ public class FindReplaceMachine {
            foundOffset += findWord.length();
         }
         _current = _doc.createPosition(foundOffset);
-      } else {
+      } 
+      else {
         // if we haven't found it
         _wrapped = true;
         //When we wrap, we need to include some text that was already searched before wrapping.
@@ -270,14 +316,14 @@ public class FindReplaceMachine {
           len = _doc.getLength() - start;
         }
         findSpace = _doc.getText(start, len);
-
+        
         if (!_matchCase) {
           findSpace = findSpace.toLowerCase();
         }
-
+        
         foundOffset = !_searchBackwards ? findSpace.indexOf(findWord)
-                                        : findSpace.lastIndexOf(findWord);
-
+          : findSpace.lastIndexOf(findWord);
+        
         if (foundOffset >= 0) {
           foundOffset += start;
           if (!_searchBackwards) {

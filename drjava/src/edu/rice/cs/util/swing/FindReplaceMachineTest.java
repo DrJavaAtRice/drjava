@@ -315,6 +315,35 @@ public class FindReplaceMachineTest extends TestCase
     _testFindNextSucceeds(frm, CONTINUE, 8, 3);
     _testFindNextSucceeds(frm, CONTINUE, 8, 3);
   }
+  
+  /**
+   * This test addresses bug #745714 Searches Repeat When Changing Direction.
+   * The word that was just found should not be found again after toggling
+   * the search backwards flag.
+   */
+  public void testSearchesDoNotRepeatWhenChangingDirection() throws BadLocationException {
+    doc.insertString(0, "int int int", null);
+    _initFrm(0);
+    frm.setFindWord("int");
+    frm.setMatchCase(false);
+    frm.setSearchBackwards(false);
+    _testFindNextSucceeds(frm, CONTINUE, 0, 3);
+    _testFindNextSucceeds(frm, CONTINUE, 0, 7);
+    
+    frm.setLastFindWord();
+    frm.setSearchBackwards(true);
+    _testFindNextSucceeds(frm, CONTINUE, 0, 0);
+    
+    frm.setLastFindWord();
+    frm.setSearchBackwards(false);
+    _testFindNextSucceeds(frm, CONTINUE, 0, 7);
+    
+    frm.setLastFindWord();
+    frm.positionChanged();
+    frm.setSearchBackwards(true);
+    _testFindNextSucceeds(frm, CONTINUE, 0, 4);
+    
+  }
 
   /**
    test case no longer applies -- we always wrap
