@@ -1,4 +1,3 @@
-
 /*BEGIN_COPYRIGHT_BLOCK
  *
  * This file is a part of DrJava. Current versions of this project are available
@@ -44,6 +43,7 @@ import java.io.*;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.net.MalformedURLException;
+import java.util.jar.JarFile;
 import java.lang.reflect.Method;
 import java.lang.reflect.InvocationTargetException;
 import javax.swing.*;
@@ -75,6 +75,7 @@ public class DrJava implements OptionConstants {
   private static String[] _filesToOpen = new String[0];
   private static boolean _attemptingAugmentedClasspath = false;
   private static boolean _showDrJavaDebugConsole = false;
+  private static boolean _usingJSR14v20 = false;
   
   /*
    * Config objects can't be public static final, since we have to delay 
@@ -133,7 +134,9 @@ public class DrJava implements OptionConstants {
           // Shouldn't happen: _config shouldn't be assigned yet
           throw new UnexpectedException(ise);
         }
-      
+
+        _usingJSR14v20 = checkForJSR14v20();
+
         checkForCompilersAndDebugger(args);
 
         // Show splash screen
@@ -329,7 +332,46 @@ public class DrJava implements OptionConstants {
       }
     }
   }
-  
+
+  /**
+   * Try to determine if the preferences specify jsr14 v2.0, so that we can
+   * restart with the proper boot classpath.
+   */
+  public static boolean checkForJSR14v20() {
+    File jsr14 = _config.getSetting(JSR14_LOCATION);
+    
+    if (jsr14 != FileOption.NULL_FILE) {
+      try {
+        JarFile jsr14jar = new JarFile(jsr14);
+        String fs = System.getProperty("file.separator");
+        String checkClass = "com" + fs + "sun" + fs + "tools" + fs + "javac" + fs + "comp" + fs + "Check.class";
+        if (jsr14jar.getJarEntry(checkClass) != null) {
+          return true;
+        }
+      }
+      catch (IOException ex) {
+        // if there was an error loading the jar file, just return false
+      }
+/* 
+      try {
+        URL[] urls = new URL[] { jsr14.toURL() };
+        URLClassLoader cl = new URLClassLoader(urls);
+        cl.loadClass("com.sun.tools.javac.comp.Check");
+        //System.out.println("Using JSR14v20 is true!");
+        return true;
+      }
+      catch (Throwable t) {
+        // failed to load class, so we're not using jsr14 v2.0
+      }
+*/
+      // this method fails if JSR14 v2.0 is on the classpath but a different
+      // version is specified in the preferences.
+    }
+    // either caught an exception thrown by the classloader or had no jsr14 specified.
+    // Therefore, not using jsr14 v2.0.
+    return false;
+  }
+
   /**
    * Check to see if a compiler and the debugger are available.  If necessary,
    * starts DrJava in a new JVM with an augmented classpath to make these 
@@ -454,6 +496,22 @@ public class DrJava implements OptionConstants {
     }
   }
 
+  /**
+   * helper method to determine if jsr14 v2.0 jar is on the boot classpath.
+   * @return true iff java.lang.Enum can be loaded successfully.
+   */
+  public static boolean bootClasspathHasJSR14v20() {
+    try {
+      Class.forName("java.lang.Enum");
+      return true;
+    }
+    catch (Throwable t) {
+      // failed to load java.lang.Enum, so jsr14 v2.0 is not on the boot claspath.
+      // This logic avoids a restart if _usingJSR14v20 with the correct boot classpath.
+      //t.printStackTrace();
+      return false;
+    }
+  }
   
   /**
    * Tries to run a new DrJava process with our notion of tools.jar
@@ -464,18 +522,22 @@ public class DrJava implements OptionConstants {
    * but that isn't needed anymore.  I'll leave the contract like this in 
    * case another condition becomes necessary.  For now, it just returns
    * if you pass in false for the first argument.
+   * Also, this function now restarts when using jsr14 v2.0, since it has to be
+   * on the JVM's boot classpath.
    *
    * @param forToolsJar Whether to restart DrJava to find tools.jar
    * @param args Array of command line arguments to pass
    */
   public static void restartIfNecessary(boolean forToolsJar, String[] args) {
+    //JOptionPane.showMessageDialog(null, "forToolsJar = " + forToolsJar);
     if (!forToolsJar) {
-      // Don't need to restart: just continue normally
-      return;
+      if (!_usingJSR14v20 || bootClasspathHasJSR14v20()) {
+        return;
+      }
     }
-    
+
     //System.out.println("restarting with debugger...");
-    
+
     String pathSep = System.getProperty("path.separator");
     String classpath = System.getProperty("java.class.path");
     
@@ -485,7 +547,16 @@ public class DrJava implements OptionConstants {
     classArgs[args.length] = "-attemptingAugmentedClasspath";
     
     // JVM arguments
-    String[] jvmArgs = new String[0];
+    String[] jvmArgs;
+    
+    if (_usingJSR14v20) {
+      //System.out.println("Using JSR14v20, appending bootclasspath");
+      String jsr14 = _config.getSetting(JSR14_LOCATION).getAbsolutePath();
+      jvmArgs = new String[] { "-Xbootclasspath/p:" + jsr14 };
+    }
+    else {
+      jvmArgs = new String[0];
+    }
     
     if (forToolsJar) {
       // Try to restart with tools.jar on the classpath
@@ -523,6 +594,10 @@ public class DrJava implements OptionConstants {
     }
   }
   
+  public static boolean usingJSR14v20() {
+    return _usingJSR14v20;
+  }
+
   /**
    * Prompts the user that the location of tools.jar needs to be
    * specified to be able to use the compiler and/or the debugger.

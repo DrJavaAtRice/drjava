@@ -38,20 +38,10 @@
 END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.config;
+
+/**
+ * @version $Id$
+ */
 public interface OptionListener<T> {
     public void optionChanged(OptionEvent<T> oce);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-

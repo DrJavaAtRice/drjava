@@ -44,11 +44,6 @@ import edu.rice.cs.javaast.tree.*;
 import edu.rice.cs.javaast.*;
 import java.io.*;
 
-interface InteractionsProcessorI {
-  public String preProcess(String s) throws ParseException;
-  public String postProcess(String s, Object result);
-}
-
 /**
  * Processes any commands sent to or from the interpreter.
  * 
@@ -69,7 +64,7 @@ public class InteractionsProcessor implements InteractionsProcessorI {
     JavaAST typeErasedTree = (JavaAST) tree.accept( typeEraser );
     //precalled = true;
     String source =  InteractionsPrinter.generateSource( typeErasedTree );
-    System.out.println("Interpreting: " + source);
+    //System.out.println("Interpreting: " + source);
     return source;
   }
 

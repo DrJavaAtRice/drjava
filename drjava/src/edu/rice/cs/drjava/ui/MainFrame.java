@@ -1111,15 +1111,32 @@ public class MainFrame extends JFrame implements OptionConstants {
     _docList.setFont(doclistFont);
     
     // Add option listeners for changes to config options
-    DrJava.getConfig().addOptionListener( OptionConstants.FONT_MAIN, new MainFontOptionListener());
-    DrJava.getConfig().addOptionListener( OptionConstants.FONT_DOCLIST, new DoclistFontOptionListener());
-    DrJava.getConfig().addOptionListener( OptionConstants.FONT_TOOLBAR, new ToolbarFontOptionListener());
-    DrJava.getConfig().addOptionListener( OptionConstants.TOOLBAR_ICONS_ENABLED, new ToolbarOptionListener());
-    DrJava.getConfig().addOptionListener( OptionConstants.TOOLBAR_TEXT_ENABLED, new ToolbarOptionListener());
-    DrJava.getConfig().addOptionListener( OptionConstants.WORKING_DIRECTORY, new WorkingDirOptionListener());
-    DrJava.getConfig().addOptionListener( OptionConstants.LINEENUM_ENABLED, new LineEnumOptionListener());
-    DrJava.getConfig().addOptionListener( OptionConstants.QUIT_PROMPT, new QuitPromptOptionListener());
-    DrJava.getConfig().addOptionListener( OptionConstants.RECENT_FILES_MAX_SIZE, new RecentFilesOptionListener());
+    DrJava.getConfig().addOptionListener(OptionConstants.FONT_MAIN, new MainFontOptionListener());
+    DrJava.getConfig().addOptionListener(OptionConstants.FONT_DOCLIST, new DoclistFontOptionListener());
+    DrJava.getConfig().addOptionListener(OptionConstants.FONT_TOOLBAR, new ToolbarFontOptionListener());
+    DrJava.getConfig().addOptionListener(OptionConstants.TOOLBAR_ICONS_ENABLED, new ToolbarOptionListener());
+    DrJava.getConfig().addOptionListener(OptionConstants.TOOLBAR_TEXT_ENABLED, new ToolbarOptionListener());
+    DrJava.getConfig().addOptionListener(OptionConstants.WORKING_DIRECTORY, new WorkingDirOptionListener());
+    DrJava.getConfig().addOptionListener(OptionConstants.LINEENUM_ENABLED, new LineEnumOptionListener());
+    DrJava.getConfig().addOptionListener(OptionConstants.QUIT_PROMPT, new QuitPromptOptionListener());
+    DrJava.getConfig().addOptionListener(OptionConstants.RECENT_FILES_MAX_SIZE, new RecentFilesOptionListener());
+    DrJava.getConfig().addOptionListener(OptionConstants.JSR14_LOCATION, new OptionListener<File>() {
+      public void optionChanged(OptionEvent<File> oe) {
+        boolean bootClasspathHasv2 = DrJava.bootClasspathHasJSR14v20();
+        if (oe.value != FileOption.NULL_FILE) {
+          if (DrJava.checkForJSR14v20() && !bootClasspathHasv2) {
+            JOptionPane.showMessageDialog(MainFrame.this,
+                                          "You must restart DrJava in order to use the JSR14 v2.0 compiler.",
+                                          "JSR14 Warning", JOptionPane.WARNING_MESSAGE);
+          }
+          else if (bootClasspathHasv2) {
+            JOptionPane.showMessageDialog(MainFrame.this,
+                                          "You must restart DrJava in order to switch to earlier versions of the JSR14 compiler.",
+                                          "JSR14 Warning", JOptionPane.WARNING_MESSAGE);
+          }
+        }
+      }
+    });
     
     // Initialize breakpoint highlights hashtable, for easy removal of highlights
     _breakpointHighlights = new gj.util.Hashtable<Breakpoint, HighlightManager.HighlightInfo>();

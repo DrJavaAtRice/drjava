@@ -49,6 +49,9 @@ import java.awt.event.InputEvent;
 import java.awt.Toolkit;
 import edu.rice.cs.drjava.CodeStatus;
 
+/**
+ * @version $Id$
+ */
 public interface OptionConstants {
   
   // STATIC VARIABLES  

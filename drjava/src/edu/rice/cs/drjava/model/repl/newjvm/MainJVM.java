@@ -48,6 +48,8 @@ import gj.util.Vector;
 
 // NOTE: Do NOT import/use the config framework in this class!
 //  (It seems to crash Eclipse...)
+import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.model.repl.*;
 import edu.rice.cs.drjava.model.junit.JUnitError;
@@ -551,11 +553,16 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
       jvmArgs.addElement("-Xnoagent");
       jvmArgs.addElement("-Djava.compiler=NONE");
     }
+    if (DrJava.usingJSR14v20()) {
+      // System.out.println("using jsr14 v2.0");
+      File jsr14 = DrJava.getConfig().getSetting(OptionConstants.JSR14_LOCATION);
+      jvmArgs.addElement("-Xbootclasspath/p:" + jsr14.getAbsolutePath());
+    }
     String[] jvmArgsArray = new String[jvmArgs.size()];
     for (int i=0; i < jvmArgs.size(); i++) {
       jvmArgsArray[i] = jvmArgs.elementAt(i);
     }
-    
+
     // Invoke the Interpreter JVM
     try {
       invokeSlave(jvmArgsArray, _startupClasspath);

@@ -38,11 +38,15 @@
 END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.config;
+
+/**
+ * @version $Id$
+ */
 public class OptionEvent<T> {
-    public final Option<T> option;
-    public final T value;
-    public OptionEvent(Option<T> option, T value) {
-	this.option = option;
-	this.value = value;
-    }
+  public final Option<T> option;
+  public final T value;
+  public OptionEvent(Option<T> option, T value) {
+    this.option = option;
+    this.value = value;
+  }
 }
