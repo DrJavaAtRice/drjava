@@ -49,7 +49,7 @@ import java.awt.*;
 public class BorderlessScrollPane extends JScrollPane {
   // note, I can't think of a way to guarantee superclass behavior without
   // overriding each superclass constructor and then calling setBorder().
-  private static final Border DEFAULT = null; // new LineBorder(Color.black);
+  private static final Border DEFAULT = new EtchedBorder(); //new LineBorder(Color.black);
   public BorderlessScrollPane() {
     super();
     setBorder(DEFAULT);

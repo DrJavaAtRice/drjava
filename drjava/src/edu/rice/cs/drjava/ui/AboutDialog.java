@@ -74,15 +74,15 @@ public class AboutDialog extends JDialog implements ActionListener {
 
     buildGUI(getContentPane());
     
-    //pack();
+    // pack();
+    // setSize((int) (.8f*owner.getWidth()),(int) (.8f*owner.getHeight()));
     setSize(500, 400);
-    // setSize((int) (owner.getWidth() * (.8f)),(int) (owner.getHeight() * (.8f)));
     // suggested from zaq@nosi.com, to keep the frame on the screen!
     //System.out.println("Dialog created...");
   }
   
   public void show() {
-    //System.out.println("Showing dialog...");
+    // suggested from zaq@nosi.com, to keep the frame on the screen!
     Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
     Dimension frameSize = this.getSize();
     this.setLocation((screenSize.width - frameSize.width) / 2,
@@ -92,26 +92,27 @@ public class AboutDialog extends JDialog implements ActionListener {
   
   public void buildGUI(Container cp) {
     cp.setLayout(new BorderLayout());
-
-    JLabel drjava = createImageLabel(DRJAVA, JLabel.LEFT);
+    JLabel drjava = createImageLabel(DRJAVA,JLabel.LEFT);
     if (drjava != null) {
-      //DrJava.consoleOut().println("adding drjava logo");
       cp.add(drjava,BorderLayout.NORTH);
     }
-    //else { 
-    //  DrJava.consoleOut().println("drjava logo is null");
-    //}
-
     JTabbedPane tabs = new JTabbedPane();
-    tabs.addTab("About",createCopyrightTab());
-    tabs.addTab("GNU Public License",createTextScroller(GPL));
-    tabs.addTab("DynamicJava License",createTextScroller(DYADE_LICENSE));
+    addTab(tabs,"About",createCopyrightTab());
+    addTab(tabs,"GNU Public License",createTextScroller(GPL));
+    addTab(tabs,"DynamicJava License",createTextScroller(DYADE_LICENSE));
     cp.add(createBottomBar(),BorderLayout.SOUTH);
     cp.add(tabs,BorderLayout.CENTER);
   }
   
+  private static void addTab(JTabbedPane tabs, String title,
+                             JComponent tab) {
+    wrapBorder(tab,new EmptyBorder(5,6,6,5));
+    tabs.addTab(title,tab);
+  }
+  
   public static JPanel createCopyrightTab() {
     JComponent copy = createTextScroller(COPYRIGHT);
+    wrapBorder(copy,new EmptyBorder(5,0,5,0));
     JPanel panel = new JPanel(new BorderLayout());
     LogoList logos = new LogoList();
     logos.addLogo(createBorderedLabel(CSLOGO));
@@ -145,8 +146,6 @@ public class AboutDialog extends JDialog implements ActionListener {
     private void resizeLogos() {
       java.util.Iterator it = iterator();
       Dimension d = new Dimension(width,height);
-      //System.out.println("resizing logos to "+d);
-      //System.out.flush();
       while(it.hasNext()) {
         JComponent i = (JComponent) it.next();
         i.setMinimumSize(d);
@@ -160,7 +159,7 @@ public class AboutDialog extends JDialog implements ActionListener {
     JLabel label = createImageLabel(info,JLabel.CENTER);
     if(label == null) return null;
     JPanel panel = new JPanel(new GridLayout(1,1));
-    panel.setBorder(new CompoundBorder(new EmptyBorder(0,10,10,10),new EtchedBorder()));
+    panel.setBorder(new EtchedBorder());
     panel.add(label);
     return panel;
   }
@@ -191,6 +190,7 @@ public class AboutDialog extends JDialog implements ActionListener {
     JPanel panel = new JPanel(new BorderLayout());
     button.addActionListener(this);
     panel.add(button,BorderLayout.EAST);
+    wrapBorder(panel,new EmptyBorder(5,5,5,5));
     return panel;
   }
   
@@ -260,6 +260,10 @@ public class AboutDialog extends JDialog implements ActionListener {
       this.name = name;
       this.color = color;
     }
+  }
+  
+  private static void wrapBorder(JComponent c, Border b) {
+    c.setBorder(new CompoundBorder(b,c.getBorder()));
   }
 }
   

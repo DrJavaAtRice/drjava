@@ -151,6 +151,8 @@
       <fileset dir="${built}" excludes="**/*Test.class">
         <include name="${projpath}/**" />
         <include name="edu/rice/cs/util/**" />
+
+        <!-- include the GPL -->
         <include name="edu/rice/cs/LICENSE" />
       </fileset>
     </jar>
