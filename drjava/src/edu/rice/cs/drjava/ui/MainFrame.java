@@ -610,33 +610,22 @@ public class MainFrame extends JFrame implements OptionConstants {
   };
   
   /** Interprets the commands in a file in the interactions window */
-  private Action _loadHistoryAction = new AbstractAction("Load Interactions History")
+  private Action _loadHistoryAction = new AbstractAction("Load Interactions History...")
   {
     public void actionPerformed(ActionEvent ae) {
       if (CodeStatus.DEVELOPMENT) {
         // Working directory is default place to start
-        String workDir = DrJava.CONFIG.getSetting(WORKING_DIRECTORY).toString();
-        if ((workDir == null) || (workDir.equals(""))) {
-          workDir = System.getProperty("user.dir");
+        File workDir = DrJava.CONFIG.getSetting(WORKING_DIRECTORY);
+        if (workDir == FileOption.NULL_FILE) {
+          workDir = new File(System.getProperty("user.dir"));
         }
-        final JFileChooser jfc = new JFileChooser(workDir);
-        jfc.setFileFilter(new javax.swing.filechooser.FileFilter() {
-          public boolean accept(File f) {
-            String ext = null;
-            String s = f.getName();
-            int i = s.lastIndexOf('.');
-            
-            if (i > 0 &&  i < s.length() - 1) {
-              ext = s.substring(i+1).toLowerCase();
-            }
-            if ("hist".equals(ext))
-              return true;
-            return false;
-          }
-          public String getDescription() {
-            return "Interaction History Files";
-          }
-        });
+        if (workDir.isFile() && workDir.getParent() != null) {
+          workDir = workDir.getParentFile();
+        }
+        final JFileChooser jfc = new JFileChooser();
+        jfc.setCurrentDirectory(workDir);
+        jfc.setDialogTitle("Load Interactions History");
+        jfc.setFileFilter(new InteractionsHistoryFilter());
         FileOpenSelector selector = new FileOpenSelector() {
           public File[] getFiles() throws OperationCanceledException {            
             return getOpenFiles(jfc);
@@ -654,33 +643,22 @@ public class MainFrame extends JFrame implements OptionConstants {
   };
   
   /** Save the commands in the interactions window's history to a file */
-  private Action _saveHistoryAction = new AbstractAction("Save Interactions History")
+  private Action _saveHistoryAction = new AbstractAction("Save Interactions History...")
   {
     public void actionPerformed(ActionEvent ae) {
       if (CodeStatus.DEVELOPMENT) {
         // Working directory is default place to start
-        String workDir = DrJava.CONFIG.getSetting(WORKING_DIRECTORY).toString();
-        if ((workDir == null) || (workDir.equals(""))) {
-          workDir = System.getProperty("user.dir");
+        File workDir = DrJava.CONFIG.getSetting(WORKING_DIRECTORY);
+        if (workDir == FileOption.NULL_FILE) {
+          workDir = new File(System.getProperty("user.dir"));
         }
-        final JFileChooser jfc = new JFileChooser(workDir);
-        jfc.setFileFilter(new javax.swing.filechooser.FileFilter() {
-          public boolean accept(File f) {
-            String ext = null;
-            String s = f.getName();
-            int i = s.lastIndexOf('.');
-            
-            if (i > 0 &&  i < s.length() - 1) {
-              ext = s.substring(i+1).toLowerCase();
-            }
-            if ("hist".equals(ext))
-              return true;
-            return false;
-          }
-          public String getDescription() {
-            return "Interaction History Files";
-          }
-        });
+        if (workDir.isFile() && workDir.getParent() != null) {
+          workDir = workDir.getParentFile();
+        }
+        final JFileChooser jfc = new JFileChooser();
+        jfc.setCurrentDirectory(workDir);
+        jfc.setDialogTitle("Save Interactions History");
+        jfc.setFileFilter(new InteractionsHistoryFilter());
         FileSaveSelector selector = new FileSaveSelector() {
           public File getFile() throws OperationCanceledException {
             return getSaveFile(jfc);
@@ -744,17 +722,18 @@ public class MainFrame extends JFrame implements OptionConstants {
     
     // Working directory is default place to start
     File workDir = DrJava.CONFIG.getSetting(WORKING_DIRECTORY);
-        
     if (workDir == FileOption.NULL_FILE) {
-      workDir = new File( System.getProperty("user.dir"));
+      workDir = new File(System.getProperty("user.dir"));
     }
     if (workDir.isFile() && workDir.getParent() != null) {
       workDir = workDir.getParentFile();
     }
-    _openChooser = new JFileChooser(workDir);
+    _openChooser = new JFileChooser();
+    _openChooser.setCurrentDirectory(workDir);
     _openChooser.setFileFilter(new JavaSourceFilter());
     _openChooser.setMultiSelectionEnabled(true);
-    _saveChooser = new JFileChooser(workDir);
+    _saveChooser = new JFileChooser();
+    _saveChooser.setCurrentDirectory(workDir);
     _saveChooser.setFileFilter(new JavaSourceFilter());
     
     //set up the hourglass cursor
@@ -946,9 +925,9 @@ public class MainFrame extends JFrame implements OptionConstants {
     // This redundant-looking hack is necessary for JDK 1.3.1 on Mac OS X!
     File selection = jfc.getSelectedFile();//_openChooser.getSelectedFile();
     if (selection != null) {
-      _openChooser.setSelectedFile(selection.getParentFile());
-      _openChooser.setSelectedFile(selection);
-      _openChooser.setSelectedFile(null);
+      jfc.setSelectedFile(selection.getParentFile());
+      jfc.setSelectedFile(selection);
+      jfc.setSelectedFile(null);
     }
     int rc = jfc.showOpenDialog(this);//_openChooser.showOpenDialog(this);
     return getChosenFiles(jfc, rc);//_openChooser, rc);
@@ -961,14 +940,19 @@ public class MainFrame extends JFrame implements OptionConstants {
     // This redundant-looking hack is necessary for JDK 1.3.1 on Mac OS X!
     File selection = jfc.getSelectedFile();//_saveChooser.getSelectedFile();
     if (selection != null) {
-      _saveChooser.setSelectedFile(selection.getParentFile());
-      _saveChooser.setSelectedFile(selection);
-      _saveChooser.setSelectedFile(null);
+      jfc.setSelectedFile(selection.getParentFile());
+      jfc.setSelectedFile(selection);
+      jfc.setSelectedFile(null);
     }
     
     OpenDefinitionsDocument active = _model.getActiveDocument();
-    if (active.isUntitled()) { 
-      jfc.setSelectedFile(new File(active.getClassName()));
+    
+    // Fill in class name if untitled
+    if (active.isUntitled()) {
+      String className = active.getClassName();
+      if (!className.equals("")) {
+        jfc.setSelectedFile(new File(jfc.getCurrentDirectory(), className));
+      }
     }
     int rc = jfc.showSaveDialog(this);//_saveChooser.showSaveDialog(this);
     return getChosenFile(jfc, rc);//_saveChooser, rc);

@@ -44,27 +44,27 @@ import  javax.swing.filechooser.FileFilter;
 
 
 /**
- * A file filter for files with extensions ".java" and ".gj".
- * Used in the file choosers for open and save.
+ * A file filter for files with extensions ".hist".
+ * Used in the file choosers for the Interactions History.
  * @version $Id$
  */
-public class JavaSourceFilter extends FileFilter {
+public class InteractionsHistoryFilter extends FileFilter {
 
   /**
-   * Returns true if the file's extension matches Java or GJ.
+   * Extension to match for History files.
+   */
+  public static final String HIST_EXTENSION = "hist";
+  
+  /**
+   * Returns true if the file matches the Interactions History filter.
    */
   public boolean accept(File f) {
     if (f.isDirectory()) {
       return true;
     }
-    String extension = getExtension(f);
-    if (extension != null) {
-      if (extension.equals("java") || extension.equals("j")) {
-        return true;
-      } 
-      else {
-        return false;
-      }
+    String ext = getExtension(f);
+    if ((ext != null) && (ext.equals(HIST_EXTENSION))) {
+      return true;
     }
     return false;
   }
@@ -73,7 +73,7 @@ public class JavaSourceFilter extends FileFilter {
    * @return A description of this filter to display
    */
   public String getDescription() {
-    return "Java and GJ source files";
+    return "Interaction History Files";
   }
 
   /*
