@@ -43,48 +43,52 @@
  * 
 END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava;
+package edu.rice.cs.drjava.model.compiler;
 
-import java.util.Date;
-import java.text.SimpleDateFormat;
+import edu.rice.cs.drjava.config.*;
+import edu.rice.cs.drjava.DrJava;
 
 /**
- * This interface hold the information about this build of DrJava.
- * This file is copied to Version.java by the build process, which also
- * fills in the right values of the date and time.
- *
- * This javadoc corresponds to build drjava-20040714-2054;
- *
- * @version $Id$
+ * Represents the compiler warnings
  */
-public abstract class Version {
+
+public class CompilerWarnings implements OptionConstants {
+  
+  public static boolean SHOW_UNCHECKED = DrJava.getConfig().getSetting(SHOW_UNCHECKED_WARNINGS);
+  public static boolean SHOW_DEPRECATION = DrJava.getConfig().getSetting(SHOW_DEPRECATION_WARNINGS);
+  public static boolean SHOW_PATH = DrJava.getConfig().getSetting(SHOW_PATH_WARNINGS);
+  public static boolean SHOW_SERIAL = DrJava.getConfig().getSetting(SHOW_SERIAL_WARNINGS);
+  public static boolean SHOW_FINALLY = DrJava.getConfig().getSetting(SHOW_FINALLY_WARNINGS);
+  public static boolean SHOW_FALLTHROUGH = DrJava.getConfig().getSetting(SHOW_FALLTHROUGH_WARNINGS);
+   
+  private static WarningOptionListener wol = new WarningOptionListener();
+  
   /**
-   * This string will be automatically expanded upon "ant commit".
-   * Do not edit it by hand!
+   * The OptionListener for TEXT_ANTIALIAS
    */
-  private static final String BUILD_TIME_STRING = "20040714-2054";
-
-  /** A {@link Date} version of the build time. */
-  private static final Date BUILD_TIME = _getBuildDate();
-
-  public static String getBuildTimeString() {
-    return BUILD_TIME_STRING;
-  }
-
-  public static Date getBuildTime() {
-    return BUILD_TIME;
-  }
-
-  private static Date _getBuildDate() {
-    try {
-      return new SimpleDateFormat("yyyyMMdd-HHmm z").parse(BUILD_TIME_STRING + " GMT");
-    }
-    catch (Exception e) { // parse format or whatever problem
-      return null;
+  private static class WarningOptionListener implements OptionListener<Boolean> {
+    public void optionChanged(OptionEvent<Boolean> oce) {
+      updateWarnings();
     }
   }
-
-  public static void main(String[] args) {
-    System.out.println("Version for edu.rice.cs.drjava: " + BUILD_TIME_STRING);
+  
+  public static void updateWarnings() {
+    SHOW_UNCHECKED = DrJava.getConfig().getSetting(SHOW_UNCHECKED_WARNINGS);
+    SHOW_DEPRECATION = DrJava.getConfig().getSetting(SHOW_DEPRECATION_WARNINGS);
+    SHOW_PATH = DrJava.getConfig().getSetting(SHOW_PATH_WARNINGS);
+    SHOW_SERIAL = DrJava.getConfig().getSetting(SHOW_SERIAL_WARNINGS);
+    SHOW_FINALLY = DrJava.getConfig().getSetting(SHOW_FINALLY_WARNINGS);
+    SHOW_FALLTHROUGH = DrJava.getConfig().getSetting(SHOW_FALLTHROUGH_WARNINGS);
   }
-} 
+  
+  
+  static {
+    DrJava.getConfig().addOptionListener( OptionConstants.SHOW_UNCHECKED_WARNINGS, wol);
+    DrJava.getConfig().addOptionListener( OptionConstants.SHOW_DEPRECATION_WARNINGS, wol);
+    DrJava.getConfig().addOptionListener( OptionConstants.SHOW_PATH_WARNINGS, wol);
+    DrJava.getConfig().addOptionListener( OptionConstants.SHOW_SERIAL_WARNINGS, wol);
+    DrJava.getConfig().addOptionListener( OptionConstants.SHOW_FINALLY_WARNINGS, wol);
+    DrJava.getConfig().addOptionListener( OptionConstants.SHOW_FALLTHROUGH_WARNINGS, wol);
+    
+  }
+}
