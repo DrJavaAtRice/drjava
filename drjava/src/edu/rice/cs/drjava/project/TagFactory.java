@@ -98,7 +98,7 @@ public class TagFactory {
    * @return An IR object representing the contents of a BuildDir tag in the Project file the Reader was reading
    */
   public static BuildDirTag makeBuildDirTag(File projFile, Reader r) throws IOException {
-    return new BuildDirTagImpl(_readAllEntries(BUILDDIR_TAG, projFile, r));
+    return new BuildDirTagImpl(_readAllEntries(BUILDDIR_TAG, null, r));
   } 
   
   /**

@@ -758,6 +758,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     
     // add build directory
     File f = getBuildDirectory();
+    System.out.println(f);
     if(f != null)
       builder.setBuildDir(f);
     

@@ -51,7 +51,7 @@ public class ProjectFileBuilder
     StringBuffer tbr = new StringBuffer();
     makeEntries(tbr, _sourcefiles, "Source", true);
     makeEntries(tbr, _resourcefiles, "Resources", true);
-    makeEntries(tbr, _builddirfiles, "BuildDir", true);
+    makeEntries(tbr, _builddirfiles, "BuildDir", false);
     //makeEntries(tbr, _classpathfiles, "Classpath", false);
     tbr.append("(Classpath\n)");
     makeEntries(tbr, _jarfiles, "Jar", true);
