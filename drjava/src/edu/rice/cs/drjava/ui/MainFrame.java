@@ -1684,6 +1684,8 @@ public class MainFrame extends JFrame implements OptionConstants {
     config.addOptionListener
       (TOOLBAR_TEXT_ENABLED, new ToolbarOptionListener());
     config.addOptionListener
+      (TOOLBAR_ENABLED, new ToolbarOptionListener());
+    config.addOptionListener
       (WORKING_DIRECTORY, new WorkingDirOptionListener());
     config.addOptionListener
       (LINEENUM_ENABLED, new LineEnumOptionListener());
@@ -4075,22 +4077,30 @@ public class MainFrame extends JFrame implements OptionConstants {
     _fixToolbarHeights();
 
     getContentPane().add(_toolBar, BorderLayout.NORTH);
+    _updateToolbarVisible();
   }
-
+  
+  /**
+   * Sets the toolbar as either visible or invisible based on the config option
+   */
+  private void _updateToolbarVisible() {
+    _toolBar.setVisible(DrJava.getConfig().getSetting(TOOLBAR_ENABLED));
+  }  
+  
   /**
    * Update the toolbar's buttons, following any change to TOOLBAR_ICONS_ENABLED,
    * TOOLBAR_TEXT_ENABLED, or FONT_TOOLBAR (name, style, text)
    */
   private void _updateToolbarButtons() {
-
+    _updateToolbarVisible();
     Component[] buttons = _toolBar.getComponents();
-
+    
     Font toolbarFont = DrJava.getConfig().getSetting(FONT_TOOLBAR);
     boolean iconsEnabled = DrJava.getConfig().getSetting(TOOLBAR_ICONS_ENABLED).booleanValue();
     boolean textEnabled = DrJava.getConfig().getSetting(TOOLBAR_TEXT_ENABLED).booleanValue();
-
+    
     for (int i = 0; i< buttons.length; i++) {
-
+      
       if (buttons[i] instanceof JButton) {
 
         JButton b = (JButton) buttons[i];

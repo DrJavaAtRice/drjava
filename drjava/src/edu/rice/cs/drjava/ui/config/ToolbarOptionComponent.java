@@ -61,13 +61,15 @@ import java.awt.*;
  */
 public class ToolbarOptionComponent extends OptionComponent<Boolean> {
 
+  private JRadioButton _noneButton;
   private JRadioButton _textButton;
   private JRadioButton _iconsButton;
   private JRadioButton _textAndIconsButton;
   private ButtonGroup _group;
   private JPanel _buttonPanel;
 
-  //String constants used to identify which one of the three choices is selected.
+  //String constants used to identify which one of the four choices is selected.
+  public static final String NONE = "none";
   public static final String TEXT_ONLY = "text only";
   public static final String ICONS_ONLY= "icons only";
   public static final String TEXT_AND_ICONS = "text and icons";
@@ -82,6 +84,9 @@ public class ToolbarOptionComponent extends OptionComponent<Boolean> {
   public ToolbarOptionComponent(String title, Frame parent) {
     super(title, parent);
 
+    _noneButton = new JRadioButton(NONE);
+    _noneButton.setActionCommand(NONE);
+    
     _textButton = new JRadioButton(TEXT_ONLY);
     _textButton.setActionCommand(TEXT_ONLY);
 
@@ -94,6 +99,7 @@ public class ToolbarOptionComponent extends OptionComponent<Boolean> {
     resetToCurrent();
 
     _group = new ButtonGroup();
+    _group.add(_noneButton);
     _group.add(_textButton);
     _group.add(_iconsButton);
     _group.add(_textAndIconsButton);
@@ -101,6 +107,7 @@ public class ToolbarOptionComponent extends OptionComponent<Boolean> {
     _buttonPanel = new JPanel();
     _buttonPanel.setLayout(new GridLayout(0,1));
     _buttonPanel.setBorder(BorderFactory.createEtchedBorder());
+    _buttonPanel.add(_noneButton);
     _buttonPanel.add(_textButton);
     _buttonPanel.add(_iconsButton);
     _buttonPanel.add(_textAndIconsButton);
@@ -117,6 +124,13 @@ public class ToolbarOptionComponent extends OptionComponent<Boolean> {
         resetToCurrent();
       }
     });
+    DrJava.getConfig().addOptionListener(OptionConstants.TOOLBAR_ENABLED,
+                                         new OptionListener<Boolean>() {
+      public void optionChanged(OptionEvent<Boolean> oe) { 
+        resetToCurrent();
+      }
+    });
+      
   }
 
   /**
@@ -133,6 +147,7 @@ public class ToolbarOptionComponent extends OptionComponent<Boolean> {
    */
   public void setDescription(String description) {
     _buttonPanel.setToolTipText(description);
+    _noneButton.setToolTipText(description);
     _textButton.setToolTipText(description);
     _iconsButton.setToolTipText(description);
     _textAndIconsButton.setToolTipText(description);
@@ -144,7 +159,8 @@ public class ToolbarOptionComponent extends OptionComponent<Boolean> {
    */
   public void resetToCurrent() {
     _setSelected(DrJava.getConfig().getSetting(OptionConstants.TOOLBAR_TEXT_ENABLED).booleanValue(),
-                 DrJava.getConfig().getSetting(OptionConstants.TOOLBAR_ICONS_ENABLED).booleanValue());
+                 DrJava.getConfig().getSetting(OptionConstants.TOOLBAR_ICONS_ENABLED).booleanValue(),
+                 DrJava.getConfig().getSetting(OptionConstants.TOOLBAR_ENABLED).booleanValue());
   }
 
   /**
@@ -152,7 +168,8 @@ public class ToolbarOptionComponent extends OptionComponent<Boolean> {
    */
   public void resetToDefault() {
     _setSelected(OptionConstants.TOOLBAR_TEXT_ENABLED.getDefault().booleanValue(),
-                 OptionConstants.TOOLBAR_ICONS_ENABLED.getDefault().booleanValue());
+                 OptionConstants.TOOLBAR_ICONS_ENABLED.getDefault().booleanValue(),
+                 OptionConstants.TOOLBAR_ENABLED.getDefault().booleanValue());
   }
 
   /**
@@ -160,8 +177,11 @@ public class ToolbarOptionComponent extends OptionComponent<Boolean> {
    * @param textEnabled Whether toolbar text is enabled
    * @param iconsEnabled Whether toolbar icons are enabled
    */
-  private void _setSelected(boolean textEnabled, boolean iconsEnabled) {
-    if (textEnabled && iconsEnabled) {
+  private void _setSelected(boolean textEnabled, boolean iconsEnabled, boolean isEnabled) {
+    if(! isEnabled) {
+      _noneButton.setSelected(true);
+    }
+    else if (textEnabled && iconsEnabled) {
       _textAndIconsButton.setSelected(true);
     }
     else {
@@ -185,20 +205,27 @@ public class ToolbarOptionComponent extends OptionComponent<Boolean> {
     String btnIdent = _group.getSelection().getActionCommand();
     boolean textWasEnabled = DrJava.getConfig().getSetting(OptionConstants.TOOLBAR_TEXT_ENABLED).booleanValue();
     boolean iconsWereEnabled = DrJava.getConfig().getSetting(OptionConstants.TOOLBAR_ICONS_ENABLED).booleanValue();
-
+    boolean wasEnabled = DrJava.getConfig().getSetting(OptionConstants.TOOLBAR_ENABLED).booleanValue();
+    
+    if(btnIdent == NONE) {
+      if(wasEnabled) DrJava.getConfig().setSetting(OptionConstants.TOOLBAR_ENABLED, Boolean.FALSE);      
+    }
     if (btnIdent == TEXT_ONLY) {
       if (!textWasEnabled) DrJava.getConfig().setSetting(OptionConstants.TOOLBAR_TEXT_ENABLED, Boolean.TRUE);
       if (iconsWereEnabled) DrJava.getConfig().setSetting(OptionConstants.TOOLBAR_ICONS_ENABLED, Boolean.FALSE);
+      if(!wasEnabled) DrJava.getConfig().setSetting(OptionConstants.TOOLBAR_ENABLED, Boolean.TRUE);   
     }
 
     if (btnIdent == ICONS_ONLY) {
       if (!iconsWereEnabled) DrJava.getConfig().setSetting(OptionConstants.TOOLBAR_ICONS_ENABLED, Boolean.TRUE);
       if (textWasEnabled) DrJava.getConfig().setSetting(OptionConstants.TOOLBAR_TEXT_ENABLED, Boolean.FALSE);
+      if(!wasEnabled) DrJava.getConfig().setSetting(OptionConstants.TOOLBAR_ENABLED, Boolean.TRUE);  
     }
 
     if (btnIdent == TEXT_AND_ICONS) {
       if (!textWasEnabled) DrJava.getConfig().setSetting(OptionConstants.TOOLBAR_TEXT_ENABLED, Boolean.TRUE);
       if (!iconsWereEnabled) DrJava.getConfig().setSetting(OptionConstants.TOOLBAR_ICONS_ENABLED, Boolean.TRUE);
+      if(!wasEnabled) DrJava.getConfig().setSetting(OptionConstants.TOOLBAR_ENABLED, Boolean.TRUE);        
     }
 
     return true;

@@ -231,6 +231,12 @@ public interface OptionConstants {
     new BooleanOption("toolbar.text.enabled", Boolean.TRUE);
 
   /**
+   * Whether or not the toolbar should be displayed
+   */
+   public static final BooleanOption TOOLBAR_ENABLED = 
+     new BooleanOption("toolbar.enabled", Boolean.TRUE);
+
+  /**
    * Whether the line-numbers should be displayed in a row header.
    */
   public static final BooleanOption LINEENUM_ENABLED =
