@@ -59,44 +59,48 @@ import java.util.List;
  */
 public class TypeParameter extends ReferenceType {
   private final ReferenceType _bound;
-  
+  private final List<ReferenceType> _interfaceBounds;
+
   /**
    * Constructs a TypeParameter.
    * @throw IllegalArgumentException if any parameter to the constructor is null.
    */
-  public TypeParameter(SourceInfo in_sourceInfo, List<IdentifierToken> ids, ReferenceType in_bound) {
-    this(in_sourceInfo, TreeUtilities.listToName(ids), in_bound);
+  public TypeParameter(SourceInfo in_sourceInfo, List<IdentifierToken> ids, ReferenceType in_bound, List<ReferenceType> in_interfaceBounds) {
+    this(in_sourceInfo, TreeUtilities.listToName(ids), in_bound, in_interfaceBounds);
   }
-  
+
   /**
    * Constructs a TypeParameter.
    * @throw IllegalArgumentException if any parameter to the constructor is null.
    */
-  public TypeParameter(SourceInfo in_sourceInfo, String rep, ReferenceType in_bound) {
+  public TypeParameter(SourceInfo in_sourceInfo, String rep, ReferenceType in_bound, List<ReferenceType> in_interfaceBounds) {
     super(rep, in_sourceInfo.getFilename(), in_sourceInfo.getStartLine(),
           in_sourceInfo.getStartColumn(), in_sourceInfo.getEndLine(), in_sourceInfo.getEndColumn());
-    
+
     if (in_bound == null) {
       throw new IllegalArgumentException("Parameter 'bound' to the TypeParameter constructor was null.");
     }
     _bound = in_bound;
-  }
-  
+    _interfaceBounds = in_interfaceBounds;
+}
+
   public ReferenceType getBound() { return _bound; }
-  
+
+  public List<ReferenceType> getInterfaceBounds() { return _interfaceBounds; }
+
   public String getRepresentation(){
     return _bound.getRepresentation(); // coerce to bound's type
   }
-  
+
   public String getName(){
     return super.getRepresentation();
   }
-  
+
   public String toString() {
     return "("+getClass().getName()+": "+toStringHelper()+")";
   }
-  
+
   protected String toStringHelper() {
-    return getName()+" "+getBound();
+    return getName()+" "+getBound()+" "+getInterfaceBounds();
   }
 }

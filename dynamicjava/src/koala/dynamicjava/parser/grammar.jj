@@ -16,7 +16,7 @@ options {
 }
 
 PARSER_BEGIN(Parser)
-  package koala.dynamicjava.parser;
+package koala.dynamicjava.parser;
 
 //import java.lang.reflect.*;
 import java.lang.reflect.Modifier;
@@ -4799,16 +4799,23 @@ ForSlashEachStatement forStatement() :
     List/*<IdentifierToken>*/ name;
     Type bound = new ReferenceType("Object");
     Token first = getToken(1);
+    List/*<ReferenceType>*/ interfaceBoundsList = new LinkedList/*<ReferenceType>*/();
+    ReferenceType interf;
   }
   {
     name = name()
       [
        "extends"
        bound = type()
+       ("&" interf = ReferenceTypeName()
+           {
+             interfaceBoundsList.add(interf);
+           }
+       )*
          ]
     {
       if(bound instanceof ReferenceType){
-        return new TypeParameter(_loc(first), name, (ReferenceType)bound);
+        return new TypeParameter(_loc(first), name, (ReferenceType)bound, interfaceBoundsList);
       } else {
         throw new ParseException("Primitives are not allowed as bound"+
                                  "types, and array types are temporarily disabled due to a "+
