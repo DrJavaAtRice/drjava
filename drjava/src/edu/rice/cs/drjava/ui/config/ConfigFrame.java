@@ -117,7 +117,11 @@ public class ConfigFrame extends JFrame {
     _okButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         // Always apply and save settings
-        boolean successful = saveSettings();
+        boolean successful = true;
+        try{
+          successful = saveSettings();
+        }
+        catch (IOException ioe) {}
         if (successful) ConfigFrame.this.hide();
       }
     });
@@ -126,7 +130,10 @@ public class ConfigFrame extends JFrame {
     _applyButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         // Always save settings
-        saveSettings();
+        try {
+          saveSettings();
+        }
+        catch (IOException ioe) {}
       }
     });
     
@@ -223,7 +230,7 @@ public class ConfigFrame extends JFrame {
   /**
    * Write the configured option values to disk.
    */
-  public boolean saveSettings() {
+  public boolean saveSettings() throws IOException {
     boolean successful = apply();
     if (successful) {
       try {
@@ -235,7 +242,8 @@ public class ConfigFrame extends JFrame {
                                       "in your home directory.\n\n" + ioe,
                                       "Could Not Save Changes",
                                       JOptionPane.ERROR_MESSAGE);
-        return false;
+        //return false;
+        throw ioe;
       }
     }
     return successful;

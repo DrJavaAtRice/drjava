@@ -70,7 +70,9 @@ public class MainJVM extends UnicastRemoteObject implements MainJVMRemoteI {
    * Is there a JVM in the process of starting up?
    * This variable is protected by synchronized(this).
    */
-  private boolean _startupInProgress = false;
+  //private boolean _startupInProgress = false;
+  
+  private RestartThread _restartThread = null;
   
   /**
    * Keeps track of whether we are currently in the process of cleanly
@@ -80,7 +82,7 @@ public class MainJVM extends UnicastRemoteObject implements MainJVMRemoteI {
    * This variable is protected by synchronized(this).
    * @see #setIsResetting
    */
-  private boolean _resetInProgress = false;
+  //private boolean _resetInProgress = false;
 
   /**
    * This is the pointer to the interpreter JVM remote object, used to call
@@ -203,7 +205,7 @@ public class MainJVM extends UnicastRemoteObject implements MainJVMRemoteI {
     synchronized(this) {
       //System.out.println("interpreter jvm registered: " + remote);
       _interpreterJVM = remote;
-      _startupInProgress = false;
+      //_startupInProgress = false;
       // wake up anyone waiting for an interpreter!
       notify();
     }
@@ -274,11 +276,17 @@ public class MainJVM extends UnicastRemoteObject implements MainJVMRemoteI {
    */
   public void restartInterpreterJVM() {
     synchronized(this) {
+      /**
       if (_startupInProgress) {
         return;
       }
 
       _startupInProgress = true;
+      */
+      if (_restartThread != null) {
+        //DrJava.consoleOut().println("Disabling _restartThread");
+        _restartThread.disable();
+      }
 
       killInterpreter();
       
@@ -316,16 +324,18 @@ public class MainJVM extends UnicastRemoteObject implements MainJVMRemoteI {
         
         // Start a thread to wait for the interpreter to die and to fire
         // off a new one (and notify model) when it happens
-        Thread thread = new Thread() {
+        _restartThread = new RestartThread() {
           public void run() {
             try {
               int status = _interpreterProcess.waitFor();
               //DrJava.consoleOut().println("In Thread: interpreterProcess ended. status=" +
               //                            status);
-              restartInterpreterJVM();
-              if (!_isResetting()) {
-               
+              if (_shouldReset) {
+                //DrJava.consoleOut().println("I should reset");
+                restartInterpreterJVM();
+                //if (!_isResetting()) {
                 replCalledSystemExit(status);
+                //}
               }
             }
             catch (InterruptedException ie) {
@@ -335,7 +345,7 @@ public class MainJVM extends UnicastRemoteObject implements MainJVMRemoteI {
         };
 
         //DrJava.consoleOut().println("In MainJVM: starting thread");
-        thread.start();
+        _restartThread.start();
       }
       catch (IOException ioe) {
         _threwException(ioe);
@@ -375,21 +385,21 @@ public class MainJVM extends UnicastRemoteObject implements MainJVMRemoteI {
    * class, rather than simply setting the field in restartInteractionsJVM.
    * (Timing issues, maybe?)
    * @param b whether we are in the process of resetting
-   */
+   *
   public synchronized void setIsResetting(boolean b) { 
     //DrJava.consoleOut().println("setIsResestting: resetInProgress: " + b);
     _resetInProgress = b;
-  }
+  }*/
   
   /**
    * Returns whether we are in the process of cleanly resetting the
    * interactions JVM.
    * @see #setIsResetting
-   */
+   *
   private synchronized boolean _isResetting() {
     //DrJava.consoleOut().println("isResetting: resetInProgress: " + _resetInProgress);
     return _resetInProgress;
-  }
+  }*/
   
   public void checkStillAlive() throws RemoteException {
     // do nothing.
@@ -443,6 +453,14 @@ public class MainJVM extends UnicastRemoteObject implements MainJVMRemoteI {
     }
     catch (IOException ioe) { 
       throw new edu.rice.cs.util.UnexpectedException(ioe);
+    }
+  }
+  
+  private class RestartThread extends Thread {
+    protected boolean _shouldReset = true;
+    
+    public void disable() {
+      _shouldReset = false;
     }
   }
 }

@@ -598,13 +598,13 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
    */
   public void resetInteractions() {
     // Keep a note that we're resetting so that the exit message is not displayed
-    _interpreterControl.setIsResetting(true);
+    //_interpreterControl.setIsResetting(true);
     if ((_debugManager != null) && (_debugManager.isReady())){
       _debugManager.shutdown();
     }
     _interpreterControl.restartInterpreterJVM();
     _restoreInteractionsState();
-    _interpreterControl.setIsResetting(false);
+    //_interpreterControl.setIsResetting(false);
     
     /* Old approach.  (Didn't kill leftover interactions threads)
     _interpreterControl.reset();
@@ -661,14 +661,6 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
     else {
       failed.run();
     }
-  }
-
-  /**
-   * Aborts any threads running in the Interactions JVM by completely
-   * restarting that JVM.
-   */
-  public void abortCurrentInteraction() {
-    _interpreterControl.restartInterpreterJVM();
   }
 
   /**
@@ -983,6 +975,10 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
     String classpath= "";
     File[] sourceFiles = getSourceRootSet();
 
+    for(int i=0; i < sourceFiles.length; i++) {
+      classpath += sourceFiles[i].getAbsolutePath() + separator;
+    }
+
     // Adds extra.classpath to the classpath.
     Vector<File> extraClasspath = DrJava.CONFIG.getSetting(EXTRA_CLASSPATH);
     if(extraClasspath != null) {
@@ -990,10 +986,6 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
         while(enum.hasMoreElements()) {
             classpath += enum.nextElement().getAbsolutePath() + separator;
         }
-    }
-
-    for(int i=0; i < sourceFiles.length; i++) {
-      classpath += sourceFiles[i].getAbsolutePath() + separator;
     }
     return classpath;
   }
@@ -1028,7 +1020,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
         // can't add it to roots
       }
     }
-    
+    /*    
     File workDir = DrJava.CONFIG.getSetting(WORKING_DIRECTORY);
         
     if (workDir == FileOption.NULL_FILE) {
@@ -1037,7 +1029,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
     if (workDir.isFile() && workDir.getParent() != null) {
       workDir = workDir.getParentFile();
     }
-    roots.add(workDir);
+    roots.add(workDir);*/
 
     return (File[]) roots.toArray(new File[0]);
   }

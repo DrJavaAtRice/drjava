@@ -516,7 +516,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
    * @return true if the document has been modified
    */
   public boolean isModifiedOnDisk() {
-      DrJava.consoleOut().println("Beginning isModifiedOnDisk()");
+      //DrJava.consoleOut().println("Beginning isModifiedOnDisk()");
     boolean ret = false;
     try {
       readLock();
@@ -528,7 +528,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
     finally {
       readUnlock();
     }
-    DrJava.consoleOut().println("Ending isModifiedOnDisk()");
+    //DrJava.consoleOut().println("Ending isModifiedOnDisk()");
     return ret;
 
   }

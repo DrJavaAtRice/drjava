@@ -81,9 +81,9 @@ public interface OptionConstants extends ConfigurationTool {
   public static final ColorOption DEFINITIONS_DOUBLE_QUOTED_COLOR = 
     new ColorOption("definitions.double.quoted.color", Color.red.darker());
   public static final ColorOption DEFINITIONS_SINGLE_QUOTED_COLOR = 
-    new ColorOption("definitions.single.quoted.color", Color.magenta);
+    new ColorOption("definitions.single.quoted.color", Color.cyan.darker());
   public static final ColorOption DEFINITIONS_NUMBER_COLOR = 
-    new ColorOption("definitions.number.color", Color.cyan.darker().darker());
+    new ColorOption("definitions.number.color", Color.magenta);
   
   /**
    * Color for background of definitions pane.

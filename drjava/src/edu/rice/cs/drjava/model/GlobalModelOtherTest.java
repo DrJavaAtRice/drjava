@@ -65,6 +65,7 @@ import edu.rice.cs.drjava.CodeStatus;
  * @version $Id$
  */
 public class GlobalModelOtherTest extends GlobalModelTestCase implements OptionConstants {
+  
   /**
    * Constructor.
    * @param  String name
@@ -170,9 +171,8 @@ public class GlobalModelOtherTest extends GlobalModelTestCase implements OptionC
         synchronized(this) {
           //System.err.println("reset notice");
           assertInteractionStartCount(1);
-          assertInteractionsExitedCount(1);
+          assertInteractionsExitedCount(0);
           interactionsResetCount++;
-          this.notify();
         }
       }
     };
@@ -182,15 +182,13 @@ public class GlobalModelOtherTest extends GlobalModelTestCase implements OptionC
       interpretIgnoreResult("while (true) {}");
       listener.assertInteractionStartCount(1);
       //System.err.println("about to abort");
-      _model.abortCurrentInteraction();
+      _model.resetInteractions();
       //System.err.println("about to wait for abort");
-      listener.wait();
     }
-
     //System.err.println("waiting done");
     listener.assertInteractionsResetCount(1);
     //System.err.println("after wait");
-    listener.assertInteractionsExitedCount(1);
+    listener.assertInteractionsExitedCount(0);
     //System.err.println("after wait");
     _model.removeListener(listener);
 
@@ -356,11 +354,11 @@ public class GlobalModelOtherTest extends GlobalModelTestCase implements OptionC
     
     // Get source root (current directory only)
     File[] roots = _model.getSourceRootSet();
-    assertEquals("number of source roots", 1, roots.length);
-    assertEquals("source root (current directory)", 
+    assertEquals("number of source roots", 0, roots.length);
+    /*assertEquals("source root (current directory)", 
                  workDir,
                  roots[0]);
-
+                 */
     // Create temp directory
     File baseTempDir = tempDirectory();
 
@@ -380,7 +378,7 @@ public class GlobalModelOtherTest extends GlobalModelTestCase implements OptionC
 
     // Get source roots
     roots = _model.getSourceRootSet();
-    assertEquals("number of source roots", 2, roots.length);
+    assertEquals("number of source roots", 1, roots.length);
     assertEquals("source root", subdir, roots[0]);
   }
 
@@ -406,9 +404,8 @@ public class GlobalModelOtherTest extends GlobalModelTestCase implements OptionC
     _model.addListener(new TestListener());
 
     // Since we had the package statement the source root should be base dir
-    // (also contains currDir)
     File[] roots = _model.getSourceRootSet();
-    assertEquals("number of source roots", 2, roots.length);
+    assertEquals("number of source roots", 1, roots.length);
     assertEquals("source root", baseTempDir, roots[0]);
 
   }
@@ -445,10 +442,10 @@ public class GlobalModelOtherTest extends GlobalModelTestCase implements OptionC
 
     // The package name is wrong so this should return only currDir
     File[] roots = _model.getSourceRootSet();
-    assertEquals("number of source roots", 1, roots.length);
-    assertEquals("source root (current directory)", 
+    assertEquals("number of source roots", 0, roots.length);
+    /*assertEquals("source root (current directory)", 
                  workDir,
-                 roots[0]);
+                 roots[0]);*/
   }
 
   public void testGetSourceRootPackageOneDeepValid()
@@ -470,9 +467,8 @@ public class GlobalModelOtherTest extends GlobalModelTestCase implements OptionC
     _model.addListener(new TestListener());
 
     // Since we had the package statement the source root should be base dir
-    //  (also currDir)
     File[] roots = _model.getSourceRootSet();
-    assertEquals("number of source roots", 2, roots.length);
+    assertEquals("number of source roots", 1, roots.length);
     assertEquals("source root", baseTempDir, roots[0]);
 
   }
@@ -508,9 +504,9 @@ public class GlobalModelOtherTest extends GlobalModelTestCase implements OptionC
     // No events should fire
     _model.addListener(new TestListener());
 
-    // Get source roots (should be 3: no duplicates, but also currDir)
+    // Get source roots (should be 2: no duplicates)
     File[] roots = _model.getSourceRootSet();
-    assertEquals("number of source roots", 3, roots.length);
+    assertEquals("number of source roots", 2, roots.length);
     File root1 = roots[0];
     File root2 = roots[1];
 

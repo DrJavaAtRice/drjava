@@ -236,11 +236,6 @@ public interface GlobalModel {
 
   /** Returns the first location in the document where editing is allowed. */
   public int getInteractionsFrozenPos();
-
-  /**
-   * Aborts the currently running interaction.
-   */
-  public void abortCurrentInteraction();
   
   /** Prints System.out to the DrJava console. */
   public void systemOutPrint(String s);
