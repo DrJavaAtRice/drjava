@@ -56,8 +56,6 @@ public class DrJava {
   private static final PrintStream _consoleErr = System.err;
   private static PreventExitSecurityManager _manager;
   
-  private static final MainFrame _mf = new MainFrame();
-  
   public static void main(final String[] args) {
     
     /*
@@ -88,13 +86,18 @@ an      }
       
       _setupCompilerIfNeeded();
       
-      //      MainFrame mf = new MainFrame();
+      // The MainFrame *must* be constructed after the compiler setup process has
+      // occurred; otherwise, the list of compilers in the UI will be wrong.
+      // At some point this should be fixed, which would involve making the
+      // CompilerRegistry notify listeners when there is a change in the list of
+      // available compilers.
+      MainFrame mf = new MainFrame();
       
       // This enabling of the security manager must happen *after* the mainframe
       // is constructed. See bug #518509.
       enableSecurityManager();
-      openCommandLineFiles(_mf, args);
-      _mf.show();
+      openCommandLineFiles(mf, args);
+      mf.show();
     } catch (Exception ex) {
       _consoleErr.println(ex.getClass().getName() + ": " + ex.getMessage());
       ex.printStackTrace(_consoleErr);
@@ -125,15 +128,6 @@ an      }
     }
   }
 
-  /**
-   * Get the MainFrame we're using.  Lets the DrJava class tester 
-   * know what's going on.
-   *
-  public static MainFrame getMainFrame() {
-    return _mf;
-  }
-  */
-  
   /**
    * Implements feature req #523222: Prompt user for compiler if none found.
    */

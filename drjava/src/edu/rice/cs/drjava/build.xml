@@ -63,7 +63,19 @@
     <cvs dest="${dist}/${version-tag}"
          tag="HEAD"
          quiet="yes"
-         package="src/edu/rice/cs"
+         package="src/edu/rice/cs/drjava"
+         command="export -N" />
+
+    <cvs dest="${dist}/${version-tag}"
+         tag="HEAD"
+         quiet="yes"
+         package="src/edu/rice/cs/util"
+         command="export -N" />
+
+    <cvs dest="${dist}/${version-tag}"
+         tag="HEAD"
+         quiet="yes"
+         package="src/edu/rice/cs/lib"
          command="export -N" />
 
     <zip zipfile="${dist}/${version-tag}-src.zip">
