@@ -110,6 +110,11 @@ public interface FileGroupingState {
   public boolean isProjectFile(File f);
   
   /**
+   * @return true if the file is a project auxiliary file
+   */
+  public boolean isAuxiliaryFile(File f);
+  
+  /**
    * Returns true if in project mode and the current project file has changed
    */
   public boolean isProjectChanged();

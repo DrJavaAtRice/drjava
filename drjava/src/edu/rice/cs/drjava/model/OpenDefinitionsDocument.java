@@ -112,6 +112,11 @@ public interface OpenDefinitionsDocument extends DJDocument, Finalizable<Definit
   public boolean isInProjectPath();
   
   /**
+   * @return true if the document's file is a project auxiliary file
+   */
+  public boolean isAuxiliaryFile();
+  
+  /**
    * @return true if the documents file is saved in the current project file
    */
   public boolean isProjectFile();

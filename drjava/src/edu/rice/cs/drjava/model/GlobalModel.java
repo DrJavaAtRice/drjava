@@ -183,6 +183,21 @@ public interface GlobalModel extends IGetDocuments, ILoadDocuments {
     throws IOException;
   
   /**
+   * formats a string pathname for use in the document navigator
+   */
+  public String fixPathForNavigator(String path) throws IOException;
+  
+  /**
+   * adds a document to the list of auxiliary files
+   */
+  public void addAuxiliaryFile(OpenDefinitionsDocument doc);
+  
+  /**
+   * removes a document from the list of auxiliary files
+   */
+  public void removeAuxiliaryFile(OpenDefinitionsDocument doc);
+  
+  /**
    * Parses out the given project file, sets up the state and other configurations
    * such as the Navigator and the classpath, and returns an array of files to open.
    * @param file The project file to parse

@@ -219,6 +219,8 @@ public class MainFrame extends JFrame implements OptionConstants {
 
   // Popup menus
   private JPopupMenu _navPanePopupMenu;
+  private JPopupMenu _navPanePopupMenuForExternal;
+  private JPopupMenu _navPanePopupMenuForAuxiliary;
   private JPopupMenu _navPaneFolderPopupMenu;
   private JPopupMenu _interactionsPanePopupMenu;
   private JPopupMenu _consolePanePopupMenu;
@@ -382,6 +384,18 @@ public class MainFrame extends JFrame implements OptionConstants {
    */
   private FolderDialog _folderSelector = new FolderDialog(this);
 
+  private Action _moveToAuxiliaryAction = new AbstractAction("Move To Auxiliary"){
+    public void actionPerformed(ActionEvent ae){
+      _moveToAuxiliary();
+    }
+  };
+  
+  private Action _removeAuxiliaryAction = new AbstractAction("Move To External"){
+    public void actionPerformed(ActionEvent ae){
+      _removeAuxiliary();
+    }
+  };
+  
   /** Resets the document in the definitions pane to a blank one. */
   private Action _newAction = new AbstractAction("New") {
     public void actionPerformed(ActionEvent ae) {
@@ -2088,6 +2102,43 @@ public class MainFrame extends JFrame implements OptionConstants {
     _sbMessage.setForeground(c);
   }
 
+  private void _moveToAuxiliary(){
+    INavigatorItem n = _model.getDocumentNavigator().getCurrentSelectedLeaf();
+    if(n == null){
+      // false alarm, a document is not really selected...
+    }else{
+      OpenDefinitionsDocument d = _model.getODDGivenIDoc(n);
+      if(d.isUntitled()){
+        // can't move an untitled document to the auxiliary files
+      }else{
+        _model.addAuxiliaryFile(d);
+        try{
+          _model.getDocumentNavigator().refreshDocument(n, _model.fixPathForNavigator(d.getFile().getCanonicalPath()));
+        }catch(IOException e){
+          // noop
+        }
+      }
+    }
+  }
+  
+  private void _removeAuxiliary(){
+    INavigatorItem n = _model.getDocumentNavigator().getCurrentSelectedLeaf();
+    if(n == null){
+      // false alarm, a document is not really selected...
+    }else{
+      OpenDefinitionsDocument d = _model.getODDGivenIDoc(n);
+      if(d.isUntitled()){
+        // can't move an untitled document to the auxiliary files
+      }else{
+        _model.removeAuxiliaryFile(d);
+        try{
+          _model.getDocumentNavigator().refreshDocument(n, _model.fixPathForNavigator(d.getFile().getCanonicalPath()));
+        }catch(IOException e){
+          // noop
+        }
+      }
+    }
+  }
 
   private void _new() {
     _model.newFile();
@@ -2211,7 +2262,7 @@ public class MainFrame extends JFrame implements OptionConstants {
         docsToClose.add(d);
       }else{
         try{
-          nav.refreshDocument(_model.getIDocGivenODD(d), d.getFile().getParentFile().getCanonicalPath());
+          nav.refreshDocument(_model.getIDocGivenODD(d), _model.fixPathForNavigator(d.getFile().getCanonicalPath()));
         }catch(IOException e){
           // noop
         }
@@ -4385,6 +4436,39 @@ public class MainFrame extends JFrame implements OptionConstants {
     _navPaneFolderPopupMenu.add(_compileFolderAction);
     _navPaneFolderPopupMenu.add(_junitFolderAction);
     
+    _navPanePopupMenuForExternal = new JPopupMenu();
+    _navPanePopupMenuForExternal.add(_saveAction);
+    _navPanePopupMenuForExternal.add(_saveAsAction);
+    _navPanePopupMenuForExternal.add(_revertAction);
+    _navPanePopupMenuForExternal.addSeparator();
+    _navPanePopupMenuForExternal.add(_closeAction);
+    _navPanePopupMenuForExternal.addSeparator();
+    _navPanePopupMenuForExternal.add(_printAction);
+    _navPanePopupMenuForExternal.add(_printPreviewAction);
+    _navPanePopupMenuForExternal.addSeparator();
+    _navPanePopupMenuForExternal.add(_compileAction);
+    _navPanePopupMenuForExternal.add(_junitAction);
+    _navPanePopupMenuForExternal.add(_javadocCurrentAction);
+    _navPanePopupMenuForExternal.add(_runAction);
+    _navPanePopupMenuForExternal.addSeparator();
+    _navPanePopupMenuForExternal.add(_moveToAuxiliaryAction);
+    
+    _navPanePopupMenuForAuxiliary = new JPopupMenu();
+    _navPanePopupMenuForAuxiliary.add(_saveAction);
+    _navPanePopupMenuForAuxiliary.add(_saveAsAction);
+    _navPanePopupMenuForAuxiliary.add(_revertAction);
+    _navPanePopupMenuForAuxiliary.addSeparator();
+    _navPanePopupMenuForAuxiliary.add(_closeAction);
+    _navPanePopupMenuForAuxiliary.addSeparator();
+    _navPanePopupMenuForAuxiliary.add(_printAction);
+    _navPanePopupMenuForAuxiliary.add(_printPreviewAction);
+    _navPanePopupMenuForAuxiliary.addSeparator();
+    _navPanePopupMenuForAuxiliary.add(_compileAction);
+    _navPanePopupMenuForAuxiliary.add(_junitAction);
+    _navPanePopupMenuForAuxiliary.add(_javadocCurrentAction);
+    _navPanePopupMenuForAuxiliary.add(_runAction);
+    _navPanePopupMenuForAuxiliary.addSeparator();
+    _navPanePopupMenuForAuxiliary.add(_removeAuxiliaryAction);
     
     // NavPane menu
     _navPanePopupMenu = new JPopupMenu();
@@ -4408,7 +4492,28 @@ public class MainFrame extends JFrame implements OptionConstants {
           if(_model.getDocumentNavigator().isGroupSelected()){
             _navPaneFolderPopupMenu.show(e.getComponent(), e.getX(), e.getY());
           }else{
-            _navPanePopupMenu.show(e.getComponent(), e.getX(), e.getY());
+            try{
+              String groupName = _model.getDocumentNavigator().getNameOfSelectedTopLevelGroup();
+              if(groupName == "[ Source Files ]"){
+                _navPanePopupMenu.show(e.getComponent(), e.getX(), e.getY());
+              }else if(groupName == "[ External Files ]"){
+                INavigatorItem n = _model.getDocumentNavigator().getCurrentSelectedLeaf();
+                if(n == null){
+                  // false alarm, a document is not really selected...
+                }else{
+                  OpenDefinitionsDocument d = _model.getODDGivenIDoc(n);
+                  if(d.isUntitled()){
+                    _navPanePopupMenu.show(e.getComponent(), e.getX(), e.getY());
+                  }else{
+                    _navPanePopupMenuForExternal.show(e.getComponent(), e.getX(), e.getY());
+                  }
+                }
+              }else if(groupName == "[ Auxiliary Files ]"){
+                _navPanePopupMenuForAuxiliary.show(e.getComponent(), e.getX(), e.getY());
+              }
+            }catch(GroupNotSelectedException ex){
+              // noop
+            }
           }
           
 //          _navPaneFolderPopupMenu.show(e.getComponent(), e.getX(), e.getY());
@@ -5326,7 +5431,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       if(doc != null) {
         try {
           File f = doc.getFile();
-          if(_model.isProjectFile(f)) {
+          if(_model.isProjectFile(f) || doc.isAuxiliaryFile()) {
 //            _saveProjectAction.setEnabled(true);
             _model.setProjectChanged(true);
           }

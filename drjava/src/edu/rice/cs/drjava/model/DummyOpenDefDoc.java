@@ -488,6 +488,10 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
     return false;
   }
   
+  public boolean isAuxiliaryFile(){
+    return false;
+  }
+  
   public boolean belongsHuh(Document doc){
     return false;
   }

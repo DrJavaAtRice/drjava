@@ -106,6 +106,51 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
   // ----- FIELDS -----
 
   /**
+   * a list of files that are auxiliary files to the currently open project
+   */
+  private LinkedList<File> _auxiliaryFiles = new LinkedList<File>();
+  
+  /**
+   * adds a document to the list of auxiliary files
+   */
+  public void addAuxiliaryFile(OpenDefinitionsDocument doc){
+    if(!doc.isUntitled() && !doc.isProjectFile()){
+      File f;
+      try{
+        f = doc.getFile();
+      }catch(FileMovedException fme){
+        f = fme.getFile();
+      }
+      _auxiliaryFiles.add(f);
+      setProjectChanged(true);
+    }
+  }
+  
+  /**
+   * removes a document from the list of auxiliary files
+   */
+  public void removeAuxiliaryFile(OpenDefinitionsDocument doc){
+    File file;
+    try{
+      file = doc.getFile();
+    }catch(FileMovedException fme){
+      file = fme.getFile();
+    }
+    LinkedList<File> newAuxiliaryFiles = new LinkedList<File>();  
+    for(File f: _auxiliaryFiles){
+      try{
+        if(!f.getCanonicalPath().equals(file.getCanonicalPath())){
+          newAuxiliaryFiles.add(f);
+        }
+      }catch(IOException e){
+        // noop
+      }
+    }
+    _auxiliaryFiles = newAuxiliaryFiles;
+    setProjectChanged(true);
+  }
+
+  /**
    * Keeps track of all listeners to the model, and has the ability
    * to notify them of some event.  Originally used a Command Pattern style,
    * but this has been replaced by having EN directly implement all listener
@@ -499,11 +544,14 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
 
   public FileGroupingState _makeProjectFileGroupingState(final File jarMainClass, final File buildDir, final File projectFile, final File[] projectFiles) { 
     return new FileGroupingState(){
+      
       private File _builtDir = buildDir;
       
       private File _mainFile = jarMainClass;
       
       private boolean _isProjectChanged = false;
+      
+      private ArrayList<File> _auxFiles = new ArrayList<File>();
       
       public boolean isProjectActive(){
         return true;
@@ -578,6 +626,31 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       public void setProjectChanged(boolean changed) {
         _isProjectChanged = changed;
       }
+      
+      public boolean isAuxiliaryFile(File f){
+        String path;
+        
+        if (f == null) return false;
+        
+        try{
+          path = f.getCanonicalPath();
+        }
+        catch(IOException ioe) {
+          return false;
+        }
+        
+        for(File file : _auxiliaryFiles) {
+          try {
+            if(file.getCanonicalPath().equals(path))
+              return true;
+          }
+          catch(IOException ioe) {
+            //continue
+          }
+        }
+        return false;
+      }
+      
     };
   }
   
@@ -621,6 +694,10 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       
       public void setProjectChanged(boolean changed) {
         //Do nothing    
+      }
+      
+      public boolean isAuxiliaryFile(File f){
+        return false;
       }
     };
   }
@@ -959,6 +1036,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     
     // add opendefinitionsdocument
     Vector<File> srcFileVector = new Vector<File>();
+    Vector<File> auxFileVector = new Vector<File>();
     Iterator<OpenDefinitionsDocument> odds = _documentsRepos.valuesIterator();
     while(odds.hasNext()){
       OpenDefinitionsDocument doc = odds.next();
@@ -972,6 +1050,10 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
           DocumentInfoGetter g = info.get(doc);
           builder.addSourceFile(g);
           srcFileVector.add(g.getFile());
+        }else if(doc.isAuxiliaryFile()){
+          DocumentInfoGetter g = info.get(doc);
+          builder.addAuxiliaryFile(g);
+          auxFileVector.add(g.getFile());
         }
       }
     }
@@ -1003,6 +1085,12 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
   
     // set the state if all went well
     File[] srcFiles = srcFileVector.toArray(new File[0]);
+    
+    _auxiliaryFiles.clear();
+    for(File file: auxFileVector){
+      _auxiliaryFiles.add(file);
+    }
+    
     setFileGroupingState(_makeProjectFileGroupingState(mainClass, f, new File(filename), srcFiles));
   }
 
@@ -1015,24 +1103,35 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
   public DocFile[] openProject(File projectFile) throws IOException, MalformedProjectFileException {
     final ProjectFileIR ir;
     final DocFile[] srcFiles;
+    final DocFile[] auxFiles;
     
     //File projectRoot = projectFile.getParentFile();
     ir = ProjectFileParser.ONLY.parse(projectFile);
     srcFiles = ir.getSourceFiles();
+    auxFiles = ir.getAuxiliaryFiles();
     String projfilepath = projectFile.getCanonicalPath();
 
+    
+    
     List<Pair<String, INavigatorItemFilter>> l = new LinkedList<Pair<String, INavigatorItemFilter>>();
     l.add(new Pair<String, INavigatorItemFilter>("[ Source Files ]", new INavigatorItemFilter(){
       public boolean accept(INavigatorItem n){
         OpenDefinitionsDocument d = DefaultGlobalModel.this.getODDGivenIDoc(n);
-        return d.isProjectFile();
+        return d.isInProjectPath();
       }
     }));
 
+    l.add(new Pair<String, INavigatorItemFilter>("[ Auxiliary Files ]", new INavigatorItemFilter(){
+      public boolean accept(INavigatorItem n){
+        OpenDefinitionsDocument d = DefaultGlobalModel.this.getODDGivenIDoc(n);
+        return d.isAuxiliaryFile();
+      }
+    }));
+    
     l.add(new Pair<String, INavigatorItemFilter>("[ External Files ]", new INavigatorItemFilter(){
       public boolean accept(INavigatorItem n){
         OpenDefinitionsDocument d = DefaultGlobalModel.this.getODDGivenIDoc(n);
-        return !d.isProjectFile() || d.isUntitled();
+        return !(d.isProjectFile() || d.isAuxiliaryFile()) || d.isUntitled();
       }
     }));
     
@@ -1047,6 +1146,11 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     File mainClass;
     mainClass = ir.getMainClass();
     
+    _auxiliaryFiles.clear();
+    for(File file: auxFiles){
+      _auxiliaryFiles.add(file);
+    }
+
     setFileGroupingState(_makeProjectFileGroupingState(mainClass, buildDir, projectFile, srcFiles));
     setBuildDirectory(buildDir);
     
@@ -1062,7 +1166,15 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     
     setProjectChanged(false);
     
-    return srcFiles;
+    ArrayList<DocFile> al = new ArrayList<DocFile>();
+    for(DocFile f: srcFiles){
+      al.add(f);
+    }
+    for(DocFile f: auxFiles){
+      al.add(f);
+    }
+    
+    return al.toArray(new DocFile[0]);
   }
   
   /**
@@ -1908,6 +2020,18 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
         return false;
       }
     }
+    
+    /**
+     * @return true if the file is an auxiliary file
+     */
+    public boolean isAuxiliaryFile(){
+      if(!isUntitled()){
+        return _state.isAuxiliaryFile(_file);
+      }else{
+        return false;
+      }
+    }
+    
     
     /**
      * makes a default DDReconstructor that will make a Document based on if the Handler has a file or not
@@ -3474,7 +3598,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     return projectDocs;
   }
     
-  private String fixPathForNavigator(String path) throws IOException{
+  public String fixPathForNavigator(String path) throws IOException{
       path = path.substring(0, path.lastIndexOf(File.separator));
       String _topLevelPath;
       if(getProjectFile() != null){
