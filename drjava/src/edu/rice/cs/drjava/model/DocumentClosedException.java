@@ -43,48 +43,28 @@
  * 
 END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava;
-
-import java.util.Date;
-import java.text.SimpleDateFormat;
+package edu.rice.cs.drjava.model;
 
 /**
- * This interface hold the information about this build of DrJava.
- * This file is copied to Version.java by the build process, which also
- * fills in the right values of the date and time.
- *
- * This javadoc corresponds to build drjava-20040701-2010;
- *
- * @version $Id$
+ * Special DocumentClosedException to signify when a document's file no longer
+ *  exists on disk where it once was, and as a result of the prompt given to the user, the 
+ * document is closed
  */
-public abstract class Version {
+public class DocumentClosedException extends RuntimeException {
+  private OpenDefinitionsDocument _document;
+  
   /**
-   * This string will be automatically expanded upon "ant commit".
-   * Do not edit it by hand!
+   * Creates a DocumentClosedException for the given file
    */
-  private static final String BUILD_TIME_STRING = "20040701-2010";
-
-  /** A {@link Date} version of the build time. */
-  private static final Date BUILD_TIME = _getBuildDate();
-
-  public static String getBuildTimeString() {
-    return BUILD_TIME_STRING;
+  public DocumentClosedException(OpenDefinitionsDocument d, String s) {
+    super(s);
+    _document = d;
   }
-
-  public static Date getBuildTime() {
-    return BUILD_TIME;
+  
+  /**
+   * Get the document which caused this exception.
+   */
+  public OpenDefinitionsDocument getDocument() {
+    return _document;
   }
-
-  private static Date _getBuildDate() {
-    try {
-      return new SimpleDateFormat("yyyyMMdd-HHmm z").parse(BUILD_TIME_STRING + " GMT");
-    }
-    catch (Exception e) { // parse format or whatever problem
-      return null;
-    }
-  }
-
-  public static void main(String[] args) {
-    System.out.println("Version for edu.rice.cs.drjava: " + BUILD_TIME_STRING);
-  }
-} 
+}
