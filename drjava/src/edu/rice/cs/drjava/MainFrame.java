@@ -14,6 +14,8 @@ import javax.swing.JSplitPane;
 import javax.swing.BoxLayout;
 import javax.swing.JTextField;
 
+import javax.swing.text.DefaultEditorKit;
+
 import java.awt.event.ActionEvent;
 
 import java.io.File;
@@ -177,8 +179,24 @@ public class MainFrame extends JFrame
     _fileMenu.add(_openAction);
     _fileMenu.add(_saveAction);
     _fileMenu.add(_saveAsAction);
+    _fileMenu.addSeparator();
     _fileMenu.add(_compileAction);
+    _fileMenu.addSeparator();
     _fileMenu.add(_quitAction);
+
+    Action cutAction = new DefaultEditorKit.CutAction();
+    cutAction.putValue(Action.NAME, "Cut");
+    Action copyAction = new DefaultEditorKit.CopyAction();
+    copyAction.putValue(Action.NAME, "Copy");
+    Action pasteAction = new DefaultEditorKit.PasteAction();
+    pasteAction.putValue(Action.NAME, "Paste");
+
+    _editMenu.add(_definitionsView.getUndoAction());
+    _editMenu.add(_definitionsView.getRedoAction());
+    _editMenu.addSeparator();
+    _editMenu.add(cutAction);
+    _editMenu.add(copyAction);
+    _editMenu.add(pasteAction);
 
     // Add the menus to the menu bar
     _menuBar.add(_fileMenu);

@@ -2,10 +2,19 @@
 
 package edu.rice.cs.drjava;
 
+import javax.swing.Action;
+import javax.swing.AbstractAction;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JTextArea;
 import javax.swing.JEditorPane;
+
+import javax.swing.undo.CannotRedoException;
+import javax.swing.undo.CannotUndoException;
+import javax.swing.undo.UndoManager;
+
+import javax.swing.event.UndoableEditListener;
+import javax.swing.event.UndoableEditEvent;
 
 import javax.swing.text.Document;
 import javax.swing.text.StyledEditorKit;
@@ -19,6 +28,7 @@ import java.io.FileWriter;
 
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.event.ActionEvent;
 
 public class DefinitionsView extends JEditorPane
 {
@@ -28,10 +38,48 @@ public class DefinitionsView extends JEditorPane
   private String _currentFileName = "";
   private MainFrame _mainFrame;
 
+  private UndoManager _undoManager;
+  private UndoAction _undoAction;
+  private RedoAction _redoAction;
+
+  private UndoableEditListener _undoListener = new UndoableEditListener() {
+    public void undoableEditHappened(UndoableEditEvent e) {
+      //Remember the edit and update the menus
+      _undoManager.addEdit(e.getEdit());
+      _undoAction.updateUndoState();
+      _redoAction.updateRedoState();
+    }
+  };
+
   public DefinitionsView(MainFrame mf)
   {
     _mainFrame = mf;
     _resetDocument("");
+    _resetUndo();
+  }
+
+  public Action getUndoAction() { return _undoAction; }
+  public Action getRedoAction() { return _redoAction; }
+
+  /** Reset undo machinery on setDocument. */
+  public void setDocument(Document doc) {
+    if (_undoAction == null) {
+      _undoAction = new UndoAction();
+    }
+
+    if (_redoAction == null) {
+      _redoAction = new RedoAction();
+    }
+
+    super.setDocument(doc);
+    _resetUndo();
+  }
+
+  private void _resetUndo() {
+    _undoManager = new UndoManager();
+    getDocument().addUndoableEditListener(_undoListener);
+    _undoAction.updateUndoState();
+    _redoAction.updateRedoState();
   }
 
   /** Gets current file name, or "" if it was never saved. */
@@ -235,4 +283,63 @@ public class DefinitionsView extends JEditorPane
   {
     return (DefinitionsDocument) getDocument();
   }
+
+
+  private class UndoAction extends AbstractAction {
+    private UndoAction() {
+      super("Undo");
+      setEnabled(false);
+    }
+
+    public void actionPerformed(ActionEvent e) {
+      try {
+        _undoManager.undo();
+      } catch (CannotUndoException ex) {
+        System.out.println("Unable to undo: " + ex);
+        ex.printStackTrace();
+      }
+
+      updateUndoState();
+      _redoAction.updateRedoState();
+    }
+
+    protected void updateUndoState() {
+      if (_undoManager.canUndo()) {
+        setEnabled(true);
+        putValue(Action.NAME, _undoManager.getUndoPresentationName());
+      } else {
+        setEnabled(false);
+        putValue(Action.NAME, "Undo");
+      }
+    }      
+  }    
+
+  private class RedoAction extends AbstractAction {
+    private RedoAction() {
+      super("Redo");
+      setEnabled(false);
+    }
+
+    public void actionPerformed(ActionEvent e) {
+      try {
+        _undoManager.redo();
+      } catch (CannotRedoException ex) {
+        System.out.println("Unable to redo: " + ex);
+        ex.printStackTrace();
+      }
+
+      updateRedoState();
+      _undoAction.updateUndoState();
+    }
+
+    protected void updateRedoState() {
+      if (_undoManager.canRedo()) {
+        setEnabled(true);
+        putValue(Action.NAME, _undoManager.getRedoPresentationName());
+      } else {
+        setEnabled(false);
+        putValue(Action.NAME, "Redo");
+      }
+    }
+  }    
 }

@@ -65,7 +65,7 @@
   -->
   <target name="compile" depends="init">
     <javac srcdir="${srcroot}"
-           includes="${projpath}/*java"
+           includes="${projpath}/**/*java"
            destdir="${built}" 
            debug="on"
            optimize="off" />
@@ -107,7 +107,7 @@
   </target>
 
   <!-- Run the program! -->
-  <target name="run" depends="test">
+  <target name="run" depends="compile">
     <java classpath="${built}:${java.class.path}"
           fork="true"
           classname="edu.rice.cs.drjava.DrJava" />
