@@ -47,7 +47,7 @@ public class ReducedModelControl implements BraceReduction {
   * right. </P>
   * @param count indicates the direction and magnitude of cursor movement
   */
-  public void move( int count ) {
+  public void move(int count) {
     rmb.move(count);
     rmc.move(count);
   }
@@ -58,7 +58,7 @@ public class ReducedModelControl implements BraceReduction {
   * Negative values delete text to the left of the cursor, positive
   * values delete text to the right.
   */
-  public void delete( int count ) {
+  public void delete(int count) {
     rmb.delete(count);
     rmc.delete(count);
   }
@@ -315,7 +315,7 @@ public class ReducedModelControl implements BraceReduction {
     int curLocation;
     int curLength;
 
-    ModelList<ReducedToken>.Iterator cursor = rmc._cursor.copy();
+    TokenList.Iterator cursor = rmc._cursor.copy();
     int ct = rmc._braces.listenerCount();
     curLocation = start;
     curLength = cursor.current().getSize() - rmc._offset;

@@ -4,7 +4,6 @@ import gj.util.Stack;
 import gj.util.Vector;
 
 /**
- * @version $Id$
  * This class provides an implementation of the BraceReduction
  * interface for brace matching.  In order to correctly match, this class
  * keeps track of what is commented (line and block) and what is inside
@@ -24,7 +23,7 @@ import gj.util.Vector;
  *      in the middle of a comment, it is treated as two separate slashes.
  *      Similar for /*.
  * </ol>
- * @author Mike Yantosca, Jonathan Bannet
+ * @version $Id$
  */
 
 public class ReducedModelComment implements ReducedModelStates {
@@ -39,15 +38,15 @@ public class ReducedModelComment implements ReducedModelStates {
   * A list of ReducedTokens (braces and gaps).
   * @see ModelList
   */
-  ModelList<ReducedToken> _braces;
+  TokenList _braces;
   /**
   * keeps track of cursor position in document
   * @see ModelList.Iterator
   */
-  ModelList<ReducedToken>.Iterator _cursor;
+  TokenList.Iterator _cursor;
   
   /**Can be used by other classes to walk through the list of comment chars*/
-  ModelList<ReducedToken>.Iterator _walker;
+  TokenList.Iterator _walker;
   /** a relative offset within the current ReducedToken */
   int _offset;
   int _walkerOffset;
@@ -56,7 +55,7 @@ public class ReducedModelComment implements ReducedModelStates {
   * at the start of a blank "page."
   */
   public ReducedModelComment() {
-    _braces = new ModelList<ReducedToken>();
+    _braces = new TokenList();
     _cursor = _braces.getIterator();
     _walker = _cursor.copy();
     // we should be pointing to the head of the list
@@ -70,7 +69,7 @@ public class ReducedModelComment implements ReducedModelStates {
   */
   int absOffset() {
     int off = _offset;
-    ModelList<ReducedToken>.Iterator it = _cursor.copy();
+    TokenList.Iterator it = _cursor.copy();
     
     if (!it.atStart()) {
       it.prev();
@@ -90,7 +89,7 @@ public class ReducedModelComment implements ReducedModelStates {
     String val = "";
     ReducedToken tmp;
     
-    ModelList<ReducedToken>.Iterator it = _braces.getIterator();
+    TokenList.Iterator it = _braces.getIterator();
     it.next(); // since we start at the head, which has no current item
     
     
@@ -167,12 +166,11 @@ public class ReducedModelComment implements ReducedModelStates {
   *   </ol>
   *  <li>otherwise, check previous and insert
   * </OL>
-  * @return a Vector of highlighting information after the cursor
   */
-  public void insertSpecial(String special) {
+  private void insertSpecial(String special) {
     // Check if empty.
     if (_braces.isEmpty()) {
-      _insertNewBrace(special, _cursor);//now pointing to tail.
+      _insertNewBrace(special, _cursor); //now pointing to tail.
       return;
     }
     // Check if at start.
@@ -185,7 +183,7 @@ public class ReducedModelComment implements ReducedModelStates {
     }      
     // If inside a double character brace, break it.
     else if ((_offset > 0) && _cursor.current().isMultipleCharBrace()) {
-      _splitCurrentIfCommentBlock(true,true,_cursor);
+      _cursor._splitCurrentIfCommentBlock(true,true);
       //leaving us at the start
       _cursor.next(); //leaving us after first char
       _insertNewBrace(special, _cursor); //leaves us after the insert
@@ -203,7 +201,9 @@ public class ReducedModelComment implements ReducedModelStates {
       //is then we don't want to break it.  If the special character is 
       // a backslash, we want to break the following escape sequence if there
       // is one.
-      _splitCurrentIfCommentBlock(false,special.equals("\\"),_cursor); //leaving us at start
+      _cursor._splitCurrentIfCommentBlock(false,special.equals("\\")); 
+      //leaving us at start
+      
       _checkPreviousInsertSpecial(special);
     }
     else {
@@ -312,7 +312,7 @@ public class ReducedModelComment implements ReducedModelStates {
       _insertNewEndOfLine();
     }
     else if ((_offset > 0) && _cursor.current().isMultipleCharBrace()) {
-      _splitCurrentIfCommentBlock(true, true, _cursor);
+      _cursor._splitCurrentIfCommentBlock(true, true);
       _cursor.next();
       _cursor.insert(Brace.MakeBrace("\n", getStateAtCurrent()));
       _cursor.prev();
@@ -375,7 +375,7 @@ public class ReducedModelComment implements ReducedModelStates {
     }
     // in the middle of a multiple character brace
     else if ((_offset > 0) && _cursor.current().isMultipleCharBrace()) {
-      _splitCurrentIfCommentBlock(true,true, _cursor);
+      _cursor._splitCurrentIfCommentBlock(true,true);
       _cursor.next();
       _cursor.insert(Brace.MakeBrace(quote, getStateAtCurrent()));
       _cursor.prev();
@@ -473,7 +473,7 @@ public class ReducedModelComment implements ReducedModelStates {
       if (_offset > 1) {      
         throw new IllegalArgumentException("OFFSET TOO BIG:  " + _offset);  
       }    
-      _splitCurrentIfCommentBlock(true, true, _cursor);      
+      _cursor._splitCurrentIfCommentBlock(true, true);      
       _cursor.next();
       _insertNewGap(length);  //inserts gap and goes to next item  
       // we have to go back two tokens; we don't want to use move because it could
@@ -508,65 +508,21 @@ public class ReducedModelComment implements ReducedModelStates {
     return;
   }
   
-  public ModelList<ReducedToken>.Iterator makeCopyCursor() {
+  public TokenList.Iterator makeCopyCursor() {
     return _cursor.copy();
   }
-  /**
-  *Wrapper for getStateAtCurrentHelper that returns the current state for
-  *some iterator. This function passes _cursor to the _getStateAtCurrent
-  *Helper to return the current state in the cursor iterator.
+ 
+ /**
+  * Wrapper for TokenList.Iterator.getStateAtCurrent that returns the current 
+  * state for some iterator.
+  * Convenience method to return the current state in the cursor iterator.
   */
   ReducedModelState getStateAtCurrent() {
-    return _getStateAtCurrentHelper(_cursor);
+    return _cursor.getStateAtCurrent();
   }
   
-  /**
-  * Returns the current commented/quoted state at the cursor.
-  * @return FREE|INSIDE_BLOCK_COMMENT|INSIDE_LINE_COMMENT|INSIDE_SINGLE_QUOTE|
-  * INSIDE_DOUBLE_QUOTE
-  */
-  private ReducedModelState _getStateAtCurrentHelper(ModelList<ReducedToken>.Iterator temp) {
-    
-    ReducedModelState state = FREE;
-    
-    if (temp.atFirstItem() || temp.atStart() || _braces.isEmpty()) {
-      state = FREE;
-    }
-    else if ( temp.prevItem().isLineComment() ||
-             (temp.prevItem().getState() ==
-              INSIDE_LINE_COMMENT))
-    {
-      state = INSIDE_LINE_COMMENT;
-    }
-    else if ( temp.prevItem().isBlockCommentStart() ||
-             (temp.prevItem().getState() ==
-              INSIDE_BLOCK_COMMENT)) 
-    {
-      state = INSIDE_BLOCK_COMMENT;
-    }
-    else if ( (temp.prevItem().isDoubleQuote() &&
-               temp.prevItem().isOpen() &&
-               (temp.prevItem().getState() == FREE)) ||
-             (temp.prevItem().getState() ==
-              INSIDE_DOUBLE_QUOTE))
-    {
-      state = INSIDE_DOUBLE_QUOTE;
-    }
-    else if ( (temp.prevItem().isSingleQuote() &&
-               temp.prevItem().isOpen() &&
-               (temp.prevItem().getState() == FREE)) ||
-             (temp.prevItem().getState() ==
-              INSIDE_SINGLE_QUOTE))
-    {
-      state = INSIDE_SINGLE_QUOTE;
-    }
-    else {
-      state = FREE;
-    }
-    return state;
-  }
   
-  /**
+ /**
   * Returns true if there is a gap immediately to the right.
   */
   private boolean _gapToRight() {
@@ -612,22 +568,15 @@ public class ReducedModelComment implements ReducedModelStates {
     _offset = 0;
   }
   
-  
-
-  
-  
   /**
   * Helper function to _insertBrace.
   * Handles the details of the case where a brace is inserted into a gap.
   */
-  private void _insertBraceToGap(String text,
-                                 ModelList<ReducedToken>.Iterator
-                                 copyCursor)
-  {
+  private void _insertBraceToGap(String text, TokenList.Iterator copyCursor) {
     copyCursor.current().shrink(_offset);
     copyCursor.insert(Brace.MakeBrace(text, getStateAtCurrent()));
     copyCursor.insert(new Gap(_offset, getStateAtCurrent()));
-    ModelList<ReducedToken>.Iterator copy2 = copyCursor.copy();
+    TokenList.Iterator copy2 = copyCursor.copy();
     _updateBasedOnCurrentStateHelper(copy2);
     copy2.dispose();
     copyCursor.next(); // now pointing at new brace
@@ -640,16 +589,11 @@ public class ReducedModelComment implements ReducedModelStates {
   * Handles the details of the case where brace is inserted between two
   * reduced tokens.  No destructive action is taken.
   */
-  private void _insertNewBrace(String text,
-                               ModelList<ReducedToken>.Iterator
-                               copyCursor)
-  {
+  private void _insertNewBrace(String text, TokenList.Iterator copyCursor) {
     copyCursor.insert(Brace.MakeBrace(text, getStateAtCurrent()));
     copyCursor.next();
     _offset = 0;
   }
-  
-
   
   /**
   * USE RULES:
@@ -662,7 +606,7 @@ public class ReducedModelComment implements ReducedModelStates {
   */
   
   private void _updateBasedOnCurrentState() {
-    ModelList<ReducedToken>.Iterator copyCursor = _cursor.copy();
+    TokenList.Iterator copyCursor = _cursor.copy();
     _updateBasedOnCurrentStateHelper(copyCursor);
     copyCursor.dispose();
   }
@@ -673,9 +617,7 @@ public class ReducedModelComment implements ReducedModelStates {
   * cursor position.  Which path it takes depends on the
   * return value of getStateAtCurrent() at the start of the walk.
   */
-  private void _updateBasedOnCurrentStateHelper
-    (ModelList<ReducedToken>.Iterator copyCursor)
-  {
+  private void _updateBasedOnCurrentStateHelper(TokenList.Iterator copyCursor) {
     if (copyCursor.atStart()) {
       copyCursor.next();
     }
@@ -685,385 +627,14 @@ public class ReducedModelComment implements ReducedModelStates {
       return;
     }
     
-    ReducedModelState curState = _getStateAtCurrentHelper(copyCursor);
+    ReducedModelState curState = copyCursor.getStateAtCurrent();
     // Free if at the beginning     
     while (!copyCursor.atEnd()) {
-      if (curState == FREE) {
-        curState = _updateFree(copyCursor);
-      }
-      else if (curState == INSIDE_SINGLE_QUOTE) {
-        curState = _updateInsideSingleQuote(copyCursor);
-      }
-      else if (curState == INSIDE_DOUBLE_QUOTE) {
-        curState = _updateInsideDoubleQuote(copyCursor);
-      }
-      else if (curState == INSIDE_BLOCK_COMMENT) {
-        curState = _updateInsideBlockComment(copyCursor);
-      }
-      else if (curState == INSIDE_LINE_COMMENT) {
-        curState = _updateInsideLineComment(copyCursor);
-      }
-      else { // curState == STUTTER
-        if (copyCursor.atStart()) {
-          copyCursor.next();
-        }
-        if (copyCursor.atEnd()) {
-          return;
-        }
-        curState = _getStateAtCurrentHelper(copyCursor);
-      }
+      curState = curState.update(copyCursor);
     }
   }
   
-  /**
-   *  Walk function for when we're not inside a string or comment.
-   *  Self-recursive and mutually recursive with other walk functions.
-   *  <ol>
-   *   <li> atEnd: return
-   *   <li> If we find / *, * /, or / /, combine them into a single Brace,
-   *        and keep the cursor on that Brace.
-   *   <li> If current brace = //, go to next then call updateLineComment.<BR>
-   *        If current brace = /*, go to next then call updateBlockComment.<BR>
-   *        If current brace = ", go to next then call updateInsideDoubleQuote.<BR>
-   *        Else, mark current brace as FREE, go to the next brace, and recur.
-   * </ol>
-   */
-  private ReducedModelState _updateFree
-    (ModelList<ReducedToken>.Iterator copyCursor) 
-  {
-    if (copyCursor.atEnd()) {
-      return STUTTER;
-    }
-    
-    _combineCurrentAndNextIfFind("/", "*", copyCursor);
-    //_combineCurrentAndNextIfFind("*", "/", copyCursor);
-    _combineCurrentAndNextIfFind("/", "/", copyCursor);
-    _combineCurrentAndNextIfFind("","", copyCursor);
-    //if a / preceeds a /* or a // combine them.
-    _combineCurrentAndNextIfFind("/","/*",copyCursor);
-    _combineCurrentAndNextIfFind("/","//",copyCursor);
-    _combineCurrentAndNextIfEscape(copyCursor);
-    
-    String type = copyCursor.current().getType();
-    if (type.equals("*/")) {
-      _splitCurrentIfCommentBlock(true,false,copyCursor);
-      copyCursor.prev();
-      return STUTTER;
-    }
-    else if (type.equals("//")) {
-      // open comment blocks are not set commented, they're set free
-      copyCursor.current().setState(FREE);
-      copyCursor.next();
-      return INSIDE_LINE_COMMENT;
-    }
-    else if (type.equals("/*")) {
-      // open comment blocks are not set commented, they're set free
-      copyCursor.current().setState(FREE);
-      copyCursor.next();
-      return INSIDE_BLOCK_COMMENT;
-    }
-    else if (type.equals("\'")) {
-      // make sure this is a OPEN single quote
-      if (copyCursor.current().isClosed()) {
-        copyCursor.current().flip();
-      }
-      copyCursor.current().setState(FREE);
-      copyCursor.next();
-      return INSIDE_SINGLE_QUOTE;
-    }
-    else if (type.equals("\"")) {
-      // make sure this is a OPEN quote
-      if (copyCursor.current().isClosed()) {
-        copyCursor.current().flip();
-      }
-      copyCursor.current().setState(FREE);
-      copyCursor.next();
-      return INSIDE_DOUBLE_QUOTE;
-    }
-    else {
-      copyCursor.current().setState(FREE);
-      copyCursor.next();
-      return FREE;
-    }
-  }
-  /**
-   * Walk function for when inside single quotes.
-   *  <ol>
-   *  <li> If we've reached the end of the list, return.
-   *  <li> If we find //, /* or * /, split them into two separate braces.
-   *       The cursor will be on the first of the two new braces.
-   *  <li> If current brace = \n or ', mark current brace FREE, next(), and
-   *       go to updateFree.
-   *       Else, mark current brace as INSIDE_SINGLE_QUOTE, go to next brace, recur.
-   * </ol>   
-   */
-  private ReducedModelState _updateInsideSingleQuote
-    (ModelList<ReducedToken>.Iterator copyCursor) 
-  {
-    if (copyCursor.atEnd()) {
-      return STUTTER;
-    }
-    _splitCurrentIfCommentBlock(true,false, copyCursor);
-    _combineCurrentAndNextIfFind("","", copyCursor);
-    _combineCurrentAndNextIfEscape(copyCursor);
-    
-    String type = copyCursor.current().getType();
-    
-    if (type.equals("\n")) {
-      copyCursor.current().setState(FREE);
-      copyCursor.next();
-      return FREE;
-    }
-    else if (type.equals("\'")) {
-      // make sure this is a CLOSE quote
-      if (copyCursor.current().isOpen())
-        copyCursor.current().flip();
-      
-      copyCursor.current().setState(FREE);
-      copyCursor.next();
-      return FREE;
-    }
-    else {
-      copyCursor.current().setState(INSIDE_SINGLE_QUOTE);
-      copyCursor.next();
-      return INSIDE_SINGLE_QUOTE;
-    }
-  }
-  
-  /**
-   * Walk function for when inside a quoted string.
-   *  Self-recursive and mutually recursive with other walk functions.
-   *  <ol>
-   *  <li> If we've reached the end of the list, return.
-   *  <li> If we find //, /* or * /, split them into two separate braces.
-   *       The cursor will be on the first of the two new braces.
-   *  <li> If current brace = \n or ", mark current brace FREE, next(), and
-   *       go to updateFree.
-   *       Else, mark current brace as INSIDE_DOUBLE_QUOTE, go to next brace, recur.
-   * </ol>   
-   */
-  private ReducedModelState _updateInsideDoubleQuote
-    (ModelList<ReducedToken>.Iterator copyCursor) 
-  {
-    if (copyCursor.atEnd()) {
-      return STUTTER;
-    }
-    _splitCurrentIfCommentBlock(true,false, copyCursor);
-    _combineCurrentAndNextIfFind("","", copyCursor);
-    _combineCurrentAndNextIfEscape(copyCursor);
-    String type = copyCursor.current().getType();
-    
-    if (type.equals("\n")) {
-      copyCursor.current().setState(FREE);
-      copyCursor.next();
-      return FREE;
-    }
-    else if (type.equals("\"")) {
-      // make sure this is a CLOSE quote
-      if (copyCursor.current().isOpen())
-        copyCursor.current().flip();
-      
-      copyCursor.current().setState(FREE);
-      copyCursor.next();
-      return FREE;
-    }
-    else {
-      copyCursor.current().setState(INSIDE_DOUBLE_QUOTE);
-      copyCursor.next();
-      return INSIDE_DOUBLE_QUOTE;
-    }
-  }
-  
-  /**
-  * Walk function for inside line comment.
-  *  <ol>
-  *   <li> If we've reached the end of the list, return.
-  *   <li> If we find //, /* or * /, split them into two separate braces.
-  *     The cursor will be on the first of the two new braces.
-  *   <li> If current brace = \n, mark current brace FREE, next(), and
-  *        go to updateFree.<BR>
-  *        Else, mark current brace as LINE_COMMENT, goto next, and recur.
-  *  </ol>
-  */
-  private ReducedModelState _updateInsideLineComment
-    (ModelList<ReducedToken>.Iterator copyCursor)
-  {
-    if (copyCursor.atEnd()) {
-      return STUTTER;
-    }
-    _splitCurrentIfCommentBlock(true, false,copyCursor);
-    _combineCurrentAndNextIfFind("","", copyCursor);
-    _combineCurrentAndNextIfEscape(copyCursor);
-    
-    String type = copyCursor.current().getType();
-    
-    if (type.equals("\n")) {
-      copyCursor.current().setState(FREE);
-      copyCursor.next();
-      return FREE;
-    }
-    else {
-      copyCursor.current().setState(INSIDE_LINE_COMMENT);
-      copyCursor.next();
-      return INSIDE_LINE_COMMENT;
-    }
-  }
-  
-  /**
-   * Walk function for inside block comment.
-   *  Self-recursive and mutually recursive with other walk functions.
-   *  <ol>
-   *   <li> If we've reached the end of the list, return.
-   *   <li> If we find * /, combine it into a single Brace, and
-   *        keep the cursor on that Brace.
-   *   <li> If we find // or /*, split that into two Braces and keep the cursor
-   *        on the first one.
-   *   <li> If current brace = * /, mark the current brace as FREE,
-   *        go to the next brace, and call updateFree.<BR>
-   *        Else, mark current brace as INSIDE_BLOCK_COMMENT
-   *        and go to next brace and recur.
-   *  </ol>
-   */
-  private ReducedModelState _updateInsideBlockComment
-    (ModelList<ReducedToken>.Iterator copyCursor)
-  {
-    if (copyCursor.atEnd()) {
-      return STUTTER;
-    }
-    _combineCurrentAndNextIfFind("*", "/", copyCursor);
-    _combineCurrentAndNextIfFind("*","//", copyCursor);
-    _combineCurrentAndNextIfFind("*","/*", copyCursor);
-    _combineCurrentAndNextIfFind("","", copyCursor);    
-    _combineCurrentAndNextIfEscape(copyCursor);                                              
-        
-    _splitCurrentIfCommentBlock(false, false,copyCursor);
-    
-    String type = copyCursor.current().getType();
-    if (type.equals("*/")) {
-      copyCursor.current().setState(FREE);
-      copyCursor.next();
-      return FREE;
-    }
-    
-    else {
-      copyCursor.current().setState(INSIDE_BLOCK_COMMENT);
-      copyCursor.next();
-      return INSIDE_BLOCK_COMMENT;
-    }
-  }
-
-  private boolean _combineCurrentAndNextIfEscape(ModelList<ReducedToken>.Iterator copyCursor)
-  { 
-    boolean combined = false;
-    combined = combined || _combineCurrentAndNextIfFind("\\","\\",copyCursor);  // \-\
-    combined = combined || _combineCurrentAndNextIfFind("\\","\'",copyCursor);  // \-'
-    combined = combined || _combineCurrentAndNextIfFind("\\","\\'",copyCursor);// \-\'
-    combined = combined || _combineCurrentAndNextIfFind("\\","\"",copyCursor);  // \-"
-    combined = combined || _combineCurrentAndNextIfFind("\\","\\\"",copyCursor);// \-\"
-    combined = combined || _combineCurrentAndNextIfFind("\\","\\\\",copyCursor);// \-\\
-    return combined;
-  }
-  
-  /**
-   * Combines the current and next braces if they match the given types.
-   * If we have braces of first and second in immediate succession, and if
-   * second's gap is 0, combine them into first+second.
-   * The cursor remains on the same block after this method is called.
-   * @param first the first half of a multiple char brace
-   * @param second the second half of a multiple char brace
-   * @return true if we combined two braces or false if not
-   */
-  private boolean  _combineCurrentAndNextIfFind
-    (String first, 
-     String second, 
-     ModelList<ReducedToken>.Iterator copyCursor)
-  {
-    if (copyCursor.atStart() ||
-        copyCursor.atEnd() ||
-        copyCursor.atLastItem() ||
-        !copyCursor.current().getType().equals(first))
-    {
-      return false;
-    }
-    copyCursor.next(); // move to second one to check if we can combine
-    
-    // The second one is eligible to combine if it exists (atLast is false),
-    // if it has the right brace type, and if it has no gap.
-    if (copyCursor.current().getType().equals(second)) {
-      if ((copyCursor.current().getType().equals("")) &&
-          (copyCursor.prevItem().getType().equals(""))) {
-        // delete first Gap and augment the second
-        copyCursor.prev();
-        int growth = copyCursor.current().getSize();
-        copyCursor.remove();
-        copyCursor.current().grow(growth);
-      }
-      else if (copyCursor.current().getType().length() == 2) {
-        String tail = copyCursor.current().getType().substring(1,2);
-        String head = copyCursor.prevItem().getType() + 
-          copyCursor.current().getType().substring(0,1);        
-        copyCursor.current().setType(tail);
-        copyCursor.prev();
-        copyCursor.current().setType(head);
-        copyCursor.current().setState(FREE);
-      }
-      else {
-        // delete the first Brace and augment the second
-        copyCursor.prev();
-        copyCursor.remove();
-        copyCursor.current().setType(first + second);
-      }
-      return true;
-    }
-    else {
-      // we couldn't combine, so move back and return
-      copyCursor.prev();
-      return false;
-    }
-  }
-  
-  
-  /**
-   * Splits the current brace if it is a multiple character brace and
-   * fulfills certain conditions.
-   * If the current brace is a // or /*, split it into two braces.
-   *  Do the same for star-slash (end comment block) if
-   *  the parameter splitClose is true.
-   *  Do the same for \\ and \" if splitEscape is true.
-   *  If a split was performed, the first of the two Braces
-   *  will be the current one when we're done.
-   *  The offset is not changed.
-   *  The two new Braces will have the same quoted/commented status
-   *  as the one they were split from.
-   */
-  private void _splitCurrentIfCommentBlock(boolean splitClose,
-                                           boolean splitEscape,
-                                           ModelList<ReducedToken>.Iterator 
-                                           copyCursor)
-    {
-      String type = copyCursor.current().getType();
-      if (type.equals("//") ||
-          type.equals("/*") ||
-          (splitClose && type.equals("*/")) ||
-          (splitEscape && type.equals("\\\\")) ||
-          (splitEscape && type.equals("\\\"")) ||
-          (splitEscape && type.equals("\\'")))
-      {
-        String first = type.substring(0, 1);
-        String second = type.substring(1, 2);
-        // change current Brace to only be first character
-        copyCursor.current().setType(first);
-        ReducedModelState oldState = copyCursor.current().getState();
-        
-        // then put a new brace after the current one
-        copyCursor.next();
-        copyCursor.insert( Brace.MakeBrace(second, oldState) );
-        // Move back to make the first brace we inserted current
-        copyCursor.prev();
-      }
-    }
-  
-  /**
+ /**
   * Updates the BraceReduction to reflect cursor movement.
   * Negative values move left from the cursor, positive values move
   * right.
@@ -1081,11 +652,11 @@ public class ReducedModelComment implements ReducedModelStates {
   * @param currentOffset the current offset for copyCursor
   * @return the updated offset
   */
-  private int _move(int count, ModelList<ReducedToken>.Iterator copyCursor,
+  private int _move(int count, TokenList.Iterator copyCursor,
                     int currentOffset)
   {
     int retval = currentOffset;
-    ModelList<ReducedToken>.Iterator copyCursor2 = copyCursor.copy();
+    TokenList.Iterator copyCursor2 = copyCursor.copy();
     
     if (count == 0) {
       copyCursor2.dispose();
@@ -1116,7 +687,7 @@ public class ReducedModelComment implements ReducedModelStates {
   * </ol>
   */
   private int _moveRight(int count,
-                         ModelList<ReducedToken>.Iterator copyCursor,
+                         TokenList.Iterator copyCursor,
                          int currentOffset)
   {
     if (copyCursor.atStart()) {
@@ -1153,7 +724,7 @@ public class ReducedModelComment implements ReducedModelStates {
   * </ol>
   */
   private int _moveLeft(int count,
-                        ModelList<ReducedToken>.Iterator copyCursor,
+                        TokenList.Iterator copyCursor,
                         int currentOffset)
   {
     if (copyCursor.atEnd()) {
@@ -1194,11 +765,11 @@ public class ReducedModelComment implements ReducedModelStates {
   * values delete text to the right.
   * Always move count spaces to make sure we can delete.
   */
-  public void delete( int count) {
+  public void delete(int count) {
     if (count == 0) {
       return;
     }
-    ModelList<ReducedToken>.Iterator copyCursor = _cursor.copy();
+    TokenList.Iterator copyCursor = _cursor.copy();
     // from = the _cursor
     // to = _cursor.copy()
     _offset = _delete(count, _offset, _cursor, copyCursor);
@@ -1219,11 +790,11 @@ public class ReducedModelComment implements ReducedModelStates {
   * @return new offset after deletion
   */
   private int _delete(int count, int offset,
-                      ModelList<ReducedToken>.Iterator delFrom,
-                      ModelList<ReducedToken>.Iterator delTo)
+                      TokenList.Iterator delFrom,
+                      TokenList.Iterator delTo)
   {                      
     // Guarrantees that its possible to delete count characters.
-    if (count >0) {
+    if (count > 0) {
       int endOffset = -1;
       try {
         endOffset = _move(count,delTo, offset);
@@ -1234,7 +805,7 @@ public class ReducedModelComment implements ReducedModelStates {
       }
       return _deleteRight(offset, endOffset,delFrom, delTo);
     }
-    else { // count < 0
+    else { // count <= 0
       int startOffset = -1;
       try {
         startOffset = _move(count,delFrom, offset);
@@ -1253,8 +824,8 @@ public class ReducedModelComment implements ReducedModelStates {
   * Uses ModelList's collapse function to facilitate quick deletion.
   */
   private int _deleteRight(int offset,int endOffset,
-                           ModelList<ReducedToken>.Iterator delFrom,
-                           ModelList<ReducedToken>.Iterator delTo)
+                           TokenList.Iterator delFrom,
+                           TokenList.Iterator delTo)
   {
     delFrom.collapse(delTo);
     
@@ -1267,7 +838,7 @@ public class ReducedModelComment implements ReducedModelStates {
     
     
     //if brace is multiple char it must be a comment because the above if
-    //test gaurentees it can't be a gap.
+    //test guarrantees it can't be a gap.
     if (!delFrom.eq(delTo)) {
       _clipLeft(offset, delFrom);
     }
@@ -1324,7 +895,7 @@ public class ReducedModelComment implements ReducedModelStates {
   * this partial span into the non-collapsed token on the left is removed.
   */
   private void _clipLeft(int offset, 
-                         ModelList<ReducedToken>.Iterator
+                         TokenList.Iterator
                          copyCursor)
   {
     if (copyCursor.atStart()) {
@@ -1359,7 +930,7 @@ public class ReducedModelComment implements ReducedModelStates {
   * only partially spanning a token, we need to make sure that
   * this partial span into the non-collapsed token on the right is removed.
   */
-  private void _clipRight(int offset, ModelList<ReducedToken>.Iterator
+  private void _clipRight(int offset, TokenList.Iterator
                           copyCursor)
   {
     if (copyCursor.atEnd()) {
@@ -1399,7 +970,7 @@ public class ReducedModelComment implements ReducedModelStates {
   */
   private int _calculateOffset(int delToSizePrev, String delToTypePrev,
                                int delToSizeCurr, String delToTypeCurr,
-                               ModelList<ReducedToken>.Iterator delTo)
+                               TokenList.Iterator delTo)
   {      
     int offset;
     int delToSizeChange = delTo.current().getSize();
@@ -1503,7 +1074,7 @@ public class ReducedModelComment implements ReducedModelStates {
   * @param match the type we want to check
   * @return true if the previous token is of type match
   */
-  private boolean _checkPrevEquals(ModelList<ReducedToken>.Iterator delTo,
+  private boolean _checkPrevEquals(TokenList.Iterator delTo,
                                    String match)
   {
     if (delTo.atFirstItem() || delTo.atStart()) {
@@ -1526,7 +1097,7 @@ public class ReducedModelComment implements ReducedModelStates {
   */
   ReducedModelState stateAtRelLocation(int relLocation) {
     _walkerOffset = _move(relLocation,_walker,_walkerOffset);
-    return _getStateAtCurrentHelper(_walker);
+    return _walker.getStateAtCurrent();
   }
   
   /**
@@ -1561,7 +1132,7 @@ public class ReducedModelComment implements ReducedModelStates {
   /**
    *returns distance to after newline
    */
-  private int _getDistToPreviousNewline(ModelList<ReducedToken>.Iterator
+  private int _getDistToPreviousNewline(TokenList.Iterator
                                         copyCursor, int offset)
   {
     int walkcount = offset;
@@ -1584,7 +1155,7 @@ public class ReducedModelComment implements ReducedModelStates {
   
   void getDistToIndentNewline(IndentInfo braceInfo) {
     
-    ModelList<ReducedToken>.Iterator copyCursor = _cursor.copy();
+    TokenList.Iterator copyCursor = _cursor.copy();
     
     if (braceInfo.distToBrace == -1 || copyCursor.atStart()) { // no brace
       return;
@@ -1611,7 +1182,7 @@ public class ReducedModelComment implements ReducedModelStates {
   * back from the cursor that we want to start searching.
   */
   public int getDistToPreviousNewline(int relLoc) {
-    ModelList<ReducedToken>.Iterator copyCursor = _cursor.copy();
+    TokenList.Iterator copyCursor = _cursor.copy();
     int copyOffset = _move(-relLoc,copyCursor, _offset);
     copyCursor.dispose();
     
@@ -1627,7 +1198,7 @@ public class ReducedModelComment implements ReducedModelStates {
   * returns the distance to the end of the document if there is no newline
   */
   public int getDistToNextNewline() {
-    ModelList<ReducedToken>.Iterator copyCursor = _cursor.copy();
+    TokenList.Iterator copyCursor = _cursor.copy();
     if(copyCursor.atStart()) {
       copyCursor.next();
     }

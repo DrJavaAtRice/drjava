@@ -345,15 +345,24 @@ public class ReducedModelDeleteTest extends TestCase implements ReducedModelStat
   public void testDeleteFreesBlockCommentEnd() {
     model1.insertChar('/');
     model1.insertChar('*');
+    assertEquals("#0.0", 2, model1.absOffset());
+    
     insertGap(model1, 2);
+    assertEquals("#0.1", 4, model1.absOffset());
+    
     model1.insertChar('*');
     model1.insertChar('/');
+    assertEquals("#0.2", 6, model1.absOffset());
+    
     model1.move(-6);
+    assertEquals("#0.3", 0, model1.absOffset());
+    
     model1.delete(4);
-    assertEquals("#0.0", 0, model1.absOffset());
-    assertEquals("#0.1", "*", model1.currentToken().getType());
-    assertEquals("#0.2", FREE, model1.currentToken().getState());
-    assertEquals("#0.3", FREE, model1.getStateAtCurrent());
+    assertEquals("#0.4", 0, model1.absOffset());
+    assertEquals("#0.5", "*", model1.currentToken().getType());
+    assertEquals("#0.6", FREE, model1.currentToken().getState());
+    assertEquals("#0.7", FREE, model1.getStateAtCurrent());
+    
     model1.move(1);
     assertEquals("#1.0", 1, model1.absOffset());
     assertEquals("#1.1", "/", model1.currentToken().getType());

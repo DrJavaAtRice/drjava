@@ -19,7 +19,7 @@ public abstract class Version {
 
   private static Date _getBuildDate() {
     try {
-      return new SimpleDateFormat("yyyyMMdd-HHmm").parse("20010816-1550");
+      return new SimpleDateFormat("yyyyMMdd-HHmm").parse("20010816-2243");
     }
     catch (Exception e) { // parse format or whatever problem
       return null;

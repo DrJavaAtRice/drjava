@@ -149,7 +149,7 @@ class ModelList<T> {
      * Creates a new iterator with the same values as the progenitor.
      * Adds it to the list's set of listeners.
      */
-    private Iterator(Iterator iter) {
+    public Iterator(Iterator iter) {
       _point = iter._point;
       _pos = iter._pos;
       ModelList.this.addListener(this);

@@ -38,12 +38,12 @@ public class ReducedModelBrace implements ReducedModelStates {
    * A list of ReducedTokens (braces and gaps).
    * @see ModelList
    */
-  ModelList<ReducedToken> _braces;
+  TokenList _braces;
   /**
    * keeps track of cursor position in document
    * @see ModelList.Iterator
    */
-  ModelList<ReducedToken>.Iterator _cursor;
+  TokenList.Iterator _cursor;
   ReducedModelControl parent;
   
   /** a relative offset within the current ReducedToken */
@@ -55,7 +55,7 @@ public class ReducedModelBrace implements ReducedModelStates {
    * at the start of a blank "page."
    */
   public ReducedModelBrace(ReducedModelControl parent) {
-    _braces = new ModelList<ReducedToken>();
+    _braces = new TokenList();
     _cursor = _braces.getIterator();
     // we should be pointing to the head of the list
     _offset = 0;
@@ -69,7 +69,7 @@ public class ReducedModelBrace implements ReducedModelStates {
    */
   int absOffset() {
     int off = _offset;
-    ModelList<ReducedToken>.Iterator it = _cursor.copy();
+    TokenList.Iterator it = _cursor.copy();
     if (!it.atStart())
       it.prev();
     
@@ -88,7 +88,7 @@ public class ReducedModelBrace implements ReducedModelStates {
     String val = "";
     ReducedToken tmp;
     
-    ModelList<ReducedToken>.Iterator it = _braces.getIterator();
+    TokenList.Iterator it = _braces.getIterator();
     it.next(); // since we start at the head, which has no current item
     
     
@@ -197,7 +197,7 @@ public class ReducedModelBrace implements ReducedModelStates {
     return;
   }
   
-  public ModelList<ReducedToken>.Iterator makeCopyCursor() {
+  public TokenList.Iterator makeCopyCursor() {
     return _cursor.copy();
   }
   
@@ -292,7 +292,7 @@ public class ReducedModelBrace implements ReducedModelStates {
    * Handles the details of the case where a brace is inserted into a gap.
    */
   private void _insertBraceToGap(String text,
-                                 ModelList<ReducedToken>.Iterator copyCursor)
+                                 TokenList.Iterator copyCursor)
   {
     copyCursor.current().shrink(_offset);
     copyCursor.insert(Brace.MakeBrace(text, FREE));
@@ -308,7 +308,7 @@ public class ReducedModelBrace implements ReducedModelStates {
    * reduced tokens.  No destructive action is taken.
    */
   private void _insertNewBrace(String text,
-                               ModelList<ReducedToken>.Iterator copyCursor)
+                               TokenList.Iterator copyCursor)
   {
     copyCursor.insert(Brace.MakeBrace(text, FREE));
     copyCursor.next();
@@ -336,12 +336,12 @@ public class ReducedModelBrace implements ReducedModelStates {
    * @return the updated offset
    */
   private int _move(int count, 
-                    ModelList<ReducedToken>.Iterator copyCursor,
+                    TokenList.Iterator copyCursor,
                     int currentOffset)
   {
     int retval = currentOffset;
     
-    ModelList<ReducedToken>.Iterator copyCursor2 = copyCursor.copy();
+    TokenList.Iterator copyCursor2 = copyCursor.copy();
 
     if (count == 0) {
       copyCursor2.dispose();
@@ -371,7 +371,7 @@ public class ReducedModelBrace implements ReducedModelStates {
    * </ol>
    */
   private int _moveRight(int count,
-                         ModelList<ReducedToken>.Iterator copyCursor,
+                         TokenList.Iterator copyCursor,
                          int currentOffset)
   {
     if (copyCursor.atStart()) {
@@ -407,7 +407,7 @@ public class ReducedModelBrace implements ReducedModelStates {
    * </ol>
    */
   private int _moveLeft(int count,
-                        ModelList<ReducedToken>.Iterator copyCursor,
+                        TokenList.Iterator copyCursor,
                         int currentOffset)
   {
     if (copyCursor.atEnd()) {
@@ -451,7 +451,7 @@ public class ReducedModelBrace implements ReducedModelStates {
     if (count == 0) {
       return;
     }
-    ModelList<ReducedToken>.Iterator copyCursor = _cursor.copy();
+    TokenList.Iterator copyCursor = _cursor.copy();
     // from = the _cursor
     // to = _cursor.copy()
     _offset = _delete(count, _offset, _cursor, copyCursor);
@@ -473,8 +473,8 @@ public class ReducedModelBrace implements ReducedModelStates {
   */
   private int _delete(int count, 
                       int offset,
-                      ModelList<ReducedToken>.Iterator delFrom,
-                      ModelList<ReducedToken>.Iterator delTo)
+                      TokenList.Iterator delFrom,
+                      TokenList.Iterator delTo)
  {                     
    
    // Guarrantees that it's possible to delete count characters
@@ -507,8 +507,8 @@ public class ReducedModelBrace implements ReducedModelStates {
    * Uses ModelList's collapse function to facilitate quick deletion.
    */
   private int _deleteRight(int offset,int endOffset,
-                           ModelList<ReducedToken>.Iterator delFrom,
-                           ModelList<ReducedToken>.Iterator delTo)
+                           TokenList.Iterator delFrom,
+                           TokenList.Iterator delTo)
   {
     delFrom.collapse(delTo);
     
@@ -558,7 +558,7 @@ public class ReducedModelBrace implements ReducedModelStates {
    * this partial span into the non-collapsed token on the left is removed.
    */
   private void _clipLeft(int offset, 
-                         ModelList<ReducedToken>.Iterator copyCursor)
+                         TokenList.Iterator copyCursor)
   {
     if (copyCursor.atStart()) {
       return;
@@ -583,7 +583,7 @@ public class ReducedModelBrace implements ReducedModelStates {
    * this partial span into the non-collapsed token on the right is removed.
    */
   private void _clipRight(int offset, 
-                          ModelList<ReducedToken>.Iterator copyCursor)
+                          TokenList.Iterator copyCursor)
   {
     if (copyCursor.atEnd()) {
       return;
@@ -609,7 +609,7 @@ public class ReducedModelBrace implements ReducedModelStates {
   *  All other braces are matchable.
   */
   private boolean _isCurrentBraceMatchable
-    (ModelList<ReducedToken>.Iterator copyCursor)
+    (TokenList.Iterator copyCursor)
   {
     return _isBraceMatchable(copyCursor.current());
   }
@@ -641,7 +641,7 @@ public class ReducedModelBrace implements ReducedModelStates {
     int dist = 0;
     resetLocation();//reset the interface to the comment model
     
-    ModelList<ReducedToken>.Iterator copyCursor = _cursor.copy();
+    TokenList.Iterator copyCursor = _cursor.copy();
     if (!copyCursor.atStart())
       copyCursor.prev();
     if (copyCursor.atStart()) {
@@ -682,7 +682,7 @@ public class ReducedModelBrace implements ReducedModelStates {
   public int nextBrace() {
     int relDistance = 0;
     int dist = 0;
-    ModelList<ReducedToken>.Iterator copyCursor = _cursor.copy();
+    TokenList.Iterator copyCursor = _cursor.copy();
     
     resetLocation();
     
@@ -727,7 +727,7 @@ public class ReducedModelBrace implements ReducedModelStates {
    */
   public int balanceForward() {
     Stack<ReducedToken> braceStack = new Stack<ReducedToken>();
-    ModelList<ReducedToken>.Iterator iter = _cursor.copy();
+    TokenList.Iterator iter = _cursor.copy();
     int relDistance = 0;
     int distance = 0;
     
@@ -819,7 +819,7 @@ public class ReducedModelBrace implements ReducedModelStates {
    */
   public int balanceBackward() { 
     Stack<ReducedToken> braceStack = new Stack<ReducedToken>();
-    ModelList<ReducedToken>.Iterator iter = _cursor.copy();
+    TokenList.Iterator iter = _cursor.copy();
     resetLocation();
     int relDistance = 0;
     int distance = 0;
@@ -927,7 +927,7 @@ public class ReducedModelBrace implements ReducedModelStates {
   */
   protected void getDistToEnclosingBrace(IndentInfo braceInfo) {
     Stack<ReducedToken> braceStack = new Stack<ReducedToken>();
-    ModelList<ReducedToken>.Iterator iter = _cursor.copy();
+    TokenList.Iterator iter = _cursor.copy();
     resetLocation();
     //this is the distance to in front of the previous newline.
     int relDistance = braceInfo.distToNewline + 1;
