@@ -99,6 +99,17 @@ import junit.runner.ReloadingTestSuiteLoader;
  */
 public class DefaultGlobalModel implements GlobalModel, OptionConstants {
   
+  // ----- FIELDS -----
+
+  /**
+   * All GlobalModelListeners that are listening to this model.
+   * All accesses should be synchronized on this field.
+   */
+  private final LinkedList _listeners = new LinkedList();
+  
+  
+  // ---- Definitions fields ----
+  
   /**
    * Factory for new definitions documents and views.
    */
@@ -108,6 +119,95 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
    * ListModel for storing all OpenDefinitionsDocuments.
    */
   private final DefaultListModel _definitionsDocs = new DefaultListModel();
+  
+  /**
+   * The instance of the indent decision tree used by Definitions documents.
+   */
+  public static final Indenter INDENTER;
+  static {
+    // Statically create the indenter from the config values
+    int ind = DrJava.getConfig().getSetting(OptionConstants.INDENT_LEVEL).intValue();
+    INDENTER = new Indenter(ind);
+    DrJava.getConfig().addOptionListener(OptionConstants.INDENT_LEVEL, 
+                                    new OptionListener<Integer>() {
+      public void optionChanged(OptionEvent<Integer> oce) {
+        INDENTER.buildTree(DrJava.getConfig().getSetting(OptionConstants.INDENT_LEVEL).intValue());
+      }
+    });
+  }
+  
+  
+  // ---- Interpreter fields ----
+  
+  /**
+   * RMI interface to the Interactions JVM.
+   * Final, but set differently in the two constructors.
+   * Package private so we can access it from test cases.
+   * All accesses should be synchronized on _interpreterLock.
+   */
+  final MainJVM _interpreterControl;
+  
+  /**
+   * Lock to prevent multiple threads from accessing the interpreter at
+   * the same time.
+   */
+  private Object _interpreterLock = new Object();
+  
+  /**
+   * Flag to indicate DrJava is first starting up, and that the interpreter
+   * JVM is connecting for the first time.
+   */
+  private boolean _waitingForFirstInterpreter;
+  
+  
+  // ---- Compiler Fields ----
+  
+  /**
+   * Lock to prevent multiple threads from accessing the compiler at the
+   * same time.
+   */
+  private Object _compilerLock = new Object();
+  
+  /**
+   * An array of all current compiler errors which do not have files.
+   * Errors with files are stored on their respective OpenDefinitionsDocuments.
+   */
+  private CompilerError[] _compilerErrorsWithoutFiles = new CompilerError[0];
+  
+  /**
+   * The total number of current compiler errors, including both errors
+   * with and without files.
+   */
+  private int _numErrors = 0;
+  
+  
+  // ---- JUnit Fields ----
+  
+  /**
+   * If a JUnit test is currently running, this is the OpenDefinitionsDocument
+   * being tested.  Otherwise this is null.
+   */
+  private OpenDefinitionsDocument _docBeingTested = null;
+  
+  
+  // ---- Debugger Fields ----
+  
+  /**
+   * Interface to the integrated debugger.  If the JPDA classes are not
+   * available, this is set to null.
+   * TO DO:  Would be nice to have a DebugManager interface and a
+   *   NoDebuggerAvailable class instead of using null as a value...
+   */
+  private DebugManager _debugManager = null;
+  
+  /**
+   * Port used by the debugger to connect to the Interactions JVM.
+   * Uniquely created in getDebugPort().
+   */
+  private int _debugPort = -1;
+
+  
+  // ---- Input/Output Document Fields ----
   
   /**
    * The document used to interact with the repl.
@@ -124,91 +224,23 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
    * The document used to display JUnit test results.
    */
   private final StyledDocument _junitDoc = new DefaultStyledDocument();
-
-  /**
-   * All GlobalModelListeners that are listening to this model.
-   * All accesses should be synchronized on this field.
-   */
-  private final LinkedList _listeners = new LinkedList();
   
   /**
-   * A PageFormat object for printing.
+   * A lock object to prevent print calls to System.out or System.err
+   * from flooding the JVM, ensuring the UI remains responsive.
+   */
+  private final Object _systemWriterLock = new Object();
+  
+  /**
+   * Number of milliseconds to wait after each println, to prevent
+   * the JVM from being flooded with print calls.
+   */
+  private static final int WRITE_DELAY = 50;
+
+  /**
+   * A PageFormat object for printing to paper.
    */
   private PageFormat _pageFormat = new PageFormat();
-
-  /**
-   * RMI interface to the Interactions JVM.
-   * Final, but set differently in the two constructors.
-   * Package private so we can access it from test cases.
-   * All accesses should be synchronized on _interpreterLock.
-   */
-  final MainJVM _interpreterControl;
-
-  /**
-   * An array of all current compiler errors which do not have files.
-   * Errors with files are stored on their respective OpenDefinitionsDocuments.
-   */
-  private CompilerError[] _compilerErrorsWithoutFiles = new CompilerError[0];
-  
-  /**
-   * The total number of current compiler errors, including both errors
-   * with and without files.
-   */
-  private int _numErrors = 0;
-
-  /**
-   * Interface to the integrated debugger.  If the JPDA classes are not
-   * available, this is set to null.
-   * TO DO:  Would be nice to have a DebugManager interface and a
-   *   DebugManagerUnavailable class instead of using null as a value...
-   */
-  private DebugManager _debugManager = null;
-  
-  /**
-   * Port used by the debugger to connect to the Interactions JVM.
-   * Uniquely created in getDebugPort().
-   */
-  private int _debugPort = -1;
-  
-  /**
-   * Lock to prevent multiple threads from accessing the compiler at the
-   * same time.
-   */
-  private Object _compilerLock = new Object();
-
-  /**
-   * Lock to prevent multiple threads from accessing the interpreter at
-   * the same time.
-   */
-  private Object _interpreterLock = new Object();
-  
-  /**
-   * If a JUnit test is currently running, this is the OpenDefinitionsDocument
-   * being tested.  Otherwise this is null.
-   */
-  private OpenDefinitionsDocument _docBeingTested = null;
-  
-  /**
-   * Flag to indicate DrJava is first starting up, and that the interpreter
-   * JVM is connecting for the first time.
-   */
-  private boolean _waitingForFirstInterpreter;
-
-  /**
-   * The instance of the indent decision tree used by Definitions documents.
-   */
-  public static final Indenter INDENTER;
-  static {
-    // Statically create the indenter from the config values
-    int ind = DrJava.getConfig().getSetting(OptionConstants.INDENT_LEVEL).intValue();
-    INDENTER = new Indenter(ind);
-    DrJava.getConfig().addOptionListener(OptionConstants.INDENT_LEVEL, 
-                                    new OptionListener<Integer>() {
-      public void optionChanged(OptionEvent<Integer> oce) {
-        INDENTER.buildTree(DrJava.getConfig().getSetting(OptionConstants.INDENT_LEVEL).intValue());
-      }
-    });
-  }
 
   /**
    * Attributes for System.out output in the console document.
@@ -266,6 +298,9 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
     s.addAttribute(StyleConstants.Bold, new Boolean(true));
     return s;
   }
+  
+  
+  // ----- CONSTRUCTORS -----
   
   /**
    * Constructs a new GlobalModel.
@@ -326,6 +361,9 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
     DrJava.getConfig().addOptionListener(EXTRA_CLASSPATH, new ExtraClasspathOptionListener());
   }
 
+  
+  // ----- METHODS -----
+  
   /**
    * Add a listener to this global model.
    * @param listener a listener that reacts on events generated by the GlobalModel
@@ -611,16 +649,12 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
       // Kill the interpreter
       _interpreterControl.killInterpreter();
 
-      // Clean up debugger if necessary
-      //if ((_debugManager != null) && (_debugManager.isReady())) {
-      //  _debugManager.shutdown();
-      //}
-      
       if (DrJava.getSecurityManager() != null) {
         DrJava.getSecurityManager().exitVM(0);
       }
       else {
-        //might be being debugged by another DrJava
+        // If we are being debugged by another copy of DrJava,
+        //  then we have no security manager.  Just exit cleanly.
         System.exit(0);
       }
         
@@ -915,12 +949,29 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
     return _interactionsDoc.getHistoryAsString();
   }
   
+  /**
+   * Appends a string to the given document using a particular attribute set.
+   * Also waits for a small amount of time (WRITE_DELAY) to prevent any one
+   * writer from flooding the model with print calls to the point that the 
+   * user interface could become unresponsive.
+   * @param doc Document to append to
+   * @param s String to append to the end of the document
+   * @param set AttributeSet to use, or null for default
+   */
   private void _docAppend(Document doc, String s, AttributeSet set) {
-    try {
-      doc.insertString(doc.getLength(), s, set);
-    }
-    catch (BadLocationException e) {
-      throw new UnexpectedException(e);
+    synchronized(_systemWriterLock) {
+      try {
+        doc.insertString(doc.getLength(), s, set);
+        
+        // Wait to prevent being flooded with println's
+        _systemWriterLock.wait(WRITE_DELAY);
+      }
+      catch (BadLocationException e) {
+        throw new UnexpectedException(e);
+      }
+      catch (InterruptedException e) {
+        // It's ok, we'll go ahead and resume
+      }
     }
   }
  
@@ -933,6 +984,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
   public void systemErrPrint(String s) {
     _docAppend(_consoleDoc, s, SYSTEM_ERR_CONSOLE_STYLE);
   }
+  
 
   /** Called when the repl prints to System.out. */
   public void replSystemOutPrint(String s) {
@@ -1144,6 +1196,13 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
   
   /**
    * Compiles all open documents, after ensuring that all are saved.
+   * 
+   * This method used to only compile documents which were out of sync
+   * with their class file, as a performance optimization.  However,
+   * bug #634386 pointed out that unmodified files could depend on
+   * modified files, in which case this would not recompile a file in
+   * some situations when it should.  Since we value correctness over
+   * performance, we now always compile all open documents.
    */
   public void compileAll() throws IOException {
     synchronized(_compilerLock) {
@@ -1163,20 +1222,13 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
         for (int i = 0; i < _definitionsDocs.getSize(); i++) {
           OpenDefinitionsDocument doc = (OpenDefinitionsDocument)
             _definitionsDocs.getElementAt(i);
-          if (!doc.checkIfClassFileInSync()) {
             try {
-              files[index] = doc.getFile();
-              index++;
+              files[i] = doc.getFile();
             }
             catch (IllegalStateException ise) {
               // No file for this document; skip it
             }
-          }
         }
-        
-        // Only compile docs with files that are out of sync
-        File[] outOfSyncFiles = new File[index];
-        System.arraycopy(files,0,outOfSyncFiles,0,index);
         
         notifyListeners(new EventNotifier() {
           public void notifyListener(GlobalModelListener l) {
@@ -1186,11 +1238,10 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
         
         try {
           // Compile the files
-          _compileFiles(sourceRoots, outOfSyncFiles);
+          _compileFiles(sourceRoots, files);
         }
         catch (Throwable t) {
-          CompilerError err = new CompilerError(t.toString(),
-                                                false);
+          CompilerError err = new CompilerError(t.toString(), false);
           CompilerError[] errors = new CompilerError[] { err };
           _distributeErrors(errors);
         }

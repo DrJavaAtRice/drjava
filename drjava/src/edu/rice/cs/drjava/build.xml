@@ -92,7 +92,7 @@
     <cvs dest="${dist}/${version-tag}"
          tag="HEAD"
          quiet="yes"
-         package="src/edu/rice/cs/drjava src/edu/rice/cs/util src/edu/rice/cs/lib src/edu/rice/cs/README src/edu/rice/cs/build-common.xml src/src-jsr14v1_0/edu/rice/cs/drjava src/src-jsr14v1_2"
+         package="src/edu/rice/cs/drjava src/edu/rice/cs/util src/edu/rice/cs/lib src/edu/rice/cs/LICENSE src/edu/rice/cs/README src/edu/rice/cs/build-common.xml src/src-jsr14v1_0 src/src-jsr14v1_2"
          command="export -N" />
 <!--
     <cvs dest="${dist}/${version-tag}"
@@ -141,9 +141,11 @@
 
   <target name="compile" depends="do-compile">
     <rmic base="${built}"
+          classpath="${classpath_text}"
           classname="edu.rice.cs.drjava.model.repl.newjvm.InterpreterJVM" />
 
     <rmic base="${built}"
+          classpath="${classpath_text}"
           classname="edu.rice.cs.drjava.model.repl.newjvm.MainJVM" />
 
     <copy todir="${built}">
