@@ -42,20 +42,27 @@ package edu.rice.cs.util.swing;
 import javax.swing.*;
 import java.awt.event.*;
 import java.beans.*;
+import java.util.HashMap;
 import java.util.ListIterator;
 import java.util.LinkedList;
 
 public class DelegatingAction implements Action {
-  private static final String[] KEYS = {
-    DEFAULT,
+  /**
+   * These keys will be copied from the delegatee. All other keys
+   * are held in this action itself.
+   */
+  private static final String[] KEYS_TO_DELEGATE = {
+    //DEFAULT,
     NAME,
-    SHORT_DESCRIPTION,
-    LONG_DESCRIPTION,
-    SMALL_ICON,
-    ACTION_COMMAND_KEY,
-    ACCELERATOR_KEY,
-    MNEMONIC_KEY,
+    //SHORT_DESCRIPTION,
+    //LONG_DESCRIPTION,
+    //SMALL_ICON,
+    //ACTION_COMMAND_KEY,
+    //ACCELERATOR_KEY,
+    //MNEMONIC_KEY,
   };
+
+  private HashMap _localProperties = new HashMap();
   
   /**
    * The action to delegate to. If it's null, this action is
@@ -64,14 +71,49 @@ public class DelegatingAction implements Action {
   private Action _delegatee;
   private final LinkedList _listenerList = new LinkedList();
 
+  /**
+   * Returns value of the key, from delegatee is it's in {@link #KEYS_TO_DELEGATE}
+   * or from this if not.
+   */
   public Object getValue(String key) {
     _checkState();
-    return _delegatee.getValue(key);
+
+    if (_isDelegatedKey(key)) {
+      return _delegatee.getValue(key);
+    }
+    else {
+      return _localProperties.get(key);
+    }
+  }
+
+  private boolean _isDelegatedKey(String key) {
+    for (int i = 0; i < KEYS_TO_DELEGATE.length; i++) {
+      if (KEYS_TO_DELEGATE[i].equals(key)) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   public void putValue(String key, Object value) {
     _checkState();
-    _delegatee.putValue(key, value);
+
+    if (_isDelegatedKey(key)) {
+      _delegatee.putValue(key, value);
+    }
+    else {
+      Object old = _localProperties.get(key);
+      _localProperties.put(key, value);
+      ListIterator itor = _listenerList.listIterator();
+
+      PropertyChangeEvent event = new PropertyChangeEvent(this, key, old, value);
+
+      while (itor.hasNext()) {
+        PropertyChangeListener listener = (PropertyChangeListener) itor.next();
+        listener.propertyChange(event);
+      }
+    }
   }
 
   public void setEnabled(boolean b) {
@@ -115,14 +157,14 @@ public class DelegatingAction implements Action {
     PropertyChangeEvent[] events = null;
 
     if (_delegatee != null) {
-      events = new PropertyChangeEvent[KEYS.length];
+      events = new PropertyChangeEvent[KEYS_TO_DELEGATE.length];
 
-      for (int i = 0; i < KEYS.length; i++) {
-        Object oldValue = _delegatee.getValue(KEYS[i]);
-        Object newValue = newDelegatee.getValue(KEYS[i]);
+      for (int i = 0; i < KEYS_TO_DELEGATE.length; i++) {
+        Object oldValue = _delegatee.getValue(KEYS_TO_DELEGATE[i]);
+        Object newValue = newDelegatee.getValue(KEYS_TO_DELEGATE[i]);
 
         events[i] = new PropertyChangeEvent(newDelegatee,
-                                            KEYS[i],
+                                            KEYS_TO_DELEGATE[i],
                                             oldValue,
                                             newValue);
       }
@@ -140,6 +182,7 @@ public class DelegatingAction implements Action {
       newDelegatee.addPropertyChangeListener(listener);
 
       // fire property change events for all properties
+
       if (events != null) {
         for (int i = 0; i < events.length; i++) {
           listener.propertyChange(events[i]);
