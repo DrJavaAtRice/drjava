@@ -83,6 +83,10 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
   private JCheckBox _matchCase;
   private JCheckBox _searchBackwards;
   private JCheckBox _searchAllDocuments;
+  private ButtonGroup _radioButtonGroup;
+  private JPanel _radioButtonPanel;
+  private JRadioButton _matchWholeWord;
+  private JRadioButton _findAnyOccurrence;
   private JPanel _matchCaseAndClosePanel;
   private JPanel _rightPanel;
   private FindReplaceMachine _machine;
@@ -379,6 +383,9 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
     // replaceLabel.setLabelFor(_replaceField);
     replaceLabel.setHorizontalAlignment(SwingConstants.LEFT);
 
+    JLabel matchLabel = new JLabel("Match", SwingConstants.LEFT);
+    matchLabel.setHorizontalAlignment(SwingConstants.LEFT);
+
     // need separate label and field panels so that the find and
     // replace textfields line up
 
@@ -388,6 +395,7 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
     //_labelPanel.add(Box.createGlue());
     _labelPanel.add(findLabel);
     _labelPanel.add(replaceLabel);
+    _labelPanel.add(matchLabel);
     _labelPanel.setBorder(new EmptyBorder(0,5,0,5)); // 5 pix on sides
 
     MatchCaseListener mcl = new MatchCaseListener();
@@ -402,28 +410,52 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
     _searchAllDocuments = new JCheckBox("Search All Documents", false);
     _searchAllDocuments.addItemListener(sadl);
 
+    MatchWholeWordListener mwwl = new MatchWholeWordListener();
+    _matchWholeWord = new JRadioButton("Whole Word");
+    _matchWholeWord.addActionListener(mwwl);
+
+    FindAnyOccurrenceListener faol = new FindAnyOccurrenceListener();
+    _findAnyOccurrence = new JRadioButton("Any Occurrence");
+    _findAnyOccurrence.addActionListener(faol);
+
     this.removeAll(); // actually, override the behavior of TabbedPanel
 
     // remake closePanel
     _closePanel = new JPanel(new BorderLayout());
     _closePanel.add(_closeButton, BorderLayout.NORTH);
 
+
+    _radioButtonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+    _radioButtonPanel.add(_matchWholeWord);
+    _radioButtonPanel.add(_findAnyOccurrence);
+    // add radiobuttons to the buttongroup
+    _radioButtonGroup = new ButtonGroup();
+    _radioButtonGroup.add(_matchWholeWord);
+    _radioButtonGroup.add(_findAnyOccurrence);
+
     _matchCaseAndClosePanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
     _matchCaseAndClosePanel.add(_matchCase);
     _matchCaseAndClosePanel.add(_searchBackwards);
     _matchCaseAndClosePanel.add(_searchAllDocuments);
+    //_matchCaseAndClosePanel.add(_matchWholeWord);
+    //_matchCaseAndClosePanel.add(_findAnyOccurrence);
     _matchCaseAndClosePanel.add(_closePanel);
 
+    _findAnyOccurrence.setSelected(true);
+
 //    _rightPanel = new JPanel(new GridLayout(1,2,5,0));
-    JPanel midPanel = new JPanel(new GridLayout(2,1));
+    JPanel midPanel = new JPanel(new GridLayout(3,1));
     JPanel farRightPanel = new JPanel(new GridLayout(2,1));
     midPanel.add(wrap(_findField));
     midPanel.add(wrap(_replaceField));
+    midPanel.add(wrap(_radioButtonPanel));
+
     farRightPanel.add(_matchCaseAndClosePanel);
     farRightPanel.add(_message);
     _rightPanel = new JPanel(new BorderLayout(5, 0));
     _rightPanel.add(midPanel, BorderLayout.CENTER);
     _rightPanel.add(farRightPanel, BorderLayout.EAST);
+    //_rightPanel.add(_radioButtonPanel, BorderLayout.SOUTH);
 
     hookComponents(this,_rightPanel,_labelPanel,buttons);
 
@@ -435,7 +467,9 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
     _replaceField.setNextFocusableComponent(_matchCase);
     _matchCase.setNextFocusableComponent(_searchBackwards);
     _searchBackwards.setNextFocusableComponent(_searchAllDocuments);
-    _searchAllDocuments.setNextFocusableComponent(_findNextButton);
+    _searchAllDocuments.setNextFocusableComponent(_matchWholeWord);
+    _matchWholeWord.setNextFocusableComponent(_findAnyOccurrence);
+    _findAnyOccurrence.setNextFocusableComponent(_findNextButton);
     _replaceAllButton.setNextFocusableComponent(_closeButton);
     _closeButton.setNextFocusableComponent(_findField);
 
@@ -683,5 +717,17 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
       }
       _findField.requestFocus();
     }
+  }
+  
+  class MatchWholeWordListener implements ActionListener {
+      public void actionPerformed(ActionEvent e) {
+          _machine.setMatchWholeWord();
+      }
+  }
+
+  class FindAnyOccurrenceListener implements ActionListener {
+      public void actionPerformed(ActionEvent e) {
+          _machine.setFindAnyOccurrence();
+      }
   }
 }
