@@ -1,0 +1,71 @@
+<project name="drjava" default="test">
+  <!-- This makes the javac task use the GJ compiler. -->
+  <property name="build.compiler" value="edu.rice.cs.misc.GJv6CompilerAdapter" />
+
+  <!-- srcroot is the base directory of the source, 4 packages back -->
+  <property name="srcroot" value="../../../../" />
+  <!-- built is where the compiled classes go -->
+  <property name="built" value="${srcroot}/../built/" />
+
+  <property name="jarfile" value="${srcroot}/../drjava2.jar" />
+  <property name="manifest" value="manifest" />
+  <property name="cvsroot" value="/home/javaplt/.cvsroot" />
+
+  <!-- Init target. All others depend on it. Initialize the directory. -->
+  <target name="init">
+    <tstamp /> <!-- Ant requires us to make time stamp -->
+    <mkdir dir="${built}" /> <!-- Make the built directory -->
+  </target>
+
+  <!-- Check out source -->
+  <target name="checkout" depends="init">
+    <!-- 
+    <cvs command="checkout" cvsRoot="${cvsroot}" package="{ant.project.name}">
+    -->
+  </target>
+
+  <!-- Compile -->
+  <target name="compile" depends="init">
+    <javac srcdir="${srcroot}"
+           destdir="${built}" 
+           debug="on"
+           optimize="off" />
+  </target>
+
+  <!-- Unit test -->
+  <target name="test" depends="compile">
+    <junit printsummary="yes" haltonerror="yes" haltonfailure="yes">
+      <!-- Uncomment below to generate more text on console for tests -->
+      <!-- <formatter type="plain" usefile="no" /> -->
+      <batchtest>
+        <fileset dir="${srcroot}">
+          <include name="**/*Test.java" />
+          <exclude name="**/AllTests.java" />
+          <exclude name="**/Test.java" />
+        </fileset>
+      </batchtest>
+    </junit>
+  </target>
+
+  <!-- Makes a jar for distribution. No tests are included. -->
+  <target name="jar" depends="test">
+    <jar jarfile="${jarfile}"
+         basedir="${built}"
+         excludes="**/*Test.class"
+         manifest="${manifest}" />
+  </target>
+
+  <!-- Run the program! -->
+  <target name="run" depends="test">
+    <java classpath="${built}"
+          fork="true"
+          classname="edu.rice.cs.drjava.MainFrame" />
+  </target>
+
+  <!-- Delete all generated files -->
+  <target name="clean">
+    <delete dir="${built}" />
+    <delete file="${jarfile}" />
+  </target>
+</project>
+
