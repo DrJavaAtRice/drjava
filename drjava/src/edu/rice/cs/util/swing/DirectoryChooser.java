@@ -495,6 +495,10 @@ public class DirectoryChooser extends JPanel {
     _tree.expandRow(0);
     
     _scroller.setViewportView(_tree);
+    _tree.setEnabled(this.isEnabled());
+    _scroller.setEnabled(this.isEnabled());
+    _scroller.getHorizontalScrollBar().setEnabled(this.isEnabled());
+    _scroller.getVerticalScrollBar().setEnabled(this.isEnabled());
     _treeIsGenerated = true;
     _forceTreeGenerate = false;
     
@@ -959,6 +963,16 @@ public class DirectoryChooser extends JPanel {
   public void removeNotify() {
     super.removeNotify();
     _embedded = false;
+  }
+  
+  public void setEnabled(boolean enable) {
+    super.setEnabled(enable);
+    if (_treeIsGenerated) {
+      _tree.setEnabled(enable);
+      _scroller.setEnabled(enable);
+      _scroller.getHorizontalScrollBar().setEnabled(enable);
+      _scroller.getVerticalScrollBar().setEnabled(enable);
+    }
   }
   
   //////////////////// PROTECTED UTILITY METHODS /////////////////
@@ -1593,9 +1607,10 @@ public class DirectoryChooser extends JPanel {
     JFrame jf = new JFrame();
     jf.getContentPane().add(d);
     jf.setSize(300,300);
+    d.setEnabled(false);
     jf.setVisible(true);
     
-    d.startRename();
+//    d.startRename();
     
 //    System.out.println("done with success: " + res);
 //    File f = d.getSelectedDirectory();
