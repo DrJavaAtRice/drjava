@@ -61,6 +61,8 @@ public class FindReplaceMachine {
   private String _findWord;
   /** The word to replace the word being sought. */
   private String _replaceWord;
+  private boolean _found;
+  private boolean _wrapped;
   
   /**
    * Constructor.
@@ -70,26 +72,40 @@ public class FindReplaceMachine {
    * @param position the character offset into the document
    * @exception BadLocationException
    */
-  public FindReplaceMachine(Document doc, int position) 
-    throws BadLocationException
-  {
-    // we have to put this in here because createPosition
-    // will not catch these cases for us.  Better safe than
-    // sorry, and we shouldn't have to deal later with positions
-    // that are not within the bounds of the document.
-    if ((position < 0) ||
-        (position > doc.getLength())) 
-    {
-      throw new BadLocationException("position outside document bounds",
-                                     position);
-    }
-    _doc = doc;
-    _start = _doc.createPosition(position);
-    _current = _doc.createPosition(position);
+
+  /**
+   * NonModal version
+   */
+  public FindReplaceMachine() {
     _findWord = "";
     _replaceWord = "";
   }
  
+  public void setDocument(Document doc) {
+    _doc = doc;
+  }
+
+  public void setPosition(int pos)
+  {
+    try {
+      _current = _doc.createPosition(pos);      
+    } catch (BadLocationException ble) {
+      throw new UnexpectedException(ble);
+    }
+  }
+
+  public void setStart(int pos)
+  {
+    try {
+      _start = _doc.createPosition(pos);
+      _found = false;
+      _wrapped = false;
+    }
+    catch (BadLocationException ble) {
+      throw new UnexpectedException(ble);
+    }
+  }
+  
   /**
    * Gets the character offset at which this machine started
    * operations.
@@ -144,9 +160,12 @@ public class FindReplaceMachine {
    *         of the find word.
    */
   public boolean isOnMatch() {
+    int len = _findWord.length();
+    int off = _current.getOffset();
+    if(off < len) return false;
     try {
-      String matchSpace = _doc.getText(0, _current.getOffset());
-      return matchSpace.endsWith(_findWord);
+      String matchSpace = _doc.getText(off-len, len);
+      return matchSpace.equals(_findWord);
     }
     catch (BadLocationException e) {
       throw new UnexpectedException(e);
@@ -160,9 +179,14 @@ public class FindReplaceMachine {
    * the find word from the find offset.  This position is stored
    * in the current offset of the machine, and that is why it is
    * after: in subsequent searches, the same instance won't be found
-   * twice.
+   * twice. Also returns a flag indicating whether the end of the
+   * document was reached and wrapped around. This is done using 
+   * the FindResult class which just contains an integer and a
+   * flag. 
+   * @return a FindResult object containing foundOffset and aflag 
+   * indicating wrapping to the beginning during a search
    */
-  public int findNext(ContinueCommand startFromTop) {
+  public FindResult findNext() {
     try {
       // get the search space in the document
       String findSpace = _doc.getText(_current.getOffset(), 
@@ -171,11 +195,13 @@ public class FindReplaceMachine {
       int foundOffset = findSpace.indexOf(_findWord);
       // if we've found it
       if (foundOffset >= 0) {
+        _found = true;
         foundOffset += _current.getOffset() + _findWord.length();
         _current = _doc.createPosition(foundOffset);
       }
-      else if ((getStartOffset() > 0) && (startFromTop.shouldContinue())) { 
+      else {
         // if we haven't found it
+        _wrapped = true;
         findSpace = _doc.getText(0, _start.getOffset());
         foundOffset = findSpace.indexOf(_findWord);
         if (foundOffset >= 0) {
@@ -183,10 +209,18 @@ public class FindReplaceMachine {
           _current = _doc.createPosition(foundOffset);
         }
       }
+      // flag the return value so that they can tell that we had to wrap the file to determine the info.
+    
+      if(foundOffset == -1 && _found) {
+        _current = _start;
+        _found = false;
+        return findNext();
+      } 
       else {
-        foundOffset = -1;
+        FindResult fr = new FindResult(foundOffset, _wrapped);
+        _wrapped = false;
+        return fr;
       }
-      return foundOffset;
     }
     catch (BadLocationException e) {
       throw new UnexpectedException(e);
@@ -205,45 +239,25 @@ public class FindReplaceMachine {
         // the current offset will be correct since we keep track
         // of it as a Position.
         _doc.insertString(getCurrentOffset(), _replaceWord, null);
+        //_doc.createPosition(getCurrentOffset() + _findWord.length());
         return true;
       }
       else {
         return false;
       }
-    }
-    catch (BadLocationException e) {
-      throw new UnexpectedException(e);
-    }
+      }
+      catch (BadLocationException e) {
+        throw new UnexpectedException(e);
+      }
   }
   
-  public int replaceAll(ContinueCommand startFromTop) {
+  public int replaceAll() {
     int count = 0;
-    try {
-      Position midpoint = _doc.createPosition(_current.getOffset());
-      count += _replaceAllWithinBounds(_current, _doc.getEndPosition());
-      if (startFromTop.shouldContinue()) {
-        _current = _doc.getStartPosition();
-        count += _replaceAllWithinBounds(_current, midpoint);
-      }
-      return count;
-    }
-    catch (BadLocationException e) {
-      throw new UnexpectedException(e);
-    }
-  }
-
-  private int _replaceAllWithinBounds(Position first, Position last) {
-    ContinueCommand halt = new ContinueCommand() {
-      public boolean shouldContinue() {
-        return false;
-      }
-    };
-    int count = 0;
-    int found = findNext(halt);
+    int found = findNext().getFoundOffset();
     while (found >= 0) {
       replaceCurrent();
       count++;
-      found = findNext(halt);
+      found = findNext().getFoundOffset();
     }
     return count;
   }

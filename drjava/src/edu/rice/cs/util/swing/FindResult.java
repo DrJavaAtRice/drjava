@@ -37,48 +37,29 @@
  *
 END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.util;
-
-import java.util.Date;
-import java.text.SimpleDateFormat;
+package edu.rice.cs.util.swing;
 
 /**
- * This interface hold the information about this build of util.
- * This file is copied to Version.java by the build process, which also
- * fills in the right values of the date and time.
- *
- * This javadoc corresponds to build util-20020607-2125;
+ * Returned to FindMachineDialog with the location of the found string
+ * (or -1 if the string was not found) as well as a flag indicating
+ * whether the machine wrapped around the end of the document.
  *
  * @version $Id$
  */
-public abstract class Version {
-  /**
-   * This string will be automatically expanded upon "ant commit".
-   * Do not edit it by hand!
-   */
-  private static final String BUILD_TIME_STRING = "20020607-2125";
-
-  /** A {@link Date} version of the build time. */
-  private static final Date BUILD_TIME = _getBuildDate();
-
-  public static String getBuildTimeString() {
-    return BUILD_TIME_STRING;
+public class FindResult {
+  private int _foundoffset;
+  private boolean _wrapped;
+  
+  public FindResult(int foundoffset, boolean wrapped) {
+    _foundoffset = foundoffset;
+    _wrapped = wrapped;
   }
-
-  public static Date getBuildTime() {
-    return BUILD_TIME;
+  
+  public int getFoundOffset() {
+    return _foundoffset;
   }
-
-  private static Date _getBuildDate() {
-    try {
-      return new SimpleDateFormat("yyyyMMdd-HHmm z").parse(BUILD_TIME_STRING + " GMT");
+  
+  public boolean getWrapped() {
+    return _wrapped;
     }
-    catch (Exception e) { // parse format or whatever problem
-      return null;
-    }
-  }
-
-  public static void main(String[] args) {
-    System.out.println("Version for edu.rice.cs.util: " + BUILD_TIME_STRING);
-  }
-} 
+}
