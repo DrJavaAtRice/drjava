@@ -52,6 +52,11 @@
       </cmdsynopsis>
       <para>(The command should all be on one line, and PATH should be replaced with the correct path to <filename>tools.jar</filename>.  In Windows, replace the colon with a semicolon and forward slashes with backslashes.)</para>
       <para>Note that <filename>tools.jar</filename> is always on the classpath in Mac OS X, so this additional step is unnecessary.</para>
+
+      <formalpara>
+        <title>Other Command Line Arguments</title>
+        <para>You can specify a custom configuration file (rather than the default <filename>.drjava</filename> file in your home directory) by adding "-config [FILE]" before any documents to be opened on the command line.  Replace "[FILE]" with the full path to the custom configuration file.</para>
+      </formalpara>
     </section>
 
     <section id="gs-requirements">
@@ -166,7 +171,7 @@
 
     <formalpara>
       <title>Setting the Classpath</title>
-      <para>To access any class within the Interactions Pane, it must be included on the Interactions classpath, which is different than the user's own classpath.  Any class which is opened in the Definitions Pane of DrJava is automatically added to this classpath, but additional classes and directories can be added using the "Interactions Classpath" configuration option.  (See <link linkend="configuration">Configuring DrJava</link>.)</para>
+      <para>To access any class within the Interactions Pane, it must be included on the Interactions classpath, which is different than the user's own classpath.  Any class which is opened in the Definitions Pane of DrJava is automatically added to this classpath, but additional classes and directories can be added using the "Extra Classpath" configuration option.  (See <link linkend="configuration">Configuring DrJava</link>.)</para>
     </formalpara>
 
     <formalpara>
@@ -416,9 +421,9 @@ public static Test suite() {
 	    </varlistentry>
 	    
 	    <varlistentry>
-	      <term>Interactions Classpath (<varname>extra.classpath = ""</varname>)</term>
+	      <term>Extra Classpath (<varname>extra.classpath = ""</varname>)</term>
 	      <listitem>
-		<para>Used to specify any directories or <filename>jar</filename> files to append to the classpath of the Interactions window.  Separate the directories using the system-specific path separator (eg. colon on Unix, semicolon on Windows).</para>
+		<para>Used to specify any directories or <filename>jar</filename> files to append to the classpath of the Interactions window and the compiler.  Separate the directories using the system-specific path separator (eg. colon on Unix, semicolon on Windows).</para>
 	      </listitem>
 	    </varlistentry>
 	    

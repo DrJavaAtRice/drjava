@@ -42,8 +42,11 @@ package edu.rice.cs.drjava.config;
 import javax.swing.KeyStroke; 
 import java.awt.event.KeyEvent;
 import java.awt.event.InputEvent;
+import java.io.IOException;
+import java.util.Locale;
 import junit.framework.*;
 import edu.rice.cs.drjava.CodeStatus;
+import edu.rice.cs.util.newjvm.ExecJVM;
 
 /**
  * Class according to the JUnit protocol. Tests
@@ -129,4 +132,61 @@ public class KeyStrokeOptionTest extends TestCase
                                 true);
     assertEquals(ks, io.parse(io.format(ks)));
   }
+  
+  /**
+   * Tests that key strokes are output in a parseable format
+   * even in foreign locales.
+   * The test must be run in a separate JVM, because once the locale
+   * is set, it cannot be set back.  (If someone can figure out how
+   * to effectively set it back, feel free to remove this hack!)
+   */
+  public void testLocaleSpecificFormat() 
+    throws IOException, InterruptedException
+  {
+    String className = "edu.rice.cs.drjava.config.KeyStrokeOptionTest";
+    String[] args = new String[0];
+    
+    Process process = ExecJVM.
+      runJVMPropogateClassPath(className, args);
+    int status = process.waitFor();
+    assertEquals("Local specific keystroke test failed!",
+                 0, status);
+  }
+  
+  /**
+   * Main method to be called by testLocalSpecificFormat.  Runs in
+   * a new JVM so as not to affect the locale of other tests.
+   */
+  public static void main(String[] args) {
+    // Set to German, which has different words for ctrl and shift
+    Locale.setDefault(Locale.GERMAN);
+
+    KeyStrokeOption io = new KeyStrokeOption("test",null);
+    KeyStroke ks = KeyStroke.getKeyStroke(KeyEvent.VK_A,
+                                          InputEvent.ALT_MASK | 
+                                          InputEvent.CTRL_MASK |
+                                          InputEvent.SHIFT_MASK | 
+                                          InputEvent.META_MASK);
+    String s = io.format(ks);
+    // Test alt/option
+    if ((s.indexOf("alt") == -1) && (s.indexOf("option") == -1)) {
+      System.exit(1);
+    }
+    // Test ctrl
+    if (s.indexOf("ctrl") == -1) {
+      System.exit(2);
+    }
+    // Test shift
+    if (s.indexOf("shift") == -1) {
+      System.exit(3);
+    }
+    // Test meta
+    if ((s.indexOf("meta") == -1) && (s.indexOf("command") == -1)) {
+      System.exit(4);
+    }
+    
+    // Ok, so exit cleanly
+    System.exit(0);
+  }
+  
 }

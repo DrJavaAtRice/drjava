@@ -112,7 +112,6 @@ public class KeyStrokeOption extends Option<KeyStroke> {
     
     KeyStroke ks = KeyStroke.getKeyStroke(s);
     if (ks == null) {
-//      return NULL_KEYSTROKE;
       throw new OptionParseException(name, s,
                                      "Must be a valid string representation of a Keystroke.");
     }
@@ -128,10 +127,16 @@ public class KeyStrokeOption extends Option<KeyStroke> {
       return "<none>";
     }
 
-    //String s = KeyEvent.getKeyModifiersText(k.getModifiers()).toLowerCase();
-    //s = s.replace('+', ' ');
-    //if (!s.equals(""))
-    //  s += " ";
+    // This code prints out locale specific text, which is bad!
+    //  (KeyStroke.getKeystroke(s) can't parse it.)
+    /*
+    StringBuffer buf = new StringBuffer();
+    String s = KeyEvent.getKeyModifiersText(k.getModifiers()).toLowerCase();
+    s = s.replace('+', ' ');
+    if (!s.equals(""))
+      s += " ";
+    buf.append(s);
+    */
 
     // Generate modifiers text on our own, since getKeyStroke can't parse
     //  locale-specific modifiers.

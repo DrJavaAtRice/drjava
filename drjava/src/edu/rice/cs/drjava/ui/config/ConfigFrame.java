@@ -374,7 +374,7 @@ public class ConfigFrame extends JFrame {
       new FileOptionComponent( OptionConstants.JSR14_COLLECTIONSPATH, "JSR14 Collections Path", this);
     jsr14Col.setFileFilter(new ClasspathFilter());
     panel.addComponent( jsr14Col );
-    panel.addComponent( new VectorOptionComponent (OptionConstants.EXTRA_CLASSPATH, "Interactions Classpath", this));
+    panel.addComponent( new VectorOptionComponent (OptionConstants.EXTRA_CLASSPATH, "Extra Classpath", this));
     panel.displayComponents();
   }
   
