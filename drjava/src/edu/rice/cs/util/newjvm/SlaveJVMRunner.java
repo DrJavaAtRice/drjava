@@ -95,7 +95,7 @@ public final class SlaveJVMRunner {
       try {
         Class slaveClass = Class.forName(args[1]);
         SlaveRemote slave = _getInstance(slaveClass);
-                
+        
         // Must export slave object to RMI so we can pass stub to the master
         SlaveRemote stub= (SlaveRemote) UnicastRemoteObject.exportObject(slave);
         
@@ -106,14 +106,14 @@ public final class SlaveJVMRunner {
         slave.start(remote);
         remote.registerSlave(slave);
       }
-      catch (Exception e) {
-        System.err.println("Exception while instantiation slave " + args[1]);
+      catch (Throwable e) {
+        System.err.println("Exception while instantiating slave " + args[1]);
         e.printStackTrace();
         //javax.swing.JOptionPane.showMessageDialog(null, e.toString());
         System.exit(3);
       }
     }
-    catch (Exception e) {
+    catch (Throwable e) {
       System.err.println("Exception while deserializing remote stub");
       e.printStackTrace();
       System.exit(2);

@@ -223,10 +223,10 @@ public abstract class FileOps {
    */
   public static LinkedList packageExplore(String prefix, File root) {
     /* Inner holder class. */
-    class prefixAndFile {
+    class PrefixAndFile {
       public String prefix;
       public File root;
-      public prefixAndFile(String prefix, File root) {
+      public PrefixAndFile(String prefix, File root) {
         this.root = root;
         this.prefix = prefix;
       }
@@ -237,8 +237,8 @@ public abstract class FileOps {
     final Set exploredDirectories = new HashSet();
 
     LinkedList output = new LinkedList();
-    gj.util.Stack<prefixAndFile> working = new gj.util.Stack<prefixAndFile>();
-    working.push(new prefixAndFile(prefix, root));
+    gj.util.Stack<PrefixAndFile> working = new gj.util.Stack<PrefixAndFile>();
+    working.push(new PrefixAndFile(prefix, root));
     exploredDirectories.add(root);
 
     //This filter allows only directories, and accepts each directory
@@ -255,16 +255,16 @@ public abstract class FileOps {
     //working list.  If a directory has .java files, add the associated
     //package to the list of packages
     while (!working.empty()){
-      prefixAndFile current = working.pop();
+      PrefixAndFile current = working.pop();
       File [] subDirectories = current.root.listFiles(directoryFilter);
       for(int a = 0; a < subDirectories.length; a++){
         File dir = subDirectories[a];
-        prefixAndFile paf;
+        PrefixAndFile paf;
 //         System.out.println("exploring " + dir);
         if (current.prefix == ""){
-          paf = new prefixAndFile(dir.getName(), dir);
+          paf = new PrefixAndFile(dir.getName(), dir);
         } else {
-          paf = new prefixAndFile(current.prefix + "." + dir.getName(), dir);
+          paf = new PrefixAndFile(current.prefix + "." + dir.getName(), dir);
         }
         working.push(paf);
       }
