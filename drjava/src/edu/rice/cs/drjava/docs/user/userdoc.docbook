@@ -57,7 +57,7 @@
     <section id="gs-requirements">
       <title>System Requirements</title>
       <para>DrJava requires Java 2, version 1.3 or later.  Note that you will need to have the JDK (not the JRE) installed if you wish to use the compiler or debugger within DrJava.</para>
-      <para>We recommend using <ulink url="http://java.sun.com/j2se/1.4.1/download.html">Sun's JDK 1.4.1</ulink> or later for Solaris, Linux, and Windows.  Other users should use the Java virtual machine that comes with their operating system (including Mac OS X).</para>
+      <para>We recommend using <ulink url="http://java.sun.com/j2se/1.4.2/download.html">Sun's JDK 1.4.2</ulink> or later for Solaris, Linux, and Windows.  Other users should use the Java virtual machine that comes with their operating system (including Mac OS X).</para>
     </section>
 
     <section id="gs-license">
@@ -79,7 +79,7 @@
   <!-- Chapter: Editing Programs -->
   <chapter id="editing">
     <title>Editing Programs</title>
-    <para>While DrJava contains many useful tools for Java development, its fundamental tool is an editor for Java source code.  Like most text editors, it supports a full range of editing features such as "Find/Replace" and "Goto Line", while also providing more advanced features like syntax coloring, automatic indentation, and brace matching.</para>
+    <para>While DrJava contains many useful tools for Java development, its fundamental component is an editor for writing Java source code.  Like most text editors, it supports a full range of editing features such as "Find/Replace" and "Goto Line", while also providing more advanced features like syntax coloring, automatic indentation, and brace matching.</para>
 
     <section id="edit-defpane">
       <title>Definitions Pane</title>
@@ -115,6 +115,11 @@
     <section id="edit-multiple">
       <title>Multiple Documents</title>
       <para>DrJava supports having multiple documents open at the same time, since most users tend to edit several related class files at a time.  A list of all of the names of the open documents appears in the pane to the left of the Definitions Pane, listing files in the order they were opened.  The user can view and edit a particular document by selecting it in the list, or by using the Previous and Next Document actions in the Edit Menu, which also have keyboard shortcuts (<keycode>Ctrl+Comma</keycode> and <keycode>Ctrl+Period</keycode>).  Only the class name of a source file is shown in the list and in the title bar, but the full filename of the current document is always displayed in the status bar at the bottom of the window.</para>
+
+      <formalpara>
+	<title>Contextual Menu</title>
+	<para>The Document List also has a contextual menu, which can be used by right-clicking on any document in the list.  (Mac users should use <keycode>Ctrl+Click</keycode> or <keycode>Option+Click</keycode>.)  This menu provides shortcuts to document-related commands, such as saving, reverting, printing, compiling, and testing.</para>
+      </formalpara>
     </section>
 
     <section id="edit-navigation">
@@ -123,7 +128,7 @@
 
       <formalpara>
 	<title>Find/Replace</title>
-	<para>DrJava has a powerful Find and Replace utility, which is displayed as one of the tabs at the bottom of the window.  The tab is first displayed by selecting Find/Replace from the Edit Menu (or using the keyboard shortcut, <keycode>Ctrl+F</keycode>), and can be closed by clicking on the "X" button in the upper right corner of the tab<!-- broken for now? (or by hitting the <keycode>Escape</keycode> key) -->.  To search for a term, type it in the Find text field and click "Find Next" (or press <keycode>Enter</keycode>).  To replace the term with another, type the new term in the Replace text field, find an occurrence using "Find Next", and then click "Replace".  The "Replace/Find Next" and "Replace All" buttons help to speed up this process.</para>
+	<para>DrJava has a powerful Find and Replace utility, which is displayed as one of the tabs at the bottom of the window.  The tab is first displayed by selecting Find/Replace from the Edit Menu (or using the keyboard shortcut, <keycode>Ctrl+F</keycode>), and can be closed by clicking on the "X" button in the upper right corner of the tab<!-- broken for now? (or by hitting the <keycode>Escape</keycode> key) -->.  To search for a term, type it in the Find text field and click "Find Next" (or press <keycode>Enter</keycode>).  To replace the term with another, type the new term in the Replace text field, find an occurrence using "Find Next", and then click "Replace".  The "Replace/Find Next" and "Replace All" buttons help to speed up this process.  There are also two checkboxes to customize each search: "Match Case" and "Search Backwards".  Unchecking the first box will return case-insensitive results, and checking the second box will return the previous match for each search.</para>
       </formalpara>
 
       <formalpara>
@@ -149,7 +154,7 @@
 
     <formalpara>
       <title>How to Use</title>
-      <para>The Interactions Pane allows the execution of any valid Java statements as well as the evaluation of Java expressions.  Simply define variables and call methods as you would in an ordinary method, or even define new classes and methods and call them interactively.  In general, any statement or expression ending without a semicolon will display its result in the Interactions Pane, while those ending with a semicolon will complete without displaying a result.  Result objects are displayed using the object's toString() method, which may be overridden to print more useful information.  Any system output will be displayed in the Interactions Pane in green (as well as in the Console tab), while system errors will be displayed in red.</para>
+      <para>The Interactions Pane allows the execution of any valid Java statements as well as the evaluation of Java expressions.  Simply define variables and call methods as you would in an ordinary method, or even define new classes and methods and call them interactively.  In general, any statement or expression ending without a semicolon will display its result in the Interactions Pane, while those ending with a semicolon will complete without displaying a result.  Result objects are displayed using the object's toString() method.  Any system output will be displayed in the Interactions Pane in green (as well as in the Console tab), while system errors will be displayed in red.</para>
     </formalpara>
     
     <para>Here is a simple interactions session, to demonstrate how the Interactions Pane can be used to experiment with objects or show GUI components.</para>
@@ -186,13 +191,23 @@ Welcome to DrJava.
 
     <formalpara>
       <title>Setting the Classpath</title>
-      <para>To access any class within the Interactions Pane, it must be included on the Interactions classpath, which is different than the user's own classpath.  Any class which is opened in the Definitions Pane of DrJava is automatically added to this classpath, but additional classes and directories can be added using the "Extra Classpath" configuration option.  (See <link linkend="configuration">Configuring DrJava</link>.)</para>
+      <para>To access any class within the Interactions Pane, it must be included on the Interactions classpath, which is different than the user's own classpath.  Any class which is opened in the Definitions Pane of DrJava is automatically added to this classpath, but additional classes and directories can be added using the "Extra Classpath" configuration option.  (See <link linkend="configuration">Configuring DrJava</link>.)  The current classpath of the Interactions Pane can be viewed at any time by selecting "View Interactions Classpath" from the contextual menu.</para>
     </formalpara>
 
     <formalpara>
       <title>Saving the Interactions History</title>
       <para>The contents of the Interactions history can be saved to a file at any time, using the "Save Interactions History" action in the Tools menu.  This will open a separate window displaying this history, allowing the user to edit any part before saving it.  By default, up to 500 of the most recent Interaction commands are kept in this history, though this number can be configured.  Histories are saved in a file with a <filename>.hist</filename> extension, and can be loaded back into the Interactions pane with the "Load Interactions History" action in the Tools menu.  Saving and loading histories can be particularly useful for initial setup of an often repeated task, such as importing several packages and initializing frequently used variables.  To help manage the history, a "Clear Interactions History" action is also provided.</para>
     </formalpara>
+
+    <formalpara>
+      <title>Lifting Interactions to Definitions</title>
+      <para>Often, the Interactions Pane can be used to test a line of code for a program, even before it is written in the program.  For example, this can be the case when experimenting with method calls to determine their results.  In such a situation, it is desirable to copy a working line from the Interactions Pane into the Definitions Pane.  This can be done by copying and pasting, but a shortcut has also been added to the contextual menu, allowing the user to "Lift Current Interaction to Definitions".  This shortcut copies the text at the current prompt and pastes it at the caret position in the Definitions Pane.</para>
+    </formalpara>
+
+      <formalpara>
+	<title>Contextual Menu</title>
+	<para>The Interactions Pane has a contextual menu, which can be used by right-clicking in the pane.  (Mac users should use <keycode>Ctrl+Click</keycode> or <keycode>Option+Click</keycode>.)  This menu provides shortcuts to useful commands for the Interactions Pane, including cut, copy, and paste, as well as resetting the Interactions Pane, loading and saving history files, viewing the current classpath, and copying the current interaction to the Definitions Pane.</para>
+      </formalpara>
   </chapter>
 
 
@@ -200,21 +215,21 @@ Welcome to DrJava.
   <!-- Chapter: Integrated Compiler -->
   <chapter id="compiling">
     <title>Compiling Programs</title>
-    <para>DrJava uses an integrated compiler to speed up the development process and help locate errors.  Rather than switching to a command line and running "javac", the user can simply click on the Compile All button and DrJava will compile the open files and display any errors it finds.</para>
+    <para>Java source programs must be compiled to class files before they can be used, so DrJava provides an easy mechanism to compile programs and view any errors that occur.  The user can simply click on the "Compile All" button on DrJava's toolbar to compile any open documents in DrJava, and any resulting errors will be highlighted in the document.</para>
 
     <section id="compiling-file">
       <title>Compiling Files</title>
-      <para>To use the compiler, simply click on the Compile All button on the toolbar, or choose either Compile All or Compile Current Document from the Tools menu.  Before the process can begin, all open files must be saved, even if only the current document is being compiled.  This is because a file can depend on other files, and it is important that no open files are out of date when the errors are displayed.  Once a compilation completes successfully, the Interactions Pane is reset so that the updated classes can now be used.</para>
+      <para>To use the compiler, simply click on the Compile All button on the toolbar, or choose either Compile All or Compile Current Document from the Tools menu.  Before the process can begin, all open files must be saved, even if only the current document is being compiled.  This is necessary because one file can depend on other files, and it is important that no files have been modified when the errors are displayed.  Once a compilation completes successfully, the Interactions Pane is reset so that the updated classes can be used.</para>
     </section>
 
     <section id="compiling-errors">
       <title>Viewing Compiler Errors</title>
-      <para>If any errors are found when compiling, DrJava displays them in the Compiler Output tab at the bottom of the window.  A summary of each error is displayed in the list, and clicking on any error will highlight the corresponding line in the appropriate file.  (Note that a file will be opened automatically if it contains errors caused by the compile.)  Similarly, if the cursor is moved to a line in a file that contains an error while the Compiler Output tab is displayed, that line and the corresponding error message are highlighted.  The user can choose to disable highlighting compiler errors in the source by unchecking the "Highlight Source" checkbox on the Compiler Output tab, or by closing the Compiler Output tab.</para>
+      <para>If any errors are found when compiling, DrJava displays them in the Compiler Output tab at the bottom of the window.  A summary of each error is displayed in the list, and clicking on any error will highlight the corresponding line in the appropriate file.  (Note that a file will be opened automatically if it contains errors detected by the compilation.)  Similarly, if the cursor is moved to a line of code that contains an error while the Compiler Output tab is displayed, that line and the corresponding error message are highlighted.  The user can choose to disable highlighting compiler errors in the source by unchecking the "Highlight Source" checkbox on the Compiler Output tab, or by closing the Compiler Output tab.</para>
     </section>
 
     <section id="compiling-selecting">
       <title>Selecting a Compiler</title>
-      <para>DrJava supports the use of different Java compilers, such as the traditional Javac supplied with the JDK and the prototype JSR-14 compiler which supports generics.  DrJava will attempt to locate the user's Java compiler on startup by searching for standard installation directories, but sometimes it is unable to find a compiler.  In this case, it will prompt the user to specify the location of a compiler, or allow the user to continue using DrJava without any compiler.  Note that the location of compilers is configurable (see <link linkend="configuration">Configuring DrJava</link>).  If more than one compiler is specified, the active compiler can be selected from the menu on the Compiler Output tab itself.</para>
+      <para>DrJava supports the use of different Java compilers, such as the traditional Javac compiler supplied with the JDK or Sun's JSR-14 prototype compiler which supports generics.  DrJava will attempt to locate the user's Java compiler on startup by searching for standard installation directories, but sometimes it is unable to find a compiler.  In this case, it will prompt the user to specify the location of a compiler, or allow the user to continue using DrJava without any compiler.  Note that the location of the compiler can be specified in the Preferences (see <link linkend="configuration">Configuring DrJava</link>).  If more than one compiler is specified, the active compiler can be selected from the menu on the Compiler Output tab itself.</para>
     </section>
   </chapter>
 
@@ -303,7 +318,7 @@ Welcome to DrJava.
 	    <programlisting>
 public static Test suite() {
   TestSuite suite = new TestSuite();
-  suite.addTest(new &lt;classname&gt;("&lt;methodname&gt;");
+  suite.addTest(new &lt;classname&gt;("&lt;methodname&gt;"));
   ...
   return suite;
 }
@@ -336,7 +351,7 @@ public static Test suite() {
   <!-- ---- Chapter: Debugger ---- -->
   <chapter id="debug">
     <title>Debugger</title>
-    <para>DrJava supports basic debugging features on classes used in the Interactions Pane.  Users can set breakpoints in classes in the Definitions Pane, call methods in the Interactions Pane, and see when the breakpoints are reached.  Once a breakpoint is reached, users can resume the call, or step through a line at a time.  The values of local variables and fields can also be watched as the method call progresses.</para>
+    <para>DrJava supports advanced interactive debugging features on classes used in the Interactions Pane.  Users can set breakpoints in classes in the Definitions Pane, call methods in the Interactions Pane, and then interact with programs while they are suspended at breakpoints.  Once a breakpoint is reached, users can interact with any variables, fields, or methods in scope through the Interactions Pane.  Users can also resume the call, or step through a line at a time.  Finally, the values of local variables and fields can be watched in a table as the method call progresses.</para>
 
     <section id="debug-setup">
       <title>Using the Debugger</title>
@@ -353,7 +368,7 @@ public static Test suite() {
 
     <section id="debug-breakpoints">
       <title>Breakpoints</title>
-      <para>Once DrJava is in Debug Mode, you can set a breakpoint on almost any line of code in a source file in the Definitions Pane, using either the Toggle Breakpoint on Current Line command in the Debugger menu or the Toggle Breakpoint command on the contextual (right-click) menu in the Definitions Pane.  When a breakpoint is set, the line will be highlighted in red and will appear in the Breakpoints tab of the Debug Panel.  A breakpoint is reached when a method is invoked in the Interactions Pane and the control flow reaches a line of code where a breakpoint has been set.  When this happens, the line becomes highlighted in bright blue and a message is printed to the Interactions Pane.  The Interactions Pane will then be suspended until the Resume command is selected from the Debugger menu.</para>
+      <para>Once DrJava is in Debug Mode, the user can set a breakpoint on almost any line of code in a source file in the Definitions Pane, using either the Toggle Breakpoint on Current Line command in the Debugger menu or the Toggle Breakpoint command on the contextual (right-click) menu in the Definitions Pane.  When a breakpoint is set, the line will be highlighted in red and will appear in the Breakpoints tab of the Debug Panel.  A breakpoint is reached when a method is invoked in the Interactions Pane and the control flow reaches a line of code where a breakpoint has been set.  When this happens, the line becomes highlighted in bright blue and a message is printed to the Interactions Pane.  A new prompt is then displayed in the Interactions Pane, allowing the user to interact with the suspended program until it is resumed (see <link linkend="debug-interactions">Interactions at a Breakpoint</link>).</para>
 
       <para>When setting breakpoints, it is important to remember that only lines with actual code can be used.  Blank lines and comments will never trigger a breakpoint, even if the line is highlighted in red.  (Note that we do not yet support breakpoints on method contracts either, although this will be supported in a later version of DrJava.)</para>
 
@@ -363,9 +378,40 @@ public static Test suite() {
       </formalpara>
     </section>
 
+
+    <section id="debug-interactions">
+      <title>Interactions at a Breakpoint</title>
+      <para>When a breakpoint has been reached during a method call, a new prompt is printed to the Interactions Pane.  This prompt represents the context of the program which has been suspended, and all variables, fields, and methods that are in scope at the breakpoint are available at the prompt.  (The prompt itself contains the name of the thread which has been suspended.  In most cases, this name will include the text being interpreted.)  The user can type the name of any variable or field to view its value or assign a new value, and any method in scope can be invoked to observe its behavior.  Changes to values in scope will be reflected in the program when it resumes execution, either by stepping or resuming.</para>
+
+      <formalpara>
+	<title>Interacting with Fields and Methods</title>
+	<para>At a debugging prompt, variables can be easily referred to by name.  At the moment, interacting with fields and methods is slightly more complicated, since the <literal>"this"</literal> keyword must prefix the name.  For example, <literal>"this.x"</literal> will print the value of a field name <literal>"x"</literal>, and <literal>"this.foo(v)"</literal> will return the result of calling the <literal>"foo"</literal> method with local variable <literal>"v"</literal>.</para>
+      </formalpara>
+
+      <para>If the program is suspended while in an inner class, it is a little more complicated to refer to fields and methods of its enclosing class.  Each enclosing class is referred to as <literal>"this$N"</literal>, where N is the number of additional enclosing classes.  For example, suppose the following class is defined in the Definitions Pane.</para>
+
+<programlisting>
+class Foo {
+  int x;
+  class FooInner {
+    int y;
+    class FooInnerInner {
+      int z;
+      public void myMethod() {
+        // code ...
+      }
+    }
+  }
+}
+</programlisting>
+
+      <para>If a breakpoint is hit in <literal>"myMethod"</literal>, <literal>"z"</literal> is accessible as <literal>"this.z"</literal>, <literal>"y"</literal> is accessible as <literal>"this.this$1.y"</literal>, and <literal>"x"</literal> is accessible as <literal>"this.this$1.this$0.x"</literal>.  This is contrary to traditional Java syntax, where the outer fields could be accessible as <literal>"FooInner.y"</literal> and <literal>"Foo.x"</literal>.  (For this reason, we plan to allow such syntax in a future release of DrJava.)</para>
+    </section>
+
+
     <section id="debug-step">
       <title>Stepping and Resuming</title>
-      <para>After a breakpoint has been reached, the Interactions Pane will be suspended.  Choosing Resume from the Debug menu will allow the current method to finish and will return the prompt in the Interactions Pane.  Alternatively, the Step commands in the Debug menu allow the user to step through the execution of the method, one line at a time.  Each time a Step command is selected, the debugger will highlight the next line of code to be executed.  If the code is in another file, the debugger will look for the file on the Sourcepath and attempt to open it.</para>
+      <para>After a breakpoint has been reached, the Interactions Pane will be suspended.  Choosing Resume from the Debug menu will allow the current method to finish execution.  If any other threads are suspended, the Interactions Pane will switch to the most recently suspended thread.  Otherwise, the original ("top level") prompt is displayed.  Alternatively, the Step commands in the Debug menu allow the user to step through the execution of the method, one line at a time.  Each time a Step command is selected, the debugger will highlight the next line of code to be executed.  If the code is in another file, the debugger will look for the file on the Sourcepath and attempt to open it.</para>
 
       <formalpara>
 	<title>Step Into</title>
@@ -390,14 +436,32 @@ public static Test suite() {
 
     <section id="debug-panel">
       <title>Debug Panel</title>
-      <para>The Debug Panel appears when Debug Mode is on, displaying several informational tabs along with useful buttons for debugging.  All current breakpoints are displayed by document in the Breakpoints tab, while currently watched fields and variables are displayed with their values in the Watches tab.  The Stack tab displays the current stack trace any time the code has been suspended, and the Threads tab (if configured to be displayed) shows all current threads at that point in time.</para>
+      <para>The Debug Panel appears when Debug Mode is on, displaying several informational tabs along with useful buttons for debugging.  All current breakpoints are displayed in a tree organized by document in the Breakpoints tab, while currently watched fields and variables are displayed with their values in a table in the Watches tab.  The Stack tab displays the current stack trace any time the code has been suspended, and the Threads tab (if configured to be displayed) shows all current threads at that point in time.  Most of these tabs provide contextual (right-click) menus for easy access to related commands, such as scrolling to a breakpoint or a line in a stack frame, or resuming a suspended thread.</para>
 
       <formalpara>
 	<title>Watching Fields and Variables</title>
-	<para>Users can watch the values of class fields and local variables by entering the field or variable name into the last row of the Watches table.  Any time the code is suspended (eg. after a breakpoint or step), the current value of the field or variable (if any) is displayed.  Watches can be removed from the table by deleting the name and pressing Enter.  (There are some known issues when some fields or variables which actually are in scope do not have values displayed, such as non-static fields of an outer class.)</para>
+	<para>Users can watch the values of class fields and local variables by entering the field or variable name into the last row of the Watches table.  Any time the code is suspended (eg. after a breakpoint or step), the current value of the field or variable (if any) is displayed.  Watches can be removed from the table by deleting the name and pressing Enter.</para>
       </formalpara>
     </section>
   </chapter>
+
+
+  <!-- Chapter: Javadoc Integration -->
+  <chapter id="javadoc">
+    <title>Documentation with Javadoc</title>
+    <para>Javadoc is a tool provided with Java which can generate useful HTML documentation for a set of classes, describing the methods and fields of each class with comments written by the developer.  DrJava allows users to easily generate Javadoc documentation using a "Javadoc" button on the toolbar.</para>
+
+    <formalpara>
+      <title>How to Use</title>
+      <para>When the "Javadoc" button is clicked, the user is given the opportunity to select the destination directory for the HTML files.  Javadoc is then run for all the packages and sub-packages of the current open documents.  (This includes all Java files in the same directory of an open document, as well as in any subdirectories.)  This potentially large set of files is used because the utility of the documentation increases with the number of classes it covers.  If the documentation is generated successfully, a new window is displayed that allows the user to browse the Javadoc as if in a web browser.  If Javadoc finds any errors in the documents, it will report them in a similar manner as the compiler.</para>
+    </formalpara>
+
+    <formalpara>
+      <title>Configuring Javadoc</title>
+      <para>There are many options which can be configured when generating Javadoc.  Several common options are available on the "Javadoc" panel of the Preferences window, including the ability to exclude fields and methods below a particular access level (eg. protected), and the ability to specify the location of Javadoc files for Java itself.  (This defaults to a URL to Sun's documentation online, so clicking links in the browser to Object, String, etc, will request files from the web.)  It is also possible to pass custom parameters to the Javadoc tool, by entering them into a text box in the Preferences.  Other options include the ability to include all packages within the source root (including enclosing packages), and the option to set a default directory for generating documentation.</para>
+    </formalpara>    
+  </chapter>
+
 
 
   <!-- ---- Appendix: Configuring DrJava ---- -->
@@ -407,7 +471,9 @@ public static Test suite() {
 
     <section id="config-preferences">
       <title>Preferences Window</title>
-      <para>The Preferences window is available in the Edit menu, and provides a graphical means to edit all configurable options in DrJava.  It displays the options in several categories, each of which can be displayed as a panel of options.  The Apply button submits the changes on all panels and saves them to the config file, while the OK button does the same and also closes the window.  The Cancel button closes the window without applying or saving the changes.  Each panel also has a Reset to Defaults button, which resets each of the options on that panel to its original value.  Resetting does not take effect until the changes are applied with the Apply or OK buttons.</para>
+      <para>The Preferences window is available in the Edit menu, and provides a graphical means to edit all configurable options in DrJava.  It displays the options in several categories, each of which can be displayed as a panel of options.  Each option has a tool tip with a short description, which can be displayed by holding the mouse arrow over the option.</para>
+
+      <para>The Apply button submits the changes on all panels and saves them to the config file, while the OK button does the same and also closes the window.  The Cancel button closes the window without applying or saving the changes.  Each panel also has a Reset to Defaults button, which resets each of the options on that panel to its original value.  Resetting does not take effect until the changes are applied with the Apply or OK buttons.</para>
     </section>
 
     <section id="config-file">
@@ -618,7 +684,7 @@ public static Test suite() {
       <!-- Key Bindings -->
       <formalpara>
 	<title>Key Bindings</title>
-	<para>Most menu items in DrJava have configurable keyboard shortcuts, along with several other navigational commands (such as moving to the beginning or end of a line).  All such options are displayed on the Key Bindings panel in the Preferences window, along with their current value.  Clicking on the value displays a window which allows the user to type a new key, showing any conflict with an existing key if there is one.</para>
+	<para>Most menu items in DrJava have configurable keyboard shortcuts, along with several other navigational commands (such as moving to the beginning or end of a line).  All such options are displayed on the Key Bindings panel in the Preferences window, along with their current value.  Clicking on the value displays a window which allows the user to type a new key, showing any conflict with an existing key if there is one.  (We recommend editing these options in the Preferences window.)</para>
       </formalpara>
       
       
@@ -666,6 +732,73 @@ public static Test suite() {
 	</varlistentry>
 
       </variablelist>
+
+
+      <!-- Javadoc -->
+      <formalpara>
+	<title>Javadoc</title>
+	<para>All configurable options relating to generating Javadoc.</para>
+      </formalpara>
+      <variablelist>
+
+	<varlistentry>
+	  <term>Access Level (<varname>javadoc.access.level = "protected"</varname>)</term>
+	  <listitem>
+	    <para>Specifies the lowest access level for fields and methods to include in the generated documentation.  Legal values are "public", "protected", "package", and "private".</para>
+	  </listitem>
+	</varlistentry>
+
+	<varlistentry>
+	  <term>Java Version for Javadoc Links (<varname>javadoc.link.version = (JDK Version)</varname>)</term>
+	  <listitem>
+	    <para>Specifies which URL to use when generating links to Java library classes.  Legal values are "1.3", "1.4", and "none" if no links to Java library classes are desired.  (This option defaults to the version of the user's JDK.)</para>
+	  </listitem>
+	</varlistentry>
+
+	<varlistentry>
+	  <term>Javadoc 1.3 URL (<varname>javadoc.1.3.link = "http://java.sun.com/j2se/1.3/docs/api"</varname>)</term>
+	  <listitem>
+	    <para>The URL to use when generating links to JDK 1.3 library classes.</para>
+	  </listitem>
+	</varlistentry>
+
+        <varlistentry>
+	  <term>Javadoc 1.4 URL (<varname>javadoc.1.4.link = "http://java.sun.com/j2se/1.4/docs/api"</varname>)</term>
+	  <listitem>
+	    <para>The URL to use when generating links to JDK 1.4 library classes.</para>
+	  </listitem>
+	</varlistentry>
+
+	<varlistentry>
+	  <term>Generate Javadoc From Source Roots (<varname>javadoc.from.roots = false</varname>)</term>
+	  <listitem>
+	    <para>If this option is enabled, then Javadoc will not only search the current package and all subpackages for files, it will also search all "enclosing" packages (those at a higher level).</para>
+	  </listitem>
+	</varlistentry>
+
+	<varlistentry>
+	  <term>Custom Javadoc Parameters (<varname>javadoc.custom.params = ""</varname>)</term>
+	  <listitem>
+	    <para>Any custom parameters to pass to the Javadoc tool, separated by spaces.  Use "javadoc -help" at a command line to view the available parameters.</para>
+	  </listitem>
+	</varlistentry>
+
+	<varlistentry>
+	  <term>Default Destination Directory (<varname>javadoc.destination = ""</varname>)</term>
+	  <listitem>
+	    <para>If a directory is specified, it will be used as the default when generating new documentation.</para>
+	  </listitem>
+	</varlistentry>
+
+	<varlistentry>
+	  <term>Always Prompt for Destination (<varname>javadoc.prompt.for.destination = true</varname>)</term>
+	  <listitem>
+	    <para>Whether to always display the destination selection dialog when starting Javadoc.</para>
+	  </listitem>
+	</varlistentry>
+
+      </variablelist>
+
 
       
       <!-- Miscellaneous -->
@@ -721,6 +854,13 @@ public static Test suite() {
 	  <term>Prompt Before Quit (<varname>quit.prompt = true</varname>)</term>
 	  <listitem>
 	    <para>Whether to display a confirmation message before DrJava quits.</para>
+	  </listitem>
+	</varlistentry>
+
+        <varlistentry>
+	  <term>Keep Emacs-style Backup Files (<varname>files.backup = true</varname>)</term>
+	  <listitem>
+	    <para>Whether DrJava should keep a backup copy of each file that the user modifies, saved with a "~" at the end of the filename.</para>
 	  </listitem>
 	</varlistentry>
 	

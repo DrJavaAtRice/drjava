@@ -3008,9 +3008,26 @@ public class MainFrame extends JFrame implements OptionConstants {
    * Sets the current directory to be that of the given file.
    */
   private void _setCurrentDirectory(File file) {
-    _openChooser.setCurrentDirectory(file.getAbsoluteFile());
-    _saveChooser.setCurrentDirectory(file.getAbsoluteFile());
-    _javadocChooser.setCurrentDirectory(file.getAbsoluteFile());
+    // We want to use absolute paths whenever possible, since canonical paths
+    //  resolve symbolic links and can be quite long and unintuitive.
+    // However, Windows blows up if you set the current directory of a
+    //  JFileChooser to an absolute path with ".." in it.
+    // In that case, we'll use the canonical path for the file chooser.
+    // (Fix for bug 707734)
+    try {
+      File f = file.getAbsoluteFile();
+      if (PlatformFactory.ONLY.isWindowsPlatform() &&
+          (file.getAbsolutePath().indexOf("..") != -1)) {
+        f = file.getCanonicalFile();
+      }
+      _openChooser.setCurrentDirectory(f);
+      _saveChooser.setCurrentDirectory(f);
+      _javadocChooser.setCurrentDirectory(f);
+    }
+    catch (IOException ioe) {
+      // If getCanonicalFile throws an IOException, we can't
+      //  set the directory of the file chooser.  Oh well.
+    }
   }
   /**
    * Sets the current directory to be that of document's file.

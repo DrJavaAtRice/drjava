@@ -428,8 +428,12 @@ public class DefaultJavadocModel implements JavadocModel {
     boolean done = false;
     while (!done) {
       try {
+        Thread.sleep(500);
         javadocProcess.exitValue();
         done = true;
+      }
+      catch (InterruptedException e) {
+        // try again
       }
       catch (IllegalThreadStateException e) {
         ExecJVM.ventBuffers(javadocProcess, outLines, errLines);

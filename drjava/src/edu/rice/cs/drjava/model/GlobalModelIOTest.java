@@ -334,7 +334,13 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
           // We know file should exist
           fail("file does not exist");
         }
-        assertEquals("file to open", tempFile, file);
+        try {
+          assertEquals("file to open", tempFile.getCanonicalPath(), 
+                       file.getCanonicalPath());
+        }
+        catch (IOException ioe) {
+          throw new UnexpectedException(ioe);
+        }
         openCount++;
       }
     };
@@ -358,6 +364,25 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
     // Now reopen
     try {
       OpenDefinitionsDocument doc2 = _model.openFile(new FileSelector(tempFile));
+      fail("file should already be open");
+    }
+    catch (AlreadyOpenException aoe) {
+      // Should not be open
+      listener.assertOpenCount(1);
+    }
+    catch (OperationCanceledException oce) {
+      // Should not be canceled
+      fail("Open was unexpectedly canceled!");
+    }
+    
+    // Now reopen same file with a different path
+    //  eg. /tmp/MyFile -> /tmp/./MyFile
+    try {
+      File parent = tempFile.getParentFile();
+      String dotSlash = "." + System.getProperty("file.separator");
+      parent = new File(parent, dotSlash);
+      File sameFile = new File(parent, tempFile.getName());
+      OpenDefinitionsDocument doc2 = _model.openFile(new FileSelector(sameFile));
       fail("file should already be open");
     }
     catch (AlreadyOpenException aoe) {
@@ -1290,7 +1315,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
     ConsoleDocument con = _model.getConsoleDocument();
     assertEquals("Output of loaded history is not correct: " +
                  con.getDocText(0, con.getDocLength()).trim(),
-                 "x = 5"+'\n'+"x = 5",
+                 "x = 5"+System.getProperty("line.separator")+"x = 5",
                  con.getDocText(0, con.getDocLength()).trim());
   }
   

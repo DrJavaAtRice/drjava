@@ -1364,13 +1364,16 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
 
   /**
    * Updates the stored value of each watched field and variable.
-   * @throws IllegalStateException if there are no suspended threads
    */
   private void _updateWatches() throws DebugException {
     _ensureReady();
     if (_suspendedThreads.size() <= 0) {
-      throw new IllegalStateException("Cannot update watches if there " +
-                                      "are no suspended threads.");
+      // Not suspended, so all watches are blank
+      for (int i = 0; i < _watches.size(); i++) {
+        DebugWatchData currWatch = _watches.elementAt(i);
+        currWatch.hideValueAndType();
+      }
+      return;
     }
     
     try {
@@ -1389,6 +1392,16 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
       Location location = currFrame.location();
       ReferenceType rt = location.declaringType();
       ObjectReference obj = currFrame.thisObject();
+      // note: obj is null if we're in a static context
+      
+      // Get the name to determine how many $'s there are
+      String rtName = rt.name();
+      int numDollars = 0;
+      int dollarIndex = rtName.indexOf("$", 0);
+      while (dollarIndex != -1) {
+        numDollars++;
+        dollarIndex = rtName.indexOf("$", dollarIndex+1);
+      }
       
       for (int i = 0; i < _watches.size(); i++) {
         DebugWatchData currWatch = _watches.elementAt(i);
@@ -1399,15 +1412,17 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
         if (currName.equals("this")) {
           if (obj != null) {
             currWatch.setValue(_getValue(obj));
-            currWatch.setType(obj.type());
+            currWatch.setType(String.valueOf(obj.type()));
           }
           else {
-            currWatch.setValue(DebugWatchUndefinedValue.ONLY);
-            currWatch.setType(null);
+            // "this" is not defined in a static context
+            currWatch.setNoValue();
+            currWatch.setNoType();
           }
           continue;
         }
-        //List frames = null;
+        
+        // Look for a variable with this name
         LocalVariable localVar = null;
         try {
           localVar = currFrame.visibleVariableByName(currName);
@@ -1415,124 +1430,62 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
         catch (AbsentInformationException aie) {
           // Not compiled with debug flag.... ignore
         }
-        
-        ReferenceType outerRt = rt;
-        ObjectReference outer = obj;
-        // if the variable being watched is not a local variable, check if it's a field
-        if (localVar == null) {
+
+        if (localVar != null) {
+          currWatch.setValue(_getValue(currFrame.getValue(localVar)));
+          try {
+            currWatch.setType(String.valueOf(localVar.type()));
+          }
+          catch (ClassNotLoadedException cnle) {
+            currWatch.setNoType();
+          }
+        }
+        // if the variable being watched is not a local variable,
+        //  check if it's a field
+        else {
+          ReferenceType outerRt = rt;
+          ObjectReference outer = obj;  // (null if static context)
           Field field = outerRt.fieldByName(currName);
-          
-          // if the variable is not a field either, it's not defined in this
-          // ReferenceType's scope, keep going further out in scope.
-          Field outerThis = outerRt.fieldByName("this$0");
-          
+
+          // If we don't find it here, loop through any enclosing classes
+          //  Start at this$N, where N is the number of dollar signs in
+          //  the reference type's name, minus one.
+          int outerIndex = numDollars - 1;
+          Field outerThis = outerRt.fieldByName("this$" + outerIndex);
           while ((field == null) && (outerThis != null)) {
             outer = (ObjectReference) outer.getValue(outerThis);
-            //outer = (ObjectReference)outer.getValue(outerThis);//currFrame.getValue(var);
             outerRt = outer.referenceType();
             field = outerRt.fieldByName(currName);
             
             if (field == null) {
               // Enter the loop again with the next outer enclosing class
-              outerThis = outerRt.fieldByName("this$0");
+              outerIndex--;
+              outerThis = outerRt.fieldByName("this$" + outerIndex);
             }
           }
           
-          if (field != null) {
-            currWatch.setValue(_getValue(outer.getValue(field)));
+          // Try to set the value and type of the field.
+          //  If the field is not static and we are in a static context
+          //  (outer==null), we have to setNoValue.
+          if ((field != null) &&
+              (field.isStatic() || (outer != null))) {
+            Value v = (field.isStatic()) ?
+              outerRt.getValue(field) :
+              outer.getValue(field);
+            currWatch.setValue(_getValue(v));
             try {
-              currWatch.setType(field.type());
+              currWatch.setType(String.valueOf(field.type()));
             }
             catch (ClassNotLoadedException cnle) {
-              currWatch.setType(null);
+              currWatch.setNoType();
             }
           }
-          /*
-            
-            // crop off the $ if there is one and anything after it
-            int indexOfDollar = className.lastIndexOf('$');
-            if (indexOfDollar > -1) {
-              className = className.substring(0, indexOfDollar);
-            }
-            else {
-              // There is no $ in the className, we're at the outermost class and the
-              // field still was not found
-              break;
-            }
-            outerRt = (ReferenceType)_vm.classesByName(className).get(0);
-            if (outerRt == null) {
-              break;
-            }
-            field = outerRt.fieldByName(currName);
-          }
-          if (field != null) {
-            // check if the field is static
-            if (field.isStatic()) {
-              currWatch.setValue(_getValue(outerRt.getValue(field)));
-              try {
-                currWatch.setType(field.type());
-              }
-              catch (ClassNotLoadedException cnle) {
-                currWatch.setType(null);
-              }
-            }
-            else {
-              LocalVariable var;
-              ObjectReference outer;
-              do {
-                // get the object reference for outer classes
-                var = currFrame.visibleVariableByName("this$0");
-                outer = (ObjectReference)currFrame.getValue(var);
-              }
-              while (!outer.referenceType().equals(outerRt));
-                 
-              */
-          
-              /*
-              StackFrame outerFrame = currFrame;
-              // the field is not static
-              // Check if the frame represents a native or static method and
-              // keep going down the stack frame looking for the frame that
-              // has the same ReferenceType that we found the Field in.
-              // This is a hack, remove it to slightly improve performance but
-              // at the loss of ever being able to watch outer instance
-              // fields. If unremoved, this will work sometimes, but not always.
-              while (outerFrame.thisObject() != null &&
-                     !outerFrame.thisObject().referenceType().equals(outerRt) &&
-                     stackIndex < frames.size()) {
-                outerFrame = (StackFrame) frames.get(stackIndex);
-                stackIndex++;
-              }
-              if (stackIndex < frames.size() && outerFrame.thisObject() != null) {
-                // then we found the right stack frame
-                currWatch.setValue(_getValue(outerFrame.thisObject().getValue(field)));
-                try {
-                  currWatch.setType(field.type());
-                }
-                catch (ClassNotLoadedException cnle) {
-                  currWatch.setType(null);
-                }
-              }
-              else {
-                currWatch.setValue(DebugWatchUndefinedValue.ONLY);
-                currWatch.setType(null);
-              }
-              
-            }*/
           else {
-            currWatch.setValue(DebugWatchUndefinedValue.ONLY);
-            currWatch.setType(null);
+            currWatch.setNoValue();
+            currWatch.setNoType();
           }
         }
-        else {
-          currWatch.setValue(_getValue(currFrame.getValue(localVar)));
-          try {
-            currWatch.setType(localVar.type());
-          }
-          catch (ClassNotLoadedException cnle) {
-            currWatch.setType(null);
-          }
-        }
+        
       }
     }
     catch (IncompatibleThreadStateException itse) {

@@ -84,8 +84,11 @@ public class CompilerErrorModel<T extends CompilerError> {
   
   /**
    * Used internally in building _positions.
+   * The file used as the index *must* be a canonical file, or else
+   * errors won't always be associated with the right documents.
    */
-  private final Hashtable<File, StartAndEndIndex> _filesToIndexes = new Hashtable<File, StartAndEndIndex>();
+  private final Hashtable<File, StartAndEndIndex> _filesToIndexes = 
+    new Hashtable<File, StartAndEndIndex>();
   
   /**
    * The global model which created/controls this object.
@@ -164,10 +167,20 @@ public class CompilerErrorModel<T extends CompilerError> {
     File file = null;
     try {
       file = odd.getFile();
-    } catch (IllegalStateException e) {
+    }
+    catch (IllegalStateException e) {
       return null;
-    } catch (FileMovedException e) {
+    }
+    catch (FileMovedException e) {
       file = e.getFile();
+    }
+    
+    // Use the canonical file if possible
+    try {
+      file = file.getCanonicalFile();
+    }
+    catch (IOException ioe) {
+      // Oh well, we'll look for it as is.
     }
 
 
@@ -247,13 +260,23 @@ public class CompilerErrorModel<T extends CompilerError> {
     File file = null;
     try {
       file = odd.getFile();
-    } catch (IllegalStateException ise) {
+    }
+    catch (IllegalStateException ise) {
       //no associated file, do nothing
-    } catch (FileMovedException fme) {
+    }
+    catch (FileMovedException fme) {
       file = fme.getFile();
     }
-    if (file == null){
+    if (file == null) {
       return false;
+    }
+    
+    // Try to use the canonical file
+    try {
+      file = file.getCanonicalFile();
+    }
+    catch (IOException ioe) {
+      // Oh well, look for the file as is.
     }
 
     StartAndEndIndex saei = _filesToIndexes.get(file);
@@ -351,13 +374,22 @@ public class CompilerErrorModel<T extends CompilerError> {
           }
         }
 
-        //Remember the indexes in the _errors and _positions arrays that are for errors in this file
+        //Remember the indexes in the _errors and _positions arrays that 
+        // are for the errors in this file
         int fileEndIndex = curError;
-        if (fileEndIndex != fileStartIndex){
+        if (fileEndIndex != fileStartIndex) {
+          // Try to use the canonical file if possible
+          try {
+            file = file.getCanonicalFile();
+          }
+          catch (IOException ioe) {
+            // Oh well, store it as is
+          }
           _filesToIndexes.put(file, new StartAndEndIndex(fileStartIndex, fileEndIndex));
         }
       }
-    } catch (BadLocationException ble) {
+    }
+    catch (BadLocationException ble) {
        throw new UnexpectedException(ble);
     }
   }

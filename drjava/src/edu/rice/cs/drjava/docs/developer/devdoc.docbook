@@ -63,7 +63,7 @@
   <!-- Chapter: Build Environment -->
   <chapter id="environment">
     <title>Setting Up A Build Environment</title>
-    <para>This chapter walks you through setting up your build environment to develop DrJava.  It is addressed to both independent developers and members of the DrJava development team who will be committing code to the CVS repository.  We attempt to support development on Linux, Mac OS X, and Windows.</para>
+    <para>This chapter walks you through setting up your build environment to develop DrJava.  It is addressed to both independent developers and members of the DrJava development team who will be committing code to the CVS repository.  We attempt to support development on Linux, Mac OS X, Solaris, and Windows.</para>
 
     <section id="env-sf-account">
       <title>SourceForge Account</title>
@@ -74,6 +74,9 @@
         </listitem>
         <listitem>
           <para>Fill in the form to create a user account.</para>
+        </listitem>
+        <listitem>
+          <para>We recommend that you sign up for the <literal>drjava-hackers</literal> mailing list, since we send out messages when developers need to update parts of their build environment or when new releases become available.  You can sign up at <ulink url="http://lists.sourceforge.net/lists/listinfo/drjava-hackers">http://lists.sourceforge.net/lists/listinfo/drjava-hackers</ulink>.</para>
         </listitem>
         <listitem>
           <para>If you will be a member of the DrJava development team, email one of the DrJava project administrators with your SourceForge username so that you can be added to the DrJava project.</para>
@@ -90,8 +93,9 @@
         <listitem>
           <formalpara>
             <title>Java Software Development Kit</title>
-            <para>If you don't have it already, you will need to install Sun's Java SDK (not just the JRE).  If you are using Linux or Windows, install version 1.4.1 or later.  If you are using Mac OS X, you should already have version 1.3.1 installed.  (Version 1.4.1 for Mac OS X is not yet available.)  You can download the SDK for your platform from <ulink url="http://java.sun.com">http://java.sun.com</ulink>.</para>
+            <para>If you don't have it already, you will need to install Sun's Java SDK (not just the JRE).  If you are using Linux or Windows, install version 1.4.1 or later.  If you are using Mac OS X 10.2 or higher, you should already have version 1.4.1 installed.  (Earlier versions of Mac OS X have JDK 1.3.1.)  You can download the SDK for your platform from <ulink url="http://java.sun.com">http://java.sun.com</ulink>.</para>
           </formalpara>
+          <para>Note: If you wish for your builds of DrJava to be compatible with JDK 1.3.1, you must compile with JDK 1.3.1.</para>
         </listitem>
 
         <listitem>
@@ -161,7 +165,7 @@
           </formalpara>
           <programlisting>
 export ANT_HOME=/usr/local/ant
-export JAVA_HOME=/usr/java/j2sdk1.4.1_01
+export JAVA_HOME=/usr/java/j2sdk1.4.2
 export PATH=${JAVA_HOME}/bin:${ANT_HOME}/bin:$PATH
 export CVS_RSH=ssh
           </programlisting>
@@ -175,13 +179,13 @@ export CVS_RSH=ssh
           </formalpara>
           <itemizedlist>
             <listitem>
-              <para>Include the following <emphasis>at the beginning</emphasis> of the <literal>Path</literal> variable: <literal>c:\j2sdk1.4.1\bin;c:\jakarta-ant-1.5.1\bin</literal></para>
+              <para>Include the following <emphasis>at the beginning</emphasis> of the <literal>Path</literal> variable: <literal>c:\j2sdk1.4.2\bin;c:\jakarta-ant-1.5.1\bin</literal></para>
             </listitem>
             <listitem>
               <para>Set <literal>ANT_HOME</literal> to <literal>c:\jakarta-ant-1.5.1</literal></para>
             </listitem>
             <listitem>
-              <para>Set <literal>JAVA_HOME</literal> to <literal>c:\j2sdk1.4.1</literal></para>
+              <para>Set <literal>JAVA_HOME</literal> to <literal>c:\j2sdk1.4.2</literal></para>
             </listitem>
             <listitem>
               <para>Set <literal>CVS_RSH</literal> to <literal>ssh</literal></para>
@@ -239,10 +243,10 @@ cvs -z3 -d:pserver:anonymous@cvs.sf.net:/cvsroot/drjava co src
           <para>Download the most recent JSR-14 compiler from <ulink url="http://developer.java.sun.com/developer/earlyAccess/adding_generics/">http://developer.java.sun.com/developer/earlyAccess/adding_generics/</ulink>.</para>
         </listitem>
         <listitem>
-          <para>Unzip the package you downloaded and copy the included <filename>javac.jar</filename> to <filename>~/drjava/src/edu/rice/cs/lib/jsr14.jar</filename>.  (Note that in JSR-14 version 2.0, <filename>javac.jar</filename> has been renamed to <filename>gjc-rt.jar</filename>.)</para>
+          <para>Unzip the package you downloaded and copy the included <filename>javac.jar</filename> to <filename>~/drjava/src/edu/rice/cs/lib/jsr14.jar</filename>.  (Note that in JSR-14 version 2.0, <filename>javac.jar</filename> has been renamed to <filename>gjc-rt.jar</filename>.)  Also copy <filename>collect.jar</filename> to <filename>~/drjava/src/edu/rice/cs/lib/collect.jar</filename>.</para>
         </listitem>
         <listitem>
-          <para>Note: The current version of the JSR-14 compiler <emphasis>will not work</emphasis> with any version of Java prior to 1.4.1, so it <emphasis>will not work</emphasis> on Mac OS X with JDK 1.3.1.  Please contact a DrJava project administrator for help if you are running Mac OS X.  (This problem will go away when Java 1.4.1 is released for Mac OS X.)</para>
+          <para>Note: The current version of the JSR-14 compiler will not work with any version of Java prior to 1.4.1.  If you want to compile with JDK 1.3.1 (eg. in Mac OS X 10.1 or to create builds compatible with JDK 1.3), you will need to use JSR-14 version 1.0.  (This version is no longer available from Sun; please contact a DrJava project administrator if you need help.)</para>
         </listitem>
       </itemizedlist>
     </section>
@@ -259,12 +263,15 @@ cvs -z3 -d:pserver:anonymous@cvs.sf.net:/cvsroot/drjava co src
           </formalpara>
           <programlisting>
 ${HOME}/drjava/src/edu/rice/cs/lib/jsr14.jar
+${HOME}/drjava/src/edu/rice/cs/lib/collect.jar
 ${HOME}/drjava/src/edu/rice/cs/lib/GJv6.jar
 ${HOME}/drjava/src/edu/rice/cs/lib/compilers.jar
 ${HOME}/drjava/src/edu/rice/cs/lib/dynamicjava.jar
 ${HOME}/drjava/src/edu/rice/cs/lib/gj-util.jar
 ${HOME}/drjava/src/edu/rice/cs/lib/junit.jar
 ${HOME}/drjava/src/edu/rice/cs/lib/platform.jar
+${HOME}/drjava/src/edu/rice/cs/lib/javaast.jar
+${HOME}/drjava/src/edu/rice/cs/lib/clover.jar
 ${HOME}/drjava/built/
 ${JAVA_HOME}/lib/tools.jar
           </programlisting>
@@ -278,14 +285,17 @@ ${JAVA_HOME}/lib/tools.jar
           </formalpara>
           <programlisting>
 c:\cygwin\home\USERNAME\drjava\src\edu\rice\cs\lib\jsr14.jar
+c:\cygwin\home\USERNAME\drjava\src\edu\rice\cs\lib\collect.jar
 c:\cygwin\home\USERNAME\drjava\src\edu\rice\cs\lib\GJv6.jar
 c:\cygwin\home\USERNAME\drjava\src\edu\rice\cs\lib\compilers.jar
 c:\cygwin\home\USERNAME\drjava\src\edu\rice\cs\lib\dynamicjava.jar
 c:\cygwin\home\USERNAME\drjava\src\edu\rice\cs\lib\gj-util.jar
 c:\cygwin\home\USERNAME\drjava\src\edu\rice\cs\lib\junit.jar
 c:\cygwin\home\USERNAME\drjava\src\edu\rice\cs\lib\platform.jar
+c:\cygwin\home\USERNAME\drjava\src\edu\rice\cs\lib\javaast.jar
+c:\cygwin\home\USERNAME\drjava\src\edu\rice\cs\lib\clover.jar
 c:\cygwin\home\USERNAME\drjava\built\
-c:\j2sdk1.4.1\lib\tools.jar
+c:\j2sdk1.4.2\lib\tools.jar
           </programlisting>
         </listitem>
       </itemizedlist>
@@ -309,7 +319,7 @@ ant clean compile
 
       <formalpara>
         <title>Note for Older Versions of Java</title>
-        <para>If you are using a version of the JDK earlier than 1.4.1 and a version of JSR-14 earlier than 1.3, you will need to make a change to the <filename>src/edu/rice/cs/build-common.xml</filename> file.  Search for <literal>"do-compile"</literal> and follow the instructions in the comment.  (Remove <literal>source="1.5"</literal>, change <literal>target</literal> to <literal>1.1</literal>, and uncomment the <literal>compilerarg</literal> line.)</para>
+        <para>If you are using a version of JSR-14 earlier than 2.0, you will need to make a change to the <filename>src/edu/rice/cs/build-common.xml</filename> file.  There are three copies of the <literal>"do-compile"</literal> target; uncomment the one appropriate for your version.</para>
       </formalpara>
     </section>
 

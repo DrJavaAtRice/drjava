@@ -169,4 +169,67 @@ public final class RecentFileManagerTest extends TestCase {
                  FileOps.readFileAsString(vector.elementAt(0)));
     
   }
+  
+  /**
+   * Tests that files are removed correctly from the list.
+   */
+  public void testRemoveFile() throws Exception {
+    // Open two files
+    final File tempFile = writeToNewTempFile(BAR_TEXT);
+    final File tempFile2 = writeToNewTempFile(FOO_TEXT);
+    _rfm.updateMax(2);
+    _rfm.updateOpenFiles(tempFile);
+    _rfm.updateOpenFiles(tempFile2);
+    Vector<File> vector = _rfm.getFileVector();
+    assertEquals("tempFile2 should be at top", vector.elementAt(0), tempFile2);
+    
+    // Remove top
+    _rfm.removeIfInList(tempFile2);
+    assertEquals("number of recent files", 1, vector.size());
+    assertEquals("tempFile should be at top", vector.elementAt(0), tempFile);
+    
+    // Remove non-existant entry
+    _rfm.removeIfInList(tempFile2);
+    assertEquals("number of recent files", 1, vector.size());
+    assertEquals("tempFile should still be at top", vector.elementAt(0), tempFile);
+    
+    // Remove top again
+    _rfm.removeIfInList(tempFile);
+    assertEquals("number of recent files", 0, vector.size());
+  }
+  
+  /**
+   * Tests that the list is re-ordered correctly after a file is
+   * re-opened, even if it has a different path.
+   */
+  public void testReopenFiles() throws Exception {
+    final File tempFile = writeToNewTempFile(BAR_TEXT);
+    final File tempFile2 = writeToNewTempFile(FOO_TEXT);
+    
+    _rfm.updateMax(2);
+    _rfm.updateOpenFiles(tempFile2);
+    _rfm.updateOpenFiles(tempFile);
+    Vector<File> vector = _rfm.getFileVector();
+    
+    assertEquals("tempFile should be at top", vector.elementAt(0), tempFile);
+    
+    // Re-open tempFile2
+    _rfm.updateOpenFiles(tempFile2);
+    vector = _rfm.getFileVector();
+    assertEquals("tempFile2 should be at top", vector.elementAt(0), tempFile2);
+    
+    
+    // Re-open tempFile with a different path
+    //  eg. /tmp/MyFile -> /tmp/./MyFile
+    File parent = tempFile.getParentFile();
+    String dotSlash = "." + System.getProperty("file.separator");
+    parent = new File(parent, dotSlash);
+    File sameFile = new File(parent, tempFile.getName());
+    
+    _rfm.updateOpenFiles(sameFile);
+    vector = _rfm.getFileVector();
+    assertEquals("sameFile should be at top", vector.elementAt(0), sameFile);
+    assertEquals("should only have two files", 2, vector.size());
+    assertTrue("should not contain tempFile", !(vector.contains(tempFile)));
+  }
 }

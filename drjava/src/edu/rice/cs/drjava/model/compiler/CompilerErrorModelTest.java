@@ -306,16 +306,23 @@ public final class CompilerErrorModelTest extends TestCase {
   public void testHasErrorsWithPositions() throws IOException, OperationCanceledException {
     fullSetup();
     
+    // Doc with errors
     OpenDefinitionsDocument doc = getter.getDocumentForFile(files[4]);
     assertTrue("File should have errors with lines.", model.hasErrorsWithPositions(doc));
+    
+    // Same doc with a different (but equivalent) file name
+    doc.getDocument().setFile(new File("/tmp/./nowhere5"));
+    assertTrue("Same file should have errors with lines.", model.hasErrorsWithPositions(doc));
+    
+    // Doc without errors
     doc = getter.getDocumentForFile(files[1]);
     assertTrue("File shouldn't have errors with lines.", !model.hasErrorsWithPositions(doc));
   }
   
   public void testErrorsInMultipleDocuments() throws IOException, OperationCanceledException {
     files = new File[]
-    { new File("//nowhere1"),
-      new File("//nowhere2") };
+    { new File("/tmp/nowhere1"),
+      new File("/tmp/nowhere2") };
     texts = new String[]
     { new String("kfgkasjg\n" +
                  "faijskgisgj\n" +
@@ -344,7 +351,7 @@ public final class CompilerErrorModelTest extends TestCase {
    * Setup for test cases with one document.
    */
   private void setupDoc() {
-    files = new File[] { new File("//nowhere") };
+    files = new File[] { new File("/tmp/nowhere") };
     texts = new String[]
     { new String("This is a block of test text.\n" +
                  "It doesn't matter what goes in here.\n" +
@@ -357,11 +364,11 @@ public final class CompilerErrorModelTest extends TestCase {
    */
   private void setupDocs() {
     files = new File[]
-    { new File("//nowhere1"),
-      new File("//nowhere2"),
-      new File("//nowhere3"),
-      new File("//nowhere4"),
-      new File("//nowhere5") };
+    { new File("/tmp/nowhere1"),
+      new File("/tmp/nowhere2"),
+      new File("/tmp/nowhere3"),
+      new File("/tmp/nowhere4"),
+      new File("/tmp/nowhere5") };
     texts = new String[]
     { new String("This is the first block of test text.\n" +
                  "It doesn't matter what goes in here.\n" +

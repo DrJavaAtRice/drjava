@@ -2292,8 +2292,20 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
         }
         finally {
           // Always do the comparison
-          if ((thisFile != null) && thisFile.equals(file)) {
-            doc = thisDoc;
+          if (thisFile != null) {
+            try {
+              // Compare canonical paths if possible
+              if (thisFile.getCanonicalFile().equals(file.getCanonicalFile())) {
+                doc = thisDoc;
+              }
+            }
+            catch (IOException ioe) {
+              // Can be thrown from getCanonicalFile.
+              //  If so, compare the files themselves
+              if (thisFile.equals(file)) {
+                doc = thisDoc;
+              }
+            }
           }
         }
       }

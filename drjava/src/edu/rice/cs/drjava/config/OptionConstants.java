@@ -72,9 +72,6 @@ public interface OptionConstants {
   public static final VectorOption<File> EXTRA_CLASSPATH =
     new ClasspathOption().evaluate("extra.classpath");
   
-  public static final BooleanOption JAVAC_ALLOW_ASSERT =
-    new BooleanOption("javac.allow.assert", Boolean.FALSE);
-  
   
   /* ---------- Color Options ---------- */
   
@@ -543,17 +540,18 @@ public interface OptionConstants {
   /**
    * Possible options for Javadoc access levels.
    */
-  static final ArrayList accessLevelChoices =
-    (new Begin<ArrayList<String>>() {
-       public ArrayList<String> evaluate() {
-         ArrayList<String> aList = new ArrayList<String>(4);
-         aList.add("public");
-         aList.add("protected");
-         aList.add("package");
-         aList.add("private");
-         return aList;
-       }
-     }).evaluate();
+  static final ArrayList<String> accessLevelChoices = 
+    AccessLevelChoices.evaluate();
+  static class AccessLevelChoices {
+    public static ArrayList<String> evaluate() {
+      ArrayList<String> aList = new ArrayList<String>(4);
+      aList.add("public");
+      aList.add("protected");
+      aList.add("package");
+      aList.add("private");
+      return aList;
+    }
+  }
   
   /**
    * The lowest access level of classes and members to include in the javadoc.
@@ -568,16 +566,17 @@ public interface OptionConstants {
   static final String JAVADOC_1_3_TEXT = "1.3";
   static final String JAVADOC_1_4_TEXT = "1.4";
   
-  static final ArrayList linkVersionChoices =
-    (new Begin<ArrayList<String>>() {
-       public ArrayList<String> evaluate() {
-         ArrayList<String> aList = new ArrayList<String>(4);
-         aList.add(JAVADOC_NONE_TEXT);
-         aList.add(JAVADOC_1_3_TEXT);
-         aList.add(JAVADOC_1_4_TEXT);
-         return aList;
-       }
-     }).evaluate();
+  static final ArrayList<String> linkVersionChoices = 
+    LinkVersionChoices.evaluate();
+  static class LinkVersionChoices {
+    public static ArrayList<String> evaluate() {
+      ArrayList<String> aList = new ArrayList<String>(4);
+      aList.add(JAVADOC_NONE_TEXT);
+      aList.add(JAVADOC_1_3_TEXT);
+      aList.add(JAVADOC_1_4_TEXT);
+      return aList;
+    }
+  }
      
   /**
    * Constants for the URLs of Sun's system class documentation for different
@@ -652,6 +651,12 @@ public interface OptionConstants {
    */
   public static final NonNegativeIntegerOption RECENT_FILES_MAX_SIZE =
     new NonNegativeIntegerOption("recent.files.max.size", new Integer(5));
+  
+  /**
+   * Whether to allow the assert keyword in Java 1.4+.
+   */
+  public static final BooleanOption JAVAC_ALLOW_ASSERT =
+    new BooleanOption("javac.allow.assert", Boolean.FALSE);
   
   /**
    * Whether to prompt when the interactions pane is unexpectedly reset.

@@ -150,12 +150,11 @@ public class DebugPanel extends JPanel implements OptionConstants {
   public void updateData() {
     if (_debugger.isReady()) {
       try {
+        _watches = _debugger.getWatches();
         if (_debugger.isCurrentThreadSuspended()) {
-          _watches = _debugger.getWatches();
           _stackFrames = _debugger.getCurrentStackFrameData();
         }
         else {
-          _watches = new Vector<DebugWatchData>();
           _stackFrames = new Vector<DebugStackData>();
         }
         _threads = _debugger.getCurrentThreadData();

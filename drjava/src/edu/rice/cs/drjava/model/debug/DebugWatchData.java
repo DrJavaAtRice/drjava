@@ -46,9 +46,21 @@ import com.sun.jdi.*;
  * @version $Id$
  */
 public class DebugWatchData {
+  /**
+   * String to display if the value is not in scope.
+   */
+  public static final String NO_VALUE = "<not in scope>";
+  
+  /**
+   * String to display if the type is not in scope.
+   */
+  public static final String NO_TYPE = "<no type>";
+  
   private String _name;
   private String _value;
-  private Type _type;
+  private String _type;
+  private boolean _showValue;
+  private boolean _showType;
   private boolean _changed;
   
   /**
@@ -57,8 +69,10 @@ public class DebugWatchData {
    */
   public DebugWatchData(String name) {
     _name = name;
-    _value = DebugWatchUndefinedValue.ONLY.toString();
-    _type = null;
+    _value = "";
+    _type = "";
+    _showValue = false;
+    _showType = false;
     _changed = false;
   }
   
@@ -73,21 +87,21 @@ public class DebugWatchData {
    * Returns the most recently determined value for this field or variable.
    */
   public String getValue() {
-    return _value;
+    return (_showValue) ? _value : "";
   }
   
   /**
    * Returns the type of this field or variable in the current context.
    */
-  public Type getType() {
-    return _type;
+  public String getType() {
+    return (_showType) ? _type : "";
   }
   
   /**
    * Sets a new name for this field or variable.
    * @param name Name of the field or variable
    */
-  public void setName(String name) {
+  void setName(String name) {
     _name = name;
   }
   
@@ -95,35 +109,56 @@ public class DebugWatchData {
    * Sets the most recently determined value for this field or variable.
    * @param value Value of the field or variable
    */
-  public void setValue(Object value) {
-    if (value != null) {
-      if (!(value.toString()).equals(_value)) {
-        _changed = true;
-      }
-      else {
-        _changed = false;
-      }
-      _value = value.toString();
+  void setValue(Object value) {
+    _showValue = true;
+    String valString = String.valueOf(value);
+    if (!valString.equals(_value)) {
+      _changed = true;
     }
     else {
-      // Value is null-- don't mark it as changed
       _changed = false;
-      _value = "null";
     }
+    _value = valString;
+  }
+  
+  /**
+   * Hides the value for this watch (when no thread is suspended).
+   */
+  void hideValueAndType() {
+    _showValue = false;
+    _showType = false;
+    _changed = false;
+  }
+  
+  /**
+   * Called to indicate that this watch has no value in the current scope.
+   */
+  void setNoValue() {
+    _showValue = true;
+    _value = NO_VALUE;
   }
   
   /**
    * Sets the most recently determined type of this field or variable.
    * @param type Type of the field or variable
    */
-  public void setType(Type type) {
+  void setType(String type) {
+    _showType = true;
     _type = type;
+  }
+  
+  /**
+   * Called to indicate that this watch has no type in the current scope.
+   */
+  void setNoType() {
+    _showType = true;
+    _type = NO_TYPE;
   }
   
   /**
    * Returns whether this value has changed since the last call to setValue.
    */
-  public boolean getChanged() {
+  public boolean isChanged() {
     return _changed;
   }
   
