@@ -2063,7 +2063,6 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
      * @return true if the file was saved, false if the operation was canceled
      */
     public boolean saveFileAs(FileSaveSelector com) throws IOException {
-      // XXX
       try {
         final OpenDefinitionsDocument openDoc = this;
         final File file = com.getFile();
