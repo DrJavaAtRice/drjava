@@ -85,8 +85,9 @@ public class DocumentCache{
     Pair<DefinitionsDocument,DDReconstructor> pair = new Pair<DefinitionsDocument,DDReconstructor>(null, reconstructor);
     table.remove(odd);
     table.put(odd, pair);
-    lru.remove(odd);
-    
+    synchronized(lru) {
+      lru.remove(odd);
+    }
 //    System.out.println(this);
   }
 
@@ -155,28 +156,34 @@ public class DocumentCache{
    * @param odd the document that has been used most recently
    */
   private void updatelru(OpenDefinitionsDocument odd, Pair<DefinitionsDocument,DDReconstructor> pair){
-    if(!lru.isEmpty() && lru.getFirst() == odd){
-      //System.out.println("updatelru: " + odd + " is first in list");
-      return;
+    synchronized(lru) {
+      if(!lru.isEmpty() && lru.getFirst() == odd){
+        //System.out.println("updatelru: " + odd + " is first in list");
+        return;
+      }
+      lru.remove(odd);
     }
-    lru.remove(odd);
     
     if(!(isDDocInCache(odd) && pair.getFirst().isModifiedSinceSave())){
 //      System.out.println("adding " + odd + " to lru");
-      lru.addFirst(odd);
+      synchronized(lru) {
+        lru.addFirst(odd);
+      }
     }
-    
+
     //System.out.println("Cache size is : " + lru.size());
     if(lru.size() > CACHE_SIZE){
-      odd = lru.removeLast();
+      synchronized(lru) {
+        odd = lru.removeLast();
+      }
       Pair<DefinitionsDocument,DDReconstructor> removedPair = table.get(odd);
 //      System.out.println("should i dispose of " + odd + "?");
      
       if(isDDocInCache(odd) && removedPair.getFirst().isModifiedSinceSave()){
 //        System.out.println("no");
-      }else{
+      } else {
 //        System.out.println("disposing of " + odd);
-        update(odd, removedPair.getSecond());
+          update(odd, removedPair.getSecond());
       }
     }
   }
@@ -204,7 +211,9 @@ public class DocumentCache{
 //      pair.getSecond().saveDocInfo(pair.getFirst());
       pair.getFirst().close();
     }
-    lru.remove(odd);
+    synchronized(lru) {
+      lru.remove(odd);
+    }
   }
   
   public void setCacheSize(int size) {
@@ -222,7 +231,7 @@ public class DocumentCache{
     return lru.size();
   }
   
-  public String toString() {
+  public synchronized String toString() {
     return "Document Cache: LRU: " + lru;
   }
 }
