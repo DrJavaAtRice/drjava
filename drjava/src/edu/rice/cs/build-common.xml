@@ -140,7 +140,9 @@ optimize="off"/>
          bootclasspath="${jsr14_classpath}:${sun.boot.class.path}"
          target="1.1"
          debug="on"
-         optimize="off"/>
+         optimize="off">
+    <compilerarg value="-gj" />
+  </javac>
 
     <!--
     <echo message="Recompiling all classes ..." />
@@ -158,6 +160,8 @@ optimize="off"/>
 
       <arg value="-target" />
       <arg value="1.1" />
+
+      <arg value="-gj" />
 
       <arg value="-g" />
       
