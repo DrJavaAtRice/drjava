@@ -1378,8 +1378,8 @@ public class MainFrame extends JFrame implements OptionConstants {
     tmpItem = menu.add(a);
     
     KeyStroke ks = DrJava.CONFIG.getSetting(opt);
-    // checks that "a" is the action associated with the keystroke
-    // need to check in case two actions were assigned to the same
+    // Checks that "a" is the action associated with the keystroke.
+    // Need to check in case two actions were assigned to the same
     // key in the config file
     if (_keyBindingManager.get(ks) == a) { 
       tmpItem.setAccelerator(ks);
@@ -2662,6 +2662,10 @@ public class MainFrame extends JFrame implements OptionConstants {
                                             "Up");
       _keyBindingManager.putActionToNameMap(_actionMap.get(DefaultEditorKit.selectionUpAction), 
                                             "Selection Up");
+      _keyBindingManager.putActionToNameMap(_actionMap.get(DefaultEditorKit.deletePrevCharAction), 
+                                            "Delete Previous Character");
+      _keyBindingManager.putActionToNameMap(_actionMap.get(DefaultEditorKit.deleteNextCharAction), 
+                                            "Delete Next Character");
       _keyBindingManager.putActionToNameMap(_cutLineAction, 
                                             "Cut Line");
       
@@ -2687,7 +2691,7 @@ public class MainFrame extends JFrame implements OptionConstants {
                  _switchToNextAction);
       _keyBindingManager.mapInsert(DrJava.CONFIG.getSetting(KEY_COMPILE), _compileAction);
       _keyBindingManager.mapInsert(DrJava.CONFIG.getSetting(KEY_ABORT_INTERACTION), 
-                 _abortInteractionAction);
+                 _abortInteractionAction);      
       
       _keyBindingManager.addShiftAction(KEY_BACKWARD, 
                                         DefaultEditorKit.backwardAction, 
@@ -2747,6 +2751,24 @@ public class MainFrame extends JFrame implements OptionConstants {
       _keyBindingManager.mapInsert(DrJava.CONFIG.getSetting(KEY_CUT_LINE), 
                                    _cutLineAction);
       _keyBindingManager.addListener(KEY_CUT_LINE, null);
+      _keyBindingManager.mapInsert(DrJava.CONFIG.getSetting(KEY_DELETE_PREVIOUS), 
+                                   _actionMap.get(DefaultEditorKit.deletePrevCharAction));
+      _keyBindingManager.addListener(KEY_DELETE_PREVIOUS, null);
+      _keyBindingManager.mapInsert(DrJava.CONFIG.getSetting(KEY_DELETE_NEXT), 
+                                   _actionMap.get(DefaultEditorKit.deleteNextCharAction));
+      _keyBindingManager.addListener(KEY_DELETE_NEXT, null);
+      _keyBindingManager.mapInsert(KeyStroke.getKeyStroke(KeyEvent.VK_F3,0),
+                                   new AbstractAction("FindReplace") {
+        public void actionPerformed(ActionEvent ae) {
+          if(!_findReplace.isDisplayed()) {
+            showTab(_findReplace);
+            _findReplace.beginListeningTo(_currentDefPane);
+          }
+          _findReplace.findNext();
+          _currentDefPane.requestFocus();
+        }
+      });
+                                  
     }
   }
   

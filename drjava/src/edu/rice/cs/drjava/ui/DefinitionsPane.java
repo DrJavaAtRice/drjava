@@ -296,7 +296,8 @@ public class DefinitionsPane extends JEditorPane
         e.consume();
       }
       else {        
-        if ((ks.getModifiers() & mask) != 0)
+        if (((ks.getModifiers() & mask) != 0) || 
+            ks.getKeyChar() == '\010') // backspace deletes twice without this check
           e.consume();
       }
       if (!e.isConsumed())

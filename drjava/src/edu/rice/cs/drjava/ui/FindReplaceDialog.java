@@ -95,8 +95,18 @@ import edu.rice.cs.util.UnexpectedException;
    public void requestFocus() {
      super.requestFocus();
      _findField.requestFocus();
+     _findField.selectAll();
    }
 
+   /**
+    * Called when the user presses the key assigned to find next
+    */
+   public void findNext() {
+     if (_findField.getText().length() > 0) {
+       _doFind();
+     }
+   }
+   
    /**
     * Called from MainFrame upon opening this Dialog or
     * changes in the active document
@@ -258,6 +268,7 @@ import edu.rice.cs.util.UnexpectedException;
   };*/
 
    protected void _close() {
+     _defPane.requestFocus();
      if (_displayed)
        stopListening();
      super._close();
@@ -274,19 +285,19 @@ import edu.rice.cs.util.UnexpectedException;
     super(frame, "Find/Replace");
     _model = model;
     
-    _mainPanel.addKeyListener(new KeyListener() {
-      public void keyPressed(KeyEvent e) {
-        if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
-          _close();
-        }
+    int i = this.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT;
+    //i = this.WHEN_FOCUSED;
+    //i = this.WHEN_IN_FOCUSED_WINDOW;
+    InputMap im = _mainPanel.getInputMap(i);
+    im.put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE,0), "Close");
+    im.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER,0), "Find Next");
+    ActionMap am = _mainPanel.getActionMap();
+    am.put("Find Next", _findNextAction);
+    am.put("Close", new AbstractAction("Close") {
+      public void actionPerformed(ActionEvent ae) {
+        _frame.getCurrentDefPane().requestFocus();
+        _close();
       }
-      public void keyReleased(KeyEvent e) {
-        if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
-          _close();
-        }
-      }
-      public void keyTyped(KeyEvent e) {
-      }      
     });
 
     _findNextButton = new JButton(_findNextAction);
@@ -516,7 +527,7 @@ import edu.rice.cs.util.UnexpectedException;
       // user to hit enter repeatedly and change the document while finding
       // next
       _defPane.getCaret().setSelectionVisible(true);
-      _findField.requestFocus();
+      //_findField.requestFocus();
     } 
     catch (BadLocationException badBadLocation) {}
   }
@@ -552,6 +563,7 @@ import edu.rice.cs.util.UnexpectedException;
 
     }
     };*/
+  
    class MatchCaseListener implements ItemListener {
      public void itemStateChanged(ItemEvent e) {
        if (e.getStateChange() == ItemEvent.DESELECTED) {
