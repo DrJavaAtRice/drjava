@@ -398,6 +398,9 @@ public class DrJava implements OptionConstants {
     catch (ClassNotFoundException cnfe) {
       return false;
     }
+    catch (UnsupportedClassVersionError ucve) {
+      return false;
+    }
   }
   
   /**
@@ -418,6 +421,9 @@ public class DrJava implements OptionConstants {
       catch (ClassNotFoundException e) {
         // no debugger in this jar file; try ToolsJarClasLoader
       }
+      catch (UnsupportedClassVersionError ucve) {
+        return false;
+      }
       catch (MalformedURLException e) {
         // specified jar invalid; try ToolsJarClassLoader
       }
@@ -430,6 +436,9 @@ public class DrJava implements OptionConstants {
       return true;
     }
     catch (ClassNotFoundException cnfe) {
+      return false;
+    }
+    catch (UnsupportedClassVersionError ucve) {
       return false;
     }
   }
@@ -582,7 +591,8 @@ public class DrJava implements OptionConstants {
   private static boolean _userWantsToPickAgain() {
     final String[] text = {
       "The file you chose did not appear to be a valid 'tools.jar'. ",
-      "Would you like to pick again? The 'tools.jar' file is ",
+      "(Your choice might be an incompatible version of the file.) ",
+      "Would you like to pick again?  The 'tools.jar' file is ",
       "generally located in the 'lib' subdirectory under your ",
       "JDK installation directory.",
       "(If you say 'No', DrJava might be unable to compile or ",
