@@ -239,7 +239,7 @@ cvs -z3 -d:pserver:anonymous@cvs.sf.net:/cvsroot/drjava co src
           <para>Download the most recent JSR-14 compiler from <ulink url="http://developer.java.sun.com/developer/earlyAccess/adding_generics/">http://developer.java.sun.com/developer/earlyAccess/adding_generics/</ulink>.</para>
         </listitem>
         <listitem>
-          <para>Unzip the package you downloaded and copy the included <filename>javac.jar</filename> to <filename>~/drjava/src/edu/rice/cs/lib/jsr14.jar</filename>.</para>
+          <para>Unzip the package you downloaded and copy the included <filename>javac.jar</filename> to <filename>~/drjava/src/edu/rice/cs/lib/jsr14.jar</filename>.  (Note that in JSR-14 version 2.0, <filename>javac.jar</filename> has been renamed to <filename>gjc-rt.jar</filename>.)</para>
         </listitem>
         <listitem>
           <para>Note: The current version of the JSR-14 compiler <emphasis>will not work</emphasis> with any version of Java prior to 1.4.1, so it <emphasis>will not work</emphasis> on Mac OS X with JDK 1.3.1.  Please contact a DrJava project administrator for help if you are running Mac OS X.  (This problem will go away when Java 1.4.1 is released for Mac OS X.)</para>

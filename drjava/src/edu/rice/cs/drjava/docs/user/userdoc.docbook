@@ -442,7 +442,7 @@ public static Test suite() {
 	      <term>JSR14 Location (<varname>jsr14.location = ""</varname>)</term>
 	      <term>JSR14 Collections Path (<varname>jsr14.collectionspath = ""</varname>)</term>
 	      <listitem>
-		<para>Used to specify the location of the JSR-14 versions of <filename>javac.jar</filename> and <filename>collect.jar</filename>, respectively, for use as an alternative compiler in DrJava.  JSR-14 is a prototype compiler provided by Sun which supports generics.  The <filename>collect.jar</filename> file contains parameterized collection classes for JSR-14.  (Currently only JSR14 version 1.0 is supported; support for version 1.2 is in progress.)</para>
+		<para>Used to specify the location of the JSR-14 versions of <filename>javac.jar</filename> and <filename>collect.jar</filename>, respectively, for use as an alternative compiler in DrJava.  JSR-14 is a prototype compiler provided by Sun which supports generics.  The <filename>collect.jar</filename> file contains parameterized collection classes for JSR-14.  (We currently support JSR-14 versions 1.0, 1.2, 1.3, and 2.0.  Note that for version 2.0, <filename>javac.jar</filename> has been renamed <filename>gjc-rt.jar</filename>.)</para>
 	      </listitem>
 	    </varlistentry>
 	    
