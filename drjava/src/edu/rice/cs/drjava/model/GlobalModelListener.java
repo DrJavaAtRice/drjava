@@ -2,20 +2,21 @@ package edu.rice.cs.drjava;
 
 public interface GlobalModelListener {
 
-  public void fireNewFileEvent();
+  public void newFileCreated();
   
-  public void fireSaveFileEvent(String fileName);
+  public void fileSaved(String fileName);
   
-  public void fireOpenFileEvent(String fileName);
+  public void fileOpened(String fileName);
   
-  public void fireCompileBeginEvent();
+  public void compileStarted();
   
-  public void fireCompileEndEvent();
+  public void compileEnded();
   
-  public void fireQuitEvent();
+  public void quit();
   
-  public void fireResetInteractionsEvent();
+  public void interactionsReset();
   
-  public void fireResetConsoleEvent();
+  public void consoleReset();
   
+  public boolean canAbandonFile();
 }
