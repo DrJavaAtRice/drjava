@@ -37,58 +37,17 @@
  *
 END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava.ui;
+package edu.rice.cs.drjava;
 
-import javax.swing.*;
-import javax.swing.text.*;
-import javax.swing.event.*;
-import java.awt.event.*;
-import java.awt.*;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.Hashtable;
 
 /**
- * About dialog.
- *
- * @version $Id$
+ * Contains the constant that specifies whether any new features should be used in any
+ * compilation or test. This flag will be set to false for preparing stable releases and
+ * will be set to true during development of new features. To set the flag to false, include
+ * the "stable" target when using ant and "development" to set the flag to true. All new features
+ * during the beta test stage should be surrounded by a conditional based on this flag.
+ * @version $Idx$
  */
-public class AboutDialog extends JDialog {
-  public AboutDialog(JFrame owner, String text) {
-    super(owner, "About DrJava", true);
-    Insets ins = new Insets(20,20,20,20);
-
-    JTextArea textArea = new JTextArea(text);
-    textArea.setEditable(false);
-    textArea.setLineWrap(true);
-    textArea.setWrapStyleWord(true);
-    textArea.setMargin(ins);
-    Container cp = getContentPane();
-    cp.add(new BorderlessScrollPane(textArea),BorderLayout.CENTER);
-
-    JButton button = new JButton("OK");
-    button.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        AboutDialog.this.hide();
-      }
-    });
-
-    JPanel bottom = new JPanel();
-    bottom.setLayout(new BoxLayout(bottom, BoxLayout.X_AXIS));
-    bottom.add(Box.createHorizontalGlue());
-    bottom.add(button);
-    bottom.add(Box.createHorizontalGlue());
-
-    cp.add(bottom, BorderLayout.SOUTH);
-
-    //pack();
-    setSize((int) (owner.getWidth() * (4f/5f)),
-            (int) (owner.getHeight() * (4f/5f)));
-    // suggested from zaq@nosi.com, to keep the frame on the screen!
-    Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-    Dimension frameSize = this.getSize();
-    this.setLocation((screenSize.width - frameSize.width) / 2,
-                     (screenSize.height - frameSize.height) / 2);
-  }
+public class CodeStatus {
+  public static final boolean DEVELOPMENT = true;
 }

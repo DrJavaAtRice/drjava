@@ -63,7 +63,7 @@ import gj.util.Vector;
 import gj.util.Enumeration;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.util.*;
-import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.CodeStatus;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.config.BooleanOption;
 import edu.rice.cs.drjava.model.print.*;
@@ -1692,7 +1692,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
    */
   private void _createDebugger() {
     boolean useDebug = DrJava.CONFIG.getSetting(DEBUGGER_ENABLED).booleanValue();
-    if (useDebug) {
+    if (useDebug && CodeStatus.DEVELOPMENT) {
       try {
         _debugManager = new DebugManager(this);
       }

@@ -84,22 +84,13 @@ public class UncaughtExceptionWindow extends JFrame {
       // If we set this pane to be of type text/rtf, it wraps based on words
       // as opposed to based on characters.
     _stackTrace = new JTextArea(_getStackTraceString());
-    //_stackTrace.setPreferredSize(new Dimension(400, 250));
     _stackTrace.setBackground(Color.gray.brighter());
     _stackTrace.setMargin(ins);
     _exceptionInfo = new JTextArea(_getExceptionString());
     _exceptionInfo.setBackground(Color.gray.brighter());
     _exceptionInfo.setMargin(ins);
-    //_exceptionInfo.setPreferredSize(new Dimension(300, 100));
-    
-    // set text in _exceptionInfo JEditorPane    
-    //String exceptionString = _getExceptionString();
-    //_exceptionInfo.setText(exceptionString);
     _exceptionInfo.setEditable(false);
     
-    // set text in _stackTrace JEditorPane
-    //String stackTraceString = _getStackTraceString();
-    //_stackTrace.setText(stackTraceString);
     _stackTrace.setEditable(false);
     
     _okButton = new JButton(_okAction);
@@ -115,18 +106,13 @@ public class UncaughtExceptionWindow extends JFrame {
     _stackTraceScroll = new JScrollPane(_stackTrace, 
                                         JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
                                         JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
-    
-    /*this.getContentPane().setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-    this.getContentPane().add(_topPanel);
-    this.getContentPane().add(Box.createGlue());
-    this.getContentPane().add(_stackTraceScroll);*/
     this.getContentPane().setLayout(new BorderLayout());
     this.getContentPane().add(_topPanel, BorderLayout.NORTH);
     this.getContentPane().add(_stackTraceScroll, BorderLayout.CENTER);
     this.setTitle("Uncaught Exception");
     
     this.setVisible(true);
-    //this.pack();
+    //Toolkit.getDefaultToolkit().beep();
   }
   
   private Action _okAction = new AbstractAction("OK") {
@@ -142,10 +128,10 @@ public class UncaughtExceptionWindow extends JFrame {
     return new String("A runtime exception occured!\n"+
                       _exception+"\n\n"+
                       "Please submit a bug report containing the "+
-                      "system information in the \n"+
-                      "Help>About window and an " +
+                      "system information in the "+
+                      "Help>About \n window and an " +
                       "account of the actions "+ 
-                      "that caused the bug \n(if known) to "+
+                      "that caused the bug (if known) to\n"+
                       "http://sourceforge.net/projects/drjava.\n\n"+
                       "You may wish to save all your work and "+
                       "restart DrJava.\n" +

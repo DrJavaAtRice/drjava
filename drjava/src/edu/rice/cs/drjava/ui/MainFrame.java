@@ -57,6 +57,7 @@ import java.util.LinkedList;
 import java.net.URL;
 
 import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.CodeStatus;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;

@@ -49,6 +49,7 @@ import java.awt.event.*;
 import java.awt.*;
 
 import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.CodeStatus;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.drjava.model.compiler.*;
 import edu.rice.cs.drjava.model.GlobalModel;
@@ -142,7 +143,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
     // Only add input field in advanced mode
     boolean advancedMode = 
       DrJava.CONFIG.getSetting(DEBUGGER_ADVANCED).booleanValue();
-    if (advancedMode) {
+    if (advancedMode && CodeStatus.DEVELOPMENT) {
       add(_inputField, BorderLayout.SOUTH);
     
       // Listen for enter key
