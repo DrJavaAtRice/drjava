@@ -193,7 +193,13 @@ public class StickyClassLoader extends ClassLoader {
     
     if (name.startsWith("java.") ||
         name.startsWith("javax.") ||
-        name.startsWith("sun."))
+        name.startsWith("sun.") ||
+        name.startsWith("com.sun.") ||
+        name.startsWith("org.omg.") ||
+        name.startsWith("sunw.") ||
+        name.startsWith("org.w3c.dom.") ||
+        name.startsWith("org.xml.sax.") ||
+        name.startsWith("net.jini.")) 
     {
       try {
         clazz = getSystemClassLoader().loadClass(name);
