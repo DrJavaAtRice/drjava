@@ -53,6 +53,7 @@ import java.util.Vector;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.model.*;
+import edu.rice.cs.drjava.model.repl.InteractionsDocumentAdapter;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.config.OptionEvent;
 import edu.rice.cs.drjava.config.OptionListener;
@@ -77,16 +78,18 @@ public class ColoringView extends PlainView implements OptionConstants {
   private static Color KEYWORD_COLOR = DrJava.getConfig().getSetting(DEFINITIONS_KEYWORD_COLOR);
   private static Color NUMBER_COLOR = DrJava.getConfig().getSetting(DEFINITIONS_NUMBER_COLOR);
   private static Color TYPE_COLOR = DrJava.getConfig().getSetting(DEFINITIONS_TYPE_COLOR);
-
+  private static Font MAIN_FONT = DrJava.getConfig().getSetting(FONT_MAIN);
+  
   /**
    * Constructs a new coloring view.
    * @param elem the element
    */
-  ColoringView(Element elem) {
+  public ColoringView(Element elem) {
     super(elem);
 
     // Listen for updates to configurable colors
     final ColorOptionListener col = new ColorOptionListener();
+    final FontOptionListener fol = new FontOptionListener();
 //
 //    final Document doc = getDocument();
 //    if(doc instanceof DefinitionsDocument){
@@ -120,6 +123,7 @@ public class ColoringView extends PlainView implements OptionConstants {
       DrJava.getConfig().addOptionListener( OptionConstants.DEFINITIONS_KEYWORD_COLOR, col);
       DrJava.getConfig().addOptionListener( OptionConstants.DEFINITIONS_NUMBER_COLOR, col);
       DrJava.getConfig().addOptionListener( OptionConstants.DEFINITIONS_TYPE_COLOR, col);
+      DrJava.getConfig().addOptionListener( OptionConstants.FONT_MAIN, fol);
       
       if(doc instanceof DefinitionsDocument) {
         // remove the listeners when the document closes
@@ -132,6 +136,7 @@ public class ColoringView extends PlainView implements OptionConstants {
             DrJava.getConfig().removeOptionListener( OptionConstants.DEFINITIONS_KEYWORD_COLOR, col);
             DrJava.getConfig().removeOptionListener( OptionConstants.DEFINITIONS_NUMBER_COLOR, col);
             DrJava.getConfig().removeOptionListener( OptionConstants.DEFINITIONS_TYPE_COLOR, col);
+            DrJava.getConfig().removeOptionListener( OptionConstants.FONT_MAIN, fol);
           }
         });
       }
@@ -186,19 +191,24 @@ public class ColoringView extends PlainView implements OptionConstants {
     }
     for (int i = 0; i < stats.size(); i++) {
       HighlightStatus stat = stats.get(i);
-      setFormattingForState(g, stat.getState());
-      // If this highlight status extends past p1, end at p1
       int length = stat.getLength();
       int location = stat.getLocation();
+      // If this highlight status extends past p1, end at p1
       if (location + length > p1) {
         length = p1 - stat.getLocation();
       }
       Segment text = getLineBuffer();
-      /*
-       DrJava.consoleErr().println("Highlight: loc=" + location + " len=" +
-       length + " state=" + stat.getState() +
-       " text=" + text);
-       */
+      
+      if(!(_doc instanceof InteractionsDocumentAdapter) || !((InteractionsDocumentAdapter)_doc).setColoring(p1,g))      
+        setFormattingForState(g, stat.getState());
+//      else
+//        DrJava.consoleErr().println("Highlight: p0="+p0+"; p1="+p1+"; location="+location+"; color="+g.getColor()+"; text="+text);
+      
+//      
+//       DrJava.consoleErr().println("Highlight: loc=" + location + " length=" +
+//       length + " state=" + stat.getState() +
+//       " text=" + text);
+//       
       _doc.getText(location, length, text);
       x = Utilities.drawTabbedText(text, x, y, g, this, location);
     }
@@ -223,6 +233,10 @@ public class ColoringView extends PlainView implements OptionConstants {
      DrJava.consoleErr().println("drawSelected: " + p0 + "-" + p1 +
      " doclen=" + _doc.getLength() +" x="+x+" y="+y);
      */
+    Document doc = getDocument();
+    if(doc instanceof InteractionsDocumentAdapter)
+      ((InteractionsDocumentAdapter)doc).setBoldFonts(p1,g);
+    
     return  super.drawSelectedText(g, x, y, p0, p1);
   }
 
@@ -257,6 +271,7 @@ public class ColoringView extends PlainView implements OptionConstants {
       default:
         throw  new RuntimeException("Can't get color for invalid state: " + state);
     }
+    g.setFont(MAIN_FONT);
   }
 
   /**
@@ -298,6 +313,13 @@ public class ColoringView extends PlainView implements OptionConstants {
 
     public void optionChanged(OptionEvent<Color> oce) {
       updateColors();
+    }
+  }
+  
+  private class FontOptionListener implements OptionListener<Font> {
+    
+    public void optionChanged(OptionEvent<Font> oce) {
+      MAIN_FONT = DrJava.getConfig().getSetting(FONT_MAIN);
     }
   }
 

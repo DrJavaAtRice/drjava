@@ -52,6 +52,6 @@ import java.io.Serializable;
  * 
  * @version $Id$
  */
-public interface InterpretResult extends Serializable {
+public interface InterpretResult extends Serializable{
   public <T> T apply(InterpretResultVisitor<T> v);
 }

@@ -82,7 +82,7 @@ public class ConsoleDocument implements DocumentAdapter {
   /**
    * The document storing the text for this console model.
    */
-  protected DocumentAdapter _document;
+  protected InteractionsDocumentAdapter _document;
 
   /**
    * A runnable command to use for a notification beep.
@@ -108,7 +108,7 @@ public class ConsoleDocument implements DocumentAdapter {
    * Creates a new ConsoleDocument with the given DocumentAdapter.
    * @param adapter the DocumentAdapter to use
    */
-  public ConsoleDocument(DocumentAdapter adapter) {
+  public ConsoleDocument(InteractionsDocumentAdapter adapter) {
     _document = adapter;
 
     _beep = new Runnable() {
@@ -266,6 +266,7 @@ public class ConsoleDocument implements DocumentAdapter {
     try {
       int pos = getPositionBeforePrompt();
       _promptPos += text.length();
+      _addToStyleLists(pos,text,style);
       _document.forceInsertText(pos, text, style);
     }
     catch (DocumentAdapterException ble) {
@@ -289,6 +290,7 @@ public class ConsoleDocument implements DocumentAdapter {
       _beep.run();
     }
     else {
+      _addToStyleLists(offs,str,style);
       _document.insertText(offs, str, style);
     }
   }
@@ -305,7 +307,12 @@ public class ConsoleDocument implements DocumentAdapter {
   public void forceInsertText(int offs, String str, String style)
     throws DocumentAdapterException
   {
+    _addToStyleLists(offs,str,style);
     _document.forceInsertText(offs, str, style);
+  }
+  
+  private void _addToStyleLists(int offs, String str, String style) {
+    _document.addColoring(offs,offs + str.length(),style);
   }
 
   /**

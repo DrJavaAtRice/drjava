@@ -62,6 +62,7 @@ import edu.rice.cs.util.Log;
 import edu.rice.cs.util.OutputStreamRedirector;
 import edu.rice.cs.util.InputStreamRedirector;
 import edu.rice.cs.util.StringOps;
+import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.platform.PlatformFactory;
 import edu.rice.cs.drjava.model.junit.JUnitModelCallback;
 import edu.rice.cs.drjava.model.junit.JUnitTestManager;
@@ -269,7 +270,6 @@ public class InterpreterJVM extends AbstractSlaveJVM
 
             String s1 = s;//_interactionsProcessor.preProcess(s);
             Object result = interpreter.getInterpreter().interpret(s1);
-
             String resultString = String.valueOf(result);
 
             if (result == Interpreter.NO_RESULT) {
@@ -281,7 +281,19 @@ public class InterpreterJVM extends AbstractSlaveJVM
               // we use String.valueOf because it deals with result = null!
               //_dialog("about to tell main result was " + resultString);
               //return new ValueResult(resultString);
-              _mainJVM.interpretResult(new ValueResult(resultString));
+              String style = InteractionsDocument.OBJECT_RETURN_STYLE;
+              if(result instanceof String) {
+                style = InteractionsDocument.STRING_RETURN_STYLE;
+                //Single quotes have already been added to chars by now, so they are read as strings
+                String possibleChar = (String)result;
+                
+                if(possibleChar.startsWith("\'") && possibleChar.endsWith("\'") && possibleChar.length()==3)
+                  style = InteractionsDocument.CHARACTER_RETURN_STYLE;                
+              }
+              if(result instanceof Number) {
+                style = InteractionsDocument.NUMBER_RETURN_STYLE;
+              }
+              _mainJVM.interpretResult(new ValueResult(resultString, style));
 
             }
           }

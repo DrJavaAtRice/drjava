@@ -81,6 +81,9 @@ public final class IndentInfoTest extends TestCase {
       protected void addUndoRedo(AbstractDocument.DefaultDocumentEvent chng, Runnable undoCommand, Runnable doCommand) {
         //Do nothing
       }
+      protected void _styleChanged() {
+       //Do nothing 
+      }
     };
   }
 

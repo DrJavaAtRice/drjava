@@ -1081,6 +1081,46 @@ public interface OptionConstants {
   public static final BooleanOption ALLOW_PRIVATE_ACCESS =
     new BooleanOption("allow.private.access", Boolean.FALSE);
 
+  /* ---------- COMPILER OPTIONS ------------- */
+  
+  /**
+   * Whether to show unchecked warnings
+   */
+  public static final BooleanOption SHOW_UNCHECKED_WARNINGS = 
+    new BooleanOption("show.unchecked.warnings", Boolean.TRUE);
+  
+  /**
+   * Whether to show deprecation warnings
+   */
+  public static final BooleanOption SHOW_DEPRECATION_WARNINGS = 
+    new BooleanOption("show.deprecation.warnings", Boolean.TRUE);
+    
+  /**
+   * Whether to show finally warnings
+   */
+  public static final BooleanOption SHOW_FINALLY_WARNINGS = 
+    new BooleanOption("show.finally.warnings", Boolean.FALSE);
+  
+  /**
+   * Whether to show serial warnings
+   */
+  public static final BooleanOption SHOW_SERIAL_WARNINGS = 
+    new BooleanOption("show.serial.warnings", Boolean.FALSE);
+  
+  /**
+   * Whether to show serial warnings
+   */
+  public static final BooleanOption SHOW_FALLTHROUGH_WARNINGS = 
+    new BooleanOption("show.fallthrough.warnings", Boolean.FALSE);
+  
+  /**
+   * Whether to show serial warnings
+   */
+  public static final BooleanOption SHOW_PATH_WARNINGS = 
+    new BooleanOption("show.path.warnings", Boolean.FALSE);
+  
+  
+  
   /* ---------- Undisplayed Options ---------- */
 
   /**

@@ -925,7 +925,8 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
      */
     public Object forValueResult(ValueResult that) {
       String result = that.getValueStr();
-      _interactionsModel.replReturnedResult(result);
+      String style = that.getStyle();
+      _interactionsModel.replReturnedResult(result, style);
       return null;
     }
 
@@ -973,7 +974,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
       throw new IllegalStateException("Cannot change the input listener of dummy interactions model!");
     }
     public void replReturnedVoid() {}
-    public void replReturnedResult(String result) {}
+    public void replReturnedResult(String result, String style) {}
     public void replThrewException(String exceptionClass,
                                    String message,
                                    String stackTrace,

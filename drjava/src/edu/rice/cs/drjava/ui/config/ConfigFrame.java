@@ -409,6 +409,9 @@ public class ConfigFrame extends JFrame {
 
     PanelTreeNode miscNode = _createPanel("Miscellaneous");
     _setupMiscPanel(miscNode.getPanel());
+    
+    PanelTreeNode compilerOptionsNode = _createPanel("Compiler Options");
+    _setupCompilerPanel(compilerOptionsNode.getPanel());
 
     // Expand the display options node
     //DrJava.consoleOut().println("expanding path...");
@@ -799,7 +802,31 @@ public class ConfigFrame extends JFrame {
 
     panel.displayComponents();
   }
-
+  
+  /**
+   * Adds all of the components for the Compiler Options Panel of the preferences window
+   */
+  private void _setupCompilerPanel(ConfigPanel panel) {
+    panel.addComponent(new BooleanOptionComponent(OptionConstants.SHOW_UNCHECKED_WARNINGS, "Show Unchecked Warnings", this, 
+                                                  "<html>Give more detail for unchecked conversion warnings that are mandated<br>" + 
+                                                  "by the Java Language Specification.</html>"));
+    panel.addComponent(new BooleanOptionComponent(OptionConstants.SHOW_DEPRECATION_WARNINGS, "Show Deprecation Warnings", this, 
+                                                  "<html>Show a description of each use or override of a deprecated member or class.</html>"));
+    panel.addComponent(new BooleanOptionComponent(OptionConstants.SHOW_PATH_WARNINGS, "Show Path Warnings", this, 
+                                                  "<html>Warn about nonexistent path (classpath, sourcepath, etc) directories.</html>"));
+    panel.addComponent(new BooleanOptionComponent(OptionConstants.SHOW_SERIAL_WARNINGS, "Show Serial Warnings", this, 
+                                                  "<html>Warn about missing <code>serialVersionUID</code> definitions on serializable classes.</html>"));
+    panel.addComponent(new BooleanOptionComponent(OptionConstants.SHOW_FINALLY_WARNINGS, "Show Finally Warnings", this,
+                                                  "<html>Warn about <code>finally<code> clauses that cannot complete normally.</html>"));
+    panel.addComponent(new BooleanOptionComponent(OptionConstants.SHOW_FALLTHROUGH_WARNINGS, "Show Fall-Through Warnings", this,
+                                                  "<html>Check <code>switch</code> blocks for fall-through cases and provide a warning message for any that are found.<br>"+
+                                                  "Fall-through cases are cases in a <code>switch</code> block, other than the last case in the block,<br>"+
+                                                  "whose code does not include a <code>break</code> statement, allowing code execution to \"fall through\"<br>"+
+                                                  "from that case to the next case.</html>"));
+    panel.displayComponents();
+    
+  }
+  
   /**
    * Private class to handle rendering of tree nodes, each of which
    * corresponds to a ConfigPanel.

@@ -290,6 +290,19 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     }
   }
   
+  
+  protected void _styleChanged() 
+  {
+    throwErrorHuh();
+    int length = getLength() - _currentLocation;
+    //DrJava.consoleErr().println("Changed: " + _currentLocation + ", " + length);
+    DocumentEvent evt = new DefaultDocumentEvent(_currentLocation,
+                                                 length,
+                                                 DocumentEvent.EventType.CHANGE);
+    fireChangedUpdate(evt);
+  } 
+  
+  
   /**
    * Returns whether this document is currently untitled
    * (indicating whether it has a file yet or not).

@@ -45,12 +45,16 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.ui;
 
+import edu.rice.cs.drjava.model.definitions.ColoringView;
 import edu.rice.cs.drjava.model.repl.*;
 import edu.rice.cs.drjava.model.repl.InteractionsDocumentTest.TestBeep;
 import edu.rice.cs.drjava.model.repl.InteractionsModelTest.TestInteractionsModel;
 import edu.rice.cs.util.text.DocumentAdapterException;
 
+import javax.swing.text.*;
+
 import junit.framework.*;
+
 
 /**
  * Test functions of InteractionsPane.
@@ -296,4 +300,11 @@ public final class InteractionsPaneTest extends TestCase {
       assertEquals("Should have returned the correct text.", "\n\n", buf.toString());
     }
   }
+  
+//  public void testInteractionsPaneHasColoringView() {
+//    EditorKit ek = _pane.createDefaultEditorKit();
+//    assertEquals("Should be an InteractionsEditorKit", InteractionsEditorKit.class, ek.getClass());
+//    assertEquals("View Factory should return a Coloring View", ColoringView.class, ek.getViewFactory().create(null).getClass());
+//    
+//  }
 }

@@ -47,13 +47,12 @@ package edu.rice.cs.drjava.model.compiler;
 
 import  java.io.File;
 
-
 /**
  * The minimum interface that a compiler must meet to be used by DrJava.
  * @version $Id$
  */
 public interface CompilerInterface {
-
+  
   /**
    * Compile the given files.
    * @param files Source files to compile.

@@ -90,33 +90,9 @@ public abstract class AbstractDJPane extends JTextPane implements OptionConstant
   
   protected final StyledDocument NULL_DOCUMENT = new DefaultStyledDocument();
   
-  /**
-   * Looks for changes in the caret position to see if a paren/brace/bracket
-   * highlight is needed.
-   */
-  protected CaretListener _matchListener = new CaretListener() {
-    /**
-     * Checks caret position to see if it needs to set or remove a highlight
-     * from the document.
-     * When the cursor is immediately right of ')', '}', or ']', it highlights
-     * up to the matching open paren/brace/bracket.
-     * @param e the event fired by the caret position change
-     */
-    public void caretUpdate(CaretEvent e) {
-      //_doc().setCurrentLocation(getCaretPosition());
-      getDJDocument().setCurrentLocation(getCaretPosition());
-      _removePreviousHighlight();
-      _updateMatchHighlight();
-    }
-  };
-  
   //--------- CONSTRUCTOR ----------
   AbstractDJPane(StyledDocument doc) {
     super(doc);
-    
-    // Add listener that checks if position in the document has changed.
-    // If it has changed, check and see if we should be highlighting matching braces.
-    this.addCaretListener(_matchListener);
     setContentType("text/java");
   }
   
@@ -125,7 +101,7 @@ public abstract class AbstractDJPane extends JTextPane implements OptionConstant
   /**
    * Updates the highlight if there is any.
    */
-  private void _updateMatchHighlight() {
+  protected void _updateMatchHighlight() {
     int to = getCaretPosition();
     int from = getDJDocument().balanceBackward(); //_doc()._reduced.balanceBackward();
     if (from > -1) {
@@ -160,7 +136,7 @@ public abstract class AbstractDJPane extends JTextPane implements OptionConstant
   /**
    * Removes the previous highlight so document is cleared when caret position changes.
    */
-  private void _removePreviousHighlight() {
+  protected void _removePreviousHighlight() {
     if (_matchHighlight != null) {
       _matchHighlight.remove();
       //_highlightManager.removeHighlight((HighlightManager.HighlightInfo)_matchHighlight);

@@ -67,6 +67,12 @@ public class InteractionsPane extends JTextPane implements OptionConstants {
   // this can't be placed in the constructor.
   protected HighlightManager _highlightManager = null;
 
+  private static StyledEditorKit EDITOR_KIT;
+  
+  static {
+    EDITOR_KIT = new InteractionsEditorKit();    
+  }
+  
   /**
    *  Highlight painter for syntax errors, currently borrowing breakpoint color.
    */
@@ -114,7 +120,7 @@ public class InteractionsPane extends JTextPane implements OptionConstants {
     new ForegroundColorListener(this);
     new BackgroundColorListener(this);
   }
-
+  
   /**
    * Assigns the given keystroke to the given action in this pane.
    * @param stroke keystroke that triggers the action
@@ -159,6 +165,17 @@ public class InteractionsPane extends JTextPane implements OptionConstants {
     }
     _highlightManager.addHighlight(offset, offset+length, ERROR_PAINTER);
   }
+  
+  
+  /**
+   * Overriding this method ensures that all new documents created in this
+   * editor pane use our editor kit (and thus our model).
+   */
+  protected EditorKit createDefaultEditorKit() {
+    //return _editorKit;
+    return EDITOR_KIT;
+  }
+
   
 //  public void requestFocus() {
 //    super.requestFocus();

@@ -110,7 +110,7 @@ public interface InteractionsModelCallback {
    *               because returning the Object directly would require the
    *               data type to be serializable.
    */
-  public void replReturnedResult(String result);
+  public void replReturnedResult(String result, String style);
 
   /**
    * Signifies that the most recent interpretation was ended

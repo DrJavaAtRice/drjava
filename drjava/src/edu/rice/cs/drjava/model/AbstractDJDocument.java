@@ -466,15 +466,7 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
    * I think this is because the UI only actually paints the things on the
    * screen anyway.
    */
-  private void _styleChanged() {
-    throwErrorHuh();
-    int length = getLength() - _currentLocation;
-    //DrJava.consoleErr().println("Changed: " + _currentLocation + ", " + length);
-    DocumentEvent evt = new DefaultDocumentEvent(_currentLocation,
-                                                 length,
-                                                 DocumentEvent.EventType.CHANGE);
-    fireChangedUpdate(evt);
-  }
+  protected abstract void _styleChanged(); 
   
   
   /**

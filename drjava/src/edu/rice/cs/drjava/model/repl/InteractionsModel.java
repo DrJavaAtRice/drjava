@@ -126,6 +126,8 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   /** The input listener to listen for requests to System.in. */
   protected InputListener _inputListener;
 
+  protected InteractionsDocumentAdapter _adapter;
+  
   /**
    * Constructs an InteractionsModel.
    * @param adapter DocumentAdapter to use in the InteractionsDocument
@@ -136,6 +138,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
                            int writeDelay) {
     _writeDelay = writeDelay;
     _document = new InteractionsDocument(adapter, historySize);
+    _adapter = adapter;
     _waitingForFirstInterpreter = true;
     _interpreterUsed = false;
     _interpreterLock = new Object();
@@ -639,8 +642,8 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
    *               because returning the Object directly would require the
    *               data type to be serializable.
    */
-  public void replReturnedResult(String result) {
-    _docAppend(result + _newLine, InteractionsDocument.DEFAULT_STYLE);
+  public void replReturnedResult(String result, String style) {
+    _docAppend(result + _newLine, style);
     _interactionIsOver();
   }
 
@@ -747,6 +750,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
       }
 
       _notifyInterpreterResetting();
+      _adapter.clearColoring();
     }
   }
 

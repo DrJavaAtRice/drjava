@@ -71,6 +71,14 @@ public class InteractionsDocument extends ConsoleDocument {
   /** Style for debugger messages */
   public static final String DEBUGGER_STYLE = "debugger";
 
+  public static final String OBJECT_RETURN_STYLE = "object.return.style";
+  
+  public static final String STRING_RETURN_STYLE = "string.return.style";
+  
+  public static final String CHARACTER_RETURN_STYLE = "character.return.style";
+  
+  public static final String NUMBER_RETURN_STYLE = "number.return.style";
+  
   /**
    * String to print when the document is reset.
    * Defaults to "Welcome to DrJava."
@@ -86,7 +94,7 @@ public class InteractionsDocument extends ConsoleDocument {
    * Reset the document on startup.  Uses a history with configurable size.
    * @param document DocumentAdapter to use for the model
    */
-  public InteractionsDocument(DocumentAdapter document) {
+  public InteractionsDocument(InteractionsDocumentAdapter document) {
     this(document, new History());
   }
 
@@ -96,7 +104,7 @@ public class InteractionsDocument extends ConsoleDocument {
    * @param document DocumentAdapter to use for the model
    * @param maxHistorySize Number of commands to remember in the history
    */
-  public InteractionsDocument(DocumentAdapter document, int maxHistorySize) {
+  public InteractionsDocument(InteractionsDocumentAdapter document, int maxHistorySize) {
     this(document, new History(maxHistorySize));
   }
 
@@ -105,7 +113,7 @@ public class InteractionsDocument extends ConsoleDocument {
    * @param document DocumentAdapter to use for the model
    * @param history History of commands
    */
-  public InteractionsDocument(DocumentAdapter document, History history) {
+  public InteractionsDocument(InteractionsDocumentAdapter document, History history) {
     super(document);
     _history = history;
 

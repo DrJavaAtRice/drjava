@@ -45,6 +45,7 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.repl;
 
+import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.model.repl.newjvm.InterpreterJVM;
 
 /**
@@ -99,7 +100,7 @@ public class SimpleInteractionsModel extends InteractionsModel {
       Object result = _interpreter.interpret(toEval);
       if (result != Interpreter.NO_RESULT) {
         _docAppend(String.valueOf(result) + System.getProperty("line.separator"),
-                   InteractionsDocument.DEFAULT_STYLE);
+                   InteractionsDocument.OBJECT_RETURN_STYLE);
       }
     }
     catch (ExceptionReturnedException e) {
