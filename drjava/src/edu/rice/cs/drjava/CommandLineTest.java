@@ -124,7 +124,7 @@ public class CommandLineTest extends TestCase {
       nof3.delete();
     } catch (IOException e) {
       System.err.print("createTempFile failed.  This should not happen.");
-      throw new RuntimeException(e);
+      throw new RuntimeException(e.toString());
     }
   }
 
