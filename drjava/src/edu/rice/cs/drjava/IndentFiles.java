@@ -124,10 +124,10 @@ public class IndentFiles {
                                  int indentLevel,
                                  boolean silent)
   {
-    System.setProperty("java.awt.headless", "true"); // attempt headless AWT
+    //System.setProperty("java.awt.headless", "true"); // attempt headless AWT
     //System.out.println("Using Headless AWT: "+isHeadless());
-    
     Indenter indenter = new Indenter(indentLevel);
+    
     if (!silent) System.out.println("DrJava - Indenting files:");
     for (int i = 0; i < filenames.size(); i++) {
       String fname = filenames.get(i);
