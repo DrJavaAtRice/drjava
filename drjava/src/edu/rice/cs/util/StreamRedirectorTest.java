@@ -47,6 +47,24 @@ import java.io.*;
  */
 public class StreamRedirectorTest extends TestCase {
   /**
+   * Tests that an InputStreamRedirector correctly rejects empty input.
+   */
+  public void testEmptyInput() throws IOException {
+    InputStreamRedirector isr = new InputStreamRedirector() {
+      protected String _getInput() {
+        return "";
+      }
+    };
+    try {
+      isr.read();
+      fail("Should have thrown IOException on empty input!");
+    }
+    catch (IOException ioe) {
+      // correct behavior
+    }
+  }
+
+  /**
    * Tests that an InputStreamRedirector correctly redirects input that is static.
    */
   public void testStaticInput() throws IOException {
@@ -101,8 +119,9 @@ public class StreamRedirectorTest extends TestCase {
       br.readLine();
       fail("_getInput() should be called again!");
     }
-    catch(RuntimeException ex) {
-      // correct behavior
+    catch(RuntimeException re) {
+      assertEquals("Should have thrown correct exception.",
+                   "_getInput() has already been called!", re.getMessage());
     }
   }
 }

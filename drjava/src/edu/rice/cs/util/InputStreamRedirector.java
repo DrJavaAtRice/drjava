@@ -40,24 +40,24 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.util;
 
 import java.io.*;
+import java.util.ArrayList;
 
 /**
  * Redirects requests for input through the abstract method _getInput().
  * @version $Id$
  */
-public abstract class InputStreamRedirector extends PipedInputStream {
+public abstract class InputStreamRedirector extends InputStream {
   /**
-   * The piped output stream that will write the output from _getInput()
-   * to the actual input stream.
+   * Buffer that stores the current set of bytes.
    */
-  protected PipedOutputStream _os;
+  protected ArrayList _buffer;
 
   /**
    * constructs a new InputStreamRedirector.
    * @throws IOException if an I/O error occurs
    */
   public InputStreamRedirector() throws IOException {
-    _os = new PipedOutputStream(this);
+    _buffer = new ArrayList();
   }
 
   /**
@@ -65,9 +65,59 @@ public abstract class InputStreamRedirector extends PipedInputStream {
    * nothing is currently available.  Subclasses should return the appropriate
    * input to feed to the input stream.  When using a readLine() method, be sure
    * to append a newline to the end of the input.
-   * @return the input to the stream
+   * @return the input to the stream, not the empty string
    */
   protected abstract String _getInput() throws IOException;
+
+  /**
+   * Reads a single "line" of input into the buffer, i.e. makes a single call
+   * to _getInput() and puts the result into the buffer.
+   * @throws IOException if _getInput() returns the empty string
+   */
+  private void _readInputIntoBuffer() throws IOException {
+    String input = _getInput();
+    if (input.equals("")) {
+      throw new IOException("_getInput() must return non-empty input!");
+    }
+    for(int i = 0; i < input.length(); i++) {
+      _buffer.add(new Character(input.charAt(i)));
+    }
+  }
+
+  /**
+   * tries to fill b with bytes from the user, prompting for input only
+   * if the stream is already empty.
+   * @param b the byte array to fill
+   * @return the number of bytes successfully read
+   */
+  public int read(byte[] b) throws IOException {
+    return this.read(b, 0, b.length);
+  }
+
+  /**
+   * tries to fill b with bytes from the user, prompting for input only
+   * if the stream is already empty.
+   * @param b the byte array to fill
+   * @param off the offset in the byte array
+   * @param len the number of characters to try to read
+   * @return the number of bytes successfully read
+   */
+  public int read(byte[] b, int off, int len) throws IOException {
+    int numRead = 0;
+    if (available() == 0) {
+      _readInputIntoBuffer();
+    }
+    for(int i = off; i < off + len; i++) {
+      if (available() == 0) {
+        break;
+      }
+      else {
+        b[i] = (byte) ((Character) _buffer.remove(0)).charValue();
+        numRead++;
+      }
+    }
+    return numRead;
+  }
 
   /**
    * overrides the read() in PipedInputStream so that if the stream is empty
@@ -76,12 +126,16 @@ public abstract class InputStreamRedirector extends PipedInputStream {
    * @throws IOException if an I/O exception
    */
   public int read() throws IOException {
-    if(available() == 0) {
-      String input = _getInput();
-      for(int i = 0; i < input.length(); i++) {
-        _os.write((int) input.charAt(i));
-      }
+    if (available() == 0) {
+      _readInputIntoBuffer();
     }
-    return super.read();
+    return (int) ((Character) _buffer.remove(0)).charValue();
+  }
+
+  /**
+   * @return the number of characters available in this stream.
+   */
+  public int available() {
+    return _buffer.size();
   }
 }
