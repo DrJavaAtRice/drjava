@@ -4,25 +4,25 @@
  * http://sourceforge.net/projects/drjava/ or http://www.drjava.org/
  *
  * DrJava Open Source License
- * 
+ *
  * Copyright (C) 2001-2003 JavaPLT group at Rice University (javaplt@rice.edu)
  * All rights reserved.
  *
  * Developed by:   Java Programming Languages Team
  *                 Rice University
  *                 http://www.cs.rice.edu/~javaplt/
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a 
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
- * to deal with the Software without restriction, including without 
- * limitation the rights to use, copy, modify, merge, publish, distribute, 
- * sublicense, and/or sell copies of the Software, and to permit persons to 
- * whom the Software is furnished to do so, subject to the following 
+ * to deal with the Software without restriction, including without
+ * limitation the rights to use, copy, modify, merge, publish, distribute,
+ * sublicense, and/or sell copies of the Software, and to permit persons to
+ * whom the Software is furnished to do so, subject to the following
  * conditions:
- * 
- *     - Redistributions of source code must retain the above copyright 
+ *
+ *     - Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimers.
- *     - Redistributions in binary form must reproduce the above copyright 
+ *     - Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimers in the
  *       documentation and/or other materials provided with the distribution.
  *     - Neither the names of DrJava, the JavaPLT, Rice University, nor the
@@ -32,15 +32,15 @@
  *       use the term "DrJava" as part of their names without prior written
  *       permission from the JavaPLT group.  For permission, write to
  *       javaplt@rice.edu.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
- * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR 
- * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, 
- * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR 
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+ * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  * OTHER DEALINGS WITH THE SOFTWARE.
- * 
+ *
 END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.definitions.reducedmodel;
@@ -48,14 +48,14 @@ package edu.rice.cs.drjava.model.definitions.reducedmodel;
 /**
  * Keeps track of newlines, comment blocks, and single and double-quoted strings.
  * This reduced sub-model is used for coloring purposes.  Given the information
- * contained here, the DefinitionsEditorKit can paint strings, comments, and 
+ * contained here, the DefinitionsEditorKit can paint strings, comments, and
  * regular code in different colors.  DefinitionsEditorKit colors keywords
  * by directly reading DefinitionsDocument, the "full-scale" model.
  * @version $Id$
  */
 
 public class ReducedModelComment extends AbstractReducedModel {
-  
+
   /**Can be used by other classes to walk through the list of comment chars*/
   TokenList.Iterator _walker;
 
@@ -67,14 +67,14 @@ public class ReducedModelComment extends AbstractReducedModel {
     super();
     _walker = _cursor._copy();
   }
-  
+
   public void insertChar(char ch) {
     switch(ch) {
       case '*': insertSpecial("*"); break;
       case '/': insertSpecial("/"); break;
       case '\n': insertNewline(); break;
       case '\\': insertSpecial("\\"); break;
-      case '\'': insertQuote("'"); break; 
+      case '\'': insertQuote("'"); break;
       case '\"': insertQuote("\""); break;
       default:
         _insertGap(1); break;
@@ -120,7 +120,7 @@ public class ReducedModelComment extends AbstractReducedModel {
     // Not empty, not at start, if at end check the previous brace
     if (_cursor.atEnd()) {
       _checkPreviousInsertSpecial(special);
-    }      
+    }
     // If inside a double character brace, break it.
     else if ((_cursor.getBlockOffset() > 0) && _cursor.current().isMultipleCharBrace()) {
       _cursor._splitCurrentIfCommentBlock(true,true);
@@ -136,21 +136,21 @@ public class ReducedModelComment extends AbstractReducedModel {
       _cursor.insertBraceToGap(special);
       _cursor.prev();
       _cursor.prev();
-      _updateBasedOnCurrentState();   
+      _updateBasedOnCurrentState();
       // restore cursor state
       _cursor.next();
       _cursor.next();
       // update based on current state
-    }   
+    }
     //if at start of double character brace, break it.
     else if ((_cursor.getBlockOffset() == 0) && _cursor.current().isMultipleCharBrace()) {
       //if we're free there won't be a block comment close so if there
-      //is then we don't want to break it.  If the special character is 
+      //is then we don't want to break it.  If the special character is
       // a backslash, we want to break the following escape sequence if there
       // is one.
-      _cursor._splitCurrentIfCommentBlock(false,special.equals("\\")); 
+      _cursor._splitCurrentIfCommentBlock(false,special.equals("\\"));
       //leaving us at start
-      
+
       _checkPreviousInsertSpecial(special);
     }
     else {
@@ -158,12 +158,12 @@ public class ReducedModelComment extends AbstractReducedModel {
     }
     return;
   }
- 
+
   /**
    * Checks before point of insertion to make sure we don't need to combine.
    * Delegates work to _checkPreviousInsertBackSlash and _checkPreviousInsertCommentChar,
    * depending on what's being inserted into the document.
-   */  
+   */
   private void _checkPreviousInsertSpecial(String special)
      {
        if (special.equals("\\"))
@@ -171,12 +171,12 @@ public class ReducedModelComment extends AbstractReducedModel {
        else
          _checkPreviousInsertCommentChar(special);
      }
-         
+
   /**
   * Checks before point of insertion to make sure we don't need to combine
   * backslash with another backslash (yes, they too can be escaped).
   */
-  
+
   private void _checkPreviousInsertBackSlash() {
     if (!_cursor.atStart()  && !_cursor.atFirstItem()) {
       if (_cursor.prevItem().getType().equals("\\")) {
@@ -196,11 +196,11 @@ public class ReducedModelComment extends AbstractReducedModel {
       _cursor.next();
     }
   }
-  
+
   /**
   * Checks before the place of insert to make sure there are no preceding
   * slashes with which the inserted slash must combine.  It then performs
-  * the insert of either (/), (/ /), (/ *) or (* /).   
+  * the insert of either (/), (/ /), (/ *) or (* /).
   */
   private void _checkPreviousInsertCommentChar(String special) {
     if (!_cursor.atStart()  && !_cursor.atFirstItem()) {
@@ -211,7 +211,7 @@ public class ReducedModelComment extends AbstractReducedModel {
             _updateBasedOnCurrentState();
             return;
           }
-      // if we're after a star, 
+      // if we're after a star,
       else if ((_cursor.prevItem().getType().equals("*")) &&
                (getStateAtCurrent() == INSIDE_BLOCK_COMMENT) &&
                special.equals("/"))
@@ -231,7 +231,7 @@ public class ReducedModelComment extends AbstractReducedModel {
     else
       _cursor.next();
   }
-  
+
   /**
   * Inserts an end-of-line character.
   * <OL>
@@ -271,7 +271,7 @@ public class ReducedModelComment extends AbstractReducedModel {
       _cursor.insertBraceToGap("\n");
       _cursor.prev();
       _cursor.prev();
-      _updateBasedOnCurrentState();   
+      _updateBasedOnCurrentState();
       // restore cursor state
       _cursor.next();
       _cursor.next();
@@ -281,7 +281,7 @@ public class ReducedModelComment extends AbstractReducedModel {
     }
     return;
   }
-  
+
   private void _insertNewEndOfLine() {
     _cursor.insertNewBrace("\n");
     _cursor.prev();
@@ -341,7 +341,7 @@ public class ReducedModelComment extends AbstractReducedModel {
       _cursor.insertBraceToGap(quote);
       _cursor.prev();
       _cursor.prev();
-      _updateBasedOnCurrentState();   
+      _updateBasedOnCurrentState();
       // restore cursor state
       _cursor.next();
       _cursor.next();
@@ -352,21 +352,21 @@ public class ReducedModelComment extends AbstractReducedModel {
     }
     return;
   }
-  
+
   /**
    * Helper function for insertQuote.  Creates a new quote Brace and puts it in the
    * reduced model.
    * @param quote the quote to insert
    */
   private void _insertNewQuote(String quote) {
-    String insert = _getQuoteType(quote);    
+    String insert = _getQuoteType(quote);
     _cursor.insertNewBrace(insert);
     _cursor.prev();
     _updateBasedOnCurrentState();
     _cursor.next();
     _cursor.setBlockOffset(0);
   }
-  
+
   /**
    * Helper function for insertNewQuote.  In the case where a backslash
    * precedes the point of insertion, it removes the backslash and returns
@@ -387,8 +387,8 @@ public class ReducedModelComment extends AbstractReducedModel {
     else {
       return quote;
     }
-  }  
-  
+  }
+
   /**
    * Inserts a gap between the characters in a multiple character brace.
    * This function is called by AbstractReducedModel's method insertGap
@@ -399,19 +399,19 @@ public class ReducedModelComment extends AbstractReducedModel {
    * @param length the size of the Gap to be inserted in characters
    */
   protected void insertGapBetweenMultiCharBrace(int length) {
-    if (_cursor.getBlockOffset() > 1) {      
-      throw new IllegalArgumentException("OFFSET TOO BIG:  " + _cursor.getBlockOffset());  
-    }    
-    _cursor._splitCurrentIfCommentBlock(true, true);      
+    if (_cursor.getBlockOffset() > 1) {
+      throw new IllegalArgumentException("OFFSET TOO BIG:  " + _cursor.getBlockOffset());
+    }
+    _cursor._splitCurrentIfCommentBlock(true, true);
     _cursor.next();
-    _insertNewGap(length);  //inserts gap and goes to next item  
+    _insertNewGap(length);  //inserts gap and goes to next item
     // we have to go back two tokens; we don't want to use move because it could
     // throw us past start if there was only one character before us and we went
     // the usual 2 spaces before.  There would have to be a check and a branch
     // depending on conditions that way.
     _cursor.prev();
     _cursor.prev();
-    _updateBasedOnCurrentState();   
+    _updateBasedOnCurrentState();
     // restore cursor state
     _cursor.next();
     _cursor.next();
@@ -423,16 +423,16 @@ public class ReducedModelComment extends AbstractReducedModel {
   *                           characters of the broken double comment.
   * Deleting special chars: Start from previous char if it exists.
   * Begins updating at current character.  /./ would not become // because
-  * current is in the middle. 
+  * current is in the middle.
   * Double character comments inside of a quote or a comment are broken.
   */
-  
+
   private void _updateBasedOnCurrentState() {
     TokenList.Iterator copyCursor = _cursor._copy();
     copyCursor.updateBasedOnCurrentState();
     copyCursor.dispose();
   }
-     
+
  /**
   * Updates the BraceReduction to reflect cursor movement.
   * Negative values move left from the cursor, positive values move
@@ -442,7 +442,7 @@ public class ReducedModelComment extends AbstractReducedModel {
   public void move(int count) {
     _cursor.move(count);
   }
-  
+
   /**
   * <P>Update the BraceReduction to reflect text deletion.</P>
   * @param count indicates the size and direction of text deletion.
@@ -456,12 +456,12 @@ public class ReducedModelComment extends AbstractReducedModel {
     }
     _cursor.delete(count);
 
-    // Changes in ReducedModelComment can entail state changes in the 
-    // document.  For this reason, we have to call 
+    // Changes in ReducedModelComment can entail state changes in the
+    // document.  For this reason, we have to call
     // _updateBasedOnCurrentState because there is no need to call it
     // in ReducedModelBrace, and factoring it out would be stupid and
     // wasteful.
-    
+
     // Move back 2 or as far back as the document will allow
     int absOff = this.absOffset();
     int movement;
@@ -476,29 +476,29 @@ public class ReducedModelComment extends AbstractReducedModel {
     _cursor.move(movement);
     return;
   }
-  
-  
+
+
   /**In order to interface with the ReducedModelComment two functions are
   provided. One resets the walker and the other will both move the cursor
   by x and return the state at that new location.
   Once the new value has returned all new calculations will be relative to
   that spot until the walker is reset to the _cursor.
   */
-  
+
   /**
    * Returns the state at the relLocation, where relLocation is the location
    * relative to the walker
    * @param relLocation distance from walker to get state at.
    */
-  protected ReducedModelState stateAtRelLocation(int relLocation) {
+  protected ReducedModelState moveWalkerGetState(int relLocation) {
     _walker.move(relLocation);
     return _walker.getStateAtCurrent();
   }
-  
+
   /**
    * Resets the walker to the current position in document
    */
-  protected void resetLocation() {
+  protected void resetWalkerLocationToCursor() {
     _walker.dispose();
     _walker = _cursor._copy();
   }
@@ -511,7 +511,7 @@ public class ReducedModelComment extends AbstractReducedModel {
     braceInfo.distToNewline = braceInfo.distToPrevNewline;
     return;
   }
-  
+
   /**
    *returns distance to after newline
    */
@@ -527,24 +527,24 @@ public class ReducedModelComment extends AbstractReducedModel {
              walkcount += copyCursor.current().getSize();
              copyCursor.prev();
            }
-    
+
     if (copyCursor.atStart()) {
       return -1;
     }
     return walkcount;
   }
-  
+
   void getDistToIndentNewline(IndentInfo braceInfo) {
     int walkcount = -1;
     TokenList.Iterator copyCursor = _cursor._copy();
-    
+
     if (braceInfo.distToBrace == -1 || copyCursor.atStart()) { // no brace
       return;
     }
-    
-    copyCursor.move(-braceInfo.distToBrace);    
+
+    copyCursor.move(-braceInfo.distToBrace);
     walkcount = _getDistToPreviousNewline(copyCursor);
-    
+
     if (walkcount == -1) {
       braceInfo.distToNewline = -1;
     }
@@ -553,7 +553,7 @@ public class ReducedModelComment extends AbstractReducedModel {
     }
     return;
   }
-  
+
 /**
  * Computes the distance to the beginning of the line containing the brace enclosing
  * the current location.  Stores this info in the IndentInfo field distToNewlineCurrent.
@@ -561,14 +561,14 @@ public class ReducedModelComment extends AbstractReducedModel {
   void getDistToCurrentBraceNewline(IndentInfo braceInfo) {
     int walkcount = -1;
     TokenList.Iterator copyCursor = _cursor._copy();
-    
+
     if (braceInfo.distToBraceCurrent == -1 || copyCursor.atStart()) { // no brace
       return;
     }
-    
-    copyCursor.move(-braceInfo.distToBraceCurrent);    
+
+    copyCursor.move(-braceInfo.distToBraceCurrent);
     walkcount = _getDistToPreviousNewline(copyCursor);
-    
+
     if (walkcount == -1) {
       braceInfo.distToNewlineCurrent = -1;
     }
@@ -577,7 +577,7 @@ public class ReducedModelComment extends AbstractReducedModel {
     }
     return;
   }
-  
+
   /**
   * Gets distance to previous newline, relLoc is the distance
   * back from the cursor that we want to start searching.
@@ -592,7 +592,7 @@ public class ReducedModelComment extends AbstractReducedModel {
     }
     return dist + relLoc;
   }
-  
+
   /**
   * returns the distance to the space before the next newline
   * returns the distance to the end of the document if there is no newline
@@ -607,9 +607,9 @@ public class ReducedModelComment extends AbstractReducedModel {
     }
     int walkcount = copyCursor.current().getSize() - _cursor.getBlockOffset();
     copyCursor.next();
-    
+
     while ((!copyCursor.atEnd()) &&
-           (!(copyCursor.current().getType().equals("\n")))) 
+           (!(copyCursor.current().getType().equals("\n"))))
     {
       //copyCursor.current().getState() == FREE))){
       walkcount += copyCursor.current().getSize();

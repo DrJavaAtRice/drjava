@@ -302,12 +302,12 @@ public abstract class AbstractReducedModel implements ReducedModelStates {
    * relative to the walker
    * @param relLocation distance from walker to get state at.
    */
-  protected abstract ReducedModelState stateAtRelLocation(int relLocation);
+  protected abstract ReducedModelState moveWalkerGetState(int relLocation);
   
   /**
    * Resets the walker to the current position in document
    */
-  protected abstract void resetLocation();
+  protected abstract void resetWalkerLocationToCursor();
 
   /**
    * Get the ReducedToken currently pointed at by the cursor.

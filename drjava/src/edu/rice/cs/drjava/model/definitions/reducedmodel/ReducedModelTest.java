@@ -4,25 +4,25 @@
  * http://sourceforge.net/projects/drjava/ or http://www.drjava.org/
  *
  * DrJava Open Source License
- * 
+ *
  * Copyright (C) 2001-2003 JavaPLT group at Rice University (javaplt@rice.edu)
  * All rights reserved.
  *
  * Developed by:   Java Programming Languages Team
  *                 Rice University
  *                 http://www.cs.rice.edu/~javaplt/
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a 
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
- * to deal with the Software without restriction, including without 
- * limitation the rights to use, copy, modify, merge, publish, distribute, 
- * sublicense, and/or sell copies of the Software, and to permit persons to 
- * whom the Software is furnished to do so, subject to the following 
+ * to deal with the Software without restriction, including without
+ * limitation the rights to use, copy, modify, merge, publish, distribute,
+ * sublicense, and/or sell copies of the Software, and to permit persons to
+ * whom the Software is furnished to do so, subject to the following
  * conditions:
- * 
- *     - Redistributions of source code must retain the above copyright 
+ *
+ *     - Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimers.
- *     - Redistributions in binary form must reproduce the above copyright 
+ *     - Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimers in the
  *       documentation and/or other materials provided with the distribution.
  *     - Neither the names of DrJava, the JavaPLT, Rice University, nor the
@@ -32,15 +32,15 @@
  *       use the term "DrJava" as part of their names without prior written
  *       permission from the JavaPLT group.  For permission, write to
  *       javaplt@rice.edu.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
- * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR 
- * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, 
- * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR 
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+ * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  * OTHER DEALINGS WITH THE SOFTWARE.
- * 
+ *
 END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.definitions.reducedmodel;
@@ -55,10 +55,10 @@ import  junit.extensions.*;
  * of the reduced model.
  * @version $Id$
  */
-public final class ReducedModelTest extends BraceReductionTestCase 
-  implements ReducedModelStates 
+public final class ReducedModelTest extends BraceReductionTestCase
+  implements ReducedModelStates
 {
-   
+
   protected ReducedModelControl model0;
   protected ReducedModelControl model1;
   protected ReducedModelControl model2;
@@ -92,7 +92,7 @@ public final class ReducedModelTest extends BraceReductionTestCase
 
   /**
    * put your documentation comment here
-   * @return 
+   * @return
    */
   public static Test suite() {
     return  new TestSuite(ReducedModelTest.class);
@@ -292,9 +292,9 @@ public final class ReducedModelTest extends BraceReductionTestCase
 
   /**
    * Test to ensure that a complex sequence of multi-lined Brace entries does not fail.
-   * Originally, the insertBraceInGap() had the chance of inserting at the beginning 
+   * Originally, the insertBraceInGap() had the chance of inserting at the beginning
    * of a gap, in which case the gap to be split was actually never shrunk and a new
-   * gap of size 0 is added after the newly inserted Brace. This caused problems for 
+   * gap of size 0 is added after the newly inserted Brace. This caused problems for
    * brace-matching when new nested braces/parentheses piled up on top of each other.
    */
   public void testComplexBraceInsertion() {
@@ -319,7 +319,7 @@ public final class ReducedModelTest extends BraceReductionTestCase
     model1.move(-1);
     assertEquals("#1.1", 2, model1.balanceBackward());
   }
-  
+
   /**
    * put your documentation comment here
    */
@@ -409,7 +409,7 @@ public final class ReducedModelTest extends BraceReductionTestCase
     assertEquals("2.5", INSIDE_LINE_COMMENT, model1.currentToken().getState());
     //break line comment forming a block comment
     model1.move(-2);
-    model1.insertChar('*');                     //  ///__/__ 
+    model1.insertChar('*');                     //  ///__/__
     model1.move(0);
     // /*#//__/__
     model1.move(-2);
@@ -439,7 +439,7 @@ public final class ReducedModelTest extends BraceReductionTestCase
     //break block comment start with a star.
     model1.move(-8);
     model1.insertChar('*');
-    // /*#*//__/__      
+    // /*#*//__/__
     model1.move(-2);
     assertEquals("#4.0", "/*", model1.currentToken().getType());
     assertEquals("#4.3", FREE, model1.currentToken().getState());
@@ -1064,24 +1064,32 @@ public final class ReducedModelTest extends BraceReductionTestCase
     model0 = setUpExample();
     assertEquals("#1.0", -1, model0.balanceForward());
     model0.move(-1);
+//    System.out.println(model0.currentToken());
     assertEquals("#2.0", -1, model0.balanceForward());
-    model0.move(-35);
-    assertEquals("#3.0", 36, model0.balanceForward());
+    model0.move(-34);
+//    System.out.println(model0.currentToken());
+    assertEquals("#3.0", 35, model0.balanceForward());
     model0.move(1);
+//    System.out.println(model0.currentToken());
     assertEquals("#4.0", -1, model0.balanceForward());
     model0.move(5);
-    assertEquals("#5.0", 4, model0.balanceForward());
+//    System.out.println(model0.currentToken());
+    assertEquals("#5.0", 3, model0.balanceForward());
     model0.move(27);
+//    System.out.println(model0.currentToken());
     assertEquals("#6.0", -1, model0.balanceForward());
     model0.move(-20);
-    assertEquals(-1, model0.balanceForward());
+//    System.out.println(model0.currentToken());
+    assertEquals("#7.0", -1, model0.balanceForward());
     model1.insertChar('(');
     model1.move(-1);
-    assertEquals("#7.0", -1, model1.balanceForward());
+//    System.out.println(model0.currentToken());
+    assertEquals("#8.0", -1, model1.balanceForward());
     model1.move(1);
     model1.insertChar('}');
     model1.move(-1);
-    assertEquals("#8.0", -1, model1.balanceForward());
+//    System.out.println(model0.currentToken());
+    assertEquals("#9.0", -1, model1.balanceForward());
   }
 
   /** tests backwards balancer, e.g., ')' balances with '(' */
@@ -1115,4 +1123,4 @@ public final class ReducedModelTest extends BraceReductionTestCase
 
 
 ;
- 
+
