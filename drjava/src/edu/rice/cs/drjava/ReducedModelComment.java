@@ -663,6 +663,15 @@ public class ReducedModelComment implements ReducedModelStates {
     // to = _cursor.copy()
     _cursor.setBlockOffset(_delete(count, _cursor, copyCursor));
     copyCursor.dispose();
+    int absOff = this.absOffset();
+    int movement;
+    if (absOff < 2)
+      movement = absOff;
+    else
+      movement = 2;
+    _cursor.move(-movement);
+    _updateBasedOnCurrentState();
+    _cursor.move(movement);
     return;
   }
   
@@ -733,7 +742,7 @@ public class ReducedModelComment implements ReducedModelStates {
     int delToSizeCurr;
     String delToTypeCurr;
     if (delTo.atEnd()) {
-      _updateBasedOnCurrentState();
+//      _updateBasedOnCurrentState();
       delFrom.setTo(delTo);
       return 0;
     }
@@ -749,7 +758,7 @@ public class ReducedModelComment implements ReducedModelStates {
     String delToTypePrev;
     if (delTo.atStart()) { //no previous item, can't be at end
       delTo.next();
-      _updateBasedOnCurrentStateHelper(delFrom);
+//      _updateBasedOnCurrentStateHelper(delFrom);
       delFrom.setTo(delTo);
       return 0;
     }
@@ -759,7 +768,7 @@ public class ReducedModelComment implements ReducedModelStates {
     }
     delTo.next(); //put delTo back on original node
     
-    _updateBasedOnCurrentState();
+//    _updateBasedOnCurrentState();
     
     int temp = _calculateOffset(delToSizePrev,delToTypePrev,
                                 delToSizeCurr, delToTypeCurr,
