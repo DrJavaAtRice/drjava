@@ -41,8 +41,6 @@
        For example, to release drjava-20020101-0000, you'd type:
 
        ant -Dversion-tag=drjava-20020101-0000 release
-
-       Note: Release must be run on CS net
   -->
   <target name="release" if="version-tag" depends="update,compile">
     <delete dir="${dist}/${version-tag}" />
