@@ -372,22 +372,24 @@ public class JTreeSortNavigator extends JTree
   /**
    * only takes in nodes that have a inavigatoritem as their object
    */
-  private INavigatorItem removeNode(LeafNode toRemove){
+  private synchronized INavigatorItem removeNode(LeafNode toRemove){
+    DefaultMutableTreeNode parent = (DefaultMutableTreeNode)toRemove.getParent();
     _model.removeNodeFromParent(toRemove);
     _doc2node.remove(toRemove.getData());
-   
-    Enumeration enumeration = ((DefaultMutableTreeNode)_model.getRoot()).depthFirstEnumeration();
-    while(enumeration.hasMoreElements())
-    {
-      TreeNode next = (TreeNode)enumeration.nextElement();
-      if(next.getChildCount() == 0 && 
-         !_doc2node.containsValue(next) && 
-         next != _model.getRoot())
-      {
-        _model.removeNodeFromParent((MutableTreeNode)next); 
-        _path2node.removeKey((InnerNode)next);
-      }
-    }
+    
+    cleanFolderNode(parent);
+//    // check all elements of the tree and remove incomplete items
+//    Enumeration enumeration = ((DefaultMutableTreeNode)_model.getRoot()).depthFirstEnumeration();
+//    while(enumeration.hasMoreElements()) {
+//      TreeNode next = (TreeNode)enumeration.nextElement();
+//      if(next.getChildCount() == 0 &&
+//         !_doc2node.containsValue(next) && 
+//         next != _model.getRoot())
+//      {
+//        _model.removeNodeFromParent((MutableTreeNode)next);
+//        _path2node.removeKey((InnerNode)next);
+//      }
+//    }
    
   
     if(_nonProjRoot.getChildCount() == 0)
@@ -397,7 +399,20 @@ public class JTreeSortNavigator extends JTree
     return (INavigatorItem)toRemove.getUserObject();
   }
     
-
+  /**
+   * If the given node is an InnerNode, it removes it from the tree
+   * if it has no children.  If the given node is a leaf or the root,
+   * it does nothing to it.
+   */
+  private void cleanFolderNode(DefaultMutableTreeNode node) {
+    if (node instanceof InnerNode && node.getChildCount() == 0) {
+      DefaultMutableTreeNode parent = (DefaultMutableTreeNode)node.getParent();
+      _model.removeNodeFromParent(node);
+      _path2node.removeKey((InnerNode)node);
+      cleanFolderNode(parent);
+    }
+  }
+  
   /**
    * Resets a given <code>INavigatorItem<code> in the tree.  This may affect the
    * placement of the item or its display to reflect any changes made in the model.
@@ -412,11 +427,25 @@ public class JTreeSortNavigator extends JTree
      * Note: this solved the bug where compile all with modified documents would throw an array
      * index out of bounds exception when painting.
      */
-    synchronized(this){
-      LeafNode node = getNodeForDoc(doc);
+    Object lock = new Object();
+    LeafNode node = getNodeForDoc(doc);
+    // Check to see if it's already in the correct path.
+    InnerNode parent = _path2node.getValue(path);
+    String oldPath = _path2node.getKey(null);
+    if (path.equals(oldPath)) {
+      node.removeFromParent(); // doesn't cause a repaint.
+      insertNodeSortedInto(node, parent); // causes a repaint.
+    }
+    
+    //System.out.println("refresh -> remove");
+    synchronized(lock) {
       removeNode(node);
+    }
+    //System.out.println("refresh -> add");
+    synchronized(lock) {
       addDocument(doc, path);
     }
+    //System.out.println("refresh done");
   }
   
   public void paint(Graphics g){
