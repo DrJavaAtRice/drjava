@@ -283,6 +283,10 @@ public class HighlightManager {
         else return false;
       }
       
+      public void remove() {
+        removeHighlight(this);
+      }
+          
       /**
        * Accessor for the highlight tag
        * @return the highlight tag
