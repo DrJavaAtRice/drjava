@@ -388,7 +388,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
   };
 
-  private Action _runProjectAction = new AbstractAction("Run") {
+  private Action _runProjectAction = new AbstractAction("Run Main Document") {
     public void actionPerformed(ActionEvent ae) {
       _runProject();
     }
@@ -571,7 +571,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   };
 
   /** Compiles all the project. */
-  private Action _compileProjectAction = new AbstractAction("Compile") {
+  private Action _compileProjectAction = new AbstractAction("Compile Project") {
     public void actionPerformed(ActionEvent ae) {
       // right now, it's the same as compile all
       _compileAll();
@@ -2157,7 +2157,8 @@ public class MainFrame extends JFrame implements OptionConstants {
       _projectPropertiesAction.setEnabled(true);
       _compileProjectAction.setEnabled(true);
       _model.setProjectChanged(false);
-      _resetNavigatorPane(); 
+      _resetNavigatorPane();
+      _compileButton.setToolTipText("<html>Compile all documents in the project.<br>External files are excluded.</html>");
     }
   }
   
@@ -2187,6 +2188,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       _compileProjectAction.setEnabled(false);
       _setUpContextMenus();
       _currentProjFile = null;
+      _compileButton.setToolTipText("Compile all open documents");
       return true;
     }else{
       return false;
@@ -3231,8 +3233,10 @@ public class MainFrame extends JFrame implements OptionConstants {
     _projectPropertiesAction.setEnabled(false);    
     _setUpAction(_compileProjectAction, "Compile", "Compile",
                  "Compile the current project");
-    
     _compileProjectAction.setEnabled(false);
+      
+    _setUpAction(_runProjectAction, "Run","Run the project's main method");
+    _runProjectAction.setEnabled(false);
     
     _setUpAction(_saveAllAction, "Save All", "SaveAll", "Save all open documents");
 
@@ -3556,7 +3560,6 @@ public class MainFrame extends JFrame implements OptionConstants {
 
     projectMenu.addSeparator();
     // run project
-    _runProjectAction.setEnabled(false);
     projectMenu.add(_compileProjectAction);
     projectMenu.add(_runProjectAction);
     
@@ -3644,6 +3647,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     int currentLanguageLevel = config.getSetting(LANGUAGE_LEVEL);
     JRadioButtonMenuItem rbMenuItem;
     rbMenuItem = new JRadioButtonMenuItem("Full Java");
+    rbMenuItem.setToolTipText("Use full Java syntax");
     if (currentLanguageLevel == DrJava.FULL_JAVA) { rbMenuItem.setSelected(true); }
     rbMenuItem.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
@@ -3654,6 +3658,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     languageLevelMenu.addSeparator();
     
     rbMenuItem = new JRadioButtonMenuItem("Elementary");
+    rbMenuItem.setToolTipText("Use Elementary language-level features");
     if (currentLanguageLevel == DrJava.ELEMENTARY_LEVEL) { rbMenuItem.setSelected(true); }
     rbMenuItem.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
@@ -3663,6 +3668,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     languageLevelMenu.add(rbMenuItem);
     
     rbMenuItem = new JRadioButtonMenuItem("Intermediate");
+    rbMenuItem.setToolTipText("Use Intermediate language-level features");
     if (currentLanguageLevel == DrJava.INTERMEDIATE_LEVEL) { rbMenuItem.setSelected(true); }
     rbMenuItem.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
@@ -3672,6 +3678,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     languageLevelMenu.add(rbMenuItem);
     
     rbMenuItem = new JRadioButtonMenuItem("Advanced");
+    rbMenuItem.setToolTipText("Use Advanced language-level features");
     if (currentLanguageLevel == DrJava.ADVANCED_LEVEL) { rbMenuItem.setSelected(true); }
     rbMenuItem.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {

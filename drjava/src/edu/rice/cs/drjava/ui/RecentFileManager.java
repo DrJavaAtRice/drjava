@@ -182,6 +182,12 @@ public class RecentFileManager implements OptionConstants {
 //        _frame.getCurrentDefPane().getCaret().setVisible(true);
       }
     });
+    try {
+      newItem.setToolTipText(file.getCanonicalPath());
+    }
+    catch(IOException e) {
+      // don't worry about it at this point
+    }
     removeIfInList(file);
     _recentMenuItems.add(0,newItem);
     _recentFiles.add(0,file);

@@ -247,6 +247,9 @@ public class ProjectPropertiesFrame extends JFrame {
     c.insets = labelInsets;
     
     JLabel label = new JLabel("Build Directory");
+    label.setToolTipText("<html>The directory the class files will be compiled into.<br>"+
+                         "If not specified, the class files will be compiled into<br>"+
+                         "the same directory as their corresponding source files</html>");
     gridbag.setConstraints(label, c);
     panel.add(label);
     c.weightx = 1.0;
@@ -261,7 +264,9 @@ public class ProjectPropertiesFrame extends JFrame {
     c.gridwidth = 1;
     c.insets = labelInsets;
 
-    JLabel classLabel = new JLabel("Main File");
+    JLabel classLabel = new JLabel("Main Document");
+    classLabel.setToolTipText("<html>The project document containing the<br>" + 
+                              "<code>main</code>method for the entire project</html>");
     gridbag.setConstraints(classLabel, c);
     panel.add(classLabel);
 
