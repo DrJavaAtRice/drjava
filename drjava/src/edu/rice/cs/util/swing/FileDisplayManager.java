@@ -52,21 +52,7 @@ import java.io.File;
  * FileIconManagers choose the icons to use when displaying files
  * using their icons in lists or trees.
  */
-public interface FileDisplayManager {
-  
-  /**
-   * Given a file, decide which icon to use
-   * @param f The file to base the icon decision on
-   * @return The icon to display for the given file
-   */
-  public Icon getIcon(File f);
-  
-  /**
-   * Given a file, decide on which name to display for it
-   * @param f The file to base the naming decison on
-   * @return The name to display for the file
-   */
-  public String getName(File f);
+public interface FileDisplayManager extends DisplayManager<File> {
   
   /**
    * Creates a file display that displays a file as this manager specifies

@@ -109,6 +109,7 @@ public class JTreeSortNavigator extends JTree
   protected CustomTreeCellRenderer _renderer;
 
   protected DisplayManager<INavigatorItem> _displayManager;
+  protected Icon _rootIcon;
   
   private java.util.List<GroupNode> _roots = new LinkedList<GroupNode>();
   
@@ -166,8 +167,18 @@ public class JTreeSortNavigator extends JTree
     _displayManager = dm;
   }
   
+  /**
+   * Sets the display manager that is used to select icons for the leaves of the tree.
+   * This does not apply to the inner nodes or the root.
+   */
   public void setDisplayManager(DisplayManager<INavigatorItem> manager) {
     _displayManager = manager;
+  }
+  /**
+   * Sets the icon to be displayed at the root of the tree
+   */
+  public void setRootIcon(Icon ico) {
+    _rootIcon = ico;
   }
   
   /**
@@ -685,7 +696,7 @@ public class JTreeSortNavigator extends JTree
 //    private ImageIcon _otherIcon;
 //    private ImageIcon _javaMIcon;
 //    private ImageIcon _otherMIcon;
-    private ImageIcon _projectIcon;
+//    private ImageIcon _projectIcon;
     
     /**
      * simple constructor
@@ -701,7 +712,6 @@ public class JTreeSortNavigator extends JTree
 //      _advancedMIcon  = _getIconResource("AdvancedMIcon.gif");
 //      _otherIcon  = _getIconResource("OtherIcon.gif");
 //      _otherMIcon = _getIconResource("OtherMIcon.gif");
-      _projectIcon = _getIconResource("ProjectIcon.gif");
     }
     
     private ImageIcon _getIconResource(String name) {
@@ -730,17 +740,16 @@ public class JTreeSortNavigator extends JTree
                                          expanded, leaf, row,
                                          hasFocus);
       DefaultMutableTreeNode node = (DefaultMutableTreeNode)value;
-      if (node instanceof RootNode) {
-        setIcon(_projectIcon);
-      }else if(node.getUserObject() instanceof INavigatorItem){
+      if (node instanceof RootNode && _rootIcon != null) {
+        setIcon(_rootIcon);
+      }
+      else if(node.getUserObject() instanceof INavigatorItem){
         INavigatorItem doc = (INavigatorItem)(node.getUserObject());
         if (leaf) {
           if (_displayManager != null) {
             setIcon(_displayManager.getIcon(doc));
           }
         }
-      }else if(value instanceof String){
-        // a directory
       }
       return this;
     }
