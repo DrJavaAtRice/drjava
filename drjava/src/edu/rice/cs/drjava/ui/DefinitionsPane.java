@@ -59,11 +59,7 @@ import java.util.ArrayList;
 import edu.rice.cs.util.Pair;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.HighlightManager;
-import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
-import edu.rice.cs.drjava.model.OperationCanceledException;
-import edu.rice.cs.drjava.model.Finalizable;
-import edu.rice.cs.drjava.model.FinalizationListener;
-import edu.rice.cs.drjava.model.FinalizationEvent;
+import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.model.definitions.CompoundUndoManager;
 import edu.rice.cs.drjava.model.definitions.DefinitionsEditorKit;
 import edu.rice.cs.drjava.model.definitions.NoSuchDocumentException;
@@ -79,7 +75,7 @@ import edu.rice.cs.drjava.model.debug.Breakpoint;
  * changed.
  * @version $Id$
  */
-public class DefinitionsPane extends JTextPane implements OptionConstants, Finalizable<DefinitionsPane> {
+public class DefinitionsPane extends AbstractDJPane implements Finalizable<DefinitionsPane> {
 
   /**
    * This field NEEDS to be set by setEditorKit() BEFORE any DefinitonsPanes
@@ -94,10 +90,7 @@ public class DefinitionsPane extends JTextPane implements OptionConstants, Final
   private final OpenDefinitionsDocument _doc;
   private UndoAction _undoAction;
   private RedoAction _redoAction;
-  private HighlightManager _highlightManager;
   
-  
-  private final StyledDocument NULL_DOCUMENT = new DefaultStyledDocument();
 //  private Document _defdoc;
   
   /**
@@ -105,11 +98,6 @@ public class DefinitionsPane extends JTextPane implements OptionConstants, Final
    * when the document within this defpane has been modified since its last save.
    */
   private boolean _hasWarnedAboutModified = false;
-
-  /**
-   * Our current paren/brace/bracket matching highlight.
-   */
-  private HighlightManager.HighlightInfo _matchHighlight = null;
 
   /**
    * Used by the centering source mechanism to ensure paints
@@ -122,29 +110,9 @@ public class DefinitionsPane extends JTextPane implements OptionConstants, Final
   private boolean _antiAliasText = false;
 
   /**
-   * Paren/brace/bracket matching highlight color.
-   */
-  public static DefaultHighlighter.DefaultHighlightPainter
-    MATCH_PAINTER;
-
-  static {
-    Color highColor = DrJava.getConfig().getSetting(DEFINITIONS_MATCH_COLOR);
-
-    MATCH_PAINTER =
-      new DefaultHighlighter.DefaultHighlightPainter(highColor);
-  }
-
-  /**
    * Our current compiler error matching highlight.
    */
   private HighlightManager.HighlightInfo _errorHighlightTag = null;
-
-  /**
-   * Highlight painter for selected errors in the defs doc.
-   */
-  public static DefaultHighlighter.DefaultHighlightPainter
-    ERROR_PAINTER =
-    new DefaultHighlighter.DefaultHighlightPainter(DrJava.getConfig().getSetting(COMPILER_ERROR_COLOR));
 
   /**
    *  Highlight painter for breakpoints
@@ -267,72 +235,6 @@ public class DefinitionsPane extends JTextPane implements OptionConstants, Final
   private ErrorCaretListener _errorListener;
 
   private ActionListener _setSizeListener = null;
-
-  /**
-   * Looks for changes in the caret position to see if a paren/brace/bracket
-   * highlight is needed.
-   */
-  private CaretListener _matchListener = new CaretListener() {
-    /**
-     * Checks caret position to see if it needs to set or remove a highlight
-     * from the document.
-     * When the cursor is immediately right of ')', '}', or ']', it highlights
-     * up to the matching open paren/brace/bracket.
-     * @param e the event fired by the caret position change
-     */
-    public void caretUpdate(CaretEvent e) {
-      //_doc().setCurrentLocation(getCaretPosition());
-      _doc.setCurrentLocation(getCaretPosition());
-      _removePreviousHighlight();
-      _updateMatchHighlight();
-    }
-  };
-
-  /**
-   * Updates the highlight if there is any.
-   */
-  private void _updateMatchHighlight() {
-    int to = getCaretPosition();
-    int from = _doc.balanceBackward(); //_doc()._reduced.balanceBackward();
-    if (from > -1) {
-      // Found a matching open brace to this close brace
-      from = to - from;
-      _addHighlight(from, to);
-      //      Highlighter.Highlight[] _lites = getHighlighter().getHighlights();
-    }
-    // if this wasn't a close brace, check for an open brace
-    else {
-      // (getCaretPosition will be the start of the highlight)
-      from = to;
-
-      to = _doc.balanceForward();
-      if (to > -1) {
-        to = to + from;
-        _addHighlight(from - 1, to);
-//        Highlighter.Highlight[] _lites = getHighlighter().getHighlights();
-      }
-    }
-  }
-
-  /**
-   * Adds a highlight to the document.  Called by _updateMatchHighlight().
-   * @param from start of highlight
-   * @param to end of highlight
-   */
-  private void _addHighlight(int from, int to) {
-    _matchHighlight = _highlightManager.addHighlight(from, to, MATCH_PAINTER);
-  }
-
-  /**
-   * Removes the previous highlight so document is cleared when caret position changes.
-   */
-  private void _removePreviousHighlight() {
-    if (_matchHighlight != null) {
-      _matchHighlight.remove();
-      //_highlightManager.removeHighlight((HighlightManager.HighlightInfo)_matchHighlight);
-      _matchHighlight = null;
-    }
-  }
 
   /**
    * An action to handle indentation spawned by pressing the tab key.
@@ -605,7 +507,6 @@ public class DefinitionsPane extends JTextPane implements OptionConstants, Final
     //super.setDocument(NULL_DOCUMENT);
     _resetUndo();
     
-    setContentType("text/java");
     //setFont(new Font("Courier", 0, 12));
     Font mainFont = DrJava.getConfig().getSetting(FONT_MAIN);
     setFont(mainFont);
@@ -628,10 +529,6 @@ public class DefinitionsPane extends JTextPane implements OptionConstants, Final
     setKeymap(ourMap);
 
     //this.setEditorKit(new StyledEditorKit());
-
-    // Add listener that checks if position in the document has changed.
-    // If it has changed, check and see if we should be highlighting matching braces.
-    this.addCaretListener(_matchListener);
 
     if (CodeStatus.DEVELOPMENT) {
       _antiAliasText = DrJava.getConfig().getSetting(TEXT_ANTIALIAS).booleanValue();
@@ -859,6 +756,14 @@ public class DefinitionsPane extends JTextPane implements OptionConstants, Final
    * Get the OpenDefinitionsDocument contained in this DefinitionsPane.
    */
   public OpenDefinitionsDocument getOpenDefDocument() {
+    return _doc;
+  }
+  
+  /**
+   * Get the DJDocument (OpenDefinitionsDocument) contained in this pane.
+   * Required by the super class AbstractDJPane
+   */
+  public DJDocument getDJDocument() {
     return _doc;
   }
 
