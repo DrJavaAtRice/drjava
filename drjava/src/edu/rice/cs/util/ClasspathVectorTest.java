@@ -45,46 +45,53 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.util;
 
-import java.util.Date;
-import java.text.SimpleDateFormat;
+import junit.framework.TestCase;
+import java.net.URL;
+import java.net.MalformedURLException;
+import java.io.File;
 
 /**
- * This interface hold the information about this build of util.
- * This file is copied to Version.java by the build process, which also
- * fills in the right values of the date and time.
- *
- * This javadoc corresponds to build util-20050321-0612;
- *
- * @version $Id$
+ * A JUnit test case for the ClasspathVector class.
  */
-public abstract class Version {
+public class ClasspathVectorTest extends TestCase {
+  
   /**
-   * This string will be automatically expanded upon "ant commit".
-   * Do not edit it by hand!
+   * Verifies the correctness of the formatting of the toString method of ClasspathVector.
    */
-  private static final String BUILD_TIME_STRING = "20050321-0612";
-
-  /** A {@link Date} version of the build time. */
-  private static final Date BUILD_TIME = _getBuildDate();
-
-  public static String getBuildTimeString() {
-    return BUILD_TIME_STRING;
+  public void test_toString() {
+    ClasspathVector v = new ClasspathVector();
+    assertEquals("Empty classpath", "", v.toString());
+    addElement(v, "file:///jsr14.jar");
+    assertEquals("One element classpath", "/jsr14.jar"+File.pathSeparator,v.toString());
+    addElement(v, "file:///wherever/supercool.jar");
+    assertEquals("Multiple element classpath", "/jsr14.jar" + File.pathSeparator + "/wherever/supercool.jar" + File.pathSeparator, v.toString());
+    addElement(v, "http://www.drjava.org/hosted.jar");
+    assertEquals("Multiple element classpath", "/jsr14.jar" + File.pathSeparator + "/wherever/supercool.jar" + File.pathSeparator + "/hosted.jar" + File.pathSeparator, v.toString());
   }
-
-  public static Date getBuildTime() {
-    return BUILD_TIME;
-  }
-
-  private static Date _getBuildDate() {
+  
+  /**
+   * Tests the overloaded methods for translating other inputs to URLs on the fly
+   */
+  public void test_OverloadedAdds() {
+    ClasspathVector v = new ClasspathVector();
     try {
-      return new SimpleDateFormat("yyyyMMdd-HHmm z").parse(BUILD_TIME_STRING + " GMT");
+      v.add("asdf");
+      fail("v.add(\"asdf\"): no exception thrown!");
+    } catch(IllegalArgumentException e) {
+      // EXPECTED //
+    } catch(Exception e) {
+      fail("v.add(\"asdf\") threw " + e.getClass().toString() + " instead of IllegalArgumentException!");
     }
-    catch (Exception e) { // parse format or whatever problem
-      return null;
+    
+    
+  } 
+  
+  private void addElement(ClasspathVector v, String element) {
+    try {
+      v.add(new URL(element));
+    } catch(MalformedURLException e) {
+      fail("Mysterious MalformedURLException. Probably not our fault.");
     }
   }
-
-  public static void main(String[] args) {
-    System.out.println("Version for edu.rice.cs.util: " + BUILD_TIME_STRING);
-  }
-} 
+  
+}
