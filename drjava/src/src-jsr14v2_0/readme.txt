@@ -1,5 +1,11 @@
 JSR-14 v2.0 Specific Classes ----
 
+*Changes: This branch must now be compiled with JSR-14 v2.2 because we've 
+introduced the variable args construct into these files.  Also, this
+branch now supports JSR-14 v2.0, 2.2, 2.3, 2.4, 2.5 and J2SE 1.5.0 beta.
+We combined them all here simply because it wasn't necessary to create
+new branches for each one.
+
 The src/src-jsr14v2_0/ directory contains all source files which can only be
 compiled using the JSR-14 version 2.0 compiler.  We need to maintain support
 for JSR-14 v1.0 for developers on platforms with Java 1.3 (eg.  Mac OS X), so
@@ -22,3 +28,4 @@ To compile:
    src/edu/rice/cs/lib/ directory.
  - Run "ant compile-jsr14v2_0".  This will update the "compilers.jar" file in
    the lib directory.
+
