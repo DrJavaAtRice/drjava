@@ -599,11 +599,18 @@ public class MainFrame extends JFrame {
    * Configures the component used for selecting active documents.
    */
   private void _setUpDocumentSelector() {
-    _docList = new JList(_model.getDefinitionsDocuments());// {
-      //public String getToolTipText(MouseEvent event) {
-      //  return "tool tip";
-      //}
-    //};
+    _docList = new JList(_model.getDefinitionsDocuments()) {
+      public String getToolTipText(MouseEvent event) {
+        Point location = event.getPoint();
+        int index = locationToIndex(location);
+        String tip = null;
+        if (index >= 0) {
+          tip = _model.getDisplayFullPath(index);
+        }
+        return tip;
+      }
+    };
+    _docList.setToolTipText("Document List");
     _docList.setSelectionModel(_model.getDocumentSelectionModel());
     _docList.setCellRenderer(new DocCellRenderer());
   }
@@ -691,6 +698,19 @@ public class MainFrame extends JFrame {
     _currentDefPane = (DefinitionsPane) scroll.getViewport().getView();
   }
 
+  /**
+   * Sets the current directory to be that of the given file.
+   */
+  private void _setCurrentDirectory(OpenDefinitionsDocument doc) {
+    try {
+      File file = doc.getFile();
+      _openChooser.setCurrentDirectory(file);
+      _saveChooser.setCurrentDirectory(file);
+    }
+    catch (IllegalStateException ise) {
+      // no file, leave in current directory
+    }
+  }
 
   /**
    * put your documentation comment here
@@ -755,6 +775,8 @@ public class MainFrame extends JFrame {
       _compileButton.setEnabled(canCompile);
       _saveMenuItem.setEnabled(isModified);
       _compileMenuItem.setEnabled(canCompile);
+
+      _setCurrentDirectory(active);
 
       updateFileTitle();
       _currentDefPane.grabFocus();

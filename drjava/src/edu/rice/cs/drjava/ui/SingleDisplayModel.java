@@ -208,6 +208,20 @@ public class SingleDisplayModel extends DefaultGlobalModel {
     return path;
   }
 
+  /**
+   * Return the absolute path of the file with the given index,
+   * or "(untitled)" if no file exists.
+   */
+  public String getDisplayFullPath(int index) {
+    OpenDefinitionsDocument doc = (OpenDefinitionsDocument)
+      getDefinitionsDocuments().getElementAt(index);
+    if (doc == null) {
+      throw new RuntimeException(
+        "Document not found with index " + index);
+    }
+    return getDisplayFullPath(doc);
+  }
+
 
 
   /**
