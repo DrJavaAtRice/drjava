@@ -89,11 +89,21 @@ public class GlobalModel {
   }
   
   /**
+   * Set the indent tab size for the definitions document.
+   * @param indent the number of spaces to make per level of indent
+   */
+  void setDefinitionsIndent(int indent) {
+    _definitionsDoc.setIndent(indent);
+  }
+  
+  /**
    * Creates a new document in the definitions pane.
-   * Checks first to make sure no changes need to be saved.
+   * Checks first to make sure no changes need to be saved by
+   * firing canAbandonFile().
    * If the user saves the changes, or chooses to disregard any
    * changes, the creation of a new document continues, otherwise
-   * it is halted and the document remains the same.
+   * it is halted and the document remains the same.  If the creation
+   * goes through, newFileCreated() is fired.
    */
   public void newFile() {
     boolean canCreateNew = canAbandonFile();
@@ -113,6 +123,7 @@ public class GlobalModel {
    * set, the method will use that name instead of whatever selector
    * is passed in.
    * @param com a selector that picks the file name
+   * @exception IOException
    */
   public void saveFile(FileSaveSelector com) throws IOException {
     FileSaveSelector realCommand;
@@ -134,8 +145,11 @@ public class GlobalModel {
    * Saves a document with a FileWriter.  The FileSaveSelector will
    * either provide a file name or prompt the user for one.  It is
    * up to the caller to decide what needs to be done to choose
-   * a file to save to.
+   * a file to save to.  Once the file has been saved succssfully,
+   * this method fires fileSave(File).  If the save fails for any
+   * reason, the event is not fired.
    * @param com a selector that picks the file name.
+   * @exception IOException
    */
   public void saveFileAs(FileSaveSelector com) throws IOException {
     try {
@@ -161,12 +175,13 @@ public class GlobalModel {
   
   /**
    * Open a file and read it into the definitions.
-   * Checks first to see if we can abandon the current file.
-   * The file selector either provides a name or prompts the user
-   * for a name - it is up to the caller to provide this
-   * as the argument to this method.
+   * Checks first to see if we can abandon the current file
+   * by firing canAbandonFile().  If it can continue with the open,
+   * the provided file selector chooses a file, and on a successful
+   * open, the fileOpened() event is fired.
    * @param com a command pattern command that selects what file
    *            to open
+   * @exception IOException
    */
   public void openFile(FileOpenSelector com) throws IOException {
     boolean canOpen = canAbandonFile();
@@ -196,11 +211,14 @@ public class GlobalModel {
   
   /**
    * Starts compiling the source.  Demands that the definitions be
-   * saved before proceeding with the compile.  Depending on whether
-   * the compile can proceed, the interations pane and console may be 
-   * reset. If the compile can proceed, a compileStarted event is fired,
-   * which guarantees that a compileEnded event will be fired when the
-   * compile finishes or fails.
+   * saved before proceeding with the compile. If the compile can 
+   * proceed, a compileStarted event is fired which guarantees that
+   * a compileEnded event will be fired when the compile finishes or
+   * fails.  If the compileEnded event was fired, then calls are
+   * made to resetConsole() and _resetInteractions(), which fire
+   * events of their own, contingent on the conditions.  If the current
+   * package as determined by getSourceRoot(String) and getPackageName()
+   * is invalid, none of the events mentioned above will be fired.
    */
   public void startCompile() {
     saveBeforeProceeding(GlobalModelListener.COMPILE_REASON);
@@ -248,7 +266,8 @@ public class GlobalModel {
   
   /**
    * Exits the program.
-   * Make sure the user has a chance to save before quitting.
+   * Make sure the user has a chance to save before quitting
+   * by firing canAbandonFile().
    */
   public void quit() {
     boolean canQuit = canAbandonFile();
@@ -258,7 +277,12 @@ public class GlobalModel {
   }
   
   /**
-   * Lets the listeners know that the interactions pane has been cleared.
+   * Clears and resets the interactions pane.
+   * First it makes sure it's in the right package given the
+   * package specified by the definitions.  If it can't, 
+   * the package for the interactions becomes the defualt
+   * top level. In either case, this method calls a helper
+   * which fires the interactionsReset() event.
    */
   public void resetInteractions() {
     try {
@@ -275,7 +299,8 @@ public class GlobalModel {
 
  
   /**
-   * Lets the listeners know that the console pane has been cleared.
+   * Resets the console.
+   * Fires consoleReset() event.
    */
   public void resetConsole() {
     try {
@@ -294,6 +319,7 @@ public class GlobalModel {
    * Called to demand that one or more listeners saves the 
    * definitions document before proceeding.  It is up to the caller
    * of this method to check if the document has been saved.
+   * Fires saveBeforeProceeding(SaveReason) if isModifiedSinceSave() is true.
    * @param reason the reason behind the demand to save the file
    */
   public void saveBeforeProceeding(final GlobalModelListener.SaveReason reason)
@@ -309,9 +335,10 @@ public class GlobalModel {
   
   /**
    * Asks the listeners if the GlobalModel can abandon the current document.
+   * Fires the canAbandonFile(File) event if isModifiedSinceSave() is true.
    * @return true if the current document may be abandoned, false if the
    * current action should be halted in its tracks (e.g., file open when
-   * the document has been modified since the last save)
+   * the document has been modified since the last save).
    */
   public boolean canAbandonFile() {
     if (isModifiedSinceSave()) {
@@ -593,6 +620,9 @@ public class GlobalModel {
   /**
    * Private method to keep outsiders from resetting the interactions
    * pane without the GlobalModel's permission.
+   * Sets up a new interpreter to clear out the interpreter's environment.
+   * If the setup works and the package directory exists,
+   * interactionsReset() is fired.
    */
   private void _resetInteractions(String packageName, File sourceRoot) {
     _interactionsDoc.reset();
@@ -626,7 +656,8 @@ public class GlobalModel {
   /**
    * Allows the GlobalModel to ask its listeners a yes/no question and
    * receive a response.
-   * @param the listeners' responses ANDed together, true if they all
+   * @param EventPoller p the question being asked of the listeners
+   * @return the listeners' responses ANDed together, true if they all
    * agree, false if some disagree
    */
   private boolean _pollListeners(EventPoller p) {
@@ -642,6 +673,7 @@ public class GlobalModel {
     
   /**
    * Lets the listeners know some event has taken place.
+   * @param EventNotifier n tells the listener what happened
    */
   private void _notifyListeners(EventNotifier n) {
     ListIterator i = _listeners.listIterator();
