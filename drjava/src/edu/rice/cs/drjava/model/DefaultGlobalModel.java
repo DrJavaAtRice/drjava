@@ -1016,14 +1016,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     
     File buildDir = ir.getBuildDirectory();
     File mainClass;
-    try{
-      mainClass = ir.getMainClass();
-      if(mainClass != null){
-        mainClass = new File(projectFile.getParentFile().getPath(), mainClass.getPath()).getCanonicalFile();
-      }
-    }catch(IOException e){
-      mainClass = null;
-    }
+    mainClass = ir.getMainClass();
     
     setFileGroupingState(_makeProjectFileGroupingState(mainClass, buildDir, projectFile, srcFiles));
     setBuildDirectory(buildDir);
