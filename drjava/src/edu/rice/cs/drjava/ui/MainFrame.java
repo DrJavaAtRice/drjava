@@ -2603,6 +2603,10 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
 
     int oldLocation = _docSplitPane.getDividerLocation();
+    
+    // Following line should fix "Dancing UI" bug
+    // scroll.setPreferredSize(_docSplitPane.getRightComponent().getPreferredSize()); 
+    
     _docSplitPane.setRightComponent(scroll);
     _docSplitPane.setDividerLocation(oldLocation);
     _currentDefPane = (DefinitionsPane) scroll.getViewport().getView();

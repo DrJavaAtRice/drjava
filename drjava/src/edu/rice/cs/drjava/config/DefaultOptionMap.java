@@ -46,12 +46,12 @@ public class DefaultOptionMap implements OptionMap {
     private final Vector<OptionParser> keys = new Vector();
 
     public <T> T getOption(OptionParser<T> o) {
-	return o.getOption(this);
+ return o.getOption(this);
     }
   
     public <T> T setOption(Option<T> o, T val) {
         setOption(o);
-	return o.setOption(this,val); 
+ return o.setOption(this,val); 
     }
 
     private <T> void setOption(OptionParser<T> o) {
@@ -60,17 +60,17 @@ public class DefaultOptionMap implements OptionMap {
     }
   
     public <T> String getString(OptionParser<T> o) {
-	return o.getString(this);
+ return o.getString(this);
     }
   
     public <T> T setString(OptionParser<T> o, String s) {
         setOption(o);
-	return o.setString(this,s);
+ return o.setString(this,s);
     }
   
     public <T> T removeOption(OptionParser<T> o) {
-	keys.removeElement(o);
-	return o.remove(this);
+ keys.removeElement(o);
+ return o.remove(this);
     }
   
     public Enumeration<OptionParser> keys() {
@@ -78,14 +78,14 @@ public class DefaultOptionMap implements OptionMap {
     }
 
     public String toString() {
-	String result = "\n{ ";
+ String result = "\n{ ";
 
-	for (int i = 0; i < keys.size(); i++) {
-	    OptionParser key = keys.elementAt(i);
-	    result += key.name + " = " + getString(key) + '\n';
-	}
-	
-	result += '}';
-	return result;
+ for (int i = 0; i < keys.size(); i++) {
+     OptionParser key = keys.elementAt(i);
+     result += key.name + " = " + getString(key) + '\n';
+ }
+ 
+ result += '}';
+ return result;
     }
 }

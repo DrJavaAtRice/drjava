@@ -258,6 +258,49 @@ public class JavaInterpreterTest extends TestCase {
     tester(cases);
   }
 
+ /**
+  * Tests the operation of the TypeCheckerExtension by performing the 
+  * operations ((false) ? 2/0 : 1) and ((false) ? 2%0 : 1), which should 
+  * not throw Exceptions in the Java interpreter.
+  */
+  public void testTypeCheckerExtension() {
+    Object out = null;
+    
+    try{
+      out = _interpreter.interpret("(false) ? 2/0 : 1 ");
+    }
+    catch(ExceptionReturnedException e){
+      if( e.getContainedException() instanceof ArithmeticException ){
+        fail("testTypeCheckerExtension failed to prevent short circuit DivideByZeroException");
+      }
+    }
+    
+    try{
+      out = _interpreter.interpret("(false) ? 2%0 : 1 ");
+    }
+    catch(ExceptionReturnedException e){
+      if( e.getContainedException() instanceof ArithmeticException ){
+        fail("testTypeCheckerExtension failed to prevent short circuit DivideByZeroException");
+      }
+    }
+  }
+  
+  /**
+  * Tests the operation of the EvaluationVisitorExtension by 
+  * Performing a computation with no results (interpreter 
+  * should return NO_RESULT and not null)
+  */
+  public void testEvaluationVisitorExtensionNO_RESULT() {   
+    boolean passed = false;
+    
+    try{
+      Object out = _interpreter.interpret("true;");
+      assertEquals("testEvaluationVisitorExtension", JavaInterpreter.NO_RESULT, out);
+    }
+    catch(ExceptionReturnedException e){
+      fail("testEvaluationVisitorExtension Exception returned for none exceptional code!" + e);
+    }
+  }
 }
 
 /**

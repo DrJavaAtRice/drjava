@@ -4,7 +4,7 @@
  * at http://sourceforge.net/projects/drjava
  *
  * Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)
- * 
+ *
  * DrJava is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -39,6 +39,7 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.compiler;
 
+import java.io.*;
 import junit.framework.*;
 import edu.rice.cs.util.classloader.LimitingClassLoader;
 
@@ -103,11 +104,11 @@ public class CompilerRegistryTest extends TestCase {
   /*
   public void testExpectedDefaultCompilers() {
     CompilerInterface[] compilers = _registry.getAvailableCompilers();
-    
+
     assertEquals("Number of available compilers vs. number of default compilers",
                  _defaultCompilers.length,
                  compilers.length);
-    
+
     for (int i = 0; i < compilers.length; i++) {
       assertEquals("Name of available compiler #" + i + " is the same as the " +
                      "name of the corresponding default compiler",
@@ -146,7 +147,7 @@ public class CompilerRegistryTest extends TestCase {
                    "because all real compilers are restricted.",
                  1,
                  compilers.length);
-    
+
     assertEquals("Only available compiler should be NoCompilerAvailable.ONLY",
                  NoCompilerAvailable.ONLY,
                  compilers[0]);
@@ -166,7 +167,7 @@ public class CompilerRegistryTest extends TestCase {
     assertEquals("active compiler before any setActive",
                  compilers[0],
                  _registry.getActiveCompiler());
-    
+
     for (int i = 0; i < compilers.length; i++) {
       // TODO: deal with the problem that sometimes not all compilers avail!
       //if (compilers[i].isAvailable()) {
@@ -193,7 +194,7 @@ public class CompilerRegistryTest extends TestCase {
    * Returns the list of available compilers after disabling some of them.
    * This method includes checks for the correctness of the list
    * after disabling them.
-   * 
+   *
    * @param indices Array of ints signifying which of the default compilers
    *                to disable.
    */
@@ -236,7 +237,7 @@ public class CompilerRegistryTest extends TestCase {
 
     return compilers;
   }
-  
+
   /**
    * Ensure that the active compiler in the registry cannot be set to null.
    */
@@ -248,5 +249,45 @@ public class CompilerRegistryTest extends TestCase {
     catch (IllegalArgumentException e) {
       // Good-- exception was thrown.
     }
+  }
+
+  static class Without implements CompilerInterface {
+    public boolean testField = false;
+    public Without()
+    {
+      testField = true;
+    }
+
+     public void addToBootClassPath(File s) {}
+     public CompilerError[] compile(File[] sourceRoots, File[] files){ return null; }
+     public CompilerError[] compile(File sourceRoot, File[] files) { return null; }
+     public String getName() { return "Without"; }
+     public boolean isAvailable() { return false; }
+     public void setAllowAssertions(boolean allow) {}
+     public void setExtraClassPath(String extraClassPath) {}
+     public String toString(){ return "Without"; }
+  }
+
+  /**
+   * Test that createCompiler() does successfully instantiate
+   * compilers that do not have the ONLY static field, and those which
+   * do have it.
+   */
+   public void testCreateCompiler(){
+     try{
+       _registry.createCompiler(Without.class);
+     }
+     catch(Throwable e){
+       e.printStackTrace();
+       fail("testCreateCompiler: Unexpected Exception for class without ONLY field\n" + e);
+     }
+
+     try{
+       _registry.createCompiler(JavacFromClasspath.ONLY.getClass());
+     }
+     catch(Throwable e2){
+
+        fail("testCreateCompiler: Unexpected Exception for class with ONLY field\n" + e2);
+     }
   }
 }

@@ -35,65 +35,78 @@
  * present version of DrJava depends on these classes, so you'd want to
  * remove the dependency first!)
  *
- END_COPYRIGHT_BLOCK*/
+END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava.config;
+package edu.rice.cs.drjava.model.print;
 
-import junit.framework.*;
-import java.awt.Color;
+import  java.awt.print.*;
+import  java.awt.*;
+import  java.awt.image.*;
+import  junit.framework.*;
+import  junit.extensions.*;
 
 /**
- * Class according to the JUnit protocol. Tests
- * the proper functionality of the class ColorOption.
+ * Test functions of DrJavaBook
+ *
  */
-public class ColorOptionTest extends TestCase
-{
+public class DrJavaBookTest extends TestCase {
   /**
-   * @param name The name of this test case.
+   * The DrJavaBook instance we will be testing
    */
-  public ColorOptionTest(String name) { super(name); }
+  private DrJavaBook book = null;
   
-  public void setUp() {}
-  
-  public void testGetName()
-  {
-    ColorOption io1 = new ColorOption("indent_size",null);
-    ColorOption io2 = new ColorOption("max_files",null);
-    
-    assertEquals("indent_size", io1.getName());
-    assertEquals("max_files",   io2.getName());
+  /**
+   * Constructor.
+   * @param  String name
+   */
+  public DrJavaBookTest(String name) {
+    super(name);
   }
   
-  public void testParse()
-  {
-    ColorOption io = new ColorOption("max_files",null);
-    
-    assertEquals(Color.black, io.parse("0x000000"));
-    assertEquals(Color.green, io.parse("0x00ff00"));
-    
-    try { io.parse("true"); fail(); }
-    catch (OptionParseException e) {}
-    
-    try { io.parse("black"); fail(); }
-    catch (OptionParseException e) {}
+  /**
+   * Creates a test suite for JUnit to run.
+   * @return a test suite based on the methods in this class
+   */
+  public static Test suite() {
+    return  new TestSuite(DrJavaBookTest.class);
   }
   
- /**
-   *  Test the format() method of ColorOption class
-   */
-  public void testFormat()
-  {
-    ColorOption io1 = new ColorOption("max_files",null);
-    ColorOption io2 = new ColorOption("indent_size",null);
+  public void setUp(){
+    book = new DrJavaBook("import java.io.*;", "simple_file.java", new PageFormat());
+  }
+  
+  public void tearDown(){
+    book = null;
+  }
+  
+  public void testGetNumberOfPages(){
+    assertEquals("testGetNumberOfPages:", new Integer(1), new Integer(book.getNumberOfPages()));
+  }
+  
+  public void testGetPageFormat(){
+    assertEquals("testGetPageFormat:", PageFormat.PORTRAIT, book.getPageFormat(0).getOrientation());
+  }
+  
+  public void xtestGetPrintable(){ // FAILS for some reason // moez & eliot
+    Graphics g = (new BufferedImage(100, 100, BufferedImage.TYPE_INT_RGB)).getGraphics();
+    Printable p = book.getPrintable(0);
+    try{
+      assertEquals("testGetPrintable:", new Integer(Printable.PAGE_EXISTS), 
+                   new Integer(p.print(g, new PageFormat(), 0)));
+    }
+    catch(Exception e){
+      fail("testGetPrintable: Unexpected exception!\n" + e);
+    }
     
-    assertEquals("#000000",  io1.format(Color.black));
-    assertEquals("#ff00ff",  io2.format(Color.magenta));
-    assertEquals("#ffffff", io1.format(Color.white));
-
-    ColorOption c = new ColorOption("blue", Color.blue);
-    assertEquals("testFormat:", "#000000", c.format(Color.black));
-    assertEquals("testFormat:", "#0000ff", c.format(Color.blue));
-    assertEquals("testFormat:", "#00ff00", c.format(Color.green));
-    assertEquals("testFormat:", "#ff0000", c.format(Color.red));  
+    p = book.getPrintable(99);
+    
+    try{
+      assertEquals("testGetPrintable:", new Integer(Printable.NO_SUCH_PAGE), 
+                   new Integer(p.print(g, new PageFormat(), 99)));
+    }
+    catch(Exception e)
+    {
+      fail("testGetPrintable: Unexpected exception!\n" + e);
+    }
   }
 }
