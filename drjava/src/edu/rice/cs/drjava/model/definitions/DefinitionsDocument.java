@@ -659,33 +659,14 @@ public class DefinitionsDocument extends PlainDocument {
    * Gets the name of the package this source file claims it's in (with the
    * package keyword). It does this by minimally parsing the source file
    * to find the package statement.
-   * This is implemented by searching from the top of the file for the first
-   * character that's not whitespace and is NORMAL -- this is the only
-   * place a package statement could start. If this location begins the string
-   * "package", then parse the package statement from there.
-   *
-   * FIXME: This will accept more inputs than it should. It should only consider
-   *        package statements if they're at the top of the source file.
-   *        This is unlikely to be a problem in practice, since the only way
-   *        the program will not report an error if "package" is used in an
-   *        invalid way is something like this:
-   *
-   *        public class Foo {
-   *          package tmp;
-   *        }
-   *
-   *        iff this source file is in a directory named "tmp".
-   *
-   *        The way to fix this is to add a primitive to the reduced model
-   *        to search for the first FREE block from a given point.
-   *        Then, look at the text for the document from there. If there is
-   *        a valid package statement, it must be right here (ignoring 
-   *        whitespace).
-   *        
    *
    * @return The name of package this source file declares itself to be in,
    *         or the empty string if there is no package statement (and thus
    *         the source file is in the empty package).
+   *
+   * @exception InvalidPackageException if there is some sort of a 
+   *                                    <TT>package</TT> statement but it
+   *                                    is invalid.
    */
   public String getPackageName() throws InvalidPackageException {
     // Where we'll build up the package name we find
