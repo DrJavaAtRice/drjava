@@ -69,6 +69,9 @@
           overwrite="yes"
           filtering="yes" />
 
+    <!-- recompile to make new version number get into code. -->
+    <antcall target="compile" />
+
     <cvs command="commit" cvsRoot="${cvsroot}" />
 
     <property name="version-tag"
