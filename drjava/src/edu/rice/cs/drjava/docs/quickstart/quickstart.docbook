@@ -68,7 +68,7 @@
 	Select which build of DrJava is right for you, and click on the appropriate button.  We recommend that Windows users download the .exe file, that Mac OS X users use the osx.tar.gz version, and that all other users download the stable jar file.  Experienced users may want to download the most recent Development Build jar instead. To do so, click on the "more download options" link
 	<mediaobject>
        		<imageobject>
-       		<imagedata fileref="CurrentStableRelease.png" format="jpg" scale=50 scalefit="1">
+       		<imagedata fileref="CurrentStableRelease.jpg" format="jpg" scale=50 scalefit="1">
        		</imageobject>
      	</mediaobject>
 
@@ -77,7 +77,7 @@
 	Click on one of the Download buttons to go to the download server.  Choose a site to download the file from, and then click on the corresponding icon in the "Download" column on the far right to start the download.
 		<mediaobject>
        		<imageobject>
-       		<imagedata fileref="DownloadServer.png" format="jpg" scale=50 scalefit="1">
+       		<imagedata fileref="DownloadServer.jpg" format="jpg" scale=50 scalefit="1">
        		</imageobject>
      	</mediaobject>
 	</para></listitem>
