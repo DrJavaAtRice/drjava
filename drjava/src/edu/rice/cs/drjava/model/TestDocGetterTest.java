@@ -69,15 +69,15 @@ public class TestDocGetterTest extends TestCase {
     */
     public void testGetDocumentForFile() throws IOException {
         TestDocGetter testDocGetter = new TestDocGetter(new File[0], new String[0]);
-	try {
-	    testDocGetter.getDocumentForFile(new File(""));
-	}
-	catch (IllegalStateException e) {
-	    assertTrue(true);
-	    return;
-	}
-	fail("should throw IllegalStateException");
-	
+ try {
+     testDocGetter.getDocumentForFile(new File(""));
+ }
+ catch (IllegalStateException e) {
+     assertTrue(true);
+     return;
+ }
+ fail("should throw IllegalStateException");
+ 
     }
 
 }

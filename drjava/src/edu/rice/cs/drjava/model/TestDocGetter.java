@@ -84,14 +84,15 @@ public class TestDocGetter extends DummyGetDocuments {
     GlobalEventNotifier en = new GlobalEventNotifier();
     for (int i = 0; i < texts.length; i++) {
       DefinitionsDocument doc = new DefinitionsDocument(en);
-      doc.setFile(files[i]);
+      OpenDefinitionsDocument odoc = new TestOpenDoc(doc);
+      odoc.setFile(files[i]);
       try {
         doc.insertString(0, texts[i], null);
       }
       catch (BadLocationException e) {
         throw new UnexpectedException(e);
       }
-      docs.put(files[i], new TestOpenDoc(doc));
+      docs.put(files[i], odoc);
     }
   }
 
@@ -111,8 +112,10 @@ public class TestDocGetter extends DummyGetDocuments {
    */
   private static class TestOpenDoc extends DummyOpenDefDoc {
     DefinitionsDocument _doc;
+    File _file;
     TestOpenDoc(DefinitionsDocument doc) {
       _doc = doc;
+      _file = null;
     }
 
     /**
@@ -126,7 +129,11 @@ public class TestDocGetter extends DummyGetDocuments {
      * Okay, I lied.  We need this one, too.
      */
     public File getFile() throws IllegalStateException, FileMovedException  {
-      return _doc.getFile();
+      return _file;
+    }
+    
+    public void setFile(File f){
+      _file = f;
     }
   }
 }

@@ -68,8 +68,7 @@ import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
  * @version $Id$
  */
 public class ColoringView extends PlainView implements OptionConstants {
-  private DefinitionsDocument _doc;
-
+ 
   private static Color COMMENTED_COLOR = DrJava.getConfig().getSetting(DEFINITIONS_COMMENT_COLOR);
   private static Color DOUBLE_QUOTED_COLOR = DrJava.getConfig().getSetting(DEFINITIONS_DOUBLE_QUOTED_COLOR);
   private static Color SINGLE_QUOTED_COLOR = DrJava.getConfig().getSetting(DEFINITIONS_SINGLE_QUOTED_COLOR);
@@ -85,12 +84,6 @@ public class ColoringView extends PlainView implements OptionConstants {
   ColoringView(Element elem) {
     super(elem);
 
-    // Might be a PlainDocument (when DefPane is first constructed).
-    //   See comments for DefinitionsEditorKit.createNewDocument() for details.
-    Document doc = getDocument();
-    if (doc instanceof DefinitionsDocument) {
-      _doc = (DefinitionsDocument)doc;
-    }
 
     // Listen for updates to configurable colors
     ColorOptionListener col = new ColorOptionListener();
@@ -127,6 +120,19 @@ public class ColoringView extends PlainView implements OptionConstants {
      DrJava.consoleErr().println("drawUnselected: " + p0 + "-" + p1 +
      " doclen=" + _doc.getLength() +" x="+x+" y="+y);
      */
+        
+    // Might be a PlainDocument (when DefPane is first constructed).
+    //   See comments for DefinitionsEditorKit.createNewDocument() for details.
+    Document doc = getDocument();
+    DefinitionsDocument _doc = null;
+    if (doc instanceof DefinitionsDocument) {
+      _doc = (DefinitionsDocument)doc;
+    }
+    else {
+      return x; // don't do anything if there is no definitions document
+    }
+    
+    
     // If there's nothing to show, don't do anything!
     // For some reason I don't understand we tend to get called sometimes
     // to render a zero-length area.

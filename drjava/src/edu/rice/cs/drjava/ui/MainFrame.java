@@ -72,6 +72,7 @@ import edu.rice.cs.drjava.platform.*;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
+import edu.rice.cs.drjava.model.definitions.DocumentUIListener;
 import edu.rice.cs.drjava.model.definitions.CompoundUndoManager;
 import edu.rice.cs.drjava.model.definitions.ClassNameNotFoundException;
 import edu.rice.cs.drjava.model.debug.*;
@@ -350,6 +351,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   /** Resets the document in the definitions pane to a blank one. */
   private Action _newAction = new AbstractAction("New") {
     public void actionPerformed(ActionEvent ae) {
+//      System.out.println("------------------new----------------------");
       _new();
     }
   };
@@ -1862,7 +1864,7 @@ public class MainFrame extends JFrame implements OptionConstants {
    * modifications.
    */
   private void _installNewDocumentListener(final Document d) {
-    d.addDocumentListener(new DocumentListener() {
+    d.addDocumentListener(new DocumentUIListener() {
       public void changedUpdate(DocumentEvent e) {
         _saveAction.setEnabled(true);
         if (inDebugMode() && _debugPanel.getStatusText().equals("")) {
@@ -1931,18 +1933,23 @@ public class MainFrame extends JFrame implements OptionConstants {
     final ProjectFileIR ir;
     final File[] srcFiles;
     IDocumentNavigator new_nav;
+    
+    
+    
+    
     try
     {
       ir = ProjectFileParser.ONLY.parse(projectFile);
       srcFiles = ir.getSourceFiles();
       
       
-      
-      
       _model.setDocumentNavigator(AWTContainerNavigatorFactory.Singleton.makeTreeNavigator(projectFile.getName(),
-                                                                                         _model.getDocumentNavigator()));
+                                                                                             _model.getDocumentNavigator()));
       new_nav = _model.getDocumentNavigator();
 
+      _setUpContextMenus();
+      
+      
       File projectfile = projectFile;
       String projfilepath = projectfile.getCanonicalPath();
       String tlp = projfilepath.substring(0, projfilepath.lastIndexOf(File.separator));
@@ -1954,50 +1961,11 @@ public class MainFrame extends JFrame implements OptionConstants {
       throw new UnexpectedException(e);
     }
     
+    _closeAll();
 
     
     List<OpenDefinitionsDocument> old_lod =  _model.getDefinitionsDocuments();
 
-    /* i have to copy the list, but i can't use clone, since List is an interface
-     * so i need to manually copy the list.
-     * 
-     * i have to copy it, becase when i close all the files, i have to keep a reference to the currently open files
-     */
-    /*
-    LinkedList<OpenDefinitionsDocument> lod = new LinkedList<OpenDefinitionsDocument>();
-    for(int i=0;i<old_lod.size();i++){
-      lod.add(old_lod.get(i));
-    }
-    */
-    
-    
-    // XXX
-    _closeAll();
-
-/*    
-    OpenDefinitionsDocument odd;
-    INavigatorItem item;
-
-    System.out.println(lod.size());
-    System.out.println("-------------");
-    for(int i=0;i<lod.size();i++){
-      odd = lod.get(i);
-      item = _model.getIDocGivenODD(odd);
-      try{
-        new_nav.addDocument(item, odd.getFile().getParent());
-        System.out.println("adding " + item + " at " + odd.getFile().getParent());
-      }catch(IllegalStateException e){
-        
-      }catch(FileMovedException e){
-        
-      }
-      
-    }
-    System.out.println("-------------");
-
-  */  
-    
-    
     File[] projectclasspaths = ir.getClasspath();
     Vector<File> currentclasspaths = DrJava.getConfig().getSetting(OptionConstants.EXTRA_CLASSPATH);
     for(int i = 0; i<projectclasspaths.length; i++)
@@ -2005,16 +1973,6 @@ public class MainFrame extends JFrame implements OptionConstants {
       currentclasspaths.add(projectclasspaths[i].getAbsoluteFile());
     }
     DrJava.getConfig().setSetting(OptionConstants.EXTRA_CLASSPATH, currentclasspaths);
-    //System.out.println("classpaths are now = " + DrJava.getConfig().getSetting(OptionConstants.EXTRA_CLASSPATH));
-    
-    _model.getDocumentNavigator().asContainer().addMouseListener(new RightClickMouseAdapter()
-                                                                   {
-      protected void _popupAction(MouseEvent e) {
-//        System.out.println(e.getSource());
-        _docPanePopupMenu.show(e.getComponent(), e.getX(), e.getY());
-      }
-    }
-    );
 
     
     
@@ -2030,7 +1988,6 @@ public class MainFrame extends JFrame implements OptionConstants {
       }
     });
     _closeProjectAction.setEnabled(true);    
-    
   }
   
   private void _openProject() {
@@ -2065,6 +2022,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       Font doclistFont = DrJava.getConfig().getSetting(FONT_DOCLIST);
       _model.getDocCollectionWidget().setFont(doclistFont);
       _closeProjectAction.setEnabled(false);
+      _setUpContextMenus();
   }
   
   void open(FileOpenSelector openSelector) {
@@ -2242,7 +2200,9 @@ public class MainFrame extends JFrame implements OptionConstants {
         }
         String filename = file.getCanonicalPath();    
         _model.saveProject(filename);
-        _openProjectHelper(file);
+        if(!(_model.getDocumentNavigator() instanceof JTreeSortNavigator)){
+          _openProjectHelper(file);
+        }
       }
       catch(IOException ioe) {
         _showIOError(ioe);
@@ -2409,7 +2369,6 @@ public class MainFrame extends JFrame implements OptionConstants {
       }
     };
     worker.start();
-
   }
 
   /**
@@ -2519,7 +2478,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     if (inDebugMode()) {
       OpenDefinitionsDocument doc = _model.getActiveDocument();
 
-      boolean isUntitled = doc.getDocument().isUntitled();
+      boolean isUntitled = doc.isUntitled();
       if (isUntitled) {
         JOptionPane.showMessageDialog(this,
                                       "You must save and compile this document before you can\n" +
@@ -3710,7 +3669,9 @@ public class MainFrame extends JFrame implements OptionConstants {
     _docPanePopupMenu.add(_runAction);
     _model.getDocCollectionWidget().addMouseListener(new RightClickMouseAdapter() {
       protected void _popupAction(MouseEvent e) {
-        _docPanePopupMenu.show(e.getComponent(), e.getX(), e.getY());
+        if(_model.getDocumentNavigator().selectDocumentAt(e.getX(), e.getY())){
+          _docPanePopupMenu.show(e.getComponent(), e.getX(), e.getY());
+        }
       }
     });
 
@@ -3774,6 +3735,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     JScrollPane scroll = new BorderlessScrollPane(pane,
                                                   JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
                                                   JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+    pane.setScrollPane(scroll);
     //scroll.setBorder(null); // removes all default borders (MacOS X installs default borders)
 
     // can be used to make sure line wrapping occurs
@@ -3871,21 +3833,17 @@ public class MainFrame extends JFrame implements OptionConstants {
     // demoted to package private protection to test the disabling editing while
     // compiling functionality.
 
-    // Sync caret with location before switching
-    _currentDefPane.getOpenDocument().
-      syncCurrentLocationWithDefinitions( _currentDefPane.getCaretPosition() );
-
-    // Remove any error highlighting in the old def pane
-    _currentDefPane.removeErrorHighlight();
-
+    // Added 2004-May-27
+    // Notify the definitions pane that is being replaced (becoming inactive)
+    _currentDefPane.notifyInactive();
+    
     JScrollPane scroll = _defScrollPanes.get(_model.getActiveDocument());
     if (scroll == null) {
-      throw new UnexpectedException(new Exception(
-                                                  "Current definitions scroll pane not found."));
+      throw new UnexpectedException(new Exception("Current definitions scroll pane not found."));
     }
 
     int oldLocation = _docSplitPane.getDividerLocation();
-
+    
     _docSplitPane.setRightComponent(scroll);
     _docSplitPane.setDividerLocation(oldLocation);
 
@@ -3897,10 +3855,12 @@ public class MainFrame extends JFrame implements OptionConstants {
     // is un-editable at any time.
     if ( _currentDefPane.isEditable() ){
       _currentDefPane = (DefinitionsPane) scroll.getViewport().getView();
+      _currentDefPane.notifyActive();
     }
     else {
       _currentDefPane.setEditable(true);
       _currentDefPane = (DefinitionsPane) scroll.getViewport().getView();
+      _currentDefPane.notifyActive();
       _currentDefPane.setEditable(false);
     }
     // reset the undo/redo menu items
@@ -4572,6 +4532,7 @@ public class MainFrame extends JFrame implements OptionConstants {
           Runnable command = new Runnable() {
             public void run(){
               _fileClosed(doc);
+//              System.out.println("gui closed file 1");
             }
           };
           SwingUtilities.invokeAndWait(command);
@@ -4587,6 +4548,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       }
       else {
         _fileClosed(doc);
+//        System.out.println("gui closed file 2");
       }
     }
 

@@ -2,7 +2,7 @@
  *
  * This file is part of DrJava.  Download the current version of this project:
  * http://sourceforge.net/projects/drjava/ or http://www.drjava.org/
- *
+ * 
  * DrJava Open Source License
  *
  * Copyright (C) 2001-2003 JavaPLT group at Rice University (javaplt@rice.edu)

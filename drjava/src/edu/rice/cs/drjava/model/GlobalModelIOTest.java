@@ -1011,9 +1011,9 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
     final File file1 = tempFile();
     final File file2 = tempFile();
     final File file3 = tempFile();
-    fooDoc.getDocument().setFile(file1);
-    barDoc.getDocument().setFile(file2);
-    trdDoc.getDocument().setFile(file3);
+    fooDoc.setFile(file1);
+    barDoc.setFile(file2);
+    trdDoc.setFile(file3);
 
     // check.
     FileSelector fs = new FileSelector(file1);
@@ -1023,10 +1023,10 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
     assertEquals("contents of saved file1",
                  FOO_TEXT,
                  FileOps.readFileAsString(file1));
-    assertEquals("contents of saved file1",
+    assertEquals("contents of saved file2",
                  BAR_TEXT,
                  FileOps.readFileAsString(file2));
-    assertEquals("contents of saved file1",
+    assertEquals("contents of saved file3",
                  "third document contents",
                  FileOps.readFileAsString(file3));
   }

@@ -54,8 +54,8 @@ import java.io.*;
 import java.util.*;
 import java.awt.Container;
 
-import edu.rice.cs.util.swing.FindReplaceMachine;
 
+import edu.rice.cs.util.swing.FindReplaceMachine;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.Version;
 import edu.rice.cs.util.UnexpectedException;
@@ -128,19 +128,18 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel
    */
   private void _init() {
     _documentNavigator.addNavigationListener(new INavigationListener() {
-     public void gainedSelection(INavigatorItem docu) {
-       _setActiveDoc(docu);
-     }
-
-     public void lostSelection(INavigatorItem docu) {
-  // not important, only one document selected at a time
-     }
- });
+      public void gainedSelection(INavigatorItem docu) {
+        _setActiveDoc(docu);
+      }
+      
+      public void lostSelection(INavigatorItem docu) {
+        // not important, only one document selected at a time
+      }
+    });
+    
     _isClosingAllDocs = false;
     _ensureNotEmpty();
     _setActiveFirstDocument();
-    
-    
   }
 
   /**
@@ -164,26 +163,26 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel
   public OpenDefinitionsDocument getActiveDocument() {
     return _activeDocument;
   }
-
+  
   /**
    * Sets the currently active document by updating the selection model.
    * @param doc Document to set as active
    */
   public void setActiveDocument(OpenDefinitionsDocument doc) {
     _documentNavigator.setActiveDoc(getIDocGivenODD(doc));
-//    _setActiveDoc(getIDocGivenODD(doc));
+    //    _setActiveDoc(getIDocGivenODD(doc));
   }
-
-    public Container getDocCollectionWidget() {
-      return _documentNavigator.asContainer();
-    }
-
+  
+  public Container getDocCollectionWidget() {
+    return _documentNavigator.asContainer();
+  }
+  
   /**
    * Sets the active document to be the next one in the collection
    */
   public void setActiveNextDocument() {
-      INavigatorItem key = getIDocGivenODD(_activeDocument);
-      INavigatorItem nextKey =_documentNavigator.getNext(key);
+    INavigatorItem key = getIDocGivenODD(_activeDocument);
+    INavigatorItem nextKey =_documentNavigator.getNext(key);
       if( key != nextKey ) {
         /* this will select the active document in the navigator, which
          * will signal a listener to call _setActiveDoc(...)
@@ -197,15 +196,15 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel
    * Sets the active document to be the previous one in the collection
    */
   public void setActivePreviousDocument() {
-      INavigatorItem key = getIDocGivenODD(_activeDocument);
-      INavigatorItem prevKey =_documentNavigator.getPrevious(key);
-      if( key != prevKey ) {
-        /* this will select the active document in the navigator, which
-         * will signal a listener to call _setActiveDoc(...)
-         */
-          _documentNavigator.setActiveDoc(prevKey);
-//   _setActiveDoc(prevKey);
-      }
+    INavigatorItem key = getIDocGivenODD(_activeDocument);
+    INavigatorItem prevKey =_documentNavigator.getPrevious(key);
+    if( key != prevKey ) {
+      /* this will select the active document in the navigator, which
+       * will signal a listener to call _setActiveDoc(...)
+       */
+      _documentNavigator.setActiveDoc(prevKey);
+      //   _setActiveDoc(prevKey);
+    }
   }
 
   /**
@@ -325,40 +324,41 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel
    * one open document holds by creating a new file if necessary.
    * @return true if the document was closed
    */
-  public boolean closeFile(OpenDefinitionsDocument doc) {
-      INavigatorItem switchTo =_documentNavigator.getNext(getIDocGivenODD(doc));
-      /** if we can't move forward, go backwards */
-      if( switchTo == getIDocGivenODD(doc)) {
-   switchTo = _documentNavigator.getPrevious(switchTo);
-      }
-
-      if( super.closeFile(doc) ) {
-   // Select next document if not closing all documents
-   if (!_isClosingAllDocs) {
-       _ensureNotEmpty();
-
-       if( getDefinitionsDocumentsSize() == 1 ) {
-         _setActiveFirstDocument();
+   public boolean closeFile(OpenDefinitionsDocument doc) {
+     INavigatorItem switchTo =_documentNavigator.getNext(getIDocGivenODD(doc));
+     /** if we can't move forward, go backwards */
+     if( switchTo == getIDocGivenODD(doc)) {
+       switchTo = _documentNavigator.getPrevious(switchTo);
+     }
+     
+     if( super.closeFile(doc) ) {
+       // Select next document if not closing all documents
+       if (!_isClosingAllDocs) {
+         _ensureNotEmpty();
+         
+//         if( _hasOneEmptyDocument() ) {
+         if(getDocumentCount() == 1){
+           _setActiveFirstDocument();
+         }
+         else {
+           /* this will select the active document in the navigator, which
+            * will signal a listener to call _setActiveDoc(...)
+            */
+           _documentNavigator.setActiveDoc(switchTo);
+           //    _setActiveDoc(switchTo);
+         }
        }
-       else {
-        /* this will select the active document in the navigator, which
-         * will signal a listener to call _setActiveDoc(...)
-         */
-    _documentNavigator.setActiveDoc(switchTo);
-    //    _setActiveDoc(switchTo);
-       }
+       return true;
+     }
+     return false;
    }
-   return true;
-      }
-      return false;
-  }
-
-  /**
-   * Attempts to close all open documents.
-   * Also ensures the invariant that there is always at least
-   * one open document holds by creating a new file if necessary.
-   * @return true if all documents were closed
-   */
+   
+   /**
+    * Attempts to close all open documents.
+    * Also ensures the invariant that there is always at least
+    * one open document holds by creating a new file if necessary.
+    * @return true if all documents were closed
+    */
   public boolean closeAllFiles() {
     _isClosingAllDocs = true;
     boolean success = super.closeAllFiles();

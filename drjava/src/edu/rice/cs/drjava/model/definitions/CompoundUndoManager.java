@@ -58,6 +58,12 @@ import edu.rice.cs.drjava.model.GlobalEventNotifier;
  * @version $Id$
  */
 public class CompoundUndoManager extends UndoManager {
+  
+  private static int counter = 0;
+  
+  private int id;
+  
+  
   /**
    * The compound edits we are storing.
    */
@@ -88,6 +94,8 @@ public class CompoundUndoManager extends UndoManager {
    */
   public CompoundUndoManager(GlobalEventNotifier notifier) {
     super();
+    counter++;
+    id = counter;
     _compoundEdits = new LinkedList<CompoundEdit>();
     _keys = new LinkedList<Integer>();
     _nextKey = 0;
@@ -123,6 +131,9 @@ public class CompoundUndoManager extends UndoManager {
       if (compoundEdit.canUndo()) {
         if (!_compoundEditInProgress()) {
           super.addEdit(compoundEdit);
+//          if(!canUndo()){
+//            throw new RuntimeException("could not add the edit to the undomanager");
+//          }
           _notifyUndoHappened();
         }
         else {
@@ -284,5 +295,9 @@ public class CompoundUndoManager extends UndoManager {
    */
   public boolean isModified() {
     return editToBeUndone() != _savePoint;
+  }
+  
+  public String toString(){
+    return "(CompoundUndoManager: " + id + ")";
   }
 }

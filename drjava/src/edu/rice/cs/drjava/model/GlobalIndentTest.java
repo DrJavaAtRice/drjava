@@ -7,7 +7,7 @@
  *
  * Copyright (C) 2001-2003 JavaPLT group at Rice University (javaplt@rice.edu)
  * All rights reserved.
- *
+ * 
  * Developed by:   Java Programming Languages Team
  *                 Rice University
  *                 http://www.cs.rice.edu/~javaplt/

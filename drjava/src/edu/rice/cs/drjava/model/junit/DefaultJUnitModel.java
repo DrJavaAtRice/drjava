@@ -193,7 +193,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
             classNames.add(cn);
             File f;
             try {
-              f = dd.getFile();
+              f = doc.getFile();
             }
             catch (FileMovedException fme) {
               f = fme.getFile();

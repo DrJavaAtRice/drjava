@@ -47,9 +47,11 @@ package edu.rice.cs.drjava.model;
 
 import java.awt.print.*;
 import javax.swing.text.*;
+import javax.swing.event.DocumentListener;
 import javax.swing.ListModel;
 import javax.swing.DefaultListModel;
 import javax.swing.ProgressMonitor;
+import javax.swing.event.UndoableEditListener;
 import java.io.*;
 import java.util.*;
 
@@ -74,6 +76,7 @@ import edu.rice.cs.drjava.model.definitions.indent.Indenter;
 import edu.rice.cs.drjava.project.*;
 import edu.rice.cs.drjava.platform.PlatformFactory;
 import edu.rice.cs.util.docnavigation.*;
+import edu.rice.cs.drjava.model.cache.*;
 
 /**
  * Handles the bulk of DrJava's program logic.
@@ -87,6 +90,13 @@ import edu.rice.cs.util.docnavigation.*;
 public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     DocumentIterator {
 
+  /**
+   * a document cache that manages how many unmodified documents are open at once
+   */
+  private DocumentCache _cache;
+  
+
+  
   static final String DOCUMENT_OUT_OF_SYNC_MSG =
     "Current document is out of sync with the Interactions Pane and should be recompiled!\n";
 
@@ -250,6 +260,8 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
    */
   public DefaultGlobalModel() {
 
+    _cache = new DocumentCache();
+
     _interactionsDocAdapter = new SwingDocumentAdapter();
     _interactionsModel =
       new DefaultInteractionsModel(this, _interpreterControl,
@@ -411,48 +423,37 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     return _javadocModel;
   }
   
-  public IAWTContainerNavigatorActor getDocumentNavigator()
-  {
+  public IAWTContainerNavigatorActor getDocumentNavigator() {
     return _documentNavigator;
   }
   
-  public void setDocumentNavigator(IAWTContainerNavigatorActor newnav)
-  {
+  public void setDocumentNavigator(IAWTContainerNavigatorActor newnav) {
     _documentNavigator = newnav;
   }
   
-  private INavigatorItem makeIDocFromODD(final OpenDefinitionsDocument oddoc)
-  {
-      final INavigatorItem idoc  = new INavigatorItem()
-          {
-             public String getName()
-             {
-               return oddoc.getFilename();
-             }
-             
-             public boolean equals(Object obj)
-             {
-               try
-               {
-               
-                 INavigatorItem castidoc = (INavigatorItem)obj;
-                 return this == castidoc;
-               }
-               catch(ClassCastException e)
-               {
-                 return oddoc.equals(obj);
-               }
-             }
-             
-             public String toString()
-             {
-               if(oddoc.isModifiedSinceSave()){
-                 return oddoc.getFilename() + " *";
-               }else{
-                 return oddoc.getFilename();
-               }
-             }
-          };
+  private INavigatorItem makeIDocFromODD(final OpenDefinitionsDocument oddoc) {
+    final INavigatorItem idoc  = new INavigatorItem() {
+      public String getName() {
+        return oddoc.getFilename();
+      }
+      public boolean equals(Object obj){
+        try {
+          INavigatorItem castidoc = (INavigatorItem)obj;
+          return this == castidoc;
+        }
+        catch(ClassCastException e) {
+          return oddoc.equals(obj);
+        }
+      }
+      public String toString() {
+        if(oddoc.isModifiedSinceSave()){
+          return oddoc.getFilename() + " *";
+        }
+        else{
+          return oddoc.getFilename() + "  ";
+        }
+      }
+    };
     
     return idoc;
   }
@@ -464,7 +465,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
   public OpenDefinitionsDocument newFile() {
     final OpenDefinitionsDocument oddoc = _createOpenDefinitionsDocument();
     INavigatorItem idoc = makeIDocFromODD(oddoc);
-    oddoc.getDocument().setFile(null);
+    oddoc.setFile(null);
     _documentsRepos.put(idoc, oddoc);
     _documentNavigator.addDocument(idoc);
     _notifier.newFileCreated(oddoc);
@@ -525,6 +526,13 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     return openDoc;
   }
 
+  /**
+   * This is for use by test cases only.
+   */
+  public DocumentCache getDocumentCache() {
+    return _cache;
+  }
+  
   //---------------------- Specified by ILoadDocuments ----------------------//
 
   /**
@@ -640,13 +648,10 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     {
       builder.addClasspathFile(currentclasspaths.get(i));
     }
-    
     // write to disk
     FileWriter fw = new FileWriter(filename);
     fw.write(builder.makeProjectFile());
     fw.close();
-    
-    
   }
 
   /**
@@ -663,15 +668,19 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
    * @return true if the document was closed
    */
   public boolean closeFile(OpenDefinitionsDocument doc) {
+    
     boolean canClose = doc.canAbandonFile();
     final OpenDefinitionsDocument closedDoc = doc;
     if (canClose) {
-      doc.removeFromDebugger();
       // Only fire event if doc exists and was removed from list
       INavigatorItem idoc = _documentsRepos.removeKey(closedDoc);
+      closedDoc.close();
+      
       if (idoc != null) {
         _documentNavigator.removeDocument(idoc);
         _notifier.fileClosed(closedDoc);
+//        System.out.println("model closed file");
+//        closedDoc.close();
         return true;
       }
     }
@@ -858,6 +867,10 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     }
   }
 
+  public int getDocumentCount() {
+    return _documentsRepos.size();
+  }
+  
   /*
   private int _getIndexOfDocument(Document doc) {
     int index = 0;
@@ -1321,9 +1334,12 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
    * one, otherwise null.
    *
   public OpenDefinitionsDocument getDocBeingTested() {
-    return _docBeingTested;
+  return _docBeingTested;
   }*/
-
+  
+  
+  
+  private static int ID_COUNTER = 0; // TAKE THIS OUT!!!  IT's DEBUG CODE
   // ---------- DefinitionsDocumentHandler inner class ----------
 
   /**
@@ -1331,12 +1347,19 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
    * DefinitionsDocuments by the GlobalModel.
    */
   private class DefinitionsDocumentHandler implements OpenDefinitionsDocument {
-    private DefinitionsDocument _doc;
+//    private DefinitionsDocument _doc;
     // TODO: Should these be document-specific?  They aren't used as such now.
 //    private CompilerErrorModel _errorModel;
 //    private JUnitErrorModel _junitErrorModel;
+    
+    private int _id;
     private DrJavaBook _book;
     private Vector<Breakpoint> _breakpoints;
+    
+    private boolean _modifiedSinceSave;
+    
+    private File _file;
+    private long _timestamp;
 
 //    boolean _shouldRun;
 //    private GlobalModelListener _notifyListener = new DummySingleDisplayModelListener() {
@@ -1357,43 +1380,131 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
      * Constructor.  Initializes this handler's document.
      * @param doc DefinitionsDocument to manage
      */
-    DefinitionsDocumentHandler(DefinitionsDocument doc) {
-      _doc = doc;
-      /*
-          try{
-            final _file = doc.getFile();
-            DocReconstructor reconstruct = new DocReconstructor(){
-              public void make(){
-                // make doc from file
-                _file;
-              }
-            };
-          }catch(IllegalStateException e){
-            DocReconstructor reconstruct = new DocReconstructor(){
-              public void make(){
-                // make the untitled doc
-              }
-          }
-      
-      cache.put(this, reconstruct);
-      cache.get(this);
-      cache.clear(this);
-      
-      */
+    DefinitionsDocumentHandler(File f) throws IOException{
+      if(f.exists()){
+        _file = f;
+        _timestamp = f.lastModified();
+        init();
+      }else{
+        throw new FileNotFoundException("file " + f + " cannot be found");
+      }
+    }
+    
+    DefinitionsDocumentHandler(){
+      _file = null;
+      init();
+    }
+    
+    public void init(){
+      _id = ID_COUNTER++;
+      //      _doc = doc;
+      try{
+        //System.out.println("about to make reconstructor " + this);
+        DDReconstructor ddr = makeReconstructor();
+        //System.out.println("finished making reconstructor " + this);
+        _cache.put(this, ddr);
+      }catch(IllegalStateException e){
+        throw new UnexpectedException(e);
+      }
+
 //      _errorModel = new CompilerErrorModel<CompilerError> (new CompilerError[0], null);
 //      _junitErrorModel = new JUnitErrorModel(new JUnitError[0], null, false);
       _breakpoints = new Vector<Breakpoint>();
+      _modifiedSinceSave = false;
     }
-
+    
+    
+    /**
+     * makes a default DDReconstructor that will make a Document based on if the Handler has a file or not
+     */
+    protected DDReconstructor makeReconstructor(){
+      return new DDReconstructor(){
+        
+        // Brand New documents start at location 0
+        private int _loc = 0;
+        // Start out with empty list for the very first time the document is made
+        private DocumentListener[] _list = {};
+        
+        private CompoundUndoManager _undo = null;
+        
+        private UndoableEditListener[] _undoListeners = {};
+        
+        public DefinitionsDocument make() throws IOException, BadLocationException, FileMovedException{
+          //          System.out.println("making doc" + DefinitionsDocumentHandler.this);
+          DefinitionsDocument tempDoc;
+//          if(_undo != null){
+//            System.out.println("creating doc with undomanager for " + DefinitionsDocumentHandler.this);
+//            tempDoc = new DefinitionsDocument(_notifier, _undo);
+//          }else{
+            tempDoc = new DefinitionsDocument(_notifier);
+//          }
+            
+          
+          if(_file != null){
+            FileReader reader = new FileReader(_file);
+            _editorKit.read(reader, tempDoc, 0);
+            reader.close(); // win32 needs readers closed explicitly!
+            
+            tempDoc.setCurrentLocation(_loc);
+            for(DocumentListener d : _list) {
+              if (d instanceof DocumentUIListener) {
+                tempDoc.addDocumentListener(d);
+              }
+            }
+            for(UndoableEditListener l: _undoListeners){
+              tempDoc.addUndoableEditListener(l);              
+            }
+            tempDoc.resetModification();
+          }
+          tempDoc.setUndoManager(_undo);
+          return tempDoc;
+        }
+        public void saveDocInfo(DefinitionsDocument doc) {
+          _undo = doc.getUndoManager();
+          _undoListeners = doc.getUndoableEditListeners();
+          _loc = doc.getCurrentLocation();
+          _list = doc.getDocumentListeners();
+        }
+      };
+    }
+    
+    /**
+     * Originally designed to allow undoManager to set the current document to
+     * be modified whenever an undo or redo is performed.
+     * Now it actually does this.
+     */
+    public void setModifiedSinceSave() {
+      getDocument().setModifiedSinceSave();
+    }
+    
+    
     /**
      * Gets the definitions document being handled.
      * @return document being handled
      */
     public DefinitionsDocument getDocument() {
-        return _doc;
+      try{
+        return _cache.get(this);
+      }catch(FileMovedException e){
+        System.out.println("DefaultGlobalModel: 1430: FileMovedException should be handled by box that fixes everything.");
+      }catch(IOException e){
+        System.out.println("DefaultGlobalModel: 1432: IOException should be handled by box that fixes everything.");
+      }
+      
+      
+      try{
+        System.out.println("DefaultGlobalModel: 1435: creating blank doc.");
+        _cache.update(this, makeReconstructor());
+        return _cache.get(this);
+      }catch(FileMovedException e){
+        System.out.println("DefaultGlobalModel: 1440: this should NEVER happen");
+      }catch(IOException e){
+        System.out.println("DefaultGlobalModel: 1442: this should NEVER happen");
+      }
+      return null;
     }
 
-    /**
+    /** 
      * Returns the name of the top level class, if any.
      * @throws ClassNameNotFoundException if no top level class name found.
      */
@@ -1407,7 +1518,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
      * @return true if the document is untitled and has no file
      */
     public boolean isUntitled() {
-      return getDocument().isUntitled();
+      return (_file == null);
     }
 
     /**
@@ -1416,15 +1527,39 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
      * @return the file for this document
      * @exception IllegalStateException if no file exists
      */
-    public File getFile() throws IllegalStateException, FileMovedException {
-      return getDocument().getFile();
+    public File getFile() throws IllegalStateException , FileMovedException {
+        if (_file == null) {
+          throw new IllegalStateException(
+                                          "This document does not yet have a file.");
+        }
+        //does the file actually exist?
+        if (_file.exists()) {
+          return _file;
+        }
+        else {
+          throw new FileMovedException(_file,
+                                       "This document's file has been moved or deleted.");
+        }
     }
 
     /**
      * Returns the name of this file, or "(untitled)" if no file.
      */
     public String getFilename() {
-      return getDocument().getFilename();
+      String filename = "(Untitled)";
+      try {
+        File file = getFile();
+        filename = file.getName();
+      }
+      catch (IllegalStateException ise) {
+        // No file, leave as "untitled"
+      }
+      catch (FileMovedException fme) {
+        // Recover, even though file has been deleted
+        File file = fme.getFile();
+        filename = file.getName();
+      }
+      return filename;
     }
 
     // TODO: Move this to where it can be static.
@@ -1465,12 +1600,12 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       }
 
       try {
-        if (getDocument().isUntitled()) {
+        if (isUntitled()) {
           realCommand = com;
         }
         else {
           try {
-            file = getDocument().getFile();
+            file = getFile();
             realCommand = new TrivialFSS(file);
           }
           catch (FileMovedException fme) {
@@ -1543,14 +1678,14 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
             }
           });
 
-          getDocument().resetModification();
-          getDocument().setFile(file);
+          resetModification();
+          setFile(file);
           getDocument().setCachedClassFile(null);
           checkIfClassFileInSync();
           _notifier.fileSaved(openDoc);
           
           
-          INavigatorItem idoc = _documentsRepos.getKey(getODDForDocument(getDocument()));
+          INavigatorItem idoc = _documentsRepos.getKey(this);
 //          _documentNavigator.removeDocument(idoc);
 //          _documentNavigator.addDocument(idoc);
 
@@ -1574,6 +1709,38 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       }
     }
 
+    
+    /**
+     * Whenever this document has been saved, this method should be called
+     * so that it knows it's no longer in a modified state.
+     */
+    public void resetModification() {
+      getDocument().resetModification();
+      if (_file != null) {
+        _timestamp = _file.lastModified();
+      }
+    }
+    
+    
+    /**
+     * sets the file for this openDefinitionsDocument
+     */
+    public void setFile(File file) {
+      _file = file;
+//      resetModification();
+      //jim: maybe need lock
+      if (_file != null) {
+        _timestamp = _file.lastModified();
+      }
+    }
+    
+    /**
+     * returns the timestamp
+     */
+    public long getTimestamp() {
+      return _timestamp;
+    }
+    
     /**
      * This method tells the document to prepare all the DrJavaBook
      * and PagePrinter objects.
@@ -1583,7 +1750,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
 
       String filename = "(untitled)";
       try {
-        filename = getDocument().getFile().getAbsolutePath();
+        filename = getFile().getAbsolutePath();
       }
       catch (IllegalStateException e) {
       }
@@ -1718,25 +1885,41 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       // Use the model's classpath, and use the EventNotifier as the listener
       _javadocModel.javadocDocument(this, saver, getClasspath());
     }
-
+    
     /**
-     * Determines if the definitions document has changed since the
-     * last save.
+     * Determines if the document has been modified since the last save.
      * @return true if the document has been modified
      */
     public boolean isModifiedSinceSave() {
-      return getDocument().isModifiedSinceSave();
+      /* if the document is not in the cache, then we know that it's not modified, so
+       * only check if the DDoc is in the cache */
+      if(_cache.isDDocInCache(this)){
+        return getDocument().isModifiedSinceSave();
+      }else{
+        return false;
+      }
     }
-
+    
     /**
-     * Determines if the definitions document has changed on disk
-     * since the last time the document was read.
-     * @return true if the document has been modified on disk
+     * Determines if the document has been modified since the last save.
+     * @return true if the document has been modified
      */
     public boolean isModifiedOnDisk() {
-      return getDocument().isModifiedOnDisk();
+      boolean ret = false;
+      try {
+        getDocument().aquireReadLock();
+        if (_file == null) {
+        } else {
+          ret = (_file.lastModified() > _timestamp);
+        }
+      }
+      finally {
+        getDocument().releaseReadLock();
+      }
+      return ret;
     }
-
+    
+    
     /**
      * Checks if the document is modified. If not, searches for the class file
      * corresponding to this document and compares the timestamps of the
@@ -1755,7 +1938,6 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
         // Not cached, so locate the file
         classFile = _locateClassFile();
         getDocument().setCachedClassFile(classFile);
-
         if (classFile == null) {
           // couldn't find the class file
           getDocument().setClassFileInSync(false);
@@ -1800,7 +1982,8 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
         String filename = className + ".class";
 
         // Check source root set (open files)
-        File[] sourceRoots = getSourceRootSet();
+        File[] sourceRoots = {};
+//        sourceRoots = getSourceRootSet();
         Vector<File> roots = new Vector<File>();
         // Add the current document to the beginning of the roots Vector
         try {
@@ -1882,6 +2065,11 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
         return false;
       }
     }
+    
+    public void close(){
+      removeFromDebugger();
+      _cache.removeDoc(this);      
+    }
 
     public void revertFile() throws IOException {
 
@@ -1904,7 +2092,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
         _editorKit.read(reader, tempDoc, 0);
         reader.close(); // win32 needs readers closed explicitly!
 
-        tempDoc.resetModification();
+        resetModification();
         doc.checkIfClassFileInSync();
 
         syncCurrentLocationWithDefinitions(0);
@@ -1962,7 +2150,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
      * to the definitions document.
      */
     public int getCurrentDefinitionsLocation() {
-      return getDocument().getCurrentLocation();
+        return getDocument().getCurrentLocation();
     }
 
     /**
@@ -2175,7 +2363,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     {
       File sourceFile;
       try {
-        sourceFile = getDocument().getFile();
+        sourceFile = getFile();
       }
       catch (IllegalStateException ise) {
         throw new InvalidPackageException(-1, "Can not get source root for " +
@@ -2241,6 +2429,10 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
         throw new InvalidPackageException(-1, msg);
       }
     }
+    
+    public String toString() {
+      return "(ODD " + _id + ":" + getFilename() + ")";
+    }
   }
 
   /**
@@ -2249,8 +2441,8 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
    * @return OpenDefinitionsDocument object for a new document
    */
   private OpenDefinitionsDocument _createOpenDefinitionsDocument() {
-    DefinitionsDocument doc = (DefinitionsDocument) _editorKit.createNewDocument();
-    return new DefinitionsDocumentHandler(doc);
+//    DefinitionsDocument doc = (DefinitionsDocument) _editorKit.createNewDocument();
+    return new DefinitionsDocumentHandler();
   }
 
 
@@ -2317,6 +2509,9 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       return true;
   }*/
 
+  
+  
+  
   /**
    * Creates a document from a file.
    * @param file File to read document from
@@ -2325,8 +2520,6 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
   private OpenDefinitionsDocument _openFile(File file)
     throws IOException, AlreadyOpenException
   {
-    try {
-      
       OpenDefinitionsDocument openDoc = _getOpenDocument(file);
       if (openDoc != null) {
         throw new AlreadyOpenException(openDoc);
@@ -2334,17 +2527,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
 
       
       
-      DefinitionsDocument tempDoc = (DefinitionsDocument) _editorKit.createNewDocument();
-
-      FileReader reader = new FileReader(file);
-      _editorKit.read(reader, tempDoc, 0);
-      reader.close(); // win32 needs readers closed explicitly!
-
-      tempDoc.setFile(file);
-      tempDoc.resetModification();
-      tempDoc.setCurrentLocation(0);
-      
-      final OpenDefinitionsDocument doc = new DefinitionsDocumentHandler(tempDoc);
+      final OpenDefinitionsDocument doc = new DefinitionsDocumentHandler(file);
       INavigatorItem idoc = makeIDocFromODD(doc);
       _documentsRepos.put(idoc, doc);
       
@@ -2366,10 +2549,6 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       _notifier.fileOpened(doc);
 
       return doc;
-    }
-    catch (BadLocationException docFailed) {
-      throw new UnexpectedException(docFailed);
-    }
   }
 
   /**

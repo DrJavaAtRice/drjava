@@ -55,6 +55,7 @@ import java.util.Date;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
+import edu.rice.cs.drjava.model.*;
 
 /**
  * Tests the Definitions Pane
@@ -479,6 +480,30 @@ public final class DefinitionsPaneTest extends TestCase {
     assertEquals("Should have undone correctly.", "a",
                  doc.getText(0, doc.getLength()));*/
   }
+  
+  
+  public void testActiveAndInactive(){
+    SingleDisplayModel _model = _frame.getModel();
+    
+    _model.newFile();
+
+    DefinitionsPane currpane, oldpane;
+    Document ddoc, olddoc;
+    
+    currpane = _frame.getCurrentDefPane();
+    
+    ddoc = currpane.getDocument();
+    assertEquals("the active pane should have a defintions document", DefinitionsDocument.class, ddoc.getClass());
+    
+    _model.setActiveNextDocument();
+    oldpane = currpane;
+    currpane = _frame.getCurrentDefPane();
+    olddoc = oldpane.getDocument();
+    ddoc = currpane.getDocument();
+    assertNotSame("the old pane should not have a defintions document", DefinitionsDocument.class, olddoc.getClass());
+    assertEquals("the active pane should have a defintions document", DefinitionsDocument.class, ddoc.getClass());
+  }
+  
 }
 
 class KeyTestListener implements KeyListener {

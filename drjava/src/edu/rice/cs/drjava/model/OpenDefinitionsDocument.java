@@ -338,4 +338,32 @@ public interface OpenDefinitionsDocument {
    * all related state from the debug manager.
    */
   public void removeFromDebugger();
+  
+  /**
+   * sets this document's file
+   * @param file the file that this OpenDefinitionsDocument is associated with
+   */
+  public void setFile(File file);
+  
+  /**
+   * resets the document to be unmodified
+   */
+  public void resetModification();
+  
+  /**
+   * returns the date that this document was last modified
+   */
+  public long getTimestamp();
+  
+  /**
+   * sets the document as modified
+   */
+  public void setModifiedSinceSave();
+
+  
+  /**
+   * should be called when closing an ODD to let the ODD clean up after itself
+   */
+  public void close();
+
 }

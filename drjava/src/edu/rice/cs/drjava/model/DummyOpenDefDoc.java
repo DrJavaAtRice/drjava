@@ -433,10 +433,46 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
     throw new UnsupportedOperationException("Dummy method");
   }
     
-    /**
-     * @return the INavigatorItem representing this object
-     */
-    public INavigatorItem getIDoc() {
-        throw new UnsupportedOperationException("Dummy method");
-    }
+  /**
+   * @return the INavigatorItem representing this object
+   */
+  public INavigatorItem getIDoc() {
+    throw new UnsupportedOperationException("Dummy method");
+  }
+  
+  /**
+   * resets the document to be unmodified
+   */
+  public void resetModification(){
+    throw new UnsupportedOperationException("Dummy method");
+  }
+  
+  /**
+   * returns the date that this document was last modified
+   */
+  public long getTimestamp(){
+    throw new UnsupportedOperationException("Dummy method");
+  }
+  
+  /**
+   * sets the document as modified
+   */
+  public void setModifiedSinceSave(){
+    throw new UnsupportedOperationException("Dummy method");
+  }
+  
+  /**
+   * sets the file for this openDefinitionsDocument
+   */
+  public void setFile(File file) {
+    throw new UnsupportedOperationException("Dummy method");
+  }
+  
+  /**
+   * cleans up the doc before closing it
+   */
+  public void close() {
+    // no body
+  }
+
 }

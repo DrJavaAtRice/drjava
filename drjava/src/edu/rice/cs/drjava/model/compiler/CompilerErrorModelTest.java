@@ -341,7 +341,7 @@ public final class CompilerErrorModelTest extends TestCase {
     assertTrue("File should have errors with lines.", model.hasErrorsWithPositions(doc));
     
     // Same doc with a different (but equivalent) file name
-    doc.getDocument().setFile(new File("/tmp/./nowhere5"));
+    doc.setFile(new File("/tmp/./nowhere5"));
     assertTrue("Same file should have errors with lines.", model.hasErrorsWithPositions(doc));
     
     // Doc without errors

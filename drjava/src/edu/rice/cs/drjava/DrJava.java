@@ -1,4 +1,4 @@
-/*BEGIN_COPYRIGHT_BLOCK
+  /*BEGIN_COPYRIGHT_BLOCK
  *
  * This file is part of DrJava.  Download the current version of this project:
  * http://sourceforge.net/projects/drjava/ or http://www.drjava.org/
@@ -345,6 +345,9 @@ public class DrJava implements OptionConstants {
         // TODO: show a dialog? (file not found)
       }
       catch (AlreadyOpenException aoe) {
+        // This explicitly does nothing to ignore duplicate files.
+      }
+      catch (FileMovedException aoe) {
         // This explicitly does nothing to ignore duplicate files.
       }
       catch (Exception ex) {

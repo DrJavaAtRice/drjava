@@ -117,7 +117,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
    */
   public void testDocLocationAfterSwitch() throws BadLocationException {
     DefinitionsPane pane = _frame.getCurrentDefPane();
-    DefinitionsDocument doc = pane.getOpenDocument().getDocument();
+    OpenDefinitionsDocument doc = pane.getOpenDocument();//.getDocument();
     
     /**
      * NOTE: This has been added because MainFrameTest hangs randomly (about every other time) without this line.
@@ -132,9 +132,9 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     
     }
         
-    doc.insertString(0, "abcd", null);
+    doc.getDocument().insertString(0, "abcd", null);
     pane.setCaretPosition(3);
-    assertEquals("Location of old doc before switch", 3, doc.getCurrentLocation());
+    assertEquals("Location of old doc before switch", 3, doc.getDocument().getCurrentLocation());
     
     // Create a new file
     SingleDisplayModel model = _frame.getModel();
@@ -142,16 +142,16 @@ public final class MainFrameTest extends MultiThreadedTestCase {
 
     // Current pane should be new doc, pos 0
     pane = _frame.getCurrentDefPane();
-    doc = pane.getOpenDocument().getDocument();
-    assertEquals("Location of new document", 0, doc.getCurrentLocation());
+    doc = pane.getOpenDocument();//.getDocument();
+    assertEquals("Location of new document", 0, doc.getDocument().getCurrentLocation());
 
     // Switch back
     model.setActiveNextDocument();
 
     // Current pane should be old doc, pos 3
     pane = _frame.getCurrentDefPane();
-    doc = pane.getOpenDocument().getDocument();
-    assertEquals("Location of old document", 3, doc.getCurrentLocation());
+    doc = pane.getOpenDocument();//.getDocument();
+    assertEquals("Location of old document", 3, doc.getDocument().getCurrentLocation());
   }
 
   /**

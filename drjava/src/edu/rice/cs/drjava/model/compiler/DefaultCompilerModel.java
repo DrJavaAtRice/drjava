@@ -159,7 +159,9 @@ public class DefaultCompilerModel implements CompilerModel {
         }
         catch (IllegalStateException ise) {
           // No file for this document; skip it
-        }
+        }/*catch(RuntimeExceptoin e){
+         * Adam look here
+         * }*/
       }
       File[] files = filesToCompile.toArray(new File[0]);
 
@@ -212,7 +214,7 @@ public class DefaultCompilerModel implements CompilerModel {
     }
     else {
       try {
-        File file = doc.getDocument().getFile();
+        File file = doc.getFile();
         File[] files = new File[] { file };
 
         try {
@@ -296,7 +298,9 @@ public class DefaultCompilerModel implements CompilerModel {
       catch (InvalidPackageException e) {
         // oh well, invalid package statement for this one
         // can't add it to roots
-      }
+      }/*catch(RuntimeException){
+       * Adam look here
+       * }*/
     }
 
     return roots.toArray(new File[0]);

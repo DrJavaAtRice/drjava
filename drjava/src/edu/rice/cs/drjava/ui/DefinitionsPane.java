@@ -59,6 +59,7 @@ import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.OperationCanceledException;
 import edu.rice.cs.drjava.model.definitions.CompoundUndoManager;
 import edu.rice.cs.drjava.model.definitions.DefinitionsEditorKit;
+import edu.rice.cs.drjava.model.definitions.NoSuchDocumentException;
 import edu.rice.cs.drjava.model.definitions.indent.Indenter;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.ReducedModelState;
 import edu.rice.cs.drjava.config.*;
@@ -79,7 +80,14 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
    * are created.
    */
   private static DefinitionsEditorKit EDITOR_KIT;
-
+  
+  /**
+   * A dummy value for the document for when any instance of the pane
+   * is set to inactive
+   */
+  private static PlainDocument NULL_DOCUMENT = new PlainDocument();
+  
+    
   /**
    * Our parent window.
    */
@@ -671,7 +679,9 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
    */
   public void setCaretPosition(int pos) {
     super.setCaretPosition(pos);
-    _doc.getDocument().setCurrentLocation(pos);
+    System.out.flush();
+    _doc.syncCurrentLocationWithDefinitions(pos);
+//    _doc.getDocument().setCurrentLocation(pos);
   }
 
   /**
@@ -913,6 +923,79 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
     _resetUndo();
   }
 
+  
+  
+  private JScrollPane _scrollPane;
+  
+  private int _saved_vert_pos;
+  private int _saved_horz_pos;
+  
+  public void setScrollPane(JScrollPane s){
+    _scrollPane = s;
+  }
+  
+  
+  /**
+   * used to save the caret position when setting the pane as inactive
+   */
+  private int _position;
+  
+  /**
+   * This function is called when the active document is changed. this function
+   * is called on the pane that is replaced by the new active pane. it allows
+   * the pane to "shutdown" when not in use.
+   * currently, this procedure replaces the Definitions Document with a blank dummy
+   * document to help conserve memory (so that the pane will not be holding onto the last
+   * reference of a definitions document not allowing it to be garbage collected)
+   */
+  public void notifyInactive(){
+    // we catch a NoSuchDocumentException here because during a close/closeAll
+    // the model closes the definitions document before the MainFrame switches
+    // out the panes.  If this is the case, then the following code does not
+    // need to be run.
+    try {
+      // Sync caret with location before switching
+      getOpenDocument().syncCurrentLocationWithDefinitions(getCaretPosition());
+      int loc = _doc.getCurrentDefinitionsLocation();
+      
+      // Remove any error highlighting in the old def pane
+      removeErrorHighlight();
+      
+      super.setDocument(NULL_DOCUMENT);
+//      _doc.syncCurrentLocationWithDefinitions(loc);
+      
+      
+      _position = loc; // added because saving the location through the ddoc didn't work
+      
+      
+      _saved_vert_pos = _scrollPane.getVerticalScrollBar().getValue();
+      _saved_horz_pos = _scrollPane.getHorizontalScrollBar().getValue();
+    }
+    catch(NoSuchDocumentException e) {
+      // This exception was just thrown because the document was just 
+      // closed and so this pane will soon be garbage collected.  
+      // We don't need to do any more cleanup.
+    }
+  }
+  
+  /**
+   * this function is called when switching a pane to be the active document pane.
+   * it allows the pane to do any "startup" it needs to. since setInactive swapped
+   * out the document for a dummy document, we need to reload the actual document
+   * and reset its caret position to the saved location.
+   */
+  public void notifyActive() {
+//    int loc = _doc.getCurrentDefinitionsLocation();
+    int loc = _position;
+    super.setDocument(_doc.getDocument());
+    super.setCaretPosition(loc);
+    _doc.syncCurrentLocationWithDefinitions(loc);
+    _scrollPane.getVerticalScrollBar().setValue(_saved_vert_pos);
+    _scrollPane.getHorizontalScrollBar().setValue(_saved_horz_pos);
+    // NOTE: Should we be resetting the undo???
+  }
+  
+  
   public int getCurrentLine() {
     try {
       int pos = getCaretPosition();
@@ -1027,6 +1110,8 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
     }
 
     _doc.getDocument().resetUndoManager();
+    
+    // ADAM LOOK HERE
 
     getDocument().addUndoableEditListener(_undoListener);
     _undoAction.updateUndoState();
@@ -1196,12 +1281,11 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
         //           setCaretPosition(pos);
         //         }
         _doc.getDocument().getUndoManager().undo();
-        _doc.getDocument().setModifiedSinceSave();
+        _doc.setModifiedSinceSave();
         _mainFrame.updateFileTitle();
       }
       catch (CannotUndoException ex) {
-        System.out.println("Unable to undo: " + ex);
-        ex.printStackTrace();
+        throw new UnexpectedException(ex);
       }
       updateUndoState();
       _redoAction.updateRedoState();
@@ -1253,11 +1337,10 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
         //           //centerViewOnOffset(pos);
         //           setCaretPosition(pos);
         //         }
-        _doc.getDocument().setModifiedSinceSave();
+        _doc.setModifiedSinceSave();
         _mainFrame.updateFileTitle();
       } catch (CannotRedoException ex) {
-        System.out.println("Unable to redo: " + ex);
-        ex.printStackTrace();
+        throw new UnexpectedException(ex);
       }
       updateRedoState();
       _undoAction.updateUndoState();
