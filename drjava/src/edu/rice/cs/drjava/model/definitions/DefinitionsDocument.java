@@ -10,7 +10,7 @@ import  java.util.StringTokenizer;
 import java.io.File;
 
 /** 
- * The model for the definitions pane. 
+ * The model for the definitions pane.   
  * @version $Id$
  */
 public class DefinitionsDocument extends PlainDocument {
@@ -116,7 +116,7 @@ public class DefinitionsDocument extends PlainDocument {
       
       int locationChange = offset - _currentLocation;
       int strLength = str.length();
-      int prevSize;               //stores the size of the item prev when insert begins.
+      int prevSize;     //stores the size of the item prev when insert begins.
       int reducedOffset;
       // adjust location
       _reduced.move(locationChange);
@@ -287,13 +287,34 @@ public class DefinitionsDocument extends PlainDocument {
     return _tabsRemoved;
   }
 
+  public void indentLines(int selStart, int selEnd) {
+    try {
+      if (selStart == selEnd) {
+        Position oldCurrentPosition = createPosition(_currentLocation);
+        _indentLine();
+        //int caretPos = getCaretPosition();
+        //_doc().setCurrentLocation(caretPos);
+        setCurrentLocation(oldCurrentPosition.getOffset());
+        int space = getWhiteSpace();
+        move(space);
+        //setCaretPosition(caretPos + space);
+      } 
+      else {
+        _indentBlock(selStart, selEnd);
+      }
+    }
+    catch (BadLocationException e) {
+      throw new UnexpectedException(e);
+    }
+  }
+  
   /**
    * Indents the lines between and including the lines containing
    * points start and end.
    * @param start Position in document to start indenting from
    * @param end Position in document to end indenting at
    */
-  public void indentBlock(final int start, final int end) {
+  private void _indentBlock(final int start, final int end) {
     try {
       // Keep marker at the end. This Position will be the 
       // correct endpoint no matter how we change the doc
@@ -307,7 +328,7 @@ public class DefinitionsDocument extends PlainDocument {
         // regardless of how indentLine changes things
         Position walkerPos = this.createPosition(walker);
         // Indent current line
-        indentLine();
+        _indentLine();
         // Move back to walker spot
         setCurrentLocation(walkerPos.getOffset());
         walker = walkerPos.getOffset();
@@ -321,25 +342,26 @@ public class DefinitionsDocument extends PlainDocument {
       throw  new RuntimeException("Impossible bad loc except: " + e);
     }
   }
-
+ 
+  
   /**
    * Indents a line in accordance with the rules that DrJava has set up.
    */
-  public void indentLine() {
-    // moves us to the end of the line
-    move(_reduced.getDistToNextNewline());
-    IndentInfo ii = _reduced.getIndentInformation();
-    String braceType = ii.braceType;
-    int distToNewline = ii.distToNewline;
-    int distToBrace = ii.distToBrace;
-    int distToPrevNewline = ii.distToPrevNewline;
-    int tab = 0;
-    boolean isSecondLine = false;
-    if (distToNewline == -1) {
-      distToNewline = _currentLocation;
-      isSecondLine = true;
-    }
-    try {
+  private void _indentLine() {
+    try {    
+      // moves us to the end of the line
+      move(_reduced.getDistToNextNewline());
+      IndentInfo ii = _reduced.getIndentInformation();
+      String braceType = ii.braceType;
+      int distToNewline = ii.distToNewline;
+      int distToBrace = ii.distToBrace;
+      int distToPrevNewline = ii.distToPrevNewline;
+      int tab = 0;
+      boolean isSecondLine = false;
+      if (distToNewline == -1) {
+        distToNewline = _currentLocation;
+        isSecondLine = true;
+      }
       if (distToPrevNewline == -1)              //only on the first line
         tab = 0;
       //takes care of the second line
@@ -357,8 +379,7 @@ public class DefinitionsDocument extends PlainDocument {
         tab = distToNewline - distToBrace + 1;
       tab(tab, distToPrevNewline);
     } catch (BadLocationException e) {
-      e.printStackTrace();
-      throw  new IllegalArgumentException(e.getMessage());
+      throw  new UnexpectedException(e);
     }
   }
 

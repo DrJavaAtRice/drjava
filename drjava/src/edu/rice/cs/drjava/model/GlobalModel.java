@@ -103,6 +103,12 @@ public class GlobalModel {
     }
   }
   
+  /**
+   * Saves a document with a FileWriter.  If the file name is already
+   * set, the method will use that name instead of whatever selector
+   * is passed in.
+   * @param com a selector that picks the file name
+   */
   public void saveFile(FileSaveSelector com) throws IOException {
     FileSaveSelector realCommand;
     final File file = _definitionsDoc.getFile();
@@ -120,9 +126,8 @@ public class GlobalModel {
   }
   
   /**
-   * Saves a file using the Writer encapsulated in the given WriterCommand.
-   * @param com a command containing the Writer and name of
-   * the file to save to.
+   * Saves a document with a FileWriter.
+   * @param com a selector that picks the file name.
    */
   public void saveFileAs(FileSaveSelector com) throws IOException {
     try {
@@ -271,7 +276,12 @@ public class GlobalModel {
     });
   }
 
-  
+  /**
+   * Called to demand that one or more listeners saves the 
+   * definitions document before proceeding.  It is up to the caller
+   * of this method to check if the document has been saved.
+   * @param reason the reason behind the demand to save the file
+   */
   public void saveBeforeProceeding(final GlobalModelListener.SaveReason reason)
   {
     if (isModifiedSinceSave()) {
@@ -314,8 +324,44 @@ public class GlobalModel {
     return _definitionsDoc.getCurrentLocation();
   }
 
-
+  /**
+   * Forwarding method to sync the definitions with whatever view
+   * component is representing them.
+   */
+  public void syncCurrentLocationWithDefinitions(int location) {
+    _definitionsDoc.setCurrentLocation(location);
+  }
   
+  /**
+   * Get the location of the cursor in the definitions according
+   * to the definitions document.
+   */
+  public int getCurrentDefinitionsLocation() {
+    return _definitionsDoc.getCurrentLocation();
+  }
+  
+  /**
+   * Forwarding method to find the match for the closing brace 
+   * immediately to the left, assuming there is such a brace.
+   * @return the relative distance backwards to the offset before
+   *         the matching brace.
+   */
+  public int balanceBackward() {
+    return _definitionsDoc._reduced.balanceBackward();
+  }
+  
+  /**
+   * A forwarding method to indent the current line or selection
+   * in the definitions.
+   */
+  public void indentLinesInDefinitions(int selStart, int selEnd) {
+    _definitionsDoc.indentLines(selStart, selEnd);
+  }
+  
+  /**
+   * Create a find and replace mechanism starting at the current
+   * character offset in the definitions.
+   */
   public FindReplaceMachine createFindReplaceMachine() {
     try {
       return new FindReplaceMachine(_definitionsDoc,
@@ -326,6 +372,10 @@ public class GlobalModel {
     }
   }
   
+  /**
+   * Private method to keep outsiders from resetting the interactions
+   * pane without the GlobalModel's permission.
+   */
   private void _resetInteractions(String packageName, File sourceRoot) {
     _interactionsDoc.reset();
     _interpreter = new DynamicJavaAdapter();
@@ -343,7 +393,12 @@ public class GlobalModel {
     });
   }
 
-  
+  /**
+   * Forwarding method to remove logical dependency of InteractionsPane on
+   * the InteractionsDocument.  Gets the previous interaction in the 
+   * InteractionsDocument's history and replaces whatever is on the current
+   * interactions input line with this interaction.
+   */
   public void recallPreviousInteractionInHistory(Runnable failed) {
       if (_interactionsDoc.hasHistoryPrevious()) {
         _interactionsDoc.moveHistoryPrevious();
@@ -353,6 +408,12 @@ public class GlobalModel {
       }
   }
 
+  /**
+   * Forwarding method to remove logical dependency of InteractionsPane on
+   * the InteractionsDocument.  Gets the next interaction in the 
+   * InteractionsDocument's history and replaces whatever is on the current
+   * interactions input line with this interaction.
+   */
   public void recallNextInteractionInHistory(Runnable failed) {
       if (_interactionsDoc.hasHistoryNext()) {
         _interactionsDoc.moveHistoryNext();
@@ -533,7 +594,8 @@ public class GlobalModel {
   }
 
   /**
-   * put your documentation comment here
+   * Deletes the last character of a string.  Assumes semicolon at the
+   * end, but does not check.  Helper for _testClassCall(String).
    * @param s
    * @return 
    */

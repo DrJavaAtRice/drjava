@@ -177,7 +177,7 @@ public class IndentTest extends TestCase {
   public void testEndOfBlockComment () throws BadLocationException {
     BraceReduction rm = doc._reduced;
     doc.insertString(0, "\n{\n  hello;\n /*\n hello\n */", null);
-    doc.indentLine();
+    doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
     assertEquals("0.1", "\n{\n  hello;\n /*\n hello\n  */", doc.getText(0, doc.getLength()));
   }
 
@@ -188,7 +188,7 @@ public class IndentTest extends TestCase {
   public void testAfterBlockComment () throws BadLocationException {
     BraceReduction rm = doc._reduced;
     doc.insertString(0, "\n{\n  hello;\n  /*\n  hello\n  */\nhello", null);
-    doc.indentLine();
+    doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
     assertEquals("0.1", "\n{\n  hello;\n  /*\n  hello\n  */\n  hello", doc.getText(0, 
         doc.getLength()));
   }
@@ -200,7 +200,7 @@ public class IndentTest extends TestCase {
   public void testAfterBlockComment3 () throws BadLocationException {
     BraceReduction rm = doc._reduced;
     doc.insertString(0, "\n{\n  hello;\n  /*\n  hello\n  grr*/\nhello", null);
-    doc.indentLine();
+    doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
     assertEquals("0.1", "\n{\n  hello;\n  /*\n  hello\n  grr*/\n  hello", doc.getText(0, 
         doc.getLength()));
   }
@@ -212,7 +212,7 @@ public class IndentTest extends TestCase {
   public void testAfterBlockComment4 () throws BadLocationException {
     BraceReduction rm = doc._reduced;
     doc.insertString(0, "\n{\n  hello;\n /*\n  hello\n */ hello", null);
-    doc.indentLine();
+    doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
     assertEquals("0.1", "\n{\n  hello;\n /*\n  hello\n  */ hello", doc.getText(0, 
         doc.getLength()));
   }
@@ -224,7 +224,7 @@ public class IndentTest extends TestCase {
   public void testAfterBlockComment2 () throws BadLocationException {
     BraceReduction rm = doc._reduced;
     doc.insertString(0, "\n{\n  hello;\n  /*\n  hello\n  */ (\nhello", null);
-    doc.indentLine();
+    doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
     assertEquals("0.1", "\n{\n  hello;\n  /*\n  hello\n  */ (\n      hello", doc.getText(0, 
         doc.getLength()));
   }
@@ -356,7 +356,7 @@ public class IndentTest extends TestCase {
     // just paren
     BraceReduction rm = doc._reduced;
     doc.insertString(0, "abcde", null);
-    doc.indentLine();
+    doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
     assertEquals("0.1", "abcde", doc.getText(0, doc.getLength()));
   }
 
@@ -368,7 +368,7 @@ public class IndentTest extends TestCase {
     // just paren
     BraceReduction rm = doc._reduced;
     doc.insertString(0, "  abcde", null);
-    doc.indentLine();
+    doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
     assertEquals("0.1", "abcde", doc.getText(0, doc.getLength()));
   }
 
@@ -380,7 +380,7 @@ public class IndentTest extends TestCase {
     // just paren
     BraceReduction rm = doc._reduced;
     doc.insertString(0, "public class temp \n {", null);
-    doc.indentLine();
+    doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
     assertEquals("0.1", "public class temp \n{", doc.getText(0, doc.getLength()));
   }
 
@@ -392,7 +392,7 @@ public class IndentTest extends TestCase {
     // just paren
     BraceReduction rm = doc._reduced;
     doc.insertString(0, "public class temp \n{ \n  }", null);
-    doc.indentLine();
+    doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
     assertEquals("0.1", "public class temp \n{ \n}", doc.getText(0, doc.getLength()));
   }
 
@@ -404,7 +404,7 @@ public class IndentTest extends TestCase {
     // just paren
     BraceReduction rm = doc._reduced;
     doc.insertString(0, "public class temp \n{ \ntext here", null);
-    doc.indentLine();
+    doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
     assertEquals("0.1", "public class temp \n{ \n  text here", doc.getText(0, doc.getLength()));
   }
 
@@ -416,7 +416,7 @@ public class IndentTest extends TestCase {
     // just paren
     BraceReduction rm = doc._reduced;
     doc.insertString(0, "public class temp \n{  ()\ntext here", null);
-    doc.indentLine();
+    doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
     assertEquals("0.1", "public class temp \n{  ()\n  text here", doc.getText(0, 
         doc.getLength()));
   }
@@ -429,7 +429,7 @@ public class IndentTest extends TestCase {
     // just paren
     BraceReduction rm = doc._reduced;
     doc.insertString(0, "public class temp \n{  ()\n{text here", null);
-    doc.indentLine();
+    doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
     assertEquals("0.1", "public class temp \n{  ()\n  {text here", doc.getText(0, 
         doc.getLength()));
   }
@@ -442,7 +442,7 @@ public class IndentTest extends TestCase {
     // just paren
     BraceReduction rm = doc._reduced;
     doc.insertString(0, "public class temp \n  {  ()\n { text here", null);
-    doc.indentLine();
+    doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
     assertEquals("0.1", "public class temp \n  {  ()\n    { text here", doc.getText(0, 
         doc.getLength()));
   }
@@ -455,7 +455,7 @@ public class IndentTest extends TestCase {
     // just paren
     BraceReduction rm = doc._reduced;
     doc.insertString(0, "hello\n", null);
-    doc.indentLine();
+    doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
     assertEquals("0.1", "hello\n  ", doc.getText(0, doc.getLength()));
   }
 
@@ -467,7 +467,7 @@ public class IndentTest extends TestCase {
     // just paren
     BraceReduction rm = doc._reduced;
     doc.insertString(0, "hello", null);
-    doc.indentLine();
+    doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
     assertEquals("0.1", "hello", doc.getText(0, doc.getLength()));
   }
 
@@ -483,7 +483,7 @@ public class IndentTest extends TestCase {
     // hes{\n{abcde\n{#
     doc.move(-8);
     // hes{\n#{abcde\n{
-    doc.indentLine();
+    doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
     // hes{\n  #{abcde\n{
     assertEquals("0.1", "hes{\n  {abcde\n{", doc.getText(0, doc.getLength()));
   }
@@ -500,7 +500,7 @@ public class IndentTest extends TestCase {
     // hes{\n{abcde\n{#
     doc.move(-2);
     // hes{\n{abcde#\n{
-    doc.indentLine();
+    doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
     // hes{\n  {abcde#\n{
     assertEquals("0.1", "hes{\n  {abcde\n{", doc.getText(0, doc.getLength()));
   }
@@ -513,7 +513,7 @@ public class IndentTest extends TestCase {
     // just paren
     BraceReduction rm = doc._reduced;
     doc.insertString(0, "for(;;)\n", null);
-    doc.indentLine();
+    doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
     assertEquals("0.1", "for(;;)\n  ", doc.getText(0, doc.getLength()));
   }
 
@@ -525,7 +525,7 @@ public class IndentTest extends TestCase {
     // just paren
     BraceReduction rm = doc._reduced;
     doc.insertString(0, "{\n  for(;;)\n", null);
-    doc.indentLine();
+    doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
     assertEquals("0.1", "{\n  for(;;)\n    ", doc.getText(0, doc.getLength()));
   }
 
@@ -537,7 +537,7 @@ public class IndentTest extends TestCase {
     // just paren
     BraceReduction rm = doc._reduced;
     doc.insertString(0, "hello(\n", null);
-    doc.indentLine();
+    doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
     assertEquals("0.1", "hello(\n      ", doc.getText(0, doc.getLength()));
   }
 
@@ -549,7 +549,7 @@ public class IndentTest extends TestCase {
     // just paren
     BraceReduction rm = doc._reduced;
     doc.insertString(0, "Sys.out(\"hello\"\n", null);
-    doc.indentLine();
+    doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
     assertEquals("0.1", "Sys.out(\"hello\"\n        ", doc.getText(0, doc.getLength()));
   }
 
@@ -561,7 +561,7 @@ public class IndentTest extends TestCase {
     // just paren
     BraceReduction rm = doc._reduced;
     doc.insertString(0, "hello[\n", null);
-    doc.indentLine();
+    doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
     assertEquals("0.1", "hello[\n      ", doc.getText(0, doc.getLength()));
   }
 
@@ -573,7 +573,7 @@ public class IndentTest extends TestCase {
     // just paren
     BraceReduction rm = doc._reduced;
     doc.insertString(0, "{\n  }", null);
-    doc.indentLine();
+    doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
     assertEquals("0.1", "{\n}", doc.getText(0, doc.getLength()));
   }
 
@@ -585,7 +585,7 @@ public class IndentTest extends TestCase {
     // just paren
     BraceReduction rm = doc._reduced;
     doc.insertString(0, "   {\n", null);
-    doc.indentLine();
+    doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
     assertEquals("0.1", "   {\n     ", doc.getText(0, doc.getLength()));
   }
 
@@ -597,7 +597,7 @@ public class IndentTest extends TestCase {
     // just paren
     BraceReduction rm = doc._reduced;
     doc.insertString(0, "if\n  if\n    if\n{", null);
-    doc.indentLine();
+    doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
     assertEquals("0.1", "if\n  if\n    if\n    {", doc.getText(0, doc.getLength()));
   }
 
@@ -609,7 +609,7 @@ public class IndentTest extends TestCase {
     // just paren
     BraceReduction rm = doc._reduced;
     doc.insertString(0, "{\n  if\n    if\n      if\n{", null);
-    doc.indentLine();
+    doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
     assertEquals("0.1", "{\n  if\n    if\n      if\n      {", doc.getText(0, doc.getLength()));
   }
 
@@ -621,7 +621,7 @@ public class IndentTest extends TestCase {
     // just paren
     BraceReduction rm = doc._reduced;
     doc.insertString(0, "\n\n", null);
-    doc.indentLine();
+    doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
     assertEquals("0.1", "\n\n", doc.getText(0, doc.getLength()));
   }
 
@@ -633,7 +633,7 @@ public class IndentTest extends TestCase {
     // just paren
     BraceReduction rm = doc._reduced;
     doc.insertString(0, "\n", null);
-    doc.indentLine();
+    doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
     assertEquals("0.1", "\n", doc.getText(0, doc.getLength()));
   }
 
@@ -645,7 +645,7 @@ public class IndentTest extends TestCase {
     // just paren
     BraceReduction rm = doc._reduced;
     doc.insertString(0, "\nhello //bal;\n", null);
-    doc.indentLine();
+    doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
     assertEquals("0.1", "\nhello //bal;\n  ", doc.getText(0, doc.getLength()));
   }
 
@@ -657,7 +657,7 @@ public class IndentTest extends TestCase {
     // just paren
     BraceReduction rm = doc._reduced;
     doc.insertString(0, "\nhello; /*bal*/\n ", null);
-    doc.indentLine();
+    doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
     assertEquals("0.1", "\nhello; /*bal*/\n", doc.getText(0, doc.getLength()));
   }
 
@@ -669,7 +669,7 @@ public class IndentTest extends TestCase {
     // just paren
     BraceReduction rm = doc._reduced;
     doc.insertString(0, "hello\n{\n{\n  {", null);
-    doc.indentBlock(8, 13);
+    doc.indentLines(8, 13);
     assertEquals("0.1", "hello\n{\n  {\n    {", doc.getText(0, doc.getLength()));
   }
 
@@ -682,7 +682,7 @@ public class IndentTest extends TestCase {
   public void testBlockIndent2 () throws BadLocationException {
     BraceReduction rm = doc._reduced;
     doc.insertString(0, "  x;\n  y;\n", null);
-    doc.indentBlock(0, doc.getLength());
+    doc.indentLines(0, doc.getLength());
     assertEquals("text after indent", "x;\ny;\n", doc.getText(0, doc.getLength()));
   }
 
@@ -693,7 +693,7 @@ public class IndentTest extends TestCase {
   public void testIndentInsideCommentBlock () throws BadLocationException {
     BraceReduction rm = doc._reduced;
     doc.insertString(0, "hello\n{\n/*{\n{\n*/\nhehe", null);
-    doc.indentBlock(0, 21);
+    doc.indentLines(0, 21);
     assertEquals("0.1", "hello\n{\n  /*{\n  {\n  */\n  hehe", doc.getText(0, doc.getLength()));
   }
 
@@ -705,7 +705,7 @@ public class IndentTest extends TestCase {
     // just paren
     BraceReduction rm = doc._reduced;
     doc.insertString(0, "\n", null);
-    doc.indentLine();
+    doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
     assertEquals("0.1", "\n", doc.getText(0, doc.getLength()));
   }
 
@@ -717,7 +717,7 @@ public class IndentTest extends TestCase {
     // just paren
     BraceReduction rm = doc._reduced;
     doc.insertString(0, "a\n", null);
-    doc.indentLine();
+    doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
     assertEquals("0.1", "a\n  ", doc.getText(0, doc.getLength()));
   }
 
@@ -729,7 +729,7 @@ public class IndentTest extends TestCase {
     // just paren
     BraceReduction rm = doc._reduced;
     doc.insertString(0, "\n\n", null);
-    doc.indentLine();
+    doc.indentLines(doc.getCurrentLocation(), doc.getCurrentLocation());
     assertEquals("0.1", "\n\n", doc.getText(0, doc.getLength()));
   }
 }

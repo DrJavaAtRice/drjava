@@ -176,7 +176,7 @@ public class MainFrame extends JFrame {
    * are enabled and disabled appropriately after document
    * modifications.
    */
-  void installNewDocumentListener(DefinitionsDocument d) {
+  void installNewDocumentListener(Document d) {
     d.addDocumentListener(new DocumentListener() {
       public void changedUpdate(DocumentEvent e) {
         _saveButton.setEnabled(true);

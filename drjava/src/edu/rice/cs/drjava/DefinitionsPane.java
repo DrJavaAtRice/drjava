@@ -38,7 +38,6 @@ public class DefinitionsPane extends JEditorPane {
    * highlight is needed.
   */
   private CaretListener _matchListener = new CaretListener() {
-
     /**
      * Checks caret position to see if it needs to set or remove a highlight
      * from the document.
@@ -47,7 +46,8 @@ public class DefinitionsPane extends JEditorPane {
      * @param e the event fired by the caret position change
      */
     public void caretUpdate(CaretEvent e) {
-      _doc().setCurrentLocation(getCaretPosition());
+      //_doc().setCurrentLocation(getCaretPosition());
+      _model.syncCurrentLocationWithDefinitions(getCaretPosition());
       _removePreviousHighlight();
       try {
         _updateMatchHighlight();
@@ -61,7 +61,7 @@ public class DefinitionsPane extends JEditorPane {
    */
   private void _updateMatchHighlight() throws BadLocationException {
     int to = getCaretPosition();
-    int from = _doc()._reduced.balanceBackward();
+    int from = _model.balanceBackward(); //_doc()._reduced.balanceBackward();
     if (from == -1) {} 
     else {
       from = to - from;
@@ -110,20 +110,9 @@ public class DefinitionsPane extends JEditorPane {
 
     /** Handle the key typed event from the text field. */
     public void actionPerformed(ActionEvent e) {
-      int pos = getCaretPosition();
-      _doc().setCurrentLocation(pos);
-      int selStart = getSelectionStart();
-      int selEnd = getSelectionEnd();
-      if (selStart == selEnd) {
-        _doc().indentLine();
-        int caretPos = getCaretPosition();
-        _doc().setCurrentLocation(caretPos);
-        int space = _doc().getWhiteSpace();
-        _doc().move(space);
-        setCaretPosition(caretPos + space);
-      } 
-      else 
-        _doc().indentBlock(selStart, selEnd);
+      //int pos = getCaretPosition();
+      //_doc().setCurrentLocation(pos);
+      _indent();
     }
   }
 
@@ -156,7 +145,7 @@ public class DefinitionsPane extends JEditorPane {
      */
     public void actionPerformed(ActionEvent e) {
       _defaultAction.actionPerformed(e);
-      _doc().indentLine();
+      _indent();
     }
   }
   
@@ -166,7 +155,7 @@ public class DefinitionsPane extends JEditorPane {
   private Action _indentKeyActionTab = new IndentKeyActionTab();
   /**
    * Because the "default" action for the enter key is special, it must be grabbed
-   * from the Keymap using getAction(KeyStroke), which returns the "default" actions
+   * from the Keymap using getAction(KeyStroke), which returns the "default" action
    * for all keys which have behavior extending beyond regular text keys.
    */
   private Action _indentKeyActionLine =
@@ -214,7 +203,7 @@ public class DefinitionsPane extends JEditorPane {
     // Add listener that checks if position in the document has changed.
     // If it has changed, check and see if we should be highlighting matching braces.
     this.addCaretListener(_matchListener);
-    _mainFrame.installNewDocumentListener(_doc());
+    _mainFrame.installNewDocumentListener(_model.getDefinitionsDocument());
   }
 
   /**
@@ -283,14 +272,31 @@ public class DefinitionsPane extends JEditorPane {
     return new DefinitionsEditorKit();
   }
 
+
   /**
-   * Gets the pane's document with a stronger return type.
-   * @return a DefinitionsDocument
+   * Perform an indent either on the current line or on the given
+   * selected box of text.  Calls are sent to GlobalModel which are then
+   * forwarded on to DefinitionsDocument.  Hopefully the indent code
+   * will be fixed and corrected so this doesn't look so ugly.
+   * The purpose is to divorce the pane from the document so we can just
+   * pass a document to DefinitionsPane and that's all it cares about.
    */
-  DefinitionsDocument _doc() {
-    return  (DefinitionsDocument)getDocument();
+  private void _indent() {
+    // because _indent() is a function called directly by the Keymap
+    // it does not go through the regular insertString channels and thus
+    // it may not be in sync with the document's position.  For that 
+    // reason, we must sync the document with the pane before we go
+    // ahead and indent.    
+    // old: _doc().setCurrentLocation(getCaretPosition());
+    // new:
+    _model.syncCurrentLocationWithDefinitions(getCaretPosition());
+    int selStart = getSelectionStart();
+    int selEnd = getSelectionEnd();
+    _model.indentLinesInDefinitions(selStart, selEnd);
+    setCaretPosition(_model.getCurrentDefinitionsLocation());
   }
 
+  
   /**
    * The undo action.
    */
@@ -298,7 +304,7 @@ public class DefinitionsPane extends JEditorPane {
 
     /**
      * Constructor.
-     */
+    */
     private UndoAction() {
       super("Undo");
       setEnabled(false);
@@ -319,6 +325,7 @@ public class DefinitionsPane extends JEditorPane {
       _redoAction.updateRedoState();
     }
 
+    
     /**
      * Updates the undo list, i.e., where we are as regards undo and redo.
      */
