@@ -87,6 +87,12 @@ public class NoCompilerAvailable implements CompilerInterface {
   }
   
   /**
+   * Sets whether to allow assertions in Java 1.4.
+   */
+  public void setAllowAssertions(boolean allow) {
+  }
+  
+  /**
    * This method allows us to set the JSR14 collections path across a class loader.
    * (cannot cast a loaded class to a subclass, so all compiler interfaces must have this method)
    */

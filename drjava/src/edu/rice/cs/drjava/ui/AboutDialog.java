@@ -67,10 +67,6 @@ public class AboutDialog extends JDialog implements ActionListener {
 
   private final JButton _okButton = new JButton("OK");
   
-  public AboutDialog(JFrame owner, String text) {
-    this(owner);
-  }
-  
   public AboutDialog(JFrame owner) {
     super(owner, "About DrJava", true); // (changed to non-modal for now)
 
@@ -155,7 +151,7 @@ public class AboutDialog extends JDialog implements ActionListener {
     StringBuffer sb = new StringBuffer("DrJava Version : ");
     sb.append(Version.getBuildTimeString());
     sb.append("\n\nDrJava Configuration file: ");
-    sb.append(DrJava.PROPERTIES_FILE.getAbsolutePath());
+    sb.append(DrJava.getPropertiesFile().getAbsolutePath());
     sb.append("\n\n");
     sb.append(COPYRIGHT);
     JComponent copy = createTextScroller(sb.toString());

@@ -200,6 +200,7 @@ public class ConfigFrame extends JFrame {
     // Make sure each row is expanded (this is harder than it seems...)
     _tree.expandRow(0);
     _tree.expandRow(1);
+    _tree.expandRow(2);
   }
 
   /**
@@ -234,7 +235,7 @@ public class ConfigFrame extends JFrame {
     boolean successful = apply();
     if (successful) {
       try {
-        DrJava.CONFIG.saveConfiguration();
+        DrJava.getConfig().saveConfiguration();
       }
       catch (IOException ioe) {
         JOptionPane.showMessageDialog(this,
@@ -360,7 +361,7 @@ public class ConfigFrame extends JFrame {
    * Add all of the components for the Resource Locations panel of the preferences window.
    */ 
   private void _setupResourceLocPanel ( ConfigPanel panel) {
-   
+
     FileOptionComponent javacLoc =
       new FileOptionComponent( OptionConstants.JAVAC_LOCATION, "Javac Location", this);
     javacLoc.setFileFilter(new ClasspathFilter());
@@ -373,7 +374,7 @@ public class ConfigFrame extends JFrame {
       new FileOptionComponent( OptionConstants.JSR14_COLLECTIONSPATH, "JSR14 Collections Path", this);
     jsr14Col.setFileFilter(new ClasspathFilter());
     panel.addComponent( jsr14Col );
-    panel.addComponent( new VectorOptionComponent (OptionConstants.EXTRA_CLASSPATH, "Interactions Classpath", this));     
+    panel.addComponent( new VectorOptionComponent (OptionConstants.EXTRA_CLASSPATH, "Interactions Classpath", this));
     panel.displayComponents();
   }
   
@@ -529,6 +530,7 @@ public class ConfigFrame extends JFrame {
     panel.addComponent( workDir );
     panel.addComponent( new IntegerOptionComponent( OptionConstants.HISTORY_MAX_SIZE, "Size of Interactions History", this));
     panel.addComponent( new IntegerOptionComponent( OptionConstants.RECENT_FILES_MAX_SIZE, "Recent Files List Size", this));
+    panel.addComponent( new BooleanOptionComponent ( OptionConstants.JAVAC_ALLOW_ASSERT, "Allow Assert Keyword in Java 1.4", this));
     panel.addComponent( new BooleanOptionComponent( OptionConstants.INTERACTIONS_EXIT_PROMPT, "Prompt if Interactions Window Exits Unexpectedly", this));
     panel.addComponent( new BooleanOptionComponent( OptionConstants.QUIT_PROMPT, "Prompt Before Quit", this));
     

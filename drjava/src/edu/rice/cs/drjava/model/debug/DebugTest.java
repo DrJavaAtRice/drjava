@@ -110,28 +110,11 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     super.setUp();
     _debugManager = _model.getDebugManager();
     assertTrue("Debug Manager should not be null", _debugManager != null);
-    
-    // Remember all previous settings and clear them
-    _userSourcePath = ConfigurationTool.CONFIG.getSetting(OptionConstants.DEBUG_SOURCEPATH);
-    ConfigurationTool.CONFIG.setSetting(OptionConstants.DEBUG_SOURCEPATH,new Vector<File>());
-    _userStepInterpreter = ConfigurationTool.CONFIG.getSetting(OptionConstants.DEBUG_STEP_INTERPRETER);
-    ConfigurationTool.CONFIG.setSetting(OptionConstants.DEBUG_STEP_INTERPRETER,new Boolean(false));
-    _userStepJava = ConfigurationTool.CONFIG.getSetting(OptionConstants.DEBUG_STEP_JAVA);
-    ConfigurationTool.CONFIG.setSetting(OptionConstants.DEBUG_STEP_JAVA,new Boolean(false));
-    _userStepDrJava = ConfigurationTool.CONFIG.getSetting(OptionConstants.DEBUG_STEP_DRJAVA);
-    ConfigurationTool.CONFIG.setSetting(OptionConstants.DEBUG_STEP_DRJAVA,new Boolean(false));
-    
   }
   
   public void tearDown() throws IOException{
     super.tearDown();
     assertTrue("Debug Manager should not be null", _debugManager != null);
-    
-    // Reset all previous settings
-    ConfigurationTool.CONFIG.setSetting(OptionConstants.DEBUG_SOURCEPATH,_userSourcePath);
-    ConfigurationTool.CONFIG.setSetting(OptionConstants.DEBUG_STEP_INTERPRETER,_userStepInterpreter);
-    ConfigurationTool.CONFIG.setSetting(OptionConstants.DEBUG_STEP_JAVA, _userStepJava);
-    ConfigurationTool.CONFIG.setSetting(OptionConstants.DEBUG_STEP_DRJAVA,_userStepDrJava);
   }
   
   /**
@@ -309,7 +292,7 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
    
     synchronized(_debugManager){
       // Add _tempDir to our sourcepath
-      ConfigurationTool.CONFIG.setSetting(OptionConstants.DEBUG_SOURCEPATH, path);
+      DrJava.getConfig().setSetting(OptionConstants.DEBUG_SOURCEPATH, path);
     }
     
     // Step to next line

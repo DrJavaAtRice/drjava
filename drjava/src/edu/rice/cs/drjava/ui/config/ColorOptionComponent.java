@@ -99,9 +99,9 @@ public class ColorOptionComponent extends OptionComponent<Color> {
     else {
       _colorField.setBackground(Color.white);
       // Would be nice to use background color here (need a listener in configframe?)
-      //_colorField.setBackground(DrJava.CONFIG.getSetting(OptionConstants.DEFINITIONS_BACKGROUND_COLOR)););
+      //_colorField.setBackground(DrJava.getConfig().getSetting(OptionConstants.DEFINITIONS_BACKGROUND_COLOR)););
     }
-    _currentColor = DrJava.CONFIG.getSetting(_option);
+    _currentColor = DrJava.getConfig().getSetting(_option);
     _newColor = _currentColor;
     _updateField(_currentColor);
   }
@@ -112,7 +112,7 @@ public class ColorOptionComponent extends OptionComponent<Color> {
    */
   public boolean updateConfig() {
     if (!_newColor.equals(_currentColor)) {
-      DrJava.CONFIG.setSetting(_option, _newColor);
+      DrJava.getConfig().setSetting(_option, _newColor);
       _currentColor = _newColor;
     }
 

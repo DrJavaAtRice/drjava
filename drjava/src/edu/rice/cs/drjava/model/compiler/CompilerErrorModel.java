@@ -228,4 +228,20 @@ public class CompilerErrorModel {
     }
   }
 
+  /**
+   * Prints out this model's errors.
+   */
+  public String toString() {
+    StringBuffer buf = new StringBuffer();
+    buf.append("CompilerErrorModel:\n  ");
+    for (int i=0; i < _errorsWithoutPositions.length; i++) {
+      buf.append(_errorsWithoutPositions[i]);
+      buf.append("\n  ");
+    }
+    for (int i=0; i < _errors.length; i++) {
+      buf.append(_errors[i]);
+      buf.append("\n  ");
+    }
+    return buf.toString();
+  }
 }

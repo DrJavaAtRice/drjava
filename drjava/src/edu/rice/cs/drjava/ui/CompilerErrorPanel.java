@@ -75,7 +75,7 @@ public class CompilerErrorPanel extends TabbedPanel
   /** Highlight painter for selected list items. */
   private static DefaultHighlighter.DefaultHighlightPainter
     _listHighlightPainter
-      =  new DefaultHighlighter.DefaultHighlightPainter(DrJava.CONFIG.getSetting(COMPILER_ERROR_COLOR));
+      =  new DefaultHighlighter.DefaultHighlightPainter(DrJava.getConfig().getSetting(COMPILER_ERROR_COLOR));
 
   private static final SimpleAttributeSet NORMAL_ATTRIBUTES = _getNormalAttributes();
   private static final SimpleAttributeSet BOLD_ATTRIBUTES = _getBoldAttributes();
@@ -193,8 +193,8 @@ public class CompilerErrorPanel extends TabbedPanel
     
     _mainPanel.add(scroller, BorderLayout.CENTER);
     _mainPanel.add(compilerPanel, BorderLayout.EAST);
-    DrJava.CONFIG.addOptionListener( OptionConstants.JAVAC_LOCATION, new CompilerLocationOptionListener());
-    DrJava.CONFIG.addOptionListener( OptionConstants.JSR14_LOCATION, new CompilerLocationOptionListener());
+    DrJava.getConfig().addOptionListener( OptionConstants.JAVAC_LOCATION, new CompilerLocationOptionListener());
+    DrJava.getConfig().addOptionListener( OptionConstants.JSR14_LOCATION, new CompilerLocationOptionListener());
 
     _showHighlightsCheckBox = new JCheckBox( "Highlight source", true);
     _showHighlightsCheckBox.addChangeListener( new ChangeListener() {
@@ -357,7 +357,7 @@ public class CompilerErrorPanel extends TabbedPanel
       // which makes it uneditable, and so you can't select text inside it.
       setEnabled(false);    
       
-      DrJava.CONFIG.addOptionListener( OptionConstants.COMPILER_ERROR_COLOR, new CompilerErrorColorOptionListener());    
+      DrJava.getConfig().addOptionListener( OptionConstants.COMPILER_ERROR_COLOR, new CompilerErrorColorOptionListener());    
     }
     
     /**

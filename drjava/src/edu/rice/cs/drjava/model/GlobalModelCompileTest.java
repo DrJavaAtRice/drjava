@@ -48,6 +48,8 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import javax.swing.text.DefaultStyledDocument;
 
+import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.model.compiler.*;
 import edu.rice.cs.util.UnexpectedException;
 
@@ -86,6 +88,9 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
   
   private static final String FOO2_REFERENCES_NON_PUBLIC_CLASS_TEXT =
     "class DrJavaTestFoo2 extends Foo{}";
+  
+  private static final String FOO_WITH_ASSERT =
+    "class DrJavaTestFoo { void foo() { assert true; } }";
 
   /**
    * Constructor.
@@ -148,7 +153,13 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
     CompileShouldSucceedListener listener = new CompileShouldSucceedListener();
     _model.addListener(listener);
     synchronized(listener) {
+      int numErrors = _model.getNumErrors();
       _model.compileAll();
+      numErrors = _model.getNumErrors();
+      if (_model.getNumErrors() > 0) {
+        fail("compile failed: " + doc.getCompilerErrorModel() + 
+             doc2.getCompilerErrorModel());
+      }
       listener.wait();
     }
     assertCompileErrorsPresent(_name(), false);
@@ -215,6 +226,9 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
     _model.addListener(listener); 
     synchronized(listener) {   
       doc1.startCompile();
+      if (_model.getNumErrors() > 0) {
+        fail("compile failed: " + doc1.getCompilerErrorModel());
+      }
       listener.wait();
     }
     _model.removeListener(listener);
@@ -226,6 +240,9 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
     _model.addListener(listener2);
     synchronized(listener2) {
       doc2.startCompile();
+      if (_model.getNumErrors() > 0) {
+        fail("compile failed: " + doc2.getCompilerErrorModel());
+      }
       listener2.wait();
     }
     assertCompileErrorsPresent(_name(), false);
@@ -260,6 +277,9 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
     _model.addListener(listener);
     synchronized(listener) {
       doc1.startCompile();
+      if (_model.getNumErrors() > 0) {
+        fail("compile failed: " + doc1.getCompilerErrorModel());
+      }
       listener.wait();
     }
     _model.removeListener(listener);
@@ -273,6 +293,9 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
     _model.addListener(listener2);
     synchronized(listener2) {
       doc2.startCompile();
+      if (_model.getNumErrors() > 0) {
+        fail("compile failed: " + doc2.getCompilerErrorModel());
+      }
       listener2.wait();
     }
     assertCompileErrorsPresent(_name(), false);
@@ -381,7 +404,7 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
     CompileShouldFailListener listener = new CompileShouldFailListener();
     _model.addListener(listener);
     doc.startCompile();
-
+    
     listener.checkCompileOccurred();
     assertCompileErrorsPresent(_name(), true);
     assertTrue(_name() + "Class file exists after failed compile",
@@ -507,6 +530,9 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
     _model.addListener(listener);
     synchronized(listener) {
       doc.startCompile();
+      if (_model.getNumErrors() > 0) {
+        fail("compile failed: " + doc.getCompilerErrorModel());
+      }
       listener.wait();
     }
 
@@ -590,6 +616,9 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
     _model.addListener(listener);
     synchronized(listener) {
       doc.startCompile();
+      if (_model.getNumErrors() > 0) {
+        fail("compile failed: " + doc.getCompilerErrorModel());
+      }
       listener.wait();
     }
     assertTrue(!_model.areAnyModifiedSinceSave());
@@ -617,10 +646,21 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
     final File file = tempFile();
     
     doc.saveFile(new FileSelector(file));
+    
+    CompileShouldSucceedListener listener = new CompileShouldSucceedListener();
+    _model.addListener(listener);
     assertTrue("should not be in sync before compile", 
                !doc.checkIfClassFileInSync());
-    doc.startCompile();
-    assertTrue("should be in sync after compile", 
+    synchronized(listener) {
+      doc.startCompile();
+      if (_model.getNumErrors() > 0) {
+        fail("compile failed: " + doc.getCompilerErrorModel());
+      }
+      listener.wait();
+    }
+    _model.removeListener(listener);
+    listener.checkCompileOccurred();
+    assertTrue("should be in sync after compile",
                doc.checkIfClassFileInSync());
     doc.getDocument().insertString(0, "hi", null);
     assertTrue("should not be in sync after modification",
@@ -650,9 +690,20 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
     final File file2 = tempFile(2);
     
     doc.saveFile(new FileSelector(file));
+    
+    CompileShouldSucceedListener listener = new CompileShouldSucceedListener();
+    _model.addListener(listener);
     assertTrue("should not be in sync before compile", 
                !doc.checkIfClassFileInSync());
-    doc.startCompile();
+    synchronized(listener) {
+      doc.startCompile();
+      if (_model.getNumErrors() > 0) {
+        fail("compile failed: " + doc.getCompilerErrorModel());
+      }
+      listener.wait();
+    }
+    _model.removeListener(listener);
+    listener.checkCompileOccurred();
     assertTrue("should be in sync after compile", 
                doc.checkIfClassFileInSync());
     
@@ -691,7 +742,7 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
     assertTrue(_name() + "Class file shouldn't exist after compile", !compiled.exists());
   }
   
-   /**
+  /**
    * Tests a compile on a file that references a non-public class defined in another 
    * class with a name different than the non-public class
    */
@@ -706,6 +757,9 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
     _model.addListener(listener);
     synchronized(listener) {
       doc.startCompile();
+      if (_model.getNumErrors() > 0) {
+        fail("compile failed: " + doc.getCompilerErrorModel());
+      }
       listener.wait();
     }
     _model.removeListener(listener);
@@ -713,6 +767,9 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
     _model.addListener(listener2);
     synchronized(listener2) {
       doc2.startCompile();
+      if (_model.getNumErrors() > 0) {
+        fail("compile failed: " + doc.getCompilerErrorModel());
+      }
       listener2.wait();
     }
     
@@ -725,5 +782,55 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
     File compiled2 = classForJava(file, "DrJavaTestFoo2");
     assertTrue(_name() + "Class file should exist after compile", compiled.exists());
     assertTrue(_name() + "Class file should exist after compile", compiled2.exists());
+  }
+  
+  /**
+   * Test support for assert keyword if enabled.
+   * Note that this test only runs in Java 1.4 or higher.
+   */
+  public void testCompileWithJavaAssert()
+    throws BadLocationException, IOException, InterruptedException
+  {
+    // No assert support by default (or in 1.3)
+    OpenDefinitionsDocument doc = setupDocument(FOO_WITH_ASSERT);
+    final File file = tempFile();
+    doc.saveFile(new FileSelector(file));
+    CompileShouldFailListener listener = new CompileShouldFailListener();
+    _model.addListener(listener);
+    
+    doc.startCompile();
+
+    assertCompileErrorsPresent(_name(), true);
+    listener.checkCompileOccurred();
+    File compiled = classForJava(file, "DrJavaTestFoo");
+    assertTrue(_name() + "Class file exists after compile?!", !compiled.exists());
+    _model.removeListener(listener);
+    
+    
+    // Only run assertions test in 1.4
+    String version = System.getProperty("java.version");
+    if ((version != null) && ("1.4.0".compareTo(version) <= 0)) {
+      // Turn on assert support
+      DrJava.getConfig().setSetting(OptionConstants.JAVAC_ALLOW_ASSERT,
+                                    new Boolean(true));
+      
+      CompileShouldSucceedListener listener2 = new CompileShouldSucceedListener();
+      _model.addListener(listener2); 
+      synchronized(listener2) {   
+        doc.startCompile();
+        if (_model.getNumErrors() > 0) {
+          fail("compile failed: " + doc.getCompilerErrorModel());
+        }
+        listener2.wait();
+      }
+      _model.removeListener(listener2);
+      assertCompileErrorsPresent(_name(), false);
+      listener2.checkCompileOccurred();
+      
+      // Make sure .class exists
+      compiled = classForJava(file, "DrJavaTestFoo");
+      assertTrue(_name() + "Class file doesn't exist after compile",
+                 compiled.exists());
+    }
   }
 }

@@ -71,7 +71,7 @@ public class JUnitPanel extends TabbedPanel
   /** Highlight painter for selected list items. */
   private static DefaultHighlighter.DefaultHighlightPainter
     _listHighlightPainter
-      = new DefaultHighlighter.DefaultHighlightPainter(DrJava.CONFIG.getSetting(COMPILER_ERROR_COLOR));
+      = new DefaultHighlighter.DefaultHighlightPainter(DrJava.getConfig().getSetting(COMPILER_ERROR_COLOR));
 
   private static final SimpleAttributeSet NORMAL_ATTRIBUTES = _getNormalAttributes();
   private static final SimpleAttributeSet BOLD_ATTRIBUTES = _getBoldAttributes();
@@ -335,7 +335,7 @@ public class JUnitPanel extends TabbedPanel
       // which makes it uneditable, and so you can't select text inside it.
       setEnabled(false);
       
-      DrJava.CONFIG.addOptionListener( OptionConstants.COMPILER_ERROR_COLOR, new CompilerErrorColorOptionListener());    
+      DrJava.getConfig().addOptionListener( OptionConstants.COMPILER_ERROR_COLOR, new CompilerErrorColorOptionListener());    
     }
     
     

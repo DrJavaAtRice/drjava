@@ -60,13 +60,13 @@ public class BooleanOptionComponentTest extends TestCase {
   
   protected void setUp() {
     _option = new BooleanOptionComponent( OptionConstants.LINEENUM_ENABLED, "Line Enumeration", new Frame());
-    DrJava.CONFIG.setSetting(OptionConstants.LINEENUM_ENABLED, OptionConstants.LINEENUM_ENABLED.getDefault());
+    DrJava.getConfig().resetToDefaults();
     
   }
   
   public void testCancelDoesNotChangeConfig() {
 
-    Boolean testBoolean = new Boolean (!DrJava.CONFIG.getSetting(OptionConstants.LINEENUM_ENABLED).booleanValue());
+    Boolean testBoolean = new Boolean (!DrJava.getConfig().getSetting(OptionConstants.LINEENUM_ENABLED).booleanValue());
     
     _option.setValue(testBoolean);
     _option.resetToCurrent(); // should reset to the original.
@@ -74,23 +74,23 @@ public class BooleanOptionComponentTest extends TestCase {
   
     assertEquals("Cancel (resetToCurrent) should not change the config", 
                  OptionConstants.LINEENUM_ENABLED.getDefault(),
-                 DrJava.CONFIG.getSetting(OptionConstants.LINEENUM_ENABLED));
+                 DrJava.getConfig().getSetting(OptionConstants.LINEENUM_ENABLED));
     
   }
   
   public void testApplyDoesChangeConfig() {
-    Boolean testBoolean = new Boolean (!DrJava.CONFIG.getSetting(OptionConstants.LINEENUM_ENABLED).booleanValue());
+    Boolean testBoolean = new Boolean (!DrJava.getConfig().getSetting(OptionConstants.LINEENUM_ENABLED).booleanValue());
        
     _option.setValue(testBoolean); 
     _option.updateConfig();
     
     assertEquals("Apply (updateConfig) should write change to file", 
                  testBoolean,
-                 DrJava.CONFIG.getSetting(OptionConstants.LINEENUM_ENABLED));
+                 DrJava.getConfig().getSetting(OptionConstants.LINEENUM_ENABLED));
   }
   
   public void testApplyThenResetDefault() {
-    Boolean testBoolean = new Boolean (!DrJava.CONFIG.getSetting(OptionConstants.LINEENUM_ENABLED).booleanValue());
+    Boolean testBoolean = new Boolean (!DrJava.getConfig().getSetting(OptionConstants.LINEENUM_ENABLED).booleanValue());
     
     _option.setValue(testBoolean);
     _option.updateConfig(); 
@@ -99,7 +99,7 @@ public class BooleanOptionComponentTest extends TestCase {
     
     assertEquals("Apply (updateConfig) should write change to file", 
                  OptionConstants.LINEENUM_ENABLED.getDefault(),
-                 DrJava.CONFIG.getSetting(OptionConstants.LINEENUM_ENABLED));
+                 DrJava.getConfig().getSetting(OptionConstants.LINEENUM_ENABLED));
   }
     
 }

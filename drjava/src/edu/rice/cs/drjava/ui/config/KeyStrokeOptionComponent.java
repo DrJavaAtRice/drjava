@@ -69,7 +69,7 @@ public class KeyStrokeOptionComponent extends OptionComponent<KeyStroke>
                                   final Frame parent) {
     super(opt, text, parent);
   
-    _currentKey = DrJava.CONFIG.getSetting(opt);
+    _currentKey = DrJava.getConfig().getSetting(opt);
     _newKey = _currentKey;
     
     _button = new JButton();
@@ -118,8 +118,8 @@ public class KeyStrokeOptionComponent extends OptionComponent<KeyStroke>
    */
   public boolean updateConfig() {
     if (!_newKey.equals(_currentKey)) {
-      DrJava.CONFIG.setSetting(_option, _newKey);
-      _setKeyStroke(DrJava.CONFIG.getSetting(_option));
+      DrJava.getConfig().setSetting(_option, _newKey);
+      _setKeyStroke(DrJava.getConfig().getSetting(_option));
       _currentKey = _newKey;
     }
     return true;

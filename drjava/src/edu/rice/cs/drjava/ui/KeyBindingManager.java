@@ -96,13 +96,13 @@ public class KeyBindingManager {
   public Enumeration getKeyStrokeData() { return _actionToDataMap.elements(); }
   
   public void put(Option<KeyStroke> kso, Action a, JMenuItem jmi, String name)  {
-    KeyStroke ks = DrJava.CONFIG.getSetting(kso);
+    KeyStroke ks = DrJava.getConfig().getSetting(kso);
     KeyStrokeData ksd = new KeyStrokeData(ks, a, jmi, name, kso);
     _keyToDataMap.put(ks, ksd);
     _actionToDataMap.put(a, ksd);
     
     if (kso != null) // check for shift-actions
-      DrJava.CONFIG.addOptionListener(kso, new KeyStrokeOptionListener(jmi, a, ks));
+      DrJava.getConfig().addOptionListener(kso, new KeyStrokeOptionListener(jmi, a, ks));
   }
   
   /**
@@ -133,9 +133,9 @@ public class KeyBindingManager {
   }
 /*
  public void addListener(Option<KeyStroke> opt, JMenuItem jmi) {
-    KeyStroke ks = DrJava.CONFIG.getSetting(opt);
+    KeyStroke ks = DrJava.getConfig().getSetting(opt);
     Action a = (Action)_keyToActionMap.get(ks);
-    DrJava.CONFIG.addOptionListener(opt, new KeyStrokeOptionListener(jmi, a, ks));                                    
+    DrJava.getConfig().addOptionListener(opt, new KeyStrokeOptionListener(jmi, a, ks));                                    
   }
 */ 
   /**
@@ -148,7 +148,7 @@ public class KeyBindingManager {
    * @param shiftS the name of the Selection Action
    */
   public void addShiftAction(Option<KeyStroke> opt, String shiftS) {
-    KeyStroke ks = DrJava.CONFIG.getSetting(opt);
+    KeyStroke ks = DrJava.getConfig().getSetting(opt);
 
     KeyStrokeData normal = (KeyStrokeData)_keyToDataMap.get(ks);
     Action shiftA = _actionMap.get(shiftS);
@@ -278,7 +278,7 @@ public class KeyBindingManager {
           conflictKSD.setKeyStroke(KeyStrokeOption.NULL_KEYSTROKE);
           _updateMenuItem(conflictKSD);
           _keyToDataMap.remove(oce.value);
-          DrJava.CONFIG.setSetting(conflictKSD.getOption(), KeyStrokeOption.NULL_KEYSTROKE);
+          DrJava.getConfig().setSetting(conflictKSD.getOption(), KeyStrokeOption.NULL_KEYSTROKE);
         }
         
         if (oce.value != KeyStrokeOption.NULL_KEYSTROKE) {
@@ -301,7 +301,7 @@ public class KeyBindingManager {
         _ks = oce.value;          
       }
       else if (_ks != oce.value) {
-        DrJava.CONFIG.setSetting(oce.option, _ks);
+        DrJava.getConfig().setSetting(oce.option, _ks);
       }
     }
   }

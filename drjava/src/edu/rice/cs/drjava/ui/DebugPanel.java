@@ -206,7 +206,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
     _rightPane.addTab("Stack", new JScrollPane(_stackTable));
     
     // Thread table
-    if (DrJava.CONFIG.getSetting(DEBUG_SHOW_THREADS).booleanValue()) {
+    if (DrJava.getConfig().getSetting(DEBUG_SHOW_THREADS).booleanValue()) {
       _threadTable = new JTable( new ThreadTableModel());
       _rightPane.addTab("Threads", new JScrollPane(_threadTable)); 
       // Sets the name column to always be 2 times as wide as the status column
@@ -216,7 +216,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
       statusColumn = _threadTable.getColumnModel().getColumn(1);
       nameColumn.setPreferredWidth(2*statusColumn.getPreferredWidth()); 
     }
-    DrJava.CONFIG.addOptionListener( OptionConstants.DEBUG_SHOW_THREADS, 
+    DrJava.getConfig().addOptionListener( OptionConstants.DEBUG_SHOW_THREADS, 
                                     new OptionListener<Boolean>() {
       public void optionChanged(OptionEvent<Boolean> oce) {
         if (oce.value.booleanValue()) {

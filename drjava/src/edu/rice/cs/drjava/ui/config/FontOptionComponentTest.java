@@ -60,7 +60,7 @@ public class FontOptionComponentTest extends TestCase {
   
   protected void setUp() {
     _option = new FontOptionComponent( OptionConstants.FONT_MAIN, "Main font", new Frame());
-    DrJava.CONFIG.setSetting(OptionConstants.FONT_MAIN, OptionConstants.FONT_MAIN.getDefault());
+    DrJava.getConfig().resetToDefaults();
     
   }
   
@@ -74,7 +74,7 @@ public class FontOptionComponentTest extends TestCase {
   
     assertEquals("Cancel (resetToCurrent) should not change the config", 
                  OptionConstants.FONT_MAIN.getDefault(),
-                 DrJava.CONFIG.getSetting(OptionConstants.FONT_MAIN));
+                 DrJava.getConfig().getSetting(OptionConstants.FONT_MAIN));
     
   }
   
@@ -86,7 +86,7 @@ public class FontOptionComponentTest extends TestCase {
     
     assertEquals("Apply (updateConfig) should write change to file", 
                  testFont,
-                 DrJava.CONFIG.getSetting(OptionConstants.FONT_MAIN));
+                 DrJava.getConfig().getSetting(OptionConstants.FONT_MAIN));
   }
   
   public void testApplyThenResetDefault() {
@@ -99,7 +99,7 @@ public class FontOptionComponentTest extends TestCase {
     
     assertEquals("Apply (updateConfig) should write change to file", 
                  OptionConstants.FONT_MAIN.getDefault(),
-                 DrJava.CONFIG.getSetting(OptionConstants.FONT_MAIN));
+                 DrJava.getConfig().getSetting(OptionConstants.FONT_MAIN));
   }
     
 }

@@ -85,11 +85,11 @@ public class FileOptionComponent extends OptionComponent<File>
       }
     });
     
-    _currentFile = DrJava.CONFIG.getSetting(_option);
+    _currentFile = DrJava.getConfig().getSetting(_option);
     _newFile = _currentFile;
     _updateTextField(_currentFile);
     
-    File workDir = DrJava.CONFIG.getSetting(WORKING_DIRECTORY);
+    File workDir = DrJava.getConfig().getSetting(WORKING_DIRECTORY);
        
     if (workDir == FileOption.NULL_FILE) {
       workDir = new File( System.getProperty("user.dir"));
@@ -117,7 +117,7 @@ public class FileOptionComponent extends OptionComponent<File>
     if (!validChoice) return false;
     
     if (!_newFile.equals(_currentFile)) {
-      DrJava.CONFIG.setSetting(_option, _newFile);
+      DrJava.getConfig().setSetting(_option, _newFile);
       _currentFile = _newFile;
     }
     

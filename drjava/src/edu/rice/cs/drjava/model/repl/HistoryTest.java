@@ -39,13 +39,14 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.repl;
 
-import  junit.framework.*;
-import  java.util.Vector;
-import  junit.extensions.*;
-import  javax.swing.text.BadLocationException;
-import  java.io.File;
-import  edu.rice.cs.drjava.config.*;
-import  edu.rice.cs.drjava.CodeStatus;
+import junit.framework.*;
+import java.util.Vector;
+import junit.extensions.*;
+import javax.swing.text.BadLocationException;
+import java.io.File;
+import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.config.*;
+import edu.rice.cs.drjava.CodeStatus;
 
 /**
  * Tests the functionality of the repl History.
@@ -67,6 +68,7 @@ public class HistoryTest extends TestCase implements OptionConstants{
    */
   protected void setUp() {
     _history = new History();
+    DrJava.getConfig().resetToDefaults();
   }
 
   /**
@@ -103,7 +105,7 @@ public class HistoryTest extends TestCase implements OptionConstants{
   public void testHistoryIsBounded() {
     
     int maxLength = 500;
-    CONFIG.setSetting(HISTORY_MAX_SIZE, new Integer(maxLength));
+    DrJava.getConfig().setSetting(HISTORY_MAX_SIZE, new Integer(maxLength));
     
     for (int i = 0; i < maxLength + 100; i++) {
       _history.add("testing " + i);
@@ -123,30 +125,30 @@ public class HistoryTest extends TestCase implements OptionConstants{
   public void testLiveUpdateOfHistoryMaxSize() {
     
     int maxLength = 20;
-    CONFIG.setSetting(HISTORY_MAX_SIZE, new Integer(20));
+    DrJava.getConfig().setSetting(HISTORY_MAX_SIZE, new Integer(20));
     
     for (int i = 0; i < maxLength; i++) {
       _history.add("testing " + i);
     }
     
-    CONFIG.setSetting(HISTORY_MAX_SIZE, new Integer(10));
+    DrJava.getConfig().setSetting(HISTORY_MAX_SIZE, new Integer(10));
     
     assertEquals("History size should be 10",
                  10, _history.size());
     
-    CONFIG.setSetting(HISTORY_MAX_SIZE, new Integer(100));
+    DrJava.getConfig().setSetting(HISTORY_MAX_SIZE, new Integer(100));
     
     assertEquals("History size should still be 10",
                  10,
                  _history.size());
     
-    CONFIG.setSetting(HISTORY_MAX_SIZE, new Integer(0));
+    DrJava.getConfig().setSetting(HISTORY_MAX_SIZE, new Integer(0));
     
     assertEquals("History size should be 0",
                  0,
                  _history.size());
     
-    CONFIG.setSetting(HISTORY_MAX_SIZE, new Integer(-1));
+    DrJava.getConfig().setSetting(HISTORY_MAX_SIZE, new Integer(-1));
     
     assertEquals("History size should still be 0",
                  0,

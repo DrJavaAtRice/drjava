@@ -60,7 +60,7 @@ public class IntegerOptionComponentTest extends TestCase {
   
   protected void setUp() {
     _option = new IntegerOptionComponent( OptionConstants.INDENT_LEVEL, "Indent Level", new Frame());
-    DrJava.CONFIG.setSetting(OptionConstants.INDENT_LEVEL, OptionConstants.INDENT_LEVEL.getDefault());
+    DrJava.getConfig().resetToDefaults();
     
   }
   
@@ -74,7 +74,7 @@ public class IntegerOptionComponentTest extends TestCase {
   
     assertEquals("Cancel (resetToCurrent) should not change the config", 
                  OptionConstants.INDENT_LEVEL.getDefault(),
-                 DrJava.CONFIG.getSetting(OptionConstants.INDENT_LEVEL));
+                 DrJava.getConfig().getSetting(OptionConstants.INDENT_LEVEL));
     
   }
   
@@ -86,7 +86,7 @@ public class IntegerOptionComponentTest extends TestCase {
     
     assertEquals("Apply (updateConfig) should write change to file", 
                  testInteger,
-                 DrJava.CONFIG.getSetting(OptionConstants.INDENT_LEVEL));
+                 DrJava.getConfig().getSetting(OptionConstants.INDENT_LEVEL));
   }
   
   public void testApplyThenResetDefault() {
@@ -99,7 +99,7 @@ public class IntegerOptionComponentTest extends TestCase {
     
     assertEquals("Apply (updateConfig) should write change to file", 
                  OptionConstants.INDENT_LEVEL.getDefault(),
-                 DrJava.CONFIG.getSetting(OptionConstants.INDENT_LEVEL));
+                 DrJava.getConfig().getSetting(OptionConstants.INDENT_LEVEL));
   }
     
 }

@@ -71,7 +71,12 @@ import edu.rice.cs.util.UnexpectedException;
  */
 public class JavacGJCompiler implements CompilerInterface {
   
-  private String _extraClassPath = "";  
+  private String _extraClassPath = "";
+  
+  /**
+   * Whether to allow 1.4 assertions.
+   */
+  private boolean _allowAssertions = false;
     
   /** Singleton instance. */
   public static final CompilerInterface ONLY = new JavacGJCompiler();
@@ -266,6 +271,13 @@ public class JavacGJCompiler implements CompilerInterface {
   }
   
   /**
+   * Sets whether to allow assertions in Java 1.4.
+   */
+  public void setAllowAssertions(boolean allow) {
+    _allowAssertions = allow;
+  }
+  
+  /**
    * This method allows us to set the JSR14 collections path across a class loader.
    * (cannot cast a loaded class to a subclass, so all compiler interfaces must have this method)
    */
@@ -287,8 +299,12 @@ public class JavacGJCompiler implements CompilerInterface {
     // Set output classfile version to 1.1
     options.put("-target", "1.1");
 
-    // Allow assertions in 1.4  (config option)
-    //options.put("-source", "1.4");
+    // Allow assertions in 1.4 if configured and in Java >= 1.4
+    String version = System.getProperty("java.version");
+    if ((_allowAssertions) && (version != null) &&
+        ("1.4.0".compareTo(version) <= 0)) {
+      options.put("-source", "1.4");
+    }
 
     String sourceRootString = getSourceRootString(sourceRoots);
     options.put("-sourcepath", sourceRootString /*sourceRoot.getAbsolutePath()*/);

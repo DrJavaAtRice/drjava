@@ -674,7 +674,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
    * @param indent the size of indent that you want for the document
    */
   public void setIndent(final int indent) {
-    DrJava.CONFIG.setSetting(INDENT_LEVEL,new Integer(indent));
+    DrJava.getConfig().setSetting(INDENT_LEVEL,new Integer(indent));
     this._indent = indent;
   }
 

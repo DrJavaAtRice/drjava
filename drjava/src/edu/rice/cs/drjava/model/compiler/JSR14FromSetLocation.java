@@ -67,7 +67,7 @@ public class JSR14FromSetLocation extends CompilerProxy implements OptionConstan
   }
 
   private static ClassLoader _getClassLoader() {
-    File loc = DrJava.CONFIG.getSetting(JSR14_LOCATION);
+    File loc = DrJava.getConfig().getSetting(JSR14_LOCATION);
     if (loc == FileOption.NULL_FILE) {
       throw new RuntimeException("jsr14 location not set");
     }

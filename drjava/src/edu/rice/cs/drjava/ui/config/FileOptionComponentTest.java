@@ -61,7 +61,7 @@ public class FileOptionComponentTest extends TestCase {
     
   protected void setUp() {
     _option = new FileOptionComponent( OptionConstants.JAVAC_LOCATION, "Javac Location", new Frame());
-    DrJava.CONFIG.setSetting(OptionConstants.JAVAC_LOCATION, OptionConstants.JAVAC_LOCATION.getDefault());
+    DrJava.getConfig().resetToDefaults();
     
   }
   
@@ -75,7 +75,7 @@ public class FileOptionComponentTest extends TestCase {
   
     assertEquals("Cancel (resetToCurrent) should not change the config", 
                  OptionConstants.JAVAC_LOCATION.getDefault(),
-                 DrJava.CONFIG.getSetting(OptionConstants.JAVAC_LOCATION));
+                 DrJava.getConfig().getSetting(OptionConstants.JAVAC_LOCATION));
     
   }
   
@@ -87,7 +87,7 @@ public class FileOptionComponentTest extends TestCase {
     
     assertEquals("Apply (updateConfig) should write change to file", 
                  testFile,
-                 DrJava.CONFIG.getSetting(OptionConstants.JAVAC_LOCATION));
+                 DrJava.getConfig().getSetting(OptionConstants.JAVAC_LOCATION));
   }
   
   public void testApplyThenResetDefault() {
@@ -100,7 +100,7 @@ public class FileOptionComponentTest extends TestCase {
     
     assertEquals("Apply (updateConfig) should write change to file", 
                  OptionConstants.JAVAC_LOCATION.getDefault(),
-                 DrJava.CONFIG.getSetting(OptionConstants.JAVAC_LOCATION));
+                 DrJava.getConfig().getSetting(OptionConstants.JAVAC_LOCATION));
   }
     
 }

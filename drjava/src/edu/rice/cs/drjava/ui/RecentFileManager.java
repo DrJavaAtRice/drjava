@@ -52,7 +52,7 @@ public class RecentFileManager implements OptionConstants {
     int _pos; // position in the file menu for the next insert
     Vector<File> _recentFiles;
     Vector<JMenuItem> _recentMenuItems;
-    int MAX = DrJava.CONFIG.getSetting(RECENT_FILES_MAX_SIZE).intValue();
+    int MAX = DrJava.getConfig().getSetting(RECENT_FILES_MAX_SIZE).intValue();
     JMenu _fileMenu;
     Action _open;
     MainFrame _frame;
@@ -63,7 +63,7 @@ public class RecentFileManager implements OptionConstants {
       _frame = frame;
       _recentFiles = new Vector<File>();
       _recentMenuItems = new Vector<JMenuItem>();
-      Vector<File> files = DrJava.CONFIG.getSetting(RECENT_FILES);
+      Vector<File> files = DrJava.getConfig().getSetting(RECENT_FILES);
       for (int i = files.size() - 1; i >= 0; i--) {
         updateOpenFiles(files.elementAt(i));
       }
@@ -78,7 +78,7 @@ public class RecentFileManager implements OptionConstants {
     }
     
     public void saveRecentFiles() { 
-      DrJava.CONFIG.setSetting(RECENT_FILES,_recentFiles);
+      DrJava.getConfig().setSetting(RECENT_FILES,_recentFiles);
     }
     
     public void updateOpenFiles(final File file) {   

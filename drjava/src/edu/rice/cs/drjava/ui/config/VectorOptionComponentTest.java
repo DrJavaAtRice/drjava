@@ -62,7 +62,7 @@ public class VectorOptionComponentTest extends TestCase {
     
   protected void setUp() {
     _option = new VectorOptionComponent( OptionConstants.EXTRA_CLASSPATH, "Extra Classpath", new Frame());
-    DrJava.CONFIG.setSetting(OptionConstants.EXTRA_CLASSPATH, OptionConstants.EXTRA_CLASSPATH.getDefault());
+    DrJava.getConfig().resetToDefaults();
     
   }
   
@@ -77,7 +77,7 @@ public class VectorOptionComponentTest extends TestCase {
   
     assertTrue("Cancel (resetToCurrent) should not change the config", 
                vectorEquals( OptionConstants.EXTRA_CLASSPATH.getDefault(),
-                            DrJava.CONFIG.getSetting(OptionConstants.EXTRA_CLASSPATH)));
+                            DrJava.getConfig().getSetting(OptionConstants.EXTRA_CLASSPATH)));
     
   }
   
@@ -90,7 +90,7 @@ public class VectorOptionComponentTest extends TestCase {
     
     assertTrue("Apply (updateConfig) should write change to file", 
                vectorEquals( testVector,
-                            DrJava.CONFIG.getSetting(OptionConstants.EXTRA_CLASSPATH)));
+                            DrJava.getConfig().getSetting(OptionConstants.EXTRA_CLASSPATH)));
   }
   
   public void testApplyThenResetDefault() {
@@ -104,7 +104,7 @@ public class VectorOptionComponentTest extends TestCase {
     
     assertTrue("Apply (updateConfig) should write change to file", 
                  vectorEquals( OptionConstants.EXTRA_CLASSPATH.getDefault(), 
-                              DrJava.CONFIG.getSetting(OptionConstants.EXTRA_CLASSPATH)));
+                              DrJava.getConfig().getSetting(OptionConstants.EXTRA_CLASSPATH)));
   }
     
     /**

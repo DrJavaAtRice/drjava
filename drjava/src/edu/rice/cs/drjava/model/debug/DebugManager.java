@@ -678,7 +678,7 @@ public class DebugManager {
       File f = _model.getSourceFileFromPaths(filename, roots);
       if (f == null) {
         Vector<File> sourcepath = 
-          DrJava.CONFIG.getSetting(OptionConstants.DEBUG_SOURCEPATH);
+          DrJava.getConfig().getSetting(OptionConstants.DEBUG_SOURCEPATH);
         f = _model.getSourceFileFromPaths(filename, sourcepath);
       }
       
@@ -861,6 +861,10 @@ public class DebugManager {
   private String _getValue(Value value) {
     // Most types work as they are; for the rest, for now, only care about getting
     // accurate toString for Objects
+    if (value == null) {
+      return "null";
+    }
+    
     if (!(value instanceof ObjectReference)) {
       return value.toString();
     }

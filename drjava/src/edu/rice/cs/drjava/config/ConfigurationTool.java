@@ -46,34 +46,44 @@ import edu.rice.cs.drjava.DrJava;
 
 /**
  * Interface which sets up the global configuration object at runtime.
+ * 
+ * NOTE: Not used any more.  DrJava.java now handles all setup of
+ * the config object, because it must be delayed until the user can
+ * specify a custom config file.
+ * 
  * @version $Id$
  */
 public interface ConfigurationTool {
   
-  // STATIC VARIABLES    
+  // STATIC VARIABLES
+  
+  // Not used any more:
+  //  DrJava.java now creates the config object after determining if the
+  //  user has specified a custom config file.
   
   /**
    * The ".drjava" file in the user's home directory.
    */
-  public static final File PROPERTIES_FILE =  
-    new File(System.getProperty("user.home"), ".drjava");  
+  //public static final File PROPERTIES_FILE =  
+  //  new File(System.getProperty("user.home"), ".drjava");  
   
   /**
    * The global Configuration object to use for all configurable options.
    */
-  public static final FileConfiguration CONFIG = new DefaultFileConfig().evaluate();
+  //public static final FileConfiguration CONFIG = new DefaultFileConfig().evaluate();
 }
 
 /**
  * Generate the CONFIG object separately to appease the almighty Javadoc.
  * (It didn't like anonymous inner classes with generics in interfaces in Java 1.3.)
- */
+ *
 class DefaultFileConfig {
   public FileConfiguration evaluate() {
     try { 
       ConfigurationTool.PROPERTIES_FILE.createNewFile(); 
       // be nice and ensure a config file 
-    } catch(IOException e) { // IOException occurred 
+    } 
+    catch(IOException e) { // IOException occurred 
     } 
     FileConfiguration config = 
       new FileConfiguration(ConfigurationTool.PROPERTIES_FILE); 
@@ -88,6 +98,6 @@ class DefaultFileConfig {
     }
     return config;
   }
-}
+}*/
 
 

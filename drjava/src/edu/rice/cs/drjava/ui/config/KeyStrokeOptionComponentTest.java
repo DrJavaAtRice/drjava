@@ -60,8 +60,7 @@ public class KeyStrokeOptionComponentTest extends TestCase {
   
   protected void setUp() {
     _option = new KeyStrokeOptionComponent( OptionConstants.KEY_NEW_FILE, "Normal KeyStroke", new Frame());
-    DrJava.CONFIG.setSetting(OptionConstants.KEY_NEW_FILE, OptionConstants.KEY_NEW_FILE.getDefault());
-    
+    DrJava.getConfig().resetToDefaults();
   }
   
   public void testCancelDoesNotChangeConfig() {
@@ -74,7 +73,7 @@ public class KeyStrokeOptionComponentTest extends TestCase {
   
     assertEquals("Cancel (resetToCurrent) should not change the config", 
                  OptionConstants.KEY_NEW_FILE.getDefault(),
-                 DrJava.CONFIG.getSetting(OptionConstants.KEY_NEW_FILE));
+                 DrJava.getConfig().getSetting(OptionConstants.KEY_NEW_FILE));
     
   }
   
@@ -86,7 +85,7 @@ public class KeyStrokeOptionComponentTest extends TestCase {
     
     assertEquals("Apply (updateConfig) should write change to file", 
                  testKeyStroke,
-                 DrJava.CONFIG.getSetting(OptionConstants.KEY_NEW_FILE));
+                 DrJava.getConfig().getSetting(OptionConstants.KEY_NEW_FILE));
   }
   
   public void testApplyThenResetDefault() {
@@ -99,7 +98,7 @@ public class KeyStrokeOptionComponentTest extends TestCase {
     
     assertEquals("Apply (updateConfig) should write change to file", 
                  OptionConstants.KEY_NEW_FILE.getDefault(),
-                 DrJava.CONFIG.getSetting(OptionConstants.KEY_NEW_FILE));
+                 DrJava.getConfig().getSetting(OptionConstants.KEY_NEW_FILE));
   }
     
 }

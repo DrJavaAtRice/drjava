@@ -461,9 +461,9 @@ public class MainFrame extends JFrame implements OptionConstants {
         
       // Save recent files, but only if there wasn't a problem at startup
       // (Don't want to overwrite a custom config file with a simple typo.)
-      if (!DrJava.CONFIG.hadStartupException()) {
+      if (!DrJava.getConfig().hadStartupException()) {
         try {
-          DrJava.CONFIG.saveConfiguration();
+          DrJava.getConfig().saveConfiguration();
         }
         catch (IOException ioe) {
           _showIOError(ioe);
@@ -553,7 +553,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     public void actionPerformed(ActionEvent ae) {
       // Create dialog if we haven't yet
       if(_aboutDialog == null) {
-        _aboutDialog = new AboutDialog(MainFrame.this, _model.getAboutText());
+        _aboutDialog = new AboutDialog(MainFrame.this);
       }
       _aboutDialog.show();
     }
@@ -721,7 +721,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       _tabbedPane.setSelectedIndex(INTERACTIONS_TAB);
       
       // Working directory is default place to start
-      File workDir = DrJava.CONFIG.getSetting(WORKING_DIRECTORY);
+      File workDir = DrJava.getConfig().getSetting(WORKING_DIRECTORY);
       if (workDir == FileOption.NULL_FILE) {
         workDir = new File(System.getProperty("user.dir"));
       }
@@ -773,7 +773,7 @@ public class MainFrame extends JFrame implements OptionConstants {
         return; // save cancelled
       }
       // Working directory is default place to start
-      File workDir = DrJava.CONFIG.getSetting(WORKING_DIRECTORY);
+      File workDir = DrJava.getConfig().getSetting(WORKING_DIRECTORY);
       if (workDir == FileOption.NULL_FILE) {
         workDir = new File(System.getProperty("user.dir"));
       }
@@ -884,7 +884,7 @@ public class MainFrame extends JFrame implements OptionConstants {
 
     
     // Working directory is default place to start
-    File workDir = DrJava.CONFIG.getSetting(WORKING_DIRECTORY);
+    File workDir = DrJava.getConfig().getSetting(WORKING_DIRECTORY);
     if (workDir == FileOption.NULL_FILE) {
       workDir = new File(System.getProperty("user.dir"));
     }
@@ -965,23 +965,23 @@ public class MainFrame extends JFrame implements OptionConstants {
     _setUpPanes();
     updateFileTitle();
     
-    _promptBeforeQuit = DrJava.CONFIG.getSetting(QUIT_PROMPT).booleanValue();
+    _promptBeforeQuit = DrJava.getConfig().getSetting(QUIT_PROMPT).booleanValue();
 
     // Set the fonts
     _setMainFont();    
-    Font doclistFont = DrJava.CONFIG.getSetting(FONT_DOCLIST);
+    Font doclistFont = DrJava.getConfig().getSetting(FONT_DOCLIST);
     _docList.setFont(doclistFont);
     
     // Add option listeners for changes to config options
-    DrJava.CONFIG.addOptionListener( OptionConstants.FONT_MAIN, new MainFontOptionListener());
-    DrJava.CONFIG.addOptionListener( OptionConstants.FONT_DOCLIST, new DoclistFontOptionListener());
-    DrJava.CONFIG.addOptionListener( OptionConstants.FONT_TOOLBAR, new ToolbarFontOptionListener());
-    DrJava.CONFIG.addOptionListener( OptionConstants.TOOLBAR_ICONS_ENABLED, new ToolbarOptionListener());
-    DrJava.CONFIG.addOptionListener( OptionConstants.TOOLBAR_TEXT_ENABLED, new ToolbarOptionListener());
-    DrJava.CONFIG.addOptionListener( OptionConstants.WORKING_DIRECTORY, new WorkingDirOptionListener());
-    DrJava.CONFIG.addOptionListener( OptionConstants.LINEENUM_ENABLED, new LineEnumOptionListener());
-    DrJava.CONFIG.addOptionListener( OptionConstants.QUIT_PROMPT, new QuitPromptOptionListener());
-    DrJava.CONFIG.addOptionListener( OptionConstants.RECENT_FILES_MAX_SIZE, new RecentFilesOptionListener());
+    DrJava.getConfig().addOptionListener( OptionConstants.FONT_MAIN, new MainFontOptionListener());
+    DrJava.getConfig().addOptionListener( OptionConstants.FONT_DOCLIST, new DoclistFontOptionListener());
+    DrJava.getConfig().addOptionListener( OptionConstants.FONT_TOOLBAR, new ToolbarFontOptionListener());
+    DrJava.getConfig().addOptionListener( OptionConstants.TOOLBAR_ICONS_ENABLED, new ToolbarOptionListener());
+    DrJava.getConfig().addOptionListener( OptionConstants.TOOLBAR_TEXT_ENABLED, new ToolbarOptionListener());
+    DrJava.getConfig().addOptionListener( OptionConstants.WORKING_DIRECTORY, new WorkingDirOptionListener());
+    DrJava.getConfig().addOptionListener( OptionConstants.LINEENUM_ENABLED, new LineEnumOptionListener());
+    DrJava.getConfig().addOptionListener( OptionConstants.QUIT_PROMPT, new QuitPromptOptionListener());
+    DrJava.getConfig().addOptionListener( OptionConstants.RECENT_FILES_MAX_SIZE, new RecentFilesOptionListener());
     
     // Initialize breakpoint highlights hashtable, for easy removal of highlights
     _breakpointHighlights = new gj.util.Hashtable<Breakpoint, HighlightManager.HighlightInfo>();
@@ -1625,8 +1625,8 @@ public class MainFrame extends JFrame implements OptionConstants {
    * and display a message if necessary.
    */
   private void _showConfigException() {
-    if (DrJava.CONFIG.hadStartupException()) {
-      Exception e = DrJava.CONFIG.getStartupException();
+    if (DrJava.getConfig().hadStartupException()) {
+      Exception e = DrJava.getConfig().getStartupException();
       _showError(e, "Error in Config File",
                  "Could not read the '.drjava' configuration file\n" +
                  "in your home directory.  Starting with default\n" +
@@ -1935,7 +1935,7 @@ public class MainFrame extends JFrame implements OptionConstants {
    * @param opt Configurable keystroke for the menu item
    */
   private void _setMenuShortcut(JMenuItem item, Action a, Option<KeyStroke> opt) {
-    KeyStroke ks = DrJava.CONFIG.getSetting(opt);
+    KeyStroke ks = DrJava.getConfig().getSetting(opt);
     // Checks that "a" is the action associated with the keystroke.
     // Need to check in case two actions were assigned to the same
     // key in the config file
@@ -2134,11 +2134,11 @@ public class MainFrame extends JFrame implements OptionConstants {
   JButton _createManualToolbarButton(Action a) {
     final JButton ret;
     
-    Font buttonFont = DrJava.CONFIG.getSetting(FONT_TOOLBAR);
+    Font buttonFont = DrJava.getConfig().getSetting(FONT_TOOLBAR);
 
     // Check whether icons should be shown
-    boolean useIcon = DrJava.CONFIG.getSetting(OptionConstants.TOOLBAR_ICONS_ENABLED).booleanValue();
-    boolean useText = DrJava.CONFIG.getSetting(OptionConstants.TOOLBAR_TEXT_ENABLED).booleanValue();
+    boolean useIcon = DrJava.getConfig().getSetting(OptionConstants.TOOLBAR_ICONS_ENABLED).booleanValue();
+    boolean useText = DrJava.getConfig().getSetting(OptionConstants.TOOLBAR_TEXT_ENABLED).booleanValue();
     final Icon icon = (useIcon) ? (Icon) a.getValue(Action.SMALL_ICON) : null;
     if (icon == null) {
       ret = new JButton( (String) a.getValue(Action.DEFAULT)) {
@@ -2180,9 +2180,9 @@ public class MainFrame extends JFrame implements OptionConstants {
    * _createManualToolbarButton.
    */
   public JButton _createToolbarButton(Action a) {
-    boolean useText = DrJava.CONFIG.getSetting(OptionConstants.TOOLBAR_TEXT_ENABLED).booleanValue();
-    boolean useIcons = DrJava.CONFIG.getSetting(OptionConstants.TOOLBAR_ICONS_ENABLED).booleanValue();
-    Font buttonFont = DrJava.CONFIG.getSetting(FONT_TOOLBAR);
+    boolean useText = DrJava.getConfig().getSetting(OptionConstants.TOOLBAR_TEXT_ENABLED).booleanValue();
+    boolean useIcons = DrJava.getConfig().getSetting(OptionConstants.TOOLBAR_ICONS_ENABLED).booleanValue();
+    Font buttonFont = DrJava.getConfig().getSetting(FONT_TOOLBAR);
     
     final JButton result = new JButton(a) {
       public boolean isFocusTraversable() {
@@ -2282,13 +2282,13 @@ public class MainFrame extends JFrame implements OptionConstants {
             
           */
           
-        Font toolbarFont = DrJava.CONFIG.getSetting(FONT_TOOLBAR);
+        Font toolbarFont = DrJava.getConfig().getSetting(FONT_TOOLBAR);
         b.setFont(toolbarFont);
                    
         if (a==null) continue;
         //}
           
-        boolean iconsEnabled = DrJava.CONFIG.getSetting(TOOLBAR_ICONS_ENABLED).booleanValue();
+        boolean iconsEnabled = DrJava.getConfig().getSetting(TOOLBAR_ICONS_ENABLED).booleanValue();
           
         if (b.getIcon() == null) {
           if (iconsEnabled) {
@@ -2301,7 +2301,7 @@ public class MainFrame extends JFrame implements OptionConstants {
           }
         }
           
-        boolean textEnabled = DrJava.CONFIG.getSetting(TOOLBAR_TEXT_ENABLED).booleanValue();
+        boolean textEnabled = DrJava.getConfig().getSetting(TOOLBAR_TEXT_ENABLED).booleanValue();
           
         if (b.getText() == "") {
           if (textEnabled) {
@@ -2455,7 +2455,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       }
     });*/
     
-    if (DrJava.CONFIG.getSetting(LINEENUM_ENABLED).booleanValue()) {
+    if (DrJava.getConfig().getSetting(LINEENUM_ENABLED).booleanValue()) {
       scroll.setRowHeaderView( new LineEnumRule(pane));
     }
     
@@ -2636,7 +2636,7 @@ public class MainFrame extends JFrame implements OptionConstants {
    */
   private void _setMainFont() {
     
-    Font f = DrJava.CONFIG.getSetting(FONT_MAIN);
+    Font f = DrJava.getConfig().getSetting(FONT_MAIN);
     
     Iterator scrollPanes = _defScrollPanes.values().iterator();
     while (scrollPanes.hasNext()) {  
@@ -2645,7 +2645,7 @@ public class MainFrame extends JFrame implements OptionConstants {
         DefinitionsPane pane = (DefinitionsPane) scroll.getViewport().getView();
         pane.setFont(f);
         // Update the font of the line enumeration rule
-        if (DrJava.CONFIG.getSetting(LINEENUM_ENABLED).booleanValue()) {
+        if (DrJava.getConfig().getSetting(LINEENUM_ENABLED).booleanValue()) {
           scroll.setRowHeaderView( new LineEnumRule( pane) );
         }
       }
@@ -2662,7 +2662,7 @@ public class MainFrame extends JFrame implements OptionConstants {
    *  Update the row header (line number enumeration) for the definitions scroll pane
    */
   private void _updateDefScrollRowHeader() {
-    boolean ruleEnabled = DrJava.CONFIG.getSetting(LINEENUM_ENABLED).booleanValue();
+    boolean ruleEnabled = DrJava.getConfig().getSetting(LINEENUM_ENABLED).booleanValue();
     
     Iterator scrollPanes = _defScrollPanes.values().iterator();
     while (scrollPanes.hasNext()) {  
@@ -3117,6 +3117,7 @@ public class MainFrame extends JFrame implements OptionConstants {
           showTab(_junitPanel);
           _junitPanel.setJUnitInProgress(doc);
           _junitAction.setEnabled(false);
+          updateErrorListeners();
         }
       };
       SwingUtilities.invokeLater(doCommand);
@@ -3139,7 +3140,7 @@ public class MainFrame extends JFrame implements OptionConstants {
 
     public void interactionsExited(final int status) {
       // Only show prompt if option is set
-      if (DrJava.CONFIG.getSetting(INTERACTIONS_EXIT_PROMPT).booleanValue()) {
+      if (DrJava.getConfig().getSetting(INTERACTIONS_EXIT_PROMPT).booleanValue()) {
         // Show the dialog in a Swing thread, so Interactions can
         // start resetting right away.
         Runnable doCommand = new Runnable() {
@@ -3553,7 +3554,7 @@ public class MainFrame extends JFrame implements OptionConstants {
    */
   private class DoclistFontOptionListener implements OptionListener<Font> {
     public void optionChanged(OptionEvent<Font> oce) {
-      Font doclistFont = DrJava.CONFIG.getSetting(FONT_DOCLIST);
+      Font doclistFont = DrJava.getConfig().getSetting(FONT_DOCLIST);
       _docList.setFont(doclistFont);
     }
   }

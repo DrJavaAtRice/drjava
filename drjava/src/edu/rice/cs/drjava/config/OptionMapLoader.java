@@ -44,68 +44,68 @@ import gj.util.Enumeration;
 import java.io.*;
 import java.lang.reflect.*;
 public class OptionMapLoader implements OptionConstants {
-
-    /** bag of default options (programmatically defined, instead of in an options file) */
-    private static DefaultOptionMap DEFAULTS = new DefaultOptionMap();
-    private static Properties DEFAULT_STRINGS = new Properties();
-
-    static {
- // initialize DEFAULTS objects, based on OptionConstants using reflection.
-        Field[] fields = OptionConstants.class.getDeclaredFields();
-        for(int i = 0; i < fields.length; i++) {
-            Field field = fields[i];
-            int mods = field.getModifiers();
-            if(Modifier.isStatic(mods) && Modifier.isPublic(mods) && Modifier.isFinal(mods)) {
-                // field is public static and final.
-                Option option = null;
-                try {
-                    Object o = field.get(null); // we should be able to pass in null as the 'receiver', since it's static.
-                    //System.out.println("field name: "+field.getName()+"  o: "+o);
-                    if (o == null) continue; // Development options can be null in the stable version of the code
-                    if(!( o instanceof Option)) continue;
-                    
-                    option = (Option) o;
-                } catch(IllegalAccessException e) {
-                    // this cannot happen, since we don't get in here unless the field is public.
-                    throw new RuntimeException("IllegalAccessException happened on a public field.");
-                }
-                
-                String sval = option.getDefaultString();
-                DEFAULT_STRINGS.setProperty(option.name,sval);
-                DEFAULTS.setString(option,sval);
-            }
+  
+  /** bag of default options (programmatically defined, instead of in an options file) */
+  private static DefaultOptionMap DEFAULTS = new DefaultOptionMap();
+  private static Properties DEFAULT_STRINGS = new Properties();
+  
+  static {
+    // initialize DEFAULTS objects, based on OptionConstants using reflection.
+    Field[] fields = OptionConstants.class.getDeclaredFields();
+    for(int i = 0; i < fields.length; i++) {
+      Field field = fields[i];
+      int mods = field.getModifiers();
+      if(Modifier.isStatic(mods) && Modifier.isPublic(mods) && Modifier.isFinal(mods)) {
+        // field is public static and final.
+        Option option = null;
+        try {
+          Object o = field.get(null); // we should be able to pass in null as the 'receiver', since it's static.
+          //System.out.println("field name: "+field.getName()+"  o: "+o);
+          if (o == null) continue; // Development options can be null in the stable version of the code
+          if(!( o instanceof Option)) continue;
+          
+          option = (Option) o;
+        } catch(IllegalAccessException e) {
+          // this cannot happen, since we don't get in here unless the field is public.
+          throw new RuntimeException("IllegalAccessException happened on a public field.");
         }
-    }
-
-    public static final OptionMapLoader DEFAULT = new OptionMapLoader(DEFAULT_STRINGS);
-    
-    /**
-     * creates an OptionMapLoader from a given input stream.
-     * does not maintain a reference to this input stream after 
-     * Constructor creates
-     * @param is the input stream to read. 
-     */
-    public OptionMapLoader(InputStream is) throws IOException {
-      this(new Properties(DEFAULT_STRINGS));
-       prop.load(is);
-    }
-    
-    private final Properties prop;
-    
-    private OptionMapLoader(Properties prop) {
-      this.prop = prop;
-    }
-    
-    /**
-     * creates an OptionMap from an InputStream.
-     * @param is the inputstream to read from to load these options.
-     */
-    public void loadInto(OptionMap map) {
-      Enumeration<OptionParser> options = DEFAULTS.keys();
-      while(options.hasMoreElements()) {
-        OptionParser option = options.nextElement();
-        String val = prop.getProperty(option.name);
-        map.setString(option,val);
+        
+        String sval = option.getDefaultString();
+        DEFAULT_STRINGS.setProperty(option.name,sval);
+        DEFAULTS.setString(option,sval);
       }
     }
+  }
+  
+  public static final OptionMapLoader DEFAULT = new OptionMapLoader(DEFAULT_STRINGS);
+  
+  /**
+   * creates an OptionMapLoader from a given input stream.
+   * does not maintain a reference to this input stream after 
+   * Constructor creates
+   * @param is the input stream to read. 
+   */
+  public OptionMapLoader(InputStream is) throws IOException {
+    this(new Properties(DEFAULT_STRINGS));
+    prop.load(is);
+  }
+  
+  private final Properties prop;
+  
+  private OptionMapLoader(Properties prop) {
+    this.prop = prop;
+  }
+  
+   /**
+   * creates an OptionMap from an InputStream.
+   * @param is the inputstream to read from to load these options.
+   */
+  public void loadInto(OptionMap map) {
+    Enumeration<OptionParser> options = DEFAULTS.keys();
+    while(options.hasMoreElements()) {
+      OptionParser option = options.nextElement();
+      String val = prop.getProperty(option.name);
+      map.setString(option,val);
+    }
+  }
 }

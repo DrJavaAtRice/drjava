@@ -54,7 +54,7 @@ import javax.swing.*;
 public class History implements OptionConstants {
   
   // Not final because it may be updated by config
-  private static int MAX_SIZE = DrJava.CONFIG.getSetting(HISTORY_MAX_SIZE).intValue();
+  private static int MAX_SIZE = DrJava.getConfig().getSetting(HISTORY_MAX_SIZE).intValue();
   
   private Vector<String> _vector = new Vector<String>();
   private int _cursor = -1;
@@ -63,7 +63,7 @@ public class History implements OptionConstants {
    * Constructor, so we can add a listener to the Config item being used.
    */ 
   public History() {
-    DrJava.CONFIG.addOptionListener(HISTORY_MAX_SIZE, new HistorySizeOptionListener());
+    DrJava.getConfig().addOptionListener(HISTORY_MAX_SIZE, new HistorySizeOptionListener());
     
     // Sanity check on MAX_SIZE
     if (MAX_SIZE < 0) MAX_SIZE = 0;

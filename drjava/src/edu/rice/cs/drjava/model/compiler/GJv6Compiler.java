@@ -60,7 +60,7 @@ import edu.rice.cs.util.UnexpectedException;
 public class GJv6Compiler implements CompilerInterface{
   
   private String _extraClassPath = "";
-    
+  
   /** Singleton instance. */
   public static final CompilerInterface ONLY = new GJv6Compiler();
 
@@ -110,7 +110,7 @@ public class GJv6Compiler implements CompilerInterface{
     newclasspath.append(_extraClassPath);
 
     options.put("-classpath", newclasspath.toString());
-
+    
     _compiler = JavaCompiler.make(_compilerLog, options);
   }
 
@@ -176,6 +176,13 @@ public class GJv6Compiler implements CompilerInterface{
    */ 
   public void setExtraClassPath( String extraClassPath) {
       _extraClassPath = extraClassPath;
+  }
+  
+  /**
+   * Sets whether to allow assertions in Java 1.4.
+   */
+  public void setAllowAssertions(boolean allow) {
+    // Nothing to do: GJ is Java 1.3, and has no assertions
   }
   
   /**

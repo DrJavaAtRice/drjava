@@ -72,7 +72,7 @@ public class HistorySaveDialog {
     
     
     _textArea = new JTextArea();
-    _textArea.setFont(DrJava.CONFIG.getSetting(OptionConstants.FONT_MAIN));
+    _textArea.setFont(DrJava.getConfig().getSetting(OptionConstants.FONT_MAIN));
     JButton _saveButton = new JButton("Save"),
       _cancelButton = new JButton("Cancel");
     _cancelButton.addActionListener(_cancelListener);

@@ -49,8 +49,6 @@ import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
 import edu.rice.cs.drjava.ui.MainFrame;
 import edu.rice.cs.util.FileOps;
 
-//import edu.rice.cs.drjava.*;
-
 /**
  * Tests opening/creating files specified as command line arguments.
  * @version $Id$

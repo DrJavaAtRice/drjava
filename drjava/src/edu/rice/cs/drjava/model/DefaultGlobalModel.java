@@ -194,12 +194,12 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
   public static final Indenter INDENTER;
   static {
     // Statically create the indenter from the config values
-    int ind = DrJava.CONFIG.getSetting(OptionConstants.INDENT_LEVEL).intValue();
+    int ind = DrJava.getConfig().getSetting(OptionConstants.INDENT_LEVEL).intValue();
     INDENTER = new Indenter(ind);
-    DrJava.CONFIG.addOptionListener(OptionConstants.INDENT_LEVEL, 
+    DrJava.getConfig().addOptionListener(OptionConstants.INDENT_LEVEL, 
                                     new OptionListener<Integer>() {
       public void optionChanged(OptionEvent<Integer> oce) {
-        INDENTER.buildTree(DrJava.CONFIG.getSetting(OptionConstants.INDENT_LEVEL).intValue());
+        INDENTER.buildTree(DrJava.getConfig().getSetting(OptionConstants.INDENT_LEVEL).intValue());
       }
     });
   }
@@ -278,7 +278,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
     _createDebugger();
     
     // Listen to any relevant config options
-    DrJava.CONFIG.addOptionListener(EXTRA_CLASSPATH, new ExtraClasspathOptionListener());
+    DrJava.getConfig().addOptionListener(EXTRA_CLASSPATH, new ExtraClasspathOptionListener());
   }
 
   /**
@@ -308,7 +308,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
     }
     
     // Listen to any relevant config options
-    DrJava.CONFIG.addOptionListener(EXTRA_CLASSPATH, new ExtraClasspathOptionListener());
+    DrJava.getConfig().addOptionListener(EXTRA_CLASSPATH, new ExtraClasspathOptionListener());
   }
 
   /**
@@ -412,19 +412,16 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
   public OpenDefinitionsDocument openFile(FileOpenSelector com)
     throws IOException, OperationCanceledException, AlreadyOpenException
   {
-    DefinitionsDocument tempDoc = (DefinitionsDocument)
-      _editorKit.createDefaultDocument();
-
     final File file = (com.getFiles())[0].getAbsoluteFile();
     OpenDefinitionsDocument odd = _openFile(file);
     
     // Make sure this is on the classpath
     try {
-        File classpath = odd.getSourceRoot();
-        _interpreterControl.addClassPath(classpath.getAbsolutePath());
+      File classpath = odd.getSourceRoot();
+      _interpreterControl.addClassPath(classpath.getAbsolutePath());
     }
     catch (InvalidPackageException e) {
-        // Invalid package-- don't add it to classpath
+      // Invalid package-- don't add it to classpath
     }
     
     return odd;
@@ -1066,7 +1063,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
     }
 
     // Adds extra.classpath to the classpath.
-    Vector<File> extraClasspath = DrJava.CONFIG.getSetting(EXTRA_CLASSPATH);
+    Vector<File> extraClasspath = DrJava.getConfig().getSetting(EXTRA_CLASSPATH);
     if(extraClasspath != null) {
         Enumeration<File> enum = extraClasspath.elements();
         while(enum.hasMoreElements()) {
@@ -1107,7 +1104,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
       }
     }
     /*    
-    File workDir = DrJava.CONFIG.getSetting(WORKING_DIRECTORY);
+    File workDir = DrJava.getConfig().getSetting(WORKING_DIRECTORY);
         
     if (workDir == FileOption.NULL_FILE) {
       workDir = new File( System.getProperty("user.dir"));
@@ -1167,7 +1164,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
           _compileFiles(sourceRoots, outOfSyncFiles);
         }
         catch (Throwable t) {
-          CompilerError err = new CompilerError(t.getMessage(),
+          CompilerError err = new CompilerError(t.toString(),
                                                 false);
           CompilerError[] errors = new CompilerError[] { err };
           _distributeErrors(errors);
@@ -1715,9 +1712,6 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
           });
           throw enae;
         }
-        //System.err.println("JUnit tried to exit -- Resolving this bug requires some refactoring");
-        //System.err.println(" because such an error causes a System.exit(Exception) in JUnit, and");
-        //System.err.println(" we need a way of catching its output.");
       }
     }
 
@@ -1841,7 +1835,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
         }
         if (classFile == null) {
           // not on system classpath, check interactions classpath
-          classFile = getSourceFileFromPaths(filename, DrJava.CONFIG.getSetting(EXTRA_CLASSPATH));
+          classFile = getSourceFileFromPaths(filename, DrJava.getConfig().getSetting(EXTRA_CLASSPATH));
         }
         _doc.setCachedClassFile(classFile);
         if (classFile == null) {
@@ -2434,7 +2428,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
       _interpreterControl.addClassPath(sourceRoots[i].getAbsolutePath());
     }
 
-    Vector<File> cp = DrJava.CONFIG.getSetting(EXTRA_CLASSPATH);
+    Vector<File> cp = DrJava.getConfig().getSetting(EXTRA_CLASSPATH);
     if(cp!=null) {
       Enumeration<File> enum = cp.elements();
       while(enum.hasMoreElements()) {

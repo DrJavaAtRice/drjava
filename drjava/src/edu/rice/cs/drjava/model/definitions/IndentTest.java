@@ -44,6 +44,7 @@ import  junit.extensions.*;
 import  javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 
+import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.model.definitions.indent.*;
@@ -69,22 +70,20 @@ public class IndentTest extends TestCase {
    */
   public IndentTest(String name) {
     super(name);
-    
   }
 
   /**
    * put your documentation comment here
    */
   public void setUp() {
+    DrJava.getConfig().resetToDefaults();
     doc = new DefinitionsDocument();
-    configIndent = ConfigurationTool.CONFIG.getSetting(OptionConstants.INDENT_LEVEL);
-    ConfigurationTool.CONFIG.setSetting(OptionConstants.INDENT_LEVEL,indentLevel);
+    DrJava.getConfig().setSetting(OptionConstants.INDENT_LEVEL,indentLevel);
   }
   /**
    * put your documentation comment here
    */
   protected void tearDown() {
-    ConfigurationTool.CONFIG.setSetting(OptionConstants.INDENT_LEVEL,configIndent);
   }
 
   /**
@@ -1054,7 +1053,7 @@ public class IndentTest extends TestCase {
     _assertContents(text, doc);
     doc.indentLines(0, doc.getLength());
     _assertContents(indentedBefore, doc);
-    ConfigurationTool.CONFIG.setSetting(OptionConstants.INDENT_LEVEL, new Integer(8));
+    DrJava.getConfig().setSetting(OptionConstants.INDENT_LEVEL, new Integer(8));
     doc.indentLines(0, doc.getLength());
     _assertContents(indentedAfter, doc);   
   }

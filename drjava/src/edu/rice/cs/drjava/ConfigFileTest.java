@@ -37,81 +37,51 @@
  *
 END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava.model.compiler;
+package edu.rice.cs.drjava;
+
+import junit.framework.*;
 
 import java.io.File;
-import java.io.Writer;
-import java.io.PrintWriter;
 import java.io.IOException;
 
-import java.lang.reflect.Field;
-
-import java.util.LinkedList;
-
-import com.sun.tools.javac.v8.JavaCompiler;
-
-import com.sun.tools.javac.v8.util.Name;
-import com.sun.tools.javac.v8.util.Position;
-import com.sun.tools.javac.v8.util.Hashtable;
-import com.sun.tools.javac.v8.util.List;
-import com.sun.tools.javac.v8.util.Log;
-
-import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.util.FileOps;
+import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.config.*;
 
 /**
- * An implementation of the CompilerInterface that supports compiling with
- * the JSR-14 prototype compiler.
- * It adds the collections classes signature to the bootclasspath
- * as requested by {@link Configuration}.
- *
+ * Tests that a custom config file can be specified.
  * @version $Id$
  */
-public class JSR14Compiler extends JavacGJCompiler {
+public class ConfigFileTest extends TestCase {
+  private static final String CUSTOM_PROPS =
+    "indent.level = 5\n" +
+    "history.max.size = 1\n";
   
-  private File _collectionsPath;
-  
-  /** Singleton instance. */
-  public static final CompilerInterface ONLY = new JSR14Compiler();
-
-  protected JSR14Compiler() {
-    super();
-  }
-  
-  protected void updateBootClassPath() {
-
-    // add collections path to the bootclasspath
-    // Yes, we are mutating some other class's public variable.
-    // But the docs for ClassReader say it's OK for others to mutate it!
-    // And this way, we don't need to specify the entire bootclasspath,
-    // just what we want to add on to it.
-    
-    if (_collectionsPath != null) {
-      String ccp = _collectionsPath.getAbsolutePath();
-    
-      if (ccp != null && ccp.length() > 0) {
-        compiler.syms.reader.bootClassPath = ccp +
-          System.getProperty("path.separator")+
-          compiler.syms.reader.bootClassPath;
-  
-      }
-    }
-  }
-    
-  protected void initCompiler(File[] sourceRoots) {
-    super.initCompiler(sourceRoots);
-    updateBootClassPath();
-  }
-
   /**
-   * This method allows us to set the JSR14 collections path across a class loader.
-   * (cannot cast a loaded class to a subclass, so all compiler interfaces must have this method)
-   */ 
-  public void addToBootClassPath( File cp) {
-    _collectionsPath = cp;
+   * Constructor.
+   */
+  public ConfigFileTest(String name) {
+    super(name);
   }
   
-  public String getName() { return "JSR-14"; }
-
-
+  /**
+   * Creates a custom properties file, tells DrJava to use it, and
+   * checks that it is being used.
+   */
+  public void testCustomConfigFile() throws IOException {
+    File propsFile = 
+      FileOps.writeStringToNewTempFile("DrJavaProps", ".txt", CUSTOM_PROPS);
+    DrJava.setPropertiesFile(propsFile.getAbsolutePath());
+    DrJava.initConfig();
+    FileConfiguration config = DrJava.getConfig();
+    
+    assertEquals("custom indent level", 5, 
+                 config.getSetting(OptionConstants.INDENT_LEVEL).intValue());
+    assertEquals("custom history size", 1,
+                 config.getSetting(OptionConstants.HISTORY_MAX_SIZE).intValue());
+    assertEquals("default javac location", 
+                 OptionConstants.JAVAC_LOCATION.getDefault(),
+                 config.getSetting(OptionConstants.JAVAC_LOCATION));
+  }
+  
 }

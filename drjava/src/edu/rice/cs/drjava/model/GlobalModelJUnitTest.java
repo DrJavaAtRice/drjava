@@ -321,6 +321,9 @@ public class GlobalModelJUnitTest extends GlobalModelTestCase {
     _model.addListener(listener);
     synchronized(listener) {
       doc.startCompile();
+      if (_model.getNumErrors() > 0) {
+        fail("compile failed: " + doc.getCompilerErrorModel());
+      }
       listener.wait();
     }
     _model.removeListener(listener);

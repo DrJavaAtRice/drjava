@@ -279,6 +279,9 @@ public class GlobalModelOtherTest extends GlobalModelTestCase implements OptionC
     _model.addListener(listener);
     synchronized(listener) {
       doc.startCompile();
+      if (_model.getNumErrors() > 0) {
+        fail("compile failed: " + doc.getCompilerErrorModel());
+      }
       listener.wait();
     }
     listener.checkCompileOccurred();
@@ -310,7 +313,7 @@ public class GlobalModelOtherTest extends GlobalModelTestCase implements OptionC
     // Add directory 1 to extra classpath and close doc1
     Vector<File> cp = new Vector<File>();
     cp.addElement(dir1);
-    DrJava.CONFIG.setSetting(EXTRA_CLASSPATH, cp);
+    DrJava.getConfig().setSetting(EXTRA_CLASSPATH, cp);
     _model.closeFile(doc1);
     
     // Compile Baz which extends Foo in another directory.
@@ -385,7 +388,7 @@ public class GlobalModelOtherTest extends GlobalModelTestCase implements OptionC
     throws BadLocationException, IOException, InvalidPackageException
   {
     // Get current working directory
-    File workDir = DrJava.CONFIG.getSetting(WORKING_DIRECTORY);
+    File workDir = DrJava.getConfig().getSetting(WORKING_DIRECTORY);
         
     if (workDir == FileOption.NULL_FILE) {
       workDir = new File( System.getProperty("user.dir"));
@@ -459,7 +462,7 @@ public class GlobalModelOtherTest extends GlobalModelTestCase implements OptionC
     File baseTempDir = tempDirectory();
     
     // Get current working directory
-    File workDir = DrJava.CONFIG.getSetting(WORKING_DIRECTORY);
+    File workDir = DrJava.getConfig().getSetting(WORKING_DIRECTORY);
         
     if (workDir == FileOption.NULL_FILE) {
       workDir = new File( System.getProperty("user.dir"));
@@ -587,10 +590,10 @@ public class GlobalModelOtherTest extends GlobalModelTestCase implements OptionC
     assertTrue("interactions should have an error, not the correct answer",
                !"DrJavaTestFoo".equals(result));
 
-    // Add new directory to classpath through CONFIG
+    // Add new directory to classpath through Config
     Vector<File> cp = new Vector<File>();
     cp.addElement(new File(tempPath + "a"));
-    DrJava.CONFIG.setSetting(EXTRA_CLASSPATH, cp);
+    DrJava.getConfig().setSetting(EXTRA_CLASSPATH, cp);
     
     result = interpret("new DrJavaTestFoo().getClass().getName()");
     

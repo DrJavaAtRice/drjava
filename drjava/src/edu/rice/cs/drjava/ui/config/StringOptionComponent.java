@@ -55,7 +55,7 @@ public class StringOptionComponent extends OptionComponent<String> {
   public StringOptionComponent (StringOption opt, String text, Frame parent) {
     super(opt, text, parent);
     _jtf = new JTextField();
-    _jtf.setText(_option.format(DrJava.CONFIG.getSetting(_option)));
+    _jtf.setText(_option.format(DrJava.getConfig().getSetting(_option)));
   }
   
   /**
@@ -63,10 +63,10 @@ public class StringOptionComponent extends OptionComponent<String> {
    * @return true if the new value is set successfully
    */
   public boolean updateConfig() {
-    String oldValue = DrJava.CONFIG.getSetting(_option);
+    String oldValue = DrJava.getConfig().getSetting(_option);
     String newValue = _option.parse(_jtf.getText().trim());
     
-    if (!oldValue.equals(newValue)) DrJava.CONFIG.setSetting(_option, newValue);   
+    if (!oldValue.equals(newValue)) DrJava.getConfig().setSetting(_option, newValue);   
     return true;
   } 
  

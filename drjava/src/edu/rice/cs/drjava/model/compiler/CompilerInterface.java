@@ -89,9 +89,15 @@ public interface CompilerInterface {
   
   /**
    * Allows us to set the extra classpath for the compilers without referencing the
-   * config object in a loaded class file
+   * config object in a loaded class file.
    */ 
   void setExtraClassPath( String extraClassPath);
+  
+  /**
+   * Sets whether to allow assertions in Java 1.4.  (Allows us not to reference
+   * the config object in a loaded class file.)
+   */
+  void setAllowAssertions(boolean allow);
   
   /**
    * This method allows us to set the JSR14 collections path across a class loader.

@@ -170,15 +170,22 @@ public class JUnitErrorCaretListener implements CaretListener {
       _errorListPane.selectNothing();
     }
     else {
-  
-      if (_errorListPane.shouldShowHighlightsInSource()) {
-        // No need to move the caret since it's already here!
-        _highlightErrorInSource(shouldSelect);
-      }
       
       // Select item wants the JUnitError
       JUnitError[] errors = _model.getErrorsWithPositions();
-      _errorListPane.selectItem(errors[shouldSelect]);
+      try {
+        _errorListPane.selectItem(errors[shouldSelect]);
+        
+        if (_errorListPane.shouldShowHighlightsInSource()) {
+          // No need to move the caret since it's already here!
+          _highlightErrorInSource(shouldSelect);
+        }
+      }
+      catch (IllegalArgumentException e) {
+        // A new test could perhaps have started before this listener
+        //  has been reset, so be prepared if it throws an exception.
+        //  We'll ignore it here, so nothing gets highlighted.
+      }
     }
 
   }

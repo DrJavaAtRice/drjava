@@ -109,7 +109,7 @@ public class DefinitionsPane extends JEditorPane
     MATCH_PAINTER;
     
   static {
-    Color highColor = DrJava.CONFIG.getSetting(DEFINITIONS_MATCH_COLOR);
+    Color highColor = DrJava.getConfig().getSetting(DEFINITIONS_MATCH_COLOR);
     
     MATCH_PAINTER = 
       new DefaultHighlighter.DefaultHighlightPainter(highColor);
@@ -124,21 +124,21 @@ public class DefinitionsPane extends JEditorPane
    */
   public static DefaultHighlighter.DefaultHighlightPainter
     ERROR_PAINTER =
-    new DefaultHighlighter.DefaultHighlightPainter(DrJava.CONFIG.getSetting(COMPILER_ERROR_COLOR));
+    new DefaultHighlighter.DefaultHighlightPainter(DrJava.getConfig().getSetting(COMPILER_ERROR_COLOR));
   
   /**
    *  Highlight painter for breakpoints
    */
   public static DefaultHighlighter.DefaultHighlightPainter 
     BREAKPOINT_PAINTER =
-    new DefaultHighlighter.DefaultHighlightPainter(DrJava.CONFIG.getSetting(DEBUG_BREAKPOINT_COLOR));
+    new DefaultHighlighter.DefaultHighlightPainter(DrJava.getConfig().getSetting(DEBUG_BREAKPOINT_COLOR));
   
   /**
    * Highlight painter for thread's current location
    */
   public static DefaultHighlighter.DefaultHighlightPainter 
     THREAD_PAINTER =
-    new DefaultHighlighter.DefaultHighlightPainter(DrJava.CONFIG.getSetting(DEBUG_THREAD_COLOR));
+    new DefaultHighlighter.DefaultHighlightPainter(DrJava.getConfig().getSetting(DEBUG_THREAD_COLOR));
   
   /**
    * The OptionListener for DEFINITIONS_BACKGROUND_COLOR 
@@ -429,9 +429,9 @@ public class DefinitionsPane extends JEditorPane
     _doc = doc;    
     setDocument(_doc);
     setContentType("text/java");
-    setBackground(DrJava.CONFIG.getSetting(DEFINITIONS_BACKGROUND_COLOR));
+    setBackground(DrJava.getConfig().getSetting(DEFINITIONS_BACKGROUND_COLOR));
     //setFont(new Font("Courier", 0, 12));
-    Font mainFont = DrJava.CONFIG.getSetting(FONT_MAIN);
+    Font mainFont = DrJava.getConfig().getSetting(FONT_MAIN);
     setFont(mainFont);
     
     //setSize(new Dimension(1024, 1000));
@@ -457,15 +457,15 @@ public class DefinitionsPane extends JEditorPane
     // If it has changed, check and see if we should be highlighting matching braces.
     this.addCaretListener(_matchListener);
  
-    DrJava.CONFIG.addOptionListener( OptionConstants.DEFINITIONS_BACKGROUND_COLOR,
+    DrJava.getConfig().addOptionListener( OptionConstants.DEFINITIONS_BACKGROUND_COLOR,
                                     new BackgroundColorOptionListener());
-    DrJava.CONFIG.addOptionListener( OptionConstants.DEFINITIONS_MATCH_COLOR,
+    DrJava.getConfig().addOptionListener( OptionConstants.DEFINITIONS_MATCH_COLOR,
                                     new MatchColorOptionListener());
-    DrJava.CONFIG.addOptionListener( OptionConstants.COMPILER_ERROR_COLOR,
+    DrJava.getConfig().addOptionListener( OptionConstants.COMPILER_ERROR_COLOR,
                                     new ErrorColorOptionListener());
-    DrJava.CONFIG.addOptionListener( OptionConstants.DEBUG_BREAKPOINT_COLOR,
+    DrJava.getConfig().addOptionListener( OptionConstants.DEBUG_BREAKPOINT_COLOR,
                                     new BreakpointColorOptionListener());
-    DrJava.CONFIG.addOptionListener( OptionConstants.DEBUG_THREAD_COLOR,
+    DrJava.getConfig().addOptionListener( OptionConstants.DEBUG_THREAD_COLOR,
                                     new ThreadColorOptionListener());
         
     createPopupMenu();

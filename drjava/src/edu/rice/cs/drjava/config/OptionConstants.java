@@ -49,7 +49,7 @@ import java.awt.event.InputEvent;
 import java.awt.Toolkit;
 import edu.rice.cs.drjava.CodeStatus;
 
-public interface OptionConstants extends ConfigurationTool {
+public interface OptionConstants {
   
   // STATIC VARIABLES  
   
@@ -66,6 +66,9 @@ public interface OptionConstants extends ConfigurationTool {
   
   public static final VectorOption<File> EXTRA_CLASSPATH = 
     new ClasspathOption().evaluate("extra.classpath");
+  
+  public static final BooleanOption JAVAC_ALLOW_ASSERT =
+    new BooleanOption("javac.allow.assert", new Boolean(false));
   
   
   /* ---------- Color Options ---------- */

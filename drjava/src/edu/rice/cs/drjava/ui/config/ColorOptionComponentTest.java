@@ -61,7 +61,7 @@ public class ColorOptionComponentTest extends TestCase {
   
   protected void setUp() {
     _option = new ColorOptionComponent( OptionConstants.DEFINITIONS_NORMAL_COLOR, "Normal Color", new Frame());
-    DrJava.CONFIG.setSetting(OptionConstants.DEFINITIONS_NORMAL_COLOR, OptionConstants.DEFINITIONS_NORMAL_COLOR.getDefault());
+    DrJava.getConfig().resetToDefaults();
     
   }
   
@@ -75,7 +75,7 @@ public class ColorOptionComponentTest extends TestCase {
   
     assertEquals("Cancel (resetToCurrent) should not change the config", 
                  OptionConstants.DEFINITIONS_NORMAL_COLOR.getDefault(),
-                 DrJava.CONFIG.getSetting(OptionConstants.DEFINITIONS_NORMAL_COLOR));
+                 DrJava.getConfig().getSetting(OptionConstants.DEFINITIONS_NORMAL_COLOR));
     
   }
   
@@ -87,7 +87,7 @@ public class ColorOptionComponentTest extends TestCase {
     
     assertEquals("Apply (updateConfig) should write change to file", 
                  testColor,
-                 DrJava.CONFIG.getSetting(OptionConstants.DEFINITIONS_NORMAL_COLOR));
+                 DrJava.getConfig().getSetting(OptionConstants.DEFINITIONS_NORMAL_COLOR));
   }
   
   public void testApplyThenResetDefault() {
@@ -100,7 +100,7 @@ public class ColorOptionComponentTest extends TestCase {
     
     assertEquals("Apply (updateConfig) should write change to file", 
                  OptionConstants.DEFINITIONS_NORMAL_COLOR.getDefault(),
-                 DrJava.CONFIG.getSetting(OptionConstants.DEFINITIONS_NORMAL_COLOR));
+                 DrJava.getConfig().getSetting(OptionConstants.DEFINITIONS_NORMAL_COLOR));
   }
     
 }

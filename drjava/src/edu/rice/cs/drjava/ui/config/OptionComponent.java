@@ -97,7 +97,7 @@ public abstract class OptionComponent<T> {
    */
   public void resetToCurrent() {
     if (_option != null) {
-      setValue(DrJava.CONFIG.getSetting(_option));
+      setValue(DrJava.getConfig().getSetting(_option));
     }
   }
   

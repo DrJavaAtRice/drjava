@@ -90,8 +90,8 @@ public class KeyStrokeConfigPanel extends ConfigPanel {
     Iterator iter = _comps.iterator();
     while (iter.hasNext()) {
       KeyStrokeOptionComponent x = (KeyStrokeOptionComponent) iter.next();
-      if (!DrJava.CONFIG.getSetting(x.getOption()).equals(x.getKeyStroke())) {
-        DrJava.CONFIG.setSetting((Option)x.getOption(), KeyStrokeOption.NULL_KEYSTROKE);
+      if (!DrJava.getConfig().getSetting(x.getOption()).equals(x.getKeyStroke())) {
+        DrJava.getConfig().setSetting((Option)x.getOption(), KeyStrokeOption.NULL_KEYSTROKE);
       }
           
     }

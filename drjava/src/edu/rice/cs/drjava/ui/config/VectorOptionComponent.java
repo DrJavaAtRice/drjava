@@ -78,7 +78,7 @@ public class VectorOptionComponent extends OptionComponent<Vector<File>>
     resetToCurrent();
     _fileFilter = new ClasspathFilter();
     /*
-    Vector v = DrJava.CONFIG.getSetting(_option);
+    Vector v = DrJava.getConfig().getSetting(_option);
     String[] array = new String[v.size()];
     v.copyInto(array);
     //_list.setListData(array);
@@ -169,7 +169,7 @@ public class VectorOptionComponent extends OptionComponent<Vector<File>>
     for (int i = 0; i < _listModel.getSize(); i++) {
       current.addElement((File)_listModel.getElementAt(i));
     }
-    DrJava.CONFIG.setSetting(_option, current);
+    DrJava.getConfig().setSetting(_option, current);
     resetToCurrent();
     
     return true;
@@ -203,7 +203,7 @@ public class VectorOptionComponent extends OptionComponent<Vector<File>>
    * Shows a file chooser for adding a file to the element.
    */
   public void chooseFile() {
-    File workDir = DrJava.CONFIG.getSetting(WORKING_DIRECTORY);
+    File workDir = DrJava.getConfig().getSetting(WORKING_DIRECTORY);
         
     if (workDir == FileOption.NULL_FILE) {
       workDir = new File( System.getProperty("user.dir"));

@@ -88,6 +88,7 @@ import edu.rice.cs.drjava.model.compiler.*;
  * @version $Id$
  */
 public class SingleDisplayModel extends DefaultGlobalModel {
+  /**
   public static final String ABOUT_TEXT =
     "DrJava " + Version.getBuildTimeString() + "\n" +
     "Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)\n" +
@@ -118,10 +119,11 @@ public class SingleDisplayModel extends DefaultGlobalModel {
     "Except as contained in this notice, the name of Dyade shall not be used in advertising or otherwise to promote the sale, use or other dealings in this Software without prior written authorization from Dyade." +
     "\n\n" +
     "DrJava version: " + Version.getBuildTimeString() + "\n" +
-    "Configuration file: " + DrJava.PROPERTIES_FILE + "\n" +
-    "Properties: " + DrJava.CONFIG + "\n" +
+    "Configuration file: " + DrJava.getPropertiesFile() + "\n" +
+    "Properties: " + DrJava.getConfig() + "\n" +
      "JVM: " + System.getProperty("java.vm.vendor") + " " +
      System.getProperty("java.vm.version");
+  */
 
   /**
    * The active document pointer, which will never be null once
@@ -143,17 +145,31 @@ public class SingleDisplayModel extends DefaultGlobalModel {
   /**
    * Creates a SingleDisplayModel.
    *
-   * <OL>
-   * <LI>A new document is created to satisfy the invariant.
-   * </LI>
-   * <LI>The first document in the list is set as the active document.
-   * </LI>
-   * </OL>
-   *
+   * <ol>
+   *   <li>A new document is created to satisfy the invariant.
+   *   <li>The first document in the list is set as the active document.
+   * </ol>
    */
   public SingleDisplayModel() {
     super();
+    _init();
+  }
 
+  /**
+   * Creates a SingleDisplayModel using the Interactions JVM from
+   * the given model.  (Useful in test cases.)
+   * @param other A model with a valid Interactions JVM to use.
+   */
+  public SingleDisplayModel(DefaultGlobalModel other) {
+    super(other);
+    _init();
+  }
+
+  /**
+   * Initiates this SingleDisplayModel.  Should only be called
+   * from the constructor.
+   */
+  private void _init() {
     _selectionModel = new DefaultListSelectionModel();
     _selectionModel.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     _selectionModel.addListSelectionListener(new SelectionModelListener());
@@ -235,10 +251,10 @@ public class SingleDisplayModel extends DefaultGlobalModel {
 
   /**
    * Returns the text to be displayed in the About box.
-   */
+   *
   public String getAboutText() {
     return ABOUT_TEXT;
-  }
+  }*/
 
 
   /**

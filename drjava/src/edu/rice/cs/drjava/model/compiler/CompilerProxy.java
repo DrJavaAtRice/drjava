@@ -93,7 +93,7 @@ public class CompilerProxy implements CompilerInterface {
   }
 
   private void _recreateCompiler() {
-    File collectionsPath = DrJava.CONFIG.getSetting(OptionConstants.JSR14_COLLECTIONSPATH);
+    File collectionsPath = DrJava.getConfig().getSetting(OptionConstants.JSR14_COLLECTIONSPATH);
             
     StickyClassLoader loader =
       new StickyClassLoader(_newLoader,
@@ -105,7 +105,7 @@ public class CompilerProxy implements CompilerInterface {
       _realCompiler = CompilerRegistry.createCompiler(c);
      
       StringBuffer newclasspath = new StringBuffer();
-      Vector<File> cp = DrJava.CONFIG.getSetting(OptionConstants.EXTRA_CLASSPATH);
+      Vector<File> cp = DrJava.getConfig().getSetting(OptionConstants.EXTRA_CLASSPATH);
       //if(cp!=null) {
         Enumeration<File> enum = cp.elements();
         while(enum.hasMoreElements()) {
@@ -113,6 +113,10 @@ public class CompilerProxy implements CompilerInterface {
         }
       //}
       _realCompiler.setExtraClassPath(newclasspath.toString());
+      
+      boolean allowAssertions = 
+        DrJava.getConfig().getSetting(OptionConstants.JAVAC_ALLOW_ASSERT).booleanValue();
+      _realCompiler.setAllowAssertions(allowAssertions);
       
       if (_realCompiler.getClass().getName().equals("edu.rice.cs.drjava.model.compiler.JSR14Compiler") &&
           collectionsPath != FileOption.NULL_FILE) {
@@ -209,6 +213,13 @@ public class CompilerProxy implements CompilerInterface {
    */ 
   public void setExtraClassPath( String extraClassPath) {
     _realCompiler.setExtraClassPath(extraClassPath);
+  }
+  
+  /**
+   * Sets whether to allow assertions in Java 1.4.
+   */
+  public void setAllowAssertions(boolean allow) {
+    _realCompiler.setAllowAssertions(allow);
   }
   
   /**

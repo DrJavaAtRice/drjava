@@ -68,7 +68,7 @@ public class JavacFromSetLocation extends CompilerProxy
     }
     
     private static ClassLoader _getClassLoader() {
-        File loc = DrJava.CONFIG.getSetting(JAVAC_LOCATION);
+        File loc = DrJava.getConfig().getSetting(JAVAC_LOCATION);
         if (loc == FileOption.NULL_FILE) {
             throw new RuntimeException("javac location not set");
         }

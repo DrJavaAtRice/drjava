@@ -39,19 +39,21 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.ui;
 
-import  junit.framework.*;
+import junit.framework.*;
 
 import java.io.*;
 
-import  java.util.Vector;
-import  javax.swing.text.BadLocationException;
-import  junit.extensions.*;
+import java.util.Vector;
+import javax.swing.text.BadLocationException;
+import junit.extensions.*;
 import java.util.LinkedList;
 import javax.swing.text.Document;
 import javax.swing.text.DefaultStyledDocument;
 import javax.swing.ListModel;
 
 import edu.rice.cs.util.FileOps;
+import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.model.definitions.*;
 import edu.rice.cs.drjava.model.repl.*;
@@ -83,7 +85,7 @@ public class SingleDisplayModelTest extends GlobalModelTestCase {
    * Instantiates the SingleDisplayModel to be used in the test cases.
    */
   protected void createModel() {
-    _model = new SingleDisplayModel();
+    _model = new SingleDisplayModel(_originalModel);
   }
   
   /**
@@ -169,6 +171,13 @@ public class SingleDisplayModelTest extends GlobalModelTestCase {
     }
   }
 
+  /**
+   * Custom setup for SingleDisplayModel tests.
+   */
+  public void setUp() throws IOException {
+    super.setUp();
+  }
+  
   
   /**
    * Tests the invariant that at least one document is open
