@@ -33,7 +33,7 @@ import java.util.*;
 import koala.dynamicjava.tree.visitor.*;
 
 /**
- * This class represents the static method call nodes of the syntax tree
+ * This class represents the static method call nodes of the syntax tree.
  *
  * @author  Stephane Hillion
  * @version 1.0 - 1999/05/01
@@ -48,16 +48,18 @@ public class StaticMethodCall extends MethodCall {
   /**
    * The type on which this method call applies
    */
-  private ReferenceType methodType;
+  private Type methodType;
   
   /**
-   * Creates a new node
+   * Creates a new node. (Note: Type has been changed from ReferenceType so that it can accept an ArrayType as input.
+   * A better solution would be to make ArrayType extend ReferenceType. This would alleviate some problems with
+   * static method call being able to take in a primitive type)
    * @param typ   the type on which this method call applies
    * @param mn    the field name
    * @param args  the arguments. Can be null.
    * @exception IllegalArgumentException if typ is null or mn is null
    */
-  public StaticMethodCall(ReferenceType typ, String mn, List<Expression> args) {
+  public StaticMethodCall(Type typ, String mn, List<Expression> args) {
     this(typ, mn, args, null, 0, 0, 0, 0);
   }
   
@@ -73,7 +75,7 @@ public class StaticMethodCall extends MethodCall {
    * @param ec    the end column
    * @exception IllegalArgumentException if typ is null or mn is null
    */
-  public StaticMethodCall(ReferenceType typ, String mn, List<Expression> args,
+  public StaticMethodCall(Type typ, String mn, List<Expression> args,
                           String fn, int bl, int bc, int el, int ec) {
     super(mn, args, fn, bl, bc, el, ec);
     
@@ -85,7 +87,7 @@ public class StaticMethodCall extends MethodCall {
   /**
    * Returns the type on which this method call applies
    */
-  public ReferenceType getMethodType() {
+  public Type getMethodType() {
     return methodType;
   }
   

@@ -39,7 +39,7 @@ public class NoSuchFunctionException extends Exception {
      * Constructs a <code>NoSuchFunctionException</code> without a detail message.
      */
     public NoSuchFunctionException() {
-	super();
+ super();
     }
     
     /**
@@ -47,6 +47,6 @@ public class NoSuchFunctionException extends Exception {
      * @param s the detail message.
      */
     public NoSuchFunctionException(String s) {
-	super(s);
+ super(s);
     }
 }

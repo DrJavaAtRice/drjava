@@ -84,7 +84,7 @@ public class EvaluationVisitorTest extends TestCase {
     }
     catch (ExceptionReturnedException ere) {
       fail("Should have been able to declare variables for interpreter.");
-    }
+    } 
   }
   private AssignExpression _parseAssignExpression(String text) {
     JavaCCParserFactory parserFactory = new JavaCCParserFactory();

@@ -36,6 +36,7 @@ import koala.dynamicjava.interpreter.error.*;
 import koala.dynamicjava.interpreter.modifier.*;
 import koala.dynamicjava.interpreter.throwable.*;
 import koala.dynamicjava.tree.*;
+import koala.dynamicjava.tree.tiger.generic.*;
 import koala.dynamicjava.tree.visitor.*;
 import koala.dynamicjava.util.*;
 
@@ -90,7 +91,294 @@ public class EvaluationVisitor extends VisitorObject<Object> {
    * @param node the node to visit
    */
   public Object visit(ForEachStatement node){
-    /* to be filled in shortly */
+    Set vars = (Set)node.getProperty(NodeProperties.VARIABLES);
+      context.enterScope(vars);
+        
+    FormalParameter formalparam = node.getParameter();
+    Expression collection = node.getCollection();
+    Class collTypeClass = NodeProperties.getType(collection);
+    Node body = node.getBody();
+    
+    /*examples*/
+    /*
+     * Collection<String> c = ... ;
+     * for(String s: c){
+     *   ...
+     * }
+     * translates to:
+     * for(Iterator<E> #i = Expression.iterator(); #i.hasNext(); ){
+     *    FormalParameter = #i.next();
+     *    statement...
+     * }
+     * Collection c = ... ;
+     * for(Object o: c){
+     *   String s = (String) o;
+     *   ...
+     * }
+     * translates to:
+     * for(Iterator #i = Expression.iterator(); #i.hasNext(); ){
+     *    FormalParameter = #i.next();
+     *    statement...
+     * }
+     * 
+     * int sum(int[] a){
+     *    int sum = 0;
+     *    for(int i:a){
+     *      sum+=i;
+     *    return sum
+     * }
+     * translates to:
+     * for(int #i=0; #i<a.length; #i++){
+     *   FormalParameter=a[#i];
+     *   statement...
+     * }
+     * ============================================================================
+     */
+    Method m;
+    Class c;
+    Expression exp;
+    /************************************************************************************/
+    /**  create an initialization  ******************************************************/
+    /************************************************************************************/
+
+    VariableDeclaration init;
+    if(collTypeClass.isArray()){
+      exp = new IntegerLiteral("0");
+
+      exp.setProperty(NodeProperties.TYPE, int.class);
+      
+      init = new VariableDeclaration(false,
+                                     new IntType(),
+                                     node.getVars().get(0),
+                                     exp);
+      
+      c = NodeProperties.getType(exp);
+      init.setProperty(NodeProperties.TYPE, c);
+      init.getType().setProperty(NodeProperties.TYPE, c);
+    }else{
+      exp = new ObjectMethodCall(node.getCollection(), "iterator", null,
+                                                  "", 0, 0, 0, 0);
+      /* these next fields refer to fileame and row/col of source
+       * but there isn't any source, b/c i'm making it... */
+      
+      /* set properties of exp */
+      m = null;
+      try {
+        m = context.lookupMethod(((ObjectMethodCall)exp).getExpression(), "iterator", Constants.EMPTY_CLASS_ARRAY);
+      }catch(NoSuchMethodException e){
+        /* this is very bad */
+        /* should never happen, b/c everything has typechecked etc and been ok'd */
+      }catch(MethodModificationError e){
+        /* ths is very bad */
+        /* should never happen, b/c everything has typechecked etc and been ok'd */
+      } 
+      exp.setProperty(NodeProperties.METHOD, m);
+      exp.setProperty(NodeProperties.TYPE,   m.getReturnType());
+      
+      /* done setting properties */
+      IdentifierToken javaId = new Identifier("java");
+      IdentifierToken utilId = new Identifier("util");
+      IdentifierToken iteratorId = new Identifier("Iterator");
+      List<IdentifierToken> ids = new LinkedList<IdentifierToken>();
+      ids.add(javaId); ids.add(utilId); ids.add(iteratorId);
+      
+      
+      
+      List<List<? extends koala.dynamicjava.tree.Type>> typeArgs = new LinkedList<List<? extends koala.dynamicjava.tree.Type>>();
+      List<koala.dynamicjava.tree.Type> arg1 = new LinkedList<koala.dynamicjava.tree.Type>();
+      arg1.add(formalparam.getType());
+      typeArgs.add(arg1);
+      init = new VariableDeclaration(false,
+                                     new GenericReferenceType(ids,typeArgs),
+                                     node.getVars().get(0),
+                                     exp);
+      
+      c = NodeProperties.getType(exp);
+      init.setProperty(NodeProperties.TYPE, c);
+      init.getType().setProperty(NodeProperties.TYPE, c);
+      
+    }
+      
+      
+    /************************************************************************************/
+    /**  visit initialization  **********************************************************/
+    /************************************************************************************/
+    init.acceptVisitor(this);
+    //everything is initialzized
+    
+
+    
+    
+    
+    
+    
+    
+    /************************************************************************************/
+    /**  create a condition  ************************************************************/
+    /************************************************************************************/
+    Node condition;
+    if(collTypeClass.isArray()){
+      // make lhs
+      IdentifierToken newforcounter = new Identifier(node.getVars().get(0));
+      List<IdentifierToken> listForQualifiedName = new LinkedList<IdentifierToken>();
+      listForQualifiedName.add(newforcounter);
+      QualifiedName lhs = new QualifiedName(listForQualifiedName);
+      
+      
+      
+      // make rhs
+      LinkedList<Expression> argsToGetLength = new LinkedList<Expression>();
+      argsToGetLength.add(collection);
+
+      /*
+      newforcounter = new Identifier("Array");
+      listForQualifiedName = new LinkedList<IdentifierToken>();
+      listForQualifiedName.add(newforcounter);
+      QualifiedName qf = new QualifiedName(listForQualifiedName);
+      qf.setProperty(NodeProperties.TYPE, Array.class);
+      ObjectMethodCall rhs = new ObjectMethodCall(qf, "getLength", argsToGetLength,
+                                       "", 0, 0, 0, 0);
+      */
+
+      
+      /* since we're finding the length of the array, the dimension is always 1 */
+      ArrayType art = new ArrayType(formalparam.getType(), 1);
+      
+      StaticMethodCall rhs = new StaticMethodCall(art, "getLength", argsToGetLength);
+      
+      
+      m = null;
+      try {
+        Class[] lookupArgs= {Object.class};
+        m = Array.class.getMethod("getLength", lookupArgs);
+      }catch(NoSuchMethodException e){
+        /* this is very bad */
+        /* should never happen, b/c everything has typechecked etc and been ok'd */
+      }catch(MethodModificationError e){
+        /* ths is very bad */
+        /* should never happen, b/c everything has typechecked etc and been ok'd */
+      } 
+      
+      rhs.setProperty(NodeProperties.METHOD, m);
+      rhs.setProperty(NodeProperties.TYPE,   m.getReturnType());
+      
+      
+      
+      condition = new LessExpression(lhs, rhs);
+      condition.setProperty(NodeProperties.TYPE,   new BooleanType());
+      
+      /* 4-17-04 */
+      /* maybe i need to set the type of hte condition node? */
+      
+      
+      
+    }else{
+      IdentifierToken newforcounter = new Identifier(node.getVars().get(0));
+      List<IdentifierToken> listForQualifiedName = new LinkedList<IdentifierToken>();
+      listForQualifiedName.add(newforcounter);
+      QualifiedName qf = new QualifiedName(listForQualifiedName);
+      condition = new ObjectMethodCall(qf, "hasNext", null,
+                                       "", 0, 0, 0, 0);
+      /* these next fields refer to fileame and row/col of source
+       * but there isn't any source, b/c i'm making it... */
+      /* set properties of condition */
+      Method m2 = null;
+      try {
+        m2 = context.lookupMethod(exp, "hasNext", Constants.EMPTY_CLASS_ARRAY);
+      }catch(NoSuchMethodException e){
+        /* this is very bad */
+        /* should never happen, b/c everything has typechecked etc and been ok'd */
+      }catch(MethodModificationError e){
+        /* ths is very bad */
+        /* should never happen, b/c everything has typechecked etc and been ok'd */
+      }
+      condition.setProperty(NodeProperties.METHOD, m2);
+      condition.setProperty(NodeProperties.TYPE,   m2.getReturnType());
+      /* done setting properties */
+    }
+
+    
+    
+    /************************************************************************************/
+    /**  create an update statement  ****************************************************/
+    /************************************************************************************/
+    Node statement1;
+    Expression assignment = null;
+    if(collTypeClass.isArray()){
+      Identifier counterName = new Identifier(node.getVars().get(0));
+      LinkedList<IdentifierToken> listForQualifiedName = new LinkedList<IdentifierToken>();
+      listForQualifiedName.add(counterName);
+      QualifiedName arg = new QualifiedName(listForQualifiedName);
+      VariableModifier mod = new VariableModifier(arg, int.class);
+      arg.setProperty(NodeProperties.MODIFIER, mod);
+      statement1 = new AddAssignExpression(arg, new IntegerLiteral("1"));
+      statement1.setProperty(NodeProperties.TYPE, int.class);
+      
+      Expression arrayaccess = new ArrayAccess(collection, arg);
+
+      listForQualifiedName = new LinkedList<IdentifierToken>();
+      listForQualifiedName.add(new Identifier(formalparam.getName()));
+      arg = new QualifiedName(listForQualifiedName);
+      mod = new VariableModifier(arg, collTypeClass.getComponentType());
+      arg.setProperty(NodeProperties.MODIFIER, mod);
+      assignment  = new SimpleAssignExpression(arg, arrayaccess);
+      assignment.setProperty(NodeProperties.TYPE, collTypeClass.getComponentType());
+    }else{
+      IdentifierToken newforcounter = new Identifier(node.getVars().get(0));
+      List<IdentifierToken> listForQualifiedName = new LinkedList<IdentifierToken>();
+      listForQualifiedName.add(newforcounter);
+      QualifiedName qf = new QualifiedName(listForQualifiedName);
+      ObjectMethodCall next = new ObjectMethodCall(qf, "next", null,
+                                                   "", 0, 0, 0, 0);
+      /* these next fields refer to fileame and row/col of source
+       * but there isn't any source, b/c i'm making it... */
+      /* set properties of next */
+      Method m3 = null;
+      try {
+        m3 = context.lookupMethod(exp, "next", Constants.EMPTY_CLASS_ARRAY);
+      }catch(NoSuchMethodException e){
+        /* this is very bad */
+        /* should never happen, b/c everything has typechecked etc and been ok'd */
+      }catch(MethodModificationError e){
+        /* ths is very bad */
+        /* should never happen, b/c everything has typechecked etc and been ok'd */
+      }
+      next.setProperty(NodeProperties.METHOD, m3);
+      next.setProperty(NodeProperties.TYPE,   m3.getReturnType());
+      /* done setting properties */
+      
+      
+      statement1 = new VariableDeclaration(formalparam.isFinal(), 
+                                              formalparam.getType(), 
+                                              formalparam.getName(), 
+                                              next);
+      statement1.setProperty(NodeProperties.TYPE, NodeProperties.getType(next));
+      c = NodeProperties.getType(next);
+      statement1.setProperty(NodeProperties.TYPE, c);
+      ((VariableDeclaration)statement1).getType().setProperty(NodeProperties.TYPE, c);
+    }
+    
+    
+    
+    
+    /************************************************************************************/
+    /**  evaluate the foreach  **********************************************************/
+    /************************************************************************************/
+    
+    
+    
+    while(((Boolean)condition.acceptVisitor(this)).booleanValue()){
+      /* if the foreach uses an array, then it will have an assignment instruction that must be run */
+      /* otherwise it will be null */
+      if(assignment != null){
+        assignment.acceptVisitor(this);
+      }
+      statement1.acceptVisitor(this);
+      body.acceptVisitor(this);
+    }
+    
+    context.leaveScope();
+    
     return null;
   }
   
@@ -505,7 +793,6 @@ public class EvaluationVisitor extends VisitorObject<Object> {
    */
   public Object visit(ObjectMethodCall node) {
     Expression exp = node.getExpression();
-
     // Evaluate the receiver first
     Object obj  = exp.acceptVisitor(this);
 
@@ -536,7 +823,8 @@ public class EvaluationVisitor extends VisitorObject<Object> {
             Object p  = it.next().acceptVisitor(this);
             args[i] = performCast(typs[i], p);
             i++;
-          } else { // Pass an array with all the remaining arguments of 'it'
+          } else { 
+            /* Pass an array with all the remaining arguments of 'it' */
             args[typs.length-1] = buildArrayOfRemainingArgs(typs, larg.size(), it );
           }
         }

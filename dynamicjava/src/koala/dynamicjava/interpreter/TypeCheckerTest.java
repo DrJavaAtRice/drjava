@@ -116,10 +116,15 @@ public class TypeCheckerTest extends TestCase {
   ////// Internal Initialization ////////////////////////
   
   /**
-   * The global context we are using.
+   * The global context we are using for the type checker.
    */
   private GlobalContext _globalContext;
-  
+
+    /**
+   * The global context we are using for the name visitor.
+   */
+  private GlobalContext _globalNameContext;
+
   /**
    * The type checker we are testing.
    */
@@ -154,9 +159,15 @@ public class TypeCheckerTest extends TestCase {
     _globalContext.define("B", Boolean.class);
     _globalContext.define("I", int[].class);
 
+    _globalNameContext = new GlobalContext(new TreeInterpreter(parserFactory));
+    _globalNameContext.define("x", int.class);
+    _globalNameContext.define("X", Integer.class);
+    _globalNameContext.define("B", Boolean.class);
+    _globalNameContext.define("b", boolean.class);
+   
+    
     //makeTypeChecker will return the correct type checker depending on the current runtime version of Java
     _typeChecker = AbstractTypeChecker.makeTypeChecker(_globalContext);
-
     _interpreter = new TreeInterpreter(parserFactory);
     
     try {
@@ -261,9 +272,11 @@ public class TypeCheckerTest extends TestCase {
    * Tests the for loop's condition statement
    */
   public void testVisitForStatement() throws InterpreterException {
+    NameVisitor nv = new NameVisitor(_globalNameContext);
     String text = "for(int i=0; new Boolean(i<1); i++);";
     Node stmt = _parseCode(text).get(0);
     
+    stmt.acceptVisitor(nv);
     stmt.acceptVisitor(_typeChecker);
 
     String expected = "(koala.dynamicjava.tree.ObjectMethodCall: booleanValue null (koala.dynamicjava.tree.SimpleAllocation: (koala.dynamicjava.tree.ReferenceType: Boolean) [(koala.dynamicjava.tree.LessExpression: (koala.dynamicjava.tree.QualifiedName: i) (koala.dynamicjava.tree.IntegerLiteral: 1 1 int))]))";
@@ -272,6 +285,113 @@ public class TypeCheckerTest extends TestCase {
 
     _interpretText(text);
   }
+  
+  /**
+   * test type checking of collection/array in for each statements
+   */
+  public void testVisitForEachStatementStringVector() throws InterpreterException {
+    NameVisitor nv = new NameVisitor(_globalNameContext);
+    String text = "java.util.Vector<String> ss = new java.util.Vector<String>();for(String s: ss);";
+    Node stmt = _parseCode(text).get(0);
+    
+    stmt.acceptVisitor(nv);
+    stmt.acceptVisitor(_typeChecker);
+    //throws exception if types don't check
+  }
+  
+  public void testVisitForEachStatementStringArrayError() throws InterpreterException {
+    NameVisitor nv = new NameVisitor(_globalNameContext);
+    String text = "String[] ss = {\"asf\",\"qwer\"};for(Integer s: ss);";
+    List<Node> stmts = _parseCode(text);
+    Node stmt;
+    try{
+      for(int i=0;i<stmts.size();i++){
+        stmt = stmts.get(i);
+        stmt.acceptVisitor(nv);
+        stmt.acceptVisitor(_typeChecker);
+      }
+     fail("For each statement with string collection and Integer formal parameter should not type check.");
+    }
+    catch(ExecutionError e){
+    }
+  }
+
+  
+  public void testVisitForEachStatementStringArrayNarrow() throws InterpreterException {
+    NameVisitor nv = new NameVisitor(_globalNameContext);
+    String text = "String[] ss = {\"asf\",\"qwer\"};for(Object s: ss);";
+    List<Node> stmts = _parseCode(text);
+    Node stmt;
+    for(int i=0;i<stmts.size();i++){
+      stmt = stmts.get(i);
+      stmt.acceptVisitor(nv);
+      stmt.acceptVisitor(_typeChecker);
+    }
+  }
+/*
+  public void testVisitForEachStatementStringArrayUnbox() throws ExceptionReturnedException {
+    String text = "Integer[] ss = {1,2};for(int s: ss);";
+    List<Node> stmts = _parseCode(text);
+    Node stmt;
+    for(int i=0;i<stmts.size();i++){
+      stmt = stmts.get(i);
+      stmt.acceptVisitor(_typeChecker);
+    }
+  }
+*/
+  
+  public void testVisitForEachStatementStringArray() throws InterpreterException {
+    NameVisitor nv = new NameVisitor(_globalNameContext);
+    String text = "String[] ss = {\"asf\",\"qwer\"};for(String s: ss);";
+    List<Node> stmts = _parseCode(text);
+    Node stmt;
+    for(int i=0;i<stmts.size();i++){
+      stmt = stmts.get(i);
+      stmt.acceptVisitor(nv);
+      stmt.acceptVisitor(_typeChecker);
+    }
+  }
+  /*
+  public void testVisitForEachStatementStringVectorError() throws ExceptionReturnedException {
+    String text = "java.util.Vector<String> ss = new java.util.Vector<String>();for(Integer s: ss);";
+    List<Node> stmts = _parseCode(text);
+    Node stmt;
+    try{
+      for(int i=0;i<stmts.size();i++){
+        stmt = stmts.get(i);
+        stmt.acceptVisitor(_typeChecker);
+      }
+     fail("For each statement with string collection and Integer formal parameter should not type check.");
+    }
+    catch(ExecutionError e){
+    }
+  }
+  */
+  
+  
+  
+  public void testVisitForEachStatementObjectVector() throws InterpreterException {
+    NameVisitor nv = new NameVisitor(_globalNameContext);
+    String text = "java.util.Vector ss = new java.util.Vector();for(Object s: ss);";
+    Node stmt = _parseCode(text).get(0);
+    
+    stmt.acceptVisitor(nv);
+    stmt.acceptVisitor(_typeChecker);
+    //throws exception if types don't check
+  }
+  
+  public void testVisitForEachStatementStringVector2() throws InterpreterException {
+    NameVisitor nv = new NameVisitor(_globalNameContext);
+    String text = "java.util.Vector ss = new java.util.Vector();for(String s: ss);";
+    Node stmt = _parseCode(text).get(0);
+    
+    stmt.acceptVisitor(nv);
+    stmt.acceptVisitor(_typeChecker);
+    //throws exception if types don't check
+  }
+  
+  
+  
   
   public void testSwitchStatement() throws InterpreterException {
     String text = "switch (new Integer(1)) { }";
@@ -550,8 +670,7 @@ public class TypeCheckerTest extends TestCase {
   }
   
   //////////// Shift Assignments ////////////////////////
-
-  
+ 
   /**
    * Tests the <<= operation.
    */
@@ -1105,13 +1224,11 @@ public class TypeCheckerTest extends TestCase {
   public void testObjectMethodCall() throws InterpreterException {
     String text = "X.equals(0);";
     List<Node> list = _parseCode(text);
-    System.out.println(list);
     MethodCall exp = (MethodCall)list.get(0);
     Class type = exp.acceptVisitor(_typeChecker);
     Method m = (Method)exp.getProperty(NodeProperties.METHOD);
     assertEquals("the method's parameter type should have been int", Object.class, m.getParameterTypes()[0]);
     Object res = _interpretText(text);
-    System.out.println(res instanceof Boolean);
   }
   
   /**
@@ -1121,20 +1238,14 @@ public class TypeCheckerTest extends TestCase {
    */
   public void testStaticMethodCall() throws InterpreterException {
     String text = "Integer.toString(new Integer(1));";
-    /**
-     * This code was commented out because the static method call relies on the
-     * name visitor to recognize that the preceding expression is a class name
-     * and convert it from an object method call to a static method call.  This 
-     * would require some extra initialization that I have not done yet.
-     * - Jonathan Lugo 5/19/2004
-     */
-//    List<Node> list = _parseCode(text);
-//    System.out.println(list);
-//    MethodCall exp = (MethodCall)list.get(0);
-//    Class type = exp.acceptVisitor(_typeChecker);
-//    Method m = (Method)exp.getProperty(NodeProperties.METHOD);
-//    assertEquals("the method's parameter type should have been int", int.class, m.getParameterTypes()[0]);
+
+    List<Node> list = _parseCode(text);
+    NameVisitor nv = new NameVisitor(_globalNameContext);
+    Node exp = (MethodCall)list.get(0);
+    exp = exp.acceptVisitor(nv);
+    Class type = exp.acceptVisitor(_typeChecker);
+    Method m = (Method)exp.getProperty(NodeProperties.METHOD);
+    assertEquals("the method's parameter type should have been int", int.class, m.getParameterTypes()[0]);
     Object res = _interpretText(text);
-    System.out.println(res instanceof String);
   }
 }

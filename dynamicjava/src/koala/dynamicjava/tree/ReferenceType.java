@@ -136,6 +136,6 @@ public class ReferenceType extends Type {
   }
 
   protected String toStringHelper() {
-	  return getRepresentation();
+   return getRepresentation();
   }
 }

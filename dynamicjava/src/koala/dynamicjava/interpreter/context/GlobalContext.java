@@ -748,7 +748,6 @@ public class GlobalContext extends VariableContext implements Context {
         }
       } catch (ClassNotFoundException e) {
       } catch (NoClassDefFoundError e) {
-        //       System.out.println("NoClassDefFoundError: " + e);
       }
 
 

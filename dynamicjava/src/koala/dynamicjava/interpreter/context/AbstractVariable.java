@@ -27,6 +27,10 @@ public abstract class AbstractVariable {
   public int hashCode() {
     return name.hashCode();
   }
+  
+  public String toString(){
+    return name;
+  }
 }
 
 /**

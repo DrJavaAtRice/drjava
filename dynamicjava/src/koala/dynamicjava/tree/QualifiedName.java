@@ -29,7 +29,7 @@
 package koala.dynamicjava.tree;
 
 import java.util.*;
-
+import koala.dynamicjava.interpreter.*;
 import koala.dynamicjava.tree.visitor.*;
 
 /**

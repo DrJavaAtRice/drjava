@@ -149,6 +149,82 @@ public class DynamicjavaTest extends TestCase {
     assertEquals("f2 should be 7.3", new Float(7.3), interpret(testString));  
   }
   
+  public void testFor(){
+    testString = 
+      "import java.util.*;"+
+      "List<Double> l = new LinkedList<Double>();"+
+      "l.add(new Double(5.5));"+
+      "l.add(new Double(7.3));"+
+      "List<Double> l2 = new LinkedList<Double>();" +
+      "for(Iterator<Double> i = l.iterator();i.hasNext();){"+
+      "Double d = i.next();" +
+      "l2.add(d);" +
+      "}" +
+      "l2.get(0);";
+    
+    assertEquals("first of l2 should be 5.5", new Double(5.5), interpret(testString));
+    
+  }
+  
+  public void testForEachGeneric(){
+    testString = 
+      "import java.util.*;"+
+      "List<Double> l = new LinkedList<Double>();"+
+      "l.add(new Double(5.5));"+
+      "l.add(new Double(7.3));"+
+      "List<Double> l2 = new LinkedList<Double>();" +
+      "for(Double d: l){"+
+      "l2.add(d);" +
+      "}" +
+      "l2.get(0);";
+    
+    assertEquals("first of l2 should be 5.5", new Double(5.5), interpret(testString));
+  }
+
+  
+  public void testForEachNonGeneric(){
+    testString = 
+      "import java.util.*;"+
+      "List l = new LinkedList();"+
+      "l.add(new Double(5.5));"+
+      "l.add(new Double(7.3));"+
+      "List l2 = new LinkedList();" +
+      "for(final Object d: l){"+
+      "l2.add(d);" +
+      "}" +
+      "l2.get(0);";
+    
+    assertEquals("first of l2 should be 5.5", new Double(5.5), interpret(testString));
+  }
+
+  public void testForEachWithArray(){
+    testString = 
+      "import java.util.*;"+
+      "import java.lang.reflect.Array;" +
+      "Double[] l = {new Double(5.5), new Double(7.3)};"+
+      "Double l2 = new Double(0);" +
+      "for(Double d: l){"+
+      "l2 = new Double(l2.doubleValue() + d.doubleValue());" +
+      "}" +
+      "l2;";
+    
+    assertEquals("l2 should be 12.8", new Double(12.8), interpret(testString));
+  }
+  
+  public void testForEachWithArrayNarrow(){
+    testString = 
+      "import java.util.*;"+
+      "import java.lang.reflect.Array;" +
+      "Double[] l = {new Double(5.5), new Double(7.3)};"+
+      "Double l2 = new Double(0);" +
+      "for(Object d: l){"+
+      "l2 = new Double(l2.doubleValue() + ((Double)d).doubleValue());" +
+      "}" +
+      "l2;";
+    
+    assertEquals("l2 should be 12.8", new Double(12.8), interpret(testString));
+  }
+  
   // Test with Generics.
   //  public void testGenericList(){ /**/
   //    testString = 

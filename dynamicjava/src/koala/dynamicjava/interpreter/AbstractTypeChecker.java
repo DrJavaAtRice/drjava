@@ -2183,9 +2183,9 @@ public abstract class AbstractTypeChecker extends VisitorObject<Class> {
    * @param node the node to visit
    */
   public Class visit(PostIncrement node) {
+
     Node exp = node.getExpression();
     Class c  = exp.acceptVisitor(this);
-
     // The type of the subexpression must be numeric
     if (!(c.isPrimitive() || _isBoxingType(c)) ||
         c == void.class     ||

@@ -58,21 +58,21 @@ public class MethodModificationError extends Error {
      * @param m the method found
      */
     public MethodModificationError(Expression e, Method m) {
-	expression = e;
-	method     = m;
+ expression = e;
+ method     = m;
     }
     
     /**
      * Returns the expression
      */
     public Expression getExpression() {
-	return expression;
+ return expression;
     }
     
     /**
      * Returns the method
      */
     public Method getMethod() {
-	return method;
+ return method;
     }
 }

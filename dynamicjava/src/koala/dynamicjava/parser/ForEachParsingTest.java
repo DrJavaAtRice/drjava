@@ -34,6 +34,14 @@ public class ForEachParsingTest extends TestCase {
       
       assertEquals("[(koala.dynamicjava.tree.ForEachStatement: (koala.dynamicjava.tree.FormalParameter: false (koala.dynamicjava.tree.ReferenceType: Integer) i) (koala.dynamicjava.tree.QualifiedName: crazyCollection) (koala.dynamicjava.tree.EmptyStatement: ))]", statements.toString());
   }
+  
+  
+  public void testFoo() throws ParseException{
+      Parser p = new Parser(new StringReader("import java.lang.reflect.Array;" + "Array.getLength(asdf);"));
+      List    statements = p.parseStream();
+      ListIterator    it = statements.listIterator();
+      
+  }
 
   /* tests the basic syntax of a foreach statement
    * includes a final keyword for the parameter

@@ -79,59 +79,54 @@ public class TypeChecker15 extends AbstractTypeChecker {
    * @param node the node to visit
    */
   public Class visit(ForEachStatement node){
-    /* to be filled in shortly */
+    // Enter a new scope
+    context.enterScope();
+    context.define(node.getVars().get(0), null);
+    context.define(node.getVars().get(1), null);
+    
+    Class paramTypeClass;
+    Class collTypeClass;
 
-  
-        /*examples*/
-    /*
-     * Collection<String> c = ... ;
-     * for(String s: c){
-     *   ...
-     * }
-     * translates to:
-     * for(Iterator<E> #i = Expression.iterator(); #i.hasNext(); ){
-     *    FormalParameter = #i.next();
-     *    statement...
-     * }
-     * 
-     * 
-     * create a variable name #i
-     * get the generic type of the collection and create an iterator with the
-     *   same generic type and give it the name #i
-     * create an expressio for #i.iterator();
-     * create an AssignmentExpression for the iterator and the expression.iterator
-     * create an expression for #i.hasNext();
-     * create an expression for #i.next();
-     * create an assignemntExpression for FormalParameter = #i.next();
-     * create a new for body expression and add the assigment to it's first
-     * create a new for statement.
-     * 
-     * ============================================================================
-     * 
-     * Collection c = ... ;
-     * for(Object o: c){
-     *   String s = (String) o;
-     *   ...
-     * }
-     * translates to:
-     * for(Iterator #i = Expression.iterator(); #i.hasNext(); ){
-     *    FormalParameter = #i.next();
-     *    statement...
-     * }
-     * 
-     * int sum(int[] a){
-     *    int sum = 0;
-     *    for(int i:a){
-     *      sum+=i;
-     *    return sum
-     * }
-     * translates to:
-     * for(int #i=0; #i<a.length; #i++){
-     *   FormalParameter=a[#i];
-     *   statement...
-     * }
-     */
-return null;
+    FormalParameter param = node.getParameter();
+    Expression coll = node.getCollection();
+    Node body = node.getBody();
+    Class component;
+    
+    paramTypeClass = param.acceptVisitor(this);
+    collTypeClass = coll.acceptVisitor(this);
+    body.acceptVisitor(this);
+    
+    /*for array access */
+    /* remember to type check potential unbox/box situations */
+    /* ie, an array of ints -> Integer or array of Integers -> int */
+    if(collTypeClass.isArray()){
+      component = collTypeClass.getComponentType();
+      if(paramTypeClass.isAssignableFrom(component)){
+        // noop, we typed checked ok.
+      }else{
+        // error, the parameter is not the same type as the collection items
+        throw new ExecutionError("collection.type", node);
+      }
+      
+    }else if(java.util.Collection.class.isAssignableFrom(collTypeClass)){
+      // the collection is a Collection.
+      // we still need to check it's component type
+      
+    }else{
+      throw new ExecutionError("collection.type", node);
+    }
+    
+    
+    //---------------------------------------------
+    
+    node.getBody().acceptVisitor(this);
+
+    // Leave the current scope and store the defined variables
+    // (a map of String-Class mappings) in the "variables" property
+    node.setProperty(NodeProperties.VARIABLES, context.leaveScope());
+    
+    
+  return null;
   }
 
   /**
