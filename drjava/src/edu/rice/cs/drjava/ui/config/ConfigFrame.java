@@ -781,7 +781,11 @@ public class ConfigFrame extends JFrame {
                                                   "Whether to clear the Console output after resetting the Interactions Pane."));
     panel.addComponent(new BooleanOptionComponent(OptionConstants.ALLOW_PRIVATE_ACCESS, "Allow Access of Private Members in Interactions Pane", this,
                                                   "Whether to allow users to access private (and protected) fields and methods."));
-
+    if(CodeStatus.DEVELOPMENT){
+      panel.addComponent(new StringOptionComponent(OptionConstants.JVM_ARGS, "JVM Args", this,
+                                                   "The command-line arguments to pass to the Interpreter JVM."));
+    }
+    
     panel.displayComponents();
   }
 

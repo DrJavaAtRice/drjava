@@ -238,4 +238,16 @@ public final class RecentFileManagerTest extends TestCase {
     assertEquals("should only have two files", 2, vector.size());
     assertTrue("should not contain tempFile", !(vector.contains(tempFile)));
   }
+
+  /**
+   * Verifies that the presentation names for the directory filter are correct.
+   */
+  public void testDirectoryFilterDescription() {
+    DirectoryFilter f = new DirectoryFilter();
+    assertEquals("Should have the correct description.",
+                 "Directories", f.getDescription());
+    f = new DirectoryFilter("Other directories");
+    assertEquals("Should have allowed an alternate description.",
+                 "Other directories", f.getDescription());
+  }
 }

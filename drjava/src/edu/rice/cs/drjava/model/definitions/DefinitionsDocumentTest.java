@@ -46,6 +46,7 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.model.definitions;
 
 import javax.swing.undo.CannotUndoException;
+import javax.swing.undo.CannotRedoException;
 import javax.swing.text.*;
 import java.util.Vector;
 
@@ -1276,6 +1277,28 @@ public final class DefinitionsDocumentTest extends TestCase
     assertEquals("Should have inserted the text properly.", text, 
                  _defModel.getText(0, _defModel.getLength()));
     
+    // Indent the lines, so as to trigger a nested compond edit
+    _defModel.indentLines(0, _defModel.getLength());
+    assertEquals("Should have indented correctly.", indented, 
+                 _defModel.getText(0, _defModel.getLength()));
+    
+//    // Try to undo the nested edit
+//    try {
+//      _defModel.getUndoManager().undo();
+//      fail("Should not have allowed undoing a nested edit.");
+//    }
+//    catch (CannotUndoException e) {
+//      // Correct: cannot undo a nested edit
+//    }
+//
+//    try {
+//      _defModel.getUndoManager().redo();
+//      fail("Should not have allowed redoing a nested edit.");
+//    }
+//    catch (CannotRedoException cre) {
+//      // Correct: cannot redo a nested edit
+//    }
+//    
     // Try end the compound edit with a wrong key
     try {
       _defModel.getUndoManager().endCompoundEdit(key + 1);

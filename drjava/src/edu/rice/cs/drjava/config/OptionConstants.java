@@ -1086,5 +1086,9 @@ public interface OptionConstants {
    */
   public static final NonNegativeIntegerOption DEBUG_PANEL_HEIGHT =
     new NonNegativeIntegerOption("debug.panel.height",new Integer(0));
-  
+
+  /**
+   * The command-line arguments to be passed to the interpreter jvm.
+   */
+  public static final StringOption JVM_ARGS = new StringOption("jvm.args", "");
 }

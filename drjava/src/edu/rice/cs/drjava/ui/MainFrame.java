@@ -1511,6 +1511,28 @@ public class MainFrame extends JFrame implements OptionConstants {
       }
     });
 
+    config.addOptionListener
+      (JVM_ARGS, new OptionListener<String>() {
+      public void optionChanged(OptionEvent<String> oe) {
+        if(oe.value != "") {
+          int result = JOptionPane.showConfirmDialog(_configFrame,
+                                                     "Changing JVM Args is an advanced option, bad command line arguments may break DrJava.\n"+
+                                                     "Are you sure you want to set this option?\n"+
+                                                     "(You will have to reset the interactions pane before changes take effect.)",
+                                                     "Confirm JVM Arguments", JOptionPane.YES_NO_OPTION);
+          if(result!=JOptionPane.YES_OPTION) {
+            config.setSetting(oe.option, "");
+          }
+        }
+      }
+    });
+
+    config.addOptionListener(ALLOW_PRIVATE_ACCESS, new OptionListener<Boolean>() {
+      public void optionChanged(OptionEvent<Boolean> oce) {
+        _model.getInteractionsModel().setPrivateAccessible(oce.value.booleanValue());
+      }
+    });
+
     // Initialize breakpoint highlights hashtable, for easy removal of highlights
     _breakpointHighlights = new gj.util.Hashtable<Breakpoint, HighlightManager.HighlightInfo>();
 

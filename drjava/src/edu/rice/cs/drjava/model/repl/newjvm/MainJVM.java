@@ -66,6 +66,7 @@ import edu.rice.cs.drjava.model.junit.JUnitModelCallback;
 import edu.rice.cs.drjava.model.debug.DebugModelCallback;
 import edu.rice.cs.util.Log;
 import edu.rice.cs.util.StringOps;
+import edu.rice.cs.util.ArgumentTokenizer;
 import edu.rice.cs.util.newjvm.*;
 
 /**
@@ -676,7 +677,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     }
 
     // Pass assertion and debug port information as JVM arguments
-    Vector<String> jvmArgs = new Vector<String>();
+    ArrayList<String> jvmArgs = new ArrayList<String>();
     if (allowAssertions()) {
       jvmArgs.add("-ea");
     }
@@ -699,6 +700,9 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
       File jsr14 = DrJava.getConfig().getSetting(OptionConstants.JSR14_LOCATION);
       jvmArgs.add("-Xbootclasspath/p:" + jsr14.getAbsolutePath());
     }
+    String optionArgString = DrJava.getConfig().getSetting(OptionConstants.JVM_ARGS);
+    List<String> optionArgs = ArgumentTokenizer.tokenize(optionArgString);
+    jvmArgs.addAll(optionArgs);
     String[] jvmArgsArray = new String[jvmArgs.size()];
     for (int i=0; i < jvmArgs.size(); i++) {
       jvmArgsArray[i] = jvmArgs.get(i);

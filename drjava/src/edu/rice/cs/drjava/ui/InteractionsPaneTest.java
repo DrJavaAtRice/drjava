@@ -280,4 +280,36 @@ public final class InteractionsPaneTest extends TestCase {
     assertEquals("caret should be immediately after the d",
                  pos + 1, _pane.getCaretPosition());
   }
+
+  public void testSystemIn() {
+    final Object lock = new Object();
+    final StringBuffer buf = new StringBuffer();
+    synchronized (_controller._inputEnteredAction) {
+      new Thread("Testing System.in") {
+        public void run() {
+          synchronized (_controller._inputEnteredAction) {
+            _controller._inputEnteredAction.notify();
+            synchronized (lock) {
+              buf.append(_controller._inputListener.getConsoleInput());
+            }
+          }
+        }
+      }.start();
+      try {
+        _controller._inputEnteredAction.wait();
+      }
+      catch (InterruptedException ie) {
+      }
+    }
+    try {
+      Thread.sleep(2000);
+    }
+    catch (InterruptedException ie) {
+    }
+    _controller._insertNewlineAction.actionPerformed(null);
+    _controller._inputEnteredAction.actionPerformed(null);
+    synchronized (lock) {
+      assertEquals("Should have returned the correct text.", "\n\n", buf.toString());
+    }
+  }
 }

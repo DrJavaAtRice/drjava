@@ -218,8 +218,7 @@ public final class InteractionsModelTest extends TestCase {
   }
 
   /**
-   * Tests that single quotes cannot be used as argument delimiters.
-   * This is consistent with DOS, not with Unix.
+   * Tests that single quotes can be used as argument delimiters.
    */
   public void testInterpretJavaSingleQuotedArgs() throws DocumentAdapterException {
     // java Foo 'asdf'
@@ -228,6 +227,10 @@ public final class InteractionsModelTest extends TestCase {
     // java Foo 'a b c'
     _assertProcessedContents("java Foo 'a b c'",
                              "Foo.main(new String[]{\"a b c\"});");
+    
+    // java Foo 'a b'c
+    _assertProcessedContents("java Foo 'a b'c",
+                             "Foo.main(new String[]{\"a bc\"});");
   }
   
   

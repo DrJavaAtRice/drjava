@@ -106,7 +106,7 @@ public class InteractionsController extends AbstractConsoleController {
   /**
    * Invoked when input is completed in an input box.
    */
-  private Action _inputEnteredAction = new AbstractAction() {
+  protected Action _inputEnteredAction = new AbstractAction() {
     public synchronized void actionPerformed(ActionEvent e) {
       _box.setEditable(false);
       _box.getCaret().setVisible(false);
@@ -122,7 +122,7 @@ public class InteractionsController extends AbstractConsoleController {
   /**
    * Shift-Enter action in a System.in box.  Inserts a newline.
    */
-  private Action _insertNewlineAction = new AbstractAction() {
+  protected Action _insertNewlineAction = new AbstractAction() {
     public void actionPerformed(ActionEvent e) {
       _box.insert("\n", _box.getCaretPosition());
     }
