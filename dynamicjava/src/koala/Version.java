@@ -53,7 +53,7 @@ import java.text.SimpleDateFormat;
  * This file is copied to Version.java by the build process, which also
  * fills in the right values of the date and time.
  *
- * This javadoc corresponds to build drjava-20041025-2018;
+ * This javadoc corresponds to build drjava-20041031-2008;
  *
  * @version $Id$
  */
@@ -62,7 +62,7 @@ public abstract class Version {
    * This string will be automatically expanded upon "ant commit".
    * Do not edit it by hand!
    */
-  private static final String BUILD_TIME_STRING = "20041025-2018";
+  private static final String BUILD_TIME_STRING = "20041031-2008";
 
   /** A {@link Date} version of the build time. */
   private static final Date BUILD_TIME = _getBuildDate();
