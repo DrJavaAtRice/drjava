@@ -37,48 +37,31 @@
  *
 END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava;
+package edu.rice.cs.drjava.ui.config;
 
-import java.util.Date;
-import java.text.SimpleDateFormat;
+import javax.swing.*;
+import javax.swing.text.*;
+import javax.swing.event.*;
+import java.awt.event.*;
+import java.awt.*;
+
+import gj.util.Vector;
+import gj.util.Hashtable;
 
 /**
- * This interface hold the information about this build of DrJava.
- * This file is copied to Version.java by the build process, which also
- * fills in the right values of the date and time.
- *
- * This javadoc corresponds to build drjava-20020627-1657;
- *
- * @version $Id$
+ * 
  */
-public abstract class Version {
-  /**
-   * This string will be automatically expanded upon "ant commit".
-   * Do not edit it by hand!
-   */
-  private static final String BUILD_TIME_STRING = "20020627-1657";
-
-  /** A {@link Date} version of the build time. */
-  private static final Date BUILD_TIME = _getBuildDate();
-
-  public static String getBuildTimeString() {
-    return BUILD_TIME_STRING;
+public class ConfigPanel extends JPanel {
+  
+  private JLabel _title;
+  
+  public ConfigPanel(String t) {
+    _title = new JLabel(t);
+    
+    this.add(_title);
   }
-
-  public static Date getBuildTime() {
-    return BUILD_TIME;
+  
+  public String getTitle() {
+    return _title.getText();
   }
-
-  private static Date _getBuildDate() {
-    try {
-      return new SimpleDateFormat("yyyyMMdd-HHmm z").parse(BUILD_TIME_STRING + " GMT");
-    }
-    catch (Exception e) { // parse format or whatever problem
-      return null;
-    }
-  }
-
-  public static void main(String[] args) {
-    System.out.println("Version for edu.rice.cs.drjava: " + BUILD_TIME_STRING);
-  }
-} 
+}

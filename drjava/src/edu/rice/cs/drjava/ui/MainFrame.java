@@ -70,6 +70,7 @@ import edu.rice.cs.drjava.model.debug.DebugException;
 import edu.rice.cs.drjava.ui.CompilerErrorPanel.ErrorListPane;
 import edu.rice.cs.drjava.ui.JUnitPanel.JUnitErrorListPane;
 import edu.rice.cs.drjava.ui.KeyBindingManager.KeyStrokeOptionListener;
+import edu.rice.cs.drjava.ui.config.ConfigFrame;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.ExitingNotAllowedException;
 import edu.rice.cs.util.swing.DelegatingAction;
@@ -136,6 +137,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   private JMenuItem _printBreakpointsMenuItem;
   private JMenuItem _clearAllBreakpointsMenuItem;
   private LinkedList _tabs;
+  private ConfigFrame _configFrame;
   
   private KeyBindingManager _keyBindingManager;
   
@@ -420,6 +422,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       //Vector<String> v = new Vector<String>();
       //v.addElement("/home/mcgraw/javafiles/");
       //CONFIG.setSetting(EXTRA_CLASSPATH, v);
+      //CONFIG.setSetting(HISTORY_MAX_SIZE, new Integer(10));
     }
   };
 
@@ -460,6 +463,15 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
   };
 
+  /** Calls the ConfigFrame to edit preferences */
+  private Action _editPreferencesAction = 
+    new AbstractAction("Preferences...") 
+  {
+    public void actionPerformed(ActionEvent ae) {
+      _editPreferences();
+    }
+  };
+  
   /** Enables the debugger */
   private Action _toggleDebuggerAction =
     new AbstractAction("Debugger Enabled")
@@ -696,7 +708,9 @@ public class MainFrame extends JFrame implements OptionConstants {
       DrJava.CONFIG.addOptionListener( OptionConstants.LINEENUM_ENABLED, new LineEnumOptionListener());
     }
     
-
+    // Set the configuration frame to null
+    _configFrame = null;
+      
     // If any errors parsing config file, show them
     _showConfigException();
   }
@@ -970,6 +984,15 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
   }
 
+  private void _editPreferences() {
+    if (CodeStatus.DEVELOPMENT) {
+      if (_configFrame == null) {
+        _configFrame = new ConfigFrame();
+      }
+      _configFrame.show();
+    }
+  }
+  
   private void _compile() {
     try {
       _model.getActiveDocument().startCompile();
@@ -1565,6 +1588,11 @@ public class MainFrame extends JFrame implements OptionConstants {
     //tmpItem = editMenu.add(_preferencesAction);
     //tmpItem.setAccelerator(KeyStrong.getKeyStroke(KeyEvent.VK_
     
+    
+    if (CodeStatus.DEVELOPMENT) {
+      editMenu.addSeparator();
+      _addMenuItem(editMenu, _editPreferencesAction, KEY_NEXT_DOCUMENT);
+    }
     // Add the menus to the menu bar
     return editMenu;
   }
