@@ -530,7 +530,7 @@ public class TreeClassInfo implements ClassInfo {
                                             new LinkedList<FormalParameter>(),
                                             new LinkedList<ReferenceType>(),
                                             ci,
-                                            new LinkedList<Node>());
+                                            new LinkedList<Node>(), false);
             cd.acceptVisitor(this);
             classTree.getMembers().add(cd);
           }
@@ -586,7 +586,7 @@ public class TreeClassInfo implements ClassInfo {
         if (dc != null && !Modifier.isStatic(getModifiers())) {
           ReferenceType t = new ReferenceType(dc.getName());
           node.getParameters().add(0,
-                                   new FormalParameter(false, t, "param$0", false));
+                                   new FormalParameter(false, t, "param$0"));
         }
       }
 

@@ -100,6 +100,8 @@ public class MethodDeclaration extends Node {
    */
   private BlockStatement body;
 
+  private boolean varargs;
+  
   /**
    * Creates a new method declaration
    * @param flags   the access flags
@@ -112,8 +114,8 @@ public class MethodDeclaration extends Node {
    *            params is null or excepts is null
    */
   public MethodDeclaration(int flags, Type type, String name,
-                           List<FormalParameter> params, List<? extends ReferenceType> excepts, BlockStatement body) {
-    this(flags, type, name, params, excepts, body, null, 0, 0, 0, 0);
+                           List<FormalParameter> params, List<? extends ReferenceType> excepts, BlockStatement body, boolean va) {
+    this(flags, type, name, params, excepts, body, va, null, 0, 0, 0, 0);
   }
 
   /**
@@ -133,7 +135,7 @@ public class MethodDeclaration extends Node {
    *            params is null or excepts is null
    */
   public MethodDeclaration(int flags, Type type, String name,
-                           List<FormalParameter> params, List<? extends ReferenceType> excepts, BlockStatement body,
+                           List<FormalParameter> params, List<? extends ReferenceType> excepts, BlockStatement body, boolean va,
                            String fn, int bl, int bc, int el, int ec) {
     super(fn, bl, bc, el, ec);
 
@@ -154,6 +156,7 @@ public class MethodDeclaration extends Node {
     while (it.hasNext()) {
       exceptions.add(it.next().getRepresentation());
     }
+    varargs        = va;
   }
 
   /**
@@ -253,6 +256,10 @@ public class MethodDeclaration extends Node {
     firePropertyChange(BODY, body, body = bs);
   }
 
+  public boolean isVarArgs(){
+    return varargs;
+  }
+  
   /**
    * Allows a visitor to traverse the tree
    * @param visitor the visitor to accept
@@ -268,6 +275,6 @@ public class MethodDeclaration extends Node {
   }
 
   public String toStringHelper() {
-	return java.lang.reflect.Modifier.toString(getAccessFlags())+" "+getReturnType()+" "+getName()+" "+getParameters()+" "+getExceptions()+" "+getBody();
+ return java.lang.reflect.Modifier.toString(getAccessFlags())+" "+getReturnType()+" "+getName()+" "+getParameters()+" "+getExceptions()+" "+getBody();
   }
 }

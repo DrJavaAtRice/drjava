@@ -111,7 +111,7 @@ public class GenericTreeTest extends TestCase {
     List<Node> body = new LinkedList<Node>();
     FieldDeclaration n = new FieldDeclaration(accessFlags, t, "n", null);
     body.add(n);
-    FormalParameter param = new FormalParameter(false, t, "_n", false);
+    FormalParameter param = new FormalParameter(false, t, "_n");
     List<FormalParameter> cparams = new LinkedList<FormalParameter>();
     cparams.add(param);
     
@@ -123,14 +123,14 @@ public class GenericTreeTest extends TestCase {
     _nIds.add(new Identifier("_n"));
     AssignExpression stmt = new SimpleAssignExpression(nName, new QualifiedName(_nIds));
     cstmts.add(stmt);
-    ConstructorDeclaration c = new ConstructorDeclaration(accessFlags, "C", cparams, new LinkedList<ReferenceType>(), null, cstmts);
+    ConstructorDeclaration c = new ConstructorDeclaration(accessFlags, "C", cparams, new LinkedList<ReferenceType>(), null, cstmts, false);
     body.add(c);
     List<Node> mstmts = new LinkedList<Node>();
     ReturnStatement mstmt = new ReturnStatement(nName);
     mstmts.add(mstmt);
     List<FormalParameter> mparams = new LinkedList<FormalParameter>();
     List<ReferenceType> mexcepts = new LinkedList<ReferenceType>();
-    MethodDeclaration m = new MethodDeclaration(accessFlags, t, "m", mparams, mexcepts, new BlockStatement(mstmts));
+    MethodDeclaration m = new MethodDeclaration(accessFlags, t, "m", mparams, mexcepts, new BlockStatement(mstmts), false);
     body.add(m);
     GenericClassDeclaration cls = new GenericClassDeclaration(accessFlags, "C", null, null, body, typeParams);
     

@@ -62,6 +62,7 @@ public class Parser {
   // checking for a type parameter, this Map has to be checked
   // first before the GenericTypesEnv environment.
   
+  boolean lastFormalParameterIsVarArgs = false;
   
   /**
    * The message reader
@@ -1667,7 +1668,6 @@ PARSER_END(Parser)
           bl = typ.getBeginLine();
           bc = typ.getBeginColumn();
         }
-        
         if (dim > 0) {
           typ = new ArrayType(typ, dim,
                               filename,
@@ -1680,6 +1680,7 @@ PARSER_END(Parser)
                                        exceptions,
                                        (body instanceof BlockStatement) ?
                                          (BlockStatement)body : null,
+                                       lastFormalParameterIsVarArgs,
                                        filename,
                                        bl, bc, body.getEndLine(), body.getEndColumn());
         } else {
@@ -1688,6 +1689,7 @@ PARSER_END(Parser)
                                                   exceptions,
                                                   (body instanceof BlockStatement) ?
                                                     (BlockStatement)body : null,
+                                                  lastFormalParameterIsVarArgs,
                                                   filename,
                                                   bl, bc, body.getEndLine(), body.getEndColumn(),
                                                   typeParameters);
@@ -1703,9 +1705,12 @@ PARSER_END(Parser)
   {
     List/*<FormalParameter>*/ list = new LinkedList/*<FormalParameter>*/();
     FormalParameter node;
+    FormalParameter lastVarArgsParam = null;
   }
   {
-    "(" [ node=formalParameter()
+    "(" 
+      [ LOOKAHEAD(formalParameterLookahead()) 
+       node=formalParameter()
            {
       list.add(node);
     }
@@ -1713,8 +1718,12 @@ PARSER_END(Parser)
             {
            list.add(node);
          }
-         )* ] ")"
+         )* ] [lastVarArgsParam = varArgsFormalParameter() ] ")"
          {
+           lastFormalParameterIsVarArgs = (lastVarArgsParam != null);
+           if(lastFormalParameterIsVarArgs) {
+             list.add(lastVarArgsParam);
+           }
            return list;
          }
   }
@@ -1729,16 +1738,9 @@ PARSER_END(Parser)
     Token id;
     Token f   = null;
     int   dim = 0;
-    Token varargs = null;
   }
   {
-    [ f="final" ] typ=type() 
-      (
-       (varargs=<VAR_ARGS> id=<IDENTIFIER>)
-       |
-       (id=<IDENTIFIER> ( "[" "]" { dim++; } )*)
-      )
-       
+    [ f="final" ] typ=type() id=<IDENTIFIER> ( "[" "]" { dim++; } )*
     {
       if (dim > 0) {
         typ = new ArrayType(typ, dim,
@@ -1746,7 +1748,7 @@ PARSER_END(Parser)
                             typ.getBeginLine(), typ.getBeginColumn(),
                             typ.getEndLine(),   typ.getEndColumn());
       }
-      return new FormalParameter(f != null, typ, id.image, varargs != null,
+      return new FormalParameter(f != null, typ, id.image,
                                  filename,
                                  (f != null) ? f.beginLine   : typ.getBeginLine(),
                                  (f != null) ? f.beginColumn : typ.getBeginColumn(),
@@ -1754,6 +1756,58 @@ PARSER_END(Parser)
     }
   }
   
+  /**
+   * Parses a varargs formal parameter
+   * @see koala.dynamicjava.tree.FormalParameter
+   */
+  FormalParameter varArgsFormalParameter() :
+  {
+    Type  typ;
+    Token id;
+    Token f   = null;
+  }
+  {
+    [ f="final" ] typ=type() <VAR_ARGS> id=<IDENTIFIER>
+    {
+      return new FormalParameter(f != null, typ, id.image,
+                                 filename,
+                                 (f != null) ? f.beginLine   : typ.getBeginLine(),
+                                 (f != null) ? f.beginColumn : typ.getBeginColumn(),
+                                 id.endLine, id.endColumn);
+    }
+  }
+  
+//  FormalParameter varArgsFormalParameter() :
+//  {
+//    Type  typ;
+//    Token id;
+//    Token f   = null;
+//    int   dim = 0;
+//    Token varargs = null;
+//  }
+//  {
+//    [ f="final" ] typ=type() 
+//      (
+//       (varargs=<VAR_ARGS> id=<IDENTIFIER>)
+//       |
+//       (id=<IDENTIFIER> ( "[" "]" { dim++; } )*)
+//      )
+//       
+//    {
+//      if (dim > 0) {
+//        typ = new ArrayType(typ, dim,
+//                            filename,
+//                            typ.getBeginLine(), typ.getBeginColumn(),
+//                            typ.getEndLine(),   typ.getEndColumn());
+//      }
+//      return new FormalParameter(f != null, typ, id.image, varargs != null,
+//                                 filename,
+//                                 (f != null) ? f.beginLine   : typ.getBeginLine(),
+//                                 (f != null) ? f.beginColumn : typ.getBeginColumn(),
+//                                 id.endLine, id.endColumn);
+//    }
+//  }
+//  
   // Production for Initializer ===================================================
   
   /**
@@ -1835,7 +1889,7 @@ PARSER_END(Parser)
          bl = t.beginLine;
          bc = t.beginColumn;
        }
-       return new ConstructorDeclaration(flag, id.image, params, exceptions, ci, stmts,
+       return new ConstructorDeclaration(flag, id.image, params, exceptions, ci, stmts, lastFormalParameterIsVarArgs,
                                          filename,
                                          bl, bc,
                                          e.endLine, e.endColumn);

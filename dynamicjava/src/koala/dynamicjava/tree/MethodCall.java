@@ -37,7 +37,7 @@ import java.util.*;
  * @version 1.0 - 1999/04/24
  */
 
-public abstract class MethodCall extends    PrimaryExpression
+public abstract class MethodCall extends PrimaryExpression
   implements ExpressionStatement {
   /**
    * The methodName property name

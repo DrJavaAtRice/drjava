@@ -82,13 +82,13 @@ public class TigerTest extends TestCase {
       "public void someMethod(int ... i){}";
     
     LinkedList<FormalParameter> params = new LinkedList<FormalParameter>();
-    FormalParameter fp = new FormalParameter(false,new IntType() ,"i",true);
+    FormalParameter fp = new FormalParameter(false,new IntType() ,"i");
     params.add(fp);
     List<Node> statements = new LinkedList<Node>();
     //statements.add(new EmptyStatement());
     BlockStatement body = new BlockStatement(statements);
     
-    MethodDeclaration md = new MethodDeclaration(java.lang.reflect.Modifier.PUBLIC,new VoidType(),"someMethod",params,new LinkedList<ReferenceType>(),body,null, 0, 0, 0, 0);
+    MethodDeclaration md = new MethodDeclaration(java.lang.reflect.Modifier.PUBLIC,new VoidType(),"someMethod",params,new LinkedList<ReferenceType>(),body,true,null, 0, 0, 0, 0);
     assertEquals(md, parse(testString).get(0));
   }
 }

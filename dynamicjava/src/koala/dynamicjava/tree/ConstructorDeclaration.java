@@ -95,6 +95,8 @@ public class ConstructorDeclaration extends Node {
    */
   private List<Node> statements;
 
+  private boolean varargs;
+
   /**
    * Creates a new method declaration
    * @param flags   the access flags
@@ -108,8 +110,8 @@ public class ConstructorDeclaration extends Node {
    */
   public ConstructorDeclaration(int flags, String name,
                                 List<FormalParameter> params, List<? extends ReferenceType> excepts,
-                                ConstructorInvocation eci, List<Node> stmts) {
-    this(flags, name, params, excepts, eci, stmts, null, 0, 0, 0, 0);
+                                ConstructorInvocation eci, List<Node> stmts, boolean va) {
+    this(flags, name, params, excepts, eci, stmts, va, null, 0, 0, 0, 0);
   }
 
   /**
@@ -130,7 +132,7 @@ public class ConstructorDeclaration extends Node {
    */
   public ConstructorDeclaration(int flags, String name,
                                 List<FormalParameter> params, List<? extends ReferenceType> excepts,
-                                ConstructorInvocation eci, List<Node> stmts,
+                                ConstructorInvocation eci, List<Node> stmts, boolean va,
                                 String fn, int bl, int bc, int el, int ec) {
     super(fn, bl, bc, el, ec);
 
@@ -150,6 +152,7 @@ public class ConstructorDeclaration extends Node {
     while (it.hasNext()) {
       exceptions.add(it.next().getRepresentation());
     }
+    varargs = va;
   }
 
   /**
@@ -247,6 +250,10 @@ public class ConstructorDeclaration extends Node {
     firePropertyChange(STATEMENTS, statements, statements = l);
   }
 
+  public boolean isVarArgs(){
+    return varargs;
+  }
+  
   /**
    * Allows a visitor to traverse the tree
    * @param visitor the visitor to accept
