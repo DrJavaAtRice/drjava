@@ -46,6 +46,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
 import java.io.IOException;
+import javax.swing.filechooser.FileFilter;
 
 /**
  * Graphical form of a FileOption.
@@ -59,6 +60,7 @@ public class FileOptionComponent extends OptionComponent<File>
   private File _currentFile;
   private File _newFile;
   private JFileChooser _jfc;
+  private FileFilter _fileFilter;  // null if not customized
   private JPanel _panel;
   
   public FileOptionComponent (FileOption opt, String text, Frame parent) {
@@ -96,6 +98,7 @@ public class FileOptionComponent extends OptionComponent<File>
       workDir = workDir.getParentFile();
     }
     _jfc = new JFileChooser(workDir);
+    _fileFilter = null;
     
     _panel = new JPanel();
     _panel.setLayout(new BorderLayout());
@@ -158,6 +161,13 @@ public class FileOptionComponent extends OptionComponent<File>
   private void _updateTextField(File c) {    
     _jtf.setText(c.getAbsolutePath());
   }
+  
+  /**
+   * Set the file filter for this file option component
+   */
+  public void setFileFilter(FileFilter fileFilter) {
+    _fileFilter = fileFilter;
+  }
 
   /**
    * Shows a file chooser to pick a new file.  Allows picking directories.
@@ -168,7 +178,12 @@ public class FileOptionComponent extends OptionComponent<File>
       _jfc.setCurrentDirectory( new File(_newFile.getParent()));
     }
     
+    _jfc.setDialogTitle("Select");
+    _jfc.setApproveButtonText("Select");
     _jfc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+    if (_fileFilter != null) {
+      _jfc.setFileFilter(_fileFilter);
+    }
     File c = null;
     int returnValue = _jfc.showDialog(_parent,
                                      null);

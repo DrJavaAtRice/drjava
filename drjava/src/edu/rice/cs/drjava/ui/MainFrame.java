@@ -513,7 +513,7 @@ public class MainFrame extends JFrame implements OptionConstants {
             _interactionsPane.setEditable(false);
             _interactionsPane.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
             _model.resetInteractions();
-            _interactionsPane.setCursor(null);
+            _interactionsPane.setCursor(Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR));
             _interactionsPane.setEditable(true);
             return null;
           }
@@ -800,11 +800,9 @@ public class MainFrame extends JFrame implements OptionConstants {
     // create our model
     _model = new SingleDisplayModel();
     
-    if (CodeStatus.DEVELOPMENT) {
-      if (_model.getDebugManager() != null) {
-        // add listener to debug manager
-        _model.getDebugManager().addListener(new UIDebugListener());
-      }
+    if (_model.getDebugManager() != null) {
+      // add listener to debug manager
+      _model.getDebugManager().addListener(new UIDebugListener());
     }
     
     // Working directory is default place to start
@@ -900,6 +898,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     DrJava.CONFIG.addOptionListener( OptionConstants.FONT_TOOLBAR, new ToolbarFontOptionListener());
     DrJava.CONFIG.addOptionListener( OptionConstants.TOOLBAR_ICONS_ENABLED, new ToolbarOptionListener());
     DrJava.CONFIG.addOptionListener( OptionConstants.TOOLBAR_TEXT_ENABLED, new ToolbarOptionListener());
+    DrJava.CONFIG.addOptionListener( OptionConstants.WORKING_DIRECTORY, new WorkingDirOptionListener());
     DrJava.CONFIG.addOptionListener( OptionConstants.LINEENUM_ENABLED, new LineEnumOptionListener());
     DrJava.CONFIG.addOptionListener( OptionConstants.RECENT_FILES_MAX_SIZE, new RecentFilesOptionListener());
     
@@ -1243,7 +1242,7 @@ public class MainFrame extends JFrame implements OptionConstants {
           _interactionsPane.setEditable(false);
           _interactionsPane.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
           _model.getActiveDocument().startCompile();
-          _interactionsPane.setCursor(null);
+          _interactionsPane.setCursor(Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR));
           _interactionsPane.setEditable(true);
         }
         catch (IOException ioe) {
@@ -1256,12 +1255,24 @@ public class MainFrame extends JFrame implements OptionConstants {
   }
   
   private void _compileAll() {
-    try {
-      _model.compileAll();
-    }
-    catch (IOException ioe) {
-      _showIOError(ioe);
-    }
+    
+    final SwingWorker worker = new SwingWorker() {
+      public Object construct() {
+        try {
+          _interactionsPane.setEditable(false);
+          _interactionsPane.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+          _model.compileAll();
+          _interactionsPane.setCursor(Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR));
+          _interactionsPane.setEditable(true);
+        }
+        catch (IOException ioe) {
+          _showIOError(ioe);
+        }
+        return null;
+      }
+    };
+    worker.start();
+    
   }
 
   private void _junit() {
@@ -1606,7 +1617,7 @@ public class MainFrame extends JFrame implements OptionConstants {
    * Update all appropriate listeners that the CompilerErrorModels
    * have changed.
    */
-  private void _updateErrorListeners() {
+  void updateErrorListeners() {
     // Loop through each errorListener and tell it to update itself
     ListModel docs = _model.getDefinitionsDocuments();
     for (int i = 0; i < docs.getSize(); i++) {
@@ -2379,8 +2390,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     JScrollPane scroll = (JScrollPane)
       _defScrollPanes.get(_model.getActiveDocument());
     if (scroll == null) {
-      throw new UnexpectedException(new Exception(
-                                                  "Current definitions scroll pane not found."));
+      throw new UnexpectedException(new Exception("Current definitions scroll pane not found."));
     }
     
     JScrollBar oldbar = scroll.getVerticalScrollBar();
@@ -2393,8 +2403,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     newbar.revalidate();
     scroll.setVerticalScrollBar(newbar);
     
-    // This needs to be repeated for a horizontal scrollbar!
-    
+    // This needs to be repeated for the horizontal scrollbar
     oldbar = scroll.getHorizontalScrollBar();
     newbar = scroll.createHorizontalScrollBar();
     newbar.setMinimum(oldbar.getMinimum());
@@ -2436,11 +2445,17 @@ public class MainFrame extends JFrame implements OptionConstants {
   /**
    * Sets the current directory to be that of the given file.
    */
+  private void _setCurrentDirectory(File file) {
+    _openChooser.setCurrentDirectory(file.getAbsoluteFile());
+    _saveChooser.setCurrentDirectory(file.getAbsoluteFile());
+  }
+  /**
+   * Sets the current directory to be that of document's file.
+   */
   private void _setCurrentDirectory(OpenDefinitionsDocument doc) {
     try {
       File file = doc.getFile();
-      _openChooser.setCurrentDirectory(file);
-      _saveChooser.setCurrentDirectory(file);
+      _setCurrentDirectory(file);
     }
     catch (IllegalStateException ise) {
       // no file, leave in current directory
@@ -2527,6 +2542,8 @@ public class MainFrame extends JFrame implements OptionConstants {
    * is in sync. Clears the debugPanel's status bar in this case
    */
   private void _updateDebugStatus() {
+    if (!inDebugMode());
+
     // if the document is untitled, don't show that it is out of sync since it can't be debugged anyway
     if (_model.getActiveDocument().isUntitled() || _model.getActiveDocument().getDocument().getClassFileInSync()) {
       if (_debugPanel.getStatusText().equals(OUT_OF_SYNC)) {  
@@ -2667,7 +2684,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       SwingUtilities.invokeLater(doCommand);*/
       
       HighlightManager.HighlightInfo highlight = _breakpointHighlights.get(bp);
-      highlight.remove();
+      if (highlight != null) highlight.remove();
       _breakpointHighlights.remove(bp);
     }
     
@@ -2705,6 +2722,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       Runnable doCommand = new Runnable() {
         public void run() {
           _setThreadDependentDebugMenuItems(false);
+          _removeThreadLocationHighlight();
         }
       };
       SwingUtilities.invokeLater(doCommand);
@@ -2750,7 +2768,6 @@ public class MainFrame extends JFrame implements OptionConstants {
       // Fix OS X scrollbar bug before switching
       _reenableScrollBar();
       _createDefScrollPane(doc);
-      //_updateDebugStatus();
       _recentFileManager.updateOpenFiles(doc.getFile());
     }
 
@@ -2764,6 +2781,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       _currentDefPane.resetUndo();
       _currentDefPane.hasWarnedAboutModified(false);
       _currentDefPane.setPositionAndScroll(0);
+      if (inDebugMode()) _updateDebugStatus();
     }
     public void activeDocumentChanged(final OpenDefinitionsDocument active) {
       // Only change GUI from event-dispatching thread
@@ -2834,7 +2852,7 @@ public class MainFrame extends JFrame implements OptionConstants {
         SwingUtilities.invokeLater(doCommand);
       }
       //_abortInteractionAction.setEnabled(false);
-      _interactionsPane.setCursor(null);
+      _interactionsPane.setCursor(Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR));
       _interactionsPane.setEditable(true);
       int pos = _interactionsPane.getDocument().getLength();
       _interactionsPane.setCaretPosition(pos);
@@ -2848,31 +2866,33 @@ public class MainFrame extends JFrame implements OptionConstants {
       if (!_errorPanel.isDisplayed()) {
         showTab(_errorPanel);
       }
+      _errorPanel.setCompilationInProgress();
       _saveAction.setEnabled(false);
       hourglassOn();
     }
 
     public void compileEnded() {
       hourglassOff();
-      _updateErrorListeners();
+      updateErrorListeners();
       _errorPanel.reset();
-      _updateDebugStatus();
+      if (inDebugMode()) _updateDebugStatus();
     }
     
     public void compileErrorDuringJUnit() {
-      System.err.println("Called");
+      //System.err.println("Called");
       removeTab(_junitPanel);
       _tabbedPane.setSelectedComponent(_errorPanel);
     }
 
     public void junitStarted() {
       _saveAction.setEnabled(false);
+      _junitPanel.setJUnitInProgress();
       hourglassOn();
     }
 
     public void junitEnded() {
       hourglassOff();
-      _updateErrorListeners();
+      updateErrorListeners();
       _errorPanel.reset();
       _junitPanel.reset();
     }
@@ -2949,7 +2969,8 @@ public class MainFrame extends JFrame implements OptionConstants {
         "that  to  work,  the  currently  open  document  must be a valid\n" +
         "JUnit TestCase,  i.e., a subclass of junit.framework.TestCase.\n\n" +
 
-        "For information on how to write JUnit TestCases, visit:\n\n" +
+        "For information on how to write JUnit TestCases, view the JUnit\n" +
+        "chapter in the User Documentation or the online Help, or visit:\n\n" +
 
         "  http://www.junit.org/\n\n";
 
@@ -3141,7 +3162,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   boolean inDebugMode() {
     DebugManager dm = _model.getDebugManager();
     if (dm != null)
-      return dm.isReady();
+      return dm.isReady() && (_debugPanel != null);
     else
       return false;
   }
@@ -3271,6 +3292,14 @@ public class MainFrame extends JFrame implements OptionConstants {
   private class ToolbarOptionListener implements OptionListener<Boolean> {
     public void optionChanged(OptionEvent<Boolean> oce) {
       _updateToolbarButtons();
+    }
+  }
+  /**
+   *  The OptionListener for WORKING_DIRECTORY
+   */
+  private class WorkingDirOptionListener implements OptionListener<File> {
+    public void optionChanged(OptionEvent<File> oce) {
+      _setCurrentDirectory(oce.value);
     }
   }
   

@@ -1048,47 +1048,48 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
       // of the compile.
     }
     else {
-      try {
-        // Get sourceroots and all files
-        File[] sourceRoots = getSourceRootSet();
-        File[] files = new File[_definitionsDocs.getSize()];
-        int index = 0;
-        for (int i = 0; i < _definitionsDocs.getSize(); i++) {
-          OpenDefinitionsDocument doc = (OpenDefinitionsDocument)
-            _definitionsDocs.getElementAt(i);
-          if (!doc.checkIfClassFileInSync()) {
+      // Get sourceroots and all files
+      File[] sourceRoots = getSourceRootSet();
+      File[] files = new File[_definitionsDocs.getSize()];
+      int index = 0;
+      for (int i = 0; i < _definitionsDocs.getSize(); i++) {
+        OpenDefinitionsDocument doc = (OpenDefinitionsDocument)
+          _definitionsDocs.getElementAt(i);
+        if (!doc.checkIfClassFileInSync()) {
+          try {
             files[index] = doc.getFile();
             index++;
           }
-        }
-        
-        File[] outOfSyncFiles = new File[index];
-        System.arraycopy(files,0,outOfSyncFiles,0,index);
-      
-        notifyListeners(new EventNotifier() {
-          public void notifyListener(GlobalModelListener l) {
-            l.compileStarted();
+          catch (IllegalStateException ise) {
+            // No file for this document; skip it
           }
-        });
-        
-        // Compile everything
-        _compileFiles(sourceRoots, outOfSyncFiles);
-        
-        // Fire a compileEnded event
-        notifyListeners(new EventNotifier() {
-          public void notifyListener(GlobalModelListener l) {
-            l.compileEnded();
-          }
-        });
-        
-        // Only clear console/interactions if there were no errors
-        if (_numErrors == 0) {
-          resetConsole();
-          resetInteractions();
         }
       }
-      catch (IllegalStateException ise) {
-        // One of the docs didn't have a file.  Don't compile.
+      
+      // Only compile docs with files that are out of sync
+      File[] outOfSyncFiles = new File[index];
+      System.arraycopy(files,0,outOfSyncFiles,0,index);
+      
+      notifyListeners(new EventNotifier() {
+        public void notifyListener(GlobalModelListener l) {
+          l.compileStarted();
+        }
+      });
+        
+      // Compile the files
+      _compileFiles(sourceRoots, outOfSyncFiles);
+
+      // Fire a compileEnded event
+      notifyListeners(new EventNotifier() {
+        public void notifyListener(GlobalModelListener l) {
+          l.compileEnded();
+        }
+      });
+        
+      // Only clear console/interactions if there were no errors
+      if (_numErrors == 0) {
+        resetConsole();
+        resetInteractions();
       }
     }
   }
@@ -1322,6 +1323,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
         writer.close();
         _doc.resetModification();
         _doc.setFile(file);
+        checkIfClassFileInSync();
         notifyListeners(new EventNotifier() {
           public void notifyListener(GlobalModelListener l) {
           l.fileSaved(openDoc);
@@ -1780,7 +1782,8 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
         reader.close(); // win32 needs readers closed explicitly!
         
         tempDoc.resetModification();
-        
+        doc.checkIfClassFileInSync();
+
         syncCurrentLocationWithDefinitions(0);
         
         notifyListeners(new EventNotifier() {
@@ -2053,6 +2056,19 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
   }
 
   /**
+   * Resets the compiler error state to have no errors.
+   */
+  public void resetCompilerErrors() {
+    // Reset CompilerErrorModels
+    for (int i = 0; i < _definitionsDocs.getSize(); i++) {
+      OpenDefinitionsDocument doc = (OpenDefinitionsDocument)
+        _definitionsDocs.getElementAt(i);
+      doc.setCompilerErrorModel(new CompilerErrorModel());
+    }
+    _numErrors = 0;
+  }
+  
+  /**
    * Sorts the given array of CompilerErrors and divides it into groups
    * based on the file, giving each group to the appropriate
    * OpenDefinitionsDocument, opening files if necessary.
@@ -2060,12 +2076,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
   private void _distributeErrors(CompilerError[] errors)
     throws IOException
   {
-    // Reset CompilerErrorModels
-    for (int i = 0; i < _definitionsDocs.getSize(); i++) {
-      OpenDefinitionsDocument doc = (OpenDefinitionsDocument)
-        _definitionsDocs.getElementAt(i);
-      doc.setCompilerErrorModel(new CompilerErrorModel());
-    }
+    resetCompilerErrors();
     
     // Store number of errors
     _numErrors = errors.length;
@@ -2218,15 +2229,13 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
    * config option is set to true.  Leaves it at null if not.
    */
   private void _createDebugger() {
-    if (CodeStatus.DEVELOPMENT) {
-      try {
-        _debugManager = new DebugManager(this);
-      }
-      catch( NoClassDefFoundError ncdfe ){
-        // JPDA not available, so we won't use it.
-        _debugManager = null;
-      }
-    }    
+    try {
+      _debugManager = new DebugManager(this);
+    }
+    catch( NoClassDefFoundError ncdfe ){
+      // JPDA not available, so we won't use it.
+      _debugManager = null;
+    }
   }
 
 

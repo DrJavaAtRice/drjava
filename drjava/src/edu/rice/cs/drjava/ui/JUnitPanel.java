@@ -53,8 +53,10 @@ import java.awt.*;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.model.junit.*;
 import edu.rice.cs.util.UnexpectedException;
+import edu.rice.cs.util.swing.HighlightManager;
 import edu.rice.cs.drjava.model.GlobalModel;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
+import edu.rice.cs.drjava.config.*;
 
 /**
  * The panel which displays all the testing errors.
@@ -62,12 +64,13 @@ import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
  *
  * @version $Id$
  */
-public class JUnitPanel extends TabbedPanel {
+public class JUnitPanel extends TabbedPanel 
+  implements OptionConstants{
 
   /** Highlight painter for selected list items. */
-  private static final DefaultHighlighter.DefaultHighlightPainter
+  private static DefaultHighlighter.DefaultHighlightPainter
     _listHighlightPainter
-      = new DefaultHighlighter.DefaultHighlightPainter(Color.yellow);
+      = new DefaultHighlighter.DefaultHighlightPainter(DrJava.CONFIG.getSetting(COMPILER_ERROR_COLOR));
 
   private static final SimpleAttributeSet NORMAL_ATTRIBUTES = _getNormalAttributes();
   private static final SimpleAttributeSet BOLD_ATTRIBUTES = _getBoldAttributes();
@@ -97,7 +100,7 @@ public class JUnitPanel extends TabbedPanel {
    * @param frame MainFrame in which we are displayed
    */
   public JUnitPanel(SingleDisplayModel model, MainFrame frame) {
-    super(frame, "Test output");
+    super(frame, "Test Output");
     _model = model;
     _errorListPane = new JUnitErrorListPane();
 
@@ -158,6 +161,16 @@ public class JUnitPanel extends TabbedPanel {
   public void setJUnitInProgress() {
     _errorListPane.setJUnitInProgress();
   }
+  
+  /**
+   * Clean up when the tab is closed.
+   */
+  protected void _close() {
+    super._close();
+    _model.getActiveDocument().setJUnitErrorModel(new JUnitErrorModel());
+    _frame.updateErrorListeners();
+    reset();
+  }
 
   /**
    * Reset the errors to the current error information.
@@ -165,12 +178,14 @@ public class JUnitPanel extends TabbedPanel {
    */
   public void reset() {
     JUnitErrorModel juem = _model.getActiveDocument().getJUnitErrorModel();
+    boolean testsHaveRun = false;
     if (juem != null) {
       _numErrors = juem.getErrorsWithoutPositions().length + juem.getErrorsWithPositions().length;
+      testsHaveRun = juem.haveTestsRun();
     } else {
       _numErrors = 0;
     }
-    _errorListPane.updateListPane(juem.haveTestsRun());
+    _errorListPane.updateListPane(testsHaveRun);
     _resetEnabledStatus();
   }
 
@@ -216,7 +231,7 @@ public class JUnitPanel extends TabbedPanel {
     private DefinitionsPane _lastDefPane;
 
     // when we create a highlight we get back a tag we can use to remove it
-    private Object _listHighlightTag = null;
+    private HighlightManager.HighlightInfo _listHighlightTag = null;
 
     // on mouse click, highlight the error in the list and also in the source
     /**private MouseAdapter _mouseListener = new MouseAdapter() {
@@ -273,6 +288,8 @@ public class JUnitPanel extends TabbedPanel {
     private JFrame _stackFrame = null;
     private JTextArea _stackTextArea;
 
+    private HighlightManager _highlightManager = new HighlightManager(this);
+    
     /**
      * Constructs the ErrorListPane.
      */
@@ -297,6 +314,8 @@ public class JUnitPanel extends TabbedPanel {
       // We set the editor pane disabled so it won't get keyboard focus,
       // which makes it uneditable, and so you can't select text inside it.
       setEnabled(false);
+      
+      DrJava.CONFIG.addOptionListener( OptionConstants.COMPILER_ERROR_COLOR, new CompilerErrorColorOptionListener());    
     }
     
     
@@ -306,10 +325,13 @@ public class JUnitPanel extends TabbedPanel {
       JMenuItem stackTraceItem = new JMenuItem("Show Stack Trace");
       stackTraceItem.addActionListener ( new AbstractAction() {
         public void actionPerformed( ActionEvent ae) {
-          if (_stackFrame == null) {
-            _setupStackTraceFrame();
+          JUnitError error = _popupAdapter.getError();
+          if (error != null) {
+            if (_stackFrame == null) {
+              _setupStackTraceFrame();
+            }
+            _displayStackTrace(_popupAdapter.getError());
           }
-          _displayStackTrace(_popupAdapter.getError());
         }
       });
       _popMenu.add(stackTraceItem);
@@ -339,7 +361,7 @@ public class JUnitPanel extends TabbedPanel {
       _stackFrame.getContentPane().setLayout(new BorderLayout());
       _stackFrame.getContentPane().add(scroll, BorderLayout.CENTER);
       _stackFrame.getContentPane().add(closePanel, BorderLayout.SOUTH);
-      _stackFrame.setSize(500, 500);
+      _stackFrame.setSize(600, 500);
       
       Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
       Dimension frameSize = _stackFrame.getSize();
@@ -522,7 +544,7 @@ public class JUnitPanel extends TabbedPanel {
         String filename = "(Untitled)";
         try {
           File file = openDoc.getFile();
-          filename = file.getAbsolutePath();
+          filename = file.getName();
         }
         catch (IllegalStateException ise) {
           // Not possible: compiled documents must have files
@@ -555,7 +577,8 @@ public class JUnitPanel extends TabbedPanel {
         // Show errors with source locations
         for (int j = 0; j < errorsWithPositions.length; j++, errorNum++) {
           int startPos = doc.getLength();
-
+          JUnitError currError = errorsWithPositions[j];
+          
           //WARNING: the height of the highlight box in JUnitError panel is dependent on the 
           // presence of this extra line. If removed, code must be changed in order to account for its
           // absence.
@@ -563,7 +586,8 @@ public class JUnitPanel extends TabbedPanel {
           
           // Show file
           doc.insertString(doc.getLength(), "File: ", BOLD_ATTRIBUTES);
-          doc.insertString(doc.getLength(), filename + "\n", NORMAL_ATTRIBUTES);
+          String fileAndLineNumber = filename + "  [line: " + (currError.lineNumber()+1) + "]";
+          doc.insertString(doc.getLength(), fileAndLineNumber + "\n", NORMAL_ATTRIBUTES);
 
           // Show error
           _insertErrorText(errorsWithPositions, j, doc);
@@ -614,7 +638,7 @@ public class JUnitPanel extends TabbedPanel {
     private void _removeListHighlight() {
       //System.out.println("_removeHighlight():  _listHighlightTag == "+_listHighlightTag);
       if (_listHighlightTag != null) {
-        getHighlighter().removeHighlight(_listHighlightTag);
+       _listHighlightTag.remove();
         _listHighlightTag = null;
       }
     }
@@ -655,9 +679,9 @@ public class JUnitPanel extends TabbedPanel {
 
       try {
         _listHighlightTag =
-          getHighlighter().addHighlight(startPos,
-                                        endPos,
-                                        _listHighlightPainter);
+          _highlightManager.addHighlight(startPos,
+                                         endPos,
+                                         _listHighlightPainter);
 
         // Scroll to make sure this item is visible
         Rectangle startRect = modelToView(startPos);
@@ -777,6 +801,22 @@ public class JUnitPanel extends TabbedPanel {
       defPane.setCaretPosition(errPos);
       defPane.grabFocus();
       defPane.getJUnitErrorCaretListener().updateHighlight(errPos);
+    }
+    
+     /**
+     * The OptionListener for compiler COMPILER_ERROR_COLOR 
+     */
+    private class CompilerErrorColorOptionListener implements OptionListener<Color> {
+      
+      public void optionChanged(OptionEvent<Color> oce) {
+
+        _listHighlightPainter
+          =  new DefaultHighlighter.DefaultHighlightPainter(oce.value);
+       
+        if (_listHighlightTag != null) {
+          _listHighlightTag.refresh(_listHighlightPainter);
+        }
+      }
     }
     
   }

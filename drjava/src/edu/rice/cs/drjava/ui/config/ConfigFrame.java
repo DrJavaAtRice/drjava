@@ -353,9 +353,18 @@ public class ConfigFrame extends JFrame {
    */ 
   private void _setupResourceLocPanel ( ConfigPanel panel) {
    
-    panel.addComponent( new FileOptionComponent( OptionConstants.JAVAC_LOCATION, "Javac Location", this));
-    panel.addComponent( new FileOptionComponent( OptionConstants.JSR14_LOCATION, "JSR14 Location", this));
-    panel.addComponent( new FileOptionComponent( OptionConstants.JSR14_COLLECTIONSPATH, "JSR14 Collections Path", this));
+    FileOptionComponent javacLoc =
+      new FileOptionComponent( OptionConstants.JAVAC_LOCATION, "Javac Location", this);
+    javacLoc.setFileFilter(new ClasspathFilter());
+    panel.addComponent( javacLoc );
+    FileOptionComponent jsr14Loc =
+      new FileOptionComponent( OptionConstants.JSR14_LOCATION, "JSR14 Location", this);
+    jsr14Loc.setFileFilter(new ClasspathFilter());
+    panel.addComponent( jsr14Loc );
+    FileOptionComponent jsr14Col = 
+      new FileOptionComponent( OptionConstants.JSR14_COLLECTIONSPATH, "JSR14 Collections Path", this);
+    jsr14Col.setFileFilter(new ClasspathFilter());
+    panel.addComponent( jsr14Col );
     panel.addComponent( new VectorOptionComponent (OptionConstants.EXTRA_CLASSPATH, "Interactions Classpath", this));     
     panel.displayComponents();
   }
@@ -492,7 +501,24 @@ public class ConfigFrame extends JFrame {
    */
   private void _setupMiscPanel( ConfigPanel panel) {
     panel.addComponent( new IntegerOptionComponent ( OptionConstants.INDENT_LEVEL, "Indent Level", this));
-    panel.addComponent( new FileOptionComponent ( OptionConstants.WORKING_DIRECTORY, "Working Directory", this));
+    FileOptionComponent workDir = 
+      new FileOptionComponent ( OptionConstants.WORKING_DIRECTORY, "Working Directory", this);
+    workDir.setFileFilter(new FileFilter() {
+      public boolean accept (File f) {
+        if (f.isDirectory()) {
+          return true;
+        }
+        return false;
+      }
+
+      /**
+       * @return A description of this filter to display
+       */
+      public String getDescription() {
+        return "Directories";
+      }
+    });
+    panel.addComponent( workDir );
     panel.addComponent( new IntegerOptionComponent ( OptionConstants.HISTORY_MAX_SIZE, "Size of Interactions History", this));
     panel.addComponent( new IntegerOptionComponent ( OptionConstants.RECENT_FILES_MAX_SIZE, "Recent Files List Size", this));
 

@@ -91,6 +91,11 @@ public class ConfigPanel extends JPanel {
     JScrollPane scroll = new JScrollPane(panel,
                                          JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
                                          JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+    // Fix increment on scrollbar
+    JScrollBar bar = scroll.getVerticalScrollBar();
+    bar.setUnitIncrement(25);
+    bar.setBlockIncrement(400);
+
     GridBagLayout gridbag = new GridBagLayout(); 
     GridBagConstraints c = new GridBagConstraints();
     panel2.setLayout(gridbag);

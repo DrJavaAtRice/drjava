@@ -52,6 +52,7 @@ import java.awt.*;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.CodeStatus;
+import edu.rice.cs.util.swing.HighlightManager;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.drjava.model.compiler.*;
 import edu.rice.cs.drjava.model.GlobalModel;
@@ -67,12 +68,13 @@ import edu.rice.cs.drjava.config.*;
  *
  * @version $Id$
  */
-public class CompilerErrorPanel extends TabbedPanel {
+public class CompilerErrorPanel extends TabbedPanel 
+  implements OptionConstants {
 
   /** Highlight painter for selected list items. */
-  private static final DefaultHighlighter.DefaultHighlightPainter
+  private static DefaultHighlighter.DefaultHighlightPainter
     _listHighlightPainter
-      = new DefaultHighlighter.DefaultHighlightPainter(Color.yellow);
+      =  new DefaultHighlighter.DefaultHighlightPainter(DrJava.CONFIG.getSetting(COMPILER_ERROR_COLOR));
 
   private static final SimpleAttributeSet NORMAL_ATTRIBUTES = _getNormalAttributes();
   private static final SimpleAttributeSet BOLD_ATTRIBUTES = _getBoldAttributes();
@@ -108,7 +110,7 @@ public class CompilerErrorPanel extends TabbedPanel {
    * @param frame MainFrame in which we are displayed
    */
   public CompilerErrorPanel(SingleDisplayModel model, MainFrame frame) {
-    super(frame, "Compiler output");
+    super(frame, "Compiler Output");
     _model = model;
 
     _showAllButton = new JButton("Show all");
@@ -190,7 +192,7 @@ public class CompilerErrorPanel extends TabbedPanel {
     _mainPanel.add(compilerPanel, BorderLayout.EAST);
     DrJava.CONFIG.addOptionListener( OptionConstants.JAVAC_LOCATION, new CompilerLocationOptionListener());
     DrJava.CONFIG.addOptionListener( OptionConstants.JSR14_LOCATION, new CompilerLocationOptionListener());
-    
+
     _showHighlightsCheckBox = new JCheckBox( "Highlight source", true);
     _showHighlightsCheckBox.addChangeListener( new ChangeListener() {
       public void stateChanged (ChangeEvent ce) {
@@ -224,6 +226,7 @@ public class CompilerErrorPanel extends TabbedPanel {
       }
     }
   }
+  
   /**
    * Returns the ErrorListPane that this panel manages.
    */
@@ -243,6 +246,16 @@ public class CompilerErrorPanel extends TabbedPanel {
   /** Called when compilation begins. */
   public void setCompilationInProgress() {
     _errorListPane.setCompilationInProgress();
+  }
+  
+  /**
+   * Clean up when the tab is closed.
+   */
+  protected void _close() {
+    super._close();
+    _model.resetCompilerErrors();
+    _frame.updateErrorListeners();
+    reset();
   }
 
   /**
@@ -302,8 +315,10 @@ public class CompilerErrorPanel extends TabbedPanel {
     private DefinitionsPane _lastDefPane;
 
     // when we create a highlight we get back a tag we can use to remove it
-    private Object _listHighlightTag = null;
+    private HighlightManager.HighlightInfo _listHighlightTag = null;
 
+    private HighlightManager _highlightManager = new HighlightManager(this);
+    
     // on mouse click, highlight the error in the list and also in the source
     private MouseAdapter _mouseListener = new MouseAdapter() {
       public void mouseClicked(MouseEvent e) {
@@ -336,7 +351,9 @@ public class CompilerErrorPanel extends TabbedPanel {
 
       // We set the editor pane disabled so it won't get keyboard focus,
       // which makes it uneditable, and so you can't select text inside it.
-      setEnabled(false);      
+      setEnabled(false);    
+      
+      DrJava.CONFIG.addOptionListener( OptionConstants.COMPILER_ERROR_COLOR, new CompilerErrorColorOptionListener());    
     }
     
     /**
@@ -511,18 +528,17 @@ public class CompilerErrorPanel extends TabbedPanel {
             (errorsWithPositions.length > 0)) {
 
           // Grab filename for this set of errors
-          String filename = _model.getDisplayFilename(openDoc);
-          /**
+                    
           String filename = "(Untitled)";
           try {
             File file = openDoc.getFile();
-            filename = file.getAbsolutePath();
+            filename = file.getName();
           }
           catch (IllegalStateException ise) {
             // Not possible: compiled documents must have files
             throw new UnexpectedException(ise);
           }
-          */
+          
 
           // Show errors without source locations
           for (int j = 0; j < errorsWithoutPositions.length; j++, errorNum++) {
@@ -543,10 +559,11 @@ public class CompilerErrorPanel extends TabbedPanel {
           // Show errors with source locations
           for (int j = 0; j < errorsWithPositions.length; j++, errorNum++) {
             int startPos = doc.getLength();
-
+            CompilerError currError = errorsWithPositions[j];
             // Show file
-            doc.insertString(doc.getLength(), "Class: ", BOLD_ATTRIBUTES);
-            doc.insertString(doc.getLength(), filename + "\n", NORMAL_ATTRIBUTES);
+            doc.insertString(doc.getLength(), "File: ", BOLD_ATTRIBUTES);
+            String fileAndLineNumber = filename + "  [line: " + (currError.lineNumber()+1) + "]";
+            doc.insertString(doc.getLength(), fileAndLineNumber + "\n", NORMAL_ATTRIBUTES);
 
             // Show error
             _insertErrorText(errorsWithPositions, j, doc);
@@ -591,7 +608,7 @@ public class CompilerErrorPanel extends TabbedPanel {
      */
     private void _removeListHighlight() {
       if (_listHighlightTag != null) {
-        getHighlighter().removeHighlight(_listHighlightTag);
+        _listHighlightTag.remove();
         _listHighlightTag = null;
       }
     }
@@ -632,10 +649,10 @@ public class CompilerErrorPanel extends TabbedPanel {
 
       try {
         _listHighlightTag =
-          getHighlighter().addHighlight(startPos,
-                                        endPos,
-                                        _listHighlightPainter);
-
+          _highlightManager.addHighlight(startPos,
+                                         endPos,
+                                         _listHighlightPainter);
+        
         // Scroll to make sure this item is visible
         Rectangle startRect = modelToView(startPos);
         Rectangle endRect = modelToView(endPos - 1);
@@ -729,6 +746,22 @@ public class CompilerErrorPanel extends TabbedPanel {
       DefinitionsPane defPane = _frame.getCurrentDefPane();
       defPane.setCaretPosition(errPos);
       defPane.requestFocus();
+    }
+    
+    /**
+     * The OptionListener for compiler COMPILER_ERROR_COLOR 
+     */
+    private class CompilerErrorColorOptionListener implements OptionListener<Color> {
+      
+      public void optionChanged(OptionEvent<Color> oce) {
+
+        _listHighlightPainter
+          =  new DefaultHighlighter.DefaultHighlightPainter(oce.value);
+        
+        if (_listHighlightTag != null) {
+          _listHighlightTag.refresh(_listHighlightPainter);
+        }
+      }
     }
 
   }

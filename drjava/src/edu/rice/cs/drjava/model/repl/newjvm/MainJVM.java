@@ -346,13 +346,11 @@ public class MainJVM extends UnicastRemoteObject implements MainJVMRemoteI {
    */
   protected int getDebugPort() {
     int port = -1;
-    if (CodeStatus.DEVELOPMENT) {
-      try {
-        port = _model.getDebugPort();
-      }
-      catch (IOException ioe) {
-        // Can't find port; don't use debugger
-      }
+    try {
+      port = _model.getDebugPort();
+    }
+    catch (IOException ioe) {
+      // Can't find port; don't use debugger
     }
     return port;
   }

@@ -115,6 +115,11 @@ public interface GlobalModel {
    * Gets the total number of current errors.
    */
   public int getNumErrors();
+  
+  /**
+   * Resets the compiler error state to have no errors.
+   */
+  public void resetCompilerErrors();
 
   /**
    * Creates a new document in the definitions pane and

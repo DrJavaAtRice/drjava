@@ -200,7 +200,11 @@ public class CompilerErrorCaretListener implements CaretListener {
       }
 
       _errorListPane.getLastDefPane().removeErrorHighlight();
-      _definitionsPane.addErrorHighlight(prevNewline+1, nextNewline);
+      //Add 1 if not the first line of the file, so that the highlight range
+      // will match the range chosen for the highlight manager.
+      if (prevNewline>0) prevNewline++;
+      
+      _definitionsPane.addErrorHighlight(prevNewline, nextNewline);
       _errorListPane.setLastDefPane(_definitionsPane);
     }
     catch (BadLocationException impossible) {

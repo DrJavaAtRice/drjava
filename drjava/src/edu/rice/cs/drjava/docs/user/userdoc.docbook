@@ -102,7 +102,7 @@
 
       <formalpara>
 	<title>Contextual Menu</title>
-	<para>The Definitions Pane has a contextual menu, which can be used by right-clicking in the pane.  (Mac users should use Option+Click.)  This menu provides shortcuts to useful features such as cut, copy, and paste, as well as indenting and setting breakpoints.</para>
+	<para>The Definitions Pane has a contextual menu, which can be used by right-clicking in the pane.  (Mac users should use CTRL+Click or Option+Click.)  This menu provides shortcuts to useful features such as cut, copy, and paste, as well as indenting and setting breakpoints.</para>
       </formalpara>
     </section>
 
@@ -129,6 +129,8 @@
 	<title>Line Numbering</title>
 	<para>DrJava displays the cursor's current line number and column number on the right side of the status bar at the bottom of the window.  The line number is shown on the left and starts at 1, and the column number is shown on the right and starts at 0.</para>
       </formalpara>
+
+      <para>All line numbers can also be displayed in the left margin of the Definitions Pane, using the "Line Number Enumeration" option on the Display Options section of the Preferences window.  (See <link linkend="configuration">Configuring DrJava</link>.)</para>
 
       <formalpara>
 	<title>Opening Files at Startup</title>
@@ -168,7 +170,7 @@
 
     <formalpara>
       <title>Saving the Interactions History</title>
-      <para>The contents of the Interactions history can be saved to a file at any time, using the "Save Interactions History" action in the Tools menu.  By default, up to 500 of the most recent Interaction commands are kept in this history, though this number can be configured.  Histories are saved in a file with a <filename>.hist</filename> extension, and can be loaded back into the Interactions pane with the "Load Interactions History" action in the Tools menu.  Saving and loading histories can be particularly useful for initial setup of an often repeated task, such as importing several packages and initializing frequently used variables.  To help manage the history, a "Clear Interactions History" action is also provided.</para>
+      <para>The contents of the Interactions history can be saved to a file at any time, using the "Save Interactions History" action in the Tools menu.  This will open a separate window displaying this history, allowing the user to edit any part before saving it.  By default, up to 500 of the most recent Interaction commands are kept in this history, though this number can be configured.  Histories are saved in a file with a <filename>.hist</filename> extension, and can be loaded back into the Interactions pane with the "Load Interactions History" action in the Tools menu.  Saving and loading histories can be particularly useful for initial setup of an often repeated task, such as importing several packages and initializing frequently used variables.  To help manage the history, a "Clear Interactions History" action is also provided.</para>
     </formalpara>
   </chapter>
 
@@ -177,16 +179,16 @@
   <!-- Chapter: Integrated Compiler -->
   <chapter id="compiling">
     <title>Compiling Programs</title>
-    <para>DrJava uses an integrated compiler to speed up the development process and help locate errors.  Rather than switching to a command line and running "javac", the user can simply click on the Compile button and DrJava will compile the file and display any errors it finds.</para>
+    <para>DrJava uses an integrated compiler to speed up the development process and help locate errors.  Rather than switching to a command line and running "javac", the user can simply click on the Compile All button and DrJava will compile the open files and display any errors it finds.</para>
 
     <section id="compiling-file">
-      <title>Compiling a File</title>
-      <para>To compile any file, simply click on the Compile button in the toolbar, or choose Compile from the Tools menu.  Before the process can begin, all open files must be saved.  This is because files can depend on other files, and it is important that no copies are out of date when the errors are displayed.  A Compile All option is also provided in the Tools menu, which causes all open documents to be compiled.  Once a compile completes successfully, the Interactions Pane is reset so that the updated classes can be used.</para>
+      <title>Compiling Files</title>
+      <para>To use the compiler, simply click on the Compile All button on the toolbar, or choose either Compile All or Compile Current Document from the Tools menu.  Before the process can begin, all open files must be saved, even if only the current document is being compiled.  This is because a file can depend on other files, and it is important that no open files are out of date when the errors are displayed.  Once a compilation completes successfully, the Interactions Pane is reset so that the updated classes can now be used.</para>
     </section>
 
     <section id="compiling-errors">
       <title>Viewing Compiler Errors</title>
-      <para>If any errors are found when compiling, DrJava displays them in the Compiler Output tab at the bottom of the window.  A summary of each error is displayed in the list, and clicking on any error will highlight the corresponding line in the appropriate file.  (Note that a file will be opened automatically if it contains errors caused by the compile.)  Similarly, if the cursor is moved to a line in a file that contains an error, that line and the corresponding error message are highlighted.</para>
+      <para>If any errors are found when compiling, DrJava displays them in the Compiler Output tab at the bottom of the window.  A summary of each error is displayed in the list, and clicking on any error will highlight the corresponding line in the appropriate file.  (Note that a file will be opened automatically if it contains errors caused by the compile.)  Similarly, if the cursor is moved to a line in a file that contains an error, that line and the corresponding error message are highlighted.  The user can choose to disable highlighting compiler errors in the source by unchecking the "Highlight Source" checkbox on the Compiler Output tab, or by closing the Compiler Output tab.</para>
     </section>
 
     <section id="compiling-selecting">
@@ -293,7 +295,11 @@ public static Test suite() {
 
     <section id="junit-failures">
       <title>Viewing Test Failures</title>
-      <para>After a JUnit test is run, any failures are displayed in the Test Output tab at the bottom of the window.  This list of failures behaves quite similarly to <link linkend="compiling-errors">compiler errors</link>, in that a summary of the error is given in the tab, and clicking on it highlights the corresponding line in the file.</para>
+      <para>After a JUnit test is run, any failures are displayed in the Test Output tab at the bottom of the window.  This list of failures behaves quite similarly to <link linkend="compiling-errors">compiler errors</link>, in that a summary of the error is given in the tab, and clicking on it highlights the corresponding line in the file, as long as the "Highlight Source" checkbox is checked.  The current set of JUnit failures can be reset by closing the Test Output tab.</para>
+      <formalpara>
+	<title>Viewing the Stack Trace</title>
+	<para>When a JUnit test fails or throws an exception, it can sometimes be helpful to view the entire stack trace when diagnosing the problem.  To view the stack trace for any test failure, right click on the failure in the Test Output tab and select "Show Stack Trace."</para>
+      </formalpara>
     </section>
 
   </chapter>
@@ -305,20 +311,20 @@ public static Test suite() {
 
     <section id="debug-setup">
       <title>Starting the Debugger</title>
-      <para>To use DrJava's debugger, Sun's Java Platform Debugger Architecture (JPDA) classes must be on the classpath when DrJava is started.  These classes are usually found in the tools.jar file in the lib directory of the JDK, or can be downloaded in a separate <filename>jpda.jar</filename>.  See <link linkend="gs-running">Running DrJava</link> for the correct method of starting DrJava.</para>
+      <para>To use DrJava's debugger, Sun's Java Platform Debugger Architecture (JPDA) classes must be on the classpath when DrJava is started.  These classes are usually found in the tools.jar file in the lib directory of the JDK, or can be downloaded in a separate <filename>jpda.jar</filename>.  See <link linkend="gs-running">Running DrJava</link> for the correct method of starting DrJava with the debugger.</para>
 
       <para>Once DrJava is running with tools.jar on the classpath, a Debugger menu will be available.  To begin using the debugging features, select the "Debug Mode" menu item from the Debugger menu.  Once Debug Mode is on, an informational panel will be displayed between the Definitions Pane and the Interactions Pane.</para>
 
       <formalpara>
 	<title>Modifying Files</title>
-	<para>When using the debugger, it is essential to remember that any modifications to source files will not be reflected in the behavior of the Interactions Pane or the debugger until the classes are recompiled.  Changing a source file while the debugger is running is not recommended, since lines which are highlighted by the debugger may no longer correspond to the lines in the class file being run.</para>
+	<para>When using the debugger, it is essential to remember that any modifications to source files will not be reflected in the behavior of the Interactions Pane or the debugger until the classes are recompiled.  Changing a source file while the debugger is running is not recommended, since lines which are highlighted by the debugger may no longer correspond to the lines in the class file being run.  To help notify the user of this danger, a warning message is displayed in the Debug Panel if the current document is out of sync with its class file.</para>
       </formalpara>
 
     </section>
 
     <section id="debug-breakpoints">
       <title>Breakpoints</title>
-      <para>Once DrJava is in Debug Mode, you can set a breakpoint on any line of code in a source file in the Definitions Pane, using either the Toggle Breakpoing on Current Line command in the Debugger menu or the Toggle Breakpoint command on the contextual (right-click) menu in the Definitions Pane.  When a breakpoint is set, the line will be highlighted in red and will appear in the Breakpoints tab of the Debug Panel.  When a breakpoint is reached, the line becomes highlighted in bright blue and a message is printed to the Interactions Pane.  The Interactions Pane will then be suspended until the Resume command is selected from the Debugger menu.</para>
+      <para>Once DrJava is in Debug Mode, you can set a breakpoint on almost any line of code in a source file in the Definitions Pane, using either the Toggle Breakpoint on Current Line command in the Debugger menu or the Toggle Breakpoint command on the contextual (right-click) menu in the Definitions Pane.  When a breakpoint is set, the line will be highlighted in red and will appear in the Breakpoints tab of the Debug Panel.  When a breakpoint is reached, the line becomes highlighted in bright blue and a message is printed to the Interactions Pane.  The Interactions Pane will then be suspended until the Resume command is selected from the Debugger menu.</para>
 
       <para>When setting breakpoints, it is important to remember that only lines with actual code can be used.  Blank lines and comments will never trigger a breakpoint, even if the line is highlighted in red.  (Note that we do not yet support breakpoints on method contracts either, although this will be supported in a later version of DrJava.)</para>
     </section>
@@ -334,17 +340,17 @@ public static Test suite() {
 
       <formalpara>
 	<title>Step Over</title>
-	<para>The Step Over command will not enter any new method calls, but will treat them as a single operation.</para>
+	<para>The Step Over command will not enter any new method calls, treating them instead as a single operation.</para>
       </formalpara>
 
       <formalpara>
 	<title>Step Out</title>
-	<para>The Step Out command will finish running the current method and stop at the next line of code.</para>
+	<para>The Step Out command will finish running the current method and stop at the next line of code from where the method was called.</para>
       </formalpara>
 
       <formalpara>
 	<title>Sourcepath and Step Options</title>
-	<para>The sourcepath is the set of directories in which to look for source files when stepping.  It can be set using the Preferences command in the Edit menu, on the Debugger panel.  This panel also contains options for controlling which classes will be included as part of stepping.  By default, DrJava will never step into its own source, nor the Java Interpreter (Dynamic Java), nor Java itself.  Interested users can enable these options to see how Java or DrJava functions.</para>
+	<para>The sourcepath is the set of directories in which to look for source files when stepping.  It can be set using the Preferences command in the Edit menu, in the Debugger section.  This section also contains options for controlling which classes will be included as part of stepping.  By default, DrJava will never step into its own source, nor the Java Interpreter (Dynamic Java), nor Java itself.  Interested users can enable these options to see how Java or DrJava functions.</para>
       </formalpara>
     </section>
 
@@ -538,18 +544,47 @@ public static Test suite() {
       <variablelist>
 	<title>Other Colors</title>
 	<varlistentry>
+	  <term>Background Color (<varname>definitions.background.color = #FFFFFF</varname>)</term>
+	  <listitem>
+	    <para>Used as the background color for the Definitions Pane.</para>
+	  </listitem>
+	</varlistentry>
+
+	<varlistentry>
 	  <term>Brace-matching Color (<varname>definitions.match.color = #BEFFE6</varname>)</term>
 	  <listitem>
 	    <para>Used as the highlight color when matching braces.</para>
 	  </listitem>
 	</varlistentry>
+
+	<varlistentry>
+	  <term>Compiler Error Color (<varname>compiler.error.color = #FFFF00</varname>)</term>
+	  <listitem>
+	    <para>Used as the highlight color for compiler errors and JUnit test failures.</para>
+	  </listitem>
+	</varlistentry>
+
+	<varlistentry>
+	  <term>Debugger Breakpoint Color (<varname>debug.breakpoint.color = #FF0000</varname>)</term>
+	  <listitem>
+	    <para>Used as the highlight color for breakpoints set from the debugger.</para>
+	  </listitem>
+	</varlistentry>
+
+	<varlistentry>
+	  <term>Debugger Location Color (<varname>debug.thread.color = #64FFFF</varname>)</term>
+	  <listitem>
+	    <para>Used as the highlight color for the location of the current thread in the debugger, shown after a breakpoint is hit or a step has occurred.</para>
+	  </listitem>
+	</varlistentry>
+
       </variablelist>
 
 
       <!-- Key Bindings -->
       <formalpara>
 	<title>Key Bindings</title>
-	<para>Most menu items in DrJava have configurable keyboard shortcuts, along with several other navigation commands (such as moving to the beginning or end of a line).  All such options are displayed on the Key Bindings panel in the Preferences window, along with their current value.  Clicking on the value displays a window which allows the user to type a new key, showing any conflict with an existing key if there is one.  (A list of the configurable key bindings will be added to this documentation.)</para>
+	<para>Most menu items in DrJava have configurable keyboard shortcuts, along with several other navigational commands (such as moving to the beginning or end of a line).  All such options are displayed on the Key Bindings panel in the Preferences window, along with their current value.  Clicking on the value displays a window which allows the user to type a new key, showing any conflict with an existing key if there is one.</para>
       </formalpara>
       
       

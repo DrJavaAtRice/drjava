@@ -701,13 +701,24 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
     final File file = tempFile();
     
     doc.saveFile(new FileSelector(file));
-    assertTrue(!doc.checkIfClassFileInSync());
+    assertTrue("should not be in sync before compile", 
+               !doc.checkIfClassFileInSync());
     doc.startCompile();
-    assertTrue(doc.checkIfClassFileInSync());
+    assertTrue("should be in sync after compile", 
+               doc.checkIfClassFileInSync());
     doc.getDocument().insertString(0, "hi", null);
-    assertTrue(!doc.checkIfClassFileInSync());
+    assertTrue("should not be in sync after modification",
+               !doc.checkIfClassFileInSync());
+
+    // Have to wait 1 second so file will have a different timestamp
+    try {
+      Thread.sleep(1000);
+    }
+    catch (InterruptedException ie) {}
+
     doc.saveFile(new FileSelector(file));
-    assertTrue(!doc.checkIfClassFileInSync());
+    assertTrue("should not be in sync after save", 
+               !doc.checkIfClassFileInSync());
     
     // Make sure .class exists
     File compiled = classForJava(file, "DrJavaTestFoo");

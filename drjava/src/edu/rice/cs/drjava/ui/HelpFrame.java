@@ -269,7 +269,7 @@ public class HelpFrame extends JFrame {
   private void _displayError() {
     // The help files are made available by running "ant docs"
     String errorText = "The Help files are currently unavailable.";
-    if (CodeStatus.DEVELOPMENT) {
+    if (CodeStatus.DEVELOPMENT) {  // don't show this message in stable
       errorText += "\n\nTo generate the help files, run the \"ant docs\" target" +
         " after compiling DrJava.";
     }

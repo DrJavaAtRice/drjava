@@ -50,19 +50,12 @@ import java.awt.*;
  * @version $Id$
  */
 public class BooleanOptionComponent extends OptionComponent<Boolean> {
-  private JPanel _panel;
   private JCheckBox _jcb;
-  private JLabel _checkboxLabel;
   
   public BooleanOptionComponent (BooleanOption opt, String text, Frame parent) {
     super(opt, "", parent);
     _jcb = new JCheckBox();
-    _checkboxLabel = new JLabel(text);
-    
-    _panel = new JPanel();
-    _panel.setLayout(new BorderLayout());
-    _panel.add(_jcb, BorderLayout.WEST);
-    _panel.add(_checkboxLabel, BorderLayout.CENTER);
+    _jcb.setText(text);
     
     _jcb.setSelected(DrJava.CONFIG.getSetting(_option).booleanValue());
   }
@@ -89,5 +82,5 @@ public class BooleanOptionComponent extends OptionComponent<Boolean> {
   /**
    * Return's this OptionComponent's configurable component.
    */
-  public JComponent getComponent() { return _panel; }
+  public JComponent getComponent() { return _jcb; }
 }
