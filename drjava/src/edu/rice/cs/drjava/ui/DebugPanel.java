@@ -87,9 +87,16 @@ public class DebugPanel extends JPanel {
     public void actionPerformed(ActionEvent e) {
       _performCommand();
     }
-  };
-                                                             
-  
+  };                                                             
+
+  /**
+   * Highlighter
+   */
+  /** Highlight painter for selected list items. */
+  private static final DefaultHighlighter.DefaultHighlightPainter
+    _breakpointHighlightPainter
+      = new DefaultHighlighter.DefaultHighlightPainter(Color.red);
+    
   /**
    * Constructor.
    * @param model SingleDisplayModel in which we are running
@@ -424,5 +431,20 @@ public class DebugPanel extends JPanel {
     public void showStatus(String status) {
     }
   }
-  
+
+  /**
+    * Highlights the given line.
+    */
+  public void highlightLine(int line) {      
+      DefinitionsDocument doc = _model.getActiveDocument().getDocument();
+      doc.gotoLine(line);
+      int curPos = doc.getCurrentLocation();
+      int startPos = doc.getLineStartPos(curPos);
+      int endPos = doc.getLineEndPos(curPos);
+      try {
+	  _frame.getCurrentDefPane().getHighlighter().addHighlight(startPos,
+				    endPos,
+				    _breakpointHighlightPainter);
+      } catch (BadLocationException badBadLocation) {}
+  }    
 }
