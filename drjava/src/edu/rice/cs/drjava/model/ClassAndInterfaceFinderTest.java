@@ -41,32 +41,84 @@
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR 
  * OTHER DEALINGS WITH THE SOFTWARE.
  * 
-END_COPYRIGHT_BLOCK*/
+ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model;
-
-import java.io.*;
 import junit.framework.TestCase;
+import java.io.*;
 
-public class ClassAndInterfaceFinderTest extends TestCase
-{
-  private String INPUT1 = "model/ClassAndInterfaceFinderTest.java";
-  private String OUTPUT1 = "edu.rice.cs.drjava.model.ClassAndInterfaceFinderTest";
+/**
+ * ClassAndInterfaceFinderTest for unit testing ClassAndInterfaceFinder.  Uses
+ * junit for testing.
+ *
+ * @author <a href="mailto:jasonbs@rice.edu">Jason Schiller</a>
+ * @version $Id$
+ */
+
+public class ClassAndInterfaceFinderTest extends TestCase {
   
-  private String INPUT2 = "model/OpenDefinitionsDocument.java";
-  private String OUTPUT2 = "edu.rice.cs.drjava.model.OpenDefinitionsDocument";
   
-  private ClassAndInterfaceFinder one, two;
- 
-  public void testGetClassInterfaceName()
-  {
-    one = new ClassAndInterfaceFinder(new File(INPUT1));
-    
-    assertEquals("Find a Class", OUTPUT1, one.getClassName());
-    
-    two = new ClassAndInterfaceFinder(new File(INPUT2));
-    
-    assertEquals("Find an Interface", OUTPUT2, two.getClassOrInterfaceName());
+  /**
+   * Tests to see if string input is properly parsed to obtain interface name.
+   */
+  public void testStringInterfaceRecognition(){
+    try {
+      Reader r = new StringReader("//\n /**/public Class Interface interface Aa.12_34 {}");
+      ClassAndInterfaceFinder finder = new ClassAndInterfaceFinder(r);
+      String s = finder.getClassOrInterfaceName();
+      assertEquals("stringInterfaceRecognition","Aa.12_34", s);
+    }
+    catch (Exception e){
+      fail("stringInterfaceRecognition threw "+e);
+    }
   }
+  
+  
+  /**
+   * Tests to see if string input is properly parsed to reject interface name.
+   */
+  public void testStringInterfaceRejection(){
+    try {
+      Reader r = new StringReader("//\n /**/public Class Interface interface Aa.12_34 {}");
+      ClassAndInterfaceFinder finder = new ClassAndInterfaceFinder(r);
+      String s = finder.getClassName();
+      assertEquals("stringInterfaceRejection","", s);
+    }
+    catch (Exception e) {
+      fail("stringInterfaceRejection threw "+ e);
+    }
+  }
+  
+  
+  /**
+   * Tests to see if string input is properly parsed to obtain class name.
+   */
+  public void testStringClassRecognition(){
+    try {
+      Reader r = new StringReader("//\n /**/public Class Interface class Aa.12_34 {}");
+      ClassAndInterfaceFinder finder = new ClassAndInterfaceFinder(r);
+      String s = finder.getClassOrInterfaceName();
+      assertEquals("stringNameRecognition","Aa.12_34", s);
+    }
+    catch (Exception e) {
+      fail("stringClassRecognition threw " +e);
+    }
+  }
+  
+  /**
+   * Tests to see if string input is properly parsed to insert package name.
+   */
+  public void testStringPackageRecognition(){
+    try {
+      Reader r = new StringReader("//\n /**/package x public interface Aa.12_34 {}");
+      ClassAndInterfaceFinder finder = new ClassAndInterfaceFinder(r);
+      String s = finder.getClassOrInterfaceName();
+      assertEquals("stringNameRecognition","x.Aa.12_34", s);
+    }
+    catch (Exception e) {
+      fail("stringPackageRecognition threw " + e);
+    }
+  }
+  
+  
 }
-    
