@@ -21,6 +21,7 @@ import  java.beans.PropertyChangeEvent;
 
 
 /**
+ * The dialog box that handles requests for finding and replacing text.
  * @version $Id$
  */
 public class FindReplaceDialog extends JDialog {
@@ -37,25 +38,26 @@ public class FindReplaceDialog extends JDialog {
   private Label _message;
 
   /**
-   * put your documentation comment here
-   * @return 
+   * Get the word being searched for.
+   * @return the value of the "find" field
    */
   public String getFindWord() {
     return  _fWord;
   }
 
   /**
-   * put your documentation comment here
-   * @return 
+   * Get the word replacing the word being searched for.
+   * @return the value of the "replace" field
    */
   public String getReplaceWord() {
     return  _rWord;
   }
 
   /**
-   * put your documentation comment here
-   * @param   Frame frame
-   * @param   DefinitionsPane defPane
+   * Constructor.
+   * @param   Frame frame the overall enclosing window
+   * @param   DefinitionsPane defPane the definitions pane which contains the
+   * document text being searched over
    */
   public FindReplaceDialog(Frame frame, DefinitionsPane defPane) {
     super(frame);
@@ -93,11 +95,14 @@ public class FindReplaceDialog extends JDialog {
     outside.add(_message);
     setContentPane(outside);
     setDefaultCloseOperation(HIDE_ON_CLOSE);
+    setModal(false);
+    // DocumentListener that keeps track of changes in the find field.
     findField.getDocument().addDocumentListener(new DocumentListener() {
 
       /**
-       * put your documentation comment here
-       * @param e
+       * If attributes in the find field have changed, gray out
+       * "Replace" and "Replace and Find Next" buttons.
+       * @param e the event caught by this listener
        */
       public void changedUpdate(DocumentEvent e) {
         _replaceButton.setEnabled(false);
@@ -105,8 +110,9 @@ public class FindReplaceDialog extends JDialog {
       }
 
       /**
-       * put your documentation comment here
-       * @param e
+       * If text has been inserted into the find field, gray out
+       * "Replace" and "Replace and Find Next" buttons.
+       * @param e the event caught by this listener
        */
       public void insertUpdate(DocumentEvent e) {
         _replaceButton.setEnabled(false);
@@ -114,19 +120,23 @@ public class FindReplaceDialog extends JDialog {
       }
 
       /**
-       * put your documentation comment here
-       * @param e
+       * If text has been deleted from the find field, gray out
+       * "Replace" and "Replace and Find Next" buttons.
+       * @param e the event caught by this listener
        */
       public void removeUpdate(DocumentEvent e) {
         _replaceButton.setEnabled(false);
         _replaceFindButton.setEnabled(false);
       }
     });
+    
+    // DocumentListener for the actual document
     _defPane.getDocument().addDocumentListener(new DocumentListener() {
 
       /**
-       * put your documentation comment here
-       * @param e
+       * If attributes have changed in the document, gray out
+       * "Replace" and "Replace and Find Next" buttons.
+       * @param e the event caught by this listener
        */
       public void changedUpdate(DocumentEvent e) {
         _replaceButton.setEnabled(false);
@@ -134,8 +144,9 @@ public class FindReplaceDialog extends JDialog {
       }
 
       /**
-       * put your documentation comment here
-       * @param e
+       * If text has been deleted from the document, gray out
+       * "Replace" and "Replace and Find Next" buttons.
+       * @param e the event caught by this listener
        */
       public void insertUpdate(DocumentEvent e) {
         _replaceButton.setEnabled(false);
@@ -143,31 +154,39 @@ public class FindReplaceDialog extends JDialog {
       }
 
       /**
-       * put your documentation comment here
-       * @param e
+       * If text has been inserted into the document, gray out
+       * "Replace" and "Replace and Find Next" buttons.
+       * @param e the event caught by this listener
        */
-      public void removeUpdate(DocumentEvent e) {
+       public void removeUpdate(DocumentEvent e) {
         _replaceButton.setEnabled(false);
         _replaceFindButton.setEnabled(false);
       }
     });
+
+    // Add a listener to see if there's a change in position in the document.
     _defPane.addCaretListener(new CaretListener() {
 
       /**
-       * put your documentation comment here
-       * @param e
+       * If the caret has moved in the document, gray out
+       * "Replace" and "Replace and Find Next" buttons.
+       * @param e the event caught by this listener
        */
-      public void caretUpdate(CaretEvent e) {
+       public void caretUpdate(CaretEvent e) {
         _replaceButton.setEnabled(false);
         _replaceFindButton.setEnabled(false);
       }
     });
-    /** only enable if you found one.. otherwise leave it the same as before
+    
+    /** 
+     * We want to enable the "Replace" and "Replace and Find Next"
+     * fields iff we've found an instance of the find field in
+     * the document.
      */
     _findNextButton.addActionListener(new ActionListener() {
 
       /**
-       * put your documentation comment here
+       * What happens when the user presses the "Find Next" button.
        * @param e
        */
       public void actionPerformed(ActionEvent e) {
@@ -186,10 +205,11 @@ public class FindReplaceDialog extends JDialog {
         }
       }
     });
+    
     _replaceButton.addActionListener(new ActionListener() {
 
       /**
-       * put your documentation comment here
+       * What happens when the user presses the "Replace" button.
        * @param e
        */
       public void actionPerformed(ActionEvent e) {
@@ -205,7 +225,7 @@ public class FindReplaceDialog extends JDialog {
     _replaceFindButton.addActionListener(new ActionListener() {
 
       /**
-       * put your documentation comment here
+       * What happens when the user presses the "Replace and Find Next" button.
        * @param e
        */
       public void actionPerformed(ActionEvent e) {
@@ -232,7 +252,7 @@ public class FindReplaceDialog extends JDialog {
     _replaceAllButton.addActionListener(new ActionListener() {
 
       /**
-       * put your documentation comment here
+       * What happens when the user presses the "Replace All" button.
        * @param e
        */
       public void actionPerformed(ActionEvent e) {
@@ -246,16 +266,21 @@ public class FindReplaceDialog extends JDialog {
         _replaceFindButton.setEnabled(false);
       }
     });
+    
     _closeButton.addActionListener(new ActionListener() {
 
       /**
-       * put your documentation comment here
+       * Closes the Find/Replace dialog.
        * @param e
        */
       public void actionPerformed(ActionEvent e) {
         setVisible(false);
       }
     });
+    
+    // Set the size and position of the dialog.
+    // There are no guarantees to how accurate the size is,
+    // given Swing's tendency to muck things up.
     setBounds(100, 200, 520, 300);
     setSize(520, 300);
   }

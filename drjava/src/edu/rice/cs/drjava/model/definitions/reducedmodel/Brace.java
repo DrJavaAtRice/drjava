@@ -1,11 +1,11 @@
 package  edu.rice.cs.drjava;
 
 /** 
- * @version $Id$
  * This class acts as the representation of a brace in the reduced
  * view.  It also includes information about the gap of plaintext
  * preceding the actual brace before the previous brace or the start
  * of the file.
+ * @version $Id$
  */
 class Brace extends ReducedToken implements ReducedModelStates {
   /**
@@ -110,16 +110,14 @@ class Brace extends ReducedToken implements ReducedModelStates {
   }
 
   /**
-   * put your documentation comment here
-   * @return 
+   * @return true if this is {|(|[
    */
   public boolean isOpenBrace() {
     return  ((_type == 0) || (_type == 2) || (_type == 4));
   }
 
   /**
-   * put your documentation comment here
-   * @return 
+   * @return true if this is }|)|]
    */
   public boolean isClosedBrace() {
     return  ((_type == 1) || (_type == 3) || (_type == 5));

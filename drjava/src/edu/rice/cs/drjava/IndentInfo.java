@@ -1,6 +1,7 @@
 package  edu.rice.cs.drjava;
 
 /**
+ * Indent information block.
  * @version $Id$
  */
 public class IndentInfo {

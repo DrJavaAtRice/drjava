@@ -4,6 +4,7 @@ import  java.io.File;
 
 
 /**
+ * The minimum interface that a compiler must meet to be used by DrJava.
  * @version $Id$
  */
 public interface CompilerInterface {

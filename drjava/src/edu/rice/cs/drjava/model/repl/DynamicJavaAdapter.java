@@ -14,6 +14,7 @@ import  koala.dynamicjava.parser.wrapper.JavaCCParserFactory;
 
 
 /**
+ * An implementation of the interpreter for the repl pane.
  * @version $Id$
  */
 public class DynamicJavaAdapter implements JavaInterpreter {

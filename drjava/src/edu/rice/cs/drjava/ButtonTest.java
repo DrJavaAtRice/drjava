@@ -8,14 +8,16 @@ import  junit.extensions.*;
 
 
 /**
+ * Tests the enabled/disabled status of "Save" and "Compile" buttons.
+ * Unfortunately, the tests take forever since they are creating an
+ * actual MainFrame.
  * @version $Id$
- * put your documentation comment here
  */
 public class ButtonTest extends TestCase {
   MainFrame _m;
 
   /**
-   * put your documentation comment here
+   * Constructor.
    * @param   String name
    */
   public ButtonTest(String name) {
@@ -23,36 +25,37 @@ public class ButtonTest extends TestCase {
   }
 
   /**
-   * put your documentation comment here
+   * Sets up a window for testing.
    */
   public void setUp() {
     _m = new MainFrame();
   }
 
   /**
-   * put your documentation comment here
-   * @return 
+   * Creates a test suite for JUnit to run.
+   * @return a test suite based on the methods in this class
    */
   public static Test suite() {
     return  new TestSuite(ButtonTest.class);
   }
 
   /**
-   * put your documentation comment here
+   * Test if the save button is initially disabled.
    */
   public void testSaveButtonInitiallyDisabled() {
     assertTrue(!_m._saveButton.isEnabled());
   }
 
   /**
-   * put your documentation comment here
+   * Test if the compile button is initially disabled.
    */
   public void testCompileButtonInitiallyDisabled() {
     assertTrue(!_m._compileButton.isEnabled());
   }
 
   /**
-   * put your documentation comment here
+   * Test if the save button becomes usable after modification
+   * to the document.
    * @exception BadLocationException
    */
   public void testSaveEnabledAfterModification() throws BadLocationException {
@@ -62,7 +65,8 @@ public class ButtonTest extends TestCase {
   }
 
   /**
-   * put your documentation comment here
+   * Test to make sure the compile button is disabled
+   * after modification to the document.
    * @exception BadLocationException
    */
   public void testCompileDisabledAfterModification() throws BadLocationException {
@@ -72,7 +76,8 @@ public class ButtonTest extends TestCase {
   }
 
   /**
-   * put your documentation comment here
+   * Test to make sure the compile button is enabled
+   * after the document is saved.
    * @exception BadLocationException
    */
   public void testCompileEnabledAfterSave() throws BadLocationException {
@@ -85,7 +90,9 @@ public class ButtonTest extends TestCase {
   }
 
   /**
-   * put your documentation comment here
+   * Test to make sure the save button is disabled
+   * immediately after a document save.  It should only be enabled when
+   * there have been unsaved modifications made to the document.
    * @exception BadLocationException
    */
   public void testSaveDisabledAfterSave() throws BadLocationException {
@@ -98,7 +105,9 @@ public class ButtonTest extends TestCase {
   }
 
   /**
-   * put your documentation comment here
+   * Test to make sure the compile button is disabled after the compiler is run
+   * on the current source code.  It will be re-enabled after the document has
+   * been modified and saved.
    * @exception BadLocationException
    */
   public void testCompileDisabledAfterCompile() throws BadLocationException {
@@ -118,6 +127,3 @@ public class ButtonTest extends TestCase {
     new File("C.class").delete();
   }
 }
-
-
-

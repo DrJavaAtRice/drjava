@@ -9,8 +9,8 @@ import  java.util.StringTokenizer;
 
 
 /** 
+ * The model for the definitions pane. 
  * @version $Id$
- * The model for the definitions window. 
  */
 public class DefinitionsDocument extends PlainDocument {
   private static HashSet _normEndings = _makeNormEndings();
@@ -592,6 +592,3 @@ public class DefinitionsDocument extends PlainDocument {
     }
   }
 }
-
-
-

@@ -1,6 +1,7 @@
 package  edu.rice.cs.drjava;
 
 /**
+ * A subclass of ReducedToken that represents non-special characters.
  * @version $Id$
  */
 class Gap extends ReducedToken {

@@ -4,6 +4,7 @@ import  gj.util.Vector;
 
 
 /**
+ * Keeps track of what was typed in the interactions pane.
  * @version $Id$
  */
 public class History {

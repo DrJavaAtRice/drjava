@@ -11,6 +11,7 @@ import  gjc.v6.util.Log;
 
 
 /**
+ * The GJ compiler used by DrJava.
  * @version $Id$
  */
 public class GJv6Compiler

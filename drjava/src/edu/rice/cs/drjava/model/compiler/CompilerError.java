@@ -1,10 +1,11 @@
 package  edu.rice.cs.drjava;
 
 /**
+ * A class to represent compiler errors.  Having this class allows DrJava
+ * to make the errors as legible as possible.
  * @version $Id$
  */
-public class CompilerError
-    implements Comparable {
+public class CompilerError implements Comparable {
   private String _fileName;
 
   /** zero-based line number. */
@@ -92,6 +93,3 @@ public class CompilerError
     }
   }
 }
-
-
-

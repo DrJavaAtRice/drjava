@@ -1,6 +1,7 @@
 package  edu.rice.cs.drjava;
 
 /**
+ * Interface for repl interpreters.
  * @version $Id$
  */
 public interface JavaInterpreter {

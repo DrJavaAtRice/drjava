@@ -3,6 +3,8 @@ package  edu.rice.cs.drjava;
 import  java.awt.Color;
 
 /**
+ * The representation of document text in the reduced model.
+ * It is the core atomic piece.
  * @version $Id$
  */
 abstract class ReducedToken implements ReducedModelStates {
@@ -13,38 +15,39 @@ abstract class ReducedToken implements ReducedModelStates {
   }
   
   /**
-   * put your documentation comment here
-   * @return 
+   * Get the size of the token.
+   * @return the number of characters represented by the token
    */
   public abstract int getSize();
 
   /**
-   * put your documentation comment here
-   * @return 
+   * Get the type of the token.
+   * @return a String representation of the token type
    */
   public abstract String getType();
 
   /**
-   * put your documentation comment here
-   * @param type
+   * Set the type of the token
+   * @param type a String representation of the new token type
    */
   public abstract void setType(String type);
 
   /**
-   * put your documentation comment here
+   * Flip between open and closed.  Valid only for braces.
    */
   public abstract void flip();
 
   /**
-   * put your documentation comment here
-   * @param other
-   * @return 
+   * Determine if the given token is a open/close match with this.
+   * @param other another ReducedToken
+   * @return true if there is a match
    */
   public abstract boolean isMatch(ReducedToken other);
 
   /**
-   * put your documentation comment here
-   * @return 
+   * Get the shadowing state of the token.
+   * @return FREE|INSIDE_SINGLE_QUOTE|INSIDE_DOUBLE_QUOTE|INSIDE_LINE_COMMENT|
+   * INSIDE_BLOCK_COMMENT
    */
   public ReducedModelState getState() {
     return  _state;

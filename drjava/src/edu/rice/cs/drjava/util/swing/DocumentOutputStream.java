@@ -8,6 +8,7 @@ import  javax.swing.text.StyleConstants.ColorConstants;
 
 
 /**
+ * Output stream for documents.  Used for file I/O.
  * @version $Id$
  */
 public class DocumentOutputStream extends OutputStream {

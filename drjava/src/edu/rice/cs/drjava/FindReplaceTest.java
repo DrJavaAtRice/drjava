@@ -8,6 +8,7 @@ import  javax.swing.text.BadLocationException;
 
 
 /**
+ * Tests the functionality of find/replace in the definitions pane.
  * @version $Id$
  */
 public class FindReplaceTest extends TestCase {

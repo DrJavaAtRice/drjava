@@ -8,15 +8,18 @@ import  javax.swing.JTextArea;
 import  javax.swing.JEditorPane;
 import  javax.swing.KeyStroke;
 import  javax.swing.SwingUtilities;
+
 import  javax.swing.undo.CannotRedoException;
 import  javax.swing.undo.CannotUndoException;
 import  javax.swing.undo.UndoManager;
+
 import  javax.swing.event.UndoableEditListener;
 import  javax.swing.event.UndoableEditEvent;
 import  javax.swing.event.DocumentListener;
 import  javax.swing.event.DocumentEvent;
 import  javax.swing.event.CaretListener;
 import  javax.swing.event.CaretEvent;
+
 import  javax.swing.text.Document;
 import  javax.swing.text.Keymap;
 import  javax.swing.text.StyledEditorKit;
@@ -25,11 +28,12 @@ import  javax.swing.text.EditorKit;
 import  javax.swing.text.BadLocationException;
 import  javax.swing.text.Highlighter;
 import  javax.swing.text.DefaultHighlighter;
+
 import  java.io.File;
 import  java.io.IOException;
 import  java.io.FileReader;
 import  java.io.FileWriter;
-import  java.beans.PropertyChangeListener;
+
 import  java.awt.Rectangle;
 import  java.awt.Color;
 import  java.awt.Font;
@@ -44,21 +48,46 @@ import  java.awt.event.*;
 
 
 /**
+ * The pane in which work on the current document occurs.
  * @version $Id$
  */
 public class DefinitionsPane extends JEditorPane {
-  /** Keep track of the name of the file currently associated
-   *  with the document we're editing. If we've never saved this file
-   *  then this String is "". */
+  /**
+   * Keep track of the file name associated with the current document.
+   * For a new file that we haven't saved yet, the value is "".
+   */
   private String _currentFileName = "";
+  /**
+   * Our parent window.
+   */
   private MainFrame _mainFrame;
   private UndoManager _undoManager;
   private UndoAction _undoAction;
   private RedoAction _redoAction;
+  /** 
+   * For find and replace. 
+   * We have a persistent dialog so it keeps track of our last find criterion.
+   */
   private FindReplaceDialog _findReplace;
+  /** 
+   * For opening files.
+   * We have a persistent dialog to keep track of the last directory
+   * from which we opened.
+   */  
   private JFileChooser _openChooser;
+  /** 
+   * For saving files.
+   * We have a persistent dialog to keep track of the last directory
+   * from which we saved.
+   */  
   private JFileChooser _saveChooser;
+  /**
+   * Our current paren/brace/bracket matching highlight.
+   */
   private Object _matchHighlight = null;
+  /**
+   * Paren/brace/bracket matching highlight color.
+   */
   private static DefaultHighlighter.DefaultHighlightPainter _highlightPainter = 
       new DefaultHighlighter.DefaultHighlightPainter(Color.lightGray);
   
@@ -160,41 +189,62 @@ public class DefinitionsPane extends JEditorPane {
    * Used for indent action spawned by pressing the enter key, '{', or '}'.
    */
   private class IndentKeyAction extends AbstractAction {
-
+    /**
+     * The key string ("\n"|"{"|"}") for the key pressed that invokes this instance.
+     * Not used currently, but there for readability and possible future use, e.g.,
+     * debugging add-ons or the rewrite of the indention code.
+     */    
     private String _key;
-    private Action _defaultAction;
-    
+    /**
+     * The default action to take when the specified key is pressed.
+     */
+    private Action _defaultAction;    
+    /**
+     * Constructor.
+     */
     IndentKeyAction(String key, Action defaultAction) {
       _key = key;
       _defaultAction = defaultAction;
     }
-
-    /** Handle the key typed event from the text field. */
+    /** 
+     * Handle the "key typed" event from the text field. 
+     * Calls the default action to make sure the right things happen, then makes
+     * a call to indentLine().
+     */
     public void actionPerformed(ActionEvent e) {
- //     int pos = getCaretPosition();
- //     _doc().setCurrentLocation(pos);
- //     try {
- //       _doc().insertString(pos, _key, null);
- //     } catch (BadLocationException be) {
- //       throw  new IllegalArgumentException(be.toString());
- //     }
       _defaultAction.actionPerformed(e);
       _doc().indentLine();
     }
   }
   
+  /**
+   * Special action to take care of case when tab key is pressed.
+   */
   private Action _indentKeyActionTab = new IndentKeyActionTab();
+  /**
+   * Because the "default" action for the enter key is special, it must be grabbed
+   * from the Keymap using getAction(KeyStroke), which returns the "default" actions
+   * for all keys which have behavior extending beyond regular text keys.
+   */
   private Action _indentKeyActionLine =
     new IndentKeyAction("\n",
                         getKeymap().getAction(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0)));
-                                               
+  
+  /**
+   * Likewise, regular text keys like '{' and '}' do not have special actions
+   * that are returned by getAction(KeyStroke).  To make sure these behave right,
+   * we use getDefaultAction() instead.
+   */
   private Action _indentKeyActionSquiggly =
-    new IndentKeyAction("\n", getKeymap().getDefaultAction());
+    new IndentKeyAction("}", getKeymap().getDefaultAction());
   
   private Action _indentKeyActionOpenSquiggly =
-    new IndentKeyAction("\n", getKeymap().getDefaultAction());
+    new IndentKeyAction("{", getKeymap().getDefaultAction());
 
-  // Constructor
+  /**
+   * Constructor.  Sets up all the defaults.
+   * @param mf the parent window
+   */
   public DefinitionsPane(MainFrame mf) {
     _mainFrame = mf;
     _resetDocument("");
@@ -204,16 +254,14 @@ public class DefinitionsPane extends JEditorPane {
     setBackground(Color.white);
     setFont(new Font("Courier", 0, 12));
     setEditable(true);
-    //????KEEP??????
     _openChooser = new JFileChooser(System.getProperty("user.dir"));
     _openChooser.setFileFilter(new JavaSourceFilter());
     _saveChooser = new JFileChooser(System.getProperty("user.dir"));
-    //add actions for indent keay
-    Keymap ourMap = addKeymap("INDENT_KEYMAP", getKeymap());
 
+    //add actions for indent key
+    Keymap ourMap = addKeymap("INDENT_KEYMAP", getKeymap());
     ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), 
                                  (Action)_indentKeyActionLine);
-
     ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_TAB, 0), 
                                  (Action)_indentKeyActionTab);
     ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke('}'), 
@@ -221,10 +269,18 @@ public class DefinitionsPane extends JEditorPane {
     ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke('{'), 
       (Action)_indentKeyActionOpenSquiggly);
     setKeymap(ourMap);
+
+    // Add listener that checks if position in the document has changed.
+    // If it has changed, check and see if we should be highlighting matching braces.
     this.addCaretListener(_matchListener);
     _mainFrame.installNewDocumentListener(_doc());
   }
 
+  /** Gets current file name, or "" if it was never saved. */
+  public String getCurrentFileName() {
+    return  _currentFileName;
+  }
+  
   /**
    * @return the undo action
    */
@@ -239,7 +295,9 @@ public class DefinitionsPane extends JEditorPane {
     return  _redoAction;
   }
 
-  /** Reset undo machinery on setDocument. */
+  /** 
+   * Reset undo machinery on setDocument. 
+   */
   public void setDocument(Document doc) {
     if (_undoAction == null) {
       _undoAction = new UndoAction();
@@ -261,13 +319,11 @@ public class DefinitionsPane extends JEditorPane {
     _redoAction.updateRedoState();
   }
 
-  /** Gets current file name, or "" if it was never saved. */
-  public String getCurrentFileName() {
-    return  _currentFileName;
-  }
 
-  /** Overriding this method ensures that all new documents created in this
-   *  editor pane use our editor kit (and thus our model). */
+  /**
+   * Overriding this method ensures that all new documents created in this
+   * editor pane use our editor kit (and thus our model). 
+   */
   protected EditorKit createDefaultEditorKit() {
     return  new DefinitionsEditorKit();
   }
@@ -278,7 +334,10 @@ public class DefinitionsPane extends JEditorPane {
   public void gotoLine() {
     final String msg = "What line would you like to go to?";
     final String title = "Jump to line";
-    String lineStr = JOptionPane.showInputDialog(this, msg, title, JOptionPane.QUESTION_MESSAGE);
+    String lineStr = JOptionPane.showInputDialog(this, 
+                                                 msg, 
+                                                 title, 
+                                                 JOptionPane.QUESTION_MESSAGE);
     try {
       int lineNum = Integer.parseInt(lineStr);
       // Move the defs document to the right spot
@@ -292,15 +351,17 @@ public class DefinitionsPane extends JEditorPane {
       // And make sure the defs view has focus!
       grabFocus();
     } catch (BadLocationException impossible) {
-    // we got the location from defs doc. it is valid, i swear.
+      // we got the location from defs doc. it is valid, i swear.
     } catch (NumberFormatException nfe) {       // invalid input for line number
       Toolkit.getDefaultToolkit().beep();
       // Do nothing.
     }
   }
 
-  /** Save the current document over the old version of the document.
-   *  If the current document is unsaved, call save as. */
+  /** 
+   * Save the current document over the old version of the document.
+   * If the current document is unsaved, call save as. 
+   */
   public boolean save() {
     if (_currentFileName == "")
       return  saveAs(); 
@@ -315,7 +376,9 @@ public class DefinitionsPane extends JEditorPane {
     return  _doc().modifiedSinceSave();
   }
 
-  /** Prompt the user to select a place to save the file, then save it. */
+  /** 
+   * Prompt the user to select a place to save the file, then save it. 
+   */
   public boolean saveAs() {
     JFileChooser fc = _saveChooser;
     fc.setSelectedFile(null);
@@ -355,7 +418,6 @@ public class DefinitionsPane extends JEditorPane {
     // On all open/new operations reset focus to this
     // But do it in the Swing thread to be safe.
     SwingUtilities.invokeLater(new Runnable() {
-
       /**
        * Reset the focus to the DefinitionsPane.
        */
@@ -373,7 +435,7 @@ public class DefinitionsPane extends JEditorPane {
       FileWriter writer = new FileWriter(path);
       write(writer);
       writer.close();           // This flushes the buffer!
-      // Update file name if the read succeeds.
+      // Update file name if the write succeeds.
       _resetDocument(path);
       return  true;
     } catch (IOException ioe) {
@@ -518,7 +580,7 @@ public class DefinitionsPane extends JEditorPane {
       }
     }
   }
-
+  
   /**
    * Redo action.
    */
@@ -630,7 +692,8 @@ public class DefinitionsPane extends JEditorPane {
     }
   }
 
-  /** Replaces first word that matches fWord.  Invariant: word has been found.
+  /** 
+   * Replaces first word that matches fWord.  Invariant: word has been found.
    */
   public boolean replaceText(String fWord, String rWord) {
     // getSelectedText could return null, so fWord must call the equals

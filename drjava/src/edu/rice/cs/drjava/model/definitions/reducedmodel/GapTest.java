@@ -6,6 +6,7 @@ import  junit.extensions.*;
 
 
 /**
+ * Tests the functionality of the Gap class.
  * @version $Id$
  */
 public class GapTest extends TestCase {

@@ -41,10 +41,12 @@ import java.awt.BorderLayout;
 import java.awt.Font;
 
 /**
+ * The panel which houses the list of errors after an unsuccessful compilation.
+ * If the user clicks on the combobox, move the definitions cursor to the error in
+ * the source.
+ * If the cursor is moved onto a line with an error, select the appropriate error 
+ * in the list but do not move the cursor.
  * @version $Id$
- * If click on combobox, move cursor to error location.
- * If move cursor onto line with error, select error in combobox but do
- * not move the cursor.
  */
 public class CompilerErrorPanel extends JPanel {
   /** Highlight painter for selected errors in the defs doc. */
@@ -173,6 +175,9 @@ public class CompilerErrorPanel extends JPanel {
     }
   };
 
+  /**
+   * Adds an error highlight to the document.
+   */
   private void _addHighlight(int from, int to) throws BadLocationException {
     _previousHighlightTag =
       _definitionsPane.getHighlighter().addHighlight(from,
@@ -180,6 +185,10 @@ public class CompilerErrorPanel extends JPanel {
                                                      _documentHighlightPainter);
   }
 
+  /**
+   * Removes the previous error highlight from the document after the cursor
+   * has moved.
+   */
   private void _removePreviousHighlight() {
     if (_previousHighlightTag != null) {
       _definitionsPane.getHighlighter().removeHighlight(_previousHighlightTag);
@@ -187,6 +196,10 @@ public class CompilerErrorPanel extends JPanel {
     }
   }
 
+  /**
+   * Constructor.
+   * @param defPane the definitions pane which holds the source to be compiled
+   */
   public CompilerErrorPanel(DefinitionsPane defPane) {
     setLayout(new BorderLayout());
         
@@ -321,6 +334,10 @@ public class CompilerErrorPanel extends JPanel {
   private void _showAllErrors() {
   }
 
+  /**
+   * Reset the enabled status of the "next", "previous", and "show all" 
+   * buttons in the compiler error panel.
+   */
   private void _resetEnabledStatus() {
     int numErrors = _errorsWithoutPositions.length + _errors.length;
 
@@ -329,6 +346,10 @@ public class CompilerErrorPanel extends JPanel {
     _showAllButton.setEnabled(numErrors != 0);
   }
 
+  /**
+   * Reset the errors to the current error information.
+   * @param errors the current error information
+   */
   public void resetErrors(CompilerError[] errors) {
     for (int i = 0; i < errors.length; i++) {
       DrJava.consoleErr().println("#" + i + ": " + errors[i]);
@@ -376,8 +397,10 @@ public class CompilerErrorPanel extends JPanel {
     _errorListPane.updateListPane();
   }
 
+  /**
+   * Create array of positions where each error occurred.
+   */
   private void _createPositionsArray() {
-    // Create array of positions where each error occurred
     _errorPositions = new Position[_errors.length];
 
     // don't bother with anything else if there are no errors
@@ -496,6 +519,9 @@ public class CompilerErrorPanel extends JPanel {
       return errorNum;
     }
 
+    /** 
+     * Update the pane which holds the list of errors for the viewer.
+     */
     public void updateListPane() {
       try {
         int numErrors = _errorsWithoutPositions.length + _errors.length;
@@ -514,6 +540,9 @@ public class CompilerErrorPanel extends JPanel {
       revalidate();
     }
 
+    /**
+     * Used to show that the last compile was successful.
+     */
     private void _updateNoErrors() throws BadLocationException {
       DefaultStyledDocument doc = new DefaultStyledDocument();
       doc.insertString(0,
@@ -524,6 +553,9 @@ public class CompilerErrorPanel extends JPanel {
       selectNothing();
     }
 
+    /**
+     * Used to show that the last compile was unsuccessful.
+     */
     private void _updateWithErrors() throws BadLocationException {
       DefaultStyledDocument doc = new DefaultStyledDocument();
 
@@ -556,6 +588,12 @@ public class CompilerErrorPanel extends JPanel {
       _switchToError(0);
     }
 
+    /**
+     * Puts an error message into the array of errors at the specified index.
+     * @param array the array of errors
+     * @param i the index at which the message will be inserted
+     * @param doc the document in the error pane
+     */
     private void _insertErrorText(CompilerError[] array, int i, Document doc)
       throws BadLocationException
     {
@@ -571,6 +609,10 @@ public class CompilerErrorPanel extends JPanel {
       doc.insertString(doc.getLength(), error.message(), NORMAL_ATTRIBUTES);
     }
 
+    /**
+     * When the selection of the current error changes, remove
+     * the highlight in the error pane.
+     */
     private void _removeListHighlight() {
       if (_listHighlightTag != null) {
         getHighlighter().removeHighlight(_listHighlightTag);
@@ -578,13 +620,18 @@ public class CompilerErrorPanel extends JPanel {
       }
     }
 
+    /**
+     * Don't select any errors in the error pane.
+     */
     public void selectNothing() {
       _selectedIndex = -1;
       _removeListHighlight();
       _removePreviousHighlight();
     }
 
-    /** Selects the given error inside the error list pane. */
+    /**
+     * Selects the given error inside the error list pane. 
+     */
     public void selectItem(int i) {
       _selectedIndex = i;
       _removeListHighlight();
@@ -623,6 +670,9 @@ public class CompilerErrorPanel extends JPanel {
       catch (BadLocationException badBadLocation) {}
     }
 
+    /**
+     * Get the index of the current error in the error array.
+     */
     public int getSelectedIndex() { return _selectedIndex; }
   }
 }

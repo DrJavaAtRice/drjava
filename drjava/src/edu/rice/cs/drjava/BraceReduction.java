@@ -2,10 +2,10 @@ package edu.rice.cs.drjava;
 
 import gj.util.Vector;
 /**
- * @version $Id$
  * The interface BraceReduction serves as the template for our reduced
  * view of a java document, which stores only the information necessary
  * for parenthesis matching.
+ * @version $Id$
  * @author JavaPLT
  */
 

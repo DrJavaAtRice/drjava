@@ -6,6 +6,7 @@ import  junit.extensions.*;
 
 
 /**
+ * Tests the Brace class.
  * @version $Id$
  */
 public class BraceTest extends TestCase implements ReducedModelStates {

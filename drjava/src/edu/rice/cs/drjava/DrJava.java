@@ -4,8 +4,8 @@ import  java.io.PrintStream;
 
 
 /** 
- * @version $Id$
  * Main class for DrJava. 
+ * @version $Id$
  */
 public class DrJava {
   // Generated automatically when you check out with tag name!
@@ -48,6 +48,3 @@ public class DrJava {
     return  _consoleOut;
   }
 }
-
-
-

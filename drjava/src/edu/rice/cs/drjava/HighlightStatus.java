@@ -1,6 +1,8 @@
 package  edu.rice.cs.drjava;
 
 /**
+ * A block that represents some information about the highlighting status in 
+ * a particular section in the document.
  * @version $Id$
  */
 public class HighlightStatus {

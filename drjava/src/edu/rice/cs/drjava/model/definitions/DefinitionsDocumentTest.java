@@ -7,6 +7,7 @@ import  junit.extensions.*;
 
 
 /**
+ * Tests the functionality of the definitions document.
  * @version $Id$
  */
 public class DefinitionsDocumentTest extends TestCase
@@ -15,7 +16,7 @@ public class DefinitionsDocumentTest extends TestCase
   protected DefinitionsDocument defModel;
 
   /**
-   * put your documentation comment here
+   * Constructor.
    * @param   String name
    */
   public DefinitionsDocumentTest(String name) {
@@ -23,22 +24,22 @@ public class DefinitionsDocumentTest extends TestCase
   }
 
   /**
-   * put your documentation comment here
+   * Create a definitions document to work with.
    */
   protected void setUp() {
     defModel = new DefinitionsDocument();
   }
 
   /**
-   * put your documentation comment here
-   * @return 
+   * Create a test suite for JUnit to run.
+   * @return a test suite based on this class
    */
   public static Test suite() {
     return  new TestSuite(DefinitionsDocumentTest.class);
   }
 
   /**
-   * put your documentation comment here
+   * Test insertion.
    */
   public void testInsertToDoc() {
     try {
@@ -95,7 +96,7 @@ public class DefinitionsDocumentTest extends TestCase
   }
 
   /**
-   * put your documentation comment here
+   * Test inserting a star between a star-slash combo.
    * @exception BadLocationException
    */
   public void testInsertStarIntoStarSlash() throws BadLocationException {
@@ -115,7 +116,7 @@ public class DefinitionsDocumentTest extends TestCase
   }
 
   /**
-   * put your documentation comment here
+   * Test inserting a slash between a star-slash combo.
    * @exception BadLocationException
    */
   public void testInsertSlashIntoStarSlash() throws BadLocationException {
@@ -135,7 +136,7 @@ public class DefinitionsDocumentTest extends TestCase
   }
 
   /**
-   * put your documentation comment here
+   * Test inserting a star between a slash-star combo.
    * @exception BadLocationException
    */
   public void testInsertStarIntoSlashStar() throws BadLocationException {
@@ -155,7 +156,7 @@ public class DefinitionsDocumentTest extends TestCase
   }
 
   /**
-   * put your documentation comment here
+   * Test removal of text.
    */
   public void testDeleteDoc() {
     try {
@@ -177,7 +178,7 @@ public class DefinitionsDocumentTest extends TestCase
   }
 
   /**
-   * make sure the vector is consistent: all elements immediately adjoin
+   * Make sure the vector is consistent: all elements immediately adjoin
    * one another (no overlap), and make sure all indices between start and end
    * are in the vector. Vector is guaranteed to not have size zero.
    */
@@ -202,6 +203,9 @@ public class DefinitionsDocumentTest extends TestCase
                  walk);
   }
   
+  /** 
+   * Test that keywords are highlighted properly.
+   */
   public void testHighlightKeywords1() throws BadLocationException {
     Vector<HighlightStatus> v;
     final String s = "public class Foo {\n" +
@@ -221,6 +225,7 @@ public class DefinitionsDocumentTest extends TestCase
     assertEquals(HighlightStatus.KEYWORD, v.elementAt(6).getState());
     assertEquals(HighlightStatus.NORMAL, v.elementAt(7).getState());
   }
+  
   /**
    * This test case simulates what happens when some text is selected
    * and there is a keyword around too.
@@ -249,6 +254,9 @@ public class DefinitionsDocumentTest extends TestCase
     assertEquals(2, v.elementAt(0).getLength());
   }
   
+  /**
+   * Test going to the second line in a two-line document.
+   */
   public void testGotoLine1() throws BadLocationException {
     final String s = "a\n";
     defModel.insertString(0, s, null);
@@ -257,7 +265,7 @@ public class DefinitionsDocumentTest extends TestCase
   }
 
   /**
-   * put your documentation comment here
+   * Test going to a specific line.
    * @exception BadLocationException
    */
   public void testGotoLine2() throws BadLocationException {
@@ -268,7 +276,7 @@ public class DefinitionsDocumentTest extends TestCase
   }
 
   /**
-   * put your documentation comment here
+   * Test going to the fourth line in a four line document.
    * @exception BadLocationException
    */
   public void testGotoLine3() throws BadLocationException {
@@ -279,7 +287,8 @@ public class DefinitionsDocumentTest extends TestCase
   }
 
   /**
-   * put your documentation comment here
+   * Test going to a line beyond the number of lines in a document
+   * just goes to the end of the file.
    * @exception BadLocationException
    */
   public void testGotoLine4() throws BadLocationException {
@@ -290,7 +299,9 @@ public class DefinitionsDocumentTest extends TestCase
   }
 
   /**
-   * put your documentation comment here
+   * Test going to the first line of an empty document
+   * doesn't do anything funny.  It should stay in the same
+   * location.
    */
   public void testGotoLine5() {
     defModel.gotoLine(1);
@@ -298,7 +309,8 @@ public class DefinitionsDocumentTest extends TestCase
   }
 
   /**
-   * put your documentation comment here
+   * Test going to a line that is greater than the line count
+   * of an empty document just keeps you in your current location.
    */
   public void testGotoLine6() {
     defModel.gotoLine(4);
@@ -306,7 +318,8 @@ public class DefinitionsDocumentTest extends TestCase
   }
 
   /**
-   * put your documentation comment here
+   * Test that going to a line within the document's line count
+   * sets the current position to the first character of the line.
    * @exception BadLocationException
    */
   public void testGotoLine7() throws BadLocationException {
@@ -342,6 +355,3 @@ public class DefinitionsDocumentTest extends TestCase
     }
   }
 }
-
-
-

@@ -4,6 +4,12 @@ import  junit.framework.*;
 import  java.util.Vector;
 import  junit.extensions.*;
 
+/**
+ * Test cases which test the implementation of BraceReduction
+ * may extend this abstract class to acquire a convenience
+ * function for determining the state of the current token.
+ * @version $Id$
+ */
 public abstract class BraceReductionTestCase extends TestCase {
   
   public BraceReductionTestCase(String name) {
