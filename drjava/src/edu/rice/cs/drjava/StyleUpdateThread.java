@@ -15,7 +15,7 @@ public class StyleUpdateThread extends Thread {
 	}
 
 	public void run() {
-		
+			
 		while (true) {
 			while (_messages.size() == 0) {
 				try {
@@ -25,7 +25,7 @@ public class StyleUpdateThread extends Thread {
 			}
 			StyleUpdateMessage nextMessage = _messages.elementAt(0);
 			_messages.removeElementAt(0);
-
+			
 			nextMessage.dispatch(_doc, _messages);
 			_taskCounter.decrement();
 		}
@@ -37,3 +37,10 @@ public class StyleUpdateThread extends Thread {
 			this._messages.addElement(message);
 		}
 }
+
+
+
+
+
+
+

@@ -120,8 +120,14 @@ public class DefinitionsView extends JEditorPane
 		public void actionPerformed(ActionEvent e) {
 			int pos = getCaretPosition();
 			_doc().setCurrentLocation(pos);
-			_doc().indentLine();
 
+			int selStart = getSelectionStart();
+			int selEnd = getSelectionEnd();
+			
+			if(selStart == selEnd)
+				_doc().indentLine();
+			else
+				_doc().indentBlock(selStart, selEnd);
 		}
 	}
 
@@ -461,8 +467,8 @@ public class DefinitionsView extends JEditorPane
         setEnabled(false);
         putValue(Action.NAME, "Undo");
       }
-    }      
-  }    
+    }
+  }
 
   private class RedoAction extends AbstractAction {
     private RedoAction() {

@@ -1977,7 +1977,9 @@ public class ReducedModelComment
 		{
 			_cursor.prev();
 		}
-
+/**
+ *Dist to Previous newline will be -1 if no newline.
+ */
 	void getDistToPreviousNewline(IndentInfo braceInfo)
 		{
 			braceInfo.distToPrevNewline = _getDistToPreviousNewline(_cursor.copy(),
@@ -2048,6 +2050,10 @@ public class ReducedModelComment
 			return dist + relLoc;
 		}
 
+	/**
+	 * returns the distance to the space before the next newline
+	 * returns the distance to the end of the document if there is no newline
+	 */
 	public int getDistToNextNewline()
 		{
 			ModelList<ReducedToken>.Iterator copyCursor = _cursor.copy();
@@ -2065,7 +2071,6 @@ public class ReducedModelComment
 				walkcount += copyCursor.current().getSize();
 				copyCursor.next();
 			}
-
 			return walkcount;
 		}
 	

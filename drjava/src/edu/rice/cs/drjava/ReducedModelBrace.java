@@ -450,7 +450,7 @@ public class ReducedModelBrace
    */
 	public void move(int count)
 		{
-			_offset = _move(count, _cursor, _offset);			
+			_offset = _move(count, _cursor, _offset);
 		}
 
 	/**
@@ -496,7 +496,7 @@ public class ReducedModelBrace
 												 ModelList<ReducedToken>.Iterator copyCursor,
 												 int currentOffset)
 		{
-			if (copyCursor.atStart()){
+			if (copyCursor.atStart()) {
 				currentOffset = 0;
 				copyCursor.next();
 			}

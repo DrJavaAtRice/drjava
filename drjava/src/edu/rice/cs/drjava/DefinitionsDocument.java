@@ -43,6 +43,7 @@ public class DefinitionsDocument extends DefaultStyledDocument
 //			this._taskCounter = new Semaphore();
 //			this._styleUpdater = new StyleUpdateThread(this);
 //			_styleUpdater.start();
+
 		}
 
 	private static HashSet _makeNormEndings() {
@@ -102,6 +103,7 @@ public class DefinitionsDocument extends DefaultStyledDocument
 //																					!_modifiedHighlights);
 //		updateCurrentHighlights(message);
 //		updateStyles(message);
+
 	}
 	
 	
@@ -170,6 +172,7 @@ public class DefinitionsDocument extends DefaultStyledDocument
     _modifiedSinceSave = true;
 		_modifiedHighlights = _reduced.hasHighlightChanged();
 		
+
 //		message = _reduced.generateHighlights(offset,0, !_modifiedHighlights);
 //		updateCurrentHighlights(message);
 //		updateStyles(message);
@@ -234,6 +237,30 @@ public class DefinitionsDocument extends DefaultStyledDocument
 			this._indent = indent;
 		}
 	
+	public void indentBlock(int start, int end)
+		{
+			try{
+				
+				int moved = 0;
+				Position endPos = this.createPosition(end);
+				
+				while(start < endPos.getOffset()){
+					moved = _reduced.getDistToNextNewline();
+					start += moved;
+					setCurrentLocation(start);
+					indentLine();
+					//keeps track of the start and end position
+					start += endPos.getOffset() - end;
+					end = endPos.getOffset();
+					
+					if(start < end)
+						start++;
+					setCurrentLocation(start);
+				}
+			}
+			catch (Exception e){e.printStackTrace();}
+		}
+	
 	public void indentLine() 
 		{
 			// moves us to the end of the line
@@ -245,12 +272,20 @@ public class DefinitionsDocument extends DefaultStyledDocument
 			int distToBrace = ii.distToBrace;
 			int distToPrevNewline = ii.distToPrevNewline;
 			int tab = 0;
-			
-			if (distToNewline == -1)
+			boolean isSecondLine = false;
+
+			if (distToNewline == -1){
 				distToNewline = _currentLocation;
-			
+				isSecondLine = true;
+			}
+
 			try{
-				if ((distToNewline == -1) || (distToBrace == -1))
+				if (distToPrevNewline == -1) //only on the first line
+					tab = 0;
+				//takes care of the second line
+				else if(this._currentLocation - distToPrevNewline < 2)
+					tab = 0;
+				else if (distToBrace == -1)
 					tab = _indentSpecialCases(0, distToPrevNewline);
 				else if (braceType.equals("("))
 					tab = distToNewline - distToBrace + 1;
@@ -260,11 +295,11 @@ public class DefinitionsDocument extends DefaultStyledDocument
 				}
 				else if (braceType.equals("["))
 					tab = distToNewline - distToBrace + 1;
-						
+
 				tab(tab, distToPrevNewline);
 			}
 			catch (BadLocationException e){
-				//e.printStackTrace();
+				e.printStackTrace();
 				throw new IllegalArgumentException(e.getMessage());
 			}
 		}
@@ -279,9 +314,10 @@ public class DefinitionsDocument extends DefaultStyledDocument
 			//not a special case.
 			if (distToPrevNewline == -1)
 				return tab;
-
+			
 			//setup
 			int start = _reduced.getDistToPreviousNewline(distToPrevNewline + 1);
+
 			if (start == -1)
 				start = 0;
 			else
@@ -301,9 +337,9 @@ public class DefinitionsDocument extends DefaultStyledDocument
 
 			//non-normal endings
 			int i = length - distToPrevNewline - 2;
-
-			move(-distToPrevNewline - 2); //assumed: we are at end of a line.
 			int distanceMoved = distToPrevNewline + 2;
+			move(-distToPrevNewline - 2); //assumed: we are at end of a line.
+			
 			while (i >= 0 && _isCommentedOrSpace(i, text)){
 				i--;
 				if (i > 0){ //gaurentees you don't move into document Start.
@@ -317,9 +353,13 @@ public class DefinitionsDocument extends DefaultStyledDocument
 				int j = 0;
 				while ((j < length) && (text.charAt(j) == ' '))
 					j++;
-				if ((k < length) && (text.charAt(k) != '{'))
-					tab = j + _indent;
-				else if (k == text.length())
+				if ((k < length) && (text.charAt(k) == '{')){
+					if ((j < length) && (text.charAt(j) == '{'))
+						tab = j + _indent;
+					else
+						tab = j;
+				}
+				else
 					tab = j + _indent;
 			}
 				
