@@ -50,7 +50,6 @@
  * x show/hide hidden files
  * x set top component
  * x set root after instantiation
- * ! check boxes at each node?
  * x create/mutate directory
  *   x when ok/cancel/close, stopEdits
  * x delete
@@ -69,11 +68,16 @@
  * x add icon override
  * x change warning for delete (different for files)
  * x add external selection listeners (gives file selected?)
- * - make into JComponent that can be imbeded into other components
+ * x make into JComponent that can be imbeded into other components
  * x make drjava icons correct size & resize programatically for recent doc frame
  *   x or make two copies of the folder find a way to select which
- * - request that when a main file is selected, it is brought into the project tree
- *   if not there already.
+ * - (project prefs) request that when a main file is selected, it is brought 
+ *   into the project tree if not there already.
+ * - double click causes that node to be picked
+ * - click,wait,click again should cause rename
+ * - Text box on bottom to type in manually
+ * - check boxes at each node?
+ * - 
  */
 
 package edu.rice.cs.util.swing;
@@ -145,6 +149,7 @@ public class DirectoryChooser extends JPanel {
   protected JPopupMenu _treePopup;
   protected JMenuItem _collapseItem;
   protected JMenuItem _expandItem;
+  protected JMenuItem _refreshItem;
   protected JMenuItem _renameItem;
   protected JMenuItem _deleteItem;
   protected JMenuItem _newFolderItem;
@@ -353,6 +358,13 @@ public class DirectoryChooser extends JPanel {
     _treePopup.addSeparator();
     _popSep = (JPopupMenu.Separator)_treePopup.getComponent(2);
     
+    _refreshItem = new JMenuItem("Refresh");
+    _treePopup.add(_refreshItem);
+    _refreshItem.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        startRefreshNode();
+      }
+    });
     _renameItem = new JMenuItem("Rename");
     _treePopup.add(_renameItem);
     _renameItem.addActionListener(new ActionListener() {
@@ -390,8 +402,8 @@ public class DirectoryChooser extends JPanel {
       
       if (fd.isNew()) {
         DefaultMutableTreeNode parent = (DefaultMutableTreeNode)node.getParent();
-        node.removeFromParent();
-        ((DefaultTreeModel)_tree.getModel()).nodeStructureChanged(parent);
+        
+        getModel().removeNodeFromParent(node);
       }
     }
     public void editingStopped(ChangeEvent e) {
@@ -957,6 +969,85 @@ public class DirectoryChooser extends JPanel {
     }
     return false;
   }
+    
+  public boolean startRefreshNode() {
+    if (!_treeIsGenerated) return false;
+    DefaultMutableTreeNode node = (DefaultMutableTreeNode)_tree.getLastSelectedPathComponent();
+    if (node != null) {
+      refreshNode(node);
+      return true;
+    }
+    return false;
+  }
+  
+  public void refreshTree() {
+    if (!_treeIsGenerated) return;
+    DefaultMutableTreeNode root = (DefaultMutableTreeNode)_tree.getModel().getRoot();
+    if (_rootFile.exists())
+      refreshNode(root);
+    else
+      setRootFile(null); // force find new root file
+  }
+  
+  /**
+   * Updates the given node's children to match the filesystem. If the node carries
+   * a non-existent file or if the node is an EmptyTreeNode, then nothing is done.
+   * @param node The node to update. This will not be removed from the tree if it
+   *  doesn't exist. The caller of this method should ensure that it is removed properly.
+   * @return the file contained in this newly refreshed node, or
+   * null if the file doesn't exist or if the node is an EmptyTreeNode.
+   */
+  private File refreshNode(DefaultMutableTreeNode node) {
+    // Case 1: Empty tree node (not ever shown to user)
+    if (node instanceof EmptyTreeNode) return null;
+    
+    // Assume that if not an empty node, it's a file node.
+    File f = ((FileDisplay)node.getUserObject()).getFile();
+    // don't update if file doesn't exist. Let the parent take care of it.
+    if (!f.exists()) return null; 
+    
+    // Case 2: Non-empty Case (not yet expanded)
+    if (node.getChildCount() == 1 && node.getChildAt(0) instanceof EmptyTreeNode)
+        return f; // children are not generated yet
+      
+    // Case 3: Non-empty Case (has been expanded and may or may not have children)
+      
+    Enumeration<DefaultMutableTreeNode> e = node.children();/** The Swing API uses raw types!  This warning should be corrected in J2SE 6.0 **/
+    HashSet<File> set = new HashSet<File>();
+    LinkedList<DefaultMutableTreeNode> nodesToRemove = new LinkedList<DefaultMutableTreeNode>();
+    while (e.hasMoreElements()) {
+      DefaultMutableTreeNode n = e.nextElement();
+      if (nodeShouldBeRemoved(n)) 
+        nodesToRemove.add(n); 
+      else
+        set.add(refreshNode(n));
+    }
+    for(DefaultMutableTreeNode n : nodesToRemove) {
+      getModel().removeNodeFromParent(n);
+    }
+    File[] childFiles = f.listFiles();
+    if (childFiles.length > node.getChildCount()) {
+      Arrays.sort(childFiles); // just in case.
+      // fill in missing files in tree.
+      for (int i=0,j=0; i < childFiles.length; i++) {
+        if (shouldDisplay(childFiles[i])) {
+          if (!set.contains(childFiles[i])) // add to tree
+            getModel().insertNodeInto(makeFileNode(childFiles[i]), node, j);
+          j++;
+        }
+      }
+    }
+    return f;
+  }  
+  
+  /**
+   * Helper to the refreshNode method.
+   */
+  private boolean nodeShouldBeRemoved(DefaultMutableTreeNode node) {
+    Object dat = node.getUserObject();
+    return (dat instanceof FileDisplay) &&
+      !((FileDisplay)dat).getFile().exists();
+  }
   
   ///////// Public overridden methods from JComponent ///////////
   
@@ -1164,15 +1255,13 @@ public class DirectoryChooser extends JPanel {
         Arrays.sort(childFiles, _fileComparator);
         
         for (File f : childFiles) {
-          if ((f.isDirectory() || (_showFiles && allowFile(f))) && 
-              (_showHidden || !f.isHidden())) {
+          if (shouldDisplay(f)) {
             DefaultMutableTreeNode n = makeFileNode(f);
-            node.add(n);
-            ((DefaultTreeModel)_tree.getModel()).nodeStructureChanged(node);
+            addNode(n,node);
           }
         }
       }
-      ((DefaultTreeModel)_tree.getModel()).nodeStructureChanged(node);
+      getModel().nodeStructureChanged(node);
       hourglassOff();
     }
   }
@@ -1206,7 +1295,7 @@ public class DirectoryChooser extends JPanel {
       DefaultMutableTreeNode node = (DefaultMutableTreeNode)tp.getLastPathComponent();
       TreeNode parent = node.getParent();
       node.removeFromParent();
-      ((DefaultTreeModel)_tree.getModel()).nodeStructureChanged(parent);
+      getModel().nodeStructureChanged(parent);
       return true;
     }
     else {
@@ -1229,6 +1318,11 @@ public class DirectoryChooser extends JPanel {
     }
   }
         
+  protected boolean shouldDisplay(File f) {
+    return ((f.isDirectory() || (_showFiles && allowFile(f))) && 
+            (_showHidden || !f.isHidden()));
+  }
+  
   protected boolean allowFile(File f) {
     try{
       for (FileFilter ff : _normalFileFilters) {
@@ -1267,8 +1361,7 @@ public class DirectoryChooser extends JPanel {
     File f = getFileForTreeNode(parent);
     DefaultMutableTreeNode newNode = new DefaultMutableTreeNode(_fdManager.makeNewFolderDisplay(f));
     ensureHasChildren(parent);
-    parent.insert(newNode, 0);
-    ((DefaultTreeModel)_tree.getModel()).nodeStructureChanged(parent);
+    getModel().insertNodeInto(newNode,parent,0);
     TreePath newPath = new TreePath(newNode.getPath());
     _tree.startEditingAtPath(newPath);
   }
@@ -1317,6 +1410,11 @@ public class DirectoryChooser extends JPanel {
     updateChildFiles(top);
   }
   
+  /**
+   * If the name of the parent had been chaned, this corrects the
+   * file objects stored within all its children to include the 
+   * changed name in its path.
+   */
   protected void updateChildFiles(DefaultMutableTreeNode parent) {
     if (parent.getChildCount() == 1 && parent.getChildAt(0) instanceof EmptyTreeNode) {
       return; // children are not generated yet
@@ -1342,13 +1440,11 @@ public class DirectoryChooser extends JPanel {
       DefaultMutableTreeNode child = (DefaultMutableTreeNode)e.nextElement();
       if (node.toString().compareTo(child.toString()) < 0) {
         int idx = parent.getIndex(child);
-        parent.insert(node, idx);
-        ((DefaultTreeModel)_tree.getModel()).nodeStructureChanged(parent);
+        getModel().insertNodeInto(node,parent,idx);
         return;
       }
     }
-    parent.add(node); // add to end if no other node should go after
-    ((DefaultTreeModel)_tree.getModel()).nodeStructureChanged(parent);
+    addNode(node,parent); // add to end if no other node should go after
   }
   
   protected DefaultMutableTreeNode makeFileNode(File f) {
@@ -1357,6 +1453,15 @@ public class DirectoryChooser extends JPanel {
     return n;
   }
   
+  protected DefaultTreeModel getModel() {
+    return ((DefaultTreeModel)_tree.getModel());
+  }
+  
+  protected void addNode(DefaultMutableTreeNode child, DefaultMutableTreeNode parent) {
+    getModel().insertNodeInto(child,parent,parent.getChildCount());
+  }
+  
+  
   /////////////////////// INNER CLASS DECLARATIoNS /////////////////////
   
   /**
@@ -1364,7 +1469,7 @@ public class DirectoryChooser extends JPanel {
    * selecting the correct icon to put on each directory in the tree.
    */
   private class CustomTreeCellRenderer extends DefaultTreeCellRenderer{
-    
+    private WeakHashMap<File,Icon> _iconCache = new WeakHashMap<File,Icon>();
     /**
      * returns the component for a cell
      * @param tree
@@ -1384,9 +1489,9 @@ public class DirectoryChooser extends JPanel {
       
       DefaultMutableTreeNode node = (DefaultMutableTreeNode)value;
       File f = getFileForTreeNode(node);
-      Icon ico = _fdManager.getIcon(f); 
+      Icon ico = _iconCache.get(f);
+      if (ico == null) { ico = _fdManager.getIcon(f); _iconCache.put(f,ico); }
       setIcon(ico);
-      
       return this;
     }
     

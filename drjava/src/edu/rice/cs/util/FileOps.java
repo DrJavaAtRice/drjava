@@ -514,6 +514,7 @@ public abstract class FileOps {
       BufferedOutputStream bos = new BufferedOutputStream(fos);
       fileSaver.saveTo(bos);
       bos.close();
+      fos.close();
 
       if (tempFileUsed && !renameFile(tempFile, file)) {
         throw new IOException("Save failed: Another process may be using " + file + ".");
