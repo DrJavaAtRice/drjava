@@ -29,7 +29,7 @@
 package koala.dynamicjava.util;
 
 import koala.dynamicjava.interpreter.throwable.WrongVersionException;
-  
+
 import java.lang.reflect.*;
 import java.util.*;
 
@@ -45,58 +45,70 @@ public class ReflectionUtilities {
    * Looks for a constructor in the given class or in super classes of this class.
    * @param cl   the class of which the constructor is a member
    * @param ac   the arguments classes (possibly not the exact declaring classes)
+   * @return The constructor with which to instantiate the declaring class given 
+   *   the given types of the arguments being given.
    */
   public static Constructor lookupConstructor(Class cl, Class [] ac)
     throws NoSuchMethodException {
-    List<Constructor> ms = getConstructors(cl, ac.length);
-    List<Constructor> mm = new LinkedList<Constructor>();
+    List<Constructor> all = getConstructors(cl, ac.length);
+    List<Constructor> compatible = new LinkedList<Constructor>();
     
-    // Search for the constructors with good parameter types and
-    // put them in 'mm'
-    Iterator<Constructor> it = ms.iterator();
+    // Search for the methods with good parameter types and
+    // put them in 'compatible'
+    Iterator<Constructor> it = all.iterator();
     while (it.hasNext()) {
-      Constructor m = it.next();
-      if (hasCompatibleSignatures(m.getParameterTypes(), ac)) {
-        mm.add(m);
+      Constructor c = it.next();
+      if (hasCompatibleSignatures(c.getParameterTypes(), ac)) {
+        compatible.add(c);
       }
     }
     
-    if (mm.isEmpty()) {
-      boolean compatibleVersion = Float.valueOf(System.getProperty("java.specification.version")) >= 1.5;
-      
-      // Autoboxing handled in the isCompatible method called by the hasVarArgsCompatibleSignatures method
-      
-      // Do second pass for finding a varargs method that matches given method call
-      
-      ms = getVarArgsConstructors(cl, ac.length);
-      
-      // Search for the methods with good parameter types and
-      // put them in 'mm'
-      it = ms.iterator();
-      while (it.hasNext()) {
-        Constructor m = it.next();
-        if (hasVarArgsCompatibleSignatures(m.getParameterTypes(), ac)) {
-          if (!compatibleVersion) {
-            throw new WrongVersionException("Variable arguments are only supported in Java 1.5 or better");
-          }
-          mm.add(m);
-        }
-      }
-      
-      if(mm.isEmpty()){
-        throw new NoSuchMethodException(cl.getName()+" constructor");
-      }
+    // Select the most specific method if any were found
+    if (!compatible.isEmpty()) {
+      return selectTheMostSpecificConstructor(compatible);
     }
     
-    // Select the most specific constructor
-    it = mm.iterator();
-    Constructor result = it.next();
+    // Do a second pass to search for methods with autoboxing
     
+    it = all.iterator();
     while (it.hasNext()) {
-      result = selectTheMostSpecificConstructor(result, it.next());
+      Constructor c = it.next();
+      TigerUsage tu = new TigerUsage();
+      if (hasAutoBoxingCompatibleSignatures(c.getParameterTypes(), ac, tu)) {
+        tu.checkForCompatibleUsage();
+        compatible.add(c);
+      }
+    }
+      
+    if (!compatible.isEmpty()) {
+      return selectTheMostSpecificBoxingConstructor(compatible);
     }
     
-    return result;
+    // Do third pass for finding a varargs method that matches given method call
+    
+    it = all.iterator();
+    while (it.hasNext()) {
+      Constructor c = it.next();
+      TigerUsage tu = new TigerUsage();
+      if (hasVarArgsCompatibleSignatures(c.getParameterTypes(), ac, tu)) {
+        tu.checkForCompatibleUsage();
+        compatible.add(c);
+      }
+    }
+    
+    if(compatible.isEmpty()){
+      throw new NoSuchMethodException(generateNotFoundMsg("constructor", cl.getName(), ac));
+    }
+    else if (compatible.size() > 1) {
+      // It is ambiguous if more than one variable-argument 
+      // method matches the given parameter type list.
+      throw new AmbiguousMethodException("both methods match: " + 
+                                         compatible.get(0) + ", and " +
+                                         compatible.get(1));
+    }
+    else {
+      return compatible.get(0);
+    }
   }
   
   /**
@@ -112,38 +124,19 @@ public class ReflectionUtilities {
     Constructor[] ms = cl.getDeclaredConstructors();
     
     for (int i = 0; i < ms.length; i++) {
-      if (ms[i].getParameterTypes().length == params) {
+      if (ms[i].getParameterTypes().length <= (params + 1)) {
         result.add(ms[i]);
       }
     }
     return result;
   }
-  
-  /**
-   * Gets all the variable arguments constructors in the given class or super classes,
-   * even the redefined constructors are returned.
-   * @param cl     the class where the varargs constructor was declared
-   * @param params the number of parameters
-   * @return a list that contains the found constructors, an empty list if no
-   *         matching constructor was found.
-   */
-  public static List<Constructor> getVarArgsConstructors(Class cl, int params) {
-    List<Constructor>  result = new LinkedList<Constructor>();
-    Constructor[] ms = cl.getDeclaredConstructors();
     
-    for (int i = 0; i < ms.length; i++) {
-      if (ms[i].isVarArgs() && ms[i].getParameterTypes().length <= params) {
-        result.add(ms[i]);
-      }
-    }
-    return result;
-  }
-  
   /**
    * Looks for a method in the given class or in super classes of this class.
    * @param cl   the class of which the method is a member
    * @param name the name of the method
    * @param ac   the arguments classes (possibly not the exact declaring classes)
+   * @retun the method that should be invoked with arguments of the given types
    */
   public static Method lookupMethod(Class cl, String name, List<Class> ac)
     throws NoSuchMethodException {
@@ -155,67 +148,79 @@ public class ReflectionUtilities {
    * @param cl   the class of which the method is a member
    * @param name the name of the method
    * @param ac   the arguments classes (possibly not the exact declaring classes)
+   * @return the method that should be invoked with arguments of the given types
    */
   public static Method lookupMethod(Class cl, String name, Class[] ac)
     throws NoSuchMethodException {
-    List<Method> ms = getMethods(cl, name, ac.length);
-    List<Method> mm = new LinkedList<Method>();
+    List<Method> all = getMethods(cl, name, ac.length);
+    List<Method> compatible = new LinkedList<Method>();
     
     // Search for the methods with good parameter types and
-    // put them in 'mm'
-    Iterator<Method> it = ms.iterator();
+    // put them in 'compatible'
+    Iterator<Method> it = all.iterator();
     while (it.hasNext()) {
       Method m = it.next();
       if (hasCompatibleSignatures(m.getParameterTypes(), ac)) {
-        mm.add(m);
+        compatible.add(m);
       }
     }
     
-    if (mm.isEmpty()) {
-      boolean compatibleVersion = Float.valueOf(System.getProperty("java.specification.version")) >= 1.5;
-      
-      // Autoboxing handled in the isCompatible method called by the hasVarArgsCompatibleSignatures method
-      
-      // Do second pass for finding a varargs method that matches given method call
-      
-      ms = getVarArgsMethods(cl, name, ac.length);
-      
-      // Search for the methods with good parameter types and
-      // put them in 'mm'
-      it = ms.iterator();
-      while (it.hasNext()) {
-        Method m = it.next();
-        
-        if (hasVarArgsCompatibleSignatures(m.getParameterTypes(), ac)) {
-          if (!compatibleVersion) {
-            throw new WrongVersionException("Variable arguments are only supported in Java 1.5 or better");
-          }
-          mm.add(m);
-        }
-      }
-      
-      if(mm.isEmpty()){
-        throw new NoSuchMethodException(name);
-      }
+    // Select the most specific method if any were found
+    if (!compatible.isEmpty()) {
+      return selectTheMostSpecificMethod(compatible);
     }
     
-    // Select the most specific method
-    it = mm.iterator();
-    Method result = it.next();
+    // Do a second pass to search for methods with autoboxing
     
+    it = all.iterator();
     while (it.hasNext()) {
-      result = selectTheMostSpecificMethod(result, it.next()); /**/// may be confused by mm having varargs and need to be changed
+      Method m = it.next();
+      TigerUsage tu = new TigerUsage();
+      if (hasAutoBoxingCompatibleSignatures(m.getParameterTypes(), ac, tu)) {
+        tu.checkForCompatibleUsage();
+        compatible.add(m);
+      }
+    }
+      
+    if (!compatible.isEmpty()) {
+      return selectTheMostSpecificBoxingMethod(compatible);
     }
     
-    return result;
-  }
+    // Do third pass for finding a varargs method that matches given method call
+    
+    it = all.iterator();
+    while (it.hasNext()) {
+      Method m = it.next();
+      TigerUsage tu = new TigerUsage();
+      if (hasVarArgsCompatibleSignatures(m.getParameterTypes(), ac, tu)) {
+        tu.checkForCompatibleUsage();
+        compatible.add(m);
+      }
+    }
+    
+    if(compatible.isEmpty()){
+      throw new NoSuchMethodException(generateNotFoundMsg("method", cl.getName()+"."+name, ac));
+    }
+    else if (compatible.size() > 1) {
+      // It is ambiguous if more than one variable-argument 
+      // method matches the given parameter type list.
+      throw new AmbiguousMethodException("both methods match: " + 
+                                         compatible.get(0) + ", and " +
+                                         compatible.get(1));
+    }
+    else {
+      return compatible.get(0);
+    }
+  
+  } // end method: lookupMethod 
   
   /**
    * Gets all the methods with the given name in the given class or super classes.
-   * Even the redefined methods are returned.
+   * Even the redefined methods are returned. (Even methods of different parameter
+   * lengths are selected due to the introduction of variable arguments in 1.5)
    * @param cl     the class where the method was declared
    * @param name   the name of the method
-   * @param params the number of parameters
+   * @param params the number of parameters 
    * @return a list that contains the found methods, an empty list if no
    *         matching method was found.
    */
@@ -226,7 +231,7 @@ public class ReflectionUtilities {
       Method[] ms = cl.getDeclaredMethods();
       for (int i = 0; i < ms.length; i++) {
         if (ms[i].getName().equals(name) &&
-            ms[i].getParameterTypes().length == params) {
+            ms[i].getParameterTypes().length <= (params + 1)) {
           result.add(ms[i]);
         }
       }
@@ -237,53 +242,7 @@ public class ReflectionUtilities {
       if (cs.length == 0) {
         result.addAll(getMethods(Object.class, name, params));
       }
-    } 
-    else {
-      Class c = cl;
-      while (c != null) {
-        Method[] ms = c.getDeclaredMethods();
-        
-        for (int i = 0; i < ms.length; i++) {
-          if (ms[i].getName().equals(name) &&
-              ms[i].getParameterTypes().length == params) {
-            result.add(ms[i]);
-          }
-        }
-        c = c.getSuperclass();
-      }
     }
-    return result;
-  }
-  
-  /**
-   * Gets all the varargs methods with the given name in the given class or super classes.
-   * Even the redefined methods are returned.
-   * @param cl     the class where the method was declared
-   * @param name   the name of the method
-   * @param params the number of parameters
-   * @return a list that contains the found methods, an empty list if no
-   *         matching method was found.
-   */
-  public static List<Method> getVarArgsMethods(Class cl, String name, int params) {
-    List<Method>  result = new LinkedList<Method>();
-    
-    if (cl.isInterface()) {
-      Method[] ms = cl.getDeclaredMethods();
-      for (int i = 0; i < ms.length; i++) {
-        if (ms[i].getName().equals(name) &&
-            ms[i].isVarArgs() &&  // Use new 1.5 API
-            ms[i].getParameterTypes().length <= params) {
-          result.add(ms[i]);
-        }
-      }
-      Class[] cs = cl.getInterfaces();
-      for (int i = 0; i < cs.length; i++) {
-        result.addAll(getVarArgsMethods(cs[i], name, params));
-      }
-      if (cs.length == 0) {
-        result.addAll(getVarArgsMethods(Object.class, name, params));
-      }
-    } 
     else {
       Class c = cl;
       while (c != null) {
@@ -291,8 +250,7 @@ public class ReflectionUtilities {
         
         for (int i = 0; i < ms.length; i++) {
           if (ms[i].getName().equals(name) &&
-              ms[i].isVarArgs() &&  // Use new 1.5 API
-              ms[i].getParameterTypes().length <= params) {
+              ms[i].getParameterTypes().length <= (params + 1)) {
             result.add(ms[i]);
           }
         }
@@ -323,7 +281,7 @@ public class ReflectionUtilities {
       }
       c = c.getDeclaringClass();
     }
-    throw new NoSuchMethodException(name);
+    throw new NoSuchMethodException(generateNotFoundMsg("method", name, ac));
   }
   
   /**
@@ -388,51 +346,342 @@ public class ReflectionUtilities {
   }
   
   /**
-   * Returns the method with the most specific signature.
-   * It is assumed that m1 and m2 have the same number of parameters.
+   * Selects the method with the most specific signature.  This assumes that 
+   * each method does not require the application of any 1.5+ specific features.
+   * @param list The list of methods used 
+   * @return the most specific method among the methods in the given list
    */
-  protected static Method selectTheMostSpecificMethod(Method m1, Method m2) {
-    Class [] a1 = m1.getParameterTypes();
-    Class [] a2 = m2.getParameterTypes();
+  protected static Method selectTheMostSpecificMethod(List<Method> list) {
+    if (list.isEmpty()) return null;
     
-    for (int i = 0; i < a1.length; i++) {
-      if (a1[i] != a2[i]) {
-        return (isCompatible(a1[i], a2[i])) ? m2 : m1;
+    Iterator<Method> it = list.iterator();
+    Method best = it.next();
+    Method ambiguous = null; // there is no ambiguous other method at first
+    while (it.hasNext()) {
+      Method curr = it.next();
+      Class[] a1 = best.getParameterTypes();
+      Class[] a2 = curr.getParameterTypes();
+      
+      boolean better1 = false; // whether 'best' is better than 'curr'
+      boolean better2 = false; // whether 'curr' is better than 'best'
+      for (int i = 0; i < a1.length; i++) {
+        boolean from2to1 = isCompatible(a1[i], a2[i]);
+        boolean from1to2 = isCompatible(a2[i], a1[i]);
+        
+        if (from1to2 && !from2to1) {// best's parameter[i] is more specific than curr's
+          better1 = true; // so best is better than curr
+        }
+        if (from2to1 && !from1to2) {// curr's parameter[i] is more specific than best's
+          better2 = true; // so curr is better than best
+        }
+      }
+      
+      // decide which is more specific or whether they are ambiguous
+      if ( !(better1 ^ better2) ) { // neither is better than the other
+        // Handle overridden methods
+        if (Arrays.equals(a1, a2)) {
+          Class c1 = best.getDeclaringClass();
+          Class c2 = curr.getDeclaringClass();
+          boolean c1IsSuperOrSame = c1.isAssignableFrom(c2);
+          boolean c2IsSuperOrSame = c2.isAssignableFrom(c1);
+          if (c1IsSuperOrSame && !c2IsSuperOrSame) { // c2 is more specific
+            best = curr;
+            continue;
+          }
+          else if (c2IsSuperOrSame && !c1IsSuperOrSame) { // c1 is more specific
+            continue;
+          }
+        }
+        ambiguous = curr;
+      }
+      else if (better2) {
+        best = curr;
+        ambiguous = null; // no more ambiguity
       }
     }
-    return m1;
+    if (ambiguous != null) {
+      throw new AmbiguousMethodException("Both methods match: " + best + ", and " + ambiguous);
+    }
+    return best;
   }
   
   /**
-   * Returns the constructor with the most specific signature.
-   * It is assumed that m1 and m2 have the same number of parameters.
+   * Selects the constructor with the most specific signature.  This assumes that 
+   * each constructor does not require the use of any 1.5+ specific features.
+   * @param list The list of constructor used 
+   * @return the most specific constructor among the constructors in the given list
    */
-  protected static Constructor selectTheMostSpecificConstructor(Constructor c1,
-                                                                Constructor c2) {
-    Class [] a1 = c1.getParameterTypes();
-    Class [] a2 = c2.getParameterTypes();
+  protected static Constructor selectTheMostSpecificConstructor(List<Constructor> list) {
+    if (list.isEmpty()) return null;
     
+    Iterator<Constructor> it = list.iterator();
+    Constructor best = it.next();
+    Constructor ambiguous = null; // there is no ambiguous other method at first
+    while (it.hasNext()) {
+      Constructor curr = it.next();
+      Class[] a1 = best.getParameterTypes();
+      Class[] a2 = curr.getParameterTypes();
+      
+      boolean better1 = false; // whether 'best' is better than 'curr'
+      boolean better2 = false; // whether 'curr' is better than 'best'
+      for (int i = 0; i < a1.length; i++) {
+        boolean from2to1 = isCompatible(a1[i], a2[i]);
+        boolean from1to2 = isCompatible(a2[i], a1[i]);
+        
+        if (from1to2 && !from2to1) {// best's parameter[i] is more specific than curr's
+          better1 = true; // so best is better than curr
+        }
+        if (from2to1 && !from1to2) {// curr's parameter[i] is more specific than best's
+          better2 = true; // so curr is better than best
+        }
+      }
+      
+      // decide which is more specific or whether they are ambiguous
+      if ( !(better1 ^ better2) ) { // neither is better than the other
+        // Handle overridden methods
+        if (Arrays.equals(a1, a2)) {
+          Class c1 = best.getDeclaringClass();
+          Class c2 = curr.getDeclaringClass();
+          boolean c1IsSuperOrSame = c1.isAssignableFrom(c2);
+          boolean c2IsSuperOrSame = c2.isAssignableFrom(c1);
+          if (c1IsSuperOrSame && !c2IsSuperOrSame) { // c2 is more specific
+            best = curr;
+            continue;
+          }
+          else if (c2IsSuperOrSame && !c1IsSuperOrSame) { // c1 is more specific
+            continue;
+          }
+        }
+        ambiguous = curr;
+      }
+      else if (better2) {
+        best = curr;
+        ambiguous = null; // no more ambiguity
+      }
+    }
+    if (ambiguous != null) {
+      throw new AmbiguousMethodException("Both contructors match: " + best + ", and " + ambiguous);
+    }
+    return best;
+  }
+  
+  /**
+   * Selects the method with the most specific signature including autoboxing.
+   * It is assumed that m1 and m2 have the same number of parameters, but
+   * also assumes that there will be autoboxing required in at least one of the 
+   * parameter types.
+   * @param list The list of methods used 
+   * @return the most specific method among the methods in the given list
+   */
+  protected static Method selectTheMostSpecificBoxingMethod(List<Method> list) {
+    if (list.isEmpty()) return null;
+    TigerUsage tu = new TigerUsage(); // needed for the calls to isBoxCompatible
+    
+    Iterator<Method> it = list.iterator();
+    Method best = it.next();
+    Method ambiguous = null; // there is no ambiguous other method at first
+    while (it.hasNext()) {
+      Method curr = it.next();
+      Class[] a1 = best.getParameterTypes();
+      Class[] a2 = curr.getParameterTypes();
+      
+      boolean better1 = false; // whether 'best' is better than 'curr'
+      boolean better2 = false; // whether 'curr' is better than 'best'
+      for (int i = 0; i < a1.length; i++) {
+        boolean from2to1 = isBoxCompatible(a1[i], a2[i], tu);
+        boolean from1to2 = isBoxCompatible(a2[i], a1[i], tu);
+        
+        if (from1to2 && !from2to1) {// best's parameter[i] is more specific than curr's
+          better1 = true; // so best is better than curr
+        }
+        if (from2to1 && !from1to2) {// curr's parameter[i] is more specific than best's
+          better2 = true; // so curr is better than best
+        }
+      }
+      
+      // decide which is more specific or whether they are ambiguous
+      if ( !(better1 ^ better2) ) { // neither is better than the other
+        // Handle overridden methods
+        if (Arrays.equals(a1, a2)) {
+          Class c1 = best.getDeclaringClass();
+          Class c2 = curr.getDeclaringClass();
+          boolean c1IsSuperOrSame = c1.isAssignableFrom(c2);
+          boolean c2IsSuperOrSame = c2.isAssignableFrom(c1);
+          if (c1IsSuperOrSame && !c2IsSuperOrSame) { // c2 is more specific
+            best = curr;
+            continue;
+          }
+          else if (c2IsSuperOrSame && !c1IsSuperOrSame) { // c1 is more specific
+            continue;
+          }
+        }
+        ambiguous = curr;
+      }
+      else if (better2) {
+        best = curr;
+        ambiguous = null; // no more ambiguity
+      }
+    }
+    if (ambiguous != null) {
+      throw new AmbiguousMethodException("Both methods match: " + best + ", and " + ambiguous);
+    }
+    return best;
+  }
+   
+    
+  /**
+   * Selects the constructor with the most specific signature including autoboxing.
+   * It is assumed that m1 and m2 have the same number of parameters.
+   * @param list The list of constructors used 
+   * @return the most specific constructor among the constructors in the given list
+   */
+  protected static Constructor selectTheMostSpecificBoxingConstructor(List<Constructor> list) {
+    if (list.isEmpty()) return null;
+    TigerUsage tu = new TigerUsage(); // needed for the calls to isBoxCompatible
+    
+    Iterator<Constructor> it = list.iterator();
+    Constructor best = it.next();
+    Constructor ambiguous = null; // there is no ambiguous other method at first
+    while (it.hasNext()) {
+      Constructor curr = it.next();
+      Class[] a1 = best.getParameterTypes();
+      Class[] a2 = curr.getParameterTypes();
+      
+      boolean better1 = false; // whether 'best' is better than 'curr'
+      boolean better2 = false; // whether 'curr' is better than 'best'
+      for (int i = 0; i < a1.length; i++) {
+        boolean from2to1 = isBoxCompatible(a1[i], a2[i], tu);
+        boolean from1to2 = isBoxCompatible(a2[i], a1[i], tu);
+        
+        if (from1to2 && !from2to1) {// best's parameter[i] is more specific than curr's
+          better1 = true; // so best is better than curr
+        }
+        if (from2to1 && !from1to2) {// curr's parameter[i] is more specific than best's
+          better2 = true; // so curr is better than best
+        }
+      }
+      
+      // decide which is more specific or whether they are ambiguous
+      if ( !(better1 ^ better2) ) { // neither is better than the other
+        // Handle overridden methods
+        if (Arrays.equals(a1, a2)) {
+          Class c1 = best.getDeclaringClass();
+          Class c2 = curr.getDeclaringClass();
+          boolean c1IsSuperOrSame = c1.isAssignableFrom(c2);
+          boolean c2IsSuperOrSame = c2.isAssignableFrom(c1);
+          if (c1IsSuperOrSame && !c2IsSuperOrSame) { // c2 is more specific
+            best = curr;
+            continue;
+          }
+          else if (c2IsSuperOrSame && !c1IsSuperOrSame) { // c1 is more specific
+            continue;
+          }
+        }
+        ambiguous = curr;
+      }
+      else if (better2) {
+        best = curr;
+        ambiguous = null; // no more ambiguity
+      }
+    }
+    if (ambiguous != null) {
+      throw new AmbiguousMethodException("Both constructors match: " + best + ", and " + ambiguous);
+    }
+    return best;
+  }
+  
+  /**
+   * For each element (class) of the given arrays, tests if the first array
+   * element is assignable from the second array element. The two arrays are
+   * assumed to have the same length.
+   * @param a1 The parameter types of the method being checked for compatibility
+   * @param a2 The types of the arguments that are to be given to the method found
+   * @return whether the method with parameter types <code>a1</code> can be
+   *   legitimately called usining arguments of the types in <code>a2</code>
+   *   without applying any of the new features introduced in java 2 v1.5.0
+   */
+  public static boolean hasCompatibleSignatures(Class[] a1, Class[] a2) {
+    if (a1.length != a2.length) {
+      return false;
+    }
     for (int i = 0; i < a1.length; i++) {
-      if (a1[i] != a2[i]) {
-        if (isCompatible(a1[i], a2[i])) {
-          return c2;
-        } else {
-          return c1;
+      if (!isCompatible(a1[i], a2[i])) {
+        return false;
+      }
+    }
+    return true;
+  }
+  
+  
+  /**
+   * For each element (class) of the given arrays, tests if the first array
+   * element is assignable from the second array element. The two arrays are
+   * assumed to have the same length, but the elements may be the boxing 
+   * equivalents of eachother.
+   * @param a1 The parameter types of the method being checked for compatibility
+   * @param a2 The types of the arguments that are to be given to the method found
+   * @return whether the method with parameter types <code>a1</code> can be
+   *   legitimately called usining arguments of the types in <code>a2</code> 
+   *   using autoboxing but not using variabled arguments
+   */
+  public static boolean hasAutoBoxingCompatibleSignatures(Class[] a1, Class[] a2, TigerUsage tu) {
+    if (a1.length != a2.length) {
+      return false;
+    }
+    
+    // Now we know that a1.length > 0;
+    for (int i = 0; i < a1.length; i++) { //  a2 can have length larger than or equal to a1
+      if (!isBoxCompatible(a1[i], a2[i], tu)) {
+        return false;
+      }
+    }
+    return true;
+  }
+  
+  /**
+   * Tests if the first array element is assignable from the second array element 
+   * for each element except the last.  The last element of <code>a1</code> is
+   * expected to be an array while the last element(s) of <code>a2</code> may have 
+   * more (only all extra parameter types are equal to the element type of the 
+   * varargs array in <code>a1</code>
+   * @param a1 The parameter types of the method being checked for compatibility
+   * @param a2 The types of the arguments that are to be given to the method found
+   * @return whether the method with parameter types <code>a1</code> can be
+   *   legitimately called usining arguments of the types in <code>a2</code> using
+   *   both autoboxing and variable arguments
+   */
+  public static boolean hasVarArgsCompatibleSignatures(Class[] a1, Class[] a2, TigerUsage tu) {
+    if (a1.length == 0) {
+      return a2.length == 0;
+    }
+    
+    if (a1.length > (a2.length + 1)) {
+      return false;
+    }
+    
+    // Now we know that a1.length > 0;
+    for (int i = 0; i < a1.length-1; i++) { //  a2 can have length larger than or equal to a1
+      if (!isBoxCompatible(a1[i], a2[i], tu)) {
+        return false;
+      }
+    }
+    int lastIdx1 = a1.length - 1;
+    Class lastElt1 = a1[lastIdx1];
+    if(lastElt1.isArray() && (a2.length == a1.length - 1)) {
+      tu.varArgsAreUsed();
+      return true; // No varargs given.
+    }
+    else if(lastElt1.isArray() && !a2[lastIdx1].isArray()){
+      tu.varArgsAreUsed();
+      Class varArgsType = lastElt1.getComponentType(); // Get the element type of the array
+      for( int i = lastIdx1; i < a2.length; i++ ){
+        if(!isBoxCompatible(varArgsType, a2[i], tu)){
+          return false;
         }
       }
     }
-    
-    return c1;
-  }
-  
-  /**
-   * For each element (class) of the given arrays, tests if the first array
-   * element is assignable from the second array element. The two arrays are
-   * assumed to have the same length.
-   */
-  public static boolean hasCompatibleSignatures(Class[] a1, Class[] a2) {
-    for (int i = 0; i < a1.length; i++) {
-      if (!isCompatible(a1[i], a2[i])) {
+    else { // if equal lengths, then check the last one for compatibility
+      if (!isBoxCompatible(lastElt1, a2[lastIdx1], tu) || (a1.length != a2.length) ) {
         return false;
       }
     }
@@ -440,129 +689,78 @@ public class ReflectionUtilities {
   }
   
   /**
-   * For each element (class) of the given arrays, tests if the first array
-   * element is assignable from the second array element. The two arrays are
-   * assumed to have the same length.
-   */
-  public static boolean hasVarArgsCompatibleSignatures(Class[] a1, Class[] a2) {
-    for (int i = 0; i < a1.length-1; i++) { //  a2 can have length larger than or equal to a1
-      if (!isCompatible(a1[i], a2[i])) {
-        return false;
-      }
-    }
-    if(!a1[a1.length-1].isArray()){
-      return false; 
-      // in fact it indicates a more serious error that should be reported to DynamicJava 
-      // developers. That's, for the time being, US!
-    }
-    Class VarArgsType = a1[a1.length-1].getComponentType(); // Get the element type of the array
-    for( int i = a1.length-1; i < a2.length; i++ ){
-      if(!isCompatible(VarArgsType, a2[i])){
-        return false;
-      }
-    }
-    return true;
-  }
-  
-  /**
-   * Whether 'c1' is assignable from 'c2'
+   * Tests whether the Class c1 is assignable from c2.  If c1 and c2 are
+   * reference types, this method returns whether an argument of type c2
+   * can be passed to a parameter of type c1 without applying any features
+   * introduced in java 2 v1.5.0.
+   * @param c1 the type of the parameter being tested
+   * @param c2 the type of the argument being passed to the parameter
+   * @return whether c2 can be passed to c1 in a method invokation without
+   *   the features introduced in java 2 v1.5.0
    */
   public static boolean isCompatible(Class c1, Class c2) {
-    return isBoxCompatible(c1, c2, Float.valueOf(System.getProperty("java.specification.version")) >= 1.5);
-    
-    /** Commented by Jonathan Lugo 2004-05-18.  Code moved to isBoxCompatible**/
-//    if (c1.isPrimitive()) {
-//      if (c1 != c2) {
-//        if (c1 == int.class) {
-//          return (c2 == byte.class  ||
-//                  c2 == short.class ||
-//                  c2 == char.class);
-//        } 
-//        else if (c1 == long.class) {
-//          return (c2 == byte.class  ||
-//                  c2 == short.class ||
-//                  c2 == int.class);
-//        } 
-//        else if (c1 == short.class) {
-//          return c2 == byte.class;
-//        } 
-//        else if (c1 == float.class) {
-//          return (c2 == byte.class  ||
-//                  c2 == short.class ||
-//                  c2 == int.class   ||
-//                  c2 == long.class);
-//        } 
-//        else if (c1 == double.class) {
-//          return (c2 == byte.class  ||
-//                  c2 == short.class ||
-//                  c2 == int.class   ||
-//                  c2 == long.class  ||
-//                  c2 == float.class);
-//        } 
-//        else { // it's a boolean && c1 != c2
-//          return false;
-//        }
-//      }
-//      else { // c1 == c2
-//        return true;
-//      }
-//    } 
-//    else { // It's a reference type
-//      return (c2 == null) ? true : c1.isAssignableFrom(c2);
-//    }
-  }
-  
-  private static boolean _isBoxingType(Class c) {
-    return (c == Integer.class   || c == Long.class   ||
-            c == Boolean.class   || c == Double.class ||
-            c == Character.class || c == Short.class  ||
-            c == Byte.class      || c == Float.class );
+    if (c1.isPrimitive()) {
+      if (c1 != c2) {
+        if (c1 == int.class) {
+          return (c2 == byte.class  ||
+                  c2 == short.class ||
+                  c2 == char.class);
+        }
+        else if (c1 == long.class) {
+          return (c2 == byte.class  ||
+                  c2 == short.class ||
+                  c2 == int.class);
+        } 
+        else if (c1 == short.class) {
+          return c2 == byte.class;
+        } 
+        else if (c1 == float.class) {
+          return (c2 == byte.class  ||
+                  c2 == short.class ||
+                  c2 == int.class   ||
+                  c2 == long.class);
+        } 
+        else if (c1 == double.class) {
+          return (c2 == byte.class  ||
+                  c2 == short.class ||
+                  c2 == int.class   ||
+                  c2 == long.class  ||
+                  c2 == float.class);
+        } 
+        else { // it's a boolean && c1 != c2
+          return false;
+        }
+      }
+      else { // c1 == c2
+        return true;
+      }
+    } 
+    else { // It's a reference type
+      return (c2 == null) ? true : c1.isAssignableFrom(c2);
+    }
   }
   
   /**
-   * Returns the reference type that corresponds to the given primitive type.
-   * @param primType the primitive type
-   * @return the corresponding reference type
+   * Tests whether the Class c1 is assignable from c2.  If c1 and c2 are
+   * reference types, this method returns whether an argument of type c2
+   * can be passed to a parameter of type c1 BY APPLYING the features
+   * introduced in java 2 v1.5.0.
+   * @param c1 the type of the parameter being tested
+   * @param c2 the type of the argument being passed to the parameter
+   * @return whether c2 can be passed to c1 in a method invokation using
+   *   autoboxing
    */
-  protected static Class _correspondingBoxingType(Class primType) {
-    if (primType == boolean.class) { return Boolean.class; }
-    else if (primType == byte.class) { return Byte.class; }
-    else if (primType == char.class) { return Character.class; }
-    else if (primType == short.class) { return Short.class; }
-    else if (primType == int.class) { return Integer.class; }
-    else if (primType == long.class) { return Long.class; }
-    else if (primType == float.class) { return Float.class; }
-    else if (primType == double.class) { return Double.class; }
-    else {
-      return primType; // It's already a reference type
-    }
-  }
-  protected static Class _correspondingPrimType(Class refType) {
-    if (refType == Boolean.class) { return boolean.class; }
-    else if (refType == Byte.class) { return byte.class; }
-    else if (refType == Character.class) { return char.class; }
-    else if (refType == Short.class) { return short.class; }
-    else if (refType == Integer.class) { return int.class; }
-    else if (refType == Long.class) { return long.class; }
-    else if (refType == Float.class) { return float.class; }
-    else if (refType == Double.class) { return double.class; }
-    else {
-      return refType; // It's already a primitive type
-    }
-  }
-  public static boolean isBoxCompatible(Class c1, Class c2, boolean autoBoxEnabled) {
+  public static boolean isBoxCompatible(Class c1, Class c2, TigerUsage tu) {
     if (c1.isPrimitive()) {
       
-        
-      if (!c2.isPrimitive() && !autoBoxEnabled) {
-        // We know autoboxing/unboxing is required but
-        // the version of java doesn't support it
-        throw new WrongVersionException("Auto-unboxing only supported in Java 1.5 or better");
+      if (!c2.isPrimitive()) {
+        tu.autoBoxingIsUsed();
+        //        throw new RuntimeException("autoboxing used1:" + tu);
       }
-      else {
-        // unbox the second type (may not change)
-        c2 = _correspondingPrimType(c2);
-      }
+      
+      // unbox the second type (may not change)
+      c2 = TigerUtilities.correspondingPrimType(c2);
+      
       
       if (c1 != c2) {
         if (c1 == int.class) {
@@ -601,13 +799,75 @@ public class ReflectionUtilities {
     }
     else { // It's a reference type
       if (c2 != null && c2.isPrimitive()) {
-        if (!autoBoxEnabled) {
-           throw new WrongVersionException("Auto-boxing/unboxing is only supported in Java 1.5 or better");
-        }
-        c2 = _correspondingBoxingType(c2);
+        tu.autoBoxingIsUsed();
+        c2 = TigerUtilities.correspondingBoxingType(c2);
+        //        throw new RuntimeException("autoboxing 2:" + tu);
       }
       return (c2 == null) ? true : c1.isAssignableFrom(c2);
     }
+  }
+  
+  /**
+   * Generates a message string stating that one method is not found.  It 
+   * puts the given information into the message so as to make the message
+   * sufficiently descriptive (as much like javac as possible).
+   * @param methodType either "constructor" or "method"
+   * @param cl The class in which the method/constructor is being searched
+   * @param mName the name of the method being looked for
+   * @param ac The types of the expected parameters
+   * @return the message that should be given to the NoSuchMethodException
+   */
+  protected static String generateNotFoundMsg(String methodType, String mName, Class[] ac) {
+    String msg = methodType + " " + mName + "(";
+    if (ac.length > 0) {
+      msg += ac[0].getName();
+    }
+    for (int i=1; i < ac.length; i++) {
+      msg += "," + ac[i].getName();
+    }
+    msg += ")";
+    return msg;
+  }
+  
+  /**
+   * An object that can be passed from getMethod and getConstructor methods to
+   * certain helper functions.  It keeps track of whether 1.5 features were needed to
+   * search for the correct signatures.  The main reasong for this class's existence
+   * is that when a search resorts to checking for variable arguments, the user
+   * may or may not be using autoboxing.  By putting the error checking handler
+   * in this class, we are able to taylor the error message to reflect exactly which
+   * features were used in the method/constructor lookup that may not be supported
+   * in versions less than 1.5.
+   */
+  static class TigerUsage {
+    private boolean _autoBox = false;
+    private boolean _varArgs = false;
+    
+    public TigerUsage() {
+    }
+    
+    public void autoBoxingIsUsed() { _autoBox = true; }
+    
+    public boolean isAutoBoxingUsed() { return _autoBox; }
+    
+    public void varArgsAreUsed() { _varArgs = true; }
+    
+    public boolean areVarArgsUsed() { return _varArgs; }
+    
+    public void checkForCompatibleUsage() {
+      String msg = "only allowed in Java 2 v1.5 or better";
+      if (_autoBox && _varArgs) {
+        TigerUtilities.assertTigerEnabled("Auto-boxing and variable arguments are" + msg);
+      }
+      else if (_varArgs) {
+        TigerUtilities.assertTigerEnabled("Variable arguments are" + msg);
+      }
+      else if (_autoBox) {
+        TigerUtilities.assertTigerEnabled("Auto-boxing is" + msg);
+      }
+    }
+    
+    public String toString() { return "TigerUsage: {Boxing:" + _autoBox + ", VarArgs:" + _varArgs + "}"; }
   }
   
   /**

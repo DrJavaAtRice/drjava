@@ -668,7 +668,7 @@ public abstract class AbstractTypeChecker extends VisitorObject<Class> {
         }
         node.setProperty(NodeProperties.ERROR_STRINGS, new String[] { mn, s, sargs });
         throw new ExecutionError("no.such.method.with.args", node);
-      } 
+      }
       catch (MethodModificationError e) {
         Expression expr = e.getExpression();
         expr.acceptVisitor(this);

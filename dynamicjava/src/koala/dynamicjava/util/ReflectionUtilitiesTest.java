@@ -48,12 +48,41 @@ package koala.dynamicjava.util;
 import koala.dynamicjava.interpreter.throwable.WrongVersionException;
 
 import junit.framework.TestCase;
+import java.lang.reflect.*;
+import java.util.*;
+
+import static koala.dynamicjava.util.ReflectionUtilities.TigerUsage;
+import static koala.dynamicjava.util.ReflectionUtilities.lookupMethod;
+import static koala.dynamicjava.util.ReflectionUtilities.lookupConstructor;
+import static koala.dynamicjava.util.ReflectionUtilities.isBoxCompatible;
 
 /**
  * Tests the utility methods in the ReflectionUtilities class to
  * make sure they are working correctly.
  */
 public class ReflectionUtilitiesTest extends TestCase {
+  public void testTigerUsageClass() {
+    TigerUsage tu;
+    tu = new TigerUsage();
+    assertFalse("Autoboxing was not used", tu.isAutoBoxingUsed());
+    assertFalse("Var Args was not used", tu.areVarArgsUsed());
+    tu.autoBoxingIsUsed();
+    assertTrue("Autoboxing was used", tu.isAutoBoxingUsed());
+    assertFalse("Var Args was not used", tu.areVarArgsUsed());
+    tu.varArgsAreUsed();
+    assertTrue("Autoboxing was used", tu.isAutoBoxingUsed());
+    assertTrue("Var Args were used", tu.areVarArgsUsed());
+    
+    TigerUtilities.setTigerEnabled(false);
+    try {
+      tu.checkForCompatibleUsage();
+      TigerUtilities.resetVersion();
+      fail("Should have thrown a WrongVersionException");
+    }
+    catch(WrongVersionException e) {
+      TigerUtilities.resetVersion();
+    }
+  }
   
   /**
    * Tests the isBoxCompatible method (The three following private methods
@@ -99,23 +128,201 @@ public class ReflectionUtilitiesTest extends TestCase {
     _assertBoxCompatible(Object.class, Character.class, false);
   }
   private void _assertBoxCompatible(Class c1, Class c2, boolean boxEnabled) {
-    assertTrue("Should have been compatible: " + 
+    TigerUtilities.setTigerEnabled(boxEnabled);
+    TigerUsage tu = new TigerUsage();
+    assertTrue("Should have been compatible: " +
                c1 + " <- " + c2 + " (boxing enabled: " + boxEnabled + ")", 
-               ReflectionUtilities.isBoxCompatible(c1, c2, boxEnabled));
+               isBoxCompatible(c1, c2, tu));
+    assertFalse("Wrong version exception would have been thrown (bad)",
+                !boxEnabled && tu.isAutoBoxingUsed());
   }
   private void _assertNotBoxCompatible(Class c1, Class c2, boolean boxEnabled) {
+    TigerUtilities.setTigerEnabled(boxEnabled);
+    TigerUsage tu = new TigerUsage();
     assertFalse("Shouldn't have been compatible: " + 
                c1 + " <- " + c2 + " (boxing enabled: " + boxEnabled + ")", 
-                ReflectionUtilities.isBoxCompatible(c1, c2, boxEnabled));
+                isBoxCompatible(c1, c2, tu));
+    assertFalse("Wrong version exception would have been thrown (bad)",
+                !boxEnabled && tu.isAutoBoxingUsed());
   }
   private void _exceptionBoxCompatible(Class c1, Class c2, boolean boxEnabled) {
+    TigerUtilities.setTigerEnabled(boxEnabled);
+    TigerUsage tu = new TigerUsage();
+    isBoxCompatible(c1, c2, tu);
+    assertTrue("Should not have worked: " + 
+               c1 + " <- " + c2 + " (boxing enabled: " + boxEnabled + ")",
+               tu.isAutoBoxingUsed() &&
+               !boxEnabled);
+  }
+  
+  public void testLookupMethod() 
+    throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+    TigerUtilities.setTigerEnabled(false);
+    Method m;
     try {
-      ReflectionUtilities.isBoxCompatible(c1, c2, boxEnabled);
-      fail("Should have thrown an exception: " + 
-           c1 + " <- " + c2 + " (boxing enabled: " + boxEnabled + ")");
-    } 
-    catch (WrongVersionException e) { 
-      // it's good
+      m = lookupMethod(Integer.class, "toString", new Class[]{Integer.class});
+      fail("Didn't throw a wrong version exception!");
     }
+    catch (WrongVersionException e) {
+    }
+    catch (NoSuchMethodException e) {
+      fail("Was supposed to throw WrongVersionException, not NoSuchMethodException");
+    }
+    
+    try {
+      m = lookupMethod(Integer.class, "toString", new Class[]{Integer.class, int.class, int.class});
+      fail("Didn't throw an method exception!");
+    }
+    catch (NoSuchMethodException e) {
+    }
+    
+    // test to see that it can find overridden methods in classes that extend othre classes
+    Class[] pTypes = new Class[]{Object.class};
+    m = lookupMethod(LinkedList.class, "add", pTypes);
+    assertTrue("Incorrect parameter types", Arrays.equals(pTypes, m.getParameterTypes()));
+    assertEquals("Method was selected from wrong class", LinkedList.class, m.getDeclaringClass());
+    
+    // The following tests use 1.5 to assure correct semantics
+    TigerUtilities.resetVersion();
+    TigerUtilities.assertTigerEnabled("1.5 needed for this UnitTest");
+    
+    // Check to see that lookupMethod selects the corret method.
+    Integer ONE = new Integer(1);
+    int result;
+    
+    // test to see that it can find overridden methods in classes that extend othre classes
+    m = lookupMethod(Vector.class, "add", new Class[]{int.class});
+    assertTrue("Incorrect parameter types", Arrays.equals(new Class[]{Object.class}, m.getParameterTypes()));
+    assertEquals("Method was selected from wrong class", Vector.class, m.getDeclaringClass());
+    
+    // test(1,1) -> test(int x, int y)
+    m = lookupMethod(TestClass.class, "test", new Class[]{int.class, int.class});
+    result = ((Integer)m.invoke(null, new Object[]{ONE, ONE})).intValue();
+    assertEquals("lookup with test(int,int) found wrong method", TestClass.test(1, 1), result);
+    
+    // test(1,1,ONE) -> test(int x, int y, int z)
+    m = lookupMethod(TestClass.class, "test", new Class[]{int.class, int.class, Integer.class});
+    assertEquals("Wrong number of arguments chosen for (int,int,Integer): " + m, 3, m.getParameterTypes().length);
+    result = ((Integer)m.invoke(null, new Object[]{ONE, ONE, ONE})).intValue();
+    assertEquals("lookup with test(int,int,Integer) found wrong method", TestClass.test(1,1,ONE), result);
+    
+    // test1(1,1,1) -> ambiguous
+    try {
+      m = lookupMethod(TestClass.class, "test1", new Class[]{int.class, int.class, int.class});
+      fail("test1(int,int,int) Didn't throw an ambiguous method exception");
+    }
+    catch(AmbiguousMethodException e) {  }
+    
+    // test2(1,1,1) -> test2(Integer,Integer,Integer)
+    m = lookupMethod(TestClass.class, "test2", new Class[]{int.class, int.class, int.class});
+    assertEquals("Wrong number of arguments chosen for test2: " + m, 3, m.getParameterTypes().length);
+    result = ((Integer)m.invoke(null, new Object[]{ONE, ONE, ONE})).intValue();
+    assertEquals("lookup with test2 found wrong method", TestClass.test2(1,1,1), result);
+    
+    // test3(1,1) -> test3(Integer,Integer,Integer)
+    m = lookupMethod(TestClass.class, "test3", new Class[]{int.class, int.class});
+    assertEquals("Wrong number of arguments chosen for test3: " + m, 2, m.getParameterTypes().length);
+    result = ((Integer)m.invoke(null, new Object[]{ONE, ONE})).intValue();
+    assertEquals("lookup with test3 ound wrong method", TestClass.test3(1,1), result);
+    
+    // test4(ONE) -> test4(int)
+    m = lookupMethod(TestClass.class, "test4", new Class[]{Integer.class});
+    result = ((Integer)m.invoke(null, new Object[]{ONE})).intValue();
+    assertEquals("lookup with test4 ound wrong method", TestClass.test4(ONE), result);
+    
+    // test5(ONE) -> test5(int,int...)
+    m = lookupMethod(TestClass.class, "test5", new Class[]{Integer.class});
+    assertEquals("Wrong number of arguments chosen for test5: " + m, 2, m.getParameterTypes().length);
+    result = ((Integer)m.invoke(null, new Object[]{ONE, new int[]{}})).intValue();
+    assertEquals("lookup with test5 ound wrong method", TestClass.test5(1), result);
+    
+    // test5(1,1) -> ambiguous
+    try {
+      m = lookupMethod(TestClass.class, "test5", new Class[]{int.class, int.class});
+      fail("test5(int,int) Didn't throw an ambiguous method exception");
+    }
+    catch(AmbiguousMethodException e) {  }
+    
+  }
+  
+  
+  public void testLookupConstructor() 
+    throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+   
+    Constructor c;
+    int result;
+    
+    try {
+      c = lookupConstructor(TestClass.class, new Class[]{int.class,int.class,int.class});
+      fail("(int,int,int) Didn't throw an AmbiguousMethodException");
+    }
+    catch(AmbiguousMethodException e) { }
+      
+    try {
+      c = lookupConstructor(TestClass.class, new Class[]{String.class,int.class,int.class});
+      fail("(String,int,int) Didn't throw an AmbiguousMethodException");
+    }
+    catch(AmbiguousMethodException e) { }
+    
+    try {
+      c = lookupConstructor(TestClass.class, new Class[]{Class.class,int.class});
+      fail("(Class,int) Didn't throw an AmbiguousMethodException");
+    }
+    catch(AmbiguousMethodException e) { }
+    
+    c = lookupConstructor(TestClass.class, new Class[]{Method.class,int.class});
+    result = ((TestClass)c.newInstance(new Object[] {null,new Integer(1)})).value();
+    assertEquals("(Method,int) Should have picked #7 (Method,Number",new TestClass((Method)null,1).value(),result);
+    
+    c = lookupConstructor(TestClass.class, new Class[]{Field.class,String.class,String.class,String.class});
+    result = ((TestClass)c.newInstance(new Object[] {null,new String[]{"a","b","c"}})).value();
+    assertEquals("(Field,String,String,String) should have found varargs constructor",new TestClass((Field)null,"a","b","c").value(),result);
+  }
+  /**
+   * This class is created with methods that the tests can look for.
+   * They return numbers so that the result of invoking the returned 
+   * method can be checked against what the VM chooses during runtime.
+   */
+  protected static class TestClass {
+    private int value;
+    
+    // Test with (int,int,int), ambiguous
+    public TestClass(int i, double d, float f) { value = 1; }
+    public TestClass(int i, float f, double d) { value = 2; }
+    // Test with (String,int,int), ambiguous
+    public TestClass(String s, Integer a, int b) { value = 3; }
+    public TestClass(String s, int a, Integer b) { value = 4; }
+    // Test with (Class,int), ambiguous
+    public TestClass(Class c, int... rest) { value = 5; }
+    public TestClass(Class c, int i, int... rest) { value = 6; }
+    // Test with (Method,int), expect 7
+    public TestClass(Method m, Number n) { value = 7; }
+    public TestClass(Method m, Object o) { value = 8; }
+    // Test with (Field,String,String,String), assert found 9
+    public TestClass(Field f, String... msg) { value = 9; }
+    // Test with (boolean, int), expect not found
+    public TestClass(boolean b, Float f) { value = 10; }
+    
+                     public static int test(int x, int y){ return 4; }
+    public static int test(Integer x, Integer y){ return 5; }
+    public static int test(int x, int y, int z){ return 6; }
+    public static int test(int... i){ return 3; }
+    
+    public static int test1(double a, int b, float c){ return 1; }
+    public static int test1(float a, int b, double c){ return 2; }
+    
+    public static int test2(int a, int b, int c, int... rest) { return 1; }
+    public static int test2(Integer a, Integer b, Integer c) { return 2; }
+    
+    public static int test3(Integer a, double b) { return 1; }
+    public static int test3(Integer a, long b) { return 2; }
+    
+    public static int test4(Number b) { return 1; }
+    public static int test4(int b) { return 2; }
+    
+    public static int test5(int a, int... rest) { return 1; }
+    public static int test5(int a, int b, int... rest) { return 2; }
+    
+    public int value() { return value; }
   }
 }

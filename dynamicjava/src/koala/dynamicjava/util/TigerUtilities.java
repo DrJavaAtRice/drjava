@@ -101,20 +101,20 @@ public class TigerUtilities {
   }
   
   /**
-   * Uses short circuiting to ensure that if tiger is not enabled, isVarArgs will not be called
-   * Returns true if tiger is enabled and m.isVarArgs is true
-   * @param m the Method which is being tested with isVarArgs()
-   * @return boolean that is true if tiger is enabled and m isVarArgs
+   * Uses short circuiting to ensure that if tiger is not enabled, <code>isVarArgs()</code> 
+   * will not be called. Returns true if tiger is enabled and <code>misVarArgs()</code>  is true
+   * @param m the <code>Method</code> which is being tested with <code>isVarArgs()</code>
+   * @return boolean that is true if tiger is enabled and <code>c.isVarArgs</code>
    */  
   public static boolean isVarArgs(Method m) {
-    return _tigerEnabled && m.isVarArgs();    
+    return _tigerEnabled && m.isVarArgs();
   }
   
   /**
-   * Uses short circuiting to ensure that if tiger is not enabled, isVarArgs will not be called
-   * Returns true if tiger is enabled and c.isVarArgs is true
-   * @param c the Class which is being tested with isVarArgs()
-   * @return boolean that is true if tiger is enabled and c isVarArgs
+   * Uses short circuiting to ensure that if tiger is not enabled, <code>isVarArgs()</code> 
+   * will not be called.  Returns true if tiger is enabled and <code>c.isVarArgs()</code>  is true
+   * @param c the <code>Constructor</code> which is being tested with <code>isVarArgs()</code>
+   * @return boolean that is true if tiger is enabled and <code>c.isVarArgs</code>
    */  
   public static boolean isVarArgs(Constructor c) {
     return _tigerEnabled && c.isVarArgs();
@@ -122,6 +122,7 @@ public class TigerUtilities {
   
   /**
    * Returns the reference type that corresponds to the given primitive type.
+   * If the type given is not primitive, it returns the given type.
    * @param primType the primitive type
    * @return the corresponding reference type
    */
@@ -141,6 +142,7 @@ public class TigerUtilities {
   
   /**
    * Returns the primitive type that corresponds to the given reference type.
+   * If the given type is not a boxing type, it returns the given type.
    * @param refType the reference type
    * @return the corresponding primitive type
    */

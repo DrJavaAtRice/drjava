@@ -43,48 +43,20 @@
  * 
 END_COPYRIGHT_BLOCK*/
 
-package koala;
+package koala.dynamicjava.util;
 
-import java.util.Date;
-import java.text.SimpleDateFormat;
 
 /**
- * This interface hold the information about this build of DrJava.
- * This file is copied to Version.java by the build process, which also
- * fills in the right values of the date and time.
- *
- * This javadoc corresponds to build drjava-20040525-1712;
- *
- * @version $Id$
+ * This exception is thrown when more than one method is acceptable
+ * during a method lookup due to the new features added in 1.5
  */
-public abstract class Version {
+public class AmbiguousMethodException extends RuntimeException {
+  
   /**
-   * This string will be automatically expanded upon "ant commit".
-   * Do not edit it by hand!
+   * Public constructor - calls the super class constructor
+   * @param e - the message to be shown when the exception occurs
    */
-  private static final String BUILD_TIME_STRING = "20040525-1712";
-
-  /** A {@link Date} version of the build time. */
-  private static final Date BUILD_TIME = _getBuildDate();
-
-  public static String getBuildTimeString() {
-    return BUILD_TIME_STRING;
+  public AmbiguousMethodException(String e) {
+    super(e);
   }
-
-  public static Date getBuildTime() {
-    return BUILD_TIME;
-  }
-
-  private static Date _getBuildDate() {
-    try {
-      return new SimpleDateFormat("yyyyMMdd-HHmm z").parse(BUILD_TIME_STRING + " GMT");
-    }
-    catch (Exception e) { // parse format or whatever problem
-      return null;
-    }
-  }
-
-  public static void main(String[] args) {
-    System.out.println("Version for edu.rice.cs.drjava: " + BUILD_TIME_STRING);
-  }
-} 
+}

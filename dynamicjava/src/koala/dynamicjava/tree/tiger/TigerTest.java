@@ -202,19 +202,24 @@ public class TigerTest extends TestCase {
         "ps.printf(\"SomeStr %d somestr\",new Integer(2))\n;"+
         "ps.printf(\"SomeStr %s somestr\",\"str\")\n;"+
         "ps.printf(\"SomeStr\",null)\n;"+
-        "ps.printf(\"SomeStr %d %s somestr\",new Integer(26),\"str\")\n;";
+        "ps.printf(\"SomeStr %d %s somestr\",new Integer(26),\"str\")\n;\n"+
+        "ps.printf(\"SomeStr\");";
         
         interpret(testString);
         
-        try {
-          testString = 
-            "ps.printf(\"SomeStr\")\n;";
-          interpret(testString);
-          fail("Should have failed, as Printf needs some parameters");
-        }
-        catch(InterpreterException ie){
-          //Expected to fail.
-        }
+        /** 
+         * This test was originally expected to fail, but we found that 
+         * this actually was an acceptable varargs behavior
+         */
+//        try {
+//          testString = 
+//            "ps.printf(\"SomeStr\")\n;";
+//          interpret(testString);
+//          fail("Should have failed, as Printf needs some parameters");
+//        }
+//        catch(InterpreterException ie){
+//          //Expected to fail.
+//        }
     }
     
 }
