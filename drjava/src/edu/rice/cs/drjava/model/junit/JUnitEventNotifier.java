@@ -48,7 +48,8 @@ package edu.rice.cs.drjava.model.junit;
 import java.util.List;
 import edu.rice.cs.drjava.model.EventNotifier;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
-
+import java.io.File;
+import java.io.IOException;
 /**
  * Keeps track of all listeners to a JUnitModel, and has the ability
  * to notify them of some event.

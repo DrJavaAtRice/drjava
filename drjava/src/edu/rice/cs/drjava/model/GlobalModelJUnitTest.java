@@ -153,6 +153,25 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     "    assertTrue(true); " +
     "  } " +
     "}";
+  
+  private static final String STATIC_INNER_TEST_TEXT = 
+    "import junit.framework.TestCase;" +
+    " public class StaticInnerTestCase{" +
+    "   public static class Sadf extends TestCase {" +
+    "     public Sadf(){" +
+    "       super();" +
+    "     }" +
+    "     public Sadf(String name){" +
+    "       super(name);" +
+    "     }" +
+    "     public void testX() {" +
+    "       assertTrue(\"this is true\", true);" +
+    "     }" +
+    "     public void testY() {" +
+    "       assertFalse(\"this is false\", false);" +
+    "     }" +
+    "   }" +
+    "}";
 
   /**
    * Creates a test suite for JUnit to run.
@@ -687,7 +706,32 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     listener2.assertJUnitEndCount(1);
   }
 
-  
+  /**
+   * Tests that junit all works with one or two test cases that should pass.
+   */
+  public void testJUnitStaticInnerClass() throws Exception {
+    if (printMessages) System.err.println("----testJUnitAllWithNoErrors-----");
+    OpenDefinitionsDocument doc = setupDocument(NON_TESTCASE_TEXT);
+    JUnitNonTestListener listener = new JUnitNonTestListener(true);
+    File file = new File(_tempDir, "NonTestCase.java");
+    doc.saveFile(new FileSelector(file));
+    doc.startCompile();
+    doc = setupDocument(STATIC_INNER_TEST_TEXT);
+    file = new File(_tempDir, "StaticInnerTestCase.java");
+    doc.saveFile(new FileSelector(file));
+    doc.startCompile();
+    _model.addListener(listener);
+    synchronized (listener) {
+      _model.getJUnitModel().junitAll();
+      listener.wait();
+    }
+    listener.assertNonTestCaseCount(0);
+    listener.assertJUnitSuiteStartedCount(1);
+    listener.assertJUnitTestStartedCount(2);
+    listener.assertJUnitTestEndedCount(2);
+    _model.removeListener(listener);
+    if (printMessages) System.err.println("----testJUnitAllWithNoErrors-----");  
+  }  
   
   public static class JUnitNonTestListener extends JUnitTestListener {
     private boolean _shouldBeTestAll;

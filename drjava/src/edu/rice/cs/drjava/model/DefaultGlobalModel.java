@@ -686,7 +686,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
           return (filePath.startsWith(projectPath));
         }
         catch(IOException e) {
-          System.out.println(e); // What should we do in this case?
+//          System.out.println(e); // What should we do in this case?
           return false;
         }
       }
@@ -982,7 +982,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
         getJUnitModel().junitAll();
       }
       public void cleanBuildDirectory() throws FileMovedException, IOException{
-        System.out.println("not cleaning");
+        //System.out.println("not cleaning");
       }
 
     };

@@ -135,4 +135,5 @@ public interface JUnitModel {
    * Resets the junit error state to have no errors.
    */
   public void resetJUnitErrors();
+  
 }

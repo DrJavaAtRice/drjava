@@ -47,6 +47,8 @@ package edu.rice.cs.drjava.model;
 
 import java.util.List;
 import java.io.File;
+import java.io.IOException;
+import edu.rice.cs.util.FileOps;
 
 /**
  * Keeps track of all listeners to the model, and has the ability

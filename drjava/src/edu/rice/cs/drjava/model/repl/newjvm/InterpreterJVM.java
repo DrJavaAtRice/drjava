@@ -779,7 +779,8 @@ public class InterpreterJVM extends AbstractSlaveJVM
    */
   public List<String> runTestSuite(List<String> classNames, List<File> files,
                                    boolean isTestAll) throws RemoteException {
-    return _junitTestManager.runTest(classNames, files, isTestAll);
+    List<String> ret = _junitTestManager.runTest(classNames, files, isTestAll);
+    return ret;
   }
 
   /**

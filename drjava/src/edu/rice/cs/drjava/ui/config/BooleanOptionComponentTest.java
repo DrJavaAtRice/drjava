@@ -105,5 +105,5 @@ public final class BooleanOptionComponentTest extends TestCase {
                  OptionConstants.LINEENUM_ENABLED.getDefault(),
                  DrJava.getConfig().getSetting(OptionConstants.LINEENUM_ENABLED));
   }
-
 }
+

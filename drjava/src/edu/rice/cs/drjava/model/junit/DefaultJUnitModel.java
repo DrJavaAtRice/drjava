@@ -1,5 +1,4 @@
 /*BEGIN_COPYRIGHT_BLOCK
- *
  * This file is part of DrJava.  Download the current version of this project:
  * http://sourceforge.net/projects/drjava/ or http://www.drjava.org/
  *
@@ -67,7 +66,7 @@ import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 import edu.rice.cs.drjava.model.definitions.ClassNameNotFoundException;
 import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
 import edu.rice.cs.util.ExitingNotAllowedException;
-
+import org.apache.bcel.classfile.*;
 // TODO: remove swing dependency!
 import javax.swing.text.StyledDocument;
 import javax.swing.text.DefaultStyledDocument;
@@ -218,45 +217,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
 
   
   public void junitDocs(List<OpenDefinitionsDocument> lod){
-    synchronized (_compilerModel) {
-      //reset the JUnitErrorModel, fixes bug #907211 "Test Failures Not Cleared Properly".
-      _junitErrorModel = new JUnitErrorModel(new JUnitError[0], null, false);
-      
-      Iterator<OpenDefinitionsDocument> it = lod.iterator();
-//        _getter.getDefinitionsDocuments().iterator();
-      HashMap<String,OpenDefinitionsDocument> classNamesToODDs =
-        new HashMap<String,OpenDefinitionsDocument>();
-      ArrayList<String> classNames = new ArrayList<String>();
-      ArrayList<File> files = new ArrayList<File>();
-      while (it.hasNext()) {
-        try {
-          OpenDefinitionsDocument doc = it.next();
-          String cn = doc.getQualifiedClassName();
-          classNames.add(cn);
-          File f;
-          try {
-            f = doc.getFile();
-          }
-          catch (FileMovedException fme) {
-            f = fme.getFile();
-          }
-          files.add(f);
-          classNamesToODDs.put(cn, doc);
-        }
-        catch (ClassNameNotFoundException cnnfe) {
-          // don't add it to the test suite
-        }
-      }
-      List<String> tests = _jvm.runTestSuite(classNames, files, true);
-      ArrayList<OpenDefinitionsDocument> odds =
-        new ArrayList<OpenDefinitionsDocument>();
-      Iterator<String> it2 = tests.iterator();
-      while (it2.hasNext()) {
-        odds.add(classNamesToODDs.get(it2.next()));
-      }
-      _notifier.junitStarted(odds);
-      _isTestInProgress = true;
-    }
+    junitOpenDefDocs(lod, true);
   }
 
   
@@ -267,106 +228,164 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
    * sync, a message is displayed.
    */
   public void junit(OpenDefinitionsDocument doc)
-      throws ClassNotFoundException, IOException {
-      synchronized(_compilerModel) {
-        //JUnit started, so throw out all JUnitErrorModels now, regardless of whether
-        //  the tests succeed, etc.
+    throws ClassNotFoundException, IOException {
+    try {
+      // try to get the file, to make sure it's not untitled. if it is, it'll throw an IllegalStateException
+      File testFile = doc.getFile();
+      LinkedList<OpenDefinitionsDocument> lod = new LinkedList<OpenDefinitionsDocument>();
+      lod.add(doc);
+      junitOpenDefDocs(lod, false);
+    }
+    catch (IllegalStateException e) {
+      // No file exists, don't try to compile and test
+      nonTestCase(false);
+      return;
+    }
+    catch (NoClassDefFoundError e) {
+      // Method getTest in junit.framework.BaseTestRunner can throw a
+      // NoClassDefFoundError (via reflection).
+      _isTestInProgress = false;
+      _notifier.junitEnded();
+      throw e;
+    }
+    catch (ExitingNotAllowedException enae) {
+      _isTestInProgress = false;
+      _notifier.junitEnded();
+      throw enae;
+    }
+  }
+  
+  
+  
+  
+  protected void junitOpenDefDocs(List<OpenDefinitionsDocument> lod, boolean allTests){
+    synchronized (_compilerModel) {
+      
+      // if a test is running, don't start another one
+      if (_isTestInProgress) {
+        return;
+      }
+      
 
-        // if a test is running, don't start another one
-        if (_isTestInProgress) {
-          return;
-        }
-
-        //reset the JUnitErrorModel
-        _junitErrorModel = new JUnitErrorModel(new JUnitError[0], null, false);
-
-        // Compile and save before proceeding.
-//        saveAllBeforeProceeding(GlobalModelListener.JUNIT_REASON);
-//        if (areAnyModifiedSinceSave()) {
-//          return;
-//        }
+      //reset the JUnitErrorModel, fixes bug #907211 "Test Failures Not Cleared Properly".
+      _junitErrorModel = new JUnitErrorModel(new JUnitError[0], null, false);
+      
+//        _getter.getDefinitionsDocuments().iterator();
+      HashMap<String,OpenDefinitionsDocument> classNamesToODDs =
+        new HashMap<String,OpenDefinitionsDocument>();
+      ArrayList<String> classNames = new ArrayList<String>();
+      ArrayList<File> files = new ArrayList<File>();
+      
+      // start here.
+      Iterator<OpenDefinitionsDocument> it = lod.iterator();
+      File builtDir = _model.getBuildDirectory();
+      LinkedList<File> classDirs = new LinkedList<File>();
+      LinkedList<File> sourceFiles = new LinkedList<File>();
+      while (it.hasNext()) {
         try {
-          File testFile = doc.getFile();
-
-//          compileAll();
-//          if(getNumErrors() > 0) {
-//            _notifier.notifyListeners(new EventNotifier.Notifier() {
-//              public void notifyListener(GlobalModelListener l) {
-//                l.compileErrorDuringJUnit();
-//              }
-//            });
-//            return;
-//          }
-
-          ArrayList<OpenDefinitionsDocument> thisList = new ArrayList<OpenDefinitionsDocument>();
-          thisList.add(doc);
-          _notifier.junitStarted(thisList);
-
-          try {
-            // TODO: should this happen here, or should we make a "clear" method?
-            StyledDocument junitDoc = getJUnitDocument();
-            junitDoc.remove(0, junitDoc.getLength() - 1);
-          }
-          catch (BadLocationException e) {
-            nonTestCase(false);
-            return;
-          }
-
-          String testFilename = testFile.getName();
-          String lowerCaseName = testFilename.toLowerCase();
-          if (lowerCaseName.endsWith(".java")) {
-            testFilename = testFilename.substring(0, testFilename.length() - 5);
-          }
-          else if (lowerCaseName.endsWith(".dj0") || lowerCaseName.endsWith(".dj1") || lowerCaseName.endsWith(".dj2")) {
-            testFilename = testFilename.substring(0, testFilename.length() - 4);
-          }
-          else {
-            nonTestCase(false);
-            return;
-          }
+          OpenDefinitionsDocument doc = it.next();
           String packageName;
-          try {
+          try{
             packageName = doc.getPackageName();
+          }catch(InvalidPackageException e){
+            packageName = "";
           }
-          catch (InvalidPackageException e) {
-            nonTestCase(false);
-            return;
+          packageName = packageName.replace('.', File.separatorChar);
+          // kep a record of unique built direcotries
+          if(builtDir == null){
+            builtDir = doc.getSourceRoot();
           }
-          if(!packageName.equals("")) {
-            testFilename = packageName + "." + testFilename;
+          File temp = new File(builtDir.getCanonicalPath() + File.separator + packageName);
+          if(!classDirs.contains(temp)){
+            classDirs.add(temp);
           }
-          ArrayList<String> classNames = new ArrayList<String>();
-          classNames.add(testFilename);
-          ArrayList<File> files = new ArrayList<File>();
-          files.add(testFile);
-          _jvm.runTestSuite(classNames, files, false);
-
-          // Assign _isTestInProgress after calling runTest because we know at
-          // this point that the interpreterJVM has registered itself. We also
-          // know that the testFinished cannot be entered before this because
-          // it has to acquire the same lock as this method.
-          _isTestInProgress = true;
+//          String cn = doc.getQualifiedClassName();
+//          classNames.add(cn);
+//          files.add(f);
+//          classNamesToODDs.put(cn, doc);
         }
-        catch (IllegalStateException e) {
-          // No file exists, don't try to compile and test
-          nonTestCase(false);
-          return;
-        }
-        catch (NoClassDefFoundError e) {
-          // Method getTest in junit.framework.BaseTestRunner can throw a
-          // NoClassDefFoundError (via reflection).
-          _isTestInProgress = false;
-          _notifier.junitEnded();
-          throw e;
-        }
-        catch (ExitingNotAllowedException enae) {
-          _isTestInProgress = false;
-          _notifier.junitEnded();
-          throw enae;
+        catch(IOException e){
+          // don't add it to the test suite b/c the directory doesn't exist
+        }catch(InvalidPackageException e){
+          // don't add it, b/c it's package is bogus
         }
       }
-  }
 
+      
+      for(File dir: classDirs){
+        // foreach built directory
+        File[] listing = dir.listFiles();
+        if(listing != null) for(File entry : listing){
+          // for each class file in the built directory
+          if(entry.isFile()){
+            try{
+              JavaClass clazz = new ClassParser(entry.getCanonicalPath()).parse();
+              String classname = clazz.getClassName();// get classname
+//              System.out.println("looking for file for: " + classname);
+              int index_of_dot = classname.lastIndexOf('.');
+              String filenameFromClassfile = classname.substring(0, index_of_dot+1);
+              filenameFromClassfile = filenameFromClassfile.replace('.', File.separatorChar);
+              filenameFromClassfile = filenameFromClassfile + clazz.getSourceFileName();
+              // filenameFromClassfile now contains the location of a file with it's package directories attached
+              // now i need to strip off the filetype (in case the dj0 file is open in drjava, the class file would point to a .java file...)
+              index_of_dot = filenameFromClassfile.lastIndexOf('.');
+              filenameFromClassfile = filenameFromClassfile.substring(0, index_of_dot);
+              // now the filenameFromClassfile contains the package/filename without the extension.
+              
+              it = lod.iterator();
+              File f;
+              OpenDefinitionsDocument doc;
+              while (it.hasNext()) {
+                // for each open ODD
+                doc = it.next();
+                try{
+                  f = doc.getFile();
+                  String filename = doc.getSourceRoot().getCanonicalPath() + File.separator + filenameFromClassfile;
+                  int index = f.getCanonicalPath().lastIndexOf('.');
+                  String filenameFromDoc = f.getCanonicalPath().substring(0, index);
+                  String ext = f.getCanonicalPath().substring(index, f.getCanonicalPath().length());
+                  // filenameFromDoc now contains the filename minus the extention
+//                  System.out.println(f.getCanonicalPath() + " == " + filename);
+                  if(filenameFromDoc.equals(filename) && (ext.equals(".java") || ext.equals(".dj0") || ext.equals(".dj1") || ext.equals(".dj2"))){
+  //                    System.out.println("testing: " + classname + " from " + f.getCanonicalPath());
+//                    Method methods[] = clazz.getMethods();
+//                    for(Method d : methods){
+//                      System.out.println(" method: " + d);
+//                    }
+                    classNames.add(classname);
+                    files.add(f);
+                    classNamesToODDs.put(classname, doc);
+                  }
+                }catch(InvalidPackageException e){
+                }catch(IOException e){
+                }catch(IllegalStateException e){
+                  // doc is untitled
+                }
+              }
+            }catch(IOException e){
+              // can't read class file
+            }catch(ClassFormatException e){
+              // class file is bad
+            }
+            // match source file to odd (if possible)
+            // if match, add clasname to test suite
+          }
+        }
+      }
+      
+      _isTestInProgress = true;
+      List<String> tests = _jvm.runTestSuite(classNames, files, allTests);
+      ArrayList<OpenDefinitionsDocument> odds =
+        new ArrayList<OpenDefinitionsDocument>();
+      Iterator<String> it2 = tests.iterator();
+      while (it2.hasNext()) {
+        odds.add(classNamesToODDs.get(it2.next()));
+      }
+      _notifier.junitStarted(odds);
+    }
+  }
+  
+  
   //-------------------------------- Helpers --------------------------------//
 
   //----------------------------- Error Results -----------------------------//

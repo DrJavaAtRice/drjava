@@ -133,7 +133,6 @@ public class JUnitTestManager {
               errors[i] = _makeJUnitError(tFail, classNames, false, files);
               i++;
             }
-
             _jmc.testSuiteEnded(errors);
           }
           catch (Throwable t) {
@@ -299,6 +298,12 @@ public class JUnitTestManager {
     }
     else {
       file = _jmc.getFileForClassName(className);
+    }
+    
+    // a test didn't fail, we couldn't even open the test.
+    if(file == null){
+      return new JUnitError(new File("nofile"), 0,  //lineNum, 
+                          0, exception, !isFailure, testName, className, stackTrace);
     }
     
     //The conditional has been added because of the augmented code in the .dj0 files - it causes the error to be highlighted on the wrong line

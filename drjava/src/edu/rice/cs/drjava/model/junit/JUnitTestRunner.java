@@ -48,6 +48,8 @@ package edu.rice.cs.drjava.model.junit;
 import edu.rice.cs.drjava.model.repl.newjvm.InterpreterJVM;
 import edu.rice.cs.util.UnexpectedException;
 
+import java.io.File;
+import java.io.IOException;
 import java.io.PrintStream;
 import javax.swing.*;
 import javax.swing.text.StyledDocument;
@@ -117,7 +119,6 @@ public class JUnitTestRunner extends TestRunner {
   }
 
   public synchronized TestResult doRun(Test suite) {
-
     // Reset all bookkeeping
     _errorCount = 0;
     _failureCount = 0;
@@ -131,7 +132,6 @@ public class JUnitTestRunner extends TestRunner {
 //    long endTime = System.currentTimeMillis();
 //    long runTime = endTime - startTime;
 //    fPrinter.print(result, runTime);
-
     return _result;
   }
 

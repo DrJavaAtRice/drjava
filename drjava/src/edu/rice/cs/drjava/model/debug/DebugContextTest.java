@@ -53,6 +53,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.text.Document;
 import javax.swing.text.DefaultStyledDocument;
 import java.util.Vector;
+import java.util.Date;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.*;
