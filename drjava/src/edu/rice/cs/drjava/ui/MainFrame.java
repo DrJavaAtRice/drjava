@@ -114,8 +114,10 @@ public class MainFrame extends JFrame {
   private JMenuItem _compileMenuItem;
   private JMenuItem _abortInteractionMenuItem;
   private JCheckBoxMenuItem _debuggerEnabledMenuItem;
-  private JMenuItem _breakpointMenuItem;
   private JMenuItem _runDebuggerMenuItem;
+  private JMenuItem _toggleBreakpointMenuItem;
+  private JMenuItem _printBreakpointsMenuItem;
+  private JMenuItem _clearAllBreakpointsMenuItem;
 
   public SingleDisplayModel getModel() {
     return _model;
@@ -397,6 +399,24 @@ public class MainFrame extends JFrame {
     }
   };
 
+  /** Prints all breakpoints */
+  private Action _printBreakpointsAction =
+    new AbstractAction("Print All Breakpoints")
+  {
+    public void actionPerformed(ActionEvent ae) {
+      _printBreakpoints();
+    }
+  };
+
+  /** Prints all breakpoints */
+  private Action _clearAllBreakpointsAction =
+    new AbstractAction("Clear All Breakpoints")
+  {
+    public void actionPerformed(ActionEvent ae) {
+      _clearAllBreakpoints();
+    }
+  };
+    
   /** How DrJava responds to window events. */
   private WindowListener _windowCloseListener = new WindowListener() {
     public void windowActivated(WindowEvent ev) {}
@@ -786,7 +806,15 @@ public class MainFrame extends JFrame {
       _showClassNotFoundError(cnfe);
     }
   }
-  
+
+  private void _printBreakpoints() {
+    _model.getDebugManager().printBreakpoints();    
+  }
+
+  private void _clearAllBreakpoints() {
+    _model.getDebugManager().clearAllBreakpoints(true);
+  }    
+    
   private void _showIOError(IOException ioe) {
     _showError(ioe, "Input/output error",
                "An I/O exception occurred during the last operation.");
@@ -1143,12 +1171,20 @@ public class MainFrame extends JFrame {
     debugMenu.add(_debuggerEnabledMenuItem);
     
     debugMenu.addSeparator();
-    
-    _breakpointMenuItem = debugMenu.add(_toggleBreakpointAction);
-    // TO DO: add an accelerator
-    
+
     _runDebuggerMenuItem = debugMenu.add(_runDebuggerAction);
     // TO DO: add an accelerator
+
+    debugMenu.addSeparator(); // breakpoints section:    
+    
+    _toggleBreakpointMenuItem = debugMenu.add(_toggleBreakpointAction);
+    // TO DO: add an accelerator
+    
+    _printBreakpointsMenuItem = debugMenu.add(_printBreakpointsAction);
+    // TO DO: add an accelerator (optionally :) )
+
+    _clearAllBreakpointsMenuItem = debugMenu.add(_clearAllBreakpointsAction);
+    // TO DO: ?? do we want an acc?
     
     // Start off disabled
     _setDebugMenuItemsEnabled(false);
@@ -1162,8 +1198,10 @@ public class MainFrame extends JFrame {
    */
   private void _setDebugMenuItemsEnabled(boolean enabled) {
     _debuggerEnabledMenuItem.setState(enabled);
-    _breakpointMenuItem.setEnabled(enabled);
+    _toggleBreakpointMenuItem.setEnabled(enabled);
     _runDebuggerMenuItem.setEnabled(enabled);
+    _printBreakpointsMenuItem.setEnabled(enabled);
+    _clearAllBreakpointsMenuItem.setEnabled(enabled);
   }
 
   /**

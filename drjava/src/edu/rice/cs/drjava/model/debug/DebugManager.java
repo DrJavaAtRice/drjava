@@ -111,6 +111,8 @@ public class DebugManager {
 
     _session.addListener(new DebugOutputAdapter());
 
+    clearAllBreakpoints(false);
+    
      _isReady = true;
    }
   
@@ -126,7 +128,8 @@ public class DebugManager {
    * removes it from memory.
    */
   public void cleanUp() {
-    
+    clearAllBreakpoints(false);
+      
     _session = null;
     _swat = null;
     
@@ -178,6 +181,23 @@ public class DebugManager {
   
   public void getBreakpoints();
  */
+
+
+ /**
+  * Removes all breakpoints
+  */
+  public void clearAllBreakpoints(boolean visible) {
+    BreakpointManager bpManager = (BreakpointManager)_session.getManager(BreakpointManager.class);
+    Iterator i=bpManager.breakpoints(true);
+    Breakpoint bp;
+    while (i.hasNext()) {
+      bp = (Breakpoint)i.next();
+      bpManager.removeBreakpoint(bp);
+      i=bpManager.breakpoints(true);
+    }
+    if (visible) 
+      writeToLog("All breakpoints removed.\n");      
+  }    
 
  /**
   * Sets a breakpoint (or removes it, if it already
@@ -262,6 +282,40 @@ public class DebugManager {
     BreakpointManager bpManager = (BreakpointManager)_session.getManager(BreakpointManager.class);    
     bpManager.removeBreakpoint(bp);
     writeToLog("Breakpoint removed: " + className + ":" + bp.getLineNumber() + "\n");
+  }
+
+  /**
+   * Prints all location breakpoints via writeToLog()
+   */    
+  public void printBreakpoints() {
+    BreakpointManager bpManager = (BreakpointManager)_session.getManager(BreakpointManager.class);
+    Iterator i = bpManager.breakpoints(true);
+    Object o;
+    LineBreakpoint lbp;
+    MethodBreakpoint mbp;
+
+    writeToLog("current breakpoints:  ");
+    if (!i.hasNext())
+	writeToLog("none\n");
+    else
+	writeToLog("\n\n");
+    while (i.hasNext()) { // remember, ONLY locationbreakpoints
+      o = i.next();
+      if (o instanceof LineBreakpoint) {
+	lbp = (LineBreakpoint)o;  
+	writeToLog(" " + lbp.getClassName() +
+		   ":" + lbp.getLineNumber() +
+		   "\n");
+      }
+      if (o instanceof MethodBreakpoint) {
+	mbp = (MethodBreakpoint)o;
+	writeToLog(" " + mbp.getClassName() +
+		   ":" + mbp.getMethodName() +
+		   ":" + mbp.getLineNumber() +
+		   "\n");			 	
+      }
+    }
+    writeToLog("\n");
   }
     
   /*   
