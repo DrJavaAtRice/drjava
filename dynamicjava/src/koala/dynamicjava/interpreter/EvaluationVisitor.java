@@ -819,7 +819,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
           i++;
         }
         if(typs.length > 0){
-          if(!m.isVarArgs()){
+          if(!TigerUtilities.isVarArgs(m)){
             Object p  = it.next().acceptVisitor(this);
             args[i] = performCast(typs[i], p);
             i++;
@@ -910,7 +910,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
         i++;
       }
       if(typs.length > 0){
-        if(!m.isVarArgs()){
+        if(!TigerUtilities.isVarArgs(m)){
           args[i] = it.next().acceptVisitor(this);
           i++;
         } else {
@@ -955,7 +955,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
         i++;
       }
       if(typs.length > 0){
-        if(!m.isVarArgs()){
+        if(!TigerUtilities.isVarArgs(m)){
           args[i] = it.next().acceptVisitor(this);
           i++;
         } else {
@@ -1037,7 +1037,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
       }
     
       if(typs.length > 0){
-        if(!cons.isVarArgs()){
+        if(!TigerUtilities.isVarArgs(cons)){
           args[i++] = it.next().acceptVisitor(this);
         } else {
           args[i] = buildArrayOfRemainingArgs(typs, larg.size(), it);
@@ -1130,7 +1130,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
         args[i++] = it.next().acceptVisitor(this);
       }
       if(typs.length > 1){ 
-        if(!cons.isVarArgs()){
+        if(!TigerUtilities.isVarArgs(cons)){
           args[i++] = it.next().acceptVisitor(this);
         } else {
           args[i++] = buildArrayOfRemainingArgs(typs, larg.size()+1, it);
@@ -1175,7 +1175,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
         args[i++] = it.next().acceptVisitor(this);
       }
       if(typs.length > 0){
-        if(!cons.isVarArgs()){
+        if(!TigerUtilities.isVarArgs(cons)){
           args[i++] = it.next().acceptVisitor(this);
         } else {
           args[i] = buildArrayOfRemainingArgs(typs, larg.size(), it);

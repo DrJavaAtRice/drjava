@@ -156,4 +156,74 @@ public class TigerUtilitiesTest extends TestCase {
     assertEquals("Should not be a boxing type",TigerUtilities.isBoxingType(String.class),false);
   }
    
+  /**
+   * Tests the isIntegralType method
+   */
+  public void testIsIntegralType() {
+   assertEquals("Should be an integral type",TigerUtilities.isIntegralType(int.class),true); 
+   assertEquals("Should be an integral type",TigerUtilities.isIntegralType(Integer.class),true);
+   assertEquals("Should be an integral type",TigerUtilities.isIntegralType(short.class),true);
+   assertEquals("Should be an integral type",TigerUtilities.isIntegralType(Short.class),true);
+   assertEquals("Should be an integral type",TigerUtilities.isIntegralType(long.class),true);
+   assertEquals("Should be an integral type",TigerUtilities.isIntegralType(Long.class),true);
+   assertEquals("Should be an integral type",TigerUtilities.isIntegralType(byte.class),true);
+   assertEquals("Should be an integral type",TigerUtilities.isIntegralType(Byte.class),true);
+   assertEquals("Should be an integral type",TigerUtilities.isIntegralType(char.class),true);
+   assertEquals("Should be an integral type",TigerUtilities.isIntegralType(Character.class),true);
+   assertEquals("Should not be an integral type",TigerUtilities.isIntegralType(double.class),false);
+   assertEquals("Should not be an integral type",TigerUtilities.isIntegralType(Double.class),false);
+   assertEquals("Should not be an integral type",TigerUtilities.isIntegralType(float.class),false);
+   assertEquals("Should not be an integral type",TigerUtilities.isIntegralType(Float.class),false);
+   assertEquals("Should not be an integral type",TigerUtilities.isIntegralType(boolean.class),false);
+   assertEquals("Should not be an integral type",TigerUtilities.isIntegralType(Boolean.class),false);
+   assertEquals("Should not be an integral type",TigerUtilities.isIntegralType(String.class),false);
+  }
+  
+  /**
+   * Tests the boxesTo method
+   */
+  public void testBoxesTo() {
+    assertEquals("Should be able to box primitive to reference type",TigerUtilities.boxesTo(boolean.class,Boolean.class),true);
+    
+    assertEquals("Should be able to box primitive to reference type",TigerUtilities.boxesTo(int.class,Integer.class),true);
+    assertEquals("Should be able to box primitive to reference type",TigerUtilities.boxesTo(int.class,Long.class),true);
+    assertEquals("Should be able to box primitive to reference type",TigerUtilities.boxesTo(int.class,Double.class),true);
+    assertEquals("Should be able to box primitive to reference type",TigerUtilities.boxesTo(int.class,Float.class),true);
+    
+    assertEquals("Should be able to box primitive to reference type",TigerUtilities.boxesTo(double.class,Double.class),true);
+    
+    assertEquals("Should be able to box primitive to reference type",TigerUtilities.boxesTo(float.class,Float.class),true);
+    assertEquals("Should be able to box primitive to reference type",TigerUtilities.boxesTo(float.class,Double.class),true);
+    
+    assertEquals("Should be able to box primitive to reference type",TigerUtilities.boxesTo(long.class,Long.class),true);
+    assertEquals("Should be able to box primitive to reference type",TigerUtilities.boxesTo(long.class,Double.class),true);
+    assertEquals("Should be able to box primitive to reference type",TigerUtilities.boxesTo(long.class,Float.class),true);
+    
+    assertEquals("Should be able to box primitive to reference type",TigerUtilities.boxesTo(byte.class,Byte.class),true);
+    assertEquals("Should be able to box primitive to reference type",TigerUtilities.boxesTo(byte.class,Integer.class),true);
+    assertEquals("Should be able to box primitive to reference type",TigerUtilities.boxesTo(byte.class,Short.class),true);
+    assertEquals("Should be able to box primitive to reference type",TigerUtilities.boxesTo(byte.class,Long.class),true);
+    assertEquals("Should be able to box primitive to reference type",TigerUtilities.boxesTo(byte.class,Float.class),true);
+    assertEquals("Should be able to box primitive to reference type",TigerUtilities.boxesTo(byte.class,Double.class),true);
+    
+    assertEquals("Should be able to box primitive to reference type",TigerUtilities.boxesTo(char.class,Character.class),true);
+    assertEquals("Should be able to box primitive to reference type",TigerUtilities.boxesTo(char.class,Integer.class),true);
+    assertEquals("Should be able to box primitive to reference type",TigerUtilities.boxesTo(char.class,Long.class),true);
+    assertEquals("Should be able to box primitive to reference type",TigerUtilities.boxesTo(char.class,Double.class),true);
+    assertEquals("Should be able to box primitive to reference type",TigerUtilities.boxesTo(char.class,Float.class),true);
+    
+    assertEquals("Should be able to box primitive to reference type",TigerUtilities.boxesTo(short.class,Short.class),true);
+    assertEquals("Should be able to box primitive to reference type",TigerUtilities.boxesTo(short.class,Integer.class),true);
+    assertEquals("Should be able to box primitive to reference type",TigerUtilities.boxesTo(short.class,Long.class),true);
+    assertEquals("Should be able to box primitive to reference type",TigerUtilities.boxesTo(short.class,Double.class),true);
+    assertEquals("Should be able to box primitive to reference type",TigerUtilities.boxesTo(short.class,Float.class),true);
+    
+    assertEquals("Should not be able to box primitive to reference type",TigerUtilities.boxesTo(int.class,Byte.class),false);
+    assertEquals("Should not be able to box primitive to reference type",TigerUtilities.boxesTo(int.class,Character.class),false);
+    assertEquals("Should not be able to box primitive to reference type",TigerUtilities.boxesTo(int.class,Short.class),false);
+    assertEquals("Should not be able to box primitive to reference type",TigerUtilities.boxesTo(int.class,Boolean.class),false);
+    
+    assertEquals("Should not be able to box primitive to reference type",TigerUtilities.boxesTo(double.class,Float.class),false);
+    assertEquals("Should not be able to box primitive to reference type",TigerUtilities.boxesTo(double.class,Integer.class),false);
+  }
 }

@@ -102,12 +102,22 @@ public class TigerUtilities {
   
   /**
    * Uses short circuiting to ensure that if tiger is not enabled, isVarArgs will not be called
+   * Returns true if tiger is enabled and m.isVarArgs is true
+   * @param m the Method which is being tested with isVarArgs()
+   * @return boolean that is true if tiger is enabled and m isVarArgs
+   */  
+  public static boolean isVarArgs(Method m) {
+    return _tigerEnabled && m.isVarArgs();    
+  }
+  
+  /**
+   * Uses short circuiting to ensure that if tiger is not enabled, isVarArgs will not be called
    * Returns true if tiger is enabled and c.isVarArgs is true
    * @param c the Class which is being tested with isVarArgs()
    * @return boolean that is true if tiger is enabled and c isVarArgs
    */  
-  public static boolean isVarArgs(Method m) {
-    return _tigerEnabled && m.isVarArgs();    
+  public static boolean isVarArgs(Constructor c) {
+    return _tigerEnabled && c.isVarArgs();
   }
   
   /**
@@ -176,7 +186,7 @@ public class TigerUtilities {
             c == short.class || c == Short.class);
   }
   
- 
+  
   public static boolean boxesTo(Class prim, Class ref) {
     return 
       (prim == int.class     && (ref == Integer.class   || 

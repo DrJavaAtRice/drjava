@@ -214,8 +214,47 @@ public class Distinction1415Test extends TestCase {
     TigerUtilities.resetVersion();
   }
   
- 
+  /**
+   * Test that the use of foreach statements fails when the runtime environment is set to 1.4
+   */ 
+  public void testForEach14() {
+    TigerUtilities.setTigerEnabled(false);
+    try{
+      testString = 
+        "double sum = 0;\n" +
+        "for(double j : new double[]{3.0,4.0,5.0})\n" +
+        "sum+=j;";
+      interpret(testString);
+      fail("Should have thrown WrongVersionException");
+    }
+    catch(WrongVersionException wve) {
+      //Expected to throw a WrongVersionException
+    }
+    
+    //Set the java runtime version back to the correct version
+    TigerUtilities.resetVersion();
+  }
   
+  /**
+   * Test that the use of foreach statements does not fail when the runtime environment is set to 1.5
+   */
+  public void testForEach15() {
+    TigerUtilities.setTigerEnabled(true);
+    try{
+      testString = 
+        "double sum = 0;\n" +
+        "for(double j : new double[]{3.0,4.0,5.0})\n" +
+        "sum+=j;";
+      interpret(testString);
+    }
+    catch(WrongVersionException wve) {      
+      fail("Should not have thrown WrongVersionException");
+    }
+    
+    //Set the java runtime version back to the correct version
+    TigerUtilities.resetVersion();
+    
+  }
   
 }
 
