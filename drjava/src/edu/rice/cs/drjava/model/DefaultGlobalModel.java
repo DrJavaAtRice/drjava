@@ -1646,11 +1646,14 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
       
       try {
         File file = doc.getFile();
+        //this line precedes the .remove() so that a document with an invalid file is not cleared before
+        // this fact is discovered.
+        FileReader reader = new FileReader(file);
         DefinitionsDocument tempDoc = doc.getDocument();
         
         tempDoc.remove(0,tempDoc.getLength());
         
-        FileReader reader = new FileReader(file);
+
         _editorKit.read(reader, tempDoc, 0);
         reader.close(); // win32 needs readers closed explicitly!
         

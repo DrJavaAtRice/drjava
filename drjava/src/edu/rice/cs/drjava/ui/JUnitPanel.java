@@ -88,7 +88,9 @@ public class JUnitPanel extends TabbedPanel {
   private int _numErrors;
   private final SingleDisplayModel _model;
   private final JUnitErrorListPane _errorListPane;
-
+  
+  private JCheckBox _showHighlightsCheckBox;
+  
   /**
    * Constructor.
    * @param model SingleDisplayModel in which we are running
@@ -111,8 +113,31 @@ public class JUnitPanel extends TabbedPanel {
 
 
     _mainPanel.add(scroller, BorderLayout.CENTER);
-  }
+    
+    JPanel buttonPane = new JPanel();
+    buttonPane.setLayout(new BorderLayout());
+    
+    _showHighlightsCheckBox = new JCheckBox( "Highlight source", true);
+    _showHighlightsCheckBox.addChangeListener( new ChangeListener() {
+      public void stateChanged (ChangeEvent ce) {
+        DefinitionsPane lastDefPane = _errorListPane.getLastDefPane();
+        
+        if (_showHighlightsCheckBox.isSelected()) {
+          //lastDefPane.setCaretPosition( lastDefPane.getCaretPosition());
+          _errorListPane.switchToError(_errorListPane.getSelectedIndex());
+          lastDefPane.requestFocus();
+        }
+        else {
+          lastDefPane.removeErrorHighlight();
+        }
+      }
+    });
+    
+    buttonPane.add(_showHighlightsCheckBox, BorderLayout.SOUTH);
+    _mainPanel.add(buttonPane, BorderLayout.EAST);
 
+  }
+  
   /**
    * Returns the ErrorListPane that this panel manages.
    */
@@ -194,7 +219,7 @@ public class JUnitPanel extends TabbedPanel {
     private Object _listHighlightTag = null;
 
     // on mouse click, highlight the error in the list and also in the source
-    private MouseAdapter _mouseListener = new MouseAdapter() {
+    /**private MouseAdapter _mouseListener = new MouseAdapter() {
       public void mouseClicked(MouseEvent e) {
         JUnitError error = _errorAtPoint(e.getPoint());
 
@@ -205,7 +230,48 @@ public class JUnitPanel extends TabbedPanel {
           _errorListPane.switchToError(error);
         }
       }
-    };
+    };*/
+    
+    private class PopupAdapter extends MouseAdapter {
+      
+      private JUnitError _error = null;
+      
+      public void mouseClicked(MouseEvent e) {
+        maybeShowPopup(e);
+      }
+      
+      public void mouseReleased(MouseEvent e) {
+        _error = _errorAtPoint(e.getPoint());
+
+        if (_error == null) {
+          selectNothing();
+        }
+        else {
+          _errorListPane.switchToError(_error);
+        }
+        maybeShowPopup(e);      
+      }
+      
+      private void maybeShowPopup(MouseEvent e) {
+        
+        if (SwingUtilities.isRightMouseButton(e)) {
+          //if (e.isPopupTrigger()) {
+          _popMenu.show(e.getComponent(),
+                          e.getX(), e.getY());
+        }
+      }
+      //}
+        
+      public JUnitError getError() {
+        return _error;
+      }
+      
+    }
+    
+    private JPopupMenu _popMenu;
+    private PopupAdapter _popupAdapter;
+    private JFrame _stackFrame = null;
+    private JTextArea _stackTextArea;
 
     /**
      * Constructs the ErrorListPane.
@@ -214,7 +280,11 @@ public class JUnitPanel extends TabbedPanel {
       // If we set this pane to be of type text/rtf, it wraps based on words
       // as opposed to based on characters.
       super("text/rtf", "");
-      addMouseListener(_mouseListener);
+      
+      _createPopupMenu();
+      _popupAdapter = new PopupAdapter();
+      addMouseListener(_popupAdapter);
+      //addMouseListener(_mouseListener);
 
       _selectedIndex = 0;
       _errorListPositions = new Position[0];
@@ -223,12 +293,86 @@ public class JUnitPanel extends TabbedPanel {
       //System.out.println("lastDefPane = " + _lastDefPane);
 
       JUnitErrorListPane.this.setFont(new Font("Courier", 0, 20));
-
+      
       // We set the editor pane disabled so it won't get keyboard focus,
       // which makes it uneditable, and so you can't select text inside it.
       setEnabled(false);
     }
-
+    
+    
+    private void _createPopupMenu() {
+      
+      _popMenu = new JPopupMenu();
+      JMenuItem stackTraceItem = new JMenuItem("Show Stack Trace");
+      stackTraceItem.addActionListener ( new AbstractAction() {
+        public void actionPerformed( ActionEvent ae) {
+          if (_stackFrame == null) {
+            _setupStackTraceFrame();
+          }
+          _displayStackTrace(_popupAdapter.getError());
+        }
+      });
+      _popMenu.add(stackTraceItem);
+      
+    }
+        
+    private void _setupStackTraceFrame() {
+      
+      //DrJava.consoleOut().println("Stack Trace for Error: \n"+ e.stackTrace());
+      _stackFrame = new JFrame("JUnit Error Stack Trace");
+      _stackTextArea = new JTextArea();
+      _stackTextArea.setEditable(false);
+      _stackTextArea.setLineWrap(false);
+      JScrollPane scroll = new JScrollPane(_stackTextArea, 
+                                           JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+                                           JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+      
+      Action closeAction = new AbstractAction("Close") {
+        public void actionPerformed(ActionEvent e) {        
+          _stackFrame.hide();
+        }
+      };
+      JButton closeButton = new JButton(closeAction);
+      JPanel closePanel = new JPanel(new BorderLayout());
+      closePanel.add(closeButton, BorderLayout.EAST);
+            
+      _stackFrame.getContentPane().setLayout(new BorderLayout());
+      _stackFrame.getContentPane().add(scroll, BorderLayout.CENTER);
+      _stackFrame.getContentPane().add(closePanel, BorderLayout.SOUTH);
+      _stackFrame.setSize(500, 500);
+      
+      Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+      Dimension frameSize = _stackFrame.getSize();
+      _stackFrame.setLocation((screenSize.width - frameSize.width) / 2,
+                        (screenSize.height - frameSize.height) / 2);
+      
+      //_stackFrame.setResizable(false);
+      
+    }
+    
+    private void _displayStackTrace (JUnitError e) {
+      String errorOrFailure = (e.isWarning())?
+        "Error: ":
+        "Failure: ";
+        
+      _stackTextArea.setText("File: "+e.file().getName() + "\n" +
+                             "Test: "+e.testName() + "\n" +
+                             errorOrFailure + e.message() + "\n" + 
+                             "--------------\n\n" +
+                             e.stackTrace());
+      _stackTextArea.setCaretPosition(0);
+      _stackFrame.show();
+      
+    }
+    
+    /**
+     * Returns true if the errors should be highlighted in the source
+     * @return the status of the JCheckBox _showHighlightsCheckBox
+     */
+    public boolean shouldShowHighlightsInSource() {
+      return _showHighlightsCheckBox.isSelected();
+    }
+    
     /**
      * Get the index of the current error in the error array.
      */

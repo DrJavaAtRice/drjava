@@ -709,6 +709,8 @@ public class DebugManager {
   }
 
   private void _updateWatches() {
+    if (!isReady() || (_thread == null)) return;
+    
     int stackIndex = 0;
     StackFrame currFrame = null;
     List frames = null;

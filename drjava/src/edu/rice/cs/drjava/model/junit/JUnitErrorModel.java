@@ -208,19 +208,20 @@ public class JUnitErrorModel {
     tFail.thrownException().printStackTrace(pwFail);
         
     String classnameFail = theclass + "." + tcFail.getName();
-       
+    
     int lineNum = _lineNumber( swFail.toString(), classnameFail);
     if (lineNum > -1) _errorsWithPos++;
     
     _file = _document.getFile();
     
     String exception =  (isError) ? 
-      tFail.thrownException().toString() : 
+      tFail.thrownException().toString(): 
       tFail.thrownException().getMessage();
       
-    return new JUnitError(_file, lineNum, 0, exception,
-                                 ! (tFail.thrownException() instanceof AssertionFailedError),
-                                 tcFail.getName());
+      return new JUnitError(_file, lineNum, 0, exception,
+                            ! (tFail.thrownException() instanceof AssertionFailedError),
+                            tcFail.getName(),
+                            swFail.toString());
   }
 
 

@@ -66,7 +66,7 @@ public class CompilerErrorCaretListener implements CaretListener {
 
   private CompilerErrorModel _model;
   private Position[] _positions;
-
+  
 
   /**
    * Constructs a new caret listener to highlight compiler errors.
@@ -163,9 +163,12 @@ public class CompilerErrorCaretListener implements CaretListener {
       _errorListPane.selectNothing();
     }
     else {
-      // No need to move the caret since it's already here!
-      _highlightErrorInSource(shouldSelect);
-
+      
+      if (_errorListPane.shouldShowHighlightsInSource()) {
+        // No need to move the caret since it's already here!
+        _highlightErrorInSource(shouldSelect);
+      }
+       
       // Select item wants the CompilerError
       CompilerError[] errors = _model.getErrorsWithPositions();
       _errorListPane.selectItem(errors[shouldSelect]);
@@ -197,7 +200,7 @@ public class CompilerErrorCaretListener implements CaretListener {
       }
 
       _errorListPane.getLastDefPane().removeErrorHighlight();
-      _definitionsPane.addErrorHighlight(prevNewline, nextNewline);
+      _definitionsPane.addErrorHighlight(prevNewline+1, nextNewline);
       _errorListPane.setLastDefPane(_definitionsPane);
     }
     catch (BadLocationException impossible) {

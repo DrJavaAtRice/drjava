@@ -2174,6 +2174,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _docList = new JList(_model.getDefinitionsDocuments());
     _docList.setSelectionModel(_model.getDocumentSelectionModel());
     _docList.setCellRenderer(new DocCellRenderer());
+
   }
 
   /**

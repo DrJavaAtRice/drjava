@@ -167,10 +167,12 @@ public class JUnitErrorCaretListener implements CaretListener {
       _errorListPane.selectNothing();
     }
     else {
-
-      // No need to move the caret since it's already here!
-      _highlightErrorInSource(shouldSelect);
-
+  
+      if (_errorListPane.shouldShowHighlightsInSource()) {
+        // No need to move the caret since it's already here!
+        _highlightErrorInSource(shouldSelect);
+      }
+      
       // Select item wants the JUnitError
       JUnitError[] errors = _model.getErrorsWithPositions();
       _errorListPane.selectItem(errors[shouldSelect]);
@@ -178,10 +180,18 @@ public class JUnitErrorCaretListener implements CaretListener {
 
   }
 
+  /**
+   * Sets whether the given error should or should not be highlighted. Errors without
+   *  location do not highlight the source.
+   */
   public void shouldHighlight( boolean sH) {
     _shouldHighlight = sH;
   }
   
+  /**
+   * Indicates that the given error should or should not be highlighted. Errors without
+   *  location do not highlight the source.
+   */
   public boolean shouldHighlight() {
     return _shouldHighlight;
   }
@@ -212,9 +222,10 @@ public class JUnitErrorCaretListener implements CaretListener {
         nextNewline = _document.getLength();
       }
 
-      if (_errorListPane.getLastDefPane() != null)
+      if (_errorListPane.getLastDefPane() != null) {
         _errorListPane.getLastDefPane().removeErrorHighlight();
-      _definitionsPane.addErrorHighlight(prevNewline, nextNewline);
+      }
+      _definitionsPane.addErrorHighlight(prevNewline+1, nextNewline);
       _errorListPane.setLastDefPane(_definitionsPane);
     }
     catch (BadLocationException impossible) {

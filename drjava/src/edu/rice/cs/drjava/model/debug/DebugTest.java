@@ -66,8 +66,8 @@ import edu.rice.cs.drjava.CodeStatus;
  */
 public class DebugTest extends GlobalModelTestCase implements OptionConstants {
   
-  final boolean printEvents = false;
-  final boolean printMessages = false;
+  final boolean printEvents = true;
+  final boolean printMessages = true;
   
   private int _pendingNotifies = 0;
   private Object _notifierLock = new Object();
@@ -267,7 +267,7 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
   
     // Start debugger and add breakpoint
     synchronized(_notifierLock) {
-      _debugManager.startup();
+      _startup();  //_debugManager.startup();
       _waitForNotifies(1);  // startup
       _notifierLock.wait();
     }
@@ -427,7 +427,7 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     _debugManager.addListener(debugListener); 
     // Start debugger and add breakpoint
     synchronized(_notifierLock) {
-      _debugManager.startup();
+      _startup();  //_debugManager.startup();
       _waitForNotifies(1);  // startup
       _notifierLock.wait();
     }
@@ -591,7 +591,7 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     _debugManager.addListener(debugListener); 
     // Start debugger
     synchronized(_notifierLock) {
-      _debugManager.startup();
+      _startup();  //_debugManager.startup();
       _waitForNotifies(1);  // startup
       _notifierLock.wait();
     }
@@ -796,7 +796,7 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     _debugManager.addListener(debugListener);
     // Start debugger and add breakpoint (before class is loaded)
     synchronized(_notifierLock) {
-      _debugManager.startup();
+      _startup();  //_debugManager.startup();
       _waitForNotifies(1);
       _notifierLock.wait();
     }
@@ -903,8 +903,8 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
 
     _debugManager.addListener(listener);
      synchronized(_notifierLock) {
-      _debugManager.startup();
-      _waitForNotifies(1);
+       _startup();
+       _waitForNotifies(1);
       _notifierLock.wait();
     }
     
@@ -922,6 +922,23 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     assertTrue("Debug Manager should not be ready", !_debugManager.isReady());
 
     _debugManager.removeListener(listener);
+  }
+  
+  private void _startup() throws DebugException{
+    try {
+      _debugManager.startup();
+    }
+    catch (Exception e) {
+
+      try {
+        Thread.sleep(1000);
+      }
+      catch (InterruptedException ie) {
+      }            
+      // try starting up again
+      _debugManager.startup();
+    }
+    
   }
   
   

@@ -117,7 +117,8 @@ public class DefinitionsPane extends JEditorPane
   /**
    * Our current error matching highlight.
    */
-  private Object _errorHighlightTag = null;
+  //private Object _errorHighlightTag = null;
+  private HighlightManager.HighlightInfo _errorHighlightTag = null;
   /**
    * Highlight painter for selected errors in the defs doc.
    */

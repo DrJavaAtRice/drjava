@@ -88,6 +88,7 @@ public class CompilerErrorPanel extends TabbedPanel {
     return s;
   }
 
+  
 
   /** The total number of errors in the list */
   private int _numErrors;
@@ -99,7 +100,8 @@ public class CompilerErrorPanel extends TabbedPanel {
   private final JButton _previousButton;
   private final ErrorListPane _errorListPane;
   private final JComboBox _compilerChoiceBox;
-
+  private JCheckBox _showHighlightsCheckBox;
+  
   /**
    * Constructor.
    * @param model SingleDisplayModel in which we are running
@@ -179,13 +181,33 @@ public class CompilerErrorPanel extends TabbedPanel {
     JPanel uiBox = new JPanel(new BorderLayout());
     compilerPanel.add(new JLabel("Compiler", SwingConstants.RIGHT),
                       BorderLayout.NORTH);
+       
     compilerPanel.add(uiBox,BorderLayout.CENTER);
     uiBox.add(_compilerChoiceBox,BorderLayout.NORTH);
     uiBox.add(new JPanel(),BorderLayout.CENTER);
+    
     _mainPanel.add(scroller, BorderLayout.CENTER);
     _mainPanel.add(compilerPanel, BorderLayout.EAST);
     DrJava.CONFIG.addOptionListener( OptionConstants.JAVAC_LOCATION, new CompilerLocationOptionListener());
     DrJava.CONFIG.addOptionListener( OptionConstants.JSR14_LOCATION, new CompilerLocationOptionListener());
+    
+    _showHighlightsCheckBox = new JCheckBox( "Highlight source", true);
+    _showHighlightsCheckBox.addChangeListener( new ChangeListener() {
+      public void stateChanged (ChangeEvent ce) {
+        DefinitionsPane lastDefPane = _errorListPane.getLastDefPane();
+        
+        if (_showHighlightsCheckBox.isSelected()) {
+          //lastDefPane.setCaretPosition( lastDefPane.getCaretPosition());
+          _errorListPane.switchToError(_errorListPane.getSelectedIndex());
+          lastDefPane.requestFocus();
+        }
+        else {
+          lastDefPane.removeErrorHighlight();
+        }
+      }
+    });
+    
+    uiBox.add(_showHighlightsCheckBox, BorderLayout.SOUTH);
   }
   
   
@@ -286,7 +308,7 @@ public class CompilerErrorPanel extends TabbedPanel {
     private MouseAdapter _mouseListener = new MouseAdapter() {
       public void mouseClicked(MouseEvent e) {
         CompilerError error = _errorAtPoint(e.getPoint());
-
+        
         if (error == null) {
           selectNothing();
         }
@@ -314,9 +336,17 @@ public class CompilerErrorPanel extends TabbedPanel {
 
       // We set the editor pane disabled so it won't get keyboard focus,
       // which makes it uneditable, and so you can't select text inside it.
-      setEnabled(false);
+      setEnabled(false);      
     }
-
+    
+    /**
+     * Returns true if the errors should be highlighted in the source
+     * @return the status of the JCheckBox _showHighlightsCheckBox
+     */
+    public boolean shouldShowHighlightsInSource() {
+      return _showHighlightsCheckBox.isSelected();
+    }
+    
     /**
      * Get the index of the current error in the error array.
      */
@@ -515,7 +545,7 @@ public class CompilerErrorPanel extends TabbedPanel {
             int startPos = doc.getLength();
 
             // Show file
-            doc.insertString(doc.getLength(), "File: ", BOLD_ATTRIBUTES);
+            doc.insertString(doc.getLength(), "Class: ", BOLD_ATTRIBUTES);
             doc.insertString(doc.getLength(), filename + "\n", NORMAL_ATTRIBUTES);
 
             // Show error
