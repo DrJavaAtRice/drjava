@@ -45,6 +45,7 @@ import  javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
+import edu.rice.cs.drjava.config.*;
 
 /**
  * Test the tab/enter/squiggly indenting functionality.
@@ -52,17 +53,21 @@ import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
  */
 public class IndentTest extends TestCase {
   protected DefinitionsDocument doc;
+
   static String noBrace = IndentInfo.noBrace;
   static String openSquiggly = IndentInfo.openSquiggly;
   static String openParen = IndentInfo.openParen;
   static String openBracket = IndentInfo.openBracket;
-  private int indentLevel = 0;
+  private Integer indentLevel = new Integer(2);
+  private Integer configIndent;
+
   /**
    * put your documentation comment here
    * @param     String name
    */
   public IndentTest(String name) {
     super(name);
+    
   }
 
   /**
@@ -70,6 +75,14 @@ public class IndentTest extends TestCase {
    */
   public void setUp() {
     doc = new DefinitionsDocument();
+    configIndent = ConfigurationTool.CONFIG.getSetting(OptionConstants.INDENT_LEVEL);
+    ConfigurationTool.CONFIG.setSetting(OptionConstants.INDENT_LEVEL,indentLevel);
+  }
+  /**
+   * put your documentation comment here
+   */
+  protected void tearDown() {
+    ConfigurationTool.CONFIG.setSetting(OptionConstants.INDENT_LEVEL,configIndent);
   }
 
   /**
