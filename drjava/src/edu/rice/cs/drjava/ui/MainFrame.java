@@ -2333,6 +2333,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     toolsMenu.add(_loadHistoryAction);
     toolsMenu.add(_saveHistoryAction);
     toolsMenu.add(_clearHistoryAction);
+    toolsMenu.add(_viewInteractionsClasspathAction);
     toolsMenu.add(_copyInteractionToDefinitionsAction);
     toolsMenu.addSeparator();
 
