@@ -142,7 +142,7 @@
 
   <!-- Initializes properties used in all Eclipse tasks -->
   <target name="eclipse">
-    <property name="eclipse_plugin_version" value="0.9.0" />
+    <property name="eclipse_plugin_version" value="0.9.1" />
     <property name="eclipse_dir" value="${plugins_dir}/eclipse" />
     <property name="eclipse_srcroot" value="${eclipse_dir}/src" />
     <property name="eclipse_built" value="${eclipse_dir}/bin" />
