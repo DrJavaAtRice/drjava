@@ -51,6 +51,8 @@ import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
 import edu.rice.cs.drjava.ui.MainFrame;
 import edu.rice.cs.util.FileOps;
+import edu.rice.cs.util.StringOps;
+import edu.rice.cs.drjava.platform.PlatformFactory;
 
 /**
  * Tests opening/creating files specified as command line arguments.
@@ -318,16 +320,8 @@ public final class CommandLineTest extends TestCase {
    * when opening files.)
    */
   public void testRelativePath() throws IOException, InvalidPackageException {
-    // OK, we have to create a directory with a hard-coded name in the
-    // current working directory, so we'll make it strange. If this 
-    // directory happens to exist, it'll be deleted.
     String funnyName = "DrJava_automatically_deletes_this";
-    File newDirectory = new File(funnyName);
-    if (newDirectory.exists()) {
-      FileOps.deleteDirectory(newDirectory);
-    }
-
-    assertTrue("directory created OK", newDirectory.mkdir());
+    File newDirectory = mkTempDir(funnyName);
 
     File relativeFile = new File(newDirectory, "X.java");
 
@@ -336,29 +330,88 @@ public final class CommandLineTest extends TestCase {
                  relativeFile.isAbsolute());
 
     try {
-      FileOps.writeStringToFile(relativeFile,
-                                "package " + funnyName + "; class X {}");
-      assertTrue("file exists", relativeFile.exists());
-
-      String path = relativeFile.getPath();
-      DrJava.openCommandLineFiles(_mf, new String[] { path });
-
-      List<OpenDefinitionsDocument> docs = _mf.getModel().getDefinitionsDocuments();
-      assertEquals("Number of open documents", 1, docs.size());
-
-      OpenDefinitionsDocument doc = docs.get(0);
-
-      assertEquals("OpenDefDoc file is the right one and is absolute",
-                   relativeFile.getAbsoluteFile(),
-                   doc.getFile());
-
-      // The source root should be the current directory (as
-      // an absolute path, of course).
-      File root = doc.getSourceRoot();
-      assertEquals("source root", new File("").getAbsoluteFile(), root);
+      checkFile(relativeFile, funnyName);
+    }
+    catch (Exception e) {
+      fail("Exception thrown: " + StringOps.getStackTrace(e));
     }
     finally {
       FileOps.deleteDirectory(newDirectory);
     }
+  }
+  
+  /**
+   * Tests paths with "." and ".." in them.  Windows will blow up if you
+   * use one in a JFileChooser without converting it to a canonical filename.
+   */
+  public void testDotPaths() {
+    String funnyName = "DrJava_automatically_deletes_this";
+    File newDirectory = mkTempDir(funnyName);
+    
+    assertTrue("child directory created OK", 
+               new File(newDirectory, "childDir").mkdir());
+
+    File relativeFile = new File(newDirectory, "./X.java");
+    File relativeFile2 = new File(newDirectory, ".\\Y.java");
+    File relativeFile3 = new File(newDirectory, "childDir/../Z.java");
+
+    try {
+      checkFile(relativeFile, funnyName);
+      checkFile(relativeFile2, funnyName);
+      checkFile(relativeFile3, funnyName);
+    }
+    catch (Exception e) {
+      fail("Exception thrown: " + StringOps.getStackTrace(e));
+    }
+    finally {
+      FileOps.deleteDirectory(newDirectory);
+    }
+  }
+  
+  
+  /**
+   * Helper for testRelativeFile and testDotPaths.
+   */
+  private File mkTempDir(String funnyName) {
+    // OK, we have to create a directory with a hard-coded name in the
+    // current working directory, so we'll make it strange. If this 
+    // directory happens to exist, it'll be deleted.
+    File newDirectory = new File(funnyName);
+    if (newDirectory.exists()) {
+      FileOps.deleteDirectory(newDirectory);
+    }
+    
+    assertTrue("directory created OK", newDirectory.mkdir());
+    return newDirectory;
+  }
+  
+  /**
+   * Helper for testRelativeFile and testDotPaths.
+   */
+  private void checkFile(File relativeFile, String funnyName)
+      throws IOException, InvalidPackageException {
+    FileOps.writeStringToFile(relativeFile,
+                              "package " + funnyName + "; class X {}");
+    assertTrue("file exists", relativeFile.exists());
+    
+    String path = relativeFile.getPath();
+    DrJava.openCommandLineFiles(_mf, new String[] { path });
+    
+    List<OpenDefinitionsDocument> docs = _mf.getModel().getDefinitionsDocuments();
+    assertEquals("Number of open documents", 1, docs.size());
+    
+    OpenDefinitionsDocument doc = docs.get(0);
+    
+    assertEquals("OpenDefDoc file is the right one and is canonical",
+                 relativeFile.getCanonicalFile(),
+                 doc.getFile());
+    
+    // The source root should be the current directory (as
+    // a canonical path, of course).
+    File root = doc.getSourceRoot();
+    assertEquals("source root", new File("").getCanonicalFile(), root);
+    
+    // Close this doc to clean up after ourselves for the next check.
+    _mf.getModel().closeFile(doc);
   }
 }

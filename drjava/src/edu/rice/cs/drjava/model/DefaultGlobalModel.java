@@ -83,6 +83,7 @@ import edu.rice.cs.drjava.model.repl.newjvm.*;
 import edu.rice.cs.drjava.model.compiler.*;
 import edu.rice.cs.drjava.model.junit.*;
 import edu.rice.cs.drjava.model.definitions.indent.Indenter;
+import edu.rice.cs.drjava.platform.PlatformFactory;
 
 
 /**
@@ -501,14 +502,16 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
 
   /**
    * Note that .getFile called on the returned OpenDefinitionsDocument
-   * is guaranteed to return an absolute path, as this method makes
-   * it absolute.
+   * is guaranteed to return a canonical path, as this method makes
+   * it canonical.  This is necessary to ensure proper package detection.
+   * (Also see bug 774896 and 707734)
    * @see ILoadDocuments
    */
   public OpenDefinitionsDocument openFile(FileOpenSelector com)
     throws IOException, OperationCanceledException, AlreadyOpenException
   {
-    final File file = (com.getFiles())[0].getAbsoluteFile();
+    // This code is duplicated in MainFrame._setCurrentDirectory(File) for safety.
+    final File file = (com.getFiles())[0].getCanonicalFile();
     OpenDefinitionsDocument odd = _openFile(file);
     
     // Make sure this is on the classpath

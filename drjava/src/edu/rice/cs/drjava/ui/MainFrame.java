@@ -3261,10 +3261,13 @@ public class MainFrame extends JFrame implements OptionConstants {
     //  JFileChooser to an absolute path with ".." in it.
     // In that case, we'll use the canonical path for the file chooser.
     // (Fix for bug 707734)
+    // Extended this to fix "./" and ".\" also (bug 774896)
     try {
       File f = file.getAbsoluteFile();
       if (PlatformFactory.ONLY.isWindowsPlatform() &&
-          (file.getAbsolutePath().indexOf("..") != -1)) {
+          ((file.getAbsolutePath().indexOf("..") != -1) ||
+           (file.getAbsolutePath().indexOf("./") != -1) ||
+           (file.getAbsolutePath().indexOf(".\\") != -1))) {
         f = file.getCanonicalFile();
       }
       _openChooser.setCurrentDirectory(f);
