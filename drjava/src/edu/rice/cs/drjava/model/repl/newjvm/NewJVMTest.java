@@ -120,7 +120,11 @@ public class NewJVMTest extends TestCase {
     }
   }
 
-  
+  /**
+   * temporarily disabled...
+   * (This was originally disabled, but it seemed to pass, so I put
+   *  it back in.  Then it inconsistently failed/hung on other platforms.
+   *  I'm investigating why at the moment...  creis)  
   public void testWorksAfterRestartConstant() throws Throwable {
     if (printMessages) System.out.println("----testWorksAfterRestartConstant-----");
     synchronized(_jvm) {
@@ -136,7 +140,7 @@ public class NewJVMTest extends TestCase {
       assertEquals("result", "4", _jvm.returnBuf);
     }
   }
-  
+  */
   
   public void testThrowRuntimeException() throws Throwable {
     if (printMessages) System.out.println("----testThrowRuntimeException-----");
