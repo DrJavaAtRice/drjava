@@ -136,6 +136,7 @@ public class EventNotifier implements GlobalModelListener {
   /**
    * Lets the listeners know some event has taken place.
    * @param EventNotifier n tells the listener what happened
+   * @deprecated
    */
   public void notifyListeners(Notifier n) {
     _lock.startRead();
@@ -156,6 +157,7 @@ public class EventNotifier implements GlobalModelListener {
    * @param EventPoller p the question being asked of the listeners
    * @return the listeners' responses ANDed together, true if they all
    * agree, false if some disagree
+   * @deprecated
    */
   public boolean pollListeners(Poller p) {
     _lock.startRead();

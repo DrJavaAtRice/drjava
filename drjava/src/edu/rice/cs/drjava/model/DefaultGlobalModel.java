@@ -107,7 +107,9 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
 
   /**
    * Keeps track of all listeners to the model, and has the ability
-   * to notify them of some event.
+   * to notify them of some event.  Originally used a Command Pattern style,
+   * but this has been replaced by having EN directly implement all listener
+   * interfaces it supports.
    */
   protected final EventNotifier _notifier = new EventNotifier();
 
@@ -430,20 +432,6 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
   }
 
   /**
-   * Static inner class for newFile method.
-   */
-  private static class NewFileNotifier extends EventNotifier.Notifier {
-    private OpenDefinitionsDocument _doc;
-    public NewFileNotifier(OpenDefinitionsDocument doc) {
-      super();
-      _doc = doc;
-    }
-    public void notifyListener(GlobalModelListener l) {
-      l.newFileCreated(_doc);
-    }
-  }
-
-  /**
    * Creates a new definitions document and adds it to the list.
    * @return The new open document
    */
@@ -451,7 +439,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     final OpenDefinitionsDocument doc = _createOpenDefinitionsDocument();
     doc.getDocument().setFile(null);
     _definitionsDocs.addElement(doc);
-    _notifier.notifyListeners(new NewFileNotifier(doc));
+    _notifier.newFileCreated(doc);
     return doc;
   }
 
@@ -624,11 +612,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       doc.removeFromDebugger();
       // Only fire event if doc exists and was removed from list
       if (_definitionsDocs.removeElement(doc)) {
-        _notifier.notifyListeners(new EventNotifier.Notifier() {
-          public void notifyListener(GlobalModelListener l) {
-          l.fileClosed(closedDoc);
-        }
-        });
+        _notifier.fileClosed(closedDoc);
         return true;
       }
     }
@@ -820,11 +804,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
   public void resetConsole() {
     _consoleDoc.reset();
 
-    _notifier.notifyListeners(new EventNotifier.Notifier() {
-      public void notifyListener(GlobalModelListener l) {
-        l.consoleReset();
-      }
-    });
+    _notifier.consoleReset();
   }
 
   /**
@@ -1112,11 +1092,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
         }
         File[] files = filesToCompile.toArray(new File[0]);
 
-        _notifier.notifyListeners(new EventNotifier.Notifier() {
-          public void notifyListener(GlobalModelListener l) {
-            l.compileStarted();
-          }
-        });
+        _notifier.compileStarted();
 
         try {
           // Compile the files
@@ -1129,11 +1105,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
         }
         finally {
           // Fire a compileEnded event
-          _notifier.notifyListeners(new EventNotifier.Notifier() {
-            public void notifyListener(GlobalModelListener l) {
-              l.compileEnded();
-            }
-          });
+          _notifier.compileEnded();
 
           // Only clear interactions if there were no errors
           if (_numErrors == 0) {
@@ -1310,12 +1282,8 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     synchronized(_compilerLock) {
 //      _docBeingTested = null;
       _isTestInProgress = false;
-      _notifier.notifyListeners(new EventNotifier.Notifier() {
-        public void notifyListener(GlobalModelListener l) {
-          l.nonTestCase(isTestAll);
-          l.junitEnded();
-        }
-      });
+      _notifier.nonTestCase(isTestAll);
+      _notifier.junitEnded();
     }
   }
 
@@ -1325,11 +1293,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
    */
   public void testSuiteStarted(final int numTests) {
     synchronized(_compilerLock) {
-      _notifier.notifyListeners(new EventNotifier.Notifier() {
-        public void notifyListener(GlobalModelListener l) {
-          l.junitSuiteStarted(numTests);
-        }
-      });
+      _notifier.junitSuiteStarted(numTests);
     }
   }
 
@@ -1339,11 +1303,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
    */
   public void testStarted(final String testName) {
     synchronized(_compilerLock) {
-      _notifier.notifyListeners(new EventNotifier.Notifier() {
-        public void notifyListener(GlobalModelListener l) {
-          l.junitTestStarted(testName);
-        }
-      });
+      _notifier.junitTestStarted(testName);
     }
   }
 
@@ -1358,12 +1318,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
                         final boolean causedError)
   {
     synchronized(_compilerLock) {
-      _notifier.notifyListeners(new EventNotifier.Notifier() {
-        public void notifyListener(GlobalModelListener l) {
-//          l.junitTestEnded(_docBeingTested, testName, wasSuccessful, causedError);
-          l.junitTestEnded(testName, wasSuccessful, causedError);
-        }
-      });
+      _notifier.junitTestEnded(testName, wasSuccessful, causedError);
     }
   }
 
@@ -1586,11 +1541,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
           _doc.setFile(file);
           _doc.setCachedClassFile(null);
           checkIfClassFileInSync();
-          _notifier.notifyListeners(new EventNotifier.Notifier() {
-            public void notifyListener(GlobalModelListener l) {
-              l.fileSaved(openDoc);
-            }
-          });
+          _notifier.fileSaved(openDoc);
 
           // Make sure this file is on the classpath
           try {
@@ -1690,11 +1641,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
             File[] files = new File[] { file };
 
             try {
-              _notifier.notifyListeners(new EventNotifier.Notifier() {
-                public void notifyListener(GlobalModelListener l) {
-                  l.compileStarted();
-                }
-              });
+              _notifier.compileStarted();
 
               File[] sourceRoots = new File[] { getSourceRoot() };
 
@@ -2070,11 +2017,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       final OpenDefinitionsDocument doc = this;
       if (isModifiedOnDisk()) {
 
-        boolean shouldRevert = _notifier.pollListeners(new EventNotifier.Poller() {
-          public boolean poll(GlobalModelListener l) {
-            return l.shouldRevertFile(doc);
-          }
-        });
+        boolean shouldRevert = _notifier.shouldRevertFile(doc);
         if (shouldRevert) {
           doc.revertFile();
         }
@@ -2111,11 +2054,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
 
         syncCurrentLocationWithDefinitions(0);
 
-        _notifier.notifyListeners(new EventNotifier.Notifier() {
-          public void notifyListener(GlobalModelListener l) {
-            l.fileReverted(doc);
-          }
-        });
+        _notifier.fileReverted(doc);
       }
       catch (IllegalStateException docFailed) {
         //cant revert file if doc has no file
@@ -2136,11 +2075,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     public boolean canAbandonFile() {
       final OpenDefinitionsDocument doc = this;
       if (isModifiedSinceSave()) {
-        return _notifier.pollListeners(new EventNotifier.Poller() {
-          public boolean poll(GlobalModelListener l) {
-            return l.canAbandonFile(doc);
-          }
-        });
+        return _notifier.canAbandonFile(doc);
       }
       else {
         return true;
@@ -2718,11 +2653,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       _junitErrorModel = new JUnitErrorModel(errors, this, true);
 //      _docBeingTested = null;
       _isTestInProgress = false;
-      _notifier.notifyListeners(new EventNotifier.Notifier() {
-        public void notifyListener(GlobalModelListener l) {
-          l.junitEnded();
-        }
-      });
+      _notifier.junitEnded();
     }
   }
 

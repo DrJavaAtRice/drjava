@@ -65,7 +65,8 @@ import java.io.IOException;
 
 /**
  * This class takes common code and interfaces from CompilerErrorPanel, JUnitPanel,
- * and JavadocErrorPanel
+ * and JavadocErrorPanel.
+ * TODO: parameterize the types of CompilerErrors used here
  * @version $Id$
  */
 public abstract class ErrorPanel extends TabbedPanel implements OptionConstants {
@@ -107,15 +108,15 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
     StyleConstants.setItalic(set, f.isItalic());
 
     _updateStyles(set);
-    
+
     getErrorListPane().setFont(f);
-    
+
     Document doc = getErrorListPane().getDocument();
     if (doc instanceof StyledDocument) {
       ((StyledDocument)doc).setCharacterAttributes(0, doc.getLength()+1, set, false);
     }
   }
-  
+
   /**
    * Updates all document styles with the attributes contained in newSet.
    * @param newSet Style containing new attributes to use.
@@ -202,10 +203,10 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
 
       // Set the editor pane to be uneditable, but allow selecting text.
       setEditable(false);
-      
+
       DrJava.getConfig().addOptionListener(COMPILER_ERROR_COLOR,
                                            new CompilerErrorColorOptionListener());
-      
+
       // Set the colors.
       StyleConstants.setForeground(NORMAL_ATTRIBUTES,
                                    DrJava.getConfig().getSetting
@@ -214,7 +215,7 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
                                    DrJava.getConfig().getSetting
                                      (DEFINITIONS_NORMAL_COLOR));
       setBackground(DrJava.getConfig().getSetting(DEFINITIONS_BACKGROUND_COLOR));
-      
+
       // Add OptionListeners for the colors.
       DrJava.getConfig().addOptionListener(DEFINITIONS_NORMAL_COLOR,
                                            new ForegroundColorListener());
@@ -225,7 +226,7 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
       _showHighlightsCheckBox.addChangeListener( new ChangeListener() {
         public void stateChanged (ChangeEvent ce) {
           DefinitionsPane lastDefPane = _frame.getCurrentDefPane();
-          
+
           if (_showHighlightsCheckBox.isSelected()) {
             lastDefPane.setCaretPosition( lastDefPane.getCaretPosition());
             getErrorListPane().switchToError(getSelectedIndex());
@@ -408,14 +409,14 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
       doc.insertString(doc.getLength(), error.message(), NORMAL_ATTRIBUTES);
       doc.insertString(doc.getLength(), "\n", NORMAL_ATTRIBUTES);
     }
-    
+
     /**
      * Returns the string to identify a warning.
      */
     protected String _getWarningText() {
       return "Warning: ";
     }
-    
+
     /**
      * Returns the string to identify an error.
      */
@@ -479,9 +480,9 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
             // Add the end rect onto the start rect to make a rectangle
             // that encompasses the entire error
             startRect.add(endRect);
-            
+
             //System.err.println("scrll vis: " + startRect);
-            
+
             scrollRectToVisible(startRect);
           }
           else {
@@ -506,7 +507,7 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
      * @param error The error to switch to
      */
     void switchToError(CompilerError error) {
-      if (error == null) { 
+      if (error == null) {
         return;
       }
 
@@ -583,7 +584,7 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
       public void optionChanged(OptionEvent<Color> oce) {
         StyleConstants.setForeground(NORMAL_ATTRIBUTES, oce.value);
         StyleConstants.setForeground(BOLD_ATTRIBUTES, oce.value);
-        
+
         // Re-attribute the existing text with the new color.
         Document doc = getErrorListPane().getDocument();
         if (doc instanceof StyledDocument) {

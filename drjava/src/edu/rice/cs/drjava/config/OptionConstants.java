@@ -63,6 +63,19 @@ public interface OptionConstants {
   
   /* ---------- Resource Location and Classpath Options ---------- */
   
+  /**
+   * A file path to a user's preferred browser.
+   */
+  public static final FileOption BROWSER_FILE =
+    new FileOption("browser.file", FileOption.NULL_FILE);
+  
+  /**
+   * A String used with the command to launch a user's preferred browser.
+   * This will be tokenized and appended to the file path.
+   */
+  public static final StringOption BROWSER_STRING =
+    new StringOption("browser.string", "");
+  
   public static final FileOption JAVAC_LOCATION =
     new FileOption("javac.location", FileOption.NULL_FILE);
   
@@ -154,6 +167,12 @@ public interface OptionConstants {
  /** Toolbar buttons */
   public static final FontOption FONT_TOOLBAR =
     new FontOption("font.toolbar", Font.decode("dialog-PLAIN-10"));
+    
+  /**
+   * Whether to draw anti-aliased text.  (Slightly slower.)
+   */
+  public static final BooleanOption TEXT_ANTIALIAS =
+    new BooleanOption("text.antialias", Boolean.FALSE);
        
   
   /* ---------- Other Display Options ---------- */
@@ -178,16 +197,11 @@ public interface OptionConstants {
     new BooleanOption("lineenum.enabled", Boolean.FALSE);
   
   /**
-   * Whether to automatically close comments.
+   * Whether to save and restore window size and position at startup/shutdown.
    */
-  public static final BooleanOption AUTO_CLOSE_COMMENTS =
-    new BooleanOption("auto.close.comments", Boolean.FALSE);
-    
-  /**
-   * Whether to draw anti-aliased text.  (Slightly slower.)
-   */
-  public static final BooleanOption TEXT_ANTIALIAS =
-    new BooleanOption("text.antialias", Boolean.FALSE);
+  public static final BooleanOption WINDOW_STORE_POSITION =
+    new BooleanOption("window.store.position", Boolean.TRUE);
+  
 
   /**
    * The current look and feel.
@@ -940,6 +954,12 @@ public interface OptionConstants {
     new NonNegativeIntegerOption("recent.files.max.size", new Integer(5));
   
   /**
+   * Whether to automatically close comments.
+   */
+  public static final BooleanOption AUTO_CLOSE_COMMENTS =
+    new BooleanOption("auto.close.comments", Boolean.FALSE);
+  
+  /**
    * Whether to clear the console when manually resetting the interactions pane.
    */
   public static final BooleanOption RESET_CLEAR_CONSOLE = 
@@ -963,19 +983,6 @@ public interface OptionConstants {
   public static final VectorOption<File> RECENT_FILES =
     new VectorOption<File>("recent.files",new FileOption("",null),new Vector<File>());
   
-  /**
-   * A file path to a user's preferred browser.
-   */
-  public static final FileOption BROWSER_FILE =
-    new FileOption("browser.file", FileOption.NULL_FILE);
-  
-  /**
-   * A String used with the command to launch a user's preferred browser.
-   * This will be tokenized and appended to the file path.
-   */
-  public static final StringOption BROWSER_STRING =
-    new StringOption("browser.string", "");
-  
   /* ---------- Undisplayed Options ---------- */
   
   /**
@@ -995,6 +1002,20 @@ public interface OptionConstants {
    */
   public static final NonNegativeIntegerOption WINDOW_WIDTH =
     new NonNegativeIntegerOption("window.width",new Integer(800));
+  
+  /**
+   * X position of MainFrame at startup.  Can be overridden if out of bounds.
+   * This value can legally be negative in a multi-screen setup.
+   */
+  public static final IntegerOption WINDOW_X =
+    new IntegerOption("window.x", new Integer(Integer.MAX_VALUE));
+  
+  /**
+   * Y position of MainFrame at startup.  Can be overridden if out of bounds.
+   * This value can legally be negative in a multi-screen setup.
+   */
+  public static final IntegerOption WINDOW_Y =
+    new IntegerOption("window.y", new Integer(Integer.MAX_VALUE));
   
   /**
    * Width of DocList at startup.  Must be less than WINDOW_WIDTH.

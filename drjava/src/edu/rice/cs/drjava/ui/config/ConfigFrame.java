@@ -476,6 +476,9 @@ public class ConfigFrame extends JFrame {
     panel.addComponent(new BooleanOptionComponent(OptionConstants.LINEENUM_ENABLED,
                                                   "Show All Line Numbers", this,
                                                   "Whether to show line numbers on the left side of the Definitions Pane."));
+    panel.addComponent(new BooleanOptionComponent(OptionConstants.WINDOW_STORE_POSITION,
+                                                  "Save Main Window Position", this,
+                                                  "Whether to save amd restore the size and position of the main window."));
     panel.displayComponents();
   }
 

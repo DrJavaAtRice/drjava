@@ -1286,28 +1286,59 @@ public class MainFrame extends JFrame implements OptionConstants {
     // Set frame icon
     setIconImage(getIcon("drjava64.png").getImage());
 
-    // Set size and position
+    // Size and position
+    int x = config.getSetting(WINDOW_X).intValue();
+    int y = config.getSetting(WINDOW_Y).intValue();
     int width = config.getSetting(WINDOW_WIDTH).intValue();
     int height = config.getSetting(WINDOW_HEIGHT).intValue();
-    setBounds(0, 0, width, height);
-    setSize(width, height);
-
+    
+    // Bounds checking.
     // suggested from zaq@nosi.com, to keep the frame on the screen!
     Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-    Dimension frameSize = this.getSize();
+    
     final int menubarHeight = 24;
-    if (frameSize.height > screenSize.height - menubarHeight) {
+    if (height > screenSize.height - menubarHeight) {
       // Too tall, so resize
-      frameSize.height = screenSize.height - menubarHeight;
+      height = screenSize.height - menubarHeight;
     }
-    if (frameSize.width > screenSize.width) {
+    if (width > screenSize.width) {
       // Too wide, so resize
-      frameSize.width = screenSize.width;
+      width = screenSize.width;
     }
+    
+    // I assume that we want to be contained on the default screen.
+    // TODO: support spanning screens in multi-screen setups.
+    Rectangle bounds = GraphicsEnvironment.getLocalGraphicsEnvironment()
+      .getDefaultScreenDevice().getDefaultConfiguration().getBounds();
+    
+    if (x == Integer.MAX_VALUE) {
+      // magic value for "not set" - center.
+      x = (bounds.width - width + bounds.x) / 2;
+    }
+    if (y == Integer.MAX_VALUE) {
+      // magic value for "not set" - center.
+      y = (bounds.height - height + bounds.y) / 2;
+    }
+    
+    if (x < bounds.x) {
+      // Too far left, move to left edge.
+      x = bounds.x;
+    }
+    if (y < bounds.y) {
+      // Too far up, move to top edge.
+      y = bounds.y;
+    }
+    if ((x + width) > (bounds.x + bounds.width)) {
+      // Too far right, move to right edge.
+      x = bounds.width - width + bounds.x;
+    }
+    if ((y + height) > (bounds.y + bounds.height)) {
+      // Too far down, move to bottom edge.
+      y = bounds.height - height + bounds.y;
+    }
+    
     // Set to the new correct size and location
-    this.setSize(frameSize);
-    this.setLocation((screenSize.width - frameSize.width) / 2,
-                     (screenSize.height - frameSize.height - menubarHeight) / 2);
+    setBounds(x, y, width, height);
 
     _setUpPanes();
     updateFileTitle();
@@ -1371,37 +1402,36 @@ public class MainFrame extends JFrame implements OptionConstants {
     });
     config.addOptionListener(LOOK_AND_FEEL, new OptionListener<String>() {
       public void optionChanged(OptionEvent<String> oe) {
-        /*
-        try {
-          UIManager.setLookAndFeel(oe.value);
-          SwingUtilities.updateComponentTreeUI(MainFrame.this);
-          if (_debugPanel != null) {
-            SwingUtilities.updateComponentTreeUI(_debugPanel);
-          }
-          if (_configFrame != null) {
-            SwingUtilities.updateComponentTreeUI(_configFrame);
-          }
-          if (_helpFrame != null) {
-            SwingUtilities.updateComponentTreeUI(_helpFrame);
-          }
-          if (_aboutDialog != null) {
-            SwingUtilities.updateComponentTreeUI(_aboutDialog);
-          }
-          SwingUtilities.updateComponentTreeUI(_docPanePopupMenu);
-          SwingUtilities.updateComponentTreeUI(_interactionsPanePopupMenu);
-          SwingUtilities.updateComponentTreeUI(_consolePanePopupMenu);
-          SwingUtilities.updateComponentTreeUI(_openChooser);
-          SwingUtilities.updateComponentTreeUI(_saveChooser);
-          Iterator<TabbedPanel> it = _tabs.iterator();
-          while (it.hasNext()) {
-            SwingUtilities.updateComponentTreeUI(it.next());
-          }
-        }
-        catch (Exception ex) {
-          _showError(ex, "Could Not Set Look and Feel",
-                     "An error occurred while trying to set the look and feel.");
-        }
-        */
+//        try {
+//          UIManager.setLookAndFeel(oe.value);
+//          SwingUtilities.updateComponentTreeUI(MainFrame.this);
+//          if (_debugPanel != null) {
+//            SwingUtilities.updateComponentTreeUI(_debugPanel);
+//          }
+//          if (_configFrame != null) {
+//            SwingUtilities.updateComponentTreeUI(_configFrame);
+//          }
+//          if (_helpFrame != null) {
+//            SwingUtilities.updateComponentTreeUI(_helpFrame);
+//          }
+//          if (_aboutDialog != null) {
+//            SwingUtilities.updateComponentTreeUI(_aboutDialog);
+//          }
+//          SwingUtilities.updateComponentTreeUI(_docPanePopupMenu);
+//          SwingUtilities.updateComponentTreeUI(_interactionsPanePopupMenu);
+//          SwingUtilities.updateComponentTreeUI(_consolePanePopupMenu);
+//          SwingUtilities.updateComponentTreeUI(_openChooser);
+//          SwingUtilities.updateComponentTreeUI(_saveChooser);
+//          Iterator<TabbedPanel> it = _tabs.iterator();
+//          while (it.hasNext()) {
+//            SwingUtilities.updateComponentTreeUI(it.next());
+//          }
+//        }
+//        catch (Exception ex) {
+//          _showError(ex, "Could Not Set Look and Feel",
+//                     "An error occurred while trying to set the look and feel.");
+//        }
+        
         String title = "Apply Look and Feel";
         String msg = "Look and feel changes will take effect when you restart DrJava.";
         if (config.getSetting(WARN_CHANGE_LAF).booleanValue()) {
@@ -1910,11 +1940,22 @@ public class MainFrame extends JFrame implements OptionConstants {
   private void _storePositionInfo() {
     Configuration config = DrJava.getConfig();
 
-    // Window size.
-    Dimension size = getSize();
-    config.setSetting(WINDOW_HEIGHT, new Integer(size.height));
-    config.setSetting(WINDOW_WIDTH, new Integer(size.width));
-
+    // Window bounds.
+    if (config.getSetting(WINDOW_STORE_POSITION).booleanValue()) {
+      Rectangle bounds = getBounds();
+      config.setSetting(WINDOW_HEIGHT, new Integer(bounds.height));
+      config.setSetting(WINDOW_WIDTH, new Integer(bounds.width));
+      config.setSetting(WINDOW_X, new Integer(bounds.x));
+      config.setSetting(WINDOW_Y, new Integer(bounds.y));
+    }
+    else {
+      // Reset to defaults to restore pristine behavior.
+      config.setSetting(WINDOW_HEIGHT, WINDOW_HEIGHT.getDefault());
+      config.setSetting(WINDOW_WIDTH, WINDOW_WIDTH.getDefault());
+      config.setSetting(WINDOW_X, WINDOW_X.getDefault());
+      config.setSetting(WINDOW_Y, WINDOW_Y.getDefault());
+    }
+      
     // Panel heights.
     if (_debugPanel != null) {
       config.setSetting(DEBUG_PANEL_HEIGHT, new Integer(_debugPanel.getHeight()));

@@ -61,7 +61,7 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
    */
 //  public static final String INPUT_REQUIRED_MESSAGE =
 //    "Please enter input in the Console tab." + _newLine;
-  
+
   /**
    * Model that contains the interpreter to use.
    * (If possible, we'd like to eliminate the need for this field...)
@@ -86,12 +86,12 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
           DefaultGlobalModel.WRITE_DELAY);
     _model = model;
     _notifier = model.getNotifier();
-    
+
     // Set whether to allow "assert" statements to be run in the remote JVM.
-    Boolean allow = 
+    Boolean allow =
       DrJava.getConfig().getSetting(OptionConstants.JAVAC_ALLOW_ASSERT);
     _interpreterControl.setAllowAssertions(allow.booleanValue());
-    
+
     // Add option listeners
     DrJava.getConfig().addOptionListener(OptionConstants.HISTORY_MAX_SIZE,
                                          _document.getHistory().
@@ -103,9 +103,9 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
       }
     });
   }
-  
-    
-  /** 
+
+
+  /**
    * Called when the repl prints to System.out.
    * @param s String to print
    */
@@ -115,7 +115,7 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
     _model.systemOutPrint(s);
   }
 
-  /** 
+  /**
    * Called when the repl prints to System.err.
    * @param s String to print
    */
@@ -124,7 +124,7 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
     // TO DO: How can we print to the console without having a model field?
     _model.systemErrPrint(s);
   }
-  
+
   /**
    * Any extra action to perform (beyond notifying listeners) when
    * the interpreter fails to reset.
@@ -136,7 +136,7 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
     // Print the exception to the console
     _model.systemErrPrint(StringOps.getStackTrace(t));
   }
-  
+
   /**
    * Called when input is requested from System.in.
    * @return the input
@@ -161,94 +161,63 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
     _model.resetInteractionsClasspath();
     super.interpreterReady();
   }
-  
+
   /**
    * Notifies listeners that an interaction has started.
    */
   protected void _notifyInteractionStarted() {
-    _notifier.notifyListeners(new EventNotifier.Notifier() {
-      public void notifyListener(GlobalModelListener l) {
-        l.interactionStarted();
-      }
-    });
+    _notifier.interactionStarted();
   }
-  
+
   /**
    * Notifies listeners that an interaction has ended.
    */
   protected void _notifyInteractionEnded() {
-    _notifier.notifyListeners(new EventNotifier.Notifier() {
-      public void notifyListener(GlobalModelListener l) {
-        l.interactionEnded();
-      }
-    });
+    _notifier.interactionEnded();
   }
 
   /**
    * Notifies listeners that an error was present in the interaction.
    */
   protected void _notifySyntaxErrorOccurred(final int offset, final int length) {
-    _notifier.notifyListeners(new EventNotifier.Notifier() {
-      public void notifyListener(GlobalModelListener l) {
-        l.interactionErrorOccurred(offset,length);
-      }
-    });
+    _notifier.interactionErrorOccurred(offset,length);
   }
+
   /**
    * Notifies listeners that the interpreter has changed.
    * @param inProgress Whether the new interpreter is currently in progress.
    */
   protected void _notifyInterpreterChanged(final boolean inProgress) {
-    _notifier.notifyListeners(new EventNotifier.Notifier() {
-      public void notifyListener(GlobalModelListener l) {
-        l.interpreterChanged(inProgress);
-      }
-    });
+    _notifier.interpreterChanged(inProgress);
   }
-  
+
   /**
    * Notifies listeners that the interpreter is resetting.
    */
   protected void _notifyInterpreterResetting() {
-    _notifier.notifyListeners(new EventNotifier.Notifier() {
-      public void notifyListener(GlobalModelListener l) {
-        l.interpreterResetting();
-      }
-    });
+    _notifier.interpreterResetting();
   }
-  
+
   /**
    * Notifies listeners that the interpreter is ready.
    */
   protected void _notifyInterpreterReady() {
-    _notifier.notifyListeners(new EventNotifier.Notifier() {
-      public void notifyListener(GlobalModelListener l) {
-        l.interpreterReady();
-      }
-    });
+    _notifier.interpreterReady();
   }
-  
+
   /**
    * Notifies listeners that the interpreter has exited unexpectedly.
    * @param status Status code of the dead process
    */
   protected void _notifyInterpreterExited(final int status) {
-    _notifier.notifyListeners(new EventNotifier.Notifier() {
-      public void notifyListener(GlobalModelListener l) {
-        l.interpreterExited(status);
-      }
-    });
+    _notifier.interpreterExited(status);
   }
-  
+
   /**
    * Notifies listeners that the interpreter reset failed.
    * @param t Throwable causing the failure
    */
   protected void _notifyInterpreterResetFailed(final Throwable t) {
-    _notifier.notifyListeners(new EventNotifier.Notifier() {
-      public void notifyListener(GlobalModelListener l) {
-        l.interpreterResetFailed(t);
-      }
-    });    
+    _notifier.interpreterResetFailed(t);
   }
 }
