@@ -309,11 +309,11 @@ public final class GlobalIndentTest extends GlobalModelTestCase {
    * Get the only open definitions document.
    */
   private OpenDefinitionsDocument _getOpenDoc() {
-    _assertNumOpenDocs(0);
+    _assertNumOpenDocs(1);
     OpenDefinitionsDocument doc = _model.newFile();
     doc.setIndent(2);
     List<OpenDefinitionsDocument> docs = _model.getDefinitionsDocuments();
-    _assertNumOpenDocs(1);
+    _assertNumOpenDocs(2);
     return docs.get(0);
   }
 

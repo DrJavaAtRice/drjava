@@ -110,14 +110,14 @@ public class ConsoleDocument implements DocumentAdapter {
    */
   public ConsoleDocument(DocumentAdapter adapter) {
     _document = adapter;
-
+    
     _beep = new Runnable() {
       public void run() {}
     };
     _promptPos = 0;
     _prompt = DEFAULT_CONSOLE_PROMPT;
     _hasPrompt = false;
-
+    
     // Prevent any edits before the prompt!
     _document.setEditCondition(new InteractionsEditCondition());
   }

@@ -147,8 +147,8 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
    * Instantiates the GlobalModel to be used in the test cases.
    */
   protected void createModel() {
-    //_model = new DefaultGlobalModel(_originalModel);
-    _model = new DefaultGlobalModel();
+    //_model = new DefaultSingleDisplayModel(_originalModel);
+    _model = new DefaultSingleDisplayModel();
 
     // Wait until it has connected
     _model._interpreterControl.ensureInterpreterConnected();
@@ -436,16 +436,14 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
   }
 
 
-  protected void assertLength(int len, OpenDefinitionsDocument doc)
-    throws BadLocationException
-  {
+  protected void assertLength(int len, OpenDefinitionsDocument doc) {
     assertEquals("document length",
                  len,
                  doc.getLength());
   }
 
   protected void assertContents(String s, OpenDefinitionsDocument doc)
-    throws BadLocationException
+    throws BadLocationException 
   {
     int len = doc.getLength();
 
@@ -572,7 +570,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
    * By default it expects no events to be fired. To customize,
    * subclass and override one or more methods.
    */
-  public static class TestListener implements GlobalModelListener {
+  public static class TestListener implements SingleDisplayModelListener {
     /** Remembers when this listener was created. */
     protected Exception _startupTrace;
     protected int fileNotFoundCount;
@@ -1021,6 +1019,10 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     
     public void documentNotFound(OpenDefinitionsDocument d, File f) {
       listenerFail("documentNotFound fired unexpectedly");
+    }
+    
+    public void activeDocumentChanged(OpenDefinitionsDocument active) {
+      // listenerFail("activeDocumentChanged fired unexpectedly"); // this event is not current tested !!
     }
   }
 

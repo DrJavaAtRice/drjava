@@ -88,9 +88,12 @@ import edu.rice.cs.drjava.model.cache.*;
  * This removes the dependency on the UI for the logical flow of the program's
  * features.  With the current implementation, we can finally test the compile
  * functionality of DrJava, along with many other things.
+ * 
+ * This class is now abstract because additional funtionality to support document
+ * navigation in the context of projects was added in DefaultSingleDisplayModel
  * @version $Id$
  */
-public class DefaultGlobalModel implements GlobalModel, OptionConstants,
+public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants,
     DocumentIterator {
 
   /**
@@ -514,7 +517,9 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
   
   // ----- STATE -----
   protected FileGroupingState _state;
-  
+  /**
+   * Delegates the compileAll command to the _state, a FileGroupingState
+   */
   public void compileAll() throws IOException{
     _state.compileAll();
   }
@@ -2273,7 +2278,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
    * This was at one time called the <code>DefinitionsDocumentHandler</code>
    * but was renamed (2004-Jun-8) to be more descriptive/intuitive.
    */
-  private class ConcreteOpenDefDoc implements OpenDefinitionsDocument{
+  private class ConcreteOpenDefDoc implements OpenDefinitionsDocument {
 //    private DefinitionsDocument _doc;
     // TODO: Should these be document-specific?  They aren't used as such now.
 //    private CompilerErrorModel _errorModel;
@@ -2314,7 +2319,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
      * Constructor.  Initializes this handler's document.
      * @param doc DefinitionsDocument to manage
      */
-    ConcreteOpenDefDoc(File f) throws IOException{
+    ConcreteOpenDefDoc(File f) throws IOException {
       if(f.exists()){
         _file = f;
         _timestamp = f.lastModified();

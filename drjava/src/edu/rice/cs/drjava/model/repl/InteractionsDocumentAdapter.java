@@ -101,10 +101,14 @@ public class InteractionsDocumentAdapter extends AbstractDJDocument {
   
   /**
    * A list of styles and their locations.
-   * This list holds pairs of locations in the document and styles, which is basically a map of regions where the coloring view
-   * that is now attached to the Interactions Pane is not allowed to use the reduced model to determine the color settings when rendering
-   * text. We keep a list of all places where styles not considered by the reduced model are being used, 
-   * such as System.out, System.err, and the various return styles for Strings and other Objects.
+   * This list holds pairs of locations in the document and styles, which is basically a map of regions 
+   * where the coloring view that is now attached to the Interactions Pane is not allowed to use the 
+   * reduced model to determine the color settings when rendering text. We keep a list of all places 
+   * where styles not considered by the reduced model are being used, such as System.out, System.err, 
+   * and the various return styles for Strings and other Objects.
+   * 
+   * Since the LinkedList class is not thread safe, we have to synchronized all methods that access 
+   * pointers in _stylesList 
    */
   private List<Pair<Pair<Integer,Integer>,String>> _stylesList = new LinkedList<Pair<Pair<Integer,Integer>,String>>();
   
@@ -218,7 +222,7 @@ public class InteractionsDocumentAdapter extends AbstractDJDocument {
    * Returns true iff the end of the current interaction is an open comment block
    * @return true iff the end of the current interaction is an open comment block
    */
-  public boolean isInCommentBlock() {
+  public synchronized boolean isInCommentBlock() {
     resetReducedModelLocation();
     ReducedModelState state = stateAtRelLocation(getLength()-_currentLocation);
     boolean toReturn = (state.equals(ReducedModelStates.INSIDE_BLOCK_COMMENT));

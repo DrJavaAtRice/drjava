@@ -474,10 +474,11 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
   
   
   /**
-   * Add a character to the underlying reduced model.
+   * Add a character to the underlying reduced model. ONLY called from already synchronized
+   * code!
    * @param curChar the character to be added.
    */
-  private synchronized void _addCharToReducedModel(char curChar) {
+  private void _addCharToReducedModel(char curChar) {
     throwErrorHuh();
     // Clear the helper method cache
     if (_cacheInUse) _clearCache();
@@ -1763,15 +1764,13 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
     public void run() {
       // adjust location to the start of the text to input
       synchronized(AbstractDJDocument.this){
-        _reduced.move(_offset - _currentLocation);
+        _reduced.move(_offset - _currentLocation);  
+        // loop over string, inserting characters into reduced model
+        for (int i = 0; i < _text.length(); i++) {
+          char curChar = _text.charAt(i);
+          _addCharToReducedModel(curChar);
+        }
       }
-      
-      // loop over string, inserting characters into reduced model
-      for (int i = 0; i < _text.length(); i++) {
-        char curChar = _text.charAt(i);
-        _addCharToReducedModel(curChar);
-      }
-      
       _currentLocation = _offset + _text.length();
       _styleChanged();
     }

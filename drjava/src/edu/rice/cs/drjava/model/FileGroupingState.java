@@ -50,12 +50,12 @@ import java.io.IOException;
 import edu.rice.cs.drjava.model.FileMovedException;
 
 /**
- * This state pattern is used by the global model to store
- * any information pertaining to the currently open project.
- * A state pattern was used because most project information 
- * is not needed in list view. (Elspeth Rocks)
- * (hint: if you're looking for the instances of this interface,
- *  look in the MainFrame as anonymous inner classes)
+ * This state pattern is used by the global model to store any information 
+ * pertaining to the currently open project.  The state pattern is used because
+ * most project information is not needed in list view. (Elspeth Rocks)
+ * 
+ * Hint: if you're looking for the instances of this interface, look in 
+ * DefaultGlobalModel where they are defined as anonymous inner classes.
  */
 public interface FileGroupingState {
   

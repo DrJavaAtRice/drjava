@@ -103,8 +103,7 @@ public final class InteractionsDocumentAdapterTest extends TestCase {
       //this adds the "Resetting Interactions"
       _model.resetInterpreter();
       _model.interpreterResetting();
-    }
-    synchronized(_model){
+ 
       int returnNum = System.getProperty("line.separator").length();
       assertEquals("StylesList after reset should contain 1 pair",1, _adapter.getStylesList().size());
       //Resetting Interactions piece

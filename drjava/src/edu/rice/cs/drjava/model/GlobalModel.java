@@ -441,7 +441,7 @@ public interface GlobalModel extends IGetDocuments, ILoadDocuments {
   public List<OpenDefinitionsDocument> getProjectDocuments();
   
   /**
-   * defers to the state to compile all (compiles all files in directory in project mode)
+   * Compiles all open files (all files in project (??) in project mode)
    */
   public void compileAll() throws IOException;
   

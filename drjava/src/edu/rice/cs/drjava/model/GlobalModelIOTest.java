@@ -59,25 +59,31 @@ import edu.rice.cs.drjava.config.OptionConstants;
 
 /**
  * Test I/O functions of the global model.
+ * 
+ * These tests are complicated by the fact that they were originally written
+ * for DefaultGlobalModel rather than DefaultSingleDisplayModel.  The critical
+ * change introduced by DefaultSingleDisplayModel is that at least one document
+ * is always open; the constructor establishes this invariant.  As a result, 
+ * calling setupDocument on a new instance of DefaultSingleDisplayModel creates 
+ * the second document (index 1) instead of the first document (index 0).
  *
  * @version $Id$
  */
 public final class GlobalModelIOTest extends GlobalModelTestCase
-  implements OptionConstants
-{
+  implements OptionConstants {
   /**
    * Creates a new document, modifies it, and then does the same
    * with a second document, ensuring that the changes are separate.
    */
   public void testMultipleFiles() throws BadLocationException {
-    assertNumOpenDocs(0);
+    assertNumOpenDocs(1);
 
     OpenDefinitionsDocument doc1 = setupDocument(FOO_TEXT);
-    assertNumOpenDocs(1);
+    assertNumOpenDocs(2);
 
     // Create a second, empty document
     OpenDefinitionsDocument doc2 = _model.newFile();
-    assertNumOpenDocs(2);
+    assertNumOpenDocs(3);
     assertModified(true, doc1);
     assertModified(false, doc2);
     assertContents(FOO_TEXT, doc1);
@@ -99,14 +105,14 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
     doc1 = setupDocument(FOO_TEXT);
     doc2 = setupDocument(BAR_TEXT);
     doc3 = setupDocument(FOO_TEXT);
-    assertNumOpenDocs(3);
+    assertNumOpenDocs(4);
 
     List<OpenDefinitionsDocument> docs = _model.getDefinitionsDocuments();
-    assertEquals("size of document array", 3, docs.size());
+    assertEquals("size of document array", 4, docs.size());
 
-    assertEquals("document 1", doc1, docs.get(0));
-    assertEquals("document 2", doc2, docs.get(1));
-    assertEquals("document 3", doc3, docs.get(2));
+    assertEquals("document 1", doc1, docs.get(1));
+    assertEquals("document 2", doc2, docs.get(2));
+    assertEquals("document 3", doc3, docs.get(3));
   }
 
 
@@ -114,23 +120,23 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
    * Ensures closing documents works correctly.
    */
   public void testCloseMultipleFiles() throws BadLocationException {
-    assertNumOpenDocs(0);
-    OpenDefinitionsDocument doc1 = setupDocument(FOO_TEXT);
     assertNumOpenDocs(1);
-    OpenDefinitionsDocument doc2 = setupDocument(BAR_TEXT);
+    OpenDefinitionsDocument doc1 = setupDocument(FOO_TEXT);
     assertNumOpenDocs(2);
+    OpenDefinitionsDocument doc2 = setupDocument(BAR_TEXT);
+    assertNumOpenDocs(3);
 
     _model.closeFile(doc1);
-    assertNumOpenDocs(1);
+    assertNumOpenDocs(2);
 
     List<OpenDefinitionsDocument> docs = _model.getDefinitionsDocuments();
-    assertEquals("size of document array", 1, docs.size());
-    assertContents(BAR_TEXT, docs.get(0));
+    assertEquals("size of document array", 2, docs.size());
+    assertContents(BAR_TEXT, docs.get(1));
 
     _model.closeFile(doc2);
-    assertNumOpenDocs(0);
+    assertNumOpenDocs(1);
     docs = _model.getDefinitionsDocuments();
-    assertEquals("size of document array", 0, docs.size());
+    assertEquals("size of document array", 1, docs.size());
   }
 
 
@@ -186,9 +192,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
   /**
    * Opens a file.
    */
-  public void testOpenRealFile()
-    throws BadLocationException, IOException
-  {
+  public void testOpenRealFile() throws BadLocationException, IOException {
     final File tempFile = writeToNewTempFile(BAR_TEXT);
 
     TestListener listener = new TestListener() {
@@ -214,6 +218,12 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
           fail("could not get canonical file");
         }
       }
+      
+      public void fileClosed(OpenDefinitionsDocument doc) {
+        /* opening a file closes the empty document created on startup [Corky: 10-8-04]*/
+//        assertTrue(doc.isUntitled());
+//        assertFalse(doc.isModifiedSinceSave());
+      }
     };
 
     _model.addListener(listener);
@@ -236,12 +246,10 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
   /**
    * Initiates a file open, but cancels.
    */
-  public void testCancelOpenFile()
-    throws BadLocationException, IOException
-  {
+  public void testCancelOpenFile() throws BadLocationException, IOException {
 
     OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
-    assertNumOpenDocs(1);
+    assertNumOpenDocs(2);
 
     TestListener listener = new TestListener() {
       public boolean canAbandonFile(OpenDefinitionsDocument doc) {
@@ -251,6 +259,12 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
 
       public void fileOpened(OpenDefinitionsDocument doc) {
         openCount++;
+      }
+      
+      public void fileClosed(OpenDefinitionsDocument doc) {
+        /* opening a file closes the empty document created on startup [Corky: 10-8-04]*/
+//        assertTrue(doc.isUntitled());
+//        assertFalse(doc.isModifiedSinceSave());
       }
     };
 
@@ -267,11 +281,11 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
       // we expect this to be thrown
     }
     finally {
-      assertNumOpenDocs(1);
+      assertNumOpenDocs(2);
       listener.assertOpenCount(0);
 
       List<OpenDefinitionsDocument> docs = _model.getDefinitionsDocuments();
-      doc = docs.get(0);
+      doc = docs.get(1);
       assertModified(true, doc);
       assertContents(FOO_TEXT, doc);
     }
@@ -308,9 +322,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
   /**
    * Attempts to reopen an already open file.
    */
-  public void testReopenFile()
-    throws BadLocationException, IOException
-  {
+  public void testReopenFile() throws BadLocationException, IOException {
     final File tempFile = writeToNewTempFile(BAR_TEXT);
 
     TestListener listener = new TestListener() {
@@ -335,6 +347,12 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
           throw new UnexpectedException(ioe);
         }
         openCount++;
+      }
+      
+      public void fileClosed(OpenDefinitionsDocument doc) {
+        /* opening a file closes the empty document created on startup [Corky: 10-8-04]*/
+//        assertTrue(doc.isUntitled());
+//        assertFalse(doc.isModifiedSinceSave());
       }
     };
 
@@ -430,6 +448,11 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
           fail("could not get canonical file");
         }
       }
+      public void fileClosed(OpenDefinitionsDocument doc) {
+        /* opening a file closes the empty document created on startup [Corky: 10-8-04]*/
+//        assertTrue(doc.isUntitled());
+//        assertFalse(doc.isModifiedSinceSave());
+      }
     };
 
     _model.addListener(listener);
@@ -464,7 +487,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
 
     OpenDefinitionsDocument doc1 = setupDocument(FOO_TEXT);
     OpenDefinitionsDocument doc2 = setupDocument(BAR_TEXT);
-    assertNumOpenDocs(2);
+    assertNumOpenDocs(3);
 
     TestListener listener = new TestListener() {
       public boolean canAbandonFile(OpenDefinitionsDocument doc) {
@@ -474,6 +497,12 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
 
       public void fileOpened(OpenDefinitionsDocument doc) {
         openCount++;
+      }
+      
+      public void fileClosed(OpenDefinitionsDocument doc) {
+        /* opening a file closes the empty document created on startup [Corky: 10-8-04]*/
+//        assertTrue(doc.isUntitled());
+//        assertFalse(doc.isModifiedSinceSave());
       }
     };
 
@@ -490,15 +519,15 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
       // we expect this to be thrown
     }
     finally {
-      assertNumOpenDocs(2);
+      assertNumOpenDocs(3);
       listener.assertOpenCount(0);
 
       List<OpenDefinitionsDocument> docs = _model.getDefinitionsDocuments();
-      doc1 = docs.get(0);
+      doc1 = docs.get(1);
       assertModified(true, doc1);
       assertContents(FOO_TEXT, doc1);
 
-      doc2 = docs.get(1);
+      doc2 = docs.get(2);
       assertModified(true, doc2);
       assertContents(BAR_TEXT, doc2);
     }
@@ -542,6 +571,12 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
         catch (IOException ioe) {
           fail("could not get canonical file");
         }
+      }
+      
+      public void fileClosed(OpenDefinitionsDocument doc) {
+        /* opening a file closes the empty document created on startup [Corky: 10-8-04]*/
+//        assertTrue(doc.isUntitled());
+//        assertFalse(doc.isModifiedSinceSave());
       }
     };
     _model.addListener(listener);
@@ -643,6 +678,12 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
           fail("file does not exist");
         }
         openCount++;
+      }
+      
+      public void fileClosed(OpenDefinitionsDocument doc) {
+        /* opening a file closes the empty document created on startup [Corky: 10-8-04]*/
+//        assertTrue(doc.isUntitled());
+//        assertFalse(doc.isModifiedSinceSave());
       }
     };
 
@@ -1062,6 +1103,11 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
         }
         openCount++;
       }
+      public void fileClosed(OpenDefinitionsDocument doc) {
+        /* opening a file closes the empty document created on startup [Corky: 10-8-04]*/
+//        assertTrue(doc.isUntitled());
+//        assertFalse(doc.isModifiedSinceSave());
+      }
       public void fileReverted(OpenDefinitionsDocument doc) {
         fileRevertedCount++;
       }
@@ -1099,6 +1145,11 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
 
     TestListener listener = new TestListener() {
       public void fileOpened(OpenDefinitionsDocument doc) { }
+      public void fileClosed(OpenDefinitionsDocument doc) {
+        /* opening a file closes the empty document created on startup [Corky: 10-8-04]*/
+//        assertTrue(doc.isUntitled());
+//        assertFalse(doc.isModifiedSinceSave());
+      }
       public void fileReverted(OpenDefinitionsDocument doc) {
         fileRevertedCount++;
       }
@@ -1151,6 +1202,12 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
 
     TestListener listener = new TestListener() {
       public void fileOpened(OpenDefinitionsDocument doc) { }
+      
+      public void fileClosed(OpenDefinitionsDocument doc) {
+        /* opening a file closes the empty document created on startup [Corky: 10-8-04]*/
+//        assertTrue(doc.isUntitled());
+//        assertFalse(doc.isModifiedSinceSave());
+      }
 
       public void fileReverted(OpenDefinitionsDocument doc) {
         fileRevertedCount++;
