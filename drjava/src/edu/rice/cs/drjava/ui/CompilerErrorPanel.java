@@ -4,25 +4,25 @@
  * http://sourceforge.net/projects/drjava/ or http://www.drjava.org/
  *
  * DrJava Open Source License
- * 
+ *
  * Copyright (C) 2001-2003 JavaPLT group at Rice University (javaplt@rice.edu)
  * All rights reserved.
  *
  * Developed by:   Java Programming Languages Team
  *                 Rice University
  *                 http://www.cs.rice.edu/~javaplt/
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a 
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
- * to deal with the Software without restriction, including without 
- * limitation the rights to use, copy, modify, merge, publish, distribute, 
- * sublicense, and/or sell copies of the Software, and to permit persons to 
- * whom the Software is furnished to do so, subject to the following 
+ * to deal with the Software without restriction, including without
+ * limitation the rights to use, copy, modify, merge, publish, distribute,
+ * sublicense, and/or sell copies of the Software, and to permit persons to
+ * whom the Software is furnished to do so, subject to the following
  * conditions:
- * 
- *     - Redistributions of source code must retain the above copyright 
+ *
+ *     - Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimers.
- *     - Redistributions in binary form must reproduce the above copyright 
+ *     - Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimers in the
  *       documentation and/or other materials provided with the distribution.
  *     - Neither the names of DrJava, the JavaPLT, Rice University, nor the
@@ -32,15 +32,15 @@
  *       use the term "DrJava" as part of their names without prior written
  *       permission from the JavaPLT group.  For permission, write to
  *       javaplt@rice.edu.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
- * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR 
- * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, 
- * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR 
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+ * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  * OTHER DEALINGS WITH THE SOFTWARE.
- * 
+ *
 END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.ui;
@@ -66,6 +66,10 @@ import javax.swing.text.Position;
 import java.awt.*;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 import java.io.File;
 import java.util.Vector;
 
@@ -87,6 +91,9 @@ public class CompilerErrorPanel extends ErrorPanel {
 
   private final JComboBox _compilerChoiceBox;
 
+  JButton nextErrorButton = new JButton("Next Error");
+  JButton prevErrorButton = new JButton("Prev Error");
+
   /**
    * Constructor.
    * @param model SingleDisplayModel in which we are running
@@ -97,7 +104,10 @@ public class CompilerErrorPanel extends ErrorPanel {
     _compileHasOccurred = false;
     _numErrors = 0;
 
+
     _errorListPane = new CompilerErrorListPane();
+
+
 
 
     // Limitation: Only compiler choices are those that were available
@@ -146,7 +156,30 @@ public class CompilerErrorPanel extends ErrorPanel {
 
     compilerPanel.add(uiBox,BorderLayout.CENTER);
     uiBox.add(_compilerChoiceBox,BorderLayout.NORTH);
-    uiBox.add(new JPanel(),BorderLayout.CENTER);
+
+    JPanel midPanel = new JPanel();
+ //nextErrorButton.setEnabled(false);
+    nextErrorButton.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        _errorListPane.nextError();
+//  prevErrorButton.setEnabled(_errorListPane.hasPrevError());
+//  nextErrorButton.setEnabled(_errorListPane.hasNextError());
+      }
+    });
+ //prevErrorButton.setEnabled(false);
+    prevErrorButton.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        _errorListPane.prevError();
+//  prevErrorButton.setEnabled(_errorListPane.hasPrevError());
+//  nextErrorButton.setEnabled(_errorListPane.hasNextError());
+      }
+    });
+    midPanel.setLayout(new FlowLayout());
+    midPanel.add(prevErrorButton);
+    midPanel.add(nextErrorButton);
+
+    uiBox.add(midPanel,BorderLayout.CENTER);
+
 
     _mainPanel.add(scroller, BorderLayout.CENTER);
     _mainPanel.add(compilerPanel, BorderLayout.EAST);
@@ -184,7 +217,7 @@ public class CompilerErrorPanel extends ErrorPanel {
     _errorListPane.setCompilationInProgress();
   }
 
-  protected CompilerErrorModel getErrorModel(){
+  protected CompilerErrorModel<CompilerError> getErrorModel(){
     return getModel().getCompilerModel().getCompilerErrorModel();
   }
 
@@ -201,9 +234,13 @@ public class CompilerErrorPanel extends ErrorPanel {
    * Reset the errors to the current error information.
    */
   public void reset() {
+// nextErrorButton.setEnabled(false);
+// prevErrorButton.setEnabled(false);
     _numErrors = getModel().getCompilerModel().getNumErrors();
 
     _errorListPane.updateListPane(true);
+// nextErrorButton.setEnabled(_errorListPane.hasNextError());
+// prevErrorButton.setEnabled(_errorListPane.hasPrevError());
   }
 
   class CompilerErrorListPane extends ErrorPanel.ErrorListPane {
