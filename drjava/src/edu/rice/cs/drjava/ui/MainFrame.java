@@ -587,7 +587,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     new AbstractAction("Toggle Breakpoint on Current Line")
   {
     public void actionPerformed(ActionEvent ae) {
-      _toggleBreakpoint();
+      toggleBreakpoint();
     }
   };
 
@@ -1251,7 +1251,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   /**
    * Toggles a breakpoint on the current line
    */
-  private void _toggleBreakpoint() {
+  void toggleBreakpoint() {
     OpenDefinitionsDocument doc = _model.getActiveDocument();
     try {
       _model.getDebugManager().toggleBreakpoint(doc, _currentDefPane.getCurrentLine());
