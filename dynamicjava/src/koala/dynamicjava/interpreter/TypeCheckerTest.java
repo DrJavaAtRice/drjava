@@ -205,21 +205,68 @@ public class TypeCheckerTest extends TestCase {
     _interpreter.interpret(text);
   }
   
+  public void testSwitchStatement() throws ExceptionReturnedException {
+    String text = "switch (new Integer(1)) { }";
+    SwitchStatement stmt = (SwitchStatement)_parseCode(text).get(0);
+    
+    stmt.acceptVisitor(_typeChecker);
+    
+    String expected = "(koala.dynamicjava.tree.ObjectMethodCall: intValue null (koala.dynamicjava.tree.SimpleAllocation: (koala.dynamicjava.tree.ReferenceType: Integer) [(koala.dynamicjava.tree.IntegerLiteral: 1 1 int)]))";
+    String actual = stmt.getSelector().toString();
+    assertEquals("Should have autounboxed", expected, actual);
+    
+    _interpreter.interpret(text);
+  }
   
+
+  public void testIfThenStatement() throws ExceptionReturnedException {
+    String text = "if (B) { }";
+    IfThenStatement stmt = (IfThenStatement) _parseCode(text).get(0);
+    
+    stmt.acceptVisitor(_typeChecker);
+    
+    String expected = "(koala.dynamicjava.tree.ObjectMethodCall: booleanValue null (koala.dynamicjava.tree.QualifiedName: B))";
+    String actual = stmt.getCondition().toString();
+    assertEquals("Should have autounboxed", expected, actual);
+    
+    _interpreter.interpret("Boolean B = Boolean.TRUE;" + text);
+  }
+  
+  /**
+   * Tests the if-then-else statement for auto-unboxing.
+   */
+  public void testIfThenElseStatement() throws ExceptionReturnedException {
+    String text = "if (B) { } else if (B) { }";
+    IfThenStatement stmt = (IfThenStatement) _parseCode(text).get(0);
+    
+    stmt.acceptVisitor(_typeChecker);
+    
+    String expected = "(koala.dynamicjava.tree.ObjectMethodCall: booleanValue null (koala.dynamicjava.tree.QualifiedName: B))";
+    String actual = stmt.getCondition().toString();
+    assertEquals("Should have autounboxed", expected, actual);
+    
+    _interpreter.interpret("Boolean B = Boolean.TRUE;" + text);
+  }
   
   //////////// Addititve Bin Ops ////////////////////////
   /**
    * Tests adding two Integers.
    */
-  public void testAddTwoIntegers() {
-    Node exp = _parseCode("new Integer(1) + new Integer(2);").get(0);
+  public void testAddTwoIntegers() throws ExceptionReturnedException {
+    String text = "new Integer(1) + new Integer(2);";
+    AddExpression exp = (AddExpression) _parseCode(text).get(0);
     
-    try {
-      exp.acceptVisitor(_typeChecker);
-      fail("Should have thrown an excpetion.");
-    }
-    catch (ExecutionError ee) {
-    }
+    exp.acceptVisitor(_typeChecker);
+    
+    String expected = "(koala.dynamicjava.tree.ObjectMethodCall: intValue null (koala.dynamicjava.tree.SimpleAllocation: (koala.dynamicjava.tree.ReferenceType: Integer) [(koala.dynamicjava.tree.IntegerLiteral: 1 1 int)]))";
+    String actual = exp.getLeftExpression().toString();
+    assertEquals("Should have unboxed correctly.", expected, actual);
+    
+    expected = "(koala.dynamicjava.tree.ObjectMethodCall: intValue null (koala.dynamicjava.tree.SimpleAllocation: (koala.dynamicjava.tree.ReferenceType: Integer) [(koala.dynamicjava.tree.IntegerLiteral: 2 2 int)]))";
+    actual = exp.getRightExpression().toString();
+    assertEquals("Should have unboxed correctly.", expected, actual);
+    
+    _interpreter.interpret(text);
   }
   
   /**
@@ -228,12 +275,7 @@ public class TypeCheckerTest extends TestCase {
   public void testSubtractingTwoIntegers() {
     Node exp = _parseCode("new Integer(1) - new Integer(2);").get(0);
     
-    try {
-      exp.acceptVisitor(_typeChecker);
-      fail("Should have thrown an excpetion.");
-    }
-    catch (ExecutionError ee) {
-    }
+    exp.acceptVisitor(_typeChecker);
   }
     
   ///////////// Additive Assignemt //////////////////////
@@ -275,12 +317,7 @@ public class TypeCheckerTest extends TestCase {
   public void testMultiplyingTwoIntegers() {
     Node exp = _parseCode("new Integer(1) * new Integer(2);").get(0);
     
-    try {
-      exp.acceptVisitor(_typeChecker);
-      fail("Should have thrown an excpetion.");
-    }
-    catch (ExecutionError ee) {
-    }
+    exp.acceptVisitor(_typeChecker);
   }
   
   /**
@@ -289,12 +326,7 @@ public class TypeCheckerTest extends TestCase {
   public void testDividingTwoIntegers() {
     Node exp = _parseCode("new Integer(1) / new Integer(2);").get(0);
     
-    try {
-      exp.acceptVisitor(_typeChecker);
-      fail("Should have thrown an excpetion.");
-    }
-    catch (ExecutionError ee) {
-    }
+    exp.acceptVisitor(_typeChecker);
   }
   
   /**
@@ -303,12 +335,7 @@ public class TypeCheckerTest extends TestCase {
   public void testModingTwoIntegers() {
     Node exp = _parseCode("new Integer(1) % new Integer(2);").get(0);
     
-    try {
-      exp.acceptVisitor(_typeChecker);
-      fail("Should have thrown an excpetion.");
-    }
-    catch (ExecutionError ee) {
-    }
+    exp.acceptVisitor(_typeChecker);
   }
   
   //////////// Multiplicitive Assignments ///////////////

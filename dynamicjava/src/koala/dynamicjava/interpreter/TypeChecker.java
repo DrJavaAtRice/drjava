@@ -183,19 +183,25 @@ public class TypeChecker extends VisitorObject<Class> {
    */
   public Class visit(SwitchStatement node) {
     // Visits the components of this node
-    Class c = node.getSelector().acceptVisitor(this);
-    if (c != char.class && c != byte.class && c != short.class && c != int.class) {
+    Expression exp = node.getSelector();
+    Class c = exp.acceptVisitor(this);
+    if (c != char.class      && c != byte.class && c != short.class && c != int.class  && 
+        c != Character.class && c != Byte.class && c != Short.class && c != Integer.class) {
       node.setProperty(NodeProperties.ERROR_STRINGS,
                        new String[] { c.getName() });
       throw new ExecutionError("selector.type", node);
     }
-
+    // unbox it if needed
+    if (c == Character.class || c == Byte.class || c == Short.class || c == Integer.class) {
+      node.setSelector(_unbox(exp, c));
+    }
+    
     // Check the type of the case labels
     Iterator it = node.getBindings().iterator();
     while (it.hasNext()) {
       SwitchBlock sb = (SwitchBlock)it.next();
       sb.acceptVisitor(this);
-      Expression exp = sb.getExpression();
+      exp = sb.getExpression();
       if (exp != null) {
         Class lc = NodeProperties.getType(exp);
         if (lc != char.class &&  lc != byte.class &&
@@ -341,11 +347,21 @@ public class TypeChecker extends VisitorObject<Class> {
    * @param node the node to visit
    */
   public Class visit(IfThenStatement node) {
+    Expression cond = node.getCondition();
+    
     // Check the condition
-    if (node.getCondition().acceptVisitor(this) != boolean.class) {
+    Class type = cond.acceptVisitor(this);
+    if (type != boolean.class && type != Boolean.class) {
       throw new ExecutionError("condition.type", node);
     }
-
+    
+    // Auto unbox: Boolean->boolean
+    if (type == Boolean.class) {
+      // add method call on expression:
+      //   "cond.booleanValue();"
+      node.setCondition(_unbox(cond, type));
+    }
+    
     node.getThenStatement().acceptVisitor(this);
     return null;
   }
@@ -355,9 +371,19 @@ public class TypeChecker extends VisitorObject<Class> {
    * @param node the node to visit
    */
   public Class visit(IfThenElseStatement node) {
+    Expression cond = node.getCondition();
+    
     // Check the condition
-    if (node.getCondition().acceptVisitor(this) != boolean.class) {
+    Class type = cond.acceptVisitor(this);
+    if (type != boolean.class && type != Boolean.class) {
       throw new ExecutionError("condition.type", node);
+    }
+    
+    // Auto unbox: Boolean->boolean
+    if (type == Boolean.class) {
+      // add method call on expression:
+      //   "cond.booleanValue();"
+      node.setCondition(_unbox(cond, type));
     }
 
     node.getThenStatement().acceptVisitor(this);
@@ -1073,18 +1099,17 @@ public class TypeChecker extends VisitorObject<Class> {
 
     if (lc != String.class && rc != String.class) {
       c = visitNumericExpression(node, "addition.type");
-    } else {
-      node.setProperty(NodeProperties.TYPE, c = String.class);
+    } 
+    else {
+      node.setProperty(NodeProperties.TYPE, c);
     }
 
     // Compute the expression if it is constant
-    if (ln.hasProperty(NodeProperties.VALUE) &&
+    if (ln.hasProperty(NodeProperties.VALUE) && 
         rn.hasProperty(NodeProperties.VALUE)) {
-      node.setProperty
-        (NodeProperties.VALUE,
-         InterpreterUtilities.add(c,
-                                  ln.getProperty(NodeProperties.VALUE),
-                                  rn.getProperty(NodeProperties.VALUE)));
+      node.setProperty(NodeProperties.VALUE,
+                       InterpreterUtilities.add(c, ln.getProperty(NodeProperties.VALUE),
+                                                rn.getProperty(NodeProperties.VALUE)));
     }
     return c;
   }
@@ -1966,28 +1991,67 @@ public class TypeChecker extends VisitorObject<Class> {
    * Visits a numeric expression
    */
   private static Class visitNumericExpression(BinaryExpression node, String s) {
+    Expression leftExp = node.getLeftExpression();
+    Expression rightExp = node.getRightExpression();
+    
     // Set the type property of the given node
-    Class lc = NodeProperties.getType(node.getLeftExpression());
-    Class rc = NodeProperties.getType(node.getRightExpression());
+    Class lc = NodeProperties.getType(leftExp);
+    Class rc = NodeProperties.getType(rightExp);
     Class c  = null;
 
+    // Check to make sure the left and right types are valid
     if (lc == null           || rc == null          ||
         lc == boolean.class  || rc == boolean.class ||
-        !lc.isPrimitive()    || !rc.isPrimitive()   ||
+        !(lc.isPrimitive()   || _isBoxingType(lc))  || 
+        !(rc.isPrimitive()   || _isBoxingType(rc))  ||
         lc == void.class     || rc == void.class) {
       throw new ExecutionError(s, node);
-    } else if (lc == double.class || rc == double.class) {
-      node.setProperty(NodeProperties.TYPE, c = double.class);
-    } else if (lc == float.class || rc == float.class) {
-      node.setProperty(NodeProperties.TYPE, c = float.class);
-    } else if (lc == long.class || rc == long.class) {
-      node.setProperty(NodeProperties.TYPE, c = long.class);
-    } else {
-      node.setProperty(NodeProperties.TYPE, c = int.class);
+    } 
+
+    // Auto-unbox, if necessary
+    if (_isBoxingType(lc)) {
+      node.setLeftExpression(_unbox(leftExp, lc));
     }
+    if (_isBoxingType(rc)) {
+      node.setRightExpression(_unbox(rightExp, rc));
+    }
+    
+    // Set the type of the node to be the binary promotion
+    if (lc == double.class || lc == Double.class || 
+        rc == double.class || rc == Double.class) {
+      c = double.class;
+      node.setProperty(NodeProperties.TYPE, c);
+    } 
+    else if (lc == float.class || lc == Float.class ||
+             rc == float.class || rc == Float.class) {
+      c = float.class;
+      node.setProperty(NodeProperties.TYPE, c);
+    } 
+    else if (lc == long.class || lc == Long.class ||
+             rc == long.class || rc == Long.class) {
+      c = long.class;
+      node.setProperty(NodeProperties.TYPE, c);
+    } 
+    else {
+      c = int.class;
+      node.setProperty(NodeProperties.TYPE, c);
+    }
+    
+    // Return the type of the node
     return c;
   }
-
+  
+  /**
+   * Returns true iff the given class is a boxing (reference) type.
+   * @param c the <code>Class</code> to check
+   * @return true iff it is a boxing type
+   */
+  private static boolean _isBoxingType(Class c) {
+    return (c == Integer.class   || c == Long.class  ||
+            c == Character.class || c == Float.class ||
+            c == Double.class);
+  }
+  
   /**
    * Checks the typing rules for an assignment
    * @param lc   the class of the left part of an assignment
@@ -2256,7 +2320,7 @@ public class TypeChecker extends VisitorObject<Class> {
    * @param type The type of the evaluated expression
    * @return The <code>ObjectMethodCall</code> that unboxes the expression
    */
-  private ObjectMethodCall _unbox(Expression child, Class type) {
+  private static ObjectMethodCall _unbox(Expression child, Class type) {
     String methodName = "";
     if (type == Boolean.class) {
       methodName = "booleanValue";
