@@ -965,6 +965,13 @@ public class MainFrame extends JFrame implements OptionConstants {
     _javadocChooser = new JFileChooser();
     _javadocChooser.setCurrentDirectory(workDir);
     _javadocChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+    _javadocChooser.setDialogTitle("JavaDoc Destination Directory");
+    
+//     JPanel _jdAccPanel = new JPanel();
+//     JCheckBox _jdCheckBox = new JCheckBox("Start From Source Roots");
+//     _jdAccPanel.add(_jdCheckBox);
+//     
+//     _javadocChooser.setAccessory(_jdAccPanel);
     
     //set up the hourglass cursor
     setGlassPane(new GlassPane());
@@ -1582,20 +1589,48 @@ public class MainFrame extends JFrame implements OptionConstants {
     worker.start();
   }
 
+  /**
+   * Negotiates with the user and the global model to generate javadoc output.
+   * The user provides a destination, and the gm provides the package info.
+   */
   private void _javadocAll() {
+    // Only javadoc if all are saved.
+    _model.saveAllBeforeProceeding(GlobalModelListener.JAVADOC_REASON);
+    
+    // Get the destination directory via a JFileChooser.
     try {
-      int returnVal = _javadocChooser.showDialog(MainFrame.this, "Create Javadoc!");
+      int returnVal;
       File destDir;
-      try {
+      boolean rejected = false;
+        
+      // Make sure the destination is writable.
+      do {
+        // If the choice was rejected, tell the user and ask again.
+        if (rejected) {
+          JOptionPane.showMessageDialog(this,
+                                        "The destination directory you have chosen\n"
+                                          + "does not exist or is not readable. Please\n"
+                                          + "choose another directory.",
+                                        "Bad Destination", JOptionPane.ERROR_MESSAGE);
+        }
+        
+        returnVal = _javadocChooser.showOpenDialog(MainFrame.this);
         destDir = getChosenFile(_javadocChooser, returnVal);
-      } catch(OperationCanceledException oce){
-        return;
-      }
+      } while (!destDir.exists() || !destDir.canWrite());
+      
+      // Generate the output with the GlobalModel.
       _model.javadocAll(destDir.getAbsolutePath());
+      
+      // Display the results.
       _javadocFrame = new JavadocFrame(destDir);
       _javadocFrame.show();
-    } catch (IOException ioe) {
+    }
+    catch (IOException ioe) {
       _showIOError(ioe);
+    }
+    catch (OperationCanceledException oce) {
+      // If the user cancels the prompt, silently return.
+      return;
     }
   }
 
@@ -2037,7 +2072,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _setUpAction(_resetInteractionsAction, "Reset", "Reset interactions");
   
     _setUpAction(_junitAction, "Test", "Run JUnit over the current document");
-    _setUpAction(_javadocAction, "Doc", "Test", "Create javadoc");
+    _setUpAction(_javadocAction, "JavaDoc", "Test", "Create javadoc");
 
   }
 

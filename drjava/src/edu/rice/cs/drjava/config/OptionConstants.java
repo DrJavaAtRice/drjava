@@ -575,6 +575,13 @@ public interface OptionConstants {
    */
   public static final VectorOption<File> RECENT_FILES = 
     new VectorOption("recent.files",new FileOption("",null),new Vector<File>());
+  
+  /**
+   * Whether to include the entire package heirarchy from the source roots when
+   * generating JavaDoc output.
+   */
+  public static final BooleanOption JAVADOC_ALL_PACKAGES =
+    new BooleanOption("javadoc.all.packages", new Boolean(false));
 }
 
 

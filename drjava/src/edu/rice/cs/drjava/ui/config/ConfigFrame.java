@@ -552,6 +552,7 @@ public class ConfigFrame extends JFrame {
     panel.addComponent( new BooleanOptionComponent( OptionConstants.INTERACTIONS_EXIT_PROMPT, "Prompt if Interactions Pane Exits Unexpectedly", this));
     panel.addComponent( new BooleanOptionComponent( OptionConstants.QUIT_PROMPT, "Prompt Before Quit", this));
     panel.addComponent( new BooleanOptionComponent( OptionConstants.BACKUP_FILES, "Keep emacs style backup files", this));
+    panel.addComponent( new BooleanOptionComponent( OptionConstants.JAVADOC_ALL_PACKAGES, "Generate JavaDoc From Source Roots", this));
     
     panel.displayComponents();
   }

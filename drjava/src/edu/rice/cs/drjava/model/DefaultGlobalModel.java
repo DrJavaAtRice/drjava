@@ -1065,25 +1065,63 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
   
   /**
    * Javadocs all open documents, after ensuring that all are saved.
+   * @param destDir the absolute path to the destination directory
+   * @pre The destination directory must be writable and exist.
    */
   public void javadocAll(String destDir) throws IOException {
-    // Only javadoc if all are saved
-    saveAllBeforeProceeding(GlobalModelListener.JAVADOC_REASON);
     
-    // Get the sourceroots
-    File[] sourceRoots = getSourceRootSet();
-    File[] files = new File[_definitionsDocs.getSize()];
-    String[] docUnits = new String[_definitionsDocs.getSize()];
+    // Accumulate a set of arguments to JavaDoc - package or file names.
+    HashSet docUnits = new HashSet();
+    HashSet sourceRootSet = new HashSet();
+    HashSet defaultRoots = new HashSet();
+    HashSet topLevelPacks = new HashSet();
+    
+    // This depends on the current value of the "javadoc.all.packages" option.
+    boolean docAll = DrJava.getConfig().getSetting(JAVADOC_ALL_PACKAGES).booleanValue();
+    
+    // Each document has a package heirarchy to traverse.
     for (int i = 0; i < _definitionsDocs.getSize(); i++) {
       OpenDefinitionsDocument doc = (OpenDefinitionsDocument)
         _definitionsDocs.getElementAt(i);
       try {
-        files[i] = doc.getFile();
-        docUnits[i] = doc.getPackageName();
+        File sourceRoot = doc.getSourceRoot();
+        File file = doc.getFile();
+        String pack = doc.getPackageName();
         
-        if (docUnits[i].equals("")) {
+        if (pack.equals("") && !defaultRoots.contains(sourceRoot)) {
           // This file uses the default package.
-          docUnits[i] = files[i].getAbsolutePath();
+          // Look for other source files at the source root.
+          // But don't do it if we've already done it for this directory.
+          defaultRoots.add(sourceRoot);
+          File[] javaFiles = sourceRoot.listFiles(FileOps.JAVA_FILE_FILTER);
+          
+          for (int j = 0; j < javaFiles.length; j++) {
+            docUnits.add(javaFiles[j].getAbsolutePath());
+          }
+        }
+        else {
+          String topLevelPack;
+          File searchRoot;
+          if (docAll) {
+            // We need to doc all packages from the root level down.
+            topLevelPack = pack.substring(0, pack.indexOf('.'));
+            searchRoot = new File(sourceRoot, topLevelPack);
+          }
+          else {
+            // We just want packages below the current one.
+            topLevelPack = pack;
+            searchRoot = new File(sourceRoot,
+                                  topLevelPack.replace('.', File.separatorChar));
+          }
+          
+          // But we don't want to traverse the heirarchy more than once.
+          if (!topLevelPacks.contains(topLevelPack) 
+                || !sourceRootSet.contains(sourceRoot)) {
+            topLevelPacks.add(topLevelPack);
+            sourceRootSet.add(sourceRoot);
+            docUnits.addAll
+              (FileOps.packageExplore(topLevelPack, searchRoot));
+          }
         }
       }
       catch (InvalidPackageException ipe) {
@@ -1096,7 +1134,8 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     
     // Build the source path.
     StringBuffer sourcePath = new StringBuffer();
-    String separator= System.getProperty("path.separator");
+    String separator = System.getProperty("path.separator");
+    File[] sourceRoots = (File[]) sourceRootSet.toArray(new File[0]);
     for(int a = 0 ; a  < sourceRoots.length; a++){
       if (a != 0){
         sourcePath.append(separator);
@@ -1110,9 +1149,9 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
 //                                                    " com.sun.tools.javadoc.Main " +
 //                                                    "-private " + 
 //                                                    "-sourcepath " + sourcePath + "*");
-    //       for (int a = 0; a < files.length; a++){
-    //  javadocCommand.append(" " + files[a]);
-    //       }
+//     for (int a = 0; a < files.length; a++){
+//       javadocCommand.append(" " + files[a]);
+//     }
 //     System.out.println("javadoc started with command:\n" + javadocCommand);
     
     // Build the "command-line" arguments.
@@ -1120,9 +1159,9 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     args.add("-private");
     args.add("-sourcepath");
     args.add(sourcePath.toString());
-    args.addAll(Arrays.asList(docUnits));
     args.add("-d");
     args.add(destDir);
+    args.addAll(docUnits);
     
     System.err.println("javadoc started with args:\n" + args);
 
@@ -1130,7 +1169,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     //Pass the function some way to tell about its output (use the way compilers do it for
     //a model)
     //And finally, when we're done notify the listeners along with some sort of failure flag
-    javadoc_1_3((String[]) args.toArray(docUnits));
+    javadoc_1_3((String[]) args.toArray(new String[0]));
   }
 
   /**
