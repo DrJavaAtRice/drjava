@@ -598,13 +598,20 @@ learning tool.</para>
      <para> The general presentation of concepts in the Language Levels' Facility corresponds to the book <emphasis> How To Design Programs</emphasis> by Felleisen, Findler, Flatt, and Krishnamurthi.  Basically, the levels provide an incremental introduction to data structures and operations on those structures while helping to simplify syntax for the students. </para>
      <para> The levels are also designed to allow the introduction of <emphasis>design patterns</emphasis>--models for writing code with certain abstract behavior that are essential to teaching elegant object-oriented programming. </para>
 
-     <para> Here is a summary of what is provided at each level.</para>
+     <para> Here is a summary of what is allowed at each level.</para>
 
      <mediaobject>
        <imageobject>
        <imagedata fileref="LanguageLevelFeatures.jpg" format="jpg" scale=50 scalefit="1">
        </imageobject>
      </mediaobject>
+
+	<para>And here is a summary of the code augmentation performed for the students.</para>
+	<mediaobject>
+	  <imageobject>
+	  <imagedata fileref="LanguageLevelAugmentation.jpg" format="jpg" scale=50 scalefit="1">
+	  </imageobject>
+	</mediaobject>
 
      <para>Read on for a more detailed explaination of each level.</para>
 </section>
