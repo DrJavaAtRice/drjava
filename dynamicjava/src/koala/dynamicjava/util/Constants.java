@@ -44,7 +44,7 @@ public class Constants {
     /**
      * An empty class array
      */
-    public final static Class[] EMPTY_CLASS_ARRAY = new Class[0];
+    public final static Class<?>[] EMPTY_CLASS_ARRAY = new Class[0];
 
     /**
      * This class has not to be instanciated

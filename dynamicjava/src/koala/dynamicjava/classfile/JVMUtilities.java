@@ -119,7 +119,7 @@ public abstract class JVMUtilities {
   /**
    * Returns the string that represents internally the given class
    */
-  public static String getName(Class c) {
+  public static String getName(Class<?> c) {
     String s = types.get(c);
     if (s != null) {
       return s;
@@ -151,7 +151,7 @@ public abstract class JVMUtilities {
   /**
    * Returns the string that represents internally the given class
    */
-  public static String getReturnTypeName(Class c) {
+  public static String getReturnTypeName(Class<?> c) {
     String s = types.get(c);
     if (s != null) {
       return s;
@@ -181,7 +181,7 @@ public abstract class JVMUtilities {
   /**
    * Returns the string that represents internally the given class
    */
-  public static String getParameterTypeName(Class c) {
+  public static String getParameterTypeName(Class<?> c) {
     return getReturnTypeName(c);
   }
 

@@ -78,8 +78,8 @@ public class TigerUtilitiesTest extends DynamicJavaTestCase {
    */
   public void testIsVarArgs() {
     try {    
-      Method m1 = java.io.PrintStream.class.getMethod("printf", new Class[]{String.class, Object[].class});
-      Method m2 = java.io.PrintStream.class.getMethod("println",new Class[]{ });
+      Method m1 = java.io.PrintStream.class.getMethod("printf", new Class<?>[]{String.class, Object[].class});
+      Method m2 = java.io.PrintStream.class.getMethod("println",new Class<?>[]{ });
       assertEquals("The method should have variable arguments",TigerUtilities.isVarArgs(m1),true);
       assertEquals("The method should not have variable arguments",TigerUtilities.isVarArgs(m2),false);   
       

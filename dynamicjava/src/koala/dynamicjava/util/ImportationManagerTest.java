@@ -107,7 +107,7 @@ public class ImportationManagerTest extends TestCase {
   }
   
   public void testFindInnerClass() throws ClassNotFoundException {
-    Class result;
+    Class<?> result;
     //try {
     result = im.findInnerClass("java.util.Map.Entry");
     assertEquals("findInnerClass() for java.util.Map.Entry should return the java.util.Map$Entry Class", 

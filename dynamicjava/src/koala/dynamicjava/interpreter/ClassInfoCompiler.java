@@ -122,7 +122,7 @@ public class ClassInfoCompiler {
    * Creates a Class object from the classInfo attribute
    * @return the created class
    */
-  public Class compile() {
+  public Class<?> compile() {
     // Create a class factory
     ClassInfo dc = classInfo.getDeclaringClass();
     String outer = (dc != null) ? dc.getName() : null;
@@ -487,7 +487,7 @@ public class ClassInfoCompiler {
      */
     public Object visit(Literal node) {
       // Set the properties of the node
-      Class c = node.getType();
+      Class<?> c = node.getType();
       node.setProperty(NodeProperties.TYPE,
                        (c == null) ? null : new JavaClassInfo(c));
       return null;
@@ -955,7 +955,7 @@ public class ClassInfoCompiler {
       ClassInfo ci = NodeProperties.getClassInfo(n);
       
       if (ci instanceof JavaClassInfo) {
-        Class c = ((JavaClassInfo)ci).getJavaClass();
+        Class<?> c = ((JavaClassInfo)ci).getJavaClass();
         if (c == char.class || c == byte.class || c == short.class) {
           node.setProperty(NodeProperties.TYPE, JavaClassInfo.INT);
         } else if (c == int.class  || c == long.class) {
@@ -1001,8 +1001,8 @@ public class ClassInfoCompiler {
       Node      rn  = node.getRightExpression();
       ClassInfo lci = NodeProperties.getClassInfo(ln);
       ClassInfo rci = NodeProperties.getClassInfo(rn);
-      Class     lc  = null;
-      Class     rc  = null;
+      Class<?>     lc  = null;
+      Class<?>     rc  = null;
       
       if ((lci instanceof JavaClassInfo) &&
           (rci instanceof JavaClassInfo)) {
@@ -1495,7 +1495,7 @@ public class ClassInfoCompiler {
       ClassInfo ci = NodeProperties.getClassInfo(n);
       
       if (ci.isPrimitive()) {
-        Class c = ci.getJavaClass();
+        Class<?> c = ci.getJavaClass();
         if (c == char.class  ||
             c == byte.class  ||
             c == short.class ||
@@ -1541,8 +1541,8 @@ public class ClassInfoCompiler {
       // Set the type property of the given node
       ClassInfo lci = NodeProperties.getClassInfo(node.getLeftExpression());
       ClassInfo rci = NodeProperties.getClassInfo(node.getRightExpression());
-      Class lc = lci.getJavaClass();
-      Class rc = rci.getJavaClass();
+      Class<?> lc = lci.getJavaClass();
+      Class<?> rc = rci.getJavaClass();
       
       if (lc == null           || rc == null          ||
           lc == boolean.class  || rc == boolean.class ||
@@ -1569,8 +1569,8 @@ public class ClassInfoCompiler {
       Node      rn  = node.getRightExpression();
       ClassInfo lci = NodeProperties.getClassInfo(ln);
       ClassInfo rci = NodeProperties.getClassInfo(rn);
-      Class     lc  = null;
-      Class     rc  = null;
+      Class<?>     lc  = null;
+      Class<?>     rc  = null;
       
       if ((lci instanceof JavaClassInfo) &&
           (rci instanceof JavaClassInfo)) {
@@ -1605,8 +1605,8 @@ public class ClassInfoCompiler {
       Node      rn  = node.getRightExpression();
       ClassInfo lci = NodeProperties.getClassInfo(ln);
       ClassInfo rci = NodeProperties.getClassInfo(rn);
-      Class     lc  = null;
-      Class     rc  = null;
+      Class<?>     lc  = null;
+      Class<?>     rc  = null;
       
       if ((lci instanceof JavaClassInfo) &&
           (rci instanceof JavaClassInfo)) {

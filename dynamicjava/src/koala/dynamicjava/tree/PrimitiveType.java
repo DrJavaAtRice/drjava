@@ -46,7 +46,7 @@ public abstract class PrimitiveType extends Type {
   /**
    * The value of the node
    */
-  private Class value;
+  private Class<?> value;
   
   /**
    * Initializes the type
@@ -58,7 +58,7 @@ public abstract class PrimitiveType extends Type {
    * @param ec    the end column
    * @exception IllegalArgumentException if val is null
    */
-  protected PrimitiveType(Class val, String fn, int bl, int bc, int el, int ec) {
+  protected PrimitiveType(Class<?> val, String fn, int bl, int bc, int el, int ec) {
     super(fn, bl, bc, el, ec);
     
     if (val == null) throw new IllegalArgumentException("val == null");
@@ -69,7 +69,7 @@ public abstract class PrimitiveType extends Type {
   /**
    * Returns the value of this node
    */
-  public Class getValue() {
+  public Class<?> getValue() {
     return value;
   }
   
@@ -77,7 +77,7 @@ public abstract class PrimitiveType extends Type {
    * Sets the value of this node
    * @exception IllegalArgumentException if c is null
    */
-  public void setValue(Class c) {
+  public void setValue(Class<?> c) {
     if (c == null) throw new IllegalArgumentException("c == null");
     
     firePropertyChange(VALUE, value, value = c);

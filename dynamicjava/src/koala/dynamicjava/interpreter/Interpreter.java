@@ -97,7 +97,7 @@ public interface Interpreter {
      * @param name  the variable's name
      * @exception IllegalStateException if the variable do not exist
      */
-    Class getVariableClass(String name);
+    Class<?> getVariableClass(String name);
 
     /**
      * Returns the defined variable names
@@ -153,13 +153,13 @@ public interface Interpreter {
      * @param s the fully qualified name of the class to load
      * @exception ClassNotFoundException if the class cannot be find
      */
-    Class loadClass(String name) throws ClassNotFoundException;
+    Class<?> loadClass(String name) throws ClassNotFoundException;
 
     /**
      * Converts an array of bytes into an instance of class Class
      * @exception ClassFormatError if the class could not be defined
      */
-    Class defineClass(String name, byte[] code);
+    Class<?> defineClass(String name, byte[] code);
 
     /**
      * Gets the class loader

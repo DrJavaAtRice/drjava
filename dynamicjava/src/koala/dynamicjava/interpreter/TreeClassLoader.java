@@ -160,8 +160,8 @@ public class TreeClassLoader extends SecureClassLoader
    *
    * @exception ClassFormatError if the class could not be defined
    */
-  public Class defineClass(String name, byte[] code)  {
-    Class c = defineClass(name, code, 0, code.length, codeSource);
+  public Class<?> defineClass(String name, byte[] code)  {
+    Class<?> c = defineClass(name, code, 0, code.length, codeSource);
     classes.put(name, c);
     trees.remove(name);
     return c;
@@ -224,7 +224,7 @@ public class TreeClassLoader extends SecureClassLoader
    * @return the resulting <code>Class</code> object
    * @exception ClassNotFoundException if the class could not be find
    */
-  protected Class findClass(String name) throws ClassNotFoundException {
+  protected Class<?> findClass(String name) throws ClassNotFoundException {
     if (classes.containsKey(name)) {
       return classes.get(name);
     }

@@ -590,7 +590,7 @@ public class NameVisitor extends VisitorObject<Node> {
         AbstractTypeChecker tc = AbstractTypeChecker.makeTypeChecker(typeCheckerContext);
         //Get fully qualified name for Object o if the methodCall is to a staticly imported method
         //The full class name is given as if the user gave a call using the entire fully qualified name
-        Class[] params = new Class[args!=null? args.size() : 0];
+        Class<?>[] params = new Class[args!=null? args.size() : 0];
         if(args != null) {
           for(int i = 0; i < args.size(); i++) {
             String toParse = args.get(i).toString();

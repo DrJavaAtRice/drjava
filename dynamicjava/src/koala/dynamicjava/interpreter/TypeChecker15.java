@@ -175,7 +175,7 @@ public class TypeChecker15 extends AbstractTypeChecker {
     
     Constructor constructor;
     try {
-      constructor = refType.getConstructor(new Class[] { primType.getValue() });
+      constructor = refType.getConstructor(new Class<?>[] { primType.getValue() });
     }
     catch (NoSuchMethodException nsme) {
       throw new RuntimeException("The constructor for " + refTypeName + " not found.");

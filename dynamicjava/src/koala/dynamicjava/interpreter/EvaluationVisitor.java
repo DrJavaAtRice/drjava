@@ -249,7 +249,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
       
       m = null;
       try {
-        Class[] lookupArgs= {Object.class};
+        Class<?>[] lookupArgs= {Object.class};
         m = Array.class.getMethod("getLength", lookupArgs);
       }catch(NoSuchMethodException e){
         /* this is very bad */
@@ -814,7 +814,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
    * @param it         An expression iterator that holds the values of the actual arguments, STANDING
    *                     AT THE FIRST ACTUAL PARAMETER TO BE PUT IN THE VARARGS ARRAY
    */
-  private Object buildArrayOfRemainingArgs(Class[] typs, int larg_size, Iterator<Expression> it) {
+  private Object buildArrayOfRemainingArgs(Class<?>[] typs, int larg_size, Iterator<Expression> it) {
     if(! typs[typs.length-1].isArray())
       throw new RuntimeException("Last argument is not variable arguments");
         

@@ -122,7 +122,7 @@ public class ReflectionUtilitiesTest extends DynamicJavaTestCase {
     _assertBoxCompatible(java.util.List.class, java.util.Vector.class, true);
     _assertBoxCompatible(Object.class, Character.class, false);
   }
-  private void _assertBoxCompatible(Class c1, Class c2, boolean boxEnabled) {
+  private void _assertBoxCompatible(Class<?> c1, Class<?> c2, boolean boxEnabled) {
     setTigerEnabled(boxEnabled);
     ReflectionUtilities.TigerUsage tu = new ReflectionUtilities.TigerUsage();
     assertTrue("Should have been compatible: " +
@@ -131,7 +131,7 @@ public class ReflectionUtilitiesTest extends DynamicJavaTestCase {
     assertFalse("Wrong version exception would have been thrown (bad)",
                 !boxEnabled && tu.isAutoBoxingUsed());
   }
-  private void _assertNotBoxCompatible(Class c1, Class c2, boolean boxEnabled) {
+  private void _assertNotBoxCompatible(Class<?> c1, Class<?> c2, boolean boxEnabled) {
     setTigerEnabled(boxEnabled);
     ReflectionUtilities.TigerUsage tu = new ReflectionUtilities.TigerUsage();
     assertFalse("Shouldn't have been compatible: " + 
@@ -140,7 +140,7 @@ public class ReflectionUtilitiesTest extends DynamicJavaTestCase {
     assertFalse("Wrong version exception would have been thrown (bad)",
                 !boxEnabled && tu.isAutoBoxingUsed());
   }
-  private void _exceptionBoxCompatible(Class c1, Class c2, boolean boxEnabled) {
+  private void _exceptionBoxCompatible(Class<?> c1, Class<?> c2, boolean boxEnabled) {
     setTigerEnabled(boxEnabled);
     ReflectionUtilities.TigerUsage tu = new ReflectionUtilities.TigerUsage();
     ReflectionUtilities.isBoxCompatible(c1, c2, tu);
@@ -155,7 +155,7 @@ public class ReflectionUtilitiesTest extends DynamicJavaTestCase {
     setTigerEnabled(false);
     Method m;
     try {
-      m = ReflectionUtilities.lookupMethod(Integer.class, "toString", new Class[]{Integer.class});
+      m = ReflectionUtilities.lookupMethod(Integer.class, "toString", new Class<?>[]{Integer.class});
       fail("Didn't throw a wrong version exception!");
     }
     catch (WrongVersionException e) {
@@ -165,14 +165,14 @@ public class ReflectionUtilitiesTest extends DynamicJavaTestCase {
     }
     
     try {
-      m = ReflectionUtilities.lookupMethod(Integer.class, "toString", new Class[]{Integer.class, int.class, int.class});
+      m = ReflectionUtilities.lookupMethod(Integer.class, "toString", new Class<?>[]{Integer.class, int.class, int.class});
       fail("Didn't throw an method exception!");
     }
     catch (NoSuchMethodException e) {
     }
     
     // test to see that it can find overridden methods in classes that extend othre classes
-    Class[] pTypes = new Class[]{Object.class};
+    Class<?>[] pTypes = new Class<?>[]{Object.class};
     m = ReflectionUtilities.lookupMethod(LinkedList.class, "add", pTypes);
     assertTrue("Incorrect parameter types", Arrays.equals(pTypes, m.getParameterTypes()));
     assertEquals("Method was selected from wrong class", LinkedList.class, m.getDeclaringClass());
@@ -185,77 +185,77 @@ public class ReflectionUtilitiesTest extends DynamicJavaTestCase {
     int result;
     
     // test to see that it can find overridden methods in classes that extend othre classes
-    m = ReflectionUtilities.lookupMethod(Vector.class, "add", new Class[]{int.class});
-    assertTrue("Incorrect parameter types", Arrays.equals(new Class[]{Object.class}, m.getParameterTypes()));
+    m = ReflectionUtilities.lookupMethod(Vector.class, "add", new Class<?>[]{int.class});
+    assertTrue("Incorrect parameter types", Arrays.equals(new Class<?>[]{Object.class}, m.getParameterTypes()));
     assertEquals("Method was selected from wrong class", Vector.class, m.getDeclaringClass());
     
     // test(1,1) -> test(int x, int y)
-    m = ReflectionUtilities.lookupMethod(TestClass.class, "test", new Class[]{int.class, int.class});
+    m = ReflectionUtilities.lookupMethod(TestClass.class, "test", new Class<?>[]{int.class, int.class});
     result = ((Integer)m.invoke(null, new Object[]{ONE, ONE})).intValue();
     assertEquals("lookup with test(int,int) found wrong method", TestClass.test(1, 1), result);
     
     // test(1,1,ONE) -> test(int x, int y, int z)
-    m = ReflectionUtilities.lookupMethod(TestClass.class, "test", new Class[]{int.class, int.class, Integer.class});
+    m = ReflectionUtilities.lookupMethod(TestClass.class, "test", new Class<?>[]{int.class, int.class, Integer.class});
     assertEquals("Wrong number of arguments chosen for (int,int,Integer): " + m, 3, m.getParameterTypes().length);
     result = ((Integer)m.invoke(null, new Object[]{ONE, ONE, ONE})).intValue();
     assertEquals("lookup with test(int,int,Integer) found wrong method", TestClass.test(1,1,ONE), result);
     
     // test0(1) -> test0(int)
-    m = ReflectionUtilities.lookupMethod(TestClass.class, "test0", new Class[]{int.class});
+    m = ReflectionUtilities.lookupMethod(TestClass.class, "test0", new Class<?>[]{int.class});
     assertEquals("Wrong number of arguments chosen for test0: " + m, 1, m.getParameterTypes().length);
     result = ((Integer)m.invoke(null, new Object[]{ONE})).intValue();
     assertEquals("lookup with test0 found wrong method", TestClass.test0(1), result);
     
     // test1(1,1,1) -> ambiguous
     try {
-      m = ReflectionUtilities.lookupMethod(TestClass.class, "test1", new Class[]{int.class, int.class, int.class});
+      m = ReflectionUtilities.lookupMethod(TestClass.class, "test1", new Class<?>[]{int.class, int.class, int.class});
       fail("test1(int,int,int) Didn't throw an ambiguous method exception");
     }
     catch(AmbiguousMethodException e) {  }
     
     // test2(1,1,1) -> test2(Integer,Integer,Integer)
-    m = ReflectionUtilities.lookupMethod(TestClass.class, "test2", new Class[]{int.class, int.class, int.class});
+    m = ReflectionUtilities.lookupMethod(TestClass.class, "test2", new Class<?>[]{int.class, int.class, int.class});
     assertEquals("Wrong number of arguments chosen for test2: " + m, 3, m.getParameterTypes().length);
     result = ((Integer)m.invoke(null, new Object[]{ONE, ONE, ONE})).intValue();
     assertEquals("lookup with test2 found wrong method", TestClass.test2(1,1,1), result);
     
     // test3(1,1) -> test3(Integer,Integer,Integer)
-    m = ReflectionUtilities.lookupMethod(TestClass.class, "test3", new Class[]{int.class, int.class});
+    m = ReflectionUtilities.lookupMethod(TestClass.class, "test3", new Class<?>[]{int.class, int.class});
     assertEquals("Wrong number of arguments chosen for test3: " + m, 2, m.getParameterTypes().length);
     result = ((Integer)m.invoke(null, new Object[]{ONE, ONE})).intValue();
     assertEquals("lookup with test3 ound wrong method", TestClass.test3(1,1), result);
     
     // test4(ONE) -> test4(int)
-    m = ReflectionUtilities.lookupMethod(TestClass.class, "test4", new Class[]{Integer.class});
+    m = ReflectionUtilities.lookupMethod(TestClass.class, "test4", new Class<?>[]{Integer.class});
     result = ((Integer)m.invoke(null, new Object[]{ONE})).intValue();
     assertEquals("lookup with test4 ound wrong method", TestClass.test4(ONE), result);
     
     // test5(ONE) -> test5(int,int...)
-    m = ReflectionUtilities.lookupMethod(TestClass.class, "test5", new Class[]{Integer.class});
+    m = ReflectionUtilities.lookupMethod(TestClass.class, "test5", new Class<?>[]{Integer.class});
     assertEquals("Wrong number of arguments chosen for test5: " + m, 2, m.getParameterTypes().length);
     result = ((Integer)m.invoke(null, new Object[]{ONE, new int[]{}})).intValue();
     assertEquals("lookup with test5 ound wrong method", TestClass.test5(1), result);
     
     // test5(1,1) -> ambiguous
     try {
-      m = ReflectionUtilities.lookupMethod(TestClass.class, "test5", new Class[]{int.class, int.class});
+      m = ReflectionUtilities.lookupMethod(TestClass.class, "test5", new Class<?>[]{int.class, int.class});
       fail("test5(int,int) Didn't throw an ambiguous method exception");
     }
     catch(AmbiguousMethodException e) {  }
     
     // test6() -> method not found
     try {
-      m = ReflectionUtilities.lookupMethod(TestClass.class, "test6", new Class[]{});
+      m = ReflectionUtilities.lookupMethod(TestClass.class, "test6", new Class<?>[]{});
       fail("test6() didn't throw a NoSuchMethodException");
     }
     catch(NoSuchMethodException e) { }
       
     // java.util.Arrays.asList(Object...) with Integer[]
-    m = ReflectionUtilities.lookupMethod(java.util.Arrays.class, "asList", new Class[]{Integer[].class});
+    m = ReflectionUtilities.lookupMethod(java.util.Arrays.class, "asList", new Class<?>[]{Integer[].class});
     
     
     // test5(ONE) -> test5(int,int...)
-    m = ReflectionUtilities.lookupMethod(TestClass.class, "test7", new Class[]{Integer.class});
+    m = ReflectionUtilities.lookupMethod(TestClass.class, "test7", new Class<?>[]{Integer.class});
     result = ((Integer)m.invoke(null, new Object[]{ONE})).intValue();
     assertEquals("lookup with test5 ound wrong method", TestClass.test5(new Integer(1)), result);
   }
@@ -268,32 +268,32 @@ public class ReflectionUtilitiesTest extends DynamicJavaTestCase {
     int result;
     
     try {
-      c = ReflectionUtilities.lookupConstructor(TestClass.class, new Class[]{int.class,int.class,int.class});
+      c = ReflectionUtilities.lookupConstructor(TestClass.class, new Class<?>[]{int.class,int.class,int.class});
       fail("(int,int,int) Didn't throw an AmbiguousMethodException");
     }
     catch(AmbiguousMethodException e) { }
       
     try {
-      c = ReflectionUtilities.lookupConstructor(TestClass.class, new Class[]{String.class,int.class,int.class});
+      c = ReflectionUtilities.lookupConstructor(TestClass.class, new Class<?>[]{String.class,int.class,int.class});
       fail("(String,int,int) Didn't throw an AmbiguousMethodException");
     }
     catch(AmbiguousMethodException e) { }
     
     try {
-      c = ReflectionUtilities.lookupConstructor(TestClass.class, new Class[]{Class.class,int.class});
+      c = ReflectionUtilities.lookupConstructor(TestClass.class, new Class<?>[]{Class.class,int.class});
       fail("(Class,int) Didn't throw an AmbiguousMethodException");
     }
     catch(AmbiguousMethodException e) { }
     
-    c = ReflectionUtilities.lookupConstructor(TestClass.class, new Class[]{Method.class,int.class});
+    c = ReflectionUtilities.lookupConstructor(TestClass.class, new Class<?>[]{Method.class,int.class});
     result = ((TestClass)c.newInstance(new Object[] {null,new Integer(1)})).value();
     assertEquals("(Method,int) Should have picked #7 (Method,Number",new TestClass((Method)null,1).value(),result);
     
-    c = ReflectionUtilities.lookupConstructor(TestClass.class, new Class[]{Field.class,String.class,String.class,String.class});
+    c = ReflectionUtilities.lookupConstructor(TestClass.class, new Class<?>[]{Field.class,String.class,String.class,String.class});
     result = ((TestClass)c.newInstance(new Object[] {null,new String[]{"a","b","c"}})).value();
     assertEquals("(Field,String,String,String) should have found varargs constructor",new TestClass((Field)null,"a","b","c").value(),result);
     
-    c = ReflectionUtilities.lookupConstructor(TestClass.class, new Class[]{int.class});
+    c = ReflectionUtilities.lookupConstructor(TestClass.class, new Class<?>[]{int.class});
     result = ((TestClass)c.newInstance(new Object[] {new Integer(1)})).value();
     assertEquals("(int) should have found correct constructor",new TestClass(1).value(),result);
   }
@@ -307,8 +307,9 @@ public class ReflectionUtilitiesTest extends DynamicJavaTestCase {
     String result;
     C1 instance = new C1();
     Method m1 = C1.class.getDeclaredMethods()[1];
+    //System.err.println(m1.getModifiers());
     assertTrue(m1+" isBridge?", TigerUtilities.isBridge(m1));
-    m = ReflectionUtilities.lookupMethod(C1.class, "method1", new Class[]{});
+    m = ReflectionUtilities.lookupMethod(C1.class, "method1", new Class<?>[]{});
     result = ((String)m.invoke(instance, new Object[]{}));
     assertEquals("lookup c1.method1", instance.method1(), result);
   }
@@ -328,8 +329,8 @@ public class ReflectionUtilitiesTest extends DynamicJavaTestCase {
     public TestClass(String s, Integer a, int b) { value = 3; }
     public TestClass(String s, int a, Integer b) { value = 4; }
     // Test with (Class,int), ambiguous
-    public TestClass(Class c, int... rest) { value = 5; }
-    public TestClass(Class c, int i, int... rest) { value = 6; }
+    public TestClass(Class<?> c, int... rest) { value = 5; }
+    public TestClass(Class<?> c, int i, int... rest) { value = 6; }
     // Test with (Method,int), expect 7
     public TestClass(Method m, Number n) { value = 7; }
     public TestClass(Method m, Object o) { value = 8; }

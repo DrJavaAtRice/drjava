@@ -42,7 +42,7 @@ public class TreeUtilities {
    * Creates Type node from a Class object
    * @param c     the class to use
    */
-  public static Type classToType(Class c) {
+  public static Type classToType(Class<?> c) {
     return classToType(c, null, 0, 0, 0, 0);
   }
   
@@ -55,7 +55,7 @@ public class TreeUtilities {
    * @param el    the end line
    * @param ec    the end column
    */
-  public static Type classToType(Class c, String fn, int bl, int bc, int el, int ec) {
+  public static Type classToType(Class<?> c, String fn, int bl, int bc, int el, int ec) {
     Type result;
     if (c == int.class) {
       result = new IntType(fn, bl, bc, el, ec);

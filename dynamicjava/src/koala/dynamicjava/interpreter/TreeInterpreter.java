@@ -229,7 +229,7 @@ public class TreeInterpreter implements Interpreter {
    * @param c the variable's type.
    * @exception IllegalStateException if name is already defined
    */
-  public void defineVariable(String name, Object value, Class c) {
+  public void defineVariable(String name, Object value, Class<?> c) {
     nameVisitorContext.define(name, c);
     checkVisitorContext.define(name, c);
     evalVisitorContext.define(name, value);
@@ -252,7 +252,7 @@ public class TreeInterpreter implements Interpreter {
    * @exception IllegalStateException if name is already defined
    */
   public void defineVariable(String name, boolean value) {
-    Class c = boolean.class;
+    Class<?> c = boolean.class;
     nameVisitorContext.define(name, c);
     checkVisitorContext.define(name, c);
     evalVisitorContext.define(name, new Boolean(value));
@@ -265,7 +265,7 @@ public class TreeInterpreter implements Interpreter {
    * @exception IllegalStateException if name is already defined
    */
   public void defineVariable(String name, byte value) {
-    Class c = byte.class;
+    Class<?> c = byte.class;
     nameVisitorContext.define(name, c);
     checkVisitorContext.define(name, c);
     evalVisitorContext.define(name, new Byte(value));
@@ -278,7 +278,7 @@ public class TreeInterpreter implements Interpreter {
    * @exception IllegalStateException if name is already defined
    */
   public void defineVariable(String name, short value) {
-    Class c = short.class;
+    Class<?> c = short.class;
     nameVisitorContext.define(name, c);
     checkVisitorContext.define(name, c);
     evalVisitorContext.define(name, new Short(value));
@@ -291,7 +291,7 @@ public class TreeInterpreter implements Interpreter {
    * @exception IllegalStateException if name is already defined
    */
   public void defineVariable(String name, char value) {
-    Class c = char.class;
+    Class<?> c = char.class;
     nameVisitorContext.define(name, c);
     checkVisitorContext.define(name, c);
     evalVisitorContext.define(name, new Character(value));
@@ -304,7 +304,7 @@ public class TreeInterpreter implements Interpreter {
    * @exception IllegalStateException if name is already defined
    */
   public void defineVariable(String name, int value) {
-    Class c = int.class;
+    Class<?> c = int.class;
     nameVisitorContext.define(name, c);
     checkVisitorContext.define(name, c);
     evalVisitorContext.define(name, new Integer(value));
@@ -317,7 +317,7 @@ public class TreeInterpreter implements Interpreter {
    * @exception IllegalStateException if name is already defined
    */
   public void defineVariable(String name, long value) {
-    Class c = long.class;
+    Class<?> c = long.class;
     nameVisitorContext.define(name, c);
     checkVisitorContext.define(name, c);
     evalVisitorContext.define(name, new Long(value));
@@ -330,7 +330,7 @@ public class TreeInterpreter implements Interpreter {
    * @exception IllegalStateException if name is already defined
    */
   public void defineVariable(String name, float value) {
-    Class c = float.class;
+    Class<?> c = float.class;
     nameVisitorContext.define(name, c);
     checkVisitorContext.define(name, c);
     evalVisitorContext.define(name, new Float(value));
@@ -343,7 +343,7 @@ public class TreeInterpreter implements Interpreter {
    * @exception IllegalStateException if name is already defined
    */
   public void defineVariable(String name, double value) {
-    Class c = double.class;
+    Class<?> c = double.class;
     nameVisitorContext.define(name, c);
     checkVisitorContext.define(name, c);
     evalVisitorContext.define(name, new Double(value));
@@ -356,7 +356,7 @@ public class TreeInterpreter implements Interpreter {
    * @exception IllegalStateException if the assignment is invalid
    */
   public void setVariable(String name, Object value) {
-    Class c = (Class)checkVisitorContext.get(name);
+    Class<?> c = (Class)checkVisitorContext.get(name);
     if (InterpreterUtilities.isValidAssignment(c, value)) {
       evalVisitorContext.set(name, value);
     } else {
@@ -378,7 +378,7 @@ public class TreeInterpreter implements Interpreter {
    * @param name  the variable's name
    * @exception IllegalStateException if the variable do not exist
    */
-  public Class getVariableClass(String name) {
+  public Class<?> getVariableClass(String name) {
     return (Class)checkVisitorContext.get(name);
   }
 
@@ -449,7 +449,7 @@ public class TreeInterpreter implements Interpreter {
    * @param s the fully qualified name of the class to load
    * @exception ClassNotFoundException if the class cannot be find
    */
-  public Class loadClass(String name) throws ClassNotFoundException {
+  public Class<?> loadClass(String name) throws ClassNotFoundException {
     return new TreeCompiler(this).compile(name);
   }
 
@@ -457,7 +457,7 @@ public class TreeInterpreter implements Interpreter {
    * Converts an array of bytes into an instance of the class Class
    * @exception ClassFormatError if the class cannot be defined
    */
-  public Class defineClass(String name, byte[] code) {
+  public Class<?> defineClass(String name, byte[] code) {
     return classLoader.defineClass(name, code);
   }
 
@@ -485,7 +485,7 @@ public class TreeInterpreter implements Interpreter {
   /**
    * Returns the class of the execution exception
    */
-  public Class getExceptionClass() {
+  public Class<?> getExceptionClass() {
     return CatchedExceptionError.class;
   }
 
@@ -510,7 +510,7 @@ public class TreeInterpreter implements Interpreter {
    */
   public static Object invokeMethod(String key, Object obj, Object[] params) {
     MethodDescriptor md = methods.get(key);
-    Class c = null;
+    Class<?> c = null;
     try {
       c = Class.forName(key.substring(0, key.lastIndexOf('#')),
                         true, md.interpreter.getClassLoader());
@@ -529,7 +529,7 @@ public class TreeInterpreter implements Interpreter {
    * @param obj the object (this)
    * @param params the arguments
    */
-  protected Object interpretMethod(Class c,
+  protected Object interpretMethod(Class<?> c,
                                    MethodDescriptor md,
                                    Object obj,
                                    Object[] params) {
@@ -746,7 +746,7 @@ public class TreeInterpreter implements Interpreter {
    */
   public static Object[] interpretArguments(String key, Object[] args) {
     ConstructorParametersDescriptor cpd = constructorParameters.get(key);
-    Class c = null;
+    Class<?> c = null;
     try {
       c = Class.forName(key.substring(0, key.lastIndexOf('#')),
                         true, cpd.interpreter.getClassLoader());
@@ -766,7 +766,7 @@ public class TreeInterpreter implements Interpreter {
    * @return the arguments to give to the 'super' or 'this' constructor
    *         followed by the new values of the constructor arguments
    */
-  protected Object[] interpretArguments(Class c,
+  protected Object[] interpretArguments(Class<?> c,
                                         ConstructorParametersDescriptor cpd,
                                         Object[] args) {
     if (cpd.variables == null) {

@@ -88,8 +88,8 @@ public class ClassInfoUtilities {
         if (c2 == null || !c2.isPrimitive()) {
           return false;
         } else {
-          Class cl1 = c1.getJavaClass();
-          Class cl2 = c2.getJavaClass();
+          Class<?> cl1 = c1.getJavaClass();
+          Class<?> cl2 = c2.getJavaClass();
           if (cl1 == short.class) {
             return cl2 == byte.class;
           } else if (cl1 == int.class) {

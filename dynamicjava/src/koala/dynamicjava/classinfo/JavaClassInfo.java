@@ -79,13 +79,13 @@ public class JavaClassInfo implements ClassInfo {
   /**
    * The underlying class
    */
-  private Class javaClass;
+  private Class<?> javaClass;
   
   /**
    * Creates a new class info
    * @param c the java class
    */
-  public JavaClassInfo(Class c) {
+  public JavaClassInfo(Class<?> c) {
     if (c == null) throw new IllegalArgumentException("c == null");
     
     javaClass = c;
@@ -102,16 +102,12 @@ public class JavaClassInfo implements ClassInfo {
   /**
    * Returns the underlying class
    */
-  public Class getJavaClass() {
-    return javaClass;
-  }
+  public Class<?> getJavaClass() { return javaClass; }
   
   /**
    * Whether the underlying class needs compilation
    */
-  public boolean isCompilable() {
-    return false;
-  }
+  public boolean isCompilable() { return false; }
   
   /**
    * Sets the compilable property
@@ -124,7 +120,7 @@ public class JavaClassInfo implements ClassInfo {
    * Returns the declaring class or null
    */
   public ClassInfo getDeclaringClass() {
-    Class c = javaClass.getDeclaringClass();
+    Class<?> c = javaClass.getDeclaringClass();
     return (c == null) ? null : new JavaClassInfo(c);
   }
   
@@ -154,7 +150,7 @@ public class JavaClassInfo implements ClassInfo {
    * represented by this info
    */
   public ClassInfo getSuperclass() {
-    Class c = javaClass.getSuperclass();
+    Class<?> c = javaClass.getSuperclass();
     return (c == null) ? null : new JavaClassInfo(c);
   }
   
@@ -163,7 +159,7 @@ public class JavaClassInfo implements ClassInfo {
    * the class this info represents
    */
   public ClassInfo[] getInterfaces() {
-    Class[]     interfaces = javaClass.getInterfaces();
+    Class<?>[]     interfaces = javaClass.getInterfaces();
     ClassInfo[] result     = new ClassInfo[interfaces.length];
     
     for (int i = 0; i < interfaces.length; i++) {
@@ -216,7 +212,7 @@ public class JavaClassInfo implements ClassInfo {
    * of the class represented by this ClassInfo object.
    */
   public ClassInfo[] getDeclaredClasses() {
-    Class[]     classes = javaClass.getDeclaredClasses();
+    Class<?>[]     classes = javaClass.getDeclaredClasses();
     ClassInfo[] result  = new ClassInfo[classes.length];
     
     for (int i = 0; i < classes.length; i++) {

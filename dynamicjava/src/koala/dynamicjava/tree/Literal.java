@@ -66,7 +66,7 @@ public abstract class Literal extends PrimaryExpression {
   /**
    * The type of this literal
    */
-  private Class type;
+  private Class<?> type;
   
   /**
    * Initializes a literal
@@ -80,7 +80,7 @@ public abstract class Literal extends PrimaryExpression {
    * @param ec  the end column
    * @exception IllegalArgumentException if rep is null
    */
-  protected Literal(String rep, Object val, Class typ,
+  protected Literal(String rep, Object val, Class<?> typ,
                     String fn, int bl, int bc, int el,int ec) {
     super(fn, bl, bc, el, ec);
     
@@ -127,14 +127,14 @@ public abstract class Literal extends PrimaryExpression {
    * Returns the type of this expression.
    * NOTE: the 'null' literal has a null type
    */
-  public Class getType() {
+  public Class<?> getType() {
     return type;
   }
   
   /**
    * Sets the type of this object
    */
-  public void setType(Class c) {
+  public void setType(Class<?> c) {
     firePropertyChange(TYPE, type, type = c);
   }
   

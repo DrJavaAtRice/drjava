@@ -98,13 +98,13 @@ public class TigerUtilities {
   
   
   /**
-   * Resets _tigerEnabled based upon the version of the runtime environement that is being used.
+   * Resets _tigerEnabled based upon the version of the runtime environment that is being used.
    */
   public static void resetVersion() {
     try {
       //Class.forName("java.lang.Enum");
 //      Class.forName("com.sun.javadoc.ParameterizedType");
-      java.lang.reflect.Method.class.getMethod("isVarArgs", new Class[]{});
+      java.lang.reflect.Method.class.getMethod("isVarArgs", new Class<?>[]{});
       _tigerEnabled = true;
     }
     catch (Throwable t) {
@@ -119,9 +119,7 @@ public class TigerUtilities {
    * Accessor method for _tigerEnabled. Returns true if the features in 1.5 are enabled currently.
    * @return boolean - true if 1.5 features are enabled
    */
-  public static boolean isTigerEnabled() {
-    return _tigerEnabled;
-  }
+  public static boolean isTigerEnabled() { return _tigerEnabled; }
 
   /**
    * Allows the features in 1.5 to be enabled or disabled. Used only in test cases.
@@ -160,9 +158,7 @@ public class TigerUtilities {
     return _tigerEnabled && ((c.getModifiers() & VARARGS) != 0); //c.isVarArgs(); use this for some beta versions of 1.5 did not properly support the isVarArgs() method!
   }
   
-  public static boolean isBridge(Method m) {
-    return ((m.getModifiers() & BRIDGE) != 0);
-  }
+  public static boolean isBridge(Method m) { return ((m.getModifiers() & BRIDGE) != 0); }
 
   /**
    * Uses short circuiting to ensure that if tiger is not enabled, <code>isEnum()</code>
@@ -200,7 +196,7 @@ public class TigerUtilities {
    * @param primType the primitive type
    * @return the corresponding reference type
    */
-  public static Class correspondingBoxingType(Class primType) {
+  public static Class<?> correspondingBoxingType(Class<?> primType) {
     if (primType == boolean.class) { return Boolean.class; }
     else if (primType == byte.class) { return Byte.class; }
     else if (primType == char.class) { return Character.class; }
@@ -220,7 +216,7 @@ public class TigerUtilities {
    * @param refType the reference type
    * @return the corresponding primitive type
    */
-  public static Class correspondingPrimType(Class refType) {
+  public static Class<?> correspondingPrimType(Class<?> refType) {
     if (refType == Boolean.class) { return boolean.class; }
     else if (refType == Byte.class) { return byte.class; }
     else if (refType == Character.class) { return char.class; }
@@ -239,7 +235,7 @@ public class TigerUtilities {
    * @param c the class that may be a reference type
    * @return boolean that is true if the input class is a boxing type
    */
-  public static boolean isBoxingType(Class c) {
+  public static boolean isBoxingType(Class<?> c) {
     return (c == Integer.class   || c == Long.class   ||
             c == Boolean.class   || c == Double.class ||
             c == Character.class || c == Short.class  ||
@@ -254,7 +250,7 @@ public class TigerUtilities {
    * @param c The class to check
    * @return true iff the given class is an integral type
    */
-  public static boolean isIntegralType(Class c) {
+  public static boolean isIntegralType(Class<?> c) {
     return (c == int.class   || c == Integer.class   ||
             c == long.class  || c == Long.class      ||
             c == byte.class  || c == Byte.class      ||
@@ -269,7 +265,7 @@ public class TigerUtilities {
 //   * @param ref - the reference class being boxed to
 //   * @return true iff the given primitive class can be boxed to the given reference class
 //   */
-//  public static boolean boxesTo(Class prim, Class ref) {
+//  public static boolean boxesTo(Class<?> prim, Class<?> ref) {
 //    return
 //      (prim == int.class     && (ref == Integer.class   ||
 //                                 ref == Long.class      ||
@@ -309,7 +305,7 @@ public class TigerUtilities {
    * @param ref - the reference class being boxed to
    * @return true iff the given primitive class can be boxed to the given reference class
    */
-  public static boolean boxesTo(Class prim, Class ref) {
+  public static boolean boxesTo(Class<?> prim, Class<?> ref) {
     return
       ((prim == int.class    && ref == Integer.class)     ||
       (prim == long.class    && ref == Long.class)        ||

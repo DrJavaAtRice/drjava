@@ -98,15 +98,15 @@ public class BufferedImportationManager extends ImportationManager {
    * @return the class found
    * @exception ClassNotFoundException if the class cannot be loaded
    */
-  public Class lookupClass(String cname, String ccname)
+  public Class<?> lookupClass(String cname, String ccname)
     throws ClassNotFoundException {
     Map<String,Class> m = buffer.get(ccname);
     if (m != null) {
-      Class c = m.get(cname);
+      Class<?> c = m.get(cname);
       if (c != null) return c;
     }
     
-    Class c = super.lookupClass(cname, ccname);
+    Class<?> c = super.lookupClass(cname, ccname);
     
     if (m == null) {
       m = new HashMap<String,Class>(11);

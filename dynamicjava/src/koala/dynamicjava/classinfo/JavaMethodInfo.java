@@ -91,7 +91,7 @@ public class JavaMethodInfo implements MethodInfo {
      */
     public ClassInfo[] getParameterTypes() {
   if (parameters == null) {
-      Class[] pcs = javaMethod.getParameterTypes();
+      Class<?>[] pcs = javaMethod.getParameterTypes();
       parameters  = new ClassInfo[pcs.length];
 
       for (int i = 0; i < pcs.length; i++) {
@@ -107,7 +107,7 @@ public class JavaMethodInfo implements MethodInfo {
      */
     public ClassInfo[] getExceptionTypes() {
   if (exceptions == null) {
-      Class[] ecs = javaMethod.getExceptionTypes();
+      Class<?>[] ecs = javaMethod.getExceptionTypes();
       exceptions  = new ClassInfo[ecs.length];
 
       for (int i = 0; i < ecs.length; i++) {

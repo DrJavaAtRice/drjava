@@ -81,7 +81,7 @@ public class TreeCompiler {
    * Compiles a compilation unit
    * @param name the name of the class to compile
    */
-  public Class compile(String name) throws ClassNotFoundException {
+  public Class<?> compile(String name) throws ClassNotFoundException {
     loadClass(name);
     return compileClasses(name);
   }
@@ -90,13 +90,13 @@ public class TreeCompiler {
    * Compiles all the classes in the class pool
    * @param name the name of the class to return
    */
-  public Class compileClasses(String name) throws ClassNotFoundException {
-    Class result = null;
+  public Class<?> compileClasses(String name) throws ClassNotFoundException {
+    Class<?> result = null;
     if (classPool.contains(name)) {
       ClassInfo ci;
       while ((ci = classPool.getFirstCompilable()) != null) {
         if (!classExists(ci.getName())) {
-          Class c = compileClass(ci, name);
+          Class<?> c = compileClass(ci, name);
           if (c != null) {
             result = c;
           }
@@ -117,7 +117,7 @@ public class TreeCompiler {
    * @param td the type declaration
    * @param im the importation manager
    */
-  public Class compileTree(Context ctx, TypeDeclaration td) {
+  public Class<?> compileTree(Context ctx, TypeDeclaration td) {
     ClassFinder cf = new TreeClassFinder(ctx, interpreter, classPool);
     ClassInfo   ci = new TreeClassInfo(td, cf);
     classPool.add(ci.getName(), ci);
@@ -135,13 +135,13 @@ public class TreeCompiler {
    * @param ci   the class info to compile
    * @param name the name of the class to return
    */
-  protected Class compileClass(ClassInfo ci, String name) {
-    Class result = null;
+  protected Class<?> compileClass(ClassInfo ci, String name) {
+    Class<?> result = null;
     
     // Compile first the superclass and interfaces if needed
     ClassInfo t = ci.getSuperclass();
     if (t.isCompilable() && !classExists(t.getName())) {
-      Class c = compileClass(t, name);
+      Class<?> c = compileClass(t, name);
       if (c != null) {
         result = c;
       }
@@ -151,7 +151,7 @@ public class TreeCompiler {
     for (int i = 0; i < ti.length; i++) {
       t = ti[i];
       if (t.isCompilable() && !classExists(t.getName())) {
-        Class c = compileClass(t, name);
+        Class<?> c = compileClass(t, name);
         if (c != null) {
           result = c;
         }
@@ -159,7 +159,7 @@ public class TreeCompiler {
     }
     
     // Then compile the class
-    Class c = new ClassInfoCompiler(ci).compile();
+    Class<?> c = new ClassInfoCompiler(ci).compile();
     ci.setCompilable(false);
     if (name.equals(c.getName())) {
       result = c;
@@ -332,7 +332,7 @@ public class TreeCompiler {
      * @return the resulting <code>Class</code> object
      * @exception ClassNotFoundException if the class could not be find
      */
-    protected Class findClass(String name) throws ClassNotFoundException {
+    protected Class<?> findClass(String name) throws ClassNotFoundException {
       TreeCompiler.this.loadClass(name);
       if (classPool.contains(name)) {
         throw new PseudoError(classPool.get(name));

@@ -67,7 +67,7 @@ public class JavaConstructorInfo implements ConstructorInfo {
      * by this object
      */
     public ClassInfo[] getParameterTypes() {
-        Class[]     pcs    = javaConstructor.getParameterTypes();
+        Class<?>[]     pcs    = javaConstructor.getParameterTypes();
         ClassInfo[] result = new ClassInfo[pcs.length];
 
         for (int i = 0; i < pcs.length; i++) {
@@ -81,7 +81,7 @@ public class JavaConstructorInfo implements ConstructorInfo {
      * the exceptions declared to be thrown by the underlying constructor
      */
     public ClassInfo[] getExceptionTypes() {
-        Class[]     ecs    = javaConstructor.getExceptionTypes();
+        Class<?>[]     ecs    = javaConstructor.getExceptionTypes();
         ClassInfo[] result = new ClassInfo[ecs.length];
 
         for (int i = 0; i < ecs.length; i++) {

@@ -224,7 +224,7 @@ public class DynamicjavaTest extends DynamicJavaTestCase {
       "}" +
       "l2.size();";
     
-    assertEquals("the size of the list should be 2", 2, interpret(testString));
+    assertEquals("the size of the list should be 2", new Integer(2), interpret(testString));
   }
 
   public void testForEachWithArray(){

@@ -42,7 +42,7 @@ public interface ClassInfo {
     /**
      * Returns the underlying class
      */
-    Class getJavaClass();
+    Class<?> getJavaClass();
 
     /**
      * Whether the underlying class needs compilation

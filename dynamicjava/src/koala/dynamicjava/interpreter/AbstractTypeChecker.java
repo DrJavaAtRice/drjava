@@ -94,7 +94,7 @@ import koala.dynamicjava.util.*;
  *
  */
 
-public abstract class AbstractTypeChecker extends VisitorObject<Class> {
+public abstract class AbstractTypeChecker extends VisitorObject<Class<?>> {
   /**
    * The context
    */
@@ -288,7 +288,7 @@ public abstract class AbstractTypeChecker extends VisitorObject<Class> {
         if (lc != char.class &&  lc != byte.class &&
             lc != short.class && lc != int.class &&
             //  (TigerUtilities.isTigerEnabled() && (lc.getSuperclass() != Class.forName("java.lang.Enum")))) {
-            !TigerUtilities.isEnum(lc)) {
+            (TigerUtilities.isTigerEnabled() && !TigerUtilities.isEnum(lc))) {
           node.setProperty(NodeProperties.ERROR_STRINGS,
                            new String[] { lc.getName() });
           throw new ExecutionError("switch.label.type", node);
@@ -607,16 +607,15 @@ public abstract class AbstractTypeChecker extends VisitorObject<Class> {
       Field f = null;
       try {
         f = context.getField(c, node.getFieldName());
-      } catch (Exception e) {
-        throw new CatchedExceptionError(e, node);
-      }
+      } catch (Exception e) { throw new CatchedExceptionError(e, node); }
 
       // Set the node properties
+      c = f.getType();
       node.setProperty(NodeProperties.FIELD, f);
-      node.setProperty(NodeProperties.TYPE,  c = f.getType());
-
+      node.setProperty(NodeProperties.TYPE, c);
       node.setProperty(NodeProperties.MODIFIER, context.getModifier(node));
       return c;
+      
     } else {
       if (!node.getFieldName().equals("length")) {
         String s0 = "length";
@@ -687,7 +686,7 @@ public abstract class AbstractTypeChecker extends VisitorObject<Class> {
     if (!c.isArray() || (c.isArray() && !mn.equals("clone"))) {
       // Do the type checking of the arguments
       List<Expression> args = node.getArguments();
-      Class[] cargs = Constants.EMPTY_CLASS_ARRAY;
+      Class<?>[] cargs = Constants.EMPTY_CLASS_ARRAY;
       if (args != null) {
         cargs = new Class[args.size()];
         Iterator<Expression> it = args.iterator();
@@ -772,7 +771,7 @@ public abstract class AbstractTypeChecker extends VisitorObject<Class> {
   public Class<?> visit(FunctionCall node) {
     // Do the type checking of the arguments
     List<Expression> args = node.getArguments();
-    Class[] cargs = Constants.EMPTY_CLASS_ARRAY;
+    Class<?>[] cargs = Constants.EMPTY_CLASS_ARRAY;
     if (args != null) {
       cargs = new Class[args.size()];
       Iterator<Expression> it = args.iterator();
@@ -804,7 +803,7 @@ public abstract class AbstractTypeChecker extends VisitorObject<Class> {
   public Class<?> visit(SuperMethodCall node) {
     // Do the type checking of the arguments
     List<Expression> args = node.getArguments();
-    Class[] pt = Constants.EMPTY_CLASS_ARRAY;
+    Class<?>[] pt = Constants.EMPTY_CLASS_ARRAY;
     if (args != null) {
       pt = new Class[args.size()];
       Iterator<Expression> it = args.iterator();
@@ -834,7 +833,7 @@ public abstract class AbstractTypeChecker extends VisitorObject<Class> {
   public Class<?> visit(StaticMethodCall node) {
     // Do the type checking of the arguments
     List<Expression> args = node.getArguments();
-    Class[] cargs = Constants.EMPTY_CLASS_ARRAY;
+    Class<?>[] cargs = Constants.EMPTY_CLASS_ARRAY;
     if (args != null) {
       cargs = new Class[args.size()];
       Iterator<Expression> it = args.iterator();
@@ -1012,7 +1011,7 @@ public abstract class AbstractTypeChecker extends VisitorObject<Class> {
       Node   ctn   = node.getCreationType();
       Class<?>   ct   = ctn.acceptVisitor(this);
       List<Expression>   largs = node.getArguments();
-      Class[] args = Constants.EMPTY_CLASS_ARRAY;
+      Class<?>[] args = Constants.EMPTY_CLASS_ARRAY;
 
       if (largs != null) {
         args = new Class[largs.size()];
@@ -2845,7 +2844,7 @@ public abstract class AbstractTypeChecker extends VisitorObject<Class> {
   /**
    * Tests if the class/interface c is final
    */
-  private static boolean isFinal(Class c) { 
+  private static boolean isFinal(Class<?> c) { 
     return Modifier.isFinal(c.getModifiers());
   }
   

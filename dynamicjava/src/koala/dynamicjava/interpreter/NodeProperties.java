@@ -130,8 +130,8 @@ public class NodeProperties {
     /**
      * Returns the type property of a node
      */
-    public static Class getComponentType(Node n) {
-        return (Class)n.getProperty(COMPONENT_TYPE);
+    public static Class<?> getComponentType(Node n) {
+        return (Class<?>)n.getProperty(COMPONENT_TYPE);
     }
 
     /**
@@ -144,8 +144,8 @@ public class NodeProperties {
     /**
      * Returns the type property of a node
      */
-    public static Class getType(Node n) {
-        return (Class)n.getProperty(TYPE);
+    public static Class<?> getType(Node n) {
+        return (Class<?>)n.getProperty(TYPE);
     }
 
     /**

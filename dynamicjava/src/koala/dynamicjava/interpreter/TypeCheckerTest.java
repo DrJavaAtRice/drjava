@@ -207,13 +207,13 @@ public class TypeCheckerTest extends DynamicJavaTestCase {
   /**
    * Checks a binary expression to make sure that it is getting typed correctly.
    */
-  private Class _checkBinaryExpression(String text, 
+  private Class<?> _checkBinaryExpression(String text, 
                                        String leftExpected, 
                                        String rightExpected) 
     throws InterpreterException {
     
     BinaryExpression exp = (BinaryExpression)_parseCode(text).get(0);
-    Class type = exp.acceptVisitor(_typeChecker);
+    Class<?> type = exp.acceptVisitor(_typeChecker);
         
     String actual = exp.getLeftExpression().toString();
     assertEquals("Left should have typed correctly.", leftExpected, actual);
@@ -225,12 +225,12 @@ public class TypeCheckerTest extends DynamicJavaTestCase {
     return type;
   }
   
-  private Class _checkUnaryExpression(String text, String expected) 
+  private Class<?> _checkUnaryExpression(String text, String expected) 
     throws InterpreterException {
     
     UnaryExpression exp = (UnaryExpression)_parseCode(text).get(0);
     
-    Class type = exp.acceptVisitor(_typeChecker);
+    Class<?> type = exp.acceptVisitor(_typeChecker);
         
     String actual = exp.getExpression().toString();
     assertEquals("Expression should have typed correctly.", expected, actual);
@@ -445,6 +445,8 @@ public class TypeCheckerTest extends DynamicJavaTestCase {
 
     text = "switch( 'a' ) { case 'a': }";
     _parseCode(text).get(0).acceptVisitor(_typeChecker);
+    
+    System.err.println("Is Tiger enabled? " + TigerUtilities.isTigerEnabled());
     
     try {
       text = "switch ('a') { case \"adsf\": }";
@@ -1238,7 +1240,7 @@ public class TypeCheckerTest extends DynamicJavaTestCase {
     String text = "Integer i = 1;";
     String initExpected = "(koala.dynamicjava.tree.SimpleAllocation: (koala.dynamicjava.tree.ReferenceType: java.lang.Integer) [(koala.dynamicjava.tree.CastExpression: (koala.dynamicjava.tree.IntegerLiteral: 1 1 int) (koala.dynamicjava.tree.IntType: int))])";
     VariableDeclaration exp = (VariableDeclaration)_parseCode(text).get(0);
-    Class type = exp.acceptVisitor(_typeChecker);
+    Class<?> type = exp.acceptVisitor(_typeChecker);
     String actual = exp.getInitializer().toString();
     assertEquals("The initializer should have been boxed.", initExpected, actual);
     _interpretText(text);
@@ -1264,7 +1266,7 @@ public class TypeCheckerTest extends DynamicJavaTestCase {
     String text = "(int)new Integer(1);";
   
     Node exp = _parseCode(text).get(0);
-    Class type = exp.acceptVisitor(_typeChecker);
+    Class<?> type = exp.acceptVisitor(_typeChecker);
     assertEquals("Should be the primitive type.", int.class, type);
 
     _interpretText(text);
@@ -1273,7 +1275,7 @@ public class TypeCheckerTest extends DynamicJavaTestCase {
   public void testBoxingCastExpression() throws InterpreterException{
     String text = "(Integer)1;";
     Node exp = _parseCode(text).get(0);
-    Class type = exp.acceptVisitor(_typeChecker);
+    Class<?> type = exp.acceptVisitor(_typeChecker);
     assertEquals("Should be the refrence type.", Integer.class, type);
 
     _interpretText(text);
@@ -1282,7 +1284,7 @@ public class TypeCheckerTest extends DynamicJavaTestCase {
   public void testDoubleCastExpression() throws InterpreterException{
     String text = "(Byte)(byte)1;";
     Node exp = _parseCode(text).get(0);
-    Class type = exp.acceptVisitor(_typeChecker);
+    Class<?> type = exp.acceptVisitor(_typeChecker);
     assertEquals("Should be the primitive type.", Byte.class, type);
 
     _interpretText(text);
@@ -1306,7 +1308,7 @@ public class TypeCheckerTest extends DynamicJavaTestCase {
     // a Boolean reference type and the other is a primitive type works
     String text = "(B) ? B : 1;";
     ConditionalExpression stmt = (ConditionalExpression)_parseCode(text).get(0);
-    Class type = stmt.acceptVisitor(_typeChecker);
+    Class<?> type = stmt.acceptVisitor(_typeChecker);
     assertEquals("Test 1: the type should have been Object", Object.class, type);
     
     String expected = "(koala.dynamicjava.tree.ObjectMethodCall: booleanValue null (koala.dynamicjava.tree.QualifiedName: B))";
@@ -1371,7 +1373,7 @@ public class TypeCheckerTest extends DynamicJavaTestCase {
     String text = "new int[new Integer(5)];";
     String sizeExpected = "(koala.dynamicjava.tree.ObjectMethodCall: intValue null (koala.dynamicjava.tree.SimpleAllocation: (koala.dynamicjava.tree.ReferenceType: Integer) [(koala.dynamicjava.tree.IntegerLiteral: 5 5 int)]))";
     ArrayAllocation exp = (ArrayAllocation) _parseCode(text).get(0);
-    Class type = exp.acceptVisitor(_typeChecker);
+    Class<?> type = exp.acceptVisitor(_typeChecker);
     String actual = exp.getSizes().get(0).toString();
     assertEquals("The size should have been unboxed.", sizeExpected, actual);
     _interpretText(text);
@@ -1390,7 +1392,7 @@ public class TypeCheckerTest extends DynamicJavaTestCase {
     String text = "I[new Integer(0)];";
     String idxExpected = "(koala.dynamicjava.tree.ObjectMethodCall: intValue null (koala.dynamicjava.tree.SimpleAllocation: (koala.dynamicjava.tree.ReferenceType: Integer) [(koala.dynamicjava.tree.IntegerLiteral: 0 0 int)]))";
     ArrayAccess exp = (ArrayAccess)_parseCode(text).get(0);
-    Class type = exp.acceptVisitor(_typeChecker);
+    Class<?> type = exp.acceptVisitor(_typeChecker);
     String actual = exp.getCellNumber().toString();
     assertEquals("The index should have been unboxed.", idxExpected, actual);
     _interpretText(text);
@@ -1412,7 +1414,7 @@ public class TypeCheckerTest extends DynamicJavaTestCase {
     String text = "X.equals(0);";
     List<Node> list = _parseCode(text);
     MethodCall exp = (MethodCall)list.get(0);
-    Class type = exp.acceptVisitor(_typeChecker);
+    Class<?> type = exp.acceptVisitor(_typeChecker);
     Method m = (Method)exp.getProperty(NodeProperties.METHOD);
     assertEquals("the method's parameter type should have been int", Object.class, m.getParameterTypes()[0]);
     Object res = _interpretText(text);
@@ -1430,7 +1432,7 @@ public class TypeCheckerTest extends DynamicJavaTestCase {
     NameVisitor nv = new NameVisitor(_globalNameContext);
     Node exp = (MethodCall)list.get(0);
     exp = exp.acceptVisitor(nv);
-    Class type = exp.acceptVisitor(_typeChecker);
+    Class<?> type = exp.acceptVisitor(_typeChecker);
     Method m = (Method)exp.getProperty(NodeProperties.METHOD);
     assertEquals("the method's parameter type should have been int", int.class, m.getParameterTypes()[0]);
     Object res = _interpretText(text);

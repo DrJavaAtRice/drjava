@@ -162,7 +162,7 @@ public class TreeClassInfo implements ClassInfo {
   /**
    * Returns the underlying class
    */
-  public Class getJavaClass() {
+  public Class<?> getJavaClass() {
     throw new IllegalStateException();
   }
 

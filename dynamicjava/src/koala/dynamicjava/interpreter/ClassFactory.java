@@ -312,8 +312,8 @@ public class ClassFactory extends ClassFile {
   public ClassFactory(int     af,
                       String  name,
                       String  sname,
-                      Class   interp,
-                      Class   except,
+                      Class<?>   interp,
+                      Class<?>   except,
                       String  clid) {
     super(name, sname);
     this.name = name;

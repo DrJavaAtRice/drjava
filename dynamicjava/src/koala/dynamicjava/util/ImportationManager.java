@@ -236,7 +236,7 @@ public class ImportationManager implements Cloneable {
       }
     } catch (ClassNotFoundException e) {
       // try to find an inner class with this name
-      Class c = findInnerClass(cname);
+      Class<?> c = findInnerClass(cname);
       singleTypeImportClauses.remove((c == null) ? cname : c.getName());
       singleTypeImportClauses.add(0, (c == null) ? cname : c.getName());
     } finally {
@@ -257,7 +257,7 @@ public class ImportationManager implements Cloneable {
       }
     } catch (ClassNotFoundException e) {
       // try to find an inner class with this name
-      Class c = findInnerClass(cname);
+      Class<?> c = findInnerClass(cname);
       importOnDemandStaticClauses.remove((c == null) ? cname : c.getName());
       importOnDemandStaticClauses.add(0, (c == null) ? cname : c.getName());
     } finally {
@@ -277,7 +277,7 @@ public class ImportationManager implements Cloneable {
       surroundingClassName = member.substring(0,i);
     }
     
-    Class surroundingClass;
+    Class<?> surroundingClass;
     
     try {
       surroundingClass = Class.forName(surroundingClassName, true, classLoader);
@@ -300,7 +300,7 @@ public class ImportationManager implements Cloneable {
     //Different methods require different formats, and having both can't hurt anything. Any of the methods that use the list of classes try and catch through the
     //list until they come across a class that fits
     try {
-      Class c;
+      Class<?> c;
       try {
         c = Class.forName(member, true, classLoader);
       } catch (ClassNotFoundException cnfe) {
@@ -367,7 +367,7 @@ public class ImportationManager implements Cloneable {
    * @return the class found
    * @exception ClassNotFoundException if the class cannot be loaded
    */
-  public Class lookupClass(String cname, String ccname)
+  public Class<?> lookupClass(String cname, String ccname)
     throws ClassNotFoundException {
         
     String str = cname.replace('.', '$');
@@ -494,7 +494,7 @@ public class ImportationManager implements Cloneable {
   /**
    * Searches for an inner class from its name in the dotted notation
    */
-  protected Class findInnerClass(String s) throws ClassNotFoundException {
+  protected Class<?> findInnerClass(String s) throws ClassNotFoundException {
     int   n;
     while ((n = s.lastIndexOf('.')) != -1) {
       s = s.substring(0, n) + '$' + s.substring(n + 1, s.length());
@@ -533,7 +533,7 @@ public class ImportationManager implements Cloneable {
    * @param name - the name of the method
    * @param params - the parameters of the method
    */  
-  protected Method lookupMethod(String name, Class[] params) throws NoSuchMethodException {
+  protected Method lookupMethod(String name, Class<?>[] params) throws NoSuchMethodException {
     Method m, toReturn;
     Iterator<Method> i = singleTypeImportStaticMethodClauses.iterator();
     while(i.hasNext()) {
@@ -568,7 +568,7 @@ public class ImportationManager implements Cloneable {
      * @param methodName the method name
      * @param args the argument list for the method
      */
-  public String getQualifiedName(String methodName, Class[] args) 
+  public String getQualifiedName(String methodName, Class<?>[] args) 
     throws NoSuchMethodException {
     List<IdentifierToken> toReturn = new LinkedList<IdentifierToken>(); 
     Method m = lookupMethod(methodName, args);
