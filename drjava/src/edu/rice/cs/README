@@ -1,0 +1,37 @@
+$Id$
+
+How to set up your environment to develop on DrJava
+by Brian Stoler (bstoler@rice.edu)
+
+1) Get SourceForge.net account and get added to the DrJava group.
+
+2) Make a directory to be the top-level container of DrJava stuff. I recommend
+   "sf", for SourceForge.
+
+3) Set CVSROOT environment variable to "user@cvs.drjava.sf.net:/cvsroot/drjava",
+   substitution your SourceForge account name for user.
+
+4) Set CVS_RSH environment variable to "ssh"
+
+5) cd ~/sf
+
+6) cvs -d $CVSROOT checkout src
+
+7) Install Ant: http://jakarta.apache.org/ant
+
+8) Download the JSR-14 prototype compiler (with generics) from
+   http://developer.java.sun.com/developer/earlyAccess/adding_generics.
+   Then unzip the file you downloaded, and move the included javac.jar to
+   ~/sf/src/edu/rice/cs/lib/jsr14.jar.
+
+9) Set CLASSPATH environment variable to include all of the following:
+   * ~/sf/built (this is where compiled classes will go)
+   * ~/sf/src/edu/rice/cs/lib/jsr14.jar
+   * ~/sf/src/edu/rice/cs/lib/junit.jar
+   * ~/sf/src/edu/rice/cs/lib/GJv6.jar
+   * ~/sf/src/edu/rice/cs/lib/gj-util.jar
+   * ~/sf/src/edu/rice/cs/lib/dynamicjava.jar
+
+That should be it! Make sure all the environment variables are exported if
+you're using UNIX. Of course you'll probably want to set them from within
+a script or your .bashrc or .cshrc or whatever.
