@@ -37,48 +37,65 @@
  *
 END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava;
+package edu.rice.cs.drjava.config;
 
-import java.util.Date;
-import java.text.SimpleDateFormat;
+import edu.rice.cs.drjava.CodeStatus;
+import javax.swing.KeyStroke;
+import java.awt.event.KeyEvent;
 
 /**
- * This interface hold the information about this build of DrJava.
- * This file is copied to Version.java by the build process, which also
- * fills in the right values of the date and time.
- *
- * This javadoc corresponds to build drjava-20020619-1941;
- *
- * @version $Id$
+ * Class representing all configuration options with values of type KeyStroke.
  */
-public abstract class Version {
+public class KeyStrokeOption extends Option<KeyStroke> {
+  
   /**
-   * This string will be automatically expanded upon "ant commit".
-   * Do not edit it by hand!
+   * @param key The name of this option.
    */
-  private static final String BUILD_TIME_STRING = "20020619-1941";
-
-  /** A {@link Date} version of the build time. */
-  private static final Date BUILD_TIME = _getBuildDate();
-
-  public static String getBuildTimeString() {
-    return BUILD_TIME_STRING;
-  }
-
-  public static Date getBuildTime() {
-    return BUILD_TIME;
-  }
-
-  private static Date _getBuildDate() {
-    try {
-      return new SimpleDateFormat("yyyyMMdd-HHmm z").parse(BUILD_TIME_STRING + " GMT");
+  public KeyStrokeOption(String key, KeyStroke def) { super(key,def); }
+  
+  /**
+   * @param s The String to be parsed, must be the string representation of 
+   * the KeyStroke to be created. Uses the method KeyStroke.getKeyStroke(String s)
+   * which returns a KeyStroke if the string is correctly formatted or null
+   * otherwise.
+   * @return The KeyStroke object corresponding to the input string "s".
+   */
+  public KeyStroke parse(String s) {
+    if (CodeStatus.DEVELOPMENT) {
+      KeyStroke ks = KeyStroke.getKeyStroke(s);
+      if (ks == null)
+        throw new IllegalArgumentException("Input must be a string that is a valid " +
+                                           "representation of a Keystroke");
+      return ks;
     }
-    catch (Exception e) { // parse format or whatever problem
+    else
       return null;
-    }
   }
 
-  public static void main(String[] args) {
-    System.out.println("Version for edu.rice.cs.drjava: " + BUILD_TIME_STRING);
+  /**
+   * @param k The instance of class KeyStroke to be formatted.
+   * @return A String representing the KeyStroke "k".
+   */
+  public String format(KeyStroke k) {
+    if (CodeStatus.DEVELOPMENT) {
+      String s = KeyEvent.getKeyModifiersText(k.getModifiers()).toLowerCase();
+      s = s.replace('+', ' ');
+      s += " ";
+      // If the key code is undefined, this is a "typed" unicode character
+      if (k.getKeyCode() == KeyEvent.VK_UNDEFINED) {
+        s += "typed ";
+        s += k.getKeyChar();
+      }
+      // else this corresponds to a static KeyEvent constant
+      else {
+        // defaults to pressed
+        if (k.isOnKeyRelease())
+          s += "released ";
+        s += KeyEvent.getKeyText(k.getKeyCode()).toUpperCase().replace(' ', '_');
+      }
+      return s; 
+    }
+    else
+      return null;
   }
-} 
+}
