@@ -247,5 +247,4 @@ public class SimpleInteractionsModel extends InteractionsModel {
   protected void _notifyInterpreterResetFailed(Throwable t) {
     // Won't happen in a single JVM
   }
-
 }

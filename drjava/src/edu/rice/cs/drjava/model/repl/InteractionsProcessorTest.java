@@ -43,41 +43,91 @@
  * 
 END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava.model.repl.newjvm;
+package edu.rice.cs.drjava.model.repl;
 
+import junit.framework.*;
 import edu.rice.cs.javaast.parser.*;
 import edu.rice.cs.javaast.tree.*;
 import edu.rice.cs.javaast.*;
-import java.io.*;
 
 /**
- * Processes any commands sent to or from the interpreter.
- * 
- * This class is loaded in the Interpreter JVM, not the Main JVM.
- * (Do not use DrJava's config framework here.)
- *
+ * Tests the behavior of the InteractionsProcessor.
  * @version $Id$
  */
-public class InteractionsProcessor implements InteractionsProcessorI {
+public final class InteractionsProcessorTest extends TestCase {
 
   /**
-   * Processes each command sent to the interpreter.
-   * Currently type-erases any GJ-style generic code.
-   * @param s String typed by the user
-   * @return Processed String to send to the interpreter
+   * InteractionsProcessor to be used in the test methods.
    */
-  public String preProcess(String s) throws ParseException
-  {
-    InteractionsInput tree = new GJParser(new StringReader(s)) . InteractionsInput();
-    JavaASTVisitor typeEraser = new TypeEraser(); // Add parameterization <JavaAST> on typeEraser.
-    JavaAST typeErasedTree = (JavaAST)tree.accept(typeEraser);
-    String source =  InteractionsPrinter.generateSource(typeErasedTree);
-    // System.out.println("Interpreting: " + source);
-    return source;
+  InteractionsProcessor _ip;
+
+  protected void setUp() {
+    _ip = new InteractionsProcessor();
   }
 
-  // postProcess method removed for now:
-  //  Contract was unclear, since it didn't do anything.  If we find a good
-  //  use for post-processing, we'll add it again here.
-
+  /**
+   * Tests a simple assignment to be sure it works.  More comprehensive
+   * parser tests are in edu.rice.cs.javaast.InteractionsParserTest.
+   */
+  public void testPreProcessAssignment() throws ParseException
+  {
+    String s = _ip.preProcess("int x = 3;");
+    assertEquals("assignment", "int x = 3;", s);
+  }
+  
+  /**
+   * Tests that generic statements are type erased.  More comprehensive
+   * generic tests are in edu.rice.cs.javaast.TypeEraserTest.
+   */
+  public void testPreProcessGenerics() throws ParseException
+  {
+    String s = _ip.preProcess("Vector<String> v = new Vector<String>();");
+    assertEquals("type-erased assignment", "Vector v = new Vector();", s);
+  }
+  
+  /**
+   * Tests that the correct exception is thrown on a syntax error.
+   */
+  public void testPreProcessSyntaxError()
+  {
+    try{
+      String s = _ip.preProcess("i+");
+      fail("preProcess failed, syntax error expected");
+    }
+    catch( ParseException pe ){
+      // expected this.
+    }
+  }
+  
+  /**
+   * Tests that the correct exception is thrown on a token manager error.
+   */
+  public void testPreProcessTokenMgrError()
+  {
+    try{
+      String s = _ip.preProcess("#");
+      fail("preProcess failed, token manager error expected");
+    }
+    catch( ParseException pe ){
+      fail("preProcess failed, token manager error expected");
+    }
+    catch( TokenMgrError tme ){
+     // this was what we wanted.
+    }
+  }
+  
+  /** 
+   * Tests that the preprocessor will accept single-line comments. (Bug #768726)
+   */
+  public void testPreProcessSingleLineComments() {
+    try {
+      String s = _ip.preProcess("// Mary had a little lamb");
+      assertEquals("The preprocessor should have removed the single-line comment.", 
+                   "", 
+                   s);
+    }
+    catch(ParseException e) {
+      fail("preProcess failed, should have accepted the single-line comment.");
+    }
+  }
 }

@@ -428,5 +428,8 @@ public final class InteractionsModelTest extends TestCase {
       fail("cannot get input from System.in in a test");
       return null;
     }
+    protected boolean _checkInteraction(String code) {
+      return true;
+    }
   }
 }

@@ -63,6 +63,10 @@ import edu.rice.cs.util.*;
 import edu.rice.cs.util.text.DocumentAdapter;
 import edu.rice.cs.util.text.DocumentAdapterException;
 
+import edu.rice.cs.javaast.*;
+import edu.rice.cs.javaast.tree.*;
+import edu.rice.cs.javaast.parser.*;
+
 /**
  * A model which can serve as the glue between an InteractionsDocument and
  * any JavaInterpreter.  This abstract class provides common functionality
@@ -123,6 +127,9 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
    */
   private boolean _debugPortSet;
   
+  /** Interactions processor, currently a pre-processor **/
+  private InteractionsProcessorI _interactionsProcessor;
+
   /**
    * Constructs an InteractionsModel.
    * @param adapter DocumentAdapter to use in the InteractionsDocument
@@ -139,6 +146,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     _writerLock = new Object();
     _debugPort = -1;
     _debugPortSet = false;
+    _interactionsProcessor = new InteractionsProcessor();
   }
   
   /**
@@ -190,21 +198,26 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
       if (_document.inProgress()) {
         return;
       }
-      
-      _notifyInteractionStarted();
-      
+
       String text = _document.getCurrentInteraction();
-      _document.setInProgress(true);
-      _document.addToHistory(text);
-      
-      // there is no return at the end of the last line
-      // better to put it on now and not later.
-      _docAppend(_newLine, InteractionsDocument.DEFAULT_STYLE);
-      
       String toEval = text.trim();
       if (toEval.startsWith("java ")) {
         toEval = _testClassCall(toEval);
       }
+
+      if (!_checkInteraction(text)) {
+        return;
+      }
+
+      // there is no return at the end of the last line
+      // better to put it on now and not later.
+      _docAppend(_newLine, InteractionsDocument.DEFAULT_STYLE);
+
+      _notifyInteractionStarted();
+
+      _document.setInProgress(true);
+      _document.addToHistory(text);
+
       interpret(toEval);
     }
   }
@@ -224,7 +237,38 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
    * @param toEval command to be evaluated
    */
   protected abstract void _interpret(String toEval);
-  
+
+  /**
+   * Verifies that the current interaction is "complete"; i.e. the user has
+   * finished typing.
+   * @param toCheck the String to check
+   * @return true iff the interaction is complete
+   */
+//  protected abstract boolean _checkInteraction(String toCheck);
+  /**
+   * Verifies that the current interaction is "complete"; i.e. the user has
+   * finished typing.
+   * @param toCheck the String to check
+   * @return true iff the interaction is complete
+   */
+  protected boolean _checkInteraction(String toCheck) {
+    String result;
+    try {
+      result = _interactionsProcessor.preProcess(toCheck);
+    }
+    catch (ParseException pe) {
+      // A ParseException indicates a syntax error in the input window
+      if (pe.getInteractionsMessage().endsWith("<EOF>\"")) {
+        _notifier.interactionIncomplete();
+        return false;
+      }
+    }
+    catch (TokenMgrError tme) {
+      // A TokenMgrError indicates some lexical difficulty with input.
+    }
+    return true;
+  }
+
   /**
    * Notifies listeners that an interaction has started.
    * (Subclasses must maintain listeners.)
@@ -602,8 +646,8 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     edu.rice.cs.util.Pair<Integer,Integer> oAndL = 
       StringOps.getOffsetAndLength( interaction, startRow, startCol, endRow, endCol );
     
-    _notifySyntaxErrorOccurred( _document.getPromptPos() + oAndL.getFirst().intValue(),
-                                oAndL.getSecond().intValue() );
+    _notifySyntaxErrorOccurred(_document.getPromptPos() + oAndL.getFirst().intValue(),
+                                oAndL.getSecond().intValue());
     
     _document.appendSyntaxErrorResult(errorMessage,
                                       startRow,

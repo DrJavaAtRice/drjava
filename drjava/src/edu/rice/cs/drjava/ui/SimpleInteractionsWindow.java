@@ -108,6 +108,10 @@ public class SimpleInteractionsWindow extends JFrame {
       public void interpreterResetFailed(Throwable t) {
         interpreterReady();
       }
+      public void interactionIncomplete() {
+        int caretPos = _pane.getCaretPosition();
+        _controller.getConsoleDoc().insertNewLine(caretPos);
+      }
     });
 
     JScrollPane scroll = new JScrollPane(_pane);

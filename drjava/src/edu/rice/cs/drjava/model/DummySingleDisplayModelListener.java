@@ -182,6 +182,8 @@ public class DummySingleDisplayModelListener implements SingleDisplayModelListen
    */
   public void interpreterChanged(boolean inProgress) { }
 
+  public void interactionIncomplete() { }
+
   //-------------------- End InteractionsListener Methods --------------------//
   
   /**

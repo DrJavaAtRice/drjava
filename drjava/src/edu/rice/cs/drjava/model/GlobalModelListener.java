@@ -136,6 +136,5 @@ public interface GlobalModelListener extends InteractionsListener,
    * Called when an undoable edit occurs.
    */
   public void undoableEditHappened();
-
 }
 

@@ -611,6 +611,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     protected int fileRevertedCount;
     protected int shouldRevertFileCount;
     protected int undoableEditCount;
+    protected int interactionIncompleteCount;
     
     public TestListener() {
       _startupTrace = new Exception();
@@ -651,6 +652,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       fileRevertedCount = 0;
       shouldRevertFileCount = 0;
       undoableEditCount = 0;
+      interactionIncompleteCount = 0;
     }
 
     /**
@@ -832,6 +834,12 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
                    shouldRevertFileCount);
     }
 
+    public void assertInteractionIncompleteCount(int i) {
+      assertEquals("number of times interactionIncomplete fired",
+                   i,
+                   interactionIncompleteCount);
+    }
+
     public void newFileCreated(OpenDefinitionsDocument doc) {
       listenerFail("newFileCreated fired unexpectedly");
     }
@@ -978,6 +986,10 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
 
       // this is actually unreachable but the compiler won't believe me. sigh.
       throw new RuntimeException();
+    }
+
+    public void interactionIncomplete() {
+      listenerFail("interactionIncomplete fired unexpectedly");
     }
   }
 

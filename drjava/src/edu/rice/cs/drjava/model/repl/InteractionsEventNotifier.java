@@ -223,5 +223,20 @@ public class InteractionsEventNotifier extends
       _lock.endRead();
     }
   }
-}
 
+  /**
+   * Notifies the view that the current interaction is incomplete.
+   */
+  public void interactionIncomplete() {
+    _lock.startRead();
+    try {
+      int size = _listeners.size();
+      for(int i = 0; i < size; i++) {
+        _listeners.get(i).interactionIncomplete();
+      }
+    }
+    finally {
+      _lock.endRead();
+    }
+  }
+}

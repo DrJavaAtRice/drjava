@@ -98,4 +98,9 @@ public interface InteractionsListener {
    */
   public void interpreterChanged(boolean inProgress);
 
+  /**
+   * Called when enter was typed in the interactions pane but
+   * the interaction was incomplete.
+   */
+  public void interactionIncomplete();
 }

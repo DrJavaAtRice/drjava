@@ -3869,7 +3869,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     // Only change GUI from event-dispatching thread
     Runnable doCommand = new Runnable() {
       public void run() {
-        /**
+        /*
          if (inDebugMode()) {
          _disableStepTimer();
          Debugger manager = _model.getDebugger();
@@ -4807,6 +4807,15 @@ public class MainFrame extends JFrame implements OptionConstants {
         default:
           throw new RuntimeException("Invalid rc: " + rc);
       }
+    }
+    
+    public void interactionIncomplete() {
+      SwingUtilities.invokeLater(new Runnable() {
+        public void run() {
+          int caretPos = _interactionsPane.getCaretPosition();
+          _interactionsController.getConsoleDoc().insertNewLine(caretPos);
+        }
+      });
     }
   }
 

@@ -43,7 +43,7 @@
  * 
 END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava.model.repl.newjvm;
+package edu.rice.cs.drjava.model.repl;
 
 import edu.rice.cs.javaast.parser.ParseException;
 
