@@ -40,11 +40,15 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.config;
 import java.io.File;
 import gj.util.Vector;
+import java.awt.Color;
 public interface OptionConstants {
   
   // STATIC VARIABLES    
   public static final IntegerOption INDENT_LEVEL =
     new IntegerOption("indent.level",new Integer(2));
+
+  public static final ColorOption DEFINITIONS_MATCH_COLOR = 
+    new ColorOption("definitions.match.color", new Color(190, 255, 230));
   
   public static final StringOption JAVAC_LOCATION = 
     new StringOption("javac.location","");

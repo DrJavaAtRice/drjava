@@ -52,6 +52,8 @@ import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.drjava.model.GlobalModel;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.definitions.DefinitionsEditorKit;
+import edu.rice.cs.drjava.config.*;
+import edu.rice.cs.drjava.DrJava;
 
 /**
  * The pane in which work on a given OpenDefinitionsDocument occurs.
@@ -59,7 +61,8 @@ import edu.rice.cs.drjava.model.definitions.DefinitionsEditorKit;
  * changed.
  * @version $Id$
  */
-public class DefinitionsPane extends JEditorPane {
+public class DefinitionsPane extends JEditorPane 
+  implements OptionConstants {
   private static final EditorKit EDITOR_KIT = new DefinitionsEditorKit();
 
   /**
@@ -79,8 +82,13 @@ public class DefinitionsPane extends JEditorPane {
    * Paren/brace/bracket matching highlight color.
    */
   private static DefaultHighlighter.DefaultHighlightPainter
-    _highlightPainter =
-      new DefaultHighlighter.DefaultHighlightPainter(Color.lightGray);
+    _highlightPainter;
+
+  static {
+    Color highColor = DrJava.CONFIG.getSetting(DEFINITIONS_MATCH_COLOR);
+    _highlightPainter = 
+      new DefaultHighlighter.DefaultHighlightPainter(highColor);
+  }
 
   /**
    * Our current error matching highlight.
