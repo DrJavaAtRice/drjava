@@ -92,13 +92,13 @@ import edu.rice.cs.util.swing.SwingWorker;
  * @version $Id$
  */
 public class DefinitionsPaneTest extends TestCase {
-
+  
   private MainFrame _frame;
-
+  
   public DefinitionsPaneTest(String name) {
     super(name);
   }
-
+  
   /**
    * Creates a test suite for JUnit to run.
    * @return a test suite based on the methods in this class
@@ -111,65 +111,128 @@ public class DefinitionsPaneTest extends TestCase {
    * Setup method for each JUnit test case.
    */
   public void setUp() {
+    DrJava.getConfig().resetToDefaults();
     _frame = new MainFrame();
   }
   
-
+  public void tearDown() {
+    _frame.dispose();
+    _frame = null;
+    System.gc();
+  }
+  
+  /**
+   * Tests that shift backspace works the same as backspace.
+   * (Ease of use issue 693253
+   * 
+   * Ideally, this test would be a bit lighter weight, and not require
+   * the creation of an entire MainFrame+GlobalModel.  Some refactoring
+   * is in order...
+   *
+   * NOTE: This test doesn't work yet, since we can't currently bind
+   * two keys to the same action.  This should be implemented as part of
+   * feature request 683300.
+   * 
+  public void testShiftBackspace() throws BadLocationException {
+    DefinitionsPane definitions = _frame.getCurrentDefPane();
+    DefinitionsDocument doc = definitions.getOpenDocument().getDocument();
+    _assertDocumentEmpty(doc, "before testing");
+    doc.insertString(0, "test", null);
+    
+    definitions.setCaretPosition(4);
+    int shiftBackspaceCode = 
+      OptionConstants.KEY_DELETE_PREVIOUS.getDefault().getKeyCode();
+    // The following is the sequence of key events for shift+backspace
+    definitions.processKeyEvent(new KeyEvent(definitions, 
+                                             KeyEvent.KEY_PRESSED, 
+                                             (new Date()).getTime(),
+                                             InputEvent.SHIFT_MASK,
+                                             shiftBackspaceCode));
+    definitions.processKeyEvent(new KeyEvent(definitions, 
+                                             KeyEvent.KEY_RELEASED, 
+                                             (new Date()).getTime(),
+                                             InputEvent.SHIFT_MASK,
+                                             shiftBackspaceCode));
+    _assertDocumentContents(doc, "tes", "Did not delete on shift+backspace");
+    
+    
+    int shiftDeleteCode = 
+      OptionConstants.KEY_DELETE_NEXT.getDefault().getKeyCode();
+    definitions.setCaretPosition(1);
+    // The following is the sequence of key events for shift+delete
+    definitions.processKeyEvent(new KeyEvent(definitions, 
+                                             KeyEvent.KEY_PRESSED, 
+                                             (new Date()).getTime(),
+                                             InputEvent.SHIFT_MASK,
+                                             shiftDeleteCode));
+    definitions.processKeyEvent(new KeyEvent(definitions, 
+                                             KeyEvent.KEY_RELEASED, 
+                                             (new Date()).getTime(),
+                                             InputEvent.SHIFT_MASK,
+                                             shiftDeleteCode));
+    _assertDocumentContents(doc, "ts", "Did not delete on shift+delete");
+  }*/
+  
   /**
    * Tests that a simulated key press with the meta modifier is correct
    * Reveals bug 676586
    */
-   public void testMetaKeyPress() {
-     DefinitionsPane definitions = _frame.getCurrentDefPane();
-     DefinitionsDocument doc = definitions.getOpenDocument().getDocument();
-     _assertDocumentEmpty(doc, "point 0");
-     /* The following is the sequence of key events that happen when the user presses Meta-a */
+  public void testMetaKeyPress() throws BadLocationException {
+    DefinitionsPane definitions = _frame.getCurrentDefPane();
+    DefinitionsDocument doc = definitions.getOpenDocument().getDocument();
+    _assertDocumentEmpty(doc, "point 0");
+    // The following is the sequence of key events that happen when the user presses Meta-a
     definitions.processKeyEvent(new KeyEvent(definitions, KeyEvent.KEY_PRESSED, (new Date()).getTime(),
-					     InputEvent.META_MASK, KeyEvent.VK_META));
-     _assertDocumentEmpty(doc, "point 1");
+                                             InputEvent.META_MASK, KeyEvent.VK_META));
+    _assertDocumentEmpty(doc, "point 1");
     definitions.processKeyEvent(new KeyEvent(definitions, KeyEvent.KEY_PRESSED, (new Date()).getTime(),
-					     InputEvent.META_MASK, KeyEvent.VK_W));
-     _assertDocumentEmpty(doc, "point 2");
+                                             InputEvent.META_MASK, KeyEvent.VK_W));
+    _assertDocumentEmpty(doc, "point 2");
     definitions.processKeyEvent(new KeyEvent(definitions, KeyEvent.KEY_TYPED, (new Date()).getTime(),
-					     InputEvent.META_MASK, KeyEvent.VK_UNDEFINED, 'w'));
-     _assertDocumentEmpty(doc, "point 3");
+                                             InputEvent.META_MASK, KeyEvent.VK_UNDEFINED, 'w'));
+    _assertDocumentEmpty(doc, "point 3");
     definitions.processKeyEvent(new KeyEvent(definitions, KeyEvent.KEY_RELEASED, (new Date()).getTime(),
-					     InputEvent.META_MASK, KeyEvent.VK_W));
-     _assertDocumentEmpty(doc, "point 4");
+                                             InputEvent.META_MASK, KeyEvent.VK_W));
+    _assertDocumentEmpty(doc, "point 4");
     definitions.processKeyEvent(new KeyEvent(definitions, KeyEvent.KEY_RELEASED, (new Date()).getTime(),
-					     0, KeyEvent.VK_META));
-     _assertDocumentEmpty(doc, "point 5");
-   }
-
-  private void _assertDocumentEmpty(DefinitionsDocument doc, String message){
-    try {
-      assertEquals(message, "", doc.getText(0, doc.getLength()));
-    } catch(BadLocationException ble){
-      ble.printStackTrace();
-      fail("BadLocationException");
-    }
+                                             0, KeyEvent.VK_META));
+    _assertDocumentEmpty(doc, "point 5");
   }
-
+  
+  protected void _assertDocumentEmpty(DefinitionsDocument doc, String message)
+    throws BadLocationException
+  {
+    _assertDocumentContents(doc, "", message);
+  }
+  
+  protected void _assertDocumentContents(DefinitionsDocument doc, 
+                                       String contents, 
+                                       String message)
+    throws BadLocationException
+  {
+    assertEquals(message, contents, doc.getText(0, doc.getLength()));
+  }
+  
 }
 
 
 
-  class KeyTestListener implements KeyListener {
-
-    public void keyPressed(KeyEvent e){
-      DefinitionsPaneTest.fail("Unexpected keypress " + e);
-    }
-
-    public void keyReleased(KeyEvent e){
-      DefinitionsPaneTest.fail("Unexpected keyrelease " + e);
-    }
-
-    public void keyTyped(KeyEvent e){
-      DefinitionsPaneTest.fail("Unexpected keytyped " + e);
-    }
-
-    public boolean done(){
-      return true;
-    }
+class KeyTestListener implements KeyListener {
+  
+  public void keyPressed(KeyEvent e){
+    DefinitionsPaneTest.fail("Unexpected keypress " + e);
   }
+  
+  public void keyReleased(KeyEvent e){
+    DefinitionsPaneTest.fail("Unexpected keyrelease " + e);
+  }
+  
+  public void keyTyped(KeyEvent e){
+    DefinitionsPaneTest.fail("Unexpected keytyped " + e);
+  }
+  
+  public boolean done(){
+    return true;
+  }
+}
 

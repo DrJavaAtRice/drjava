@@ -132,6 +132,12 @@ public class CommandLineTest extends TestCase {
     _mf = new MainFrame();
   }
   
+  public void tearDown() {
+    _mf.dispose();
+    _mf = null;
+    System.gc();
+  }
+  
   /**
    * Tests DrJava with no command line arguments.
    * Should open a new, untitled document.

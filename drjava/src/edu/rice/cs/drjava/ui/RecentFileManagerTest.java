@@ -94,6 +94,14 @@ public class RecentFileManagerTest extends TestCase {
     String user = System.getProperty("user.name");
     _tempDir = FileOps.createTempDirectory("DrJava-test-" + user);
   }
+  
+  public void tearDown() {
+    _menu = null;
+    _rfm = null;
+    _tempDir.delete();
+    _tempDir = null;
+    System.gc();
+  }
 
   /** 
    * Create a new temporary file in _tempDir.  Calls with the same

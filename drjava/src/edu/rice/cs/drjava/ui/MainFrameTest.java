@@ -87,6 +87,12 @@ public class MainFrameTest extends TestCase {
     _frame = new MainFrame();
   }
   
+  public void tearDown() {
+    _frame.dispose();
+    _frame = null;
+    System.gc();
+  }
+  
   
   /**
    * Tests that the returned JButton of <code>createManualToolbarButton</code>:
