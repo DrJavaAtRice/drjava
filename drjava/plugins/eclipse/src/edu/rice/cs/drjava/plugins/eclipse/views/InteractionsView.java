@@ -290,6 +290,4 @@ public class InteractionsView extends ViewPart {
   public void addContextMenuItem(Action action) {
     _contextMenu.add(action);
   }
-  
-
 }

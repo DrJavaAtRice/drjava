@@ -429,6 +429,14 @@ public class InteractionsController {
       else if (event.keyCode == SWT.HOME) {
         event.doit = gotoPromptPosAction();
       }
+      // tab
+      else if (event.keyCode == '\t') {
+        event.doit = historyReverseSearchAction();
+      }
+      // shift+tab
+      else if (event.keyCode == '\t' && (event.stateMask & SWT.SHIFT) == 1) {
+        event.doit = historyForwardSearchAction();
+      }
       // shortcut for clear command?  (ctrl+B is build project)
     }
   } 
@@ -463,7 +471,21 @@ public class InteractionsController {
     moveToEnd();
     return false;
   }
-  
+
+  /** Searches backwards through the history. */
+  boolean historyReverseSearchAction() {
+    _doc.reverseSearchInteractionsInHistory();
+    moveToEnd();
+    return false;
+  }
+
+  /** Searches forwards through the history. */
+  boolean historyForwardSearchAction() {
+    _doc.forwardSearchInteractionsInHistory();
+    moveToEnd();
+    return false;
+  }
+
   /** Removes all text after the prompt. */
   boolean clearCurrentAction() {
     _doc.clearCurrentInteraction();
