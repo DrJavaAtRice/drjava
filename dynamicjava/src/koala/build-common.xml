@@ -208,7 +208,6 @@
 
      This version works with JDK 1.3 and JSR-14 v1.0.
      (Necessary for releases.)
--->
 <target name="do-compile" depends="init">
   <mkdir dir="${built}"/>
   <javac srcdir="${srcroot}"
@@ -222,6 +221,7 @@
     <compilerarg value="-gj" />
   </javac>
 </target>
+-->
        
 
 <!-- Compile. We have to start at srcroot and then selectively include
@@ -279,7 +279,7 @@
 
      This version works with JDK 1.4.1 and JSR-14 v2.2.
      (Be sure to have the right version of tools.jar on your classpath.)
-
+-->
 <target name="do-compile" depends="init">
   <mkdir dir="${built}"/>
   <javac srcdir="${srcroot}"
@@ -294,7 +294,7 @@
     <compilerarg value="-J-Xbootclasspath/p:${jsr14_classpath}"/>
   </javac>
 </target>
--->
+
 
 <!-- Compile. We have to start at srcroot and then selectively include
      just this project in order for it to realize what files have already
@@ -302,6 +302,7 @@
 
      This version works with JDK 1.4.2 and JSR-14 v2.3 and JSR-14 v2.4.
      (Be sure to have the right version of tools.jar on your classpath.)
+
 <target name="do-compile" depends="init">
   <mkdir dir="${built}"/>
   <javac srcdir="${srcroot}"
@@ -315,6 +316,7 @@
          fork="on"
          optimize="off">
     <compilerarg value="-J-Xbootclasspath/p:${jsr14_classpath}"/>
+    <compilerarg value="-Xlint"/>
   </javac>
 </target>
 -->
