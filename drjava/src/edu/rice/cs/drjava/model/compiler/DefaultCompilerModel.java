@@ -154,7 +154,7 @@ public class DefaultCompilerModel implements CompilerModel {
    * @throws IOException if a filesystem-related problem prevents compilation
    */
   synchronized public void compileAll() throws IOException {
-    
+    //System.out.println("Running compile all");
     List<OpenDefinitionsDocument> defDocs =
       _getter.getDefinitionsDocuments();
     
@@ -173,11 +173,13 @@ public class DefaultCompilerModel implements CompilerModel {
             projectDocs.add(odd);
         }
       }
+      //System.out.println("Project is active");
       defDocs = projectDocs;
     }
 
     // Only compile if all are saved
     if (_hasModifiedFiles(defDocs)) {
+      //System.out.println("Has modified files");
       _notifier.saveBeforeCompile();
     }
 
@@ -467,9 +469,7 @@ public class DefaultCompilerModel implements CompilerModel {
   protected boolean _hasModifiedFiles(List<OpenDefinitionsDocument> defDocs) {
     boolean hasModifiedFiles = false;
     for(OpenDefinitionsDocument odd : defDocs){
-      if(odd.isInProjectPath()){
-        hasModifiedFiles |= odd.isModifiedSinceSave();
-      }
+      hasModifiedFiles |= odd.isModifiedSinceSave();
     }
     return hasModifiedFiles;
   }
