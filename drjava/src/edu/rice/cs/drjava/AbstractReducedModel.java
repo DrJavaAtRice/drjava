@@ -32,7 +32,7 @@ public abstract class AbstractReducedModel implements ReducedModelStates {
    */
   public AbstractReducedModel() {
     _tokens = new TokenList();
-    _cursor = _tokens.getIterator();
+    _cursor = _tokens._getIterator();
     // we should be pointing to the head of the list
     _cursor.setBlockOffset(0);
   }
@@ -52,7 +52,7 @@ public abstract class AbstractReducedModel implements ReducedModelStates {
    */
   int absOffset() {
     int off = _cursor.getBlockOffset();
-    TokenList.Iterator it = _cursor.copy();
+    TokenList.Iterator it = _cursor._copy();
     if (!it.atStart())
       it.prev();
     
@@ -71,7 +71,7 @@ public abstract class AbstractReducedModel implements ReducedModelStates {
     String val = "";
     ReducedToken tmp;
     
-    TokenList.Iterator it = _tokens.getIterator();
+    TokenList.Iterator it = _tokens._getIterator();
     it.next(); // since we start at the head, which has no current item
     
     
@@ -186,7 +186,7 @@ public abstract class AbstractReducedModel implements ReducedModelStates {
   protected abstract void insertGapBetweenMultiCharBrace(int length);
   
   public TokenList.Iterator makeCopyCursor() {
-    return _cursor.copy();
+    return _cursor._copy();
   }
   
   /**

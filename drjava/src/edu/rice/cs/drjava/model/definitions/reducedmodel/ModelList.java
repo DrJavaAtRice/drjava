@@ -86,14 +86,12 @@ class ModelList<T> {
   }
   
   /**
-   * Create a new iterator for this list and add it to the set of the
-   * list's listeners.  The iterator must be notified of changes so it
-   * does not become out-of-date.
+   * Create a new iterator for this list.  The constructor for the
+   * iterator adds itself to the list's listeners.  The iterator 
+   * must be notified of changes so it does not become out-of-date.
    */
   public Iterator getIterator() {
-    Iterator result = new Iterator();
-    this.addListener(result);
-    return result;
+    return new Iterator();
   }
   
   

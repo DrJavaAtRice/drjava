@@ -139,7 +139,7 @@ public class ReducedModelBrace extends AbstractReducedModel {
     int dist = 0;
     resetLocation();//reset the interface to the comment model
     
-    TokenList.Iterator copyCursor = _cursor.copy();
+    TokenList.Iterator copyCursor = _cursor._copy();
     if (!copyCursor.atStart())
       copyCursor.prev();
     if (copyCursor.atStart()) {
@@ -180,7 +180,7 @@ public class ReducedModelBrace extends AbstractReducedModel {
   public int nextBrace() {
     int relDistance = 0;
     int dist = 0;
-    TokenList.Iterator copyCursor = _cursor.copy();
+    TokenList.Iterator copyCursor = _cursor._copy();
     
     resetLocation();
     
@@ -225,7 +225,7 @@ public class ReducedModelBrace extends AbstractReducedModel {
    */
   public int balanceForward() {
     Stack<ReducedToken> braceStack = new Stack<ReducedToken>();
-    TokenList.Iterator iter = _cursor.copy();
+    TokenList.Iterator iter = _cursor._copy();
     int relDistance = 0;
     int distance = 0;
     
@@ -330,7 +330,7 @@ public class ReducedModelBrace extends AbstractReducedModel {
    */
   public int balanceBackward() { 
     Stack<ReducedToken> braceStack = new Stack<ReducedToken>();
-    TokenList.Iterator iter = _cursor.copy();
+    TokenList.Iterator iter = _cursor._copy();
     resetLocation();
     int relDistance = 0;
     int distance = 0;
@@ -428,7 +428,7 @@ public class ReducedModelBrace extends AbstractReducedModel {
    */
   protected void getDistToEnclosingBrace(IndentInfo braceInfo) {
     Stack<ReducedToken> braceStack = new Stack<ReducedToken>();
-    TokenList.Iterator iter = _cursor.copy();
+    TokenList.Iterator iter = _cursor._copy();
     resetLocation();
     //this is the distance to in front of the previous newline.
     int relDistance = braceInfo.distToNewline + 1;

@@ -18,7 +18,7 @@ public class ReducedModelComment extends AbstractReducedModel {
   */
   public ReducedModelComment() {
     super();
-    _walker = _cursor.copy();
+    _walker = _cursor._copy();
   }
   
   public void insertChar(char ch) {
@@ -383,7 +383,7 @@ public class ReducedModelComment extends AbstractReducedModel {
   */
   
   private void _updateBasedOnCurrentState() {
-    TokenList.Iterator copyCursor = _cursor.copy();
+    TokenList.Iterator copyCursor = _cursor._copy();
     copyCursor.updateBasedOnCurrentState();
     copyCursor.dispose();
   }
@@ -455,14 +455,14 @@ public class ReducedModelComment extends AbstractReducedModel {
    */
   protected void resetLocation() {
     _walker.dispose();
-    _walker = _cursor.copy();
+    _walker = _cursor._copy();
   }
 
   /**
    * Dist to Previous newline will be -1 if no newline.
    */
   void getDistToPreviousNewline(IndentInfo braceInfo) {
-    braceInfo.distToPrevNewline = _getDistToPreviousNewline(_cursor.copy());
+    braceInfo.distToPrevNewline = _getDistToPreviousNewline(_cursor._copy());
     braceInfo.distToNewline = braceInfo.distToPrevNewline;
     return;
   }
@@ -491,7 +491,7 @@ public class ReducedModelComment extends AbstractReducedModel {
   
   void getDistToIndentNewline(IndentInfo braceInfo) {
     int walkcount = -1;
-    TokenList.Iterator copyCursor = _cursor.copy();
+    TokenList.Iterator copyCursor = _cursor._copy();
     
     if (braceInfo.distToBrace == -1 || copyCursor.atStart()) { // no brace
       return;
@@ -514,7 +514,7 @@ public class ReducedModelComment extends AbstractReducedModel {
   * back from the cursor that we want to start searching.
   */
   public int getDistToPreviousNewline(int relLoc) {
-    TokenList.Iterator copyCursor = _cursor.copy();
+    TokenList.Iterator copyCursor = _cursor._copy();
     copyCursor.move(-relLoc);
     int dist = _getDistToPreviousNewline(copyCursor);
     copyCursor.dispose();
@@ -529,7 +529,7 @@ public class ReducedModelComment extends AbstractReducedModel {
   * returns the distance to the end of the document if there is no newline
   */
   public int getDistToNextNewline() {
-    TokenList.Iterator copyCursor = _cursor.copy();
+    TokenList.Iterator copyCursor = _cursor._copy();
     if(copyCursor.atStart()) {
       copyCursor.next();
     }

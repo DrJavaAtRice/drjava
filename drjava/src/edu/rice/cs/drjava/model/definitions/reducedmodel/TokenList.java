@@ -7,8 +7,15 @@ package edu.rice.cs.drjava;
 public class TokenList extends ModelList<ReducedToken> 
                        implements /*imports*/ ReducedModelStates
 {
-  
-  public Iterator getIterator() {
+  /**
+   * Gets a TokenList.Iterator for this list.
+   * getIterator() returns a ModelList<ReducedToken>.Iterator
+   * which is not as fully featured as a TokenList.Iterator.
+   * The underscore differentiates between the two.  This 
+   * differentiation was easiest since it allowed us to keep
+   * TokenList.Iterator extending ModelList<ReducedToken>.Iterator.
+   */
+  public Iterator _getIterator() {
     return new Iterator();
   }
   
@@ -26,7 +33,15 @@ public class TokenList extends ModelList<ReducedToken>
       _offset = that.getBlockOffset();
     }
     
-    public Iterator copy() {
+    /**
+     * Makes a fresh copy of this TokenList.Iterator.
+     * copy() returns a ModelList<ReducedToken>.Iterator copy
+     * which is not as fully featured as a TokenList.Iterator.
+     * The underscore differentiates between the two.  This 
+     * differentiation was easiest since it allowed us to keep
+     * TokenList.Iterator extending ModelList<ReducedToken>.Iterator.
+     */
+    public Iterator _copy() {
       return new Iterator(this);
     }
     
@@ -197,7 +212,7 @@ public class TokenList extends ModelList<ReducedToken>
     private int _move(int count, int currentOffset)
     {
       int retval = currentOffset;
-      TokenList.Iterator it = this.copy();
+      TokenList.Iterator it = this._copy();
       
       if (count == 0) {
         it.dispose();
@@ -305,7 +320,7 @@ public class TokenList extends ModelList<ReducedToken>
       if (count == 0) {
         return;
       }
-      TokenList.Iterator copyCursor = this.copy();
+      TokenList.Iterator copyCursor = this._copy();
       // from = this iterator
       // to = this iterator's copy
       _offset = _delete(count, copyCursor);
