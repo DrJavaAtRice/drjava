@@ -1,8 +1,10 @@
 <!--
-  $Header$
+  $Id$
 -->
 <project name="drjava" default="test">
-  <property name="jsr14_classpath" value="/home/javaplt/packages/jsr14_adding_generics-1_0-ea/javac.jar" />
+  <property name="build.sysclasspath" value="last" />
+
+  <property name="jsr14_classpath" value="lib/jsr14.jar" />
 
   <!-- srcroot is the base directory of the source, 4 packages back -->
   <property name="srcroot" value="../../../.." />
@@ -26,10 +28,33 @@
   <property name="jarfile" value="${srcroot}/../drjava.jar" />
   <property name="manifest" value="manifest" />
 
+  <!-- classpath to use everywhere. -->
+  <path id="classpath">
+    <pathelement location="${built}" />
+
+    <fileset dir="lib">
+      <include name="**/*.jar"/>
+    </fileset>
+
+    <pathelement path="${java.class.path}" />
+  </path>
+
   <!-- Init target. All others depend on it. Initialize the directory. -->
   <target name="init">
+    <available type="file" file="${jsr14_classpath}" property="jsr14_ok" />
+    <antcall target="check_for_jsr14" />
+
     <tstamp /> <!-- Ant requires us to make time stamp -->
     <mkdir dir="${built}" /> <!-- Make the built directory -->
+
+    <pathconvert refid="classpath"
+                 property="classpath_text"
+                 pathsep="${path.separator}" />
+
+  </target>
+
+  <target name="check_for_jsr14" unless="jsr14_ok">
+    <fail message=" JSR-14 prototype compiler was not found. A jar file containing the compiler must be put in ${basedir}/lib/jsr14.jar. (We can not distribute the jar for licensing reasons.) To download jsr14, go to http://developer.java.sun.com/developer/earlyAccess/adding_generics. Then unzip the file you downloaded, and move the included javac.jar to ./lib/jsr14.jar." />
   </target>
 
   <!-- Reconcile source with CVS archive -->
@@ -111,13 +136,38 @@
        been compiled (preventing needless recompilation)
   -->
   <target name="compile" depends="init">
+  <!--
     <javac srcdir="${srcroot}"
            includes="${projpath}/**/*java"
            destdir="${built}" 
            bootclasspath="${jsr14_classpath}:${java.home}/lib/rt.jar"
            target="1.1"
            debug="on"
-           optimize="off" />
+           optimize="off">
+            <classpath refid="classpath" />
+    </javac>
+  -->
+    <apply executable="java" failonerror="yes" parallel="yes" type="file">
+      <arg value="-classpath" />
+      <arg value="${classpath_text}" />
+      <arg value="com.sun.tools.javac.Main" />
+
+      <arg value="-sourcepath" />
+      <arg value="${srcroot}" />
+
+      <arg value="-d" />
+      <arg value="${built}" />
+
+      <arg value="-target" />
+      <arg value="1.1" />
+
+      <arg value="-g" />
+      
+      <fileset dir="${srcroot}">
+        <include name="${projpath}/**/*.java" />
+      </fileset>
+    </apply>
+
 
     <rmic base="${built}"
           classname="edu.rice.cs.drjava.model.repl.newjvm.InterpreterJVM" />
@@ -144,7 +194,7 @@
       <!-- propogate the same classpath. not sure why it doesn't
            happen by default!
       -->
-      <classpath path="${java.class.path}" />
+      <classpath refid="classpath" />
 
       <!-- This makes JUnit display info about each test to console -->
       <formatter type="plain" usefile="no" />
@@ -171,31 +221,25 @@
 
   <!-- Makes a jar with dependencies. No tests are included. -->
   <target name="jar">
-    <jar jarfile="${jarfile}" manifest="${manifest}">
-      <fileset dir="${built}"
-               includes="${projpath}/**"
-               excludes="**/*Test.class" />
+    <!-- copy external dependencies -->
+    <zip zipfile="${jarfile}">
+      <zipfileset src="lib/gj-util.jar" />
+      <zipfileset src="lib/dynamicjava.jar" />
+    </zip>
 
-      <!-- dependencies -->
-      <fileset dir="${built}"
-               includes="edu/rice/cs/util/**"
-               excludes="**/*Test.class" />
-
-      <!--
-      <fileset dir="/home/javaplt/classes"
-               includes="gj/**,gjc/**,koala/**" />
-      -->
-
-      <fileset dir="/home/javaplt/classes"
-               includes="gj/**,koala/**" />
+    <jar jarfile="${jarfile}" manifest="${manifest}" update="true" >
+      <fileset dir="${built}" excludes="**/*Test.class">
+        <include name="${projpath}/**" />
+        <include name="edu/rice/cs/util/**" />
+      </fileset>
     </jar>
   </target>
 
   <!-- Run the program! -->
   <target name="run" depends="compile">
-    <java classpath="${built}:${java.class.path}"
-          fork="true"
-          classname="edu.rice.cs.drjava.DrJava" />
+    <java fork="true" classname="edu.rice.cs.drjava.DrJava">
+      <classpath refid="classpath" />
+    </java>
   </target>
 
   <!-- generate private javadoc for current uncommitted version -->
@@ -211,12 +255,18 @@
        The property javadoc_dir must be set when calling this.
        The property javadoc_title must be set when calling this.
   -->
-  <target name="generate_javadoc" if="javadoc_dir">
+  <target name="generate_javadoc" if="javadoc_dir" depends="init">
     <delete dir="${javadoc_dir}" />
     <mkdir dir="${javadoc_dir}" />
 
     <mkdir dir="${javadoc_dir}/src" />
-    <apply executable="jsr14" failonerror="yes" parallel="yes" type="file">
+
+    <!-- run jsr14 from jsr14.jar to make non-generic source. -->
+    <apply executable="java" failonerror="yes" parallel="yes" type="file">
+      <arg value="-classpath" />
+      <arg value="${classpath_text}" />
+      <arg value="com.sun.tools.javac.Main" />
+
       <arg value="-sourcepath" />
       <arg value="${srcroot}" />
 
@@ -246,6 +296,8 @@
              Use="yes"
              Version="yes"
              Windowtitle="${javadoc_title}">
+
+      <classpath refid="classpath" />
 
       <link href="http://www.cs.rice.edu/~javaplt/javadoc/util" />
       <link href="http://www.cs.rice.edu/~javaplt/javadoc/java-api" />
