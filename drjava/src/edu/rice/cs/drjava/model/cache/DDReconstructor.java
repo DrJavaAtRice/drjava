@@ -1,4 +1,4 @@
-/*BEGIN_COPYRIGHT_BLOCK
+  /*BEGIN_COPYRIGHT_BLOCK
  *
  * This file is part of DrJava.  Download the current version of this project:
  * http://sourceforge.net/projects/drjava/ or http://www.drjava.org/

@@ -923,8 +923,6 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     final ProjectFileIR ir;
     final File[] srcFiles;
     
-    System.out.println("opening a project");
-    
     //File projectRoot = projectFile.getParentFile();
     ir = ProjectFileParser.ONLY.parse(projectFile);
     srcFiles = ir.getSourceFiles();
