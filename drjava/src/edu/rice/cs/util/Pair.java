@@ -1,5 +1,10 @@
 package edu.rice.cs.util;
 
+/**
+ * A pair.
+ *
+ * @version $Id$
+ */
 public class Pair<T,U> {
   T _first;
   U _second;
