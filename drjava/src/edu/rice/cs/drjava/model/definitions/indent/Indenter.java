@@ -147,7 +147,7 @@ public class Indenter {
    */
   public void indent(DefinitionsDocument doc, int reason)
   {
-    _topRule.indentLine(doc, /*, reason*/reason);
+    _topRule.indentLine(doc, reason);
   }
 
 }

@@ -171,7 +171,7 @@ public class DefinitionsPaneTest extends TestCase {
                                              shiftDeleteCode));
     _assertDocumentContents(doc, "ts", "Did not delete on shift+delete");
   }
-  
+
   /**
    * Tests that a simulated key press with the meta modifier is correct
    * Reveals bug 676586

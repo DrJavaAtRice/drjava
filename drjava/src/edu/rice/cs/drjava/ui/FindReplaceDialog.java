@@ -73,14 +73,15 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
   private JLabel _message;
   private JPanel _labelPanel;
   private JCheckBox _matchCase;
+  private JCheckBox _searchBackwards;
   private JPanel _matchCaseAndClosePanel;
   private JPanel _rightPanel;
   private FindReplaceMachine _machine;
   private SingleDisplayModel _model;
   private DefinitionsPane _defPane = null;
   private boolean _caretChanged;
-  
-  /** 
+
+  /**
    * Listens for changes to the cursor position in order
    * to reset the start position
    */
@@ -180,11 +181,15 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
     FindResult fr = _machine.findNext();
     if (fr.getWrapped()) {
       Toolkit.getDefaultToolkit().beep();
-      _message.setText("Search wrapped to beginning.");
+      if (!_machine.getSearchBackwards()) {
+        _message.setText("Search wrapped to beginning.");
+      } else {
+        _message.setText("Search wrapped to end");
+      }
     }
     int pos = fr.getFoundOffset();
     if (pos >= 0) {
-      _selectFoundItem(pos - _machine.getFindWord().length(), pos);
+      _selectFoundItem();
       _replaceAction.setEnabled(true);
       _replaceFindAction.setEnabled(true);
     } 
@@ -208,16 +213,14 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
       // replaces the occurance at the current position
       boolean replaced = _machine.replaceCurrent();
       if (replaced) {
-        int pos =  _machine.getCurrentOffset();
-        _selectFoundItem(pos-replaceWord.length(),pos);
+        _selectReplacedItem(replaceWord.length());
       }
       _replaceAction.setEnabled(false);
       _replaceFindAction.setEnabled(false);
       _replaceButton.requestFocus();
     }
   };
-  
-  
+
   private Action _replaceFindAction = new AbstractAction("Replace/Find Next") {
     public void actionPerformed(ActionEvent e) {
       //_updateMachine();
@@ -229,8 +232,7 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
       boolean replaced = _machine.replaceCurrent();
       // and finds the next word
       if (replaced) {
-        int pos =  _machine.getCurrentOffset();
-        _selectFoundItem(pos-replaceWord.length(),pos);
+        _selectReplacedItem(replaceWord.length());
         _doFind();
         _replaceFindButton.requestFocus();
       }
@@ -345,10 +347,15 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
     _labelPanel.add(replaceLabel);
     _labelPanel.setBorder(new EmptyBorder(0,5,0,5)); // 5 pix on sides
     MatchCaseListener mcl = new MatchCaseListener();
-    
+
     _matchCase = new JCheckBox("Match Case", true);
     _matchCase.addItemListener(mcl);
        
+    SearchBackwardsListener bsl = new SearchBackwardsListener();
+
+    _searchBackwards = new JCheckBox("Search Backwards", false);
+    _searchBackwards.addItemListener(bsl);
+
     this.removeAll(); // actually, override the behavior of TabbedPanel
     
     // remake closePanel
@@ -357,6 +364,7 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
     
     _matchCaseAndClosePanel = new JPanel(new BorderLayout());
     _matchCaseAndClosePanel.add(_matchCase, BorderLayout.WEST);
+    _matchCaseAndClosePanel.add(_searchBackwards, BorderLayout.CENTER);
     _matchCaseAndClosePanel.add(_closePanel, BorderLayout.EAST);
     
     _rightPanel = new JPanel(new GridLayout(1,2,5,0));
@@ -378,7 +386,8 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
     
     _findField.setNextFocusableComponent(_replaceField);
     _replaceField.setNextFocusableComponent(_matchCase);
-    _matchCase.setNextFocusableComponent(_findNextButton);
+    _matchCase.setNextFocusableComponent(_searchBackwards);
+    _searchBackwards.setNextFocusableComponent(_findNextButton);
     _replaceAllButton.setNextFocusableComponent(_closeButton);
     _closeButton.setNextFocusableComponent(_findField);
     
@@ -502,21 +511,52 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
    _findField.requestFocus();
    _findField.selectAll();
    }*/
-  
+
+  /**
+   * This method is used to select the item that has been inserted in a
+   * replacement
+   */
+  private void _selectReplacedItem(int length) {
+    int from, to;
+    to = _machine.getCurrentOffset();
+    if(_machine.getSearchBackwards()){
+      from = to + length;
+    } else {
+      from = to - length;
+    }
+    _selectFoundItem(from, to);
+  }
+
+
+  /**
+   * Calls _selectFoundItem(from, to) with reasonable defaults
+   */
+  private void _selectFoundItem() {
+    int position = _machine.getCurrentOffset();
+    int to, from;
+    to = position;
+    if(_machine.getSearchBackwards()){
+      from = position + _machine.getFindWord().length();
+    } else {
+      from = position - _machine.getFindWord().length();
+    }
+    _selectFoundItem(from, to);
+  }
+
   /**
    * Will select the searched-for text.
    * Originally highlighted the text, but we ran into problems
    * with the document remove method changing the view to where
-   * the cursor was located, resulting in replace constantly jumping 
+   * the cursor was located, resulting in replace constantly jumping
    * from the replaced text back to the cursor.
    * There was a removePreviousHighlight method which was removed
-   * since selections are removed automatically upon a caret 
-   * change. 
-   */ 
-  private void _selectFoundItem(int from, int to) {
+   * since selections are removed automatically upon a caret
+   * change.
+   */
+  private void _selectFoundItem(int from, int to){
     _defPane.centerViewOnOffset(from);
     _defPane.select(from, to);
-      
+
       // Found this little statement that will show the selected text
       // in _defPane without giving _defPane focus, previously allowing the
       // user to hit enter repeatedly and change the document while finding
@@ -593,5 +633,17 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
       }
       
     }
+  }
+
+  class SearchBackwardsListener implements ItemListener {
+    public void itemStateChanged(ItemEvent e) {
+      if (e.getStateChange() == ItemEvent.DESELECTED) {
+        _machine.setSearchBackwards(false);
+      }
+      if (e.getStateChange() == ItemEvent.SELECTED) {
+        _machine.setSearchBackwards(true);
+      }
+    }
+
   }
 }

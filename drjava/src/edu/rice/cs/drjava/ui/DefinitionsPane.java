@@ -360,7 +360,6 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
     }
   }
 
-
   /**
    * Used for indent action spawned by pressing the enter key, '{', or '}'.
    */
@@ -383,6 +382,14 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
     }
 
     /**
+     * This method tells what the reason should be for spawning this indent event
+     * Defaults to Indenter.OTHER
+     */
+    protected int getIndentReason(){
+      return Indenter.OTHER;
+    }
+    
+    /**
      * Handle the "key typed" event from the text field.
      * Calls the default action to make sure the right things happen, then makes
      * a call to indentLine().
@@ -390,11 +397,7 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
     public void actionPerformed(ActionEvent e) {
       int key = _doc.getDocument().getUndoManager().startCompoundEdit();
       _defaultAction.actionPerformed(e);
-      if (e.getID() == KeyEvent.VK_ENTER){
-        indent(Indenter.ENTER_KEY_PRESS);
-      } else {
-        indent(Indenter.OTHER);
-      }
+      indent(getIndentReason());
       _doc.getDocument().getUndoManager().endCompoundEdit(key);
     }
   }
@@ -412,7 +415,14 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
    */
   private Action _indentKeyActionLine =
     new IndentKeyAction("\n", 
-                        (Action) this.getActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0)));
+                        (Action) this.getActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0))) {
+      /* overwriting this method is important so that pressing the enter key causes
+       * different indentation than pressing other keys, for bug 681203
+       */
+      protected int getIndentReason(){
+	    return Indenter.ENTER_KEY_PRESS;
+      }
+  };
 
   /**
    * Likewise, regular text keys like '{', '}', and ':' do not have special actions
@@ -935,6 +945,22 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
     Point p = new Point(0, metrics.getHeight() * (lineNumber));
     int offset = this.viewToModel(p);
     this.centerViewOnOffset(offset);
+  }
+
+  /**
+   * This method overrides a broken version in JTextComponent.  It allows
+   * selection to proceed backwards as well as forwards.  If selection is backwards,
+   * then the caret will end up at the start of the selection rather than the end.
+   */
+  public void select(int selectionStart, int selectionEnd){
+    if (selectionStart < 0){
+      selectionStart = 0;
+    }
+    if (selectionEnd < 0) {
+      selectionEnd = 0;
+    }
+    setCaretPosition(selectionStart);
+    moveCaretPosition(selectionEnd);
   }
 
   /**
