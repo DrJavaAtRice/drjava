@@ -49,7 +49,9 @@ import gj.util.Vector;
 import gj.util.Hashtable;
 
 /**
- * 
+ * The panel on which each set of configuration options (e.g. Fonts, Colors) displays
+ *  its configurable items as read from the OptionConstants.
+ * @version $Id$
  */
 public class ConfigPanel extends JPanel {
   

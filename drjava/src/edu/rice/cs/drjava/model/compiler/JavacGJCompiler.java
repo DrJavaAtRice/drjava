@@ -103,9 +103,53 @@ public class JavacGJCompiler implements CompilerInterface {
    */
   protected OurLogI compilerLog;
 
+  /**
+   * Constructor for JavacGJCompiler will throw a RuntimeException if an invalid version
+   * of the JDK is in use. 
+   */ 
   protected JavacGJCompiler() {
+    if (!_isValidVersion()) {
+      throw new RuntimeException("Invalid version of Java compiler.");
+    } 
   }
-
+  
+  /**
+   * Uses reflection on the Log object to deduce which JDK is being used.
+   * If the constructor for Log in this JDK does not match that of JDK13 or 
+   * JDK14/JSR14v1.0, then the version is not yet supported.
+   */
+  protected boolean _isValidVersion() {
+    
+    Class log = com.sun.tools.javac.v8.util.Log.class;
+    // The JDK13 version of the Log constructor
+    Class[] validArgs1 = { boolean.class, boolean.class};
+    
+    // The JDK14 & JSR14v1.0 version of the Log constructor
+    Class[] validArgs2 = { boolean.class, 
+      boolean.class, 
+      PrintWriter.class, 
+      PrintWriter.class,
+      PrintWriter.class};
+    
+    try { 
+      log.getConstructor(validArgs1);
+      // succeeds, therefore must be JDK13
+      return true;
+    }
+    catch (NoSuchMethodException e) {
+      try {
+        log.getConstructor(validArgs2);
+        // succeeds, therefore must be JDK14/JSR14v1.0
+        return true;
+      }
+      catch (NoSuchMethodException e2) {
+        //none of the above, so false
+        return false;
+      }
+    }
+  }
+      
+  
   /*
   private boolean _testIfSupportsGenerics() {
     try {
