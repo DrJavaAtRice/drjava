@@ -16,10 +16,10 @@ public class HighlightStatus {
   private int _length;
 
   /**
-   * put your documentation comment here
-   * @param     int location
-   * @param     int length
-   * @param     int state
+   * Constructor.
+   * @param     int location the starting character offset of the block
+   * @param     int length length of block
+   * @param     int state coloring state of the block
    */
   public HighlightStatus(int location, int length, int state) {
     _location = location;
@@ -28,24 +28,25 @@ public class HighlightStatus {
   }
 
   /**
-   * put your documentation comment here
-   * @return 
+   * Get the coloring state of this block.
+   * @return an integer representing the color to paint the text
+   * in the bounds of this block
    */
   public int getState() {
     return  _state;
   }
 
   /**
-   * put your documentation comment here
-   * @return 
+   * Get the starting location of this coloring block.
+   * @return an integer offset
    */
   public int getLocation() {
     return  _location;
   }
 
   /**
-   * put your documentation comment here
-   * @return 
+   * Get the size of this coloring block.
+   * @return the number of characters spanned by this block.
    */
   public int getLength() {
     return  _length;

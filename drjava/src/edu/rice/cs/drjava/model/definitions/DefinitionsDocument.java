@@ -13,15 +13,22 @@ import  java.util.StringTokenizer;
  * @version $Id$
  */
 public class DefinitionsDocument extends PlainDocument {
+  /** A set of normal endings for lines. */
   private static HashSet _normEndings = _makeNormEndings();
+  /** A set of Java keywords. */
   private static HashSet _keywords = _makeKeywords();
+  /** The default indent setting. */
   private static int _indent = 2;
-  
+  /** Determines if tabs are removed on open and converted to spaces. */
   private static boolean _tabsRemoved = true;
-  
+  /** Determines if the document has been modified since the last save. */
   private boolean _modifiedSinceSave = false;
-  
+  /** 
+   * The reduced model of the document that handles most of the 
+   * document logic and keeps track of state.
+   */
   BraceReduction _reduced = new ReducedModelControl();
+  /** The absolute character offset in the document. */
   int _currentLocation = 0;
 
   /**
@@ -69,14 +76,23 @@ public class DefinitionsDocument extends PlainDocument {
   }
 
   /**
-   *1)mark the item previous to the current first insert
-   *2)insert string
-   *3)update from marked point.
+   * Inserts a string of text into the document.
+   * <ol>
+   *  <li>update the current location to the insertion point
+   *  <li>insert the string into the reduced model
+   *  <li>update the current location to be after the insertion
+   *  <li>update modification state of the document
+   *  <li>fire a document change event so the DefinitionsPane
+   *      painter redraws the visible text
+   * </ol>
+   * @param offset insertion point, a character offset
+   * @param str the text to be inserted
+   * @a the attributes for the inserted text, usually null
+   *   since the view does the attribute updates for us
+   * @exception BadLocationException
    */
   public void insertString(int offset, String str, AttributeSet a) 
-    throws BadLocationException {
-      //System.err.println("insert@" + offset + ": |" + str + "|");
-      
+    throws BadLocationException {     
       // If _removeTabs is set to true, remove all tabs from str. 
       // It is a current invariant of the tabification`functionality that 
       // the document contains no tabs, but we want to allow the user
@@ -89,16 +105,14 @@ public class DefinitionsDocument extends PlainDocument {
       int strLength = str.length();
       int prevSize;               //stores the size of the item prev when insert begins.
       int reducedOffset;
-      //1)adjust location
+      // adjust location
       _reduced.move(locationChange);
-      //3)loop through string inserting characters
+      // loop over string, inserting characters into reduced model
       for (int i = 0; i < str.length(); i++) {
         char curChar = str.charAt(i);
         _addCharToReducedModel(curChar);
       }
-      //DrJava.consoleErr().print("Insert: loc before=" + _currentLocation);
       _currentLocation = offset + strLength;
-      //DrJava.consoleErr().println(" loc after=" + _currentLocation);
       super.insertString(offset, str, a);
       _modifiedSinceSave = true;
       _styleChanged();
@@ -106,8 +120,9 @@ public class DefinitionsDocument extends PlainDocument {
   
   /**
    * Given a String, return a new String will all tabs converted to spaces.
-   * Each tab is converted to two spaces.
+   * Each tab is converted to two spaces, or whatever the _indent field is.
    * @param source the String to be converted.
+   * @return a String will all the tabs converted to spaces
    */
   String _removeTabs(String source) {
     StringBuffer target = new StringBuffer();
@@ -138,14 +153,24 @@ public class DefinitionsDocument extends PlainDocument {
 
   /**
    * Removes a block of text from the specified location.
+   * <ol>
+   *  <li>update the current location to the deletion point
+   *  <li>remove the number of characters specified 
+   *      after the deletion point
+   *  <li>update modification state of the document
+   *  <li>fire a document change event so the DefinitionsPane
+   *      painter redraws the visible text
+   * </ol>
    * @param offset the start of the block for removal
    * @param len the size of the block for removal
+   * @exception BadLocationException
    */
   public void remove(int offset, int len) throws BadLocationException {
-    //System.err.println("remove: " + offset + ", " + len);
     int locationChange = offset - _currentLocation;
+    // update current location
     _reduced.move(locationChange);
     _currentLocation = offset;
+    // remove text
     _reduced.delete(len);
     super.remove(offset, len);
     _modifiedSinceSave = true;
@@ -156,14 +181,15 @@ public class DefinitionsDocument extends PlainDocument {
    * Fire event that styles changed from current location to the end.
    * Right now we do this every time there is an insertion or removal. 
    * Two possible future optimizations:
-   * 1. Only fire changed event if text other than that which was inserted
+   * <ol>
+   * <li>Only fire changed event if text other than that which was inserted
    *    or removed *actually* changed status. If we didn't changed the status
    *    of other text (by inserting or deleting unmatched pair of quote or
    *    comment chars), no change need be fired.
-   * 2. If a change must be fired, we could figure out the exact end
+   * <li>If a change must be fired, we could figure out the exact end
    *    of what has been changed. Right now we fire the event saying that
    *    everything changed to the end of the document.
-   *
+   * </ol>
    * I don't think we'll need to do either one since it's still fast now.
    * I think this is because the UI only actually paints the things on the
    * screen anyway.
@@ -185,8 +211,9 @@ public class DefinitionsDocument extends PlainDocument {
    }
    */
   
-  /** Whenever this document has been saved, this method should be called
-   *  so that it knows it's no longer in a modified state.
+  /** 
+   * Whenever this document has been saved, this method should be called
+   * so that it knows it's no longer in a modified state.
    */
   public void resetModification() {
     _modifiedSinceSave = false;
@@ -241,7 +268,7 @@ public class DefinitionsDocument extends PlainDocument {
   }
   
   /**
-   * Returns true iff tabs are removed on text insertion.
+   * Returns true iff tabs are to removed on text insertion.
    */
   public boolean tabsRemoved() {
     return _tabsRemoved;
