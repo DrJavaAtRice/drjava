@@ -227,8 +227,13 @@ public class DefaultGlobalModel implements GlobalModel {
    * open, the fileOpened() event is fired.
    * @param com a command pattern command that selects what file
    *            to open
-   * @return The open document, or null if unsuccessful
-   * @exception IOException
+   *
+   * @return The open document, or null if unsuccessful.
+   * Note that .getFile called on the returned OpenDefinitionsDocument
+   * is guaranteed to return an absolute path, as this method makes
+   * it absolute.
+   *
+   * @exception IOException if an underlying I/O operation fails
    * @exception OperationCanceledException if the open was canceled
    * @exception AlreadyOpenException if the file is already open
    */
@@ -238,7 +243,7 @@ public class DefaultGlobalModel implements GlobalModel {
     DefinitionsDocument tempDoc = (DefinitionsDocument)
       _editorKit.createDefaultDocument();
     try {
-      final File file = com.getFile();
+      final File file = com.getFile().getAbsoluteFile();
 
       OpenDefinitionsDocument openDoc = _getOpenDocument(file);
       if (openDoc != null) {

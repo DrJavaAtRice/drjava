@@ -45,7 +45,9 @@ import javax.swing.ListModel;
 import javax.swing.DefaultListModel;
 import javax.swing.text.BadLocationException;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
+import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
 import edu.rice.cs.drjava.ui.MainFrame;
+import edu.rice.cs.util.FileOps;
 
 //import edu.rice.cs.drjava.*;
 
@@ -295,5 +297,57 @@ public class CommandLineTest extends TestCase {
                  doc2,
                  _mf.getModel().getActiveDocument());
     
+  }
+
+  /**
+   * A regression test for bug #542747, which related to opening a file
+   * via the command line using a relative path.
+   * The problem was that getSourceRoot() would fail on the document, because
+   * the filename was not absolute. (The fix will be to absolutize file paths
+   * when opening files.)
+   */
+  public void testRelativePath() throws IOException, InvalidPackageException {
+    // OK, we have to create a directory with a hard-coded name, so we'll
+    // make it strange. If this directory happens to exist, it'll be deleted.
+    String funnyName = "DrJava_automatically_deletes_this";
+    File newDirectory = new File(funnyName);
+    if (newDirectory.exists()) {
+      FileOps.deleteDirectory(newDirectory);
+    }
+
+    assertTrue("directory created OK", newDirectory.mkdir());
+
+    File relativeFile = new File(newDirectory, "X.java");
+
+    assertEquals(relativeFile + " is absolute?",
+                 false,
+                 relativeFile.isAbsolute());
+
+    try {
+      FileOps.writeStringToFile(relativeFile,
+                                "package " + funnyName + "; class X {}");
+      assertTrue("file exists", relativeFile.exists());
+
+      String path = relativeFile.getPath();
+      DrJava.openCommandLineFiles(_mf, new String[] { path });
+
+      ListModel docs = _mf.getModel().getDefinitionsDocuments();
+      assertEquals("Number of open documents", 1, docs.getSize());
+
+      OpenDefinitionsDocument doc =
+        (OpenDefinitionsDocument) docs.getElementAt(0);
+
+      assertEquals("OpenDefDoc file is the right one and is absolute",
+                   relativeFile.getAbsoluteFile(),
+                   doc.getFile());
+
+      // The source root should be the current directory (as 
+      // an absolute path, of course).
+      File root = doc.getSourceRoot();
+      assertEquals("source root", new File("").getAbsoluteFile(), root);
+    }
+    finally {
+      FileOps.deleteDirectory(newDirectory);
+    }
   }
 }
