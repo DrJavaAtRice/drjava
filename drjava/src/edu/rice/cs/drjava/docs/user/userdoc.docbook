@@ -226,15 +226,15 @@ OTHER DEALINGS WITH THE SOFTWARE.
   <!-- Chapter: Project Facility -->
   <chapter id="projects">
   <title>Project Facility</title>
-  <para>As of the June 18th release, DrJava now includes a project facility for managing many files. The project facility allows the user to save their open java files in a project file, and reopen the project file at a later time to work on some or all of the project java files.</para>
+  <para>DrJava includes a project facility for managing many files. The project facility allows the user to save their open Java files in a project file, and reopen the project file at a later time to work on some or all of the project Java files. Project files are saved as ".pjt" files.</para>
   <formalpara>
   <title>Tree View</title>
-  <para>When using the project facility, the navigator pane on the left hand side of the DrJava window displays the files in a tree view, giving the user a graphical representation of where the project files are layed out in the project directories.</para>
+  <para>When using the project facility, the navigator pane on the left hand side of the DrJava window displays the files in a tree view, giving the user a graphical representation of where the project files are located in the project directories.</para>
   </formalpara>
   <para>Note that when using the project facility, all project files must be in the directory where the project file is saved or in subdirectories of this directory.</para>
   <formalpara>
   <title>New Projects</title>
-  <para>To create a new project, either select new project in the Project menu, or select Save As in the project menu when you have one or more files already open.</para>
+  <para>To create a new project, either select "New" in the Project menu for a project with no files, or select "Save As" in the project menu when you have one or more files already open.</para>
   </formalpara>
   <para>Only one project may be open at a time.</para>
   <formalpara>
