@@ -951,8 +951,8 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     Iterator<OpenDefinitionsDocument> odds = _documentsRepos.valuesIterator();
     while(odds.hasNext()){
       OpenDefinitionsDocument doc = odds.next();
-      if (!doc.isUntitled()) {
-        DocumentInfoGetter g = info.get(doc); 
+      if (!doc.isUntitled() && doc.isInProjectPath()) {
+        DocumentInfoGetter g = info.get(doc);
         builder.addSourceFile(g);
         srcFileVector.add(g.getFile());
       }

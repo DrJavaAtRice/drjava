@@ -270,7 +270,7 @@ public class ProjectFileBuilder {
     String pack = df.getPackage();
     if (pack != null) {
       ret += "\n" + prefix + "      "; // add prefix
-      ret += "(package " + pack + ")";
+      ret += "(package " + convertToLiteral(pack) + ")";
     }
     
     ret += ")"; // close the file expression

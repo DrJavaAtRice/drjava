@@ -150,7 +150,7 @@ public class ProjectTest extends TestCase {
     fb.addSourceFile(makeGetter(1,1,0,0,  "dir1/testfile2.java","dir1",false,false,pf));
     fb.addSourceFile(makeGetter(20,22,0,0,"dir2/testfile3.java","dir2",false,false,pf));
     fb.addSourceFile(makeGetter(1,1,0,0,  "dir2/testfile4.java","dir2",true, false,pf));
-    fb.addSourceFile(makeGetter(0,0,0,0,  "dir3/testfile5.java","dir3",false,false,pf));
+    fb.addSourceFile(makeGetter(0,0,0,0,  "dir3/testfile5.java","",false,false,pf));
     fb.addAuxiliaryFile(makeGetter(1,1,0,0,  ""+absp+"test/testfile6.java","/home/javaplt",false, false,null));
     fb.addAuxiliaryFile(makeGetter(1,1,0,0,  ""+absp+"test/testfile7.java","/home/javaplt",false, false,null));
     fb.addCollapsedPath(new File(pf.getParentFile(), "dir1"));
