@@ -497,7 +497,11 @@ public class MainFrame extends JFrame {
     }
     public void windowDeactivated(WindowEvent ev) {}
     public void windowDeiconified(WindowEvent ev) {
-      
+      try {
+        _model.getActiveDocument().revertIfModifiedOnDisk();
+       } catch (IOException e) {
+         _showIOError(e);
+       }
     }
     public void windowIconified(WindowEvent ev) {
     }
@@ -1498,10 +1502,10 @@ public class MainFrame extends JFrame {
     _toolBar.add(_createToolbarButton(_findReplaceAction));
 
     // Junit
-    _toolBar.addSeparator();
+    //_toolBar.addSeparator();
     
-    _junitButton = _createToolbarButton(_junitAction);
-    _toolBar.add(_junitButton);
+    //_junitButton = _createToolbarButton(_junitAction);
+    //_toolBar.add(_junitButton);
 
     getContentPane().add(_toolBar, BorderLayout.NORTH);
   }
@@ -1571,7 +1575,7 @@ public class MainFrame extends JFrame {
     _tabbedPane.add("Interactions", new BorderlessScrollPane(_interactionsPane));
     _tabbedPane.add("Compiler output", _errorPanel);
     _tabbedPane.add("Console", new JScrollPane(_outputPane));
-    _tabbedPane.add("Test output", _junitPanel);
+    //_tabbedPane.add("Test output", _junitPanel);
 
     // Select interactions pane when interactions tab is selected
     _tabbedPane.addChangeListener(new ChangeListener() {
@@ -1761,16 +1765,16 @@ public class MainFrame extends JFrame {
       _defScrollPanes.remove(doc);
     }
     public void fileReverted(OpenDefinitionsDocument doc) {
-    updateFileTitle();
-    _currentDefPane.setPositionAndScroll(0);
-  }
+      updateFileTitle();
+      _currentDefPane.setPositionAndScroll(0);
+    }
     public void activeDocumentChanged(OpenDefinitionsDocument active) {
       _switchDefScrollPane();
 
       boolean isModified = active.isModifiedSinceSave();
       boolean canCompile = (!isModified && !active.isUntitled());
       _saveAction.setEnabled(isModified);
-   _revertAction.setEnabled(!active.isUntitled());
+      _revertAction.setEnabled(!active.isUntitled());
 
       //_compileAction.setEnabled(canCompile);
 
