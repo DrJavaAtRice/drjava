@@ -145,7 +145,7 @@ public class ReducedModelBrace
 				_insertBrace("" + ch);
 				break;
 			default:
-				insertGap(1);
+				_insertGap(1);
 				break;
 			}
 		}
@@ -166,7 +166,7 @@ public class ReducedModelBrace
 	 *  <li> between two braces: insert new gap
    * @param length the length of the inserted text
    */
-  public void insertGap( int length )
+  private void _insertGap( int length )
 		{
 			//0 - a
 			if (_cursor.atStart())
@@ -259,7 +259,7 @@ public class ReducedModelBrace
 		}
 	
 	/**
-	 * Helper function for insertGap.
+	 * Helper function for _insertGap.
 	 * Performs the actual insert and marks the offset appropriately.
 	 * @param length size of gap to insert
 	 */

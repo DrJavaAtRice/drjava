@@ -143,7 +143,7 @@ public class ReducedModelComment
 			case '\"': insertQuote(); break;
 			case '\\': insertBackSlash(); break;
 			default:
-				insertGap(1);break;
+				_insertGap(1); break;
 			}
 																			
 		}
@@ -667,7 +667,7 @@ public class ReducedModelComment
 	 *  <li> between two braces: insert new gap
    * @param length the length of the inserted text
    */
-  public void insertGap( int length )
+  public void _insertGap( int length )
 		{
 			//0 - a
 			if (_cursor.atStart())
@@ -813,7 +813,7 @@ public class ReducedModelComment
 			_offset = length;
 		}
 	/**
-	 * Helper function for insertGap.
+	 * Helper function for _insertGap.
 	 * Performs the actual insert and marks the offset appropriately.
 	 * @param length size of gap to insert
 	 */

@@ -45,12 +45,6 @@ public class ReducedModelControl implements BraceReduction
 			rmc.insertChar(ch);
 		}
 
-	public void insertGap(int length)
-		{
-			rmb.insertGap(length);
-			rmc.insertGap(length);
-		}
-
   /**
    * <P>Updates the BraceReduction to reflect cursor movement.
    * Negative values move left from the cursor, positive values move

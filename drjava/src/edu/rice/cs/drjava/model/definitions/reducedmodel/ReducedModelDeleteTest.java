@@ -28,6 +28,11 @@ public class ReducedModelDeleteTest extends TestCase {
 			return new TestSuite(ReducedModelDeleteTest.class);
 		}
 	//*********************THE DELETE TESTS************************************/
+	protected void insertGap(BraceReduction model, int size)
+		{
+			for (int i = 0; i < size; i++)
+				model.insertChar(' ');
+		}
 
 	public void testHalfLineComment()
 		{ 
@@ -56,7 +61,7 @@ public class ReducedModelDeleteTest extends TestCase {
 
 	public void testInnerGapDelete()
 		{
-			model1.insertGap(8);
+			insertGap(model1, 8);
 			assertEquals("#0.0", 8, model1.absOffset());
 			model1.move(-6);
 			assertEquals("#0.0", 2, model1.absOffset());
@@ -71,14 +76,14 @@ public class ReducedModelDeleteTest extends TestCase {
 
 	public void testDeleteAndMergeTwoGaps()
 		{
-			model1.insertGap(5);
+			insertGap(model1, 5);
 			model1.insertChar('/');
 			assertEquals("#1.0", 6, model1.absOffset());
 
 			model1.insertChar('*');
 			assertEquals("#2.0", 7, model1.absOffset());
 
-			model1.insertGap(6);
+			insertGap(model1, 6);
 			assertEquals("#3.0", 13, model1.absOffset());
 
 			model1.move(-9);
@@ -110,7 +115,7 @@ public class ReducedModelDeleteTest extends TestCase {
 			assertEquals("#1.1", ReducedToken.INSIDE_BLOCK_COMMENT,
 									 model1.getStateAtCurrent());
 
-			model1.insertGap(2);
+			insertGap(model1, 2);
 			assertEquals("#2.0", 4, model1.absOffset());
 			assertEquals("#2.1", ReducedToken.INSIDE_BLOCK_COMMENT,
 									 model1.getStateAtCurrent());
@@ -125,7 +130,7 @@ public class ReducedModelDeleteTest extends TestCase {
 			assertEquals("#4.1", ReducedToken.FREE,
 									 model1.getStateAtCurrent());
 
-			model1.insertGap(1);
+			insertGap(model1, 1);
 			assertEquals("#5.0", 7, model1.absOffset());
 			assertEquals("#5.1", ReducedToken.FREE,
 									 model1.getStateAtCurrent());
@@ -153,7 +158,7 @@ public class ReducedModelDeleteTest extends TestCase {
 			model1.insertChar('/');
 			assertEquals("#0.0", 1, model1.absOffset());
 
-			model1.insertGap(2);
+			insertGap(model1, 2);
 			assertEquals("#1.0", 3, model1.absOffset());
 
 			model1.insertChar('/');
@@ -185,7 +190,7 @@ public class ReducedModelDeleteTest extends TestCase {
 			model1.insertChar('/');
 			assertEquals("#0.0", 1, model1.absOffset());
 
-			model1.insertGap(2);
+			insertGap(model1, 2);
 			assertEquals("#1.0", 3, model1.absOffset());
 
 			model1.insertChar('/');
@@ -275,7 +280,7 @@ public class ReducedModelDeleteTest extends TestCase {
 			assertEquals("#1.1",ReducedToken.INSIDE_BLOCK_COMMENT,
 									 model1.getStateAtCurrent());									 
 
-			model1.insertGap(2);
+			insertGap(model1, 2);
 			assertEquals("#2.0", 4, model1.absOffset());
 			assertEquals("#2.1",ReducedToken.INSIDE_BLOCK_COMMENT,
 									 model1.getStateAtCurrent());
@@ -321,7 +326,7 @@ public class ReducedModelDeleteTest extends TestCase {
 			model1.insertChar('/');
 			model1.insertChar('*');
 			model1.insertChar('\n');
-			model1.insertGap(2);
+			insertGap(model1, 2);
 			model1.insertChar('(');
 			model1.insertChar('*');
 			model1.insertChar('/');
@@ -391,7 +396,7 @@ public class ReducedModelDeleteTest extends TestCase {
 		{
 			model1.insertChar('/');
 			model1.insertChar('*');
-			model1.insertGap(2);
+			insertGap(model1, 2);
 			model1.insertChar('*');
 			model1.insertChar('/');
 
@@ -412,7 +417,7 @@ public class ReducedModelDeleteTest extends TestCase {
 		{
 			model1.insertChar('/');
 			model1.insertChar('*');
-			model1.insertGap(2);
+			insertGap(model1, 2);
 			model1.insertChar('*');
 			model1.insertChar('/');
 
@@ -439,7 +444,7 @@ public class ReducedModelDeleteTest extends TestCase {
 		{
 			model1.insertChar('/');
 			model1.insertChar('*');
-			model1.insertGap(2);
+			insertGap(model1, 2);
 			model1.insertChar('/');
 			model1.insertChar('/');
 
@@ -482,7 +487,7 @@ public class ReducedModelDeleteTest extends TestCase {
 			model1.insertChar('/');
 			model1.insertChar('/');
 			model1.insertChar('*');
-			model1.insertGap(2);
+			insertGap(model1, 2);
 			model1.insertChar('\n');
 			model1.insertChar('/');
 			model1.insertChar('/');

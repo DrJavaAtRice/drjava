@@ -42,8 +42,6 @@ public interface BraceReduction
 	int getStateAtCurrent();
 
 
-	public void insertGap(int length);
-	
 	public void insertChar(char ch);
 	
   /**

@@ -21,6 +21,12 @@ public class ReducedModelTest extends TestCase {
 			model0 = new ReducedModelControl();
 			model1 = new ReducedModelControl();
 			model2 = new ReducedModelControl();
+		}	
+
+	protected void insertGap(BraceReduction model, int size)
+		{
+			for (int i = 0; i < size; i++)
+				model.insertChar(' ');
 		}
 	
 	public static Test suite()
@@ -30,15 +36,14 @@ public class ReducedModelTest extends TestCase {
 
 	public void testInsertGap()
 		{
-			//inserts a gap. 
-			model1.insertGap(4);
+			insertGap(model1, 4);
 			model1.move(-4);
 			//checks to make sure it is a gap
 			assertTrue("#0.0", model1.currentToken().isGap());			
 			assertEquals("#0.2", 4, model1.currentToken().getSize());
 			model1.move(4);
 			//inserts another gap after the afor mentioned gap
-			model2.insertGap(5);
+			insertGap(model2, 5);
 			model2.move(-5);
 			//makes sure they united to form an Uber gap.
 			assertTrue("#1.0", model2.currentToken().isGap());
@@ -50,16 +55,16 @@ public class ReducedModelTest extends TestCase {
 	 */
 	public void testInsertGapBeforeGap()
 		{
-			model1.insertGap(3);
+			insertGap(model1, 3);
 			assertTrue("#0.0.0", model1.atEnd());
 			model1.move(-3);
-			model1.insertGap(3);
+			insertGap(model1, 3);
 			//insert two consecutive gaps and make sure they combine.
 			assertTrue("#0.0", model1.currentToken().isGap());
 			assertEquals("#0.1", 3, model1.absOffset());
 			assertEquals("#0.2", 6, model1.currentToken().getSize());
 			model1.move(-3);
-			model1.insertGap(2);
+			insertGap(model1, 2);
 			assertTrue("#1.0", model1.currentToken().isGap());
 			assertEquals("#1.1", 2, model1.absOffset());
 			assertEquals("#1.2", 8, model1.currentToken().getSize());
@@ -67,12 +72,12 @@ public class ReducedModelTest extends TestCase {
 
 	public void testInsertGapAfterGap()
 		{
-			model1.insertGap(3);
+			insertGap(model1, 3);
 			assertTrue("#0.0", model1.atEnd());
 			model1.move(-3);
 			assertTrue("#0.1", model1.currentToken().isGap());
 			assertEquals("#0.2", 3, model1.currentToken().getSize());	
-			model1.insertGap(4);
+			insertGap(model1, 4);
 			assertTrue("#1.1", model1.currentToken().isGap());
 			assertEquals("#1.2", 7, model1.currentToken().getSize());
 		}
@@ -80,16 +85,16 @@ public class ReducedModelTest extends TestCase {
 	/**Inserts one gap inside of the other*/
 	public void testInsertGapInsideGap()
 		{
-			model1.insertGap(3);
+			insertGap(model1, 3);
 			assertTrue("#0.0", model1.atEnd());
 			model1.move(-3);
 			assertTrue("#0.1", model1.currentToken().isGap());
 			assertEquals("#0.2", 3, model1.currentToken().getSize());			
-			model1.insertGap(3);
+			insertGap(model1, 3);
 			assertTrue("#1.1", model1.currentToken().isGap());
 			assertEquals("#1.2", 6, model1.currentToken().getSize());
 			assertEquals("#1.3", 3, model1.absOffset());
-			model1.insertGap(4);
+			insertGap(model1, 4);
 			assertTrue("#1.1", model1.currentToken().isGap());
 			assertEquals("#1.2", 10, model1.currentToken().getSize());
 			assertEquals("#1.3", 7, model1._offset);			
@@ -118,9 +123,9 @@ public class ReducedModelTest extends TestCase {
 	//**************
 	public void testInsertBraceInsideGap()
 		{
-			model1.insertGap(4);
+			insertGap(model1, 4);
 			model1.move(-4);
-			model1.insertGap(3);
+			insertGap(model1, 3);
 			assertEquals("#0.0", 3, model1.absOffset());
 			assertEquals("#0.1", 7, model1.currentToken().getSize());
 			model1.insertChar('{');
@@ -230,7 +235,7 @@ public class ReducedModelTest extends TestCase {
 	public void testCrazyCase1()
 		{
 			model1.insertChar('/');
-			model1.insertGap(4);
+			insertGap(model1, 4);
 			model1.insertChar('*');
 			model1.insertChar('/');
 			//should not form an end block comment
@@ -269,7 +274,7 @@ public class ReducedModelTest extends TestCase {
 	public void testCrazyCase2()
 		{
 			model1.insertChar('/');
-			model1.insertGap(4);
+			insertGap(model1, 4);
 			model1.move(-2);
 			model1.insertChar('/');
 			model1.move(0);
@@ -303,7 +308,7 @@ public class ReducedModelTest extends TestCase {
 		{
 			model1.insertChar('/');
 			model1.insertChar('/');
-			model1.insertGap(4);
+			insertGap(model1, 4);
 			model1.move(-2);
 			model1.insertChar('/');
 			// //#__/__
@@ -356,9 +361,9 @@ public class ReducedModelTest extends TestCase {
 			model1.insertChar('*');
 			model1.insertChar('/');
 			model1.insertChar('/');
-			model1.insertGap(2);
+			insertGap(model1, 2);
 			model1.insertChar('/');
-			model1.insertGap(2);
+			insertGap(model1, 2);
 			
 			//break block comment start with a star.
 			model1.move(-8);
@@ -389,12 +394,12 @@ public class ReducedModelTest extends TestCase {
 			model1.insertChar('*');
 			model1.insertChar('/');
 			model1.insertChar('/');
-			model1.insertGap(2);
+			insertGap(model1, 2);
 			model1.insertChar('/');
-			model1.insertGap(2);
+			insertGap(model1, 2);
 
 			model1.move(-7);
-			model1.insertGap(3);
+			insertGap(model1, 3);
 			 // /**___#//__/__
 			model1.move(-3);
 			assertEquals("#5.0", true, model1.currentToken().isGap());
@@ -551,7 +556,7 @@ public class ReducedModelTest extends TestCase {
 			assertEquals("#0.4", ReducedToken.INSIDE_QUOTE,
 									 model1.getStateAtCurrent());
 			
-			model1.insertGap(4);
+			insertGap(model1, 4);
 			// "____#"
 			model1.move(-4);
 			assertEquals("#1.1", true, model1.currentToken().isGap());
@@ -584,9 +589,9 @@ public class ReducedModelTest extends TestCase {
 	public void testInsertQuoteToQuoteBlock()
 		{
 			model1.insertChar('\"');
-			model1.insertGap(2);
+			insertGap(model1, 2);
 			model1.insertChar('/');
-			model1.insertGap(2);
+			insertGap(model1, 2);
 			model1.insertChar('\"');
 			model1.move(-3);
 			model1.insertChar('\"');
@@ -730,7 +735,7 @@ public class ReducedModelTest extends TestCase {
 		{
 			model1.insertChar('/');
 			model1.insertChar('/');
-			model1.insertGap(5);
+			insertGap(model1, 5);
 			model1.move(-2);
 			model1.insertChar('\n');
 			// //___\n#__
@@ -751,7 +756,7 @@ public class ReducedModelTest extends TestCase {
 	public void testInsertNewlineEndQuote()
 		{
 			model1.insertChar('\"');
-			model1.insertGap(5);
+			insertGap(model1, 5);
 			model1.move(-2);
 			model1.insertChar('\n');
 			// "___\n#__
@@ -835,7 +840,7 @@ public class ReducedModelTest extends TestCase {
 
 	public void testMoveWithinToken()
 		{
-			model1.insertGap(10);
+			insertGap(model1, 10);
 			assertTrue("#0.0", model1.atEnd());
 			assertEquals("#0.1", 10, model1.absOffset());
 
@@ -1024,7 +1029,7 @@ public class ReducedModelTest extends TestCase {
 									 model0.getStateAtCurrent());      
 			assertEquals("#12.1", 3, model0.absOffset());
 
-			model0.insertGap(4);
+			insertGap(model0, 4);
       // /*(____#*/
 			model0.move(-2);
       // /*(__#__*/
@@ -1048,11 +1053,11 @@ public class ReducedModelTest extends TestCase {
 		{
 			model0.insertChar('/');
 			model0.insertChar('*');
-			model0.insertGap(5);
+			insertGap(model0, 5);
 			assertEquals("#0.0",7, model0.absOffset());
 			model0.insertChar('(');
 			model0.move(-1);
-			model0.insertGap(3);
+			insertGap(model0, 3);
 			assertEquals("#1.0", 10, model0.absOffset());
 		}
 
@@ -1061,10 +1066,10 @@ public class ReducedModelTest extends TestCase {
 	public void testMove()
 		{
 			model0.insertChar('(');
-			model0.insertGap(5);
+			insertGap(model0, 5);
 			model0.insertChar(')');
 			model0.insertChar('\n');
-			model0.insertGap(2);
+			insertGap(model0, 2);
 			model0.insertChar('{');
 			model0.insertChar('}');
 			try {
@@ -1099,29 +1104,29 @@ public class ReducedModelTest extends TestCase {
 			ReducedModelControl model = new ReducedModelControl();
 			model.insertChar('{');
 			model.insertChar('\n');
-			model.insertGap(3);
+			insertGap(model, 3);
 			model.insertChar('\n');
 			model.insertChar('(');
-			model.insertGap(2);
+			insertGap(model, 2);
 			model.insertChar(')');
 			model.insertChar('\n');
-			model.insertGap(3);
+			insertGap(model, 3);
 			model.insertChar('/');
 			model.insertChar('/');
-			model.insertGap(3);
+			insertGap(model, 3);
 			model.insertChar('\n');
 			model.insertChar('\"');
-			model.insertGap(1);
+			insertGap(model, 1);
 			model.insertChar('{');
-			model.insertGap(1);
+			insertGap(model, 1);
 			model.insertChar('\"');
 			model.insertChar('/');
 			model.insertChar('*');
-			model.insertGap(1);
+			insertGap(model, 1);
 			model.insertChar('(');
-			model.insertGap(1);
+			insertGap(model, 1);
 			model.insertChar(')');
-			model.insertGap(1);
+			insertGap(model, 1);
 			model.insertChar('*');
 			model.insertChar('/');
 			model.insertChar('\n');

@@ -29,6 +29,12 @@ public class BackSlashTest extends TestCase {
     return new TestSuite(BackSlashTest.class);
   }
 
+	protected void insertGap(BraceReduction model, int size)
+		{
+			for (int i = 0; i < size; i++)
+				model.insertChar(' ');
+		}
+
   public void testInsideQuotePrevious() {
     model1.insertChar('\"');
     model1.insertChar('\\');
@@ -184,7 +190,7 @@ public class BackSlashTest extends TestCase {
 
   public void testDeleteAndCombine() {
     model0.insertChar('\\');
-    model0.insertGap(2);
+    insertGap(model0, 2);
     model0.insertChar('\"');
     model0.move(-1);
     assertEquals("#0.0", "\"", model0.currentToken().getType());
@@ -194,7 +200,7 @@ public class BackSlashTest extends TestCase {
     assertEquals("#1.1", 1, model0.absOffset());
     
     model0.delete(1);
-    model0.insertGap(2);
+    insertGap(model0, 2);
     model0.insertChar('\\');
     model0.move(-1);
     assertEquals("#2.0", "\\", model0.currentToken().getType());
@@ -230,7 +236,7 @@ public class BackSlashTest extends TestCase {
   public void testDeleteAndCombine3() {
     model0.insertChar('\\');
     model0.insertChar('\\');
-    model0.insertGap(3);
+    insertGap(model0, 3);
     model0.insertChar('\\');
     model0.move(-1);
     model0.delete(-4);
@@ -238,7 +244,7 @@ public class BackSlashTest extends TestCase {
     assertEquals("#0.1", 1, model0.absOffset());
 
     model1.insertChar('\\');
-    model1.insertGap(3);
+    insertGap(model1, 3);
     model1.insertChar('\\');
     model1.insertChar('\"');
     model1.move(-1);
