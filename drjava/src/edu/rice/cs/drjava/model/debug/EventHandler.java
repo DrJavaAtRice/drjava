@@ -155,15 +155,19 @@ public class EventHandler extends Thread {
   
   private void _handleVMDeathEvent(VMDeathEvent e) {
     System.out.println("VM died");    
+    _cleanUp(e);
   }
   
   private void _handleVMDisconnectEvent(VMDisconnectEvent e) {
     System.out.println("VM disconnected");
+    _cleanUp(e);
+  }
+  
+  private void _cleanUp(Event e) {
     DrJava.consoleOut().println("event: "+e);
     _connected = false;
     _manager.shutdown();
   }
-  
   /**
    * A VMDisconnectedException has happened while dealing with
    * another event. We need to flush the event queue, dealing only

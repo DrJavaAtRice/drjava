@@ -67,6 +67,7 @@ import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 import edu.rice.cs.drjava.model.debug.DebugManager;
 import edu.rice.cs.drjava.model.debug.DebugException;
 import edu.rice.cs.drjava.model.debug.DebugListener;
+import edu.rice.cs.drjava.model.debug.Breakpoint;
 import edu.rice.cs.drjava.ui.config.*;
 import edu.rice.cs.drjava.ui.CompilerErrorPanel.ErrorListPane;
 import edu.rice.cs.drjava.ui.JUnitPanel.JUnitErrorListPane;
@@ -75,6 +76,7 @@ import edu.rice.cs.drjava.ui.config.ConfigFrame;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.ExitingNotAllowedException;
 import edu.rice.cs.util.swing.DelegatingAction;
+import edu.rice.cs.util.swing.HighlightManager;
 
 /**
  * DrJava's main window.
@@ -150,9 +152,9 @@ public class MainFrame extends JFrame implements OptionConstants {
   private JMenuItem _clearAllBreakpointsMenuItem;
  
   private ConfigFrame _configFrame;
-
-  
   private RecentFileManager _recentFileManager;
+  
+  private HighlightManager.HighlightInfo _currentThreadLocationHighlight = null;
   
   /**
    * @return The model providing the logic for this view.
@@ -756,8 +758,10 @@ public class MainFrame extends JFrame implements OptionConstants {
     _model = new SingleDisplayModel();
     
     if (CodeStatus.DEVELOPMENT) {
-      // add listener to debug manager
-      _model.getDebugManager().setListener(new UIDebugListener());
+      if (_model.getDebugManager() != null) {
+        // add listener to debug manager
+        _model.getDebugManager().addListener(new UIDebugListener());
+      }
     }
     
     // Working directory is default place to start
@@ -1246,6 +1250,10 @@ public class MainFrame extends JFrame implements OptionConstants {
    */
   private void _resumeDebugger() {
     _model.getDebugManager().resume();
+    if (_currentThreadLocationHighlight != null) {
+      _currentThreadLocationHighlight.remove();
+    }
+    _currentThreadLocationHighlight = null;
   }
 
   /**
@@ -1293,7 +1301,9 @@ public class MainFrame extends JFrame implements OptionConstants {
   void toggleBreakpoint() {
     OpenDefinitionsDocument doc = _model.getActiveDocument();
     try {
-      _model.getDebugManager().toggleBreakpoint(doc, _currentDefPane.getCurrentLine());
+      _model.getDebugManager().toggleBreakpoint(doc, 
+                                                _currentDefPane.getCaretPosition(),
+                                                _currentDefPane.getCurrentLine());
     }
     catch (DebugException de) {
       _showError(de, "Debugger Error",
@@ -1328,7 +1338,7 @@ public class MainFrame extends JFrame implements OptionConstants {
    * Clears all breakpoints from the debugger
    */
   private void _clearAllBreakpoints() {
-    //_model.getDebugManager().clearAllBreakpoints(true);
+    _model.getDebugManager().removeAllBreakpoints();
   }
 
 
@@ -1887,7 +1897,7 @@ public class MainFrame extends JFrame implements OptionConstants {
 
     _toggleBreakpointMenuItem = debugMenu.add(_toggleBreakpointAction);
     _printBreakpointsMenuItem = debugMenu.add(_printBreakpointsAction);
-    //_clearAllBreakpointsMenuItem = debugMenu.add(_clearAllBreakpointsAction);
+    _clearAllBreakpointsMenuItem = debugMenu.add(_clearAllBreakpointsAction);
 
     // Start off disabled
     _setDebugMenuItemsEnabled(false);
@@ -1909,7 +1919,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _stepOutDebugMenuItem.setEnabled(enabled);
     _toggleBreakpointMenuItem.setEnabled(enabled);
     _printBreakpointsMenuItem.setEnabled(enabled);
-    //_clearAllBreakpointsMenuItem.setEnabled(enabled);
+    _clearAllBreakpointsMenuItem.setEnabled(enabled);
   }
 
   /**
@@ -2479,6 +2489,36 @@ public class MainFrame extends JFrame implements OptionConstants {
     public void scrollToLineInSource(OpenDefinitionsDocument doc, int lineNumber) {
       _model.setActiveDocument(doc);
       _currentDefPane.centerViewOnLine(lineNumber);
+
+      if (_currentThreadLocationHighlight != null) {
+        _currentThreadLocationHighlight.remove();
+      }
+      DefinitionsDocument defDoc = doc.getDocument();
+      int startOffset = defDoc.getOffset(lineNumber);
+      _currentThreadLocationHighlight = _currentDefPane.getHighlightManager().addHighlight(startOffset,
+                                                         defDoc.getLineEndPos(startOffset),
+                                                         DefinitionsPane.THREAD_PAINTER);
+    }
+    
+    public void breakpointSet(Breakpoint bp) {
+      _model.setActiveDocument(bp.getDocument());
+      _currentDefPane.getHighlightManager().addHighlight(bp.getStartOffset(),
+                                                         bp.getEndOffset(),
+                                                         DefinitionsPane.BREAKPOINT_PAINTER);
+    }
+    
+    public void breakpointRemoved(Breakpoint bp) {
+      _model.setActiveDocument(bp.getDocument());
+      _currentDefPane.getHighlightManager().removeHighlight(bp.getStartOffset(),
+                                                            bp.getEndOffset(),
+                                                            DefinitionsPane.BREAKPOINT_PAINTER);
+    }
+    
+    public void debuggerShutdown() {
+      if (_currentThreadLocationHighlight != null) {
+        _currentThreadLocationHighlight.remove();
+      }
+      _currentThreadLocationHighlight = null;
     }
   }
 

@@ -274,4 +274,9 @@ public interface OpenDefinitionsDocument {
    * this document contains
    */
   public Vector<Breakpoint> getBreakpoints();
+  
+  /**
+   * Tells the document to remove all breakpoints
+   */
+  public void clearBreakpoints();
 }

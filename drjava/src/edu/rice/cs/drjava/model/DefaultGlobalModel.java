@@ -495,8 +495,14 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
       //if ((_debugManager != null) && (_debugManager.isReady())) {
       //  _debugManager.endSession();
       //}
-
-      DrJava.getSecurityManager().exitVM(0);
+      if (DrJava.getSecurityManager() != null) {
+        DrJava.getSecurityManager().exitVM(0);
+      }
+      else {
+        //might be being debugged
+        System.exit(0);
+      }
+        
     }
   }
 
@@ -1151,7 +1157,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
     private CompilerErrorModel _errorModel;
     private JUnitErrorModel _junitErrorModel;
     private DrJavaBook _book;
-    private Hashtable<Integer,Breakpoint> _breakpoints;
+    private Vector<Breakpoint> _breakpoints;
     
     /**
      * Constructor.  Initializes this handler's document.
@@ -1161,7 +1167,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
       _doc = doc;
       _errorModel = new CompilerErrorModel();
       _junitErrorModel = new JUnitErrorModel();
-      _breakpoints = new Hashtable<Integer, Breakpoint>();
+      _breakpoints = new Vector<Breakpoint>();
     }
 
     /**
@@ -1749,13 +1755,21 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
     }
 
     /**
-     * Returns the Breakpoint in this OpenDefinitionsDocument at the given 
-     * linenumber, or null if one does not exist.
-     * @param lineNumber the line number of the breakpoint
+     * Returns the first Breakpoint in this OpenDefinitionsDocument whose region 
+     * includes the given offset, or null if one does not exist.
+     * @param offset an offset at which to search for a breakpoint
      * @return the Breakpoint at the given lineNumber, or null if it does not exist.
      */
-    public Breakpoint getBreakpointAt( int lineNumber) {
-      return _breakpoints.get(new Integer(lineNumber));
+    public Breakpoint getBreakpointAt( int offset) {
+      //return _breakpoints.get(new Integer(lineNumber));
+      
+      for (int i =0; i<_breakpoints.size(); i++) {
+        Breakpoint bp = _breakpoints.elementAt(i);
+        if (offset >= bp.getStartOffset() && offset <= bp.getEndOffset()) {
+          return bp;
+        }
+      }
+      return null;
     }
     
     /**
@@ -1763,7 +1777,28 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
      * @param breakpoint the Breakpoint to be inserted into the hashtable
      */
     public void addBreakpoint( Breakpoint breakpoint) {
-      _breakpoints.put( new Integer(breakpoint.getLineNumber()), breakpoint); 
+      //_breakpoints.put( new Integer(breakpoint.getLineNumber()), breakpoint); 
+      
+      for (int i=0; i<_breakpoints.size();i++) {
+        Breakpoint bp = _breakpoints.elementAt(i);
+        int oldStart = bp.getStartOffset();
+        int newStart = breakpoint.getStartOffset();
+        
+        if ( newStart < oldStart) {
+          _breakpoints.insertElementAt(breakpoint, i);
+          return;
+        }
+        if ( newStart == oldStart) {
+          int oldEnd = bp.getEndOffset();
+          int newEnd = breakpoint.getEndOffset();
+          
+          if ( newEnd < oldEnd) {
+            _breakpoints.insertElementAt(breakpoint, i);
+            return;
+          }
+        }
+      }
+      _breakpoints.addElement(breakpoint);
     }
     
     /**
@@ -1771,7 +1806,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
      * @param breakpoint the Breakpoint to be removed.
      */
     public void removeBreakpoint( Breakpoint breakpoint) {
-      _breakpoints.remove( new Integer(breakpoint.getLineNumber())); 
+      _breakpoints.removeElement( breakpoint);
     }
     
     /**
@@ -1779,20 +1814,16 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
      * this document contains
      */
     public Vector<Breakpoint> getBreakpoints() {
-      Vector<Breakpoint> sortedBreakpoints = new Vector<Breakpoint>();
-      int numBreakpoints = _breakpoints.size();
-      Integer[] linenums = new Integer[numBreakpoints];
-      Enumeration enum = _breakpoints.keys();
-      int count = 0;
-      while (enum.hasMoreElements()) {
-        linenums[count++] = (Integer)enum.nextElement();
-      }
-      Arrays.sort(linenums);
-      for (int i = 0; i < numBreakpoints; i++) 
-        sortedBreakpoints.addElement(_breakpoints.get(linenums[i]));
-      return sortedBreakpoints;
+      return _breakpoints;
     }
     
+    /**
+     * Tells the document to remove all breakpoints
+     */
+    public void clearBreakpoints() {
+      _breakpoints.removeAllElements();
+    }
+  
     /**
      * Finds the root directory of the source files.
      * @return The root directory of the source files,

@@ -44,6 +44,8 @@ import com.sun.jdi.request.*;
 
 import java.io.File;
 
+import javax.swing.text.*;
+
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.model.definitions.InvalidPackageException;

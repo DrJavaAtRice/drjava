@@ -39,12 +39,17 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.debug;
 
+import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
+import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 
 import java.util.List;
 import java.util.Iterator;
+
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Position;
 
 import com.sun.jdi.*;
 import com.sun.jdi.request.*;
@@ -59,19 +64,33 @@ public class Breakpoint extends DocumentDebugAction<BreakpointRequest> {
   //private int _lineNumber;
   //private ReferenceType _ref;
   //private BreakpointRequest _breakpointReq;
+   private Position _startPos;
+   private Position _endPos;
    
   /**
    * @throws IllegalStateException if the document does not have a file
    */
-  public Breakpoint( OpenDefinitionsDocument doc, int lineNumber, DebugManager manager) 
+  public Breakpoint( OpenDefinitionsDocument doc, int offset, int lineNumber, DebugManager manager) 
     throws DebugException, IllegalStateException {    
     
     super (manager, doc);
     _suspendPolicy = EventRequest.SUSPEND_EVENT_THREAD;
     _lineNumber = lineNumber;
+    
+    DefinitionsDocument defDoc = doc.getDocument();
+    
+    try {
+      _startPos = defDoc.createPosition(defDoc.getLineStartPos(offset));
+      _endPos = defDoc.createPosition( defDoc.getLineEndPos(offset));
+    }
+    catch (BadLocationException ble) {
+      throw new UnexpectedException(ble);
+    }
+    
     _initializeRequest(_manager.getReferenceType(_className, _lineNumber));
     //_doc = doc;
     //_createBreakpointRequest();
+    
     DrJava.consoleOut().println("Breakpoint lineNumber is " + lineNumber);
   }
  
@@ -131,11 +150,26 @@ public class Breakpoint extends DocumentDebugAction<BreakpointRequest> {
       //_breakpointReq.setSuspendPolicy(EventRequest.SUSPEND_EVENT_THREAD);
       //_breakpointReq.enable();
       //System.out.println("Breakpoint: " + req);
-      _manager.addBreakpointToMap(this);
     }
     catch (AbsentInformationException aie) {
       throw new DebugException("Could not find line number: " + aie);
     }
+  }
+  
+  /**
+   * Accessor for the offset of this breakpoint's start position
+   * @return the start offset
+   */
+  public int getStartOffset() {
+    return _startPos.getOffset();
+  }
+  
+  /**
+   * Accessor for the offset of this breakpoint's end position
+   * @return the end offset
+   */
+  public int getEndOffset(){
+    return _endPos.getOffset();
   }
   
   public String toString() {

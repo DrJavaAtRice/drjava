@@ -917,6 +917,46 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
     char[] whitespace = {' ', '\t', '\n'};
     return findPrevCharPos(pos, whitespace);
   }
+  
+  /**
+   * Returns the offset corresponding to the first character of the given line number, 
+   *  or -1 if the lineNum is not found.
+   * @param lineNum the line number for which to calculate the offset.
+   * @return the offset of the first character in the given line number
+   */
+  public int getOffset(int lineNum) {
+    
+    try {
+      String defsText = getText(0, getLength());
+      
+      int curLine = 1;
+      int offset = 0; // offset is number of chars from beginning of file
+      
+      // offset is always pointing to the first character in a line
+      // at the top of the loop
+      while (offset < defsText.length()) {
+        
+        if (curLine==lineNum) {
+          return offset;
+        }
+        
+        int nextNewline = defsText.indexOf('\n', offset);
+        if (nextNewline == -1) {
+          // end of the document, and couldn't find the supplied lineNum
+          return -1;
+        }
+        else {
+          curLine++;
+          offset = nextNewline + 1;
+        } 
+      }
+      return -1;
+    }
+    catch (BadLocationException ble) {
+      throw new UnexpectedException(ble);
+    }
+  }
+  
   /**
    * Finds the position of the first non-whitespace character before pos.
    * NB: Skips comments and all whitespace, including newlines
@@ -1787,4 +1827,5 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
       _styleChanged();
     }
   }
+  
 }

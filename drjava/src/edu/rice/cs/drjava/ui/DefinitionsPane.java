@@ -94,7 +94,7 @@ public class DefinitionsPane extends JEditorPane
   /**
    * Paren/brace/bracket matching highlight color.
    */
-  private static DefaultHighlighter.DefaultHighlightPainter
+  public static DefaultHighlighter.DefaultHighlightPainter
     MATCH_PAINTER;
     
   static {
@@ -111,16 +111,23 @@ public class DefinitionsPane extends JEditorPane
   /**
    * Highlight painter for selected errors in the defs doc.
    */
-  private static final DefaultHighlighter.DefaultHighlightPainter
+  public static final DefaultHighlighter.DefaultHighlightPainter
     ERROR_PAINTER =
     new DefaultHighlighter.DefaultHighlightPainter(Color.yellow);
   
   /**
    *  Highlight painter for breakpoints
    */
-  private static final DefaultHighlighter.DefaultHighlightPainter 
+  public static final DefaultHighlighter.DefaultHighlightPainter 
     BREAKPOINT_PAINTER =
     new DefaultHighlighter.DefaultHighlightPainter(Color.red);
+  
+  /**
+   * Highlight painter for thread's current location
+   */
+  public static final DefaultHighlighter.DefaultHighlightPainter 
+    THREAD_PAINTER =
+    new DefaultHighlighter.DefaultHighlightPainter(new Color(100,255,255));
   
   /**
    * The menu item for the "Toggle Breakpoint" option. Stored in field so that it may be enabled and
@@ -628,7 +635,7 @@ public class DefinitionsPane extends JEditorPane
   /**
    * Access to the pane's HighlightManager
    */
-  public HighlightManager _getHighlightManager() {
+  public HighlightManager getHighlightManager() {
     return _highlightManager;
   }
     

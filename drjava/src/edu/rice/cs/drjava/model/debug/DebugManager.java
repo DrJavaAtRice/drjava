@@ -41,6 +41,7 @@ package edu.rice.cs.drjava.model.debug;
 
 import java.io.*;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.LinkedList;
 import java.util.Map;
 import javax.swing.ListModel;
@@ -110,11 +111,8 @@ public class DebugManager {
    * Manages all event requests in JDI.
    */
   private EventRequestManager _eventManager;
-  
-  /**
-   * Maps BreakpointRequests to their container Breakpoints
-   */
-  private Hashtable<BreakpointRequest,Breakpoint> _breakpoints;
+
+  private Vector<Breakpoint> _breakpoints;
   
   /**
    * Maps class names to vector's of pending DebugAction
@@ -124,7 +122,7 @@ public class DebugManager {
   /**
    * Provides a way for the DebugManager to communicate with the view
    */
-  private DebugListener _listener;
+  private LinkedList _listeners;
   
   /**
    * The Thread that the DebugManager is currently analyzing
@@ -148,7 +146,8 @@ public class DebugManager {
     _vm = null;
     _eventManager = null;
     _thread = null;
-    _breakpoints = new Hashtable<BreakpointRequest, Breakpoint>();
+    _listeners = new LinkedList();
+    _breakpoints = new Vector<Breakpoint>();
     //_logwriter = new PrintWriter(DrJava.consoleOut());
     _pendingRequestManager = new PendingRequestManager(this);
   }
@@ -215,8 +214,10 @@ public class DebugManager {
   public synchronized void shutdown() {
     if (isReady()) {
       DrJava.consoleOut().println("Shutting down...");
+      
+      removeAllBreakpoints();
       try {
-      _vm.dispose();
+        _vm.dispose();
       }
       catch (VMDisconnectedException vmde) {
         //VM was shutdown prematurely
@@ -225,14 +226,12 @@ public class DebugManager {
         _vm = null;
         _eventManager = null;
         //remove all remaining breakpoints
-        Enumeration<Breakpoint> breakpoints = _breakpoints.elements();
         
-        while (breakpoints.hasMoreElements()) {
-          Breakpoint bp = breakpoints.nextElement();
-          bp.getDocument().removeBreakpoint(bp);
-        }
-        _breakpoints.clear();
-        
+        notifyListeners(new EventNotifier() {
+          public void notifyListener(DebugListener l) {
+            l.debuggerShutdown();
+          }
+        });
       }
     }
   }
@@ -485,12 +484,12 @@ public class DebugManager {
    * @param lineNumber Line on which to set or remove the breakpoint
    */
   public synchronized void toggleBreakpoint(OpenDefinitionsDocument doc, 
-                                            int lineNumber)
+                                            int offset, int lineNum)
     throws DebugException {  
     
-    Breakpoint breakpoint = doc.getBreakpointAt(lineNumber);
+    Breakpoint breakpoint = doc.getBreakpointAt(offset);
     if (breakpoint == null) {
-      setBreakpoint(new Breakpoint (doc, lineNumber, this));
+      setBreakpoint(new Breakpoint (doc, offset, lineNum, this));
     }
     else {
       removeBreakpoint(breakpoint);
@@ -503,20 +502,23 @@ public class DebugManager {
    * @param className the name of the class in which to break
    * @param lineNumber the line number at which to break
    */
-  public synchronized void setBreakpoint(Breakpoint breakpoint)
+  public synchronized void setBreakpoint(final Breakpoint breakpoint)
   {
 
     System.out.println("setting: " + breakpoint);
     /*
     if (breakpoint.getRequest() != null)
       _breakpoints.put(breakpoint.getRequest(), breakpoint);*/
+    _breakpoints.addElement(breakpoint);
     breakpoint.getDocument().addBreakpoint(breakpoint);
+    
+    notifyListeners(new EventNotifier() {
+      public void notifyListener(DebugListener l) {
+        l.breakpointSet(breakpoint);
+      }
+    });
   }
   
-  void addBreakpointToMap(Breakpoint breakpoint) {
-    _breakpoints.put((BreakpointRequest)breakpoint.getRequest(), breakpoint);
-  }
-
  /**
   * Removes a breakpoint.
   * Called from ToggleBreakpoint -- even with BPs that are not active.
@@ -526,18 +528,37 @@ public class DebugManager {
   * @param breakpoint The breakpoint to remove.
   * @param className the name of the class the BP is being removed from.
   */
-  public synchronized void removeBreakpoint(Breakpoint breakpoint) {
+  public synchronized void removeBreakpoint(final Breakpoint breakpoint) {
     System.out.println("unsetting: " + breakpoint);
-    if (breakpoint.getRequest() != null) {
-      _breakpoints.remove((BreakpointRequest)breakpoint.getRequest());
+    _breakpoints.removeElement(breakpoint);
+    
+    if ( breakpoint.getRequest() != null && _eventManager != null) {
       _eventManager.deleteEventRequest(breakpoint.getRequest());
     }
     else {
       _pendingRequestManager.removePendingRequest(breakpoint);
     }
     breakpoint.getDocument().removeBreakpoint(breakpoint);
+    
+    notifyListeners(new EventNotifier() {
+      public void notifyListener(DebugListener l) {
+        l.breakpointRemoved(breakpoint);
+      }
+    });
   }
 
+  /**
+   * Removes all the breakpoints from the manager's vector of breakpoints
+   */
+  public void removeAllBreakpoints() {
+    
+    while (_breakpoints.size() > 0) {
+      
+      removeBreakpoint( _breakpoints.elementAt(0));
+    }
+    
+  }
+  
   /**
    * Prints all location breakpoints via writeToLog().
    *
@@ -761,10 +782,13 @@ public class DebugManager {
   //}
   
   public void hitBreakpoint(BreakpointRequest request) {
-    Breakpoint breakpoint = _breakpoints.get(request);
-    System.out.println("Encountered a breakpoint at line "+ 
-                       breakpoint.getLineNumber() +
-                       " in file " + breakpoint.getClassName());
+    Object property = request.getProperty("debugAction");
+    if ( (property!=null) && (property instanceof Breakpoint)) {
+      Breakpoint breakpoint = (Breakpoint)property;
+      System.out.println("Encountered a breakpoint at line "+ 
+                         breakpoint.getLineNumber() +
+                         " in file " + breakpoint.getClassName());
+    }
   }
   
   /**
@@ -846,8 +870,16 @@ public class DebugManager {
     // Open and scroll if doc was found
     if (doc != null) {
       DrJava.consoleOut().println("Will scroll to line: " + location.lineNumber());
-      _listener.scrollToLineInSource(doc, 
-                                     location.lineNumber());
+
+      final OpenDefinitionsDocument docF = doc;
+      final Location locationF = location;
+        
+      notifyListeners(new EventNotifier() {
+        public void notifyListener(DebugListener l) {
+          l.scrollToLineInSource(docF, 
+                                     locationF.lineNumber());
+        }
+      });
     }
     else {
       DrJava.consoleOut().println("couldn't open file to scroll to");
@@ -863,18 +895,20 @@ public class DebugManager {
   }
 
   /**
-   * Sets the listener to this DebugManager.
+   * Adds a listener to this DebugManager.
    * @param listener a listener that reacts on events generated by the DebugManager
    */
-  public void setListener(DebugListener listener) {
-    _listener = listener;
+  public void addListener(DebugListener listener) {
+    _listeners.addLast(listener);
   }
 
+  
+  
   /**
    * Lets the listeners know some event has taken place.
    * @param EventNotifier n tells the listener what happened
    */
-/*  protected void notifyListeners(EventNotifier n) {
+  protected void notifyListeners(EventNotifier n) {
     synchronized(_listeners) {
       ListIterator i = _listeners.listIterator();
 
@@ -883,5 +917,13 @@ public class DebugManager {
         n.notifyListener(cur);
       }
     }
-  }*/
+  }
+  
+  /**
+   * Class model for notifying listeners of an event.
+   */
+  protected abstract class EventNotifier {
+    public abstract void notifyListener(DebugListener l);
+  }
+  
 }
