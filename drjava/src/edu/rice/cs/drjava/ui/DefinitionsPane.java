@@ -234,6 +234,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
   private class AntiAliasOptionListener implements OptionListener<Boolean> {
     public void optionChanged(OptionEvent<Boolean> oce) {
       _antiAliasText = oce.value.booleanValue();
+      DefinitionsPane.this.repaint();
     }
   }
 

@@ -48,7 +48,7 @@ package edu.rice.cs.drjava.ui;
 import javax.swing.*;
 import javax.swing.text.*;
 import javax.swing.event.*;
-import java.awt.Toolkit;
+import java.awt.*;
 import java.awt.event.ContainerEvent;
 import java.awt.event.KeyEvent;
 
@@ -73,6 +73,11 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
   /** The custom keymap for the interactions pane. */
   protected Keymap _keymap;
   
+  /**
+   * Whether to draw text as antialiased.
+   */
+  private boolean _antiAliasText = false;
+  
   static StyledEditorKit EDITOR_KIT;
   
   static {
@@ -86,6 +91,17 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
     }
   };
 
+  
+  /**
+   * The OptionListener for TEXT_ANTIALIAS
+   */
+  private class AntiAliasOptionListener implements OptionListener<Boolean> {
+    public void optionChanged(OptionEvent<Boolean> oce) {
+      _antiAliasText = oce.value.booleanValue();
+      InteractionsPane.this.repaint();
+    }
+  }
+  
   /**
    * Returns a runnable object that beeps to the user.
    */
@@ -120,9 +136,21 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
     setCaretPosition(doc.getLength());
     this.addCaretListener(_matchListener);
     _highlightManager = new HighlightManager(this);
+    
+    if (CodeStatus.DEVELOPMENT) {
+      _antiAliasText = DrJava.getConfig().getSetting(TEXT_ANTIALIAS).booleanValue();
+    }
+    
     // Setup color listeners.
+    
     new ForegroundColorListener(this);
     new BackgroundColorListener(this);
+    
+    
+    if (CodeStatus.DEVELOPMENT) {
+      OptionListener<Boolean> aaTemp = new AntiAliasOptionListener();
+      DrJava.getConfig().addOptionListener(OptionConstants.TEXT_ANTIALIAS, aaTemp);
+    }
   }
 
   public void processKeyEvent(KeyEvent e) {
@@ -172,6 +200,20 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
   protected EditorKit createDefaultEditorKit() {
     //return _editorKit;
     return EDITOR_KIT;
+  }
+  
+  /**
+   * Enable anti-aliased text by overriding paintComponent.
+   */
+  protected void paintComponent(Graphics g) {
+    if (CodeStatus.DEVELOPMENT) {
+      if (_antiAliasText && g instanceof Graphics2D) {
+        Graphics2D g2d = (Graphics2D)g;
+        g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
+                             RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+      }
+    }
+    super.paintComponent(g);
   }
 
   /**
