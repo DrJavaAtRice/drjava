@@ -94,50 +94,19 @@ public interface OptionConstants extends ConfigurationTool {
   
   /* ---------- Font Options ---------- */
   
-  /* Main (definitions document, tab contents) */
+  /** Main (definitions document, tab contents) */
   
   public static final FontOption FONT_MAIN = 
-    (CodeStatus.DEVELOPMENT) ?
-    new FontOption("font.main", Font.decode("Monospaced-PLAIN-12")):
-    null;
-    
-  // The following options are available in the next stable release, but will be deprecated thereafter.
-  public static final StringOption FONT_MAIN_NAME = 
-    new StringOption("font.main.name", "Monospaced");
-  public static final IntegerOption FONT_MAIN_STYLE = 
-    new IntegerOption("font.main.style", new Integer(0));
-  public static final IntegerOption FONT_MAIN_SIZE = 
-    new IntegerOption("font.main.size", new Integer(12));
-  
-  /* List of open documents */
+    new FontOption("font.main", Font.decode("Monospaced-PLAIN-12"));
+        
+  /** List of open documents */
   public static final FontOption FONT_DOCLIST = 
-    (CodeStatus.DEVELOPMENT) ?
-    new FontOption("font.doclist", Font.decode("Monospaced-PLAIN-10")):
-    null;
-    
-  // The following options are available in the next stable release, but will be deprecated thereafter.
-  public static final StringOption FONT_DOCLIST_NAME = 
-    new StringOption("font.doclist.name", "Monospaced");
-  public static final IntegerOption FONT_DOCLIST_STYLE = 
-    new IntegerOption("font.doclist.style", new Integer(0));
-  public static final IntegerOption FONT_DOCLIST_SIZE = 
-    new IntegerOption("font.doclist.size", new Integer(10));
-
-  
-  /* Toolbar buttons */
+    new FontOption("font.doclist", Font.decode("Monospaced-PLAIN-10"));
+        
+ /** Toolbar buttons */
   public static final FontOption FONT_TOOLBAR = 
-    (CodeStatus.DEVELOPMENT) ?
-    new FontOption("font.toolbar", Font.decode("dialog-PLAIN-10")):
-    null;
-    
-  // The following options are available in the next stable release, but will be deprecated thereafter.
-  public static final StringOption FONT_TOOLBAR_NAME = 
-    new StringOption("font.toolbar.name", "dialog");
-  public static final IntegerOption FONT_TOOLBAR_STYLE = 
-    new IntegerOption("font.toolbar.style", new Integer(0));
-  public static final IntegerOption FONT_TOOLBAR_SIZE = 
-    new IntegerOption("font.toolbar.size", new Integer(10));
-  
+    new FontOption("font.toolbar", Font.decode("dialog-PLAIN-10"));
+       
   
   /* ---------- Other Display Options ---------- */
   
@@ -158,10 +127,7 @@ public interface OptionConstants extends ConfigurationTool {
    * Whether the line-numbers should be displayed in a row header.
    */
   public static final BooleanOption LINEENUM_ENABLED = 
-    (CodeStatus.DEVELOPMENT) ?
-    new BooleanOption("lineenum.enabled", new Boolean(false)):
-    null;
-  
+    new BooleanOption("lineenum.enabled", new Boolean(false));
   
   /* ---------- Key Binding Options ----------- */
   static int mask = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();

@@ -50,10 +50,7 @@ public class FontOption extends Option<Font> {
   public FontOption(String key, Font def) { super(key,def); }
   
   public Font parse(String s) {
-    if (CodeStatus.DEVELOPMENT) {
-      return Font.decode(s);
-    }
-    else return null;
+    return Font.decode(s);
   }
   
   /**
@@ -61,24 +58,20 @@ public class FontOption extends Option<Font> {
    *   fontname-fontstyle-fontsize
    */ 
   public String format(Font f) {  
-    if (CodeStatus.DEVELOPMENT) {
-      StringBuffer str = new StringBuffer(f.getName());
-      str.append("-");
-      if (f.isBold()) {
-        str.append("BOLD");
-      }
-      if (f.isItalic()) {
-        str.append("ITALIC");
-      }
-      if (f.isPlain()) {
-        str.append("PLAIN");
-      }
-      str.append("-");
-      str.append(f.getSize());
-      
-      return str.toString();
+    StringBuffer str = new StringBuffer(f.getName());
+    str.append("-");
+    if (f.isBold()) {
+      str.append("BOLD");
     }
-    else return null;
+    if (f.isItalic()) {
+      str.append("ITALIC");
+    }
+    if (f.isPlain()) {
+      str.append("PLAIN");
+    }
+    str.append("-");
+    str.append(f.getSize());
+    
+    return str.toString();
   }
-  
 }

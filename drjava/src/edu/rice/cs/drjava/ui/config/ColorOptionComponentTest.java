@@ -4,7 +4,7 @@
  * at http://sourceforge.net/projects/drjava
  *
  * Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)
- * 
+ *
  * DrJava is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -37,47 +37,70 @@
  *
 END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava.config;
+package edu.rice.cs.drjava.ui.config;
+
+import javax.swing.*;
+import java.awt.*;
+import edu.rice.cs.drjava.config.*;
+import edu.rice.cs.drjava.DrJava;
 
 import junit.framework.*;
-import java.awt.Font;
-import edu.rice.cs.drjava.CodeStatus;
+import junit.extensions.*;
+
 
 /**
- * Class according to the JUnit protocol. Tests
- * the proper functionality of the class FontOption.
- * @version $Id$
+ * Tests functionality of this OptionComponent
  */
-public class FontOptionTest extends TestCase
-{
-  /**
-   * @param name The name of this test case.
-   */
-  public FontOptionTest(String name) { super(name); }
+public class ColorOptionComponentTest extends TestCase {
   
-  public void setUp() {}
+  private static ColorOptionComponent _option;
+ 
+  public ColorOptionComponentTest(String name) {
+    super(name);
+  }
   
-  public void testParse() {
-    
-    FontOption fo = new FontOption("font.test1", Font.decode(null));
-    
-    assertEquals(new Font("monospaced", 0, 12), fo.parse("monospaced-PLAIN-12"));
-    assertEquals(new Font("sansserif", 1, 10), fo.parse("sansserif-BOLD-10"));
-    assertEquals(new Font("sansserif", 3, 10), fo.parse("sansserif-BOLDITALIC-10"));
-    
-    // Any failed parse attempts return some platform-dependent default font
-    assertTrue("defaults to a font", (fo.parse("true") instanceof Font));
+  protected void setUp() {
+    _option = new ColorOptionComponent( OptionConstants.DEFINITIONS_NORMAL_COLOR, "Normal Color", new Frame());
+    DrJava.CONFIG.setSetting(OptionConstants.DEFINITIONS_NORMAL_COLOR, OptionConstants.DEFINITIONS_NORMAL_COLOR.getDefault());
     
   }
   
-  public void testFormat()
-  {
+  public void testCancelDoesNotChangeConfig() {
+
+    Color testColor = Color.decode("#ABCDEF");
     
-    FontOption fO1 = new FontOption("font.test2", Font.decode(null));
-    
-    assertEquals("monospaced-PLAIN-12",  fO1.format(new Font("monospaced", 0, 12)));
-    assertEquals("sansserif-BOLD-10", fO1.format(new Font("sansserif", 1, 10)));
-    assertEquals("sansserif-BOLDITALIC-10", fO1.format(new Font("sansserif", 3, 10)));
+    _option.setValue(testColor);
+    _option.resetToCurrent(); // should reset to the original.
+    _option.updateConfig(); // should update with original values therefore no change.
+  
+    assertEquals("Cancel (resetToCurrent) should not change the config", 
+                 OptionConstants.DEFINITIONS_NORMAL_COLOR.getDefault(),
+                 DrJava.CONFIG.getSetting(OptionConstants.DEFINITIONS_NORMAL_COLOR));
     
   }
+  
+  public void testApplyDoesChangeConfig() {
+    Color testColor = Color.decode("#ABCDEF");
+    
+    _option.setValue(testColor); 
+    _option.updateConfig();
+    
+    assertEquals("Apply (updateConfig) should write change to file", 
+                 testColor,
+                 DrJava.CONFIG.getSetting(OptionConstants.DEFINITIONS_NORMAL_COLOR));
+  }
+  
+  public void testApplyThenResetDefault() {
+    Color testColor = Color.decode("#ABCDEF");
+    
+    _option.setValue(testColor);
+    _option.updateConfig(); 
+    _option.resetToDefault(); // resets to default
+    _option.updateConfig();
+    
+    assertEquals("Apply (updateConfig) should write change to file", 
+                 OptionConstants.DEFINITIONS_NORMAL_COLOR.getDefault(),
+                 DrJava.CONFIG.getSetting(OptionConstants.DEFINITIONS_NORMAL_COLOR));
+  }
+    
 }

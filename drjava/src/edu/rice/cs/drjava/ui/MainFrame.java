@@ -806,26 +806,16 @@ public class MainFrame extends JFrame implements OptionConstants {
 
     // Set the fonts
     _setMainFont();    
-    Font doclistFont;
-    if (CodeStatus.DEVELOPMENT) {  // only use FontOption in development
-      doclistFont = DrJava.CONFIG.getSetting(FONT_DOCLIST);
-    }
-    else {
-      doclistFont = new Font (DrJava.CONFIG.getSetting(FONT_DOCLIST_NAME).toString(),
-                                 DrJava.CONFIG.getSetting(FONT_DOCLIST_STYLE).intValue(),
-                                 DrJava.CONFIG.getSetting(FONT_DOCLIST_SIZE).intValue());
-    }
+    Font doclistFont = DrJava.CONFIG.getSetting(FONT_DOCLIST);
     _docList.setFont(doclistFont);
     
     // Add option listeners for changes to config options
-    if (CodeStatus.DEVELOPMENT) {  // no config live update in stable
-      DrJava.CONFIG.addOptionListener( OptionConstants.FONT_MAIN, new MainFontOptionListener());
-      DrJava.CONFIG.addOptionListener( OptionConstants.FONT_DOCLIST, new DoclistFontOptionListener());
-      DrJava.CONFIG.addOptionListener( OptionConstants.FONT_TOOLBAR, new ToolbarFontOptionListener());
-      DrJava.CONFIG.addOptionListener( OptionConstants.TOOLBAR_ICONS_ENABLED, new ToolbarOptionListener());
-      DrJava.CONFIG.addOptionListener( OptionConstants.TOOLBAR_TEXT_ENABLED, new ToolbarOptionListener());
-      DrJava.CONFIG.addOptionListener( OptionConstants.LINEENUM_ENABLED, new LineEnumOptionListener());
-    }
+    DrJava.CONFIG.addOptionListener( OptionConstants.FONT_MAIN, new MainFontOptionListener());
+    DrJava.CONFIG.addOptionListener( OptionConstants.FONT_DOCLIST, new DoclistFontOptionListener());
+    DrJava.CONFIG.addOptionListener( OptionConstants.FONT_TOOLBAR, new ToolbarFontOptionListener());
+    DrJava.CONFIG.addOptionListener( OptionConstants.TOOLBAR_ICONS_ENABLED, new ToolbarOptionListener());
+    DrJava.CONFIG.addOptionListener( OptionConstants.TOOLBAR_TEXT_ENABLED, new ToolbarOptionListener());
+    DrJava.CONFIG.addOptionListener( OptionConstants.LINEENUM_ENABLED, new LineEnumOptionListener());
     
     // Set the configuration frame to null
     _configFrame = null;
@@ -1815,15 +1805,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   JButton _createManualToolbarButton(Action a) {
     final JButton ret;
     
-    Font buttonFont;
-    if (CodeStatus.DEVELOPMENT) {  // only use FontOption in development
-      buttonFont = DrJava.CONFIG.getSetting(FONT_TOOLBAR);
-    }
-    else {
-      buttonFont = new Font (DrJava.CONFIG.getSetting(FONT_TOOLBAR_NAME).toString(),
-                             DrJava.CONFIG.getSetting(FONT_TOOLBAR_STYLE).intValue(),
-                             DrJava.CONFIG.getSetting(FONT_TOOLBAR_SIZE).intValue());
-    }
+    Font buttonFont = DrJava.CONFIG.getSetting(FONT_TOOLBAR);
 
     // Check whether icons should be shown
     boolean useIcon = DrJava.CONFIG.getSetting(OptionConstants.TOOLBAR_ICONS_ENABLED).booleanValue();
@@ -1863,15 +1845,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   public JButton _createToolbarButton(Action a) {
     boolean useText = DrJava.CONFIG.getSetting(OptionConstants.TOOLBAR_TEXT_ENABLED).booleanValue();
     boolean useIcons = DrJava.CONFIG.getSetting(OptionConstants.TOOLBAR_ICONS_ENABLED).booleanValue();
-    Font buttonFont;
-    if (CodeStatus.DEVELOPMENT) {
-      buttonFont = DrJava.CONFIG.getSetting(FONT_TOOLBAR);
-    }
-    else {
-      buttonFont = new Font (DrJava.CONFIG.getSetting(FONT_TOOLBAR_NAME).toString(),
-                             DrJava.CONFIG.getSetting(FONT_TOOLBAR_STYLE).intValue(),
-                             DrJava.CONFIG.getSetting(FONT_TOOLBAR_SIZE).intValue());
-    }
+    Font buttonFont = DrJava.CONFIG.getSetting(FONT_TOOLBAR);
     
     final JButton result = new JButton(a);
     result.setText((String) a.getValue(Action.DEFAULT));
@@ -2277,15 +2251,7 @@ public class MainFrame extends JFrame implements OptionConstants {
    */
   private void _setMainFont() {
     
-    Font f;
-    if (CodeStatus.DEVELOPMENT) {  // only use FontOption in development
-      f = DrJava.CONFIG.getSetting(FONT_MAIN);
-    }
-    else {
-      f = new Font (DrJava.CONFIG.getSetting(FONT_MAIN_NAME).toString(),
-                         DrJava.CONFIG.getSetting(FONT_MAIN_STYLE).intValue(),
-                         DrJava.CONFIG.getSetting(FONT_MAIN_SIZE).intValue());
-    }
+    Font f = DrJava.CONFIG.getSetting(FONT_MAIN);
     
     Iterator scrollPanes = _defScrollPanes.values().iterator();
     while (scrollPanes.hasNext()) {  
@@ -2293,11 +2259,9 @@ public class MainFrame extends JFrame implements OptionConstants {
       if (scroll != null) {
         DefinitionsPane pane = (DefinitionsPane) scroll.getViewport().getView();
         pane.setFont(f);
-        if (CodeStatus.DEVELOPMENT) {  // no line enumeration in stable
-          // Update the font of the line enumeration rule
-          if (DrJava.CONFIG.getSetting(LINEENUM_ENABLED).booleanValue()) {
-            scroll.setRowHeaderView( new LineEnumRule( pane) );
-          }
+        // Update the font of the line enumeration rule
+        if (DrJava.CONFIG.getSetting(LINEENUM_ENABLED).booleanValue()) {
+          scroll.setRowHeaderView( new LineEnumRule( pane) );
         }
       }
     }

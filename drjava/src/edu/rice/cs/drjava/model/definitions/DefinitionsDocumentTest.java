@@ -687,12 +687,13 @@ public class DefinitionsDocumentTest extends TestCase
    * Test class name-finding on document 
    */
   public void testClassNameWComments() throws BadLocationException {
-    String weird = "package edu . rice\n./*comment!*/cs.drjava; " + 
+    String weird = "package edu . rice\n./*comment!*/cs.drjava; \n" + 
       "/* class Y */ \n" + 
-      " /* class Foo " + 
-      " * class Bar " + 
-      " interface Baz  " + 
-      " */ " + 
+      " /* class Foo \n" + 
+      " * class Bar \n" + 
+      " interface Baz \n" + 
+      " */ \n" + 
+      "//class Blah\n" +
       "class MyClass {";
 
     String result = "MyClass";
@@ -710,7 +711,7 @@ public class DefinitionsDocumentTest extends TestCase
     String weird = "package edu . rice\n./*comment!*/cs.drjava; \n" +
       " {class X} " + 
       " interface thisInterface { \n" +
-      " class MyClass {";
+      " class MyInnerClass {";
     String result = "thisInterface";
     defModel.insertString(0, weird, null);
 
@@ -718,12 +719,14 @@ public class DefinitionsDocumentTest extends TestCase
                  result,
                  defModel.getClassName());
   }
+
   /**
    * Test class name-finding on document 
    */
   public void testInterfaceNameMisleading() throws BadLocationException {
     String weird = "package edu . rice\n./*comment!*/cs.drjava; \n" +
       " {interface X} " + 
+      " \"class Foo\"" +
       " class MyClass {";
     String result = "MyClass";
     defModel.insertString(0, weird, null);
@@ -732,4 +735,45 @@ public class DefinitionsDocumentTest extends TestCase
                  result,
                  defModel.getClassName());
   }
+  
+    /**
+   * Test class name-finding on document 
+   */
+  public void testInterfaceNameBeforeClassName() throws BadLocationException {
+    String weird = "package edu . rice\n./*comment!*/cs.drjava; \n" +
+      " interface thisInterface { \n" + 
+      "  } \n" +
+      " class thatClass {\n" +
+      "  }";
+    String result = "thisInterface";
+    defModel.insertString(0, weird, null);
+
+    assertEquals("interface should have been chosen, rather than the class: '" + weird + "'",
+                 result,
+                 defModel.getClassName());
+  }
+  
+  /**
+   * Test class name-finding on document 
+   */
+  public void testClassNameWithDelimiters() throws BadLocationException {
+    String weird1 = "package edu . rice\n./*comment!*/cs.drjava; \n" +
+       " class MyClass<T> {";
+    String result1 = "MyClass";
+    defModel.insertString(0, weird1, null);
+
+    assertEquals("generics should be removed: '" + weird1 + "'",
+                 result1,
+                 defModel.getClassName());
+    
+    String weird2 = "package edu . rice\n./*comment!*/cs.drjava; \n" +
+       " class My_Class {";
+    String result2 = "My_Class";
+    defModel.insertString(0, weird2, null);
+
+    assertEquals("underscores should remain: '" + weird1 + "'",
+                 result2,
+                 defModel.getClassName());
+  }
+  
 }

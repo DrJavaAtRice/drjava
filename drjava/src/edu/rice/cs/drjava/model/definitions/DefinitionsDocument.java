@@ -657,11 +657,11 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
   }
 
   /**
-   * Returns true if the given position is inside a paren/brace/etc phrase.
+   * Returns true if the given position is not inside a paren/brace/etc phrase.
    * @param pos the position we're looking at
    * @return true if pos is immediately inside a paren/brace/etc
    */
-  protected boolean posNotInPhrase(int pos) {
+  protected boolean posNotInBlock (int pos) {
     int here = _reduced.absOffset();
     _reduced.move(pos - here);
     IndentInfo info = _reduced.getIndentInformation();
@@ -1630,93 +1630,49 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
       boolean done = false;
       int index = 0;
 
-      while (!done) {
-        index = text.indexOf("class", index);
-        if (index == -1) {  //not found
-          done = true; break;
-        } else {
-          //found a match, check quality
-          setCurrentLocation(index);
-          if (!_isCommentedOrSpace(index,text)) {
-            done = true;
-            if (!posNotInPhrase(index)) { //in a paren phrase, gone too far
-              index = -1;
-            }
-          } else {
-            index++;  //move past so we can search again
-          }
+      int indexOfClass = _findKeywordAtToplevel("class", text);
+      int indexOfInterface = _findKeywordAtToplevel("interface", text);
+      
+      if ( indexOfClass > -1 ) {
+        
+        if (indexOfInterface > -1) {
+          // compare indices to find the lesser
+          index = (indexOfClass < indexOfInterface) ?
+            indexOfClass + "class".length() :
+            indexOfInterface + "interface".length();     
+        }
+        else {
+          //top level class declaration found
+          index = indexOfClass + "class".length();
         }
       }
-
-      if (index > -1) {
-        //top level class declaration found
-        index = index + "class".length();
+      else {
         
-      } else {
-        //no acceptable match, search for interface
-        done = false;
-        index = 0; 
-
-        //search again for interface
-        while (!done) {
-          index = text.indexOf("interface", index);
-          if (index == -1) {  //not found
-            done = true; break;
-          } else {
-            //found a match, check for quality
-            setCurrentLocation(index);
-            if (!_isCommentedOrSpace(index,text)) {
-              done = true;
-              if (!posNotInPhrase(index)) { //in a paren phrase, gone too far
-                index = -1;
-              }
-            } else { 
-              index++; //move past so we can search again
-            }
-          }
+        if (indexOfInterface > -1) {
+          index = indexOfInterface + "interface".length();
         }
-
-        if (index > -1) {
-          index = index + "interface".length();
-        } else {
-          //no match
+        else { 
+          // neither index was valid
           return "";
         }
       }
+      
       //if we make it here we have a valid index
 
-      char c;  //tmp char
-      int j;   
-
       //first find index of first non whitespace
-      done = false;
-      char[] whitespace = {' ', '\t', '\n'};
-      for (int i=index; i < docLength && !done; i++) {
-        c = text.charAt(i);
-
-        done = true;
-        for (j = 0; j < whitespace.length; j++) {
-          if (c == whitespace[j]) {
-            done = false;
-          }
-        }
-        if (done) index = i;
-      }
-
+      index = getFirstNonWSCharPos(index);
+      if (index == -1) return "";
+      
       int endIndex = docLength; //just in case no whitespace at end of file
 
       //find index of next delimiter or whitespace
-
+      char c;
       done = false;
-      char[] delims = {' ', '\t', '\n','{','}','[',']','(',')',';','<','>'};
       for (int i=index; i < docLength && !done; i++) {
         c = text.charAt(i);
-
-        for (j = 0; j < delims.length; j++) {
-          if (c == delims[j]) {
-            endIndex = i;
-            done = true; break;
-          }
+        if (!Character.isJavaIdentifierPart(c)) {
+          endIndex = i;
+          done = true;
         }
       }
 
@@ -1726,10 +1682,45 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
       throw new UnexpectedException(ble);
     }
     finally {
+      System.out.println("In finally");
       setCurrentLocation(oldLocation);
     }
   }
 
+  /**
+   * Finds the first occurrence of the keyword within the document that is not
+   *  enclosed within a brace or comment
+   * @param keyword the keyword for which to search
+   * @param 
+   */
+  private int _findKeywordAtToplevel( String keyword, String text) {
+   
+    int index = 0;
+    boolean done = false;
+    
+    while (!done) {
+      index = text.indexOf(keyword, index);
+      if (index == -1) {  //not found
+        done = true; break;
+      } else {
+        //found a match, check quality
+        setCurrentLocation(index);
+        ReducedToken rt = _reduced.currentToken();
+        if (rt.getState() == ReducedModelStates.FREE) {
+        //if (!_isCommentedOrSpace(index,text)) {
+          done = true;
+          if (!posNotInBlock(index)) { //in a paren phrase, gone too far
+            index = -1;
+          }
+        } else {
+          index++;  //move past so we can search again
+        }
+      }
+    } 
+    return index;
+    
+  }
+  
   private class CommandUndoableEdit extends AbstractUndoableEdit {
     private final Runnable _undoCommand;
     private final Runnable _redoCommand;

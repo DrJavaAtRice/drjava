@@ -112,26 +112,11 @@ public class FontOptionComponent extends OptionComponent<Font> {
     return true;
   }
   
-  /**
-   * Resets this component to the current config value.
-   */
-  public void resetToCurrent() {
-    _newFont = _currentFont;
-    _updateButton(_newFont);
-  }
-  
-  /**
-   * Resets this component to the option's default value.
-   */
-  public void resetToDefault() {
-    _newFont = _option.getDefault();
-    _updateButton(_newFont);
-  }
-  
-  /**
+   /**
    * Displays the given value.
    */
-  public void setDisplay(Font value) {
+  public void setValue(Font value) {
+    _newFont = value;
     _updateButton(value);
   }
 }

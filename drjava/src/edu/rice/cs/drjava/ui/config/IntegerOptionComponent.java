@@ -86,7 +86,7 @@ public class IntegerOptionComponent extends OptionComponent<Integer> {
   /**
    * Displays the given value.
    */
-  public void setDisplay(Integer value) {
+  public void setValue(Integer value) {
     _jtf.setText(_option.format(value));
   }
   

@@ -326,15 +326,7 @@ public class DefinitionsPane extends JEditorPane
     setContentType("text/java");
     setBackground(Color.white);
     //setFont(new Font("Courier", 0, 12));
-    Font mainFont;
-    if (CodeStatus.DEVELOPMENT) {
-      mainFont = DrJava.CONFIG.getSetting(FONT_MAIN);
-    }
-    else {
-      mainFont = new Font (DrJava.CONFIG.getSetting(FONT_MAIN_NAME).toString(),
-                         DrJava.CONFIG.getSetting(FONT_MAIN_STYLE).intValue(),
-                         DrJava.CONFIG.getSetting(FONT_MAIN_SIZE).intValue());
-    }
+    Font mainFont = DrJava.CONFIG.getSetting(FONT_MAIN);
     setFont(mainFont);
     
     //setSize(new Dimension(1024, 1000));

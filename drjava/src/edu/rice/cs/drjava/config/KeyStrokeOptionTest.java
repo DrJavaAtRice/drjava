@@ -76,6 +76,8 @@ public class KeyStrokeOptionTest extends TestCase
       assertEquals(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER,
                                           InputEvent.CTRL_MASK),
                    io.parse("ctrl ENTER"));
+      assertEquals(KeyStrokeOption.NULL_KEYSTROKE,
+                   io.parse("<none>"));
       assertEquals(KeyStroke.getKeyStroke(KeyEvent.VK_NUM_LOCK,
                                           InputEvent.ALT_MASK | InputEvent.SHIFT_MASK,
                                           true),

@@ -174,7 +174,7 @@ public class VectorOptionComponent extends OptionComponent<Vector<String>>
   /**
    * Displays the given value.
    */
-  public void setDisplay(Vector<String> value) {
+  public void setValue(Vector<String> value) {
     String[] array = new String[value.size()];
     value.copyInto(array);
     _listModel.clear();

@@ -81,26 +81,12 @@ public class ColorOptionComponent extends OptionComponent<Color> {
     return true;
   }
   
-  /**
-   * Resets this component to the current config value.
-   */
-  public void resetToCurrent() {
-    _newColor = _currentColor;
-    _updateButton(_newColor);
-  }
-  
-  /**
-   * Resets this component to the option's default value.
-   */
-  public void resetToDefault() {
-    _newColor = _option.getDefault();
-    _updateButton(_newColor);
-  }
-  
+   
   /**
    * Displays the given value.
    */
-  public void setDisplay(Color value) {
+  public void setValue(Color value) {
+    _newColor = value;
     _updateButton(value);
   }
   

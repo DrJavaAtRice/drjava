@@ -73,7 +73,7 @@ public class StringOptionComponent extends OptionComponent<String> {
   /**
    * Displays the given value.
    */
-  public void setDisplay(String value) {
+  public void setValue(String value) {
     _jtf.setText(value);
   }
   

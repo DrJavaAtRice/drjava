@@ -169,7 +169,7 @@ public class ToolbarOptionComponent extends OptionComponent<Boolean> {
   /**
    * Displays the given value.
    */
-  public void setDisplay(Boolean value) {
+  public void setValue(Boolean value) {
     resetToCurrent();
   }
   

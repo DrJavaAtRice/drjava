@@ -362,13 +362,24 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
     if (files == null) 
       throw new IOException("No Files returned from FileSelector");
 
+    AlreadyOpenException storedAOE = null;
+    
     for (int i=0; i < files.length; i++) {
       if (files[i] == null) {
         throw new IOException("File name returned from FileSelector is null");
       }
-      
+        
+      try {
       //always return last opened Doc
       retDoc = _openFile(files[i].getAbsoluteFile());
+      }
+      catch (AlreadyOpenException aoe) {
+        retDoc = aoe.getOpenDocument(); 
+        //Remember the first AOE
+        if (storedAOE == null) {
+          storedAOE = aoe;
+        }
+      }
       
       // Make sure this is on the classpath
       try {
@@ -381,6 +392,8 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
       
     }
     
+    if (storedAOE != null) throw storedAOE;
+    
     if (retDoc != null) {
       return retDoc;
     } else {
@@ -388,6 +401,8 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
       //have atleast one file. 
       throw new IOException("No Files returned from FileChooser");
     }
+    
+    
   }
  
   /**

@@ -100,20 +100,20 @@ public abstract class OptionComponent<T> {
    * Resets the entry field to reflect the actual stored value for the option.
    */
   public void resetToCurrent() {
-    setDisplay(DrJava.CONFIG.getSetting(_option));
+    setValue(DrJava.CONFIG.getSetting(_option));
   }
   
   /**
    * Resets the actual value of the component to the original default.
    */
   public void resetToDefault() {
-    setDisplay(_option.getDefault());
+    setValue(_option.getDefault());
   }
   
   /**
    * Sets the value that is currently displayed by this component.
    */
-  public abstract void setDisplay(T value);
+  public abstract void setValue(T value);
   
   public void showErrorMessage(String title, OptionParseException e) {
     showErrorMessage(title, e.value, e.message);

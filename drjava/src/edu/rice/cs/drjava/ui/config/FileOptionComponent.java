@@ -140,7 +140,8 @@ public class FileOptionComponent extends OptionComponent<File>
   /**
    * Displays the given value.
    */
-  public void setDisplay(File value) {
+  public void setValue(File value) {
+    _newFile = value;
     _updateTextField(value);
   }
   

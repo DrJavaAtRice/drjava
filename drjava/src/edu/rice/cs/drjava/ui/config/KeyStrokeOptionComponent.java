@@ -114,25 +114,10 @@ public class KeyStrokeOptionComponent extends OptionComponent<KeyStroke>
   }
   
   /**
-   * Resets this component to the current config value.
-   */
-  public void resetToCurrent() {
-    _newKey = _currentKey;
-    setDisplay(_newKey);
-  }
-  
-  /**
-   * Resets this component to the option's default value.
-   */
-  public void resetToDefault() {
-    _newKey = _option.getDefault();
-    setDisplay(_newKey);
-  }
-  
-  /**
    * Displays the given value.
    */
-  public void setDisplay(KeyStroke value) {
+  public void setValue(KeyStroke value) {
+    _newKey = value;
     _button.setText(_option.format(value));
   }
   
