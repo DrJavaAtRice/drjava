@@ -2590,6 +2590,11 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
     /**
      * Returns the file for this document.  If the document
      * is untitled and has no file, it throws an IllegalStateException.
+     * If the document's file does not exist, this throws a FileMovedException.
+     * If you still want the file, you can retrieve it from
+     * the FileMovedException by using the getFile() method.
+     * EACH TIME YOU CALL THIS METHOD, YOU SHOULD HAVE A CHECK FIRST 
+     * TO isUntitled() IN ORDER TO AVOID THE IllegalStateException.
      * @return the file for this document
      * @exception IllegalStateException if no file exists
      */

@@ -2814,15 +2814,21 @@ public class MainFrame extends JFrame implements OptionConstants {
     //    LinkedList<OpenDefinitionsDocument> l = new LinkedList<OpenDefinitionsDocument>();
     //    l.add(_model.getActiveDocument());
     //    _model.closeFiles(l);
-    String filename = null;
-    try{
-      filename = _model.getActiveDocument().getFile().getName();
-    }
-    catch(FileMovedException e){
-      filename = "File";
-    }
+    
     if(_model.getActiveDocument().isAuxiliaryFile() || 
        _model.getActiveDocument().isProjectFile()){
+
+      String filename = null;
+      OpenDefinitionsDocument doc = _model.getActiveDocument();
+      try{
+        if (doc.isUntitled())
+          filename = "File";
+        else
+          filename = _model.getActiveDocument().getFile().getName();
+      }
+      catch(FileMovedException e){
+        filename = e.getFile().getName();
+      }
       String text = "Closing this file will permanently remove it from the current project." + 
         "\nAre you sure that you want to close this file?";
       
@@ -2841,9 +2847,9 @@ public class MainFrame extends JFrame implements OptionConstants {
     
     //Either this is an external file or user actually wants to close it
     _model.closeFile(_model.getActiveDocument());
-      
+    
   }
-
+  
   private void _junitFolder(){
     INavigatorItem n;
     Enumeration<INavigatorItem> e = _model.getDocumentNavigator().getDocuments();
