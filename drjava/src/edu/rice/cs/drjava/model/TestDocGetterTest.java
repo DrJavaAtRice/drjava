@@ -47,36 +47,37 @@ package edu.rice.cs.drjava.model;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
+
+import  junit.framework.*;
+
 
 /**
- * Concrete implementation of IGetDocuments that always throws exceptions.
- * @version $Id$
- */
-public class DummyGetDocuments implements IGetDocuments {
-  /**
-   * Since this is not supposed to be used, we need to throw an exception OTHER
-   * than the ones it officially supports.
-   * @throws UnsupportedOperationException
-   */
-  public OpenDefinitionsDocument getDocumentForFile(File file)
-    throws IOException {
-    throw new UnsupportedOperationException
-      ("Tried to getDocumentForFile on a Dummy with file: " + file);
-  }
+* JUnit test class for testing TestDocGetter.
+*
+* @author <a href="mailto:ericc@rice.edu">Eric Shao-yu Cheng</a>
+* @version $Id$
+*/
+public class TestDocGetterTest extends TestCase {
 
-  public boolean isAlreadyOpen(File file) {
-    throw new UnsupportedOperationException
-      ("Tried to call isAlreadyOpen on a Dummy with file: " + file);
-  }
 
-  public List<OpenDefinitionsDocument> getDefinitionsDocuments() {
-    throw new UnsupportedOperationException
-      ("Tried to getDefinitionsDocuments on a Dummy!");
-  }
+    /**
+    * Creates a new empty TestDocGetter instance, calls
+    * getDocumentForFile() with an empty File and ensures it throws
+    * IllegalStateException. 
+    *
+    * @exception IOException if an error occurs
+    */
+    public void testGetDocumentForFile() throws IOException {
+        TestDocGetter testDocGetter = new TestDocGetter(new File[0], new String[0]);
+	try {
+	    testDocGetter.getDocumentForFile(new File(""));
+	}
+	catch (IllegalStateException e) {
+	    assertTrue(true);
+	    return;
+	}
+	fail("should throw IllegalStateException");
+	
+    }
 
-  public boolean hasModifiedDocuments() {
-    throw new UnsupportedOperationException
-      ("Tried to call hasModifiedDocuments on a Dummy!");
-  }
 }
