@@ -39,9 +39,6 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.util.text;
 
-// This goes away...
-//import javax.swing.text.AttributeSet;
-
 import org.eclipse.swt.custom.StyledText;
 
 import gj.util.Hashtable;
@@ -57,8 +54,11 @@ import org.eclipse.swt.events.*;
  * 
  * @version $Id$
  */
-public class SWTDocumentAdapter implements DocumentAdapter
-{
+public class SWTDocumentAdapter implements DocumentAdapter {
+  
+  // TO DO:
+  //  - Add support for styles
+  
   /** StyledText widget containing the view. */
   protected StyledText _pane;
   

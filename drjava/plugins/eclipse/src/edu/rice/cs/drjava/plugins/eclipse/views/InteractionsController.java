@@ -67,6 +67,10 @@ import edu.rice.cs.util.text.DocumentAdapterException;
  * @version $Id$
  */
 public class InteractionsController {
+  
+  // TO DO:
+  //  - What to do with unexpected exceptions?
+  
   /** Adapter for an SWT document */
   protected SWTDocumentAdapter _adapter;
   
@@ -90,10 +94,11 @@ public class InteractionsController {
     _doc = doc;
     _view = view;
     
+    // Put the caret at the end
     _view.getTextPane().setCaretOffset(_doc.getDocLength());
     
-    _addModelListeners();
-    _addViewActions();
+    _setupModel();
+    _setupView();
   }
   
   /**
@@ -120,7 +125,7 @@ public class InteractionsController {
   /**
    * Adds listeners to the model.
    */
-  protected void _addModelListeners() {
+  protected void _setupModel() {
     _adapter.addVerifyListener(new DocumentUpdateListener());
     _doc.setBeep(_view.getBeep());
     
@@ -138,28 +143,24 @@ public class InteractionsController {
   }
   
   /**
-   * Listener to ensure that the SWT text widget always contains the same
-   * text as the underlying document in the model, and to ensure that the
-   * caret always stays on or after the prompt, so that output is always 
-   * scrolled to the bottom. (The prompt is always at the bottom.)
+   * Listener to ensure that the document cannot be edited before the prompt
+   * from the view.  Also ensures that the caret always stays on or after the
+   * prompt, so that output is always scrolled to the bottom.
    */
   class DocumentUpdateListener implements VerifyListener {
     public void verifyText(VerifyEvent e) {
       // Ensure document cannot be edited before the prompt.
       DocumentEditCondition cond = _adapter.getEditCondition();
-      System.out.println("checking for edit legality");
       if (!cond.canRemoveText(e.start, e.end - e.start) ||
           !cond.canInsertText(e.start, e.text, InteractionsDocument.DEFAULT_STYLE)) {
-        System.out.println("nope");
+        // EditCondition says we can't
         e.doit = false;
         return;
       }
-      System.out.println("yep");
-      
-      StyledText pane = _view.getTextPane();
-      int caretPos = pane.getCaretOffset();
       
       // Update the caret position
+      StyledText pane = _view.getTextPane();
+      int caretPos = pane.getCaretOffset();
       int promptPos = _doc.getPromptPos();
       int docLength = _doc.getDocLength();
 
@@ -181,39 +182,10 @@ public class InteractionsController {
   
   
   /**
-   * Adds actions to the view.
+   * Assigns key bindings to the view.
    */
-  protected void _addViewActions() {
-    //_view.getTextPane().addVerifyListener(new ViewUpdateListener());
+  protected void _setupView() {
     _view.getTextPane().addVerifyKeyListener(new KeyUpdateListener());
-  }
-
-  /**
-   * Listener that ensures no changes can be made to the document
-   * above the prompt.
-   */
-  class ViewUpdateListener implements VerifyListener {
-    public void verifyText(VerifyEvent event) {
-      if (event.start < _doc.getPromptPos()) {
-        System.out.println("edit in view before model's prompt");
-        _view.getBeep().run();
-        event.doit = false;
-      }
-      else {
-        // Make the change to the document
-        /*
-        try {
-          System.out.println("adding from view to model: '" + event.text + "'");
-          _doc.remove(event.start, event.start-event.end);
-          _doc.insertText(event.start, event.text, InteractionsDocument.DEFAULT_STYLE);
-        }
-        catch (DocumentAdapterException e) {
-          // Exceptions in Eclipse?
-          e.printStackTrace();
-        }
-        */
-      }
-    }
   }
   
   /**
@@ -223,8 +195,10 @@ public class InteractionsController {
     public void verifyKey(VerifyEvent event) {
       StyledText pane = _view.getTextPane();
       int caretPos = pane.getCaretOffset();
-      System.out.println("event consumer: keycode: " + event.keyCode);
-      //JOptionPane.showMessageDialog(null, "event consumer: keycode: " + event.keyCode);
+      //System.out.println("event consumer: keycode: " + event.keyCode);
+      
+      // -- Branch to an action on certain keystrokes --
+      //  (needs to be refactored for better OO code)
       
       // enter
       if (event.keyCode == 13 && event.stateMask == 0) {
@@ -320,31 +294,6 @@ public class InteractionsController {
   boolean evalAction() {
     _doc.interpretCurrentInteraction();
     return false;
-    
-//      StyledText pane = _view.getTextPane();
-// //     int paneLength = pane().length();
-//      
-//      // Get the command that the user entered
-//      String command = _view.getCurrentInteraction(_doc.getPromptPos());
-//      System.out.println("Submitting command: '" + command + "'");
-//      // Remove the command from the view, because it will be added automatically
-//      pane.replaceTextRange(_doc.getPromptPos(), command.length(), "");
-//      
-//      command.trim();
-//      int docLength = _doc.getDocLength();
-//      try {
-//        // Add the command to the model (adding it back to the view)
-//        _doc.insertText(docLength, command, InteractionsDocument.DEFAULT_STYLE);
-//        //docLength = _doc.getDocLength();
-//        _doc.interpretCurrentInteraction();
-// //       pane.replaceTextRange(paneLength, 0,
-// //                           _doc.getDocText(docLength, _doc.getDocLength() - docLength));
-//      }
-//      catch (DocumentAdapterException e) {
-//        e.printStackTrace();
-//      }
-//      //_view.updatePrompt();
-//     return false;
   }
   
   /** Inserts a new line at the caret position. */

@@ -45,14 +45,23 @@ import junit.framework.TestCase;
 
 /**
  * Tests the SWTDocumentAdapter.
+ * 
+ * NOTE: To run this test, you have to put the correct SWT directory on
+ * your java.library.path...  (eg. org.eclipse.swt.motif_2.1.0/os/linux/x86)
+ * 
  * @version $Id$
  */
 public class SWTDocumentAdapterTest extends TestCase {
+  
+  
+  // TO DO:
+  //  - Figure out how to instantiate a StyledText for a unit test...
+  
   protected StyledText _pane;
   protected SWTDocumentAdapter _doc;
   
   public void setUp() {
-    _pane = new StyledText(null, 0);
+    _pane = new StyledText(null, 0);  // this doesn't work...
     _doc = new SWTDocumentAdapter(_pane);
   }
   
