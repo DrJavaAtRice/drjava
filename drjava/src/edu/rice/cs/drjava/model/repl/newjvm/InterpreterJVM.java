@@ -76,14 +76,15 @@ public class InterpreterJVM extends AbstractSlaveJVM
   private JavaInterpreter _interpreter;
   private String _classpath;
   private JUnitTestManager _junitTestManager;
+  
+  public static final InterpreterJVM ONLY = new InterpreterJVM();
 
-  public InterpreterJVM() {
+  private InterpreterJVM() {
     reset();
     _junitTestManager = new JUnitTestManager(this);
   }
 
-  protected void handleStart(MasterRemote mainJVM)
-  {
+  protected void handleStart(MasterRemote mainJVM) {
     //_dialog("handleStart");
     _mainJVM = (MainJVMRemoteI) mainJVM;
 

@@ -304,6 +304,7 @@ public class JPDADebugger implements Debugger {
     }
     
     currThreadSuspended();
+    currThreadSet(threadData);
   }
   
   /**
@@ -1171,6 +1172,15 @@ public class JPDADebugger implements Debugger {
     });
   }
   
+  synchronized void currThreadSet(final DebugThreadData thread) {
+    _model.printDebugMessage("The current thread has been set.");
+    notifyListeners(new EventNotifier() {
+      public void notifyListener(DebugListener l) {
+        l.currThreadSet(thread);
+      }
+    });
+  }
+    
   /**
    * Notifies all listeners that the debugger has shut down.
    * updateThreads is set to true if the threads and stack tables
@@ -1243,7 +1253,7 @@ public class JPDADebugger implements Debugger {
   protected abstract class EventNotifier {
     public abstract void notifyListener(DebugListener l);
   }
-  
+ 
   /** 
    * A stack from which you can remove any element, not just the top of the stack 
    */

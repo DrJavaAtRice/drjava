@@ -207,19 +207,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
     
     // Thread table
     if (DrJava.getConfig().getSetting(DEBUG_SHOW_THREADS).booleanValue()) {
-      _threadTable = new JTable( new ThreadTableModel());
-      _threadTable.addMouseListener(new ThreadMouseAdapter());
-      _rightPane.addTab("Threads", new JScrollPane(_threadTable)); 
-      // Sets the name column to always be 2 times as wide as the status column
-      TableColumn nameColumn = null;
-      TableColumn statusColumn = null;
-      nameColumn = _threadTable.getColumnModel().getColumn(0);
-      statusColumn = _threadTable.getColumnModel().getColumn(1);
-      nameColumn.setPreferredWidth(2*statusColumn.getPreferredWidth()); 
-      
-      // Adds a cell renderer to the threads table
-      _currentThreadIndex = -1;
-      _threadTable.getColumnModel().getColumn(0).setCellRenderer(new DebugTableCellRenderer());
+       _initThreadTable();
     }
 
     DrJava.getConfig().addOptionListener(OptionConstants.DEBUG_SHOW_THREADS, 
@@ -227,14 +215,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
       public void optionChanged(OptionEvent<Boolean> oce) {
         if (oce.value.booleanValue()) {
           if (_threadTable == null) {
-            _threadTable = new JTable( new ThreadTableModel());
-            _rightPane.addTab("Threads", new JScrollPane(_threadTable));
-            // Sets the name column to always be 2 times as wide as the status column
-            TableColumn nameColumn = null;
-            TableColumn statusColumn = null;
-            nameColumn = _threadTable.getColumnModel().getColumn(0);
-            statusColumn = _threadTable.getColumnModel().getColumn(1);
-            nameColumn.setPreferredWidth(2*statusColumn.getPreferredWidth()); 
+             _initThreadTable();
           }          
         }
         else {
@@ -251,6 +232,22 @@ public class DebugPanel extends JPanel implements OptionConstants {
     methodColumn = _stackTable.getColumnModel().getColumn(0);
     lineColumn = _stackTable.getColumnModel().getColumn(1);
     methodColumn.setPreferredWidth(7*lineColumn.getPreferredWidth());  
+  }
+  
+  private void _initThreadTable() {
+    _threadTable = new JTable( new ThreadTableModel());
+    _threadTable.addMouseListener(new ThreadMouseAdapter());
+    _rightPane.addTab("Threads", new JScrollPane(_threadTable)); 
+    // Sets the name column to always be 2 times as wide as the status column
+    TableColumn nameColumn = null;
+    TableColumn statusColumn = null;
+    nameColumn = _threadTable.getColumnModel().getColumn(0);
+    statusColumn = _threadTable.getColumnModel().getColumn(1);
+    nameColumn.setPreferredWidth(2*statusColumn.getPreferredWidth()); 
+    
+    // Adds a cell renderer to the threads table
+    _currentThreadIndex = -1;
+    _threadTable.getColumnModel().getColumn(0).setCellRenderer(new DebugTableCellRenderer());
   }
   
   /**
