@@ -87,6 +87,10 @@ public class ForcedChoiceOptionComponent extends OptionComponent<String> {
     setDescription(description);
   }
 
+  /**
+   * Sets the tooltip description text for this option.
+   * @param description the tooltip text
+   */
   public void setDescription(String description) {
     _comboBox.setToolTipText(description);
     _label.setToolTipText(description);

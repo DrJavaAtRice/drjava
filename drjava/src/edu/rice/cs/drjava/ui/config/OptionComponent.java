@@ -54,11 +54,18 @@ public abstract class OptionComponent<T> {
   protected JLabel _label;
   protected Frame _parent;
     
-  public OptionComponent (Option<T> option, String labelText, Frame parent) {
+  public OptionComponent(Option<T> option, String labelText, Frame parent) {
     _option = option;
     _label = new JLabel(labelText);
     _label.setHorizontalAlignment(JLabel.RIGHT);
     _parent = parent;
+    if (option != null) {
+      DrJava.getConfig().addOptionListener(option, new OptionListener<T>() {
+        public void optionChanged(OptionEvent<T> oe) {
+          resetToCurrent();
+        }
+      });
+    }
   }
   
   /**

@@ -66,6 +66,10 @@ public class IntegerOptionComponent extends OptionComponent<Integer> {
     setDescription(description);
   }
 
+  /**
+   * Sets the tooltip description text for this option.
+   * @param description the tooltip text
+   */
   public void setDescription(String description) {
     _jtf.setToolTipText(description);
     _label.setToolTipText(description);

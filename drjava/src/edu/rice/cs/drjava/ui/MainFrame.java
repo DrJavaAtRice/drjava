@@ -82,6 +82,7 @@ import edu.rice.cs.util.ExitingNotAllowedException;
 import edu.rice.cs.util.swing.DelegatingAction;
 import edu.rice.cs.util.swing.HighlightManager;
 import edu.rice.cs.util.swing.SwingWorker;
+import edu.rice.cs.util.swing.ConfirmCheckBoxDialog;
 import edu.rice.cs.util.text.SwingDocumentAdapter;
 import edu.rice.cs.util.text.DocumentAdapterException;
 
@@ -660,29 +661,40 @@ public class MainFrame extends JFrame implements OptionConstants {
     new AbstractAction("Reset Interactions")
   {
     public void actionPerformed(ActionEvent ae) {
+      if (!DrJava.getConfig().getSetting(INTERACTIONS_RESET_PROMPT).booleanValue()) {
+        _doResetInteractions();
+        return;
+      }
       String title = "Confirm Reset Interactions";
       
       String message = "Are you sure you want to reset the " +
         "Interactions Pane?";
       
-      int rc = JOptionPane.showConfirmDialog(MainFrame.this,
-                                             message,
-                                             title,
-                                             JOptionPane.YES_NO_OPTION);
+      ConfirmCheckBoxDialog dialog =
+        new ConfirmCheckBoxDialog(MainFrame.this, title, message);
+      int rc = dialog.show();
       if (rc == JOptionPane.YES_OPTION) {
-        _tabbedPane.setSelectedIndex(INTERACTIONS_TAB);
-        
-        // Lots of work, so use another thread
-        final SwingWorker worker = new SwingWorker() {
-          public Object construct() {
-            _model.resetInteractions();
-            return null;
-          }
-        };
-        worker.start();
+        _doResetInteractions();
+      }
+      if ((rc == JOptionPane.YES_OPTION || rc == JOptionPane.NO_OPTION)
+            && dialog.getCheckBoxValue()) {
+        DrJava.getConfig().setSetting(INTERACTIONS_RESET_PROMPT, Boolean.FALSE);
       }
     }
   };
+
+  private void _doResetInteractions() {
+    _tabbedPane.setSelectedIndex(INTERACTIONS_TAB);
+    
+    // Lots of work, so use another thread
+    final SwingWorker worker = new SwingWorker() {
+      public Object construct() {
+        _model.resetInteractions();
+        return null;
+      }
+    };
+    worker.start();
+  }
 
   /**
    * Displays the interactions classpath.
@@ -1631,12 +1643,13 @@ public class MainFrame extends JFrame implements OptionConstants {
     if (_promptBeforeQuit) {
       String title = "Quit DrJava?";
       String message = "Are you sure you want to quit DrJava?";
-      
-      int rc = JOptionPane.showConfirmDialog(MainFrame.this,
-                                             message,
-                                             title,
-                                             JOptionPane.YES_NO_OPTION);
+      ConfirmCheckBoxDialog dialog =
+        new ConfirmCheckBoxDialog(MainFrame.this, title, message);
+      int rc = dialog.show();
       if (rc != JOptionPane.YES_OPTION) {
+        if (rc == JOptionPane.NO_OPTION && dialog.getCheckBoxValue() == true) {
+          DrJava.getConfig().setSetting(OptionConstants.QUIT_PROMPT, Boolean.FALSE);
+        }
         return;
       }
     }
@@ -1820,22 +1833,27 @@ public class MainFrame extends JFrame implements OptionConstants {
       }
       
       boolean isModified = doc.isModifiedSinceSave();
-      if (isModified  && !_currentDefPane.hasWarnedAboutModified()) {
-        
-        int rc = JOptionPane.showConfirmDialog(this,
-                                               "This document has been modified and may be out of sync\n" +
-                                               "with the debugger.  It is recommended that you first\n" +
-                                               "save and recompile before continuing to use the debugger,\n" +
-                                               "to avoid any unexpected errors.  Would you still like to\n" +
-                                               "toggle the breakpoint on the specified line?",
-                                               "Toggle breakpoint on modified file?",
-                                               JOptionPane.YES_NO_OPTION);
-        
+      if (isModified  && !_currentDefPane.hasWarnedAboutModified() &&
+          DrJava.getConfig().getSetting(WARN_BREAKPOINT_OUT_OF_SYNC).booleanValue()) {
+        String message =
+          "This document has been modified and may be out of sync\n" +
+          "with the debugger.  It is recommended that you first\n" +
+          "save and recompile before continuing to use the debugger,\n" +
+          "to avoid any unexpected errors.  Would you still like to\n" +
+          "toggle the breakpoint on the specified line?";
+        String title = "Toggle breakpoint on modified file?";
+
+        ConfirmCheckBoxDialog dialog = new ConfirmCheckBoxDialog(this, message, title);
+        int rc = dialog.show();
         switch (rc) {
           case JOptionPane.YES_OPTION:
             _currentDefPane.hasWarnedAboutModified(true);
-            break;
+            // don't break -- maybe update option
           case JOptionPane.NO_OPTION:
+            if (dialog.getCheckBoxValue()) {
+              DrJava.getConfig().setSetting(WARN_BREAKPOINT_OUT_OF_SYNC, Boolean.FALSE);
+            }
+            break;
           case JOptionPane.CANCEL_OPTION:
           case JOptionPane.CLOSED_OPTION:
             // do nothing
@@ -3890,11 +3908,15 @@ public class MainFrame extends JFrame implements OptionConstants {
               "The interactions window will now be restarted.";
             
             String title = "Interactions terminated by System.exit(" + status + ")";
-            
-            JOptionPane.showMessageDialog(MainFrame.this,
-                                          msg,
-                                          title,
-                                          JOptionPane.INFORMATION_MESSAGE);
+
+            ConfirmCheckBoxDialog dialog =
+              new ConfirmCheckBoxDialog(MainFrame.this, title, msg,
+                                        "Do not show this message again",
+                                        JOptionPane.INFORMATION_MESSAGE,
+                                        JOptionPane.DEFAULT_OPTION);
+            if (dialog.show() == JOptionPane.OK_OPTION && dialog.getCheckBoxValue()) {
+              DrJava.getConfig().setSetting(INTERACTIONS_EXIT_PROMPT, Boolean.FALSE);
+            }
           }
         };
         SwingUtilities.invokeLater(doCommand);
@@ -3985,20 +4007,32 @@ public class MainFrame extends JFrame implements OptionConstants {
      */
     private void _saveAllBeforeProceeding(String message) {
       if (_model.hasModifiedDocuments()) {
-        int rc = JOptionPane.showConfirmDialog(MainFrame.this, message,
-                                               "Must save all files to continue",
-                                               JOptionPane.YES_NO_OPTION);
-        switch (rc) {
-          case JOptionPane.YES_OPTION:
-            _saveAll();
-            break;
-          case JOptionPane.NO_OPTION:
-          case JOptionPane.CANCEL_OPTION:
-          case JOptionPane.CLOSED_OPTION:
-            // do nothing
-            break;
-          default:
-            throw new RuntimeException("Invalid rc from showConfirmDialog: " + rc);
+        if (!DrJava.getConfig().getSetting(ALWAYS_SAVE_BEFORE_COMPILE).booleanValue()) {
+          ConfirmCheckBoxDialog dialog =
+            new ConfirmCheckBoxDialog(MainFrame.this,
+                                      "Must save all files to continue",
+                                      message,
+                                      "Always save before compiling");
+          int rc = dialog.show();
+          switch (rc) {
+            case JOptionPane.YES_OPTION:
+              _saveAll();
+              // don't break, since no option and yes option both check the checkbox
+            case JOptionPane.NO_OPTION:
+              if (dialog.getCheckBoxValue()) {
+                DrJava.getConfig().setSetting(ALWAYS_SAVE_BEFORE_COMPILE, Boolean.TRUE);
+              }
+              break;
+            case JOptionPane.CANCEL_OPTION:
+            case JOptionPane.CLOSED_OPTION:
+              // do nothing
+              break;
+            default:
+              throw new RuntimeException("Invalid rc from showConfirmDialog: " + rc);
+          }
+        }
+        else {
+          _saveAll();
         }
       }
     }

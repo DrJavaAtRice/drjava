@@ -187,6 +187,10 @@ public class VectorOptionComponent extends OptionComponent<Vector<File>>
     setDescription(description);
   }
 
+  /**
+   * Sets the tooltip description text for this option.
+   * @param description the tooltip text
+   */
   public void setDescription(String description) {
     _listScrollPane.setToolTipText(description);
     _list.setToolTipText(description);

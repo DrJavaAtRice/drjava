@@ -382,6 +382,9 @@ public class ConfigFrame extends JFrame {
     PanelTreeNode javadocNode = _createPanel("Javadoc");
     _setupJavadocPanel(javadocNode.getPanel());
     
+    PanelTreeNode notificationsNode = _createPanel("Notifications");
+    _setupNotificationsPanel(notificationsNode.getPanel());
+    
     PanelTreeNode miscNode = _createPanel("Miscellaneous");
     _setupMiscPanel(miscNode.getPanel());
 
@@ -631,7 +634,28 @@ public class ConfigFrame extends JFrame {
     
     panel.displayComponents();
   }
-  
+
+  /**
+   *  Adds all of the components for the Prompts panel of the preferences window.
+   */
+  private void _setupNotificationsPanel(ConfigPanel panel) {
+    panel.addComponent(new BooleanOptionComponent(OptionConstants.INTERACTIONS_EXIT_PROMPT, "Prompt If Interactions Pane Exits Unexpectedly", this,
+                                                  "<html>Whether DrJava should show a dialog box if a program<br>" +
+                                                  "in the Interactions Pane exits without the user clicking Reset.</html>"));
+    panel.addComponent(new BooleanOptionComponent(OptionConstants.INTERACTIONS_RESET_PROMPT, "Prompt Before Resetting Interactions Pane", this,
+                                                  "Whether DrJava should prompt the user before resetting the interactinos pane."));
+    panel.addComponent(new BooleanOptionComponent(OptionConstants.QUIT_PROMPT, "Prompt Before Quit", this,
+                                                  "Whether DrJava should prompt the user before quitting."));
+    panel.addComponent(new BooleanOptionComponent(OptionConstants.ALWAYS_SAVE_BEFORE_COMPILE, "Automatically Save Before Compiling", this,
+                                                  "<html>Whether DrJava should automatically save before<br>" +
+                                                  "recompiling, or instead as the user each time</html>"));
+    panel.addComponent(new BooleanOptionComponent(OptionConstants.WARN_BREAKPOINT_OUT_OF_SYNC, "Warn on Breakpoint If out of Sync", this,
+                                                  "<html>Whether DrJava should prompt the user if the class file<br>" +
+                                                  "is out of sync before setting a breakpoint in that file</html>."));
+
+    panel.displayComponents();
+  }
+
   /**
    *  Adds all of the components for the Miscellaneous panel of the preferences window.
    */
@@ -667,11 +691,6 @@ public class ConfigFrame extends JFrame {
                                                   "the recently used files list in the File menu.</html>"));
     panel.addComponent(new BooleanOptionComponent(OptionConstants.JAVAC_ALLOW_ASSERT, "Allow Assert Keyword in Java 1.4", this,
                                                   "<html>Whether to allow the <code>assert</code> keyword when compiling in Java 1.4.</html>"));
-    panel.addComponent(new BooleanOptionComponent(OptionConstants.INTERACTIONS_EXIT_PROMPT, "Prompt if Interactions Pane Exits Unexpectedly", this,
-                                                  "<html>Whether DrJava should show a dialog box if a program<br>" +
-                                                  "in the Interactions Pane exits without the user clicking Reset.</html>"));
-    panel.addComponent(new BooleanOptionComponent(OptionConstants.QUIT_PROMPT, "Prompt Before Quit", this,
-                                                  "Whether DrJava should prompt the user before quitting."));
     panel.addComponent(new BooleanOptionComponent(OptionConstants.BACKUP_FILES, "Keep emacs style backup files", this,
                                                   "<html>Whether DrJava should keep a backup copy of each file that<br>" +
                                                   "the user modifies, saved with a '~' at the end of the filename.</html>"));

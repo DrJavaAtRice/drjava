@@ -53,8 +53,7 @@ public class ColorOptionComponent extends OptionComponent<Color> {
   private JButton _button;
   private JTextField _colorField;
   private JPanel _panel;
-  private Color _currentColor;
-  private Color _newColor;
+  private Color _color;
   private boolean _isBackgroundColor;
   
   /**
@@ -101,9 +100,8 @@ public class ColorOptionComponent extends OptionComponent<Color> {
       // Would be nice to use background color here (need a listener in configframe?)
       //_colorField.setBackground(DrJava.getConfig().getSetting(OptionConstants.DEFINITIONS_BACKGROUND_COLOR)););
     }
-    _currentColor = DrJava.getConfig().getSetting(_option);
-    _newColor = _currentColor;
-    _updateField(_currentColor);
+    _color = DrJava.getConfig().getSetting(_option);
+    _updateField(_color);
   }
   
   /**
@@ -125,6 +123,10 @@ public class ColorOptionComponent extends OptionComponent<Color> {
     setDescription(description);
   }
 
+  /**
+   * Sets the tooltip description text for this option.
+   * @param description the tooltip text
+   */
   public void setDescription(String description) {
     _panel.setToolTipText(description);
     _button.setToolTipText(description);
@@ -137,9 +139,8 @@ public class ColorOptionComponent extends OptionComponent<Color> {
    * @return true if the new value is set successfully
    */
   public boolean updateConfig() {
-    if (!_newColor.equals(_currentColor)) {
-      DrJava.getConfig().setSetting(_option, _newColor);
-      _currentColor = _newColor;
+    if (!_color.equals(DrJava.getConfig().getSetting(_option))) {
+      DrJava.getConfig().setSetting(_option, _color);
     }
 
     return true;
@@ -150,7 +151,7 @@ public class ColorOptionComponent extends OptionComponent<Color> {
    * Displays the given value.
    */
   public void setValue(Color value) {
-    _newColor = value;
+    _color = value;
     _updateField(value);
   }
   
@@ -178,10 +179,10 @@ public class ColorOptionComponent extends OptionComponent<Color> {
   public void chooseColor() {
     Color c = JColorChooser.showDialog(_parent,
                                        "Choose '" + getLabelText() + "'",
-                                       _newColor);
+                                       _color);
     if (c != null) {
-      _newColor = c;
-      _updateField(_newColor);
+      _color = c;
+      _updateField(_color);
     }    
   }
   

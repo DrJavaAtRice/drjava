@@ -50,9 +50,15 @@ import java.awt.*;
  * @version $Id$
  */
 public class BooleanOptionComponent extends OptionComponent<Boolean> {
-  private JCheckBox _jcb;
+  protected JCheckBox _jcb;
 
-  public BooleanOptionComponent (BooleanOption opt, String text, Frame parent) {
+  /**
+   * Constructs a new BooleanOptionComponent.
+   * @param opt the BooleanOption this component represents
+   * @param text the text to display with the option
+   * @param parent the parent frame
+   */
+  public BooleanOptionComponent(BooleanOption opt, String text, Frame parent) {
     super(opt, "", parent);
     _jcb = new JCheckBox();
     _jcb.setText(text);
@@ -61,20 +67,24 @@ public class BooleanOptionComponent extends OptionComponent<Boolean> {
   }
 
   /**
-   * Constructor that allows for a tooltip description.
+   * Constructs a new BooleanOptionComponent with a tooltip description.
+   * @param opt the BooleanOption this component represents
+   * @param text the text to display with the option
+   * @param parent the parent frame
+   * @param description text to show in a tooltip over 
    */
-  public BooleanOptionComponent (BooleanOption opt, String text,
-                                 Frame parent, String description) {
-    this(opt, "", parent);
+  public BooleanOptionComponent(BooleanOption opt, String text,
+                                Frame parent, String description) {
+    this(opt, text, parent);
     setDescription(description);
-    _jcb.setText(text);
   }
 
+  /**
+   * Sets the tooltip description text for this option.
+   * @param description the tooltip text
+   */
   public void setDescription(String description) {
-    String text = _jcb.getText();
     _jcb.setToolTipText(description);
-    _jcb.setText(text);
-    // need to do this since setting the tooltip erases the text of a JCheckBox.
     _label.setToolTipText(description);
   }
 

@@ -75,7 +75,7 @@ public class ToolbarOptionComponent extends OptionComponent<Boolean> {
    * @param the parent frame
    */
   public ToolbarOptionComponent(String title, Frame parent) {
-    super( title, parent);
+    super(title, parent);
     
     _textButton = new JRadioButton(TEXT_ONLY);
     _textButton.setActionCommand(TEXT_ONLY);
@@ -99,6 +99,19 @@ public class ToolbarOptionComponent extends OptionComponent<Boolean> {
     _buttonPanel.add(_textButton);
     _buttonPanel.add(_iconsButton);
     _buttonPanel.add(_textAndIconsButton);
+
+    DrJava.getConfig().addOptionListener(OptionConstants.TOOLBAR_TEXT_ENABLED,
+                                         new OptionListener<Boolean>() {
+      public void optionChanged(OptionEvent<Boolean> oe) {
+        resetToCurrent();
+      }
+    });
+    DrJava.getConfig().addOptionListener(OptionConstants.TOOLBAR_ICONS_ENABLED,
+                                         new OptionListener<Boolean>() {
+      public void optionChanged(OptionEvent<Boolean> oe) {
+        resetToCurrent();
+      }
+    });
   }
   
   /**
@@ -109,6 +122,10 @@ public class ToolbarOptionComponent extends OptionComponent<Boolean> {
     setDescription(description);
   }
 
+  /**
+   * Sets the tooltip description text for this option.
+   * @param description the tooltip text
+   */
   public void setDescription(String description) {
     _buttonPanel.setToolTipText(description);
     _textButton.setToolTipText(description);

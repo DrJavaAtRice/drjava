@@ -56,8 +56,7 @@ public class FontOptionComponent extends OptionComponent<Font> {
   private JButton _button;
   private JTextField _fontField;
   private JPanel _panel;
-  private Font _currentFont;
-  private Font _newFont;
+  private Font _font;
   
   public FontOptionComponent(FontOption opt, String text, Frame parent) {
     super(opt, text, parent);
@@ -79,9 +78,8 @@ public class FontOptionComponent extends OptionComponent<Font> {
     _panel.add(_fontField, BorderLayout.CENTER);
     _panel.add(_button, BorderLayout.EAST);
 
-    _currentFont = DrJava.getConfig().getSetting(_option);
-    _newFont = _currentFont;
-    _updateField(_currentFont);
+    _font = DrJava.getConfig().getSetting(_option);
+    _updateField(_font);
   }
   
   /**
@@ -93,6 +91,10 @@ public class FontOptionComponent extends OptionComponent<Font> {
     setDescription(description);
   }
 
+  /**
+   * Sets the tooltip description text for this option.
+   * @param description the tooltip text
+   */
   public void setDescription(String description) {
     _panel.setToolTipText(description);
     _fontField.setToolTipText(description);
@@ -120,10 +122,10 @@ public class FontOptionComponent extends OptionComponent<Font> {
   public void chooseFont() {
     Font f = FontChooser.showDialog(_parent, 
                                     "Choose '" + getLabelText() + "'",
-                                    _newFont);
+                                    _font);
     if (f != null) {
-      _newFont = f;
-      _updateField(_newFont);
+      _font = f;
+      _updateField(_font);
     }
   }
   
@@ -132,9 +134,8 @@ public class FontOptionComponent extends OptionComponent<Font> {
    * @return true if the new value is set successfully
    */
   public boolean updateConfig() {
-    if (!_newFont.equals(_currentFont)) {
-      DrJava.getConfig().setSetting(_option, _newFont);
-      _currentFont = _newFont;
+    if (!_font.equals(DrJava.getConfig().getSetting(_option))) {
+      DrJava.getConfig().setSetting(_option, _font);
     }
     return true;
   }
@@ -143,7 +144,7 @@ public class FontOptionComponent extends OptionComponent<Font> {
    * Displays the given value.
    */
   public void setValue(Font value) {
-    _newFont = value;
+    _font = value;
     _updateField(value);
   }
 }

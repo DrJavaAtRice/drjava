@@ -67,6 +67,10 @@ public class StringOptionComponent extends OptionComponent<String> {
     setDescription(description);
   }
 
+  /**
+   * Sets the tooltip description text for this option.
+   * @param description the tooltip text
+   */
   public void setDescription(String description) {
     _jtf.setToolTipText(description);
     _label.setToolTipText(description);
@@ -80,7 +84,9 @@ public class StringOptionComponent extends OptionComponent<String> {
     String oldValue = DrJava.getConfig().getSetting(_option);
     String newValue = _option.parse(_jtf.getText().trim());
     
-    if (!oldValue.equals(newValue)) DrJava.getConfig().setSetting(_option, newValue);   
+    if (!oldValue.equals(newValue)) {
+      DrJava.getConfig().setSetting(_option, newValue);
+    }
     return true;
   } 
  

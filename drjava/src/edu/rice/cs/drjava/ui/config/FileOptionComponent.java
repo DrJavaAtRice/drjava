@@ -57,8 +57,7 @@ public class FileOptionComponent extends OptionComponent<File>
   
   private JButton _button;
   private JTextField _jtf;
-  private File _currentFile;
-  private File _newFile;
+  private File _file;
   private JFileChooser _jfc;
   private FileFilter _fileFilter;  // null if not customized
   private JPanel _panel;
@@ -86,9 +85,8 @@ public class FileOptionComponent extends OptionComponent<File>
       }
     });
     
-    _currentFile = DrJava.getConfig().getSetting(_option);
-    _newFile = _currentFile;
-    _updateTextField(_currentFile);
+    _file = DrJava.getConfig().getSetting(_option);
+    _updateTextField(_file);
 
     _jfc = jfc;
     _fileFilter = null;
@@ -109,6 +107,10 @@ public class FileOptionComponent extends OptionComponent<File>
     setDescription(description);
   }
 
+  /**
+   * Sets the tooltip description text for this option.
+   * @param description the tooltip text
+   */
   public void setDescription(String description) {
     _panel.setToolTipText(description);
     _button.setToolTipText(description);
@@ -121,39 +123,23 @@ public class FileOptionComponent extends OptionComponent<File>
    * @return true if the new value is set successfully
    */
   public boolean updateConfig() {
-        
-    boolean validChoice = chooseFileFromField();
-    if (!validChoice) return false;
-    
-    if (!_newFile.equals(_currentFile)) {
-      DrJava.getConfig().setSetting(_option, _newFile);
-      _currentFile = _newFile;
+    if (!chooseFileFromField()) {
+      return false;
     }
-    
+
+    File currentFile = DrJava.getConfig().getSetting(_option);
+    if (!_file.equals(currentFile)) {
+      DrJava.getConfig().setSetting(_option, _file);
+    }
+
     return true;
   } 
-  
-  /**
-   * Resets this component to the current config value.
-   */
-  public void resetToCurrent() {
-    _newFile = _currentFile;
-    _updateTextField(_newFile);
-  }
-  
-  /**
-   * Resets this component to the option's default value.
-   */
-  public void resetToDefault() {
-    _newFile = _option.getDefault();
-    _updateTextField(_newFile);
-  }
   
   /**
    * Displays the given value.
    */
   public void setValue(File value) {
-    _newFile = value;
+    _file = value;
     _updateTextField(value);
   }
   
@@ -182,8 +168,8 @@ public class FileOptionComponent extends OptionComponent<File>
    * Shows a file chooser to pick a new file.  Allows picking directories.
    */
   public void chooseFile() {
-    if (_newFile != FileOption.NULL_FILE && _newFile.getParent() != null) {
-      _jfc.setCurrentDirectory(new File(_newFile.getParent()));
+    if (_file != FileOption.NULL_FILE && _file.getParent() != null) {
+      _jfc.setCurrentDirectory(new File(_file.getParent()));
     }
     
     if (_fileFilter != null) {
@@ -195,8 +181,8 @@ public class FileOptionComponent extends OptionComponent<File>
     if (returnValue == JFileChooser.APPROVE_OPTION) 
       c = _jfc.getSelectedFile();
     if (c != null) {
-      _newFile = c;
-      _updateTextField(_newFile);
+      _file = c;
+      _updateTextField(_file);
     }
   }
     
@@ -207,7 +193,7 @@ public class FileOptionComponent extends OptionComponent<File>
    */
   public boolean chooseFileFromField() {
    String newValue = _jtf.getText().trim();
-   String currentValue = _currentFile.getAbsolutePath();
+   String currentValue = DrJava.getConfig().getSetting(_option).getAbsolutePath();
      
    if (newValue.equals(currentValue)) return true;
 
@@ -222,7 +208,7 @@ public class FileOptionComponent extends OptionComponent<File>
      return false;
    }
   
-   _newFile = newFile;
+   _file = newFile;
      
    return true;
   }

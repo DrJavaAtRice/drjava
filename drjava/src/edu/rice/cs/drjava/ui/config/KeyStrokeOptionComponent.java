@@ -65,16 +65,14 @@ public class KeyStrokeOptionComponent extends OptionComponent<KeyStroke>
   private JPanel _panel;
   private static GetKeyDialog _getKeyDialog =  null;
   
-  private KeyStroke _currentKey;
-  private KeyStroke _newKey;
+  private KeyStroke _key;
 
   public KeyStrokeOptionComponent(KeyStrokeOption opt,
                                   String text,
                                   final Frame parent) {
     super(opt, text, parent);
   
-    _currentKey = DrJava.getConfig().getSetting(opt);
-    _newKey = _currentKey;
+    _key = DrJava.getConfig().getSetting(opt);
     
     _button = new JButton();
     _button.addActionListener(new ActionListener() {
@@ -98,14 +96,14 @@ public class KeyStrokeOptionComponent extends OptionComponent<KeyStroke>
     _keyField.setEditable(false);
     _keyField.setBackground(Color.white);
     _keyField.setHorizontalAlignment(JTextField.CENTER);
-    _keyField.setText(_option.format(_currentKey));
+    _keyField.setText(_option.format(_key));
     _panel = new JPanel(new BorderLayout());
     _panel.add(_keyField, BorderLayout.CENTER);
     _panel.add(_button, BorderLayout.EAST);
    
     GridLayout gl = new GridLayout(1,0);
     gl.setHgap(15);
-    _keyToKSOC.put(_currentKey, this);
+    _keyToKSOC.put(_key, this);
   }
   
   /**
@@ -117,6 +115,10 @@ public class KeyStrokeOptionComponent extends OptionComponent<KeyStroke>
     setDescription(description);
   }
 
+  /**
+   * Sets the tooltip description text for this option.
+   * @param description the tooltip text
+   */
   public void setDescription(String description) {
     _panel.setToolTipText(description);
     _button.setToolTipText(description);
@@ -137,10 +139,9 @@ public class KeyStrokeOptionComponent extends OptionComponent<KeyStroke>
    * @return true if the new value is set successfully
    */
   public boolean updateConfig() {
-    if (!_newKey.equals(_currentKey)) {
-      DrJava.getConfig().setSetting(_option, _newKey);
-      _setKeyStroke(DrJava.getConfig().getSetting(_option));
-      _currentKey = _newKey;
+    if (!_key.equals(getConfigKeyStroke())) {
+      DrJava.getConfig().setSetting(_option, _key);
+      _setKeyStroke(_key);
     }
     return true;
   }
@@ -149,7 +150,7 @@ public class KeyStrokeOptionComponent extends OptionComponent<KeyStroke>
    * Displays the given value.
    */
   public void setValue(KeyStroke value) {
-    _newKey = value;
+    _key = value;
     _keyField.setText(_option.format(value));
   }
   
@@ -169,14 +170,14 @@ public class KeyStrokeOptionComponent extends OptionComponent<KeyStroke>
    * Returns the currently selected KeyStroke.
    */
   public KeyStroke getKeyStroke() {
-    return _newKey;
+    return _key;
   }
   
   /**
    * Returns the KeyStroke current set in the Config settings.
    */
   public KeyStroke getConfigKeyStroke() {
-    return _currentKey;
+    return DrJava.getConfig().getSetting(_option);
   }
   
   /**
@@ -188,8 +189,8 @@ public class KeyStrokeOptionComponent extends OptionComponent<KeyStroke>
    * Sets the currently selected KeyStroke.
    */
   private void _setKeyStroke(KeyStroke ks) {
-    _newKey = ks;
-    _keyField.setText(_option.format(_newKey));
+    _key = ks;
+    _keyField.setText(_option.format(_key));
   }
   
   /**
