@@ -39,7 +39,10 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.repl;
 
+import koala.dynamicjava.interpreter.*;
 import koala.dynamicjava.interpreter.context.*;
+import koala.dynamicjava.tree.*;
+import koala.dynamicjava.tree.visitor.*;
 
 public class JavaDebugInterpreter extends DynamicJavaAdapter {
   /**
@@ -54,13 +57,60 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
   public JavaDebugInterpreter(String name) {
     _name = name;
   }
+  
+  /**
+   * Helper method to convert a ThisExpression to a QualifiedName.
+   * Allows us to redefine "this" in a debug interpreter.
+   * @param node ThisExpression
+   * @return Corresponding QualifiedName
+   */
+  protected QualifiedName _convertThisToName(ThisExpression node) {
+    java.util.List ids = new java.util.LinkedList();
+    ids.add(new Identifier("this", node.getBeginLine(), node.getBeginColumn(),
+                           node.getEndLine(), node.getEndColumn()));
+    return new QualifiedName(ids, node.getFilename(),
+                             node.getBeginLine(), node.getBeginColumn(),
+                             node.getEndLine(), node.getEndColumn());
+  }
 
   /**
-   * Gets the debug evaluation visitor associated wiht this interpreter.
+   * Factory method to make a new NameVisitor that treats "this" as a variable.
    * @param context the context
    * @return visitor the visitor
    */
-//   public EvaluationVisitorExtension makeEvaluationVisitor(Context context) {
-//     return new DebugEvaluationVisitor(context, _name);
-//   }
+  public NameVisitor makeNameVisitor(Context context) {
+    return new NameVisitor(context) {
+      public Object visit(ThisExpression node) {
+        return visit(_convertThisToName(node));
+      }
+    };
+  }
+  
+  /**
+   * Factory method to make a new TypeChecker that treats "this" as a variable.
+   * @param context the context
+   * @return visitor the visitor
+   */
+  public TypeChecker makeTypeChecker(Context context) {
+    return new TypeChecker(context) {
+      public Object visit(ThisExpression node) {
+        return visit(_convertThisToName(node));
+      }
+    };
+  }
+  
+  /**
+   * Factory method to make a new DebugEvaluationVisitor that treats "this"
+   * as a variable.
+   * @param context the context
+   * @return visitor the visitor
+   */
+  public EvaluationVisitor makeEvaluationVisitor(Context context) {
+    //return new DebugEvaluationVisitorExtension(context, _name);
+    return new EvaluationVisitorExtension(context) {
+      public Object visit(ThisExpression node) {
+        return visit(_convertThisToName(node));
+      }
+    };
+  }
 }

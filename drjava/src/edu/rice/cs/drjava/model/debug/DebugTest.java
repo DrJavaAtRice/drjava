@@ -303,14 +303,14 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
       // Run the main() method, hitting breakpoints
      synchronized(_notifierLock) {
        interpretIgnoreResult("java Monkey");
-       _waitForNotifies(6); // suspended, updated, breakpointReached
+       _waitForNotifies(6); // (suspended, updated, breakpointReached) * 2
        _notifierLock.wait();
      }    
      DebugThreadData threadA = new DebugThreadData(_debugger.getCurrentThread());
      DebugThreadData threadB = new DebugThreadData(_debugger.getThreadAt(1));
      synchronized(_notifierLock){
        _asynchDoSetCurrentThread(threadB);
-       _waitForNotifies(2);  // updated, interpreterChanged
+       _waitForNotifies(2);  // updated, suspended
        _notifierLock.wait();
      }
      
@@ -326,7 +326,12 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
      
      // Shutdown the debugger
      if (printMessages) System.out.println("Shutting down...");
-     InterpretListener interpretListener = new InterpretListener();
+     InterpretListener interpretListener = new InterpretListener() {
+       public void interpreterChanged(boolean inProgress){
+         // Don't notify: happens in the same thread
+        interpreterChangedCount++;
+       }
+     };
      _model.addListener(interpretListener);
      synchronized(_notifierLock) {
        //_asynchResume();
@@ -335,7 +340,7 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
        _waitForNotifies(2);  // shutdown, interactionEnded
        _notifierLock.wait();
      }
-     
+     interpretListener.assertInterpreterChangedCount(1);
      debugListener.assertDebuggerShutdownCount(1);  //fires
      if (printMessages) System.out.println("Shut down.");
      _model.removeListener(interpretListener);
@@ -838,7 +843,12 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     
     // Shutdown the debugger and listen for the interpret call to end
     if (printMessages) System.out.println("Shutting down...");
-    InterpretListener interpretListener = new InterpretListener();
+    InterpretListener interpretListener = new InterpretListener() {
+       public void interpreterChanged(boolean inProgress){
+         // Don't notify: happens in the same thread
+        interpreterChangedCount++;
+       }
+     };
     _model.addListener(interpretListener);
     synchronized(_notifierLock) {
       _debugger.shutdown();
@@ -936,7 +946,7 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     _model.addListener(interpretListener);
     synchronized(_notifierLock) {
       _asynchResume();
-      _waitForNotifies(3);  // interactionEnded, currThreadDied
+      _waitForNotifies(3);  // interactionEnded, currThreadDied, interpreterChanged
       _notifierLock.wait();
     }
     interpretListener.assertInteractionEndCount(1);
@@ -1045,7 +1055,12 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     
     // Shutdown the debugger and listen for the interpret call to end
     if (printMessages) System.out.println("Shutting down...");
-    InterpretListener interpretListener = new InterpretListener();
+    InterpretListener interpretListener = new InterpretListener() {
+       public void interpreterChanged(boolean inProgress){
+         // Don't notify: happens in the same thread
+        interpreterChangedCount++;
+       }
+     };
     _model.addListener(interpretListener);
     synchronized(_notifierLock) {
       _debugger.shutdown();

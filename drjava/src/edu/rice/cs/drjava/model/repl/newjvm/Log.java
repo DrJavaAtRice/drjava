@@ -63,7 +63,7 @@ public class Log {
           System.getProperty("file.separator");
         
         File f = new File(dir, s);
-        FileWriter w = new FileWriter(f, true);
+        FileWriter w = new FileWriter(f.getAbsolutePath(), true);
         _writer = new PrintWriter(w);
         
         log("Log opened: " + (new Date()));

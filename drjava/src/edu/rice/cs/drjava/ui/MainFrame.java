@@ -2412,7 +2412,7 @@ public class MainFrame extends JFrame implements OptionConstants {
 
     _toolBar.setFloatable(false);
 
-    _toolBar.addSeparator();
+    //_toolBar.addSeparator();
 
     // New, open, save, close
     _toolBar.add(_createToolbarButton(_newAction));
@@ -2433,7 +2433,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     // Undo/Redo button text in JDK 1.3
     // We just manually create the JButtons, and we *don't* set up
     // PropertyChangeListeners on the action's name.
-    _toolBar.addSeparator();
+    //_toolBar.addSeparator();
     _toolBar.add(_createManualToolbarButton(_undoAction));
     _toolBar.add(_createManualToolbarButton(_redoAction));
     

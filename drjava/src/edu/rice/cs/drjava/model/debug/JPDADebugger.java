@@ -250,6 +250,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
         //VM was shutdown prematurely
       }
       finally {
+        ((DefaultInteractionsModel)_model.getInteractionsModel()).setToDefaultInterpreter();
         _vm = null;
         _eventManager = null;
         _suspendedThreads = new RandomAccessStack();
@@ -1381,7 +1382,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
       Value thisVal = frame.thisObject();
       if (thisVal != null) {
         _defineVariable(suspendedThreadRef, debugInterpreter,
-                        "this2", thisVal);
+                        "this", thisVal);
       }
       
       String prompt = _getPromptString(suspendedThreadRef);

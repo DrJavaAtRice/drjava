@@ -331,11 +331,29 @@ public class DynamicJavaAdapter implements JavaInterpreter {
   }
 
   /**
-   * Gets the evaluation visitor associated wiht this interpreter.
+   * Factory method to make a new NameVisitor.
    * @param context the context
    * @return visitor the visitor
    */
-  public EvaluationVisitorExtension makeEvaluationVisitor(Context context) {
+  public NameVisitor makeNameVisitor(Context context) {
+    return new NameVisitor(context);
+  }
+  
+  /**
+   * Factory method to make a new TypeChecker.
+   * @param context the context
+   * @return visitor the visitor
+   */
+  public TypeChecker makeTypeChecker(Context context) {
+    return new TypeChecker(context);
+  }
+  
+  /**
+   * Factory method to make a new EvaluationVisitor.
+   * @param context the context
+   * @return visitor the visitor
+   */
+  public EvaluationVisitor makeEvaluationVisitor(Context context) {
     return new EvaluationVisitorExtension(context);
   }
 
@@ -391,13 +409,13 @@ public class DynamicJavaAdapter implements JavaInterpreter {
         while (it.hasNext()) {
           Node n = (Node)it.next();
 
-          Visitor v = new NameVisitor(nameVisitorContext);
+          Visitor v = makeNameVisitor(nameVisitorContext);
           Object o = n.acceptVisitor(v);
           if (o != null) {
             n = (Node)o;
           }
 
-          v = new TypeChecker(checkVisitorContext);
+          v = makeTypeChecker(checkVisitorContext);
           n.acceptVisitor(v);
 
           evalVisitorContext.defineVariables
