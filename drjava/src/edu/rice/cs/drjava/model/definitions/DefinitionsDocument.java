@@ -24,7 +24,7 @@ public class DefinitionsDocument extends DefaultStyledDocument
 	//keeps track of all lit blocks
 	Vector<StateBlock> litBlocks = new Vector<StateBlock>(); 
 	Vector<StateBlock> changes = new Vector<StateBlock>();
-  int _currentLocation = 0;	
+  int _currentLocation = 0;
 
 	
 	
@@ -200,7 +200,7 @@ public class DefinitionsDocument extends DefaultStyledDocument
 		{
 			changes = newBlocks;
 		}
-public int getCurrentLocation()
+	public int getCurrentLocation()
   {
     return _currentLocation;
   }
@@ -211,7 +211,11 @@ public int getCurrentLocation()
     _currentLocation = loc;
   }
 
-
+	public void move(int dist)
+		{
+			_currentLocation += dist;
+			_reduced.move(dist);
+		}
 
 }
 

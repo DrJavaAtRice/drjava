@@ -144,7 +144,7 @@ public interface BraceReduction
 	/**
 	 *Gets the distance to the enclosing brace.
 	 */
-	public int getDistToEnclosingBrace();
+	public IndentInfo getIndentInformation();
 
 	/**
 	 *Gets distance to enclosing new line

@@ -1924,7 +1924,62 @@ public class ReducedModelComment
 			_cursor.prev();
 		}
 
+	void getDistToPreviousNewline(IndentInfo braceInfo)
+		{
+			braceInfo.distToNewline = _getDistToPreviousNewline(_cursor.copy(),
+																													_offset);
+			return;
+		}
+	
+	/**
+	 *returns distance to after newline
+	 */
+	private int _getDistToPreviousNewline(ModelList<ReducedToken>.Iterator
+																			 copyCursor, int offset)
+		{
+			int walkcount = offset;
+			if (!copyCursor.atStart())
+				copyCursor.prev();
+			
+			while ((!copyCursor.atStart()) &&
+						 (!copyCursor.current().getType().equals("\n"))){
+				walkcount += copyCursor.current().getSize();
+				copyCursor.prev();
+			}
+
+			if(copyCursor.atStart())
+				return -1;
+			return walkcount;
+		}
+	
+	void getDistToIndentNewline(IndentInfo braceInfo)
+		{
+			ModelList<ReducedToken>.Iterator copyCursor = _cursor.copy();
+			
+			if (braceInfo.distToBrace == -1 || copyCursor.atStart()) //if no brace
+				return;
+
+			int walkcount = _move(-braceInfo.distToBrace, copyCursor,_offset);
+
+//walk count now holds the offset within the current block.
+			//but negative.
+			// find newline
+			
+			walkcount = _getDistToPreviousNewline(copyCursor,walkcount);
+
+
+			if(walkcount == -1)
+				braceInfo.distToNewline = braceInfo.distToBrace;
+			else
+				braceInfo.distToNewline = walkcount + braceInfo.distToBrace;
+
+			return;
+		}
+	
 }
+
+
+
 
 
 

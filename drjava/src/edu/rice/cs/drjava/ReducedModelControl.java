@@ -178,24 +178,7 @@ public class ReducedModelControl implements BraceReduction
 			rmc.delete(count);
 		}
   
-  /**
-   * <P>Finds the next significant brace.</P>
-   * @return the distance to the next significant brace.
-   */
-  public int nextBrace()
-		{
-			return rmb.nextBrace();
-		}
-  
-  /**
-   * <P>Finds the previous significant brace.</P>
-   * @return the distance to the previous significant brace.
-   */
-  public int previousBrace()
-		{
-			return rmb.previousBrace();
-		}
-  
+    
   /**
    * <P>Finds the closing brace that matches the next significant
    * brace iff that brace is an open brace.</P>
@@ -419,9 +402,16 @@ public class ReducedModelControl implements BraceReduction
 	/**
 	 *Gets the distance to the enclosing brace.
 	 */
-	public int getDistToEnclosingBrace()
+	public IndentInfo getIndentInformation()
 		{
-			return -1;
+			IndentInfo braceInfo = new IndentInfo();
+			//get distance to the previous newline (in braceInfo.distToNewline)
+			rmc.getDistToPreviousNewline(braceInfo);
+			//get distance to the closing brace before that new line.
+			rmb.getDistToEnclosingBrace(braceInfo);
+			//get distance to newline before the previous, just mentioned, brace.
+			rmc.getDistToIndentNewline(braceInfo);
+			return braceInfo;
 		}
 
 	/**
