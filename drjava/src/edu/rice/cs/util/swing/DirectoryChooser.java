@@ -57,15 +57,15 @@
  * x toggle editable
  * x entering edit mode
  * x right-click menus
- *   - enabling/hiding with editable
+ *   x enabling/hiding with editable
  * x <enter>/<escape> key bindings
  * x need to set the open/closed/leaf icons change
  * x need to make so changes propagate to children.
  * x make editable optional
  * x center in parent
- * - roots should not be editable
+ * x roots should not be editable
  * x null pointer when right-click in empty space
- * - add accept enable filter
+ * x add accept enable filter
  */
 
 package edu.rice.cs.util.swing;
@@ -73,13 +73,13 @@ package edu.rice.cs.util.swing;
 import java.io.File;
 import java.io.IOException;
 import java.io.FileNotFoundException;
-import java.io.FileFilter;
 import java.util.*;
 
 import javax.swing.*;
 import javax.swing.tree.*;
 import javax.swing.border.*;
 import javax.swing.event.*;
+import javax.swing.filechooser.FileFilter;
 import java.awt.*;
 import java.awt.event.*;
 
@@ -504,6 +504,10 @@ public class DirectoryChooser extends JDialog {
   
   public void removeChoosableFileFilter(FileFilter filter) {
     if (filter != null) _choosableDirs.remove(filter);
+  }
+  
+  public void clearChoosableFileFilters() {
+    _choosableDirs.clear();
   }
   
   /**
@@ -1268,6 +1272,7 @@ public class DirectoryChooser extends JDialog {
       public boolean accept(File f) {
         return f.getName().equals("foo");
       }
+      public String getDescription() { return "Only select the file whose name is foo"; }
     });
     int res = d.showDialog();
     System.out.println("done with success: " + res);

@@ -60,7 +60,7 @@ import java.io.*;
  *
  * @version $Id$
  */
-public class FileSelectorComponent extends JPanel {
+public class DirectorySelectorComponent extends JPanel {
   /**
    * The default number of columns for the text box.
    */
@@ -90,36 +90,30 @@ public class FileSelectorComponent extends JPanel {
   /**
    * File chooser to open when clicking the "..." button.
    */
-  protected final JFileChooser _chooser;
+  protected final DirectoryChooser _chooser;
 
   /**
-   * File filter to use in the chooser.
-   */
-  protected FileFilter _fileFilter;
-
-  /**
-   * Creates a new FileSelectorComponent with default dimensions.
+   * Creates a new DirectorySelectorComponent with default dimensions.
    *
    * @param parent  Parent of this component.
    * @param chooser File chooser to display from the "..." button.
    */
-  public FileSelectorComponent(Frame parent, JFileChooser chooser) {
+  public DirectorySelectorComponent(Frame parent, DirectoryChooser chooser) {
     this(parent, chooser, DEFAULT_NUM_COLS, DEFAULT_FONT_SIZE);
   }
 
   /**
-   * Creates a new FileSelectorComponent.
+   * Creates a new DirectorySelectorComponent.
    *
    * @param parent   Parent of this component.
    * @param chooser  File chooser to display from the "..." button.
    * @param numCols  Number of columns to display in the text field
    * @param fontSize Font size for the text field
    */
-  public FileSelectorComponent(Frame parent, JFileChooser chooser,
+  public DirectorySelectorComponent(Frame parent, DirectoryChooser chooser,
                                int numCols, float fontSize) {
     _parent = parent;
     _chooser = chooser;
-    _fileFilter = null;
     
     _fileField = new JTextField(numCols) {
       public Dimension getMaximumSize() {
@@ -149,7 +143,6 @@ public class FileSelectorComponent extends JPanel {
     super.setEnabled(enabled);
   }
   
-
   /**
    * Returns the file text field.
    */
@@ -160,7 +153,7 @@ public class FileSelectorComponent extends JPanel {
   /**
    * Returns the file chooser.
    */
-  public JFileChooser getFileChooser() {
+  public DirectoryChooser getFileChooser() {
     return _chooser;
   }
 
@@ -178,7 +171,7 @@ public class FileSelectorComponent extends JPanel {
    */
   public void setFileField(File file) {
     try {
-    _fileField.setText(file.getCanonicalPath());
+      _fileField.setText(file.getCanonicalPath());
     }
     catch(IOException e) {
       //handle it gracefully
@@ -186,41 +179,40 @@ public class FileSelectorComponent extends JPanel {
     }
     _fileField.setCaretPosition(_fileField.getText().length());
     if (file.exists()) {
-      _chooser.setCurrentDirectory(file);
-      _chooser.setSelectedFile(file);
+      _chooser.setSelectedDirectory(file);
     }
   }
 
 
   /**
-   * Sets the file filter to use.
+   * adds a filter to decide if a directory can be chosen
    */
-  public void setFileFilter(FileFilter filter) {
-    _fileFilter = filter;
+  public void addChoosableFileFilter(FileFilter filter) {
+    _chooser.addChoosableFileFilter(filter);
   }
-
-
+  
+  /**
+   * removes the given filefilter from the chooser
+   */
+  public void removeChoosableFileFilter(FileFilter filter) {
+    _chooser.removeChoosableFileFilter(filter);
+  }
+  
+  public void clearChoosableFileFilters() {
+    _chooser.clearChoosableFileFilters();
+  }
+  
   /**
    * Opens the file chooser to select a file, putting the result
    * in the file field.
    */
   private void _chooseFile() {
     File file = getFileFromField();
-    // Set the chooser to be in the right directory
-    if (file.exists()) {
-      _chooser.setCurrentDirectory(file);
-      _chooser.setSelectedFile(file);
-    }
-
-    // Apply the filter
-    if (_fileFilter != null) {
-      _chooser.setFileFilter(_fileFilter);
-    }
 
     // Get the file from the chooser
-    int returnValue = _chooser.showDialog(_parent, null);
-    if (returnValue == JFileChooser.APPROVE_OPTION) {
-      File chosen = _chooser.getSelectedFile();
+    int returnValue = _chooser.showDialog(file);
+    if (returnValue == DirectoryChooser.APPROVE_OPTION) {
+      File chosen = _chooser.getSelectedDirectory();
       if (chosen != null) {
         setFileField(chosen);
       }
