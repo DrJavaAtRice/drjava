@@ -164,6 +164,8 @@ public class DebugManager {
       doc.saveBeforeProceeding(GlobalModelListener.DEBUG_REASON);
     }
 
+    if (doc.isModifiedSinceSave()) return; // they cancelled.
+
     String className = mapClassName(doc);
     if (className == null) {
       throw new ClassNotFoundException();
@@ -210,6 +212,8 @@ public class DebugManager {
     if (doc.isModifiedSinceSave()) {
       doc.saveBeforeProceeding(GlobalModelListener.DEBUG_REASON);
     }
+
+    if (doc.isModifiedSinceSave()) return; // they cancelled.
 
     String className = mapClassName(doc);
     if (className == null) {
