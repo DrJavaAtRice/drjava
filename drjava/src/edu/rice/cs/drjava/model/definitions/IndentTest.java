@@ -116,7 +116,7 @@ public class IndentTest extends TestCase {
       "\n" +
       "*/\n" +
       "\n";
-    
+
     String indented = 
       "  foo();\n" +     // (skip this line)
       "  // foo\n" +     // align to start of statement
@@ -129,7 +129,7 @@ public class IndentTest extends TestCase {
       "   * \n" +     // add a star after line with star
       "   */\n" +     // align star
       "  \n";     // align close comment to prev statement
-    
+
     doc.insertString(0, text, null);
     _assertContents(text, doc);
     doc.indentLines(9, doc.getLength());
@@ -138,65 +138,67 @@ public class IndentTest extends TestCase {
   
   /**
    * Test case for SourceForge bug# 681203.
-   * NOTE: This test is commented out because the bug is still open, but it
-   *       doesn't disrupt normal editing operations.
    */
-//   public void testOnBeginCommentLine() throws BadLocationException {
-//     _text = 
-//       "/**\n" + 
-//       " comments here blah blah\n" +
-//       " */";
-//
-//     _aligned = 
-//       "/**\n" +
-//       " * comments here blah blah\n" +
-//       " */";
-// 
-//     _setDocText(_text);
-//     _doc.indentLines(0, 0); // Does nothing.
-//     System.out.println(_doc.getText(0, _doc.getLength()));
-//     assertEquals("First line is already properly indented.", _text.length(), _doc.getLength());
-//     _doc.indentLines(_doc.getLength()-2, _doc.getLength()); // Does nothing.
-//     assertEquals("Last line is already properly indented.", _text.length(), _doc.getLength());
-//     _doc.indentLines(0, _doc.getLength()); // Aligns second line.
-//     System.out.println(_aligned);
-//     System.out.println(_doc.getText(0, _doc.getLength()));
-//     
-//     assertEquals("Second line indented with asterisk.", _aligned, _doc.getText(0, _doc.getLength()));
-//   }
+  public void testMultiLineStarInsertFirstLine() throws BadLocationException {
+    String text =
+      "/**\n" +
+      "comments here blah blah\n" +
+      " */";
+
+    String noStarAdded =
+      "/**\n" +
+      " comments here blah blah\n" +
+      " */";
+
+    String starAdded =
+      "/**\n" +
+      " * comments here blah blah\n" +
+      " */";
+
+    doc.insertString(0, text, null);
+    _assertContents(text, doc);
+    doc.gotoLine(2);
+    /* First test that indentation caused not by an enter press inserts no star */
+    doc._indentLine(Indenter.OTHER);
+    _assertContents(noStarAdded, doc);
+    /* Now test that indentation caused by an enter press does insert a star */
+    doc._indentLine(Indenter.ENTER_KEY_PRESS);
+    _assertContents(starAdded, doc);
+  }
     
   /**
    * Test case for SourceForge bug# 681203.
-   * NOTE: This test is commented out because the bug is still open, but it
-   *       doesn't disrupt normal editing operations.
    */
-//   public void testNotOnBeginCommentLine() throws BadLocationException {
-// 
-//     _text = 
-//       "/**\n" +
-//       " * other comments\n" +
-//       "comments here blah blah\n" +
-//       " */";
-//
-//     _aligned = 
-//       "/**\n" +
-//       " * other comments\n" +
-//       " * comments here blah blah\n" +
-//       " */";
-//  
-//     _setDocText(_text);
-//     _doc.indentLines(0, 0); // Does nothing.
-//     assertEquals("First line is already properly indented.", _text.length(), _doc.getLength());
-//     _doc.indentLines(0, 5); // Does nothing.
-//     assertEquals("Second line is already properly indented.", _text.length(), _doc.getLength());
-//     _doc.indentLines(_doc.getLength()-2, _doc.getLength()); // Does nothing.
-//     assertEquals("Last line is already properly indented.", _text.length(), _doc.getLength());
-//     _doc.indentLines(0, _doc.getLength()); // Aligns third line.
-//     System.out.println(_aligned);
-//     System.out.println(_doc.getText(0, _doc.getLength()));
-//     
-//     assertEquals("Third line indented with asterisk.", _aligned, _doc.getText(0, _doc.getLength()));
-//   }
+  public void testMultiLineStarInsertLaterLine() throws BadLocationException {
+
+    String text =
+      "/**\n" +
+      " * other comments\n" +
+      "comments here blah blah\n" +
+      " */";
+
+    String noStarAdded =
+      "/**\n" +
+      " * other comments\n" +
+      " comments here blah blah\n" +
+      " */";
+
+    String starAdded =
+      "/**\n" +
+      " * other comments\n" +
+      " * comments here blah blah\n" +
+      " */";
+
+    doc.insertString(0, text, null);
+    _assertContents(text, doc);
+    doc.gotoLine(3);
+    /* First test that indentation caused not by an enter press inserts no star */
+    doc._indentLine(Indenter.OTHER);
+    _assertContents(noStarAdded, doc);
+    /* Now test that indentation caused by an enter press does insert a star */
+    doc._indentLine(Indenter.ENTER_KEY_PRESS);
+    _assertContents(starAdded, doc);
+  }
   
   /**
    * Regression test for paren phrases.

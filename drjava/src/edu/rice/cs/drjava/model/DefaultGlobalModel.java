@@ -2002,8 +2002,8 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
      * A forwarding method to indent the current line or selection
      * in the definitions.
      */
-    public void indentLinesInDefinitions(int selStart, int selEnd) {
-      _doc.indentLines(selStart, selEnd);
+    public void indentLinesInDefinitions(int selStart, int selEnd, int reason) {
+      _doc.indentLines(selStart, selEnd, reason);
     }
 
     /**

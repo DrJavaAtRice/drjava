@@ -4,7 +4,7 @@
  * at http://sourceforge.net/projects/drjava
  *
  * Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)
- * 
+ *
  * DrJava is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -55,18 +55,32 @@ import edu.rice.cs.drjava.config.FileConfiguration;
  */
 public class Indenter {
 
-  public Indenter(int indentLevel) { 
+  public Indenter(int indentLevel) {
       buildTree(indentLevel);
   }
+
+  /**
+   * This constant is used to indicate that an enter key press caused the
+   * indentation.  This is important for some rules dealing with stars
+   * at the line start in multiline comments
+   */
+  public static final int ENTER_KEY_PRESS = 1;
+
+  /**
+   * This constant is used to indicate that indentation was started for
+   * some other reason.  This is important for some rules dealing with stars
+   * at the line start in multiline comments
+   */
+  public static final int OTHER = 0;
 
   /**
    * Root of decision tree.
    */
   private IndentRule _topRule;
-  
+
   /**
    * Builds the decision tree for indentation.
-   * 
+   *
    * For now, this method needs to be called every time the
    * size of one indent level is being changed!
    */
@@ -75,8 +89,8 @@ public class Indenter {
     char[] indent = new char[indentLevel];
     java.util.Arrays.fill(indent,' ');
     String oneLevel = new String(indent);
-    
-    IndentRule 
+
+    IndentRule
       // Main tree
       rule37 = new ActionStartCurrStmtPlus(oneLevel),
       rule36 = new ActionStartStmtOfBracePlus(oneLevel),
@@ -107,22 +121,22 @@ public class Indenter {
         // Why is rule 38 here?
       rule14 = new QuestionNewParenPhrase(rule38, rule16), //rule15->rule38
       rule13 = new QuestionBraceIsParenOrBracket(rule14, rule17),
-        
+
       // Comment tree
       rule12 = new ActionStartPrevLinePlus(""),
       rule11 = rule12,
       rule10 = new ActionStartPrevLinePlus("* "),
-      rule09 = new QuestionCurrLineEmpty(rule10, rule11),
-      rule08 = rule12,          
+      rule09 = new QuestionCurrLineEmptyOrEnterPress(rule10, rule11),
+      rule08 = rule12,
       rule07 = new QuestionCurrLineStartsWith("*", rule08, rule09),
       rule06 = new QuestionPrevLineStartsWith("*", rule07, rule12),
       rule05 = new ActionStartPrevLinePlus(" "),
-      rule04 = new ActionStartPrevLinePlus(" * "), 
-      rule03 = new QuestionCurrLineEmpty(rule04, rule05),
+      rule04 = new ActionStartPrevLinePlus(" * "),
+      rule03 = new QuestionCurrLineEmptyOrEnterPress(rule04, rule05),
       rule02 = new QuestionPrevLineStartsComment(rule03, rule06),
 
       rule01 = new QuestionInsideComment(rule02, rule13);
-    
+
     _topRule = rule01;
   }
 
@@ -131,11 +145,11 @@ public class Indenter {
    * the indent based on context.
    * @param doc document containing line to be indented
    */
-  public void indent(DefinitionsDocument doc)
+  public void indent(DefinitionsDocument doc, int reason)
   {
-    _topRule.indentLine(doc);
+    _topRule.indentLine(doc, /*, reason*/reason);
   }
-  
+
 }
 
 

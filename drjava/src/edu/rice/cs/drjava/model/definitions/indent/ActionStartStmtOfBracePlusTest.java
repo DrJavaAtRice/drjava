@@ -75,12 +75,12 @@ public class ActionStartStmtOfBracePlusTest extends IndentRulesTestCase {
     String aligned2 = "public void foo() {\n   bar();";
     
     _setDocText(text);
-    rule1.indentLine(_doc, 20);
+    rule1.indentLine(_doc, 20, Indenter.OTHER);
     assertEquals("single line contract, no indent, no suffix", 
                  aligned1, _doc.getText(0, _doc.getLength()));
     
     _setDocText(text);
-    rule2.indentLine(_doc, 20);
+    rule2.indentLine(_doc, 20, Indenter.OTHER);
     assertEquals("single line contract, no indent, with suffix", 
                  aligned2, _doc.getText(0, _doc.getLength()));
   }
@@ -97,12 +97,12 @@ public class ActionStartStmtOfBracePlusTest extends IndentRulesTestCase {
     String aligned2 = "  y = new Foo() {\n     bar();";
     
     _setDocText(text);
-    rule1.indentLine(_doc, 20);
+    rule1.indentLine(_doc, 20, Indenter.OTHER);
     assertEquals("single line contract, with indent, no suffix", 
                  aligned1, _doc.getText(0, _doc.getLength()));
     
     _setDocText(text);
-    rule2.indentLine(_doc, 20);
+    rule2.indentLine(_doc, 20, Indenter.OTHER);
     assertEquals("single line contract, with indent, with suffix", 
                  aligned2, _doc.getText(0, _doc.getLength()));
   }
@@ -128,12 +128,12 @@ public class ActionStartStmtOfBracePlusTest extends IndentRulesTestCase {
                       "      bar();";
     
     _setDocText(text);
-    rule1.indentLine(_doc, 56);
+    rule1.indentLine(_doc, 56, Indenter.OTHER);
     assertEquals("multi line contract, with indent, no suffix", 
                  aligned1, _doc.getText(0, _doc.getLength()));
     
     _setDocText(text);
-    rule2.indentLine(_doc, 56);
+    rule2.indentLine(_doc, 56, Indenter.OTHER);
     assertEquals("multi line contract, with indent, with suffix", 
                  aligned2, _doc.getText(0, _doc.getLength()));
   }
@@ -150,12 +150,12 @@ public class ActionStartStmtOfBracePlusTest extends IndentRulesTestCase {
     String aligned2 = "  for (int i=0; i<j; i++) {\n     bar();";
     
     _setDocText(text);
-    rule1.indentLine(_doc, 28);
+    rule1.indentLine(_doc, 28, Indenter.OTHER);
     assertEquals("for statement, with indent, no suffix", 
                  aligned1, _doc.getText(0, _doc.getLength()));
     
     _setDocText(text);
-    rule2.indentLine(_doc, 28);
+    rule2.indentLine(_doc, 28, Indenter.OTHER);
     assertEquals("for statement, with indent, with suffix", 
                  aligned2, _doc.getText(0, _doc.getLength()));
   }
@@ -184,12 +184,12 @@ public class ActionStartStmtOfBracePlusTest extends IndentRulesTestCase {
                       "    bar();";
     
     _setDocText(text);
-    rule1.indentLine(_doc, 44);
+    rule1.indentLine(_doc, 44, Indenter.OTHER);
     assertEquals("multi-line for statement, with indent, no suffix", 
                  aligned1, _doc.getText(0, _doc.getLength()));
     
     _setDocText(text);
-    rule2.indentLine(_doc, 44);
+    rule2.indentLine(_doc, 44, Indenter.OTHER);
     assertEquals("multi-line for statement, with indent, with suffix", 
                  aligned2, _doc.getText(0, _doc.getLength()));
   }
@@ -248,12 +248,12 @@ public class ActionStartStmtOfBracePlusTest extends IndentRulesTestCase {
                       "    foo();\n";
     
     _setDocText(text);
-    rule1.indentLine(_doc, 30);
+    rule1.indentLine(_doc, 30, Indenter.OTHER);
     assertEquals("commented brace, no suffix", 
                  aligned1, _doc.getText(0, _doc.getLength()));
     
     _setDocText(text);
-    rule2.indentLine(_doc, 30);
+    rule2.indentLine(_doc, 30, Indenter.OTHER);
     assertEquals("commented brace, with suffix", 
                  aligned2, _doc.getText(0, _doc.getLength()));
   }
@@ -306,12 +306,12 @@ public class ActionStartStmtOfBracePlusTest extends IndentRulesTestCase {
                       "  import bar.*;\n";
     
     _setDocText(text);
-    rule1.indentLine(_doc, 13);
+    rule1.indentLine(_doc, 13, Indenter.OTHER);
     assertEquals("no brace, no suffix", 
                  aligned1, _doc.getText(0, _doc.getLength()));
     
     _setDocText(text);
-    rule2.indentLine(_doc, 13);
+    rule2.indentLine(_doc, 13, Indenter.OTHER);
     assertEquals("no brace, with suffix", 
                  aligned2, _doc.getText(0, _doc.getLength()));
   }

@@ -81,7 +81,7 @@ public class QuestionBraceIsCurlyTest extends IndentRulesTestCase
     _setDocText(_text);
     
     for (i = 0; i < _text.length(); i++)
-      assertTrue("START has no brace.", !_rule.applyRule(_doc, i));
+      assertTrue("START has no brace.", !_rule.applyRule(_doc, i, Indenter.OTHER));
       
     /* (2) */
     
@@ -91,8 +91,8 @@ public class QuestionBraceIsCurlyTest extends IndentRulesTestCase
     
     _setDocText(_text);
     
-    assertTrue("START has no brace.", !_rule.applyRule(_doc, 18)); 
-    assertTrue("START's brace is curly brace.", _rule.applyRule(_doc, 19));
+    assertTrue("START has no brace.", !_rule.applyRule(_doc, 18, Indenter.OTHER));
+    assertTrue("START's brace is curly brace.", _rule.applyRule(_doc, 19, Indenter.OTHER));
     
     /* (3) */
     
@@ -103,8 +103,8 @@ public class QuestionBraceIsCurlyTest extends IndentRulesTestCase
     
     _setDocText(_text);
     
-    assertTrue("START is open curly brace.", !_rule.applyRule(_doc, _text.length() - 2));
-    assertTrue("START is open curly brace.", !_rule.applyRule(_doc, _text.length() - 1));
+    assertTrue("START is open curly brace.", !_rule.applyRule(_doc, _text.length() - 2, Indenter.OTHER));
+    assertTrue("START is open curly brace.", !_rule.applyRule(_doc, _text.length() - 1, Indenter.OTHER));
     
     /* (4) */
     
@@ -115,9 +115,9 @@ public class QuestionBraceIsCurlyTest extends IndentRulesTestCase
     
     _setDocText(_text);
     
-    assertTrue("START's brace is open curly brace.", _rule.applyRule(_doc, 14));     
-    assertTrue("START's brace is open curly brace.", _rule.applyRule(_doc, 22));     
-    assertTrue("START's brace is an open paren.", !_rule.applyRule(_doc, 23));     
+    assertTrue("START's brace is open curly brace.", _rule.applyRule(_doc, 14, Indenter.OTHER));
+    assertTrue("START's brace is open curly brace.", _rule.applyRule(_doc, 22, Indenter.OTHER));
+    assertTrue("START's brace is an open paren.", !_rule.applyRule(_doc, 23, Indenter.OTHER));
     
     /* (5) */
     
@@ -130,11 +130,11 @@ public class QuestionBraceIsCurlyTest extends IndentRulesTestCase
     
     _setDocText(_text);
     
-    assertTrue("START has no brace.", !_rule.applyRule(_doc, 0));     
-    assertTrue("START's brace is open bracket.", !_rule.applyRule(_doc, 7));     
-    assertTrue("START's brace is an open curly brace.", _rule.applyRule(_doc, 28));     
-    assertTrue("START's brace is an open curly brace.", _rule.applyRule(_doc, 30));     
-    assertTrue("START's brace is an open curly brace.", _rule.applyRule(_doc, _text.length() - 1));     
+    assertTrue("START has no brace.", !_rule.applyRule(_doc, 0, Indenter.OTHER));
+    assertTrue("START's brace is open bracket.", !_rule.applyRule(_doc, 7, Indenter.OTHER));
+    assertTrue("START's brace is an open curly brace.", _rule.applyRule(_doc, 28, Indenter.OTHER));
+    assertTrue("START's brace is an open curly brace.", _rule.applyRule(_doc, 30, Indenter.OTHER));
+    assertTrue("START's brace is an open curly brace.", _rule.applyRule(_doc, _text.length() - 1, Indenter.OTHER));
   }
   
   public void testOnlyCurly() throws BadLocationException
@@ -148,11 +148,11 @@ public class QuestionBraceIsCurlyTest extends IndentRulesTestCase
     
     _setDocText(_text);
     
-    assertTrue("START has no brace.", !_rule.applyRule(_doc, 0));     
-    assertTrue("START has no brace.", !_rule.applyRule(_doc, 7));     
-    assertTrue("START has no brace.", !_rule.applyRule(_doc, 28));     
-    assertTrue("START has no brace.", !_rule.applyRule(_doc, 30));     
-    assertTrue("START has no brace.", !_rule.applyRule(_doc, _text.length() - 1));     
+    assertTrue("START has no brace.", !_rule.applyRule(_doc, 0, Indenter.OTHER));
+    assertTrue("START has no brace.", !_rule.applyRule(_doc, 7, Indenter.OTHER));
+    assertTrue("START has no brace.", !_rule.applyRule(_doc, 28, Indenter.OTHER));
+    assertTrue("START has no brace.", !_rule.applyRule(_doc, 30, Indenter.OTHER));
+    assertTrue("START has no brace.", !_rule.applyRule(_doc, _text.length() - 1, Indenter.OTHER));
     
     /* (2) */
     
@@ -165,11 +165,11 @@ public class QuestionBraceIsCurlyTest extends IndentRulesTestCase
     
     _setDocText(_text);
     
-    assertTrue("START has no brace.", !_rule.applyRule(_doc, 0));     
-    assertTrue("START's brace is an open curly brace.", _rule.applyRule(_doc, 7));     
-    assertTrue("START's brace is an open curly brace.", _rule.applyRule(_doc, 18));     
-    assertTrue("START's brace is an open curly brace.", _rule.applyRule(_doc, 19));     
-    assertTrue("START's brace is an open curly brace.", _rule.applyRule(_doc, _text.length() - 1));
+    assertTrue("START has no brace.", !_rule.applyRule(_doc, 0, Indenter.OTHER));
+    assertTrue("START's brace is an open curly brace.", _rule.applyRule(_doc, 7, Indenter.OTHER));
+    assertTrue("START's brace is an open curly brace.", _rule.applyRule(_doc, 18, Indenter.OTHER));
+    assertTrue("START's brace is an open curly brace.", _rule.applyRule(_doc, 19, Indenter.OTHER));
+    assertTrue("START's brace is an open curly brace.", _rule.applyRule(_doc, _text.length() - 1, Indenter.OTHER));
     
     /* (3) */
     
@@ -178,7 +178,7 @@ public class QuestionBraceIsCurlyTest extends IndentRulesTestCase
       "}";
     _setDocText(_text);
     
-    assertTrue("Close brace immediately after open brace.", _rule.applyRule(_doc, 12));
+    assertTrue("Close brace immediately after open brace.", _rule.applyRule(_doc, 12, Indenter.OTHER));
     
     /* (4) */
     
@@ -190,7 +190,7 @@ public class QuestionBraceIsCurlyTest extends IndentRulesTestCase
       "}";
     _setDocText(_text);
     
-    assertTrue("Close brace immediately after open brace.", _rule.applyRule(_doc, 29));
+    assertTrue("Close brace immediately after open brace.", _rule.applyRule(_doc, 29, Indenter.OTHER));
   }
 }
 

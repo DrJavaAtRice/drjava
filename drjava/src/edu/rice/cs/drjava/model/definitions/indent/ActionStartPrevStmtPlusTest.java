@@ -69,13 +69,13 @@ public class ActionStartPrevStmtPlusTest extends IndentRulesTestCase {
     IndentRuleAction rule2 = new ActionStartPrevStmtPlus("  ", true);
 
     _setDocText("foo();\n");
-    rule1.indentLine(_doc, 2);
+    rule1.indentLine(_doc, 2, Indenter.OTHER);
     assertEquals("no prev stmt, no suffix",
                  "foo();\n",
                  _doc.getText(0, _doc.getLength()));
     
     _setDocText("foo();\n");
-    rule2.indentLine(_doc, 2);
+    rule2.indentLine(_doc, 2, Indenter.OTHER);
     assertEquals("no prev stmt, suffix two spaces",
                  "  foo();\n",
                  _doc.getText(0, _doc.getLength()));
@@ -86,13 +86,13 @@ public class ActionStartPrevStmtPlusTest extends IndentRulesTestCase {
     IndentRuleAction rule2 = new ActionStartPrevStmtPlus("  ", true);
 
     _setDocText("  foo().\n//boo();\n/*y=x+1;\nfoo(){}*/\nbar();\nbiz();\n");
-    rule1.indentLine(_doc, 44);
+    rule1.indentLine(_doc, 44, Indenter.OTHER);
     assertEquals("prev stmt on prev line, no suffix",
                  "  foo().\n//boo();\n/*y=x+1;\nfoo(){}*/\nbar();\n  biz();\n",
                  _doc.getText(0, _doc.getLength()));
     
     _setDocText("  foo().\n//boo();\n/*y=x+1;\nfoo(){}*/\nbar();\nbiz();\n");
-    rule2.indentLine(_doc, 44);
+    rule2.indentLine(_doc, 44, Indenter.OTHER);
     assertEquals("prev stmt on prev line, suffix two spaces",
                  "  foo().\n//boo();\n/*y=x+1;\nfoo(){}*/\nbar();\n    biz();\n",
                  _doc.getText(0, _doc.getLength()));
@@ -103,13 +103,13 @@ public class ActionStartPrevStmtPlusTest extends IndentRulesTestCase {
     IndentRuleAction rule2 = new ActionStartPrevStmtPlus("  ", true);
     
     _setDocText("  foo();\n//y=x+1;\n/*void blah {\n}*/\n  ';' + blah.\n//foo\nx;\n");
-    rule1.indentLine(_doc, 56);
+    rule1.indentLine(_doc, 56, Indenter.OTHER);
     assertEquals("prev stmt serveral lines before, no suffix",
                  "  foo();\n//y=x+1;\n/*void blah {\n}*/\n  ';' + blah.\n//foo\n  x;\n",
                  _doc.getText(0, _doc.getLength()));
     
     _setDocText("  foo();\n//y=x+1;\n/*void blah {\n}*/\n  ';' + blah.\n//foo\nx;\n");
-    rule2.indentLine(_doc, 56);
+    rule2.indentLine(_doc, 56, Indenter.OTHER);
     assertEquals("prev stmt serveral lines before, suffix two spaces", 
                  "  foo();\n//y=x+1;\n/*void blah {\n}*/\n  ';' + blah.\n//foo\n    x;\n",
                  _doc.getText(0, _doc.getLength()));
@@ -121,7 +121,7 @@ public class ActionStartPrevStmtPlusTest extends IndentRulesTestCase {
     _setDocText("test2 = x ? y :\n" +     // ? and : on one line
                 "  z;\n" +     // unfinished ternary
                 "foo();\n");     // new stmt
-    rule.indentLine(_doc, 21);
+    rule.indentLine(_doc, 21, Indenter.OTHER);
     assertEquals("Colon is not a delimiter",
                  "test2 = x ? y :\n" +     // ? and : on one line
                  "  z;\n" +     // unfinished ternary
@@ -138,7 +138,7 @@ public class ActionStartPrevStmtPlusTest extends IndentRulesTestCase {
                 "};\n" +
                 "   a;");     // new stmt
     //rule.indentLine(_doc, 8);
-    rule.indentLine(_doc, 17);
+    rule.indentLine(_doc, 17, Indenter.OTHER);
     assertEquals("After array assignment",
                  "a = {\n" + 
                  "  b,c,d\n" +
@@ -154,7 +154,7 @@ public class ActionStartPrevStmtPlusTest extends IndentRulesTestCase {
                 "};;;\n" +
                 "   a;");     // new stmt
     //rule.indentLine(_doc, 8);
-    rule.indentLine(_doc, 19);
+    rule.indentLine(_doc, 19, Indenter.OTHER);
     assertEquals("After array assignment multi semi colons",
                  "a = {\n" + 
                  "  b,c,d\n" +

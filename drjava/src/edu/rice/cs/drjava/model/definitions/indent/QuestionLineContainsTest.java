@@ -74,14 +74,14 @@ public class QuestionLineContainsTest extends IndentRulesTestCase {
     _setDocText("return test ? x : y;\n}\n");
     _doc.setCurrentLocation(0);
     assertTrue("colon in text (after startdoc)",
-	       rule.applyRule(_doc));
+	       rule.applyRule(_doc, Indenter.OTHER));
     _setDocText("foo();\nreturn test ? x : y;\n}\n");
     _doc.setCurrentLocation(10);
     assertTrue("colon in text (after newline)",
-	       rule.applyRule(_doc));
+	       rule.applyRule(_doc, Indenter.OTHER));
     _doc.setCurrentLocation(25);
     assertTrue("colon in text (after colon on line)",
-	       rule.applyRule(_doc));
+	       rule.applyRule(_doc, Indenter.OTHER));
   }    
   
   /**
@@ -94,9 +94,9 @@ public class QuestionLineContainsTest extends IndentRulesTestCase {
     // No colon in text
     _setDocText("foo();\nreturn test ? x : y;\n}\n");
     _doc.setCurrentLocation(6);
-    assertTrue("no colon", !rule.applyRule(_doc));
+    assertTrue("no colon", !rule.applyRule(_doc, Indenter.OTHER));
     _doc.setCurrentLocation(28);
-    assertTrue("line of close brace (no colon in text)", !rule.applyRule(_doc));    
+    assertTrue("line of close brace (no colon in text)", !rule.applyRule(_doc, Indenter.OTHER));
   }
 
   /**
@@ -111,15 +111,15 @@ public class QuestionLineContainsTest extends IndentRulesTestCase {
     _setDocText("//case 1:\nreturn test; //? x : y\n}\n");
     _doc.setCurrentLocation(0);
     assertTrue("entire line with colon in comment (no colon, single line comment)",
-	       !rule.applyRule(_doc));
+	       !rule.applyRule(_doc, Indenter.OTHER));
     _doc.setCurrentLocation(10);
     assertTrue("part of line with colon in comment (no colon, single line comment)",
-	       !rule.applyRule(_doc));
+	       !rule.applyRule(_doc, Indenter.OTHER));
 
     // No colon, multi-line comment
     _setDocText("foo();\nreturn test; /*? x : y*/\n}\n");
     _doc.setCurrentLocation(7);
-    assertTrue("no colon, colon in multi-line comment", !rule.applyRule(_doc));
+    assertTrue("no colon, colon in multi-line comment", !rule.applyRule(_doc, Indenter.OTHER));
   }
 
   /**
@@ -133,6 +133,6 @@ public class QuestionLineContainsTest extends IndentRulesTestCase {
     // No colon, quotes
     _setDocText("foo();\nreturn \"total: \" + sum\n}\n");
     _doc.setCurrentLocation(7);
-    assertTrue("no colon, colon in quotes", !rule.applyRule(_doc));
+    assertTrue("no colon, colon in quotes", !rule.applyRule(_doc, Indenter.OTHER));
   }
 }

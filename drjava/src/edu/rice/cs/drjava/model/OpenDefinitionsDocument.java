@@ -240,7 +240,7 @@ public interface OpenDefinitionsDocument {
    * A forwarding method to indent the current line or selection
    * in the definitions.
    */
-  public void indentLinesInDefinitions(int selStart, int selEnd);
+  public void indentLinesInDefinitions(int selStart, int selEnd, int reason);
 
   /**
    * A forwarding method to comment out the current line or selection

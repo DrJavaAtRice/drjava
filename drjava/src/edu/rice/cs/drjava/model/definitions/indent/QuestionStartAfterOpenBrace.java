@@ -70,7 +70,7 @@ public class QuestionStartAfterOpenBrace extends IndentRuleQuestion
    * previous to the start of the current line (excluding any characters
    * inside comments or strings) is an open brace.
    */
-  boolean applyRule(DefinitionsDocument doc)
+  boolean applyRule(DefinitionsDocument doc, int reason)
   {
     
     int origin = doc.getCurrentLocation();

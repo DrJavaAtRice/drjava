@@ -49,11 +49,12 @@ import edu.rice.cs.util.UnexpectedException;
 /**
  * @version $Id$
  * 
- * Asks whether the current line is empty (contains only whitespace).
+ * Asks whether the current line is empty (contains only whitespace), or indentation was
+ * spawned by pressing enter
  */
-class QuestionCurrLineEmpty extends IndentRuleQuestion {
+class QuestionCurrLineEmptyOrEnterPress extends IndentRuleQuestion {
   
-  QuestionCurrLineEmpty(IndentRule yesRule, IndentRule noRule) {
+  QuestionCurrLineEmptyOrEnterPress(IndentRule yesRule, IndentRule noRule) {
     super(yesRule, noRule);
   }
 
@@ -62,7 +63,10 @@ class QuestionCurrLineEmpty extends IndentRuleQuestion {
    * @param doc DefinitionsDocument containing the line to be indented.
    * @return true if this node's rule holds.
    */
-  boolean applyRule(DefinitionsDocument doc) {
+  boolean applyRule(DefinitionsDocument doc, int reason) {
+    if (reason == Indenter.ENTER_KEY_PRESS){
+      return true;
+    }
     try {
       // Determine if there are only whitespace chars by seeing if the
       //  first non-WS char is the endOfLine

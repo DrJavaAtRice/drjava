@@ -1586,8 +1586,10 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
     return _reduced.balanceForward();
   }
 
-
-  public void indentLines(int selStart, int selEnd) {
+  public void indentLines(int selStart, int selEnd){
+    indentLines(selStart, selEnd, Indenter.OTHER);
+  }
+  public void indentLines(int selStart, int selEnd, int reason) {
     //long start = System.currentTimeMillis();
     try {
       // Begins a compound edit. 
@@ -1595,7 +1597,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
       
       if (selStart == selEnd) {
         Position oldCurrentPosition = createPosition(_currentLocation);
-        _indentLine();
+        _indentLine(reason);
         //int caretPos = getCaretPosition();
         //_doc().setCurrentLocation(caretPos);
         setCurrentLocation(oldCurrentPosition.getOffset());
@@ -1604,7 +1606,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
         //setCaretPosition(caretPos + space);
       }
       else {
-        _indentBlock(selStart, selEnd);
+        _indentBlock(selStart, selEnd, reason);
       }
       // Ends the compound edit.
       _undoManager.endCompoundEdit(key);
@@ -1628,8 +1630,9 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
    * points start and end.
    * @param start Position in document to start indenting from
    * @param end Position in document to end indenting at
+   * @param reason the user action spawning this indent
    */
-  private synchronized void _indentBlock(final int start, final int end) {
+  private synchronized void _indentBlock(final int start, final int end, int reason) {
     //DrJava.consoleOut().println("indenting block of " + (end-start));
     try {
       // Keep marker at the end. This Position will be the
@@ -1644,7 +1647,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
         // regardless of how indentLine changes things
         Position walkerPos = this.createPosition(walker);
         // Indent current line
-        _indentLine();
+        _indentLine(reason);
         // Move back to walker spot
         setCurrentLocation(walkerPos.getOffset());
         walker = walkerPos.getOffset();
@@ -1661,10 +1664,10 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
   }
 
   /**
-   * Indents a line using the Indenter decision tree.
+   * Indents a line using the Indenter decision tree.  Package private for testing purposes
    */
-  private void _indentLine() {
-    _indenter.indent(this);
+void _indentLine(int reason) {
+    _indenter.indent(this, reason);
   }
   
   /**
@@ -1839,7 +1842,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
       if ((pos >= 0) && goodWing) {
         // Otherwise, remove the wings and indent.
         remove(lineStart + pos, 2);
-        _indentLine();
+        _indentLine(Indenter.OTHER);
       }
     } catch (BadLocationException e) {
       // Should not happen

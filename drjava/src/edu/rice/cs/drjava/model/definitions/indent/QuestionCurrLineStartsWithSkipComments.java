@@ -81,7 +81,7 @@ public class QuestionCurrLineStartsWithSkipComments extends IndentRuleQuestion
    * @return True iff the current line in the document starts with the
    * character sequence specified by the String field _prefix.
    */
-  boolean applyRule(DefinitionsDocument doc)
+  boolean applyRule(DefinitionsDocument doc, int reason)
   {
     try
     {

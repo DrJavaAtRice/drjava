@@ -4,7 +4,7 @@
  * at http://sourceforge.net/projects/drjava
  *
  * Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)
- * 
+ *
  * DrJava is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -60,7 +60,7 @@ public abstract class IndentRuleQuestion extends IndentRuleWithTrace {
    * Node in decision tree to use if the rule does not hold in this context.
    */
   private final IndentRule _noRule;
-  
+
   /**
    * Constructs a new Question indent rule using the two given children.
    * @param yesRule Rule to use if this rule holds
@@ -74,20 +74,22 @@ public abstract class IndentRuleQuestion extends IndentRuleWithTrace {
   /**
    * Determines if the given rule holds in this context.
    * @param doc DefinitionsDocument containing the line to be indented.
+   * @param reason - The reason that indentation was initiated, specified in Indenter
    * @return true if this node's rule holds.
    */
-  abstract boolean applyRule(DefinitionsDocument doc);
+  abstract boolean applyRule(DefinitionsDocument doc, int reason);
 
   /**
    * Determines if the given rule holds in this context.
    * @param doc DefinitionsDocument containing the line to be indented.
    * @param pos Position within line to be indented.
+   * @param reason - The reason that indentation was initiated, specified in Indenter
    * @return true if this node's rule holds.
    */
-  boolean applyRule(DefinitionsDocument doc, int pos) {
+  boolean applyRule(DefinitionsDocument doc, int pos, int reason) {
     int oldPos = doc.getCurrentLocation();
     doc.setCurrentLocation(pos);
-    boolean result = applyRule(doc);
+    boolean result = applyRule(doc, reason);
     if (oldPos > doc.getLength()) {
       oldPos = doc.getLength();
     }
@@ -99,16 +101,17 @@ public abstract class IndentRuleQuestion extends IndentRuleWithTrace {
    * Determines if the given rule holds in this context and calls
    * the same method on one of its child nodes.
    * @param doc DefinitionsDocument containing the line to be indented.
+   * @param reason - The reason that indentation was initiated, specified in Indenter
    */
-  public void indentLine(DefinitionsDocument doc)
+  public void indentLine(DefinitionsDocument doc, int reason)
   {
-    if (applyRule(doc)) {
+    if (applyRule(doc, reason)) {
       _addToIndentTrace(getRuleName(), YES, false);
-      _yesRule.indentLine(doc);
+      _yesRule.indentLine(doc, reason);
     }
     else {
       _addToIndentTrace(getRuleName(), NO, false);
-      _noRule.indentLine(doc);
+      _noRule.indentLine(doc, reason);
     }
   }
 

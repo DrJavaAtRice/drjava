@@ -68,7 +68,7 @@ public class QuestionBraceIsParenOrBracket extends IndentRuleQuestion
    * to the start of the current line was opened by one of the characters 
    * '(' or '['. 
    */
-  boolean applyRule(DefinitionsDocument doc)
+  boolean applyRule(DefinitionsDocument doc, int reason)
   {
     // PRE: We are not inside a multiline comment.
 

@@ -108,7 +108,7 @@ public class QuestionExistsCharInStmt extends IndentRuleQuestion {
    * @param doc DefinitionsDocument containing the line to be indented.
    * @return true if this node's rule holds.
    */
-  boolean applyRule(DefinitionsDocument doc) {
+  boolean applyRule(DefinitionsDocument doc, int reason) {
 
    // Find the position of endChar on the current line
     int endCharPos = doc.findCharOnLine(doc.getCurrentLocation(), _endChar);

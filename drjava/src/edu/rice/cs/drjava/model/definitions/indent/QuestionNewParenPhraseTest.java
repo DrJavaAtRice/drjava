@@ -69,8 +69,8 @@ public class QuestionNewParenPhraseTest extends IndentRulesTestCase {
     
     // Hits docstart
     _setDocText("\nfoo();");
-    assertTrue("first line", !rule.applyRule(_doc, 0));
-    assertTrue("second line", !rule.applyRule(_doc, 2));
+    assertTrue("first line", !rule.applyRule(_doc, 0, Indenter.OTHER));
+    assertTrue("second line", !rule.applyRule(_doc, 2, Indenter.OTHER));
   }
   
   /**
@@ -81,8 +81,8 @@ public class QuestionNewParenPhraseTest extends IndentRulesTestCase {
     
     // No paren delimiters
     _setDocText("foo\nbar.\ny");
-    assertTrue("second line", !rule.applyRule(_doc, 4));
-    assertTrue("third line", !rule.applyRule(_doc, 9));
+    assertTrue("second line", !rule.applyRule(_doc, 4, Indenter.OTHER));
+    assertTrue("third line", !rule.applyRule(_doc, 9, Indenter.OTHER));
   }
   
   /**
@@ -93,11 +93,11 @@ public class QuestionNewParenPhraseTest extends IndentRulesTestCase {
         
     // Lines ending in delimiter, each with preceding text
     _setDocText("new Foo(\nx,\ny;\na[\nbar])\n{");
-    assertTrue("line after paren", rule.applyRule(_doc, 9));
-    assertTrue("line after comma", rule.applyRule(_doc, 12));
-    assertTrue("line after semicolon", rule.applyRule(_doc, 15));
-    assertTrue("line after bracket", rule.applyRule(_doc, 18));
-    assertTrue("line after close paren", !rule.applyRule(_doc, 24));
+    assertTrue("line after paren", rule.applyRule(_doc, 9, Indenter.OTHER));
+    assertTrue("line after comma", rule.applyRule(_doc, 12, Indenter.OTHER));
+    assertTrue("line after semicolon", rule.applyRule(_doc, 15, Indenter.OTHER));
+    assertTrue("line after bracket", rule.applyRule(_doc, 18, Indenter.OTHER));
+    assertTrue("line after close paren", !rule.applyRule(_doc, 24, Indenter.OTHER));
   }
   
   /**
@@ -108,11 +108,11 @@ public class QuestionNewParenPhraseTest extends IndentRulesTestCase {
     
     // Paren delims with no leading text
     _setDocText("(\n,\n;\n[\nfoo\nbar");
-    assertTrue("line after paren", rule.applyRule(_doc, 2));
-    assertTrue("line after comma", rule.applyRule(_doc, 4));
-    assertTrue("line after semicolon", rule.applyRule(_doc, 6));
-    assertTrue("line after bracket", rule.applyRule(_doc, 8));
-    assertTrue("line after text", !rule.applyRule(_doc, 12));
+    assertTrue("line after paren", rule.applyRule(_doc, 2, Indenter.OTHER));
+    assertTrue("line after comma", rule.applyRule(_doc, 4, Indenter.OTHER));
+    assertTrue("line after semicolon", rule.applyRule(_doc, 6, Indenter.OTHER));
+    assertTrue("line after bracket", rule.applyRule(_doc, 8, Indenter.OTHER));
+    assertTrue("line after text", !rule.applyRule(_doc, 12, Indenter.OTHER));
   }
   
   /**
@@ -123,8 +123,8 @@ public class QuestionNewParenPhraseTest extends IndentRulesTestCase {
     
     // Delim in text, with comment before
     _setDocText("for (int i; // comment\ni < 2; /** comment */\ni++) {");
-    assertTrue("// comment", rule.applyRule(_doc, 23));
-    assertTrue("/* */ comment", rule.applyRule(_doc, 45));
+    assertTrue("// comment", rule.applyRule(_doc, 23, Indenter.OTHER));
+    assertTrue("/* */ comment", rule.applyRule(_doc, 45, Indenter.OTHER));
   }
   
   /**
@@ -136,10 +136,10 @@ public class QuestionNewParenPhraseTest extends IndentRulesTestCase {
     
     // Blank lines between
     _setDocText("for(\n\nint i;\n\n\ni > 0;;\n)");
-    assertTrue("line after open paren", rule.applyRule(_doc, 5));
-    assertTrue("two lines after open paren", rule.applyRule(_doc, 6));
-    assertTrue("line after semicolon", rule.applyRule(_doc, 13));
-    assertTrue("two lines after semicolon", rule.applyRule(_doc, 16));
+    assertTrue("line after open paren", rule.applyRule(_doc, 5, Indenter.OTHER));
+    assertTrue("two lines after open paren", rule.applyRule(_doc, 6, Indenter.OTHER));
+    assertTrue("line after semicolon", rule.applyRule(_doc, 13, Indenter.OTHER));
+    assertTrue("two lines after semicolon", rule.applyRule(_doc, 16, Indenter.OTHER));
   }
   
   /**
@@ -151,10 +151,10 @@ public class QuestionNewParenPhraseTest extends IndentRulesTestCase {
     
     // Comments between
     _setDocText("for(\n//\n/** foo * /int i;\n\n// bar\ni > 0;;\n)");
-    assertTrue("line after open paren", rule.applyRule(_doc, 7));
-    assertTrue("two lines after open paren", rule.applyRule(_doc, 18));
-    assertTrue("line after semicolon", rule.applyRule(_doc, 25));
-    assertTrue("two lines after semicolon", rule.applyRule(_doc, 28));
+    assertTrue("line after open paren", rule.applyRule(_doc, 7, Indenter.OTHER));
+    assertTrue("two lines after open paren", rule.applyRule(_doc, 18, Indenter.OTHER));
+    assertTrue("line after semicolon", rule.applyRule(_doc, 25, Indenter.OTHER));
+    assertTrue("two lines after semicolon", rule.applyRule(_doc, 28, Indenter.OTHER));
   }
   
   /**
@@ -165,8 +165,8 @@ public class QuestionNewParenPhraseTest extends IndentRulesTestCase {
     
     // Delim in text, not ending line
     _setDocText("foo(bar.\nx,y\n)");
-    assertTrue("line after paren", !rule.applyRule(_doc, 9));
-    assertTrue("line after comma", !rule.applyRule(_doc, 13));
+    assertTrue("line after paren", !rule.applyRule(_doc, 9, Indenter.OTHER));
+    assertTrue("line after comma", !rule.applyRule(_doc, 13, Indenter.OTHER));
   }
   
   /**
@@ -177,8 +177,8 @@ public class QuestionNewParenPhraseTest extends IndentRulesTestCase {
     
     // Delim in text, not ending line
     _setDocText("foo(x +\ny\n)");
-    assertTrue("line after operator", rule.applyRule(_doc, 8));
-    assertTrue("line after comma", !rule.applyRule(_doc, 10));
+    assertTrue("line after operator", rule.applyRule(_doc, 8, Indenter.OTHER));
+    assertTrue("line after comma", !rule.applyRule(_doc, 10, Indenter.OTHER));
   }
   
   /**
@@ -189,7 +189,7 @@ public class QuestionNewParenPhraseTest extends IndentRulesTestCase {
     
     // Delim in text, not ending line
     _setDocText("foo(x.\ny()\n)");
-    assertTrue("after paren, but not new phrase", !rule.applyRule(_doc, 10));
+    assertTrue("after paren, but not new phrase", !rule.applyRule(_doc, 10, Indenter.OTHER));
   }
 
 }

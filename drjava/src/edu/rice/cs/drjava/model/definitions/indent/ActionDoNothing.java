@@ -4,7 +4,7 @@
  * at http://sourceforge.net/projects/drjava
  *
  * Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)
- * 
+ *
  * DrJava is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -49,21 +49,21 @@ import edu.rice.cs.drjava.model.definitions.reducedmodel.BraceReduction;
  * @version $Id$
  */
 public class ActionDoNothing extends IndentRuleAction {
-  
+
   /**
    * Constructs a new rule to do nothing.
    */
   public ActionDoNothing() {
     super();
   }
-  
+
   /**
    * Properly indents the line that the caret is currently on.
    * Replaces all whitespace characters at the beginning of the
    * line with the appropriate spacing or characters.
    * @param doc DefinitionsDocument containing the line to be indented.
    */
-  public void indentLine(DefinitionsDocument doc) {
-    super.indentLine(doc);
+  public void indentLine(DefinitionsDocument doc, int reason) {
+    super.indentLine(doc, reason);
   }
 }

@@ -4,7 +4,7 @@
  * at http://sourceforge.net/projects/drjava
  *
  * Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)
- * 
+ *
  * DrJava is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -55,7 +55,7 @@ import javax.swing.text.BadLocationException;
 public class ActionStartPrevStmtPlus extends IndentRuleAction {
   private String _suffix;
   private boolean _useColon;
-  
+
   /**
    * Constructs a new rule with the given suffix string.
    * @param suffix String to append to indent level of brace
@@ -66,7 +66,7 @@ public class ActionStartPrevStmtPlus extends IndentRuleAction {
     _suffix = suffix;
     _useColon = colonIsDelim;
   }
-  
+
   /**
    * Properly indents the line that the caret is currently on.
    * Replaces all whitespace characters at the beginning of the
@@ -74,11 +74,11 @@ public class ActionStartPrevStmtPlus extends IndentRuleAction {
    *
    * @param doc DefinitionsDocument containing the line to be indented.
    */
-  public void indentLine(DefinitionsDocument doc) {
-    super.indentLine(doc);
+  public void indentLine(DefinitionsDocument doc, int reason) {
+    super.indentLine(doc, reason);
     String indent = "";
     int here = doc.getCurrentLocation();
-    
+
     // Find end of previous statement (or end of case statement)
     char[] delims = {';', '{', '}'};
     int lineStart = doc.getLineStartPos(here);
@@ -112,11 +112,11 @@ public class ActionStartPrevStmtPlus extends IndentRuleAction {
       // Jump over {-} region if delimiter was a close brace.
       char delim = doc.getText(prevDelimiterPos, 1).charAt(0);
 
-      if (delim == '}') {       
+      if (delim == '}') {
         //BraceReduction reduced = doc.getReduced();
         //we're pretty sure the doc is in sync.
         doc.resetReducedModelLocation();
-        
+
         int dist = prevDelimiterPos - here + 1;
         synchronized(doc){
           doc.move(dist);
@@ -128,7 +128,7 @@ public class ActionStartPrevStmtPlus extends IndentRuleAction {
     catch (BadLocationException e) {
       throw new UnexpectedException(e);
     }
-    
+
     // Get indent of prev statement
     try {
       // Include colons as end of statement (ie. "case")
@@ -149,7 +149,7 @@ public class ActionStartPrevStmtPlus extends IndentRuleAction {
     indent = indent + _suffix;
     doc.setTab(indent, here);
   }
-  
+
   private boolean _isPrevNonWSCharEqualTo(DefinitionsDocument doc,int pos,char c) {
     try {
       int prevPos = doc.findPrevNonWSCharPos(pos);

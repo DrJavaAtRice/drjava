@@ -59,6 +59,7 @@ import edu.rice.cs.drjava.model.GlobalModel;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.definitions.DefinitionsEditorKit;
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
+import edu.rice.cs.drjava.model.definitions.indent.Indenter;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.CodeStatus;
@@ -389,7 +390,11 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
     public void actionPerformed(ActionEvent e) {
       int key = _doc.getDocument().getUndoManager().startCompoundEdit();
       _defaultAction.actionPerformed(e);
-      indent();
+      if (e.getID() == KeyEvent.VK_ENTER){
+        indent(Indenter.ENTER_KEY_PRESS);
+      } else {
+        indent(Indenter.OTHER);
+      }
       _doc.getDocument().getUndoManager().endCompoundEdit(key);
     }
   }
@@ -419,7 +424,7 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
   private Action _indentKeyActionColon = new IndentKeyAction(":", getKeymap().getDefaultAction());
 
   /**
-   * Takes in any keyboard input, checks to see if it is in the keyToActionMap 
+   * Takes in any keyboard input, checks to see if it is in the keyToActionMap
    * in KeybindingManager, if so executes the action, otherwise checks if it
    * contains the current platform's menu shortcut modifier and if so, ignores 
    * that command (this disallows the execution of the UI's default 
@@ -677,8 +682,8 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
   /**
    *  Indents the lines contained within the given selection.
    */
-  private void _indentLines() {
-    _doc.indentLinesInDefinitions(getSelectionStart(), getSelectionEnd());
+  private void _indentLines(int reason) {
+    _doc.indentLinesInDefinitions(getSelectionStart(), getSelectionEnd(), reason);
   }
   
   /**
@@ -970,6 +975,12 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
     return EDITOR_KIT;
   }
 
+  /**
+   * Runs indent(int) with a default value of Indenter.OTHER
+   */
+  public void indent(){
+  indent(Indenter.OTHER);
+  }
 
   /**
    * Perform an indent either on the current line or on the given
@@ -978,8 +989,11 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
    * will be fixed and corrected so this doesn't look so ugly.
    * The purpose is to divorce the pane from the document so we can just
    * pass a document to DefinitionsPane and that's all it cares about.
+   * @param reason the action that spawned this indent action.  Enter presses
+   * are special, so that stars are inserted when lines in a multiline comment
+   * are broken up.
    */
-  public void indent() {
+  public void indent(int reason) {
     /**
      * Because indent() is a function called directly by the Keymap,
      * it does not go through the regular insertString channels and thus
@@ -1019,7 +1033,7 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
         _mainFrame.hourglassOn();
       }
       //_doc.indentLinesInDefinitions(selStart, selEnd);
-      _indentLines();
+      _indentLines(reason);
       setCaretPosition(_doc.getCurrentDefinitionsLocation());
       if (showWaitCursor) {
         _mainFrame.hourglassOff();

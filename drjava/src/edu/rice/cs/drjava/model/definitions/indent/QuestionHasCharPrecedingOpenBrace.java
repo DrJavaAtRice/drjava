@@ -73,7 +73,7 @@ public class QuestionHasCharPrecedingOpenBrace extends IndentRuleQuestion
    * @return True iff the last block or expression list opened previous 
    * to the start of the current line was opened by the character '{'. 
    */
-  boolean applyRule(DefinitionsDocument doc)
+  boolean applyRule(DefinitionsDocument doc, int reason)
   {
     // PRE: We are inside a {.
     

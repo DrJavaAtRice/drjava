@@ -4,7 +4,7 @@
  * at http://sourceforge.net/projects/drjava
  *
  * Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)
- * 
+ *
  * DrJava is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -54,7 +54,7 @@ import javax.swing.text.BadLocationException;
  */
 public class ActionStartStmtOfBracePlus extends IndentRuleAction {
   private String _suffix;
-  
+
   /**
    * Constructs a new rule with the given suffix string.
    * @param prefix String to append to indent level of brace
@@ -63,15 +63,15 @@ public class ActionStartStmtOfBracePlus extends IndentRuleAction {
     super();
     _suffix = suffix;
   }
-  
+
   /**
    * Properly indents the line that the caret is currently on.
    * Replaces all whitespace characters at the beginning of the
    * line with the appropriate spacing or characters.
    * @param doc DefinitionsDocument containing the line to be indented.
    */
-  public void indentLine(DefinitionsDocument doc){
-    super.indentLine(doc);
+  public void indentLine(DefinitionsDocument doc, int reason){
+    super.indentLine(doc, reason);
     int pos = doc.getCurrentLocation();
 
     // Get distance to brace
@@ -98,5 +98,5 @@ public class ActionStartStmtOfBracePlus extends IndentRuleAction {
 
     doc.setTab(indent, pos);
   }
-    
+
 }

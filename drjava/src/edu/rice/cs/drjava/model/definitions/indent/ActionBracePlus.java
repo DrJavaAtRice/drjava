@@ -4,7 +4,7 @@
  * at http://sourceforge.net/projects/drjava
  *
  * Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)
- * 
+ *
  * DrJava is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -46,36 +46,36 @@ import edu.rice.cs.drjava.model.definitions.reducedmodel.IndentInfo;
 /**
  * Aligns the indentation of the current line to the character
  * that opened the most recent block or expression list that contains
- * the beginning of the current line. Optional additional whitespaces 
+ * the beginning of the current line. Optional additional whitespaces
  * can be passed through the constructor.
  * @version $Id$
  */
-public class ActionBracePlus extends IndentRuleAction 
+public class ActionBracePlus extends IndentRuleAction
 {
   /** String holding the additional whitespaces to be inserted. */
   private String _suffix;
-  
+
   /** @param plus The additional whitespaces to be inserted. */
   public ActionBracePlus(String suffix)
   {
     _suffix = suffix;
   }
-  
+
   /**
-   * Properly indents the line that the caret is currently on. 
-   * Replaces all whitespace characters at the beginning of the 
+   * Properly indents the line that the caret is currently on.
+   * Replaces all whitespace characters at the beginning of the
    * line with the appropriate spacing or characters.
    * Preconditions: must be inside a brace.
    * @param doc DefinitionsDocument containing the line to be indented.
    */
-  public void indentLine(DefinitionsDocument doc)
+  public void indentLine(DefinitionsDocument doc, int reason)
   {
-    super.indentLine(doc);
+    super.indentLine(doc, reason);
     int here = doc.getCurrentLocation();
     int startLine = doc.getLineStartPos(here);
     doc.setCurrentLocation(startLine);
     IndentInfo ii = doc.getIndentInformation();
-    
+
     // Check preconditions
     if ((ii.braceType.equals("")) ||
         (ii.distToBrace < 0)) {
@@ -97,12 +97,12 @@ public class ActionBracePlus extends IndentRuleAction
       tab.append(" ");
     }
     tab.append(_suffix);
-    
+
     if (here > doc.getLength()) {
       here = doc.getLength() - 1;
     }
     doc.setCurrentLocation(here);
-    
+
     doc.setTab(tab.toString(), here);
   }
 }

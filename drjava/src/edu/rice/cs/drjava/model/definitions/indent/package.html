@@ -32,7 +32,7 @@
         <!-- Comment Tree -->
         <li>2. Yes: <b>QuestionPrevLineStartsComment</b><br>
         <ul>
-            <li>3. Yes: <b>QuestionCurrLineEmpty</b><br>
+            <li>3. Yes: <b>QuestionCurrLineEmptyOrEnterPress</b><br>
             <ul>
                 <li>4. Yes: ActionStartPrevLinePlus(" * ")<br>
                     <i>Starting first line of a mutli-line comment</i>
@@ -45,7 +45,7 @@
                 <ul>
                     <li>8. Yes: ActionStartPrevLinePlus("") (Goto 12)<br>
                         <i>Revisiting middle line of a mutli-line comment (with star)</i>
-                    <li>9. No: <b>QuestionCurrLineEmpty</b><br>
+                    <li>9. No: <b>QuestionCurrLineEmptyOrEnterPress</b><br>
                     <ul>
                         <li>10. Yes: ActionStartPrevLinePlus("* ")<br>
                             <i>Starting middle line of a mutli-line comment</i>

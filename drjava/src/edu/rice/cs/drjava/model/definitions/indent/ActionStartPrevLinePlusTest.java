@@ -4,7 +4,7 @@
  * at http://sourceforge.net/projects/drjava
  *
  * Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)
- * 
+ *
  * DrJava is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -53,76 +53,76 @@ public class ActionStartPrevLinePlusTest extends IndentRulesTestCase {
     super(name);
   }
 
-    
+
   public void testLeaveBe() throws javax.swing.text.BadLocationException {
     _setDocText("foo\nbar");
     _doc.setCurrentLocation(4);
-    new ActionStartPrevLinePlus("").indentLine(_doc);
+    new ActionStartPrevLinePlus("").indentLine(_doc, Indenter.OTHER);
     assertEquals(7, _doc.getLength());
     assertEquals("foo\nbar", _doc.getText(0, 7));
   }
   public void testLeaveBeMidLine() throws javax.swing.text.BadLocationException {
     _setDocText("foo\nbar");
     _doc.setCurrentLocation(6);
-    new ActionStartPrevLinePlus("").indentLine(_doc);
+    new ActionStartPrevLinePlus("").indentLine(_doc, Indenter.OTHER);
     assertEquals(7, _doc.getLength());
     assertEquals("foo\nbar", _doc.getText(0, 7));
   }
   public void testAddSpaces() throws javax.swing.text.BadLocationException {
     _setDocText("foo\nbar");
     _doc.setCurrentLocation(4);
-    new ActionStartPrevLinePlus("   ").indentLine(_doc);  // three spaces
+    new ActionStartPrevLinePlus("   ").indentLine(_doc, Indenter.OTHER);  // three spaces
     assertEquals(10, _doc.getLength());
     assertEquals("foo\n   bar", _doc.getText(0, 10));
   }
   public void testAddSpacesMidLine() throws javax.swing.text.BadLocationException {
     _setDocText("foo\nbar");
     _doc.setCurrentLocation(6);
-    new ActionStartPrevLinePlus("   ").indentLine(_doc);  // three spaces
+    new ActionStartPrevLinePlus("   ").indentLine(_doc, Indenter.OTHER);  // three spaces
     assertEquals(10, _doc.getLength());
     assertEquals("foo\n   bar", _doc.getText(0, 10));
   }
   public void testBothIndented() throws javax.swing.text.BadLocationException {
     _setDocText("  foo\n  bar");
     _doc.setCurrentLocation(9);
-    new ActionStartPrevLinePlus("").indentLine(_doc);
+    new ActionStartPrevLinePlus("").indentLine(_doc, Indenter.OTHER);
     assertEquals(11, _doc.getLength());
     assertEquals("  foo\n  bar", _doc.getText(0, 11));
   }
   public void testBothIndentedAddSpaces() throws javax.swing.text.BadLocationException {
     _setDocText("  foo\n  bar");
     _doc.setCurrentLocation(9);
-    new ActionStartPrevLinePlus("   ").indentLine(_doc);
+    new ActionStartPrevLinePlus("   ").indentLine(_doc, Indenter.OTHER);
     assertEquals(14, _doc.getLength());
     assertEquals("  foo\n     bar", _doc.getText(0, 14));
   }
   public void testBothIndentedAddStuff() throws javax.swing.text.BadLocationException {
     _setDocText("  foo\n  bar");
     _doc.setCurrentLocation(9);
-    new ActionStartPrevLinePlus("abc").indentLine(_doc);
+    new ActionStartPrevLinePlus("abc").indentLine(_doc, Indenter.OTHER);
     assertEquals(14, _doc.getLength());
     assertEquals("  foo\n  abcbar", _doc.getText(0, 14));
   }
   public void testSecondLineMisindented() throws javax.swing.text.BadLocationException {
     _setDocText("  foo\n bar");
     _doc.setCurrentLocation(9);
-    new ActionStartPrevLinePlus("abc").indentLine(_doc);
+    new ActionStartPrevLinePlus("abc").indentLine(_doc, Indenter.OTHER);
     assertEquals(14, _doc.getLength());
     assertEquals("  foo\n  abcbar", _doc.getText(0, 14));
   }
   public void testLeavesOtherLinesAlone() throws javax.swing.text.BadLocationException {
     _setDocText("foo\nbar\nblah");
     _doc.setCurrentLocation(10);
-    new ActionStartPrevLinePlus("   ").indentLine(_doc);  // three spaces
+    new ActionStartPrevLinePlus("   ").indentLine(_doc, Indenter.OTHER);  // three spaces
     assertEquals(15, _doc.getLength());
     assertEquals("foo\nbar\n   blah", _doc.getText(0, 15));
   }
   public void testOtherLinesIndented() throws javax.swing.text.BadLocationException {
     _setDocText(" foo\n  bar\n   blah");
     _doc.setCurrentLocation(15);
-    new ActionStartPrevLinePlus("   ").indentLine(_doc);  // three spaces
+    new ActionStartPrevLinePlus("   ").indentLine(_doc, Indenter.OTHER);  // three spaces
     assertEquals(20, _doc.getLength());
     assertEquals(" foo\n  bar\n     blah", _doc.getText(0, 20));
   }
-  
+
 }

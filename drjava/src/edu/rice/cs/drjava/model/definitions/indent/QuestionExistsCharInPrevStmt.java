@@ -62,7 +62,7 @@ public class QuestionExistsCharInPrevStmt extends IndentRuleQuestion {
    * Searches through the previous statement to find if it has the current character not in a 
    * comment and not in a string
    */
-  boolean applyRule(DefinitionsDocument doc) {
+  boolean applyRule(DefinitionsDocument doc, int reason) {
     //Find the end of the previous line
     int endPreviousStatement;
     try {

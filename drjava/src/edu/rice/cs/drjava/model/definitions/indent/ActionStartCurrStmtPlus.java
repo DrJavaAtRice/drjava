@@ -4,7 +4,7 @@
  * at http://sourceforge.net/projects/drjava
  *
  * Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)
- * 
+ *
  * DrJava is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -47,14 +47,14 @@ import javax.swing.text.BadLocationException;
 
 /**
  * Indents the current line in the document to the indent level of the
- * start of the statement that the cursor is currently on, plus the given 
+ * start of the statement that the cursor is currently on, plus the given
  * suffix string.
  *
  * @version $Id$
  */
 public class ActionStartCurrStmtPlus extends IndentRuleAction {
   private String _suffix;
-  
+
   /**
    * Constructs a new rule with the given suffix string.
    * @param prefix String to append to indent level of brace
@@ -63,7 +63,7 @@ public class ActionStartCurrStmtPlus extends IndentRuleAction {
     super();
     _suffix = suffix;
   }
-  
+
   /**
    * Properly indents the line that the caret is currently on.
    * Replaces all whitespace characters at the beginning of the
@@ -71,17 +71,17 @@ public class ActionStartCurrStmtPlus extends IndentRuleAction {
    *
    * @param doc DefinitionsDocument containing the line to be indented.
    */
-  public void indentLine(DefinitionsDocument doc) {
-    super.indentLine(doc);
-    
+  public void indentLine(DefinitionsDocument doc, int reason) {
+    super.indentLine(doc, reason);
+
     /**
      * This method is simply a call to getIndentOfCurrStmt, which is
      * fully tested in IndentHelperTest, so no additional tests are
      * provided for this class.
      */
-    
+
     String indent = "";
-    
+
     try {
       indent = doc.getIndentOfCurrStmt(doc.getCurrentLocation(),
                                        new char[] {';','{','}'},

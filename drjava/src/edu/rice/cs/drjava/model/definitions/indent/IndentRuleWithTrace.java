@@ -4,7 +4,7 @@
  * at http://sourceforge.net/projects/drjava
  *
  * Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)
- * 
+ *
  * DrJava is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -40,9 +40,8 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.model.definitions.indent;
 
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
-import edu.rice.cs.drjava.model.definitions.reducedmodel.BraceReduction;
-
 import gj.util.Vector;
+
 import java.io.PrintStream;
 
 /**
@@ -60,7 +59,7 @@ public abstract class IndentRuleWithTrace implements IndentRule{
   public static final String YES = "Yes";
   public static final String NO = "No";
   public static final String TERMINUS_RULE = "";
-  
+
   /* This method prints the most recent trace through the indent tree */
   public static void printLastIndentTrace(PrintStream ps){
     if (trace == null){
@@ -72,15 +71,15 @@ public abstract class IndentRuleWithTrace implements IndentRule{
       ps.println("******************************");
     }
   }
-  
+
   public static void setRuleTraceEnabled(boolean ruleTraceEnabled){
     IndentRuleWithTrace.ruleTraceEnabled = ruleTraceEnabled;
   }
-  
+
   static Vector<String> getTrace(){
     return trace;
   }
-  
+
   /**
    * This rule just adds to the trace kept in trace
    */
@@ -101,17 +100,17 @@ public abstract class IndentRuleWithTrace implements IndentRule{
    * line with the appropriate spacing or characters.
    * @param doc DefinitionsDocument containing the line to be indented.
    */
-  public void indentLine(DefinitionsDocument doc, int pos) {
+  public void indentLine(DefinitionsDocument doc, int pos, int reason) {
     int oldPos = doc.getCurrentLocation();
     doc.setCurrentLocation(pos);
-    indentLine(doc);
+    indentLine(doc, reason);
     if (oldPos > doc.getLength()) {
       oldPos = doc.getLength();
     }
     doc.setCurrentLocation(oldPos);
   }
 
-  public void indentLine(DefinitionsDocument doc){
+  public void indentLine(DefinitionsDocument doc, int reason){
     _addToIndentTrace(getRuleName(), TERMINUS_RULE, true);
 
     //Add the next line, and every time something is indented, the indent trace will be printed
