@@ -241,7 +241,7 @@ public class MainFrame extends JFrame {
   };
 
   /** Compiles the document in the definitions pane. */
-  private Action _compileAction = new AbstractAction("Compile") {
+  private Action _compileAction = new AbstractAction("Compile Current Document") {
     public void actionPerformed(ActionEvent ae) {
       _compile();
     }
@@ -265,7 +265,7 @@ public class MainFrame extends JFrame {
 
   /** Aborts current interaction. */
   private Action _abortInteractionAction
-    = new AbstractAction("Abort")
+    = new AbstractAction("Abort Current Interaction")
   {
     public void actionPerformed(ActionEvent ae) {
       String title = "Confirm abort interaction";
@@ -314,7 +314,7 @@ public class MainFrame extends JFrame {
 
   /** Clears the interactions console. */
   private Action _resetInteractionsAction =
-    new AbstractAction("Reset")
+    new AbstractAction("Reset Interactions")
   {
     public void actionPerformed(ActionEvent ae) {
       _model.resetInteractions();
@@ -735,12 +735,12 @@ public class MainFrame extends JFrame {
     _setUpAction(_openAction, "Open", "Open an existing file");
     _setUpAction(_saveAction, "Save", "Save the current document");
     _setUpAction(_saveAsAction, "SaveAs", "Save the current document with a new name");
-    _setUpAction(_closeAction, "Close", "Close");
-    _setUpAction(_closeAllAction, "CloseAll", "Close all");
+    _setUpAction(_closeAction, "Close", "Close the current document");
+    _setUpAction(_closeAllAction, "CloseAll", "Close all documents");
     _setUpAction(_saveAllAction, "SaveAll", "Save all open documents");
 
-    _setUpAction(_compileAction, "Play", "Compile the current document");
-    _setUpAction(_printAction, "Print", "Print");
+    _setUpAction(_compileAction, "Compile", "Compile the current document");
+    _setUpAction(_printAction, "Print", "Print the current document");
     _setUpAction(_pageSetupAction, "PageSetup", "Page Setup");
     _setUpAction(_printPreviewAction, "PrintPreview", "Print Preview");
 
@@ -758,17 +758,21 @@ public class MainFrame extends JFrame {
     _setUpAction(_findReplaceAction, "Find", "Find/Replace");
     _setUpAction(_aboutAction, "About", "About");
 
-    _setUpAction(_undoAction, "Undo", "Undo");
-    _setUpAction(_redoAction, "Redo", "Redo");
-    _setUpAction(_abortInteractionAction, "Stop", "Abort the current interaction");
-    _setUpAction(_resetInteractionsAction, "Refresh", "Reset interactions");
+    _setUpAction(_undoAction, "Undo", "Undo previous command");
+    _setUpAction(_redoAction, "Redo", "Redo last undo");
+    
+    _undoAction.putValue(Action.NAME, "Undo Previous Command");
+    _redoAction.putValue(Action.NAME, "Redo Last Undo");
+    
+    _setUpAction(_abortInteractionAction, "Break", "Abort the current interaction");
+    _setUpAction(_resetInteractionsAction, "Reset", "Reset interactions");
   }
 
-  private void _setUpAction(Action a, String icon, String desc) {
+  private void _setUpAction(Action a, String shortDesc, String desc) {
     // Commented out so that the toolbar buttons use text instead of icons.
-    // createManualToolbarButton needed to be modified as well.
+    // createManualToolbarButton was modified as well.
     // a.putValue(Action.SMALL_ICON, _getIcon(icon + "16.gif"));
-    
+    a.putValue(Action.DEFAULT, shortDesc);
     a.putValue(Action.SHORT_DESCRIPTION, desc);
   }
 
@@ -959,7 +963,7 @@ public class MainFrame extends JFrame {
     // _setUpAction had to be modified as well.
     final Icon icon = null; //(Icon) a.getValue(Action.SMALL_ICON);
     if (icon == null) {
-      ret = new JButton( (String) a.getValue(Action.NAME));
+      ret = new JButton( (String) a.getValue(Action.DEFAULT));
     }
     else {
       ret = new JButton(icon);
@@ -980,6 +984,16 @@ public class MainFrame extends JFrame {
 
     return ret;
   }
+  
+  /**
+   * Sets up all buttons for the toolbar except for undo and redo, which use
+   * _createManualToolbarButton.
+   */
+  public JButton _createToolbarButton(Action a) {
+    final JButton result = new JButton(a);
+    result.setLabel((String) a.getValue(Action.DEFAULT));
+    return result;
+  }
 
   /**
    * Sets up the toolbar with several useful buttons.
@@ -992,47 +1006,46 @@ public class MainFrame extends JFrame {
     _toolBar.setFloatable(false);
 
     _toolBar.addSeparator();
-
+    
     // New, open, save, close
-    _toolBar.add(_newAction);
-    _toolBar.add(_openAction);
-    _saveButton = _toolBar.add(_saveAction);
-    _toolBar.add(_closeAction);
+    _toolBar.add(_createToolbarButton(_newAction));
+    _toolBar.add(_createToolbarButton(_openAction));
+    _saveButton = _createToolbarButton(_saveAction);
+    _toolBar.add(_saveButton);
+    _toolBar.add(_createToolbarButton(_closeAction));
     
     // Compile, reset, abort
     _toolBar.addSeparator();
-    _compileButton = _toolBar.add(_compileAction);
-    _toolBar.add(_resetInteractionsAction);
-    _toolBar.add(_abortInteractionAction);
+    _compileButton = _createToolbarButton(_compileAction);
+    _toolBar.add(_compileButton);
+    _toolBar.add(_createToolbarButton(_resetInteractionsAction));
+    _toolBar.add(_createToolbarButton(_abortInteractionAction));
 
     // Commented out to make room on the toolbar;
     // print actions don't need buttons.
     // Print preview, print
     //_toolBar.addSeparator();
-    //_toolBar.add(_printPreviewAction);
-    //_toolBar.add(_printAction);
+    //_toolBar.add(_createToolbarButton(_printPreviewAction));
+    //_toolBar.add(_createToolbarButton(_printAction));
     
     // Cut, copy, paste
     _toolBar.addSeparator();
-    _toolBar.add(_cutAction);
-    _toolBar.add(_copyAction);
-    _toolBar.add(_pasteAction);
+    _toolBar.add(_createToolbarButton(_cutAction));
+    _toolBar.add(_createToolbarButton(_copyAction));
+    _toolBar.add(_createToolbarButton(_pasteAction));
 
+    // Undo, redo
     // Simple workaround, for now, for bug # 520742:
     // Undo/Redo button text in JDK 1.3
     // We just manually create the JButtons, and we *don't* set up
-    // PropertyChangeListeners on the action's name
-    //_toolBar.add(_undoAction);
-    //_toolBar.add(_redoAction);
-
-    // Undo, redo
+    // PropertyChangeListeners on the action's name.
     _toolBar.addSeparator();
     _toolBar.add(_createManualToolbarButton(_undoAction));
     _toolBar.add(_createManualToolbarButton(_redoAction));
     
     // Find
     _toolBar.addSeparator();
-    _toolBar.add(_findReplaceAction);
+    _toolBar.add(_createToolbarButton(_findReplaceAction));
 
     getContentPane().add(_toolBar, BorderLayout.NORTH);
   }

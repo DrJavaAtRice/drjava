@@ -109,7 +109,11 @@ public class HistoryTest extends TestCase {
     while(_history.hasPrevious()) {
       _history.movePrevious();
     }
-    assertEquals("history length is not bound to " + maxLength,
+
+    assertEquals("History length is not bound to " + maxLength,
+		 maxLength,
+		 _history.size());
+    assertEquals("History elements are not removed in FILO order",
                  "testing 100",
                  _history.getCurrent());
   }
