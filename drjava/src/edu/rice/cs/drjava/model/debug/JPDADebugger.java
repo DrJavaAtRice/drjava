@@ -130,9 +130,15 @@ public class JPDADebugger implements Debugger {
   private DeadThreadFilter _deadThreads;
   
   /**
+   * A handle to the interpreterJVM that we need so we can
+   * populate the environment.
+   */
+  private ObjectReference _interpreterJVM;
+  
+  /**
    * Builds a new JPDADebugger to debug code in the Interactions JVM,
    * using the JPDA/JDI interfaces.
-   * Does not actually connect to the InteractionsJVM until startup().
+   * Does not actually connect to the interpreterJVM until startup().
    */
   public JPDADebugger(GlobalModel model) {
     _model = model;
@@ -145,6 +151,7 @@ public class JPDADebugger implements Debugger {
     _pendingRequestManager = new PendingRequestManager(this);
     _runningThread = null;
     _deadThreads = new DeadThreadFilter();
+    _interpreterJVM = null;
   }
   
   /**
@@ -176,7 +183,7 @@ public class JPDADebugger implements Debugger {
   }
   
   /**
-   * Handles the details of attaching to the InteractionsJVM.
+   * Handles the details of attaching to the interpreterJVM.
    */
   private void _attachToVM() throws DebugException {
     // Blocks until interpreter has registered itself
@@ -212,6 +219,15 @@ public class JPDADebugger implements Debugger {
     catch (IllegalConnectorArgumentsException icae) {
       throw new DebugException("Could not connect to VM: " + icae);
     }
+    
+    // get the singleton instance of the interpreterJVM
+    List referenceTypes = _vm.classesByName("edu.rice.cs.drjava.model.repl.newjvm.InterpreterJVM");
+    if (referenceTypes.size() <= 0) {
+      throw new DebugException("Could not get a reference to interpreterJVM");
+    }
+    ReferenceType rt = (ReferenceType)referenceTypes.get(0);
+    Field field = rt.fieldByName("ONLY");
+    _interpreterJVM = (ObjectReference)rt.getValue(field);
   }
   
   /**
@@ -231,6 +247,9 @@ public class JPDADebugger implements Debugger {
       finally {
         _vm = null;
         _eventManager = null;
+        _suspendedThreads = new RandomAccessStack();
+        _deadThreads = new DeadThreadFilter();
+        _runningThread = null;
       }
     }
   }
@@ -299,13 +318,17 @@ public class JPDADebugger implements Debugger {
     _suspendedThreads.push(thread_ref);
     
     try{
+      if( thread_ref.frameCount() <= 0 ) {
+        printMessage(thread_ref.name() + " could not be suspended. It had no stackframes.");
+        resume();
+        return;
+      }
       scrollToSource(thread_ref.frame(0).location());
     }catch(IncompatibleThreadStateException e){
       throw new UnexpectedException(e);
     }
     
     currThreadSuspended();
-    currThreadSet(threadData);
   }
   
   /**
@@ -459,7 +482,7 @@ public class JPDADebugger implements Debugger {
   }
   
   /**
-   * Resumes execution of the currently suspended document
+   * Resumes execution of the currently suspended thread
    */
   public synchronized void resume() {
     if (!isReady()) return;
@@ -475,7 +498,7 @@ public class JPDADebugger implements Debugger {
   }
   
   /**
-   * Resumes execution of the currently loaded document.
+   * This is called when the user manually chooses a thread to resume.
    */
   public synchronized void resume(DebugThreadData threadData) {
     if (!isReady()) return;
@@ -945,7 +968,12 @@ public class JPDADebugger implements Debugger {
       int stackIndex = 0;
       StackFrame currFrame = null;
       List frames = null;
-      frames = _suspendedThreads.peek().frames();
+      ThreadReference thread = _suspendedThreads.peek();
+      if (thread.frameCount() <= 0 ) {
+        printMessage("Could not update watch values. The current thread had no stackframes.");
+        return;
+      }
+      frames = thread.frames();
       currFrame = (StackFrame) frames.get(stackIndex);
       stackIndex++;
       Location location = currFrame.location();
@@ -1124,10 +1152,17 @@ public class JPDADebugger implements Debugger {
    * Notifies all listeners that the current thread has been suspended.
    */
   synchronized void currThreadSuspended() {
+    _runningThread = null;
     _updateWatches();
     notifyListeners(new EventNotifier() {
       public void notifyListener(DebugListener l) {
         l.currThreadSuspended();
+        /** 
+         * Anytime a thread is suspended, it becomes the current thread.
+         * This makes sure the debug panel will correctly put the
+         * current thread in bold.
+         */
+        l.currThreadSet(new DebugThreadData(_suspendedThreads.peek()));
       }
     });
   }
@@ -1165,11 +1200,19 @@ public class JPDADebugger implements Debugger {
     }
        
     if (_suspendedThreads.size() > 0) {
+      ThreadReference thread = _suspendedThreads.peek();
+      
       try{
-        scrollToSource(_suspendedThreads.peek().frame(0).location());
+        if (thread.frameCount() <= 0) {
+          printMessage("Could not scroll to source for " + thread.name() + ". It has no stackframes.");
+        }
+        else {
+          scrollToSource(thread.frame(0).location());
+        }
       }catch(IncompatibleThreadStateException e){
         throw new UnexpectedException(e);
       }
+    
       // updates watches and makes buttons in UI active, does this because
       // there are suspended threads on the stack
       currThreadSuspended();
