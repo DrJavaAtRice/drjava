@@ -306,7 +306,8 @@ public class ColoringView extends PlainView implements OptionConstants {
   public void changedUpdate(DocumentEvent changes, Shape a, ViewFactory f) {
     super.changedUpdate(changes, a, f);
     // Make sure we redraw since something changed in the formatting
-    getContainer().repaint();
+    Container c = getContainer();
+    if (c != null) c.repaint();
   }
 
   /**

@@ -558,7 +558,8 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     
     addFocusListener(new FocusListener(){
       public void focusGained(FocusEvent e){
-        _mainFrame.getModel().getDocumentNavigator().setActiveDoc(_mainFrame.getModel().getIDocGivenODD(doc));
+        
+        _mainFrame.getModel().getDocumentNavigator().requestSelectionUpdate(_mainFrame.getModel().getIDocGivenODD(doc));
       }
       public void focusLost(FocusEvent e){  }
     });

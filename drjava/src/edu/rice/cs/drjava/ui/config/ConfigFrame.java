@@ -63,6 +63,7 @@ import edu.rice.cs.drjava.CodeStatus;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.ui.*;
 import edu.rice.cs.drjava.ui.KeyBindingManager.KeyStrokeData;
+import edu.rice.cs.util.swing.DirectoryChooser;
 
 /**
  * The frame for setting Configuration options on the fly
@@ -87,7 +88,8 @@ public class ConfigFrame extends JFrame {
   private JPanel _mainPanel;
   private JFileChooser _fileOptionChooser;
   private JFileChooser _browserChooser;
-
+  private DirectoryChooser _dirChooser;
+  
   /**
    * Sets up the frame and displays it.
    */
@@ -108,6 +110,12 @@ public class ConfigFrame extends JFrame {
     _browserChooser.setApproveButtonText("Select");
     _browserChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 
+    _dirChooser = new DirectoryChooser();
+    _dirChooser.setSelectedDirectory(_getWorkDir());
+    _dirChooser.setTitle("Select");
+    _dirChooser.setApproveButtonText("Select");
+    _dirChooser.setMultiSelectionEnabled(false);
+    
     _createTree();
     _createPanels();
 
@@ -668,10 +676,10 @@ public class ConfigFrame extends JFrame {
                                  "The URL to the Java 1.5 API, for generating links to library classes."));
 
     panel.addComponent
-      (new FileOptionComponent(OptionConstants.JAVADOC_DESTINATION,
-                               "Default Destination Directory", this,
-                               "Optional default directory for saving Javadoc documentation.",
-                               _fileOptionChooser));
+      (new DirectoryOptionComponent(OptionConstants.JAVADOC_DESTINATION,
+                                    "Default Destination Directory", this,
+                                    "Optional default directory for saving Javadoc documentation.",
+                                    _dirChooser));
 
     panel.addComponent
       (new StringOptionComponent(OptionConstants.JAVADOC_CUSTOM_PARAMS,
@@ -771,19 +779,11 @@ public class ConfigFrame extends JFrame {
     panel.addComponent(new IntegerOptionComponent(OptionConstants.INDENT_LEVEL,
                                                   "Indent Level", this,
                                                   "The number of spaces to use for each level of indentation."));
-    // Working directory chooser and component
-    JFileChooser dirChooser = new JFileChooser(_getWorkDir());
-    dirChooser.setDialogTitle("Select");
-    dirChooser.setApproveButtonText("Select");
-    dirChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-    dirChooser.setMultiSelectionEnabled(false);
-    FileOptionComponent workDir =
-      new FileOptionComponent(OptionConstants.WORKING_DIRECTORY,
-                              "Working Directory", this,
-                              "The directory that DrJava should consider the default working directory.",
-                              dirChooser);
-    workDir.setFileFilter(new DirectoryFilter());
-    panel.addComponent(workDir);
+    
+    panel.addComponent(new DirectoryOptionComponent(OptionConstants.WORKING_DIRECTORY,
+                                                    "Working Directory", this,
+                                                    "The directory that DrJava should consider the default working directory.",
+                                                    _dirChooser));
 
     panel.addComponent(new IntegerOptionComponent(OptionConstants.HISTORY_MAX_SIZE, "Size of Interactions History", this,
                                                   "The number of interactions to remember in the history."));

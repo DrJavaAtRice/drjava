@@ -45,7 +45,8 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.ui;
 
-import edu.rice.cs.util.swing.FileSelectorComponent;
+import edu.rice.cs.util.swing.DirectorySelectorComponent;
+import edu.rice.cs.util.swing.DirectoryChooser;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.Configuration;
 import edu.rice.cs.drjava.config.OptionConstants;
@@ -69,7 +70,7 @@ public class JavadocDialog implements DirectorySelector {
   private final JFrame _frame;
 
   /** File field and button. */
-  private final FileSelectorComponent _selector;
+  private final DirectorySelectorComponent _selector;
 
   /** Whether to always prompt for destination. */
   private final JCheckBox _checkBox;
@@ -96,19 +97,14 @@ public class JavadocDialog implements DirectorySelector {
     _suggestedDir = null;
 
     // Create file chooser
-    JFileChooser chooser = new JFileChooser();
+    DirectoryChooser chooser = new DirectoryChooser();
     chooser.setMultiSelectionEnabled(false);
-    // We use FILES_AND_DIRECTORIES because it behaves better than
-    //  DIRECTORIES_ONLY.  (The latter will return the parent of a
-    //  pre-selected directory unless the user chooses something else first.)
-    //  I hate JFileChooser.
-    chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
     chooser.setApproveButtonText("Select");
-    chooser.setFileFilter(new DirectoryFilter());
-
+    chooser.setEditable(true);
+    
     // Create components for dialog
     String msg = "Select a destination directory for the Javadoc files:";
-    _selector = new FileSelectorComponent(_frame, chooser);
+    _selector = new DirectorySelectorComponent(_frame, chooser);
     _checkBox = new JCheckBox("Always Prompt For Destination");
     Object[] components = new Object[] { msg, _selector, _checkBox };
 

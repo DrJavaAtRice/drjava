@@ -48,6 +48,7 @@ package edu.rice.cs.drjava.ui.config;
 import javax.swing.*;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.*;
+import edu.rice.cs.util.swing.FileSelectorComponent;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
@@ -64,47 +65,49 @@ import javax.swing.filechooser.FileFilter;
 public class FileOptionComponent extends OptionComponent<File>
   implements OptionConstants {
 
-  private JButton _button;
-  private JTextField _jtf;
-  private File _file;
-  private JFileChooser _jfc;
-  private FileFilter _fileFilter;  // null if not customized
-  private JPanel _panel;
+//  private JButton _button;
+//  private JTextField _jtf;
+//  private File _file;
+//  private JFileChooser _jfc;
+//  private FileFilter _fileFilter;  // null if not customized
+  private FileSelectorComponent _component;
 
   public FileOptionComponent (FileOption opt, String text,
                               Frame parent, JFileChooser jfc) {
     super(opt, text, parent);
-    _button = new JButton();
-    _button.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        chooseFile();
-      }
-    });
-    _button.setText("...");
-    _button.setMaximumSize(new Dimension(10,10));
-    _button.setMinimumSize(new Dimension(10,10));
-
-    _jtf = new JTextField();
-    _jtf.setColumns(30);
-
-    _jtf.setFont(_jtf.getFont().deriveFont(10f));
-    _jtf.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        chooseFileFromField();
-      }
-    });
-
-    _file = DrJava.getConfig().getSetting(_option);
-    _updateTextField(_file);
-
-    _jfc = jfc;
-    _fileFilter = null;
-
-    _panel = new JPanel();
-    _panel.setLayout(new BorderLayout());
-
-    _panel.add(_jtf, BorderLayout.CENTER);
-    _panel.add(_button, BorderLayout.EAST);
+//    _button = new JButton();
+//    _button.addActionListener(new ActionListener() {
+//      public void actionPerformed(ActionEvent e) {
+//        chooseFile();
+//      }
+//    });
+//    _button.setText("...");
+//    _button.setMaximumSize(new Dimension(10,10));
+//    _button.setMinimumSize(new Dimension(10,10));
+//
+//    _jtf = new JTextField();
+//    _jtf.setColumns(30);
+//
+//    _jtf.setFont(_jtf.getFont().deriveFont(10f));
+//    _jtf.addActionListener(new ActionListener() {
+//      public void actionPerformed(ActionEvent e) {
+//        chooseFileFromField();
+//      }
+//    });
+//
+//    _file = DrJava.getConfig().getSetting(_option);
+//    _updateTextField(_file);
+//
+//    _jfc = jfc;
+//    _fileFilter = null;
+//
+//    _panel = new JPanel();
+//    _panel.setLayout(new BorderLayout());
+//
+//    _panel.add(_jtf, BorderLayout.CENTER);
+//    _panel.add(_button, BorderLayout.EAST);
+    _component = new FileSelectorComponent(parent, jfc, 30, 10f);
+    _component.setFileField(DrJava.getConfig().getSetting(_option));
   }
 
   /**
@@ -121,9 +124,9 @@ public class FileOptionComponent extends OptionComponent<File>
    * @param description the tooltip text
    */
   public void setDescription(String description) {
-    _panel.setToolTipText(description);
-    _button.setToolTipText(description);
-    _jtf.setToolTipText(description);
+    _component.setToolTipText(description);
+//    _button.setToolTipText(description);
+//    _jtf.setToolTipText(description);
     _label.setToolTipText(description);
   }
 
@@ -132,13 +135,14 @@ public class FileOptionComponent extends OptionComponent<File>
    * @return true if the new value is set successfully
    */
   public boolean updateConfig() {
-    if (!chooseFileFromField()) {
-      return false;
-    }
-
+    File componentFile = _component.getFileFromField();
     File currentFile = DrJava.getConfig().getSetting(_option);
-    if (!_file.equals(currentFile)) {
-      DrJava.getConfig().setSetting(_option, _file);
+    
+    if (componentFile != null && !componentFile.equals(currentFile)) {
+      DrJava.getConfig().setSetting(_option, componentFile);
+    }
+    else if (componentFile == null) {
+      DrJava.getConfig().setSetting(_option, _option.getDefault());
     }
 
     return true;
@@ -148,79 +152,82 @@ public class FileOptionComponent extends OptionComponent<File>
    * Displays the given value.
    */
   public void setValue(File value) {
-    _file = value;
-    _updateTextField(value);
+//    _file = value;
+//    _updateTextField(value);
+    _component.setFileField(value);
   }
 
   /**
    * Return's this OptionComponent's configurable component.
    */
   public JComponent getComponent() {
-    return _panel;
+    return _component;
   }
 
-  /**
-   * Updates the text field to display the given file.
-   */
-  private void _updateTextField(File c) {
-    _jtf.setText(c.getAbsolutePath());
-  }
+//  /**
+//   * Updates the text field to display the given file.
+//   */
+//  private void _updateTextField(File c) {
+////    _jtf.setText(c.getAbsolutePath());
+//    _component.setFileField(c);
+//  }
 
   /**
    * Set the file filter for this file option component
    */
   public void setFileFilter(FileFilter fileFilter) {
-    _fileFilter = fileFilter;
+//    _fileFilter = fileFilter;
+    _component.setFileFilter(fileFilter);
   }
 
-  /**
-   * Shows a file chooser to pick a new file.  Allows picking directories.
-   */
-  public void chooseFile() {
-    if (_file != FileOption.NULL_FILE && _file.getParent() != null) {
-      _jfc.setCurrentDirectory(new File(_file.getParent()));
-    }
+//  /**
+//   * Shows a file chooser to pick a new file.  Allows picking directories.
+//   */
+//  public void chooseFile() {
+//    if (_file != FileOption.NULL_FILE && _file.getParent() != null) {
+//      _jfc.setCurrentDirectory(new File(_file.getParent()));
+//    }
+//
+//    if (_fileFilter != null) {
+//      _jfc.setFileFilter(_fileFilter);
+//    }
+//    File c = null;
+//    int returnValue = _jfc.showDialog(_parent,
+//                                     null);
+//    if (returnValue == JFileChooser.APPROVE_OPTION)
+//      c = _jfc.getSelectedFile();
+//    if (c != null) {
+//      _file = c;
+//      _updateTextField(_file);
+//    }
+//  }
 
-    if (_fileFilter != null) {
-      _jfc.setFileFilter(_fileFilter);
-    }
-    File c = null;
-    int returnValue = _jfc.showDialog(_parent,
-                                     null);
-    if (returnValue == JFileChooser.APPROVE_OPTION)
-      c = _jfc.getSelectedFile();
-    if (c != null) {
-      _file = c;
-      _updateTextField(_file);
-    }
-  }
-
-  /**
-   *  The chooser method for the validation of filenames that are manually entered
-   *  into the text field.
-   *  @return False, if file does not exist. True, otherwise.
-   */
-  public boolean chooseFileFromField() {
-    String newValue = _jtf.getText().trim();
-    String currentValue = DrJava.getConfig().getSetting(_option).getAbsolutePath();
-
-    if (newValue.equals(currentValue)) {
-      return true;
-    }
-
-    File newFile = _option.parse(newValue);
-
-    if (newFile != null && !newFile.exists()) {
-      JOptionPane.showMessageDialog(_parent,
-                                    "The file '"+ newValue + "' is an invalid selection for\n" +
-                                    getLabelText() + " because it does not exist.",
-                                    "Invalid File Chosen for " + getLabelText() + "!",
-                                    JOptionPane.ERROR_MESSAGE);
-      return false;
-    }
-    else {
-      _file = newFile;
-      return true;
-    }
-  }
+//  /**
+//   *  The chooser method for the validation of filenames that are manually entered
+//   *  into the text field.
+//   *  @return False, if file does not exist. True, otherwise.
+//   */
+//  public boolean chooseFileFromField() {
+//    String newValue = _jtf.getText().trim();
+//    String currentValue = DrJava.getConfig().getSetting(_option).getAbsolutePath();
+//
+//    if (newValue.equals(currentValue)) {
+//      return true;
+//    }
+//
+//    File newFile = _option.parse(newValue);
+//
+//    if (newFile != null && !newFile.exists()) {
+//      JOptionPane.showMessageDialog(_parent,
+//                                    "The file '"+ newValue + "' is an invalid selection for\n" +
+//                                    getLabelText() + " because it does not exist.",
+//                                    "Invalid File Chosen for " + getLabelText() + "!",
+//                                    JOptionPane.ERROR_MESSAGE);
+//      return false;
+//    }
+//    else {
+//      _file = newFile;
+//      return true;
+//    }
+//  }
 }

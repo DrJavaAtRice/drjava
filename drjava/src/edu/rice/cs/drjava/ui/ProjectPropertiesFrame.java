@@ -65,6 +65,7 @@ import edu.rice.cs.drjava.ui.config.*;
 import edu.rice.cs.util.swing.FileSelectorComponent;
 import edu.rice.cs.util.swing.DirectorySelectorComponent;
 import edu.rice.cs.util.swing.DirectoryChooser;
+import edu.rice.cs.util.swing.FileDisplayManager;
 import javax.swing.filechooser.FileFilter;
 
 /**
@@ -83,7 +84,7 @@ public class ProjectPropertiesFrame extends JFrame {
   private MainFrame _mainFrame;
   
   private DirectorySelectorComponent _builtDirSelector;
-  private FileSelectorComponent _jarMainClassSelector;
+  private DirectorySelectorComponent _jarMainClassSelector;
   
   /**
    * Sets up the frame and displays it.
@@ -242,8 +243,8 @@ public class ProjectPropertiesFrame extends JFrame {
     GridBagConstraints c = new GridBagConstraints();
     panel.setLayout(gridbag);
     c.fill = GridBagConstraints.HORIZONTAL;
-    Insets labelInsets = new Insets(5, 10, 0, 10);
-    Insets compInsets  = new Insets(5, 5, 0, 0);
+    Insets labelInsets = new Insets(5, 10, 0, 0);
+    Insets compInsets  = new Insets(5, 5, 0, 10);
     c.weightx = 0.0;
     c.gridwidth = 1;
     c.insets = labelInsets;
@@ -294,31 +295,62 @@ public class ProjectPropertiesFrame extends JFrame {
     dirChooser.setSelectedDirectory(_getWorkDir());
     dirChooser.setTitle("Select Built Directory");
     dirChooser.setApproveButtonText("Select");
+    dirChooser.setEditable(true);
     _builtDirSelector = new DirectorySelectorComponent(this,dirChooser,20,12f);
     //toReturn.add(_builtDirSelector, BorderLayout.EAST);
     return _builtDirSelector;
   }
   
+//  public JPanel _jarMainClassSelector(){
+//    JFileChooser fileChooser = new JFileChooser(_mainFrame.getModel().getProjectFile().getParentFile());
+//    fileChooser.setDialogTitle("Select");
+//    fileChooser.setApproveButtonText("Select");
+//    fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+//    fileChooser.setMultiSelectionEnabled(false);
+//    _jarMainClassSelector = new FileSelectorComponent(this,fileChooser,20,12f);
+//    _jarMainClassSelector.setFileFilter(new FileFilter(){
+//      public boolean accept(File f){
+//        return f.getName().endsWith(".java") || f.isDirectory();
+//      }
+//      public String getDescription(){
+//        return "Java Files (*.java)";
+//      }
+//      
+//    });
+//    //toReturn.add(_builtDirSelector, BorderLayout.EAST);
+//    return _jarMainClassSelector;
+//  }
   public JPanel _jarMainClassSelector(){
-    JFileChooser fileChooser = new JFileChooser(_mainFrame.getModel().getProjectFile().getParentFile());
-    fileChooser.setDialogTitle("Select");
-    fileChooser.setApproveButtonText("Select");
-    fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-    fileChooser.setMultiSelectionEnabled(false);
-    _jarMainClassSelector = new FileSelectorComponent(this,fileChooser,20,12f);
-    _jarMainClassSelector.setFileFilter(new FileFilter(){
+    File rootFile = _mainFrame.getModel().getProjectFile();
+    try {
+      rootFile = rootFile.getCanonicalFile();
+    } catch(IOException e) { }
+    
+    DirectoryChooser chooser = new DirectoryChooser(this,rootFile);
+    chooser.setTitle("Select Main Document");
+    chooser.setTopMessage("Select the main doucment for the project:");
+    chooser.setApproveButtonText("Select");
+    FileFilter filter = new FileFilter(){
       public boolean accept(File f){
-        return f.getName().endsWith(".java") || f.isDirectory();
+        String name = f.getName();
+        return  !f.isDirectory() &&
+          (name.endsWith(".java") ||
+           name.endsWith(".dj0") ||
+           name.endsWith(".dj1") ||
+           name.endsWith(".dj2"));
       }
       public String getDescription(){
-        return "Java Files (*.java)";
+        return "Java & DrJava Files (*.java, *.dj0, *.dj1, *.dj2)";
       }
-      
-    });
+    };
+    chooser.addChoosableFileFilter(filter);
+    chooser.addFileFilter(filter);
+    chooser.setShowFiles(true);
+    chooser.setFileDisplayManager(MainFrame.getFileDisplayManager());
+    _jarMainClassSelector = new DirectorySelectorComponent(this,chooser,20,12f);
     //toReturn.add(_builtDirSelector, BorderLayout.EAST);
     return _jarMainClassSelector;
   }
-  
   
   public void setVisible(boolean vis){
     super.setVisible(vis);

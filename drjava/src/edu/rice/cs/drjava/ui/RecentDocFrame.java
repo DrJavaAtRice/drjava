@@ -55,16 +55,22 @@ import javax.swing.text.EditorKit;
 import java.awt.*;
 import java.util.List;
 import java.util.LinkedList;
+import java.io.*;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.model.definitions.DefinitionsEditorKit;
 import edu.rice.cs.drjava.model.repl.InteractionsEditorKit;
 import edu.rice.cs.drjava.CodeStatus;
+import edu.rice.cs.util.swing.FileDisplayManager;
 
 public class RecentDocFrame extends JWindow{
   // MainFrame
   MainFrame _frame;
+  
+  // The manager that gives filenames and icons
+  FileDisplayManager _fdm = _frame.getFileDisplayManager();
+    
   // the label that shows the icon and filename
   JLabel _label;
   // the panel that holds the label and textpane
@@ -79,12 +85,6 @@ public class RecentDocFrame extends JWindow{
   int _padding = 4;
   
   LinkedList<OpenDefinitionsDocument> _docs = new LinkedList<OpenDefinitionsDocument>();
-  
-  ImageIcon _javaIcon         = _getIconResource("JavaIcon.gif");
-  ImageIcon _elementaryIcon     = _getIconResource("ElementaryIcon.gif");
-  ImageIcon _intermediateIcon = _getIconResource("IntermediateIcon.gif");
-  ImageIcon _advancedIcon     = _getIconResource("AdvancedIcon.gif");
-  ImageIcon _textIcon         = _getIconResource("OtherIcon.gif");
   
   private OptionListener<Color> _colorListener = new OptionListener<Color>(){
     public void optionChanged(OptionEvent<Color> oce){
@@ -214,11 +214,20 @@ public class RecentDocFrame extends JWindow{
   
   private void show(int _current){
       OpenDefinitionsDocument doc = _docs.get(_current);
-      
-      String filename = doc.getFilename();
+      File docfile;
+      try {
+        if (doc.isUntitled()) {
+          docfile = new File("(Untitled)");
+        }
+        else {
+          docfile = doc.getFile();
+        }
+      } catch(IOException e) {
+        docfile = null;
+      }
       String text = getTextFor(doc);
-      _label.setText(filename);
-      _label.setIcon(getIconFor(filename));
+      _label.setText(_fdm.getName(docfile));
+      _label.setIcon(_fdm.getIcon(docfile));
       if(text.length() > 0){
         // as wide as the text area wants, but only 200px high
         _textpane.setText(text);
@@ -301,24 +310,7 @@ public class RecentDocFrame extends JWindow{
     text = text.substring(start, end);
     return text;
   }
-  
-  private Icon getIconFor(String s){
-    if(s.endsWith(".java")){
-      return _javaIcon;
-    }else
-      if(s.endsWith(".dj0")){
-      return _elementaryIcon;
-    }else
-      if(s.endsWith(".dj1")){
-      return _intermediateIcon;
-    }else
-      if(s.endsWith(".dj2")){
-      return _advancedIcon;
-    }else{
-      return _textIcon;
-    }
-  }
-  
+    
   /**
    * resets the frame to point to the first document in the list
    */

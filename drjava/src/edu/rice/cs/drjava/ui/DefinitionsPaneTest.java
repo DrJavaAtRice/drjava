@@ -51,6 +51,7 @@ import javax.swing.*;
 import javax.swing.text.*;
 import java.awt.event.*;
 import java.util.Date;
+import java.io.*;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.*;
@@ -548,6 +549,7 @@ public final class DefinitionsPaneTest extends TestCase {
     assertEquals("all the defdocs have been garbage collected", 5, _finalDocCount);
   }
   
+
 }
 
 class KeyTestListener implements KeyListener {

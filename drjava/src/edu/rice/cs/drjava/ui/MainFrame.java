@@ -92,6 +92,7 @@ import edu.rice.cs.util.swing.SwingWorker;
 import edu.rice.cs.util.swing.ConfirmCheckBoxDialog;
 import edu.rice.cs.util.swing.BorderlessScrollPane;
 import edu.rice.cs.util.swing.BorderlessSplitPane;
+import edu.rice.cs.util.swing.FileDisplayManager;
 import edu.rice.cs.util.text.DocumentAdapterException;
 import edu.rice.cs.util.docnavigation.*;
 import edu.rice.cs.drjava.project.*;
@@ -1299,7 +1300,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       _currentDefPane.moveCaretPosition(beginLinePos);
     }
   };
-
+  
   /**
    * Returns the "intelligent" beginning of line.  If the caret is to
    * the right of the first non-whitespace character, the position of the
@@ -1502,6 +1503,32 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
   };
 
+
+  /**
+   * This manager is meant to retrieve the correct icons for the given filename.
+   * The only files recognized are the files obviously listed below inthe function
+   */
+  private static FileDisplayManager _djFileDisplayManager = new DefaultFileDisplayManager() {
+    private Icon _java = MainFrame.getIcon("JavaIcon.gif");
+    private Icon _dj0 = MainFrame.getIcon("ElementaryIcon.gif");
+    private Icon _dj1 = MainFrame.getIcon("IntermediateIcon.gif");
+    private Icon _dj2 = MainFrame.getIcon("AdvancedIcon.gif");
+    
+    public Icon getIcon(File f) {
+      if (!f.isDirectory()) {
+        String name = f.getName().toLowerCase();
+        if (name.endsWith(".java")) return _java;
+        if (name.endsWith(".dj0")) return _dj0;
+        if (name.endsWith(".dj1")) return _dj1;
+        if (name.endsWith(".dj2")) return _dj2;
+      }
+      return super.getIcon(f);
+    }
+  };
+  
+  public static FileDisplayManager getFileDisplayManager() {
+    return _djFileDisplayManager;
+  }
 
 
 
@@ -3076,13 +3103,20 @@ public class MainFrame extends JFrame implements OptionConstants {
   private boolean showCleanWarning(){
     //adam
     if (!DrJava.getConfig().getSetting(NO_PROMPT_BEFORE_CLEAN).booleanValue()) {
+      String buildDirTxt = "";
+      try {
+        buildDirTxt = _model.getBuildDirectory().getCanonicalPath();
+      }
+      catch (Exception e) {
+        buildDirTxt = _model.getBuildDirectory().getPath();
+      }
       ConfirmCheckBoxDialog dialog =
         new ConfirmCheckBoxDialog(MainFrame.this,
                                   "Clean Built Directory?",
                                   "Cleaning your built directory will delete all\n" + 
                                   "class files and empty folders within that directory.\n" + 
                                   "Are you sure you want to clean\n" + 
-                                  _model.getBuildDirectory() + "?",
+                                  buildDirTxt + "?",
                                   "Do not show this message again");
       int rc = dialog.show();
       switch (rc) {
