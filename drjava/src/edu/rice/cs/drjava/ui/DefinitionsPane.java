@@ -646,22 +646,22 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
   /*
    * The private MouseAdapter for responding to various clicks concerning the popup menu
    */
-  private class PopupMenuMouseAdapter extends MouseAdapter {
+  private class PopupMenuMouseAdapter extends RightClickMouseAdapter {
     
     private MouseEvent _lastMouseClick = null;
     
     public void mousePressed(MouseEvent e) {
-      
+      super.mousePressed(e);
+
       _lastMouseClick = e;
-      
+
       // if not in the selected area, 
       if ((viewToModel(e.getPoint()) < getSelectionStart()) || 
           (viewToModel(e.getPoint()) > getSelectionEnd()) ) {
         //move caret to clicked position, deselecting previous selection
         setCaretPosition(viewToModel(e.getPoint()));
       }
-      
-      maybeShowPopup(e);
+
       //Don't show the "Toggle Breakpoint" option in the contextual menu, if the JMenuItem is null.
       if (_toggleBreakpointMenuItem != null) {
         _toggleBreakpointMenuItem.setEnabled(_mainFrame.inDebugMode());
@@ -670,20 +670,12 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
       //if (_addWatchMenuItem != null) {
       //  _addWatchMenuItem.setEnabled(_mainFrame.inDebugMode());
       //}
-      
     }
-    
-    public void mouseReleased(MouseEvent e) {
-      maybeShowPopup(e);
+
+    protected void _popupAction(MouseEvent e) {
+      _popMenu.show(e.getComponent(), e.getX(), e.getY());
     }
-    
-    private void maybeShowPopup(MouseEvent e) {
-      if (e.isPopupTrigger()) {
-        _popMenu.show(e.getComponent(),
-                      e.getX(), e.getY());
-      }
-    }
-    
+
     public MouseEvent getLastMouseClick() {
       return _lastMouseClick;
     }

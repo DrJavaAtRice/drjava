@@ -804,9 +804,9 @@ public class DebugPanel extends JPanel implements OptionConstants {
       if (getSelectedThread().isSuspended()) {
          _threadSuspendedPopupMenu.show(e.getComponent(), e.getX(), e.getY());
       }
-      else {
+//       else {
 //         _threadRunningPopupMenu.show(e.getComponent(), e.getX(), e.getY());
-      }
+//       }
     }
 
     public void _action() {
@@ -815,7 +815,8 @@ public class DebugPanel extends JPanel implements OptionConstants {
           _debugger.suspend(getSelectedThread());
         }
         catch(DebugException exception){
-          JOptionPane.showMessageDialog(_frame, "Cannot suspend the thread.", "Debugger Erro", JOptionPane.ERROR_MESSAGE);
+          JOptionPane.showMessageDialog(_frame, "Cannot suspend the thread.", 
+                                        "Debugger Erro", JOptionPane.ERROR_MESSAGE);
         }
       }
     }
@@ -842,7 +843,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
    * A mouse adapter that allows for double-clicking and
    * bringing up a right-click menu.
    */
-  private abstract class DebugMouseAdapter extends MouseAdapter {
+  private abstract class DebugMouseAdapter extends RightClickMouseAdapter {
     private JTable _table;
 
     public DebugMouseAdapter(JTable table) {
@@ -852,22 +853,17 @@ public class DebugPanel extends JPanel implements OptionConstants {
     protected abstract void _showPopup(MouseEvent e);
     protected abstract void _action();
 
-    public void mousePressed(MouseEvent e) {
-      if (e.isPopupTrigger()) {
-        int row = _table.rowAtPoint(e.getPoint());
-        _table.setRowSelectionInterval(row, row);
-        _showPopup(e);
-      }
-      else if (SwingUtilities.isLeftMouseButton(e) && e.getClickCount() == 2) {
-        _action();
-      }
+    protected void _popupAction(MouseEvent e) {
+      int row = _table.rowAtPoint(e.getPoint());
+      _table.setRowSelectionInterval(row, row);
+      _showPopup(e);
     }
-    
-    public void mouseReleased(MouseEvent e) {
-      if (e.isPopupTrigger()) {
-        int row = _table.rowAtPoint(e.getPoint());
-        _table.setRowSelectionInterval(row, row);
-        _showPopup(e);
+
+    public void mousePressed(MouseEvent e) {
+      super.mousePressed(e);
+
+      if (SwingUtilities.isLeftMouseButton(e) && e.getClickCount() == 2) {
+        _action();
       }
     }
   }

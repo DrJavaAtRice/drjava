@@ -37,48 +37,43 @@
  *
 END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava;
+package edu.rice.cs.drjava.ui;
 
-import java.util.Date;
-import java.text.SimpleDateFormat;
+import java.awt.*;
+import java.awt.event.*;
 
 /**
- * This interface hold the information about this build of DrJava.
- * This file is copied to Version.java by the build process, which also
- * fills in the right values of the date and time.
- *
- * This javadoc corresponds to build drjava-20030429-2016;
- *
- * @version $Id$
+ * Abstract mouse listener that supports showing a popup menu.
+ * If subclasses override mousePressed() or mouseReleased(), they should
+ * first call the superclass method so that the popup will be shown correctly.
+ * Because of platform differences, we must check for popup trigger both
+ * when the mouse is pressed and when it is released.
  */
-public abstract class Version {
+public abstract class RightClickMouseAdapter extends MouseAdapter {
   /**
-   * This string will be automatically expanded upon "ant commit".
-   * Do not edit it by hand!
+   * Performs the action when the popup trigger is received.
+   * Generally shows a popup context menu.
+   * @param e the MouseEvent that is a popup trigger
    */
-  private static final String BUILD_TIME_STRING = "20030429-2016";
-
-  /** A {@link Date} version of the build time. */
-  private static final Date BUILD_TIME = _getBuildDate();
-
-  public static String getBuildTimeString() {
-    return BUILD_TIME_STRING;
-  }
-
-  public static Date getBuildTime() {
-    return BUILD_TIME;
-  }
-
-  private static Date _getBuildDate() {
-    try {
-      return new SimpleDateFormat("yyyyMMdd-HHmm z").parse(BUILD_TIME_STRING + " GMT");
-    }
-    catch (Exception e) { // parse format or whatever problem
-      return null;
+  protected abstract void _popupAction(MouseEvent e);
+  
+  /**
+   * Signals that the mouse has been pressed.
+   * @param e the MouseEvent that just occurred
+   */
+  public void mousePressed(MouseEvent e) {
+    if (e.isPopupTrigger()) {
+      _popupAction(e);
     }
   }
 
-  public static void main(String[] args) {
-    System.out.println("Version for edu.rice.cs.drjava: " + BUILD_TIME_STRING);
+  /**
+   * Signals that the mouse has been released.
+   * @param e the MouseEvent that just occurred
+   */
+  public void mouseReleased(MouseEvent e) {
+    if (e.isPopupTrigger()) {
+      _popupAction(e);
+    }
   }
-} 
+}
