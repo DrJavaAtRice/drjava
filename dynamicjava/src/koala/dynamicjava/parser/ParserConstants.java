@@ -103,19 +103,24 @@ public interface ParserConstants {
   int XOR = 107;
   int REMAINDER = 108;
   int LEFT_SHIFT = 109;
-  int RIGHT_SIGNED_SHIFT = 110;
-  int RIGHT_UNSIGNED_SHIFT = 111;
-  int PLUS_ASSIGN = 112;
-  int MINUS_ASSIGN = 113;
-  int STAR_ASSIGN = 114;
-  int SLASH_ASSIGN = 115;
-  int AND_ASSIGN = 116;
-  int OR_ASSIGN = 117;
-  int XOR_ASSIGN = 118;
-  int REMAINDER_ASSIGN = 119;
-  int LEFT_SHIFT_ASSIGN = 120;
-  int RIGHT_SIGNED_SHIFT_ASSIGN = 121;
-  int RIGHT_UNSIGNED_SHIFTASSIGN = 122;
+  int PLUS_ASSIGN = 110;
+  int MINUS_ASSIGN = 111;
+  int STAR_ASSIGN = 112;
+  int SLASH_ASSIGN = 113;
+  int AND_ASSIGN = 114;
+  int OR_ASSIGN = 115;
+  int XOR_ASSIGN = 116;
+  int REMAINDER_ASSIGN = 117;
+  int LEFT_SHIFT_ASSIGN = 118;
+  int RIGHT_SIGNED_SHIFT_ASSIGN = 119;
+  int RIGHT_UNSIGNED_SHIFTASSIGN = 120;
+  int RSIGNEDSHIFT = 121;
+  int RUNSIGNEDSHIFT = 122;
+  int RSSHIFT1 = 123;
+  int RSSHIFT2 = 124;
+  int RUSHIFT1 = 125;
+  int RUSHIFT2 = 126;
+  int RUSHIFT3 = 127;
 
   int DEFAULT = 0;
   int IN_SINGLE_LINE_COMMENT = 1;
@@ -233,8 +238,6 @@ public interface ParserConstants {
     "\"^\"",
     "\"%\"",
     "\"<<\"",
-    "\">>\"",
-    "\">>>\"",
     "\"+=\"",
     "\"-=\"",
     "\"*=\"",
@@ -246,6 +249,13 @@ public interface ParserConstants {
     "\"<<=\"",
     "\">>=\"",
     "\">>>=\"",
+    "\">>\"",
+    "\">>>\"",
+    "\">@1\"",
+    "\">@2\"",
+    "\">`1\"",
+    "\">`2\"",
+    "\">`3\"",
   };
 
 }

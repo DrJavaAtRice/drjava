@@ -44,12 +44,12 @@ public class ReferenceType extends Type {
    * The representation property name
    */
   public final static String REPRESENTATION = "representation";
-  
+
   /**
    * The representation of this type
    */
   private String representation;
-  
+
   /**
    * Initializes the type
    * @param ids   the list of the tokens that compose the type name
@@ -58,7 +58,7 @@ public class ReferenceType extends Type {
   public ReferenceType(List<IdentifierToken> ids) {
     this(ids, null, 0, 0, 0, 0);
   }
-  
+
   /**
    * Initializes the type
    * @param rep   the type name
@@ -67,7 +67,7 @@ public class ReferenceType extends Type {
   public ReferenceType(String rep) {
     this(rep, null, 0, 0, 0, 0);
   }
-  
+
   /**
    * Initializes the type
    * @param ids   the list of the tokens that compose the type name
@@ -80,12 +80,12 @@ public class ReferenceType extends Type {
    */
   public ReferenceType(List<IdentifierToken> ids, String fn, int bl, int bc, int el, int ec) {
     super(fn, bl, bc, el, ec);
-    
+
     if (ids == null) throw new IllegalArgumentException("ids == null");
-    
+
     representation = TreeUtilities.listToName(ids);
   }
-  
+
   /**
    * Initializes the type
    * @param rep   the type name
@@ -98,29 +98,29 @@ public class ReferenceType extends Type {
    */
   public ReferenceType(String rep, String fn, int bl, int bc, int el, int ec) {
     super(fn, bl, bc, el, ec);
-    
+
     if (rep == null) throw new IllegalArgumentException("rep == null");
-    
+
     representation = rep;
   }
-  
+
   /**
    * Returns the representation of this type
    */
   public String getRepresentation() {
     return representation;
   }
-  
+
   /**
    * Sets the representation of this type
    * @exception IllegalArgumentException if s is null
    */
   public void setRepresentation(String s) {
     if (s == null) throw new IllegalArgumentException("s == null");
-    
+
     firePropertyChange(REPRESENTATION, representation, representation = s);
   }
-  
+
   /**
    * Allows a visitor to traverse the tree
    * @param visitor the visitor to accept
@@ -132,6 +132,10 @@ public class ReferenceType extends Type {
    * Implementation of toString for use in unit testing
    */
   public String toString() {
-    return "("+getClass().getName()+": "+getRepresentation()+")";
+    return "("+getClass().getName()+": "+toStringHelper()+")";
+  }
+
+  protected String toStringHelper() {
+	  return getRepresentation();
   }
 }

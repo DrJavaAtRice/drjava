@@ -4,25 +4,25 @@
  * http://sourceforge.net/projects/drjava/ or http://www.drjava.org/
  *
  * DrJava Open Source License
- * 
+ *
  * Copyright (C) 2001-2003 JavaPLT group at Rice University (javaplt@rice.edu)
  * All rights reserved.
  *
  * Developed by:   Java Programming Languages Team
  *                 Rice University
  *                 http://www.cs.rice.edu/~javaplt/
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a 
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
- * to deal with the Software without restriction, including without 
- * limitation the rights to use, copy, modify, merge, publish, distribute, 
- * sublicense, and/or sell copies of the Software, and to permit persons to 
- * whom the Software is furnished to do so, subject to the following 
+ * to deal with the Software without restriction, including without
+ * limitation the rights to use, copy, modify, merge, publish, distribute,
+ * sublicense, and/or sell copies of the Software, and to permit persons to
+ * whom the Software is furnished to do so, subject to the following
  * conditions:
- * 
- *     - Redistributions of source code must retain the above copyright 
+ *
+ *     - Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimers.
- *     - Redistributions in binary form must reproduce the above copyright 
+ *     - Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimers in the
  *       documentation and/or other materials provided with the distribution.
  *     - Neither the names of DrJava, the JavaPLT, Rice University, nor the
@@ -32,15 +32,15 @@
  *       use the term "DrJava" as part of their names without prior written
  *       permission from the JavaPLT group.  For permission, write to
  *       javaplt@rice.edu.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
- * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR 
- * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, 
- * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR 
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+ * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  * OTHER DEALINGS WITH THE SOFTWARE.
- * 
+ *
  END_COPYRIGHT_BLOCK*/
 
 package koala.dynamicjava.tree.tiger.generic;
@@ -56,28 +56,28 @@ import java.util.List;
 
 public class GenericReferenceType extends ReferenceType {
 
-  private List<ReferenceType> _typeArguments;
-      
+  private List<? extends Type> _typeArguments;
+
   /**
    * Initializes the type
    * @param ids   the list of the tokens that compose the type name
    * @param typeArgs the type arguments
    * @exception IllegalArgumentException if ids is null
    */
-  public GenericReferenceType(List<IdentifierToken> ids, List<ReferenceType> typeArgs) {
+  public GenericReferenceType(List<IdentifierToken> ids, List<? extends Type> typeArgs) {
     this(ids, null, 0, 0, 0, 0, typeArgs);
   }
-  
+
   /**
    * Initializes the type
    * @param rep   the type name
    * @param typeArgs the type arguments
    * @exception IllegalArgumentException if rep is null
    */
-  public GenericReferenceType(String rep, List<ReferenceType> typeArgs) {
+  public GenericReferenceType(String rep, List<? extends Type> typeArgs) {
     this(rep, null, 0, 0, 0, 0, typeArgs);
   }
-  
+
   /**
    * Initializes the type
    * @param ids   the list of the tokens that compose the type name
@@ -89,12 +89,12 @@ public class GenericReferenceType extends ReferenceType {
    * @param typeParams the type parameters
    * @exception IllegalArgumentException if ids is null
    */
-  public GenericReferenceType(List<IdentifierToken> ids, String fn, int bl, int bc, int el, int ec, List<ReferenceType> typeArgs) {
+  public GenericReferenceType(List<IdentifierToken> ids, String fn, int bl, int bc, int el, int ec, List<? extends Type> typeArgs) {
     super(ids, fn, bl, bc, el, ec);
 
     _typeArguments = typeArgs;
   }
-  
+
   /**
    * Initializes the type
    * @param rep   the type name
@@ -106,11 +106,26 @@ public class GenericReferenceType extends ReferenceType {
    * @param typeArgs the type arguments
    * @exception IllegalArgumentException if rep is null
    */
-  public GenericReferenceType(String rep, String fn, int bl, int bc, int el, int ec, List<ReferenceType> typeArgs) {
+  public GenericReferenceType(String rep, String fn, int bl, int bc, int el, int ec, List<? extends Type> typeArgs) {
     super(rep, fn, bl, bc, el, ec);
-    
-    _typeArguments = typeArgs;    
+
+    _typeArguments = typeArgs;
   }
-  
-  public List<ReferenceType> getTypeArguments(){ return _typeArguments; }
+
+  public List<? extends Type> getTypeArguments(){ return _typeArguments; }
+
+  public String toString() {
+	return "("+getClass().getName()+": "+toStringHelper()+")";
+  }
+
+  public String toStringHelper() {
+	  List<? extends Type> ta = getTypeArguments();
+	  String typeArgS = "";
+	  if(ta.size()>0)
+	    typeArgS = ""+ta.get(0);
+	  for(int i = 1; i < ta.size(); i++)
+	    typeArgS = typeArgS + " " + ta.get(i);
+
+	  return typeArgS+" "+super.toStringHelper();
+  }
 }

@@ -4,25 +4,25 @@
  * http://sourceforge.net/projects/drjava/ or http://www.drjava.org/
  *
  * DrJava Open Source License
- * 
+ *
  * Copyright (C) 2001-2003 JavaPLT group at Rice University (javaplt@rice.edu)
  * All rights reserved.
  *
  * Developed by:   Java Programming Languages Team
  *                 Rice University
  *                 http://www.cs.rice.edu/~javaplt/
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a 
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
- * to deal with the Software without restriction, including without 
- * limitation the rights to use, copy, modify, merge, publish, distribute, 
- * sublicense, and/or sell copies of the Software, and to permit persons to 
- * whom the Software is furnished to do so, subject to the following 
+ * to deal with the Software without restriction, including without
+ * limitation the rights to use, copy, modify, merge, publish, distribute,
+ * sublicense, and/or sell copies of the Software, and to permit persons to
+ * whom the Software is furnished to do so, subject to the following
  * conditions:
- * 
- *     - Redistributions of source code must retain the above copyright 
+ *
+ *     - Redistributions of source code must retain the above copyright
  *       notice, this list of conditions and the following disclaimers.
- *     - Redistributions in binary form must reproduce the above copyright 
+ *     - Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimers in the
  *       documentation and/or other materials provided with the distribution.
  *     - Neither the names of DrJava, the JavaPLT, Rice University, nor the
@@ -32,15 +32,15 @@
  *       use the term "DrJava" as part of their names without prior written
  *       permission from the JavaPLT group.  For permission, write to
  *       javaplt@rice.edu.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
- * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR 
- * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, 
- * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR 
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+ * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  * OTHER DEALINGS WITH THE SOFTWARE.
- * 
+ *
  END_COPYRIGHT_BLOCK*/
 
 package koala.dynamicjava.tree.tiger.generic;
@@ -54,8 +54,8 @@ import java.util.List;
  */
 
 public class PolymorphicMethodDeclaration extends MethodDeclaration {
-  
-  
+
+
   private TypeParameter[] _typeParameters;
   /**
    * Creates a new method declaration
@@ -73,7 +73,7 @@ public class PolymorphicMethodDeclaration extends MethodDeclaration {
                                       List<FormalParameter> params, List<List<IdentifierToken>> excepts, BlockStatement body, TypeParameter[] typeParams) {
     this(flags, type, name, params, excepts, body, null, 0, 0, 0, 0, typeParams);
   }
-  
+
   /**
    * Creates a new method declaration
    * @param flags   the access flags
@@ -98,8 +98,23 @@ public class PolymorphicMethodDeclaration extends MethodDeclaration {
 
     _typeParameters = typeParams;
   }
-  
+
   public TypeParameter[] getTypeParameters(){ return _typeParameters; }
+
+  public String toString() {
+    return "("+getClass().getName()+": "+toStringHelper()+")";
+  }
+
+  public String toStringHelper() {
+	  TypeParameter[] tp = getTypeParameters();
+	  String typeParamsS = "";
+	  if(tp.length>0)
+		typeParamsS = ""+tp[0];
+	  for(int i = 1; i < tp.length; i++)
+	    typeParamsS = typeParamsS + " " + tp[i];
+
+	  return typeParamsS+" "+super.toStringHelper();
+  }
 
 //  public <T> T acceptVisitor(GenericVisitor<T> visitor) {
 //    return visitor.visit(this);

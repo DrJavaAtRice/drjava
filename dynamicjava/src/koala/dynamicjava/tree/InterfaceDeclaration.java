@@ -50,7 +50,7 @@ public class InterfaceDeclaration extends TypeDeclaration {
   public InterfaceDeclaration(int flags, String name, List<List<IdentifierToken>> impl, List<Node> body) {
     this(flags, name, impl, body, null, 0, 0, 0, 0);
   }
-  
+
   /**
    * Creates a new interface declaration
    * @param flags the access flags
@@ -67,7 +67,7 @@ public class InterfaceDeclaration extends TypeDeclaration {
                               String fn, int bl, int bc, int el, int ec) {
     super(flags, name, impl, body, fn, bl, bc, el, ec);
   }
-  
+
   /**
    * Allows a visitor to traverse the tree
    * @param visitor the visitor to accept
@@ -79,6 +79,10 @@ public class InterfaceDeclaration extends TypeDeclaration {
    * Implementation of toString for use in unit testing
    */
   public String toString() {
-    return "("+getClass().getName()+": "+getAccessFlags()+" "+getName()+" "+getInterfaces()+" "+getMembers()+")";
+    return "("+getClass().getName()+": "+toStringHelper()+")";
+  }
+
+  protected String toStringHelper() {
+    return java.lang.reflect.Modifier.toString(getAccessFlags())+" "+getName()+" "+getInterfaces()+" "+getMembers();
   }
 }

@@ -2,7 +2,7 @@
  * the general comment notation, which is later removed by our script. To remove these comments,
  * from this file later, we can simply run the script on this file.
  * AVOID SPANNING LINES!! ONLY put 1 comment around nested generic tags
-*/
+ */
 
 
 
@@ -18,26 +18,52 @@ options {
 PARSER_BEGIN(Parser)
   package koala.dynamicjava.parser;
 
-//import java.lang.reflect.*;  
+//import java.lang.reflect.*;
 import java.lang.reflect.Modifier;
 import java.util.*;
+import java.io.File;
+
+import koala.dynamicjava.SourceInfo;
 import koala.dynamicjava.parser.wrapper.*;
 import koala.dynamicjava.tree.*;
 import koala.dynamicjava.tree.visitor.*;
 import koala.dynamicjava.util.*;
+import koala.dynamicjava.tree.tiger.generic.*;
 
 /**
  * This class represents a (interpreted) Java 1.1 language parser
- *
- * @author  Stephane Hillion
- * @version 1.1 - 1999/10/25
+ * adapted for 1.5 language extensions.
+ * @author  Stephane Hillion, adapted by Moez Abdel-Gawad
+ * @version 1.1 - 1999/10/25, 1.5 - 2004/03/25
  */
 
 public class Parser {
   /**
-   * The name of the file currenty interpreted
+   * The name of the file currently interpreted
    */
   private String filename;
+  
+  /**
+   * An environment that has the generic type parameters defined
+   * at any point.
+   *
+   * Used as a stack, pushed if TypeParameters are parsed (in
+   * a class/interface/method declaration), and popped after
+   * parsing whole scope (class, interface, or method).
+   */
+  private Environment/*<String, TypeParameter>*/ GenericTypesEnv =
+    new EmptyEnv/*<String, TypeParameter>*/();
+  
+  private Map/*<String, TypeParameter>*/ TypeParamsMap = new HashMap/*<String, TypeParameter>*/();
+  // contains the latest defined type parameters list whose
+  // full declaration has not finished yet. That is to take
+  // care of the fact that the scope of a type parameter is
+  // covers the rest of the definition of the type parameters
+  // list beyond a parameter's own definition (for example,
+  // class Enum<E extends Enum<E>>, in Java 1.5 API). When
+  // checking for a type parameter, this Map has to be checked
+  // first before the GenericTypesEnv environment.
+  
   
   /**
    * The message reader
@@ -51,6 +77,18 @@ public class Parser {
    */
   public void setFilename(String fname) {
     filename = fname;
+  }
+  
+  /**
+   * Creates a source location that starts at the given first token
+   * and ends in the last token yet read.
+   */
+  private SourceInfo _loc(Token first) {
+    return new SourceInfo(new File(filename),
+                          first.beginLine,
+                          first.beginColumn,
+                          token.endLine,
+                          token.endColumn);
   }
   
   /**
@@ -215,7 +253,7 @@ public class Parser {
           (exp, ca.getCreationType(), ca.getArguments(), ca.getMembers(),
            filename,
            exp.getBeginLine(), exp.getBeginColumn(),
-           ca.getEndLine(),    ca.getEndColumn());  
+           ca.getEndLine(),    ca.getEndColumn());
       }
     }
   }
@@ -522,9 +560,9 @@ public class Parser {
                                                        filename,
                                                        f.beginLine, f.beginColumn,
                                                        l.endLine,   l.endColumn),
-                                                       t.image, filename,
-                                                       f.beginLine, f.beginColumn,
-                                                       t.endLine,   t.endColumn);
+                                     t.image, filename,
+                                     f.beginLine, f.beginColumn,
+                                     t.endLine,   t.endColumn);
       }
     }
     
@@ -842,8 +880,8 @@ PARSER_END(Parser)
     | < XOR: "^" >
     | < REMAINDER: "%" >
     | < LEFT_SHIFT: "<<" >
-    | < RIGHT_SIGNED_SHIFT: ">>" >
-    | < RIGHT_UNSIGNED_SHIFT: ">>>" >
+      /*    | < RIGHT_SIGNED_SHIFT: ">>" >
+       | < RIGHT_UNSIGNED_SHIFT: ">>>" > */
     | < PLUS_ASSIGN: "+=" >
     | < MINUS_ASSIGN: "-=" >
     | < STAR_ASSIGN: "*=" >
@@ -855,6 +893,70 @@ PARSER_END(Parser)
     | < LEFT_SHIFT_ASSIGN: "<<=" >
     | < RIGHT_SIGNED_SHIFT_ASSIGN: ">>=" >
     | < RIGHT_UNSIGNED_SHIFTASSIGN: ">>>=" >
+  }
+  
+  TOKEN : /* OPERATORS, from Generics Preprocessor  */
+  {
+    /*  < ASSIGN: "=" >
+     | < GT: ">" >
+     | < LT: "<" >
+     | < BANG: "!" >
+     | < TILDE: "~" >
+     | < HOOK: "?" >
+     | < COLON: ":" >
+     | < EQ: "==" >
+     | < LE: "<=" >
+     | < GE: ">=" >
+     | < NE: "!=" >
+     | < SC_OR: "||" >
+     | < SC_AND: "&&" >
+     | < INCR: "++" >
+     | < DECR: "--" >
+     | < PLUS: "+" >
+     | < MINUS: "-" >
+     | < STAR: "*" >
+     | < SLASH: "/" >
+     | < BIT_AND: "&" >
+     | < BIT_OR: "|" >
+     | < XOR: "^" >
+     | < REM: "%" >
+     | < LSHIFT: "<<" >
+     | */
+    < RSIGNEDSHIFT: ">>" >
+    {
+      matchedToken.kind = RSSHIFT1;
+      matchedToken.image = ">@1";
+      matchedToken.next = new Token();
+      matchedToken.next.kind = RSSHIFT2;
+      matchedToken.next.image = ">@2";
+    }
+    | < RUNSIGNEDSHIFT: ">>>" >
+    {
+      matchedToken.image = ">`1";
+      matchedToken.kind = RUSHIFT1;
+      matchedToken.next = new Token();
+      matchedToken.next.kind = RUSHIFT2;
+      matchedToken.next.image = ">`2";
+      matchedToken.next.next = new Token();
+      matchedToken.next.next.kind = RUSHIFT3;
+      matchedToken.next.next.image = ">`3";
+    }
+    | < RSSHIFT1: ">@1" >
+    | < RSSHIFT2: ">@2" >
+    | < RUSHIFT1: ">`1" >
+    | < RUSHIFT2: ">`2" >
+    | < RUSHIFT3: ">`3" >
+      /*| < PLUSASSIGN: "+=" >
+       | < MINUSASSIGN: "-=" >
+       | < STARASSIGN: "*=" >
+       | < SLASHASSIGN: "/=" >
+       | < ANDASSIGN: "&=" >
+       | < ORASSIGN: "|=" >
+       | < XORASSIGN: "^=" >
+       | < REMASSIGN: "%=" >
+       | < LSHIFTASSIGN: "<<=" >
+       | < RSIGNEDSHIFTASSIGN: ">>=" >
+       | < RUNSIGNEDSHIFTASSIGN: ">>>=" >*/
   }
   
   /*
@@ -905,7 +1007,7 @@ PARSER_END(Parser)
   /**
    * Parses one top level statement. This production is
    * not a Java language rule. It is used by DynamicJava.
-   * 
+   *
    * @return a node
    * @see koala.dynamicjava.tree.Node
    */
@@ -959,7 +1061,7 @@ PARSER_END(Parser)
        list.add(node);
      }
      )*
-       ( ( node=typeDeclaration() 
+       ( ( node=typeDeclaration()
             {
        list.add(node);
      }
@@ -1072,7 +1174,7 @@ PARSER_END(Parser)
     {
       list.add(obj);
     }
-    ( "," obj=name() 
+    ( "," obj=name()
        {
       list.add(obj);
     }
@@ -1127,7 +1229,7 @@ PARSER_END(Parser)
       }
       flags |= Modifier.ABSTRACT;
     }
-     | t="final" 
+     | t="final"
        {
        if (ft == null) {
          ft = t;
@@ -1162,7 +1264,7 @@ PARSER_END(Parser)
        
        flags |= Modifier.PUBLIC;
      }
-     | t="protected" 
+     | t="protected"
        {
        if (ft == null) {
          ft = t;
@@ -1275,24 +1377,43 @@ PARSER_END(Parser)
   {
     Token t;
     Token id;
+    TypeParameter[] typeParameters = null;
     List/*<IdentifierToken>*/  ext  = null;
     List/*<List<IdentifierToken>>*/ impl = null;
     ClassBody body;
   }
   {
-    t="class" id=<IDENTIFIER> [ "extends" ext=name() ] [ "implements" impl=nameList() ]
+    t="class" id=<IDENTIFIER>
+      [ typeParameters = TypeParameters() ]
+      [ "extends" ext=name() ] [ "implements" impl=nameList() ]
       body=classBody()
     {
-      if (mf == null) {
-        return new ClassDeclaration(0, id.image, ext, impl, body.list,
-                                    filename,
-                                    t.beginLine,  t.beginColumn,
-                                    body.endLine, body.endColumn);
-      } else {
-        return new ClassDeclaration(mf.accessFlags, id.image, ext, impl, body.list,
-                                    filename,
-                                    mf.beginLine, mf.beginColumn,
-                                    body.endLine, body.endColumn);
+      if (typeParameters != null){
+        GenericTypesEnv = GenericTypesEnv.getRest(); // pop added type params
+        if (mf == null) {
+          return new GenericClassDeclaration(0, id.image, ext, impl, body.list,
+                                             filename,
+                                             t.beginLine,  t.beginColumn,
+                                             body.endLine, body.endColumn, typeParameters);
+        } else {
+          return new GenericClassDeclaration(mf.accessFlags, id.image, ext, impl, body.list,
+                                             filename,
+                                             mf.beginLine, mf.beginColumn,
+                                             body.endLine, body.endColumn, typeParameters);
+        }
+      }
+      else {
+        if (mf == null) {
+          return new ClassDeclaration(0, id.image, ext, impl, body.list,
+                                      filename,
+                                      t.beginLine,  t.beginColumn,
+                                      body.endLine, body.endColumn);
+        } else {
+          return new ClassDeclaration(mf.accessFlags, id.image, ext, impl, body.list,
+                                      filename,
+                                      mf.beginLine, mf.beginColumn,
+                                      body.endLine, body.endColumn);
+        }
       }
     }
   }
@@ -1307,8 +1428,8 @@ PARSER_END(Parser)
     List/*<Node>*/ decl;
   }
   {
-    "{" 
-      ( 
+    "{"
+      (
        decl=classBodyDeclaration()
          {
       list.addAll(decl);
@@ -1410,6 +1531,7 @@ PARSER_END(Parser)
     int               bl;
     int               bc;
     int               flags = 0;
+    TypeParameter[]   typeParameters = null;
     Type              typ;
     Token             id;
     int               dim = 0;
@@ -1419,10 +1541,11 @@ PARSER_END(Parser)
   }
   {
     mf=modifiers()
+      [ typeParameters = TypeParameters() ]
       typ=resultType()
       id=<IDENTIFIER>
-      params=formalParameters() 
-      ( "[" "]" { dim++; } )* 
+      params=formalParameters()
+      ( "[" "]" { dim++; } )*
         [ "throws" exceptions=nameList() ]
         ( body=block() | body=emptyStatement() )
       {
@@ -1442,12 +1565,23 @@ PARSER_END(Parser)
                               typ.getEndLine(),   typ.getEndColumn());
         }
         
-        return new MethodDeclaration(flags, typ, id.image, params,
-                                     exceptions,
-                                     (body instanceof BlockStatement) ?
-                                       (BlockStatement)body : null,
-                                     filename,
-                                     bl, bc, body.getEndLine(), body.getEndColumn());
+        if (typeParameters == null){
+          return new MethodDeclaration(flags, typ, id.image, params,
+                                       exceptions,
+                                       (body instanceof BlockStatement) ?
+                                         (BlockStatement)body : null,
+                                       filename,
+                                       bl, bc, body.getEndLine(), body.getEndColumn());
+        } else {
+          GenericTypesEnv = GenericTypesEnv.getRest(); // pop added type params
+          return new PolymorphicMethodDeclaration(flags, typ, id.image, params,
+                                                  exceptions,
+                                                  (body instanceof BlockStatement) ?
+                                                    (BlockStatement)body : null,
+                                                  filename,
+                                                  bl, bc, body.getEndLine(), body.getEndColumn(),
+                                                  typeParameters);
+        }
       }
   }
   
@@ -1465,7 +1599,7 @@ PARSER_END(Parser)
            {
       list.add(node);
     }
-         ( "," node=formalParameter() 
+         ( "," node=formalParameter()
             {
            list.add(node);
          }
@@ -1564,7 +1698,7 @@ PARSER_END(Parser)
        flag = Modifier.PRIVATE;
      }
      ]
-       id=<IDENTIFIER> 
+       id=<IDENTIFIER>
        params=formalParameters()
        [ "throws" exceptions=nameList() ]
        "{"
@@ -1643,15 +1777,18 @@ PARSER_END(Parser)
     Token t;
     Token id;
     Token e;
+    TypeParameter[] typeParameters = null;
     List/*<List<IdentifierToken>>*/ impl = null;
     List/*<Node>*/ list = new LinkedList/*<Node>*/();
     List/*<Node>*/  decl;
     int   m = 0;
   }
   {
-    t="interface" id=<IDENTIFIER> [ "extends" impl=nameList() ]
+    t="interface" id=<IDENTIFIER>
+      [ typeParameters = TypeParameters() ]
+      [ "extends" impl=nameList() ]
       "{"
-      ( 
+      (
        decl=interfaceMemberDeclaration()
          {
       list.addAll(decl);
@@ -1662,10 +1799,19 @@ PARSER_END(Parser)
       if (mf != null) {
         m = mf.accessFlags;
       }
-      return new InterfaceDeclaration(m, id.image, impl, list,
-                                      filename,
-                                      t.beginLine, t.beginColumn,
-                                      e.endLine,   e.endColumn);
+      if (typeParameters == null){
+        return new InterfaceDeclaration(m, id.image, impl, list,
+                                        filename,
+                                        t.beginLine, t.beginColumn,
+                                        e.endLine,   e.endColumn);
+      } else {
+        GenericTypesEnv = GenericTypesEnv.getRest(); // pop added type params
+        return new GenericInterfaceDeclaration(m, id.image, impl, list,
+                                               filename,
+                                               t.beginLine, t.beginColumn,
+                                               e.endLine, e.endColumn,
+                                               typeParameters);
+      }
     }
   }
   
@@ -1768,7 +1914,7 @@ PARSER_END(Parser)
          {
       list.addAll(nodes);
     }
-    )* 
+    )*
       p2="}"
     {
       return new BlockStatement(list,
@@ -1835,8 +1981,8 @@ PARSER_END(Parser)
       {
         list.add(createVariableDeclaration(t, typ, id, init, dim));
       }
-      ( { init = null; dim = 0; } 
-       ","  id=<IDENTIFIER> ( "[" "]" { dim++; } )* 
+      ( { init = null; dim = 0; }
+       ","  id=<IDENTIFIER> ( "[" "]" { dim++; } )*
        [ "=" init=variableInitializer() ]
          {
          list.add(createVariableDeclaration(t, typ, id, init, dim));
@@ -2271,7 +2417,7 @@ PARSER_END(Parser)
   {
     ( exp=preIncrementExpression()
        | exp=preDecrementExpression()
-       | exp=primaryExpression() 
+       | exp=primaryExpression()
        [ t="++"
           {
       exp = new PostIncrement(exp,
@@ -2279,7 +2425,7 @@ PARSER_END(Parser)
                               exp.getBeginLine(), exp.getBeginColumn(),
                               t.endLine,          t.endColumn);
     }
-        | t="--" 
+        | t="--"
           {
           exp = new PostDecrement(exp,
                                   filename,
@@ -2526,7 +2672,7 @@ PARSER_END(Parser)
     Expression exp2;
   }
   {
-    exp=andExpression() 
+    exp=andExpression()
       ( "^" exp2=andExpression()
          {
       exp = new ExclusiveOrExpression(exp, exp2,
@@ -2549,7 +2695,7 @@ PARSER_END(Parser)
     Expression exp2;
   }
   {
-    exp=equalityExpression() 
+    exp=equalityExpression()
       ( "&" exp2=equalityExpression()
          {
       exp = new BitAndExpression(exp, exp2,
@@ -2572,7 +2718,7 @@ PARSER_END(Parser)
     Expression exp2;
   }
   {
-    exp=instanceOfExpression() 
+    exp=instanceOfExpression()
       ( "==" exp2=instanceOfExpression()
          {
       exp = new EqualExpression(exp, exp2,
@@ -2624,7 +2770,7 @@ PARSER_END(Parser)
     Expression exp2;
   }
   {
-    exp=shiftExpression() 
+    exp=shiftExpression()
       ( "<"  exp2=shiftExpression()
          {
       exp = new LessExpression(exp, exp2,
@@ -2706,8 +2852,8 @@ PARSER_END(Parser)
     Expression exp2;
   }
   {
-    exp=multiplicativeExpression() 
-      ( "+" exp2=multiplicativeExpression() 
+    exp=multiplicativeExpression()
+      ( "+" exp2=multiplicativeExpression()
          {
       exp = new AddExpression(exp, exp2,
                               filename,
@@ -2736,7 +2882,7 @@ PARSER_END(Parser)
     Expression exp2;
   }
   {
-    exp=unaryExpression() 
+    exp=unaryExpression()
       ( "*" exp2=unaryExpression()
          {
       exp = new MultiplyExpression(exp, exp2,
@@ -2900,7 +3046,7 @@ PARSER_END(Parser)
     Token      t;
   }
   {
-    pe=primaryExpression() 
+    pe=primaryExpression()
       [ t="++"
          {
       return new PostIncrement(pe,
@@ -2931,7 +3077,7 @@ PARSER_END(Parser)
     List/*<ExpressionSuffix>*/ list = new LinkedList/*<ExpressionSuffix>*/();
   }
   {
-    pp=primaryPrefix() 
+    pp=primaryPrefix()
       ( LOOKAHEAD(2) es=primarySuffix()
          {
       // Build the list of suffixes in reverse order
@@ -3018,29 +3164,38 @@ PARSER_END(Parser)
   {
     Token           t;
     List/*<IdentifierToken>*/ ls;
+    List/*<Type>*/ typeArgs = null;
     ArgumentsSuffix as;
     ClassBody       cb = null;
   }
   {
     
-    t="new" ls=name() as=arguments() [ cb=classBody() ]
+    t="new" ls=name() [ typeArgs = TypeArguments() ] as=arguments() [ cb=classBody() ]
     {
       IdentifierToken f  = ls.get(0);
       IdentifierToken l  = ls.get(ls.size()-1);
+      ReferenceType rt;
+      if(typeArgs == null){
+        rt = new ReferenceType(ls,
+                               filename,
+                               f.beginLine(), f.beginColumn(),
+                               l.endLine(),   l.endColumn());
+      } else {
+        rt = new GenericReferenceType(ls,
+                                      filename,
+                                      f.beginLine(), f.beginColumn(),
+                                      l.endLine(), l.endColumn(),
+                                      typeArgs);
+      }
+      
       if (cb == null) {
-        return new SimpleAllocation(new ReferenceType(ls,
-                                                      filename,
-                                                      f.beginLine(), f.beginColumn(),
-                                                      l.endLine(),   l.endColumn()),
+        return new SimpleAllocation(rt,
                                     as.arguments,
                                     filename,
                                     t.beginLine, t.beginColumn,
                                     as.endLine,  as.endColumn);
       } else {
-        return new ClassAllocation(new ReferenceType(ls,
-                                                     filename,
-                                                     f.beginLine(), f.beginColumn(),
-                                                     l.endLine(),   l.endColumn()),
+        return new ClassAllocation(rt,
                                    as.arguments,
                                    cb.list,
                                    filename,
@@ -3191,7 +3346,7 @@ PARSER_END(Parser)
     |
       t="null"
     {
-      return new NullLiteral(filename, 
+      return new NullLiteral(filename,
                              t.beginLine, t.beginColumn,
                              t.endLine,   t.endColumn);
     }
@@ -3272,6 +3427,7 @@ PARSER_END(Parser)
     ArrayAllocation.TypeDescriptor td;
     Type            pt;
     List/*<IdentifierToken>*/ ls;
+    List/*<Type>*/ typeArgs = null;
     ArgumentsSuffix as;
     ClassBody       cb = null;
   }
@@ -3279,20 +3435,28 @@ PARSER_END(Parser)
     ( LOOKAHEAD(2)
        t="new" pt=primitiveType() td=arrayDimsAndInits()
        {
-      return new ArrayAllocation(pt, td, 
+      return new ArrayAllocation(pt, td,
                                  filename,
                                  t.beginLine, t.beginColumn,
                                  td.endLine,  td.endColumn);
     }
      |
-     t="new" ls=name()
+     t="new" ls=name() [ typeArgs = TypeArguments() ]
        {
        IdentifierToken f  = ls.get(0);
        IdentifierToken l  = ls.get(ls.size()-1);
-       pt = new ReferenceType(ls,
-                              filename,
-                              f.beginLine(), f.beginColumn(),
-                              l.endLine(),   l.endColumn());
+       if( typeArgs == null ){
+         pt = new ReferenceType(ls,
+                                filename,
+                                f.beginLine(), f.beginColumn(),
+                                l.endLine(),   l.endColumn());
+       } else {
+         pt = new GenericReferenceType(ls,
+                                       filename,
+                                       f.beginLine(), f.beginColumn(),
+                                       l.endLine(), l.endColumn(),
+                                       typeArgs);
+       }
      }
      ( td=arrayDimsAndInits()
         {
@@ -3358,7 +3522,7 @@ PARSER_END(Parser)
        return new ArrayAllocation.TypeDescriptor
          (dims, dim, ai,
           ai.getEndLine(), ai.getEndColumn());
-     }     
+     }
      )
   }
   
@@ -3373,10 +3537,12 @@ PARSER_END(Parser)
     Type  pt  = null;
     List/*<IdentifierToken>*/ ls  = null;
     Token t   = null;
+    List/*<Type>*/ typeArgs = null;
   }
   {
     ( pt=primitiveType()
-       | ls=name() ) 
+       | ls=name() [ typeArgs = TypeArguments() ]
+       )
       ( "[" t="]"
          {
       dim++;
@@ -3389,10 +3555,24 @@ PARSER_END(Parser)
       } else {
         IdentifierToken f  = ls.get(0);
         IdentifierToken l  = ls.get(ls.size()-1);
-        rt = new ReferenceType(ls,
-                               filename,
-                               f.beginLine(), f.beginColumn(),
-                               l.endLine(),   l.endColumn());
+        if(typeArgs == null){
+          if(TypeParamsMap.containsKey(TreeUtilities.listToName(ls))){
+            rt = TypeParamsMap.get(TreeUtilities.listToName(ls));
+          } else if(GenericTypesEnv.contains(TreeUtilities.listToName(ls))){
+            rt = GenericTypesEnv.lookup(TreeUtilities.listToName(ls));
+          } else {
+            rt = new ReferenceType(ls,
+                                   filename,
+                                   f.beginLine(), f.beginColumn(),
+                                   l.endLine(),   l.endColumn());
+          }
+        } else {
+          rt = new GenericReferenceType(ls,
+                                        filename,
+                                        f.beginLine(), f.beginColumn(),
+                                        l.endLine(), l.endColumn(),
+                                        typeArgs);
+        }
       }
       if (dim == 0) {
         return rt;
@@ -3436,7 +3616,7 @@ PARSER_END(Parser)
   {
     t="boolean"
     {
-      return new BooleanType(filename, 
+      return new BooleanType(filename,
                              t.beginLine, t.beginColumn, t.endLine, t.endColumn);
     }
     |
@@ -3925,7 +4105,9 @@ PARSER_END(Parser)
   void methodDeclarationLookahead() :
   {}
   {
-    modifiersLookahead() resultTypeLookahead() <IDENTIFIER> "("
+    modifiersLookahead()
+      [ TypeParametersLookahead() ]
+      resultTypeLookahead() <IDENTIFIER> "("
   }
   
   /**
@@ -3934,7 +4116,7 @@ PARSER_END(Parser)
   void methodDeclarationLookahead2() :
   {}
   {
-    modifiersLookahead()
+    modifiersLookahead() [ TypeParametersLookahead() ]
       resultTypeLookahead() methodDeclaratorLookahead() [ "throws" nameListLookahead() ]
       ( blockLookahead() | ";" )
   }
@@ -4286,7 +4468,7 @@ PARSER_END(Parser)
   void unmodifiedClassDeclarationLookahead() :
   {}
   {
-    "class" <IDENTIFIER> [ "extends" nameLookahead() ]
+    "class" <IDENTIFIER> [ TypeParametersLookahead() ] [ "extends" nameLookahead() ]
       [ "implements" nameListLookahead() ]
       classBodyLookahead()
   }
@@ -4315,7 +4497,7 @@ PARSER_END(Parser)
   void unmodifiedInterfaceDeclarationLookahead() :
   {}
   {
-    "interface" <IDENTIFIER> [ "extends" nameListLookahead() ]
+    "interface" <IDENTIFIER> [ TypeParametersLookahead() ] [ "extends" nameListLookahead() ]
       "{" ( interfaceMemberDeclarationLookahead() )* "}"
   }
   
@@ -4335,4 +4517,125 @@ PARSER_END(Parser)
       methodDeclarationLookahead2()
       |
       fieldDeclarationLookahead()
+  }
+  
+  
+  
+  /* Additions to DynamicJava grammar to parse Generics */
+  
+  TypeParameter[] TypeParameters() :
+  {
+    List/*<TypeParameter>*/ list = new LinkedList/*<TypeParameter>*/();
+    TypeParameter temp;
+  }
+  {
+    <LESS>
+      temp = TypeParameter() { list.add(temp); TypeParamsMap.put(temp.getName(), temp); }
+    (
+     <COMMA>
+     temp = TypeParameter() { list.add(temp); TypeParamsMap.put(temp.getName(), temp); }
+    )*
+      RightAngledBracket()
+    {
+      GenericTypesEnv = GenericTypesEnv.extend(TypeParamsMap); // push the map of typename/typeparam to the generic types env
+      TypeParamsMap = new HashMap/*<String, TypeParameter>*/(); // flush old map
+      return (TypeParameter[]) list.toArray(new TypeParameter[0]);
+    }
+  }
+  
+  // does not add the peeked type params to the type environment
+  TypeParameter[] TypeParametersLookahead() :
+  {
+    List/*<TypeParameter>*/ list = new LinkedList/*<TypeParameter>*/();
+    TypeParameter temp;
+  }
+  {
+    <LESS>
+      temp = TypeParameter() { list.add(temp); }
+    (
+     <COMMA>
+     temp = TypeParameter() { list.add(temp); }
+    )*
+      RightAngledBracket()
+    {
+      return (TypeParameter[]) list.toArray(new TypeParameter[0]);
+    }
+  }
+  
+  TypeParameter TypeParameter() :
+  {
+    List/*<IdentifierToken>*/ name;
+    Type bound = new ReferenceType("Object");
+    Token first = getToken(1);
+  }
+  {
+    name = name()
+      [
+       <EXTENDS>
+       bound = type()
+         ]
+    {
+      if(bound instanceof ReferenceType){
+        return new TypeParameter(_loc(first), name, (ReferenceType)bound);
+      } else {
+        throw new ParseException("Primitives are not allowed as bound"+
+                                 "types, and array types are temporarily disabled due to a "+
+                                 "DynamicJava AST hierarchy bug!");
+      }
+    }
+  }
+  
+  /*
+   ReferenceType ReferenceType() :
+   {
+   List<IdentifierToken> ls  = null;
+   }
+   {
+   ls=name()
+   {
+   IdentifierToken f  = ls.get(0);
+   IdentifierToken l  = ls.get(ls.size()-1);
+   return new ReferenceType(ls,
+   filename,
+   f.beginLine(), f.beginColumn(),
+   l.endLine(),   l.endColumn());
+   }
+   }
+   */
+  
+  List/*<Type>*/ TypeArguments() :
+  {
+    List/*<Type>*/ typeArgs = new LinkedList/*<Type>*/();
+    Type temp;
+  }
+  {
+    <LESS>
+      
+      ( temp = type() ) // should be modified to not allow primitives
+    {
+      typeArgs.add(temp);
+    }
+    
+    (
+     <COMMA>
+     (temp = type() ) // should be modified to not allow primitives
+       {
+      typeArgs.add(temp);
+    }
+    )*
+      
+      RightAngledBracket()
+      
+    {
+      return typeArgs;
+    }
+  }
+  
+  Token RightAngledBracket() :
+  {
+    Token t;
+  }
+  {
+    ( t=<GREATER_THAN> | t=<RSSHIFT1> | t=<RSSHIFT2> | t=<RUSHIFT1> | t=<RUSHIFT2> | t=<RUSHIFT3> )
+    { return t; }
   }

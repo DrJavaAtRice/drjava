@@ -44,12 +44,12 @@ public class ClassDeclaration extends TypeDeclaration {
    * The superclass property name
    */
   public final static String SUPERCLASS = "superclass";
-  
+
   /**
    * The superclass of this class
    */
   private String superclass;
-  
+
   /**
    * Creates a new class declaration
    * @param flags the access flags
@@ -64,7 +64,7 @@ public class ClassDeclaration extends TypeDeclaration {
   public ClassDeclaration(int flags, String name, List<IdentifierToken> ext, List<List<IdentifierToken>> impl, List<Node> body) {
     this(flags, name, ext, impl, body, null, 0, 0, 0, 0);
   }
-  
+
   /**
    * Creates a new class declaration
    * @param flags the access flags
@@ -90,24 +90,24 @@ public class ClassDeclaration extends TypeDeclaration {
       superclass = TreeUtilities.listToName(ext);
     }
   }
-  
+
   /**
    * Returns the name of the superclass of this class
    */
   public String getSuperclass() {
     return superclass;
   }
-  
+
   /**
    * Sets the superclass name
    * @exception IllegalArgumentException if s is null
    */
   public void setSuperclass(String s) {
     if (s == null) throw new IllegalArgumentException("s == null");
-    
+
     firePropertyChange(SUPERCLASS, superclass, superclass = s);
   }
-  
+
   /**
    * Allows a visitor to traverse the tree
    * @param visitor the visitor to accept
@@ -119,6 +119,11 @@ public class ClassDeclaration extends TypeDeclaration {
    * Implementation of toString for use in unit testing
    */
   public String toString() {
-    return "("+getClass().getName()+": "+getAccessFlags()+" "+getName()+" "+getInterfaces()+" "+getMembers()+")";
+    return "("+getClass().getName()+": "+toStringHelper()+")";
+  }
+
+  protected String toStringHelper() {
+	  return java.lang.reflect.Modifier.toString(getAccessFlags())+" "+getName()+
+	         " "+getInterfaces()+" "+getMembers();
   }
 }

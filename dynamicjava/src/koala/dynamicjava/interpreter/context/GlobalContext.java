@@ -64,43 +64,43 @@ public class GlobalContext extends VariableContext implements Context {
   protected final static ReferenceType OBJECT_TYPE = new ReferenceType("java.lang.Object");
   protected final static ArrayType OBJECT_ARRAY_ARRAY = new ArrayType(OBJECT_TYPE, 2);
   protected final static TypeExpression OBJECT_CLASS = new TypeExpression(OBJECT_TYPE);
-  
+
   protected final static String LOCALS_NAME = "local$Variables$Reference$0";
   protected final static FieldDeclaration LOCALS =
     new FieldDeclaration(Modifier.PUBLIC, MAP_TYPE, LOCALS_NAME, null);
-  
+
   /**
    * To generate an unique name for the generated classes
    */
   protected static int classCount = 0;
-  
+
   /**
    * The importation manager
    */
   protected ImportationManager importationManager;
-  
+
   /**
    * The interpreter
    */
   protected Interpreter interpreter;
-  
+
   /**
    * The class loader
    */
   protected ClassLoader classLoader;
-  
+
   /**
    * The class loader container
    */
   protected ClassLoaderContainer clc;
-  
+
   /**
    * The functions
    */
   protected List<MethodDeclaration> functions = new LinkedList<MethodDeclaration>();
-  
+
   protected boolean accessible = false;
-  
+
   /**
    * Creates a new context
    * @param i the interpreter
@@ -109,7 +109,7 @@ public class GlobalContext extends VariableContext implements Context {
     importationManager = new BufferedImportationManager(i.getClassLoader());
     interpreter        = i;
   }
-  
+
   /**
    * Creates a new context
    * @param i   the interpreter
@@ -121,7 +121,7 @@ public class GlobalContext extends VariableContext implements Context {
     interpreter        = i;
     classLoader        = cl;
   }
-  
+
   /**
    * Creates a new context initialized with the given entries defined
    * in the initial scope.
@@ -132,30 +132,30 @@ public class GlobalContext extends VariableContext implements Context {
     super(entries);
     interpreter = i;
   }
-  
+
   /**
    * Sets the additional class loader container
    */
   public void setAdditionalClassLoaderContainer(ClassLoaderContainer clc) {
     this.clc = clc;
   }
-  
+
   /**
    * Allows the scripts to access private fields.
    */
   public void setAccessible(boolean accessible) {
     this.accessible = accessible;
   }
-  
+
   /**
    * Returns the accessibility state of this context.
    */
   public boolean getAccessible() {
     return this.accessible;
   }
-  
+
   /**
-   * Gets the additional class loader 
+   * Gets the additional class loader
    */
   protected ClassLoader getAdditionalClassLoader() {
     if (clc != null) {
@@ -163,42 +163,42 @@ public class GlobalContext extends VariableContext implements Context {
     }
     return null;
   }
-  
+
   /**
    * Sets the defined functions
    */
   public void setFunctions(List<MethodDeclaration> l) {
     functions = l;
   }
-  
+
   /**
    * Returns the defined functions
    */
   public List<MethodDeclaration> getFunctions() {
     return functions;
   }
-  
+
   /**
    * Returns the current interpreter
    */
   public Interpreter getInterpreter() {
     return interpreter;
   }
-  
+
   /**
    * Returns the importation manager
    */
   public ImportationManager getImportationManager() {
     return importationManager;
   }
-  
+
   /**
    * Sets the importation manager
    */
   public void setImportationManager(ImportationManager im) {
     importationManager = im;
   }
-  
+
   /**
    * Whether a simple identifier represents an existing
    * variable or field or type in this context.
@@ -207,7 +207,7 @@ public class GlobalContext extends VariableContext implements Context {
   public boolean exists(String name) {
     return isDefined(name) || classExists(name);
   }
-  
+
   /**
    * Whether a simple identifier is a class
    * @param name the identifier
@@ -230,7 +230,7 @@ public class GlobalContext extends VariableContext implements Context {
     }
     return result;
   }
-  
+
   /**
    * Defines a MethodDeclaration as a function
    * @param node the function declaration
@@ -238,7 +238,7 @@ public class GlobalContext extends VariableContext implements Context {
   public void defineFunction(MethodDeclaration node) {
     functions.add(0, node);
   }
-  
+
   /**
    * Defines a class from its syntax tree
    * @param node the class declaration
@@ -246,7 +246,7 @@ public class GlobalContext extends VariableContext implements Context {
   public void defineClass(TypeDeclaration node) {
     new TreeCompiler(interpreter).compileTree(this, node);
   }
-  
+
   /**
    * Tests whether a variable is defined in this context
    * @param name the name of the entry
@@ -255,7 +255,7 @@ public class GlobalContext extends VariableContext implements Context {
   public boolean isDefined(String name) {
     return isDefinedVariable(name);
   }
-  
+
   /**
    * Sets the current package
    * @param pkg the package name
@@ -263,14 +263,14 @@ public class GlobalContext extends VariableContext implements Context {
   public void setCurrentPackage(String pkg) {
     importationManager.setCurrentPackage(pkg);
   }
-  
+
   /**
    * Returns the current package
    */
   public String getCurrentPackage() {
     return importationManager.getCurrentPackage();
   }
-  
+
   /**
    * Declares a new import-on-demand clause
    * @param pkg the package name
@@ -278,7 +278,7 @@ public class GlobalContext extends VariableContext implements Context {
   public void declarePackageImport(String pkg) {
     importationManager.declarePackageImport(pkg);
   }
-  
+
   /**
    * Declares a new single-type-import clause
    * @param cname the fully qualified class name
@@ -297,7 +297,7 @@ public class GlobalContext extends VariableContext implements Context {
       }
     }
   }
-  
+
   /**
    * Returns the default qualifier for this context
    * @param node the current node
@@ -305,7 +305,7 @@ public class GlobalContext extends VariableContext implements Context {
   public Node getDefaultQualifier(Node node) {
     return getDefaultQualifier(node, "");
   }
-  
+
   /**
    * Returns the default qualifier for this context
    * @param node the current node
@@ -314,7 +314,7 @@ public class GlobalContext extends VariableContext implements Context {
   public Node getDefaultQualifier(Node node, String tname) {
     return null;
   }
-  
+
   /**
    * Returns the modifier that match the given node
    * @param node a tree node
@@ -326,7 +326,7 @@ public class GlobalContext extends VariableContext implements Context {
       return new VariableModifier(node, NodeProperties.getType(node));
     }
   }
-  
+
   /**
    * Returns the modifier that match the given node
    * @param node a tree node
@@ -339,7 +339,7 @@ public class GlobalContext extends VariableContext implements Context {
       return new InvalidModifier(node);
     }
   }
-  
+
   /**
    * Returns the modifier that match the given node
    * @param node a tree node
@@ -352,7 +352,7 @@ public class GlobalContext extends VariableContext implements Context {
       return new InvalidModifier(node);
     }
   }
-  
+
   /**
    * Returns the modifier that match the given node
    * @param node a tree node
@@ -360,14 +360,14 @@ public class GlobalContext extends VariableContext implements Context {
   public LeftHandSideModifier getModifier(SuperFieldAccess node) {
     throw new IllegalStateException("internal.error");
   }
-  
+
   /**
    * Returns the default argument to pass to methods in this context
    */
   public Object getHiddenArgument() {
     return null;
   }
-  
+
   /**
    * Creates the tree that is associated with the given name
    * @param node the current node
@@ -376,12 +376,12 @@ public class GlobalContext extends VariableContext implements Context {
    */
   public Expression createName(Node node, IdentifierToken name) {
     if (!isDefined(name.image())) throw new IllegalStateException();
-    
+
     List<IdentifierToken> l = new LinkedList<IdentifierToken>();
     l.add(name);
     return new QualifiedName(l);
   }
-  
+
   /**
    * Looks for a class
    * @param cname the class name
@@ -390,7 +390,7 @@ public class GlobalContext extends VariableContext implements Context {
   public Class lookupClass(String cname) throws ClassNotFoundException {
     return importationManager.lookupClass(cname, null);
   }
-  
+
   /**
    * Looks for a class (context-free lookup)
    * @param cname the class name
@@ -400,7 +400,7 @@ public class GlobalContext extends VariableContext implements Context {
   public Class lookupClass(String cname, String ccname) throws ClassNotFoundException {
     return importationManager.lookupClass(cname, ccname);
   }
-  
+
   /**
    * Sets the properties of a SimpleAllocation node
    * @param node  the allocation node
@@ -414,13 +414,13 @@ public class GlobalContext extends VariableContext implements Context {
     } catch (Exception e) {
       throw new CatchedExceptionError(e, node);
     }
-    
+
     // Set the properties of this node
     node.setProperty(NodeProperties.TYPE,        c);
     node.setProperty(NodeProperties.CONSTRUCTOR, cons);
     return c;
   }
-  
+
   /**
    * Sets the properties of a ClassAllocation node
    * @param node the allocation node
@@ -432,48 +432,48 @@ public class GlobalContext extends VariableContext implements Context {
     String cname = "TopLevel" + "$" + classCount++;
     FieldDeclaration fd;
     ConstructorDeclaration csd;
-    
+
     // Create the reference to the declaring class
     fd = new FieldDeclaration(Modifier.PUBLIC | Modifier.STATIC,
                               CLASS_TYPE,
                               "declaring$Class$Reference$0",
                               OBJECT_CLASS);
     memb.add(fd);
-    
+
     // Add the reference to the final local variables map
     memb.add(LOCALS);
-    
+
     // Create the reference to the final local variables map
     fd = new FieldDeclaration(Modifier.PUBLIC | Modifier.STATIC,
                               OBJECT_ARRAY_ARRAY,
                               "local$Variables$Class$0",
                               createClassArrayInitializer());
     memb.add(fd);
-    
+
     // Create the constructor
     List<FormalParameter> params = new LinkedList<FormalParameter>();
     List<Node> stmts = new LinkedList<Node>();
-    
+
     // Add the final local variables map parameter
     params.add(new FormalParameter(false, MAP_TYPE, "param$0"));
-    
+
     // Add the other parameters
     List<Expression> superArgs = new LinkedList<Expression>();
     for (int i = 0; i < args.length; i++) {
-      params.add(new FormalParameter(false, 
+      params.add(new FormalParameter(false,
                                      TreeUtilities.classToType(args[i]),
                                      "param$" + (i + 1)));
       List<IdentifierToken> l = new LinkedList<IdentifierToken>();
       l.add(new Identifier("param$" + (i + 1)));
       superArgs.add(new QualifiedName(l));
     }
-    
+
     // Create the explicit constructor invocation
     ConstructorInvocation ci = null;
     if (superArgs.size() > 0) {
       ci = new ConstructorInvocation(null, superArgs, true);
     }
-    
+
     // Add the outer instance reference initialization statement
     List<IdentifierToken> p1 = new LinkedList<IdentifierToken>();
     p1.add(new Identifier("local$Variables$Reference$0"));
@@ -481,7 +481,7 @@ public class GlobalContext extends VariableContext implements Context {
     p2.add(new Identifier("param$0"));
     stmts.add(new SimpleAssignExpression(new QualifiedName(p1),
                                          new QualifiedName(p2)));
-    
+
     csd = new ConstructorDeclaration(Modifier.PUBLIC,
                                      cname,
                                      params,
@@ -489,7 +489,7 @@ public class GlobalContext extends VariableContext implements Context {
                                      ci,
                                      stmts);
     memb.add(csd);
-    
+
     // Set the inheritance
     List<IdentifierToken> ext = null;
     List<List<IdentifierToken>> impl = null;
@@ -502,19 +502,19 @@ public class GlobalContext extends VariableContext implements Context {
       ext = new LinkedList<IdentifierToken>();
       ext.add(new Identifier(c.getName()));
     }
-    
+
     // Create the class
     TypeDeclaration type = new ClassDeclaration(Modifier.PUBLIC,
                                                 cname,
                                                 ext,
                                                 impl,
                                                 memb);
-    
+
     type.setProperty(TreeClassInfo.ANONYMOUS_DECLARING_CLASS,
                      new JavaClassInfo(Object.class));
-    
+
     Class cl = new TreeCompiler(interpreter).compileTree(this, type);
-    
+
     // Update the argument types
     Class[] tmp = new Class[args.length+1];
     tmp[0] = Map.class;
@@ -531,7 +531,7 @@ public class GlobalContext extends VariableContext implements Context {
     node.setProperty(NodeProperties.TYPE, cl);
     return cl;
   }
-  
+
   /**
    * Creates an initializer for the variable class array used to implement
    * inner classes
@@ -539,7 +539,7 @@ public class GlobalContext extends VariableContext implements Context {
   protected ArrayInitializer createClassArrayInitializer() {
     List<Expression> cells = new LinkedList<Expression>();
     ArrayInitializer cell;
-    
+
     Type tp = new ReferenceType(Object.class.getName());
     Map m = getConstants();
     Iterator it = m.keySet().iterator();
@@ -549,7 +549,7 @@ public class GlobalContext extends VariableContext implements Context {
       pair.add(new StringLiteral('\"' + s + '\"'));
       Class c = (Class)m.get(s);
       pair.add(new TypeExpression(TreeUtilities.classToType(c)));
-      
+
       cell = new ArrayInitializer(pair);
       cell.setElementType(tp);
       cells.add(cell);
@@ -559,7 +559,7 @@ public class GlobalContext extends VariableContext implements Context {
     ai.setElementType(tp);
     return ai;
   }
-  
+
   /**
    * Looks for a constructor
    * @param c  the class of the constructor
@@ -572,7 +572,7 @@ public class GlobalContext extends VariableContext implements Context {
     setAccessFlag(cons);
     return cons;
   }
-  
+
   /**
    * Invokes a constructor
    * @param node the SimpleAllocation node
@@ -580,7 +580,7 @@ public class GlobalContext extends VariableContext implements Context {
    */
   public Object invokeConstructor(SimpleAllocation node, Object[] args) {
     Constructor cons = (Constructor)node.getProperty(NodeProperties.CONSTRUCTOR);
-    
+
     try {
       return cons.newInstance(args);
     } catch (InvocationTargetException e) {
@@ -594,7 +594,7 @@ public class GlobalContext extends VariableContext implements Context {
       throw new CatchedExceptionError(e, node);
     }
   }
-  
+
   /**
    * Invokes a constructor
    * @param node the ClassAllocation node
@@ -602,14 +602,14 @@ public class GlobalContext extends VariableContext implements Context {
    */
   public Object invokeConstructor(ClassAllocation node, Object[] args) {
     Constructor cons = (Constructor)node.getProperty(NodeProperties.CONSTRUCTOR);
-    
+
     Object[] t = new Object[args.length + 1];
     t[0] = getConstants();
     for (int i = 1; i < t.length; i++) {
       t[i] = args[i - 1];
     }
     args = t;
-    
+
     try {
       return cons.newInstance(args);
     } catch (InvocationTargetException e) {
@@ -623,7 +623,7 @@ public class GlobalContext extends VariableContext implements Context {
       throw new CatchedExceptionError(e, node);
     }
   }
-  
+
   /**
    * Looks for a method
    * @param prefix the method prefix
@@ -641,7 +641,7 @@ public class GlobalContext extends VariableContext implements Context {
     }
     return m;
   }
-  
+
   /**
    * Looks for a function
    * @param mname  the function name
@@ -652,38 +652,38 @@ public class GlobalContext extends VariableContext implements Context {
     throws NoSuchFunctionException {
     Iterator<MethodDeclaration> it = functions.iterator();
     List<MethodDeclaration> f = new LinkedList<MethodDeclaration>();
-    
+
     while (it.hasNext()) {
       MethodDeclaration md = it.next();
       if (md.getName().equals(mname)) {
         f.add(md);
       }
     }
-    
+
     it = f.iterator();
     while (it.hasNext()) {
       MethodDeclaration md = it.next();
       List<FormalParameter> l =  md.getParameters();
-      
+
       if (l.size() != params.length) {
         continue;
       }
-      
+
       Class[] p = new Class[l.size()];
       Iterator<FormalParameter> it2 = l.iterator();
       int i = 0;
       while (it2.hasNext()) {
         p[i++] = (Class)NodeProperties.getType(it2.next());
       }
-      
+
       if (ReflectionUtilities.hasCompatibleSignatures(p, params)) {
         return md;
       }
     }
-    
+
     throw new NoSuchFunctionException(mname);
   }
-  
+
   /**
    * Looks for a super method
    * @param node the current node
@@ -695,7 +695,7 @@ public class GlobalContext extends VariableContext implements Context {
     throws NoSuchMethodException {
     throw new ExecutionError("super.method", node);
   }
-  
+
   /**
    * Looks for a field
    * @param fc the field class
@@ -709,7 +709,7 @@ public class GlobalContext extends VariableContext implements Context {
     setAccessFlag(f);
     return f;
   }
-  
+
   /**
    * Looks for a field in the super class
    * @param node the current node
@@ -721,7 +721,7 @@ public class GlobalContext extends VariableContext implements Context {
     AmbiguousFieldException {
     throw new ExecutionError("super.field", node);
   }
-  
+
   /**
    * To test the existance of a class without loading it
    */
@@ -741,8 +741,8 @@ public class GlobalContext extends VariableContext implements Context {
       } catch (NoClassDefFoundError e) {
         //       System.out.println("NoClassDefFoundError: " + e);
       }
-      
-      
+
+
       ClassLoader cl = (classLoader == null)
         ? interpreter.getClassLoader()
         : classLoader;
@@ -751,20 +751,20 @@ public class GlobalContext extends VariableContext implements Context {
           ((TreeClassLoader)cl).hasDefined(name)) {
         throw new PseudoError();
       }
-      
+
       // Is there a tree associated with this name ?
       TreeClassLoader cld = (TreeClassLoader)interpreter.getClassLoader();
       TypeDeclaration td = cld.getTree(name);
       if (td != null) {
         ImportationManager im = (ImportationManager)td.getProperty
           (NodeProperties.IMPORTATION_MANAGER);
-        
+
         CompilationUnitVisitor v  = new CompilationUnitVisitor(name, im);
         if (td.acceptVisitor(v).equals(Boolean.TRUE)) {
           throw new PseudoError();
         }
       }
-      
+
       // Is the class tree already loaded ?
       LibraryFinder lf = interpreter.getLibraryFinder();
       try {
@@ -773,7 +773,7 @@ public class GlobalContext extends VariableContext implements Context {
         if (td != null) {
           ImportationManager im = (ImportationManager)td.getProperty
             (NodeProperties.IMPORTATION_MANAGER);
-          
+
           CompilationUnitVisitor v  = new CompilationUnitVisitor(name, im);
           if (td.acceptVisitor(v).equals(Boolean.TRUE)) {
             throw new PseudoError();
@@ -781,16 +781,16 @@ public class GlobalContext extends VariableContext implements Context {
         }
       } catch (ClassNotFoundException e) {
       }
-      
+
       // Load the tree
       try {
         File f = lf.findCompilationUnit(name);
         FileInputStream fis = new FileInputStream(f);
-        
+
         ParserFactory pf = interpreter.getParserFactory();
         SourceCodeParser p = pf.createParser(fis, f.getCanonicalPath());
         List stmts = p.parseCompilationUnit();
-        
+
         Iterator it = stmts.iterator();
         CompilationUnitVisitor v  = new CompilationUnitVisitor(name);
         boolean classFound = false;
@@ -799,7 +799,7 @@ public class GlobalContext extends VariableContext implements Context {
             classFound = true;
           }
         }
-        
+
         if (classFound) {
           throw new PseudoError();
         }
@@ -808,13 +808,13 @@ public class GlobalContext extends VariableContext implements Context {
       throw new ClassNotFoundException(name);
     }
   }
-  
+
   /**
    * To test the existance of a class without loading it
    */
   protected class PseudoError extends Error {
   }
-  
+
   /**
    * Sets the access flag of a member
    */
@@ -825,12 +825,12 @@ public class GlobalContext extends VariableContext implements Context {
     String  pkg     = importationManager.getCurrentPackage();
     String  mp      = getPackageName(c);
     boolean samePkg = pkg.equals(mp);
-    
+
     // Relax the protection for members.
     if (getAccessible()) {
       ((AccessibleObject)m).setAccessible(true);
     }
-    
+
     if (Modifier.isPublic(cmods) || samePkg) {
       if (Modifier.isPublic(mods)) {
         ((AccessibleObject)m).setAccessible(true);
@@ -841,11 +841,11 @@ public class GlobalContext extends VariableContext implements Context {
       } else if (!Modifier.isPrivate(mods)) {
         if (samePkg) {
           ((AccessibleObject)m).setAccessible(true);
-        }               
+        }
       }
     }
   }
-  
+
   /**
    * Gets the package name for the given class
    */
@@ -854,7 +854,7 @@ public class GlobalContext extends VariableContext implements Context {
     int    i = s.lastIndexOf('.');
     return (i == -1) ? "" : s.substring(0, i);
   }
-  
+
   /**
    * To find a class in a compilation unit
    */
@@ -863,22 +863,22 @@ public class GlobalContext extends VariableContext implements Context {
      * The class to find
      */
     private String className;
-    
+
     /**
      * The current package
      */
     private String currentPackage;
-    
+
     /**
      * The importation manager
      */
     private ImportationManager importationManager;
-    
+
     /**
      * The current class loader
      */
     private TreeClassLoader classLoader;
-    
+
     /**
      * Creates a new visitor
      */
@@ -887,7 +887,7 @@ public class GlobalContext extends VariableContext implements Context {
       importationManager = new BufferedImportationManager(new PseudoClassLoader());
       classLoader = (TreeClassLoader)interpreter.getClassLoader();
     }
-    
+
     /**
      * Creates a new visitor
      */
@@ -897,7 +897,7 @@ public class GlobalContext extends VariableContext implements Context {
       importationManager.setClassLoader(new PseudoClassLoader());
       classLoader = (TreeClassLoader)interpreter.getClassLoader();
     }
-    
+
     /**
      * Visits a PackageDeclaration
      * @param node the node to visit
@@ -907,7 +907,7 @@ public class GlobalContext extends VariableContext implements Context {
       importationManager.setCurrentPackage(node.getName());
       return null;
     }
-    
+
     /**
      * Visits an ImportDeclaration
      * @param node the node to visit
@@ -926,7 +926,7 @@ public class GlobalContext extends VariableContext implements Context {
       }
       return null;
     }
-    
+
     /**
      * Visits a ClassDeclaration
      * @param node the node to visit
@@ -934,7 +934,7 @@ public class GlobalContext extends VariableContext implements Context {
     public Boolean visit(ClassDeclaration node) {
       return visitType(node);
     }
-    
+
     /**
      * Visits an InterfaceDeclaration
      * @param node the node to visit
@@ -942,7 +942,7 @@ public class GlobalContext extends VariableContext implements Context {
     public Boolean visit(InterfaceDeclaration node) {
       return visitType(node);
     }
-    
+
     /**
      * visits a TypeDeclaration
      */
@@ -963,7 +963,7 @@ public class GlobalContext extends VariableContext implements Context {
         return Boolean.FALSE;
       }
     }
-    
+
     /**
      * To find a class in a compilation unit
      */
@@ -972,14 +972,14 @@ public class GlobalContext extends VariableContext implements Context {
        * The outer class
        */
       private String outerName;
-      
+
       /**
        * Creates a new visitor
        */
       public MembersVisitor(String cname) {
         outerName = cname;
       }
-      
+
       /**
        * Visits a ClassDeclaration
        * @param node the node to visit
@@ -987,7 +987,7 @@ public class GlobalContext extends VariableContext implements Context {
       public Boolean visit(ClassDeclaration node) {
         return visitType(node);
       }
-      
+
       /**
        * Visits an InterfaceDeclaration
        * @param node the node to visit
@@ -995,7 +995,7 @@ public class GlobalContext extends VariableContext implements Context {
       public Boolean visit(InterfaceDeclaration node) {
         return visitType(node);
       }
-      
+
       /**
        * visits a TypeDeclaration
        */

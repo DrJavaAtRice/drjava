@@ -42,42 +42,42 @@ public class FieldDeclaration extends Node {
    * The accessFlags property name
    */
   public final static String ACCESS_FLAGS = "accessFlags";
-  
+
   /**
    * The type property name
    */
   public final static String TYPE = "type";
-  
+
   /**
    * The name property name
    */
   public final static String NAME = "name";
-  
+
   /**
    * The initializer property name
    */
   public final static String INITIALIZER = "initializer";
-  
+
   /**
    * The access flags
    */
   private int accessFlags;
-  
+
   /**
    * The type of this field
    */
   private Type type;
-  
+
   /**
    * The name of this field
    */
   private String name;
-  
+
   /**
    * The initializer
    */
   private Expression initializer;
-  
+
   /**
    * Creates a new field declaration
    * @param flags  the access flags
@@ -89,7 +89,7 @@ public class FieldDeclaration extends Node {
   public FieldDeclaration(int flags, Type type, String name, Expression init) {
     this(flags, type, name, init, null, 0, 0 ,0 ,0);
   }
-  
+
   /**
    * Creates a new field declaration
    * @param flags  the access flags
@@ -106,15 +106,15 @@ public class FieldDeclaration extends Node {
   public FieldDeclaration(int flags, Type type, String name, Expression init,
                           String fn, int bl, int bc, int el, int ec) {
     super(fn, bl, bc, el, ec);
-    
+
     if (type == null) throw new IllegalArgumentException("type == null");
     if (name == null) throw new IllegalArgumentException("name == null");
-    
+
     accessFlags = flags;
     this.type   = type;
     this.name   = name;
     initializer = init;
-    
+
     if (type instanceof ArrayType) {
       if (initializer instanceof ArrayInitializer) {
         ((ArrayInitializer)initializer).setElementType
@@ -122,80 +122,80 @@ public class FieldDeclaration extends Node {
       }
     }
   }
-  
+
   /**
    * Returns the access flags for this method
    */
   public int getAccessFlags() {
     return accessFlags;
   }
-  
+
   /**
    * Sets the access flags for this constructor
    */
   public void setAccessFlags(int f) {
     firePropertyChange(ACCESS_FLAGS, accessFlags, accessFlags = f);
   }
-  
+
   /**
    * Gets the declared type for this field
    */
   public Type getType() {
     return type;
   }
-  
+
   /**
    * Sets the type of this field
    * @exception IllegalArgumentException if t is null
    */
   public void setType(Type t) {
     if (t == null) throw new IllegalArgumentException("t == null");
-    
+
     firePropertyChange(TYPE, type, type = t);
   }
-  
+
   /**
    * Returns the name of this field
    */
   public String getName() {
     return name;
   }
-  
+
   /**
    * Sets the field's name
    * @exception IllegalArgumentException if s is null
    */
   public void setName(String s) {
     if (s == null) throw new IllegalArgumentException("s == null");
-    
+
     firePropertyChange(NAME, name, name = s);
   }
-  
+
   /**
    * Returns the initializer for this field
    */
   public Expression getInitializer() {
     return initializer;
   }
-  
+
   /**
    * Sets the initializer
    */
   public void setInitializer(Expression e) {
     firePropertyChange(INITIALIZER, initializer, initializer = e);
   }
-  
+
   /**
    * Allows a visitor to traverse the tree
    * @param visitor the visitor to accept
    */
   public <T> T acceptVisitor(Visitor<T> visitor) {
     return visitor.visit(this);
-  }    
+  }
    /**
    * Implementation of toString for use in unit testing
    */
   public String toString() {
-    return "("+getClass().getName()+": "+getAccessFlags()+" "+getType()+" "+getName()+" "+getInitializer()+")";
+    return "("+getClass().getName()+": "+java.lang.reflect.Modifier.toString(getAccessFlags())+" "+getType()+" "+getName()+" "+getInitializer()+")";
   }
 }
