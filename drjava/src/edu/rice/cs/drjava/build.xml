@@ -14,6 +14,9 @@
   -->
   <property name="projpath" value="edu/rice/cs/${ant.project.name}" />
 
+  <!-- What file will have $Name$ expanded in it properly? -->
+  <property name="file_with_build_name" value="MainFrame.java" />
+
   <property name="jarfile" value="${srcroot}/../drjava2.jar" />
   <property name="manifest" value="manifest" />
   <property name="cvsroot" value="/home/javaplt/.cvsroot" />
@@ -43,6 +46,16 @@
     <property name="version-tag"
               value="${ant.project.name}-${DSTAMP}-${TSTAMP}" />
     <cvs command="tag ${version-tag}" cvsRoot="${cvsroot}" quiet="true" />
+
+    <!-- Delete MainFrame.java and re-update to set $Name$ tags. -->
+    <delete file="${file_with_build_name}" />
+    <cvs command="update -r${version-tag} ${file_with_build_name}"
+         cvsRoot="${cvsroot}" quiet="true" />
+
+    <!-- we need to "unstick" the tag we checked it out with. otherwise
+         we can't check this file back in! -->
+    <cvs command="update -A ${file_with_build_name}"
+         cvsRoot="${cvsroot}" quiet="true" />
     <echo message="New version ${version-tag} committed to CVS." />
   </target>
 
