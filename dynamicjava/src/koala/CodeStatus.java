@@ -43,78 +43,16 @@
  * 
 END_COPYRIGHT_BLOCK*/
 
-
-/*
- * DynamicJava - Copyright (C) 1999-2001
- *
- * Permission is hereby granted, free of charge, to any person obtaining a
- * copy of this software and associated documentation files
- * (the "Software"), to deal in the Software without restriction, including
- * without limitation the rights to use, copy, modify, merge, publish,
- * distribute, sublicense, and/or sell copies of the Software, and to permit
- * persons to whom the Software is furnished to do so, subject to the
- * following conditions:
- * The above copyright notice and this permission notice shall be included
- * in all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
- * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
- * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
- * IN NO EVENT SHALL DYADE BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
- * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
- * DEALINGS IN THE SOFTWARE.
- *
- * Except as contained in this notice, the name of Dyade shall not be
- * used in advertising or otherwise to promote the sale, use or other
- * dealings in this Software without prior written authorization from
- * Dyade.
- *
- */
-
-package koala.dynamicjava.classfile;
+package edu.rice.cs.drjava;
 
 /**
- * This class represents a class in the JVM internal format
- *
- * @author Stephane Hillion
- * @version 1.0 - 1999/05/06
+ * Contains the constant that specifies whether any new features should be used
+ * in any compilation or test.  This flag will be set to false when preparing 
+ * stable releases and will be set to true during development of new features.
+ * To set the flag to false, use the "stable" target in ant and the 
+ * "development" target to set the flag to true.  All new features during a beta
+ * test period should be surrounded by a conditional based on this flag.
  */
-
-public class ClassIdentifier {
-  /**
-   * The value of this class identifier
-   */
-  private String value;
-  
-  /**
-   * Creates a new class identifier
-   */
-  public ClassIdentifier(String v) {
-    value = v;
-  }
-  
-  /**
-   * Returns the value of this constant
-   */
-  public String getValue() {
-    return value;
-  }
-  
-  /**
-   * Indicates whether some other object is equal to this one
-   */
-  public boolean equals(Object other) {
-    if (other == null || !(other instanceof ClassIdentifier)) {
-      return false;
-    }
-    return value.equals(((ClassIdentifier)other).value);
-  }
-  
-  /**
-   * Returns a hash code value for this object
-   */
-  public int hashCode() {
-    return "ClassIdentifier".hashCode()+value.hashCode();
-  }
+public class CodeStatus {
+  public static final boolean DEVELOPMENT = true;
 }

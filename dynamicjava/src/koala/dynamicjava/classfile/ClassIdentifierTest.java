@@ -72,153 +72,62 @@ END_COPYRIGHT_BLOCK*/
  *
  */
 
+
 package koala.dynamicjava.classfile;
 
-import java.io.*;
-import java.lang.reflect.*;
-import java.util.*;
+import junit.framework.*;
 
-/**
- * This class allows the creation of JVM bytecode field format outputs
- *
- * @author Stephane Hillion
- * @version 1.0 - 1999/05/06
- */
-
-public class FieldInfo extends AttributeOwnerComponent {
+public class ClassIdentifierTest extends TestCase {
+  private ClassIdentifier _classIDf;
+  private ClassIdentifier _classIDf2;
+  private ClassIdentifier _classIDf3;
+  private String _myTestString;
   /**
-   * The descriptor index
+   * Create a new instance of this TestCase.
+   * @param     String name
    */
-  private short descriptorIndex;
-  
-  /**
-   * Creates a new field info
-   * @param cp the constant pool where constants are stored
-   * @param tp the type name.
-   * The type name must be fully qualified.
-   * <p>The following strings are valid class names:
-   * <ul>
-   *   <li>"int"</li>
-   *   <li>"Z"</li>
-   *   <li>"java.lang.String"</li>
-   *   <li>"java.lang.Object[][]"</li>
-   *   <li>"Ljava/lang/String;"</li>
-   *   <li>"[[Ljava/lang/Integer;"</li>
-   * </ul>
-   * @param nm the name of the field
-   */
-  public FieldInfo(ConstantPool cp, String tp, String nm) {
-    constantPool = cp;
-    nameIndex = constantPool.putUTF8(nm);
-    descriptorIndex = constantPool.putUTF8(JVMUtilities.getReturnTypeName(tp));
+  public ClassIdentifierTest(String name) {
+    super(name);
   }
   
   /**
-   * Writes the field info to the given output stream
+   * Initialize fields for each test.
    */
-  public void write(DataOutputStream out) throws IOException {
-    out.writeShort(accessFlags);
-    out.writeShort(nameIndex);
-    out.writeShort(descriptorIndex);
+  protected void setUp() {
+    _myTestString = new String("tstring");
+    _classIDf = new ClassIdentifier(_myTestString);
+    _classIDf2 = new ClassIdentifier(_myTestString);
+    _classIDf3 = new ClassIdentifier("some other String");
+  }
+  
+  public void testGetValue(){
+    assertEquals(_myTestString,_classIDf.getValue());
+  }
+
+  //Testing with a null object
+  public void testEquals(){
+    assertFalse("Giving a null object should return false",_classIDf.equals(null));
+  }
+  
+  //Testing with a an object other than an instance of ClassIdentifier
+  public void testEquals2(){
+    assertFalse("Giving an object that is not an instance of ClassIdentifier should return false",_classIDf.equals(_myTestString));
+  }
+  
+  //Testing with a an object that is an instance of ClassIdentifier but different value
+  public void testEquals3(){
+    assertFalse("Giving an object that is an instance of ClassIdentifier but with different value should return false",_classIDf.equals(_classIDf3));
+  }
+  
+    //Testing with a an object that is an instance of ClassIdentifier with same value
+  public void testEquals4(){
+    assertTrue("Giving an object that is an instance of ClassIdentifier with same value should return true",_classIDf.equals(_classIDf2));
+  }
     
-    out.writeShort(attributes.size());
-    Iterator it = attributes.iterator();
-    while (it.hasNext()) {
-      ((AttributeInfo)it.next()).write(out);
-    }
+  //Hashcode of the name of the class and of the string in the value variable.
+  //1588571558 comes from the String ClassIdentifier and _myTestString
+   public void testHashCode(){
+    assertEquals(1588571558,"ClassIdentifier".hashCode()+_classIDf.getValue().hashCode());
   }
-  
-  // Access flag settings ///////////////////////////////////////////////////
-  
-  /**
-   * Sets the public flag for this class
-   */
-  public void setPublic() {
-    accessFlags |= Modifier.PUBLIC;
-  }
-  
-  /**
-   * Sets the private flag for this class
-   */
-  public void setPrivate() {
-    accessFlags |= Modifier.PRIVATE;
-  }
-  
-  /**
-   * Sets the protected flag for this class
-   */
-  public void setProtected() {
-    accessFlags |= Modifier.PROTECTED;
-  }
-  
-  /**
-   * Sets the static flag for this class
-   */
-  public void setStatic() {
-    accessFlags |= Modifier.STATIC;
-  }
-  
-  /**
-   * Sets the final flag for this class
-   */
-  public void setFinal() {
-    accessFlags |= Modifier.FINAL;
-  }
-  
-  /**
-   * Sets the volatile flag for this class
-   */
-  public void setVolatile() {
-    accessFlags |= Modifier.VOLATILE;
-  }
-  
-  /**
-   * Sets the transient flag for this class
-   */
-  public void setTransient() {
-    accessFlags |= Modifier.TRANSIENT;
-  }
-  
-  // Name and type ////////////////////////////////////////////////////////////
-  
-  /**
-   * Sets the constant value attribute for this field to
-   * an integer value.
-   */
-  public void setConstantValueAttribute(Integer value) {
-    attributes.add(new ConstantValueAttribute(constantPool, value));
-  }
-  
-  /**
-   * Sets the constant value attribute for this field to
-   * a long value.
-   */
-  public void setConstantValueAttribute(Long value) {
-    attributes.add(new ConstantValueAttribute(constantPool, value));
-  }
-  
-  /**
-   * Sets the constant value attribute for this field to
-   * a float value.
-   */
-  public void setConstantValueAttribute(Float value) {
-    attributes.add(new ConstantValueAttribute(constantPool, value));
-  }
-  
-  /**
-   * Sets the constant value attribute for this field to
-   * a double value.
-   */
-  public void setConstantValueAttribute(Double value) {
-    attributes.add(new ConstantValueAttribute(constantPool, value));
-  }
-  
-  /**
-   * Sets the constant value attribute for this field to
-   * a string value.
-   */
-  public void setConstantValueAttribute(String value) {
-    attributes.add(new ConstantValueAttribute(constantPool, value));
-  }
-  
 }
+  

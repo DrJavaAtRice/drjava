@@ -72,153 +72,82 @@ END_COPYRIGHT_BLOCK*/
  *
  */
 
+
 package koala.dynamicjava.classfile;
 
-import java.io.*;
-import java.lang.reflect.*;
-import java.util.*;
+import junit.framework.*;
 
-/**
- * This class allows the creation of JVM bytecode field format outputs
- *
- * @author Stephane Hillion
- * @version 1.0 - 1999/05/06
- */
-
-public class FieldInfo extends AttributeOwnerComponent {
-  /**
-   * The descriptor index
-   */
-  private short descriptorIndex;
-  
-  /**
-   * Creates a new field info
-   * @param cp the constant pool where constants are stored
-   * @param tp the type name.
-   * The type name must be fully qualified.
-   * <p>The following strings are valid class names:
-   * <ul>
-   *   <li>"int"</li>
-   *   <li>"Z"</li>
-   *   <li>"java.lang.String"</li>
-   *   <li>"java.lang.Object[][]"</li>
-   *   <li>"Ljava/lang/String;"</li>
-   *   <li>"[[Ljava/lang/Integer;"</li>
-   * </ul>
-   * @param nm the name of the field
-   */
-  public FieldInfo(ConstantPool cp, String tp, String nm) {
-    constantPool = cp;
-    nameIndex = constantPool.putUTF8(nm);
-    descriptorIndex = constantPool.putUTF8(JVMUtilities.getReturnTypeName(tp));
-  }
-  
-  /**
-   * Writes the field info to the given output stream
-   */
-  public void write(DataOutputStream out) throws IOException {
-    out.writeShort(accessFlags);
-    out.writeShort(nameIndex);
-    out.writeShort(descriptorIndex);
-    
-    out.writeShort(attributes.size());
-    Iterator it = attributes.iterator();
-    while (it.hasNext()) {
-      ((AttributeInfo)it.next()).write(out);
+ 
+ 
+// A class created to help test the abstract class called MemberIdentifier
+  class MemberIDHelper extends MemberIdentifier{
+         
+    MemberIDHelper(String dc, String n, String t){
+      super(dc,n,t);
     }
   }
+
+public class MemberIdentifierTest extends TestCase {
   
-  // Access flag settings ///////////////////////////////////////////////////
+  private MemberIDHelper _memIDf;
+  private MemberIDHelper _memIDf2;
+  private MemberIDHelper _memIDf3;
+  private String _classThatDefineStr;
+  private String _nameOfDefinedStr;
+  private String _typeOfDefinedStr;
+  
   
   /**
-   * Sets the public flag for this class
+   * Create a new instance of this TestCase.
+   * @param     String name
    */
-  public void setPublic() {
-    accessFlags |= Modifier.PUBLIC;
+  public MemberIdentifierTest(String name) {
+    super(name);
   }
   
   /**
-   * Sets the private flag for this class
+   * Initialize fields for each test.
    */
-  public void setPrivate() {
-    accessFlags |= Modifier.PRIVATE;
+  protected void setUp() {
+    _classThatDefineStr = "ClassThatDefine";
+    _nameOfDefinedStr = "NameOfDefined";
+    _typeOfDefinedStr = "TypeOfDefined";
+    _memIDf=  new MemberIDHelper(_classThatDefineStr,_nameOfDefinedStr,_typeOfDefinedStr);
+    _memIDf2=  new MemberIDHelper(_classThatDefineStr,"someotherstring",_typeOfDefinedStr);
+    _memIDf3=  new MemberIDHelper(_classThatDefineStr,_nameOfDefinedStr,_typeOfDefinedStr);
   }
   
-  /**
-   * Sets the protected flag for this class
-   */
-  public void setProtected() {
-    accessFlags |= Modifier.PROTECTED;
+  
+   public void testGetDeclaringClass() {
+     assertEquals(_classThatDefineStr,_memIDf.getDeclaringClass());
+   }
+  
+   public void testGetName(){
+     assertEquals(_nameOfDefinedStr,_memIDf.getName());
+   }
+  
+   public void testGetType() {
+     assertEquals(_typeOfDefinedStr, _memIDf.getType());
+   }
+  
+   //Testing with a null object
+   public void testEquals(){
+     assertFalse("Giving a null object should return false",_memIDf.equals(null));
+   }
+   
+  //Testing with an object other than an instance of MemberIdentifier
+  public void testEquals2(){
+    assertFalse("Giving an object that is not an instance of MemberIdentifier should return false",_memIDf.equals(new String("SomeTestString")));
   }
   
-  /**
-   * Sets the static flag for this class
-   */
-  public void setStatic() {
-    accessFlags |= Modifier.STATIC;
+  //Testing with an object which is an instance of MemberIdentifier but with different attributes for name, type and declaringClass
+  public void testEquals3(){
+    assertFalse("Giving an object that is an instance of MemberIdentifier but with not all equal attributes should return false",_memIDf.equals(_memIDf2));
   }
-  
-  /**
-   * Sets the final flag for this class
-   */
-  public void setFinal() {
-    accessFlags |= Modifier.FINAL;
+  //Testing with a an object that is an instance of MemberIdentifier with same value
+  public void testEquals4(){
+    assertTrue("Giving an object that is an instance of MemberIdentifier with same attributes should return true",_memIDf.equals(_memIDf3));
   }
-  
-  /**
-   * Sets the volatile flag for this class
-   */
-  public void setVolatile() {
-    accessFlags |= Modifier.VOLATILE;
-  }
-  
-  /**
-   * Sets the transient flag for this class
-   */
-  public void setTransient() {
-    accessFlags |= Modifier.TRANSIENT;
-  }
-  
-  // Name and type ////////////////////////////////////////////////////////////
-  
-  /**
-   * Sets the constant value attribute for this field to
-   * an integer value.
-   */
-  public void setConstantValueAttribute(Integer value) {
-    attributes.add(new ConstantValueAttribute(constantPool, value));
-  }
-  
-  /**
-   * Sets the constant value attribute for this field to
-   * a long value.
-   */
-  public void setConstantValueAttribute(Long value) {
-    attributes.add(new ConstantValueAttribute(constantPool, value));
-  }
-  
-  /**
-   * Sets the constant value attribute for this field to
-   * a float value.
-   */
-  public void setConstantValueAttribute(Float value) {
-    attributes.add(new ConstantValueAttribute(constantPool, value));
-  }
-  
-  /**
-   * Sets the constant value attribute for this field to
-   * a double value.
-   */
-  public void setConstantValueAttribute(Double value) {
-    attributes.add(new ConstantValueAttribute(constantPool, value));
-  }
-  
-  /**
-   * Sets the constant value attribute for this field to
-   * a string value.
-   */
-  public void setConstantValueAttribute(String value) {
-    attributes.add(new ConstantValueAttribute(constantPool, value));
-  }
-  
 }
+
+  
