@@ -239,7 +239,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   };
 
   /** Reverts the current document. */
-  private Action _revertAction = new AbstractAction("Revert") {
+  private Action _revertAction = new AbstractAction("Revert to Saved") {
     public void actionPerformed(ActionEvent ae) {
       String title = "Revert to Saved?";
 
@@ -690,9 +690,11 @@ public class MainFrame extends JFrame implements OptionConstants {
     if (!filename.equals(_fileTitle)) {
       _fileTitle = filename;
       setTitle(filename + " - DrJava");
-      _fileNameField.setText(_model.getDisplayFullPath(doc));
       _docList.repaint();
     }
+    // Always update this field-- two files in different directories
+    //  can have the same _fileTitle
+    _fileNameField.setText(_model.getDisplayFullPath(doc));
   }
 
   /**
@@ -1203,11 +1205,11 @@ public class MainFrame extends JFrame implements OptionConstants {
 
   }
 
-  private void _setUpAction(Action a, String _default, String shortDesc) {
-    // Commented out so that the toolbar buttons use text instead of icons.
-    // createManualToolbarButton was modified as well.
-    // a.putValue(Action.SMALL_ICON, _getIcon(icon + "16.gif"));
-    a.putValue(Action.DEFAULT, _default);
+  private void _setUpAction(Action a, String icon, String shortDesc) {
+    // Check whether to show icons
+    boolean useIcons = DrJava.CONFIG.getSetting(OptionConstants.TOOLBAR_ICONS_ENABLED).booleanValue();
+    if (useIcons) a.putValue(Action.SMALL_ICON, _getIcon(icon + "16.gif"));
+    a.putValue(Action.DEFAULT, icon);
     a.putValue(Action.SHORT_DESCRIPTION, shortDesc);
   }
 
@@ -1279,13 +1281,13 @@ public class MainFrame extends JFrame implements OptionConstants {
 
     tmpItem = fileMenu.add(_saveAsAction);
     tmpItem.setAccelerator
- (KeyStroke.getKeyStroke(KeyEvent.VK_S, mask | ActionEvent.SHIFT_MASK));
+      (KeyStroke.getKeyStroke(KeyEvent.VK_S, mask | ActionEvent.SHIFT_MASK));
 
     tmpItem = fileMenu.add(_saveAllAction);
 
     tmpItem = fileMenu.add(_revertAction);
-  _revertMenuItem = tmpItem;
-  _revertAction.setEnabled(false);
+    _revertMenuItem = tmpItem;
+    _revertAction.setEnabled(false);
 
     // Close, Close all
     fileMenu.addSeparator();
@@ -1301,7 +1303,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     tmpItem = fileMenu.add(_pageSetupAction);
     tmpItem = fileMenu.add(_printPreviewAction);
     tmpItem.setAccelerator
- (KeyStroke.getKeyStroke(KeyEvent.VK_P, mask | ActionEvent.SHIFT_MASK));
+      (KeyStroke.getKeyStroke(KeyEvent.VK_P, mask | ActionEvent.SHIFT_MASK));
     tmpItem = fileMenu.add(_printAction);
     tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_P, mask));
 
@@ -1448,22 +1450,29 @@ public class MainFrame extends JFrame implements OptionConstants {
 
   JButton _createManualToolbarButton(Action a) {
     final JButton ret;
+    
+    Font buttonFont = new Font(DrJava.CONFIG.getSetting(FONT_TOOLBAR_NAME).toString(),
+                               DrJava.CONFIG.getSetting(FONT_TOOLBAR_STYLE).intValue(),
+                               DrJava.CONFIG.getSetting(FONT_TOOLBAR_SIZE).intValue());
 
-    // icon is set to null so that toolbar buttons use text instead
-    // icons. To change back to icons, simply replace "null" with the
-    // commented out text that follows.
-    // _setUpAction had to be modified as well.
-    final Icon icon = null; //(Icon) a.getValue(Action.SMALL_ICON);
+    // Check whether icons should be shown
+    boolean useIcon = DrJava.CONFIG.getSetting(OptionConstants.TOOLBAR_ICONS_ENABLED).booleanValue();
+    boolean useText = DrJava.CONFIG.getSetting(OptionConstants.TOOLBAR_TEXT_ENABLED).booleanValue();
+    final Icon icon = (useIcon) ? (Icon) a.getValue(Action.SMALL_ICON) : null;
     if (icon == null) {
       ret = new JButton( (String) a.getValue(Action.DEFAULT));
     }
     else {
       ret = new JButton(icon);
+      if (useText) {
+        ret.setText((String) a.getValue(Action.DEFAULT));
+      }
     }
 
     ret.setEnabled(false);
     ret.addActionListener(a);
     ret.setToolTipText( (String) a.getValue(Action.SHORT_DESCRIPTION));
+    ret.setFont(buttonFont);
 
     a.addPropertyChangeListener(new PropertyChangeListener() {
       public void propertyChange(PropertyChangeEvent evt) {
@@ -1482,8 +1491,17 @@ public class MainFrame extends JFrame implements OptionConstants {
    * _createManualToolbarButton.
    */
   public JButton _createToolbarButton(Action a) {
+    boolean useText = DrJava.CONFIG.getSetting(OptionConstants.TOOLBAR_TEXT_ENABLED).booleanValue();
+    Font buttonFont = new Font(DrJava.CONFIG.getSetting(FONT_TOOLBAR_NAME).toString(),
+                               DrJava.CONFIG.getSetting(FONT_TOOLBAR_STYLE).intValue(),
+                               DrJava.CONFIG.getSetting(FONT_TOOLBAR_SIZE).intValue());
+    
     final JButton result = new JButton(a);
     result.setText((String) a.getValue(Action.DEFAULT));
+    result.setFont(buttonFont);
+    if (!useText && (result.getIcon() != null)) {
+      result.setText("");
+    }
     return result;
   }
 
@@ -1505,27 +1523,13 @@ public class MainFrame extends JFrame implements OptionConstants {
     _saveButton = _createToolbarButton(_saveAction);
     _toolBar.add(_saveButton);
     _toolBar.add(_createToolbarButton(_closeAction));
-
-    // Compile, reset, abort
-    _toolBar.addSeparator();
-    _compileButton = _createToolbarButton(_compileAction);
-    _toolBar.add(_compileButton);
-    _toolBar.add(_createToolbarButton(_resetInteractionsAction));
-    _toolBar.add(_createToolbarButton(_abortInteractionAction));
-
-    // Commented out to make room on the toolbar;
-    // print actions don't need buttons.
-    // Print preview, print
-    //_toolBar.addSeparator();
-    //_toolBar.add(_createToolbarButton(_printPreviewAction));
-    //_toolBar.add(_createToolbarButton(_printAction));
-
+    
     // Cut, copy, paste
     _toolBar.addSeparator();
     _toolBar.add(_createToolbarButton(_cutAction));
     _toolBar.add(_createToolbarButton(_copyAction));
     _toolBar.add(_createToolbarButton(_pasteAction));
-
+    
     // Undo, redo
     // Simple workaround, for now, for bug # 520742:
     // Undo/Redo button text in JDK 1.3
@@ -1534,10 +1538,17 @@ public class MainFrame extends JFrame implements OptionConstants {
     _toolBar.addSeparator();
     _toolBar.add(_createManualToolbarButton(_undoAction));
     _toolBar.add(_createManualToolbarButton(_redoAction));
-
+    
     // Find
     _toolBar.addSeparator();
     _toolBar.add(_createToolbarButton(_findReplaceAction));
+
+    // Compile, reset, abort
+    _toolBar.addSeparator();
+    _compileButton = _createToolbarButton(_compileAction);
+    _toolBar.add(_compileButton);
+    _toolBar.add(_createToolbarButton(_resetInteractionsAction));
+    _toolBar.add(_createToolbarButton(_abortInteractionAction));
 
     // Junit
     _toolBar.addSeparator();

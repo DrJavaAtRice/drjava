@@ -45,35 +45,9 @@ import edu.rice.cs.drjava.DrJava;
 public interface OptionConstants extends ConfigurationTool {
   
   // STATIC VARIABLES  
-  public static final IntegerOption HISTORY_MAX_SIZE =
-    new IntegerOption("history.max.size", new Integer(500));
   
-  public static final StringOption FONT_MAIN_NAME = 
-    new StringOption("font.main.name", "Monospaced");
-
-  public static final IntegerOption FONT_MAIN_STYLE = 
-    new IntegerOption("font.main.style", new Integer(0));
   
-  public static final IntegerOption FONT_MAIN_SIZE = 
-    new IntegerOption("font.main.size", new Integer(12));
-  
-  public static final StringOption FONT_DOCLIST_NAME = 
-    new StringOption("font.doclist.name", "Monospaced");
-
-  public static final IntegerOption FONT_DOCLIST_STYLE = 
-    new IntegerOption("font.doclist.style", new Integer(0));
-  
-  public static final IntegerOption FONT_DOCLIST_SIZE = 
-    new IntegerOption("font.doclist.size", new Integer(10));
-
-  public static final StringOption WORKING_DIRECTORY = 
-    new StringOption("working.directory", System.getProperty("user.dir"));
-  
-  public static final IntegerOption INDENT_LEVEL =
-    new IntegerOption("indent.level",new Integer(2));
-
-  public static final ColorOption DEFINITIONS_MATCH_COLOR = 
-    new ColorOption("definitions.match.color", new Color(190, 255, 230));
+  /* ---------- Resource Location and Classpath Options ---------- */
   
   public static final StringOption JAVAC_LOCATION = 
     new StringOption("javac.location","");
@@ -105,6 +79,79 @@ public interface OptionConstants extends ConfigurationTool {
       }
     }).evaluate();
   
+  
+  /* ---------- Color Options ---------- */
+    
+  /**
+   * Color for highlighting brace-matching.
+   */
+  public static final ColorOption DEFINITIONS_MATCH_COLOR = 
+    new ColorOption("definitions.match.color", new Color(190, 255, 230));
+  
+  
+  /* ---------- Font Options ---------- */
+  
+  /* Main (definitions document, tab contents) */
+  public static final StringOption FONT_MAIN_NAME = 
+    new StringOption("font.main.name", "Monospaced");
+  public static final IntegerOption FONT_MAIN_STYLE = 
+    new IntegerOption("font.main.style", new Integer(0));
+  public static final IntegerOption FONT_MAIN_SIZE = 
+    new IntegerOption("font.main.size", new Integer(12));
+
+  /* List of open documents */
+  public static final StringOption FONT_DOCLIST_NAME = 
+    new StringOption("font.doclist.name", "Monospaced");
+  public static final IntegerOption FONT_DOCLIST_STYLE = 
+    new IntegerOption("font.doclist.style", new Integer(0));
+  public static final IntegerOption FONT_DOCLIST_SIZE = 
+    new IntegerOption("font.doclist.size", new Integer(10));
+  
+  /* Toolbar buttons */
+  public static final StringOption FONT_TOOLBAR_NAME = 
+    new StringOption("font.toolbar.name", "dialog");
+  public static final IntegerOption FONT_TOOLBAR_STYLE = 
+    new IntegerOption("font.toolbar.style", new Integer(0));
+  public static final IntegerOption FONT_TOOLBAR_SIZE = 
+    new IntegerOption("font.toolbar.size", new Integer(10));
+  
+  
+  /* ---------- Other Display Options ---------- */
+  
+  /**
+   * Whether icons should be displayed on the toolbar buttons
+   */    
+  public static final BooleanOption TOOLBAR_ICONS_ENABLED =
+    new BooleanOption("toolbar.icons.enabled", new Boolean(true));
+  
+  /**
+   * Whether text should be displayed on the toolbar buttons.
+   * Note: this is only relevant if toolbar icons are enabled
+   */    
+  public static final BooleanOption TOOLBAR_TEXT_ENABLED =
+    new BooleanOption("toolbar.text.enabled", new Boolean(true));
+  
+  
+  /* ---------- Misc Options ---------- */
+  
+  /**
+   * Directory to start looking for files in when DrJava starts up.
+   */
+  public static final StringOption WORKING_DIRECTORY = 
+    new StringOption("working.directory", System.getProperty("user.dir"));
+  
+  /**
+   * How many spaces to use for indenting.
+   */
+  public static final IntegerOption INDENT_LEVEL =
+    new IntegerOption("indent.level",new Integer(2));
+  
+  /**
+   * Number of lines to remember in the Interactions History
+   */
+  public static final IntegerOption HISTORY_MAX_SIZE =
+    new IntegerOption("history.max.size", new Integer(500));
+  
   /**
    * Whether the integrated debugger should be displayed as available.
    */
@@ -116,6 +163,8 @@ public interface OptionConstants extends ConfigurationTool {
    */    
   public static final BooleanOption DEBUGGER_ADVANCED =
     new BooleanOption("debugger.advanced", new Boolean(false));
+  
+
 }
 
 
