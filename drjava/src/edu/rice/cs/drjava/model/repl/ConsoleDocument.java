@@ -163,6 +163,14 @@ public class ConsoleDocument implements DocumentAdapter {
   }
 
   /**
+   * Sets the prompt position.
+   * @param newPos the new position.
+   */
+  public void setPromptPos(int newPos) {
+    _promptPos = newPos;
+  }
+
+  /**
    * Sets a runnable action to use as a beep.
    * @param beep Runnable beep command
    */
@@ -229,6 +237,19 @@ public class ConsoleDocument implements DocumentAdapter {
   }
 
   /**
+   * Gets the position immediately before the prompt, or the doc length if
+   * there is no prompt.
+   */
+  public int getPositionBeforePrompt() {
+    if (_hasPrompt) {
+      return _promptPos - _prompt.length();
+    }
+    else {
+      return getDocLength();
+    }
+  }
+
+  /**
    * Inserts the given string with the given attributes just before the
    * most recent prompt.
    * @param text String to insert
@@ -236,14 +257,7 @@ public class ConsoleDocument implements DocumentAdapter {
    */
   public void insertBeforeLastPrompt(String text, String style) {
     try {
-      int pos;
-      if (_hasPrompt) {
-        pos = _promptPos - _prompt.length();
-      }
-      else {
-        pos = getDocLength();
-      }
-
+      int pos = getPositionBeforePrompt();
       _promptPos += text.length();
       _document.forceInsertText(pos, text, style);
     }

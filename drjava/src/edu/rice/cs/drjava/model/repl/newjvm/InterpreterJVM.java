@@ -167,24 +167,18 @@ public class InterpreterJVM extends AbstractSlaveJVM
     _mainJVM = (MainJVMRemoteI) mainJVM;
 
     // redirect stdin
-    try {
-      System.setIn(new InputStreamRedirector() {
-        protected String _getInput() {
-          try {
-            return _mainJVM.getConsoleInput();
-          }
-          catch (RemoteException re) {
-            // blow up if no MainJVM found
-            _log.logTime("System.in: " + re.toString());
-            throw new IllegalStateException("Main JVM can't be reached for input.\n" + re);
-          }
+    System.setIn(new InputStreamRedirector() {
+      protected String _getInput() {
+        try {
+          return _mainJVM.getConsoleInput();
         }
-      });
-    }
-    catch (IOException ioe) {
-      // leaves System.in alone
-      _log.logTime("Creating InputStreamRedirector: " + ioe.toString());
-    }
+        catch (RemoteException re) {
+          // blow up if no MainJVM found
+          _log.logTime("System.in: " + re.toString());
+          throw new IllegalStateException("Main JVM can't be reached for input.\n" + re);
+        }
+      }
+    });
 
     // redirect stdout
     System.setOut(new PrintStream(new OutputStreamRedirector() {

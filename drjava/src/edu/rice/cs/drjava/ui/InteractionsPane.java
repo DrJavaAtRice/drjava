@@ -65,8 +65,7 @@ public class InteractionsPane extends JTextPane implements OptionConstants {
   /**
    *  Highlight painter for syntax errors, currently borrowing breakpoint color.
    */
-  public static DefaultHighlighter.DefaultHighlightPainter 
-    ERROR_PAINTER =
+  public static DefaultHighlighter.DefaultHighlightPainter ERROR_PAINTER =
     new DefaultHighlighter.DefaultHighlightPainter(DrJava.getConfig().getSetting(COMPILER_ERROR_COLOR));
  
   

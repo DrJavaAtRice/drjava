@@ -1685,28 +1685,18 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
               _compileFiles(sourceRoots, files);
             }
             catch (Throwable e) {
-              CompilerError err = new CompilerError(file,
-                                                    -1,
-                                                    -1,
-                                                    e.getMessage(),
-                                                    false);
+              CompilerError err = new CompilerError(file, -1, -1, e.getMessage(), false);
               CompilerError[] errors = new CompilerError[] { err };
               _distributeErrors(errors);
             }
             finally {
               // Fire a compileEnded event
-              _notifier.notifyListeners(new EventNotifier.Notifier() {
-                public void notifyListener(GlobalModelListener l) {
-                  l.compileEnded();
-                }
-              });
+              _notifier.compileEnded();
               
               // Only clear interactions if there were no errors
-              if (_numErrors == 0) {
-                if (/*_resetAfterCompile && */
-                    _interactionsModel.interpreterUsed()) {
-                  resetInteractions();
-                }
+              if (_numErrors == 0 && _interactionsModel.interpreterUsed()) {
+//                  && _resetAfterCompile) {
+                resetInteractions();
               }
             }
           }

@@ -39,25 +39,10 @@
 
 package edu.rice.cs.drjava.model.definitions;
 
-import javax.swing.text.*;
 import javax.swing.undo.*;
-import javax.swing.event.DocumentEvent;
-import java.util.Vector;
-import java.util.Hashtable;
-import java.util.HashSet;
-import java.util.StringTokenizer;
+import java.util.LinkedList;
 
-import java.io.File;
-
-import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
-import edu.rice.cs.util.UnexpectedException;
-import edu.rice.cs.drjava.config.OptionConstants;
-import edu.rice.cs.drjava.DrJava;
-import edu.rice.cs.drjava.model.definitions.indent.Indenter;
-import edu.rice.cs.drjava.model.DefaultGlobalModel;
-import edu.rice.cs.drjava.model.FileMovedException;
 import edu.rice.cs.drjava.model.EventNotifier;
-import edu.rice.cs.drjava.model.GlobalModelListener;
 
 /**
  * Extended UndoManager with increased functionality.  Can handle aggregating 
@@ -69,12 +54,12 @@ public class CompoundUndoManager extends UndoManager {
   /**
    * The compound edits we are storing.
    */
-  private Vector<CompoundEdit> _compoundEdits;
+  private LinkedList<CompoundEdit> _compoundEdits;
   
   /**
    * The keys for the CompoundEdits we are storing.
    */
-  private Vector<Integer> _keys;
+  private LinkedList<Integer> _keys;
     
   /**
    * The next key to use for nested CompoundEdits.
@@ -96,13 +81,13 @@ public class CompoundUndoManager extends UndoManager {
    */
   public CompoundUndoManager(EventNotifier notifier) {
     super();
-    _compoundEdits = new Vector<CompoundEdit>();
-    _keys = new Vector<Integer>();
+    _compoundEdits = new LinkedList<CompoundEdit>();
+    _keys = new LinkedList<Integer>();
     _nextKey = 0;
     _savePoint = null;
     _notifier = notifier;
   }
-  
+
   /**
    * Starts a compound edit.
    * @return the key for the compound edit
@@ -238,11 +223,7 @@ public class CompoundUndoManager extends UndoManager {
    * helper method to notify the view that an undoable edit has occured
    */
   private void _notifyUndoHappened() {
-    _notifier.notifyListeners(new EventNotifier.Notifier() {
-      public void notifyListener(GlobalModelListener l) {
-        l.undoableEditHappened();
-      }
-    });
+    _notifier.undoableEditHappened();
   }
 
   /**

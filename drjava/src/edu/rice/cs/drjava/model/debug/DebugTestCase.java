@@ -53,8 +53,8 @@ import junit.framework.*;
  */
 public abstract class DebugTestCase extends GlobalModelTestCase {
 
-  protected final boolean printEvents = true;
-  protected final boolean printMessages = true;
+  protected final boolean printEvents = false;
+  protected final boolean printMessages = false;
   
   protected int _pendingNotifies = 0;
   protected Object _notifierLock = new Object();

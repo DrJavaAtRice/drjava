@@ -47,6 +47,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.Toolkit;
 import java.awt.Color;
+import java.awt.Event;
 
 import edu.rice.cs.drjava.model.InputListener;
 import edu.rice.cs.drjava.model.repl.ConsoleDocument;
@@ -98,6 +99,9 @@ public class ConsoleController extends AbstractConsoleController {
     _doc.setBeep(_pane.getBeep());
   }
 
+  /**
+   * Listens for input from System.in
+   */
   protected InputListener _inputListener = new InputListener() {
     public String getConsoleInput() {
 //     return JOptionPane.showInputDialog(MainFrame.this, "Please enter System.in:",
@@ -136,24 +140,19 @@ public class ConsoleController extends AbstractConsoleController {
    * Adds actions to the view.
    */
   protected void _setupView() {
+    super._setupView();
+
     // Get proper cross-platform mask.
     int mask = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
     
     _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0),
                                 enterAction);
     _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 
-                                                       java.awt.Event.SHIFT_MASK), 
+                                                       Event.SHIFT_MASK), 
                                 newLineAction);
 
     _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_B, mask), 
                                 clearCurrentAction);
-
-    _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_HOME, 0), 
-                                gotoPromptPosAction);
-    
-    _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_HOME,
-                                                       java.awt.Event.SHIFT_MASK), 
-                                selectToPromptPosAction);
 
     // Left needs to be prevented from rolling cursor back before the prompt.
     // Both left and right should lock when caret is before the prompt.

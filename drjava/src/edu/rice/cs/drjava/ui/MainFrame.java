@@ -2961,7 +2961,6 @@ public class MainFrame extends JFrame implements OptionConstants {
     _consoleController = new ConsoleController(_model.getConsoleDocument(),
                                                _model.getSwingConsoleDocument());
     _consolePane = _consoleController.getPane();
-    _model.setInputListener(_consoleController.getInputListener());
 
     // Interactions
     _interactionsController =
@@ -2970,15 +2969,18 @@ public class MainFrame extends JFrame implements OptionConstants {
     _interactionsController.setPrevPaneAction(_switchToPreviousPaneAction);
     _interactionsController.setNextPaneAction(_switchToNextPaneAction);
     _interactionsPane = _interactionsController.getPane();
-    
+
+    _model.setInputListener(_consoleController.getInputListener());
+//    _model.setInputListener(_interactionsController.getInputListener());
+
     _findReplace = new FindReplaceDialog(this, _model);
-    
+
     _consoleScroll = new BorderlessScrollPane(_consolePane);
     _interactionsScroll = new BorderlessScrollPane(_interactionsPane);
-    
+
     _junitErrorPanel = new JUnitPanel(_model, this);
     _javadocErrorPanel = new JavadocErrorPanel(_model, this);
-    
+
     _tabbedPane = new JTabbedPane();
     _tabbedPane.addChangeListener(new ChangeListener () {
       public void stateChanged(ChangeEvent e) {

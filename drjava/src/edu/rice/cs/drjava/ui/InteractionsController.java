@@ -43,19 +43,27 @@ import javax.swing.*;
 import javax.swing.text.*;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.DocumentEvent;
+import javax.swing.border.Border;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.Toolkit;
 import java.awt.Color;
+import java.awt.Event;
+import java.awt.Cursor;
+import java.lang.reflect.InvocationTargetException;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.config.OptionListener;
 import edu.rice.cs.drjava.config.OptionEvent;
+import edu.rice.cs.drjava.model.InputListener;
 import edu.rice.cs.drjava.model.repl.ConsoleDocument;
 import edu.rice.cs.drjava.model.repl.InteractionsDocument;
 import edu.rice.cs.drjava.model.repl.InteractionsModel;
+import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.SwingWorker;
+import edu.rice.cs.util.text.DocumentEditCondition;
+import edu.rice.cs.util.text.DocumentAdapterException;
 import edu.rice.cs.util.text.SwingDocumentAdapter;
 
 /**
@@ -86,15 +94,99 @@ public class InteractionsController extends AbstractConsoleController {
    * Style to use for debug messages.
    */
   protected final SimpleAttributeSet _debugStyle;
-  
+  protected static final Color SYSTEM_IN_COLOR = Color.magenta.darker().darker();
+  protected static final String INPUT_ENTERED_NAME = "Input Entered";
+  protected static final String INSERT_NEWLINE_NAME = "Insert Newline";
+
+  /**
+   * Invoked when input is completed in an input box.
+   */
+  private Action _inputEnteredAction = new AbstractAction() {
+    public synchronized void actionPerformed(ActionEvent e) {
+      _box.setEditable(false);
+      _box.getCaret().setVisible(false);
+      setEnabled(false);
+//      _insertNewlineAction.setEnabled(false);
+      _inputText = _box.getText();
+      notify();
+      _pane.setCaretPosition(_doc.getDocLength());
+    }
+  };
+
+  /**
+   * Shift-Enter action in a System.in box.  Inserts a newline.
+   */
+  private Action _insertNewlineAction = new AbstractAction() {
+    public void actionPerformed(ActionEvent e) {
+      _box.insert("\n", _box.getCaretPosition());
+    }
+  };
+
+  private String _inputText;
+  private InputBox _box;
+
+  /**
+   * Listens for input requests from System.in, displaying an input box as needed.
+   */
+  protected InputListener _inputListener = new InputListener() {
+    public String getConsoleInput() {
+      SwingUtilities.invokeLater(new Runnable() {
+        public void run() {
+          _box = new InputBox();
+
+/*        if (_busy()) {
+            _pane.setEditable(true);
+            moveToEnd();
+            _pane.insertComponent(_box);
+            _pane.setEditable(false);
+          }
+          else {
+            DocumentEditCondition ec = _doc.getEditCondition();
+            _doc.setEditCondition(new DocumentEditCondition());
+            int pos = _doc.getPositionBeforePrompt();
+            _pane.setCaretPosition(pos);
+            _pane.insertComponent(_box);
+            _doc.setPromptPos(_doc.getPromptPos() + 1);
+//            _doc.insertBeforeLastPrompt("\n", _doc.DEFAULT_STYLE);
+            _doc.setEditCondition(ec);
+          }
+*/
+          int pos = _doc.getPositionBeforePrompt();
+          _doc.insertBeforeLastPrompt(" ", _doc.DEFAULT_STYLE);
+          SimpleAttributeSet att = new SimpleAttributeSet();
+          StyleConstants.setComponent(att, _box);
+          _adapter.setCharacterAttributes(pos, 1, att, false);
+          try {
+            int len = _doc.getDocLength();
+            _doc.forceInsertText(len, " ", _doc.DEFAULT_STYLE);
+            _doc.forceRemoveText(len, 1);
+          }
+          catch (DocumentAdapterException dae) {
+          }
+
+          _inputEnteredAction.setEnabled(true);
+//          _insertNewlineAction.setEnabled(true);
+          _box.requestFocus();
+        }
+      });
+      synchronized(_inputEnteredAction) {
+        try {
+          _inputEnteredAction.wait();
+        }
+        catch (InterruptedException ie) {
+        }
+      }
+      
+      return _inputText;
+    }
+  };
+
   /**
    * Glue together the given model and a new view.
    * @param model An InteractionsModel
    * @param adapter SwingDocumentAdapter being used by the model's doc
    */
-  public InteractionsController(InteractionsModel model, 
-                                SwingDocumentAdapter adapter)
-  {
+  public InteractionsController(InteractionsModel model, SwingDocumentAdapter adapter) {
     this(model, adapter, new InteractionsPane(adapter));
   }
   
@@ -104,10 +196,9 @@ public class InteractionsController extends AbstractConsoleController {
    * @param adapter SwingDocumentAdapter being used by the model's doc
    * @param pane An InteractionsPane
    */
-  public InteractionsController(InteractionsModel model, 
-                                SwingDocumentAdapter adapter, 
-                                InteractionsPane pane)
-  {
+  public InteractionsController(InteractionsModel model,
+                                SwingDocumentAdapter adapter,
+                                InteractionsPane pane) {
     super(adapter, pane);
     _model = model;
     _doc = model.getDocument();
@@ -116,14 +207,21 @@ public class InteractionsController extends AbstractConsoleController {
     
     _init();
   }
-  
+
+  /**
+   * Gets the input listener for console input requests.
+   */
+  public InputListener getInputListener() {
+    return _inputListener;
+  }
+
   /**
    * Accessor method for the InteractionsModel.
    */
   public InteractionsModel getInteractionsModel() {
     return _model;
   }
-  
+
   /**
    * Allows the abstract superclass to use the document.
    * @return the InteractionsDocument
@@ -186,10 +284,11 @@ public class InteractionsController extends AbstractConsoleController {
    * Adds actions to the view.
    */
   protected void _setupView() {
-    
+    super._setupView();
+
     // Get proper cross-platform mask.
     int mask = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
-    
+
     // Add actions with keystrokes
     _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), 
                                 evalAction);
@@ -198,17 +297,6 @@ public class InteractionsController extends AbstractConsoleController {
                                 newLineAction);
     _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_B, mask), 
                                 clearCurrentAction);
-
-    _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_HOME, 0), 
-                                gotoPromptPosAction);
-    _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_HOME,
-                                                       java.awt.Event.SHIFT_MASK),
-                                selectToPromptPosAction);
-    _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_END, 0), 
-                                gotoEndAction);
-    _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_END,
-                                                       java.awt.Event.SHIFT_MASK),
-                                selectToEndAction);
 
     // Up and down need to be bound both for keypad and not
     _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_KP_UP, 0), 
@@ -219,7 +307,7 @@ public class InteractionsController extends AbstractConsoleController {
                                 historyNextAction);
     _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0), 
                                 historyNextAction);
-    
+
     // Left needs to be prevented from rolling cursor back before the prompt.
     // Both left and right should lock when caret is before the prompt.
     // Caret is allowed before the prompt for the purposes of mouse-based copy-
@@ -228,21 +316,22 @@ public class InteractionsController extends AbstractConsoleController {
                                 moveLeftAction);
     _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, 0),
                                 moveLeftAction);
-    
     _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_KP_RIGHT, 0),
                                 moveRightAction);
     _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, 0),
                                 moveRightAction);
+
     // Prevent previous word action from going past the prompt
     _pane.addActionForKeyStroke(DrJava.getConfig().getSetting(OptionConstants.KEY_PREVIOUS_WORD),
                                 prevWordAction);
-    DrJava.getConfig().addOptionListener(OptionConstants.KEY_PREVIOUS_WORD, new OptionListener<KeyStroke>() {
+    DrJava.getConfig().addOptionListener(OptionConstants.KEY_PREVIOUS_WORD,
+                                         new OptionListener<KeyStroke>() {
       public void optionChanged(OptionEvent<KeyStroke> oe) {
         _pane.addActionForKeyStroke(DrJava.getConfig().getSetting(OptionConstants.KEY_PREVIOUS_WORD),
                                     prevWordAction);
       }
     });
-    
+
     _pane.addActionForKeyStroke(DrJava.getConfig().getSetting(OptionConstants.KEY_NEXT_WORD),
                                 nextWordAction);
     DrJava.getConfig().addOptionListener(OptionConstants.KEY_NEXT_WORD, new OptionListener<KeyStroke>() {
@@ -253,18 +342,11 @@ public class InteractionsController extends AbstractConsoleController {
     });
   }
 
-  /**
-   * determines if the interactions pane is currently computing or resetting.
-   * @return true iff the interactions pane is currently busy
-   */
-  protected boolean _busy() {
-    // should also check to see if we are resetting the interactions pane
-    return _doc.inProgress();
-  }
-  
   // The fields below were made package private for testing purposes.
-  
-  /** Evaluates the interaction on the current line. */
+
+  /**
+   * Evaluates the interaction on the current line.
+   */
   AbstractAction evalAction = new AbstractAction() {
     public void actionPerformed(ActionEvent e) {
       SwingWorker worker = new SwingWorker() {
@@ -277,7 +359,9 @@ public class InteractionsController extends AbstractConsoleController {
     }
   };
   
-  /** Recalls the previous command from the history. */
+  /**
+   * Recalls the previous command from the history.
+   */
   AbstractAction historyPrevAction = new AbstractAction() {
     public void actionPerformed(ActionEvent e) {
       if (!_busy()) {
@@ -287,7 +371,9 @@ public class InteractionsController extends AbstractConsoleController {
     }
   };
 
-  /** Recalls the next command from the history. */
+  /**
+   * Recalls the next command from the history.
+   */
   AbstractAction historyNextAction = new AbstractAction() {
     public void actionPerformed(ActionEvent e) {
       if (!_busy()) {
@@ -297,7 +383,9 @@ public class InteractionsController extends AbstractConsoleController {
     }
   };
 
-  /** Moves the caret left or wraps around. */
+  /**
+   * Moves the caret left or wraps around.
+   */
   AbstractAction moveLeftAction = new AbstractAction() {
     public void actionPerformed(ActionEvent e) {
       if (!_busy()) {
@@ -316,7 +404,9 @@ public class InteractionsController extends AbstractConsoleController {
     }
   };
 
-  /** Moves the caret right or wraps around. */
+  /**
+   * Moves the caret right or wraps around.
+   */
   AbstractAction moveRightAction = new AbstractAction() {
     public void actionPerformed(ActionEvent e) {
       int position = _pane.getCaretPosition();
@@ -333,6 +423,9 @@ public class InteractionsController extends AbstractConsoleController {
     }
   };
 
+  /**
+   * Skips back one word.  Doesn't move past the prompt.
+   */
   AbstractAction prevWordAction = new AbstractAction() {
     public void actionPerformed(ActionEvent e) {
       int position = _pane.getCaretPosition();
@@ -350,6 +443,9 @@ public class InteractionsController extends AbstractConsoleController {
     }
   };
 
+  /**
+   * Skips forward one word.  Doesn't move past the prompt.
+   */
   AbstractAction nextWordAction = new AbstractAction() {
     public void actionPerformed(ActionEvent e) {
       int position = _pane.getCaretPosition();
@@ -366,4 +462,45 @@ public class InteractionsController extends AbstractConsoleController {
       }
     }
   };
+
+  /**
+   * A box that can be inserted into the interactions pane for separate input.
+   */
+  class InputBox extends JTextArea {
+    public InputBox() {
+      super(1, 80);
+      DrJava.getConfig().addOptionListener(OptionConstants.DEFINITIONS_NORMAL_COLOR,
+                                           new OptionListener<Color>() {
+        public void optionChanged(OptionEvent<Color> oe) {
+          setBorder(_createBorder());
+        }
+      });
+      DrJava.getConfig().addOptionListener(OptionConstants.DEFINITIONS_BACKGROUND_COLOR,
+                                           new OptionListener<Color>() {
+        public void optionChanged(OptionEvent<Color> oe) {
+          setBorder(_createBorder());
+        }
+      });
+      setBorder(_createBorder());
+      setForeground(SYSTEM_IN_COLOR);
+      setLineWrap(true);
+
+      InputMap im = getInputMap(WHEN_FOCUSED);
+      im.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER,0), INPUT_ENTERED_NAME);
+      im.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER,Event.SHIFT_MASK), INSERT_NEWLINE_NAME);
+      ActionMap am = getActionMap();
+      am.put(INPUT_ENTERED_NAME, _inputEnteredAction);
+      am.put(INSERT_NEWLINE_NAME, _insertNewlineAction);
+    }
+
+    private Border _createBorder() {
+      Color outerColor = DrJava.getConfig().getSetting(OptionConstants.DEFINITIONS_NORMAL_COLOR);
+      Color innerColor = DrJava.getConfig().getSetting(OptionConstants.DEFINITIONS_BACKGROUND_COLOR);
+      Border outerouter = BorderFactory.createLineBorder(innerColor, 2);
+      Border outer = BorderFactory.createLineBorder(outerColor, 1);
+      Border inner = BorderFactory.createLineBorder(innerColor, 3);
+      Border temp = BorderFactory.createCompoundBorder(outer, inner);
+      return BorderFactory.createCompoundBorder(outerouter, temp);
+    }
+  }
 }

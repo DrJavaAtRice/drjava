@@ -240,7 +240,33 @@ public abstract class AbstractConsoleController {
   /**
    * Sets up the view.
    */
-  protected abstract void _setupView();
+  protected void _setupView() {
+    KeyStroke beginLineKey = DrJava.getConfig().getSetting(OptionConstants.KEY_BEGIN_LINE);
+    _pane.addActionForKeyStroke(beginLineKey, gotoPromptPosAction);
+    _pane.addActionForKeyStroke(KeyBindingManager.Singleton.addShiftModifier(beginLineKey),
+                                selectToPromptPosAction);
+    KeyStroke endLineKey = DrJava.getConfig().getSetting(OptionConstants.KEY_END_LINE);
+    _pane.addActionForKeyStroke(endLineKey, gotoEndAction);
+    _pane.addActionForKeyStroke(KeyBindingManager.Singleton.addShiftModifier(endLineKey),
+                                selectToEndAction);
+
+    DrJava.getConfig().addOptionListener(OptionConstants.KEY_BEGIN_LINE,
+                                         new OptionListener<KeyStroke>() {
+      public void optionChanged(OptionEvent<KeyStroke> oe) {
+        _pane.addActionForKeyStroke(oe.value, gotoPromptPosAction);
+        _pane.addActionForKeyStroke(KeyBindingManager.Singleton.addShiftModifier(oe.value),
+                                    selectToPromptPosAction);
+     }
+    });
+    DrJava.getConfig().addOptionListener(OptionConstants.KEY_END_LINE,
+                                         new OptionListener<KeyStroke>() {
+      public void optionChanged(OptionEvent<KeyStroke> oe) {
+        _pane.addActionForKeyStroke(oe.value, gotoEndAction);
+        _pane.addActionForKeyStroke(KeyBindingManager.Singleton.addShiftModifier(oe.value),
+                                    selectToEndAction);
+     }
+    });
+  }
 
   /**
    * Accessor method for the SwingDocumentAdapter.
@@ -256,6 +282,14 @@ public abstract class AbstractConsoleController {
     return _pane;
   }
   
+  /**
+   * Determines if the associated console pane is currently computing.
+   * @return true iff the console is busy
+   */
+  protected boolean _busy() {
+    return !getConsoleDoc().hasPrompt();
+  }
+
   /** Inserts a new line at the caret position. */
   AbstractAction newLineAction = new AbstractAction() {
     public void actionPerformed(ActionEvent e) {
