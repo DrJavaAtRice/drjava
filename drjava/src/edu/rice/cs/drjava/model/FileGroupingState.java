@@ -105,5 +105,5 @@ public interface FileGroupingState {
   /**
    * Sets that the project state is no longer a snapshot of the open project.
    */
-   public void setProjectChanged(); 
+   public void setProjectChanged(boolean changed); 
 }

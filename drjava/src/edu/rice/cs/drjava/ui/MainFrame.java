@@ -2181,7 +2181,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       _closeProjectAction.setEnabled(true);
       _saveProjectAction.setEnabled(false);
       _projectPropertiesAction.setEnabled(true);
-      
+      _model.setProjectChanged(false);
       _resetNavigatorPane(); 
     }
   }
@@ -2214,7 +2214,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   }
   
   private boolean _checkProjectClose() {
-   if(_model.isProjectActive() && _model.isProjectChanged()) {
+   if(_model.isProjectChanged()) {
       String fname = _model.getProjectFile().getName();
       String text = fname + " has been modified. Would you like to save it?";
       int rc = JOptionPane.showConfirmDialog(MainFrame.this,
@@ -2463,6 +2463,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     if (rc == JFileChooser.APPROVE_OPTION) {
       File file = _saveChooser.getSelectedFile();
       _saveProjectHelper(file);
+      _openProjectHelper(file);
     }
   }
   
@@ -2482,6 +2483,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
     _recentProjectManager.updateOpenFiles(file);
     _saveProjectAction.setEnabled(false);
+    _model.setProjectChanged(false);
   }
   
   
@@ -4889,7 +4891,7 @@ public class MainFrame extends JFrame implements OptionConstants {
         File f = doc.getFile();
         if(! _model.isProjectFile(f) && _model.isInProjectPath(doc)) {
           _saveProjectAction.setEnabled(true);
-          _model.setProjectChanged();
+          _model.setProjectChanged(true);
         }
       }
       catch(FileMovedException fme) {
@@ -4952,7 +4954,7 @@ public class MainFrame extends JFrame implements OptionConstants {
           File f = doc.getFile();
           if(_model.isProjectFile(f)) {
             _saveProjectAction.setEnabled(true);
-            _model.setProjectChanged();
+            _model.setProjectChanged(true);
           }
         }
         catch(FileMovedException fme) {

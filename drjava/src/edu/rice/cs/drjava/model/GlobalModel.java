@@ -439,7 +439,7 @@ public interface GlobalModel extends IGetDocuments, ILoadDocuments {
   /**
    * Notifies the project state that the project has been changed
    */
-  public void setProjectChanged();
+  public void setProjectChanged(boolean changed);
   
   /**
    * Returns true if the project state has been changed

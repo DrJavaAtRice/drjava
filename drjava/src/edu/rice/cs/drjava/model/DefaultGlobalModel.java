@@ -373,8 +373,8 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
   /**
    * Notifies the project state that the project has been changed
    */
-  public void setProjectChanged() {
-    _state.setProjectChanged();
+  public void setProjectChanged(boolean changed) {
+    _state.setProjectChanged(changed);
   }
   
   /**
@@ -452,8 +452,8 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
         return _isProjectChanged;
       }
       
-      public void setProjectChanged() {
-        _isProjectChanged = true;
+      public void setProjectChanged(boolean changed) {
+        _isProjectChanged = changed;
       }
     };
   }
@@ -488,7 +488,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
         return false;
       }
       
-      public void setProjectChanged() {
+      public void setProjectChanged(boolean changed) {
         //Do nothing    
       }
     };
