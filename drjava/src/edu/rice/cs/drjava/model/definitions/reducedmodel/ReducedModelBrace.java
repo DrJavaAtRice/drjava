@@ -351,9 +351,19 @@ public class ReducedModelBrace extends AbstractReducedModel {
     }
     else {
       _cursor.prev();
+      /*
+      System.out.println("+ closedBraceImmediatelyLeft() {");
+      System.out.println("  _cursor.getBlockOffset(): "+_cursor.getBlockOffset());
+      System.out.println("  _cursor.current().isClosed(): "+_cursor.current().isClosed());
+      System.out.println("  _isCurrentBraceMatchable(): "+_isCurrentBraceMatchable());
+      System.out.println("  }");
+      */
       boolean isLeft = ((_cursor.getBlockOffset() == 0) && _cursor.current().isClosed() &&
                         _isCurrentBraceMatchable());
+      //System.out.println("= token to left: " + _cursor);
       _cursor.next();
+      //String output = (_cursor.atEnd()) ? "<end>": _cursor.toString();
+      //System.out.println("= current token: " + output);
       return isLeft;
     }
   }
@@ -373,6 +383,7 @@ public class ReducedModelBrace extends AbstractReducedModel {
    * - Anything else, increase distance by size of the ReducedToken, continue.
    */
   public int balanceBackward() { 
+    //System.out.println("-------------------------------------------");
     Stack<ReducedToken> braceStack = new Stack<ReducedToken>();
     TokenList.Iterator iter = _cursor._copy();
     resetLocation();
@@ -382,7 +393,9 @@ public class ReducedModelBrace extends AbstractReducedModel {
         iter.atFirstItem() ||
         !closedBraceImmediatelyLeft()) 
     {
+      //System.out.println("closedBraceImmediatelyLeft(): "+closedBraceImmediatelyLeft());
       iter.dispose();
+      //System.out.println("! atStart, atFirstItem, or no closed brace");
       return -1;
     }
     
@@ -405,11 +418,13 @@ public class ReducedModelBrace extends AbstractReducedModel {
       }
       else {
         iter.dispose();
+        //System.out.println("! state at relative location != FREE");
         return -1;
       }
     }
     else {
       iter.dispose();
+      //System.out.println("! no open brace to immediate right of cursor");
       return -1;
     }
     // either we get a match and the stack is empty
@@ -425,6 +440,7 @@ public class ReducedModelBrace extends AbstractReducedModel {
                 ReducedToken popped = braceStack.pop();
                 if (!iter.current().isMatch(popped)){
                   iter.dispose();
+                  //System.out.println("! encountered open brace that didn't match");
                   return -1;
                 }
               }
@@ -447,6 +463,7 @@ public class ReducedModelBrace extends AbstractReducedModel {
     // we couldn't find a match
     if (!braceStack.isEmpty()) {
       iter.dispose();
+      //System.out.println("! ran to end of brace stack");
       return -1;
     }
     // success
@@ -585,7 +602,7 @@ public class ReducedModelBrace extends AbstractReducedModel {
               // open
               if (iter.current().isOpenBrace()) {
                 if (braceStack.isEmpty()) {
-		  braceInfo.braceTypeCurrent = iter.current().getType();
+    braceInfo.braceTypeCurrent = iter.current().getType();
                   braceInfo.distToBraceCurrent = distance;
                   iter.dispose();
                   return;

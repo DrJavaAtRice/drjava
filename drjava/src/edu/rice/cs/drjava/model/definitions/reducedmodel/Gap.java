@@ -111,6 +111,7 @@ class Gap extends ReducedToken {
    * @return the string representation of the Brace.
    */
   public String toString() {
+    //String val = "Gap(size: "+_size+"): ";
     String val = "";
     int i;
     for (i = 0; i < _size; i++) {
@@ -271,6 +272,7 @@ class Gap extends ReducedToken {
   public boolean isClosedBrace() {
     return  false;
   }
+  
 }
 
 

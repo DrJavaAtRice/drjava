@@ -120,6 +120,7 @@ class Brace extends ReducedToken implements ReducedModelStates {
    * @return the string representation of the Brace.
    */
   public String toString() {
+    //String val = "Brace(size: "+ getSize() +"): ";
     String val = "";
     int i;
     for (i = 0; i < getSize(); i++) {
@@ -239,7 +240,7 @@ class Brace extends ReducedToken implements ReducedModelStates {
     return  this.getType().equals(BLK_CMT_BEG);
   }
 
-  /**
+  /**7
    * @return true if this is a block comment close delimiter
    */
   public boolean isBlockCommentEnd() {
@@ -329,6 +330,7 @@ class Brace extends ReducedToken implements ReducedModelStates {
   public void shrink(int delta) {
     throw  new RuntimeException("Braces can't shrink.");
   }
+ 
 }
 
 

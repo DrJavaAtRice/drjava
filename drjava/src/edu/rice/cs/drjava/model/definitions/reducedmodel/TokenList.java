@@ -151,8 +151,12 @@ public class TokenList extends ModelList<ReducedToken>
     void insertBraceToGap(String text) {
       this.current().shrink(this.getBlockOffset());
       this.insert(Brace.MakeBrace(text, getStateAtCurrent()));
-      this.insert(new Gap(this.getBlockOffset(), getStateAtCurrent()));
-      this.next(); // now pointing at new brace
+      // add a new gap to account for the remainder from the split gap
+      // if block offset is zero, do NOT add a Gap of size 0.
+      if (this.getBlockOffset() > 0) {
+        this.insert(new Gap(this.getBlockOffset(), getStateAtCurrent()));
+        this.next(); //now point at new brace
+      }
       this.next(); // now pointing at second half of gap
       this.setBlockOffset(0);
     }
@@ -655,5 +659,9 @@ public class TokenList extends ModelList<ReducedToken>
       return delTo.prevItem().getType().equals(match);
     }
    
+    public String toString() {
+      return ""+ this.current();
+    }
+    
   }
 }

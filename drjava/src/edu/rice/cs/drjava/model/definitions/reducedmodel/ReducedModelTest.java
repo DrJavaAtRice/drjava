@@ -238,7 +238,7 @@ public class ReducedModelTest extends BraceReductionTestCase
   }
 
   /**
-   * put your documentation comment here
+   * Tests the reduced model's ability to insert braces correctly
    */
   public void testInsertBraceAndBreakBlockCommentStart() {
     model1.insertChar('/');
@@ -284,6 +284,36 @@ public class ReducedModelTest extends BraceReductionTestCase
     assertEquals("#2.2", "/", model1.currentToken().getType());
   }
 
+  /**
+   * Test to ensure that a complex sequence of multi-lined Brace entries does not fail.
+   * Originally, the insertBraceInGap() had the chance of inserting at the beginning 
+   * of a gap, in which case the gap to be split was actually never shrunk and a new
+   * gap of size 0 is added after the newly inserted Brace. This caused problems for 
+   * brace-matching when new nested braces/parentheses piled up on top of each other.
+   */
+  public void testComplexBraceInsertion() {
+    model1.insertChar('\n');
+    model1.insertChar('\n');
+    model1.move(-1);
+    // \n#\n
+    assertEquals("#0.0", false, model1.atEnd());
+    model1.insertChar('{');
+    model1.insertChar('\n');
+    model1.insertChar('\n');
+    model1.insertChar('}');
+    model1.move(-2);
+    // \n{\n#\n}\n
+    assertEquals("#0.1", FREE, model1.currentToken().getState());
+    model1.insertChar('{');
+    model1.insertChar('{');
+    model1.insertChar('}');
+    model1.insertChar('}');
+    // \n{\n{{}}#\n}\n
+    assertEquals("#1.0", 4, model1.balanceBackward());
+    model1.move(-1);
+    assertEquals("#1.1", 2, model1.balanceBackward());
+  }
+  
   /**
    * put your documentation comment here
    */
