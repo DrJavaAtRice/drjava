@@ -190,7 +190,8 @@ public class JTreeSortNavigator extends JTree implements IAWTContainerNavigatorA
    *                                  <code>contains</code> method.
    */
   public void addDocument(INavigatorItem doc, String path) throws IllegalArgumentException {
-    if (!path.startsWith(_topLevelPath))
+    
+    if (!path.equals(_topLevelPath) && !path.startsWith(_topLevelPath + File.separator) )
     {
       addDocument(doc);
       return;
