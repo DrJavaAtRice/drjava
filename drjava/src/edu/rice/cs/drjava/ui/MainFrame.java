@@ -513,13 +513,13 @@ public class MainFrame extends JFrame implements OptionConstants {
   /**
    * Action for un-commenting a block of commented text.
    */
-  private Action _unCommentLinesAction = new AbstractAction("Uncomment Line(s)")
+  private Action _uncommentLinesAction = new AbstractAction("Uncomment Line(s)")
   {
     public void actionPerformed(ActionEvent ae) {
       // Delegate everything to the DefinitionsDocument.
       int start = _currentDefPane.getSelectionStart();
       int end = _currentDefPane.getSelectionEnd();
-      _model.getActiveDocument().getDocument().unCommentLines(start, end);
+      _model.getActiveDocument().getDocument().uncommentLines(start, end);
     }
   };
   
@@ -2118,7 +2118,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     //_addMenuItem(editMenu, _indentLinesAction, KEY_INDENT);
     editMenu.add(_indentLinesAction);
     _addMenuItem(editMenu, _commentLinesAction, KEY_COMMENT_LINES);
-    _addMenuItem(editMenu, _unCommentLinesAction, KEY_UNCOMMENT_LINES);
+    _addMenuItem(editMenu, _uncommentLinesAction, KEY_UNCOMMENT_LINES);
     
     // Find/replace, goto
     editMenu.addSeparator();
@@ -3682,7 +3682,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     KeyBindingManager.Singleton.put(KEY_COMMENT_LINES, 
                                     _commentLinesAction, null, "Comment Out Line(s)");
     KeyBindingManager.Singleton.put(KEY_UNCOMMENT_LINES, 
-                                    _unCommentLinesAction, null, "Uncomment Line(s)");
+                                    _uncommentLinesAction, null, "Uncomment Line(s)");
     KeyBindingManager.Singleton.put(KEY_DELETE_PREVIOUS, 
                                     _actionMap.get(DefaultEditorKit.deletePrevCharAction), null, "Delete Previous");
     KeyBindingManager.Singleton.put(KEY_DELETE_NEXT, 

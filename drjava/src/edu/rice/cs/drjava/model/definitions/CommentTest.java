@@ -130,7 +130,7 @@ public class CommentTest extends TestCase {
     
     doc.insertString(0, text, null);
     _assertContents("Sample text is inserted improperly.", text, doc);
-    doc.unCommentLines(70, 75);
+    doc.uncommentLines(70, 75);
     _assertContents("These lines should be unchanged by uncomment!", text, doc);
   }
   
@@ -147,7 +147,7 @@ public class CommentTest extends TestCase {
     
     doc.insertString(0, text, null);
     _assertContents("Sample text is inserted improperly.", text, doc);
-    doc.unCommentLines(0, doc.getLength());
+    doc.uncommentLines(0, doc.getLength());
     _assertContents("These lines should be unchanged by uncomment!", text, doc);
   }
   
@@ -172,7 +172,7 @@ public class CommentTest extends TestCase {
     
     doc.insertString(0, text, null);
     _assertContents("Sample text is inserted improperly.", text, doc);
-    doc.unCommentLines(doc.getLength()-1, doc.getLength());
+    doc.uncommentLines(doc.getLength()-1, doc.getLength());
     _assertContents("The last line should be indented and have no commenting!",
                     uncommented, doc);
   }
@@ -198,7 +198,7 @@ public class CommentTest extends TestCase {
     
     doc.insertString(0, text, null);
     _assertContents("Sample text is inserted improperly.", text, doc);
-    doc.unCommentLines(0, doc.getLength());
+    doc.uncommentLines(0, doc.getLength());
     _assertContents("These lines should be indented and have at most"+
                     "one level of commenting!", uncommented, doc);
   }

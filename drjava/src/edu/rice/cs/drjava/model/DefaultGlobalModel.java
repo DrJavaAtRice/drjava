@@ -2179,8 +2179,8 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
      * A forwarding method to un-comment the current line or selection
      * in the definitions.
      */
-    public void unCommentLinesInDefinitions(int selStart, int selEnd) {
-      _doc.unCommentLines(selStart, selEnd);
+    public void uncommentLinesInDefinitions(int selStart, int selEnd) {
+      _doc.uncommentLines(selStart, selEnd);
     }
 
     /**

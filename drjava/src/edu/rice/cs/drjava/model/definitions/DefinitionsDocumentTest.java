@@ -48,6 +48,8 @@ import junit.framework.*;
 import junit.extensions.*;
 
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
+import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.config.OptionConstants;
 
 /**
  * Tests the functionality of the definitions document.
@@ -71,6 +73,7 @@ public class DefinitionsDocumentTest extends TestCase
    */
   protected void setUp() {
     defModel = new DefinitionsDocument();
+    DrJava.getConfig().resetToDefaults();
   }
 
   /**
@@ -1078,5 +1081,82 @@ public class DefinitionsDocumentTest extends TestCase
       // Correct: no class name found
     }
   }*/
-  
+
+  /**
+   * verify that undoing a multiple-line indent will be a single undo action
+   * @throws BadLocationException
+   */
+  public void testUndoAndRedoAfterMultipleLineIndent() throws BadLocationException {
+    String text =
+      "public class stuff {\n" + 
+      "private int _int;\n" + 
+      "private Bar _bar;\n" +
+      "public void foo() {\n" +
+      "_bar.baz(_int);\n" +
+      "}\n" +
+      "}\n";
+    
+    String indented =
+      "public class stuff {\n" + 
+      "  private int _int;\n" + 
+      "  private Bar _bar;\n" +
+      "  public void foo() {\n" +
+      "    _bar.baz(_int);\n" +
+      "  }\n" +
+      "}\n";
+
+    defModel.addUndoableEditListener(defModel.getUndoManager());
+    DrJava.getConfig().setSetting(OptionConstants.INDENT_LEVEL,new Integer(2));
+    defModel.insertString(0,text,null);
+    assertEquals("insertion",text, defModel.getText(0,defModel.getLength()));
+    defModel.indentLines(0,defModel.getLength());
+    assertEquals("indenting",indented, defModel.getText(0,defModel.getLength()));
+    defModel.getUndoManager().undo();
+    assertEquals("undo",text, defModel.getText(0,defModel.getLength()));
+    defModel.getUndoManager().redo();
+    assertEquals("redo",indented, defModel.getText(0,defModel.getLength()));
+  }
+
+  /**
+   * verify that undoing a multiple-line indent will be a single undo action
+   * @throws BadLocationException
+   */
+  public void testUndoAndRedoAfterMultipleLineCommentAndUncomment() throws BadLocationException {
+    String text =
+      "public class stuff {\n" + 
+      "  private int _int;\n" + 
+      "  private Bar _bar;\n" +
+      "  public void foo() {\n" +
+      "    _bar.baz(_int);\n" +
+      "  }\n" +
+      "}\n";
+    
+    String commented =
+      "// public class stuff {\n" + 
+      "//   private int _int;\n" + 
+      "//   private Bar _bar;\n" +
+      "//   public void foo() {\n" +
+      "//     _bar.baz(_int);\n" +
+      "//   }\n" +
+      "// }\n";
+
+    defModel.addUndoableEditListener(defModel.getUndoManager());
+    DrJava.getConfig().setSetting(OptionConstants.INDENT_LEVEL,new Integer(2));
+    defModel.insertString(0,text,null);
+    assertEquals("insertion",text, defModel.getText(0,defModel.getLength()));
+    
+    defModel.commentLines(0,defModel.getLength());
+    assertEquals("commenting",commented, defModel.getText(0,defModel.getLength()));
+    defModel.getUndoManager().undo();
+    assertEquals("undo commenting",text, defModel.getText(0,defModel.getLength()));
+    defModel.getUndoManager().redo();
+    assertEquals("redo commenting",commented, defModel.getText(0,defModel.getLength()));
+
+    defModel.uncommentLines(0,defModel.getLength());
+    assertEquals("uncommenting",text, defModel.getText(0,defModel.getLength()));
+    defModel.getUndoManager().undo();
+    assertEquals("undo uncommenting",commented, defModel.getText(0,defModel.getLength()));
+    defModel.getUndoManager().redo();
+    assertEquals("redo uncommenting",text, defModel.getText(0,defModel.getLength()));
+  }
 }

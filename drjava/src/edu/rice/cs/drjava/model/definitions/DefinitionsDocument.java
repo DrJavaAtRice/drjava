@@ -82,6 +82,8 @@ import edu.rice.cs.drjava.model.FileMovedException;
  * @version $Id$
  */
 public class DefinitionsDocument extends PlainDocument implements OptionConstants {
+  /** The maximum number of undos the model can remember */
+  private static final int UNDO_LIMIT = 1000;
   /** A set of normal endings for lines. */
   private static HashSet _normEndings = _makeNormEndings();
   /** A set of Java keywords. */
@@ -118,6 +120,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
   private long _timestamp;
 
   private final Indenter _indenter;
+  private OurUndoManager _undoManager;
   
   /**
    * Caches calls to the reduced model to speed up indent performance.
@@ -178,6 +181,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
     _helperCache = new Hashtable();
     _helperCacheHistory = new Vector();
     _cacheInUse = false;
+    resetUndoManager();
   }
 
   /**
@@ -1519,6 +1523,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
   public void indentLines(int selStart, int selEnd) {
     //long start = System.currentTimeMillis();
     try {
+      _undoManager.startCompoundEdit();
       if (selStart == selEnd) {
         Position oldCurrentPosition = createPosition(_currentLocation);
         _indentLine();
@@ -1532,6 +1537,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
       else {
         _indentBlock(selStart, selEnd);
       }
+      _undoManager.endCompoundEdit();
     }
     catch (BadLocationException e) {
       throw new UnexpectedException(e);
@@ -1599,6 +1605,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
    */
   public void commentLines(int selStart, int selEnd) {
     try {
+      _undoManager.startCompoundEdit();
       if (selStart == selEnd) {
         Position oldCurrentPosition = createPosition(_currentLocation);
         _commentLine();
@@ -1609,6 +1616,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
       else {
         _commentBlock(selStart, selEnd);
       }
+      _undoManager.endCompoundEdit();
     }
     catch (BadLocationException e) {
       throw new UnexpectedException(e);
@@ -1673,18 +1681,20 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
    * @param selStart the document offset for the start of the selection
    * @param selEnd the document offset for the end of the selection
    */
-  public void unCommentLines(int selStart, int selEnd) {
+  public void uncommentLines(int selStart, int selEnd) {
     try {
+      _undoManager.startCompoundEdit();
       if (selStart == selEnd) {
         Position oldCurrentPosition = createPosition(_currentLocation);
-        _unCommentLine();
+        _uncommentLine();
         //int caretPos = getCaretPosition();
         //_doc().setCurrentLocation(caretPos);
         setCurrentLocation(oldCurrentPosition.getOffset());
       }
       else {
-        _unCommentBlock(selStart, selEnd);
+        _uncommentBlock(selStart, selEnd);
       }
+      _undoManager.endCompoundEdit();
     }
     catch (BadLocationException e) {
       throw new UnexpectedException(e);
@@ -1697,7 +1707,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
    * @param start Position in document to start commenting from
    * @param end Position in document to end commenting at
    */
-  private synchronized void _unCommentBlock(final int start, final int end) {
+  private synchronized void _uncommentBlock(final int start, final int end) {
     //DrJava.consoleOut().println("uncommenting block of " + (end-start));
     try {
       // Keep marker at the end. This Position will be the
@@ -1711,8 +1721,8 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
         // Keep pointer to walker position that will stay current
         // regardless of how commentLine changes things
         Position walkerPos = this.createPosition(walker);
-        // unComment current line
-        _unCommentLine();
+        // uncomment current line
+        _uncommentLine();
         
         // Move back to walker spot
         setCurrentLocation(walkerPos.getOffset());
@@ -1733,7 +1743,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
    * Uncomments a single line.  This simply looks for a leading "//".
    * Also indents the line, once the comments have been removed.
    */
-  private void _unCommentLine() {
+  private void _uncommentLine() {
     try {
       // Look for "//" at the beginning of the line, and remove it.
       int curCol = getCurrentCol();
@@ -2508,7 +2518,9 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
     setCurrentLocation(oldLocation);
     return index;
   }
-  
+  /**
+   * Appending any information for the reduced model from each undo command
+   */
   private class CommandUndoableEdit extends AbstractUndoableEdit {
     private final Runnable _undoCommand;
     private final Runnable _redoCommand;
@@ -2579,4 +2591,77 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
     }
   }
   
+  /**
+   * getter method for OurUndoManager
+   * @return _undoManager
+   */
+  public UndoManager getUndoManager() {
+    return _undoManager;
+  }
+
+  /**
+   * resets the undo manager
+   */
+  public void resetUndoManager() {
+    _undoManager = new OurUndoManager();
+    _undoManager.setLimit(UNDO_LIMIT);
+  }
+
+  /**
+   * public accessor for the next undo action
+   */
+  public UndoableEdit getNextUndo() {
+    return _undoManager.getNextUndo();
+  }
+  
+  /**
+   * public accessor for the next undo action
+   */
+  public UndoableEdit getNextRedo() {
+    return _undoManager.getNextRedo();
+  }
+  
+  /**
+   * Is used to be able to call editToBeUndone and editToBeRedone since they
+   * are protected methods in UndoManager
+   */
+  private class OurUndoManager extends UndoManager {
+    private boolean _compoundEditState = false;
+    private CompoundEdit _compoundEdit;
+    
+    public void startCompoundEdit() {
+      if(_compoundEditState) {
+        throw new IllegalStateException("Cannot start a compound edit while making a compound edit");
+      }
+      _compoundEditState = true;
+      _compoundEdit = new CompoundEdit();
+    }
+
+    public void endCompoundEdit() {
+      if(!_compoundEditState) {
+        throw new IllegalStateException("Cannot end a compound edit while not making a compound edit");
+      }
+      _compoundEditState = false;
+      _compoundEdit.end();
+      super.addEdit(_compoundEdit);
+    }
+
+    public UndoableEdit getNextUndo() {
+      return editToBeUndone();
+    }
+    
+    public UndoableEdit getNextRedo() {
+      return editToBeRedone();
+    }
+    
+    public boolean addEdit(UndoableEdit e) {
+      if(_compoundEditState) {
+        return _compoundEdit.addEdit(e);
+      }
+      else {
+        return super.addEdit(e);
+      }
+    }
+  }
+
 }
