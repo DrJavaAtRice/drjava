@@ -296,7 +296,7 @@ public class DefinitionsPane extends JEditorPane
     // If it has changed, check and see if we should be highlighting matching braces.
     this.addCaretListener(_matchListener);
   }
-
+  
   /**
    * @return the undo action
    */

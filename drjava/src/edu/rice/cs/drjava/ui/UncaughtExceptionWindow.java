@@ -105,7 +105,7 @@ public class UncaughtExceptionWindow extends JFrame {
     _okButton = new JButton(_okAction);
     
     _okPanel = new JPanel(new BorderLayout());
-    _okPanel.add(_okButton, BorderLayout.NORTH);
+    _okPanel.add(_okButton, BorderLayout.SOUTH);
     _okPanel.setBackground(Color.gray.brighter());
     
     _topPanel = new JPanel(new BorderLayout());
@@ -123,6 +123,7 @@ public class UncaughtExceptionWindow extends JFrame {
     this.getContentPane().setLayout(new BorderLayout());
     this.getContentPane().add(_topPanel, BorderLayout.NORTH);
     this.getContentPane().add(_stackTraceScroll, BorderLayout.CENTER);
+    this.setTitle("Uncaught Exception");
     
     this.setVisible(true);
     //this.pack();
@@ -142,11 +143,13 @@ public class UncaughtExceptionWindow extends JFrame {
                       _exception+"\n\n"+
                       "Please submit a bug report containing the "+
                       "system information in the \n"+
-                      "Help>About window and an" +
-                      "account of the actions \n"+ 
-                      "that caused the bug (if known) to "+
+                      "Help>About window and an " +
+                      "account of the actions "+ 
+                      "that caused the bug \n(if known) to "+
                       "http://sourceforge.net/projects/drjava.\n\n"+
-                      "Thanks for your help in making Dr Java "+
+                      "You may wish to save all your work and "+
+                      "restart DrJava.\n" +
+                      "Thanks for your help in making DrJava "+
                       "better!");
   }
   
