@@ -31,16 +31,14 @@
        For example, to release drjava-20020101-0000, you'd type:
 
        ant -Dversion-tag=drjava-20020101-0000 release
-
-       Note: Release must be run on CS net
   -->
   <target name="release" if="version-tag" depends="update">
+    <echo message="Util should not be released by itself. Release the associated version of DrJava instead." />
     <!-- util doesn't make its own jars right now -->
     <!--
     <antcall target="jar">
       <param name="jarfile" value="${jars_dir}/${version-tag}.jar" />
     </antcall>
-    -->
 
     <!-- generate javadoc for the committed version! -->
     <antcall target="generate_javadoc">
@@ -50,6 +48,7 @@
 
     <!-- give group permissions to write over the javadoc -->
     <chmod perm="g+w,a+rX" dir="${public_javadoc_dir}" type="both" includes="**" />
+    -->
   </target>
 
   <target name="compile" depends="do-compile">
