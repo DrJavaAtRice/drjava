@@ -19,7 +19,7 @@ public interface CompilerInterface {
    */
   CompilerError[] compile(File sourceRoot, File[] files);
 
-  /*
+  /**
    * Indicates whether this compiler is actually available.
    * As in: Is it installed and located?
    * This method should load the compiler class, which should
@@ -27,12 +27,15 @@ public interface CompilerInterface {
    * If this method returns true, the {@link #compile} method
    * should not fail due to class not being found.
    */
-  //boolean isAvailable();
+  boolean isAvailable();
 
-  /*
+  /**
    * Returns the name of this compiler, appropriate to show to the user.
    */
-  //String getName();
+  String getName();
+
+  /** Should return info about compiler, at least including name. */
+  String toString();
 }
 
 

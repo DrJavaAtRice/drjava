@@ -15,6 +15,11 @@ import  gjc.v6.util.Log;
  * @version $Id$
  */
 public class GJv6Compiler implements CompilerInterface {
+  /** Singleton instance. */
+  public static final CompilerInterface ONLY = new GJv6Compiler();
+
+  public static final String COMPILER_CLASS_NAME = "gj.v6.JavaCompiler";
+
   private JavaCompiler _compiler;
   /**
    * We need to explicitly make the compiler's log and pass it
@@ -25,9 +30,9 @@ public class GJv6Compiler implements CompilerInterface {
   private OurLog _compilerLog;
 
   /**
-   * Create the compiler.
+   * Create the compiler. Private because of singleton.
    */
-  public GJv6Compiler () {
+  private GJv6Compiler () {
   }
 
   /**
@@ -78,6 +83,18 @@ public class GJv6Compiler implements CompilerInterface {
       };
     }
     return  _compilerLog.getErrors();
+  }
+
+  public boolean isAvailable() {
+    return true;
+  }
+
+  public String getName() {
+    return "GJ compiler v6";
+  }
+
+  public String toString() {
+    return getName();
   }
 
   /**
