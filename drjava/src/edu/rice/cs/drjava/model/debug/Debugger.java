@@ -77,9 +77,17 @@ public interface Debugger {
   public boolean isReady();
   
   /**
-   * Suspends execution of the currently running document.
+   * Suspends execution of the thread referenced by d
    */
-  public void suspend();
+  public void suspend(DebugThreadData d);
+  
+  /** Suspends all the threads in the VM the debugger is attached to */
+  public void suspendAll();
+  
+  /** 
+   * Sets the current thread we are debugging to the thread referenced by d
+   */
+  public void setCurrentThread(DebugThreadData d);
   
   /**
    * Resumes execution of the currently loaded document.
@@ -99,7 +107,10 @@ public interface Debugger {
    * Called from interactionsEnded in MainFrame in order to clear any current 
    * StepRequests that remain.
    */
-  public void clearCurrentStepRequest();
+  /**
+   * We don't need this method anymore
+   */
+  /** public void clearCurrentStepRequest(); **/
 
   /**
    * Adds a watch on the given field or variable.
@@ -197,4 +208,9 @@ public interface Debugger {
    */
   public void removeListener(DebugListener listener);
   
+  /**
+   * @return true if there are any threads in the program currently being 
+   * debugged which have been suspended (by the user or by hitting a breakpoint).
+   */
+  public boolean hasSuspendedThreads();
 }

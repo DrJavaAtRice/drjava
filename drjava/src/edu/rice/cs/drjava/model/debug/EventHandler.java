@@ -44,6 +44,7 @@ import edu.rice.cs.drjava.DrJava;
 import com.sun.jdi.*;
 import com.sun.jdi.event.*;
 import com.sun.jdi.request.*;
+import java.util.*;
 
 public class EventHandler extends Thread {
   
@@ -103,10 +104,12 @@ public class EventHandler extends Thread {
   }
   
   private void _handleBreakpointEvent(BreakpointEvent e) {
-    _manager.setCurrentThread(e.thread());
-    _manager.currThreadSuspended();
-    _manager.scrollToSource(e);
-    _manager.reachedBreakpoint((BreakpointRequest)e.request());
+    synchronized(_manager){
+      _manager.setCurrentThread(e.thread());
+      _manager.currThreadSuspended();
+      _manager.scrollToSource(e);
+      _manager.reachedBreakpoint((BreakpointRequest)e.request());
+    }
   }
   
   private void _handleStepEvent(StepEvent e) {
@@ -116,6 +119,7 @@ public class EventHandler extends Thread {
                             e.location().method().name() + "(...)  [line " + 
                             e.location().lineNumber() + "]");
       _manager.getEventRequestManager().deleteEventRequest(e.request());
+      _manager.setCurrentThread(e.thread());
       _manager.currThreadSuspended();
       _manager.scrollToSource(e);
     }
@@ -141,9 +145,20 @@ public class EventHandler extends Thread {
   }
   
   private void _handleThreadDeathEvent(ThreadDeathEvent e) {
-    if (e.thread().equals(_manager.getCurrentThread())) {
+    /** no need to check if there are suspended threads on the stack
+     * because all that logic should be in the debugger
+     */
+    if(e.thread().equals(_manager.getCurrentRunningThread())) {
+      EventRequestManager erm = _vm.eventRequestManager();
+      List steps = erm.stepRequests();
+      for (int i = 0; i < steps.size(); i++) {
+        StepRequest step = (StepRequest)steps.get(i);
+        if (step.thread().equals(e.thread())) {
+          erm.deleteEventRequest(step);
+          break;
+        }
+      }
       _manager.currThreadDied();
-      _manager.setCurrentThread(null);
     }
   }
   
@@ -157,9 +172,8 @@ public class EventHandler extends Thread {
   
   private void _cleanUp(Event e) {
     _connected = false;
-    if (_manager.getCurrentThread() != null) {
+    if (_manager.hasSuspendedThreads()) {
       _manager.currThreadDied();
-      _manager.setCurrentThread(null);
     }
     _manager.shutdown();
   }

@@ -81,6 +81,10 @@ public class DebugPanel extends JPanel implements OptionConstants {
   private JTree _bpTree;
   private JTable _stackTable;
   private JTable _threadTable;
+  private int _currentThreadIndex;
+  
+  private JPopupMenu _threadPopupMenu;
+  private JMenuItem _threadMenuItem;
   
   private final SingleDisplayModel _model;
   private final MainFrame _frame;
@@ -136,25 +140,20 @@ public class DebugPanel extends JPanel implements OptionConstants {
     this.add(_statusBar, BorderLayout.SOUTH);
     
     _debugger.addListener(new DebugPanelListener());
+
+    _initThreadPopup();
   }
   
   /**
    * Causes all display tables to update their information from the debug manager.
-   * @param updateThreads Whether to check for current stack trace and threads
    */
-  public void updateData(boolean updateStack) {
-     if (_debugger.isReady()) {
+  public void updateData() {
+    if (_debugger.isReady()) {
       _watches = _debugger.getWatches();
-      if (updateStack) {
-        // Get threads and stack (thread suspended)
-        _threads = _debugger.getCurrentThreadData();
-        _stackFrames = _debugger.getCurrentStackFrameData();
-      }
-      else {
-        // Empty tables (thread resumed)
-        _threads = new Vector<DebugThreadData>();
-        _stackFrames = new Vector<DebugStackData>();
-      }
+      // Get threads and stack (thread suspended); the debugger will pass empty
+      // vectors if there are no threads or stack frames
+      _threads = _debugger.getCurrentThreadData();
+      _stackFrames = _debugger.getCurrentStackFrameData();
     }
     else {
       // Clean up if debugger dies
@@ -209,6 +208,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
     // Thread table
     if (DrJava.getConfig().getSetting(DEBUG_SHOW_THREADS).booleanValue()) {
       _threadTable = new JTable( new ThreadTableModel());
+      _threadTable.addMouseListener(new ThreadMouseAdapter());
       _rightPane.addTab("Threads", new JScrollPane(_threadTable)); 
       // Sets the name column to always be 2 times as wide as the status column
       TableColumn nameColumn = null;
@@ -216,9 +216,14 @@ public class DebugPanel extends JPanel implements OptionConstants {
       nameColumn = _threadTable.getColumnModel().getColumn(0);
       statusColumn = _threadTable.getColumnModel().getColumn(1);
       nameColumn.setPreferredWidth(2*statusColumn.getPreferredWidth()); 
+      
+      // Adds a cell renderer to the threads table
+      _currentThreadIndex = -1;
+      _threadTable.getColumnModel().getColumn(0).setCellRenderer(new DebugTableCellRenderer());
     }
-    DrJava.getConfig().addOptionListener( OptionConstants.DEBUG_SHOW_THREADS, 
-                                    new OptionListener<Boolean>() {
+
+    DrJava.getConfig().addOptionListener(OptionConstants.DEBUG_SHOW_THREADS, 
+                                         new OptionListener<Boolean>() {
       public void optionChanged(OptionEvent<Boolean> oce) {
         if (oce.value.booleanValue()) {
           if (_threadTable == null) {
@@ -340,13 +345,17 @@ public class DebugPanel extends JPanel implements OptionConstants {
     public String getColumnName(int col) { 
       return _columnNames[col]; 
     }
+    
     public int getRowCount() { 
       if (_threads == null) {
         return 0;
       }
       return _threads.size();
     }
-    public int getColumnCount() { return _columnNames.length; }
+    
+    public int getColumnCount() { 
+      return _columnNames.length; 
+    }
     
     public Object getValueAt(int row, int col) { 
       DebugThreadData threadData  = _threads.elementAt(row);
@@ -357,6 +366,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
       
       return null;
     }
+
     public boolean isCellEditable(int row, int col) { 
       return false; 
     }
@@ -427,10 +437,30 @@ public class DebugPanel extends JPanel implements OptionConstants {
   }
   
   /**
+   * Initializes the pop-up menu that is revealed when the user 
+   * right-clicks on a row in the thread table.
+   */
+  private void _initThreadPopup() {
+    _threadPopupMenu = new JPopupMenu("Thread Selection");
+    _threadMenuItem = new JMenuItem();
+    _threadPopupMenu.add(_threadMenuItem);
+  }
+  
+  /**
+   * Sets the font for a cell.
+   * @param renderer the renderer
+   * @param row the current row
+   */
+  private void _setCellFont(Component renderer, int row) {
+    if (row == _currentThreadIndex) {
+      renderer.setFont(getFont().deriveFont(Font.BOLD));
+    }
+  }
+  
+  /**
    * Listens to events from the debug manager to keep the panel updated.
    */
   class DebugPanelListener implements DebugListener {
-  
     /**
      * Called when debugger mode has been enabled.
      */
@@ -601,7 +631,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
       // Only change GUI from event-dispatching thread
       Runnable doCommand = new Runnable() {
         public void run() {
-          updateData(true);
+          updateData();
         }
       };
       SwingUtilities.invokeLater(doCommand);
@@ -614,7 +644,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
       // Only change GUI from event-dispatching thread
       Runnable doCommand = new Runnable() {
         public void run() {
-          updateData(false);
+          updateData();
         }
       };
       SwingUtilities.invokeLater(doCommand);
@@ -627,10 +657,19 @@ public class DebugPanel extends JPanel implements OptionConstants {
       // Only change GUI from event-dispatching thread
       Runnable doCommand = new Runnable() {
         public void run() {
-          updateData(false);
+          updateData();
         }
       };
       SwingUtilities.invokeLater(doCommand);
+    }
+    
+    /**
+     * Called when the current (selected) thread is set in the debugger.
+     * @param thread the thread that was set as current
+     */
+    public void currThreadSet(DebugThreadData thread) {
+      _currentThreadIndex = _threads.indexOf(thread);
+      _threadTable.repaint();
     }
   }
   
@@ -658,5 +697,50 @@ public class DebugPanel extends JPanel implements OptionConstants {
   public String getStatusText() {
     return _statusBar.getText();
   }
-}
+  
+  /**
+   * A mouse adapter that allows for double-clicking.
+   */
+  private class ThreadMouseAdapter extends MouseAdapter {
+    public void mousePressed(MouseEvent e) {
+      if (e.isPopupTrigger()) {
+        int row = _threadTable.rowAtPoint(e.getPoint());
 
+        _threadTable.setRowSelectionInterval(row, row);
+
+        final DebugThreadData thread = _threads.elementAt(row);
+        _threadMenuItem.setAction(new AbstractAction() {
+          public void actionPerformed(ActionEvent e) {
+            _debugger.setCurrentThread(thread);
+          }
+        });
+        
+        if (_threads.elementAt(row).isSuspended()) {
+          _threadMenuItem.setText("Select Thread");
+        }
+        else {
+          _threadMenuItem.setText("Suspend & Select Thread");
+        }
+        _threadPopupMenu.show(e.getComponent(), e.getX(), e.getY());
+      }
+      else if (SwingUtilities.isLeftMouseButton(e) && e.getClickCount() == 2) {
+        _debugger.setCurrentThread(_threads.elementAt(_threadTable.getSelectedRow()));
+      }
+    }
+  }
+  
+  /**
+   * Table cell renderer to make the selected thread show up in bold.
+   */
+  private class DebugTableCellRenderer extends DefaultTableCellRenderer {
+    public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, 
+                                                   boolean hasFocus, int row, int column) {
+      Component renderer = 
+        super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+      
+      _setCellFont(renderer, row);
+      
+      return renderer;
+    }
+  }
+}

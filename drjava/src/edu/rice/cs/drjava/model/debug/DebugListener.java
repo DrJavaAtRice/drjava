@@ -103,4 +103,10 @@ public interface DebugListener {
    * Called when the current thread dies
    */
   public void currThreadDied();
+
+  /**
+   * Called when the current (selected) thread is set in the debugger.
+   * @param thread the thread that was set as current
+   */
+  public void currThreadSet(DebugThreadData thread);
 }

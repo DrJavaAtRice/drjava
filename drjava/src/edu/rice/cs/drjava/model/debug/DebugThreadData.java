@@ -74,7 +74,14 @@ public class DebugThreadData {
       case ThreadReference.THREAD_STATUS_ZOMBIE:
         status = "ZOMBIE"; break;
     }
-    _status = status;
+    if( thread.isSuspended() && status.equals("RUNNING") ){
+      _status = "SUSPENDED";
+    }
+    else{
+      _status = status;
+    }
+    
+    
   }
   
   /**
@@ -90,4 +97,18 @@ public class DebugThreadData {
   public String getStatus() {
     return _status;
   }
+  
+  public long getUniqueID() {
+    return _thread.uniqueID();
+  }
+  
+  /**
+   * Tells whether or not the thread is suspended.
+   * @return true iff the thread is suspended
+   */
+  public boolean isSuspended() {
+    return _thread.isSuspended();
+  }
+ 
+  
 }

@@ -67,10 +67,7 @@ import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 import edu.rice.cs.drjava.model.definitions.ClassNameNotFoundException;
-import edu.rice.cs.drjava.model.debug.Debugger;
-import edu.rice.cs.drjava.model.debug.DebugException;
-import edu.rice.cs.drjava.model.debug.DebugListener;
-import edu.rice.cs.drjava.model.debug.Breakpoint;
+import edu.rice.cs.drjava.model.debug.*;
 import edu.rice.cs.drjava.ui.config.*;
 import edu.rice.cs.drjava.ui.CompilerErrorPanel.ErrorListPane;
 import edu.rice.cs.drjava.ui.JUnitPanel.JUnitErrorListPane;
@@ -1162,7 +1159,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   private void _showDebuggerPanel() {
     _debugSplitPane.setTopComponent(_docSplitPane);
     _mainSplit.setTopComponent(_debugSplitPane);
-    _debugPanel.updateData(false);
+    _debugPanel.updateData();
   }
   
   private void _hideDebuggerPanel() {
@@ -2970,6 +2967,9 @@ public class MainFrame extends JFrame implements OptionConstants {
       SwingUtilities.invokeLater(doCommand);
     }
     
+    public void currThreadSet(DebugThreadData dtd) {
+    }    
+       
     public void threadLocationUpdated(final OpenDefinitionsDocument doc, 
                                       final int lineNumber) {
       // Only change GUI from event-dispatching thread
@@ -3043,8 +3043,6 @@ public class MainFrame extends JFrame implements OptionConstants {
         }
       };
       SwingUtilities.invokeLater(doCommand);
-      
-
     }
     
     public void breakpointReached(Breakpoint bp) {
@@ -3108,14 +3106,17 @@ public class MainFrame extends JFrame implements OptionConstants {
       // Only change GUI from event-dispatching thread
       Runnable doCommand = new Runnable() {
         public void run() {
-          _removeThreadLocationHighlight();
           if (inDebugMode()) {
-            _setDebugMenuItemsEnabled(true);
+            if (!_model.getDebugger().hasSuspendedThreads()) { 
+              // no more suspended threads, resume default debugger state
+              // all thread dependent debug menu items are disabled
+              _setDebugMenuItemsEnabled(true);
+              _removeThreadLocationHighlight();
+              // Make sure we're at the prompt
+              // (This should really be fixed in InteractionsController, not here.)
+              _interactionsController.moveToPrompt(); // there are no suspended threads, bring back prompt
+            }
           }
-
-          // Make sure we're at the prompt
-          // (This should really be fixed in InteractionsController, not here.)
-          _interactionsController.moveToPrompt();
         }
       };
       SwingUtilities.invokeLater(doCommand);
@@ -3315,12 +3316,14 @@ public class MainFrame extends JFrame implements OptionConstants {
       // Only change GUI from event-dispatching thread
       Runnable doCommand = new Runnable() {
         public void run() {
-          if (inDebugMode()) {
+          /**
+           if (inDebugMode()) {
             _disableStepTimer();
             Debugger manager = _model.getDebugger();
             manager.clearCurrentStepRequest();
             _removeThreadLocationHighlight();
           }
+          */
           
           _interactionsPane.setCursor(Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR));
           _interactionsPane.setEditable(true);

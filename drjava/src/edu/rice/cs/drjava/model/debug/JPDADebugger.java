@@ -7,7 +7,7 @@
  * 
  * DrJava is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation; either version of the License, or
  * (at your option) any later version.
  *
  * DrJava is distributed in the hope that it will be useful,
@@ -16,7 +16,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
+ * along with this p2rogram; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  * or see http://www.gnu.org/licenses/gpl.html
  *
@@ -45,6 +45,7 @@ import java.util.ListIterator;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import javax.swing.ListModel;
 
 import gj.util.Enumeration;
@@ -53,6 +54,7 @@ import gj.util.Vector;
 
 // DrJava stuff
 import edu.rice.cs.util.StringOps;
+import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.model.GlobalModel;
 import edu.rice.cs.drjava.model.GlobalModelListener;
@@ -73,7 +75,6 @@ import com.sun.jdi.event.*;
  * @version $Id$
  */
 public class JPDADebugger implements Debugger {
-  
   /**
    * Reference to DrJava's model.
    */
@@ -112,9 +113,20 @@ public class JPDADebugger implements Debugger {
   private LinkedList _listeners;
   
   /**
-   * The Thread that the JPDADebugger is currently analyzing.
+   * The running ThreadReference that we are debugging.
    */
-  private ThreadReference _thread;
+  private ThreadReference _runningThread;
+  
+  /**
+   * Storage for all the threads suspended by this debugger 
+   */
+  private RandomAccessStack _suspendedThreads;
+  
+  /** 
+   * A structure for remembering threads which we have been informed have died 
+   * (via currThreadDied()) but which _vm.allThreads() will still return
+   */
+  private DeadThreadFilter _deadThreads;
   
   /**
    * Builds a new JPDADebugger to debug code in the Interactions JVM,
@@ -125,11 +137,13 @@ public class JPDADebugger implements Debugger {
     _model = model;
     _vm = null;
     _eventManager = null;
-    _thread = null;
     _listeners = new LinkedList();
     _breakpoints = new Vector<Breakpoint>();
     _watches = new Vector<DebugWatchData>();
+    _suspendedThreads = new RandomAccessStack();
     _pendingRequestManager = new PendingRequestManager(this);
+    _runningThread = null;
+    _deadThreads = new DeadThreadFilter();
   }
   
   /**
@@ -227,7 +241,6 @@ public class JPDADebugger implements Debugger {
     return _vm != null;
   }
   
-  
   /**
    * Returns the current EventRequestManager from JDI, or null if 
    * startup() has not been called.
@@ -245,16 +258,80 @@ public class JPDADebugger implements Debugger {
   
   /**
    * Sets the debugger's currently active thread.
+   * This method assumes that the thread referenced by thread
+   * is suspended already.
    */
   synchronized void setCurrentThread(ThreadReference thread) {
-    _thread = thread;
+    _suspendedThreads.push(thread);
   }
   
   /**
-   * Returns the debugger's currently active thread.
+   * Sets the current debugged thread to the thread referenced by threadData,
+   * suspending it if necessary.
+   */
+  synchronized public void setCurrentThread(DebugThreadData threadData) throws NoSuchElementException{
+    if (!isReady()) return;
+    
+    if ( threadData == null)
+      return;
+    
+    ThreadReference thread_ref = getThreadFromDebugThreadData(threadData);
+    
+    /** 
+     * Special case to avoid overhead of scrollToSource() if we
+     * are selecting the thread we have already selected currently
+     */
+    if( _suspendedThreads.size() > 0 && 
+       _suspendedThreads.peek().uniqueID() == thread_ref.uniqueID() ){
+      return;
+    }
+    
+    /** if we switch to a currently suspended thread, we need to remove 
+     * it from the stack and put it on the top
+     **/
+    if( _suspendedThreads.contains(thread_ref.uniqueID()) ){
+      _suspendedThreads.remove(thread_ref.uniqueID());
+    }
+    if( !thread_ref.isSuspended() ){
+      thread_ref.suspend();
+    }
+    _suspendedThreads.push(thread_ref);
+    
+    try{
+      scrollToSource(thread_ref.frame(0).location());
+    }catch(IncompatibleThreadStateException e){
+      throw new UnexpectedException(e);
+    }
+    
+    currThreadSuspended();
+  }
+  
+  /**
+   * Returns the debugger's thread that currently has the focus.
    */
   synchronized ThreadReference getCurrentThread() {
-    return _thread;
+    return _suspendedThreads.peek();
+  }
+  
+  /**
+   * Returns the debugger's currently running thread.
+   */
+  synchronized ThreadReference getCurrentRunningThread() {
+    return _runningThread;
+  }
+  
+  public synchronized boolean hasSuspendedThreads(){
+    if( _suspendedThreads.size() > 0 ) return true;
+    else return false;
+  }
+  
+  synchronized boolean hasRunningThread(){
+    if( _runningThread != null) {
+      return true;
+    }
+    else {
+      return false;
+    }
   }
   
   /**
@@ -334,35 +411,90 @@ public class JPDADebugger implements Debugger {
     return refTypes;
   }
   
+  /**
+   * @return The thread in the virtual machine with name d.getName()
+   */
+  private ThreadReference getThreadFromDebugThreadData(DebugThreadData d) throws NoSuchElementException{
+    List threads = _vm.allThreads();
+    Iterator iterator = threads.iterator();
+    ThreadReference thread_ref = null;
+    
+    while(iterator.hasNext()){
+      thread_ref = (ThreadReference)iterator.next();
+      if( thread_ref.uniqueID() == d.getUniqueID() ){
+        return thread_ref;
+      }
+    }
+    
+    throw new NoSuchElementException("Thread " + d.getName() + " not found in virtual machine!");
+  }
   
   /**
-   * Suspends execution of the currently running document.
+   * Suspends all the currently running threads in the virtual machine
    */
-  public synchronized void suspend() {
-    if (!isReady()) return;
+  public synchronized void suspendAll(){
+    List threads = _vm.allThreads();
+    Iterator iterator = threads.iterator();
+    ThreadReference thread_ref = null;
     
-    if (_thread == null)
+    while(iterator.hasNext()){
+      thread_ref = (ThreadReference)iterator.next();
+      
+      if( !thread_ref.isSuspended() ){
+        thread_ref.suspend();
+        _suspendedThreads.push(thread_ref);
+      }
+    }
+    _runningThread = null;
+  }
+  
+  /**
+   * Suspends execution of the thread referenced by threadData.
+   */
+  public synchronized void suspend(DebugThreadData threadData) {
+    setCurrentThread(threadData);
+    _runningThread = null;
+  }
+  
+  /**
+   * Resumes execution of the currently suspended document
+   */
+  public synchronized void resume() {
+    if (!isReady()) return;
+    ThreadReference thread = null;
+    try{
+      thread = _suspendedThreads.pop();
+    }catch(NoSuchElementException e){
+      /** Just return because there is no thread to resume */
       return;
-    _thread.suspend();
-    currThreadSuspended();
+    }
+    
+    resumeThread(thread);
   }
   
   /**
    * Resumes execution of the currently loaded document.
    */
-  public synchronized void resume() {
+  public synchronized void resume(DebugThreadData threadData) {
     if (!isReady()) return;
     
-    if (_thread == null)
+    ThreadReference thread = _suspendedThreads.remove(threadData.getUniqueID());
+    
+    resumeThread(thread);
+  }
+  
+  private void resumeThread(ThreadReference thread){
+    if( thread == null)
       return;
     
-    int suspendCount = _thread.suspendCount();
-    for (int i=suspendCount; i>0; i--) {
-      _thread.resume();
-    }
+    int suspendCount = thread.suspendCount();
+    _runningThread = thread;
     currThreadResumed();
+    for (int i=suspendCount; i>0; i--) {
+      thread.resume();
+    }
   }
-    
+  
   /** 
    * Steps into the execution of the currently loaded document.
    * @flag The flag denotes what kind of step to take. The following mark valid options:
@@ -371,20 +503,17 @@ public class JPDADebugger implements Debugger {
    * StepRequest.STEP_OUT
    */
   public synchronized void step(int flag) throws DebugException {
-    if (!isReady() || (_thread == null)) return;
-
+    if (!isReady() || (_suspendedThreads.size() <= 0)) return;
+    
+    ThreadReference thread = _suspendedThreads.peek();
     // don't allow the creation of a new StepRequest if there's already one on
     // the current thread
-    List steps = _eventManager.stepRequests();    
+    List steps = _eventManager.stepRequests();
     for (int i = 0; i < steps.size(); i++) {
       StepRequest step = (StepRequest)steps.get(i);
-      if (step.thread().equals(_thread)) {
-        if (!_thread.isSuspended())
-          return;
-        else {
-          _eventManager.deleteEventRequest(step);
-          break;
-        }
+      if (step.thread().equals(thread)) {
+        _eventManager.deleteEventRequest(step);
+        break;
       }
     }
         
@@ -397,17 +526,30 @@ public class JPDADebugger implements Debugger {
    * Called from interactionsEnded in MainFrame in order to clear any current 
    * StepRequests that remain.
    */
+  /*** 
+   * NOTE: We don't think we need this method any more, if we ever did at all
+   * Wednesday, March 5th, 2003
+   **/
+ /**
   public synchronized void clearCurrentStepRequest() {   
-    List steps = _eventManager.stepRequests();   
+    List steps = _eventManager.stepRequests();
+    
+    if( suspendedThreads.size() <= 0 ){
+      return ;
+    }
+    
+    ThreadReference thread = _suspendedThreads().peek();
+    
     for (int i = 0; i < steps.size(); i++) {
       StepRequest step = (StepRequest)steps.get(i);
-      if (step.thread().equals(_thread)) {
+      if (step.thread().equals(thread)) {
         _eventManager.deleteEventRequest(step);
         return;
       }
     }
   }
-
+  */
+  
   /**
    * Adds a watch on the given field or variable.
    * @param field the name of the field we will watch
@@ -619,7 +761,11 @@ public class JPDADebugger implements Debugger {
   public synchronized Vector<DebugThreadData> getCurrentThreadData() {
     if (!isReady()) return null;
 
-    Iterator iter = _vm.allThreads().iterator();
+    List listThreads = _vm.allThreads();
+    /** get an iterator that filters out threads that we know are dead from the list returned 
+     * by _vm.allThreads() 
+     **/
+    Iterator iter = _deadThreads.filter(listThreads).iterator();
     Vector<DebugThreadData> threads = new Vector<DebugThreadData>();
     while (iter.hasNext()) {      
       threads.addElement(new DebugThreadData((ThreadReference)iter.next()));                                                  
@@ -633,13 +779,18 @@ public class JPDADebugger implements Debugger {
    * TO DO: Config option for hiding DrJava subset of stack trace
    */
   public synchronized Vector<DebugStackData> getCurrentStackFrameData() {
-    if (!isReady() || (_thread == null) || !_thread.isSuspended()) {
+    if (!isReady()) {
       return null;
+    }
+    
+    if(_runningThread != null || _suspendedThreads.size() <= 0)
+    {
+      return new Vector<DebugStackData>();
     }
     
     Iterator iter = null;
     try {
-      iter = _thread.frames().iterator();
+      iter = _suspendedThreads.peek().frames().iterator();
       Vector<DebugStackData> frames = new Vector<DebugStackData>();
       while (iter.hasNext()) {
         frames.addElement(new DebugStackData((StackFrame)iter.next()));
@@ -665,59 +816,76 @@ public class JPDADebugger implements Debugger {
     Object docProp = request.getProperty("document");
     if ((docProp != null) && (docProp instanceof OpenDefinitionsDocument)) {
       doc = (OpenDefinitionsDocument) docProp;
+      openAndScroll(doc, location);
     }
     else {
-      // No stored doc, look on the source root set (later, also the sourcepath)
-      ReferenceType rt = location.declaringType();
-      String filename = "";
+      scrollToSource(location);
+    }
+  }  
+  
+  /**
+   * Scroll to the location specified by location
+   */
+  synchronized void scrollToSource(Location location){
+    OpenDefinitionsDocument doc = null;
+    
+    // No stored doc, look on the source root set (later, also the sourcepath)
+    ReferenceType rt = location.declaringType();
+    String filename = "";
+    try {
+      filename = rt.sourceName();
+      filename = getPackageDir(rt.name()) + filename;
+    }
+    catch (AbsentInformationException aie) {
+      // Don't know real source name:
+      //   assume source name is same as file name
+      String className = rt.name();
+      String ps = System.getProperty("file.separator");
+      // replace periods with the System's file separator
+      className = StringOps.replace(className, ".", ps);
+      
+      // crop off the $ if there is one and anything after it
+      int indexOfDollar = className.indexOf('$');    
+      if (indexOfDollar > -1) {
+        className = className.substring(0, indexOfDollar);
+      }
+      
+      filename = className + ".java";
+    }
+    
+    // Check source root set (open files)
+    File[] sourceRoots = _model.getSourceRootSet();
+    Vector<File> roots = new Vector<File>();
+    for (int i=0; i < sourceRoots.length; i++) {
+      roots.addElement(sourceRoots[i]);
+    }
+    File f = _model.getSourceFileFromPaths(filename, roots);
+    if (f == null) {
+      Vector<File> sourcepath = 
+        DrJava.getConfig().getSetting(OptionConstants.DEBUG_SOURCEPATH);
+      f = _model.getSourceFileFromPaths(filename, sourcepath);
+    }
+    
+    if (f != null) {
+      // Get a document for this file, forcing it to open
       try {
-        filename = rt.sourceName();
-        filename = getPackageDir(rt.name()) + filename;
+        doc = _model.getDocumentForFile(f);
       }
-      catch (AbsentInformationException aie) {
-        // Don't know real source name:
-        //   assume source name is same as file name
-        String className = rt.name();
-        String ps = System.getProperty("file.separator");
-        // replace periods with the System's file separator
-        className = StringOps.replace(className, ".", ps);
-        
-        // crop off the $ if there is one and anything after it
-        int indexOfDollar = className.indexOf('$');    
-        if (indexOfDollar > -1) {
-          className = className.substring(0, indexOfDollar);
-        }
-      
-        filename = className + ".java";
+      catch (IOException ioe) {
+        // No doc, so don't notify listener
       }
-        
-      // Check source root set (open files)
-      File[] sourceRoots = _model.getSourceRootSet();
-      Vector<File> roots = new Vector<File>();
-      for (int i=0; i < sourceRoots.length; i++) {
-        roots.addElement(sourceRoots[i]);
-      }
-      File f = _model.getSourceFileFromPaths(filename, roots);
-      if (f == null) {
-        Vector<File> sourcepath = 
-          DrJava.getConfig().getSetting(OptionConstants.DEBUG_SOURCEPATH);
-        f = _model.getSourceFileFromPaths(filename, sourcepath);
-      }
-      
-      if (f != null) {
-        // Get a document for this file, forcing it to open
-        try {
-          doc = _model.getDocumentForFile(f);
-        }
-        catch (IOException ioe) {
-          // No doc, so don't notify listener
-        }
-        catch (OperationCanceledException oce) {
-          // No doc, so don't notify listener
-        }
+      catch (OperationCanceledException oce) {
+        // No doc, so don't notify listener
       }
     }
     
+    openAndScroll(doc, location);
+  }
+  
+  /** 
+   * Opens a document and scrolls to the appropriate location specified by location
+   */
+  synchronized void openAndScroll(OpenDefinitionsDocument doc, Location location){
     // Open and scroll if doc was found
     if (doc != null) {
       doc.checkIfClassFileInSync();
@@ -736,7 +904,7 @@ public class JPDADebugger implements Debugger {
       String className = location.declaringType().name();
       printMessage("  (Source for " + className + " not found.)");
     }
-  }  
+  }
   
   /**
    * Returns the relative directory (from the source root) that the source
@@ -769,13 +937,13 @@ public class JPDADebugger implements Debugger {
   }
 
   private void _updateWatches() {
-    if (!isReady() || (_thread == null)) return;
+    if (!isReady() || (_suspendedThreads.size() <= 0)) return;
     
     try {
       int stackIndex = 0;
       StackFrame currFrame = null;
       List frames = null;
-      frames = _thread.frames();
+      frames = _suspendedThreads.peek().frames();
       currFrame = (StackFrame) frames.get(stackIndex);
       stackIndex++;
       Location location = currFrame.location();
@@ -914,8 +1082,7 @@ public class JPDADebugger implements Debugger {
     }
     ObjectReference object = (ObjectReference) value;
     ReferenceType rt = object.referenceType();
-    ThreadReference thread = null;
-    thread = _thread;
+    ThreadReference thread = _suspendedThreads.peek();
     /*try {
       thread = object.owningThread();
     }
@@ -977,9 +1144,26 @@ public class JPDADebugger implements Debugger {
   
   /**
    * Notifies all listeners that the current thread has died.
+   * updateThreads is set to true if the threads and stack tables
+   * need to be updated, false if there are no suspended threads
    */
   synchronized void currThreadDied() {
     _model.printDebugMessage("The current thread has finished.");
+    if( _runningThread != null ){
+      _deadThreads.add(_runningThread);
+      _runningThread = null;
+    }
+        
+    if (_suspendedThreads.size() > 0) {
+      try{
+        scrollToSource(_suspendedThreads.peek().frame(0).location());
+      }catch(IncompatibleThreadStateException e){
+        throw new UnexpectedException(e);
+      }
+      // updates watches and makes buttons in UI active, does this because
+      // there are suspended threads on the stack
+      currThreadSuspended();
+    }
     notifyListeners(new EventNotifier() {
       public void notifyListener(DebugListener l) {
         l.currThreadDied();
@@ -989,6 +1173,8 @@ public class JPDADebugger implements Debugger {
   
   /**
    * Notifies all listeners that the debugger has shut down.
+   * updateThreads is set to true if the threads and stack tables
+   * need to be updated, false if there are no suspended threads
    */
   synchronized void notifyDebuggerShutdown() {
     notifyListeners(new EventNotifier() {
@@ -1058,4 +1244,108 @@ public class JPDADebugger implements Debugger {
     public abstract void notifyListener(DebugListener l);
   }
   
+  /** 
+   * A stack from which you can remove any element, not just the top of the stack 
+   */
+  protected class RandomAccessStack extends Vector<ThreadReference>{
+    public void push(ThreadReference t){
+      insertElementAt(t, 0);
+    }
+    
+    public ThreadReference peek() throws NoSuchElementException{
+      try{
+        return elementAt(0);
+      }catch(ArrayIndexOutOfBoundsException e){
+        throw new NoSuchElementException("Cannot peek at the top of an empty RandomAccessStack!");
+      }
+    }
+    
+    public ThreadReference remove(long id) throws NoSuchElementException{
+      int i = 0;
+      for(i = 0; i < size(); i++){
+        if( elementAt(i).uniqueID() == id ){
+          ThreadReference t = elementAt(i);
+          removeElementAt(i);
+          return t; 
+        }
+      }
+      
+      throw new NoSuchElementException("Thread " + id + " not found in debugger suspended threads stack!");
+    }
+    
+    public ThreadReference pop() throws NoSuchElementException{
+      try{
+        ThreadReference t = elementAt(0);
+        removeElementAt(0);
+        return t; 
+      }catch(ArrayIndexOutOfBoundsException e){
+        throw new NoSuchElementException("Cannot pop from an empty RandomAccessStack!");
+      }
+    }
+    
+    public boolean contains(long id){
+      int i = 0;
+      for(i = 0; i < size(); i++){
+        if( elementAt(i).uniqueID() == id ){
+          return true;
+        }
+      }
+      
+      return false;
+    }
+  }
+  
+   /**
+     * A class for filtering threads that we know are dead from the List returned by
+     * _vm.allThreads() [thanks sun for returning dead threads in this method call, 
+     * good decision]
+     */
+    class DeadThreadFilter{
+      private Hashtable<Long,ThreadReference> _theDeadThreads;
+      public DeadThreadFilter(){
+        _theDeadThreads = new Hashtable<Long,ThreadReference>();
+      }
+      public void add(ThreadReference thread){
+        _theDeadThreads.put(new Long(thread.uniqueID()), thread);
+      }
+      
+      public List filter(List threads){
+        LinkedList retList = new LinkedList();
+        Enumeration keys = _theDeadThreads.keys();
+        
+        /** 
+         * The following code removes dead threads from _theDeadThreads if
+         * the threads do not appear in the list of threads threads.  This 
+         * must be done to make sure that _theDeadThreads doesn't grow too
+         * large with useless info
+         */
+        while(keys.hasMoreElements()){
+          Long key = (Long)keys.nextElement();
+          
+          boolean flag = false;
+          for(int i = 0; i < threads.size(); i++){
+            if( ((ThreadReference)threads.get(i)).uniqueID() == key.longValue() ){
+              flag = true;
+              break;
+            }
+          }
+          
+          if( !flag ){
+            _theDeadThreads.remove(key);
+          }
+        }
+        
+        Iterator iterator = threads.iterator();
+        ThreadReference ref = null;
+        
+        while(iterator.hasNext()){
+          ref = (ThreadReference)iterator.next();
+          if( _theDeadThreads.get(new Long(ref.uniqueID())) == null ){
+            retList.add(ref);
+          }
+        }
+        
+        return (List)retList;
+      }
+    }
 }
