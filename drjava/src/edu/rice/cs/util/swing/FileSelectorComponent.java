@@ -50,7 +50,7 @@ import javax.swing.filechooser.FileFilter;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
+import java.io.*;
 
 /**
  * A JPanel with a text box and a "..." button used to select
@@ -141,6 +141,12 @@ public class FileSelectorComponent extends JPanel {
     this.add(_chooserButton, BorderLayout.EAST);
   }
 
+  public void setEnabled(boolean enabled) {
+    _fileField.setEnabled(enabled);
+    _chooserButton.setEnabled(enabled);
+    super.setEnabled(enabled);
+  }
+  
 
   /**
    * Returns the file text field.
@@ -169,7 +175,13 @@ public class FileSelectorComponent extends JPanel {
    * @param file File to display in the file field.
    */
   public void setFileField(File file) {
-    _fileField.setText(file.getAbsolutePath());
+    try {
+    _fileField.setText(file.getCanonicalPath());
+    }
+    catch(IOException e) {
+      //handle it gracefully
+      _fileField.setText(file.getAbsolutePath());      
+    }
     _fileField.setCaretPosition(_fileField.getText().length());
     if (file.exists()) {
       _chooser.setCurrentDirectory(file);

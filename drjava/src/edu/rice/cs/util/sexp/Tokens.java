@@ -124,7 +124,10 @@ class BooleanToken extends SExpToken {
   public static final BooleanToken FALSE = new BooleanToken(false);
   
   private boolean _bool;
-  private BooleanToken(boolean bool){super(""+bool);}
+  private BooleanToken(boolean bool){
+    super(""+bool);
+    _bool = bool;
+  }
   public boolean getValue() { return _bool; }
 }
 
