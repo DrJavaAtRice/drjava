@@ -82,7 +82,12 @@ public interface DebugListener {
    * Called when a breakpoint is removed from a document.
    * @param bp the breakpoint
    */
-  public void breakpointRemoved(Breakpoint bp);  
+  public void breakpointRemoved(Breakpoint bp);
+  
+  /**
+   * Called when a step is requested on the current thread.
+   */
+  public void stepRequested();
   
   /**
    * Called when the current thread is suspended

@@ -169,8 +169,14 @@ public class HelpFrame extends JFrame implements HyperlinkListener {
    */
   public void hyperlinkUpdate(HyperlinkEvent event){
     if (event.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
-      // TO DO: don't follow links to the net!
-      displayPage(event.getURL());
+      // Only follow links within the documentation
+      URL url = event.getURL();
+      String protocol = url.getProtocol();
+      String path = url.getPath();
+      if (("file".equals(protocol) || "jar".equals(protocol))
+            && path.indexOf(HELP_PATH) >= 0) {
+        displayPage(url);
+      }
     }
   }
   

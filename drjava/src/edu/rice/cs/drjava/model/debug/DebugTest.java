@@ -200,6 +200,14 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
         //}
       }
       
+      public void stepRequested() {
+        //synchronized(_notifierLock) {
+          stepRequestedCount++;
+          if (printEvents) System.out.println("stepRequested " + stepRequestedCount);
+        //  _notifyObject(_notifierLock);
+        //}
+      }
+      
       public void currThreadSuspended() {
         synchronized(_notifierLock) {
           currThreadSuspendedCount++;
@@ -281,6 +289,7 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
       _notifierLock.wait();
     }
     // Source is highlighted because file is in source root set
+    debugListener.assertStepRequestedCount(1);  // fires (don't wait)
     debugListener.assertThreadLocationUpdatedCount(2);  // fires
     
     
@@ -295,7 +304,7 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
       _notifierLock.wait();
     }
     // Source is not highlighted
-   
+    debugListener.assertStepRequestedCount(2);  // fires (don't wait)
     debugListener.assertThreadLocationUpdatedCount(2);  // doesn't fire
    
     synchronized(_debugManager){
@@ -305,13 +314,12 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     
     // Step to next line
     synchronized(_notifierLock){
-     
-     
       _debugManager.step(DebugManager.STEP_OVER);
       _waitForNotifies(2);  // suspended, updated
       _notifierLock.wait();
     }
     // Source is highlighted because file is on sourcepath
+    debugListener.assertStepRequestedCount(3);  // fires (don't wait)
     debugListener.assertThreadLocationUpdatedCount(3);  // fires
     
     
@@ -352,6 +360,14 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
         //synchronized(_notifierLock) {
           breakpointRemovedCount++;
           if (printEvents) System.out.println("breakpointRemoved " + breakpointRemovedCount);
+        //  _notifyObject(_notifierLock);
+        //}
+      }
+      
+      public void stepRequested() {
+        //synchronized(_notifierLock) {
+          stepRequestedCount++;
+          if (printEvents) System.out.println("stepRequested " + stepRequestedCount);
         //  _notifyObject(_notifierLock);
         //}
       }
@@ -445,6 +461,7 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
       _waitForNotifies(2);  // suspended, updated
       _notifierLock.wait();
     }
+    debugListener.assertStepRequestedCount(1);  // fires (don't wait)
     debugListener.assertCurrThreadResumedCount(1); // fires (don't wait)
     debugListener.assertThreadLocationUpdatedCount(2);  //fires
     debugListener.assertCurrThreadSuspendedCount(2);  //fires
@@ -460,6 +477,7 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     }
     
     if (printMessages) System.out.println("****"+_getInteractionsText());
+    debugListener.assertStepRequestedCount(2);  // fires (don't wait)
     debugListener.assertCurrThreadResumedCount(2); // fires (don't wait)
     debugListener.assertThreadLocationUpdatedCount(3);  // fires
     debugListener.assertCurrThreadDiedCount(0);
@@ -506,6 +524,14 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
         //synchronized(_notifierLock) {
           breakpointRemovedCount++;
           if (printEvents) System.out.println("breakpointRemoved " + breakpointRemovedCount);
+        //  _notifyObject(_notifierLock);
+        //}
+      }
+      
+      public void stepRequested() {
+        //synchronized(_notifierLock) {
+          stepRequestedCount++;
+          if (printEvents) System.out.println("stepRequested " + stepRequestedCount);
         //  _notifyObject(_notifierLock);
         //}
       }
@@ -599,6 +625,7 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
       _waitForNotifies(1);  // suspended
       _notifierLock.wait();
     }
+    debugListener.assertStepRequestedCount(1);  // fires (don't wait)
     debugListener.assertCurrThreadResumedCount(1); // fires (don't wait)
     //NOTE: LocationUpdatedCount is still 1 because the manager could not find the
     //file on the sourcepath so the count was not updated.
@@ -616,6 +643,7 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     }
     
     if (printMessages) System.out.println("****"+_getInteractionsText());
+    debugListener.assertStepRequestedCount(2);  // fires (don't wait)
     debugListener.assertCurrThreadResumedCount(2); // fires (don't wait)
     debugListener.assertThreadLocationUpdatedCount(1);  
     debugListener.assertCurrThreadDiedCount(0);
@@ -631,7 +659,7 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
       _waitForNotifies(1);  // suspended
       _notifierLock.wait();
     }
-    
+    debugListener.assertStepRequestedCount(3);  // fires (don't wait)
     debugListener.assertCurrThreadResumedCount(3); // fires (don't wait)
     debugListener.assertThreadLocationUpdatedCount(1);
     debugListener.assertCurrThreadDiedCount(0);
@@ -652,7 +680,7 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
       _waitForNotifies(1);  // suspended
       _notifierLock.wait();
     }
-
+    debugListener.assertStepRequestedCount(5);  // fires (don't wait)
     debugListener.assertCurrThreadResumedCount(5); // fires (don't wait)
     debugListener.assertThreadLocationUpdatedCount(1);
     debugListener.assertCurrThreadDiedCount(0);
@@ -667,6 +695,7 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
       _waitForNotifies(1);  // threadDied
       _notifierLock.wait();
     }
+    debugListener.assertStepRequestedCount(6);  // fires (don't wait)
     debugListener.assertCurrThreadDiedCount(1);
 
       // Remove listener at end
@@ -952,6 +981,7 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     protected int breakpointSetCount = 0;
     protected int breakpointReachedCount = 0;
     protected int breakpointRemovedCount = 0;
+    protected int stepRequestedCount = 0;
     protected int currThreadSuspendedCount = 0;
     protected int currThreadResumedCount = 0;
     protected int currThreadDiedCount = 0;
@@ -979,6 +1009,11 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     
     public void assertBreakpointRemovedCount(int i) {
       assertEquals("number of times breakpointRemoved fired", i, breakpointRemovedCount);
+    }
+    
+    public void assertStepRequestedCount(int i) {
+      assertEquals("number of times stepRequested fired", i,
+                   stepRequestedCount);
     }
     
     public void assertCurrThreadSuspendedCount(int i) {
@@ -1019,6 +1054,10 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
     
     public void breakpointRemoved(Breakpoint bp) {
       fail("breakpointRemoved fired unexpectedly");
+    }
+    
+    public void stepRequested() {
+      fail("stepRequested fired unexpectedly");
     }
     
     public void currThreadSuspended() {

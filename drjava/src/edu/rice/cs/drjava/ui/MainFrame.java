@@ -77,6 +77,7 @@ import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.ExitingNotAllowedException;
 import edu.rice.cs.util.swing.DelegatingAction;
 import edu.rice.cs.util.swing.HighlightManager;
+import edu.rice.cs.util.swing.SwingWorker;
 
 /**
  * DrJava's main window.
@@ -157,6 +158,9 @@ public class MainFrame extends JFrame implements OptionConstants {
   private ConfigFrame _configFrame;
   private RecentFileManager _recentFileManager;
   private HelpFrame _helpFrame;
+  
+  private Timer _debugStepTimer = null;
+  private Object _debugStepTimerLock = new Object();
   
   private HighlightManager.HighlightInfo _currentThreadLocationHighlight = null;
   
@@ -497,7 +501,15 @@ public class MainFrame extends JFrame implements OptionConstants {
                                              title,
                                              JOptionPane.YES_NO_OPTION);
       if (rc == JOptionPane.YES_OPTION) {
-        _model.resetInteractions();
+        final SwingWorker worker = new SwingWorker() {
+          public Object construct() {
+            _interactionsPane.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+            _model.resetInteractions();
+            _interactionsPane.setCursor(null);
+            return null;
+          }
+        };
+        worker.start();
       }
       _interactionsPane.requestFocus();
     }
@@ -1226,12 +1238,20 @@ public class MainFrame extends JFrame implements OptionConstants {
   }
   
   private void _compile() {
-    try {
-      _model.getActiveDocument().startCompile();
-    }
-    catch (IOException ioe) {
-      _showIOError(ioe);
-    }
+    final SwingWorker worker = new SwingWorker() {
+      public Object construct() {
+        try {
+          _interactionsPane.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+          _model.getActiveDocument().startCompile();
+          _interactionsPane.setCursor(null);
+        }
+        catch (IOException ioe) {
+          _showIOError(ioe);
+        }
+        return null;
+      }
+    };
+    worker.start();
   }
   
   private void _compileAll() {
@@ -2545,6 +2565,14 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
     
     public void debuggerShutdown() {
+      // Disable any step timer
+      synchronized (_debugStepTimerLock) {
+        if ((_debugStepTimer != null) && (_debugStepTimer.isRunning())) {
+          _debugStepTimer.stop();
+          _debugStepTimer = null;
+        }
+      }
+      
       // Only change GUI from event-dispatching thread
       Runnable doCommand = new Runnable() {
         public void run() {
@@ -2640,7 +2668,32 @@ public class MainFrame extends JFrame implements OptionConstants {
       SwingUtilities.invokeLater(doCommand);
     }
     
+    /**
+     * Called when a step is requested on the current thread.
+     */
+    public void stepRequested() {
+      // Print a message if step takes a long time
+      synchronized (_debugStepTimerLock) {
+        // Wait 2 seconds
+        _debugStepTimer = new Timer(2000, new ActionListener() {
+          public void actionPerformed(ActionEvent e) {
+            _model.printDebugMessage("Stepping...");
+          }
+        });
+        _debugStepTimer.setRepeats(false);
+        _debugStepTimer.start();
+      }
+    }
+    
     public void currThreadSuspended() {
+      // Disable any step timer
+      synchronized (_debugStepTimerLock) {
+        if ((_debugStepTimer != null) && (_debugStepTimer.isRunning())) {
+          _debugStepTimer.stop();
+          _debugStepTimer = null;
+        }
+      }
+      
       // Only change GUI from event-dispatching thread
       Runnable doCommand = new Runnable() {
         public void run() {
@@ -2664,6 +2717,14 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
     
     public void currThreadDied() {
+      // Disable any step timer
+      synchronized (_debugStepTimerLock) {
+        if ((_debugStepTimer != null) && (_debugStepTimer.isRunning())) {
+          _debugStepTimer.stop();
+          _debugStepTimer = null;
+        }
+      }
+      
       // Only change GUI from event-dispatching thread
       Runnable doCommand = new Runnable() {
         public void run() {

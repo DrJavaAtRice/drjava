@@ -566,6 +566,11 @@ public class DebugPanel extends JPanel implements OptionConstants {
     }
     
     /**
+     * Called when a step is requested on the current thread.
+     */
+    public void stepRequested() {}
+    
+    /**
      * Called when the current thread is suspended
      */
     public void currThreadSuspended() {
