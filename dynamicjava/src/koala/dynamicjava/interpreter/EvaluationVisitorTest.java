@@ -300,7 +300,7 @@ public class EvaluationVisitorTest extends DynamicJavaTestCase {
     assertEquals("X should have the Integer value 1", "1", res.toString());
   }
 
-  public void xtestUnaryArrayOps() throws InterpreterException {
+  public void testUnaryArrayOps() throws InterpreterException {
     String text =
       "char [] c = {\'a\', \'b\'};\n"+
       "c[0]++;\n"+
