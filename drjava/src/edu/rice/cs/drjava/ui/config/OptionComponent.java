@@ -60,6 +60,16 @@ public abstract class OptionComponent<T extends Option> {
     _parent = parent;
   }
   
+  /**
+   * Special constructor for degenerate option components does not take
+   * an option.
+   * @param labelText Text for descriptive label of this option.
+   * @param parent The parent frame.
+   */
+  public OptionComponent (String labelText, Frame parent) {
+    this(null, labelText, parent);
+  }
+  
   public T getOption() {
     return _option;
   }
@@ -68,8 +78,10 @@ public abstract class OptionComponent<T extends Option> {
     return _label.getText();
   } 
   
-  public JLabel     getLabel() { return _label; } 
+  public JLabel getLabel() { return _label; } 
+  
   public abstract JComponent getComponent();
+  
   /**
    * Updates the appropriate configuration option with the new value 
    * if different from the old value and legal. Any changes should be 

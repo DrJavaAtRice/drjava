@@ -1821,6 +1821,11 @@ public class MainFrame extends JFrame implements OptionConstants {
             }
             
             */
+          
+          Font toolbarFont = DrJava.CONFIG.getSetting(FONT_TOOLBAR);
+          
+          b.setFont(toolbarFont);
+                   
             if (a==null) continue;
           //}
           
@@ -1852,9 +1857,6 @@ public class MainFrame extends JFrame implements OptionConstants {
             }
           }
           
-          Font toolbarFont = DrJava.CONFIG.getSetting(FONT_TOOLBAR);
-          
-          b.setFont(toolbarFont);
           
         }
       }

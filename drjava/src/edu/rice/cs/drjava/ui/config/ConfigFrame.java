@@ -75,7 +75,7 @@ public class ConfigFrame extends JFrame {
   private JButton _okButton;
   private JButton _applyButton;
   private JButton _cancelButton;
-  private JButton _defaultButton;
+  private JButton _saveSettingsButton;
   private JPanel _mainPanel;
   /**
    * Sets up the frame and displays it.
@@ -133,22 +133,22 @@ public class ConfigFrame extends JFrame {
     _cancelButton = new JButton("Cancel");
     _cancelButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        reset();
-        ConfigFrame.this.hide();
+        cancel();
       }
     });
     
-    _defaultButton = new JButton("Set as default");
-    _defaultButton.addActionListener(new ActionListener() {
+    _saveSettingsButton = new JButton("Save Settings");
+    _saveSettingsButton.setToolTipText("Save all settings to disk for future sessions.");
+    _saveSettingsButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        setAsDefault();
+        saveSettings();
       }
     });
 
     JPanel bottom = new JPanel();
     bottom.setLayout(new BoxLayout(bottom, BoxLayout.X_AXIS));
     bottom.add(Box.createHorizontalGlue());
-    bottom.add(_defaultButton);
+    bottom.add(_saveSettingsButton);
     bottom.add(Box.createHorizontalGlue());
     bottom.add(_applyButton);
     bottom.add(_okButton);
@@ -180,6 +180,11 @@ public class ConfigFrame extends JFrame {
     System.out.println("width for divider: " + width);
     _splitPane.setDividerLocation(width);
     _mainPanel.setPreferredSize(new Dimension(getWidth() - width, _splitPane.getHeight()));
+    addWindowListener(new WindowAdapter() { 
+      public void windowClosing(java.awt.event.WindowEvent e) { 
+        cancel();}
+    });
+    
   }
 
   /**
@@ -197,7 +202,18 @@ public class ConfigFrame extends JFrame {
     _rootNode.reset();
   }
   
-  public void setAsDefault() {
+  /** 
+   * Resets the frame and hides it.
+   */
+  public void cancel() {
+    reset();
+    ConfigFrame.this.hide();
+  }
+  
+  /**
+   * Write the configured option values to disk.
+   */
+  public void saveSettings() {
     boolean successful = apply();
     if (successful) {
       try {
@@ -233,27 +249,40 @@ public class ConfigFrame extends JFrame {
     _tree.setShowsRootHandles(true);
     _tree.setRootVisible(false);
     
+    DefaultTreeCellRenderer dtcr = new DefaultTreeCellRenderer();
+    dtcr.setLeafIcon(null);
+    dtcr.setOpenIcon(null);
+    dtcr.setClosedIcon(null);
+    _tree.setCellRenderer(dtcr);
+    
   }
   
   /**
    * Creates all of the panels contained within the frame.
    */
   private void _createPanels() {
-    /*PanelTreeNode fontNode = _createPanel("Fonts");
-    _setupFontPanel(fontNode.getPanel());
-    */
     
-    PanelTreeNode colorNode = _createPanel("Colors");
+    PanelTreeNode resourceLocNode = _createPanel("Resource Locations");
+    _setupResourceLocPanel(resourceLocNode.getPanel());
+    
+    PanelTreeNode displayNode = _createPanel("Display Options");
+    _setupDisplayPanel(displayNode.getPanel());
+    
+    PanelTreeNode fontNode = _createPanel("Fonts", displayNode);
+    _setupFontPanel(fontNode.getPanel());
+
+    PanelTreeNode colorNode = _createPanel("Colors", displayNode);
     _setupColorPanel(colorNode.getPanel());
 
     PanelTreeNode keystrokesNode = _createPanel(new KeyStrokeConfigPanel("Key Bindings"),
                                                 _rootNode);
     _setupKeyBindingsPanel(keystrokesNode.getPanel());    
-/*
+
+    /*
     PanelTreeNode fileNode = _createPanel("File");
     _setupFilePanel(fileNode.getPanel());
     */
-    
+
     PanelTreeNode pathsNode = _createPanel("Paths");
     _setupPathsPanel(pathsNode.getPanel());
     
@@ -302,12 +331,31 @@ public class ConfigFrame extends JFrame {
   }
   
   /**
+   * Add all of the components for the Resource Locations panel of the preferences window.
+   */ 
+  private void _setupResourceLocPanel ( ConfigPanel panel) {
+   
+    panel.displayComponents();
+  }
+  
+  /**
+   * Add all of the components for the Display Options panel of the preferences window.
+   */ 
+  private void _setupDisplayPanel ( ConfigPanel panel) {
+
+    //ToolbarOptionComponent is a degenerate option component
+    panel.addComponent( new ToolbarOptionComponent ( "Toolbar button options", this));
+    panel.addComponent( new BooleanOptionComponent ( OptionConstants.LINEENUM_ENABLED, "Line number enumeration", this));
+    panel.displayComponents();
+  }
+   
+  /**
    * Add all of the components for the Font panel of the preferences window.
    */ 
   private void _setupFontPanel ( ConfigPanel panel) {
-    //panel.addComponent( new FontOptionComponent (OptionConstants.
-    //TO DO: write FontOptionComponent .. probably ought to be composed of three different entry fields,
-    //  along the lines of word processors
+    panel.addComponent( new FontOptionComponent (OptionConstants.FONT_MAIN, "Main Font", this) );
+    panel.addComponent( new FontOptionComponent (OptionConstants.FONT_DOCLIST, "Document List Font", this));
+    panel.addComponent( new FontOptionComponent (OptionConstants.FONT_TOOLBAR, "Toolbar Font", this));
     panel.displayComponents(); 
   }
   
@@ -387,7 +435,7 @@ public class ConfigFrame extends JFrame {
     panel.addComponent( new StringOptionComponent ( OptionConstants.WORKING_DIRECTORY, "Working directory", this));
     panel.addComponent( new IntegerOptionComponent ( OptionConstants.INDENT_LEVEL, "Indent level", this));
     panel.addComponent( new IntegerOptionComponent ( OptionConstants.HISTORY_MAX_SIZE, "Size of Interactions command history", this));
-    panel.addComponent( new BooleanOptionComponent ( OptionConstants.LINEENUM_ENABLED, "Line number enumeration", this));
+
     panel.displayComponents();
   }
   
@@ -416,6 +464,7 @@ public class ConfigFrame extends JFrame {
       boolean isValidUpdate = _panel.update();
       //if this panel encountered an error while attempting to update, return false
       if (!isValidUpdate) {
+        System.out.println("Panel.update() returned false");
         TreePath path = new TreePath(this.getPath());
         _tree.expandPath(path);
         _tree.setSelectionPath(path);

@@ -69,7 +69,7 @@ public class ColorOptionComponent extends OptionComponent<ColorOption> {
   }
   
   public boolean update() {
-    if (_newColor != _currentColor) {
+    if (!_newColor.equals(_currentColor)) {
       DrJava.CONFIG.setSetting(_option, _newColor);
     }
     return true;
@@ -90,8 +90,7 @@ public class ColorOptionComponent extends OptionComponent<ColorOption> {
   
   public void chooseColor() {
 
-    Color c = JColorChooser.showDialog(
-                                       _parent,
+    Color c = JColorChooser.showDialog(_parent,
                                        "Choose '" + getLabelText() + "'",
                                        _newColor);
     if (c != null) {
@@ -100,25 +99,5 @@ public class ColorOptionComponent extends OptionComponent<ColorOption> {
     }
     
   }
-    
-  /**
-  private class ColorDialog extend JDialog {
-    
-    private JLabel _title;
-    private JColorChooser _chooser;
-    
-    public ColorDialog() {
-      super(_parent, "Choose Color", true);
-      this.setLayout(new BorderLayout());
-      
-      _title = new JLabel("Choose Color");
-      this.add(_title, BorderLayout.NORTH);
-      
-      _chooser = new JColorChooser();
-      this.add(_chooser, BorderLayout.CENTER);
-    }
-    
-  }
-  */
   
 }

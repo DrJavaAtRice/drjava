@@ -4,7 +4,7 @@
  * at http://sourceforge.net/projects/drjava
  *
  * Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)
- * 
+ *
  * DrJava is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -37,48 +37,67 @@
  *
 END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava;
+package edu.rice.cs.drjava.ui.config;
 
-import java.util.Date;
-import java.text.SimpleDateFormat;
+import javax.swing.*;
+import edu.rice.cs.drjava.config.*;
+import edu.rice.cs.drjava.*;
+import edu.rice.cs.util.swing.FontChooser;
+
+import java.awt.*;
+import java.awt.event.*;
 
 /**
- * This interface hold the information about this build of DrJava.
- * This file is copied to Version.java by the build process, which also
- * fills in the right values of the date and time.
- *
- * This javadoc corresponds to build drjava-20020702-2018;
- *
- * @version $Id$
- */
-public abstract class Version {
-  /**
-   * This string will be automatically expanded upon "ant commit".
-   * Do not edit it by hand!
-   */
-  private static final String BUILD_TIME_STRING = "20020702-2018";
+ * The Graphical form of a FontOption
+ */ 
+public class FontOptionComponent extends OptionComponent<FontOption> {
+  
+  JButton _button;
+  Font _currentFont;
+  Font _newFont;
+  
+  public FontOptionComponent(FontOption opt, String text, Frame parent) {
+    super(opt, text, parent);
+    _button = new JButton();
+    _button.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        chooseFont();
+      }
+    });
+    _button.setBackground(Color.white);
 
-  /** A {@link Date} version of the build time. */
-  private static final Date BUILD_TIME = _getBuildDate();
-
-  public static String getBuildTimeString() {
-    return BUILD_TIME_STRING;
+    _currentFont = DrJava.CONFIG.getSetting(_option);
+    _newFont = _currentFont;
+    _updateButton(_currentFont);
+    
   }
-
-  public static Date getBuildTime() {
-    return BUILD_TIME;
+  
+  private void _updateButton (Font f) {
+    _button.setFont(f);
+    _button.setText(_option.format(f));
   }
-
-  private static Date _getBuildDate() {
-    try {
-      return new SimpleDateFormat("yyyyMMdd-HHmm z").parse(BUILD_TIME_STRING + " GMT");
+    
+  public JComponent getComponent() {
+    return _button;
+  }
+  
+  public void chooseFont() {
+    Font f = FontChooser.showDialog(_parent, _newFont);
+    
+    if (f != null) {
+      _newFont = f;
+      _updateButton(_newFont);
     }
-    catch (Exception e) { // parse format or whatever problem
-      return null;
-    }
   }
-
-  public static void main(String[] args) {
-    System.out.println("Version for edu.rice.cs.drjava: " + BUILD_TIME_STRING);
+  
+  public boolean update() {
+    if (!_newFont.equals(_currentFont)) DrJava.CONFIG.setSetting(_option, _newFont);
+    return true;
   }
-} 
+  
+  public void reset() {
+    _currentFont = DrJava.CONFIG.getSetting(_option);
+    _newFont = _currentFont;
+    _updateButton(_currentFont);
+  }
+}

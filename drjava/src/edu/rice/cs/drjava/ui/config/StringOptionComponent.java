@@ -59,10 +59,10 @@ public class StringOptionComponent extends OptionComponent<StringOption> {
   }
   
   public boolean update() {
-    DrJava.CONFIG.setSetting(_option, _option.parse(_jtf.getText()));
-    _jtf.setText(_option.format(DrJava.CONFIG.getSetting(_option)));
-
+    String oldValue = DrJava.CONFIG.getSetting(_option);
+    String newValue = _option.parse(_jtf.getText().trim());
     
+    if (!oldValue.equals(newValue)) DrJava.CONFIG.setSetting(_option, newValue);   
     return true;
   } 
  

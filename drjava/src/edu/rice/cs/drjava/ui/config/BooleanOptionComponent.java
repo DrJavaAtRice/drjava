@@ -59,8 +59,10 @@ public class BooleanOptionComponent extends OptionComponent<BooleanOption> {
   }
   
   public boolean update() {
-    DrJava.CONFIG.setSetting(_option, new Boolean(_jcb.isSelected()));
+    Boolean oldValue = DrJava.CONFIG.getSetting(_option);
+    Boolean newValue = new Boolean(_jcb.isSelected());
     
+    if (!oldValue.equals(newValue)) DrJava.CONFIG.setSetting(_option, newValue);
     return true;
   } 
   
