@@ -442,6 +442,12 @@ public abstract class Node {
   public boolean equals(Object n){
     if(this.getClass() != n.getClass())
       return false;
+    // the following is not the ideal when we have fields
+    // that we want to display (in toString()) but do not
+    // want them to be influential in deciding equality,
+    // like generic type info for example. In these cases
+    // it is best if equals() method is overriden to provide
+    // more precise semantics
     return this.toString().equals(n.toString());
   }
 }

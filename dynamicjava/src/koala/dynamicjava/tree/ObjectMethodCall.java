@@ -100,10 +100,15 @@ public class ObjectMethodCall extends MethodCall implements ExpressionContainer 
   public <T> T acceptVisitor(Visitor<T> visitor) {
     return visitor.visit(this);
   }
-    /**
+
+  public String toString() {
+    return "("+getClass().getName()+": "+toStringHelper()+")";
+  }
+
+  /**
    * Implementation of toString for use in unit testing
    */
-  public String toString() {
-    return "("+getClass().getName()+": "+getMethodName()+" "+getArguments()+" "+getExpression()+")";
+  public String toStringHelper() {
+    return getMethodName()+" "+getArguments()+" "+getExpression();
   }
 }

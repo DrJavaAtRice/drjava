@@ -77,6 +77,12 @@ public class SuperMethodCall extends MethodCall {
    * Implementation of toString for use in unit testing
    */
   public String toString() {
-    return "("+getClass().getName()+": "+getMethodName()+" "+getArguments()+")";
+    return "("+getClass().getName()+": "+toStringHelper()+")";
+  }
+    /**
+   * Implementation of toString for use in unit testing
+   */
+  public String toStringHelper() {
+    return getMethodName()+" "+getArguments();
   }
 }

@@ -1117,7 +1117,45 @@ public class TigerTest extends DynamicJavaTestCase {
   public void testNoNullPointerExceptionForEmptyEnum(){
     testString =
       "public enum Suit { ; }";
-    assertEquals("Interpreting empty null should return a null", null, interpret(testString));
+    assertEquals("Interpreting empty enum should return a null", null, interpret(testString));
   }
 
+  public void testExplicitPolymorhicMethodCall(){
+    testString =   
+      "class CC {\n"+
+      "  CC(){\n"+
+      "    <Integer>m(new Integer(6), new Integer(7));\n"+
+      "  }\n"+
+      "  static <S> void m(S s, S t){}\n"+
+      "}\n"+
+      "new CC();\n";
+    assertEquals("Parsing and interpreting a new CC() should throw no exceptions", "CC", interpret(testString).getClass().getName());
+  }
+  
+  public void testEnumConstructorsInvocationsDoNotAcceptTypeInfoMethodsDo(){
+    testString =   
+      "enum Suit {\n"+
+      "  CLUBS(new Integer(5), new Integer(7)),\n"+
+      "  SPADE(new String(\"hi\"), new String(\"bar\"));\n"+ 
+      "  <T> Suit(T t, T s){\n"+
+      "    <Integer>m(s);\n"+
+      "  }\n"+
+      "  <S> void m(S s){}\n"+
+      "}\n"+
+      "Suit.CLUBS";
+    assertEquals("Parsing and interpreting Suit.CLUBS should throw no exceptions", "CLUBS", interpret(testString).toString());
+  }
+  
+//  class CC {
+//  <T> CC(T t){
+//    CC cc = new <Integer>CC(new Integer(5));
+//    cc.m(new Integer(6), new Integer(7));
+//  }
+//  
+//  CC() {<Integer>this(new Integer(7));}
+//  
+//  <S> void m(S s, S t){}
+//}
+//
+//enum Suit { CLUBS(new Integer(5), new Integer(7)), SPADE(new String("hi"), new String("bar")); <T> Suit(T t, T s){<Integer>m(s);} <S> void m(S s){}}
 }

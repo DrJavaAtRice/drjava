@@ -459,6 +459,11 @@ public class Parser {
     public List/*<Expression>*/ arguments;
 
     /**
+     * The type arguments
+     */
+    public List/*<Type>*/ typeArgs;
+
+    /**
      * The end line
      */
     public int endLine;
@@ -474,8 +479,9 @@ public class Parser {
      * @param el    the end line
      * @param ec    the end column
      */
-    public ArgumentsSuffix(List/*<Expression>*/ args, int el, int ec) {
+    public ArgumentsSuffix(List/*<Expression>*/ args, List/*<Type>*/ tArgs, int el, int ec) {
       arguments = args;
+      typeArgs = tArgs;
       endLine   = el;
       endColumn = ec;
     }
@@ -496,11 +502,18 @@ public class Parser {
           } else if (prefix instanceof CompileTimeExpression) {
             exp = ((CompileTimeExpression)prefix).createRuntimeExpression();
           }
-          return new ObjectMethodCall
+          if(typeArgs != null && typeArgs.size() > 0)
+            return new PolymorphicObjectMethodCall
+            (exp, dis.identifier.image, arguments, typeArgs,
+             filename,
+             exp.getBeginLine(), exp.getBeginColumn(),
+             endLine, endColumn);
+          else
+            return new ObjectMethodCall
             (exp, dis.identifier.image, arguments,
              filename,
              exp.getBeginLine(), exp.getBeginColumn(),
-             endLine,            endColumn);
+             endLine, endColumn);
         } else {
           throw new ParseError(reader.getMessage("parameter.list", null),
                                filename,
@@ -517,14 +530,26 @@ public class Parser {
             exp = ((CompileTimeQualifiedName)prefix).
               createRuntimeExpression();
           }
-          return new ObjectMethodCall(exp, t.image, arguments,
+          if(typeArgs != null && typeArgs.size() > 0)
+            return new PolymorphicObjectMethodCall(exp, t.image, arguments, typeArgs,
+                                      filename,
+                                      f.beginLine, f.beginColumn,
+                                      endLine,   endColumn);
+          else
+            return new ObjectMethodCall(exp, t.image, arguments,
                                       filename,
                                       f.beginLine, f.beginColumn,
                                       endLine,   endColumn);
         } else if (prefix instanceof CompileTimeSuperExpression) {
           // Transform the super expression into a super method call
           CompileTimeSuperExpression se = (CompileTimeSuperExpression)prefix;
-          return new SuperMethodCall(se.identifier, arguments,
+          if(typeArgs != null && typeArgs.size() > 0)
+            return new PolymorphicSuperMethodCall(se.identifier, arguments, typeArgs,
+                                     filename,
+                                     se.getBeginLine(), se.getBeginColumn(),
+                                     endLine,           endColumn);
+          else
+            return new SuperMethodCall(se.identifier, arguments,
                                      filename,
                                      se.getBeginLine(), se.getBeginColumn(),
                                      endLine,           endColumn);
@@ -2011,15 +2036,18 @@ PARSER_END(Parser)
     Token           b, e;
     ArgumentsSuffix args;
     Expression      exp = null;
+    List/*<Type>*/ typeArgs = new LinkedList/*<Type>*/();
   }
   {
     try
     {
-    ( LOOKAHEAD("this" arguments() ";")
-       b="this" args=arguments() e=";"
+    ( LOOKAHEAD([TypeArguments()] "this" arguments(typeArgs) ";")
+      [ typeArgs = TypeArguments() ]
+       b="this" args=arguments(typeArgs) e=";"
        |
      [ LOOKAHEAD(2) exp=primaryExpression() "." ]
-       b="super" args=arguments() e=";"
+       [LOOKAHEAD(TypeArguments()) typeArgs = TypeArguments()]
+       b="super" args=arguments(typeArgs) e=";"
        )
     {
       return new ConstructorInvocation(exp, args.arguments, b.image.equals("super"),
@@ -2238,7 +2266,7 @@ PARSER_END(Parser)
   }
   {
     id = <IDENTIFIER>
-    [ args = arguments() ]
+    [ args = arguments(null) ] // quite unnaturally, type parameters for polymorphic enum constructors (which are allowed) cannot be specified!!
     [ _classBody = classBody() ]
 
     {
@@ -3589,10 +3617,12 @@ ForSlashEachStatement forStatement() :
     Expression       pp;
     ExpressionSuffix es;
     List/*<ExpressionSuffix>*/ list = new LinkedList/*<ExpressionSuffix>*/();
+    List/*<Type>*/ typeArgs = new LinkedList/*<Type>*/();
   }
   {
+    [LOOKAHEAD(TypeArguments()) typeArgs = TypeArguments()]
     pp=primaryPrefix()
-      ( LOOKAHEAD(2) es=primarySuffix()
+      ( LOOKAHEAD(2) es=primarySuffix(typeArgs)
          {
       // Build the list of suffixes in reverse order
       list.add(0, es);
@@ -3627,7 +3657,7 @@ ForSlashEachStatement forStatement() :
   /**
    * Used internally to parse an expression
    */
-  ExpressionSuffix primarySuffix() :
+  ExpressionSuffix primarySuffix(List/*<Type>*/ typeArgs) :
   {
     ExpressionSuffix es;
   }
@@ -3636,7 +3666,7 @@ ForSlashEachStatement forStatement() :
        | LOOKAHEAD(2) es=dotAllocationExpression()
        | es=arrayReference()
        | es=dotIdentifier()
-       | es=arguments()
+       | es=arguments(typeArgs)
        )
     {
       return es;
@@ -3680,10 +3710,13 @@ ForSlashEachStatement forStatement() :
     ReferenceType   rt;
     ArgumentsSuffix as;
     ClassBody       cb = null;
+    List/*<Type>*/ typeArgs = new LinkedList/*<Type>*/();
   }
   {
 
-    t="new" rt=ReferenceTypeName() as=arguments() [ cb=classBody() ]
+    t="new"
+    [LOOKAHEAD(TypeArguments()) typeArgs = TypeArguments()]
+    rt=ReferenceTypeName() as=arguments(typeArgs) [ cb=classBody() ]
     {
       if (cb == null) {
         return new SimpleAllocation(rt,
@@ -3734,7 +3767,7 @@ ForSlashEachStatement forStatement() :
   /**
    * Used internally to parse an expression
    */
-  ArgumentsSuffix arguments() :
+  ArgumentsSuffix arguments(List/*<Type>*/ typeArgs) :
   {
     List/*<Expression>*/ list = null;
     Token t;
@@ -3742,7 +3775,7 @@ ForSlashEachStatement forStatement() :
   {
     "(" [ list=argumentList() ] t=")"
     {
-      return new ArgumentsSuffix(list, t.endLine, t.endColumn);
+      return new ArgumentsSuffix(list, typeArgs, t.endLine, t.endColumn);
     }
   }
 
@@ -3927,9 +3960,9 @@ ForSlashEachStatement forStatement() :
     Token t;
     ArrayAllocation.TypeDescriptor td;
     Type            pt;
-    List/*<Type>*/  typeArgs = null;
     ArgumentsSuffix as;
     ClassBody       cb = null;
+    List/*<Type>*/ typeArgs = new LinkedList/*<Type>*/();
   }
   {
     ( LOOKAHEAD(2)
@@ -3941,7 +3974,9 @@ ForSlashEachStatement forStatement() :
                                  td.endLine,  td.endColumn);
     }
      |
-     t="new" pt = ReferenceTypeName()
+     t="new"
+     [LOOKAHEAD(TypeArguments()) typeArgs = TypeArguments()]
+     pt = ReferenceTypeName()
        ( td=arrayDimsAndInits()
           {
        return new ArrayAllocation(pt, td,
@@ -3949,7 +3984,7 @@ ForSlashEachStatement forStatement() :
                                   t.beginLine, t.beginColumn,
                                   td.endLine, td.endColumn);
      }
-        | as=arguments() [ cb=classBody() ]
+        | as=arguments(typeArgs) [ cb=classBody() ]
           {
           if (cb == null) {
             return new SimpleAllocation(pt, as.arguments,
@@ -4707,7 +4742,7 @@ ForSlashEachStatement forStatement() :
     }
   }
 
-  // does not add the peeked type params to the type environment
+  // Does not add the peeked type params to the type environment
   TypeParameter[] TypeParametersLookahead() :
   {
     List/*<TypeParameter>*/ list = new LinkedList/*<TypeParameter>*/();

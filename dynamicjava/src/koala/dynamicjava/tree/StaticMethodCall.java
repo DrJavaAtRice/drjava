@@ -44,12 +44,12 @@ public class StaticMethodCall extends MethodCall {
    * The methodType property name
    */
   public final static String METHOD_TYPE = "methodType";
-  
+
   /**
    * The type on which this method call applies
    */
   private Type methodType;
-  
+
   /**
    * Creates a new node. (Note: Type has been changed from ReferenceType so that it can accept an ArrayType as input.
    * A better solution would be to make ArrayType extend ReferenceType. This would alleviate some problems with
@@ -62,7 +62,7 @@ public class StaticMethodCall extends MethodCall {
   public StaticMethodCall(Type typ, String mn, List<Expression> args) {
     this(typ, mn, args, null, 0, 0, 0, 0);
   }
-  
+
   /**
    * Creates a new node
    * @param typ   the type on which this method call applies
@@ -78,29 +78,29 @@ public class StaticMethodCall extends MethodCall {
   public StaticMethodCall(Type typ, String mn, List<Expression> args,
                           String fn, int bl, int bc, int el, int ec) {
     super(mn, args, fn, bl, bc, el, ec);
-    
+
     if (typ == null) throw new IllegalArgumentException("typ == null");
-    
+
     methodType = typ;
   }
-  
+
   /**
    * Returns the type on which this method call applies
    */
   public Type getMethodType() {
     return methodType;
   }
-  
+
   /**
    * Sets the declaring type of the method
    * @exception IllegalArgumentException if t is null
    */
   public void setMethodType(ReferenceType t) {
     if (t == null) throw new IllegalArgumentException("t == null");
-    
+
     firePropertyChange(METHOD_TYPE, methodType, methodType = t);
   }
-  
+
   /**
    * Allows a visitor to traverse the tree
    * @param visitor the visitor to accept
