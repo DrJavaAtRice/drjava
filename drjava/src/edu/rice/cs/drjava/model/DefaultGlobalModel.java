@@ -2500,6 +2500,10 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
       // Wrong version of JPDA, so we won't use it.
       _debugManager = null;
     }
+    catch( Throwable t ) {
+      // Something went wrong in initialization, don't use debugger
+      _debugManager = null;
+    }
   }
 
 
