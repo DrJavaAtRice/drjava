@@ -126,14 +126,38 @@ import java.io.*;
  * TODO: Add comments.
  */
 public final class SourceInfo {
+  /**
+   * The source file
+   */
   private final File _file;
+  
+  /**
+   * The starting line of the source location
+   */
   private final int _startLine;
+  
+  /**
+   * The starting column of the source location
+   */
   private final int _startColumn;
+  
+  /**
+   * The ending line of the source location
+   */
   private final int _endLine;
+  
+  /**
+   * The ending column of the source location
+   */
   private final int _endColumn;
 
   /**
    * Constructs a SourceInfo.
+   * @param file The source file
+   * @param startLine Starting line
+   * @param startColumn Starting column
+   * @param endLine Ending line
+   * @param endColumn Ending column
    */
   public SourceInfo(File file,
                     int startLine,
@@ -160,13 +184,48 @@ public final class SourceInfo {
     _endColumn = -1;
   }
 
+  /**
+   * Getter Method
+   * @return Source file
+   */
   final public File getFile() { return _file; }
+  
+  /**
+   * Getter Method
+   * @return Source filename
+   */
   final public String getFilename() { return _file.getName(); }
+  
+  /**
+   * Getter Method
+   * @return Starting line
+   */
   final public int getStartLine() { return _startLine; }
+  
+  /**
+   * Getter Method
+   * @return Starting column
+   */
   final public int getStartColumn() { return _startColumn; }
+  
+  /**
+   * Getter Method
+   * @return Ending line
+   */
   final public int getEndLine() { return _endLine; }
+  
+  /**
+   * Getter Method
+   * @return Ending column
+   */
   final public int getEndColumn() { return _endColumn; }
 
+  /**
+   * Returns a string representation of the source information.  The format is as following:
+   * [fileName: (startLine,startColumn)-(endLine,endColumn)]
+   * If there is no file then fileName is "(no file)"
+   * @return The string format of the source info
+   */
   public String toString() {
     String fileName;
     if (_file == null) {
@@ -181,6 +240,14 @@ public final class SourceInfo {
            "(" + _endLine + "," + _endColumn + ")]";
   }
 
+  /**
+   * Method for determining the equality of two source locations - overriden from Object
+   * The method for determining if two source locations are equal is as follows:
+   * 
+   * The two Files must be equal using the File.equals method
+   * The integers for the corresponding Start/End Line/Column must be identical
+   * @return Whether or not the two SourceInfo objects are equal
+   */
   public boolean equals(Object obj) {
     if (obj == null) return false;
 
@@ -212,6 +279,7 @@ public final class SourceInfo {
    * equals. The value of the hashCode is formed by
    * XORing the hashcode of the class object with
    * the hashcodes of all the fields of the object.
+   * @return A hashcode for a SourceInfo object
    */
   public final int hashCode() {
     int code = getClass().hashCode();
