@@ -1306,7 +1306,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
    * @return the Breakpoint corresponding to the line and className, or null if
    *         there is no such breakpoint.
    */
-  public Breakpoint getBreakpoint(int line, String className) {
+  public synchronized Breakpoint getBreakpoint(int line, String className) {
     for (int i = 0; i < _breakpoints.size(); i++) {
       Breakpoint bp = _breakpoints.get(i);
       if ((bp.getLineNumber() == line) && (bp.getClassName().equals(className))) {

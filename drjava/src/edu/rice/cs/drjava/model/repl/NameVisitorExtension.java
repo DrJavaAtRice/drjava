@@ -62,7 +62,7 @@ import koala.dynamicjava.tree.*;
  */
 
 public class NameVisitorExtension extends NameVisitor {
-  private Context _context;
+  // private Context _context;
   private AbstractTypeChecker _tc;
   
   /**
@@ -74,7 +74,7 @@ public class NameVisitorExtension extends NameVisitor {
    */
   public NameVisitorExtension(Context nameContext, Context typeContext) {
     super(nameContext);
-    _context = nameContext;
+    // _context = nameContext;
     _tc = AbstractTypeChecker.makeTypeChecker(typeContext);
   }
   

@@ -90,11 +90,6 @@ public class RecentFileManager implements OptionConstants {
    * true if the file manager manages recent project files
    */
   protected boolean _isProject;
-  
-  /**
-   * The action to perform on any of the menu items.
-   */
-  Action _open;
 
   /**
    * The MainFrame containing the file menu.

@@ -213,7 +213,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
   /**
    * The OptionListener for DEBUG_BREAKPOINT_COLOR
    */
-  private class BreakpointColorOptionListener implements OptionListener<Color> {
+  private static class BreakpointColorOptionListener implements OptionListener<Color> {
     public void optionChanged(OptionEvent<Color> oce) {
       BREAKPOINT_PAINTER = new DefaultHighlighter.DefaultHighlightPainter(oce.value);
     }
@@ -222,7 +222,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
   /**
    * The OptionListener for DEBUG_THREAD_COLOR
    */
-  private class ThreadColorOptionListener implements OptionListener<Color> {
+  private static class ThreadColorOptionListener implements OptionListener<Color> {
     public void optionChanged(OptionEvent<Color> oce) {
       THREAD_PAINTER = new DefaultHighlighter.DefaultHighlightPainter(oce.value);
     }

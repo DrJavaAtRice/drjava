@@ -5544,7 +5544,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   /**
    * Blocks access to DrJava while the hourglass cursor is on
    */
-  private class GlassPane extends JComponent {
+  private static class GlassPane extends JComponent {
 
     /**
      * Creates a new GlassPane over the DrJava window
@@ -5567,7 +5567,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     // actually centers the correct line instead of having it
     // appear at the top of the screen. There ought to be a
     // cleaner way to do this...
-    private boolean _firstCallFromSetSize;
+    // private boolean _firstCallFromSetSize;
 
     public void debuggerStarted() {
       // Only change GUI from event-dispatching thread
@@ -5612,7 +5612,8 @@ public class MainFrame extends JFrame implements OptionConstants {
           // is called, the document won't yet have positive size and we
           // don't want to scroll to a line until it does, so we wait
           // for a call to setSize.
-          _firstCallFromSetSize = true;
+          
+//          _firstCallFromSetSize = true;
           ActionListener setSizeListener = new ActionListener() {
             public void actionPerformed(ActionEvent ae) {
 //              if (_firstCallFromSetSize) {

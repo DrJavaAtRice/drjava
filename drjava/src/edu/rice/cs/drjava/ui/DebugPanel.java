@@ -330,7 +330,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
   /**
    * Adds config color support to DefaultCellEditor.
    */
-  class WatchEditor extends DefaultCellEditor {
+  static class WatchEditor extends DefaultCellEditor {
 
     WatchEditor() {
       super(new JTextField());

@@ -60,7 +60,7 @@ import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 class ActionStartPrevLinePlusMultiline extends IndentRuleAction {
   private String[] _suffices;
   private int _line = 0;
-  private int _position = 0;
+  // private int _position = 0;
   private int _offset = 0;
 
   /**
@@ -89,13 +89,14 @@ class ActionStartPrevLinePlusMultiline extends IndentRuleAction {
         ("The specified line was outside the bounds of the specified array.");
     }
     
-    if ((position >= 0) && (position <= suffices[line].length())) {
-      _position = position;
-    }
-    else {
+    if ((position < 0) || (position > suffices[line].length())) {
       throw new IllegalArgumentException
         ("The specified position was not within the bounds of the specified line.");
     }
+//    else {
+//      _position = position;
+//    }
+
     
     // pre-compute the relative offset (without indents) of the new position
     for (int i = 0; i < line; i++) {

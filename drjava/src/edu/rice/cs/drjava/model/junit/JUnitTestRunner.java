@@ -116,7 +116,7 @@ public class JUnitTestRunner extends TestRunner {
     _failureCount = 0;
   }
 
-  public TestResult doRun(Test suite) {
+  public synchronized TestResult doRun(Test suite) {
 
     // Reset all bookkeeping
     _errorCount = 0;

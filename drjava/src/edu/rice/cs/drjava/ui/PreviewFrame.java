@@ -455,11 +455,10 @@ public class PreviewFrame extends JFrame {
   }
 
   /**
-   * Inner class which displays the image on the screen, and
+   * Static inner class which displays the image on the screen, and
    * holds the Image object.
    */
-  class PagePreview extends JPanel
-  {
+  static class PagePreview extends JPanel {
     protected int _width;
     protected int _height;
     protected Image _source;

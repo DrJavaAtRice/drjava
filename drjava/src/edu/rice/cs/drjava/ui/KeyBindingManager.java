@@ -352,7 +352,7 @@ public class KeyBindingManager {
     }
   }
 
-  public class KeyStrokeData {
+  public static class KeyStrokeData {
     private KeyStroke _ks;
     private Action _a;
     private JMenuItem _jmi;

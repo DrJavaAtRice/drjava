@@ -338,12 +338,9 @@ public class DrJavaTestCaseClassLoader extends TestCaseClassLoader {
   * allows more control over the URLClassLoader. specifically,
   * allows us to view what's loaded when
   */
- private class DrJavaURLClassLoader extends URLClassLoader{
-   URL[] _urls;
-   public DrJavaURLClassLoader(URL[] urls, ClassLoader c){
-     super(urls, c);
-     _urls = urls;
-   }
+ private static class DrJavaURLClassLoader extends URLClassLoader{
+   
+   public DrJavaURLClassLoader(URL[] urls, ClassLoader c){ super(urls, c); }
    
    public URL getResource(String name){
      URL ret = getParent().getResource(name);

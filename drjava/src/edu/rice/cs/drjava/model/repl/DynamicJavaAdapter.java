@@ -622,7 +622,7 @@ public class DynamicJavaAdapter implements JavaInterpreter {
    * A class loader for the interpreter.
    */
   public static class ClassLoaderExtension extends TreeClassLoader {
-    private class WrapperClassLoader extends ClassLoader{
+    private static class WrapperClassLoader extends ClassLoader{
       ClassLoader cl;
       public WrapperClassLoader(ClassLoader c){
         cl = c;

@@ -215,7 +215,7 @@ public class InteractionsDocumentAdapter extends AbstractDJDocument {
   
   
   //Called when the Interactions pane is reset
-  public void clearColoring() {
+  public synchronized void clearColoring() {
     //Don't clear immediately or else the colors will disappear while the interactions pane resets
     //_stylesList.clear();
     _toClear = true;

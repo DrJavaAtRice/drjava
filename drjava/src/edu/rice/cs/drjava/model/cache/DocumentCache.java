@@ -135,7 +135,7 @@ public class DocumentCache{
     }
   }
   
-  public int getCacheSize() {
+  public synchronized int getCacheSize() {
     return CACHE_SIZE;
   }
   

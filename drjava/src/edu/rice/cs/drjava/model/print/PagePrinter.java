@@ -58,18 +58,18 @@ import java.awt.font.*;
  */
 public class PagePrinter implements Printable {
 
-  private int _page;
+  // private int _page;
   private ArrayList<TextLayout> _textLayouts;
   private ArrayList<TextLayout> _lineNumbers;
   private String _filename;
   private DrJavaBook _parent;
 
   /**
-   * Constructs a PagePrinter for a given page number, a
+   * Constructs a PagePrinter for a given page number (which is ignored!), a
    * given filename, and parent.
    */
   public PagePrinter(int page, String filename, DrJavaBook parent) {
-    _page = page;
+    // _page = page;
     _textLayouts = new ArrayList<TextLayout>();
     _lineNumbers = new ArrayList<TextLayout>();
     _filename = filename;
