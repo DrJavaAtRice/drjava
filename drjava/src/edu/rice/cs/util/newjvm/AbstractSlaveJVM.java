@@ -64,8 +64,8 @@ public abstract class AbstractSlaveJVM implements SlaveRemote {
           Thread.currentThread().sleep(100);
           System.exit(0);
         }
-        catch (Exception e) {
-          quitFailed(e);
+        catch (Throwable th) {
+          quitFailed(th);
         }
       }
     };
@@ -84,7 +84,7 @@ public abstract class AbstractSlaveJVM implements SlaveRemote {
    * be exited (likely because of its having a
    * security manager)
    */
-  protected void quitFailed(Exception e) {}
+  protected void quitFailed(Throwable th) {}
   
   /**
    * Starts background thread to periodically poll the master JVM and
