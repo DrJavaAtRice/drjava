@@ -20,9 +20,6 @@ import java.awt.event.ActionEvent;
  *    Definitions, Output and Interactions. */
 public class MainFrame extends JFrame
 {
-  // Generated automatically when you check out with tag name!
-  public static final String DRJAVA_BUILD = "$Name$";
-
   private DefinitionsView _definitionsView;
   private OutputView _outputView;
   private InteractionsView _interactionsView;
@@ -103,6 +100,10 @@ public class MainFrame extends JFrame
 
     _definitionsView = new DefinitionsView(this);
     _outputView = new OutputView();
+    
+    // Make the output view the active one
+    _outputView.makeActive();
+    
     _interactionsView = new InteractionsView();
 
     // Create split pane with defs and output
@@ -142,11 +143,6 @@ public class MainFrame extends JFrame
   {
     setTitle(filename + " - DrJava");
     _fileNameField.setText(filename);
-  }
-
-  public static void main(String[] args)
-  {
-    MainFrame mf = new MainFrame();
   }
 }
 

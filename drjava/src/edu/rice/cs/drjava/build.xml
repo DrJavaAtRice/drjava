@@ -15,7 +15,7 @@
   <property name="projpath" value="edu/rice/cs/${ant.project.name}" />
 
   <!-- What file will have $Name$ expanded in it properly? -->
-  <property name="file_with_build_name" value="MainFrame.java" />
+  <property name="file_with_build_name" value="DrJava.java" />
 
   <property name="jarfile" value="${srcroot}/../drjava2.jar" />
   <property name="manifest" value="manifest" />
@@ -110,7 +110,7 @@
   <target name="run" depends="test">
     <java classpath="${built}:${java.class.path}"
           fork="true"
-          classname="edu.rice.cs.drjava.MainFrame" />
+          classname="edu.rice.cs.drjava.DrJava" />
   </target>
 
   <!-- Delete all generated files (only for this project!) -->
