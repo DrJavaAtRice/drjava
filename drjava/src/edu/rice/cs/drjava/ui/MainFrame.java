@@ -2694,6 +2694,8 @@ public class MainFrame extends JFrame implements OptionConstants {
     final JPopupMenu docPanePopupMenu = new JPopupMenu();
     docPanePopupMenu.add(_saveAction);
     docPanePopupMenu.add(_saveAsAction);
+    docPanePopupMenu.add(_revertAction);
+    docPanePopupMenu.addSeparator();
     docPanePopupMenu.add(_closeAction);
     docPanePopupMenu.addSeparator();
     docPanePopupMenu.add(_printAction);
@@ -3596,7 +3598,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
   
     public void junitTestStarted(final String name) {
-      _junitErrorPanel.getErrorListPane().testStarted(name);
+      _junitErrorPanel.getErrorListPane().testStarted(name); // this does nothing!
     }
   
     public void junitTestEnded(final OpenDefinitionsDocument doc, final String name,
@@ -3605,7 +3607,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       SwingUtilities.invokeLater( new Runnable() {
         public void run() {
           _junitErrorPanel.getErrorListPane().
-            testEnded(name, wasSuccessful, causedError);
+            testEnded(name, wasSuccessful, causedError); // this does nothing!
           _junitErrorPanel.progressStep(wasSuccessful);
         }
       });
