@@ -1969,7 +1969,6 @@ public class MainFrame extends JFrame implements OptionConstants {
    * @param projectFile the file of the project to open
    */
   private void _openProjectHelper(File projectFile) {
-    System.err.println("opening");
     _currentProjFile = projectFile;
     File[] srcFiles = null;
     try{
@@ -2001,9 +2000,7 @@ public class MainFrame extends JFrame implements OptionConstants {
      * close all project files
      */
     for(OpenDefinitionsDocument d: projDocs){
-      System.err.println("closing " + d);
       _model.closeFile(d);
-      System.err.println("closed");
     }
       
     /**
@@ -2029,7 +2026,6 @@ public class MainFrame extends JFrame implements OptionConstants {
 //      }
 //    }
     
-    System.err.println("done adding");
     
     final File[] files = srcFiles;
     // project could be empty
@@ -2041,11 +2037,8 @@ public class MainFrame extends JFrame implements OptionConstants {
       });
     }
     
-    System.err.println("about to set close project action");
     
     _closeProjectAction.setEnabled(true);
-
-    System.err.println("done opening");
     
     _resetNavigatorPane();
   }

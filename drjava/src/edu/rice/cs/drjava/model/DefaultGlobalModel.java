@@ -377,9 +377,6 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
           if(doc.isUntitled()) return false;
           String filePath = doc.getFile().getParentFile().getCanonicalPath();
           String projectPath = projectRoot.getCanonicalPath();
-          System.err.println("filePath and projectPath");
-          System.err.println("  " + filePath);
-          System.err.println("  " + projectPath);
           return (filePath.startsWith(projectPath));
 //          return (doc.getSourceRoot().compareTo(projectRoot) == 0);
         }
@@ -2596,6 +2593,21 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     private boolean _belongsHuhHelper(DefinitionsDocument doc){
       return (doc.getOpenDefDoc() == this);
     }
+    
+    
+    
+    
+    /**
+     * Implementation of the javax.swing.text.Document interface
+     */
+    public void addDocumentListener(DocumentListener listener){
+      getDocument().addDocumentListener(listener);
+    }
+    
+    public void addUndoableEditListener(UndoableEditListener listener){
+      getDocument().addUndoableEditListener(listener);
+    }
+    
   }
 
   /**
