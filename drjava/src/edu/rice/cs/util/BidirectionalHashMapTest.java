@@ -22,15 +22,15 @@ public class BidirectionalHashMapTest extends TestCase {
     String cat = "cat";
     String mouse = "mouse";
     
-    Vector vdog = new Vector();
-    Vector vcat = new Vector();
-    Vector vmouse = new Vector();
+    Vector<String> vdog = new Vector<String>();
+    Vector<String> vcat = new Vector<String>();
+    Vector<String> vmouse = new Vector<String>();
     
     vdog.add(dog);
     vcat.add(cat);
     vmouse.add(mouse);
     
-    BidirectionalHashMap<String, Vector> myhash = new BidirectionalHashMap<String, Vector>();
+    BidirectionalHashMap<String, Vector<String>> myhash = new BidirectionalHashMap<String, Vector<String>>();
     
     assertEquals("Expected null", null, myhash.getValue(dog));
     assertEquals("Expected null", null, myhash.getValue(cat));
