@@ -21,6 +21,7 @@
 <property name="lib_dir" value="${srcroot}/edu/rice/cs/lib" />
 
 <property name="jsr14_classpath" value="${lib_dir}/jsr14.jar" />
+<property name="jsr14_collect_classpath" value="${lib_dir}/collect.jar" />
 
 <property name="jars_dir" value="/home/javaplt/public_html/drjava/builds" />
 
@@ -51,7 +52,7 @@
   <javac srcdir="${srcroot}"
          includes="edu/rice/cs/util/ant/TstampGMT.java"
          destdir="${built}"
-         bootclasspath="${jsr14_classpath}:${sun.boot.class.path}"
+         bootclasspath="${jsr14_classpath}:${jsr14_collect_classpath}:${sun.boot.class.path}"
          target="1.1"
          fork="on"
          debug="on"
@@ -212,8 +213,8 @@
   <mkdir dir="${built}"/>
   <javac srcdir="${srcroot}"
          includes="${projpath}/**/*java"
-         destdir="${built}" 
-         bootclasspath="${jsr14_classpath}:${sun.boot.class.path}"
+         destdir="${built}"
+         bootclasspath="${jsr14_classpath}:${jsr14_collect_classpath}:${sun.boot.class.path}"
 	 classpath="${classpath_text}"
          target="1.1"
          debug="on"
@@ -222,6 +223,7 @@
   </javac>
 </target>
 -->
+
 
 <!-- Compile. We have to start at srcroot and then selectively include
      just this project in order for it to realize what files have already
@@ -234,8 +236,8 @@
   <mkdir dir="${built}"/>
   <javac srcdir="${srcroot}"
          includes="${projpath}/**/*java"
-         destdir="${built}" 
-         bootclasspath="${jsr14_classpath}:${sun.boot.class.path}"
+         destdir="${built}"
+         bootclasspath="${jsr14_classpath}:${jsr14_collect_classpath}:${sun.boot.class.path}" 
 	 classpath="${classpath_text}"
          source="1.5"
          target="1.5"
@@ -244,6 +246,7 @@
   </javac>
 </target>
 -->
+
 
 <!-- Compile. We have to start at srcroot and then selectively include
      just this project in order for it to realize what files have already
@@ -256,8 +259,8 @@
   <mkdir dir="${built}"/>
   <javac srcdir="${srcroot}"
          includes="${projpath}/**/*java"
-         destdir="${built}" 
-         bootclasspath="${jsr14_classpath}:${sun.boot.class.path}"
+         destdir="${built}"
+         bootclasspath="${jsr14_classpath}:${jsr14_collect_classpath}:${sun.boot.class.path}" 
 	 classpath="${classpath_text}"
          source="1.5"
          target="1.5"
@@ -386,6 +389,21 @@
   <delete file="${osxdir}/${osxtag}.tar.gz" />
   <delete dir="${doc_dir}" />
 </target>
+
+
+  <!-- Target to fix JSR-14 v1.0's collect.jar to work in JDK 1.3.
+       (We have to remove java.lang.String and java.util.Arrays,
+        since they were somehow compiled against JDK 1.4.)  -->
+  <target name="fix-collect-v1_0">
+    <delete file="${jsr14_collect_classpath}.fixed" />
+    <zip destfile="${jsr14_collect_classpath}.fixed">
+      <zipfileset src="${jsr14_collect_classpath}" 
+                  excludes="java/lang/String.class,java/util/Arrays.class" />
+    </zip>
+    <move file="${jsr14_collect_classpath}.fixed" 
+          toFile="${jsr14_collect_classpath}"
+          overwrite="true" />
+  </target>
 
   <!-- Clover targets -->
   <taskdef resource="clovertasks"/>
