@@ -64,8 +64,6 @@ import koala.dynamicjava.parser.wrapper.JavaCCParserFactory;
 
 import koala.dynamicjava.interpreter.throwable.WrongVersionException;
 
-
-
 /**
  * Common utilities of DynamicJava for implementing features of 1.5.
  */
@@ -104,7 +102,7 @@ public class TigerUtilities {
    * to 1.5 i.e. isVarArgs()
    * @param enabled - a boolean that specifies whether or not Tiger features are to be enabled
    */  
-  public static void setTigerEnabled(boolean enabled) {
+  protected static void setTigerEnabled(boolean enabled) {
     _tigerEnabled = enabled;
   }
   

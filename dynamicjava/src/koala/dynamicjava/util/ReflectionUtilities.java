@@ -36,6 +36,8 @@ import java.util.*;
 /**
  * This class contains a collection of utility methods for reflection.
  *
+ * Extends TigerUtilities so that it may use its protected methods
+ * 
  * @author  Stephane Hillion
  * @version 1.3 - 1999/11/28
  */

@@ -44,15 +44,14 @@
  END_COPYRIGHT_BLOCK*/
 
 
-package koala.dynamicjava.interpreter;
+package koala.dynamicjava.util;
 
 import java.util.*;
 import junit.framework.*;
 
 import koala.dynamicjava.tree.*;
-//import koala.dynamicjava.interpreter.*;
+import koala.dynamicjava.interpreter.*;
 import koala.dynamicjava.SourceInfo;
-import koala.dynamicjava.util.*;
 
 import java.io.StringReader;
 import java.util.List;
@@ -64,7 +63,7 @@ import koala.dynamicjava.interpreter.throwable.WrongVersionException;
 
 /**
  * 
- * Tests to ensure the type checker behaves 
+ * Tests to ensure the type checker throws WrongVersionExceptions if 1.5 features are used when running 1.4
  * 
  */
 public class Distinction1415Test extends TestCase {
