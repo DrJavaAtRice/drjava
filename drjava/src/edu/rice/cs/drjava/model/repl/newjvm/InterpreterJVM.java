@@ -106,6 +106,8 @@ public class InterpreterJVM extends UnicastRemoteObject
     // it's dead
     // This is just in case the main vm dies without killing us
     Thread thread = new Thread() {
+      private boolean _masterPossiblyDead = false;
+      
       public void run() {
         while (true) {
           try {
@@ -116,10 +118,18 @@ public class InterpreterJVM extends UnicastRemoteObject
 
           try {
             _mainJVM.checkStillAlive();
+            _masterPossiblyDead = false;
           }
           catch (RemoteException re) {
-            // not there anymore. quit!
-            System.exit(0);
+            if (_masterPossiblyDead) {
+              // not there anymore, and we've given it a chance. quit!
+              System.exit(0);
+            }
+            else {
+              // Set a flag and give it another chance
+              //  (in case machine was merely asleep)
+              _masterPossiblyDead = true;
+            }
           }
         }
       }

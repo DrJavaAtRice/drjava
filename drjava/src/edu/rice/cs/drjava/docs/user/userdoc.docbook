@@ -2,13 +2,13 @@
 
 <!--
   User Documentation for DrJava
+  @version $Id$
 -->
 <book id="index">
   <!-- Meta info -->
   <bookinfo>
     <date>2002-6-20</date>
     <title>DrJava User Documentation</title>
-    <releaseinfo>Version $Id$</releaseinfo>
   </bookinfo>
   <toc></toc>
 
@@ -85,6 +85,7 @@
 	<title>Syntax Coloring</title>
 	<para>Certain types of words are colored differently to help make the structure of the program more apparent.  Any comments appear in green, while Java keywords appear in blue and primitive types and class names appear in dark blue.  Strings are colored red and characters are colored magenta, while the remaining types of text appear in black.  These colors can all be configured by the user (see <link linkend="configuration">Configuring DrJava</link>).</para>
       </formalpara>
+      <para>One notable difference between syntax coloring in DrJava and other common editors (such as Emacs) is that DrJava uses <emphasis>fully correct</emphasis> coloring as the document is edited.  For example, simply typing the beginning of a block comment ("/*") will immediately update the coloring of the entire program, unlike other editors which will only update the color of a line when that line is edited.</para>
 
       <formalpara>
 	<title>Automatic Indentation</title>
@@ -93,7 +94,7 @@
 
       <formalpara>
 	<title>Brace Matching</title>
-	<para>To help the user visualize the structure of the code, DrJava uses highlighting to match braces.  If the cursor is placed immediately after a close brace, parenthesis, or bracket, all text between that character and the corresponding open brace is highlighted in another color.</para>
+	<para>To help the user visualize the structure of the code, DrJava uses highlighting to match braces.  If the cursor is placed immediately after a close brace, parenthesis, or bracket, all text between that character and the corresponding open brace is highlighted in another color.  Like syntax coloring, brace matching is also done in a <emphasis>fully correct</emphasis> fashion, updated with each keystroke.</para>
       </formalpara>
     </section>
 
@@ -129,11 +130,28 @@
 
   </chapter>
   
-  <!-- Chapter: Interactions Pane
-    - How to use
-    - Keyboard shortcuts
-    - Setting classpath
-  -->
+  <!-- Chapter: Interactions Pane -->
+  <chapter id="interactions">
+    <title>Interactions Pane</title>
+    <para>One of the key strengths of DrJava is its Interactions Pane, which allows the user to enter and evaluate arbitrary Java statements and expressions on the fly.  This can be remarkably useful for beginning students, who no longer have to write main methods, recompile, and run from a command line simply to test how a class or method behaves.  It can also be used to experiment with new libraries, or even create graphical Swing objects interactively.</para>
+
+    <formalpara>
+      <title>How to Use</title>
+      <para>DrJava uses <ulink url="http://koala.ilog.fr/djava">DynamicJava</ulink> as the interpreter for the Interactions Pane, which allows execution of any valid Java statements as well as the evaluation of Java expressions.  Simply define variables and call methods as in a main method, or even define new classes and methods.  DrJava provides the ability both to reset the Interactions Pane, if the user wishes to start from scratch, and to abort the current interaction, in the case that a method never returns.</para>
+    </formalpara>
+
+    <formalpara>
+      <title>Useful Shortcuts</title>
+      <para>Many actions in the Interactions Pane have keyboard shortcuts that improve the pane's usability.  Use the Up and Down arrow keys to scroll through a history of the previously entered commands, or CTRL+B to clear the current command.  Also, if a command is currently executing, pressing Escape will abort it.</para>
+    </formalpara>
+
+    <formalpara>
+      <title>Setting the Classpath</title>
+      <para>To access any class within the Interactions Pane, it must be included on DrJava's notion of the Interactions classpath, which is different than the user's own classpath.  Any class which is opened in the Definitions Pane of DrJava is automatically added to this classpath, but additional classes can be added using the "extra.classpath" configuration option.  (See <link linkend="configuration">Configuring DrJava</link>.)</para>
+    </formalpara>
+  </chapter>
+
+
 
   <!-- Chapter: Integrated Compiler
     - Compiling an open file
@@ -153,19 +171,23 @@
   <!-- ---- Appendix: Configuring DrJava ---- -->
   <appendix id="configuration">
     <title>Configuring DrJava</title>
-    <para>DrJava currently has several configurable options which can be defined in a <filename>.drjava</filename> file in your home directory.  This file is a standard Java properties file, with one option on each line and with names and values separated by an equals sign.  Any options which are not defined in your <filename>.drjava</filename> file will have their default value, which is shown below after each option.  The options which are currently available are described below.</para>
+    <para>DrJava currently has several configurable options which can be defined in a <filename>.drjava</filename> file in your home directory.  (The path to this file is displayed in DrJava's "About" window, accessible from the help menu.)  This file is a standard Java properties file, with one option on each line and with names and values separated by an equals sign.  Any options which are not defined in your <filename>.drjava</filename> file will have their default value, which is shown below after each option.  The options which are currently available are described below.</para>
     
+    <para>Note: All parameters are parsed as standard Java strings, so escape characters must be considered.  Notably, to include a Windows-style path in a parameter value, all backslashes must be escaped.  For example:</para>
+
+    <programlisting>javac.location=c:\\jdk1.4\\lib\\tools.jar</programlisting>
     
     <!-- Resource Location -->
     <formalpara>
       <title>Resource Location Options</title>
-      <para>Description of resource location options... (see documentation on SourceForge page)
+      <para>These options specify where to find Java resources on your computer, such as compilers or classpath directories.
+
         <variablelist>
 	  
 	  <varlistentry>
 	    <term><varname>javac.location = ""</varname></term>
 	    <listitem>
-	      <para>Used to specify the location of the <filename>javac.jar</filename>, for use as a compiler within DrJava.</para>
+	      <para>Used to specify the location of "javac", for use as a compiler within DrJava.  Usually this is the path to <filename>tools.jar</filename> in the JDK's <filename>lib</filename> directory.</para>
 	    </listitem>
 	  </varlistentry>
 	
@@ -173,7 +195,7 @@
 	    <term><varname>jsr14.location = ""</varname></term>
 	    <term><varname>jsr14.collectionspath = ""</varname></term>
 	    <listitem>
-	      <para>Used to specify the locaiton of the JSR-14 versions of <filename>javac.jar</filename> and <filename>collect.jar</filename>, respectively, for use as an alternative compiler in DrJava.</para>
+	      <para>Used to specify the location of the JSR-14 versions of <filename>javac.jar</filename> and <filename>collect.jar</filename>, respectively, for use as an alternative compiler in DrJava.  The <filename>collect.jar</filename> file contains parameterized collection classes for JSR-14.</para>
 	    </listitem>
 	  </varlistentry>
 	  
@@ -191,7 +213,7 @@
     <!-- Colors -->
     <formalpara>
       <title>Color Options</title>
-      <para>Colors are defined similar to HTML colors: as six hexadecimal digits preceeded by a pound sign.  The first two digits specify a red value, the next two specify a green value, the next two specify a blue value.  For example, <constant>#00FF00</constant> would be a bright green.
+      <para>Colors are defined similarly to HTML colors: as six hexadecimal digits preceeded by a pound sign.  The first two digits specify a red value, the next two specify a green value, the next two specify a blue value.  For example, <constant>#00FF00</constant> would be a bright green.
 
         <!-- Definitions Colors -->
         <variablelist>
@@ -301,7 +323,7 @@
     <!-- Other Display -->
     <formalpara>
       <title>Other Display Options</title>
-      <para>Description</para>
+      <para>This configurable options affect how DrJava's user interface is displayed.</para>
     </formalpara>
     <variablelist>
       <title>Toolbar Options</title>
@@ -325,21 +347,21 @@
     <!-- Miscellaneous -->
     <formalpara>
       <title>Miscellaneous Options</title>
-      <para>Description...</para>
+      <para>These are the remaining configurable options in DrJava.</para>
     </formalpara>
     <variablelist>
+
+      <varlistentry>
+	<term><varname>indent.level = 2</varname></term>
+	<listitem>
+	  <para>Sets how many spaces to use for each level of indenting.  Note that tab characters are not allowed in DrJava.</para>
+	</listitem>
+      </varlistentry>
 
       <varlistentry>
 	<term><varname>working.directory = ""</varname></term>
 	<listitem>
 	  <para>Specifies the default directory for DrJava to use when starting up.  The open and save dialogs will start here, rather than in the user's current directory, if this option is set.  The Interactions classpath will also include this directory.</para>
-	</listitem>
-      </varlistentry>
-      
-      <varlistentry>
-	<term><varname>indent.level = 2</varname></term>
-	<listitem>
-	  <para>Sets how many spaces to use for each level of indenting.  Note that tab characters are not allowed in DrJava.</para>
 	</listitem>
       </varlistentry>
       

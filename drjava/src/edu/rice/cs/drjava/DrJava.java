@@ -98,7 +98,7 @@ public class DrJava implements ConfigurationTool, OptionConstants {
       // available compilers.
       final MainFrame mf = new MainFrame();
       System.setProperty("sun.awt.exception.handler", 
-                         "edu.rice.cs.drjava.AWTExceptionHandler");
+                         "edu.rice.cs.drjava.ui.AWTExceptionHandler");
       
       // This enabling of the security manager must happen *after* the mainframe
       // is constructed. See bug #518509.

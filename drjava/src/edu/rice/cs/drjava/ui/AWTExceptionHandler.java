@@ -37,9 +37,7 @@
  *
  END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava;
-
-import edu.rice.cs.drjava.ui.UncaughtExceptionWindow;
+package edu.rice.cs.drjava.ui;
 
 /**
  * This class is called everytime an uncaught exception propogates to an awt

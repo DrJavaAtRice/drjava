@@ -83,9 +83,9 @@ import edu.rice.cs.util.swing.DelegatingAction;
 public class MainFrame extends JFrame implements OptionConstants {
   
   private static final int INTERACTIONS_TAB = 0;
-  private static final int COMPILE_TAB = 1;
-  private static final int OUTPUT_TAB = 2;
-  private static final int JUNIT_TAB = 3;
+  //private static final int COMPILE_TAB = 1;
+  //private static final int OUTPUT_TAB = 2;
+  //private static final int JUNIT_TAB = 3;
 
   // GUI Dimensions
   private static final int GUI_WIDTH = 800;
@@ -94,40 +94,50 @@ public class MainFrame extends JFrame implements OptionConstants {
 
   private static final String ICON_PATH = "/edu/rice/cs/drjava/ui/icons/";
 
+  /**
+   * The model which controls all logic in DrJava.
+   */
   private final SingleDisplayModel _model;
 
+  /** Maps an OpenDefDoc to its JScrollPane */
   private Hashtable _defScrollPanes;
   private DefinitionsPane _currentDefPane;
 
-  // Used to determine whether the file title needs to be updated.
+  /** Used to determine whether the file title needs to be updated. */
   private String _fileTitle = "";
 
   // These should be final but can't be, as the code is currently organized,
   // because they are not set in the constructor
+  
+  // Tabbed panel fields
+  private JTabbedPane _tabbedPane;
   private CompilerErrorPanel _errorPanel;
   private OutputPane _outputPane;
   private InteractionsPane _interactionsPane;
   private DebugPanel _debugPanel;
   private JUnitPanel _junitPanel;
+  private FindReplaceDialog _findReplace;
+  private LinkedList _tabs;
+  
   private JPanel _statusBar;
   private JLabel _fileNameField;
   private JLabel _currLocationField;
   private PositionListener _posListener;
-  private JTabbedPane _tabbedPane;
   private JSplitPane _docSplitPane;
   private JSplitPane _mainSplit;
   private JList _docList;
-  private JMenuBar _menuBar;
+  private JButton _saveButton;
+  private JButton _compileButton;
+  private JButton _junitButton;
   private JToolBar _toolBar;
+  
+  // Menu fields
+  private JMenuBar _menuBar;
   private JMenu _fileMenu;
   private JMenu _editMenu;
   private JMenu _toolsMenu;
   private JMenu _debugMenu;
   private JMenu _helpMenu;
-  private FindReplaceDialog _findReplace;
-  private JButton _saveButton;
-  private JButton _compileButton;
-  private JButton _junitButton;
   private JCheckBoxMenuItem _debuggerEnabledMenuItem;
   private JMenuItem _runDebuggerMenuItem;
   private JMenuItem _resumeDebugMenuItem;
@@ -137,11 +147,13 @@ public class MainFrame extends JFrame implements OptionConstants {
   private JMenuItem _toggleBreakpointMenuItem;
   private JMenuItem _printBreakpointsMenuItem;
   private JMenuItem _clearAllBreakpointsMenuItem;
-  private LinkedList _tabs;
-  private ConfigFrame _configFrame;
   
+  private ConfigFrame _configFrame;
   private KeyBindingManager _keyBindingManager;
   
+  /**
+   * @return The model providing the logic for this view.
+   */
   public SingleDisplayModel getModel() {
     return _model;
   }
@@ -376,7 +388,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
   };
 
-  /** Selects all text in window*/
+  /** Selects all text in window. */
   private Action _selectAllAction = new AbstractAction("Select All") {
     public void actionPerformed(ActionEvent ae) {
       _selectAll();
@@ -433,14 +445,11 @@ public class MainFrame extends JFrame implements OptionConstants {
   {
     public void actionPerformed(ActionEvent ae) {
       _model.resetInteractions();
-      //CONFIG.setSetting(JSR14_COLLECTIONSPATH, "/home/javaplt/packages/jsr14_adding_generics-1_2-ea/collect.jar");
-      //CONFIG.setSetting(TOOLBAR_TEXT_ENABLED, new Boolean(!DrJava.CONFIG.getSetting(TOOLBAR_TEXT_ENABLED).booleanValue()));
     }
   };
 
   /** Pops up an info dialog. */
   private Action _aboutAction = new AbstractAction("About") {
-
     public void actionPerformed(ActionEvent ae) {
       new AboutDialog(MainFrame.this, _model.getAboutText()).show();
     }
@@ -553,7 +562,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
   };
   
-  /** Clears all breakpoints */
+  /** Cuts from the caret to the end of the line to the clipboard. */
   private Action _cutLineAction = new AbstractAction("Cut Line")
   {
     public void actionPerformed(ActionEvent ae) {
@@ -597,13 +606,17 @@ public class MainFrame extends JFrame implements OptionConstants {
   /** Creates the main window, and shows it. */
   public MainFrame() {
     
-    if (CodeStatus.DEVELOPMENT) {
+    if (CodeStatus.DEVELOPMENT) {  // no key bindings in stable
       _keyBindingManager = new KeyBindingManager(this);
     }
+    // create position listener for line numbers in status bar
     _posListener = new PositionListener();
     _setUpStatusBar();
 
+    // create our model
     _model = new SingleDisplayModel();
+    
+    // Working directory is default place to start
     String workDir = DrJava.CONFIG.getSetting(WORKING_DIRECTORY).toString();
     if ((workDir == null) || (workDir.equals(""))) {
       workDir = System.getProperty("user.dir");
@@ -613,6 +626,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _openChooser.setMultiSelectionEnabled(true);
     _saveChooser = new JFileChooser(workDir);
     _saveChooser.setFileFilter(new JavaSourceFilter());
+    
     //set up the hourglass cursor
     setGlassPane(new GlassPane());
     this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
@@ -621,7 +635,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     this.addWindowListener(_windowCloseListener);
     _model.addListener(new ModelListener());
 
-    //install
+    // Create tabs before DefPane
     _setUpTabs();
 
     // DefinitionsPane
@@ -644,7 +658,6 @@ public class MainFrame extends JFrame implements OptionConstants {
 
     _errorPanel.getErrorListPane().setLastDefPane(_currentDefPane);
     _errorPanel.reset();
-
     _junitPanel.getJUnitErrorListPane().setLastDefPane(_currentDefPane);
     _junitPanel.reset();
 
@@ -654,32 +667,22 @@ public class MainFrame extends JFrame implements OptionConstants {
     _setUpToolBar();
     _setUpDocumentSelector();
 
+    // Set size and position
     setBounds(0, 0, GUI_WIDTH, GUI_HEIGHT);
     setSize(GUI_WIDTH, GUI_HEIGHT);
-
     // suggested from zaq@nosi.com, to keep the frame on the screen!
     Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
     Dimension frameSize = this.getSize();
     final int menubarHeight = 24;
-
     if (frameSize.height > screenSize.height - menubarHeight) {
-      //       System.out.println("Too Tall! " +
-      //     screenSize.height + " vs. " + frameSize.height);
-
+      // Too tall, so resize
       frameSize.height = screenSize.height - menubarHeight;
-
-      //       System.out.println("Frame Height: " + frameSize.height);
     }
-
     if (frameSize.width > screenSize.width) {
-      //       System.out.println("Too Wide! " +
-      //     screenSize.width + " vs. " + frameSize.width);
-
+      // Too wide, so resize
       frameSize.width = screenSize.width;
-
-      //       System.out.println("Frame Width: " + frameSize.height);
     }
-
+    // Set to the new correct size and location
     this.setSize(frameSize);
     this.setLocation((screenSize.width - frameSize.width) / 2,
                      (screenSize.height - frameSize.height - menubarHeight) / 2);
@@ -688,10 +691,9 @@ public class MainFrame extends JFrame implements OptionConstants {
     updateFileTitle();
 
     // Set the fonts
-    _setMainFont();
-    
+    _setMainFont();    
     Font doclistFont;
-    if (CodeStatus.DEVELOPMENT) {
+    if (CodeStatus.DEVELOPMENT) {  // only use FontOption in development
       doclistFont = DrJava.CONFIG.getSetting(FONT_DOCLIST);
     }
     else {
@@ -701,9 +703,8 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
     _docList.setFont(doclistFont);
     
-    //Add option listeners
-    
-    if (CodeStatus.DEVELOPMENT) {
+    // Add option listeners for changes to config options
+    if (CodeStatus.DEVELOPMENT) {  // no config live update in stable
       DrJava.CONFIG.addOptionListener( OptionConstants.FONT_MAIN, new MainFontOptionListener());
       DrJava.CONFIG.addOptionListener( OptionConstants.FONT_DOCLIST, new DoclistFontOptionListener());
       DrJava.CONFIG.addOptionListener( OptionConstants.FONT_TOOLBAR, new ToolbarFontOptionListener());
@@ -715,7 +716,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     // Set the configuration frame to null
     _configFrame = null;
       
-    // If any errors parsing config file, show them
+    // If any errors occurred while parsing config file, show them
     _showConfigException();
   }
 
@@ -781,8 +782,6 @@ public class MainFrame extends JFrame implements OptionConstants {
     _debugPanel.reset();
     _setDebugMenuItemsEnabled(false);
   }
-
-
 
 
   /**
@@ -989,7 +988,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   }
 
   private void _editPreferences() {
-    if (CodeStatus.DEVELOPMENT) {
+    if (CodeStatus.DEVELOPMENT) {  // no preferences action in stable
       if (_configFrame == null) {
         _configFrame = new ConfigFrame();
       }
@@ -1232,8 +1231,8 @@ public class MainFrame extends JFrame implements OptionConstants {
         int pos = _model.getActiveDocument().gotoLine(lineNum);
         _currentDefPane.setCaretPosition(pos);
 
-        // this code was taken from FindReplaceDialog's 
-        // _selectFoundItem method
+        // Center the destination line on the screen
+        // (this code taken from FindReplaceDialog's _selectFoundItem method)
         JScrollPane defScroll = (JScrollPane) 
           _defScrollPanes.get(_model.getActiveDocument());
         int viewHeight = (int)defScroll.getViewport().getSize().getHeight();
@@ -1351,9 +1350,6 @@ public class MainFrame extends JFrame implements OptionConstants {
   }
 
   private void _setUpAction(Action a, String icon, String shortDesc) {
-    // Check whether to show icons
-    //boolean useIcons = DrJava.CONFIG.getSetting(OptionConstants.TOOLBAR_ICONS_ENABLED).booleanValue();
-    //if (useIcons) 
     a.putValue(Action.SMALL_ICON, _getIcon(icon + "16.gif"));
     a.putValue(Action.DEFAULT, icon);
     a.putValue(Action.SHORT_DESCRIPTION, shortDesc);
@@ -1382,7 +1378,6 @@ public class MainFrame extends JFrame implements OptionConstants {
    */
   private void _setUpMenuBar() {
     boolean showDebugger = (_debugPanel != null);
-    //boolean showDebugger = false;
 
     // Get proper cross-platform mask.
     int mask = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
@@ -1402,6 +1397,13 @@ public class MainFrame extends JFrame implements OptionConstants {
     setJMenuBar(_menuBar);
   }
   
+  /**
+   * Adds an Action as a menu item to the given menu, using the
+   * specified configurable keystroke.
+   * @param menu Menu to add item to
+   * @param a Action for the menu item
+   * @param opt Configurable keystroke for the menu item
+   */
   private void _addMenuItem(JMenu menu, Action a, Option<KeyStroke> opt) {
     JMenuItem tmpItem;
     tmpItem = menu.add(a);
@@ -1413,11 +1415,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _keyBindingManager.put(opt, a, tmpItem, tmpItem.getText());
     if (_keyBindingManager.get(ks) == a) { 
       tmpItem.setAccelerator(ks);
-      
-      //_keyBindingManager.putKeyToMenuItemMap(ks, tmpItem);
     }
-    //_keyBindingManager.addListener(opt, tmpItem);
-    
   }
   
   /**
@@ -1432,24 +1430,22 @@ public class MainFrame extends JFrame implements OptionConstants {
     if (!CodeStatus.DEVELOPMENT) {
       tmpItem = fileMenu.add(_newAction);
       tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, mask));
-    }
-    else
-      _addMenuItem(fileMenu, _newAction, KEY_NEW_FILE);
-    
-    if (!CodeStatus.DEVELOPMENT) {
       tmpItem = fileMenu.add(_openAction);
       tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, mask));
     }
-    else
+    else {
+      _addMenuItem(fileMenu, _newAction, KEY_NEW_FILE);
       _addMenuItem(fileMenu, _openAction, KEY_OPEN_FILE);
+    }
     fileMenu.addSeparator();
 
     if (!CodeStatus.DEVELOPMENT) {
       tmpItem = fileMenu.add(_saveAction);
       tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, mask));
     }
-    else
+    else {
       _addMenuItem(fileMenu, _saveAction, KEY_SAVE_FILE);
+    }
     _saveAction.setEnabled(false);
 
     if (!CodeStatus.DEVELOPMENT) {
@@ -1457,9 +1453,9 @@ public class MainFrame extends JFrame implements OptionConstants {
       tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, 
                                                     mask | InputEvent.SHIFT_MASK));
     }
-    else
+    else {
       _addMenuItem(fileMenu, _saveAsAction, KEY_SAVE_FILE_AS);
-
+    }
     tmpItem = fileMenu.add(_saveAllAction);
 
     tmpItem = fileMenu.add(_revertAction);
@@ -1467,43 +1463,39 @@ public class MainFrame extends JFrame implements OptionConstants {
 
     // Close, Close all
     fileMenu.addSeparator();
-    
     if (!CodeStatus.DEVELOPMENT) {
       tmpItem = fileMenu.add(_closeAction);
       tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_W, mask));
     }
-    else
-    _addMenuItem(fileMenu, _closeAction, KEY_CLOSE_FILE);
+    else {
+      _addMenuItem(fileMenu, _closeAction, KEY_CLOSE_FILE);
+    }
     tmpItem = fileMenu.add(_closeAllAction);
 
     // Page setup, print preview, print
     fileMenu.addSeparator();
-
     tmpItem = fileMenu.add(_pageSetupAction);
-    
     if (!CodeStatus.DEVELOPMENT) {
       tmpItem = fileMenu.add(_printPreviewAction);
       tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_P, 
                                                     mask | InputEvent.SHIFT_MASK));
-    }
-    else
-      _addMenuItem(fileMenu, _printPreviewAction, KEY_PRINT_PREVIEW);
-    
-    if (!CodeStatus.DEVELOPMENT) {
       tmpItem = fileMenu.add(_printAction);
       tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_P, mask));
     }
-    else
+    else {
+      _addMenuItem(fileMenu, _printPreviewAction, KEY_PRINT_PREVIEW);
       _addMenuItem(fileMenu, _printAction, KEY_PRINT);
+    }
+      
     // Quit
     fileMenu.addSeparator();
-    
     if (!CodeStatus.DEVELOPMENT) {
       tmpItem = fileMenu.add(_quitAction);
       tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, mask));
     }
-    else
+    else {
       _addMenuItem(fileMenu, _quitAction, KEY_QUIT);
+    }
     return fileMenu;
   }
 
@@ -1518,87 +1510,65 @@ public class MainFrame extends JFrame implements OptionConstants {
     if (!CodeStatus.DEVELOPMENT) {
       tmpItem = editMenu.add(_undoAction);
       tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Z, mask));
-    }
-    else
-      _addMenuItem(editMenu, _undoAction, KEY_UNDO);
-    if (!CodeStatus.DEVELOPMENT) {
       tmpItem = editMenu.add(_redoAction);
       tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R, mask));
     }
-    else
+    else {
+      _addMenuItem(editMenu, _undoAction, KEY_UNDO);
       _addMenuItem(editMenu, _redoAction, KEY_REDO);
-    // Cut, copy, paste
+    }
+      
+    // Cut, copy, paste, select all
     editMenu.addSeparator();
-    
     if (!CodeStatus.DEVELOPMENT) {
       tmpItem = editMenu.add(_cutAction);
       tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_X, mask));
-    }
-    else
-      _addMenuItem(editMenu, _cutAction, KEY_CUT);
-    
-    if (!CodeStatus.DEVELOPMENT) {
       tmpItem = editMenu.add(_copyAction);
       tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, mask));
-    }
-    else
-      _addMenuItem(editMenu, _copyAction, KEY_COPY);
-    
-    if (!CodeStatus.DEVELOPMENT) {
       tmpItem = editMenu.add(_pasteAction);
       tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_V, mask));
-    }
-    else
-      _addMenuItem(editMenu, _pasteAction, KEY_PASTE);   
-    
-    // Select All
-    if (!CodeStatus.DEVELOPMENT) {
       tmpItem = editMenu.add(_selectAllAction);
       tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_A, mask));
     }
-    else
+    else {
+      _addMenuItem(editMenu, _cutAction, KEY_CUT);
+      _addMenuItem(editMenu, _copyAction, KEY_COPY);
+      _addMenuItem(editMenu, _pasteAction, KEY_PASTE);
       _addMenuItem(editMenu, _selectAllAction, KEY_SELECT_ALL);
+    }
 
     // Find/replace, goto
     editMenu.addSeparator();
-    
     if (!CodeStatus.DEVELOPMENT) {
       tmpItem = editMenu.add(_findReplaceAction);
       tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F, mask));
-    }
-    else
-      _addMenuItem(editMenu, _findReplaceAction, KEY_FIND_REPLACE);
-    
-    if (!CodeStatus.DEVELOPMENT) {
       tmpItem = editMenu.add(_gotoLineAction);
       tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_G, mask));
     }
-    else
+    else {
+      _addMenuItem(editMenu, _findReplaceAction, KEY_FIND_REPLACE);
       _addMenuItem(editMenu, _gotoLineAction, KEY_GOTO_LINE);
+    }
+      
     // Next, prev doc
     editMenu.addSeparator();
-    
     if (!CodeStatus.DEVELOPMENT) {
       tmpItem = editMenu.add(_switchToPrevAction);
       tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_COMMA, mask));
-    }
-    else
-      _addMenuItem(editMenu, _switchToPrevAction, KEY_PREVIOUS_DOCUMENT);
-    
-    if (!CodeStatus.DEVELOPMENT) {
       tmpItem = editMenu.add(_switchToNextAction);
       tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_PERIOD, mask));
     }
-    else
+    else {
+      _addMenuItem(editMenu, _switchToPrevAction, KEY_PREVIOUS_DOCUMENT);
       _addMenuItem(editMenu, _switchToNextAction, KEY_NEXT_DOCUMENT);
+    }
+    
     // access to configurations GUI
-    
-    
     if (CodeStatus.DEVELOPMENT) {
       editMenu.addSeparator();
       editMenu.add(_editPreferencesAction);
-      //_addMenuItem(editMenu, _editPreferencesAction, KEY_NEXT_DOCUMENT);
     }
+    
     // Add the menus to the menu bar
     return editMenu;
   }
@@ -1615,22 +1585,21 @@ public class MainFrame extends JFrame implements OptionConstants {
       tmpItem = toolsMenu.add(_compileAction);
       tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F5, 0));
     }
-    else
+    else {
       _addMenuItem(toolsMenu, _compileAction, KEY_COMPILE);
-
+    }
     toolsMenu.add(_junitAction);
 
     // Abort/reset interactions, clear console
     toolsMenu.addSeparator();
-
     _abortInteractionAction.setEnabled(false);
     if (!CodeStatus.DEVELOPMENT) {
       tmpItem = toolsMenu.add(_abortInteractionAction);
       tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0));
     }
-    else
+    else {
       _addMenuItem(toolsMenu, _abortInteractionAction, KEY_ABORT_INTERACTION);
-
+    }
     toolsMenu.add(_resetInteractionsAction);
     toolsMenu.add(_clearOutputAction);
 
@@ -1696,11 +1665,14 @@ public class MainFrame extends JFrame implements OptionConstants {
     return helpMenu;
   }
 
+  /**
+   * Creates a toolbar button for undo and redo, which behave differently.
+   */
   JButton _createManualToolbarButton(Action a) {
     final JButton ret;
     
     Font buttonFont;
-    if (CodeStatus.DEVELOPMENT) {
+    if (CodeStatus.DEVELOPMENT) {  // only use FontOption in development
       buttonFont = DrJava.CONFIG.getSetting(FONT_TOOLBAR);
     }
     else {
@@ -1823,8 +1795,8 @@ public class MainFrame extends JFrame implements OptionConstants {
   }
 
   /**
-   * Update the toolbar's buttons, following any change to TOOLBAR_ICONS_ENABLED, TOOLBAR_TEXT_ENABLED,
-   *  or FONT_TOOLBAR (name, style, text)
+   * Update the toolbar's buttons, following any change to TOOLBAR_ICONS_ENABLED,
+   * TOOLBAR_TEXT_ENABLED, or FONT_TOOLBAR (name, style, text)
    */ 
   private void _updateToolbarButtons() {
     
@@ -1906,10 +1878,10 @@ public class MainFrame extends JFrame implements OptionConstants {
     _statusBar = new JPanel( new BorderLayout() );
     _statusBar.add( _fileNameField, BorderLayout.WEST );
     _statusBar.add( _currLocationField, BorderLayout.EAST );
-    _statusBar.setBorder(new
-                           CompoundBorder(new EmptyBorder(2,2,2,2),
-                                          new CompoundBorder(new BevelBorder(BevelBorder.LOWERED),
-                                                             new EmptyBorder(2,2,2,2))));
+    _statusBar.setBorder(
+      new CompoundBorder(new EmptyBorder(2,2,2,2),
+                         new CompoundBorder(new BevelBorder(BevelBorder.LOWERED),
+                                            new EmptyBorder(2,2,2,2))));
     getContentPane().add(_statusBar, BorderLayout.SOUTH);
   }
 
@@ -1959,9 +1931,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _junitPanel = new JUnitPanel(_model, this);
     _tabbedPane = new JTabbedPane();
     _tabbedPane.add("Interactions", new BorderlessScrollPane(_interactionsPane));
-    //_tabbedPane.add("Compiler output", _errorPanel);
     _tabbedPane.add("Console", new JScrollPane(_outputPane));
-    //_tabbedPane.add("Test output", _junitPanel);
     
     _tabs = new LinkedList();
 
@@ -1971,7 +1941,6 @@ public class MainFrame extends JFrame implements OptionConstants {
     
     // Show compiler output pane by default
     showTab(_errorPanel);
-    //showTab(_junitPanel);
     
     _tabbedPane.setSelectedIndex(0);
     
@@ -1990,19 +1959,6 @@ public class MainFrame extends JFrame implements OptionConstants {
    */
   private void _setUpDocumentSelector() {
     _docList = new JList(_model.getDefinitionsDocuments());
-    /* {
-     public String getToolTipText(MouseEvent event) {
-     Point location = event.getPoint();
-     int index = locationToIndex(location);
-     String tip = null;
-     if (index >= 0) {
-     tip = _model.getDisplayFullPath(index);
-     }
-     return tip;
-     }
-     };
-     _docList.setToolTipText("Document List"); */
-
     _docList.setSelectionModel(_model.getDocumentSelectionModel());
     _docList.setCellRenderer(new DocCellRenderer());
   }
@@ -2047,10 +2003,9 @@ public class MainFrame extends JFrame implements OptionConstants {
       }
     });*/
     
-    if (CodeStatus.DEVELOPMENT) {
-      
+    if (CodeStatus.DEVELOPMENT) { // no line enumeration in stable
       if (DrJava.CONFIG.getSetting(LINEENUM_ENABLED).booleanValue()) {
-        scroll.setRowHeaderView( new Rule(pane));
+        scroll.setRowHeaderView( new LineEnumRule(pane));
       }
     }
     
@@ -2121,7 +2076,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   }
   
   /**
-   * Addresses the Mac OS X bug where the scrollbars are disable in
+   * Addresses the Mac OS X bug where the scrollbars are disabled in
    * one document after opening another document.
    */
   private void _reenableScrollBar() {
@@ -2177,7 +2132,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   private void _setMainFont() {
     
     Font f;
-    if (CodeStatus.DEVELOPMENT) {
+    if (CodeStatus.DEVELOPMENT) {  // only use FontOption in development
       f = DrJava.CONFIG.getSetting(FONT_MAIN);
     }
     else {
@@ -2192,9 +2147,10 @@ public class MainFrame extends JFrame implements OptionConstants {
       if (scroll != null) {
         DefinitionsPane pane = (DefinitionsPane) scroll.getViewport().getView();
         pane.setFont(f);
-        if (CodeStatus.DEVELOPMENT) {
+        if (CodeStatus.DEVELOPMENT) {  // no line enumeration in stable
+          // Update the font of the line enumeration rule
           if (DrJava.CONFIG.getSetting(LINEENUM_ENABLED).booleanValue()) {
-            scroll.setRowHeaderView( new Rule( pane) );
+            scroll.setRowHeaderView( new LineEnumRule( pane) );
           }
         }
       }
@@ -2211,37 +2167,37 @@ public class MainFrame extends JFrame implements OptionConstants {
    *  Update the row header (line number enumeration) for the definitions scroll pane
    */
   private void _updateDefScrollRowHeader() {
-    
-    boolean ruleEnabled = DrJava.CONFIG.getSetting(LINEENUM_ENABLED).booleanValue();
-    
-    Iterator scrollPanes = _defScrollPanes.values().iterator();
-    while (scrollPanes.hasNext()) {  
-      JScrollPane scroll = (JScrollPane) scrollPanes.next();
-      if (scroll != null) {
-        DefinitionsPane pane = (DefinitionsPane) scroll.getViewport().getView();
-        if (scroll.getRowHeader() == null || scroll.getRowHeader().getView() == null) {
-          if (ruleEnabled) {
-            scroll.setRowHeaderView(new Rule(pane));
+    if (CodeStatus.DEVELOPMENT) {  // no line enumeration in stable
+      boolean ruleEnabled = DrJava.CONFIG.getSetting(LINEENUM_ENABLED).booleanValue();
+      
+      Iterator scrollPanes = _defScrollPanes.values().iterator();
+      while (scrollPanes.hasNext()) {  
+        JScrollPane scroll = (JScrollPane) scrollPanes.next();
+        if (scroll != null) {
+          DefinitionsPane pane = (DefinitionsPane) scroll.getViewport().getView();
+          if (scroll.getRowHeader() == null || scroll.getRowHeader().getView() == null) {
+            if (ruleEnabled) {
+              scroll.setRowHeaderView(new LineEnumRule(pane));
+            }
           }
-        }
-        else {
-          if (!ruleEnabled) {
-            scroll.setRowHeaderView(null);
+          else {
+            if (!ruleEnabled) {
+              scroll.setRowHeaderView(null);
+            }
           }
         }
       }
     }
-    
   }
   
   
   /**
-   * put your documentation comment here
+   * Blocks access to DrJava while the hourglass cursor is on
    */
   private class GlassPane extends JComponent {
 
     /**
-     * put your documentation comment here
+     * Creates a new GlassPane over the DrJava window
      */
     public GlassPane() {
       addKeyListener(new KeyAdapter() {});
@@ -2250,6 +2206,9 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
   }
 
+  /**
+   * Inner class to listen to all events in the model.
+   */
   private class ModelListener implements SingleDisplayModelListener{
     public void newFileCreated(OpenDefinitionsDocument doc) {
       _createDefScrollPane(doc);
@@ -2258,7 +2217,6 @@ public class MainFrame extends JFrame implements OptionConstants {
     public void fileSaved(OpenDefinitionsDocument doc) {
       _saveAction.setEnabled(false);
       _revertAction.setEnabled(true);
-      //_compileAction.setEnabled(true);
       updateFileTitle();
       _currentDefPane.requestFocus();
     }
@@ -2284,12 +2242,10 @@ public class MainFrame extends JFrame implements OptionConstants {
       boolean canCompile = (!isModified && !active.isUntitled());
       _saveAction.setEnabled(isModified);
       _revertAction.setEnabled(!active.isUntitled());
-      //_compileAction.setEnabled(canCompile);
 
       // Update error highlights
       _errorPanel.getErrorListPane().selectNothing();
       _junitPanel.getJUnitErrorListPane().selectNothing();
-      //_junitPanel.reset();
       
       int pos = _currentDefPane.getCaretPosition();
       _currentDefPane.getErrorCaretListener().updateHighlight(pos);
@@ -2298,7 +2254,6 @@ public class MainFrame extends JFrame implements OptionConstants {
       _setCurrentDirectory(active);
 
       updateFileTitle();
-      //_posListener.updateLocation();
       _currentDefPane.requestFocus();
       _posListener.updateLocation();
       
@@ -2313,7 +2268,6 @@ public class MainFrame extends JFrame implements OptionConstants {
         //uninstallFindReplaceDialog(_findReplace);
         //installFindReplaceDialog(_findReplace);
       }
-      
     }
     
     public void interactionStarted() {
@@ -2331,11 +2285,10 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
 
     public void compileStarted() {
-      if (!_errorPanel.isDisplayed())
+      if (!_errorPanel.isDisplayed()) {
         showTab(_errorPanel);
-      //_tabbedPane.setSelectedIndex(COMPILE_TAB);
+      }
       _saveAction.setEnabled(false);
-      //_compileAction.setEnabled(false);
       hourglassOn();
     }
 
@@ -2343,7 +2296,6 @@ public class MainFrame extends JFrame implements OptionConstants {
       hourglassOff();
       _updateErrorListeners();
       _errorPanel.reset();
-      //_compileAction.setEnabled(true);
     }
     
     public void compileErrorDuringJUnit() {
@@ -2353,7 +2305,6 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
 
     public void junitStarted() {
-      //_tabbedPane.setSelectedIndex(JUNIT_TAB);
       _saveAction.setEnabled(false);
       hourglassOn();
     }
@@ -2363,7 +2314,6 @@ public class MainFrame extends JFrame implements OptionConstants {
       _updateErrorListeners();
       _errorPanel.reset();
       _junitPanel.reset();
-      //_tabbedPane.setSelectedComponent(_junitPanel);
     }
 
     public void interactionsExited(int status) {
@@ -2528,7 +2478,6 @@ public class MainFrame extends JFrame implements OptionConstants {
           throw new RuntimeException("Invalid rc: " + rc);
       }
     }
-
   }
  
 
@@ -2603,7 +2552,7 @@ public class MainFrame extends JFrame implements OptionConstants {
    * intelligent error messages (the ActionToNameMap)
    */
   private void _setUpKeyBindingMaps() {
-    if (CodeStatus.DEVELOPMENT) {
+    if (CodeStatus.DEVELOPMENT) {  // no configurable keystrokes in stable
       ActionMap _actionMap = _currentDefPane.getActionMap();
  
       _keyBindingManager.put(KEY_BACKWARD, _actionMap.get(DefaultEditorKit.backwardAction),null, "Backward");
@@ -2697,7 +2646,6 @@ public class MainFrame extends JFrame implements OptionConstants {
     public void optionChanged(OptionEvent<Font> oce) {
       _setMainFont();
     }
-    
   }
     
   /**
@@ -2709,7 +2657,6 @@ public class MainFrame extends JFrame implements OptionConstants {
       _docList.setFont(doclistFont);
     }
   }
-  
   
   /**
    *  The OptionListener for FONT_TOOLBAR

@@ -109,9 +109,7 @@ public interface OptionConstants extends ConfigurationTool {
   public static final IntegerOption FONT_MAIN_SIZE = 
     new IntegerOption("font.main.size", new Integer(12));
   
-  
   /* List of open documents */
-
   public static final FontOption FONT_DOCLIST = 
     (CodeStatus.DEVELOPMENT) ?
     new FontOption("font.doclist", Font.decode("Monospaced-PLAIN-10")):
@@ -509,7 +507,6 @@ public interface OptionConstants extends ConfigurationTool {
     (CodeStatus.DEVELOPMENT) ?
     new BooleanOption("debugger.advanced", new Boolean(false)):
     null;
-  
 
 }
 

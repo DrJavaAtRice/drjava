@@ -51,6 +51,7 @@ import java.awt.*;
  * displayed, and a close button. Attaches an action to the close button which
  * calls the _close method. This method can be overwritten in a subclass if
  * needed.
+ * @version $Id$
  */
 public abstract class TabbedPanel extends JPanel {
   // indicates whether this tab is displayed in the tabbed pane
@@ -67,6 +68,11 @@ public abstract class TabbedPanel extends JPanel {
   // string to be displayed on the tab
   private String _name;
  
+  /**
+   * Constructor.
+   * @param frame MainFrame displaying the tab
+   * @param name Name to display for the tab
+   */
   public TabbedPanel(MainFrame frame, String name) {
     _frame = frame;
     _name = name;
@@ -90,28 +96,40 @@ public abstract class TabbedPanel extends JPanel {
     this.add(_mainPanel, BorderLayout.CENTER);
   }
   
-  // defines the action that takes place upon clicking the close button
+  /**
+   * defines the action that takes place upon clicking the close button
+   */
   private Action _closeAction = new AbstractAction("X") {
     public void actionPerformed(ActionEvent e) {
       _close();
     }
   };
   
-  // behavior that subclasses of TabbedPanel generally have
+  /**
+   * behavior that subclasses of TabbedPanel generally have
+   */
   protected void _close() {
      _displayed = false;
      _frame.removeTab(this);
   }
   
-  // @return whether this tabbedPanel is displayed in a tab
+  /**
+   * @return whether this tabbedPanel is displayed in a tab
+   */
   public boolean isDisplayed() {
     return _displayed;
   }
     
+  /**
+   * @return the display name of this tab
+   */
   public String getName() {
     return _name;
   }
   
+  /**
+   * Sets whether the tab is displayed.  Doesn't actually show or hide the tab.
+   */
   public void setDisplayed(boolean displayed) {
     _displayed = displayed;
   }

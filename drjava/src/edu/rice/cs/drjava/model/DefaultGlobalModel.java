@@ -1342,19 +1342,19 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
 
     /**
      * Determines if the definitions document has changed on disk
-   * since the last time the document was read.
+     * since the last time the document was read.
      * @return true if the document has been modified on disk
      */
     public boolean isModifiedOnDisk() {
       return _doc.isModifiedOnDisk();
     }
-    // <<<<<<< DefaultGlobalModel.java
     
-    /** Determines if the defintions document has been changed
-     *  by an outside program. If the document has changed,
-     *  then asks the listeners if the GlobalModel should 
-     *  revert the document to the most recent version saved.
-     *  @return true if document has been reverted
+    /** 
+     * Determines if the defintions document has been changed
+     * by an outside program. If the document has changed,
+     * then asks the listeners if the GlobalModel should 
+     * revert the document to the most recent version saved.
+     * @return true if document has been reverted
      */
     public boolean revertIfModifiedOnDisk() throws IOException{
       final OpenDefinitionsDocument doc = this;
@@ -1759,8 +1759,8 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
 
 
   /**
-   *Assumes a trimmed String. Returns a string of the main call that the
-   *interpretor can use.
+   * Assumes a trimmed String. Returns a string of the main call that the
+   * interpretor can use.
    */
   private String _testClassCall(String s) {
     LinkedList ll = new LinkedList();
@@ -1798,18 +1798,16 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
   }
 
   private class ExtraClasspathOptionListener implements OptionListener<Vector<String>> {
-   
-      public void optionChanged (OptionEvent<Vector<String>> oce) {
-          Vector<String> cp = oce.value;
-          if(cp!=null) {
-              Enumeration<String> enum = cp.elements();
-              while(enum.hasMoreElements()) {
-                  _interpreterControl.addClassPath(enum.nextElement());
-              }
-          }
-          
-      }
-      
+    
+    public void optionChanged (OptionEvent<Vector<String>> oce) {
+      Vector<String> cp = oce.value;
+      if(cp!=null) {
+        Enumeration<String> enum = cp.elements();
+        while(enum.hasMoreElements()) {
+          _interpreterControl.addClassPath(enum.nextElement());
+        }
+      } 
+    }    
   }
 
   /**

@@ -73,6 +73,10 @@ public class UncaughtExceptionWindow extends JFrame {
   // the exception that was passed to this window
   private Throwable _exception;
   
+  /**
+   * Creates a window to graphically display an exception which
+   * has occurred in the code of DrJava.
+   */
   public UncaughtExceptionWindow(Throwable exception) {
     _exception = exception;
     
@@ -129,7 +133,7 @@ public class UncaughtExceptionWindow extends JFrame {
                       _exception+"\n\n"+
                       "Please submit a bug report containing the "+
                       "system information in the "+
-                      "Help>About \n window and an " +
+                      "Help>About \nwindow and an " +
                       "account of the actions "+ 
                       "that caused the bug (if known) to\n"+
                       "http://sourceforge.net/projects/drjava.\n\n"+
