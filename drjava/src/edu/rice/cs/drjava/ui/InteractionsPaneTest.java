@@ -46,6 +46,7 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.ui;
 
 import edu.rice.cs.drjava.model.definitions.ColoringView;
+import edu.rice.cs.drjava.model.GlobalModel;
 import edu.rice.cs.drjava.model.repl.*;
 import edu.rice.cs.drjava.model.repl.InteractionsDocumentTest.TestBeep;
 import edu.rice.cs.drjava.model.repl.InteractionsModelTest.TestInteractionsModel;
@@ -305,6 +306,55 @@ public final class InteractionsPaneTest extends TestCase {
     synchronized (lock) {
       assertEquals("Should have returned the correct text.", "\n\n", buf.toString());
     }
+  }
+  
+  public void testPromptListClearedOnReset() throws Exception {
+    //Can't use the fields declared in setUp - it doesn't use a real InteractionsModel
+    MainFrame mf = new MainFrame();
+    GlobalModel gm = mf.getModel();
+    _controller = mf.getInteractionsController();
+    _model = gm.getInteractionsModel();
+    _adapter = gm.getSwingInteractionsDocument();
+    _doc = gm.getInteractionsDocument();
+    _pane = mf.getInteractionsPane();
+    
+    assertEquals("PromptList before insert should contain 0 elements",
+                 0, _pane.getPromptList().size());
+        
+    // Insert some text                   
+    _doc.insertText(_doc.getDocLength(), "5", InteractionsDocument.NUMBER_RETURN_STYLE);
+    _pane.setCaretPosition(_doc.getDocLength());
+    
+    assertEquals("PromptList after insert should contain 1 element",
+                 1, _pane.getPromptList().size());    
+    assertEquals("First prompt should be saved as being at position",
+                 InteractionsDocument.DEFAULT_BANNER.length() + InteractionsDocument.DEFAULT_PROMPT.length(),
+                 _pane.getPromptList().get(0));
+    
+    _doc.insertPrompt();
+    _pane.setCaretPosition(_doc.getDocLength());
+    assertEquals("PromptList after insertion of new prompt should contain 2 elements",
+                 2, _pane.getPromptList().size());
+    assertEquals("First prompt should be saved as being at position",
+                 InteractionsDocument.DEFAULT_BANNER.length() + InteractionsDocument.DEFAULT_PROMPT.length(),
+                 _pane.getPromptList().get(0));
+    assertEquals("Second prompt should be saved as being at position",
+                 InteractionsDocument.DEFAULT_BANNER.length() + InteractionsDocument.DEFAULT_PROMPT.length() * 2 + 1,
+                 _pane.getPromptList().get(1));
+    
+    
+    synchronized(_model){
+      // Reset should clear
+      _model.setWaitingForFirstInterpreter(false);
+      //this adds the "Resetting Interactions" 
+      _model.resetInterpreter();
+      _model.interpreterResetting();
+    }
+    
+    synchronized(_model){
+      assertEquals("PromptList after reset should contain no elements",
+                   0, _pane.getPromptList().size());
+    }  
   }
     
 }

@@ -272,10 +272,6 @@ public class History implements OptionConstants {
     // Make sure we ask before overwriting
     if (c != null) {
       if (!c.exists() || selector.verifyOverwrite()) {
-        if (c.getName().indexOf('.') == -1) {
-          c = new File(c.getAbsolutePath() + "." +
-                       InteractionsHistoryFilter.HIST_EXTENSION);
-        }
         FileOps.DefaultFileSaver saver = new FileOps.DefaultFileSaver(c) {
           public void saveTo(OutputStream os) throws IOException {
 

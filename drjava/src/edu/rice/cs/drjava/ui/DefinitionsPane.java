@@ -729,7 +729,8 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
       _toggleBreakpointMenuItem = _popMenu.add(breakpointItem);
       _toggleBreakpointMenuItem.setEnabled(false);
     }
-
+    
+    
 
   }
 

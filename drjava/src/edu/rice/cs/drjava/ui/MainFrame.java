@@ -1388,7 +1388,15 @@ public class MainFrame extends JFrame implements OptionConstants {
           }
 //          return getSaveFile(_interactionsHistoryChooser);
           int rc = _interactionsHistoryChooser.showSaveDialog(MainFrame.this);
-          return getChosenFile(_interactionsHistoryChooser, rc);
+          File c = getChosenFile(_interactionsHistoryChooser, rc);
+          //Moved from history itself to here to account for bug #989232, non-existant default
+          //history file found
+          if (c.getName().indexOf('.') == -1) {
+            c = new File(c.getAbsolutePath() + "." +
+                         InteractionsHistoryFilter.HIST_EXTENSION);
+          }
+          _interactionsHistoryChooser.setSelectedFile(c);
+          return c;
         }
         public boolean warnFileOpen(File f) {
           return true;
@@ -1824,6 +1832,13 @@ public class MainFrame extends JFrame implements OptionConstants {
     return _interactionsPane;
   }
 
+  /**
+   * Returns the frame's interactions controller. (Package private accessor)
+   */
+  InteractionsController getInteractionsController() {
+    return _interactionsController;
+  }
+  
    /**
    * @return The frame's close button (Package private accessor)
    */
