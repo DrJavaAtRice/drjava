@@ -40,6 +40,7 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.model.repl;
 
 import gj.util.Vector;
+import edu.rice.cs.util.FileOps;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.model.*;
@@ -220,7 +221,7 @@ public class History implements OptionConstants {
    * The saved file will still include
    * any tags or extensions needed to recognize it as a saved interactions file.
    */
-  public void writeToFile(FileSaveSelector selector, String editedVersion) 
+  public void writeToFile(FileSaveSelector selector, final String editedVersion) 
     throws IOException
   {
     
@@ -240,11 +241,19 @@ public class History implements OptionConstants {
           c = new File(c.getAbsolutePath() + "." +
                        InteractionsHistoryFilter.HIST_EXTENSION);
         }
-        FileOutputStream fos = new FileOutputStream(c);
-        OutputStreamWriter osw = new OutputStreamWriter(fos);
-        BufferedWriter bw = new BufferedWriter(osw);
-        bw.write(HISTORY_FORMAT_VERSION_2 + editedVersion, 0, HISTORY_FORMAT_VERSION_2.length() + editedVersion.length());
-        bw.close();
+	FileOps.DefaultFileSaver saver =
+	  new FileOps.DefaultFileSaver(c) {
+	    public void saveTo(File file) throws IOException {
+	
+	      FileOutputStream fos = new FileOutputStream(file);
+	      OutputStreamWriter osw = new OutputStreamWriter(fos);
+	      BufferedWriter bw = new BufferedWriter(osw);
+	      bw.write(HISTORY_FORMAT_VERSION_2 + editedVersion, 0,
+		       HISTORY_FORMAT_VERSION_2.length() + editedVersion.length());
+	      bw.close();
+	    }
+	  };
+	FileOps.saveFile(saver);
       }
     }
   }

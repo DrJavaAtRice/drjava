@@ -551,6 +551,7 @@ public class ConfigFrame extends JFrame {
     panel.addComponent( new BooleanOptionComponent ( OptionConstants.JAVAC_ALLOW_ASSERT, "Allow Assert Keyword in Java 1.4", this));
     panel.addComponent( new BooleanOptionComponent( OptionConstants.INTERACTIONS_EXIT_PROMPT, "Prompt if Interactions Pane Exits Unexpectedly", this));
     panel.addComponent( new BooleanOptionComponent( OptionConstants.QUIT_PROMPT, "Prompt Before Quit", this));
+    panel.addComponent( new BooleanOptionComponent( OptionConstants.BACKUP_FILES, "Keep emacs style backup files", this));
     
     panel.displayComponents();
   }

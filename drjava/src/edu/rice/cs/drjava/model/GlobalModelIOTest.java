@@ -57,13 +57,15 @@ import edu.rice.cs.util.text.DocumentAdapterException;
 import edu.rice.cs.drjava.model.definitions.*;
 import edu.rice.cs.drjava.model.repl.*;
 import edu.rice.cs.drjava.model.compiler.*;
-
+import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.config.OptionConstants;
+  
 /**
  * Test I/O functions of the global model.
  *
  * @version $Id$
  */
-public class GlobalModelIOTest extends GlobalModelTestCase {
+public class GlobalModelIOTest extends GlobalModelTestCase implements OptionConstants{
   /**
    * Constructor.
    * @param  String name
@@ -694,6 +696,10 @@ public class GlobalModelIOTest extends GlobalModelTestCase {
    */
   public void testSaveAlreadySaved() throws BadLocationException, IOException
   {
+    //disable file backups, remember original setting
+    Boolean backupStatus = DrJava.getConfig().getSetting(BACKUP_FILES);
+    DrJava.getConfig().setSetting(BACKUP_FILES, Boolean.FALSE);
+    
     OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
     final File file = tempFile();
     
@@ -705,7 +711,7 @@ public class GlobalModelIOTest extends GlobalModelTestCase {
                  FOO_TEXT,
                  FileOps.readFileAsString(file));
     
-    // Listener to use on future save
+    // Listener to use on future saves
     TestListener listener = new TestListener() {
       public void fileSaved(OpenDefinitionsDocument doc) {
         File f = null;
@@ -724,19 +730,45 @@ public class GlobalModelIOTest extends GlobalModelTestCase {
         saveCount++;
       }
     };
+
+    File backup = new File(file.getPath() + "~");
+    backup.delete();
     
     _model.addListener(listener);
     
     // Muck up the document
     changeDocumentText(BAR_TEXT, doc);
-    
+
     // Save over top of the previous file
     doc.saveFile(new FileSelector(file));
     listener.assertSaveCount(1);
     
-    assertEquals("contents of saved file",
+    assertEquals("contents of saved file 2nd write",
                  BAR_TEXT,
                  FileOps.readFileAsString(file));
+
+    assertEquals("no backup was made", false, backup.exists());
+
+    
+    //enable file backups
+    DrJava.getConfig().setSetting(BACKUP_FILES, Boolean.TRUE);
+    
+    // Muck up the document
+    changeDocumentText(FOO_TEXT, doc);
+
+    // Save over top of the previous file
+    doc.saveFile(new FileSelector(file));
+    listener.assertSaveCount(2);
+    
+    assertEquals("contents of saved file 3rd write",
+                 FOO_TEXT,
+                 FileOps.readFileAsString(file));
+    assertEquals("contents of backup file 3rd write",
+		 BAR_TEXT,
+		 FileOps.readFileAsString(backup));
+
+    /* Set the config back to the original option */
+    DrJava.getConfig().setSetting(BACKUP_FILES, backupStatus);
   }
   
   /**

@@ -39,6 +39,7 @@
 
 package edu.rice.cs.drjava.config;
 import java.io.*;
+import edu.rice.cs.util.FileOps;
 
 /**
  * A Configuration object that is backed by a file.
@@ -77,9 +78,16 @@ public class FileConfiguration extends SavableConfiguration {
    * Saves the current settings to the stored properties file.
    * @param header Description of the properties list
    */
-  public void saveConfiguration(String header) throws IOException {
-    OutputStream os = new BufferedOutputStream(new FileOutputStream(file));
-    super.saveConfiguration(os,header);
-    os.close(); // in this implementation, close the file after saving.
+  public void saveConfiguration(final String header) throws IOException {
+    FileOps.saveFile(new FileOps.DefaultFileSaver(file){
+	public void saveTo(File file) throws IOException {
+	  OutputStream os = new BufferedOutputStream(new FileOutputStream(file));
+	  saveConfiguration(os,header);
+	  os.close(); // in this implementation, close the file after saving.
+	}
+	public boolean shouldBackup(){
+	  return false;
+	}
+      });
   }
 }

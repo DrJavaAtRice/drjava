@@ -311,8 +311,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
 
     _createDebugger();
     
-    // Listen to any relevant config options
-    DrJava.getConfig().addOptionListener(EXTRA_CLASSPATH, new ExtraClasspathOptionListener());
+    _registerOptionListeners();
   }
 
 
@@ -802,6 +801,19 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     return _interactionsModel.getDocument().getHistoryAsString();
   }
   
+  /**
+   * Registers OptionListeners.  Factored out code from the two constructors
+   */
+  private void _registerOptionListeners(){
+    // Listen to any relevant config options
+    DrJava.getConfig().addOptionListener(EXTRA_CLASSPATH,
+					 new ExtraClasspathOptionListener());
+    DrJava.getConfig().addOptionListener(BACKUP_FILES,
+					 new BackUpFileOptionListener());
+    Boolean makeBackups = DrJava.getConfig().getSetting(BACKUP_FILES);
+    FileOps.DefaultFileSaver.setBackupsEnabled(makeBackups.booleanValue());
+  }
+
   /**
    * Appends a string to the given document using a particular attribute set.
    * Also waits for a small amount of time (WRITE_DELAY) to prevent any one
@@ -1381,10 +1393,23 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
             file.renameTo(file);
           }
           
-          // Save the file
-          FileWriter writer = new FileWriter(file);
-          _editorKit.write(writer, _doc, 0, _doc.getLength());
-          writer.close();
+          // have FileOps save the file the correct way
+	  FileOps.saveFile(new FileOps.DefaultFileSaver(file){
+	      public void saveTo(File file) throws IOException{
+		FileWriter writer = new FileWriter(file);
+		try {
+		  _editorKit.write(writer, _doc, 0, _doc.getLength());
+		} catch (BadLocationException docFailed){
+		  // We don't expect this to happen
+		  throw new UnexpectedException(docFailed);
+		}
+		finally {
+		   writer.close();
+		 }
+	      }
+	    });
+		
+	  
           _doc.resetModification();
           _doc.setFile(file);
           _doc.setCachedClassFile(null);
@@ -1412,10 +1437,6 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
         // Thrown by com.getFile() if the user cancels.
         //   We don't save if this happens.
         return false;
-      }
-      catch (BadLocationException docFailed) {
-        // We don't expect this to happen
-        throw new UnexpectedException(docFailed);
       }
     }
 
@@ -2428,10 +2449,18 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
         while(enum.hasMoreElements()) {
           _interactionsModel.addToClassPath(enum.nextElement().getAbsolutePath());
         }
-      }
-    }
+      } 
+    }    
   }
 
+  private class BackUpFileOptionListener implements OptionListener<Boolean> {
+
+    public void optionChanged (OptionEvent<Boolean> oe){
+      Boolean value = oe.value;
+      FileOps.DefaultFileSaver.setBackupsEnabled(value.booleanValue());
+    }
+  }
+  
   /**
    * Called when the JVM used for unit tests has registered.
    */

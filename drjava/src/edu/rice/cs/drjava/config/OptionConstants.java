@@ -563,6 +563,12 @@ public interface OptionConstants {
    */
   public static final BooleanOption QUIT_PROMPT =
     new BooleanOption("quit.prompt", new Boolean(true));
+
+  /**
+   * Whether to make file backups
+   */
+  public static final BooleanOption BACKUP_FILES =
+    new BooleanOption("files.backup", new Boolean(true));
   
   /**
    * A vector containing the most recently used files
