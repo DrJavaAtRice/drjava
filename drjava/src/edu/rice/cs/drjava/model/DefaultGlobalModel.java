@@ -664,6 +664,95 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
     _interpreterControl.interpret(toEval);
   }
 
+  /**
+   * Interprets the given String array. Assumes all strings have no 
+   * trailing whitespace. Interprets the array all at once so if there are 
+   * any errors, none of the statements after the first erroneous one are processed.
+   */
+  public void interpretHistory(FileOpenSelector selector) 
+    throws IOException {//Vector<String> interactions) {
+    
+    File[] files = null;
+    try {
+      files = selector.getFiles();
+    }
+    catch (OperationCanceledException oce) {
+      return;
+      // don't need to do anything
+    }
+    Vector<String> strings = new Vector<String>();
+    if (files == null) 
+      throw new IOException("No Files returned from FileSelector");
+    
+    for (int i=0; i < files.length; i++) {
+      if (files[i] == null) {
+        throw new IOException("File name returned from FileSelector is null");
+      }
+      File c = files[i];
+      if (c != null) {
+        try {
+          FileInputStream fis = new FileInputStream(c);
+          InputStreamReader isr = new InputStreamReader(fis);
+          BufferedReader br = new BufferedReader(isr);
+          String currLine;
+          while ((currLine = br.readLine()) != null) {
+            strings.addElement(currLine);
+          }
+        }
+        catch (IOException ioe) {
+          throw new IOException("File name returned from FileSelector is null");
+          //_showIOError(ioe);
+        }
+        
+      }
+      notifyListeners(new EventNotifier() {
+        public void notifyListener(GlobalModelListener l) {
+          l.interactionStarted();
+        }
+      });
+      String text = "";
+      String currString;
+      for (int j = 0; j < strings.size(); j++) {
+        currString = strings.elementAt(j);
+        if (currString.length() > 0) {
+          if (currString.charAt(currString.length() - 1) == ';') 
+            text += currString + "\n";
+          else
+            text += currString + ";\n";
+        }
+      }
+      _docAppend(_interactionsDoc, text, null);
+      _interactionsDoc.setInProgress(true);
+      _interactionsDoc.addToHistory(text);
+      
+      // there is no return at the end of the last line
+      // better to put it on now and not later.
+      _docAppend(_interactionsDoc, "\n", null);
+      
+      String toEval = text.trim();
+      if (toEval.startsWith("java ")) {
+        toEval = _testClassCall(toEval);
+      }
+      
+      //System.out.println("Interpreting "+toEval);
+      _interpreterControl.interpret(toEval);
+    }
+  }
+  
+  /**
+   * Clears the interactions history
+   */
+  public void clearHistory() {
+    _interactionsDoc.clearHistory();
+  }
+  
+  /**
+   * Saves the current history to a file
+   */
+  public void saveHistory(FileSaveSelector selector) {
+    _interactionsDoc.saveHistory(selector);
+  }
+  
   private void _docAppend(Document doc, String s, AttributeSet set) {
     try {
       doc.insertString(doc.getLength(), s, set);

@@ -68,6 +68,8 @@ public class OutputPane extends JTextPane {
         if (endPos != null) {
           scrollRectToVisible(endPos);
         }
+        revalidate();
+        repaint();
       } catch (BadLocationException willNeverHappenISwear) {}
     }
 

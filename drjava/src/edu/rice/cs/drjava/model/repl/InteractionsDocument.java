@@ -47,6 +47,7 @@ import java.util.*;
 import java.io.*;
 
 import edu.rice.cs.util.UnexpectedException;
+import edu.rice.cs.drjava.model.FileSaveSelector;
 
 /**
  * The document that handles input to the repl and the interpretation
@@ -172,6 +173,13 @@ public class InteractionsDocument extends DefaultStyledDocument {
     } catch (BadLocationException e) {
       throw new UnexpectedException(e);
     }
+  }
+  
+  /**
+   * Clears the history
+   */
+  public void clearHistory() {
+    _history.clear();
   }
 
   /**
@@ -339,6 +347,10 @@ public class InteractionsDocument extends DefaultStyledDocument {
     finally {
       //writeUnlock();
     }
+  }
+  
+  public void saveHistory(FileSaveSelector selector) {
+    _history.writeToFile(selector);
   }
 
   private class ExceptionButtonListener implements ActionListener {

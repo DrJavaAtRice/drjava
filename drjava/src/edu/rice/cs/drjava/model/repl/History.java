@@ -42,8 +42,10 @@ package edu.rice.cs.drjava.model.repl;
 import  gj.util.Vector;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.DrJava;
-import edu.rice.cs.drjava.config.*;
+import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.CodeStatus;
+import java.io.*;
+import javax.swing.*;
 
 /**
  * Keeps track of what was typed in the interactions pane.
@@ -145,6 +147,50 @@ public class History implements OptionConstants {
    */
   public int size() {
     return _vector.size();
+  }
+  
+  /**
+   * Clears the vector
+   */
+  public void clear() {
+    // apparently gj Vector's don't have the clear() method
+    _vector.setSize(0);
+  }
+  
+  /**
+   * Writes this History to a the file selected in the FileSaveSelector
+   */
+  public void writeToFile(FileSaveSelector selector) {
+    
+    File c = null;
+    try {
+      c = selector.getFile();
+    }
+    catch (OperationCanceledException oce) {
+      return;
+      // don't need to do anything
+    }
+    if (c != null) {
+      if (c.getName().indexOf('.') == -1)
+        c = new File(c.getAbsolutePath() + ".hist");
+      try {
+        FileOutputStream fos = new FileOutputStream(c);
+        OutputStreamWriter osw = new OutputStreamWriter(fos);
+        BufferedWriter bw = new BufferedWriter(osw);
+        String currString;
+        for (int i = 0; i < size(); i++) {
+          currString = _vector.elementAt(i);
+          currString.trim();
+          bw.write(currString, 0, currString.length());
+          bw.newLine();
+        }
+        bw.close();
+      }
+      catch (IOException ioe) {JOptionPane.showMessageDialog(null,
+                                  "An IOException has occured" + "\n" + ioe,
+                                  "IOException",
+                                  JOptionPane.ERROR_MESSAGE);}
+    }
   }
   
   /**

@@ -44,14 +44,13 @@ import javax.swing.text.*;
 import javax.swing.event.*;
 import javax.swing.border.*;
 import javax.swing.plaf.*;
+import javax.swing.filechooser.*;
 import java.awt.event.*;
 import java.awt.*;
 import java.awt.print.*;
 import java.beans.*;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -172,42 +171,22 @@ public class MainFrame extends JFrame implements OptionConstants {
    * from which we saved.
    */
   private JFileChooser _saveChooser;
-
+  
   private FileOpenSelector _openSelector = new FileOpenSelector() {
     public File[] getFiles() throws OperationCanceledException {
-      return getOpenFiles();
+      return getOpenFiles(_openChooser);
     }
   };
 
   private FileSaveSelector _saveSelector = new FileSaveSelector() {
     public File getFile() throws OperationCanceledException {
-      return getSaveFile();
+      return getSaveFile(_saveChooser);
     }
     public void warnFileOpen() {
-      // If we'd like to change to an error message for this, instead
-      // of a warning, change both incidents of WARNING to ERROR.
-      JOptionPane.showMessageDialog
-        ( MainFrame.this,
-         "This file is open in DrJava.  You may not overwrite it.",
-         "File Open Warning",
-         JOptionPane.WARNING_MESSAGE);
+      _warnFileOpen();
     }
-
-
     public boolean verifyOverwrite() {
-      Object[] options = {"Yes","No"};
-      int n = JOptionPane.showOptionDialog
-        (MainFrame.this,
-         "This file already exists.  Do you wish to overwrite the file?",
-         "Confirm Overwrite",
-         JOptionPane.YES_NO_OPTION,
-         JOptionPane.QUESTION_MESSAGE,
-         null,
-         options,
-         options[1]);
-      if (n==JOptionPane.YES_OPTION){ return true;}
-      else {return false;}
-
+      return _verifyOverwrite();
     }
   };
 
@@ -493,6 +472,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       if (rc == JOptionPane.YES_OPTION) {
         _model.resetInteractions();
       }
+      _interactionsPane.requestFocus();
     }
   };
 
@@ -625,6 +605,108 @@ public class MainFrame extends JFrame implements OptionConstants {
           _actionMap.get(DefaultEditorKit.deleteNextCharAction).actionPerformed(ae);
         else
           _cutAction.actionPerformed(ae);
+      }
+    }
+  };
+  
+  /** Interprets the commands in a file in the interactions window */
+  private Action _loadHistoryAction = new AbstractAction("Load Interactions History")
+  {
+    public void actionPerformed(ActionEvent ae) {
+      if (CodeStatus.DEVELOPMENT) {
+        // Working directory is default place to start
+        String workDir = DrJava.CONFIG.getSetting(WORKING_DIRECTORY).toString();
+        if ((workDir == null) || (workDir.equals(""))) {
+          workDir = System.getProperty("user.dir");
+        }
+        final JFileChooser jfc = new JFileChooser(workDir);
+        jfc.setFileFilter(new javax.swing.filechooser.FileFilter() {
+          public boolean accept(File f) {
+            String ext = null;
+            String s = f.getName();
+            int i = s.lastIndexOf('.');
+            
+            if (i > 0 &&  i < s.length() - 1) {
+              ext = s.substring(i+1).toLowerCase();
+            }
+            if ("hist".equals(ext))
+              return true;
+            return false;
+          }
+          public String getDescription() {
+            return "Interaction History Files";
+          }
+        });
+        FileOpenSelector selector = new FileOpenSelector() {
+          public File[] getFiles() throws OperationCanceledException {            
+            return getOpenFiles(jfc);
+          }
+        };
+        try {
+          _model.interpretHistory(selector);
+        }
+        catch (IOException ioe) {
+          _showIOError(ioe);
+        }
+        _interactionsPane.requestFocus();
+      }
+    }
+  };
+  
+  /** Save the commands in the interactions window's history to a file */
+  private Action _saveHistoryAction = new AbstractAction("Save Interactions History")
+  {
+    public void actionPerformed(ActionEvent ae) {
+      if (CodeStatus.DEVELOPMENT) {
+        // Working directory is default place to start
+        String workDir = DrJava.CONFIG.getSetting(WORKING_DIRECTORY).toString();
+        if ((workDir == null) || (workDir.equals(""))) {
+          workDir = System.getProperty("user.dir");
+        }
+        final JFileChooser jfc = new JFileChooser(workDir);
+        jfc.setFileFilter(new javax.swing.filechooser.FileFilter() {
+          public boolean accept(File f) {
+            String ext = null;
+            String s = f.getName();
+            int i = s.lastIndexOf('.');
+            
+            if (i > 0 &&  i < s.length() - 1) {
+              ext = s.substring(i+1).toLowerCase();
+            }
+            if ("hist".equals(ext))
+              return true;
+            return false;
+          }
+          public String getDescription() {
+            return "Interaction History Files";
+          }
+        });
+        FileSaveSelector selector = new FileSaveSelector() {
+          public File getFile() throws OperationCanceledException {
+            return getSaveFile(jfc);
+          }
+          public void warnFileOpen() {
+            _warnFileOpen();
+          }
+          public boolean verifyOverwrite() {
+            return _verifyOverwrite();
+          }
+        };
+        _model.saveHistory(selector);
+        _interactionsPane.requestFocus();
+      }
+    }
+  };
+  
+  /**
+   * Clears the commands in the interaction history 
+   */
+  private Action _clearHistoryAction = new AbstractAction("Clear Interactions History")
+  {
+    public void actionPerformed(ActionEvent ae) {
+      if (CodeStatus.DEVELOPMENT) {
+        _model.clearHistory();
+        _interactionsPane.requestFocus();
       }
     }
   };
@@ -860,24 +942,24 @@ public class MainFrame extends JFrame implements OptionConstants {
    * Ask the user if they'd like to save previous changes (if the current
    * document has been modified) before opening.
    */
-  public File[] getOpenFiles() throws OperationCanceledException {
+  public File[] getOpenFiles(JFileChooser jfc) throws OperationCanceledException {
     // This redundant-looking hack is necessary for JDK 1.3.1 on Mac OS X!
-    File selection = _openChooser.getSelectedFile();
+    File selection = jfc.getSelectedFile();//_openChooser.getSelectedFile();
     if (selection != null) {
       _openChooser.setSelectedFile(selection.getParentFile());
       _openChooser.setSelectedFile(selection);
       _openChooser.setSelectedFile(null);
     }
-    int rc = _openChooser.showOpenDialog(this);
-    return getChosenFiles(_openChooser, rc);
+    int rc = jfc.showOpenDialog(this);//_openChooser.showOpenDialog(this);
+    return getChosenFiles(jfc, rc);//_openChooser, rc);
   }
 
   /**
    * Prompt the user to select a place to save the current document.
    */
-  public File getSaveFile() throws OperationCanceledException {
+  public File getSaveFile(JFileChooser jfc) throws OperationCanceledException {
     // This redundant-looking hack is necessary for JDK 1.3.1 on Mac OS X!
-    File selection = _saveChooser.getSelectedFile();
+    File selection = jfc.getSelectedFile();//_saveChooser.getSelectedFile();
     if (selection != null) {
       _saveChooser.setSelectedFile(selection.getParentFile());
       _saveChooser.setSelectedFile(selection);
@@ -886,11 +968,10 @@ public class MainFrame extends JFrame implements OptionConstants {
     
     OpenDefinitionsDocument active = _model.getActiveDocument();
     if (active.isUntitled()) { 
-      _saveChooser.setSelectedFile(new File(active.getClassName()));
-    } 
-
-    int rc = _saveChooser.showSaveDialog(this);
-    return getChosenFile(_saveChooser, rc);
+      jfc.setSelectedFile(new File(active.getClassName()));
+    }
+    int rc = jfc.showSaveDialog(this);//_saveChooser.showSaveDialog(this);
+    return getChosenFile(jfc, rc);//_saveChooser, rc);
   }
 
   /**
@@ -1674,6 +1755,12 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
     */
     toolsMenu.add(_resetInteractionsAction);
+    if (CodeStatus.DEVELOPMENT) {
+      toolsMenu.add(_loadHistoryAction);
+      toolsMenu.add(_saveHistoryAction);
+      toolsMenu.add(_clearHistoryAction);
+    }
+    toolsMenu.addSeparator();
     toolsMenu.add(_clearOutputAction);
 
     // Add the menus to the menu bar
@@ -2637,6 +2724,33 @@ public class MainFrame extends JFrame implements OptionConstants {
       (int)_tabbedPane.getMinimumSize().getHeight();
     if (_mainSplit.getDividerLocation() > divLocation)
       _mainSplit.setDividerLocation(divLocation);
+  }
+  
+  private void _warnFileOpen() {
+    // If we'd like to change to an error message for this, instead
+    // of a warning, change both incidents of WARNING to ERROR.
+    JOptionPane.showMessageDialog
+      ( MainFrame.this,
+       "This file is open in DrJava.  You may not overwrite it.",
+       "File Open Warning",
+       JOptionPane.WARNING_MESSAGE);
+  }
+  
+  
+  private boolean _verifyOverwrite() {
+    Object[] options = {"Yes","No"};
+    int n = JOptionPane.showOptionDialog
+      (MainFrame.this,
+       "This file already exists.  Do you wish to overwrite the file?",
+       "Confirm Overwrite",
+       JOptionPane.YES_NO_OPTION,
+       JOptionPane.QUESTION_MESSAGE,
+       null,
+       options,
+       options[1]);
+    if (n==JOptionPane.YES_OPTION){ return true;}
+    else {return false;}
+    
   }
   
   /**
