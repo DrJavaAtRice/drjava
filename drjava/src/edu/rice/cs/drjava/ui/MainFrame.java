@@ -554,6 +554,8 @@ public class MainFrame extends JFrame implements OptionConstants {
     public void actionPerformed(ActionEvent e) {
       super.actionPerformed(e);
       _currentDefPane.requestFocus();
+      OpenDefinitionsDocument doc = _model.getActiveDocument();
+      _saveButton.setEnabled(doc.isModifiedSinceSave() || doc.isUntitled());
     }
   };
 
@@ -562,6 +564,8 @@ public class MainFrame extends JFrame implements OptionConstants {
     public void actionPerformed(ActionEvent e) {
       super.actionPerformed(e);
       _currentDefPane.requestFocus();
+      OpenDefinitionsDocument doc = _model.getActiveDocument();
+      _saveButton.setEnabled(doc.isModifiedSinceSave() || doc.isUntitled());
     }
   };
 
