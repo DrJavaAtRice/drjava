@@ -72,29 +72,48 @@ public class ReducedModelComment
 	 *@param offset the absolute location that the insert was committed at.
 	 *@param insertSize the size of the commited insert.
 	 */
-	public Vector<StateBlock> generateHighlights(int offset, int insertSize)
+	public StyleUpdateMessage generateHighlights(int offset, int insertSize,
+																							 boolean simple)
 		{
 			ModelList<ReducedToken>.Iterator mark = _cursor.copy();
-			int markOffset = -1;
-			int adjustment = 0;
-			int moveSize = 0;
-			
-			if (2 > offset){
-				moveSize = insertSize + offset;
-				adjustment = 0;
+			StyleUpdateMessage message;
+			if (simple) {
+				if (insertSize == 0)
+					{
+						message = new NoUpdateMessage();
+					}
+				else {
+					_move(-insertSize, mark, _offset);
+					message = new SimpleUpdateMessage(offset, insertSize,
+																						mark.current().getHighlight());
+				}
 			}
 			else {
-				moveSize = 2 + insertSize;
-				adjustment = offset - 2;
+				int markOffset = -1;
+				int adjustment = 0;
+				int moveSize = 0;
+				
+				if (2 > offset){
+					moveSize = insertSize + offset;
+					adjustment = 0;
+				}
+				else {
+					moveSize = 2 + insertSize;
+					adjustment = offset - 2;
+				}
+				
+				//move back to before the insert.
+				markOffset = _move(-moveSize,mark,_offset);			
+				
+				Vector<StateBlock> states =
+					SBVectorFactory.generate(mark,markOffset,adjustment);
+				if (states.size() == 0)
+					message = new NoUpdateMessage();
+				else
+					message = new CompoundUpdateMessage(states);
 			}
-
-			//move back to before the insert.
-			markOffset = _move(-moveSize,mark,_offset);			
-
-			Vector<StateBlock> states =
-				SBVectorFactory.generate(mark,markOffset,adjustment);
 			mark.dispose();
-			return states;
+			return message;
 		}
 	
 	/**

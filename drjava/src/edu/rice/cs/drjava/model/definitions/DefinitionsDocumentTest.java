@@ -25,6 +25,11 @@ public class DefinitionsDocumentTest extends TestCase {
 			return new TestSuite(DefinitionsDocumentTest.class);
 		}
 
+	public void testTaskCounterNotNull()
+		{
+			assertTrue(defModel._taskCounter != null);
+		}
+	
 	public void testInsertToDoc()
 		{
 			try {
@@ -111,14 +116,14 @@ public class DefinitionsDocumentTest extends TestCase {
 	public void testStateChangeDoc()
 		{
 			try {
-				Vector<StateBlock> actual;
-				Vector<StateBlock> expected = new Vector<StateBlock>();
+				CompoundUpdateMessage actual;
+				CompoundUpdateMessage expected = new CompoundUpdateMessage();
 
 				defModel.insertString(0,"a/*bc */\"\\{}()",null);
 
 				assertEquals("#0.0",true, defModel.hasHighlightChanged());
 
-				actual = defModel.getHighLightInformation();
+				actual = (CompoundUpdateMessage)defModel.getHighlightInformation();
 				expected.addElement(new StateBlock(0, 1,
 																					 StateBlock.DEFAULT_COLOR));
 				expected.addElement(new StateBlock(1, 7,
@@ -141,14 +146,14 @@ public class DefinitionsDocumentTest extends TestCase {
 	public void testStateChangeDoc2()
 		{
 			try {
-				Vector<StateBlock> actual = new Vector<StateBlock>();
-				Vector<StateBlock> expected = new Vector<StateBlock>();
+				CompoundUpdateMessage actual;
+				CompoundUpdateMessage expected = new CompoundUpdateMessage();
 
 				defModel.insertString(0,"/*bc */ //ad}()",null);
 
 				assertEquals("#0.0",true, defModel.hasHighlightChanged());
 
-				actual = defModel.getHighLightInformation();
+				actual = (CompoundUpdateMessage)defModel.getHighlightInformation();
 				expected.addElement(new StateBlock(0, 7,
 																					 StateBlock.BLOCK_COMMENT_COLOR));
 				expected.addElement(new StateBlock(7, 1,
@@ -161,12 +166,12 @@ public class DefinitionsDocumentTest extends TestCase {
 				assertTrue("#0.2.2",actual.elementAt(2).equals(expected.elementAt(2)));
 				assertEquals("#0.3",3,actual.size());
 			
-				expected = new Vector<StateBlock>();
+				expected = new CompoundUpdateMessage();
 			
 				defModel.insertString(1,"\"hehe\"",null);
 				// /"hehe"*bc */ //ad}()
 							
-				actual = defModel.getHighLightInformation();
+				actual = (CompoundUpdateMessage)defModel.getHighlightInformation();
 				expected.addElement(new StateBlock(0, 1,
 																					 StateBlock.DEFAULT_COLOR));
 				expected.addElement(new StateBlock(1, 6,
@@ -192,8 +197,9 @@ public class DefinitionsDocumentTest extends TestCase {
 	public void testStateChangeOnRemove()
 		{
 			try {
-				Vector<StateBlock> actual;
-				Vector<StateBlock> expected = new Vector<StateBlock>();
+				NoUpdateMessage first;
+				CompoundUpdateMessage actual;
+				CompoundUpdateMessage expected = new CompoundUpdateMessage();
 				defModel.insertString(0,"/*bc */ //ad}()",null);
 				defModel.remove(13,2);
 
@@ -202,19 +208,28 @@ public class DefinitionsDocumentTest extends TestCase {
 				//					 	 defModel.hasHighlightChanged());
 				defModel.remove(4,1);
 				// /*bc*/ //ad}
-				actual = defModel.getHighLightInformation();
-				expected.addElement(new StateBlock(2, 4,
-																					 StateBlock.BLOCK_COMMENT_COLOR));
-				expected.addElement(new StateBlock(6, 1,
+				/*actual = (CompoundUpdateMessage)defModel.getHighlightInformation();
+				expected.addElement(new StateBlock(2, 4, 
+																					 StateBlock.BLOCK_COMMENT_COLOR)); 
+				expected.addElement(new StateBlock(6, 1, 
 																					 StateBlock.DEFAULT_COLOR));
-				expected.addElement(new StateBlock(7, 5,
-																					 StateBlock.LINE_COMMENT_COLOR));
+				expected.addElement(new StateBlock(7, 5, 
+																					 StateBlock.LINE_COMMENT_COLOR)); 
 				
-				assertEquals("#0.2",3,actual.size());
-				assertEquals("#0.3",expected.elementAt(0),actual.elementAt(0));
-				assertEquals("#0.4",expected.elementAt(1),actual.elementAt(1));
-				assertEquals("#0.5",expected.elementAt(2),actual.elementAt(2));
-				
+				assertEquals("#0.2",3,actual.size()); 
+				assertEquals("#0.3",expected.elementAt(0),actual.elementAt(0)); 
+				assertEquals("#0.4",expected.elementAt(1),actual.elementAt(1)); 
+				assertEquals("#0.5",expected.elementAt(2),actual.elementAt(2));*/
+			 
+				first = (NoUpdateMessage)defModel.getHighlightInformation();
+
+				defModel.remove(4,1);
+				// /*bc/ //ad}
+				actual = (CompoundUpdateMessage)defModel.getHighlightInformation();
+				expected.addElement(new StateBlock(2,9,
+																					 StateBlock.BLOCK_COMMENT_COLOR));
+				assertEquals("#0.2",1, actual.size());
+				assertEquals("#0.3",expected.elementAt(0), actual.elementAt(0));
 			}
 			catch (BadLocationException e) {
 				throw new RuntimeException(e.toString());
@@ -225,13 +240,13 @@ public class DefinitionsDocumentTest extends TestCase {
 	public void testInsertBetween()
 		{
 			try {
-				Vector<StateBlock> actual = new Vector<StateBlock>();
-				Vector<StateBlock> expected = new Vector<StateBlock>();
+				CompoundUpdateMessage actual;
+				CompoundUpdateMessage expected = new CompoundUpdateMessage();
 
 				defModel.insertString(0,"{}\"\"/*bcnrqu */jl/}()",null);
 				// {}""/*bcnrqu */jl/}()
 				assertEquals("#0.0",true, defModel.hasHighlightChanged());
-				actual = defModel.getHighLightInformation();
+				actual = (CompoundUpdateMessage)defModel.getHighlightInformation();
 				expected.addElement(new StateBlock(0, 2,
 																					 StateBlock.DEFAULT_COLOR));
 				expected.addElement(new StateBlock(2, 2,
@@ -250,24 +265,13 @@ public class DefinitionsDocumentTest extends TestCase {
 				defModel.insertString(6,"1",null);
 				assertEquals("0.1",false,defModel.hasHighlightChanged());
 
-				actual = defModel.getHighLightInformation();
-				expected = new Vector<StateBlock>();
-				expected.addElement(new StateBlock(0, 2,
-																					 StateBlock.DEFAULT_COLOR));
-				expected.addElement(new StateBlock(2, 2,
-																					 StateBlock.QUOTE_COLOR));
-				expected.addElement(new StateBlock(4, 12,
-																					 StateBlock.BLOCK_COMMENT_COLOR));
-				expected.addElement(new StateBlock(16, 6,
-																					 StateBlock.DEFAULT_COLOR));
+				SimpleUpdateMessage actual2 = (SimpleUpdateMessage)defModel.getHighlightInformation();
 
 				defModel.insertString(9,"2",null);
 				assertEquals("0.1",false,defModel.hasHighlightChanged());
 
-				actual = defModel.getHighLightInformation();
-				expected = new Vector<StateBlock>();
-				expected.addElement(new StateBlock(4, 13,
-																					 StateBlock.BLOCK_COMMENT_COLOR));
+				actual2 = (SimpleUpdateMessage)defModel.getHighlightInformation();
+
 			}
 			catch (BadLocationException e) {
 				throw new RuntimeException(e.toString());
@@ -279,8 +283,8 @@ public class DefinitionsDocumentTest extends TestCase {
 	public void testInsertBetweenFormNewBrace()
 		{
 			try {
-				Vector<StateBlock> actual = new Vector<StateBlock>();
-				Vector<StateBlock> expected = new Vector<StateBlock>();
+				CompoundUpdateMessage actual;
+				CompoundUpdateMessage expected = new CompoundUpdateMessage();
 
 				defModel.insertString(0,"abcd/ddd",null);
 				// was commented out
@@ -290,8 +294,8 @@ public class DefinitionsDocumentTest extends TestCase {
 				defModel.insertString(5,"/",null);
 				assertEquals("#0.1",true, defModel.hasHighlightChanged());
 
-				actual = defModel.getHighLightInformation();
-				expected = new Vector<StateBlock>();
+				actual = (CompoundUpdateMessage)defModel.getHighlightInformation();
+				expected = new CompoundUpdateMessage();
 				expected.addElement(new StateBlock(4, 5,
 																					 StateBlock.LINE_COMMENT_COLOR));
 			}
@@ -304,15 +308,15 @@ public class DefinitionsDocumentTest extends TestCase {
 	public void testInsertBetweenFormNewBrace2()
 		{
 			try {
-				Vector<StateBlock> actual = new Vector<StateBlock>();
-				Vector<StateBlock> expected = new Vector<StateBlock>();
+				CompoundUpdateMessage actual;
+				CompoundUpdateMessage expected = new CompoundUpdateMessage();
 
 				defModel.insertString(0,"\"",null);
 
 				assertEquals("#0.0",true, defModel.hasHighlightChanged());
 
-				actual = defModel.getHighLightInformation();
-				expected = new Vector<StateBlock>();
+				actual = (CompoundUpdateMessage)defModel.getHighlightInformation();
+				expected = new CompoundUpdateMessage();
 				expected.addElement(new StateBlock(0, 1,
 																					 StateBlock.QUOTE_COLOR));
 			}

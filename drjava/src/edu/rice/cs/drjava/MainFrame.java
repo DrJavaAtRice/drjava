@@ -282,6 +282,10 @@ public class MainFrame extends JFrame
 		{
 			return _definitionsView;
 		}
-	
+
+	OutputView getOutView()
+		{
+			return _outputView;
+		}
 }
 

@@ -39,9 +39,11 @@ public class ReducedModelControl implements BraceReduction
 			rmc = new ReducedModelComment();
 		}
 	
-	public Vector<StateBlock> generateHighlights(int offset, int insertSize)
+	public StyleUpdateMessage generateHighlights(int offset,
+																							 int insertSize,
+																							 boolean simple)
 		{
-			return rmc.generateHighlights(offset, insertSize);
+			return rmc.generateHighlights(offset, insertSize, simple);
 		}
 	
 	public void insertOpenSquiggly()

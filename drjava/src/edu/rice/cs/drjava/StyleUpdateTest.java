@@ -6,12 +6,14 @@ import junit.framework.*;
 import gj.util.Vector;
 import junit.extensions.*;
 
-public class StyleUpdateTest extends TestCase {
+public class StyleUpdateTest extends TestCase implements Flag {
 
 	
 	
 	protected DefinitionsDocument defModel;
-	protected static Object FOREGROUND = StyleConstants.ColorConstants.Foreground;
+	protected static Object FOREGROUND =
+	  StyleConstants.ColorConstants.Foreground;
+	private boolean _wasRaised, _wasLowered;
 		
 	public StyleUpdateTest(String name)
 		{
@@ -20,7 +22,10 @@ public class StyleUpdateTest extends TestCase {
 	
 	protected void setUp()
 		{
+			this._wasRaised = false;
+			this._wasLowered = false;
 			defModel = new DefinitionsDocument();
+			defModel._taskCounter.setFlag(this);
 		}
 	
 	public static Test suite()
@@ -33,13 +38,19 @@ public class StyleUpdateTest extends TestCase {
 			try {
 				this.defModel.insertString(0, "class C { /* comment */ }", null);
 				
-				while (defModel.styleUpdater == null);
-				defModel.styleUpdater.join();
+				while (defModel._styleUpdater == null ||
+							 ! _wasRaised ||
+							 ! _wasLowered);
 				AttributeSet attributes =
 					defModel.getCharacterElement(0).getAttributes();
 				assertEquals(Color.black, attributes.getAttribute(FOREGROUND));
+				
+				this._wasRaised = false;
+				this._wasLowered = false;
 				this.defModel.insertString(0, "//", null);
-				defModel.styleUpdater.join();
+				while (defModel._styleUpdater == null ||
+							 ! _wasRaised ||
+							 ! _wasLowered);
 				attributes = defModel.getCharacterElement(0).getAttributes();
 				assertEquals(Color.blue, attributes.getAttribute(FOREGROUND));
 			}
@@ -71,8 +82,9 @@ public class StyleUpdateTest extends TestCase {
 				this.defModel.insertString(0, "class C { /* comment */ }", null);
 				AttributeSet attributes;
 				this.defModel.remove(10,2);
-				while (defModel.styleUpdater == null);
-				defModel.styleUpdater.join();
+				while (defModel._styleUpdater == null ||
+							 ! _wasRaised ||
+							 ! _wasLowered);
 				attributes = defModel.getCharacterElement(13).getAttributes();
 				assertEquals(Color.black, attributes.getAttribute(FOREGROUND));
 			}
@@ -80,7 +92,18 @@ public class StyleUpdateTest extends TestCase {
 			catch (BadLocationException ex) {
 				throw new RuntimeException(ex.toString());
 			}			
-		}	
+		}
+
+	public void raise() {
+		this._wasRaised = true;
+	}
+
+	public void lower() {
+		this._wasLowered = true;
+	}
+
+	public void wave() {}
+	
 }
 
 

@@ -20,6 +20,8 @@ public class OutputView extends JTextPane
 {
   private PrintStream _out;
   private PrintStream _err;
+	private PrintStream _realOut;
+	private PrintStream _realErr;
 
   private class ScrollToEndDocumentListener implements DocumentListener {
     public void insertUpdate(DocumentEvent e) {
@@ -49,6 +51,9 @@ public class OutputView extends JTextPane
 
     StyleContext defaultStyle = StyleContext.getDefaultStyleContext();
 
+		_realOut = System.out;
+		_realErr = System.err;
+
     _out = new PrintStream(new DocumentOutputStream(getDocument()));
                                                     
 
@@ -75,4 +80,10 @@ public class OutputView extends JTextPane
     System.setOut(_out);
     System.setErr(_err);
   }
+
+	public void deactivate() {
+		System.setOut(_realOut);
+		System.setErr(_realErr);
+	}
 }
+

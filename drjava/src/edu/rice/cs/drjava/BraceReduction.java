@@ -33,7 +33,9 @@ public interface BraceReduction
 	/**
 	 *Returns a vector of StateBlocks signifying the new look of the view
 	 */
-	public Vector<StateBlock> generateHighlights(int offset,int insertSize);
+	public StyleUpdateMessage generateHighlights(int offset,
+																							 int insertSize,
+																							 boolean simple);
 	/**
 	 *returns the current
 	 */

@@ -25,13 +25,23 @@ public class DefinitionsDocument extends DefaultStyledDocument
   BraceReduction _reduced = new ReducedModelControl();
 	//keeps track of all lit blocks
 	Vector<StateBlock> litBlocks = new Vector<StateBlock>(); 
-	Vector<StateBlock> changes = new Vector<StateBlock>();
+	StyleUpdateMessage changes;
 
 	private static HashSet _normEndings = _makeNormEndings();
 	
   int _currentLocation = 0;
 
-	StyleUpdateThread styleUpdater = null;
+	StyleUpdateThread _styleUpdater;
+
+	Semaphore _taskCounter;
+
+	public DefinitionsDocument()
+		{
+			super();
+			this._taskCounter = new Semaphore();
+			this._styleUpdater = new StyleUpdateThread(this);
+			_styleUpdater.start();
+		}
 
 	private static HashSet _makeNormEndings() {
 		HashSet normEndings = new HashSet();
@@ -42,7 +52,7 @@ public class DefinitionsDocument extends DefaultStyledDocument
 		return normEndings;
 	}
 
-	
+
 	/**
 	 *1)mark the item previous to the current first insert
 	 *2)insert string
@@ -60,8 +70,10 @@ public class DefinitionsDocument extends DefaultStyledDocument
 		int prevSize;		//stores the size of the item prev when insert begins.
 		int reducedOffset;
 		ModelList<ReducedToken>.Iterator mark;
-		Vector<StateBlock> newStates = new Vector<StateBlock>();
+		StyleUpdateMessage message;
 		_modifiedHighlights = false;
+
+		_taskCounter.increment();
 		
 		//1)adjust location
     _reduced.move(locationChange);
@@ -83,9 +95,10 @@ public class DefinitionsDocument extends DefaultStyledDocument
 		//get highlight information from mark onward
 		//numbers are off by prevSize + strLength + reducedOffset
 		//the adjustment is the absolute position that newStates started at
-			newStates = _reduced.generateHighlights(offset,strLength);
-			updateCurrentHighlights(newStates);
-			updateStyles();
+			message = _reduced.generateHighlights(offset,strLength,
+																						!_modifiedHighlights);
+			updateCurrentHighlights(message);
+			updateStyles(message);
   }
 
 	private void _addCharToReducedView(char curChar)
@@ -139,9 +152,10 @@ public class DefinitionsDocument extends DefaultStyledDocument
 	
   public void remove(int offset, int len) throws BadLocationException
   {
+		_taskCounter.increment();
     int locationChange = offset - _currentLocation;
 		ModelList<ReducedToken>.Iterator mark;
-		Vector<StateBlock> newStates;
+		StyleUpdateMessage message;
 
 		_reduced.move(locationChange);
 
@@ -152,9 +166,9 @@ public class DefinitionsDocument extends DefaultStyledDocument
     _modifiedSinceSave = true;
 		_modifiedHighlights = _reduced.hasHighlightChanged();
 		
-		newStates = _reduced.generateHighlights(offset,0);		
-		updateCurrentHighlights(newStates);
-		updateStyles();
+		message = _reduced.generateHighlights(offset,0, !_modifiedHighlights);
+		updateCurrentHighlights(message);
+		updateStyles(message);
   }
 
 
@@ -178,51 +192,19 @@ public class DefinitionsDocument extends DefaultStyledDocument
 			return  _modifiedHighlights;
 		}
 
-	public Vector<StateBlock> getHighLightInformation()
+	private void updateStyles(StyleUpdateMessage message) {
+					_styleUpdater.sendMessage(message);
+		}
+
+	public void updateCurrentHighlights(StyleUpdateMessage message)
 		{
-			return changes;
+			this.changes = message;
 		}
-
-	/**
-	 *@param newStates the vector of blocks that are now lit up.
-	 *@param adjustment the point where the walk was begun.	 
-	 */
-	private void updateCurrentHighlights(Vector<StateBlock> newBlocks)
+	
+	public StyleUpdateMessage getHighlightInformation()
 		{
-			changes = newBlocks;
+			return this.changes;
 		}
-
-	private void updateStyles() {
-		Vector<StateBlock> changedStates = getHighLightInformation();
-		//int startOfInterimText = changedStates.elementAt(0).location;
-		if (styleUpdater != null) {
-			//styleUpdater._breakLocation = startOfInterimText;
-			//styleUpdater.interrupt();
-			try { styleUpdater.join(); }
-			catch (InterruptedException ex) {}
-		}
-		
-		if (hasHighlightChanged()) {
-				styleUpdater = new StyleUpdateThread(this, changedStates);				
-				styleUpdater.start();
-		}
-		else {
-			Vector<StateBlock> subset = new Vector<StateBlock>();
-			int i = 0;
-			StateBlock update = changedStates.elementAt(i);
-			while ((i < changedStates.size()) &&
-						 (update.location < _currentLocation) )
-				{
-					update = changedStates.elementAt(i);
-					subset.addElement(update);
-					i++;
-				}	
-
-			styleUpdater = new StyleUpdateThread(this, subset);
-			styleUpdater.start();
-		}
-
-	}
 
 	public int getCurrentLocation()
 		{

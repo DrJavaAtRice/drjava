@@ -5,6 +5,7 @@ package edu.rice.cs.drjava;
 import junit.framework.*;
 import java.util.Vector;
 import junit.extensions.*;
+import java.io.PrintStream;
 
 import javax.swing.text.BadLocationException;
 
@@ -31,6 +32,7 @@ public class FindReplaceTest extends TestCase
 		{
 			MainFrame frame = new MainFrame();
 			_view = frame.getDefView();
+			frame.getOutView().deactivate();
 		}
 	
 	public void testFindNext()
