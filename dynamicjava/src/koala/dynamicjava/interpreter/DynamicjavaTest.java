@@ -77,16 +77,22 @@ package koala.dynamicjava.interpreter;
 import junit.framework.TestCase;
 
 import koala.dynamicjava.parser.wrapper.JavaCCParserFactory;
+import koala.dynamicjava.util.*;
 import java.io.StringReader;
 
 
-public class DynamicjavaTest extends TestCase {
+public class DynamicjavaTest extends DynamicJavaTestCase {
   
   Interpreter interpreter;
   String testString;
   
   protected void setUp(){
+    setTigerEnabled(true);
     interpreter = new TreeInterpreter(new JavaCCParserFactory());
+  }
+  
+  protected void tearDown(){
+   TigerUtilities.resetVersion();    
   }
   
   Object interpret(String testString){
@@ -150,6 +156,7 @@ public class DynamicjavaTest extends TestCase {
   }
   
   public void testFor(){
+    TigerUtilities.assertTigerEnabled("Tiger should be enabled to use generics");
     testString = 
       "import java.util.*;"+
       "List<Double> l = new LinkedList<Double>();"+

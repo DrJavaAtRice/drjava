@@ -66,7 +66,7 @@ import koala.dynamicjava.parser.wrapper.*;
  * out there. For that reason, those cases are handled directly in the
  * evaluation visitor.
  */
-public class EvaluationVisitorTest extends TestCase {
+public class EvaluationVisitorTest extends DynamicJavaTestCase {
   
   private TreeInterpreter astInterpreter;
   private TreeInterpreter strInterpreter;
@@ -75,6 +75,7 @@ public class EvaluationVisitorTest extends TestCase {
   private String testString;
   
   public void setUp() throws java.io.IOException {
+    setTigerEnabled(true);
     parserFactory = new JavaCCParserFactory();
     astInterpreter = new TreeInterpreter(null); // No ParserFactory needed to interpret an AST
     strInterpreter = new TreeInterpreter(parserFactory); // ParserFactory is needed to interpret a string
@@ -90,6 +91,10 @@ public class EvaluationVisitorTest extends TestCase {
     catch (InterpreterException ie) {
       fail("Should have been able to declare variables for interpreter.");
     } 
+  }
+  
+  public void tearDown() {
+    TigerUtilities.resetVersion();
   }
   
   public Object interpret(String testString) throws InterpreterException {

@@ -54,11 +54,11 @@ import java.lang.reflect.*;
  * Tests the utility methods in the TigerUtilities class to
  * make sure they are working correctly.
  */
-public class TigerUtilitiesTest extends TestCase {
+public class TigerUtilitiesTest extends DynamicJavaTestCase {
   
   
   public void setUp() {
-    TigerUtilities.resetVersion();    
+    setTigerEnabled(true);    
   }
   
   public void tearDown() {
@@ -80,15 +80,14 @@ public class TigerUtilitiesTest extends TestCase {
     try {    
       Method m1 = java.io.PrintStream.class.getMethod("printf", new Class[]{String.class, Object[].class});
       Method m2 = java.io.PrintStream.class.getMethod("println",new Class[]{ });
-      //Don't run test if the user is only using 1.4
-      if(TigerUtilities.isTigerEnabled()) {
-        assertEquals("The method should have variable arguments",TigerUtilities.isVarArgs(m1),true);
-        assertEquals("The method should not have variable arguments",TigerUtilities.isVarArgs(m2),false);   
-      }
+      assertEquals("The method should have variable arguments",TigerUtilities.isVarArgs(m1),true);
+      assertEquals("The method should not have variable arguments",TigerUtilities.isVarArgs(m2),false);   
+      
       
       TigerUtilities.setTigerEnabled(false);
       assertEquals("Tiger features are disabled, isVarArgs should return false",TigerUtilities.isVarArgs(m1),false);
       assertEquals("Tiger features are disabled, isVarArgs should return false",TigerUtilities.isVarArgs(m2),false);
+      TigerUtilities.setTigerEnabled(true);
     }
     catch(NoSuchMethodException e) {
       throw new RuntimeException(e.toString());

@@ -66,7 +66,7 @@ import koala.dynamicjava.interpreter.throwable.WrongVersionException;
  * Tests to ensure the type checker throws WrongVersionExceptions if 1.5 features are used when running 1.4
  * 
  */
-public class Distinction1415Test extends TestCase {
+public class Distinction1415Test extends DynamicJavaTestCase {
   private TreeInterpreter astInterpreter;
   private TreeInterpreter strInterpreter;
   
@@ -93,10 +93,10 @@ public class Distinction1415Test extends TestCase {
    * Tests the ability to enable and disable the functionality of 1.5
    */
   public void testSetAndResetTigerEnabled() {
-    TigerUtilities.setTigerEnabled(true);
+    setTigerEnabled(true);
     TigerUtilities.assertTigerEnabled("Tiger should be enabled");
     assertEquals("Tiger should be enabled",TigerUtilities.isTigerEnabled(),true);
-    TigerUtilities.setTigerEnabled(false);
+    setTigerEnabled(false);
     assertEquals("Tiger should be disabled",TigerUtilities.isTigerEnabled(),false);
     
   }
@@ -105,7 +105,7 @@ public class Distinction1415Test extends TestCase {
    * Test that the use of generic reference types fails when the runtime environment version is set to 1.4
    */
   public void testGenericReferenceTypes14(){
-    TigerUtilities.setTigerEnabled(false);
+    setTigerEnabled(false);
     
     try{
       testString =
@@ -128,7 +128,7 @@ public class Distinction1415Test extends TestCase {
    * Test that the use of generic reference types does not fail when the runtime environment version is set to 1.5
    */
   public void testGenericReferenceTypes15(){
-    TigerUtilities.setTigerEnabled(true);
+    setTigerEnabled(true);
     try{
       testString =
         "import java.util.LinkedList;\n"+
@@ -149,7 +149,7 @@ public class Distinction1415Test extends TestCase {
    * Test that the use of autoboxing and auto-unboxing fails when the runtime environment version is set to 1.4
    */
   public void testAutoboxing14() {
-    TigerUtilities.setTigerEnabled(false);
+    setTigerEnabled(false);
     
     //Auto box
     try{
@@ -207,7 +207,7 @@ public class Distinction1415Test extends TestCase {
    * Test that the use of autoboxing and auto-unboxing does not fail when the runtime environment version is set to 1.5
    */
   public void testAutoboxing15() {
-    TigerUtilities.setTigerEnabled(true);
+    setTigerEnabled(true);
     try{
       testString =
         "Character c = new Character('c');" +
@@ -231,7 +231,7 @@ public class Distinction1415Test extends TestCase {
    * Test that the use of foreach statements fails when the runtime environment is set to 1.4
    */ 
   public void testForEach14() {
-    TigerUtilities.setTigerEnabled(false);
+    setTigerEnabled(false);
     try{
       testString = 
         "double sum = 0;\n" +
@@ -252,7 +252,7 @@ public class Distinction1415Test extends TestCase {
    * Test that the use of foreach statements does not fail when the runtime environment is set to 1.5
    */
   public void testForEach15() {
-    TigerUtilities.setTigerEnabled(true);
+    setTigerEnabled(true);
     try{
       testString = 
         "double sum = 0;\n" +
@@ -272,7 +272,7 @@ public class Distinction1415Test extends TestCase {
    * Test that the use of methods with variable arguments fails when the runtime environment is set to 1.4
    */
   public void testVarArgs14(){
-    TigerUtilities.setTigerEnabled(false);
+    setTigerEnabled(false);
     try {
       
       testString =
@@ -297,7 +297,7 @@ public class Distinction1415Test extends TestCase {
    * Test that the use of methods with variable arguments does not fail when the runtime environment is set to 1.5
    */
   public void testVarArgs15(){
-    TigerUtilities.setTigerEnabled(true);
+    setTigerEnabled(true);
     try {
       
       testString =
@@ -323,7 +323,7 @@ public class Distinction1415Test extends TestCase {
    * Note: static importing is not yet supported. Uncomment the test case when it is supported
    */ /**/
   public void testStaticImport14() {
-    TigerUtilities.setTigerEnabled(false);
+    setTigerEnabled(false);
     try {
       testString =
         "import static java.lang.Math.abs;\n"+
@@ -355,7 +355,7 @@ public class Distinction1415Test extends TestCase {
    * Note: static importing is not yet supported. Uncomment the test case when it is supported
    */ /**/
   public void testStaticImport15() {
-    TigerUtilities.setTigerEnabled(true);
+    setTigerEnabled(true);
     try {
       testString =
         "import static java.lang.Math.abs;\n"+
@@ -381,7 +381,7 @@ public class Distinction1415Test extends TestCase {
    * Note: enum types are not yet supported. Uncomment the test case when it is supported
    */
   public void xtestEnumType14() {
-    TigerUtilities.setTigerEnabled(false);
+    setTigerEnabled(false);
     try {
       testString =
         "public class C {\n"+
@@ -406,7 +406,7 @@ public class Distinction1415Test extends TestCase {
    * Note: enum types are not yet supported. Uncomment the test case when it is supported
    */
   public void xtestEnumType15() {
-    TigerUtilities.setTigerEnabled(true);
+    setTigerEnabled(true);
     try {
       testString =
         "public class C {\n"+

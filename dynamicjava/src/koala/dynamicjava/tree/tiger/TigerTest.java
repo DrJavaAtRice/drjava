@@ -5,6 +5,7 @@ import junit.framework.*;
 
 import koala.dynamicjava.tree.*;
 import koala.dynamicjava.interpreter.*;
+import koala.dynamicjava.util.*;
 import koala.dynamicjava.SourceInfo;
 import koala.dynamicjava.interpreter.error.CatchedExceptionError;
 
@@ -14,7 +15,7 @@ import koala.dynamicjava.parser.wrapper.ParserFactory;
 import koala.dynamicjava.parser.wrapper.JavaCCParserFactory;
 
 
-public class TigerTest extends TestCase {
+public class TigerTest extends DynamicJavaTestCase {
   private TreeInterpreter astInterpreter;
   private TreeInterpreter strInterpreter;
   
@@ -26,9 +27,14 @@ public class TigerTest extends TestCase {
   }
   
   public void setUp(){
+    setTigerEnabled(true);
     parserFactory = new JavaCCParserFactory();
     astInterpreter = new TreeInterpreter(null); // No ParserFactory needed to interpret an AST
     strInterpreter = new TreeInterpreter(parserFactory); // ParserFactory is needed to interpret a string
+  }
+  
+  public void tearDown(){
+   TigerUtilities.resetVersion(); 
   }
   
   public List<Node> parse(String testString){

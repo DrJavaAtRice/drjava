@@ -97,9 +97,7 @@ public class TigerUtilities {
   }
   
   /**
-   * Allows the features in 1.5 to be enabled or disabled. Used mostly in test cases. Should not be used if the
-   * user is running a version less than 1.5, as this enables features which call methods that do not exist prior 
-   * to 1.5 i.e. isVarArgs()
+   * Allows the features in 1.5 to be enabled or disabled. Used only in test cases. 
    * @param enabled - a boolean that specifies whether or not Tiger features are to be enabled
    */  
   protected static void setTigerEnabled(boolean enabled) {

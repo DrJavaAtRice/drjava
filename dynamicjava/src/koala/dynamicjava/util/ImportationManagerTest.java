@@ -357,21 +357,30 @@ public class ImportationManagerTest extends TestCase {
     
     
     try {
-      im.declareMemberStaticImport("java.lang.Integer.valueOf");
+      im.declareMemberStaticImport("java.lang.Integer.parseInt");
     }
     catch(ClassNotFoundException e) {
       fail("Class java.lang.Integer should be found");
     }
     assertEquals("List of staticly imported inner classes should not have changed",0,classes.size());
     assertEquals("List of staticly imported fields should not have changed",1,fields.size());
-    assertEquals("List of staticly imported methods should contain all three valueOf methods",3,methods.size());
+    assertEquals("List of staticly imported methods should contain both parseint methods",2,methods.size());
     assertEquals("List of staticly imported fields should contain java.lang.Integer.MAX_VALUE","public static final int java.lang.Integer.MAX_VALUE",fields.get(0).toString());
-    assertEquals("List of staticly imported fields should contain all three valueOf methods",
-                 "public static java.lang.Integer java.lang.Integer.valueOf(int)",methods.get(0).toString());
-    assertEquals("List of staticly imported fields should contain all three valueOf methods",
-                 "public static java.lang.Integer java.lang.Integer.valueOf(java.lang.String) throws java.lang.NumberFormatException",methods.get(1).toString());
-    assertEquals("List of staticly imported fields should contain all three valueOf methods",
-                 "public static java.lang.Integer java.lang.Integer.valueOf(java.lang.String,int) throws java.lang.NumberFormatException",methods.get(2).toString());
+    if(TigerUtilities.isTigerEnabled()) {      
+      assertEquals("List of staticly imported fields should contain both parseInt methods",
+                   "public static int java.lang.Integer.parseInt(java.lang.String) throws java.lang.NumberFormatException",methods.get(0).toString());
+      assertEquals("List of staticly imported fields should contain both parseInt methods",
+                   "public static int java.lang.Integer.parseInt(java.lang.String,int) throws java.lang.NumberFormatException",methods.get(1).toString());
+    }
+    else {
+      //When running 1.4, the methods returned by java.lang.reflect.Class.getMethods() are in the array in reverse order from the way they are returned in 1.5.
+      //This will not affect the program but does affect these assertions
+      assertEquals("List of staticly imported fields should contain both parseInt methods",
+                   "public static int java.lang.Integer.parseInt(java.lang.String,int) throws java.lang.NumberFormatException",methods.get(0).toString());
+      assertEquals("List of staticly imported fields should contain both parseInt methods",
+                   "public static int java.lang.Integer.parseInt(java.lang.String) throws java.lang.NumberFormatException",methods.get(1).toString());
+    }
+      
     
     
     //**//Note, all static inner classes imported with "import static" have to be added to the list twice, once with a '.' and once with a $. 
@@ -385,7 +394,7 @@ public class ImportationManagerTest extends TestCase {
       fail("Class javax.security.auth.login.AppConfigurationEntry should be found");
     }
     assertEquals("List of staticly imported fields should not have changed",1,fields.size());
-    assertEquals("List of staticly imported methods should not have changed",3,methods.size());
+    assertEquals("List of staticly imported methods should not have changed",2,methods.size());
     assertEquals("List of staticly imported inner classes should contain the AppConfigurationEntry$LoginModuleControlFlag class",2,classes.size());
     assertEquals("List of staticly imported inner classes should contain the AppConfigurationEntry.LoginModuleControlFlag class",
                  "javax.security.auth.login.AppConfigurationEntry.LoginModuleControlFlag",classes.get(0));
@@ -400,7 +409,7 @@ public class ImportationManagerTest extends TestCase {
       fail("Class javax.swing.plaf.basic.BasicOptionPaneUI should be found");
     }
     assertEquals("List of staticly imported fields should not have changed",1,fields.size());
-    assertEquals("List of staticly imported methods should not have changed",3,methods.size());
+    assertEquals("List of staticly imported methods should not have changed",2,methods.size());
     assertEquals("List of staticly imported inner classes should contain the BasicOptionPaneUI$ButtonAreaLayout class",4,classes.size());
     assertEquals("List of staticly imported inner classes should contain the BasicOptionPaneUI.ButtonAreaLayout class as its first entry",
                  "javax.swing.plaf.basic.BasicOptionPaneUI.ButtonAreaLayout",classes.get(0));
@@ -416,12 +425,21 @@ public class ImportationManagerTest extends TestCase {
     }
     assertEquals("List of staticly imported fields should not have changed",1,fields.size());
     assertEquals("List of staticly imported inner classes should not have changed",4,classes.size());
-    assertEquals("List of staticly imported methods should contain the two static toString methods in the Integer class",5,methods.size());
-    assertEquals("List of staticly imported methods should contain the two static toString methods in the Integer class as its first two entries",
-                 "public static java.lang.String java.lang.Integer.toString(int)",methods.get(0).toString());
-    assertEquals("List of staticly imported methods should contain the two static toString methods in the Integer class as its first two entries",
-                 "public static java.lang.String java.lang.Integer.toString(int,int)",methods.get(1).toString());
-    
+    assertEquals("List of staticly imported methods should contain the two static toString methods in the Integer class",4,methods.size());
+    if(TigerUtilities.isTigerEnabled()) {
+      assertEquals("List of staticly imported methods should contain the two static toString methods in the Integer class as its first two entries",
+                   "public static java.lang.String java.lang.Integer.toString(int)",methods.get(0).toString());
+      assertEquals("List of staticly imported methods should contain the two static toString methods in the Integer class as its first two entries",
+                   "public static java.lang.String java.lang.Integer.toString(int,int)",methods.get(1).toString());
+    }
+    else {
+      //When running 1.4, the methods returned by java.lang.reflect.Class.getMethods() are in the array in reverse order from the way they are returned in 1.5.
+      //This will not affect the program but does affect these assertions
+      assertEquals("List of staticly imported methods should contain the two static toString methods in the Integer class as its first two entries",
+                   "public static java.lang.String java.lang.Integer.toString(int,int)",methods.get(0).toString());
+      assertEquals("List of staticly imported methods should contain the two static toString methods in the Integer class as its first two entries",
+                   "public static java.lang.String java.lang.Integer.toString(int)",methods.get(1).toString());
+    }
   }
   
 }

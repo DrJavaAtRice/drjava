@@ -55,7 +55,7 @@ import java.util.*;
  * Tests the utility methods in the ReflectionUtilities class to
  * make sure they are working correctly.
  */
-public class ReflectionUtilitiesTest extends TestCase {
+public class ReflectionUtilitiesTest extends DynamicJavaTestCase {
   public void testTigerUsageClass() {
     ReflectionUtilities.TigerUsage tu;
     tu = new ReflectionUtilities.TigerUsage();
@@ -68,7 +68,7 @@ public class ReflectionUtilitiesTest extends TestCase {
     assertTrue("Autoboxing was used", tu.isAutoBoxingUsed());
     assertTrue("Var Args were used", tu.areVarArgsUsed());
     
-    TigerUtilities.setTigerEnabled(false);
+    setTigerEnabled(false);
     try {
       tu.checkForCompatibleUsage();
       TigerUtilities.resetVersion();
@@ -123,7 +123,7 @@ public class ReflectionUtilitiesTest extends TestCase {
     _assertBoxCompatible(Object.class, Character.class, false);
   }
   private void _assertBoxCompatible(Class c1, Class c2, boolean boxEnabled) {
-    TigerUtilities.setTigerEnabled(boxEnabled);
+    setTigerEnabled(boxEnabled);
     ReflectionUtilities.TigerUsage tu = new ReflectionUtilities.TigerUsage();
     assertTrue("Should have been compatible: " +
                c1 + " <- " + c2 + " (boxing enabled: " + boxEnabled + ")", 
@@ -132,7 +132,7 @@ public class ReflectionUtilitiesTest extends TestCase {
                 !boxEnabled && tu.isAutoBoxingUsed());
   }
   private void _assertNotBoxCompatible(Class c1, Class c2, boolean boxEnabled) {
-    TigerUtilities.setTigerEnabled(boxEnabled);
+    setTigerEnabled(boxEnabled);
     ReflectionUtilities.TigerUsage tu = new ReflectionUtilities.TigerUsage();
     assertFalse("Shouldn't have been compatible: " + 
                c1 + " <- " + c2 + " (boxing enabled: " + boxEnabled + ")", 
@@ -141,7 +141,7 @@ public class ReflectionUtilitiesTest extends TestCase {
                 !boxEnabled && tu.isAutoBoxingUsed());
   }
   private void _exceptionBoxCompatible(Class c1, Class c2, boolean boxEnabled) {
-    TigerUtilities.setTigerEnabled(boxEnabled);
+    setTigerEnabled(boxEnabled);
     ReflectionUtilities.TigerUsage tu = new ReflectionUtilities.TigerUsage();
     ReflectionUtilities.isBoxCompatible(c1, c2, tu);
     assertTrue("Should not have worked: " + 
@@ -152,7 +152,7 @@ public class ReflectionUtilitiesTest extends TestCase {
   
   public void testLookupMethod() 
     throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-    TigerUtilities.setTigerEnabled(false);
+    setTigerEnabled(false);
     Method m;
     try {
       m = ReflectionUtilities.lookupMethod(Integer.class, "toString", new Class[]{Integer.class});
@@ -178,7 +178,7 @@ public class ReflectionUtilitiesTest extends TestCase {
     assertEquals("Method was selected from wrong class", LinkedList.class, m.getDeclaringClass());
     
     // The following tests use 1.5 to assure correct semantics
-    TigerUtilities.setTigerEnabled(true);
+    setTigerEnabled(true);
     
     // Check to see that lookupMethod selects the corret method.
     Integer ONE = new Integer(1);

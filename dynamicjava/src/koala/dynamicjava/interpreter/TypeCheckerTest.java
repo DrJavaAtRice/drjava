@@ -111,7 +111,7 @@ import junit.framework.TestCase;
  * associated with the assignment operators (<CODE>+=, -=, *=, /=, %=, &lt;&lt;=, &gt;&gt;&gt;=, 
  * &gt;&gt;&gt;=, &amp;=, ^=, |=</CODE>) must also be modified and thus tested
  */
-public class TypeCheckerTest extends TestCase {
+public class TypeCheckerTest extends DynamicJavaTestCase {
   
   ////// Internal Initialization ////////////////////////
   
@@ -146,10 +146,12 @@ public class TypeCheckerTest extends TestCase {
     // This test is dependent on 1.5 since the ObjectMethodCall uses 1.5 reflection methods.
     // If this were run in 1.4 and we faked the version property to 1.5, some methods would
     // not be found during the test and would cause the test case to fail.
-    String version = System.getProperty(VERSION_KEY);
-    if (Float.valueOf(version) < 1.5) {
-      throw new WrongVersionException("This test case requires Java 2 SDK v1.5.0 or better");
-    }
+//    String version = System.getProperty(VERSION_KEY);
+//    if (Float.valueOf(version) < 1.5) {
+//      throw new WrongVersionException("This test case requires Java 2 SDK v1.5.0 or better");
+//    }
+    //This test will fail if not running 1.5 OR 1.4 with jsr14
+    setTigerEnabled(true);
     
     parserFactory = new JavaCCParserFactory();
     _globalContext = new GlobalContext(new TreeInterpreter(parserFactory));
@@ -180,6 +182,10 @@ public class TypeCheckerTest extends TestCase {
     catch (InterpreterException ere) {
       fail("Should have been able to declare variables for interpreter.");
     }
+  }
+  
+  public void tearDown() {
+    TigerUtilities.resetVersion();
   }
   
   
