@@ -62,7 +62,7 @@ import edu.rice.cs.drjava.DrJava;
  * @version $Id$
  */
 public class DynamicJavaAdapter implements JavaInterpreter {
-  private Interpreter _djInterpreter;
+  private TreeInterpreter _djInterpreter;
 
   /**
    * Constructor.
@@ -165,14 +165,6 @@ public class DynamicJavaAdapter implements JavaInterpreter {
   public void setPrivateAccessible(boolean accessible) {
     _djInterpreter.setAccessible(accessible);
   }
-  
-  /**
-   * Temporary accessor for DynamicJava's interpreter, to be
-   * used for debugging.
-   */
-  public Interpreter getDynamicJavaInterpreter() {
-    return _djInterpreter;
-  }
 
   /**
    * An extension of DynamicJava's interpreter that makes sure classes are
@@ -272,7 +264,7 @@ public class DynamicJavaAdapter implements JavaInterpreter {
      * Constructor.
      * @param         Interpreter i
      */
-    public ClassLoaderExtension(Interpreter i) {
+    public ClassLoaderExtension(TreeInterpreter i) {
       super(i);
       // The protected variable classLoader contains the class loader to use
       // to find classes. When a new class path is added to the loader,

@@ -310,18 +310,36 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   
   
   /**
-   * Adds a named DynamicJavaAdapter to this interpreter's list of debug 
-   * interpreters
+   * Adds a named DynamicJavaAdapter to the list of interpreters.
    * @param name the unique name for the interpreter
+   * @throws IllegalArgumentException if the name is not unique
    */
-  public void addDebugInterpreter(String name) {
+  public void addJavaInterpreter(String name) {
     // silently fail if disabled. see killInterpreter docs for details.
     if (! _enabled) return;
 
     ensureInterpreterConnected();
     
     try {
-      _interpreterJVM().addDebugInterpreter(name);
+      _interpreterJVM().addJavaInterpreter(name);
+    }
+    catch (RemoteException re) {
+      _threwException(re);
+    }
+  }
+  
+  /**
+   * Removes the interpreter with the given name, if it exists.
+   * @param name Name of the interpreter to remove
+   */
+  public void removeInterpreter(String name) {
+    // silently fail if disabled. see killInterpreter docs for details.
+    if (! _enabled) return;
+
+    ensureInterpreterConnected();
+    
+    try {
+      _interpreterJVM().removeInterpreter(name);
     }
     catch (RemoteException re) {
       _threwException(re);
@@ -354,14 +372,14 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
    * @return Whether the new interpreter is currently in progress
    * with an interaction (ie. whether an interactionEnded event will be fired)
    */
-  public boolean setDefaultInterpreter() {
+  public boolean setToDefaultInterpreter() {
     // silently fail if disabled. see killInterpreter docs for details.
     if (! _enabled) return false;
 
     ensureInterpreterConnected();
     
     try {
-      return _interpreterJVM().setDefaultInterpreter();
+      return _interpreterJVM().setToDefaultInterpreter();
     }
     catch (RemoteException re) {
       _threwException(re);

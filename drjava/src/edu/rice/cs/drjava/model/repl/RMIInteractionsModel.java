@@ -98,11 +98,20 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
   }
   
   /**
-   * adds a new DynamicJavaInterpreter with the given name
-   * @param name the name of the new interpreter
+   * Adds a named DynamicJavaAdapter to the list of interpreters.
+   * @param name the unique name for the interpreter
+   * @throws IllegalArgumentException if the name is not unique
    */
-  public void addDebugInterpreter(String name) {
-    _interpreterControl.addDebugInterpreter(name);
+  public void addJavaInterpreter(String name) {
+    _interpreterControl.addJavaInterpreter(name);
+  }
+  
+  /**
+   * Removes the interpreter with the given name, if it exists.
+   * @param name Name of the interpreter to remove
+   */
+  public void removeInterpreter(String name) {
+    _interpreterControl.removeInterpreter(name);
   }
 
   /**
@@ -112,17 +121,29 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
    */
   public void setActiveInterpreter(String name, String prompt) {
     boolean inProgress = _interpreterControl.setActiveInterpreter(name);
-    _document.setPrompt(prompt);
+    _updateDocument(prompt, inProgress);
     _notifyInterpreterChanged(inProgress);
   }
 
   /**
    * Sets the default interpreter to be the current one.
    */
-  public void setDefaultInterpreter() {
-    boolean inProgress = _interpreterControl.setDefaultInterpreter();
-    _document.setPrompt(_document.DEFAULT_PROMPT);
+  public void setToDefaultInterpreter() {
+    boolean inProgress = _interpreterControl.setToDefaultInterpreter();
+    _updateDocument(_document.DEFAULT_PROMPT, inProgress);
     _notifyInterpreterChanged(inProgress);
+  }
+  
+  /**
+   * Updates the prompt and status of the document after an interpreter change.
+   * @param prompt New prompt to display
+   * @param inProgress whether the interpreter is currently in progress
+   */
+  private void _updateDocument(String prompt, boolean inProgress) {
+    _document.setPrompt(prompt);
+    _document.insertNewLine(_document.getDocLength());
+    _document.insertPrompt();
+    _document.setInProgress(inProgress);
   }
   
   /**

@@ -86,11 +86,11 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
   /** The maximum number of undos the model can remember */
   private static final int UNDO_LIMIT = 1000;
   /** A set of normal endings for lines. */
-  private static HashSet _normEndings = _makeNormEndings();
+  protected static HashSet _normEndings = _makeNormEndings();
   /** A set of Java keywords. */
-  private static HashSet _keywords = _makeKeywords();
+  protected static HashSet _keywords = _makeKeywords();
   /** A set of Java keywords. */
-  private static HashSet _primTypes = _makePrimTypes();
+  protected static HashSet _primTypes = _makePrimTypes();
   /** The default indent setting. */
   private int _indent = 2;
   /** Determines if tabs are removed on open and converted to spaces. */
@@ -205,7 +205,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
    * of indenting.
    * @return the set of normal endings
    */
-  private static HashSet _makeNormEndings() {
+  protected static HashSet _makeNormEndings() {
     HashSet normEndings = new HashSet();
     normEndings.add(";");
     normEndings.add("{");
@@ -218,7 +218,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
    * Create a set of Java/GJ keywords for special coloring.
    * @return the set of keywords
    */
-  private static HashSet _makeKeywords() {
+  protected static HashSet _makeKeywords() {
     final String[] words =  {
       "import", "native", "package", "goto", "const", "if", "else",
       "switch", "while", "for", "do", "true", "false", "null", "this",
@@ -239,7 +239,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
    * Create a set of Java/GJ primitive types for special coloring.
    * @return the set of primitive types
    */
-  private static HashSet _makePrimTypes() {
+  protected static HashSet _makePrimTypes() {
     final String[] words =  {
       "boolean", "char", "byte", "short", "int", 
       "long", "float", "double", "void", 

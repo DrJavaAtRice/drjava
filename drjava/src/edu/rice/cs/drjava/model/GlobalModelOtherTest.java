@@ -659,9 +659,9 @@ public class GlobalModelOtherTest extends GlobalModelTestCase implements OptionC
     };
     _model.addListener(listener);
     
-    // Create a new debug interpreter
+    // Create a new Java interpreter
     ((RMIInteractionsModel)_model.getInteractionsModel()).
-      addDebugInterpreter("testInterpreter");
+      addJavaInterpreter("testInterpreter");
     
     // Set it to be active
     ((RMIInteractionsModel)_model.getInteractionsModel()).

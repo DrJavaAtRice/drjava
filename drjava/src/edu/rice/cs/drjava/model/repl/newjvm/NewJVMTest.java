@@ -222,7 +222,7 @@ public class NewJVMTest extends TestCase {
       _jvm.interpret("x = 6;");
       _jvm.wait();
     }
-    _jvm.addDebugInterpreter("monkey");
+    _jvm.addJavaInterpreter("monkey");
     
     // x should be defined in active interpreter
     synchronized(_jvm) {
@@ -245,7 +245,7 @@ public class NewJVMTest extends TestCase {
       _jvm.interpret("x = 3;");
       _jvm.wait();
     }
-    _jvm.setDefaultInterpreter();
+    _jvm.setToDefaultInterpreter();
     
     // x should have its old value
     synchronized(_jvm) {

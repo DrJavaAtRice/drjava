@@ -101,7 +101,7 @@ public interface GlobalModel {
   /**
    * Returns the interactions model.
    */
-  public InteractionsModel getInteractionsModel();
+  public DefaultInteractionsModel getInteractionsModel();
 
   /**
    * Gets the (toolkit-independent) interactions document.

@@ -51,27 +51,36 @@ import edu.rice.cs.util.newjvm.*;
  */
 public interface InterpreterJVMRemoteI extends SlaveRemote {
   public void interpret(String s) throws RemoteException;
-  //public InterpretResult interpret(String s) throws RemoteException;
   public void addClassPath(String s) throws RemoteException;
   public void runTestSuite(String className, String fileName) throws RemoteException;
   public void setPackageScope(String s) throws RemoteException;
   public void reset() throws RemoteException;
   
   /**
-   * Adds a named DynamicJavaAdapter to this interpreter's list of debug 
-   * interpreters
+   * Adds a named DynamicJavaAdapter to the list of interpreters.
    * @param name the unique name for the interpreter
+   * @throws IllegalArgumentException if the name is not unique
    */
-  public void addDebugInterpreter(String name) throws RemoteException;
+  public void addJavaInterpreter(String name) throws RemoteException;
   
   /**
-   * sets the current interpreter to the one specified by name
+   * Removes the interpreter with the given name, if it exists.
+   * @param name Name of the interpreter to remove
+   */
+  public void removeInterpreter(String name) throws RemoteException;
+  
+  /**
+   * Sets the current interpreter to be the one specified by the given name
    * @param name the unique name of the interpreter to set active
+   * @return Whether the new interpreter is currently in progress
+   * with an interaction
    */
   public boolean setActiveInterpreter(String name) throws RemoteException;
   
   /**
-   * Sets the default interpreter to be the current one.
+   * Sets the default interpreter to be active.
+   * @return Whether the new interpreter is currently in progress
+   * with an interaction
    */
-  public boolean setDefaultInterpreter() throws RemoteException;
+  public boolean setToDefaultInterpreter() throws RemoteException;
 }

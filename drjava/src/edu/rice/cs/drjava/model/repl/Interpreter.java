@@ -40,34 +40,19 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.model.repl;
 
 /**
- * Interface for an interpreter of Java source code.
+ * Interface for any language interpreter which can be used with DrJava's RMI
+ * framework to safely interpret code in another JVM.
  * @version $Id$
  */
-public interface JavaInterpreter extends Interpreter {
+public interface Interpreter {
+  /** Value returned to indicate no result. */
+  public static final Object NO_RESULT = new Object();
 
   /**
-   * Adds the given path to the interpreter's classpath.
-   * @param path Path to add
+   * Interprets the given string.
+   * @param s Source code to interpret
+   * @return The result of the interpretation, or {@link #NO_RESULT} if
+   *         the interpretation had no return value.
    */
-  public void addClassPath(String path);
-
-  /**
-   * Set the scope for unqualified names to be the given package.
-   * @param packageName Package to use for the current scope.
-   */
-  public void setPackageScope(String packageName);
-  
-  /**
-   * Assigns the given value to the given name in the interpreter.
-   * @param name Name of the variable
-   * @param value Value to assign
-   */
-  public void defineVariable(String name, Object value);
-  
-  /**
-   * Sets whether protected and private variables should be accessible in
-   * the interpreter.
-   * @param accessible Whether protected and private variable are accessible
-   */
-  public void setPrivateAccessible(boolean accessible);
+  public Object interpret(String s) throws ExceptionReturnedException;
 }

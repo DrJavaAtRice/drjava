@@ -354,7 +354,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
   /**
    * Returns the interactions model.
    */
-  public InteractionsModel getInteractionsModel() {
+  public DefaultInteractionsModel getInteractionsModel() {
     return _interactionsModel;
   }
   
@@ -1154,7 +1154,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     }
     catch (UnsupportedClassVersionError ucve) {
     }
-
+    
     if (failed) {
       //If we get here, we will just have to try using the javadoc program
       //which is hopefully on the system path
@@ -1167,16 +1167,16 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       //TODO: try/catch the previous line and prompt for javadoc's location
       //on failure....and even keep the location in the drjava config
     }
-
+    
     //Get a handle on the streams that the process produces
     BufferedReader jdOut =
       new BufferedReader(new InputStreamReader(javadocProcess.getInputStream()));
     BufferedReader jdErr =
       new BufferedReader(new InputStreamReader (javadocProcess.getErrorStream()));
-
-
+    
+    
     boolean done = false;
-
+    
     //Loop until javadoc is done, putting its output on the console
     while (!done) {
       String output = jdOut.readLine();
@@ -1184,7 +1184,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
         System.out.println("[javadoc] " + output);
         output = jdOut.readLine();
       }
-
+      
       output = jdErr.readLine();
       while(output!= null){
         System.err.println("[javadoc] " + output);
@@ -1194,15 +1194,13 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
         int value = javadocProcess.exitValue();
         done = true;
         System.out.println("Javadoc finished with exit code " + value);
-      } catch (IllegalThreadStateException itse) {
+      }
+      catch (IllegalThreadStateException itse) {
         done = false;
       }
-
+      
     }
-
-
-
-
+    
   }
 
 
@@ -1214,7 +1212,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
    * @param sourceRoots An array of all sourceroots for the files to be compiled
    * @param files An array of all files to be compiled
    */
-  private void _compileFiles(File[] sourceRoots, File[] files) throws IOException {
+  protected void _compileFiles(File[] sourceRoots, File[] files) throws IOException {
     
     CompilerError[] errors = new CompilerError[0];
     
@@ -1533,29 +1531,29 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
         
         // If the file exists, make sure it's ok to overwrite it
         else if (!file.exists() || com.verifyOverwrite()) {
-            
+          
           // Correct the case of the filename (in Windows)
           if (! file.getCanonicalFile().getName().equals(file.getName())) {
             file.renameTo(file);
           }
           
           // have FileOps save the file the correct way
-   FileOps.saveFile(new FileOps.DefaultFileSaver(file){
-       public void saveTo(File file) throws IOException{
-  FileWriter writer = new FileWriter(file);
-  try {
-    _editorKit.write(writer, _doc, 0, _doc.getLength());
-  } catch (BadLocationException docFailed){
-    // We don't expect this to happen
-    throw new UnexpectedException(docFailed);
-  }
-  finally {
-     writer.close();
-   }
-       }
-     });
-  
-   
+          FileOps.saveFile(new FileOps.DefaultFileSaver(file){
+            public void saveTo(File file) throws IOException{
+              FileWriter writer = new FileWriter(file);
+              try {
+                _editorKit.write(writer, _doc, 0, _doc.getLength());
+              } catch (BadLocationException docFailed){
+                // We don't expect this to happen
+                throw new UnexpectedException(docFailed);
+              }
+              finally {
+                writer.close();
+              }
+            }
+          });
+          
+          
           _doc.resetModification();
           _doc.setFile(file);
           _doc.setCachedClassFile(null);

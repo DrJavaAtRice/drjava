@@ -54,11 +54,11 @@ public class InterpreterJVMTest extends TestCase {
   private JavaInterpreter _interpreter3;
   
   private void _addInterpreter(String name, JavaInterpreter interpreter) {
-    InterpreterJVM.ONLY.addDebugInterpreter(name, interpreter);
+    InterpreterJVM.ONLY.addInterpreter(name, interpreter);
   }
   
   public void setUp() {
-    _debugInterpreters = InterpreterJVM.ONLY.getDebugInterpreters();
+    _debugInterpreters = InterpreterJVM.ONLY.getInterpreters();
     _interpreter1 = new DynamicJavaAdapter();
     _interpreter2 = new DynamicJavaAdapter();
     _interpreter3 = new DynamicJavaAdapter();
@@ -99,46 +99,50 @@ public class InterpreterJVMTest extends TestCase {
     _addInterpreter("1",_interpreter1);
     _addInterpreter("2",_interpreter2);
     
-    jvm.getActiveInterpreter().defineVariable(var0, val0);
-    assertEquals(val0, jvm.getActiveInterpreter().interpret(var0));
+    JavaInterpreter interpreter = (JavaInterpreter) jvm.getActiveInterpreter();
+    interpreter.defineVariable(var0, val0);
+    assertEquals(val0, interpreter.interpret(var0));
 
     jvm.setActiveInterpreter("1");
+    interpreter = (JavaInterpreter) jvm.getActiveInterpreter();
     try {
-      jvm.getActiveInterpreter().interpret(var0);
+      interpreter.interpret(var0);
       fail();
     }
     catch (ExceptionReturnedException ex) {
       // correct behavior -- var0 should not be defined
     }
-    jvm.getActiveInterpreter().defineVariable(var1,val1);
-    assertEquals(val1, jvm.getActiveInterpreter().interpret(var1));
+    interpreter.defineVariable(var1,val1);
+    assertEquals(val1, interpreter.interpret(var1));
     
     jvm.setActiveInterpreter("2");
+    interpreter = (JavaInterpreter) jvm.getActiveInterpreter();
     try {
-      jvm.getActiveInterpreter().interpret(var0);
+      interpreter.interpret(var0);
       fail();
     }
     catch (ExceptionReturnedException ex) {
     }
     try {
-      jvm.getActiveInterpreter().interpret(var1);
+      interpreter.interpret(var1);
       fail();
     }
     catch (ExceptionReturnedException ex) {
       // correct behavior -- var0 & var1 should not be defined
     }
-    jvm.getActiveInterpreter().defineVariable(var2,val2);
-    assertEquals(val2, jvm.getActiveInterpreter().interpret(var2));
+    interpreter.defineVariable(var2,val2);
+    assertEquals(val2, interpreter.interpret(var2));
 
-    jvm.setDefaultInterpreter();
+    jvm.setToDefaultInterpreter();
+    interpreter = (JavaInterpreter) jvm.getActiveInterpreter();
     try {
-      jvm.getActiveInterpreter().interpret(var1);
+      interpreter.interpret(var1);
       fail();
     }
     catch (ExceptionReturnedException ex) {
     }
     try {
-      jvm.getActiveInterpreter().interpret(var2);
+      interpreter.interpret(var2);
       fail();
     }
     catch (ExceptionReturnedException ex) {
@@ -147,27 +151,28 @@ public class InterpreterJVMTest extends TestCase {
     assertEquals(val0, jvm.getActiveInterpreter().interpret(var0));
 
     jvm.setActiveInterpreter("1");
+    interpreter = (JavaInterpreter) jvm.getActiveInterpreter();
     try {
-      jvm.getActiveInterpreter().interpret(var0);
+      interpreter.interpret(var0);
       fail();
     }
     catch (ExceptionReturnedException ex) {
     }
     try {
-      jvm.getActiveInterpreter().interpret(var2);
+      interpreter.interpret(var2);
       fail();
     }
     catch (ExceptionReturnedException ex) {
       // correct behavior -- var1 & var2 should not be defined
     }
-    assertEquals(val1, jvm.getActiveInterpreter().interpret(var1));
+    assertEquals(val1, interpreter.interpret(var1));
 
     try {
       jvm.setActiveInterpreter("not an interpreter");
       fail();
     }
     catch (IllegalArgumentException ex) {
-      assertEquals("Interpreter <not an interpreter> does not exist.", ex.getMessage());
+      assertEquals("Interpreter 'not an interpreter' does not exist.", ex.getMessage());
     }
   }
 }
