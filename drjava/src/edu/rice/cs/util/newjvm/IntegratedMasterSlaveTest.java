@@ -86,6 +86,7 @@ public class IntegratedMasterSlaveTest extends TestCase {
   {
     private char _letter;
     private boolean _justQuit;
+    private String _currentTest = "";
    
     public MasterImpl() {
       super(IntegratedMasterSlaveTest.class.getName() + "$CounterSlave");
@@ -98,6 +99,7 @@ public class IntegratedMasterSlaveTest extends TestCase {
      * slave to quit as soon as it is started up.
      */
     public synchronized void runImmediateQuitTest() throws Exception {
+      _currentTest = "runImmediateQuitTest";
       _justQuit = false;
 
       // this needs to be reset because the slave is going to check it!
@@ -117,24 +119,28 @@ public class IntegratedMasterSlaveTest extends TestCase {
 
       // If we get here, it worked as expected.
       // (All of the post-quit invariants are checked in handleSlaveQuit.
+      _currentTest = "";
     }
     
     public synchronized void runTestSequence() throws Exception {
+      _currentTest = "runTestSequence";
       _justQuit = false;
       _letter = 'a';
       
       long start, end;
       start = System.currentTimeMillis();
       invokeSlave();
-      wait(); // for connection
+      wait();  // for handleConnected
       end = System.currentTimeMillis();
       //System.err.println((end-start) + "ms waiting for invocation");
+      
+      ((SlaveI)getSlave()).startLetterTest();
       
       // now, wait until five getletter calls passed
       // (after fifth call letter is 'f' due to the ++
       start = System.currentTimeMillis();
       while (_letter != 'f') {
-        wait();
+        wait();  // for getLetter()
       }
 
       end = System.currentTimeMillis();
@@ -154,13 +160,14 @@ public class IntegratedMasterSlaveTest extends TestCase {
       quitSlave();
       wait(); // for quit to finish
       end = System.currentTimeMillis();
-      //System.err.println((end-start) + "ms waiting to quit");      
+      //System.err.println((end-start) + "ms waiting to quit");
+      _currentTest = "";
     }
     
     public synchronized char getLetter() {
       char ret = _letter;
       _letter++;
-
+      
       notify();
       
       return ret;
@@ -177,11 +184,13 @@ public class IntegratedMasterSlaveTest extends TestCase {
     
     protected synchronized void handleSlaveQuit(int status) {
       assertEquals("slave result code", 0, status);
-      // 5 letter calls must have occurred, so 'f' should be next
-      assertEquals("last letter returned", 'f', _letter);
+      if (_currentTest.equals("runTestSequence")) {
+        // 5 letter calls must have occurred, so 'f' should be next
+        assertEquals("last letter returned", 'f', _letter);
+      }
       assertTrue("slave is not set", getSlave() == null);
       assertTrue("startup not in progress", !isStartupInProgress());
-
+      
       // alert test method that quit occurred.
       notify();
       _justQuit = true;
@@ -202,39 +211,52 @@ public class IntegratedMasterSlaveTest extends TestCase {
    */
   public static class CounterSlave extends AbstractSlaveJVM implements SlaveI {
     private int _counter = 0;
+    private MasterI _master = null;
 
     public int getNumber() {
       return _counter++;
     }
     
     protected void handleStart(MasterRemote m) {
-      try {
-        MasterI master = (MasterI) m;
-        for (char c = 'a'; c <= 'e'; c++) {
-          char got = master.getLetter();
-          if (c != got) {
-            System.exit(2);
+      _master = (MasterI) m;
+    }
+    
+    public void startLetterTest() throws RemoteException {
+      // Run this part of the test in a new thread, so this call will
+      //  immediately return
+      Thread thread = new Thread() {
+        public void run() {
+          try {
+            for (char c = 'a'; c <= 'e'; c++) {
+              char got = _master.getLetter();
+              if (c != got) {
+                System.exit(2);
+              }
+            }
+            
+            // OK, now wait up till 15 seconds for master jvm to call
+            Thread.currentThread().sleep(15000);
+            System.exit(4);
+          }
+          catch (InterruptedException e) {
+            System.exit(5);
+          }
+          catch (RemoteException re) {
+            javax.swing.JOptionPane.showMessageDialog(null, re.toString());
+            System.exit(3);
+          }
+          catch (ClassCastException cce) {
+            System.exit(1);
           }
         }
-        
-        // OK, now wait up till 15 seconds for master jvm to call
-        Thread.currentThread().sleep(15000);
-        System.exit(4);
-      }
-      catch (InterruptedException e) {
-        System.exit(5);
-      }
-      catch (RemoteException re) {
-        System.exit(3);
-      }
-      catch (ClassCastException cce) {
-        System.exit(1);
-      }
+      };
+      thread.start();
     }
   }
   
   public interface SlaveI extends SlaveRemote {
     public int getNumber() throws RemoteException;
+    public void startLetterTest() throws RemoteException;
   }
   
   public interface MasterI/*<SlaveType extends SlaveRemote>*/ extends MasterRemote/*<SlaveType>*/ {

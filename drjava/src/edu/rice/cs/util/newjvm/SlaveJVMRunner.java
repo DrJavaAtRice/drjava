@@ -93,14 +93,14 @@ public final class SlaveJVMRunner {
         // Debug: check that the IP address is 127.0.0.1
         //javax.swing.JOptionPane.showMessageDialog(null, stub.toString());
 
-        // start the slave and notify the master
-        remote.registerSlave(slave);
+        // start the slave and then notify the master
         slave.start(remote);
+        remote.registerSlave(slave);
       }
       catch (Exception e) {
         System.err.println("Exception while instantiation slave " + args[1]);
         e.printStackTrace();
-        //javax.swing.JOptionPane.showMessageDialog(null, e);
+        //javax.swing.JOptionPane.showMessageDialog(null, e.toString());
         System.exit(3);
       }
     }
