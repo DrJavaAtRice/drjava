@@ -80,6 +80,9 @@ public class DebugPanel extends JPanel {
   
   private final DebugLogger _logger;
 
+  private Object _curBreakpointTag=null; // currently highlighted line
+  private int    _curBP;                 // and its associated tag.
+    
   /**
    * Action performed when the Enter key is pressed.
    */
@@ -93,9 +96,17 @@ public class DebugPanel extends JPanel {
    * Highlighter
    */
   /** Highlight painter for selected list items. */
+    //  private static final DefaultHighlighter.DefaultHighlightPainter
+    //    _breakpointHighlightPainter
+    //      = new DefaultHighlighter.DefaultHighlightPainter(new Color(255,155,155));
+
+  /**
+   * Highlighter for active breakpoint.
+   */
+  /** Highlight painter for selected list items. */
   private static final DefaultHighlighter.DefaultHighlightPainter
-    _breakpointHighlightPainter
-      = new DefaultHighlighter.DefaultHighlightPainter(Color.red);
+    _activeBreakpointHighlightPainter
+      = new DefaultHighlighter.DefaultHighlightPainter(new Color(255,155,155));
     
   /**
    * Constructor.
@@ -371,11 +382,17 @@ public class DebugPanel extends JPanel {
           if (file.exists()) {
             DrJava.consoleOut().println("DebugPanel: file: " + file.getName());
             OpenDefinitionsDocument doc = _model.getDocumentForFile(file);
-            _model.setActiveDocument(doc);
-            DrJava.consoleErr().println("Showing line " + line);
+            _model.setActiveDocument(doc);	    
+            DrJava.consoleErr().println("Showing line " + line);	    
             if (line > 0) {
-              int pos = doc.gotoLine(line);
-              _frame.getCurrentDefPane().setCaretPosition(pos);
+ 	      if (_curBP>0 && line != _curBP) // remove existing bp
+		_frame.getCurrentDefPane().getHighlighter().removeHighlight(_curBreakpointTag);
+
+	      _curBreakpointTag = highlightLine(line, _activeBreakpointHighlightPainter);
+	      _curBP = line;
+	      	      
+	      // _frame.getCurrentDefPane().setCaretPosition(doc.getDocument().getCurrentLocation());
+	      
             }
             _inputField.grabFocus();
             return true;
@@ -401,8 +418,14 @@ public class DebugPanel extends JPanel {
               _model.setActiveDocument(doc);
               DrJava.consoleErr().println("Showing line " + line);
               if (line > 0) {
-                int pos = doc.gotoLine(line);
-                _frame.getCurrentDefPane().setCaretPosition(pos);
+		if (_curBP>0 && line != _curBP) // remove existing bp
+		  _frame.getCurrentDefPane().getHighlighter().removeHighlight(_curBreakpointTag);
+
+  	        _curBreakpointTag = highlightLine(line, _activeBreakpointHighlightPainter);
+	        _curBP = line;
+	      	      
+	        // _frame.getCurrentDefPane().setCaretPosition(doc.getDocument().getCurrentLocation());
+
               }
               _inputField.grabFocus();
               return true;
@@ -434,17 +457,47 @@ public class DebugPanel extends JPanel {
 
   /**
     * Highlights the given line.
+    * @param  line  the line to highlight
+    * @param  brush the highlighter to use.
+    *
+    * @return the highlight tag for removal later (Object)
     */
-  public void highlightLine(int line) {      
-      DefinitionsDocument doc = _model.getActiveDocument().getDocument();
+  public Object highlightLine(int line, DefaultHighlighter.DefaultHighlightPainter brush) {
+      
+      OpenDefinitionsDocument doc = _model.getActiveDocument();
+      doc.syncCurrentLocationWithDefinitions(doc.getDocument().getCurrentLocation());
       doc.gotoLine(line);
-      int curPos = doc.getCurrentLocation();
-      int startPos = doc.getLineStartPos(curPos);
-      int endPos = doc.getLineEndPos(curPos);
+      
+      int curPos = doc.getDocument().getCurrentLocation();
+      int startPos = doc.getDocument().getLineStartPos(curPos);
+      int endPos = doc.getDocument().getLineEndPos(curPos);
+      Object o=null;      
       try {
-	  _frame.getCurrentDefPane().getHighlighter().addHighlight(startPos,
-				    endPos,
-				    _breakpointHighlightPainter);
-      } catch (BadLocationException badBadLocation) {}
-  }    
+  	  o = _frame.getCurrentDefPane().getHighlighter().addHighlight(startPos,
+								       endPos,
+								       brush);
+      } catch (BadLocationException badBadLocation) { System.err.println("DebugPanel.highlightLine() Got a ble."); }
+      return o;
+  }
+    
+   /**
+    * Highlights the given region (not used right now)
+    *
+    * @param  start  the start pos of region to highlight
+    * @param  start  the end pos of region to highlight    
+    * @param  brush  the highlighter to use.
+    *
+    * @return the highlight tag for removal later (Object)
+    */     
+  public Object highlightRegion(int start, int end, DefaultHighlighter.DefaultHighlightPainter brush) {
+	Object o=null;      
+	try {
+	    o = _frame.getCurrentDefPane().getHighlighter().addHighlight(start,
+									 end,
+									 brush);
+      } catch (BadLocationException badBadLocation) { System.err.println("DebugPanel.highlightRegion() Got a ble."); }
+	return o;
+    }
 }
+
+
