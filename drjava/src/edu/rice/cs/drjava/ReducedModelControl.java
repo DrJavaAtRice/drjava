@@ -90,7 +90,7 @@ public class ReducedModelControl implements BraceReduction {
   *is relative to the last time it was called. You can reset the last
   *call to the current offset using resetLocation.
   */
-  public int stateAtRelLocation(int relDistance) {
+  public ReducedModelState stateAtRelLocation(int relDistance) {
     return rmc.stateAtRelLocation(relDistance);
   }
   
@@ -122,7 +122,7 @@ public class ReducedModelControl implements BraceReduction {
       return new Gap(size, rmc.getStateAtCurrent());
   }
 
-  public int getStateAtCurrent() {
+  public ReducedModelState getStateAtCurrent() {
       return rmc.getStateAtCurrent();
   }
 

@@ -6,8 +6,12 @@ import  java.awt.Color;
  * @version $Id$
  */
 abstract class ReducedToken implements ReducedModelStates {
-  protected int _state;
+  private ReducedModelState _state;
 
+  public ReducedToken(ReducedModelState state) {
+    _state = state;
+  }
+  
   /**
    * put your documentation comment here
    * @return 
@@ -42,7 +46,7 @@ abstract class ReducedToken implements ReducedModelStates {
    * put your documentation comment here
    * @return 
    */
-  public int getState() {
+  public ReducedModelState getState() {
     return  _state;
   }
 
@@ -69,7 +73,7 @@ abstract class ReducedToken implements ReducedModelStates {
    * put your documentation comment here
    * @param state
    */
-  public void setState(int state) {
+  public void setState(ReducedModelState state) {
     _state = state;
   }
 

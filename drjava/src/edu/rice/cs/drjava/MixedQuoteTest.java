@@ -8,7 +8,9 @@ import  junit.extensions.*;
 /**
  * @version $Id$
  */
-public class MixedQuoteTest extends TestCase implements ReducedModelStates {
+public class MixedQuoteTest extends BraceReductionTestCase 
+  implements ReducedModelStates 
+{
 
   protected ReducedModelControl model;
 
@@ -57,21 +59,21 @@ public class MixedQuoteTest extends TestCase implements ReducedModelStates {
     model.insertChar('\"');
     assertEquals("#0.0", INSIDE_DOUBLE_QUOTE, model.getStateAtCurrent());
     model.move(-1);
-    assertEquals("#0.1", FREE, stateAtCurrentToken(model));
+    assertEquals("#0.1", FREE, stateOfCurrentToken(model));
     model.move(1);
     model.insertChar('A');    
     model.move(-1);
     assertEquals("#1.0", INSIDE_DOUBLE_QUOTE, model.getStateAtCurrent());    
-    assertEquals("#1.1", INSIDE_DOUBLE_QUOTE, stateAtCurrentToken(model));
+    assertEquals("#1.1", INSIDE_DOUBLE_QUOTE, stateOfCurrentToken(model));
     assertTrue("#1.2", model.currentToken().isGap());
     model.move(-1);
     model.insertChar('\'');
     assertEquals("#2.0", INSIDE_SINGLE_QUOTE, model.getStateAtCurrent());
-    assertEquals("#2.1", INSIDE_SINGLE_QUOTE, stateAtCurrentToken(model));
+    assertEquals("#2.1", INSIDE_SINGLE_QUOTE, stateOfCurrentToken(model));
     assertEquals("#2.2", "\"", model.currentToken().getType());
     model.move(1);
     assertEquals("#3.0", INSIDE_SINGLE_QUOTE, model.getStateAtCurrent());
-    assertEquals("#3.1", INSIDE_SINGLE_QUOTE, stateAtCurrentToken(model));
+    assertEquals("#3.1", INSIDE_SINGLE_QUOTE, stateOfCurrentToken(model));
     assertTrue("#3.2", model.currentToken().isGap());    
   }
 
@@ -83,24 +85,21 @@ public class MixedQuoteTest extends TestCase implements ReducedModelStates {
     model.insertChar('\'');
     assertEquals("#0.0", INSIDE_SINGLE_QUOTE, model.getStateAtCurrent());
     model.move(-1);
-    assertEquals("#0.1", FREE, stateAtCurrentToken(model));
+    assertEquals("#0.1", FREE, stateOfCurrentToken(model));
     model.move(1);
     model.insertChar('A');    
     model.move(-1);
     assertEquals("#1.0", INSIDE_SINGLE_QUOTE, model.getStateAtCurrent());    
-    assertEquals("#1.1", INSIDE_SINGLE_QUOTE, stateAtCurrentToken(model));
+    assertEquals("#1.1", INSIDE_SINGLE_QUOTE, stateOfCurrentToken(model));
     assertTrue("#1.2", model.currentToken().isGap());
     model.move(-1);
     model.insertChar('\"');
     assertEquals("#2.0", INSIDE_DOUBLE_QUOTE, model.getStateAtCurrent());
-    assertEquals("#2.1", INSIDE_DOUBLE_QUOTE, stateAtCurrentToken(model));
+    assertEquals("#2.1", INSIDE_DOUBLE_QUOTE, stateOfCurrentToken(model));
     assertEquals("#2.2", "\'", model.currentToken().getType());
     model.move(1);
     assertEquals("#3.0", INSIDE_DOUBLE_QUOTE, model.getStateAtCurrent());
-    assertEquals("#3.1", INSIDE_DOUBLE_QUOTE, stateAtCurrentToken(model));
+    assertEquals("#3.1", INSIDE_DOUBLE_QUOTE, stateOfCurrentToken(model));
     assertTrue("#3.2", model.currentToken().isGap());    
   }  
-  public int stateAtCurrentToken(ReducedModelControl rmc) {
-    return rmc.currentToken().getState();
-  }
 }

@@ -9,11 +9,11 @@ class Gap extends ReducedToken {
   /**
    * put your documentation comment here
    * @param     int size
-   * @param     int state
+   * @param     ReducedModelState state
    */
-  Gap(int size, int state) {
+  Gap(int size, ReducedModelState state) {
+    super(state);
     _size = size;
-    _state = state;
   }
 
   /**

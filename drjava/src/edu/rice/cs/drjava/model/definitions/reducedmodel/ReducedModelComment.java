@@ -523,7 +523,7 @@ public class ReducedModelComment implements ReducedModelStates {
   *some iterator. This function passes _cursor to the _getStateAtCurrent
   *Helper to return the current state in the cursor iterator.
   */
-  int getStateAtCurrent() {
+  ReducedModelState getStateAtCurrent() {
     return _getStateAtCurrentHelper(_cursor);
   }
   
@@ -532,9 +532,9 @@ public class ReducedModelComment implements ReducedModelStates {
   * @return FREE|INSIDE_BLOCK_COMMENT|INSIDE_LINE_COMMENT|INSIDE_SINGLE_QUOTE|
   * INSIDE_DOUBLE_QUOTE
   */
-  private int _getStateAtCurrentHelper(ModelList<ReducedToken>.Iterator temp) {
+  private ReducedModelState _getStateAtCurrentHelper(ModelList<ReducedToken>.Iterator temp) {
     
-    int state = FREE;
+    ReducedModelState state = FREE;
     
     if (temp.atFirstItem() || temp.atStart() || _braces.isEmpty()) {
       state = FREE;
@@ -692,34 +692,32 @@ public class ReducedModelComment implements ReducedModelStates {
       return;
     }
     
-    int curState = _getStateAtCurrentHelper(copyCursor);
+    ReducedModelState curState = _getStateAtCurrentHelper(copyCursor);
     // Free if at the beginning     
     while (!copyCursor.atEnd()) {
-      switch (curState) {
-        case FREE:
-          curState = _updateFree(copyCursor);
-        break;
-        case INSIDE_SINGLE_QUOTE:
-          curState = _updateInsideSingleQuote(copyCursor);
-        break;
-        case INSIDE_DOUBLE_QUOTE:
-          curState = _updateInsideDoubleQuote(copyCursor);
-        break;
-        case INSIDE_BLOCK_COMMENT:
-          curState = _updateInsideBlockComment(copyCursor);
-        break;
-        case INSIDE_LINE_COMMENT:
-          curState = _updateInsideLineComment(copyCursor);
-        break;
-        default:
-          if (copyCursor.atStart()) {
-            copyCursor.next();
-          }
+			if (curState == FREE) {
+        curState = _updateFree(copyCursor);
+      }
+      else if (curState == INSIDE_SINGLE_QUOTE) {
+        curState = _updateInsideSingleQuote(copyCursor);
+      }
+      else if (curState == INSIDE_DOUBLE_QUOTE) {
+        curState = _updateInsideDoubleQuote(copyCursor);
+      }
+      else if (curState == INSIDE_BLOCK_COMMENT) {
+        curState = _updateInsideBlockComment(copyCursor);
+      }
+      else if (curState == INSIDE_LINE_COMMENT) {
+        curState = _updateInsideLineComment(copyCursor);
+      }
+      else { // curState == STUTTER
+        if (copyCursor.atStart()) {
+          copyCursor.next();
+        }
         if (copyCursor.atEnd()) {
           return;
         }
-        curState = _getStateAtCurrentHelper(copyCursor);
-        break;
+			  curState = _getStateAtCurrentHelper(copyCursor);
       }
     }
   }
@@ -737,9 +735,11 @@ public class ReducedModelComment implements ReducedModelStates {
    *        Else, mark current brace as FREE, go to the next brace, and recur.
    * </ol>
    */
-  private int _updateFree(ModelList<ReducedToken>.Iterator copyCursor) {
+  private ReducedModelState _updateFree
+    (ModelList<ReducedToken>.Iterator copyCursor) 
+  {
     if (copyCursor.atEnd()) {
-      return -1;
+      return STUTTER;
     }
     
     _combineCurrentAndNextIfFind("/", "*", copyCursor);
@@ -755,7 +755,7 @@ public class ReducedModelComment implements ReducedModelStates {
     if (type.equals("*/")) {
       _splitCurrentIfCommentBlock(true,false,copyCursor);
       copyCursor.prev();
-      return -1;
+      return STUTTER;
     }
     else if (type.equals("//")) {
       // open comment blocks are not set commented, they're set free
@@ -804,9 +804,11 @@ public class ReducedModelComment implements ReducedModelStates {
    *       Else, mark current brace as INSIDE_SINGLE_QUOTE, go to next brace, recur.
    * </ol>   
    */
-  private int _updateInsideSingleQuote(ModelList<ReducedToken>.Iterator copyCursor) {
+  private ReducedModelState _updateInsideSingleQuote
+    (ModelList<ReducedToken>.Iterator copyCursor) 
+  {
     if (copyCursor.atEnd()) {
-      return -1;
+      return STUTTER;
     }
     _splitCurrentIfCommentBlock(true,false, copyCursor);
     _combineCurrentAndNextIfFind("","", copyCursor);
@@ -847,9 +849,11 @@ public class ReducedModelComment implements ReducedModelStates {
    *       Else, mark current brace as INSIDE_DOUBLE_QUOTE, go to next brace, recur.
    * </ol>   
    */
-  private int _updateInsideDoubleQuote(ModelList<ReducedToken>.Iterator copyCursor) {
+  private ReducedModelState _updateInsideDoubleQuote
+    (ModelList<ReducedToken>.Iterator copyCursor) 
+  {
     if (copyCursor.atEnd()) {
-      return -1;
+      return STUTTER;
     }
     _splitCurrentIfCommentBlock(true,false, copyCursor);
     _combineCurrentAndNextIfFind("","", copyCursor);
@@ -888,11 +892,11 @@ public class ReducedModelComment implements ReducedModelStates {
   *        Else, mark current brace as LINE_COMMENT, goto next, and recur.
   *  </ol>
   */
-  private int _updateInsideLineComment
+  private ReducedModelState _updateInsideLineComment
     (ModelList<ReducedToken>.Iterator copyCursor)
   {
     if (copyCursor.atEnd()) {
-      return -1;
+      return STUTTER;
     }
     _splitCurrentIfCommentBlock(true, false,copyCursor);
     _combineCurrentAndNextIfFind("","", copyCursor);
@@ -927,11 +931,11 @@ public class ReducedModelComment implements ReducedModelStates {
    *        and go to next brace and recur.
    *  </ol>
    */
-  private int _updateInsideBlockComment
+  private ReducedModelState _updateInsideBlockComment
     (ModelList<ReducedToken>.Iterator copyCursor)
   {
     if (copyCursor.atEnd()) {
-      return -1;
+      return STUTTER;
     }
     _combineCurrentAndNextIfFind("*", "/", copyCursor);
     _combineCurrentAndNextIfFind("*","//", copyCursor);
@@ -1056,7 +1060,7 @@ public class ReducedModelComment implements ReducedModelStates {
         String second = type.substring(1, 2);
         // change current Brace to only be first character
         copyCursor.current().setType(first);
-        int oldState = copyCursor.current().getState();
+        ReducedModelState oldState = copyCursor.current().getState();
         
         // then put a new brace after the current one
         copyCursor.next();
@@ -1526,7 +1530,7 @@ public class ReducedModelComment implements ReducedModelStates {
   *relative to the walker
   *@param relLocation distance from walker to get state at.
   */
-  int stateAtRelLocation(int relLocation) {
+  ReducedModelState stateAtRelLocation(int relLocation) {
     _walkerOffset = _move(relLocation,_walker,_walkerOffset);
     return _getStateAtCurrentHelper(_walker);
   }

@@ -9,7 +9,9 @@ import  junit.extensions.*;
 /**
  * @version $Id$
  */
-public class DefinitionsDocumentTest extends TestCase {
+public class DefinitionsDocumentTest extends TestCase
+  implements ReducedModelStates 
+{
   protected DefinitionsDocument defModel;
 
   /**
@@ -49,7 +51,7 @@ public class DefinitionsDocumentTest extends TestCase {
       // document is:
       // Start:=>a/*bc */"\\{}()
       BraceReduction rm = defModel._reduced;
-      assertEquals("2.1", 0, rm.getStateAtCurrent());
+      assertEquals("2.1", FREE, rm.getStateAtCurrent());
       rm.move(2);
       // document is:
       // Start:a/=>*bc */"\\{}()

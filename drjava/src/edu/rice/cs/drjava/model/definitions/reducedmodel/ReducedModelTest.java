@@ -8,7 +8,9 @@ import  junit.extensions.*;
 /**
  * @version $Id$
  */
-public class ReducedModelTest extends TestCase implements ReducedModelStates {
+public class ReducedModelTest extends BraceReductionTestCase 
+  implements ReducedModelStates 
+{
    
   protected ReducedModelControl model0;
   protected ReducedModelControl model1;

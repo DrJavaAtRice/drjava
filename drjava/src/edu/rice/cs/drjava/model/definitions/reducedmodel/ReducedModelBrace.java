@@ -899,7 +899,7 @@ public class ReducedModelBrace implements ReducedModelStates {
     }
   }
   
-  int stateAtRelLocation(int relDistance) {
+  ReducedModelState stateAtRelLocation(int relDistance) {
     return parent.stateAtRelLocation(relDistance);
   }
   

@@ -7,11 +7,18 @@ package edu.rice.cs.drjava;
  */
 public interface ReducedModelStates {
   
-  public static final int FREE = 0;
+  public static final Free FREE = Free.ONLY;
+  public static final Stutter STUTTER = Stutter.ONLY;
   
-  public static final int INSIDE_SINGLE_QUOTE = 1;
-  public static final int INSIDE_DOUBLE_QUOTE = 2;
+  public static final InsideSingleQuote INSIDE_SINGLE_QUOTE =  
+    InsideSingleQuote.ONLY;
+  
+  public static final InsideDoubleQuote INSIDE_DOUBLE_QUOTE =  
+    InsideDoubleQuote.ONLY;
 
-  public static final int INSIDE_LINE_COMMENT = 3;
-  public static final int INSIDE_BLOCK_COMMENT = 4;
+  public static final InsideLineComment INSIDE_LINE_COMMENT  = 
+    InsideLineComment.ONLY;
+  
+  public static final InsideBlockComment INSIDE_BLOCK_COMMENT = 
+    InsideBlockComment.ONLY;
 }

@@ -26,7 +26,7 @@ public interface BraceReduction {
    * Get the state of the token at the current cursor position.
    * @return the current state
    */
-  int getStateAtCurrent();
+  ReducedModelState getStateAtCurrent();
 
   /**
    * Insert a character into the BraceReduction.
@@ -100,4 +100,11 @@ public interface BraceReduction {
    * @param length How far should we generate info for?             
    */
   public Vector<HighlightStatus> getHighlightStatus(int start, int length);
+    
+  /**
+   *Returns the state at the relLocation, where relLocation is the location
+   *relative to the walker
+   *@param relLocation distance from walker to get state at.
+   */
+  public ReducedModelState stateAtRelLocation(int relLocation);
 }

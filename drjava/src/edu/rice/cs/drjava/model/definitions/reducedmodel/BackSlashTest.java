@@ -8,7 +8,9 @@ import  junit.extensions.*;
 /**
  * @version $Id$
  */
-public class BackSlashTest extends TestCase implements ReducedModelStates {
+public class BackSlashTest extends BraceReductionTestCase 
+  implements ReducedModelStates 
+{
 
   protected ReducedModelControl model0;
   protected ReducedModelControl model1;
@@ -381,15 +383,6 @@ public class BackSlashTest extends TestCase implements ReducedModelStates {
     assertEquals("#6.2", "\"", model0.currentToken().getType());
     assertTrue("#6.3", model0.currentToken().isOpen());
     assertEquals("#6.4", FREE, stateOfCurrentToken(model0));
-  }
-
-  /**
-   * Convenience function to get state of the current token.
-   * @param rmc the reduced model in question
-   * @return the state of the current token
-   */
-  private int stateOfCurrentToken(ReducedModelControl rmc) {
-    return  rmc.currentToken().getState();
   }
 }
 

@@ -40,7 +40,7 @@ class Brace extends ReducedToken implements ReducedModelStates {
    * @param state whether the brace is shadwowed by a comment, quote etc
    * @return a new Brace if type is valid, otherwise null
    */
-  public static Brace MakeBrace(String type, int state) {
+  public static Brace MakeBrace(String type, ReducedModelState state) {
     int index = findBrace(type);
     if (index == braces.length) {
       throw  new BraceException("Invalid brace type \"" + type + "\"");
@@ -55,9 +55,9 @@ class Brace extends ReducedToken implements ReducedModelStates {
    * @param type the brace type
    * @param width the size of the brace and its gap
    */
-  private Brace(int type, int state) {
+  private Brace(int type, ReducedModelState state) {
+    super(state);
     _type = type;
-    _state = state;
   }
 
   /**
