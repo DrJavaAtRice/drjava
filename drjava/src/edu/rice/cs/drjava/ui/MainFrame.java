@@ -13,10 +13,13 @@ import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.BoxLayout;
 import javax.swing.JTextField;
+import javax.swing.KeyStroke;
+import javax.swing.JMenuItem;
 
 import javax.swing.text.DefaultEditorKit;
 
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
 import java.awt.event.WindowListener;
 import java.awt.event.WindowEvent;
 import java.awt.BorderLayout;
@@ -56,6 +59,10 @@ public class MainFrame extends JFrame
     }
   };
 
+	public Action getQuitAction() {
+		return _quitAction;
+	}
+	
   private Action _openAction = new AbstractAction("Open")
   {
     public void actionPerformed(ActionEvent ae)
@@ -67,6 +74,11 @@ public class MainFrame extends JFrame
     }
   };
 
+	public Action getOpenAction() {
+		return _openAction;
+	}
+
+	
   private Action _newAction = new AbstractAction("New")
   {
     public void actionPerformed(ActionEvent ae)
@@ -77,6 +89,10 @@ public class MainFrame extends JFrame
       }
     }
   };
+
+	public Action getNewAction() {
+		return _newAction;
+	}
 
   private Action _saveAction = new AbstractAction("Save")
   {
@@ -93,6 +109,10 @@ public class MainFrame extends JFrame
     }
   };
 
+	public Action getSaveAction() {
+		return _saveAction;
+	}
+
   private Action _saveAsAction = new AbstractAction("Save as")
   {
     public void actionPerformed(ActionEvent ae)
@@ -100,6 +120,10 @@ public class MainFrame extends JFrame
       _definitionsView.saveAs();
     }
   };
+
+	public Action getSaveAsAction() {
+		return _saveAsAction;
+	}
 
   private Action _compileAction = new AbstractAction("Compile")
   {
@@ -158,6 +182,10 @@ public class MainFrame extends JFrame
     }
   };
 
+	public Action getCompileAction() {
+		return _compileAction;
+	}
+	
   private Action _findReplaceAction = new AbstractAction("Find/Replace")
 		{
 			public void actionPerformed(ActionEvent ae)
@@ -165,6 +193,10 @@ public class MainFrame extends JFrame
 				_definitionsView.findReplace();
 			}
 		};
+	
+	public Action getFindReplaceAction() {
+		return _findReplaceAction;
+	}
 	
 	private Action _clearOutputAction = new AbstractAction("Clear Output")
 		{
@@ -208,6 +240,7 @@ public class MainFrame extends JFrame
 		public void windowOpened(WindowEvent ev) {}
 	};
 
+	
   /** Creates the main window, and shows it. */
   public MainFrame()
   {
@@ -227,14 +260,26 @@ public class MainFrame extends JFrame
 		this.addWindowListener(_windowCloseListener);
 		
     // Add items to menus
-    _fileMenu.add(_newAction);
-    _fileMenu.add(_openAction);
-    _fileMenu.add(_saveAction);
-    _fileMenu.add(_saveAsAction);
+    JMenuItem tmpItem = _fileMenu.add(_newAction);
+		tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N,
+																									ActionEvent.CTRL_MASK));
+		tmpItem = _fileMenu.add(_openAction);
+ 		tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O,
+																									ActionEvent.CTRL_MASK));
+		tmpItem = _fileMenu.add(_saveAction);
+		tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S,
+																									ActionEvent.CTRL_MASK));
+    tmpItem = _fileMenu.add(_saveAsAction);
+		tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_A,
+																									ActionEvent.CTRL_MASK));
     _fileMenu.addSeparator();
-    _fileMenu.add(_compileAction);
+    tmpItem = _fileMenu.add(_compileAction);
+		tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_B,
+																									ActionEvent.CTRL_MASK));
     _fileMenu.addSeparator();
-    _fileMenu.add(_quitAction);
+    tmpItem = _fileMenu.add(_quitAction);
+		tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q,
+																									ActionEvent.CTRL_MASK));
 
     Action cutAction = new DefaultEditorKit.CutAction();
     cutAction.putValue(Action.NAME, "Cut");
@@ -243,15 +288,24 @@ public class MainFrame extends JFrame
     Action pasteAction = new DefaultEditorKit.PasteAction();
     pasteAction.putValue(Action.NAME, "Paste");
 
-    _editMenu.add(_definitionsView.getUndoAction());
-    _editMenu.add(_definitionsView.getRedoAction());
+    tmpItem = _editMenu.add(_definitionsView.getUndoAction());
+		tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Z,
+																									ActionEvent.CTRL_MASK));		
+    tmpItem = _editMenu.add(_definitionsView.getRedoAction());
+		tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R,
+																									ActionEvent.CTRL_MASK));
     _editMenu.addSeparator();
     _editMenu.add(cutAction);
     _editMenu.add(copyAction);
     _editMenu.add(pasteAction);
     _editMenu.addSeparator();
-    _editMenu.add(_findReplaceAction);
+    tmpItem = _editMenu.add(_findReplaceAction);
+		tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F,
+																									ActionEvent.CTRL_MASK));
 		_editMenu.add(_clearOutputAction);
+
+
+
 
 
     // Add the menus to the menu bar

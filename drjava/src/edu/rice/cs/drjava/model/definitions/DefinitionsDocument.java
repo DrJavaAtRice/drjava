@@ -40,9 +40,9 @@ public class DefinitionsDocument extends DefaultStyledDocument
 	public DefinitionsDocument()
 		{
 			super();
-			this._taskCounter = new Semaphore();
-			this._styleUpdater = new StyleUpdateThread(this);
-			_styleUpdater.start();
+//			this._taskCounter = new Semaphore();
+//			this._styleUpdater = new StyleUpdateThread(this);
+//			_styleUpdater.start();
 		}
 
 	private static HashSet _makeNormEndings() {
@@ -75,7 +75,7 @@ public class DefinitionsDocument extends DefaultStyledDocument
 		StyleUpdateMessage message;
 		_modifiedHighlights = false;
 
-		_taskCounter.increment();
+//		_taskCounter.increment();
 		
 		//1)adjust location
     _reduced.move(locationChange);
@@ -98,10 +98,10 @@ public class DefinitionsDocument extends DefaultStyledDocument
 		//numbers are off by prevSize + strLength + reducedOffset
 		//the adjustment is the absolute position that newStates started at
 
-		message = _reduced.generateHighlights(offset,strLength,
-																					!_modifiedHighlights);
-		updateCurrentHighlights(message);
-		updateStyles(message);
+//		message = _reduced.generateHighlights(offset,strLength,
+//																					!_modifiedHighlights);
+//		updateCurrentHighlights(message);
+//		updateStyles(message);
 	}
 	
 	
@@ -156,7 +156,7 @@ public class DefinitionsDocument extends DefaultStyledDocument
 	
   public void remove(int offset, int len) throws BadLocationException
   {
-		_taskCounter.increment();
+//		_taskCounter.increment();
     int locationChange = offset - _currentLocation;
 		ModelList<ReducedToken>.Iterator mark;
 		StyleUpdateMessage message;
@@ -170,9 +170,9 @@ public class DefinitionsDocument extends DefaultStyledDocument
     _modifiedSinceSave = true;
 		_modifiedHighlights = _reduced.hasHighlightChanged();
 		
-		message = _reduced.generateHighlights(offset,0, !_modifiedHighlights);
-		updateCurrentHighlights(message);
-		updateStyles(message);
+//		message = _reduced.generateHighlights(offset,0, !_modifiedHighlights);
+//		updateCurrentHighlights(message);
+//		updateStyles(message);
 	}
 
 

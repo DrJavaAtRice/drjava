@@ -190,6 +190,7 @@ public class DefinitionsView extends JEditorPane
 				
 
 		Keymap ourMap = addKeymap("INDENT_KEYMAP", getKeymap());
+		
 		ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0),
 																 (Action) _indentKeyActionLine);
 		ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_TAB, 0),
@@ -198,6 +199,7 @@ public class DefinitionsView extends JEditorPane
 																 (Action) _indentKeyActionSquiggly);
 		ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke('{'),
 																 (Action) _indentKeyActionOpenSquiggly);
+
 
 		setKeymap(ourMap);
 					
