@@ -37,48 +37,52 @@
  *
 END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava;
+package edu.rice.cs.drjava.config;
+import gj.util.Hashtable;
+import gj.util.Vector;
+public abstract class Option<T> {
+    
+    public final String key;
 
-import java.util.Date;
-import java.text.SimpleDateFormat;
+    private final Hashtable<OptionMap,T> map =
+	new Hashtable<OptionMap,T>();
+    private final Hashtable<Configuration,Vector<OptionListener<T>>> listeners=
+	new Hashtable<Configuration,Vector<OptionListener<T>>>();
+    
+    public <T> Option(String key) { this.key = key; }
 
-/**
- * This interface hold the information about this build of DrJava.
- * This file is copied to Version.java by the build process, which also
- * fills in the right values of the date and time.
- *
- * This javadoc corresponds to build drjava-20020327-1919;
- *
- * @version $Id$
- */
-public abstract class Version {
-  /**
-   * This string will be automatically expanded upon "ant commit".
-   * Do not edit it by hand!
-   */
-  private static final String BUILD_TIME_STRING = "20020327-1919";
+    public String getName() { return key; }
 
-  /** A {@link Date} version of the build time. */
-  private static final Date BUILD_TIME = _getBuildDate();
+    public abstract T parse(String value);
+    
+    public String format(T value) { return value.toString(); }
 
-  public static String getBuildTimeString() {
-    return BUILD_TIME_STRING;
-  }
+    // PACKAGE PRIVATE MAGIC STUFF
 
-  public static Date getBuildTime() {
-    return BUILD_TIME;
-  }
+    String getString(DefaultOptionMap om) { return format(getOption(om)); }
+    
+    T setString(DefaultOptionMap om, String val) { return setOption(om,parse(val)); }
+    
+    T getOption(DefaultOptionMap om) { return map.get(om); }
 
-  private static Date _getBuildDate() {
-    try {
-      return new SimpleDateFormat("yyyyMMdd-HHmm z").parse(BUILD_TIME_STRING + " GMT");
+    T setOption(DefaultOptionMap om, T val) { return map.put(om,val); }
+
+    T remove(DefaultOptionMap om) { return map.remove(om); }
+
+    void addListener(Configuration c, OptionListener<T> l) {
+	Vector<OptionListener<T>> v = listeners.get(c);
+	if(v==null) {
+	    v = new Vector<OptionListener<T>>();
+	    listeners.put(c,v);
+	}
+	v.addElement(l);
     }
-    catch (Exception e) { // parse format or whatever problem
-      return null;
+    
+    void removeListener(Configuration c, OptionListener<T> l) {
+	Vector<OptionListener<T>> v = listeners.get(c);
+	if(v==null) return;
+	if(v.removeElement(l) && v.size() == 0) {
+	    listeners.remove(c);
+	}
     }
-  }
-
-  public static void main(String[] args) {
-    System.out.println("Version for edu.rice.cs.drjava: " + BUILD_TIME_STRING);
-  }
-} 
+}

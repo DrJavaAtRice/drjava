@@ -37,48 +37,39 @@
  *
 END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava;
-
-import java.util.Date;
-import java.text.SimpleDateFormat;
-
-/**
- * This interface hold the information about this build of DrJava.
- * This file is copied to Version.java by the build process, which also
- * fills in the right values of the date and time.
- *
- * This javadoc corresponds to build drjava-20020327-1919;
- *
- * @version $Id$
- */
-public abstract class Version {
-  /**
-   * This string will be automatically expanded upon "ant commit".
-   * Do not edit it by hand!
-   */
-  private static final String BUILD_TIME_STRING = "20020327-1919";
-
-  /** A {@link Date} version of the build time. */
-  private static final Date BUILD_TIME = _getBuildDate();
-
-  public static String getBuildTimeString() {
-    return BUILD_TIME_STRING;
-  }
-
-  public static Date getBuildTime() {
-    return BUILD_TIME;
-  }
-
-  private static Date _getBuildDate() {
-    try {
-      return new SimpleDateFormat("yyyyMMdd-HHmm z").parse(BUILD_TIME_STRING + " GMT");
+package edu.rice.cs.drjava.config;
+import gj.util.Hashtable;
+public class DefaultOptionMap 
+    extends Hashtable<Option<Object>,Object> implements OptionMap {    
+    public <T extends Object> T getOption(Option<T> o) {
+	return o.getOption(this);
     }
-    catch (Exception e) { // parse format or whatever problem
-      return null;
-    }
-  }
 
-  public static void main(String[] args) {
-    System.out.println("Version for edu.rice.cs.drjava: " + BUILD_TIME_STRING);
-  }
-} 
+    public <T extends Object> T setOption(Option<T> o, T val) {
+	super.put((Option)o,val); // jsr14 is dumb.  we have to cast.
+	return o.setOption(this,val);	
+    }
+
+    public String getString(Option<Object> o) {
+	return o.getString(this);
+    }
+    
+    public <T extends Object> T setString(Option<T> o, String s) {
+	return o.setString(this,s);
+    }
+
+    public Object remove(Option<Object> o) {
+	super.remove(o);
+	return o.remove(this);
+    }
+
+    public <T extends Object> T removeOption(Option<T> o) {
+	super.remove((Option)o); // jsr14 is dumb.  we have to cast.
+	return o.remove(this);
+    }
+
+    public Object put(Option<Object> o, Object val) {
+	super.put(o,val); 
+	return o.setOption(this,val);
+    }
+}
