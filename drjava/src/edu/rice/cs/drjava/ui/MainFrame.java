@@ -1708,10 +1708,12 @@ public class MainFrame extends JFrame implements OptionConstants {
         catch (ClassNameNotFoundException e) {
           // Display a warning message if a class name can't be found.
           JOptionPane.showMessageDialog
-            (MainFrame.this, 
+            (MainFrame.this,
              "DrJava could not find the top level class name in the\n" +
              "current document.  Please make sure that a class is\n" +
-             "properly defined before trying to run its main method.");
+             "properly defined before trying to run its main method.",
+             "No Main Method",
+             JOptionPane.ERROR_MESSAGE);
         }
         catch (FileMovedException fme) {
           _showFileMovedError(fme);
