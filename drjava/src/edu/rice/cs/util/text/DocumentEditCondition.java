@@ -37,48 +37,31 @@
  *
 END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.util;
-
-import java.util.Date;
-import java.text.SimpleDateFormat;
+package edu.rice.cs.util.text;
 
 /**
- * This interface hold the information about this build of util.
- * This file is copied to Version.java by the build process, which also
- * fills in the right values of the date and time.
- *
- * This javadoc corresponds to build util-20030227-1932;
- *
+ * Class to decide whether a given edit can be applied to the document.
+ * Subclasses can impose conditions on which edits will be applied.
  * @version $Id$
  */
-public abstract class Version {
+public class DocumentEditCondition {
   /**
-   * This string will be automatically expanded upon "ant commit".
-   * Do not edit it by hand!
+   * Returns whether to actually insert, given these inputs.
+   * @param offs Offset into the document
+   * @param str String to be inserted
+   * @param style Name of the style to use.  Must have been
+   * added using addStyle.
    */
-  private static final String BUILD_TIME_STRING = "20030227-1932";
-
-  /** A {@link Date} version of the build time. */
-  private static final Date BUILD_TIME = _getBuildDate();
-
-  public static String getBuildTimeString() {
-    return BUILD_TIME_STRING;
+  public boolean canInsertText(int offs, String str, String style) {
+    return true;
   }
-
-  public static Date getBuildTime() {
-    return BUILD_TIME;
+  
+  /**
+   * Returns whether to actually remove, given these inputs.
+   * @param offs Offset to start deleting from
+   * @param len Number of characters to remove
+   */
+  public boolean canRemoveText(int offs, int len) {
+    return true;
   }
-
-  private static Date _getBuildDate() {
-    try {
-      return new SimpleDateFormat("yyyyMMdd-HHmm z").parse(BUILD_TIME_STRING + " GMT");
-    }
-    catch (Exception e) { // parse format or whatever problem
-      return null;
-    }
-  }
-
-  public static void main(String[] args) {
-    System.out.println("Version for edu.rice.cs.util: " + BUILD_TIME_STRING);
-  }
-} 
+}

@@ -37,48 +37,38 @@
  *
 END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.util;
-
-import java.util.Date;
-import java.text.SimpleDateFormat;
+package edu.rice.cs.util.text;
 
 /**
- * This interface hold the information about this build of util.
- * This file is copied to Version.java by the build process, which also
- * fills in the right values of the date and time.
- *
- * This javadoc corresponds to build util-20030227-1932;
- *
+ * Exception thrown indicating an illegal state or operation
+ * on a DocumentAdapter.
  * @version $Id$
  */
-public abstract class Version {
-  /**
-   * This string will be automatically expanded upon "ant commit".
-   * Do not edit it by hand!
+public class DocumentAdapterException extends Exception {
+  private Throwable _value;
+
+   /**
+   * Constructs an exception with
+   * <code>value.toString()</code> as it's message.
    */
-  private static final String BUILD_TIME_STRING = "20030227-1932";
-
-  /** A {@link Date} version of the build time. */
-  private static final Date BUILD_TIME = _getBuildDate();
-
-  public static String getBuildTimeString() {
-    return BUILD_TIME_STRING;
+  public DocumentAdapterException(Throwable value) {
+    super(value.toString());
+    _value = value;
   }
 
-  public static Date getBuildTime() {
-    return BUILD_TIME;
+   /**
+   * Constructs an exception with a custom message string in
+   * addition to <code>value.toString()</code>.
+   */
+  public DocumentAdapterException(Throwable value, String msg) {
+    super(msg + ": " + value.toString());
+    _value = value;
   }
 
-  private static Date _getBuildDate() {
-    try {
-      return new SimpleDateFormat("yyyyMMdd-HHmm z").parse(BUILD_TIME_STRING + " GMT");
-    }
-    catch (Exception e) { // parse format or whatever problem
-      return null;
-    }
+  /**
+   * Returns the contained exception.
+   */
+  public Throwable getContainedThrowable() {
+    return _value;
   }
-
-  public static void main(String[] args) {
-    System.out.println("Version for edu.rice.cs.util: " + BUILD_TIME_STRING);
-  }
-} 
+}
