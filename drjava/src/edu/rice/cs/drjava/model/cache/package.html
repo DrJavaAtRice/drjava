@@ -1,0 +1,61 @@
+<HTML>
+	<P>The idea behind this new interface is that the rest of the model should not talk 
+		directly to the document cache but rather to an adapter to the cache. For 
+		example, in the old implementation, when the OpenDefinitionsDocument needed to 
+		get the DefinitionsDocument, the code would look like this:
+	</P>
+	<BLOCKQUOTE dir="ltr" style="MARGIN-RIGHT: 0px">
+		<P>
+			<code>DefinitionsDocument getDocument() {
+				<BR>
+			</code><CODE>&nbsp; ...&nbsp;<BR>
+				&nbsp; return _cache.get(this);
+				<BR>
+				&nbsp; ...
+				<BR>
+			</CODE><CODE>} </CODE>
+		</P>
+		<P><CODE>public boolean isModifiedSinceSave() {&nbsp;
+				<BR>
+				&nbsp; if(_cache.isDDocInCache(this)){&nbsp;
+				<BR>
+				&nbsp;&nbsp;&nbsp; return getDocument().isModifiedSinceSave();
+				<BR>
+				&nbsp; }<BR>
+				&nbsp; else{<BR>
+				&nbsp;&nbsp;&nbsp; return false;&nbsp;<BR>
+				&nbsp; }
+				<BR>
+				}</CODE></P>
+	</BLOCKQUOTE>
+	<P>But now the code looks like this:</P>
+	<BLOCKQUOTE dir="ltr" style="MARGIN-RIGHT: 0px">
+		<P><CODE>DefinitionsDocument getDocument() {&nbsp;
+				<BR>
+				&nbsp;&nbsp; </CODE><CODE>...&nbsp;<BR>
+				&nbsp;&nbsp;return _cacheAdapter.getDocument();&nbsp;
+				<BR>
+				&nbsp;&nbsp;...
+				<BR>
+			</CODE><CODE>} </CODE>
+		</P>
+		<P><CODE>public boolean isModifiedSinceSave() {&nbsp;
+				<BR>
+				&nbsp;&nbsp;if(_cacheAdpater.isReady()){&nbsp;
+				<BR>
+				&nbsp;&nbsp;&nbsp;&nbsp; return getDocument().isModifiedSinceSave();&nbsp;
+				<BR>
+				&nbsp;&nbsp;}<BR>
+				&nbsp;&nbsp;else{<BR>
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return false;&nbsp;<BR>
+				&nbsp;&nbsp;}
+				<BR>
+				}</CODE></P>
+	</BLOCKQUOTE>
+	<P>On the inside of the cache, these DCacheAdapters serve as managers for the 
+		instances of the DefinitionsDocuments. They are responsible for storing the 
+		unique reference to the document. The cache that created it keeps an LRU of 
+		these managers/adapters and tells the manager to discard its document if its 
+		place in the LRU has expired.
+	</P>
+</HTML>
