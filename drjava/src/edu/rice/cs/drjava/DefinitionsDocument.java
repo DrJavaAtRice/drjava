@@ -659,46 +659,94 @@ public class DefinitionsDocument extends PlainDocument {
    * Gets the name of the package this source file claims it's in (with the
    * package keyword). It does this by minimally parsing the source file
    * to find the package statement.
+   * This is implemented by searching from the top of the file for the first
+   * character that's not whitespace and is NORMAL -- this is the only
+   * place a package statement could start. If this location begins the string
+   * "package", then parse the package statement from there.
+   *
+   * FIXME: This will accept more inputs than it should. It should only consider
+   *        package statements if they're at the top of the source file.
+   *        This is unlikely to be a problem in practice, since the only way
+   *        the program will not report an error if "package" is used in an
+   *        invalid way is something like this:
+   *
+   *        public class Foo {
+   *          package tmp;
+   *        }
+   *
+   *        iff this source file is in a directory named "tmp".
+   *
+   *        The way to fix this is to add a primitive to the reduced model
+   *        to search for the first FREE block from a given point.
+   *        Then, look at the text for the document from there. If there is
+   *        a valid package statement, it must be right here (ignoring 
+   *        whitespace).
+   *        
    *
    * @return The name of package this source file declares itself to be in,
    *         or the empty string if there is no package statement (and thus
    *         the source file is in the empty package).
    */
-  public String getPackageName() {
-    // The idea: Look for the first usage of the keyword "package" that is
-    // inside a FREE block. Then, gather together all text after "package"
-    // but before ";", and strip out the whitespace. This is the package.
+  public String getPackageName() throws InvalidPackageException {
+    // Where we'll build up the package name we find
     StringBuffer buf = new StringBuffer();
 
     int oldLocation = getCurrentLocation();
 
     try {
-      String text = getText(0, getLength());
-    
-      int packageLocation = -1;
-      do {
-        packageLocation = text.indexOf("package", packageLocation + 1);
+      setCurrentLocation(0);
+      final int docLength = getLength();
+      final String text = getText(0, docLength);
 
-        if (packageLocation == -1) {
-          // We never found a package statement. Thus it's the empty package.
-          return "";
+      // The location of the first non-whitespace character that
+      // is not inside quote or comment.
+      int firstNormalLocation = 0;
+      while ((firstNormalLocation < docLength)) {
+        setCurrentLocation(firstNormalLocation);
+
+        if (_reduced.currentToken().getHighlightState() ==
+            HighlightStatus.NORMAL)
+        {
+          // OK, it's normal -- so if it's not whitespace, we found the spot
+          char curChar = text.charAt(firstNormalLocation);
+          if (!Character.isWhitespace(curChar)) {
+            break;
+          }
         }
-        
-        setCurrentLocation(packageLocation);
+
+        firstNormalLocation++;
       }
-      while (_reduced.currentToken().getHighlightState() !=
-             HighlightStatus.NORMAL);
+
+      // Now there are two possibilities: firstNormalLocation is at
+      // the first spot of a non-whitespace character that's NORMAL,
+      // or it's at the end of the document.
+      if (firstNormalLocation == docLength) {
+        return "";
+      }
+
+      final int strlen = "package".length();
+
+      final int endLocation = firstNormalLocation + strlen;
+
+      if ((firstNormalLocation + strlen > docLength) ||
+          ! text.substring(firstNormalLocation, endLocation).equals("package"))
+      {
+        // the first normal text is not "package" or there is not enough
+        // text for there to be a package statement.
+        // thus, there is no valid package statement.
+        return "";
+      }
 
       // OK, we must have found a package statement.
       // Now let's find the semicolon. Again, the semicolon must be free.
-      int afterPackage = packageLocation + "package".length();
+      int afterPackage = firstNormalLocation + "package".length();
 
       int semicolonLocation = afterPackage;
       do {
         semicolonLocation = text.indexOf(";", semicolonLocation + 1);
 
         if (semicolonLocation == -1) {
-          throw new InvalidPackageException(packageLocation,
+          throw new InvalidPackageException(firstNormalLocation,
                                             "No semicolon found to terminate " +
                                             "package statement!");
         }
@@ -709,8 +757,9 @@ public class DefinitionsDocument extends PlainDocument {
              HighlightStatus.NORMAL);
 
       // Now we have semicolon location. We'll gather text in between one
-      // character at a time for simplicity. It's inefficient (I think?) but it's
-      // easy, and there shouldn't be much text between "package" and ";" anyhow.
+      // character at a time for simplicity. It's inefficient (I think?)
+      // but it's easy, and there shouldn't be much text between
+      // "package" and ";" anyhow.
       for (int walk = afterPackage + 1; walk < semicolonLocation; walk++) {
         setCurrentLocation(walk);
 
@@ -727,7 +776,7 @@ public class DefinitionsDocument extends PlainDocument {
 
       String toReturn = buf.toString();
       if (toReturn.equals("")) {
-        throw new InvalidPackageException(packageLocation,
+        throw new InvalidPackageException(firstNormalLocation,
                                           "Package name was not specified " +
                                           "after the package keyword!");
       }

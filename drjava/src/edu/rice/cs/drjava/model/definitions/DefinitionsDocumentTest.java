@@ -360,14 +360,18 @@ public class DefinitionsDocumentTest extends TestCase
   }
 
   /** Test package-finding on empty document. */
-  public void testPackageNameEmpty() throws BadLocationException {
+  public void testPackageNameEmpty()
+    throws BadLocationException, InvalidPackageException
+  {
     assertEquals("Package name for empty document",
                  "",
                  defModel.getPackageName());
   }
 
   /** Test package-finding on simple document, with no funny comments. */
-  public void testPackageNameSimple() throws BadLocationException {
+  public void testPackageNameSimple()
+    throws BadLocationException, InvalidPackageException
+  {
     final String[] comments = {
       "/* package very.bad; */",
       "// package terribly.wrong;"
@@ -399,7 +403,9 @@ public class DefinitionsDocumentTest extends TestCase
    * Test package-finding on document with a block comment
    * between parts of package.
    */
-  public void testPackageNameWeird1() throws BadLocationException {
+  public void testPackageNameWeird1()
+    throws BadLocationException, InvalidPackageException
+  {
     String weird = "package edu . rice\n./*comment!*/cs.drjava;";
     String normal = "edu.rice.cs.drjava";
     defModel.insertString(0, weird, null);
@@ -413,13 +419,31 @@ public class DefinitionsDocumentTest extends TestCase
    * Test package-finding on document with a line comment between
    * parts of package.
    */
-  public void testPackageNameWeird2() throws BadLocationException {
+  public void testPackageNameWeird2()
+    throws BadLocationException, InvalidPackageException
+  {
     String weird = "package edu . rice //comment!\n.cs.drjava;";
     String normal = "edu.rice.cs.drjava";
     defModel.insertString(0, weird, null);
 
     assertEquals("Package name for weird: '" + weird + "'",
                  normal,
+                 defModel.getPackageName());
+  }
+
+  /**
+   * Puts an otherwise valid package statement after a valid import
+   * declaration.
+   * This should result in seeing no package statement (for the purposes
+   * of getSourceRoot), so the resulting package name should be "".
+   */
+  public void testGetPackageNameWithPackageStatementAfterImport()
+    throws BadLocationException, InvalidPackageException
+  {
+    String text = "import java.util.*;\npackage junk;\nclass Foo {}";
+    defModel.insertString(0, text, null);
+    assertEquals("Package name for text with package statement after import",
+                 "",
                  defModel.getPackageName());
   }
 }

@@ -146,35 +146,11 @@ public abstract class GlobalModelTestCase extends TestCase {
                  _model.getDefinitionsDocument().getText(0, len));
   }
 
-
-  protected class NormalCompileListener extends TestListener {
-    public void compileStarted() {
-      assertCompileEndCount(0);
-      assertInteractionsResetCount(0);
-      assertConsoleResetCount(0);
-      compileStartCount++;
-    }
-
-    public void compileEnded() {
-      assertCompileStartCount(1);
-      assertInteractionsResetCount(0);
-      assertConsoleResetCount(0);
-      compileEndCount++;
-    }
-
-    public void interactionsReset() {
-      assertCompileStartCount(1);
-      assertCompileEndCount(1);
-      // don't care whether interactions or console are reset first
-      interactionsResetCount++;
-    }
-
-    public void consoleReset() {
-      assertCompileStartCount(1);
-      assertCompileEndCount(1);
-      // don't care whether interactions or console are reset first
-      consoleResetCount++;
-    }
+  protected void assertCompileErrorsPresent(boolean b) {
+    CompilerError[] errors = _model.getCompileErrors();
+    assertEquals("compile errors > 0?",
+                 b,
+                 errors.length > 0);
   }
 
   protected class FileSelector implements FileOpenSelector, FileSaveSelector {
@@ -216,117 +192,166 @@ public abstract class GlobalModelTestCase extends TestCase {
   }
   
   /**
- * A GlobalModelListener for testing.
- * By default it expects no events to be fired. To customize,
- * subclass and override one or more methods.
- */
-class TestListener implements GlobalModelListener {
-  protected int newCount;
-  protected int openCount;
-  protected int saveCount;
-  protected int canAbandonCount;
-  protected int compileStartCount;
-  protected int compileEndCount;
-  protected int consoleResetCount;
-  protected int interactionsResetCount;
-  protected int saveBeforeProceedingCount;
- 
-  public TestListener() {
-    resetCounts();
-  }
-  
-  public void resetCounts() {
-    newCount = 0;
-    openCount = 0;
-    saveCount = 0;
-    canAbandonCount = 0;
-    compileStartCount = 0;
-    compileEndCount = 0;
-    consoleResetCount = 0;
-    interactionsResetCount = 0;
-    saveBeforeProceedingCount = 0;
-  }
-  
-  public void assertAbandonCount(int i) {
-    assertEquals("number of times canAbandon fired", i, canAbandonCount);
-  }
-  
-  public void assertNewCount(int i) {
-    assertEquals("number of times newFile fired", i, newCount);
-  }
-  
-  public void assertOpenCount(int i) {
-    assertEquals("number of times openFile fired", i, openCount);
-  }
-  
-  public void assertSaveCount(int i) {
-    assertEquals("number of times openFile fired", i, saveCount);
-  }
-  
-  public void assertCompileStartCount(int i) {
-    assertEquals("number of times compileStarted fired", i, compileStartCount);
-  }
-  
-  public void assertCompileEndCount(int i) {
-    assertEquals("number of times compileEnded fired", i, compileEndCount);
-  }
-  
-  public void assertInteractionsResetCount(int i) {
-    assertEquals("number of times interactionsReset fired",
-                 i,
-                 interactionsResetCount);
-  }
-  
-  public void assertConsoleResetCount(int i) {
-    assertEquals("number of times consoleReset fired",
-                 i,
-                 consoleResetCount);
-  }
-  
-  public void assertSaveBeforeProceedingCount(int i) {
-    assertEquals("number of times saveBeforeProceeding fired",
-                 i,
-                 saveBeforeProceedingCount);
-  }
-  public void newFileCreated() {
-    fail("newFileCreated fired unexpectedly");
-  }
-  
-  public void fileSaved(File file) {
-    fail("fileSaved fired unexpectedly");
-  }
-  
-  public void fileOpened(File file) {
-    fail("fileOpened fired unexpectedly");
-  }
-  
-  public void compileStarted() {
-    fail("compileStarted fired unexpectedly");
-  }
-  
-  public void compileEnded() {
-    fail("compileEnded fired unexpectedly");
-  }
-  
-  public void interactionsReset() {
-    fail("interactionsReset fired unexpectedly");
-  }
-  
-  public void consoleReset() {
-    fail("consoleReset fired unexpectedly");
-  }
-  
-  public void saveBeforeProceeding(GlobalModelListener.SaveReason reason) {
-    fail("saveBeforeProceeding fired unexpectedly");
-  }
-  
-  public boolean canAbandonFile(File file) {
-    fail("canAbandonFile fired unexpectedly");
+   * A GlobalModelListener for testing.
+   * By default it expects no events to be fired. To customize,
+   * subclass and override one or more methods.
+   */
+  class TestListener implements GlobalModelListener {
+    protected int newCount;
+    protected int openCount;
+    protected int saveCount;
+    protected int canAbandonCount;
+    protected int compileStartCount;
+    protected int compileEndCount;
+    protected int consoleResetCount;
+    protected int interactionsResetCount;
+    protected int saveBeforeProceedingCount;
+   
+    public TestListener() {
+      resetCounts();
+    }
     
-    // this is actually unreachable but the compiler won't believe me. sigh.
-    throw new RuntimeException();
+    public void resetCounts() {
+      newCount = 0;
+      openCount = 0;
+      saveCount = 0;
+      canAbandonCount = 0;
+      compileStartCount = 0;
+      compileEndCount = 0;
+      consoleResetCount = 0;
+      interactionsResetCount = 0;
+      saveBeforeProceedingCount = 0;
+    }
+    
+    public void assertAbandonCount(int i) {
+      assertEquals("number of times canAbandon fired", i, canAbandonCount);
+    }
+    
+    public void assertNewCount(int i) {
+      assertEquals("number of times newFile fired", i, newCount);
+    }
+    
+    public void assertOpenCount(int i) {
+      assertEquals("number of times openFile fired", i, openCount);
+    }
+    
+    public void assertSaveCount(int i) {
+      assertEquals("number of times openFile fired", i, saveCount);
+    }
+    
+    public void assertCompileStartCount(int i) {
+      assertEquals("number of times compileStarted fired", i, compileStartCount);
+    }
+    
+    public void assertCompileEndCount(int i) {
+      assertEquals("number of times compileEnded fired", i, compileEndCount);
+    }
+    
+    public void assertInteractionsResetCount(int i) {
+      assertEquals("number of times interactionsReset fired",
+                   i,
+                   interactionsResetCount);
+    }
+    
+    public void assertConsoleResetCount(int i) {
+      assertEquals("number of times consoleReset fired",
+                   i,
+                   consoleResetCount);
+    }
+    
+    public void assertSaveBeforeProceedingCount(int i) {
+      assertEquals("number of times saveBeforeProceeding fired",
+                   i,
+                   saveBeforeProceedingCount);
+    }
+    public void newFileCreated() {
+      fail("newFileCreated fired unexpectedly");
+    }
+    
+    public void fileSaved(File file) {
+      fail("fileSaved fired unexpectedly");
+    }
+    
+    public void fileOpened(File file) {
+      fail("fileOpened fired unexpectedly");
+    }
+    
+    public void compileStarted() {
+      fail("compileStarted fired unexpectedly");
+    }
+    
+    public void compileEnded() {
+      fail("compileEnded fired unexpectedly");
+    }
+    
+    public void interactionsReset() {
+      fail("interactionsReset fired unexpectedly");
+    }
+    
+    public void consoleReset() {
+      fail("consoleReset fired unexpectedly");
+    }
+    
+    public void saveBeforeProceeding(GlobalModelListener.SaveReason reason) {
+      fail("saveBeforeProceeding fired unexpectedly");
+    }
+    
+    public boolean canAbandonFile(File file) {
+      fail("canAbandonFile fired unexpectedly");
+      
+      // this is actually unreachable but the compiler won't believe me. sigh.
+      throw new RuntimeException();
+    }
   }
-}
 
-  
+  protected class CompileShouldSucceedListener extends TestListener {
+    public void compileStarted() {
+      assertCompileStartCount(0);
+      assertCompileEndCount(0);
+      assertInteractionsResetCount(0);
+      assertConsoleResetCount(0);
+      compileStartCount++;
+    }
+
+    public void compileEnded() {
+      assertCompileEndCount(0);
+      assertCompileStartCount(1);
+      assertInteractionsResetCount(0);
+      assertConsoleResetCount(0);
+      compileEndCount++;
+    }
+
+    public void interactionsReset() {
+      assertInteractionsResetCount(0);
+      assertCompileStartCount(1);
+      assertCompileEndCount(1);
+      // don't care whether interactions or console are reset first
+      interactionsResetCount++;
+    }
+
+    public void consoleReset() {
+      assertConsoleResetCount(0);
+      assertCompileStartCount(1);
+      assertCompileEndCount(1);
+      // don't care whether interactions or console are reset first
+      consoleResetCount++;
+    }
+  }
+
+  /**
+   * A model listener for situations expecting a compilation to fail.
+   */
+  protected class CompileShouldFailListener extends TestListener {
+    public void compileStarted() {
+      assertCompileStartCount(0);
+      assertCompileEndCount(0);
+      compileStartCount++;
+    }
+
+    public void compileEnded() {
+      assertCompileEndCount(0);
+      assertCompileStartCount(1);
+      compileEndCount++;
+    }
+  }
 }

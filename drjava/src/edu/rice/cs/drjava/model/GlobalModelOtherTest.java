@@ -14,11 +14,31 @@ import javax.swing.text.DefaultStyledDocument;
 /**
  * A test on the GlobalModel that does deals with everything outside of
  * simple file operations, e.g., compile, quit.
+ *
+ * TODO: Have setUp create a temp directory and tearDown delete it recursively.
+ *       This would get rid of junk dealing with creating/deleting directories
+ *       from each test.
+ *
  * @version $Id$
  */
 public class GlobalModelOtherTest extends GlobalModelTestCase {
   private static final String FOO_MISSING_CLOSE_TEXT = 
     "class Foo {";
+
+  private static final String FOO_PACKAGE_AFTER_IMPORT = 
+    "import java.util.*;\npackage a;\n" + FOO_TEXT;
+
+  private static final String FOO_PACKAGE_INSIDE_CLASS = 
+    "class Foo { package a; }";
+
+  private static final String FOO_PACKAGE_AS_FIELD = 
+    "class Foo { int package; }";
+
+  private static final String FOO_PACKAGE_AS_FIELD_2 = 
+    "class Foo { int package = 5; }";
+
+  private static final String FOO_PACKAGE_AS_PART_OF_FIELD = 
+    "class Foo { int cur_package = 5; }";
 
   /**
    * Constructor.
@@ -35,6 +55,7 @@ public class GlobalModelOtherTest extends GlobalModelTestCase {
   public static Test suite() {
     return  new TestSuite(GlobalModelOtherTest.class);
   }
+
   /**
    * Tests a normal compile that should work.
    */
@@ -44,9 +65,10 @@ public class GlobalModelOtherTest extends GlobalModelTestCase {
 
     // No listener for save -- assume it works
     _model.saveFile(new FileSelector(file));
-    TestListener listener = new NormalCompileListener();
+    TestListener listener = new CompileShouldSucceedListener();
     _model.addListener(listener);
     _model.startCompile();
+    assertCompileErrorsPresent(false);
     listener.assertCompileStartCount(1);
     listener.assertCompileEndCount(1);
     listener.assertInteractionsResetCount(1);
@@ -61,6 +83,94 @@ public class GlobalModelOtherTest extends GlobalModelTestCase {
   }
 
   /**
+   * Tests a compile that should work that uses a field that contains
+   * the text "package" as a component of the name.
+   */
+  public void testCompileWithPackageAsPartOfFieldName()
+    throws BadLocationException, IOException
+  {
+    setupDocument(FOO_PACKAGE_AS_PART_OF_FIELD);
+    final File file = tempFile();
+
+    // No listener for save -- assume it works
+    _model.saveFile(new FileSelector(file));
+    TestListener listener = new CompileShouldSucceedListener();
+    _model.addListener(listener);
+    _model.startCompile();
+    assertCompileErrorsPresent(false);
+    listener.assertCompileStartCount(1);
+    listener.assertCompileEndCount(1);
+    listener.assertInteractionsResetCount(1);
+    listener.assertConsoleResetCount(1);
+
+    // Make sure .class exists
+    File compiled = classForJava(file, "Foo");
+    assertTrue("Class file doesn't exist after compile", compiled.exists());
+
+    file.delete();
+    compiled.delete();
+  }
+
+  /**
+   * Creates a source file with "package" as a field name and ensures
+   * that compile starts but fails due to the invalid field name.
+   */
+  public void testCompilePackageAsField()
+    throws BadLocationException, IOException
+  {
+    setupDocument(FOO_PACKAGE_AS_FIELD);
+    final File file = tempFile();
+    _model.saveFile(new FileSelector(file));
+
+    CompileShouldFailListener listener = new CompileShouldFailListener();
+
+    _model.addListener(listener);
+    _model.startCompile();
+    listener.assertCompileStartCount(1);
+    listener.assertCompileEndCount(1);
+
+    // There better be an error since "package" can not be an identifier!
+    assertCompileErrorsPresent(true);
+
+    File compiled = classForJava(file, "Foo");
+    assertEquals("Class file exists after failing compile",
+                 false,
+                 compiled.exists());
+
+    file.delete();
+  }
+  
+  /**
+   * Creates a source file with "package" as a field name and ensures
+   * that compile starts but fails due to the invalid field name.
+   * This is different from {@link #testCompilePackageAsField} as it
+   * initializes the field.
+   */
+  public void testCompilePackageAsField2()
+    throws BadLocationException, IOException
+  {
+    setupDocument(FOO_PACKAGE_AS_FIELD_2);
+    final File file = tempFile();
+    _model.saveFile(new FileSelector(file));
+
+    CompileShouldFailListener listener = new CompileShouldFailListener();
+    _model.addListener(listener);
+    _model.startCompile();
+    listener.assertCompileStartCount(1);
+    listener.assertCompileEndCount(1);
+
+    // There better be an error since "package" can not be an identifier!
+    assertCompileErrorsPresent(true);
+
+    File compiled = classForJava(file, "Foo");
+    assertEquals("Class file exists after failing compile",
+                 false,
+                 compiled.exists());
+
+    file.delete();
+  }
+  
+  /**
    * Tests compiling an invalid file and checks to make sure the class
    * file was not created.
    */
@@ -70,19 +180,64 @@ public class GlobalModelOtherTest extends GlobalModelTestCase {
     setupDocument(FOO_MISSING_CLOSE_TEXT);
     final File file = tempFile();
     _model.saveFile(new FileSelector(file));
-    TestListener listener = new NormalCompileListener();
+    TestListener listener = new CompileShouldFailListener();
     _model.addListener(listener);
     _model.startCompile();
+    assertCompileErrorsPresent(true);
     listener.assertCompileStartCount(1);
     listener.assertCompileEndCount(1);
-    listener.assertInteractionsResetCount(1);
-    listener.assertConsoleResetCount(1);
     File compiled = classForJava(file, "Foo");
     assertTrue("Class file exists after compile?!", !compiled.exists());
 
     file.delete();
   }
+
+  /**
+   * Puts an otherwise valid package statement inside a class declaration.
+   * This better not work!
+   */
+  public void testCompileWithPackageStatementInsideClass()
+    throws BadLocationException, IOException
+  {
+    // Create temp file
+    File baseTempDir = tempFile();
+    File subdir = new File(baseTempDir, "a");
+    File fooFile = new File(subdir, "Foo.java");
+    File compiled = classForJava(fooFile, "Foo");
+
+    try {
+      // Delete the file and make a directory of the same name
+      baseTempDir.delete();
+      baseTempDir.mkdir();
+
+      // Now make subdirectory a
+      subdir.mkdir();
+
+      // Save the footext to Foo.java in the subdirectory
+      setupDocument(FOO_PACKAGE_INSIDE_CLASS);
+      _model.saveFileAs(new FileSelector(fooFile));
+
+      // do compile -- should fail since package decl is not valid!
+      CompileShouldFailListener listener = new CompileShouldFailListener();
+      _model.addListener(listener);
+      _model.startCompile();
+
+      listener.assertCompileStartCount(1);
+      listener.assertCompileEndCount(1);
+      assertCompileErrorsPresent(true);
+      assertTrue("Class file exists after failed compile", !compiled.exists());
+    }
+    finally {
+      // Delete files and then directories
+      compiled.delete(); // shouldn't be there, but just in case
+      fooFile.delete();
+      subdir.delete();
+      baseTempDir.delete();
+    }
+  }
   
+
+ 
   /**
    * If we try to compile an unsaved file but we do save it from within
    * saveBeforeProceeding, the compile should occur happily.
@@ -93,7 +248,7 @@ public class GlobalModelOtherTest extends GlobalModelTestCase {
     setupDocument(FOO_TEXT);
     final File file = tempFile();
 
-    NormalCompileListener listener = new NormalCompileListener() {
+    CompileShouldSucceedListener listener = new CompileShouldSucceedListener() {
       public void saveBeforeProceeding(GlobalModelListener.SaveReason reason) {
         assertEquals("save reason", COMPILE_REASON, reason);
         assertModified(true);
@@ -132,6 +287,7 @@ public class GlobalModelOtherTest extends GlobalModelTestCase {
     // Check events fired
     listener.assertSaveBeforeProceedingCount(1);
     listener.assertSaveCount(1);
+    assertCompileErrorsPresent(false);
     listener.assertCompileStartCount(1);
     listener.assertCompileEndCount(1);
     listener.assertInteractionsResetCount(1);
@@ -259,33 +415,36 @@ public class GlobalModelOtherTest extends GlobalModelTestCase {
     // Create temp file
     File baseTempDir = tempFile();
     // Delete the file and make a directory of the same name
-    assertTrue(baseTempDir.delete());
-    assertTrue(baseTempDir.mkdir());
+    baseTempDir.delete();
+    baseTempDir.mkdir();
 
     // Now make subdirectory a/b/c
     File subdir = new File(baseTempDir, "a");
     subdir = new File(subdir, "b");
     subdir = new File(subdir, "c");
-    assertTrue(subdir.mkdirs());
+    subdir.mkdirs();
 
     // Save the footext to Foo.java in the subdirectory
     File fooFile = new File(subdir, "Foo.java");
     setupDocument(FOO_TEXT);
     _model.saveFileAs(new FileSelector(fooFile));
 
+    // No events should fire
+    _model.addListener(new TestListener());
+
     assertEquals("source root",
                  subdir,
                  _model.getSourceRoot());
 
-    assertTrue(fooFile.delete());
+    fooFile.delete();
 
     // walk back and delete all dirs to the base
     while (! subdir.equals(baseTempDir)) {
-      assertTrue(subdir.delete());
+      subdir.delete();
       subdir = subdir.getParentFile();
     }
 
-    assertTrue(baseTempDir.delete());
+    baseTempDir.delete();
   }
 
   public void testGetSourceRootPackageThreeDeepValid()
@@ -294,34 +453,37 @@ public class GlobalModelOtherTest extends GlobalModelTestCase {
     // Create temp file
     File baseTempDir = tempFile();
     // Delete the file and make a directory of the same name
-    assertTrue(baseTempDir.delete());
-    assertTrue(baseTempDir.mkdir());
+    baseTempDir.delete();
+    baseTempDir.mkdir();
 
     // Now make subdirectory a/b/c
     File subdir = new File(baseTempDir, "a");
     subdir = new File(subdir, "b");
     subdir = new File(subdir, "c");
-    assertTrue(subdir.mkdirs());
+    subdir.mkdirs();
 
     // Save the footext to Foo.java in the subdirectory
     File fooFile = new File(subdir, "Foo.java");
     setupDocument("package a.b.c;\n" + FOO_TEXT);
     _model.saveFileAs(new FileSelector(fooFile));
 
+    // No events should fire
+    _model.addListener(new TestListener());
+
     // Since we had the package statement the source root should be base dir
     assertEquals("source root",
                  baseTempDir,
                  _model.getSourceRoot());
 
-    assertTrue(fooFile.delete());
+    fooFile.delete();
 
     // walk back and delete all dirs to the base
     while (! subdir.equals(baseTempDir)) {
-      assertTrue(subdir.delete());
+      subdir.delete();
       subdir = subdir.getParentFile();
     }
 
-    assertTrue(baseTempDir.delete());
+    baseTempDir.delete();
   }
 
   public void testGetSourceRootPackageThreeDeepInvalid()
@@ -330,19 +492,22 @@ public class GlobalModelOtherTest extends GlobalModelTestCase {
     // Create temp file
     File baseTempDir = tempFile();
     // Delete the file and make a directory of the same name
-    assertTrue(baseTempDir.delete());
-    assertTrue(baseTempDir.mkdir());
+    baseTempDir.delete();
+    baseTempDir.mkdir();
 
     // Now make subdirectory a/b/d
     File subdir = new File(baseTempDir, "a");
     subdir = new File(subdir, "b");
     subdir = new File(subdir, "d");
-    assertTrue(subdir.mkdirs());
+    subdir.mkdirs();
 
     // Save the footext to Foo.java in the subdirectory
     File fooFile = new File(subdir, "Foo.java");
     setupDocument("package a.b.c;\n" + FOO_TEXT);
     _model.saveFileAs(new FileSelector(fooFile));
+
+    // No events should fire
+    _model.addListener(new TestListener());
 
     // The package name is wrong so this should fail.
     try {
@@ -354,15 +519,15 @@ public class GlobalModelOtherTest extends GlobalModelTestCase {
       // good.
     }
 
-    assertTrue(fooFile.delete());
+    fooFile.delete();
 
     // walk back and delete all dirs to the base
     while (! subdir.equals(baseTempDir)) {
-      assertTrue(subdir.delete());
+      subdir.delete();
       subdir = subdir.getParentFile();
     }
 
-    assertTrue(baseTempDir.delete());
+    baseTempDir.delete();
   }
 
   public void testGetSourceRootPackageOneDeepValid()
@@ -371,26 +536,29 @@ public class GlobalModelOtherTest extends GlobalModelTestCase {
     // Create temp file
     File baseTempDir = tempFile();
     // Delete the file and make a directory of the same name
-    assertTrue(baseTempDir.delete());
-    assertTrue(baseTempDir.mkdir());
+    baseTempDir.delete();
+    baseTempDir.mkdir();
 
     // Now make subdirectory a
     File subdir = new File(baseTempDir, "a");
-    assertTrue(subdir.mkdir());
+    subdir.mkdir();
 
     // Save the footext to Foo.java in the subdirectory
     File fooFile = new File(subdir, "Foo.java");
     setupDocument("package a;\n" + FOO_TEXT);
     _model.saveFileAs(new FileSelector(fooFile));
 
+    // No events should fire
+    _model.addListener(new TestListener());
+
     // Since we had the package statement the source root should be base dir
     assertEquals("source root",
                  baseTempDir,
                  _model.getSourceRoot());
 
-    assertTrue(fooFile.delete());
-    assertTrue(subdir.delete());
-    assertTrue(baseTempDir.delete());
+    fooFile.delete();
+    subdir.delete();
+    baseTempDir.delete();
   }
 
-}
+ }

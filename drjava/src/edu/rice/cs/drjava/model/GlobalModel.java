@@ -214,11 +214,12 @@ public class GlobalModel {
    * saved before proceeding with the compile. If the compile can 
    * proceed, a compileStarted event is fired which guarantees that
    * a compileEnded event will be fired when the compile finishes or
-   * fails.  If the compileEnded event was fired, then calls are
+   * fails.  If the compilation succeeds, then calls are
    * made to resetConsole() and _resetInteractions(), which fire
    * events of their own, contingent on the conditions.  If the current
    * package as determined by getSourceRoot(String) and getPackageName()
-   * is invalid, none of the events mentioned above will be fired.
+   * is invalid, compileStarted and compileEnded will fire, and
+   * an error will be put in compileErrors.
    */
   public void startCompile() {
     saveBeforeProceeding(GlobalModelListener.COMPILE_REASON);
@@ -231,27 +232,23 @@ public class GlobalModel {
     else {
       File file = _definitionsDoc.getFile();
 
+      // These are the defaults to send to _resetInteractions
+      // in the case that we fail to find the package.
+      String packageName = "";
+      File sourceRoot = null;
+
       try {
-        String packageName = _definitionsDoc.getPackageName();
-        File sourceRoot = _getSourceRoot(packageName);
-        
         _notifyListeners(new EventNotifier() {
           public void notifyListener(GlobalModelListener l) {
             l.compileStarted();
           }
         });
 
+        packageName = _definitionsDoc.getPackageName();
+        sourceRoot = _getSourceRoot(packageName);
+        
         File[] files = new File[] { file };
         _compileErrors = DrJava.compiler.compile(sourceRoot, files);
-        
-        _notifyListeners(new EventNotifier() {
-          public void notifyListener(GlobalModelListener l) {
-            l.compileEnded();
-          }
-        });
-
-        resetConsole();
-        _resetInteractions(packageName, sourceRoot);
       }
       catch (InvalidPackageException e) {
         CompilerError err = new CompilerError(file.getAbsolutePath(),
@@ -260,6 +257,19 @@ public class GlobalModel {
                                               e.getMessage(),
                                               false);
         _compileErrors = new CompilerError[] { err };
+      }
+      finally {
+        _notifyListeners(new EventNotifier() {
+          public void notifyListener(GlobalModelListener l) {
+            l.compileEnded();
+          }
+        });
+
+        // Only clear console/interactions if there were no errors
+        if (_compileErrors.length == 0) {
+          resetConsole();
+          _resetInteractions(packageName, sourceRoot);
+        }
       }
     }
   }
