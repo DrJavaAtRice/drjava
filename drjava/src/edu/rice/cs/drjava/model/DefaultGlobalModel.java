@@ -9,7 +9,7 @@ import java.util.*;
 import edu.rice.cs.util.swing.FindReplaceMachine;
 
 import edu.rice.cs.drjava.DrJava;
-import edu.rice.cs.util.UnexpectedException;
+import edu.rice.cs.util.*;
 import edu.rice.cs.drjava.model.definitions.*;
 import edu.rice.cs.drjava.model.repl.*;
 import edu.rice.cs.drjava.model.compiler.*;
@@ -33,6 +33,9 @@ public class DefaultGlobalModel implements GlobalModel {
   private int _numErrors;
   private JavaInterpreter _interpreter;
   private LinkedList _listeners;
+
+  public static final String EXIT_CALLED_MESSAGE
+    = "The interaction was aborted by a call to System.exit.";
 
   /**
    * Constructor.  Initializes all the documents and the interpreter.
@@ -197,7 +200,7 @@ public class DefaultGlobalModel implements GlobalModel {
    */
   public void quit() {
     if (closeAllFiles()) {
-      System.exit(0);
+      DrJava.getSecurityManager().exitVM(0);
     }
   }
 
@@ -347,13 +350,25 @@ public class DefaultGlobalModel implements GlobalModel {
           // Very weird. toString() on result must have thrown this exception!
           // Let's act like DynamicJava would have if this exception were thrown
           // and rethrow as RuntimeException
-          throw  new RuntimeException(t.toString());
+          throw new RuntimeException(t.toString());
         }
       }
 
       if (result != JavaInterpreter.NO_RESULT) {
        _interactionsDoc.insertString(_interactionsDoc.getLength(),
                                      "\n" + String.valueOf(result), null);
+      }
+
+      _interactionsDoc.prompt();
+    }
+    catch (ExitingNotAllowedException e) {
+      try {
+        _interactionsDoc.insertString(_interactionsDoc.getLength(),
+                                      "\n" + EXIT_CALLED_MESSAGE,
+                                      null);
+      }
+      catch (BadLocationException ble) {
+        throw new UnexpectedException(ble);
       }
 
       _interactionsDoc.prompt();
@@ -384,7 +399,10 @@ public class DefaultGlobalModel implements GlobalModel {
         }
 
         _interactionsDoc.prompt();
-      } catch (BadLocationException willNeverHappen) {}
+      }
+      catch (BadLocationException ble) {
+        throw new UnexpectedException(ble);
+      }
     }
   }
 

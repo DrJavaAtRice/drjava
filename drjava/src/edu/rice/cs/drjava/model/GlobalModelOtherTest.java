@@ -1,19 +1,21 @@
 package edu.rice.cs.drjava.model;
 
-import  junit.framework.*;
+import junit.framework.*;
 
 import java.io.*;
 
-import  java.util.Vector;
-import  javax.swing.text.BadLocationException;
-import  junit.extensions.*;
+import java.util.Vector;
+import javax.swing.text.BadLocationException;
+import junit.extensions.*;
 import java.util.LinkedList;
 import javax.swing.text.Document;
 import javax.swing.text.DefaultStyledDocument;
 
+import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.model.definitions.*;
 import edu.rice.cs.drjava.model.repl.*;
 import edu.rice.cs.drjava.model.compiler.*;
+import edu.rice.cs.util.*;
 
 /**
  * A test on the GlobalModel that does deals with everything outside of
@@ -53,8 +55,94 @@ public class GlobalModelOtherTest extends GlobalModelTestCase {
    * @return a test suite based on the methods in this class
    */
   public static Test suite() {
-    return  new TestSuite(GlobalModelOtherTest.class);
+    TestSuite suite = new TestSuite(GlobalModelOtherTest.class);
+
+    // wrapper allows these methods to be run once before/after all tests
+    // respectively
+    TestSetup wrapper = new TestSetup(suite) {
+      public void setUp() {
+        DrJava.enableSecurityManager();
+      }
+
+      public void tearDown() {
+        DrJava.disableSecurityManager();
+      }
+    };
+
+    return wrapper;
   }
+
+  /**
+   * Make all test cases run with exit blocking on.
+   */
+  protected void setUp() throws IOException {
+    super.setUp();
+    _manager().setBlockExit(true);
+    // reset exit attempted status
+    _manager().exitAttempted();
+  }
+
+  /**
+   * Reset exit blocking.
+   */
+  protected void tearDown() throws IOException {
+    _manager().setBlockExit(false);
+    super.tearDown();
+  }
+
+  private static PreventExitSecurityManager _manager() {
+    return DrJava.getSecurityManager();
+  }
+
+  /**
+   * Checks that System.exit is handled appropriately from
+   * interactions frame.
+   */
+  public void testInteractionPreventedFromExit() throws BadLocationException
+  {
+    String result = interpret("System.exit(-1);");
+
+    assertEquals("interactions result",
+                 DefaultGlobalModel.EXIT_CALLED_MESSAGE,
+                 result);
+  }
+
+  /**
+   * Checks that reset console works.
+   * BROKEN because OutputPane is stupid.
+   */
+  /*
+  public void testResetConsole() throws BadLocationException
+  {
+    TestListener listener = new TestListener() {
+      public void consoleReset() {
+        consoleResetCount++;
+      }
+    };
+
+    _model.addListener(listener);
+
+    _model.resetConsole();
+    assertEquals("Length of console text",
+                 0,
+                 _model.getConsoleDocument().getLength());
+
+    listener.assertConsoleResetCount(1);
+
+    interpretIgnoreResult("System.out.println(\"a\");");
+    assertEquals("Length of console text",
+                 1,
+                 _model.getConsoleDocument().getLength());
+
+
+    _model.resetConsole();
+    assertEquals("Length of console text",
+                 0,
+                 _model.getConsoleDocument().getLength());
+
+    listener.assertConsoleResetCount(2);
+  }
+  */
 
   /**
    * Creates a new class, compiles it and then checks that the REPL
@@ -147,9 +235,6 @@ public class GlobalModelOtherTest extends GlobalModelTestCase {
    * Exits the program without opening any documents.
    */
   public void testQuitNoDocuments() {
-    PreventExitSecurityManager manager = new PreventExitSecurityManager();
-    System.setSecurityManager(manager);
-
     assertNumOpenDocs(0);
 
     // Ensure no events get fired
@@ -159,21 +244,16 @@ public class GlobalModelOtherTest extends GlobalModelTestCase {
       _model.quit();
       fail("Got past quit without security exception (and without quitting!)");
     }
-    catch (SecurityException e) {
+    catch (ExitingNotAllowedException e) {
       // Good, the security manager saved us from exiting.
-      assertEquals("number of attempts to quit", 1, manager.getAttempts());
+      assertTrue("attempted to quit", _manager().exitAttempted());
     }
-
-    System.setSecurityManager(null);
   }
 
   /**
    * Exits the program without having written anything to the open documents.
    */
   public void testQuitEmptyDocuments() {
-    PreventExitSecurityManager manager = new PreventExitSecurityManager();
-    System.setSecurityManager(manager);
-
     _model.newFile();
     _model.newFile();
 
@@ -191,13 +271,11 @@ public class GlobalModelOtherTest extends GlobalModelTestCase {
       _model.quit();
       fail("Got past quit without security exception (and without quitting!)");
     }
-    catch (SecurityException e) {
+    catch (ExitingNotAllowedException e) {
       // Good, the security manager saved us from exiting.
-      assertEquals("number of attempts to quit", 1, manager.getAttempts());
+      assertTrue("attempted to quit", _manager().exitAttempted());
       listener.assertCloseCount(2);
     }
-
-    System.setSecurityManager(null);
   }
 
 
@@ -208,9 +286,6 @@ public class GlobalModelOtherTest extends GlobalModelTestCase {
   public void testQuitUnsavedDocumentsAllowAbandon()
     throws BadLocationException
   {
-    PreventExitSecurityManager manager = new PreventExitSecurityManager();
-    System.setSecurityManager(manager);
-
     TestListener listener = new TestListener() {
       public boolean canAbandonFile(OpenDefinitionsDocument doc) {
         canAbandonCount++;
@@ -234,16 +309,14 @@ public class GlobalModelOtherTest extends GlobalModelTestCase {
       _model.quit();
       fail("Got past quit without security exception (and without quitting!)");
     }
-    catch (SecurityException e) {
+    catch (ExitingNotAllowedException e) {
       // Good, the security manager saved us from exiting.
-      assertEquals("number of attempts to quit", 1, manager.getAttempts());
+      assertTrue("attempted to quit", _manager().exitAttempted());
 
       // Only the changed files should prompt an event
       listener.assertAbandonCount(2);
       listener.assertCloseCount(3);
     }
-
-    System.setSecurityManager(null);
   }
 
   /**
@@ -252,9 +325,6 @@ public class GlobalModelOtherTest extends GlobalModelTestCase {
   public void testQuitUnsavedDocumentDisallowAbandon()
     throws BadLocationException
   {
-    PreventExitSecurityManager manager = new PreventExitSecurityManager();
-    System.setSecurityManager(manager);
-
     OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
 
     assertNumOpenDocs(1);
@@ -272,13 +342,11 @@ public class GlobalModelOtherTest extends GlobalModelTestCase {
     try {
       _model.quit();
       listener.assertAbandonCount(1);
-      assertEquals("number of attempts to quit", 0, manager.getAttempts());
+      assertTrue("did not attempt to quit", !_manager().exitAttempted());
     }
-    catch (SecurityException e) {
+    catch (ExitingNotAllowedException e) {
       fail("Quit succeeded despite canAbandon returning no!");
     }
-
-    System.setSecurityManager(null);
   }
 
   /**
@@ -287,9 +355,6 @@ public class GlobalModelOtherTest extends GlobalModelTestCase {
   public void testQuitMultipleDocumentsDisallowAbandon()
     throws BadLocationException
   {
-    PreventExitSecurityManager manager = new PreventExitSecurityManager();
-    System.setSecurityManager(manager);
-
     _model.newFile();
     OpenDefinitionsDocument doc1 = setupDocument(FOO_TEXT);
     _model.newFile();
@@ -319,13 +384,11 @@ public class GlobalModelOtherTest extends GlobalModelTestCase {
       listener.assertAbandonCount(1);
       assertNumOpenDocs(3);
 
-      assertEquals("number of attempts to quit", 0, manager.getAttempts());
+      assertTrue("did not attempt to quit", !_manager().exitAttempted());
     }
-    catch (SecurityException e) {
+    catch (ExitingNotAllowedException e) {
       fail("Quit succeeded despite canAbandon returning no!");
     }
-
-    System.setSecurityManager(null);
   }
 
 

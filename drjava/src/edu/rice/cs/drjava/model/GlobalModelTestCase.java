@@ -189,6 +189,14 @@ public abstract class GlobalModelTestCase extends TestCase {
     return interactionsDoc.getText(resultsStartLocation, resultsLen);
   }
 
+  protected void interpretIgnoreResult(String input) throws BadLocationException
+  {
+    Document interactionsDoc = _model.getInteractionsDocument();
+    interactionsDoc.insertString(interactionsDoc.getLength(), input, null);
+
+    _model.interpretCurrentInteraction();
+  }
+
   protected void assertNumOpenDocs(int num) {
     assertEquals("number of open documents",
                  num,
@@ -258,25 +266,6 @@ public abstract class GlobalModelTestCase extends TestCase {
   {
     public File getFile() throws OperationCanceledException {
       throw new OperationCanceledException();
-    }
-  }
-
-  /**
-   * A security manager to prevent exiting the VM.
-   * This allows us to test whether quit() correctly tries to exit without
-   * letting the exit actually occur.
-   */
-  public class PreventExitSecurityManager extends SecurityManager {
-    private int _attempts = 0;
-
-    public int getAttempts() { return _attempts; }
-
-    public void checkPermission(java.security.Permission perm) {
-    }
-
-    public void checkExit(int status) {
-      _attempts++;
-      throw new SecurityException("Can not exit!");
     }
   }
 

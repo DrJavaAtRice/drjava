@@ -14,6 +14,7 @@ import koala.dynamicjava.tree.visitor.*;
 import koala.dynamicjava.util.*;
 
 import edu.rice.cs.util.classloader.StickyClassLoader;
+import edu.rice.cs.util.*;
 import edu.rice.cs.drjava.DrJava;
 
 /**
@@ -53,12 +54,17 @@ public class DynamicJavaAdapter implements JavaInterpreter {
     try {
       Object result = _djInterpreter.interpret(reader, "DrJava");
       if (print)
-        return  result; 
+        return result; 
       else 
-        return  JavaInterpreter.NO_RESULT;
-    } catch (InterpreterInterruptedException iie) {
+        return JavaInterpreter.NO_RESULT;
+    }
+    catch (InterpreterInterruptedException iie) {
       throw iie;
-    } catch (Throwable ie) {
+    }
+    catch (ExitingNotAllowedException enae) {
+      throw enae;
+    }
+    catch (Throwable ie) {
       System.err.print(new Date() + ": ");
       System.err.println(ie);
       ie.printStackTrace();
