@@ -404,6 +404,11 @@ public class MainFrame extends JFrame implements OptionConstants {
   private Action _clearOutputAction = new AbstractAction("Clear Console") {
     public void actionPerformed(ActionEvent ae) {
       _model.resetConsole();
+      //CONFIG.setSetting(INDENT_LEVEL, new Integer(8));
+      //CONFIG.setSetting(FONT_MAIN, DrJava.CONFIG.getSetting(FONT_MAIN).deriveFont(32f));
+      //CONFIG.setSetting(FONT_DOCLIST, DrJava.CONFIG.getSetting(FONT_DOCLIST).deriveFont(25f));
+      //CONFIG.setSetting(FONT_TOOLBAR, DrJava.CONFIG.getSetting(FONT_TOOLBAR).deriveFont(18f));
+      //CONFIG.setSetting(TOOLBAR_ICONS_ENABLED, new Boolean(!DrJava.CONFIG.getSetting(TOOLBAR_ICONS_ENABLED).booleanValue()));
     }
   };
 
@@ -413,6 +418,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   {
     public void actionPerformed(ActionEvent ae) {
       _model.resetInteractions();
+      //CONFIG.setSetting(TOOLBAR_TEXT_ENABLED, new Boolean(!DrJava.CONFIG.getSetting(TOOLBAR_TEXT_ENABLED).booleanValue()));
     }
   };
 
@@ -627,16 +633,30 @@ public class MainFrame extends JFrame implements OptionConstants {
     _setUpPanes();
     updateFileTitle();
 
-    Font mainFont = new Font (DrJava.CONFIG.getSetting(FONT_MAIN_NAME).toString(),
-                              DrJava.CONFIG.getSetting(FONT_MAIN_STYLE).intValue(),
-                              DrJava.CONFIG.getSetting(FONT_MAIN_SIZE).intValue());
+    // Set the fonts
+    _setMainFont();
     
-    Font doclistFont = new Font (DrJava.CONFIG.getSetting(FONT_DOCLIST_NAME).toString(),
+    Font doclistFont;
+    if (CodeStatus.DEVELOPMENT) {
+      doclistFont = DrJava.CONFIG.getSetting(FONT_DOCLIST);
+    }
+    else {
+      doclistFont = new Font (DrJava.CONFIG.getSetting(FONT_DOCLIST_NAME).toString(),
                                  DrJava.CONFIG.getSetting(FONT_DOCLIST_STYLE).intValue(),
                                  DrJava.CONFIG.getSetting(FONT_DOCLIST_SIZE).intValue());
-    
-    _setAllFonts(mainFont);
+    }
     _docList.setFont(doclistFont);
+    
+    //Add option listeners
+    
+    if (CodeStatus.DEVELOPMENT) {
+      DrJava.CONFIG.addOptionListener( OptionConstants.FONT_MAIN, new MainFontOptionListener());
+      DrJava.CONFIG.addOptionListener( OptionConstants.FONT_DOCLIST, new DoclistFontOptionListener());
+      DrJava.CONFIG.addOptionListener( OptionConstants.FONT_TOOLBAR, new ToolbarFontOptionListener());
+      DrJava.CONFIG.addOptionListener( OptionConstants.TOOLBAR_ICONS_ENABLED, new ToolbarIconsOptionListener());
+      DrJava.CONFIG.addOptionListener( OptionConstants.TOOLBAR_TEXT_ENABLED, new ToolbarTextOptionListener());
+    }
+    
 
     // If any errors parsing config file, show them
     _showConfigException();
@@ -1264,8 +1284,9 @@ public class MainFrame extends JFrame implements OptionConstants {
 
   private void _setUpAction(Action a, String icon, String shortDesc) {
     // Check whether to show icons
-    boolean useIcons = DrJava.CONFIG.getSetting(OptionConstants.TOOLBAR_ICONS_ENABLED).booleanValue();
-    if (useIcons) a.putValue(Action.SMALL_ICON, _getIcon(icon + "16.gif"));
+    //boolean useIcons = DrJava.CONFIG.getSetting(OptionConstants.TOOLBAR_ICONS_ENABLED).booleanValue();
+    //if (useIcons) 
+    a.putValue(Action.SMALL_ICON, _getIcon(icon + "16.gif"));
     a.putValue(Action.DEFAULT, icon);
     a.putValue(Action.SHORT_DESCRIPTION, shortDesc);
   }
@@ -1513,9 +1534,15 @@ public class MainFrame extends JFrame implements OptionConstants {
   JButton _createManualToolbarButton(Action a) {
     final JButton ret;
     
-    Font buttonFont = new Font(DrJava.CONFIG.getSetting(FONT_TOOLBAR_NAME).toString(),
-                               DrJava.CONFIG.getSetting(FONT_TOOLBAR_STYLE).intValue(),
-                               DrJava.CONFIG.getSetting(FONT_TOOLBAR_SIZE).intValue());
+    Font buttonFont;
+    if (CodeStatus.DEVELOPMENT) {
+      buttonFont = DrJava.CONFIG.getSetting(FONT_TOOLBAR);
+    }
+    else {
+      buttonFont = new Font (DrJava.CONFIG.getSetting(FONT_TOOLBAR_NAME).toString(),
+                             DrJava.CONFIG.getSetting(FONT_TOOLBAR_STYLE).intValue(),
+                             DrJava.CONFIG.getSetting(FONT_TOOLBAR_SIZE).intValue());
+    }
 
     // Check whether icons should be shown
     boolean useIcon = DrJava.CONFIG.getSetting(OptionConstants.TOOLBAR_ICONS_ENABLED).booleanValue();
@@ -1554,9 +1581,16 @@ public class MainFrame extends JFrame implements OptionConstants {
    */
   public JButton _createToolbarButton(Action a) {
     boolean useText = DrJava.CONFIG.getSetting(OptionConstants.TOOLBAR_TEXT_ENABLED).booleanValue();
-    Font buttonFont = new Font(DrJava.CONFIG.getSetting(FONT_TOOLBAR_NAME).toString(),
-                               DrJava.CONFIG.getSetting(FONT_TOOLBAR_STYLE).intValue(),
-                               DrJava.CONFIG.getSetting(FONT_TOOLBAR_SIZE).intValue());
+    
+    Font buttonFont;
+    if (CodeStatus.DEVELOPMENT) {
+      buttonFont = DrJava.CONFIG.getSetting(FONT_TOOLBAR);
+    }
+    else {
+      buttonFont = new Font (DrJava.CONFIG.getSetting(FONT_TOOLBAR_NAME).toString(),
+                             DrJava.CONFIG.getSetting(FONT_TOOLBAR_STYLE).intValue(),
+                             DrJava.CONFIG.getSetting(FONT_TOOLBAR_SIZE).intValue());
+    }
     
     final JButton result = new JButton(a);
     result.setText((String) a.getValue(Action.DEFAULT));
@@ -1622,6 +1656,74 @@ public class MainFrame extends JFrame implements OptionConstants {
     getContentPane().add(_toolBar, BorderLayout.NORTH);
   }
 
+  /**
+   * Update the toolbar's buttons, following any change to TOOLBAR_ICONS_ENABLED, TOOLBAR_TEXT_ENABLED,
+   *  or FONT_TOOLBAR (name, style, text)
+   */ 
+  private void _updateToolbarButtons() {
+    
+    if (CodeStatus.DEVELOPMENT) {
+      Component[] buttons = _toolBar.getComponents();
+      
+      for (int i = 0; i< buttons.length; i++) {
+        
+        if (buttons[i] instanceof JButton) {
+          
+          JButton b = (JButton) buttons[i];
+          Action a = b.getAction();
+
+          // Work-around for strange configuration of undo/redo buttons
+          if (a == null) {
+            ActionListener[] al = b.getActionListeners();
+            
+            for (int j=0; j<al.length; j++) {
+              if (al[j] instanceof Action) {
+                a = (Action) al[j];
+                break;
+              }
+            }
+            
+            if (a==null) continue;
+          }
+          
+          boolean iconsEnabled = DrJava.CONFIG.getSetting(TOOLBAR_ICONS_ENABLED).booleanValue();
+          
+          if (b.getIcon() == null) {
+            if (iconsEnabled) {
+              //Icon I = (Icon) b.getAction().getValue(Action.SMALL_ICON);
+              //System.out.println("button["+i+"]: " + I);
+              b.setIcon( (Icon) a.getValue(Action.SMALL_ICON));
+            }
+          }
+          else {
+            if (!iconsEnabled && b.getText() != "") {
+              b.setIcon(null);
+            }
+          }
+          
+          boolean textEnabled = DrJava.CONFIG.getSetting(TOOLBAR_TEXT_ENABLED).booleanValue();
+          
+          if (b.getText() == "") {
+            if (textEnabled) {
+              b.setText( (String) a.getValue(Action.DEFAULT));
+            }
+          }
+          else {
+            if (!textEnabled && b.getIcon() != null) {
+              b.setText("");
+            }
+          }
+          
+          Font toolbarFont = DrJava.CONFIG.getSetting(FONT_TOOLBAR);
+          
+          b.setFont(toolbarFont);
+          
+        }
+      }
+    }   
+  }
+  
+  
   /**
    * Sets up the status bar with the filename field.
    */
@@ -1898,17 +2000,28 @@ public class MainFrame extends JFrame implements OptionConstants {
   }
 
   /**
-   * Sets the font of all panes and panels
+   * Sets the font of all panes and panels to the main font
    * @param f is a Font object
    */
-  private void _setAllFonts(Font f) {
-        
+  private void _setMainFont() {
+    
+    Font f;
+    if (CodeStatus.DEVELOPMENT) {
+      f = DrJava.CONFIG.getSetting(FONT_MAIN);
+    }
+    else {
+      f = new Font (DrJava.CONFIG.getSetting(FONT_MAIN_NAME).toString(),
+                         DrJava.CONFIG.getSetting(FONT_MAIN_STYLE).intValue(),
+                         DrJava.CONFIG.getSetting(FONT_MAIN_SIZE).intValue());
+    }
+    
     Iterator scrollPanes = _defScrollPanes.values().iterator();
     while (scrollPanes.hasNext()) {  
       JScrollPane scroll = (JScrollPane) scrollPanes.next();
       if (scroll != null) {
         DefinitionsPane pane = (DefinitionsPane) scroll.getViewport().getView();
         pane.setFont(f);
+        scroll.setRowHeaderView( new Rule( pane) );
       }
     }
     _interactionsPane.setFont(f);
@@ -2278,4 +2391,52 @@ public class MainFrame extends JFrame implements OptionConstants {
     if (_mainSplit.getDividerLocation() > divLocation)
       _mainSplit.setDividerLocation(divLocation);
   }
+  
+  /**
+   * The OptionListener for FONT_MAIN 
+   */
+  private class MainFontOptionListener implements OptionListener<Font> {
+    public void optionChanged(OptionEvent<Font> oce) {
+      _setMainFont();
+    }
+    
+  }
+    
+  /**
+   * The OptionListener for FONT_DOCLIST
+   */
+  private class DoclistFontOptionListener implements OptionListener<Font> {
+    public void optionChanged(OptionEvent<Font> oce) {
+      Font doclistFont = DrJava.CONFIG.getSetting(FONT_DOCLIST);
+      _docList.setFont(doclistFont);
+    }
+  }
+  
+  /**
+   *  The OptionListener for TOOLBAR_ICONS_ENABLED
+   */
+  private class ToolbarIconsOptionListener implements OptionListener<Boolean> {
+    public void optionChanged(OptionEvent<Boolean> oce) {
+      _updateToolbarButtons();
+    }
+  }
+  
+  /**
+   *  The OptionListener for TOOLBAR_TEXT_ENABLED
+   */
+  private class ToolbarTextOptionListener implements OptionListener<Boolean> {
+    public void optionChanged(OptionEvent<Boolean> oce) {
+      _updateToolbarButtons();
+    }
+  }
+  
+  /**
+   *  The OptionListener for FONT_TOOLBAR
+   */
+  private class ToolbarFontOptionListener implements OptionListener<Font> {
+    public void optionChanged(OptionEvent<Font> oce) {
+      _updateToolbarButtons();
+    }
+  }
+   
 }

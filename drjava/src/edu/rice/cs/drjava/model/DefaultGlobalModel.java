@@ -1691,17 +1691,19 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
    * config option is set to true.  Leaves it at null if not.
    */
   private void _createDebugger() {
-    boolean useDebug = DrJava.CONFIG.getSetting(DEBUGGER_ENABLED).booleanValue();
-    if (useDebug && CodeStatus.DEVELOPMENT) {
-      try {
-        _debugManager = new DebugManager(this);
+    if (CodeStatus.DEVELOPMENT) {
+      boolean useDebug = DrJava.CONFIG.getSetting(DEBUGGER_ENABLED).booleanValue();
+      if (useDebug) {
+        try {
+          _debugManager = new DebugManager(this);
+        }
+        catch( NoClassDefFoundError ncdfe ){
+          // JSwat not present, so we won't use it.
+        }
       }
-      catch( NoClassDefFoundError ncdfe ){
-        // JSwat not present, so we won't use it.
+      else {
+        _debugManager = null;
       }
-    }
-    else {
-      _debugManager = null;
     }
   }
 

@@ -60,6 +60,8 @@ public class OptionMapLoader implements OptionConstants {
                 Option option = null;
                 try {
                     Object o = field.get(null); // we should be able to pass in null as the 'receiver', since it's static.
+                    //System.out.println("field name: "+field.getName()+"  o: "+o);
+                    if (o == null) continue; // Development options can be null in the stable version of the code
                     if(!( o instanceof Option)) continue;
                     
                     option = (Option) o;
@@ -85,13 +87,13 @@ public class OptionMapLoader implements OptionConstants {
      */
     public OptionMapLoader(InputStream is) throws IOException {
       this(new Properties(DEFAULT_STRINGS));
-      prop.load(is);
+       prop.load(is);
     }
     
     private final Properties prop;
     
     private OptionMapLoader(Properties prop) {
- this.prop = prop;
+      this.prop = prop;
     }
     
     /**
@@ -99,11 +101,11 @@ public class OptionMapLoader implements OptionConstants {
      * @param is the inputstream to read from to load these options.
      */
     public void loadInto(OptionMap map) {
- Enumeration<OptionParser> options = DEFAULTS.keys();
- while(options.hasMoreElements()) {
-     OptionParser option = options.nextElement();
-     String val = prop.getProperty(option.name);
-     map.setString(option,val);
- }
+      Enumeration<OptionParser> options = DEFAULTS.keys();
+      while(options.hasMoreElements()) {
+        OptionParser option = options.nextElement();
+        String val = prop.getProperty(option.name);
+        map.setString(option,val);
+      }
     }
 }

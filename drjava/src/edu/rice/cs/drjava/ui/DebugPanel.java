@@ -141,13 +141,15 @@ public class DebugPanel extends JPanel implements OptionConstants {
     // Add the fields to the panel
     add(_scrollPane, BorderLayout.CENTER);
     // Only add input field in advanced mode
-    boolean advancedMode = 
-      DrJava.CONFIG.getSetting(DEBUGGER_ADVANCED).booleanValue();
-    if (advancedMode && CodeStatus.DEVELOPMENT) {
-      add(_inputField, BorderLayout.SOUTH);
-    
-      // Listen for enter key
-      _inputField.addActionListener(_performAction);
+    if (CodeStatus.DEVELOPMENT) {
+      boolean advancedMode = 
+        DrJava.CONFIG.getSetting(DEBUGGER_ADVANCED).booleanValue();
+      if (advancedMode) {
+        add(_inputField, BorderLayout.SOUTH);
+        
+        // Listen for enter key
+        _inputField.addActionListener(_performAction);
+      }
     }
     
     _logger = new DebugLogger(System.err);

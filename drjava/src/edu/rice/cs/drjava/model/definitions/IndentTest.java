@@ -46,6 +46,8 @@ import javax.swing.text.Document;
 
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 import edu.rice.cs.drjava.config.*;
+import edu.rice.cs.drjava.model.definitions.indent.*;
+import edu.rice.cs.drjava.CodeStatus;
 
 /**
  * Test the tab/enter/squiggly indenting functionality.
@@ -1005,20 +1007,68 @@ public class IndentTest extends TestCase {
      "  \n" +
      "}\n" +
      ");\n";
-
+   
    
    doc.insertString(0, text, null);
    _assertContents(text, doc);
    doc.indentLines(0, doc.getLength());
    _assertContents(indented, doc);
  }
-  
-  private void _assertContents(String expected, Document document) 
-    throws BadLocationException
-  {
-    assertEquals("document contents", expected, 
-                 document.getText(0, document.getLength()));
-  }
+ 
+ public void testLiveUpdateOfIndentLevel() throws BadLocationException {
+   
+   if (CodeStatus.DEVELOPMENT) {
+     String text =
+       "int[2][] a ={\n" +
+       "{\n"  +
+       "1,\n" +
+       "2,\n" +
+       "3},\n" + 
+       "{\n" +
+       "4,\n" +
+       "5}\n" +
+       "};\n";
+     
+     String indentedBefore =
+       "int[2][] a ={\n" +
+       "  {\n"  +
+       "    1,\n" +
+       "    2,\n" +
+       "    3},\n" + 
+       "  {\n" +
+       "    4,\n" +
+       "    5}\n" +
+       "};\n";
+     
+     String indentedAfter =
+       "int[2][] a ={\n" + 
+       "        {\n" + 
+       "                1,\n" + 
+       "                2,\n" + 
+       "                3},\n" + 
+       "        {\n" + 
+       "                4,\n" + 
+       "                5}\n" + 
+       "};\n";
+     
+     doc.insertString(0, text, null);
+     _assertContents(text, doc);
+     doc.indentLines(0, doc.getLength());
+     _assertContents(indentedBefore, doc);
+     ConfigurationTool.CONFIG.setSetting(OptionConstants.INDENT_LEVEL, new Integer(8));
+     doc.indentLines(0, doc.getLength());
+     _assertContents(indentedAfter, doc);
+   }
+   else return;
+   
+ }
+ 
+ private void _assertContents(String expected, Document document) 
+   throws BadLocationException
+ {
+   assertEquals("document contents", expected, 
+                document.getText(0, document.getLength()));
+ }
 
   private void _assertIndentInfo(IndentInfo ii, 
                                  String braceType,

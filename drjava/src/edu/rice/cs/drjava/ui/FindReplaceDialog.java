@@ -48,6 +48,7 @@ import java.beans.*;
 
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.CodeStatus;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.util.swing.FindReplaceMachine;
 import edu.rice.cs.util.swing.FindResult;
@@ -298,9 +299,16 @@ import edu.rice.cs.util.UnexpectedException;
     _replaceAction.setEnabled(false);
     _replaceFindAction.setEnabled(false);
 
-    Font font = new Font(DrJava.CONFIG.getSetting(FONT_MAIN_NAME).toString(),
-                         DrJava.CONFIG.getSetting(FONT_MAIN_STYLE).intValue(),
-                         DrJava.CONFIG.getSetting(FONT_MAIN_SIZE).intValue());
+    Font font;
+    if (CodeStatus.DEVELOPMENT) {
+      font= DrJava.CONFIG.getSetting(FONT_MAIN);
+    }
+    else {
+      font = new Font (DrJava.CONFIG.getSetting(FONT_MAIN_NAME).toString(),
+                       DrJava.CONFIG.getSetting(FONT_MAIN_STYLE).intValue(),
+                       DrJava.CONFIG.getSetting(FONT_MAIN_SIZE).intValue());
+    }
+    
     _findField.setFont(font);
     _replaceField.setFont(font);
 

@@ -37,11 +37,15 @@
  *
 END_COPYRIGHT_BLOCK*/
 
+
 package edu.rice.cs.drjava.model.definitions.indent;
 
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.BraceReduction;
 import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.CodeStatus;
+import edu.rice.cs.drjava.config.OptionEvent;
+import edu.rice.cs.drjava.config.OptionListener;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.config.FileConfiguration;
 /**
@@ -49,7 +53,7 @@ import edu.rice.cs.drjava.config.FileConfiguration;
  *
  * @version $Id$
  */
-public class Indenter implements OptionConstants {
+public class Indenter {
   /**
    * Singleton instance.
    */
@@ -60,6 +64,9 @@ public class Indenter implements OptionConstants {
    */
   private Indenter() { 
       buildTree();
+      if (CodeStatus.DEVELOPMENT) {
+        DrJava.CONFIG.addOptionListener( OptionConstants.INDENT_LEVEL, new IndentOptionListener());
+      }
   }
   
   /**
@@ -75,7 +82,7 @@ public class Indenter implements OptionConstants {
    */
   public void buildTree()
   {
-    char[] indent = new char[CONFIG.getSetting(INDENT_LEVEL).intValue()];
+    char[] indent = new char[DrJava.CONFIG.getSetting(OptionConstants.INDENT_LEVEL).intValue()];
     java.util.Arrays.fill(indent,' ');
     String oneLevel = new String(indent);
     
@@ -131,9 +138,17 @@ public class Indenter implements OptionConstants {
   {
     _topRule.indentLine(doc);
   }
+  
+  /**
+   * The OptionListener for INDENT_LEVEL 
+   */
+  private class IndentOptionListener implements OptionListener<Integer> {
+    public void optionChanged(OptionEvent<Integer> oce) {
+      buildTree();
+    }
+  }
+
 }
-
-
 
 
 

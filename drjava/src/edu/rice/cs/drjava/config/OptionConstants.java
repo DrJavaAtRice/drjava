@@ -41,11 +41,12 @@ package edu.rice.cs.drjava.config;
 import java.io.File;
 import gj.util.Vector;
 import java.awt.Color;
+import java.awt.Font;
 import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.CodeStatus;
 public interface OptionConstants extends ConfigurationTool {
   
   // STATIC VARIABLES  
-  
   
   /* ---------- Resource Location and Classpath Options ---------- */
   
@@ -108,22 +109,44 @@ public interface OptionConstants extends ConfigurationTool {
   /* ---------- Font Options ---------- */
   
   /* Main (definitions document, tab contents) */
+  
+  public static final FontOption FONT_MAIN = 
+    (CodeStatus.DEVELOPMENT) ?
+    new FontOption("font.main", Font.decode("Monospaced-PLAIN-12")):
+    null;
+    
+  // The following options are available in the next stable release, but will be deprecated thereafter.
   public static final StringOption FONT_MAIN_NAME = 
     new StringOption("font.main.name", "Monospaced");
   public static final IntegerOption FONT_MAIN_STYLE = 
     new IntegerOption("font.main.style", new Integer(0));
   public static final IntegerOption FONT_MAIN_SIZE = 
     new IntegerOption("font.main.size", new Integer(12));
-
+  
+  
   /* List of open documents */
+
+  public static final FontOption FONT_DOCLIST = 
+    (CodeStatus.DEVELOPMENT) ?
+    new FontOption("font.doclist", Font.decode("Monospaced-PLAIN-10")):
+    null;
+    
+  // The following options are available in the next stable release, but will be deprecated thereafter.
   public static final StringOption FONT_DOCLIST_NAME = 
     new StringOption("font.doclist.name", "Monospaced");
   public static final IntegerOption FONT_DOCLIST_STYLE = 
     new IntegerOption("font.doclist.style", new Integer(0));
   public static final IntegerOption FONT_DOCLIST_SIZE = 
     new IntegerOption("font.doclist.size", new Integer(10));
+
   
   /* Toolbar buttons */
+  public static final FontOption FONT_TOOLBAR = 
+    (CodeStatus.DEVELOPMENT) ?
+    new FontOption("font.toolbar", Font.decode("dialog-PLAIN-10")):
+    null;
+    
+  // The following options are available in the next stable release, but will be deprecated thereafter.
   public static final StringOption FONT_TOOLBAR_NAME = 
     new StringOption("font.toolbar.name", "dialog");
   public static final IntegerOption FONT_TOOLBAR_STYLE = 
@@ -178,13 +201,17 @@ public interface OptionConstants extends ConfigurationTool {
    * Whether the integrated debugger should be displayed as available.
    */
   public static final BooleanOption DEBUGGER_ENABLED =
-    new BooleanOption("debugger.enabled", new Boolean(false));
+    (CodeStatus.DEVELOPMENT) ?
+    new BooleanOption("debugger.enabled", new Boolean(false)):
+    null;
 
   /**
    * Whether the integrated debugger should display the advanced mode JSwat console
    */    
   public static final BooleanOption DEBUGGER_ADVANCED =
-    new BooleanOption("debugger.advanced", new Boolean(false));
+    (CodeStatus.DEVELOPMENT) ?
+    new BooleanOption("debugger.advanced", new Boolean(false)):
+    null;
   
 
 }
