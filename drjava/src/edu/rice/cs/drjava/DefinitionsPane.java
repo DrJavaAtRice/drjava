@@ -139,7 +139,22 @@ public class DefinitionsView extends JEditorPane
 			_doc().indentLine();
 		}
 	}
+	
+	private class IndentKeyActionOpenSquiggly extends AbstractAction {
+		/** Handle the key typed event from the text field. */
+		public void actionPerformed(ActionEvent e) {
+			int pos = getCaretPosition();
+			_doc().setCurrentLocation(pos);
+			try{
+				_doc().insertString(pos, "{", null);
+			}
+			catch(BadLocationException be){throw new IllegalArgumentException
+																			 (be.toString());}
 
+			_doc().indentLine();
+		}
+	}
+	
 	private class IndentKeyActionLine extends AbstractAction {
 		/** Handle the key typed event from the text field. */
 		public void actionPerformed(ActionEvent e) {
@@ -159,7 +174,7 @@ public class DefinitionsView extends JEditorPane
 	private Action _indentKeyActionTab = new IndentKeyActionTab();
 	private Action _indentKeyActionLine = new IndentKeyActionLine();
 	private Action _indentKeyActionSquiggly = new IndentKeyActionSquiggly();
-
+	private Action _indentKeyActionOpenSquiggly = new IndentKeyActionOpenSquiggly();
 	
 // Constructor
 	
@@ -169,19 +184,26 @@ public class DefinitionsView extends JEditorPane
     _resetDocument("");
     _resetUndo();
 		_findReplace = new FindReplaceDialog(mf, this);
+			
+
+
+		//????KEEP??????
 		_openChooser = new JFileChooser(System.getProperty("user.dir"));
 		_saveChooser = new JFileChooser(System.getProperty("user.dir"));
 				
-	//  	Keymap ourMap = addKeymap("INDENT_KEYMAP", getKeymap());
 
-//  		ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0),
-//  																 (Action) _indentKeyActionLine);
-//  		ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_TAB, 0),
-//  																 (Action) _indentKeyActionTab);
-//  		ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke('}'),
-//  																 (Action) _indentKeyActionSquiggly);
-//  		setKeymap(ourMap);
-		
+		Keymap ourMap = addKeymap("INDENT_KEYMAP", getKeymap());
+		ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0),
+																 (Action) _indentKeyActionLine);
+		ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_TAB, 0),
+																 (Action) _indentKeyActionTab);
+		ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke('}'),
+																 (Action) _indentKeyActionSquiggly);
+		ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke('{'),
+																 (Action) _indentKeyActionOpenSquiggly);
+
+		setKeymap(ourMap);
+					
 		this.addCaretListener(_matchListener);
 //		this.addKeyListener(_indentKeyListener);
   }

@@ -65,7 +65,7 @@ public class DefinitionsDocument extends DefaultStyledDocument
   public void insertString(int offset, String str, AttributeSet a)
     throws BadLocationException
   {
-    int locationChange = offset - _currentLocation;
+		int locationChange = offset - _currentLocation;
 		int strLength = str.length();
 		int prevSize;		//stores the size of the item prev when insert begins.
 		int reducedOffset;
@@ -95,12 +95,14 @@ public class DefinitionsDocument extends DefaultStyledDocument
 		//get highlight information from mark onward
 		//numbers are off by prevSize + strLength + reducedOffset
 		//the adjustment is the absolute position that newStates started at
+
 		message = _reduced.generateHighlights(offset,strLength,
 																					!_modifiedHighlights);
 		updateCurrentHighlights(message);
 		updateStyles(message);
-  }
-
+	}
+	
+	
 	private void _addCharToReducedView(char curChar)
   {
     switch (curChar)
@@ -172,6 +174,7 @@ public class DefinitionsDocument extends DefaultStyledDocument
 	}
 
 
+
   /** Whenever this document has been saved, this method should be called
    *  so that it knows it's no longer in a modified state. */
   public void resetModification()
@@ -239,16 +242,17 @@ public class DefinitionsDocument extends DefaultStyledDocument
 			
 			try{
 				if ((distToNewline == -1) || (distToBrace == -1))
-					tab = 0;
+					tab = _indentSpecialCases(0, distToPrevNewline);
 				else if (braceType.equals("("))
 					tab = distToNewline - distToBrace + 1;
-				else if (braceType.equals("{"))
+				else if (braceType.equals("{")) {
 					tab = getWhiteSpaceBetween(distToNewline, distToBrace) + 2;
+					tab = _indentSpecialCases(tab, distToPrevNewline);
+				}
 				else if (braceType.equals("["))
 					tab = distToNewline - distToBrace + 1;
-
-				tab = _indentSpecialCases(tab,distToPrevNewline);
-			 
+				
+				
 				tab(tab, distToPrevNewline);
 			}
 			catch (BadLocationException e){
@@ -278,31 +282,52 @@ public class DefinitionsDocument extends DefaultStyledDocument
 
 			//case of  }
 			int length = text.length();
-			int i = length - distToPrevNewline;
-			while (i < length && text.charAt(i) == ' ')
-				i++;
-			if(i < length && text.charAt(i) == '}')
+			int k = length - distToPrevNewline;
+			while (k < length && text.charAt(k) == ' ')
+				k++;
+			if(k < length && text.charAt(k) == '}')
 				tab -= 2;
 			// if no matching { then let offset be 0.
 			if(tab < 0)
 				tab = 0;
 
 			//non-normal endings
-			i = length - distToPrevNewline - 2;
-			while (i >= 0 && text.charAt(i) == ' ') {
+			int i = length - distToPrevNewline - 2;
+
+			move(-distToPrevNewline - 2); //assumed: we are at end of a line.
+			int distanceMoved = distToPrevNewline + 2;
+			while (i >= 0 && _isCommentedOrSpace(i, text)){
 				i--;
+				if (i > 0){ //gaurentees you don't move into document Start.
+					distanceMoved++;
+					move(-1);
+				}
 			}
+			move (distanceMoved); //move the document bac.
+
 			if (i >= 0 && !(_normEndings.contains(text.substring(i, i+1)))) {
 				int j = 0;
-				while (j < length && text.charAt(j) == ' ')
+				while ((j < length) && (text.charAt(j) == ' '))
 					j++;
-				
-				tab = j + 2;
+				if ((k < length) && (text.charAt(k) != '{'))
+					tab = j + 2;
+				else if (k == text.length())
+					tab = j + 2;
 			}
 				
       //return tab
 			return tab;
 		}
+
+	private boolean _isCommentedOrSpace (int i, String text)
+		{
+			ReducedToken rt = _reduced.currentToken();
+			String type = rt.getType();
+
+			return (rt.isCommented() || type.equals("//") || type.equals("/*") ||
+							type.equals("*/") || (text.charAt(i) == ' '));
+		}
+	
 	/**
 	 *Starts at start and gets whitespace starting at relStart and either
 	 *stopping at relEnd or at the first non-white space char.
