@@ -77,11 +77,42 @@ public class JSR14v12Compiler extends Javac141Compiler {
   
   private File _collectionsPath;
   
+  /**
+   * Whether this is a version later than 1.2.
+   */
+  private boolean post12;
+  
   /** Singleton instance. */
   public static final CompilerInterface ONLY = new JSR14v12Compiler();
 
   protected JSR14v12Compiler() {
     super();
+    post12 = _isPost12();
+  }
+  
+  /**
+   * Returns whether this is a version of JSR-14 which is post-version 1.2.
+   * (The checkLimits() method was added in version 1.3, and version 1.3
+   * requires a different command line switch for generics.)
+   */
+  protected boolean _isPost12() {
+    
+    Class code = com.sun.tools.javac.v8.code.Code.class;
+    // The JSR14 1.3 Code.checkLimits method
+    Class[] validArgs1 = {
+      int.class,
+      com.sun.tools.javac.v8.util.Log.class
+    };
+    
+    try { 
+      code.getMethod("checkLimits", validArgs1);
+      // succeeds, therefore must be correct version
+      return true;
+    }
+    catch (NoSuchMethodException e) {
+      // Didn't have expected method, so we must be using v1.2.
+      return false;
+    }
   }
   
   protected void updateBootClassPath() {
@@ -118,7 +149,48 @@ public class JSR14v12Compiler extends Javac141Compiler {
     _collectionsPath = cp;
   }
   
-  public String getName() { return "JSR-14 v1.2+"; }
+  /**
+   * Adds the appropriate switch for generics, if available.
+   */
+  protected void _addGenericsOption(Options options) {
+    if (!post12) {
+      options.put("-gj", "");
+    }
+    else {
+      // Uses "-source 1.5" and "-target 1.5" (see below)
+    }
+  }
+  
+  /**
+   * Adds the appropriate values for the source and target arguments.
+   */
+  protected void _addSourceAndTargetOptions(Options options) {
+    if (!post12) {
+      // Set output classfile version to 1.1
+      options.put("-target", "1.1");
+    
+      // Allow assertions in 1.4 if configured and in Java >= 1.4
+      String version = System.getProperty("java.version");
+      if ((_allowAssertions) && (version != null) &&
+          ("1.4.0".compareTo(version) <= 0)) {
+        options.put("-source", "1.4");
+      }
+    }
+    else {
+      // Version 1.3 or later needs "-source 1.5"
+      options.put("-source", "1.5");
+      options.put("-target", "1.5");
+    }
+  }
+  
+  public String getName() { 
+    if (!post12) {
+      return "JSR-14 v1.2";
+    }
+    else {
+      return "JSR-14 v1.3+";
+    }
+  }
 
 
 }

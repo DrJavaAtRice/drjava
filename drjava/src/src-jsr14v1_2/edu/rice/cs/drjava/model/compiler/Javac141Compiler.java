@@ -74,7 +74,7 @@ public class Javac141Compiler implements CompilerInterface {
   
   private String _extraClassPath = "";
 
-  private boolean _allowAssertions = false;
+  protected boolean _allowAssertions = false;
     
   /** Singleton instance. */
   public static final CompilerInterface ONLY = new Javac141Compiler();
@@ -141,7 +141,6 @@ public class Javac141Compiler implements CompilerInterface {
       return false;
     }
   }
-      
   
   /**
    * Compile the given files.
@@ -250,20 +249,14 @@ public class Javac141Compiler implements CompilerInterface {
     options.put("-g", "");
 
     // turn on generics, if we have em
-    options.put("-gj", "");
+    _addGenericsOption(options);
 
-    // Set output classfile version to 1.1
-    options.put("-target", "1.1");
+    // Set output target version
+    _addSourceAndTargetOptions(options);
+    
 
     String sourceRootString = getSourceRootString(sourceRoots);
     options.put("-sourcepath", sourceRootString /*sourceRoot.getAbsolutePath()*/);
-
-    // Allow assertions in 1.4 if configured and in Java >= 1.4
-    String version = System.getProperty("java.version");
-    if ((_allowAssertions) && (version != null) &&
-        ("1.4.0".compareTo(version) <= 0)) {
-      options.put("-source", "1.4");
-    }
 
     String cp = System.getProperty("java.class.path");
     // Adds extra.classpath to the classpath.
@@ -273,6 +266,28 @@ public class Javac141Compiler implements CompilerInterface {
     options.put("-classpath", cp);
     
     return context;
+  }
+  
+  /**
+   * Adds the appropriate switch for generics, if available.
+   */
+  protected void _addGenericsOption(Options options) {
+    // No generics support
+  }
+  
+  /**
+   * Adds the appropriate values for the source and target arguments.
+   */
+  protected void _addSourceAndTargetOptions(Options options) {
+    // Set output classfile version to 1.1
+    options.put("-target", "1.1");
+    
+    // Allow assertions in 1.4 if configured and in Java >= 1.4
+    String version = System.getProperty("java.version");
+    if ((_allowAssertions) && (version != null) &&
+        ("1.4.0".compareTo(version) <= 0)) {
+      options.put("-source", "1.4");
+    }
   }
   
   /**
