@@ -73,4 +73,9 @@ public interface DirectorySelector {
    */
   public void warnUser(String message, String title);
 
+  /**
+   * returns true if the user wants the directory to include all subdirectories
+   */
+  public boolean isRecursive();
+
 }

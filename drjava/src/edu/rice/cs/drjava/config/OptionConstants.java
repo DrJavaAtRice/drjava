@@ -317,6 +317,13 @@ public interface OptionConstants {
   public static final KeyStrokeOption KEY_NEW_TEST =
     new KeyStrokeOption("key.new.test",
                         KeyStrokeOption.NULL_KEYSTROKE);
+
+  /**
+   * The key binding for opening a folder
+   */
+  public static final KeyStrokeOption KEY_OPEN_FOLDER =
+    new KeyStrokeOption("key.open.folder",
+                        KeyStrokeOption.NULL_KEYSTROKE);
   /**
    * The key binding for opening a file
    */
@@ -999,6 +1006,12 @@ public interface OptionConstants {
 
   /* ---------- Misc Options ---------- */
 
+  /**
+   * open directory should default to recursive
+   */
+  public static final BooleanOption OPEN_FOLDER_RECURSIVE = 
+    new BooleanOption("open.folder.recursive", Boolean.FALSE);
+  
   /**
    * Directory to start looking for files in when DrJava starts up.
    */

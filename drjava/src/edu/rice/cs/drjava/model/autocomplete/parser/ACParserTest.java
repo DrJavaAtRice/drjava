@@ -203,4 +203,15 @@ public class ACParserTest extends TestCase {
     assertEquals("Number of classes",1,s.getClasses().length);
     assertEquals("the class name is A", "A", s.getClasses()[0].getName().getText());
   }
+  
+  
+/*
+  public void testFunctionOutsideClass() throws ParseException{
+    SourceFile s = _parseString("public class A{}\n" + 
+                                "public void foo(){}");
+    assertEquals("Number of classes",1,s.getClasses().length);
+    assertEquals("the class name is A", "A", s.getClasses()[0].getName().getText());
+    assertEquals("there is 1 function in the body", 1, s.getClasses()[0].getBody().getItems().length);
+  }
+  */
 }

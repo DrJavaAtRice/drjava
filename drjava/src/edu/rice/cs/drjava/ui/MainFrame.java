@@ -60,6 +60,7 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.Vector;
 import java.util.Arrays;
 import java.util.StringTokenizer;
@@ -372,6 +373,11 @@ public class MainFrame extends JFrame implements OptionConstants {
    * Provides the view's contribution to the Javadoc interaction.
    */
   private JavadocDialog _javadocSelector = new JavadocDialog(this);
+  
+  /**
+   * Provides a dialog to open a directory
+   */
+  private FolderDialog _folderSelector = new FolderDialog(this);
 
   /** Resets the document in the definitions pane to a blank one. */
   private Action _newAction = new AbstractAction("New") {
@@ -423,6 +429,16 @@ public class MainFrame extends JFrame implements OptionConstants {
   private Action _openAction = new AbstractAction("Open...") {
     public void actionPerformed(ActionEvent ae) {
       _open();
+    }
+  };
+  
+  /**
+   * Asks user for directory name and and reads it's files (and subdirectories files, on request) to
+   * the definitions pane.
+   */
+  private Action _openFolderAction = new AbstractAction("Open Folder...") {
+    public void actionPerformed(ActionEvent ae) {
+      openFolder(_folderSelector);
     }
   };
   
@@ -2019,6 +2035,10 @@ public class MainFrame extends JFrame implements OptionConstants {
     open(_openSelector);
   }
   
+  private void _openFolder(){
+    openFolder(_folderSelector);
+  }
+  
   private void _openFileOrProject() {
     try {
       final File[] fileList = _openFileOrProjectSelector.getFiles();
@@ -2302,6 +2322,58 @@ public class MainFrame extends JFrame implements OptionConstants {
     finally {
       hourglassOff();
       //_openProjectUpdate();
+    }
+  }
+
+  
+  private void getFilesInDir(File d, List<File> acc, boolean recur){
+    if(d.isDirectory()){
+      File[] fa = d.listFiles();
+      for(File f: fa){
+        if(f.isDirectory() && recur){ 
+          getFilesInDir(f, acc, recur);
+        }else if(f.isFile()){
+          acc.add(f);
+        }
+      }      
+    }else{
+      acc.add(d);
+    }
+  }
+  
+  private File[] getFilesInDir(File d, boolean recur){
+    ArrayList<File> l = new ArrayList<File>();
+    getFilesInDir(d, l, recur);
+    return l.toArray(new File[0]);    
+  }
+  
+  
+  /**
+   * Opens all the files in the directory returned by the FolderSelector prompting
+   * the user to handle the cases where files are already open,
+   * files are missing, or the action was canceled by the user
+   * @param openSelector the selector that returns the files to open
+   */
+  public void openFolder(DirectorySelector openSelector) {
+    try{
+      File opendir = null;
+      try{
+        opendir = _model.getActiveDocument().getFile().getParentFile();
+      }catch(FileMovedException e){
+      }
+      
+      
+      File dir = openSelector.getDirectory(opendir);
+      if(dir != null && dir.isDirectory()){
+        final File[] files = getFilesInDir(dir, openSelector.isRecursive());
+        open(new FileOpenSelector(){
+          public File[] getFiles() {
+            return files;
+          }
+        });
+      }
+    }catch(OperationCanceledException e){
+      // noop
     }
   }
 
@@ -3210,6 +3282,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _setUpAction(_newJUnitTestAction, "New", "Create a new JUnit test case class");
     _setUpAction(_newProjectAction, "New", "Make a new project");
     _setUpAction(_openAction, "Open", "Open an existing file");
+    _setUpAction(_openFolderAction, "Open Folder", "Open all files within a directory");
     _setUpAction(_openFileOrProjectAction, "Open", "Open an existing file or project");
     _setUpAction(_openProjectAction, "Open", "Open an existing project");
     _setUpAction(_saveAction, "Save", "Save the current document");
@@ -3415,6 +3488,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _addMenuItem(fileMenu, _newAction, KEY_NEW_FILE);
     _addMenuItem(fileMenu, _newJUnitTestAction, KEY_NEW_TEST);
     _addMenuItem(fileMenu, _openAction, KEY_OPEN_FILE);
+    _addMenuItem(fileMenu, _openFolderAction, KEY_OPEN_FOLDER);
     //_addMenuItem(fileMenu, _openProjectAction, KEY_OPEN_PROJECT);
     
     fileMenu.addSeparator();

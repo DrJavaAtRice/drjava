@@ -119,6 +119,10 @@ public class JavadocDialog implements DirectorySelector {
   }
 
 
+  public boolean isRecursive(){
+    return false;
+  }
+  
   /**
    * Shows the dialog prompting the user for a destination directory
    * in which to generate Javadoc.
