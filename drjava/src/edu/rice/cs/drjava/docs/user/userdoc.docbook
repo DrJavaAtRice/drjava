@@ -1,0 +1,288 @@
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook V3.1//EN">
+
+<!--
+  User Documentation for DrJava
+-->
+<book id="index">
+  <!-- Meta info -->
+  <bookinfo>
+    <date>2002-6-20</date>
+    <title>DrJava User Documentation</title>
+    <releaseinfo>Version $Id$</releaseinfo>
+  </bookinfo>
+  <toc></toc>
+
+  <!-- Chapter: Intro -->
+  <chapter id="intro">
+    <title>Introduction</title>
+    <note>
+      <para>This document is still in progress!  We're just getting started with documentation for DrJava...</para>
+    </note>
+    <para>DrJava is a pedagogic programming environment for Java, intended to help students focus more on program design than on the features of a complicated development environment.  It provides an Interactions window based on a "read-eval-print loop", which allows programmers to develop, test, and debug Java programs in an interactive, incremental fashion.</para>
+    <simplelist>
+      <member>Home Page: <ulink url="http://drjava.sourceforge.net">http://drjava.sourceforge.net</ulink></member>
+      <member>Paper: <ulink url="http://drjava.sf.net/papers/drjava-paper.shtml">http://drjava.sf.net/papers/drjava-paper.shtml</ulink></member>
+    </simplelist>
+  </chapter>
+
+
+  <!-- ---- Chapter: Getting Started ---- -->
+  <chapter id="gettingstarted">
+    <title>Getting Started</title>
+    <para>This chapter describes the basics for how to start using DrJava, including where to get the program and how to run it.</para>
+    <section id="gs-downloading">
+      <title>Downloading DrJava</title>
+      <para>You can download the newest releases of DrJava as a <filename>.jar</filename> file from our home page, <ulink url="http://drjava.sourceforge.net">http://drjava.sourceforge.net</ulink>, or directly from our <ulink url="http://sourceforge.net/project/showfiles.php?group_id=44253">Project Filelist</ulink> page on SourceForge.</para>
+      
+      <formalpara>
+	<title>Stable and Development Releases</title>
+	<para>A distinction is made between Stable and Development releases of DrJava.  All releases must pass our rigorous unit-tests and should be safe to use, but we have found that a period of beta-testing can be helpful for finding additional bugs.  Our Stable releases have gone through a period of beta-testing and should be safe for all users.  Our Development releases contain newer features that are under development.  We believe these releases are ready to use, but they have not been widely beta-tested.</para>
+      </formalpara>
+    </section>
+
+    <section id="gs-running">
+      <title>Running DrJava</title>
+      <para>DrJava can be started from a command prompt using the Jar file you downloaded.  You can optionally give it a list of source files to open at startup.</para>
+      <cmdsynopsis>
+	<command>java -jar drjava-DATE-TIME.jar</command>
+	<arg choice='opt' rep='repeat'>filename.java</arg>
+      </cmdsynopsis>
+      <para>(Replace DATE-TIME with the appropriate value for your file.)  On many platforms, you can also simply double-click on the Jar file and DrJava will start automatically.</para>
+    </section>
+
+    <section id="gs-requirements">
+      <title>System Requirements</title>
+      <para>DrJava requires Java 2 v1.3 or later.  Note that you will need to have the JDK (not the JRE) installed if you wish to use the compiler within DrJava.</para>
+      <para>We recommend using <ulink url="http://java.sun.com/j2se/1.4/download.html">Sun's JDK 1.4</ulink> for Solaris, Linux, and Windows.  Other users should use the Java virtual machine that comes with their operating system (including MacOS X).</para>
+    </section>
+
+    <section id="gs-license">
+      <title>License</title>
+      <para>DrJava is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.</para>
+      <para>DrJava is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.</para>
+      <para>The full text of the license is available from <ulink url="http://www.gnu.org">www.gnu.org.</ulink>.</para>
+      <para>DrJava incorporates DynamicJava (available at <ulink url="http://koala.ilog.fr/djava">http://koala.ilog.fr/djava</ulink>), which is licensed under these terms:</para>
+      <para>DynamicJava - Copyright (c) 1999 Dyade</para>
+      <para>Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:</para>
+      <para>The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.</para>
+      <para>THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL DYADE BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE</para>
+      <para>Except as contained in this notice, the name of Dyade shall not be used in advertising or otherwise to promote the sale, use or other dealings in this Software without prior written authorization from Dyade.</para>
+
+    </section>
+
+  </chapter>
+  
+
+  <!-- ---- Chapter: Configuring DrJava ---- -->
+  <chapter id="configuration">
+    <title>Configuring DrJava</title>
+    <para>DrJava currently has several configurable options which can be defined in a <filename>.drjava</filename> file in your home directory.  This file is a standard Java properties file, with one option on each line and with names and values separated by an equals sign.  Any options which are not defined in your <filename>.drjava</filename> file will have their default value, which is shown below after each option.  The options which are currently available are described below.</para>
+    
+    
+    <!-- Resource Location -->
+    <formalpara>
+      <title>Resource Location Options</title>
+      <para>Description of resource location options...
+        <variablelist>
+	  
+	  <varlistentry>
+	    <term><varname>javac.location = ""</varname></term>
+	    <listitem>
+	      <para>Used to specify the location of the <filename>javac.jar</filename>, for use as a compiler within DrJava.</para>
+	    </listitem>
+	  </varlistentry>
+	
+	  <varlistentry>
+	    <term><varname>jsr14.location = ""</varname></term>
+	    <term><varname>jsr14.collectionspath = ""</varname></term>
+	    <listitem>
+	      <para>Used to specify the locaiton of the JSR-14 versions of <filename>javac.jar</filename> and <filename>collect.jar</filename>, respectively, for use as an alternative compiler in DrJava.</para>
+	    </listitem>
+	  </varlistentry>
+	  
+	  <varlistentry>
+	    <term><varname>extra.classpath = ""</varname></term>
+	    <listitem>
+	      <para>Used to specify any directories to append to the classpath of the Interactions window.  Separate the directories using the system-specific path separator (eg.colon on Unix, semicolon on Windows).</para>
+	    </listitem>
+	  </varlistentry>
+	  
+	</variablelist>
+      </para>
+    </formalpara>
+
+    <!-- Colors -->
+    <formalpara>
+      <title>Color Options</title>
+      <para>Colors are defined similar to HTML colors: as six hexadecimal digits preceeded by a pound sign.  The first two digits specify a red value, the next two specify a green value, the next two specify a blue value.  For example, <constant>#00FF00</constant> would be a bright green.
+
+        <!-- Definitions Colors -->
+        <variablelist>
+	  <title>Syntax Colors for Definitions</title>
+	  
+	  <varlistentry>
+	    <term><varname>definitions.normal.color = #000000</varname></term>
+	    <listitem>
+	      <para>Used as the default color for program text.</para>
+	    </listitem>
+	  </varlistentry>
+
+	  <varlistentry>
+	    <term><varname>definitions.keyword.color = #0000FF</varname></term>
+	    <listitem>
+	      <para>Used as the color for known keywords (eg. "public", "for").</para>
+	    </listitem>
+	  </varlistentry>
+	  
+	  <varlistentry>
+	    <term><varname>definitions.type.color = #00007C</varname></term>
+	    <listitem>
+	      <para>Used for known primitive types (eg. "int") and capitalized words, which usually correspond to class names.</para>
+	    </listitem>
+	  </varlistentry>
+	  
+	  <varlistentry>
+	    <term><varname>definitions.comment.color = #007C00</varname></term>
+	    <listitem>
+	      <para>Used as the color for all comments.</para>
+	    </listitem>
+	  </varlistentry>
+	  
+	  <varlistentry>
+	    <term><varname>definitions.double.quoted.color = #B20000</varname></term>
+	    <listitem>
+	      <para>Used as the color for strings, which use double quotation marks.</para>
+	    </listitem>
+	  </varlistentry>
+	  
+	  <varlistentry>
+	    <term><varname>definitions.single.quoted.color = #FF00FF</varname></term>
+	    <listitem>
+	      <para>Used as the color for characters, which use single quotation marks.</para>
+	    </listitem>
+	  </varlistentry>
+	  
+	  <varlistentry>
+	    <term><varname>definitions.number.color = #000000</varname></term>
+	    <listitem>
+	      <para>Used as the color for all numbers.</para>
+	    </listitem>
+	  </varlistentry>
+	  
+	</variablelist>
+
+        <!-- Other colors -->
+        <variablelist>
+	  <title>Other Colors</title>
+	  <varlistentry>
+	    <term><varname>definitions.match.color = #BEFFE6</varname></term>
+	    <listitem>
+	      <para>Used as the highlight color when matching braces.</para>
+	    </listitem>
+	  </varlistentry>
+	</variablelist>
+
+      </para>
+    </formalpara>
+
+    <!-- Fonts -->
+    <formalpara>
+      <title>Font Options</title>
+      <para>All configurable fonts have three options: the name, the size, and the style.  The font name can be set to anything available from GraphicsEnvironment.getAllFonts(), and the size is any positive integer.  The style option corresponds directly to the style constants in java.awt.Font.  (Use 0 for plain, 1 for bold, 2 for italic, and 3 for bold italic.)</para>
+    </formalpara>
+    <variablelist>
+	
+      <varlistentry>
+	<term><varname>font.main.name = Monospaced</varname></term>
+	<term><varname>font.main.size = 12</varname></term>
+	<term><varname>font.main.style = 0</varname></term>
+	<listitem>
+	  <para>This font is used for the definitions pane and the tabs at the bottom of the window.</para>
+	</listitem>
+      </varlistentry>
+      
+      <varlistentry>
+	<term><varname>font.doclist.name = Monospaced</varname></term>
+	<term><varname>font.doclist.size = 10</varname></term>
+	<term><varname>font.doclist.style = 0</varname></term>
+	<listitem>
+	  <para>This font is used in the list of all open documents on the left side of the window.</para>
+	</listitem>
+      </varlistentry>
+      
+      <varlistentry>
+	<term><varname>font.toolbar.name = dialog</varname></term>
+	<term><varname>font.toolbar.size = 10</varname></term>
+	<term><varname>font.toolbar.style = 0</varname></term>
+	<listitem>
+	  <para>This font is used on the toolbar buttons, if the button names are configured to be displayed.</para>
+	</listitem>
+      </varlistentry>
+      
+    </variablelist>
+    
+    <!-- Other Display -->
+    <formalpara>
+      <title>Other Display Options</title>
+      <para>Description</para>
+    </formalpara>
+    <variablelist>
+      <title>Toolbar Options</title>
+      
+      <varlistentry>
+	<term><varname>toolbar.icons.enabled = true</varname></term>
+	<listitem>
+	  <para>Whether to display icons on the toolbar buttons and menu items.</para>
+	</listitem>
+      </varlistentry>
+      
+      <varlistentry>
+	<term><varname>toolbar.text.enabled = true</varname></term>
+	<listitem>
+	  <para>Whether to display text on the toolbar buttons.  It is only relevant if the <varname>toolbar.icons.enabled</varname> option is set to true, since text will always be displayed if the icons are disabled.</para>
+	</listitem>
+      </varlistentry>
+      
+    </variablelist>
+
+    <!-- Miscellaneous -->
+    <formalpara>
+      <title>Miscellaneous Options</title>
+      <para>Description...</para>
+    </formalpara>
+    <variablelist>
+
+      <varlistentry>
+	<term><varname>working.directory = ""</varname></term>
+	<listitem>
+	  <para>Specifies the default directory for DrJava to use when starting up.  The open and save dialogs will start here, rather than in the user's current directory, if this option is set.  The Interactions classpath will also include this directory.</para>
+	</listitem>
+      </varlistentry>
+      
+      <varlistentry>
+	<term><varname>indent.level = 2</varname></term>
+	<listitem>
+	  <para>Sets how many spaces to use for each level of indenting.  Note that tab characters are not allowed in DrJava.</para>
+	</listitem>
+      </varlistentry>
+      
+      <varlistentry>
+	<term><varname>history.max.size = 500</varname></term>
+	<listitem>
+	  <para>Specifies how many commands will be remembered in the history of the Interactions window.  Previous commands can be recalled using the up and down arrow keys.</para>
+	</listitem>
+      </varlistentry>
+      
+    </variablelist>
+    
+  </chapter>
+ 
+  <!-- Chapter: JUnit Integration -->
+  <chapter id="junit">
+    <title>Testing Classes using JUnit</title>
+    <para>
+      Copy from Chris Haynes' page.
+    </para>
+  </chapter>
+
+</book>

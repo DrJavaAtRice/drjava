@@ -155,4 +155,40 @@
     </java>
   </target>
 
+
+  <!-- Check if docbook2html is available -->
+  <target name="docbook-present">
+    <property environment="env"/>
+    <available file="docbook2html" property="docbook.present">
+      <filepath>
+        <pathelement path="${env.PATH}" />
+      </filepath>
+    </available>
+  </target>
+
+  <!-- Create documentation html -->
+  <target name="docs" depends="userdocs" unless="docbook.present">
+    <echo message="Could not find docbook2html.  Not generating docs." />
+  </target>
+
+  <!-- Create the user documentation -->
+  <target name="userdocs" depends="docbook-present" if="docbook.present">
+    <delete dir="${doc_dir}/user/" />
+    <mkdir dir="${doc_dir}/user/" />
+    <echo message="Creating documentation HTML..." />
+    <apply executable="docbook2html" failonerror="yes" type="file">
+      <arg value="-o"/>
+      <arg value="${doc_dir}/user/"/>
+      <fileset dir="${srcroot}/${projpath}/docs/user">
+        <include name="userdoc.docbook" />
+      </fileset>
+    </apply>
+  </target>
+
+  <!-- Allow a commit of just the docs, without testing -->
+  <target name="commit-docs">
+    <echo message="Committing the documentation." />
+    <cvs command="commit docs" />
+  </target>
+
 </project>
