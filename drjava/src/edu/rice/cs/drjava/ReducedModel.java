@@ -1826,9 +1826,14 @@ public class ReducedModel implements BraceReduction
   private boolean _isCurrentBraceMatchable(
 		ModelList<ReducedToken>.Iterator copyCursor)
 		{
-			String type = copyCursor.current().getType();
+			return _isBraceMatchable(copyCursor.current());
+		}
 
-			return (!copyCursor.current().isGap() &&
+  private boolean _isBraceMatchable(ReducedToken token)
+		{
+			String type = token.getType();
+
+			return (!token.isGap() &&
 							!(type.equals("/")  ||
 								type.equals("*")  ||
 								type.equals("\n") ||
@@ -1836,9 +1841,9 @@ public class ReducedModel implements BraceReduction
 								type.equals("\\") ||
 								type.equals("\\\\") ||
 								type.equals("\\\"")) &&
-							!copyCursor.current().isShadowed());
+							!token.isShadowed());
 		}
-  
+
 
 /**
  *returns distance from current location of cursor to the location of the
@@ -1910,6 +1915,23 @@ public class ReducedModel implements BraceReduction
  
 
 
+	public boolean openBraceImmediatelyRight()
+		{
+			return (!_cursor.atStart() && !_cursor.atEnd() &&
+							_isBraceMatchable(_cursor.current()) &&
+							_cursor.current().isOpen() &&
+							_offset == 0);
+		}
+
+
+	public boolean closedBraceImmediatelyLeft()
+		{
+			return (!_cursor.atStart() && !_cursor.atFirstItem() &&
+							_isBraceMatchable(_cursor.prevItem()) &&
+							_cursor.prevItem().isClosed() &&
+							_offset == 0);
+		}
+	
   /**
 	 * If the current ReducedToken is an open significant brace and the
 	 * offset is 0 (i.e., if we're immediately left of said brace),
@@ -2005,7 +2027,7 @@ public class ReducedModel implements BraceReduction
 				return -1;
 			
 			iter.prev();
-			// here we check to make sure there is an open significant brace
+			// here we check to make sure there is an closed significant brace
 			// immediately to the right of the cursor
 			if (_isCurrentBraceMatchable(iter) &&
 					iter.current().isClosed() &&

@@ -19,6 +19,7 @@ import javax.swing.text.DefaultEditorKit;
 import java.awt.event.ActionEvent;
 
 import java.awt.BorderLayout;
+import java.awt.Label;
 
 import java.io.File;
 
@@ -36,7 +37,8 @@ public class MainFrame extends JFrame
   private JMenuBar _menuBar;
   private JMenu _fileMenu;
   private JMenu _editMenu;
-  
+  private Label _status;
+	
   // Make some actions for menus
   private Action _quitAction = new AbstractAction("Quit")
   {
@@ -228,6 +230,9 @@ public class MainFrame extends JFrame
     
     _interactionsView = new InteractionsView();
 
+		// status bar at bottom of window
+		_status = new Label("");
+
     // Create split pane with defs and output
     JSplitPane split1 = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
                                        true,
@@ -240,10 +245,16 @@ public class MainFrame extends JFrame
                                        split1,
                                        new JScrollPane(_interactionsView));
 
+		JSplitPane split3 = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
+																			 true,
+																			 _errorPanel,
+																			 _status);
+
+
     setBounds(25, 25, 300, 500);
 
 
-    getContentPane().add(_errorPanel, BorderLayout.SOUTH);
+    getContentPane().add(split3, BorderLayout.SOUTH);
     getContentPane().add(split2, BorderLayout.CENTER);
     setSize(300, 500);
 
@@ -267,9 +278,14 @@ public class MainFrame extends JFrame
     _fileNameField.setText(filename);
   }
 		
-		DefinitionsView getDefView()
+	DefinitionsView getDefView()
 		{
-				return _definitionsView;
+			return _definitionsView;
+		}
+	
+	Label getStatusBar()
+		{
+			return _status;
 		}
 }
 

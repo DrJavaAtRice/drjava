@@ -23,6 +23,7 @@ public class DefinitionsDocument extends DefaultStyledDocument
 	Vector<StateBlock> litBlocks = new Vector<StateBlock>(); 
 	Vector<StateBlock> changes = new Vector<StateBlock>();
   int _currentLocation = 0;	
+
 	
 	
 	/**
@@ -37,7 +38,6 @@ public class DefinitionsDocument extends DefaultStyledDocument
   public void insertString(int offset, String str, AttributeSet a)
     throws BadLocationException
   {
-    super.insertString(offset, str, a);
 		//System.out.println("STRING: "+str+"      "+str.length()+" "+
 		//	offset);
 		//variables
@@ -67,6 +67,10 @@ public class DefinitionsDocument extends DefaultStyledDocument
 				char curChar = str.charAt(i);
 				_addCharToReducedView(curChar);
 			}
+
+		_currentLocation = offset + strLength;
+
+    super.insertString(offset, str, a);
 		
 		//get highlight information from mark onward
 		//numbers are off by prevSize + strLength + reducedOffset
@@ -77,7 +81,6 @@ public class DefinitionsDocument extends DefaultStyledDocument
 		
 		updateCurrentHighlights(newStates,adjustment);
 		
-		_currentLocation = offset + strLength;
 		_modifiedSinceSave = true;
 
 		updateStyles();
@@ -148,8 +151,6 @@ public class DefinitionsDocument extends DefaultStyledDocument
 
   public void remove(int offset, int len) throws BadLocationException
   {
-    super.remove(offset, len);
-
     int locationChange = offset - _currentLocation;
 		ModelList<ReducedToken>.Iterator mark;
 		Vector<StateBlock> newStates;
@@ -169,9 +170,11 @@ public class DefinitionsDocument extends DefaultStyledDocument
 		
 //System.err.println("doc.remove: locChange=" + locationChange);
 		_currentLocation = offset;		
-		
 		_reduced.delete(len);
 		
+    super.remove(offset, len);
+
+
 		int adjustment = offset - prevSize - reducedOffset;
 		newStates = SBVectorFactory.generate(mark,0,adjustment);
 		

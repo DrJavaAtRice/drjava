@@ -15,12 +15,18 @@ import javax.swing.undo.UndoManager;
 
 import javax.swing.event.UndoableEditListener;
 import javax.swing.event.UndoableEditEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.CaretListener;
+import javax.swing.event.CaretEvent;
 
 import javax.swing.text.Document;
 import javax.swing.text.StyledEditorKit;
 import javax.swing.text.DefaultEditorKit;
 import javax.swing.text.EditorKit;
 import javax.swing.text.BadLocationException;
+import javax.swing.text.Highlighter;
+import javax.swing.text.DefaultHighlighter;
 
 import java.io.File;
 import java.io.IOException;
@@ -32,6 +38,11 @@ import java.awt.Font;
 import java.awt.Toolkit;
 
 import java.awt.event.ActionEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.KeyListener;
+import java.awt.event.KeyEvent;
+
 
 public class DefinitionsView extends JEditorPane
 {
@@ -45,7 +56,60 @@ public class DefinitionsView extends JEditorPane
   private UndoAction _undoAction;
   private RedoAction _redoAction;
 	private FindReplaceDialog _findReplace;
+	private Object _matchHighlight = null;
+	private static DefaultHighlighter.DefaultHighlightPainter _highlightPainter
+  = new DefaultHighlighter.DefaultHighlightPainter(Color.lightGray);
 
+	private CaretListener _matchListener = new CaretListener() {
+		public void caretUpdate(CaretEvent e) {
+			_doc()._reduced.move(getCaretPosition() - _doc()._currentLocation);
+			_doc()._currentLocation = getCaretPosition();
+			_mainFrame.getStatusBar().setText("");
+
+			try {
+				_updateMatchHighlight();
+			}
+			catch (BadLocationException ex) {}
+		}
+	};
+
+	private void _updateMatchHighlight() throws BadLocationException {
+		if (_doc()._reduced.closedBraceImmediatelyLeft()) {
+			int to = getCaretPosition();
+			int from = _doc()._reduced.balanceBackward();
+			if (from == -1) {
+				_removePreviousHighlight();
+				_mainFrame.getStatusBar().setText(
+					"Mismatched '" +
+					_doc()._reduced._cursor.prevItem().getType() + "'");
+			}
+			else {
+				_removePreviousHighlight();
+				from = to - from;
+				_addHighlight(from, to);
+				Highlighter.Highlight[] _lites = getHighlighter().getHighlights();
+			}
+		}
+		else {
+			_removePreviousHighlight();
+		}
+	}	
+
+	private void _addHighlight(int from, int to) throws
+		BadLocationException {
+		_matchHighlight = 		
+			getHighlighter().addHighlight(from,
+																		to,
+																		_highlightPainter);
+	}
+	
+	private void _removePreviousHighlight() {
+		if (_matchHighlight != null) {
+			getHighlighter().removeHighlight(_matchHighlight);
+			_matchHighlight = null;
+		}
+	}
+	
   private UndoableEditListener _undoListener = new UndoableEditListener() {
     public void undoableEditHappened(UndoableEditEvent e) {
       //Remember the edit and update the menus
@@ -55,12 +119,15 @@ public class DefinitionsView extends JEditorPane
     }
   };
 
+	// Constructor
+	
   public DefinitionsView(MainFrame mf)
   {
     _mainFrame = mf;
     _resetDocument("");
     _resetUndo();
 		_findReplace = new FindReplaceDialog(mf, this);
+		this.addCaretListener(_matchListener);
   }
 
   public Action getUndoAction() { return _undoAction; }
@@ -75,7 +142,6 @@ public class DefinitionsView extends JEditorPane
     if (_redoAction == null) {
       _redoAction = new RedoAction();
     }
-
     super.setDocument(doc);
     _resetUndo();
   }
