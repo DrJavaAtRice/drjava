@@ -87,18 +87,7 @@ public class FindReplaceDialog extends JDialog {
 		outside.add(buttons);
 		outside.add(_message);
 		setContentPane(outside);
-		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-		addWindowListener(new WindowAdapter() {
-			public void windowClosing(WindowEvent we) {
-				/*
-				 * Instead of directly closing the window,
-				 * we're going to change the JOptionPane's
-				 * value property.
-				 */
-				System.out.println("closing?");
-			}
-		});
-
+		setDefaultCloseOperation(HIDE_ON_CLOSE);
 
 		findField.getDocument().addDocumentListener(new DocumentListener() {
 			public void changedUpdate(DocumentEvent e) {
@@ -223,6 +212,5 @@ public class FindReplaceDialog extends JDialog {
 				
 		setBounds(100, 200, 520, 300);
 		setSize(520, 300);
-		setVisible(true);
 	}
 }

@@ -44,6 +44,7 @@ public class DefinitionsView extends JEditorPane
   private UndoManager _undoManager;
   private UndoAction _undoAction;
   private RedoAction _redoAction;
+	private FindReplaceDialog _findReplace;
 
   private UndoableEditListener _undoListener = new UndoableEditListener() {
     public void undoableEditHappened(UndoableEditEvent e) {
@@ -59,6 +60,7 @@ public class DefinitionsView extends JEditorPane
     _mainFrame = mf;
     _resetDocument("");
     _resetUndo();
+		_findReplace = new FindReplaceDialog(mf, this);
   }
 
   public Action getUndoAction() { return _undoAction; }
@@ -347,11 +349,10 @@ public class DefinitionsView extends JEditorPane
   }
 
 		public void findReplace () {
-				FindReplaceDialog box = new FindReplaceDialog(_mainFrame, this);
+			_findReplace.show();
 		}
 
 		public boolean findText (String fWord) {
-				System.out.println("find " + fWord);
 				return findNextText(fWord);
 		}
 
@@ -455,6 +456,7 @@ public class DefinitionsView extends JEditorPane
 			}
 		// unselect
 		setCaretPosition(getSelectionEnd());
+		_saveToFile("fuckup");
 		return count;
 	}
 
@@ -478,5 +480,3 @@ public class DefinitionsView extends JEditorPane
 	}
 	
 }
-
-
