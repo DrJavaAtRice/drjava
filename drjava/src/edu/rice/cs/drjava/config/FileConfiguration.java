@@ -43,20 +43,27 @@ import java.io.*;
  * a Configuration object that is backed by a file.
  * @version $ID$
  */
-public class FileConfiguration extends Configuration {  
+public class FileConfiguration extends SavableConfiguration {  
     
-    private File file;
+    public final File file;
 
-    public FileConfiguration(File f) throws IOException {
+    public FileConfiguration(File f) {
         super(new DefaultOptionMap());
         file = f.getAbsoluteFile();
-        FileInputStream fis = new FileInputStream(file);
-        BufferedInputStream bis = new BufferedInputStream(fis);
-        OptionMapLoader loader = new OptionMapLoader(bis);
-        loader.loadInto(map);
     }
  
+    public void loadConfiguration() throws IOException {
+        loadConfiguration(new BufferedInputStream(new FileInputStream(file)));
+    }
+
     public void saveConfiguration() throws IOException {
-        
+        saveConfiguration("DrJava configuration file");
+    }
+
+    public void saveConfiguration(String header) throws IOException {
+        OutputStream os = new BufferedOutputStream(new
+            FileOutputStream(file));
+        super.saveConfiguration(os,header);
+        os.close(); // in this implementation, close the file after saving.
     }
 }

@@ -56,22 +56,18 @@ public final class Configuration implements OptionConstants {
     
     public static final Configuration ONLY = new Configuration();
     
-    private final edu.rice.cs.drjava.config.Configuration _config;
+    private final FileConfiguration _config;
     
     private Configuration() {
-	OptionMapLoader loader = OptionMapLoader.DEFAULT;
-	try {
-	    if (PROPERTIES_FILE.exists()) {
-		InputStream fis = new FileInputStream(PROPERTIES_FILE);
-		loader = new OptionMapLoader(fis);
-	    } else { // be nice and create a config file.
-		new FileOutputStream(PROPERTIES_FILE).close();
-	    }
+        try {
+            PROPERTIES_FILE.createNewFile(); // be nice and ensure a config file
 	} catch(IOException e) { // IOException occurred
 	}
-	OptionMap map = new DefaultOptionMap();
-	loader.loadInto(map);
-	_config = new edu.rice.cs.drjava.config.Configuration(map);
+        _config = new FileConfiguration(PROPERTIES_FILE);
+        try {
+            _config.loadConfiguration();
+        } catch(IOException e) {
+        }
     }
     
     /**
@@ -82,6 +78,11 @@ public final class Configuration implements OptionConstants {
      * @deprecated this is a dumb method.  this is a dumb class.
      */
     public void saveProperties() {
+        try {
+            _config.saveConfiguration();
+        } catch(IOException e) {
+            // for now, do nothing
+        }
     }
 
     
