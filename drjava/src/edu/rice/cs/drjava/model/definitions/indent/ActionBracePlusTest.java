@@ -58,127 +58,104 @@ import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
  */
 public class ActionBracePlusTest extends IndentRulesTestCase 
 {
-    private String _text, _aligned;
+  private String _text, _aligned;
+  
+  private IndentRuleAction _action;
+  
+  /** @param name The name of this test case. */
+  public ActionBracePlusTest(String name) { super(name); }
+  
+  public void setUp() {
+    super.setUp();
+  }
+  
 
-    private IndentRuleAction _action;
-
-    /** @param name The name of this test case. */
-    public ActionBracePlusTest(String name) { super(name); }
-
-    public void setUp() {}
+  public void testSpaceSuffix() throws BadLocationException
+  {
+    _action = new ActionBracePlus(" ");
     
-    public void testEmptySuffix() throws BadLocationException
-    {
-	_action = new ActionBracePlus("");
-	/*
-	// (1) 
+    // (2) 
+    
+    _text = 
+     "var = method(arg1,\n"+
+     "  arg2, arg3) + 4;";
 
-	_text = 
-	    "var = method(arg1,\n"+
-	    "  arg2, arg3) + 4;";
-
-	_aligned = 
-	    "var = method(arg1,\n"+
-	    "             arg2, arg3) + 4;";
-	
-	_setDocText(_text);
-	_action.indentLine(_doc, 0); // Does nothing.
-	assertEquals("START has no brace.", _doc.getLength(), _text.length());
-	_action.indentLine(_doc, 18); // Does nothing.
-	assertEquals("START has no brace.", _doc.getLength(), _text.length());
-	_action.indentLine(_doc, 20); // Aligns second line.
-	assertEquals("Line aligned to open paren.", _doc.getLength(), _aligned.length());
-	assertEquals("Line aligned to open paren.", _doc.getText(0, _doc.getLength()), _aligned);
-	
-	// (2) 
-
-	_text = 
-	    "{ /* block1* /\n"+
-	    "    { /* block2* /\n"+
-	    "        { /* block3* / }\n"+
-	    "}\n"+
-	    "}";
-	_aligned = 
-	    "{ /* block1* /\n"+
-	    "    { /* block2* /\n"+
-	    "        { /* block3* / }\n"+
-	    "    }\n"+
-	    "}";
-
-	_setDocText(_text);
-	_action.indentLine(_doc, 0); // Does nothing.
-	assertEquals("START has no brace.", _doc.getLength(), _text.length());
-	_action.indentLine(_doc, 18); // Does nothing.
-	assertEquals("START has no brace.", _doc.getLength(), _text.length());
-	_action.indentLine(_doc, 34); // Aligns fourth line.
-	assertEquals("Line aligned to open brace.", _doc.getLength(), _aligned.length());
-	assertEquals("Line aligned to open brace.", _doc.getText(0, _doc.getLength()), _aligned);
-	
-	// (3) 
+    _aligned = 
+     "var = method(arg1,\n"+
+     "             arg2, arg3) + 4;";
+ 
+    _setDocText(_text);
+    _action.indentLine(_doc, 0); // Does nothing.
+    assertEquals("START has no brace.", _text.length(), _doc.getLength());
+    _action.indentLine(_doc, 18); // Does nothing.
+    assertEquals("START has no brace.", _text.length(), _doc.getLength());
+    _action.indentLine(_doc, 20); // Aligns second line.
+    assertEquals("Line aligned to open paren.", _aligned.length(), _doc.getLength());
+    assertEquals("Line aligned to open paren.", _aligned, _doc.getText(0, _doc.getLength()));
+    
+    // (3) 
      
-	_text =
-	    "boolean method(\n"+
-	    "int[] a, String b)\n"+
-	    "{}";
-	_aligned = 
-	    "boolean method(\n"+
-	    "               int[] a, String s)\n"+
-	    "{}";
+    _text =
+     "boolean method(\n"+
+     "int[] a, String b)\n"+
+     "{}";
+    _aligned = 
+     "boolean method(\n"+
+     "               int[] a, String b)\n"+
+     "{}";
 
-	_setDocText(_text);
-	_action.indentLine(_doc, 0); // Does nothing.
-	assertEquals("START has no brace.", _doc.getLength(), _text.length());
-	_action.indentLine(_doc, 15); // Does nothing.
-	assertEquals("START has no brace.", _doc.getLength(), _text.length());
-	_action.indentLine(_doc, 16); // Aligns second line.
-	assertEquals("Line aligned to open paren.", _doc.getLength(), _aligned.length());
-	assertEquals("Line aligned to open paren.", _doc.getText(0, _doc.getLength()), _aligned);
-	
-	// (4) 
-	
-	_text =
-	    "boolean method(\n"+
-	    "int[] a,\n"+
-	    "               String b)\n"+
-	    "{}";
-	_aligned = 
-	    "boolean method(\n"+
-	    "               int[] a,\n"+
-	    "               String b)\n"+
-	    "{}";
+    _setDocText(_text);
+    _action.indentLine(_doc, 0); // Does nothing.
+    assertEquals("START has no brace.", _text.length(), _doc.getLength());
+    _action.indentLine(_doc, 15); // Does nothing.
+    assertEquals("START has no brace.", _text.length(), _doc.getLength());
+    _action.indentLine(_doc, 16); // Aligns second line.
+    assertEquals("Line aligned to open paren.", _aligned.length(), _doc.getLength());
+    assertEquals("Line aligned to open paren.", _aligned, _doc.getText(0, _doc.getLength()));
+ 
+    // (4) 
+ 
+    _text =
+     "boolean method(\n"+
+     "int[] a,\n"+
+     "               String b)\n"+
+     "{}";
+    _aligned = 
+     "boolean method(\n"+
+     "               int[] a,\n"+
+     "               String b)\n"+
+     "{}";
 
-	_setDocText(_text);
-	_action.indentLine(_doc, 0); // Does nothing.
-	assertEquals("START has no brace.", _doc.getLength(), _text.length());
-	_action.indentLine(_doc, 15); // Does nothing.
-	assertEquals("START has no brace.", _doc.getLength(), _text.length());
-	_action.indentLine(_doc, 20); // Aligns second line.
-	assertEquals("Line aligned to open paren.", _doc.getLength(), _aligned.length());
-	assertEquals("Line aligned to open paren.", _doc.getText(0, _doc.getLength()), _aligned);
-	
-	// (5) 
+    _setDocText(_text);
+    _action.indentLine(_doc, 0); // Does nothing.
+    assertEquals("START has no brace.", _text.length(), _doc.getLength());
+    _action.indentLine(_doc, 15); // Does nothing.
+    assertEquals("START has no brace.", _text.length(), _doc.getLength());
+    _action.indentLine(_doc, 20); // Aligns second line.
+    assertEquals("Line aligned to open paren.", _aligned, _doc.getText(0, _doc.getLength()));
+ 
+    // (5) 
 
-	_text =
-	    "array[\n"+
-	    "              new Listener() {\n"+
-	    "           method() {\n"+
-	    "           }\n"+
-	    "      }]";
-	_aligned =
-	    "array[\n"+
-	    "      new Listener() {\n"+
-	    "           method() {\n"+
-	    "           }\n"+
-	    "      }]";
+    _text =
+     "array[\n"+
+     "              new Listener() {\n"+
+     "           method() {\n"+
+     "           }\n"+
+     "      }]";
+    _aligned =
+     "array[\n"+
+     "      new Listener() {\n"+
+     "           method() {\n"+
+     "           }\n"+
+     "      }]";
 
-	_setDocText(_text);
-	_action.indentLine(_doc, 0); // Does nothing.
-	assertEquals("START has no brace.", _doc.getLength(), _text.length());
-	_action.indentLine(_doc, 6); // Does nothing.
-	assertEquals("START has no brace.", _doc.getLength(), _text.length());
-	_action.indentLine(_doc, 10); // Aligns second line.
-	assertEquals("Line aligned to open bracket.", _doc.getLength(), _aligned.length());
-	assertEquals("Line aligned to open bracket.", _doc.getText(0, _doc.getLength()), _aligned);	
-	*/
-    }
+    _setDocText(_text);
+    _action.indentLine(_doc, 0); // Does nothing.
+    assertEquals("START has no brace.", _text.length(), _doc.getLength());
+    _action.indentLine(_doc, 6); // Does nothing.
+    assertEquals("START has no brace.", _text.length(), _doc.getLength());
+    _action.indentLine(_doc, 10); // Aligns second line.
+    assertEquals("Line aligned to open bracket.", _aligned, _doc.getText(0, _doc.getLength())); 
+
+  }
 }

@@ -39,6 +39,8 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.definitions.indent;
 
+import javax.swing.text.*;
+import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 
@@ -70,14 +72,33 @@ public class QuestionNewParenPhrase extends IndentRuleQuestion {
    * @return true if this node's rule holds.
    */
   boolean applyRule(DefinitionsDocument doc) {
-    throw new RuntimeException("Not yet implemented.");
-    
-    /**
-    int startPos = startOfLine(doc, pos);
-    IndentInfo ii = doc.getIndentInfo(pos);
-    int delimPos = findPrevDelimiter(doc, startPos, {';',',','(','['});
-    return (non-WS/comment after delimPos?);
-
-    */
+    try {
+      // Find start of line
+      int here = doc.getCurrentLocation();
+      int startLine = doc.getLineStartPos(here);
+      
+      if (startLine > DefinitionsDocument.DOCSTART) {
+        // Find previous delimiter
+        char[] delims = {';', ',', '(', '['};
+        int prevDelim = doc.findPrevDelimiter(here, delims);
+        
+        if (prevDelim == DefinitionsDocument.ERROR_INDEX) {
+          return false;
+        }
+        
+        // Make sure the delim is the previous non-WS char
+        int nextNonWS = doc.getFirstNonWSCharPos(prevDelim + 1);
+        if (nextNonWS == DefinitionsDocument.ERROR_INDEX) {
+          nextNonWS = startLine;
+        }
+        return (nextNonWS >= startLine);
+      }
+    }
+    catch (BadLocationException e) {
+      // Shouldn't happen
+      throw new UnexpectedException(e);
+    }
+    // On first line
+    return false;
   }
 }

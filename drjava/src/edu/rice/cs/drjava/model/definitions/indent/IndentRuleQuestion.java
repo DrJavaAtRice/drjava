@@ -88,6 +88,9 @@ public abstract class IndentRuleQuestion implements IndentRule {
     int oldPos = doc.getCurrentLocation();
     doc.setCurrentLocation(pos);
     boolean result = applyRule(doc);
+    if (oldPos > doc.getLength()) {
+      oldPos = doc.getLength();
+    }
     doc.setCurrentLocation(oldPos);
     return result;
   }
@@ -118,6 +121,9 @@ public abstract class IndentRuleQuestion implements IndentRule {
     int oldPos = doc.getCurrentLocation();
     doc.setCurrentLocation(pos);
     indentLine(doc);
+    if (oldPos > doc.getLength()) {
+      oldPos = doc.getLength();
+    }
     doc.setCurrentLocation(oldPos);
   }
 }

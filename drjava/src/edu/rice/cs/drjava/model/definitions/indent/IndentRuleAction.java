@@ -61,6 +61,9 @@ public abstract class IndentRuleAction implements IndentRule {
     int oldPos = doc.getCurrentLocation();
     doc.setCurrentLocation(pos);
     indentLine(doc);
+    if (oldPos > doc.getLength()) {
+      oldPos = doc.getLength();
+    }
     doc.setCurrentLocation(oldPos);
   }
   

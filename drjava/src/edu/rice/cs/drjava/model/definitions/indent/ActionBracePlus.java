@@ -43,6 +43,7 @@ package edu.rice.cs.drjava.model.definitions.indent;
 
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.BraceReduction;
+import edu.rice.cs.drjava.model.definitions.reducedmodel.IndentInfo;
 
 /**
  * Aligns the indentation of the current line to the character
@@ -66,12 +67,44 @@ public class ActionBracePlus extends IndentRuleAction
    * Properly indents the line that the caret is currently on. 
    * Replaces all whitespace characters at the beginning of the 
    * line with the appropriate spacing or characters.
+   * Preconditions: must be inside a brace.
    * @param doc DefinitionsDocument containing the line to be indented.
    */
   public void indentLine(DefinitionsDocument doc)
   {
-    // For testing only
-    doc.setTab("---", doc.getCurrentLocation());
+    int here = doc.getCurrentLocation();
+    int startLine = doc.getLineStartPos(here);
+    doc.setCurrentLocation(startLine);
+    IndentInfo ii = doc.getReduced().getIndentInformation();
+    
+    // Check preconditions
+    if ((ii.braceType.equals("")) ||
+        (ii.distToBrace < 0)) {
+      // Can't find brace, so do nothing.
+      return;
+    }
+
+    // Find length to brace
+    int bracePos = startLine - ii.distToBrace;
+    int braceNewLine = 0;
+    if (ii.distToNewline >=0) {
+      braceNewLine = startLine - ii.distToNewline;
+    }
+    int braceLen = bracePos - braceNewLine;
+
+    // Create tab string
+    StringBuffer tab = new StringBuffer(_suffix.length() + braceLen);
+    for (int i=0; i < braceLen; i++) {
+      tab.append(" ");
+    }
+    tab.append(_suffix);
+    
+    if (here >= doc.getLength()) {
+      here = doc.getLength() - 1;
+    }
+    doc.setCurrentLocation(here);
+    
+    doc.setTab(tab.toString(), here);
   }
 
 }
