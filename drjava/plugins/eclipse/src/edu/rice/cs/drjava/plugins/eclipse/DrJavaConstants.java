@@ -63,5 +63,15 @@ public interface DrJavaConstants {
   public static final String INTERACTIONS_RESET_PROMPT =
     "interactions.reset.prompt";
   
-
+  /**
+   * Whether to prompt when the interactions pane is unexpectedly reset.
+   */
+  public static final String INTERACTIONS_EXIT_PROMPT =
+    "interactions.exit.prompt";
+  
+  /**
+   * Number of lines to remember in the Interactions History.
+   */
+  public static final String HISTORY_MAX_SIZE =
+    "history.max.size";
 }

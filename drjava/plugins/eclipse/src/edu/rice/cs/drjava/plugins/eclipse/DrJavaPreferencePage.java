@@ -41,7 +41,7 @@ package edu.rice.cs.drjava.plugins.eclipse;
 
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.jface.preference.BooleanFieldEditor;
-import org.eclipse.jface.preference.FontFieldEditor;
+import org.eclipse.jface.preference.IntegerFieldEditor;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.swt.SWT;
@@ -82,6 +82,13 @@ public class DrJavaPreferencePage extends FieldEditorPreferencePage
     addField(new BooleanFieldEditor(DrJavaConstants.INTERACTIONS_RESET_PROMPT,
                                     "Prompt Before Resetting Interactions Pane",
                                     SWT.NONE, getFieldEditorParent()));
+    addField(new BooleanFieldEditor(DrJavaConstants.INTERACTIONS_EXIT_PROMPT,
+                                    "Prompt if Interactions Pane Exits Unexpectedly",
+                                    SWT.NONE, getFieldEditorParent()));
+    
+    addField(new IntegerFieldEditor(DrJavaConstants.HISTORY_MAX_SIZE,
+                                    "Size of Interactions History",
+                                    getFieldEditorParent()));
   }
 
   /** 

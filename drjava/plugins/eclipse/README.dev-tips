@@ -7,7 +7,28 @@ How to compile and package the plug-in:
  - Run "source eclipse.sh"
  - Run "ant clean-eclipse package-eclipse"
    - This will generate a zip file in plugins/eclipse/packages
-   - Unzip this to your eclipse/plugins directory to run.
+   - Unzip this to the plugins directory of your Eclipse installation to run.
+
+
+How to commit changes:
+
+ - Note: these are temporary instructions.  DO NOT USE "ant commit"!
+ - Change to the plugins/eclipse directory and run "cvs commit".
+ - Commit the build.xml if the version number has changed.
+ - To do:
+   - The ant script needs to be modified to work at the top level.
+     Ideally, all DrJava development could be done from that build.xml,
+     and src/edu/rice/cs/drjava/build.xml could be deleted.
+     A commit-eclipse target should be created, which would run the tests.
+
+
+How to run the plug-in tests:
+
+ - The tests create Eclipse objects, which require extra libraries.
+   There is currently no ant target for running the plug-in tests,
+   so it's best to run them by hand.
+ - To do:
+   - Add instructions for specifying these libraries to this document.
 
 
 How to update the version number:

@@ -101,8 +101,14 @@ public class InteractionsController {
   
   // ---- Preferences ----
   
+  /** Listens to changes to preferences. */
+  protected IPropertyChangeListener _preferenceListener;
+  
   /** Whether to prompt before resetting Interactions. */
   protected boolean _promptToReset;
+  
+  /** Whether to prompt if Interactions are reset unexpectedly. */
+  protected boolean _promptIfExited;
   
   
   /**
@@ -122,9 +128,9 @@ public class InteractionsController {
     
     // Initialize preferences
     IPreferenceStore store = EclipsePlugin.getDefault().getPreferenceStore();
-    IPropertyChangeListener listener = new PrefChangeListener();
-    store.addPropertyChangeListener(listener);
-    JFaceResources.getFontRegistry().addListener(listener);
+    _preferenceListener = new PrefChangeListener();
+    store.addPropertyChangeListener(_preferenceListener);
+    JFaceResources.getFontRegistry().addListener(_preferenceListener);
     _updatePreferences();
     
     // Put the caret at the end
@@ -133,18 +139,6 @@ public class InteractionsController {
     _addDocumentStyles();
     _setupModel();
     _setupView();
-  }
-  
-  /**
-   * Reads user-defined preferences and sets up a PropertyChangeListener
-   * to react to changes.
-   */
-  private void _updatePreferences() {
-    IPreferenceStore store = EclipsePlugin.getDefault().getPreferenceStore();
-    _promptToReset = store.getBoolean(DrJavaConstants.INTERACTIONS_RESET_PROMPT);
-    
-    // Update the font
-    _view.updateFont();
   }
   
   /**
@@ -157,6 +151,29 @@ public class InteractionsController {
     _colorDarkGreen.dispose();
     _colorDarkBlue.dispose();
     _colorYellow.dispose();
+    
+    // Remove preference listener
+    IPreferenceStore store = EclipsePlugin.getDefault().getPreferenceStore();
+    store.removePropertyChangeListener(_preferenceListener);
+    JFaceResources.getFontRegistry().removeListener(_preferenceListener);
+  }
+
+  /**
+   * Reads user-defined preferences and sets up a PropertyChangeListener
+   * to react to changes.
+   */
+  private void _updatePreferences() {
+    IPreferenceStore store = EclipsePlugin.getDefault().getPreferenceStore();
+    
+    // Notifications
+    _promptToReset = store.getBoolean(DrJavaConstants.INTERACTIONS_RESET_PROMPT);
+    _promptIfExited = store.getBoolean(DrJavaConstants.INTERACTIONS_EXIT_PROMPT);
+    
+    // History size
+    _doc.getHistory().setMaxSize(store.getInt(DrJavaConstants.HISTORY_MAX_SIZE));
+    
+    // Update the font
+    _view.updateFont();
   }
   
   /**
@@ -299,11 +316,13 @@ public class InteractionsController {
     }
     
     public void interpreterExited(int status) {
-      String title = "Interactions terminated by System.exit(" + status + ")";
-      String msg = "The interactions window was terminated by a call " +
-              "to System.exit(" + status + ").\n" +
-              "The interactions window will now be restarted.";
-      _view.showInfoDialog(title, msg);
+      if (_promptIfExited) {
+        String title = "Interactions terminated by System.exit(" + status + ")";
+        String msg = "The interactions window was terminated by a call " +
+          "to System.exit(" + status + ").\n" +
+          "The interactions window will now be restarted.";
+        _view.showInfoDialog(title, msg);
+      }
     }
     
     public void interpreterChanged(boolean inProgress) {

@@ -149,5 +149,7 @@ public class EclipsePlugin extends AbstractUIPlugin {
     // These settings will show up when Preference dialog
     // opens up for the first time.
     store.setDefault(DrJavaConstants.INTERACTIONS_RESET_PROMPT, true);
+    store.setDefault(DrJavaConstants.INTERACTIONS_EXIT_PROMPT, true);
+    store.setDefault(DrJavaConstants.HISTORY_MAX_SIZE, 500);
   }
 }
