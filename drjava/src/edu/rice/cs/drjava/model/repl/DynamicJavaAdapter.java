@@ -50,7 +50,8 @@ public class DynamicJavaAdapter implements JavaInterpreter {
 			else
 				return JavaInterpreter.NO_RESULT;
     }
-    catch (InterpreterException ie) {
+    catch (Throwable ie) {
+			System.out.println("\n\ngotinterpreter exception\n\n");
       throw new RuntimeException(ie.getMessage());
     }
   }

@@ -3,24 +3,38 @@
 package edu.rice.cs.drjava;
 
 import javax.swing.JTextArea;
+import javax.swing.Action;
+import javax.swing.AbstractAction;
+import javax.swing.KeyStroke;
 
-import java.awt.event.KeyAdapter;
+import javax.swing.text.Keymap;
+
 import java.awt.event.KeyEvent;
+import java.awt.event.ActionEvent;
 
 public class InteractionsView extends JTextArea
 {
-  public InteractionsView() {
+	private class EvalAction extends AbstractAction {
+		public void actionPerformed(ActionEvent e) {
+			setCaretPosition(getInteractionsDocument().getLength());
+			getInteractionsDocument().eval();
+		}
+	}
+	
+	private EvalAction _evalAction = new EvalAction();
+	
+	public InteractionsView() {
     super(new InteractionsDocument());
     reset();
 
-    // Eval when the user hits enter.
-    addKeyListener(new KeyAdapter() {
-                    public void keyTyped(KeyEvent e) {
-                      if (e.getKeyChar() == '\n') {
-                        getInteractionsDocument().eval();
-                      }
-                    }
-                  });
+		//add actions for indent keay
+		Keymap ourMap = addKeymap("INDENT_KEYMAP", getKeymap());
+		
+		ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0),
+																 (Action) _evalAction);
+
+		setKeymap(ourMap);
+
   }
 
   private InteractionsDocument getInteractionsDocument() {
@@ -38,8 +52,7 @@ public class InteractionsView extends JTextArea
   }
   
   public void prompt() {
-    getInteractionsDocument().prompt();
-    setCaretPosition(getInteractionsDocument().getLength());
+    getInteractionsDocument().prompt();		
   }
   
   // public boolean atEnd() { return getCaretPosition() == doc.getLength(); }
