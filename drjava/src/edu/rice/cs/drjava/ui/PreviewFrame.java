@@ -86,9 +86,10 @@ public class PreviewFrame extends JFrame {
 
   // Actions
   /** Prints the current document. */
-  private Action _printAction = new AbstractAction("Print") {
+  private Action _printAction = new AbstractAction("Print...") {
     public void actionPerformed(ActionEvent ae) {
       _print();
+      _close();
     }
   };
 
