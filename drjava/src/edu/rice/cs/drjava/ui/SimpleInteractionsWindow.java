@@ -100,6 +100,9 @@ public class SimpleInteractionsWindow extends JFrame {
       public void interpreterChanged(boolean inProgress) {
         _pane.setEditable(inProgress);
       }
+      public void interpreterResetFailed(Throwable t) {
+        interpreterReady();
+      }
     });
 
     JScrollPane scroll = new JScrollPane(_pane);

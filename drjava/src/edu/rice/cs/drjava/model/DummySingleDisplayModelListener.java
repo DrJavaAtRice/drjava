@@ -167,7 +167,7 @@ public class DummySingleDisplayModelListener implements SingleDisplayModelListen
    * Called if the interpreter reset failed.
    * (Subclasses must maintain listeners.)
    */
-  public void interpreterResetFailed() { }
+  public void interpreterResetFailed(Throwable t) { }
   
   /**
    * Called when the active interpreter is changed.

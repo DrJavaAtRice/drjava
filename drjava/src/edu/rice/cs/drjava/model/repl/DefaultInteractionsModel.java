@@ -131,6 +131,18 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
   }
   
   /**
+   * Any extra action to perform (beyond notifying listeners) when
+   * the interpreter fails to reset.
+   * @param t The Throwable thrown by System.exit
+   */
+  protected void _interpreterResetFailed(Throwable t) {
+    _document.insertBeforeLastPrompt("Reset Failed! See the console tab for details." + _newLine,
+                                     InteractionsDocument.ERROR_STYLE);
+    // Print the exception to the console
+    _model.systemErrPrint(StringOps.getStackTrace(t));
+  }
+  
+  /**
    * Called when input is requested from System.in.
    * @return the input
    */
@@ -237,16 +249,10 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
    * Notifies listeners that the interpreter reset failed.
    * @param t Throwable causing the failure
    */
-  protected void _notifyInterpreterResetFailed(Throwable t) {
-    // Print the exception to the console
-//    StringWriter sw = new StringWriter();
-//    PrintWriter pw = new PrintWriter(sw);
-//    t.printStackTrace(pw);
-//    _model.systemErrPrint(sw.toString());
-    _model.systemErrPrint(StringOps.getStackTrace(t));
+  protected void _notifyInterpreterResetFailed(final Throwable t) {
     _notifier.notifyListeners(new EventNotifier.Notifier() {
       public void notifyListener(GlobalModelListener l) {
-        l.interpreterResetFailed();
+        l.interpreterResetFailed(t);
       }
     });    
   }

@@ -375,6 +375,10 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     _document.insertBeforeLastPrompt(s, InteractionsDocument.SYSTEM_ERR_STYLE);
   }
   
+  /**
+   * Returns a line of text entered by the user at the equivalent
+   * of System.in.
+   */
   public abstract String getConsoleInput();
 
   /**
@@ -505,18 +509,6 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   }
   
   /**
-   * This method is called by the Main JVM if the Interpreter JVM cannot
-   * be exited (likely because of its having a security manager)
-   * @param th The Throwable thrown by System.exit
-   */
-  public void interpreterResetFailed(Throwable th) {    
-    _document.insertBeforeLastPrompt("Reset Failed! See the console tab for details." + _newLine,
-                                     InteractionsDocument.ERROR_STYLE);
-    _document.setInProgress(false);
-    _notifyInterpreterResetFailed(th);
-  }
-  
-  /**
    * Notifies listeners that the interpreter has exited unexpectedly.
    * @param status Status code of the dead process
    * (Subclasses must maintain listeners.)
@@ -551,7 +543,26 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   protected abstract void _notifyInterpreterResetting();
   
   /**
+   * This method is called by the Main JVM if the Interpreter JVM cannot
+   * be exited (likely because of its having a security manager)
+   * @param t The Throwable thrown by System.exit
+   */
+  public void interpreterResetFailed(Throwable t) {
+    _interpreterResetFailed(t);
+    _document.setInProgress(false);
+    _notifyInterpreterResetFailed(t);
+  }
+  
+  /**
+   * Any extra action to perform (beyond notifying listeners) when
+   * the interpreter fails to reset.
+   * @param t The Throwable thrown by System.exit
+   */
+  protected abstract void _interpreterResetFailed(Throwable t);
+  
+  /**
    * Notifies listeners that the interpreter reset failed.
+   * @param t Throwable explaining why the reset failed.
    * (Subclasses must maintain listeners.)
    */
   protected abstract void _notifyInterpreterResetFailed(Throwable t);

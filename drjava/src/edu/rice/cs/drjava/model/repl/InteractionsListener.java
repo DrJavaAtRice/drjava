@@ -80,6 +80,12 @@ public interface InteractionsListener {
   public void interpreterExited(int status);
   
   /**
+   * Called if the interpreter could not be reset.
+   * @param t Throwable explaining why the reset failed.
+   */
+  public void interpreterResetFailed(Throwable t);
+  
+  /**
    * Called when the active interpreter is changed.
    * @param inProgress Whether the new interpreter is currently in progress
    * with an interaction (ie. whether an interactionEnded event will be fired)

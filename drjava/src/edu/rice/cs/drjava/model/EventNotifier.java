@@ -495,14 +495,15 @@ public class EventNotifier implements GlobalModelListener {
   
   /**
    * Called if the interpreter reset failed.
+   * @param t Throwable explaining why the reset failed.
    * (Subclasses must maintain listeners.)
    */
-  public void interpreterResetFailed() {
+  public void interpreterResetFailed(final Throwable t) {
     _lock.startRead();
     try {
       int size = _listeners.size();
       for(int i = 0; i < size; i++) {
-        _listeners.get(i).interpreterResetFailed();
+        _listeners.get(i).interpreterResetFailed(t);
       }
     }
     finally {

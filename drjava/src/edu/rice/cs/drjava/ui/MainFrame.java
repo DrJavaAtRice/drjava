@@ -4105,7 +4105,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       }
     }
     
-    public void interpreterResetFailed() {
+    public void interpreterResetFailed(Throwable t) {
       interpreterReady();
     }
     

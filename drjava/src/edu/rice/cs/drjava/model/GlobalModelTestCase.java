@@ -918,7 +918,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       listenerFail("interpreterExited(" + status + ") fired unexpectedly");
     }
     
-    public void interpreterResetFailed() {
+    public void interpreterResetFailed(Throwable t) {
       listenerFail("interpreterResetFailed fired unexpectedly");
     }
 

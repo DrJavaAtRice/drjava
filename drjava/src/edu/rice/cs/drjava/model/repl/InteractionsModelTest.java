@@ -285,6 +285,7 @@ public final class InteractionsModelTest extends TestCase {
     protected void _notifyInterpreterResetting() {}
     protected void _notifyInterpreterResetFailed(Throwable t) {}
     protected void _notifyInterpreterReady() {}
+    protected void _interpreterResetFailed(Throwable t) {}
     public String getConsoleInput() {
       fail("cannot get input from System.in in a test");
       return null;

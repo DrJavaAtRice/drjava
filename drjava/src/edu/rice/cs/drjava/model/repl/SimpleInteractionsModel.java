@@ -143,6 +143,26 @@ public class SimpleInteractionsModel extends InteractionsModel {
   }
   
   /**
+   * Does not allow input from System.in.
+   * @return empty string
+   */
+  public String getConsoleInput() {
+    _document.insertBeforeLastPrompt("Cannot read from System.in." + _newLine,
+                                     InteractionsDocument.ERROR_STYLE);
+    return "";
+  }
+  
+  /**
+   * Any extra action to perform (beyond notifying listeners) when
+   * the interpreter fails to reset.
+   * @param t The Throwable thrown by System.exit
+   */
+  protected void _interpreterResetFailed(Throwable t) {
+    _document.insertBeforeLastPrompt("Reset Failed!" + _newLine,
+                                     InteractionsDocument.ERROR_STYLE);
+  }
+  
+  /**
    * Resets the Java interpreter.
    */
   protected void _resetInterpreter() {
@@ -230,12 +250,4 @@ public class SimpleInteractionsModel extends InteractionsModel {
     // Won't happen in a single JVM
   }
 
-  /**
-   * Does not allow input from System.in.
-   * @return does not return
-   * @throws UnsupportedOperationException always
-   */
-  public String getConsoleInput() {
-    throw new UnsupportedOperationException("Cannot get input from System.in");
-  }
 }

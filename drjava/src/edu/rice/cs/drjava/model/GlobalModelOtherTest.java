@@ -177,7 +177,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase
         interpreterResettingCount++;
       }
       
-      public void interpreterResetFailed() {
+      public void interpreterResetFailed(Throwable t) {
         synchronized(this) {
           assertInterpreterResettingCount(1);
           interpreterResetFailedCount++;

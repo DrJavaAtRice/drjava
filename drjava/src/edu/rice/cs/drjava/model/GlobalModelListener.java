@@ -126,58 +126,6 @@ public interface GlobalModelListener extends InteractionsListener, JavadocListen
    */
   public void junitEnded();
 
-  //---------------------- InteractionsListener Methods ----------------------//
-  
-  /**
-   * Called after an interaction is started by the GlobalModel.
-   */
-  public void interactionStarted();
-
-  /**
-   * Called when an interaction has finished running.
-   */
-  public void interactionEnded();
-  
-  /**
-   * Called when the interactions window generates a syntax error.
-   *
-   * @param offset the error's offset into the InteractionsDocument
-   * @param length the length of the error
-   */
-  public void interactionErrorOccurred(int offset, int length);
-
-  /**
-   * Called when the interactionsJVM has begun resetting.
-   */
-  public void interpreterResetting();
-  
-  /**
-   * Called when the interactions window is reset.
-   */
-  public void interpreterReady();
-
-  /**
-   * Called when the interactions JVM was closed by System.exit
-   * or by being aborted. Immediately after this the interactions
-   * will be reset.
-   * @param status the exit code
-   */
-  public void interpreterExited(int status);
-  
-  /**
-   * Called if the interpreter reset failed.
-   * (Subclasses must maintain listeners.)
-   */
-  public void interpreterResetFailed();
-  
-  /**
-   * Called when the active interpreter is changed.
-   * @param inProgress Whether the new interpreter is currently in progress
-   * with an interaction (ie. whether an interactionEnded event will be fired)
-   */
-  public void interpreterChanged(boolean inProgress);
-
-  //-------------------- End InteractionsListener Methods --------------------//
   
   /**
    * Called when the caret position in the interactions pane is changed
