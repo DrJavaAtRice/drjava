@@ -41,14 +41,16 @@
 </path>
 
 <target name="compile-tstamp-gmt">
- <javac srcdir="${srcroot}"
+  <javac srcdir="${srcroot}"
          includes="edu/rice/cs/util/ant/TstampGMT.java"
          destdir="${built}"
          bootclasspath="${jsr14_classpath}:${sun.boot.class.path}"
          target="1.1"
+         fork="on"
          debug="on"
-         
-optimize="off"/>
+         optimize="off">
+    <compilerarg value="-J-Xbootclasspath/p:${jsr14_classpath}"/>
+  </javac>
 </target>
 
 <!-- Init target. All others depend on it. Initialize the directory. -->
@@ -205,12 +207,14 @@ optimize="off"/>
          includes="${projpath}/**/*java"
          destdir="${built}" 
          bootclasspath="${jsr14_classpath}:${sun.boot.class.path}"
-	 classpath="${classpath_text}"
-         source="1.5"
+         classpath="${classpath_text}"
          target="1.5"
          debug="on"
+         source="1.5"
+         fork="on"
          optimize="off">
-<!--    <compilerarg value="-gj" />  -->
+     <compilerarg value="-J-Xbootclasspath/p:${jsr14_classpath}"/>
+     <compilerarg value="-novariance"/>
   </javac>
 </target>
 
@@ -223,7 +227,7 @@ optimize="off"/>
 -->
 <property name="test-spec" value="" />
 <target name="test-only">
-  <junit printsummary="yes" haltonerror="yes" haltonfailure="yes" fork="no">
+  <junit printsummary="yes" haltonerror="yes" haltonfailure="yes" fork="yes">
     <classpath refid="classpath" />
 
     <!-- This makes JUnit display info about each test to console -->
