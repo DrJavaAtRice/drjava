@@ -34,6 +34,7 @@ import java.awt.event.KeyAdapter;
 import java.awt.BorderLayout;
 import java.awt.Label;
 import java.awt.Cursor;
+import java.awt.Font;
 
 
 import java.io.File;
@@ -460,7 +461,17 @@ public class MainFrame extends JFrame
     //split2.setDividerLocation(50);
 
     updateFileTitle("Untitled");
+
+    _setAllFonts(new Font("Monospaced", 0, 12));
   }
+
+  private void _setAllFonts(Font f) {
+    _definitionsView.setFont(f);
+    _interactionsView.setFont(f);
+    _outputView.setFont(f);
+    _errorPanel.setListFont(f);
+  }
+
 
   private void _selectCompileTab() {
     _tabbedPane.setSelectedIndex(1);

@@ -1,3 +1,4 @@
+
 /* $Id$ */
 
 package edu.rice.cs.drjava;
@@ -85,6 +86,65 @@ public class DefinitionsDocumentTest extends TestCase {
     }
   }
 
+  public void testInsertStarIntoStarSlash() throws BadLocationException {
+   BraceReduction rm = defModel._reduced;
+   defModel.insertString(0, "/**/", null);
+   
+   // Put new star between second star and second slash
+   defModel.insertString(3, "*", null);
+   defModel.move(-4);
+   assertEquals("1","/*",rm.currentToken().getType());
+   assertEquals("2",ReducedToken.FREE,rm.currentToken().getState());
+   rm.move(2);
+   assertEquals("3","*",rm.currentToken().getType());
+   assertEquals("4",ReducedToken.INSIDE_BLOCK_COMMENT,
+		rm.currentToken().getState());
+   rm.move(1);
+   assertEquals("5","*/",rm.currentToken().getType());
+   assertEquals("6",ReducedToken.FREE,
+		rm.currentToken().getState());
+
+  }
+
+ public void testInsertSlashIntoStarSlash() throws BadLocationException {
+   BraceReduction rm = defModel._reduced;
+   defModel.insertString(0, "/**/", null);
+   
+   // Put new slash between second star and second slash
+   defModel.insertString(3, "/", null);
+   defModel.move(-4);
+   assertEquals("1","/*",rm.currentToken().getType());
+   assertEquals("2",ReducedToken.FREE,rm.currentToken().getState());
+   rm.move(2);
+   assertEquals("3","*/",rm.currentToken().getType());
+   assertEquals("4",ReducedToken.FREE,
+		rm.currentToken().getState());
+   rm.move(2);
+   assertEquals("5","/",rm.currentToken().getType());
+   assertEquals("6",ReducedToken.FREE,
+		rm.currentToken().getState());
+
+  }
+
+  public void testInsertStarIntoSlashStar() throws BadLocationException {
+   BraceReduction rm = defModel._reduced;
+   defModel.insertString(0, "/**/", null);
+   
+   // Put new star between second star and second slash
+   defModel.insertString(1, "*", null);
+   defModel.move(-2);
+   assertEquals("1","/*",rm.currentToken().getType());
+   assertEquals("2",ReducedToken.FREE,rm.currentToken().getState());
+   rm.move(2);
+   assertEquals("3","*",rm.currentToken().getType());
+   assertEquals("4",ReducedToken.INSIDE_BLOCK_COMMENT,
+		rm.currentToken().getState());
+   rm.move(1);
+   assertEquals("5","*/",rm.currentToken().getType());
+   assertEquals("6",ReducedToken.FREE,
+		rm.currentToken().getState());
+
+  }
   public void testDeleteDoc()
   {
     try {

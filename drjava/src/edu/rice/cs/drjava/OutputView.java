@@ -27,7 +27,12 @@ public class OutputView extends JTextPane
     public void insertUpdate(DocumentEvent e) {
       try {
         Rectangle endPos = modelToView(getDocument().getLength());
-        scrollRectToVisible(endPos);
+
+        // If the window is not on the screen, this will be null
+        // In that case, don't try to scroll!
+        if (endPos != null) {
+          scrollRectToVisible(endPos);
+        }
       }
       catch (BadLocationException willNeverHappenISwear) {}
     }

@@ -80,28 +80,52 @@ class InteractionsDocument extends PlainDocument {
 				toEval = _testClassCall(toEval);
 							
       Object result = _interpreter.interpret(toEval);
-			if(result != JavaInterpreter.NO_RESULT)
+      String resultStr;
+
+      try {
+        resultStr = String.valueOf(result);
+      }
+      catch (Throwable t) {
+        // Very weird. toString() on result must have thrown this exception!
+        // Let's act like DynamicJava would have if this exception were thrown
+        // and rethrow as RuntimeException
+        throw new RuntimeException(t.toString());
+      }
+
+			if(result != JavaInterpreter.NO_RESULT) {
 				 super.insertString(getLength(), "\n" + String.valueOf(result)
 														+ "\n", null);
-			else
+      }
+			else {
 				super.insertString(getLength(), "\n", null);
+      }
 
       prompt();
     }		
     catch (BadLocationException e) {
       throw new InternalError("getting repl text failed");
     }
-    catch (Exception e) {
+    catch (Throwable e) {
 			//System.out.println("\n\nhey!!!!!!\n\n");
+      String message = e.getMessage();
+      // Don't let message be null. Java sadly makes getMessage() return
+      // null if you construct an exception without a message.
+      if (message == null) {
+        message = e.toString();
+        e.printStackTrace();
+      }
+
       try {
-				if (e.getMessage().startsWith("koala.dynamicjava.interpreter.InterpreterException: Encountered"))
+				if (message.startsWith("koala.dynamicjava.interpreter.InterpreterException: Encountered"))
         {
-          int end = e.toString().indexOf('\n');
-          super.insertString(getLength(), "\nError in evaluation: " +
-              "Invalid syntax\n", null);
+          super.insertString(getLength(),
+                             "\nError in evaluation: " +
+                             "Invalid syntax\n", null);
         }
         else {
-          super.insertString(getLength(), "\nError in evaluation: " + e.getMessage() + "\n", null);
+          super.insertString(getLength(),
+                             "\nError in evaluation: " + message + "\n",
+                             null);
         }
           
         prompt();
@@ -110,6 +134,7 @@ class InteractionsDocument extends PlainDocument {
     }
 		//System.out.println("\n\neval done!!!!!!\n\n");
 	}
+
 	/**
 	 *Assumes a trimmed String. Returns a string of the main call that the
 	 *interpretor can use.

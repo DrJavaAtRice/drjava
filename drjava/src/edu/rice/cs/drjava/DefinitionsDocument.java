@@ -463,7 +463,7 @@ public class DefinitionsDocument extends PlainDocument
    */
   private int _highlightKeywords(Vector<HighlightStatus> v, int i) {
     // Basically all non-alphanumeric chars are delimiters
-    final String delimiters = " \t\n\r{}()[].+-/*;:=!~<>?";
+    final String delimiters = " \t\n\r{}()[].+-/*;:=!@#$%^&*~<>?,\"`'<>|";
     final HighlightStatus original = v.elementAt(i);
 
     final String text;

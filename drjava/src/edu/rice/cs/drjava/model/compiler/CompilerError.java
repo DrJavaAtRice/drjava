@@ -23,6 +23,11 @@ public class CompilerError implements Comparable {
     _isWarning = isWarning;
   }
 
+  public String toString() {
+    return "CompilerError(file=" + _fileName + ", line=" + _lineNumber +
+           ", col=" + _startColumn + ", msg=" + _message + ")";
+  }
+
   public String fileName() {
     return _fileName;
   }

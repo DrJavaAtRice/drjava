@@ -45,6 +45,7 @@ import java.awt.Point;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.BorderLayout;
+import java.awt.Font;
 
 public class CompilerErrorPanel extends JPanel {
   /** Highlight painter for selected errors in the defs doc. */
@@ -57,20 +58,41 @@ public class CompilerErrorPanel extends JPanel {
     _listHighlightPainter
       = new DefaultHighlighter.DefaultHighlightPainter(Color.yellow);
 
-  private static final AttributeSet BOLD_ATTRIBUTES = _getBoldAttributes();
+  private static final SimpleAttributeSet NORMAL_ATTRIBUTES = _getNormalAttributes();
+  private static final SimpleAttributeSet BOLD_ATTRIBUTES = _getBoldAttributes();
 
-  private static final AttributeSet _getBoldAttributes() {
+  private static final SimpleAttributeSet _getBoldAttributes() {
     SimpleAttributeSet s = new SimpleAttributeSet();
     StyleConstants.setBold(s, true);
     return s;
   }
 
+  private static final SimpleAttributeSet _getNormalAttributes() {
+    SimpleAttributeSet s = new SimpleAttributeSet();
+    return s;
+  }
+
+  public void setListFont(Font f) {
+    StyleConstants.setFontFamily(NORMAL_ATTRIBUTES, f.getFamily());
+    StyleConstants.setFontSize(NORMAL_ATTRIBUTES, f.getSize());
+
+    StyleConstants.setFontFamily(BOLD_ATTRIBUTES, f.getFamily());
+    StyleConstants.setFontSize(BOLD_ATTRIBUTES, f.getSize());
+  }
 
   // when we create a highlight we get back a tag we can use to remove it
   private Object _previousHighlightTag = null;
 
+  /**
+   * Errors with source info have an entry in both _errors and _errorPositions.
+   */
   private CompilerError[] _errors;
   private Position[] _errorPositions;
+
+  /**
+   * Here's where we put errors that have no source information.
+   */
+  private CompilerError[] _errorsWithoutPositions;
 
   private DefinitionsView _definitionsView;
 
@@ -144,7 +166,10 @@ public class CompilerErrorPanel extends JPanel {
       else {
         // No need to move the caret since it's already here!
         _highlightErrorInSource(shouldSelect);
-        _errorListPane.selectItem(shouldSelect);
+
+        // Select item wants the error number overall, including
+        // accounting for errors with no source location
+        _errorListPane.selectItem(shouldSelect +_errorsWithoutPositions.length);
       }
     }
   };
@@ -216,13 +241,40 @@ public class CompilerErrorPanel extends JPanel {
     add(scroller, BorderLayout.CENTER);
   }
 
-  /** Change all state to select a new error. */
-  private void _switchToError(final int idx) {
-    _highlightErrorInSource(idx);
-    _gotoErrorSourceLocation(idx);
-    _errorListPane.selectItem(idx);
+  /**
+   * Change all state to select a new error.
+   * @param errorNum Error number, which is either in _errorsWithoutPositions
+   * (if errorNum < _errorsWithoutPositions.length) or in _errors (otherwise).
+   * If it's in _errors, we need to subtract _errorsWithoutPositions.length
+   * to get the index into the array.
+   */
+  private void _switchToError(final int errorNum) {
+    // errorNum is an error number. Because errors without source info 
+    // come first, check and see if this error is without source info, and
+    // if so don't try to highlight source info!
+    boolean errorHasLocation = (errorNum >= _errorsWithoutPositions.length);
+
+    if (errorHasLocation) {
+      // Index into _errors array
+      int idx = errorNum - _errorsWithoutPositions.length;
+
+      _highlightErrorInSource(idx);
+      _gotoErrorSourceLocation(idx);
+    }
+    else {
+      // Get rid of old highlight, since the error we have no has
+      // no source location
+      _removePreviousHighlight();
+    }
+
+    // Select item wants the error number, which what we were passed
+    _errorListPane.selectItem(errorNum);
   }
 
+  /**
+   * Jumps to error location in source
+   * @param idx Index into _errors array
+   */
   private void _gotoErrorSourceLocation(final int idx) {
     if (idx < 0) return;
 
@@ -234,6 +286,10 @@ public class CompilerErrorPanel extends JPanel {
     _definitionsView.grabFocus();
   }
 
+  /**
+   * Highlights the given error in the source.
+   * @param newIndex Index into _errors array
+   */
   private void _highlightErrorInSource(int newIndex) {
     int errPos = _errorPositions[newIndex].getOffset();
 
@@ -267,19 +323,53 @@ public class CompilerErrorPanel extends JPanel {
   }
 
   private void _resetEnabledStatus() {
-    _nextButton.setEnabled(_errorListPane.getSelectedIndex() < _errors.length);
+    int numErrors = _errorsWithoutPositions.length + _errors.length;
+
+    _nextButton.setEnabled(_errorListPane.getSelectedIndex() < numErrors);
     _previousButton.setEnabled(_errorListPane.getSelectedIndex() > 0);
-    _showAllButton.setEnabled(_errors.length != 0);
+    _showAllButton.setEnabled(numErrors != 0);
   }
 
   public void resetErrors(CompilerError[] errors) {
+    for (int i = 0; i < errors.length; i++) {
+      DrJava.consoleErr().println("#" + i + ": " + errors[i]);
+    }
+
     // Get rid of any old highlights
     _removePreviousHighlight();
 
-    _errors = errors;
-
     // sort the errors by location
-    Arrays.sort(_errors);
+    Arrays.sort(errors);
+
+    // Filter out those with invalid source info.
+    // They will be first since errors are sorted by line number,
+    // and invalid source info is for negative line numbers.
+    int numInvalid = 0;
+    for (int i = 0; i < errors.length; i++) {
+      if (errors[i].lineNumber() < 0) {
+        numInvalid++;
+      }
+      else {
+        // Since they were sorted, we must be done looking 
+        // for invalid source coordinates, since we found this valid one.
+        break;
+      }
+    }
+
+    _errorsWithoutPositions = new CompilerError[numInvalid];
+    System.arraycopy(errors,
+                     0,
+                     _errorsWithoutPositions,
+                     0,
+                     numInvalid);
+
+    int numValid = errors.length - numInvalid;
+    _errors = new CompilerError[numValid];
+    System.arraycopy(errors,
+                     numInvalid,
+                     _errors,
+                     0,
+                     numValid);
 
     _createPositionsArray();
     _resetEnabledStatus();
@@ -306,13 +396,15 @@ public class CompilerErrorPanel extends JPanel {
       // offset is always pointing to the first character in a line
       // at the top of the loop
       while ((numProcessed < _errors.length) &&
-          (offset < defsText.length())) {
+             (offset < defsText.length()))
+      {
         // first figure out if we need to create any new positions on this line
         for (int i = numProcessed;
-            (i < _errors.length) && (_errors[i].lineNumber() == curLine);
-            i++) {
+             (i < _errors.length) && (_errors[i].lineNumber() == curLine);
+             i++)
+        {
           _errorPositions[i] = defsDoc.createPosition(offset +
-              _errors[i].startColumn());
+                                                      _errors[i].startColumn());
           numProcessed++;
         }
 
@@ -367,10 +459,19 @@ public class CompilerErrorPanel extends JPanel {
       super("text/rtf", "");
       addMouseListener(_mouseListener);
 
+      ErrorListPane.this.setFont(new Font("Courier", 0, 20));
+
       // We set the editor pane disabled so it won't get keyboard focus,
       // which makes it uneditable, and so you can't select text inside it.
       setEnabled(false);
     }
+
+    /*
+    public void setFont(Font f) {
+      super.setFont(f);
+      System.err.println(new java.util.Date() + ": Set font: " + f);
+    }
+    */
 
     /**
      * Returns error number associated with the given visual coordinates.
@@ -398,9 +499,10 @@ public class CompilerErrorPanel extends JPanel {
 
     public void updateListPane() {
       try {
-        _errorListPositions = new Position[_errors.length];
+        int numErrors = _errorsWithoutPositions.length + _errors.length;
+        _errorListPositions = new Position[numErrors];
 
-        if (_errors.length == 0) {
+        if ((_errors.length == 0) && (_errorsWithoutPositions.length == 0)) {
           _updateNoErrors();
         }
         else {
@@ -409,6 +511,7 @@ public class CompilerErrorPanel extends JPanel {
       }
       catch (BadLocationException impossible) {}
 
+      // Force UI to redraw
       revalidate();
     }
 
@@ -416,7 +519,7 @@ public class CompilerErrorPanel extends JPanel {
       DefaultStyledDocument doc = new DefaultStyledDocument();
       doc.insertString(0,
                        "Last compilation completed successfully.",
-                       null);
+                       NORMAL_ATTRIBUTES);
       setDocument(doc);
 
       selectNothing();
@@ -424,16 +527,28 @@ public class CompilerErrorPanel extends JPanel {
 
     private void _updateWithErrors() throws BadLocationException {
       DefaultStyledDocument doc = new DefaultStyledDocument();
-      /*
-      doc.insertString(0,
-                       "Last compilation returned the following errors:\n",
-                       null);
-      */
 
-      for (int i = 0; i < _errors.length; i++) {
+      // Show errors without source locations
+      int errorNum = 0;
+      for (int i = 0; i < _errorsWithoutPositions.length; i++, errorNum++) {
         int startPos = doc.getLength();
-        _insertErrorText(i, doc);
-        _errorListPositions[i] = doc.createPosition(startPos);
+        _insertErrorText(_errorsWithoutPositions, i, doc);
+
+        // Note to user that there is no source info for this error
+        doc.insertString(doc.getLength(),
+                         " (no source location)",
+                         NORMAL_ATTRIBUTES);
+        doc.insertString(doc.getLength(), "\n", NORMAL_ATTRIBUTES);
+
+        _errorListPositions[errorNum] = doc.createPosition(startPos);
+      }
+
+      // Show errors with source locations
+      for (int i = 0; i < _errors.length; i++, errorNum++) {
+        int startPos = doc.getLength();
+        _insertErrorText(_errors, i, doc);
+        doc.insertString(doc.getLength(), "\n", NORMAL_ATTRIBUTES);
+        _errorListPositions[errorNum] = doc.createPosition(startPos);
       }
 
       setDocument(doc);
@@ -442,10 +557,10 @@ public class CompilerErrorPanel extends JPanel {
       _switchToError(0);
     }
 
-    private void _insertErrorText(int i, Document doc)
+    private void _insertErrorText(CompilerError[] array, int i, Document doc)
       throws BadLocationException
     {
-      CompilerError error = _errors[i];
+      CompilerError error = array[i];
 
       if (error.isWarning()) {
         doc.insertString(doc.getLength(), "Warning: ", BOLD_ATTRIBUTES);
@@ -454,8 +569,7 @@ public class CompilerErrorPanel extends JPanel {
         doc.insertString(doc.getLength(), "Error: ", BOLD_ATTRIBUTES);
       }
 
-      doc.insertString(doc.getLength(), error.message(), null);
-      doc.insertString(doc.getLength(), "\n", null);
+      doc.insertString(doc.getLength(), error.message(), NORMAL_ATTRIBUTES);
     }
 
     private void _removeListHighlight() {
@@ -471,6 +585,7 @@ public class CompilerErrorPanel extends JPanel {
       _removePreviousHighlight();
     }
 
+    /** Selects the given error inside the error list pane. */
     public void selectItem(int i) {
       _selectedIndex = i;
       _removeListHighlight();
@@ -480,7 +595,7 @@ public class CompilerErrorPanel extends JPanel {
       // end pos is either the end of the document (if this is the last error)
       // or the char where the next error starts
       int endPos;
-      if (i + 1 == _errors.length) {
+      if (i + 1 == (_errorsWithoutPositions.length + _errors.length)) {
         endPos = getDocument().getLength();
       }
       else {
@@ -504,6 +619,7 @@ public class CompilerErrorPanel extends JPanel {
         //System.err.println("scrll vis: " + startRect);
 
         scrollRectToVisible(startRect);
+
       } 
       catch (BadLocationException badBadLocation) {}
     }

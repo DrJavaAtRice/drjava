@@ -26,7 +26,7 @@ public class DynamicJavaAdapter implements JavaInterpreter {
     _djInterpreter = new InterpreterExtension();
 
     // Allow access to private fields/methods from interpreter!
-    _djInterpreter.setAccessible(true);
+    //_djInterpreter.setAccessible(true);
   }
 
   public Object interpret(String s) {

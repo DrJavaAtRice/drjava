@@ -237,16 +237,26 @@ public class ReducedModelComment
 			//if inside a double character brace, break it.
 			else if ((_offset > 0) && _cursor.current().isMultipleCharBrace())
 				{
+
+				    
 					_splitCurrentIfCommentBlock(true,true,_cursor);
           //leaving us at the start
 					_cursor.next(); //leaving us after first char
 					_insertNewBrace("*",_cursor); //leaves us after *
-					_cursor.prev();
-					_cursor.prev(); //puts us back on first char in double comment
+					
+					//this code was changed to make the cursor move
+					//back two spaces instead of prev twice.
+					//gaurenteeing that we end in the correct 
+					//location.
+					//_cursor.prev();
+					//_cursor.prev(); //puts us back on first char in double comment
+					move(-2);
 					_updateBasedOnCurrentState();
-					if (!_cursor.current().isMultipleCharBrace())
-						_cursor.next();
-					_cursor.next();
+
+					//if (!_cursor.current().isMultipleCharBrace())
+					//	_cursor.next();
+					//_cursor.next();
+					move(2);
 				}
 			//if a gap
 			else if ((_offset > 0) && (_cursor.current().isGap()))
@@ -352,12 +362,14 @@ public class ReducedModelComment
 					_cursor.next(); //leaving us after first char
 					//System.out.println(this.simpleString());
 					_insertNewBrace("/",_cursor); //leaves us after /
-					_cursor.prev();
-					_cursor.prev(); //puts us back on first char in double comment
+					//_cursor.prev();
+					//_cursor.prev(); //puts us back on first char in double comment
+					move(-2);
 					_updateBasedOnCurrentState();
-					if (!_cursor.current().isMultipleCharBrace())
-						_cursor.next();
-					_cursor.next();
+					//if (!_cursor.current().isMultipleCharBrace())
+					    //_cursor.next();
+					    //_cursor.next();
+					move(2);
 				}
 
 			else if ((_offset > 0) && (_cursor.current().isGap()))
@@ -1387,20 +1399,20 @@ public class ReducedModelComment
 					(splitEscape && type.equals("\\\\")) ||
 					(splitEscape && type.equals("\\\"")))
 				{
-					String first = type.substring(0, 1);
-					String second = type.substring(1, 2);
-					// change current Brace to only be first character
-					copyCursor.current().setType(first);
-					int oldState = copyCursor.current().getState();
+				    String first = type.substring(0, 1);
+				    String second = type.substring(1, 2);
+				    // change current Brace to only be first character
+				    copyCursor.current().setType(first);
+				    int oldState = copyCursor.current().getState();
 
-					// then put a new brace after the current one
-					copyCursor.next();
-					copyCursor.insert( Brace.MakeBrace(second, oldState) );
-					// Move back to make the first brace we inserted current
-					copyCursor.prev();
+				    // then put a new brace after the current one
+				    copyCursor.next();
+				    copyCursor.insert( Brace.MakeBrace(second, oldState) );
+				    // Move back to make the first brace we inserted current
+				    copyCursor.prev();
 				}
 		}
-
+    
 	
   /**
    * Updates the BraceReduction to reflect cursor movement.
