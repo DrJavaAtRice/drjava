@@ -39,46 +39,49 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.util;
 
-import java.util.Date;
-import java.text.SimpleDateFormat;
+import java.io.*;
 
 /**
- * This interface hold the information about this build of util.
- * This file is copied to Version.java by the build process, which also
- * fills in the right values of the date and time.
- *
- * This javadoc corresponds to build util-20030523-1552;
- *
+ * Redirects requests for input through the abstract method _getInput().
  * @version $Id$
  */
-public abstract class Version {
+public abstract class InputStreamRedirector extends PipedInputStream {
   /**
-   * This string will be automatically expanded upon "ant commit".
-   * Do not edit it by hand!
+   * The piped output stream that will write the output from _getInput()
+   * to the actual input stream.
    */
-  private static final String BUILD_TIME_STRING = "20030523-1552";
+  protected PipedOutputStream _os;
 
-  /** A {@link Date} version of the build time. */
-  private static final Date BUILD_TIME = _getBuildDate();
-
-  public static String getBuildTimeString() {
-    return BUILD_TIME_STRING;
+  /**
+   * constructs a new InputStreamRedirector.
+   * @throws IOException if an I/O error occurs
+   */
+  public InputStreamRedirector() throws IOException {
+    _os = new PipedOutputStream(this);
   }
 
-  public static Date getBuildTime() {
-    return BUILD_TIME;
-  }
+  /**
+   * This method gets called whenever input is requested from the stream and
+   * nothing is currently available.  Subclasses should return the appropriate
+   * input to feed to the input stream.  When using a readLine() method, be sure
+   * to append a newline to the end of the input.
+   * @return the input to the stream
+   */
+  protected abstract String _getInput() throws IOException;
 
-  private static Date _getBuildDate() {
-    try {
-      return new SimpleDateFormat("yyyyMMdd-HHmm z").parse(BUILD_TIME_STRING + " GMT");
+  /**
+   * overrides the read() in PipedInputStream so that if the stream is empty
+   * it will ask for more input from _getInput().
+   * @return the next character in the stream
+   * @throws IOException if an I/O exception
+   */
+  public int read() throws IOException {
+    if(available() == 0) {
+      String input = _getInput();
+      for(int i = 0; i < input.length(); i++) {
+        _os.write((int) input.charAt(i));
+      }
     }
-    catch (Exception e) { // parse format or whatever problem
-      return null;
-    }
+    return super.read();
   }
-
-  public static void main(String[] args) {
-    System.out.println("Version for edu.rice.cs.util: " + BUILD_TIME_STRING);
-  }
-} 
+}
