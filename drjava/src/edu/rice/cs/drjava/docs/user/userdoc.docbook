@@ -63,6 +63,7 @@
       <formalpara>
         <title>Running DrJava on Windows</title>
         <para>If you are using Windows, you can download DrJava as an executable file from our website.  Download the <filename>drjava-DATE-TIME.exe</filename> file.  You can then run it like a normal Windows program.</para>
+      </formalpara>
     </section>
 
     <section id="gs-requirements">
@@ -203,8 +204,7 @@ OTHER DEALINGS WITH THE SOFTWARE.
 
       <formalpara>
  <title>Find/Replace</title>
- <para>DrJava has a Find and Replace utility, which is conveniently displayed as one of the tabs at the bottom of the window, rather than as a dialog blocking part of the window.  The tab is first displayed when you Find/Replace from the Edit Menu (or using the keyboard shortcut, <keycode>Ctrl+F</keycode>), and it can be closed by clicking on the "X" button in the upper right corner of the tab (or by hitting the <keycode>Escape</keycode> key).  To search for a term, type it in the Find text field and click "Find Next" (or press <keycode>Enter</keycode>).  To replace the term with another, type the new term in the Replace text field, find an occurrence using "Find Next", and then click "Replace".  The "Replace/Find Next" and "Replace All" buttons help to speed up this process.</para>
-  <para>There are also three checkboxes to customize each search: "Match Case", "Search Backwards", and "Search All Documents".  Unchecking the first box will return case-insensitive results, checking the second box will reverse the direction of searching, and checking the third box will tell DrJava to search through all of the open documents in sequence.  Note that if "Search All Documents" is enabled, the search will not wrap to the beginning of the current document until all other documents have first been searched.</para>
+ <para>DrJava has a Find and Replace utility, which is conveniently displayed as one of the tabs at the bottom of the window, rather than as a dialog blocking part of the window.  The tab is first displayed when you Find/Replace from the Edit Menu (or using the keyboard shortcut, <keycode>Ctrl+F</keycode>), and it can be closed by clicking on the "X" button in the upper right corner of the tab (or by hitting the <keycode>Escape</keycode> key).  To search for a term, type it in the Find text field and click "Find Next" (or press <keycode>Enter</keycode>).  To replace the term with another, type the new term in the Replace text field, find an occurrence using "Find Next", and then click "Replace".  The "Replace/Find Next" and "Replace All" buttons help to speed up this process.  There are also three checkboxes to customize each search: "Match Case", "Search Backwards", and "Search All Documents".  Unchecking the first box will return case-insensitive results, checking the second box will reverse the direction of searching, and checking the third box will tell DrJava to search through all of the open documents in sequence.  Note that if "Search All Documents" is enabled, the search will not wrap to the beginning of the current document until all other documents have first been searched.</para>
       </formalpara>
 
       <formalpara>
@@ -266,7 +266,7 @@ Welcome to DrJava.
 
     <formalpara>
       <title>Keyboard Shortcuts</title>
-      <para>Many actions in the Interactions Pane have keyboard shortcuts for ease of use.  Use the Up and Down arrow keys to scroll through a history of the previously entered commands, or <keycode>Ctrl+B</keycode> to clear the current command.  You can also use <keycode>Shift+Enter</keycode> to insert newlines into statements in the Interactions Pane.</para>
+      <para>Many actions in the Interactions Pane have keyboard shortcuts for ease of use.  Use the Up and Down arrow keys to scroll through a history of the previously entered commands, or <keycode>Ctrl+B</keycode> to clear the current command.  You can also use <keycode>Shift+Enter</keycode> to insert newlines into statements in the Interactions Pane.  DrJava also now supports searching backwards through history.  To use this feature, type in the first few characters of the command you wish to repeat and hit the Tab key.  The last command that matches the characters you typed will appear.  Hitting Tab repeated searches farther back, while Shift-Tab will move you forward in the history.</para>
     </formalpara>
 
     <formalpara>
@@ -1195,6 +1195,13 @@ public class Student {
      <para>Whether DrJava should clear the contents of the Console Tab each time the Interactions Pane is reset.</para>
    </listitem>
  </varlistentry>
+   
+  <varlistentry>
+   <term>JVM Args (<varname>jvm.args = ""</varname>)</term>
+   <listitem>
+     <para>Command line arguments used when creating the InterpreterJVM.  This is an advanced option because if you use invalid arguments, the InterpreterJVM may not start up successfully.  If this happens, remove the value stored in Preferences.</para>
+   </listitem>
+  </varlistentry>
  
       </variablelist>
       
