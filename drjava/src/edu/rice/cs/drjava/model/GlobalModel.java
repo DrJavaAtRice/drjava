@@ -304,6 +304,11 @@ public interface GlobalModel {
   public CompilerInterface getActiveCompiler();
 
   /**
+   * Returns the current classpath in use by the Interpreter JVM.
+   */
+  public String getClasspath();
+  
+  /**
    * Gets an array of all sourceRoots for the open definitions
    * documents, without duplicates.
    * @throws InvalidPackageException if the package statement in one

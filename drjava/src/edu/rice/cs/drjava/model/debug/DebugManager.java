@@ -131,6 +131,8 @@ public class DebugManager {
     // Start without any breakpoints
     clearAllBreakpoints(false);
     
+    performCommand("classpath " + _model.getClasspath());
+    
     // TO DO: start without a file loaded?
     
      _isReady = true;

@@ -715,6 +715,29 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
   }
   
   /**
+   * Returns the current classpath in use by the Interpreter JVM.
+   */
+  public String getClasspath() {
+    String separator= System.getProperty("path.separator");
+    String classpath= "";
+    File[] sourceFiles = getSourceRootSet();
+    
+    // Adds extra.classpath to the classpath.
+    Vector<String> extraClasspath = DrJava.CONFIG.getSetting(EXTRA_CLASSPATH);
+    if(extraClasspath != null) {
+        Enumeration<String> enum = extraClasspath.elements();
+        while(enum.hasMoreElements()) {
+            classpath += enum.nextElement() + separator;
+        }
+    }
+    
+    for(int i=0; i < sourceFiles.length; i++) {
+      classpath += sourceFiles[i].getAbsolutePath() + separator;
+    }
+    return classpath;
+  }
+  
+  /**
    * Gets an array of all sourceRoots for the open definitions
    * documents, without duplicates. Note that if any of the open
    * documents has an invalid package statement, it won't be added

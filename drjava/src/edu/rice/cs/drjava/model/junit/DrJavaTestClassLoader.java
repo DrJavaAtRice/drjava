@@ -61,34 +61,14 @@ public class DrJavaTestClassLoader implements TestSuiteLoader, OptionConstants {
     _model = model;
   }
   
-  protected String getDrJavaClasspath() {
-    String separator= System.getProperty("path.separator");
-    String classpath= "";
-    File[] sourceFiles = _model.getSourceRootSet();
-    
-    // Adds extra.classpath to the classpath.
-    Vector<String> extraClasspath = DrJava.CONFIG.getSetting(EXTRA_CLASSPATH);
-    if(extraClasspath != null) {
-        Enumeration<String> enum = extraClasspath.elements();
-        while(enum.hasMoreElements()) {
-            classpath += enum.nextElement() + separator;
-        }
-    }
-    
-    for(int i=0; i < sourceFiles.length; i++) {
-      classpath += sourceFiles[i].getAbsolutePath() + separator;
-    }
-    return classpath;
-  }
-  
   public Class load(String suiteClassName) throws ClassNotFoundException {
-    String classpath = getDrJavaClasspath();
+    String classpath = _model.getClasspath();
     TestCaseClassLoader loader= new TestCaseClassLoader(classpath);
     return loader.loadClass(suiteClassName, true);
   }
   
   public Class reload(Class aClass) throws ClassNotFoundException {
-    String classpath = getDrJavaClasspath();
+    String classpath = _model.getClasspath();
     TestCaseClassLoader loader= new TestCaseClassLoader(classpath);
     return loader.loadClass(aClass.getName(), true);
   }
