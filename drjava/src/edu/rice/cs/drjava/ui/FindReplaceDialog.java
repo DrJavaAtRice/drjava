@@ -301,6 +301,15 @@ class FindReplaceDialog extends JDialog {
     OpenDefinitionsDocument doc = defPane.getOpenDocument();
     _machine = doc.createFindReplaceMachine();
   }
+  
+  /**
+   * Shows the dialog and sets the focus appropriately.
+   */
+  public void show() {
+    super.show();
+    _findField.grabFocus();
+    _findField.selectAll();
+  }
 
   
   private void _highlightFoundItem(int from, int to) {

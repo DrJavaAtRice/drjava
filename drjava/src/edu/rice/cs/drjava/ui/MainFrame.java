@@ -715,10 +715,12 @@ public class MainFrame extends JFrame {
                                                  title,
                                                  JOptionPane.QUESTION_MESSAGE);
     try {
-      int lineNum = Integer.parseInt(lineStr);
-      int pos = _model.getActiveDocument().gotoLine(lineNum);
-      _currentDefPane.setPositionAndScroll(pos);
-      _currentDefPane.grabFocus();
+      if (lineStr != null) {
+        int lineNum = Integer.parseInt(lineStr);
+        int pos = _model.getActiveDocument().gotoLine(lineNum);
+        _currentDefPane.setPositionAndScroll(pos);
+        _currentDefPane.grabFocus();
+      }
     } catch (NumberFormatException nfe) {
       // invalid input for line number
       Toolkit.getDefaultToolkit().beep();
