@@ -531,8 +531,12 @@ public class CompilerErrorPanel extends TabbedPanel
                     "the Preferences dialog in the Edit menu.";
         }
         else {
-          message = _model.getActiveCompiler().getName() +
-            " compiler ready.";
+          if (_model.getActiveCompiler() == NoCompilerAvailable.ONLY) {
+            message = "No compiler available.";
+          }
+          else {
+            message = _model.getActiveCompiler().getName() + " compiler ready.";
+          }
         }
       }
       
