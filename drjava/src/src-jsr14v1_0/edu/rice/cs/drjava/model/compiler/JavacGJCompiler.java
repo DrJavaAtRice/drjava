@@ -229,7 +229,7 @@ public class JavacGJCompiler implements CompilerInterface {
     //  DrJava.consoleOut().println(sourceRoots[i]);
     //}
     initCompiler(sourceRoots);
-    List<String> filesToCompile = new List<String>();
+    List filesToCompile = new List();
 
     for (int i = 0; i < files.length; i++) {
       filesToCompile = filesToCompile.prepend(files[i].getAbsolutePath());
@@ -325,10 +325,33 @@ public class JavacGJCompiler implements CompilerInterface {
     throw new UnexpectedException( new Exception("Method only implemented in JSR14Compiler"));
   }
   
-  protected Hashtable<String, String> createOptionsHashtable(File[] sourceRoots) {
-    Hashtable<String, String> options = Hashtable.make();
+  protected Hashtable createOptionsHashtable(File[] sourceRoots) {
+    Hashtable options = Hashtable.make();
 
-    options.put("-warnunchecked", "");
+    if(CompilerWarnings.SHOW_UNCHECKED) {
+      options.put("-Xlint:unchecked","");
+    }
+    
+    if(CompilerWarnings.SHOW_DEPRECATION) {
+      options.put("-Xlint:deprecation","");
+    }
+
+    if(CompilerWarnings.SHOW_PATH) {
+      options.put("-Xlint:path","");
+    }
+    
+    if(CompilerWarnings.SHOW_SERIAL) {
+      options.put("-Xlint:serial","");
+    }
+    
+    if(CompilerWarnings.SHOW_FINALLY) {
+      options.put("-Xlint:finally","");
+    }
+    
+    if(CompilerWarnings.SHOW_FALLTHROUGH) {
+      options.put("-Xlint:fallthrough","");
+      options.put("-Xlint:switchcheck",""); //Some compilers appear to use this option instead. Anyone know anything about this?
+    }
 
     // Turn on debug -- maybe this should be setable some day?
     options.put("-g", "");
@@ -375,7 +398,7 @@ public class JavacGJCompiler implements CompilerInterface {
   }
 
   protected void initCompiler(File[] sourceRoots) {
-    Hashtable<String, String> options = createOptionsHashtable(sourceRoots);
+    Hashtable options = createOptionsHashtable(sourceRoots);
 
     // sigh, the 1.4 log won't work on 1.3 so we need to try the 1.4 first
     // and fall back to the 1.3

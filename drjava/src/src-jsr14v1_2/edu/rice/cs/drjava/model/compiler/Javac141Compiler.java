@@ -266,7 +266,30 @@ public class Javac141Compiler implements CompilerInterface {
     Context context = new Context();
     Options options = Options.instance(context);
     
-    options.put("-warnunchecked", "");
+    if(CompilerWarnings.SHOW_UNCHECKED) {
+      options.put("-Xlint:unchecked","");
+    }
+    
+    if(CompilerWarnings.SHOW_DEPRECATION) {
+      options.put("-Xlint:deprecation","");
+    }
+
+    if(CompilerWarnings.SHOW_PATH) {
+      options.put("-Xlint:path","");
+    }
+    
+    if(CompilerWarnings.SHOW_SERIAL) {
+      options.put("-Xlint:serial","");
+    }
+    
+    if(CompilerWarnings.SHOW_FINALLY) {
+      options.put("-Xlint:finally","");
+    }
+    
+    if(CompilerWarnings.SHOW_FALLTHROUGH) {
+      options.put("-Xlint:fallthrough","");
+      options.put("-Xlint:switchcheck",""); //Some compilers appear to use this option instead. Anyone know anything about this?
+    }
 
     // Turn on debug -- maybe this should be setable some day?
     options.put("-g", "");
