@@ -1128,7 +1128,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
     List<Expression> larg = node.getArguments();
     Object[] args = Constants.EMPTY_OBJECT_ARRAY;
 
-    Class[] typs = cons.getParameterTypes();
+    Class<?>[] typs = cons.getParameterTypes();
 
     // Fill the arguments
     if (larg != null) {
@@ -1234,7 +1234,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
     List<Expression> larg = node.getArguments();
     Object[]    args = null;
 
-    Class[] typs = cons.getParameterTypes();
+    Class<?>[] typs = cons.getParameterTypes();
     
     if (larg != null) {
       args = new Object[typs.length];
@@ -1296,7 +1296,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
     List<Expression> larg = node.getArguments();
     Object[]    args = Constants.EMPTY_OBJECT_ARRAY;
 
-    Class[] typs = cons.getParameterTypes();
+    Class<?>[] typs = cons.getParameterTypes();
     
     // Fill the arguments
     if (larg != null) {
