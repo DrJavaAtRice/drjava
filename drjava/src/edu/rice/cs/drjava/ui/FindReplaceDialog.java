@@ -118,7 +118,8 @@ import edu.rice.cs.util.UnexpectedException;
       _defPane.removeCaretListener(_caretListener);
       _defPane = null;
     } else {
-      throw new UnexpectedException(new RuntimeException("FindReplaceDialog should be listening to something"));
+      // Probably a double-click on close...
+      //throw new UnexpectedException(new RuntimeException("FindReplaceDialog should be listening to something"));
     }
 
   }
@@ -438,8 +439,8 @@ import edu.rice.cs.util.UnexpectedException;
       }*/
     
     //_defPane.requestFocus();
-    _frame.uninstallFindReplaceDialog(this);
     super.hide();
+    _frame.uninstallFindReplaceDialog(this);
   }  
   
    /*private ContinueCommand CONFIRM_CONTINUE = new ContinueCommand() {
