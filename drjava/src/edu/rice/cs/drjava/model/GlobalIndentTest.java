@@ -19,7 +19,6 @@ public class GlobalIndentTest extends TestCase {
   private static final String BAR_CALL_2 = "banana)\n";
   private static final String BEAT_1 = "void beat(Horse dead,\n";
   private static final String BEAT_2 = "          Stick pipe)\n";
-  
   /**
    * put your documentation comment here
    * @param     String name
@@ -215,6 +214,20 @@ public class GlobalIndentTest extends TestCase {
   }
   
   /**
+   * Indent does nothing to change the document when everything is in place.
+   */
+  public void testIndentDoesNothing() throws BadLocationException {
+    Document doc = _model.getDefinitionsDocument();
+    doc.insertString(0, FOO_EX_2 + FOO_EX_2, null);    
+    _model.syncCurrentLocationWithDefinitions(doc.getLength() - 1);
+    int loc = _model.getCurrentDefinitionsLocation();
+    _model.indentLinesInDefinitions(loc, loc);
+    _assertContents(FOO_EX_2 + FOO_EX_2, doc);
+    _assertLocation(doc.getLength() - 1);
+  }
+  
+  
+  /**
    * The quintessential "make the squiggly go to the start, even though
    * method arguments extend over two lines" test.  This behavior is not
    * correctly followed yet, so until it is, leave this method commented.
@@ -231,6 +244,20 @@ public class GlobalIndentTest extends TestCase {
     _assertLocation(doc.getLength());
   }
 */
+  
+  /**
+   * Indents block comments with stars as they should.
+   * Uncomment this method when the correct functionality is implemented.
+   */
+//  public void testIndentBlockCommentStar() throws BadLocationException {
+//    Document doc = _model.getDefinitionsDocument();
+//    doc.insertString(0, "/*\n*\n*/\n " + FOO_EX_2, null);
+//    int loc = _model.getCurrentDefinitionsLocation();
+//    _model.indentLinesInDefinitions(0, doc.getLength());
+//    _assertContents("/*\n *\n */\n" + FOO_EX_2, doc);
+//    _assertLocation(doc.getLength());    
+//  }
+  
   private void _assertContents(String expected, Document document) 
     throws BadLocationException
   {
