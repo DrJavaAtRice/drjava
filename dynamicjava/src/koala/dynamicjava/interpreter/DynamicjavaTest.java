@@ -255,6 +255,25 @@ public class DynamicjavaTest extends DynamicJavaTestCase {
     assertEquals("l2 should be 12.8", new Double(12.8), interpret(testString));
   }
   
+  // Test to verify Bug #1065196
+  public void testCharIntCast() {
+    testString = "(int) 'a'";
+    
+    assertTrue("cast to int should return int", interpret(testString) instanceof Integer);
+  }
+  
+  // Test to verify Bug #1064721
+  public void testComparableStringCast() {
+    testString = "Comparable c = \"cat\";\n(String) c;";
+    
+    try {    
+      interpret(testString);
+    }
+    catch (Exception e) {
+      fail("cast from Comparable to String should work");
+    }
+  }
+  
   // Test with Generics.
   //  public void testGenericList(){ /**/
   //    testString = 
@@ -339,6 +358,5 @@ public class DynamicjavaTest extends DynamicJavaTestCase {
       "Sphere s = (Sphere) a;" +
       "int rad = s.getRadius();"+
       "return new Integer(rad*rad*rad*3*1);}}";
-  }
-  
+  }  
 }

@@ -408,8 +408,51 @@ public class TypeCheckerTest extends DynamicJavaTestCase {
     String expected = "(koala.dynamicjava.tree.ObjectMethodCall: intValue null (koala.dynamicjava.tree.SimpleAllocation: (koala.dynamicjava.tree.ReferenceType: Integer) [(koala.dynamicjava.tree.IntegerLiteral: 1 1 int)]))";
     String actual = stmt.getSelector().toString();
     assertEquals("Should have autounboxed", expected, actual);
+
+
+    text = "switch( 'a' ) { case 'a': }";
+    _parseCode(text).get(0).acceptVisitor(_typeChecker);
     
-    _interpretText(text);
+    try {
+      text = "switch ('a') { case \"adsf\": }";
+      _parseCode(text).get(0).acceptVisitor(_typeChecker);
+      fail("shouldn't be able to switch Strings");
+    }
+    catch (ExecutionError e) {
+	// DO NOTHING
+    }
+    //System.out.println(_parseCode(text).get(0));
+    
+    text = "switch (5) { case 'a': }";
+    expected = "(koala.dynamicjava.tree.SwitchStatement: (koala.dynamicjava.tree.IntegerLiteral: 5 5 int) [(koala.dynamicjava.tree.SwitchBlock: (koala.dynamicjava.tree.CharacterLiteral: 'a' a char) null)])";
+    Statement stmt1 = (Statement)_parseCode(text).get(0);
+    actual = stmt1.toString();
+    assertEquals("should parse switch into selector and switch block", expected, actual);
+    stmt1.acceptVisitor(_typeChecker);
+  
+    text = "switch ((byte)5) { case 'a': }";
+    expected = "(koala.dynamicjava.tree.SwitchStatement: (koala.dynamicjava.tree.CastExpression: (koala.dynamicjava.tree.IntegerLiteral: 5 5 int) (koala.dynamicjava.tree.ByteType: byte)) [(koala.dynamicjava.tree.SwitchBlock: (koala.dynamicjava.tree.CharacterLiteral: 'a' a char) null)])";
+    List stmts = _parseCode(text);
+    stmt1 = (Statement)stmts.get(0);
+    actual = stmt1.toString();
+    assertEquals("should parse switch into selector and switch block", expected, actual);
+    stmt1.acceptVisitor(_typeChecker);
+   
+    text = "switch ((short)5) { case 5: default: }";
+    expected = "(koala.dynamicjava.tree.SwitchStatement: (koala.dynamicjava.tree.CastExpression: (koala.dynamicjava.tree.IntegerLiteral: 5 5 int) (koala.dynamicjava.tree.ShortType: short)) [(koala.dynamicjava.tree.SwitchBlock: (koala.dynamicjava.tree.IntegerLiteral: 5 5 int) null), (koala.dynamicjava.tree.SwitchBlock: null null)])";
+    stmt1 = (Statement)_parseCode(text).get(0);
+    actual = stmt1.toString();
+    assertEquals("should parse switch into selector and switch block", expected, actual);
+    stmt1.acceptVisitor(_typeChecker);
+
+    try {
+      text = "boolean BB = true; switch (BB) { case true: case false: }";
+      _interpretText(text);
+      fail("shouldn't be able to switch booleans");
+    } 
+    catch (ExecutionError e) {
+	//DO NOTHING
+    }
   }
   
 

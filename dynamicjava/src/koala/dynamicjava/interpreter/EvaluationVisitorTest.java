@@ -115,7 +115,14 @@ public class EvaluationVisitorTest extends DynamicJavaTestCase {
 //    }
 //  }
 
-  
+  /**
+   * Per Bug 1062245 & 1095505
+   * Predicit problem due to error in scoping
+   */
+  public void testScopingBug() {
+     Object res = interpret("for(int n = 0; n < 5; n++) for(int m = n; m < 0; m++) ;");
+     assertEquals("result of for loop should be null", res, null);
+  }
    /**
    * Tests primitive casts
    */
@@ -154,7 +161,7 @@ public class EvaluationVisitorTest extends DynamicJavaTestCase {
       res = interpret("String s1 = \"cat\"; (Number) s1");
       fail("Failing cast from Class to disjoint Class");
     }
-    catch(ExecutionError e) {}                   
+    catch(ExecutionError e) {}
   }
   
   
@@ -353,8 +360,8 @@ public class EvaluationVisitorTest extends DynamicJavaTestCase {
 
     res = interpret("c[0]--");
     assertEquals("char value should still be \'b\'","b",res.toString());
-    res = interpret("--c[0]");
-    assertEquals("char value should be \'`\'","`",res.toString());
+    res = interpret("-X++-c[0]");
+    assertEquals("int value should be -97","-97",res.toString());
   }
   
   /**
