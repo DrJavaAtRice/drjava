@@ -1100,9 +1100,21 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
      *
      */
     public TestResult startJUnit() throws ClassNotFoundException, IOException {
+
+      //JUnit started, so throw out all JUnitErrorModels now, egardless of whether
+      //  the tests succeed, etc.
+      
+      ListModel docs = getDefinitionsDocuments();
+      // walk thru all open documents, resetting the JUnitErrorModel
+      for (int i = 0; i < docs.getSize(); i++) {
+        OpenDefinitionsDocument doc = (OpenDefinitionsDocument)
+          docs.getElementAt(i);
+        doc.setJUnitErrorModel( new JUnitErrorModel() );
+      }
+      
       // Compile and save before proceeding.
       saveAllBeforeProceeding(GlobalModelListener.JUNIT_REASON);
-      if (isModifiedSinceSave()) {
+      if (areAnyModifiedSinceSave()) {
         return null;
       }
       try {

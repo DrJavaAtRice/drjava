@@ -141,14 +141,7 @@ public class JUnitTestRunner extends junit.textui.TestRunner {
    */
   public TestResult doRun(Test suite, boolean wait, OpenDefinitionsDocument odd) {
     TestResult tr = super.doRun(suite, wait);
-
-    ListModel docs = _model.getDefinitionsDocuments();
-    // walk thru all open documents, resetting the JUnitErrorModel
-    for (int i = 0; i < docs.getSize(); i++) {
-      OpenDefinitionsDocument doc = (OpenDefinitionsDocument)
-        docs.getElementAt(i);
-      doc.setJUnitErrorModel( new JUnitErrorModel() );
-    }
+    
     odd.setJUnitErrorModel(new JUnitErrorModel(odd.getDocument(), _currentTest, tr));
 
     

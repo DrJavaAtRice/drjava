@@ -44,7 +44,10 @@ import java.awt.Color;
 import edu.rice.cs.drjava.DrJava;
 public interface OptionConstants extends ConfigurationTool {
   
-  // STATIC VARIABLES    
+  // STATIC VARIABLES  
+  public static final IntegerOption HISTORY_MAX_SIZE =
+    new IntegerOption("history.max.size", new Integer(500));
+  
   public static final StringOption FONT_MAIN_NAME = 
     new StringOption("font.main.name", "Monospaced");
 

@@ -40,19 +40,21 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.model.repl;
 
 import  gj.util.Vector;
-
+import edu.rice.cs.drjava.config.*;
+import edu.rice.cs.drjava.DrJava;
 
 /**
  * Keeps track of what was typed in the interactions pane.
  * @version $Id$
  */
-public class History {
+public class History implements OptionConstants {
   
-  private static final int MAX_SIZE = 500;
+  // Not final because it may be updated by config
+  private static int MAX_SIZE = DrJava.CONFIG.getSetting(HISTORY_MAX_SIZE).intValue();
   
   private Vector<String> _vector = new Vector<String>();
   private int _cursor = -1;
-
+ 
   /**
    * Adds an item to the history and moves the cursor to point
    * to the place after it.
@@ -130,6 +132,8 @@ public class History {
   public int size() {
     return _vector.size();
   }
+  
+  
 }
 
 
