@@ -11,7 +11,6 @@
  
 -->
 <!-- <taskdef name="javamake" classname="com.sun.tools.javamake.ant.JavaMake"/>  -->
-<taskdef name="tstamp_gmt" classname="edu.rice.cs.util.ant.TstampGMT" />
 
 <property name="build.sysclasspath" value="last" />
 
@@ -30,11 +29,22 @@
   <pathelement path="${java.class.path}" />
 </path>
 
+<target name="compile-tstamp-gmt">
+ <javac srcdir="${srcroot}"
+         includes="edu/rice/cs/util/ant/TstampGMT.java"
+         destdir="${built}"
+         bootclasspath="${jsr14_classpath}:${sun.boot.class.path}"
+         target="1.1"
+         debug="on"
+         optimize="off"/>
+</target>
+
 <!-- Init target. All others depend on it. Initialize the directory. -->
 <target name="init">
   <available type="file" file="${jsr14_classpath}" property="jsr14_ok" />
   <antcall target="check_for_jsr14" />
-
+  <antcall target="compile-tstamp-gmt"/>
+  <taskdef name="tstamp_gmt" classname="edu.rice.cs.util.ant.TstampGMT" />
   <tstamp_gmt /> <!-- Ant requires us to make time stamp -->
   <mkdir dir="${built}" /> <!-- Make the built directory -->
 
