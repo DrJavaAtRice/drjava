@@ -20,7 +20,7 @@
   <!-- put javadoc in this directory if generating private javadoc -->
   <property name="private_javadoc_dir" value="${srcroot}/../javadoc" />
 
-  <property name="jarfile" value="${srcroot}/../drjava.jar" />
+  <property name="jarfile" value="${srcroot}/../util.jar" />
   <property name="manifest" value="manifest" />
 
   <!-- Init target. All others depend on it. Initialize the directory. -->
@@ -194,7 +194,7 @@
 
     <javadoc sourcepath="${javadoc_dir}/src"
              destdir="${javadoc_dir}"
-             packagenames="edu.rice.cs.drjava.*"
+             packagenames="edu.rice.cs.util.*"
              Private="yes"
              Use="yes"
              Version="yes"
