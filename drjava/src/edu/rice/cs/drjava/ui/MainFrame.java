@@ -2725,8 +2725,7 @@ public class MainFrame extends JFrame implements OptionConstants {
    * @param openSelector the selector that returns the files to open
    */
   public void openFolder(DirectoryChooser chooser) {
-    String type = DrJava.LANGUAGE_LEVEL_EXTENSIONS[DrJava.getConfig().getSetting(LANGUAGE_LEVEL)] + " ";
-    if (type==null) { type = ""; }
+    String type = "'"+DrJava.LANGUAGE_LEVEL_EXTENSIONS[DrJava.getConfig().getSetting(LANGUAGE_LEVEL)] + "' ";
     chooser.setDialogTitle("Open All " + type + "Files In...");
     
     File openDir = null;

@@ -155,7 +155,8 @@ public class DrJava implements OptionConstants {
         if (!configLAFName.equals(currLAFName)) {
           UIManager.setLookAndFeel(configLAFName);
         }
-
+        net.java.plaf.LookAndFeelPatchManager.initialize();
+        
         // Don't use JSR14v20 if running with Java 1.5 because we putting it on the bootclasspath causes DrJava to
         // hang on startup.
         _usingJSR14v20 = checkForJSR14v20() && !System.getProperty("java.specification.version").equals("1.5");

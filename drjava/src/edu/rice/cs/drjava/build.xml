@@ -612,6 +612,9 @@
                   excludes="META-INF/MANIFEST.MF" />
       <zipfileset src="${lib_dir}/platform.jar"
                   excludes="META-INF/MANIFEST.MF" />
+      <zipfileset src="${lib_dir}/winlaf-0.4.1.jar"
+                  excludes="META-INF/MANIFEST.MF" />
+
 <!--      <zipfileset src="${lib_dir}/javaast.jar"
                   excludes="META-INF/MANIFEST.MF" /> -->
     <!-- These two jars to be included when language levels are integrated -->
