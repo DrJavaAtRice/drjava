@@ -371,33 +371,31 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel
     * Attempts to close all open documents.
     * Also ensures the invariant that there is always at least
     * one open document holds by creating a new file if necessary.
+    //Bug when the first document, in list view, is selected:
+    //When "close all" documents is selected, each document in turn is set active
+    //Fix: close the currently active document last
     * @return true if all documents were closed
     */
   public boolean closeAllFiles() {
     _isClosingAllDocs = true;
-    //Bug when the first document, in list view, is selected:
-    //When "close all" documents is selected, each document in turn is set active
-    //Workaround: begin to close the active document, then close all other documents, then remove the 
-    //active doc from the navigator pane
-    final OpenDefinitionsDocument toClose = getActiveDocument();
-    boolean canClose = toClose.canAbandonFile();
-    if(canClose) {
-      INavigatorItem idoc = _documentsRepos.removeKey(toClose);      
-      boolean success = super.closeAllFiles();
-      if (idoc != null) {
-        getDocumentNavigator().removeDocument(idoc);
-        _notifier.fileClosed(toClose);
-        toClose.close();
+    
+    List<OpenDefinitionsDocument> docs = getDefinitionsDocuments();
+    OpenDefinitionsDocument active = getActiveDocument();
+    boolean keepClosing = true;
+    for(OpenDefinitionsDocument d: docs){
+      if(d != active && keepClosing){
+        keepClosing = closeFile(d);
       }
-      _isClosingAllDocs = false;
-      
-      _ensureNotEmpty();
-      setActiveFirstDocument();
-      return success;
+    }
+    if(keepClosing){
+      closeFile(active);
     }
     _isClosingAllDocs = false;
-    return false; 
+    _ensureNotEmpty();
+    setActiveFirstDocument();
+    return keepClosing;
   }
+    
   
   
   /**

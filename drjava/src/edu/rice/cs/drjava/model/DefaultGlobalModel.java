@@ -848,10 +848,12 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       public String toString() {
         try{
           if(oddoc.isModifiedSinceSave()){
-            return oddoc.getFilename() + " *";
+            return oddoc.toString() + " *";
+//            return oddoc.getFilename() + " *";
           }
           else{
-            return oddoc.getFilename() + "  ";
+            return oddoc.toString() + "  ";
+//            return oddoc.getFilename() + "  ";
           }
         }catch(NoSuchDocumentException e){
           return "** error **";
@@ -1312,10 +1314,10 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     if (canClose) {
       // Only fire event if doc exists and was removed from list
       INavigatorItem idoc = _documentsRepos.removeKey(closedDoc);
+      String name = idoc.toString();
       closedDoc.close();
       
       if (idoc != null) {
-//        System.err.println("removing from navigator "+ _documentNavigator.getClass());
         _documentNavigator.removeDocument(idoc);
         _notifier.fileClosed(closedDoc);
 //        closedDoc.close();
@@ -1334,11 +1336,9 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     Iterator<OpenDefinitionsDocument> odds = _documentsRepos.valuesIterator();
     while (odds.hasNext() &&  keepClosing) {
       OpenDefinitionsDocument next = odds.next();
-//      System.out.println("closing " + next);
       keepClosing = closeFile(next);
       odds = _documentsRepos.valuesIterator(); // call to closeFile can mutate Iterator, so generate a new "current" Iterator on each loop 
     }
-    
     return keepClosing;
   }
   
