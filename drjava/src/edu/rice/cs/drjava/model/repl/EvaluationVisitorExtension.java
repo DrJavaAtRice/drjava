@@ -92,7 +92,7 @@ public class EvaluationVisitorExtension extends EvaluationVisitor {
     }
   }
 
-  /* Note:  protected static Object performCast(Class tc, Object o)
+  /* Note:  protected static Object performCast(Class<?> tc, Object o)
    * is inherited from EvaluationVisitoor */
   
   public Object visit(WhileStatement node) {
@@ -168,7 +168,7 @@ public class EvaluationVisitorExtension extends EvaluationVisitor {
    */
   public Object visit(VariableDeclaration node) {
     _checkInterrupted(node);
-    Class c = NodeProperties.getType(node.getType());
+    Class<?> c = NodeProperties.getType(node.getType());
 
     if (node.getInitializer() != null) {
       Object o = performCast(c, node.getInitializer().acceptVisitor(this));
@@ -176,7 +176,7 @@ public class EvaluationVisitorExtension extends EvaluationVisitor {
       // Forces a runtime type-check on the cast.
       String name = node.getName();
 
-      if (!(c.isPrimitive()                     ||
+      if (!(c.isPrimitive()                    ||
             o == null                          ||
             c.isAssignableFrom(o.getClass()))) {
         Exception e = new ClassCastException(name);
@@ -600,8 +600,8 @@ public class EvaluationVisitorExtension extends EvaluationVisitor {
      * @param tc the target class
      * @param o  the object to cast
      */
-  protected static Object performCast(Class tc, Object o) {
-    Class ec = (o != null) ? o.getClass() : null;
+  protected static Object performCast(Class<?> tc, Object o) {
+    Class<?> ec = (o != null) ? o.getClass() : null;
     
     if (tc != ec && tc.isPrimitive() && ec != null) {
       if (tc != char.class && ec == Character.class) {

@@ -96,17 +96,17 @@ public class NameVisitorExtension extends NameVisitor {
      * to fix some bugs
      */
 //    // TypeChecker
-//    Class lc = node.getType().acceptVisitor(_tc);
+//    Class<?> lc = node.getType().acceptVisitor(_tc);
 //    Node init = node.getInitializer();
 //    if (init != null) {
-//      Class rc = init.acceptVisitor(_tc);
+//      Class<?> rc = init.acceptVisitor(_tc);
 //      _checkAssignmentStaticRules(lc, rc, node, init);
 //    }
     _tc.preCheckVariableDeclaration(node);
     
     //        // EvaluationVisitor
     //        EvaluationVisitorExtension eve = new EvaluationVisitorExtension(context);
-    //        Class c = NodeProperties.getType(node.getType());
+    //        Class<?> c = NodeProperties.getType(node.getType());
     //
     //        if (node.getInitializer() != null) {
     //          Object o = eve.performCast(c, node.getInitializer().acceptVisitor(eve));
@@ -115,7 +115,7 @@ public class NameVisitorExtension extends NameVisitor {
   }
 
   
-  private static void _checkAssignmentStaticRules(Class lc, Class rc,
+  private static void _checkAssignmentStaticRules(Class<?> lc, Class<?> rc,
                                                   Node node, Node v) {
     if (lc != null) {
       if (lc.isPrimitive()) {

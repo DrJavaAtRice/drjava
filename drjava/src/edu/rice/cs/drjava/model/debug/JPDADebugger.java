@@ -301,9 +301,9 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     AttachingConnector connector = _getAttachingConnector();
 
     // Try to connect on our debug port
-    Map args = connector.defaultArguments();
-    Connector.Argument port = (Connector.Argument) args.get("port");
-    Connector.Argument host = (Connector.Argument) args.get("hostname");
+    Map<String, Connector.Argument> args = connector.defaultArguments();
+    Connector.Argument port = args.get("port");
+    Connector.Argument host = args.get("hostname");
     try {
       int debugPort = _model.getDebugPort();
       port.setValue("" + debugPort);
@@ -1695,7 +1695,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     // Assume that there's only one method named toString
     Method method = toStrings.get(0);
     try {
-      Value stringValue = object.invokeMethod(thread, method, new LinkedList(),
+      Value stringValue = object.invokeMethod(thread, method, new LinkedList<Value>(),
                                               ObjectReference.INVOKE_SINGLE_THREADED);
       if (stringValue == null) {
         return "null";
@@ -2185,7 +2185,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
       return v;
     }
 
-    return ref.invokeMethod(threadRef, m, new LinkedList(),
+    return ref.invokeMethod(threadRef, m, new LinkedList<Value>(),
                             ObjectReference.INVOKE_SINGLE_THREADED);
   }
 

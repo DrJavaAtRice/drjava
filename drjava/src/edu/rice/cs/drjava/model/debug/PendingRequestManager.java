@@ -62,22 +62,22 @@ import java.util.Vector;
 
 public class PendingRequestManager {
   private JPDADebugger _manager;
-  private Hashtable<String, Vector<DocumentDebugAction>> _pendingActions;
+  private Hashtable<String, Vector<DocumentDebugAction<?>>> _pendingActions;
 
   public PendingRequestManager(JPDADebugger manager) {
     _manager = manager;
-    _pendingActions = new Hashtable<String, Vector<DocumentDebugAction>>();
+    _pendingActions = new Hashtable<String, Vector<DocumentDebugAction<?>>>();
   }
 
   /**
    * Called if a breakpoint is set before its class is prepared
    * @param action The DebugAction that is pending
    */
-  public void addPendingRequest (DocumentDebugAction action) {
+  public void addPendingRequest (DocumentDebugAction<?> action) {
     String className = action.getClassName();
-    Vector<DocumentDebugAction> actions = _pendingActions.get(className);
+    Vector<DocumentDebugAction<?>> actions = _pendingActions.get(className);
     if (actions == null) {
-      actions = new Vector<DocumentDebugAction>();
+      actions = new Vector<DocumentDebugAction<?>>();
 
       // only create a ClassPrepareRequest once per class
       ClassPrepareRequest request =
@@ -96,9 +96,9 @@ public class PendingRequestManager {
    * Called if a breakpoint is set and removed before its class is prepared
    * @param action The DebugAction that was set and removed
    */
-  public void removePendingRequest (DocumentDebugAction action) {
+  public void removePendingRequest (DocumentDebugAction<?> action) {
     String className = action.getClassName();
-    Vector<DocumentDebugAction> actions = _pendingActions.get(className);
+    Vector<DocumentDebugAction<?>> actions = _pendingActions.get(className);
     if (actions == null) {
       return;
     }
@@ -137,9 +137,9 @@ public class PendingRequestManager {
     }
 
     // Get the pending actions for this class (and inner classes)
-    Vector<DocumentDebugAction> actions = _pendingActions.get(className);  // The type argument should be <DocumentDebugAction<? extends EventRequest>> /**/
-    Vector<DocumentDebugAction> failedActions =
-      new Vector<DocumentDebugAction>();
+    Vector<DocumentDebugAction<?>> actions = _pendingActions.get(className);
+    Vector<DocumentDebugAction<?>> failedActions =
+      new Vector<DocumentDebugAction<?>>();
     //DrJava.consoleOut().println("pending actions: " + actions);
     if (actions == null) {
       // Must have been a different class with a matching prefix, ignore it
