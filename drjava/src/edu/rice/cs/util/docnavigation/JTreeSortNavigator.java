@@ -130,7 +130,7 @@ public class JTreeSortNavigator extends JTree implements IDocumentNavigator, Tre
    * @param name the name of the root node
    */
   public JTreeSortNavigator(String projfilepath) {
-    super(new DefaultTreeModel(new DefaultMutableTreeNode(projfilepath.substring(projfilepath.lastIndexOf(File.separator)+1))));
+    super(new DefaultTreeModel(new RootNode(projfilepath.substring(projfilepath.lastIndexOf(File.separator)+1))));
     
 //
     this.addTreeSelectionListener(this);
@@ -743,6 +743,11 @@ public class JTreeSortNavigator extends JTree implements IDocumentNavigator, Tre
         this.scrollPathToVisible(path);
         return true;
       }else if(node instanceof InnerNode){
+        this.expandPath(path);
+        this.setSelectionPath(path);
+        this.scrollPathToVisible(path);
+        return true;
+      }else if(node instanceof RootNode){
         this.expandPath(path);
         this.setSelectionPath(path);
         this.scrollPathToVisible(path);
