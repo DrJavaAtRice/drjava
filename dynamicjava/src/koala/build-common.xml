@@ -264,7 +264,7 @@
          source="1.5"
          target="1.5"
          debug="on"
--        fork="on"
+         fork="on"
          optimize="off">
     <compilerarg value="-J-Xbootclasspath/p:${jsr14_classpath}"/>
     <compilerarg value="-novariance"/>

@@ -116,13 +116,6 @@
   </target>
 
   <target name="compile" depends="do-compile">
-    <rmic base="${built}"
-          classpath="${classpath_text}"
-          classname="edu.rice.cs.drjava.model.repl.newjvm.InterpreterJVM" />
-
-    <rmic base="${built}"
-          classpath="${classpath_text}"
-          classname="edu.rice.cs.drjava.model.repl.newjvm.MainJVM" />
 
     <copy todir="${built}">
       <fileset dir="${srcroot}">
