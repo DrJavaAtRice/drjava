@@ -1832,7 +1832,7 @@ public class ClassInfoCompiler {
      */
     public Void visit(MethodDeclaration node) {
       if(node.isVarArgs())
-        TigerUtilities.assertTigerEnabled("Methods with variable arguments are only allowed in Java 1.5 or better");
+        TigerUtilities.assertTigerEnabled("Methods with variable arguments are only allowed in Java 1.5 or higher");
       MethodInfo mi         = classInfo.getMethod(node);
       int        af         = mi.getModifiers();
       String     mn         = node.getName();

@@ -69,42 +69,42 @@ import koala.dynamicjava.interpreter.throwable.WrongVersionException;
  * Common utilities of DynamicJava for implementing features of 1.5.
  */
 public class TigerUtilities {
-  
+
   /**
    * The version of the java runtime environment that is in use.
    */
   public static final float VERSION = Float.parseFloat(System.getProperty("java.specification.version"));
-  
+
   /**
-   * Field that is set to determine whether or not features of 1.5 are enabled. 
-   * Disabling this field and then attempting to use a feature of 1.5 will cause a 
+   * Field that is set to determine whether or not features of 1.5 are enabled.
+   * Disabling this field and then attempting to use a feature of 1.5 will cause a
    * WrongVersionException to be thrown
    */
   private static boolean _tigerEnabled = (VERSION >= 1.5);
-  
+
   /**
    * Resets _tigerEnabled based upon the version of the runtime environement that is being used.
-   */  
+   */
   public static void resetVersion() {
     _tigerEnabled = (VERSION >= 1.5);
   }
-  
+
   /**
    * Accessor method for _tigerEnabled. Returns true if the features in 1.5 are enabled currently.
    * @return boolean - true if 1.5 features are enabled
-   */  
+   */
   public static boolean isTigerEnabled() {
-    return _tigerEnabled;    
+    return _tigerEnabled;
   }
-  
+
   /**
-   * Allows the features in 1.5 to be enabled or disabled. Used only in test cases. 
+   * Allows the features in 1.5 to be enabled or disabled. Used only in test cases.
    * @param enabled - a boolean that specifies whether or not Tiger features are to be enabled
-   */  
+   */
   protected static void setTigerEnabled(boolean enabled) {
     _tigerEnabled = enabled;
   }
-  
+
   /**
    * To be called before a feature of 1.5 is used. Asserts that Tiger features are enabled.
    * @param msg The error message if 1.5 is not enabled
@@ -113,33 +113,33 @@ public class TigerUtilities {
     if(!_tigerEnabled)
       throw new WrongVersionException(msg);
   }
-  
+
   /**
-   * Uses short circuiting to ensure that if tiger is not enabled, <code>isVarArgs()</code> 
-   * will not be called. Returns true if tiger is enabled and <code>misVarArgs()</code>  is true
+   * Uses short circuiting to ensure that if tiger is not enabled, <code>isVarArgs()</code>
+   * will not be called. Returns true if tiger is enabled and <code>m.isVarArgs()</code>  is true
    * @param m the <code>Method</code> which is being tested with <code>isVarArgs()</code>
    * @return boolean that is true if tiger is enabled and <code>c.isVarArgs()</code>
-   */  
+   */
   public static boolean isVarArgs(Method m) {
-    return _tigerEnabled && m.isVarArgs();
+    return _tigerEnabled && ((m.getModifiers() & 0x00000080) != 0);// m.isVarArgs(); use this for some beta versions of 1.5 did not properly support the isVarArgs() method!
   }
-  
+
   /**
-   * Uses short circuiting to ensure that if tiger is not enabled, <code>isVarArgs()</code> 
+   * Uses short circuiting to ensure that if tiger is not enabled, <code>isVarArgs()</code>
    * will not be called.  Returns true if tiger is enabled and <code>c.isVarArgs()</code>  is true
    * @param c the <code>Constructor</code> which is being tested with <code>isVarArgs()</code>
    * @return boolean that is true if tiger is enabled and <code>c.isVarArgs()</code>
-   */  
+   */
   public static boolean isVarArgs(Constructor c) {
-    return _tigerEnabled && c.isVarArgs();
+    return _tigerEnabled && ((c.getModifiers() & 0x00000080) != 0); //c.isVarArgs(); use this for some beta versions of 1.5 did not properly support the isVarArgs() method!
   }
-  
+
   /**
-   * Uses short circuiting to ensure that if tiger is not enabled, <code>isEnum()</code> 
+   * Uses short circuiting to ensure that if tiger is not enabled, <code>isEnum()</code>
    * will not be called.  Returns true if tiger is enabled and <code>c.isEnum()</code>  is true
    * @param c the <code>Class</code> which is being tested with <code>isEnum()</code>
    * @return boolean that is true if tiger is enabled and <code>c.isEnum()</code>
-   */  
+   */
   public static boolean isEnum(Class<?> c) {
     try {
       return _tigerEnabled && (c.getSuperclass() == Class.forName("java.lang.Enum"));
@@ -150,20 +150,20 @@ public class TigerUtilities {
     catch(ClassNotFoundException e){
       throw new ExecutionError("Tiger is enabled, but cannot find class java.lang.Enum! Please contact the DynamicJava/DrJava team (javaplt@cs.rice.edu).");
     }
-    
+
     //return _tigerEnabled && c.isEnum();
   }
-  
+
   /**
-   * Uses short circuiting to ensure that if tiger is not enabled, <code>isEnumConstant()</code> 
+   * Uses short circuiting to ensure that if tiger is not enabled, <code>isEnumConstant()</code>
    * will not be called.  Returns true if tiger is enabled and <code>f.isEnumConstant()</code>  is true
    * @param f the <code>Field</code> which is being tested with <code>isEnumConstant()</code>
    * @return boolean that is true if tiger is enabled and <code>f.isEnumConstant()</code>
-   */  
+   */
   public static boolean isEnumConstant(Field f) {
     return _tigerEnabled && f.isEnumConstant();
   }
-  
+
   /**
    * Returns the reference type that corresponds to the given primitive type.
    * If the type given is not primitive, it returns the given type.
@@ -183,7 +183,7 @@ public class TigerUtilities {
       return primType; // It's already a reference type
     }
   }
-  
+
   /**
    * Returns the primitive type that corresponds to the given reference type.
    * If the given type is not a boxing type, it returns the given type.
@@ -203,7 +203,7 @@ public class TigerUtilities {
       return refType; // It's already a primitive type
     }
   }
-  
+
   /**
    * Returns if the given class is a reference type
    * @param c the class that may be a reference type
@@ -215,7 +215,7 @@ public class TigerUtilities {
             c == Character.class || c == Short.class  ||
             c == Byte.class      || c == Float.class );
   }
-  
+
     /**
    * Returns true iff the given class is an integral type
    * This includes both primitive and boxing integral types.<br><br>
@@ -231,56 +231,56 @@ public class TigerUtilities {
             c == char.class  || c == Character.class ||
             c == short.class || c == Short.class);
   }
-//  
+//
 //  /**
-//   * Returns true iff the given primitive class can be boxed 
+//   * Returns true iff the given primitive class can be boxed
 //   * to the given reference class.
 //   * @param prim - the primitive class being boxed
 //   * @param ref - the reference class being boxed to
 //   * @return true iff the given primitive class can be boxed to the given reference class
-//   */  
+//   */
 //  public static boolean boxesTo(Class prim, Class ref) {
-//    return 
-//      (prim == int.class     && (ref == Integer.class   || 
-//                                 ref == Long.class      || 
-//                                 ref == Double.class    || 
+//    return
+//      (prim == int.class     && (ref == Integer.class   ||
+//                                 ref == Long.class      ||
+//                                 ref == Double.class    ||
 //                                 ref == Float.class))   ||
-//      (prim == long.class    && (ref == Long.class      || 
-//                                 ref == Double.class    || 
+//      (prim == long.class    && (ref == Long.class      ||
+//                                 ref == Double.class    ||
 //                                 ref == Float.class))   ||
-//      (prim == byte.class    && (ref == Byte.class      || 
-//                                 ref == Short.class     || 
-//                                 ref == Integer.class   || 
-//                                 ref == Long.class      || 
-//                                 ref == Double.class    || 
+//      (prim == byte.class    && (ref == Byte.class      ||
+//                                 ref == Short.class     ||
+//                                 ref == Integer.class   ||
+//                                 ref == Long.class      ||
+//                                 ref == Double.class    ||
 //                                 ref == Float.class))   ||
-//      (prim == char.class    && (ref == Character.class || 
-//                                 ref == Integer.class   || 
-//                                 ref == Long.class      || 
-//                                 ref == Double.class    || 
+//      (prim == char.class    && (ref == Character.class ||
+//                                 ref == Integer.class   ||
+//                                 ref == Long.class      ||
+//                                 ref == Double.class    ||
 //                                 ref == Float.class))   ||
-//      (prim == short.class   && (ref == Short.class     || 
-//                                 ref == Integer.class   || 
-//                                 ref == Long.class      || 
-//                                 ref == Double.class    || 
+//      (prim == short.class   && (ref == Short.class     ||
+//                                 ref == Integer.class   ||
+//                                 ref == Long.class      ||
+//                                 ref == Double.class    ||
 //                                 ref == Float.class))   ||
 //      (prim == boolean.class && ref == Boolean.class)   ||
-//      (prim == float.class   && (ref == Float.class     || 
+//      (prim == float.class   && (ref == Float.class     ||
 //                                 ref == Double.class))  ||
 //      (prim == double.class  && ref == Double.class);
 //  }
-  
-  //The above was written off of a proposed specification for boxing, but is not the way that it has been set up to work in 
+
+  //The above was written off of a proposed specification for boxing, but is not the way that it has been set up to work in
   //Java 1.5. Primitives only box to their corresponding boxing type, not to any widening types, as the above allows
   /**
-   * Returns true iff the given primitive class can be boxed 
+   * Returns true iff the given primitive class can be boxed
    * to the given reference class.
    * @param prim - the primitive class being boxed
    * @param ref - the reference class being boxed to
    * @return true iff the given primitive class can be boxed to the given reference class
-   */  
+   */
   public static boolean boxesTo(Class prim, Class ref) {
-    return 
+    return
       ((prim == int.class    && ref == Integer.class)     ||
       (prim == long.class    && ref == Long.class)        ||
       (prim == byte.class    && ref == Byte.class)        ||
