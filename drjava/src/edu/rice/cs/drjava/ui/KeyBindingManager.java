@@ -56,14 +56,8 @@ public class KeyBindingManager {
   
   // Key-binding configuration tables
   
-  // Maps KeyStrokes to their Actions
-  private Hashtable _keyToActionMap = new Hashtable(); 
-  // Maps KeyStrokes to their JMenuItems
-  private Hashtable _keyToMenuItemMap = new Hashtable();
-  // Maps Actions to their Names (Strings)
-  private Hashtable _actionToNameMap = new Hashtable();
-  // Maps Actions to their Selection Actions
-  private Hashtable _actionToShiftActionMap = new Hashtable();
+  private Hashtable _keyToDataMap = new Hashtable();
+  private Hashtable _actionToDataMap = new Hashtable();
   
   private MainFrame _mainFrame;
   
@@ -73,13 +67,23 @@ public class KeyBindingManager {
   public KeyBindingManager(MainFrame mainFrame) {
     _mainFrame = mainFrame;
   }
-    
+   
   /**
    * Sets the ActionMap
    * @param am the ActionMap to set to
    */
   public void setActionMap (ActionMap am) {      
     _actionMap = _mainFrame.getCurrentDefPane().getActionMap();
+  }
+  
+  public void put(Option<KeyStroke> kso, Action a, JMenuItem jmi, String name)  {
+    KeyStroke ks = DrJava.CONFIG.getSetting(kso);
+    KeyStrokeData ksd = new KeyStrokeData(ks, a, jmi, name, kso);
+    _keyToDataMap.put(ks, ksd);
+    _actionToDataMap.put(a, ksd);
+    
+    if (kso != null) // check for shift-actions
+      DrJava.CONFIG.addOptionListener(kso, new KeyStrokeOptionListener(jmi, a, ks));
   }
   
   /**
@@ -89,33 +93,18 @@ public class KeyBindingManager {
    * with the KeyStroke
    */
   public Action get(KeyStroke ks) {
-    return (Action)_keyToActionMap.get(ks);
+    KeyStrokeData ksd = (KeyStrokeData)_keyToDataMap.get(ks);
+    if (ksd == null)
+      return null;    
+    return ksd.getAction();
   }
-  
-  /**
-   * Puts an Action/String pair into the actionToNameMap
-   * @param a an Action
-   * @param name its name
-   */
-  public void putActionToNameMap (Action a, String name) {
-    _actionToNameMap.put(a, name);
-  } 
-  
-  /**
-   * Puts an KeyStroke/JMenuItem pair into the actionToNameMap
-   * @param ks a KeyStroke
-   * @param tmpItem its JMenuitem
-   */
-  public void putKeyToMenuItemMap (KeyStroke ks, JMenuItem tmpItem) {
-    _keyToMenuItemMap.put(ks, tmpItem);
-  } 
-  
-  public void addListener(Option<KeyStroke> opt, JMenuItem jmi) {
+/*
+ public void addListener(Option<KeyStroke> opt, JMenuItem jmi) {
     KeyStroke ks = DrJava.CONFIG.getSetting(opt);
     Action a = (Action)_keyToActionMap.get(ks);
     DrJava.CONFIG.addOptionListener(opt, new KeyStrokeOptionListener(jmi, a, ks));                                    
   }
-  
+*/ 
   /**
    * Takes an option, its name, and the name of the corresponding
    * selection action and returns the selection action after putting
@@ -125,16 +114,18 @@ public class KeyBindingManager {
    * @param s the name of the Action
    * @param shiftS the name of the Selection Action
    */
-  public void addShiftAction(Option<KeyStroke> opt, String s, String shiftS) {
+  public void addShiftAction(Option<KeyStroke> opt, String shiftS) {
     KeyStroke ks = DrJava.CONFIG.getSetting(opt);
-    Action a = _actionMap.get(s);
+
+    KeyStrokeData normal = (KeyStrokeData)_keyToDataMap.get(ks);
     Action shiftA = _actionMap.get(shiftS);
+    normal.setShiftAction(shiftA);
+
+    KeyStrokeData ksd = new KeyStrokeData(addShiftModifier(ks), shiftA, null,
+                                          "Selection " + normal.getName(), null);
     
-    mapInsert(ks, a);
-    mapInsert(addShiftModifier(ks), shiftA);
-    
-    addListener(opt, null);
-    _actionToShiftActionMap.put(a, shiftA);
+    _keyToDataMap.put(addShiftModifier(ks), ksd);
+    _actionToDataMap.put(shiftA, ksd);
   }
   
   /**
@@ -156,26 +147,35 @@ public class KeyBindingManager {
    * @param a the Action
    * @return whether a map insertion was done
    */
-  public boolean mapInsert(KeyStroke ks, Action a) {
+  //precondition ks != KeyStrokeOption.NULL_KEYSTROKE
+  private boolean shouldUpdate(KeyStroke ks, Action a) {
     if (CodeStatus.DEVELOPMENT) {
+      /*
       if (ks == KeyStrokeOption.NULL_KEYSTROKE) 
         // then there should be no keystroke for this action
         return false;
-      if (!_keyToActionMap.containsKey(ks) ) { 
+      */
+      if (!_keyToDataMap.containsKey(ks) ) { 
         // the key is not in the Hashtable, put it in
-        _keyToActionMap.put(ks, a);
+        //_keyToActionMap.put(ks, a);
+        //need to update map
+        //KeyStrokeData data = (KeyStrokeData)_actionToDataMap.get(a);
+        //data.setKeyStroke(ks);
+        //_keyToDataMap.put(ks,data);
+        
         return true;
       } 
-      else if (_keyToActionMap.get(ks).equals(a)) { 
+      else if (((KeyStrokeData)_keyToDataMap.get(ks)).getAction().equals(a)) { 
         // this KeyStroke/Action pair is already in the Hashtable
         return false;
       }
       else { // key-binding conflict
         KeyStrokeOption opt = new KeyStrokeOption(null,null);
+        KeyStrokeData conflictKSD = (KeyStrokeData)_keyToDataMap.get(ks);
         String key = opt.format(ks);
-        Action oldA = (Action) _keyToActionMap.get(ks);
-        String text = key + " is already assigned to " + _actionToNameMap.get(oldA) + 
-          ". Would you like to assign " + key + " to " + _actionToNameMap.get(a) + "?";
+        KeyStrokeData newKSD = (KeyStrokeData)_actionToDataMap.get(a);
+        String text = "\""+ key +"\"" + " is already assigned to \"" + conflictKSD.getName() + 
+          "\".\nWould you like to assign \"" + key + "\" to \"" + newKSD.getName() + "\"?";
         int rc = JOptionPane.showConfirmDialog(_mainFrame,
                                                text,
                                                "DrJava",
@@ -183,8 +183,6 @@ public class KeyBindingManager {
         
         switch (rc) {
           case JOptionPane.YES_OPTION:
-            _keyToActionMap.remove(ks);
-            _keyToActionMap.put(ks,a);
             return true;
           case JOptionPane.NO_OPTION:
             return false;
@@ -223,28 +221,125 @@ public class KeyBindingManager {
       _ks = ks;
     }
     
+    private void _updateMenuItem (KeyStrokeData data) {
+      JMenuItem jmi = data.getJMenuItem();
+      
+      //Check associated Menu Item
+      if (jmi != null) { // otherwise this keystroke should map to an action that isn't in the menu
+        KeyStroke ks = data.getKeyStroke();
+        jmi.setAccelerator(ks);
+      }
+    }
+    
     public void optionChanged(OptionEvent<KeyStroke> oce) {
       if (CodeStatus.DEVELOPMENT) {
-        if(mapInsert(oce.value, _a)) // if overwrite, remove accelerator of overwritten menuitem
+        if (oce.value == KeyStrokeOption.NULL_KEYSTROKE) return; 
+        
+        if(shouldUpdate(oce.value, _a)) 
         {
-          if (_jmi != null) { // otherwise this keystroke should map to an action that isn't in the menu
-            JMenuItem overwrittenMenuItem = (JMenuItem) _keyToMenuItemMap.get(oce.value);
-            if (overwrittenMenuItem != null) {
-              overwrittenMenuItem.setAccelerator(null);
-            }
-            _jmi.setAccelerator(oce.value);
-          }
-          // change shift-version's binding
-          Action shiftAction = (Action) _actionToShiftActionMap.get(_a);
-          if (shiftAction != null) {
-            _keyToActionMap.remove(addShiftModifier(_ks));
-            mapInsert(addShiftModifier(oce.value), shiftAction);
+          KeyStrokeData data = (KeyStrokeData)_actionToDataMap.get(_a);
+          _keyToDataMap.remove(_ks);
+          
+          //check for conflicting key binding
+          if (_keyToDataMap.containsKey(oce.value)) {
+            //if new key in map, and shouldUpdate returns true, we are overwriting it
+            KeyStrokeData conflictKSD = (KeyStrokeData)_keyToDataMap.get(oce.value);
+            conflictKSD.setKeyStroke(KeyStrokeOption.NULL_KEYSTROKE);
+            _updateMenuItem(conflictKSD);
+            _keyToDataMap.remove(oce.value);
+            DrJava.CONFIG.setSetting(conflictKSD.getOption(), KeyStrokeOption.NULL_KEYSTROKE);
           }
           
-          _keyToActionMap.remove(_ks);
-          _ks = oce.value;
+          
+          _keyToDataMap.put(oce.value,data);
+          data.setKeyStroke(oce.value);
+          _updateMenuItem(data);
+          
+          //Check associated shift-version's binding
+          Action shiftAction = (Action) data.getShiftAction();
+          if (shiftAction != null) {
+            //_keyToActionMap.remove(addShiftModifier(_ks));
+            KeyStrokeData shiftKSD = (KeyStrokeData) _actionToDataMap.get(shiftAction);
+            _keyToDataMap.remove(shiftKSD.getKeyStroke());
+            shiftKSD.setKeyStroke(addShiftModifier(oce.value));
+            _keyToDataMap.put(shiftKSD.getKeyStroke(), shiftKSD);
+            //mapInsert(addShiftModifier(oce.value), shiftAction);
+          }
+          
+          _ks = oce.value;          
         }
+        else if (_ks != oce.value)
+          DrJava.CONFIG.setSetting(oce.option, _ks);
       }
+   
+    
+    }
+  }
+  
+  private class KeyStrokeData {
+    private KeyStroke _ks;
+    private Action _a;
+    private JMenuItem _jmi;
+    private String _name;
+    private Option<KeyStroke> _kso;
+    private Action _shiftA;
+    
+    public KeyStrokeData(KeyStroke ks, Action a, JMenuItem jmi, String name, 
+                         Option<KeyStroke> kso) {
+      _ks = ks;
+      _a = a;
+      _jmi = jmi;
+      _name = name;
+      _kso = kso;
+      _shiftA = null;
+    }
+    
+    public KeyStroke getKeyStroke() {
+      return _ks;
+    }
+    
+    public Action getAction() {
+      return _a;
+    }
+    
+    public JMenuItem getJMenuItem() {
+      return _jmi;
+    }
+    
+    public String getName() {
+      return _name;
+    }
+    
+    public Option<KeyStroke> getOption() {
+      return _kso;
+    }
+    
+    public Action getShiftAction() {
+      return _shiftA;
+    }
+    
+    public void setKeyStroke(KeyStroke ks) {
+      _ks = ks;
+    }
+    
+    public void setAction(Action a) {
+      _a = a;
+    }
+    
+    public void setJMenuItem(JMenuItem jmi) {
+      _jmi = jmi;
+    }
+    
+    public void setName(String name) {
+      _name = name;
+    }
+    
+    public void setOption(Option<KeyStroke> kso) {
+      _kso = kso;
+    }
+    
+    public void setShiftAction(Action shiftA) {
+      _shiftA = shiftA;
     }
   }
 }

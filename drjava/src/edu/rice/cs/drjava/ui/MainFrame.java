@@ -67,6 +67,7 @@ import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 import edu.rice.cs.drjava.model.debug.DebugManager;
 import edu.rice.cs.drjava.model.debug.DebugException;
+import edu.rice.cs.drjava.ui.config.*;
 import edu.rice.cs.drjava.ui.CompilerErrorPanel.ErrorListPane;
 import edu.rice.cs.drjava.ui.JUnitPanel.JUnitErrorListPane;
 import edu.rice.cs.drjava.ui.KeyBindingManager.KeyStrokeOptionListener;
@@ -1404,11 +1405,13 @@ public class MainFrame extends JFrame implements OptionConstants {
     // Checks that "a" is the action associated with the keystroke.
     // Need to check in case two actions were assigned to the same
     // key in the config file
+    _keyBindingManager.put(opt, a, tmpItem, tmpItem.getText());
     if (_keyBindingManager.get(ks) == a) { 
       tmpItem.setAccelerator(ks);
-      _keyBindingManager.putKeyToMenuItemMap(ks, tmpItem);
+      
+      //_keyBindingManager.putKeyToMenuItemMap(ks, tmpItem);
     }
-    _keyBindingManager.addListener(opt, tmpItem);
+    //_keyBindingManager.addListener(opt, tmpItem);
     
   }
   
@@ -1584,14 +1587,12 @@ public class MainFrame extends JFrame implements OptionConstants {
     else
       _addMenuItem(editMenu, _switchToNextAction, KEY_NEXT_DOCUMENT);
     // access to configurations GUI
-    //editMenu.addSeparator();
-    //tmpItem = editMenu.add(_preferencesAction);
-    //tmpItem.setAccelerator(KeyStrong.getKeyStroke(KeyEvent.VK_
     
     
     if (CodeStatus.DEVELOPMENT) {
       editMenu.addSeparator();
-      _addMenuItem(editMenu, _editPreferencesAction, KEY_NEXT_DOCUMENT);
+      editMenu.add(_editPreferencesAction);
+      //_addMenuItem(editMenu, _editPreferencesAction, KEY_NEXT_DOCUMENT);
     }
     // Add the menus to the menu bar
     return editMenu;
@@ -2598,195 +2599,78 @@ public class MainFrame extends JFrame implements OptionConstants {
   private void _setUpKeyBindingMaps() {
     if (CodeStatus.DEVELOPMENT) {
       ActionMap _actionMap = _currentDefPane.getActionMap();
-      _keyBindingManager.putActionToNameMap(_newAction, 
-                                            "New File");
-      _keyBindingManager.putActionToNameMap(_openAction, 
-                                            "Open File");
-      _keyBindingManager.putActionToNameMap(_saveAction, 
-                                            "Save File");
-      _keyBindingManager.putActionToNameMap(_saveAsAction, 
-                                            "Save File As");
-      _keyBindingManager.putActionToNameMap(_closeAction, 
-                                            "Close File");
-      _keyBindingManager.putActionToNameMap(_printPreviewAction, 
-                                            "Print Preview");
-      _keyBindingManager.putActionToNameMap(_printAction, 
-                                            "Print");
-      _keyBindingManager.putActionToNameMap(_quitAction, 
-                                            "Quit");
-      _keyBindingManager.putActionToNameMap(_undoAction, 
-                                            "Undo");
-      _keyBindingManager.putActionToNameMap(_redoAction, 
-                                            "Redo");
-      _keyBindingManager.putActionToNameMap(_cutAction, 
-                                            "Cut");
-      _keyBindingManager.putActionToNameMap(_copyAction, 
-                                            "Copy");
-      _keyBindingManager.putActionToNameMap(_pasteAction, 
-                                            "Paste");
-      _keyBindingManager.putActionToNameMap(_selectAllAction, 
-                                            "Select All");
-      _keyBindingManager.putActionToNameMap(_findReplaceAction, 
-                                            "Find Replace");
-      _keyBindingManager.putActionToNameMap(_gotoLineAction, 
-                                            "Goto Line");
-      _keyBindingManager.putActionToNameMap(_switchToPrevAction, 
-                                            "Previous Document");
-      _keyBindingManager.putActionToNameMap(_switchToNextAction, 
-                                            "Next Document");
-      _keyBindingManager.putActionToNameMap(_compileAction, 
-                                            "Compile");
-      _keyBindingManager.putActionToNameMap(_abortInteractionAction, 
-                                            "Abort Interaction");
-      _keyBindingManager.putActionToNameMap(_actionMap.get(DefaultEditorKit.backwardAction), 
-                                            "Backward");
-      _keyBindingManager.putActionToNameMap(_actionMap.get(DefaultEditorKit.selectionBackwardAction), 
-                                            "Selection Backward");
-      _keyBindingManager.putActionToNameMap(_actionMap.get(DefaultEditorKit.beginAction), 
-                                            "Begin Document");
-      _keyBindingManager.putActionToNameMap(_actionMap.get(DefaultEditorKit.selectionBeginAction), 
-                                            "Selection Begin Document");
-      _keyBindingManager.putActionToNameMap(_actionMap.get(DefaultEditorKit.beginLineAction), 
-                                            "Begin Line");
-      _keyBindingManager.putActionToNameMap(_actionMap.get(DefaultEditorKit.selectionBeginLineAction), 
-                                            "Selection Begin Line");
-      _keyBindingManager.putActionToNameMap(_actionMap.get(DefaultEditorKit.beginParagraphAction), 
-                                            "Begin Paragraph");
-      _keyBindingManager.putActionToNameMap(_actionMap.get(DefaultEditorKit.selectionBeginParagraphAction), 
-                                            "Selection Begin Paragraph");
-      _keyBindingManager.putActionToNameMap(_actionMap.get(DefaultEditorKit.previousWordAction), 
-                                            "Previous Word");
-      _keyBindingManager.putActionToNameMap(_actionMap.get(DefaultEditorKit.selectionPreviousWordAction), 
-                                            "Selection Previous Word");
-      _keyBindingManager.putActionToNameMap(_actionMap.get(DefaultEditorKit.downAction), 
-                                            "Down");
-      _keyBindingManager.putActionToNameMap(_actionMap.get(DefaultEditorKit.selectionDownAction), 
-                                            "Selection Down");
-      _keyBindingManager.putActionToNameMap(_actionMap.get(DefaultEditorKit.endAction), 
-                                            "End Document");
-      _keyBindingManager.putActionToNameMap(_actionMap.get(DefaultEditorKit.selectionEndAction), 
-                                            "Selection End Document");
-      _keyBindingManager.putActionToNameMap(_actionMap.get(DefaultEditorKit.endLineAction), 
-                                            "End Line");
-      _keyBindingManager.putActionToNameMap(_actionMap.get(DefaultEditorKit.selectionEndLineAction), 
-                                            "Selection End Line");
-      _keyBindingManager.putActionToNameMap(_actionMap.get(DefaultEditorKit.endParagraphAction), 
-                                            "End Paragraph");
-      _keyBindingManager.putActionToNameMap(_actionMap.get(DefaultEditorKit.selectionEndParagraphAction), 
-                                            "Selection End Paragraph");
-      _keyBindingManager.putActionToNameMap(_actionMap.get(DefaultEditorKit.nextWordAction), 
-                                            "Next Word");
-      _keyBindingManager.putActionToNameMap(_actionMap.get(DefaultEditorKit.selectionNextWordAction), 
-                                            "Selection Next Word");
-      _keyBindingManager.putActionToNameMap(_actionMap.get(DefaultEditorKit.forwardAction), 
-                                            "Forward");
-      _keyBindingManager.putActionToNameMap(_actionMap.get(DefaultEditorKit.selectionForwardAction), 
-                                            "Selection Forward");
-      _keyBindingManager.putActionToNameMap(_actionMap.get(DefaultEditorKit.pageDownAction), 
-                                            "Page Down");
-      _keyBindingManager.putActionToNameMap(_actionMap.get(DefaultEditorKit.pageUpAction), 
-                                            "Page Up");
-      _keyBindingManager.putActionToNameMap(_actionMap.get(DefaultEditorKit.upAction), 
-                                            "Up");
-      _keyBindingManager.putActionToNameMap(_actionMap.get(DefaultEditorKit.selectionUpAction), 
-                                            "Selection Up");
-      _keyBindingManager.putActionToNameMap(_actionMap.get(DefaultEditorKit.deletePrevCharAction), 
-                                            "Delete Previous Character");
-      _keyBindingManager.putActionToNameMap(_actionMap.get(DefaultEditorKit.deleteNextCharAction), 
-                                            "Delete Next Character");
-      _keyBindingManager.putActionToNameMap(_cutLineAction, 
-                                            "Cut Line");
-      
-      _keyBindingManager.mapInsert(DrJava.CONFIG.getSetting(KEY_NEW_FILE), _newAction);
-      _keyBindingManager.mapInsert(DrJava.CONFIG.getSetting(KEY_OPEN_FILE), _openAction);
-      _keyBindingManager.mapInsert(DrJava.CONFIG.getSetting(KEY_SAVE_FILE), _saveAction);
-      _keyBindingManager.mapInsert(DrJava.CONFIG.getSetting(KEY_SAVE_FILE_AS), _saveAsAction);
-      _keyBindingManager.mapInsert(DrJava.CONFIG.getSetting(KEY_CLOSE_FILE), _closeAction);
-      _keyBindingManager.mapInsert(DrJava.CONFIG.getSetting(KEY_PRINT_PREVIEW), _printPreviewAction);
-      _keyBindingManager.mapInsert(DrJava.CONFIG.getSetting(KEY_PRINT), _printAction);
-      _keyBindingManager.mapInsert(DrJava.CONFIG.getSetting(KEY_QUIT), _quitAction);
-      _keyBindingManager.mapInsert(DrJava.CONFIG.getSetting(KEY_UNDO), _undoAction);
-      _keyBindingManager.mapInsert(DrJava.CONFIG.getSetting(KEY_REDO), _redoAction);
-      _keyBindingManager.mapInsert(DrJava.CONFIG.getSetting(KEY_CUT), _cutAction);
-      _keyBindingManager.mapInsert(DrJava.CONFIG.getSetting(KEY_COPY), _copyAction);
-      _keyBindingManager.mapInsert(DrJava.CONFIG.getSetting(KEY_PASTE), _pasteAction);
-      _keyBindingManager.mapInsert(DrJava.CONFIG.getSetting(KEY_SELECT_ALL), _selectAllAction);
-      _keyBindingManager.mapInsert(DrJava.CONFIG.getSetting(KEY_FIND_REPLACE), _findReplaceAction);
-      _keyBindingManager.mapInsert(DrJava.CONFIG.getSetting(KEY_GOTO_LINE), _gotoLineAction);
-      _keyBindingManager.mapInsert(DrJava.CONFIG.getSetting(KEY_PREVIOUS_DOCUMENT), 
-                 _switchToPrevAction);
-      _keyBindingManager.mapInsert(DrJava.CONFIG.getSetting(KEY_NEXT_DOCUMENT), 
-                 _switchToNextAction);
-      _keyBindingManager.mapInsert(DrJava.CONFIG.getSetting(KEY_COMPILE), _compileAction);
-      _keyBindingManager.mapInsert(DrJava.CONFIG.getSetting(KEY_ABORT_INTERACTION), 
-                 _abortInteractionAction);      
-      
-      _keyBindingManager.addShiftAction(KEY_BACKWARD, 
-                                        DefaultEditorKit.backwardAction, 
-                                        DefaultEditorKit.selectionBackwardAction);
  
+      _keyBindingManager.put(KEY_BACKWARD, _actionMap.get(DefaultEditorKit.backwardAction),null, "Backward");
+      _keyBindingManager.addShiftAction(KEY_BACKWARD,
+                                        DefaultEditorKit.selectionBackwardAction);
+      
+      _keyBindingManager.put(KEY_BEGIN_DOCUMENT, _actionMap.get(DefaultEditorKit.beginAction), null, "Begin Document");
       _keyBindingManager.addShiftAction(KEY_BEGIN_DOCUMENT, 
-                                        DefaultEditorKit.beginAction, 
                                         DefaultEditorKit.selectionBeginAction);
       
+      _keyBindingManager.put(KEY_BEGIN_LINE, _actionMap.get(DefaultEditorKit.beginLineAction), null, "Begin Line");
       _keyBindingManager.addShiftAction(KEY_BEGIN_LINE, 
-                                        DefaultEditorKit.beginLineAction, 
                                         DefaultEditorKit.selectionBeginLineAction);
-          
+      
+      _keyBindingManager.put(KEY_BEGIN_PARAGRAPH, 
+                             _actionMap.get(DefaultEditorKit.beginParagraphAction), null, "Begin Paragraph");
       _keyBindingManager.addShiftAction(KEY_BEGIN_PARAGRAPH, 
-                                        DefaultEditorKit.beginParagraphAction, 
                                         DefaultEditorKit.selectionBeginParagraphAction); 
       
+      _keyBindingManager.put(KEY_PREVIOUS_WORD, 
+                             _actionMap.get(DefaultEditorKit.previousWordAction), null, "Previous Word");
       _keyBindingManager.addShiftAction(KEY_PREVIOUS_WORD, 
-                                        DefaultEditorKit.previousWordAction, 
                                         DefaultEditorKit.selectionPreviousWordAction);
-       
+      
+      
+      _keyBindingManager.put(KEY_DOWN, 
+                             _actionMap.get(DefaultEditorKit.downAction), null, "Down");
       _keyBindingManager.addShiftAction(KEY_DOWN, 
-                                        DefaultEditorKit.downAction, 
                                         DefaultEditorKit.selectionDownAction);
       
+      _keyBindingManager.put(KEY_END_DOCUMENT, 
+                             _actionMap.get(DefaultEditorKit.endAction), null, "End Document");
       _keyBindingManager.addShiftAction(KEY_END_DOCUMENT, 
-                                        DefaultEditorKit.endAction, 
                                         DefaultEditorKit.selectionEndAction);
-       
+      
+      _keyBindingManager.put(KEY_END_LINE, 
+                             _actionMap.get(DefaultEditorKit.endLineAction), null, "End Line");
       _keyBindingManager.addShiftAction(KEY_END_LINE, 
-                                        DefaultEditorKit.endLineAction, 
                                         DefaultEditorKit.selectionEndLineAction);
       
+      _keyBindingManager.put(KEY_END_PARAGRAPH, 
+                             _actionMap.get(DefaultEditorKit.endParagraphAction), null, "End Paragraph");
       _keyBindingManager.addShiftAction(KEY_END_PARAGRAPH, 
-                                        DefaultEditorKit.endParagraphAction, 
                                         DefaultEditorKit.selectionEndParagraphAction);
-       
+      
+      _keyBindingManager.put(KEY_NEXT_WORD, 
+                             _actionMap.get(DefaultEditorKit.nextWordAction), null, "Next Word");
       _keyBindingManager.addShiftAction(KEY_NEXT_WORD, 
-                                        DefaultEditorKit.nextWordAction, 
                                         DefaultEditorKit.selectionNextWordAction);
       
-      _keyBindingManager.addShiftAction(KEY_FORWARD, 
-                                        DefaultEditorKit.forwardAction, 
+      _keyBindingManager.put(KEY_FORWARD, 
+                             _actionMap.get(DefaultEditorKit.forwardAction), null, "Forward");
+      _keyBindingManager.addShiftAction(KEY_FORWARD,
                                         DefaultEditorKit.selectionForwardAction);
       
+      _keyBindingManager.put(KEY_UP, 
+                             _actionMap.get(DefaultEditorKit.upAction), null, "Up");
       _keyBindingManager.addShiftAction(KEY_UP, 
-                                        DefaultEditorKit.upAction, 
-                                        DefaultEditorKit.selectionUpAction);     
+                                        DefaultEditorKit.selectionUpAction); 
       
       // These last methods have no default selection methods
-      _keyBindingManager.mapInsert(DrJava.CONFIG.getSetting(KEY_PAGE_DOWN), 
-                                   _actionMap.get(DefaultEditorKit.pageDownAction));
-      _keyBindingManager.addListener(KEY_PAGE_DOWN, null);
-      _keyBindingManager.mapInsert(DrJava.CONFIG.getSetting(KEY_PAGE_UP), 
-                                   _actionMap.get(DefaultEditorKit.pageUpAction));
-      _keyBindingManager.addListener(KEY_PAGE_UP, null);
-      _keyBindingManager.mapInsert(DrJava.CONFIG.getSetting(KEY_CUT_LINE), 
-                                   _cutLineAction);
-      _keyBindingManager.addListener(KEY_CUT_LINE, null);
-      _keyBindingManager.mapInsert(DrJava.CONFIG.getSetting(KEY_DELETE_PREVIOUS), 
-                                   _actionMap.get(DefaultEditorKit.deletePrevCharAction));
-      _keyBindingManager.addListener(KEY_DELETE_PREVIOUS, null);
-      _keyBindingManager.mapInsert(DrJava.CONFIG.getSetting(KEY_DELETE_NEXT), 
-                                   _actionMap.get(DefaultEditorKit.deleteNextCharAction));
-      _keyBindingManager.addListener(KEY_DELETE_NEXT, null);
-      _keyBindingManager.mapInsert(KeyStroke.getKeyStroke(KeyEvent.VK_F3,0),
-                                   new AbstractAction("FindReplace") {
+      _keyBindingManager.put(KEY_PAGE_DOWN, 
+                             _actionMap.get(DefaultEditorKit.pageDownAction), null, "Page Down");
+      _keyBindingManager.put(KEY_PAGE_UP, 
+                             _actionMap.get(DefaultEditorKit.pageUpAction), null, "Page Up");
+      _keyBindingManager.put(KEY_CUT_LINE, 
+                             _cutLineAction, null, "Cut Line");
+      _keyBindingManager.put(KEY_DELETE_PREVIOUS, 
+                             _actionMap.get(DefaultEditorKit.deletePrevCharAction), null, "Delete Previous");
+      _keyBindingManager.put(KEY_DELETE_NEXT, 
+                             _actionMap.get(DefaultEditorKit.deleteNextCharAction), null, "Delete Next");
+      _keyBindingManager.put(KEY_FIND_NEXT,
+                             new AbstractAction("FindNext") {
         public void actionPerformed(ActionEvent ae) {
           if(!_findReplace.isDisplayed()) {
             showTab(_findReplace);
@@ -2795,8 +2679,8 @@ public class MainFrame extends JFrame implements OptionConstants {
           _findReplace.findNext();
           _currentDefPane.requestFocus();
         }
-      });
-                                  
+      }, null, "Find Next");
+      
     }
   }
   

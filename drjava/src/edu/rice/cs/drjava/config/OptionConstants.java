@@ -285,6 +285,14 @@ public interface OptionConstants extends ConfigurationTool {
   /**
    * The key binding for find and replace
    */
+  public static final KeyStrokeOption KEY_FIND_NEXT =
+    (!CodeStatus.DEVELOPMENT)?
+    null:
+    new KeyStrokeOption("key.find.next", 
+                        KeyStroke.getKeyStroke(KeyEvent.VK_F3, 0));
+  /**
+   * The key binding for find and replace
+   */
   public static final KeyStrokeOption KEY_FIND_REPLACE =
     (!CodeStatus.DEVELOPMENT)?
     null:
