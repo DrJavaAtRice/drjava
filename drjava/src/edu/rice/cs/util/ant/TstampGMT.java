@@ -37,40 +37,46 @@
  *
 END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.util;
+package edu.rice.cs.util.ant;
+
+import org.apache.tools.ant.Task;
+import org.apache.tools.ant.BuildException;
 
 import java.util.Date;
+import java.util.TimeZone;
 import java.text.SimpleDateFormat;
 
 /**
- * This interface hold the information about this build of util.
- * This file is copied to Version.java by the build process, which also
- * fills in the right values of the date and time.
- *
- * This javadoc corresponds to build util-20020221-1537;
+ * A simple, inflexible replacement for Ant's TSTAMP task that
+ * always uses GMT.
+ * 
+ * This simple task never allows parameters or nested elements.
+ * It only sets the DSTAMP and TSTAMP variables.
  *
  * @version $Id$
- */
-public abstract class Version {
-  /**
-   * This string will be automatically expanded upon "ant commit".
-   * Do not edit it by hand!
-   */
-  public static final String BUILD_TIME_STRING = "20020221-1537";
+*/
+public class TstampGMT extends Task {
+  private static final TimeZone GMT = TimeZone.getTimeZone("GMT");
+  private static final SimpleDateFormat DATE_FORMAT
+    = new SimpleDateFormat ("yyyyMMdd");
+  private static final SimpleDateFormat TIME_FORMAT
+    = new SimpleDateFormat ("HHmm");
 
-  /** A {@link Date} version of the build time. */
-  public static final Date BUILD_TIME = _getBuildDate();
+  {
+    DATE_FORMAT.setTimeZone(GMT);
+    TIME_FORMAT.setTimeZone(GMT);
+  }
 
-  private static Date _getBuildDate() {
+  public void execute() throws BuildException {
     try {
-      return new SimpleDateFormat("yyyyMMdd-HHmm").parse(BUILD_TIME_STRING);
+      Date d = new Date();
+      project.setProperty("DSTAMP", DATE_FORMAT.format(d));
+      project.setProperty("TSTAMP", TIME_FORMAT.format(d));
     }
-    catch (Exception e) { // parse format or whatever problem
-      return null;
+    catch (Exception e) {
+      throw new BuildException(e);
     }
   }
+}
 
-  public static void main(String[] args) {
-    System.out.println("Version for edu.rice.cs.util: " + BUILD_TIME_STRING);
-  }
-} 
+
