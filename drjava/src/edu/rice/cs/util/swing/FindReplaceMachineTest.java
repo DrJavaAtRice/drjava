@@ -195,8 +195,30 @@ public class FindReplaceMachineTest extends TestCase
     assertEquals("revised text", 
                  "Hear no monkey, see no monkey, speak no monkey.", 
                  doc.getText(0, doc.getLength()));     
-  } 
-  
+  }
+
+  public void testFindNoMatchCase() throws BadLocationException{
+    doc.insertString(0, EVIL_TEXT, null); 
+    _initFrm(0);
+    _assertOffsets(frm, 0, 0);
+    frm.setMatchCase(false);
+    frm.setFindWord("eViL"); 
+    _testFindNextSucceeds(frm, CONTINUE, 0, 12); 
+  }
+
+  public void testReplaceAllContinueNoMatchCase() throws BadLocationException{
+    doc.insertString(0, EVIL_TEXT, null); 
+    _initFrm(15); 
+    _assertOffsets(frm, 15, 15); 
+    frm.setFindWord("eViL"); 
+    frm.setReplaceWord("monkey");
+    frm.setMatchCase(false);
+    frm.replaceAll();
+    assertEquals("revised text", 
+                 "Hear no monkey, see no monkey, speak no monkey.", 
+                 doc.getText(0, doc.getLength()));     
+  }
+
   /**
    test case no longer applies -- we always wrap
    public void testReplaceAllHalt() throws BadLocationException { 
