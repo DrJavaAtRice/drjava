@@ -90,6 +90,11 @@ public interface GlobalModelListener {
   public void fileClosed(OpenDefinitionsDocument doc);
 
   /**
+   * Called after a document is reverted.
+   */
+  public void fileReverted(OpenDefinitionsDocument doc);
+
+  /**
    * Called after a compile is started by the GlobalModel.
    */
   public void compileStarted();
@@ -160,4 +165,11 @@ public interface GlobalModelListener {
    * document.
    */
   public boolean canAbandonFile(OpenDefinitionsDocument doc);
+
+  /**
+   * Called to ask the listener if it is OK to revert the current
+   * document to a newer version saved on file.
+   */
+  public boolean shouldRevertFile(OpenDefinitionsDocument doc);
+	
 }

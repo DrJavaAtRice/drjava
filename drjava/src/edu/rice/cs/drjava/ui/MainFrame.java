@@ -114,6 +114,7 @@ public class MainFrame extends JFrame {
   private JButton _compileButton;
   private JButton _junitButton;
   private JMenuItem _saveMenuItem;
+  private JMenuItem _revertMenuItem;
   private JMenuItem _compileMenuItem;
   private JMenuItem _abortInteractionMenuItem;
   private JCheckBoxMenuItem _debuggerEnabledMenuItem;
@@ -221,6 +222,25 @@ public class MainFrame extends JFrame {
   private Action _saveAction = new AbstractAction("Save") {
     public void actionPerformed(ActionEvent ae) {
       _save();
+    }
+  };
+
+  /** Reverts the current document. */
+  private Action _revertAction = new AbstractAction("Revert") {
+    public void actionPerformed(ActionEvent ae) {
+      String title = "Confirm revert file";
+
+      String message = "Are you sure you would like to revert the " +
+        "current file to the version on disk?";
+
+      int rc = JOptionPane.showConfirmDialog(MainFrame.this,
+                                             message,
+                                             title,
+                                             JOptionPane.YES_NO_OPTION);
+      if (rc == JOptionPane.YES_OPTION) {
+					_revert();
+      }
+
     }
   };
 
@@ -812,6 +832,15 @@ public class MainFrame extends JFrame {
     }
   }
 
+  private void _revert() {
+    try {
+      _model.getActiveDocument().revertFile();
+    }
+    catch (IOException ioe) {
+      _showIOError(ioe);
+    }
+  }
+
   private void _compile() {
     try {
       _model.getActiveDocument().startCompile();
@@ -1040,6 +1069,8 @@ public class MainFrame extends JFrame {
     _setUpAction(_openAction, "Open", "Open an existing file");
     _setUpAction(_saveAction, "Save", "Save the current document");
     _setUpAction(_saveAsAction, "SaveAs", "Save the current document with a new name");
+    _setUpAction(_revertAction, "Revert", "Revert the current document to saved version");
+
     _setUpAction(_closeAction, "Close", "Close the current document");
     _setUpAction(_closeAllAction, "CloseAll", "Close all documents");
     _setUpAction(_saveAllAction, "SaveAll", "Save all open documents");
@@ -1154,6 +1185,10 @@ public class MainFrame extends JFrame {
     tmpItem = fileMenu.add(_saveAsAction);
 
     tmpItem = fileMenu.add(_saveAllAction);
+
+    tmpItem = fileMenu.add(_revertAction);
+		_revertMenuItem = tmpItem;
+		_revertAction.setEnabled(false);
 
     // Close, Close all
     fileMenu.addSeparator();
@@ -1664,6 +1699,7 @@ public class MainFrame extends JFrame {
 
     public void fileSaved(OpenDefinitionsDocument doc) {
       _saveAction.setEnabled(false);
+      _revertAction.setEnabled(true);
       //_compileAction.setEnabled(true);
       updateFileTitle();
       _currentDefPane.requestFocus();
@@ -1677,13 +1713,18 @@ public class MainFrame extends JFrame {
       _removeErrorListener(doc);
       _defScrollPanes.remove(doc);
     }
-
+    public void fileReverted(OpenDefinitionsDocument doc) {
+				updateFileTitle();
+				_currentDefPane.setPositionAndScroll(0);
+		}
     public void activeDocumentChanged(OpenDefinitionsDocument active) {
       _switchDefScrollPane();
 
       boolean isModified = active.isModifiedSinceSave();
       boolean canCompile = (!isModified && !active.isUntitled());
       _saveAction.setEnabled(isModified);
+			_revertAction.setEnabled(!active.isUntitled());
+
       //_compileAction.setEnabled(canCompile);
 
       // Update error highlights
@@ -1696,6 +1737,11 @@ public class MainFrame extends JFrame {
       updateFileTitle();
       _posListener.updateLocation();
       _currentDefPane.requestFocus();
+			try {
+					active.revertIfModifiedOnDisk();
+			} catch (IOException e) {
+					_showIOError(e);
+			}
     }
 
     public void interactionStarted() {
@@ -1893,7 +1939,47 @@ public class MainFrame extends JFrame {
           throw new RuntimeException("Invalid rc: " + rc);
       }
     }
+		/**
+		 * Called to ask the listener if it is OK to revert the current
+		 * document to a newer version saved on file.
+ 		 */
+			public boolean shouldRevertFile(OpenDefinitionsDocument doc) {
+				 
+					String fname;
+					
+					if (! _model.getActiveDocument().equals(doc)) {
+							_model.setActiveDocument(doc);
+					}
+					
+					try {
+							File file = doc.getFile();
+							fname = file.getName();
+					}
+					catch (IllegalStateException ise) {
+							// No file exists
+							fname = "untitled file";
+					}
+					
+					String text = fname + " has changed on disk. Would you like to revert?";
+					int rc = JOptionPane.showConfirmDialog(MainFrame.this,
+																								 text,
+                                             "Would you like to revert " + fname + "?",
+                                             JOptionPane.YES_NO_OPTION);
+
+					switch (rc) {
+					case JOptionPane.YES_OPTION:
+							return true;
+					case JOptionPane.NO_OPTION:
+							return false;
+					case JOptionPane.CLOSED_OPTION:
+							return false;
+					default:
+							throw new RuntimeException("Invalid rc: " + rc);
+					}
+			}
+
   }
+	
 
   /**
    * Prints a display label for each item in the document list.

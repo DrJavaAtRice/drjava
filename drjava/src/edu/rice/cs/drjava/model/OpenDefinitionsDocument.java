@@ -89,6 +89,11 @@ public interface OpenDefinitionsDocument {
   public void saveFile(FileSaveSelector com) throws IOException;
 
   /**
+   * Revert the document to the version saved on disk.
+   */
+  public void revertFile() throws IOException;
+
+  /**
    * Saves the document with a FileWriter.  The FileSaveSelector will
    * either provide a file name or prompt the user for one.  It is
    * up to the caller to decide what needs to be done to choose
@@ -159,6 +164,22 @@ public interface OpenDefinitionsDocument {
    * @return true if the document has been modified
    */
   public boolean isModifiedSinceSave();
+
+  /**
+   * Determines if this definitions document has changed since the
+   * last save.
+   * @return true if the document has been modified
+   */
+  public boolean isModifiedOnDisk();
+
+	/**
+   * Asks the GlobalModel if it can revert current definitions
+	 * to version on disk. If ok, it reverts the file to the
+	 * version on disk
+   * last save.
+   * @return true if the document has been reverted
+   */
+	public boolean revertIfModifiedOnDisk() throws IOException;
 
   /**
    * Returns whether the GlobalModel can abandon this document,

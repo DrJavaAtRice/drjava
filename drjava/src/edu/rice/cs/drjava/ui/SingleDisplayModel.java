@@ -267,6 +267,7 @@ public class SingleDisplayModel extends DefaultGlobalModel {
     if (doc.isModifiedSinceSave()) {
       filename = filename + " *";
     }
+
     return filename;
   }
 
@@ -287,6 +288,7 @@ public class SingleDisplayModel extends DefaultGlobalModel {
     if (doc.isModifiedSinceSave()) {
       path = path + " *";
     }
+
     return path;
   }
 

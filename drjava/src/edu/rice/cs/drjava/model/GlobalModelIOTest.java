@@ -708,4 +708,148 @@ public class GlobalModelIOTest extends GlobalModelTestCase {
      "third document contents",
      FileOps.readFileAsString(file3));      
      }
+  /**
+   * Force a file to be opened with getDocumentforFile
+   */
+  public void testRevertFile()
+    throws BadLocationException, IOException, OperationCanceledException,
+      AlreadyOpenException
+  {
+    final File tempFile1 = writeToNewTempFile(FOO_TEXT);
+// don't catch and fail!
+    
+    TestListener listener = new TestListener() {
+      public void fileOpened(OpenDefinitionsDocument doc) {
+        File file = null;
+        try {
+          file = doc.getFile();
+        }
+        catch (IllegalStateException ise) {
+          // We know file should exist
+          fail("file does not exist");
+        }
+        openCount++;
+      }
+      public void fileReverted(OpenDefinitionsDocument doc) {
+					fileRevertedCount++;
+      }
+    };
+
+    _model.addListener(listener);
+    // Open file 1
+    OpenDefinitionsDocument doc = _model.openFile(new FileSelector(tempFile1));
+    listener.assertOpenCount(1);
+    assertModified(false, doc);
+    assertContents(FOO_TEXT, doc);
+
+		
+		assertEquals("original doc unmodified",doc.isModifiedSinceSave(), false);
+		changeDocumentText(BAR_TEXT, doc);
+		assertEquals("doc now modified",doc.isModifiedSinceSave(), true);
+		doc.revertFile();
+		assertEquals("doc reverted",doc.isModifiedSinceSave(), false);
+		assertContents(FOO_TEXT, doc);
+  }
+
+
+		public void testModifiedByOther()
+    throws BadLocationException, IOException, OperationCanceledException,
+					 AlreadyOpenException, InterruptedException
+  {
+    final File tempFile1 = writeToNewTempFile(FOO_TEXT);
+// don't catch and fail!
+    
+    TestListener listener = new TestListener() {
+						public void fileOpened(OpenDefinitionsDocument doc) { }
+      public void fileReverted(OpenDefinitionsDocument doc) {
+        fileRevertedCount++;
+      }
+			public boolean shouldRevertFile(OpenDefinitionsDocument doc) {
+					shouldRevertFileCount++;
+					return true;
+	 		}
+    };
+
+    _model.addListener(listener);
+    // Open file 1
+    OpenDefinitionsDocument doc = _model.openFile(new FileSelector(tempFile1));
+    listener.assertShouldRevertFileCount(0);
+    listener.assertFileRevertedCount(0);
+    assertModified(false, doc);
+
+		doc.revertIfModifiedOnDisk();		
+
+
+    listener.assertShouldRevertFileCount(0);
+    listener.assertFileRevertedCount(0);
+		synchronized(tempFile1) { 
+				tempFile1.wait(1000);
+		}
+
+		String s = "THIS IS ONLY A TEST";
+		FileOps.writeStringToFile(tempFile1, s);
+    assertEquals("contents of saved file",
+                 s,
+                 FileOps.readFileAsString(tempFile1));
+
+		tempFile1.setLastModified((new java.util.Date()).getTime());
+
+		assertTrue("modified on disk1", doc.isModifiedOnDisk());
+		boolean res = doc.revertIfModifiedOnDisk();
+		assertTrue("file reverted", res);
+
+
+		listener.assertShouldRevertFileCount(1);
+    listener.assertFileRevertedCount(1);
+		assertContents(s,doc);
+  }
+
+		public void testModifiedByOtherFalse()
+    throws BadLocationException, IOException, OperationCanceledException,
+					 AlreadyOpenException, InterruptedException
+  {
+    final File tempFile1 = writeToNewTempFile(FOO_TEXT);
+// don't catch and fail!
+    
+    TestListener listener = new TestListener() { 
+						public void fileOpened(OpenDefinitionsDocument doc) { }
+
+			public void fileReverted(OpenDefinitionsDocument doc) {
+        fileRevertedCount++;
+      }
+      public boolean shouldRevertFile(OpenDefinitionsDocument doc) {
+					shouldRevertFileCount++;
+					return false;
+	 		}
+    };
+
+    _model.addListener(listener);
+    // Open file 1
+    OpenDefinitionsDocument doc = _model.openFile(new FileSelector(tempFile1));
+    listener.assertShouldRevertFileCount(0);
+    listener.assertFileRevertedCount(0);
+    assertModified(false, doc);
+
+		doc.revertIfModifiedOnDisk();
+    listener.assertShouldRevertFileCount(0);
+    listener.assertFileRevertedCount(0);
+
+		synchronized(tempFile1) { 
+				tempFile1.wait(1000);
+		}
+
+		String s = "THIS IS ONLY A TEST";
+		FileOps.writeStringToFile(tempFile1, s);
+    assertEquals("contents of saved file",
+                 s,
+                 FileOps.readFileAsString(tempFile1));
+
+		assertTrue("modified on disk1", doc.isModifiedOnDisk());
+		boolean reverted = doc.revertIfModifiedOnDisk();
+		assertTrue("modified on disk", reverted == false);
+		listener.assertShouldRevertFileCount(1);
+    listener.assertFileRevertedCount(0);
+		assertContents(FOO_TEXT, doc);
+  }
+
 }

@@ -97,7 +97,8 @@ public class DefinitionsDocument extends PlainDocument {
   int _currentLocation = 0;
   
   private File _file;
-  
+  private long _timestamp;
+
   /**
    * Constant for starting position of document.
    */
@@ -189,8 +190,16 @@ public class DefinitionsDocument extends PlainDocument {
 
   public void setFile(File file) {
     _file = file;
-  }
 
+		//jim: maybe need lock
+		if (_file != null) {
+				_timestamp = _file.lastModified();
+		}
+  }
+		
+		public long getTimestamp() {
+				return _timestamp;
+		}
   /**
    * Inserts a string of text into the document.
    * It turns out that this is not where we should do custom processing
@@ -364,6 +373,8 @@ public class DefinitionsDocument extends PlainDocument {
     try {
       writeLock();
       _modifiedSinceSave = false;
+			if (_file != null)
+					_timestamp = _file.lastModified();
     }
     finally {
       writeUnlock();
@@ -384,6 +395,25 @@ public class DefinitionsDocument extends PlainDocument {
     }
   }
 
+  /**
+   * Determines if the document has been modified since the last save.
+   * @return true if the document has been modified
+   */
+  public boolean isModifiedOnDisk() {
+    try {
+      readLock();
+			boolean ret = false;
+			if (_file == null) {
+			} else {
+					ret = (_file.lastModified() > _timestamp);
+			}
+			return ret;
+    }
+    finally {
+      readUnlock();
+    }
+  }
+	
   /**
    * Get the current location of the cursor in the document.
    * Unlike the usual swing document model, which is stateless, because of our implementation

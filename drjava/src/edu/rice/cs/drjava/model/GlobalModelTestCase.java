@@ -435,6 +435,8 @@ public abstract class GlobalModelTestCase extends TestCase {
     protected int saveAllBeforeProceedingCount;
     protected int nonTestCaseCount;
     protected int lastExitStatus;
+    protected int fileRevertedCount;
+    protected int shouldRevertFileCount;
 
     public TestListener() {
       resetCounts();
@@ -456,6 +458,8 @@ public abstract class GlobalModelTestCase extends TestCase {
       saveAllBeforeProceedingCount = 0;
       nonTestCaseCount = 0;
       lastExitStatus = 0;
+      fileRevertedCount = 0;
+      shouldRevertFileCount = 0;
     }
 
     public void assertAbandonCount(int i) {
@@ -537,6 +541,19 @@ public abstract class GlobalModelTestCase extends TestCase {
                    i,
                    nonTestCaseCount);
     }
+
+		public void assertFileRevertedCount(int i) {
+      assertEquals("number of times fileReverted fired",
+                   i,
+                   fileRevertedCount);
+    }
+
+		public void assertShouldRevertFileCount(int i) {
+      assertEquals("number of times shouldRevertFile fired",
+                   i,
+                   shouldRevertFileCount);
+    }
+
     
     public void newFileCreated(OpenDefinitionsDocument doc) {
       fail("newFileCreated fired unexpectedly");
@@ -552,6 +569,10 @@ public abstract class GlobalModelTestCase extends TestCase {
 
     public void fileSaved(OpenDefinitionsDocument doc) {
       fail("fileSaved fired unexpectedly");
+    }
+
+    public void fileReverted(OpenDefinitionsDocument doc) {
+      fail("fileReverted fired unexpectedly");
     }
 
     public void junitStarted() {
@@ -604,6 +625,12 @@ public abstract class GlobalModelTestCase extends TestCase {
 
     public boolean canAbandonFile(OpenDefinitionsDocument doc) {
       fail("canAbandonFile fired unexpectedly");
+
+      // this is actually unreachable but the compiler won't believe me. sigh.
+      throw new RuntimeException();
+    }
+    public boolean shouldRevertFile(OpenDefinitionsDocument doc) {
+      fail("shouldRevertfile fired unexpectedly");
 
       // this is actually unreachable but the compiler won't believe me. sigh.
       throw new RuntimeException();
