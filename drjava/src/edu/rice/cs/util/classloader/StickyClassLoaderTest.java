@@ -41,6 +41,8 @@ package edu.rice.cs.util.classloader;
 
 import junit.framework.*;
 import java.io.*;
+import java.net.URL;
+import java.security.SecureClassLoader;
 
 /**
  * Test cases for {@link StickyClassLoader}.
@@ -87,6 +89,33 @@ public class StickyClassLoaderTest extends TestCase {
 
     Class c = loader.loadClass("java.lang.Object");
     assertEquals("java.lang.Object", c.getName());
+  }
+  
+  /**
+   * Tests that add-on Java packages, such as javax.mail.*, can be
+   * loaded through the secondary loader if not found in the system
+   * loader.
+   */
+  public void testLoaderFindsNonSystemJavaClasses() throws Throwable {
+    class LoadingClassException extends RuntimeException {}
+    
+    ClassLoader testLoader = new SecureClassLoader() {
+      public URL getResource(String name) {
+        throw new LoadingClassException();
+      }
+    };
+    StickyClassLoader loader = new StickyClassLoader(myLoader, testLoader);
+    
+    try {
+      Class c = loader.loadClass("javax.mail.FakeClass");
+      // Should not have actually found it...
+      fail("FakeClass should not exist.");
+    }
+    catch (LoadingClassException lce) {
+      // Good, that's what we want to happen
+    }
+    // If a ClassNotFoundException is thrown, then StickyClassLoader
+    //  is not looking in the secondary loader.
   }
 
   /**

@@ -176,7 +176,7 @@ public class StickyClassLoader extends ClassLoader {
    * </OL>
    */
   protected Class loadClass(String name, boolean resolve) 
-  throws ClassNotFoundException
+    throws ClassNotFoundException
   {
     // check if it's already loaded!
     Class clazz;
@@ -189,39 +189,22 @@ public class StickyClassLoader extends ClassLoader {
         name.startsWith("javax.") ||
         name.startsWith("sun."))
     {
-      clazz = getSystemClassLoader().loadClass(name);
+      try {
+        clazz = getSystemClassLoader().loadClass(name);
+      }
+      catch (ClassNotFoundException e) {
+        // It might be a non-system class, like javax.mail.*.
+        //  Fall back on the secondary loader.
+        clazz = _loadWithSecondary(name);
+      }
     }
     else if (Arrays.binarySearch(_classesToLoadWithOld, name) >= 0) {
+      // Don't fall back to secondary if this fails...
       clazz = getParent().loadClass(name);
     }
     else {
-      // we get the data using getResource because if we just delegate
-      // the call to loadClass on old or new loader, it will use that
-      // loader as the associated class loader for the class. that's bad.
-      try {
-        String fileName = name.replace('.', '/') + ".class";
-
-        URL resource = getResource(fileName);
-        if (resource == null) {
-          throw new ClassNotFoundException("Resource not found: " + fileName);
-        }
-
-        byte[] data = FileOps.readStreamAsBytes(resource.openStream());
-        try {
-          clazz = defineClass(name, data, 0, data.length);
-        }
-        catch (Error t) {
-          /*
-          System.err.println("Sticky " + this + " error when loading " + name +
-                             " with resolve=" + resolve + ":");
-          */
-          //t.printStackTrace();
-          throw t;
-        }
-      }
-      catch (IOException ioe) {
-        throw new ClassNotFoundException(ioe.toString());
-      }
+      // Load with the secondary loader
+      clazz = _loadWithSecondary(name);
     }
 
     if (resolve) {
@@ -233,5 +216,42 @@ public class StickyClassLoader extends ClassLoader {
                        clazz.getClassLoader());
     */
     return clazz;
+  }
+  
+  /**
+   * Try to load the class with the given name with the secondary (new)
+   * loader.  Uses getResource to find the class.
+   * @param name Name of the class to load.
+   */
+  protected Class _loadWithSecondary(String name) 
+    throws ClassNotFoundException
+  {
+    // we get the data using getResource because if we just delegate
+    // the call to loadClass on old or new loader, it will use that
+    // loader as the associated class loader for the class. that's bad.
+    try {
+      String fileName = name.replace('.', '/') + ".class";
+      
+      URL resource = getResource(fileName);
+      if (resource == null) {
+        throw new ClassNotFoundException("Resource not found: " + fileName);
+      }
+      
+      byte[] data = FileOps.readStreamAsBytes(resource.openStream());
+      try {
+        return defineClass(name, data, 0, data.length);
+      }
+      catch (Error t) {
+        /*
+         System.err.println("Sticky " + this + " error when loading " + name +
+         " with resolve=" + resolve + ":");
+         */
+        //t.printStackTrace();
+        throw t;
+      }
+    }
+    catch (IOException ioe) {
+      throw new ClassNotFoundException(ioe.toString());
+    } 
   }
 }
