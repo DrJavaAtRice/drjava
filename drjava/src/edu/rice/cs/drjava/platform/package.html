@@ -1,0 +1,62 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<html>
+<head>
+<!--
+  HTML file providing an overview of the contents of this package.
+
+  $Id$
+-->
+</head>
+<body bgcolor="white">
+<p>
+  This package provides a framework for abstracting platform-specific calls
+  away from the platform-independent DrJava codebase.  The main code tree
+  contains platform-independent code to access and execute the platform-specific
+  implementations, which are kept in separate code trees.
+</p>
+<p>
+  The <code>PlatformSupport</code> interface defines the calls which must be
+  supported by all platform implementations.  <code>DefaultPlatform</code>
+  provides a platform-independent implementation.  For convenience, all platform
+  implementations extend <code>DefaultPlatform</code>, inheriting default
+  implementations for all methods that are not tailored for that platform.
+  <code>PlatformFactory</code> is a factory class which contains all logic for
+  identifying the host platform and instantiating the appropriate 
+  <code>PlatformSupport</code> implementation.  This is performed statically,
+  and the result is stored as a singleton field for easy access.  Client
+  code can access platform-specific calls like so: 
+  <code>PlatformFactory.ONLY.method()</code>.  <code>PlatformFactory</code>
+  currently differentiates between Windows, Mac OS X with a 1.3 JVM, Mac OS X
+  with a 1.4 JVM, and the default platform.  Note that in order to reference a
+  new platform implementation, it must already be compiled and added to the
+  classpath.  The current platforms are built with special ant targets which add
+  the class files to platforms.jar in the lib directory.
+</p>
+<p>
+  In order to add a new platform-specific feature to DrJava, you must follow
+  these steps:
+  <ol>
+    <li>
+      Add a new method to <code>PlatformSupport</code>.  Make sure it is
+      properly documented.
+    </li>
+    <li>
+      Provide a default implementation in <code>DefaultPlatform</code>.  Often
+      this will be an empty method body.  Document why it does what it does (or
+      doesn't).
+    </li>
+    <li>
+      Privode a platform-specific implementation for the necessary platforms.
+      Platforms which will use the default method do not need to be modified.
+    </li>
+    <li>
+      Write a test case that reveals the platform-specific behavior, or ensures
+      that all platforms produce expected results.
+    </li>
+    <li>
+      Rebuild the modified platform code using the appropriate systems.
+    </li>
+  </ol>
+</p>
+</body>
+</html>
