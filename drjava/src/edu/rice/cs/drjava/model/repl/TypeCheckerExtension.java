@@ -230,37 +230,46 @@ public class TypeCheckerExtension extends TypeChecker {
     Class c = visitNumericExpression(node, "remainder.type");
     return c;
   }
-
-  /**
-   * Visits a numeric expression
-   */
-  private static Class visitNumericExpression(BinaryExpression node, String s) {
-    // Set the type property of the given node
-    Class lc = NodeProperties.getType(node.getLeftExpression());
-    Class rc = NodeProperties.getType(node.getRightExpression());
-
-    if (lc == null          || rc == null          ||
-        lc == boolean.class || rc == boolean.class ||
-        !lc.isPrimitive()   || !rc.isPrimitive()   ||
-        lc == void.class    || rc == void.class)
-    {
-      throw new ExecutionError(s, node);
-    }
-    else if (lc == double.class || rc == double.class) {
-      node.setProperty(NodeProperties.TYPE, double.class);
-      return double.class;
-    }
-    else if (lc == float.class || rc == float.class) {
-      node.setProperty(NodeProperties.TYPE, float.class);
-      return float.class;
-    }
-    else if (lc == long.class || rc == long.class) {
-      node.setProperty(NodeProperties.TYPE, long.class);
-      return long.class;
-    }
-    else {
-      node.setProperty(NodeProperties.TYPE, int.class);
-      return int.class;
-    }
-  }
+  
+/** 
+ * visitNumericExpression:
+ * Commented out because of the changes made in the original
+ * TypeChecker.java to allow for auto unboxing.  We made the
+ * original method protected instead of private so that this
+ * code could work, but we seriously think this should be 
+ * reworked.
+ */
+  
+//  /**
+//   * Visits a numeric expression
+//   */
+//  private static Class visitNumericExpression(BinaryExpression node, String s) {
+//    // Set the type property of the given node
+//    Class lc = NodeProperties.getType(node.getLeftExpression());
+//    Class rc = NodeProperties.getType(node.getRightExpression());
+//
+//    if (lc == null          || rc == null          ||
+//        lc == boolean.class || rc == boolean.class ||
+//        !lc.isPrimitive()   || !rc.isPrimitive()   ||
+//        lc == void.class    || rc == void.class)
+//    {
+//      throw new ExecutionError(s, node);
+//    }
+//    else if (lc == double.class || rc == double.class) {
+//      node.setProperty(NodeProperties.TYPE, double.class);
+//      return double.class;
+//    }
+//    else if (lc == float.class || rc == float.class) {
+//      node.setProperty(NodeProperties.TYPE, float.class);
+//      return float.class;
+//    }
+//    else if (lc == long.class || rc == long.class) {
+//      node.setProperty(NodeProperties.TYPE, long.class);
+//      return long.class;
+//    }
+//    else {
+//      node.setProperty(NodeProperties.TYPE, int.class);
+//      return int.class;
+//    }
+//  }
 }
