@@ -96,6 +96,8 @@ public class DrJava implements ConfigurationTool, OptionConstants {
       // CompilerRegistry notify listeners when there is a change in the list of
       // available compilers.
       MainFrame mf = new MainFrame();
+      System.setProperty("sun.awt.exception.handler", 
+                         "edu.rice.cs.drjava.AWTExceptionHandler");
       
       // This enabling of the security manager must happen *after* the mainframe
       // is constructed. See bug #518509.

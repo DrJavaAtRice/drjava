@@ -125,8 +125,7 @@ import edu.rice.cs.util.UnexpectedException;
       _message.setText("");
     } else {
       throw new UnexpectedException(new RuntimeException("FindReplaceDialog should not be listening to anything"));
-    }
-    
+    }    
   }
 
    /**
