@@ -55,7 +55,9 @@ import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 public class DefinitionsEditorKit extends DefaultEditorKit {
   private static final ViewFactory _factory = new ViewFactory() {
     public View create(Element elem) {
-      return new ColoringView(elem);
+	// The following line is for performance analysis only!
+	// return new WrappedPlainView(elem, true);
+	return new ColoringView(elem);
     }
   };
 
@@ -84,9 +86,9 @@ public class DefinitionsEditorKit extends DefaultEditorKit {
    * We want to use our ColoringView to render text, so here we return
    * a factory that creates ColoringViews.
    */
-  public final ViewFactory getViewFactory() {
-    return _factory;
-  }
+   public final ViewFactory getViewFactory() {
+     return _factory;
+   }
 }
 
 
