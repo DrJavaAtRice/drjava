@@ -147,6 +147,22 @@ public class DirectoryChooser extends JDialog {
   
   /**
    * Creates a DirectoryChooser whose root is the file system root, 
+   * allowing only single selection.
+   */
+  public DirectoryChooser(Dialog owner) {
+    this(owner, null, false, false);
+  }
+  
+  /**
+   * Creates a DirectoryChooser whose root is the file system root, 
+   * allowing only single selection.
+   */
+  public DirectoryChooser(Frame owner) {
+    this(owner, null, false, false);
+  }
+  
+  /**
+   * Creates a DirectoryChooser whose root is the file system root, 
    * allowing multiple selection as specified
    * @param allowMultiple whether to allow multiple selection
    */
