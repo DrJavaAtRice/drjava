@@ -68,32 +68,35 @@
 
                     <li>20. No: <b>QuestionStartAfterOpenBrace</b><br>
                     <ul>
-                        <li>21. Yes: ActionStartStmtOfBracePlus(1 level) (Goto 34)
-                        <li>22. No: Goto 23.
+                        <li>21. Yes: ActionStartStmtOfBracePlus(1 level) (Goto 36)
+                        <li>22. No: <b>QuestionHasCharBeforeBrace</b><br>
+                        <ul>
+                            <li>23. Yes: ActionStartStmtOfBracePlus(1 level) (Goto 36)
+                            <li>24. No: Goto 25.
                     </ul>
                 </ul>
-                <li>23. No: <b>QuestionStartingNewStmt</b><br>
+                <li>25. No: <b>QuestionStartingNewStmt</b><br>
                 <ul>
-                    <li>24. Yes: <b>QuestionLineContains(":")</b><br>
+                    <li>26. Yes: <b>QuestionLineContains(":")</b><br>
                     <ul>
-                        <li>25. Yes: <b>QuestionExistsCharInStmt("?", ":")</b><br>
+                        <li>27. Yes: <b>QuestionExistsCharInStmt("?", ":")</b><br>
                         <ul>
-                            <li>26. Yes: ActionStartPrevStmtPlus("") (Goto 28)
-                            <li>27. No: ActionStartStmtOfBracePlus(1 level) (Goto 34)
+                            <li>28. Yes: ActionStartPrevStmtPlus("") (Goto 30)
+                            <li>29. No: ActionStartStmtOfBracePlus(1 level) (Goto 36)
                         </ul>
-                        <li>28. No: ActionStartPrevStmtPlus("")
+                        <li>30. No: ActionStartPrevStmtPlus("")
                     </ul>
-                    <li>29. No: <b>QuestionCurrLineStartsWithSkipComments("{")</b><br>
+                    <li>31. No: <b>QuestionCurrLineStartsWithSkipComments("{")</b><br>
                     <ul>
-                        <li>30. Yes: ActionStartCurrStmtPlus("")
-                        <li>31. No: <b>QuestionLineContains(":")</b><br>
+                        <li>32. Yes: ActionStartCurrStmtPlus("")
+                        <li>33. No: <b>QuestionLineContains(":")</b><br>
                         <ul>
-                            <li>32. Yes: <b>QuestionExistsCharInStmt("?", ":")</b><br>
+                            <li>34. Yes: <b>QuestionExistsCharInStmt("?", ":")</b><br>
                             <ul>
-                                <li>33. Yes: ActionStartCurrStmtPlus(1 level) (Goto 35)
-                                <li>34. No: ActionStartStmtOfBracePlus(1 level)
+                                <li>35. Yes: ActionStartCurrStmtPlus(1 level) (Goto 37)
+                                <li>36. No: ActionStartStmtOfBracePlus(1 level)
                             </ul>
-                            <li>35. No: ActionStartCurrStmtPlus(1 level)
+                            <li>37. No: ActionStartCurrStmtPlus(1 level)
                         </ul>
                     </ul>
                 </ul>
