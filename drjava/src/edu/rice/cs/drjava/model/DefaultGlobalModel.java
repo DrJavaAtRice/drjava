@@ -123,7 +123,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
   /**
    * Collection for storing all OpenDefinitionsDocuments.
    */
-  private final BidirectionalHashMap<INavigatorItem, OpenDefinitionsDocument> _documentsRepos =
+  protected final BidirectionalHashMap<INavigatorItem, OpenDefinitionsDocument> _documentsRepos =
     new OrderedBidirectionalHashMap<INavigatorItem, OpenDefinitionsDocument>();
 
 
@@ -141,6 +141,12 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
    */
   protected DefaultInteractionsModel _interactionsModel;
   
+  /**
+   * Denotes whether the model is currently trying to close all
+   * documents, and thus that a new one should not be created, and whether or not to update the navigator
+   */
+  protected boolean _isClosingAllDocs;
+    
   protected InteractionsListener _interactionsListener = new InteractionsListener(){
     public void interactionStarted(){    }
     
@@ -1060,14 +1066,13 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       if (idoc != null) {
         _documentNavigator.removeDocument(idoc);
         _notifier.fileClosed(closedDoc);
-//        System.out.println("model closed file");
 //        closedDoc.close();
         return true;
       }
     }
     return false;
   }
-
+     
   /**
    * Attempts to close all open documents.
    * @return true if all documents were closed
@@ -1080,10 +1085,10 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       keepClosing = closeFile(next);
       odds = _documentsRepos.valuesIterator(); // call to closeFile can mutate Iterator, so generate a new "current" Iterator on each loop 
     }
-
     
     return keepClosing;
   }
+  
 
   /**
    * Exits the program.

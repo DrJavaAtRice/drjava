@@ -46,6 +46,7 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.model;
 
 import edu.rice.cs.util.docnavigation.*;
+import java.util.*;
 
 /**
  * A GlobalModel that enforces invariants associated with having
@@ -110,6 +111,12 @@ public interface SingleDisplayModel extends GlobalModel {
    * TODO: Move to DGM?  Make private?
    */
   public boolean isClosingAllFiles();
+  
+  /**
+   * Shared code between close project and close All files which only sets 
+   * the new active document after all documents to be closed have been closed
+   */
+  public boolean closeFiles(List<OpenDefinitionsDocument> docList);
   
   public OpenDefinitionsDocument getODDGivenIDoc(INavigatorItem idoc);
     

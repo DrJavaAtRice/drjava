@@ -2135,7 +2135,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       }
     }
 
-    closeFiles(docsToClose);
+    _model.closeFiles(docsToClose);
     
     final File[] files = srcFiles;
     // project could be empty
@@ -2149,44 +2149,6 @@ public class MainFrame extends JFrame implements OptionConstants {
     
     _openProjectUpdate();
   }
-  
-  private void closeFiles(List<OpenDefinitionsDocument> docList) {
-    OpenDefinitionsDocument last = null;
-    Iterator<OpenDefinitionsDocument> it = docList.iterator();
-    while(it.hasNext()) {
-      last = it.next();
-      if(it.hasNext())
-        _model.closeFile(last);      
-    }
-    if(last != null) {
-      IDocumentNavigator nav = _model.getDocumentNavigator();
-      INavigatorItem switchTo = nav.getNext(_model.getIDocGivenODD(last));
-      /** if we can't move forward, go backwards */
-      if( switchTo == _model.getIDocGivenODD(last)) {
-        switchTo = nav.getPrevious(switchTo);
-      }
-      
-      //close the last file
-      if (_model.closeFile(last))
-      {        
-        if(_model.getDocumentCount() == 1){
-          _model.setActiveFirstDocument();
-        }
-        else {
-          /* this will select the active document in the navigator, which
-           * will signal a listener to call _setActiveDoc(...)
-           */
-          nav.setActiveDoc(switchTo);
-        }
-      }
-      else
-      {
-       nav.setActiveDoc(_model.getIDocGivenODD(last)); 
-      }
-    }
-  }
-  
-  
   
   private void _openProjectUpdate() {
     if(_model.isProjectActive()) {
@@ -2211,7 +2173,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       //    for(OpenDefinitionsDocument d: projDocs){
       //      _model.closeFile(d);
       //    }
-      closeFiles(projDocs);
+      _model.closeFiles(projDocs);
       _model.closeProject();
       Component renderer = _model.getDocumentNavigator().getRenderer();
       new ForegroundColorListener(renderer);
@@ -2349,7 +2311,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   private void _close() {
     LinkedList<OpenDefinitionsDocument> l = new LinkedList<OpenDefinitionsDocument>();
     l.add(_model.getActiveDocument());
-    closeFiles(l);
+    _model.closeFiles(l);
     //_model.closeFile(_model.getActiveDocument());
   }
 
@@ -5784,7 +5746,7 @@ public class MainFrame extends JFrame implements OptionConstants {
         //Close the file that wasn't found
         LinkedList<OpenDefinitionsDocument> l = new LinkedList<OpenDefinitionsDocument>();
         l.add(d);
-        closeFiles(l);
+        _model.closeFiles(l);
         throw new DocumentClosedException(d,"Document in " + f + "closed unexpectedly");
       }
     }

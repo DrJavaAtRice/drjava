@@ -102,13 +102,6 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel
    */
   private OpenDefinitionsDocument _activeDocument;
 
-
-  /**
-   * Denotes whether the model is currently trying to close all
-   * documents, and thus that a new one should not be created.
-   */
-  private boolean _isClosingAllDocs;
-
   /**
    * Creates a SingleDisplayModel.
    *
@@ -365,12 +358,70 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel
     */
   public boolean closeAllFiles() {
     _isClosingAllDocs = true;
-    boolean success = super.closeAllFiles();
+    //Bug when the first document, in list view, is selected:
+    //When "close all" documents is selected, each document in turn is set active
+    //Workaround: begin to close the active document, then close all other documents, then remove the 
+    //active doc from the navigator pane
+    final OpenDefinitionsDocument toClose = getActiveDocument();
+    boolean canClose = toClose.canAbandonFile();
+    if(canClose) {
+      INavigatorItem idoc = _documentsRepos.removeKey(toClose);      
+      boolean success = super.closeAllFiles();
+      if (idoc != null) {
+        getDocumentNavigator().removeDocument(idoc);
+        _notifier.fileClosed(toClose);
+        toClose.close();
+      }
+      _isClosingAllDocs = false;
+      
+      _ensureNotEmpty();
+      setActiveFirstDocument();
+      return success;
+    }
     _isClosingAllDocs = false;
-    
-    _ensureNotEmpty();
-    setActiveFirstDocument();
-    return success;
+    return false; 
+  }
+  
+  
+  /**
+   * Shared code between close project and close All files which only sets 
+   * the new active document after all documents to be closed have been closed
+   */
+  public boolean closeFiles(List<OpenDefinitionsDocument> docList) {
+    OpenDefinitionsDocument last = null;
+    Iterator<OpenDefinitionsDocument> it = docList.iterator();
+    while(it.hasNext()) {
+      last = it.next();
+      if(it.hasNext())
+        closeFile(last);      
+    }
+    if(last != null) {
+      IDocumentNavigator nav = getDocumentNavigator();
+      INavigatorItem switchTo = nav.getNext(getIDocGivenODD(last));
+      /** if we can't move forward, go backwards */
+      if( switchTo == getIDocGivenODD(last)) {
+        switchTo = nav.getPrevious(switchTo);
+      }
+      
+      //close the last file
+      if (closeFile(last))
+      {        
+        if(getDocumentCount() == 1){
+          setActiveFirstDocument();
+        }
+        else {
+          /* this will select the active document in the navigator, which
+           * will signal a listener to call _setActiveDoc(...)
+           */
+          nav.setActiveDoc(switchTo);
+        }
+      }
+      else
+      {
+        nav.setActiveDoc(getIDocGivenODD(last)); 
+      }
+    }
+    return true;
   }
 
   /**
