@@ -55,6 +55,7 @@ import edu.rice.cs.drjava.model.repl.SimpleInteractionsListener;
 public class SimpleInteractionsWindow extends JFrame {
   private final SimpleInteractionsDocument _doc;
   private final InteractionsPane _pane;
+  private final InteractionsController _controller;
   
   public SimpleInteractionsWindow() {
     super("Interactions Window");
@@ -62,6 +63,8 @@ public class SimpleInteractionsWindow extends JFrame {
     
     _doc = new SimpleInteractionsDocument();
     _pane = new InteractionsPane(_doc);
+    _controller = new InteractionsController(_doc, _pane);
+    
     _pane.setFont(Font.decode("monospaced"));
 
 
@@ -70,7 +73,7 @@ public class SimpleInteractionsWindow extends JFrame {
         _pane.setEditable(false);
       }
       public void interactionEnded() {
-        _pane.moveToPrompt();
+        _controller.moveToPrompt();
         _pane.setEditable(true);
       }
     });

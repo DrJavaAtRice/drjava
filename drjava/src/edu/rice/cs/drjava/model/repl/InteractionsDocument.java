@@ -68,13 +68,20 @@ public interface InteractionsDocument extends StyledDocument {
 
   /**
    * Lets this document know whether an interaction is in progress.
+   * @param inProgress Whether an interaction is in progress
    */
-  public void setInProgress(boolean b);
+  public void setInProgress(boolean inProgress);
 
   /**
    * Returns whether an interaction is currently in progress.
    */
   public boolean inProgress();
+  
+  /**
+   * Sets a runnable action to use as a beep.
+   * @param beep Runnable beep command
+   */
+  public void setBeep(Runnable beep);
   
   /** 
    * Resets the document to a clean state.  Does not reset the history.
@@ -84,7 +91,13 @@ public interface InteractionsDocument extends StyledDocument {
   /**
    * Prints a prompt for a new interaction.
    */
-  public void prompt();
+  public void insertPrompt();
+  
+  /**
+   * Inserts a new line at the given position.
+   * @param pos Position to insert the new line
+   */
+  public void insertNewLine(int pos);
 
   /**
    * Inserts the given string with the given attributes just before the

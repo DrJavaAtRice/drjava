@@ -138,6 +138,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   private CompilerErrorPanel _errorPanel;
   private OutputPane _outputPane;
   private InteractionsPane _interactionsPane;
+  private InteractionsController _interactionsController;  // move to controller
   private DebugPanel _debugPanel;
   private JUnitPanel _junitPanel;
   private FindReplaceDialog _findReplace;
@@ -2485,6 +2486,9 @@ public class MainFrame extends JFrame implements OptionConstants {
     _outputPane = new OutputPane(_model);
     _errorPanel = new CompilerErrorPanel(_model, this);
     _interactionsPane = new InteractionsPane(_model.getInteractionsDocument());
+    _interactionsController = 
+      new InteractionsController(_model.getInteractionsDocument(),
+                                 _interactionsPane);
     _findReplace = new FindReplaceDialog(this, _model);
     
     final JScrollPane outputScroll = 
@@ -3074,8 +3078,8 @@ public class MainFrame extends JFrame implements OptionConstants {
           }
 
           // Make sure we're at the prompt
-          // (This should really be fixed in InteractionsPane, not here.)
-          _interactionsPane.moveToPrompt();
+          // (This should really be fixed in InteractionsController, not here.)
+          _interactionsController.moveToPrompt();
         }
       };
       SwingUtilities.invokeLater(doCommand);
@@ -3222,8 +3226,7 @@ public class MainFrame extends JFrame implements OptionConstants {
           
           _interactionsPane.setCursor(Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR));
           _interactionsPane.setEditable(true);
-          int pos = _interactionsPane.getDocument().getLength();
-          _interactionsPane.setCaretPosition(pos);
+          _interactionsController.moveToEnd();
           if (_interactionsPane.hasFocus()) {
             _interactionsPane.getCaret().setVisible(true);
           }

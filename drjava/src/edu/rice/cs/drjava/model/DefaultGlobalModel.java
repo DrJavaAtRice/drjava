@@ -845,34 +845,36 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
       for (int j = 0; j < strings.size(); j++) {
         currString = strings.elementAt(j);
         if (currString.length() > 0) {
-	    // check for file format version string.
-            // NOTE: the original file format did not have a version string
-	    if (firstLine && (currString.trim().equals(History.HISTORY_FORMAT_VERSION_2.trim()))) {
-		formatVersion = 2;
-	    }
-	    switch (formatVersion) {
-	    case (1):
-                // When reading this format, we need to make sure each line ends in a semicolon.
-                // This behavior can be buggy; that's why the format was changed.
-		if (currString.charAt(currString.length() - 1) == ';') {
-		    text += currString + "\n";
-		} else {
-		    text += currString + ";\n";
-		}
-		break;
-	    case(2):
-		if (!firstLine) // don't include format version string in output
-		    text += currString + "\n";
-		break;
-	    }
-	    firstLine = false;
-	}
+          // check for file format version string.
+          // NOTE: the original file format did not have a version string
+          if (firstLine && (currString.trim().equals(History.HISTORY_FORMAT_VERSION_2.trim()))) {
+            formatVersion = 2;
+          }
+          switch (formatVersion) {
+            case (1):
+              // When reading this format, we need to make sure each line ends in a semicolon.
+              // This behavior can be buggy; that's why the format was changed.
+              if (currString.charAt(currString.length() - 1) == ';') {
+                text += currString + "\n";
+              }
+              else {
+                text += currString + ";\n";
+              }
+              break;
+            case(2):
+              if (!firstLine) { // don't include format version string in output
+                text += currString + "\n";
+              }
+              break;
+          }
+          firstLine = false;
+        }
       }
       _interactionsDoc.clearCurrentInteraction();
       _docAppend(_interactionsDoc, text, null);
       _interactionsDoc.setInProgress(true);
       _interactionsDoc.addToHistory(text);
-            // there is no return at the end of the last line
+      // there is no return at the end of the last line
       // better to put it on now and not later.
       //_docAppend(_interactionsDoc, "\n", null);
       
@@ -983,7 +985,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
 
   private void _interactionIsOver() {
     _interactionsDoc.setInProgress(false);
-    _interactionsDoc.prompt();
+    _interactionsDoc.insertPrompt();
 
     notifyListeners(new EventNotifier() {
       public void notifyListener(GlobalModelListener l) {

@@ -39,7 +39,6 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.repl;
 
-import java.awt.Toolkit;
 import java.awt.event.*;
 import javax.swing.text.*;
 import javax.swing.*;
@@ -64,6 +63,13 @@ public abstract class AbstractInteractionsDocument extends DefaultStyledDocument
    * Whether the interpreter is currently interpreting an interaction
    */
   protected boolean _inProgress = false;
+  
+  /**
+   * A runnable command to use for a notification beep.
+   */
+  protected Runnable _beep = new Runnable() {
+    public void run() {}
+  };
 
   /** 
    * Index in the document of the first place that is editable.
@@ -96,10 +102,10 @@ public abstract class AbstractInteractionsDocument extends DefaultStyledDocument
 
   /**
    * Lets this document know whether an interaction is in progress.
-   * @param b whether an interaction is in progress
+   * @param inProgress whether an interaction is in progress
    */
-  public void setInProgress(boolean b) {
-    _inProgress = b;
+  public void setInProgress(boolean inProgress) {
+    _inProgress = inProgress;
   }
 
   /**
@@ -109,6 +115,14 @@ public abstract class AbstractInteractionsDocument extends DefaultStyledDocument
     return _inProgress;
   }
   
+  /**
+   * Sets a runnable action to use as a beep.
+   * @param beep Runnable beep command
+   */
+  public void setBeep(Runnable beep) {
+    _beep = beep;
+  }
+  
   /** 
    * Resets the document to a clean state.  Does not reset the history.
    */
@@ -116,7 +130,7 @@ public abstract class AbstractInteractionsDocument extends DefaultStyledDocument
     try {
       super.remove(0, getLength());
       super.insertString(0, BANNER, null);
-      prompt();
+      insertPrompt();
       _history.moveEnd();
       setInProgress(false);
     }
@@ -128,12 +142,34 @@ public abstract class AbstractInteractionsDocument extends DefaultStyledDocument
   /**
    * Prints a prompt for a new interaction.
    */
-  public void prompt() {
+  public void insertPrompt() {
     try {
       super.insertString(getLength(), PROMPT, null);
       _promptPos = getLength();
     }
     catch (BadLocationException e) {
+      throw new UnexpectedException(e);
+    }
+  }
+  
+  /**
+   * Inserts a new line at the given position.
+   * @param pos Position to insert the new line
+   */
+  public void insertNewLine(int pos) {
+    // Correct the position if necessary
+    if (pos > getLength()) {
+      pos = getLength();
+    }
+    else if (pos < 0) {
+      pos = 0;
+    }
+    
+    try {
+      insertString(pos, "\n", null);
+    }
+    catch (BadLocationException e) {
+      // Shouldn't happen after we've corrected it
       throw new UnexpectedException(e);
     }
   }
@@ -154,8 +190,9 @@ public abstract class AbstractInteractionsDocument extends DefaultStyledDocument
         pos = _promptPos - PROMPT.length();
       }
 
-      super.insertString(pos, s, a);
       _promptPos += s.length();
+      super.insertString(pos, s, a);
+      
     }
     catch (BadLocationException ble) {
       throw new UnexpectedException(ble);
@@ -170,7 +207,7 @@ public abstract class AbstractInteractionsDocument extends DefaultStyledDocument
     throws BadLocationException
   {
     if (offs < _promptPos) {
-      Toolkit.getDefaultToolkit().beep();
+      _beep.run();
     } 
     else {
       super.insertString(offs, str, a);
@@ -183,7 +220,7 @@ public abstract class AbstractInteractionsDocument extends DefaultStyledDocument
    */
   public void remove(int offs, int len) throws BadLocationException {
     if (offs < _promptPos) {
-      Toolkit.getDefaultToolkit().beep();
+      _beep.run();
     } 
     else {
       super.remove(offs, len);

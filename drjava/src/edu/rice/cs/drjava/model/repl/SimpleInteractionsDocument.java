@@ -118,7 +118,7 @@ public class SimpleInteractionsDocument extends AbstractInteractionsDocument {
       }
       finally {
         setInProgress(false);
-        prompt();
+        insertPrompt();
         
         // notify listeners
         notifyInteractionEnded();
