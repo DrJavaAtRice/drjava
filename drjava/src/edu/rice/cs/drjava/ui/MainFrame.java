@@ -783,7 +783,9 @@ public class MainFrame extends JFrame implements OptionConstants {
     _setUpDocumentSelector();
     
     if (CodeStatus.DEVELOPMENT) {
-      _recentFileManager = new RecentFileManager(_fileMenu.getItemCount() - 2);
+      _recentFileManager = new RecentFileManager(_fileMenu.getItemCount() - 2, 
+                                                 _fileMenu,
+                                                 this);
     }
 
     // Set size and position
@@ -821,6 +823,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     DrJava.CONFIG.addOptionListener( OptionConstants.TOOLBAR_ICONS_ENABLED, new ToolbarOptionListener());
     DrJava.CONFIG.addOptionListener( OptionConstants.TOOLBAR_TEXT_ENABLED, new ToolbarOptionListener());
     DrJava.CONFIG.addOptionListener( OptionConstants.LINEENUM_ENABLED, new LineEnumOptionListener());
+    DrJava.CONFIG.addOptionListener( OptionConstants.RECENT_FILES_MAX_SIZE, new RecentFilesOptionListener());
     
     // Set the configuration frame to null
     _configFrame = null;
@@ -992,10 +995,10 @@ public class MainFrame extends JFrame implements OptionConstants {
   }
 
   private void _open() { 
-    _open (_openSelector);
+    open (_openSelector);
   }
   
-  private void _open(FileOpenSelector openSelector) {
+  void open(FileOpenSelector openSelector) {
     try {
       _model.openFiles(openSelector);
     }
@@ -2848,91 +2851,13 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
   }
   
-  private class RecentFileManager {
-    int _pos;
-    Vector<File> _recentFiles;
-    Vector<JMenuItem> _recentMenuItems;
-    int MAX_SIZE = 5;
-
-    public RecentFileManager(int pos) {
-      _pos = pos;   
-      _recentFiles = new Vector<File>();
-      _recentMenuItems = new Vector<JMenuItem>();
-      Vector<File> files = DrJava.CONFIG.getSetting(RECENT_FILES);
-      for (int i = files.size() - 1; i >= 0; i--) {
-        updateOpenFiles(files.elementAt(i));
-      }
+  /**
+   * The OptionListener for RECENT_FILES_MAX_SIZE
+   */
+  private class RecentFilesOptionListener implements OptionListener<Integer> {
+    public void optionChanged(OptionEvent<Integer> oce) {  
+      _recentFileManager.updateMax(oce.value.intValue()); 
+      _recentFileManager.numberItems();
     }
-    
-    public void saveRecentFiles() { 
-      DrJava.CONFIG.setSetting(RECENT_FILES,_recentFiles);
-    }
-    
-    public void updateOpenFiles(final File file) {   
-      
-      if (_recentMenuItems.size() == 0) {
-        _fileMenu.insertSeparator(_pos);  //one at top
-        _pos++;
-      }
-
-      
-      final FileOpenSelector _recentSelector = new FileOpenSelector() {
-        public File[] getFiles() throws OperationCanceledException {
-          return new File[] { file };
-        }
-      };
-        
-      JMenuItem newItem = new JMenuItem("");//1. " + file.getName());      
-      newItem.addActionListener(new AbstractAction("Open " + file.getName()) {
-        public void actionPerformed(ActionEvent ae) {          
-          _open(_recentSelector);
-        }
-      });
-      removeIfInList(file);
-      _recentMenuItems.insertElementAt(newItem,0);
-      _recentFiles.insertElementAt(file,0);
-      //incrementExisting();
-      numberItems();
-      _fileMenu.insert(newItem,_pos);
-     
-    }
-    
-    public void removeIfInList(File file) {
-      int index = _recentFiles.indexOf(file);
-      /*int index = -1;
-      for (int i=0; i< _recentFiles.size(); i++) {
-        if (_recentFiles.elementAt(i).equals(file)) {
-          System.out.println("i: "+i+" fileName: "+_recentFiles.elementAt(i).getName());
-          index = i;
-          break;
-        }
-      }*/
-      
-      if (index >= 0) {
-        _recentFiles.removeElementAt(index);
-        JMenuItem delItem = _recentMenuItems.elementAt(index);
-        _fileMenu.remove(delItem);
-        _recentMenuItems.removeElementAt(index);
-      }
-    }
-    
-    public void numberItems() {
-      int delPos = _recentMenuItems.size();
-      while (delPos > MAX_SIZE) {
-        JMenuItem delItem = _recentMenuItems.elementAt(delPos - 1);
-        _recentMenuItems.removeElementAt(delPos - 1);
-        _recentFiles.removeElementAt(delPos - 1);
-        _fileMenu.remove(delItem);
-
-        delPos = _recentMenuItems.size();
-      }
-      JMenuItem currItem;
-      String itemText;
-      for (int i=0; i< _recentMenuItems.size(); i++ ) {
-        currItem = _recentMenuItems.elementAt(i);
-        currItem.setText((i+1) + ". " + _recentFiles.elementAt(i).getName());
-        
-      }
-    }
-  }
+  }  
 }

@@ -451,14 +451,20 @@ public interface OptionConstants extends ConfigurationTool {
   /**
    * How many spaces to use for indenting.
    */
-  public static final IntegerOption INDENT_LEVEL =
-    new IntegerOption("indent.level",new Integer(2));
+  public static final NonNegativeIntegerOption INDENT_LEVEL =
+    new NonNegativeIntegerOption("indent.level",new Integer(2));
   
   /**
    * Number of lines to remember in the Interactions History
    */
-  public static final IntegerOption HISTORY_MAX_SIZE =
-    new IntegerOption("history.max.size", new Integer(500));
+  public static final NonNegativeIntegerOption HISTORY_MAX_SIZE =
+    new NonNegativeIntegerOption("history.max.size", new Integer(500));
+  
+  /**
+   * Number of files to list in the recent file list
+   */
+  public static final NonNegativeIntegerOption RECENT_FILES_MAX_SIZE =
+    new NonNegativeIntegerOption("recent.files.max.size", new Integer(5));
   
   /**
    * Whether the integrated debugger should be displayed as available.

@@ -56,14 +56,14 @@ public class OptionMapLoaderTest extends TestCase implements OptionConstants {
   public static final String OPTION_DOC = 
     "# this is a fake header\n"+
     "this.is.a.real.key = value\n"+
-    "indent.level = -1\n"+
+    "indent.level = 1\n"+
     "javac.location = foo\n"+
     "jsr14.location = bar\n"+
     "jsr14.collectionspath = baz\n"+
     "extra.classpath = bam\n\n";
   
   public void testProperConfigSet() throws IOException {
-    checkSet(OPTION_DOC,new Integer(-1),new File("foo"),new File("bar"),new File("baz"),1);
+    checkSet(OPTION_DOC,new Integer(1),new File("foo"),new File("bar"),new File("baz"),1);
   }
   
   private void checkSet(String set, Integer indent, File javac, File jsr, File col, int size) throws IOException {

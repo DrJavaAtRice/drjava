@@ -419,6 +419,7 @@ public class ConfigFrame extends JFrame {
     panel.addComponent( new IntegerOptionComponent ( OptionConstants.INDENT_LEVEL, "Indent Level", this));
     panel.addComponent( new FileOptionComponent ( OptionConstants.WORKING_DIRECTORY, "Working Directory", this));
     panel.addComponent( new IntegerOptionComponent ( OptionConstants.HISTORY_MAX_SIZE, "Size of Interactions History", this));
+    panel.addComponent( new IntegerOptionComponent ( OptionConstants.RECENT_FILES_MAX_SIZE, "Maximum Size of Recent Files List", this));
 
     panel.displayComponents();
   }
