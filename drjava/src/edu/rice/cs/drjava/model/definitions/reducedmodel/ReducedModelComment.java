@@ -134,6 +134,7 @@ public class ReducedModelComment implements ReducedModelStates {
       case '\n': insertNewline(); break;
       case '\"': insertDoubleQuote(); break;
       case '\\': insertBackSlash(); break;
+      case '\'': insertSingleQuote(); break; 
       default:
         _insertGap(1); break;
     }
@@ -212,7 +213,6 @@ public class ReducedModelComment implements ReducedModelStates {
     }
     return;
   }
-  
   
   /**
   * Checks before the place of insert to make sure there are no preceding
@@ -411,6 +411,94 @@ public class ReducedModelComment implements ReducedModelStates {
     _cursor.next();
     _offset = 0;
   }
+
+ /**
+  * Inserts a single quote character.
+  * <OL>
+  *  <li> atStart: insert
+  *  <li> atEnd: insert
+  *  <li> inside multiple character brace:
+  *   <ol>
+  *    <li> break current brace
+  *    <li> move next to make second part current
+  *    <li> insert brace between broken parts of former brace
+  *    <li> walk
+  *    <li> current = multiple char brace? move next once<BR>
+  *         current = single char brace?  move next twice<BR>
+  *         We moved two previous, but if the broken part combined with
+  *         the insert, there's only one brace where once were two.
+  *    <li> move next twice to be after newline insertion
+  *   </ol>
+  *  <li> inside a gap: use helper function
+  *  <li> before a multiple char brace:
+  *   <ol>
+  *    <li> break the current brace
+  *    <li> check previous and insert
+  *   </ol>
+  *  <li>otherwise, just insert normally
+  * </OL>
+  * @return a Vector of highlighting information after the cursor
+  */
+  public void insertSingleQuote() {
+    if (_cursor.atStart()) {
+      _insertNewSingleQuote();
+    }
+    else if (_cursor.atEnd()) {
+      _insertNewSingleQuote();
+    }
+    else if ((_offset > 0) && _cursor.current().isMultipleCharBrace()) {
+      _splitCurrentIfCommentBlock(true,true, _cursor);
+      _cursor.next();
+      _cursor.insert(Brace.MakeBrace("'", getStateAtCurrent()));
+      _cursor.prev();
+      _updateBasedOnCurrentState();
+      if (!_cursor.current().isMultipleCharBrace())
+        _cursor.next();
+      _cursor.next();
+      _offset = 0;
+    }
+    else if ((_offset > 0) && _cursor.current().isGap()) {
+      _insertBraceToGap("'", _cursor);
+    }
+    else {
+      _insertNewSingleQuote();
+    }
+    return;
+  }
+  
+  /**
+  * Helper function for insertSingleQuote.
+  */
+  private void _insertNewSingleQuote() {
+    String insert = _getSingleQuoteType();
+    
+    _insertNewBrace(insert, _cursor);
+    _cursor.prev();
+    _updateBasedOnCurrentState();
+    _cursor.next();
+    _offset = 0;
+  }
+  
+  /**
+  * Helper function for insertSingleQuote.  Returns text for either
+  * a regular (') or escaped (\') quote.  In the case where a backslash
+  * precedes the point of insertion, it removes the backslash and returns
+  * the text for an escaped quote.
+  */
+  private String _getSingleQuoteType() {
+    if (_cursor.atStart() || _cursor.atFirstItem()) {
+      return "'";
+    }
+    else if (_cursor.prevItem().getType().equals("\\")) {
+      _cursor.prev();
+      _cursor.remove();
+      return "\\'";
+    }
+    else {
+      return "'";
+    }
+  }
+  
   
   /**
   * Inserts a double quote character.
@@ -548,7 +636,6 @@ public class ReducedModelComment implements ReducedModelStates {
       _splitCurrentIfCommentBlock(true,true,_cursor);
       //leaving us at the start
       _cursor.next(); //leaving us after first char
-      //System.out.println(this.simpleString());
       _insertNewBrace("\\",_cursor); //leaves us after /
       _cursor.prev();
       _cursor.prev(); //puts us back on first char in double comment
@@ -712,11 +799,20 @@ public class ReducedModelComment implements ReducedModelStates {
       state = INSIDE_BLOCK_COMMENT;
     }
     else if ( (temp.prevItem().isDoubleQuote() &&
-               temp.prevItem().isOpen()) ||
+               temp.prevItem().isOpen() &&
+               (temp.prevItem().getState() == FREE)) ||
              (temp.prevItem().getState() ==
               INSIDE_DOUBLE_QUOTE))
     {
       state = INSIDE_DOUBLE_QUOTE;
+    }
+    else if ( (temp.prevItem().isSingleQuote() &&
+               temp.prevItem().isOpen() &&
+               (temp.prevItem().getState() == FREE)) ||
+             (temp.prevItem().getState() ==
+              INSIDE_SINGLE_QUOTE))
+    {
+      state = INSIDE_SINGLE_QUOTE;
     }
     else {
       state = FREE;
@@ -923,6 +1019,9 @@ public class ReducedModelComment implements ReducedModelStates {
         case FREE:
           curState = _updateFree(copyCursor);
         break;
+        case INSIDE_SINGLE_QUOTE:
+          curState = _updateInsideSingleQuote(copyCursor);
+        break;
         case INSIDE_DOUBLE_QUOTE:
           curState = _updateInsideDoubleQuote(copyCursor);
         break;
@@ -972,6 +1071,8 @@ public class ReducedModelComment implements ReducedModelStates {
     _combineCurrentAndNextIfFind("/","//",copyCursor);
     
     _combineCurrentAndNextIfFind("\\","\\",copyCursor);  // \-\
+    _combineCurrentAndNextIfFind("\\","'",copyCursor);  // \-'
+    _combineCurrentAndNextIfFind("\\","\\'",copyCursor);// \-\'
     _combineCurrentAndNextIfFind("\\","\"",copyCursor);  // \-"
     _combineCurrentAndNextIfFind("\\","\\\"",copyCursor);// \-\"
     _combineCurrentAndNextIfFind("\\","\\\\",copyCursor);// \-\\
@@ -998,6 +1099,15 @@ public class ReducedModelComment implements ReducedModelStates {
       return INSIDE_BLOCK_COMMENT;
       //_updateInsideBlockComment(copyCursor);
     }
+    else if (type.equals("\'")) {
+      // make sure this is a OPEN single quote
+      if (copyCursor.current().isClosed()) {
+        copyCursor.current().flip();
+      }
+      copyCursor.current().setState(FREE);
+      copyCursor.next();
+      return INSIDE_SINGLE_QUOTE;
+    }
     else if (type.equals("\"")) {
       // make sure this is a OPEN quote
       if (copyCursor.current().isClosed()) {
@@ -1013,6 +1123,54 @@ public class ReducedModelComment implements ReducedModelStates {
       copyCursor.next();
       return FREE;
       //_updateFree(copyCursor);
+    }
+  }
+  /**
+   * Walk function for when inside single quotes.
+   *  <ol>
+   *  <li> If we've reached the end of the list, return.
+   *  <li> If we find //, /* or * /, split them into two separate braces.
+   *       The cursor will be on the first of the two new braces.
+   *  <li> If current brace = \n or ', mark current brace FREE, next(), and
+   *       go to updateFree.
+   *       Else, mark current brace as INSIDE_SINGLE_QUOTE, go to next brace, recur.
+   * </ol>   
+   */
+  private int _updateInsideSingleQuote(ModelList<ReducedToken>.Iterator copyCursor) {
+    if (copyCursor.atEnd()) {
+      return -1;
+    }
+    _splitCurrentIfCommentBlock(true,false, copyCursor);
+    _combineCurrentAndNextIfFind("","", copyCursor);
+    _combineCurrentAndNextIfFind("\\","\\",copyCursor);  // \-\
+    _combineCurrentAndNextIfFind("\\","\"",copyCursor);  // \-"
+    _combineCurrentAndNextIfFind("\\","\\\"",copyCursor);// \-\"
+    _combineCurrentAndNextIfFind("\\","'",copyCursor);  // \-'
+    _combineCurrentAndNextIfFind("\\","\\'",copyCursor);// \-\'
+    _combineCurrentAndNextIfFind("\\","\\\\",copyCursor);// \-\\
+    String type = copyCursor.current().getType();
+    
+    if (type.equals("\n")) {
+      copyCursor.current().setState(FREE);
+      copyCursor.next();
+      return FREE;
+      //_updateFree(copyCursor);
+    }
+    else if (type.equals("\'")) {
+      // make sure this is a CLOSE quote
+      if (copyCursor.current().isOpen())
+        copyCursor.current().flip();
+      
+      copyCursor.current().setState(FREE);
+      copyCursor.next();
+      return FREE;
+      //_updateFree(copyCursor);
+    }
+    else {
+      copyCursor.current().setState(INSIDE_SINGLE_QUOTE);
+      copyCursor.next();
+      return INSIDE_SINGLE_QUOTE;
+      //_updateInsideDoubleQuote(copyCursor);
     }
   }
   
@@ -1035,6 +1193,8 @@ public class ReducedModelComment implements ReducedModelStates {
     _splitCurrentIfCommentBlock(true,false, copyCursor);
     _combineCurrentAndNextIfFind("","", copyCursor);
     _combineCurrentAndNextIfFind("\\","\\",copyCursor);  // \-\
+    _combineCurrentAndNextIfFind("\\","\'",copyCursor);  // \-'
+    _combineCurrentAndNextIfFind("\\","\\'",copyCursor);// \-\'
     _combineCurrentAndNextIfFind("\\","\"",copyCursor);  // \-"
     _combineCurrentAndNextIfFind("\\","\\\"",copyCursor);// \-\"
     _combineCurrentAndNextIfFind("\\","\\\\",copyCursor);// \-\\
@@ -1085,6 +1245,8 @@ public class ReducedModelComment implements ReducedModelStates {
     _splitCurrentIfCommentBlock(true, false,copyCursor);
     _combineCurrentAndNextIfFind("","", copyCursor);
     _combineCurrentAndNextIfFind("\\","\\",copyCursor);  // \-\
+    _combineCurrentAndNextIfFind("\\","\'",copyCursor);  // \-'
+    _combineCurrentAndNextIfFind("\\","\\'",copyCursor);// \-\'
     _combineCurrentAndNextIfFind("\\","\"",copyCursor);  // \-"
     _combineCurrentAndNextIfFind("\\","\\\"",copyCursor);// \-\"
     _combineCurrentAndNextIfFind("\\","\\\\",copyCursor);// \-\\
@@ -1106,7 +1268,7 @@ public class ReducedModelComment implements ReducedModelStates {
   }
   
   /**
-   * Walk function for inside line comment.
+   * Walk function for inside block comment.
    *  Self-recursive and mutually recursive with other walk functions.
    *  <ol>
    *   <li> If we've reached the end of the list, return.
@@ -1131,6 +1293,8 @@ public class ReducedModelComment implements ReducedModelStates {
     _combineCurrentAndNextIfFind("*","/*", copyCursor);
     _combineCurrentAndNextIfFind("","", copyCursor);
     _combineCurrentAndNextIfFind("\\","\\",copyCursor);  // \-\
+    _combineCurrentAndNextIfFind("\\","\'",copyCursor);  // \-'
+    _combineCurrentAndNextIfFind("\\","\\'",copyCursor);// \-\'
     _combineCurrentAndNextIfFind("\\","\"",copyCursor);  // \-"
     _combineCurrentAndNextIfFind("\\","\\\"",copyCursor);// \-\"
     _combineCurrentAndNextIfFind("\\","\\\\",copyCursor);// \-\\
@@ -1244,6 +1408,15 @@ public class ReducedModelComment implements ReducedModelStates {
         copyCursor.current().setType("\\\\");
         copyCursor.current().setState(FREE);
         return true;
+      } // \-\'
+      else if ((copyCursor.current().getType().equals("\\'")) &&
+               (copyCursor.prevItem().getType().equals("\\")))
+      {
+        copyCursor.current().setType("'");
+        copyCursor.prev();
+        copyCursor.current().setType("\\\\");
+        copyCursor.current().setState(FREE);
+        return true;
       }
       // delete the first Brace and augment the second
       copyCursor.prev();
@@ -1271,16 +1444,18 @@ public class ReducedModelComment implements ReducedModelStates {
    *  The two new Braces will have the same quoted/commented status
    *  as the one they were split from.
    */
-  private void
-    _splitCurrentIfCommentBlock(boolean splitClose,boolean splitEscape,
-                                ModelList<ReducedToken>.Iterator copyCursor)
+  private void _splitCurrentIfCommentBlock(boolean splitClose,
+                                           boolean splitEscape,
+                                           ModelList<ReducedToken>.Iterator 
+                                           copyCursor)
     {
       String type = copyCursor.current().getType();
       if (type.equals("//") ||
           type.equals("/*") ||
           (splitClose && type.equals("*/")) ||
           (splitEscape && type.equals("\\\\")) ||
-          (splitEscape && type.equals("\\\"")))
+          (splitEscape && type.equals("\\\"")) ||
+          (splitEscape && type.equals("\\'")))
       {
         String first = type.substring(0, 1);
         String second = type.substring(1, 2);
@@ -1712,6 +1887,11 @@ public class ReducedModelComment implements ReducedModelStates {
            delTo.prev();
            return 1;
          }
+      else if (delToTypeCurr.equals("\\'") &&
+               _checkPrevEquals(delTo,"'")) {
+                 delTo.prev();
+                 return 1;
+               }      
       else if (delToTypeCurr.equals("\\\"") &&
                _checkPrevEquals(delTo,"\"")) {
                  delTo.prev();
@@ -1722,6 +1902,13 @@ public class ReducedModelComment implements ReducedModelStates {
                {
                  return 1;
                }
+
+      else if (delToTypeCurr.equals("'") &&
+               delTo.current().getType().equals("\\'"))
+               {
+                 return 1;
+               }
+
       else if (delToTypeCurr.equals("\"") &&
                delTo.current().getType().equals("\\\""))
                {

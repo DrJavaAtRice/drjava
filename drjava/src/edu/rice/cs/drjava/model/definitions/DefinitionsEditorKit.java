@@ -161,7 +161,8 @@ class ColoringView extends WrappedPlainView {
    */
   private void setFormattingForState(Graphics g, int state) {
     final Color COMMENTED_COLOR = Color.green.darker().darker();
-    final Color QUOTED_COLOR = Color.red.darker();
+    final Color DOUBLE_QUOTED_COLOR = Color.red.darker();
+    final Color SINGLE_QUOTED_COLOR = Color.magenta;
     final Color NORMAL_COLOR = Color.black;
     final Color KEYWORD_COLOR = Color.blue;
     switch (state) {
@@ -171,8 +172,11 @@ class ColoringView extends WrappedPlainView {
       case HighlightStatus.COMMENTED:
         g.setColor(COMMENTED_COLOR);
         break;
-      case HighlightStatus.QUOTED:
-        g.setColor(QUOTED_COLOR);
+      case HighlightStatus.SINGLE_QUOTED:
+        g.setColor(SINGLE_QUOTED_COLOR);
+        break;
+      case HighlightStatus.DOUBLE_QUOTED:
+        g.setColor(DOUBLE_QUOTED_COLOR);
         break;
       case HighlightStatus.KEYWORD:
         g.setColor(KEYWORD_COLOR);

@@ -18,7 +18,7 @@ class Brace extends ReducedToken implements ReducedModelStates {
    */
   public static final String[] braces =  {
     "{", "}", "(", ")", "[", "]", "/*", "*/", "//", "\n", "/", "*", "\"", "\"", 
-    "'", "'", "\\\\", "\\\"", "\\", ""
+    "'", "'", "\\\\", "\\", "\\'", "\\\"", ""
   };
   public static final String BLK_CMT_BEG = "/*";
   public static final String BLK_CMT_END = "*/";
@@ -220,15 +220,17 @@ class Brace extends ReducedToken implements ReducedModelStates {
    * @return true if this is a multiple character brace
    */
   public boolean isMultipleCharBrace() {
-    return  (isLineComment() || isBlockCommentStart() || isBlockCommentEnd() || 
-        isDoubleEscapeSequence());
+    return  (isLineComment() || isBlockCommentStart() ||
+             isBlockCommentEnd() ||              
+             isDoubleEscapeSequence());
   }
 
   /**
    * @return true if this is \\ or \"
    */
   public boolean isDoubleEscapeSequence() {
-    return  isDoubleEscape() || isEscapedQuote();
+    return  isDoubleEscape() || isEscapedDoubleQuote() ||
+      isEscapedSingleQuote();
   }
 
   /**
@@ -241,8 +243,15 @@ class Brace extends ReducedToken implements ReducedModelStates {
   /**
    * @return true if this is \"
    */
-  public boolean isEscapedQuote() {
+  public boolean isEscapedDoubleQuote() {
     return  this.getType().equals("\\\"");
+  }
+
+  /**
+   * @return true if this is \'
+   */
+  public boolean isEscapedSingleQuote() {
+    return this.getType().equals("\\'");
   }
 
   /**

@@ -56,8 +56,11 @@ abstract class ReducedToken implements ReducedModelStates {
         || type.equals("*/") || (_state == INSIDE_BLOCK_COMMENT)) {
       return  HighlightStatus.COMMENTED;
     }
+    if ((type.equals("'") && (_state == FREE)) || (_state == INSIDE_SINGLE_QUOTE)) {
+      return  HighlightStatus.SINGLE_QUOTED;
+    }
     if ((type.equals("\"") && (_state == FREE)) || (_state == INSIDE_DOUBLE_QUOTE)) {
-      return  HighlightStatus.QUOTED;
+      return  HighlightStatus.DOUBLE_QUOTED;
     }
     return  HighlightStatus.NORMAL;
   }
@@ -188,7 +191,13 @@ abstract class ReducedToken implements ReducedModelStates {
    * put your documentation comment here
    * @return 
    */
-  public abstract boolean isEscapedQuote();
+  public abstract boolean isEscapedSingleQuote();
+
+  /**
+   * put your documentation comment here
+   * @return 
+   */
+  public abstract boolean isEscapedDoubleQuote();
 
   /**
    * put your documentation comment here

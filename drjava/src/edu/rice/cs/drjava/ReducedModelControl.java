@@ -120,11 +120,11 @@ public class ReducedModelControl implements BraceReduction {
       
       int size = getSize(rmbToken,rmcToken);
       return new Gap(size, rmc.getStateAtCurrent());
-    }
+  }
 
   public int getStateAtCurrent() {
       return rmc.getStateAtCurrent();
-    }
+  }
 
   String getType() {
     ReducedToken rmcToken = rmc.current();
@@ -267,7 +267,8 @@ public class ReducedModelControl implements BraceReduction {
 
 
   public String simpleString() {
-    return rmb.simpleString() + "\n\n\n" +rmc.simpleString();
+    return "\n********\n" + rmb.simpleString() + "\n________\n" +
+      rmc.simpleString();
   }
 
   /**
