@@ -218,7 +218,10 @@ public class DefaultGlobalModel implements GlobalModel {
         throw new AlreadyOpenException(openDoc);
       }
 
-      _editorKit.read(new FileReader(file), tempDoc, 0);
+      FileReader reader = new FileReader(file);
+      _editorKit.read(reader, tempDoc, 0);
+      reader.close(); // win32 needs readers closed explicitly!
+
       tempDoc.setFile(file);
       tempDoc.resetModification();
 

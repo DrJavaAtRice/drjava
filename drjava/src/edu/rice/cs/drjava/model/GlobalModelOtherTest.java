@@ -271,7 +271,7 @@ public class GlobalModelOtherTest extends GlobalModelTestCase {
     // alas, there's no very good way to know when it's done
     // so we just wait some time hoping the println will have happened
     int i;
-    for (i = 0; i < 10; i++) {
+    for (i = 0; i < 50; i++) {
       if (_model.getConsoleDocument().getLength() == 1) {
         break;
       }
