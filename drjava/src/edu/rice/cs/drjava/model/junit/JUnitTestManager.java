@@ -180,6 +180,7 @@ public class JUnitTestManager {
     }
   }
 
+  
   /**
    * Constructs a new JUnitError from a TestFailure
    * @param failure A given TestFailure

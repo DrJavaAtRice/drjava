@@ -343,6 +343,35 @@ public final class MainFrameTest extends MultiThreadedTestCase {
   }
 
   /**
+   * Ensure that all key events are disabled when the glass pane is up
+   */
+  public void testGlassPaneHidesKeyEvents() {
+    SingleDisplayModel model = _frame.getModel();
+
+    OpenDefinitionsDocument doc1 = model.newFile();
+    OpenDefinitionsDocument doc2 = model.newFile();
+
+    // doc2 is now active
+
+    JScrollPane pane1 = _frame._createDefScrollPane(doc1);
+    JScrollPane pane2 = _frame._createDefScrollPane(doc2);
+
+    DefinitionsPane defPane1 = (DefinitionsPane) pane1.getViewport().getView();
+    DefinitionsPane defPane2 = (DefinitionsPane) pane2.getViewport().getView();
+
+    _frame.hourglassOn();
+
+    defPane1.processKeyEvent(new KeyEvent(defPane1, KeyEvent.KEY_PRESSED, 70, KeyEvent.CTRL_MASK, KeyEvent.VK_F, 'F') );
+    assertTrue("the find replace dialog should not come up", !_frame.getFindReplaceDialog().isDisplayed());
+    
+    _frame.getInteractionsPane().processKeyEvent(new KeyEvent(_frame.getInteractionsPane(), KeyEvent.KEY_PRESSED, 0, KeyEvent.CTRL_MASK, KeyEvent.VK_F, 'F') );
+    assertTrue("the find replace dialog should not come up", !_frame.getFindReplaceDialog().isDisplayed());
+
+    _frame.hourglassOff();
+
+  }
+
+  /**
    * A Test to guarantee that the Dancing UI bug will not rear its ugly head again.
    * Basically, add a component listener to the leftComponent of _docSplitPane and
    * make certain its size does not change while compiling a class which depends on

@@ -430,7 +430,8 @@ public class MainFrame extends JFrame implements OptionConstants {
    */
   private Action _openAction = new AbstractAction("Open...") {
     public void actionPerformed(ActionEvent ae) {
-      _open();
+      throw new RuntimeException();
+      //_open();
     }
   };
   
@@ -632,6 +633,19 @@ public class MainFrame extends JFrame implements OptionConstants {
       new Thread("Running JUnit Tests") {
         public void run() {
           _model.getJUnitModel().junitAll();
+        }
+      }.start();
+    }
+  };
+
+  /**
+   * Runs JUnit over all open JUnit tests in the project direcotry.
+   */
+  private Action _junitProjectAction = new AbstractAction("Test Project") {
+    public void actionPerformed(ActionEvent e) {
+      new Thread("Running JUnit Tests") {
+        public void run() {
+          _model.getJUnitModel().junitProject();
         }
       }.start();
     }
@@ -1784,6 +1798,16 @@ public class MainFrame extends JFrame implements OptionConstants {
   public void hourglassOn() {
     getGlassPane().setVisible(true);
     _currentDefPane.setEditable(false);
+    setAllowKeyEvents(false);
+  }
+  
+  private boolean allow_key_events = true;
+  public void setAllowKeyEvents(boolean a){
+    this.allow_key_events = a;
+  }
+  
+  public boolean getAllowKeyEvents(){
+    return this.allow_key_events;
   }
 
   /**
@@ -1792,6 +1816,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   public void hourglassOff() {
     getGlassPane().setVisible(false);
     _currentDefPane.setEditable(true);
+    setAllowKeyEvents(true);
   }
 
   /**
@@ -2176,6 +2201,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       _closeProjectAction.setEnabled(true);
 //      _saveProjectAction.setEnabled(false);
       _projectPropertiesAction.setEnabled(true);
+      _junitProjectAction.setEnabled(true);
       _compileProjectAction.setEnabled(true);
       _model.setProjectChanged(false);
       _resetNavigatorPane();
@@ -2206,6 +2232,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       _closeProjectAction.setEnabled(false);
 //      _saveProjectAction.setEnabled(false);
       _projectPropertiesAction.setEnabled(false);
+      _junitProjectAction.setEnabled(false);
       _compileProjectAction.setEnabled(false);
       _setUpContextMenus();
       _currentProjFile = null;
@@ -3314,7 +3341,11 @@ public class MainFrame extends JFrame implements OptionConstants {
     
     _setUpAction(_projectPropertiesAction, "Project Properties", "Preferences", "Edit Project Properties");
     _projectPropertiesAction.setEnabled(false);    
-    _setUpAction(_compileProjectAction, "Compile", "Compile",
+
+    _setUpAction(_junitProjectAction, "Test", "Test", "Test the current project");
+    _junitProjectAction.setEnabled(false);    
+
+  _setUpAction(_compileProjectAction, "Compile", "Compile",
                  "Compile the current project");
     _compileProjectAction.setEnabled(false);
       
@@ -3424,6 +3455,21 @@ public class MainFrame extends JFrame implements OptionConstants {
     return null;
   }
 
+  
+  /**
+   * this allows us to intercept key events when compiling testing
+   * and turn them off when the glass pane is up
+   */
+  private class MenuBar extends JMenuBar{
+    public boolean processKeyBinding(KeyStroke ks, KeyEvent e, int condition, boolean pressed) {
+      if(MainFrame.this.getAllowKeyEvents()){
+        return super.processKeyBinding(ks, e, condition, pressed);
+      }else{
+        return false;
+      }
+    }
+  }
+  
   /**
    * Sets up the components of the menu bar and links them to the private
    * fields within MainFrame.  This method serves to make the code
@@ -3435,7 +3481,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     // Get proper cross-platform mask.
     int mask = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
 
-    _menuBar = new JMenuBar();
+    _menuBar = new MenuBar();
     _fileMenu = _setUpFileMenu(mask);
     _editMenu = _setUpEditMenu(mask);
     _toolsMenu = _setUpToolsMenu(mask);
@@ -3646,6 +3692,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     // run project
     projectMenu.add(_compileProjectAction);
     projectMenu.add(_runProjectAction);
+    projectMenu.add(_junitProjectAction);
     
     projectMenu.addSeparator();
     // eventually add project options
@@ -5350,7 +5397,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       // Only change GUI from event-dispatching thread
       SwingUtilities.invokeLater(new Runnable() {
         public void run() {
-//          MainFrame.this.hourglassOn();
+          MainFrame.this.hourglassOn();
           showTab(_junitErrorPanel);
           _junitErrorPanel.setJUnitInProgress(docs);
           _junitAction.setEnabled(false);
@@ -5389,7 +5436,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       // Only change GUI from event-dispatching thread
       SwingUtilities.invokeLater(new Runnable() {
         public void run() {
-//          MainFrame.this.hourglassOff();
+          MainFrame.this.hourglassOff();
           showTab(_junitErrorPanel);
           _junitAction.setEnabled(true);
           _junitAllAction.setEnabled(true);
@@ -5941,6 +5988,15 @@ public class MainFrame extends JFrame implements OptionConstants {
       return false;
     }
   }
+
+  /**
+   * returns teh find replace dialog
+   * package protected for use in tests
+   */
+  FindReplaceDialog getFindReplaceDialog(){
+    return _findReplace;
+  }
+  
 
   /**
    * Builds the Hashtables in KeyBindingManager that are used to keep track

@@ -90,6 +90,14 @@ public interface JUnitModel {
   public void junitAll();
 
   /**
+   * Creates a JUnit test suite over all currently open project documents and runs it.
+   * If the class file associated with a file is not a test case, it will be
+   * ignored.  Synchronized against the compiler model to prevent testing and
+   * compiling at the same time, which would create invalid results.
+   */
+  public void junitProject();
+
+  /**
    * Runs JUnit over a single document.  Synchronized against the compiler model
    * to prevent testing and compiling at the same time, which would create
    * invalid results.

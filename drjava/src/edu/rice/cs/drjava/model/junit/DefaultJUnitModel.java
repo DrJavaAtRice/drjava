@@ -201,6 +201,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
             classNamesToODDs.put(cn, doc);
           }
         }
+        
         catch (ClassNameNotFoundException cnnfe) {
           // don't add it to the test suite
         }
@@ -225,22 +226,6 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
    */
   public void junitProject() {
     synchronized (_compilerModel) {
-//      File d = getProjectFile();
-//      if(d == null) return;
-//      d = d.getParentFile();
-//      File[] files = FileOps.getFilesInDir(d, true);
-//      for(File f: files){
-//        try{
-//          if(_getter.isAlreadyOpen(f)){
-//            _getter.getDocumentForFile(f);
-//          }else{
-//            // assume the 
-//          }
-//        }catch(IOException e){
-//          // error opening the file, so don't inlcude it in testing
-//        }
-//      }
-      
       //reset the JUnitErrorModel, fixes bug #907211 "Test Failures Not Cleared Properly".
       _junitErrorModel = new JUnitErrorModel(new JUnitError[0], null, false);
       Iterator<OpenDefinitionsDocument> it =
@@ -252,7 +237,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
       while (it.hasNext()) {
         try {
           OpenDefinitionsDocument doc = it.next();
-          if (!doc.isUntitled()) {
+          if (doc.isProjectFile()) {
             String cn = doc.getQualifiedClassName();
             classNames.add(cn);
             File f;
@@ -262,12 +247,16 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
             catch (FileMovedException fme) {
               f = fme.getFile();
             }
-            files.add(f);
+            if(f.getCanonicalPath().startsWith(_model.getProjectFile().getParentFile().getCanonicalPath())){
+              files.add(f);
+            }
             classNamesToODDs.put(cn, doc);
           }
         }
         catch (ClassNameNotFoundException cnnfe) {
           // don't add it to the test suite
+        }catch(IOException e){
+          // don't add it to the test
         }
       }
       List<String> tests = _jvm.runTestSuite(classNames, files, true);

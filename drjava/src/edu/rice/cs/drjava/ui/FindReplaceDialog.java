@@ -88,7 +88,7 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
   private SingleDisplayModel _model;
   private DefinitionsPane _defPane = null;
   private boolean _caretChanged;
-
+  
   /**
    * Listens for changes to the cursor position in order
    * to reset the start position

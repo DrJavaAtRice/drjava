@@ -48,6 +48,8 @@ package edu.rice.cs.drjava.ui;
 import javax.swing.*;
 import javax.swing.text.*;
 import java.awt.Toolkit;
+import java.awt.event.ContainerEvent;
+import java.awt.event.KeyEvent;
 
 import edu.rice.cs.util.swing.*;
 import edu.rice.cs.drjava.config.*;
@@ -119,6 +121,10 @@ public class InteractionsPane extends JTextPane implements OptionConstants {
     // Setup color listeners.
     new ForegroundColorListener(this);
     new BackgroundColorListener(this);
+  }
+
+  public void processKeyEvent(KeyEvent e) {
+    super.processKeyEvent(e);
   }
   
   /**

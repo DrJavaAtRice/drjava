@@ -59,11 +59,11 @@ import java.awt.event.*;
  * @version $Id$
  */
 public class KeyBindingManager {
-
+  
   public static final KeyBindingManager Singleton = new KeyBindingManager();
 
-  private KeyBindingManager() {}
-
+  private KeyBindingManager() {   }
+  
   // Key-binding configuration tables
   /**
    * TODO: should these be synchronized?
@@ -103,7 +103,9 @@ public class KeyBindingManager {
   public void setShouldCheckConflict (boolean bool) {
     _shouldCheckConflict = bool;
   }
-  public Enumeration getKeyStrokeData() { return _actionToDataMap.elements(); }
+  public Enumeration getKeyStrokeData() { 
+      return _actionToDataMap.elements();
+  }
 
   public void put(Option<KeyStroke> kso, Action a, JMenuItem jmi, String name)  {
     KeyStroke ks = DrJava.getConfig().getSetting(kso);
