@@ -181,6 +181,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   // Status bar fields
   private JPanel _statusBar;
   private JLabel _fileNameField;
+  private JLabel _sbMessage;
   private JLabel _currLocationField;
   private PositionListener _posListener;
 
@@ -1809,7 +1810,35 @@ public class MainFrame extends JFrame implements OptionConstants {
     });
   }
 
-
+  /**
+   * Changes the message text toward the right of the status bar
+   * @param msg The message to place in the status bar
+   */
+  public void setStatusMessage(String msg) {
+    _sbMessage.setText(msg);
+  }
+  /**
+   * Sets the message text in the status bar to the null string
+   */
+  public void clearStatusMessage() {
+    _sbMessage.setText("");
+  }
+  /**
+   * Sets the font of the status bar message
+   * @param f The new font of the status bar message
+   */
+  public void setStatusMessageFont(Font f) {
+    _sbMessage.setFont(f);
+  }
+  /**
+   * Sets the color of the text in the status bar message
+   * @param c The color of the text
+   */
+  public void setStatusMessageColor(Color c) {
+    _sbMessage.setForeground(c);
+  }
+  
+  
   private void _new() {
     _model.newFile();
   }
@@ -3185,22 +3214,47 @@ public class MainFrame extends JFrame implements OptionConstants {
    * Sets up the status bar with the filename field.
    */
   private void _setUpStatusBar() {
+    // Set up the 3 labels:
     _fileNameField = new JLabel();
     _fileNameField.setFont(_fileNameField.getFont().deriveFont(Font.PLAIN));
-
-
+    
+    _sbMessage = new JLabel();//("This is the text for the center message");
+    _sbMessage.setHorizontalAlignment(SwingConstants.RIGHT);
+    
     _currLocationField = new JLabel();
     _currLocationField.setFont(_currLocationField.getFont().deriveFont(Font.PLAIN));
-    _currLocationField.setVisible(true);
-
-    _statusBar = new JPanel( new BorderLayout() );
+    _currLocationField.setHorizontalAlignment(SwingConstants.RIGHT);
+    _currLocationField.setPreferredSize(new Dimension(65,20));
+    //_currLocationField.setVisible(true);
+    
+    // Create the status bar panel
+    //SpringLayout layout = new SpringLayout();
+    _statusBar = new JPanel(new BorderLayout());//( layout );
     _statusBar.add( _fileNameField, BorderLayout.WEST );
+    _statusBar.add( _sbMessage, BorderLayout.CENTER );
     _statusBar.add( _currLocationField, BorderLayout.EAST );
     _statusBar.setBorder(
       new CompoundBorder(new EmptyBorder(2,2,2,2),
                          new CompoundBorder(new BevelBorder(BevelBorder.LOWERED),
                                             new EmptyBorder(2,2,2,2))));
     getContentPane().add(_statusBar, BorderLayout.SOUTH);
+    
+    /*
+    //Adjust constraints for the fileName label so it's next to the left edge.
+    layout.getConstraints(_fileNameField).setX(Spring.constant(0));
+    
+    //Adjust constraints for the message label so it's spaced a bit from the right.
+    //and doesn't interfere with the left-most label
+    layout.putConstraint(SpringLayout.EAST, _sbMessage, -65,
+                         SpringLayout.EAST, _statusBar);
+    
+    //Adjust constraints for the location label so it's next to the right edge.
+    layout.putConstraint(SpringLayout.EAST, _currLocationField, 0,
+                         SpringLayout.EAST, _statusBar);
+    
+    //Adjust constraints for the panel to set its size
+    layout.putConstraint(SpringLayout.SOUTH, _statusBar, 0,
+                         SpringLayout.SOUTH, _currLocationField);*/
   }
 
   /**

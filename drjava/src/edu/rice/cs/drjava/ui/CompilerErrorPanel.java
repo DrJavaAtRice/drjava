@@ -91,8 +91,8 @@ public class CompilerErrorPanel extends ErrorPanel {
 
   private final JComboBox _compilerChoiceBox;
 
-  JButton nextErrorButton = new JButton("Next Error");
-  JButton prevErrorButton = new JButton("Prev Error");
+  JButton nextErrorButton = new JButton(MainFrame.getIcon("Down16.gif"));//new JButton("Next Error");
+  JButton prevErrorButton = new JButton(MainFrame.getIcon("Up16.gif"));//new JButton("Prev Error");
 
   /**
    * Constructor.
@@ -107,8 +107,13 @@ public class CompilerErrorPanel extends ErrorPanel {
 
     _errorListPane = new CompilerErrorListPane();
 
-
-
+    nextErrorButton.setMargin(new Insets(0,0,0,0));
+    //nextErrorButton.setBorder(BorderFactory.createEmptyBorder());
+    nextErrorButton.setToolTipText("Go to the next error");
+    prevErrorButton.setMargin(new Insets(0,0,0,0));
+    //prevErrorButton.setBorder(BorderFactory.createEmptyBorder());
+    prevErrorButton.setToolTipText("Go to the previous error");
+//    _showHighlightsCheckBox.setText("Highlight");
 
     // Limitation: Only compiler choices are those that were available
     // at the time this box was created.
@@ -138,6 +143,7 @@ public class CompilerErrorPanel extends ErrorPanel {
     });
 
     _mainPanel.setLayout(new BorderLayout());
+    _mainPanel.setMinimumSize(new Dimension(225,60));
 
     // We make the vertical scrollbar always there.
     // If we don't, when it pops up it cuts away the right edge of the
@@ -155,7 +161,7 @@ public class CompilerErrorPanel extends ErrorPanel {
                       BorderLayout.NORTH);
 
     compilerPanel.add(uiBox,BorderLayout.CENTER);
-    uiBox.add(_compilerChoiceBox,BorderLayout.NORTH);
+//    uiBox.add(_compilerChoiceBox,BorderLayout.NORTH);
 
     JPanel midPanel = new JPanel();
  //nextErrorButton.setEnabled(false);
@@ -174,19 +180,29 @@ public class CompilerErrorPanel extends ErrorPanel {
 //  nextErrorButton.setEnabled(_errorListPane.hasNextError());
       }
     });
-    midPanel.setLayout(new FlowLayout());
-    midPanel.add(prevErrorButton);
-    midPanel.add(nextErrorButton);
+    midPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 3, 3));  // 3 pix padding on sides
+    midPanel.setPreferredSize(new Dimension(170,70));
+//    midPanel.add(errorPanel);
+    midPanel.add(_compilerChoiceBox);
+    midPanel.add(_showHighlightsCheckBox);
+    uiBox.add(midPanel,BorderLayout.EAST);
 
-    uiBox.add(midPanel,BorderLayout.CENTER);
-
+    
+    JPanel errorPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 3)); 
+    errorPanel.setPreferredSize(new Dimension(27,35));
+    errorPanel.add(prevErrorButton);
+//    errorLabel.setMargin(new Insets(3,0,3,0));
+//    errorLabel.setBorder(BorderFactory.createEtchedBorder());
+    errorPanel.add(nextErrorButton);
+//    errorPanel.setBorder(BorderFactory.createEtchedBorder());
+    uiBox.add(errorPanel, BorderLayout.WEST);
 
     _mainPanel.add(scroller, BorderLayout.CENTER);
     _mainPanel.add(compilerPanel, BorderLayout.EAST);
     DrJava.getConfig().addOptionListener(OptionConstants.JAVAC_LOCATION, new CompilerLocationOptionListener<File>());
     DrJava.getConfig().addOptionListener(OptionConstants.JSR14_LOCATION, new CompilerLocationOptionListener<File>());
     DrJava.getConfig().addOptionListener(OptionConstants.EXTRA_COMPILERS, new CompilerLocationOptionListener<Vector<String>>());
-    uiBox.add(_showHighlightsCheckBox, BorderLayout.SOUTH);
+    //uiBox.add(_showHighlightsCheckBox, BorderLayout.SOUTH);
   }
 
 
