@@ -307,6 +307,20 @@ public interface OptionConstants {
                         KeyStroke.getKeyStroke(KeyEvent.VK_PERIOD, mask));
   
   /**
+   * The key binding for changing the focus to the previous pane
+   */
+  public static final KeyStrokeOption KEY_PREVIOUS_PANE = 
+    new KeyStrokeOption("key.previous.pane",
+                        KeyStroke.getKeyStroke(KeyEvent.VK_OPEN_BRACKET, mask));
+  
+  /**
+   * The key binding for changing the focus to the previous pane
+   */
+  public static final KeyStrokeOption KEY_NEXT_PANE = 
+    new KeyStrokeOption("key.next.pane",
+                        KeyStroke.getKeyStroke(KeyEvent.VK_CLOSE_BRACKET, mask));
+  
+  /**
    * The key binding for openning the preferences dialog
    */
   public static final KeyStrokeOption KEY_PREFERENCES =

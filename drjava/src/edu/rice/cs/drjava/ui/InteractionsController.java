@@ -50,6 +50,8 @@ import java.awt.Color;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
+import edu.rice.cs.drjava.config.OptionListener;
+import edu.rice.cs.drjava.config.OptionEvent;
 import edu.rice.cs.drjava.model.repl.ConsoleDocument;
 import edu.rice.cs.drjava.model.repl.InteractionsDocument;
 import edu.rice.cs.drjava.model.repl.InteractionsModel;
@@ -231,8 +233,21 @@ public class InteractionsController extends AbstractConsoleController {
     // Prevent previous word action from going past the prompt
     _pane.addActionForKeyStroke(DrJava.getConfig().getSetting(OptionConstants.KEY_PREVIOUS_WORD),
                                 prevWordAction);
+    DrJava.getConfig().addOptionListener(OptionConstants.KEY_PREVIOUS_WORD, new OptionListener<KeyStroke>() {
+      public void optionChanged(OptionEvent<KeyStroke> oe) {
+        _pane.addActionForKeyStroke(DrJava.getConfig().getSetting(OptionConstants.KEY_PREVIOUS_WORD),
+                                    prevWordAction);
+      }
+    });
+    
     _pane.addActionForKeyStroke(DrJava.getConfig().getSetting(OptionConstants.KEY_NEXT_WORD),
                                 nextWordAction);
+    DrJava.getConfig().addOptionListener(OptionConstants.KEY_NEXT_WORD, new OptionListener<KeyStroke>() {
+      public void optionChanged(OptionEvent<KeyStroke> oe) {
+        _pane.addActionForKeyStroke(DrJava.getConfig().getSetting(OptionConstants.KEY_NEXT_WORD),
+                                    nextWordAction);
+      }
+    });
   }
 
   /**
@@ -243,7 +258,6 @@ public class InteractionsController extends AbstractConsoleController {
     // should also check to see if we are resetting the interactions pane
     return _doc.inProgress();
   }
-  
   
   // The fields below were made package private for testing purposes.
   

@@ -461,7 +461,11 @@ public class IdentityVisitor implements Visitor {
      * @param node the node to visit
      */
     public Object visit(TypeExpression node) {
-      node.setType((ReferenceType)((Type)node.getType().acceptVisitor(this)));
+      // For some reason, the setType expression in node only takes in
+      // ReferenceTypes so we have to create a new TypeExpression in
+      // case the visitor returns a PrimitiveType (e.g. int.class used
+      // to cause a ClassCastException).
+      node = new TypeExpression((Type)node.getType().acceptVisitor(this));
       return node;
     }
 

@@ -111,11 +111,19 @@ public class InteractionsPane extends JTextPane implements OptionConstants {
    * Assigns the given keystroke to the given action in this pane.
    * @param stroke keystroke that triggers the action
    * @param action Action to perform
+   * @param oldStroke the keystroke that used to be bound to this action
    */
   public void addActionForKeyStroke(KeyStroke stroke, Action action) {
+    // we don't want multiple keys bound to the same action
+    KeyStroke[] keys = _keymap.getKeyStrokesForAction(action);
+    if (keys != null) {
+      for (int i = 0; i < keys.length; i++) {
+        _keymap.removeKeyStrokeBinding(keys[i]);
+      }
+    }
     _keymap.addActionForKeyStroke(stroke, action);
     setKeymap(_keymap);
-  }
+  }  
   
   /**
    * Sets this pane's beep to be a different runnable object.

@@ -530,4 +530,8 @@ public class EvaluationVisitorExtension extends EvaluationVisitor {
   public Object visit(EmptyStatement node) {
     return Interpreter.NO_RESULT;
   }
+  
+  protected static Object performCast(Class tc, Object o) {
+    return EvaluationVisitor.performCast(tc, o);
+  }
 }

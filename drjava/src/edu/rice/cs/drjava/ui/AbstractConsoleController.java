@@ -49,6 +49,10 @@ import java.awt.Toolkit;
 import java.awt.Color;
 import java.awt.Font;
 
+import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.config.OptionConstants;
+import edu.rice.cs.drjava.config.OptionListener;
+import edu.rice.cs.drjava.config.OptionEvent;
 import edu.rice.cs.drjava.model.repl.ConsoleDocument;
 import edu.rice.cs.drjava.platform.PlatformFactory;
 import edu.rice.cs.util.text.SwingDocumentAdapter;
@@ -82,6 +86,18 @@ public abstract class AbstractConsoleController {
    * Style to use for System.err.
    */
   protected final SimpleAttributeSet _systemErrStyle;
+  
+  // package private for testing purposes (although I haven't written tests yet)
+  
+  /**
+   * Action to change focus to previous pane.
+   */
+  Action switchToPrevPaneAction;
+  
+  /**
+   * Action to change focus to next pane.
+   */
+  Action switchToNextPaneAction;
 
   /**
    * Initializes the document adapter and interactions pane.
@@ -285,5 +301,35 @@ public abstract class AbstractConsoleController {
     if (pos > getConsoleDoc().getDocLength()) pos = getConsoleDoc().getDocLength();
     
     _pane.setCaretPosition(pos);
+  } 
+  
+  public void setPrevPaneAction(Action a) {
+    switchToPrevPaneAction = a;
+    
+    // We do this here since switchToPrevPaneAction is set after the
+    // constructor is called. 
+    _pane.addActionForKeyStroke(DrJava.getConfig().getSetting(OptionConstants.KEY_PREVIOUS_PANE),
+                                switchToPrevPaneAction);
+    DrJava.getConfig().addOptionListener(OptionConstants.KEY_PREVIOUS_PANE, new OptionListener<KeyStroke>() {
+      public void optionChanged(OptionEvent<KeyStroke> oe) {
+        _pane.addActionForKeyStroke(DrJava.getConfig().getSetting(OptionConstants.KEY_PREVIOUS_PANE),
+                                    switchToPrevPaneAction);
+      }
+    });
+  }
+  
+  public void setNextPaneAction(Action a) {
+    switchToNextPaneAction = a;
+    
+    // We do this here since switchToNextPaneAction is set after the
+    // constructor is called. 
+    _pane.addActionForKeyStroke(DrJava.getConfig().getSetting(OptionConstants.KEY_NEXT_PANE),
+                                switchToNextPaneAction);
+    DrJava.getConfig().addOptionListener(OptionConstants.KEY_NEXT_PANE, new OptionListener<KeyStroke>() {
+      public void optionChanged(OptionEvent<KeyStroke> oe) {
+        _pane.addActionForKeyStroke(DrJava.getConfig().getSetting(OptionConstants.KEY_NEXT_PANE),
+                                    switchToNextPaneAction);
+      }
+    });
   }
 }

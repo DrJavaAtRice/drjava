@@ -160,6 +160,21 @@ public class DynamicJavaAdapter implements JavaInterpreter {
   
   /**
    * Assigns the given value to the given name in the interpreter.
+   * If type == null, we assume that the type of this variable
+   * has not been loaded so we set it to Object.
+   * @param name Name of the variable
+   * @param value Value to assign
+   * @param type the type of the variable
+   */
+  public void defineVariable(String name, Object value, Class type) {
+    if (type == null) {
+      type = java.lang.Object.class;
+    }
+    ((TreeInterpreter)_djInterpreter).defineVariable(name, value, type);
+  }
+  
+  /**
+   * Assigns the given value to the given name in the interpreter.
    * @param name Name of the variable
    * @param value Value to assign
    */

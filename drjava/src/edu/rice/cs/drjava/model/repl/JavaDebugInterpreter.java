@@ -63,9 +63,7 @@ import edu.rice.cs.util.UnexpectedException;
  * 
  * @version $Id$
  */
-public class JavaDebugInterpreter extends DynamicJavaAdapter {
-  // TODO: support methods  
-  
+public class JavaDebugInterpreter extends DynamicJavaAdapter {  
   /**
    * This interpreter's name.
    */
@@ -482,6 +480,33 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
     };
   }
   
+//  private Class _getClassForType(Type type, Context context) {
+//    Class c = (Class)type.getProperty(NodeProperties.TYPE);
+//    if (c != null) {
+//      return c;
+//    }
+//    else if (type instanceof PrimitiveType) {
+//      return ((PrimitiveType)type).getValue();
+//    }
+//    else if (type instanceof ReferenceType) {
+//      ReferenceType rt = (ReferenceType) type;
+//      try {
+//        return context.lookupClass(rt.getRepresentation());
+//      }
+//      catch (ClassNotFoundException e) {
+//        rt.setProperty(NodeProperties.ERROR_STRINGS,
+//                       new String[] { rt.getRepresentation() });
+//        throw new ExecutionError("undefined.class", rt);
+//      }
+//    }
+//    else {
+//      // type should be an ArrayType
+//      Type eType = ((ArrayType)type).getElementType();
+//      c = _getClassForType(eType, context);
+//      return java.lang.reflect.Array.newInstance(c, 0).getClass();
+//    }
+//  }
+        
   /**
    * Factory method to make a new NameChecker that tries to find the
    * right scope for QualifiedNames.
@@ -490,6 +515,61 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
    */
   public NameVisitor makeNameVisitor(final Context context) {
     return new NameVisitor(context) {
+//      public Object visit(VariableDeclaration node) {  
+//        // NameVisitor
+//        Node n = node.getInitializer();
+//        if (n != null) {
+//          Object o = n.acceptVisitor(this);
+//          if (o != null) {
+//            if (o instanceof ReferenceType) {
+//              throw new ExecutionError("malformed.expression", n);
+//            }
+//            node.setInitializer((Expression)o);
+//          }
+//        }
+//        
+//        // TypeChecker
+//        TypeChecker tc = makeTypeChecker(context);
+//        Class lc = (Class)node.getType().acceptVisitor(tc);
+//        Node init = node.getInitializer();
+//        if (init != null) {
+//          Class rc = (Class)init.acceptVisitor(tc);
+//          _checkAssignmentStaticRules(lc, rc, node, init);
+//        }
+//        
+//        // EvaluationVisitor
+//        EvaluationVisitorExtension eve = new EvaluationVisitorExtension(context);
+//        Class c = NodeProperties.getType(node.getType());
+//        
+//        if (node.getInitializer() != null) {
+//          Object o = eve.performCast(c, node.getInitializer().acceptVisitor(eve));
+//        }
+//        return super.visit(node);
+//      }    
+      //        try {
+      //          return super.visit(node);
+      //        }
+      //        catch (ExecutionError e) {
+      //          System.out.println(e.getMessage());
+      //          if (e.getMessage().startsWith("Redefinition of")) {
+      //            Type type = node.getType();
+      //            String name = node.getName();
+      //            Class oldClass = (Class)context.get(name);
+      //            Class newClass = _getClassForType(type, context);
+      //            if (oldClass.equals(newClass)) {
+      //              // This is a redefinition of the same variable 
+      //              // with the same type. Allow the user to do
+      //              // this so make a new SimpleAssignExpression
+      //              Identifier id = new Identifier(name);
+      //              LinkedList ids = new LinkedList();
+      //              ids.add(id);
+      //              QualifiedName qName = new QualifiedName(ids);
+      //              return new SimpleAssignExpression(qName, node.getInitializer());
+      //            }
+      //          }
+      //          throw e;
+      //        }
+      //      }
       public Object visit(QualifiedName node) {
         try {
           return super.visit(node);
@@ -534,43 +614,37 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
         }
       }
       public Object visit(ObjectMethodCall node) {
-//        try {
-          MethodCall method = (MethodCall) super.visit(node);
-          // if (method != null) this object method call is either a method with no
-          // class before it or is a static method call
-          if (method != null) {
-            if (method instanceof StaticMethodCall) {
+        MethodCall method = (MethodCall) super.visit(node);
+        // if (method != null) this object method call is either a method with no
+        // class before it or is a static method call
+        if (method != null) {
+          if (method instanceof StaticMethodCall) {
+            return method;
+          }
+          // now we know that method is a FunctionCall
+          else if (context.isDefined("this")) {
+            ObjectMethodCall omc = _getObjectMethodCallForFunction(method, context);
+            if (omc != null) {
+              return omc;
+            }
+            else {
               return method;
             }
-            // now we know that method is a FunctionCall
-            else if (context.isDefined("this")) {
-              ObjectMethodCall omc = _getObjectMethodCallForFunction(method, context);
-              if (omc != null) {
-                return omc;
-              }
-              else {
-                return method;
-              }
-            }
-            // it's a FunctionCall from a static context
-            else {
-              StaticMethodCall smc = _getStaticMethodCallForFunction(method, context);
-              if (smc != null) {
-                return smc;
-              }
-              else {
-                return method;                  
-              }
-            }
           }
+          // it's a FunctionCall from a static context
           else {
-            return null;
+            StaticMethodCall smc = _getStaticMethodCallForFunction(method, context);
+            if (smc != null) {
+              return smc;
+            }
+            else {
+              return method;                  
+            }
           }
-//        }
-//        catch (ExecutionError e) {
-//          // see if the expression is a static inner class
-//          
-//        }
+        }
+        else {
+          return null;
+        }
       }
     };
   }
@@ -582,19 +656,6 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
    */
   public TypeChecker makeTypeChecker(final Context context) {
     return new TypeChecker(context) {
-      /*
-      public Object visit(ThisExpression node) {
-        Expression e = visitThis(node);
-        if (e instanceof QualifiedName) {
-          return visit((QualifiedName)e);
-        }
-        else if (e instanceof ObjectFieldAccess) {
-          return visit((ObjectFieldAccess)e);
-        }
-        else {
-          throw new UnexpectedException(new IllegalArgumentException("Illegal type of Expression"));
-        }
-      }*/
       /**
        * Visits a QualifiedName, returning our class if it is "this"
        * @param node the node to visit
@@ -621,4 +682,63 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
 
     };
   }
+  
+//  private static void _checkAssignmentStaticRules(Class lc, Class rc,
+//                                                   Node node, Node v) {
+//      if (lc != null) {
+//        if (lc.isPrimitive()) {
+//          if (lc == boolean.class && rc != boolean.class) {
+//            throw new ExecutionError("assignment.types", node);
+//          } else if (lc == byte.class && rc != byte.class) {
+//            if (rc == int.class && v.hasProperty(NodeProperties.VALUE)) {
+//              Number n = (Number)v.getProperty(NodeProperties.VALUE);
+//              if (n.intValue() == n.byteValue()) {
+//                return;
+//              }
+//            }
+//            throw new ExecutionError("assignment.types", node);
+//          } else if ((lc == short.class || rc == char.class) &&
+//                     (rc != byte.class && rc != short.class && rc != char.class)) {
+//            if (rc == int.class && v.hasProperty(NodeProperties.VALUE)) {
+//              Number n = (Number)v.getProperty(NodeProperties.VALUE);
+//              if (n.intValue() == n.shortValue()) {
+//                return;
+//              }
+//            }
+//            throw new ExecutionError("assignment.types", node);
+//          } else if (lc == int.class    &&
+//                     (rc != byte.class  &&
+//                      rc != short.class &&
+//                      rc != char.class  &&
+//                      rc != int.class)) {
+//            throw new ExecutionError("assignment.types", node);
+//          } else if (lc == long.class   &&
+//                     (rc == null          ||
+//                      !rc.isPrimitive()   ||
+//                      rc == void.class    ||
+//                      rc == boolean.class ||
+//                      rc == float.class   ||
+//                      rc == double.class)) {
+//            throw new ExecutionError("assignment.types", node);
+//          } else if (lc == float.class  && 
+//                     (rc == null          ||
+//                      !rc.isPrimitive()   ||
+//                      rc == void.class    ||
+//                      rc == boolean.class ||
+//                      rc == double.class)) {
+//            throw new ExecutionError("assignment.types", node);
+//          } else if (lc == double.class && 
+//                     (rc == null        ||
+//                      !rc.isPrimitive() ||
+//                      rc == void.class  ||
+//                      rc == boolean.class)) {
+//            throw new ExecutionError("assignment.types", node);
+//          }
+//        } else if (rc != null) {
+//          if (!lc.isAssignableFrom(rc)) {
+//            throw new ExecutionError("assignment.types", node);
+//          }
+//        }
+//      }
+//    }
 }

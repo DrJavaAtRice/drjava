@@ -145,25 +145,26 @@ public final class DebugTest extends DebugTestCase
     /* 6 */    "      int innerInnerFoo = 10;\n" +
     /* 7 */    "      public void innerMethod() { \n" +
     /* 8 */    "        int innerMethodFoo;\n" +
-    /* 9 */    "        innerMethodFoo = 12;\n" +
-    /* 10 */   "        foo++;\n" +
-    /* 11 */   "        innerFoo++;\n" +
-    /* 12 */   "        innerInnerFoo++;\n" +
-    /* 13 */   "        innerMethodFoo++;\n" +
-    /* 14 */   "        staticMethod();\n" +
-    /* 15 */   "        System.out.println(\"innerMethodFoo: \" + innerMethodFoo);\n" +
-    /* 16 */   "      }\n" +
-    /* 17 */   "    }\n" +
-    /* 18 */   "  }\n" +
-    /* 19 */   "  public void bar() {\n" +
-    /* 20 */   "    MonkeyInner.MonkeyInnerInner mi = \n" +
-    /* 21 */   "      new MonkeyInner().new MonkeyInnerInner();\n" +
-    /* 22 */   "    mi.innerMethod();\n" +
-    /* 23 */   "  }\n" +
-    /* 24 */   "  public static void staticMethod() {\n" +
-    /* 25 */   "    int z = 3;\n" +
-    /* 26 */   "  }\n" +
-    /* 27 */   "}\n";
+    /* 9 */    "        String nullString = null;\n" +
+    /* 10 */   "        innerMethodFoo = 12;\n" +
+    /* 11 */   "        foo++;\n" +
+    /* 12 */   "        innerFoo++;\n" +
+    /* 13 */   "        innerInnerFoo++;\n" +
+    /* 14 */   "        innerMethodFoo++;\n" +
+    /* 15 */   "        staticMethod();\n" +
+    /* 16 */   "        System.out.println(\"innerMethodFoo: \" + innerMethodFoo);\n" +
+    /* 17 */   "      }\n" +
+    /* 18 */   "    }\n" +
+    /* 19 */   "  }\n" +
+    /* 20 */   "  public void bar() {\n" +
+    /* 21 */   "    MonkeyInner.MonkeyInnerInner mi = \n" +
+    /* 22 */   "      new MonkeyInner().new MonkeyInnerInner();\n" +
+    /* 23 */   "    mi.innerMethod();\n" +
+    /* 24 */   "  }\n" +
+    /* 25 */   "  public static void staticMethod() {\n" +
+    /* 26 */   "    int z = 3;\n" +
+    /* 27 */   "  }\n" +
+    /* 28 */   "}\n";
   
   protected static final String CLASS_WITH_STATIC_FIELD =
     /*  1 */    "public class DrJavaDebugStaticField {\n" +
@@ -1522,7 +1523,8 @@ public final class DebugTest extends DebugTestCase
 
   /**
    * Tests that watches can correctly see the values of local
-   * variables, fields and fields of outer classes.
+   * variables, fields and fields of outer classes. Also tests
+   * that we can watch objects initialized to null (bug #771040).
    */
   public void testNonStaticWatches()
     throws DebugException, BadLocationException, DocumentAdapterException,
@@ -1547,7 +1549,7 @@ public final class DebugTest extends DebugTestCase
     }
     debugListener.assertDebuggerStartedCount(1);
     
-    _debugger.toggleBreakpoint(doc,MONKEY_WITH_INNER_CLASS.indexOf("innerMethodFoo = 12;"), 9);
+    _debugger.toggleBreakpoint(doc,MONKEY_WITH_INNER_CLASS.indexOf("innerMethodFoo = 12;"), 10);
     debugListener.assertBreakpointSetCount(1);
 
     // Run the foo() method, hitting breakpoint
@@ -1561,6 +1563,7 @@ public final class DebugTest extends DebugTestCase
     _debugger.addWatch("innerInnerFoo");
     _debugger.addWatch("innerMethodFoo");
     _debugger.addWatch("asdf");
+    _debugger.addWatch("nullString");
     
     if (printMessages) {
       System.out.println("first step");
@@ -1584,11 +1587,14 @@ public final class DebugTest extends DebugTestCase
     assertEquals("watch name incorrect", "innerInnerFoo", watches.elementAt(2).getName());
     assertEquals("watch name incorrect", "innerMethodFoo", watches.elementAt(3).getName());
     assertEquals("watch name incorrect", "asdf", watches.elementAt(4).getName());
+    assertEquals("watch name incorrect", "nullString", watches.elementAt(5).getName());
     assertEquals("watch value incorrect", "6", watches.elementAt(0).getValue());
     assertEquals("watch value incorrect", "8", watches.elementAt(1).getValue());
     assertEquals("watch value incorrect", "10", watches.elementAt(2).getValue());
     assertEquals("watch value incorrect", "12", watches.elementAt(3).getValue());
     assertEquals("watch value incorrect", DebugWatchData.NO_VALUE, watches.elementAt(4).getValue());
+    assertEquals("watch value incorrect", "null", watches.elementAt(5).getValue());
+    assertEquals("watch type incorrect", "java.lang.String", watches.elementAt(5).getType());
 
     interpret("innerFoo = 0");
     watches = _debugger.getWatches();
@@ -1669,11 +1675,14 @@ public final class DebugTest extends DebugTestCase
     assertEquals("watch name incorrect", "innerInnerFoo", watches.elementAt(2).getName());
     assertEquals("watch name incorrect", "innerMethodFoo", watches.elementAt(3).getName());
     assertEquals("watch name incorrect", "asdf", watches.elementAt(4).getName());
+    assertEquals("watch name incorrect", "nullString", watches.elementAt(5).getName());
     assertEquals("watch value incorrect", "7", watches.elementAt(0).getValue());
     assertEquals("watch value incorrect", "9", watches.elementAt(1).getValue());
     assertEquals("watch value incorrect", "11", watches.elementAt(2).getValue());
     assertEquals("watch value incorrect", "13", watches.elementAt(3).getValue());
     assertEquals("watch value incorrect", DebugWatchData.NO_VALUE, watches.elementAt(4).getValue());
+    assertEquals("watch value incorrect", "null", watches.elementAt(5).getValue());
+    assertEquals("watch type incorrect", "java.lang.String", watches.elementAt(5).getType());
     
     if (printMessages) {
       System.out.println("sixth step");
@@ -1698,11 +1707,14 @@ public final class DebugTest extends DebugTestCase
     assertEquals("watch name incorrect", "innerInnerFoo", watches.elementAt(2).getName());
     assertEquals("watch name incorrect", "innerMethodFoo", watches.elementAt(3).getName());
     assertEquals("watch name incorrect", "asdf", watches.elementAt(4).getName());
+    assertEquals("watch name incorrect", "nullString", watches.elementAt(5).getName());
     assertEquals("watch value incorrect", "7", watches.elementAt(0).getValue());
     assertEquals("watch value incorrect", DebugWatchData.NO_VALUE, watches.elementAt(1).getValue());
     assertEquals("watch value incorrect", DebugWatchData.NO_VALUE, watches.elementAt(2).getValue());
     assertEquals("watch value incorrect", DebugWatchData.NO_VALUE, watches.elementAt(3).getValue());
     assertEquals("watch value incorrect", DebugWatchData.NO_VALUE, watches.elementAt(4).getValue());
+    assertEquals("watch value incorrect", DebugWatchData.NO_VALUE, watches.elementAt(5).getValue());
+    assertEquals("watch type incorrect", DebugWatchData.NO_TYPE, watches.elementAt(5).getType());
     
     // Close doc and make sure breakpoints are removed
     _model.closeFile(doc);

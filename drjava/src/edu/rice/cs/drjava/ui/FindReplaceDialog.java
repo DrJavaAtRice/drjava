@@ -59,7 +59,7 @@ import edu.rice.cs.util.UnexpectedException;
 
 /**
  * The tabbed panel that handles requests for finding and replacing text.
- * (Used to be a dialog box, hence the name.)
+ * (Used to be a dialog box, hence the name. We should fix this.)
  * @version $Id$
  */
 class FindReplaceDialog extends TabbedPanel implements OptionConstants {

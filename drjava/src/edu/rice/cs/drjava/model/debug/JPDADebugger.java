@@ -251,8 +251,9 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
       throw new IllegalStateException("Debugger is not active.");
     }
     if (_eventHandlerError != null) {
-      throw new DebugException("Error in Debugger Event Handler: " +
-                               _eventHandlerError);
+      Throwable t = _eventHandlerError;
+      _eventHandlerError = null;
+      throw new DebugException("Error in Debugger Event Handler: " + t);
     }
   }
   
@@ -807,6 +808,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     }
     try {
       removeCurrentDebugInterpreter();
+      _updateWatches();
       currThreadResumed();
     }
     catch(DebugException e) {  //??
@@ -1425,6 +1427,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
       frames = thread.frames();
       currFrame = (StackFrame) frames.get(0);
       Location location = currFrame.location();
+        
       ReferenceType rt = location.declaringType();
       ObjectReference obj = currFrame.thisObject();
       // note: obj is null if we're in a static context
@@ -1478,9 +1481,25 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
           // currWatch.setValue(_getValue(currFrame.getValue(localVar)));
           try {
             Value v = _getValueOfLocalVariable(localVar, thread);
-            currWatch.setValue(v);
-            // currWatch.setType(String.valueOf(localVar.type()));
-            currWatch.setType(v.type().name());
+            if (v == null) {
+              currWatch.setValue(_getValue(null));
+              try {
+                currWatch.setType(localVar.type().name());
+              }
+              catch (ClassNotLoadedException cnle) {
+                List classes = _vm.classesByName(localVar.typeName());
+                if (!classes.isEmpty()) {
+                  currWatch.setType(((Type)classes.get(0)).name());
+                }
+                else {
+                  currWatch.setTypeNotLoaded();
+                }
+              }
+            }
+            else {              
+              currWatch.setValue(_getValue(v));
+              currWatch.setType(v.type().name());
+            }
           }
           catch (Exception ex) {
             _log("Exception when getting the value of a local variable", ex);
@@ -1552,10 +1571,16 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
               outer.getValue(field);
             currWatch.setValue(_getValue(v));
             try {
-              currWatch.setType(String.valueOf(field.type()));
+              currWatch.setType(field.type().name());
             }
             catch (ClassNotLoadedException cnle) {
-              currWatch.setNoType();
+              List classes = _vm.classesByName(field.typeName());
+              if (!classes.isEmpty()) {
+                currWatch.setType(((Type)classes.get(0)).name());
+              }
+              else {
+                currWatch.setTypeNotLoaded();
+              }
             }
           }
           else {
@@ -1634,7 +1659,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     String signature = "";
     
     if((val == null) || ( val instanceof ObjectReference )){
-      signature_mid = "Ljava/lang/Object;";
+      signature_mid = "Ljava/lang/Object;Ljava/lang/Class;";
     }
     else if( val instanceof BooleanValue ){
       signature_mid = "Z";
@@ -1800,8 +1825,26 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
         // Have to update the frame each time
         frame = suspendedThreadRef.frame(0);
         Value val = frame.getValue(localVar);
+        Type type;
+        if (val != null) {
+          type = val.type();
+        }
+        else {
+          try {
+            type = localVar.type();
+          }
+          catch(ClassNotLoadedException e) {
+            List classes = _vm.classesByName(localVar.typeName());
+            if (!classes.isEmpty()) {
+              type = (Type)classes.get(0);
+            }
+            else {
+              type = null;
+            }
+          }
+        }
         _defineVariable(suspendedThreadRef, debugInterpreter,
-                        localVar.name(), val);
+                        localVar.name(), val, type);
       }
 
       // Update the frame
@@ -1811,14 +1854,20 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
       Value thisVal = frame.thisObject();
       if (thisVal != null) {
         _defineVariable(suspendedThreadRef, debugInterpreter,
-                        "this", thisVal);
+                        "this", thisVal, thisVal.type());
         //_setThisInInterpreter(suspendedThreadRef, debugInterpreter, thisVal);
       }
       
       // Set the new interpreter and prompt
       String prompt = _getPromptString(suspendedThreadRef);
+      if (printMessages) {
+        System.out.println("setting active interpreter");
+      }
       _model.getInteractionsModel().setActiveInterpreter(interpreterName,
                                                          prompt);
+      if (printMessages) {
+        System.out.println("got active interpreter");
+      }
     }
     catch(InvalidTypeException exc){
       throw new DebugException(exc.toString());
@@ -1845,6 +1894,8 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
   /**
    * Defines a variable with the given name to the given value, using
    * a thread reference and JavaInterpreter.
+   * If type == null, we assume that the type of this variable
+   * has not been loaded so we will set it to Object in DynamicJavaAdapter.
    * @param suspendedThreadRef Thread ref being debugged
    * @param debugInterpreter ObjectReference to the JavaInterpreter to contain
    * the variable
@@ -1853,7 +1904,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
    */
   private void _defineVariable(ThreadReference suspendedThreadRef,
                                ObjectReference debugInterpreter,
-                               String name, Value val)
+                               String name, Value val, Type type)
     throws InvalidTypeException, AbsentInformationException, IncompatibleThreadStateException,
     ClassNotLoadedException, InvocationException, DebugException
   {
@@ -1870,6 +1921,12 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
       List args = new LinkedList();
       args.add(_vm.mirrorOf(name));
       args.add(val);
+      if (type == null) {
+        args.add(null);
+      }
+      else if (type instanceof ReferenceType) {
+        args.add(((ReferenceType)type).classObject());
+      }
       
       /* System.out.println("Calling " + method2Call.toString() + "with " + args.get(0).toString()); */
       try {
@@ -2232,6 +2289,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
       _deadThreads.add(new DebugThreadData(_runningThread));
       _runningThread = null;
     }
+    _updateWatches();
        
     if (_suspendedThreads.size() > 0) {
       ThreadReference thread = _suspendedThreads.peek();

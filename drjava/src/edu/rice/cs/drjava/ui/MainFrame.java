@@ -754,6 +754,64 @@ public class MainFrame extends JFrame implements OptionConstants {
       _model.setPreviousActiveDocument();
     }
   };
+  
+  /** Switches focus to next pane. */
+  private Action _switchToNextPaneAction = 
+    new AbstractAction("Next Pane")
+  {
+    public void actionPerformed(ActionEvent ae) {
+      _switchPaneFocus(true);
+    }
+  };
+  
+  /** Switches focus to previous pane. */
+  private Action _switchToPreviousPaneAction = 
+    new AbstractAction("Previous Pane")
+  {
+    public void actionPerformed(ActionEvent ae) {
+      _switchPaneFocus(false);
+    }
+  };
+  
+  private void _switchToPane(Component c) {
+    c.requestFocus();
+    showTab(c);
+  }
+  
+  /**
+   * For now, this method will switch to the definitions
+   * pane from the interactions pane on a call to
+   * switchToPreviousPane and from the definitions pane
+   * to the interactions pane on a call to 
+   * switchToNextPane. 
+   * Eventually, we should move toward being able to cycle 
+   * through the definitions pane and all of the tabs.
+   * @param next true if we want to go to the next pane
+   */
+  private void _switchPaneFocus(boolean next) {
+    if (next) {
+      if (_currentDefPane.hasFocus()) {
+        _switchToPane(_interactionsPane);
+      }     
+//      else if (_interactionsPane.hasFocus()) {
+//        _switchToPane(_consolePane);
+//      }
+//      else if (_consolePane.hasFocus()) {
+//        _switchToPane(_currentDefPane);
+//      }
+    }
+    else {
+      if (_interactionsPane.hasFocus()) {
+        _switchToPane(_currentDefPane);
+      }
+//      else if (_currentDefPane.hasFocus()) {
+//        _switchToPane(_consolePane);
+//      }
+//      else if (_consolePane.hasFocus()) {
+//        _switchToPane(_interactionsPane);
+//      }
+    }
+  }
 
   /** Calls the ConfigFrame to edit preferences */
   private Action _editPreferencesAction =
@@ -2193,7 +2251,7 @@ public class MainFrame extends JFrame implements OptionConstants {
 
     _setUpAction(_switchToPrevAction, "Back", "Previous Document");
     _setUpAction(_switchToNextAction, "Forward", "Next Document");
-
+    
     _setUpAction(_findReplaceAction, "Find", "Find/Replace");
     _setUpAction(_editPreferencesAction, "Preferences", "Edit DrJava Preferences");
     _setUpAction(_helpAction, "Help", "Show the User Documentation");
@@ -2747,6 +2805,8 @@ public class MainFrame extends JFrame implements OptionConstants {
     _interactionsController =
       new InteractionsController(_model.getInteractionsModel(),
                                  _model.getSwingInteractionsDocument());
+    _interactionsController.setPrevPaneAction(_switchToPreviousPaneAction);
+    _interactionsController.setNextPaneAction(_switchToNextPaneAction);
     _interactionsPane = _interactionsController.getPane();
     
     _findReplace = new FindReplaceDialog(this, _model);
@@ -4357,7 +4417,14 @@ public class MainFrame extends JFrame implements OptionConstants {
         _findReplace.findNext();
         _currentDefPane.requestFocus();
       }
-    }, null, "Find Next");
+    }, null, "Find Next");    
+    
+    // For now, _switchToPreviousPaneAction only switches the focus from the interactions pane to the definitions pane.
+    // Change this when the behavior is updated. Same for _switchToNextPaneAction.
+    KeyBindingManager.Singleton.put(KEY_PREVIOUS_PANE,
+                                    _switchToPreviousPaneAction, null, "Switch Focus To Definitions Pane");    
+    KeyBindingManager.Singleton.put(KEY_NEXT_PANE,
+                                    _switchToNextPaneAction, null, "Switch Focus To Interactions Pane");
   }
   
    /**

@@ -56,6 +56,11 @@ public class DebugWatchData {
    */
   public static final String NO_TYPE = "";
   
+  /**
+   * String to display if the type is not loaded.
+   */
+  public static final String NOT_LOADED = "<not loaded>";
+  
   private String _name;
   private String _value;
   private String _type;
@@ -153,6 +158,14 @@ public class DebugWatchData {
   void setNoType() {
     _showType = true;
     _type = NO_TYPE;
+  }
+  
+  /**
+   * Called to indicate that this watch's type has not been loaded.
+   */
+  void setTypeNotLoaded() {
+    _showType = true;
+    _type = NOT_LOADED;
   }
   
   /**

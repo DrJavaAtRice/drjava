@@ -132,7 +132,7 @@ public class EventNotifier implements GlobalModelListener {
   /**
    * Called when a file's main method is about to be run.
    */
-  public void runStarted(OpenDefinitionsDocument doc) {
+  synchronized public void runStarted(OpenDefinitionsDocument doc) {
     int size = _listeners.size();
     for(int i = 0; i < size; i++) {
       _listeners.get(i).runStarted(doc);

@@ -440,7 +440,7 @@ public class InterpreterJVM extends AbstractSlaveJVM
    * @return Whether the new interpreter is currently in progress
    * with an interaction
    */
-   public boolean setActiveInterpreter(String name) {
+   public boolean setActiveInterpreter(String name) {   
      _activeInterpreter = getInterpreter(name);
      return _activeInterpreter.isInProgress();
    }
