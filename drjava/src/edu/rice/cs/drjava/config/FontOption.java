@@ -60,7 +60,13 @@ public class FontOption extends Option<Font> {
   //if the word is present /**/ This may be fixed in future versions of 1.5.0, but the use of the word PLAIN appears to
   //have been deprecated since 1.3
   public Font parse(String s) {
-    return Font.decode(s.replaceAll("PLAIN-",""));  //Font.decode(s);
+    String newS = s;// s.replaceAll("PLAIN-","")
+    int idx = newS.indexOf("PLAIN-");
+    while (idx != -1) {
+      newS = newS.substring(0, idx) + newS.substring(idx + 6);
+      idx = newS.indexOf("PLAIN-");
+    }
+    return Font.decode(newS);  //Font.decode(s);
   }
 
   /**

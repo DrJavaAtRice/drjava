@@ -1147,12 +1147,13 @@ public class DebugPanel extends JPanel implements OptionConstants {
     
     public void setForeground(Color c){
       super.setForeground(c);
-      dtcr.setTextNonSelectionColor(c);
+      if(dtcr != null)
+        dtcr.setTextNonSelectionColor(c);
     }
     
     public void setBackground(Color c){
       super.setBackground(c);
-      if(dtcr != null)
+      if(DebugPanel.this != null && dtcr != null)
         dtcr.setBackgroundNonSelectionColor(c);
     }
   }
