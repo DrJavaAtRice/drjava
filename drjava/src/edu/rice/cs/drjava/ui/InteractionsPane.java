@@ -73,7 +73,7 @@ public class InteractionsPane extends JTextPane implements OptionConstants {
   /** A runnable object that causes the editor to beep. */
   protected Runnable _beep = new Runnable() {
     public void run() {
-        Toolkit.getDefaultToolkit().beep();      
+      Toolkit.getDefaultToolkit().beep();      
     }
   };
   
@@ -86,13 +86,23 @@ public class InteractionsPane extends JTextPane implements OptionConstants {
   
   /**
    * Creates an InteractionsPane with the given document.
+   * Uses default keymap name ("INTERACTIONS_KEYMAP")
    * @param doc StyledDocument containing the interactions history.
    */
   public InteractionsPane(StyledDocument doc) {
+    this("INTERACTIONS_KEYMAP", doc);
+  }
+  
+  /**
+   * Creates an InteractionsPane with the given document.
+   * @param keymapName the name of the keymap for this pane
+   * @param doc StyledDocument containing the interactions history.
+   */
+  public InteractionsPane(String keymapName, StyledDocument doc) {
     super(doc);
     
     //add actions for enter key, etc.
-    _keymap = addKeymap("INTERACTIONS_KEYMAP", getKeymap());
+    _keymap = addKeymap(keymapName, getKeymap());
 
     setCaretPosition(doc.getLength());
   }
@@ -115,18 +125,23 @@ public class InteractionsPane extends JTextPane implements OptionConstants {
   public void setBeep(Runnable beep) {
     _beep = beep;
   }
-  
-  private void _initializeHighlightManager(){
+
+  /**
+   * Initializes the highlight manager.
+   */
+  private void _initializeHighlightManager() {
     _highlightManager = new HighlightManager(this);
   }
-  
-  public void highlightError( int offset, int length ){
-    if( _highlightManager == null ) _initializeHighlightManager();
-    _highlightManager.addHighlight( offset, offset+length, ERROR_PAINTER );
+
+  /**
+   * Highlights the given text with error highlight.
+   * @param offset the offset in the text
+   * @param length the length of the error to highlight
+   */
+  public void highlightError(int offset, int length) {
+    if(_highlightManager == null) {
+      _initializeHighlightManager();
+    }
+    _highlightManager.addHighlight(offset, offset+length, ERROR_PAINTER);
   }
-  
-  
 }
-
-
-

@@ -49,6 +49,7 @@ import java.rmi.*;
 
 import edu.rice.cs.util.newjvm.*;
 import edu.rice.cs.util.OutputStreamRedirector;
+import edu.rice.cs.util.InputStreamRedirector;
 import edu.rice.cs.drjava.platform.PlatformFactory;
 import edu.rice.cs.drjava.model.junit.JUnitTestManager;
 import edu.rice.cs.drjava.model.junit.JUnitError;
@@ -142,6 +143,26 @@ public class InterpreterJVM extends AbstractSlaveJVM
   protected void handleStart(MasterRemote mainJVM) {
     //_dialog("handleStart");
     _mainJVM = (MainJVMRemoteI) mainJVM;
+
+    // redirect stdin
+    try {
+      System.setIn(new InputStreamRedirector() {
+        protected String _getInput() {
+          try {
+            return _mainJVM.getConsoleInput();
+          }
+          catch (RemoteException re) {
+            // blow up if no MainJVM found
+            _log.log(re.toString());
+            throw new IllegalStateException("Main JVM can't be reached.\n" + re);
+          }
+        }
+      });
+    }
+    catch (IOException ioe) {
+      // leaves System.in alone
+      _log.log(ioe.toString());
+    }
 
     // redirect stdout
     System.setOut(new PrintStream(new OutputStreamRedirector() {

@@ -326,6 +326,8 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     _document.insertBeforeLastPrompt(s, InteractionsDocument.SYSTEM_ERR_STYLE);
   }
   
+  public abstract String getConsoleInput();
+
   /**
    * Any common behavior when an interaction ends.
    * Subclasses might want to additionally notify listeners here.
@@ -467,6 +469,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     if (!_waitingForFirstInterpreter) {
       _document.insertBeforeLastPrompt("Resetting Interactions...\n",
                                        InteractionsDocument.ERROR_STYLE);
+      _document.setInProgress(true);
       _notifyInterpreterResetting();
     }
   }
@@ -483,6 +486,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   public void interpreterReady() {
     if (!_waitingForFirstInterpreter) {
       _document.reset();
+      _document.setInProgress(false);
       _notifyInterpreterReady();
     }
     _waitingForFirstInterpreter = false;

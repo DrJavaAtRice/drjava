@@ -255,22 +255,23 @@ public class DebugTest extends GlobalModelTestCase implements OptionConstants {
   }
   
   /**
-   * Sets the current thread in the Swing event thread to avoid
+   * Sets the current thread in a new thread to avoid
    * being notified of events before we start waiting for them
    */
   private void _asynchDoSetCurrentThread(final DebugThreadData th){
-    SwingUtilities.invokeLater(new Runnable(){
+    new Thread() {
       public void run(){
-        try{
+        try {
           doSetCurrentThread(th);
         }
         catch(DebugException dbe){
           dbe.printStackTrace();
           fail("Couldn't set current thread in DebugTest::_asynchDoSetCurrentThread(...)");
+        }
       }
-      }});
-    }
-
+    }.start();
+  }
+  
   /** 
    * Test that when two threads are suspended setCurrentThread can be used 
    * to switch between them in the debugger

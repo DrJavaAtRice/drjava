@@ -100,4 +100,10 @@ public interface MainJVMRemoteI extends MasterRemote {
    * @param name the name of the debug interpreter
    */
   public void notifyDebugInterpreterAssignment(String name) throws RemoteException;
+
+  /**
+   * Asks the main jvm for input from the console.
+   * @return the console input
+   */
+  public String getConsoleInput() throws RemoteException;
 }

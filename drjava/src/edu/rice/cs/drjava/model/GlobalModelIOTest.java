@@ -75,14 +75,6 @@ public class GlobalModelIOTest extends GlobalModelTestCase implements OptionCons
   }
   
   /**
-   * Creates a test suite for JUnit to run.
-   * @return a test suite based on the methods in this class
-   */
-  public static Test suite() {
-    return  new TestSuite(GlobalModelIOTest.class);
-  }
-  
-  /**
    * Creates a new document, modifies it, and then does the same
    * with a second document, ensuring that the changes are separate.
    */
@@ -1225,10 +1217,10 @@ public class GlobalModelIOTest extends GlobalModelTestCase implements OptionCons
       }
     }
     // check that output of loaded history is correct
-    DefaultStyledDocument con = (DefaultStyledDocument)_model.getConsoleDocument();
+    ConsoleDocument con = _model.getConsoleDocument();
     assertEquals("Output of loaded history is not correct",
                  "x = 5",
-                 con.getText(0, con.getLength()).trim());
+                 con.getDocText(0, con.getDocLength()).trim());
     listener.assertInteractionStartCount(3);
     listener.assertInteractionEndCount(3);
     _model.removeListener(listener);
@@ -1239,7 +1231,7 @@ public class GlobalModelIOTest extends GlobalModelTestCase implements OptionCons
    * Makes sure that it doesn't matter.
    */
   public void testLoadHistoryWithAndWithoutSemicolons() throws BadLocationException, 
-    InterruptedException, IOException
+    InterruptedException, IOException, DocumentAdapterException
   {
     TestListener listener = new TestListener() {
       public void interactionStarted() {
@@ -1292,10 +1284,11 @@ public class GlobalModelIOTest extends GlobalModelTestCase implements OptionCons
       }
     }
     // check that output of loaded history is correct
-    DefaultStyledDocument con = (DefaultStyledDocument)_model.getConsoleDocument();
-    assertEquals("Output of loaded history is not correct: "+con.getText(0, con.getLength()).trim(),
+    ConsoleDocument con = _model.getConsoleDocument();
+    assertEquals("Output of loaded history is not correct: " +
+                 con.getDocText(0, con.getDocLength()).trim(),
                  "x = 5"+'\n'+"x = 5",
-                 con.getText(0, con.getLength()).trim());
+                 con.getDocText(0, con.getDocLength()).trim());
   }
   
   /**
@@ -1327,6 +1320,28 @@ public class GlobalModelIOTest extends GlobalModelTestCase implements OptionCons
     
     assertModified(true, doc);
     assertContents(BAR_TEXT, doc);
+  }
+
+  /**
+   * Tests that input can be written to and read from the console correctly.
+   */
+  public void testConsoleInput() throws DocumentAdapterException {
+    _model.setInputListener(new InputListener() {
+      public String getConsoleInput() {
+        return "input\n";
+      }
+    });
     
+    String result = interpret("System.in.read()");
+    String expected = DefaultInteractionsModel.INPUT_REQUIRED_MESSAGE +
+      String.valueOf((int)'i');
+    assertEquals("read() should prompt for input and return the first byte of \"input\"",
+                 expected, result);
+
+    interpret("import java.io.*;");
+    interpret("br = new BufferedReader(new InputStreamReader(System.in))");
+    result = interpret("br.readLine()");
+    assertEquals("readLine() should return the rest of \"input\" without prompting for input",
+                 "\"nput\"", result);
   }
 }

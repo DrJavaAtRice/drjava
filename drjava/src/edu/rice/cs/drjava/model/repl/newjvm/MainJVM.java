@@ -259,7 +259,6 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     _interactionsModel.replSystemOutPrint(s);
   }
   
-  
   /**
    * Runs a JUnit Test class in the Interpreter JVM.
    * @param className Name of the TestCase class
@@ -278,7 +277,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
       _threwException(re);
     }
   }
-  
+
   /**
    * Called if JUnit is invoked on a non TestCase class.  Forwards from
    * the other JVM to the local JUnit model.
@@ -335,7 +334,14 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
    */
   public void notifyDebugInterpreterAssignment(String name) {
   }
-  
+
+  /**
+   * Accessor for the remote interface to the Interpreter JVM.
+   */
+  private InterpreterJVMRemoteI _interpreterJVM() {
+    return (InterpreterJVMRemoteI) getSlave();
+  }
+
   /**
    * Adds a named DynamicJavaAdapter to the list of interpreters.
    * @param name the unique name for the interpreter
@@ -624,10 +630,11 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   }
 
   /**
-   * Accessor for the remote interface to the Interpreter JVM.
+   * Asks the main jvm for input from the console.
+   * @return the console input
    */
-  private InterpreterJVMRemoteI _interpreterJVM() {
-    return (InterpreterJVMRemoteI) getSlave();
+  public String getConsoleInput() {
+    return _interactionsModel.getConsoleInput();
   }
 
   /**
@@ -689,6 +696,9 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     public int getDebugPort() throws IOException { return -1; }
     public void replSystemOutPrint(String s) {}
     public void replSystemErrPrint(String s) {}
+    public String getConsoleInput() {
+      throw new IllegalStateException("Cannot request input from dummy interactions model!");
+    }
     public void replReturnedVoid() {}
     public void replReturnedResult(String result) {}
     public void replThrewException(String exceptionClass,

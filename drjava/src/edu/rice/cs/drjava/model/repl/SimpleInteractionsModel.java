@@ -221,5 +221,13 @@ public class SimpleInteractionsModel extends InteractionsModel {
   protected void _notifyInterpreterExited(final int status) {
     // Won't happen in a single JVM
   }
-  
+
+  /**
+   * Does not allow input from System.in.
+   * @return does not return
+   * @throws UnsupportedOperationException always
+   */
+  public String getConsoleInput() {
+    throw new UnsupportedOperationException("Cannot get input from System.in");
+  }
 }

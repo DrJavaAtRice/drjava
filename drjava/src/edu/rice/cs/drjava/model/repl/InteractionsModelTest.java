@@ -167,6 +167,9 @@ public class InteractionsModelTest extends TestCase {
     protected void _notifyInterpreterExited(int status) {}
     protected void _notifyInterpreterResetting() {}
     protected void _notifyInterpreterReady() {}
-    
+    public String getConsoleInput() {
+      fail("cannot get input from System.in in a test");
+      return null;
+    }
   }
 }

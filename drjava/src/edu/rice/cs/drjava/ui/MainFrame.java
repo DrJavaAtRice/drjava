@@ -135,7 +135,8 @@ public class MainFrame extends JFrame implements OptionConstants {
   // Tabbed panel fields
   private JTabbedPane _tabbedPane;
   private CompilerErrorPanel _compilerErrorPanel;
-  private OutputPane _outputPane;
+  private InteractionsPane _consolePane;
+  private ConsoleController _consoleController;  // move to controller
   private InteractionsPane _interactionsPane;
   private InteractionsController _interactionsController;  // move to controller
   private DebugPanel _debugPanel;
@@ -1014,6 +1015,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _setUpMenuBar();
     _setUpToolBar();
     _setUpDocumentSelector();
+    _setUpDocPaneContextMenu();
     
     _recentFileManager = new RecentFileManager(_fileMenu.getItemCount() - 2, 
                                                _fileMenu,
@@ -1281,7 +1283,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   public boolean isTestTabSelected() {
     return _tabbedPane.getSelectedComponent() == _junitErrorPanel;
   }
-  
+
   /**
    * Makes sure save and compile buttons and menu items
    * are enabled and disabled appropriately after document
@@ -2577,9 +2579,13 @@ public class MainFrame extends JFrame implements OptionConstants {
   }
 
   private void _setUpTabs() {
-    _outputPane = new OutputPane(_model);
     _compilerErrorPanel = new CompilerErrorPanel(_model, this);
     
+    _consoleController = new ConsoleController(_model.getConsoleDocument(),
+                                               _model.getSwingConsoleDocument());
+    _consolePane = _consoleController.getPane();
+    _model.setInputListener(_consoleController.getInputListener());
+
     // Interactions
     _interactionsController = 
       new InteractionsController(_model.getInteractionsModel(),
@@ -2588,15 +2594,19 @@ public class MainFrame extends JFrame implements OptionConstants {
     
     _findReplace = new FindReplaceDialog(this, _model);
     
-    final JScrollPane outputScroll = 
-      new BorderlessScrollPane(_outputPane);
+    final JScrollPane consoleScroll = new BorderlessScrollPane(_consolePane);
+    final JScrollPane interactionsScroll = new BorderlessScrollPane(_interactionsPane);
     _junitErrorPanel = new JUnitPanel(_model, this);
     _tabbedPane = new JTabbedPane();
     _tabbedPane.addChangeListener(new ChangeListener () {
       public void stateChanged(ChangeEvent e) {
-        if (_tabbedPane.getSelectedComponent() == outputScroll) {
-          outputScroll.revalidate();
-          outputScroll.repaint();
+        if (_tabbedPane.getSelectedComponent() == interactionsScroll) {
+          _interactionsPane.requestFocus();
+        }
+        else if (_tabbedPane.getSelectedComponent() == consoleScroll) {
+//           consoleScroll.revalidate();
+//           consoleScroll.repaint();
+          _consolePane.requestFocus();
         }
         // Update error highlights?
         if (_currentDefPane != null) {
@@ -2613,8 +2623,8 @@ public class MainFrame extends JFrame implements OptionConstants {
     //                               BorderLayout.CENTER);
     //_interactionsWithSyncPanel.add(_syncStatus, BorderLayout.SOUTH);
                                     
-    _tabbedPane.add("Interactions", new BorderlessScrollPane(_interactionsPane));
-    _tabbedPane.add("Console", outputScroll);
+    _tabbedPane.add("Interactions", interactionsScroll);
+    _tabbedPane.add("Console", consoleScroll);
     
     _tabs = new LinkedList();
 
@@ -2626,15 +2636,6 @@ public class MainFrame extends JFrame implements OptionConstants {
     showTab(_compilerErrorPanel);
     
     _tabbedPane.setSelectedIndex(0);
-    
-    // Select interactions pane when interactions tab is selected
-    _tabbedPane.addChangeListener(new ChangeListener() {
-      public void stateChanged(ChangeEvent e) {
-      if (_tabbedPane.getSelectedIndex() == INTERACTIONS_TAB) {
-        _interactionsPane.requestFocus();
-      }
-    }
-    });
   }
 
   /**
@@ -2645,6 +2646,28 @@ public class MainFrame extends JFrame implements OptionConstants {
     _docList.setSelectionModel(_model.getDocumentSelectionModel());
     _docList.setCellRenderer(new DocCellRenderer());
 
+  }
+
+  /**
+   * Sets up the context menu to show in the document pane.
+   */
+  private void _setUpDocPaneContextMenu() {
+    final JPopupMenu docPanePopupMenu = new JPopupMenu();
+    docPanePopupMenu.add(_saveAction);
+    docPanePopupMenu.add(_saveAsAction);
+    docPanePopupMenu.add(_closeAction);
+    docPanePopupMenu.addSeparator();
+    docPanePopupMenu.add(_printAction);
+    docPanePopupMenu.add(_printPreviewAction);
+    docPanePopupMenu.addSeparator();
+    docPanePopupMenu.add(_compileAction);
+    docPanePopupMenu.add(_junitAction);
+    _docList.addMouseListener(new RightClickMouseAdapter() {
+      protected void _popupAction(MouseEvent e) {
+        _docList.setSelectedIndex(_docList.locationToIndex(e.getPoint()));
+        docPanePopupMenu.show(e.getComponent(), e.getX(), e.getY());
+      }
+    });
   }
 
   /**
@@ -2905,7 +2928,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       }
     }
     _interactionsPane.setFont(f);
-    _outputPane.setFont(f);
+    _consolePane.setFont(f);
     _findReplace.setFieldFont(f);
     _compilerErrorPanel.setListFont(f);
     _junitErrorPanel.setListFont(f);

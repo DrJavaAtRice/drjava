@@ -76,15 +76,6 @@ public class InteractionsPaneTest extends TestCase {
   }
   
   /**
-   * Return a new TestSuite for this class.
-   * @return Test
-   */
-  public static Test suite() {
-    return new TestSuite(InteractionsPaneTest.class);
-  }
-  
-  
-  /**
    * Setup method for each JUnit test case.
    */
   public void setUp() {

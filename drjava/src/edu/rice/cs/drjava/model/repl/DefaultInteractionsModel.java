@@ -55,6 +55,11 @@ import edu.rice.cs.util.text.*;
  * @version $Id$
  */
 public class DefaultInteractionsModel extends RMIInteractionsModel {
+  /**
+   * Message to signal that input is required from the console.
+   */
+  public static final String INPUT_REQUIRED_MESSAGE =
+    "Please enter input in the Console tab.\n";
   
   /**
    * Model that contains the interpreter to use.
@@ -125,6 +130,21 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
   }
   
   /**
+   * Called when input is requested from System.in.
+   * @return the input
+   */
+  public String getConsoleInput() {
+    if (_document.inProgress()) {
+      _docAppend(INPUT_REQUIRED_MESSAGE, InteractionsDocument.DEBUGGER_STYLE);
+    }
+    else {
+      _document.insertBeforeLastPrompt(INPUT_REQUIRED_MESSAGE,
+                                       InteractionsDocument.DEBUGGER_STYLE);
+    }
+    return _model.getConsoleInput();
+  }
+
+  /**
    * Called when the Java interpreter is ready to use.
    * Adds any open documents to the classpath.
    */
@@ -155,8 +175,7 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
       }
     });
   }
-  
-  
+
   /**
    * Notifies listeners that an error was present in the interaction.
    */

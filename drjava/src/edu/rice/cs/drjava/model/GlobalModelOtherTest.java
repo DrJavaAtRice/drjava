@@ -264,7 +264,7 @@ public class GlobalModelOtherTest extends GlobalModelTestCase implements OptionC
     _model.resetConsole();
     assertEquals("Length of console text",
                  0,
-                 _model.getConsoleDocument().getLength());
+                 _model.getConsoleDocument().getDocLength());
 
     listener.assertConsoleResetCount(1);
 
@@ -289,13 +289,13 @@ public class GlobalModelOtherTest extends GlobalModelTestCase implements OptionC
 
     assertEquals("Length of console text",
                  1,
-                 _model.getConsoleDocument().getLength());
+                 _model.getConsoleDocument().getDocLength());
 
 
     _model.resetConsole();
     assertEquals("Length of console text",
                  0,
-                 _model.getConsoleDocument().getLength());
+                 _model.getConsoleDocument().getDocLength());
 
     listener.assertConsoleResetCount(2);
   }
@@ -606,7 +606,7 @@ public class GlobalModelOtherTest extends GlobalModelTestCase implements OptionC
    * Creates a new class, compiles it and then checks that the REPL
    * can see it.
    */
-  public void xtestInteractionsLiveUpdateClasspath()
+  public void testInteractionsLiveUpdateClasspath()
     throws BadLocationException, DocumentAdapterException, 
     IOException, InterruptedException
   {
@@ -620,7 +620,7 @@ public class GlobalModelOtherTest extends GlobalModelTestCase implements OptionC
     String tempPath = f.getParent();
     File tempDir = new File(tempPath);
     tempDir.renameTo(new File(tempPath+"a"));
-                      
+
     String result = interpret("new DrJavaTestFoo().getClass().getName()");
     
     // Should cause a NoClassDefFound, but we shouldn't check exact syntax.
@@ -671,4 +671,35 @@ public class GlobalModelOtherTest extends GlobalModelTestCase implements OptionC
     _model.removeListener(listener);
   }
   
+  /**
+   * Tests that setting and changing an input listener works correctly.
+   */
+  public void testSetChangeInputListener() {
+    InputListener listener1 = new InputListener() {
+      public String getConsoleInput() {
+        return "input1";
+      }
+    };
+    
+    InputListener listener2 = new InputListener() {
+      public String getConsoleInput() {
+        return "input2";
+      }
+    };
+    
+    try {
+      _model.getConsoleInput();
+      fail("Should not have allowed getting input before a listener is installed!");
+    }
+    catch (IllegalStateException ise) {
+      assertEquals("Should have thrown the correct exception.",
+                   "No input listener installed!", ise.getMessage());
+    }
+    
+    _model.setInputListener(listener1);
+    assertEquals("First input listener should return correct input", "input1", _model.getConsoleInput());
+    _model.changeInputListener(listener1, listener2);
+    assertEquals("Second input listener should return correct input", "input2", _model.getConsoleInput());
+  }
+   
 }

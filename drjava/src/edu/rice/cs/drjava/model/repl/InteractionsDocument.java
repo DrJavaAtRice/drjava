@@ -53,22 +53,13 @@ import edu.rice.cs.drjava.model.FileSaveSelector;
  * with a Java interpreter.
  * @version $Id$
  */
-public class InteractionsDocument implements DocumentAdapter {
+public class InteractionsDocument extends ConsoleDocument {
 
   /** Default banner. */
   public static final String DEFAULT_BANNER = "Welcome to DrJava.\n";
   
   /** Default prompt. */
   public static final String DEFAULT_PROMPT = "> ";
-  
-  /** Default text style. */
-  public static final String DEFAULT_STYLE = "default";
-
-  /** Style for System.out */
-  public static final String SYSTEM_OUT_STYLE = "System.out";
-
-  /** Style for System.err */
-  public static final String SYSTEM_ERR_STYLE = "System.err";
 
   /** Style for error messages */
   public static final String ERROR_STYLE = "error";
@@ -76,39 +67,12 @@ public class InteractionsDocument implements DocumentAdapter {
   /** Style for debugger messages */
   public static final String DEBUGGER_STYLE = "debugger";
   
-  
-  /**
-   * The document storing the text for this interactions model.
-   */
-  protected DocumentAdapter _document;
-  
-  /**
-   * Whether the interpreter is currently interpreting an interaction
-   */
-  protected boolean _inProgress;
-  
-  /**
-   * A runnable command to use for a notification beep.
-   */
-  protected Runnable _beep;
-  
-  /** 
-   * Index in the document of the first place that is editable.
-   */
-  protected int _promptPos;
-  
   /**
    * String to print when the document is reset.
    * Defaults to "Welcome to DrJava."
    */
   protected String _banner;
   
-  /**
-   * String to use for the prompt.
-   * Defaults to "> ".
-   */
-  protected String _prompt;
-
   /**
    * Command-line history. It's not reset when the interpreter is reset.
    */
@@ -131,26 +95,19 @@ public class InteractionsDocument implements DocumentAdapter {
   public InteractionsDocument(DocumentAdapter document, int maxHistorySize) {
     this(document, new History(maxHistorySize));
   }
-  
+
   /**
    * Reset the document on startup.  Uses the given history.
    * @param document DocumentAdapter to use for the model
    * @param history History of commands
    */
   public InteractionsDocument(DocumentAdapter document, History history) {
-    _document = document;
+    super(document);
     _history = history;
     
-    _inProgress = false;
-    _beep = new Runnable() {
-      public void run() {}
-    };
-    _promptPos = 0;
+    _hasPrompt = true;
     _banner = DEFAULT_BANNER;
     _prompt = DEFAULT_PROMPT;
-    
-    // Prevent any edits before the prompt!
-    _document.setEditCondition(new InteractionsEditCondition());
     
     reset();
   }
@@ -164,13 +121,6 @@ public class InteractionsDocument implements DocumentAdapter {
   }
   
   /**
-   * Accessor for the string used for the prompt.
-   */
-  public String getPrompt() {
-    return _prompt;
-  }
-  
-  /**
    * Sets the string to use for the banner when the document resets.
    * @param banner String to be printed when the document resets.
    */
@@ -179,60 +129,18 @@ public class InteractionsDocument implements DocumentAdapter {
   }
   
   /**
-   * Sets the string to use for the prompt.
-   * @param prompt String to use for the prompt.
-   */
-  public void setPrompt(String prompt) {
-    _prompt = prompt;
-  }
-  
-  
-  /**
-   * Gets the object which can determine whether an insert
-   * or remove edit should be applied, based on the inputs.
-   * @param condition Object to determine legality of inputs
-   */
-  public DocumentEditCondition getEditCondition() {
-    return _document.getEditCondition();
-  }
-  
-  /**
-   * Provides an object which can determine whether an insert
-   * or remove edit should be applied, based on the inputs.
-   * @param condition Object to determine legality of inputs
-   */
-  public void setEditCondition(DocumentEditCondition condition) {
-    _document.setEditCondition(condition);
-  }
-
-  /**
-   * Returns the first location in the document where editing is allowed.
-   */
-  public int getPromptPos() {
-    return _promptPos;
-  }
-
-  /**
    * Lets this document know whether an interaction is in progress.
    * @param inProgress whether an interaction is in progress
    */
   public void setInProgress(boolean inProgress) {
-    _inProgress = inProgress;
+    _hasPrompt = !inProgress;
   }
 
   /**
    * Returns whether an interaction is currently in progress.
    */
   public boolean inProgress() {
-    return _inProgress;
-  }
-  
-  /**
-   * Sets a runnable action to use as a beep.
-   * @param beep Runnable beep command
-   */
-  public void setBeep(Runnable beep) {
-    _beep = beep;
+    return !_hasPrompt;
   }
   
   /** 
@@ -252,184 +160,12 @@ public class InteractionsDocument implements DocumentAdapter {
   }
 
   /**
-   * Prints a prompt for a new interaction.
-   */
-  public void insertPrompt() {
-    try {
-      forceInsertText(_document.getDocLength(), _prompt, DEFAULT_STYLE);
-      _promptPos = _document.getDocLength();
-    }
-    catch (DocumentAdapterException e) {
-      throw new UnexpectedException(e);
-    }
-  }
-  
-  /**
-   * Inserts a new line at the given position.
-   * @param pos Position to insert the new line
-   */
-  public void insertNewLine(int pos) {
-    // Correct the position if necessary
-    if (pos > getDocLength()) {
-      pos = getDocLength();
-    }
-    else if (pos < 0) {
-      pos = 0;
-    }
-    
-    try {
-      insertText(pos, "\n", DEFAULT_STYLE);
-    }
-    catch (DocumentAdapterException e) {
-      // Shouldn't happen after we've corrected it
-      throw new UnexpectedException(e);
-    }
-  }
-
-  /**
-   * Inserts the given string with the given attributes just before the
-   * most recent prompt.
-   * @param text String to insert
-   * @param style name of style to format the string
-   */
-  public void insertBeforeLastPrompt(String text, String style) {
-    try {
-      int pos;
-      if (_inProgress) {
-        pos = getDocLength();
-      }
-      else {
-        pos = _promptPos - _prompt.length();
-      }
-
-      _promptPos += text.length();
-      _document.forceInsertText(pos, text, style);
-      
-    }
-    catch (DocumentAdapterException ble) {
-      throw new UnexpectedException(ble);
-    }
-  }
-  
-  /**
-   * Inserts a string into the document at the given offset
-   * and the given named style, if the edit condition allows it.
-   * @param offs Offset into the document
-   * @param str String to be inserted
-   * @param style Name of the style to use.  Must have been
-   * added using addStyle.
-   * @throws DocumentAdapterException if the offset is illegal
-   */
-  public void insertText(int offs, String str, String style)
-    throws DocumentAdapterException
-  {
-    if (offs < _promptPos) {
-      _beep.run();
-    }
-    else {
-      _document.insertText(offs, str, style);
-    }
-  }
-  
-  /**
-   * Inserts a string into the document at the given offset
-   * and the given named style, regardless of the edit condition.
-   * @param offs Offset into the document
-   * @param str String to be inserted
-   * @param style Name of the style to use.  Must have been
-   * added using addStyle.
-   * @throws DocumentAdapterException if the offset is illegal
-   */
-  public void forceInsertText(int offs, String str, String style)
-    throws DocumentAdapterException
-  {
-    _document.forceInsertText(offs, str, style);
-  }
-
-  /**
-   * Removes a portion of the document, if the edit condition allows it.
-   * @param offs Offset to start deleting from
-   * @param len Number of characters to remove
-   * @throws DocumentAdapterException if the offset or length are illegal
-   */
-  public void removeText(int offs, int len) throws DocumentAdapterException {
-    if (offs < _promptPos) {
-      _beep.run();
-    } 
-    else {
-      _document.removeText(offs, len);
-    }
-  }
-  
-  /**
-   * Removes a portion of the document, regardless of the edit condition.
-   * @param offs Offset to start deleting from
-   * @param len Number of characters to remove
-   * @throws DocumentAdapterException if the offset or length are illegal
-   */
-  public void forceRemoveText(int offs, int len) throws DocumentAdapterException {
-    _document.forceRemoveText(offs, len);
-  }
-  
-  /**
-   * Returns the length of the document.
-   */
-  public int getDocLength() {
-    return _document.getDocLength();
-  }
-  
-  /**
-   * Returns a portion of the document.
-   * @param offs First offset of the desired text
-   * @param len Number of characters to return
-   * @throws DocumentAdapterException if the offset or length are illegal
-   */
-  public String getDocText(int offs, int len) throws DocumentAdapterException {
-    return _document.getDocText(offs, len);
-  }
-  
-  /**
-   * Returns the string that the user has entered at the current prompt.
-   * May contain newline characters.
-   */
-  public String getCurrentInteraction() {
-    try {
-      return getDocText(_promptPos, getDocLength() - _promptPos);
-    }
-    catch (DocumentAdapterException e) {
-      throw new UnexpectedException(e);
-    }
-  }
-
-  /**
-   * Clears the current interaction text and then moves
-   * to the end of the command history.
-   */
-  public void clearCurrentInteraction() {
-    _clearCurrentInteractionText();
-    _history.moveEnd();
-  }
-
-  /**
-   * Removes the text from the current prompt to the end of the document.
-   */
-  protected void _clearCurrentInteractionText() {
-    try {
-      // Delete old value of current line
-      removeText(_promptPos, getDocLength() - _promptPos);
-    }
-    catch (DocumentAdapterException ble) {
-      throw new UnexpectedException(ble);
-    }
-  }
-  
-  /**
    * Replaces any text entered past the prompt with the current
    * item in the history.
    */
   protected void _replaceCurrentLineFromHistory() {
     try {
-      _clearCurrentInteractionText();
+      _clearCurrentInputText();
       insertText(getDocLength(), _history.getCurrent(), DEFAULT_STYLE);
     }
     catch (DocumentAdapterException ble) {
@@ -687,29 +423,20 @@ public class InteractionsDocument implements DocumentAdapter {
     }
   }
 
-  
   /**
-   * Class to ensure that any attempt to edit the document
-   * above the prompt is rejected.
+   * Clears the current input text and then moves
+   * to the end of the command history.
    */
-  class InteractionsEditCondition extends DocumentEditCondition {
-    public boolean canInsertText(int offs, String str, String style) {
-      if (offs < getPromptPos()) {
-        _beep.run();
-        return false;
-      }
-      else {
-        return true;
-      }
-    }
-    public boolean canRemoveText(int offs, int len) {
-      if (offs < getPromptPos()) {
-        _beep.run();
-        return false;
-      }
-      else {
-        return true;
-      }
-    }
+  public void clearCurrentInteraction() {
+    super.clearCurrentInput();
+    _history.moveEnd();
+  }
+
+  /**
+   * Returns the string that the user has entered at the current prompt.
+   * Forwards to getCurrentInput()
+   */
+  public String getCurrentInteraction() {
+    return super.getCurrentInput();
   }
 }

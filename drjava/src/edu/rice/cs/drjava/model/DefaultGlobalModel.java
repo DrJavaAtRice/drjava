@@ -207,10 +207,16 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
   private final SwingDocumentAdapter _interactionsDocAdapter;
   
   /**
-   * The document used to display System.out and System.err.
+   * The document used to display System.out and System.err,
+   * and to read from System.in.
    */
-  private final StyledDocument _consoleDoc = new DefaultStyledDocument();
-  
+  private final ConsoleDocument _consoleDoc;
+
+  /**
+   * The document adapter used in the console document.
+   */
+  private final SwingDocumentAdapter _consoleDocAdapter;
+
   /**
    * The document used to display JUnit test results.
    */
@@ -234,21 +240,9 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
   private PageFormat _pageFormat = new PageFormat();
 
   /**
-   * Attributes for System.out output in the console document.
+   * Listens for requests from System.in.
    */
-  public static final AttributeSet SYSTEM_OUT_CONSOLE_STYLE
-    = SimpleAttributeSet.EMPTY;
-
-  /**
-   * Attributes for System.err output in the console document.
-   */
-  public static final AttributeSet SYSTEM_ERR_CONSOLE_STYLE = _getConsoleErrStyle();
-
-  private static AttributeSet _getConsoleErrStyle() {
-    SimpleAttributeSet s = new SimpleAttributeSet(SYSTEM_OUT_CONSOLE_STYLE);
-    s.addAttribute(StyleConstants.Foreground, Color.red);
-    return s;
-  }
+  private InputListener _inputListener;
 
   
   // ----- CONSTRUCTORS -----
@@ -303,6 +297,11 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     _interpreterControl.setInteractionsModel(_interactionsModel);
     _interpreterControl.setJUnitModel(this);  // to be replaced by JUnitModel
 
+    _consoleDocAdapter = new SwingDocumentAdapter();
+    _consoleDoc = new ConsoleDocument(_consoleDocAdapter);
+
+    _inputListener = NoInputListener.ONLY;
+
     _createDebugger();
     
     _registerOptionListeners();
@@ -327,7 +326,6 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
   public void removeListener(GlobalModelListener listener) {
     _notifier.removeListener(listener);
   }
-  
 
   // getter methods for the private fields
   
@@ -344,19 +342,19 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
   }
   
   /**
-   * Returns the interactions model.
+   * @return the interactions model.
    */
   public DefaultInteractionsModel getInteractionsModel() {
     return _interactionsModel;
   }
-  
+
   /**
-   * Returns SwingDocumentAdapter in use by the InteractionsDocument.
+   * @return SwingDocumentAdapter in use by the InteractionsDocument.
    */
   public SwingDocumentAdapter getSwingInteractionsDocument() {
     return _interactionsDocAdapter;
   }
-  
+
   public InteractionsDocument getInteractionsDocument() {
     return _interactionsModel.getDocument();
   }
@@ -365,8 +363,12 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     return _junitErrorModel;
   }
 
-  public StyledDocument getConsoleDocument() {
+  public ConsoleDocument getConsoleDocument() {
     return _consoleDoc;
+  }
+
+  public SwingDocumentAdapter getSwingConsoleDocument() {
+    return _consoleDocAdapter;
   }
 
   public CompilerErrorModel getCompilerErrorModel() {
@@ -386,7 +388,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
   }
 
   /**
-   * Returns the current total number of errors, both with and without files.
+   * @return the current total number of errors, both with and without files.
    */
   public int getNumErrors() {
     return _numErrors;
@@ -721,12 +723,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
    * Fires consoleReset() event.
    */
   public void resetConsole() {
-    try {
-      _consoleDoc.remove(0, _consoleDoc.getLength());
-    }
-    catch (BadLocationException ble) {
-      throw new UnexpectedException(ble);
-    }
+    _consoleDoc.reset();
 
     _notifier.notifyListeners(new EventNotifier.Notifier() {
       public void notifyListener(GlobalModelListener l) {
@@ -815,18 +812,15 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
    * user interface could become unresponsive.
    * @param doc Document to append to
    * @param s String to append to the end of the document
-   * @param set AttributeSet to use, or null for default
+   * @param style the style to print with
    */
-  private void _docAppend(Document doc, String s, AttributeSet set) {
+  private void _docAppend(ConsoleDocument doc, String s, String style) {
     synchronized(_systemWriterLock) {
       try {
-        doc.insertString(doc.getLength(), s, set);
+        doc.insertBeforeLastPrompt(s, style);
         
         // Wait to prevent being flooded with println's
         _systemWriterLock.wait(WRITE_DELAY);
-      }
-      catch (BadLocationException e) {
-        throw new UnexpectedException(e);
       }
       catch (InterruptedException e) {
         // It's ok, we'll go ahead and resume
@@ -835,16 +829,19 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
   }
   
  
-  /** Prints System.out to the DrJava console. */
+  /**
+   * Prints System.out to the DrJava console.
+   */
   public void systemOutPrint(String s) {
-    _docAppend(_consoleDoc, s, SYSTEM_OUT_CONSOLE_STYLE);
+    _docAppend(_consoleDoc, s, ConsoleDocument.SYSTEM_OUT_STYLE);
   }
 
-  /** Prints System.err to the DrJava console. */
+  /**
+   * Prints System.err to the DrJava console.
+   */
   public void systemErrPrint(String s) {
-    _docAppend(_consoleDoc, s, SYSTEM_ERR_CONSOLE_STYLE);
+    _docAppend(_consoleDoc, s, ConsoleDocument.SYSTEM_ERR_STYLE);
   }
-  
 
   /** Called when the repl prints to System.out.
   public void replSystemOutPrint(String s) {
@@ -871,7 +868,6 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
   public void waitForInterpreter() {
     _interpreterControl.ensureInterpreterConnected();
   }
-
 
   /**
    * Returns all registered compilers that are actually available.
@@ -1062,16 +1058,16 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
    */
   public void javadocAll(String destDir)
     throws IOException, JavadocException, InvalidPackageException {
-    
+
     // Accumulate a set of arguments to JavaDoc - package or file names.
     HashSet docUnits = new HashSet();
     HashSet sourceRootSet = new HashSet();
     HashSet defaultRoots = new HashSet();
     HashSet topLevelPacks = new HashSet();
-    
+
     // This depends on the current value of the "javadoc.all.packages" option.
     boolean docAll = DrJava.getConfig().getSetting(JAVADOC_ALL_PACKAGES).booleanValue();
-    
+
     // Each document has a package heirarchy to traverse.
     for (int i = 0; i < _definitionsDocs.getSize(); i++) {
       OpenDefinitionsDocument doc = (OpenDefinitionsDocument)
@@ -1087,7 +1083,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
           // But don't do it if we've already done it for this directory.
           defaultRoots.add(sourceRoot);
           File[] javaFiles = sourceRoot.listFiles(FileOps.JAVA_FILE_FILTER);
-          
+
           for (int j = 0; j < javaFiles.length; j++) {
             docUnits.add(javaFiles[j].getAbsolutePath());
           }
@@ -2528,27 +2524,6 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     }
   }
 
-  private class ExtraClasspathOptionListener implements OptionListener<Vector<File>> {
-    
-    public void optionChanged (OptionEvent<Vector<File>> oce) {
-      Vector<File> cp = oce.value;
-      if(cp!=null) {
-        Enumeration<File> enum = cp.elements();
-        while(enum.hasMoreElements()) {
-          _interactionsModel.addToClassPath(enum.nextElement().getAbsolutePath());
-        }
-      } 
-    }    
-  }
-
-  private class BackUpFileOptionListener implements OptionListener<Boolean> {
-
-    public void optionChanged (OptionEvent<Boolean> oe){
-      Boolean value = oe.value;
-      FileOps.DefaultFileSaver.setBackupsEnabled(value.booleanValue());
-    }
-  }
-  
   /**
    * Called when the JVM used for unit tests has registered.
    */
@@ -2577,4 +2552,81 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     }
   }
 
+  /**
+   * Sets the listener for any type of single-source input event.
+   * The listener can only be changed with the changeInputListener method.
+   * @param listener a listener that reacts to input requests
+   * @throws IllegalStateException if the input listener is locked
+   */
+  public void setInputListener(InputListener listener) {
+    if (_inputListener == NoInputListener.ONLY) {
+      _inputListener = listener;
+    }
+    else {
+      throw new IllegalStateException("Cannot change the input listener until it is released.");
+    }
+  }
+
+  /**
+   * Changes the input listener. Takes in the old listener to ensure that the owner
+   * of the original listener is aware that it is being changed. It is therefore
+   * important NOT to include a public accessor to the input listener on the model.
+   * @param oldListener the listener that was installed
+   * @param newListener the listener to be installed
+   */
+  public void changeInputListener(InputListener oldListener, InputListener newListener) {
+    // syncrhonize to prevent concurrent modifications to the listener
+    synchronized(NoInputListener.ONLY) {
+      if (_inputListener == oldListener) {
+        _inputListener = newListener;
+      }
+      else {
+        throw new IllegalArgumentException("The given old listener is not installed!");
+      }
+    }
+  }
+
+  /**
+   * Gets input from the console through the currently installed input listener.
+   * @return the console input
+   */
+  public String getConsoleInput() {
+    _consoleDoc.insertPrompt();
+    return _inputListener.getConsoleInput();
+  }
+
+  /**
+   * Singleton InputListener which should never be asked for input.
+   */
+  private static class NoInputListener implements InputListener {
+    public static final NoInputListener ONLY = new NoInputListener();
+    private NoInputListener() {
+    }
+
+    public String getConsoleInput() {
+      throw new IllegalStateException("No input listener installed!");
+    }
+  }
+
+  private class ExtraClasspathOptionListener implements OptionListener<Vector<File>> {
+    
+    public void optionChanged (OptionEvent<Vector<File>> oce) {
+      Vector<File> cp = oce.value;
+      if(cp!=null) {
+        Enumeration<File> enum = cp.elements();
+        while(enum.hasMoreElements()) {
+          _interactionsModel.addToClassPath(enum.nextElement().getAbsolutePath());
+        }
+      } 
+    }    
+  }
+
+  private class BackUpFileOptionListener implements OptionListener<Boolean> {
+
+    public void optionChanged (OptionEvent<Boolean> oe){
+      Boolean value = oe.value;
+      FileOps.DefaultFileSaver.setBackupsEnabled(value.booleanValue());
+    }
+  }
+  
 }

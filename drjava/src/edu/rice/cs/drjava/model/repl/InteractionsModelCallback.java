@@ -59,7 +59,13 @@ public interface InteractionsModelCallback {
    * @param s String to print
    */
   public void replSystemOutPrint(String s);
-  
+
+  /**
+   * Called when input is request from System.in.
+   * @return the input given to System.in
+   */
+  public String getConsoleInput();
+
   /** 
    * Called when the repl prints to System.err.
    * @param s String to print

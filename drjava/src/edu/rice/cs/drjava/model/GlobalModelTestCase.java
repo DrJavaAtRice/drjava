@@ -616,19 +616,6 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       undoableEditCount = 0;
     }
     
-    /**
-     * This method prints the failure message to System.err and
-     * kills the JVM.  Just calling fail() doesn't always cause the
-     * test to fail, because the listener is often called from another
-     * thread.
-     */
-    protected void listenerFail(String s) {
-      System.err.println("TEST FAILED: " + s);
-      new AssertionFailedError(s).printStackTrace(System.err);
-      _testFailed = true;
-      fail(s);
-    }
-
     public void assertAbandonCount(int i) {
       assertEquals("number of times canAbandon fired", i, canAbandonCount);
     }
