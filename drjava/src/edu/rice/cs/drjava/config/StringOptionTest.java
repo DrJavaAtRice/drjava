@@ -37,48 +37,43 @@
  *
 END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava;
+package edu.rice.cs.drjava.config;
 
-import java.util.Date;
-import java.text.SimpleDateFormat;
+import junit.framework.*;
 
 /**
- * This interface hold the information about this build of DrJava.
- * This file is copied to Version.java by the build process, which also
- * fills in the right values of the date and time.
- *
- * This javadoc corresponds to build drjava-20020331-1620;
- *
- * @version $Id$
+ * Class according to the JUnit protocol. Tests
+ * the proper functionality of the class StringOption.
  */
-public abstract class Version {
+public class StringOptionTest extends TestCase
+{
   /**
-   * This string will be automatically expanded upon "ant commit".
-   * Do not edit it by hand!
+   * @param name The name of this test case.
    */
-  private static final String BUILD_TIME_STRING = "20020331-1620";
+  public StringOptionTest(String name) { super(name); }
+  
+  public void setUp() {}
+  
+  public void testGetName()
+  {
+    StringOption so = new StringOption("classpath");
 
-  /** A {@link Date} version of the build time. */
-  private static final Date BUILD_TIME = _getBuildDate();
-
-  public static String getBuildTimeString() {
-    return BUILD_TIME_STRING;
+    assertEquals("classpath", so.getName());
   }
-
-  public static Date getBuildTime() {
-    return BUILD_TIME;
+  
+  public void testParse()
+  {
+    StringOption so = new StringOption("classpath");
+    
+    assertEquals("3", so.parse("3"));
+    assertEquals(".:..", so.parse(".:.."));
   }
-
-  private static Date _getBuildDate() {
-    try {
-      return new SimpleDateFormat("yyyyMMdd-HHmm z").parse(BUILD_TIME_STRING + " GMT");
-    }
-    catch (Exception e) { // parse format or whatever problem
-      return null;
-    }
+  
+  public void testFormat()
+  {
+    StringOption so = new StringOption("classpath");
+    
+    assertEquals("3", so.format("3"));
+    assertEquals(".:..", so.format(".:.."));
   }
-
-  public static void main(String[] args) {
-    System.out.println("Version for edu.rice.cs.drjava: " + BUILD_TIME_STRING);
-  }
-} 
+}

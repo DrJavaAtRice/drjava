@@ -35,50 +35,54 @@
  * present version of DrJava depends on these classes, so you'd want to
  * remove the dependency first!)
  *
-END_COPYRIGHT_BLOCK*/
+END_COPYRIGHT_BLOCK*/package edu.rice.cs.drjava.config;
 
-package edu.rice.cs.drjava;
-
-import java.util.Date;
-import java.text.SimpleDateFormat;
+import junit.framework.*;
 
 /**
- * This interface hold the information about this build of DrJava.
- * This file is copied to Version.java by the build process, which also
- * fills in the right values of the date and time.
- *
- * This javadoc corresponds to build drjava-20020331-1620;
- *
- * @version $Id$
+ * Class according to the JUnit protocol. Tests
+ * the proper functionality of the class BooleanOption.
  */
-public abstract class Version {
+public class BooleanOptionTest extends TestCase
+{
   /**
-   * This string will be automatically expanded upon "ant commit".
-   * Do not edit it by hand!
+   * @param name The name of this test case.
    */
-  private static final String BUILD_TIME_STRING = "20020331-1620";
+  public BooleanOptionTest(String name) { super(name); }
+  
+  public void setUp() {}
+  
+  public void testGetName()
+  {
+    BooleanOption bo1 = new BooleanOption("enable JUnit");
+    BooleanOption bo2 = new BooleanOption("use menu icons");
 
-  /** A {@link Date} version of the build time. */
-  private static final Date BUILD_TIME = _getBuildDate();
-
-  public static String getBuildTimeString() {
-    return BUILD_TIME_STRING;
+    assertEquals("enable JUnit", bo1.getName());
+    assertEquals("use menu icons",   bo2.getName());
   }
-
-  public static Date getBuildTime() {
-    return BUILD_TIME;
+  
+  public void testParse()
+  {
+    BooleanOption bo = new BooleanOption("enable JUnit");
+    
+    assertEquals(Boolean.TRUE, bo.parse("true"));
+    assertEquals(Boolean.FALSE, bo.parse("false"));
+    
+    try { bo.parse("3"); fail(); }
+    catch (IllegalArgumentException e) {}
+    
+    try { bo.parse("True"); fail(); }
+    catch (IllegalArgumentException e) {}
   }
-
-  private static Date _getBuildDate() {
-    try {
-      return new SimpleDateFormat("yyyyMMdd-HHmm z").parse(BUILD_TIME_STRING + " GMT");
-    }
-    catch (Exception e) { // parse format or whatever problem
-      return null;
-    }
+  
+  public void testFormat()
+  {
+    BooleanOption bo1 = new BooleanOption("max_files");
+    BooleanOption bo2 = new BooleanOption("indent_size");
+    
+    assertEquals("true",  bo1.format(Boolean.TRUE));
+    assertEquals("true",  bo2.format(Boolean.TRUE));
+    assertEquals("false", bo1.format(Boolean.FALSE));
+    assertEquals("false", bo2.format(Boolean.FALSE));
   }
-
-  public static void main(String[] args) {
-    System.out.println("Version for edu.rice.cs.drjava: " + BUILD_TIME_STRING);
-  }
-} 
+}
