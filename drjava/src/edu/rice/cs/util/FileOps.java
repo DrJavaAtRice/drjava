@@ -39,8 +39,6 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.util;
 
-import gj.util.Vector;
-
 import java.io.*;
 import java.util.*;
 
@@ -237,7 +235,7 @@ public abstract class FileOps {
     final Set exploredDirectories = new HashSet();
 
     LinkedList output = new LinkedList();
-    gj.util.Stack<PrefixAndFile> working = new gj.util.Stack<PrefixAndFile>();
+    Stack<PrefixAndFile> working = new Stack<PrefixAndFile>();
     working.push(new PrefixAndFile(prefix, root));
     exploredDirectories.add(root);
 

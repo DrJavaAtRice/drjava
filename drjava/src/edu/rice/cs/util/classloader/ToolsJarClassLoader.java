@@ -42,7 +42,7 @@ package edu.rice.cs.util.classloader;
 import java.net.*;
 import java.io.File;
 
-import gj.util.Vector;
+import java.util.ArrayList;
 
 /**
  * A class loader that tries to load classes from tools.jar.
@@ -65,32 +65,32 @@ public class ToolsJarClassLoader extends URLClassLoader {
   public static File[] getToolsJarFiles() {
     String javaHome = System.getProperty("java.home");
     File home = new File(javaHome);    
-    Vector<File> files = new Vector<File>();
+    ArrayList<File> files = new ArrayList<File>();
     
     // Check $JAVA_HOME/lib/tools.jar
     File libDir = new File(home, "lib");
     File jar = new File(libDir, "tools.jar");
     if (jar.exists()) {
-      files.addElement(jar);
+      files.add(jar);
     }
     
     // Check $JAVA_HOME/../lib/tools.jar
     File libDir2 = new File(home.getParentFile(), "lib");
     File jar2 = new File(libDir2, "tools.jar");
     if (jar2.exists()) {
-      files.addElement(jar2);
+      files.add(jar2);
     }
     
     if (javaHome.indexOf("Program Files") != -1) {
       // Windows: JavaHome is JRE; guess where SDK is
       File jar3 = new File(getWindowsToolsJar(javaHome));
       if (jar3.exists()) {
-        files.addElement(jar3);
+        files.add(jar3);
       }
     }
 
     File[] fileArray = new File[files.size()];
-    files.copyInto(fileArray);
+    files.toArray(fileArray);
     return fileArray;
   }
   

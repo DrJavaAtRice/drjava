@@ -43,7 +43,6 @@ import junit.framework.*;
 import java.io.*;
 
 import java.util.LinkedList;
-import gj.util.Vector;
 
 /**
  * Test cases for {@link FileOps}.

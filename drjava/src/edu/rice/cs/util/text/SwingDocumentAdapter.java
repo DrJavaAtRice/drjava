@@ -43,7 +43,7 @@ import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 
-import gj.util.Hashtable;
+import java.util.Hashtable;
 
 /**
  * Provides a toolkit-independent way to interact with a

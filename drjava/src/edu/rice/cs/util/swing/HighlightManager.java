@@ -39,8 +39,8 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.util.swing;
   
-import gj.util.Stack;
-import gj.util.Vector;
+import java.util.Stack;
+import java.util.Vector;
 
 import javax.swing.text.JTextComponent;
 import javax.swing.text.Document;
