@@ -1428,6 +1428,8 @@ public class MainFrame extends JFrame {
 
     _currLocationField = new JLabel();
     _currLocationField.setFont(_currLocationField.getFont().deriveFont(Font.PLAIN));
+    // This field currently disabled due to performance concerns.
+    _currLocationField.setVisible(false);
 
     _statusBar = new JPanel( new BorderLayout() );
     _statusBar.add( _fileNameField, BorderLayout.WEST );
@@ -1448,7 +1450,7 @@ public class MainFrame extends JFrame {
     public void caretUpdate( CaretEvent ce ) {
       _model.getActiveDocument().
         syncCurrentLocationWithDefinitions(ce.getDot());
-      updateLocation();
+      //updateLocation();
     }
 
     public void updateLocation() {
