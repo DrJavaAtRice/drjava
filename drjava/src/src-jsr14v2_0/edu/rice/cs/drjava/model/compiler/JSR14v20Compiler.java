@@ -389,7 +389,10 @@ public class JSR14v20Compiler implements CompilerInterface {
   }
   
   public void setBuildDirectory(File dir){
-    _builtPath=dir.getAbsolutePath();    
+    if(dir == null)
+      _builtPath = "";
+    else
+      _builtPath=dir.getAbsolutePath(); 
   }
   
   /**
