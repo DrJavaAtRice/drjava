@@ -121,6 +121,12 @@ public class ForEachStatement extends ForSlashEachStatement implements ContinueT
    */
   private List<String> labels;
   
+  
+  /*
+   * The list of variables used for expansion of the foreach node.
+   */
+  private List<String> vars;
+  
   /**
    * Creates a new for statement
    * @param init  the initialization statements
@@ -156,6 +162,16 @@ public class ForEachStatement extends ForSlashEachStatement implements ContinueT
     collection     = coll;
     this.body      = body;
     labels         = new LinkedList();
+    vars = new LinkedList();
+  }
+  
+  
+  public void addVar(String s){
+    vars.add(s);
+  }
+  
+  public List<String> getVars(){
+    return vars;
   }
   
   /**

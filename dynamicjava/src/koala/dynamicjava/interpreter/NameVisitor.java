@@ -52,11 +52,18 @@ public class NameVisitor extends VisitorObject<Node> {
   private Context context;
   
   /**
+   * a counter to help define unique variable names
+   * added to help with foreach variable naming
+   */
+  private Integer name_counter;
+  
+  /**
    * Creates a new name visitor
    * @param ctx the context
    */
   public NameVisitor(Context ctx) {
     context = ctx;
+    name_counter = new Integer(0);
   }
   
   protected static void rejectReferenceType(Node o, Node n) {
@@ -115,8 +122,54 @@ public class NameVisitor extends VisitorObject<Node> {
   /**
    * Visits a ForEachStatement
    * @param node the node to visit
+   * 
+   * this simply takes in a ForEachStatement, and changes it to 
+   * a ForStatement and runs the Name visitor on it
    */
   public Node visit(ForEachStatement node){
+    String s1, s2;
+    context.enterScope();
+
+    
+    name_counter = new Integer(name_counter.intValue() + 1);
+    s1 = "#_foreach_var_" + name_counter;
+    name_counter = new Integer(name_counter.intValue() + 1);
+    s2 = "#_foreach_var_" + name_counter;
+    context.define(s1, null);
+    context.define(s2, null);
+      
+    node.addVar(s1);
+    node.addVar(s2);
+
+    
+    
+    
+    FormalParameter param = node.getParameter();
+    Expression coll = node.getCollection();
+    Node body = node.getBody();
+    Node o;
+    
+    o = param.acceptVisitor(this);
+    if (o != null) {
+      rejectReferenceType (o,param);
+      node.setParameter((FormalParameter)o);  
+    }
+    
+    o = coll.acceptVisitor(this);
+    if (o != null) {
+      rejectReferenceType (o,coll);
+      node.setCollection((Expression)o);
+    }
+    
+    o = body.acceptVisitor(this);
+    if (o != null) {
+      rejectReferenceType (o,body);
+      node.setBody(o);  
+    }
+    
+    
+    context.leaveScope();
+    
     return null;
   }
 
@@ -147,7 +200,7 @@ public class NameVisitor extends VisitorObject<Node> {
     n = node.getBody();
     Node o = n.acceptVisitor(this);
     if (o != null) {
-      rejectReferenceType(o,n);
+      rejectReferenceType (o,n);
       node.setBody(o);  
     }
     // Leave the current scope

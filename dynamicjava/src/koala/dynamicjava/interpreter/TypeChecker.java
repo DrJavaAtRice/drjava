@@ -119,7 +119,58 @@ public class TypeChecker extends VisitorObject<Class> {
    */
   public Class visit(ForEachStatement node){
     /* to be filled in shortly */
-    return null;
+
+    
+        /*examples*/
+    /*
+     * Collection<String> c = ... ;
+     * for(String s: c){
+     *   ...
+     * }
+     * translates to:
+     * for(Iterator<E> #i = Expression.iterator(); #i.hasNext(); ){
+     *    FormalParameter = #i.next();
+     *    statement...
+     * }
+     * 
+     * 
+     * create a variable name #i
+     * get the generic type of the collection and create an iterator with the
+     *   same generic type and give it the name #i
+     * create an expressio for #i.iterator();
+     * create an AssignmentExpression for the iterator and the expression.iterator
+     * create an expression for #i.hasNext();
+     * create an expression for #i.next();
+     * create an assignemntExpression for FormalParameter = #i.next();
+     * create a new for body expression and add the assigment to it's first
+     * create a new for statement.
+     * 
+     * ============================================================================
+     * 
+     * Collection c = ... ;
+     * for(Object o: c){
+     *   String s = (String) o;
+     *   ...
+     * }
+     * translates to:
+     * for(Iterator #i = Expression.iterator(); #i.hasNext(); ){
+     *    FormalParameter = #i.next();
+     *    statement...
+     * }
+     * 
+     * int sum(int[] a){
+     *    int sum = 0;
+     *    for(int i:a){
+     *      sum+=i;
+     *    return sum
+     * }
+     * translates to:
+     * for(int #i=0; #i<a.length; #i++){
+     *   FormalParameter=a[#i];
+     *   statement...
+     * }
+     */
+return null;
   }
 
   /**

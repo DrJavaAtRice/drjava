@@ -67,6 +67,16 @@ public class ForEachParsingTest extends TestCase {
     assertEquals("[(koala.dynamicjava.tree.ForEachStatement: (koala.dynamicjava.tree.FormalParameter: true (koala.dynamicjava.tree.ReferenceType: String) i) (koala.dynamicjava.tree.SimpleAllocation: (koala.dynamicjava.tree.ReferenceType: List) null) (koala.dynamicjava.tree.EmptyStatement: ))]", statements.toString());
   }
   
+  public void testArrayInForeach(){
+    try{
+    Parser p = new Parser(new StringReader("for(final String i:{\"dsfg\",\"safsa\"});"));
+    List statements = p.parseStream();
+
+    }catch(ParseException e){
+      
+    }
+  }
+  
   public void testNonTrivialCollectionInForeach() throws ParseException{
     Parser p = new Parser(new StringReader("for(final String i:new List(\"asdf\", \"asfd\"));"));
     List statements = p.parseStream();
