@@ -1,10 +1,11 @@
-package  edu.rice.cs.drjava;
+package edu.rice.cs.drjava.model.definitions;
 
 import  javax.swing.text.BadLocationException;
 import  junit.framework.*;
 import  gj.util.Vector;
 import  junit.extensions.*;
 
+import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 
 /**
  * Tests the functionality of the definitions document.

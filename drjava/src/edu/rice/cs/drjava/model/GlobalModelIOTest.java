@@ -1,4 +1,4 @@
-package  edu.rice.cs.drjava;
+package edu.rice.cs.drjava.model;
 
 import  junit.framework.*;
 
@@ -10,6 +10,10 @@ import  junit.extensions.*;
 import java.util.LinkedList;
 import javax.swing.text.Document;
 import javax.swing.text.DefaultStyledDocument;
+
+import edu.rice.cs.drjava.model.definitions.*;
+import edu.rice.cs.drjava.model.repl.*;
+import edu.rice.cs.drjava.model.compiler.*;
 
 public class GlobalModelIOTest extends GlobalModelTestCase {
   /**

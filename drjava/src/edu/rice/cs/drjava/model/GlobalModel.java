@@ -1,15 +1,16 @@
-package edu.rice.cs.drjava;
+package edu.rice.cs.drjava.model;
 
-import javax.swing.text.Document;
-import javax.swing.text.DefaultStyledDocument;
-import javax.swing.text.BadLocationException;
-
+import javax.swing.text.*;
 import java.io.*;
+import java.util.*;
 
-import java.util.Stack;
-import java.util.LinkedList;
-import java.util.ListIterator;
-import java.util.StringTokenizer;
+import edu.rice.cs.drjava.util.swing.FindReplaceMachine;
+
+import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.util.UnexpectedException;
+import edu.rice.cs.drjava.model.definitions.*;
+import edu.rice.cs.drjava.model.repl.*;
+import edu.rice.cs.drjava.model.compiler.*;
 
 /**
  * Handles the bulk of DrJava's program logic.
@@ -398,7 +399,7 @@ public class GlobalModel {
    *         the matching brace.
    */
   public int balanceBackward() {
-    return _definitionsDoc._reduced.balanceBackward();
+    return _definitionsDoc.balanceBackward();
   }
   
   /**

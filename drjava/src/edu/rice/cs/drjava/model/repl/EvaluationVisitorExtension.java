@@ -1,4 +1,4 @@
-package  edu.rice.cs.drjava;
+package edu.rice.cs.drjava.model.repl;
 
 import koala.dynamicjava.interpreter.*;
 import koala.dynamicjava.interpreter.context.*;

@@ -1,11 +1,13 @@
-package  edu.rice.cs.drjava;
+package edu.rice.cs.drjava.util.swing;
 
 import  junit.framework.*;
 import  java.util.Vector;
 import  junit.extensions.*;
 
 import javax.swing.text.BadLocationException;
+import javax.swing.text.PlainDocument;
 import javax.swing.text.Document;
+
 /**
  * Test the interactions between double quotes and backslashes.
  * @version $Id$
@@ -27,7 +29,7 @@ public class FindReplaceMachineTest extends TestCase
    * Initializes the document for the tests.
    */
   protected void setUp() {
-    doc = new DefinitionsDocument();
+    doc = new PlainDocument();
   }
 
   /**

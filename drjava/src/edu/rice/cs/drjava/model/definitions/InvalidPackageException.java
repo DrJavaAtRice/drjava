@@ -1,4 +1,4 @@
-package edu.rice.cs.drjava;
+package edu.rice.cs.drjava.model.definitions;
 
 /**
  * An exception thrown by DefinitionsDocument.getPackageName() when the

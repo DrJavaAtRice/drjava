@@ -1,44 +1,15 @@
-package edu.rice.cs.drjava;
+package edu.rice.cs.drjava.ui;
 
 import java.util.Arrays;
 
-import javax.swing.JPanel;
-import javax.swing.JList;
-import javax.swing.JTextArea;
-import javax.swing.ListCellRenderer;
-import javax.swing.JButton;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.SwingUtilities;
-import javax.swing.ListSelectionModel;
-import javax.swing.BoxLayout;
-import javax.swing.JScrollPane;
-import javax.swing.JEditorPane;
+import javax.swing.*;
+import javax.swing.text.*;
+import javax.swing.event.*;
+import java.awt.event.*;
+import java.awt.*;
 
-import javax.swing.text.Document;
-import javax.swing.text.DefaultStyledDocument;
-import javax.swing.text.Position;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.AttributeSet;
-import javax.swing.text.SimpleAttributeSet;
-import javax.swing.text.DefaultHighlighter;
-import javax.swing.text.StyleConstants;
-
-import javax.swing.event.CaretListener;
-import javax.swing.event.CaretEvent;
-import javax.swing.event.ListSelectionListener;
-import javax.swing.event.ListSelectionEvent;
-
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-
-import java.awt.Rectangle;
-import java.awt.Point;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.BorderLayout;
-import java.awt.Font;
+import edu.rice.cs.drjava.util.UnexpectedException;
+import edu.rice.cs.drjava.model.compiler.*;
 
 /**
  * The panel which houses the list of errors after an unsuccessful compilation.
@@ -357,10 +328,6 @@ public class CompilerErrorPanel extends JPanel {
    * @param errors the current error information
    */
   public void resetErrors(CompilerError[] errors) {
-    for (int i = 0; i < errors.length; i++) {
-      DrJava.consoleErr().println("#" + i + ": " + errors[i]);
-    }
-
     // Get rid of any old highlights
     _removePreviousHighlight();
 

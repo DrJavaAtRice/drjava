@@ -1,4 +1,6 @@
-package edu.rice.cs.drjava;
+package edu.rice.cs.drjava.model.repl;
+
+import edu.rice.cs.drjava.util.UnexpectedException;
 
 /**
  * A class to wrap up a JavaInterpreter, encapsulating a Thread which

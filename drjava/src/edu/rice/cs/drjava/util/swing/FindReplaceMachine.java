@@ -1,8 +1,10 @@
-package edu.rice.cs.drjava;
+package edu.rice.cs.drjava.util.swing;
 
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import javax.swing.text.Position;
+
+import edu.rice.cs.drjava.util.UnexpectedException;
 
 public class FindReplaceMachine {
   /** The document on which FindReplaceMachine is operating. */

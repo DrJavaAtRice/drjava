@@ -1,4 +1,4 @@
-package  edu.rice.cs.drjava;
+package edu.rice.cs.drjava.model.definitions;
 
 import  javax.swing.text.StyleContext.SmallAttributeSet;
 import  javax.swing.text.*;
@@ -8,6 +8,9 @@ import  java.util.HashSet;
 import  java.util.StringTokenizer;
 
 import java.io.File;
+
+import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
+import edu.rice.cs.drjava.util.UnexpectedException;
 
 /** 
  * The model for the definitions pane.   
@@ -286,6 +289,17 @@ public class DefinitionsDocument extends PlainDocument {
   public boolean tabsRemoved() {
     return _tabsRemoved;
   }
+
+  /**
+   * Forwarding method to find the match for the closing brace 
+   * immediately to the left, assuming there is such a brace.
+   * @return the relative distance backwards to the offset before
+   *         the matching brace.
+   */
+  public int balanceBackward() {
+    return _reduced.balanceBackward();
+  }
+  
 
   public void indentLines(int selStart, int selEnd) {
     try {

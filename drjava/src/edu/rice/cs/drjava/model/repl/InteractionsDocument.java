@@ -1,4 +1,4 @@
-package  edu.rice.cs.drjava;
+package edu.rice.cs.drjava.model.repl;
 
 import  javax.swing.text.PlainDocument;
 import  javax.swing.text.AttributeSet;
@@ -8,16 +8,19 @@ import  java.util.LinkedList;
 import  java.util.ListIterator;
 import  java.util.StringTokenizer;
 
+import edu.rice.cs.drjava.util.UnexpectedException;
+
 /**
  * The document that handles input to the repl and the interpretation
  * of said input.
  * @version $Id$
  */
-class InteractionsDocument extends PlainDocument {
+public class InteractionsDocument extends PlainDocument {
 
   /** Index in the document of the first place that is editable. */
   int frozenPos = 0;
   private final String banner = "Welcome to DrJava.\n";
+
   /**
    * Command-line history. It's not reset when the interpreter is reset.
    */
@@ -34,7 +37,9 @@ class InteractionsDocument extends PlainDocument {
    * Override superclass insertion to prevent insertion past frozen point. 
    * @exception BadLocationException
    */
-  public void insertString(int offs, String str, AttributeSet a) throws BadLocationException {
+  public void insertString(int offs, String str, AttributeSet a)
+    throws BadLocationException
+  {
     if (offs < frozenPos) {
       Toolkit.getDefaultToolkit().beep();
     } 
@@ -136,7 +141,7 @@ class InteractionsDocument extends PlainDocument {
     return  _history.hasNext();
   }
 
-  void addToHistory(String text) {
+  public void addToHistory(String text) {
     _history.add(text);
   }
 }

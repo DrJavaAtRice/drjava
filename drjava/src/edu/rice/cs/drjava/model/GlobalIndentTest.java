@@ -1,9 +1,13 @@
-package  edu.rice.cs.drjava;
+package edu.rice.cs.drjava.model;
 
 import  junit.framework.*;
 import  junit.extensions.*;
 import  javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
+
+import edu.rice.cs.drjava.model.definitions.*;
+import edu.rice.cs.drjava.model.repl.*;
+import edu.rice.cs.drjava.model.compiler.*;
 
 /**
  * Tests the indenting functionality on the level of the GlobalModel.

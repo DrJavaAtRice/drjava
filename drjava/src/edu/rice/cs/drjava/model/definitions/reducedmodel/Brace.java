@@ -1,4 +1,4 @@
-package  edu.rice.cs.drjava;
+package edu.rice.cs.drjava.model.definitions.reducedmodel;
 
 /** 
  * This class acts as the representation of a brace in the reduced

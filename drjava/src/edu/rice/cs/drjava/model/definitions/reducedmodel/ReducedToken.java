@@ -1,4 +1,4 @@
-package  edu.rice.cs.drjava;
+package edu.rice.cs.drjava.model.definitions.reducedmodel;
 
 import  java.awt.Color;
 
@@ -7,7 +7,7 @@ import  java.awt.Color;
  * It is the core atomic piece.
  * @version $Id$
  */
-abstract class ReducedToken implements ReducedModelStates {
+public abstract class ReducedToken implements ReducedModelStates {
   private ReducedModelState _state;
 
   public ReducedToken(ReducedModelState state) {

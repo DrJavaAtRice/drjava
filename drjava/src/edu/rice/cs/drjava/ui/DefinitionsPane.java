@@ -1,4 +1,4 @@
-package  edu.rice.cs.drjava;
+package edu.rice.cs.drjava.ui;
 
 import  javax.swing.*;
 import  javax.swing.undo.*;
@@ -9,6 +9,9 @@ import  java.awt.event.*;
 import  java.io.*;
 import  java.util.*;
 
+import edu.rice.cs.drjava.util.UnexpectedException;
+import edu.rice.cs.drjava.model.GlobalModel;
+import edu.rice.cs.drjava.model.definitions.DefinitionsEditorKit;
 
 /**
  * The pane in which work on the current document occurs.

@@ -1,4 +1,4 @@
-package  edu.rice.cs.drjava;
+package edu.rice.cs.drjava.model.definitions;
 
 import  javax.swing.text.Document;
 import  javax.swing.text.PlainDocument;
@@ -9,6 +9,7 @@ import  java.awt.*;
 import  javax.swing.event.DocumentEvent;
 import  gj.util.Vector;
 
+import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 
 /**
  * This is an editor kit for editing Java source files.

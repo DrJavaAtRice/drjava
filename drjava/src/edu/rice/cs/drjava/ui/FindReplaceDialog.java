@@ -1,32 +1,16 @@
-package  edu.rice.cs.drjava;
+package edu.rice.cs.drjava.ui;
 
-import  javax.swing.JOptionPane;
-import  javax.swing.JDialog;
-import  javax.swing.JTextField;
-import  javax.swing.JButton;
-import  javax.swing.Box;
-import  java.awt.Frame;
-import  java.awt.Label;
-import  java.awt.Toolkit;
-import java.awt.Color;
-import java.awt.Rectangle;
-import  java.awt.event.WindowAdapter;
-import  java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
-import  java.awt.event.ActionListener;
-import  java.awt.event.ActionEvent;
-import javax.swing.Action;
-import javax.swing.AbstractAction;
-import  javax.swing.event.DocumentListener;
-import  javax.swing.event.DocumentEvent;
-import  javax.swing.event.CaretListener;
-import  javax.swing.event.CaretEvent;
-import java.awt.event.KeyListener;
-import java.awt.event.KeyEvent;
-import  java.beans.PropertyChangeListener;
-import  java.beans.PropertyChangeEvent;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.DefaultHighlighter;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+import javax.swing.*;
+import javax.swing.event.*;
+import java.awt.event.*;
+import java.beans.*;
+import javax.swing.text.*;
+
+import edu.rice.cs.drjava.util.swing.FindReplaceMachine;
+import edu.rice.cs.drjava.util.swing.ContinueCommand;
 
 /**
  * The dialog box that handles requests for finding and replacing text.

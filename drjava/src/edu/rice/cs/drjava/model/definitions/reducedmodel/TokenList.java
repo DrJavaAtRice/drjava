@@ -1,4 +1,4 @@
-package edu.rice.cs.drjava;
+package edu.rice.cs.drjava.model.definitions.reducedmodel;
 
 /**
  * A list of reduced model tokens.  Uses ModelList as its base.

@@ -1,4 +1,4 @@
-package  edu.rice.cs.drjava;
+package edu.rice.cs.drjava.ui;
 
 import  java.io.File;
 import  javax.swing.filechooser.FileFilter;

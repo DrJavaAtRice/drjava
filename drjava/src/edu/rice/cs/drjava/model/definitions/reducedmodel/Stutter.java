@@ -1,4 +1,4 @@
-package edu.rice.cs.drjava;
+package edu.rice.cs.drjava.model.definitions.reducedmodel;
 
 /**
  * This class represents a special state, passed by some methods that return

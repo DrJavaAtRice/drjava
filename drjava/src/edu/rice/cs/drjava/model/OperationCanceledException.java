@@ -1,4 +1,4 @@
-package edu.rice.cs.drjava;
+package edu.rice.cs.drjava.model;
 
 /**
  * Indicates that a GUI operation has been canceled, e.g., choosing

@@ -1,4 +1,4 @@
-package  edu.rice.cs.drjava;
+package edu.rice.cs.drjava.ui;
 
 import  javax.swing.JTextArea;
 import  javax.swing.Action;
@@ -9,6 +9,8 @@ import  java.awt.Toolkit;
 import  java.awt.event.KeyEvent;
 import  java.awt.event.ActionEvent;
 
+import edu.rice.cs.drjava.model.GlobalModel;
+import edu.rice.cs.drjava.model.repl.*;
 
 /**
  * The view component for repl interaction.

@@ -1,4 +1,4 @@
-package  edu.rice.cs.drjava;
+package edu.rice.cs.drjava.model.compiler;
 
 /**
  * A class to represent compiler errors.  Having this class allows DrJava

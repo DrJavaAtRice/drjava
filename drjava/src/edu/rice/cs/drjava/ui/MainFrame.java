@@ -1,4 +1,4 @@
-package  edu.rice.cs.drjava;
+package edu.rice.cs.drjava.ui;
 
 import javax.swing.*;
 import javax.swing.text.*;
@@ -8,6 +8,9 @@ import java.awt.*;
 
 import java.io.File;
 import java.io.IOException;
+
+import edu.rice.cs.drjava.model.*;
+import edu.rice.cs.drjava.Version;
 
 /** 
  * DrJava's main window.
@@ -539,7 +542,7 @@ public class MainFrame extends JFrame {
       _saveMenuItem.setEnabled(false);
       _compileMenuItem.setEnabled(false);
       _fileNameField.setText("Untitled");
-      installNewDocumentListener((DefinitionsDocument)_model.getDefinitionsDocument());
+      installNewDocumentListener(_model.getDefinitionsDocument());
       _definitionsPane.grabFocus();
       _definitionsPane.getHighlighter().removeAllHighlights();
     }
@@ -559,7 +562,7 @@ public class MainFrame extends JFrame {
       _saveMenuItem.setEnabled(false);
       _compileMenuItem.setEnabled(true);
       _fileNameField.setText(file.getName());
-      installNewDocumentListener((DefinitionsDocument)_model.getDefinitionsDocument());
+      installNewDocumentListener(_model.getDefinitionsDocument());
       _definitionsPane.grabFocus();
       _definitionsPane.getHighlighter().removeAllHighlights();
     }

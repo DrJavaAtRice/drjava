@@ -1,4 +1,4 @@
-package edu.rice.cs.drjava;
+package edu.rice.cs.drjava.model.definitions.reducedmodel;
 
 import gj.util.Stack;
 import gj.util.Vector;
@@ -31,7 +31,7 @@ public class ReducedModelControl implements BraceReduction {
   ReducedModelComment rmc;
   int _offset;
   
-  ReducedModelControl() {
+  public ReducedModelControl() {
     rmb = new ReducedModelBrace(this);
     rmc = new ReducedModelComment();
   }

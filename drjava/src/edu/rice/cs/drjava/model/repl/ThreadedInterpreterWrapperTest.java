@@ -1,4 +1,4 @@
-package edu.rice.cs.drjava;
+package edu.rice.cs.drjava.model.repl;
 
 import  junit.framework.*;
 import  junit.extensions.*;

@@ -1,9 +1,11 @@
-package  edu.rice.cs.drjava;
+package  edu.rice.cs.drjava.model.definitions;
 
 import  junit.framework.*;
 import  junit.extensions.*;
 import  javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
+
+import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 
 /**
  * Test the tab/enter/squiggly indenting functionality.

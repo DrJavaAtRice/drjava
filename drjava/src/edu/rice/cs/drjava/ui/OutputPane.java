@@ -1,4 +1,4 @@
-package  edu.rice.cs.drjava;
+package edu.rice.cs.drjava.ui;
 
 import  javax.swing.JTextPane;
 import  javax.swing.text.AttributeSet;
@@ -11,6 +11,7 @@ import  java.awt.Color;
 import  java.awt.Rectangle;
 import  java.io.PrintStream;
 
+import edu.rice.cs.drjava.util.swing.DocumentOutputStream;
 
 /**
  * The view component to which System.out and System.err is redirected

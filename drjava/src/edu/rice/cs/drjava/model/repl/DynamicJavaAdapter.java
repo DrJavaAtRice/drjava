@@ -1,4 +1,4 @@
-package  edu.rice.cs.drjava;
+package edu.rice.cs.drjava.model.repl;
 
 import  java.util.*;
 import  java.io.*;
@@ -78,7 +78,7 @@ public class DynamicJavaAdapter implements JavaInterpreter {
    * @param packageName Package to assume scope of.
    */
   public void setPackageScope(String packageName) {
-    StringReader reader = new StringReader("package " + packageName + ";");
+    StringReader reader = new StringReader("package edu.rice.cs.drjava.model.repl;");
     _djInterpreter.interpret(reader, "DrJava");
   }
 

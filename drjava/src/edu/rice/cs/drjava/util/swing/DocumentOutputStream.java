@@ -1,4 +1,4 @@
-package  edu.rice.cs.drjava;
+package edu.rice.cs.drjava.util.swing;
 
 import  java.io.OutputStream;
 import  javax.swing.text.Document;
