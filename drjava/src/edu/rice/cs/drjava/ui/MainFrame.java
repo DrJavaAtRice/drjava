@@ -21,6 +21,8 @@ import javax.swing.JTabbedPane;
 
 import javax.swing.text.DefaultEditorKit;
 
+import javax.swing.event.ChangeListener;
+import javax.swing.event.ChangeEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.DocumentEvent;
 
@@ -44,6 +46,10 @@ import java.io.File;
  *    Definitions, Output and Interactions. */
 public class MainFrame extends JFrame
 {
+  private static final int INTERACTIONS_TAB = 0;
+  private static final int COMPILE_TAB = 1;
+  private static final int OUTPUT_TAB = 2;
+
   private CompilerErrorPanel _errorPanel;
   private DefinitionsView _definitionsView;
   private OutputView _outputView;
@@ -54,11 +60,25 @@ public class MainFrame extends JFrame
   private JMenuBar _menuBar;
   private JMenu _fileMenu;
   private JMenu _editMenu;
+  private JMenu _helpMenu;
 	
   JButton _saveButton;
   JButton _compileButton;
 
   // Make some actions for menus
+  private Action _aboutAction = new AbstractAction("About")
+  {
+    public void actionPerformed(ActionEvent ae)
+    {			
+      final String message = "DrJava, brought to you by the Java PLT " +
+                             "research group at Rice University.\n" +
+                             "http://www.cs.rice.edu/~javaplt/drjava\n\n" +
+                             "Version: " + Version.BUILD_TIME;
+
+      JOptionPane.showMessageDialog(MainFrame.this, message);
+    }
+  };
+
   private Action _quitAction = new AbstractAction("Quit")
   {
     public void actionPerformed(ActionEvent ae)
@@ -183,7 +203,7 @@ public class MainFrame extends JFrame
       // Clear the output window before compilation
       _outputView.clear();
 
-      _selectCompileTab();
+      _tabbedPane.setSelectedIndex(COMPILE_TAB);
       
       File file = new File(filename);
       CompilerError[] errors = DrJava.compiler.compile(new File[] { file });
@@ -243,6 +263,14 @@ public class MainFrame extends JFrame
 			public void actionPerformed(ActionEvent ae)
 			{
 				_outputView.clear();
+			}
+		};
+
+	private Action _resetInteractionsAction = new AbstractAction("Reset interactions")
+		{
+			public void actionPerformed(ActionEvent ae)
+			{
+				_interactionsView.reset();
 			}
 		};
 
@@ -337,15 +365,18 @@ public class MainFrame extends JFrame
     _outputView = new OutputView();
     _errorPanel = new CompilerErrorPanel(_definitionsView);
 
-    // Make the menu bar, and stub file and edit menus
-    _menuBar = new JMenuBar();
-    _fileMenu = new JMenu("File");
-    _editMenu = new JMenu("Edit");
-
     this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
     this.addWindowListener(_windowCloseListener);
 		
+    // Make the menu bar
+    _menuBar = new JMenuBar();
+    _fileMenu = new JMenu("File");
+    _editMenu = new JMenu("Edit");
+    _helpMenu = new JMenu("Help");
+
     // Add items to menus
+    _helpMenu.add(_aboutAction);
+
     JMenuItem tmpItem = _fileMenu.add(_newAction);
 		tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N,
 																									ActionEvent.CTRL_MASK));
@@ -402,14 +433,12 @@ public class MainFrame extends JFrame
 		tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_G,
 																									ActionEvent.CTRL_MASK));
 		_editMenu.add(_clearOutputAction);
-
-
-
-
+		_editMenu.add(_resetInteractionsAction);
 
     // Add the menus to the menu bar
     _menuBar.add(_fileMenu);
     _menuBar.add(_editMenu);
+    _menuBar.add(_helpMenu);
     
     // Menu bars can actually hold anything!
     _menuBar.add(_fileNameField);
@@ -434,6 +463,15 @@ public class MainFrame extends JFrame
     _tabbedPane.add("Interactions", new JScrollPane(_interactionsView));
     _tabbedPane.add("Compiler output", _errorPanel);
     _tabbedPane.add("Console", new JScrollPane(_outputView));
+
+    // Select interactions pane when interactions tab is selected
+    _tabbedPane.addChangeListener(new ChangeListener() {
+      public void stateChanged(ChangeEvent e) {
+        if (_tabbedPane.getSelectedIndex() == INTERACTIONS_TAB) {
+          _interactionsView.grabFocus();
+        }
+      }
+    });
 
     JScrollPane defScroll =
       new JScrollPane(_definitionsView,
@@ -472,18 +510,6 @@ public class MainFrame extends JFrame
     _errorPanel.setListFont(f);
   }
 
-
-  private void _selectCompileTab() {
-    _tabbedPane.setSelectedIndex(1);
-  }
-
-  private void _selectInteractionsTab() {
-    _tabbedPane.setSelectedIndex(0);
-  }
-
-  private void _selectOutputTab() {
-    _tabbedPane.setSelectedIndex(2);
-  }
 
   public void updateFileTitle(String filename)
   {

@@ -288,6 +288,9 @@ public class DefinitionsView extends JEditorPane
       // Finally, scroll the window to make this line visible.
       Rectangle rect = modelToView(pos);
       scrollRectToVisible(rect);
+
+      // And make sure the defs view has focus!
+      grabFocus();
     }
     catch (BadLocationException impossible) {
       // we got the location from defs doc. it is valid, i swear.

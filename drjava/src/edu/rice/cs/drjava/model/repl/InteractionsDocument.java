@@ -11,14 +11,19 @@ import java.awt.Toolkit;
 import java.util.LinkedList;
 import java.util.ListIterator;
 import java.util.StringTokenizer;
+
 // model
 class InteractionsDocument extends PlainDocument {
   /** Index in the document of the first place that is editable. */
   int frozenPos = 0;
   private final String banner = "Welcome to DrJava.\n";
-	private InteractionsView _myView;
 	
   JavaInterpreter _interpreter;
+
+  /**
+   * Command-line history. It's not reset when the interpreter is reset.
+   */
+  private History _history = new History();
 
   public InteractionsDocument()
   {
@@ -52,6 +57,7 @@ class InteractionsDocument extends PlainDocument {
       super.remove(0, getLength());
       super.insertString(0, banner, null);
       prompt();
+      _history.moveEnd();
 
       _interpreter = new DynamicJavaAdapter();
     } catch (BadLocationException e) {
@@ -72,32 +78,80 @@ class InteractionsDocument extends PlainDocument {
     }
   }
 
+  public void moveHistoryPrevious() {
+    _history.movePrevious();
+    _replaceCurrentLineFromHistory();
+  }
+
+  public void moveHistoryNext() {
+    _history.moveNext();
+    _replaceCurrentLineFromHistory();
+  }
+
+  /**
+   * Replaces any text entered past the prompt with the current
+   * item in the history.
+   */
+  private void _replaceCurrentLineFromHistory() {
+    try {
+      // Delete old value of current line
+      remove(frozenPos, getLength() - frozenPos);
+
+      // Add current.
+      insertString(getLength(), _history.getCurrent(), null);
+    }
+    catch (BadLocationException ble) {
+      // impossible
+    }
+  }
+
+  public boolean hasHistoryPrevious() {
+    return _history.hasPrevious();
+  }
+
+  public boolean hasHistoryNext() {
+    return _history.hasNext();
+  }
+
   public void eval() {
     try {
-      String toEval = getText(frozenPos, getLength()-frozenPos).trim();
-			
-			if (toEval.startsWith("java "))
-				toEval = _testClassCall(toEval);
-							
-      Object result = _interpreter.interpret(toEval);
-      String resultStr;
+      String text = getText(frozenPos, getLength()-frozenPos);
+      _history.add(text);
 
-      try {
-        resultStr = String.valueOf(result);
+      String toEval = text.trim();
+
+      // Result of interpretation, or JavaInterpreter.NO_RESULT if none.
+      Object result; 
+      
+      // Do nothing but prompt if there's nothing to evaluate!
+      if (toEval.length() == 0) {
+        result = JavaInterpreter.NO_RESULT;
       }
-      catch (Throwable t) {
-        // Very weird. toString() on result must have thrown this exception!
-        // Let's act like DynamicJava would have if this exception were thrown
-        // and rethrow as RuntimeException
-        throw new RuntimeException(t.toString());
+      else {
+        if (toEval.startsWith("java ")) {
+          toEval = _testClassCall(toEval);
+        }
+                
+        result = _interpreter.interpret(toEval);
+        String resultStr;
+
+        try {
+          resultStr = String.valueOf(result);
+        }
+        catch (Throwable t) {
+          // Very weird. toString() on result must have thrown this exception!
+          // Let's act like DynamicJava would have if this exception were thrown
+          // and rethrow as RuntimeException
+          throw new RuntimeException(t.toString());
+        }
       }
 
-			if(result != JavaInterpreter.NO_RESULT) {
-				 super.insertString(getLength(), "\n" + String.valueOf(result)
-														+ "\n", null);
+      if(result != JavaInterpreter.NO_RESULT) {
+        super.insertString(getLength(), "\n" + String.valueOf(result)
+            + "\n", null);
       }
-			else {
-				super.insertString(getLength(), "\n", null);
+      else {
+        super.insertString(getLength(), "\n", null);
       }
 
       prompt();
@@ -106,7 +160,6 @@ class InteractionsDocument extends PlainDocument {
       throw new InternalError("getting repl text failed");
     }
     catch (Throwable e) {
-			//System.out.println("\n\nhey!!!!!!\n\n");
       String message = e.getMessage();
       // Don't let message be null. Java sadly makes getMessage() return
       // null if you construct an exception without a message.
@@ -115,6 +168,7 @@ class InteractionsDocument extends PlainDocument {
         e.printStackTrace();
       }
 
+      // Hack to prevent long syntax error messages
       try {
 				if (message.startsWith("koala.dynamicjava.interpreter.InterpreterException: Encountered"))
         {
@@ -132,7 +186,6 @@ class InteractionsDocument extends PlainDocument {
       }
       catch (BadLocationException willNeverHappen) {}
     }
-		//System.out.println("\n\neval done!!!!!!\n\n");
 	}
 
 	/**

@@ -75,7 +75,7 @@ public class DynamicJavaAdapter implements JavaInterpreter {
    * This is somewhat a hack (it might be better to just modify TreeInterpreter)
    * but we don't want to modify DynamicJava right now.
    */
-  private class InterpreterExtension extends TreeInterpreter {
+  public class InterpreterExtension extends TreeInterpreter {
     public InterpreterExtension() {
       super(new JavaCCParserFactory());
       classLoader = new ClassLoaderExtension(this);
@@ -93,7 +93,7 @@ public class DynamicJavaAdapter implements JavaInterpreter {
     }
   }
 
-  private class ClassLoaderExtension extends TreeClassLoader
+  public class ClassLoaderExtension extends TreeClassLoader
   {
     public ClassLoaderExtension(Interpreter i) {
       super(i);

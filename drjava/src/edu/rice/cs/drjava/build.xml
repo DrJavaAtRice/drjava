@@ -19,6 +19,9 @@
   <!-- What file will have $Name$ expanded in it properly? -->
   <property name="file_with_build_name" value="DrJava.java" />
 
+  <!-- put a jar in this directory after each commit -->
+  <property name="jars_dir" value="/home/javaplt/public_html/drjava/builds" />
+
   <property name="jarfile" value="${srcroot}/../drjava2.jar" />
   <property name="manifest" value="manifest" />
   <property name="cvsroot" value="/home/javaplt/.cvsroot" />
@@ -34,6 +37,19 @@
     <cvs command="update -d" cvsRoot="${cvsroot}" />
   </target>
 
+  <target name="temp-make-version">
+    <tstamp /> <!-- get new time stamp to use for CVS tag -->
+
+    <!-- Create new Version.java, filling in date and time. -->
+    <filter token="DATE" value="${DSTAMP}" />
+    <filter token="TIME" value="${TSTAMP}" />
+    <copy file="Version.orig"
+          tofile="Version.java" 
+          overwrite="yes"
+          filtering="yes" />
+  </target>
+
+
   <!-- Commit source to CVS archive
        Before doing do, we update our copy with the CVS copy. This ensures that
        if there were any clashes, we have to resolve them now. Then we
@@ -43,8 +59,18 @@
        projectname-date-time.
   -->
   <target name="commit" depends="clean, update, test">
-    <cvs command="commit" cvsRoot="${cvsroot}" />
     <tstamp /> <!-- get new time stamp to use for CVS tag -->
+
+    <!-- Create new Version.java, filling in date and time. -->
+    <filter token="DATE" value="${DSTAMP}" />
+    <filter token="TIME" value="${TSTAMP}" />
+    <copy file="Version.orig"
+          tofile="Version.java" 
+          overwrite="yes"
+          filtering="yes" />
+
+    <cvs command="commit" cvsRoot="${cvsroot}" />
+
     <property name="version-tag"
               value="${ant.project.name}-${DSTAMP}-${TSTAMP}" />
     <cvs command="tag -c ${version-tag}" cvsRoot="${cvsroot}" quiet="true" />
@@ -58,7 +84,20 @@
          we can't check this file back in! -->
     <cvs command="update -A ${file_with_build_name}"
          cvsRoot="${cvsroot}" quiet="true" />
+
     <echo message="New version ${version-tag} committed to CVS." />
+
+    <!-- Create distribution jar.
+         We modify property jarfile for this call to put the jar in
+         the right place.
+    -->
+    <property name="distjar" value="${jars_dir}/${version-tag}.jar" />
+
+    <antcall target="jar">
+      <param name="jarfile" value="${distjar}" />
+    </antcall>
+
+    <echo message="Created jar: ${distjar}" />
   </target>
 
   <!-- Compile. We have to start at srcroot and then selectively include
@@ -84,9 +123,11 @@
       <arg value="${srcroot}" />
 
       <!-- Tell the compiler to generate bytecode with version number
-           that will run on JDK 1.2! -->
+           that will run on JDK 1.2!
+           In particular this makes the classfile version 45.3 not 46.0.
+      -->
       <arg value="-target" />
-      <arg value="1.2" />
+      <arg value="1.1" />
 
       <arg value="-g" />
       <arg value="-d" />
@@ -154,12 +195,17 @@
     </junit>
   </target>
 
-  <!-- Makes a jar for distribution. No tests are included. -->
-  <target name="jar" depends="test">
-    <jar jarfile="${jarfile}"
-         basedir="${built}"
-         excludes="**/*Test.class"
-         manifest="${manifest}" />
+  <!-- Makes a jar with dependencies. No tests are included. -->
+  <target name="jar">
+    <jar jarfile="${jarfile}" manifest="${manifest}">
+      <fileset dir="${built}"
+               includes="${projpath}/**"
+               excludes="**/*Test.class" />
+
+      <!-- dependencies -->
+      <fileset dir="/home/javaplt/classes"
+               includes="gj/**,gjc/**,koala/**" />
+    </jar>
   </target>
 
   <!-- Run the program! -->
