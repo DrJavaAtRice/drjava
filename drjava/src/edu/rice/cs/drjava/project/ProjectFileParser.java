@@ -207,7 +207,9 @@ public class ProjectFileParser {
       if(l == Empty.ONLY){
         throw new PrivateProjectException("expected filename, but nothing found");
       }else{
-        return l.accept(NameVisitor.ONLY);
+        String name = l.accept(NameVisitor.ONLY);
+        name = edu.rice.cs.util.StringOps.replace(name,"\\","/");
+        return name;
       }
     }
     else{

@@ -253,6 +253,7 @@ public class ProjectFileBuilder {
     else {
       path = f.getCanonicalPath();
     }
+    path = replace(path,File.separator,"/");
     return prefix + "(file (name " + convertToLiteral(path) + "))";
   }
   /**
@@ -282,6 +283,7 @@ public class ProjectFileBuilder {
     else {
       path = df.getCanonicalPath();
     }
+    path = replace(path,File.separator,"/");
     ret += prefix + "(file (name " + convertToLiteral(path) + ")";
     
     Pair<Integer,Integer> p1 = df.getSelection();

@@ -1333,8 +1333,6 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
       }
     }
 
-    // TODO: add all the auxiliary files to the builder.  The aux files should be in the info map too
-    
     // add collapsed path info
     if (_documentNavigator instanceof JTreeSortNavigator) {
       String[] paths = ((JTreeSortNavigator)_documentNavigator).getCollapsedPaths();
