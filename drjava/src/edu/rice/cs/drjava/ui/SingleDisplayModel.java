@@ -73,7 +73,7 @@ import edu.rice.cs.drjava.model.compiler.*;
  * <LI>There is always exactly one active document, which can be get/set
  *     via {@link #getActiveDocument} and {@link #setActiveDocument}.
  * </LI>
- * <OL>
+ * </OL>
  *
  * Other functions added by this class:
  * <OL>

@@ -49,6 +49,7 @@ import edu.rice.cs.util.swing.FindReplaceMachine;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.drjava.model.definitions.*;
+import edu.rice.cs.drjava.model.debug.DebugManager;
 import edu.rice.cs.drjava.model.repl.*;
 import edu.rice.cs.drjava.model.compiler.*;
 
@@ -230,6 +231,12 @@ public interface GlobalModel {
 
   /** Called when the repl prints to System.err. */
   public void replSystemErrPrint(String s);
+  
+  /** Called when the debugger prints to System.out. */
+  public void debugSystemOutPrint(String s);
+
+  /** Called when the debugger prints to System.err. */
+  public void debugSystemErrPrint(String s);
 
   /**
    * Signifies that the most recent interpretation completed successfully,
@@ -303,5 +310,10 @@ public interface GlobalModel {
    *  of the open documents is invalid.
    */
   public File[] getSourceRootSet();
-
+  
+  /**
+   * Gets the DebugManager, which interfaces with the integrated debugger.
+   */
+  public DebugManager getDebugManager();
+  
 }

@@ -50,12 +50,14 @@ import java.beans.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Hashtable;
 import java.net.URL;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
+import edu.rice.cs.drjava.model.debug.DebugManager;
 import edu.rice.cs.drjava.ui.CompilerErrorPanel.ErrorListPane;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.DelegatingAction;
@@ -87,6 +89,7 @@ public class MainFrame extends JFrame {
   private CompilerErrorPanel _errorPanel;
   private OutputPane _outputPane;
   private InteractionsPane _interactionsPane;
+  private DebugPanel _debugPanel;
   private JUnitPane _junitPane;
   private JPanel _statusBar;
   private JLabel _fileNameField;
@@ -100,6 +103,7 @@ public class MainFrame extends JFrame {
   private JMenu _fileMenu;
   private JMenu _editMenu;
   private JMenu _toolsMenu;
+  private JMenu _debugMenu;
   private JMenu _helpMenu;
   private FindReplaceDialog _findReplace;
   private JButton _saveButton;
@@ -108,7 +112,8 @@ public class MainFrame extends JFrame {
   private JMenuItem _saveMenuItem;
   private JMenuItem _compileMenuItem;
   private JMenuItem _abortInteractionMenuItem;
-  
+  private JCheckBoxMenuItem _debuggerEnabledMenuItem;
+
   public SingleDisplayModel getModel() {
     return _model;
   }
@@ -362,6 +367,16 @@ public class MainFrame extends JFrame {
     }
   };
   
+  /** Enables the debugger */
+  private Action _toggleDebuggerAction =
+    new AbstractAction("Debugger Enabled")
+  {
+    public void actionPerformed(ActionEvent ae) {
+      toggleDebugger();
+    }
+  };
+
+
   /** How DrJava responds to window events. */
   private WindowListener _windowCloseListener = new WindowListener() {
     public void windowActivated(WindowEvent ev) {}
@@ -475,8 +490,58 @@ public class MainFrame extends JFrame {
   public void hourglassOff() {
     getGlassPane().setVisible(false);
   }
+
+  /**
+   * Toggles whether the debugger is enabled or disabled,
+   * and updates the display accordingly.
+   */
+  public void toggleDebugger() {
+    // Make sure the debugger is available
+    if (_debugPanel == null) return;
+    
+    try {
+      DebugManager debugger = _model.getDebugManager();
+      if (debugger.isReady()) {
+        // Turn off debugger
+        debugger.endSession();
+        hideDebugger();
+      }
+      else {
+        // Turn on debugger
+        showDebugger();
+      }
+    }
+    catch (NoClassDefFoundError err) {
+      _showError(err, "Debugger Error",
+                 "Unable to find the JPDA package for the debugger.\n" +
+                 "Please make sure either tools.jar or jpda.jar is\n" +
+                 "in your classpath when you start DrJava.");
+      _debuggerEnabledMenuItem.setState(false);
+    }
+  }
   
+  /**
+   * Display the debugger tab and update the Debug menu accordingly.
+   */
+  public void showDebugger() {
+//js     _model.getDebugManager().init(_debugPanel.getUIAdapter());
+    _tabbedPane.add("Debug", _debugPanel);
+    _tabbedPane.setSelectedComponent(_debugPanel);
+    _debuggerEnabledMenuItem.setState(true);
+  }
   
+  /**
+   * Hide the debugger tab and update the Debug menu accordingly.
+   */
+  public void hideDebugger() {
+    _model.getDebugManager().cleanUp();
+    _tabbedPane.remove(_debugPanel);
+    _debugPanel.reset();
+    _debuggerEnabledMenuItem.setState(false);
+  }
+  
+
+
   /**
    * Updates the title bar with the name of the active document.
    */
@@ -855,16 +920,21 @@ public class MainFrame extends JFrame {
    * fields within MainFrame.  This method serves to make the code
    * more legible on the higher calling level, i.e., the constructor.
    */
-  private void _setUpMenuBar() {
+    private void _setUpMenuBar() {
+	//js     boolean showDebugger = (_debugPanel != null);
+    boolean showDebugger = false;
+    
     _menuBar = new JMenuBar();
     _fileMenu = _setUpFileMenu();
     _editMenu = _setUpEditMenu();
     _toolsMenu = _setUpToolsMenu();
+    if (showDebugger) _debugMenu = _setUpDebugMenu();
     _helpMenu = _setUpHelpMenu();
     
     _menuBar.add(_fileMenu);
     _menuBar.add(_editMenu);
     _menuBar.add(_toolsMenu);
+    if (showDebugger) _menuBar.add(_debugMenu);
     _menuBar.add(_helpMenu);
     setJMenuBar(_menuBar);
   }
@@ -977,7 +1047,7 @@ public class MainFrame extends JFrame {
   }
   
   /**
-   * Creates and returns a edit menu.
+   * Creates and returns a tools menu.
    */
   private JMenu _setUpToolsMenu() {
     JMenuItem tmpItem;
@@ -1006,6 +1076,22 @@ public class MainFrame extends JFrame {
     return toolsMenu;
   }
   
+  /**
+   * Creates and returns a debug menu.
+   */
+  private JMenu _setUpDebugMenu() {
+    JMenu debugMenu = new JMenu("Debug");
+    
+    // Enable debugging
+    _debuggerEnabledMenuItem = new JCheckBoxMenuItem(_toggleDebuggerAction);
+    _debuggerEnabledMenuItem.setState(false);
+    debugMenu.add(_debuggerEnabledMenuItem);
+    
+    // Add the menu to the menu bar
+    return debugMenu;
+  }
+
+
   /**
    * Creates and returns a help menu.
    */
@@ -1160,6 +1246,16 @@ public class MainFrame extends JFrame {
     _outputPane = new OutputPane(_model);
     _errorPanel = new CompilerErrorPanel(_model, this);
     _interactionsPane = new InteractionsPane(_model);
+    
+    // Try to create debug panel (see if JSwat is around)
+    try {
+      _debugPanel = new DebugPanel(_model, this);
+    }
+    catch(NoClassDefFoundError e) {
+      // Don't use the debugger
+      _debugPanel = null;
+    }
+    
     _junitPane = new JUnitPane(_model);
     _tabbedPane = new JTabbedPane();
     _tabbedPane.add("Interactions", new BorderlessScrollPane(_interactionsPane));
@@ -1310,6 +1406,7 @@ public class MainFrame extends JFrame {
     _currentDefPane.setFont(f);
     _interactionsPane.setFont(f);
     _outputPane.setFont(f);
+    if (_debugPanel != null) _debugPanel.setFonts(f);
     _errorPanel.setListFont(f);
   }
   /**

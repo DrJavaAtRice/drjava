@@ -67,6 +67,7 @@ import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.model.print.*;
 import edu.rice.cs.drjava.model.definitions.*;
+import edu.rice.cs.drjava.model.debug.*;
 import edu.rice.cs.drjava.model.repl.*;
 import edu.rice.cs.drjava.model.repl.newjvm.*;
 import edu.rice.cs.drjava.model.compiler.*;
@@ -95,6 +96,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
   private final InteractionsDocument _interactionsDoc
     = new InteractionsDocument();
   private final StyledDocument _consoleDoc = new DefaultStyledDocument();
+  private final StyledDocument _debugDoc = new DefaultStyledDocument();
   private final StyledDocument _junitDoc = new DefaultStyledDocument();
   private final LinkedList _listeners = new LinkedList();
   private PageFormat _pageFormat = new PageFormat();
@@ -107,6 +109,9 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
   private CompilerError[] _compilerErrorsWithoutFiles;
   private int _numErrors;
   
+  // Create a debug manager
+  private DebugManager _debugManager = new DebugManager(this);
+
   public static final String EXIT_CALLED_MESSAGE
     = "The interaction was aborted by a call to System.exit.";
   
@@ -123,6 +128,9 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
   public static final AttributeSet SYSTEM_OUT_INTERACTIONS_STYLE
     = _getOutInsideInteractionsStyle();
   
+  public static final AttributeSet SYSTEM_OUT_DEBUG_STYLE
+    = _getOutInsideInteractionsStyle();
+
   private static AttributeSet _getOutInsideInteractionsStyle() {
     SimpleAttributeSet s = new SimpleAttributeSet(SYSTEM_OUT_STYLE);
     s.addAttribute(StyleConstants.Foreground, Color.green.darker().darker());
@@ -201,6 +209,10 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
   
   public StyledDocument getConsoleDocument() {
     return _consoleDoc;
+  }
+
+  public StyledDocument getDebugDocument() {
+    return _debugDoc;
   }
   
   public StyledDocument getJUnitDocument() {
@@ -566,6 +578,18 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
     _docAppend(_consoleDoc, s, SYSTEM_ERR_STYLE);
   }
   
+  /** Called when the repl prints to System.out. */  
+  public void debugSystemOutPrint(String s) {
+    _docAppend(_consoleDoc, s, SYSTEM_OUT_STYLE);
+    _docAppend(_debugDoc, s, SYSTEM_OUT_DEBUG_STYLE);
+  }
+  
+  /** Called when the repl prints to System.err. */
+  public void debugSystemErrPrint(String s) {
+    _docAppend(_consoleDoc, s, SYSTEM_ERR_STYLE);
+    _docAppend(_debugDoc, s, SYSTEM_ERR_STYLE);    
+  }
+
   private void _interactionIsOver() {
     _interactionsDoc.setInProgress(false);
     _interactionsDoc.prompt();
@@ -711,7 +735,16 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
     
     return (File[]) roots.toArray(new File[0]);
   }
+
+  /**
+   * Gets the DebugManager, which interfaces with the integrated debugger.
+   */
+  public DebugManager getDebugManager() {
+    return _debugManager;
+  }
   
+
+
   // ---------- DefinitionsDocumentHandler inner class ----------
   
   /**
@@ -926,7 +959,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
               l.compileStarted();
             }
             });
-            
+
             File[] files = new File[] { file };
             
             String packageName = _doc.getPackageName();

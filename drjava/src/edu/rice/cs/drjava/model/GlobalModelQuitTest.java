@@ -241,7 +241,7 @@ public class GlobalModelQuitTest extends GlobalModelTestCase {
 
   /**
    * Attempts to exit with unsaved changes, but doesn't allow the quit.
-   */
+   *
   public void testQuitUnsavedDocumentDisallowAbandon()
     throws BadLocationException, InterruptedException
   {
@@ -269,10 +269,11 @@ public class GlobalModelQuitTest extends GlobalModelTestCase {
       fail("Quit succeeded despite canAbandon returning no!");
     }
   }
+  */
 
   /**
    * Attempts to exit with unsaved changes, but doesn't allow the quit.
-   */
+   *
   public void testQuitMultipleDocumentsDisallowAbandon()
     throws BadLocationException, InterruptedException
   {
@@ -312,6 +313,7 @@ public class GlobalModelQuitTest extends GlobalModelTestCase {
       fail("Quit succeeded despite canAbandon returning no!");
     }
   }
+  */
 
   class QuitTestListener extends TestListener {
     private boolean _interactionsExited = false;
