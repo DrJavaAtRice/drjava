@@ -15,7 +15,7 @@ public class NoCompilerAvailable implements CompilerInterface {
   private NoCompilerAvailable() {}
 
   public CompilerError[] compile(File sourceRoot, File[] files) {
-    CompilerError error = new CompilerError(files[0].getName(),
+    CompilerError error = new CompilerError(files[0],
                                             -1,
                                             -1,
                                             MESSAGE,

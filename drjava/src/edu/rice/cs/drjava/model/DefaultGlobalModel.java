@@ -29,7 +29,8 @@ public class DefaultGlobalModel implements GlobalModel {
   private DefaultListModel _definitionsDocs;
   private InteractionsDocument _interactionsDoc;
   private Document _consoleDoc;
-  private CompilerError[] _compileErrors;  // goes away
+  private CompilerError[] _compilerErrorsWithoutFiles;
+  private int _numErrors;
   private JavaInterpreter _interpreter;
   private LinkedList _listeners;
 
@@ -42,7 +43,8 @@ public class DefaultGlobalModel implements GlobalModel {
     _definitionsDocs = new DefaultListModel();
     _interactionsDoc = new InteractionsDocument();
     _consoleDoc = new DefaultStyledDocument();
-    _compileErrors = new CompilerError[0];  // goes away
+    _compilerErrorsWithoutFiles = new CompilerError[0];
+    _numErrors = 0;
     _interpreter = new DynamicJavaAdapter();
     _listeners = new LinkedList();
   }
@@ -80,8 +82,13 @@ public class DefaultGlobalModel implements GlobalModel {
   public Document getConsoleDocument() {
     return _consoleDoc;
   }
-  public CompilerError[] getCompileErrors() {  // this method goes away
-    return _compileErrors;
+  /** Errors without associated files */
+  public CompilerError[] getCompilerErrorsWithoutFiles() {
+    return _compilerErrorsWithoutFiles;
+  }
+  /** Total number of current errors */
+  public int getNumErrors() {
+    return _numErrors;
   }
 
 
@@ -193,15 +200,16 @@ public class DefaultGlobalModel implements GlobalModel {
       System.exit(0);
     }
   }
-  
+
   /**
    * Returns the OpenDefinitionsDocument for the specified
    * File, opening a new copy if one is not already open.
    * @param file File contained by the document to be returned
    * @return OpenDefinitionsDocument containing file
+   * @exception IOException if there are problems opening the file
    */
-  public OpenDefinitionsDocument getDocumentForFile(File file) 
-    throws IOException, OperationCanceledException
+  public OpenDefinitionsDocument getDocumentForFile(File file)
+    throws IOException
   {
     // Check if this file is already open
     OpenDefinitionsDocument doc = _getOpenDocument(file);
@@ -218,6 +226,10 @@ public class DefaultGlobalModel implements GlobalModel {
       }
       catch (AlreadyOpenException aoe) {
         doc = aoe.getOpenDocument();
+      }
+      catch (OperationCanceledException oce) {
+        // Cannot happen, since we don't throw it in our selector
+        throw new UnexpectedException(oce);
       }
     }
     return doc;
@@ -443,6 +455,7 @@ public class DefaultGlobalModel implements GlobalModel {
    */
   private class DefinitionsDocumentHandler implements OpenDefinitionsDocument {
     private final DefinitionsDocument _doc;
+    private CompilerErrorModel _errorModel;
 
     /**
      * Constructor.  Initializes this handler's document.
@@ -450,6 +463,7 @@ public class DefaultGlobalModel implements GlobalModel {
      */
     DefinitionsDocumentHandler(DefinitionsDocument doc) {
       _doc = doc;
+      _errorModel = new CompilerErrorModel();
     }
 
     /**
@@ -576,8 +590,9 @@ public class DefaultGlobalModel implements GlobalModel {
      * is invalid, compileStarted and compileEnded will fire, and
      * an error will be put in compileErrors.
      */
-    public void startCompile() {
+    public void startCompile() throws IOException {
       saveBeforeProceeding(GlobalModelListener.COMPILE_REASON);
+      CompilerError[] errors = new CompilerError[0];
 
       if (isModifiedSinceSave()) {
         // if the file hasn't been saved after we told our
@@ -607,17 +622,20 @@ public class DefaultGlobalModel implements GlobalModel {
 
             CompilerInterface compiler =CompilerRegistry.ONLY.getActiveCompiler();
 
-            _compileErrors = compiler.compile(sourceRoot, files);
+            errors = compiler.compile(sourceRoot, files);
           }
           catch (InvalidPackageException e) {
-            CompilerError err = new CompilerError(file.getAbsolutePath(),
+            CompilerError err = new CompilerError(file,
                                                   -1,
                                                   -1,
                                                   e.getMessage(),
                                                   false);
-            _compileErrors = new CompilerError[] { err };
+            errors = new CompilerError[] { err };
           }
           finally {
+            _distributeErrors(errors);
+
+            // Fire a compileEnded event
             notifyListeners(new EventNotifier() {
               public void notifyListener(GlobalModelListener l) {
                 l.compileEnded();
@@ -625,7 +643,7 @@ public class DefaultGlobalModel implements GlobalModel {
             });
 
             // Only clear console/interactions if there were no errors
-            if (_compileErrors.length == 0) {
+            if (_numErrors == 0) {
               resetConsole();
               resetInteractions();
             }
@@ -636,6 +654,27 @@ public class DefaultGlobalModel implements GlobalModel {
         }
       }
     }
+
+    /**
+     * Returns the model responsible for maintaining all current errors
+     * within this OpenDefinitionsDocument's file.
+     */
+    public CompilerErrorModel getCompilerErrorModel() {
+      return _errorModel;
+    }
+
+    /**
+     * Sets this OpenDefinitionsDocument's notion of all current errors
+     * within the corresponding file.
+     * @param model CompilerErrorModel containing all errors for this file
+     */
+    public void setCompilerErrorModel(CompilerErrorModel model) {
+      if (model == null) {
+        model = new CompilerErrorModel();
+      }
+      _errorModel = model;
+    }
+
 
     /**
      * Determines if the definitions document has changed since the
@@ -816,6 +855,69 @@ public class DefaultGlobalModel implements GlobalModel {
       return parentDir;
     }
 
+    /**
+     * Sorts the given array of CompilerErrors and divides it into groups
+     * based on the file, giving each group to the appropriate
+     * OpenDefinitionsDocument, opening files if necessary.
+     */
+    private void _distributeErrors(CompilerError[] errors)
+      throws IOException
+    {
+      // Reset CompilerErrorModels
+      for (int i = 0; i < _definitionsDocs.getSize(); i++) {
+        OpenDefinitionsDocument doc = (OpenDefinitionsDocument)
+          _definitionsDocs.getElementAt(i);
+        doc.setCompilerErrorModel(new CompilerErrorModel());
+      }
+
+      // Store number of errors
+      _numErrors = errors.length;
+
+      // Sort the errors by file and position
+      Arrays.sort(errors);
+
+      // Filter out ones without files
+      int numWithoutFiles = 0;
+      for (int i = 0; i < errors.length; i++) {
+        if (errors[i].file() == null) {
+          numWithoutFiles++;
+        }
+        else {
+          // Since sorted, finding one with a file means we're done
+          break;
+        }
+      }
+
+      // Copy errors without files into GlobalModel's array
+      _compilerErrorsWithoutFiles = new CompilerError[numWithoutFiles];
+      System.arraycopy(errors, 0, _compilerErrorsWithoutFiles, 0,
+                       numWithoutFiles);
+
+      // Create error models and give to their respective documents
+      for (int i = numWithoutFiles; i < errors.length; i++) {
+        File file = errors[i].file();
+        OpenDefinitionsDocument doc = getDocumentForFile(file);
+
+        // Find all other errors with this file
+        int numErrors = 1;
+        int j = i + 1;
+        while ((j < errors.length) &&
+               (file.equals(errors[j].file()))) {
+          j++;
+          numErrors++;
+        }
+
+        // Create a model with all errors with this file
+        CompilerError[] fileErrors = new CompilerError[numErrors];
+        System.arraycopy(errors, i, fileErrors, 0, numErrors);
+        CompilerErrorModel model =
+          new CompilerErrorModel(fileErrors, doc.getDocument(), file);
+        doc.setCompilerErrorModel(model);
+
+        // Continue with errors for the next file
+        i = j - 1;
+      }
+    }
   }
 
   /**

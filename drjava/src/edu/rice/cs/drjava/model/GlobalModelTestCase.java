@@ -74,7 +74,7 @@ public abstract class GlobalModelTestCase extends TestCase {
   protected void createModel() {
     _model = new DefaultGlobalModel();
   }
-  
+
   /**
    * Get the instance of the GlobalModel.
    */
@@ -225,20 +225,21 @@ public abstract class GlobalModelTestCase extends TestCase {
   }
 
   protected void assertCompileErrorsPresent(String name, boolean b) {
-    CompilerError[] errors = _model.getCompileErrors();
+    //CompilerError[] errors = _model.getCompileErrors();
+    int numErrors = _model.getNumErrors();
 
     if (name.length() > 0) {
       name += ": ";
     }
 
-    StringBuffer buf = new StringBuffer();
-    for (int i = 0; i < errors.length; i++) {
-      buf.append("\nerror #" + i + ": " + errors[i]);
-    }
+    //StringBuffer buf = new StringBuffer();
+    //for (int i = 0; i < errors.length; i++) {
+    //  buf.append("\nerror #" + i + ": " + errors[i]);
+    //}
 
-    assertEquals(name + "compile errors > 0? errors=" + buf,
+    assertEquals(name + "compile errors > 0? numErrors=" + numErrors,
                  b,
-                 errors.length > 0);
+                 numErrors > 0);
   }
 
   public class FileSelector implements FileOpenSelector, FileSaveSelector {

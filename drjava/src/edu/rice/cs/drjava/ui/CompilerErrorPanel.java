@@ -1,6 +1,9 @@
 package edu.rice.cs.drjava.ui;
 
 import java.util.Arrays;
+import java.util.Hashtable;
+import java.io.File;
+import java.io.IOException;
 
 import javax.swing.*;
 import javax.swing.text.*;
@@ -12,6 +15,7 @@ import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.drjava.model.compiler.*;
 import edu.rice.cs.drjava.model.GlobalModel;
+import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 
 /**
  * The panel which houses the list of errors after an unsuccessful compilation.
@@ -23,10 +27,6 @@ import edu.rice.cs.drjava.model.GlobalModel;
  * @version $Id$
  */
 public class CompilerErrorPanel extends JPanel {
-  /** Highlight painter for selected errors in the defs doc. */
-  private static final DefaultHighlighter.DefaultHighlightPainter
-    _documentHighlightPainter
-      = new DefaultHighlighter.DefaultHighlightPainter(Color.yellow);
 
   /** Highlight painter for selected list items. */
   private static final DefaultHighlighter.DefaultHighlightPainter
@@ -47,22 +47,12 @@ public class CompilerErrorPanel extends JPanel {
     return s;
   }
 
-  // when we create a highlight we get back a tag we can use to remove it
-  private Object _previousHighlightTag = null;
 
-  /**
-   * Errors with source info have an entry in both _errors and _errorPositions.
-   */
-  private CompilerError[] _errors;
-  private Position[] _errorPositions;
+  /** The total number of errors in the list */
+  private int _numErrors;
 
-  /**
-   * Here's where we put errors that have no source information.
-   */
-  private CompilerError[] _errorsWithoutPositions;
-
-  private final DefinitionsPane _definitionsPane;
-  private final GlobalModel _model;
+  private final SingleDisplayModel _model;
+  private final MainFrame _frame;
 
   private final JButton _showAllButton;
   private final JButton _nextButton;
@@ -71,21 +61,13 @@ public class CompilerErrorPanel extends JPanel {
   private final JComboBox _compilerChoiceBox;
 
   /**
-   * A caret listener to watch the Defs Doc and highlight the error on the
-   * current line.
-   */
-  private final DefinitionsCaretListener _listener;
-
-  /**
    * Constructor.
-   * @param defPane the definitions pane which holds the source to be compiled
+   * @param model SingleDisplayModel in which we are running
+   * @param frame MainFrame in which we are displayed
    */
-  public CompilerErrorPanel(DefinitionsPane defPane, GlobalModel model) {
-    _definitionsPane = defPane;
+  public CompilerErrorPanel(SingleDisplayModel model, MainFrame frame) {
     _model = model;
-
-    _listener = new DefinitionsCaretListener();
-    _definitionsPane.addCaretListener(_listener);
+    _frame = frame;
 
     _showAllButton = new JButton("Show all");
     _showAllButton.addActionListener(new ActionListener() {
@@ -97,18 +79,25 @@ public class CompilerErrorPanel extends JPanel {
     _nextButton = new JButton("Next");
     _nextButton.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
-          _switchToError(_errorListPane.getSelectedIndex() + 1);
+          int index = _errorListPane.getSelectedIndex() + 1;
+          if (index < _numErrors) {
+            _errorListPane.switchToError(index);
+          }
         }
     });
 
     _previousButton = new JButton("Previous");
     _previousButton.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
-          _switchToError(_errorListPane.getSelectedIndex() - 1);
+          int index = _errorListPane.getSelectedIndex() -1 ;
+          if (index >= 0) {
+            _errorListPane.switchToError(index);
+          }
         }
     });
-    
+
     _errorListPane = new ErrorListPane();
+
 
     // Limitation: Only compiler choices are those that were available
     // at the time this box was created.
@@ -128,14 +117,12 @@ public class CompilerErrorPanel extends JPanel {
     setLayout(new BorderLayout());
 
     // We make the vertical scrollbar always there.
-    // If we don't, when it pops up it cuts away the right edge of the 
+    // If we don't, when it pops up it cuts away the right edge of the
     // text. Very bad.
     JScrollPane scroller =
       new JScrollPane(_errorListPane,
                       JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
                       JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-
-    resetErrors(new CompilerError[0]);
 
     // Disable buttons. They don't totally work and who needs em.
     /*
@@ -157,6 +144,13 @@ public class CompilerErrorPanel extends JPanel {
     add(uiBox, BorderLayout.EAST);
   }
 
+  /**
+   * Returns the ErrorListPane that this panel manages.
+   */
+  public ErrorListPane getErrorListPane() {
+    return _errorListPane;
+  }
+
   /** Changes the font of the error list. */
   public void setListFont(Font f) {
     StyleConstants.setFontFamily(NORMAL_ATTRIBUTES, f.getFamily());
@@ -175,235 +169,38 @@ public class CompilerErrorPanel extends JPanel {
    * Reset the errors to the current error information.
    * @param errors the current error information
    */
-  public void resetErrors(CompilerError[] errors) {
-    // Get rid of any old highlights
-    _removePreviousHighlight();
-
-    // sort the errors by location
-    Arrays.sort(errors);
-
-    // Filter out those with invalid source info.
-    // They will be first since errors are sorted by line number,
-    // and invalid source info is for negative line numbers.
-    int numInvalid = 0;
-    for (int i = 0; i < errors.length; i++) {
-      if (errors[i].lineNumber() < 0) {
-        numInvalid++;
-      }
-      else {
-        // Since they were sorted, we must be done looking 
-        // for invalid source coordinates, since we found this valid one.
-        break;
-      }
-    }
-
-    _errorsWithoutPositions = new CompilerError[numInvalid];
-    System.arraycopy(errors,
-                     0,
-                     _errorsWithoutPositions,
-                     0,
-                     numInvalid);
-
-    int numValid = errors.length - numInvalid;
-    _errors = new CompilerError[numValid];
-    System.arraycopy(errors,
-                     numInvalid,
-                     _errors,
-                     0,
-                     numValid);
-
-    _createPositionsArray();
-    _resetEnabledStatus();
-
-    for (int i = 0; i < _errors.length; i++) {
-      DrJava.consoleErr().println("error #" + i + ": " + _errors[i]);
-    }
-
-    DrJava.consoleErr().println();
-    for (int i = 0; i < _errorPositions.length; i++) {
-      DrJava.consoleErr().println("POS #" + i + ": " + _errorPositions[i]);
-    }
-
-    DrJava.consoleErr().println();
-    for (int i = 0; i < _errorsWithoutPositions.length; i++) {
-      DrJava.consoleErr().println("errorNOP #" + i + ": " + _errorsWithoutPositions[i]);
-    }
+  public void reset() {
+    _numErrors = _model.getNumErrors();
 
     _errorListPane.updateListPane();
-  }
-
-  /**
-   * Adds an error highlight to the document.
-   * @exception BadLocationException
-   */
-  private void _addHighlight(int from, int to) throws BadLocationException {
-    _previousHighlightTag =
-      _definitionsPane.getHighlighter().addHighlight(from, 
-                                                     to,
-                                                     _documentHighlightPainter);
-  }
-
-  /**
-   * Removes the previous error highlight from the document after the cursor
-   * has moved.
-   */
-  private void _removePreviousHighlight() {
-    if (_previousHighlightTag != null) {
-      _definitionsPane.getHighlighter().removeHighlight(_previousHighlightTag);
-      _previousHighlightTag = null;
-    }
-  }
-
-  /**
-   * Change all state to select a new error.
-   * @param errorNum Error number, which is either in _errorsWithoutPositions
-   * (if errorNum < _errorsWithoutPositions.length) or in _errors (otherwise).
-   * If it's in _errors, we need to subtract _errorsWithoutPositions.length
-   * to get the index into the array.
-   */
-  private void _switchToError(final int errorNum) {
-    // errorNum is an error number. Because errors without source info 
-    // come first, check and see if this error is without source info, and
-    // if so don't try to highlight source info!
-    boolean errorHasLocation = (errorNum >= _errorsWithoutPositions.length);
-
-    if (errorHasLocation) {
-      // Index into _errors array
-      int idx = errorNum - _errorsWithoutPositions.length;
-
-      _highlightErrorInSource(idx);
-      _gotoErrorSourceLocation(idx);
-    }
-    else {
-      // Get rid of old highlight, since the error we have no has
-      // no source location
-      _removePreviousHighlight();
-    }
-
-    // Select item wants the error number, which what we were passed
-    _errorListPane.selectItem(errorNum);
-  }
-
-  /**
-   * Jumps to error location in source
-   * @param idx Index into _errors array
-   */
-  private void _gotoErrorSourceLocation(final int idx) {
-    if (idx < 0) return;
-
-    _highlightErrorInSource(idx);
-
-    int errPos = _errorPositions[idx].getOffset();
-    // move caret to that position
-    _definitionsPane.setCaretPosition(errPos);
-    _definitionsPane.grabFocus();
-  }
-
-  /**
-   * Highlights the given error in the source.
-   * @param newIndex Index into _errors array
-   */
-  private void _highlightErrorInSource(int newIndex) {
-    int errPos = _errorPositions[newIndex].getOffset();
-
-    try {
-      Document doc = _definitionsPane.getDocument();
-      String text = doc.getText(0, doc.getLength());
-     
-      // Look for the previous newline BEFORE this character. Thus start looking
-      // on the character one before this character. If this is not the case,
-      // if the error is at a newline character, both prev and next newlines
-      // will be set to that place, resulting in nothing being highlighted.
-      int prevNewline = text.lastIndexOf('\n', errPos - 1);
-      if (prevNewline == -1) {
-        prevNewline = 0;
-      }
-      
-      int nextNewline = text.indexOf('\n', errPos);
-      if (nextNewline == -1) {
-        nextNewline = doc.getLength();
-      }
-
-      _removePreviousHighlight();
-      _addHighlight(prevNewline, nextNewline);
-    }
-    catch (BadLocationException imposssible) { }
-
     _resetEnabledStatus();
   }
+
 
   private void _showAllErrors() {
   }
 
   /**
-   * Reset the enabled status of the "next", "previous", and "show all" 
+   * Reset the enabled status of the "next", "previous", and "show all"
    * buttons in the compiler error panel.
    */
   private void _resetEnabledStatus() {
-    int numErrors = _errorsWithoutPositions.length + _errors.length;
-
-    _nextButton.setEnabled(_errorListPane.getSelectedIndex() < numErrors);
+    _nextButton.setEnabled(_errorListPane.getSelectedIndex() < _numErrors - 1);
     _previousButton.setEnabled(_errorListPane.getSelectedIndex() > 0);
-    _showAllButton.setEnabled(numErrors != 0);
+    _showAllButton.setEnabled(_numErrors != 0);
   }
 
-  /**
-   * Create array of positions where each error occurred.
-   */
-  private void _createPositionsArray() {
-    _errorPositions = new Position[_errors.length];
-    DrJava.consoleErr().println("created pos arr: " + _errorPositions.length);
 
-    // don't bother with anything else if there are no errors
-    if (_errorPositions.length == 0) 
-      return;
-
-    Document defsDoc = _definitionsPane.getDocument();
-    try {
-      String defsText = defsDoc.getText(0, defsDoc.getLength());
-      DrJava.consoleErr().println("got defs text, len=" + defsText.length());
-
-      int curLine = 0;
-      int offset = 0; // offset is number of chars from beginning of file
-      int numProcessed = 0;
-
-      // offset is always pointing to the first character in a line
-      // at the top of the loop
-      while ((numProcessed < _errors.length) &&
-             (offset < defsText.length()))
-      {
-        DrJava.consoleErr().println("num processed: " + numProcessed);
-
-        // first figure out if we need to create any new positions on this line
-        for (int i = numProcessed;
-             (i < _errors.length) && (_errors[i].lineNumber() == curLine);
-             i++)
-        {
-          _errorPositions[i] = defsDoc.createPosition(offset +
-                                                      _errors[i].startColumn());
-          numProcessed++;
-        }
-
-        int nextNewline = defsText.indexOf('\n', offset);
-        if (nextNewline == -1) {
-          break;
-        }
-        else {
-          curLine++;
-          offset = nextNewline + 1;
-        }
-      }
-    }
-    catch (BadLocationException ble) {
-      throw new UnexpectedException(ble);
-    }
-  }
 
   /**
    * A pane to show compiler errors. It acts a bit like a listbox (clicking
    * selects an item) but items can each wrap, etc.
    */
-  private class ErrorListPane extends JEditorPane {
+  public class ErrorListPane extends JEditorPane {
+
+    /**
+     * Index into _errorListPositions of the currently selected error.
+     */
     private int _selectedIndex;
 
     /**
@@ -413,28 +210,47 @@ public class CompilerErrorPanel extends JPanel {
      */
     private Position[] _errorListPositions;
 
+    /**
+     * Table mapping Positions in the error list to CompilerErrors.
+     */
+    private final Hashtable _errorTable;
+
+    /**
+     * The DefinitionsPane with the current error highlight.
+     * (Initialized to the current pane.)
+     */
+    private DefinitionsPane _lastDefPane;
+
     // when we create a highlight we get back a tag we can use to remove it
     private Object _listHighlightTag = null;
 
     // on mouse click, highlight the error in the list and also in the source
     private MouseAdapter _mouseListener = new MouseAdapter() {
       public void mouseClicked(MouseEvent e) {
-        int errorNum = _errorAtPoint(e.getPoint());
+        CompilerError error = _errorAtPoint(e.getPoint());
 
-        if (errorNum == -1) {
+        if (error == null) {
           selectNothing();
         }
         else {
-          _switchToError(errorNum);
+          _errorListPane.switchToError(error);
         }
       }
     };
 
+    /**
+     * Constructs the ErrorListPane.
+     */
     public ErrorListPane() {
       // If we set this pane to be of type text/rtf, it wraps based on words
       // as opposed to based on characters.
       super("text/rtf", "");
       addMouseListener(_mouseListener);
+
+      _selectedIndex = 0;
+      _errorListPositions = new Position[0];
+      _errorTable = new Hashtable();
+      _lastDefPane = _frame.getCurrentDefPane();
 
       ErrorListPane.this.setFont(new Font("Courier", 0, 20));
 
@@ -443,22 +259,35 @@ public class CompilerErrorPanel extends JPanel {
       setEnabled(false);
     }
 
-    /*
-    public void setFont(Font f) {
-      super.setFont(f);
-      System.err.println(new java.util.Date() + ": Set font: " + f);
-    }
-    */
+    /**
+     * Get the index of the current error in the error array.
+     */
+    public int getSelectedIndex() { return _selectedIndex; }
 
     /**
-     * Returns error number associated with the given visual coordinates.
-     * Returns -1 if none.
+     * Allows the ErrorListPane to remember which DefinitionsPane
+     * currently has an error highlight.
      */
-    private int _errorAtPoint(Point p) {
+    public void setLastDefPane(DefinitionsPane pane) {
+      _lastDefPane = pane;
+    }
+
+    /**
+     * Gets the last DefinitionsPane with an error highlight.
+     */
+    public DefinitionsPane getLastDefPane() {
+      return _lastDefPane;
+    }
+
+    /**
+     * Returns CompilerError associated with the given visual coordinates.
+     * Returns null if none.
+     */
+    private CompilerError _errorAtPoint(Point p) {
       int modelPos = viewToModel(p);
 
       if (modelPos == -1)
-        return -1;
+        return null;
 
       // Find the first error whose position preceeds this model position
       int errorNum = -1;
@@ -471,18 +300,42 @@ public class CompilerErrorPanel extends JPanel {
         }
       }
 
-      return errorNum;
+      if (errorNum >= 0) {
+        return (CompilerError) _errorTable.get(_errorListPositions[errorNum]);
+      }
+      else {
+        return null;
+      }
     }
 
-    /** 
+    /**
+     * Returns the index into _errorListPositions corresponding
+     * to the given CompilerError.
+     */
+    private int _getIndexForError(CompilerError error) {
+      if (error == null) return -1;
+
+      int index = -1;
+      for (int i = 0; i < _errorListPositions.length; i++) {
+        CompilerError e = (CompilerError)
+          _errorTable.get(_errorListPositions[i]);
+        if (error.equals(e)) {
+          index = i;
+          break;
+        }
+      }
+      return index;
+    }
+
+    /**
      * Update the pane which holds the list of errors for the viewer.
      */
     public void updateListPane() {
       try {
-        int numErrors = _errorsWithoutPositions.length + _errors.length;
-        _errorListPositions = new Position[numErrors];
+        _errorListPositions = new Position[_numErrors];
+        _errorTable.clear();
 
-        if ((_errors.length == 0) && (_errorsWithoutPositions.length == 0)) {
+        if (_numErrors == 0) {
           _updateNoErrors();
         }
         else {
@@ -505,8 +358,8 @@ public class CompilerErrorPanel extends JPanel {
 
       try {
         doc.insertString(0,
-                       "Compilation in progress, please wait ...",
-                       NORMAL_ATTRIBUTES);
+                         "Compilation in progress, please wait ...",
+                         NORMAL_ATTRIBUTES);
       }
       catch (BadLocationException ble) {
         throw new UnexpectedException(ble);
@@ -535,34 +388,88 @@ public class CompilerErrorPanel extends JPanel {
      */
     private void _updateWithErrors() throws BadLocationException {
       DefaultStyledDocument doc = new DefaultStyledDocument();
-
-      // Show errors without source locations
       int errorNum = 0;
-      for (int i = 0; i < _errorsWithoutPositions.length; i++, errorNum++) {
-        int startPos = doc.getLength();
-        _insertErrorText(_errorsWithoutPositions, i, doc);
 
-        // Note to user that there is no source info for this error
+      // Show errors without files
+      CompilerError[] errorsNoFiles = _model.getCompilerErrorsWithoutFiles();
+      for (int i = 0; i < errorsNoFiles.length; i++, errorNum++) {
+        int startPos = doc.getLength();
+        _insertErrorText(errorsNoFiles, i, doc);
+
+        // Note to user that there is no file for this error
         doc.insertString(doc.getLength(),
-                         " (no source location)",
+                         "(no associated file)",
                          NORMAL_ATTRIBUTES);
         doc.insertString(doc.getLength(), "\n", NORMAL_ATTRIBUTES);
-
-        _errorListPositions[errorNum] = doc.createPosition(startPos);
+        Position pos = doc.createPosition(startPos);
+        _errorListPositions[errorNum] = pos;
+        _errorTable.put(pos, errorsNoFiles[i]);
       }
 
-      // Show errors with source locations
-      for (int i = 0; i < _errors.length; i++, errorNum++) {
-        int startPos = doc.getLength();
-        _insertErrorText(_errors, i, doc);
-        doc.insertString(doc.getLength(), "\n", NORMAL_ATTRIBUTES);
-        _errorListPositions[errorNum] = doc.createPosition(startPos);
+      // Show errors for each file
+      ListModel defDocs = _model.getDefinitionsDocuments();
+      for (int i = 0; i < defDocs.getSize(); i++) {
+        // Get errors for this file
+        OpenDefinitionsDocument openDoc = (OpenDefinitionsDocument)
+          defDocs.getElementAt(i);
+        CompilerErrorModel errorModel = openDoc.getCompilerErrorModel();
+        CompilerError[] errorsWithoutPositions =
+          errorModel.getErrorsWithoutPositions();
+        CompilerError[] errorsWithPositions =
+          errorModel.getErrorsWithPositions();
+
+        if ((errorsWithoutPositions.length > 0) ||
+            (errorsWithPositions.length > 0)) {
+
+          // Grab filename for this set of errors
+          String filename = "(Untitled)";
+          try {
+            File file = openDoc.getFile();
+            filename = file.getAbsolutePath();
+          }
+          catch (IllegalStateException ise) {
+            // Not possible: compiled documents must have files
+            throw new UnexpectedException(ise);
+          }
+
+          // Show errors without source locations
+          for (int j = 0; j < errorsWithoutPositions.length; j++, errorNum++) {
+            int startPos = doc.getLength();
+            _insertErrorText(errorsWithoutPositions, j, doc);
+
+            // Note to user that there is no source info for this error
+            doc.insertString(doc.getLength(),
+                             " (no source location)",
+                             NORMAL_ATTRIBUTES);
+            doc.insertString(doc.getLength(), "\n", NORMAL_ATTRIBUTES);
+
+            Position pos = doc.createPosition(startPos);
+            _errorListPositions[errorNum] = pos;
+            _errorTable.put(pos, errorsWithoutPositions[j]);
+          }
+
+          // Show errors with source locations
+          for (int j = 0; j < errorsWithPositions.length; j++, errorNum++) {
+            int startPos = doc.getLength();
+
+            // Show file
+            doc.insertString(doc.getLength(), "File: ", BOLD_ATTRIBUTES);
+            doc.insertString(doc.getLength(), filename + "\n", NORMAL_ATTRIBUTES);
+
+            // Show error
+            _insertErrorText(errorsWithPositions, j, doc);
+            doc.insertString(doc.getLength(), "\n", NORMAL_ATTRIBUTES);
+            Position pos = doc.createPosition(startPos);
+            _errorListPositions[errorNum] = pos;
+            _errorTable.put(pos, errorsWithPositions[j]);
+          }
+        }
       }
 
       setDocument(doc);
 
       // Select the first error
-      _switchToError(0);
+      _errorListPane.switchToError(0);
     }
 
     /**
@@ -573,18 +480,18 @@ public class CompilerErrorPanel extends JPanel {
      */
     private void _insertErrorText(CompilerError[] array, int i, Document doc)
       throws BadLocationException
-    {
-      CompilerError error = array[i];
+      {
+        CompilerError error = array[i];
 
-      if (error.isWarning()) {
-        doc.insertString(doc.getLength(), "Warning: ", BOLD_ATTRIBUTES);
-      }
-      else {
-        doc.insertString(doc.getLength(), "Error: ", BOLD_ATTRIBUTES);
-      }
+        if (error.isWarning()) {
+          doc.insertString(doc.getLength(), "Warning: ", BOLD_ATTRIBUTES);
+        }
+        else {
+          doc.insertString(doc.getLength(), "Error: ", BOLD_ATTRIBUTES);
+        }
 
-      doc.insertString(doc.getLength(), error.message(), NORMAL_ATTRIBUTES);
-    }
+        doc.insertString(doc.getLength(), error.message(), NORMAL_ATTRIBUTES);
+      }
 
     /**
      * When the selection of the current error changes, remove
@@ -603,13 +510,19 @@ public class CompilerErrorPanel extends JPanel {
     public void selectNothing() {
       _selectedIndex = -1;
       _removeListHighlight();
-      _removePreviousHighlight();
+      _resetEnabledStatus();
+
+      // Remove highlight from the defPane that has it
+      _lastDefPane.removeErrorHighlight();
     }
 
     /**
-     * Selects the given error inside the error list pane. 
+     * Selects the given error inside the error list pane.
      */
-    public void selectItem(int i) {
+    public void selectItem(CompilerError error) {
+      // Find corresponding index
+      int i = _getIndexForError(error);
+
       _selectedIndex = i;
       _removeListHighlight();
 
@@ -618,7 +531,7 @@ public class CompilerErrorPanel extends JPanel {
       // end pos is either the end of the document (if this is the last error)
       // or the char where the next error starts
       int endPos;
-      if (i + 1 == (_errorsWithoutPositions.length + _errors.length)) {
+      if (i + 1 >= (_numErrors)) {
         endPos = getDocument().getLength();
       }
       else {
@@ -643,83 +556,89 @@ public class CompilerErrorPanel extends JPanel {
 
         scrollRectToVisible(startRect);
 
-      } 
+      }
       catch (BadLocationException badBadLocation) {}
+
+      _resetEnabledStatus();
     }
 
     /**
-     * Get the index of the current error in the error array.
+     * Change all state to select a new error, including moving the
+     * caret to the error, if a corresponding position exists.
+     * @param doc OpenDefinitionsDocument containing this error
+     * @param errorNum Error number, which is either in _errorsWithoutPositions
+     * (if errorNum < _errorsWithoutPositions.length) or in _errors (otherwise).
+     * If it's in _errors, we need to subtract _errorsWithoutPositions.length
+     * to get the index into the array.
      */
-    public int getSelectedIndex() { return _selectedIndex; }
-  }
+    void switchToError(CompilerError error) {
+      if (error == null) return;
 
-  private class DefinitionsCaretListener implements CaretListener {
-    public void caretUpdate(CaretEvent evt) {
-      if (_errorPositions.length == 0) {
-        return;
-      }
+      // check and see if this error is without source info, and
+      // if so don't try to highlight source info!
+      boolean errorHasLocation = (error.lineNumber() > -1);
 
-      // Now we can assume at least one error.
+      if (errorHasLocation) {
+        try {
+          OpenDefinitionsDocument doc = _model.getDocumentForFile(error.file());
+          CompilerErrorModel errorModel = doc.getCompilerErrorModel();
+          CompilerError[] errorsWithPositions =
+            errorModel.getErrorsWithPositions();
 
-      int curPos = evt.getDot();
-      // check if the dot is on a line with an error.
-      // Find the first error that is on or after the dot. If this comes
-      // before the newline after the dot, it's on the same line.
-      int errorAfter; // index of the first error after the dot
-      for (errorAfter = 0; errorAfter < _errorPositions.length; errorAfter++) {
-        if (_errorPositions[errorAfter].getOffset() >= curPos) {
-          break;
+          int index = Arrays.binarySearch(errorsWithPositions, error);
+          if (index >= 0) {
+            _gotoErrorSourceLocation(doc, index);
+          }
+        }
+        catch (IOException ioe) {
+          // Don't highlight the source if file can't be opened
         }
       }
-
-      // index of the first error before the dot
-      int errorBefore = errorAfter - 1;
-
-      // this will be set to what we want to select, or -1 if nothing
-      int shouldSelect = -1;
-
-      if (errorBefore >= 0) { // there's an error before the dot
-        int errPos = _errorPositions[errorBefore].getOffset();
-        try {
-          String betweenDotAndErr =
-            _definitionsPane.getDocument().getText(errPos, curPos - errPos);
-
-          if (betweenDotAndErr.indexOf('\n') == -1) {
-            shouldSelect = errorBefore;
-          }
-        } 
-        catch (BadLocationException willNeverHappen) {}
-      }
-
-      if ((shouldSelect == -1) && (errorAfter != _errorPositions.length)) {
-        // we found an error on/after the dot
-        // if there's a newline between dot and error,
-        // then it's not on this line
-        int errPos = _errorPositions[errorAfter].getOffset();
-        try {
-          String betweenDotAndErr =
-            _definitionsPane.getDocument().getText(curPos, errPos - curPos);
-
-          if (betweenDotAndErr.indexOf('\n') == -1) {
-            shouldSelect = errorAfter;
-          }
-        } 
-        catch (BadLocationException willNeverHappen) {}
-      }
-
-      // if no error is on this line, select the (none) item
-      if (shouldSelect == -1) {
-        _errorListPane.selectNothing();
-      }
       else {
-        // No need to move the caret since it's already here!
-        _highlightErrorInSource(shouldSelect);
+        // Remove last highlight
+        _lastDefPane.removeErrorHighlight();
+      }
 
-        // Select item wants the error number overall, including
-        // accounting for errors with no source location
-        _errorListPane.selectItem(shouldSelect +_errorsWithoutPositions.length);
+      // Select item wants the error, which is what we were passed
+      _errorListPane.selectItem(error);
+    }
+
+    /**
+     * Another interface to switchToError.
+     * @param index Index into the array of positions in the ErrorListPane
+     */
+    void switchToError(int index) {
+      if ((index >= 0) && (index < _errorListPositions.length)) {
+        Position pos = _errorListPositions[index];
+        CompilerError error = (CompilerError) _errorTable.get(pos);
+        switchToError(error);
       }
     }
+
+    /**
+     * Jumps to error location in source
+     * @param doc OpenDefinitionsDocument containing the error
+     * @param idx Index into _errors array
+     */
+    private void _gotoErrorSourceLocation(OpenDefinitionsDocument doc,
+                                          final int idx) {
+      CompilerErrorModel errorModel = doc.getCompilerErrorModel();
+      Position[] positions = errorModel.getPositions();
+
+
+      if ((idx < 0) || (idx >= positions.length)) return;
+
+      int errPos = positions[idx].getOffset();
+
+      // switch to correct def pane
+      _model.setActiveDocument(doc);
+
+      // move caret to that position
+      DefinitionsPane defPane = _frame.getCurrentDefPane();
+      defPane.setCaretPosition(errPos);
+      defPane.grabFocus();
+    }
+
   }
 
 }

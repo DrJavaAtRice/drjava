@@ -12,6 +12,7 @@ import java.util.Hashtable;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.model.*;
+import edu.rice.cs.drjava.ui.CompilerErrorPanel.ErrorListPane;
 import edu.rice.cs.util.UnexpectedException;
 
 /**
@@ -129,7 +130,7 @@ public class MainFrame extends JFrame {
   /** Compiles the document in the definitions pane. */
   private Action _compileAction = new AbstractAction("Compile") {
     public void actionPerformed(ActionEvent ae) {
-      _model.getActiveDocument().startCompile();
+      _compile();
     }
   };
 
@@ -227,11 +228,14 @@ public class MainFrame extends JFrame {
     this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
     this.addWindowListener(_windowCloseListener);
     _model.addListener(new ModelListener());
+    _setUpTabs();
 
     // DefinitionsPane
     _defScrollPanes = new Hashtable();
     JScrollPane defScroll = _createDefScrollPane(_model.getActiveDocument());
     _currentDefPane = (DefinitionsPane) defScroll.getViewport().getView();
+    _errorPanel.getErrorListPane().setLastDefPane(_currentDefPane);
+    _errorPanel.reset();
 
     // Make the menu bar
     _setUpMenuBar();
@@ -292,13 +296,20 @@ public class MainFrame extends JFrame {
     return getChosenFile(_saveChooser, rc);
   }
 
+  /**
+   * Returns the current DefinitionsPane.
+   */
+  public DefinitionsPane getCurrentDefPane() {
+    return _currentDefPane;
+  }
+
 
   /**
    * Makes sure save and compile buttons and menu items
    * are enabled and disabled appropriately after document
    * modifications.
    */
-  void installNewDocumentListener(Document d) {
+  private void _installNewDocumentListener(Document d) {
     d.addDocumentListener(new DocumentListener() {
       public void changedUpdate(DocumentEvent e) {
         _saveButton.setEnabled(true);
@@ -353,7 +364,7 @@ public class MainFrame extends JFrame {
                                                  title,
                                                  JOptionPane.OK_CANCEL_OPTION);
       if (choice == JOptionPane.OK_OPTION) {
-        
+
         _model.setActiveDocument(openDoc);
       }
     }
@@ -387,6 +398,15 @@ public class MainFrame extends JFrame {
   private void _saveAs() {
     try {
       _model.getActiveDocument().saveFileAs(_saveSelector);
+    }
+    catch (IOException ioe) {
+      _showIOError(ioe);
+    }
+  }
+
+  private void _compile() {
+    try {
+      _model.getActiveDocument().startCompile();
     }
     catch (IOException ioe) {
       _showIOError(ioe);
@@ -445,6 +465,38 @@ public class MainFrame extends JFrame {
       // invalid input for line number
       Toolkit.getDefaultToolkit().beep();
       // Do nothing.
+    }
+  }
+
+  /**
+   * Update all appropriate listeners that the CompilerErrorModels
+   * have changed.
+   */
+  private void _updateErrorListeners() {
+    // Loop through each errorListener and tell it to update itself
+    ListModel docs = _model.getDefinitionsDocuments();
+    for (int i = 0; i < docs.getSize(); i++) {
+      OpenDefinitionsDocument doc = (OpenDefinitionsDocument)
+        docs.getElementAt(i);
+      JScrollPane scroll = (JScrollPane) _defScrollPanes.get(doc);
+      if (scroll != null) {
+        DefinitionsPane pane = (DefinitionsPane) scroll.getViewport().getView();
+        CompilerErrorCaretListener listener = pane.getErrorCaretListener();
+        listener.resetErrorModel();
+      }
+    }
+  }
+
+  /**
+   * Removes the CompilerErrorCaretListener corresponding to
+   * the given document, after that document has been closed.
+   * (Allows pane and listener to be garbage collected...)
+   */
+  private void _removeErrorListener(OpenDefinitionsDocument doc) {
+    JScrollPane scroll = (JScrollPane) _defScrollPanes.get(doc);
+    if (scroll != null) {
+      DefinitionsPane pane = (DefinitionsPane) scroll.getViewport().getView();
+      pane.removeCaretListener(pane.getErrorCaretListener());
     }
   }
 
@@ -596,7 +648,7 @@ public class MainFrame extends JFrame {
 
   private void _setUpTabs() {
     _outputPane = new OutputPane();
-    _errorPanel = new CompilerErrorPanel(_currentDefPane, _model);
+    _errorPanel = new CompilerErrorPanel(_model, this);
     // Make the output view the active one
     _outputPane.makeActive();
     _interactionsPane = new InteractionsPane(_model);
@@ -636,7 +688,7 @@ public class MainFrame extends JFrame {
       }
     };
     _docList.setToolTipText("Document List"); */
-    
+
     _docList.setSelectionModel(_model.getDocumentSelectionModel());
     _docList.setCellRenderer(new DocCellRenderer());
   }
@@ -650,6 +702,14 @@ public class MainFrame extends JFrame {
    */
   private JScrollPane _createDefScrollPane(OpenDefinitionsDocument doc) {
     DefinitionsPane pane = new DefinitionsPane(this, _model, doc);
+
+    // Add listeners
+    _installNewDocumentListener(doc.getDocument());
+    CompilerErrorCaretListener caretListener =
+      new CompilerErrorCaretListener(doc, _errorPanel.getErrorListPane(), pane);
+    pane.addErrorCaretListener(caretListener);
+
+    // Add to a scroll pane
     JScrollPane scroll = new JScrollPane(pane,
                                          JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
                                          JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
@@ -749,7 +809,6 @@ public class MainFrame extends JFrame {
   private class ModelListener implements SingleDisplayModelListener {
     public void newFileCreated(OpenDefinitionsDocument doc) {
       _createDefScrollPane(doc);
-      installNewDocumentListener(doc.getDocument());
     }
 
     public void fileSaved(OpenDefinitionsDocument doc) {
@@ -763,10 +822,10 @@ public class MainFrame extends JFrame {
 
     public void fileOpened(OpenDefinitionsDocument doc) {
       _createDefScrollPane(doc);
-      installNewDocumentListener(doc.getDocument());
     }
 
     public void fileClosed(OpenDefinitionsDocument doc) {
+      _removeErrorListener(doc);
       _defScrollPanes.remove(doc);
     }
 
@@ -779,6 +838,11 @@ public class MainFrame extends JFrame {
       _compileButton.setEnabled(canCompile);
       _saveMenuItem.setEnabled(isModified);
       _compileMenuItem.setEnabled(canCompile);
+
+      // Update error highlights
+      _errorPanel.getErrorListPane().selectNothing();
+      int pos = _currentDefPane.getCaretPosition();
+      _currentDefPane.getErrorCaretListener().updateHighlight(pos);
 
       _setCurrentDirectory(active);
 
@@ -797,7 +861,8 @@ public class MainFrame extends JFrame {
 
     public void compileEnded() {
       hourglassOff();
-      _errorPanel.resetErrors(_model.getCompileErrors());
+      _updateErrorListeners();
+      _errorPanel.reset();
       _compileButton.setEnabled(true);
     }
 

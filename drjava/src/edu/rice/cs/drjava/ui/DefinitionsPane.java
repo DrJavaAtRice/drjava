@@ -15,7 +15,9 @@ import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.definitions.DefinitionsEditorKit;
 
 /**
- * The pane in which work on the current document occurs.
+ * The pane in which work on a given OpenDefinitionsDocument occurs.
+ * A DefinitionsPane is tied to a single document, which cannot be
+ * changed.
  * @version $Id$
  */
 public class DefinitionsPane extends JEditorPane {
@@ -24,7 +26,7 @@ public class DefinitionsPane extends JEditorPane {
    */
   private MainFrame _mainFrame;
   private GlobalModel _model;
-  private OpenDefinitionsDocument _doc;
+  private final OpenDefinitionsDocument _doc;
   private UndoManager _undoManager;
   private UndoAction _undoAction;
   private RedoAction _redoAction;
@@ -35,8 +37,25 @@ public class DefinitionsPane extends JEditorPane {
   /**
    * Paren/brace/bracket matching highlight color.
    */
-  private static DefaultHighlighter.DefaultHighlightPainter _highlightPainter =
+  private static DefaultHighlighter.DefaultHighlightPainter
+    _highlightPainter =
       new DefaultHighlighter.DefaultHighlightPainter(Color.lightGray);
+
+  /**
+   * Our current error matching highlight.
+   */
+  private Object _errorHighlightTag = null;
+  /**
+   * Highlight painter for selected errors in the defs doc.
+   */
+  private static final DefaultHighlighter.DefaultHighlightPainter
+    _errorHighlightPainter =
+      new DefaultHighlighter.DefaultHighlightPainter(Color.yellow);
+
+  /**
+   * Listens to caret to highlight errors as appropriate.
+   */
+  private CompilerErrorCaretListener _errorListener;
 
   /**
    * Looks for changes in the caret position to see if a paren/brace/bracket
@@ -189,13 +208,11 @@ public class DefinitionsPane extends JEditorPane {
     _mainFrame = mf;
     _model = model;
     _doc = doc;
-//    _resetDocument("");
+    setDocument(_doc);
     setContentType("text/java");
     setBackground(Color.white);
     setFont(new Font("Courier", 0, 12));
     setEditable(true);
-    setDocument(_doc);
-    _resetUndo();
 
     //add actions for indent key
     Keymap ourMap = addKeymap("INDENT_KEYMAP", getKeymap());
@@ -212,7 +229,6 @@ public class DefinitionsPane extends JEditorPane {
     // Add listener that checks if position in the document has changed.
     // If it has changed, check and see if we should be highlighting matching braces.
     this.addCaretListener(_matchListener);
-    _mainFrame.installNewDocumentListener(_doc.getDocument());
   }
 
   /**
@@ -230,30 +246,12 @@ public class DefinitionsPane extends JEditorPane {
   }
 
   /**
-   * Reset undo machinery on setDocument.
-   */
-  public void setDocument(OpenDefinitionsDocument doc) {
-    //DrJava.consoleErr().println("Reset doc: " + doc);
-
-    _doc = doc;
-
-    if (_undoAction == null) {
-      _undoAction = new UndoAction();
-    }
-    if (_redoAction == null) {
-      _redoAction = new RedoAction();
-    }
-    super.setDocument(doc.getDocument());
-    _resetUndo();
-  }
-
-  /**
    * Get the OpenDefinitionsDocument contained in this DefinitionsPane.
    */
   public OpenDefinitionsDocument getOpenDocument() {
     return _doc;
   }
-  
+
   /**
    * Set the caret position and also scroll to make sure the location is
    * visible.
@@ -270,6 +268,78 @@ public class DefinitionsPane extends JEditorPane {
   }
 
 
+  /**
+   * Override JEditorPane's setDocument to make sure only
+   * the Document in our final OpenDefinitionsDocument can
+   * be used.
+   */
+  public void setDocument(Document doc) {
+    if (_doc != null) {
+      if ((doc == null) || (!doc.equals(_doc.getDocument()))) {
+        throw new IllegalStateException("Cannot set the document of " +
+                                        "a DefinitionsPane to a " +
+                                        "different document.");
+      }
+    }
+    super.setDocument(doc);
+  }
+
+  /**
+   * Add a CompilerErrorCaretListener to this pane, keeping it
+   * accessible so its error model can be updated later.
+   */
+  public void addErrorCaretListener(CompilerErrorCaretListener listener) {
+    _errorListener = listener;
+    addCaretListener(listener);
+  }
+
+  /**
+   * Gets the CompilerErrorCaretListener for this pane.
+   */
+  public CompilerErrorCaretListener getErrorCaretListener() {
+    return _errorListener;
+  }
+
+  /**
+   * Adds an error highlight to the document.
+   * @exception BadLocationException
+   */
+  public void addErrorHighlight(int from, int to)
+    throws BadLocationException
+  {
+    removeErrorHighlight();
+    _errorHighlightTag =
+      getHighlighter().addHighlight(from, to, _errorHighlightPainter);
+  }
+
+  /**
+   * Removes the previous error highlight from the document after the cursor
+   * has moved.
+   */
+  public void removeErrorHighlight() {
+    if (_errorHighlightTag != null) {
+      getHighlighter().removeHighlight(_errorHighlightTag);
+      _errorHighlightTag = null;
+    }
+  }
+
+
+
+  /**
+   * Reset undo machinery on setDocument.
+   */
+  private void setDocument(OpenDefinitionsDocument doc) {
+    //DrJava.consoleErr().println("Reset doc: " + doc);
+    super.setDocument(doc.getDocument());
+
+    if (_undoAction == null) {
+      _undoAction = new UndoAction();
+    }
+    if (_redoAction == null) {
+      _redoAction = new RedoAction();
+    }
+    _resetUndo();
+  }
 
   /**
    * Reset the document Undo list.

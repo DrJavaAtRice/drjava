@@ -365,7 +365,9 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
    * asked to saveBeforeProceeding, it should not do the compile
    * or any other actions.
    */
-  public void testCompileAbortsIfUnsaved() throws BadLocationException {
+  public void testCompileAbortsIfUnsaved()
+    throws BadLocationException, IOException
+  {
     final OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
 
     TestListener listener = new TestListener() {

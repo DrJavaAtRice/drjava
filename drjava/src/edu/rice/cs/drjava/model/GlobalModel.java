@@ -58,9 +58,14 @@ public interface GlobalModel {
   public Document getConsoleDocument();
 
   /**
-   * Gets the array of compile errors.
+   * Gets the array of all compile errors without Files.
    */
-  public CompilerError[] getCompileErrors();
+  public CompilerError[] getCompilerErrorsWithoutFiles();
+
+  /**
+   * Gets the total number of current errors.
+   */
+  public int getNumErrors();
 
   /**
    * Creates a new document in the definitions pane and
@@ -109,9 +114,9 @@ public interface GlobalModel {
    * @param file File contained by the document to be returned
    * @return OpenDefinitionsDocument containing file
    */
-  public OpenDefinitionsDocument getDocumentForFile(File file) 
+  public OpenDefinitionsDocument getDocumentForFile(File file)
     throws IOException, OperationCanceledException;
-  
+
   /**
    * Clears and resets the interactions pane.
    * First it makes sure it's in the right package given the

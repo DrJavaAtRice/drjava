@@ -4,6 +4,7 @@ import java.io.*;
 
 import edu.rice.cs.util.swing.FindReplaceMachine;
 import edu.rice.cs.drjava.model.definitions.*;
+import edu.rice.cs.drjava.model.compiler.CompilerErrorModel;
 
 /**
  * Interface for the GlobalModel's handler of an open
@@ -68,8 +69,22 @@ public interface OpenDefinitionsDocument {
    * Starts compiling the source.  Demands that the definitions be
    * saved before proceeding with the compile.  Fires the appropriate
    * events as the compiliation proceeds and finishes.
+   * @exception IOException if a file with errors cannot be opened
    */
-  public void startCompile();
+  public void startCompile() throws IOException;
+
+  /**
+   * Returns the model responsible for maintaining all current errors
+   * within this OpenDefinitionsDocument's file.
+   */
+  public CompilerErrorModel getCompilerErrorModel();
+
+  /**
+   * Sets this OpenDefinitionsDocument's notion of all current errors
+   * within the corresponding file.
+   * @param model CompilerErrorModel containing all errors for this file
+   */
+  public void setCompilerErrorModel(CompilerErrorModel model);
 
 
   /**

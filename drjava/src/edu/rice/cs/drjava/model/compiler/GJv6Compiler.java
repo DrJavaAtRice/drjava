@@ -83,7 +83,7 @@ public class GJv6Compiler implements CompilerInterface {
       System.err.println("Compile error: " + t);
       t.printStackTrace();
       return  new CompilerError[] {
-        new CompilerError("", -1, -1, "Compile exception: " + t, false)
+        new CompilerError("Compile exception: " + t, false)
       };
     }
     return  _compilerLog.getErrors();
@@ -112,7 +112,7 @@ public class GJv6Compiler implements CompilerInterface {
     /**
      * put your documentation comment here
      * @param source
-     * @return 
+     * @return
      */
     public Name useSource(Name source) {
       _sourceName = source.toString();
@@ -133,7 +133,8 @@ public class GJv6Compiler implements CompilerInterface {
      */
     public void warning(int pos, String msg) {
       super.warning(pos, msg);
-      _errors.addLast(new CompilerError(_sourceName, Position.line(pos) - 1, // gj is 1 based
+      _errors.addLast(new CompilerError(new File(_sourceName),
+                                        Position.line(pos) - 1, // gj is 1 based
                                         Position.column(pos) - 1, msg, true));
     }
 
@@ -144,13 +145,14 @@ public class GJv6Compiler implements CompilerInterface {
      */
     public void error(int pos, String msg) {
       super.error(pos, msg);
-      _errors.addLast(new CompilerError(_sourceName, Position.line(pos) - 1, // gj is 1 based
+      _errors.addLast(new CompilerError(new File(_sourceName),
+                                        Position.line(pos) - 1, // gj is 1 based
                                         Position.column(pos) - 1, msg, false));
     }
 
     /**
      * put your documentation comment here
-     * @return 
+     * @return
      */
     public CompilerError[] getErrors() {
       return  (CompilerError[])_errors.toArray(new CompilerError[0]);

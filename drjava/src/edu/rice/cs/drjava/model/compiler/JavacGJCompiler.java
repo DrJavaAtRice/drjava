@@ -49,7 +49,7 @@ public class JavacGJCompiler implements CompilerInterface {
    * to JavaCompiler.make() so we can keep a pointer to the log,
    * since the log is not retrievable from the compiler. We
    * need to use the log to determine if any errors occurred.
-   */ 
+   */
   private OurLog _compilerLog;
 
   private JavacGJCompiler() {
@@ -81,11 +81,7 @@ public class JavacGJCompiler implements CompilerInterface {
       System.err.println("Compile error: " + t);
       t.printStackTrace();
       return new CompilerError[] {
-        new CompilerError("",
-                          -1,
-                          -1,
-                          "Compile exception: " + t,
-                          false)
+        new CompilerError("Compile exception: " + t, false)
       };
     }
 
@@ -119,7 +115,7 @@ public class JavacGJCompiler implements CompilerInterface {
 
     // Enable GJ extensions
     options.put("-gj", "");
-    
+
     options.put("-warnunchecked", "");
 
     // Turn on debug -- maybe this should be setable some day?
@@ -163,7 +159,7 @@ public class JavacGJCompiler implements CompilerInterface {
       String msg = getText("compiler.warn." + key,
         arg0, arg1, arg2, arg3, null, null, null);
 
-      _errors.addLast(new CompilerError(currentSource().toString(),
+      _errors.addLast(new CompilerError(new File(currentSource().toString()),
                                         Position.line(pos) - 1, // gj is 1 based
                                         Position.column(pos) - 1,
                                         msg,
@@ -184,7 +180,7 @@ public class JavacGJCompiler implements CompilerInterface {
                            arg0, arg1, arg2, arg3,
                            arg4, arg5, arg6);
 
-      _errors.addLast(new CompilerError(currentSource().toString(),
+      _errors.addLast(new CompilerError(new File(currentSource().toString()),
                                         Position.line(pos) - 1, // gj is 1 based
                                         Position.column(pos) - 1,
                                         msg,
