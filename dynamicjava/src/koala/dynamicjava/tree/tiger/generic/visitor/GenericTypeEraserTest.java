@@ -41,44 +41,70 @@
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR 
  * OTHER DEALINGS WITH THE SOFTWARE.
  * 
-END_COPYRIGHT_BLOCK*/
+ END_COPYRIGHT_BLOCK*/
 
-package koala.dynamicjava.tree.tiger.generic;
+package koala.dynamicjava.tree.tiger.generic.visitor;
 
-import koala.dynamicjava.tree.ReferenceType;
-import koala.dynamicjava.SourceInfo;
-import koala.dynamicjava.tree.visitor.Visitor;
-import koala.dynamicjava.tree.tiger.generic.visitor.GenericVisitor;
+import junit.framework.TestCase;
+import java.io.StringReader;
+import java.util.List;
+import koala.dynamicjava.tree.*;
+import koala.dynamicjava.parser.wrapper.ParserFactory;
+import koala.dynamicjava.parser.wrapper.JavaCCParserFactory;
 
-/**
- * Class TypeVariable, a component of the DynamicJava composite hierarchy.
- * Note: null is not allowed as a value for any field.
- */
-public class TypeVariable extends ReferenceType {
-  /**
-   * Constructs a TypeVariable.
-   * @throw IllegalArgumentException if any parameter to the constructor is null.
-   */
-  public TypeVariable(SourceInfo in_sourceInfo, String in_name) {
-    super(((in_name == null) ? null : in_name.intern()), in_sourceInfo.getFilename(), in_sourceInfo.getStartLine(), 
-          in_sourceInfo.getStartColumn(), in_sourceInfo.getEndLine(), in_sourceInfo.getEndColumn());
+
+public class GenericTypeEraserTest extends TestCase {
+  
+  ParserFactory parserFactory;
+  String testString;
+  
+  public void setUp(){
+    parserFactory = new JavaCCParserFactory();
   }
   
-  final public String getName() { return getRepresentation(); }
+  public List<Node> parse(String testString){
+    List<Node> retval = parserFactory.createParser(new StringReader(testString),"UnitTest").parseStream();
+    return retval;
+  }
   
-  public <T> T acceptVisitor(GenericVisitor<T> visitor) {
-    return visitor.visit(this);
-  } /**/
-  
-  public <T> T acceptVisitor(Visitor<T> visitor) {
-    if(visitor instanceof GenericVisitor<T>){
-      // did static method overloading resolution not work?!
-      return acceptVisitor((GenericVisitor<T>)visitor);
-    }
-    else {
-      throw new IllegalArgumentException("*Generic* AST nodes should be visited only by *generic* visitors");
-    }
-  } 
-  
-  //  public <RetType> RetType accept(ReferenceTypeVisitor<RetType> visitor) { return visitor.forTypeVariable(this); } /**/
+  public void testBasics() {
+    testString = "1;";
+    List<Node> ast = parse(testString);
+    IntegerLiteral il = (IntegerLiteral)ast.get(0);
+    assertEquals("1", il.getRepresentation());
+    
+    testString = "Integer x = new Integer(5);";
+    ast = parse(testString);
+    VariableDeclaration vd = (VariableDeclaration)ast.get(0);
+    assertEquals("x", vd.getName());
+    assertFalse(vd.isFinal());
+    ReferenceType t = (ReferenceType)vd.getType();
+    SimpleAllocation init = (SimpleAllocation)vd.getInitializer();
+    assertEquals("Integer", t.getRepresentation());
+    ReferenceType initt = (ReferenceType)init.getCreationType();
+    assertEquals("Integer", initt.getRepresentation());
+    IntegerLiteral initil = (IntegerLiteral)(init.getArguments().get(0));
+    assertEquals("5", initil.getRepresentation());
+    
+    
+    
+/*
+    testString = "Boolean y = Boolean.FALSE;";
+    assertEquals("Parse of Boolean.FALSE", Boolean.FALSE, parse(testString));
+    
+    testString = "String z = \"FOO\" + \"BAR\";";
+    assertEquals("Parse of string concatenation", "FOOBAR", parse(testString));
+    
+    testString = "int[] a = new int[]{1,2,3}; \"\"+a[0]+a[1]+a[2];";
+    assertEquals("Parse of anonymous array", "123", parse(testString));
+    
+    testString = "int[][] b = new int[][]{{12, 0}, {1, -15}}; b[0][0] + b[1][1];";
+    assertEquals("Parse of 2D Anonymous array", -3, parse(testString));
+    
+    testString = "(Number) new Integer(12);";
+    assertEquals("Parse of cast", new Integer(12), parse(testString));
+*/
+  }
 }
+
+

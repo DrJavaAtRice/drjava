@@ -45,14 +45,13 @@ END_COPYRIGHT_BLOCK*/
 
 package koala.dynamicjava.tree.tiger.generic.visitor;
 
-import koala.dynamicjava.tree.visitor.Visitor;
 import koala.dynamicjava.tree.tiger.generic.*;
 
-public interface GenericVisitor<T> extends Visitor<T> {
+public interface GenericVisitor<T> {
   T visit(GenericReferenceType node);
   T visit(GenericClassDeclaration node);
   T visit(GenericInterfaceDeclaration node);
   T visit(PolymorphicMethodDeclaration node);
   T visit(TypeParameter node);
-  T visit(TypeVariable node);
+  //T visit(TypeVariable node);
 }

@@ -48,30 +48,40 @@ package koala.dynamicjava.tree.tiger.generic;
 
 import koala.dynamicjava.tree.Node;
 import koala.dynamicjava.tree.ReferenceType;
+import koala.dynamicjava.tree.IdentifierToken;
 import koala.dynamicjava.SourceInfo;
 import koala.dynamicjava.tree.visitor.Visitor;
 import koala.dynamicjava.tree.tiger.generic.visitor.GenericVisitor;
+import java.util.List;
 
 /**
  * Class TypeParameter, a component of the DynamicJava composite hierarchy.
  * Note: null is not allowed as a value for any field.
  */
-public class TypeParameter extends Node {
-  private final TypeVariable _variable;
+public class TypeParameter extends ReferenceType {
   private final ReferenceType _bound;
   
   /**
    * Constructs a TypeParameter.
    * @throw IllegalArgumentException if any parameter to the constructor is null.
    */
-  public TypeParameter(SourceInfo in_sourceInfo, TypeVariable in_variable, ReferenceType in_bound) {
-    super(in_sourceInfo.getFilename(), in_sourceInfo.getStartLine(), 
+  public TypeParameter(SourceInfo in_sourceInfo, List<IdentifierToken> ids, ReferenceType in_bound) {
+    super(ids, in_sourceInfo.getFilename(), in_sourceInfo.getStartLine(), 
           in_sourceInfo.getStartColumn(), in_sourceInfo.getEndLine(), in_sourceInfo.getEndColumn());
     
-    if (in_variable == null) {
-      throw new IllegalArgumentException("Parameter 'variable' to the TypeParameter constructor was null. This class may not have null field values.");
+    if (in_bound == null) { /**/ // probably not.   A null indicates a normal type used as a parameter
+      /**///throw new IllegalArgumentException("Parameter 'bound' to the TypeParameter constructor was null. This class may not have null field values.");
     }
-    _variable = in_variable;
+    _bound = in_bound;
+  }
+  
+  /**
+   * Constructs a TypeParameter.
+   * @throw IllegalArgumentException if any parameter to the constructor is null.
+   */
+  public TypeParameter(SourceInfo in_sourceInfo, String rep, ReferenceType in_bound) {
+    super(rep, in_sourceInfo.getFilename(), in_sourceInfo.getStartLine(), 
+          in_sourceInfo.getStartColumn(), in_sourceInfo.getEndLine(), in_sourceInfo.getEndColumn());
     
     if (in_bound == null) {
       throw new IllegalArgumentException("Parameter 'bound' to the TypeParameter constructor was null. This class may not have null field values.");
@@ -79,20 +89,24 @@ public class TypeParameter extends Node {
     _bound = in_bound;
   }
   
-  final public TypeVariable getVariable() { return _variable; }
-  final public ReferenceType getBound() { return _bound; }
+  public ReferenceType getBound() { return _bound; }
+  
+  public String getRepresentation(){
+    return _bound.getRepresentation(); // coerce to bound's type
+    
+//    if(bound == null) { // should not happen in fact, it indicates this is not a generic type parameter but a normal type
+//      return super.getRepresentation(); // Depend on one inherited from ReferenceType
+//    }
+//    else {
+//      return _bound.getRepresentation(); // coerce to bound's type
+//    }
+  }
   
   public <T> T acceptVisitor(GenericVisitor<T> visitor) {
     return visitor.visit(this);
   } /**/
   
-  public <T> T acceptVisitor(Visitor<T> visitor) {
-    if(visitor instanceof GenericVisitor<T>){
-      // did static method overloading resolution not work?!
-      return acceptVisitor((GenericVisitor<T>)visitor);
-    }
-    else {
-      throw new IllegalArgumentException("*Generic* AST nodes should be visited only by *generic* visitors");
-    }
-  } 
+//  public <T> T acceptVisitor(Visitor<T> visitor) {
+//    throw new IllegalArgumentException("*Generic* AST nodes should be visited only by *generic* visitors");
+//  } 
 }

@@ -99,6 +99,8 @@ public class PolymorphicMethodDeclaration extends MethodDeclaration {
 
     _typeParameters = typeParams;
   }
+  
+  public TypeParameter[] getTypeParameters(){ return _typeParameters; }
 
   public <T> T acceptVisitor(GenericVisitor<T> visitor) {
     return visitor.visit(this);

@@ -55,7 +55,7 @@ import koala.dynamicjava.tree.tiger.generic.visitor.GenericVisitor;
  * This class represents a generic class declaration
  */
 
-public abstract class GenericClassDeclaration extends ClassDeclaration {
+public class GenericClassDeclaration extends ClassDeclaration {
 
   private TypeParameter[] _typeParameters;
       
@@ -93,6 +93,8 @@ public abstract class GenericClassDeclaration extends ClassDeclaration {
     super(flags, name, ext, impl, body, fn, bl, bc, el, ec);
     _typeParameters = typeParams;
   }
+
+  public TypeParameter[] getTypeParameters(){ return _typeParameters; }
 
   public <T> T acceptVisitor(GenericVisitor<T> visitor) {
     return visitor.visit(this);

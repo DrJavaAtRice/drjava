@@ -55,28 +55,28 @@ import koala.dynamicjava.tree.tiger.generic.visitor.GenericVisitor;
  * This class represents a generic reference type
  */
 
-public abstract class GenericReferenceType extends ReferenceType {
+public class GenericReferenceType extends ReferenceType {
 
-  private TypeParameter[] _typeParameters;
+  private List<ReferenceType> _typeArguments;
       
   /**
    * Initializes the type
    * @param ids   the list of the tokens that compose the type name
-   * @param typeParams the type parameters
+   * @param typeArgs the type arguments
    * @exception IllegalArgumentException if ids is null
    */
-  public GenericReferenceType(List<IdentifierToken> ids, TypeParameter[] typeParams) {
-    this(ids, null, 0, 0, 0, 0, typeParams);
+  public GenericReferenceType(List<IdentifierToken> ids, List<ReferenceType> typeArgs) {
+    this(ids, null, 0, 0, 0, 0, typeArgs);
   }
   
   /**
    * Initializes the type
    * @param rep   the type name
-   * @param typeParams the type parameters
+   * @param typeArgs the type arguments
    * @exception IllegalArgumentException if rep is null
    */
-  public GenericReferenceType(String rep, TypeParameter[] typeParams) {
-    this(rep, null, 0, 0, 0, 0, typeParams);
+  public GenericReferenceType(String rep, List<ReferenceType> typeArgs) {
+    this(rep, null, 0, 0, 0, 0, typeArgs);
   }
   
   /**
@@ -90,10 +90,10 @@ public abstract class GenericReferenceType extends ReferenceType {
    * @param typeParams the type parameters
    * @exception IllegalArgumentException if ids is null
    */
-  public GenericReferenceType(List<IdentifierToken> ids, String fn, int bl, int bc, int el, int ec, TypeParameter[] typeParams) {
+  public GenericReferenceType(List<IdentifierToken> ids, String fn, int bl, int bc, int el, int ec, List<ReferenceType> typeArgs) {
     super(ids, fn, bl, bc, el, ec);
 
-    _typeParameters = typeParams;    
+    _typeArguments = typeArgs;
   }
   
   /**
@@ -104,15 +104,16 @@ public abstract class GenericReferenceType extends ReferenceType {
    * @param bc    the begin column
    * @param el    the end line
    * @param ec    the end column
-   * @param typeParams the type parameters
+   * @param typeArgs the type arguments
    * @exception IllegalArgumentException if rep is null
    */
-  public GenericReferenceType(String rep, String fn, int bl, int bc, int el, int ec, TypeParameter[] typeParams) {
+  public GenericReferenceType(String rep, String fn, int bl, int bc, int el, int ec, List<ReferenceType> typeArgs) {
     super(rep, fn, bl, bc, el, ec);
     
-    _typeParameters = typeParams;    
+    _typeArguments = typeArgs;    
   }
   
+  public List<ReferenceType> getTypeArguments(){ return _typeArguments; }
 
   public <T> T acceptVisitor(GenericVisitor<T> visitor) {
     return visitor.visit(this);

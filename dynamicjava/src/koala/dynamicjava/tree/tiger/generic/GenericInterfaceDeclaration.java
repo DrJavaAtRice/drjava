@@ -55,7 +55,7 @@ import koala.dynamicjava.tree.tiger.generic.visitor.GenericVisitor;
  * This class represents a generic class declaration
  */
 
-public abstract class GenericInterfaceDeclaration extends InterfaceDeclaration {
+public class GenericInterfaceDeclaration extends InterfaceDeclaration {
 
   private TypeParameter[] _typeParameters;
       
@@ -92,6 +92,7 @@ public abstract class GenericInterfaceDeclaration extends InterfaceDeclaration {
     _typeParameters = typeParams;
   }
 
+  public TypeParameter[] getTypeParameters(){ return _typeParameters; }
 
   /**
    * Allows a visitor to traverse the tree
