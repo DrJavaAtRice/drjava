@@ -593,6 +593,13 @@ public class DirectoryChooser extends JDialog {
     }
   }
   
+  public void setShowFiles(boolean show) {
+    if (_showFiles != show) {
+      generateDirTree();
+      _showFiles = show;
+    }
+  }
+  
   /**
    * Sets whether to allow the creation of new directories and
    * the renaming of old ones.
