@@ -289,6 +289,20 @@ public class SWTDocumentAdapter implements DocumentAdapter {
   }
   
   /**
+   * Highlights the given range in the given color.
+   * @param offset Offset of first character to highlight
+   * @param length Number of characters to highlight
+   * @param color Color to use for the highlight
+   */
+  public void highlightRange(int offset, int length, Color color) {
+    StyleRange range = new StyleRange();
+    range.start = offset;
+    range.length = length;
+    range.background = color;
+    _pane.setStyleRange(range);
+  }
+  
+  /**
    * A VerifyListener that enforces the current edit condition.
    */
   protected class ConditionListener implements VerifyListener {

@@ -156,6 +156,16 @@ public class EclipseInteractionsModel extends RMIInteractionsModel {
   }
   
   /**
+   * Notifies listeners that an error was present in the interaction.
+   */
+  protected void _notifySyntaxErrorOccurred(final int offset, final int length) {
+    for (int i=0; i < _listeners.size(); i++) {
+      ((InteractionsListener)_listeners.get(i)).
+        interactionsErrorOccurred(offset, length);
+    }
+  }
+  
+  /**
    * Notifies listeners that the interpreter is resetting.
    */
   protected void _notifyInterpreterResetting() {
@@ -180,6 +190,16 @@ public class EclipseInteractionsModel extends RMIInteractionsModel {
   protected void _notifyInterpreterExited(final int status) {
     for (int i=0; i < _listeners.size(); i++) {
       ((InteractionsListener)_listeners.get(i)).interpreterExited(status);
+    }
+  }
+  
+  /**
+   * Notifies listeners that the interpreter has changed.
+   * @param inProgress Whether the new interpreter is currently in progress.
+   */
+  protected void _notifyInterpreterChanged(final boolean inProgress) {
+    for (int i=0; i < _listeners.size(); i++) {
+      ((InteractionsListener)_listeners.get(i)).interpreterChanged(inProgress);
     }
   }
 

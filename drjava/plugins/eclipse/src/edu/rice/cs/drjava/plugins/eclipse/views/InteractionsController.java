@@ -87,6 +87,7 @@ public class InteractionsController {
   protected Color _colorDarkRed;
   protected Color _colorDarkGreen;
   protected Color _colorDarkBlue;
+  protected Color _colorYellow;
   
   /**
    * Glue together the given model and view.
@@ -119,6 +120,7 @@ public class InteractionsController {
     _colorDarkRed.dispose();
     _colorDarkGreen.dispose();
     _colorDarkBlue.dispose();
+    _colorYellow.dispose();
   }
   
   /**
@@ -158,6 +160,7 @@ public class InteractionsController {
     _colorDarkRed = new Color(display, 178, 0, 0);
     _colorDarkGreen = new Color(display, 0, 124, 0);
     _colorDarkBlue = new Color(display, 0, 0, 178);
+    _colorYellow = new Color(display, 255, 255, 0);
     
     // System.out
     SWTStyle out = new SWTStyle(_colorDarkGreen, 0);
@@ -221,25 +224,29 @@ public class InteractionsController {
    */
   class EclipseInteractionsListener implements InteractionsListener {
     public void interactionStarted() {
-      _view.setBusyCursorShown(true);
-      _view.setEditable(false);
+      _disableInteractionsPane();
     }
     
     public void interactionEnded() {
       moveToPrompt();
-      _view.setEditable(true);
-      _view.setBusyCursorShown(false);
+      _enableInteractionsPane();
+    }
+    
+    public void interactionsErrorOccurred(final int offset, final int length) {
+      _view.getTextPane().getDisplay().asyncExec(new Runnable() {
+        public void run() {
+          _adapter.highlightRange(offset, length, _colorYellow);
+        }
+      });
     }
     
     public void interpreterResetting() {
-      _view.setBusyCursorShown(true);
-      _view.setEditable(false);
+      _disableInteractionsPane();
     }
     
     public void interpreterReady() {
       moveToPrompt();
-      _view.setEditable(true);
-      _view.setBusyCursorShown(false);
+      _enableInteractionsPane();
     }
     
     public void interpreterExited(int status) {
@@ -248,6 +255,26 @@ public class InteractionsController {
               "to System.exit(" + status + ").\n" +
               "The interactions window will now be restarted.";
       _view.showInfoDialog(title, msg);
+    }
+    
+    public void interpreterChanged(boolean inProgress) {
+      if (inProgress) {
+        _disableInteractionsPane();
+      }
+      else {
+        _enableInteractionsPane();
+      }
+    }
+    
+    /** Enables the Interactions Pane. */
+    protected void _enableInteractionsPane() {
+      _view.setBusyCursorShown(false);
+      _view.setEditable(true);
+    }
+    /** Disables the Interactions Pane. */
+    protected void _disableInteractionsPane() {
+      _view.setBusyCursorShown(true);
+      _view.setEditable(false);
     }
   }
   
