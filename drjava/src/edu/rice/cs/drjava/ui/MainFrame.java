@@ -787,8 +787,8 @@ public class MainFrame extends JFrame {
 
     // Add to a scroll pane
     JScrollPane scroll = new BorderlessScrollPane(pane,
-						  JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
-						  JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+        JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
     scroll.setBorder(null); // removes all default borders (MacOS X installs default borders)
     _defScrollPanes.put(doc, scroll);
     return scroll;
@@ -799,19 +799,19 @@ public class MainFrame extends JFrame {
     // Document list pane
     JScrollPane listScroll =
       new BorderlessScrollPane(_docList,
-			       JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-			       JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+          JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+          JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
     
     // DefinitionsPane
     JScrollPane defScroll = (JScrollPane)
       _defScrollPanes.get(_model.getActiveDocument());
 
     // Overall layout
-    _docSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
+    _docSplitPane = new BorderlessSplitPane(JSplitPane.HORIZONTAL_SPLIT,
                                    true,
                                    listScroll,
                                    defScroll);
-    JSplitPane split = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
+    JSplitPane split = new BorderlessSplitPane(JSplitPane.VERTICAL_SPLIT,
                                        true,
                                        _docSplitPane,
                                        _tabbedPane);

@@ -54,7 +54,9 @@ public class DrJava {
     = PreventExitSecurityManager.activate();
 
   public static void main(String[] args) {
+      
     try {
+      System.setProperty("com.apple.macos.useScreenMenuBar","true");
       enableSecurityManager();
       MainFrame mf = new MainFrame();
       mf.show();
