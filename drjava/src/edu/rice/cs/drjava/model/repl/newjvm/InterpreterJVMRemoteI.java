@@ -72,9 +72,11 @@ public interface InterpreterJVMRemoteI extends SlaveRemote {
   /**
    * Adds a named JavaDebugInterpreter to the list of interpreters.
    * @param name the unique name for the interpreter
+   * @param className the fully qualified class name of the class
+   * the debug interpreter is in
    * @throws IllegalArgumentException if the name is not unique
    */
-  public void addDebugInterpreter(String name) throws RemoteException;
+  public void addDebugInterpreter(String name, String className) throws RemoteException;
 
   /**
    * Removes the interpreter with the given name, if it exists.

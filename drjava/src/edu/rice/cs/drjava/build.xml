@@ -649,5 +649,10 @@
     <delete file="${commit-comments-filename}"/>
     
   </target>
+    
+    <!-- Delete all generated files in the config directory -->
+    <target name="clean-config">
+      <delete dir="${built}/${projpath}/config" />
+    </target>
 
 </project>

@@ -439,9 +439,11 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   /**
    * Adds a named JavaDebugInterpreter to the list of interpreters.
    * @param name the unique name for the interpreter
+   * @param className the fully qualified class name of the class
+   * the debug interpreter is in
    * @throws IllegalArgumentException if the name is not unique
    */
-  public void addDebugInterpreter(String name) {
+  public void addDebugInterpreter(String name, String className) {
     // silently fail if disabled. see killInterpreter docs for details.
     if (! _enabled) {
       return;
@@ -450,7 +452,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     ensureInterpreterConnected();
     
     try {
-      _interpreterJVM().addDebugInterpreter(name);
+      _interpreterJVM().addDebugInterpreter(name, className);
     }
     catch (RemoteException re) {
       _threwException(re);

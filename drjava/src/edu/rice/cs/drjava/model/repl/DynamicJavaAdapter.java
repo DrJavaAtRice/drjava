@@ -358,6 +358,14 @@ public class DynamicJavaAdapter implements JavaInterpreter {
   }
 
   /**
+   * Processes the tree before evaluating it, if necessary.
+   * @param node Tree to process
+   */
+  public Node processTree(Node node) {
+    return node;
+  }
+  
+  /**
    * An extension of DynamicJava's interpreter that makes sure classes are
    * not loaded by the system class loader (when possible) so that future
    * interpreters will be able to reload the classes.  This extension also
@@ -413,6 +421,9 @@ public class DynamicJavaAdapter implements JavaInterpreter {
 
         while (it.hasNext()) {
           Node n = (Node)it.next();
+          
+          // Process, if necessary
+          n = processTree(n);
           
           Visitor v = makeNameVisitor(nameVisitorContext);
           Object o = n.acceptVisitor(v);

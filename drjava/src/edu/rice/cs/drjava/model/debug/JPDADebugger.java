@@ -1693,15 +1693,19 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     }
     try {
       ThreadReference suspendedThreadRef = _suspendedThreads.peek();
+      StackFrame frame = suspendedThreadRef.frame(0);
+      Location l = frame.location();
+      ReferenceType rt = l.declaringType();
+      String className = rt.name();
  
       // Name the new interpreter based on this thread
       String interpreterName = _getUniqueThreadName(suspendedThreadRef);
-      _model.getInteractionsModel().addDebugInterpreter(interpreterName);
+      _model.getInteractionsModel().addDebugInterpreter(interpreterName, className);
       ObjectReference debugInterpreter = _getDebugInterpreter(interpreterName);
-      StackFrame frame = suspendedThreadRef.frame(0);
       if (printMessages) {
         System.out.println("frame = suspendedThreadRef.frame(0);");
       }
+      frame = suspendedThreadRef.frame(0);
       
       List vars = frame.visibleVariables();
       Iterator varsIterator = vars.iterator();

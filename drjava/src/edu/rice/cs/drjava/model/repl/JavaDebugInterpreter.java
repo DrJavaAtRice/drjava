@@ -48,6 +48,19 @@ import koala.dynamicjava.tree.visitor.*;
 import java.util.List;
 import java.util.LinkedList;
 
+import edu.rice.cs.util.UnexpectedException;
+
+/**
+ * This class is an extension to DynamicJavaAdapter that allows us to 
+ * process expressions involving the "this" keyword correctly in the 
+ * current debug interpreter context. This allows users to debug outer 
+ * classes and their fields using the usual Java syntax of outerclass.this. 
+ * This is done by holding on to the class name of "this" and by translating 
+ * references to outer instance classes to field accesses in the form 
+ * "this.this$N.this$N-1...".
+ * 
+ * @version $Id$
+ */
 public class JavaDebugInterpreter extends DynamicJavaAdapter {
   /**
    * This interpreter's name.
@@ -55,66 +68,64 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
   protected final String _name;
   
   /**
-   * The "this" object for the current suspended thread.
-   * Null if the thread is in a static method.
+   * The class name of the "this" object for the currently
+   * suspended thread.
    */
-  protected Object _this;
-  
-  /**
-   * Contains an ordered list of unqualified classnames which
-   * enclose _this along with the instances of each enclosing class.
-   * The first element of this list contains the outermost
-   * enclosing class.
-   */
-  //protected Vector<Pair<String, Object>> _enclosingClasses;
+  protected String _thisClassName;
   
   /**
    * The name of the package containing _this, if any.
    */
-  protected String _packageName;
+  protected String _thisPackageName;
+  
+  /**
+   * Extends IdentityVisitor to convert all instances
+   * of ThisExpressions in the tree to either 
+   * QualifiedName or an ObjectFieldAccess
+   */
+  protected Visitor _translationVisitor;
   
   /**
    * Creates a new debug interpreter.
    * @param name the name of the interpreter
+   * @param className the class name of the current context of "this"
    */
-  public JavaDebugInterpreter(String name) {
+  public JavaDebugInterpreter(String name, String className) {
     _name = name;
-    _this = null;
-    //_enclosingClasses = new Vector<Pair<String, Object>>();
-    _packageName = "";
+    setClassName(className);
+    _translationVisitor = makeTranslationVisitor();
   }
   
   /**
-   * Sets the "this" object for the current suspended thread, if there is one.
-   * @param t The "this" object
+   * Processes the tree before evaluating it.
+   * The translation visitor visits each node in the tree
+   * for the given statement or expression and converts
+   * the necessary nodes.
+   * @param node Tree to process
    */
-  public void setThis(Object t) {
-    _this = t;
+  public Node processTree(Node node) {
+    return (Node) node.acceptVisitor(_translationVisitor);
   }
   
   /**
-   * This method adds an enclosing class to the list.
-   * It should be called with the outermost class first.
-   * @param className the unqualified class name
-   * @param o the instance of className enclosing _this
+   * Sets the class name of "this", parsing out the package name.
    */
-  public void addEnclosingClass(String className, Object o) {
-    //_enclosingClasses.addElement(new Pair<String,Object>(className, o));
-  }
-  
-  /**
-   * Sets the package name.
-   * @param packageName the package containing _this
-   */
-  public void setThisPackage(String packageName) {
-    _packageName = packageName;
+  protected void setClassName(String className) {
+    int indexLastDot = className.lastIndexOf(".");
+    if (indexLastDot == -1) {
+      _thisPackageName = "";
+    }
+    else {
+      _thisPackageName = className.substring(0,indexLastDot);
+    }
+    _thisClassName = className.substring(indexLastDot + 1, className.length());
   }
   
   /**
    * Helper method to convert a ThisExpression to a QualifiedName.
    * Allows us to redefine "this" in a debug interpreter.
    * @param node ThisExpression
-   * @return Corresponding QualifiedName
+   * @return corresponding QualifiedName
    */
   protected QualifiedName _convertThisToName(ThisExpression node) {
     List ids = new LinkedList();
@@ -124,16 +135,163 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
                              node.getBeginLine(), node.getBeginColumn(),
                              node.getEndLine(), node.getEndColumn());
   }
-
+  
   /**
-   * Factory method to make a new NameVisitor that treats "this" as a variable.
-   * @param context the context
-   * @return visitor the visitor
+   * Helper method to convert a ThisExpression to a FieldAccess.
+   * Allows us to access fields of outer classes in a debug interpreter.
+   * @param node ThisExpression
+   * @return corresponding FieldAccess
    */
-  public NameVisitor makeNameVisitor(Context context) {
-    return new NameVisitor(context) {
+  protected Expression _convertThisToObjectFieldAccess(ThisExpression node) {
+    String className = node.getClassName();
+    int numToWalk = verifyClassName(className);
+    int numDollars = _getNumDollars(_thisClassName);
+    // if numToWalk == 0, just return "this"
+    if (numToWalk == -1) {
+      throw new ExecutionError("malformed.expression");
+    }
+    else {
+      return _buildObjectFieldAccess(numToWalk, numDollars);
+    }
+  }
+  
+  /**
+   * Builds a ThisExpression that has no class name.
+   * @return an unqualified ThisExpression
+   */
+  protected ThisExpression buildUnqualifiedThis() {
+    LinkedList ids = new LinkedList();
+    return new ThisExpression(ids, "", 0, 0, 0, 0);
+  }
+  
+  /**
+   * Helper method to build an ObjectFieldAccess for a ThisExpression
+   * given the number of classes to walk and the number of dollars.
+   * @param numToWalk number of outer classes to walk through
+   * @param numDollars numer of dollars in _thisClassName
+   * @return a QualifiedName is numtoWalk is zero or an ObjectFieldAccess
+   */
+  private Expression _buildObjectFieldAccess(int numToWalk, int numDollars) {     
+    if (numToWalk == 0) {
+      return _convertThisToName(buildUnqualifiedThis());
+    }
+    else {
+      return new ObjectFieldAccess(_buildObjectFieldAccess(numToWalk - 1, numDollars), "this$" + (numDollars - numToWalk));
+    }
+  }
+  
+  /**
+   * Returns the index of subString within string if the substring is
+   * either bounded by the ends of string or by $'s.
+   * @param string the super string
+   * @param subString the subString
+   * @return the index of string that subString begins at or -1
+   * if subString is not in string or is not validly bounded
+   */
+  private int _indexOfWithinBoundaries(String string, String subString) {
+    int index = string.indexOf(subString);
+    if (index == -1) {
+      return index;
+    }
+    // subString is somewhere in string
+    else {
+      // ends at legal boundary
+      if (((string.length() == subString.length() + index) ||
+           (string.charAt(subString.length() + index) == '$'))
+            &&
+          // begins at legal boundary
+          ((index == 0) ||
+           (string.charAt(index-1) == '$'))) {
+        return index;
+      }
+      else {
+        return -1;
+      }
+    }
+  }
+  
+  /**
+   * Returns the number of dollar characters in
+   * a given String.
+   * @param classname the string to be examined
+   * @return the number of dollars in the string
+   */
+  private int _getNumDollars(String className) {
+    int numDollars = 0;
+    int index = className.indexOf("$");
+    while (index != -1) {
+      numDollars++;
+      index = className.indexOf("$", index + 1);
+    }
+    return numDollars;
+  }
+  
+  /**
+   * Checks if the className passed in is a valid className.
+   * @param classname the className of the ThisExpression
+   * @return the number of outer classes to walk out to
+   */
+  protected int verifyClassName(String className) {
+    boolean hasPackage = false;
+    if (!_thisPackageName.equals("")) {
+      int index = className.indexOf(_thisPackageName);
+      if (index == 0) {
+        hasPackage = true;
+        // className begins with the package name
+        index = _thisPackageName.length() + 1;
+        if (index >= className.length()) {
+          return -1;
+        }
+        // strip off the package
+        className = className.substring(index, className.length());
+      }
+    }
+    
+    className = className.replace('.', '$');
+    int indexWithBoundaries = _indexOfWithinBoundaries(_thisClassName, className);
+    if ((hasPackage && indexWithBoundaries != 0) ||
+        (indexWithBoundaries == -1)) {
+      return -1;
+    }
+    else {
+      return _getNumDollars(_thisClassName.substring(indexWithBoundaries + className.length()));      
+    }
+  }
+  
+  /**
+   * Converts the ThisExpression to a QualifiedName
+   * if it has no class name or an ObjectFieldAccess
+   * if it does.
+   * @param node the expression to visit
+   * @return the converted form of the node
+   */
+  protected Expression visitThis(ThisExpression node) {
+    if (node.getClassName().equals("")) {
+      return _convertThisToName(node);
+    }
+    else {      
+      return _convertThisToObjectFieldAccess(node);
+    }
+  }
+  
+  /**
+   * Makes an anonymous IdentityVisitor that overrides
+   * visit for a ThisExpresssion to convert it to
+   * either a QualifiedName or an ObjectFieldAccess
+   */
+  public Visitor makeTranslationVisitor() {
+    return new IdentityVisitor() {
       public Object visit(ThisExpression node) {
-        return visit(_convertThisToName(node));
+        Expression e = visitThis(node);
+        if (e instanceof QualifiedName) {
+          return visit((QualifiedName)e);
+        }
+        else if (e instanceof ObjectFieldAccess) {
+          return visit((ObjectFieldAccess)e);
+        }
+        else {
+          throw new UnexpectedException(new IllegalArgumentException("Illegal type of Expression"));
+        }
       }
     };
   }
@@ -143,26 +301,45 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
    * @param context the context
    * @return visitor the visitor
    */
-  public TypeChecker makeTypeChecker(Context context) {
+  public TypeChecker makeTypeChecker(final Context context) {
     return new TypeChecker(context) {
+      /*
       public Object visit(ThisExpression node) {
-        return visit(_convertThisToName(node));
+        Expression e = visitThis(node);
+        if (e instanceof QualifiedName) {
+          return visit((QualifiedName)e);
+        }
+        else if (e instanceof ObjectFieldAccess) {
+          return visit((ObjectFieldAccess)e);
+        }
+        else {
+          throw new UnexpectedException(new IllegalArgumentException("Illegal type of Expression"));
+        }
+      }*/
+      /**
+       * Visits a QualifiedName, returning our class if it is "this"
+       * @param node the node to visit
+       */
+      public Object visit(QualifiedName node) {
+        String var = node.getRepresentation();
+        if ("this".equals(var)) {
+          try {
+            String cName = _thisClassName.replace('$', '.');
+            if (!_thisPackageName.equals("")) {
+              cName = _thisPackageName + "." + cName;
+            }
+            Class c = context.lookupClass(cName);
+            node.setProperty(NodeProperties.TYPE, c);
+            node.setProperty(NodeProperties.MODIFIER, context.getModifier(node));
+            return c;
+          }
+          catch (ClassNotFoundException cnfe) {
+            throw new ExecutionError("undefined.class", node);
+          }
+        }
+        else return super.visit(node);
       }
-    };
-  }
-  
-  /**
-   * Factory method to make a new DebugEvaluationVisitor that treats "this"
-   * as a variable.
-   * @param context the context
-   * @return visitor the visitor
-   */
-  public EvaluationVisitor makeEvaluationVisitor(Context context) {
-    //return new DebugEvaluationVisitorExtension(context, _name);
-    return new EvaluationVisitorExtension(context) {
-      public Object visit(ThisExpression node) {
-        return visit(_convertThisToName(node));
-      }
+
     };
   }
 }
