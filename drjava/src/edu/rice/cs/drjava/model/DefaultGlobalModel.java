@@ -1586,6 +1586,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       keepClosing = closeFile(next);
       odds = _documentsRepos.valuesIterator(); // call to closeFile can mutate Iterator, so generate a new "current" Iterator on each loop 
     }
+    
     return keepClosing;
   }
   

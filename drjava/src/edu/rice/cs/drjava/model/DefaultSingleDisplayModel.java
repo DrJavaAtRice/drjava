@@ -388,7 +388,7 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel
       }
     }
     if(keepClosing){
-      closeFile(active);
+      keepClosing = closeFile(active);
     }
     _isClosingAllDocs = false;
     _ensureNotEmpty();
