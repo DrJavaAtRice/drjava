@@ -96,7 +96,7 @@ public abstract class Option<T> extends OptionParser<T> implements FormatStrateg
     void notifyListeners(Configuration config, T val) {
 	Vector<OptionListener<T>> v = listeners.get(config);
 	if(v==null) return; // no listeners
-	OptionEvent e = new OptionEvent<T>(this,val);
+	OptionEvent<T> e = new OptionEvent<T>(this,val);
 	int size = v.size();
 	for(int i = 0; i < size; i++) {
 	    v.elementAt(i).optionChanged(e);

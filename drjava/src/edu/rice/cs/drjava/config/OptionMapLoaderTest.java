@@ -64,7 +64,7 @@ public class OptionMapLoaderTest extends TestCase implements OptionConstants {
     
     public void testProperConfigSet() throws IOException {
 	InputStream is = new StringInputStream(OPTION_DOC);
-	OptionMapLoader loader = OptionMapLoader.makeLoader(is);
+	OptionMapLoader loader = new OptionMapLoader(is);
 	DefaultOptionMap map = new DefaultOptionMap();
 	loader.loadInto(map);
 	assertEquals("indent (integer) option",

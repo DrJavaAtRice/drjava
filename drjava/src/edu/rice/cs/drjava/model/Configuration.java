@@ -63,7 +63,7 @@ public final class Configuration implements OptionConstants {
 	try {
 	    if (PROPERTIES_FILE.exists()) {
 		InputStream fis = new FileInputStream(PROPERTIES_FILE);
-		loader = OptionMapLoader.makeLoader(fis);
+		loader = new OptionMapLoader(fis);
 	    } else { // be nice and create a config file.
 		new FileOutputStream(PROPERTIES_FILE).close();
 	    }

@@ -38,46 +38,23 @@
 END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.config;
-import java.io.File;
-public interface OptionConstants {
 
-    // STATIC VARIABLES    
-    public static final IntegerOption INDENT_LEVEL =
-	new IntegerOption("indent.level");
-
-    public static final StringOption JAVAC_LOCATION = 
-	new StringOption("javac.location");
-	
-    public static final StringOption JSR14_LOCATION =
-	new StringOption("jsr14.location");
-    
-    public static final StringOption JSR14_COLLECTIONSPATH = 
-	new StringOption("jsr14.collectionspath");
-    
-    public static final VectorOption<String> EXTRA_CLASSPATH = 
-	(new Begin<VectorOption<String>>() {
-	    private String warning =
-	    "WARNING: Configurability interface only supports path separators"+
-	    " of maximum length 1 character as of this moment.";
-	    public VectorOption<String> evaluate() {
-		// system path separator
-		String ps = System.getProperty("path.separator");
-		if(ps.length() > 1) { 
-		    // spit out warning if it's more than one character.
-		    System.err.println(warning);
-		    System.err.println("using '"+ps.charAt(0)+
-				       "' for delimiter.");
-		}
-		StringOption sop = new StringOption("");
-		String name = "extra.classpath";
-		char delim = ps.charAt(0);
-		return new VectorOption<String>(name,sop,"",delim,"");
-	    }
-	}).evaluate();
-
-  
-    
+/**
+ * Java doesn't have Scheme-like begin blocks as a language construct.
+ * this is used so that you can create an anonymous class that 
+ * acts like a begin block.  For example, if you wanted to create
+ * a series of statements and the final result evaluates to a String
+ * then you do the following
+ * <code>
+ * String result = (new Begin&lt;String&gt;() {
+ *         public String evaluate() {
+ *             // series of many statements
+ *             return <i>result of statements</i>;
+ *         }
+ *    }).evaluate();
+ * </code>
+ * @version $Id$
+ */
+public interface Begin<T> {
+    public T evaluate();
 }
-
-
-

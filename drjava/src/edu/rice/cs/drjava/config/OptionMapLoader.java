@@ -69,10 +69,15 @@ public class OptionMapLoader implements OptionConstants {
 
     public static OptionMapLoader DEFAULT = new OptionMapLoader(DEFAULT_STRINGS);
     
-    public static OptionMapLoader makeLoader(InputStream is) throws IOException {
-	Properties prop = new Properties(DEFAULT_STRINGS);
-	prop.load(is); // load changes prop.
-	return new OptionMapLoader(prop);
+    /**
+     * creates an OptionMapLoader from a given input stream.
+     * does not maintain a reference to this input stream after 
+     * Constructor creates
+     * @param is the input stream to read. 
+     */
+    public OptionMapLoader(final InputStream is) throws IOException {
+	this(new Properties(DEFAULT_STRINGS));
+	prop.load(is);
     }
     
     private final Properties prop;
@@ -86,9 +91,9 @@ public class OptionMapLoader implements OptionConstants {
      * @param is the inputstream to read from to load these options.
      */
     public void loadInto(OptionMap map) {
-	Enumeration<OptionParser<Object>> options = DEFAULTS.keys();
+	Enumeration<OptionParser> options = DEFAULTS.keys();
 	while(options.hasMoreElements()) {
-	    OptionParser<Object> option = options.nextElement();
+	    OptionParser option = options.nextElement();
 	    String val = prop.getProperty(option.name);
 	    map.setString(option,val);
 	}

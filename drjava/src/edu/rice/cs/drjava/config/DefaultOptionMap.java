@@ -41,14 +41,14 @@ package edu.rice.cs.drjava.config;
 import gj.util.Hashtable;
 
 public class DefaultOptionMap 
-    extends Hashtable<OptionParser<Object>,Object> implements OptionMap {    
+    extends Hashtable<OptionParser,Object> implements OptionMap {    
 
     public <T> T getOption(OptionParser<T> o) {
 	return o.getOption(this);
     }
   
     public <T> T setOption(Option<T> o, T val) {
-	super.put((OptionParser) o,val); // jsr14 is dumb.  we have to cast.  Every OptionParser<T> is OptionParser<Object>
+	super.put(o,val); // jsr14 is dumb.  we have to cast.  Every OptionParser<T> is OptionParser<Object>
 	return o.setOption(this,val); 
     }
   
@@ -60,18 +60,17 @@ public class DefaultOptionMap
 	return o.setString(this,s);
     }
   
-    public Object remove(OptionParser<Object> o) {
+    public Object remove(OptionParser o) {
 	super.remove(o);
 	return o.remove(this);
     }
   
     public <T> T removeOption(OptionParser<T> o) {
-	super.remove((OptionParser)o); // jsr14 is dumb.  we have to cast.
+	super.remove(o); // jsr14 is dumb.  we have to cast.
 	return o.remove(this);
     }
   
-    public Object put(OptionParser<Object> o, Object val) {
-
+    public Object put(OptionParser o, Object val) {
 	super.put(o,val); 
 	return o.setOption(this,val);
     }

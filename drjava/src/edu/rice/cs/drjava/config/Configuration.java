@@ -64,19 +64,4 @@ public class Configuration {
     public <T> void removeOptionListener(Option<T> op, OptionListener<T> l) {
 	op.removeListener(this,l);
     }
-
-    /** 
-     * Java doesn't allow static initializers in interfaces.  that is dumb.  that's why OptionConstants has to call 
-     * this method.
-     * @return a vector option that represents the "extra classpath" option.
-     **/
-    static VectorOption<String> getExtraClasspathOption() {
-	String ps = System.getProperty("path.separator"); // system path separator
-	if(ps.length() > 1) { // spit out warning if it's more than one character.
-	    System.err.println("WARNING: Configurability interface only supports a one-char separator as of this moment...");
-	    System.err.println("using '"+ps.charAt(0)+"' for delimiter.");
-	}
-	return new VectorOption<String>("extra.classpath",new StringOption(""),"",ps.charAt(0),"");
-    }
-
 }
