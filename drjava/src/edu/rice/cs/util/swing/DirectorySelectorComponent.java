@@ -203,6 +203,7 @@ public class DirectorySelectorComponent extends JPanel {
         _file = file.getCanonicalFile();
       }
       catch(IOException e) {
+        throw new RuntimeException("can't get canonical file");
       }
     }
     resetFileField();
