@@ -10,13 +10,15 @@ import java.awt.*;
 
 import edu.rice.cs.drjava.util.UnexpectedException;
 import edu.rice.cs.drjava.model.compiler.*;
+import edu.rice.cs.drjava.model.GlobalModel;
 
 /**
  * The panel which houses the list of errors after an unsuccessful compilation.
- * If the user clicks on the combobox, move the definitions cursor to the error in
- * the source.
- * If the cursor is moved onto a line with an error, select the appropriate error 
- * in the list but do not move the cursor.
+ * If the user clicks on the combobox, move the definitions cursor to the
+ * error in the source.
+ * If the cursor is moved onto a line with an error, select the appropriate
+ * error in the list but do not move the cursor.
+ *
  * @version $Id$
  */
 public class CompilerErrorPanel extends JPanel {
@@ -44,14 +46,6 @@ public class CompilerErrorPanel extends JPanel {
     return s;
   }
 
-  public void setListFont(Font f) {
-    StyleConstants.setFontFamily(NORMAL_ATTRIBUTES, f.getFamily());
-    StyleConstants.setFontSize(NORMAL_ATTRIBUTES, f.getSize());
-
-    StyleConstants.setFontFamily(BOLD_ATTRIBUTES, f.getFamily());
-    StyleConstants.setFontSize(BOLD_ATTRIBUTES, f.getSize());
-  }
-
   // when we create a highlight we get back a tag we can use to remove it
   private Object _previousHighlightTag = null;
 
@@ -66,116 +60,30 @@ public class CompilerErrorPanel extends JPanel {
    */
   private CompilerError[] _errorsWithoutPositions;
 
-  private DefinitionsPane _definitionsPane;
+  private final DefinitionsPane _definitionsPane;
+  private final GlobalModel _model;
 
-  private JButton _showAllButton;
-  private JButton _nextButton;
-  private JButton _previousButton;
-  private ErrorListPane _errorListPane;
+  private final JButton _showAllButton;
+  private final JButton _nextButton;
+  private final JButton _previousButton;
+  private final ErrorListPane _errorListPane;
+  private final JComboBox _compilerChoiceBox;
 
   /**
    * A caret listener to watch the Defs Doc and highlight the error on the
    * current line.
    */
-  private CaretListener _listener = new CaretListener() {
-    public void caretUpdate(CaretEvent evt) {
-      if (_errorPositions.length == 0) {
-        return;
-      }
-
-      // Now we can assume at least one error.
-
-      int curPos = evt.getDot();
-      // check if the dot is on a line with an error.
-      // Find the first error that is on or after the dot. If this comes
-      // before the newline after the dot, it's on the same line.
-      int errorAfter; // index of the first error after the dot
-      for (errorAfter = 0; errorAfter < _errorPositions.length; errorAfter++) {
-        if (_errorPositions[errorAfter].getOffset() >= curPos) {
-          break;
-        }
-      }
-
-      // index of the first error before the dot
-      int errorBefore = errorAfter - 1;
-
-      // this will be set to what we want to select, or -1 if nothing
-      int shouldSelect = -1;
-
-      if (errorBefore >= 0) { // there's an error before the dot
-        int errPos = _errorPositions[errorBefore].getOffset();
-        try {
-          String betweenDotAndErr =
-            _definitionsPane.getDocument().getText(errPos, curPos - errPos);
-
-          if (betweenDotAndErr.indexOf('\n') == -1) {
-            shouldSelect = errorBefore;
-          }
-        } 
-        catch (BadLocationException willNeverHappen) {}
-      }
-
-      if ((shouldSelect == -1) && (errorAfter != _errorPositions.length)) {
-        // we found an error on/after the dot
-        // if there's a newline between dot and error,
-        // then it's not on this line
-        int errPos = _errorPositions[errorAfter].getOffset();
-        try {
-          String betweenDotAndErr =
-            _definitionsPane.getDocument().getText(curPos, errPos - curPos);
-
-          if (betweenDotAndErr.indexOf('\n') == -1) {
-            shouldSelect = errorAfter;
-          }
-        } 
-        catch (BadLocationException willNeverHappen) {}
-      }
-
-      // if no error is on this line, select the (none) item
-      if (shouldSelect == -1) {
-        _errorListPane.selectNothing();
-      }
-      else {
-        // No need to move the caret since it's already here!
-        _highlightErrorInSource(shouldSelect);
-
-        // Select item wants the error number overall, including
-        // accounting for errors with no source location
-        _errorListPane.selectItem(shouldSelect +_errorsWithoutPositions.length);
-      }
-    }
-  };
-
-  /**
-   * Adds an error highlight to the document.
-   * @exception BadLocationException
-   */
-  private void _addHighlight(int from, int to) throws BadLocationException {
-    _previousHighlightTag =
-      _definitionsPane.getHighlighter().addHighlight(from,
-                                                     to,
-                                                     _documentHighlightPainter);
-  }
-
-  /**
-   * Removes the previous error highlight from the document after the cursor
-   * has moved.
-   */
-  private void _removePreviousHighlight() {
-    if (_previousHighlightTag != null) {
-      _definitionsPane.getHighlighter().removeHighlight(_previousHighlightTag);
-      _previousHighlightTag = null;
-    }
-  }
+  private final DefinitionsCaretListener _listener;
 
   /**
    * Constructor.
    * @param defPane the definitions pane which holds the source to be compiled
    */
-  public CompilerErrorPanel(DefinitionsPane defPane) {
-    setLayout(new BorderLayout());
-        
+  public CompilerErrorPanel(DefinitionsPane defPane, GlobalModel model) {
     _definitionsPane = defPane;
+    _model = model;
+
+    _listener = new DefinitionsCaretListener();
     _definitionsPane.addCaretListener(_listener);
 
     _showAllButton = new JButton("Show all");
@@ -201,6 +109,23 @@ public class CompilerErrorPanel extends JPanel {
     
     _errorListPane = new ErrorListPane();
 
+    // Limitation: Only compiler choices are those that were available
+    // at the time this box was created.
+    // Also: The UI will go out of sync with reality if the active compiler
+    // is later changed somewhere else. This is because there is no way
+    // to listen on the active compiler.
+    _compilerChoiceBox = new JComboBox(_model.getAvailableCompilers());
+    _compilerChoiceBox.setEditable(false);
+    _compilerChoiceBox.setSelectedItem(_model.getActiveCompiler());
+    _compilerChoiceBox.addItemListener(new ItemListener() {
+      public void itemStateChanged(ItemEvent e) {
+        _model.setActiveCompiler((CompilerInterface)
+                                 _compilerChoiceBox.getSelectedItem());
+      }
+    });
+
+    setLayout(new BorderLayout());
+
     // We make the vertical scrollbar always there.
     // If we don't, when it pops up it cuts away the right edge of the 
     // text. Very bad.
@@ -222,7 +147,96 @@ public class CompilerErrorPanel extends JPanel {
     add(buttonPanel, BorderLayout.EAST);
     */
 
+    Box uiBox = Box.createVerticalBox();
+    uiBox.add(new JLabel("Compiler", SwingConstants.CENTER));
+    uiBox.add(_compilerChoiceBox);
+    uiBox.add(Box.createVerticalGlue());
+
     add(scroller, BorderLayout.CENTER);
+    add(uiBox, BorderLayout.EAST);
+  }
+
+  /** Changes the font of the error list. */
+  public void setListFont(Font f) {
+    StyleConstants.setFontFamily(NORMAL_ATTRIBUTES, f.getFamily());
+    StyleConstants.setFontSize(NORMAL_ATTRIBUTES, f.getSize());
+
+    StyleConstants.setFontFamily(BOLD_ATTRIBUTES, f.getFamily());
+    StyleConstants.setFontSize(BOLD_ATTRIBUTES, f.getSize());
+  }
+
+  /** Called when compilation begins. */
+  public void setCompilationInProgress() {
+    _errorListPane.setCompilationInProgress();
+  }
+
+  /**
+   * Reset the errors to the current error information.
+   * @param errors the current error information
+   */
+  public void resetErrors(CompilerError[] errors) {
+    // Get rid of any old highlights
+    _removePreviousHighlight();
+
+    // sort the errors by location
+    Arrays.sort(errors);
+
+    // Filter out those with invalid source info.
+    // They will be first since errors are sorted by line number,
+    // and invalid source info is for negative line numbers.
+    int numInvalid = 0;
+    for (int i = 0; i < errors.length; i++) {
+      if (errors[i].lineNumber() < 0) {
+        numInvalid++;
+      }
+      else {
+        // Since they were sorted, we must be done looking 
+        // for invalid source coordinates, since we found this valid one.
+        break;
+      }
+    }
+
+    _errorsWithoutPositions = new CompilerError[numInvalid];
+    System.arraycopy(errors,
+                     0,
+                     _errorsWithoutPositions,
+                     0,
+                     numInvalid);
+
+    int numValid = errors.length - numInvalid;
+    _errors = new CompilerError[numValid];
+    System.arraycopy(errors,
+                     numInvalid,
+                     _errors,
+                     0,
+                     numValid);
+
+    _createPositionsArray();
+    _resetEnabledStatus();
+
+    _errorListPane.updateListPane();
+  }
+
+  /**
+   * Adds an error highlight to the document.
+   * @exception BadLocationException
+   */
+  private void _addHighlight(int from, int to) throws BadLocationException {
+    _previousHighlightTag =
+      _definitionsPane.getHighlighter().addHighlight(from,
+                                                     to,
+                                                     _documentHighlightPainter);
+  }
+
+  /**
+   * Removes the previous error highlight from the document after the cursor
+   * has moved.
+   */
+  private void _removePreviousHighlight() {
+    if (_previousHighlightTag != null) {
+      _definitionsPane.getHighlighter().removeHighlight(_previousHighlightTag);
+      _previousHighlightTag = null;
+    }
   }
 
   /**
@@ -316,58 +330,6 @@ public class CompilerErrorPanel extends JPanel {
     _nextButton.setEnabled(_errorListPane.getSelectedIndex() < numErrors);
     _previousButton.setEnabled(_errorListPane.getSelectedIndex() > 0);
     _showAllButton.setEnabled(numErrors != 0);
-  }
-
-  /** Called when compilation begins. */
-  public void setCompilationInProgress() {
-    _errorListPane.setCompilationInProgress();
-  }
-
-  /**
-   * Reset the errors to the current error information.
-   * @param errors the current error information
-   */
-  public void resetErrors(CompilerError[] errors) {
-    // Get rid of any old highlights
-    _removePreviousHighlight();
-
-    // sort the errors by location
-    Arrays.sort(errors);
-
-    // Filter out those with invalid source info.
-    // They will be first since errors are sorted by line number,
-    // and invalid source info is for negative line numbers.
-    int numInvalid = 0;
-    for (int i = 0; i < errors.length; i++) {
-      if (errors[i].lineNumber() < 0) {
-        numInvalid++;
-      }
-      else {
-        // Since they were sorted, we must be done looking 
-        // for invalid source coordinates, since we found this valid one.
-        break;
-      }
-    }
-
-    _errorsWithoutPositions = new CompilerError[numInvalid];
-    System.arraycopy(errors,
-                     0,
-                     _errorsWithoutPositions,
-                     0,
-                     numInvalid);
-
-    int numValid = errors.length - numInvalid;
-    _errors = new CompilerError[numValid];
-    System.arraycopy(errors,
-                     numInvalid,
-                     _errors,
-                     0,
-                     numValid);
-
-    _createPositionsArray();
-    _resetEnabledStatus();
-
-    _errorListPane.updateListPane();
   }
 
   /**
@@ -670,4 +632,74 @@ public class CompilerErrorPanel extends JPanel {
      */
     public int getSelectedIndex() { return _selectedIndex; }
   }
+
+  private class DefinitionsCaretListener implements CaretListener {
+    public void caretUpdate(CaretEvent evt) {
+      if (_errorPositions.length == 0) {
+        return;
+      }
+
+      // Now we can assume at least one error.
+
+      int curPos = evt.getDot();
+      // check if the dot is on a line with an error.
+      // Find the first error that is on or after the dot. If this comes
+      // before the newline after the dot, it's on the same line.
+      int errorAfter; // index of the first error after the dot
+      for (errorAfter = 0; errorAfter < _errorPositions.length; errorAfter++) {
+        if (_errorPositions[errorAfter].getOffset() >= curPos) {
+          break;
+        }
+      }
+
+      // index of the first error before the dot
+      int errorBefore = errorAfter - 1;
+
+      // this will be set to what we want to select, or -1 if nothing
+      int shouldSelect = -1;
+
+      if (errorBefore >= 0) { // there's an error before the dot
+        int errPos = _errorPositions[errorBefore].getOffset();
+        try {
+          String betweenDotAndErr =
+            _definitionsPane.getDocument().getText(errPos, curPos - errPos);
+
+          if (betweenDotAndErr.indexOf('\n') == -1) {
+            shouldSelect = errorBefore;
+          }
+        } 
+        catch (BadLocationException willNeverHappen) {}
+      }
+
+      if ((shouldSelect == -1) && (errorAfter != _errorPositions.length)) {
+        // we found an error on/after the dot
+        // if there's a newline between dot and error,
+        // then it's not on this line
+        int errPos = _errorPositions[errorAfter].getOffset();
+        try {
+          String betweenDotAndErr =
+            _definitionsPane.getDocument().getText(curPos, errPos - curPos);
+
+          if (betweenDotAndErr.indexOf('\n') == -1) {
+            shouldSelect = errorAfter;
+          }
+        } 
+        catch (BadLocationException willNeverHappen) {}
+      }
+
+      // if no error is on this line, select the (none) item
+      if (shouldSelect == -1) {
+        _errorListPane.selectNothing();
+      }
+      else {
+        // No need to move the caret since it's already here!
+        _highlightErrorInSource(shouldSelect);
+
+        // Select item wants the error number overall, including
+        // accounting for errors with no source location
+        _errorListPane.selectItem(shouldSelect +_errorsWithoutPositions.length);
+      }
+    }
+  }
+
 }

@@ -465,12 +465,12 @@ public class MainFrame extends JFrame {
     _menuBar.add(_saveButton);
     _compileButton = new JButton(_compileAction);
     _menuBar.add(_compileButton);
-    _compileButton.setEnabled(false);
+    _compileButton.setEnabled(true);
   }
 
   private void _setUpTabs() {
     _outputPane = new OutputPane();
-    _errorPanel = new CompilerErrorPanel(_definitionsPane);
+    _errorPanel = new CompilerErrorPanel(_definitionsPane, _model);
     // Make the output view the active one
     _outputPane.makeActive();
     _interactionsPane = new InteractionsPane(_model);
@@ -579,6 +579,7 @@ public class MainFrame extends JFrame {
     public void compileEnded() {
       hourglassOff();
       _errorPanel.resetErrors(_model.getCompileErrors());
+      _compileButton.setEnabled(true);
     }
     
     public void interactionsReset() {
