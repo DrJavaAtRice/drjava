@@ -56,6 +56,7 @@ import java.util.ArrayList;
 
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.StringOps;
+import java.lang.reflect.Modifier;
 
 /**
  * Runs in the InterpreterJVM. Runs tests given a classname and formats the
@@ -162,7 +163,8 @@ public class JUnitTestManager {
    * @return true iff the given class is an instance of junit.framework.Test
    */
   private boolean _isJUnitTest(Class c) {
-    return Test.class.isAssignableFrom(c);
+
+    return Test.class.isAssignableFrom(c) && !Modifier.isAbstract(c.getModifiers()) && !Modifier.isInterface(c.getModifiers());
   }
 
   /**
@@ -195,7 +197,7 @@ public class JUnitTestManager {
       testName = ((TestCase)failedTest).getName();
     }
     
-    String testString = failedTest.toString();
+    String testString = failure.toString();
     int firstIndex = testString.indexOf('(') + 1;
     int secondIndex = testString.indexOf(')');
     
