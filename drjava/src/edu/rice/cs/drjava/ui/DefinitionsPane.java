@@ -16,14 +16,10 @@ import  java.util.*;
  */
 public class DefinitionsPane extends JEditorPane {
   /**
-   * Keep track of the file name associated with the current document.
-   * For a new file that we haven't saved yet, the value is "".
-   */
-  private String _currentFileName = "";
-  /**
    * Our parent window.
    */
   private MainFrame _mainFrame;
+  private GlobalModel _model;
   private UndoManager _undoManager;
   private UndoAction _undoAction;
   private RedoAction _redoAction;
@@ -32,18 +28,6 @@ public class DefinitionsPane extends JEditorPane {
    * We have a persistent dialog so it keeps track of our last find criterion.
    */
   private FindReplaceDialog _findReplace;
-  /** 
-   * For opening files.
-   * We have a persistent dialog to keep track of the last directory
-   * from which we opened.
-   */  
-  private JFileChooser _openChooser;
-  /** 
-   * For saving files.
-   * We have a persistent dialog to keep track of the last directory
-   * from which we saved.
-   */  
-  private JFileChooser _saveChooser;
   /**
    * Our current paren/brace/bracket matching highlight.
    */
@@ -208,18 +192,16 @@ public class DefinitionsPane extends JEditorPane {
    * Constructor.  Sets up all the defaults.
    * @param mf the parent window
    */
-  public DefinitionsPane(MainFrame mf) {
+  public DefinitionsPane(MainFrame mf, GlobalModel model) {
     _mainFrame = mf;
-    _resetDocument("");
+    _model = model;
+//    _resetDocument("");
     _resetUndo();
     _findReplace = new FindReplaceDialog(mf, this);
     setContentType("text/java");
     setBackground(Color.white);
     setFont(new Font("Courier", 0, 12));
     setEditable(true);
-    _openChooser = new JFileChooser(System.getProperty("user.dir"));
-    _openChooser.setFileFilter(new JavaSourceFilter());
-    _saveChooser = new JFileChooser(System.getProperty("user.dir"));
 
     //add actions for indent key
     Keymap ourMap = addKeymap("INDENT_KEYMAP", getKeymap());
@@ -239,79 +221,6 @@ public class DefinitionsPane extends JEditorPane {
     _mainFrame.installNewDocumentListener(_doc());
   }
 
-  public String getPackageName() throws InvalidPackageException {
-    return _doc().getPackageName();
-  }
-
-  /**
-   * Finds the root directory of the source files.
-   * @return The root directory of the source files,
-   *         based on the package statement.
-   * @throws InvalidPackageException If the package statement is invalid,
-   *                                 or if it does not match up with the
-   *                                 location of the source file.
-   */
-  public File getSourceRoot() throws InvalidPackageException {
-    if (_currentFileName.equals("")) {
-      throw new InvalidPackageException(-1, "Can not get source root for " +
-                                            "unsaved file. Please save.");
-    }
-                                        
-    String packageName = _doc().getPackageName();
-    File sourceFile = new File(_currentFileName).getAbsoluteFile();
-
-    if (packageName.equals("")) {
-      return sourceFile.getParentFile();
-    }
-
-    Stack packageStack = new Stack();
-    int dotIndex = packageName.indexOf('.');
-    int curPartBegins = 0;
-
-    while (dotIndex != -1)
-    {
-      packageStack.push(packageName.substring(curPartBegins, dotIndex));
-      dotIndex = packageName.indexOf('.', dotIndex + 1);
-    }
-
-    // Now add the last package component
-    packageStack.push(packageName.substring(curPartBegins));
-
-    File parentDir = sourceFile;
-    while (!packageStack.empty()) {
-      String part = (String) packageStack.pop();
-      parentDir = parentDir.getParentFile();
-
-      if (parentDir == null) {
-        throw new RuntimeException("parent dir is null?!");
-      }
-
-      // Make sure the package piece matches the directory name
-      if (! part.equals(parentDir.getName())) {
-        String msg = "The source file " + _currentFileName +
-                     " is in the wrong directory or in the wrong package. " +
-                     "The directory name " + parentDir.getName() +
-                     " does not match the package name " + part + ".";
-
-        throw new InvalidPackageException(-1, msg);
-      }
-    }
-
-    // OK, now parentDir points to the directory of the first component of the
-    // package name. The parent of that is the root.
-    parentDir = parentDir.getParentFile();
-    if (parentDir == null) {
-      throw new RuntimeException("parent dir of first component is null?!");
-    }
-
-    return parentDir;
-  }
-
-  /** Gets current file name, or "" if it was never saved. */
-  public String getCurrentFileName() {
-    return  _currentFileName;
-  }
-  
   /**
    * @return the undo action
    */
@@ -356,7 +265,7 @@ public class DefinitionsPane extends JEditorPane {
    * editor pane use our editor kit (and thus our model). 
    */
   protected EditorKit createDefaultEditorKit() {
-    return  new DefinitionsEditorKit();
+    return new DefinitionsEditorKit();
   }
 
   /**
@@ -389,16 +298,6 @@ public class DefinitionsPane extends JEditorPane {
     }
   }
 
-  /** 
-   * Save the current document over the old version of the document.
-   * If the current document is unsaved, call save as. 
-   */
-  public boolean save() {
-    if (_currentFileName == "")
-      return  saveAs(); 
-    else 
-      return  saveToFile(_currentFileName);
-  }
 
   /**
    * @return true if the document was modified since the last save
@@ -407,32 +306,11 @@ public class DefinitionsPane extends JEditorPane {
     return  _doc().isModifiedSinceSave();
   }
 
-  /** 
-   * Prompt the user to select a place to save the file, then save it. 
-   */
-  public boolean saveAs() {
-    JFileChooser fc = _saveChooser;
-    fc.setSelectedFile(null);
-    int rc = fc.showSaveDialog(this);
-    switch (rc) {
-      case JFileChooser.CANCEL_OPTION:case JFileChooser.ERROR_OPTION:
-        return  false;
-      case JFileChooser.APPROVE_OPTION:
-        File chosen = fc.getSelectedFile();
-        if (chosen != null)
-          return  saveToFile(chosen.getAbsolutePath()); 
-        else 
-          return  false;
-      default:                  // impossible since rc must be one of these
-        throw  new RuntimeException("filechooser returned bad rc " + rc);
-    }
-  }
-
   /**
    * Reset the document.
    * Change the title of the file in the mainframe and the menu bar, open up a file.
    * @param path the path of the file being opened.
-   */
+   *
   private void _resetDocument(String path) {
     String titlebarName;
     if (path == "") {
@@ -442,7 +320,6 @@ public class DefinitionsPane extends JEditorPane {
       File f = new File(path);
       titlebarName = f.getName();
     }
-    _currentFileName = path;
     _doc().resetModification();
     _mainFrame.updateFileTitle(titlebarName);
     _mainFrame.installNewDocumentListener(_doc());
@@ -451,115 +328,14 @@ public class DefinitionsPane extends JEditorPane {
     SwingUtilities.invokeLater(new Runnable() {
       /**
        * Reset the focus to the DefinitionsPane.
-       */
+       *
       public void run() {
         DefinitionsPane.this.requestFocus();
       }
     });
   }
+*/
 
-  /** Save the current document to the given path.
-   *  Inform the user if there was a problem.
-   */
-  boolean saveToFile(String path) {
-    try {
-      FileWriter writer = new FileWriter(path);
-      write(writer);
-      writer.close();           // This flushes the buffer!
-      // Update file name if the write succeeds.
-      _resetDocument(path);
-      return  true;
-    } catch (IOException ioe) {
-      String msg = "There was an error saving to the file " + path + "\n\n" + ioe.getMessage();
-      // Tell the user it failed and move on.
-      JOptionPane.showMessageDialog(this, "Error saving file", msg, JOptionPane.ERROR_MESSAGE);
-      return  false;
-    }
-  }
-
-  /** Create a new, empty file in this view. */
-  public boolean newFile() {
-    boolean isOK = checkAbandoningChanges();
-    if (!isOK)
-      return  false;
-    setDocument(getEditorKit().createDefaultDocument());
-    _resetDocument("");
-    return  true;
-  }
-
-  /** Prompt the user to select a place to open a file from, then load it.
-   *  Ask the user if they'd like to save previous changes (if the current
-   *  document has been modified) before opening.
-   */
-  public boolean open() {
-    boolean isOK = checkAbandoningChanges();
-    if (!isOK)
-      return  false;
-    JFileChooser fc = _openChooser;
-    fc.setSelectedFile(null);
-    int rc = fc.showOpenDialog(this);
-    switch (rc) {
-      case JFileChooser.CANCEL_OPTION:case JFileChooser.ERROR_OPTION:
-        return  false;
-      case JFileChooser.APPROVE_OPTION:
-        try {
-          _mainFrame.hourglassOn();
-          File chosen = fc.getSelectedFile();
-          if (chosen == null) {
-            return  false;
-          }
-          FileReader reader = new FileReader(chosen);
-          read(reader, null);
-          // Update file name if the read succeeds.
-          _resetDocument(chosen.getAbsolutePath());
-          return  true;
-        } catch (IOException ioe) {
-          String msg = "There was an error opening the file.\n\n" + ioe.getMessage();
-          // Tell the user it failed and move on.
-          JOptionPane.showMessageDialog(this, "Error opening file", msg, JOptionPane.ERROR_MESSAGE);
-          return  false;
-        } finally {
-          // Make sure we always turn off the hourglass!
-          _mainFrame.hourglassOff();
-        }
-      default:                  // impossible since rc must be one of these
-        throw  new RuntimeException("filechooser returned bad rc " + rc);
-    }
-  }
-
-  /**
-   * Check if the current document has been modified. If it has, ask the user
-   * if he would like to save or not, and save the document if yes. Also
-   * give the user a "cancel" option to cancel doing the operation that got
-   * us here in the first place.
-   *
-   * @return A boolean, if true means the user is OK with the file being saved
-   *         or not as they chose. If false, the user wishes to cancel.
-   */
-  public boolean checkAbandoningChanges() {
-    boolean retVal = true;
-     if (_doc().isModifiedSinceSave()) {
-       String fname = _currentFileName;
-       if (fname == "")
-        fname = "untitled file";
-      String text = fname + " has been modified. Would you like to " + "save?";
-      int rc = JOptionPane.showConfirmDialog(this, "Would you like to save " + fname
-          + "?", text, JOptionPane.YES_NO_CANCEL_OPTION);
-      switch (rc) {
-        case JOptionPane.YES_OPTION:
-          retVal = save();
-          //retVal = true;
-          break;
-        case JOptionPane.NO_OPTION:
-          retVal = true;
-          break;
-        case JOptionPane.CANCEL_OPTION:
-          retVal = false;
-          break;
-      }
-    }
-    return  retVal;
-  }
 
   /**
    * Gets the pane's document with a stronger return type.
@@ -837,4 +613,5 @@ public class DefinitionsPane extends JEditorPane {
     moveCaretPosition(place + wordLength);
     return;
   }
+
 }

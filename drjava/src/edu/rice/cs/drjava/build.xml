@@ -150,8 +150,6 @@
       <arg value="-d" />
       <arg value="${built}" />
       <arg value="-J-Xbootclasspath/p:${jsr14_path}/javac.jar" />
-      <arg value="-bootclasspath" />
-      <arg path="${jsr14_path}/collect.jar:${java.home}/lib/rt.jar" />
       <fileset dir="${srcroot}">
         <include name="${projpath}/**/*.java" />
       </fileset>

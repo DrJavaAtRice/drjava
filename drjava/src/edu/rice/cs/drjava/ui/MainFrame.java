@@ -16,6 +16,7 @@ import  javax.swing.KeyStroke;
 import  javax.swing.JMenuItem;
 import  javax.swing.JComponent;
 import  javax.swing.JTabbedPane;
+import javax.swing.JFileChooser;
 import  javax.swing.text.DefaultEditorKit;
 import  javax.swing.event.ChangeListener;
 import  javax.swing.event.ChangeEvent;
@@ -32,7 +33,7 @@ import  java.awt.Label;
 import  java.awt.Cursor;
 import  java.awt.Font;
 import  java.io.File;
-
+import java.io.IOException;
 
 /** 
  * DrJava's main window.
@@ -55,8 +56,35 @@ public class MainFrame extends JFrame {
   private JMenu _fileMenu;
   private JMenu _editMenu;
   private JMenu _helpMenu;
+  private GlobalModel _model;
   JButton _saveButton;
   JButton _compileButton;
+  
+    /** 
+   * For opening files.
+   * We have a persistent dialog to keep track of the last directory
+   * from which we opened.
+   */  
+  private JFileChooser _openChooser;
+  /** 
+   * For saving files.
+   * We have a persistent dialog to keep track of the last directory
+   * from which we saved.
+   */  
+  private JFileChooser _saveChooser;
+
+  private FileOpenSelector _openSelector = new FileOpenSelector() {
+    public File getFile() throws OperationCanceledException {
+      return getOpenFile();
+    }
+  };
+
+  private FileSaveSelector _saveSelector = new FileSaveSelector() {
+    public File getFile() throws OperationCanceledException {
+      return getSaveFile();
+    }
+  };
+  
   // Make some actions for menus
   private Action _aboutAction = new AbstractAction("About") {
 
@@ -73,205 +101,50 @@ public class MainFrame extends JFrame {
       JOptionPane.showMessageDialog(MainFrame.this, message);
     }
   };
+  
   private Action _quitAction = new AbstractAction("Quit") {
-
-    /**
-     * put your documentation comment here
-     * @param ae
-     */
     public void actionPerformed(ActionEvent ae) {
-      boolean wantToExit = true;
-      if (_definitionsPane.isModifiedSinceSave()) {
-        wantToExit = _definitionsPane.checkAbandoningChanges();
-      }
-      if (wantToExit) {
-        System.exit(0);
-      }
+      _model.quit();
     }
   };
+  
   private Action _openAction = new AbstractAction("Open") {
-
-    /**
-     * put your documentation comment here
-     * @param ae
-     */
     public void actionPerformed(ActionEvent ae) {
-      boolean opened = _definitionsPane.open();
-      if (opened) {
-        _resetInteractions();
-        _errorPanel.resetErrors(new CompilerError[0]);
-        _saveButton.setEnabled(false);
-        _compileButton.setEnabled(true);
-      }
+      _open();
     }
-  };
+  };  
+  
   private Action _newAction = new AbstractAction("New") {
-
-    /**
-     * put your documentation comment here
-     * @param ae
-     */
     public void actionPerformed(ActionEvent ae) {
-      boolean createdNew = _definitionsPane.newFile();
-      if (createdNew) {
-        _resetInteractions();
-        _errorPanel.resetErrors(new CompilerError[0]);
-        _saveButton.setEnabled(false);
-        _compileButton.setEnabled(true);
-      }
+      _model.newFile();
     }
   };
-  private Action _gotoLineAction = new AbstractAction("Goto line") {
 
-    /**
-     * put your documentation comment here
-     * @param ae
-     */
+  private Action _gotoLineAction = new AbstractAction("Goto line") {
     public void actionPerformed(ActionEvent ae) {
       _definitionsPane.gotoLine();
     }
   };
-
-  /**
-   * put your documentation comment here
-   * @param fileName
-   * @return 
-   */
-  boolean saveToFile(String fileName) {
-    boolean result = _definitionsPane.saveToFile(fileName);
-    if (result) {
-      updateEnablesAfterSave();
-    }
-    return  result;
-  }
-
-  /**
-   * put your documentation comment here
-   * @return 
-   */
-  boolean save() {
-    boolean result = _definitionsPane.save();
-    if (result) {
-      updateEnablesAfterSave();
-    }
-    return  result;
-  }
-
-  /**
-   * put your documentation comment here
-   * @return 
-   */
-  boolean saveAs() {
-    boolean result = _definitionsPane.saveAs();
-    if (result) {
-      updateEnablesAfterSave();
-    }
-    return  result;
-  }
-
-  /**
-   * put your documentation comment here
-   */
-  void updateEnablesAfterSave() {
-    _saveButton.setEnabled(false);
-    _compileButton.setEnabled(true);
-  }
+ 
   private Action _saveAction = new AbstractAction("Save") {
-
-    // This doesn't seem to ever re-enable once disabled!
-    /*
-     public boolean isEnabled() {
-     return ! _definitionsPane.isModifiedSinceSave();
-     }
-     */
     public void actionPerformed(ActionEvent ae) {
-      if (_definitionsPane.getCurrentFileName() == "")
-        saveAs(); 
-      else 
-        saveToFile(_definitionsPane.getCurrentFileName());
+      _save();
     }
   };
+    
   private Action _saveAsAction = new AbstractAction("Save as") {
-
-    /**
-     * put your documentation comment here
-     * @param ae
-     */
     public void actionPerformed(ActionEvent ae) {
-      saveAs();
+      _saveAs();
     }
   };
-
-  /**
-   * put your documentation comment here
-   */
-  void compile() {
-    _compileButton.setEnabled(false);
-    String filename = _definitionsPane.getCurrentFileName();
-    if (filename.length() == 0) {
-      // the file has never been saved. we can only get here
-      // if the file was never changed and never saved.
-      return;
-    }
-
-    try {
-      _outputPane.clear();
-      repaint();
-
-      File sourceRoot = _definitionsPane.getSourceRoot();
-      _resetInteractions(sourceRoot);
-      
-      File[] files = new File[] { new File(filename) };
-      CompilerError[] errors = DrJava.compiler.compile(sourceRoot, files);
-      _errorPanel.resetErrors(errors);
-    }
-    catch (InvalidPackageException e) {
-      CompilerError err = new CompilerError(filename,
-                                            -1,
-                                            -1,
-                                            e.getMessage(),
-                                            false);
-      _errorPanel.resetErrors(new CompilerError[] { err });
-    }
-  }
 
   private Action _compileAction = new AbstractAction("Compile") {
-
-    // This doesn't seem to ever re-enable once disabled!
-    /*
-     public boolean isEnabled() {
-     return _definitionsPane.getDocument().getLength() > 0;
-     }
-     */
     public void actionPerformed(ActionEvent ae) {
-      boolean modified = _definitionsPane.isModifiedSinceSave();
-      if (modified) {
-        // file was not saved -- tell user they must save before compiling
-        String msg = "The definitions must be saved before compiling. " + "Would you like to save and compile now?";
-        int rc = JOptionPane.showConfirmDialog(MainFrame.this, msg, "File not saved", 
-            JOptionPane.YES_NO_OPTION);
-        if (rc == JOptionPane.YES_OPTION) {
-          save();
-          // Check if they cancelled the save. If they did, exit!
-          if (_definitionsPane.isModifiedSinceSave()) {
-            return;
-          }
-        } 
-        else {
-          return;               // user wants to do nothing
-        }
-      }
-
-      _tabbedPane.setSelectedIndex(COMPILE_TAB);
-      _errorPanel.setCompilationInProgress();
-
-      hourglassOn();
-      compile();
-      hourglassOff();
+      _model.startCompile();
     }
   };
+  
   private Action _findReplaceAction = new AbstractAction("Find/Replace") {
-
     /**
      * put your documentation comment here
      * @param ae
@@ -280,140 +153,43 @@ public class MainFrame extends JFrame {
       _definitionsPane.findReplace();
     }
   };
+  
   private Action _clearOutputAction = new AbstractAction("Clear Output") {
-
-    /**
-     * put your documentation comment here
-     * @param ae
-     */
     public void actionPerformed(ActionEvent ae) {
-      _outputPane.clear();
+      _model.resetConsole();
     }
   };
+
   private Action _resetInteractionsAction = new AbstractAction("Reset interactions") {
-
-    /**
-     * put your documentation comment here
-     * @param ae
-     */
     public void actionPerformed(ActionEvent ae) {
-      _interactionsPane.reset();
+      _model.resetInteractions();
     }
   };
-
-  /**
-   * Reset the interactions window, and add the source directory
-   * of the file we just compiled to the class path.
-   */
-  private void _resetInteractions(File sourceRoot) {
-    _interactionsPane.reset();
-    _interactionsPane.addClassPath(sourceRoot.getAbsolutePath());
-
-    try {
-      _interactionsPane.setPackageScope(_definitionsPane.getPackageName());
-    }
-    catch (InvalidPackageException ipe) {
-      // oh well, can't set package scope.
-    }
-  }
-
-  private void _resetInteractions() {
-    _interactionsPane.reset();
-
-    try {
-      String path = _definitionsPane.getSourceRoot().getAbsolutePath();
-      _interactionsPane.addClassPath(path);
-      _interactionsPane.setPackageScope(_definitionsPane.getPackageName());
-    }
-    catch (InvalidPackageException ipe) {
-      // oh well, we can't add to the class path.
-    }
-  }
 
   private WindowListener _windowCloseListener = new WindowListener() {
-
-    /**
-     * put your documentation comment here
-     * @param ev
-     */
     public void windowActivated(WindowEvent ev) {}
-
-    /**
-     * put your documentation comment here
-     * @param ev
-     */
     public void windowClosed(WindowEvent ev) {}
-
-    /**
-     * put your documentation comment here
-     * @param ev
-     */
     public void windowClosing(WindowEvent ev) {
-      boolean wantToExit = true;
-      if (_definitionsPane.isModifiedSinceSave()) {
-        wantToExit = _definitionsPane.checkAbandoningChanges();
-      }
-      if (wantToExit) {
-        System.exit(0);
-      }
+      _model.quit();
     }
-
-    /**
-     * put your documentation comment here
-     * @param ev
-     */
     public void windowDeactivated(WindowEvent ev) {}
-
-    /**
-     * put your documentation comment here
-     * @param ev
-     */
     public void windowDeiconified(WindowEvent ev) {}
-
-    /**
-     * put your documentation comment here
-     * @param ev
-     */
     public void windowIconified(WindowEvent ev) {}
-
-    /**
-     * put your documentation comment here
-     * @param ev
-     */
     public void windowOpened(WindowEvent ev) {
       _definitionsPane.requestFocus();
     }
   };
 
-  /**
-   * put your documentation comment here
-   * @param d
-   */
   void installNewDocumentListener(DefinitionsDocument d) {
     d.addDocumentListener(new DocumentListener() {
-
-      /**
-       * put your documentation comment here
-       * @param e
-       */
       public void changedUpdate(DocumentEvent e) {
         _saveButton.setEnabled(true);
         _compileButton.setEnabled(false);
       }
-
-      /**
-       * put your documentation comment here
-       * @param e
-       */
       public void insertUpdate(DocumentEvent e) {
         _saveButton.setEnabled(true);
         _compileButton.setEnabled(false);
       }
-
-      /**
-       * put your documentation comment here
-       * @param e
-       */
       public void removeUpdate(DocumentEvent e) {
         _saveButton.setEnabled(true);
         _compileButton.setEnabled(false);
@@ -452,15 +228,20 @@ public class MainFrame extends JFrame {
 
   /** Creates the main window, and shows it. */
   public MainFrame() {
+    _model = new GlobalModel();
+    _openChooser = new JFileChooser(System.getProperty("user.dir"));
+    _openChooser.setFileFilter(new JavaSourceFilter());
+    _saveChooser = new JFileChooser(System.getProperty("user.dir"));
     //set up the hourglass cursor
     setGlassPane(new GlassPane());
     _fileNameField = new JTextField();
     _fileNameField.setEditable(false);
-    _definitionsPane = new DefinitionsPane(this);
+    _definitionsPane = new DefinitionsPane(this, _model);
     _outputPane = new OutputPane();
     _errorPanel = new CompilerErrorPanel(_definitionsPane);
     this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
     this.addWindowListener(_windowCloseListener);
+    _model.addListener(new ModelListener());
     // Make the menu bar
     _menuBar = new JMenuBar();
     _fileMenu = new JMenu("File");
@@ -562,6 +343,12 @@ public class MainFrame extends JFrame {
     _setAllFonts(new Font("Monospaced", 0, 12));
   }
 
+
+  GlobalModel getGlobalModel() {
+    return _model;
+  }
+  
+
   /**
    * put your documentation comment here
    * @param f
@@ -597,7 +384,176 @@ public class MainFrame extends JFrame {
   OutputPane getOutPane() {
     return  _outputPane;
   }
+  
+  /** Prompt the user to select a place to open a file from, then load it.
+   *  Ask the user if they'd like to save previous changes (if the current
+   *  document has been modified) before opening.
+   */
+  public File getOpenFile() throws OperationCanceledException {
+    _openChooser.setSelectedFile(null);
+    int rc = _openChooser.showOpenDialog(this);
+    return getFileName(_openChooser, rc);
+  }
+
+  /** 
+   * Prompt the user to select a place to save the current document.
+   */
+  public File getSaveFile() throws OperationCanceledException {
+    _saveChooser.setSelectedFile(null);
+    int rc = _saveChooser.showSaveDialog(this);
+    return getFileName(_saveChooser, rc);
+  }
+  
+  private void _open() {
+    try {
+      _model.openFile(_openSelector);
+    }
+    catch (IOException ioe) {
+      _showIOError(ioe);
+    }
+  }
+
+  private void _save() {
+    try {
+      _model.saveFile(_saveSelector);
+    }
+    catch (IOException ioe) {
+      _showIOError(ioe);
+    }
+  }
+
+
+  private void _saveAs() {
+    try {
+      _model.saveFileAs(_saveSelector);
+    }
+    catch (IOException ioe) {
+      _showIOError(ioe);
+    }
+  }
+  
+  private void _showIOError(IOException ioe) {
+    JOptionPane.showMessageDialog(this,
+                                  "An I/O exception occurred during the last operation.\n" + ioe,
+                                  "Input/output error",
+                                  JOptionPane.ERROR_MESSAGE);
+  }
+
+  public File getFileName(JFileChooser fc, int choice) throws OperationCanceledException {
+    switch (choice) {
+      case JFileChooser.CANCEL_OPTION:case JFileChooser.ERROR_OPTION:
+        throw new OperationCanceledException();
+      case JFileChooser.APPROVE_OPTION:
+        File chosen = fc.getSelectedFile();
+        if (chosen != null)
+          return chosen; 
+        else 
+          throw new RuntimeException("filechooser returned null file");
+      default:                  // impossible since rc must be one of these
+        throw  new RuntimeException("filechooser returned bad rc " + choice);
+    }
+  }
+
+  private class ModelListener implements GlobalModelListener {
+    public void newFileCreated() { 
+      _definitionsPane.setDocument(_model.getDefinitionsDocument());
+      _saveButton.setEnabled(false);
+      _compileButton.setEnabled(false);
+      _fileNameField.setText("Untitled");
+      installNewDocumentListener((DefinitionsDocument)_model.getDefinitionsDocument());
+      _definitionsPane.grabFocus();
+    }
+    
+    public void fileSaved(File file) { 
+      _saveButton.setEnabled(false);
+      _compileButton.setEnabled(true);
+    }
+    
+    public void fileOpened(File file) {    
+      _definitionsPane.setDocument(_model.getDefinitionsDocument());
+      _saveButton.setEnabled(false);
+      _compileButton.setEnabled(true);
+      _fileNameField.setText(file.getName());
+      installNewDocumentListener((DefinitionsDocument)_model.getDefinitionsDocument());
+      _definitionsPane.grabFocus();
+    }
+    
+    public void compileStarted() { 
+      _tabbedPane.setSelectedIndex(COMPILE_TAB);
+      _saveButton.setEnabled(false);
+      _compileButton.setEnabled(false);
+      hourglassOn();
+    }
+    
+    public void compileEnded() {
+      hourglassOff();
+      _errorPanel.resetErrors(_model.getCompileErrors());
+    }
+    
+    public void interactionsReset() {
+    }
+    
+    public void consoleReset() {    
+    }
+    
+    public void saveBeforeProceeding(GlobalModelListener.SaveReason reason) {
+      String message;
+      if (reason == COMPILE_REASON) {
+        message = "To compile, you must first save the current file." +
+          "Would you like to save and then compile?";
+      }
+      else {
+        throw new RuntimeException("Invalid reason for forcing a save.");
+      }
+      int rc = JOptionPane.showConfirmDialog(MainFrame.this, message, "Must save to continue", JOptionPane.YES_NO_OPTION);
+      switch (rc) {
+        case JOptionPane.YES_OPTION:
+          _save();
+          break;
+        case JOptionPane.NO_OPTION: 
+          // do nothing
+          break;
+        default:
+          throw new RuntimeException("Invalid rc from showConfirmDialog: " + rc);
+      }
+    }
+    
+    /**
+     * Check if the current document has been modified. If it has, ask the user
+     * if he would like to save or not, and save the document if yes. Also
+     * give the user a "cancel" option to cancel doing the operation that got
+     * us here in the first place.
+     *
+     * @return A boolean, if true means the user is OK with the file being saved
+     *         or not as they chose. If false, the user wishes to cancel.
+     */
+    public boolean canAbandonFile(File file) {
+      String fname;
+
+      if (file == null) {
+        fname = "untitled file";
+      }
+      else {
+        fname = file.getName();
+      }
+
+      String text = fname + " has been modified. Would you like to " + "save?";
+      int rc = JOptionPane.showConfirmDialog(MainFrame.this,
+          "Would you like to save " + fname + "?",
+          text,
+          JOptionPane.YES_NO_CANCEL_OPTION);
+
+      switch (rc) {
+        case JOptionPane.YES_OPTION:
+          _save();
+          return true;
+        case JOptionPane.NO_OPTION:
+          return true;
+        case JOptionPane.CANCEL_OPTION:
+          return false;
+        default:
+          throw new RuntimeException("Invalid rc: " + rc);
+      }
+    } 
+  }
 }
-
-
-

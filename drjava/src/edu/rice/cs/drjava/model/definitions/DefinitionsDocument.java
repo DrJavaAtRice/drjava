@@ -7,6 +7,7 @@ import  gj.util.Vector;
 import  java.util.HashSet;
 import  java.util.StringTokenizer;
 
+import java.io.File;
 
 /** 
  * The model for the definitions pane. 
@@ -31,11 +32,14 @@ public class DefinitionsDocument extends PlainDocument {
   /** The absolute character offset in the document. */
   int _currentLocation = 0;
 
+  private File _file;
+  
   /**
    * Constructor.
    */
   public DefinitionsDocument() {
     super();
+    _file = null;
   }
 
   /**
@@ -66,7 +70,7 @@ public class DefinitionsDocument extends PlainDocument {
       "strictfp", "throw", "try", "catch", "finally", "synchronized",
       "throws", "extends", "implements", "interface", "class",
       "break", "continue", "public", "protected", "private", "abstract",
-      "case"
+      "case", "default"
     };
     HashSet keywords = new HashSet();
     for (int i = 0; i < words.length; i++) {
@@ -75,6 +79,15 @@ public class DefinitionsDocument extends PlainDocument {
     return  keywords;
   }
 
+  
+  public File getFile() {
+    return _file;
+  }
+  
+  public void setFile(File file) {
+    _file = file;
+  }
+  
   /**
    * Inserts a string of text into the document.
    * <ol>
@@ -538,7 +551,7 @@ public class DefinitionsDocument extends PlainDocument {
     }
     catch (BadLocationException e) {
       e.printStackTrace();
-      throw new RuntimeException(e);
+      throw new RuntimeException(e.toString());
     }
 
     // Because this text is not quoted or commented, we can use the simpler
@@ -707,6 +720,5 @@ public class DefinitionsDocument extends PlainDocument {
       setCurrentLocation(oldLocation);
     }
   }
-
 
 }

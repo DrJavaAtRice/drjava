@@ -1,22 +1,29 @@
 package edu.rice.cs.drjava;
 
-public interface GlobalModelListener {
+import java.io.File;
 
+public interface GlobalModelListener {
+  public class SaveReason {
+    private SaveReason() {}
+  }
+  
+  public static final SaveReason COMPILE_REASON = new SaveReason();
+  
   public void newFileCreated();
   
-  public void fileSaved(String fileName);
+  public void fileSaved(File file);
   
-  public void fileOpened(String fileName);
-  
+  public void fileOpened(File file);
+    
   public void compileStarted();
   
   public void compileEnded();
-  
-  public void quit();
-  
+      
   public void interactionsReset();
   
   public void consoleReset();
   
-  public boolean canAbandonFile();
+  public void saveBeforeProceeding(SaveReason reason);
+  
+  public boolean canAbandonFile(File file);
 }
