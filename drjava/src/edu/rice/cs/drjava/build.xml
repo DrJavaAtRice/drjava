@@ -263,6 +263,14 @@
       </fileset>
     </execon>
 
+    <!-- Now we need to copy the package.htmls over to the
+         directory with the non-generic sources. -->
+    <copy todir="${javadoc_dir}/src">
+      <fileset dir="${srcroot}">
+        <include name="${projpath}/**/package.html" />
+      </fileset>
+    </copy>
+
     <javadoc sourcepath="${javadoc_dir}/src"
              destdir="${javadoc_dir}"
              packagenames="edu.rice.cs.drjava.*"
