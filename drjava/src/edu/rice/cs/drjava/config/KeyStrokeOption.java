@@ -132,7 +132,8 @@ public class KeyStrokeOption extends Option<KeyStroke> {
         return "<none>";
       String s = KeyEvent.getKeyModifiersText(k.getModifiers()).toLowerCase();
       s = s.replace('+', ' ');
-      s += " ";
+      if (!s.equals(""))
+        s += " ";
       // If the key code is undefined, this is a "typed" unicode character
       if (k.getKeyCode() == KeyEvent.VK_UNDEFINED) {
         s += "typed ";
@@ -150,37 +151,7 @@ public class KeyStrokeOption extends Option<KeyStroke> {
             key.equals("SHIFT") || key.equals("ALT_GRAPH"))
           return s;
         s += key;
-        return s; 
-        /*String key = new String();
-         switch(k.getKeyCode()) {
-         // COMMA
-         case 44:key = "COMMA";
-         break;
-         // PERIOD
-         case 46:key = "PERIOD";
-         break;
-         // SLASH
-         case 47:key = "SLASH";
-         break;
-         // SEMICOLON
-         case 59:key = "SEMICOLON";
-         break;
-         // EQUALS
-         case 61:key = "EQUALS";
-         break;
-         // OPEN BRACKET
-         case 91:key = "OPEN_BRACKET";
-         break;
-         // BACKSLASH
-         case 92:key = "BACKSLASH";
-         break;
-         // CLOSE BRACKET
-         case 93:key = "CLOSE_BRACKET";
-         break;
-         default:key = KeyEvent.getKeyText(k.getKeyCode()).toUpperCase()
-         .replace(' ', '_');
-         }
-         s += key;*/
+        return s;
       }
       return s; 
     }

@@ -509,7 +509,14 @@ public interface OptionConstants extends ConfigurationTool {
     (CodeStatus.DEVELOPMENT) ?
     new BooleanOption("debugger.advanced", new Boolean(false)):
     null;
-
+    
+  /**
+   * A vector containing the most recently used files
+   */
+  public static final VectorOption<File> RECENT_FILES = 
+    (CodeStatus.DEVELOPMENT) ?
+    new VectorOption("recent.files",new FileOption("",null),new Vector<File>()) :
+    null; 
 }
 
 

@@ -147,8 +147,11 @@ public class MainFrame extends JFrame implements OptionConstants {
   private JMenuItem _toggleBreakpointMenuItem;
   private JMenuItem _printBreakpointsMenuItem;
   private JMenuItem _clearAllBreakpointsMenuItem;
-  
+ 
   private ConfigFrame _configFrame;
+
+  
+  private RecentFileManager _recentFileManager;
   
   /**
    * @return The model providing the logic for this view.
@@ -384,6 +387,15 @@ public class MainFrame extends JFrame implements OptionConstants {
   /** Closes the program. */
   private Action _quitAction = new AbstractAction("Quit") {
     public void actionPerformed(ActionEvent ae) {
+      if (CodeStatus.DEVELOPMENT) {
+        _recentFileManager.saveRecentFiles();
+        try {
+          DrJava.CONFIG.saveConfiguration();
+        }
+        catch (IOException ioe) {
+          throw new UnexpectedException(ioe);
+        }
+      }      
       _model.quit();
     }
   };
@@ -674,6 +686,10 @@ public class MainFrame extends JFrame implements OptionConstants {
     _setUpMenuBar();
     _setUpToolBar();
     _setUpDocumentSelector();
+    
+    if (CodeStatus.DEVELOPMENT) {
+      _recentFileManager = new RecentFileManager(_fileMenu.getItemCount() - 2);
+    }
 
     // Set size and position
     setBounds(0, 0, GUI_WIDTH, GUI_HEIGHT);
@@ -880,9 +896,13 @@ public class MainFrame extends JFrame implements OptionConstants {
     _model.newFile();
   }
 
-  private void _open() {
+  private void _open() { 
+    _open (_openSelector);
+  }
+  
+  private void _open(FileOpenSelector openSelector) {
     try {
-      _model.openFiles(_openSelector);
+      _model.openFiles(openSelector);
     }
     catch (AlreadyOpenException aoe) {
       OpenDefinitionsDocument openDoc = aoe.getOpenDocument();
@@ -909,6 +929,9 @@ public class MainFrame extends JFrame implements OptionConstants {
         if (choice == JOptionPane.YES_OPTION) {
           _revert();
         }
+      }
+      if (CodeStatus.DEVELOPMENT) {
+        _recentFileManager.updateOpenFiles(openDoc.getFile());
       }
     }
     catch (OperationCanceledException oce) {
@@ -1497,9 +1520,11 @@ public class MainFrame extends JFrame implements OptionConstants {
       _addMenuItem(fileMenu, _printPreviewAction, KEY_PRINT_PREVIEW);
       _addMenuItem(fileMenu, _printAction, KEY_PRINT);
     }
-      
+    
+    
     // Quit
     fileMenu.addSeparator();
+    
     if (!CodeStatus.DEVELOPMENT) {
       tmpItem = fileMenu.add(_quitAction);
       tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, mask));
@@ -2234,12 +2259,23 @@ public class MainFrame extends JFrame implements OptionConstants {
       _revertAction.setEnabled(true);
       updateFileTitle();
       _currentDefPane.requestFocus();
+      if (CodeStatus.DEVELOPMENT) {
+        _recentFileManager.updateOpenFiles(doc.getFile());
+      }
     }
 
     public void fileOpened(OpenDefinitionsDocument doc) {     
       // Fix OS X scrollbar bug before switching
       _reenableScrollBar();   
       _createDefScrollPane(doc);
+
+      //OpenDefinitionsDocument doc = _model.getActiveDocument();
+      //String filename = _model.getDisplayFilename(doc);
+      if (CodeStatus.DEVELOPMENT) {
+        _recentFileManager.updateOpenFiles(doc.getFile());
+      }
+      //System.out.println("adding: " + filename + "into pos: " + _recentFileMenuPos);
+      //_fileMenu.insert(new JMenuItem("1. " + filename),_recentFileMenuPos++);
     }
 
     public void fileClosed(OpenDefinitionsDocument doc) {
@@ -2696,6 +2732,94 @@ public class MainFrame extends JFrame implements OptionConstants {
   private class LineEnumOptionListener implements OptionListener<Boolean> {
     public void optionChanged(OptionEvent<Boolean> oce) {
       _updateDefScrollRowHeader();
+    }
+  }
+  
+  private class RecentFileManager {
+    int _pos;
+    Vector<File> _recentFiles;
+    Vector<JMenuItem> _recentMenuItems;
+    int MAX_SIZE = 5;
+
+    public RecentFileManager(int pos) {
+      _pos = pos;   
+      _recentFiles = new Vector<File>();
+      _recentMenuItems = new Vector<JMenuItem>();
+      Vector<File> files = DrJava.CONFIG.getSetting(RECENT_FILES);
+      for (int i = files.size() - 1; i >= 0; i--) {
+        updateOpenFiles(files.elementAt(i));
+      }
+    }
+    
+    public void saveRecentFiles() { 
+      DrJava.CONFIG.setSetting(RECENT_FILES,_recentFiles);
+    }
+    
+    public void updateOpenFiles(final File file) {   
+      
+      if (_recentMenuItems.size() == 0) {
+        _fileMenu.insertSeparator(_pos);  //one at top
+        _pos++;
+      }
+
+      
+      final FileOpenSelector _recentSelector = new FileOpenSelector() {
+        public File[] getFiles() throws OperationCanceledException {
+          return new File[] { file };
+        }
+      };
+        
+      JMenuItem newItem = new JMenuItem("");//1. " + file.getName());      
+      newItem.addActionListener(new AbstractAction("Open " + file.getName()) {
+        public void actionPerformed(ActionEvent ae) {          
+          _open(_recentSelector);
+        }
+      });
+      removeIfInList(file);
+      _recentMenuItems.insertElementAt(newItem,0);
+      _recentFiles.insertElementAt(file,0);
+      //incrementExisting();
+      numberItems();
+      _fileMenu.insert(newItem,_pos);
+     
+    }
+    
+    public void removeIfInList(File file) {
+      int index = _recentFiles.indexOf(file);
+      /*int index = -1;
+      for (int i=0; i< _recentFiles.size(); i++) {
+        if (_recentFiles.elementAt(i).equals(file)) {
+          System.out.println("i: "+i+" fileName: "+_recentFiles.elementAt(i).getName());
+          index = i;
+          break;
+        }
+      }*/
+      
+      if (index >= 0) {
+        _recentFiles.removeElementAt(index);
+        JMenuItem delItem = _recentMenuItems.elementAt(index);
+        _fileMenu.remove(delItem);
+        _recentMenuItems.removeElementAt(index);
+      }
+    }
+    
+    public void numberItems() {
+      int delPos = _recentMenuItems.size();
+      while (delPos > MAX_SIZE) {
+        JMenuItem delItem = _recentMenuItems.elementAt(delPos - 1);
+        _recentMenuItems.removeElementAt(delPos - 1);
+        _recentFiles.removeElementAt(delPos - 1);
+        _fileMenu.remove(delItem);
+
+        delPos = _recentMenuItems.size();
+      }
+      JMenuItem currItem;
+      String itemText;
+      for (int i=0; i< _recentMenuItems.size(); i++ ) {
+        currItem = _recentMenuItems.elementAt(i);
+        currItem.setText((i+1) + ". " + _recentFiles.elementAt(i).getName());
+        
+      }
     }
   }
 }

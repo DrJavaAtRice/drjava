@@ -40,6 +40,9 @@ package edu.rice.cs.drjava.config;
 import java.io.*;
 import gj.util.Enumeration;
 import java.util.Properties;
+import java.util.Arrays;
+import java.util.Vector;
+import java.util.Date;
 
 /**
  * A Configuration object that can be read and saved from a Stream.
@@ -69,16 +72,47 @@ public class SavableConfiguration extends Configuration {
   }
   
   /**
-   * Saves the values from this Configuration into the given OutputStream
-   * as a Properties file.
+   * Used to save the values from this Configuration into the given OutputStream
+   * as a Properties file. The elements weren't ordered, so now the properties
+   * are written in the same way as the about dialog.
    */
   public void saveConfiguration(OutputStream os, String header) throws IOException {
+    OutputStreamWriter osw = new OutputStreamWriter(os);
     Enumeration<OptionParser> keys = map.keys();
-    Properties p = new Properties();
+    //Properties p = new Properties();
+    String tmpString;
+    StringBuffer buff;
+    OptionParser key;
+    Date date = new Date();
+    osw.write((int)'#');
+    osw.write(header, 0, header.length());
+    osw.write((int)'\n');
+    osw.write((int)'#');
+    osw.write(date.toString(), 0, date.toString().length());
+    osw.write((int)'\n');
     while(keys.hasMoreElements()) {
-      OptionParser key = keys.nextElement();
-      p.setProperty(key.getName(),map.getString(key));
+      key = keys.nextElement();
+      tmpString = key.getName();
+      osw.write(tmpString, 0, tmpString.length());
+      tmpString = " = ";
+      osw.write(tmpString, 0, 3);
+      tmpString = map.getString(key);
+      // This replaces all backslashes with two backslashes for windows
+      int index = 0;
+      int pos;
+      while (index < tmpString.length() && 
+             ((pos = tmpString.indexOf('\\', index)) >= 0)) {
+        buff = new StringBuffer(tmpString);
+        buff.insert(pos, '\\');
+        index = pos + 2;
+        tmpString = buff.toString();
+      }
+      osw.write(tmpString, 0, tmpString.length());
+      osw.write((int)'\n');
+     // p.setProperty(key.getName(),map.getString(key));
     }
-    p.store(os,header);
+    osw.close();
+    //p.store(os,header)
+    
   }
 }
