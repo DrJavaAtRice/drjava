@@ -39,58 +39,46 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.definitions.indent;
 
-import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
-import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
-import edu.rice.cs.util.UnexpectedException;
-
 import javax.swing.text.BadLocationException;
 
+import edu.rice.cs.util.UnexpectedException;
+import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
+import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
+
 /**
- * Indents the current line in the document to the indent level of the
- * start of the statement that the cursor is currently on, plus the given 
- * suffix string.
- *
+ * This class checks the previous statement for the given character
  * @version $Id$
  */
-public class ActionStartCurrStmtPlus extends IndentRuleAction {
-  private String _suffix;
+public class QuestionExistsCharInPrevStmt extends IndentRuleQuestion {
   
-  /**
-   * Constructs a new rule with the given suffix string.
-   * @param prefix String to append to indent level of brace
-   */
-  public ActionStartCurrStmtPlus(String suffix) {
-    super();
-    _suffix = suffix;
+  private char _lookFor;
+  
+  public QuestionExistsCharInPrevStmt(char lookFor, IndentRule yesRule, IndentRule noRule){
+    super(yesRule, noRule);
+    _lookFor = lookFor;
   }
   
   /**
-   * Properly indents the line that the caret is currently on.
-   * Replaces all whitespace characters at the beginning of the
-   * line with the appropriate spacing or characters.
-   *
-   * @param doc DefinitionsDocument containing the line to be indented.
+   * Searches through the previous statement to find if it has the current character not in a 
+   * comment and not in a string
    */
-  public void indentLine(DefinitionsDocument doc) {
-    super.indentLine(doc);
-    
-    /**
-     * This method is simply a call to getIndentOfCurrStmt, which is
-     * fully tested in IndentHelperTest, so no additional tests are
-     * provided for this class.
-     */
-    
-    String indent = "";
-    
+  boolean applyRule(DefinitionsDocument doc) {
+    //Find the end of the previous line
+    int endPreviousStatement;
     try {
-      indent = doc.getIndentOfCurrStmt(doc.getCurrentLocation(),
-                                       new char[] {';','{','}'},
-                                       new char[] {' ', '\t','\n'});
-    } catch (BadLocationException e) {
-      throw new UnexpectedException(e);
+      endPreviousStatement = 
+        doc.findPrevDelimiter(doc.getCurrentLocation(), new char[] {';','}','{'});
+    } catch (BadLocationException ble){
+      //default to reporting the char was not found in the case of a BadLocationeEception
+      return false;
     }
-
-    indent = indent + _suffix;
-    doc.setTab(indent, doc.getCurrentLocation());
+    
+    // if this is the first line, we'll get an error indicator and just return false
+    if (endPreviousStatement == DefinitionsDocument.ERROR_INDEX){
+      return false;
+    }
+    
+      //Now find the if the character we want exists on that line
+    return doc.findCharInStmtBeforePos(_lookFor, endPreviousStatement);
   }
 }

@@ -11,23 +11,15 @@ for()
   System.out.println(5);
 }
 
-
-int[] intArray = new foo[] {new foo() {
-  public dummmy(){
-  }
-},
-  new foo2() {
-    public dummy(){
-  }
-}};
-
+int [] x = new int {
+  2,
+    3,
+}
 
 method(new int[] {1,
   2,
   3,
 });
-
-
 
 method(int arg1,
        int arg2,
@@ -57,6 +49,6 @@ method(new WindowAdapter(){
          }
        }
        );
-       
+         
        method(int arg1
                 );

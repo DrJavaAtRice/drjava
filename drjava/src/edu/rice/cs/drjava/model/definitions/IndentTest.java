@@ -374,7 +374,7 @@ public class IndentTest extends TestCase {
   
   /**
    * Regression test for ternary operators.
-   *
+   */
   public void testIndentTernary() throws BadLocationException {
     String text =
       "test1 = x ? y : z;\n" +
@@ -410,7 +410,6 @@ public class IndentTest extends TestCase {
     doc.indentLines(0, doc.getLength());
     _assertContents(indented, doc);
   }
-  */
   
   /**
    * put your documentation comment here

@@ -115,7 +115,7 @@ public abstract class IndentRuleWithTrace implements IndentRule{
     _addToIndentTrace(getRuleName(), TERMINUS_RULE, true);
 
     //Add the next line, and every time something is indented, the indent trace will be printed
-    //    printLastIndentTrace(System.out);
+    //printLastIndentTrace(System.out);
   }
 
   /**

@@ -309,7 +309,54 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
   public long getTimestamp() {
     return _timestamp;
   }
+    /**
+   * This function finds the given character in the same statement as the given
+   * position, and before the given position.  It is used by QuestionExistsCharInStmt and
+   * QuestionExistsCharInPrevStmt
+   */
+  public boolean findCharInStmtBeforePos(char findChar, int position){
+    if(position == DefinitionsDocument.ERROR_INDEX) {
+      // Should not happen
+      throw new UnexpectedException(new
+        IllegalArgumentException("Argument endChar to " + 
+                                 "QuestionExistsCharInStmt must be a char " +
+                                 "that exists on the current line."));
+    }
     
+    char[] findCharDelims = {findChar, ';', '{', '}'};
+    int prevFindChar;
+    
+    // Find the position of the previous occurence findChar from the 
+    // position of endChar (looking in paren phrases as well)
+    try {
+      prevFindChar = this.findPrevDelimiter(position, findCharDelims, false);
+    } catch (BadLocationException e) {
+      // Should not happen
+      throw new UnexpectedException(e);
+    }
+    
+    if ((prevFindChar == DefinitionsDocument.ERROR_INDEX) ||
+        (prevFindChar < 0)) {
+      // Couldn't find a previous occurence findChar
+      return false;
+    }
+    
+    // Determine if prevFindChar was findChar, rather than end
+    //  of statement delimiter
+    boolean found = false;
+    try {
+      String foundString = this.getText(prevFindChar, 1);
+      char foundChar = foundString.charAt(0);
+      found = (foundChar == findChar);
+    }
+    catch (BadLocationException e) {
+      // Should not happen
+      throw new UnexpectedException(e);
+    }
+    
+    return found;
+  }
+  
   /**
    * Checks the helper method cache for a stored value.  Returns the
    * value if it has been cached, or null otherwise.
@@ -965,21 +1012,35 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
   /**
    * Returns the indent level of the start of the statement
    * that the cursor is on.  Uses a default set of delimiters.
-  * (';', '{', '}')
+   * (';', '{', '}') and a default set of whitespace characters 
+   * (' ', '\t', n', ',')
    * @param pos Cursor position
    */
   public String getIndentOfCurrStmt(int pos) throws BadLocationException {
     char[] delims = {';', '{', '}'};
-    return getIndentOfCurrStmt(pos, delims);
+    char[] whitespace = {' ', '\t', '\n',','};
+    return getIndentOfCurrStmt(pos, delims, whitespace);
   }
   
+  /**
+   * Returns the indent level of the start of the statement
+   * that the cursor is on.  Uses a default set of whitespace characters.
+  * (' ', '\t', '\n', ',')
+   * @param pos Cursor position
+   */
+  public String getIndentOfCurrStmt(int pos, char[] delims) throws BadLocationException {
+    char[] whitespace = {' ', '\t', '\n',','};
+    return getIndentOfCurrStmt(pos, delims, whitespace);
+  }
+
   /**
    * Returns the indent level of the start of the statement
    * that the cursor is on.
    * @param pos Cursor position
    * @param delims Delimiter characters denoting end of statement
+   * @param whitespace characters to skip when looking for beginning of next statement
    */
-  public String getIndentOfCurrStmt(int pos, char[] delims) throws BadLocationException {
+  public String getIndentOfCurrStmt(int pos, char[] delims, char[] whitespace) throws BadLocationException {
     // Check cache
     String key = "getIndentOfCurrStmt:" + pos;
     for (int i=0; i < delims.length; i++) {
@@ -1023,7 +1084,6 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
 
     // From the previous delimiter, find the next non-whitespace character
     int nextNonWSChar;
-    char[] whitespace = {' ', '\t', '\n',','};
     if(reachedStart) {
       nextNonWSChar = getFirstNonWSCharPos(DOCSTART);
     }
@@ -1411,7 +1471,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
     _reduced.move(pos - origLocation);
     int reducedPos = pos;
     
-    // Walk forward from specificed position
+    // Walk backward from specified position
     for (i = pos-1; i >= 0; i--) {
       boolean isWhitespace = false;
       c = text.charAt(i);

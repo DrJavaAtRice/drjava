@@ -75,7 +75,7 @@
                     <li>20. No: <b>QuestionStartAfterOpenBrace</b><br>
                     <ul>
                         <li>21. Yes: ActionStartStmtOfBracePlus(1 level) (Goto 36)
-                        <li>22. No: <b>QuestionHasCharBeforeBrace</b><br>
+                        <li>22. No: <b>QuestionHasCharPrecedingOpenBrace</b><br>
                         <ul>
                             <li>23. Yes: ActionStartStmtOfBracePlus(1 level) (Goto 36)
                             <li>24. No: Goto 25.
@@ -88,10 +88,10 @@
                     <ul>
                         <li>27. Yes: <b>QuestionExistsCharInStmt("?", ":")</b><br>
                         <ul>
-                            <li>28. Yes: ActionStartPrevStmtPlus("") (Goto 30)
+                            <li>28. Yes: ActionStartPrevStmtPlus("", false) (Goto 30)
                             <li>29. No: ActionStartStmtOfBracePlus(1 level) (Goto 36)
                         </ul>
-                        <li>30. No: ActionStartPrevStmtPlus("")
+                        <li>30. No: ActionStartPrevStmtPlus("", true)
                     </ul>
                     <li>31. No: <b>QuestionCurrLineStartsWithSkipComments("{")</b><br>
                     <ul>

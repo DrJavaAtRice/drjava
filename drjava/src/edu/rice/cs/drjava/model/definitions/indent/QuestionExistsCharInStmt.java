@@ -112,45 +112,6 @@ public class QuestionExistsCharInStmt extends IndentRuleQuestion {
 
    // Find the position of endChar on the current line
     int endCharPos = doc.findCharOnLine(doc.getCurrentLocation(), _endChar);
-    if(endCharPos == DefinitionsDocument.ERROR_INDEX) {
-      // Should not happen, endChar must exist on the current line
-      throw new UnexpectedException(new
-        IllegalArgumentException("Argument endChar to " + 
-                                 "QuestionExistsCharInStmt must be a char " +
-                                 "that exists on the current line."));
-    }
-    
-    char[] findCharDelims = {_findChar, ';', '{', '}'};
-    int prevFindChar;
-    
-    // Find the position of the previous occurence findChar from the 
-    // position of endChar (looking in paren phrases as well)
-    try {
-      prevFindChar = doc.findPrevDelimiter(endCharPos, findCharDelims, false);
-    } catch (BadLocationException e) {
-      // Should not happen
-      throw new UnexpectedException(e);
-    }
-    
-    if ((prevFindChar == DefinitionsDocument.ERROR_INDEX) ||
-        (prevFindChar < 0)) {
-      // Couldn't find a previous occurence findChar
-      return false;
-    }
-    
-    // Determine if prevFindChar was _findChar, rather than end
-    //  of statement delimiter
-    boolean found = false;
-    try {
-      String foundString = doc.getText(prevFindChar, 1);
-      char foundChar = foundString.charAt(0);
-      found = (foundChar == _findChar);
-    }
-    catch (BadLocationException e) {
-      // Should not happen
-      throw new UnexpectedException(e);
-    }
-    
-    return found;
+    return doc.findCharInStmtBeforePos(_findChar, endCharPos);
   }
 }

@@ -5,5 +5,13 @@ for(int x = 0; x < 5; x++){
 System.out.println("Hello");
 }
 }
-  
 }
+
+int[] intArray = new foo[] {new foo() {
+public dummmy(){
+}
+},
+new foo2() {
+public dummy(){
+}
+}};
