@@ -155,26 +155,40 @@ public final class ExecJVM {
     
     File executable;
 
-    String start = System.getProperty("java.home") + "../bin/java";
+    String java_home = System.getProperty("java.home") + "/";
+    
+    String[] candidates = {
+      java_home + "../bin/java",
+      java_home + "bin/java",
+      java_home + "java",
+    };
 
-    // try javaw for dos
-    if (_isDOS()) {
-      executable = new File(start + "w.exe");
-      if (! executable.exists()) {
-        executable = new File(start + ".exe");
+    // search all the candidates to find java
+    for (int i = 0; i < candidates.length; i++) {
+      String current = candidates[i];
+
+      // try javaw.exe first for dos, otherwise try java.exe for dos
+      if (_isDOS()) {
+        executable = new File(current + "w.exe");
+        if (! executable.exists()) {
+          executable = new File(current + ".exe");
+        }
+      }
+      else {
+        executable = new File(current);
+      }
+
+      //System.err.println("checking: " + executable);
+
+      if (executable.exists()) {
+        //System.err.println("JVM executable found: " + executable.getAbsolutePath());
+        return executable.getAbsolutePath();
       }
     }
-    else {
-      executable = new File(start);
-    }
 
-    if (executable.exists()) {
-      return executable.getAbsolutePath();
-    }
-    else {
-      // hope for the best using the system's path!
-      return "java";
-    }
+    // hope for the best using the system's path!
+    //System.err.println("Could not find java executable, using 'java'!");
+    return "java";
   }
 }
   

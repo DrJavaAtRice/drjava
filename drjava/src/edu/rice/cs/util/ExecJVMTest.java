@@ -41,8 +41,8 @@ public class ExecJVMTest extends TestCase {
 
     // Check jvm executed OK
     try {
-      assertTrue("jvm did not create file", tempFile.exists());
       assertEquals("jvm exit code", 0, result);
+      assertTrue("jvm did not create file", tempFile.exists());
       assertTrue("jvm System.out not empty", jvm.getInputStream().read() == -1);
       assertTrue("jvm System.err not empty", jvm.getErrorStream().read() == -1);
     }

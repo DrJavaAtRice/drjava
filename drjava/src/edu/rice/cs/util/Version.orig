@@ -26,4 +26,8 @@ public abstract class Version {
       return null;
     }
   }
+
+  public static void main(String[] args) {
+    System.out.println("Version for edu.rice.cs.util: " + BUILD_TIME_STRING);
+  }
 } 
