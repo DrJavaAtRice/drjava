@@ -290,7 +290,7 @@ public class MainJVM extends UnicastRemoteObject implements MainJVMRemoteI {
       String[] jvmargs;
       if (debugPort > -1) {
         jvmargs = new String[] {
-          "-Dcom.apple.backgroundOnly=true",
+          //"-Dcom.apple.backgroundOnly=true",
             // For debug interface:
             "-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=" + debugPort,
             "-Xdebug",
@@ -299,7 +299,7 @@ public class MainJVM extends UnicastRemoteObject implements MainJVMRemoteI {
         };
       }
       else {
-        jvmargs = new String[] { "-Dcom.apple.backgroundOnly=true" };
+        jvmargs = new String[] { /*"-Dcom.apple.backgroundOnly=true"*/ };
       }
       
       //System.out.println("starting interpreter... " + jvmargs[1]);

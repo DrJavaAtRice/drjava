@@ -94,7 +94,7 @@ public class DefinitionsPane extends JEditorPane
   /**
    * Our current paren/brace/bracket matching highlight.
    */
-  private Object _matchHighlight = null;
+  private HighlightManager.HighlightInfo _matchHighlight = null;
   
   /**
    * Used by the centering source mechanism to ensure paints
@@ -117,28 +117,84 @@ public class DefinitionsPane extends JEditorPane
   /**
    * Our current error matching highlight.
    */
-  //private Object _errorHighlightTag = null;
   private HighlightManager.HighlightInfo _errorHighlightTag = null;
   /**
    * Highlight painter for selected errors in the defs doc.
    */
-  public static final DefaultHighlighter.DefaultHighlightPainter
+  public static DefaultHighlighter.DefaultHighlightPainter
     ERROR_PAINTER =
-    new DefaultHighlighter.DefaultHighlightPainter(Color.yellow);
+    new DefaultHighlighter.DefaultHighlightPainter(DrJava.CONFIG.getSetting(COMPILER_ERROR_COLOR));
   
   /**
    *  Highlight painter for breakpoints
    */
-  public static final DefaultHighlighter.DefaultHighlightPainter 
+  public static DefaultHighlighter.DefaultHighlightPainter 
     BREAKPOINT_PAINTER =
-    new DefaultHighlighter.DefaultHighlightPainter(Color.red);
+    new DefaultHighlighter.DefaultHighlightPainter(DrJava.CONFIG.getSetting(DEBUG_BREAKPOINT_COLOR));
   
   /**
    * Highlight painter for thread's current location
    */
-  public static final DefaultHighlighter.DefaultHighlightPainter 
+  public static DefaultHighlighter.DefaultHighlightPainter 
     THREAD_PAINTER =
-    new DefaultHighlighter.DefaultHighlightPainter(new Color(100,255,255));
+    new DefaultHighlighter.DefaultHighlightPainter(DrJava.CONFIG.getSetting(DEBUG_THREAD_COLOR));
+  
+  /**
+   * The OptionListener for DEFINITIONS_BACKGROUND_COLOR 
+   */
+  private class BackgroundColorOptionListener implements OptionListener<Color> { 
+    public void optionChanged(OptionEvent<Color> oce) {
+      setBackground(oce.value);
+    }
+  }
+  
+  /**
+   * The OptionListener for DEFINITIONS_MATCH_COLOR 
+   */
+  private class MatchColorOptionListener implements OptionListener<Color> { 
+    public void optionChanged(OptionEvent<Color> oce) {
+      MATCH_PAINTER = new DefaultHighlighter.DefaultHighlightPainter(oce.value);
+      if (_matchHighlight != null) {
+        int start = _matchHighlight.getStartOffset();
+        int end = _matchHighlight.getEndOffset();
+        _matchHighlight.remove();
+        _addHighlight(start, end);
+      }
+    }
+  }
+  
+  /**
+   * The OptionListener for COMPILER_ERROR_COLOR
+   */
+  private class ErrorColorOptionListener implements OptionListener<Color> { 
+    public void optionChanged(OptionEvent<Color> oce) {
+      ERROR_PAINTER = new DefaultHighlighter.DefaultHighlightPainter(oce.value);
+      if (_errorHighlightTag != null) {
+        int start = _errorHighlightTag.getStartOffset();
+        int end = _errorHighlightTag.getEndOffset();
+        _errorHighlightTag.remove();
+        addErrorHighlight(start, end);
+      }
+    }
+  }
+  
+  /**
+   * The OptionListener for DEBUG_BREAKPOINT_COLOR 
+   */
+  private class BreakpointColorOptionListener implements OptionListener<Color> { 
+    public void optionChanged(OptionEvent<Color> oce) {
+      BREAKPOINT_PAINTER = new DefaultHighlighter.DefaultHighlightPainter(oce.value);
+    }
+  }
+  
+  /**
+   * The OptionListener for DEBUG_THREAD_COLOR 
+   */
+  private class ThreadColorOptionListener implements OptionListener<Color> { 
+    public void optionChanged(OptionEvent<Color> oce) {
+      THREAD_PAINTER = new DefaultHighlighter.DefaultHighlightPainter(oce.value);
+    }
+  }
   
   /**
    * The menu item for the "Toggle Breakpoint" option. Stored in field so that it may be enabled and
@@ -217,20 +273,8 @@ public class DefinitionsPane extends JEditorPane
    * @param to end of highlight
    * @exception BadLocationException
    */
-  private void _addHighlight(int from, int to) throws BadLocationException {
-    _matchHighlight = (HighlightManager.HighlightInfo)_highlightManager.addHighlight(from, to, MATCH_PAINTER);
-  }
-
-  /**
-   * The OptionListener for DEFINITIONS_MATCH_COLOR 
-   */
-  private class MatchColorOptionListener implements OptionListener<Color> { 
-    public void optionChanged(OptionEvent<Color> oce) {
-      //Set the highlightPainter to the most recent one.
-      MATCH_PAINTER = 
-        new DefaultHighlighter.DefaultHighlightPainter( DrJava.CONFIG.getSetting(DEFINITIONS_MATCH_COLOR) );
-    }
-    
+  private void _addHighlight(int from, int to) {
+    _matchHighlight = _highlightManager.addHighlight(from, to, MATCH_PAINTER);
   }
   
   /**
@@ -238,7 +282,8 @@ public class DefinitionsPane extends JEditorPane
    */
   private void _removePreviousHighlight() {
     if (_matchHighlight != null) {
-      _highlightManager.removeHighlight((HighlightManager.HighlightInfo)_matchHighlight);
+      _matchHighlight.remove();
+      //_highlightManager.removeHighlight((HighlightManager.HighlightInfo)_matchHighlight);
       _matchHighlight = null;
     }
   }
@@ -368,7 +413,7 @@ public class DefinitionsPane extends JEditorPane
     _doc = doc;
     setDocument(_doc);
     setContentType("text/java");
-    setBackground(Color.white);
+    setBackground(DrJava.CONFIG.getSetting(DEFINITIONS_BACKGROUND_COLOR));
     //setFont(new Font("Courier", 0, 12));
     Font mainFont = DrJava.CONFIG.getSetting(FONT_MAIN);
     setFont(mainFont);
@@ -396,7 +441,16 @@ public class DefinitionsPane extends JEditorPane
     // If it has changed, check and see if we should be highlighting matching braces.
     this.addCaretListener(_matchListener);
  
-    DrJava.CONFIG.addOptionListener( OptionConstants.DEFINITIONS_MATCH_COLOR, new MatchColorOptionListener());
+    DrJava.CONFIG.addOptionListener( OptionConstants.DEFINITIONS_BACKGROUND_COLOR,
+                                    new BackgroundColorOptionListener());
+    DrJava.CONFIG.addOptionListener( OptionConstants.DEFINITIONS_MATCH_COLOR,
+                                    new MatchColorOptionListener());
+    DrJava.CONFIG.addOptionListener( OptionConstants.COMPILER_ERROR_COLOR,
+                                    new ErrorColorOptionListener());
+    DrJava.CONFIG.addOptionListener( OptionConstants.DEBUG_BREAKPOINT_COLOR,
+                                    new BreakpointColorOptionListener());
+    DrJava.CONFIG.addOptionListener( OptionConstants.DEBUG_THREAD_COLOR,
+                                    new ThreadColorOptionListener());
         
     createPopupMenu();
       
@@ -453,128 +507,8 @@ public class DefinitionsPane extends JEditorPane
       });
       _toggleBreakpointMenuItem = _popMenu.add(breakpointItem);
       _toggleBreakpointMenuItem.setEnabled(false);
-      
-      // Watch
-      /*
-      JMenuItem watchItem = new JMenuItem("Add Watch");
-      watchItem.addActionListener( new AbstractAction() {
-        public void actionPerformed( ActionEvent ae ) {
-          //Make sure that the watch is set on the *clicked* line, if within a selection block.
-          setCaretPosition(viewToModel(_popupMenuMA.getLastMouseClick().getPoint()));
-          _mainFrame.debuggerAddWatch();
-        }
-      });
-      _addWatchMenuItem = _popMenu.add(watchItem);
-      _addWatchMenuItem.setEnabled(false);
-      */
     }
    
-    /*
-     * Flag to enable various presets for testing the functionality of highlights
-     */
-    boolean functionTest = false;
-    
-    if (functionTest) {
-      
-      JMenuItem highlightItem1 = new JMenuItem("Add Error");
-      highlightItem1.addActionListener ( new AbstractAction() {
-        public void actionPerformed( ActionEvent ae) {
-          _highlightTest1();
-        }
-      });
-      _popMenu.add(highlightItem1);
-      
-      JMenuItem highlightItem2 = new JMenuItem("Add Breakpoint");
-      highlightItem2.addActionListener ( new AbstractAction() {
-        public void actionPerformed( ActionEvent ae) {
-          _highlightTest2();
-        }
-      });
-      _popMenu.add(highlightItem2);
-      
-      JMenuItem highlightItem5= new JMenuItem("Add Selection");
-      highlightItem5.addActionListener ( new AbstractAction() {
-        public void actionPerformed( ActionEvent ae) {
-          _highlightTest5();
-        }
-      });
-      _popMenu.add(highlightItem5);
-      
-      JMenuItem highlightItem3 = new JMenuItem("Remove Error");
-      highlightItem3.addActionListener ( new AbstractAction() {
-        public void actionPerformed( ActionEvent ae) {
-          _highlightTest3();
-        }
-      });
-      _popMenu.add(highlightItem3);
-      
-      JMenuItem highlightItem4= new JMenuItem("Remove Breakpoint");
-      highlightItem4.addActionListener ( new AbstractAction() {
-        public void actionPerformed( ActionEvent ae) {
-          _highlightTest4();
-        }
-      });
-      _popMenu.add(highlightItem4);
-      
-      JMenuItem highlightItem6 = new JMenuItem("Remove Selection");
-      highlightItem6.addActionListener ( new AbstractAction() {
-        public void actionPerformed( ActionEvent ae) {
-          _highlightTest6();
-        }
-      });
-      _popMenu.add(highlightItem6);
-    }
-    
-  }
-  
-  public void _highlightTest1() {
-    
-    int from = getSelectionStart();
-    int to = getSelectionEnd();
-    
-    _highlightManager.addHighlight(from, to, ERROR_PAINTER);
-    
-  }
-  
-  
-  public void _highlightTest2() {
-    
-   int from = getSelectionStart();
-   int to = getSelectionEnd();
-       
-   _highlightManager.addHighlight(from, to, BREAKPOINT_PAINTER);
-       
-  }
-  
-  public void _highlightTest3() {
-    int from = getSelectionStart();
-    int to = getSelectionEnd();
-    
-    _highlightManager.removeHighlight(from, to, ERROR_PAINTER);
-    
-  }
-  
-  public void _highlightTest4() {
-    int from = getSelectionStart();
-    int to = getSelectionEnd();
-    
-    _highlightManager.removeHighlight(from, to, BREAKPOINT_PAINTER);
-    
-  }
-  
-  public void _highlightTest5() {
-    int from = getSelectionStart();
-    int to = getSelectionEnd();
-    
-    _highlightManager.addHighlight(from, to, MATCH_PAINTER);
-    
-  }
-  
-  public void _highlightTest6() {
-    int from = getSelectionStart();
-    int to = getSelectionEnd();
-    
-    _highlightManager.removeHighlight(from, to, MATCH_PAINTER);
     
   }
   
@@ -728,11 +662,9 @@ public class DefinitionsPane extends JEditorPane
    * @exception BadLocationException
    */
   public void addErrorHighlight(int from, int to)
-    throws BadLocationException
   {
     removeErrorHighlight();
-    _errorHighlightTag = (HighlightManager.HighlightInfo)
-      _highlightManager.addHighlight(from, to, ERROR_PAINTER);
+    _errorHighlightTag = _highlightManager.addHighlight(from, to, ERROR_PAINTER);
   }
 
   /**
@@ -741,7 +673,8 @@ public class DefinitionsPane extends JEditorPane
    */
   public void removeErrorHighlight() {
     if (_errorHighlightTag != null) {
-      _highlightManager.removeHighlight( (HighlightManager.HighlightInfo)_errorHighlightTag);
+      _errorHighlightTag.remove();
+      //_highlightManager.removeHighlight( (HighlightManager.HighlightInfo)_errorHighlightTag);
       _errorHighlightTag = null;
     }
   }

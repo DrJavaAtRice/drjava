@@ -151,6 +151,12 @@ public interface GlobalModel {
    * @return true if all documents were closed
    */
   public boolean closeAllFiles();
+  
+  /**
+   * Reverts all open files.
+   * (Not working yet.)
+  public void revertAllFiles() throws IOException;
+  */
 
   /**
    * Saves all open documents, prompting when necessary.

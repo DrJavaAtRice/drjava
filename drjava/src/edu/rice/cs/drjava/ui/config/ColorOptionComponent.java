@@ -51,6 +51,8 @@ import java.awt.event.*;
  */
 public class ColorOptionComponent extends OptionComponent<Color> {
   private JButton _button;
+  private JTextField _colorField;
+  private JPanel _panel;
   private Color _currentColor;
   private Color _newColor;
   private boolean _isBackgroundColor;
@@ -81,15 +83,27 @@ public class ColorOptionComponent extends OptionComponent<Color> {
         chooseColor();
       }
     });
+    _button.setText("...");
+    _button.setMaximumSize(new Dimension(10,10));
+    _button.setMinimumSize(new Dimension(10,10));
+    
+    _colorField = new JTextField();
+    _colorField.setEditable(false);
+    _colorField.setHorizontalAlignment(JTextField.CENTER);
+    _panel = new JPanel(new BorderLayout());
+    _panel.add(_colorField, BorderLayout.CENTER);
+    _panel.add(_button, BorderLayout.EAST);
     if (_isBackgroundColor) {
-      _button.setForeground(Color.black);
+      _colorField.setForeground(Color.black);
     }
     else {
-      _button.setBackground(Color.white);
+      _colorField.setBackground(Color.white);
+      // Would be nice to use background color here (need a listener in configframe?)
+      //_colorField.setBackground(DrJava.CONFIG.getSetting(OptionConstants.DEFINITIONS_BACKGROUND_COLOR)););
     }
     _currentColor = DrJava.CONFIG.getSetting(_option);
     _newColor = _currentColor;
-    _updateButton(_currentColor);
+    _updateField(_currentColor);
   }
   
   /**
@@ -111,26 +125,26 @@ public class ColorOptionComponent extends OptionComponent<Color> {
    */
   public void setValue(Color value) {
     _newColor = value;
-    _updateButton(value);
+    _updateField(value);
   }
   
   /**
-   * Updates the component's button to display the given color.
+   * Updates the component's field to display the given color.
    */
-  private void _updateButton(Color c) {
+  private void _updateField(Color c) {
     if (_isBackgroundColor) {
-      _button.setBackground(c);
+      _colorField.setBackground(c);
     }
     else {
-      _button.setForeground(c);
+      _colorField.setForeground(c);
     }
-    _button.setText(getLabelText() + " ("+_option.format(c)+")");
+    _colorField.setText(getLabelText() + " ("+_option.format(c)+")");
   }
   
   /**
    * Return's this OptionComponent's configurable component.
    */
-  public JComponent getComponent() { return _button; }
+  public JComponent getComponent() { return _panel; }
   
   /**
    * Shows a color chooser dialog for picking a new color.
@@ -141,7 +155,7 @@ public class ColorOptionComponent extends OptionComponent<Color> {
                                        _newColor);
     if (c != null) {
       _newColor = c;
-      _updateButton(_newColor);
+      _updateField(_newColor);
     }    
   }
   

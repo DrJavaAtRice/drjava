@@ -392,7 +392,11 @@ public class ConfigFrame extends JFrame {
     panel.addComponent( new ColorOptionComponent (OptionConstants.DEFINITIONS_DOUBLE_QUOTED_COLOR, "Double-quoted Color", this));
     panel.addComponent( new ColorOptionComponent (OptionConstants.DEFINITIONS_SINGLE_QUOTED_COLOR, "Single-quoted Color", this));
     panel.addComponent( new ColorOptionComponent (OptionConstants.DEFINITIONS_NUMBER_COLOR, "Number Color", this));
-    panel.addComponent( new ColorOptionComponent (OptionConstants.DEFINITIONS_MATCH_COLOR, "Brace-matching Color", this));
+    panel.addComponent( new ColorOptionComponent (OptionConstants.DEFINITIONS_BACKGROUND_COLOR, "Background Color", this, true));
+    panel.addComponent( new ColorOptionComponent (OptionConstants.DEFINITIONS_MATCH_COLOR, "Brace-matching Color", this, true));
+    panel.addComponent( new ColorOptionComponent (OptionConstants.COMPILER_ERROR_COLOR, "Compiler Error Color", this, true));
+    panel.addComponent( new ColorOptionComponent (OptionConstants.DEBUG_BREAKPOINT_COLOR, "Debugger Breakpoint Color", this, true));
+    panel.addComponent( new ColorOptionComponent (OptionConstants.DEBUG_THREAD_COLOR, "Debugger Location Color", this, true));
     panel.displayComponents();
   }
   

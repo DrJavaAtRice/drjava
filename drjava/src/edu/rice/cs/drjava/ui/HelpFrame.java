@@ -50,6 +50,7 @@ import java.net.URL;
 import java.io.*;
 
 import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.CodeStatus;
 
 /**
  * The frame for displaying the HTML help files.
@@ -167,7 +168,12 @@ public class HelpFrame extends JFrame implements HyperlinkListener {
    */
   private void _displayError() {
     // The help files are made available by running "ant docs"
-    _mainDocPane.setText("The Help files are currently unavailable.");
+    String errorText = "The Help files are currently unavailable.";
+    if (CodeStatus.DEVELOPMENT) {
+      errorText += "\n\nTo generate the help files, run the \"ant docs\" target" +
+        " after compiling DrJava.";
+    }
+    _mainDocPane.setText(errorText);
   }
   
   /**

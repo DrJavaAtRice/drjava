@@ -86,10 +86,34 @@ public interface OptionConstants extends ConfigurationTool {
     new ColorOption("definitions.number.color", Color.cyan.darker().darker());
   
   /**
+   * Color for background of definitions pane.
+   */
+  public static final ColorOption DEFINITIONS_BACKGROUND_COLOR = 
+    new ColorOption("definitions.background.color", Color.white);
+  
+  /**
    * Color for highlighting brace-matching.
    */
   public static final ColorOption DEFINITIONS_MATCH_COLOR = 
     new ColorOption("definitions.match.color", new Color(190, 255, 230));
+  
+  /**
+   * Color for highlighting errors and test failures.
+   */
+  public static final ColorOption COMPILER_ERROR_COLOR = 
+    new ColorOption("compiler.error.color", Color.yellow);
+  
+  /**
+   * Color for highlighting breakpoints.
+   */
+  public static final ColorOption DEBUG_BREAKPOINT_COLOR = 
+    new ColorOption("debug.breakpoint.color", Color.red);
+  
+  /**
+   * Color for highlighting thread locations.
+   */
+  public static final ColorOption DEBUG_THREAD_COLOR = 
+    new ColorOption("debug.thread.color", new Color(100,255,255));
   
   
   /* ---------- Font Options ---------- */
@@ -248,11 +272,20 @@ public interface OptionConstants extends ConfigurationTool {
     new KeyStrokeOption("key.next.document", 
                         KeyStroke.getKeyStroke(KeyEvent.VK_PERIOD, mask));
   /**
-   * The key binding for compiling
+   * The key binding for compiling current document
    */
   public static final KeyStrokeOption KEY_COMPILE =
     new KeyStrokeOption("key.compile", 
+                        KeyStroke.getKeyStroke(KeyEvent.VK_F5, 
+                                               InputEvent.SHIFT_MASK));
+  
+  /**
+   * The key binding for compiling all
+   */
+  public static final KeyStrokeOption KEY_COMPILE_ALL =
+    new KeyStrokeOption("key.compile.all", 
                         KeyStroke.getKeyStroke(KeyEvent.VK_F5, 0));
+  
   /**
    * The key binding for aborting the current interaction.
    * (replaced by Reset Interactions, with no shortcut.)
@@ -371,14 +404,24 @@ public interface OptionConstants extends ConfigurationTool {
   public static final KeyStrokeOption KEY_CUT_LINE =
     new KeyStrokeOption("key.cut.line", 
                         KeyStroke.getKeyStroke(KeyEvent.VK_K, mask));
+  
+  /**
+   * The key binding for toggling debug mode
+   */
+  public static final KeyStrokeOption KEY_DEBUG_MODE_TOGGLE =
+    new KeyStrokeOption("key.debug.mode.toggle", 
+                        KeyStroke.getKeyStroke(KeyEvent.VK_D, mask));
+  
   /**
    * The key binding for suspending the debugger
-   */
+   *
   public static final KeyStrokeOption KEY_DEBUG_SUSPEND =
     (!CodeStatus.DEVELOPMENT)?
     null:
     new KeyStrokeOption("key.debug.suspend", 
                         KeyStroke.getKeyStroke(KeyEvent.VK_F6, 0));
+                        */
+  
   /**
    * The key binding for resuming the debugger
    */

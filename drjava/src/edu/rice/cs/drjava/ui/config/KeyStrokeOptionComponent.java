@@ -57,6 +57,8 @@ public class KeyStrokeOptionComponent extends OptionComponent<KeyStroke>
   private static final int DIALOG_HEIGHT = 185;
   public static Hashtable _keyToKSOC = new Hashtable();
   private JButton _button;
+  private JTextField _keyField;
+  private JPanel _panel;
   private static GetKeyDialog _getKeyDialog =  null;    
   
   private KeyStroke _currentKey;
@@ -71,8 +73,6 @@ public class KeyStrokeOptionComponent extends OptionComponent<KeyStroke>
     _newKey = _currentKey;
     
     _button = new JButton();
-    _button.setBackground(Color.white);
-    _button.setText(_option.format(_currentKey));
     _button.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent ae) {
 
@@ -86,6 +86,18 @@ public class KeyStrokeOptionComponent extends OptionComponent<KeyStroke>
         _getKeyDialog.promptKey(KeyStrokeOptionComponent.this);
       }
     });
+    _button.setText("...");
+    _button.setMaximumSize(new Dimension(10,10));
+    _button.setMinimumSize(new Dimension(10,10));
+    
+    _keyField = new JTextField();
+    _keyField.setEditable(false);
+    _keyField.setBackground(Color.white);
+    _keyField.setHorizontalAlignment(JTextField.CENTER);
+    _keyField.setText(_option.format(_currentKey));
+    _panel = new JPanel(new BorderLayout());
+    _panel.add(_keyField, BorderLayout.CENTER);
+    _panel.add(_button, BorderLayout.EAST);
    
     GridLayout gl = new GridLayout(1,0);
     gl.setHgap(15);
@@ -118,7 +130,7 @@ public class KeyStrokeOptionComponent extends OptionComponent<KeyStroke>
    */
   public void setValue(KeyStroke value) {
     _newKey = value;
-    _button.setText(_option.format(value));
+    _keyField.setText(_option.format(value));
   }
   
   /**
@@ -150,14 +162,14 @@ public class KeyStrokeOptionComponent extends OptionComponent<KeyStroke>
   /**
    * Return's this OptionComponent's configurable component.
    */
-  public JComponent getComponent() { return _button; }
+  public JComponent getComponent() { return _panel; }
   
   /**
    * Sets the currently selected KeyStroke.
    */
   private void _setKeyStroke(KeyStroke ks) {
     _newKey = ks;
-    _button.setText(_option.format(_newKey));
+    _keyField.setText(_option.format(_newKey));
   }
   
   /**

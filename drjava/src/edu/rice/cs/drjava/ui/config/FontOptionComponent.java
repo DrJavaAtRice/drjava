@@ -54,6 +54,8 @@ import java.awt.event.*;
 public class FontOptionComponent extends OptionComponent<Font> {
   
   private JButton _button;
+  private JTextField _fontField;
+  private JPanel _panel;
   private Font _currentFont;
   private Font _newFont;
   
@@ -65,38 +67,49 @@ public class FontOptionComponent extends OptionComponent<Font> {
         chooseFont();
       }
     });
-    _button.setBackground(Color.white);
+    _button.setText("...");
+    _button.setMaximumSize(new Dimension(10,10));
+    _button.setMinimumSize(new Dimension(10,10));
+    
+    _fontField = new JTextField();
+    _fontField.setEditable(false);
+    _fontField.setBackground(Color.white);
+    _fontField.setHorizontalAlignment(JTextField.CENTER);
+    _panel = new JPanel(new BorderLayout());
+    _panel.add(_fontField, BorderLayout.CENTER);
+    _panel.add(_button, BorderLayout.EAST);
 
     _currentFont = DrJava.CONFIG.getSetting(_option);
     _newFont = _currentFont;
-    _updateButton(_currentFont);
+    _updateField(_currentFont);
     
   }
   
   /**
-   * Updates the button to display the given font.
+   * Updates the font field to display the given font.
    */
-  private void _updateButton (Font f) {
-    _button.setFont(f);
-    _button.setText(_option.format(f));
+  private void _updateField(Font f) {
+    _fontField.setFont(f);
+    _fontField.setText(_option.format(f));
   }
     
   /**
    * Return's this OptionComponent's configurable component.
    */
   public JComponent getComponent() {
-    return _button;
+    return _panel;
   }
   
   /**
    * Shows a custom font chooser dialog to pick a new font.
    */
   public void chooseFont() {
-    Font f = FontChooser.showDialog(_parent, _newFont);
-    
+    Font f = FontChooser.showDialog(_parent, 
+                                    "Choose '" + getLabelText() + "'",
+                                    _newFont);
     if (f != null) {
       _newFont = f;
-      _updateButton(_newFont);
+      _updateField(_newFont);
     }
   }
   
@@ -117,6 +130,6 @@ public class FontOptionComponent extends OptionComponent<Font> {
    */
   public void setValue(Font value) {
     _newFont = value;
-    _updateButton(value);
+    _updateField(value);
   }
 }

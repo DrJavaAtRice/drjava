@@ -113,6 +113,8 @@
 
     <delete dir="${dist}/${version-tag}" />
 
+    <antcall target="docs" />
+
     <antcall target="jar">
       <param name="jarfile" value="${dist}/${version-tag}.jar" />
     </antcall>

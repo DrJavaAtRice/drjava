@@ -274,6 +274,25 @@ public class MainFrame extends JFrame implements OptionConstants {
       }
     }
   };
+  
+  /** Reverts all open documents. 
+   * (not working yet
+  private Action _revertAllAction = new AbstractAction("Revert All to Saved") {
+    public void actionPerformed(ActionEvent ae) {
+      String title = "Revert All to Saved?";
+      
+      String message = "Are you sure you want to revert all open " +
+        "files to the versions on disk?";
+      
+      int rc = JOptionPane.showConfirmDialog(MainFrame.this,
+                                             message,
+                                             title,
+                                             JOptionPane.YES_NO_OPTION);
+      if (rc == JOptionPane.YES_OPTION) {
+        _revertAll();
+      }
+    }
+  };*/
 
   /**
    * Saves all documents, prompting for file names as necessary
@@ -489,9 +508,11 @@ public class MainFrame extends JFrame implements OptionConstants {
       if (rc == JOptionPane.YES_OPTION) {
         final SwingWorker worker = new SwingWorker() {
           public Object construct() {
+            _interactionsPane.setEditable(false);
             _interactionsPane.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
             _model.resetInteractions();
             _interactionsPane.setCursor(null);
+            _interactionsPane.setEditable(true);
             return null;
           }
         };
@@ -1179,13 +1200,22 @@ public class MainFrame extends JFrame implements OptionConstants {
   private void _revert() {
     try {
       _model.getActiveDocument().revertFile();
-      _currentDefPane.resetUndo();
-      _currentDefPane.hasWarnedAboutModified(false);
     }
     catch (IOException ioe) {
       _showIOError(ioe);
     }
   }
+  
+  /**
+  private void _revertAll() {
+    try {
+      _model.revertAllFiles();
+    }
+    catch (IOException ioe) {
+      _showIOError(ioe);
+    }
+  }
+  */
 
   private void _editPreferences() {
     if (_configFrame == null) {
@@ -1198,9 +1228,11 @@ public class MainFrame extends JFrame implements OptionConstants {
     final SwingWorker worker = new SwingWorker() {
       public Object construct() {
         try {
+          _interactionsPane.setEditable(false);
           _interactionsPane.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
           _model.getActiveDocument().startCompile();
           _interactionsPane.setCursor(null);
+          _interactionsPane.setEditable(true);
         }
         catch (IOException ioe) {
           _showIOError(ioe);
@@ -1604,18 +1636,22 @@ public class MainFrame extends JFrame implements OptionConstants {
     _setUpAction(_newAction, "New", "Create a new document");
     _setUpAction(_openAction, "Open", "Open an existing file");
     _setUpAction(_saveAction, "Save", "Save the current document");
-    _setUpAction(_saveAsAction, "SaveAs", "Save the current document with a new name");
+    _setUpAction(_saveAsAction, "Save As", "SaveAs",
+                 "Save the current document with a new name");
     _setUpAction(_revertAction, "Revert", "Revert the current document to saved version");
+    //_setUpAction(_revertAllAction, "Revert All", "RevertAll",
+    //             "Revert all open documents to the saved versions");
 
     _setUpAction(_closeAction, "Close", "Close the current document");
-    _setUpAction(_closeAllAction, "CloseAll", "Close all documents");
-    _setUpAction(_saveAllAction, "SaveAll", "Save all open documents");
+    _setUpAction(_closeAllAction, "Close All", "CloseAll", "Close all documents");
+    _setUpAction(_saveAllAction, "Save All", "SaveAll", "Save all open documents");
 
     _setUpAction(_compileAction, "Compile", "Compile the current document");
-    _setUpAction(_compileAllAction, "CompileAll", "Compile all open documents");
+    _setUpAction(_compileAllAction, "Compile All", "CompileAll",
+                 "Compile all open documents");
     _setUpAction(_printAction, "Print", "Print the current document");
-    _setUpAction(_pageSetupAction, "PageSetup", "Page Setup");
-    _setUpAction(_printPreviewAction, "PrintPreview", "Print Preview");
+    _setUpAction(_pageSetupAction, "Page Setup", "PageSetup", "Page Setup");
+    _setUpAction(_printPreviewAction, "Print Preview", "PrintPreview", "Print Preview");
 
     _setUpAction(cutAction, "Cut", "Cut selected text to the clipboard");
     _setUpAction(copyAction, "Copy", "Copy selected text to the clipboard");
@@ -1647,10 +1683,13 @@ public class MainFrame extends JFrame implements OptionConstants {
 
   }
 
-  private void _setUpAction(Action a, String icon, String shortDesc) {
+  private void _setUpAction(Action a, String name, String icon, String shortDesc) {
     a.putValue(Action.SMALL_ICON, _getIcon(icon + "16.gif"));
-    a.putValue(Action.DEFAULT, icon);
+    a.putValue(Action.DEFAULT, name);
     a.putValue(Action.SHORT_DESCRIPTION, shortDesc);
+  }
+  private void _setUpAction(Action a, String icon, String shortDesc) {
+    _setUpAction(a, icon, icon, shortDesc);
   }
 
 
@@ -1707,17 +1746,26 @@ public class MainFrame extends JFrame implements OptionConstants {
    * @param opt Configurable keystroke for the menu item
    */
   private void _addMenuItem(JMenu menu, Action a, Option<KeyStroke> opt) {
-    JMenuItem tmpItem;
-    tmpItem = menu.add(a);
-    
+    JMenuItem item;
+    item = menu.add(a);
+    _setMenuShortcut(item, a, opt);
+  }
+
+  /**
+   * Sets the given menu item to have the specified configurable keystroke.
+   * @param item Menu item containing the action
+   * @param a Action for the menu item
+   * @param opt Configurable keystroke for the menu item
+   */
+  private void _setMenuShortcut(JMenuItem item, Action a, Option<KeyStroke> opt) {
     KeyStroke ks = DrJava.CONFIG.getSetting(opt);
     // Checks that "a" is the action associated with the keystroke.
     // Need to check in case two actions were assigned to the same
     // key in the config file
-    KeyBindingManager.Singleton.put(opt, a, tmpItem, tmpItem.getText());
+    KeyBindingManager.Singleton.put(opt, a, item, item.getText());
     if (KeyBindingManager.Singleton.get(ks) == a) { 
-      tmpItem.setAccelerator(ks);
-      //KeyBindingManager.Singleton.addListener(opt, tmpItem);
+      item.setAccelerator(ks);
+      //KeyBindingManager.Singleton.addListener(opt, item);
     }
   }
   
@@ -1741,6 +1789,7 @@ public class MainFrame extends JFrame implements OptionConstants {
 
     tmpItem = fileMenu.add(_revertAction);
     _revertAction.setEnabled(false);
+    //tmpItem = fileMenu.add(_revertAllAction);
 
     // Close, Close all
     fileMenu.addSeparator();
@@ -1804,8 +1853,8 @@ public class MainFrame extends JFrame implements OptionConstants {
     JMenu toolsMenu = new JMenu("Tools");
 
     // Compile, Compile all
+    _addMenuItem(toolsMenu, _compileAllAction, KEY_COMPILE_ALL);
     _addMenuItem(toolsMenu, _compileAction, KEY_COMPILE);
-    toolsMenu.add(_compileAllAction);
     toolsMenu.add(_junitAction);
 
     // Abort/reset interactions, clear console
@@ -1836,6 +1885,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     // Enable debugging item
     _debuggerEnabledMenuItem = _newCheckBoxMenuItem(_toggleDebuggerAction);
     _debuggerEnabledMenuItem.setSelected(false);
+    _setMenuShortcut(_debuggerEnabledMenuItem, _toggleDebuggerAction, KEY_DEBUG_MODE_TOGGLE);
     debugMenu.add(_debuggerEnabledMenuItem);
     debugMenu.addSeparator();
 
@@ -1998,7 +2048,8 @@ public class MainFrame extends JFrame implements OptionConstants {
 
     // Compile, reset, abort
     _toolBar.addSeparator();
-    _compileButton = _createToolbarButton(_compileAction);
+    //_compileButton = _createToolbarButton(_compileAction);
+    _compileButton = _createToolbarButton(_compileAllAction);
     _toolBar.add(_compileButton);
     _toolBar.add(_createToolbarButton(_resetInteractionsAction));
     //_toolBar.add(_createToolbarButton(_abortInteractionAction));
@@ -2669,6 +2720,8 @@ public class MainFrame extends JFrame implements OptionConstants {
     public void fileReverted(OpenDefinitionsDocument doc) {
       updateFileTitle();
       _saveAction.setEnabled(false);
+      _currentDefPane.resetUndo();
+      _currentDefPane.hasWarnedAboutModified(false);
       _currentDefPane.setPositionAndScroll(0);
     }
     public void activeDocumentChanged(final OpenDefinitionsDocument active) {

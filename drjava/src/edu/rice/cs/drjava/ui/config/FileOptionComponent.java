@@ -71,7 +71,7 @@ public class FileOptionComponent extends OptionComponent<File>
     });
     _button.setText("...");
     _button.setMaximumSize(new Dimension(10,10));
-    _button.setMinimumSize(new Dimension(10, 10));
+    _button.setMinimumSize(new Dimension(10,10));
     
     _jtf = new JTextField();
     _jtf.setColumns(30);

@@ -488,6 +488,21 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
   }
 
   /**
+   * Reverts all open files.
+   * Not working yet: causes an exception in the reduced model if a
+   * non-active document is reverted...?
+   *
+  public void revertAllFiles() throws IOException {
+    for (int i = 0; i < _definitionsDocs.getSize(); i++) {
+      OpenDefinitionsDocument doc = (OpenDefinitionsDocument)
+        _definitionsDocs.getElementAt(i);
+      if (!doc.isUntitled()) {
+        doc.revertFile();
+      }
+    }
+  }*/
+
+  /**
    * Exits the program.
    * Only quits if all documents are successfully closed.
    */
@@ -1658,6 +1673,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
         reader.close(); // win32 needs readers closed explicitly!
         
         tempDoc.resetModification();
+        
         syncCurrentLocationWithDefinitions(0);
         
         notifyListeners(new EventNotifier() {
