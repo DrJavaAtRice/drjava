@@ -291,7 +291,7 @@ public class GlobalModelJUnitTest extends GlobalModelTestCase {
     final File file = new File(_tempDir, "MonkeyTestInfinite.java");
     doc.saveFile(new FileSelector(file));
     
-    CompileShouldSucceedListener listener = new CompileShouldSucceedListener();
+    CompileShouldSucceedListener listener = new CompileShouldSucceedListener(true);
     TestListener listener2 = new TestListener() {
       public void junitStarted(OpenDefinitionsDocument odd) {
         assertEquals("Documents don't match", doc, odd);
@@ -381,6 +381,9 @@ public class GlobalModelJUnitTest extends GlobalModelTestCase {
   }
   
   protected class TestShouldSucceedListener extends CompileShouldSucceedListener {
+    public TestShouldSucceedListener() {
+      super(true);
+    }
     public void junitStarted(OpenDefinitionsDocument odd) {
       junitStartCount++;
     }

@@ -718,7 +718,23 @@ public abstract class GlobalModelTestCase extends TestCase {
     }
   }
 
+  
+  /**
+   * If users expect the Interactions to be reset after a compilation, they
+   * must synchronize on this listener when compiling, then wait() on it.
+   * The interactionsReset() method will notify().
+   */
   public static class CompileShouldSucceedListener extends TestListener {
+    private boolean _expectReset;
+    
+    /**
+     * @param expectReset Whether to listen for interactions being
+     * reset after a compiliation
+     */
+    public CompileShouldSucceedListener(boolean expectReset) {
+      _expectReset = expectReset;
+    }
+    
     public void compileStarted() {
       assertCompileStartCount(0);
       assertCompileEndCount(0);
@@ -769,8 +785,10 @@ public abstract class GlobalModelTestCase extends TestCase {
     public void checkCompileOccurred() {
       assertCompileEndCount(1);
       assertCompileStartCount(1);
-      assertInteractionsResettingCount(1);
-      assertInteractionsResetCount(1);
+      if (_expectReset) {
+        assertInteractionsResettingCount(1);
+        assertInteractionsResetCount(1);
+      }
       assertConsoleResetCount(1);
     }
   }

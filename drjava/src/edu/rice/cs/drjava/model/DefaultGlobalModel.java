@@ -180,6 +180,12 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
    */
   private int _numErrors = 0;
   
+  /**
+   * Whether or not to reset the interactions JVM after compiling.
+   * Should only be false in test cases.
+   */
+  private boolean _resetAfterCompile = true;
+  
   
   // ---- JUnit Fields ----
   
@@ -1194,6 +1200,15 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
   }
   
   /**
+   * Sets whether or not the Interactions JVM will be reset after
+   * a compilation succeeds.  This should ONLY be used in tests!
+   * @param shouldReset Whether to reset after compiling
+   */
+  void setResetAfterCompile(boolean shouldReset) {
+    _resetAfterCompile = shouldReset;
+  }
+  
+  /**
    * Compiles all open documents, after ensuring that all are saved.
    * 
    * This method used to only compile documents which were out of sync
@@ -1688,6 +1703,9 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
      * package as determined by getSourceRoot(String) and getPackageName()
      * is invalid, compileStarted and compileEnded will fire, and
      * an error will be put in compileErrors.
+     * 
+     * (Interactions are not reset if the _resetAfterCompile field is
+     * set to false, which allows some test cases to run faster.)
      */
     public void startCompile() throws IOException {
       synchronized(_compilerLock) {
@@ -1735,7 +1753,9 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
               // Only clear console/interactions if there were no errors
               if (_numErrors == 0) {
                 resetConsole();
-                resetInteractions();
+                if (_resetAfterCompile) {
+                  resetInteractions();
+                }
               }
             }
           }

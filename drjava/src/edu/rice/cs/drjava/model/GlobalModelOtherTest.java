@@ -275,7 +275,7 @@ public class GlobalModelOtherTest extends GlobalModelTestCase implements OptionC
   {
     doc.saveFile(new FileSelector(file));
 
-    CompileShouldSucceedListener listener = new CompileShouldSucceedListener();
+    CompileShouldSucceedListener listener = new CompileShouldSucceedListener(true);
     _model.addListener(listener);
     synchronized(listener) {
       doc.startCompile();
