@@ -12,8 +12,8 @@ import java.io.File;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 import edu.rice.cs.drjava.util.UnexpectedException;
 
-/** 
- * The model for the definitions pane.   
+/**
+ * The model for the definitions pane.
  * @version $Id$
  */
 public class DefinitionsDocument extends PlainDocument {
@@ -27,8 +27,8 @@ public class DefinitionsDocument extends PlainDocument {
   private static boolean _tabsRemoved = true;
   /** Determines if the document has been modified since the last save. */
   private boolean _modifiedSinceSave = false;
-  /** 
-   * The reduced model of the document that handles most of the 
+  /**
+   * The reduced model of the document that handles most of the
    * document logic and keeps track of state.
    */
   BraceReduction _reduced = new ReducedModelControl();
@@ -36,7 +36,7 @@ public class DefinitionsDocument extends PlainDocument {
   int _currentLocation = 0;
 
   private File _file;
-  
+
   /**
    * Constructor.
    */
@@ -82,15 +82,33 @@ public class DefinitionsDocument extends PlainDocument {
     return  keywords;
   }
 
-  
-  public File getFile() {
+  /**
+   * Returns whether this document is currently untitled
+   * (indicating whether it has a file yet or not).
+   * @return true if the document is untitled and has no file
+   */
+  public boolean isUntitled() {
+    return (_file == null);
+  }
+
+  /**
+   * Returns the file for this document.  If the document
+   * is untitled and has no file, it throws an IllegalStateException.
+   * @return the file for this document
+   * @exception IllegalStateException if no file exists
+   */
+  public File getFile() throws IllegalStateException {
+    if (_file == null) {
+      throw new IllegalStateException(
+        "This document does not yet have a file.");
+    }
     return _file;
   }
-  
+
   public void setFile(File file) {
     _file = file;
   }
-  
+
   /**
    * Inserts a string of text into the document.
    * <ol>
@@ -107,16 +125,16 @@ public class DefinitionsDocument extends PlainDocument {
    *   since the view does the attribute updates for us
    * @exception BadLocationException
    */
-  public void insertString(int offset, String str, AttributeSet a) 
-    throws BadLocationException {     
-      // If _removeTabs is set to true, remove all tabs from str. 
-      // It is a current invariant of the tabification`functionality that 
+  public void insertString(int offset, String str, AttributeSet a)
+    throws BadLocationException {
+      // If _removeTabs is set to true, remove all tabs from str.
+      // It is a current invariant of the tabification`functionality that
       // the document contains no tabs, but we want to allow the user
       // to override this functionality.
       if (_tabsRemoved) {
         str = _removeTabs(str);
       }
-      
+
       int locationChange = offset - _currentLocation;
       int strLength = str.length();
       int prevSize;     //stores the size of the item prev when insert begins.
@@ -133,7 +151,7 @@ public class DefinitionsDocument extends PlainDocument {
       _modifiedSinceSave = true;
       _styleChanged();
     }
-  
+
   /**
    * Given a String, return a new String will all tabs converted to spaces.
    * Each tab is converted to two spaces, or whatever the _indent field is.
@@ -144,12 +162,12 @@ public class DefinitionsDocument extends PlainDocument {
     StringBuffer target = new StringBuffer();
     for (int i = 0; i < source.length(); i++) {
       char next = source.charAt(i);
-      
+
       if (next != '\t') {
         target.append(source.charAt(i));
       }
-      else { 
-        // Replace tab with a number of 
+      else {
+        // Replace tab with a number of
         // spaces according to the value of _indent.
         for (int j = 0; j < _indent; j++) {
           target.append(' ');
@@ -171,7 +189,7 @@ public class DefinitionsDocument extends PlainDocument {
    * Removes a block of text from the specified location.
    * <ol>
    *  <li>update the current location to the deletion point
-   *  <li>remove the number of characters specified 
+   *  <li>remove the number of characters specified
    *      after the deletion point
    *  <li>update modification state of the document
    *  <li>fire a document change event so the DefinitionsPane
@@ -195,7 +213,7 @@ public class DefinitionsDocument extends PlainDocument {
 
   /**
    * Fire event that styles changed from current location to the end.
-   * Right now we do this every time there is an insertion or removal. 
+   * Right now we do this every time there is an insertion or removal.
    * Two possible future optimizations:
    * <ol>
    * <li>Only fire changed event if text other than that which was inserted
@@ -226,8 +244,8 @@ public class DefinitionsDocument extends PlainDocument {
    // reduced model changes
    }
    */
-  
-  /** 
+
+  /**
    * Whenever this document has been saved, this method should be called
    * so that it knows it's no longer in a modified state.
    */
@@ -269,7 +287,7 @@ public class DefinitionsDocument extends PlainDocument {
     int oldLoc = _currentLocation;
     _currentLocation += dist;
     if (_currentLocation < 0) {
-      throw  new RuntimeException("location < 0?! oldLoc=" + oldLoc + " dist=" + 
+      throw  new RuntimeException("location < 0?! oldLoc=" + oldLoc + " dist=" +
           dist);
     }
     _reduced.move(dist);
@@ -282,7 +300,7 @@ public class DefinitionsDocument extends PlainDocument {
   public void setIndent(int indent) {
     this._indent = indent;
   }
-  
+
   /**
    * Returns true iff tabs are to removed on text insertion.
    */
@@ -291,7 +309,7 @@ public class DefinitionsDocument extends PlainDocument {
   }
 
   /**
-   * Forwarding method to find the match for the closing brace 
+   * Forwarding method to find the match for the closing brace
    * immediately to the left, assuming there is such a brace.
    * @return the relative distance backwards to the offset before
    *         the matching brace.
@@ -299,7 +317,7 @@ public class DefinitionsDocument extends PlainDocument {
   public int balanceBackward() {
     return _reduced.balanceBackward();
   }
-  
+
 
   public void indentLines(int selStart, int selEnd) {
     try {
@@ -312,7 +330,7 @@ public class DefinitionsDocument extends PlainDocument {
         int space = getWhiteSpace();
         move(space);
         //setCaretPosition(caretPos + space);
-      } 
+      }
       else {
         _indentBlock(selStart, selEnd);
       }
@@ -321,7 +339,7 @@ public class DefinitionsDocument extends PlainDocument {
       throw new UnexpectedException(e);
     }
   }
-  
+
   /**
    * Indents the lines between and including the lines containing
    * points start and end.
@@ -330,7 +348,7 @@ public class DefinitionsDocument extends PlainDocument {
    */
   private void _indentBlock(final int start, final int end) {
     try {
-      // Keep marker at the end. This Position will be the 
+      // Keep marker at the end. This Position will be the
       // correct endpoint no matter how we change the doc
       // doing the indentLine calls.
       final Position endPos = this.createPosition(end);
@@ -356,13 +374,13 @@ public class DefinitionsDocument extends PlainDocument {
       throw  new RuntimeException("Impossible bad loc except: " + e);
     }
   }
- 
-  
+
+
   /**
    * Indents a line in accordance with the rules that DrJava has set up.
    */
   private void _indentLine() {
-    try {    
+    try {
       // moves us to the end of the line
       move(_reduced.getDistToNextNewline());
       IndentInfo ii = _reduced.getIndentInformation();
@@ -380,15 +398,15 @@ public class DefinitionsDocument extends PlainDocument {
         tab = 0;
       //takes care of the second line
       else if (this._currentLocation - distToPrevNewline < 2)
-        tab = 0; 
+        tab = 0;
       else if (distToBrace == -1)
-        tab = _indentSpecialCases(0, distToPrevNewline); 
+        tab = _indentSpecialCases(0, distToPrevNewline);
       else if (braceType.equals("("))
-        tab = distToNewline - distToBrace + 1; 
+        tab = distToNewline - distToBrace + 1;
       else if (braceType.equals("{")) {
         tab = getWhiteSpaceBetween(distToNewline, distToBrace) + _indent;
         tab = _indentSpecialCases(tab, distToPrevNewline);
-      } 
+      }
       else if (braceType.equals("["))
         tab = distToNewline - distToBrace + 1;
       tab(tab, distToPrevNewline);
@@ -409,8 +427,8 @@ public class DefinitionsDocument extends PlainDocument {
     //setup
     int start = _reduced.getDistToPreviousNewline(distToPrevNewline + 1);
     if (start == -1)
-      start = 0; 
-    else 
+      start = 0;
+    else
       start = _currentLocation - start;
     String text = this.getText(start, _currentLocation - start);
     //case of  }
@@ -441,11 +459,11 @@ public class DefinitionsDocument extends PlainDocument {
         j++;
       if ((k < length) && (text.charAt(k) == '{')) {
         if ((j < length) && (text.charAt(j) == '{'))
-          tab = j + _indent; 
-        else 
+          tab = j + _indent;
+        else
           tab = j;
-      } 
-      else 
+      }
+      else
         tab = j + _indent;
     }
     //return tab
@@ -488,7 +506,7 @@ public class DefinitionsDocument extends PlainDocument {
    * @exception BadLocationException
    */
   private int getWhiteSpaceBetween(int relStart, int relEnd) throws BadLocationException {
-    String text = this.getText(_currentLocation - relStart, Math.abs(relStart - 
+    String text = this.getText(_currentLocation - relStart, Math.abs(relStart -
         relEnd));
     int i = 0;
     int length = text.length();
@@ -518,7 +536,7 @@ public class DefinitionsDocument extends PlainDocument {
       for (int i = 0; i < tab - currentTab; i++)
         spaces = spaces + " ";
       insertString(_currentLocation - distToPrevNewline, spaces, null);
-    } 
+    }
     else {
       remove(_currentLocation - distToPrevNewline, currentTab - tab);
     }
@@ -531,15 +549,15 @@ public class DefinitionsDocument extends PlainDocument {
   public Vector<HighlightStatus> getHighlightStatus(int start, int end) {
     //DrJava.consoleErr().println("getHi: start=" + start + " end=" + end +
     //" currentLoc=" + _currentLocation);
-  
+
     // First move the reduced model to the start
     int oldLocation = _currentLocation;
     setCurrentLocation(start);
 
     // Now ask reduced model for highlight status for chars till end
-    Vector<HighlightStatus> v = 
+    Vector<HighlightStatus> v =
       _reduced.getHighlightStatus(start, end - start);
-    
+
     // Go through and find any NORMAL blocks
     // Within them check for keywords
     for (int i = 0; i < v.size(); i++) {
@@ -594,7 +612,7 @@ public class DefinitionsDocument extends PlainDocument {
     // We have to return delimiters as tokens so we can keep track of positions
     // in the original string.
     StringTokenizer tokenizer = new StringTokenizer(text, delimiters, true);
-    
+
     // start and length of the text that has not yet been put back into the
     // vector.
     int start = original.getLocation();
@@ -678,7 +696,7 @@ public class DefinitionsDocument extends PlainDocument {
    *         or the empty string if there is no package statement (and thus
    *         the source file is in the empty package).
    *
-   * @exception InvalidPackageException if there is some sort of a 
+   * @exception InvalidPackageException if there is some sort of a
    *                                    <TT>package</TT> statement but it
    *                                    is invalid.
    */
@@ -745,7 +763,7 @@ public class DefinitionsDocument extends PlainDocument {
                                             "No semicolon found to terminate " +
                                             "package statement!");
         }
-        
+
         setCurrentLocation(semicolonLocation);
       }
       while (_reduced.currentToken().getHighlightState() !=
@@ -758,7 +776,7 @@ public class DefinitionsDocument extends PlainDocument {
       for (int walk = afterPackage + 1; walk < semicolonLocation; walk++) {
         setCurrentLocation(walk);
 
-        if (_reduced.currentToken().getHighlightState() == 
+        if (_reduced.currentToken().getHighlightState() ==
             HighlightStatus.NORMAL)
         {
           char curChar = text.charAt(walk);

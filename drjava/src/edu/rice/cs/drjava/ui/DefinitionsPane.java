@@ -11,6 +11,7 @@ import  java.util.*;
 
 import edu.rice.cs.drjava.util.UnexpectedException;
 import edu.rice.cs.drjava.model.GlobalModel;
+import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.definitions.DefinitionsEditorKit;
 
 /**
@@ -23,6 +24,7 @@ public class DefinitionsPane extends JEditorPane {
    */
   private MainFrame _mainFrame;
   private GlobalModel _model;
+  private OpenDefinitionsDocument _doc;
   private UndoManager _undoManager;
   private UndoAction _undoAction;
   private RedoAction _redoAction;
@@ -33,9 +35,9 @@ public class DefinitionsPane extends JEditorPane {
   /**
    * Paren/brace/bracket matching highlight color.
    */
-  private static DefaultHighlighter.DefaultHighlightPainter _highlightPainter = 
+  private static DefaultHighlighter.DefaultHighlightPainter _highlightPainter =
       new DefaultHighlighter.DefaultHighlightPainter(Color.lightGray);
-  
+
   /**
    * Looks for changes in the caret position to see if a paren/brace/bracket
    * highlight is needed.
@@ -50,7 +52,7 @@ public class DefinitionsPane extends JEditorPane {
      */
     public void caretUpdate(CaretEvent e) {
       //_doc().setCurrentLocation(getCaretPosition());
-      _model.syncCurrentLocationWithDefinitions(getCaretPosition());
+      _doc.syncCurrentLocationWithDefinitions(getCaretPosition());
       _removePreviousHighlight();
       try {
         _updateMatchHighlight();
@@ -64,8 +66,8 @@ public class DefinitionsPane extends JEditorPane {
    */
   private void _updateMatchHighlight() throws BadLocationException {
     int to = getCaretPosition();
-    int from = _model.balanceBackward(); //_doc()._reduced.balanceBackward();
-    if (from == -1) {} 
+    int from = _doc.balanceBackward(); //_doc()._reduced.balanceBackward();
+    if (from == -1) {}
     else {
       from = to - from;
       _addHighlight(from, to);
@@ -128,12 +130,12 @@ public class DefinitionsPane extends JEditorPane {
      * The key string ("\n"|"{"|"}") for the key pressed that invokes this
      * instance. Not used currently, but there for readability and possible
      * future use, e.g., debugging add-ons or the rewrite of the indention code.
-     */    
+     */
     private String _key;
     /**
      * The default action to take when the specified key is pressed.
      */
-    private Action _defaultAction;    
+    private Action _defaultAction;
     /**
      * Constructor.
      */
@@ -141,8 +143,8 @@ public class DefinitionsPane extends JEditorPane {
       _key = key;
       _defaultAction = defaultAction;
     }
-    /** 
-     * Handle the "key typed" event from the text field. 
+    /**
+     * Handle the "key typed" event from the text field.
      * Calls the default action to make sure the right things happen, then makes
      * a call to indentLine().
      */
@@ -151,7 +153,7 @@ public class DefinitionsPane extends JEditorPane {
       _indent();
     }
   }
-  
+
   /**
    * Special action to take care of case when tab key is pressed.
    */
@@ -164,7 +166,7 @@ public class DefinitionsPane extends JEditorPane {
   private Action _indentKeyActionLine =
     new IndentKeyAction("\n",
                         getKeymap().getAction(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0)));
-  
+
   /**
    * Likewise, regular text keys like '{' and '}' do not have special actions
    * that are returned by getAction(KeyStroke).  To make sure these behave right,
@@ -172,7 +174,7 @@ public class DefinitionsPane extends JEditorPane {
    */
   private Action _indentKeyActionSquiggly =
     new IndentKeyAction("}", getKeymap().getDefaultAction());
-  
+
   private Action _indentKeyActionOpenSquiggly =
     new IndentKeyAction("{", getKeymap().getDefaultAction());
 
@@ -180,33 +182,37 @@ public class DefinitionsPane extends JEditorPane {
    * Constructor.  Sets up all the defaults.
    * @param mf the parent window
    */
-  public DefinitionsPane(MainFrame mf, GlobalModel model) {
+  public DefinitionsPane(MainFrame mf,
+                         GlobalModel model,
+                         OpenDefinitionsDocument doc)
+  {
     _mainFrame = mf;
     _model = model;
+    _doc = doc;
 //    _resetDocument("");
-    _resetUndo();
     setContentType("text/java");
     setBackground(Color.white);
     setFont(new Font("Courier", 0, 12));
     setEditable(true);
-    setDocument(_model.getDefinitionsDocument());
+    setDocument(_doc);
+    _resetUndo();
 
     //add actions for indent key
     Keymap ourMap = addKeymap("INDENT_KEYMAP", getKeymap());
-    ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), 
+    ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0),
                                  (Action)_indentKeyActionLine);
-    ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_TAB, 0), 
+    ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_TAB, 0),
                                  (Action)_indentKeyActionTab);
-    ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke('}'), 
+    ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke('}'),
       (Action)_indentKeyActionSquiggly);
-    ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke('{'), 
+    ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke('{'),
       (Action)_indentKeyActionOpenSquiggly);
     setKeymap(ourMap);
 
     // Add listener that checks if position in the document has changed.
     // If it has changed, check and see if we should be highlighting matching braces.
     this.addCaretListener(_matchListener);
-    _mainFrame.installNewDocumentListener(_model.getDefinitionsDocument());
+    _mainFrame.installNewDocumentListener(_doc.getDocument());
   }
 
   /**
@@ -223,11 +229,13 @@ public class DefinitionsPane extends JEditorPane {
     return  _redoAction;
   }
 
-  /** 
-   * Reset undo machinery on setDocument. 
+  /**
+   * Reset undo machinery on setDocument.
    */
-  public void setDocument(Document doc) {
+  public void setDocument(OpenDefinitionsDocument doc) {
     //DrJava.consoleErr().println("Reset doc: " + doc);
+
+    _doc = doc;
 
     if (_undoAction == null) {
       _undoAction = new UndoAction();
@@ -235,7 +243,7 @@ public class DefinitionsPane extends JEditorPane {
     if (_redoAction == null) {
       _redoAction = new RedoAction();
     }
-    super.setDocument(doc);
+    super.setDocument(doc.getDocument());
     _resetUndo();
   }
 
@@ -269,7 +277,7 @@ public class DefinitionsPane extends JEditorPane {
 
   /**
    * Overriding this method ensures that all new documents created in this
-   * editor pane use our editor kit (and thus our model). 
+   * editor pane use our editor kit (and thus our model).
    */
   protected EditorKit createDefaultEditorKit() {
     return new DefinitionsEditorKit();
@@ -287,19 +295,19 @@ public class DefinitionsPane extends JEditorPane {
   private void _indent() {
     // because _indent() is a function called directly by the Keymap
     // it does not go through the regular insertString channels and thus
-    // it may not be in sync with the document's position.  For that 
+    // it may not be in sync with the document's position.  For that
     // reason, we must sync the document with the pane before we go
-    // ahead and indent.    
+    // ahead and indent.
     // old: _doc().setCurrentLocation(getCaretPosition());
     // new:
-    _model.syncCurrentLocationWithDefinitions(getCaretPosition());
+    _doc.syncCurrentLocationWithDefinitions(getCaretPosition());
     int selStart = getSelectionStart();
     int selEnd = getSelectionEnd();
-    _model.indentLinesInDefinitions(selStart, selEnd);
-    setCaretPosition(_model.getCurrentDefinitionsLocation());
+    _doc.indentLinesInDefinitions(selStart, selEnd);
+    setCaretPosition(_doc.getCurrentDefinitionsLocation());
   }
 
-  
+
   /**
    * The undo action.
    */
@@ -328,7 +336,7 @@ public class DefinitionsPane extends JEditorPane {
       _redoAction.updateRedoState();
     }
 
-    
+
     /**
      * Updates the undo list, i.e., where we are as regards undo and redo.
      */
@@ -336,14 +344,14 @@ public class DefinitionsPane extends JEditorPane {
       if (_undoManager.canUndo()) {
         setEnabled(true);
         putValue(Action.NAME, _undoManager.getUndoPresentationName());
-      } 
+      }
       else {
         setEnabled(false);
         putValue(Action.NAME, "Undo");
       }
     }
   }
-  
+
   /**
    * Redo action.
    */
@@ -379,7 +387,7 @@ public class DefinitionsPane extends JEditorPane {
       if (_undoManager.canRedo()) {
         setEnabled(true);
         putValue(Action.NAME, _undoManager.getRedoPresentationName());
-      } 
+      }
       else {
         setEnabled(false);
         putValue(Action.NAME, "Redo");

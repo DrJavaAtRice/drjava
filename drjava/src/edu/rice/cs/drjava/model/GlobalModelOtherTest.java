@@ -22,22 +22,22 @@ import edu.rice.cs.drjava.model.compiler.*;
  * @version $Id$
  */
 public class GlobalModelOtherTest extends GlobalModelTestCase {
-  private static final String FOO_MISSING_CLOSE_TEXT = 
+  private static final String FOO_MISSING_CLOSE_TEXT =
     "class Foo {";
 
-  private static final String FOO_PACKAGE_AFTER_IMPORT = 
+  private static final String FOO_PACKAGE_AFTER_IMPORT =
     "import java.util.*;\npackage a;\n" + FOO_TEXT;
 
-  private static final String FOO_PACKAGE_INSIDE_CLASS = 
+  private static final String FOO_PACKAGE_INSIDE_CLASS =
     "class Foo { package a; }";
 
-  private static final String FOO_PACKAGE_AS_FIELD = 
+  private static final String FOO_PACKAGE_AS_FIELD =
     "class Foo { int package; }";
 
-  private static final String FOO_PACKAGE_AS_FIELD_2 = 
+  private static final String FOO_PACKAGE_AS_FIELD_2 =
     "class Foo { int package = 5; }";
 
-  private static final String FOO_PACKAGE_AS_PART_OF_FIELD = 
+  private static final String FOO_PACKAGE_AS_PART_OF_FIELD =
     "class Foo { int cur_package = 5; }";
 
   /**
@@ -63,39 +63,16 @@ public class GlobalModelOtherTest extends GlobalModelTestCase {
   public void testInteractionsCanSeeCompile()
     throws BadLocationException, IOException
   {
-    setupDocument(FOO_TEXT);
+    OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
     final File file = tempFile();
-    _model.saveFile(new FileSelector(file));
-    
-    _model.startCompile();
+    doc.saveFile(new FileSelector(file));
+
+    doc.startCompile();
 
     String result = interpret("new Foo().getClass().getName()");
 
     assertEquals("interactions result",
                  "Foo",
-                 result);
-  }
-
-  /**
-   * Checks that the REPL is automatically put into the package
-   * scope of the class that was just compiled.
-   */
-  public void testInteractionsAutomaticallySetPackageScope()
-    throws BadLocationException, IOException
-  {
-    final File aDir = new File(_tempDir, "a");
-    aDir.mkdir();
-    final File file = new File(aDir, "Foo.java");
-
-    setupDocument("package a;\npublic " + FOO_TEXT);
-    _model.saveFile(new FileSelector(file));
-    
-    _model.startCompile();
-
-    String result = interpret("new Foo().getClass().getName()");
-
-    assertEquals("interactions result",
-                 "a.Foo",
                  result);
   }
 
@@ -110,11 +87,12 @@ public class GlobalModelOtherTest extends GlobalModelTestCase {
     final String text_after = "; } }";
     final File file = tempFile();
     final int num_iterations = 5;
+    OpenDefinitionsDocument doc;
 
     for (int i = 0; i < num_iterations; i++) {
-      setupDocument(text_before + i + text_after);
-      _model.saveFile(new FileSelector(file));
-      _model.startCompile();
+      doc = setupDocument(text_before + i + text_after);
+      doc.saveFile(new FileSelector(file));
+      doc.startCompile();
       assertEquals("interactions result, i=" + i,
           String.valueOf(i),
           interpret("new Foo().m()"));
@@ -122,18 +100,20 @@ public class GlobalModelOtherTest extends GlobalModelTestCase {
   }
 
   /**
-   * Exits the program without having written anything to the current document.
+   * Exits the program without opening any documents.
    */
-  public void testQuitEmptyDocument() {
+  public void testQuitNoDocuments() {
     PreventExitSecurityManager manager = new PreventExitSecurityManager();
     System.setSecurityManager(manager);
+
+    assertNumOpenDocs(0);
 
     // Ensure no events get fired
     _model.addListener(new TestListener());
 
     try {
       _model.quit();
-      fail("Got past quit without security exception (and without quitting!");
+      fail("Got past quit without security exception (and without quitting!)");
     }
     catch (SecurityException e) {
       // Good, the security manager saved us from exiting.
@@ -144,29 +124,79 @@ public class GlobalModelOtherTest extends GlobalModelTestCase {
   }
 
   /**
+   * Exits the program without having written anything to the open documents.
+   */
+  public void testQuitEmptyDocuments() {
+    PreventExitSecurityManager manager = new PreventExitSecurityManager();
+    System.setSecurityManager(manager);
+
+    _model.newFile();
+    _model.newFile();
+
+    assertNumOpenDocs(2);
+
+    // Check for proper events
+    TestListener listener = new TestListener() {
+      public void fileClosed(OpenDefinitionsDocument doc) {
+        closeCount++;
+      }
+    };
+    _model.addListener(listener);
+
+    try {
+      _model.quit();
+      fail("Got past quit without security exception (and without quitting!)");
+    }
+    catch (SecurityException e) {
+      // Good, the security manager saved us from exiting.
+      assertEquals("number of attempts to quit", 1, manager.getAttempts());
+      listener.assertCloseCount(2);
+    }
+
+    System.setSecurityManager(null);
+  }
+
+
+  /**
    * Exits the program without saving any changes made to the current document.
    * Loses the changes.
    */
-  public void testQuitUnsavedDocumentAllowAbandon() {
+  public void testQuitUnsavedDocumentsAllowAbandon()
+    throws BadLocationException
+  {
     PreventExitSecurityManager manager = new PreventExitSecurityManager();
     System.setSecurityManager(manager);
 
     TestListener listener = new TestListener() {
-      public boolean canAbandonFile(File file) {
+      public boolean canAbandonFile(OpenDefinitionsDocument doc) {
         canAbandonCount++;
         return true; // yes allow the abandon
       }
+
+      public void fileClosed(OpenDefinitionsDocument doc) {
+        closeCount++;
+      }
     };
+
+    _model.newFile();
+    OpenDefinitionsDocument doc1 = setupDocument(FOO_TEXT);
+    OpenDefinitionsDocument doc2 = setupDocument(BAR_TEXT);
+
+    assertNumOpenDocs(3);
 
     _model.addListener(listener);
 
     try {
       _model.quit();
-      fail("Got past quit without security exception (and without quitting!");
+      fail("Got past quit without security exception (and without quitting!)");
     }
     catch (SecurityException e) {
       // Good, the security manager saved us from exiting.
       assertEquals("number of attempts to quit", 1, manager.getAttempts());
+
+      // Only the changed files should prompt an event
+      listener.assertAbandonCount(2);
+      listener.assertCloseCount(3);
     }
 
     System.setSecurityManager(null);
@@ -181,11 +211,13 @@ public class GlobalModelOtherTest extends GlobalModelTestCase {
     PreventExitSecurityManager manager = new PreventExitSecurityManager();
     System.setSecurityManager(manager);
 
-    setupDocument(FOO_TEXT);
+    OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
+
+    assertNumOpenDocs(1);
 
     // Ensure canAbandonChanges is called
     TestListener listener = new TestListener() {
-      public boolean canAbandonFile(File file) {
+      public boolean canAbandonFile(OpenDefinitionsDocument doc) {
         canAbandonCount++;
         return false; // no, don't quit on me!
       }
@@ -205,6 +237,54 @@ public class GlobalModelOtherTest extends GlobalModelTestCase {
     System.setSecurityManager(null);
   }
 
+  /**
+   * Attempts to exit with unsaved changes, but doesn't allow the quit.
+   */
+  public void testQuitMultipleDocumentsDisallowAbandon()
+    throws BadLocationException
+  {
+    PreventExitSecurityManager manager = new PreventExitSecurityManager();
+    System.setSecurityManager(manager);
+
+    _model.newFile();
+    OpenDefinitionsDocument doc1 = setupDocument(FOO_TEXT);
+    _model.newFile();
+    OpenDefinitionsDocument doc2 = setupDocument(BAR_TEXT);
+
+    assertNumOpenDocs(4);
+
+    // Ensure canAbandonChanges is called
+    TestListener listener = new TestListener() {
+      public boolean canAbandonFile(OpenDefinitionsDocument doc) {
+        canAbandonCount++;
+        return false; // no, don't quit on me!
+      }
+
+      public void fileClosed(OpenDefinitionsDocument doc) {
+        closeCount++;
+      }
+    };
+
+    _model.addListener(listener);
+
+    try {
+      _model.quit();
+
+      // Should close first new file, stop trying after doc1
+      listener.assertCloseCount(1);
+      listener.assertAbandonCount(1);
+      assertNumOpenDocs(3);
+
+      assertEquals("number of attempts to quit", 0, manager.getAttempts());
+    }
+    catch (SecurityException e) {
+      fail("Quit succeeded despite canAbandon returning no!");
+    }
+
+    System.setSecurityManager(null);
+  }
+
+
   public void testGetSourceRootDefaultPackage()
     throws BadLocationException, IOException, InvalidPackageException
   {
@@ -219,15 +299,16 @@ public class GlobalModelOtherTest extends GlobalModelTestCase {
 
     // Save the footext to Foo.java in the subdirectory
     File fooFile = new File(subdir, "Foo.java");
-    setupDocument(FOO_TEXT);
-    _model.saveFileAs(new FileSelector(fooFile));
+    OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
+    doc.saveFileAs(new FileSelector(fooFile));
 
     // No events should fire
     _model.addListener(new TestListener());
 
-    assertEquals("source root",
-                 subdir,
-                 _model.getSourceRoot());
+    // Get source root
+    File[] roots = _model.getSourceRootSet();
+    assertEquals("number of source roots", 1, roots.length);
+    assertEquals("source root", subdir, roots[0]);
   }
 
   public void testGetSourceRootPackageThreeDeepValid()
@@ -235,7 +316,7 @@ public class GlobalModelOtherTest extends GlobalModelTestCase {
   {
     // Create temp directory
     File baseTempDir = tempDirectory();
-    
+
     // Now make subdirectory a/b/c
     File subdir = new File(baseTempDir, "a");
     subdir = new File(subdir, "b");
@@ -244,16 +325,17 @@ public class GlobalModelOtherTest extends GlobalModelTestCase {
 
     // Save the footext to Foo.java in the subdirectory
     File fooFile = new File(subdir, "Foo.java");
-    setupDocument("package a.b.c;\n" + FOO_TEXT);
-    _model.saveFileAs(new FileSelector(fooFile));
+    OpenDefinitionsDocument doc =
+      setupDocument("package a.b.c;\n" + FOO_TEXT);
+    doc.saveFileAs(new FileSelector(fooFile));
 
     // No events should fire
     _model.addListener(new TestListener());
 
     // Since we had the package statement the source root should be base dir
-    assertEquals("source root",
-                 baseTempDir,
-                 _model.getSourceRoot());
+    File[] roots = _model.getSourceRootSet();
+    assertEquals("number of source roots", 1, roots.length);
+    assertEquals("source root", baseTempDir, roots[0]);
 
   }
 
@@ -271,15 +353,16 @@ public class GlobalModelOtherTest extends GlobalModelTestCase {
 
     // Save the footext to Foo.java in the subdirectory
     File fooFile = new File(subdir, "Foo.java");
-    setupDocument("package a.b.c;\n" + FOO_TEXT);
-    _model.saveFileAs(new FileSelector(fooFile));
+    OpenDefinitionsDocument doc =
+      setupDocument("package a.b.c;\n" + FOO_TEXT);
+    doc.saveFileAs(new FileSelector(fooFile));
 
     // No events should fire
     _model.addListener(new TestListener());
 
     // The package name is wrong so this should fail.
     try {
-      File root = _model.getSourceRoot();
+      File[] root = _model.getSourceRootSet();
       fail("getSourceRoot() did not fail on invalid package. It returned: " +
            root);
     }
@@ -300,17 +383,62 @@ public class GlobalModelOtherTest extends GlobalModelTestCase {
 
     // Save the footext to Foo.java in the subdirectory
     File fooFile = new File(subdir, "Foo.java");
-    setupDocument("package a;\n" + FOO_TEXT);
-    _model.saveFileAs(new FileSelector(fooFile));
+    OpenDefinitionsDocument doc = setupDocument("package a;\n" + FOO_TEXT);
+    doc.saveFileAs(new FileSelector(fooFile));
 
     // No events should fire
     _model.addListener(new TestListener());
 
     // Since we had the package statement the source root should be base dir
-    assertEquals("source root",
-                 baseTempDir,
-                 _model.getSourceRoot());
+    File[] roots = _model.getSourceRootSet();
+    assertEquals("number of source roots", 1, roots.length);
+    assertEquals("source root", baseTempDir, roots[0]);
 
   }
 
- }
+
+  public void testGetMultipleSourceRootsDefaultPackage()
+    throws BadLocationException, IOException, InvalidPackageException
+  {
+    // Create temp directory
+    File baseTempDir = tempDirectory();
+
+    // Now make subdirectories a, b
+    File subdir1 = new File(baseTempDir, "a");
+    subdir1.mkdir();
+    File subdir2 = new File(baseTempDir, "b");
+    subdir2.mkdir();
+
+    // Save the footext to Foo.java in subdirectory 1
+    File file1 = new File(subdir1, "Foo.java");
+    OpenDefinitionsDocument doc1 = setupDocument(FOO_TEXT);
+    doc1.saveFileAs(new FileSelector(file1));
+
+    // Save the bartext to Bar.java in subdirectory 1
+    File file2 = new File(subdir1, "Bar.java");
+    OpenDefinitionsDocument doc2 = setupDocument(BAR_TEXT);
+    doc2.saveFileAs(new FileSelector(file2));
+
+    // Save the bartext to Bar.java in subdirectory 2
+    File file3 = new File(subdir2, "Bar.java");
+    OpenDefinitionsDocument doc3 = setupDocument(BAR_TEXT);
+    doc3.saveFileAs(new FileSelector(file3));
+
+    // No events should fire
+    _model.addListener(new TestListener());
+
+    // Get source roots (should be 2: no duplicates)
+    File[] roots = _model.getSourceRootSet();
+    assertEquals("number of source roots", 2, roots.length);
+    File root1 = roots[0];
+    File root2 = roots[1];
+
+    // Make sure both source roots are in set
+    if (!( (root1.equals(subdir1) && root2.equals(subdir2)) ||
+           (root1.equals(subdir2) && root2.equals(subdir1)) ))
+    {
+      fail("source roots did not match");
+    }
+  }
+
+}

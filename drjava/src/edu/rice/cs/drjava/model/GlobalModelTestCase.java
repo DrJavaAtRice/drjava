@@ -33,7 +33,7 @@ public abstract class GlobalModelTestCase extends TestCase {
 
   protected static final String FOO_TEXT = "class Foo {}";
   protected static final String BAR_TEXT = "class Bar {}";
-  
+
   /**
    * Constructor.
    * @param  String name
@@ -68,16 +68,19 @@ public abstract class GlobalModelTestCase extends TestCase {
     assertTrue("delete temp directory " + _tempDir, ret);
   }
 
+
   /**
    * Clear all old text and insert the given text.
    */
-  protected void changeDocumentText(String s) throws BadLocationException {
-    Document doc = _model.getDefinitionsDocument();
-    doc.remove(0, doc.getLength());
-    assertLength(0);
-    doc.insertString(0, s, null);
-    assertModified(true);
-    assertContents(s);
+  protected void changeDocumentText(String s, OpenDefinitionsDocument doc)
+    throws BadLocationException
+  {
+    Document document = doc.getDocument();
+    document.remove(0, document.getLength());
+    assertLength(0, doc);
+    document.insertString(0, s, null);
+    assertModified(true, doc);
+    assertContents(s, doc);
   }
 
   /** Create a new temporary file in _tempDir. */
@@ -114,11 +117,13 @@ public abstract class GlobalModelTestCase extends TestCase {
 
 
   /**
-   * Create a new document (the previous one is assumed to not be modified),
-   * makes sure newFile is fired, and then adds some text.
-   * When this method is done newCount is reset to 0.
+   * Creates and returns a new document, makes sure newFile is fired, and
+   * then adds some text.  When this method is done newCount is reset to 0.
+   * @return the new modified document
    */
-  protected void setupDocument(String text) throws BadLocationException {
+  protected OpenDefinitionsDocument setupDocument(String text)
+    throws BadLocationException
+  {
     TestListener listener = new TestListener() {
       public void newFileCreated() {
         newCount++;
@@ -126,13 +131,20 @@ public abstract class GlobalModelTestCase extends TestCase {
     };
 
     _model.addListener(listener);
-    _model.newFile();
-    listener.assertNewCount(1);
-    assertLength(0);
-    assertModified(false);
 
-    changeDocumentText(text);
+    // Open a new document
+    int numOpen = _model.getDefinitionsDocuments().length;
+    OpenDefinitionsDocument doc = _model.newFile();
+    assertNumOpenDocs(numOpen + 1);
+
+    listener.assertNewCount(1);
+    assertLength(0, doc);
+    assertModified(false, doc);
+
+    changeDocumentText(text, doc);
     _model.removeListener(listener);
+
+    return doc;
   }
 
   /**
@@ -160,25 +172,35 @@ public abstract class GlobalModelTestCase extends TestCase {
     return interactionsDoc.getText(resultsStartLocation, resultsLen);
   }
 
-  protected void assertModified(boolean b) {
-    assertEquals("definitionsDocument.isModifiedSinceSave",
+  protected void assertNumOpenDocs(int num) {
+    assertEquals("number of open documents",
+                 num,
+                 _model.getDefinitionsDocuments().length);
+  }
+
+  protected void assertModified(boolean b, OpenDefinitionsDocument doc) {
+    assertEquals("document isModifiedSinceSave",
                  b,
-                 _model.isModifiedSinceSave());
+                 doc.isModifiedSinceSave());
   }
 
 
-  protected void assertLength(int len) throws BadLocationException {
+  protected void assertLength(int len, OpenDefinitionsDocument doc)
+    throws BadLocationException
+  {
     assertEquals("document length",
                  len,
-                 _model.getDefinitionsDocument().getLength());
+                 doc.getDocument().getLength());
   }
 
-  protected void assertContents(String s) throws BadLocationException {
-    int len = _model.getDefinitionsDocument().getLength();
+  protected void assertContents(String s, OpenDefinitionsDocument doc)
+    throws BadLocationException
+  {
+    int len = doc.getDocument().getLength();
 
     assertEquals("document contents",
                  s,
-                 _model.getDefinitionsDocument().getText(0, len));
+                 doc.getDocument().getText(0, len));
   }
 
   protected void assertCompileErrorsPresent(boolean b) {
@@ -188,7 +210,7 @@ public abstract class GlobalModelTestCase extends TestCase {
     for (int i = 0; i < errors.length; i++) {
       buf.append("\nerror #" + i + ": " + errors[i]);
     }
-    
+
     assertEquals("compile errors > 0? errors=" + buf,
                  b,
                  errors.length > 0);
@@ -231,7 +253,7 @@ public abstract class GlobalModelTestCase extends TestCase {
       throw new SecurityException("Can not exit!");
     }
   }
-  
+
   /**
    * A GlobalModelListener for testing.
    * By default it expects no events to be fired. To customize,
@@ -240,6 +262,7 @@ public abstract class GlobalModelTestCase extends TestCase {
   protected static class TestListener implements GlobalModelListener {
     protected int newCount;
     protected int openCount;
+    protected int closeCount;
     protected int saveCount;
     protected int canAbandonCount;
     protected int compileStartCount;
@@ -247,14 +270,15 @@ public abstract class GlobalModelTestCase extends TestCase {
     protected int consoleResetCount;
     protected int interactionsResetCount;
     protected int saveBeforeProceedingCount;
-   
+
     public TestListener() {
       resetCounts();
     }
-    
+
     public void resetCounts() {
       newCount = 0;
       openCount = 0;
+      closeCount = 0;
       saveCount = 0;
       canAbandonCount = 0;
       compileStartCount = 0;
@@ -263,43 +287,47 @@ public abstract class GlobalModelTestCase extends TestCase {
       interactionsResetCount = 0;
       saveBeforeProceedingCount = 0;
     }
-    
+
     public void assertAbandonCount(int i) {
       assertEquals("number of times canAbandon fired", i, canAbandonCount);
     }
-    
+
     public void assertNewCount(int i) {
       assertEquals("number of times newFile fired", i, newCount);
     }
-    
+
     public void assertOpenCount(int i) {
       assertEquals("number of times openFile fired", i, openCount);
     }
-    
-    public void assertSaveCount(int i) {
-      assertEquals("number of times openFile fired", i, saveCount);
+
+    public void assertCloseCount(int i) {
+      assertEquals("number of times closeFile fired", i, closeCount);
     }
-    
+
+    public void assertSaveCount(int i) {
+      assertEquals("number of times saveFile fired", i, saveCount);
+    }
+
     public void assertCompileStartCount(int i) {
       assertEquals("number of times compileStarted fired", i, compileStartCount);
     }
-    
+
     public void assertCompileEndCount(int i) {
       assertEquals("number of times compileEnded fired", i, compileEndCount);
     }
-    
+
     public void assertInteractionsResetCount(int i) {
       assertEquals("number of times interactionsReset fired",
                    i,
                    interactionsResetCount);
     }
-    
+
     public void assertConsoleResetCount(int i) {
       assertEquals("number of times consoleReset fired",
                    i,
                    consoleResetCount);
     }
-    
+
     public void assertSaveBeforeProceedingCount(int i) {
       assertEquals("number of times saveBeforeProceeding fired",
                    i,
@@ -308,38 +336,42 @@ public abstract class GlobalModelTestCase extends TestCase {
     public void newFileCreated() {
       fail("newFileCreated fired unexpectedly");
     }
-    
-    public void fileSaved(File file) {
-      fail("fileSaved fired unexpectedly");
-    }
-    
+
     public void fileOpened(File file) {
       fail("fileOpened fired unexpectedly");
     }
-    
+
+    public void fileClosed(OpenDefinitionsDocument doc) {
+      fail("fileClosed fired unexpectedly");
+    }
+
+    public void fileSaved(File file) {
+      fail("fileSaved fired unexpectedly");
+    }
+
     public void compileStarted() {
       fail("compileStarted fired unexpectedly");
     }
-    
+
     public void compileEnded() {
       fail("compileEnded fired unexpectedly");
     }
-    
+
     public void interactionsReset() {
       fail("interactionsReset fired unexpectedly");
     }
-    
+
     public void consoleReset() {
       fail("consoleReset fired unexpectedly");
     }
-    
+
     public void saveBeforeProceeding(GlobalModelListener.SaveReason reason) {
       fail("saveBeforeProceeding fired unexpectedly");
     }
-    
-    public boolean canAbandonFile(File file) {
+
+    public boolean canAbandonFile(OpenDefinitionsDocument doc) {
       fail("canAbandonFile fired unexpectedly");
-      
+
       // this is actually unreachable but the compiler won't believe me. sigh.
       throw new RuntimeException();
     }

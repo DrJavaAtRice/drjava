@@ -14,59 +14,64 @@ public interface GlobalModelListener {
   public class SaveReason {
     private SaveReason() {}
   }
-  
+
   /**
    * This enumeration of save reason means that we want to compile.
    */
   public static final SaveReason COMPILE_REASON = new SaveReason();
-  
+
   /**
    * Called after a new document is created.
    */
   public void newFileCreated();
-  
+
   /**
    * Called after the current document is saved.
    */
   public void fileSaved(File file);
-  
+
   /**
    * Called after a file is opened and read into the current document.
    */
   public void fileOpened(File file);
-    
-  
+
+  /**
+   * Called after a document is closed.
+   */
+  public void fileClosed(OpenDefinitionsDocument doc);
+
+
   /**
    * Called after a compile is started by the GlobalModel.
    */
   public void compileStarted();
-  
+
   /**
    * Called when a compile has finished running.
    */
   public void compileEnded();
-      
-  
+
+
   /**
    * Called when the interactions window is reset.
    */
   public void interactionsReset();
-  
+
   /**
    * Called when the console window is reset.
    */
   public void consoleReset();
-  
+
   /**
    * Called to demand that the listeners save the current document
    * before the GlobalModel can proceed with another action.  Right
    * now, this is only used by GlobalModel.startCompile().
    */
   public void saveBeforeProceeding(SaveReason reason);
-  
+
   /**
    * Called to ask the listener if it is OK to abandon the current
    * document.
    */
-  public boolean canAbandonFile(File file);
+  public boolean canAbandonFile(OpenDefinitionsDocument doc);
 }

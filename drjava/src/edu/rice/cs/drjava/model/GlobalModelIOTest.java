@@ -38,59 +38,128 @@ public class GlobalModelIOTest extends GlobalModelTestCase {
     return  new TestSuite(GlobalModelIOTest.class);
   }
 
-  
   /**
-   * Creates a new document, modifies it, then allows a new document
-   * to be created after ignoring the changes made.
+   * Creates a new document, modifies it, and then does the same
+   * with a second document, ensuring that the changes are separate.
    */
-  public void testNewFileAllowAbandon() throws BadLocationException {
-    setupDocument(FOO_TEXT);
+  public void testMultipleFiles() throws BadLocationException {
+    assertNumOpenDocs(0);
 
-    // Now try to "new" again and check for proper events
+    OpenDefinitionsDocument doc1 = setupDocument(FOO_TEXT);
+    assertNumOpenDocs(1);
+
+    // Create a second, empty document
+    OpenDefinitionsDocument doc2 = _model.newFile();
+    assertNumOpenDocs(2);
+    assertModified(true, doc1);
+    assertModified(false, doc2);
+    assertContents(FOO_TEXT, doc1);
+    assertLength(0, doc2);
+
+    // Modify second document
+    changeDocumentText(BAR_TEXT, doc2);
+    assertModified(true, doc2);
+    assertContents(FOO_TEXT, doc1);
+    assertContents(BAR_TEXT, doc2);
+  }
+
+  /**
+   * Opens several documents and ensures that the array
+   * returned by the model is correct and in the right order.
+   */
+  public void testMultipleFilesArray() throws BadLocationException {
+    OpenDefinitionsDocument doc1, doc2, doc3;
+    doc1 = setupDocument(FOO_TEXT);
+    doc2 = setupDocument(BAR_TEXT);
+    doc3 = setupDocument(FOO_TEXT);
+    assertNumOpenDocs(3);
+
+    OpenDefinitionsDocument[] docs = _model.getDefinitionsDocuments();
+    assertEquals("size of document array", 3, docs.length);
+
+    assertEquals("document 1", doc1, docs[0]);
+    assertEquals("document 2", doc2, docs[1]);
+    assertEquals("document 3", doc3, docs[2]);
+  }
+
+
+  /**
+   * Ensures closing documents works correctly.
+   */
+  public void testCloseMultipleFiles() throws BadLocationException {
+    assertNumOpenDocs(0);
+    OpenDefinitionsDocument doc1 = setupDocument(FOO_TEXT);
+    assertNumOpenDocs(1);
+    OpenDefinitionsDocument doc2 = setupDocument(BAR_TEXT);
+    assertNumOpenDocs(2);
+
+    _model.closeFile(doc1);
+    assertNumOpenDocs(1);
+
+    OpenDefinitionsDocument[] docs = _model.getDefinitionsDocuments();
+    assertEquals("size of document array", 1, docs.length);
+    assertContents(BAR_TEXT, docs[0]);
+
+    _model.closeFile(doc2);
+    assertNumOpenDocs(0);
+    docs = _model.getDefinitionsDocuments();
+    assertEquals("size of document array", 0, docs.length);
+  }
+
+
+  /**
+   * Creates a new document, modifies it, then allows it
+   * to be closed, ignoring the changes made.
+   */
+  public void testCloseFileAllowAbandon() throws BadLocationException {
+    OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
+
+    // Try to close and check for proper events
     TestListener listener = new TestListener() {
-      public void newFileCreated() {
-        assertAbandonCount(1);
-        newCount++;
-      }
-
-      public boolean canAbandonFile(File file) {
+      public boolean canAbandonFile(OpenDefinitionsDocument doc) {
         canAbandonCount++;
         return true; // yes allow the abandon
       }
-    };
 
-    _model.addListener(listener);
-    _model.newFile();
-    listener.assertNewCount(1);
-    assertModified(false);
-    assertLength(0);
-  }
-
-  /**
-   * Creates a new document, modifies it, but disallows a call to create
-   * a new document without saving changes.
-   */
-  public void testNewFileDisallowAbandon() throws BadLocationException {
-    setupDocument(FOO_TEXT);
-
-    TestListener listener = new TestListener() {
-      public boolean canAbandonFile(File file) {
-        canAbandonCount++;
-        return false; // no, don't abandon our document!!!
+      public void fileClosed(OpenDefinitionsDocument doc) {
+        assertAbandonCount(1);
+        closeCount++;
       }
     };
 
     _model.addListener(listener);
-    _model.newFile();
-    listener.assertAbandonCount(1);
-    assertModified(true);
-    assertContents(FOO_TEXT);
+    _model.closeFile(doc);
+    listener.assertCloseCount(1);
   }
 
   /**
-   * Opens a file, disregarding any changes made to the current document.
+   * Creates a new document, modifies it, but disallows a call to
+   * close it without saving changes.
    */
-  public void testOpenRealFileAllowAbandon()
+  public void testCloseFileDisallowAbandon() throws BadLocationException {
+    OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
+
+    TestListener listener = new TestListener() {
+      public boolean canAbandonFile(OpenDefinitionsDocument doc) {
+        canAbandonCount++;
+        return false; // no, don't abandon our document!!!
+      }
+
+      public void fileClosed(OpenDefinitionsDocument doc) {
+         closeCount++;
+      }
+    };
+
+    _model.addListener(listener);
+    _model.closeFile(doc);
+    listener.assertAbandonCount(1);
+    listener.assertCloseCount(0);
+  }
+
+  /**
+   * Opens a file.
+   */
+  public void testOpenRealFile()
     throws BadLocationException, IOException
   {
     final File tempFile = writeToNewTempFile(BAR_TEXT);
@@ -103,33 +172,58 @@ public class GlobalModelIOTest extends GlobalModelTestCase {
     };
 
     _model.addListener(listener);
-    _model.openFile(new FileSelector(tempFile));
-    listener.assertOpenCount(1);
-    assertModified(false);
-    assertContents(BAR_TEXT);
+    try {
+      OpenDefinitionsDocument doc = _model.openFile(new FileSelector(tempFile));
+      listener.assertOpenCount(1);
+      assertModified(false, doc);
+      assertContents(BAR_TEXT, doc);
+    }
+    catch (OperationCanceledException oce) {
+      // Should not be canceled
+      fail("Open was unexpectedly canceled!");
+    }
   }
 
   /**
    * Initiates a file open, but cancels.
    */
-  public void testCancelOpenFileAllowAbandon()
+  public void testCancelOpenFile()
     throws BadLocationException, IOException
   {
 
-    setupDocument(FOO_TEXT);
+    OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
+    assertNumOpenDocs(1);
 
     TestListener listener = new TestListener() {
-      public boolean canAbandonFile(File file) {
+      public boolean canAbandonFile(OpenDefinitionsDocument doc) {
         canAbandonCount++;
         return true; // yes allow the abandon
+      }
+
+      public void fileOpened() {
+        openCount++;
       }
     };
 
     _model.addListener(listener);
-    _model.openFile(new CancelingSelector());
-    assertModified(true);
-    assertContents(FOO_TEXT);
+    try {
+      OpenDefinitionsDocument newDoc =
+        _model.openFile(new CancelingSelector());
+    }
+    catch (OperationCanceledException oce) {
+      // we expect this to be thrown
+    }
+    finally {
+      assertNumOpenDocs(1);
+      listener.assertOpenCount(0);
+
+      OpenDefinitionsDocument[] docs = _model.getDefinitionsDocuments();
+      doc = docs[0];
+      assertModified(true, doc);
+      assertContents(FOO_TEXT, doc);
+    }
   }
+
 
   /**
    * Attempts to open a non-existent file.
@@ -139,39 +233,21 @@ public class GlobalModelIOTest extends GlobalModelTestCase {
   {
     _model.addListener(new TestListener());
 
+    OpenDefinitionsDocument doc = null;
+
     try {
-      _model.openFile(new FileSelector(new File("fake-file")));
+      doc = _model.openFile(new FileSelector(new File("fake-file")));
       fail("IO exception was not thrown!");
     }
     catch (FileNotFoundException fnf) {
       // As we hoped, the file was not found
     }
+    catch (OperationCanceledException oce) {
+      // Should not be canceled
+      fail("Open was unexpectedly canceled!");
+    }
 
-    assertLength(0);
-    assertModified(false);
-  }
-
-  /**
-   * Attempts to open a file, but decides to not throw away
-   * changes, which causes the open to fail.
-   */
-  public void testOpenFileDisallowAbandon()
-    throws BadLocationException, IOException
-  {
-    setupDocument(FOO_TEXT);
-
-    TestListener listener = new TestListener() {
-      public boolean canAbandonFile(File file) {
-        canAbandonCount++;
-        return false; // no, don't abandon our document!!!
-      }
-    };
-
-    _model.addListener(listener);
-    _model.openFile(new FileSelector(new File("junk-doesnt-exist")));
-    listener.assertAbandonCount(1);
-    assertModified(true);
-    assertContents(FOO_TEXT);
+    assertEquals("non-existant file", doc, null);
   }
 
   /**
@@ -179,14 +255,14 @@ public class GlobalModelIOTest extends GlobalModelTestCase {
    */
   public void testCancelFirstSave() throws BadLocationException, IOException
   {
-    setupDocument(FOO_TEXT);
+    OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
 
     // No need to override methods since no events should be fired
     _model.addListener(new TestListener());
 
-    _model.saveFile(new CancelingSelector());
-    assertModified(true);
-    assertContents(FOO_TEXT);
+    doc.saveFile(new CancelingSelector());
+    assertModified(true, doc);
+    assertContents(FOO_TEXT, doc);
   }
 
   /**
@@ -194,7 +270,7 @@ public class GlobalModelIOTest extends GlobalModelTestCase {
    */
   public void testRealSaveFirstSave() throws BadLocationException, IOException
   {
-    setupDocument(FOO_TEXT);
+    OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
     final File file = tempFile();
 
     TestListener listener = new TestListener() {
@@ -206,10 +282,10 @@ public class GlobalModelIOTest extends GlobalModelTestCase {
 
     _model.addListener(listener);
 
-    _model.saveFile(new FileSelector(file));
+    doc.saveFile(new FileSelector(file));
     listener.assertSaveCount(1);
-    assertModified(false);
-    assertContents(FOO_TEXT);
+    assertModified(false, doc);
+    assertContents(FOO_TEXT, doc);
 
     assertEquals("contents of saved file",
                  FOO_TEXT,
@@ -221,13 +297,13 @@ public class GlobalModelIOTest extends GlobalModelTestCase {
    */
   public void testSaveAlreadySaved() throws BadLocationException, IOException
   {
-    setupDocument(FOO_TEXT);
+    OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
     final File file = tempFile();
 
     // No listeners here -- other tests ensure the first save works
-    _model.saveFile(new FileSelector(file));
-    assertModified(false);
-    assertContents(FOO_TEXT);
+    doc.saveFile(new FileSelector(file));
+    assertModified(false, doc);
+    assertContents(FOO_TEXT, doc);
     assertEquals("contents of saved file",
                  FOO_TEXT,
                  FileOps.readFile(file));
@@ -243,10 +319,10 @@ public class GlobalModelIOTest extends GlobalModelTestCase {
     _model.addListener(listener);
 
     // Muck up the document
-    changeDocumentText(BAR_TEXT);
+    changeDocumentText(BAR_TEXT, doc);
 
     // Save over top of the previous file
-    _model.saveFile(new FileSelector(file));
+    doc.saveFile(new FileSelector(file));
     listener.assertSaveCount(1);
 
     assertEquals("contents of saved file",
@@ -263,13 +339,13 @@ public class GlobalModelIOTest extends GlobalModelTestCase {
   public void testCancelSaveAlreadySaved()
     throws BadLocationException, IOException
   {
-    setupDocument(FOO_TEXT);
+    OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
     final File file = tempFile();
 
     // No listeners here -- other tests ensure the first save works
-    _model.saveFile(new FileSelector(file));
-    assertModified(false);
-    assertContents(FOO_TEXT);
+    doc.saveFile(new FileSelector(file));
+    assertModified(false, doc);
+    assertContents(FOO_TEXT, doc);
     assertEquals("contents of saved file",
                  FOO_TEXT,
                  FileOps.readFile(file));
@@ -284,15 +360,15 @@ public class GlobalModelIOTest extends GlobalModelTestCase {
     _model.addListener(listener);
 
     // Muck up the document
-    changeDocumentText(BAR_TEXT);
+    changeDocumentText(BAR_TEXT, doc);
 
-    _model.saveFile(new CancelingSelector());
+    doc.saveFile(new CancelingSelector());
 
     // The file should have saved on top of the old text anyhow.
     // The canceling selector should never have been called.
     listener.assertSaveCount(1);
-    assertModified(false);
-    assertContents(BAR_TEXT);
+    assertModified(false, doc);
+    assertContents(BAR_TEXT, doc);
 
     assertEquals("contents of saved file",
                  BAR_TEXT,
@@ -305,13 +381,13 @@ public class GlobalModelIOTest extends GlobalModelTestCase {
   public void testCancelSaveAsAlreadySaved()
     throws BadLocationException, IOException
   {
-    setupDocument(FOO_TEXT);
+    OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
     final File file = tempFile();
 
     // No listeners here -- other tests ensure the first save works
-    _model.saveFile(new FileSelector(file));
-    assertModified(false);
-    assertContents(FOO_TEXT);
+    doc.saveFile(new FileSelector(file));
+    assertModified(false, doc);
+    assertContents(FOO_TEXT, doc);
     assertEquals("contents of saved file",
                  FOO_TEXT,
                  FileOps.readFile(file));
@@ -320,9 +396,9 @@ public class GlobalModelIOTest extends GlobalModelTestCase {
     _model.addListener(new TestListener());
 
     // Muck up the document
-    changeDocumentText(BAR_TEXT);
+    changeDocumentText(BAR_TEXT, doc);
 
-    _model.saveFileAs(new CancelingSelector());
+    doc.saveFileAs(new CancelingSelector());
 
     assertEquals("contents of saved file",
                  FOO_TEXT,
@@ -335,14 +411,14 @@ public class GlobalModelIOTest extends GlobalModelTestCase {
   public void testSaveAsAlreadySaved()
     throws BadLocationException, IOException
   {
-    setupDocument(FOO_TEXT);
+    OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
     final File file1 = tempFile();
     final File file2 = tempFile();
 
     // No listeners here -- other tests ensure the first save works
-    _model.saveFile(new FileSelector(file1));
-    assertModified(false);
-    assertContents(FOO_TEXT);
+    doc.saveFile(new FileSelector(file1));
+    assertModified(false, doc);
+    assertContents(FOO_TEXT, doc);
     assertEquals("contents of saved file",
                  FOO_TEXT,
                  FileOps.readFile(file1));
@@ -358,9 +434,9 @@ public class GlobalModelIOTest extends GlobalModelTestCase {
     _model.addListener(listener);
 
     // Muck up the document
-    changeDocumentText(BAR_TEXT);
+    changeDocumentText(BAR_TEXT, doc);
 
-    _model.saveFileAs(new FileSelector(file2));
+    doc.saveFileAs(new FileSelector(file2));
 
     assertEquals("contents of saved file1",
                  FOO_TEXT,

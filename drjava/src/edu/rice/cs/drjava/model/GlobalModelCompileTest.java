@@ -17,25 +17,25 @@ import edu.rice.cs.drjava.model.compiler.*;
  * @version $Id$
  */
 public class GlobalModelCompileTest extends GlobalModelTestCase {
-  private static final String FOO_MISSING_CLOSE_TEXT = 
+  private static final String FOO_MISSING_CLOSE_TEXT =
     "class Foo {";
 
-  private static final String FOO_PACKAGE_AFTER_IMPORT = 
+  private static final String FOO_PACKAGE_AFTER_IMPORT =
     "import java.util.*;\npackage a;\n" + FOO_TEXT;
 
-  private static final String FOO_PACKAGE_INSIDE_CLASS = 
+  private static final String FOO_PACKAGE_INSIDE_CLASS =
     "class Foo { package a; }";
 
-  private static final String FOO_PACKAGE_AS_FIELD = 
+  private static final String FOO_PACKAGE_AS_FIELD =
     "class Foo { int package; }";
 
-  private static final String FOO_PACKAGE_AS_FIELD_2 = 
+  private static final String FOO_PACKAGE_AS_FIELD_2 =
     "class Foo { int package = 5; }";
 
-  private static final String FOO_PACKAGE_AS_PART_OF_FIELD = 
+  private static final String FOO_PACKAGE_AS_PART_OF_FIELD =
     "class Foo { int cur_package = 5; }";
 
-  private static final String FOO2_EXTENDS_FOO_TEXT = 
+  private static final String FOO2_EXTENDS_FOO_TEXT =
     "class Foo2 extends Foo {}";
 
   /**
@@ -86,14 +86,14 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
    * Tests a normal compile that should work.
    */
   public void testCompileNormal() throws BadLocationException, IOException {
-    setupDocument(FOO_TEXT);
+    OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
     final File file = tempFile();
 
     // No listener for save -- assume it works
-    _model.saveFile(new FileSelector(file));
+    doc.saveFile(new FileSelector(file));
     TestListener listener = new CompileShouldSucceedListener();
     _model.addListener(listener);
-    _model.startCompile();
+    doc.startCompile();
     assertCompileErrorsPresent(false);
     listener.assertCompileStartCount(1);
     listener.assertCompileEndCount(1);
@@ -114,18 +114,18 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
     throws BadLocationException, IOException
   {
     // Create/compile foo, assuming it works
-    setupDocument(FOO_TEXT);
+    OpenDefinitionsDocument doc1 = setupDocument(FOO_TEXT);
     final File fooFile = new File(_tempDir, "Foo.java");
-    _model.saveFile(new FileSelector(fooFile));
-    _model.startCompile();
+    doc1.saveFile(new FileSelector(fooFile));
+    doc1.startCompile();
 
-    setupDocument(FOO2_EXTENDS_FOO_TEXT);
+    OpenDefinitionsDocument doc2 = setupDocument(FOO2_EXTENDS_FOO_TEXT);
     final File foo2File = new File(_tempDir, "Foo2.java");
-    _model.saveFile(new FileSelector(foo2File));
+    doc2.saveFile(new FileSelector(foo2File));
 
     TestListener listener = new CompileShouldSucceedListener();
     _model.addListener(listener);
-    _model.startCompile();
+    doc2.startCompile();
     assertCompileErrorsPresent(false);
     listener.assertCompileStartCount(1);
     listener.assertCompileEndCount(1);
@@ -153,18 +153,20 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
 
     // Create/compile foo, assuming it works
     // foo must be public and in Foo.java!
-    setupDocument("package a;\n" + "public " + FOO_TEXT);
+    OpenDefinitionsDocument doc1 =
+      setupDocument("package a;\n" + "public " + FOO_TEXT);
     final File fooFile = new File(aDir, "Foo.java");
-    _model.saveFile(new FileSelector(fooFile));
-    _model.startCompile();
+    doc1.saveFile(new FileSelector(fooFile));
+    doc1.startCompile();
 
-    setupDocument("package b;\nimport a.Foo;\n" + FOO2_EXTENDS_FOO_TEXT);
+    OpenDefinitionsDocument doc2 =
+      setupDocument("package b;\nimport a.Foo;\n" + FOO2_EXTENDS_FOO_TEXT);
     final File foo2File = new File(bDir, "Foo2.java");
-    _model.saveFile(new FileSelector(foo2File));
+    doc2.saveFile(new FileSelector(foo2File));
 
     TestListener listener = new CompileShouldSucceedListener();
     _model.addListener(listener);
-    _model.startCompile();
+    doc2.startCompile();
     assertCompileErrorsPresent(false);
     listener.assertCompileStartCount(1);
     listener.assertCompileEndCount(1);
@@ -184,14 +186,14 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
   public void testCompileWithPackageAsPartOfFieldName()
     throws BadLocationException, IOException
   {
-    setupDocument(FOO_PACKAGE_AS_PART_OF_FIELD);
+    OpenDefinitionsDocument doc = setupDocument(FOO_PACKAGE_AS_PART_OF_FIELD);
     final File file = tempFile();
 
     // No listener for save -- assume it works
-    _model.saveFile(new FileSelector(file));
+    doc.saveFile(new FileSelector(file));
     TestListener listener = new CompileShouldSucceedListener();
     _model.addListener(listener);
-    _model.startCompile();
+    doc.startCompile();
     assertCompileErrorsPresent(false);
     listener.assertCompileStartCount(1);
     listener.assertCompileEndCount(1);
@@ -210,14 +212,14 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
   public void testCompilePackageAsField()
     throws BadLocationException, IOException
   {
-    setupDocument(FOO_PACKAGE_AS_FIELD);
+    OpenDefinitionsDocument doc = setupDocument(FOO_PACKAGE_AS_FIELD);
     final File file = tempFile();
-    _model.saveFile(new FileSelector(file));
+    doc.saveFile(new FileSelector(file));
 
     CompileShouldFailListener listener = new CompileShouldFailListener();
 
     _model.addListener(listener);
-    _model.startCompile();
+    doc.startCompile();
     listener.assertCompileStartCount(1);
     listener.assertCompileEndCount(1);
 
@@ -229,7 +231,7 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
                  false,
                  compiled.exists());
   }
-  
+
   /**
    * Creates a source file with "package" as a field name and ensures
    * that compile starts but fails due to the invalid field name.
@@ -239,13 +241,13 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
   public void testCompilePackageAsField2()
     throws BadLocationException, IOException
   {
-    setupDocument(FOO_PACKAGE_AS_FIELD_2);
+    OpenDefinitionsDocument doc = setupDocument(FOO_PACKAGE_AS_FIELD_2);
     final File file = tempFile();
-    _model.saveFile(new FileSelector(file));
+    doc.saveFile(new FileSelector(file));
 
     CompileShouldFailListener listener = new CompileShouldFailListener();
     _model.addListener(listener);
-    _model.startCompile();
+    doc.startCompile();
     listener.assertCompileStartCount(1);
     listener.assertCompileEndCount(1);
 
@@ -257,7 +259,7 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
                  false,
                  compiled.exists());
   }
-  
+
   /**
    * Tests compiling an invalid file and checks to make sure the class
    * file was not created.
@@ -265,12 +267,12 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
   public void testCompileMissingCloseSquiggly()
     throws BadLocationException, IOException
   {
-    setupDocument(FOO_MISSING_CLOSE_TEXT);
+    OpenDefinitionsDocument doc = setupDocument(FOO_MISSING_CLOSE_TEXT);
     final File file = tempFile();
-    _model.saveFile(new FileSelector(file));
+    doc.saveFile(new FileSelector(file));
     TestListener listener = new CompileShouldFailListener();
     _model.addListener(listener);
-    _model.startCompile();
+    doc.startCompile();
     assertCompileErrorsPresent(true);
     listener.assertCompileStartCount(1);
     listener.assertCompileEndCount(1);
@@ -295,13 +297,13 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
     subdir.mkdir();
 
     // Save the footext to Foo.java in the subdirectory
-    setupDocument(FOO_PACKAGE_INSIDE_CLASS);
-    _model.saveFileAs(new FileSelector(fooFile));
+    OpenDefinitionsDocument doc = setupDocument(FOO_PACKAGE_INSIDE_CLASS);
+    doc.saveFileAs(new FileSelector(fooFile));
 
     // do compile -- should fail since package decl is not valid!
     CompileShouldFailListener listener = new CompileShouldFailListener();
     _model.addListener(listener);
-    _model.startCompile();
+    doc.startCompile();
 
     listener.assertCompileStartCount(1);
     listener.assertCompileEndCount(1);
@@ -309,7 +311,7 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
     assertTrue(_name() + "Class file exists after failed compile",
                !compiled.exists());
   }
- 
+
   /**
    * If we try to compile an unsaved file but we do save it from within
    * saveBeforeProceeding, the compile should occur happily.
@@ -317,13 +319,13 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
   public void testCompileUnsavedButSaveWhenAsked()
     throws BadLocationException, IOException
   {
-    setupDocument(FOO_TEXT);
+    final OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
     final File file = tempFile();
 
     CompileShouldSucceedListener listener = new CompileShouldSucceedListener() {
       public void saveBeforeProceeding(GlobalModelListener.SaveReason reason) {
         assertEquals(_name() + "save reason", COMPILE_REASON, reason);
-        assertModified(true);
+        assertModified(true, doc);
         assertSaveCount(0);
         assertCompileStartCount(0);
         assertCompileEndCount(0);
@@ -331,7 +333,7 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
         assertConsoleResetCount(0);
 
         try {
-          _model.saveFile(new FileSelector(file));
+          doc.saveFile(new FileSelector(file));
         }
         catch (IOException ioe) {
           fail("Save produced exception: " + ioe);
@@ -341,7 +343,7 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
       }
 
       public void fileSaved(File f) {
-        assertModified(false);
+        assertModified(false, doc);
         assertSaveBeforeProceedingCount(0);
         assertCompileStartCount(0);
         assertCompileEndCount(0);
@@ -354,7 +356,7 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
     };
 
     _model.addListener(listener);
-    _model.startCompile();
+    doc.startCompile();
 
     // Check events fired
     listener.assertSaveBeforeProceedingCount(1);
@@ -376,11 +378,11 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
    * or any other actions.
    */
   public void testCompileAbortsIfUnsaved() throws BadLocationException {
-    setupDocument(FOO_TEXT);
+    final OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
 
     TestListener listener = new TestListener() {
       public void saveBeforeProceeding(GlobalModelListener.SaveReason reason) {
-        assertModified(true);
+        assertModified(true, doc);
         assertEquals(_name() + "save reason", COMPILE_REASON, reason);
         saveBeforeProceedingCount++;
         // since we don't actually save the compile should abort
@@ -388,12 +390,12 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
     };
 
     _model.addListener(listener);
-    _model.startCompile();
+    doc.startCompile();
     listener.assertSaveBeforeProceedingCount(1);
-    assertModified(true);
-    assertContents(FOO_TEXT);
+    assertModified(true, doc);
+    assertContents(FOO_TEXT, doc);
   }
-  
+
   protected static class CompileShouldSucceedListener extends TestListener {
     public void compileStarted() {
       assertCompileStartCount(0);
