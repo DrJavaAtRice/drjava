@@ -132,7 +132,9 @@ public class CompilerErrorPanel extends JPanel {
         _errorListPane.selectNothing();
       }
       else {
-        _selectError(shouldSelect);
+        // No need to move the caret since it's already here!
+        _highlightErrorInSource(shouldSelect);
+        _errorListPane.selectItem(shouldSelect);
       }
     }
   };
@@ -167,14 +169,14 @@ public class CompilerErrorPanel extends JPanel {
     _nextButton = new JButton("Next");
     _nextButton.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
-          _gotoError(_errorListPane.getSelectedIndex() + 1);
+          _switchToError(_errorListPane.getSelectedIndex() + 1);
         }
     });
 
     _previousButton = new JButton("Previous");
     _previousButton.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
-          _gotoError(_errorListPane.getSelectedIndex() - 1);
+          _switchToError(_errorListPane.getSelectedIndex() - 1);
         }
     });
     
@@ -204,26 +206,25 @@ public class CompilerErrorPanel extends JPanel {
     add(scroller, BorderLayout.CENTER);
   }
 
-  private void _gotoError(int newIndex) {
-    if (newIndex < 0) return;
-
-    // move caret to that position
-    final int idx = newIndex; // final so it's accessible inside inner class
-
-    SwingUtilities.invokeLater(new Runnable() {
-      public void run() {
-        _selectError(idx);
-
-        int errPos = _errorPositions[idx].getOffset();
-        _definitionsView.setCaretPosition(errPos);
-        _definitionsView.grabFocus();
-      }
-    });
+  /** Change all state to select a new error. */
+  private void _switchToError(final int idx) {
+    _highlightErrorInSource(idx);
+    _gotoErrorSourceLocation(idx);
+    _errorListPane.selectItem(idx);
   }
 
-  private void _selectError(int newIndex) {
-    _errorListPane.selectItem(newIndex);
+  private void _gotoErrorSourceLocation(final int idx) {
+    if (idx < 0) return;
 
+    _highlightErrorInSource(idx);
+
+    int errPos = _errorPositions[idx].getOffset();
+    // move caret to that position
+    _definitionsView.setCaretPosition(errPos);
+    _definitionsView.grabFocus();
+  }
+
+  private void _highlightErrorInSource(int newIndex) {
     int errPos = _errorPositions[newIndex].getOffset();
 
     try {
@@ -247,9 +248,8 @@ public class CompilerErrorPanel extends JPanel {
       _removePreviousHighlight();
       _addHighlight(prevNewline, nextNewline);
     }
-    catch (BadLocationException stupidMachineItWontHappen) {}
+    catch (BadLocationException imposssible) { }
 
-    // now display that line with highlight
     _resetEnabledStatus();
   }
 
@@ -345,10 +345,7 @@ public class CompilerErrorPanel extends JPanel {
           selectNothing();
         }
         else {
-          // This jumps the caret in the defs doc to the error and
-          // also highlights the error in the defs. The caret movement
-          // then results in the error being highlighted in the list.
-          _gotoError(errorNum);
+          _switchToError(errorNum);
         }
       }
     };
@@ -371,8 +368,6 @@ public class CompilerErrorPanel extends JPanel {
     private int _errorAtPoint(Point p) {
       int modelPos = viewToModel(p);
 
-      //System.err.println("model pos=" + modelPos);
-
       if (modelPos == -1)
         return -1;
 
@@ -386,8 +381,6 @@ public class CompilerErrorPanel extends JPanel {
           break;
         }
       }
-
-      //System.err.println("error num=" + errorNum);
 
       return errorNum;
     }
@@ -410,11 +403,9 @@ public class CompilerErrorPanel extends JPanel {
 
     private void _updateNoErrors() throws BadLocationException {
       DefaultStyledDocument doc = new DefaultStyledDocument();
-      /*
       doc.insertString(0,
                        "Last compilation completed successfully.",
                        null);
-      */
       setDocument(doc);
 
       selectNothing();
@@ -422,9 +413,11 @@ public class CompilerErrorPanel extends JPanel {
 
     private void _updateWithErrors() throws BadLocationException {
       DefaultStyledDocument doc = new DefaultStyledDocument();
+      /*
       doc.insertString(0,
                        "Last compilation returned the following errors:\n",
                        null);
+      */
 
       for (int i = 0; i < _errors.length; i++) {
         int startPos = doc.getLength();
@@ -435,7 +428,7 @@ public class CompilerErrorPanel extends JPanel {
       setDocument(doc);
 
       // Select the first error
-      _gotoError(0);
+      _switchToError(0);
     }
 
     private String _errorText(int i) {

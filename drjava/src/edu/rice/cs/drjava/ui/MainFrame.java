@@ -415,9 +415,14 @@ public class MainFrame extends JFrame
     _tabbedPane.add("Interactions", new JScrollPane(_interactionsView));
     _tabbedPane.add("Compiler output", _errorPanel);
 
+    JScrollPane defScroll =
+      new JScrollPane(_definitionsView,
+                      JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+                      JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+                            
 		JSplitPane split1 = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
                                        true,
-                                       new JScrollPane(_definitionsView),
+                                       defScroll,
 																			 _tabbedPane);
 		
 
