@@ -207,11 +207,18 @@ public class ProjectPropertiesFrame extends JFrame {
    * Write the settings to the project file
    */
   public boolean saveSettings() {//throws IOException {
-    _mainFrame.getModel().setBuildDirectory(_builtDirSelector.getFileFromField());
-    _mainFrame.getModel().setJarMainClass(_jarMainClassSelector.getFileFromField());
+    File f = _builtDirSelector.getFileFromField();
+    if(_builtDirSelector.getFileField().getText().equals("")) 
+      f = null;
+    _mainFrame.getModel().setBuildDirectory(f);
+    
+    f = _jarMainClassSelector.getFileFromField();
+    if(_jarMainClassSelector.getFileField().getText().equals(""))
+      f = null;
+    _mainFrame.getModel().setJarMainClass(f);
 //    _mainFrame.saveProject();
     return true;
-  }
+    }
   
   /**
    * Returns the current working directory, or the user's current directory
