@@ -135,8 +135,8 @@ public class ProjectFileParser {
       pfir.setAuxiliaryFiles(fList);
     }
     else if (name.compareToIgnoreCase("collapsed") == 0) {
-      List<DocFile> fList = exp.getRest().accept(new FileListVisitor(null));
-      pfir.setCollapsedPaths(fList);
+      List<String> sList = exp.getRest().accept(PathListVisitor.ONLY);
+      pfir.setCollapsedPaths(sList);
     }
     else if (name.compareToIgnoreCase("build-dir") == 0) {
       List<DocFile> fList = exp.getRest().accept(flv);
@@ -343,6 +343,28 @@ public class ProjectFileParser {
   }
   
   /**
+   * Parses out a list of path nodes into a list of Strings
+   */
+  private static class PathListVisitor implements SEListVisitor<List<String>> {
+    public static final PathListVisitor ONLY = new PathListVisitor();
+    private PathListVisitor() { }
+    
+    public List<String> forEmpty(Empty e) {
+      return new ArrayList<String>();
+    }
+    public List<String> forCons(Cons c) {
+      List<String> list = c.getRest().accept(this);
+      SExp first = c.getFirst();
+      String name = first.accept(NameVisitor.ONLY); 
+      if (name.compareToIgnoreCase("path") == 0) {
+        String tmp = ProjectFileParser.ONLY.parseStringNode(c.getFirst());
+        list.add(0,tmp); // add to the end
+      }
+      return list;
+    }
+  };
+  
+  /**
    * Retrieves the name of a node.  The node should either be a list
    * with its first element being a text atom, or a text atom itself.
    */
@@ -375,7 +397,7 @@ public class ProjectFileParser {
   private static class ProjectFileIRImpl implements ProjectFileIR {
     List<DocFile> _src;
     List<DocFile> _aux;
-    List<? extends File> _collapsed;
+    List<String> _collapsed;
     File _buildDir;
     List<? extends File> _classpaths;
     File _mainClass;
@@ -387,7 +409,7 @@ public class ProjectFileParser {
     public ProjectFileIRImpl() {
       _src = new ArrayList<DocFile>();
       _aux = new ArrayList<DocFile>();
-      _collapsed = new ArrayList<DocFile>();
+      _collapsed = new ArrayList<String>();
       _classpaths = new ArrayList<DocFile>();
       _buildDir = null;
       _mainClass = null;
@@ -410,8 +432,8 @@ public class ProjectFileParser {
     /**
      * @return an array full of all the resource files in this project file
      */
-    public File[] getCollapsedPaths() {
-      return _collapsed.toArray(new File[0]);
+    public String[] getCollapsedPaths() {
+      return _collapsed.toArray(new String[0]);
     }
     
     /**
@@ -444,7 +466,7 @@ public class ProjectFileParser {
     void setAuxiliaryFiles(List<DocFile> aux) {
       _aux = aux;
     }
-    void setCollapsedPaths(List<DocFile> path) {
+    void setCollapsedPaths(List<String> path) {
       _collapsed = path;
     }
     void setClasspaths(List<DocFile> cp) {

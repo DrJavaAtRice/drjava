@@ -947,7 +947,6 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     }
     OpenDefinitionsDocument doc = _openFiles(files);
     return doc;
-    
   }
   
   // if set to true, and uncommented, the definitions document will
@@ -966,7 +965,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     
 //        SHOW_GETDOC = true;
         
-    LinkedList<File> lof = new LinkedList<File>();
+    LinkedList<File> filesNotFound = new LinkedList<File>();
     for (File f: files) {
       if (f == null) {
         throw new IOException("File name returned from FileSelector is null");
@@ -982,17 +981,14 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
           storedAOE = aoe;
         }
       }catch(FileNotFoundException e){
-        lof.add(f);
+        filesNotFound.add(f);
       }
     }
     
 //        SHOW_GETDOC = false;
-    for(File f: lof){
+    for(File f: filesNotFound){
       _notifier.fileNotFound(f);
     }
-
-    
-    
     
     if (storedAOE != null) {
       throw storedAOE;
@@ -1063,6 +1059,14 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     }
 
     // TODO: add all the auxiliary files to the builder.  The aux files should be in the info map too
+    
+    // add collapsed path info
+    if (_documentNavigator instanceof JTreeSortNavigator) {
+      String[] paths = ((JTreeSortNavigator)_documentNavigator).getCollapsedPaths();
+      for (String s : paths) {
+        builder.addCollapsedPath(s);
+      }
+    }
     
     // add classpath info
     Vector<File> currentclasspaths = DrJava.getConfig().getSetting(OptionConstants.EXTRA_CLASSPATH);
@@ -1196,10 +1200,47 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
         al.add(file);
       }
     }
+    if (active != null) al.add(active);
+    
+    List<OpenDefinitionsDocument> nonProjDocs = getNonProjectDocuments();
+    List<OpenDefinitionsDocument> projDocs = getProjectDocuments();
+    File[] projectFiles = getProjectFiles();   
     
     
+    // keep all nonproject files open.  External files in the previous project
+    // may become project files in the new project and must be closed while external
+    // files in the previous project that are still external to the new project 
+    // should be kept open.
+     
+    //List<OpenDefinitionsDocument> docsToClose = new LinkedList<OpenDefinitionsDocument>();
+    for(OpenDefinitionsDocument d: projDocs){
+      if(d.isProjectFile()){
+        closeFile(d);
+      }else{
+        try{
+          INavigatorItem idoc = getIDocGivenODD(d);
+          String path = fixPathForNavigator(d.getFile().getCanonicalPath());
+          _documentNavigator.refreshDocument(idoc, path);
+        }catch(IOException e){
+          // noop
+        }
+      }
+    }
     
-    return al.toArray(new File[0]);
+    // call on the GUI to finish up by opening the files and making
+    // necessary gui component changes
+    final File[] filesToOpen = al.toArray(new File[0]);
+    _notifier.projectOpened(projectFile, new FileOpenSelector(){
+      public File[] getFiles() {
+        return filesToOpen;
+      }
+    });
+    
+    if (_documentNavigator instanceof JTreeSortNavigator) {
+      ((JTreeSortNavigator)_documentNavigator).collapsePaths(ir.getCollapsedPaths());
+    }
+    
+    return srcFiles; // Unnecessarily returns src files in keeping with the previous interface.
   }
   
   /**

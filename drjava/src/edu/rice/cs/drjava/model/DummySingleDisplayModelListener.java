@@ -66,6 +66,12 @@ public class DummySingleDisplayModelListener implements SingleDisplayModelListen
   public void projectBuildDirChanged(){  }
   
   /**
+   * called when the project is being opened and the model needs the
+   * gui to do some stuff for it.
+   */
+  public void projectOpened(File pfile, FileOpenSelector files) {  }
+  
+  /**
    * called when the projects modified state has changed
    */
   public void projectModified(){  }

@@ -109,8 +109,8 @@ public class ProjectTest extends TestCase {
       "   (file (name "+ProjectFileBuilder.convertToLiteral(new File(absp,"junk/sexp/Tokens.java").getCanonicalPath()) +")(select 32 32)(mod-date \"16-Jul-2004 03:45:23\"))\n" +
       "   (file (name "+ProjectFileBuilder.convertToLiteral(new File(absp,"jdk1.5.0/JScrollPane.java").getCanonicalPath()) +")(select 9086 8516)(mod-date \"16-Jul-2004 03:45:23\")))\n" +
       "(collapsed ;; relative paths\n" +
-      "   (file (name \"sexp\"))\n" +
-      "   (file (name \"[External]\")))\n" +
+      "   (path \"./[ Source Files ]/sexp/\")\n" +
+      "   (path \"./[ External ]/\"))\n" +
       "(build-dir ;; absolute path\n" +
       "   (file (name "+ProjectFileBuilder.convertToLiteral(new File(absp,"drjava/built").getCanonicalPath()) + ")))\n" +
       "(classpaths\n" +
@@ -131,7 +131,7 @@ public class ProjectTest extends TestCase {
                  pfir.getSourceFiles()[0].getSavedModDate());
     assertEquals("last source filename", new File(base,"/sexp/SEList.java").getPath(), pfir.getSourceFiles()[6].getPath());
     assertEquals("first aux filename", new File(absp,"junk/sexp/Tokens.java").getPath(), pfir.getAuxiliaryFiles()[0].getCanonicalPath());
-    assertEquals("last collapsed path", "[External]", pfir.getCollapsedPaths()[1].getPath());
+    assertEquals("last collapsed path", "./[ External ]/", pfir.getCollapsedPaths()[1]);
     assertEquals("build-dir name", new File(absp,"drjava/built").getPath(), pfir.getBuildDirectory().getCanonicalPath());
     assertEquals("classpath name", new File(absp,"drjava/src/edu/rice/cs/lib").getPath(), pfir.getClasspaths()[0].getCanonicalPath());
     assertEquals("main-class name", new File(base,"/sexp/SEList.java").getCanonicalPath(), pfir.getMainClass().getCanonicalPath());
@@ -159,7 +159,7 @@ public class ProjectTest extends TestCase {
     fb.addSourceFile(makeGetter(0,0,0,0,  "dir3/testfile5.java","",false,false,pf));
     fb.addAuxiliaryFile(makeGetter(1,1,0,0, absp+"test/testfile6.java","/home/javaplt",false, false,null));
     fb.addAuxiliaryFile(makeGetter(1,1,0,0, absp+"test/testfile7.java","/home/javaplt",false, false,null));
-    fb.addCollapsedPath(new File(pf.getParentFile(), "dir1"));
+    fb.addCollapsedPath("./[ Source Files ]/dir1/");
     fb.addClasspathFile(new File(absp,"drjava/lib"));
     fb.setBuildDirectory(new File(absp,"drjava/built"));
     fb.setMainClass(new File(pf.getParentFile(), "dir1/testfile1.java"));
@@ -195,7 +195,7 @@ public class ProjectTest extends TestCase {
     assertEquals("first source filename", new File(base,"/dir1/testfile1.java").getPath(), pfir.getSourceFiles()[0].getPath());
     assertEquals("last source filename", new File(base,"/dir3/testfile5.java").getPath(), pfir.getSourceFiles()[4].getPath());
     assertEquals("first aux filename", new File(absp,"test/testfile6.java").getPath(), pfir.getAuxiliaryFiles()[0].getPath());
-    assertEquals("last collapsed path", "dir1", pfir.getCollapsedPaths()[0].getPath());
+    assertEquals("last collapsed path", "./[ Source Files ]/dir1/", pfir.getCollapsedPaths()[0]);
     assertEquals("build-dir name", new File(absp,"drjava/built").getPath(), pfir.getBuildDirectory().getCanonicalPath());
     assertEquals("classpath name", new File(absp,"drjava/lib").getPath(), pfir.getClasspaths()[0].getCanonicalPath());
     assertEquals("main-class name", new File(base,"/dir1/testfile1.java").getCanonicalPath(), pfir.getMainClass().getCanonicalPath());

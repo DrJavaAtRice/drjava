@@ -68,7 +68,7 @@ public class ProjectFileBuilder {
   
   private List<DocFile> _auxFiles = new Vector<DocFile>();
   
-  private List<File> _collapsedPaths = new Vector<File>();
+  private List<String> _collapsedPaths = new Vector<String>();
   
   private File _buildDir = null;
   
@@ -114,7 +114,7 @@ public class ProjectFileBuilder {
       _classpathFiles.add(cp);
     }
   }
-  public void addCollapsedPath(File cp) {
+  public void addCollapsedPath(String cp) {
     if (cp != null) {
       _collapsedPaths.add(cp);
     }
@@ -163,8 +163,8 @@ public class ProjectFileBuilder {
     // write collapsed paths
     if (!_collapsedPaths.isEmpty()){
       fw.write("\n(collapsed");
-      for(File f: _collapsedPaths) {
-        fw.write("\n" + encodeFile(f, "  "));
+      for(String s: _collapsedPaths) {
+        fw.write("\n  (path " + convertToLiteral(s) + ")");
       }
       fw.write(")"); // close the collapsed expression
     }

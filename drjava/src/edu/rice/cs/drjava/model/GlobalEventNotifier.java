@@ -89,9 +89,8 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
   public void fileNotFound(File f){
     _lock.startRead();
     try {
-      int size = _listeners.size();
-      for(int i = 0; i < size; i++) {
-        _listeners.get(i).fileNotFound(f);
+      for(GlobalModelListener l : _listeners) {
+        l.fileNotFound(f);
       }
     }
     finally {
@@ -101,13 +100,23 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
   
   
   /* -------------- project state ------------------*/
+  public void projectOpened(File pfile, FileOpenSelector files) {
+    _lock.startRead();
+    try {
+      for(GlobalModelListener l : _listeners) {
+        l.projectOpened(pfile, files);
+      }
+    }
+    finally {
+      _lock.endRead();
+    }
+  }
   
   public void projectModified(){
     _lock.startRead();
     try {
-      int size = _listeners.size();
-      for(int i = 0; i < size; i++) {
-        _listeners.get(i).projectModified();
+      for(GlobalModelListener l : _listeners) {
+        l.projectModified();
       }
     }
     finally {
@@ -118,9 +127,8 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
   public void projectBuildDirChanged(){
     _lock.startRead();
     try {
-      int size = _listeners.size();
-      for(int i = 0; i < size; i++) {
-        _listeners.get(i).projectBuildDirChanged();
+      for(GlobalModelListener l : _listeners) {
+        l.projectBuildDirChanged();
       }
     }
     finally {
@@ -131,9 +139,8 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
   public void projectRunnableChanged(){
     _lock.startRead();
     try {
-      int size = _listeners.size();
-      for(int i = 0; i < size; i++) {
-        _listeners.get(i).projectRunnableChanged();
+      for(GlobalModelListener l : _listeners) {
+        l.projectRunnableChanged();
       }
     }
     finally {
@@ -153,9 +160,8 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
   public void notifyListeners(Notifier n) {
     _lock.startRead();
     try {
-      int size = _listeners.size();
-      for(int i = 0; i < size; i++) {
-        n.notifyListener(_listeners.get(i));
+      for(GlobalModelListener l : _listeners) {
+        n.notifyListener(l);
       }
     }
     finally {
@@ -215,9 +221,8 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
   public void runStarted(OpenDefinitionsDocument doc) {
     _lock.startRead();
     try {
-      int size = _listeners.size();
-      for(int i = 0; i < size; i++) {
-        _listeners.get(i).runStarted(doc);
+      for(GlobalModelListener l : _listeners) {
+        l.runStarted(doc);
       }
     }
     finally {
@@ -231,9 +236,8 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
   public void newFileCreated(OpenDefinitionsDocument doc) {
     _lock.startRead();
     try {
-      int size = _listeners.size();
-      for(int i = 0; i < size; i++) {
-        _listeners.get(i).newFileCreated(doc);
+      for(GlobalModelListener l : _listeners) {
+        l.newFileCreated(doc);
       }
     }
     finally {
@@ -247,9 +251,8 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
   public void consoleReset() {
     _lock.startRead();
     try {
-      int size = _listeners.size();
-      for(int i = 0; i < size; i++) {
-        _listeners.get(i).consoleReset();
+      for(GlobalModelListener l : _listeners) {
+        l.consoleReset();
       }
     }
     finally {
@@ -263,9 +266,8 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
   public void fileSaved(OpenDefinitionsDocument doc) {
     _lock.startRead();
     try {
-      int size = _listeners.size();
-      for(int i = 0; i < size; i++) {
-        _listeners.get(i).fileSaved(doc);
+      for(GlobalModelListener l : _listeners) {
+        l.fileSaved(doc);
       }
     }
     finally {
@@ -279,9 +281,8 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
   public void fileOpened(OpenDefinitionsDocument doc) {
     _lock.startRead();
     try {
-      int size = _listeners.size();
-      for(int i = 0; i < size; i++) {
-        _listeners.get(i).fileOpened(doc);
+      for(GlobalModelListener l : _listeners) {
+        l.fileOpened(doc);
       }
     }
     finally {
@@ -295,9 +296,8 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
   public void fileClosed(OpenDefinitionsDocument doc) {
     _lock.startRead();
     try {
-      int size = _listeners.size();
-      for(int i = 0; i < size; i++) {
-        _listeners.get(i).fileClosed(doc);
+      for(GlobalModelListener l : _listeners) {
+        l.fileClosed(doc);
       }
     }
     finally {
@@ -311,9 +311,8 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
   public void fileReverted(OpenDefinitionsDocument doc) {
     _lock.startRead();
     try {
-      int size = _listeners.size();
-      for(int i = 0; i < size; i++) {
-        _listeners.get(i).fileReverted(doc);
+      for(GlobalModelListener l : _listeners) {
+        l.fileReverted(doc);
       }
     }
     finally {
@@ -327,9 +326,8 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
   public void undoableEditHappened() {
     _lock.startRead();
     try {
-      int size = _listeners.size();
-      for(int i = 0; i < size; i++) {
-        _listeners.get(i).undoableEditHappened();
+      for(GlobalModelListener l : _listeners) {
+        l.undoableEditHappened();
       }
     }
     finally {
@@ -345,6 +343,7 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
     _lock.startRead();
     try {
       boolean poll = true;
+      
       int size = _listeners.size();
       for(int i = 0; poll && (i < size); i++) {
         poll = poll && _listeners.get(i).canAbandonFile(doc);
@@ -364,6 +363,7 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
     _lock.startRead();
     try {
       boolean poll = true;
+      
       int size = _listeners.size();
       for(int i = 0; (poll && (i < size)); i++) {
         poll = poll && _listeners.get(i).shouldRevertFile(doc);
@@ -385,9 +385,9 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
   public void saveBeforeRun() {
     _lock.startRead();
     try {
-      int size = _listeners.size();
-      for(int i = 0; i < size; i++) {
-        _listeners.get(i).saveBeforeRun();
+      
+      for(GlobalModelListener l : _listeners) {
+        l.saveBeforeRun();
       }
     }
     finally {
@@ -403,9 +403,8 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
   public void interactionStarted() {
     _lock.startRead();
     try {
-      int size = _listeners.size();
-      for(int i = 0; i < size; i++) {
-        _listeners.get(i).interactionStarted();
+      for(GlobalModelListener l : _listeners) {
+        l.interactionStarted();
       }
     }
     finally {
@@ -419,9 +418,8 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
   public void interactionEnded() {
     _lock.startRead();
     try {
-      int size = _listeners.size();
-      for(int i = 0; i < size; i++) {
-        _listeners.get(i).interactionEnded();
+      for(GlobalModelListener l : _listeners) {
+        l.interactionEnded();
       }
     }
     finally {
@@ -438,9 +436,8 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
   public void interactionErrorOccurred(int offset, int length) {
     _lock.startRead();
     try {
-      int size = _listeners.size();
-      for(int i = 0; i < size; i++) {
-        _listeners.get(i).interactionErrorOccurred(offset, length);
+      for(GlobalModelListener l : _listeners) {
+        l.interactionErrorOccurred(offset, length);
       }
     }
     finally {
@@ -454,9 +451,8 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
   public void interpreterResetting() {
     _lock.startRead();
     try {
-      int size = _listeners.size();
-      for(int i = 0; i < size; i++) {
-        _listeners.get(i).interpreterResetting();
+      for(GlobalModelListener l : _listeners) {
+        l.interpreterResetting();
       }
     }
     finally {
@@ -470,9 +466,8 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
   public void interpreterReady() {
     _lock.startRead();
     try {
-      int size = _listeners.size();
-      for(int i = 0; i < size; i++) {
-        _listeners.get(i).interpreterReady();
+      for(GlobalModelListener l : _listeners) {
+        l.interpreterReady();
       }
     }
     finally {
@@ -488,9 +483,8 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
   public void interpreterResetFailed(final Throwable t) {
     _lock.startRead();
     try {
-      int size = _listeners.size();
-      for(int i = 0; i < size; i++) {
-        _listeners.get(i).interpreterResetFailed(t);
+      for(GlobalModelListener l : _listeners) {
+        l.interpreterResetFailed(t);
       }
     }
     finally {
@@ -507,9 +501,8 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
   public void interpreterExited(int status) {
     _lock.startRead();
     try {
-      int size = _listeners.size();
-      for(int i = 0; i < size; i++) {
-        _listeners.get(i).interpreterExited(status);
+      for(GlobalModelListener l : _listeners) {
+        l.interpreterExited(status);
       }
     }
     finally {
@@ -525,9 +518,8 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
   public void interpreterChanged(boolean inProgress) {
     _lock.startRead();
     try {
-      int size = _listeners.size();
-      for(int i = 0; i < size; i++) {
-        _listeners.get(i).interpreterChanged(inProgress);
+      for(GlobalModelListener l : _listeners) {
+        l.interpreterChanged(inProgress);
       }
     }
     finally {
@@ -543,9 +535,8 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
   public void compileStarted() {
     _lock.startRead();
     try {
-      int size = _listeners.size();
-      for(int i = 0; i < size; i++) {
-        _listeners.get(i).compileStarted();
+      for(GlobalModelListener l : _listeners) {
+        l.compileStarted();
       }
     }
     finally {
@@ -559,9 +550,8 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
   public void compileEnded() {
     _lock.startRead();
     try {
-      int size = _listeners.size();
-      for(int i = 0; i < size; i++) {
-        _listeners.get(i).compileEnded();
+      for(GlobalModelListener l : _listeners) {
+        l.compileEnded();
       }
     }
     finally {
@@ -577,9 +567,8 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
   public void saveBeforeCompile() {
     _lock.startRead();
     try {
-      int size = _listeners.size();
-      for(int i = 0; i < size; i++) {
-        _listeners.get(i).saveBeforeCompile();
+      for(GlobalModelListener l : _listeners) {
+        l.saveBeforeCompile();
       }
     }
     finally {
@@ -596,9 +585,8 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
   public void nonTestCase(boolean isTestAll) {
     _lock.startRead();
     try {
-      int size = _listeners.size();
-      for(int i = 0; i < size; i++) {
-        _listeners.get(i).nonTestCase(isTestAll);
+      for(GlobalModelListener l : _listeners) {
+        l.nonTestCase(isTestAll);
       }
     }
     finally {
@@ -612,9 +600,8 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
   public void junitStarted(List<OpenDefinitionsDocument> docs) {
     _lock.startRead();
     try {
-      int size = _listeners.size();
-      for(int i = 0; i < size; i++) {
-        _listeners.get(i).junitStarted(docs);
+      for(GlobalModelListener l : _listeners) {
+        l.junitStarted(docs);
       }
     }
     finally {
@@ -629,9 +616,8 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
   public void junitSuiteStarted(int numTests) {
     _lock.startRead();
     try {
-      int size = _listeners.size();
-      for(int i = 0; i < size; i++) {
-        _listeners.get(i).junitSuiteStarted(numTests);
+      for(GlobalModelListener l : _listeners) {
+        l.junitSuiteStarted(numTests);
       }
     }
     finally {
@@ -646,9 +632,8 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
   public void junitTestStarted(String name) {
     _lock.startRead();
     try {
-      int size = _listeners.size();
-      for(int i = 0; i < size; i++) {
-        _listeners.get(i).junitTestStarted(name);
+      for(GlobalModelListener l : _listeners) {
+        l.junitTestStarted(name);
       }
     }
     finally {
@@ -666,9 +651,8 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
   public void junitTestEnded(String name, boolean wasSuccessful, boolean causedError) {
     _lock.startRead();
     try {
-      int size = _listeners.size();
-      for(int i = 0; i < size; i++) {
-        _listeners.get(i).junitTestEnded(name, wasSuccessful, causedError);
+      for(GlobalModelListener l : _listeners) {
+        l.junitTestEnded(name, wasSuccessful, causedError);
       }
     }
     finally {
@@ -682,9 +666,8 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
   public void junitEnded() {
     _lock.startRead();
     try {
-      int size = _listeners.size();
-      for(int i = 0; i < size; i++) {
-        _listeners.get(i).junitEnded();
+      for(GlobalModelListener l : _listeners) {
+        l.junitEnded();
       }
     }
     finally {
@@ -702,9 +685,8 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
   public void saveBeforeJUnit() {
     _lock.startRead();
     try {
-      int size = _listeners.size();
-      for(int i = 0; i < size; i++) {
-        _listeners.get(i).saveBeforeJUnit();
+      for(GlobalModelListener l : _listeners) {
+        l.saveBeforeJUnit();
       }
     }
     finally {
@@ -720,9 +702,8 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
   public void javadocStarted() {
     _lock.startRead();
     try {
-      int size = _listeners.size();
-      for(int i = 0; i < size; i++) {
-        _listeners.get(i).javadocStarted();
+      for(GlobalModelListener l : _listeners) {
+        l.javadocStarted();
       }
     }
     finally {
@@ -740,9 +721,8 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
   public void javadocEnded(boolean success, File destDir, boolean allDocs) {
     _lock.startRead();
     try {
-      int size = _listeners.size();
-      for(int i = 0; i < size; i++) {
-        _listeners.get(i).javadocEnded(success, destDir, allDocs);
+      for(GlobalModelListener l : _listeners) {
+        l.javadocEnded(success, destDir, allDocs);
       }
     }
     finally {
@@ -757,9 +737,8 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
   public void saveBeforeJavadoc() {
     _lock.startRead();
     try {
-      int size = _listeners.size();
-      for(int i = 0; i < size; i++) {
-        _listeners.get(i).saveBeforeJavadoc();
+      for(GlobalModelListener l : _listeners) {
+        l.saveBeforeJavadoc();
       }
     }
     finally {
@@ -777,9 +756,8 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
   public void saveBeforeDebug() {
     _lock.startRead();
     try {
-      int size = _listeners.size();
-      for(int i = 0; i < size; i++) {
-        _listeners.get(i).saveBeforeDebug();
+      for(GlobalModelListener l : _listeners) {
+        l.saveBeforeDebug();
       }
     }
     finally {
@@ -793,9 +771,8 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
   public void interactionIncomplete() {
     _lock.startRead();
     try {
-      int size = _listeners.size();
-      for(int i = 0; i < size; i++) {
-        _listeners.get(i).interactionIncomplete();
+      for(GlobalModelListener l : _listeners) {
+        l.interactionIncomplete();
       }
     }
     finally {
@@ -809,9 +786,8 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
   public void filePathContainsPound() {
     _lock.startRead();
     try {
-      int size = _listeners.size();
-      for(int i = 0; i < size; i++) {
-        _listeners.get(i).filePathContainsPound();
+      for(GlobalModelListener l : _listeners) {
+        l.filePathContainsPound();
       }
     }
     finally {
@@ -823,9 +799,8 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
   public void documentNotFound(OpenDefinitionsDocument d, File f) {
     _lock.startRead();
     try {
-      int size = _listeners.size();
-      for(int i = 0; i < size; i++) {
-        _listeners.get(i).documentNotFound(d,f);
+      for(GlobalModelListener l : _listeners) {
+        l.documentNotFound(d,f);
       }
     }
     finally {

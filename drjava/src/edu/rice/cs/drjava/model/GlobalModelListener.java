@@ -153,6 +153,13 @@ public interface GlobalModelListener extends InteractionsListener,
   public void projectBuildDirChanged();
   
   /**
+   * called while the project is being opened.
+   * @param projectFile the location of the project file
+   * @param files The files the gui should open for the model
+   */
+  public void projectOpened(File projectFile, FileOpenSelector files);
+  
+  /**
    * called if the project's modified state has changed
    */
   public void projectModified();

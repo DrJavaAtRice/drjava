@@ -2233,65 +2233,21 @@ public class MainFrame extends JFrame implements OptionConstants {
    */
   private void _openProjectHelper(File projectFile) {
     _currentProjFile = projectFile;
-    File[] srcFiles = null;
     try{
-      srcFiles = _model.openProject(projectFile);
-      _setUpContextMenus();
-      _recentProjectManager.updateOpenFiles(projectFile);
+      _model.openProject(projectFile);
     }
     catch(MalformedProjectFileException e){
-      _showProjectFileParseError(e);
+      _showProjectFileParseError(e); // add to an error adapter
       return;
     }
     catch(FileNotFoundException e) {
-      _showFileNotFoundError(e);
+      _showFileNotFoundError(e); // add to an error adapter
       return;
     }
     catch(IOException e){
-      _showIOError(e);
+      _showIOError(e); // add to an error adapter
       return;
     }
-
-    List<OpenDefinitionsDocument> nonProjDocs = _model.getNonProjectDocuments();
-    List<OpenDefinitionsDocument> projDocs = _model.getProjectDocuments();
-    File[] projectFiles = _model.getProjectFiles();
-    
-    
-    /**
-     * keep all nonproject files open
-     */
-    IDocumentNavigator nav = _model.getDocumentNavigator();
-
-    
-    // close all project files
-    List<OpenDefinitionsDocument> docsToClose = new LinkedList<OpenDefinitionsDocument>();
-    for(OpenDefinitionsDocument d: projDocs){
-      if(d.isProjectFile()){
-        docsToClose.add(d);
-      }else{
-        try{
-          nav.refreshDocument(_model.getIDocGivenODD(d), _model.fixPathForNavigator(d.getFile().getCanonicalPath()));
-        }catch(IOException e){
-          // noop
-        }
-      }
-    }
-
-    for(OpenDefinitionsDocument d: docsToClose){
-    }
-    _model.closeFiles(docsToClose);
-    
-    final File[] files = srcFiles;
-    // project could be empty
-    if(srcFiles.length > 0){
-      open(new FileOpenSelector(){
-        public File[] getFiles() {
-          return files;
-        }
-      });
-    }
-    
-    _openProjectUpdate();
   }
   
   private void _openProjectUpdate() {
@@ -3245,7 +3201,7 @@ public class MainFrame extends JFrame implements OptionConstants {
 
   void _showProjectFileParseError(MalformedProjectFileException mpfe) {
     _showError(mpfe, "Invalid Project File",
-               "The specified file is not a valid project file.");
+               "DrJava could not read the given project file.");
   }
   
   void _showFileNotFoundError(FileNotFoundException fnf) {
@@ -6086,6 +6042,13 @@ public class MainFrame extends JFrame implements OptionConstants {
     
     public void projectModified(){
 //      _saveProjectAction.setEnabled(_model.isProjectChanged());
+    }
+    
+    public void projectOpened(File projectFile, FileOpenSelector files) {
+      _setUpContextMenus();
+      _recentProjectManager.updateOpenFiles(projectFile);
+      open(files);
+      _openProjectUpdate();
     }
     
     public void projectRunnableChanged(){

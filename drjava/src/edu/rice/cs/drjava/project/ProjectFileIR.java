@@ -66,11 +66,11 @@ public interface ProjectFileIR {
   public File getBuildDirectory();
   
   /**
-   * @return an array of Files whose paths correspond to which folders in
+   * @return an array of path strings correspond to which folders in
    * the tree should not be shown.  Any paths not in this list will be 
    * expanded when the project is opened.
    */
-  public File[] getCollapsedPaths();
+  public String[] getCollapsedPaths();
     
   /**
    * @return an array full of all the classpath path elements in the classpath for this project file
