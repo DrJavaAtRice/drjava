@@ -2168,7 +2168,7 @@ public class MainFrame extends JFrame implements OptionConstants {
    * list view navigator
    * @return true if the project is closed, false if cancelled
    */
-  private boolean _closeProject(){
+  boolean _closeProject(){
     if(_checkProjectClose()) {
       List<OpenDefinitionsDocument> projDocs = _model.getProjectDocuments();
       //    for(OpenDefinitionsDocument d: projDocs){
@@ -2470,7 +2470,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
   }
   
-  private void _saveProjectHelper(File file) {
+  void _saveProjectHelper(File file) {
     try {
       if (file.getName().indexOf(".") == -1){
         file =  new File (file.getAbsolutePath() + ".pjt");

@@ -51,6 +51,10 @@ import java.util.*;
 import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.ui.*;
 import edu.rice.cs.drjava.project.MalformedProjectFileException;
+import edu.rice.cs.drjava.project.ProjectFileParser;
+import edu.rice.cs.drjava.project.ProjectFileIR;
+import edu.rice.cs.drjava.project.DocFile;
+
 /**
  * Test functions of Project Facility working through the main frame and model.
  *
@@ -141,15 +145,31 @@ public final class ProjectMenuTest extends MultiThreadedTestCase {
     assertFalse("Project should have been closed",_model.isProjectActive());
   }
   
-  public void testSaveProject() {
-    FileOpenSelector fos = new FileOpenSelector() {
+  public void testSaveProject() throws IOException, MalformedProjectFileException{
+    FileOpenSelector _projFOS = new FileOpenSelector() {
       public File[] getFiles() throws OperationCanceledException {
         return new File[] {_projFile};
       }
     };
-    // right now it's checking to make sure this doensn't throw exceptions
-    _frame.openProject(fos);
+    _frame.openProject(new FileOpenSelector() {
+      public File[] getFiles() throws OperationCanceledException {
+        return new File[] {_projFile};
+      }
+    });
     _frame.saveProject();
+    _frame._closeProject();
+    
+    // check to make sure it transitions from flat file mode to project mode well
+    _frame.open(new FileOpenSelector() {
+      public File[] getFiles() throws OperationCanceledException {
+        return new File[] {_file1};
+      }
+    });
+    _frame._saveProjectHelper(_projFile);
+    ProjectFileIR pfir = ProjectFileParser.ONLY.parse(_projFile);
+    DocFile[] dfs = pfir.getSourceFiles();
+    assertEquals("Number of saved src files", 1, dfs.length);
+    assertEquals("Wrong file name,", _file1, dfs[0]);
   }
   
 }

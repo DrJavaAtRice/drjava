@@ -951,10 +951,17 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     Iterator<OpenDefinitionsDocument> odds = _documentsRepos.valuesIterator();
     while(odds.hasNext()){
       OpenDefinitionsDocument doc = odds.next();
-      if (!doc.isUntitled() && doc.isInProjectPath()) {
-        DocumentInfoGetter g = info.get(doc);
-        builder.addSourceFile(g);
-        srcFileVector.add(g.getFile());
+      
+      
+      if (!doc.isUntitled() ) {
+        // could not use doc.isInProjectPath because we may be in flat file view which returns false
+        String projectPath = new File(filename).getParentFile().getCanonicalPath() + File.separator;
+        String filePath = doc.getFile().getParentFile().getCanonicalPath() + File.separator;
+        if (filePath.startsWith(projectPath)){
+          DocumentInfoGetter g = info.get(doc);
+          builder.addSourceFile(g);
+          srcFileVector.add(g.getFile());
+        }
       }
     }
 

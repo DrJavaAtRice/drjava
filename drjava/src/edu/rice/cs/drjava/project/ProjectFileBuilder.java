@@ -142,6 +142,9 @@ public class ProjectFileBuilder {
       }
       fw.write(")"); // close the source expression
     }
+    else {
+      fw.write("\n;; no source files");
+    }
     
     // write aux files
     if (!_auxFiles.isEmpty()) {
@@ -150,6 +153,9 @@ public class ProjectFileBuilder {
         fw.write("\n" + encodeDocFile(df, "  ", false));
       }
       fw.write(")"); // close the auxiliary expression
+    }
+    else {
+      fw.write("\n;; no aux files");
     }
     
     // write collapsed paths
@@ -160,6 +166,9 @@ public class ProjectFileBuilder {
       }
       fw.write(")"); // close the collapsed expression
     }
+    else {
+      fw.write("\n;; no collapsed branches");
+    }
     
     // write classpaths
     if (!_classpathFiles.isEmpty()) {
@@ -169,6 +178,9 @@ public class ProjectFileBuilder {
       }
       fw.write(")"); // close the classpaths expression
     }
+    else {
+      fw.write("\n;; no classpaths files");
+    }
     
     // write the build directory
     if (_buildDir != null) {
@@ -176,12 +188,18 @@ public class ProjectFileBuilder {
       fw.write("\n" + encodeFile(_buildDir, "  "));
       fw.write(")");
     }
+    else {
+      fw.write("\n;; no build directory");
+    }
     
     // write the main class
     if (_mainClass != null) {
       fw.write("\n(main-class");
       fw.write("\n" + encodeFile(_mainClass, "  "));
       fw.write(")");
+    }
+    else {
+      fw.write("\n;; no main class");
     }
     
     fw.close();
