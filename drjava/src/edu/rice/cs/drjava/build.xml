@@ -6,8 +6,10 @@
   <property name="build.compiler"
             value="edu.rice.cs.anttools.GJv6CompilerAdapter" />
 
+  <property name="jsr14_path" value="/home/javaplt/packages/jsr14_adding_generics-1_0-ea" />
+
   <!-- srcroot is the base directory of the source, 4 packages back -->
-  <property name="srcroot" value="../../../../" />
+  <property name="srcroot" value="../../../.." />
   <!-- built is where the compiled classes go -->
   <property name="built" value="${srcroot}/../built/" />
   <!-- projpath is the path from srcroot to the root directory of this project
@@ -63,12 +65,33 @@
        just this project in order for it to realize what files have already
        been compiled (preventing needless recompilation)
   -->
-  <target name="compile" depends="init">
+  <target name="compile-gj" depends="init">
     <javac srcdir="${srcroot}"
            includes="${projpath}/**/*java"
            destdir="${built}" 
            debug="on"
            optimize="off" />
+  </target>
+
+  <!-- Compile using JSR14 compiler. Hack. Bad. -->
+  <target name="compile" depends="init">
+    <echo message="Compiling with JSR14 compiler ..." />
+    <execon executable="javac"
+            failonerror="yes"
+            parallel="yes"
+            type="file">
+      <arg value="-sourcepath" />
+      <arg value="${srcroot}" />
+      <arg value="-g" />
+      <arg value="-d" />
+      <arg value="${built}" />
+      <arg value="-J-Xbootclasspath/p:${jsr14_path}/javac.jar" />
+      <arg value="-bootclasspath" />
+      <arg path="${jsr14_path}/collect.jar:${java.home}/lib/rt.jar" />
+      <fileset dir="${srcroot}">
+        <include name="${projpath}/**/*.java" />
+      </fileset>
+    </execon>
   </target>
 
   <!-- Unit test -->
