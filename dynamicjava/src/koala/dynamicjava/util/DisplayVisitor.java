@@ -329,7 +329,11 @@ public class DisplayVisitor extends VisitorObject<Void> {
     print("l."+node.getBeginLine()+" ReturnStatement {");
     print("expression:");
     indent();
-    node.getExpression().acceptVisitor(this);
+    //Bug fix to allow for "return;"
+    if( node.getExpression() != null )
+      node.getExpression().acceptVisitor(this);
+    else
+      print("null");
     unindent();
     displayProperties(node);
     print("}");
