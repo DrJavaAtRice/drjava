@@ -43,48 +43,31 @@
  * 
 END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.util;
+package edu.rice.cs.util.sexp;
 
-import java.util.Date;
-import java.text.SimpleDateFormat;
-
-/**
- * This interface hold the information about this build of util.
- * This file is copied to Version.java by the build process, which also
- * fills in the right values of the date and time.
- *
- * This javadoc corresponds to build util-20040624-2148;
- *
- * @version $Id$
- */
-public abstract class Version {
-  /**
-   * This string will be automatically expanded upon "ant commit".
-   * Do not edit it by hand!
-   */
-  private static final String BUILD_TIME_STRING = "20040624-2148";
-
-  /** A {@link Date} version of the build time. */
-  private static final Date BUILD_TIME = _getBuildDate();
-
-  public static String getBuildTimeString() {
-    return BUILD_TIME_STRING;
+public class Cons extends SEList {
+  
+  private SExp _first;
+  private SEList _rest;
+  
+  public Cons(SExp first, SEList rest) {
+    _first = first;
+    _rest = rest;
   }
-
-  public static Date getBuildTime() {
-    return BUILD_TIME;
+  
+  public SExp getFirst() { return _first; }
+  
+  public SEList getRest() { return _rest; }
+  
+  public <Ret> Ret accept(SExpVisitor<Ret> v) {
+    return v.forCons(this);
   }
-
-  private static Date _getBuildDate() {
-    try {
-      return new SimpleDateFormat("yyyyMMdd-HHmm z").parse(BUILD_TIME_STRING + " GMT");
-    }
-    catch (Exception e) { // parse format or whatever problem
-      return null;
-    }
+  
+  protected String toStringHelp() {
+    return " " + _first + _rest.toStringHelp();
   }
-
-  public static void main(String[] args) {
-    System.out.println("Version for edu.rice.cs.util: " + BUILD_TIME_STRING);
+  
+  public String toString() {
+    return "(" + _first + _rest.toStringHelp();
   }
-} 
+}

@@ -11,7 +11,7 @@
  * Developed by:   Java Programming Languages Team
  *                 Rice University
  *                 http://www.cs.rice.edu/~javaplt/
- * 
+ *   
  * Permission is hereby granted, free of charge, to any person obtaining a 
  * copy of this software and associated documentation files (the "Software"),
  * to deal with the Software without restriction, including without 
@@ -43,48 +43,30 @@
  * 
 END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.util;
+package edu.rice.cs.util.sexp;
 
-import java.util.Date;
-import java.text.SimpleDateFormat;
-
-/**
- * This interface hold the information about this build of util.
- * This file is copied to Version.java by the build process, which also
- * fills in the right values of the date and time.
- *
- * This javadoc corresponds to build util-20040624-2148;
- *
- * @version $Id$
- */
-public abstract class Version {
+public class BoolAtom implements Atom {
+  public static final BoolAtom TRUE = new BoolAtom(true);
+  public static final BoolAtom FALSE = new BoolAtom(false);
+  
+  private boolean _bool;
+  private BoolAtom(boolean bool) { _bool = bool; }
+  
   /**
-   * This string will be automatically expanded upon "ant commit".
-   * Do not edit it by hand!
+   * @return which type of BoolAtom this is
    */
-  private static final String BUILD_TIME_STRING = "20040624-2148";
-
-  /** A {@link Date} version of the build time. */
-  private static final Date BUILD_TIME = _getBuildDate();
-
-  public static String getBuildTimeString() {
-    return BUILD_TIME_STRING;
+  public boolean getValue() {
+    return _bool;
   }
-
-  public static Date getBuildTime() {
-    return BUILD_TIME;
+  
+  /**
+   * Visitor hook for the BoolAtom
+   * @param the visitor
+   * @return result of the given algorithm
+   */
+  public <Ret> Ret accept(SExpVisitor<Ret> v){
+    return v.forBoolAtom(this);
   }
-
-  private static Date _getBuildDate() {
-    try {
-      return new SimpleDateFormat("yyyyMMdd-HHmm z").parse(BUILD_TIME_STRING + " GMT");
-    }
-    catch (Exception e) { // parse format or whatever problem
-      return null;
-    }
-  }
-
-  public static void main(String[] args) {
-    System.out.println("Version for edu.rice.cs.util: " + BUILD_TIME_STRING);
-  }
-} 
+  
+  public String toString() { return "" + _bool; }
+}

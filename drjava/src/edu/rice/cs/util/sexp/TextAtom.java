@@ -4,7 +4,7 @@
  * http://sourceforge.net/projects/drjava/ or http://www.drjava.org/
  *
  * DrJava Open Source License
- * 
+ *  
  * Copyright (C) 2001-2003 JavaPLT group at Rice University (javaplt@rice.edu)
  * All rights reserved.
  *
@@ -43,48 +43,28 @@
  * 
 END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.util;
+package edu.rice.cs.util.sexp;
 
-import java.util.Date;
-import java.text.SimpleDateFormat;
-
-/**
- * This interface hold the information about this build of util.
- * This file is copied to Version.java by the build process, which also
- * fills in the right values of the date and time.
- *
- * This javadoc corresponds to build util-20040624-2148;
- *
- * @version $Id$
- */
-public abstract class Version {
+public class TextAtom implements Atom {
+  private String _text;
+  
+  public TextAtom(String text) { _text = text; }
+  
+  public String getText() { return _text; }
+  
   /**
-   * This string will be automatically expanded upon "ant commit".
-   * Do not edit it by hand!
+   * Visitor hook for the TextAtom
+   * @param the visitor
+   * @return result of the given algorithm
    */
-  private static final String BUILD_TIME_STRING = "20040624-2148";
-
-  /** A {@link Date} version of the build time. */
-  private static final Date BUILD_TIME = _getBuildDate();
-
-  public static String getBuildTimeString() {
-    return BUILD_TIME_STRING;
+  public <Ret> Ret accept(SExpVisitor<Ret> v){
+    return v.forTextAtom(this);
   }
-
-  public static Date getBuildTime() {
-    return BUILD_TIME;
-  }
-
-  private static Date _getBuildDate() {
-    try {
-      return new SimpleDateFormat("yyyyMMdd-HHmm z").parse(BUILD_TIME_STRING + " GMT");
-    }
-    catch (Exception e) { // parse format or whatever problem
-      return null;
-    }
-  }
-
-  public static void main(String[] args) {
-    System.out.println("Version for edu.rice.cs.util: " + BUILD_TIME_STRING);
-  }
-} 
+  
+  /**
+   * If the given text was a quoted string, the text returned
+   * excludes the quotes around the string.
+   * @return the text that went into making this atom.
+   */
+  public String toString() { return _text; }
+}

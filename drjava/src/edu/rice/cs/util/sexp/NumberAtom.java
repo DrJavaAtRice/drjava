@@ -43,48 +43,38 @@
  * 
 END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.util;
+package edu.rice.cs.util.sexp;
 
-import java.util.Date;
-import java.text.SimpleDateFormat;
-
-/**
- * This interface hold the information about this build of util.
- * This file is copied to Version.java by the build process, which also
- * fills in the right values of the date and time.
- *
- * This javadoc corresponds to build util-20040624-2148;
- *
- * @version $Id$
- */
-public abstract class Version {
+public class NumberAtom implements Atom {
+  private double _num;
+  private boolean _hasDecimals;
+  public NumberAtom(int num){ 
+    _num = (double)num;
+    _hasDecimals = false;
+  }
+  public NumberAtom(double num){
+    _num = num;
+    _hasDecimals = (num % 1 < 1e-12);
+  }
+  public boolean hasDecimals() { return _hasDecimals; }
+  public int intValue() { return (int)_num; }
+  public double doubleValue() { return _num; }
+  
   /**
-   * This string will be automatically expanded upon "ant commit".
-   * Do not edit it by hand!
+   * Visitor hook for the NumberAtom
+   * @param the visitor
+   * @return result of the given algorithm
    */
-  private static final String BUILD_TIME_STRING = "20040624-2148";
-
-  /** A {@link Date} version of the build time. */
-  private static final Date BUILD_TIME = _getBuildDate();
-
-  public static String getBuildTimeString() {
-    return BUILD_TIME_STRING;
+  public <Ret> Ret accept(SExpVisitor<Ret> v){
+    return v.forNumberAtom(this);
   }
-
-  public static Date getBuildTime() {
-    return BUILD_TIME;
-  }
-
-  private static Date _getBuildDate() {
-    try {
-      return new SimpleDateFormat("yyyyMMdd-HHmm z").parse(BUILD_TIME_STRING + " GMT");
+  
+  public String toString(){ 
+    if (_hasDecimals) {
+      return "" + doubleValue();
     }
-    catch (Exception e) { // parse format or whatever problem
-      return null;
+    else {
+      return "" + intValue();
     }
   }
-
-  public static void main(String[] args) {
-    System.out.println("Version for edu.rice.cs.util: " + BUILD_TIME_STRING);
-  }
-} 
+}
