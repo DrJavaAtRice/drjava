@@ -52,7 +52,7 @@ package edu.rice.cs.util.docnavigation;
  * <code>IDocumentNavigator</code> represented a file cabinet then each file in
  * the cabinet would be an <code>INavigatorItem</code>. If an
  * <code>IDocumentNavigator</code> represented a wallet then each credit card
- * and driver's license would be an <code>IDocumentNavigator</code>. <p> The
+ * and driver's license would be an <code>INavigatorItem</code>. <p> The
  * only real responsibilities a class implementing <code>INavigatorItem</code> has is
  * to provide a simple <code>String</code> representation of itself via the
  * <code>getName</code> method and to devise some notion of equality.

@@ -64,6 +64,8 @@ class JListSortNavigator extends JListNavigator{
   private Vector<INavigationListener> navListeners = new Vector<INavigationListener>();
   
   protected DefaultListCellRenderer _renderer;
+  
+  private Vector<INavigatorItem> _modified_docs = new Vector<INavigatorItem>();
 
   
   public JListSortNavigator() 
@@ -156,7 +158,10 @@ class JListSortNavigator extends JListNavigator{
     }
   }
   
-
+  
+  /**
+   * set's the INavigatorItem as active (selected)
+   */
   public void setActiveDoc(INavigatorItem doc){
     if(this.contains(doc)){
         this.setSelectedValue(doc, true);
@@ -196,6 +201,7 @@ class JListSortNavigator extends JListNavigator{
   
   public void clear()
   {
+//    System.out.println("clearing list data");
     _docs.clear();
     this.setListData(_docs);
   }

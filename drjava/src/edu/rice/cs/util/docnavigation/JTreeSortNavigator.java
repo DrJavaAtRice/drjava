@@ -55,6 +55,8 @@ import javax.swing.event.TreeSelectionEvent;
 import javax.swing.tree.*;
 import java.io.File;
 import java.awt.*;
+import java.net.URL;
+import java.net.MalformedURLException;
 import java.util.*;
 import edu.rice.cs.util.*;
 
@@ -79,13 +81,13 @@ public class JTreeSortNavigator extends JTree implements IAWTContainerNavigatorA
   /** the collection of INavigationListeners listening to this JListNavigator */
   private Vector<INavigationListener> navListeners = new Vector<INavigationListener>();
   
-  protected DefaultTreeCellRenderer _renderer;
+  protected CustomTreeCellRenderer _renderer;
 
+  private static final String ICON_PATH = "icons/";
+  
   public void setForeground(Color c){
     super.setForeground(c);
     _renderer.setTextNonSelectionColor(c);
-//    _renderer.setTextSelectionColor(c);
-    System.out.println("setting foreground to " + c);
   }
   
   public void setBackground(Color c){
@@ -101,9 +103,10 @@ public class JTreeSortNavigator extends JTree implements IAWTContainerNavigatorA
     
     _model = (DefaultTreeModel) this.getModel();
     _root = (DefaultMutableTreeNode) _model.getRoot();
-    _renderer = new DefaultTreeCellRenderer();
+    _renderer = new CustomTreeCellRenderer();
     _renderer.setOpaque(false);
-    
+//    _renderer.setJavaIcon(getIcon("javaicon.gif"));
+    _renderer.setJavaIcon(getIcon("javaicon.gif"));
     this.setCellRenderer(_renderer);
 
     
@@ -153,7 +156,6 @@ public class JTreeSortNavigator extends JTree implements IAWTContainerNavigatorA
    *                                  <code>contains</code> method.
    */
   public void addDocument(INavigatorItem doc, String path) throws IllegalArgumentException {
-   
     if (!path.startsWith(_topLevelPath))
     {
       addDocument(doc);
@@ -517,5 +519,59 @@ public class JTreeSortNavigator extends JTree implements IAWTContainerNavigatorA
    */
   public Component getRenderer(){
     return _renderer;
+  }
+  
+  
+  private class CustomTreeCellRenderer extends DefaultTreeCellRenderer{
+    Icon javaIcon;
+    String _filename;
+
+    public CustomTreeCellRenderer(){
+      javaIcon = null;
+    }
+    
+    public void setJavaIcon(Icon icon){
+      javaIcon = icon;
+    }
+    
+    public Component getTreeCellRendererComponent(
+                            JTree tree,
+                            Object value,
+                            boolean sel,
+                            boolean expanded,
+                            boolean leaf,
+                            int row,
+                            boolean hasFocus) {
+
+            super.getTreeCellRendererComponent(
+                            tree, value, sel,
+                            expanded, leaf, row,
+                            hasFocus);
+            DefaultMutableTreeNode node = (DefaultMutableTreeNode)value;
+            if(value instanceof INavigatorItem){
+              INavigatorItem doc = (INavigatorItem)(node.getUserObject());
+              _filename = doc.getName();
+              if (leaf && javaIcon != null && _filename.endsWith(".java")) {
+                setIcon(javaIcon);
+              }
+            }else if(value instanceof String){
+              // a directory
+            }
+              
+              
+             
+            return this;
+    }
+  }
+  
+  
+  
+  
+  public static ImageIcon getIcon(String name) {
+    URL url = JTreeSortNavigator.class.getResource(ICON_PATH + name);
+    if (url != null) {
+      return new ImageIcon(url);
+    }
+    return null;
   }
 }
