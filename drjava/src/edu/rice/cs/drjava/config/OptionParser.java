@@ -38,9 +38,10 @@
 END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.config;
-public interface OptionParser<T> {
-    
-    public String getName();
 
-    public abstract T parse(String val);
+public interface OptionParser<T> {
+  
+  public String getName();
+  
+  public abstract T parse(String val);
 }

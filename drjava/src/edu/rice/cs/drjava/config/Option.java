@@ -40,49 +40,50 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.config;
 import gj.util.Hashtable;
 import gj.util.Vector;
+
 public abstract class Option<T> implements OptionParser<T> {
-    
-    public final String key;
-
-    private final Hashtable<OptionMap,T> map =
-	new Hashtable<OptionMap,T>();
-    private final Hashtable<Configuration,Vector<OptionListener<T>>> listeners=
-	new Hashtable<Configuration,Vector<OptionListener<T>>>();
-    
-    public <T> Option(String key) { this.key = key; }
-
-    public String getName() { return key; }
-
-    public abstract T parse(String value);
-    
-    public String format(T value) { return value.toString(); }
-
-    // PACKAGE PRIVATE MAGIC STUFF
-
-    String getString(DefaultOptionMap om) { return format(getOption(om)); }
-    
-    T setString(DefaultOptionMap om, String val) { return setOption(om,parse(val)); }
-    
-    T getOption(DefaultOptionMap om) { return map.get(om); }
-
-    T setOption(DefaultOptionMap om, T val) { return map.put(om,val); }
-
-    T remove(DefaultOptionMap om) { return map.remove(om); }
-
-    void addListener(Configuration c, OptionListener<T> l) {
-	Vector<OptionListener<T>> v = listeners.get(c);
-	if(v==null) {
-	    v = new Vector<OptionListener<T>>();
-	    listeners.put(c,v);
-	}
-	v.addElement(l);
+  
+  public final String key;
+  
+  private final Hashtable<OptionMap,T> map =
+    new Hashtable<OptionMap,T>();
+  private final Hashtable<Configuration,Vector<OptionListener<T>>> listeners=
+    new Hashtable<Configuration,Vector<OptionListener<T>>>();
+  
+  public <T> Option(String key) { this.key = key; }
+  
+  public String getName() { return key; }
+  
+  public abstract T parse(String value);
+  
+  public String format(T value) { return value.toString(); }
+  
+  // PACKAGE PRIVATE MAGIC STUFF
+  
+  String getString(DefaultOptionMap om) { return format(getOption(om)); }
+  
+  T setString(DefaultOptionMap om, String val) { return setOption(om,parse(val)); }
+  
+  T getOption(DefaultOptionMap om) { return map.get(om); }
+  
+  T setOption(DefaultOptionMap om, T val) { return map.put(om,val); }
+  
+  T remove(DefaultOptionMap om) { return map.remove(om); }
+  
+  void addListener(Configuration c, OptionListener<T> l) {
+    Vector<OptionListener<T>> v = listeners.get(c);
+    if(v==null) {
+      v = new Vector<OptionListener<T>>();
+      listeners.put(c,v);
     }
-    
-    void removeListener(Configuration c, OptionListener<T> l) {
-	Vector<OptionListener<T>> v = listeners.get(c);
-	if(v==null) return;
-	if(v.removeElement(l) && v.size() == 0) {
-	    listeners.remove(c);
-	}
+    v.addElement(l);
+  }
+  
+  void removeListener(Configuration c, OptionListener<T> l) {
+    Vector<OptionListener<T>> v = listeners.get(c);
+    if(v==null) return;
+    if(v.removeElement(l) && v.size() == 0) {
+      listeners.remove(c);
     }
+  }
 }

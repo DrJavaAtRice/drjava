@@ -53,6 +53,11 @@ public class Indenter
    * Singleton instance.
    */
   public static final Indenter ONLY = new Indenter();
+
+  /**
+   * Private constructor for singleton instance.
+   */
+  private Indenter()  { buildTree(); }
   
   /**
    * Hardcoded indent size, for now.
@@ -63,40 +68,6 @@ public class Indenter
    * Root of decision tree.
    */
   private IndentRule _topRule;
-
-    /*
-     * "equivalent-sets" of tree nodes:
-     *
-     * { 24, 26, 28 }
-     * { 17, 31, 33 }
-     * { 25, 32 }
-     * { 18, 19 }
-     * { 3, 10 }
-     * { 4, 8 }
-     *
-     */
-
-  /**
-   * For now, create a simple tree to help integration.
-   */
-  public void buildSimpleTree() 
-  {
-    IndentRule 
-      rule05 = new ActionDoNothing(),
-      rule04 = new ActionStartPrevLinePlus(" "), 
-      rule03 = new QuestionCurrLineEmpty(rule04, rule05);
-    IndentRule 
-      rule11 = new QuestionBraceIsParenOrBracket(rule05, rule05),  // Change for real tree
-      rule10 = rule03,      
-      rule09 = new ActionStartPrevLinePlus("* "),
-      rule08 = new ActionStartPrevLinePlus(""),
-      rule07 = new QuestionCurrLineStartsWith("*", rule08, rule09),
-      rule06 = new QuestionPrevLineStartsWith("*", rule07, rule10),
-      rule02 = new QuestionPrevLineStartsComment(rule03, rule06),
-      rule01 = new QuestionInsideComment(rule02, rule11);
-    
-    _topRule = rule01;
-  }
   
   /**
    * Builds the decision tree for indentation.
@@ -120,17 +91,17 @@ public class Indenter
       rule31 = rule33,
       rule30 = new QuestionExistsCharInStmt('?', ':', rule31, rule32),
       rule29 = new QuestionLineContains(':', rule30, rule33),
-      rule28 = new ActionStartStmtOfBracePlus(""),
+      rule28 = new ActionStartCurrStmtPlus(""),
       rule27 = new QuestionCurrLineStartsWithSkipComments("{", rule28, rule29),
       rule26 = new ActionStartPrevStmtPlus(""),
       rule25 = rule32,
       rule24 = rule26,
       rule23 = new QuestionExistsCharInStmt('?', ':', rule24, rule25),
       rule22 = new QuestionLineContains(':', rule23, rule26),
-      rule21 = rule28,
+      rule21 = new ActionStartStmtOfBracePlus(""),
       rule19 = new QuestionStartingNewStmt(rule22, rule27),
       rule18 = rule19,
-      rule17 = rule32,
+      rule17 = rule32,  // ?
       rule16 = new QuestionStartAfterOpenBrace(rule17, rule18),
       rule20 = new QuestionCurrLineStartsWithSkipComments("}", rule21, rule16),
       rule15 = new QuestionBraceIsCurly(rule20, rule19),
@@ -138,7 +109,6 @@ public class Indenter
       rule13 = new ActionBracePlus(" "),
       rule12 = new QuestionNewParenPhrase(rule13, rule14),
       rule11 = new QuestionBraceIsParenOrBracket(rule12, rule15),
-      //rule10 = rule03,
       rule10 = new ActionStartPrevLinePlus(""),
       rule09 = new ActionStartPrevLinePlus("* "),
       rule08 = rule10,          
@@ -148,15 +118,6 @@ public class Indenter
       rule01 = new QuestionInsideComment(rule02, rule11);
     
     _topRule = rule01;
-  }
-
-  /**
-   * Private constructor for singleton instance.
-   */
-  private Indenter() 
-  {
-    buildTree();
-    //buildSimpleTree();
   }
 
   /**

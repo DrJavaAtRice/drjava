@@ -41,12 +41,15 @@ package edu.rice.cs.drjava.config;
 import java.awt.*;
 
 public class ColorOption extends Option<Color>{
-    public ColorOption(String key) { super(key);}
-    public Color parse(String s) { return Color.decode(s); }
-    public String format(Color c) {
-	return new StringBuffer("#").
-	    append(Integer.toString(c.getRed(),16)).
-	    append(Integer.toString(c.getGreen(),16)).
-	    append(Integer.toString(c.getBlue(),16)).toString();
-    }
+  
+  public ColorOption(String key) { super(key); }
+  
+  public Color parse(String s) { return Color.decode(s); }
+  
+  public String format(Color c) {
+    return new StringBuffer("#").
+      append(Integer.toString(c.getRed(),16)).
+      append(Integer.toString(c.getGreen(),16)).
+      append(Integer.toString(c.getBlue(),16)).toString();
+  }
 }

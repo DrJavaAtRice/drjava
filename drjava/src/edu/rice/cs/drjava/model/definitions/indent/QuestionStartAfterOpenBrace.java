@@ -80,7 +80,7 @@ public class QuestionStartAfterOpenBrace extends IndentRuleQuestion
     BraceReduction reduced = doc.getReduced();
     int origin = reduced.absOffset();
     String text;
-    char c;
+    char c, peek;
 
     try
     {
@@ -93,17 +93,27 @@ public class QuestionStartAfterOpenBrace extends IndentRuleQuestion
     }
     for (int i = start-1; i >= DefinitionsDocument.DOCSTART; i--)
     {
+	
       c = text.charAt(i);
 
-      if (c == '{')
+      if (c != ' ' && c != '\t' && c != '\n') 
       {
+	  // c is not a whitespace character.
+
           reduced.move(i - origin);
           ReducedModelState state = reduced.getStateAtCurrent();
           reduced.move(origin - i);
 
           if (state.equals(ReducedModelState.FREE))
 	  {
-	      return true;
+	      peek = text.charAt(i - 1);
+
+	      if (c == '/' && (peek == '/' || peek == '*'))
+		  i--;
+	      else if (c == '*' && peek == '/')
+		  i--;
+	      else
+		  return c == '{';
 	  }
       }
     }

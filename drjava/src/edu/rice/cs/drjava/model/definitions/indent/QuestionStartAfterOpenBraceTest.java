@@ -116,51 +116,30 @@ public class QuestionStartAfterOpenBraceTest extends IndentRulesTestCase
 
 	assertTrue("START immediatly follows an open brace.", _rule.applyRule(_doc, 14));	    
 	assertTrue("Only WS between open brace and START.", _rule.applyRule(_doc, 15));	    
-	assertTrue("Only WS between open brace and START.", _rule.applyRule(_doc, 24));	    
-	assertTrue("START immediatly follows an open paren.", _rule.applyRule(_doc, 25));	    
+	assertTrue("Only WS between open brace and START.", _rule.applyRule(_doc, 23));	    
+	assertTrue("START immediatly follows an open paren.", !_rule.applyRule(_doc, 25));	    
 	
-	/* (6) 
+	/* (6) */
 
 	_text = 
-	    "array[\n" +
-	    "    new Listener() {\n" +
-	    "        method() {\n" +
-	    "        }\n" +
-	    "    }]";
-
-	_setDocText(_text);
-
-        try { _rule.applyRule(_doc, 0); fail("START has no brace."); }
-	catch (UnexpectedException e) {}
-
-	assertTrue("START's brace ('[') is on previous line.", _rule.applyRule(_doc, 7));	    
-	assertTrue("START's brace ('{') is on previous line.", _rule.applyRule(_doc, 28));	    
-	assertTrue("START's brace ('{') is on previous line.", _rule.applyRule(_doc, 50));	    
-	assertTrue("START's brace ('{') is three lines above.", !_rule.applyRule(_doc, _text.length() - 1));	    
-
-		_text =
-	    "{ /* block1* / }\n" +
-	    "{ /* block2* / }\n" +
-	    "{ /* block3* / }";
-
-			_text =
-	    "{\n" +
-	    "    {\n" +
-	    "        {}\n" +
-	    "    }\n" +
+	    "class Foo {   \n" +
+	    "              \n" +
+	    "  /*          \n" +
+	    "   *          \n" +
+	    "   */         \n" +
+	    "  int field;  \n" +
 	    "}";
-	
+ 
 	_setDocText(_text);
 
-	assertTrue("START's brace ('{') is on previous line.", _rule.applyRule(_doc, 7));	    
-	assertTrue("START's brace ('{') is on previous line.", _rule.applyRule(_doc, 8));	    
-	assertTrue("START's brace ('{') is two lines above.", !_rule.applyRule(_doc, 19));	    
-	assertTrue("START's brace ('{') is four lines above.", !_rule.applyRule(_doc, _text.length() - 1));	    
-	*/
-    }
-
-    public void testShadowed() throws BadLocationException
-    {
+	assertTrue("START = DOCSTART.", !_rule.applyRule(_doc, 0));
+	assertTrue("START = DOCSTART.", !_rule.applyRule(_doc, 14));
+	assertTrue("Only WS between START and open brace.", _rule.applyRule(_doc, 15));
+	assertTrue("Only WS between START and open brace.", _rule.applyRule(_doc, 30));
+	assertTrue("Only WS between START and open brace.", _rule.applyRule(_doc, 44));
+	assertTrue("Only comment and WS between START and open brace.", _rule.applyRule(_doc, 45));
+	assertTrue("Only comment and WS between START and open brace.", _rule.applyRule(_doc, 60));
+	assertTrue("Only comment and WS between START and open brace.", _rule.applyRule(_doc, 77));
     }
 }
   

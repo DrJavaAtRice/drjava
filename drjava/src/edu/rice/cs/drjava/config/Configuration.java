@@ -38,26 +38,28 @@
 END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.config;
+
 public class Configuration {
-    private OptionMap map;
-
-    public Configuration(OptionMap om) {
-	map = om;
-    }
-
-    public <T> T setSetting(Option<T> op, T value) {
-	return map.setOption(op,value);
-    }
-
-    public <T> T getSetting(Option<T> op) {
-	return map.getOption(op);
-    }
-
-    public <T> void addOptionListener(Option<T> op, OptionListener<T> l) {
-	op.addListener(this,l);
-    }
-    
-    public <T> void removeOptionListener(Option<T> op, OptionListener<T> l) {
-	op.removeListener(this,l);
-    }
+  
+  private OptionMap map;
+  
+  public Configuration(OptionMap om) {
+    map = om;
+  }
+  
+  public <T> T setSetting(Option<T> op, T value) {
+    return map.setOption(op,value);
+  }
+  
+  public <T> T getSetting(Option<T> op) {
+    return map.getOption(op);
+  }
+  
+  public <T> void addOptionListener(Option<T> op, OptionListener<T> l) {
+    op.addListener(this,l);
+  }
+  
+  public <T> void removeOptionListener(Option<T> op, OptionListener<T> l) {
+    op.removeListener(this,l);
+  }
 }
