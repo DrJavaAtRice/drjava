@@ -118,6 +118,9 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
   // Debug manager (null if not available)
   private DebugManager _debugManager = null;
   private int _debugPort = -1;
+  
+  // Used to prevent multiple threads from accessing the compiler at the same time
+  private Object _compilerLock = new Object();
 
   public static final Indenter INDENTER;
 
@@ -1039,65 +1042,67 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
    * Compiles all open documents, after ensuring that all are saved.
    */
   public void compileAll() throws IOException {
-    // Only compile if all are saved
-    saveAllBeforeProceeding(GlobalModelListener.COMPILE_REASON);
-    
-    if (areAnyModifiedSinceSave()) {
-      // if any files haven't been saved after we told our
-      // listeners to do so, don't proceed with the rest
-      // of the compile.
-    }
-    else {
-      // Get sourceroots and all files
-      File[] sourceRoots = getSourceRootSet();
-      File[] files = new File[_definitionsDocs.getSize()];
-      int index = 0;
-      for (int i = 0; i < _definitionsDocs.getSize(); i++) {
-        OpenDefinitionsDocument doc = (OpenDefinitionsDocument)
-          _definitionsDocs.getElementAt(i);
-        if (!doc.checkIfClassFileInSync()) {
-          try {
-            files[index] = doc.getFile();
-            index++;
-          }
-          catch (IllegalStateException ise) {
-            // No file for this document; skip it
+    synchronized(_compilerLock) {
+      // Only compile if all are saved
+      saveAllBeforeProceeding(GlobalModelListener.COMPILE_REASON);
+      
+      if (areAnyModifiedSinceSave()) {
+        // if any files haven't been saved after we told our
+        // listeners to do so, don't proceed with the rest
+        // of the compile.
+      }
+      else {
+        // Get sourceroots and all files
+        File[] sourceRoots = getSourceRootSet();
+        File[] files = new File[_definitionsDocs.getSize()];
+        int index = 0;
+        for (int i = 0; i < _definitionsDocs.getSize(); i++) {
+          OpenDefinitionsDocument doc = (OpenDefinitionsDocument)
+            _definitionsDocs.getElementAt(i);
+          if (!doc.checkIfClassFileInSync()) {
+            try {
+              files[index] = doc.getFile();
+              index++;
+            }
+            catch (IllegalStateException ise) {
+              // No file for this document; skip it
+            }
           }
         }
-      }
-      
-      // Only compile docs with files that are out of sync
-      File[] outOfSyncFiles = new File[index];
-      System.arraycopy(files,0,outOfSyncFiles,0,index);
-      
-      notifyListeners(new EventNotifier() {
-        public void notifyListener(GlobalModelListener l) {
-          l.compileStarted();
-        }
-      });
-      
-      try {
-        // Compile the files
-        _compileFiles(sourceRoots, outOfSyncFiles);
-      }
-      catch (Throwable t) {
-        CompilerError err = new CompilerError(t.getMessage(),
-                                              false);
-        CompilerError[] errors = new CompilerError[] { err };
-        _distributeErrors(errors);
-      }
-      finally {
-        // Fire a compileEnded event
+        
+        // Only compile docs with files that are out of sync
+        File[] outOfSyncFiles = new File[index];
+        System.arraycopy(files,0,outOfSyncFiles,0,index);
+        
         notifyListeners(new EventNotifier() {
           public void notifyListener(GlobalModelListener l) {
-            l.compileEnded();
+            l.compileStarted();
           }
         });
         
-        // Only clear console/interactions if there were no errors
-        if (_numErrors == 0) {
-          resetConsole();
-          resetInteractions();
+        try {
+          // Compile the files
+          _compileFiles(sourceRoots, outOfSyncFiles);
+        }
+        catch (Throwable t) {
+          CompilerError err = new CompilerError(t.getMessage(),
+                                                false);
+          CompilerError[] errors = new CompilerError[] { err };
+          _distributeErrors(errors);
+        }
+        finally {
+          // Fire a compileEnded event
+          notifyListeners(new EventNotifier() {
+            public void notifyListener(GlobalModelListener l) {
+              l.compileEnded();
+            }
+          });
+          
+          // Only clear console/interactions if there were no errors
+          if (_numErrors == 0) {
+            resetConsole();
+            resetInteractions();
+          }
         }
       }
     }
@@ -1422,56 +1427,58 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
      * an error will be put in compileErrors.
      */
     public void startCompile() throws IOException {
-      // Only compile if all are saved
-      saveAllBeforeProceeding(GlobalModelListener.COMPILE_REASON);
-    
-      if (areAnyModifiedSinceSave()) {
-        // if any files haven't been saved after we told our
-        // listeners to do so, don't proceed with the rest
-        // of the compile.
-      }
-      else {
-        try {
-          File file = _doc.getFile();
-          File[] files = new File[] { file };
-          
-          try {
-            notifyListeners(new EventNotifier() {
-              public void notifyListener(GlobalModelListener l) {
-                l.compileStarted();
-              }
-            });
-          
-            File[] sourceRoots = new File[] { getSourceRoot() };
+      synchronized(_compilerLock) {
+        // Only compile if all are saved
+        saveAllBeforeProceeding(GlobalModelListener.COMPILE_REASON);
         
-            _compileFiles(sourceRoots, files);
-          }
-          catch (Throwable e) {
-            CompilerError err = new CompilerError(file,
-                                                  -1,
-                                                  -1,
-                                                  e.getMessage(),
-                                                  false);
-            CompilerError[] errors = new CompilerError[] { err };
-            _distributeErrors(errors);
-          }
-          finally {
-            // Fire a compileEnded event
-            notifyListeners(new EventNotifier() {
-              public void notifyListener(GlobalModelListener l) {
-                l.compileEnded();
-              }
-            });
+        if (areAnyModifiedSinceSave()) {
+          // if any files haven't been saved after we told our
+          // listeners to do so, don't proceed with the rest
+          // of the compile.
+        }
+        else {
+          try {
+            File file = _doc.getFile();
+            File[] files = new File[] { file };
             
-            // Only clear console/interactions if there were no errors
-            if (_numErrors == 0) {
-              resetConsole();
-              resetInteractions();
+            try {
+              notifyListeners(new EventNotifier() {
+                public void notifyListener(GlobalModelListener l) {
+                  l.compileStarted();
+                }
+              });
+              
+              File[] sourceRoots = new File[] { getSourceRoot() };
+              
+              _compileFiles(sourceRoots, files);
+            }
+            catch (Throwable e) {
+              CompilerError err = new CompilerError(file,
+                                                    -1,
+                                                    -1,
+                                                    e.getMessage(),
+                                                    false);
+              CompilerError[] errors = new CompilerError[] { err };
+              _distributeErrors(errors);
+            }
+            finally {
+              // Fire a compileEnded event
+              notifyListeners(new EventNotifier() {
+                public void notifyListener(GlobalModelListener l) {
+                  l.compileEnded();
+                }
+              });
+              
+              // Only clear console/interactions if there were no errors
+              if (_numErrors == 0) {
+                resetConsole();
+                resetInteractions();
+              }
             }
           }
-        }
-        catch (IllegalStateException ise) {
-          // No file exists, don't try to compile
+          catch (IllegalStateException ise) {
+            // No file exists, don't try to compile
+          }
         }
       }
     }
@@ -1484,148 +1491,148 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
      *
      */
     public TestResult startJUnit() throws ClassNotFoundException, IOException{
-
-      //JUnit started, so throw out all JUnitErrorModels now, egardless of whether
-      //  the tests succeed, etc.
-      
-      ListModel docs = getDefinitionsDocuments();
-      // walk thru all open documents, resetting the JUnitErrorModel
-      for (int i = 0; i < docs.getSize(); i++) {
-        OpenDefinitionsDocument doc = (OpenDefinitionsDocument)
-          docs.getElementAt(i);
-        doc.setJUnitErrorModel( new JUnitErrorModel() );
-      }
-      
-      // Compile and save before proceeding.
-      saveAllBeforeProceeding(GlobalModelListener.JUNIT_REASON);
-      if (areAnyModifiedSinceSave()) {
-        return null;
-      }
-      try {
-        File testFile = getFile();
-
-        startCompile();
-        if(getNumErrors() > 0) {
-          notifyListeners(new EventNotifier() {
-            public void notifyListener(GlobalModelListener l) {
-            l.compileErrorDuringJUnit();
-          }
-          });        
+      synchronized(_compilerLock) {
+        //JUnit started, so throw out all JUnitErrorModels now, egardless of whether
+        //  the tests succeed, etc.
+        
+        ListModel docs = getDefinitionsDocuments();
+        // walk thru all open documents, resetting the JUnitErrorModel
+        for (int i = 0; i < docs.getSize(); i++) {
+          OpenDefinitionsDocument doc = (OpenDefinitionsDocument)
+            docs.getElementAt(i);
+          doc.setJUnitErrorModel( new JUnitErrorModel() );
+        }
+        
+        // Compile and save before proceeding.
+        saveAllBeforeProceeding(GlobalModelListener.JUNIT_REASON);
+        if (areAnyModifiedSinceSave()) {
           return null;
-        }
-
-        notifyListeners(new EventNotifier() {
-          public void notifyListener(GlobalModelListener l) {
-          l.junitStarted();
-        }
-        });
-
-        try {
-          getJUnitDocument().remove(0, getJUnitDocument().getLength() - 1);
-        }
-        catch (BadLocationException e) {
-          notifyListeners(new EventNotifier() {
-            public void notifyListener(GlobalModelListener l) {
-            l.junitEnded();
-            l.nonTestCase();
-          }
-          });
-          return null;
-        }
-
-        JUnitTestRunner testRunner = getTestRunner();
-
-        String testFilename = testFile.getName();
-        if (testFilename.toLowerCase().endsWith(".java")) {
-          testFilename = testFilename.substring(0, testFilename.length() - 5);
-        }
-        else {
-          notifyListeners(new EventNotifier() {
-            public void notifyListener(GlobalModelListener l) {
-            l.junitEnded();
-            l.nonTestCase();
-          }
-          });
-          return null;
-        }
-        String packageName;
-        try {
-          packageName = _doc.getPackageName();
-        }
-        catch (InvalidPackageException e) {
-          notifyListeners(new EventNotifier() {
-            public void notifyListener(GlobalModelListener l) {
-            l.junitEnded();
-            l.nonTestCase();
-          }
-          });
-          return null;
-        }
-        if(!packageName.equals("")) {
-          testFilename = packageName + "." + testFilename;
         }
         try {
-          if (! testRunner.isTestCase(testFilename)) {
+          File testFile = getFile();
+          
+          compileAll();
+          if(getNumErrors() > 0) {
             notifyListeners(new EventNotifier() {
               public void notifyListener(GlobalModelListener l) {
-              l.nonTestCase();
-              l.junitEnded();
+                l.compileErrorDuringJUnit();
+              }
+            });        
+            return null;
+          }
+          
+          notifyListeners(new EventNotifier() {
+            public void notifyListener(GlobalModelListener l) {
+              l.junitStarted();
             }
+          });
+          
+          try {
+            getJUnitDocument().remove(0, getJUnitDocument().getLength() - 1);
+          }
+          catch (BadLocationException e) {
+            notifyListeners(new EventNotifier() {
+              public void notifyListener(GlobalModelListener l) {
+                l.junitEnded();
+                l.nonTestCase();
+              }
             });
             return null;
           }
-        }
-        catch (ClassNotFoundException e) {
+          
+          JUnitTestRunner testRunner = getTestRunner();
+          
+          String testFilename = testFile.getName();
+          if (testFilename.toLowerCase().endsWith(".java")) {
+            testFilename = testFilename.substring(0, testFilename.length() - 5);
+          }
+          else {
+            notifyListeners(new EventNotifier() {
+              public void notifyListener(GlobalModelListener l) {
+                l.junitEnded();
+                l.nonTestCase();
+              }
+            });
+            return null;
+          }
+          String packageName;
+          try {
+            packageName = _doc.getPackageName();
+          }
+          catch (InvalidPackageException e) {
+            notifyListeners(new EventNotifier() {
+              public void notifyListener(GlobalModelListener l) {
+                l.junitEnded();
+                l.nonTestCase();
+              }
+            });
+            return null;
+          }
+          if(!packageName.equals("")) {
+            testFilename = packageName + "." + testFilename;
+          }
+          try {
+            if (! testRunner.isTestCase(testFilename)) {
+              notifyListeners(new EventNotifier() {
+                public void notifyListener(GlobalModelListener l) {
+                  l.nonTestCase();
+                  l.junitEnded();
+                }
+              });
+              return null;
+            }
+          }
+          catch (ClassNotFoundException e) {
+            notifyListeners(new EventNotifier() {
+              public void notifyListener(GlobalModelListener l) {
+                l.junitEnded();
+              }
+            });
+            throw e;
+          }
+          
+          Test suite = testRunner.getTest(testFilename);
+          TestResult testResult = testRunner.doRun(suite, false, this);
+          
           notifyListeners(new EventNotifier() {
             public void notifyListener(GlobalModelListener l) {
-            l.junitEnded();
-          }
+              l.junitEnded();
+            }
+          });
+          return testResult;
+        }
+        catch (IllegalStateException e) {
+          // No file exists, don't try to compile and test
+          notifyListeners(new EventNotifier() {
+            public void notifyListener(GlobalModelListener l) {
+              l.junitEnded();
+              l.nonTestCase();
+            }
+          });
+          return null;
+        }
+        catch (NoClassDefFoundError e) {
+          // Method getTest in junit.framework.BaseTestRunner can throw a
+          // NoClassDefFoundError (via reflection).
+          notifyListeners(new EventNotifier() {
+            public void notifyListener(GlobalModelListener l) {
+              l.junitEnded();
+            }
           });
           throw e;
         }
-
-        Test suite = testRunner.getTest(testFilename);
-        TestResult testResult = testRunner.doRun(suite, false, this);
-
-        notifyListeners(new EventNotifier() {
-          public void notifyListener(GlobalModelListener l) {
-          l.junitEnded();
+        catch (ExitingNotAllowedException enae) {
+          notifyListeners(new EventNotifier() {
+            public void notifyListener(GlobalModelListener l) {
+              l.junitEnded();
+            }
+          });
+          throw enae;
         }
-        });
-        return testResult;
+        //System.err.println("JUnit tried to exit -- Resolving this bug requires some refactoring");
+        //System.err.println(" because such an error causes a System.exit(Exception) in JUnit, and");
+        //System.err.println(" we need a way of catching its output.");
       }
-      catch (IllegalStateException e) {
-        // No file exists, don't try to compile and test
-        notifyListeners(new EventNotifier() {
-          public void notifyListener(GlobalModelListener l) {
-          l.junitEnded();
-          l.nonTestCase();
-        }
-        });
-        return null;
-      }
-      catch (NoClassDefFoundError e) {
-        // Method getTest in junit.framework.BaseTestRunner can throw a
-        // NoClassDefFoundError (via reflection).
-        notifyListeners(new EventNotifier() {
-          public void notifyListener(GlobalModelListener l) {
-          l.junitEnded();
-        }
-        });
-        throw e;
-      }
-      catch (ExitingNotAllowedException enae) {
-        notifyListeners(new EventNotifier() {
-          public void notifyListener(GlobalModelListener l) {
-          l.junitEnded();
-        }
-        });
-        throw enae;
-      }
-      //System.err.println("JUnit tried to exit -- Resolving this bug requires some refactoring");
-      //System.err.println(" because such an error causes a System.exit(Exception) in JUnit, and");
-      //System.err.println(" we need a way of catching its output.");
-      
     }
 
     /**

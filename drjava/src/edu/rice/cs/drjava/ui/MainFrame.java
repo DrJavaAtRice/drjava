@@ -356,22 +356,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   /** Runs JUnit on the document in the definitions pane. */
   private Action _junitAction = new AbstractAction("Test Using JUnit") {
     public void actionPerformed(ActionEvent ae) {
-      // display the compiler output tab since a compilation will occur
-      if (!_errorPanel.isDisplayed()) {
-        ErrorListPane elp = _errorPanel.getErrorListPane();
-        elp.setSize(_tabbedPane.getMinimumSize());
-        showTab(_errorPanel);
-      }
-      // display the test output tab
-      if (!_junitPanel.isDisplayed()) {
-        JUnitErrorListPane elp = _junitPanel.getJUnitErrorListPane();
-        elp.setSize(_tabbedPane.getMinimumSize());
-        showTab(_junitPanel);
-      }
       _junit();
-      // it will not be displayed if a compilation error occured while running JUnit
-      if (_junitPanel.isDisplayed())
-        _tabbedPane.setSelectedComponent(_junitPanel);
       _setDividerLocation();
     }
   };
@@ -1368,29 +1353,35 @@ public class MainFrame extends JFrame implements OptionConstants {
   }
 
   private void _junit() {
-    try {
-      _model.getActiveDocument().startJUnit();
-    }
-    catch (FileMovedException fme) {
-      _showFileMovedError(fme);
-    }
-    catch (IOException ioe) {
-      _showIOError(ioe);
-    }
-    catch (ClassNotFoundException cnfe) {
-      _showClassNotFoundError(cnfe);
-    }
-    catch (NoClassDefFoundError ncde) {
-      _showNoClassDefError(ncde);
-    }
-    catch (ExitingNotAllowedException enae) {
-      JOptionPane.showMessageDialog(this,
-                                    "An exception occurred while running JUnit, which could\n" +
-                                    "not be caught be DrJava.  Details about the exception should\n" +
-                                    "have been printed to your console.\n\n",
-                                    "Error Running JUnit",
-                                    JOptionPane.ERROR_MESSAGE);
-    }
+    final SwingWorker worker = new SwingWorker() {
+      public Object construct() {
+        try {
+          _model.getActiveDocument().startJUnit();
+        }
+        catch (FileMovedException fme) {
+          _showFileMovedError(fme);
+        }
+        catch (IOException ioe) {
+          _showIOError(ioe);
+        }
+        catch (ClassNotFoundException cnfe) {
+          _showClassNotFoundError(cnfe);
+        }
+        catch (NoClassDefFoundError ncde) {
+          _showNoClassDefError(ncde);
+        }
+        catch (ExitingNotAllowedException enae) {
+          JOptionPane.showMessageDialog(MainFrame.this,
+                                        "An exception occurred while running JUnit, which could\n" +
+                                        "not be caught be DrJava.  Details about the exception should\n" +
+                                        "have been printed to your console.\n\n",
+                                        "Error Running JUnit",
+                                        JOptionPane.ERROR_MESSAGE);
+        }
+        return null;
+      }
+    };
+    worker.start();
   }
 
   
@@ -3013,9 +3004,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
 
     public void compileStarted() {
-      if (!_errorPanel.isDisplayed()) {
-        showTab(_errorPanel);
-      }
+      showTab(_errorPanel);
       _errorPanel.setCompilationInProgress();
       _saveAction.setEnabled(false);
       hourglassOn();
@@ -3035,6 +3024,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
 
     public void junitStarted() {
+      showTab(_junitPanel);
       _saveAction.setEnabled(false);
       _junitPanel.setJUnitInProgress();
       hourglassOn();
@@ -3263,6 +3253,11 @@ public class MainFrame extends JFrame implements OptionConstants {
     _currentDefPane.requestFocus();
   }
   
+  /**
+   * Shows the components passed in in the appropriate place in the tabbedPane depending on the position of
+   * the component in the _tabs list. 
+   * @param c the component to show in the tabbedPane
+   */
   public void showTab(Component c) {
     int numVisible = 0;
     TabbedPanel tp;
@@ -3271,10 +3266,12 @@ public class MainFrame extends JFrame implements OptionConstants {
       tp = (TabbedPanel)_tabs.get(i);
       if (tp == c) {
         // 2 right now is a magic number for the number of tabs always visible
-        // interactions & console
-        _tabbedPane.insertTab(tp.getName(), null, tp, null, numVisible + 2);
+        // interactions & console        
+        if (!tp.isDisplayed()) {
+          _tabbedPane.insertTab(tp.getName(), null, tp, null, numVisible + 2);
+          tp.setDisplayed(true);
+        }
         _tabbedPane.setSelectedIndex(numVisible + 2);
-        tp.setDisplayed(true);
         return;
       }
       if (tp.isDisplayed())
