@@ -177,7 +177,7 @@
     <mkdir dir="${javadoc_dir}" />
 
     <mkdir dir="${javadoc_dir}/src" />
-    <execon executable="javac" failonerror="yes" parallel="yes" type="file">
+    <apply executable="jsr14" failonerror="yes" parallel="yes" type="file">
       <arg value="-sourcepath" />
       <arg value="${srcroot}" />
 
@@ -186,11 +186,11 @@
 
       <arg value="-d" />
       <arg value="${javadoc_dir}/src" />
-      <arg value="-J-Xbootclasspath/p:${jsr14_classpath}/javac.jar" />
+      
       <fileset dir="${srcroot}">
         <include name="${projpath}/**/*.java" />
       </fileset>
-    </execon>
+    </apply>
 
     <!-- Now we need to copy the package.htmls over to the
          directory with the non-generic sources. -->
