@@ -50,6 +50,7 @@ import junit.extensions.*;
 
 /**
  * Tests functionality of this OptionComponent
+ * @version $Id:
  */
 public class ColorOptionComponentTest extends TestCase {
   

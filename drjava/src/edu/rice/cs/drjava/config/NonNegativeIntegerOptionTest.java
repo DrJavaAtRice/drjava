@@ -44,6 +44,7 @@ import junit.framework.*;
 /**
  * Class according to the JUnit protocol. Tests
  * the proper functionality of the class NonNegativeIntegerOption.
+ * @version $Id:
  */
 public class NonNegativeIntegerOptionTest extends TestCase
 {

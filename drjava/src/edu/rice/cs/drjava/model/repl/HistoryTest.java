@@ -84,6 +84,7 @@ public class HistoryTest extends TestCase implements OptionConstants{
   }
   
   public void xtestWriteToFile() throws IOException{ // Doesn't pass on Windows
+    /* Put 3 lines in the history */
     _history.add("new Object()");
     _history.add("new Object()");
     _history.add("5 * 5");
@@ -101,6 +102,7 @@ public class HistoryTest extends TestCase implements OptionConstants{
     char [] chContents = new char[fr];
     assertEquals(32, fr.read(chContents, 0, 32));
     assertTrue(!fr.ready());
+    fr.close();
     
     String contents = new String(chContents);
     assertEquals("new Object()\nnew Object()\n5 * 5", contents.trim());*/

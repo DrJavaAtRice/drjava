@@ -425,6 +425,7 @@ public class DefinitionsPane extends JEditorPane
   public void processKeyEvent(KeyEvent e) {
     KeyStroke ks = KeyStroke.getKeyStrokeForEvent(e);
     Action a = KeyBindingManager.Singleton.get(ks);
+
     if (a != null) {
       SwingUtilities.notifyAction(a, ks, e, e.getSource(), e.getModifiers());
 
@@ -434,6 +435,7 @@ public class DefinitionsPane extends JEditorPane
     else {    
       // backspace deletes twice without this check, overrides other keystrokes
       // that use the mask modifier
+      
       if (((ks.getModifiers() & mask) == 0) && ks.getKeyChar() != '\010') {
         super.processKeyEvent(e);       
       }

@@ -85,6 +85,7 @@ public class MainFrameTest extends TestCase {
     _frame = new MainFrame();
   }
   
+  
   /**
    * Tests that the returned JButton of <code>createManualToolbarButton</code>:
    *  1. Is disabled upon return.

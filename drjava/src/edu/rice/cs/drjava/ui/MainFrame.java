@@ -956,7 +956,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     // DefinitionsPane
     JScrollPane defScroll = _createDefScrollPane(_model.getActiveDocument());
     _currentDefPane = (DefinitionsPane) defScroll.getViewport().getView();
-    
+
     // set up key-bindings
     KeyBindingManager.Singleton.setMainFrame(this);
     KeyBindingManager.Singleton.setActionMap(_currentDefPane.getActionMap());

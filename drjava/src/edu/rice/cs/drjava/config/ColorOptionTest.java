@@ -45,6 +45,7 @@ import java.awt.Color;
 /**
  * Class according to the JUnit protocol. Tests
  * the proper functionality of the class ColorOption.
+ * @version $Id:
  */
 public class ColorOptionTest extends TestCase
 {
