@@ -73,15 +73,6 @@ public class CompilerRegistry {
     "edu.rice.cs.drjava.model.compiler.GJv6FromClasspath",
   };
   
-  /**
-   * A subset of DEFAULT_COMPILERS which support Generic Java.
-   */
-  public static final String[] GENERIC_JAVA_COMPILERS = {
-    "edu.rice.cs.drjava.model.compiler.JSR14v12FromSetLocation",
-    "edu.rice.cs.drjava.model.compiler.JSR14FromSetLocation",
-    "edu.rice.cs.drjava.model.compiler.GJv6FromClasspath",
-  };
-
   /** Singleton instance. */
   public static final CompilerRegistry ONLY = new CompilerRegistry();
 
@@ -94,9 +85,6 @@ public class CompilerRegistry {
   /** The active compiler. Must never be null. */
   private CompilerInterface _activeCompiler = NoCompilerAvailable.ONLY;
   
-  /** Whether any compilers that support Generic Java are available. */
-  private boolean _anyGJCompilersAvailable = false;
-
   /** Private constructor due to singleton. */
   private CompilerRegistry() {
     _baseClassLoader = getClass().getClassLoader();
@@ -144,7 +132,6 @@ public class CompilerRegistry {
   public CompilerInterface[] getAvailableCompilers() {
     LinkedList availableCompilers = new LinkedList();
     ListIterator itor = _registeredCompilers.listIterator();
-    _anyGJCompilersAvailable = false;
 
     while (itor.hasNext()) {
       String name = (String) itor.next();
@@ -163,16 +150,6 @@ public class CompilerRegistry {
           }
 
           availableCompilers.add(compiler);
-          
-          // Remember if this compiler supports generics
-          for (int i=0; 
-               i < GENERIC_JAVA_COMPILERS.length && !_anyGJCompilersAvailable;
-               i++)
-          {
-            if (name.equals(GENERIC_JAVA_COMPILERS[i])) {
-              _anyGJCompilersAvailable = true;
-            }
-          }
         }
         else {
           //DrJava.consoleOut().println("not available.");
@@ -239,16 +216,6 @@ public class CompilerRegistry {
     }
   }
   
-  /**
-   * Returns whether any of the available compilers support Generic Java.
-   */
-  public boolean areGenericJavaCompilersAvailable() {
-    // If no compiler is available now, try to see if we can get one
-    if (_activeCompiler == NoCompilerAvailable.ONLY) {
-      getAvailableCompilers();
-    }
-    return _anyGJCompilersAvailable;
-  }
 
   private void _registerDefaultCompilers() {
     for (int i = 0; i < DEFAULT_COMPILERS.length; i++) {

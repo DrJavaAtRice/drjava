@@ -75,8 +75,15 @@ public class JSR14v12FromSetLocation extends CompilerProxy implements OptionCons
       //URL url = new File(loc).toURL();
       URL url = loc.toURL();
       // Create a URLClassLoader with a null parent so it only looks
-      // in the URL for classes.
-      return new URLClassLoader(new URL[] { url }, null);
+      // in the URL for classes (not in system's class loader).
+      return new URLClassLoader(new URL[] { url }, null) {
+        /**
+         * Override getResource to not look at bootclasspath.
+         */
+        public URL getResource(String name) {
+          return findResource(name);
+        }
+      };
     }
     catch (MalformedURLException e) {
       throw new RuntimeException("malformed url exception");

@@ -320,8 +320,7 @@ public class DrJava implements OptionConstants {
   }
   
   /**
-   * Check to see if a compiler and the debugger are available, and
-   * if JSR-14 is available if its location is specified.  If necessary,
+   * Check to see if a compiler and the debugger are available.  If necessary,
    * starts DrJava in a new JVM with an augmented classpath to make these 
    * available.  If it can't find them at all, it prompts the user to 
    * optionally specify tools.jar
@@ -373,11 +372,11 @@ public class DrJava implements OptionConstants {
       }
     }
     
-    // Check to see if we need to restart for JSR14 (not working yet)
-    //boolean restartForJSR14 = shouldPrependJSR14ToBootclasspath();
-    boolean restartForJSR14 = false;
-
-    restartIfNecessary(restartForToolsJar, restartForJSR14, args);
+    // Originally this also took in a flag if it was necessary to
+    // restart to be able to use JSR-14 on OS X.  That is no longer
+    // necessary, but I'll leave the contract like this for the time
+    // being (in case another condition comes up).
+    restartIfNecessary(restartForToolsJar, args);
   }
   
   /**
@@ -435,31 +434,22 @@ public class DrJava implements OptionConstants {
     }
   }
 
-  /**
-   * Returns whether we should restart to prepend the specified JSR-14
-   * jar to the bootclasspath.  This allows us to use JSR-14 on a Mac,
-   * when tools.jar usually shows up on the classpath before JSR-14.
-   */
-  static boolean shouldPrependJSR14ToBootclasspath() {
-    //System.out.println("JSR-14:" + getConfig().getSetting(JSR14_LOCATION));
-    //System.out.println("generics avail:" + CompilerRegistry.ONLY.areGenericJavaCompilersAvailable());
-    return (getConfig().getSetting(JSR14_LOCATION) != FileOption.NULL_FILE) &&
-      !CompilerRegistry.ONLY.areGenericJavaCompilersAvailable();
-  }
-
   
   /**
    * Tries to run a new DrJava process with our notion of tools.jar
    * appended to the end of the classpath.  This should allow us to
    * always make the debugger available.
+   *
+   * Note: this used to take in a flag for JSR-14 in addition to tools.jar,
+   * but that isn't needed anymore.  I'll leave the contract like this in 
+   * case another condition becomes necessary.  For now, it just returns
+   * if you pass in false for the first argument.
+   *
    * @param forToolsJar Whether to restart DrJava to find tools.jar
-   * @param forJSR14 Whether to restart DrJava to get JSR-14
    * @param args Array of command line arguments to pass
    */
-  public static void restartIfNecessary(boolean forToolsJar, 
-                                        boolean forJSR14,
-                                        String[] args) {
-    if (!forToolsJar && !forJSR14) {
+  public static void restartIfNecessary(boolean forToolsJar, String[] args) {
+    if (!forToolsJar) {
       // Don't need to restart: just continue normally
       return;
     }
@@ -489,16 +479,6 @@ public class DrJava implements OptionConstants {
       
       // Fall back on guesses from ToolsJarClassLoader
       classpath += ToolsJarClassLoader.getToolsJarClasspath();
-    }
-    
-    if (forJSR14) {
-      // Try to prepend JSR-14 to the bootclasspath
-      File jsr14 = getConfig().getSetting(JSR14_LOCATION);
-      if (jsr14 != FileOption.NULL_FILE) {
-        String arg = "-Xbootclasspath/p:" + jsr14.getAbsolutePath();
-        jvmArgs = new String[1];
-        jvmArgs[0] = arg;
-      }
     }
     
     // Run a new copy of DrJava and exit
