@@ -548,6 +548,9 @@ public class MainFrame extends JFrame {
     _errorPanel.getErrorListPane().setLastDefPane(_currentDefPane);
     _errorPanel.reset();
 
+    _junitPanel.getJUnitErrorListPane().setLastDefPane(_currentDefPane);
+    _junitPanel.reset();
+
     // set up menu bar and actions
     _setUpActions();
     _setUpMenuBar();
@@ -1128,6 +1131,7 @@ public class MainFrame extends JFrame {
     if (scroll != null) {
       DefinitionsPane pane = (DefinitionsPane) scroll.getViewport().getView();
       pane.removeCaretListener(pane.getErrorCaretListener());
+      pane.removeCaretListener(pane.getJUnitErrorCaretListener());
     }
   }
 
@@ -1138,7 +1142,7 @@ public class MainFrame extends JFrame {
    * constructor of each action, which will subclass AbstractAction.
    */
   private void _setUpActions() {
-    _setUpAction(_newAction, "New", "Creat a new document");
+    _setUpAction(_newAction, "New", "Create a new document");
     _setUpAction(_openAction, "Open", "Open an existing file");
     _setUpAction(_saveAction, "Save", "Save the current document");
     _setUpAction(_saveAsAction, "SaveAs", "Save the current document with a new name");
@@ -1176,8 +1180,9 @@ public class MainFrame extends JFrame {
 
     _setUpAction(_abortInteractionAction, "Break", "Abort the current interaction");
     _setUpAction(_resetInteractionsAction, "Reset", "Reset interactions");
-    
+  
     _setUpAction(_junitAction, "Test", "Run JUnit over the current document");
+
   }
 
   private void _setUpAction(Action a, String _default, String shortDesc) {
@@ -1256,7 +1261,7 @@ public class MainFrame extends JFrame {
 
     tmpItem = fileMenu.add(_saveAsAction);
     tmpItem.setAccelerator
-	(KeyStroke.getKeyStroke(KeyEvent.VK_S, mask | ActionEvent.SHIFT_MASK));
+ (KeyStroke.getKeyStroke(KeyEvent.VK_S, mask | ActionEvent.SHIFT_MASK));
 
     tmpItem = fileMenu.add(_saveAllAction);
 
@@ -1278,7 +1283,7 @@ public class MainFrame extends JFrame {
     tmpItem = fileMenu.add(_pageSetupAction);
     tmpItem = fileMenu.add(_printPreviewAction);
     tmpItem.setAccelerator
-	(KeyStroke.getKeyStroke(KeyEvent.VK_P, mask | ActionEvent.SHIFT_MASK));
+ (KeyStroke.getKeyStroke(KeyEvent.VK_P, mask | ActionEvent.SHIFT_MASK));
     tmpItem = fileMenu.add(_printAction);
     tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_P, mask));
 
@@ -1349,7 +1354,7 @@ public class MainFrame extends JFrame {
     // keep track of the compile menu item
     _compileMenuItem = tmpItem;
 
-    //toolsMenu.add(_junitAction);
+    toolsMenu.add(_junitAction);
 
     // Abort/reset interactions, clear console
     toolsMenu.addSeparator();
@@ -1517,10 +1522,11 @@ public class MainFrame extends JFrame {
     _toolBar.add(_createToolbarButton(_findReplaceAction));
 
     // Junit
-    //_toolBar.addSeparator();
+    _toolBar.addSeparator();
     
-    //_junitButton = _createToolbarButton(_junitAction);
-    //_toolBar.add(_junitButton);
+    _junitButton = _createToolbarButton(_junitAction);
+    _toolBar.add(_junitButton);
+
 
     getContentPane().add(_toolBar, BorderLayout.NORTH);
   }
@@ -1590,7 +1596,7 @@ public class MainFrame extends JFrame {
     _tabbedPane.add("Interactions", new BorderlessScrollPane(_interactionsPane));
     _tabbedPane.add("Compiler output", _errorPanel);
     _tabbedPane.add("Console", new JScrollPane(_outputPane));
-    //_tabbedPane.add("Test output", _junitPanel);
+    _tabbedPane.add("Test output", _junitPanel);
 
     // Select interactions pane when interactions tab is selected
     _tabbedPane.addChangeListener(new ChangeListener() {
@@ -1790,19 +1796,23 @@ public class MainFrame extends JFrame {
       boolean canCompile = (!isModified && !active.isUntitled());
       _saveAction.setEnabled(isModified);
       _revertAction.setEnabled(!active.isUntitled());
-
       //_compileAction.setEnabled(canCompile);
 
       // Update error highlights
       _errorPanel.getErrorListPane().selectNothing();
+      _junitPanel.getJUnitErrorListPane().selectNothing();
+      //_junitPanel.reset();
+      
       int pos = _currentDefPane.getCaretPosition();
       _currentDefPane.getErrorCaretListener().updateHighlight(pos);
-
+      _currentDefPane.getJUnitErrorCaretListener().updateHighlight(pos);
+     
       _setCurrentDirectory(active);
 
       updateFileTitle();
       _posListener.updateLocation();
       _currentDefPane.requestFocus();
+      
       try {
         active.revertIfModifiedOnDisk();
       } catch (IOException e) {
@@ -1812,8 +1822,9 @@ public class MainFrame extends JFrame {
         uninstallFindReplaceDialog(_findReplace);
         installFindReplaceDialog(_findReplace);
       }
+      
     }
-
+    
     public void interactionStarted() {
       _interactionsPane.setEditable(false);
       _interactionsPane.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
@@ -1843,7 +1854,7 @@ public class MainFrame extends JFrame {
     }
 
     public void junitStarted() {
-      //_tabbedPane.setSelectedIndex(JUNIT_TAB);
+      _tabbedPane.setSelectedIndex(JUNIT_TAB);
       _saveAction.setEnabled(false);
       hourglassOn();
     }
@@ -1974,7 +1985,7 @@ public class MainFrame extends JFrame {
           throw new RuntimeException("Invalid rc: " + rc);
       }
     }
-    
+
     /**
      * Called to ask the listener if it is OK to revert the current
      * document to a newer version saved on file.
@@ -2001,7 +2012,6 @@ public class MainFrame extends JFrame {
       int rc = JOptionPane.showConfirmDialog(MainFrame.this,
                                              text,
                                              fname + " Modified on Disk",
-      
                                              JOptionPane.YES_NO_OPTION);
       
      switch (rc) {

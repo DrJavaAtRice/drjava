@@ -40,12 +40,15 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.model.junit;
 
 import java.io.*;
+import java.util.*;
 import javax.swing.*;
 import javax.swing.text.*;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.util.UnexpectedException;
+import edu.rice.cs.drjava.model.definitions.*;
+
 
 import junit.framework.*;
 import java.util.Enumeration;
@@ -57,63 +60,82 @@ import java.util.Enumeration;
  */
 public class JUnitErrorModel {
   private JUnitError[] _errors;
+  private JUnitError[] _errorsWithoutPositions;
   private Position[] _positions;
-  private Document _document;
+  private DefinitionsDocument _document;
   private File _file;
-
+  
+  private boolean _testsHaveRun = false;
+  private int _errorsWithPos = 0;
+  
   /**
    * Constructs a new JUnitErrorModel to be maintained
    * by a particular OpenDefinitionsDocument.
    * @param doc Document containing the errors
    * @param file File containing the errors, or null
    */
-  public JUnitErrorModel(Document doc, String theclass, TestResult result) {
+  public JUnitErrorModel(DefinitionsDocument doc, String theclass, TestResult result) {
     _document = doc;
+    _testsHaveRun = true;
+        
     JUnitError[] errors = new JUnitError[result.errorCount() + result.failureCount()];
-
+     
     Enumeration failures = result.failures();
-
+    Enumeration errEnum = result.errors(); 
+    
     int i=0;
-
-    while (failures.hasMoreElements()) {
-      TestFailure tf = (TestFailure) failures.nextElement();
-      TestCase tc = (TestCase) tf.failedTest();
-
-      StringWriter sw = new StringWriter();
-      PrintWriter pw = new PrintWriter(sw);
-
-      tf.thrownException().printStackTrace(pw);
-
-      String classname = theclass + "." + tc.getName();
-      String theLine = _substring(sw.toString(), 0, sw.toString().indexOf(classname));
-      theLine = _substring(theLine, 0, theLine.indexOf("\n"));
-
-      theLine = _substring(theLine, 0, theLine.indexOf("(") + 1);
-      theLine = _substring(theLine, 0, theLine.indexOf(")"));
-
-      String file = _substring(theLine, 0, theLine.indexOf(":"));
-      int lineNo = 0;
-      try {
-        lineNo = new Integer(_substring(theLine, 
-                                        theLine.indexOf(":") + 1,
-                                        theLine.length()))
-          .intValue() - 1;
-      } 
-      catch (NumberFormatException e) {
-        throw new UnexpectedException(e);
-      }
-
-      _file = new File(file);
-
-      errors[i] = new JUnitError(_file, lineNo, 0, tf.thrownException().getMessage(),
-                                 ! (tf.thrownException() instanceof AssertionFailedError),
-                                 tc.getName());
+    
+    while ( errEnum.hasMoreElements()) {
+      TestFailure tErr = (TestFailure) errEnum.nextElement();
+      errors[i] = _makeJUnitError(tErr, theclass, true);
       i++;
     }
-
+    
+    while (failures.hasMoreElements()) {
+      TestFailure tFail = (TestFailure) failures.nextElement();
+      errors[i] = _makeJUnitError(tFail, theclass, false);
+      i++;
+    }
+      
+    Arrays.sort(errors);
+    
+    //Create the array of errors and failures, ordered by line number
+    
+    /* while ( (i < errors.length) && ( (tFail != null) || (tErr != null) ) ) {
+     
+      if ( (jFail != null) && ( (jErr == null) || (jFail.lineNumber() < jErr.lineNumber()) ) ) {
+        errors[i] = jFail;
+        System.out.println(jFail.lineNumber());
+        if (failures.hasMoreElements()) {
+          tFail = (TestFailure)failures.nextElement();
+          jFail = _makeJUnitError(tFail, theclass, false);
+        }
+        else {
+          tFail = null;
+          jFail = null;
+        }
+      }
+      
+      else if ( (jErr != null) && ( (jFail == null) || (jErr.lineNumber() <= jFail.lineNumber()) ) ) {
+        errors[i] = jErr;
+        System.out.println(jErr.lineNumber());
+        if (errEnum.hasMoreElements()) {
+          tErr = (TestFailure)errEnum.nextElement();
+          jErr = _makeJUnitError(tErr, theclass, true);
+        }
+        else {
+          tErr = null;
+          jErr = null;
+        }
+      }
+       
+      i++;
+    }*/
+   
     _groupErrors(errors);
   }
 
+        
   /**
    * Constructs a new JUnitErrorModel to be maintained
    * by a particular OpenDefinitionsDocument.
@@ -124,15 +146,104 @@ public class JUnitErrorModel {
     _document = null;
     _file = null;
     _errors = new JUnitError[0];
+    _errorsWithoutPositions = new JUnitError[0];
     _positions = new Position[0];
+    _testsHaveRun = false;
+    _errorsWithPos = 0;
+  }
+  
+  /**
+   * 
+   */
+  private String _quickParse( String sw, String classname ) {
+    String theLine = _substring(sw, sw.toString().indexOf(classname), sw.length());
+    theLine = _substring(theLine, theLine.indexOf(classname), theLine.length());
+    theLine = _substring(theLine, theLine.indexOf("(") + 1, theLine.length());
+    theLine = _substring(theLine, 0, theLine.indexOf(")"));
+    return theLine;
+  }
+
+  /**
+   * 
+   */
+  private int _lineNumber (String sw, String classname) {
+    
+    int lineNum;
+
+    int idxClassname = sw.indexOf(classname);
+    if (idxClassname == -1) return -1;
+
+    String theLine = sw.substring(idxClassname, sw.length());
+    theLine = theLine.substring(theLine.indexOf(classname), theLine.length());
+    theLine = theLine.substring(theLine.indexOf("(") + 1, theLine.length());
+    theLine = theLine.substring(0, theLine.indexOf(")"));
+    
+    try {
+      lineNum = new Integer(theLine.substring(
+                                      theLine.indexOf(":") + 1,
+                                      theLine.length())).intValue() - 1;
+    } 
+    catch (NumberFormatException e) {
+      throw new UnexpectedException(e);
+    }
+    
+    return lineNum;
+  }
+    
+  /**
+   * Constructs a new JUnitError from a TestFailure
+   * @param tF A given TestFailure
+   * @param theclass The class that contains the TestFailure
+   * @param isError The passed TestFailure may signify either an error or a failure
+   * @return JUnitError 
+   */
+  private JUnitError _makeJUnitError ( TestFailure tF, String theclass, boolean isError) {
+   
+    TestFailure tFail = tF;
+    TestCase tcFail = (TestCase) tFail.failedTest();
+    
+    StringWriter swFail = new StringWriter();
+    PrintWriter pwFail  = new PrintWriter(swFail);
+    
+    tFail.thrownException().printStackTrace(pwFail);
+        
+    String classnameFail = theclass + "." + tcFail.getName();
+       
+    int lineNum = _lineNumber( swFail.toString(), classnameFail);
+    if (lineNum > -1) _errorsWithPos++;
+    
+    _file = _document.getFile();
+    
+    String exception =  (isError) ? 
+      tFail.thrownException().toString() : 
+      tFail.thrownException().getMessage();
+      
+    return new JUnitError(_file, lineNum, 0, exception,
+                                 ! (tFail.thrownException() instanceof AssertionFailedError),
+                                 tcFail.getName());
   }
 
 
   /**
+   * Accessor
+   * @return whether tests have been run before.
+   */
+  public boolean haveTestsRun() {
+    return _testsHaveRun;
+  }
+
+  /**
    * Returns the array of errors with positions.
    */
-  public JUnitError[] getErrors() {
+  public JUnitError[] getErrorsWithPositions() {
     return _errors;
+  }
+
+  /**
+   * Returns the array of errors without positions.
+   */
+  public JUnitError[] getErrorsWithoutPositions() {
+    return _errorsWithoutPositions;
   }
 
   /**
@@ -145,7 +256,7 @@ public class JUnitErrorModel {
   /**
    * Returns the document associated with this error model.
    */
-  public Document getDocument() {
+  public DefinitionsDocument getDocument() {
     return _document;
   }
 
@@ -153,7 +264,9 @@ public class JUnitErrorModel {
    * Returns a substring, if it exists. Otherwise, it returns "(not applicable)".
    * @ pre start >= 0
    */
-  private String _substring(String s, int start, int end) {
+  String _substring(String s, int start, int end) {
+    //to do: remove this method and reformat any code depending on it
+    
     if (end >= 0) {
       return s.substring(start, end);
     }
@@ -169,6 +282,36 @@ public class JUnitErrorModel {
   private void _groupErrors(JUnitError[] errors) {
     _errors = errors;
 
+    // Filter out errors with invalid source info.
+    // They will be first since errors are sorted by line number,
+    // and invalid source info is for negative line numbers.
+    int numInvalid = 0;
+    for (int i = 0; i < errors.length; i++) {
+      if (errors[i].lineNumber() < 0) {
+        numInvalid++;
+      }
+      else {
+        // Since they were sorted, we must be done looking
+        // for invalid source coordinates, since we found this valid one.
+        break;
+      }
+    }
+
+    _errorsWithoutPositions = new JUnitError[numInvalid];
+    System.arraycopy(errors,
+                     0,
+                     _errorsWithoutPositions,
+                     0,
+                     numInvalid);
+
+    int numValid = errors.length - numInvalid;
+    _errors = new JUnitError[numValid];
+    System.arraycopy(errors,
+                     numInvalid,
+                     _errors,
+                     0,
+                     numValid);
+
     // Create positions if non-null file
     if (_file != null) {
       _createPositionsArray();
@@ -176,8 +319,7 @@ public class JUnitErrorModel {
     else {
       _positions = new Position[0];
     }
-
-
+    
     // DEBUG:
     /*
     for (int i = 0; i < _errors.length; i++) {
@@ -215,24 +357,30 @@ public class JUnitErrorModel {
       int curLine = 0;
       int offset = 0; // offset is number of chars from beginning of file
       int numProcessed = 0;
-
+      
       // offset is always pointing to the first character in a line
       // at the top of the loop
       while ((numProcessed < _errors.length) &&
              (offset < defsText.length()))
       {
         //DrJava.consoleErr().println("num processed: " + numProcessed);
-
+        
+        //System.out.println( _errors[0].lineNumber());
+        
+        
         // first figure out if we need to create any new positions on this line
         for (int i = numProcessed;
              (i < _errors.length) && (_errors[i].lineNumber() == curLine);
              i++)
         {
+          
+          //System.out.println("Positions["+i+"]: "+offset+_errors[i].startColumn());
           _positions[i] = _document.createPosition(offset +
                                                    _errors[i].startColumn());
+          
           numProcessed++;
         }
-
+        
         int nextNewline = defsText.indexOf('\n', offset);
         if (nextNewline == -1) {
           break;
@@ -242,10 +390,11 @@ public class JUnitErrorModel {
           offset = nextNewline + 1;
         }
       }
-    }
+      }
     catch (BadLocationException ble) {
       throw new UnexpectedException(ble);
     }
   }
 
+  
 }

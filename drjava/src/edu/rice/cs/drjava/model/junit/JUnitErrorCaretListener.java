@@ -66,7 +66,8 @@ public class JUnitErrorCaretListener implements CaretListener {
 
   private JUnitErrorModel _model;
   private Position[] _positions;
-
+  private boolean _shouldHighlight = true;
+  
 
   /**
    * Constructs a new caret listener to highlight JUnit errors.
@@ -107,6 +108,7 @@ public class JUnitErrorCaretListener implements CaretListener {
     }
 
     // Now we can assume at least one error.
+    shouldHighlight(true);
     updateHighlight(evt.getDot());
   }
 
@@ -119,12 +121,12 @@ public class JUnitErrorCaretListener implements CaretListener {
     // Find the first error that is on or after the dot. If this comes
     // before the newline after the dot, it's on the same line.
     int errorAfter; // index of the first error after the dot
-    for (errorAfter = 0; errorAfter < _positions.length; errorAfter++) {
+    for (errorAfter = 0; errorAfter < _positions.length; errorAfter++) {   
       if (_positions[errorAfter].getOffset() >= curPos) {
         break;
       }
     }
-
+   
     // index of the first error before the dot
     int errorBefore = errorAfter - 1;
 
@@ -133,6 +135,7 @@ public class JUnitErrorCaretListener implements CaretListener {
 
     if (errorBefore >= 0) { // there's an error before the dot
       int errPos = _positions[errorBefore].getOffset();
+      //System.out.println("Error before: " + _positions[errorBefore] + _positions[errorBefore].getOffset());
       try {
         String betweenDotAndErr = _document.getText(errPos, curPos - errPos);
 
@@ -142,12 +145,13 @@ public class JUnitErrorCaretListener implements CaretListener {
       }
       catch (BadLocationException willNeverHappen) {}
     }
-
+    
     if ((shouldSelect == -1) && (errorAfter != _positions.length)) {
       // we found an error on/after the dot
       // if there's a newline between dot and error,
       // then it's not on this line
       int errPos = _positions[errorAfter].getOffset();
+      //System.out.println("Error on or after:" + _positions[errorAfter] + _positions[errorAfter].getOffset());
       try {
         String betweenDotAndErr = _document.getText(curPos, errPos - curPos);
 
@@ -163,15 +167,25 @@ public class JUnitErrorCaretListener implements CaretListener {
       _errorListPane.selectNothing();
     }
     else {
+
       // No need to move the caret since it's already here!
       _highlightErrorInSource(shouldSelect);
 
-      // Select item wants the CompilerError
-      JUnitError[] errors = _model.getErrors();
+      // Select item wants the JUnitError
+      JUnitError[] errors = _model.getErrorsWithPositions();
       _errorListPane.selectItem(errors[shouldSelect]);
     }
+
   }
 
+  public void shouldHighlight( boolean sH) {
+    _shouldHighlight = sH;
+  }
+  
+  public boolean shouldHighlight() {
+    return _shouldHighlight;
+  }
+  
   /**
    * Highlights the given error in the source.
    * @param newIndex Index into _errors array
@@ -179,6 +193,8 @@ public class JUnitErrorCaretListener implements CaretListener {
   private void _highlightErrorInSource(int newIndex) {
     int errPos = _positions[newIndex].getOffset();
 
+    if (!_shouldHighlight) return;
+    
     try {
       String text = _document.getText(0, _document.getLength());
 

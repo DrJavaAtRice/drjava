@@ -43,6 +43,7 @@ import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.drjava.model.*;
 
 import java.io.PrintStream;
+import javax.swing.*;
 import javax.swing.text.StyledDocument;
 import javax.swing.text.BadLocationException;
 
@@ -141,8 +142,16 @@ public class JUnitTestRunner extends junit.textui.TestRunner {
   public TestResult doRun(Test suite, boolean wait, OpenDefinitionsDocument odd) {
     TestResult tr = super.doRun(suite, wait);
 
+    ListModel docs = _model.getDefinitionsDocuments();
+    // walk thru all open documents, resetting the JUnitErrorModel
+    for (int i = 0; i < docs.getSize(); i++) {
+      OpenDefinitionsDocument doc = (OpenDefinitionsDocument)
+        docs.getElementAt(i);
+      doc.setJUnitErrorModel( new JUnitErrorModel() );
+    }
     odd.setJUnitErrorModel(new JUnitErrorModel(odd.getDocument(), _currentTest, tr));
 
+    
     return tr;
   }
 

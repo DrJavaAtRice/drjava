@@ -143,17 +143,14 @@ public class JUnitPanel extends JPanel {
    */
   public void reset() {
     JUnitErrorModel juem = _model.getActiveDocument().getJUnitErrorModel();
-
     if (juem != null) {
-      _numErrors = juem.getErrors().length;
+      _numErrors = juem.getErrorsWithoutPositions().length + juem.getErrorsWithPositions().length;
     } else {
       _numErrors = 0;
     }
-
-    _errorListPane.updateListPane();
+    _errorListPane.updateListPane(juem.haveTestsRun());
     _resetEnabledStatus();
   }
-
 
   private void _showAllErrors() {
   }
@@ -308,13 +305,13 @@ public class JUnitPanel extends JPanel {
     /**
      * Update the pane which holds the list of errors for the viewer.
      */
-    public void updateListPane() {
+    public void updateListPane(boolean haveTestsRun) {
       try {
         _errorListPositions = new Position[_numErrors];
         _errorTable.clear();
 
         if (_numErrors == 0) {
-          _updateNoErrors();
+          _updateNoErrors(haveTestsRun);
         }
         else {
           _updateWithErrors();
@@ -351,10 +348,13 @@ public class JUnitPanel extends JPanel {
     /**
      * Used to show that the last compile was successful.
      */
-    private void _updateNoErrors() throws BadLocationException {
+    private void _updateNoErrors(boolean haveTestsRun) throws BadLocationException {
       DefaultStyledDocument doc = new DefaultStyledDocument();
+      
+      String msg = (haveTestsRun) ? "All tests completed successfully." : "";
+      
       doc.insertString(0,
-                       "All tests completed successfully.",
+                       msg,
                        NORMAL_ATTRIBUTES);
       setDocument(doc);
 
@@ -371,9 +371,11 @@ public class JUnitPanel extends JPanel {
       // Show errors for each file
       OpenDefinitionsDocument openDoc = _model.getActiveDocument();
       JUnitErrorModel errorModel = openDoc.getJUnitErrorModel();
-      JUnitError[] errors = errorModel.getErrors();
-
-      if (errors.length > 0) {
+      JUnitError[] errorsWithPositions = errorModel.getErrorsWithPositions();
+      JUnitError[] errorsWithoutPositions = errorModel.getErrorsWithoutPositions();
+      
+      if ((errorsWithoutPositions.length > 0) ||
+            (errorsWithPositions.length > 0)) {
 
         // Grab filename for this set of errors
         String filename = "(Untitled)";
@@ -385,21 +387,49 @@ public class JUnitPanel extends JPanel {
           // Not possible: compiled documents must have files
           throw new UnexpectedException(ise);
         }
+        
+        // Show errors without source locations
+        for (int j = 0; j < errorsWithoutPositions.length; j++, errorNum++) {
+          int startPos = doc.getLength();
+          
+          doc.insertString(doc.getLength(), "================\n", NORMAL_ATTRIBUTES);
+          
+          doc.insertString(doc.getLength(), "File: ", BOLD_ATTRIBUTES);
+          doc.insertString(doc.getLength(), filename + "\n", NORMAL_ATTRIBUTES);
 
-        // Show errors
-        for (int j = 0; j < errors.length; j++, errorNum++) {
+          _insertErrorText(errorsWithoutPositions, j, doc);
+          
+          // Note to user that there is no source info for this error
+          doc.insertString(doc.getLength(),
+                           " (no source location)",
+                           NORMAL_ATTRIBUTES);
+          doc.insertString(doc.getLength(), "\n", NORMAL_ATTRIBUTES);
+          
+          Position pos = doc.createPosition(startPos);
+          _errorListPositions[errorNum] = pos;
+          _errorTable.put(pos, errorsWithoutPositions[j]);
+        }
+        
+        
+        // Show errors with source locations
+        for (int j = 0; j < errorsWithPositions.length; j++, errorNum++) {
           int startPos = doc.getLength();
 
+          //WARNING: the height of the highlight box in JUnitError panel is dependent on the 
+          // presence of this extra line. If removed, code must be changed in order to account for its
+          // absence.
+          doc.insertString(doc.getLength(), "================\n", NORMAL_ATTRIBUTES);
+          
           // Show file
           doc.insertString(doc.getLength(), "File: ", BOLD_ATTRIBUTES);
           doc.insertString(doc.getLength(), filename + "\n", NORMAL_ATTRIBUTES);
 
           // Show error
-          _insertErrorText(errors, j, doc);
+          _insertErrorText(errorsWithPositions, j, doc);
           doc.insertString(doc.getLength(), "\n", NORMAL_ATTRIBUTES);
           Position pos = doc.createPosition(startPos);
           _errorListPositions[errorNum] = pos;
-          _errorTable.put(pos, errors[j]);
+          _errorTable.put(pos, errorsWithPositions[j]);
         }
       }
 
@@ -424,14 +454,16 @@ public class JUnitPanel extends JPanel {
         doc.insertString(doc.getLength(), error.testName(), NORMAL_ATTRIBUTES);
         doc.insertString(doc.getLength(), "\n", NORMAL_ATTRIBUTES);
 
+        //TO DO: change isWarning to isError
         if (error.isWarning()) {
-          doc.insertString(doc.getLength(), "Warning: ", BOLD_ATTRIBUTES);
-        }
-        else {
           doc.insertString(doc.getLength(), "Error: ", BOLD_ATTRIBUTES);
         }
-
+        else {
+          doc.insertString(doc.getLength(), "Failure: ", BOLD_ATTRIBUTES);
+        }
+        
         doc.insertString(doc.getLength(), error.message(), NORMAL_ATTRIBUTES);
+        
       }
 
     /**
@@ -439,6 +471,7 @@ public class JUnitPanel extends JPanel {
      * the highlight in the error pane.
      */
     private void _removeListHighlight() {
+      //System.out.println("_removeHighlight():  _listHighlightTag == "+_listHighlightTag);
       if (_listHighlightTag != null) {
         getHighlighter().removeHighlight(_listHighlightTag);
         _listHighlightTag = null;
@@ -467,7 +500,7 @@ public class JUnitPanel extends JPanel {
       _selectedIndex = i;
       _removeListHighlight();
 
-      int startPos = _errorListPositions[i].getOffset();
+      int startPos = _errorListPositions[i].getOffset() + 16; //16 ='s for the beginning line
 
       // end pos is either the end of the document (if this is the last error)
       // or the char where the next error starts
@@ -518,29 +551,47 @@ public class JUnitPanel extends JPanel {
       // check and see if this error is without source info, and
       // if so don't try to highlight source info!
       boolean errorHasLocation = (error.lineNumber() > -1);
-
-      if (errorHasLocation) {
-        try {
-          OpenDefinitionsDocument doc = _model.getDocumentForFile(error.file());
-          JUnitErrorModel errorModel = doc.getJUnitErrorModel();
-          JUnitError[] errors = errorModel.getErrors();
-
-          int index = Arrays.binarySearch(errors, error);
+      
+      try {
+      
+        OpenDefinitionsDocument doc = _model.getDocumentForFile(error.file());
+        JUnitErrorModel errorModel = doc.getJUnitErrorModel();
+        
+        if (errorHasLocation) {
+          JUnitError[] errorsWithPositions = errorModel.getErrorsWithPositions();
+          //System.out.println("error has location" +error.lineNumber() + " " + error);
+          //System.out.println("error size: " + errors.length);
+          //for (int i=0; i< errors.length; i++) {
+          //  System.out.println("errors [" + i + "] " + errors[i].lineNumber() + " " + errors[i]);
+          //}
+          
+          int index = Arrays.binarySearch(errorsWithPositions, error);
+          //System.out.println("index of error: " + index);
           if (index >= 0) {
             _gotoErrorSourceLocation(doc, index);
           }
-        }
-        catch (IOException ioe) {
-          // Don't highlight the source if file can't be opened
-        }
-      }
-      else {
-        // Remove last highlight
-        _lastDefPane.removeErrorHighlight();
-      }
 
+        }
+        
+        else {
+          // Remove last highlight
+          _lastDefPane.removeErrorHighlight();
+          
+          DefinitionsPane defPane = _frame.getCurrentDefPane();
+          defPane.getJUnitErrorCaretListener().shouldHighlight(false);
+          
+          // still switch to document despite the fact that the error has no lineNum
+          _model.setActiveDocument(doc);
+          _removeListHighlight();
+        }
+      }
+      catch (IOException ioe) {
+        // Don't highlight the source if file can't be opened
+      }
+      
       // Select item wants the error, which is what we were passed
       _errorListPane.selectItem(error);
+      
     }
 
     /**
@@ -564,20 +615,27 @@ public class JUnitPanel extends JPanel {
                                           final int idx) {
       JUnitErrorModel errorModel = doc.getJUnitErrorModel();
       Position[] positions = errorModel.getPositions();
-
+         
+      //System.out.println("index clicked: " + idx);
+      
       if ((idx < 0) || (idx >= positions.length)) return;
-
+      //System.out.println("index clicked: " + idx);
+      //System.out.println("position: " + errors[idx].lineNumber());
+      
       int errPos = positions[idx].getOffset();
-
-      // switch to correct def pane
+ 
+      //set the active document (implicit call to updateHighlight() )
       _model.setActiveDocument(doc);
-
-      // move caret to that position
+     
+      //set caret then grab focus
+       // switch to correct def pane, and inform it that it should highlight
       DefinitionsPane defPane = _frame.getCurrentDefPane();
+      defPane.getJUnitErrorCaretListener().shouldHighlight(true);
       defPane.setCaretPosition(errPos);
       defPane.grabFocus();
+      defPane.getJUnitErrorCaretListener().updateHighlight(errPos);
     }
-
+    
   }
 
 }

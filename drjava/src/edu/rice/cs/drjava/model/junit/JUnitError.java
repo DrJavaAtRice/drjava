@@ -58,7 +58,7 @@ public class JUnitError extends TestResult implements Comparable {
   private int _startColumn;
   private String _message;
   private String _test;
-  private boolean _isWarning;
+  private boolean _isError;
 
   /**
    * Constructor.
@@ -66,15 +66,15 @@ public class JUnitError extends TestResult implements Comparable {
    * @param     int lineNumber the line number of the error
    * @param     int startColumn the starting column of the error
    * @param     String message  the error message
-   * @param     boolean isWarning true if the error is a warning
+   * @param     boolean isError true if the error is a warning
    */
   public JUnitError(File file, int lineNumber, int startColumn, String message,
-      boolean isWarning, String test) {
+      boolean isError, String test) {
     _file = file;
     _lineNumber = lineNumber;
     _startColumn = startColumn;
     _message = message;
-    _isWarning = isWarning;
+    _isError = isError;
     _test = test;
   }
 
@@ -141,7 +141,7 @@ public class JUnitError extends TestResult implements Comparable {
    * @return true if the error is a warning.
    */
   public boolean isWarning() {
-    return  _isWarning;
+    return  _isError;
   }
 
   /**

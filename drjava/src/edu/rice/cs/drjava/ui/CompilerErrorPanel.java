@@ -430,7 +430,6 @@ public class CompilerErrorPanel extends JPanel {
     private void _updateWithErrors() throws BadLocationException {
       DefaultStyledDocument doc = new DefaultStyledDocument();
       int errorNum = 0;
-
       // Show errors without files
       CompilerError[] errorsNoFiles = _model.getCompilerErrorsWithoutFiles();
       for (int i = 0; i < errorsNoFiles.length; i++, errorNum++) {

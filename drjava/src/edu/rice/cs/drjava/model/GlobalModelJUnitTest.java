@@ -84,6 +84,15 @@ public class GlobalModelJUnitTest extends GlobalModelTestCase {
     "  } " +
     "}";
   
+  private static final String NONPUBLIC_TEXT =
+    "import junit.framework.*; " + 
+    "public class NonPublic extends TestCase { " +
+    "  public NonPublic(String name) { super(name); } " +
+    "  void testShouldFail() { " +
+    "    assertEquals(\"monkey\", \"baboon\"); " +
+    "  } " +
+    "}";
+  
   private static final String NON_TESTCASE_TEXT =
     "public class NonTestCase {}";
   
@@ -303,6 +312,38 @@ public class GlobalModelJUnitTest extends GlobalModelTestCase {
     listener.assertJUnitStartCount(1);
     listener.assertJUnitEndCount(1);
     listener.assertNonTestCaseCount(1);
+  }
+  
+    /**
+   * Tests that the ui is notified to put up an error dialog if JUnit
+   * is run on a non-public TestCase.
+   */
+  public void testResultOfNonPublicTestCase() throws Exception {
+    final OpenDefinitionsDocument doc = setupDocument(NONPUBLIC_TEXT);
+    final File file = new File(_tempDir, "NonPublic.java");
+    doc.saveFile(new FileSelector(file));
+    
+    CompileShouldSucceedListener listener = new CompileShouldSucceedListener() {
+      public void junitStarted() { junitStartCount++; }
+      public void junitEnded() { junitEndCount++; }
+    };
+    
+    _model.addListener(listener);
+    
+    // Clear document so we can make sure it's written to after startJUnit
+    _model.getJUnitDocument().remove(0, _model.getJUnitDocument().getLength() - 1);
+     
+    final TestResult testResults = doc.startJUnit();
+    
+    System.err.println(testResults.toString());
+    
+    // Check events fired
+    listener.assertJUnitStartCount(1);
+    listener.assertJUnitEndCount(1);
+   
+    assertEquals("test case has one error reported",
+                 1,
+                 testResults.failureCount());
   }
 }
 
