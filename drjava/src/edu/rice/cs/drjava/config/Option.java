@@ -40,7 +40,7 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.config;
 import gj.util.Hashtable;
 import gj.util.Vector;
-public abstract class Option<T> {
+public abstract class Option<T> implements OptionParser<T> {
     
     public final String key;
 

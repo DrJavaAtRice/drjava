@@ -53,5 +53,5 @@ public interface OptionMap {
 
     public <T> T removeOption(Option<T> o);
 
-    public Enumeration<Option<Object>> keys();
+    public Enumeration<OptionParser<Object>> keys();
 }

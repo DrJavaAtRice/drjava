@@ -38,38 +38,9 @@
 END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.config;
-import gj.util.Hashtable;
-public class DefaultOptionMap 
-    extends Hashtable<OptionParser<Object>,Object> implements OptionMap {    
-    public <T extends Object> T getOption(Option<T> o) {
-	return o.getOption(this);
-    }
-
-    public <T extends Object> T setOption(Option<T> o, T val) {
-	super.put((OptionParser) o,val); // jsr14 is dumb.  we have to cast.
-	return o.setOption(this,val);	
-    }
-
-    public String getString(Option<Object> o) {
-	return o.getString(this);
-    }
+public interface OptionParser<T> {
     
-    public <T extends Object> T setString(Option<T> o, String s) {
-	return o.setString(this,s);
-    }
+    public String getName();
 
-    public Object remove(Option<Object> o) {
-	super.remove(o);
-	return o.remove(this);
-    }
-
-    public <T extends Object> T removeOption(Option<T> o) {
-	super.remove((OptionParser)o); // jsr14 is dumb.  we have to cast.
-	return o.remove(this);
-    }
-
-    public Object put(Option<Object> o, Object val) {
-	super.put(o,val); 
-	return o.setOption(this,val);
-    }
+    public abstract T parse(String val);
 }
