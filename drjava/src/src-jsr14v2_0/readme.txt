@@ -23,9 +23,14 @@ Important to note is that while we compile the rest of DrJava with the
 -novariance flag, the JSR14v20Compiler must be compiled using variance.  
 Thus, it uses a different ant call than the other branches.
 
+This has also been updated for all versions of JSR-14, up to v2.5, as well as 
+JDK 1.5.
+
 To compile:
  - Copy the JSR-14 v2.0 version of gjc-rt.jar to "jsr14.jar" in the
    src/edu/rice/cs/lib/ directory.
  - Run "ant compile-jsr14v2_0".  This will update the "compilers.jar" file in
    the lib directory.
 
+Or, now with JDK 1.5:
+ - Run the same target, but make sure "-target jsr14" is enabled.

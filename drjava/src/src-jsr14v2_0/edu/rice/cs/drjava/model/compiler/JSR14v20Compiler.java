@@ -55,7 +55,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.InvocationTargetException;
 
 import java.util.LinkedList;
-import java.util.Arrays;
 
 // Uses JSR-14 v2.0 compiler classes
 import com.sun.tools.javac.main.JavaCompiler;
@@ -66,8 +65,6 @@ import com.sun.tools.javac.util.Position;
 import com.sun.tools.javac.util.List;
 import com.sun.tools.javac.util.Log;
 
-import gj.util.Vector;
-import gj.util.Enumeration;
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.newjvm.ExecJVM;
@@ -320,21 +317,25 @@ public class JSR14v20Compiler implements CompilerInterface {
     options.put("-classpath", cp);    
     return context;
   }
-  
+
   /**
    * Adds the appropriate values for the source and target arguments.
    */
   protected void _addSourceAndTargetOptions(Options options) {
     options.put("-source", "1.5");
-    if (_isJSR14v2_4) {
+    if (System.getProperty("java.specification.version").equals("1.5")) {
+      options.put("-target", "1.5");
+    }
+    else if (_isJSR14v2_4) {
       options.put("-target", "jsr14");
     }
-//    options.put("-target", "1.5");
     options.put("-fork", "on");
-    if(! _builtPath.equals(""))
-      options.put("-d",_builtPath);
+
+    if (!_builtPath.equals("")) {
+      options.put("-d", _builtPath);
+    }
   }
-  
+
   /**
    * Package protected utility method for getting a properly formatted
    * string with several source paths from an array of files.
@@ -420,7 +421,7 @@ public class JSR14v20Compiler implements CompilerInterface {
       catch (Exception e2) {
         return false;
       }
-    }    
+    }
   }
 
   /**
@@ -430,7 +431,7 @@ public class JSR14v20Compiler implements CompilerInterface {
    */
   private class OurLog extends Log {
     // List of CompilerError
-    private LinkedList _errors = new LinkedList();
+    private LinkedList<CompilerError> _errors = new LinkedList<CompilerError>();
     private String _sourceName = "";
 
     public OurLog(Context context) {
