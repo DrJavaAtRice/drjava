@@ -184,7 +184,7 @@ public class CompilerErrorPanel extends ErrorPanel {
     _errorListPane.setCompilationInProgress();
   }
 
-  protected CompilerErrorModel<CompilerError> getErrorModel(){
+  protected CompilerErrorModel getErrorModel(){
     return getModel().getCompilerModel().getCompilerErrorModel();
   }
 

@@ -372,7 +372,7 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
           field = field.substring(lastDot + 1, field.length());
         }
       }
-      LinkedList list = new LinkedList();
+      LinkedList<Identifier> list = new LinkedList<Identifier>();
       StringTokenizer st = new StringTokenizer(_getFullyQualifiedClassNameForThis(), "$.");
       String currString = st.nextToken();
       while (!currString.equals(field)) {
@@ -418,7 +418,7 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
    */
   protected QualifiedName _convertThisToName(ThisExpression node) {
     // Can't parametize this List for some reason.
-    List ids = new LinkedList();
+    List<Identifier> ids = new LinkedList<Identifier>();
     ids.add(new Identifier("this", node.getBeginLine(), node.getBeginColumn(),
                            node.getEndLine(), node.getEndColumn()));
     return new QualifiedName(ids, node.getFilename(),

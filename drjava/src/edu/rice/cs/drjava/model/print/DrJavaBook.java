@@ -103,8 +103,8 @@ public class DrJavaBook implements Pageable {
     float lineHeight = textl.getLeading() + textl.getAscent();
     int linesPerPage = (int) (_format.getImageableHeight() / lineHeight) - 1;
 
-//    HashMap<TextAttribute, Object> map = new HashMap<TextAttribute, Object>();
-    HashMap map = new HashMap();
+    HashMap<TextAttribute, Object> map = new HashMap<TextAttribute, Object>();
+//    HashMap map = new HashMap();
     map.put(TextAttribute.FONT, PRINT_FONT);
 
     char[] carraigeReturn = {(char) 10};

@@ -49,6 +49,9 @@ import java.util.Calendar;
 import java.util.HashSet;
 import java.util.Set;
 
+/** TODO: convert ModelList representation to a doubly linked circular list;
+ *  separate head and tail nodes are ugly and unnecessary. */
+
 /**
  * A list class with some extra features.
  * Allows multiple iterators to make modifications to the same list
@@ -94,7 +97,7 @@ class ModelList<T> {
   }
    
   public void insertFront(T item) {
-    ModelList<T>.Iterator it = new ModelList.Iterator();
+    ModelList<T>.Iterator it = new ModelList.Iterator();  // Should be ModelList<T>.Iterator() but current Generic Java compiler rejects it.
     it.insert(item);
     it.dispose();
   }
@@ -142,7 +145,7 @@ class ModelList<T> {
    * must be notified of changes so it does not become out-of-date.
    */
   public ModelList<T>.Iterator getIterator() {
-    return new ModelList.Iterator();
+    return new ModelList.Iterator();   // Should be ModelList<T>.Iterator() but not accepted by current Generic Java compiler;
   }
   
   

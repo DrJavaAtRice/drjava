@@ -178,7 +178,9 @@ public class PendingRequestManager {
         Vector<ReferenceType> refTypes = new Vector<ReferenceType>();
         refTypes.add(rt);
         // next line was in condition for if
-        actions.get(i).createRequests(refTypes);
+        actions.get(i).createRequests(refTypes);  // the second receiver has raw type DocumentDebugAction
+                                                  // it should not generate a type warning;
+        
 //        if (!) {
           // if no request created, skip this action
           //i++;

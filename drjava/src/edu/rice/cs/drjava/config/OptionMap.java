@@ -52,9 +52,9 @@ public interface OptionMap {
 
     public <T> T setOption(Option<T> o, T val);
 
-    public <T> String getString(OptionParser<T> o);
+    public String getString(OptionParser o);
     
-    public <T> T setString(OptionParser<T> o, String s);
+    public void setString(OptionParser o, String s);
 
     public <T> T removeOption(OptionParser<T> o);
 

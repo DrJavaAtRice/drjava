@@ -60,18 +60,18 @@ public class DefaultOptionMap implements OptionMap {
     return o.setOption(this,val);
   }
   
-  private <T> void setOption(OptionParser<T> o) {
+  private void setOption(OptionParser o) {
     if(keys.indexOf(o)==-1)
       keys.add(o);
   }
   
-  public <T> String getString(OptionParser<T> o) {
+  public String getString(OptionParser o) {
     return o.getString(this);
   }
   
-  public <T> T setString(OptionParser<T> o, String s) {
+  public void setString(OptionParser o, String s) {
     setOption(o);
-    return o.setString(this,s);
+    o.setString(this,s);
   }
   
   public <T> T removeOption(OptionParser<T> o) {
