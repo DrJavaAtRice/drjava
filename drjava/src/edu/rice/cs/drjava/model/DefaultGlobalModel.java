@@ -171,7 +171,6 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
 
     _interpreterControl = other._interpreterControl;
     _interpreterControl.setModel(this);
-    _interpreterControl.startInterpreterJVM();
     _interpreterControl.reset();
     _createDebugger();
   }
@@ -398,12 +397,13 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
       // Don't kill the interpreter. It'll die in a minute on its own,
       // and if we kill it using killInterpreter, we'll just start
       // another one!
-      _interpreterControl.killInterpreter(false);
+      _interpreterControl.killInterpreter();
 
       // Clean up debugger if necessary
       if ((_debugManager != null) && (_debugManager.isReady())) {
         _debugManager.endSession();
       }
+
       DrJava.getSecurityManager().exitVM(0);
     }
   }
@@ -521,7 +521,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
   }
 
   public void abortCurrentInteraction() {
-    _interpreterControl.killInterpreter(true);
+    _interpreterControl.restartInterpreterJVM();
   }
 
   /**

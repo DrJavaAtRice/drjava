@@ -41,7 +41,6 @@ package edu.rice.cs.drjava.model.repl.newjvm;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
-import edu.rice.cs.util.newjvm.*;
 
 /**
  * This interface specifies the methods that the Main JVM exposes
@@ -49,9 +48,17 @@ import edu.rice.cs.util.newjvm.*;
  *
  * @version $Id$
  */
-public interface MainJVMRemoteI extends MasterRemote {
+public interface MainJVMRemoteI extends Remote {
   public void systemErrPrint(String s) throws RemoteException;
   public void systemOutPrint(String s) throws RemoteException;
+
+  /**
+   * Registers the interpreter JVM for later callbacks.
+   *
+   * @param remote The interpreter JVM controller.
+   */
+  public void registerInterpreterJVM(InterpreterJVMRemoteI remote)
+    throws RemoteException;
 
   /**
    * Signifies that the most recent interpretation completed successfully,
@@ -81,4 +88,10 @@ public interface MainJVMRemoteI extends MasterRemote {
   public void threwException(String exceptionClass,
                              String message,
                              String stackTrace) throws RemoteException;
+
+  /** 
+   * The interpreter JVM calls this method periodically to ensure the main
+   * VM is still alive. If it's not, the interpreter just quits.
+   */
+  public void checkStillAlive() throws RemoteException;
 }
