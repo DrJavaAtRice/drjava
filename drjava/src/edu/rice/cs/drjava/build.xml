@@ -11,7 +11,7 @@
   <property name="built" value="${srcroot}/../built/" />
   <!-- projpath is the path from srcroot to the root directory of this project
   -->
-  <property name="projpath" value="edu/rice/cs/drjava" />
+  <property name="projpath" value="edu/rice/cs/${ant.project.name}" />
 
   <property name="jarfile" value="${srcroot}/../drjava2.jar" />
   <property name="manifest" value="manifest" />
@@ -32,9 +32,17 @@
        Before doing do, we update our copy with the CVS copy. This ensures that
        if there were any clashes, we have to resolve them now. Then we
        recompile (from scratch) and retest. If this all succeeds, we can commit.
+
+       After committing, we tag the build we just made with the tag
+       projectname-date-time.
   -->
   <target name="commit" depends="clean, update, test">
     <cvs command="commit" cvsRoot="${cvsroot}" />
+    <tstamp /> <!-- get new time stamp to use for CVS tag -->
+    <property name="version-tag"
+              value="${ant.project.name}-${DSTAMP}-${TSTAMP}" />
+    <cvs command="tag ${version-tag}" cvsRoot="${cvsroot}" quiet="true" />
+    <echo message="New version ${version-tag} committed to CVS." />
   </target>
 
   <!-- Compile -->
