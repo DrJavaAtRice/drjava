@@ -127,6 +127,7 @@
         <include name="${projpath}/**/README" />
         <include name="${projpath}/**/*.gif" />
         <include name="${projpath}/**/*.png" />
+	<include name="${projpath}/**/*.properties" />
 
 	<!-- include files used for testing -->
 	<include name="${projpath}/**/testFiles/*" />
