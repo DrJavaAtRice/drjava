@@ -317,7 +317,7 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
         
     // set up the layout
     JPanel buttons = new JPanel();
-    buttons.setLayout(new GridLayout(1,0));
+    buttons.setLayout(new GridLayout(1,0,5,0));
     buttons.add(_findNextButton);
     buttons.add(_replaceButton);
     buttons.add(_replaceFindButton);
@@ -325,11 +325,11 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
     //buttons.add(_closeButton);
     
     
-    JLabel findLabel = new JLabel("Find:", SwingConstants.LEFT);
+    JLabel findLabel = new JLabel("Find", SwingConstants.LEFT);
     //findLabel.setLabelFor(_findField);
     findLabel.setHorizontalAlignment(SwingConstants.LEFT);
     
-    JLabel replaceLabel = new JLabel("Replace:", SwingConstants.LEFT);
+    JLabel replaceLabel = new JLabel("Replace", SwingConstants.LEFT);
     // replaceLabel.setLabelFor(_replaceField);
     replaceLabel.setHorizontalAlignment(SwingConstants.LEFT);
     
@@ -358,14 +358,13 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
     _matchCaseAndClosePanel.add(_matchCase, BorderLayout.WEST);
     _matchCaseAndClosePanel.add(_closePanel, BorderLayout.EAST);
     
-    _rightPanel = new JPanel(new GridLayout(1,2));
+    _rightPanel = new JPanel(new GridLayout(1,2,5,0));
     JPanel midPanel = new JPanel(new GridLayout(2,1));
     JPanel farRightPanel = new JPanel(new GridLayout(2,1));
     midPanel.add(wrap(_findField));
     midPanel.add(wrap(_replaceField));
     farRightPanel.add(_matchCaseAndClosePanel);
     farRightPanel.add(_message);
-    farRightPanel.setBorder(new EmptyBorder(0,5,0,0));
     _rightPanel.add(midPanel);
     _rightPanel.add(farRightPanel);
     

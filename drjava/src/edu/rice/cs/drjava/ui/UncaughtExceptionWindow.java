@@ -56,16 +56,16 @@ import java.io.*;
  */
 
 // wanted to make this a JWindow, but it looked funny with no border
-public class UncaughtExceptionWindow extends JFrame {
+public class UncaughtExceptionWindow extends JDialog {
   
   // information about the exception
-  private JTextArea _exceptionInfo;
+  private JComponent _exceptionInfo;
   // contains the stack trace
   private JTextArea _stackTrace;
   // scroll pane for _stackTrace
   private JScrollPane _stackTraceScroll;
   // contains the exception info and the ok panel
-  private JPanel _topPanel;
+  // private JPanel _topPanel;
   // contains the ok button in the north 
   private JPanel _okPanel;
   // the button that closes this window
@@ -77,25 +77,32 @@ public class UncaughtExceptionWindow extends JFrame {
    * Creates a window to graphically display an exception which
    * has occurred in the code of DrJava.
    */
-  public UncaughtExceptionWindow(Throwable exception) {
+  public UncaughtExceptionWindow(JFrame frame, Throwable exception) {
+    super(frame,"Unexpected Error");
     _exception = exception;
     
     this.setSize(600,400);
-    this.setLocation(200,200);
     
-    Insets ins = new Insets(20,20,20,20);
+    //this.setLocation(200,200);
+    setLocationRelativeTo(frame);
     
-      // If we set this pane to be of type text/rtf, it wraps based on words
-      // as opposed to based on characters.
+    //Insets ins = new Insets(20,20,20,20);
+    
+    // If we set this pane to be of type text/rtf, it wraps based on words
+    // as opposed to based on characters.
     _stackTrace = new JTextArea(_getStackTraceString());
-    _stackTrace.setBackground(new Color(204,204,204));
-    _stackTrace.setMargin(ins);
-    _exceptionInfo = new JTextArea(_getExceptionString());
-    _exceptionInfo.setBackground(new Color(204,204,204));
-    _exceptionInfo.setMargin(ins);
-    _exceptionInfo.setEditable(false);
-    _exceptionInfo.setLineWrap(true);
-    _exceptionInfo.setWrapStyleWord(true);
+    //_stackTrace.setBackground(new Color(204,204,204));
+    // _stackTrace.setMargin(ins);
+    msg[1] = exception.toString();
+    _exceptionInfo = new JOptionPane(msg,JOptionPane.ERROR_MESSAGE,
+                                     JOptionPane.DEFAULT_OPTION,null,
+                                     new Object[0]);
+      //new JTextArea(_getExceptionString());
+    //_exceptionInfo.setBackground(new Color(204,204,204));
+    //_exceptionInfo.setMargin(ins);
+    //_exceptionInfo.setEditable(false);
+    //_exceptionInfo.setLineWrap(true);
+    //_exceptionInfo.setWrapStyleWord(true);
     
     _stackTrace.setEditable(false);
     
@@ -103,22 +110,26 @@ public class UncaughtExceptionWindow extends JFrame {
     
     _okPanel = new JPanel(new BorderLayout());
     _okPanel.add(_okButton, BorderLayout.EAST);
-    _okPanel.setBackground(new Color(204,204,204));
+    //_okPanel.setBackground(new Color(204,204,204));
     
-    _topPanel = new JPanel();//new BorderLayout());
-    _topPanel.add(_exceptionInfo);//, BorderLayout.CENTER);
+    //_topPanel = new JPanel();//new BorderLayout());
+    //_topPanel.add(_exceptionInfo);//, BorderLayout.CENTER);
     //_topPanel.add(_okPanel, BorderLayout.EAST);
     
-    _stackTraceScroll = new JScrollPane(_stackTrace, 
-                                        JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
-                                        JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
-    this.getContentPane().setLayout(new BorderLayout());
-    this.getContentPane().add(_exceptionInfo, BorderLayout.NORTH);
-    this.getContentPane().add(_stackTraceScroll, BorderLayout.CENTER);
-    this.getContentPane().add(_okPanel, BorderLayout.SOUTH);
-    this.setTitle("Uncaught Exception");
+    _stackTraceScroll = new 
+      BorderlessScrollPane(_stackTrace, 
+                           JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+                           JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+    JPanel cp = new JPanel(new BorderLayout(5,5));
+    cp.setBorder(new EmptyBorder(5,5,5,5));
+    setContentPane(cp);
+    cp.add(_exceptionInfo, BorderLayout.NORTH);
+    cp.add(_stackTraceScroll, BorderLayout.CENTER);
+    cp.add(_okPanel, BorderLayout.SOUTH);
+    // this.setTitle("Uncaught Exception");
     
-    this.setVisible(true);
+    //this.setVisible(true);
+    show();
     //Toolkit.getDefaultToolkit().beep();
   }
   
@@ -131,20 +142,15 @@ public class UncaughtExceptionWindow extends JFrame {
   /**
    * Returns the canned message for the user
    */
-  private String _getExceptionString() {
-    return new String("A runtime exception occured!\n"+
-                      _exception+"\n\n"+
-                      "Please submit a bug report containing the "+
-                      "system information in the "+
-                      "Help>About \nwindow and an " +
-                      "account of the actions "+ 
-                      "that caused the bug (if known) to\n"+
-                      "http://sourceforge.net/projects/drjava.\n\n"+
-                      "You may wish to save all your work and "+
-                      "restart DrJava.\n" +
-                      "Thanks for your help in making DrJava "+
-                      "better!");
-  }
+  private final String[] msg = {
+    "A runtime exception occured!",
+    "",
+    "Please submit a bug report containing the system information in the Help>About ",
+    "window and an account of the actions that caused the bug (if known) to",
+    "http://sourceforge.net/projects/drjava.",
+    "You may wish to save all your work and restart DrJava.",
+    "Thanks for your help in making DrJava better!"};
+  
   
   /**
    * Returns the stack trace in String form
@@ -154,7 +160,6 @@ public class UncaughtExceptionWindow extends JFrame {
     PrintWriter pwFail  = new PrintWriter(swFail);
     
     _exception.printStackTrace(pwFail);
-    return new String("Stack Trace: \n\n"+
-                      swFail.toString());
+    return new String(swFail.toString());
   }   
 }

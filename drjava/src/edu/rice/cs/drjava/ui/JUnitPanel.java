@@ -47,6 +47,7 @@ import java.io.IOException;
 import javax.swing.*;
 import javax.swing.text.*;
 import javax.swing.event.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.event.*;
 import java.awt.*;
 
@@ -269,10 +270,10 @@ public class JUnitPanel extends TabbedPanel
       
       private void maybeShowPopup(MouseEvent e) {
         
-        if (SwingUtilities.isRightMouseButton(e)) {
-          //if (e.isPopupTrigger()) {
+        //if (SwingUtilities.isRightMouseButton(e)) {
+        if (e.isPopupTrigger()) {
           _popMenu.show(e.getComponent(),
-                          e.getX(), e.getY());
+                        e.getX(), e.getY());
         }
       }
       //}
@@ -285,9 +286,11 @@ public class JUnitPanel extends TabbedPanel
     
     private JPopupMenu _popMenu;
     private PopupAdapter _popupAdapter;
-    private JFrame _stackFrame = null;
+    private Window _stackFrame = null;
     private JTextArea _stackTextArea;
-
+    private final JLabel _errorLabel = new JLabel(),
+      _testLabel = new JLabel(), _fileLabel = new JLabel();
+    
     private HighlightManager _highlightManager = new HighlightManager(this);
     
     /**
@@ -341,50 +344,58 @@ public class JUnitPanel extends TabbedPanel
     private void _setupStackTraceFrame() {
       
       //DrJava.consoleOut().println("Stack Trace for Error: \n"+ e.stackTrace());
-      _stackFrame = new JFrame("JUnit Error Stack Trace");
+      JDialog _dialog = new JDialog(_frame,"JUnit Error Stack Trace",false);
+      _stackFrame = _dialog;
       _stackTextArea = new JTextArea();
       _stackTextArea.setEditable(false);
       _stackTextArea.setLineWrap(false);
-      JScrollPane scroll = new JScrollPane(_stackTextArea, 
-                                           JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-                                           JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+      JScrollPane scroll = new 
+        BorderlessScrollPane(_stackTextArea, 
+                             JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+                             JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
       
-      Action closeAction = new AbstractAction("Close") {
+      ActionListener closeListener = new ActionListener() {
         public void actionPerformed(ActionEvent e) {        
           _stackFrame.hide();
         }
       };
-      JButton closeButton = new JButton(closeAction);
+      JButton closeButton = new JButton("Close");
+      closeButton.addActionListener(closeListener);
       JPanel closePanel = new JPanel(new BorderLayout());
+      closePanel.setBorder(new EmptyBorder(5,5,0,0));
       closePanel.add(closeButton, BorderLayout.EAST);
-            
-      _stackFrame.getContentPane().setLayout(new BorderLayout());
-      _stackFrame.getContentPane().add(scroll, BorderLayout.CENTER);
-      _stackFrame.getContentPane().add(closePanel, BorderLayout.SOUTH);
-      _stackFrame.setSize(600, 500);
-      
+      JPanel cp = new JPanel(new BorderLayout());
+      _dialog.setContentPane(cp);
+      cp.setBorder(new EmptyBorder(5,5,5,5));
+      cp.add(scroll, BorderLayout.CENTER);
+      cp.add(closePanel, BorderLayout.SOUTH);
+      JPanel topPanel = new JPanel(new GridLayout(0,1,0,5));
+      topPanel.setBorder(new EmptyBorder(0,0,5,0));
+      topPanel.add(_fileLabel);
+      topPanel.add(_testLabel);
+      topPanel.add(_errorLabel);
+      cp.add(topPanel, BorderLayout.NORTH);
+      _dialog.setSize(600, 500);
+      /**
       Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
       Dimension frameSize = _stackFrame.getSize();
       _stackFrame.setLocation((screenSize.width - frameSize.width) / 2,
-                        (screenSize.height - frameSize.height) / 2);
-      
+                              (screenSize.height - frameSize.height) / 2);
+      **/
+      // initial location is relative to parent (MainFrame)
+      _dialog.setLocationRelativeTo(_frame);
       //_stackFrame.setResizable(false);
       
     }
     
     private void _displayStackTrace (JUnitError e) {
-      String errorOrFailure = (e.isWarning())?
-        "Error: ":
-        "Failure: ";
-        
-      _stackTextArea.setText("File: "+e.file().getName() + "\n" +
-                             "Test: "+e.testName() + "\n" +
-                             errorOrFailure + e.message() + "\n" + 
-                             "--------------\n\n" +
-                             e.stackTrace());
+      _errorLabel.setText((e.isWarning() ? "Error: " : "Failure: ") +
+                          e.message());
+      _fileLabel.setText("File: "+e.file().getName());
+      _testLabel.setText("Test: "+e.testName());
+      _stackTextArea.setText(e.stackTrace());
       _stackTextArea.setCaretPosition(0);
       _stackFrame.show();
-      
     }
     
     /**

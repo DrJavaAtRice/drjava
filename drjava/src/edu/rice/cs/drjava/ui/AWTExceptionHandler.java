@@ -38,14 +38,20 @@
  END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.ui;
-
+import javax.swing.JFrame;
 /**
  * This class is called everytime an uncaught exception propogates to an awt
  * action.
  * @version $Id$
  */
 public class AWTExceptionHandler {
+  private static JFrame frame = null;
+  
+  public static void setFrame(JFrame f) {
+    frame = f;
+  }
+  
   public void handle(Throwable thrown) {
-    UncaughtExceptionWindow uew = new UncaughtExceptionWindow(thrown);
+    UncaughtExceptionWindow uew = new UncaughtExceptionWindow(frame,thrown);
   }
 }

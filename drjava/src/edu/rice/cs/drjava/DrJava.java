@@ -40,6 +40,10 @@
 package edu.rice.cs.drjava;
 
 import java.io.*;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.lang.reflect.Method;
+import java.lang.reflect.InvocationTargetException;
 import javax.swing.*;
 
 import edu.rice.cs.drjava.ui.MainFrame;
@@ -60,31 +64,67 @@ public class DrJava implements ConfigurationTool, OptionConstants {
   public static final File PROPERTIES_FILE = ConfigurationTool.PROPERTIES_FILE;
   public static final FileConfiguration CONFIG = ConfigurationTool.CONFIG;
 
-  public static void main(final String[] args) {
-    
-    /*
-    Thread dbg = new Thread() {
-      public void run() {
-        while (true) {
-          System.gc();
-          int free = (int) (Runtime.getRuntime().freeMemory() / 1000);
-          int total = (int) (Runtime.getRuntime().totalMemory() / 1000);
-          int used = total - free;
-          System.err.println(used + "k / "  + total + "k");
-          
-          try {
-            Thread.currentThread().sleep(10000);
-          } 
-          catch (InterruptedException ie) {
-            break;
-          }
-        }
-        an      }
-    };
-    dbg.setDaemon(true);
-    dbg.start();
-    */
-    
+  public static void main(String[] args) throws Throwable {
+    try {
+      Method main = loadMainMethod();
+      main.invoke(null,new Object[] {args});
+    } catch(InvocationTargetException e) {
+      throw e.getTargetException();
+    } catch(Exception e) {
+      System.err.println(e.toString());
+      beginProgram(args);
+    }
+  }
+  /**
+  private static Class loadClass(ClassLoader cl, String name) {
+    try {
+      return cl.loadClass(name);
+    } catch(Exception e) {
+      System.err.println("Error in attempt to load "+name+" using "+cl);
+      System.err.println(e.toString());
+      System.err.println();
+      System.err.println();
+    }
+    return null;
+  }
+  private static void testCL(ClassLoader cl) {
+    loadClass(cl,"edu.rice.cs.drjava.DrJava");
+    loadClass(cl,"com.sun.jdi.Bootstrap");
+  }
+  **/
+  private static Method loadMainMethod() 
+    throws NoSuchMethodException, SecurityException {
+    Class c = DrJava.class;
+    try {
+      File fLoc = CONFIG.getSetting(JAVAC_LOCATION);
+      if(fLoc != FileOption.NULL_FILE) {
+        URL[] urls = new URL[] {fLoc.toURL()};
+        //ClassLoader sys = ClassLoader.getSystemClassLoader();
+        //ClassLoader dcl = new URLClassLoader(urls);
+        ClassLoader dcl = new DrJavaClassLoader(urls);
+        /**
+        Class uDj, dDj, uBs, dBs;
+        String djn = "edu.rice.cs.drjava.Drjava",
+          bsn = "com.sun.jdi.Bootstrap";
+        uDj = loadClass(cl,djn);
+        dDj = loadClass(dcl,djn);
+        uBs = loadClass(cl,bsn);
+        dBs = loadClass(dcl,bsn);
+        testCL(sys);
+        testCL(cl);
+        testCL(dcl);
+        **/
+        // c = 
+        // for this version, don't use the custom classloader yet.
+        dcl.loadClass("edu.rice.cs.drjava.DrJava");
+      }
+    } catch(Exception e) {
+      System.err.println(e.toString());
+    }
+    return c.getMethod("beginProgram",new Class[] {String[].class});
+  }
+  
+  public static void beginProgram(final String[] args) {
     try {
       System.setProperty("com.apple.macos.useScreenMenuBar","true");
       
@@ -96,12 +136,13 @@ public class DrJava implements ConfigurationTool, OptionConstants {
       // CompilerRegistry notify listeners when there is a change in the list of
       // available compilers.
       final MainFrame mf = new MainFrame();
+      edu.rice.cs.drjava.ui.AWTExceptionHandler.setFrame(mf);
       System.setProperty("sun.awt.exception.handler", 
                          "edu.rice.cs.drjava.ui.AWTExceptionHandler");
       
       // This enabling of the security manager must happen *after* the mainframe
       // is constructed. See bug #518509.
-      enableSecurityManager();
+      // enableSecurityManager();
       openCommandLineFiles(mf, args);
       mf.show();
       
@@ -119,8 +160,6 @@ public class DrJava implements ConfigurationTool, OptionConstants {
           mf.getModel().systemErrPrint(s);
         }
       }));
-      
-      
       
     } catch (Exception ex) {
       _consoleErr.println(ex.getClass().getName() + ": " + ex.getMessage());
