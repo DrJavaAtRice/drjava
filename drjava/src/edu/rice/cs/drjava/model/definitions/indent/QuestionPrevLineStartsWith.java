@@ -39,6 +39,9 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.definitions.indent;
 
+import javax.swing.text.*;
+import edu.rice.cs.util.UnexpectedException;
+
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 
@@ -49,49 +52,47 @@ import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
  */
 public class QuestionPrevLineStartsWith extends IndentRuleQuestion {
   private String _prefix;
-  private boolean _searchComments;
   
   /**
    * Constructs a new rule for the given prefix string.
-   * Does not look inside comments.
+   * ALWAYS looks inside comments.
    * @param prefix String to search for
    * @param yesRule Rule to use if this rule holds
    * @param noRule Rule to use if this rule does not hold
    */
   public QuestionPrevLineStartsWith(String prefix, IndentRule yesRule, IndentRule noRule) {
-    this(prefix, false, yesRule, noRule);
-  }
-  
-  /**
-   * Constructs a new rule for the given prefix string, allowing
-   * user to specify whether to look inside comments.
-   * @param prefix String to search for
-   * @param searchComments Whether to search for prefix in a comment
-   * @param yesRule Rule to use if this rule holds
-   * @param noRule Rule to use if this rule does not hold
-   */
-  public QuestionPrevLineStartsWith(String prefix, boolean searchComments,
-                                    IndentRule yesRule, IndentRule noRule) {
     super(yesRule, noRule);
     _prefix = prefix;
-    _searchComments = searchComments;
   }
   
   /**
-   * Determines if the previous line in the document stars with the
+   * Determines if the previous line in the document starts with the
    * specified character.
    * @param doc DefinitionsDocument containing the line to be indented.
    * @return true if this node's rule holds.
    */
   boolean applyRule(DefinitionsDocument doc) {
-    throw new RuntimeException("Not yet implemented.");
-    
-    /** FIXME: don't look in comments if _searchComments == false
-    int start = startOfPrevLine(doc, pos);
-    int end = endOfLine(doc, start);
-    String text = doc.getText(start, end);
-    int prefixPos = text.indexOf(_prefix);
-    return (prefixPos == 0);
-    */
+    try {
+      // Find start of line
+      int here = doc.getCurrentLocation();
+      int startLine = doc.getLineStartPos(here);
+      
+      if (startLine > DefinitionsDocument.DOCSTART) {
+        // Find start of previous line
+        int startPrevLine = doc.getLineStartPos(startLine - 1);
+        int firstChar = doc.getLineFirstCharPos(startPrevLine);
+        
+        // Compare prefix
+        String actualPrefix = doc.getText(firstChar, _prefix.length());
+        return _prefix.equals(actualPrefix);
+      }
+    }
+    catch (BadLocationException e) {
+      // Shouldn't happen
+      throw new UnexpectedException(e);
+    }
+    // On first line
+    return false;
   }
+
 }

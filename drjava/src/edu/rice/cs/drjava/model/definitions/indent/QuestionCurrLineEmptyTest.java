@@ -56,47 +56,40 @@ public class QuestionCurrLineEmptyTest extends IndentRulesTestCase {
   }
   // generic rule always returns false...
   // to use until we get the actual implementation
-  static IndentRuleQuestion rule3 = new 
-    IndentRuleQuestion(new ActionDoNothing(), new ActionDoNothing()) {
-	  public boolean applyRule(DefinitionsDocument doc) {  // Modified by Stephan
-      return false;
-    }
-  };
+  static IndentRuleQuestion _rule = new QuestionCurrLineEmpty(null, null);
 
-  public void testDummy() {
-  }
+  //public void testDummy() {
+  //}
     
-//  public void testEmpty() throws javax.swing.text.BadLocationException {
-//    // /*
-//    // 
-//    // */
-//    _setDocText("/*\n\n*/");
-//    //               .
-//    //_doc.setCurrentLocation(3);
-//    assertEquals(true, rule3.applyRule(_doc, 3));
-//  }
-//  public void testSpaces() throws javax.swing.text.BadLocationException {
-//    // /*
-//    //                         [some spaces]
-//    // */
-//    _setDocText("/*\n        \n*/");
-//    //                  .
-//    //_doc.setCurrentLocation(6);
-//    assertEquals(true, rule3.applyRule(_doc, 6));
-//  }
+  public void testEmpty() throws javax.swing.text.BadLocationException {
+    // /*
+    // 
+    // */
+    _setDocText("/*\n\n*/");
+    //               .
+    assertEquals(true, _rule.applyRule(_doc, 3));
+  }
+  public void testSpaces() throws javax.swing.text.BadLocationException {
+    // /*
+    //                         [some spaces]
+    // */
+    _setDocText("/*\n        \n*/");
+    //                  .
+    assertEquals(true, _rule.applyRule(_doc, 6));
+  }
+  
   static String stuffExample = "/*\n   foo   \n*/";
   //                                .       .
   // /*
   //     foo   
   // */
-//  public void testStuffBefore() throws javax.swing.text.BadLocationException {
-//    _setDocText(stuffExample);
-//    //_doc.setCurrentLocation(3);
-//    assertEquals(false, rule3.applyRule(_doc, 3));
-//  }
-//  public void testStuffAfter() throws javax.swing.text.BadLocationException {
-//    _setDocText(stuffExample);
-//    //_doc.setCurrentLocation(11);
-//    assertEquals(false, rule3.applyRule(_doc, 11));
-//  }
+  
+  public void testStuffBefore() throws javax.swing.text.BadLocationException {
+    _setDocText(stuffExample);
+    assertEquals(false, _rule.applyRule(_doc, 3));
+  }
+  public void testStuffAfter() throws javax.swing.text.BadLocationException {
+    _setDocText(stuffExample);
+    assertEquals(false, _rule.applyRule(_doc, 11));
+  }
 }

@@ -55,10 +55,7 @@ public class ActionStartPrevLinePlusTest extends IndentRulesTestCase {
     super(name);
   }
 
-  public void testDummy() {
-  }
-
-  /*
+    
   public void testLeaveBe() throws javax.swing.text.BadLocationException {
     _setDocText("foo\nbar");
     _doc.setCurrentLocation(4);
@@ -98,29 +95,29 @@ public class ActionStartPrevLinePlusTest extends IndentRulesTestCase {
     _setDocText("  foo\n  bar");
     _doc.setCurrentLocation(9);
     new ActionStartPrevLinePlus("   ").indentLine(_doc);
-    assertEquals(11, _doc.getLength());
-    assertEquals("  foo\n     bar", _doc.getText(0, 11));
+    assertEquals(14, _doc.getLength());
+    assertEquals("  foo\n     bar", _doc.getText(0, 14));
   }
   public void testBothIndentedAddStuff() throws javax.swing.text.BadLocationException {
     _setDocText("  foo\n  bar");
     _doc.setCurrentLocation(9);
     new ActionStartPrevLinePlus("abc").indentLine(_doc);
-    assertEquals(11, _doc.getLength());
-    assertEquals("  foo\n  abcbar", _doc.getText(0, 11));
+    assertEquals(14, _doc.getLength());
+    assertEquals("  foo\n  abcbar", _doc.getText(0, 14));
   }
   public void testSecondLineMisindented() throws javax.swing.text.BadLocationException {
     _setDocText("  foo\n bar");
     _doc.setCurrentLocation(9);
     new ActionStartPrevLinePlus("abc").indentLine(_doc);
-    assertEquals(11, _doc.getLength());
-    assertEquals("  foo\n  abcbar", _doc.getText(0, 11));
+    assertEquals(14, _doc.getLength());
+    assertEquals("  foo\n  abcbar", _doc.getText(0, 14));
   }
   public void testLeavesOtherLinesAlone() throws javax.swing.text.BadLocationException {
     _setDocText("foo\nbar\nblah");
     _doc.setCurrentLocation(10);
     new ActionStartPrevLinePlus("   ").indentLine(_doc);  // three spaces
-    assertEquals(12, _doc.getLength());
-    assertEquals("foo\nbar\nblah", _doc.getText(0, 12));
+    assertEquals(15, _doc.getLength());
+    assertEquals("foo\nbar\n   blah", _doc.getText(0, 15));
   }
   public void testOtherLinesIndented() throws javax.swing.text.BadLocationException {
     _setDocText(" foo\n  bar\n   blah");
@@ -129,5 +126,5 @@ public class ActionStartPrevLinePlusTest extends IndentRulesTestCase {
     assertEquals(20, _doc.getLength());
     assertEquals(" foo\n  bar\n     blah", _doc.getText(0, 20));
   }
-  */
+  
 }

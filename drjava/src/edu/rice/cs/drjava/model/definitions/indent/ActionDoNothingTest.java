@@ -65,19 +65,17 @@ public class ActionDoNothingTest extends IndentRulesTestCase {
    * Tests empty string
    */
   public void testEmptyString() throws BadLocationException {
-    /**
     IndentRuleAction rule = new ActionDoNothing();
     String text = "";
     
     _setDocText(text);
     rule.indentLine(_doc, 0);
     _assertContents(text);
-    */
   }
   
   /**
    * Tests no leading spaces
-   *
+   */
   public void testNoLeadingSpaces() throws BadLocationException {
     IndentRuleAction rule = new ActionDoNothing();
     String text = "foo();\nbar();";
@@ -90,11 +88,11 @@ public class ActionDoNothingTest extends IndentRulesTestCase {
     // Second line
     rule.indentLine(_doc, 9);
     _assertContents(text);
-  }*/
+  }
 
   /**
    * Tests leading spaces
-   *
+   */
   public void testLeadingSpaces() throws BadLocationException {
     IndentRuleAction rule = new ActionDoNothing();
     String text = "  foo();\n     bar();";
@@ -107,6 +105,6 @@ public class ActionDoNothingTest extends IndentRulesTestCase {
     // Second line
     rule.indentLine(_doc, 10);
     _assertContents(text);
-  }*/
+  }
 
 }

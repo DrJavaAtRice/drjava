@@ -54,80 +54,75 @@ public class QuestionInsideCommentTest extends IndentRulesTestCase {
   public QuestionInsideCommentTest(String name) {
     super(name);
   }
-  // generic rule always returns false...
-  // to use until we get the actual implementation
-  static IndentRuleQuestion rule1 = new 
-    IndentRuleQuestion(new ActionDoNothing(), new ActionDoNothing()) {
-	  public boolean applyRule(DefinitionsDocument doc) { // Modified by Stephan
-      return false;
-    }
-  };
-    //  public void setUp() {
-    //    try {
-    //    _setDocText("\n/*\nfoo\n*/\nbar\nfoo /* bar\n// /*\nfoo */ bar\n// /*\nblah");
-    //           .  .    .   .    .   .       .      .   .       .         .
-    // sample code:          expected result:
-    //                       F
-    //  /*                   F
-    //  foo                  T
-    //  */                   T
-    //  bar                  F
-    //  foo /* bar           F,F
-    //  // /*                T
-    //  foo */ bar           T,T
-    //  // /*
-    //  blah                 F
-    //    } catch (javax.swing.text.BadLocationException ex) {
-    //      throw new RuntimeException("Bad Location Exception");
-    //    }
-    //  }
-
-  public void testDummy() {}
+  static IndentRuleQuestion _rule = new QuestionInsideComment(null, null);
   
-  /*
+  public void setUp() {
+    super.setUp();
+    try {
+      _setDocText("\n/*\nfoo\n*/\nbar\nfoo /* bar\n// /*\nfoo */ bar\n// /*\nblah");
+      //           .  .    .   .    .   .       .      .   .       .         .
+      // sample code:          expected result:
+      //                       F
+      //  /*                   F
+      //  foo                  T
+      //  */                   T
+      //  bar                  F
+      //  foo /* bar           F,F
+      //  // /*                T
+      //  foo */ bar           T,T
+      //  // /*
+      //  blah                 F
+    } catch (javax.swing.text.BadLocationException ex) {
+      throw new RuntimeException("Bad Location Exception");
+    }
+  }
+      
+  //public void testDummy() {}
+  
+  
   public void testDocStart() throws javax.swing.text.BadLocationException {      
     //_doc.setCurrentLocation(0);
-    assertEquals(false, rule1.applyRule(_doc, 0));
+    assertEquals(false, _rule.applyRule(_doc, 0));
   }
   public void testLineBeginsComment() throws javax.swing.text.BadLocationException {
     //_doc.setCurrentLocation(3);
-    assertEquals(false, rule1.applyRule(_doc, 3));
+    assertEquals(false, _rule.applyRule(_doc, 3));
   }
   public void testFooLine() throws javax.swing.text.BadLocationException {
     //_doc.setCurrentLocation(6);
-    assertEquals(true, rule1.applyRule(_doc, 6));
+    assertEquals(true, _rule.applyRule(_doc, 6));
   }
   public void testLineEndsComment() throws javax.swing.text.BadLocationException {
     //_doc.setCurrentLocation(9);
-    assertEquals(true, rule1.applyRule(_doc, 9));
+    assertEquals(true, _rule.applyRule(_doc, 9));
   }
   public void testBarLine() throws javax.swing.text.BadLocationException {
     //_doc.setCurrentLocation(13);
-    assertEquals(false, rule1.applyRule(_doc, 13));
+    assertEquals(false, _rule.applyRule(_doc, 13));
   }
   public void testSlashStarMidLineBefore() throws javax.swing.text.BadLocationException {
     //_doc.setCurrentLocation(16);
-    assertEquals(false, rule1.applyRule(_doc, 16));
+    assertEquals(false, _rule.applyRule(_doc, 16));
   }
   public void testSlashStarMidLineAfter() throws javax.swing.text.BadLocationException {
     //_doc.setCurrentLocation(24);
-    assertEquals(false, rule1.applyRule(_doc, 24));
+    assertEquals(false, _rule.applyRule(_doc, 24));
   }
   public void testCommentedOutSlashStar() throws javax.swing.text.BadLocationException {
     //_doc.setCurrentLocation(30);
-    assertEquals(true, rule1.applyRule(_doc, 30));
+    assertEquals(true, _rule.applyRule(_doc, 30));
   }
   public void testStarSlashMidLineBefore() throws javax.swing.text.BadLocationException {
     //_doc.setCurrentLocation(33);
-    assertEquals(true, rule1.applyRule(_doc, 33));
+    assertEquals(true, _rule.applyRule(_doc, 33));
   }
   public void testStarSlashMidLineAfter() throws javax.swing.text.BadLocationException {
     //_doc.setCurrentLocation(41);
-    assertEquals(true, rule1.applyRule(_doc, 41));
+    assertEquals(true, _rule.applyRule(_doc, 41));
   }
   public void testAfterCommentedOutSlashStar() throws javax.swing.text.BadLocationException {
     //_doc.setCurrentLocation(49);
-    assertEquals(false, rule1.applyRule(_doc, 49));
+    assertEquals(false, _rule.applyRule(_doc, 49));
   }
-  */
+  
 }

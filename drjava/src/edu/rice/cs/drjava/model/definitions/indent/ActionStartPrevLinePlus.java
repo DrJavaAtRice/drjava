@@ -40,6 +40,8 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.model.definitions.indent;
 
 import junit.framework.*;
+import javax.swing.text.*;
+import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 
@@ -61,16 +63,31 @@ class ActionStartPrevLinePlus extends IndentRuleAction {
   
   /**
    * Indents the line according to the previous line, with the suffix string added.
+   * If on the first line, indent is set to 0.
    * @param doc DefinitionsDocument containing the line to be indented.
    */
   public void indentLine(DefinitionsDocument doc)
   {
-    // START = findPrevDelimiter
-    // START' = scoot behind the delimiter we just found
-    // PREVSTART = findPrevDelimiter(START')              -- prev line's START
-    // sol = startOfLine(PREVSTART);                      -- 1st non-WS on prev line
-    // prevWS = dist btw. PREVSTART and sol
-    // replace area btw. START and startOfLine(START) with prevWS
-    return;
+    try {
+      // Find start of line
+      int here = doc.getCurrentLocation();
+      int startLine = doc.getLineStartPos(here);
+      
+      if (startLine > DefinitionsDocument.DOCSTART) {
+        // Find prefix of previous line
+        int startPrevLine = doc.getLineStartPos(startLine - 1);
+        int firstChar = doc.getLineFirstCharPos(startPrevLine);
+        String prefix = doc.getText(startPrevLine, firstChar - startPrevLine);
+        doc.setTab(prefix + _suffix, here);
+      }
+      else {
+        // On first line
+        doc.setTab(_suffix, here);
+      }
+    }
+    catch (BadLocationException e) {
+      // Shouldn't happen
+      throw new UnexpectedException(e);
+    }
   }
 }

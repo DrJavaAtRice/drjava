@@ -39,8 +39,12 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.definitions.indent;
 
+import javax.swing.text.*;
+
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
+
+import edu.rice.cs.util.UnexpectedException;
 
 /**
  * @version $Id$
@@ -59,14 +63,17 @@ class QuestionCurrLineEmpty extends IndentRuleQuestion {
    * @return true if this node's rule holds.
    */
   boolean applyRule(DefinitionsDocument doc) {
-    // one solution: if startOfLine somehow tells you when 
-    //   there's no first WS char on this line
-    //   (i.e. the line is empty), just use that.
-    // otherwise:
-    // START = findPrevDelimiter(start of statement)   --START
-    // END = go forward to find first \n or EOF
-    // return true if there's only WS between START and END    
-
-    throw new RuntimeException("Not yet implemented!");
+    try {
+      // Determine if there are only whitespace chars by seeing if the
+      //  first non-WS char is the endOfLine
+      int here = doc.getCurrentLocation();
+      int endOfLine = doc.getLineEndPos(here);
+      int firstNonWS = doc.getLineFirstCharPos(here);
+      return (endOfLine == firstNonWS);
+    }
+    catch (BadLocationException e) {
+      // Shouldn't happen
+      throw new UnexpectedException(e);
+    }
   }
 }
