@@ -67,6 +67,11 @@ public final class Configuration {
     _properties = new Properties();
 
     try {
+      // create empty props file if it doesn't exist
+      if (! PROPERTIES_FILE.exists()) {
+        new FileOutputStream(PROPERTIES_FILE).close();
+      }
+
       _properties.load(new FileInputStream(PROPERTIES_FILE));
     }
     catch (IOException ioe) {
@@ -120,5 +125,9 @@ public final class Configuration {
 
       return ret;
     }
+  }
+
+  public String toString() {
+    return _properties.toString();
   }
 }
