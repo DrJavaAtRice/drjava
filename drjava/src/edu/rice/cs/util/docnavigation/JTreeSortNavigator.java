@@ -591,8 +591,8 @@ public class JTreeSortNavigator extends JTree implements IAWTContainerNavigatorA
     private ImageIcon _advancedIcon;
     private ImageIcon _intermediateMIcon;
     private ImageIcon _intermediateIcon;
-    private ImageIcon _beginnerMIcon;
-    private ImageIcon _beginnerIcon;
+    private ImageIcon _elementaryMIcon;
+    private ImageIcon _elementaryIcon;
     private ImageIcon _otherIcon;
     private ImageIcon _javaMIcon;
     private ImageIcon _otherMIcon;
@@ -603,8 +603,8 @@ public class JTreeSortNavigator extends JTree implements IAWTContainerNavigatorA
     public CustomTreeCellRenderer(){
       _javaIcon   = _getIconResource("JavaIcon.gif");
       _javaMIcon  = _getIconResource("JavaMIcon.gif");
-      _beginnerIcon   = _getIconResource("BeginnerIcon.gif");
-      _beginnerMIcon  = _getIconResource("BeginnerMIcon.gif");
+      _elementaryIcon   = _getIconResource("ElementaryIcon.gif");
+      _elementaryMIcon  = _getIconResource("ElementaryMIcon.gif");
       _intermediateIcon   = _getIconResource("IntermediateIcon.gif");
       _intermediateMIcon  = _getIconResource("IntermediateMIcon.gif");
       _advancedIcon   = _getIconResource("AdvancedIcon.gif");
@@ -649,11 +649,11 @@ public class JTreeSortNavigator extends JTree implements IAWTContainerNavigatorA
                 else if (_javaMIcon != null && _filename.endsWith(".java *")) {
                   setIcon(_javaMIcon);
                 }
-                else if (_beginnerIcon != null && _filename.endsWith(".dj0  ")) {
-                  setIcon(_beginnerIcon);
+                else if (_elementaryIcon != null && _filename.endsWith(".dj0  ")) {
+                  setIcon(_elementaryIcon);
                 }
-                else if (_beginnerMIcon != null && _filename.endsWith(".dj0 *")) {
-                  setIcon(_beginnerMIcon);
+                else if (_elementaryMIcon != null && _filename.endsWith(".dj0 *")) {
+                  setIcon(_elementaryMIcon);
                 }
                 else if (_intermediateIcon != null && _filename.endsWith(".dj1  ")) {
                   setIcon(_intermediateIcon);
