@@ -1276,7 +1276,10 @@ public class MainFrame extends JFrame implements OptionConstants {
     // use user.dir (bug #895998).
     File workDir = config.getSetting(WORKING_DIRECTORY);
     if (workDir == FileOption.NULL_FILE) {
-      workDir = new File(System.getProperty("user.dir"));
+      workDir = config.getSetting(LAST_DIRECTORY);
+      if (workDir == FileOption.NULL_FILE || !workDir.exists()) {
+        workDir = new File(System.getProperty("user.dir"));
+      }
     }
     if (workDir.isFile() && workDir.getParent() != null) {
       workDir = workDir.getParentFile();
@@ -2021,6 +2024,34 @@ public class MainFrame extends JFrame implements OptionConstants {
   }
   */
 
+  /**
+   * Saves the current 
+   */
+  private void _saveCurrentDirectory() {
+    try {
+      try {
+        DrJava.getConfig().setSetting(LAST_DIRECTORY, _getFullFile(_model.getActiveDocument().getFile()));
+      }
+      catch (IllegalStateException ise) {
+        // Oops, no active document for which to get the file.
+        // Try saving the current directory of the open chooser.
+        DrJava.getConfig().setSetting(LAST_DIRECTORY, _getFullFile(_openChooser.getCurrentDirectory()));
+      }
+      catch (FileMovedException fme) {
+        // File moved ... well, that's ok, right?  Try again with the new file.
+        DrJava.getConfig().setSetting(LAST_DIRECTORY, _getFullFile(fme.getFile()));
+      }
+    }
+    catch (IOException ioe) {
+      // getting canonical path probably failed under windows.
+      // Not much we can do about this.
+    }
+    catch (Throwable t) {
+      // Oops...
+//      JOptionPane.showMessageDialog(this, t.getMessage());
+    }
+  }
+
   private void _quit() {
     if (_promptBeforeQuit) {
       String title = "Quit DrJava?";
@@ -2041,6 +2072,7 @@ public class MainFrame extends JFrame implements OptionConstants {
 
     _recentFileManager.saveRecentFiles();
     _storePositionInfo();
+    _saveCurrentDirectory();
 
     // Save recent files, but only if there wasn't a problem at startup
     // (Don't want to overwrite a custom config file with a simple typo.)
@@ -3692,6 +3724,23 @@ public class MainFrame extends JFrame implements OptionConstants {
   }
 
   /**
+   * Gets the absolute file, or if necessary, the canonical file.
+   * @param f the file for which to get the full path
+   * @return the file representing the full path to the given file
+   */
+  private File _getFullFile(File f) throws IOException {
+      if (PlatformFactory.ONLY.isWindowsPlatform() &&
+          ((f.getAbsolutePath().indexOf("..") != -1) ||
+           (f.getAbsolutePath().indexOf("./") != -1) ||
+           (f.getAbsolutePath().indexOf(".\\") != -1))) {
+        return f.getCanonicalFile();
+      }
+      else {
+        return f.getAbsoluteFile();
+      }
+  }
+
+  /**
    * Sets the current directory to be that of the given file.
    */
   private void _setCurrentDirectory(File file) {
@@ -3703,15 +3752,16 @@ public class MainFrame extends JFrame implements OptionConstants {
     // (Fix for bug 707734)
     // Extended this to fix "./" and ".\" also (bug 774896)
     try {
-      File f = file.getAbsoluteFile();
+      /*File f = file.getAbsoluteFile();
       if (PlatformFactory.ONLY.isWindowsPlatform() &&
           ((file.getAbsolutePath().indexOf("..") != -1) ||
            (file.getAbsolutePath().indexOf("./") != -1) ||
            (file.getAbsolutePath().indexOf(".\\") != -1))) {
         f = file.getCanonicalFile();
-      }
-      _openChooser.setCurrentDirectory(f);
-      _saveChooser.setCurrentDirectory(f);
+      }*/
+      file = _getFullFile(file);
+      _openChooser.setCurrentDirectory(file);
+      _saveChooser.setCurrentDirectory(file);
     }
     catch (IOException ioe) {
       // If getCanonicalFile throws an IOException, we can't

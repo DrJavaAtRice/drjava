@@ -1094,6 +1094,12 @@ public interface OptionConstants {
     new NonNegativeIntegerOption("debug.panel.height",new Integer(0));
 
   /**
+   * The directory in use by the user upon the previous quit.
+   */
+  public static final FileOption LAST_DIRECTORY =
+    new FileOption("last.dir", FileOption.NULL_FILE);
+
+  /**
    * The command-line arguments to be passed to the interpreter jvm.
    */
   public static final StringOption JVM_ARGS = new StringOption("jvm.args", "");

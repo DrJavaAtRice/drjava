@@ -75,7 +75,7 @@ public class CompilerRegistry {
     "edu.rice.cs.drjava.model.compiler.Javac150FromSetLocation",
     "edu.rice.cs.drjava.model.compiler.Javac150FromClasspath",
     "edu.rice.cs.drjava.model.compiler.Javac150FromToolsJar",
-    
+    // JSR14 (and GJ)
     "edu.rice.cs.drjava.model.compiler.JSR14v20FromSetLocation",
     "edu.rice.cs.drjava.model.compiler.JSR14v12FromSetLocation",
     "edu.rice.cs.drjava.model.compiler.JSR14FromSetLocation",
@@ -86,7 +86,7 @@ public class CompilerRegistry {
    * The list of compiler interfaces that are distributed with DrJava.
    */
   public static final String[][] DEFAULT_COMPILERS = {
-    // JSR14
+    // javac 1.5 and JSR14/GJ
     GENERIC_JAVA_COMPILERS,
     // javac 1.4
     new String[] {
