@@ -360,12 +360,12 @@ target="jsr14"
     -->
     <batchtest>
       <!-- The root of the fileset must be where edu/ is. -->
-      <fileset dir="${srcroot}">
+      <fileset dir="${built}">
         <!-- Include only from projpath to only get classes in this project!
         -->
-        <include name="${projpath}/**/*${test-spec}*Test.java" />
-        <exclude name="**/AllTests.java" />
-        <exclude name="**/Test.java" />
+        <include name="${projpath}/**/*${test-spec}*Test.class" />
+        <exclude name="**/AllTests.class" />
+        <exclude name="**/Test.class" />
       </fileset>
     </batchtest>
   </junit>
