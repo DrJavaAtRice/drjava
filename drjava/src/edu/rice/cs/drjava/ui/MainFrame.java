@@ -1231,7 +1231,7 @@ public class MainFrame extends JFrame {
     
     // this causes a nasty bug when first starting DrJava
     // i'm leaving it out for now.
-    // _posListener.updateLocation();
+     _posListener.updateLocation();
 
   }
 

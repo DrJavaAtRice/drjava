@@ -433,7 +433,7 @@ public class DefinitionsDocument extends PlainDocument {
    */
   public int getCurrentLine() {
     // don't know if this does anything.
-    if (_cachedNextLineLoc == -1 ){ initNextLineNum(); }
+    // if (_cachedNextLineLoc == -1 ){ initNextLineNum(); }
     int here = getCurrentLocation();
     // let's see if we get off easy
     if( _cachedPrevLineLoc < here && here < _cachedNextLineLoc ){ 
