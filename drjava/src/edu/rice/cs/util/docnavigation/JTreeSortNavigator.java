@@ -144,7 +144,7 @@ public class JTreeSortNavigator extends JTree implements IAWTContainerNavigatorA
 //    _renderer.setJavaIcon(getIcon("javaicon.gif"));
     this.setCellRenderer(_renderer);
 
-    
+    this.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
     
     //this.setShowsRootHandles(true);
   }
@@ -404,8 +404,8 @@ public class JTreeSortNavigator extends JTree implements IAWTContainerNavigatorA
      */
     synchronized(this){
       DefaultMutableTreeNode node = getNodeForDoc(doc);
+      removeNode(node);
       addDocument(doc, path);
-      _model.removeNodeFromParent(node);
     }
   }
   

@@ -127,6 +127,8 @@ abstract class AFindReplaceMachineState {
       // we know the user just found _findWord, so skip one find.
       if (isOnMatch() && _findWord.equals(_lastFindWord)) {
         _skipOneFind = true;
+      }else{
+        _skipOneFind = false;
       }
     }
     _searchBackwards = searchBackwards;
@@ -231,6 +233,9 @@ abstract class AFindReplaceMachineState {
   public boolean isOnMatch() {
     String findWord = _findWord;
     int len, off;
+    
+    if(_current == null) return false;
+    
     len = findWord.length();
     if (!_searchBackwards) {
       off = _current.getOffset() - len;

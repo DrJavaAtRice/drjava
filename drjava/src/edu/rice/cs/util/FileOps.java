@@ -56,7 +56,35 @@ import java.util.*;
  * @version $Id$
  */
 public abstract class FileOps {
-
+  /**
+   * @return an array of Files in the directory specified (not including directories)
+   */
+  public static File[] getFilesInDir(File d, boolean recur){
+    ArrayList<File> l = new ArrayList<File>();
+    getFilesInDir(d, l, recur);
+    return l.toArray(new File[0]);    
+  }
+  /**
+   * helper fuction for getFilesInDir(Filed , boolean recur)
+   * @return an array of Files in the directory specified (not including directories)
+   */
+  private static void getFilesInDir(File d, List<File> acc, boolean recur){
+    if(d.isDirectory()){
+      File[] fa = d.listFiles();
+      for(File f: fa){
+        if(f.isDirectory() && recur){ 
+          getFilesInDir(f, acc, recur);
+        }else if(f.isFile()){
+          acc.add(f);
+        }
+      }      
+    }else{
+      acc.add(d);
+    }
+  }
+  
+  
+  
   /**
    * This filter checks for files that end in .java
    */
