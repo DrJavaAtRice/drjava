@@ -64,6 +64,7 @@ import edu.rice.cs.util.Log;
 import edu.rice.cs.util.OutputStreamRedirector;
 import edu.rice.cs.util.InputStreamRedirector;
 import edu.rice.cs.util.StringOps;
+import edu.rice.cs.util.ClasspathVector;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.platform.PlatformFactory;
 import edu.rice.cs.drjava.model.junit.JUnitModelCallback;
@@ -120,7 +121,7 @@ public class InterpreterJVM extends AbstractSlaveJVM
    * The currently accumulated classpath for all Java interpreters.
    * List contains unqiue entries.
    */
-  private Vector<URL> _classpath;
+  private ClasspathVector _classpath;
   
   /** Responsible for running JUnit tests in this JVM. */
   private JUnitTestManager _junitTestManager;
@@ -156,7 +157,7 @@ public class InterpreterJVM extends AbstractSlaveJVM
     _defaultInterpreter = new InterpreterData(new DynamicJavaAdapter(classpathManager));
     _activeInterpreter = _defaultInterpreter;
     _interpreters = new Hashtable<String,InterpreterData>();
-    _classpath = new Vector<URL>();
+    _classpath = new ClasspathVector();
     _junitTestManager = new JUnitTestManager(this);
     
     // do an interpretation to get the interpreter loaded fully
@@ -1017,40 +1018,10 @@ public class InterpreterJVM extends AbstractSlaveJVM
     _classpath.add(s);
   }
   
-//  /**
-//   * Returns a copy of the list of unique entries on the classpath.
-//   */
-//  public Vector<URL> getAugmentedClasspath() {
-//    Vector<URL> ret = new Vector<URL>();
-//    List<ClasspathEntry> locpe = classpathManager.getProjectCP();
-//    for (ClasspathEntry e: locpe) {
-//      ret.add(e.getEntry());
-//    }
-//
-//    locpe = classpathManager.getBuildDirectoryCP();
-//    for (ClasspathEntry e: locpe) {
-//      ret.add(e.getEntry());
-//    }
-//
-//    locpe = classpathManager.getProjectFilesCP();
-//    for (ClasspathEntry e: locpe) {
-//      ret.add(e.getEntry());
-//    }
-//
-//    locpe = classpathManager.getExternalFilesCP();
-//    for (ClasspathEntry e: locpe) {
-//      ret.add(e.getEntry());
-//    }
-//
-//    locpe = classpathManager.getExtraCP();
-//    for (ClasspathEntry e: locpe) {
-//      ret.add(e.getEntry());
-//    }
-//    return ret;
-//  } 
-  
   /**
    * Returns a copy of the list of unique entries on the classpath.
+   * @return a vector of strings so that RMI doesn't have to serialize
+   * the URL object. Serializing URL objects fails when using jsr14.
    */
   public Vector<String> getAugmentedClasspath() {
     Vector<String> ret = new Vector<String>();
@@ -1080,6 +1051,10 @@ public class InterpreterJVM extends AbstractSlaveJVM
     }
     return ret;
   }
+  
+  //// The following methods convert strings received
+  //// from RMI to URL objects since URL objects cannot
+  //// be successfully serialized when using JSR14.
   
   public void addExtraClassPath(String s) {
     try {
@@ -1117,49 +1092,37 @@ public class InterpreterJVM extends AbstractSlaveJVM
     }
   }
   
+  
   /**
-   * Returns the accumulated classpath in use by all Java interpreters,
-   * in the form of a path-separator delimited string.
-   * 
-   * don't switch the order of appending the classpath
-   *  the order should be:
-   *   Project
-   *   BuildDirectory
-   *   ProjectFiles
-   *   ExternalFiles
-   *   Extra
-   *   System
+   * Returns the true vector of URL objects in the form
+   * of a ClasspathVector which has an intelligent toString().
+   * The toString() of this ClasspathVector is usable as the
+   * classpath commandline argument for java, javac javadoc, 
+   * and junit.
+   * @return a vector of URLs with an intelligent toString();
    */
-  public String getClasspathString() {
-    StringBuffer cp = new StringBuffer();
+  public ClasspathVector getClasspath() {
+    ClasspathVector ret = new ClasspathVector();
+    List<ClasspathEntry> locpe;
     
-    appendAllClasspaths(classpathManager.getProjectCP(),        cp);
-    appendAllClasspaths(classpathManager.getBuildDirectoryCP(), cp);
-    appendAllClasspaths(classpathManager.getProjectFilesCP(),   cp);
-    appendAllClasspaths(classpathManager.getExternalFilesCP(),  cp);
-    appendAllClasspaths(classpathManager.getExtraCP(),          cp);
-    
-    // append system path last
-    cp.append(System.getProperty("java.class.path"));
+    locpe = classpathManager.getProjectCP();
+    for (ClasspathEntry e: locpe) ret.add(e.getEntry());
 
-    return cp.toString();
-  }
+    locpe = classpathManager.getBuildDirectoryCP();
+    for (ClasspathEntry e: locpe) ret.add(e.getEntry());
+    
+    locpe = classpathManager.getProjectFilesCP();
+    for (ClasspathEntry e: locpe) ret.add(e.getEntry());
+    
+    locpe = classpathManager.getExternalFilesCP();
+    for (ClasspathEntry e: locpe) ret.add(e.getEntry());
+    
+    locpe = classpathManager.getExtraCP();
+    for (ClasspathEntry e: locpe) ret.add(e.getEntry());
+    
+    return ret;
+  } 
   
-  private void appendAllClasspaths(List<ClasspathEntry> locpe, StringBuffer cp) {
-    for (ClasspathEntry e: locpe) {
-      cp.append(formatURL(e.getEntry()));
-      cp.append(System.getProperty("path.separator"));
-    }
-  }
-  
-  /**
-   * Takes the toString of the URL from file:/c:/.../temp or 
-   * file://home/.../temp to c:/.../temp or /home/.../temp
-   * @return fileName of the URL without the protocol infront of it.
-   */
-  private String formatURL(URL url) {
-    return new File(url.getFile()).toString();
-  }
 }
 
 

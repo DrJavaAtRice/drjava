@@ -50,7 +50,9 @@ import java.io.*;
 import java.util.*;
 import java.net.URL;
 
+import edu.rice.cs.util.ClasspathVector;
 import edu.rice.cs.util.swing.DocumentIterator;
+import edu.rice.cs.util.docnavigation.*;
 
 import edu.rice.cs.drjava.model.definitions.*;
 import edu.rice.cs.drjava.model.debug.Debugger;
@@ -60,7 +62,6 @@ import edu.rice.cs.drjava.model.compiler.CompilerModel;
 import edu.rice.cs.drjava.project.MalformedProjectFileException;
 import edu.rice.cs.drjava.project.DocumentInfoGetter;
 import edu.rice.cs.drjava.project.DocFile;
-import edu.rice.cs.util.docnavigation.*;
 
 /**
  * Handles the bulk of DrJava's program logic.
@@ -347,17 +348,24 @@ public interface GlobalModel extends IGetDocuments, ILoadDocuments {
 
   /**
    * Returns the current classpath in use by the Interpreter JVM.
+   * This includes the original jvm classpath, the global drjava
+   * extra classpaths, and the project extra classpaths.
    */
-  public Vector<URL> getClasspath();
+  public ClasspathVector getClasspath();
 
   /**
-   * Returns a pre-processed string of the classpaths separated by the
-   * system path separator
-   * @return a pre-processed string of the classpaths separated by the
-   * system path separator
+   * Returns only the project's extra classpaths.
+   * @return The classpath entries loaded along with the project
    */
-  public String getClasspathString();
-
+  public ClasspathVector getProjectExtraClasspath();
+  
+  /**
+   * Sets the set of classpath entries to use as the projects
+   * set of classpath entries.  This is normally used by the
+   * project preferences.
+   */
+  public void setProjectExtraClasspath(ClasspathVector cp);
+  
   // TODO: Move history methods to a more appropriate home.
 
   /**

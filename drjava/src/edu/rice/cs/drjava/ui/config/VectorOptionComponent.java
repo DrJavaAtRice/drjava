@@ -158,14 +158,23 @@ public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>
    * @return true if the new value is set successfully
    */
   public boolean updateConfig() {
+    Vector<T> current = getValue();
+    DrJava.getConfig().setSetting(_option, current);
+    resetToCurrent();
+    return true;
+  }
+  
+  /**
+   * Accessor to the current contents of the list.
+   * @return The contents of the list in this component
+   * in the form of a Vector.
+   */
+  public Vector<T> getValue() {
     Vector<T> current = new Vector<T>();
     for (int i = 0; i < _listModel.getSize(); i++) {
       current.add((T) _listModel.getElementAt(i));  /* javax.swing.DefaultListModel should be generified! */
     }
-    DrJava.getConfig().setSetting(_option, current);
-    resetToCurrent();
-
-    return true;
+    return current;
   }
 
   /**

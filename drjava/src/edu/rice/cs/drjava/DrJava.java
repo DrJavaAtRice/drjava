@@ -208,20 +208,20 @@ public class DrJava implements OptionConstants {
         enableSecurityManager();
         openCommandLineFiles(mf, _filesToOpen);
         mf.setVisible(true);
-//        
-//        // redirect stdout to DrJava's console
-//        System.setOut(new PrintStream(new OutputStreamRedirector() {
-//          public void print(String s) {
-//            mf.getModel().systemOutPrint(s);
-//          }
-//        }));
-//
-//        // redirect stderr to DrJava's console
-//        System.setErr(new PrintStream(new OutputStreamRedirector() {
-//          public void print(String s) {
-//            mf.getModel().systemErrPrint(s);
-//          }
-//        }));
+        
+        // redirect stdout to DrJava's console
+        System.setOut(new PrintStream(new OutputStreamRedirector() {
+          public void print(String s) {
+            mf.getModel().systemOutPrint(s);
+          }
+        }));
+
+        // redirect stderr to DrJava's console
+        System.setErr(new PrintStream(new OutputStreamRedirector() {
+          public void print(String s) {
+            mf.getModel().systemErrPrint(s);
+          }
+        }));
 
         // Show debug console if enabled
         if (_showDrJavaDebugConsole) {

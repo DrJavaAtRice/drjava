@@ -2129,18 +2129,30 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
     _interpreterControl.ensureInterpreterConnected();
   }
 
-  /**
-   * Returns the current classpath in use by the Interpreter JVM.
-   */
-  public String getClasspathString() {
-    return _interpreterControl.getClasspathString();
-  }
 
   /**
    * Returns the current classpath in use by the Interpreter JVM.
    */
-  public Vector<URL> getClasspath() {
+  public ClasspathVector getClasspath() {
     return _interpreterControl.getClasspath();
+  }
+  
+  /**
+   * Returns only the project's extra classpaths.
+   * @return The classpath entries loaded along with the project
+   */
+  public ClasspathVector getProjectExtraClasspath() {
+    return new ClasspathVector(); // TODO: Alex, fill this in
+  }
+  
+  /**
+   * Sets the set of classpath entries to use as the projects
+   * set of classpath entries.  This is normally used by the
+   * project preferences..
+   */
+  public void setProjectExtraClasspath(ClasspathVector cp) {
+    // TODO: Alex, fill this in
+    System.out.println("Setting project classpath to: " + cp);
   }
 
   /**
@@ -3068,7 +3080,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
      */
     public void generateJavadoc(FileSaveSelector saver) throws IOException {
       // Use the model's classpath, and use the EventNotifier as the listener
-      _javadocModel.javadocDocument(this, saver, getClasspathString());
+      _javadocModel.javadocDocument(this, saver, getClasspath().toString());
     }
     
     /**

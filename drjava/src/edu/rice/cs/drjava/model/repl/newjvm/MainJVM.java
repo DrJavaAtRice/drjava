@@ -63,6 +63,7 @@ import edu.rice.cs.drjava.model.junit.JUnitError;
 import edu.rice.cs.drjava.model.junit.JUnitModelCallback;
 import edu.rice.cs.drjava.model.debug.DebugModelCallback;
 import edu.rice.cs.util.Log;
+import edu.rice.cs.util.ClasspathVector;
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.ArgumentTokenizer;
 import edu.rice.cs.util.newjvm.*;
@@ -115,7 +116,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   /**
    * Starting classpath reorganized into a vector.
    */
-  private Vector<URL> _startupClasspathVector;
+  private ClasspathVector _startupClasspathVector;
   
   /**
    * A list of user-defined arguments to pass to the interpreter.
@@ -150,7 +151,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     String separator = System.getProperty("path.separator");
     int index = _startupClasspath.indexOf(separator);
     int lastIndex = 0;
-    _startupClasspathVector = new Vector<URL>();
+    _startupClasspathVector = new ClasspathVector();
     while (index != -1) {
       try{
         _startupClasspathVector.add(new File(_startupClasspath.substring(lastIndex, index)).toURL());
@@ -372,7 +373,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
    * Returns the current classpath of the interpreter as a list of
    * unique entries.  The list is empty if a remote exception occurs.
    */
-  public Vector<URL> getClasspath() {
+  public ClasspathVector getClasspath() {
     // silently fail if disabled. see killInterpreter docs for details.
     if (_enabled) {
       
@@ -380,13 +381,10 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
       
       try {
         Vector<String> strClasspath = new Vector<String>(_interpreterJVM().getAugmentedClasspath());
-        Vector<URL> classpath = new Vector<URL>(strClasspath.size()+_startupClasspathVector.size());
+        ClasspathVector classpath = new ClasspathVector(strClasspath.size()+_startupClasspathVector.size());
         
         for(String s : strClasspath) { 
-          try { classpath.add(new URL(s)); }
-          catch (MalformedURLException e) {
-           throw new edu.rice.cs.util.UnexpectedException(e);
-          }
+          classpath.add(s); // automatically converted to URL
         }
         
         classpath.addAll(_startupClasspathVector);
@@ -403,27 +401,9 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
         _threwException(re);
       }
     }
-    return new Vector<URL>();
+    return new ClasspathVector();
   }
   
-  /**
-   * Gets the augmented classpath of the interpreter jvm as a string.
-   */
-  public String getClasspathString() {
-    // silently fail if disabled. see killInterpreter docs for details.
-    if (!_enabled) {
-      return null;
-    }
-    
-    ensureInterpreterConnected();
-    try {
-      return _interpreterJVM().getClasspathString();
-    }
-    catch (RemoteException re) {
-      _threwException(re);
-      return "";
-    }
-  }
   
   /**
    * Sets the Interpreter to be in the given package.
@@ -1110,7 +1090,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     public void testEnded(String testName, boolean wasSuccessful, boolean causedError) {}
     public void testSuiteEnded(JUnitError[] errors) {}
     public File getFileForClassName(String className) { return null; }
-    public String getClasspathString() { return ""; }
+    public ClasspathVector getClasspath() { return new ClasspathVector(); }
     public void junitJVMReady() {}
   }
   

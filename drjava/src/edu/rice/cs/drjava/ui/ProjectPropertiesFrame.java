@@ -41,7 +41,7 @@
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  * OTHER DEALINGS WITH THE SOFTWARE.
  *
-END_COPYRIGHT_BLOCK*/
+ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.ui;
 
@@ -53,6 +53,7 @@ import java.awt.event.*;
 import java.awt.*;
 import java.io.IOException;
 import java.io.File;
+import java.util.Vector;
 
 import javax.swing.tree.*;
 
@@ -62,6 +63,7 @@ import edu.rice.cs.drjava.CodeStatus;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.ui.config.*;
 
+import edu.rice.cs.util.ClasspathVector;
 import edu.rice.cs.util.swing.FileSelectorComponent;
 import edu.rice.cs.util.swing.DirectorySelectorComponent;
 import edu.rice.cs.util.swing.DirectoryChooser;
@@ -72,13 +74,13 @@ import javax.swing.filechooser.FileFilter;
  * The frame for setting Project Preferences
  */
 public class ProjectPropertiesFrame extends JFrame {
-
-  private static final int FRAME_WIDTH = 400;
+  
+  private static final int FRAME_WIDTH = 500;
   private static final int FRAME_HEIGHT = 300;
   private JButton _okButton;
   private JButton _applyButton;
   private JButton _cancelButton;
-//  private JButton _saveSettingsButton;
+  //  private JButton _saveSettingsButton;
   private JPanel _mainPanel;
   
   private MainFrame _mainFrame;
@@ -89,34 +91,35 @@ public class ProjectPropertiesFrame extends JFrame {
   private FileSelectorComponent _jarFileSelector;
   private FileSelectorComponent _manifestFileSelector;
   
+  private VectorFileOptionComponent _extraClasspathList;
   
   /**
    * Sets up the frame and displays it.
    */
   public ProjectPropertiesFrame(MainFrame mf) {
     super("Project Properties");
-
+    
     _mainFrame = mf;
-
+    
     _mainPanel= new JPanel();
     _setupPanel(_mainPanel);
-       
-//    JScrollPane scroll = new JScrollPane(_mainPanel,
-//                                         JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-//                                         JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-//    
-//    // Fix increment on scrollbar
-//    JScrollBar bar = scroll.getVerticalScrollBar();
-//    bar.setUnitIncrement(25);
-//    bar.setBlockIncrement(400);
-//    
+    
+    //    JScrollPane scroll = new JScrollPane(_mainPanel,
+    //                                         JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+    //                                         JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+    //    
+    //    // Fix increment on scrollbar
+    //    JScrollBar bar = scroll.getVerticalScrollBar();
+    //    bar.setUnitIncrement(25);
+    //    bar.setBlockIncrement(400);
+    //    
     
     
     Container cp = getContentPane();
     cp.setLayout(new BorderLayout());
     
     cp.add(_mainPanel, BorderLayout.NORTH);
-   
+    
     Action okAction = new AbstractAction("OK") {
       public void actionPerformed(ActionEvent e) {
         // Always apply and save settings
@@ -128,7 +131,7 @@ public class ProjectPropertiesFrame extends JFrame {
       }
     };
     _okButton = new JButton(okAction);
-
+    
     Action applyAction = new AbstractAction("Apply") {
       public void actionPerformed(ActionEvent e) {
         // Always save settings
@@ -136,14 +139,14 @@ public class ProjectPropertiesFrame extends JFrame {
       }
     };
     _applyButton = new JButton(applyAction);
-
+    
     Action cancelAction = new AbstractAction("Cancel") {
       public void actionPerformed(ActionEvent e) {
         cancel();
       }
     };
     _cancelButton = new JButton(cancelAction);
-
+    
     // Add buttons
     JPanel bottom = new JPanel();
     bottom.setBorder(new EmptyBorder(5,5,5,5));
@@ -153,24 +156,24 @@ public class ProjectPropertiesFrame extends JFrame {
     bottom.add(_okButton);
     bottom.add(_cancelButton);
     bottom.add(Box.createHorizontalGlue());
-
+    
     cp.add(bottom, BorderLayout.SOUTH);
-
-
-
+    
+    
+    
     // Set all dimensions ----
     setSize(FRAME_WIDTH, FRAME_HEIGHT);
     // suggested from zaq@nosi.com, to keep the frame on the screen!
     Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
     Dimension frameSize = this.getSize();
-
+    
     if (frameSize.height > screenSize.height) {
       frameSize.height = screenSize.height;
     }
     if (frameSize.width > screenSize.width) {
       frameSize.width = screenSize.width;
     }
-
+    
     this.setSize(frameSize);
     this.setLocation((screenSize.width - frameSize.width) / 2,
                      (screenSize.height - frameSize.height) / 2);
@@ -184,7 +187,7 @@ public class ProjectPropertiesFrame extends JFrame {
     
     reset();
   }
-
+  
   /**
    * Resets the frame and hides it.
    */
@@ -200,7 +203,7 @@ public class ProjectPropertiesFrame extends JFrame {
       textField.setText("");
     else
       _builtDirSelector.setFileField(f);
-
+    
     f = _mainFrame.getModel().getMainClass();
     
     textField = _jarMainClassSelector.getFileField();
@@ -208,8 +211,11 @@ public class ProjectPropertiesFrame extends JFrame {
       textField.setText("");
     else
       _jarMainClassSelector.setFileField(f);
+    
+    ClasspathVector cp = _mainFrame.getModel().getProjectExtraClasspath();
+    _extraClasspathList.setValue(cp.asFileVector());
   }
-
+  
   /**
    * Write the settings to the project file
    */
@@ -223,9 +229,18 @@ public class ProjectPropertiesFrame extends JFrame {
     if(_jarMainClassSelector.getFileField().getText().equals(""))
       f = null;
     _mainFrame.getModel().setJarMainClass(f);
-//    _mainFrame.saveProject();
-    return true;
+    
+    Vector<File> extras = _extraClasspathList.getValue();
+    ClasspathVector cpv = new ClasspathVector();
+    for(File cf : extras) {
+      cpv.add(cf);
     }
+    _mainFrame.getModel().setProjectExtraClasspath(cpv);
+    
+    //    _mainFrame.saveProject();
+    
+    return true;
+  }
   
   /**
    * Returns the current working directory, or the user's current directory
@@ -263,73 +278,96 @@ public class ProjectPropertiesFrame extends JFrame {
     c.weightx = 1.0;
     c.gridwidth = GridBagConstraints.REMAINDER;
     c.insets = compInsets;
-     
-     JPanel dirPanel = _builtDirectoryPanel();
-     gridbag.setConstraints(dirPanel, c);
-     panel.add(dirPanel);
-     
+    
+    JPanel dirPanel = _builtDirectoryPanel();
+    gridbag.setConstraints(dirPanel, c);
+    panel.add(dirPanel);
+    
     c.weightx = 0.0;
     c.gridwidth = 1;
     c.insets = labelInsets;
-
+    
     // Main Document file
     JLabel classLabel = new JLabel("Main Document");
     classLabel.setToolTipText("<html>The project document containing the<br>" + 
                               "<code>main</code>method for the entire project</html>");
     gridbag.setConstraints(classLabel, c);
     panel.add(classLabel);
-
+    
     c.weightx = 1.0;
     c.gridwidth = GridBagConstraints.REMAINDER;
     c.insets = compInsets;
-
+    
     JPanel mainClassPanel = _jarMainClassSelector();
     gridbag.setConstraints(mainClassPanel, c);
     panel.add(mainClassPanel);
-     
-//    // Jar output file
-//    c.weightx = 0.0;
-//    c.gridwidth = 1;
-//    c.insets = labelInsets;
-//
-//    JLabel jarLabel = new JLabel("Jar File");
-//    classLabel.setToolTipText("The file that the jar is to be written to");
-//    gridbag.setConstraints(jarLabel, c);
-//    panel.add(jarLabel);
-//
-//    c.weightx = 1.0;
-//    c.gridwidth = GridBagConstraints.REMAINDER;
-//    c.insets = compInsets;
-//
-//    JPanel jarFilePanel = _jarFileSelector();
-//    gridbag.setConstraints(jarFilePanel, c);
-//    panel.add(jarFilePanel);
-//
-//    // Jar manifest file
-//    c.weightx = 0.0;
-//    c.gridwidth = 1;
-//    c.insets = labelInsets;
-//
-//    JLabel manifestLabel = new JLabel("Jar Manifest File");
-//    classLabel.setToolTipText("The manifest file that the jar is to be used to create the jar file");
-//    gridbag.setConstraints(manifestLabel, c);
-//    panel.add(manifestLabel);
-//
-//    c.weightx = 1.0;
-//    c.gridwidth = GridBagConstraints.REMAINDER;
-//    c.insets = compInsets;
-//
-//    JPanel manifestFilePanel = _manifestFileSelector();
-//    gridbag.setConstraints(manifestFilePanel, c);
-//    panel.add(manifestFilePanel);
+    
+    c.weightx = 0.0;
+    c.gridwidth = 1;
+    c.insets = labelInsets;
+    
+    //    ExtraProjectClasspaths
+    JLabel extrasLabel = new JLabel("Extra Classpath");
+    extrasLabel.setToolTipText("<html>The list of extra classpaths to load with the project.<br>"+  
+                              "This may include either JAR files or directories. Any<br>"+
+                              "classes defined in these classpath locations will be <br>"+
+                              "visible in the interactions pane and also accessible <br>"+
+                              "by the compiler when compiling the project.</html>");
+    gridbag.setConstraints(extrasLabel, c);
+    panel.add(extrasLabel);
+    
+    c.weightx = 1.0;
+    c.gridwidth = GridBagConstraints.REMAINDER;
+    c.insets = compInsets;
+    
+    Component extrasComponent = _extraClasspathComponent();
+    gridbag.setConstraints(extrasComponent, c);
+    panel.add(extrasComponent);
+    
+    
+    //    // Jar output file
+    //    c.weightx = 0.0;
+    //    c.gridwidth = 1;
+    //    c.insets = labelInsets;
+    //
+    //    JLabel jarLabel = new JLabel("Jar File");
+    //    classLabel.setToolTipText("The file that the jar is to be written to");
+    //    gridbag.setConstraints(jarLabel, c);
+    //    panel.add(jarLabel);
+    //
+    //    c.weightx = 1.0;
+    //    c.gridwidth = GridBagConstraints.REMAINDER;
+    //    c.insets = compInsets;
+    //
+    //    JPanel jarFilePanel = _jarFileSelector();
+    //    gridbag.setConstraints(jarFilePanel, c);
+    //    panel.add(jarFilePanel);
+    //
+    //    // Jar manifest file
+    //    c.weightx = 0.0;
+    //    c.gridwidth = 1;
+    //    c.insets = labelInsets;
+    //
+    //    JLabel manifestLabel = new JLabel("Jar Manifest File");
+    //    classLabel.setToolTipText("The manifest file that the jar is to be used to create the jar file");
+    //    gridbag.setConstraints(manifestLabel, c);
+    //    panel.add(manifestLabel);
+    //
+    //    c.weightx = 1.0;
+    //    c.gridwidth = GridBagConstraints.REMAINDER;
+    //    c.insets = compInsets;
+    //
+    //    JPanel manifestFilePanel = _manifestFileSelector();
+    //    gridbag.setConstraints(manifestFilePanel, c);
+    //    panel.add(manifestFilePanel);
   }
   
   public JPanel _builtDirectoryPanel() {
-//    JPanel toReturn = new JPanel();
-//    toReturn.setLayout(new BorderLayout());
-//   
-//    toReturn.add(new JLabel("Build Directory"),BorderLayout.WEST);
-//    
+    //    JPanel toReturn = new JPanel();
+    //    toReturn.setLayout(new BorderLayout());
+    //   
+    //    toReturn.add(new JLabel("Build Directory"),BorderLayout.WEST);
+    //    
     DirectoryChooser dirChooser = new DirectoryChooser(this);
     dirChooser.setSelectedDirectory(_getWorkDir());
     dirChooser.setDialogTitle("Select Build Directory");
@@ -340,25 +378,30 @@ public class ProjectPropertiesFrame extends JFrame {
     return _builtDirSelector;
   }
   
-//  public JPanel _jarMainClassSelector(){
-//    JFileChooser fileChooser = new JFileChooser(_mainFrame.getModel().getProjectFile().getParentFile());
-//    fileChooser.setDialogTitle("Select");
-//    fileChooser.setApproveButtonText("Select");
-//    fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-//    fileChooser.setMultiSelectionEnabled(false);
-//    _jarMainClassSelector = new FileSelectorComponent(this,fileChooser,20,12f);
-//    _jarMainClassSelector.setFileFilter(new FileFilter(){
-//      public boolean accept(File f){
-//        return f.getName().endsWith(".java") || f.isDirectory();
-//      }
-//      public String getDescription(){
-//        return "Java Files (*.java)";
-//      }
-//      
-//    });
-//    //toReturn.add(_builtDirSelector, BorderLayout.EAST);
-//    return _jarMainClassSelector;
-//  }
+  public Component _extraClasspathComponent() {
+    _extraClasspathList = new VectorFileOptionComponent(null, "Extra Project Classpaths", this);
+    return _extraClasspathList.getComponent();
+  }
+  
+  //  public JPanel _jarMainClassSelector(){
+  //    JFileChooser fileChooser = new JFileChooser(_mainFrame.getModel().getProjectFile().getParentFile());
+  //    fileChooser.setDialogTitle("Select");
+  //    fileChooser.setApproveButtonText("Select");
+  //    fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+  //    fileChooser.setMultiSelectionEnabled(false);
+  //    _jarMainClassSelector = new FileSelectorComponent(this,fileChooser,20,12f);
+  //    _jarMainClassSelector.setFileFilter(new FileFilter(){
+  //      public boolean accept(File f){
+  //        return f.getName().endsWith(".java") || f.isDirectory();
+  //      }
+  //      public String getDescription(){
+  //        return "Java Files (*.java)";
+  //      }
+  //      
+  //    });
+  //    //toReturn.add(_builtDirSelector, BorderLayout.EAST);
+  //    return _jarMainClassSelector;
+  //  }
   public JPanel _jarMainClassSelector(){
     File rootFile = _mainFrame.getModel().getProjectFile();
     try {
@@ -390,7 +433,7 @@ public class ProjectPropertiesFrame extends JFrame {
     //toReturn.add(_builtDirSelector, BorderLayout.EAST);
     return _jarMainClassSelector;
   }
-
+  
   public JPanel _manifestFileSelector(){
     JFileChooser fileChooser = new JFileChooser(_mainFrame.getModel().getProjectFile().getParentFile());
     fileChooser.setDialogTitle("Select Output jar File");
@@ -428,7 +471,7 @@ public class ProjectPropertiesFrame extends JFrame {
       
     });
     //toReturn.add(_builtDirSelector, BorderLayout.EAST);
-
+    
     return _jarFileSelector;
   }
   

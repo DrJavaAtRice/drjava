@@ -66,6 +66,7 @@ import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 import edu.rice.cs.drjava.model.definitions.ClassNameNotFoundException;
 import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
 import edu.rice.cs.util.ExitingNotAllowedException;
+import edu.rice.cs.util.ClasspathVector;
 import org.apache.bcel.classfile.*;
 // TODO: remove swing dependency!
 import javax.swing.text.StyledDocument;
@@ -284,7 +285,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
       //Gets system classpaths from the main JVM so that junit tests can find every class file.
       //Given as one long String, this separates the paths into a list of strings. 3/12/05
       LinkedList<String> classpaths = new LinkedList<String>();
-      String cpString = _jvm.getClasspathString();
+      String cpString = _jvm.getClasspath().toString();
       int cpLength = cpString.length();
       if (cpString.indexOf(File.pathSeparatorChar) == -1 && cpLength > 0) {
         classpaths.add(cpString);
@@ -552,8 +553,8 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
    * Returns the current classpath in use by the JUnit JVM,
    * in the form of a path-separator delimited string.
    */
-  public String getClasspathString() {
-    return _jvm.getClasspathString();
+  public ClasspathVector getClasspath() {
+    return _jvm.getClasspath();
   }
   
   /**

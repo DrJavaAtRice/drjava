@@ -803,7 +803,7 @@ public class MainFrame extends JFrame implements OptionConstants {
           JavadocModel jm = _model.getJavadocModel();
           File suggestedDir = jm.suggestJavadocDestination(_model.getActiveDocument());
           _javadocSelector.setSuggestedDir(suggestedDir);
-          String cps = _model.getClasspathString();
+          String cps = _model.getClasspath().toString();
           jm.javadocAll(_javadocSelector, _saveSelector, cps);
         }
         catch (IOException ioe) {

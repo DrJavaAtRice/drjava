@@ -46,6 +46,7 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.model.junit;
 
 import java.io.File;
+import edu.rice.cs.util.ClasspathVector;
 
 /**
  * Callback interface which allows an JUnitModel to respond to
@@ -98,9 +99,9 @@ public interface JUnitModelCallback {
 
   /**
    * Returns the accumulated classpath in use by all Java interpreters,
-   * in the form of a path-separator delimited string.
+   * in the form of a ClasspathVector which has the correct toString()
    */
-  public String getClasspathString();
+  public ClasspathVector getClasspath();
 
   /**
    * Called when the JVM used for unit tests has registered.
