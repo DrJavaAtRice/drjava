@@ -56,12 +56,8 @@ public class QuestionPrevLineStartsCommentTest extends IndentRulesTestCase {
   }
   // generic rule always returns false...
   // to use until we get the actual implementation
-  static IndentRuleQuestion rule2 = new 
-    IndentRuleQuestion(new ActionDoNothing(), new ActionDoNothing()) {
-	  public boolean applyRule(DefinitionsDocument doc) {  // Modified by Stephan
-      return false;
-    }
-  };
+  static IndentRuleQuestion rule2 = new QuestionPrevLineStartsComment(null,
+								      null);
   private static String example1 = "/*\nfoo\nbar\n*/";
   //                                    .    .
   // /* 
@@ -82,19 +78,16 @@ public class QuestionPrevLineStartsCommentTest extends IndentRulesTestCase {
   // bar
   // */
 
-  public void testDummy() {}
-
-  /*
   public void testSimpleFirstLine() throws javax.swing.text.BadLocationException {
     _setDocText(example1);
-    //_doc.setCurrentLocation(3);
     assertEquals(true, rule2.applyRule(_doc, 3));
   }
+  
   public void testSimpleSecondLine() throws javax.swing.text.BadLocationException {
     _setDocText(example1);
-    //_doc.setCurrentLocation(7);
     assertEquals(false, rule2.applyRule(_doc, 7));
   }
+  
   public void testSlashStarMidLineFirstLine() throws javax.swing.text.BadLocationException {
     _setDocText(example2);
     //_doc.setCurrentLocation(11);
@@ -120,5 +113,6 @@ public class QuestionPrevLineStartsCommentTest extends IndentRulesTestCase {
     //_doc.setCurrentLocation(13);
     assertEquals(false, rule2.applyRule(_doc, 13));
   }
-  */
 }
+
+

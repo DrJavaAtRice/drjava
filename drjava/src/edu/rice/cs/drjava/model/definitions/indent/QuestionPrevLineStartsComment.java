@@ -55,30 +55,49 @@ class QuestionPrevLineStartsComment extends IndentRuleQuestion {
   }
   
   /**
-   * Determines if the previous line in the document starts the block comment.
-   * @param doc DefinitionsDocument containing the line to be indented.
+   * Determines if the previous line in the document starts a block comment.
+   * We know that the current line is in a block comment. Therefore, if the
+   * start of the previous line is not inside of a block comment, then the
+   * previous line must have started the comment. 
+   * <p>
+   * There is an exception to this; however, it is handled adequately. Consider
+   * the case when the previous line contains the following code:
+   * <code>*&#47; bar(); &#47;*</code>
+   * <p>
+   * Our approach will say that since the beginning of the previous line is
+   * inside of a comment, the previous line did not start the comment. This
+   * is acceptable because we think of the previous line as a continuation
+   * of a larger commented out region.
+   *
+   * @param  doc DefinitionsDocument containing the line to be indented.
    * @return true if this node's rule holds.
    */
   boolean applyRule(DefinitionsDocument doc) {
-    // return 
-    //   (stateAtRelLocation(dist. to PREVSTART) != INSIDE_BLOCK_COMMENT)
-    // NB: not always accurate.  No false positives, but may give false
-    // negative.  Example:
-    // * /  foo  / *
-    // bar
-    // Indenting at "bar" will not notice that its comment begins on the
-    // "foo" line.  But it will be treated as a continuation of the comment
-    // before "foo", so I think this is acceptable.
-    throw new RuntimeException("Not yet implemented!");
+    int cursor;
+
+    // Move back to start of current line
+    cursor = doc.getLineStartPos(doc.getCurrentLocation());
+    
+    // If the start of the current line is the start of the
+    // document, there was no previous line and so this
+    // line must have started the comment
+    if(cursor == DefinitionsDocument.DOCSTART) {
+      return false;
+    } else {
+      // Move the cursor to the previous line
+      cursor = cursor - 1;
+      
+      // Move it to the start of the previous line
+      cursor = doc.getLineStartPos(cursor);
+      
+      // Return if the start of the previous line is
+      // in a comment.
+      BraceReduction reduced = doc.getReduced();
+      reduced.resetLocation();
+      ReducedModelState state = reduced.stateAtRelLocation(cursor -
+							   reduced.absOffset());
+      return !state.equals(ReducedModelState.INSIDE_BLOCK_COMMENT);
+    }
   }
 }
-// previous pseudocode:
-
-// point = prev line's START
-// while 1 {
-//    if this line starts with "//", keep looking
-//    if this line is empty, keep looking
-//    if this line contains a non-quoted "/*", return true
-//    otherwise, return false
-// }
 

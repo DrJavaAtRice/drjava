@@ -93,7 +93,7 @@ public class DefinitionsDocument extends PlainDocument {
   /**
    * Constant for starting position of document.
    */
-  private static final int DOCSTART = 0;
+  public static final int DOCSTART = 0;
 
   /**
    * Constant used by helper methods to indicate an error

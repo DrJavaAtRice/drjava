@@ -137,6 +137,9 @@ public class IndentHelperTest extends IndentRulesTestCase {
     assertEquals("Returns DOCSTART when there's no previous newline",
 		 0,
 		 _doc.getLineStartPos(2));
+    assertEquals("Returns DOCSTART when the cursor is at DOCSTART",
+		 0,
+		 _doc.getLineStartPos(0));
 
     _setDocText("abcdefghijk");
     _doc.setCurrentLocation(3);
