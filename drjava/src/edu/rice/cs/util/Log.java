@@ -41,14 +41,13 @@ package edu.rice.cs.util;
 
 import java.io.*;
 
-import edu.rice.cs.drjava.CodeStatus;
 import java.util.Date;
 
 /**
  * Logging class to record errors or unexpected behavior to a file.
  * The file is created in the current directory, and is only used if
- * the log is enabled and the code is in development mode.  All
- * logs can be enabled at once with the ENABLE_ALL field.
+ * the log is enabled.  All logs can be enabled at once with the 
+ * ENABLE_ALL field.
  * 
  * @version $Id$
  */
@@ -87,7 +86,7 @@ public class Log {
    */
   protected void _init() {
     if (_writer == null) {
-      if (CodeStatus.DEVELOPMENT && (_enabled || ENABLE_ALL)) {
+      if (_enabled || ENABLE_ALL) {
         try {
           File f = new File(_name);
           FileWriter w = new FileWriter(f.getAbsolutePath(), true);
@@ -115,7 +114,7 @@ public class Log {
    * Returns whether this log is currently enabled.
    */
   public boolean isEnabled() {
-    return CodeStatus.DEVELOPMENT && (_enabled || ENABLE_ALL);
+    return (_enabled || ENABLE_ALL);
   }
   
   /**

@@ -44,6 +44,8 @@ import java.io.*;
 
 import java.util.LinkedList;
 
+import edu.rice.cs.util.newjvm.ExecJVM;
+
 /**
  * Test cases for {@link FileOps}.
  *
@@ -133,6 +135,7 @@ public class FileOpsTest extends TestCase {
    */
   public void testSaveFile() throws IOException {
     File writeTo = File.createTempFile("fileops", ".test");
+    writeTo.deleteOnExit();
     File backup = new File(writeTo.getPath() + "~");
     
     FileOps.saveFile(new FileOps.DefaultFileSaver(writeTo) {
@@ -237,6 +240,65 @@ public class FileOpsTest extends TestCase {
 
 
     assertTrue("deleting temp directory", FileOps.deleteDirectory(rootDir));
+  }
+  
+  
+  /**
+   * Tests that non-empty directories can be deleted on exit.
+   */
+  public void testDeleteDirectoryOnExit() 
+    throws IOException, InterruptedException
+  {
+    // Create files:
+    //  /tmp/DrJavaTestTempDir#/
+    //   DrJavaTest-#.tmp
+    //   TempDir#/
+    //     DrJavaTest-#.tmp
+    File dir1 = FileOps.createTempDirectory("DrJavaTestTempDir");
+    assertTrue("dir1 exists", dir1.exists());
+    File file1 = File.createTempFile("DrJavaTest-", ".temp", dir1);
+    assertTrue("file1 exists", file1.exists());
+    File dir2 = FileOps.createTempDirectory("TempDir", dir1);
+    assertTrue("dir2 exists", dir2.exists());
+    File file2 = File.createTempFile("DrJavaTest-", ".temp", dir2);
+    assertTrue("file2 exists", file2.exists());
+    
+    String className = "edu.rice.cs.util.FileOpsTest";
+    String[] args = new String[] { dir1.getAbsolutePath() };
+    
+    Process process = ExecJVM.
+      runJVMPropogateClassPath(className, args);
+    int status = process.waitFor();
+    assertEquals("Delete on exit test exited with an error!", 0, status);
+    
+    assertTrue("dir1 should be deleted", !dir1.exists());
+    assertTrue("file1 should be deleted", !file1.exists());
+    assertTrue("dir2 should be deleted", !dir2.exists());
+    assertTrue("file2 should be deleted", !file2.exists());
+  }
+  
+  /**
+   * Main method to be called by testDeleteDirectoryOnExit.  Runs in
+   * a new JVM so the files can be deleted.
+   * Exits with status 1 if wrong number of arguments.
+   * Exits with status 2 if file doesn't exist
+   * 
+   * @params args should contain the file name of the directory
+   * to delete on exit
+   */
+  public static void main(String[] args) {
+    if (args.length != 1) {
+      System.exit(1);
+    }
+    
+    File dir = new File(args[0]);
+    if (!dir.exists()) {
+      System.exit(2);
+    }
+    FileOps.deleteDirectoryOnExit(dir);
+    
+    // Ok, exit cleanly
+    System.exit(0);
   }
 
 

@@ -127,6 +127,7 @@ public abstract class FileOps {
 
   /**
    * Creates a new temporary file and writes the given text to it.
+   * The file will be deleted on exit.
    *
    * @param prefix Beginning part of file name, before unique number
    * @param suffix Ending part of file name, after unique number
@@ -140,6 +141,7 @@ public abstract class FileOps {
     throws IOException
   {
     File file = File.createTempFile(prefix, suffix);
+    file.deleteOnExit();
     writeStringToFile(file, text);
     return file;
   }
@@ -160,6 +162,8 @@ public abstract class FileOps {
 
   /**
    * Create a new temporary directory.
+   * The directory will be deleted on exit, if empty.
+   * (To delete it recursively on exit, use deleteDirectoryOnExit.)
    *
    * @param name Non-unique portion of the name of the directory to create.
    * @return File representing the directory that was created.
@@ -170,6 +174,8 @@ public abstract class FileOps {
 
   /**
    * Create a new temporary directory.
+   * The directory will be deleted on exit, if empty.
+   * (To delete it recursively on exit, use deleteDirectoryOnExit.)
    *
    * @param name Non-unique portion of the name of the directory to create.
    * @param parent Parent directory to contain the new directory
@@ -181,6 +187,7 @@ public abstract class FileOps {
     File file =  File.createTempFile(name, "", parent);
     file.delete();
     file.mkdir();
+    file.deleteOnExit();
 
     return file;
   }
@@ -210,6 +217,29 @@ public abstract class FileOps {
     // Now we should have an empty directory
     ret = ret && dir.delete();
     return ret;
+  }
+  
+  /**
+   * Instructs Java to recursively delete the given directory and its contents
+   * when the JVM exits.
+   *
+   * @param dir File object representing directory to delete. If, for some
+   *            reason, this file object is not a directory, it will still be
+   *            deleted.
+   */
+  public static void deleteDirectoryOnExit(final File dir) {
+    // Delete this on exit, whether it's a directory or file
+    dir.deleteOnExit();
+
+    // If it's a directory, visit its children.
+    //  For some reason, this has to be done after calling deleteOnExit
+    //  on the directory itself.
+    if (dir.isDirectory()) {
+      File[] childFiles = dir.listFiles();
+      for (int i = 0; i < childFiles.length; i++) {
+        deleteDirectoryOnExit(childFiles[i]);
+      }
+    }
   }
 
   /**

@@ -50,6 +50,16 @@ import java.rmi.*;
  */
 public abstract class AbstractSlaveJVM implements SlaveRemote {
   public static final int CHECK_MAIN_VM_ALIVE_MINUTES = 1;
+  
+  /**
+   * Name of the thread to quit the slave.
+   */
+  protected String _quitSlaveThreadName = "Quit SlaveJVM Thread";
+  
+  /**
+   * Name of the thread to periodically poll the master.
+   */
+  protected String _pollMasterThreadName = "Poll MasterJVM Thread";
 
   /**
    * Quits the slave JVM, calling {@link #beforeQuit} before it does.
@@ -58,7 +68,7 @@ public abstract class AbstractSlaveJVM implements SlaveRemote {
     beforeQuit();
     
     // put exit into another thread to allow this RMI call to return normally.
-    Thread t = new Thread() {
+    Thread t = new Thread(_quitSlaveThreadName) {
       public void run() {
         try {
           Thread.currentThread().sleep(100);
@@ -92,7 +102,7 @@ public abstract class AbstractSlaveJVM implements SlaveRemote {
    * It delegates the actual start to {@link #handleStart}.
    */
   public final void start(final MasterRemote master) throws RemoteException {
-    Thread thread = new Thread() {
+    Thread thread = new Thread(_pollMasterThreadName) {
       public void run() {
         while (true) {
           try {

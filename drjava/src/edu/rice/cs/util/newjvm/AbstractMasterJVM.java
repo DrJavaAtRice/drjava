@@ -54,6 +54,15 @@ import java.io.*;
 public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/
   implements MasterRemote/*<SlaveType>*/
 {
+  /**
+   * Name for the thread that waits for the slave to exit.
+   */
+  protected String _waitForQuitThreadName = "Wait for SlaveJVM Exit Thread";
+  /**
+   * Name for the thread that exports the MasterJVM to RMI.
+   */
+  protected String _exportMasterThreadName = "Export MasterJVM Thread";
+  
   private static final String RUNNER = SlaveJVMRunner.class.getName();
   
   /** The slave JVM remote stub, if it's connected, or null if not. */
@@ -160,7 +169,7 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/
       throw new IllegalStateException("slave nonnull in invoke: " + _slave);
     }
     _startupInProgress = true;
-    Thread t = new Thread() {
+    Thread t = new Thread(_exportMasterThreadName) {
       public void run() {
         synchronized(AbstractMasterJVM.this) {
           try {
@@ -170,6 +179,7 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/
             //javax.swing.JOptionPane.showMessageDialog(null, _stub.toString());
           }
           catch (RemoteException re) {
+            //javax.swing.JOptionPane.showMessageDialog(null, edu.rice.cs.util.StringOps.getStackTrace(re));
             throw new edu.rice.cs.util.UnexpectedException(re);
           }
           AbstractMasterJVM.this.notify();
@@ -188,6 +198,7 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/
     }
 
     _stubFile = File.createTempFile("DrJava-remote-stub", ".tmp");
+    _stubFile.deleteOnExit();
 
     // serialize stub to _stubFile
     FileOutputStream fstream = new FileOutputStream(_stubFile);
@@ -205,11 +216,22 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/
     
     // Start a thread to wait for the slave to die
     // When it dies,
-    Thread thread = new Thread() {
+    Thread thread = new Thread(_waitForQuitThreadName) {
       public void run() {
         try {
           int status = process.waitFor();
           synchronized(AbstractMasterJVM.this) {
+            if (_startupInProgress) {
+              // If we get here, the process died without registering.
+              //  (This might be the case if something was wrong with the
+              //   classpath, or if the new JVM couldn't acquire a port
+              //   for debugging.)
+              //
+              // Proper behavior in this case is unclear, so we'll let
+              //  our subclasses decide.  By default, we print a stack
+              //  trace and do not proceed, to avoid going into a loop.
+              slaveQuitDuringStartup(status);
+            }
             _slave = null;
             UnicastRemoteObject.unexportObject(AbstractMasterJVM.this, true);
             handleSlaveQuit(status);
@@ -225,6 +247,15 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/
     };
     
     thread.start();
+  }
+  
+  /**
+   * Action to take if the slave JVM quits before registering.
+   * @param status Status code of the JVM
+   */
+  protected void slaveQuitDuringStartup(int status) {
+    String msg = "SlaveJVM quit before registering!  Status: " + status;
+    throw new IllegalStateException(msg);
   }
 
   /**
