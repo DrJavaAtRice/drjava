@@ -53,10 +53,19 @@ public class History {
   /**
    * Adds an item to the history and moves the cursor to point
    * to the place after it.
+   * Note: Items are not inserted if they would duplicate the last item,
+   * or if they are empty. (This is in accordance with bug #522123 and
+   * feature #522213.)
+   *
    * Thus, to access the newly inserted item, you must movePrevious first.
    */
   public void add(String item) {
-    _vector.addElement(item);
+    if (item.trim().length() > 0) {
+      if (_vector.isEmpty() || ! _vector.lastElement().equals(item)) {
+        _vector.addElement(item);
+      }
+    }
+
     moveEnd();
   }
 

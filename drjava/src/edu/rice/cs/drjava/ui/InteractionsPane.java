@@ -81,6 +81,18 @@ public class InteractionsPane extends JTextPane {
     }
   };
 
+  private AbstractAction _clearCurrentAction = new AbstractAction() {
+    public void actionPerformed(ActionEvent e) {
+      _model.clearCurrentInteraction();
+    }
+  };
+
+  private AbstractAction _gotoFrozenPosAction = new AbstractAction() {
+    public void actionPerformed(ActionEvent e) {
+      setCaretPosition(_model.getInteractionsFrozenPos());
+    }
+  };
+
   /**
    * Overriding this method ensures that all new documents created in this
    * editor pane use our editor kit (and thus our model).
@@ -97,6 +109,13 @@ public class InteractionsPane extends JTextPane {
     Keymap ourMap = addKeymap("INTERACTIONS_KEYMAP", getKeymap());
     ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), 
                                  _evalAction);
+
+    ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), 
+                                 _clearCurrentAction);
+
+    ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_HOME, 0), 
+                                 _gotoFrozenPosAction);
+
     // Up and down need to be bound both for keypad and not
     ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_KP_UP, 0), 
                                  _historyPrevAction);

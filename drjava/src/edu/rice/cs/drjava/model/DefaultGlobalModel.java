@@ -416,6 +416,21 @@ public class DefaultGlobalModel implements GlobalModel {
   }
 
   /**
+   * Returns the first location in the document where editing is allowed.
+   */
+  public int getInteractionsFrozenPos() {
+    return _interactionsDoc.getFrozenPos();
+  }
+
+  /**
+   * Clears the current interaction text and then moves
+   * to the end of the command history.
+   */
+  public void clearCurrentInteraction() {
+    _interactionsDoc.clearCurrentInteraction();
+  }
+
+  /**
    * Interprets the current given text at the prompt in the interactions
    * pane.
    */

@@ -173,6 +173,12 @@ public interface GlobalModel {
   public void resetConsole();
 
   /**
+   * Clears the current interaction text and then moves
+   * to the end of the command history.
+   */
+  public void clearCurrentInteraction();
+
+  /**
    * Forwarding method to remove logical dependency of InteractionsPane on
    * the InteractionsDocument.  Gets the previous interaction in the
    * InteractionsDocument's history and replaces whatever is on the current
@@ -193,6 +199,9 @@ public interface GlobalModel {
    * pane.
    */
   public void interpretCurrentInteraction();
+
+  /** Returns the first location in the document where editing is allowed. */
+  public int getInteractionsFrozenPos();
 
   /**
    * Aborts the currently running interaction.

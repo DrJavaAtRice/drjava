@@ -97,6 +97,13 @@ public class InteractionsDocument extends DefaultStyledDocument {
   }
 
   /**
+   * Returns the first location in the document where editing is allowed.
+   */
+  public int getFrozenPos() {
+    return frozenPos;
+  }
+
+  /**
    * Override superclass insertion to prevent insertion past frozen point. 
    * @exception BadLocationException
    */
@@ -191,6 +198,25 @@ public class InteractionsDocument extends DefaultStyledDocument {
       throw new UnexpectedException(e);
     }
   }
+
+  /**
+   * Clears the current interaction text and then moves
+   * to the end of the command history.
+   */
+  public void clearCurrentInteraction() {
+    _clearCurrentInteractionText();
+    _history.moveEnd();
+  }
+
+  private void _clearCurrentInteractionText() {
+    try {
+      // Delete old value of current line
+      remove(frozenPos, getLength() - frozenPos);
+    }
+    catch (BadLocationException ble) {
+      throw new UnexpectedException(ble);
+    }
+  }
   
   /**
    * Replaces any text entered past the prompt with the current
@@ -198,11 +224,10 @@ public class InteractionsDocument extends DefaultStyledDocument {
    */
   private void _replaceCurrentLineFromHistory() {
     try {
-      // Delete old value of current line
-      remove(frozenPos, getLength() - frozenPos);
-      // Add current.
+      _clearCurrentInteractionText();
       insertString(getLength(), _history.getCurrent(), null);
-    } catch (BadLocationException ble) {
+    }
+    catch (BadLocationException ble) {
       throw new UnexpectedException(ble);
     }
   }
