@@ -52,4 +52,11 @@ class WindowsPlatform extends DefaultPlatform {
    * Private constructor for singleton pattern.
    */
   protected WindowsPlatform() {};
+  
+  /**
+   * Returns whether this is a Windows platform.
+   */
+  public boolean isWindowsPlatform() {
+    return true;
+  }
 }
