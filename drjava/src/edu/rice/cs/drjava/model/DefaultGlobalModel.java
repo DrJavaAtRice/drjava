@@ -1591,8 +1591,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
    * config option is set to true.  Leaves it at null if not.
    */
   private void _createDebugger() {
-    boolean useDebug = true;
-				//      DrJava.CONFIG.getSetting(DEBUGGER_ENABLED).booleanValue();
+    boolean useDebug = DrJava.CONFIG.getSetting(DEBUGGER_ENABLED).booleanValue();
     if (useDebug) {
       try {
         _debugManager = new DebugManager(this);
