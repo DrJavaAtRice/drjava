@@ -4530,8 +4530,12 @@ public class MainFrame extends JFrame implements OptionConstants {
                 _navPanePopupMenuForAuxiliary.show(e.getComponent(), e.getX(), e.getY());
               }
             }catch(GroupNotSelectedException ex){
-              // we're looking at the root of the tree
-              _navPanePopupMenuForRoot.show(e.getComponent(), e.getX(), e.getY());
+              // we're looking at the root of the tree, or we're in list view...
+              if(_model.isProjectActive()){
+                _navPanePopupMenuForRoot.show(e.getComponent(), e.getX(), e.getY());
+              }else{
+                _navPanePopupMenu.show(e.getComponent(), e.getX(), e.getY());
+              }
             }
           }
           
