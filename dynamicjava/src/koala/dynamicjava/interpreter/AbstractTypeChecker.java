@@ -137,18 +137,29 @@ public abstract class AbstractTypeChecker extends VisitorObject<Class> {
    * @param node the node to visit
    */
   public Class visit(ImportDeclaration node) {
-    // Declare the package or class importation
-    if (node.isPackage()) {
-      context.declarePackageImport(node.getName());
-    } else {
-      try {
-        context.declareClassImport(node.getName());
-      } catch (ClassNotFoundException e) {
-        throw new CatchedExceptionError(e, node);
+    if(node.isStatic()) {
+      staticImportHandler(node);
+    }
+    else {
+      // Declare the package or class importation
+      if (node.isPackage()) {
+        context.declarePackageImport(node.getName());
+      } else {
+        try {
+          context.declareClassImport(node.getName());
+        } catch (ClassNotFoundException e) {
+          throw new CatchedExceptionError(e, node);
+        }
       }
     }
     return null;
   }
+  
+  /**
+   * Checks if the ImportDeclaration node is a static import and throws an exception if static import is not supported in the current version of the runtime environment
+   * @param node the ImportDeclaration node being checked
+   */
+  protected abstract void staticImportHandler(ImportDeclaration node);
 
   /**
    * Visits a WhileStatement first by checking the 
@@ -695,9 +706,13 @@ public abstract class AbstractTypeChecker extends VisitorObject<Class> {
 
   /**
    * Visits a MethodDeclaration
+   * Note: the checkVarArgs here may or may not actually work. The test case in Distinction1415 failed when tiger features
+   * were disabled, and when tracing through, the visitor that actually acted upon the method declaration node was the ClassInfoCompiler, and
+   * there is another statement throwing a WrongVersionException in this file.
    * @param node the node to visit
    */
   public Class visit(MethodDeclaration node) {
+    checkVarArgs(node);
     context.defineFunction(node);
 
     node.setProperty(NodeProperties.TYPE, node.getReturnType().acceptVisitor(this));
@@ -710,6 +725,12 @@ public abstract class AbstractTypeChecker extends VisitorObject<Class> {
     context.leaveScope();
     return null;
   }
+  
+  /**
+   * Checks to see if the MethodDeclaration has variable arguments and whether or not they are allowed
+   * @param node - the MethodDeclaration which may or may not contain variable arguments
+   */
+  protected abstract void checkVarArgs(MethodDeclaration node);
 
   
   /**

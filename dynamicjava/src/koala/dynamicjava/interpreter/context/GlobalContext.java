@@ -278,7 +278,7 @@ public class GlobalContext extends VariableContext implements Context {
   public void declarePackageImport(String pkg) {
     importationManager.declarePackageImport(pkg);
   }
-
+  
   /**
    * Declares a new single-type-import clause
    * @param cname the fully qualified class name
@@ -297,7 +297,23 @@ public class GlobalContext extends VariableContext implements Context {
       }
     }
   }
-
+  
+  /**
+   * Declares a new import-on-demand clause for the importation of the static methods and fields of a class
+   * @param cname the fully qualified class name
+   */
+  public void declareClassStaticImport(String cname) throws ClassNotFoundException {
+    importationManager.declareClassStaticImport(cname);
+  }
+  
+  /**
+   * Declares a new single-type-import clause for the importation of a static member
+   * @param member the method or field name
+   */
+  public void declareMemberStaticImport(String member) {
+    importationManager.declareMemberStaticImport(member);
+  }
+  
   /**
    * Returns the default qualifier for this context
    * @param node the current node
@@ -921,15 +937,28 @@ public class GlobalContext extends VariableContext implements Context {
      * @param node the node to visit
      */
     public Boolean visit(ImportDeclaration node) {
-      // Declare the package or class importation
-      if (node.isPackage()) {
-        importationManager.declarePackageImport(node.getName());
-      } else {
+      if(node.isStatic()) {
         try {
-          importationManager.declareClassImport(node.getName());
+          TigerUtilities.assertTigerEnabled("Static Import is not supported before Java 1.5");
+          if(node.isStaticImportClass()) 
+            importationManager.declareClassStaticImport(node.getName());
+          else 
+            importationManager.declareMemberStaticImport(node.getName());
         } catch (ClassNotFoundException e) {
-          throw new CatchedExceptionError(e, node);
-        } catch (PseudoError e) {
+          throw new RuntimeException("Uncaught ClassNotFoundException has been thrown: " + e.toString());
+        }
+      }        
+      else {
+        // Declare the package or class importation
+        if (node.isPackage()) {
+          importationManager.declarePackageImport(node.getName());
+        } else {
+          try {
+            importationManager.declareClassImport(node.getName());
+          } catch (ClassNotFoundException e) {
+            throw new CatchedExceptionError(e, node);
+          } catch (PseudoError e) {
+          }
         }
       }
       return null;

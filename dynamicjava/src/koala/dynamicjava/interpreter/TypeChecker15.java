@@ -137,6 +137,29 @@ public class TypeChecker15 extends AbstractTypeChecker {
     
   }
   
+  /**
+   * Does nothing - Variable Arguments are allowed in 1.5
+   * @param node - unused
+   */
+  protected void checkVarArgs(MethodDeclaration node) { 
+   
+  }
+  
+  /**
+   * Visits an Import Declaration statement that is specifically static
+   * @param node - the ImportDeclaration being visited
+   */
+  protected void staticImportHandler(ImportDeclaration node){
+    try {
+    if(node.isStaticImportClass()) 
+        context.declareClassStaticImport(node.getName());
+      else 
+        context.declareMemberStaticImport(node.getName());
+    } catch(ClassNotFoundException e) {
+      throw new RuntimeException("Uncaught Class Not Found Exception");
+    }
+  }
+  
   
   /**
    * Boxes the given expression by returning the correct

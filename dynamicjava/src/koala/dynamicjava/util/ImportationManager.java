@@ -75,6 +75,7 @@ package koala.dynamicjava.util;
 
 import java.io.*;
 import java.util.*;
+import java.lang.reflect.*;
 
 /**
  * The instances of this class manages the importation clauses.
@@ -100,6 +101,23 @@ public class ImportationManager implements Cloneable {
    * This set contains the single-type-import clauses.
    */
   protected List<String> singleTypeImportClauses = new LinkedList<String>();
+    
+  
+  /**
+   * This list contains the import-on-demand clauses for staticly imported classes
+   */
+  protected List<String> importOnDemandStaticClauses = new LinkedList<String>();
+  
+  
+  /**
+   * This list contains the single-type-import static clauses for imported static fields
+   */
+  protected List<Field> singleTypeImportStaticFieldClauses = new LinkedList<Field>();
+  
+  /**
+   * This hashmap contains the single-type-import static clauses for imported static methods
+   */
+   protected List<Method> singleTypeImportStaticMethodClauses = new LinkedList<Method>();
   
   /**
    * This string contains the name of the current package
@@ -169,6 +187,28 @@ public class ImportationManager implements Cloneable {
   }
   
   /**
+   * Returns the import-on-demand static clauses for staticly imported classes
+   */
+  public List<String> getImportOnDemandStaticClauses() {
+    return importOnDemandStaticClauses;
+  }
+  
+  /**
+   * Returns the single-type-import clauses for staticly imported fields
+   */
+  public List<Field> getSingleTypeImportStaticFieldClauses() {
+    return singleTypeImportStaticFieldClauses;
+  }
+  
+  /**
+   * Returns the single-type-import clauses for staticly imported methods
+   */
+  public List<Method> getSingleTypeImportStaticMethodClauses() {
+    return singleTypeImportStaticMethodClauses;
+  }
+  
+  
+  /**
    * Declares a new import-on-demand clause
    * @param pkg the package name
    */
@@ -203,6 +243,104 @@ public class ImportationManager implements Cloneable {
   }
   
   /**
+   * Declares a new import-on-demand clause for static importation.
+   * @param cname the fully qualified class name of the class whose members are being imported
+   */
+  public void declareClassStaticImport(String cname) throws ClassNotFoundException{
+    try {
+      // A previous importation of this class is removed to avoid a new
+      // existance verification and to speed up further loadings.
+      if (!importOnDemandStaticClauses.remove(cname)) {
+        Class.forName(cname, true, classLoader);
+      }
+    } catch (ClassNotFoundException e) {
+      // try to find an inner class with this name
+      Class c = findInnerClass(cname);
+      importOnDemandStaticClauses.remove((c == null) ? cname : c.getName());
+      importOnDemandStaticClauses.add(0, (c == null) ? cname : c.getName());
+    } finally {
+      importOnDemandStaticClauses.add(0, cname);
+    }
+  }
+  
+  /**
+   * Declares a new single-type-import clause for the static import of a field, method, or inner class, or any
+   * combination in the case of members of the same name.
+   * @param member - the name of the member being staticly imported
+   */  
+  public void declareMemberStaticImport(String member) {
+    int i = member.lastIndexOf('.');
+    String surroundingClassName = member;
+    if (i > 0) {
+      surroundingClassName = member.substring(0,i);
+    }
+    
+    Class surroundingClass;
+    
+    try {    
+      try {
+        surroundingClass = Class.forName(surroundingClassName, true, classLoader);
+        
+      } catch (ClassNotFoundException e) {
+        // try to find an inner class with this name
+        surroundingClass = findInnerClass(surroundingClassName);
+      }
+    } catch (ClassNotFoundException e) {
+      throw new RuntimeException("Class " + surroundingClassName + " not found");      
+    }
+    
+       
+    boolean foundSomethingToImport = false;
+    boolean foundSecurityException = false;
+    //First, check for all static inner classes by the given name
+    try {
+      declareClassImport(member);
+      foundSomethingToImport = true;
+    }
+    catch(ClassNotFoundException e) {
+    }
+    catch(SecurityException e) {
+      foundSecurityException = true;
+    }
+    
+    
+    
+    
+    //Next, check for all static fields
+    try {
+      Field f = surroundingClass.getField(member);
+      singleTypeImportStaticFieldClauses.remove(f);
+      singleTypeImportStaticFieldClauses.add(0,f);
+      foundSomethingToImport = true;
+    }
+    catch(NoSuchFieldException e) {
+    }
+    catch(SecurityException e) {
+      foundSecurityException = true;
+    }
+    
+    //Next, check for all static methods
+    try {
+      Method[] methodArray = surroundingClass.getMethods();
+      for(int j = 0; j<methodArray.length; j++) {
+        if(isPublicAndStatic(methodArray[j].getModifiers())) {
+          Method m = methodArray[j];
+          singleTypeImportStaticMethodClauses.remove(m);
+          singleTypeImportStaticMethodClauses.add(0,m);
+          foundSomethingToImport = true;
+        }          
+      }
+    }
+    catch(SecurityException e) {
+      foundSecurityException = true;
+    }
+    
+    if(foundSecurityException || ! foundSomethingToImport)
+      throw new RuntimeException("No public members of the name " + member);
+  }
+  
+  
+  /**
    * Loads the class that match to the given name in the source file
    * @param  cname  the name of the class to find
    * @param  ccname the name of the current class or null
@@ -211,8 +349,8 @@ public class ImportationManager implements Cloneable {
    */
   public Class lookupClass(String cname, String ccname)
     throws ClassNotFoundException {
+        
     String str = cname.replace('.', '$');
-    
     // Search for the full name ...
     
     // ... in the current package ...
@@ -242,7 +380,12 @@ public class ImportationManager implements Cloneable {
     while (it.hasNext()) {
       String s = it.next();
       if (hasSuffix(s, cname) || hasSuffix(s, str)) {
-        return Class.forName(s, false, classLoader);
+        try
+        {
+          return Class.forName(s, false, classLoader);
+        } catch (ClassNotFoundException e) {
+          return findInnerClass(s);         
+        }        
       }
       // It is perhaps an innerclass of an imported class
       // ie. a.b.C and C$D
@@ -286,12 +429,22 @@ public class ImportationManager implements Cloneable {
       }
     }
     
+     
     // ... with the import-on-demand clauses as prefix
     it = importOnDemandClauses.iterator();
     while (it.hasNext()) {
       String s = it.next();
       try {
         return Class.forName(s+"."+str, false, classLoader);
+      } catch (ClassNotFoundException e) {
+      }
+    }
+    //Now look through classes staticly imported with .*; for a static inner class 
+    it = importOnDemandStaticClauses.iterator();
+    while (it.hasNext()) {
+      String s = it.next();
+      try {
+        return Class.forName(s+"$"+str, false, classLoader);
       } catch (ClassNotFoundException e) {
       }
     }
@@ -344,6 +497,10 @@ public class ImportationManager implements Cloneable {
     
     importOnDemandClauses     = ListUtilities.listCopy(im.importOnDemandClauses);
     singleTypeImportClauses   = ListUtilities.listCopy(im.singleTypeImportClauses);
+    importOnDemandStaticClauses = ListUtilities.listCopy(im.importOnDemandStaticClauses);
+    singleTypeImportStaticFieldClauses = ListUtilities.listCopy(im.singleTypeImportStaticFieldClauses);
+    
+    singleTypeImportStaticMethodClauses = ListUtilities.listCopy(im.singleTypeImportStaticMethodClauses);
     
     currentPackage            = im.currentPackage;
     classLoader               = im.classLoader;
@@ -360,5 +517,12 @@ public class ImportationManager implements Cloneable {
       s = c1.substring(i + 1, c1.length());
     }
     return s.equals(c2);
+  }
+  
+  /**
+   * Return true iff the integer argument includes the static modifer and the public modifier, false otherwise.
+   */
+  protected boolean isPublicAndStatic(int modifiers) {
+    return Modifier.isStatic(modifiers) && Modifier.isPublic(modifiers);
   }
 }

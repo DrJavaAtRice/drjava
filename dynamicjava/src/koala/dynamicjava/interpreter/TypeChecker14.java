@@ -87,12 +87,32 @@ public class TypeChecker14 extends AbstractTypeChecker {
   }
 
   /**
-   * Checks if the node  GenericReferenceType is allowed in 1.5
-   * @param node unused
+   * Checks if the node is of GenericReference Type, which is only allowed in 1.5 or better
+   * @param node the node being checked
    */  
   protected void checkGenericReferenceType(ReferenceType node) {
    if(node instanceof GenericReferenceType)
      throw new WrongVersionException("Generics are not supported before Java 1.5");
+  }
+  
+  /**
+   * Checks to see if the MethodDeclaration has variable arguments, which are only allowed in 1.5 or better
+   * Note: the checkVarArgs here may or may not actually work. The test case in Distinction1415 failed when tiger features
+   * were disabled, and when tracing through, the visitor that actually acted upon the method declaration node was the ClassInfoCompiler, and
+   * there is another statement throwing a WrongVersionException in this file.
+   * @param node - the MethodDeclaration which may or may not contain variable arguments
+   */
+  protected void checkVarArgs(MethodDeclaration node) {
+    if(node.isVarArgs())
+      throw new WrongVersionException("Methods with variable arguments are only allowed in Java 1.5 or better");
+  }
+  
+   /**
+   * Visits a static import statement and throws an exception
+   * @param node the ImportDeclaration node being checked
+   */
+  protected void staticImportHandler(ImportDeclaration node){
+      throw new WrongVersionException("Static Import is not supported before Java 1.5");
   }
   
   

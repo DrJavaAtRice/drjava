@@ -264,13 +264,12 @@ public class Distinction1415Test extends TestCase {
       
       testString =
         "public class C {\n"+
-        "  public int someMethod(int ... i){\n"+
-        "    return i[3];\n"+
+        "  public String someMethod(String ... s){\n"+
+        "    return s[3];"+
         "  }\n"+
-        "}\n"+
-        "new C().someMethod(0,1,2,3);";
-      
-      assertEquals(new Integer(3), interpret(testString));
+        "}\n";
+              
+      interpret(testString);
       fail("Should have thrown a WrongVersionException");
     }
     catch(WrongVersionException wve) {
@@ -290,13 +289,13 @@ public class Distinction1415Test extends TestCase {
       
       testString =
         "public class C {\n"+
-        "  public int someMethod(int ... i){\n"+
-        "    return i[3];\n"+
+        "  public String someMethod(String ... s){\n"+
+        "    return s[3];"+
         "  }\n"+
         "}\n"+
-        "new C().someMethod(0,1,2,3);";
+        "new C().someMethod(\"a\",\"b\",\"c\",\"d\");";
       
-      assertEquals(new Integer(3), interpret(testString));
+      interpret(testString);
     }
     catch(WrongVersionException wve) {
       fail("Should not have thrown a WrongVersionException");
@@ -305,6 +304,114 @@ public class Distinction1415Test extends TestCase {
     //Set the java runtime version back to the correct version
     TigerUtilities.resetVersion();
   }   
+  
+  /**
+   * Test that the use of static imports fails when the runtime environment is set to 1.4
+   * Note: static importing is not yet supported. Uncomment the test case when it is supported
+   */ /**/
+  public void testStaticImport14() {
+    TigerUtilities.setTigerEnabled(false);
+    try {
+      testString =
+        "import static java.lang.Math.abs;\n"+
+        "abs(-2);";      
+      assertEquals(2,interpret(testString));
+      fail("Should have thrown a WrongVersionException");
+    }
+    catch(WrongVersionException wve) {
+      //Expected to throw a WrongVersionException
+    }
+    
+    try {
+      testString =
+        "import static java.lang.String.*;"+
+        "valueOf(1);";      
+      assertEquals("1",interpret(testString));
+      fail("Should have thrown a WrongVersionException");
+    }
+    catch(WrongVersionException wve) {
+      //Expected to throw a WrongVersionException
+    }
+    
+    //Set the java runtime version back to the correct version
+    TigerUtilities.resetVersion();
+  }
+  
+  /**
+   * Test that the use of static imports should not fail when the runtime environment is set to 1.5
+   * Note: static importing is not yet supported. Uncomment the test case when it is supported
+   */ /**/
+  public void xtestStaticImport15() {
+    TigerUtilities.setTigerEnabled(true);
+    try {
+      testString =
+        "import static java.lang.Math.abs;\n"+
+        "abs(-2);";      
+      assertEquals(2,interpret(testString));
+   
+      testString =
+        "import static java.lang.String.*;"+
+        "valueOf(1);";      
+      assertEquals("1",interpret(testString));
+    }
+    catch(WrongVersionException wve) {
+      fail("Should not have thrown a WrongVersionException");
+    }
+    
+    //Set the java runtime version back to the correct version
+    TigerUtilities.resetVersion();
+  }
+  
+  
+  /**
+   * Test that the use of enum types fails when the runtime version is set to 1.4
+   * Note: enum types are not yet supported. Uncomment the test case when it is supported
+   */
+  public void xtestEnumType14() {
+    TigerUtilities.setTigerEnabled(false);
+    try {
+      testString =
+        "public class C {\n"+
+        "  public enum Suit { CLUBS, DIAMONDS, HEARTS, SPADES }\n"+
+        "  public static void m() {\n"+
+        "     System.out.println(Suit.CLUBS);\n"+
+        "  }\n"+
+        "}\n"+
+        "C.m();";      
+      assertEquals("CLUBS",interpret(testString));
+      fail("Should have thrown a WrongVersionException");
+    }
+    catch(WrongVersionException wve) {
+      //Expected to throw a WrongVersionException
+    }
+    //Set the java runtime version back to the correct version
+    TigerUtilities.resetVersion();
+  }
+  
+  /**
+   * Test that the use of enum types does not fail when the runtime version is set to 1.5
+   * Note: enum types are not yet supported. Uncomment the test case when it is supported
+   */
+  public void xtestEnumType15() {
+    TigerUtilities.setTigerEnabled(true);
+    try {
+      testString =
+        "public class C {\n"+
+        "  public enum Suit { CLUBS, DIAMONDS, HEARTS, SPADES }\n"+
+        "  public static void m() {\n"+
+        "     System.out.println(Suit.CLUBS);\n"+
+        "  }\n"+
+        "}\n"+
+        "C.m();";      
+      assertEquals("CLUBS",interpret(testString));
+    }
+    catch(WrongVersionException wve) {
+      fail("Should not have thrown a WrongVersionException");
+    }
+    //Set the java runtime version back to the correct version
+    TigerUtilities.resetVersion();
+  }
+  
 }
   
 

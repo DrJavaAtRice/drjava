@@ -267,15 +267,28 @@ public class TreeCompiler {
      * @param node the node to visit
      */
     public Void visit(ImportDeclaration node) {
-      // Declare the package or class importation
-      if (node.isPackage()) {
-        context.declarePackageImport(node.getName());
-      } else {
+      if(node.isStatic()) {       
+        TigerUtilities.assertTigerEnabled("Static Import is not supported before Java 1.5");
         try {
-          context.declareClassImport(node.getName());
+          if(node.isStaticImportClass()) 
+            context.declareClassStaticImport(node.getName());
+          else 
+            context.declareMemberStaticImport(node.getName());
+          // Declare the package or class importation
         } catch (ClassNotFoundException e) {
-          throw new CatchedExceptionError(e, node);
-        } catch (PseudoError e) {
+          throw new RuntimeException("Uncaught Class Not Found Exception");
+        }
+      }
+      else {
+        if (node.isPackage()) {
+          context.declarePackageImport(node.getName());
+        } else {
+          try {
+            context.declareClassImport(node.getName());
+          } catch (ClassNotFoundException e) {
+            throw new CatchedExceptionError(e, node);
+          } catch (PseudoError e) {
+          }
         }
       }
       return null;

@@ -1674,10 +1674,8 @@ PARSER_END(Parser)
                               typ.getBeginLine(), typ.getBeginColumn(),
                               typ.getEndLine(),   typ.getEndColumn());
         }
-        if(lastFormalParameterIsVarArgs) {
-          TigerUtilities.assertTigerEnabled("Methods with Variable Arguments are only allowed in Java 2 v.1.5 or better");
-          flags |= 0x00000080; // Modifier.VARARGS == 0x00000080 /**/
-        }
+        if(lastFormalParameterIsVarArgs) flags |= 0x00000080; // Modifier.VARARGS == 0x00000080 /**/
+        
         if (typeParameters == null){
           return new MethodDeclaration(flags, typ, id.image, params,
                                        exceptions,

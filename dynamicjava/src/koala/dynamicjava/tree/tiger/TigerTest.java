@@ -43,6 +43,7 @@ public class TigerTest extends TestCase {
   
   // Interpreting STATIC IMPORT, NOT YET SUPPORTED
   public void xtestStaticImport(){
+    //STATIC FIELD
     testString =
       "import static java.lang.Integer.MAX_VALUE;\n"+
       "class A{\n"+
@@ -51,6 +52,42 @@ public class TigerTest extends TestCase {
       "A a = new A(); a.m();\n";
     
     assertEquals(new Integer(java.lang.Integer.MAX_VALUE), interpret(testString));
+    
+    //STATIC METHOD
+    testString = 
+      "import static java.lang.Math.abs;\n"+
+      "class B{\n"+
+      "   int m(){return abs(-2);}\n"+
+      "}\n"+
+      "B b = new B(); b.m();\n";
+    assertEquals(new Integer(2), interpret(testString));
+    
+  }
+  
+  public void testStaticImportOfStaticInnerClass(){
+    testString = 
+     "package P;\n"+
+     "public class A { \n"+
+     "  public static class B {\n"+
+     "    public static int m(){ return 0; }\n"+
+     "  }\n"+
+     "}\n"+
+     "package Q;\n"+
+     "import static P.A.B;\n"+
+     "B.m();\n";
+   assertEquals(0,interpret(testString));
+     
+    testString = 
+     "package R;\n"+
+     "public class C { \n"+
+     "  public static class D {\n"+
+     "    public static int m(){ return 0; }\n"+
+     "  }\n"+
+     "}\n"+
+     "package S;\n"+
+     "import static R.C.*;\n"+
+     "D.m();\n";
+   assertEquals(0,interpret(testString));
     
   }
   

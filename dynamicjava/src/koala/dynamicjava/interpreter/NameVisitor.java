@@ -86,13 +86,27 @@ public class NameVisitor extends VisitorObject<Node> {
    * @param node the node to visit
    */
   public Node visit(ImportDeclaration node) {
-    if (node.isPackage()) {
-      context.declarePackageImport(node.getName());
-    } else {
-      try {
-        context.declareClassImport(node.getName());
-      } catch (ClassNotFoundException e) {
-        throw new CatchedExceptionError(e, node);
+    if(node.isStatic()){
+      TigerUtilities.assertTigerEnabled("Static Import is not supported before Java 1.5");
+      try {  
+        if(node.isStaticImportClass()) 
+          context.declareClassStaticImport(node.getName());
+        else 
+          context.declareMemberStaticImport(node.getName());
+      }
+      catch (ClassNotFoundException e) {
+        throw new RuntimeException("Uncaught Class Not Found Exception");
+      }
+    }
+    else {      
+      if (node.isPackage()) {
+        context.declarePackageImport(node.getName());
+      } else {
+        try {
+          context.declareClassImport(node.getName());
+        } catch (ClassNotFoundException e) {
+          throw new CatchedExceptionError(e, node);
+        }
       }
     }
     return null;
@@ -129,7 +143,7 @@ public class NameVisitor extends VisitorObject<Node> {
   public Node visit(ForEachStatement node){
     String s1, s2;
     context.enterScope();
-
+    
     
     name_counter = new Integer(name_counter.intValue() + 1);
     s1 = "#_foreach_var_" + name_counter;
@@ -137,10 +151,10 @@ public class NameVisitor extends VisitorObject<Node> {
     s2 = "#_foreach_var_" + name_counter;
     context.define(s1, null);
     context.define(s2, null);
-      
+    
     node.addVar(s1);
     node.addVar(s2);
-
+    
     
     
     
@@ -172,7 +186,7 @@ public class NameVisitor extends VisitorObject<Node> {
     
     return null;
   }
-
+  
   /**
    * Visits a ForStatement
    * @param node the node to visit
@@ -540,7 +554,7 @@ public class NameVisitor extends VisitorObject<Node> {
                               node.getBeginColumn(),
                               node.getEndLine(),
                               node.getEndColumn()
-    );
+                                );
     } else if (o instanceof ReferenceType) {
       return new StaticMethodCall((ReferenceType)o,
                                   node.getMethodName(),
@@ -550,7 +564,7 @@ public class NameVisitor extends VisitorObject<Node> {
                                   node.getBeginColumn(),
                                   node.getEndLine(),
                                   node.getEndColumn()
-    );
+                                    );
     } else {
       node.setExpression((Expression)o);
     }
@@ -1190,7 +1204,7 @@ public class NameVisitor extends VisitorObject<Node> {
     if (o != null) {
       rejectReferenceType(o,node);
       node.setLeftExpression((Expression)o);
-      }
+    }
     
     // Visit the right expression
     o = node.getRightExpression().acceptVisitor(this);

@@ -145,6 +145,14 @@ public class ImportDeclaration extends Node {
   }
 
   /**
+   * Returns true if the identifier represents a class whose methods are being statically imported,
+   * false if it represents a single method or if it is not a static import
+   */
+  public boolean isStaticImportClass() {
+    return sttic && pckage;
+  }
+  
+  /**
    * Sets the package property
    */
   public void setPackage(boolean b) {

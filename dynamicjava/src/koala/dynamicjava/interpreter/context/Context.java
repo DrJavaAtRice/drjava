@@ -128,6 +128,18 @@ public interface Context extends SimpleContext {
      * @exception ClassNotFoundException if the class cannot be found
      */
     void declareClassImport(String cname) throws ClassNotFoundException;
+    
+    /**
+     * Declares a new import-on-demand clause for the importation of the static methods and fields of a class
+     * @param cname the fully qualified class name
+     */
+    void declareClassStaticImport(String cname) throws ClassNotFoundException;
+    
+    /**
+     * Declares a new single-type-import clause for the importation of a static member
+     * @param member the method or field name
+     */
+    void declareMemberStaticImport(String member);
 
     /**
      * Returns the default qualifier for this context
