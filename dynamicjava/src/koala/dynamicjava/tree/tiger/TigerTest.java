@@ -578,6 +578,30 @@ public class TigerTest extends DynamicJavaTestCase {
       assertEquals("Str1Str2Str3", interpret(testString));
     }
 
+    //Test added to make sure we do not get a null pointer exception when you have (null, new Integer(1)), as parameters to a method taking (Integer...a)
+    //This bug has been fixed by adding an extra check in ReflectionUtilities, fixing the bug reported with number 1151966.
+    public void testVarArgsWithNullParameter(){
+      testString=
+        "class X{\n"+
+        "  String m(Integer ... a){\n"+
+        "    String result = \"\";\n"+
+        "    for(int i =0;i<a.length;i++){\n"+
+        "      if(a[i]==null){\n"+
+        "        result=result+\"null\";\n"+
+        "      }\n"+
+        "      else{\n"+
+        "        result=result+a[i].toString();\n"+
+        "      }\n"+
+        "    }\n"+
+        "    return result;\n"+
+        "  }\n"+
+        "}\n"+
+        "X x = new X();\n"+
+        "String result = x.m(null, new Integer(10), new Integer(20));\n"+
+        "result";
+     
+      assertEquals("null1020", interpret(testString));
+    }
     // Testing constructor of an inner class with Varargs
     public void testInterpretInnerClassConstructorVarArgs(){
       testString =
