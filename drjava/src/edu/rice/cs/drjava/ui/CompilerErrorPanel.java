@@ -91,16 +91,20 @@ public class CompilerErrorPanel extends TabbedPanel
     return s;
   }
 
-  
+  /** Whether a compile has occurred since the last compiler change. */
+  private boolean _compileHasOccurred;
 
   /** The total number of errors in the list */
   private int _numErrors;
 
   private final SingleDisplayModel _model;
 
+  /*
   private final JButton _showAllButton;
   private final JButton _nextButton;
   private final JButton _previousButton;
+  */
+  
   private final ErrorListPane _errorListPane;
   private final JComboBox _compilerChoiceBox;
   private JCheckBox _showHighlightsCheckBox;
@@ -113,7 +117,10 @@ public class CompilerErrorPanel extends TabbedPanel
   public CompilerErrorPanel(SingleDisplayModel model, MainFrame frame) {
     super(frame, "Compiler Output");
     _model = model;
+    _compileHasOccurred = false;
+    _numErrors = 0;
 
+    /*
     _showAllButton = new JButton("Show all");
     _showAllButton.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
@@ -140,6 +147,7 @@ public class CompilerErrorPanel extends TabbedPanel
           }
         }
     });
+    */
 
     _errorListPane = new ErrorListPane();
 
@@ -156,6 +164,10 @@ public class CompilerErrorPanel extends TabbedPanel
       public void itemStateChanged(ItemEvent e) {
         _model.setActiveCompiler((CompilerInterface)
                                  _compilerChoiceBox.getSelectedItem());
+        _model.resetCompilerErrors();
+        _frame.updateErrorListeners();
+        _compileHasOccurred = false;
+        reset();
       }
     });
 
@@ -279,12 +291,14 @@ public class CompilerErrorPanel extends TabbedPanel
 
   /**
    * Reset the enabled status of the "next", "previous", and "show all"
-   * buttons in the compiler error panel.
+   * buttons in the compiler error panel.  (Not currently used.)
    */
   private void _resetEnabledStatus() {
+    /*
     _nextButton.setEnabled(_errorListPane.getSelectedIndex() < _numErrors - 1);
     _previousButton.setEnabled(_errorListPane.getSelectedIndex() > 0);
     _showAllButton.setEnabled(_numErrors != 0);
+    */
   }
 
 
@@ -295,8 +309,6 @@ public class CompilerErrorPanel extends TabbedPanel
    */
   public class ErrorListPane extends JEditorPane {
     
-    private boolean _compileHasOccurred;
-
     /**
      * Index into _errorListPositions of the currently selected error.
      */
@@ -351,7 +363,6 @@ public class CompilerErrorPanel extends TabbedPanel
       super("text/rtf", "");
       addMouseListener(_mouseListener);
 
-      _compileHasOccurred = false;
       _selectedIndex = 0;
       _errorListPositions = new Position[0];
       _errorTable = new Hashtable();
@@ -503,11 +514,22 @@ public class CompilerErrorPanel extends TabbedPanel
      */
     private void _updateNoErrors() throws BadLocationException {
       DefaultStyledDocument doc = new DefaultStyledDocument();
+      String message;
       if (_compileHasOccurred) {
-        doc.insertString(0,
-                         "Last compilation completed successfully.",
-                         NORMAL_ATTRIBUTES);
+        message = "Last compilation completed successfully.";
       }
+      else {
+        if (_model.getAvailableCompilers().length == 0) {
+          message = "No compiler is available.  Please specify one in\n" +
+                    "the Preferences dialog in the Edit menu.";
+        }
+        else {
+          message = _model.getActiveCompiler().getName() +
+            " compiler ready.";
+        }
+      }
+      
+      doc.insertString(0, message, NORMAL_ATTRIBUTES);
       setDocument(doc);
 
       selectNothing();
