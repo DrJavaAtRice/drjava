@@ -1763,7 +1763,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
      * @param breakpoint the Breakpoint to be inserted into the hashtable
      */
     public void addBreakpoint( Breakpoint breakpoint) {
-     _breakpoints.put( new Integer(breakpoint.getLineNumber()), breakpoint); 
+      _breakpoints.put( new Integer(breakpoint.getLineNumber()), breakpoint); 
     }
     
     /**
@@ -1772,6 +1772,25 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
      */
     public void removeBreakpoint( Breakpoint breakpoint) {
       _breakpoints.remove( new Integer(breakpoint.getLineNumber())); 
+    }
+    
+    /**
+     * Returns a Vector<Breakpoint> that contains all of the Breakpoint objects that
+     * this document contains
+     */
+    public Vector<Breakpoint> getBreakpoints() {
+      Vector<Breakpoint> sortedBreakpoints = new Vector<Breakpoint>();
+      int numBreakpoints = _breakpoints.size();
+      Integer[] linenums = new Integer[numBreakpoints];
+      Enumeration enum = _breakpoints.keys();
+      int count = 0;
+      while (enum.hasMoreElements()) {
+        linenums[count++] = (Integer)enum.nextElement();
+      }
+      Arrays.sort(linenums);
+      for (int i = 0; i < numBreakpoints; i++) 
+        sortedBreakpoints.addElement(_breakpoints.get(linenums[i]));
+      return sortedBreakpoints;
     }
     
     /**

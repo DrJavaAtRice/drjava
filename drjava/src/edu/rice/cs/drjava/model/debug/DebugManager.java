@@ -42,10 +42,12 @@ package edu.rice.cs.drjava.model.debug;
 import java.io.*;
 import java.util.List;
 import java.util.Map;
+import javax.swing.ListModel;
 //import java.util.Iterator;
 
 import gj.util.Enumeration;
 import gj.util.Hashtable;
+import gj.util.Vector;
 
 // DrJava stuff
 import edu.rice.cs.drjava.DrJava;
@@ -166,7 +168,6 @@ public class DebugManager {
       DrJava.consoleOut().println("Starting up...");
       _attachToVM();
       DrJava.consoleOut().println("Attached. VM = " +_vm);
-      
       EventHandler eventHandler = new EventHandler(this, _vm);
       eventHandler.start();
       DrJava.consoleOut().println("EventHandler started...");
@@ -362,27 +363,13 @@ public class DebugManager {
     throws DebugException {  
     
     Breakpoint breakpoint = doc.getBreakpointAt(lineNumber);
-        
-    if (breakpoint != null) {
-      removeBreakpoint( breakpoint);
+    if (breakpoint == null) {
+      setBreakpoint(new Breakpoint (doc, lineNumber, _vm));
     }
     else {
-      setBreakpoint(doc, lineNumber);
+      removeBreakpoint(breakpoint);
     }
-    
   }
-
-  /**
-   * Writes the given string to the log, ignoring exceptions.
-   *
-   * @param s the string to write to the stream.
-   *
-  protected void writeToLog(String s) {
-    try {
-      _logwriter.write(s);
-    }
-    catch (IOException ioe) {}
-  }*/
   
   /**
    * Sets a breakpoint.
@@ -390,16 +377,14 @@ public class DebugManager {
    * @param className the name of the class in which to break
    * @param lineNumber the line number at which to break
    */
-  public void setBreakpoint(OpenDefinitionsDocument doc, int lineNumber)
+  public void setBreakpoint(Breakpoint breakpoint)
     throws DebugException
   {
 
-    Breakpoint breakpoint = new Breakpoint (doc, lineNumber, _vm);
-
-    System.out.println(breakpoint);
+    System.out.println("setting: " + breakpoint);
     
     _breakpoints.put(breakpoint.getRequest(), breakpoint);
-    doc.addBreakpoint(breakpoint);
+    breakpoint.getDocument().addBreakpoint(breakpoint);
   }
 
  /**
@@ -408,10 +393,11 @@ public class DebugManager {
   * This takes in a LineBreakpoint (only kind DrJava creates) so that we can
   * get out the line number and unlighlight it if necessary.
   *
-  * @param bp The breakpoint to remove.
+  * @param breakpoint The breakpoint to remove.
   * @param className the name of the class the BP is being removed from.
   */
   public void removeBreakpoint(Breakpoint breakpoint) {
+    System.out.println("unsetting: " + breakpoint);
     _breakpoints.remove(breakpoint.getRequest());
     breakpoint.getDocument().removeBreakpoint(breakpoint);
     _eventManager.deleteEventRequest(breakpoint.getRequest());
@@ -647,4 +633,20 @@ public class DebugManager {
                        " in file " + breakpoint.getClassName());
   }
   
+  /**
+   * Returns a Vector<Breakpoint> that contains all of the Breakpoint objects that
+   * all open documents contain.
+   */
+  public Vector<Breakpoint> getBreakpoints() {
+    Vector<Breakpoint> sortedBreakpoints = new Vector<Breakpoint>();
+    ListModel docs = _model.getDefinitionsDocuments();
+    for (int i = 0; i < docs.getSize(); i++) {
+      Vector<Breakpoint> docBreakpoints = 
+        ((OpenDefinitionsDocument)docs.getElementAt(i)).getBreakpoints();
+      for (int j = 0; j < docBreakpoints.size(); j++) {
+        sortedBreakpoints.addElement(docBreakpoints.elementAt(j));
+      }      
+    }
+    return sortedBreakpoints;
+  }
 }

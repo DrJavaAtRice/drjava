@@ -39,6 +39,7 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model;
 
+import gj.util.Vector;
 import java.io.*;
 import java.awt.print.*;
 import javax.swing.text.BadLocationException;
@@ -267,4 +268,10 @@ public interface OpenDefinitionsDocument {
    * @param breakpoint the Breakpoint to be removed.
    */
   public void removeBreakpoint( Breakpoint breakpoint);
+  
+  /**
+   * Returns a Vector<Breakpoint> that contains all of the Breakpoint objects that
+   * this document contains
+   */
+  public Vector<Breakpoint> getBreakpoints();
 }

@@ -91,6 +91,9 @@ public class EventHandler extends Thread {
     if (e instanceof BreakpointEvent) {
       _handleBreakpointEvent((BreakpointEvent) e);
     }
+    else if (e instanceof ClassPrepareEvent) {
+      _handleClassPrepareEvent((ClassPrepareEvent) e);
+    }
     else if (e instanceof VMDeathEvent) {
       _handleVMDeathEvent((VMDeathEvent) e);
     }
@@ -105,6 +108,10 @@ public class EventHandler extends Thread {
     System.out.println("Breakpoint reached");
     _debugManager.hitBreakpoint((BreakpointRequest)e.request());
     //((LocatableEvent) e).thread().suspend();
+  }
+  
+  private void _handleClassPrepareEvent(ClassPrepareEvent e) {
+    System.out.println("ClassPrepareEvent occured");
   }
   
   private void _handleVMDeathEvent(VMDeathEvent e) {

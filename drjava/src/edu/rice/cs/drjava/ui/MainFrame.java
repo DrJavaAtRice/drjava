@@ -584,7 +584,7 @@ public class MainFrame extends JFrame implements OptionConstants {
 
   /** Toggles a breakpoint on the current line */
   Action _toggleBreakpointAction =
-    new AbstractAction("Set Breakpoint on Current Line")
+    new AbstractAction("Toggle Breakpoint on Current Line")
   {
     public void actionPerformed(ActionEvent ae) {
       _toggleBreakpoint();
@@ -1282,7 +1282,7 @@ public class MainFrame extends JFrame implements OptionConstants {
    * Displays all breakpoints currently set in the debugger
    */
   private void _printBreakpoints() {
-    //_model.getDebugManager().printBreakpoints();
+    System.out.println(_model.getDebugManager().getBreakpoints());
   }
 
   /**
@@ -1843,7 +1843,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     debugMenu.addSeparator(); // breakpoints section:
 
     _toggleBreakpointMenuItem = debugMenu.add(_toggleBreakpointAction);
-    //_printBreakpointsMenuItem = debugMenu.add(_printBreakpointsAction);
+    _printBreakpointsMenuItem = debugMenu.add(_printBreakpointsAction);
     //_clearAllBreakpointsMenuItem = debugMenu.add(_clearAllBreakpointsAction);
 
     // Start off disabled
@@ -1864,7 +1864,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     //_stepDebugMenuItem.setEnabled(enabled);
     //_nextDebugMenuItem.setEnabled(enabled);
     _toggleBreakpointMenuItem.setEnabled(enabled);
-    //_printBreakpointsMenuItem.setEnabled(enabled);
+    _printBreakpointsMenuItem.setEnabled(enabled);
     //_clearAllBreakpointsMenuItem.setEnabled(enabled);
   }
 
@@ -2125,11 +2125,22 @@ public class MainFrame extends JFrame implements OptionConstants {
     } else {
       _debugPanel = null;
     }*/
-
+    final JScrollPane outputScroll = new JScrollPane(_outputPane);
     _junitPanel = new JUnitPanel(_model, this);
     _tabbedPane = new JTabbedPane();
+    if (CodeStatus.DEVELOPMENT) {
+      _tabbedPane.addChangeListener(new ChangeListener () {
+        public void stateChanged(ChangeEvent e) {
+          if (_tabbedPane.getSelectedComponent() == outputScroll) {
+            outputScroll.revalidate();
+            outputScroll.repaint();
+          }
+        }
+      });
+    }
+                                    
     _tabbedPane.add("Interactions", new BorderlessScrollPane(_interactionsPane));
-    _tabbedPane.add("Console", new JScrollPane(_outputPane));
+    _tabbedPane.add("Console", outputScroll);
     
     _tabs = new LinkedList();
 
