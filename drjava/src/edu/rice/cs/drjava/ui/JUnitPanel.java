@@ -137,6 +137,7 @@ public class JUnitPanel extends ErrorPanel{
     _testsSuccessful = true;
 
     _progressBar = new JUnitProgressBar();
+    _progressBar.setUI(new javax.swing.plaf.basic.BasicProgressBarUI());
     _showStackTraceButton = new JButton(_showStackTraceAction);
     customPanel.add(_progressBar, BorderLayout.NORTH);
     customPanel.add(_showStackTraceButton, BorderLayout.SOUTH);
@@ -634,7 +635,8 @@ public class JUnitPanel extends ErrorPanel{
 //      }
     }
   }
-
+  
+  
   /**
    * A progress bar showing the status of JUnit tests.
    * Green until a test fails, then red.
