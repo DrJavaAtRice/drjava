@@ -115,21 +115,21 @@ public class Indenter
     
     IndentRule 
       rule33 = new ActionStartCurrStmtPlus(oneLevel),
-      rule32 = new ActionStartStmtOfBracePlus(oneLevel),            
+      rule32 = new ActionStartStmtOfBracePlus(oneLevel),     // ?       
       rule31 = rule33,
       rule30 = new QuestionExistsCharInStmt('?', ':', rule31, rule32),
       rule29 = new QuestionLineContains(':', rule30, rule33),
       rule28 = new ActionStartStmtOfBracePlus(""),
       rule27 = new QuestionCurrLineStartsWithSkipComments("{", rule28, rule29),
       rule26 = new ActionStartPrevStmtPlus(""),
-      rule25 = rule32,
+      rule25 = rule32,  // ?
       rule24 = rule26,
       rule23 = new QuestionExistsCharInStmt('?', ':', rule24, rule25),
-      rule22 = new QuestionLineContains(':', rule23, rule24),
+      rule22 = new QuestionLineContains(':', rule23, rule26),
       rule21 = rule28,
       rule19 = new QuestionStartingNewStmt(rule22, rule27),
       rule18 = rule19,
-      rule17 = rule32,
+      rule17 = rule32,  // ?
       //rule16 = new QuestionBraceOnPrevLine(rule17, rule18),
       rule16 = new QuestionStartAfterOpenBrace(rule17, rule18),
       rule20 = new QuestionCurrLineStartsWithSkipComments("}", rule21, rule16),

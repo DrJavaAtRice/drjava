@@ -100,7 +100,7 @@ public class ActionBracePlus extends IndentRuleAction
     }
     tab.append(_suffix);
     
-    if (here >= doc.getLength()) {
+    if (here > doc.getLength()) {
       here = doc.getLength() - 1;
     }
     doc.setCurrentLocation(here);
