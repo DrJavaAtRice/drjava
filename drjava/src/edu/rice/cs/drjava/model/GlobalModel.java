@@ -142,6 +142,16 @@ public interface GlobalModel {
   public boolean closeAllFiles();
 
   /**
+   * Saves all open documents, prompting when necessary.
+   */
+  public void saveAllFiles(FileSaveSelector com) throws IOException;
+
+  /**
+   * Saves all open documents, used for testing
+   */    
+  public void saveAllFiles(FileSaveSelector com[]) throws IOException;
+    
+  /**
    * Exits the program.
    * Only quits if all documents are successfully closed.
    */

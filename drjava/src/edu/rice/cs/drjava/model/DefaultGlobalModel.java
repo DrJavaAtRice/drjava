@@ -249,6 +249,43 @@ public class DefaultGlobalModel implements GlobalModel {
   }
 
   /**
+   * Saves all open files, prompting for names if necessary.
+   * When prompting (ie, untitled document), set that document as active.
+   * @param com a selector that picks the file name, used for each
+   * @exception IOException     
+   */
+  public void saveAllFiles(FileSaveSelector com) throws IOException {
+    for (int i = 0; i < _definitionsDocs.getSize(); i++) {
+      OpenDefinitionsDocument doc = (OpenDefinitionsDocument)
+        _definitionsDocs.getElementAt(i);
+      aboutToSaveFromSaveAll(doc);
+      doc.saveFile(com);
+    }
+  }  
+
+  /**
+   * Saves all open files, prompting for names if necessary.
+   * When prompting (ie, untitled document), set that document as active.
+   * @param com[] selectors to pick file name; size = size of _definitionsDocs
+   * @exception IOException     
+   */
+  public void saveAllFiles(FileSaveSelector com[]) throws IOException {
+    for (int i = 0; i < _definitionsDocs.getSize(); i++) {
+      OpenDefinitionsDocument doc = (OpenDefinitionsDocument)
+        _definitionsDocs.getElementAt(i);
+      aboutToSaveFromSaveAll(doc);
+      doc.saveFile(com[i]);
+    }
+  }  
+    
+  /**
+   * Does nothing in default model.
+   * @param doc the document which is about to be saved by a save all
+   *            command
+   */
+  public void aboutToSaveFromSaveAll(OpenDefinitionsDocument doc) {}
+    
+  /**
    * Closes an open definitions document, prompting to save if
    * the document has been changed.  Returns whether the file
    * was successfully closed.

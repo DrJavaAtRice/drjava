@@ -637,4 +637,35 @@ public class GlobalModelIOTest extends GlobalModelTestCase {
                  BAR_TEXT,
                  FileOps.readFileAsString(file2));
   }
+  /**
+   * Make sure that all open files are saved in appropriate order,
+   * ie, even with BAR file as active document, save all should
+   * first prompt to save FOO, then BAR.
+   */    
+  public void testSaveAllSaveInOrder()
+    throws BadLocationException, IOException {
+      OpenDefinitionsDocument fooDoc = setupDocument(FOO_TEXT);
+      OpenDefinitionsDocument barDoc = setupDocument(BAR_TEXT);
+      OpenDefinitionsDocument trdDco = setupDocument("third document contents");
+      final File file1 = tempFile();
+      final File file2 = tempFile();
+      final File file3 = tempFile();
+      // check.
+      FileSelector fs[] = new FileSelector[3];
+      fs[0] = new FileSelector(file1);
+      fs[1] = new FileSelector(file2);
+      fs[2] = new FileSelector(file3);      
+      
+      _model.saveAllFiles(fs); // this should save the files as file1,file2,file3 respectively
+
+      assertEquals("contents of saved file1",
+		   FOO_TEXT,
+		   FileOps.readFileAsString(file1));
+      assertEquals("contents of saved file1",
+		   BAR_TEXT,
+		   FileOps.readFileAsString(file2));
+      assertEquals("contents of saved file1",
+		   "third document contents",
+		   FileOps.readFileAsString(file3));      
+		   }
 }

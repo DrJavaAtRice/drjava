@@ -358,6 +358,28 @@ public class SingleDisplayModel extends DefaultGlobalModel {
   }
 
   /**
+   * Saves all open files, prompting for names if necessary.
+   * When prompting (ie, untitled document), set that document as active.
+   * @param com a FileSaveSelector
+   * @exception IOException 
+   */
+   public void saveAllFiles(FileSaveSelector com) throws IOException {    
+     OpenDefinitionsDocument curdoc = getActiveDocument();
+     super.saveAllFiles(com);
+     setActiveDocument(curdoc); // Return focus to previously active doc     
+   }
+
+  /**
+   * If the document is untitled, brings it to the top so that the
+   * user will know which file she is saving
+   */
+   public void aboutToSaveFromSaveAll(OpenDefinitionsDocument doc) {
+     if (doc.isUntitled()) {
+       setActiveDocument(doc);
+     }
+   }
+    
+  /**
    * Closes an open definitions document, prompting to save if
    * the document has been changed.  Returns whether the file
    * was successfully closed.

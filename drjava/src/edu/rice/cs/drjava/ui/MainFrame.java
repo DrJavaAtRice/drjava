@@ -178,6 +178,15 @@ public class MainFrame extends JFrame {
     }
   };
 
+  /**
+   * Saves all documents, prompting for file names as necessary
+   */
+  private Action _saveAllAction = new AbstractAction("Save all") {
+    public void actionPerformed(ActionEvent ae) {
+      _saveAll();
+    }
+  };
+
   /** Compiles the document in the definitions pane. */
   private Action _compileAction = new AbstractAction("Compile") {
     public void actionPerformed(ActionEvent ae) {
@@ -493,6 +502,15 @@ public class MainFrame extends JFrame {
     }
   }
 
+  private void _saveAll() {
+    try {
+      _model.saveAllFiles(_saveSelector);
+    }
+    catch (IOException ioe) {
+      _showIOError(ioe);
+    }
+  }
+    
   private void _compile() {
     try {
       _model.getActiveDocument().startCompile();
@@ -600,6 +618,7 @@ public class MainFrame extends JFrame {
     _setUpAction(_openAction, "Open", "Open");
     _setUpAction(_saveAction, "Save", "Save the current document");
     _setUpAction(_saveAsAction, "SaveAs", "Save the current document with a new name");
+    _setUpAction(_saveAllAction, "SaveAll", "Save all open documents");
     _setUpAction(_compileAction, "Play", "Compile the current document");
     
     _setUpAction(_cutAction, "Cut", "Cut selected text to the clipboard");
@@ -804,7 +823,7 @@ public class MainFrame extends JFrame {
     _toolBar.add(_newAction);
     _toolBar.add(_openAction);
     _saveButton = _toolBar.add(_saveAction);
-    
+    _toolBar.add(_saveAllAction);
     _toolBar.addSeparator();
     
     // Undo, redo
