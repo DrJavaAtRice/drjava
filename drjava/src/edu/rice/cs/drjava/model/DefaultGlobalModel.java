@@ -643,7 +643,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
     _state.cleanBuildDirectory();
   }
 
-  public FileGroupingState _makeProjectFileGroupingState(final File jarMainClass, final File buildDir, final File projectFile, final File[] projectFiles) { 
+  public FileGroupingState _makeProjectFileGroupingState(final File jarMainClass, final File buildDir, final File projectFile, final File[] projectFiles) {
     return new FileGroupingState(){
       
       private File _builtDir = buildDir;
@@ -653,7 +653,18 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
       private boolean _isProjectChanged = false;
       
       private ArrayList<File> _auxFiles = new ArrayList<File>();
-      
+
+
+      HashSet<String> _projFilePaths = new HashSet<String>();
+      {
+        try {
+          for(File file : projectFiles) {
+            _projFilePaths.add(file.getCanonicalPath());
+          }
+        }
+        catch(IOException e) {}
+      }
+
       public boolean isProjectActive(){
         return true;
       }
@@ -680,16 +691,17 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
       
       public boolean isProjectFile(File f) {
         String path;
-        
+
         if (f == null) return false;
         
         try{
           path = f.getCanonicalPath();
+          return _projFilePaths.contains(path);
         }
         catch(IOException ioe) {
           return false;
         }
-        
+        /*
         for(File file : projectFiles) {
           try {
             if(file.getCanonicalPath().equals(path))
@@ -699,7 +711,8 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
             //continue
           }
         }
-        return false;
+        return false;*/
+
       }
       
       public File[] getProjectFiles() {
@@ -761,8 +774,8 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
           dir.mkdirs();
         }
       }
-      
-      private void cleanHelper(File f){
+
+        private void cleanHelper(File f){
         if(f.isDirectory()){
           File fs[] = f.listFiles(new FilenameFilter(){
             public boolean accept(File parent, String name){
@@ -965,6 +978,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
       public void cleanBuildDirectory() throws FileMovedException, IOException{
         System.out.println("not cleaning");
       }
+
     };
   }
   
@@ -2315,7 +2329,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
     /**
      * 
      * Constructor.  Initializes this handler's document.
-     * @param doc DefinitionsDocument to manage
+     * @param f DefinitionsDocument to manage
      */
     ConcreteOpenDefDoc(File f) throws IOException {
       if(f.exists()){
@@ -3403,7 +3417,12 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
      *                                 location of the source file.
      */
     public File getSourceRoot() throws InvalidPackageException {
-      return _getSourceRoot(getPackageName());
+      if (_packageName == null) {
+          _packageName = getPackageName();
+      }
+      return _getSourceRoot(_packageName);
+
+        //return _state.getSourceRoot();
     }
     
     /**
@@ -3438,7 +3457,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
      *                                 or if it does not match up with the
      *                                 location of the source file.
      */
-    private File _getSourceRoot(String packageName)
+    File _getSourceRoot(String packageName)
       throws InvalidPackageException
     {
       File sourceFile;
