@@ -61,9 +61,15 @@ class MacPlatform extends DefaultPlatform {
     }
     else {
       try {
+        // Mac doesn't like how Java formats URLs:
+        //  "file:/Users/dir/file.html" isn't legal.
+        // Instead, we need to put more slashes in the protocol:
+        //  "file:///Users/dir/file.html"
+        String addressString = address.getProtocol() + ":///" + address.getPath();
+        
         // If there is no command specified, or it won't work, try using "open".
         //Process proc = 
-        Runtime.getRuntime().exec(new String[] { "open", address.toString() });
+        Runtime.getRuntime().exec(new String[] { "open", addressString });
       }
       catch (Throwable t) {
         // If there was any kind of problem, ignore it and report failure.
