@@ -287,26 +287,38 @@ public class DefinitionsDocument extends DefaultStyledDocument
 				return tab;
 
 			//setup
-			int start = _reduced.getDistToPreviousNewline(distToPrevNewline);
+			int start = _reduced.getDistToPreviousNewline(distToPrevNewline + 1);
 			if (start == -1)
 				start = 0;
 			else
 				start = _currentLocation - start;
 			String text = this.getText(start,_currentLocation - start);
 
-			//case of  }  if no matching { then let offset be 0.
+			//case of  }
 			int length = text.length();
 			int i = length - distToPrevNewline;
 			while (i < length && text.charAt(i) == ' ')
 				i++;
 			if(i < length && text.charAt(i) == '}')
 				tab -= 2;
-
-			//normal endings
-
-      //return tab
+			// if no matching { then let offset be 0.
 			if(tab < 0)
 				tab = 0;
+
+			//non-normal endings
+			i = length - distToPrevNewline - 2;
+			while (i >= 0 && text.charAt(i) == ' ') {
+				i--;
+			}
+			if (i >= 0 && !(_normEndings.contains(text.substring(i, i+1)))) {
+				int j = 0;
+				while (j < length && text.charAt(j) == ' ')
+					j++;
+				
+				tab = j + 2;
+			}
+				
+      //return tab
 			return tab;
 		}
 	/**

@@ -273,7 +273,7 @@ public class IndentTest extends TestCase
 			BraceReduction rm = doc._reduced;
 			doc.insertString(0, "public class temp \n {", null);
 			doc.indentLine();
-			assertEquals("0.1", "public class temp \n{",
+			assertEquals("0.1", "public class temp \n  {",
 									 doc.getText(0, doc.getLength()));
 		}
 		catch( javax.swing.text.BadLocationException e)
@@ -366,7 +366,7 @@ public class IndentTest extends TestCase
 				BraceReduction rm = doc._reduced;
 				doc.insertString(0, "hello\n", null);
 				doc.indentLine();
-				assertEquals("0.1", "hello\n", doc.getText(0, doc.getLength()));			
+				assertEquals("0.1", "hello\n  ", doc.getText(0, doc.getLength()));			
 			} 
 			catch( javax.swing.text.BadLocationException e)
 				{ 
