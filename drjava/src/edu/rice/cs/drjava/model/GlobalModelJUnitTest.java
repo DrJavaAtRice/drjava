@@ -198,10 +198,6 @@ public class GlobalModelJUnitTest extends GlobalModelTestCase {
     assertEquals("test case should have no errors reported",
                  0,
                  testResults.failureCount());
-    
-    assertTrue("junit document should have been written to " +
-               "so it's length should be greater than zero",
-               _model.getJUnitDocument().getLength() > 0);
   }
   
   /**
@@ -219,10 +215,6 @@ public class GlobalModelJUnitTest extends GlobalModelTestCase {
     assertEquals("test case has one error reported",
                  1,
                  testResults.failureCount());
-    
-    assertTrue("junit document should have been written to " +
-               "so it's length should be greater than zero",
-               _model.getJUnitDocument().getLength() > 0);
   }
   
   /**
@@ -313,3 +305,4 @@ public class GlobalModelJUnitTest extends GlobalModelTestCase {
     listener.assertNonTestCaseCount(1);
   }
 }
+

@@ -4,7 +4,7 @@
  * at http://sourceforge.net/projects/drjava
  *
  * Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)
- * 
+ *
  * DrJava is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -156,9 +156,9 @@ public interface GlobalModel {
 
   /**
    * Saves all open documents, used for testing
-   */    
+   */
   public void saveAllFiles(FileSaveSelector com[]) throws IOException;
-    
+
   /**
    * Exits the program.
    * Only quits if all documents are successfully closed.
@@ -231,7 +231,7 @@ public interface GlobalModel {
 
   /** Called when the repl prints to System.err. */
   public void replSystemErrPrint(String s);
-  
+
   /** Called when the debugger prints to System.out. */
   public void debugSystemOutPrint(String s);
 
@@ -256,7 +256,7 @@ public interface GlobalModel {
   public void replReturnedResult(String result);
 
   /**
-   * Signifies that the most recent interpretation was ended 
+   * Signifies that the most recent interpretation was ended
    * due to an exception being thrown.
    *
    * @param exceptionClass The name of the class of the thrown exception
@@ -307,7 +307,7 @@ public interface GlobalModel {
    * Returns the current classpath in use by the Interpreter JVM.
    */
   public String getClasspath();
-  
+
   /**
    * Gets an array of all sourceRoots for the open definitions
    * documents, without duplicates.
@@ -315,10 +315,10 @@ public interface GlobalModel {
    *  of the open documents is invalid.
    */
   public File[] getSourceRootSet();
-  
+
   /**
    * Gets the DebugManager, which interfaces with the integrated debugger.
    */
   public DebugManager getDebugManager();
-  
+
 }

@@ -45,6 +45,7 @@ import javax.swing.text.BadLocationException;
 import junit.framework.TestResult;
 
 import edu.rice.cs.util.swing.FindReplaceMachine;
+import edu.rice.cs.drjava.model.junit.*;
 import edu.rice.cs.drjava.model.definitions.*;
 import edu.rice.cs.drjava.model.compiler.CompilerErrorModel;
 
@@ -139,6 +140,18 @@ public interface OpenDefinitionsDocument {
    */
   public void setCompilerErrorModel(CompilerErrorModel model);
 
+  /**
+   * Returns the model responsible for maintaining all current
+   * JUnit errors within this OpenDefinitionsDocument.
+   */
+  public JUnitErrorModel getJUnitErrorModel();
+
+  /**
+   * Sets the OpenDefinitionDocument's notion of all JUnit errors
+   * within this current document.
+   * @param model JUnitErrorModel containing all JUnit errors for this file.
+   */
+  public void setJUnitErrorModel(JUnitErrorModel model);
 
   /**
    * Determines if this definitions document has changed since the

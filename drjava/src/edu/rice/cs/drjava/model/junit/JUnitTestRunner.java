@@ -40,14 +40,14 @@
 package edu.rice.cs.drjava.model.junit;
 
 import edu.rice.cs.util.UnexpectedException;
-import edu.rice.cs.drjava.model.GlobalModel;
-import edu.rice.cs.drjava.model.DefaultGlobalModel;
+import edu.rice.cs.drjava.model.*;
 
 import java.io.PrintStream;
 import javax.swing.text.StyledDocument;
 import javax.swing.text.BadLocationException;
 
 import junit.runner.*;
+import junit.framework.*;
 import junit.textui.TestRunner;
 
 /**
@@ -58,42 +58,52 @@ import junit.textui.TestRunner;
  */
 public class JUnitTestRunner extends junit.textui.TestRunner {
   /**
+   * Variable used to keep track of the currently executing
+   * test case.
+   */
+  private String _currentTest;
+
+  /**
    * The document in the JUnit pane in the UI
    * to write to.
    */
   private StyledDocument _doc;
-  
-  /**
-   * Used to tie the output of the ui textrunner
-   * to our pane.
-   */
-  private PrintStream _writer;
-  
+
   /**
    * Class loader that uses DrJava's classpath
    */
   TestSuiteLoader _classLoader;
-  
+
+  /**
+   * Pointer to GlobalModel. Not entirely necessary to
+   * keep around.
+   */
+  private GlobalModel _model;
+
+  /**
+   * Used to tie the output of the ui textrunner
+   * to nothing.
+   */
+  private PrintStream _writer;
+
   /**
    * Constructor
    */
   public JUnitTestRunner(GlobalModel model) {
     super();
+    _model = model;
     _doc = model.getJUnitDocument();
     _classLoader = new DrJavaTestClassLoader(model);
     _writer =  new PrintStream(System.out) {
       public void print(String s) {
-        _docAppend(s);
       }
       public void println(String s) {
-        print(s + "\n");
       }
       public void println() {
-        print("\n");
       }
     };
   }
-  
+
   /**
    * Provides our own PrintStream which outputs
    * to the appropriate document;
@@ -101,26 +111,11 @@ public class JUnitTestRunner extends junit.textui.TestRunner {
   protected PrintStream getWriter() {
     return _writer;
   }
-  
+
   protected PrintStream writer() {
     return getWriter();
   }
-  
-  /**
-   * Writes text to the document in the JUnit
-   * pane.
-   */
-  private void _docAppend(String text) {
-    try {
-      _doc.insertString(_doc.getLength(), 
-                        text, 
-                        DefaultGlobalModel.SYSTEM_OUT_STYLE);
-    } 
-    catch (BadLocationException e) {
-      throw new UnexpectedException(e);
-    }
-  }
-  
+
   /**
    * Overrides method in super class to always return
    * a reloading test suite loader.
@@ -128,27 +123,37 @@ public class JUnitTestRunner extends junit.textui.TestRunner {
   public TestSuiteLoader getLoader() {
     return _classLoader;
   }
-  
+
   /**
-   * Checks whether the given file name corresponds to 
+   * Checks whether the given file name corresponds to
    * a valid JUnit TestCase.
    */
-  public boolean isTestCase(String fileName) 
-    throws ClassNotFoundException 
+  public boolean isTestCase(String fileName)
+    throws ClassNotFoundException
   {
     return Class.forName("junit.framework.TestCase")
       .isAssignableFrom(getLoader().load(fileName));
   }
-  
+
   /**
-   * Overrides method in super class to print
-   * failed message to the JUnit console when
-   * a TestSuite could not be loaded.
-   * Should this pop up a window instead?
+   * Initiates JUnit on the currently open document.
    */
-  protected void runFailed(String message) {
-    _docAppend(message);
+  public TestResult doRun(Test suite, boolean wait, OpenDefinitionsDocument odd) {
+    TestResult tr = super.doRun(suite, wait);
+
+    odd.setJUnitErrorModel(new JUnitErrorModel(odd.getDocument(), _currentTest, tr));
+
+    return tr;
   }
+
+  /**
+   * Returns the currently executing TestCase.
+   */
+  public Test getTest(String testCase) {
+    _currentTest = testCase;
+    return super.getTest(_currentTest);
+  }
+
 }
 
 

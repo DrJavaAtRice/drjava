@@ -4,7 +4,7 @@
  * at http://sourceforge.net/projects/drjava
  *
  * Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)
- * 
+ *
  * DrJava is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -97,6 +97,11 @@ public class DefinitionsPane extends JEditorPane {
    * Listens to caret to highlight errors as appropriate.
    */
   private CompilerErrorCaretListener _errorListener;
+
+  /**
+   * Listens to caret to highlight JUnit errors as appropriate.
+   */
+  private JUnitErrorCaretListener _junitErrorListener;
 
   /**
    * Looks for changes in the caret position to see if a paren/brace/bracket
@@ -238,7 +243,7 @@ public class DefinitionsPane extends JEditorPane {
 
   private Action _indentKeyActionOpenSquiggly =
     new IndentKeyAction("{", getKeymap().getDefaultAction());
-  
+
   private Action _indentKeyActionColon =
     new IndentKeyAction(":", getKeymap().getDefaultAction());
 
@@ -341,10 +346,26 @@ public class DefinitionsPane extends JEditorPane {
   }
 
   /**
+   * Add a JUnitErrorCaretListener to this pane, keeping it
+   * accessible so its error model can be updated later.
+   */
+  public void addJUnitErrorCaretListener(JUnitErrorCaretListener listener) {
+    _junitErrorListener = listener;
+    addCaretListener(listener);
+  }
+
+  /**
    * Gets the CompilerErrorCaretListener for this pane.
    */
   public CompilerErrorCaretListener getErrorCaretListener() {
     return _errorListener;
+  }
+
+  /**
+   * Gets the JUnitErrorCaretListener for this pane.
+   */
+  public JUnitErrorCaretListener getJUnitErrorCaretListener() {
+    return _junitErrorListener;
   }
 
   /**
@@ -427,7 +448,7 @@ public class DefinitionsPane extends JEditorPane {
     _doc.syncCurrentLocationWithDefinitions(getCaretPosition());
     int selStart = getSelectionStart();
     int selEnd = getSelectionEnd();
-    
+
     // Show a wait cursor for reasonable sized blocks
     boolean showWaitCursor = selEnd > (selStart + 100);
 
@@ -447,7 +468,7 @@ public class DefinitionsPane extends JEditorPane {
          options[1]);
       if (n==JOptionPane.NO_OPTION) { doIndent = false; }
     }
-    
+
     // Do the indent
     if (doIndent) {
       if (showWaitCursor) {
