@@ -880,8 +880,8 @@ PARSER_END(Parser)
     | < XOR: "^" >
     | < REMAINDER: "%" >
     | < LEFT_SHIFT: "<<" >
-      /*    | < RIGHT_SIGNED_SHIFT: ">>" >
-       | < RIGHT_UNSIGNED_SHIFT: ">>>" > */
+ /* | < RIGHT_SIGNED_SHIFT: ">>" >
+    | < RIGHT_UNSIGNED_SHIFT: ">>>" > */
     | < PLUS_ASSIGN: "+=" >
     | < MINUS_ASSIGN: "-=" >
     | < STAR_ASSIGN: "*=" >
@@ -2878,14 +2878,14 @@ PARSER_END(Parser)
                                     exp.getBeginLine(), exp.getBeginColumn(),
                                     exp2.getEndLine(),  exp2.getEndColumn());
     }
-       | ">>"  exp2=additiveExpression()
+       | <RSSHIFT1> <RSSHIFT2>  exp2=additiveExpression()
          {
          exp = new ShiftRightExpression(exp, exp2,
                                         filename,
                                         exp.getBeginLine(), exp.getBeginColumn(),
                                         exp2.getEndLine(),  exp2.getEndColumn());
        }
-       | ">>>" exp2=additiveExpression()
+       | <RUSHIFT1> <RUSHIFT2> <RUSHIFT3> exp2=additiveExpression()
          {
          exp = new UnsignedShiftRightExpression
            (exp, exp2,
@@ -4566,21 +4566,27 @@ PARSER_END(Parser)
     List/*<IdentifierToken>*/ name;
     Type bound = new ReferenceType("Object");
     Token first = getToken(1);
+    //Token hook = null;
   }
   {
     name = name()
+    //| hook = <HOOK>
       [
        <EXTENDS>
        bound = type()
          ]
     {
-      if(bound instanceof ReferenceType){
-        return new TypeParameter(_loc(first), name, (ReferenceType)bound);
-      } else {
-        throw new ParseException("Primitives are not allowed as bound"+
-                                 "types, and array types are temporarily disabled due to a "+
-                                 "DynamicJava AST hierarchy bug!");
-      }
+	  //if(hook == null){
+        if(bound instanceof ReferenceType){
+          return new TypeParameter(_loc(first), name, (ReferenceType)bound);
+        } else {
+          throw new ParseException("Primitives are not allowed as bound"+
+                                   "types, and array types are temporarily disabled due to a "+
+                                   "DynamicJava AST hierarchy bug!");
+        }
+	  //} else { // process wildcard
+	  //  throw new ParseException("DynamicJava Parser does not support wildcards yet");
+  	  //}
     }
   }
 
@@ -4620,3 +4626,13 @@ PARSER_END(Parser)
     ( t=<GREATER_THAN> | t=<RSSHIFT1> | t=<RSSHIFT2> | t=<RUSHIFT1> | t=<RUSHIFT2> | t=<RUSHIFT3> )
     { return t; }
   }
+
+  Token RightShiftOp() :
+  {
+    Token t;
+  }
+  {
+     ( t = <RSSHIFT1> <RSSHIFT2> { return t; } )
+    | ( t = <RUSHIFT1> <RUSHIFT2> <RUSHIFT3> { return t; } )
+  }
+
