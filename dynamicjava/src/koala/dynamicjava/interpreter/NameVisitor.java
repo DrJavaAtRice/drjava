@@ -29,6 +29,7 @@
 package koala.dynamicjava.interpreter;
 
 import java.util.*;
+import java.lang.reflect.*;
 
 import koala.dynamicjava.interpreter.context.*;
 import koala.dynamicjava.interpreter.error.*;
@@ -658,8 +659,17 @@ public class NameVisitor extends VisitorObject<Node> {
       return result;
     } 
     
-    // The name must be, or starts with, a class name
+    //Added to support static field importation
+    try{
+      if(context.isFieldImported(t.image())) 
+        ids = context.getQualifiedName(t.image());        
+    }
+    catch(NoSuchFieldException e) {}
+    
+     // The name must be, or starts with, a class name
     List<IdentifierToken> l = ListUtilities.listCopy(ids);
+    
+    
     boolean b = false;
     
     while (l.size() > 0) {
@@ -700,8 +710,9 @@ public class NameVisitor extends VisitorObject<Node> {
       }
       return result;
     } 
-    else
+    else {
       return rt;
+    }
   }
   
   /**

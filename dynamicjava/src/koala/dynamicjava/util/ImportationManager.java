@@ -612,7 +612,68 @@ public class ImportationManager implements Cloneable {
    * Return true iff the name is a field that has been staticly imported
    */
   public boolean fieldExists(String name) {
-    return false; //to do
     
+    try {
+      lookupField(name);
+      return true;
+    }
+    catch (NoSuchFieldException e) {
+     return false; 
+    }
   }
+  
+  /**
+   * Returns the Field with the given name if it has been staticly imported
+   * throws a NoSuchFieldException if it cannot be found.
+   */
+  public Field lookupField(String name) throws NoSuchFieldException {
+    Field f;
+    Iterator<Field> i = singleTypeImportStaticFieldClauses.iterator();
+    while(i.hasNext()) {
+      f = i.next();
+      if(f.getName().equals(name))
+        return f;
+    }
+    String className;
+    Iterator<String> it = importOnDemandStaticClauses.iterator();
+    while(it.hasNext()) {
+      className = it.next();
+      try {
+        f = ReflectionUtilities.getField(lookupClass(className,null),name);  
+        return f;
+      }
+      catch(NoSuchFieldException nsme) {
+        //Will throw lots of these
+      }
+      catch(AmbiguousFieldException afe) {
+        throw new RuntimeException("Ambiguous Field exception: Field " + name + " is ambiguous");
+      }
+      catch(ClassNotFoundException cnfe) {
+        throw new RuntimeException("Class existed on static import and does not exist on field lookup");
+      }
+      
+    }
+    //If it hasn't returned by now, there hasn't been a method of this name with this parameter list that has been staticly imported
+    throw new NoSuchFieldException(name);
+  }
+  
+  /**
+   * Returns the fully qualified class name that wraps the given staticly imported field
+   * @param fieldName the field name
+   */
+  public List<IdentifierToken> getQualifiedName(String fieldName) throws NoSuchFieldException {
+    List<IdentifierToken> toReturn = new LinkedList<IdentifierToken>(); 
+    Field f = lookupField(fieldName);
+    String toParse = f.getDeclaringClass().getName() + "." + fieldName;
+    if(toParse.startsWith("class "))
+      toParse = toParse.substring(6,toParse.length());
+    int i;    
+    while((i=toParse.lastIndexOf(".")) != -1) {
+      toReturn.add(0, new Identifier(toParse.substring(i+1,toParse.length())));
+      toParse = toParse.substring(0,i);
+    }
+    toReturn.add(0, new Identifier(toParse));
+    return toReturn;
+  }
+  
 }

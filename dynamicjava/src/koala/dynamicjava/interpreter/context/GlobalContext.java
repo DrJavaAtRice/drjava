@@ -197,10 +197,14 @@ public class GlobalContext extends VariableContext implements Context {
   /**
    * Whether a simple identifier represents an existing
    * variable or field or type in this context.
+   * isFieldImported was added to prevent the accidental redefinition of staticly imported fields
+   * if the user staticly imports java.lang.Math.MAX_VALUE, without the call to this method, 
+   * MAX_VALUE = 1 is valid despite the fields 'final' status.
+   * int MAX_VALUE = 1 still allows for the redefinition of the imported field, as this only calls isDefined
    * @param name the identifier
    */
   public boolean exists(String name) {
-    return isDefined(name) || classExists(name);
+    return isDefined(name) || classExists(name) || isFieldImported(name);
   }
 
   /**
@@ -327,12 +331,27 @@ public class GlobalContext extends VariableContext implements Context {
   }
   
   /**
-     * Returns the fully qualified class name that wraps the given staticly imported method
-     * @param methodName the method name
-     * @param args the argument list for the method
-     */
+   * Returns the fully qualified class name that wraps the given staticly imported method
+   * @param methodName the method name
+   * @param args the argument list for the method
+   */
   public List<IdentifierToken> getQualifiedName(String methodName, Class[] args) throws NoSuchMethodException{
-   return importationManager.getQualifiedName(methodName, args);    
+    return importationManager.getQualifiedName(methodName, args);    
+  }
+  
+  /**
+   * Returns the fully qualified class name that wraps the given staticly imported field
+   * @param fieldName the field name
+   */
+  public List<IdentifierToken> getQualifiedName(String fieldName) throws NoSuchFieldException{
+    return importationManager.getQualifiedName(fieldName);    
+  }
+  
+  /**
+   * Returns true iff the field has been staticly imported
+   */
+  public boolean isFieldImported(String name) {
+    return importationManager.fieldExists(name);
   }
 
   /**

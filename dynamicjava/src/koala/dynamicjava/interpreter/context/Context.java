@@ -149,6 +149,17 @@ public interface Context extends SimpleContext {
     List<IdentifierToken> getQualifiedName(String methodName, Class[] args) throws NoSuchMethodException;
     
     /**
+     * Returns the fully qualified class name that wraps the given staticly imported field
+     * @param fieldName the field name
+     */
+    List<IdentifierToken> getQualifiedName(String fieldName) throws NoSuchFieldException;
+    
+    /**
+     * Returns true iff the field has been staticly imported
+     */
+    boolean isFieldImported(String name);
+    
+    /**
      * Returns the default qualifier for this context
      * @param node the current node
      */

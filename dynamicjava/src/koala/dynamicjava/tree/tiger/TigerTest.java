@@ -6,6 +6,7 @@ import junit.framework.*;
 import koala.dynamicjava.tree.*;
 import koala.dynamicjava.interpreter.*;
 import koala.dynamicjava.SourceInfo;
+import koala.dynamicjava.interpreter.error.CatchedExceptionError;
 
 import java.io.StringReader;
 import java.util.List;
@@ -41,17 +42,17 @@ public class TigerTest extends TestCase {
 //    return astInterpreter.interpret(exps);
   }
   
-  // Interpreting static import. Static import of fields not yet supported
+  // Interpreting static import. 
   public void testStaticImport(){
-//    //STATIC FIELD
-//    testString =
-//      "import static java.lang.Integer.MAX_VALUE;\n"+
-//      "class A{\n"+
-//      "  int m(){return MAX_VALUE;}\n"+
-//      "}\n"+
-//      "A a = new A(); a.m();\n";
-//    
-//    assertEquals(new Integer(java.lang.Integer.MAX_VALUE), interpret(testString));
+    //STATIC FIELD
+    testString =
+      "import static java.lang.Integer.MAX_VALUE;\n"+
+      "class A{\n"+
+      "  int m(){return MAX_VALUE;}\n"+
+      "}\n"+
+      "A a = new A(); a.m();\n";
+    
+    assertEquals(new Integer(java.lang.Integer.MAX_VALUE), interpret(testString));
     
     //STATIC METHOD
     testString = 
@@ -90,7 +91,9 @@ public class TigerTest extends TestCase {
     assertEquals(0,interpret(testString));
     
   }
-  
+  /**
+   * Testing various forms of static importation of methods
+   */
   public void testStaticImportOfMethods(){
     
     //no parameters
@@ -212,7 +215,109 @@ public class TigerTest extends TestCase {
       "sqrt(abs(-4));";
     assertEquals(2.0,interpret(testString));
     
+  }
+  
+  /**
+   * Testing various forms of static importation of fields
+   */
+  public void testStaticImportOfFields(){
+    //Tests simple import on demand
+    testString =
+      "package A;\n"+
+      "public class B { \n"+
+      "  public static int C = 5; \n"+
+      "}\n"+
+      "package D;\n"+
+      "import static A.B.*;\n"+
+      "C;";
+    assertEquals(5,interpret(testString));
     
+    //Change packages, should still work
+    testString = 
+      "package E;\n"+
+      "C;";
+    assertEquals(5,interpret(testString));
+    
+    //tests simple single type import
+    testString = 
+      "public class F{\n"+
+      "  public static int C = 3; \n"+
+      "}\n"+
+      "package G;\n"+
+      "import static E.F.C;\n"+
+      "C;";
+    assertEquals(3,interpret(testString));
+    
+    //Tests single type import has higher priority than import on demand 
+    testString = 
+      "public interface H{\n"+
+      "  public static int C = 1; \n"+
+      "}\n"+
+      "public class I implements H {}\n"+
+      "package J;\n"+
+      "import static G.I.*;\n"+
+      "C;";
+    //Should not have changed C - last explicit import holds
+    assertEquals(3,interpret(testString));
+    
+    //Tests the import of static member of super class/implemented interface
+    testString = 
+      "import static G.I.C;\n"+
+      "C;";
+    assertEquals(1,interpret(testString));
+    
+    //Tests the import of static member of interface
+    testString = 
+      "import static G.H.C;\n"+
+      "C;";
+    assertEquals(1,interpret(testString));
+    
+    //Tests that assignment to final field fails
+    testString =
+      "import static java.lang.Integer.MAX_VALUE;\n"+
+      "MAX_VALUE;";
+    assertEquals(java.lang.Integer.MAX_VALUE,interpret(testString));
+    testString = 
+      "MAX_VALUE = 1;"+
+      "MAX_VALUE;";
+    try {
+      assertEquals(1,interpret(testString));
+      fail("Field is final, should not be mutable");
+    }
+    catch(InterpreterException e) {
+      //Expected to fail
+    }
+      
+    
+    //Tests that the redefinition of static final field succeeds
+    testString =
+      "import static javax.accessibility.AccessibleAction.*;"+
+      "DECREMENT;";
+    assertEquals(javax.accessibility.AccessibleAction.DECREMENT,interpret(testString));
+    testString = 
+      "String INCREMENT = \"BLAH!\";"+
+      "INCREMENT;";
+    try {
+      assertEquals("BLAH!",interpret(testString));
+    } 
+    catch(InterpreterException e) {
+      fail("Redefinition of staticly imported field should be allowed!");
+    }
+    
+    //Tests that method parameter has preference over staticly imported field
+    testString =
+      "package K;\n"+
+      "public class L {\n"+
+      "  public static int x = 5;\n"+
+      "}\n"+
+      "package M;\n"+
+      "import static K.L.x;\n"+
+      "public class N { \n"+
+      "  public static int m(int x) { return x; } \n"+
+      "}\n"+
+      "N.m(3);";
+    assertEquals(3,interpret(testString));
+      
     
   }
       

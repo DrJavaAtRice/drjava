@@ -184,8 +184,8 @@ public class VariableContext implements SimpleContext {
       }
     }
     
-    return importationManager.fieldExists(name);
-    //return false;
+    //return importationManager.fieldExists(name);
+    return false;
   }
   
   /**
