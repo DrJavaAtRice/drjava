@@ -271,7 +271,7 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
    * Adds the position to the list of prompt positions. package private for tests
    */
   void addToPromptList(int pos) {
-    if (!_listOfPrompt.contains(pos)) _listOfPrompt.add(pos);
+    if (!_listOfPrompt.contains(new Integer(pos))) _listOfPrompt.add(new Integer(pos));
   }
   
   /**

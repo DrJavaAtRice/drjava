@@ -245,7 +245,7 @@ public class ProjectFileParser {
       }
       
       public List<Integer> forNumberAtom(NumberAtom n){
-        intList.add(n.intValue());
+        intList.add(new Integer(n.intValue()));
         return intList;
       }
       
@@ -256,7 +256,7 @@ public class ProjectFileParser {
     });
     
     if(li.size() == 2){
-      return new Pair<Integer, Integer>(li.get(0), li.get(1));
+      return new Pair<Integer,Integer>(li.get(0), li.get(1));
     }else{
       throw new PrivateProjectException("expected a list of 2 ints for select, found list of size " + li.size());
     }
@@ -305,8 +305,8 @@ public class ProjectFileParser {
    */
   private static class FilePropertyVisitor implements SEListVisitor<DocFile> {
     private String fname = "";
-    private Pair<Integer,Integer> select = new Pair<Integer,Integer>(0,0);
-    private Pair<Integer,Integer> scroll = new Pair<Integer,Integer>(0,0);
+    private Pair<Integer,Integer> select = new Pair<Integer,Integer>(new Integer(0),new Integer(0));
+    private Pair<Integer,Integer> scroll = new Pair<Integer,Integer>(new Integer(0),new Integer(0));
     private boolean active = false;
     private String pack = "";
     private Date modDate = null;

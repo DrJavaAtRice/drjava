@@ -124,7 +124,7 @@ public class InteractionsDocumentAdapter extends AbstractDJDocument {
     }
     if(style != null)
       _stylesList.add(0, new Pair<Pair<Integer,Integer>,String>
-                      (new Pair<Integer,Integer>(start,end), style));
+                      (new Pair<Integer,Integer>(new Integer(start),new Integer(end)), style));
   }
   
   /**

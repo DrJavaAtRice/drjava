@@ -2815,37 +2815,39 @@ public class MainFrame extends JFrame implements OptionConstants {
    * the active document
    */
   private void _close() {
-//    LinkedList<OpenDefinitionsDocument> l = new LinkedList<OpenDefinitionsDocument>();
-//    l.add(_model.getActiveDocument());
-//    _model.closeFiles(l);
-    
+    //    LinkedList<OpenDefinitionsDocument> l = new LinkedList<OpenDefinitionsDocument>();
+    //    l.add(_model.getActiveDocument());
+    //    _model.closeFiles(l);
+    String filename = null;
     try{
-      if(_model.getActiveDocument().isAuxiliaryFile() || 
-         _model.getActiveDocument().isProjectFile()){
-        String text = "Closing this file will permanently remove it from the current project." + 
-          "\nAre you sure that you want to close this file?";
-        
-        int rc = JOptionPane.showConfirmDialog(MainFrame.this,
-                                             text,
-                                             "Close " + 
-                                               _model.getActiveDocument().getFile().getName() + 
-                                               "?",
-                                             JOptionPane.YES_NO_OPTION);
-        if(rc != JOptionPane.YES_OPTION)
-          return;
-      }
-      
-      //Either this is an external file or user actually wants to close it
-      _model.closeFile(_model.getActiveDocument());
-        
+      filename = _model.getActiveDocument().getFile().getName();
     }
     catch(FileMovedException e){
-      //Not sure what exactly should be done.
-      //For now, let's just say the error is unexpected.
-      throw new UnexpectedException(e);
+      filename = "File";
     }
+    if(_model.getActiveDocument().isAuxiliaryFile() || 
+       _model.getActiveDocument().isProjectFile()){
+      String text = "Closing this file will permanently remove it from the current project." + 
+        "\nAre you sure that you want to close this file?";
+      
+      Object[] options = {"Yes", "No"};
+      int rc = JOptionPane.showOptionDialog(MainFrame.this,
+                                            text,
+                                            "Close " + filename + "?",
+                                            JOptionPane.YES_NO_OPTION,
+                                            JOptionPane.QUESTION_MESSAGE,
+                                            null,
+                                            options,
+                                            options[1]);
+      if(rc != JOptionPane.YES_OPTION)
+        return;
+    }
+    
+    //Either this is an external file or user actually wants to close it
+    _model.closeFile(_model.getActiveDocument());
+      
   }
-  
+
   private void _junitFolder(){
     INavigatorItem n;
     Enumeration<INavigatorItem> e = _model.getDocumentNavigator().getDocuments();
@@ -3082,8 +3084,8 @@ public class MainFrame extends JFrame implements OptionConstants {
     
     return new DocumentInfoGetter() {
       public Pair<Integer,Integer> getSelection() {
-        int selStart = pane.getSelectionStart();
-        int selEnd = pane.getSelectionEnd();
+        Integer selStart = new Integer(pane.getSelectionStart());
+        Integer selEnd = new Integer(pane.getSelectionEnd());
         if(pane.getCaretPosition() == selStart){
           return new Pair<Integer,Integer>(selEnd,selStart);
         }else{
@@ -3091,8 +3093,8 @@ public class MainFrame extends JFrame implements OptionConstants {
         }
       }
       public Pair<Integer,Integer> getScroll() {
-        int scrollv = pane.getVerticalScroll();
-        int scrollh = pane.getHorizontalScroll();
+        Integer scrollv = new Integer(pane.getVerticalScroll());
+        Integer scrollh = new Integer(pane.getHorizontalScroll());
         return new Pair<Integer,Integer>(scrollv,scrollh); 
       }
       public File getFile(){

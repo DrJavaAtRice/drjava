@@ -134,7 +134,7 @@ public class DocFile extends File {
    * @param end the end of the selection (and the cursor position)
    */
   public void setSelection(int start, int end) {
-    _sel = new Pair<Integer,Integer>(start, end);
+    _sel = new Pair<Integer,Integer>(new Integer(start), new Integer(end));
   }  
   /**
    * @return the selection with the first element being the vertical
@@ -154,7 +154,7 @@ public class DocFile extends File {
    * @param horiz the horizonal scroll of the scroll pane
    */
   public void setScroll(int vert, int horiz) {
-    _scroll = new Pair<Integer,Integer>(vert, horiz);
+    _scroll = new Pair<Integer,Integer>(new Integer(vert), new Integer(horiz));
   }
   /**
    * @return true if this file is supposed to be the active document when opened

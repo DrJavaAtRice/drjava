@@ -208,8 +208,8 @@ public class ProjectTest extends TestCase {
                                         final int scrollh, final String fname, final String pack,
                                         final boolean active, final boolean untitled, final File pf) {
     return new DocumentInfoGetter() {
-      public Pair<Integer,Integer> getSelection() { return new Pair<Integer,Integer>(sel1,sel2); }
-      public Pair<Integer,Integer> getScroll() { return new Pair<Integer,Integer>(scrollv,scrollh); }
+      public Pair<Integer,Integer> getSelection() { return new Pair<Integer,Integer>(new Integer(sel1),new Integer(sel2)); }
+      public Pair<Integer,Integer> getScroll() { return new Pair<Integer,Integer>(new Integer(scrollv),new Integer(scrollh)); }
       public File getFile(){
         if (pf == null)
           return new File(fname);
