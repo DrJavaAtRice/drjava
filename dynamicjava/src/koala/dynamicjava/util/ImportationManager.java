@@ -303,13 +303,16 @@ public class ImportationManager implements Cloneable {
     //Different methods require different formats, and having both can't hurt anything. Any of the methods that use the list of classes try and catch through the
     //list until they come across a class that fits
     try {
+      Class c;
       try {
-        Class.forName(member, true, classLoader);
+        c = Class.forName(member, true, classLoader);
       } catch (ClassNotFoundException cnfe) {
-        findInnerClass(member);
+        c = findInnerClass(member);
       }
-      declareClassImport(member);
-      foundSomethingToImport = true;
+      if(isPublicAndStatic(c.getModifiers())) {
+        declareClassImport(member);
+        foundSomethingToImport = true;
+      }
     }
     catch(ClassNotFoundException e) {
     }
@@ -323,9 +326,11 @@ public class ImportationManager implements Cloneable {
     //Next, check for all static fields
     try {
       Field f = surroundingClass.getField(name);
-      singleTypeImportStaticFieldClauses.remove(f);
-      singleTypeImportStaticFieldClauses.add(0,f);
-      foundSomethingToImport = true;
+      if(isPublicAndStatic(f.getModifiers())) {
+        singleTypeImportStaticFieldClauses.remove(f);
+        singleTypeImportStaticFieldClauses.add(0,f);
+        foundSomethingToImport = true;
+      }
     }
     catch(NoSuchFieldException e) {
     }
@@ -339,9 +344,11 @@ public class ImportationManager implements Cloneable {
       for(int j = 0; j<methodArray.length; j++) {
         if(isPublicAndStatic(methodArray[j].getModifiers()) && methodArray[j].getName().equals(name)) {
           Method m = methodArray[j];
-          singleTypeImportStaticMethodClauses.remove(m);
-          singleTypeImportStaticMethodClauses.add(0,m);
-          foundSomethingToImport = true;
+          if(isPublicAndStatic(m.getModifiers())) {
+            singleTypeImportStaticMethodClauses.remove(m);
+            singleTypeImportStaticMethodClauses.add(0,m);
+            foundSomethingToImport = true;
+          }
         }          
       }
     }

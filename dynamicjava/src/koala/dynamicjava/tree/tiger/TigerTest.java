@@ -90,6 +90,42 @@ public class TigerTest extends TestCase {
       "D.m();\n";
     assertEquals(0,interpret(testString));
     
+    //Tests that a non-static inner class cannot be imported
+    testString =
+      "package T;\n"+
+      "public class U {\n"+
+      "  public class V { }\n"+
+      "}\n"+
+      "package W;\n"+
+      "import static T.U.*;\n"+
+      "V v = new V();";
+    try {
+      interpret(testString);
+      fail("Non static member should not be imported");
+    } 
+    catch(InterpreterException e) {
+      //Expected to fail
+    }
+    
+    //Tests that a non-static inner class cannot be imported
+    testString =
+      "package X;\n"+
+      "public class Y {\n"+
+      "  public class Z { \n"+
+      "    public static int m() { return 5; }\n"+
+      "  }\n"+
+      "}\n"+
+      "package AA;\n"+
+      "import static X.Y.Z;\n"+
+      "Z.m()";
+    try {
+      assertEquals(5,interpret(testString));
+      fail("Non static member should not be imported");
+    } 
+    catch(RuntimeException e) {
+      //Expected to fail
+    }
+    
   }
   /**
    * Testing various forms of static importation of methods
@@ -232,6 +268,78 @@ public class TigerTest extends TestCase {
     assertEquals("Member of class should take precedence over staticly imported member",0.0,interpret(testString));
     
     
+    
+    testString = 
+      "package NN;\n"+
+      "import static java.lang.Math.abs;\n"+
+      "public abstract class OO {\n"+
+      "  public int abs(int i) { return i; }\n"+
+      "}\n"+
+      "public class PP extends OO {\n"+
+      "  public static int m() {\n"+
+      "    return abs(-2);\n"+
+      "  }\n"+
+      "}\n"+
+      "PP.m();";
+    try {
+      interpret(testString);
+      fail("Static method cannot reference non-static members of super class");
+    } catch(Error e) {
+      //Expected to fail
+    }
+    
+    
+    testString = 
+      "package QQ;\n"+
+      "import static java.lang.Math.abs;\n"+
+      "public abstract class RR {\n"+
+      "  public static int abs(int i) { return i; }\n"+
+      "}\n"+
+      "public class SS extends RR {\n"+
+      "  public static int m() {\n"+
+      "    return abs(-2);\n"+
+      "  }\n"+
+      "}\n"+
+      "SS.m();";
+    assertEquals("Super class method should take precedence over staticly imported member",-2,interpret(testString));
+      
+    
+    //Tests that a non-static method cannot be imported
+    testString =
+      "package TT;\n"+
+      "public class UU {\n"+
+      "  public int m1() { return 5;}\n"+
+      "}\n"+
+      "package VV;\n"+
+      "import static TT.UU.*;\n"+
+      "public class WW {\n"+
+      "  public int m2() { return m1(); } \n"+
+      "}\n"+
+      "WW ww = new WW(); ww.m2();";
+    try {
+      assertEquals(5,interpret(testString));
+      fail("Non static member should not be imported");
+    } 
+    catch(InterpreterException e) {
+      //Expected to fail
+    }
+    
+    //Tests that a non-static method cannot be imported
+    testString =
+      "package XX;\n"+
+      "public class YY {\n"+
+      "  public int m() { return 5;}\n"+
+      "}\n"+
+      "package ZZ;\n"+
+      "import static XX.YY.m;\n";
+    try {
+      interpret(testString);
+      fail("Non static member should not be imported");
+    } 
+    catch(RuntimeException e) {
+      //Expected to fail
+    }
+  
   }
   
   /**
@@ -336,6 +444,42 @@ public class TigerTest extends TestCase {
     assertEquals(3,interpret(testString));
       
     
+    
+    //Tests that a non-static field cannot be imported
+    testString =
+      "package N;\n"+
+      "public class O {\n"+
+      "  public int field = 5;\n"+
+      "}\n"+
+      "package P;\n"+
+      "import static N.O.*;\n"+
+      "public class Q {\n"+
+      "  public int m() { return field; } \n"+
+      "}\n"+
+      "Q q = new Q(); q.m();";
+    try {
+      assertEquals(5,interpret(testString));
+      fail("Non static member should not be imported");
+    } 
+    catch(InterpreterException e) {
+      //Expected to fail
+    }
+    
+    //Tests that a non-static field cannot be imported
+    testString =
+      "package R;\n"+
+      "public class S {\n"+
+      "  public int field = 5;\n"+
+      "}\n"+
+      "package T;\n"+
+      "import static R.S.field;\n";
+    try {
+      interpret(testString);
+      fail("Non static member should not be imported");
+    } 
+    catch(RuntimeException e) {
+      //Expected to fail
+    }
   }
       
   
