@@ -362,10 +362,19 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     return _state;
   }
   
+   /**
+   * Sets the current built directory
+   */
+  public void setBuildDirectory(File f) {
+    _state.setBuildDirectory(f);
+  }
+  
   public FileGroupingState _makeProjectFileGroupingState(final File buildDir, final File projectFile) { 
     return new FileGroupingState(){
+      private File _builtDir = buildDir;
+      
       public File getBuildDirectory(){
-        return buildDir;
+        return _builtDir;
       }
       
       public boolean isProjectActive(){
@@ -389,6 +398,10 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       public File getProjectFile() {
         return projectFile;
       }
+      
+      public void setBuildDirectory(File f) {
+        _builtDir = f;
+      }
     };
   }
   
@@ -407,6 +420,9 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       }
       public File getProjectFile() {
         return null;
+      }
+      public void setBuildDirectory(File f) {
+        //Do nothing - there is no project open. Maybe throw an exception here?
       }
     };
   }
@@ -739,6 +755,12 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     for(int i = 0; i<currentclasspaths.size(); i++){
       builder.addClasspathFile(currentclasspaths.get(i));
     }
+    
+    // add build directory
+    File f = getBuildDirectory();
+    if(f != null)
+      builder.setBuildDir(f);
+    
     // write to disk
     FileWriter fw = new FileWriter(filename);
     fw.write(builder.makeProjectFile());

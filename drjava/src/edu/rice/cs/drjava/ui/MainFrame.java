@@ -221,6 +221,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   private ConfigFrame _configFrame;
   private HelpFrame _helpFrame;
   private AboutDialog _aboutDialog;
+  private ProjectPropertiesFrame _projectPropertiesFrame;
 
   /**
    * Keeps track of the recent files list in the File menu.
@@ -354,6 +355,12 @@ public class MainFrame extends JFrame implements OptionConstants {
     public void actionPerformed(ActionEvent ae) {
 //      System.out.println("------------------new----------------------");
       _new();
+    }
+  };
+  
+  private Action _newProjectAction = new AbstractAction("New") {
+    public void actionPerformed(ActionEvent ae) {
+      _newProject();
     }
   };
 
@@ -990,6 +997,18 @@ public class MainFrame extends JFrame implements OptionConstants {
       _configFrame.toFront();
     }
   };
+  
+  private Action _projectPropertiesAction = new AbstractAction("Project Properties") {
+    public void actionPerformed(ActionEvent ae) {
+      //Create frame if we haven't yet
+      if (_projectPropertiesFrame == null) {
+        _projectPropertiesFrame = new ProjectPropertiesFrame(MainFrame.this);
+      }
+      _projectPropertiesFrame.setVisible(true);
+      _projectPropertiesFrame.toFront();
+    }
+  };
+  
 
   /** Enables the debugger */
   private Action _toggleDebuggerAction = new AbstractAction("Debug Mode") {
@@ -1625,6 +1644,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _helpFrame = null;
     _aboutDialog = null;
     _interactionsScriptController = null;
+    _projectPropertiesFrame = null;
 
     // If any errors occurred while parsing config file, show them
     _showConfigException();
@@ -2048,6 +2068,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     
     _closeProjectAction.setEnabled(true);
     _saveProjectAction.setEnabled(true);
+    _projectPropertiesAction.setEnabled(true);
     
     _resetNavigatorPane();
   }
@@ -2069,8 +2090,21 @@ public class MainFrame extends JFrame implements OptionConstants {
     _resetNavigatorPane();
     _closeProjectAction.setEnabled(false);
     _saveProjectAction.setEnabled(false);
+    _projectPropertiesAction.setEnabled(false);
     _setUpContextMenus();
     _currentProjFile = null;
+  }
+  
+  /**
+   * Closes all files and makes a new project  
+   */
+  private void _newProject(){
+    _closeAll();
+    _saveProjectAs();
+  }
+  
+  public File getCurrentProject() {
+    return _currentProjFile;
   }
   
   /**
@@ -2190,6 +2224,8 @@ public class MainFrame extends JFrame implements OptionConstants {
   }
 
   private void _closeAll() {
+    if(_model.isProjectActive())    
+      _closeProject();
     _model.closeAllFiles();
   }
 
@@ -2230,6 +2266,12 @@ public class MainFrame extends JFrame implements OptionConstants {
       _showIOError(ioe);
     }
   }
+  
+  //Called by the ProjectPropertiesFrame
+  void saveProject() {
+    _saveProject();
+  }
+  
   
   private void _saveProject() {
     //File file = _model.getProjectFile();
@@ -2902,6 +2944,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   private void _setUpActions() {
     _setUpAction(_newAction, "New", "Create a new document");
     _setUpAction(_newJUnitTestAction, "New", "Create a new JUnit test case class");
+    _setUpAction(_newProjectAction, "New", "Make a new project");
     _setUpAction(_openAction, "Open", "Open an existing file");
     _setUpAction(_openProjectAction, "Open", "Open an existing project");
     _setUpAction(_saveAction, "Save", "Save the current document");
@@ -2919,6 +2962,10 @@ public class MainFrame extends JFrame implements OptionConstants {
     _setUpAction(_closeAllAction, "Close All", "CloseAll", "Close all documents");
     _setUpAction(_closeProjectAction, "Close", "CloseAll", "Close the current project");
     _closeProjectAction.setEnabled(false);
+    
+    _setUpAction(_projectPropertiesAction, "Project Properties", "Preferences", "Edit Project Properties");
+    _projectPropertiesAction.setEnabled(false);    
+    
     _setUpAction(_saveAllAction, "Save All", "SaveAll", "Save all open documents");
 
     _setUpAction(_compileAction, "Compile", "Compile the current document");
@@ -2958,7 +3005,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _setUpAction(_switchToNextPaneAction, "Next Pane", "Switch focus to the next pane");
 
     _setUpAction(_editPreferencesAction, "Preferences", "Edit configurable settings in DrJava");
-
+    
     _setUpAction(_junitAction, "Test Current", "Run JUnit over the current document");
     _setUpAction(_junitAllAction, "Test", "Run JUnit over all open JUnit tests");
     _setUpAction(_javadocAllAction, "Javadoc", "Create and save Javadoc for the packages of all open documents");
@@ -3226,9 +3273,9 @@ public class MainFrame extends JFrame implements OptionConstants {
     JMenu projectMenu = new JMenu("Project");
     projectMenu.setMnemonic(KeyEvent.VK_P);
     // New, open
-    // will add option for new project
+    projectMenu.add(_newProjectAction);
     _addMenuItem(projectMenu, _openProjectAction, KEY_OPEN_PROJECT);
-
+        
     //Save
     projectMenu.add(_saveProjectAction);
     //SaveAs
@@ -3237,8 +3284,10 @@ public class MainFrame extends JFrame implements OptionConstants {
     // Close
     _addMenuItem(projectMenu, _closeProjectAction, KEY_CLOSE_PROJECT);
 
+    projectMenu.addSeparator();
     // eventually add project options
-
+    projectMenu.add(_projectPropertiesAction);
+    
     return projectMenu;
   }
   

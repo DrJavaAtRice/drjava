@@ -394,7 +394,22 @@ public interface GlobalModel extends IGetDocuments, ILoadDocuments {
   public List<OpenDefinitionsDocument> getProjectDocuments();
   
   /**
+   * @return the directory that the class files should be stored after compilation
+   */
+  public File getBuildDirectory();
+  
+  /**
+   * @return true if the model has a project open, false otherwise.
+   */
+  public boolean isProjectActive();
+  
+  /**
    * @return the file that points to the current project file. Null if not currently in project view
    */
   public File getProjectFile();
+  
+   /**
+   * Sets the current built directory
+   */
+  public void setBuildDirectory(File f);
 }

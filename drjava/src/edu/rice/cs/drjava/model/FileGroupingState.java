@@ -81,4 +81,8 @@ public interface FileGroupingState {
    */
   public File getProjectFile();
   
+  /**
+   * Sets the current built directory
+   */
+  public void setBuildDirectory(File f);
 }
