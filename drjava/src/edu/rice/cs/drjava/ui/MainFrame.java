@@ -42,6 +42,7 @@ package edu.rice.cs.drjava.ui;
 import javax.swing.*;
 import javax.swing.text.*;
 import javax.swing.event.*;
+import javax.swing.border.*;
 import java.awt.event.*;
 import java.awt.*;
 import java.awt.print.*;
@@ -1012,7 +1013,12 @@ public class MainFrame extends JFrame {
   private void _setUpStatusBar() {
     _fileNameField = new JLabel();
     _fileNameField.setFont(_fileNameField.getFont().deriveFont(Font.PLAIN));
-    _fileNameField.setBorder(new javax.swing.border.EmptyBorder(2,2,2,2));
+    _fileNameField.setBorder(new 
+	CompoundBorder(new EmptyBorder(2,2,2,2),
+		       new CompoundBorder(new BevelBorder(BevelBorder.LOWERED),
+					  new EmptyBorder(2,2,2,2))));
+    // _fileNameField.setBorder(new javax.swing.border.EmptyBorder(2,2,2,2));
+    // _fileNameField.setBorder(new javax.swing.border.BevelBorder(BevelBorder.LOWERED));
     getContentPane().add(_fileNameField, BorderLayout.SOUTH);
   }
 

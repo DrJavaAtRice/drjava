@@ -745,8 +745,7 @@ public class DefaultGlobalModel implements GlobalModel {
       try {
         if (_doc.isUntitled()) {
           realCommand = com;
-        }
-        else {
+        } else {
           file = _doc.getFile();
           realCommand = new FileSaveSelector() {
             public File getFile() throws OperationCanceledException {
