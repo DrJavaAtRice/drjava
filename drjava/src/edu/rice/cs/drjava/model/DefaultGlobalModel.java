@@ -726,7 +726,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
    * which fires the interactionsReset() event.)
    */
   public void resetInteractions() {
-    if ((_debugger != null) && (_debugger.isReady())){
+    if ((_debugger.isAvailable()) && (_debugger.isReady())){
       _debugger.shutdown();
     }
     _interpreterControl.restartInterpreterJVM();
@@ -2284,7 +2284,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
      * all related state from the debug manager.
      */
     public void removeFromDebugger() {
-      if ((_debugger != null) && (_debugger.isReady())) {
+      if (_debugger.isAvailable() && (_debugger.isReady())) {
         while (_breakpoints.size() > 0) {
           _debugger.removeBreakpoint(_breakpoints.elementAt(0));
         }

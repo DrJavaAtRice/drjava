@@ -131,6 +131,14 @@ public class JPDADebugger implements Debugger {
     _watches = new Vector<DebugWatchData>();
     _pendingRequestManager = new PendingRequestManager(this);
   }
+  
+  /**
+   * Returns whether the debugger is currently available in this JVM.
+   * This does not indicate whether it is ready to be used.
+   */
+  public boolean isAvailable() {
+    return true;
+  }
 
   /**
    * Attaches the debugger to the Interactions JVM to prepare for debugging.

@@ -60,6 +60,14 @@ public class NoDebuggerAvailable implements Debugger {
   }
   
   /**
+   * Returns whether the debugger is currently available in this JVM.
+   * This does not indicate whether it is ready to be used.
+   */
+  public boolean isAvailable() {
+    return false;
+  }
+  
+  /**
    * Attaches the debugger to the Interactions JVM to prepare for debugging.
    */
   public void startup() throws DebugException {

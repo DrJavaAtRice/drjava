@@ -55,6 +55,12 @@ public interface Debugger {
   public static final int STEP_OUT = StepRequest.STEP_OUT; 
   
   /**
+   * Returns whether the debugger is currently available in this JVM.
+   * This does not indicate whether it is ready to be used.
+   */
+  public boolean isAvailable();
+  
+  /**
    * Attaches the debugger to the Interactions JVM to prepare for debugging.
    */
   public void startup() throws DebugException;

@@ -882,7 +882,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     // create our model
     _model = new SingleDisplayModel(rmiPort);
     
-    if (_model.getDebugger() != null) {
+    if (_model.getDebugger().isAvailable()) {
       // add listener to debug manager
       _model.getDebugger().addListener(new UIDebugListener());
     }
@@ -1039,7 +1039,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   public void debuggerToggle() {
     // Make sure the debugger is available
     Debugger debugger = _model.getDebugger();
-    if (debugger == null) return;
+    if (!debugger.isAvailable()) return;
 
     try {
       if (inDebugMode()) {
@@ -1944,7 +1944,7 @@ public class MainFrame extends JFrame implements OptionConstants {
    * more legible on the higher calling level, i.e., the constructor.
    */
   private void _setUpMenuBar() {
-    boolean showDebugger = (_model.getDebugger() != null);
+    boolean showDebugger = (_model.getDebugger().isAvailable());
 
     // Get proper cross-platform mask.
     int mask = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
@@ -2537,7 +2537,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       _defScrollPanes.get(_model.getActiveDocument());
 
     // Try to create debug panel (see if JSwat is around)
-    if (_model.getDebugger() != null) {
+    if (_model.getDebugger().isAvailable()) {
       try {
         _debugPanel = new DebugPanel(this);
         _debugPanel.setPreferredSize(_debugPanel.getMinimumSize());
@@ -3252,13 +3252,13 @@ public class MainFrame extends JFrame implements OptionConstants {
       Runnable doCommand = new Runnable() {
         public void run() {
           Debugger dm = _model.getDebugger();
-          if (dm != null) {
+          if (dm.isAvailable()) {
             dm.shutdown();
           }
           _resetInteractionsAction.setEnabled(false);
           _interactionsPane.setEditable(false);
           _interactionsPane.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-          if (_model.getDebugger() != null) {
+          if (_model.getDebugger().isAvailable()) {
             _toggleDebuggerAction.setEnabled(false);
           }
         }
@@ -3272,7 +3272,7 @@ public class MainFrame extends JFrame implements OptionConstants {
         public void run() {
           interactionEnded();
           _resetInteractionsAction.setEnabled(true);
-          if (_model.getDebugger() != null) {
+          if (_model.getDebugger().isAvailable()) {
             _toggleDebuggerAction.setEnabled(true);
           }
         }
@@ -3538,10 +3538,12 @@ public class MainFrame extends JFrame implements OptionConstants {
   
   boolean inDebugMode() {
     Debugger dm = _model.getDebugger();
-    if (dm != null)
+    if (dm.isAvailable()) {
       return dm.isReady() && (_debugPanel != null);
-    else
+    }
+    else {
       return false;
+    }
   }
   
   /**
