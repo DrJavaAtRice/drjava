@@ -22,8 +22,6 @@
 
 <property name="jsr14_classpath" value="${lib_dir}/jsr14.jar" />
 
-<property name="jsr14_version" value="1.0" />
-
 <property name="jars_dir" value="/home/javaplt/public_html/drjava/builds" />
 
 <!-- put javadoc in this directory if generating private javadoc -->
@@ -107,15 +105,20 @@ optimize="off"/>
   <echo message="All tests passed. Rebuilding to put version tag (${version-tag}) into the code." />
   <antcall target="compile" />
 
-  <input message="Please enter the log message for the commit:"
-         addproperty="cvs-commit-message" />
+  <tempfile property="commit-comments-filename" 
+            destdir="${java.io.tmpdir}"
+            prefix="commit-comments" />
+  <antcall target="create-commit-comments">
+    <param name="commit-comments-filename" value="${commit-comments-filename}"/>
+  </antcall>
   <cvs>
     <commandline>
       <argument value="commit" />
-      <argument value="-m" />
-      <argument value="${cvs-commit-message}" /> 
+      <argument value="-F" />
+      <argument value="${commit-comments-filename}" />
     </commandline>
   </cvs>
+  <delete file="${commit-comments-filename}"/>
 
   <cvs command="tag -c ${version-tag}" quiet="true" />
 
@@ -123,25 +126,71 @@ optimize="off"/>
   <echo message="Note: This version has not yet been released. To release it, follow the process described at http://sourceforge.net/docman/display_doc.php?docid=9899&amp;group_id=44253." />
 
 </target>
+
+
+<!-- This target saves the commit comments to the file specified in the
+     "commit-comments-filename" property, which must be passed in.  The
+     comments can either be typed manually on one line, or copied from an
+     existing file; the user is given a choice of which method to use.
+
+     This target uses "file-commit-comments" and "type-commit-comments" to 
+     finish the task.
+     
+     (See the do-commit target above for how to use this file in a cvs commit.)
+-->
+<target name="create-commit-comments">
+  <input message="Commit Comments: [t]ype manually or [r]ead from a file? "
+         validargs="t,r"
+         addproperty="commit-comments-method" />
+  <condition property="commit-comments-readFile">
+    <equals arg1="r" arg2="${commit-comments-method}"/>
+  </condition>
+
+  <!-- call both, but only one will run -->
+  <antcall target="file-commit-comments">
+    <param name="commit-comments-filename" value="${commit-comments-filename}"/>
+  </antcall>
+  <antcall target="type-commit-comments">
+    <param name="commit-comments-filename" value="${commit-comments-filename}"/>
+  </antcall>
+</target>
+
+<!-- Read in the name of the file containing the commit comments
+     and copy its contents to our commit-comments-file.
+-->
+<target name="file-commit-comments" if="commit-comments-readFile">
+  <input message="Name of file with commit comments:"
+         addproperty="user-comments-filename"/>
+  <copy file="${user-comments-filename}" tofile="${commit-comments-filename}"/>
+</target>
+
+<!-- Read in comments for a CVS commit and save to our commit-comments-file,
+     but only if an existing file has not already been specified.
+-->
+<target name="type-commit-comments" unless="commit-comments-readFile">
+  <!-- Read in commit comment, then save to a temp file -->
+  <input message="Please enter the comments for the commit:"
+         addproperty="commit-comments-contents" />
+  <echo file="${commit-comments-filename}" 
+        message="${commit-comments-contents}" />
+</target>
  
+
 <!-- By default, commit uses the development version -->
 <target name="commit" depends="development">
   <echo message="Committing the development version"/>
   <antcall target="do-commit" />
 </target>
-  
+
 <target name="commit-stable" depends="stable">
   <echo message="Committing the stable version"/>
   <antcall target="do-commit" />
 </target>
 
-<!-- commit this version and then release it. only will work on cs net. -->
+<!-- commit this version and then release it. -->
 <target name="commit-and-release" depends="commit, release">
-  <!--
-  <antcall target="commit" />
-  <antcall target="release" />
-  -->
 </target>
+
 
 <!-- Compile. We have to start at srcroot and then selectively include
      just this project in order for it to realize what files have already
@@ -163,33 +212,6 @@ optimize="off"/>
          optimize="off">
 <!--    <compilerarg value="-gj" />  -->
   </javac>
- 
-  <!--  Old approach...
-    <echo message="Recompiling all classes..." />
-    <apply executable="java" failonerror="yes" parallel="yes" type="file">
-
-      <arg value="-classpath" />
-      <arg value="${classpath_text}" />
-      <arg value="com.sun.tools.javac.Main" />
-
-      <arg value="-sourcepath" />
-      <arg value="${srcroot}" />
-
-      <arg value="-d" />
-      <arg value="${built}" />
-
-      <arg value="-target" />
-      <arg value="1.1" />
-
-      <arg value="-gj" />
-
-      <arg value="-g" />
-      
-      <fileset dir="${srcroot}">
-        <include name="${projpath}/**/*.java" />
-      </fileset>
-    </apply>
-   -->
 </target>
 
 
@@ -235,6 +257,7 @@ optimize="off"/>
     <param name="javadoc_title" value="${user.name}-uncommitted-${ant.project.name}-${DSTAMP}-${TSTAMP}" />
   </antcall>
 </target>
+
 
 <!-- Generate javadoc, removing generics references first.
      The property javadoc_dir must be set when calling this.
