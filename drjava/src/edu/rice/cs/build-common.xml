@@ -74,9 +74,7 @@
      After committing, we tag the build we just made with the tag
      projectname-date-time.
 -->
-<target name="commit" depends="clean, update, test">
-  <antcall target="make-version-stamp" />
-
+<target name="commit" depends="clean, update, test, make-version-stamp">
   <property name="version-tag"
             value="${ant.project.name}-${DSTAMP}-${TSTAMP}" />
 
@@ -94,9 +92,11 @@
 </target>
 
 <!-- commit this version and then release it. only will work on cs net. -->
-<target name="commit-and-release">
+<target name="commit-and-release" depends="commit, release">
+  <!--
   <antcall target="commit" />
   <antcall target="release" />
+  -->
 </target>
 
 
