@@ -382,6 +382,23 @@ public class MainFrame extends JFrame {
     }
   };
 
+  /** Sets a breakpoint */
+  private Action _setBreakpointAction =
+    new AbstractAction("Set Breakpoint")
+  {
+    public void actionPerformed(ActionEvent ae) {
+      _setBreakpoint();
+    }
+  };
+  
+  /** Removes a breakpoint */
+  private Action _removeBreakpointAction =
+    new AbstractAction("Remove Breakpoint")
+  {
+    public void actionPerformed(ActionEvent ae) {
+      _removeBreakpoint();
+    }
+  };
 
   /** How DrJava responds to window events. */
   private WindowListener _windowCloseListener = new WindowListener() {
@@ -745,6 +762,12 @@ public class MainFrame extends JFrame {
     }
   }
   
+  private void _setBreakpoint(){
+  }
+  
+  private void _removeBreakpoint(){
+  }
+  
   private void _showIOError(IOException ioe) {
     _showError(ioe, "Input/output error",
                "An I/O exception occurred during the last operation.");
@@ -1086,12 +1109,20 @@ public class MainFrame extends JFrame {
    * Creates and returns a debug menu.
    */
   private JMenu _setUpDebugMenu() {
+    JMenuItem tempItem;
     JMenu debugMenu = new JMenu("Debug");
     
     // Enable debugging
     _debuggerEnabledMenuItem = new JCheckBoxMenuItem(_toggleDebuggerAction);
     _debuggerEnabledMenuItem.setState(false);
     debugMenu.add(_debuggerEnabledMenuItem);
+    
+    tempItem = debugMenu.add(_setBreakpointAction);
+    // add an accelerator to tempItem
+    
+    tempItem = debugMenu.add(_removeBreakpointAction);
+    // add an accelerator to tempItem
+    
     
     // Add the menu to the menu bar
     return debugMenu;

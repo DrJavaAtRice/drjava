@@ -154,9 +154,11 @@ public class DebugManager {
   public void removeAllBreakpoints();
   
   public void getBreakpoints();
-  
-  public void setBreakpoint();
+ */ 
+  public void setBreakpoint() {
     
+  }
+   /* 
   public void removeBreakpoint();
   
   public void addWatch();

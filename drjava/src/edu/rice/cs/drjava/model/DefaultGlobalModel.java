@@ -179,6 +179,13 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
     _interpreterControl.setModel(this);
     _interpreterControl.startInterpreterJVM();
     _interpreterControl.reset();
+    try{
+      // uncomment this to enable debugger
+      //js _debugManager = new DebugManager(this);
+    }
+    catch( NoClassDefFoundError ncdfe ){
+      // JSwat not present, so we won't use it.
+    }
   }
   
   
