@@ -63,12 +63,12 @@ public class TokenList extends ModelList<ReducedToken>
     private int _offset;
   
     public Iterator() {
-      super();
+      ((ModelList<ReducedToken>)TokenList.this).super();
       _offset = 0;
     }
     
     Iterator(Iterator that) {
-      super(that);
+      ((ModelList<ReducedToken>)TokenList.this).super(that);
       _offset = that.getBlockOffset();
     }
     
