@@ -416,12 +416,12 @@ public class TigerTest extends TestCase {
     
     //Tests that the redefinition of static final field succeeds
     testString =
-      "import static javax.accessibility.AccessibleAction.*;"+
-      "DECREMENT;";
-    assertEquals(javax.accessibility.AccessibleAction.DECREMENT,interpret(testString));
+      "import static javax.accessibility.AccessibleText.*;"+
+      "CHARACTER;";
+    assertEquals(javax.accessibility.AccessibleText.CHARACTER,interpret(testString));
     testString = 
-      "String INCREMENT = \"BLAH!\";"+
-      "INCREMENT;";
+      "String CHARACTER = \"BLAH!\";"+
+      "CHARACTER;";
     try {
       assertEquals("BLAH!",interpret(testString));
     } 

@@ -20,8 +20,8 @@
 
 <property name="lib_dir" value="${srcroot}/edu/rice/cs/lib" />
 
-<!--property name="jsr14_classpath" value="${lib_dir}/jsr14.jar" />
-<property name="jsr14_collect_classpath" value="${lib_dir}/collect.jar" /-->
+<property name="jsr14_classpath" value="${lib_dir}/jsr14.jar" />
+<property name="jsr14_collect_classpath" value="${lib_dir}/collect.jar" />
 
 <property name="jars_dir" value="/home/javaplt/public_html/drjava/builds" />
 
@@ -41,7 +41,7 @@
 <!-- classpath to use everywhere. -->
 <path id="classpath">
   <pathelement location="${jsr14_classpath}" />
-<!--  <pathelement path="${java.class.path}" /> -->
+  <pathelement path="${java.class.path}" />
   <fileset dir="${lib_dir}">
     <include name="*.jar" />
   </fileset>
@@ -64,8 +64,8 @@ target="jsr14"
 
 <!-- Init target. All others depend on it. Initialize the directory. -->
 <target name="init">
- <!-- <available type="file" file="${jsr14_classpath}" property="jsr14_ok" />
-  <antcall target="check_for_jsr14" /> -->
+<!--  <available type="file" file="${jsr14_classpath}" property="jsr14_ok" />
+  <antcall target="check_for_jsr14" /-->
   <antcall target="compile-tstamp-gmt"/>
   <taskdef name="tstamp_gmt" classname="edu.rice.cs.util.ant.TstampGMT" classpath="${built}"/>
   <tstamp_gmt /> <!-- Ant requires us to make time stamp -->
@@ -209,7 +209,7 @@ target="jsr14"
 
      This version works with JDK 1.3 and JSR-14 v1.0.
      (Necessary for releases.)
-<target name="do-compile" depends="init">
+<target name=3 depends="init">
   <mkdir dir="${built}"/>
   <javac srcdir="${srcroot}"
          includes="${projpath}/**/*java"
@@ -315,6 +315,7 @@ target="jsr14"
          debug="on"
          fork="on"
          optimize="off">
+    <compilerarg value="-warnunchecked"/>
     <compilerarg value="-J-Xbootclasspath/p:${jsr14_classpath}"/>
   </javac>
 </target>
