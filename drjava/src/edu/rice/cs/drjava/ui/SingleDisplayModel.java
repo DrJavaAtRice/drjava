@@ -70,7 +70,7 @@ public class SingleDisplayModel extends DefaultGlobalModel {
    * Creates a SingleDisplayModel.
    *
    * <OL>
-   * <LI>If the given model has no open documents, a new document is created.
+   * <LI>A new document is created to satisfy the invariant.
    * </LI>
    * <LI>The first document in the list is set as the active document.
    * </LI>
@@ -79,12 +79,13 @@ public class SingleDisplayModel extends DefaultGlobalModel {
    */
   public SingleDisplayModel() {
     super();
-    _isClosingAllDocs = false;
-    _ensureNotEmpty();
 
     _selectionModel = new DefaultListSelectionModel();
     _selectionModel.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     _selectionModel.addListSelectionListener(new SelectionModelListener());
+    
+    _isClosingAllDocs = false;
+    _ensureNotEmpty();
     setActiveDocument(0);
   }
 
@@ -107,14 +108,24 @@ public class SingleDisplayModel extends DefaultGlobalModel {
 
   /**
    * Sets the currently active document by updating the selection model.
+   * The selection model will trigger our SelectionModelListener
+   * to fire an activeDocumentChanged event.  
    * @param index Index of active document in the list of documents.
    */
   public void setActiveDocument(int index) {
+    int oldIndex = _selectionModel.getMinSelectionIndex();
     if ((index < 0) || (index >= getDefinitionsDocuments().getSize())) {
       throw new IllegalArgumentException(
         "No such document in model to be set to active.");
     }
+    // Automatically fires event if index has changed
     _selectionModel.setSelectionInterval(index, index);
+    
+    // Make sure field is set and event is fired,
+    //  even if selection index did not change
+    if (index == oldIndex) {
+      _setActiveDoc(index);
+    }
   }
 
   /**
@@ -237,6 +248,17 @@ public class SingleDisplayModel extends DefaultGlobalModel {
   }
 
   /**
+   * Creates a new document, adds it to the list of open documents,
+   * and sets it to be active.
+   * @return The new open document
+   */
+  public OpenDefinitionsDocument newFile() {
+    OpenDefinitionsDocument doc = super.newFile();
+    setActiveDocument(doc);
+    return doc;
+  }
+  
+  /**
    * Open a file and read it into the definitions.
    * The provided file selector chooses a file, and on a successful
    * open, the fileOpened() event is fired.
@@ -277,6 +299,7 @@ public class SingleDisplayModel extends DefaultGlobalModel {
   public boolean closeFile(OpenDefinitionsDocument doc) {
     int index = _getDocumentIndex(doc);
     if (super.closeFile(doc)) {
+      // Select next document if not closing all documents
       if (!_isClosingAllDocs) {
         _ensureNotEmpty();
 
@@ -346,10 +369,30 @@ public class SingleDisplayModel extends DefaultGlobalModel {
   private void _ensureNotEmpty() {
     if ((!_isClosingAllDocs) &&
         (getDefinitionsDocuments().getSize() == 0)) {
-      newFile();
+      super.newFile();
     }
   }
 
+  /**
+   * Actually set the activeDocument field to the document
+   * at the given index, and fire an activeDocumentChanged event.
+   * This should usually be called from the SelectionModelListener,
+   * but must also be called in setActiveDocument in the case
+   * where the selection index does not change, and thus the
+   * SelectionModel does not fire a valueChanged event.
+   */
+  private void _setActiveDoc(int index) {
+    ListModel docs = getDefinitionsDocuments();
+    _activeDocument = (OpenDefinitionsDocument) docs.getElementAt(index);
+
+    // notify listeners
+    notifyListeners(new EventNotifier() {
+      public void notifyListener(GlobalModelListener l) {
+        SingleDisplayModelListener sl = (SingleDisplayModelListener) l;
+        sl.activeDocumentChanged(_activeDocument);
+      }
+    });
+  }
 
   /**
    * Listens to the selection model for the open documents.  On a change,
@@ -363,15 +406,7 @@ public class SingleDisplayModel extends DefaultGlobalModel {
         if ((index < 0) || (index > docs.getSize())) {
           throw new RuntimeException("Document index out of bounds: " + index);
         }
-        _activeDocument = (OpenDefinitionsDocument) docs.getElementAt(index);
-
-        // notify listeners
-        notifyListeners(new EventNotifier() {
-          public void notifyListener(GlobalModelListener l) {
-            SingleDisplayModelListener sl = (SingleDisplayModelListener) l;
-            sl.activeDocumentChanged(_activeDocument);
-          }
-        });
+        _setActiveDoc(index);
       }
     }
   }
