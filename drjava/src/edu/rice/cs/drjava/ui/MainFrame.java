@@ -145,8 +145,8 @@ public class MainFrame extends JFrame {
   private JFileChooser _saveChooser;
 
   private FileOpenSelector _openSelector = new FileOpenSelector() {
-    public File getFile() throws OperationCanceledException {
-      return getOpenFile();
+    public File[] getFiles() throws OperationCanceledException {
+      return getOpenFiles();
     }
   };
 
@@ -513,6 +513,7 @@ public class MainFrame extends JFrame {
     String userdir = System.getProperty("user.dir");
     _openChooser = new JFileChooser(userdir);
     _openChooser.setFileFilter(new JavaSourceFilter());
+    _openChooser.setMultiSelectionEnabled(true);
     _saveChooser = new JFileChooser(userdir);
     //set up the hourglass cursor
     setGlassPane(new GlassPane());
@@ -669,7 +670,7 @@ public class MainFrame extends JFrame {
    * Ask the user if they'd like to save previous changes (if the current
    * document has been modified) before opening.
    */
-  public File getOpenFile() throws OperationCanceledException {
+  public File[] getOpenFiles() throws OperationCanceledException {
     // This redundant-looking hack is necessary for JDK 1.3.1 on Mac OS X!
     File selection = _openChooser.getSelectedFile();
     if (selection != null) {
@@ -678,7 +679,7 @@ public class MainFrame extends JFrame {
       _openChooser.setSelectedFile(null);
     }
     int rc = _openChooser.showOpenDialog(this);
-    return getChosenFile(_openChooser, rc);
+    return getChosenFiles(_openChooser, rc);
   }
 
   /**
@@ -736,7 +737,7 @@ public class MainFrame extends JFrame {
 
   private void _open() {
     try {
-      _model.openFile(_openSelector);
+      _model.openFiles(_openSelector);
     }
     catch (AlreadyOpenException aoe) {
       // Switch to existing copy after prompting user
@@ -1001,6 +1002,33 @@ public class MainFrame extends JFrame {
           return chosen;
         else
           throw new RuntimeException("filechooser returned null file");
+      default:                  // impossible since rc must be one of these
+        throw  new RuntimeException("filechooser returned bad rc " + choice);
+    }
+  }
+  /**
+   * Returns the File selected by the JFileChooser.
+   * @param fc File chooser presented to the user
+   * @param choice return value from fc
+   * @return Selected File
+   * @throws OperationCanceledException if file choice canceled
+   * @throws RuntimeException if fc returns a bad file or choice
+   */
+  private File[] getChosenFiles(JFileChooser fc, int choice)
+    throws OperationCanceledException
+  {
+    switch (choice) {
+      case JFileChooser.CANCEL_OPTION:case JFileChooser.ERROR_OPTION:
+        throw new OperationCanceledException();
+      case JFileChooser.APPROVE_OPTION:
+        File[] chosen = fc.getSelectedFiles();
+        if (chosen == null)
+            throw new RuntimeException("filechooser returned null file");
+    
+        if (chosen[0] == null)
+          chosen[0] = fc.getSelectedFile();
+        return chosen;
+    
       default:                  // impossible since rc must be one of these
         throw  new RuntimeException("filechooser returned bad rc " + choice);
     }

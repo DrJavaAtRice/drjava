@@ -361,6 +361,35 @@ public class SingleDisplayModel extends DefaultGlobalModel {
     return openedDoc;
   }
 
+ /**
+   * Open multiple files and read it into the definitions.
+   * The provided file selector chooses a file, and on a successful
+   * open, the fileOpened() event is fired.
+   * This also checks if there was previously a single, unchanged,
+   * untitled document open, and if so, closes it after a successful
+   * opening.
+   * @param com a command pattern command that selects what file
+   *            to open
+   * @return The open document, or null if unsuccessful
+   * @exception IOException
+   * @exception OperationCanceledException if the open was canceled
+   * @exception AlreadyOpenException if the file is already open
+   */
+  public OpenDefinitionsDocument openFiles(FileOpenSelector com)
+    throws IOException, OperationCanceledException, AlreadyOpenException
+  {
+    // Close an untitled, unchanged document if it is the only one open
+    boolean closeUntitled = _hasOneEmptyDocument();
+    OpenDefinitionsDocument oldDoc = _activeDocument;
+
+    OpenDefinitionsDocument openedDoc = super.openFiles(com);
+    if (closeUntitled) {
+      super.closeFile(oldDoc);
+    }
+
+    setActiveDocument(openedDoc);
+    return openedDoc;
+  }
   /**
    * Saves all open files, prompting for names if necessary.
    * When prompting (ie, untitled document), set that document as active.

@@ -280,38 +280,52 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
   {
     DefinitionsDocument tempDoc = (DefinitionsDocument)
       _editorKit.createDefaultDocument();
-    try {
-      final File file = com.getFile().getAbsoluteFile();
 
-      OpenDefinitionsDocument openDoc = _getOpenDocument(file);
-      if (openDoc != null) {
-        //System.err.println("This file is already open!");
-        throw new AlreadyOpenException(openDoc);
+    final File file = (com.getFiles())[0].getAbsoluteFile();
+    return _openFile(file);
+  }
+
+  /**
+   * Opens multiple files and read it into the definitions.
+   * The provided file selector chooses multiple files, and fore each
+   * successful open, the fileOpened() event is fired.
+   * @param com a command pattern command that selects what file
+   *            to open
+   *
+   * @return The last opened document, or null if unsuccessful.
+   * Note that .getFile called on the returned OpenDefinitionsDocument
+   * is guaranteed to return an absolute path, as this method makes
+   * it absolute.
+   *
+   * @exception IOException if an underlying I/O operation fails
+   * @exception OperationCanceledException if the open was canceled
+   * @exception AlreadyOpenException if the file is already open
+   */
+  public OpenDefinitionsDocument openFiles(FileOpenSelector com)
+    throws IOException, OperationCanceledException, AlreadyOpenException
+  {
+
+    final File[] files = com.getFiles();
+    OpenDefinitionsDocument retDoc = null;
+    
+    if (files == null) 
+      throw new IOException("No Files returned from FileSelector");
+
+    for (int i=0; i < files.length; i++) {
+      if (files[i] == null) {
+        throw new IOException("File name returned from FileSelector is null");
       }
-
-      FileReader reader = new FileReader(file);
-      _editorKit.read(reader, tempDoc, 0);
-      reader.close(); // win32 needs readers closed explicitly!
-
-      tempDoc.setFile(file);
-      tempDoc.resetModification();
-
-      tempDoc.setCurrentLocation(0);
-
-      final OpenDefinitionsDocument doc =
-        new DefinitionsDocumentHandler(tempDoc);
-      _definitionsDocs.addElement(doc);
-
-      notifyListeners(new EventNotifier() {
-        public void notifyListener(GlobalModelListener l) {
-        l.fileOpened(doc);
-      }
-      });
-
-      return doc;
+      
+      //always return last opened Doc
+      retDoc = _openFile(files[i].getAbsoluteFile());
+      
     }
-    catch (BadLocationException docFailed) {
-      throw new UnexpectedException(docFailed);
+    if (retDoc != null) {
+      return retDoc;
+    } else {
+      //if no OperationCanceledException, then getFiles should
+      //have atleast one file. 
+      throw new IOException("No Files returned from FileChooser");
     }
   }
 
@@ -427,6 +441,10 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
       FileOpenSelector selector = new FileOpenSelector() {
         public File getFile() throws OperationCanceledException {
           return f;
+        }
+
+        public File[] getFiles() throws OperationCanceledException {
+          return new File[] {f};
         }
       };
       try {
@@ -1584,6 +1602,51 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
       return false;
     else
       return true;
+  }
+
+  /**
+   * Creates a document from a file. 
+   * @param file File to read document from
+   * @return openened document
+   */
+  private OpenDefinitionsDocument _openFile(File file) 
+    throws IOException, AlreadyOpenException {
+
+      DefinitionsDocument tempDoc = (DefinitionsDocument)
+        _editorKit.createDefaultDocument();
+
+    try {
+      OpenDefinitionsDocument openDoc = _getOpenDocument(file);
+      if (openDoc != null) {
+        //System.err.println("This file is already open!");
+        throw new AlreadyOpenException(openDoc);
+      }
+      
+      FileReader reader = new FileReader(file);
+      _editorKit.read(reader, tempDoc, 0);
+      reader.close(); // win32 needs readers closed explicitly!
+      
+      tempDoc.setFile(file);
+      tempDoc.resetModification();
+      
+      tempDoc.setCurrentLocation(0);
+      
+      final OpenDefinitionsDocument doc =
+        new DefinitionsDocumentHandler(tempDoc);
+      _definitionsDocs.addElement(doc);
+      
+      
+      notifyListeners(new EventNotifier() {
+          public void notifyListener(GlobalModelListener l) {
+            l.fileOpened(doc);
+          }
+        });
+      
+      return doc;
+    }
+    catch (BadLocationException docFailed) {
+      throw new UnexpectedException(docFailed);
+    }
   }
 
   /**

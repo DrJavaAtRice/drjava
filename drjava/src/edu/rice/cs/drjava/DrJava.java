@@ -121,6 +121,9 @@ public class DrJava implements ConfigurationTool, OptionConstants {
         public File getFile() {
           return file;
         }
+        public File[] getFiles() {
+          return new File[] {file};
+        }
       };
       try {
         OpenDefinitionsDocument doc = mf.getModel().openFile(command);

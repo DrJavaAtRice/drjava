@@ -366,6 +366,209 @@ public class GlobalModelIOTest extends GlobalModelTestCase {
   }
 
   /**
+   * Opens multiple files.
+   */
+  public void testOpenMultipleFiles()
+    throws BadLocationException, IOException
+  {
+    final File tempFile1 = writeToNewTempFile(FOO_TEXT);
+    final File tempFile2 = writeToNewTempFile(BAR_TEXT);
+
+    TestListener listener = new TestListener() {
+      public void fileOpened(OpenDefinitionsDocument doc) {
+        File file = null;
+        try {
+          file = doc.getFile();
+        }
+        catch (IllegalStateException ise) {
+          // We know file should exist
+          fail("file does not exist");
+        }
+
+        if (tempFile1.equals(file)) {
+          assertEquals("file to open", tempFile1, file);
+        } else {
+          assertEquals("file to open", tempFile2, file);
+        }
+
+        openCount++;
+      }
+    };
+
+    _model.addListener(listener);
+    try {
+      OpenDefinitionsDocument doc = _model.openFiles(new FileSelector(tempFile1,tempFile2));
+      listener.assertOpenCount(2);
+      assertModified(false, doc);
+      assertContents(BAR_TEXT, doc);
+    }
+    catch (AlreadyOpenException aoe) {
+      // Should not be open
+      fail("File was already open!");
+    }
+    catch (OperationCanceledException oce) {
+      // Should not be canceled
+      fail("Open was unexpectedly canceled!");
+    }
+    listener.assertOpenCount(2);
+    ListModel docs = _model.getDefinitionsDocuments();
+    assertEquals("size of document array", 2, docs.getSize());
+    assertContents(FOO_TEXT, (OpenDefinitionsDocument) docs.getElementAt(0));
+    assertContents(BAR_TEXT, (OpenDefinitionsDocument) docs.getElementAt(1));
+    
+  }
+
+  /**
+   * Initiates a file open, but cancels.
+   */
+  public void testCancelOpenMultipleFiles()
+    throws BadLocationException, IOException
+  {
+
+    OpenDefinitionsDocument doc1 = setupDocument(FOO_TEXT);
+    OpenDefinitionsDocument doc2 = setupDocument(BAR_TEXT);
+    assertNumOpenDocs(2);
+
+    TestListener listener = new TestListener() {
+      public boolean canAbandonFile(OpenDefinitionsDocument doc) {
+        canAbandonCount++;
+        return true; // yes allow the abandon
+      }
+
+      public void fileOpened(OpenDefinitionsDocument doc) {
+        openCount++;
+      }
+    };
+
+    _model.addListener(listener);
+    try {
+      OpenDefinitionsDocument newDoc =
+        _model.openFiles(new CancelingSelector());
+    }
+    catch (AlreadyOpenException aoe) {
+      // Should not be open
+      fail("File was already open!");
+    }
+    catch (OperationCanceledException oce) {
+      // we expect this to be thrown
+    }
+    finally {
+      assertNumOpenDocs(2);
+      listener.assertOpenCount(0);
+
+      ListModel docs = _model.getDefinitionsDocuments();
+      doc1 = (OpenDefinitionsDocument) docs.getElementAt(0);
+      assertModified(true, doc1);
+      assertContents(FOO_TEXT, doc1);
+
+      doc1 = (OpenDefinitionsDocument) docs.getElementAt(1);
+      assertModified(true, doc1);
+      assertContents(BAR_TEXT, doc1);
+    }
+  }
+
+
+  /**
+   * Attempts to open a non-existent file.
+   */
+  public void testOpenMultipleNonexistentFiles()
+    throws BadLocationException, IOException
+  {
+
+    OpenDefinitionsDocument doc = null;
+    final File tempFile1 = writeToNewTempFile(FOO_TEXT);
+
+    //TestListener listener = new TestListener();
+    TestListener listener = new TestListener() {
+      public void fileOpened(OpenDefinitionsDocument doc) {
+        File file = null;
+        try {
+          file = doc.getFile();
+        }
+        catch (IllegalStateException ise) {
+          // We know file should exist
+          fail("file does not exist");
+        }
+        assertEquals("file to open", tempFile1, file);
+
+        openCount++;
+      }
+    };
+    _model.addListener(listener);
+
+    
+    try {
+      doc = _model.openFiles(new FileSelector(tempFile1,
+                                              new File("fake-file")));
+      fail("IO exception was not thrown!");
+    }
+    catch (FileNotFoundException fnf) {
+      // As we hoped, the file was not found
+    }
+    catch (AlreadyOpenException aoe) {
+      // Should not be open
+      fail("File was already open!");
+    }
+    catch (OperationCanceledException oce) {
+      // Should not be canceled
+      fail("Open was unexpectedly canceled!");
+    }
+    assertEquals("non-existant file", doc, null);
+    listener.assertOpenCount(1);
+  }
+
+ /**
+   * Error checking for openening multiple files
+   * checks for null and an array w/null
+   */
+  public void testOpenMultipleFilesError()
+    throws BadLocationException, IOException
+  {
+
+    OpenDefinitionsDocument doc = null;
+    final File tempFile1 = writeToNewTempFile(FOO_TEXT);
+
+    try {
+      doc = _model.openFiles(new FileOpenSelector() {
+          public File getFile() throws OperationCanceledException {
+            return null;
+          }
+          public File[] getFiles() throws OperationCanceledException {
+            return new File[] {null};
+          }
+        });
+      fail("IO exception was not thrown!");
+    }
+    catch (IOException e) {
+      // As we hoped, the file was not found
+    }
+    catch (Exception e) {
+      fail("Unexpectedly exception caught!");
+    }
+
+    try {
+      doc = _model.openFiles(new FileOpenSelector() {
+          public File getFile() throws OperationCanceledException {
+            return null;
+          }
+          public File[] getFiles() throws OperationCanceledException {
+            return null;
+          }
+        });
+
+      fail("IO exception was not thrown!");
+    }
+    catch (IOException e) {
+      // As we hoped, the file was not found
+    }
+    catch (Exception e) {
+      fail("Unexpectedly exception caught!");
+    }
+
+    assertEquals("non-existant file", doc, null);
+  }
+
+  /**
    * Force a file to be opened with getDocumentforFile
    */
   public void testForceFileOpen()

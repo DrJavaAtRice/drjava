@@ -135,6 +135,9 @@ public interface GlobalModel {
   public OpenDefinitionsDocument openFile(FileOpenSelector com)
     throws IOException, OperationCanceledException, AlreadyOpenException;
 
+  public OpenDefinitionsDocument openFiles(FileOpenSelector com)
+    throws IOException, OperationCanceledException, AlreadyOpenException;
+
   /**
    * Closes an open definitions document, prompting to save if
    * the document has been changed.  Returns whether the file

@@ -364,6 +364,9 @@ public abstract class GlobalModelTestCase extends TestCase {
     public File getFile() throws OperationCanceledException {
       return _file;
     }
+    public File[] getFiles() throws OperationCanceledException {
+      return new File[] {_file};
+    }
     public void warnFileOpen(){
       throw new OpenWarningException();
     }
@@ -384,13 +387,24 @@ public abstract class GlobalModelTestCase extends TestCase {
    */
   
     public class FileSelector implements FileOpenSelector, FileSaveSelector {
-    private File _file;
+    private File _file, _file2;
     public FileSelector(File f) {
       _file = f;
+    }
+    public FileSelector(File f1, File f2) {
+      _file = f1;
+      _file2 = f2;
     }
 
     public File getFile() throws OperationCanceledException {
       return _file;
+    }
+    public File[] getFiles() throws OperationCanceledException {
+      if (_file2 != null) {
+        return new File[] {_file, _file2};
+      } else {
+        return new File[] {_file};
+      }
     }
     public void warnFileOpen(){
     }
@@ -402,6 +416,9 @@ public abstract class GlobalModelTestCase extends TestCase {
   public class CancelingSelector implements FileOpenSelector, FileSaveSelector
   {
     public File getFile() throws OperationCanceledException {
+      throw new OperationCanceledException();
+    }
+    public File[] getFiles() throws OperationCanceledException {
       throw new OperationCanceledException();
     }
     public void warnFileOpen(){
