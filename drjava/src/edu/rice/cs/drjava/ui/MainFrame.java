@@ -228,7 +228,7 @@ public class MainFrame extends JFrame {
 
   /** Creates the main window, and shows it. */
   public MainFrame() {
-    _model = new GlobalModel();
+    _model = new DefaultGlobalModel();
     OpenDefinitionsDocument doc = _model.newFile();
     _currentDocIndex = 0;
     _definitionsDocs = new DefaultListModel();
