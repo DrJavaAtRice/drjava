@@ -4,6 +4,8 @@ import gj.util.Stack;
 import gj.util.Vector;
 
 /**
+ * A refactoring of the common code between ReducedModelComment and 
+ * ReducedModelBrace.  Both of the refactored classes extend this class.
  * @version $Id$
  * @author JavaPLT
  */
@@ -37,10 +39,18 @@ public abstract class AbstractReducedModel implements ReducedModelStates {
     _cursor.setBlockOffset(0);
   }
  
+  /**
+   * Get the offset into the current ReducedToken.
+   * @return the number of characters into the token where the cursor sits
+   */
   int getBlockOffset() {
     return _cursor.getBlockOffset();
   }
   
+  /**
+   * Change the offset into the current ReducedToken.
+   * @param offset the number of characters into the token to set the cursor
+   */
   void setBlockOffset(int offset) {
     _cursor.setBlockOffset(offset);
   }
@@ -105,27 +115,15 @@ public abstract class AbstractReducedModel implements ReducedModelStates {
     return val;
   }
   
+  /**
+   * Inserts a character into the reduced model.
+   * A method to be implemented in each specific reduced sub-model.
+   */
   public abstract void insertChar(char ch);
   
   /**
-   * Inserts a block of non-brace text into the reduced model.
-   * <OL>
-   *  <li> atStart: if gap to right, augment first gap, else insert
-   *  <li> atEnd: if gap to left, augment left gap, else insert
-   *  <li> inside a gap: grow current gap, move offset by length
-   *  <li> inside a multiple character brace:
-   *   <ol>
-   *    <li> break current brace
-   *    <li> insert new gap
-   *   </ol>
-   *  <li> gap to left: grow that gap and set offset to zero
-   *  <li> gap to right: this case handled by inside gap (offset invariant)
-   *  <li> between two braces: insert new gap
-   * @param length the length of the inserted text
-   */
-//  public abstract void _insertGap(int length);
-  /**
-   * Inserts a block of non-brace text into the reduced model.
+   * Inserts a block of text into the reduced model which has no
+   * special consideration in the reduced model.
    * <OL>
    *  <li> atStart: if gap to right, augment first gap, else insert
    *  <li> atEnd: if gap to left, augment left gap, else insert
@@ -141,7 +139,6 @@ public abstract class AbstractReducedModel implements ReducedModelStates {
    * @param length the length of the inserted text
    */
   public void _insertGap( int length ) {
-    //0 - a
     if (_cursor.atStart()) {
       if (_gapToRight()) {
         _cursor.next();
@@ -151,7 +148,6 @@ public abstract class AbstractReducedModel implements ReducedModelStates {
         _insertNewGap(length);//inserts gap and goes to next item
       }
     }
-    //0 - b
     else if (_cursor.atEnd()) {
       if (_gapToLeft()) {
         _augmentGapToLeft(length);
@@ -162,29 +158,42 @@ public abstract class AbstractReducedModel implements ReducedModelStates {
         _insertNewGap(length); //inserts gap and moves to next item
       }
     }
+    // should we insert a Gap in between the characters of a multiple char brace
     else if ((_cursor.getBlockOffset() > 0) && _cursor.current().isMultipleCharBrace()) {
       insertGapBetweenMultiCharBrace(length);
     }
+    // inserting inside a Gap
     else if (_cursor.current().isGap()) {
       _cursor.current().grow(length);
       _cursor.setBlockOffset(_cursor.getBlockOffset() + length);
     }
-    //2
-    else if (!_cursor.atFirstItem() &&
-             _cursor.prevItem().isGap())
-             {
-               //already pointing to next item
-               _cursor.prevItem().grow(length);
-             }
-    //4
+    else if (!_cursor.atFirstItem() && _cursor.prevItem().isGap()) {
+      //already pointing to next item
+      _cursor.prevItem().grow(length);
+    }
     else { //between two braces
       _insertNewGap(length); //inserts a gap and goes to the next item
     }
     return;
   }
 
+  /**
+   * Inserts a gap between a multiple character brace.
+   * Because ReducedModelBrace does not keep track of multiple character
+   * braces, only (),{}, and [], it differed in its implementation of
+   * inserGap(int) from ReducedModelComment's.  To pull out the otherwise
+   * identical code and place it here, we created this function to do
+   * something meaningful in ReducedModelComment and to throw an exception
+   * in ReducedModelBrace.
+   */
   protected abstract void insertGapBetweenMultiCharBrace(int length);
   
+  /**
+   * Make a copy of the token list's iterator.
+   * Be sure to dispose of the result of this method after you are
+   * finished with it, or there will be memory leaks as long as
+   * this ReducedModel is not garbage collected.
+   */
   public TokenList.Iterator makeCopyCursor() {
     return _cursor._copy();
   }
@@ -198,7 +207,9 @@ public abstract class AbstractReducedModel implements ReducedModelStates {
     return _cursor.getStateAtCurrent();
   }
 
-  
+  /**
+   * Determines there is a Gap immediately to the right of the cursor.
+   */
   protected boolean _gapToRight() {
     // Before using, make sure not at last, or tail.
     return (!_tokens.isEmpty() && !_cursor.atEnd() &&
@@ -206,7 +217,7 @@ public abstract class AbstractReducedModel implements ReducedModelStates {
   }
   
   /**
-   * Returns true if there is a gap immediately to the left. 
+   * Determines if there is a gap immediately to the left of the cursor.
    */
   protected boolean _gapToLeft() {
     // Before using, make sure not at first or head.
@@ -256,15 +267,32 @@ public abstract class AbstractReducedModel implements ReducedModelStates {
    */
   protected abstract void resetLocation();
 
+  /**
+   * Get the ReducedToken currently pointed at by the cursor.
+   * @return the current token
+   */
   protected ReducedToken current() {
     return _cursor.current();
   }
+  
+  /**
+   * Move to the token immediately right.
+   * This function forwards its responsibilities to the TokenList
+   * iterator.  If the cursor is at the end, it will throw an
+   * exception.
+   */
   protected void  next() {
     _cursor.next();
   }
+
+  /**
+   * Move to the token immediately left.
+   * This function forwards its responsibilities to the TokenList
+   * iterator.  If the cursor is at the start, it will throw an
+   * exception.
+   */
   protected void prev() {
     _cursor.prev();
   }
- 
- 
+
 }

@@ -352,6 +352,7 @@ public class DefinitionsDocument extends PlainDocument {
   /**
    * Deals with the special cases.
    * If the first character after the previous \n is a } then -2
+   * @exception BadLocationException
    */
   private int _indentSpecialCases(int tab, int distToPrevNewline) throws BadLocationException {
     //not a special case.
@@ -436,6 +437,7 @@ public class DefinitionsDocument extends PlainDocument {
    *stopping at relEnd or at the first non-white space char.
    *NOTE: relStart and relEnd are relative to where we are in the document
    *relStart must be <= _currentLocation
+   * @exception BadLocationException
    */
   private int getWhiteSpaceBetween(int relStart, int relEnd) throws BadLocationException {
     String text = this.getText(_currentLocation - relStart, Math.abs(relStart - 

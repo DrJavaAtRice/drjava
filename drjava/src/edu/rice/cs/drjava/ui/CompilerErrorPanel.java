@@ -177,6 +177,7 @@ public class CompilerErrorPanel extends JPanel {
 
   /**
    * Adds an error highlight to the document.
+   * @exception BadLocationException
    */
   private void _addHighlight(int from, int to) throws BadLocationException {
     _previousHighlightTag =

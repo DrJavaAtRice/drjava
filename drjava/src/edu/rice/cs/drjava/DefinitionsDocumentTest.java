@@ -205,6 +205,7 @@ public class DefinitionsDocumentTest extends TestCase
   
   /** 
    * Test that keywords are highlighted properly.
+   * @exception BadLocationException
    */
   public void testHighlightKeywords1() throws BadLocationException {
     Vector<HighlightStatus> v;
@@ -234,6 +235,7 @@ public class DefinitionsDocumentTest extends TestCase
    * The important thing about the selecting thing is that because it wants
    * to render the last three chars selected, it asks for the first two only
    * in the call to getHighlightStatus.
+   * @exception BadLocationException
    */
   public void testHighlightKeywords2() throws BadLocationException {
     Vector<HighlightStatus> v;
@@ -256,6 +258,7 @@ public class DefinitionsDocumentTest extends TestCase
   
   /**
    * Test going to the second line in a two-line document.
+   * @exception BadLocationException
    */
   public void testGotoLine1() throws BadLocationException {
     final String s = "a\n";
@@ -341,6 +344,7 @@ public class DefinitionsDocumentTest extends TestCase
   
   /**
    * Test whether tabs are removed as appropriate on call to insertString.
+   * @exception BadLocationException
    */
   public void testTabRemovalOnInsertString() throws BadLocationException {
     defModel.setIndent(1);

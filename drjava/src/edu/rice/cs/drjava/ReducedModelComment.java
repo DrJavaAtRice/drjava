@@ -4,6 +4,11 @@ import gj.util.Stack;
 import gj.util.Vector;
 
 /**
+ * Keeps track of newlines, comment blocks, and single and double-quoted strings.
+ * This reduced sub-model is used for coloring purposes.  Given the information
+ * contained here, the DefinitionsEditorKit can paint strings, comments, and 
+ * regular code in different colors.  DefinitionsEditorKit colors keywords
+ * by directly reading DefinitionsDocument, the "full-scale" model.
  * @version $Id$
  */
 

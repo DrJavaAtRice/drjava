@@ -31,7 +31,10 @@ class InteractionsDocument extends PlainDocument {
     reset();
   }
 
-  /** Override superclass insertion to prevent insertion past frozen point. */
+  /**
+   * Override superclass insertion to prevent insertion past frozen point. 
+   * @exception BadLocationException
+   */
   public void insertString(int offs, String str, AttributeSet a) throws BadLocationException {
     if (offs < frozenPos) {
       Toolkit.getDefaultToolkit().beep();
@@ -41,7 +44,10 @@ class InteractionsDocument extends PlainDocument {
     }
   }
 
-  /** Override superclass deletion to prevent deletion past frozen point. */
+  /**
+   * Override superclass deletion to prevent deletion past frozen point. 
+   * @exception BadLocationException
+   */
   public void remove(int offs, int len) throws BadLocationException {
     if (offs < frozenPos) {
       Toolkit.getDefaultToolkit().beep();

@@ -253,6 +253,10 @@ public class JavaInterpreterTest extends TestCase {
 
 }
 
+/**
+ * A structure to contain a String and an Object pair.
+ *  This class is used to help test the JavaInterpreter.
+ */
 class Pair {
   private String _first;
   private Object _second;

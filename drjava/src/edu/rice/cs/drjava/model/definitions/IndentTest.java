@@ -677,6 +677,7 @@ public class IndentTest extends TestCase {
    * Regression test for bug in drjava-20010802-1020:
    * Indent block on a file containing just "  x;\n  y;\n" would throw an
    * exception.
+   * @exception BadLocationException
    */
   public void testBlockIndent2 () throws BadLocationException {
     BraceReduction rm = doc._reduced;

@@ -128,6 +128,7 @@ public class DynamicJavaAdapter implements JavaInterpreter {
      * delegating to the system loader if we can't load a class.
      * This is because any classes loaded by the system loader are never
      * unloaded.
+     * @exception ClassNotFoundException
      */
     protected Class loadClass(String name, boolean resolve) throws ClassNotFoundException {
       //System.err.println("loadClass: " + name);
@@ -143,6 +144,7 @@ public class DynamicJavaAdapter implements JavaInterpreter {
      * Try to load the class ourselves. We do this so its classloader property
      * will be set to this loader, so all other classes that are referenced
      * from this class will be loaded by our loader.
+     * @exception ClassNotFoundException
      */
     protected Class findClass(String name) throws ClassNotFoundException {
       //System.err.println("findClass: " + name);
