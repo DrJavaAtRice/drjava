@@ -303,6 +303,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     DrJava.getConfig().setSetting(OptionConstants.INDENT_LEVEL, new Integer(2));
     
     doc.insertString(0, text, null);
+    pane.endCompoundEdit();
     assertEquals("Should have inserted correctly.", text, doc.getText(0, doc.getLength()));
 
     pane.setCaretPosition(0);

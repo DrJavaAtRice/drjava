@@ -797,9 +797,10 @@ public class MainFrame extends JFrame implements OptionConstants {
       if (_currentDefPane.hasFocus()) {
         _currentDefPane.endCompoundEdit();
         CompoundUndoManager undoMan = _model.getActiveDocument().getUndoManager();
-        int key = undoMan.startCompoundEdit();
+//        int key = undoMan.startCompoundEdit(); //commented out for french keyboard fix
         super.actionPerformed(e);
-        undoMan.endCompoundEdit(key);
+        _currentDefPane.endCompoundEdit();
+        // undoMan.endCompoundEdit(key); //commented out for french keyboard fix, replaced with _currentDefPane.endCompoundEdit()
       }
       else {
         super.actionPerformed(e);

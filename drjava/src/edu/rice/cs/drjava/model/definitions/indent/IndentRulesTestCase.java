@@ -80,6 +80,10 @@ public abstract class IndentRulesTestCase extends TestCase {
       protected void endCompoundEdit(int key) {
         //Do nothing
       }
+      
+      protected void endLastCompoundEdit() {
+        //Do nothing
+      }
       protected void addUndoRedo(AbstractDocument.DefaultDocumentEvent chng, Runnable undoCommand, Runnable doCommand) {
         //Do nothing
       }

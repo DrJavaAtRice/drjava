@@ -242,7 +242,11 @@ public final class DefinitionsPaneTest extends TestCase {
     doc.insertString(0, text, null);
     assertEquals("insertion",text, doc.getText(0,doc.getLength()));
 
+    // Need to do this here since the commentLines action in MainFrame usually takes care of this.  
+    // I can't run the test here because I'm not sure how to select the text so that we can comment it.
+    pane.endCompoundEdit();
     doc.commentLines(0,doc.getLength());
+//    pane.endCompoundEdit();
     assertEquals("commenting",commented, doc.getText(0,doc.getLength()));
     int oldPos = pane.getCaretPosition();
     pane.setCaretPosition(newPos);
@@ -253,8 +257,12 @@ public final class DefinitionsPaneTest extends TestCase {
     doc.getUndoManager().redo();
     assertEquals("redo commenting",commented, doc.getText(0,doc.getLength()));
     assertEquals("redoing commenting restores caret position", oldPos, pane.getCaretPosition());
-
+    
+    // Need to do this here since the commentLines action in MainFrame usually takes care of this.  
+    // I can't simulate a keystroke here because I'm not sure how to select the text so that we can comment it.
+    pane.endCompoundEdit();    
     doc.uncommentLines(0,doc.getLength());
+//    pane.endCompoundEdit();
     assertEquals("uncommenting",text, doc.getText(0,doc.getLength()));
     oldPos = pane.getCaretPosition();
     pane.setCaretPosition(newPos);

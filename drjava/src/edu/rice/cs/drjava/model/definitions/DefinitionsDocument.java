@@ -704,7 +704,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   public void commentLines(int selStart, int selEnd) {
     throwErrorHuh();
     try {
-      int key = _undoManager.startCompoundEdit();
+      //int key = _undoManager.startCompoundEdit();  //Uncommented in regards to the FrenchKeyBoardFix
       if (selStart == selEnd) {
         Position oldCurrentPosition = createPosition(_currentLocation);
         _commentLine();
@@ -715,7 +715,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
       else {
         _commentBlock(selStart, selEnd);
       }
-      _undoManager.endCompoundEdit(key);
+      _undoManager.endLastCompoundEdit();  //Changed from endCompoundEdit(key) for FrenchKeyBoardFix
     }
     catch (BadLocationException e) {
       throw new UnexpectedException(e);
@@ -785,7 +785,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   public void uncommentLines(int selStart, int selEnd) {
     throwErrorHuh();
     try {
-      int key = _undoManager.startCompoundEdit();
+      //int key = _undoManager.startCompoundEdit(); //commented out for FrenchKeyBoardFix
       if (selStart == selEnd) {
         Position oldCurrentPosition = createPosition(_currentLocation);
         _uncommentLine();
@@ -796,7 +796,8 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
       else {
         _uncommentBlock(selStart, selEnd);
       }
-      _undoManager.endCompoundEdit(key);
+      //_undoManager.endCompoundEdit(key); //Commented out for FrenchKeyBoardFix, Replaced with endLastCompoundEdit();
+      _undoManager.endLastCompoundEdit();
     }
     catch (BadLocationException e) {
       throw new UnexpectedException(e);
@@ -1469,7 +1470,11 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   protected void endCompoundEdit(int key) {
     _undoManager.endCompoundEdit(key);
   }
-  
+  //This method added for FrenchKeyBoardFix
+   protected void endLastCompoundEdit() {
+     _undoManager.endLastCompoundEdit();
+   }
+   
   protected void addUndoRedo(AbstractDocument.DefaultDocumentEvent chng, Runnable undoCommand, Runnable doCommand) {
     chng.addEdit(new CommandUndoableEdit(undoCommand, doCommand));    
   }

@@ -911,7 +911,7 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
     //long start = System.currentTimeMillis();
     try {
       // Begins a compound edit.
-      int key = startCompoundEdit();
+     // int key = startCompoundEdit(); // commented out in connection with the FrenchKeyBoard Fix
       
       if (selStart == selEnd) {
         Position oldCurrentPosition = createPosition(_currentLocation);
@@ -929,7 +929,8 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
         _indentBlock(selStart, selEnd, reason, pm);
       }
       // Ends the compound edit.
-      endCompoundEdit(key);
+      //endCompoundEdit(key);   //Changed to endLastCompoundEdit in connection with the FrenchKeyBoard Fix
+      endLastCompoundEdit();
     }
     catch (BadLocationException e) {
       throw new UnexpectedException(e);
@@ -1746,6 +1747,7 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
   //Two abstract methods to delegate to the undo manager, if one exists.
   protected abstract int startCompoundEdit();
   protected abstract void endCompoundEdit(int i);
+  protected abstract void endLastCompoundEdit();
   protected abstract void addUndoRedo(AbstractDocument.DefaultDocumentEvent chng, Runnable undoCommand, Runnable doCommand);
   //Checks if the document is closed, and then throws an error if it is.
   protected abstract void throwErrorHuh();

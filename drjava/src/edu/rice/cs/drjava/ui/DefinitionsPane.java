@@ -250,6 +250,13 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
      */
     public void undoableEditHappened(UndoableEditEvent e) {
       UndoWithPosition undo = new UndoWithPosition(e.getEdit(), getCaretPosition());
+      if (!_inCompoundEdit) {
+        CompoundUndoManager undoMan = _doc.getUndoManager();
+        _inCompoundEdit = true;
+        _compoundEditKey = undoMan.startCompoundEdit();
+        getUndoAction().updateUndoState();
+        getRedoAction().updateRedoState();
+      }
       _doc.getUndoManager().addEdit(undo);
       getRedoAction().setEnabled(false);
     }
@@ -449,21 +456,25 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
           if (e.getKeyCode() == KeyEvent.VK_ENTER) {
             endCompoundEdit();
           }
+         
           
-          CompoundUndoManager undoMan = _doc.getUndoManager();
-          int key = undoMan.startCompoundEdit();
+             CompoundUndoManager undoMan = _doc.getUndoManager();
+          //int key = undoMan.startCompoundEdit();
           //        System.out.println("supering 1 " + isAltF4);
           super.processKeyEvent(e);
-          undoMan.endCompoundEdit(key);
+          // We call endCompoundEdit() here because one will automatically start when processKeyEvent finishes (see the definition of _undoListener).
+          endCompoundEdit();
+//          undoMan.endCompoundEdit(key); //commented out because of frenchkeyboard fix
           //        e.consume();
         }
         else {
           // The following conditional fixes bug #676586 by ignoring typed events when the meta key is down
           // and fixes bug #905405 "Undo Alt+Anything Causes Exception" by ignoring typed events when
           // the alt key is down.
-          if ((((e.getModifiers() & InputEvent.META_MASK) != 0) || ((e.getModifiers() & InputEvent.ALT_MASK) != 0))
+          // NOTE: no longer need to check for alt since we now only start a new compound edit if an undoable edit actually happened.
+          if ((((e.getModifiers() & InputEvent.META_MASK) != 0)) // || ((e.getModifiers() & InputEvent.ALT_MASK) != 0)) //fixed for frenchkeyboard support
                 && e.getKeyCode() == KeyEvent.VK_UNDEFINED) {
-            //          System.out.println("not supering 1 " + isAltF4);
+            //            //          System.out.println("not supering 1 " + isAltF4);
             return;
           }
           
@@ -503,17 +514,18 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
           
           // backspace deletes twice without this check, overrides other keystrokes
           // that use the mask modifier
-          if (((ks.getModifiers() & mask) == 0) && ks.getKeyChar() != '\b') {
-            int _keyval = (int) e.getKeyChar();
-            if (_keyval >= 32 && _keyval <= 126) {
-              CompoundUndoManager undoMan = _doc.getUndoManager();
-              if (!_inCompoundEdit) {
-                _inCompoundEdit = true;
-                _compoundEditKey = undoMan.startCompoundEdit();
-                getUndoAction().updateUndoState();
-                getRedoAction().updateRedoState();
-                //super.processKeyEvent(e);
-              }
+// Following IF block is commented out in regards to French Keyboard Fix
+          //          if (((ks.getModifiers() & mask) == 0) && ks.getKeyChar() != '\b') {
+//            int _keyval = (int) e.getKeyChar();
+//            if (_keyval >= 32 && _keyval <= 126) {
+//              CompoundUndoManager undoMan = _doc.getUndoManager();
+//              if (!_inCompoundEdit) {
+//                _inCompoundEdit = true;
+//                _compoundEditKey = undoMan.startCompoundEdit();
+//                getUndoAction().updateUndoState();
+//                getRedoAction().updateRedoState();
+//                //super.processKeyEvent(e);
+//              }
               //            else {
               //              UndoableEdit lastEdit = undoMan.getNextUndo();
               //              lastEdit.die();
@@ -532,8 +544,8 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
           //        }
         }
       }
-    }
-  }
+    
+  
 
   /**
    * Sets the editor kit that will be used by all DefinitionsPanes.
@@ -758,9 +770,6 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
       _toggleBreakpointMenuItem = _popMenu.add(breakpointItem);
       _toggleBreakpointMenuItem.setEnabled(false);
     }
-    
-    
-
   }
 
   /*
@@ -1236,16 +1245,18 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
    */
   protected void indentLines(int selStart, int selEnd, int reason, ProgressMonitor pm) {
     _mainFrame.hourglassOn();
-      final int key = _doc.getUndoManager().startCompoundEdit();
+      // final int key = _doc.getUndoManager().startCompoundEdit(); //Commented out in regards to French KeyBoard Fix
       try {
         _doc.indentLines(selStart, selEnd, reason, pm);
         //      _indentLines(reason, pm);
-        _doc.getUndoManager().endCompoundEdit(key);
+        //_doc.getUndoManager().endCompoundEdit(key); //commented out for french keyboard fix, replaced with endCompoundEdit
+        endCompoundEdit();
       }
       catch (OperationCanceledException oce) {
         // if canceled, undo the indent; but first, end compound edit
-        _doc.getUndoManager().endCompoundEdit(key);
-        _doc.getUndoManager().undo(key);
+        //        _doc.getUndoManager().endCompoundEdit(key); fixed for french keyboard fix
+        endCompoundEdit();
+        _doc.getUndoManager().undo();
         // pm = null, so cancel can't be pressed
         throw new UnexpectedException(oce);
       }
@@ -1255,7 +1266,9 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
         //the main frame.
         _mainFrame.hourglassOff();
         //pm.close();
-        _doc.getUndoManager().endCompoundEdit(key);
+
+  // _doc.getUndoManager().endCompoundEdit(key); //commented out for french keyboard fix, replaced with endCompoundEdit()
+        endCompoundEdit();
         throw e;
       }
 

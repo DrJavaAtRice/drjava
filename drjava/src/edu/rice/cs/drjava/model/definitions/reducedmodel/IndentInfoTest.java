@@ -41,7 +41,7 @@
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  * OTHER DEALINGS WITH THE SOFTWARE.
  *
-END_COPYRIGHT_BLOCK*/
+ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.definitions.reducedmodel;
 
@@ -53,7 +53,7 @@ import edu.rice.cs.drjava.model.definitions.indent.Indenter;
 import edu.rice.cs.drjava.model.GlobalEventNotifier;
 
 /**
-
+ * 
  * @version $Id$
  */
 public final class IndentInfoTest extends TestCase {
@@ -64,10 +64,10 @@ public final class IndentInfoTest extends TestCase {
   //private GlobalEventNotifier _notifier;
   private DJDocument _document;
   
-
+  
   public void setUp() {
     //_notifier = new GlobalEventNotifier();
-   // _document = new DefinitionsDocument(_notifier);
+    // _document = new DefinitionsDocument(_notifier);
     _document = new AbstractDJDocument() {
       protected void throwErrorHuh() {
         //Do nothing
@@ -79,18 +79,21 @@ public final class IndentInfoTest extends TestCase {
       protected void endCompoundEdit(int key) {
         //Do nothing
       }
+      protected void endLastCompoundEdit() {
+        //Do nothing
+      }
       protected void addUndoRedo(AbstractDocument.DefaultDocumentEvent chng, Runnable undoCommand, Runnable doCommand) {
         //Do nothing
       }
       protected void _styleChanged() {
-       //Do nothing 
+        //Do nothing 
       }
       protected Indenter makeNewIndenter(int indentLevel) {
         return new Indenter(indentLevel);
       }
     };
   }
-
+  
   private void _infoTestHelper(int location, String message,
                                int expDistToPrevNewline, int expDistToBrace,
                                int expDistToNewline, int expDistToBraceCurrent,
@@ -99,24 +102,24 @@ public final class IndentInfoTest extends TestCase {
     _document.setCurrentLocation(location);
     //_reduced = _document.getReduced();
     _info = _document.getIndentInformation();
-
+    
     assertEquals(message + " -- distToPrevNewline", expDistToPrevNewline, _info.distToPrevNewline);
     assertEquals(message + " -- distToBrace", expDistToBrace, _info.distToBrace);
     assertEquals(message + " -- distToNewline", expDistToNewline, _info.distToNewline);
     assertEquals(message + " -- distToBraceCurrent", expDistToBraceCurrent, _info.distToBraceCurrent);
     assertEquals(message + " -- distToNewlineCurrent", expDistToNewlineCurrent, _info.distToNewlineCurrent);
   }
-
+  
   public void testFieldsForCurrentLocation() throws BadLocationException {
-
+    
     _text = "foo {\nvoid m1(int a,\nint b) {\n}\n}";
     //       .   . ..   .  ..     . .    . . ... .
     //       |          |         |           |
     //       0          10        20          30
-
+    
     _document.remove(0, _document.getLength());
     _document.insertString(0, _text, null);
-
+    
     _infoTestHelper(0, "DOCSTART -- no brace or newline",     -1, -1, -1, -1, -1);
     _infoTestHelper(4, "Location has no brace or newline",    -1, -1, -1, -1, -1);
     _infoTestHelper(5, "Location has a brace but no newline", -1, -1, -1,  1, -1);
