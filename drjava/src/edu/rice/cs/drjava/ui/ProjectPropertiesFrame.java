@@ -63,6 +63,8 @@ import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.ui.config.*;
 
 import edu.rice.cs.util.swing.FileSelectorComponent;
+import edu.rice.cs.util.swing.DirectorySelectorComponent;
+import edu.rice.cs.util.swing.DirectoryChooser;
 import javax.swing.filechooser.FileFilter;
 
 /**
@@ -80,7 +82,7 @@ public class ProjectPropertiesFrame extends JFrame {
   
   private MainFrame _mainFrame;
   
-  private FileSelectorComponent _builtDirSelector;
+  private DirectorySelectorComponent _builtDirSelector;
   private FileSelectorComponent _jarMainClassSelector;
   
   /**
@@ -241,7 +243,7 @@ public class ProjectPropertiesFrame extends JFrame {
     panel.setLayout(gridbag);
     c.fill = GridBagConstraints.HORIZONTAL;
     Insets labelInsets = new Insets(5, 10, 0, 10);
-    Insets compInsets  = new Insets(5, 0, 0, 0);
+    Insets compInsets  = new Insets(5, 5, 0, 0);
     c.weightx = 0.0;
     c.gridwidth = 1;
     c.insets = labelInsets;
@@ -288,13 +290,11 @@ public class ProjectPropertiesFrame extends JFrame {
 //   
 //    toReturn.add(new JLabel("Build Directory"),BorderLayout.WEST);
 //    
-    JFileChooser dirChooser = new JFileChooser(_getWorkDir());
-    dirChooser.setDialogTitle("Select");
+    DirectoryChooser dirChooser = new DirectoryChooser(this);
+    dirChooser.setSelectedDirectory(_getWorkDir());
+    dirChooser.setTitle("Select Built Directory");
     dirChooser.setApproveButtonText("Select");
-    dirChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-    dirChooser.setMultiSelectionEnabled(false);
-    _builtDirSelector = new FileSelectorComponent(this,dirChooser,20,12f);
-    _builtDirSelector.setFileFilter(new DirectoryFilter());
+    _builtDirSelector = new DirectorySelectorComponent(this,dirChooser,20,12f);
     //toReturn.add(_builtDirSelector, BorderLayout.EAST);
     return _builtDirSelector;
   }
