@@ -109,28 +109,28 @@ public class Indenter
     String oneLevel = _indentLevel;
     
     IndentRule 
-      rule05 = new ActionDoNothing(),
-      rule04 = new ActionStartPrevLinePlus(" "), 
+      //rule05 = new ActionDoNothing(),
+      rule05 = new ActionStartPrevLinePlus(" "),
+      rule04 = new ActionStartPrevLinePlus(" * "), 
       rule03 = new QuestionCurrLineEmpty(rule04, rule05);
     
     IndentRule 
       rule33 = new ActionStartCurrStmtPlus(oneLevel),
-      rule32 = new ActionStartStmtOfBracePlus(oneLevel),     // ?       
+      rule32 = new ActionStartStmtOfBracePlus(oneLevel),
       rule31 = rule33,
       rule30 = new QuestionExistsCharInStmt('?', ':', rule31, rule32),
       rule29 = new QuestionLineContains(':', rule30, rule33),
       rule28 = new ActionStartStmtOfBracePlus(""),
       rule27 = new QuestionCurrLineStartsWithSkipComments("{", rule28, rule29),
       rule26 = new ActionStartPrevStmtPlus(""),
-      rule25 = rule32,  // ?
+      rule25 = rule32,
       rule24 = rule26,
       rule23 = new QuestionExistsCharInStmt('?', ':', rule24, rule25),
       rule22 = new QuestionLineContains(':', rule23, rule26),
       rule21 = rule28,
       rule19 = new QuestionStartingNewStmt(rule22, rule27),
       rule18 = rule19,
-      rule17 = rule32,  // ?
-      //rule16 = new QuestionBraceOnPrevLine(rule17, rule18),
+      rule17 = rule32,
       rule16 = new QuestionStartAfterOpenBrace(rule17, rule18),
       rule20 = new QuestionCurrLineStartsWithSkipComments("}", rule21, rule16),
       rule15 = new QuestionBraceIsCurly(rule20, rule19),
@@ -138,9 +138,10 @@ public class Indenter
       rule13 = new ActionBracePlus(" "),
       rule12 = new QuestionNewParenPhrase(rule13, rule14),
       rule11 = new QuestionBraceIsParenOrBracket(rule12, rule15),
-      rule10 = rule03,      
+      //rule10 = rule03,
+      rule10 = new ActionStartPrevLinePlus(""),
       rule09 = new ActionStartPrevLinePlus("* "),
-      rule08 = new ActionStartPrevLinePlus(""),          
+      rule08 = rule10,          
       rule07 = new QuestionCurrLineStartsWith("*", rule08, rule09),
       rule06 = new QuestionPrevLineStartsWith("*", rule07, rule10),
       rule02 = new QuestionPrevLineStartsComment(rule03, rule06),
