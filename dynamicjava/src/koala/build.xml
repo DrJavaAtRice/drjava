@@ -35,7 +35,7 @@
 
   <property name="osxtag" value="drjava-osx" />
   <property name="osxdir" value="${srcroot}/../" />
-  <property name="jarfile" value="${srcroot}/../drjava.jar" />
+  <property name="jarfile" value="${srcroot}/../dynamicjava.jar" />
   <property name="manifest" value="manifest" />
 
 

@@ -537,8 +537,15 @@ public class TypeChecker extends VisitorObject<Class> {
         m = context.lookupMethod(exp, mn, cargs);
       } catch (NoSuchMethodException e) {
         String s = c.getName();
-        node.setProperty(NodeProperties.ERROR_STRINGS, new String[] { mn, s });
-        throw new ExecutionError("no.such.method", node);
+        String sargs = "";
+        for (int i = 0; i < cargs.length-1; i++) {
+          sargs += cargs[i].getName() + ", ";
+        }
+        if (cargs.length > 0) {
+          sargs += cargs[cargs.length-1].getName();
+        }
+        node.setProperty(NodeProperties.ERROR_STRINGS, new String[] { mn, s, sargs });
+        throw new ExecutionError("no.such.method.with.args", node);
       } catch (MethodModificationError e) {
         Expression expr = e.getExpression();
         expr.acceptVisitor(this);
@@ -667,8 +674,15 @@ public class TypeChecker extends VisitorObject<Class> {
     } catch (NoSuchMethodException e) {
       String s0 = node.getMethodName();
       String s1 = c.getName();
-      node.setProperty(NodeProperties.ERROR_STRINGS, new String[] { s0, s1 });
-      throw new ExecutionError("no.such.method", node);
+      String sargs = "";
+      for (int i = 0; i < cargs.length-1; i++) {
+        sargs += cargs[i].getName() + ", ";
+      }
+      if (cargs.length > 0) {
+        sargs += cargs[cargs.length-1].getName();
+      }
+      node.setProperty(NodeProperties.ERROR_STRINGS, new String[] { s0, s1, sargs });
+      throw new ExecutionError("no.such.method.with.args", node);
     }
     
     // Set the node properties
