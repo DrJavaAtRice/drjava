@@ -39,46 +39,36 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.util;
 
-import java.util.Date;
-import java.text.SimpleDateFormat;
-
 /**
- * This interface hold the information about this build of util.
- * This file is copied to Version.java by the build process, which also
- * fills in the right values of the date and time.
- *
- * This javadoc corresponds to build util-20020718-2133;
- *
+ * A class to provide some convenient String operations as static methods.
+ * It's abstract to prevent (useless) instantiation, though it can be subclassed
+ * to provide convenient namespace importation of its methods.
  * @version $Id$
  */
-public abstract class Version {
+
+public abstract class StringOps {
   /**
-   * This string will be automatically expanded upon "ant commit".
-   * Do not edit it by hand!
+   * Takes theString fullString and replaces all instances of toReplace with
+   * replacement
    */
-  private static final String BUILD_TIME_STRING = "20020718-2133";
-
-  /** A {@link Date} version of the build time. */
-  private static final Date BUILD_TIME = _getBuildDate();
-
-  public static String getBuildTimeString() {
-    return BUILD_TIME_STRING;
-  }
-
-  public static Date getBuildTime() {
-    return BUILD_TIME;
-  }
-
-  private static Date _getBuildDate() {
-    try {
-      return new SimpleDateFormat("yyyyMMdd-HHmm z").parse(BUILD_TIME_STRING + " GMT");
+  public static String replace (String fullString, String toReplace, String replacement) {
+    int index = 0;
+    int pos;
+    int fullStringLength = fullString.length();
+    int toReplaceLength = toReplace.length();
+    if (toReplaceLength > 0) {
+      int replacementLength = replacement.length();
+      StringBuffer buff;
+      while (index < fullStringLength && 
+             ((pos = fullString.indexOf(toReplace, index)) >= 0)) {      
+        buff = new StringBuffer(fullString.substring(0, pos));
+        buff.append(replacement);
+        buff.append(fullString.substring(pos + toReplaceLength, fullStringLength));
+        index = pos + replacementLength;
+        fullString = buff.toString();
+        fullStringLength = fullString.length();
+      }
     }
-    catch (Exception e) { // parse format or whatever problem
-      return null;
-    }
+    return fullString;
   }
-
-  public static void main(String[] args) {
-    System.out.println("Version for edu.rice.cs.util: " + BUILD_TIME_STRING);
-  }
-} 
+}
