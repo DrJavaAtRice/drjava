@@ -44,8 +44,6 @@ import java.awt.Component;
 import java.awt.BorderLayout;
 
 public class CompilerErrorPanel extends JPanel {
-  private static final String NEWLINE = System.getProperty("line.separator");
-
   /** Highlight painter for selected errors in the defs doc. */
   private static final DefaultHighlighter.DefaultHighlightPainter
     _documentHighlightPainter
@@ -104,7 +102,7 @@ public class CompilerErrorPanel extends JPanel {
           String betweenDotAndErr =
             _definitionsView.getDocument().getText(errPos, curPos - errPos);
 
-          if (betweenDotAndErr.indexOf(NEWLINE) == -1) {
+          if (betweenDotAndErr.indexOf('\n') == -1) {
             shouldSelect = errorBefore;
           }
         } 
@@ -120,7 +118,7 @@ public class CompilerErrorPanel extends JPanel {
           String betweenDotAndErr =
             _definitionsView.getDocument().getText(curPos, errPos - curPos);
 
-          if (betweenDotAndErr.indexOf(NEWLINE) == -1) {
+          if (betweenDotAndErr.indexOf('\n') == -1) {
             shouldSelect = errorAfter;
           }
         } 
@@ -235,12 +233,12 @@ public class CompilerErrorPanel extends JPanel {
       // on the character one before this character. If this is not the case,
       // if the error is at a newline character, both prev and next newlines
       // will be set to that place, resulting in nothing being highlighted.
-      int prevNewline = text.lastIndexOf(NEWLINE, errPos - 1);
+      int prevNewline = text.lastIndexOf('\n', errPos - 1);
       if (prevNewline == -1) {
         prevNewline = 0;
       }
       
-      int nextNewline = text.indexOf(NEWLINE, errPos);
+      int nextNewline = text.indexOf('\n', errPos);
       if (nextNewline == -1) {
         nextNewline = doc.getLength();
       }
@@ -306,7 +304,7 @@ public class CompilerErrorPanel extends JPanel {
           numProcessed++;
         }
 
-        int nextNewline = defsText.indexOf(NEWLINE, offset);
+        int nextNewline = defsText.indexOf('\n', offset);
         if (nextNewline == -1) {
           break;
         }
@@ -316,7 +314,8 @@ public class CompilerErrorPanel extends JPanel {
         }
       }
     }
-    catch (BadLocationException willNeverEverEverHappen) {}
+    catch (BadLocationException willNeverEverEverHappen) {
+    }
   }
 
   /**
