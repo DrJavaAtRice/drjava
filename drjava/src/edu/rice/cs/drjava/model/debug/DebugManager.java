@@ -45,9 +45,9 @@ import java.io.*;
 import edu.rice.cs.drjava.model.GlobalModel;
 
 // JSwat stuff
-//js import com.bluemarsh.jswat.*;
-//js import com.bluemarsh.jswat.ui.*;
-//js import com.sun.jdi.Bootstrap;
+import com.bluemarsh.jswat.*;
+import com.bluemarsh.jswat.ui.*;
+import com.sun.jdi.Bootstrap;
 
 /**
  * Interface between DrJava and JSwat, a Java debugger.
@@ -57,8 +57,8 @@ import edu.rice.cs.drjava.model.GlobalModel;
 public class DebugManager {
   private boolean _isReady; // status of debugger
 
-    //js  private Session _session;
-    //js  private JSwat _swat;
+  private Session _session;
+  private JSwat _swat;
   
   private GlobalModel _model;
   
@@ -68,8 +68,8 @@ public class DebugManager {
    */
   public DebugManager(GlobalModel model) {
     _isReady = false;
-    //js _session = null;
-    //js _swat = null;
+    _session = null;
+    _swat = null;
     _model = model;
   }
   
@@ -83,33 +83,33 @@ public class DebugManager {
   /**
    * Prepares an instantiation of the debugger.
    */
-//js   public void init(UIAdapter adapter) {
-//js    _session = new Session();
+  public void init(UIAdapter adapter) {
+    _session = new Session();
     
     // Test for the JDI package before we continue.
-//js    Bootstrap.virtualMachineManager();
+    Bootstrap.virtualMachineManager();
     
-//js    _swat = JSwat.instanceOf();
-    
+    _swat = JSwat.instanceOf();
+   
     // Load the jswat settings file.
-//js    File dir = new File(System.getProperty("user.home") + File.separator + ".jswat");
-//js    File f = new File(dir, "settings");
-//js    AppSettings props = AppSettings.instanceOf();
-//js    props.load(f);
+    File dir = new File(System.getProperty("user.home") + File.separator + ".jswat");
+    File f = new File(dir, "settings");
+    AppSettings props = AppSettings.instanceOf();
+    props.load(f);
     
-//js    adapter.buildInterface();
-//js    _session.init(adapter);
+    adapter.buildInterface();
+    _session.init(adapter);
 
-//js    _session.addListener(new DebugOutputAdapter());
+    _session.addListener(new DebugOutputAdapter());
 
-//js     _isReady = true;
-//js   }
+     _isReady = true;
+   }
   
   /**
    * 
    */
   public void endSession() {
-//js    Main.endSession(_session);
+    Main.endSession(_session);
   }
   
   /**
@@ -118,8 +118,8 @@ public class DebugManager {
    */
   public void cleanUp() {
     
-//js    _session = null;
-//js    _swat = null;
+    _session = null;
+    _swat = null;
     
     _isReady = false;
   }
@@ -130,19 +130,19 @@ public class DebugManager {
    * @param command JSwat command to perform
    */
   public void performCommand(String command) {
-//js    Manager manager = _session.getManager(CommandManager.class);
-//js    ((CommandManager)manager).handleInput(command);
+    Manager manager = _session.getManager(CommandManager.class);
+    ((CommandManager)manager).handleInput(command);
   }
   
   /**
    * Attaches the given Writer directly to JSwat's status Log.
    * This method is specific to the JSwat debugger.
    */
-//js  public void attachLogWriter(Writer w) {
-//js    Log log = _session.getStatusLog();
-//js    log.attach(w);
-//js    log.start();
-//js  }
+  public void attachLogWriter(Writer w) {
+    Log log = _session.getStatusLog();
+    log.attach(w);
+    log.start();
+  }
   
   /*
   public void start();
@@ -172,7 +172,7 @@ public class DebugManager {
    *
    * @author  Nathan Fiedler, with modifications
    */
-  class DebugOutputAdapter { //js implements SessionListener {
+  class DebugOutputAdapter implements SessionListener {
     /** When this reaches 2, the output streams are finished. */
     protected int outputCompleteCount;
     
@@ -193,32 +193,32 @@ public class DebugManager {
      *
      * @param  session  Session being activated.
      */
-//js    public void activate(Session session) {
+    public void activate(Session session) {
       // Attach to the stderr and stdout input streams of the passed
       // VirtualMachine and begin reading from them. Everything read
       // will be displayed in the text area.
-//js      com.sun.jdi.VirtualMachine vm = session.getVM();
-//js      if (vm.process() == null) {
+      com.sun.jdi.VirtualMachine vm = session.getVM();
+      if (vm.process() == null) {
         // Must be a remote process, which can't provide us
         // with an input and error streams.
         // We're automatically finished reading output.
-//js        outputCompleteCount = 2;
-//js      } else {
+        outputCompleteCount = 2;
+      } else {
         // Assume output reading is not complete.
-//js        outputCompleteCount = 0;
+        outputCompleteCount = 0;
         // Create readers for the input and error streams.
-//js        displayOutput(vm.process().getErrorStream(),false);
-//js        displayOutput(vm.process().getInputStream(),true);
-//js      }
-//js    } // activate
+        displayOutput(vm.process().getErrorStream(),false);
+        displayOutput(vm.process().getInputStream(),true);
+      }
+    } // activate
     
     /**
      * Called when the Session is about to close down.
      *
      * @param  session  Session being closed.
      */
-//js    public void close(Session session) {
-//js    } // close
+    public void close(Session session) {
+    } // close
     
     /**
      * Called when the Session is about to end an active debugging
@@ -228,16 +228,16 @@ public class DebugManager {
      *
      * @param  session  Session being deactivated.
      */
-//js    public synchronized void deactivate(Session session) {
+    public synchronized void deactivate(Session session) {
       // Wait for the output readers to finish.
-//js      while (outputCompleteCount < 2) {
-//js        try {
-//js          wait();
-//js        } catch (InterruptedException ie) {
-//js          break;
-//js        }
-//js      }
-//js    } // deactivate
+      while (outputCompleteCount < 2) {
+        try {
+          wait();
+        } catch (InterruptedException ie) {
+          break;
+        }
+      }
+    } // deactivate
     
     /** 
      * Create a thread that will retrieve and display any output
@@ -278,8 +278,8 @@ public class DebugManager {
      *
      * @param  session  Session adding this listener.
      */
-    //js    public void init(Session session) {
-    //js    } // init
+        public void init(Session session) {
+        } // init
     
     /**
      * Notify any waiters that one of the reader threads has

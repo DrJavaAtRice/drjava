@@ -62,6 +62,12 @@ import edu.rice.cs.drjava.ui.CompilerErrorPanel.ErrorListPane;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.DelegatingAction;
 
+/*
+import com.bluemarsh.jswat.*;
+import com.bluemarsh.jswat.ui.*;
+import com.bluemarsh.jswat.view.*;
+*/
+
 /**
  * DrJava's main window.
  * @version $Id$
@@ -524,7 +530,7 @@ public class MainFrame extends JFrame {
    * Display the debugger tab and update the Debug menu accordingly.
    */
   public void showDebugger() {
-//js     _model.getDebugManager().init(_debugPanel.getUIAdapter());
+     _model.getDebugManager().init(_debugPanel.getUIAdapter());
     _tabbedPane.add("Debug", _debugPanel);
     _tabbedPane.setSelectedComponent(_debugPanel);
     _debuggerEnabledMenuItem.setState(true);
@@ -920,9 +926,9 @@ public class MainFrame extends JFrame {
    * fields within MainFrame.  This method serves to make the code
    * more legible on the higher calling level, i.e., the constructor.
    */
-    private void _setUpMenuBar() {
-	//js     boolean showDebugger = (_debugPanel != null);
-    boolean showDebugger = false;
+  private void _setUpMenuBar() {
+    boolean showDebugger = (_debugPanel != null);
+    //boolean showDebugger = false;
     
     _menuBar = new JMenuBar();
     _fileMenu = _setUpFileMenu();
@@ -1248,11 +1254,15 @@ public class MainFrame extends JFrame {
     _interactionsPane = new InteractionsPane(_model);
     
     // Try to create debug panel (see if JSwat is around)
-    try {
-      _debugPanel = new DebugPanel(_model, this);
-    }
-    catch(NoClassDefFoundError e) {
-      // Don't use the debugger
+    if (_model.getDebugManager() != null) {
+      try {
+        _debugPanel = new DebugPanel(_model, this);
+      }
+      catch(NoClassDefFoundError e) {
+        // Don't use the debugger
+        _debugPanel = null;
+      }
+    } else {
       _debugPanel = null;
     }
     

@@ -56,9 +56,9 @@ import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 import edu.rice.cs.drjava.model.debug.*;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 
-//js import com.bluemarsh.jswat.*;
-//js import com.bluemarsh.jswat.ui.*;
-//js import com.bluemarsh.jswat.view.*;
+import com.bluemarsh.jswat.*;
+import com.bluemarsh.jswat.ui.*;
+import com.bluemarsh.jswat.view.*;
 
 /** 
  * The Debugger Panel
@@ -71,7 +71,7 @@ public class DebugPanel extends JPanel {
   private final DebugManager _debugger;
   
   private final Hashtable _jswatProperties;
-//js   private final UIAdapter _uiAdapter;
+  private final UIAdapter _uiAdapter;
 
   private final StyledDocument _outputDoc;
   private final JScrollPane _scrollPane;
@@ -101,7 +101,7 @@ public class DebugPanel extends JPanel {
     _debugger = _model.getDebugManager();
     
     _jswatProperties = new Hashtable();
-    //    _uiAdapter = new DebugPanelUIAdapter();
+    _uiAdapter = new DebugPanelUIAdapter();
     
     // Set up layout of panel
     setLayout(new BorderLayout());
@@ -127,9 +127,9 @@ public class DebugPanel extends JPanel {
     reset();
   }
   
-    //js  public UIAdapter getUIAdapter() {
-    //js    return _uiAdapter;
-    //js  }
+  public UIAdapter getUIAdapter() {
+    return _uiAdapter;
+  }
   
   /**
    * Sets the font for displaying text.
@@ -202,7 +202,7 @@ public class DebugPanel extends JPanel {
   }
   
   
-  class DebugPanelUIAdapter {//js implements UIAdapter {
+  class DebugPanelUIAdapter implements UIAdapter {
     
     /**
      * Construct the appropriate user interface and connect all
@@ -211,7 +211,7 @@ public class DebugPanel extends JPanel {
      */
     public void buildInterface() {
       //DrJava.consoleErr().println("DP: building interface...");
-//js       _debugger.attachLogWriter(_logger);
+      _debugger.attachLogWriter(_logger);
     }
     
     /**
@@ -273,11 +273,11 @@ public class DebugPanel extends JPanel {
      * @exception  NoOpenViewException
      *             Thrown if there is no view to be searched.
      */
-//js     public boolean findString(String query, boolean ignoreCase)
-//js       throws NoOpenViewException {
+    public boolean findString(String query, boolean ignoreCase)
+      throws NoOpenViewException {
       
-//js       return false;
-//js     }
+      return false;
+    }
     
     /**
      * Searches for the property with the specified key in the property
@@ -295,9 +295,9 @@ public class DebugPanel extends JPanel {
      *
      * @return  selected view, or null if none selected.
      */
-//js     public JSwatView getSelectedView() {
-//js       return null;
-//js     }
+    public JSwatView getSelectedView() {
+      return null;
+    }
     
     /**
      * Called when the Session initialization has completed.
@@ -355,7 +355,7 @@ public class DebugPanel extends JPanel {
      *                scrollable view.
      * @return  true if successful, false if error.
      */
-      /**js
+
     public boolean showFile(SourceSource src, int line, int count) {
       DrJava.consoleErr().println("DP: showFile()...");
       if (src instanceof FileSource) {
@@ -415,7 +415,6 @@ public class DebugPanel extends JPanel {
       }
       return false;
     }
-      */    
     
     /**
      * Show a status message in a reasonable location.

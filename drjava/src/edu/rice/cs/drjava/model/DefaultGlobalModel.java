@@ -110,7 +110,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
   private int _numErrors;
   
   // Create a debug manager
-  private DebugManager _debugManager = new DebugManager(this);
+  private DebugManager _debugManager = null;
 
   public static final String EXIT_CALLED_MESSAGE
     = "The interaction was aborted by a call to System.exit.";
@@ -152,6 +152,15 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
     catch (java.rmi.RemoteException re) {
       throw new UnexpectedException(re);
     }
+    
+    try{
+      // uncomment this to enable debugger
+      //js _debugManager = new DebugManager(this);
+    }
+    catch( NoClassDefFoundError ncdfe ){
+      // JSwat not present, so we won't use it.
+    }
+      
   }
   
   /**
