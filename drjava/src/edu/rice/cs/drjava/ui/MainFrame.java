@@ -107,12 +107,10 @@ public class MainFrame extends JFrame implements OptionConstants {
   //private static final int OUTPUT_TAB = 2;
   //private static final int JUNIT_TAB = 3;
   //private static final int JAVADOC_TAB = 4;
-  
   // GUI Dimensions
 //  private static final int GUI_WIDTH = 800;
 //  private static final int GUI_HEIGHT = 700;
 //  private static final int DOC_LIST_WIDTH = 150;
-
   private static final String ICON_PATH = "/edu/rice/cs/drjava/ui/icons/";
   private static final String DEBUGGER_OUT_OF_SYNC =
     " Current document is out of sync with the debugger and should be recompiled!";

@@ -41,7 +41,7 @@
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  * OTHER DEALINGS WITH THE SOFTWARE.
  *
-END_COPYRIGHT_BLOCK*/
+ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.ui;
 
@@ -76,12 +76,12 @@ import java.util.Vector;
  * @version $Id$
  */
 public class CompilerErrorPanel extends ErrorPanel {
-
+  
   /** Whether a compile has occurred since the last compiler change. */
   private boolean _compileHasOccurred;
   private CompilerErrorListPane _errorListPane;
   private final JComboBox _compilerChoiceBox;
-
+  
   /**
    * Constructor.
    * @param model SingleDisplayModel in which we are running
@@ -91,10 +91,10 @@ public class CompilerErrorPanel extends ErrorPanel {
     super(model, frame, "Compiler Output", "Compiler");
     _compileHasOccurred = false;
     _numErrors = 0;
-
+    
     _errorListPane = new CompilerErrorListPane();
     setErrorListPane(_errorListPane);
-
+    
     /******** Initialize the drop-down compiler menu ********/
     // Limitation: Only compiler choices are those that were available
     // at the time this box was created.
@@ -122,20 +122,20 @@ public class CompilerErrorPanel extends ErrorPanel {
         reset();
       }
     });
-
+    
     customPanel.add(_compilerChoiceBox, BorderLayout.NORTH);
-
+    
     DrJava.getConfig().addOptionListener(OptionConstants.JAVAC_LOCATION, new CompilerLocationOptionListener<File>());
     DrJava.getConfig().addOptionListener(OptionConstants.JSR14_LOCATION, new CompilerLocationOptionListener<File>());
     DrJava.getConfig().addOptionListener(OptionConstants.EXTRA_COMPILERS, new CompilerLocationOptionListener<Vector<String>>());
-    }
-
-
+  }
+  
+  
   /**
    * The OptionListener for compiler LOCATIONs
    */
   private class CompilerLocationOptionListener<T> implements OptionListener<T> {
-
+    
     public void optionChanged(OptionEvent<T> oce) {
       _compilerChoiceBox.removeAllItems();
       CompilerInterface[] availCompilers =
@@ -145,23 +145,23 @@ public class CompilerErrorPanel extends ErrorPanel {
       }
     }
   }
-
+  
   /**
    * Returns the CompilerErrorListPane that this panel manages.
    */
   public CompilerErrorListPane getErrorListPane() {
     return _errorListPane;
   }
-
+  
   /** Called when compilation begins. */
   public void setCompilationInProgress() {
     _errorListPane.setCompilationInProgress();
   }
-
+  
   protected CompilerErrorModel<? extends CompilerError> getErrorModel(){
     return getModel().getCompilerModel().getCompilerErrorModel();
   }
-
+  
   /**
    * Clean up when the tab is closed.
    */
@@ -170,22 +170,22 @@ public class CompilerErrorPanel extends ErrorPanel {
     getModel().getCompilerModel().resetCompilerErrors();
     reset();
   }
-
+  
   /**
    * Reset the errors to the current error information.
    */
   public void reset() {
-// _nextErrorButton.setEnabled(false);
-// _prevErrorButton.setEnabled(false);
+    // _nextErrorButton.setEnabled(false);
+    // _prevErrorButton.setEnabled(false);
     _numErrors = getModel().getCompilerModel().getNumErrors();
-
+    
     _errorListPane.updateListPane(true);
-// _nextErrorButton.setEnabled(_errorListPane.hasNextError());
-// _prevErrorButton.setEnabled(_errorListPane.hasPrevError());
+    // _nextErrorButton.setEnabled(_errorListPane.hasNextError());
+    // _prevErrorButton.setEnabled(_errorListPane.hasPrevError());
   }
-
+  
   class CompilerErrorListPane extends ErrorPanel.ErrorListPane {
-
+    
     protected void _updateWithErrors() throws BadLocationException {
       DefaultStyledDocument doc = new DefaultStyledDocument();
       String failureName = "error";
@@ -194,14 +194,14 @@ public class CompilerErrorPanel extends ErrorPanel {
       }
       _updateWithErrors(failureName, "found", doc);
     }
-
+    
     /** Puts the error pane into "compilation in progress" state. */
     public void setCompilationInProgress() {
       _errorListPositions = new Position[0];
       _compileHasOccurred = true;
-
+      
       DefaultStyledDocument doc = new DefaultStyledDocument();
-
+      
       try {
         doc.insertString(0,
                          "Compilation in progress, please wait...",
@@ -210,12 +210,12 @@ public class CompilerErrorPanel extends ErrorPanel {
       catch (BadLocationException ble) {
         throw new UnexpectedException(ble);
       }
-
+      
       setDocument(doc);
-
+      
       selectNothing();
     }
-
+    
     /**
      * Used to show that the last compile was successful.
      * @param done ignored: we assume that this is only called after compilation is
@@ -230,7 +230,7 @@ public class CompilerErrorPanel extends ErrorPanel {
       else {
         if (getModel().getCompilerModel().getAvailableCompilers().length == 0) {
           message = "No compiler is available.  Please specify one in\n" +
-                    "the Preferences dialog in the Edit menu.";
+            "the Preferences dialog in the Edit menu.";
         }
         else {
           if (getModel().getCompilerModel().getActiveCompiler() == NoCompilerAvailable.ONLY) {
@@ -241,13 +241,13 @@ public class CompilerErrorPanel extends ErrorPanel {
           }
         }
       }
-
+      
       doc.insertString(0, message, NORMAL_ATTRIBUTES);
       setDocument(doc);
-
+      _updateScrollButtons();
       selectNothing();
     }
-
+    
   }
-
+  
 }
