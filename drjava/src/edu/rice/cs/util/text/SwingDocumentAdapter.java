@@ -73,8 +73,16 @@ public class SwingDocumentAdapter extends DefaultStyledDocument
    * @param name Name of the style, to be passed to insertString
    * @param s AttributeSet to use for the style
    */
-  public void addDocStyle(String name, AttributeSet s) {
+  public void setDocStyle(String name, AttributeSet s) {
     _styles.put(name, s);
+  }
+  
+  /**
+   * Returns the style with the given name, or null if no such named style
+   * exists.
+   */
+  public AttributeSet getDocStyle(String name) {
+    return _styles.get(name);
   }
   
   /**
@@ -126,7 +134,7 @@ public class SwingDocumentAdapter extends DefaultStyledDocument
   {
     AttributeSet s = null;
     if (style != null) {
-      s = _styles.get(style);
+      s = getDocStyle(style);
     }
     try {
       super.insertString(offs, str, s);
