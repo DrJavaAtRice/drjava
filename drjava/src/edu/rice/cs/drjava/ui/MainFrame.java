@@ -1197,11 +1197,13 @@ public class MainFrame extends JFrame implements OptionConstants {
         File[] chosen = fc.getSelectedFiles();
         if (chosen == null)
             throw new RuntimeException("filechooser returned null file");
-    
+        
+        if (chosen.length == 0) chosen = new File[] { null };
+
         if (chosen[0] == null)
           chosen[0] = fc.getSelectedFile();
         return chosen;
-    
+        
       default:                  // impossible since rc must be one of these
         throw  new RuntimeException("filechooser returned bad rc " + choice);
     }
