@@ -362,7 +362,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     return _state;
   }
   
-  public FileGroupingState _makeProjectFileGroupingState(final File buildDir, final File projectRoot) { 
+  public FileGroupingState _makeProjectFileGroupingState(final File buildDir, final File projectFile) { 
     return new FileGroupingState(){
       public File getBuildDirectory(){
         return buildDir;
@@ -374,6 +374,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       
       public boolean isProjectFile(OpenDefinitionsDocument doc){
         try {
+          File projectRoot = projectFile.getParentFile();
           if(doc.isUntitled()) return false;
           String filePath = doc.getFile().getParentFile().getCanonicalPath();
           String projectPath = projectRoot.getCanonicalPath();
@@ -383,6 +384,10 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
         catch(IOException e) {
           return false;
         }
+      }
+      
+      public File getProjectFile() {
+        return projectFile;
       }
     };
   }
@@ -400,6 +405,9 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       public boolean isProjectFile(OpenDefinitionsDocument doc){
         return false;
       }
+      public File getProjectFile() {
+        return null;
+      }
     };
   }
   
@@ -415,6 +423,13 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
    */
   public boolean isProjectActive(){
     return _state.isProjectActive();
+  }
+  
+  /**
+   * @return the file that points to the current project file. Null if not currently in project view
+   */
+  public File getProjectFile() {
+    return _state.getProjectFile();
   }
    
   // ----- METHODS -----
@@ -740,7 +755,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     final ProjectFileIR ir;
     final File[] srcFiles;
     
-    File projectRoot = projectFile.getParentFile();
+    //File projectRoot = projectFile.getParentFile();
     ir = ProjectFileParser.ONLY.parse(projectFile);
     srcFiles = ir.getSourceFiles();
     IAWTContainerNavigatorActor newNav = 
@@ -749,7 +764,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     setDocumentNavigator(newNav);
     
     File buildDir = (ir.getBuildDirectory().length > 0) ? ir.getBuildDirectory()[0] : null;
-    setFileGroupingState(_makeProjectFileGroupingState(buildDir, projectRoot));
+    setFileGroupingState(_makeProjectFileGroupingState(buildDir, projectFile));
     
     
     String projfilepath = projectFile.getCanonicalPath();

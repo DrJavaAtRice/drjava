@@ -75,4 +75,10 @@ public interface FileGroupingState {
    */
   public boolean isProjectFile(OpenDefinitionsDocument doc);
   
+  /**
+   * Returns the current project file
+   * @return null if not currently in a project
+   */
+  public File getProjectFile();
+  
 }

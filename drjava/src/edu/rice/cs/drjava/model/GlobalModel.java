@@ -392,4 +392,9 @@ public interface GlobalModel extends IGetDocuments, ILoadDocuments {
    * if no project is active, no documents are returned.
    */
   public List<OpenDefinitionsDocument> getProjectDocuments();
+  
+  /**
+   * @return the file that points to the current project file. Null if not currently in project view
+   */
+  public File getProjectFile();
 }

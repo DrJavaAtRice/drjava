@@ -440,12 +440,12 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
   };
   
-//  
-//  private Action _saveProjectAction = new AbstractAction("Save") {
-//    public void actionPerformed(ActionEvent ae) {
-//      _saveProject();
-//    }
-//  };
+  
+  private Action _saveProjectAction = new AbstractAction("Save") {
+    public void actionPerformed(ActionEvent ae) {
+      _saveProject();
+    }
+  };
   
   private Action _saveProjectAsAction = new AbstractAction("Save As...") {
     public void actionPerformed(ActionEvent ae) {
@@ -2047,6 +2047,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     
     
     _closeProjectAction.setEnabled(true);
+    _saveProjectAction.setEnabled(true);
     
     _resetNavigatorPane();
   }
@@ -2067,7 +2068,9 @@ public class MainFrame extends JFrame implements OptionConstants {
     new BackgroundColorListener(renderer);
     _resetNavigatorPane();
     _closeProjectAction.setEnabled(false);
+    _saveProjectAction.setEnabled(false);
     _setUpContextMenus();
+    _currentProjFile = null;
   }
   
   /**
@@ -2228,10 +2231,10 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
   }
   
-//  private void _saveProject() {
-//    
-//    
-//  }
+  private void _saveProject() {
+    //File file = _model.getProjectFile();
+    _saveProjectHelper(_currentProjFile);
+  }
   
   
   private void _saveProjectAs() {
@@ -2253,23 +2256,28 @@ public class MainFrame extends JFrame implements OptionConstants {
     
     int rc = _saveChooser.showSaveDialog(this);
     if (rc == JFileChooser.APPROVE_OPTION) {
-      
-      try{
-        File file = _saveChooser.getSelectedFile();
-        if (file.getName().indexOf(".") == -1){
-          file =  new File (file.getAbsolutePath() + ".pjt");
-        }
-        String filename = file.getCanonicalPath();    
-        _model.saveProject(filename);
-        if(!(_model.getDocumentNavigator() instanceof JTreeSortNavigator)){
-          _openProjectHelper(file);
-        }
-      }
-      catch(IOException ioe) {
-        _showIOError(ioe);
-      }
+      File file = _saveChooser.getSelectedFile();
+      _saveProjectHelper(file);
     }
   }
+  
+  private void _saveProjectHelper(File file) {
+    try {
+      if (file.getName().indexOf(".") == -1){
+        file =  new File (file.getAbsolutePath() + ".pjt");
+      }
+      String filename = file.getCanonicalPath();    
+      _model.saveProject(filename);
+      if(!(_model.getDocumentNavigator() instanceof JTreeSortNavigator)){
+        _openProjectHelper(file);
+      }    
+    }
+    catch(IOException ioe) {
+      _showIOError(ioe);
+    }
+    //_saveProjectAction.setEnabled(false);
+  }
+  
   
   private void _revert() {
     try {
@@ -2899,6 +2907,8 @@ public class MainFrame extends JFrame implements OptionConstants {
     _setUpAction(_saveAction, "Save", "Save the current document");
     _setUpAction(_saveAsAction, "Save As", "SaveAs",
                  "Save the current document with a new name");
+    _setUpAction(_saveProjectAction, "Save", "Save", "Save the current project");
+    _saveProjectAction.setEnabled(false);
     _setUpAction(_saveProjectAsAction, "Save As", "SaveAs", 
                  "Save all currently open files to new project file");
     _setUpAction(_revertAction, "Revert", "Revert the current document to the saved version");
@@ -3219,7 +3229,8 @@ public class MainFrame extends JFrame implements OptionConstants {
     // will add option for new project
     _addMenuItem(projectMenu, _openProjectAction, KEY_OPEN_PROJECT);
 
-    //Add save
+    //Save
+    projectMenu.add(_saveProjectAction);
     //SaveAs
     projectMenu.add(_saveProjectAsAction);
 
