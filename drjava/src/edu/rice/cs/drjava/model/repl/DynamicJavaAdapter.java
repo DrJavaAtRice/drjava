@@ -158,6 +158,79 @@ public class DynamicJavaAdapter implements JavaInterpreter {
   }
   
   /**
+   * Assigns the given value to the given name in the interpreter.
+   * @param name Name of the variable
+   * @param value boolean to assign
+   */
+  public void defineVariable(String name, boolean value){
+    _djInterpreter.defineVariable(name, value);
+  }
+  
+  /**
+   * Assigns the given value to the given name in the interpreter.
+   * @param name Name of the variable
+   * @param value byte to assign
+   */
+  public void defineVariable(String name, byte value){
+    _djInterpreter.defineVariable(name, value);
+  }
+
+  /**
+   * Assigns the given value to the given name in the interpreter.
+   * @param name Name of the variable
+   * @param value char to assign
+   */
+  public void defineVariable(String name, char value){
+    _djInterpreter.defineVariable(name, value);
+  }
+
+  /**
+   * Assigns the given value to the given name in the interpreter.
+   * @param name Name of the variable
+   * @param value double to assign
+   */
+  public void defineVariable(String name, double value){
+    _djInterpreter.defineVariable(name, value);
+  }
+  
+  /**
+   * Assigns the given value to the given name in the interpreter.
+   * @param name Name of the variable
+   * @param value float to assign
+   */
+  public void defineVariable(String name, float value){
+    _djInterpreter.defineVariable(name, value);
+  }
+
+  
+  /**
+   * Assigns the given value to the given name in the interpreter.
+   * @param name Name of the variable
+   * @param value int to assign
+   */
+  public void defineVariable(String name, int value){
+    _djInterpreter.defineVariable(name, value);
+  }
+
+  /**
+   * Assigns the given value to the given name in the interpreter.
+   * @param name Name of the variable
+   * @param value long to assign
+   */
+  public void defineVariable(String name, long value){
+    _djInterpreter.defineVariable(name, value);
+  }
+
+  /**
+   * Assigns the given value to the given name in the interpreter.
+   * @param name Name of the variable
+   * @param value short to assign
+   */
+  public void defineVariable(String name, short value){
+    _djInterpreter.defineVariable(name, value);
+  }
+  
+  /**
    * Sets whether protected and private variables should be accessible in
    * the interpreter.
    * @param accessible Whether protected and private variable are accessible

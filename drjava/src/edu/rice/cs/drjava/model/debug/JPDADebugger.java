@@ -57,11 +57,14 @@ import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.model.GlobalModel;
+import edu.rice.cs.drjava.model.DefaultGlobalModel;
+import edu.rice.cs.drjava.model.repl.DefaultInteractionsModel;
 import edu.rice.cs.drjava.model.GlobalModelListener;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.OperationCanceledException;
 import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
 import edu.rice.cs.drjava.config.OptionConstants;
+import edu.rice.cs.util.UnexpectedException;
 
 import com.sun.jdi.*;
 import com.sun.jdi.connect.*;
@@ -1182,11 +1185,178 @@ public class JPDADebugger implements Debugger {
     }
     return stringValue.toString();
   }
+
+  /** 
+   * @return the approrpiate Method to call in the InterpreterJVM in order
+   * to define a variable of the type val
+   */
+  private Method getDefineVariableMethod(ReferenceType interpreterRef, Value val){
+    List methods = null;
+    String signature_beginning = "(Ljava/lang/String;";
+    String signature_end = ")V";
+    String signature = "";
+    
+    if( val instanceof ObjectReference ){
+      signature = signature_beginning + "Ljava/lang/Object;" + signature_end;
+    }
+    else if( val instanceof BooleanValue ){
+      signature = signature_beginning + "Z" + signature_end;      
+    }
+    else if( val instanceof ByteValue ){
+      signature = signature_beginning + "B" + signature_end;      
+    }
+    else if( val instanceof CharValue ){
+      signature = signature_beginning + "C" + signature_end;
+    }
+    else if( val instanceof DoubleValue ){
+      signature = signature_beginning + "D" + signature_end;      
+    }
+    else if( val instanceof FloatValue ){
+      signature = signature_beginning + "F" + signature_end;
+    }
+    else if( val instanceof IntegerValue ){
+      signature = signature_beginning + "I" + signature_end;
+    }
+    else if( val instanceof LongValue ){
+      signature = signature_beginning + "J" + signature_end;
+    }
+    else if( val instanceof ShortValue ){
+      signature = signature_beginning + "S" + signature_end;
+    }
+    else{
+      throw new IllegalArgumentException("Tried to define a variable which is not an Object or a primitive type");
+    }
+    
+    System.err.println("signature = " + signature);
+    methods = interpreterRef.methodsByName("defineVariable", signature);
+    
+    int i = 0;    
+    Method tempMethod = (Method)methods.get(i);
+    
+    while( tempMethod.isAbstract() ){
+      ++i;
+      tempMethod = (Method)methods.get(i);
+    }
+    
+    return tempMethod;
+  }
+  
+  /**
+   * Assumes that this method is only called immedeately after suspending a thread
+   */
+  private ObjectReference getDebugInterpreter(String interpreterName) 
+    throws InvalidTypeException, ClassNotLoadedException, IncompatibleThreadStateException, InvocationException{
+    int i = 0;
+    ThreadReference threadRef = _suspendedThreads.peek();
+    List methods = _interpreterJVM.referenceType().methodsByName("getJavaInterpreter");
+
+    Method m = (Method)methods.get(0);
+    while(m.isAbstract()){
+      ++i;
+      m = (Method)methods.get(i);
+    }
+    
+    LinkedList args = new LinkedList();
+    args.add(_vm.mirrorOf(interpreterName)); /** make the String a JDI Value **/
+    ObjectReference tmpInterpreter = (ObjectReference)_interpreterJVM.invokeMethod(threadRef, m, args, 
+                                                                                     ObjectReference.INVOKE_SINGLE_THREADED);
+    return tmpInterpreter;
+  }
+  
+  /**
+   * Copy the current selected thread's visible variables (those in scope) into
+   * an interpreter's environment and then switch the Interactions window's
+   * interpreter to that interpreter
+   */
+  private void dumpVariablesIntoInterpreterAndSwitch() throws DebugException{
+    try{
+      ThreadReference suspendedThreadRef = _suspendedThreads.peek();
+      String interpreterName = _getUniqueThreadName(suspendedThreadRef);
+      ((DefaultGlobalModel)_model).getInteractionsModel().addJavaInterpreter(interpreterName);
+      StackFrame frame = suspendedThreadRef.frame(0);
+      
+      List vars = frame.visibleVariables();
+      Iterator varsIterator = vars.iterator();
+      System.out.print("Getting debugInterpreter...");
+      ObjectReference debugInterpreter = getDebugInterpreter(interpreterName);
+      System.out.println("done.");
+      
+      while(varsIterator.hasNext()){
+        LocalVariable localVar = (LocalVariable)varsIterator.next();
+        frame = suspendedThreadRef.frame(0);
+        Value val = frame.getValue(localVar);
+        _defineVariable(suspendedThreadRef, debugInterpreter,
+                        localVar.name(), val);
+      }
+      
+      frame = suspendedThreadRef.frame(0);
+      Value thisVal = frame.thisObject();
+      if (thisVal != null) {
+        _defineVariable(suspendedThreadRef, debugInterpreter,
+                        "this2", thisVal);
+      }
+      
+      String prompt = "[" + suspendedThreadRef.name() + "] > ";
+      ((DefaultGlobalModel)_model).getInteractionsModel().setActiveInterpreter(interpreterName,prompt);
+    }
+    catch(InvalidTypeException exc){
+      throw new DebugException(exc.toString());
+    }    
+    catch(AbsentInformationException e2){
+      throw new DebugException(e2.toString());
+    }
+    catch(IncompatibleThreadStateException e){
+      throw new DebugException(e.toString());
+    }
+    catch(ClassNotLoadedException e3){
+      throw new DebugException(e3.toString());
+    }
+    catch(InvocationException e4){
+      throw new DebugException(e4.toString());
+    }
+  }
+  
+  /**
+   * Defines a variable with the given name to the given value, using
+   * a thread reference and JavaInterpreter.
+   * @param suspendedThreadRef Thread ref being debugged
+   * @param debugInterpreter ObjectReference to the JavaInterpreter to contain
+   * the variable
+   * @param name Name of the variable
+   * @param val Value of the variable
+   */
+  private void _defineVariable(ThreadReference suspendedThreadRef, 
+                               ObjectReference debugInterpreter,
+                               String name, Value val) 
+    throws InvalidTypeException, AbsentInformationException, IncompatibleThreadStateException,
+    ClassNotLoadedException, InvocationException 
+  {
+    ReferenceType rtDebugInterpreter = debugInterpreter.referenceType();
+    List args = new LinkedList();
+    args.add(_vm.mirrorOf(name));
+    args.add(val);
+    Method method2Call = getDefineVariableMethod(rtDebugInterpreter,  val);
+    
+    System.out.println("Calling " + method2Call.toString() + "with " + args.get(0).toString());
+    debugInterpreter.invokeMethod(suspendedThreadRef, method2Call, args, 
+                                  ObjectReference.INVOKE_SINGLE_THREADED);
+  }
   
   /**
    * Notifies all listeners that the current thread has been suspended.
    */
   synchronized void currThreadSuspended() {
+//     try{
+      /** 
+       * copy the variables in scope into an interpreter
+       * and switch the current interpreter to that interpreter
+       */
+//       dumpVariablesIntoInterpreterAndSwitch();
+//     }
+//     catch(DebugException ex){
+//       throw new UnexpectedException(ex);
+//     }
+    
     _runningThread = null;
     _updateWatches();
     notifyListeners(new EventNotifier() {
@@ -1202,11 +1372,17 @@ public class JPDADebugger implements Debugger {
     });
   }
   
+  private String _getUniqueThreadName(ThreadReference thread) {
+    return Long.toString(thread.uniqueID());
+  }
   
   /**
    * Notifies all listeners that the current thread has been resumed.
    */
   synchronized void currThreadResumed() {
+//     ((DefaultInteractionsModel)_model.getInteractionsModel()).setToDefaultInterpreter();
+//     String oldInterpreterName = _getUniqueThreadName(_runningThread);
+//     ((DefaultInteractionsModel)_model.getInteractionsModel()).removeInterpreter(oldInterpreterName);
     notifyListeners(new EventNotifier() {
       public void notifyListener(DebugListener l) {
         l.currThreadResumed();
@@ -1458,6 +1634,39 @@ public class JPDADebugger implements Debugger {
         }
         
         return (List)retList;
+      }
+    }
+    
+    class SystemThreadsFilter{
+      private Hashtable<String,Boolean> _filterThese = null;
+      
+      public SystemThreadsFilter(List threads){
+        _filterThese = new Hashtable<String,Boolean>();
+        Iterator iterator = threads.iterator();
+        String temp = null;
+        
+        while(iterator.hasNext()){
+          temp = ((ThreadReference)iterator.next()).name();
+          System.out.println("Inserting " + temp);
+          _filterThese.put(temp, new Boolean(true));
+        }
+      }
+     
+      public List filter(List list){
+        LinkedList retList = new LinkedList();
+        String temp = null;
+        ThreadReference tempThreadRef = null;
+        Iterator iterator = list.iterator();
+        
+        while(iterator.hasNext()){
+          tempThreadRef = (ThreadReference)iterator.next();
+          temp = tempThreadRef.name();
+          if( _filterThese.get(temp) == null ){
+            retList.add(tempThreadRef);
+          }
+        }
+        
+        return retList;
       }
     }
 }

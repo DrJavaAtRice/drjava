@@ -301,17 +301,34 @@ public class InterpreterJVM extends AbstractSlaveJVM
   }
   
   /**
-   * Returns the interpreter with the given name
+   * Returns the interpreter (with metadata) with the given name
    * @param name the unique name of the desired interpreter
    * @throws IllegalArgumentException if no such named interpreter exists
    */
-   public InterpreterData getInterpreter(String name) {
+   InterpreterData getInterpreter(String name) {
      InterpreterData interpreter = _interpreters.get(name);
      if (interpreter != null) {
        return interpreter;
      }
      else {
        throw new IllegalArgumentException("Interpreter '" + name + "' does not exist.");
+     }
+   }
+   
+   /**
+    * Returns the Java interpreter with the given name
+    * @param name the unique name of the desired interpreter
+    * @throws IllegalArgumentException if no such named interpreter exists, or if
+    * the named interpreter is not a Java interpreter
+    */
+   public JavaInterpreter getJavaInterpreter(String name) {
+     InterpreterData interpreterData = getInterpreter(name);
+     Interpreter interpreter = interpreterData.getInterpreter();
+     if (interpreter instanceof JavaInterpreter) {
+       return (JavaInterpreter) interpreter;
+     }
+     else {
+       throw new IllegalArgumentException("Interpreter '" + name + "' is not a JavaInterpreter.");
      }
    }
 
