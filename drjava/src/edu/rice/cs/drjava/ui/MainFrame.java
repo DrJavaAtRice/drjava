@@ -768,6 +768,8 @@ public class MainFrame extends JFrame {
     tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_W,
                                                   ActionEvent.CTRL_MASK));
 
+    tmpItem = fileMenu.add(_saveAllAction);
+
     tmpItem = fileMenu.add(_closeAllAction);
     fileMenu.addSeparator();
 
