@@ -41,49 +41,119 @@ package edu.rice.cs.drjava.config;
 import gj.util.Hashtable;
 import gj.util.Vector;
 
+/**
+ * Represents a configurable option in DrJava that has a static (programmatic) type of T.
+ * Classes can magically extend this class and the entire rest of the Configuration magic
+ * typing framework will work for it.  Named subclasses aren't even necessary -- but 
+ * may be convenient in order to re-use code.  For example, to make an anonymous class
+ * that handled options of static type Integer, with the name "indent.level", you use the
+ * following code:
+ * <pre>
+ * Option&lt;Integer&gt; indentParser = new Option&lt;Integer&gt;("indent.level") {
+ *         public Integer parse(String s) {
+ *             return new Integer(s);
+ *         }
+ *     };
+ * </pre>
+ * the above example is simple because Integers (like most Java(tm) standard-lib data-type
+ * classes) have handy toString() / parsing methods/constructors.
+ */
 public abstract class Option<T> implements OptionParser<T> {
   
-  public final String key;
+    /** 
+     * The logical name of this configurable option (i.e. "indent.size")
+     * public because it's final, and a String is immutable.
+     */
+    public final String name;
+    
+    /** 
+     * an inner hashtable that maps DefaultOptionMaps to value T's.
+     * part of the magic inner workings of this package.
+     */
+    private final Hashtable<DefaultOptionMap,T> map =
+	new Hashtable<DefaultOptionMap,T>();
+    
+    /**
+     * a hashtablethat maps Configuration Objects to a list of listeners for this
+     * particular option.  Part of the magic inner workings of this package.
+     */
+    private final Hashtable<Configuration,Vector<OptionListener<T>>> listeners=
+	new Hashtable<Configuration,Vector<OptionListener<T>>>();
+    
+    /** 
+     * constructor that takes in a name
+     * @param name the name of this option (i.e. "indent.level");
+     */
+    public <T> Option(String name) { this.name = name; }
+    
+    /**
+     * accessor for name option
+     * @return name of this option (i.e. "indent.level")
+     */
+    public String getName() { return name; }
   
-  private final Hashtable<OptionMap,T> map =
-    new Hashtable<OptionMap,T>();
-  private final Hashtable<Configuration,Vector<OptionListener<T>>> listeners=
-    new Hashtable<Configuration,Vector<OptionListener<T>>>();
-  
-  public <T> Option(String key) { this.key = key; }
-  
-  public String getName() { return key; }
-  
-  public abstract T parse(String value);
-  
-  public String format(T value) { return value.toString(); }
-  
-  // PACKAGE PRIVATE MAGIC STUFF
-  
-  String getString(DefaultOptionMap om) { return format(getOption(om)); }
-  
-  T setString(DefaultOptionMap om, String val) { return setOption(om,parse(val)); }
-  
-  T getOption(DefaultOptionMap om) { return map.get(om); }
-  
-  T setOption(DefaultOptionMap om, T val) { return map.put(om,val); }
-  
-  T remove(DefaultOptionMap om) { return map.remove(om); }
-  
-  void addListener(Configuration c, OptionListener<T> l) {
-    Vector<OptionListener<T>> v = listeners.get(c);
-    if(v==null) {
-      v = new Vector<OptionListener<T>>();
-      listeners.put(c,v);
+    /**
+     * the ability to parse a string to an object of type T.  All concrete versions of this
+     * class must override this method to provide some sort of parser implementation.
+     * @param value a String to parse
+     * @return the statically-typed representation of the string value.
+     */
+    public abstract T parse(String value);
+    
+    /**
+     * the ability to format a statically typed T value to a String.  Since T is an Object,
+     * the default implementation uses the .toString() method.
+     * @param value the statically-typed value to format into a String
+     * @throws NullPointerException if value is null
+     */
+    public String format(T value) { return value.toString(); }
+    
+    // PACKAGE PRIVATE MAGIC STUFF
+    // this package-private magic stuff makes all of the config "magic" types work.
+    // basically, it's achieved via a double-dispatch stunt, so that the type information
+    // is saved.
+    
+    /** 
+     * uses format() and getOption() so that any changes in format will automatically
+     * be applied to getString().
+     */
+    String getString(DefaultOptionMap om) { return format(getOption(om)); }
+
+    /**
+     * uses parse() and setOption() so that any changes in parsing will automatically
+     * be applied to setString().
+     */
+    T setString(DefaultOptionMap om, String val) { return setOption(om,parse(val)); }
+    
+    /** the accessor for the magic-typed hashtable stunt. */
+    T getOption(DefaultOptionMap om) { return map.get(om); }
+
+    /** the mutator for the magic-typed hashtable stunt. */
+    T setOption(DefaultOptionMap om, T val) { return map.put(om,val); }
+    
+    /** the destructor for a mapping in the magic-typed hashtable. */
+    T remove(DefaultOptionMap om) { return map.remove(om); }
+    
+    /** magic listener-bag adder */
+    void addListener(Configuration c, OptionListener<T> l) {
+	Vector<OptionListener<T>> v = listeners.get(c);
+	if(v==null) {
+	    v = new Vector<OptionListener<T>>();
+	    listeners.put(c,v);
+	}
+	v.addElement(l);
     }
-    v.addElement(l);
-  }
-  
-  void removeListener(Configuration c, OptionListener<T> l) {
-    Vector<OptionListener<T>> v = listeners.get(c);
-    if(v==null) return;
-    if(v.removeElement(l) && v.size() == 0) {
-      listeners.remove(c);
+    
+    /** magic listener-bag remover */
+    void removeListener(Configuration c, OptionListener<T> l) {
+	Vector<OptionListener<T>> v = listeners.get(c);
+	if(v==null) return;
+	if(v.removeElement(l) && v.size() == 0) {
+	    listeners.remove(c);
+	}
     }
-  }
 }
+
+
+
+
