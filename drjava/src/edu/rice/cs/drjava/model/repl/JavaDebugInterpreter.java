@@ -47,6 +47,7 @@ import koala.dynamicjava.tree.visitor.*;
 
 import java.util.List;
 import java.util.LinkedList;
+import java.util.StringTokenizer;
 
 import edu.rice.cs.util.UnexpectedException;
 
@@ -62,6 +63,8 @@ import edu.rice.cs.util.UnexpectedException;
  * @version $Id$
  */
 public class JavaDebugInterpreter extends DynamicJavaAdapter {
+  // TODO: support methods  
+  
   /**
    * This interpreter's name.
    */
@@ -105,7 +108,117 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
    */
   public Node processTree(Node node) {
     return (Node) node.acceptVisitor(_translationVisitor);
+  }  
+  
+  public GlobalContext makeGlobalContext(TreeInterpreter i) {
+    return new GlobalContext(i) {  
+      public boolean exists(String name) {
+        return (super.exists(name)) || 
+          (_getObjectFieldAccessForField(name, this) != null) ||
+          (_getStaticFieldAccessForField(name, this) != null) ||
+          (_getReferenceTypeForField(name, this) != null);
+      }
+    };
   }
+  
+  /**
+   * Given a field, looks at enclosing classes until it finds
+   * one that contains the field. It returns the ObjectFieldAccess
+   * that represents the field.
+   * @param field the name of the field
+   * @param context the context
+   * @return the ObjectFieldAccess that represents the field or null
+   * if it cannot find the field in any enclosing class.
+   */
+  protected ObjectFieldAccess _getObjectFieldAccessForField(String field, Context context) {
+    TypeChecker tc = makeTypeChecker(context);
+    int numDollars = _getNumDollars(_thisClassName);
+    Expression expr = null;
+    for (int i = 0; i <= numDollars; i++) {          
+      expr = _buildObjectFieldAccess(i, numDollars);
+      expr = new ObjectFieldAccess(expr, field);
+      try {
+        // the type checker will tell us if it's a field
+        tc.visit((ObjectFieldAccess)expr);
+        return (ObjectFieldAccess)expr;
+      }
+      catch (ExecutionError e2) {
+        // do nothing, try an outer class
+      }
+    }
+    return null;
+  }
+  
+  /**
+   * Given a field in a static context, looks at enclosing classes until it 
+   * finds one that contains the field. It returns the StaticFieldAccess
+   * that represents the field.
+   * @param field the name of the field
+   * @param context the context
+   * @return the StaticFieldAccess that represents the field or null
+   * if it cannot find the field in any enclosing class.
+   */  
+  protected StaticFieldAccess _getStaticFieldAccessForField(String field, Context context) {
+    TypeChecker tc = makeTypeChecker(context);
+    int numDollars = _getNumDollars(_thisClassName);
+    StaticFieldAccess expr = null;
+    String currClass = _thisClassName;
+    int index = currClass.length();
+    // iterate outward trying to find the field
+    for (int i = 0; i <= numDollars; i++) {
+      currClass = currClass.substring(0, index);
+      ReferenceType rt = new ReferenceType(currClass);
+      expr = new StaticFieldAccess(rt, field);
+      try {
+        // the type checker will tell us if it's a field
+        tc.visit(expr);
+        return expr;
+      }
+      catch (ExecutionError e2) {
+        // try an outer class
+        index = currClass.lastIndexOf("$");       
+      }
+    }
+    return null;
+  }
+  
+  /**
+   * Given the name of an not fully qualified outer class, return the fully qualified
+   * ReferenceType that corresponds to that class. This is called when the user
+   * references a static field of an outer class.
+   * @param field the name of the not fully qualified outer class
+   * @param context the context
+   * @return the ReferenceType that represents the field(in this case, 
+   * really a class) or null if it cannot load the corresponding class in the
+   * class loader.
+   */  
+  protected ReferenceType _getReferenceTypeForField(String field, Context context) {
+    TypeChecker tc = makeTypeChecker(context);
+    int index = _indexOfWithinBoundaries(_thisClassName, field);
+    if (index != -1) {
+      LinkedList list = new LinkedList();
+      StringTokenizer st = new StringTokenizer(_thisClassName, "$");
+      String currString = st.nextToken();
+      while (!currString.equals(field)) {
+        list.add(new Identifier(currString));
+        currString = st.nextToken();
+      }
+      list.add(new Identifier(field));
+      ReferenceType rt = new ReferenceType(list);
+      try {
+        // the type checker will tell us if it's a class
+        tc.visit(rt);
+        return rt;
+      }
+      catch (ExecutionError e) {
+        return null;
+      }
+    }
+    else {
+      return null;
+    }
+  }
+  
   
   /**
    * Sets the class name of "this", parsing out the package name.
@@ -291,6 +404,56 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
         }
         else {
           throw new UnexpectedException(new IllegalArgumentException("Illegal type of Expression"));
+        }
+      }
+    };
+  }
+  
+  /**
+   * Factory method to make a new NameChecker that tries to find the
+   * right scope for QualifiedNames.
+   * @param context the context
+   * @return visitor the visitor
+   */
+  public NameVisitor makeNameVisitor(final Context context) {
+    return new NameVisitor(context) {
+      public Object visit(QualifiedName node) {
+        try {
+          return super.visit(node);
+        }
+        catch(ExecutionError e) {
+          List ids = node.getIdentifiers();
+          IdentifierToken t = (IdentifierToken)ids.get(0);
+          String field = t.image();
+          // This error is thrown only if this QualifiedName is not 
+          // a local variable or a class
+          if (context.isDefined("this")) {
+            // Check if it's a field or outer field if we're not in a
+            // static context.
+            ObjectFieldAccess ofa = _getObjectFieldAccessForField(field, context);
+            if (ofa != null) {
+              return ofa;
+            }
+          }
+          else {
+            // We're in a static context.
+            StaticFieldAccess sfa = _getStaticFieldAccessForField(field, context);
+            if (sfa != null) {
+              return sfa;
+            }
+            else {
+              // This is possibly a substring of our current context's class name.
+              // (e.g. The user is trying to evaluate MonkeyOuter.someField and we
+              // have to convert MonkeyOuter to MonkeyMostOuter$MonkeyOuter)
+              // Try qualifying it.
+              ReferenceType rt = _getReferenceTypeForField(field, context);
+              if (rt != null) {
+                return rt;
+              }
+            }
+          }
+          // Didn't find this field in any outer class. Throw original exception.
+          throw e;          
         }
       }
     };

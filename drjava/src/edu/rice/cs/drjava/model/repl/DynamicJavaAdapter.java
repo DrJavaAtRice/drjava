@@ -365,6 +365,10 @@ public class DynamicJavaAdapter implements JavaInterpreter {
     return node;
   }
   
+  public GlobalContext makeGlobalContext(TreeInterpreter i) {
+    return new GlobalContext(i);
+  }
+  
   /**
    * An extension of DynamicJava's interpreter that makes sure classes are
    * not loaded by the system class loader (when possible) so that future
@@ -388,16 +392,16 @@ public class DynamicJavaAdapter implements JavaInterpreter {
       classLoader = new ClassLoaderExtension(this);
       // We have to reinitialize these variables because they automatically
       // fetch pointers to classLoader in their constructors.
-      nameVisitorContext = new GlobalContext(this);
+      nameVisitorContext = makeGlobalContext(this);
       ClassLoaderContainer clc = new ClassLoaderContainer() {
         public ClassLoader getClassLoader() {
           return classLoader;
         }
       };
       nameVisitorContext.setAdditionalClassLoaderContainer(clc);
-      checkVisitorContext = new GlobalContext(this);
+      checkVisitorContext = makeGlobalContext(this);
       checkVisitorContext.setAdditionalClassLoaderContainer(clc);
-      evalVisitorContext = new GlobalContext(this);
+      evalVisitorContext = makeGlobalContext(this);
       evalVisitorContext.setAdditionalClassLoaderContainer(clc);
       //System.err.println("set loader: " + classLoader);
       

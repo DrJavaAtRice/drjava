@@ -88,7 +88,27 @@ public final class JavaDebugInterpreterTest extends DebugTestCase {
     /*18*/"    new MonkeyStuff().new MonkeyInner().new MonkeyTwoDeep().new MonkeyThreeDeep().threeDeepMethod();\n" +
     /*19*/"  }\n" +
     /*20*/"}";
-  
+
+  protected static final String MONKEY_STATIC_STUFF =
+    /*1*/ "class MonkeyStaticStuff {\n" +
+    /*2*/ "  static int foo = 6;\n" +
+    /*3*/ "  static class MonkeyInner {\n" +
+    /*4*/ "    static int innerFoo = 8;\n" +
+    /*5*/ "    static public class MonkeyTwoDeep {\n" +
+    /*6*/ "      static int twoDeepFoo = 13;\n" +
+    /*7*/ "      static class MonkeyThreeDeep {\n" +
+    /*8*/ "        public static int threeDeepFoo = 18;\n" +
+    /*9*/ "        public static void threeDeepMethod() {\n" +
+    /*10*/"          System.out.println(MonkeyStaticStuff.MonkeyInner.MonkeyTwoDeep.MonkeyThreeDeep.threeDeepFoo);\n" +
+    /*11*/"          System.out.println(MonkeyTwoDeep.twoDeepFoo);\n" +
+    /*12*/"          System.out.println(twoDeepFoo);\n" +
+    /*13*/"        }\n" +
+    /*14*/"      }\n" +
+    /*15*/"    }\n" +
+    /*16*/"  }\n" +
+    /*17*/"}";
+
+
   /**
    * Constructor.
    * @param  String name
@@ -209,11 +229,11 @@ public final class JavaDebugInterpreterTest extends DebugTestCase {
       _notifierLock.wait();
     }
     
-    // Set one breakpoints
+    // Set one breakpoint
     int index = MONKEY_STUFF.indexOf("System.out.println");
     _debugger.toggleBreakpoint(doc,index,11);
-     
-    // Run the main() method, hitting both breakpoints in different threads
+
+    // Run the main() method, hitting the breakpoint
     synchronized(_notifierLock) {
       interpretIgnoreResult("java MonkeyStuff");
        _waitForNotifies(3); // suspended, updated, breakpointReached
@@ -222,6 +242,9 @@ public final class JavaDebugInterpreterTest extends DebugTestCase {
     
     // Calling interpret instead of interpretIgnoreResult because we want
     // to wait until the interaction has ended.
+    
+    // Test that IdentityVisitor really does visit all nodes and their subnodes
+    // by giving it a statement consisting of lots of different syntax components.
     interpret("try {\n" +
               "  for (int i = MonkeyStuff.this.foo; i < 7; i++) {\n"+
               "    do{System.out.println(MonkeyInner.this.innerFoo);}\n" +
@@ -242,6 +265,22 @@ public final class JavaDebugInterpreterTest extends DebugTestCase {
     assertInteractionsDoesNotContain("6");
     assertInteractionsContains("8\n13\n");
     
+    // Tests that the debugger has the correct notion of 
+    interpret("foo");
+    assertInteractionsContains("6");
+
+    interpret("foo = 123");
+    assertEquals("foo should have been modified" ,
+                 "123",
+                 interpret("MonkeyStuff.this.foo"));
+    interpret("int foo = 999;");
+    assertEquals("foo should refer to the foo that was declared",
+                 "999",
+                 interpret("foo"));
+    assertEquals("declaring foo should not have changed MonkeyStuff.this.foo",
+                 "123",
+                 interpret("MonkeyStuff.this.foo"));
+
     // Close doc and make sure breakpoints are removed    
     _model.closeFile(doc);
     debugListener.assertBreakpointRemovedCount(1);  //fires once
@@ -256,6 +295,100 @@ public final class JavaDebugInterpreterTest extends DebugTestCase {
     
     debugListener.assertDebuggerShutdownCount(1);  //fires
     if (printMessages) System.out.println("Shut down.");
+    _debugger.removeListener(debugListener);  
+  }
+
+  /**
+   * Tests that the user can access static fields of outer classes
+   * in the debug interpreter.
+   */
+  public void testAccessStaticFieldsOfOuterClass()
+    throws DebugException, BadLocationException, DocumentAdapterException, IOException, InterruptedException {
+    File file = new File(_tempDir, "MonkeyStaticStuff.java");
+    OpenDefinitionsDocument doc = doCompile(MONKEY_STATIC_STUFF, file);
+    BreakpointTestListener debugListener = new BreakpointTestListener();
+    _debugger.addListener(debugListener);
+    // Start debugger
+    synchronized(_notifierLock) {
+      _debugger.startup();
+      _waitForNotifies(1);  // startup
+      _notifierLock.wait();
+    }
+    
+    // Set one breakpoint
+    int index = MONKEY_STATIC_STUFF.indexOf("System.out.println");
+    _debugger.toggleBreakpoint(doc,index,10);
+     
+    // Run the main() method, hitting both breakpoints in different threads
+    synchronized(_notifierLock) {
+      interpretIgnoreResult("MonkeyStaticStuff.MonkeyInner.MonkeyTwoDeep.MonkeyThreeDeep.threeDeepMethod();");
+       _waitForNotifies(3); // suspended, updated, breakpointReached
+       _notifierLock.wait();
+     }
+
+    assertEquals("should find field of static outer class",
+                 "13",
+                 interpret("twoDeepFoo"));
+    assertEquals("should find field of static outer class",
+                 "13",
+                 interpret("MonkeyTwoDeep.twoDeepFoo"));
+    
+    interpret("twoDeepFoo = 100;");
+    assertEquals("should have assigned field of static outer class",
+                 "100",
+                 interpret("twoDeepFoo"));
+    assertEquals("should have assigned the field of static outer class",
+                 "100",
+                 interpret("MonkeyStaticStuff.MonkeyInner.MonkeyTwoDeep.twoDeepFoo"));
+
+    interpret("int twoDeepFoo = -10;");
+    assertEquals("Should have successfully shadowed field of static outer class",
+                 "-10",
+                 interpret("twoDeepFoo"));
+    assertEquals("should have assigned the field of static outer class",
+                 "100",
+                 interpret("MonkeyTwoDeep.twoDeepFoo"));
+    assertEquals("should have assigned the field of static outer class",
+                 "100",
+                 interpret("MonkeyStaticStuff.MonkeyInner.MonkeyTwoDeep.twoDeepFoo"));
+    
+    assertEquals("Should be able to access a static field of a non-static outer class",
+                 "6",
+                 interpret("foo"));
+    assertEquals("Should be able to access a static field of a non-static outer class",
+                 "6",
+                 interpret("MonkeyStaticStuff.foo"));
+    
+    interpret("foo = 987;");
+    assertEquals("Should have changed the value of a static field of a non-static outer class",
+                 "987",
+                 interpret("foo"));
+    assertEquals("Should have changed the value of a static field of a non-static outer class",
+                 "987",
+                 interpret("MonkeyStaticStuff.foo"));
+    
+    interpret("int foo = 56;");
+    assertEquals("Should have defined a new variable",
+                 "56",
+                 interpret("foo"));
+    assertEquals("Should have shadowed the value of a static field of a non-static outer class",
+                 "987",
+                 interpret("MonkeyStaticStuff.foo"));
+
+    // Shutdown the debugger
+    if (printMessages) {
+      System.out.println("Shutting down...");
+    }
+    synchronized(_notifierLock) {
+      _debugger.shutdown();
+      _waitForNotifies(1);  // shutdown
+      _notifierLock.wait();
+    }
+    
+    debugListener.assertDebuggerShutdownCount(1);  //fires
+    if (printMessages) {
+      System.out.println("Shut down.");
+    }
     _debugger.removeListener(debugListener);  
   }
 

@@ -1365,7 +1365,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
   /**
    * Updates the stored value of each watched field and variable.
    */
-  private void _updateWatches() throws DebugException {
+  private synchronized void _updateWatches() throws DebugException {
     _ensureReady();
     if (_suspendedThreads.size() <= 0) {
       // Not suspended, so all watches are blank
@@ -1377,7 +1377,6 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     }
     
     try {
-      int stackIndex = 0;
       StackFrame currFrame = null;
       List frames = null;
       ThreadReference thread = _suspendedThreads.peek();
@@ -1387,8 +1386,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
         return;
       }
       frames = thread.frames();
-      currFrame = (StackFrame) frames.get(stackIndex);
-      stackIndex++;
+      currFrame = (StackFrame) frames.get(0);
       Location location = currFrame.location();
       ReferenceType rt = location.declaringType();
       ObjectReference obj = currFrame.thisObject();
@@ -1425,6 +1423,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
         // Look for a variable with this name
         LocalVariable localVar = null;
         try {
+          currFrame = (StackFrame) frames.get(0);
           localVar = currFrame.visibleVariableByName(currName);
         }
         catch (AbsentInformationException aie) {

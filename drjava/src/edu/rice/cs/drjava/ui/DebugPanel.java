@@ -74,6 +74,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
   private JSplitPane _tabsPane;
   private JTabbedPane _leftPane;
   private JTabbedPane _rightPane;
+  private JPanel _tabsAndStatusPane;
   
   private JTable _watchTable;
   private DefaultMutableTreeNode _breakpointRootNode;
@@ -131,15 +132,19 @@ public class DebugPanel extends JPanel implements OptionConstants {
     _tabsPane.setOneTouchExpandable(true);
     _tabsPane.setDividerLocation((int)(_frame.getWidth()/2.5));
     
-    this.add(_tabsPane, BorderLayout.CENTER);
+    _tabsAndStatusPane = new JPanel(new BorderLayout());
+    _tabsAndStatusPane.add(_tabsPane, BorderLayout.CENTER);
+    
+    _statusBar = new JLabel("");
+    _statusBar.setForeground(Color.blue.darker());    
+    
+    _tabsAndStatusPane.add(_statusBar, BorderLayout.SOUTH);
+    
+    this.add(_tabsAndStatusPane, BorderLayout.CENTER);
     
     _buttonPanel = new JPanel(new BorderLayout());
     _setupButtonPanel();
     this.add(_buttonPanel, BorderLayout.EAST);
-    
-    _statusBar = new JLabel("");
-    _statusBar.setForeground(Color.blue.darker());
-    this.add(_statusBar, BorderLayout.SOUTH);
     
     _debugger.addListener(new DebugPanelListener());
   }
