@@ -129,10 +129,10 @@ public class ReducedModelComment implements ReducedModelStates {
   
   public void insertChar(char ch) {
     switch(ch) {
-      case '*': insertCommentChar("*"); break;
-      case '/': insertCommentChar("/"); break;
+      case '*': insertSpecial("*"); break;
+      case '/': insertSpecial("/"); break;
       case '\n': insertNewline(); break;
-      case '\\': insertBackSlash(); break;
+      case '\\': insertSpecial("\\"); break;
       case '\'': insertQuote("'"); break; 
       case '\"': insertQuote("\""); break;
       default:
@@ -143,7 +143,7 @@ public class ReducedModelComment implements ReducedModelStates {
 
 
   /**
-  * Inserts one of two special comment chars, (*) or (/).
+  * Inserts one of three special chars, (*),(/), or (\).
   * <OL>
   *  <li> empty list: insert slash
   *  <li> atEnd: check previous and insert slash
@@ -169,7 +169,7 @@ public class ReducedModelComment implements ReducedModelStates {
   * </OL>
   * @return a Vector of highlighting information after the cursor
   */
-  public void insertCommentChar(String special) {
+  public void insertSpecial(String special) {
     // Check if empty.
     if (_braces.isEmpty()) {
       _insertNewBrace(special, _cursor);//now pointing to tail.
@@ -181,7 +181,7 @@ public class ReducedModelComment implements ReducedModelStates {
     }
     // Not empty, not at start, if at end check the previous brace
     if (_cursor.atEnd()) {
-      _checkPreviousInsertCommentChar(special, _cursor);
+      _checkPreviousInsertSpecial(special, _cursor);
     }      
     // If inside a double character brace, break it.
     else if ((_offset > 0) && _cursor.current().isMultipleCharBrace()) {
@@ -200,16 +200,59 @@ public class ReducedModelComment implements ReducedModelStates {
     //if at start of double character brace, break it.
     else if ((_offset == 0) && _cursor.current().isMultipleCharBrace()) {
       //if we're free there won't be a block comment close so if there
-      //is then we don't want to break it.
-      _splitCurrentIfCommentBlock(false,false,_cursor); //leaving us at start
-      _checkPreviousInsertCommentChar(special, _cursor);
+      //is then we don't want to break it.  If the special character is 
+      // a backslash, we want to break the following escape sequence if there
+      // is one.
+      _splitCurrentIfCommentBlock(false,special.equals("\\"),_cursor); //leaving us at start
+      _checkPreviousInsertSpecial(special, _cursor);
     }
     else {
-      _checkPreviousInsertCommentChar(special, _cursor);
+      _checkPreviousInsertSpecial(special, _cursor);
     }
     return;
   }
+ 
+  /**
+   * Checks before point of insertion to make sure we don't need to combine.
+   * Delegates work to _checkPreviousInsertBackSlash and _checkPreviousInsertCommentChar,
+   * depending on what's being inserted into the document.
+   */  
+  private void _checkPreviousInsertSpecial(String special,
+                                           ModelList<ReducedToken>.Iterator
+                                           copyCursor)
+     {
+       if (special.equals("\\"))
+         _checkPreviousInsertBackSlash(copyCursor);
+       else
+         _checkPreviousInsertCommentChar(special, copyCursor);
+     }
+         
+  /**
+  * Checks before point of insertion to make sure we don't need to combine
+  * backslash with another backslash (yes, they too can be escaped).
+  */
   
+  private void _checkPreviousInsertBackSlash(ModelList<ReducedToken>.Iterator
+                                             copyCursor)
+  {
+    if (!copyCursor.atStart()  && !copyCursor.atFirstItem()) {
+      if (copyCursor.prevItem().getType().equals("\\")) {
+        copyCursor.prevItem().setType("\\\\");
+        _updateBasedOnCurrentState();
+        return;
+      }
+    }
+    // Here we know the / unites with nothing behind it.
+    _insertNewBrace("\\",copyCursor); //leaving us after the brace.
+    copyCursor.prev();
+    _updateBasedOnCurrentState();
+    if (copyCursor.current().getSize() == 2) {
+      _offset = 1;
+    }
+    else {
+      copyCursor.next();
+    }
+  }  
   
   /**
   * Checks before the place of insert to make sure there are no preceding
@@ -394,104 +437,6 @@ public class ReducedModelComment implements ReducedModelStates {
       return quote;
     }
   }  
-  
-  /**
-  * Inserts a backslash (\) into the reduced model.
-  * We need to keep track of backslashes so that we have valid quote
-  * information.  An escaped quote (\") in a document does not mean
-  * an open or closed quote for a string.
-  * <OL>
-  *  <li> empty: insert
-  *  <li> atEnd: insert
-  *  <li> inside multiple character brace:
-  *   <ol>
-  *    <li> break current brace
-  *    <li> move next to make second part current
-  *    <li> insert brace between broken parts of former brace
-  *    <li> walk
-  *    <li> current = multiple char brace? move next once<BR>
-  *         current = single char brace?  move next twice<BR>
-  *         We moved two previous, but if the broken part combined with
-  *         the insert, there's only one brace where once were two.
-  *    <li> move next twice to be after newline insertion
-  *   </ol>
-  *  <li> inside a gap: use helper function
-  *  <li> before a multiple char brace:
-  *   <ol>
-  *    <li> break the current brace
-  *    <li> check previous and insert
-  *   </ol>
-  *  <li>otherwise, just insert normally
-  * </OL>
-  * @return a Vector of highlighting information after the cursor
-  */
-  public void insertBackSlash() {      
-    //check if empty
-    if (_braces.isEmpty()) {
-      _insertNewBrace("\\",_cursor);//now pointing to tail.
-      return;
-    }
-    //check if at start
-    if (_cursor.atStart()) {
-      _cursor.next();
-    }
-    //not empty, not at start, if at end check the previous brace
-    if (_cursor.atEnd()) {
-      _checkPreviousInsertBackSlash(_cursor);
-    }
-    //if inside a double character brace, break it.
-    else if ((_offset > 0) && _cursor.current().isMultipleCharBrace()) {
-      _splitCurrentIfCommentBlock(true,true,_cursor);
-      //leaving us at the start
-      _cursor.next(); //leaving us after first char
-      _insertNewBrace("\\",_cursor); //leaves us after /
-      move(-2);
-      _updateBasedOnCurrentState();
-      move(2);
-    }    
-    else if ((_offset > 0) && (_cursor.current().isGap())) {
-      _insertBraceToGap("\\", _cursor);
-    }    
-    //if at start of double character brace, break it.
-    else if ((_offset == 0) && _cursor.current().isMultipleCharBrace()) {
-      // if we're free there won't be a block comment close so if there
-      // is then we don't want to break it.  However, we do want to break up
-      // following backslash compounds.
-      _splitCurrentIfCommentBlock(false,true,_cursor);//leaving us at start
-      _checkPreviousInsertBackSlash(_cursor);
-    }
-    else {
-      _checkPreviousInsertBackSlash(_cursor);
-    }
-    return;
-  }
-  
-  /**
-  * Checks before point of insertion to make sure we don't need to combine
-  * backslash with another backslash (yes, they too can be escaped).
-  */
-  
-  private void _checkPreviousInsertBackSlash(ModelList<ReducedToken>.Iterator
-                                             copyCursor)
-  {
-    if (!copyCursor.atStart()  && !copyCursor.atFirstItem()) {
-      if (copyCursor.prevItem().getType().equals("\\")) {
-        copyCursor.prevItem().setType("\\\\");
-        _updateBasedOnCurrentState();
-        return;
-      }
-    }
-    // Here we know the / unites with nothing behind it.
-    _insertNewBrace("\\",copyCursor); //leaving us after the brace.
-    copyCursor.prev();
-    _updateBasedOnCurrentState();
-    if (copyCursor.current().getSize() == 2) {
-      _offset = 1;
-    }
-    else {
-      copyCursor.next();
-    }
-  }
 
   /**
   * Inserts a block of non-brace text into the reduced model.
@@ -540,7 +485,7 @@ public class ReducedModelComment implements ReducedModelStates {
         throw new IllegalArgumentException("OFFSET TOO BIG:  " +
                                            _offset);
       }
-      _breakComment(_cursor); //leaves us inside comment
+      _breakComment(_cursor);
       _insertNewGap(length);  //inserts gap and goes to next item
       return;
     }
@@ -669,49 +614,7 @@ public class ReducedModelComment implements ReducedModelStates {
   }
   
   
-  /**
-  * Helper function for top level brace insert functions.
-  *
-  * <OL>
-  *  <li> at Head: not special case
-  *  <li> at Tail: not special case
-  *  <li> between two things (offset is 0):
-  *      <ol>
-  *       <li> insert brace
-  *       <li> move next
-  *       <li> offset = 0
-  *      </ol>
-  *  <li> inside gap:
-  *      <ol>
-  *       <li> shrink gap to size of gap - offset.
-  *       <li> insert brace
-  *       <li> insert gap the size of offset.
-  *       <li> move next twice
-  *       <li> offset = 0
-  *      </ol>
-  * <li> inside multiple char brace:
-  *      <ol>
-  *       <li> break
-  *       <li> insert brace
-  *      </ol>
-  * </OL>
-  * @param text the String type of the brace to insert
-  */
-  private void _insertBrace(String text) {
-    if (_cursor.atStart() || _cursor.atEnd()) {
-      _insertNewBrace(text,_cursor); // inserts brace and goes to next
-    }
-    else if ( _cursor.current().isGap()) {
-      _insertBraceToGap(text,_cursor);
-    }
-    else if (_cursor.current().isMultipleCharBrace() && (_offset > 0)) {
-      _breakComment(_cursor); // leave cursor in same place
-      _insertNewBrace(text,_cursor);
-    }
-    else {
-      _insertNewBrace(text,_cursor);
-    }
-  }
+
   
   
   /**
