@@ -58,47 +58,21 @@ import gj.util.Vector;
  * the above example is simple because Integers (like most Java(tm) standard-lib data-type
  * classes) have handy toString() / parsing methods/constructors.
  */
-public abstract class Option<T> implements OptionParser<T> {
+public abstract class Option<T> extends OptionParser<T> implements FormatStrategy<T> {
   
-    /** 
-     * The logical name of this configurable option (i.e. "indent.size")
-     * public because it's final, and a String is immutable.
-     */
-    public final String name;
-    
-    /** 
-     * an inner hashtable that maps DefaultOptionMaps to value T's.
-     * part of the magic inner workings of this package.
-     */
-    private final Hashtable<DefaultOptionMap,T> map =
-	new Hashtable<DefaultOptionMap,T>();
     
     /**
      * a hashtablethat maps Configuration Objects to a list of listeners for this
      * particular option.  Part of the magic inner workings of this package.
      */
-    private final Hashtable<Configuration,Vector<OptionListener<T>>> listeners=
+    final Hashtable<Configuration,Vector<OptionListener<T>>> listeners=
 	new Hashtable<Configuration,Vector<OptionListener<T>>>();
     
     /** 
      * constructor that takes in a name
      * @param name the name of this option (i.e. "indent.level");
      */
-    public <T> Option(String name) { this.name = name; }
-    
-    /**
-     * accessor for name option
-     * @return name of this option (i.e. "indent.level")
-     */
-    public String getName() { return name; }
-  
-    /**
-     * the ability to parse a string to an object of type T.  All concrete versions of this
-     * class must override this method to provide some sort of parser implementation.
-     * @param value a String to parse
-     * @return the statically-typed representation of the string value.
-     */
-    public abstract T parse(String value);
+    public <T> Option(String name) { super(name); }
     
     /**
      * the ability to format a statically typed T value to a String.  Since T is an Object,
@@ -119,21 +93,16 @@ public abstract class Option<T> implements OptionParser<T> {
      */
     String getString(DefaultOptionMap om) { return format(getOption(om)); }
 
-    /**
-     * uses parse() and setOption() so that any changes in parsing will automatically
-     * be applied to setString().
-     */
-    T setString(DefaultOptionMap om, String val) { return setOption(om,parse(val)); }
-    
-    /** the accessor for the magic-typed hashtable stunt. */
-    T getOption(DefaultOptionMap om) { return map.get(om); }
-
-    /** the mutator for the magic-typed hashtable stunt. */
-    T setOption(DefaultOptionMap om, T val) { return map.put(om,val); }
-    
-    /** the destructor for a mapping in the magic-typed hashtable. */
-    T remove(DefaultOptionMap om) { return map.remove(om); }
-    
+    void notifyListeners(Configuration config, T val) {
+	Vector<OptionListener<T>> v = listeners.get(config);
+	if(v==null) return; // no listeners
+	OptionEvent e = new OptionEvent<T>(this,val);
+	int size = v.size();
+	for(int i = 0; i < size; i++) {
+	    v.elementAt(i).optionChanged(e);
+	}
+    }
+  
     /** magic listener-bag adder */
     void addListener(Configuration c, OptionListener<T> l) {
 	Vector<OptionListener<T>> v = listeners.get(c);
@@ -143,7 +112,7 @@ public abstract class Option<T> implements OptionParser<T> {
 	}
 	v.addElement(l);
     }
-    
+
     /** magic listener-bag remover */
     void removeListener(Configuration c, OptionListener<T> l) {
 	Vector<OptionListener<T>> v = listeners.get(c);

@@ -41,120 +41,96 @@ package edu.rice.cs.drjava.model;
 
 import java.io.*;
 import java.util.*;
-
+import edu.rice.cs.drjava.config.*;
+import gj.util.Vector;
 /**
- * A temporary class to store config data.
+ * A very very temporary class to store config data.
  *
- * This wil change in a future release!
+ * This will DISAPPEAR in the NEAR NEAR NEAR FUTURE.
  *
  * @version $Id$
  */
-public final class Configuration {
-  public static final String EXTRA_CLASSPATH_KEY = "extra.classpath";
-  public static final String JAVAC_LOCATION_KEY = "javac.location";
-  public static final String JSR14_LOCATION_KEY = "jsr14.location";
-  public static final String JSR14_COLLECTIONS_KEY = "jsr14.collectionspath";
-  public static final File PROPERTIES_FILE
-    = new File(System.getProperty("user.home"), ".drjava");
-
-  public static final String PATH_SEPARATOR = System.getProperty("path.separator");
-
-  public static final Configuration ONLY = new Configuration();
-
-  private final Properties _properties;
-
-  private Configuration() {
-    _properties = new Properties();
-
-    try {
-      // create empty props file if it doesn't exist
-      if (! PROPERTIES_FILE.exists()) {
-        new FileOutputStream(PROPERTIES_FILE).close();
-      }
-
-      _properties.load(new FileInputStream(PROPERTIES_FILE));
+public final class Configuration implements OptionConstants {
+    public static final File PROPERTIES_FILE
+	= new File(System.getProperty("user.home"), ".drjava");
+    
+    public static final Configuration ONLY = new Configuration();
+    
+    private final edu.rice.cs.drjava.config.Configuration _config;
+    
+    private Configuration() {
+	OptionMapLoader loader = OptionMapLoader.DEFAULT;
+	try {
+	    if (PROPERTIES_FILE.exists()) {
+		InputStream fis = new FileInputStream(PROPERTIES_FILE);
+		loader = OptionMapLoader.makeLoader(fis);
+	    } else { // be nice and create a config file.
+		new FileOutputStream(PROPERTIES_FILE).close();
+	    }
+	} catch(IOException e) { // IOException occurred
+	}
+	OptionMap map = new DefaultOptionMap();
+	loader.loadInto(map);
+	_config = new edu.rice.cs.drjava.config.Configuration(map);
     }
-    catch (IOException ioe) {
-      // oh well, didn't find any properties.
+    
+    /**
+     * Saves the properties back to a file.
+     * This will do nothing if it can't save to the properties file
+     * for some reason.
+     * This is a temporary hack to enable feature req #523222.
+     * @deprecated this is a dumb method.  this is a dumb class.
+     */
+    public void saveProperties() {
     }
-  }
 
-  /**
-   * Saves the properties back to a file.
-   * This will do nothing if it can't save to the properties file
-   * for some reason.
-   * This is a temporary hack to enable feature req #523222.
-   */
-  public void saveProperties() {
-    try {
-      _properties.store(new FileOutputStream(PROPERTIES_FILE),
-                        "DrJava config (see " +
-                          "http://sourceforge.net/docman/display_doc.php?docid=9158&group_id=44253" +
-                          ")");
+    
+    /**
+     * Changes the setting for the javac classpath.
+     * This is a temporary hack to enable feature req #523222.
+     */
+    public void setJavacLocation(String s) {
+	_config.setSetting(JAVAC_LOCATION,s);
     }
-    catch (IOException ioe) {
-      // oh well, couldn't save.
+    
+    /**
+     * Returns the setting for the javac classpath, or null if none was
+     * specified.
+     */
+    public String getJavacLocation() {
+	return _config.getSetting(JAVAC_LOCATION);
     }
-  }
-
-
-  /**
-   * Changes the setting for the javac classpath.
-   * This is a temporary hack to enable feature req #523222.
-   */
-  public void setJavacLocation(String s) {
-    _properties.setProperty(JAVAC_LOCATION_KEY, s);
-  }
-
-  /**
-   * Returns the setting for the javac classpath, or null if none was
-   * specified.
-   */
-  public String getJavacLocation() {
-    return _properties.getProperty(JAVAC_LOCATION_KEY);
-  }
-
-  /**
-   * Returns the setting for the jsr14 classpath, or null if none was
-   * specified.
-   */
-  public String getJSR14Location() {
-    return _properties.getProperty(JSR14_LOCATION_KEY);
-  }
-
-  /**
-   * Returns the setting for the jsr14 collections classses classpath,
-   * or null if none was specified.
-   */
-  public String getJSR14CollectionsPath() {
-    return _properties.getProperty(JSR14_COLLECTIONS_KEY);
-  }
-
-  /**
-   * Gets additional items to add to the classpath for both
-   * compilation and interpretation.
-   *
-   * The classpath property must use the platform's path separator.
-   *
-   * @return An array of items to add to the classpaths.
-   */
-  public String[] getExtraClasspath() {
-    String path = _properties.getProperty(EXTRA_CLASSPATH_KEY);
-    if (path == null) {
-      return new String[0];
+    
+    /**
+     * Returns the setting for the jsr14 classpath, or null if none was
+     * specified.
+     */
+    public String getJSR14Location() {
+	return _config.getSetting(JSR14_LOCATION);
     }
-    else {
-      StringTokenizer tokenizer = new StringTokenizer(path, PATH_SEPARATOR);
-      String[] ret = new String[tokenizer.countTokens()];
-      for (int i = 0; i < ret.length; i++) {
-        ret[i] = tokenizer.nextToken();
-      }
-
-      return ret;
+    
+    /**
+     * Returns the setting for the jsr14 collections classses classpath,
+     * or null if none was specified.
+     */
+    public String getJSR14CollectionsPath() {
+	return _config.getSetting(JSR14_COLLECTIONSPATH);
     }
-  }
-
-  public String toString() {
-    return _properties.toString();
-  }
+    
+    /**
+     * Gets additional items to add to the classpath for both
+     * compilation and interpretation.
+     *
+     * The classpath property must use the platform's path separator.
+     * @deprecated this method is dumb.
+     * @return An array of items to add to the classpaths.
+     */
+    public String[] getExtraClasspath() {
+	Vector<String> v = _config.getSetting(EXTRA_CLASSPATH);
+	if(v==null) return new String[0];
+	String[] ret = new String[v.size()];
+	v.copyInto(ret);
+	return ret;
+    }
+    
 }

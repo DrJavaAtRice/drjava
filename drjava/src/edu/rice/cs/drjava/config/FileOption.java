@@ -39,63 +39,28 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.config;
 
-import gj.util.Vector;
+import java.io.*;
 
 /**
- * Class defining all configuration options with values of type Vector<String>.
+ * Class representing all configuration options with values of type File.
  */
-public class StringVectorOption extends VectorOption<String>
-{  
-  /**
-   * @param key The name of this Option.
-   */
-  public StringVectorOption(String key) { super(key); }
+public class FileOption extends Option<File> {
   
   /**
-   * @param s String representation of an instance of class Vector<String>.
-   * The format of this String is determined by the method Vector<T>.toString().
-   * @param i The index of the first character of a distinct String in "s".
-   * "Distinct" meaning separated by comma-space, or by a bracket.
-   * @param v The instance of class Vector<String> to which
-   * the parsed new element is being added.
-   * @return The index of the first character of the next
-   * distinct String in "s", or the index of the last character in "s"
-   * if this call parses the last distinct String in "s".
-   * @exception IllegalArgumentException "s" is not a legal String
-   * representation of an instance of Vector<String>.
+   * @param key The name of this option.
    */
-  int parseElement(String s, int i, Vector<String> v)
-  {
-    // Note that this implementation allows to 
-    // parse empty Strings, and it will consider
-    // the String [a,b,c] as a Vector with ONE element:
-    // it has no comma-space delimiters.
-    
-    char c;
-    
-    // Find the end of the current substring.
-    for (String current = ""; i < s.length(); i++)
-    {
-      c = s.charAt(i);
-      if (c == ']') 
-      {
-        v.addElement(current); return i;
-      }
-      else if (c == ',' && s.charAt(i+1) == ' ') 
-      {
-        v.addElement(current); return i + 2;
-      }
-      else current += c;
-    }
-    // Signal error if no delimiter is found.
-    throw new IllegalArgumentException("Input must be String representaion " +
-                                         "of a Vector of Integer objects.");    
-  }
+  public FileOption(String key) { super(key); }
   
   /**
-   * @param s The String to be formatted.
-   * @return "s": no actual formatting is necessary for String objects.
+   * @param s The String to be parsed, must represent
+   * the absolute path of the File to be created.
+   * @return The File object corresponding to path "p".
    */
-  String formatElement(String s) { return s; }
-}
+  public File parse(String s) { return new File(s).getAbsoluteFile(); }
 
+  /**
+   * @param f The instance of class File to be formatted.
+   * @return A String representing the absolute path of "f".
+   */
+  public String format(File f) { return f.getAbsolutePath(); }
+}

@@ -43,15 +43,15 @@ import gj.util.Hashtable;
 import gj.util.Enumeration;
 public interface OptionMap {
 
-    public <T> T getOption(Option<T> o);
+    public <T> T getOption(OptionParser<T> o);
 
     public <T> T setOption(Option<T> o, T val);
 
     public String getString(Option<Object> o);
     
-    public <T> T setString(Option<T> o, String s);
+    public <T> T setString(OptionParser<T> o, String s);
 
-    public <T> T removeOption(Option<T> o);
+    public <T> T removeOption(OptionParser<T> o);
 
     public Enumeration<OptionParser<Object>> keys();
 }

@@ -35,31 +35,48 @@
  * present version of DrJava depends on these classes, so you'd want to
  * remove the dependency first!)
  *
-END_COPYRIGHT_BLOCK*/
+ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.config;
 
-public class Configuration {
+public class Configuration {  
+    
+    private OptionMap map;
   
-  private OptionMap map;
+    public Configuration(OptionMap om) {
+	map = om;
+    }
   
-  public Configuration(OptionMap om) {
-    map = om;
-  }
+    public <T> T setSetting(Option<T> op, T value) {
+	T ret = map.setOption(op,value);
+	op.notifyListeners(this,value);
+	return ret;
+    }
   
-  public <T> T setSetting(Option<T> op, T value) {
-    return map.setOption(op,value);
-  }
+    public <T> T getSetting(Option<T> op) {
+	return map.getOption(op);
+    }
   
-  public <T> T getSetting(Option<T> op) {
-    return map.getOption(op);
-  }
+    public <T> void addOptionListener(Option<T> op, OptionListener<T> l) {
+	op.addListener(this,l);
+    }
   
-  public <T> void addOptionListener(Option<T> op, OptionListener<T> l) {
-    op.addListener(this,l);
-  }
-  
-  public <T> void removeOptionListener(Option<T> op, OptionListener<T> l) {
-    op.removeListener(this,l);
-  }
+    public <T> void removeOptionListener(Option<T> op, OptionListener<T> l) {
+	op.removeListener(this,l);
+    }
+
+    /** 
+     * Java doesn't allow static initializers in interfaces.  that is dumb.  that's why OptionConstants has to call 
+     * this method.
+     * @return a vector option that represents the "extra classpath" option.
+     **/
+    static VectorOption<String> getExtraClasspathOption() {
+	String ps = System.getProperty("path.separator"); // system path separator
+	if(ps.length() > 1) { // spit out warning if it's more than one character.
+	    System.err.println("WARNING: Configurability interface only supports a one-char separator as of this moment...");
+	    System.err.println("using '"+ps.charAt(0)+"' for delimiter.");
+	}
+	return new VectorOption<String>("extra.classpath",new StringOption(""),"",ps.charAt(0),"");
+    }
+
 }

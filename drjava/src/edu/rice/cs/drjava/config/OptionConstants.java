@@ -37,48 +37,15 @@
  *
 END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava;
+package edu.rice.cs.drjava.config;
+import java.io.File;
+public interface OptionConstants {
 
-import java.util.Date;
-import java.text.SimpleDateFormat;
-
-/**
- * This interface hold the information about this build of DrJava.
- * This file is copied to Version.java by the build process, which also
- * fills in the right values of the date and time.
- *
- * This javadoc corresponds to build drjava-20020402-0433;
- *
- * @version $Id$
- */
-public abstract class Version {
-  /**
-   * This string will be automatically expanded upon "ant commit".
-   * Do not edit it by hand!
-   */
-  private static final String BUILD_TIME_STRING = "20020402-0433";
-
-  /** A {@link Date} version of the build time. */
-  private static final Date BUILD_TIME = _getBuildDate();
-
-  public static String getBuildTimeString() {
-    return BUILD_TIME_STRING;
-  }
-
-  public static Date getBuildTime() {
-    return BUILD_TIME;
-  }
-
-  private static Date _getBuildDate() {
-    try {
-      return new SimpleDateFormat("yyyyMMdd-HHmm z").parse(BUILD_TIME_STRING + " GMT");
-    }
-    catch (Exception e) { // parse format or whatever problem
-      return null;
-    }
-  }
-
-  public static void main(String[] args) {
-    System.out.println("Version for edu.rice.cs.drjava: " + BUILD_TIME_STRING);
-  }
-} 
+    // STATIC VARIABLES    
+    public static final IntegerOption INDENT_LEVEL = new IntegerOption("indent.level");
+    public static final VectorOption<String> EXTRA_CLASSPATH = Configuration.getExtraClasspathOption();
+    public static final StringOption JAVAC_LOCATION = new StringOption("javac.location"),
+	JSR14_LOCATION = new StringOption("jsr14.location"),
+	JSR14_COLLECTIONSPATH = new StringOption("jsr14.collectionspath");
+    
+}

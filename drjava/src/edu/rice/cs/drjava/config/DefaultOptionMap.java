@@ -35,43 +35,46 @@
  * present version of DrJava depends on these classes, so you'd want to
  * remove the dependency first!)
  *
-END_COPYRIGHT_BLOCK*/
+ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.config;
 import gj.util.Hashtable;
 
 public class DefaultOptionMap 
-  extends Hashtable<OptionParser<Object>,Object> implements OptionMap {    
+    extends Hashtable<OptionParser<Object>,Object> implements OptionMap {    
 
-  public <T> T getOption(Option<T> o) {
-    return o.getOption(this);
-  }
+    public <T> T getOption(OptionParser<T> o) {
+	return o.getOption(this);
+    }
   
-  public <T> T setOption(Option<T> o, T val) {
-    super.put((OptionParser) o,val); // jsr14 is dumb.  we have to cast.
-    return o.setOption(this,val); 
-  }
+    public <T> T setOption(Option<T> o, T val) {
+	super.put((OptionParser) o,val); // jsr14 is dumb.  we have to cast.  Every OptionParser<T> is OptionParser<Object>
+	return o.setOption(this,val); 
+    }
   
-  public String getString(Option<Object> o) {
-    return o.getString(this);
-  }
+    public String getString(Option<Object> o) {
+	return o.getString(this);
+    }
   
-  public <T> T setString(Option<T> o, String s) {
-    return o.setString(this,s);
-  }
+    public <T> T setString(OptionParser<T> o, String s) {
+	return o.setString(this,s);
+    }
   
-  public Object remove(Option<Object> o) {
-    super.remove(o);
-    return o.remove(this);
-  }
+    public Object remove(OptionParser<Object> o) {
+	super.remove(o);
+	return o.remove(this);
+    }
   
-  public <T> T removeOption(Option<T> o) {
-    super.remove((OptionParser)o); // jsr14 is dumb.  we have to cast.
-    return o.remove(this);
-  }
+    public <T> T removeOption(OptionParser<T> o) {
+	super.remove((OptionParser)o); // jsr14 is dumb.  we have to cast.
+	return o.remove(this);
+    }
   
-  public Object put(Option<Object> o, Object val) {
-    super.put(o,val); 
-    return o.setOption(this,val);
-  }
+    public Object put(OptionParser<Object> o, Object val) {
+
+	super.put(o,val); 
+	return o.setOption(this,val);
+    }
+
+    
 }

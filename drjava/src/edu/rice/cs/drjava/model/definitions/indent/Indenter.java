@@ -57,7 +57,10 @@ public class Indenter
   /**
    * Private constructor for singleton instance.
    */
-  private Indenter()  { buildTree(); }
+  private Indenter() { 
+    // Listen to configuration.
+    buildTree(); 
+  }
   
   /**
    * Hardcoded indent size, for now.
