@@ -3931,7 +3931,8 @@ public class MainFrame extends JFrame implements OptionConstants {
       SwingUtilities.invokeLater(doCommand);
     }
 
-    public void javadocEnded(final boolean success, final File destDir) {
+    public void javadocEnded(final boolean success, final File destDir,
+                             final boolean showFrames) {
       // Only change GUI from event-dispatching thread
       Runnable doCommand = new Runnable() {
         public void run() {
@@ -3957,10 +3958,13 @@ public class MainFrame extends JFrame implements OptionConstants {
               className = "";
             }
             try {
-              File index = new File(destDir, "index.html");
+              String filename = (showFrames || className.equals("")) ?
+                "index.html" : (className + ".html");
+              File index = new File(destDir, filename);
               URL address = index.getAbsoluteFile().toURL();
               if (!PlatformFactory.ONLY.openURL(address)) {
-                JavadocFrame _javadocFrame = new JavadocFrame(destDir, className);
+                JavadocFrame _javadocFrame = 
+                  new JavadocFrame(destDir, className, showFrames);
                 _javadocFrame.show();
               }
             }

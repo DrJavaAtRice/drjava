@@ -60,7 +60,9 @@ public class HTMLFrame extends JFrame {
   private static final int FRAME_HEIGHT = 600;
   private static final int LEFT_PANEL_WIDTH = 250;
   private JEditorPane _mainDocPane;
+  private JScrollPane _mainScroll;
   private JSplitPane _splitPane;
+  private JPanel _splitPaneHolder;
   private JEditorPane _contentsDocPane;
   private JPanel _closePanel;
   private JButton _closeButton;
@@ -182,16 +184,16 @@ public class HTMLFrame extends JFrame {
     
     _mainDocPane = new JEditorPane();
     _mainDocPane.setEditable(false);
-    JScrollPane mainScroll = new BorderlessScrollPane(_mainDocPane);
+    _mainScroll = new BorderlessScrollPane(_mainDocPane);
     
     _splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
                                 true,
                                 contentsScroll, 
-                                mainScroll);
+                                _mainScroll);
     _splitPane.setDividerLocation(LEFT_PANEL_WIDTH);
-    JPanel tempPanel = new JPanel(new GridLayout(1,1));
-    tempPanel.setBorder(new EmptyBorder(0,5,0,5));
-    tempPanel.add(_splitPane);
+    _splitPaneHolder = new JPanel(new GridLayout(1,1));
+    _splitPaneHolder.setBorder(new EmptyBorder(0,5,0,5));
+    _splitPaneHolder.add(_splitPane);
     // _splitPane.setBorder(new CompoundBorder(new EmptyBorder(0,5,0,5),_splitPane.getBorder()));
     _closeButton = new JButton(_closeAction);
     _backButton = makeButton(_backAction,JButton.RIGHT,0,3);
@@ -221,7 +223,7 @@ public class HTMLFrame extends JFrame {
     Container cp = getContentPane();
     cp.setLayout(new BorderLayout());
     cp.add(navContainer, BorderLayout.NORTH);
-    cp.add(tempPanel, BorderLayout.CENTER);
+    cp.add(_splitPaneHolder, BorderLayout.CENTER);
     cp.add(_closePanel, BorderLayout.SOUTH);
 
     _linkError = false;
@@ -283,6 +285,14 @@ public class HTMLFrame extends JFrame {
     this.setSize(frameSize);
     this.setLocation((screenSize.width - frameSize.width) / 2,
                      (screenSize.height - frameSize.height) / 2);
+  }
+  
+  /**
+   * Hides the navigation panel on the left.  Cannot currently be undone.
+   */
+  protected void _hideNavigationPane() {
+    _splitPaneHolder.remove(_splitPane);
+    _splitPaneHolder.add(_mainScroll);
   }
 
   private void _resetMainPane() {

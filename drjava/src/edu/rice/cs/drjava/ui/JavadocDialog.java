@@ -65,6 +65,9 @@ public class JavadocDialog implements DirectorySelector {
   /** File field and button. */
   private final FileSelectorComponent _selector;
   
+  /** Whether to always prompt for destination. */
+  private final JCheckBox _checkBox;
+  
   /** OptionPane from which to get the results. */
   private final JOptionPane _optionPane;
   
@@ -100,13 +103,15 @@ public class JavadocDialog implements DirectorySelector {
     // Create components for dialog
     String msg = "Select a destination directory for the Javadoc files:";
     _selector = new FileSelectorComponent(_frame, chooser);
-    Object[] components = new Object[] { msg, _selector };
+    _checkBox = new JCheckBox("Always Prompt For Destination");
+    Object[] components = new Object[] { msg, _selector, _checkBox };
     
     _optionPane = new JOptionPane(components,
                                   JOptionPane.QUESTION_MESSAGE,
                                   JOptionPane.OK_CANCEL_OPTION);
     _dialog = _optionPane.createDialog(_frame, "Select Javadoc Destination");
   }
+  
   
   /**
    * Shows the dialog prompting the user for a destination directory
@@ -132,12 +137,21 @@ public class JavadocDialog implements DirectorySelector {
     boolean ask = config.getSetting(OptionConstants.JAVADOC_PROMPT_FOR_DESTINATION).booleanValue();
     
     if (ask) {
+      // The "always prompt" checkbox should be checked
+      _checkBox.setSelected(true);
+      
       // Prompt the user
       _dialog.show();
-    
+      
       // Get result
       if (!_isPositiveResult()) {
         throw new OperationCanceledException();
+      }
+      
+      // See if the user wants to suppress this dialog in the future.
+      if (!_checkBox.isSelected()) {
+        config.setSetting(OptionConstants.JAVADOC_PROMPT_FOR_DESTINATION,
+                          Boolean.FALSE);
       }
       
       // Check if the user disagreed with the suggestion

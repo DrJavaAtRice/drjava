@@ -40,6 +40,7 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.ui;
 
 import edu.rice.cs.drjava.CodeStatus;
+import edu.rice.cs.drjava.platform.PlatformFactory;
 
 import javax.swing.event.HyperlinkListener;
 import javax.swing.event.HyperlinkEvent;
@@ -88,7 +89,11 @@ public class HelpFrame extends HTMLFrame {
         String protocol = url.getProtocol();
 
         if ((!"file".equals(protocol)) && (!"jar".equals(protocol))) {
-          return; // we only handle file/jar protocols
+          // try to open in the platform's web browser, since we can't
+          //  view it effectively here if it isn't in the jar
+          // (we only handle file/jar protocols)
+          PlatformFactory.ONLY.openURL(url);
+          return; 
         }
 
         // perform path testing
@@ -97,9 +102,11 @@ public class HelpFrame extends HTMLFrame {
         if(path.indexOf(HELP_PATH+CONTENTS_PAGE) >= 0) {
           try {
             url = new URL(url,HOME_PAGE); // redirect to home, not contents
-          } catch(MalformedURLException murle) {
           }
-        } else if(path.indexOf(HELP_PATH) < 0) {
+          catch(MalformedURLException murle) {
+          }
+        }
+        else if(path.indexOf(HELP_PATH) < 0) {
           // not anywhere in the help section
           return;
         }

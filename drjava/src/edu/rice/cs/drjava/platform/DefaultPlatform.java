@@ -43,6 +43,7 @@ import javax.swing.*;
 import java.net.URL;
 import java.io.File;
 import java.util.List;
+import java.lang.reflect.Method;
 
 import edu.rice.cs.util.ArgumentTokenizer;
 import edu.rice.cs.util.StringOps;
@@ -122,6 +123,57 @@ class DefaultPlatform implements PlatformSupport {
   }
   
   /**
+   * Returns the current Java specification version.
+   */
+  public String getJavaSpecVersion() {
+    return System.getProperty("java.specification.version");
+  }
+  
+  /**
+   * Returns true if the classpath's tools.jar is from version 1.3.
+   */
+  public boolean has13ToolsJar() {
+    // Javadoc's Main class should not have an execute(String[]) method.
+    try {
+      Class main = Class.forName("com.sun.tools.javadoc.Main");
+      return !_javadocMainHasExecuteMethod(main);
+    }
+    catch (Throwable t) {
+      return false;
+    }
+  }
+  
+  /**
+   * Returns true if the classpath's tools.jar is from version 1.4.
+   */
+  public boolean has14ToolsJar() {
+    // Javadoc's Main class should have an execute(String[]) method.
+    try {
+      Class main = Class.forName("com.sun.tools.javadoc.Main");
+      return _javadocMainHasExecuteMethod(main);
+    }
+    catch (Throwable t) {
+      return false;
+    }
+  }
+  
+  /**
+   * Returns true if the given class object for com.sun.tools.javadoc.Main
+   * has an execute(String[]) method.  If so, that means we have a 1.4
+   * version of tools.jar.
+   * @param main Class object for com.sun.tools.javadoc.Main
+   */
+  private boolean _javadocMainHasExecuteMethod(Class main) {
+    try {
+      Method m = main.getMethod("execute", new Class[] { String[].class });
+      return true;
+    }
+    catch (Throwable t) {
+      return false;
+    }
+  }
+  
+  /**
    * Utility method for opening a URL in a browser in a platform-specific way.
    * The default implementation uses Runtime.exec to execute a command specified
    * in Preferences.  Platform implementations should attempt the default method
@@ -150,7 +202,13 @@ class DefaultPlatform implements PlatformSupport {
       else {
         // Otherwise, replace any <URL> tags in the command with the address.
         String tag = "<URL>";
-        command = StringOps.replace(command, tag, addr);
+        if (command.indexOf(tag) != -1) {
+          command = StringOps.replace(command, tag, addr);
+        }
+        else {
+          // No <URL> specified, so tack it onto the end.
+          command = command + " " + addr;
+        }
       }
       
       // Build a string array of command and arguments.

@@ -71,6 +71,21 @@ public interface PlatformSupport {
   public boolean isWindowsPlatform();
   
   /**
+   * Returns the current Java specification version.
+   */
+  public String getJavaSpecVersion();
+  
+  /**
+   * Returns true if the classpath's tools.jar is from version 1.3.
+   */
+  public boolean has13ToolsJar();
+  
+  /**
+   * Returns true if the classpath's tools.jar is from version 1.4.
+   */
+  public boolean has14ToolsJar();
+  
+  /**
    * Utility method to determine if the current Swing look and feel is the
    * platform-specific look and feel for the client platform.
    * @return true if current Swing look and feel is the system look and feel

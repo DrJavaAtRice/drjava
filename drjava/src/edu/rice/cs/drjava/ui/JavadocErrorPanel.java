@@ -197,7 +197,11 @@ public class JavadocErrorPanel extends ErrorPanel{
      */
     protected void _updateWithErrors() throws BadLocationException {
       DefaultStyledDocument doc = new DefaultStyledDocument();
-      _updateWithErrors("error", "found", doc);
+      String failureName = "error";
+      if (getErrorModel().hasOnlyWarnings()) {
+        failureName = "warning";
+      }
+      _updateWithErrors(failureName, "found", doc);
     }
 
     /**

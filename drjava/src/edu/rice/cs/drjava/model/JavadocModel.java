@@ -54,9 +54,9 @@ import java.util.List;
 public interface JavadocModel {
   /**
    * Name for the suggested destination directory to be placed in the
-   * source root of one of the open documents.  (Value is "docs".)
+   * source root of one of the open documents.  (Value is "doc".)
    */
-  public static final String SUGGESTED_DIR_NAME = "docs";
+  public static final String SUGGESTED_DIR_NAME = "doc";
   
   /**
    * Accessor for the Javadoc error model.

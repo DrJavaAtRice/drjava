@@ -139,7 +139,15 @@ public class JavadocFrame extends HTMLFrame {
     return packages;
   }
   
-  public JavadocFrame(File destDir, String curClass) throws MalformedURLException {
+  /**
+   * Constructor.
+   * @param destDir Directory holding the Javadoc
+   * @param curClass Name of the class to try to show by default
+   * @param showFrames Whether to show the left frame with the links
+   */
+  public JavadocFrame(File destDir, String curClass, boolean showFrames)
+    throws MalformedURLException
+  {
     // This call has to happen first!
     super("Javadoc Viewer",
           new URL("file", "", introPagePath(destDir, curClass)),
@@ -154,5 +162,9 @@ public class JavadocFrame extends HTMLFrame {
         }
       }
     });
+    
+    if (!showFrames) {
+      _hideNavigationPane();
+    }
   }
 }

@@ -55,6 +55,8 @@ import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.Configuration;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.config.FileOption;
+import edu.rice.cs.drjava.platform.PlatformFactory;
+import edu.rice.cs.drjava.platform.PlatformSupport;
 import edu.rice.cs.drjava.model.compiler.CompilerErrorModel;
 import edu.rice.cs.drjava.model.compiler.CompilerError;
 import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
@@ -190,7 +192,7 @@ public class DefaultJavadocModel implements JavadocModel {
              "does not exist.  Would you like to create it?",
              "Create Directory?");
           if (create) {
-            boolean dirMade = destDir.mkdir();
+            boolean dirMade = destDir.mkdirs();
             if (!dirMade) {
               throw new IOException("Could not create directory: " + destDir);
             }
@@ -243,6 +245,10 @@ public class DefaultJavadocModel implements JavadocModel {
                                  String[] classpath,
                                  JavadocListener listener)
   {
+    if (!_ensureValidToolsJar(listener)) {
+      return;
+    }
+    
     String destDir = destDirFile.getAbsolutePath();
     
     // Accumulate a set of arguments to JavaDoc - package or file names.
@@ -324,14 +330,14 @@ public class DefaultJavadocModel implements JavadocModel {
         // There was a problem getting the file for this document.
         // Kill javadoc and display the exception as an error.
         listener.javadocStarted();  // fire first so it can fire javadocEnded
-        _showThrowableAsCompilerError(ioe, file, listener);
+        _showCompilerError(ioe.getMessage(), file, listener);
         return;
       }
       catch (InvalidPackageException ipe) {
         // Bad package - kill the javadoc operation and display the exception
         // as an error.
         listener.javadocStarted();  // fire first so it can fire javadocEnded
-        _showThrowableAsCompilerError(ipe, file, listener);
+        _showCompilerError(ipe.getMessage(), file, listener);
          return;
       }
     }
@@ -360,7 +366,7 @@ public class DefaultJavadocModel implements JavadocModel {
                                                    classpath);
 
     // Run the actual Javadoc process
-    _runJavadoc(args, classpath, destDirFile, listener);
+    _runJavadoc(args, classpath, destDirFile, listener, true);
   }
   
   
@@ -431,17 +437,45 @@ public class DefaultJavadocModel implements JavadocModel {
                                       String[] classpath,
                                       JavadocListener listener)
   {
+    if (!_ensureValidToolsJar(listener)) {
+      return;
+    }
+    
     // Generate all command line arguments
     String destDir = destDirFile.getAbsolutePath();
     ArrayList<String> args = _buildCommandLineArgs(docFile, destDir, classpath);
 
     // Run the actual Javadoc process
-    _runJavadoc(args, classpath, destDirFile, listener);
+    _runJavadoc(args, classpath, destDirFile, listener, false);
   }
   
   
   
   // -------------------- Helper Methods --------------------
+  
+  /**
+   * Ensures that a valid version of tools.jar is being used for our classpath.
+   * Ends the process with an error and returns false if not.
+   * 
+   * Using JDK 1.4 with a 1.3 tools.jar is invalid, but using JDK 1.3 with
+   * a 1.4 tools.jar is ok.
+   * 
+   * @param listener listener to fire the error event on
+   */
+  private boolean _ensureValidToolsJar(JavadocListener listener) {
+    PlatformSupport platform = PlatformFactory.ONLY;
+    String version = platform.getJavaSpecVersion();
+    if (!"1.3".equals(version) && platform.has13ToolsJar()) {
+      String msg = 
+        "There is an incompatible version of tools.jar on your\n" +
+        "classpath, so Javadoc cannot run.\n" +
+        "(tools.jar is version 1.3, JDK is version " + version + ")";
+      listener.javadocStarted();  // fire first so it can fire javadocEnded
+      _showCompilerError(msg, null, listener);
+      return false;
+    }
+    return true;
+  }
   
   /**
    * Tell the listeners that we're starting to generate Javadoc,
@@ -452,9 +486,11 @@ public class DefaultJavadocModel implements JavadocModel {
    * @param classpath Classpath to pass to Javadoc
    * @param destDirFile Directory where the results are being saved
    * @param listener JavadocListener to notify
+   * @param showFrames Whether to show the frames version (ie. Javadoc All)
    */
   private void _runJavadoc(ArrayList<String> args, String[] classpath,
-                           File destDirFile, JavadocListener listener)
+                           File destDirFile, JavadocListener listener,
+                           boolean showFrames)
   {
     // Start a new process to execute Javadoc and tell listeners it has started
     // And finally, when we're done notify the listeners with a success flag
@@ -466,11 +502,11 @@ public class DefaultJavadocModel implements JavadocModel {
       result = _javadoc_1_3((String[]) args.toArray(new String[0]), classpath);
       
       // Notify all listeners that we're done.
-      listener.javadocEnded(result, destDirFile);
+      listener.javadocEnded(result, destDirFile, showFrames);
     }
     catch (Throwable e) {
       // This fires javadocEnded, showing the error
-      _showThrowableAsCompilerError(e, null, listener);
+      _showCompilerError(e.getMessage(), null, listener);
     } 
   }
 
@@ -497,7 +533,7 @@ public class DefaultJavadocModel implements JavadocModel {
     // can see everything the interactions pane can see.
     javadocProcess =  ExecJVM.runJVM(JAVADOC_CLASS, args, classpath, new String[0]);
     
-//    System.err.println("javadoc started with args:\n" + Arrays.asList(args));
+    //System.err.println("javadoc started with args:\n" + Arrays.asList(args));
     
     /* waitFor() call appears to block indefinitely in 1.4.1, because
      * the process will block if output buffers get full.
@@ -554,6 +590,7 @@ public class DefaultJavadocModel implements JavadocModel {
     
     final String ERROR_INDICATOR = "Error: ";
     final String EXCEPTION_INDICATOR = "Exception: ";
+    final String BAD_FLAG_INDICATOR = "invalid flag:";
     while (lines.size() > 0) {
 //         System.out.println("[javadoc raw error] " + output);
       
@@ -566,6 +603,11 @@ public class DefaultJavadocModel implements JavadocModel {
       // If we haven't found an error, look for an exception.
       if (errStart == -1) {
         errStart = output.indexOf(EXCEPTION_INDICATOR);
+      }
+      
+      // If we haven't found either, look for a bad flag report.
+      if (errStart == -1) {
+        errStart = output.indexOf(BAD_FLAG_INDICATOR);
       }
             
       if (errStart != -1) {
@@ -708,22 +750,20 @@ public class DefaultJavadocModel implements JavadocModel {
   }
   
   /**
-   * Treats the given Throwable as a Javadoc error, firing the
+   * Treats the given message as a Javadoc error, firing the
    * end event necessary to show the error.  The javadocStarted() event
    * <i>must</i> have already been fired, and Javadoc generation must
    * halt after calling this method.
    * 
+   * @param msg Message to display as an error
    * @param f File that caused the error
-   * @param t Throwable to display as an error
    * @param listener JavadocListener to notify of start and end
    */
-  private void _showThrowableAsCompilerError(Throwable t, File f,
-                                             JavadocListener listener)
-  {
+  private void _showCompilerError(String msg, File f, JavadocListener listener) {
     CompilerError[] errors = new CompilerError[1];
-    errors[0] = new CompilerError(f, -1, -1, t.getMessage(), false);
+    errors[0] = new CompilerError(f, -1, -1, msg, false);
     _javadocErrorModel = new CompilerErrorModel(errors, _getter);
-    listener.javadocEnded(false, null);
+    listener.javadocEnded(false, null, false);
   }
   
   /**
@@ -768,6 +808,7 @@ public class DefaultJavadocModel implements JavadocModel {
   {
     ArrayList<String> args = new ArrayList<String>();
     _addBasicArguments(args, destDir, "", classpath);
+    _addSingleDocArguments(args);
     args.add(file.getAbsolutePath());
     return args;
   }
@@ -833,5 +874,17 @@ public class DefaultJavadocModel implements JavadocModel {
       args.add("-link");
       args.add(config.getSetting(OptionConstants.JAVADOC_1_4_LINK));
     }
+  }
+  
+  /**
+   * Adds command line arguments for generating a single Javadoc file,
+   * suppressing most of the navigation on the page.
+   * @param args List of arguments to modify.
+   */
+  private void _addSingleDocArguments(ArrayList<String> args) {
+    args.add("-noindex");
+    args.add("-notree");
+    args.add("-nohelp");
+    args.add("-nonavbar");
   }
 }
