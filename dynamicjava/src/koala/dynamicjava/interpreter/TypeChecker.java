@@ -93,13 +93,23 @@ public class TypeChecker extends VisitorObject<Class> {
    * Visits a WhileStatement
    * @param node the node to visit
    */
-  public Class visit(WhileStatement node) {
+  public Class visit(WhileStatement whileStmt) {
     // Check the condition
-    if (node.getCondition().acceptVisitor(this) != boolean.class) {
-      throw new ExecutionError("condition.type", node);
+    Expression exp = whileStmt.getCondition();
+    
+    Class type = exp.acceptVisitor(this);
+    if (type != boolean.class && type != Boolean.class) {
+      throw new ExecutionError("condition.type", whileStmt);
     }
     
-    node.getBody().acceptVisitor(this);
+    // Auto unbox: Boolean->boolean
+    if (type == Boolean.class) {
+      // add method call on expression:
+      //   "exp.booleanValue();"
+      whileStmt.setCondition(_unbox(exp, type));
+    }
+    
+    whileStmt.getBody().acceptVisitor(this);
     return null;
   }
   
@@ -117,11 +127,19 @@ public class TypeChecker extends VisitorObject<Class> {
       checkList(l);
     }
     
-    Node cond = node.getCondition();
+    Expression cond = node.getCondition();
     if (cond != null) {
-      // Check the condition
-      if (cond.acceptVisitor(this) != boolean.class) {
+      
+      Class type = cond.acceptVisitor(this);
+      if (type != boolean.class && type != Boolean.class) {
         throw new ExecutionError("condition.type", node);
+      }
+      
+      // Auto unbox: Boolean->boolean
+      if (type == Boolean.class) {
+        // add method call on expression:
+        //   "cond.booleanValue();"
+        node.setCondition(_unbox(cond, type));
       }
     }
     
@@ -144,9 +162,17 @@ public class TypeChecker extends VisitorObject<Class> {
   public Class visit(DoStatement node) {
     node.getBody().acceptVisitor(this);
     
-    // Check the condition
-    if (node.getCondition().acceptVisitor(this) != boolean.class) {
+    Expression exp = node.getCondition();
+    Class type = exp.acceptVisitor(this);
+    if (type != boolean.class && type != Boolean.class) {
       throw new ExecutionError("condition.type", node);
+    }
+    
+    // Auto unbox: Boolean->boolean
+    if (type == Boolean.class) {
+      // add method call on expression:
+      //   "exp.booleanValue();"
+      node.setCondition(_unbox(exp, type));
     }
     return null;
   }
@@ -1960,7 +1986,8 @@ public class TypeChecker extends VisitorObject<Class> {
       if (lc.isPrimitive()) {
         if (lc == boolean.class && rc != boolean.class) {
           throw new ExecutionError("assignment.types", node);
-        } else if (lc == byte.class && rc != byte.class) {
+        } 
+        else if (lc == byte.class && rc != byte.class) {
           if (rc == int.class && v.hasProperty(NodeProperties.VALUE)) {
             Number n = (Number)v.getProperty(NodeProperties.VALUE);
             if (n.intValue() == n.byteValue()) {
@@ -1968,7 +1995,8 @@ public class TypeChecker extends VisitorObject<Class> {
             }
           }
           throw new ExecutionError("assignment.types", node);
-        } else if ((lc == short.class || rc == char.class) &&
+        } 
+        else if ((lc == short.class || rc == char.class) &&
                    (rc != byte.class && rc != short.class && rc != char.class)) {
           if (rc == int.class && v.hasProperty(NodeProperties.VALUE)) {
             Number n = (Number)v.getProperty(NodeProperties.VALUE);
@@ -1977,13 +2005,15 @@ public class TypeChecker extends VisitorObject<Class> {
             }
           }
           throw new ExecutionError("assignment.types", node);
-        } else if (lc == int.class    &&
+        } 
+        else if (lc == int.class    &&
                    (rc != byte.class  &&
                     rc != short.class &&
                     rc != char.class  &&
                     rc != int.class)) {
           throw new ExecutionError("assignment.types", node);
-        } else if (lc == long.class   &&
+        } 
+        else if (lc == long.class   &&
                    (rc == null          ||
                     !rc.isPrimitive()   ||
                     rc == void.class    ||
@@ -1991,21 +2021,24 @@ public class TypeChecker extends VisitorObject<Class> {
                     rc == float.class   ||
                     rc == double.class)) {
           throw new ExecutionError("assignment.types", node);
-        } else if (lc == float.class  && 
+        } 
+        else if (lc == float.class  && 
                    (rc == null          ||
                     !rc.isPrimitive()   ||
                     rc == void.class    ||
                     rc == boolean.class ||
                     rc == double.class)) {
           throw new ExecutionError("assignment.types", node);
-        } else if (lc == double.class && 
+        } 
+        else if (lc == double.class && 
                    (rc == null        ||
                     !rc.isPrimitive() ||
                     rc == void.class  ||
                     rc == boolean.class)) {
           throw new ExecutionError("assignment.types", node);
         }
-      } else if (rc != null) {
+      } 
+      else if (rc != null) {
         if (!lc.isAssignableFrom(rc) && !rc.isAssignableFrom(lc)) {
           throw new ExecutionError("assignment.types", node);
         }
@@ -2202,4 +2235,59 @@ public class TypeChecker extends VisitorObject<Class> {
     }
   }
   
+  /**
+   * Unboxes the given expression by returning the correct
+   * <code>ObjectMethodCall</code> corresponding to the given type
+   * @param child The expression to unbox
+   * @param type The type of the evaluated expression
+   * @return The <code>ObjectMethodCall</code> that unboxes the expression
+   */
+  private ObjectMethodCall _unbox(Expression child, Class type) {
+    String methodName = "";
+    if (type == Boolean.class) {
+      methodName = "booleanValue";
+    }
+    else if (type == Byte.class) {
+      methodName = "byteValue";
+    }
+    else if (type == Character.class) {
+      methodName = "charValue";
+    }
+    else if (type == Short.class) {
+      methodName = "shortValue";
+    }
+    else if (type == Integer.class) {
+      methodName = "intValue";
+    }
+    else if (type == Long.class) {
+      methodName = "longValue";
+    }
+    else if (type == Float.class) {
+      methodName = "floatValue";
+    }
+    else if (type == Double.class) {
+      methodName = "doubleValue";
+    }
+    else {
+      throw new ExecutionError("unbox.type", child);
+    }
+    // Return a call to the method described in methodName
+    // with no params and the file info of the child we are
+    // unboxing
+    Method method;
+    try {
+      method = type.getMethod(methodName, new Class[] {});
+    }
+    catch (NoSuchMethodException nsme) {
+      throw new RuntimeException("The method " + methodName + " not found.");
+    }
+    ObjectMethodCall methodCall = new ObjectMethodCall(child, methodName, null,
+                                                       child.getFilename(), 
+                                                       child.getBeginLine(), 
+                                                       child.getBeginColumn(), 
+                                                       child.getEndLine(), 
+                                                       child.getEndColumn());
+    methodCall.setProperty(NodeProperties.METHOD, method);
+    return methodCall;
+  }
 }

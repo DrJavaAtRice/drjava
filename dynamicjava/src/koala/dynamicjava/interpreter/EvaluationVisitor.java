@@ -506,17 +506,21 @@ public class EvaluationVisitor extends VisitorObject<Object> {
       // Invoke the method
       try {
         return m.invoke(obj, args);
-      } catch (InvocationTargetException e) {
+      } 
+      catch (InvocationTargetException e) {
         if (e.getTargetException() instanceof Error) {
           throw (Error)e.getTargetException();
-        } else if (e.getTargetException() instanceof RuntimeException) {
+        } 
+        else if (e.getTargetException() instanceof RuntimeException) {
           throw (RuntimeException)e.getTargetException();
         }
         throw new ThrownException(e.getTargetException(), node);
-      } catch (Exception e) {
+      } 
+      catch (Exception e) {
         throw new CatchedExceptionError(e, node);
       }
-    } else {
+    } 
+    else {
       // If the 'method' property is not set, the object must be
       // an array and the called method must be 'clone'.
       // Since the 'clone' method of an array is not a normal
