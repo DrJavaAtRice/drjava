@@ -107,7 +107,10 @@ public class FileOptionComponent extends OptionComponent<File>
 //    _panel.add(_jtf, BorderLayout.CENTER);
 //    _panel.add(_button, BorderLayout.EAST);
     _component = new FileSelectorComponent(parent, jfc, 30, 10f);
-    _component.setFileField(DrJava.getConfig().getSetting(_option));
+    File setting = DrJava.getConfig().getSetting(_option);
+    if (setting != _option.getDefault()) {
+      _component.setFileField(setting);
+    }
   }
 
   /**

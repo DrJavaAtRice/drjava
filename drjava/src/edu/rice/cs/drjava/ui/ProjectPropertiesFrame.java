@@ -293,7 +293,7 @@ public class ProjectPropertiesFrame extends JFrame {
 //    
     DirectoryChooser dirChooser = new DirectoryChooser(this);
     dirChooser.setSelectedDirectory(_getWorkDir());
-    dirChooser.setTitle("Select Built Directory");
+    dirChooser.setDialogTitle("Select Built Directory");
     dirChooser.setApproveButtonText("Select");
     dirChooser.setEditable(true);
     _builtDirSelector = new DirectorySelectorComponent(this,dirChooser,20,12f);
@@ -327,7 +327,7 @@ public class ProjectPropertiesFrame extends JFrame {
     } catch(IOException e) { }
     
     DirectoryChooser chooser = new DirectoryChooser(this,rootFile);
-    chooser.setTitle("Select Main Document");
+    chooser.setDialogTitle("Select Main Document");
     chooser.setTopMessage("Select the main doucment for the project:");
     chooser.setApproveButtonText("Select");
     FileFilter filter = new FileFilter(){
@@ -346,7 +346,7 @@ public class ProjectPropertiesFrame extends JFrame {
     chooser.addChoosableFileFilter(filter);
     chooser.addFileFilter(filter);
     chooser.setShowFiles(true);
-    chooser.setFileDisplayManager(MainFrame.getFileDisplayManager());
+    chooser.setFileDisplayManager(MainFrame.getFileDisplayManager20());
     _jarMainClassSelector = new DirectorySelectorComponent(this,chooser,20,12f);
     //toReturn.add(_builtDirSelector, BorderLayout.EAST);
     return _jarMainClassSelector;

@@ -69,7 +69,7 @@ public class RecentDocFrame extends JWindow{
   MainFrame _frame;
   
   // The manager that gives filenames and icons
-  FileDisplayManager _fdm = _frame.getFileDisplayManager();
+  FileDisplayManager _fdm = _frame.getFileDisplayManager30();
     
   // the label that shows the icon and filename
   JLabel _label;

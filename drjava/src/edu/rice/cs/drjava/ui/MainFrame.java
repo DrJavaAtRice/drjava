@@ -1503,31 +1503,74 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
   };
 
-
+  // ------------- File Display Managers for File Icons ------------
+  
+  private static DJFileDisplayManager _djFileDisplayManager20;
+  private static DJFileDisplayManager _djFileDisplayManager30;
+  
+  static {
+    Icon java, dj0, dj1, dj2;
+    
+    java = MainFrame.getIcon("JavaIcon20.gif");
+    dj0 = MainFrame.getIcon("ElementaryIcon20.gif");
+    dj1 = MainFrame.getIcon("IntermediateIcon20.gif");
+    dj2 = MainFrame.getIcon("AdvancedIcon20.gif");
+    _djFileDisplayManager20 = new DJFileDisplayManager(java,dj0,dj1,dj2);
+    
+    java = MainFrame.getIcon("JavaIcon30.gif");
+    dj0 = MainFrame.getIcon("ElementaryIcon30.gif");
+    dj1 = MainFrame.getIcon("IntermediateIcon30.gif");
+    dj2 = MainFrame.getIcon("AdvancedIcon30.gif");
+    _djFileDisplayManager30 = new DJFileDisplayManager(java,dj0,dj1,dj2);
+  }
+  
   /**
    * This manager is meant to retrieve the correct icons for the given filename.
    * The only files recognized are the files obviously listed below inthe function
+   * (.java, .dj0, .dj1, .dj2). The icons that represent each filetype are given 
+   * into the managers constructor upon instantiation.
    */
-  private static FileDisplayManager _djFileDisplayManager = new DefaultFileDisplayManager() {
-    private Icon _java = MainFrame.getIcon("JavaIcon.gif");
-    private Icon _dj0 = MainFrame.getIcon("ElementaryIcon.gif");
-    private Icon _dj1 = MainFrame.getIcon("IntermediateIcon.gif");
-    private Icon _dj2 = MainFrame.getIcon("AdvancedIcon.gif");
+  private static class DJFileDisplayManager extends DefaultFileDisplayManager {
+    private Icon _java;
+    private Icon _dj0;
+    private Icon _dj1;
+    private Icon _dj2;
     
+    public DJFileDisplayManager(Icon java, Icon dj0, Icon dj1, Icon dj2) {
+      _java = java;
+      _dj0 = dj0;
+      _dj1 = dj1;
+      _dj2 = dj2;
+    }
+    
+    /**
+     * This method chooses the custom icon only for the known filetypes.
+     * If these filetypes are not receiving the correct icons, make sure
+     * the filenames are correct and that the icons are present in the 
+     * ui/icons directory.
+     */
     public Icon getIcon(File f) {
+      Icon ret = null;
       if (!f.isDirectory()) {
         String name = f.getName().toLowerCase();
-        if (name.endsWith(".java")) return _java;
-        if (name.endsWith(".dj0")) return _dj0;
-        if (name.endsWith(".dj1")) return _dj1;
-        if (name.endsWith(".dj2")) return _dj2;
+        if (name.endsWith(".java")) ret = _java;
+        if (name.endsWith(".dj0")) ret = _dj0;
+        if (name.endsWith(".dj1")) ret = _dj1;
+        if (name.endsWith(".dj2")) ret = _dj2;
       }
-      return super.getIcon(f);
+      if (ret == null) 
+        return super.getIcon(f);
+      else
+        return ret;
     }
-  };
+  }
   
-  public static FileDisplayManager getFileDisplayManager() {
-    return _djFileDisplayManager;
+  public static FileDisplayManager getFileDisplayManager20() {
+    return _djFileDisplayManager20;
+  }
+  
+  public static FileDisplayManager getFileDisplayManager30() {
+    return _djFileDisplayManager30;
   }
 
 
@@ -1895,7 +1938,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     DirectoryChooser dc = new DirectoryChooser(this);
     dc.setSelectedDirectory(workDir);
     dc.setApproveButtonText("Select");
-    dc.setTitle("Open Folder");
+    dc.setDialogTitle("Open Folder");
     dc.setAccessory(_openRecursiveCheckBox);
     return dc;
   }

@@ -112,7 +112,7 @@ public class ConfigFrame extends JFrame {
 
     _dirChooser = new DirectoryChooser();
     _dirChooser.setSelectedDirectory(_getWorkDir());
-    _dirChooser.setTitle("Select");
+    _dirChooser.setDialogTitle("Select");
     _dirChooser.setApproveButtonText("Select");
     _dirChooser.setMultiSelectionEnabled(false);
     
