@@ -124,7 +124,6 @@ public class MainFrame extends JFrame implements OptionConstants {
   private JUnitPanel _junitPanel;
   private FindReplaceDialog _findReplace;
   private LinkedList _tabs;
-  private HistorySaveDialog _historySaveDialog;
   
   private JPanel _statusBar;
   private JLabel _fileNameField;
@@ -723,6 +722,24 @@ public class MainFrame extends JFrame implements OptionConstants {
   private Action _saveHistoryAction = new AbstractAction("Save Interactions History...")
   {
     public void actionPerformed(ActionEvent ae) {
+      String[] options = {"Yes","No","Cancel"};
+      int resp = JOptionPane.showOptionDialog(MainFrame.this,
+                                              "Edit interactions history before saving?",
+                                              "Edit History?",
+                                              JOptionPane.YES_NO_CANCEL_OPTION,
+                                              JOptionPane.QUESTION_MESSAGE,
+                                              null,options,
+                                              options[1]);
+      if(resp == 2 || resp == JOptionPane.CLOSED_OPTION) {
+        return;
+      }
+      String history = _model.getHistoryAsString();
+      if(resp == 0) {
+        history = (new HistorySaveDialog(MainFrame.this)).editHistory(history);
+      }
+      if(history==null) {
+        return; // save cancelled
+      }
       // Working directory is default place to start
       File workDir = DrJava.CONFIG.getSetting(WORKING_DIRECTORY);
       if (workDir == FileOption.NULL_FILE) {
@@ -746,14 +763,31 @@ public class MainFrame extends JFrame implements OptionConstants {
           return _verifyOverwrite();
         }
       };
-      String history = _model.getHistoryAsString();
-      _historySaveDialog = new HistorySaveDialog(MainFrame.this, selector, history);
-      /*try {
-        _model.saveHistory(selector);
+      
+      File c = null;
+      try {
+        c = selector.getFile();
+      } catch (OperationCanceledException oce) {
+        return;
+        // don't need to do anything
       }
-      catch (IOException ioe) {
-        _showIOError(ioe);
-      }*/
+      
+      if (c != null) {
+        if (c.getName().indexOf('.') == -1)
+          c = new File(c.getAbsolutePath() + "." + InteractionsHistoryFilter.HIST_EXTENSION);
+        try {
+          FileOutputStream fos = new FileOutputStream(c);
+          OutputStreamWriter osw = new OutputStreamWriter(fos);
+          BufferedWriter bw = new BufferedWriter(osw);
+          bw.write(history, 0, history.length());
+          bw.close();
+        }
+        catch (IOException ioe) {
+          _showIOError(new IOException("An error occured writing the history to a file"));
+        }
+      }
+      
+      
       _interactionsPane.requestFocus();
     }
   };
@@ -2205,7 +2239,8 @@ public class MainFrame extends JFrame implements OptionConstants {
     _interactionsPane = new InteractionsPane(_model);
     _findReplace = new FindReplaceDialog(this, _model);
     
-    final JScrollPane outputScroll = new JScrollPane(_outputPane);
+    final JScrollPane outputScroll = 
+      new BorderlessScrollPane(_outputPane);
     _junitPanel = new JUnitPanel(_model, this);
     _tabbedPane = new JTabbedPane();
     _tabbedPane.addChangeListener(new ChangeListener () {
@@ -2216,9 +2251,9 @@ public class MainFrame extends JFrame implements OptionConstants {
         }
       }
     });
-
                                     
-    _tabbedPane.add("Interactions", new BorderlessScrollPane(_interactionsPane));
+    _tabbedPane.add("Interactions", 
+                    new BorderlessScrollPane(_interactionsPane));
     _tabbedPane.add("Console", outputScroll);
     
     _tabs = new LinkedList();

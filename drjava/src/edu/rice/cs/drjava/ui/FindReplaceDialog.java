@@ -44,6 +44,7 @@ import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.text.*;
+import javax.swing.border.EmptyBorder;
 import java.beans.*;
 
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
@@ -341,26 +342,35 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
     //_labelPanel.add(Box.createGlue());
     _labelPanel.add(findLabel);
     _labelPanel.add(replaceLabel);
-    
+    _labelPanel.setBorder(new EmptyBorder(0,5,0,5)); // 5 pix on sides
     MatchCaseListener mcl = new MatchCaseListener();
     
     _matchCase = new JCheckBox("Match Case", true);
     _matchCase.addItemListener(mcl);
+       
+    this.removeAll(); // actually, override the behavior of TabbedPanel
     
-    //_closePanel = new JPanel(new BorderLayout());
-    //_closePanel.add(_closeButton, BorderLayout.NORTH);
+    // remake closePanel
+    _closePanel = new JPanel(new BorderLayout());
+    _closePanel.add(_closeButton, BorderLayout.NORTH);
     
     _matchCaseAndClosePanel = new JPanel(new BorderLayout());
     _matchCaseAndClosePanel.add(_matchCase, BorderLayout.WEST);
-    //_matchCaseAndClosePanel.add(_closePanel, BorderLayout.EAST);
+    _matchCaseAndClosePanel.add(_closePanel, BorderLayout.EAST);
     
-    _rightPanel = new JPanel(new GridLayout(2,2));
-    _rightPanel.add(wrap(_findField));
-    _rightPanel.add(_matchCaseAndClosePanel);
-    _rightPanel.add(wrap(_replaceField));
-    _rightPanel.add(_message);
+    _rightPanel = new JPanel(new GridLayout(1,2));
+    JPanel midPanel = new JPanel(new GridLayout(2,1));
+    JPanel farRightPanel = new JPanel(new GridLayout(2,1));
+    midPanel.add(wrap(_findField));
+    midPanel.add(wrap(_replaceField));
+    farRightPanel.add(_matchCaseAndClosePanel);
+    farRightPanel.add(_message);
+    farRightPanel.setBorder(new EmptyBorder(0,5,0,0));
+    _rightPanel.add(midPanel);
+    _rightPanel.add(farRightPanel);
     
-    hookComponents(_mainPanel,_rightPanel,_labelPanel,buttons);
+    
+    hookComponents(this,_rightPanel,_labelPanel,buttons);
     
     _machine = new FindReplaceMachine();
     

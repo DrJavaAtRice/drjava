@@ -47,6 +47,7 @@ import java.io.IOException;
 import javax.swing.*;
 import javax.swing.text.*;
 import javax.swing.event.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.event.*;
 import java.awt.*;
 
@@ -180,8 +181,10 @@ public class CompilerErrorPanel extends TabbedPanel
     */
     
     JPanel compilerPanel = new JPanel(new BorderLayout());
+    compilerPanel.setBorder(new EmptyBorder(0,5,0,5)); // 5 pix padding on sides
     JPanel uiBox = new JPanel(new BorderLayout());
-    compilerPanel.add(new JLabel("Compiler", SwingConstants.RIGHT),
+    uiBox.setBorder(new EmptyBorder(5,0,0,0)); // 5 pix padding on top
+    compilerPanel.add(new JLabel("Compiler", SwingConstants.LEFT),
                       BorderLayout.NORTH);
        
     compilerPanel.add(uiBox,BorderLayout.CENTER);

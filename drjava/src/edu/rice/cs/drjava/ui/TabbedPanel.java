@@ -60,7 +60,7 @@ public abstract class TabbedPanel extends JPanel {
   protected JButton _closeButton;
   // panel that has _closeButton in the north so it can't be stretched
   // vertically
-  private JPanel _closePanel;
+  protected JPanel _closePanel;
   // the panel that the subclasses of TabbedPanel can use
   protected JPanel _mainPanel;
   // used to be able to reference removeTab

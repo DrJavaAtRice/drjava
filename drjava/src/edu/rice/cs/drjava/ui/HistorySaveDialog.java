@@ -43,6 +43,7 @@ import edu.rice.cs.drjava.model.FileSaveSelector;
 import edu.rice.cs.drjava.model.OperationCanceledException;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
@@ -52,86 +53,74 @@ import java.io.*;
  * the current history and allow the user to edit or save it to a file.
  * $Id$
  */
-public class HistorySaveDialog extends JDialog {
-  private MainFrame _frame;
-  private FileSaveSelector _selector;
-  private String _history;
-  
+public class HistorySaveDialog {
+
+  private final JDialog _dialog;
   private JTextArea _textArea;
-  private JButton _saveButton;
-  private JButton _cancelButton;
-  private JScrollPane _textScroll;
-  private JPanel _buttonPanel;
   
-  public HistorySaveDialog (MainFrame frame, FileSaveSelector selector, String history) {
-    _frame = frame;
-    _selector = selector;
-    _history = history;
-    
-    Container content = this.getContentPane();
+  // a history pointer
+  private String _history;
+  private Object _historyLock = new Object();
+  
+  public HistorySaveDialog (MainFrame frame) {
+    _dialog = new JDialog(frame,"Save Interactions History", true);    
+    Container content = _dialog.getContentPane();
     
     content.setLayout(new BorderLayout());
     
     
     _textArea = new JTextArea();
-    _textArea.append(_history);
-    _saveButton = new JButton("Save");
-    _saveButton.addActionListener(_saveAction);
-    _cancelButton = new JButton("Cancel");
-    _cancelButton.addActionListener(_cancelAction);
+    JButton _saveButton = new JButton("Save"),
+      _cancelButton = new JButton("Cancel");
+    _cancelButton.addActionListener(_cancelListener);
+    _saveButton.addActionListener(_saveListener);
     
-    this.setTitle("Save Interactions History");
-    this.setSize(400,300);
-    this.setLocation(300,300);
+    _dialog.setSize(400,300);
+    _dialog.setLocationRelativeTo(frame);
     
-    _textScroll = new JScrollPane(_textArea,
-                                  JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-                                  JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-    
-    _buttonPanel = new JPanel();
-    _buttonPanel.setLayout(new BoxLayout(_buttonPanel, BoxLayout.X_AXIS));
-    _buttonPanel.add(Box.createGlue());
-    _buttonPanel.add(_saveButton);
+    JScrollPane _textScroll = 
+      new BorderlessScrollPane(_textArea,
+                               JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+                               JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+    JPanel scrollWrapper = new JPanel(new BorderLayout(0,5));
+    scrollWrapper.setBorder(new EmptyBorder(5,5,0,5));
+    scrollWrapper.add(new JLabel("Make your editing changes, and then click \"Save\"."),BorderLayout.NORTH);
+    scrollWrapper.add(_textScroll,BorderLayout.CENTER);
+    JPanel bottomPanel = new JPanel(new BorderLayout());
+    JPanel _buttonPanel = new JPanel(new GridLayout(1,0,5,5));
+
     _buttonPanel.add(_cancelButton);
+    _buttonPanel.add(_saveButton);
+    bottomPanel.add(_buttonPanel,BorderLayout.EAST);
+    bottomPanel.setBorder(new EmptyBorder(5,5,5,5));
+    content.add(scrollWrapper, BorderLayout.CENTER);
+    content.add(bottomPanel, BorderLayout.SOUTH);
     
-    content.add(_textScroll, BorderLayout.CENTER);
-    content.add(_buttonPanel, BorderLayout.SOUTH);
-    
-    this.show();    
+    _dialog.getRootPane().setDefaultButton(_saveButton);
+    _textArea.requestDefaultFocus();
   }
   
-  private Action _saveAction = new AbstractAction() {
-    public void actionPerformed (ActionEvent ae) {      
-      File c = null;
-      try {
-        c = _selector.getFile();
-      }
-      catch (OperationCanceledException oce) {
-        return;
-        // don't need to do anything
-      }
-      if (c != null) {
-        if (c.getName().indexOf('.') == -1)
-          c = new File(c.getAbsolutePath() + "." + InteractionsHistoryFilter.HIST_EXTENSION);
-        try {
-          FileOutputStream fos = new FileOutputStream(c);
-          OutputStreamWriter osw = new OutputStreamWriter(fos);
-          BufferedWriter bw = new BufferedWriter(osw);
-          String newHistory = _textArea.getText();
-          bw.write(newHistory, 0, newHistory.length());
-          bw.close();
-        }
-        catch (IOException ioe) {
-          _frame._showIOError(new IOException("An error occured writing the history to a file"));
-        }
-      }
-      HistorySaveDialog.this.dispose();
+  public String editHistory(String history) {
+    synchronized(_historyLock) {
+      _history = null; // make it null by default
+      _textArea.setText(history);
+      _dialog.show();
+      return _history;
+    }
+  }
+  
+  private final ActionListener _saveListener = 
+    new ActionListener() {
+    public void actionPerformed (ActionEvent ae) {
+      _history = _textArea.getText(); 
+      _dialog.dispose();
     }
   };
   
-  private Action _cancelAction = new AbstractAction() {
+  private final ActionListener _cancelListener = 
+    new ActionListener() {
     public void actionPerformed (ActionEvent ae) {
-      HistorySaveDialog.this.dispose();
+      _dialog.dispose();
     }
   };
 }
