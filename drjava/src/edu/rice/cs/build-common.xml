@@ -89,7 +89,7 @@
   <cvs command="tag -c ${version-tag}" quiet="true" />
 
   <echo message="New version ${version-tag} committed to CVS." />
-  <echo message="Note: This version has not yet been released. To release it, type the following on a CS net host (sun or frosty): ant -Dversion-tag=${version-tag} release" />
+  <echo message="Note: This version has not yet been released. To release it, follow the process described at http://sourceforge.net/docman/display_doc.php?docid=9899&group_id=44253." />
 
 </target>
 
