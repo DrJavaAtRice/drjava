@@ -118,6 +118,22 @@ class JUnitEventNotifier extends EventNotifier<JUnitListener>
   }
 
   /**
+   * Called after JUnit is started by the GlobalModel.
+   */
+  public void junitAllStarted() {
+    _lock.startRead();
+    try {
+      int size = _listeners.size();
+      for(int i = 0; i < size; i++) {
+        _listeners.get(i).junitAllStarted();
+      }
+    }
+    finally {
+      _lock.endRead();
+    }
+  }
+
+  /**
    * Called to indicate that a suite of tests has started running.
    * @param numTests The number of tests in the suite to be run.
    */

@@ -142,6 +142,12 @@ public class DummySingleDisplayModelListener implements SingleDisplayModelListen
   public void junitStarted(List<OpenDefinitionsDocument> docs) { }
   
   /**
+   * called when testing all files
+   */
+  public void junitAllStarted() {  }
+
+
+  /**
    * Called to indicate that a suite of tests has started running.
    * @param numTests The number of tests in the suite to be run.
    */

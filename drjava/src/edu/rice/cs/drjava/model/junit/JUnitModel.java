@@ -100,11 +100,6 @@ public interface JUnitModel {
   public void junitProject();
 
   /**
-   * Creates a JUnit test suite over all currently open project documents and runs it.
-   */
-  public void junitDirectory(File dir);
-  
-  /**
    * Runs JUnit over a list of documents.  Synchronized against the compiler model
    * to prevent testing and compiling at the same time, which would create
    * invalid results.
@@ -121,6 +116,14 @@ public interface JUnitModel {
   public void junit(OpenDefinitionsDocument doc)
       throws ClassNotFoundException, IOException;
 
+  
+  /**
+   * forwards the classnames and files to the test manager to test all of them
+   * @param a list of all the qualified class names to test
+   * @param a list of their source files in the same order as qualified class names
+   */
+  public void junitAll(List<String> qualifiedClassnames, List<File> files);
+  
   //----------------------------- Error Results -----------------------------//
 
   /**

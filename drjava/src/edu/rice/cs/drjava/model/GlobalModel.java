@@ -427,6 +427,11 @@ public interface GlobalModel extends IGetDocuments, ILoadDocuments {
   public boolean isProjectActive();
   
   /**
+   * junits all the appropriate files
+   */
+  public void junitAll();
+  
+  /**
    * @return the file that points to the current project file. Null if not currently in project view
    */
   public File getProjectFile();

@@ -172,6 +172,11 @@ public class JUnitPanel extends ErrorPanel{
   /** Called when work begins. */
   public void setJUnitInProgress(List<OpenDefinitionsDocument> odds) {
     _odds = odds;
+    setJUnitInProgress();
+  }
+  
+  /** called when work begins */
+  public void setJUnitInProgress() {
     _errorListPane.setJUnitInProgress();
   }
 

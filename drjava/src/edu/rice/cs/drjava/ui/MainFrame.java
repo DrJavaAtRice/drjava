@@ -703,7 +703,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   /**
    * Runs JUnit over all open JUnit tests in the project direcotry.
    */
-  private Action _junitProjectAction = new AbstractAction("Test Project") {
+  private Action _junitOpenProjectFilesAction = new AbstractAction("Test Open Project Files") {
     public void actionPerformed(ActionEvent e) {
       new Thread("Running JUnit Tests") {
         public void run() {
@@ -716,12 +716,14 @@ public class MainFrame extends JFrame implements OptionConstants {
   /**
    * junit a directory
    */
-  private Action _junitDirectoryAction = new AbstractAction("Test Directory"){
+  private Action _junitProjectAction = new AbstractAction("Test Project"){
     public void actionPerformed(ActionEvent e){
       new Thread("Running JUnit Tests"){
         public void run(){
           if(_model.isProjectActive()){
-            _model.getJUnitModel().junitDirectory(_model.getProjectFile().getParentFile());
+            hourglassOn();
+            _model.junitAll();
+            hourglassOff();
           }
         }
       }.start();
@@ -2374,6 +2376,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       _saveProjectAction.setEnabled(true);
       _projectPropertiesAction.setEnabled(true);
       _junitProjectAction.setEnabled(true);
+      _junitOpenProjectFilesAction.setEnabled(true);
       _compileProjectAction.setEnabled(true);
       if(_model.getBuildDirectory() != null){
         _cleanAction.setEnabled(true);
@@ -2408,6 +2411,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       _saveProjectAction.setEnabled(false);
       _projectPropertiesAction.setEnabled(false);
       _junitProjectAction.setEnabled(false);
+      _junitOpenProjectFilesAction.setEnabled(false);
       _compileProjectAction.setEnabled(false);
       _setUpContextMenus();
       _currentProjFile = null;
@@ -3647,6 +3651,8 @@ public class MainFrame extends JFrame implements OptionConstants {
 
     _setUpAction(_junitProjectAction, "Test", "Test", "Test the current project");
     _junitProjectAction.setEnabled(false);    
+    _setUpAction(_junitOpenProjectFilesAction, "Test", "Test all open project files");
+    _junitOpenProjectFilesAction.setEnabled(false);
 
   _setUpAction(_compileProjectAction, "Compile", "Compile",
                  "Compile the current project");
@@ -3998,8 +4004,8 @@ public class MainFrame extends JFrame implements OptionConstants {
     projectMenu.add(_cleanAction);
     projectMenu.add(_compileProjectAction);
     projectMenu.add(_runProjectAction);
+    projectMenu.add(_junitOpenProjectFilesAction);
     projectMenu.add(_junitProjectAction);
-//    projectMenu.add(_junitDirectoryAction);
     
     projectMenu.addSeparator();
     // eventually add project options
@@ -4603,6 +4609,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _navPanePopupMenuForRoot.addSeparator();
     _navPanePopupMenuForRoot.add(_compileProjectAction);
     _navPanePopupMenuForRoot.add(_runProjectAction);
+    _navPanePopupMenuForRoot.add(_junitOpenProjectFilesAction);
     _navPanePopupMenuForRoot.add(_junitProjectAction);
     _navPanePopupMenuForRoot.addSeparator();
     _navPanePopupMenuForRoot.add(_projectPropertiesAction);
@@ -5855,6 +5862,22 @@ public class MainFrame extends JFrame implements OptionConstants {
       });
     }
 
+    /**
+     * we're junit'ing all files, so we don't need a list of odd's
+     */
+    public void junitAllStarted(){
+      // Only change GUI from event-dispatching thread
+      SwingUtilities.invokeLater(new Runnable() {
+        public void run() {
+          MainFrame.this.hourglassOn();
+          showTab(_junitErrorPanel);
+          _junitErrorPanel.setJUnitInProgress();
+          _junitAction.setEnabled(false);
+          _junitAllAction.setEnabled(false);
+        }
+      });
+    }
+    
     //public void junitRunning() {}
 
     public void junitSuiteStarted(final int numTests) {

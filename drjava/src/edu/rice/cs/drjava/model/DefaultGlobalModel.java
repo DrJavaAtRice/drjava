@@ -17,7 +17,7 @@
  * to deal with the Software without restriction, including without
  * limitation the rights to use, copy, modify, merge, publish, distribute,
  * sublicense, and/or sell copies of the Software, and to permit persons to
- * whom the Software is furnished to do so, subject to the following
+ * whom the Software is furnished to do new inavso, subject to the following
  * conditions:
  *
  *     - Redistributions of source code must retain the above copyright
@@ -426,8 +426,6 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
 //  }
 
 
-
-
   // ----- STATE -----
   protected FileGroupingState _state;
   
@@ -513,6 +511,10 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
    */
   public File getMainClass(){
     return _state.getMainClass();
+  }
+  
+  public void junitAll(){
+    _state.junitAll();
   }
 
    /**
@@ -683,6 +685,32 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
         }
       }
       
+      // ----- FIND ALL DEFINED CLASSES IN FOLDER ---
+      public void junitAll(){
+        File dir = getProjectFile().getParentFile();
+        ArrayList<String> classNames = new ArrayList<String>();
+        final ArrayList<File> files = FileOps.getFilesInDir(dir, true, new FileFilter(){
+          public boolean accept(File pathname){
+            return pathname.isDirectory() || 
+              pathname.getPath().toLowerCase().endsWith(".java") ||
+              pathname.getPath().toLowerCase().endsWith(".dj0") ||
+              pathname.getPath().toLowerCase().endsWith(".dj1") ||
+              pathname.getPath().toLowerCase().endsWith(".dj2");
+          }
+        });
+        ClassFinder finder;
+        List<String> los = new LinkedList<String>();
+        List<File> lof = new LinkedList<File>();
+        for(File f: files){
+          finder = new ClassFinder(f);
+          String classname = finder.getClassName();
+          if(classname.length() > 0){
+            los.add(classname);
+            lof.add(f);
+          }
+        }
+        getJUnitModel().junitAll(los, lof);
+      }
     };
   }
   
@@ -732,7 +760,9 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
         return false;
       }
 
-      
+      public void junitAll(){
+        getJUnitModel().junitAll();
+      }
       public void cleanBuildDirectory() throws FileMovedException, IOException{
         System.out.println("not cleaning");
       }
@@ -848,12 +878,10 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       public String toString() {
         try{
           if(oddoc.isModifiedSinceSave()){
-            return oddoc.toString() + " *";
-//            return oddoc.getFilename() + " *";
+            return oddoc.getFilename() + " *";
           }
           else{
-            return oddoc.toString() + "  ";
-//            return oddoc.getFilename() + "  ";
+            return oddoc.getFilename() + "  ";
           }
         }catch(NoSuchDocumentException e){
           return "** error **";

@@ -71,6 +71,11 @@ public interface FileGroupingState {
   public boolean isInProjectPath(OpenDefinitionsDocument doc);
   
   /**
+   * junits all files that the state considers "all"
+   */
+  public void junitAll();
+  
+  /**
    * Returns the current project file
    * @return null if not currently in a project
    */

@@ -204,27 +204,19 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     junitDocs(lod);
   }
   
-  public void junitDirectory(File dir){
-    //reset the JUnitErrorModel, fixes bug #907211 "Test Failures Not Cleared Properly".
-    _junitErrorModel = new JUnitErrorModel(new JUnitError[0], null, false);
-
-    ArrayList<String> classNames = new ArrayList<String>();
-    final ArrayList<File> files = FileOps.getFilesInDir(dir, true, new FileFilter(){
-      public boolean accept(File pathname){
-        return pathname.isDirectory() || 
-          pathname.getPath().toLowerCase().endsWith(".java") ||
-          pathname.getPath().toLowerCase().endsWith(".dj0") ||
-          pathname.getPath().toLowerCase().endsWith(".dj1") ||
-          pathname.getPath().toLowerCase().endsWith(".dj2");
-      }
-    });
-
-    
-//    files;
+  /**
+   * forwards the classnames and files to the test manager to test all of them
+   * does not notify since we don't have ODD's to send out with the notification of junit start
+   * @param a list of all the qualified class names to test
+   * @param a list of their source files in the same order as qualified class names
+   */
+  public void junitAll(List<String> qualifiedClassnames, List<File> files){
+      _notifier.junitAllStarted();
+      List<String> tests = _jvm.runTestSuite(qualifiedClassnames, files, true);
+      _isTestInProgress = true;
+//      _notifier.junitEnded();
   }
-  
-  
-  
+
   
   public void junitDocs(List<OpenDefinitionsDocument> lod){
     synchronized (_compilerModel) {
