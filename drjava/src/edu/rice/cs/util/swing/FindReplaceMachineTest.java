@@ -56,9 +56,15 @@ import javax.swing.text.Document;
 public class FindReplaceMachineTest extends TestCase
 {
   Document doc;
+  Document docPrev;
+  Document docNext;
   FindReplaceMachine frm;
   private static final String EVIL_TEXT = "Hear no evil, " +
     "see no evil, speak no evil.";
+  private static final String EVIL_TEXT_PREV = "Hear no evilprev, " +
+    "see no evilprev, speak no evilprev.";
+  private static final String EVIL_TEXT_NEXT = "Hear no evilnext, " +
+    "see no evilnext, speak no evilnext.";
   /**
    * Constructor.
    * @param name a name for the test.
@@ -72,7 +78,32 @@ public class FindReplaceMachineTest extends TestCase
    */
   protected void setUp() {
     doc = new PlainDocument();
-    frm = new FindReplaceMachine();
+    docPrev = new PlainDocument();
+    docNext = new PlainDocument();
+    frm = new FindReplaceMachine(new DocumentIterator() {
+      public Document getPrevDocument(Document d) {
+        if (d == doc) {
+          return docPrev;
+        }
+        else if (d == docPrev) {
+          return docNext;
+        }
+        else {
+          return doc;
+        }
+      }
+      public Document getNextDocument(Document d) {
+        if (d == doc) {
+          return docNext;
+        }
+        else if (d == docPrev) {
+          return doc;
+        }
+        else {
+          return docPrev;
+        }
+      }
+    });
     frm.setDocument(doc);
     // _initFrm(0);
   }
@@ -344,6 +375,48 @@ public class FindReplaceMachineTest extends TestCase
     _testFindNextSucceeds(frm, CONTINUE, 0, 4);
     
   }
+  
+  /**
+   * This test addresses feature request #784514 Find/Replace in all Open Files.
+   */
+  public void testFindReplaceInAllOpenFiles() throws BadLocationException {    
+    doc.insertString(0, EVIL_TEXT, null); 
+    docPrev.insertString(0, EVIL_TEXT_PREV, null); 
+    docNext.insertString(0, EVIL_TEXT_NEXT, null); 
+    // put the caret after the last instance of the findWord in doc
+    _initFrm(40);
+    frm.setFindWord("evil");
+    frm.setMatchCase(false);
+    frm.setSearchBackwards(false);
+    frm.setSearchAllDocuments(true);
+    _testFindNextSucceeds(frm, CONTINUE, 12, 12, docNext);
+    _testFindNextSucceeds(frm, CONTINUE, 12, 29, docNext);
+    _testFindNextSucceeds(frm, CONTINUE, 12, 48, docNext);
+    _testFindNextSucceeds(frm, CONTINUE, 12, 12, docPrev);
+    _testFindNextSucceeds(frm, CONTINUE, 12, 29, docPrev);
+    _testFindNextSucceeds(frm, CONTINUE, 12, 48, docPrev);
+    _testFindNextSucceeds(frm, CONTINUE, 12, 12, doc);
+    _testFindNextSucceeds(frm, CONTINUE, 12, 25, doc);
+    _testFindNextSucceeds(frm, CONTINUE, 12, 40, doc);
+    _testFindNextSucceeds(frm, CONTINUE, 12, 12, docNext);
+    frm.setLastFindWord();
+    frm.setSearchBackwards(true);
+    _testFindNextSucceeds(frm, CONTINUE, 36, 36, doc);
+    _testFindNextSucceeds(frm, CONTINUE, 36, 21, doc);
+    _testFindNextSucceeds(frm, CONTINUE, 36, 8, doc);
+    _testFindNextSucceeds(frm, CONTINUE, 44, 44, docPrev);
+    frm.setReplaceWord("monkey"); 
+    frm.replaceAll();
+    assertEquals("revised text", 
+                 "Hear no monkey, see no monkey, speak no monkey.", 
+                 doc.getText(0, doc.getLength()));
+    assertEquals("revised text", 
+                 "Hear no monkeyprev, see no monkeyprev, speak no monkeyprev.", 
+                 docPrev.getText(0, docPrev.getLength()));
+    assertEquals("revised text", 
+                 "Hear no monkeynext, see no monkeynext, speak no monkeynext.", 
+                 docNext.getText(0, docNext.getLength()));
+  }
 
   /**
    test case no longer applies -- we always wrap
@@ -359,6 +432,21 @@ public class FindReplaceMachineTest extends TestCase
    doc.getText(0, doc.getLength()));
    }
   **/
+  private void _testFindNextSucceeds(FindReplaceMachine frm, ContinueCommand cont, 
+                             int start, int found, Document doc) {
+    FindResult fr = frm.findNext();
+    Document d = fr.getDocument();
+    if (frm.getDocument() != d) {
+      // do  FindReplaceDialog's _updateMachine
+      frm.setDocument(d);
+      frm.setStart(found);
+      frm.setPosition(found);
+    }
+    assertEquals("documents should equal", doc, frm.getDocument());
+    assertEquals("findNext return value", found, fr.getFoundOffset()); 
+    _assertOffsets(frm, start, found); 
+    assertTrue("on find text", frm.isOnMatch());  
+  }
 
   private void _testFindNextSucceeds(FindReplaceMachine frm, ContinueCommand cont, 
                              int start, int found) { 

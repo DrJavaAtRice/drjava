@@ -66,8 +66,9 @@ public class FindReplaceMachine {
   private boolean _found;
   private boolean _wrapped;
   private boolean _matchCase;
-  private boolean _searchBackwards;
-  // The last word that was found. This is set to null by the
+  private boolean _searchBackwards;  
+  private boolean _searchAllDocuments;
+  // The last word that was found. This is set to null by the 
   // FindReplaceDialog if the caret is updated. We keep this
   // so we know to ignore finding this instance of the word
   // if the user toggles the _searchBackwards flag and has not
@@ -77,6 +78,9 @@ public class FindReplaceMachine {
   // word that we find (if the user toggled _searchBackwards
   // under certain circumstances).
   private boolean _skipOneFind;
+  // An interface for the FindReplaceMachine to get the
+  // next or previous document.
+  private DocumentIterator _docIterator;
 
   /**
    * Constructor.
@@ -90,12 +94,14 @@ public class FindReplaceMachine {
   /**
    * NonModal version
    */
-  public FindReplaceMachine() {
+  public FindReplaceMachine(DocumentIterator docIterator) {
     _findWord = "";
     _replaceWord = "";
     _matchCase = true;
+    _searchAllDocuments = false;
     _lastFindWord = null;
     _skipOneFind = false;
+    _docIterator = docIterator;
   }
 
   /**
@@ -130,6 +136,10 @@ public class FindReplaceMachine {
 
   public void setMatchCase(boolean matchCase) {
     _matchCase = matchCase;
+  }
+  
+  public void setSearchAllDocuments(boolean searchAllDocuments) {
+    _searchAllDocuments = searchAllDocuments;
   }
 
   public void setDocument(Document doc) {
@@ -187,6 +197,14 @@ public class FindReplaceMachine {
 
   public String getReplaceWord() {
     return _replaceWord;
+  }
+  
+  public boolean getSearchAllDocuments() {
+    return _searchAllDocuments;
+  }
+  
+  public Document getDocument() {
+    return _doc;
   }
 
   /**
@@ -256,6 +274,9 @@ public class FindReplaceMachine {
    */
   public FindResult findNext() {
     try {
+      FindResult tempFr = new FindResult(_doc, -1, false);
+      // If the user just found and toggled the "Search Backwards"
+      // option, we should skip the first find.
       if (_skipOneFind) {
         int wordLength = _lastFindWord.length();
         if (!_searchBackwards) {
@@ -298,56 +319,99 @@ public class FindReplaceMachine {
       }
       else {
         // if we haven't found it
-        _wrapped = true;
-        //When we wrap, we need to include some text that was already searched before wrapping.
-        //Otherwise, we won't find an only match that has the caret in it already.
-        if(!_searchBackwards){
-          start = 0;
-          len = _start.getOffset() + (_findWord.length() - 1);
-          if(len > _doc.getLength()){
-            len = _doc.getLength();
-          }
-        } else {
-          start = _start.getOffset() - (_findWord.length() - 1);
-          if (start < 0){
+        if (_searchAllDocuments) {
+          tempFr = _findNextInAllDocs(!_searchBackwards ? _docIterator.getNextDocument(_doc) :
+                                        _docIterator.getPrevDocument(_doc));
+          foundOffset = tempFr.getFoundOffset();
+        }
+        // we still haven't found it
+        if (foundOffset == -1) {
+          _wrapped = true;
+          //When we wrap, we need to include some text that was already searched before wrapping.
+          //Otherwise, we won't find an only match that has the caret in it already.
+          if(!_searchBackwards){
             start = 0;
+            len = _current.getOffset() + (_findWord.length() - 1);
+            if(len > _doc.getLength()){
+              len = _doc.getLength();
+            }
+          } 
+          else {
+            start = _current.getOffset() - (_findWord.length() - 1);
+            if (start < 0){
+              start = 0;
+            }
+            len = _doc.getLength() - start;
           }
-          len = _doc.getLength() - start;
-        }
-        findSpace = _doc.getText(start, len);
-
-        if (!_matchCase) {
-          findSpace = findSpace.toLowerCase();
-        }
-
-        foundOffset = !_searchBackwards ? findSpace.indexOf(findWord)
-          : findSpace.lastIndexOf(findWord);
-
-        if (foundOffset >= 0) {
-          foundOffset += start;
-          if (!_searchBackwards) {
-            foundOffset += findWord.length();
+          findSpace = _doc.getText(start, len);
+          
+          if (!_matchCase) {
+            findSpace = findSpace.toLowerCase();
           }
-          _current = _doc.createPosition(foundOffset);
+          foundOffset = !_searchBackwards ? findSpace.indexOf(findWord)
+            : findSpace.lastIndexOf(findWord);
+          
+          if (foundOffset >= 0) {
+            foundOffset += start;
+            if (!_searchBackwards) {
+              foundOffset += findWord.length();
+            }
+            _current = _doc.createPosition(foundOffset);
+          }
         }
       }
       // flag the return value so that they can tell that we had to wrap
       // the file to determine the info.
 
       //This means we have found the word before, just not in this call
-      if(foundOffset == -1 && _found) {
-        _current = _start;
-        _found = false;
-        return findNext();
-      }
-      else {
-        FindResult fr = new FindResult(foundOffset, _wrapped);
-        _wrapped = false;
-        return fr;
-      }
+//      if(foundOffset == -1 && _found) {
+//        _current = _start;
+//        _found = false;
+//        return findNext();
+//      }
+//      else {
+      FindResult fr = new FindResult(tempFr.getDocument(), foundOffset, _wrapped);
+      _wrapped = false;
+      return fr;
+//      }
     }
     catch (BadLocationException e) {
       throw new UnexpectedException(e);
+    }
+  }
+  
+  /**
+   * Searches docToSearch for _findWord, and continues cycling through the documents
+   * in the direction specified by _searchBackwards. If the original _document is reached,
+   * we stop searching.
+   * @param docToSearch the document to search
+   * @return the FindResult containing the information for where we found _findWord or
+   * a dummy FindResult. 
+   */
+  private FindResult _findNextInAllDocs(Document docToSearch) throws BadLocationException {
+    if (docToSearch == _doc) {
+      return new FindResult(_doc, -1, false);
+    }
+    else {
+      String text = docToSearch.getText(0, docToSearch.getLength());
+      String findWord = _findWord;
+      if (!_matchCase) {
+        text = text.toLowerCase();
+        findWord = findWord.toLowerCase();
+      }
+      int index = !_searchBackwards ? text.indexOf(findWord) : text.lastIndexOf(findWord);
+      if (index != -1) {
+        // We found it in a different document, put the caret at the end of the
+        // found word (if we're going forward).
+        if (!_searchBackwards) {
+          index += findWord.length();
+        }
+        return new FindResult(docToSearch, index, false);
+      }
+      else {
+        return _findNextInAllDocs(!_searchBackwards ? _docIterator.getNextDocument(docToSearch) :
+                                        _docIterator.getPrevDocument(docToSearch));
+      }
     }
   }
 
@@ -406,11 +470,35 @@ public class FindReplaceMachine {
    * replaceString: "e"
    * document text: "hhellollo"
    * Depending on the cursor position, clicking replace all could either
-   * make the document text read "hello" (which is correct) or "".  This
+   * make the document text read "hello" (which is correct) or "e".  This
    * is because of the behavior of findNext(), and it would be incorrect
-   * to change that behavior
+   * to change that behavior.
+   * @return the number of replacements
    */
   public int replaceAll() {
+    if (_searchAllDocuments) {
+      Document startDoc = _doc;
+      _searchAllDocuments = false;
+      int count = _replaceAllInCurrentDoc();
+      _doc = _docIterator.getNextDocument(_doc);
+      while (startDoc != _doc) {
+        count += _replaceAllInCurrentDoc();
+        _doc = _docIterator.getNextDocument(_doc);
+      }
+      _searchAllDocuments = true;
+      return count;
+    }
+    else {
+      return _replaceAllInCurrentDoc();
+    }
+  }
+  
+  /**
+   * Replaces all occurences of _findWord with _replaceWord in _doc. 
+   * Never searches in other documents.
+   * @return the number of replacements
+   */
+  private int _replaceAllInCurrentDoc() {
     try {
       if (!_searchBackwards){
         _start = _doc.createPosition(0);
@@ -419,15 +507,17 @@ public class FindReplaceMachine {
         _start = _doc.createPosition(_doc.getLength());
         setPosition(_doc.getLength());
       }
-    } catch (BadLocationException e) {
+    } 
+    catch (BadLocationException e) {
       throw new UnexpectedException(e);
     }
     int count = 0;
     FindResult fr = findNext();
-//    int found = fr.getFoundOffset();
-    int wrapped = 0;
-    if (fr.getWrapped())
-      wrapped++;
+    _doc = fr.getDocument();
+    int found = fr.getFoundOffset();
+//    int wrapped = 0;
+//    if (fr.getWrapped())
+//      wrapped++;
     // Checks that the findNext method has found something and has not
     // wrapped once and gone beyond start.
 //    while (found >= 0 && (wrapped == 0 ||
@@ -435,13 +525,14 @@ public class FindReplaceMachine {
 //                          (found > _start.getOffset() - _findWord.length() && _searchBackwards))) && wrapped < 2) {
 
     //new while condition, since I started replacing from the beginning/end of the document only
-    while(wrapped == 0) {
+    while(!fr.getWrapped()) {// wrapped == 0) {
       replaceCurrent();
       count++;
       fr = findNext();
-//      found = fr.getFoundOffset();
-      if (fr.getWrapped())
-        wrapped++;
+      _doc = fr.getDocument();
+      found = fr.getFoundOffset();
+//      if (fr.getWrapped())
+//        wrapped++;
     }
     return count;
   }

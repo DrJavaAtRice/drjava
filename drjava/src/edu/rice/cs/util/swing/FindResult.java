@@ -39,6 +39,8 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.util.swing;
 
+import javax.swing.text.Document;
+
 /**
  * Returned to FindMachineDialog with the location of the found string
  * (or -1 if the string was not found) as well as a flag indicating
@@ -47,12 +49,18 @@ package edu.rice.cs.util.swing;
  * @version $Id$
  */
 public class FindResult {
+  private Document _document;
   private int _foundoffset;
   private boolean _wrapped;
   
-  public FindResult(int foundoffset, boolean wrapped) {
+  public FindResult(Document document, int foundoffset, boolean wrapped) {
+    _document = document;
     _foundoffset = foundoffset;
     _wrapped = wrapped;
+  }
+  
+  public Document getDocument() {
+    return _document;
   }
   
   public int getFoundOffset() {
