@@ -160,6 +160,7 @@ public class JavadocErrorPanel extends ErrorPanel{
    */
   protected void _close() {
     super._close();
+    getModel().resetJavadocErrors();
     reset();
   }
 

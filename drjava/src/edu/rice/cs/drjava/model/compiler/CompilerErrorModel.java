@@ -215,7 +215,7 @@ public class CompilerErrorModel<T extends CompilerError> {
       }
     }
 
-    if ((shouldSelect == -1) && (errorAfter != _positions.length)) {
+    if ((shouldSelect == -1) && (errorAfter < end)) {// (errorAfter != _positions.length)) {
       // we found an error on/after the dot
       // if there's a newline between dot and error,
       // then it's not on this line
@@ -323,8 +323,9 @@ public class CompilerErrorModel<T extends CompilerError> {
                (offset <= defsLength)) { // we haven't gone past the end of the file
 
           // create new positions for all errors on this line
-          while ((curError < _numErrors)
-                 && (_errors[curError].lineNumber() == curLine))
+          while ((curError < _numErrors) &&
+                 file.equals(_errors[curError].file()) &&  // we are still in this file
+                 (_errors[curError].lineNumber() == curLine))
           {
             _positions[curError] =
               document.createPosition(offset +  _errors[curError].startColumn());

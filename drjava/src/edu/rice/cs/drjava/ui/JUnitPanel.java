@@ -167,7 +167,7 @@ public class JUnitPanel extends ErrorPanel{
    */
   protected void _close() {
     super._close();
-    //formerly, this would also reset the JUnitErrorModel, but that doesn't seem to be necessary
+    getModel().resetJUnitErrors();
     reset();
   }
 

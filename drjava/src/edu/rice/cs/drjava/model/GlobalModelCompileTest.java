@@ -460,6 +460,13 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
     assertCompileErrorsPresent(_name(), true);
     assertTrue(_name() + "Class file exists after failed compile",
                !compiled.exists());
+    
+    // check that model.resetCompilerErrors works
+    _model.resetCompilerErrors();
+    CompilerErrorModel cem = _model.getCompilerErrorModel();
+    assertEquals("CompilerErrorModel has errors after reset", 
+                 0,
+                 cem.getNumErrors());
   }
 
   /**

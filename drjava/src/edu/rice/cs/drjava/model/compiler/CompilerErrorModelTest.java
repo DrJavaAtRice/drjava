@@ -289,43 +289,55 @@ public final class CompilerErrorModelTest extends TestCase {
   /**
    * Tests CompilerErrorModel.getErrorAtOffset(int).
    */
-  public void testGetErrorAtOffset() {
+  public void testGetErrorAtOffset() throws IOException, OperationCanceledException {
     fullSetup();
     
-    try {
-      OpenDefinitionsDocument doc = getter.getDocumentForFile(files[4]);
-      assertEquals("Wrong error at given offset.", errors[1],
-                   model.getErrorAtOffset(doc, 125));
-      doc = getter.getDocumentForFile(files[4]);
-      assertEquals("Wrong error at given offset.", errors[5],
-                   model.getErrorAtOffset(doc, 38));
-    }
-    catch (IOException e) {
-      fail("Unexpected IOException.");
-    }
-    catch (OperationCanceledException e) {
-      fail("Unexpected OperationCanceledException.");
-    }
+    OpenDefinitionsDocument doc = getter.getDocumentForFile(files[4]);
+    assertEquals("Wrong error at given offset.", errors[1],
+                 model.getErrorAtOffset(doc, 125));
+    doc = getter.getDocumentForFile(files[4]);
+    assertEquals("Wrong error at given offset.", errors[5],
+                 model.getErrorAtOffset(doc, 38));
   }
   
   /**
    * Tests CompilerErrorModel.hasErrorsWithPositions(OpenDefinitionsDocument).
    */
-  public void testHasErrorsWithPositions() {
+  public void testHasErrorsWithPositions() throws IOException, OperationCanceledException {
     fullSetup();
     
-    try {
-      OpenDefinitionsDocument doc = getter.getDocumentForFile(files[4]);
-      assertTrue("File should have errors with lines.", model.hasErrorsWithPositions(doc));
-      doc = getter.getDocumentForFile(files[1]);
-      assertTrue("File shouldn't have errors with lines.", !model.hasErrorsWithPositions(doc));
-    }
-    catch (IOException e) {
-      fail("Unexpected IOException.");
-    }
-    catch (OperationCanceledException e) {
-      fail("Unexpected OperationCanceledException.");
-    }
+    OpenDefinitionsDocument doc = getter.getDocumentForFile(files[4]);
+    assertTrue("File should have errors with lines.", model.hasErrorsWithPositions(doc));
+    doc = getter.getDocumentForFile(files[1]);
+    assertTrue("File shouldn't have errors with lines.", !model.hasErrorsWithPositions(doc));    
+  }
+  
+  public void testErrorsInMultipleDocuments() throws IOException, OperationCanceledException {
+    files = new File[]
+    { new File("//nowhere1"),
+      new File("//nowhere2") };
+    texts = new String[] 
+    { new String("kfgkasjg\n" +
+                 "faijskgisgj\n" +
+                 "sifjsidgjsd\n"),
+      new String("isdjfdi\n" +
+                 "jfa") };
+    getter = new TestDocGetter(files, texts);
+    
+    errors = new CompilerError[]
+    { new CompilerError(files[1], 0, 0, "Test error with File", false),
+      new CompilerError(files[0], 0, 0, "Test error with File", false) };
+    model = new CompilerErrorModel<CompilerError>(errors, getter);
+    model.getErrorAtOffset(getter.getDocumentForFile(files[0]), 25);
+    String temp = texts[0];
+    texts[0] = texts[1];
+    texts[1] = temp;
+    getter = new TestDocGetter(files, texts);
+    errors = new CompilerError[]
+    { new CompilerError(files[0], 0, 0, "Test error with File", false),
+      new CompilerError(files[1], 2, 0, "Test error with File", false)};
+    model = new CompilerErrorModel<CompilerError>(errors, getter);
+    model.getErrorAtOffset(getter.getDocumentForFile(files[0]), 10);    
   }
   
   /**

@@ -2592,10 +2592,22 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
   public void resetCompilerErrors() {
     // Reset CompilerErrorModel (and JUnitErrorModel)
     // TODO: see if we can get by without this function
-//    _compilerErrorModel = new CompilerErrorModel<CompilerError>(new CompilerError[0], this);
-//    _junitErrorModel = new JUnitErrorModel(new JUnitError[0], this, false);
-//    _javadocErrorModel = new CompilerErrorModel<CompilerError>(new CompilerError[0], this);
+    _compilerErrorModel = new CompilerErrorModel<CompilerError>(new CompilerError[0], this);
     _numErrors = 0;
+  }
+
+  /**
+   * Resets the junit error state to have no errors.
+   */
+  public void resetJUnitErrors() {
+    _junitErrorModel = new JUnitErrorModel(new JUnitError[0], this, false);
+  }  
+
+  /**
+   * Resets the javadoc error state to have no errors.
+   */
+  public void resetJavadocErrors() {
+    _javadocErrorModel = new CompilerErrorModel<CompilerError>(new CompilerError[0], this);
   }
   
   /**
