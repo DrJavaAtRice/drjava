@@ -1097,7 +1097,129 @@ public class IndentTest extends TestCase {
     assertEquals("indent info: dist to prev new line", 
                  distToPrevNewline, ii.distToPrevNewline);
   }
+/*
+  public void testNoParameters() throws BadLocationException
+  {
+    IndentRuleAction _action = new ActionBracePlus("");
+    
+    String _text = 
+      "method(\n"+
+      ")\n";
+    
+    String _aligned = 
+      "method(\n"+
+      "      )\n";
+    
+    doc.insertString(0, _text, null);
+    _action.indentLine(doc, 0); // Does nothing.
+    assertEquals("START has no brace.", _text.length(), doc.getLength());
+    doc.indentLines(0, 7); // Does nothing.
+    assertEquals("START has no brace.", _text.length(), doc.getLength());
+
+    doc.indentLines(0, doc.getLength()); // Aligns second line, a second time.
+    System.out.println(doc.getText(0, doc.getLength()));
+    _assertContents(_aligned, doc);
+    assertEquals("Line aligned to open paren.", _aligned.length(), doc.getLength());
+  }
+*/
+/*  
+  public void testArrayInit() throws BadLocationException
+  {
+    IndentRuleAction _action = new ActionBracePlus("");
+    
+    String _text = 
+      "int[] ar = new int[] {\n"+
+      "1,1,1,1,1,1,1,1,1 };";
+    
+    String _aligned = 
+      "int[] ar = new int[] {\n"+
+      "                      1,1,1,1,1,1,1,1,1 };";
+    
+    doc.insertString(0, _text, null);
+    _action.indentLine(doc, 0); // Does nothing.
+    assertEquals("START has no brace.", _text.length(), doc.getLength());
+    doc.indentLines(0, 7); // Does nothing.
+    assertEquals("START has no brace.", _text.length(), doc.getLength());
+
+    doc.indentLines(0, doc.getLength()); // Aligns second line, a second time.
+    System.out.println(doc.getText(0, doc.getLength()));
+    _assertContents(_aligned, doc);
+    assertEquals("Line aligned to open paren.", _aligned.length(), doc.getLength());
+  }
+*/  
+/*
+  public void testArrayInitNewline() throws BadLocationException
+  {
+    IndentRuleAction _action = new ActionBracePlus("");
+    
+    String _text = 
+      "int[] ar = new int[] { 1,1,1,\n"+
+      "1,1,1,1,1,1 };";
+    
+    String _aligned = 
+      "int[] ar = new int[] { 1,1,1,\n"+
+      "                       1,1,1,1,1,1 };";
+    
+    doc.insertString(0, _text, null);
+    _action.indentLine(doc, 0); // Does nothing.
+    assertEquals("START has no brace.", _text.length(), doc.getLength());
+    doc.indentLines(0, 7); // Does nothing.
+    assertEquals("START has no brace.", _text.length(), doc.getLength());
+
+    doc.indentLines(0, doc.getLength()); // Aligns second line, a second time.
+    System.out.println(doc.getText(0, doc.getLength()));
+    _assertContents(_aligned, doc);
+    assertEquals("Line aligned to open paren.", _aligned.length(), doc.getLength());
+  }
+*/
+/*
+  public void testArrayInitBraceNewline() throws BadLocationException
+  {
+    IndentRuleAction _action = new ActionBracePlus("");
+    
+    String _text = 
+      "int[] blah = new int[] {1, 2, 3\n"+
+      "};";
+    
+    String _aligned = 
+      "int[] blah = new int[] {1, 2, 3\n"+
+      "                        };";
+    
+    doc.insertString(0, _text, null);
+    _action.indentLine(doc, 0); // Does nothing.
+    assertEquals("START has no brace.", _text.length(), doc.getLength());
+    doc.indentLines(0, 7); // Does nothing.
+    assertEquals("START has no brace.", _text.length(), doc.getLength());
+
+    doc.indentLines(0, doc.getLength()); // Aligns second line, a second time.
+    System.out.println(doc.getText(0, doc.getLength()));
+    _assertContents(_aligned, doc);
+    assertEquals("Line aligned to open paren.", _aligned.length(), doc.getLength());
+  }
+*/
+/*
+  public void testArrayInitAllNewline() throws BadLocationException
+  {
+    IndentRuleAction _action = new ActionBracePlus("");
+    
+    String _text = 
+      "int[] blah = new int[]\n"+
+      "{4, 5, 6};";
+    
+    String _aligned = 
+      "int[] blah = new int[]\n"+
+      "  {4, 5, 6};";
+    
+    doc.insertString(0, _text, null);
+    _action.indentLine(doc, 0); // Does nothing.
+    assertEquals("START has no brace.", _text.length(), doc.getLength());
+    doc.indentLines(0, 7); // Does nothing.
+    assertEquals("START has no brace.", _text.length(), doc.getLength());
+
+    doc.indentLines(0, doc.getLength()); // Aligns second line, a second time.
+    System.out.println(doc.getText(0, doc.getLength()));
+    _assertContents(_aligned, doc);
+    assertEquals("Line aligned to open paren.", _aligned.length(), doc.getLength());
+  }
+*/  
 }
-
-
-
