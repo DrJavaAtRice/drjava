@@ -1,0 +1,218 @@
+<!--
+  $Header$
+-->
+<project name="util" default="test">
+  <property name="jsr14_classpath" value="/home/javaplt/packages/jsr14_adding_generics-1_0-ea/javac.jar" />
+
+  <!-- srcroot is the base directory of the source, 4 packages back -->
+  <property name="srcroot" value="../../../.." />
+
+  <!-- built is where the compiled classes go -->
+  <property name="built" value="${srcroot}/../built/" />
+
+  <!-- projpath is the path from srcroot to the root directory of this project
+  -->
+  <property name="projpath" value="edu/rice/cs/${ant.project.name}" />
+
+  <!-- put new javadoc in this directory after each commit -->
+  <property name="public_javadoc_dir" value="/home/javaplt/public_html/drjava/javadoc" />
+
+  <!-- put javadoc in this directory if generating private javadoc -->
+  <property name="private_javadoc_dir" value="${srcroot}/../javadoc" />
+
+  <property name="jarfile" value="${srcroot}/../drjava.jar" />
+  <property name="manifest" value="manifest" />
+
+  <!-- Init target. All others depend on it. Initialize the directory. -->
+  <target name="init">
+    <tstamp /> <!-- Ant requires us to make time stamp -->
+    <mkdir dir="${built}" /> <!-- Make the built directory -->
+  </target>
+
+  <!-- Reconcile source with CVS archive -->
+  <target name="update" depends="init">
+    <cvs command="update -d" />
+  </target>
+
+  <target name="make-version-stamp">
+    <tstamp /> <!-- get new time stamp to use for CVS tag -->
+
+    <!-- Create new Version.java, filling in date and time. -->
+    <filter token="DATE" value="${DSTAMP}" />
+    <filter token="TIME" value="${TSTAMP}" />
+    <copy file="Version.orig"
+          tofile="Version.java" 
+          overwrite="yes"
+          filtering="yes" />
+  </target>
+
+
+  <!-- Commit source to CVS archive
+       Before doing do, we update our copy with the CVS copy. This ensures that
+       if there were any clashes, we have to resolve them now. Then we
+       recompile (from scratch) and retest. If this all succeeds, we can commit.
+
+       After committing, we tag the build we just made with the tag
+       projectname-date-time.
+  -->
+  <target name="commit" depends="clean, update, test">
+    <antcall target="make-version-stamp" />
+
+    <!-- recompile to make new version number get into code. -->
+    <antcall target="compile" />
+
+    <cvs command="commit" />
+
+    <property name="version-tag"
+              value="${ant.project.name}-${DSTAMP}-${TSTAMP}" />
+
+    <cvs command="tag -c ${version-tag}" quiet="true" />
+
+    <!-- Create distribution jar.
+         We modify property jarfile for this call to put the jar in
+         the right place.
+    -->
+    <property name="distjar" value="${jars_dir}/${version-tag}.jar" />
+
+    <!--
+    <antcall target="jar">
+      <param name="jarfile" value="${distjar}" />
+    </antcall>
+    -->
+
+    <!-- generate javadoc for the committed version! -->
+    <!--
+    <antcall target="generate_javadoc">
+      <param name="javadoc_dir" value="${public_javadoc_dir}" />
+      <param name="javadoc_title" value="${version-tag}" />
+    </antcall>
+    -->
+
+    <!-- give group permissions to write over the javadoc -->
+    <!--
+    <chmod perm="g+w,a+rX" dir="${public_javadoc_dir}" type="both" />
+    <chmod perm="g+w,a+rX" file="${public_javadoc_dir}" type="both" />
+    -->
+
+    <echo message="New version ${version-tag} committed to CVS." />
+  </target>
+
+  <!-- Compile. We have to start at srcroot and then selectively include
+       just this project in order for it to realize what files have already
+       been compiled (preventing needless recompilation)
+  -->
+  <target name="compile" depends="init">
+    <javac srcdir="${srcroot}"
+           includes="${projpath}/**/*java"
+           destdir="${built}" 
+           bootclasspath="${jsr14_classpath}:${java.home}/lib/rt.jar"
+           target="1.1"
+           debug="on"
+           optimize="off" />
+  </target>
+
+  <!-- Unit test -->
+  <target name="test-only">
+    <junit printsummary="yes" haltonerror="yes" haltonfailure="yes" fork="no">
+      <!-- propogate the same classpath. not sure why it doesn't
+           happen by default!
+      -->
+      <classpath path="${java.class.path}" />
+
+      <!-- This makes JUnit display info about each test to console -->
+      <formatter type="plain" usefile="no" />
+
+      <!-- This makes JUnit run all test classes. It figures out which ones
+           automatically, without needing AllTests classes.
+      -->
+      <batchtest>
+        <!-- The root of the fileset must be where edu/ is. -->
+        <fileset dir="${srcroot}">
+          <!-- Include only from projpath to only get classes in this project!
+          -->
+          <include name="${projpath}/**/*Test.java" />
+          <exclude name="**/AllTests.java" />
+          <exclude name="**/Test.java" />
+        </fileset>
+      </batchtest>
+    </junit>
+  </target>
+
+  <!-- Unit test -->
+  <target name="test" depends="compile, test-only">
+  </target>
+
+  <!-- Makes a jar with dependencies. No tests are included. -->
+  <target name="jar">
+    <jar jarfile="${jarfile}" manifest="${manifest}">
+      <fileset dir="${built}"
+               includes="${projpath}/**"
+               excludes="**/*Test.class" />
+    </jar>
+  </target>
+
+  <!-- generate private javadoc for current uncommitted version -->
+  <target name="javadoc" depends="init">
+    <tstamp />
+    <antcall target="generate_javadoc">
+      <param name="javadoc_dir" value="${private_javadoc_dir}" />
+      <param name="javadoc_title" value="${user.name}-uncommitted-${DSTAMP}-${TSTAMP}" />
+    </antcall>
+  </target>
+
+  <!-- Generate javadoc, removing generics references first.
+       The property javadoc_dir must be set when calling this.
+       The property javadoc_title must be set when calling this.
+  -->
+  <target name="generate_javadoc" if="javadoc_dir">
+    <delete dir="${javadoc_dir}" />
+    <mkdir dir="${javadoc_dir}" />
+
+    <mkdir dir="${javadoc_dir}/src" />
+    <apply executable="jsr14" failonerror="yes" parallel="yes" type="file">
+      <arg value="-sourcepath" />
+      <arg value="${srcroot}" />
+
+      <!-- Generate Java source without generics -->
+      <arg value="-s" />
+
+      <arg value="-d" />
+      <arg value="${javadoc_dir}/src" />
+      
+      <fileset dir="${srcroot}">
+        <include name="${projpath}/**/*.java" />
+      </fileset>
+    </apply>
+
+    <!-- Now we need to copy the package.htmls over to the
+         directory with the non-generic sources. -->
+    <copy todir="${javadoc_dir}/src">
+      <fileset dir="${srcroot}">
+        <include name="${projpath}/**/package.html" />
+      </fileset>
+    </copy>
+
+    <javadoc sourcepath="${javadoc_dir}/src"
+             destdir="${javadoc_dir}"
+             packagenames="edu.rice.cs.drjava.*"
+             Private="yes"
+             Use="yes"
+             Version="yes"
+             Windowtitle="${javadoc_title}">
+      <link href="http://java.sun.com/j2se/1.3/docs/api" />
+      <link href="http://junit.org/junit/javadoc/3.7" />
+      <link href="http://www-sop.inria.fr/koala/djava/javadoc" />
+    </javadoc>
+
+    <!-- delete source we generated without generics -->
+    <delete dir="${javadoc_dir}/src" />
+  </target>
+
+  <!-- Delete all generated files (only for this project!) -->
+  <target name="clean">
+    <delete dir="${private_javadoc_dir}" />
+    <delete dir="${built}/${projpath}" />
+    <delete file="${jarfile}" />
+  </target>
+</project>
+
