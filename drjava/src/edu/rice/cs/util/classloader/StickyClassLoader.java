@@ -126,7 +126,9 @@ public class StickyClassLoader extends ClassLoader {
   {
     super(oldLoader);
     _newLoader = newLoader;
-    _classesToLoadWithOld = (String[]) classesToLoadWithOld.clone();
+    _classesToLoadWithOld = new String[classesToLoadWithOld.length];
+    System.arraycopy(classesToLoadWithOld, 0, _classesToLoadWithOld, 0,
+                     classesToLoadWithOld.length);
     Arrays.sort(_classesToLoadWithOld);
   }
 
