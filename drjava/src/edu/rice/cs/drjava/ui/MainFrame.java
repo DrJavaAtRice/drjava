@@ -1703,6 +1703,7 @@ public class MainFrame extends JFrame implements OptionConstants {
                                                   JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
     //scroll.setBorder(null); // removes all default borders (MacOS X installs default borders)
     _defScrollPanes.put(doc, scroll);
+    
     return scroll;
   }
 
@@ -1745,13 +1746,15 @@ public class MainFrame extends JFrame implements OptionConstants {
    * for the current active document.
    */
   private void _switchDefScrollPane() {
+    // Fix OS X scrollbar bug before switching
+    _reenableScrollBar();
+    
     // Sync caret with location before swtiching
     _currentDefPane.getOpenDocument().
       syncCurrentLocationWithDefinitions( _currentDefPane.getCaretPosition() );
 
-    JScrollPane scroll = (JScrollPane)
-      _defScrollPanes.get(_model.getActiveDocument());
-
+    JScrollPane scroll = 
+      (JScrollPane) _defScrollPanes.get(_model.getActiveDocument());
     if (scroll == null) {
       throw new UnexpectedException(new Exception(
                                                   "Current definitions scroll pane not found."));
@@ -1764,9 +1767,37 @@ public class MainFrame extends JFrame implements OptionConstants {
 
     // reset the undo/redo menu items
     _undoAction.setDelegatee(_currentDefPane.getUndoAction());
-    _redoAction.setDelegatee(_currentDefPane.getRedoAction());
+    _redoAction.setDelegatee(_currentDefPane.getRedoAction());    
   }
-
+  
+  /**
+   * Addresses the Mac OS X bug where the scrollbars are disable in
+   * one document after opening another document.
+   */
+  private void _reenableScrollBar() {
+    JScrollPane scroll = (JScrollPane)
+      _defScrollPanes.get(_model.getActiveDocument());
+    if (scroll == null) {
+      throw new UnexpectedException(new Exception(
+                                                  "Current definitions scroll pane not found."));
+    }
+    
+    JScrollBar bar = scroll.getVerticalScrollBar();
+    scroll.setVerticalScrollBar(new JScrollBar(bar.getOrientation(),
+                                               bar.getValue(),
+                                               bar.getVisibleAmount(),
+                                               bar.getMinimum(),
+                                               bar.getMaximum()));
+    /* When we add a horizontal scrollbar, uncomment this!
+    bar = scroll.getHorizontalScrollBar();
+    scroll.setHorizontalScrollBar(new JScrollBar(bar.getOrientation(),
+                                               bar.getValue(),
+                                               bar.getVisibleAmount(),
+                                               bar.getMinimum(),
+                                               bar.getMaximum()));
+     */
+  }
+  
   /**
    * Sets the current directory to be that of the given file.
    */
