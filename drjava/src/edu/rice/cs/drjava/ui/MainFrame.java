@@ -1,38 +1,12 @@
 package  edu.rice.cs.drjava;
 
-import  javax.swing.JFrame;
-import  javax.swing.JMenuBar;
-import  javax.swing.JMenu;
-import  javax.swing.Action;
-import  javax.swing.AbstractAction;
-import  javax.swing.JButton;
-import  javax.swing.JEditorPane;
-import  javax.swing.JOptionPane;
-import  javax.swing.JScrollPane;
-import  javax.swing.JSplitPane;
-import  javax.swing.BoxLayout;
-import  javax.swing.JTextField;
-import  javax.swing.KeyStroke;
-import  javax.swing.JMenuItem;
-import  javax.swing.JComponent;
-import  javax.swing.JTabbedPane;
-import javax.swing.JFileChooser;
-import  javax.swing.text.DefaultEditorKit;
-import  javax.swing.event.ChangeListener;
-import  javax.swing.event.ChangeEvent;
-import  javax.swing.event.DocumentListener;
-import  javax.swing.event.DocumentEvent;
-import  java.awt.event.ActionEvent;
-import  java.awt.event.KeyEvent;
-import  java.awt.event.WindowListener;
-import  java.awt.event.WindowEvent;
-import  java.awt.event.MouseAdapter;
-import  java.awt.event.KeyAdapter;
-import  java.awt.BorderLayout;
-import  java.awt.Label;
-import  java.awt.Cursor;
-import  java.awt.Font;
-import  java.io.File;
+import javax.swing.*;
+import javax.swing.text.*;
+import javax.swing.event.*;
+import java.awt.event.*;
+import java.awt.*;
+
+import java.io.File;
 import java.io.IOException;
 
 /** 
@@ -122,7 +96,7 @@ public class MainFrame extends JFrame {
 
   private Action _gotoLineAction = new AbstractAction("Goto line") {
     public void actionPerformed(ActionEvent ae) {
-      _definitionsPane.gotoLine();
+      _gotoLine();
     }
   };
  
@@ -451,6 +425,28 @@ public class MainFrame extends JFrame {
           throw new RuntimeException("filechooser returned null file");
       default:                  // impossible since rc must be one of these
         throw  new RuntimeException("filechooser returned bad rc " + choice);
+    }
+  }
+
+  /**
+   * Ask the user what line they'd like to jump to, then go there.
+   */
+  private void _gotoLine() {
+    final String msg = "What line would you like to go to?";
+    final String title = "Jump to line";
+    String lineStr = JOptionPane.showInputDialog(this, 
+                                                 msg, 
+                                                 title, 
+                                                 JOptionPane.QUESTION_MESSAGE);
+    try {
+      int lineNum = Integer.parseInt(lineStr);
+      int pos = _model.gotoLine(lineNum);
+      _definitionsPane.setPositionAndScroll(pos);
+      _definitionsPane.grabFocus();
+    } catch (NumberFormatException nfe) {
+      // invalid input for line number
+      Toolkit.getDefaultToolkit().beep();
+      // Do nothing.
     }
   }
 

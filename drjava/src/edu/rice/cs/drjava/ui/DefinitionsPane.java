@@ -39,14 +39,15 @@ public class DefinitionsPane extends JEditorPane {
       new DefaultHighlighter.DefaultHighlightPainter(Color.lightGray);
   
   /**
-   * Looks for changes in the caret position to see if a paren/brace/bracket highlight
-   * is needed.
+   * Looks for changes in the caret position to see if a paren/brace/bracket
+   * highlight is needed.
   */
   private CaretListener _matchListener = new CaretListener() {
 
     /**
-     * Checks caret position to see if it needs to set or remove a highlight from the
-     * document.  When the cursor is immediately right of ')', '}', or ']', it highlights
+     * Checks caret position to see if it needs to set or remove a highlight
+     * from the document.
+     * When the cursor is immediately right of ')', '}', or ']', it highlights
      * up to the matching open paren/brace/bracket.
      * @param e the event fired by the caret position change
      */
@@ -137,9 +138,9 @@ public class DefinitionsPane extends JEditorPane {
    */
   private class IndentKeyAction extends AbstractAction {
     /**
-     * The key string ("\n"|"{"|"}") for the key pressed that invokes this instance.
-     * Not used currently, but there for readability and possible future use, e.g.,
-     * debugging add-ons or the rewrite of the indention code.
+     * The key string ("\n"|"{"|"}") for the key pressed that invokes this
+     * instance. Not used currently, but there for readability and possible
+     * future use, e.g., debugging add-ons or the rewrite of the indention code.
      */    
     private String _key;
     /**
@@ -250,6 +251,23 @@ public class DefinitionsPane extends JEditorPane {
   }
 
   /**
+   * Set the caret position and also scroll to make sure the location is
+   * visible.
+   * @param pos Location to scroll to.
+   */
+  public void setPositionAndScroll(int pos) {
+    try {
+      setCaretPosition(pos);
+      scrollRectToVisible(modelToView(pos));
+    }
+    catch (BadLocationException ble) {
+      throw new UnexpectedException(ble);
+    }
+  }
+
+
+
+  /**
    * Reset the document Undo list.
    */
   private void _resetUndo() {
@@ -267,75 +285,6 @@ public class DefinitionsPane extends JEditorPane {
   protected EditorKit createDefaultEditorKit() {
     return new DefinitionsEditorKit();
   }
-
-  /**
-   * Ask the user what line they'd like to jump to, then go there.
-   */
-  public void gotoLine() {
-    final String msg = "What line would you like to go to?";
-    final String title = "Jump to line";
-    String lineStr = JOptionPane.showInputDialog(this, 
-                                                 msg, 
-                                                 title, 
-                                                 JOptionPane.QUESTION_MESSAGE);
-    try {
-      int lineNum = Integer.parseInt(lineStr);
-      // Move the defs document to the right spot
-      _doc().gotoLine(lineNum);
-      // Now move the caret to the same place
-      int pos = _doc().getCurrentLocation();
-      setCaretPosition(pos);
-      // Finally, scroll the window to make this line visible.
-      Rectangle rect = modelToView(pos);
-      scrollRectToVisible(rect);
-      // And make sure the defs view has focus!
-      grabFocus();
-    } catch (BadLocationException impossible) {
-      // we got the location from defs doc. it is valid, i swear.
-    } catch (NumberFormatException nfe) {       // invalid input for line number
-      Toolkit.getDefaultToolkit().beep();
-      // Do nothing.
-    }
-  }
-
-
-  /**
-   * @return true if the document was modified since the last save
-   */
-  public boolean isModifiedSinceSave() {
-    return  _doc().isModifiedSinceSave();
-  }
-
-  /**
-   * Reset the document.
-   * Change the title of the file in the mainframe and the menu bar, open up a file.
-   * @param path the path of the file being opened.
-   *
-  private void _resetDocument(String path) {
-    String titlebarName;
-    if (path == "") {
-      titlebarName = "Untitled";
-    } 
-    else {
-      File f = new File(path);
-      titlebarName = f.getName();
-    }
-    _doc().resetModification();
-    _mainFrame.updateFileTitle(titlebarName);
-    _mainFrame.installNewDocumentListener(_doc());
-    // On all open/new operations reset focus to this
-    // But do it in the Swing thread to be safe.
-    SwingUtilities.invokeLater(new Runnable() {
-      /**
-       * Reset the focus to the DefinitionsPane.
-       *
-      public void run() {
-        DefinitionsPane.this.requestFocus();
-      }
-    });
-  }
-*/
-
 
   /**
    * Gets the pane's document with a stronger return type.

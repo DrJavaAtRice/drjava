@@ -218,10 +218,6 @@ public class GlobalModel {
     }
   }
   
-  public void resetErrors() {
-    _compileErrors = new CompilerError[0];
-  }
-  
   /**
    * Let the listeners know that the compiler has finished.
    */
@@ -259,22 +255,7 @@ public class GlobalModel {
     }
   }
 
-  private void _resetInteractions(String packageName, File sourceRoot) {
-    _interactionsDoc.reset();
-
-    if (sourceRoot != null) {
-      _interactionsDoc.addClassPath(sourceRoot.getAbsolutePath());
-    }
-
-    _interactionsDoc.setPackageScope(packageName);
-
-    _notifyListeners(new EventNotifier() {
-      public void notifyListener(GlobalModelListener l) {
-        l.interactionsReset();
-      }
-    });
-  }
-  
+ 
   /**
    * Lets the listeners know that the console pane has been cleared.
    */
@@ -321,7 +302,35 @@ public class GlobalModel {
       return true;
     }
   }
+
+  /**
+   * Moves the definitions document to the given line, and returns
+   * the character position in the document it's gotten to.
+   * @param line Number of the line to go to. If line exceeds the number
+   *             of lines in the document, it is interpreted as the last line.
+   * @return Index into document of where it moved
+   */
+  public int gotoLine(int line) {
+    _definitionsDoc.gotoLine(line);
+    return _definitionsDoc.getCurrentLocation();
+  }
                   
+  private void _resetInteractions(String packageName, File sourceRoot) {
+    _interactionsDoc.reset();
+
+    if (sourceRoot != null) {
+      _interactionsDoc.addClassPath(sourceRoot.getAbsolutePath());
+    }
+
+    _interactionsDoc.setPackageScope(packageName);
+
+    _notifyListeners(new EventNotifier() {
+      public void notifyListener(GlobalModelListener l) {
+        l.interactionsReset();
+      }
+    });
+  }
+
   /**
    * Finds the root directory of the source files.
    * @return The root directory of the source files,
