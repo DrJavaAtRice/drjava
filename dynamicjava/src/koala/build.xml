@@ -8,7 +8,7 @@
   $Id$
 -->
 <project name="koala" default="test">
-  <!-- srcroot is the base directory of the source, 4 packages back -->
+  <!-- srcroot is the base directory of the source, one level up -->
   <property name="srcroot" value="${basedir}/.." />
 
   <!-- built is where the compiled classes go -->
