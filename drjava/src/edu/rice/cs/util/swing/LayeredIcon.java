@@ -48,12 +48,12 @@ package edu.rice.cs.util.swing;
 import javax.swing.*;
 import java.awt.*;
 
-class LayeredIcon implements Icon {
+public class LayeredIcon implements Icon {
   private Icon[] _layers;
   private int[] _xoffs;
   private int[] _yoffs;
-  private int _w;
-  private int _h;
+  private int _w=0;
+  private int _h=0;
   public LayeredIcon(Icon[] layers, int[] x, int[] y) {
     _layers = layers;
     _xoffs = x;
@@ -63,8 +63,10 @@ class LayeredIcon implements Icon {
     }
     _w = 0; _h = 0;
     for (int i=0; i < layers.length; i++) {
-      _w = Math.max(_w, layers[i].getIconWidth() + x[i]);
-      _h = Math.max(_h, layers[i].getIconHeight() + x[i]);
+      if (layers[i] != null) {
+        _w = Math.max(_w, layers[i].getIconWidth() + x[i]);
+        _h = Math.max(_h, layers[i].getIconHeight() + x[i]);
+      }
     }
   }
   public int getIconHeight(){
@@ -75,7 +77,18 @@ class LayeredIcon implements Icon {
   }
   public void paintIcon(Component c, Graphics g, int x, int y){
     for (int i=0; i < _layers.length; i++) {
-      _layers[i].paintIcon(c,g, x+_xoffs[i], y+_yoffs[i]);
+      Icon ico = _layers[i];
+      if (ico != null) _layers[i].paintIcon(c,g, x+_xoffs[i], y+_yoffs[i]);
     }
+  }
+  
+  public Icon[] getLayers(){
+    return _layers;
+  }
+  public int[] getXOffsets() {
+    return _xoffs;
+  }
+  public int[] getYOffsets(){
+    return _xoffs;
   }
 }

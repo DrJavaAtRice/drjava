@@ -422,9 +422,9 @@ public class DirectoryChooser extends JPanel {
         for (FileFilter filter : _choosableDirs) {
           canChoose &= (f != null && filter.accept(f));
         }
-        _approveButton.setEnabled(canChoose);
+        _approveButton.setEnabled(canChoose && DirectoryChooser.this.isEnabled());
         boolean canSubDir = enable && f.isDirectory() && f.canWrite();
-        _newFolderButton.setEnabled(canSubDir);
+        _newFolderButton.setEnabled(canSubDir && DirectoryChooser.this.isEnabled());
       }
     });
     
@@ -463,10 +463,10 @@ public class DirectoryChooser extends JPanel {
             canSubDir = canWrite && f.isDirectory();
             canAlter = canWrite && !_offLimits.contains(f);
           } catch(IllegalArgumentException iae) { }
-          _renameItem.setEnabled(canAlter);
-          _deleteItem.setEnabled(canAlter);
-          _newFolderItem.setEnabled(canSubDir);
-          _newFolderButton.setEnabled(canSubDir);
+          _renameItem.setEnabled(canAlter && DirectoryChooser.this.isEnabled());
+          _deleteItem.setEnabled(canAlter && DirectoryChooser.this.isEnabled());
+          _newFolderItem.setEnabled(canSubDir && DirectoryChooser.this.isEnabled());
+          _newFolderButton.setEnabled(canSubDir && DirectoryChooser.this.isEnabled());
           _tree.setSelectionPath(tp);
           _treePopup.show(e.getComponent(), e.getX(), e.getY());
         }
@@ -554,6 +554,7 @@ public class DirectoryChooser extends JPanel {
       }
     };
     _cancelButton.setAction(_cancelAction);
+    _cancelButton.setEnabled(DirectoryChooser.this.isEnabled());
     
     String key = "dc_cancel";
     diag.getRootPane().getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE,0), key);
@@ -835,6 +836,7 @@ public class DirectoryChooser extends JPanel {
       _accessoryPanel.remove(_accessory);
     }
     _accessory = comp;
+    _accessory.setEnabled(DirectoryChooser.this.isEnabled());
     _accessoryPanel.add(comp, BorderLayout.CENTER);
   }
   
@@ -867,8 +869,8 @@ public class DirectoryChooser extends JPanel {
     }
     boolean enable = _tree.getSelectionCount() > 0;
     JDialog diag = createDialog();
-    _approveButton.setEnabled(enable);
-    _newFolderButton.setEnabled(enable);
+    _approveButton.setEnabled(enable && DirectoryChooser.this.isEnabled());
+    _newFolderButton.setEnabled(enable && DirectoryChooser.this.isEnabled());
     diag.setVisible(true);
     int res = _finalResult;
     _finalResult = ERROR_OPTION;
@@ -977,18 +979,30 @@ public class DirectoryChooser extends JPanel {
     _newFolderButton.setEnabled(enable);
     _approveButton.setEnabled(enable);
     _cancelButton.setEnabled(enable);
+    _expandItem.setEnabled(enable);
+    _collapseItem.setEnabled(enable);
+    _newFolderItem.setEnabled(enable);
+    _deleteItem.setEnabled(enable);
+    _renameItem.setEnabled(enable);
+    _accessory.setEnabled(enable);
   }
   
   //////////////////// PROTECTED UTILITY METHODS /////////////////
-  
+  private int _hourglassDepth = 0;
   protected synchronized void hourglassOn() {
-    this.setEnabled(false);
-//    _glassPane.setVisible(true);
+//    this.setEnabled(false);
+    _hourglassDepth++;
+    _glassPane.setVisible(true);
+    if (_treeIsGenerated) { _tree.setEnabled(false); }
   }
   
   protected synchronized void hourglassOff() {
-    this.setEnabled(true);
-//    _glassPane.setVisible(false);
+//    this.setEnabled(true);
+    _hourglassDepth--;
+    if (_hourglassDepth <= 0) {
+      _glassPane.setVisible(false);
+      if (_treeIsGenerated) { _tree.setEnabled(DirectoryChooser.this.isEnabled()); }
+    }
   }
   
   protected void treeShouldBeRegenerated() {
@@ -1132,10 +1146,11 @@ public class DirectoryChooser extends JPanel {
    * to its stored file.
    * @param node the node to set up
    */
-  protected void  ensureHasChildren(DefaultMutableTreeNode node) {
+  protected void ensureHasChildren(final DefaultMutableTreeNode node) {
     if (!_treeIsGenerated) return;
     if (node.getChildCount() == 1 && node.getChildAt(0) instanceof EmptyTreeNode) {
       hourglassOn();
+      
       File parentFile = getFileForTreeNode(node);
       node.removeAllChildren(); // get rid of dummy node
       
@@ -1555,14 +1570,13 @@ public class DirectoryChooser extends JPanel {
    * Blocks access to DrJava while the hourglass cursor is on
    */
   private class GlassPane extends JComponent {
-
     /**
      * Creates a new GlassPane over the DrJava window
      */
     public GlassPane() {
       addKeyListener(new KeyAdapter() {});
       addMouseListener(new MouseAdapter() {});
-      super.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+      setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
     }
   }
   
@@ -1633,7 +1647,7 @@ public class DirectoryChooser extends JPanel {
         System.out.println("Selected("+ (e.isAddedFile() ? "+" : "-") +") " + e.getFile());
       }
     });
-    d.hourglassOn();
+//    d.setEnabled(false);
     int res = d.showDialog();
 //    JFrame jf = new JFrame();
 //    jf.getContentPane().add(d);
@@ -1648,6 +1662,6 @@ public class DirectoryChooser extends JPanel {
 //    System.out.println("directory: " + f);
 //    System.out.println("exists: " + ((f != null) ? f.exists() : false));
 //    System.out.println("Open recursive: " + ((JCheckBox)d.getAccessory()).isSelected());
-//    System.exit(1);
+    System.exit(1);
   }
 }
