@@ -47,6 +47,7 @@ package edu.rice.cs.util;
 
 import java.io.*;
 import java.util.*;
+import edu.rice.cs.util.swing.*;
 
 /**
  * A class to provide some convenient file operations as static methods.
@@ -165,8 +166,6 @@ public abstract class FileOps {
     }
   }
   
-  
-  
   /**
    * This filter checks for files that end in .java
    */
@@ -179,17 +178,11 @@ public abstract class FileOps {
       //original
       StringBuffer name = new StringBuffer(f.getAbsolutePath());
       String shortName = f.getName();
-      if (shortName.length() < 6){
-        return false;
-      }
+      if (shortName.length() < 6) return false;
       name.delete(name.length() - 5, name.length());
       name.append(".java");
       File test = new File(new String(name));
-      if (test.equals(f)){
-        return true;
-      } else {
-        return false;
-      }
+      return (test.equals(f));
     }
   };
   
@@ -491,7 +484,10 @@ public abstract class FileOps {
    * up the file, and has a method that actually performs the writing of the file
    * @throws IOException if the saving or backing up of the file fails for any reason
    */
-  public static void saveFile(FileSaver fileSaver) throws IOException{
+  public static void saveFile(FileSaver fileSaver) throws IOException {
+    
+//    ScrollableDialog sd1 = new ScrollableDialog(null, "saveFile (" + fileSaver + ") called in FileOps.java", "", "");
+//    sd1.show();
     boolean makeBackup = fileSaver.shouldBackup();
     boolean success = false;
     File file = fileSaver.getTargetFile();
@@ -500,11 +496,9 @@ public abstract class FileOps {
     // file.canWrite() is false if file.exists() is false
     // but we want to be able to save a file that doesn't
     // yet exist.
-    if (file.exists() && !file.canWrite()) {
-      throw new IOException("Permission denied");
-    }
+    if (file.exists() && !file.canWrite()) throw new IOException("Permission denied");
     /* First back up the file, if necessary */
-    if (makeBackup){
+    if (makeBackup) {
       backup = fileSaver.getBackupFile();
       if (!renameFile(file, backup)){
         throw new IOException("Save failed: Could not create backup file "
@@ -514,11 +508,18 @@ public abstract class FileOps {
       fileSaver.backupDone();
     }
     
+//    ScrollableDialog sd2 = new ScrollableDialog(null, "backup done in FileOps.saveFile", "", "");
+//    sd2.show();
+    
     //Create a temp file in the same directory as the file to be saved.
     //From this point forward, enclose in try...finally so that we can clean
     //up the temp file and restore the file from its backup.
     File parent = file.getParentFile();
     File tempFile = File.createTempFile("drjava", ".temp", parent);
+    
+//    ScrollableDialog sd3 = new ScrollableDialog(null, "temp file " + tempFile + "created in FileOps.saveFile", "", "");
+//    sd3.show();
+    
     try {
       /* Now, write your output to the temp file, then rename it to the correct
        name.  This way, if writing fails in the middle, the old file is not
@@ -552,27 +553,24 @@ public abstract class FileOps {
       success = true;
     } 
     finally {
-      if (tempFileUsed) {
-        /* Delete the temp file */
-        tempFile.delete();
-      }
+//      ScrollableDialog sd4 = new ScrollableDialog(null, "finally clause reached in FileOps.saveFile", "", "");
+//      sd4.show();
+    
+      if (tempFileUsed) tempFile.delete(); /* Delete the temp file */
+        
       if (makeBackup) {
         /* On failure, attempt to move the backup back to its original location if we
          made one.  On success, register that a backup was successfully made */
-        if (success) {
-          fileSaver.backupDone();
-        } else {
-          renameFile(backup, file);
-        }
+        if (success) fileSaver.backupDone();
+        else  renameFile(backup, file);
       }
     }
   }
 
   public interface FileSaver {
     
-    /**
-     * This method tells what to name the backup of the file, if a backup is to be made.
-     * It may depend on getTargetFile(), so it can thrown an IOException
+    /** This method tells what to name the backup of the file, if a backup is to be made.
+     *  It may depend on getTargetFile(), so it can thrown an IOException
      */
     public abstract File getBackupFile() throws IOException;
     

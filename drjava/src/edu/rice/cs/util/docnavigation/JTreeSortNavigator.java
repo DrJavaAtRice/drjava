@@ -104,7 +104,7 @@ public class JTreeSortNavigator extends JTree
    * Sets the foreground color of this JTree
    * @param c the color to set to
    */
-  public synchronized void setForeground(Color c) {
+  public /* synchronized */ void setForeground(Color c) {
     super.setForeground(c);
     _renderer.setTextNonSelectionColor(c);
   }
@@ -113,7 +113,7 @@ public class JTreeSortNavigator extends JTree
    * Sets the background color of this tree
    * @param c the color to set to
    */
-  public synchronized void setBackground(Color c){
+  public /* synchronized */ void setBackground(Color c){
     super.setBackground(c);
     if (_renderer != null) _renderer.setBackgroundNonSelectionColor(c);
   }
@@ -325,8 +325,6 @@ public class JTreeSortNavigator extends JTree
   }
   
   
-  
-  
   /**
    * Removes a given <code>INavigatorItem<code> from this navigator. Removes
    * all <code>INavigatorItem</code>s from this navigator that are "equal" (as
@@ -430,9 +428,9 @@ public class JTreeSortNavigator extends JTree
     }
   }
   
-  public synchronized void paint(Graphics g){
+  public void paint(Graphics g){
     
-    /* Synchronized so that "this" is in stable form when painted. */
+    /* Synchronized so that "this" is in stable form when painted. Doesn't the super call already supply synchronization */
     super.paint(g);
   }
   
@@ -440,7 +438,7 @@ public class JTreeSortNavigator extends JTree
   public synchronized void setActiveDoc(INavigatorItem doc){
     
     DefaultMutableTreeNode node = _doc2node.get(doc);
-    if(this.contains(doc)){
+    if (this.contains(doc)) {
       TreeNode[] nodes = node.getPath();
       TreePath path = new TreePath(nodes);
       this.expandPath(path);
@@ -486,16 +484,19 @@ public class JTreeSortNavigator extends JTree
    * @return <code>true</code> if this navigator contains a document that is "equal" (as tested by the
    *         <code>equals</code< method) to the passed document, else <code>false</code>.
    */
-  public boolean contains(INavigatorItem doc) { return _doc2node.containsKey(doc); }
+  public synchronized boolean contains(INavigatorItem doc) { return _doc2node.containsKey(doc); }
   
   /**
    * Returns all the <code>IDocuments</code> contained in this
    * navigator</code>. Does not assert any type of ordering on the returned
    * structure.
+   * 
+   * Not synchronized because it only relies on calls to superclass methods; no local structures are
+   * accessed.
    *
    * @return an <code>INavigatorItem<code> enumeration of this navigator's contents.
    */
-  public synchronized Enumeration<INavigatorItem> getDocuments() {
+  public Enumeration<INavigatorItem> getDocuments() {
     
     final ArrayList<INavigatorItem> list = new ArrayList<INavigatorItem>();
     Enumeration e_tmp = ((DefaultMutableTreeNode)_model.getRoot()).depthFirstEnumeration();
@@ -522,7 +523,7 @@ public class JTreeSortNavigator extends JTree
    *
    * @return the number of documents within this navigator.
    */
-  public int getDocumentCount() { return _doc2node.size(); }
+  public synchronized int getDocumentCount() { return _doc2node.size(); }
   
   /**
    * Returns whether this <code>IDocumentNavigator</code> contains any <code>IDocuments</code>.
@@ -797,7 +798,7 @@ public class JTreeSortNavigator extends JTree
    * are currently collapsed. See the documentation of <code>generatePathString</code>
    * for information on the format of the path strings.
    * 
-   * Not synchronized because it only does one read from _model
+   * Not synchronized because it only does reads from _model.
    */
   public String[] getCollapsedPaths() {
     DefaultMutableTreeNode rootNode = (DefaultMutableTreeNode)_model.getRoot();
@@ -821,8 +822,10 @@ public class JTreeSortNavigator extends JTree
    * names delimited by the forward slash ("/").  The path ends with a final delimeter.</p>
    * <p>(e.g. "./[ Source Files ]/util/docnavigation/")</p>
    * @return the path string for the given node in the JTree
+   * 
+   * Not synchronized because it only does one read from _model.
    */
-  public synchronized String generatePathString(TreePath tp) {
+  public String generatePathString(TreePath tp) {
     String path = "";
     
     TreeNode root = (TreeNode) _model.getRoot();
