@@ -28,6 +28,9 @@
 
 package koala.dynamicjava.parser.wrapper;
 
+
+import koala.dynamicjava.parser.ParseException;
+  
 /**
  * This error is thrown when an unexpected error append while
  * parsing a statement
@@ -37,6 +40,13 @@ package koala.dynamicjava.parser.wrapper;
  */
 
 public class ParseError extends Error {
+    /**
+     * Constructs a ParseError with no detailed message
+     * The ParseException that generated the ParseError or
+     * null if generated for another reason
+     */
+    private ParseException pe = null;
+    
     /**
      * The file name
      * @serial
@@ -56,7 +66,7 @@ public class ParseError extends Error {
     private int column;
 
     /**
-     * Constructs an <code>ExecutionError</code> with no detail message. 
+     * Constructs a ParseError with no detail message. 
      */
     public ParseError() {
         this("");
@@ -72,6 +82,16 @@ public class ParseError extends Error {
     }
     
     /**
+     * Constructs a ParseError with the specified 
+     * detail message. 
+     * @param e the ParseException.
+     */
+    public ParseError(ParseException e) {
+        this(e.getShortMessage(), "", -1, -1);
+        pe = e;
+    }
+    
+    /**
      * Constructs an <code>ExecutionError</code> with the specified 
      * detail message, filename, line and column. 
      * @param s  the detail message.
@@ -81,29 +101,36 @@ public class ParseError extends Error {
      */
     public ParseError(String s, String fn, int l, int c) {
         super(s);
-	filename = fn;
-	line     = l;
-	column   = c;
+        filename = fn;
+        line     = l;
+        column   = c;
     }
     
     /**
      * Returns the name of the source file
      */
     public String getFilename() {
-	return filename;
+      return filename;
     }
 
     /**
      * Returns the line in the source code where the error occured
      */
     public int getLine() {
-	return line;
+      return line;
     }
     
     /**
      * Returns the column in the source code where the error occured
      */
     public int getColumn() {
-	return column;
+      return column;
+    }
+    
+    /**
+     * Returns the ParseException
+     */
+    public ParseException getParseException() {
+      return pe;
     }
 }

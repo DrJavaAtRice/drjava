@@ -907,4 +907,10 @@ public class TreeInterpreter implements Interpreter {
     EvaluationVisitor ev = new EvaluationVisitor(evalVisitorContext);
     return AST.acceptVisitor(ev);
   }
+  
+  public List<Node> parse(String input) {
+    StringReader r = new StringReader(input.trim());
+    SourceCodeParser p = parserFactory.createParser(r, "DrJava");
+    return p.parseStream(); 
+  }
 }

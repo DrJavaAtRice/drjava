@@ -1,0 +1,5 @@
+javacc grammar.jj
+./fixparser Parser.java > newParser.java
+mv newParser.java Parser.java
+cd ../../
+ant clean compile

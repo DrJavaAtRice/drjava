@@ -59,7 +59,6 @@ public class InterpreterException extends ThrownException {
    */
   public InterpreterException(ParseError e) {
     super(e);
-    System.err.println("GotHere!");
     if (e.getLine() != -1) {
       //SourceInfo si = e.getSourceInfo();
       message = "L"+e.getLine()+", C"+e.getColumn()+" ("+e.getFilename()+"):\n"+/**/// use si

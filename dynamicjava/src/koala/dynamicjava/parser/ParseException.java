@@ -134,6 +134,37 @@ public class ParseException extends Exception {
     return retval;
   }
 
+  /** 
+   * This message is used in case a special constructor is called.
+   */
+  public String getShortMessage() {
+    if (!specialConstructor) {
+      return super.getMessage();
+    }
+    String expected = "";
+    int maxSize = 0;
+    for (int i = 0; i < expectedTokenSequences.length; i++) {
+      if (maxSize < expectedTokenSequences[i].length) {
+        maxSize = expectedTokenSequences[i].length;
+      }
+    }
+    String retval = "Syntax Error: \"";
+    Token tok = currentToken.next;
+    
+    for (int i = 0; i < maxSize; i++) {
+      if (i != 0) retval += " ";
+      if (tok.kind == 0) {
+        retval += tokenImage[0];
+        break;
+      }
+      retval += add_escapes(tok.image);
+      tok = tok.next; 
+    }
+    // retval += "\" at line " + currentToken.next.beginLine + ", column " + currentToken.next.beginColumn + "." + eol;
+    retval += "\"";
+    return retval;
+  }
+  
   /**
    * The end of line string for this machine.
    */
@@ -189,4 +220,31 @@ public class ParseException extends Exception {
       return retval.toString();
    }
 
+  /**
+   * Returns starting line of syntax error.
+   */
+  public int getBeginLine() {
+    return currentToken.next.beginLine;
+  }
+  
+  /**
+   * Returns starting column of syntax error.
+   */
+  public int getBeginColumn() {
+    return currentToken.next.beginColumn;
+  }
+  
+  /**
+   * Returns ending line of syntax error.
+   */
+  public int getEndLine() {
+    return currentToken.next.endLine;
+  }
+  
+  /**
+   * Returns ending column of syntax error.
+   */
+  public int getEndColumn() {
+    return currentToken.next.endColumn;
+  }
 }

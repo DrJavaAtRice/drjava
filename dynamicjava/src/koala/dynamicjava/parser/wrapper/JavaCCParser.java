@@ -95,7 +95,7 @@ public class JavaCCParser implements SourceCodeParser {
     try {
       return parser.parseStream();
     } catch (ParseException e) {
-      throw new ParseError(e.getMessage());
+      throw new ParseError(e);
     }
   }
   
@@ -107,7 +107,7 @@ public class JavaCCParser implements SourceCodeParser {
     try {
       return parser.parseCompilationUnit();
     } catch (ParseException e) {
-      throw new ParseError(e.getMessage());
+      throw new ParseError(e);
     }
   }
 }

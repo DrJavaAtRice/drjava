@@ -966,7 +966,7 @@ PARSER_END(Parser)
   // Productions for the intepreter ////////////////////////////////////////////////
   
   /**
-   * Parses top level statements. This production is
+   * Parses input stream. This production is
    * not a Java language rule. It is used by DynamicJava.
    * @return a list of nodes (possibly empty)
    * @see koala.dynamicjava.tree.Node
@@ -978,31 +978,80 @@ PARSER_END(Parser)
     Node root = null;
   }
   {
-    ( ( root=packageDeclaration()
-         | root=importDeclaration()
-         | LOOKAHEAD( methodDeclarationLookahead() )
-         root=methodDeclaration()
-         | LOOKAHEAD([ "final" ] typeLookahead() <IDENTIFIER>)
-         l=localVariableDeclaration() ";"
-         {
-      list.addAll(l);
+    (
+       LOOKAHEAD(StreamItem())
+       l = StreamItem() { list.addAll(l); }
+    )*
+    [ root = expression() [";"] { list.add(root); } ]
+    <EOF>
+    {
+      return list;
     }
-       | LOOKAHEAD(2)
-         root=topLevelStatement()
-         | root=typeDeclaration()
-         )
-       {
-         if (root != null) {
-           list.add(root);
-           root = null;
-         }
-       }
-       )*
-         <EOF>
-       {
-         return list;
-       }
   }
+  
+//  List/*<Node>*/ parseStream() :
+//  {
+//    List/*<Node>*/ list = new LinkedList/*<Node>*/();
+//    List/*<Node>*/ l;
+//    Node root = null;
+//  }
+//  {
+//    ( ( root=packageDeclaration()
+//         | root=importDeclaration()
+//         | LOOKAHEAD( methodDeclarationLookahead() )
+//         root=methodDeclaration()
+//         | LOOKAHEAD([ "final" ] typeLookahead() <IDENTIFIER>)
+//         l=localVariableDeclaration() ";"
+//         {
+//      list.addAll(l);
+//    }
+//       | LOOKAHEAD(2)
+//         root=topLevelStatement()
+//         | root=typeDeclaration()
+//         )
+//       {
+//         if (root != null) {
+//           list.add(root);
+//           root = null;
+//         }
+//       }
+//       )*
+//       <EOF>
+//       {
+//         return list;
+//       }
+//  }
+    
+  /**
+   * Parses an item of the input stream. This production is
+   * not a Java language rule. It is used by DynamicJava.
+   * @return a list of nodes (possibly empty)
+   * @see koala.dynamicjava.tree.Node
+   */
+  List/*<Node>*/ StreamItem() :
+  {
+    Node root = null;
+    List/*<Node>*/ l = new LinkedList/*<Node>*/();
+  }
+  {
+    (    root=packageDeclaration()
+       | root=importDeclaration()
+       | LOOKAHEAD( methodDeclarationLookahead() )
+         root=methodDeclaration()
+       | LOOKAHEAD([ "final" ] typeLookahead() <IDENTIFIER>)
+         l=localVariableDeclaration() (";" | <EOF>)
+       | LOOKAHEAD(topLevelStatement())
+         root=topLevelStatement()
+       | root=typeDeclaration()
+    )
+    {
+       if (root != null) {
+          l.add(root);
+       }
+       return l;
+    }
+  }
+
   
   /**
    * Parses one top level statement. This production is
@@ -1016,11 +1065,11 @@ PARSER_END(Parser)
     Node node;
   }
   {
-    ( LOOKAHEAD(2)
-       node=labeledStatement()
+    (    LOOKAHEAD(2)
+         node=labeledStatement()
+       | node=block()
        | node=emptyStatement()
        | node=expression() ";"
-       | node=block()
        | node=ifStatement()
        | node=whileStatement()
        | node=doStatement()
@@ -1083,7 +1132,7 @@ PARSER_END(Parser)
     Token t1, t2;
   }
   {
-    t1="package" [ name=ReferenceTypeName() ] t2=";"
+    t1="package" [ name=ReferenceTypeName() ] (t2=";" | t2=<EOF>)
     {
       if(name instanceof GenericReferenceType){
         throw new ParseException("Package names cannot be parameterized.");
@@ -1107,7 +1156,7 @@ PARSER_END(Parser)
     Token sttic = null;
   }
   {
-    t1="import" [sttic=<STATIC>] name=ReferenceTypeName() [ "." star="*" ] t2=";"
+    t1="import" [sttic=<STATIC>] name=ReferenceTypeName() [ "." star="*" ] (t2=";" | t2=<EOF>)
     {
       if(name instanceof GenericReferenceType){
         throw new ParseException("Import names cannot be parameterized.");
@@ -1128,11 +1177,11 @@ PARSER_END(Parser)
     TypeDeclaration node;
   }
   {
-    ( LOOKAHEAD( ( "abstract" | "final" | "public" )* "class" )
-       node=classDeclaration()
-       |
-     node=interfaceDeclaration()
-       )
+    (    LOOKAHEAD( ( "abstract" | "final" | "public" )* "class" )
+         node=classDeclaration()
+       | LOOKAHEAD( ( <STATIC> | <ABSTRACT> | <FINAL> | <PUBLIC> | <PROTECTED> | <PRIVATE> )* <INTERFACE> )
+         node=interfaceDeclaration()
+    )
     {
       return node;
     }
@@ -2092,13 +2141,12 @@ PARSER_END(Parser)
   }
   {
     p1="{"
-      (
-       nodes=blockStatement()
+      ( nodes=blockStatement()
          {
-      list.addAll(nodes);
-    }
-    )*
-      p2="}"
+           list.addAll(nodes);
+         }
+      )*
+    p2="}"
     {
       return new BlockStatement(list,
                                 filename,
@@ -2119,23 +2167,20 @@ PARSER_END(Parser)
     List/*<Node>*/ list = new LinkedList/*<Node>*/();
   }
   {
-    ( LOOKAHEAD([ "final" ] typeLookahead() <IDENTIFIER>)
-       list=localVariableDeclaration() ";"
-       |
-     node=statement()
-       {
-      list.add(node);
-    }
-     |
-     node=unmodifiedClassDeclaration(null)
-       {
-       list.add(node);
-     }
-     |
-     node=unmodifiedInterfaceDeclaration(null)
-       {
-       list.add(node);
-     }
+    (    LOOKAHEAD([ "final" ] typeLookahead() <IDENTIFIER>)
+         list=localVariableDeclaration() ";"
+       | node=statement()
+         {
+           list.add(node);
+         }
+       | node=unmodifiedClassDeclaration(null)
+         {
+           list.add(node);
+         }
+       | node=unmodifiedInterfaceDeclaration(null)
+         {
+           list.add(node);
+         }
      )
      {
        return list;
@@ -2187,9 +2232,9 @@ PARSER_END(Parser)
   {
     ( LOOKAHEAD(2)
        node=labeledStatement()
+       | node=block()
        | node=emptyStatement()
        | node=statementExpression() ";"
-       | node=block()
        | node=ifStatement()
        | node=whileStatement()
        | node=doStatement()

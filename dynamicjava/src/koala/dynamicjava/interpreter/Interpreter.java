@@ -33,6 +33,7 @@ import java.lang.reflect.*;
 import java.net.*;
 import java.util.*;
 
+import koala.dynamicjava.tree.Node;
 import koala.dynamicjava.parser.wrapper.*;
 import koala.dynamicjava.util.*;
 
@@ -174,4 +175,9 @@ public interface Interpreter {
      * Gets the parser factory
      */
     ParserFactory getParserFactory();
+    
+    /**
+     * Parses an input stream
+     */
+    public List<Node> parse(String input);
 }
