@@ -126,7 +126,7 @@ public class KeyStrokeOption extends Option<KeyStroke> {
         if (key == null)
           throw new IllegalArgumentException("Invalid keystroke");
         if (key.equals("CONTROL") || key.equals("ALT") || key.equals("META") ||
-            key.equals("SHIFT"))
+            key.equals("SHIFT") || key.equals("ALT_GRAPH"))
           return s;
         s += key;
         return s; 

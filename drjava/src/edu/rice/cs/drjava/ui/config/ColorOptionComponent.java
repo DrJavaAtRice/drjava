@@ -66,9 +66,6 @@ public class ColorOptionComponent extends OptionComponent<ColorOption> {
     _currentColor = DrJava.CONFIG.getSetting(_option);
     _newColor = _currentColor;
     _updateButton(_currentColor);
-    this.setLayout(new GridLayout(1,0));
-    this.add(_label);//, BorderLayout.WEST);
-    this.add(_button);//, BorderLayout.CENTER);
   }
   
   public boolean update() {
@@ -88,6 +85,8 @@ public class ColorOptionComponent extends OptionComponent<ColorOption> {
     _button.setForeground(c);
     _button.setText(getLabelText() + " ("+_option.format(c)+")");
   }
+  
+  public JComponent getComponent() { return _button; }
   
   public void chooseColor() {
 

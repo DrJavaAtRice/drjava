@@ -83,9 +83,8 @@ public class KeyStrokeOptionComponent  extends OptionComponent<KeyStrokeOption> 
       }
     });
    
-    this.setLayout(new GridLayout(1,0));
-    this.add(_label);
-    this.add(_jb);
+    GridLayout gl = new GridLayout(1,0);
+    gl.setHgap(15);
     _keyToKSOC.put(_ks, this);
   }
   
@@ -116,13 +115,13 @@ public class KeyStrokeOptionComponent  extends OptionComponent<KeyStrokeOption> 
     return _configKs;
   }
   
+  public JComponent getComponent() { return _jb; }
+  
   private void _setKeyStroke(KeyStroke ks) {
     System.out.println("setKS:" + getLabelText() + ks);
     _ks = ks;
     _jb.setText(_option.format(ks));
-    System.out.println("<--setKS:" + getLabelText() + _jb.getText());
-    revalidate();
-    repaint();
+    System.out.println("<--setKS:" + getLabelText() + _jb.getText());   
   }
   /*
   private JButton _getButton() {

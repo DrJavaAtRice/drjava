@@ -508,6 +508,20 @@ public interface OptionConstants extends ConfigurationTool {
     new BooleanOption("debugger.advanced", new Boolean(false)):
     null;
 
+  public static final FileOption FILE_LOCATION = 
+    (CodeStatus.DEVELOPMENT) ?
+    new FileOption("blah", new File("/home/jhsia/blah")):
+    null;    
+    
+  public static final FileOption FILE2_LOCATION = 
+    (CodeStatus.DEVELOPMENT) ?
+    new FileOption("blah2", new File("/home/jhsia/blah2")):
+    null; 
+    
+  public static final FileOption FILE3_LOCATION = 
+    (CodeStatus.DEVELOPMENT) ?
+    new FileOption("blah3", new File("/home/jhsia/blah3")):
+    null; 
 }
 
 

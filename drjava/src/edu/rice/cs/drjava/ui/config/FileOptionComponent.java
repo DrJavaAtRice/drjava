@@ -43,32 +43,89 @@ import javax.swing.*;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.*;
 import java.awt.*;
-
+import java.awt.event.*;
+import java.io.File;
 
 /**
- * Graphical form of a StringOption
+ * Graphical form of a FileOption
  * @version $Id$
  */
-public class StringOptionComponent extends OptionComponent<StringOption> {
-  private JTextField _jtf;
+public class FileOptionComponent extends OptionComponent<FileOption> 
+  implements OptionConstants {
+  private JButton _button;
+  private File _currentFile;
+  private File _newFile;
   
-  public StringOptionComponent (StringOption opt, String text, Frame parent) {
+  public FileOptionComponent (FileOption opt, String text, Frame parent) {
     super(opt, text, parent);
-    _jtf = new JTextField();
-    _jtf.setText(_option.format(DrJava.CONFIG.getSetting(_option)));
+    _button = new JButton();
+    _button.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        chooseFile();
+      }
+    });
+    _button.setBackground(Color.white);
+    _currentFile = DrJava.CONFIG.getSetting(_option);
+    _newFile = _currentFile;
+    _updateButton(_currentFile);
   }
   
   public boolean update() {
-    DrJava.CONFIG.setSetting(_option, _option.parse(_jtf.getText()));
-    _jtf.setText(_option.format(DrJava.CONFIG.getSetting(_option)));
-
-    
+    if (_newFile != _currentFile) {
+      DrJava.CONFIG.setSetting(_option, _newFile);
+    }
     return true;
   } 
- 
+  
   public void reset() {
-    _jtf.setText(_option.format(DrJava.CONFIG.getSetting(_option)));
+    _currentFile = DrJava.CONFIG.getSetting(_option);
+    _newFile = _currentFile;
+    _updateButton(_currentFile);
   }
   
-  public JComponent getComponent() { return _jtf; }
+  public JComponent getComponent() { return _button; }
+  
+  private void _updateButton(File c) {    
+    _button.setText(c.toString());
+  }
+  
+  public void chooseFile() {
+    String workDir = DrJava.CONFIG.getSetting(WORKING_DIRECTORY).toString();
+    if ((workDir == null) || (workDir.equals(""))) {
+      workDir = System.getProperty("user.dir");
+    }
+    JFileChooser jfc = new JFileChooser(workDir);
+    jfc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+    File c = null;
+    int returnValue = jfc.showDialog(_parent,
+                                     null);
+    if (returnValue == JFileChooser.APPROVE_OPTION) 
+      c = jfc.getSelectedFile();
+    if (c != null) {
+      _newFile = c;
+      _updateButton(_newFile);
+    }
+    
+  }
+    
+  /**
+  private class FileDialog extend JDialog {
+    
+    private JLabel _title;
+    private JFileChooser _chooser;
+    
+    public FileDialog() {
+      super(_parent, "Choose File", true);
+      this.setLayout(new BorderLayout());
+      
+      _title = new JLabel("Choose File");
+      this.add(_title, BorderLayout.NORTH);
+      
+      _chooser = new JFileChooser();
+      this.add(_chooser, BorderLayout.CENTER);
+    }
+    
+  }
+  */
+  
 }

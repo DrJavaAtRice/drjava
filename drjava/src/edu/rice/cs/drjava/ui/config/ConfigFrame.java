@@ -46,6 +46,7 @@ import java.awt.event.*;
 import java.awt.*;
 import java.util.Enumeration;
 import java.io.IOException;
+import java.io.File;
 import java.util.TreeSet;
 import java.util.Iterator;
 
@@ -247,9 +248,14 @@ public class ConfigFrame extends JFrame {
 
     PanelTreeNode keystrokesNode = _createPanel(new KeyStrokeConfigPanel("Key Bindings"),
                                                 _rootNode);
-
     _setupKeyBindingsPanel(keystrokesNode.getPanel());    
 
+    PanelTreeNode fileNode = _createPanel("File");
+    _setupFilePanel(fileNode.getPanel());
+    /*
+    PanelTreeNode pathsNode = _createPanel("Paths");
+    _setupPathsPanel(pathsNode.getPanel());
+    */
     PanelTreeNode miscNode = _createPanel("Miscellaneous");
     _setupMiscPanel(miscNode.getPanel());
     
@@ -317,6 +323,24 @@ public class ConfigFrame extends JFrame {
     panel.addComponent( new ColorOptionComponent (OptionConstants.DEFINITIONS_NUMBER_COLOR, "Number Color", this));
     panel.addComponent( new ColorOptionComponent (OptionConstants.DEFINITIONS_MATCH_COLOR, "Brace-matching Color", this));
     panel.displayComponents();
+  }
+  
+  /**
+   * Adds all of the components for the File panel of the preferences window.
+   */
+  private void _setupFilePanel( ConfigPanel panel) {
+    panel.addComponent( new FileOptionComponent (OptionConstants.FILE_LOCATION, "Normal File", this));     
+    panel.addComponent( new FileOptionComponent (OptionConstants.FILE2_LOCATION, "Not-So-Normal File", this)); 
+    panel.addComponent( new FileOptionComponent (OptionConstants.FILE3_LOCATION, "Dumb File", this)); 
+    panel.displayComponents();
+  }
+  
+  /**
+   * Adds all of the components for the Paths panel of the preferences window.
+   */
+  private void _setupPathsPanel( ConfigPanel panel) {/*
+    panel.addComponent( new VectorOptionComponent (OptionConstants.EXTRA_CLASSPATH, "Classpath", this));     
+    panel.displayComponents();*/
   }
  
   /**

@@ -55,7 +55,7 @@ import gj.util.Hashtable;
  */
 public class ConfigPanel extends JPanel {
   
-  private JLabel _title;
+  protected JLabel _title;
   protected Vector<OptionComponent> _components;
   
   /**
@@ -88,16 +88,40 @@ public class ConfigPanel extends JPanel {
     //panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
     panel.setLayout(new BorderLayout());
     JPanel panel2 = new JPanel();
-    panel2.setLayout(new GridLayout(0, 1));
+    //panel2.setLayout(new GridLayout(0, 1));
     panel.add(panel2, BorderLayout.NORTH);
     JScrollPane scroll = new JScrollPane(panel,
                                          JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-                                         JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-    
-    
+                                         JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+    GridBagLayout gridbag = new GridBagLayout(); 
+    GridBagConstraints c = new GridBagConstraints();
+    panel2.setLayout(gridbag);
+    c.fill = GridBagConstraints.HORIZONTAL;
+    Insets labelInsets = new Insets(0, 10, 0, 10);
+    Insets compInsets  = new Insets(0, 0, 0, 0);
     for (int i=0; i<_components.size(); i++) {
-      panel2.add(_components.elementAt(i));
+      OptionComponent comp = _components.elementAt(i);
+      
+      c.weightx = 0.0;
+      c.gridwidth = 1; 
+      c.insets = labelInsets;
+      
+      JLabel label= comp.getLabel();
+      gridbag.setConstraints(label, c);
+      panel2.add(label);
+      
+      c.weightx = 1.0;      
+      c.gridwidth = GridBagConstraints.REMAINDER;
+      c.insets = compInsets;
+      
+      JComponent otherC = comp.getComponent();
+      gridbag.setConstraints(otherC, c);
+      panel2.add(otherC);      
     }
+    /*
+     for (int i=0; i<_components.size(); i++) {
+     panel2.add(_components.elementAt(i));
+     }*/
     
     this.add(scroll, BorderLayout.CENTER);
   }

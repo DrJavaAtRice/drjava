@@ -56,9 +56,6 @@ public class BooleanOptionComponent extends OptionComponent<BooleanOption> {
     super(opt, text, parent);
     _jcb = new JCheckBox();
     _jcb.setSelected(DrJava.CONFIG.getSetting(_option).booleanValue());
-    this.setLayout(new GridLayout(1,0));
-    this.add(_label);//, BorderLayout.WEST);
-    this.add(_jcb);//, BorderLayout.CENTER);
   }
   
   public boolean update() {
@@ -70,4 +67,6 @@ public class BooleanOptionComponent extends OptionComponent<BooleanOption> {
   public void reset() {
     _jcb.setSelected(DrJava.CONFIG.getSetting(_option).booleanValue());
   }
+  
+  public JComponent getComponent() { return _jcb; }
 }

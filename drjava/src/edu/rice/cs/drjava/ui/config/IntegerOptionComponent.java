@@ -55,9 +55,6 @@ public class IntegerOptionComponent extends OptionComponent<IntegerOption> {
     super(opt, text, parent);
     _jtf = new JTextField();
     _jtf.setText(_option.format(DrJava.CONFIG.getSetting(_option)));
-    this.setLayout(new GridLayout(1,0));
-    this.add(_label);//, BorderLayout.WEST);
-    this.add(_jtf);//, BorderLayout.CENTER);
   }
   
   /**
@@ -89,5 +86,7 @@ public class IntegerOptionComponent extends OptionComponent<IntegerOption> {
   public void reset() {
     _jtf.setText(_option.format(DrJava.CONFIG.getSetting(_option)));
   }
+  
+  public JComponent getComponent() { return _jtf; }
     
 }

@@ -4,7 +4,7 @@
  * at http://sourceforge.net/projects/drjava
  *
  * Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)
- *
+ * 
  * DrJava is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -40,64 +40,61 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.ui.config;
 
 import javax.swing.*;
+import javax.swing.text.*;
+import javax.swing.event.*;
+import java.awt.event.*;
 import java.awt.*;
-import edu.rice.cs.drjava.config.*;
 
+import java.util.TreeSet;
+import java.util.Iterator;
+
+import gj.util.Vector;
+import gj.util.Hashtable;
+
+import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.config.KeyStrokeOption;
+import edu.rice.cs.drjava.config.Option;
 /**
- * The graphical form of an Option. Provides a way to see the values of Option
- * while running DrJava and perform live updating of Options.
  * @version $Id$
  */
-public abstract class OptionComponent<T extends Option> {
-  protected T _option;
-  protected JLabel _label;
-  protected Frame _parent;
-    
-  public OptionComponent (T option, String labelText, Frame parent) {
-    _option = option;
-    _label = new JLabel(labelText);
-    _label.setHorizontalAlignment(JLabel.RIGHT);
-    _parent = parent;
-  }
-  
-  public T getOption() {
-    return _option;
-  }
-  
-  public String getLabelText() {
-    return _label.getText();
-  } 
-  
-  public JLabel     getLabel() { return _label; } 
-  public abstract JComponent getComponent();
-  /**
-   * Updates the appropriate configuration option with the new value 
-   * if different from the old value and legal. Any changes should be 
-   * done immediately such that current and future references to the Option 
-   * should reflect the changes.
-   * @return false, if value is invalid; otherwise true.
-   */ 
-  public abstract boolean update();
 
-  /**
-   * Resets the entry field to reflect the actual stored value for the option.
-   */
-  public abstract void reset();
-  
-  public void showErrorMessage(String title, OptionParseException e) {
-    showErrorMessage(title, e.value, e.message);
+public class KeyStrokeConfigPanel extends ConfigPanel { 
+  TreeSet _comps = null;
+
+  public KeyStrokeConfigPanel(String title,TreeSet comps) {
+    super(title);
+    _comps = comps;
+  }
+  public KeyStrokeConfigPanel(String title) {
+    super(title);
   }
   
-  public void showErrorMessage(String title, String value, String message) {
-    JOptionPane.showMessageDialog(_parent,
-                                  "There was an error in one of the options that you entered.\n" +
-                                  "Option: '" + getLabelText() + "'\n" +
-                                  "Your value: " + value + "'\n" +
-                                  "Error: "+ message,
-                                  title,
-                                  JOptionPane.WARNING_MESSAGE);
+  public void setKeyStrokeComponents(TreeSet comps) { _comps = comps; }
+  
+  /**
+   * Tells each component in the vector to update() itself
+   * @return whether update() of all the components succeeded 
+   */ 
+  public boolean update() {
+    if (_comps == null) return false;
+    
+    Iterator iter = _comps.iterator();
+    while (iter.hasNext()) {
+      KeyStrokeOptionComponent x = (KeyStrokeOptionComponent) iter.next();
+      if (!DrJava.CONFIG.getSetting(x.getOption()).equals(x._getKeyStroke())) {
+        DrJava.CONFIG.setSetting((Option)x.getOption(), KeyStrokeOption.NULL_KEYSTROKE);
+      }
+          
+    }
+    /*
+    iter = _comps.iterator();
+    while (iter.hasNext()) {
+      KeyStrokeOptionComponent x = (KeyStrokeOptionComponent) iter.next();
+      x.update();
+    }
+    */
+    return super.update();
+    //return true;
   }
   
 }
-                                      
-  
