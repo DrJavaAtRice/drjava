@@ -176,9 +176,6 @@ public class InteractionsPane extends JTextPane {
 
   /**
    * Creates an InteractionsPane with the given InteractionsDocument.
-   * It is recommended to also install an InteractionsEditorKit with
-   * the setEditorKit() method, although there will usually only be
-   * one document created in this pane.
    * @param doc InteractionsDocument to display in this pane.
    */
   public InteractionsPane(InteractionsDocument doc) {

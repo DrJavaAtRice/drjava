@@ -1022,6 +1022,13 @@ public class MainFrame extends JFrame implements OptionConstants {
   }
 
   /**
+   * Returns the frame's interactions pane.  (Package private accessor)
+   */
+  InteractionsPane getInteractionsPane() {
+    return _interactionsPane;
+  }
+
+  /**
    * Make the cursor an hourglass.
    */
   public void hourglassOn() {
@@ -2421,7 +2428,6 @@ public class MainFrame extends JFrame implements OptionConstants {
     _outputPane = new OutputPane(_model);
     _errorPanel = new CompilerErrorPanel(_model, this);
     _interactionsPane = new InteractionsPane(_model.getInteractionsDocument());
-    _interactionsPane.setEditorKit(new InteractionsEditorKit(_model));
     _findReplace = new FindReplaceDialog(this, _model);
     
     final JScrollPane outputScroll = 

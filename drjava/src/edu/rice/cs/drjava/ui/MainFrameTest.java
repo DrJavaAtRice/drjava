@@ -129,4 +129,17 @@ public class MainFrameTest extends TestCase {
     doc = pane.getOpenDocument().getDocument();
     assertEquals("Location of old document", 3, doc.getCurrentLocation());
   }
+
+  /**
+   * Make sure that the InteractionsPane is displaying the correct
+   * InteractionsDocument.  (SourceForge bug #681547)
+   */
+  public void testCorrectInteractionsDocument() {
+    InteractionsPane pane = _frame.getInteractionsPane();
+    SingleDisplayModel model = _frame.getModel();
+
+    // Test for strict == equality
+    assertTrue("UI's int. doc. should equals Model's int. doc.",
+               pane.getDocument() == model.getInteractionsDocument());
+  }
 }

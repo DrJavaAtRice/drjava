@@ -49,6 +49,16 @@ import edu.rice.cs.drjava.model.GlobalModel;
 
 /**
  * This mediates the model and view of interactions.
+ *
+ * NOTE: This is not currently used because installing it forces
+ * the InteractionsPane to create a new document, putting it out
+ * of sync with the model.  We used to have a static instance of
+ * this to create new documents, but now we need to have a model
+ * to create a new document.
+ *
+ * I'm not sure this class is even necessary, since we will never
+ * have more than one InteractionsDocument created in a given view.
+ *
  * @version $Id$
  */
 public class InteractionsEditorKit extends StyledEditorKit {
