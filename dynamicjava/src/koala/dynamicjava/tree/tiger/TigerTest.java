@@ -122,7 +122,7 @@ public class TigerTest extends TestCase {
   }
     
     
-    /**/ // Not yet working...
+    //Testing Constructor with varargs
     public void testInterpretConstructorVarArgs(){
       testString =
         "public class C {\n"+
@@ -141,7 +141,7 @@ public class TigerTest extends TestCase {
       assertEquals("Str1Str2Str3", interpret(testString));
     }
     
-    /**/ // Not yet working...
+    // Testing constructor of an inner class with Varargs
     public void testInterpretInnerClassConstructorVarArgs(){
       testString =
         "public class B {\n"+
@@ -163,7 +163,7 @@ public class TigerTest extends TestCase {
       assertEquals("Str1Str2Str3", interpret(testString));
     }
     
-    // Aint working yet...
+    // Testing static method with varargs
     public void testInterpretStaticMethodVarArgs(){
     testString =
       "public class C {\n"+
@@ -214,10 +214,23 @@ public class TigerTest extends TestCase {
           //Expected to fail.
         }
     }
+    //Testing Polymorph Constructors with varargs
+    public void xtestInterpretPolyConstructorsVarArgs(){
+      testString =
+        "public class C {\n"+
+        "  String str = \"\";\n"+
+        "  public <String> C(String ... s){\n"+ //or <String[]>
+        "    for(int i=0;i<s.length;i++) {\n"+
+        "      str = str+s[i];\n"+
+        "    }\n"+
+        "  }\n"+
+        "  public String getStr(){\n"+
+        "    return str;\n"+
+        "  }\n"+
+        "}\n"+
+        "new C(\"Str1\",\"Str2\",\"Str3\").getStr();\n";
     
-    
-    
-    
-    
+      assertEquals("Str1Str2Str3", interpret(testString));
+    }
     
 }

@@ -813,4 +813,23 @@ public class GenericTreeTest extends TestCase {
       "d.getSomeStr();\n";
     assertEquals("Expect to get the String \"someString\"","someString", interpret(testString));
   }  
+  
+  
+     //Testing Polymorph Constructors
+    public void xtestInterpretPolyConstructors(){
+      testString =
+        "public class C {\n"+
+        "  String str = \"\";\n"+
+        "  public <String> C(String s){\n"+ //or <String[]>
+        "      str = s;\n"+
+        "    }\n"+
+        "  }\n"+
+        "  public String getStr(){\n"+
+        "    return str;\n"+
+        "  }\n"+
+        "}\n"+
+        "new C(\"Str1\",\"Str2\",\"Str3\").getStr();\n";
+    
+      assertEquals("Str1Str2Str3", interpret(testString));
+    }
 }
