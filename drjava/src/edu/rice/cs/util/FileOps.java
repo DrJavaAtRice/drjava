@@ -59,21 +59,21 @@ public abstract class FileOps {
   /**
    * @return an array of Files in the directory specified (not including directories)
    */
-  public static File[] getFilesInDir(File d, boolean recur){
+  public static ArrayList<File> getFilesInDir(File d, boolean recur, FileFilter f){
     ArrayList<File> l = new ArrayList<File>();
-    getFilesInDir(d, l, recur);
-    return l.toArray(new File[0]);    
+    getFilesInDir(d, l, recur, f);
+    return l;
   }
   /**
    * helper fuction for getFilesInDir(Filed , boolean recur)
    * @return an array of Files in the directory specified (not including directories)
    */
-  private static void getFilesInDir(File d, List<File> acc, boolean recur){
+  private static void getFilesInDir(File d, List<File> acc, boolean recur, FileFilter filter){
     if(d.isDirectory()){
-      File[] fa = d.listFiles();
+      File[] fa = d.listFiles(filter);
       for(File f: fa){
         if(f.isDirectory() && recur){ 
-          getFilesInDir(f, acc, recur);
+          getFilesInDir(f, acc, recur, filter);
         }else if(f.isFile()){
           acc.add(f);
         }
