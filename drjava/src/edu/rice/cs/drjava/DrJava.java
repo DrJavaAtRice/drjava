@@ -366,7 +366,10 @@ public class DrJava implements OptionConstants {
         JarFile jsr14jar = new JarFile(jsr14);
         if (jsr14jar.getJarEntry(checkClass) != null) {
           // If we're using Java 1.3, don't allow JSR14v2.x
-          if (System.getProperty("java.specification.version").equals("1.3")) {
+          // Also, if we're using Java 1.4.0, don't allow it 
+          // (bug #825113 "I tried to open a legitimate java file").
+          if (System.getProperty("java.specification.version").equals("1.3") ||
+              System.getProperty("java.runtime.version").startsWith("1.4.0")) {
             // Show a warning message, but only if we haven't restarted
             if (!_attemptingAugmentedClasspath) {
               JOptionPane.showMessageDialog(null, msg, title,
@@ -409,7 +412,7 @@ public class DrJava implements OptionConstants {
   public static boolean checkForJSR14v20() {
     String fs = "/"; // In jar files, the file separator is always '/'
     String checkClass = "com" + fs + "sun" + fs + "tools" + fs + "javac" + fs + "comp" + fs + "Check.class";
-    String msg = "The JSR-14 v2.x compiler is not compatible with JDK 1.3.\n" +
+    String msg = "The JSR-14 v2.x compiler is not compatible with JDK 1.3 or 1.4.0.\n" +
       "It will not be available in your list of compilers.";
     String title = "Cannot Load JSR-14 v2.x";
     return checkJSR14JarForClass(checkClass, msg, title);
