@@ -775,10 +775,18 @@ public interface OptionConstants {
     new BooleanOption("save.before.compile", Boolean.FALSE);
 
   /**
-   * Whether to prompt to save before compiling.
+   * Whether to warn if a document has been modified before allowing the
+   * user to set a breakpoint in it.
    */
   public static final BooleanOption WARN_BREAKPOINT_OUT_OF_SYNC =
     new BooleanOption("warn.breakpoint.out.of.sync", Boolean.TRUE);
+
+  /**
+   * Whether to warn that the user is debugging a file that is out of sync
+   * with its class file.
+   */
+  public static final BooleanOption WARN_DEBUG_MODIFIED_FILE =
+    new BooleanOption("warn.debug.modified.file", Boolean.TRUE);
 
   /**
    * Whether to warn that a restart is necessary before the look and feel will change.
@@ -787,13 +795,13 @@ public interface OptionConstants {
     new BooleanOption("warn.change.laf", Boolean.TRUE);
 
   /**
-   * Whether to make file backups
+   * Whether to make emacs-style backup files.
    */
   public static final BooleanOption BACKUP_FILES =
     new BooleanOption("files.backup", Boolean.TRUE);
   
   /**
-   * A vector containing the most recently used files
+   * A vector containing the most recently used files.
    */
   public static final VectorOption<File> RECENT_FILES =
     new VectorOption<File>("recent.files",new FileOption("",null),new Vector<File>());

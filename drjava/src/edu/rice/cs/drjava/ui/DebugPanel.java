@@ -468,7 +468,8 @@ public class DebugPanel extends JPanel implements OptionConstants {
    * right-clicks on a row in the thread table or stack table.
    */
   private void _initPopup() {
-
+    // this is commented out because we do not currently support manual
+    // suspension of a running thread.
 //     _threadRunningPopupMenu = new JPopupMenu("Thread Selection");
 //     JMenuItem threadRunningSuspend = new JMenuItem();
 //     Action suspendAction = new AbstractAction("Suspend Thread") {
@@ -484,15 +485,14 @@ public class DebugPanel extends JPanel implements OptionConstants {
 //     threadRunningSuspend.setAction(suspendAction);
 //     _threadRunningPopupMenu.add(threadRunningSuspend);
 //     threadRunningSuspend.setText("Suspend and Select Thread");
-    
+
     Action selectAction = new AbstractAction("Select Thread") {
       public void actionPerformed(ActionEvent e) {
         try {
           _debugger.setCurrentThread(getSelectedThread());
         }
-        catch(DebugException exception) {
-          JOptionPane.showMessageDialog(_frame, "Cannot select thread.",
-                                        "Debugger Error", JOptionPane.ERROR_MESSAGE);
+        catch(DebugException de) {
+          _frame._showDebugError(de);
         }
       }
     };

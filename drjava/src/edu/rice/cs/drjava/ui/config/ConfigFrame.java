@@ -657,6 +657,8 @@ public class ConfigFrame extends JFrame {
     panel.addComponent(new BooleanOptionComponent(OptionConstants.WARN_BREAKPOINT_OUT_OF_SYNC, "Warn on Breakpoint If out of Sync", this,
                                                   "<html>Whether DrJava should prompt the user if the class file<br>" +
                                                   "is out of sync before setting a breakpoint in that file</html>."));
+    panel.addComponent(new BooleanOptionComponent(OptionConstants.WARN_DEBUG_MODIFIED_FILE, "Warn if Debugging Modified File", this,
+                                                  "Whether DrJava should prompt the user if the file being debugged has been modified."));
     if (CodeStatus.DEVELOPMENT) {
       panel.addComponent(new BooleanOptionComponent(OptionConstants.WARN_CHANGE_LAF, "Warn to Restart to Change Look and Feel", this,
                                                     "<html>Whether DrJava should warn the user that look and feel<br>" +

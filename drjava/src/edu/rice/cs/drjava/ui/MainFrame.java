@@ -1953,7 +1953,7 @@ public class MainFrame extends JFrame implements OptionConstants {
           "toggle the breakpoint on the specified line?";
         String title = "Toggle breakpoint on modified file?";
 
-        ConfirmCheckBoxDialog dialog = new ConfirmCheckBoxDialog(this, message, title);
+        ConfirmCheckBoxDialog dialog = new ConfirmCheckBoxDialog(this, title, message);
         int rc = dialog.show();
         switch (rc) {
           case JOptionPane.YES_OPTION:
@@ -2112,15 +2112,24 @@ public class MainFrame extends JFrame implements OptionConstants {
    * and recompiled. Does not actually save or recompile for the user.
    */
   private void _showDebuggingModifiedFileWarning() {
-    JOptionPane.showMessageDialog(this,
-                                  "This document has been modified since its last save and\n" +
-                                  "may be out of sync with the debugger. It is suggested that\n" +
-                                  "you save and recompile before continuing to debug in order\n" +
-                                  "to avoid any unexpected errors.",
-                                  "Debugging modified file!",
-                                  JOptionPane.WARNING_MESSAGE);
+    if (DrJava.getConfig().getSetting(WARN_DEBUG_MODIFIED_FILE).booleanValue()) {
+      String msg =
+        "This document has been modified since its last save and\n" +
+        "may be out of sync with the debugger. It is suggested that\n" +
+        "you save and recompile before continuing to debug in order\n" +
+        "to avoid any unexpected errors.";
+      String title = "Debugging modified file!";
 
-    _currentDefPane.hasWarnedAboutModified(true);
+      ConfirmCheckBoxDialog dialog =
+        new ConfirmCheckBoxDialog(MainFrame.this, title, msg,
+                                  "Do not show this message again",
+                                  JOptionPane.WARNING_MESSAGE,
+                                  JOptionPane.DEFAULT_OPTION);
+      if (dialog.show() == JOptionPane.OK_OPTION && dialog.getCheckBoxValue()) {
+        DrJava.getConfig().setSetting(WARN_DEBUG_MODIFIED_FILE, Boolean.FALSE);
+      }
+      _currentDefPane.hasWarnedAboutModified(true);
+    }
   }
 
    /**
@@ -2135,7 +2144,8 @@ public class MainFrame extends JFrame implements OptionConstants {
     throws OperationCanceledException
   {
     switch (choice) {
-      case JFileChooser.CANCEL_OPTION:case JFileChooser.ERROR_OPTION:
+      case JFileChooser.CANCEL_OPTION:
+      case JFileChooser.ERROR_OPTION:
         throw new OperationCanceledException();
       case JFileChooser.APPROVE_OPTION:
         File chosen = fc.getSelectedFile();
