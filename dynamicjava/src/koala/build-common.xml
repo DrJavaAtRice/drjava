@@ -113,11 +113,9 @@ target="jsr14"
             value="${ant.project.name}-${DSTAMP}-${TSTAMP}" />   
   
   <!-- Copy the dynamicjava.jar to the lib directory and commit it. -->
-  <copy todir="${lib-dir}">
-    <fileset dir="${srcroot}">
-      <include name="../dynamicjava.jar" />
-    </fileset>
-  </copy>
+  <copy file="${jarfile}"
+          tofile="${lib_dir}/dynamicjava.jar"
+          overwrite="yes"/>
 
   <!-- recompile to make new version number get into code. -->
   <echo message="All tests passed. Rebuilding to put version tag (${version-tag}) into the code." />
@@ -135,7 +133,7 @@ target="jsr14"
       <argument value="commit" />
       <argument value="-F" />
       <argument value="${commit-comments-filename}" />
-      <argument value="${lib-dir}/dynamicjava.jar" />
+      <argument value="${lib_dir}/dynamicjava.jar" />
     </commandline>
   </cvs>
   <cvs>
