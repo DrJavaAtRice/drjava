@@ -38,6 +38,7 @@
 END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.platform;
+import java.net.URL;
 
 /**
  * Platform-specific code unique to the Windows platform.
@@ -57,6 +58,30 @@ class WindowsPlatform extends DefaultPlatform {
    * Returns whether this is a Windows platform.
    */
   public boolean isWindowsPlatform() {
+    return true;
+  }
+ 
+  public boolean openURL(URL address) {
+    // First, try to delegate up.
+    if (super.openURL(address)) {
+      return true;
+    }
+    else {
+      try {
+        // If there is no command specified, or it won't work, try using "rundll32".
+        //Process proc = 
+        Runtime.getRuntime().exec(new String[] {
+          "rundll32", "url.dll,FileProtocolHandler", address.toString() });
+        
+        // TODO: This may cause a memory leak on Windows, if we don't check the exit code.scp
+      }
+      catch (Throwable t) {
+        // If there was any kind of problem, ignore it and report failure.
+        return false;
+      }
+    }
+    
+    // Otherwise, trust that it worked.
     return true;
   }
 }

@@ -38,6 +38,7 @@
 END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.platform;
+import java.net.URL;
 
 /**
  * Platform-specific code shared by all Mac OS X platforms.
@@ -53,4 +54,24 @@ class MacPlatform extends DefaultPlatform {
    */
   protected MacPlatform() {};
  
+  public boolean openURL(URL address) {
+    // First, try to delegate up.
+    if (super.openURL(address)) {
+      return true;
+    }
+    else {
+      try {
+        // If there is no command specified, or it won't work, try using "open".
+        //Process proc = 
+        Runtime.getRuntime().exec(new String[] { "open", address.toString() });
+      }
+      catch (Throwable t) {
+        // If there was any kind of problem, ignore it and report failure.
+        return false;
+      }
+    }
+    
+    // Otherwise, trust that it worked.
+    return true;
+  }
 }
