@@ -494,7 +494,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     public File[] getFiles() throws OperationCanceledException {
       return new File[] {_file};
     }
-    public void warnFileOpen() {
+    public boolean warnFileOpen(File f) {
       throw new OpenWarningException();
     }
     public boolean verifyOverwrite() {
@@ -537,7 +537,8 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
         return new File[] {_file};
       }
     }
-    public void warnFileOpen() {
+    public boolean warnFileOpen(File f) {
+      return true;
     }
     public boolean verifyOverwrite() {
       return true;
@@ -555,7 +556,8 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     public File[] getFiles() throws OperationCanceledException {
       throw new OperationCanceledException();
     }
-    public void warnFileOpen() {
+    public boolean warnFileOpen(File f) {
+      return true;
     }
     public boolean verifyOverwrite() {
       return true;

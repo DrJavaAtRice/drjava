@@ -336,7 +336,7 @@ public final class InteractionsModelTest extends TestCase {
     history.add(line2);
     history.writeToFile(new FileSaveSelector() {
       public File getFile() { return temp; }
-      public void warnFileOpen() {}
+      public boolean warnFileOpen(File f) { return true; }
       public boolean verifyOverwrite() { return true; }
       public boolean shouldSaveAfterFileMoved(OpenDefinitionsDocument doc, File oldFile) {
         return true;

@@ -2350,7 +2350,9 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       public File getFile() throws OperationCanceledException {
         return _file;
       }
-      public void warnFileOpen() {}
+      public boolean  warnFileOpen(File f) {
+        return true;
+      }
       public boolean verifyOverwrite() {
         return true;
       }
@@ -2422,28 +2424,27 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       try {
         final OpenDefinitionsDocument openDoc = this;
         final File file = com.getFile();
-        final OpenDefinitionsDocument otherDoc = _getOpenDocument(file);
-
+        OpenDefinitionsDocument otherDoc = _getOpenDocument(file);
+        boolean shouldSave = false;
         // Check if file is already open in another document
         if ( otherDoc != null && openDoc != otherDoc ) {
           // Can't save over an open document
-          com.warnFileOpen();
+          shouldSave = com.warnFileOpen(file);
         }
-
+        
         // If the file exists, make sure it's ok to overwrite it
-        else if (!file.exists() || com.verifyOverwrite()) {
-
+        if (shouldSave || !file.exists() || com.verifyOverwrite()) {
           // Correct the case of the filename (in Windows)
           if (! file.getCanonicalFile().getName().equals(file.getName())) {
             file.renameTo(file);
           }
-
+          
           // Check for # in the path of the file because if there
           // is one, then the file cannot be used in the Interactions Pane
           if (file.getAbsolutePath().indexOf("#") != -1) {
             _notifier.filePathContainsPound();
           }
-
+          
           // have FileOps save the file
           FileOps.saveFile(new FileOps.DefaultFileSaver(file){
             public void saveTo(OutputStream os) throws IOException {
@@ -2455,7 +2456,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
               }
             }
           });
-
+          
           resetModification();
           setFile(file);
           try {
@@ -2473,9 +2474,9 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
           
           
           INavigatorItem idoc = _documentsRepos.getKey(this);
-//          _documentNavigator.removeDocument(idoc);
-//          _documentNavigator.addDocument(idoc);
-
+          //          _documentNavigator.removeDocument(idoc);
+          //          _documentNavigator.addDocument(idoc);
+          
           // Make sure this file is on the classpath
           try {
             File classpath = getSourceRoot();
@@ -2488,6 +2489,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
           /* update the navigator */
           _documentNavigator.refreshDocument(getIDocGivenODD(this), fixPathForNavigator(file.getCanonicalPath()));
         }
+        
 
         return true;
 

@@ -61,10 +61,11 @@ public interface FileSaveSelector {
   public File getFile() throws OperationCanceledException;
   
   /**
-   * Informs the user that the chosen file is already open and cannot be saved.
-   * The save is not performed.
+   * Informs the user that the chosen file is already open and prompts them asking whether to continue with the save
+   * @param the file being saved
+   * @return true iff the save is to occur
    */
-  public void warnFileOpen();
+  public boolean warnFileOpen(File f);
   
   /**
    * Confirms whether the existing chosen file should be overwritten.

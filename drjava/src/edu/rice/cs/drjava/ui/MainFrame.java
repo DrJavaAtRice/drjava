@@ -354,8 +354,8 @@ public class MainFrame extends JFrame implements OptionConstants {
     public File getFile() throws OperationCanceledException {
       return getSaveFile(_saveChooser);
     }
-    public void warnFileOpen() {
-      _warnFileOpen();
+    public boolean warnFileOpen(File f) {
+      return _warnFileOpen(f);
     }
     public boolean verifyOverwrite() {
       return _verifyOverwrite();
@@ -1390,8 +1390,8 @@ public class MainFrame extends JFrame implements OptionConstants {
           int rc = _interactionsHistoryChooser.showSaveDialog(MainFrame.this);
           return getChosenFile(_interactionsHistoryChooser, rc);
         }
-        public void warnFileOpen() {
-          _warnFileOpen();
+        public boolean warnFileOpen(File f) {
+          return true;
         }
         public boolean verifyOverwrite() {
           return _verifyOverwrite();
@@ -6149,14 +6149,30 @@ public class MainFrame extends JFrame implements OptionConstants {
   }*/
 
   /**
-   * Warns the user that the current file is open and cannot be modified.
+   * Warns the user that the current file is open and query them if they wish to save over the currently open file.
    */
-  private void _warnFileOpen() {
-    // If we'd like to change to an error message for this, instead
-    // of a warning, change both incidents of WARNING to ERROR.
-    JOptionPane.showMessageDialog(MainFrame.this,
-                                  "This file is open in DrJava.  You may not overwrite it.",
-                                  "File Open Warning", JOptionPane.WARNING_MESSAGE);
+  private boolean _warnFileOpen(File f) {
+    Object[] options = {"Yes","No"};
+    int choice = JOptionPane.showOptionDialog(MainFrame.this,
+                                  "This file already exists and is open in DrJava.  Do you wish to overwrite it?",
+                                  "File Open Warning",
+                                 JOptionPane.YES_NO_OPTION,
+                                 JOptionPane.QUESTION_MESSAGE,
+                                 null,
+                                 options,
+                                 options[1]);
+    if(choice == JOptionPane.YES_OPTION) {
+      List<OpenDefinitionsDocument> l = new LinkedList<OpenDefinitionsDocument>();
+      try {
+        l.add(_model.getDocumentForFile(f));
+      }
+      catch(IOException ioe) {
+        _showIOError(ioe);
+      }
+      _model.closeFiles(l);
+      return true;
+    }
+    return false;
   }
 
   /**
