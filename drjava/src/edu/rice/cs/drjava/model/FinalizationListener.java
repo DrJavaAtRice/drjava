@@ -56,7 +56,7 @@ public interface FinalizationListener<T> {
   /**
    * Called when the object we registered the
    * listener to is garbage collected
-   * @param obj an event that contains the object
+   * @param fe an event that contains the object
    *  that is going to be GC'ed
    */
   public void finalized(FinalizationEvent<T> fe);

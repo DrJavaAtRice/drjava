@@ -97,7 +97,7 @@ import edu.rice.cs.drjava.model.OperationCanceledException;
  *
  * TODO: There are lots of synchronized collections here - unsync if we can.
  *
- * @see BraceReductions
+ * @see BraceReduction
  * @see ReducedModelControl
  * @see ReducedModelComment
  * @see ReducedModelBrace

@@ -110,7 +110,6 @@ public interface JavadocModel {
    *        about bad input
    * @param saver a command object for saving a document (if it moved/changed)
    * @param classpath a collection of classpath elements to be used by Javadoc
-   * @param listener an object to be notified of start and end events, etc.
    * 
    * @throws IOException if there is a problem manipulating files
    */
@@ -126,7 +125,6 @@ public interface JavadocModel {
    * @param doc Document to generate Javadoc for
    * @param saver a command object for saving the document (if it moved/changed)
    * @param classpath a collection of classpath elements to be used by Javadoc
-   * @param listener an object to be notified of start and end events, etc.
    * 
    * @throws IOException if there is a problem manipulating files
    */

@@ -999,7 +999,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
   /**
    * Parses out the given project file, sets up the state and other configurations
    * such as the Navigator and the classpath, and returns an array of files to open.
-   * @param file The project file to parse
+   * @param projectFile The project file to parse
    * @return an array of document's files to open
    */
   public DocFile[] openProject(File projectFile) throws IOException, MalformedProjectFileException {
@@ -3328,7 +3328,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     return doc;
   }
 
-  /**
+  /*
    * Returns true if a document corresponding to the given
    * file is open, or false if that file is not open.
    * @param file File object to search for

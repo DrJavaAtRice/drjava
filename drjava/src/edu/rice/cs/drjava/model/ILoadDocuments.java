@@ -56,7 +56,9 @@ import java.io.IOException;
  * should use the more general IGetDocuments instead of this interface.
  * TODO: Subdivide GlobalModelListener to target only events generated here.
  * TODO: Simplify signatures to avoid command pattern overhead.
- * @see IGetDocuments, GlobalModel, DefaultGlobalModel
+ * @see IGetDocuments
+ * @see GlobalModel
+ * @see DefaultGlobalModel
  * @version $Id$
  */
 public interface ILoadDocuments {

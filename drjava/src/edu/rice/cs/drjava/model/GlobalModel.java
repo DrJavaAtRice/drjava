@@ -70,8 +70,12 @@ import edu.rice.cs.util.docnavigation.*;
  * functionality of DrJava, along with many other things.
  * An ongoing refactoring effort will be moving many GlobalModel functions into
  * more specific sub-interfaces for particular behaviors.
- * @see DefaultGlobalModel, IGetDocuments, ILoadDocuments, CompilerModel,
- *      JUnitModel, JavadocModel
+ * @see DefaultGlobalModel
+ * @see IGetDocuments
+ * @see ILoadDocuments
+ * @see CompilerModel
+ * @see JUnitModel
+ * @see JavadocModel
  *
  * @version $Id$
  */
@@ -184,7 +188,7 @@ public interface GlobalModel extends IGetDocuments, ILoadDocuments {
    * @param file The project file to parse
    * @return an array of document's files to open
    */
-  public DocFile[] openProject(File fine) throws IOException, MalformedProjectFileException;
+  public DocFile[] openProject(File file) throws IOException, MalformedProjectFileException;
 
   /**
    * Performs any needed operations on the model before closing the

@@ -121,7 +121,7 @@ public class DocumentCache{
   }
   
   /**
-   * @param the open definitions document who registered the reconstructor
+   * @param odd the open definitions document who registered the reconstructor
    * @return the reconstructor associated with the given odd
    */
   public DDReconstructor getReconstructor(OpenDefinitionsDocument odd) {

@@ -138,18 +138,18 @@ public class DummySingleDisplayModelListener implements SingleDisplayModelListen
   
   /**
    * Called when a particular test is started.
-   * @param testName The name of the test being started.
+   * @param name The name of the test being started.
    */
   public void junitTestStarted(String name) { }
   
   /**
    * Called when a particular test has ended.
-   * @param testName The name of the test that has ended.
+   * @param name The name of the test that has ended.
    * @param wasSuccessful Whether the test passed or not.
    * @param causedError If not successful, whether the test caused an error
    *  or simply failed.
    */
-  public void junitTestEnded(String name, boolean wasSuccesful, boolean causedError) { }
+  public void junitTestEnded(String name, boolean wasSuccessful, boolean causedError) { }
   
   /**
    * Called after JUnit is finished running tests.

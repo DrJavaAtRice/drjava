@@ -56,7 +56,9 @@ import edu.rice.cs.drjava.model.FileGroupingState;
  * should use this interface rather than the entire GlobalModel.
  * Documents which need to be loaded will most likely be retrieved from an
  * ILoadDocuments by a concrete implemention.
- * @see ILoadDocuments, GlobalModel, DefaultGlobalModel
+ * @see ILoadDocuments
+ * @see GlobalModel
+ * @see DefaultGlobalModel
  * @version $Id$
  */
 public interface IGetDocuments {

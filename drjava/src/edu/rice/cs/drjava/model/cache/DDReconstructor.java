@@ -69,7 +69,7 @@ public interface DDReconstructor{
   
   /**
    * Sets a document listener to be added to the definitions document when it is created
-   * @param DocumentListener the listener to add to the document
+   * @param dl the listener to add to the document
    */
   public void addDocumentListener(DocumentListener dl);
 }

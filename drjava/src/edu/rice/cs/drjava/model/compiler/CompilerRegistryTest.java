@@ -73,7 +73,7 @@ public final class CompilerRegistryTest extends TestCase {
 
   /**
    * Constructor.
-   * @param  String name
+   * @param name
    */
   public CompilerRegistryTest(String name) {
     super(name);

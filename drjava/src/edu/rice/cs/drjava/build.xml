@@ -8,6 +8,8 @@
   $Id$
 -->
 <project name="drjava" default="test">
+  
+  
   <!-- srcroot is the base directory of the source, 4 packages back -->
   <property name="srcroot" value="${basedir}/../../../.." />
 
@@ -39,6 +41,13 @@
   <property name="manifest" value="manifest" />
 
 
+  <!-- properties for the autocomplete parser generation -->
+  <property environment="env" />
+  <property name="acparser_path" value="model/autocomplete/parser" />
+  <property name="javacc_home"  value="${env.JAVACC_HOME}" />
+  <!-- end properties for autocomplete parser generation -->
+  
+  
   <!-- Sets a flag indicating that code dealing with new features since the 
     last stable release should be enabled and testable.
     Takes effect only after a clean compile -->
@@ -142,6 +151,46 @@
 
   </target>
 
+    
+    
+  <!-- targets used to generate the parser for autocompletion -->
+  <target name="clean-acparser">
+    <!-- <delete file="${acparser_path}/ParseException.java" /> -->
+    <!-- <delete file="${acparser_path}/TokenMgrError.java" /> -->
+    <!-- <delete file="${acparser_path}/Token.java" /> -->
+    <!-- <delete file="${acparser_path}/JavaCharStream.java" /> -->
+    <delete file="${acparser_path}/ACParser.java" />
+    <delete file="${acparser_path}/ACParserConstants.java" />
+    <delete file="${acparser_path}/ACParserTokenManager.java" />
+  </target>
+
+  <target name="generate-acparser" depends="init">
+    <javacc target="${acparser_path}/jexpr.jj" javacchome="${javacc_home}" outputdirectory="${acparser_path}" />
+    <echo message="Uncommenting the generics in the ACParser.java file" />
+    <exec executable="sed" dir="${acparser_path}" failonerror="true" output="${acparser_path}/tmpParser1.java">
+      <arg line="&quot;s/\/\*&lt;/&lt;/g&quot;" />
+      <arg line="ACParser.java" />
+    </exec>
+    <exec executable="sed" dir="${acparser_path}" failonerror="true" output="${acparser_path}/tmpParser2.java">
+      <arg line="&quot;s/&gt;\*\//&gt;/g&quot;" />
+      <arg line="tmpParser1.java" />
+    </exec>
+    <exec executable="sed" dir="${acparser_path}" failonerror="true" output="${acparser_path}/tmpParser1.java">
+      <arg line="&quot;s/LinkedList V/LinkedList&lt;VariableDeclarator&gt; V/g&quot;" />
+      <arg line="tmpParser2.java" />
+    </exec>
+    <exec executable="sed" dir="${acparser_path}" failonerror="true" output="${acparser_path}/tmpParser2.java">
+      <arg line="&quot;s/Vector jj_expentries = new java.util.Vector()/Vector&lt;int[]&gt; jj_expentries = new java.util.Vector&lt;int[]&gt;()/g&quot;" />
+      <arg line="tmpParser1.java" />
+    </exec>
+    <move file="${acparser_path}/tmpParser2.java" tofile="${acparser_path}/ACParser.java" />
+    <delete file="${acparser_path}/tmpParser1.java" />
+  </target>
+
+  <target name="rebuild-acparser" depends="clean, clean-acparser, generate-acparser, compile" />
+  
+
+    
   <target name="ccompile" depends="checked-compile">
     <rmic base="${built}"
           classpath="${classpath_text}"

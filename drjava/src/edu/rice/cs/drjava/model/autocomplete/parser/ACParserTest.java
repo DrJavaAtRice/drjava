@@ -43,47 +43,33 @@
  * 
 END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava;
+package edu.rice.cs.drjava.model.autocomplete.parser;
 
-import junit.framework.*;
-import java.util.Date;
-import java.text.SimpleDateFormat;
+import junit.framework.TestCase;
 
-/**
- * Test that ensures all external dependencies are met!
- *
- * @version $Id$
- */
-public final class DependenciesTest extends TestCase {
-  public static final String REQUIRED_UTIL_VERSION = "20040521-1616";
+import edu.rice.cs.javalanglevels.*;
+import edu.rice.cs.javalanglevels.tree.*;
 
-  /**
-   * Constructor.
-   * @param name
-   */
-  public DependenciesTest(String name) {
-    super(name);
+public class ACParserTest extends TestCase {
+  
+  private SourceFile _parseString(String txt) throws ParseException {
+    ACParser p = new ACParser(txt);
+    return p.SourceFile();
   }
   
-  /**
-   * Creates a test suite for JUnit to run.
-   * @return a test suite based on the methods in this class
-   */
-  public static Test suite() {
-    return  new TestSuite(DependenciesTest.class);
+  public void testX(){
   }
-
-  /**
-   * This test ensures that the util package version is as new as we expect.
-   */
-  public void testUtilVersion() throws Throwable {
-    Date required = new SimpleDateFormat("yyyyMMdd-HHmm z").parse(REQUIRED_UTIL_VERSION + " GMT");
-
-    Date found = edu.rice.cs.util.Version.getBuildTime();
-
-    assertTrue("Util package date is " + found + ", but at least " + required +
-                 " was required! You need to update/compile the util package.",
-               ! required.after(found));
-  }
+  
+//  
+//  public void testMissingSemicolon() throws ParseException {
+//    SourceFile s = _parseString("package edu.rice.cs.drjava\n"+
+//                                "package edu.rice.cs.drjava\n"+
+//                                "import java.io.*\n"+
+//                                "import java.util.List\n"+
+//                                "public class A {\n"+
+//                                "}");
+//    assertEquals("Number of packages",2,s.getPackageStatements().length);
+//    assertEquals("Number of imports",2,s.getImportStatements().length);
+//  }
   
 }

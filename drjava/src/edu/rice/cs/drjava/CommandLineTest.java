@@ -98,7 +98,7 @@ public final class CommandLineTest extends TestCase {
    * Constructor.  Sets up test files for us to use:
    * - three files that exist and can be opened
    * - three files that don't exist
-   * @param   String name
+   * @param name
    */
   public CommandLineTest(String name) {
     super(name);
