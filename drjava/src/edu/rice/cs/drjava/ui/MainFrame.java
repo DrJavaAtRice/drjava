@@ -358,14 +358,22 @@ public class MainFrame extends JFrame implements OptionConstants {
   DirectoryChooser _folderChooser;
   private JCheckBox _openRecursiveCheckBox;
 
-  private Action _moveToAuxiliaryAction = new AbstractAction("Move To Auxiliary"){
+  private Action _moveToAuxiliaryAction = new AbstractAction("Convert to Auxiliary"){
+    {
+      String msg = 
+      "<html>Open this document each time this project is opened.<br>"+
+      "This file would then be compiled and tested with the<br>"+
+      "rest of the project.</html>";
+      putValue(Action.SHORT_DESCRIPTION, msg);
+    }
     public void actionPerformed(ActionEvent ae) { _moveToAuxiliary(); }
   };
-  
-  private Action _removeAuxiliaryAction = new AbstractAction("Move To External"){
+  private Action _removeAuxiliaryAction = new AbstractAction("Convert to External"){
+    {
+      putValue(Action.SHORT_DESCRIPTION, "Do not open this document next time this project is opened.");
+    }
     public void actionPerformed(ActionEvent ae) { _removeAuxiliary(); }
   };
-  
   /** Resets the document in the definitions pane to a blank one. */
   private Action _newAction = new AbstractAction("New") {
     public void actionPerformed(ActionEvent ae) {

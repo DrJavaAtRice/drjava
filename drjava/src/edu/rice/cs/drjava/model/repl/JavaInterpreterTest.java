@@ -320,7 +320,7 @@ public final class JavaInterpreterTest extends TestCase {
    * sure the evaluation doesn't return errors without actually evaluating which
    * may have side-effects.
    */
-  public void testVariableRedefinition() {
+  public void testVariableRedefinition() throws ExceptionReturnedException{
     // test error in NameVisitor
     try {
       _interpreter.interpret("String s = abc;");
@@ -364,12 +364,11 @@ public final class JavaInterpreterTest extends TestCase {
     }
     catch (ExceptionReturnedException e) {
     }
-    try {
-      _interpreter.interpret("String z = \"z\";");
-      fail("variable redefinition should have failed");
-    }
-    catch (ExceptionReturnedException e) {
-    }
+    // The DynamcjavaAdapter should have undone the binding made
+    // for "z" when the first definition fails.  Defining it again
+    // should work.
+    _interpreter.interpret("String z = \"z\";");
+    
   }
 
   /**

@@ -613,9 +613,8 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
    * right hand side of a VariableDeclaration.
    * @return visitor the visitor
    */
-  public NameVisitorExtension makeNameVisitor(final Context nameContext,
-                                              final Context typeContext) {
-    return new NameVisitorExtension(nameContext, typeContext) {
+  public NameVisitor makeNameVisitor(final Context nameContext) {
+    return new NameVisitor(nameContext) {
       //        try {
       //          return super.visit(node);
       //        }

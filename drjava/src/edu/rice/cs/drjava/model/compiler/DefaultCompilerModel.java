@@ -50,6 +50,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Iterator;
 import edu.rice.cs.drjava.DrJava;
@@ -394,15 +395,31 @@ public class DefaultCompilerModel implements CompilerModel {
       compiler.setWarningsEnabled(true);
       
       /**Rename any .dj0 files in files to be .java files, so the correct thing is compiled.*/
-      for (int i = 0; i < files.length; i++) {
-        String fileName = files[i].getAbsolutePath();
+      // The hashset is used to make sure we never send in duplicate files. This can happen if
+      // the java file was sent in allong with the corresponding .dj* file. The dj* file
+      // is renamed to a .java file and thus we have two of the same file in the list.  By
+      // adding the renamed file to the hashset, the hashset efficiently removes duplicates.
+      HashSet<File> javaFileSet = new HashSet<File>();
+      for (File f : files) {
+        File canonicalFile;
+        try {
+          canonicalFile = f.getCanonicalFile();
+        } catch(IOException e) {
+          canonicalFile = f.getAbsoluteFile();
+        }
+        String fileName = canonicalFile.getPath();
         int lastIndex = fileName.lastIndexOf(".dj");
         if (lastIndex != -1) {
           /** If compiling a language level file, do not show warnings, as these are not caught by the language level parser */
           compiler.setWarningsEnabled(false);
-          files[i] = new File(fileName.substring(0, lastIndex) + ".java");
+          javaFileSet.add(new File(fileName.substring(0, lastIndex) + ".java"));
+        }
+        else {
+          javaFileSet.add(canonicalFile);
         }
       }
+      files = javaFileSet.toArray(new File[0]);
+        
       parseExceptions = errors.getFirst();
       compilerErrors.addAll(_parseExceptions2CompilerErrors(parseExceptions));
       visitorErrors = errors.getSecond();

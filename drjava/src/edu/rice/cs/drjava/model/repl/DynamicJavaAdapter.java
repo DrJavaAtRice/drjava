@@ -407,8 +407,8 @@ public class DynamicJavaAdapter implements JavaInterpreter {
    * @param context the context
    * @return visitor the visitor
    */
-  public NameVisitor makeNameVisitor(Context nameContext, Context typeContext) {
-    return new NameVisitorExtension(nameContext, typeContext);
+  public NameVisitor makeNameVisitor(Context nameContext) {
+    return new NameVisitor(nameContext);
   }
 
   /**
@@ -495,54 +495,63 @@ public class DynamicJavaAdapter implements JavaInterpreter {
      */
     public Object interpret(Reader r, String fname) throws InterpreterException
     {
+      List<Node> statements;
       try {
         SourceCodeParser p = parserFactory.createParser(r, fname);
-        List<Node>   statements = p.parseStream();
-        ListIterator<Node>   it = statements.listIterator();
-        Object result = JavaInterpreter.NO_RESULT;
-
-        while (it.hasNext()) {
-          Node n = (Node)it.next();
-
-          // Process, if necessary
-          n = processTree(n);
-
-
-          NameVisitor nv = makeNameVisitor(nameVisitorContext, checkVisitorContext);
-          Node o = n.acceptVisitor(nv);
-          if (o != null) n = o;
-
-          AbstractTypeChecker tc = AbstractTypeChecker.makeTypeChecker(checkVisitorContext);
-
-          n.acceptVisitor(tc);
-
-          evalVisitorContext.defineVariables
-            (checkVisitorContext.getCurrentScopeVariables());
-
-          EvaluationVisitor ev = makeEvaluationVisitor(evalVisitorContext);
-          result = n.acceptVisitor(ev);
-        }
-
-        if (result instanceof String) {
-          result = "\"" + result + "\"";
-        }
-        else if (result instanceof Character) {
-          result = "'" + result + "'";
-        }
-
-        return result;
-      }
-      catch (ExecutionError e) {
-        //e.printStackTrace(); // For Loop....
-        throw new InterpreterException(e);
-      }
+        statements = p.parseStream();
+      } 
       catch (ParseError e) {
         //throw new InteractionsException("There was a syntax error in the " +
         //                                "previous input.");
         throw new InterpreterException(e);
       }
+      
+      Object result = JavaInterpreter.NO_RESULT;
+      
+      nameVisitorContext.setRevertPoint();
+      checkVisitorContext.setRevertPoint();
+      evalVisitorContext.setRevertPoint();
+      
+      try {
+        for (Node n : statements) {
+          n = processTree(n);
+          
+          NameVisitor nv = makeNameVisitor(nameVisitorContext);
+          Node o = n.acceptVisitor(nv);
+          if (o != null) n = o;
+          
+          AbstractTypeChecker tc = AbstractTypeChecker.makeTypeChecker(checkVisitorContext);
+          
+          n.acceptVisitor(tc);
+          
+          evalVisitorContext.defineVariables
+            (checkVisitorContext.getCurrentScopeVariables());
+          
+          EvaluationVisitor ev = makeEvaluationVisitor(evalVisitorContext);
+          result = n.acceptVisitor(ev);
+        }
+      }
+      catch (ExecutionError e) {
+        // revert the contexts just in case a binding was made in
+        // one context before this error was thrown.
+        nameVisitorContext.revert();
+        checkVisitorContext.revert();
+        evalVisitorContext.revert();
+        
+        //e.printStackTrace(); // For Loop....
+        throw new InterpreterException(e);
+      }
+      
+      if (result instanceof String) {
+        result = "\"" + result + "\"";
+      }
+      else if (result instanceof Character) {
+        result = "'" + result + "'";
+      }
+      
+      return result;
     }
-
+    
     /**
      * Assigns the given value to the given name in the interpreter.
      * @param name Name of the variable

@@ -136,7 +136,6 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
     } catch(FileMovedException fme) {
       file = fme.getFile();
     }
-    System.out.println("Removing an Aux file");
     String path = "";
     try {
       path = file.getCanonicalPath();
@@ -1308,10 +1307,10 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
       Vector<File> exCpF = exCp.asFileVector();
       for(File f : exCpF) {
         builder.addClasspathFile(f);
-        System.out.println("Saving project classpath entry " + f);
+        //System.out.println("Saving project classpath entry " + f);
       }
     } else {
-      System.err.println("Project ClasspathVector is null!");
+      //System.err.println("Project ClasspathVector is null!");
     }
     
     // add build directory
@@ -1355,6 +1354,13 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
     auxFiles = ir.getAuxiliaryFiles();
     String projfilepath = projectFile.getCanonicalPath();
     
+    // In order to change the title of these three document
+    // categories, you would need to change it here as well
+    // as in MainFrame. In MainFrame, there's some code that
+    // determines which context menu to display based on a
+    // test on the string used.  You'd need to change that
+    // string in MainFrame as well.
+    
     List<Pair<String, INavigatorItemFilter>> l = new LinkedList<Pair<String, INavigatorItemFilter>>();
     l.add(new Pair<String, INavigatorItemFilter>("[ Source Files ]", new INavigatorItemFilter(){
       public boolean accept(INavigatorItem n){
@@ -1363,7 +1369,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
       }
     }));
     
-    l.add(new Pair<String, INavigatorItemFilter>("[ Remembered Files ]", new INavigatorItemFilter(){
+    l.add(new Pair<String, INavigatorItemFilter>("[ Auxiliary Files ]", new INavigatorItemFilter(){
       public boolean accept(INavigatorItem n){
         OpenDefinitionsDocument d = DefaultGlobalModel.this.getODDGivenIDoc(n);
         return d.isAuxiliaryFile();
@@ -2583,7 +2589,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
           catch (InvalidPackageException e) { /* do nothing */ }
           
           /* update the navigator */
-          System.out.println(fixPathForNavigator(file.getCanonicalPath()));
+          //System.out.println(fixPathForNavigator(file.getCanonicalPath()));
           _documentNavigator.refreshDocument(getIDocGivenODD(this), fixPathForNavigator(file.getCanonicalPath()));
         }
         return true;
