@@ -152,5 +152,6 @@ public class EclipsePlugin extends AbstractUIPlugin {
     store.setDefault(DrJavaConstants.ALLOW_PRIVATE_ACCESS, false);
     store.setDefault(DrJavaConstants.INTERACTIONS_EXIT_PROMPT, true);
     store.setDefault(DrJavaConstants.HISTORY_MAX_SIZE, 500);
+    store.setDefault(DrJavaConstants.JVM_ARGS, "");
   }
 }

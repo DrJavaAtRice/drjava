@@ -42,6 +42,7 @@ package edu.rice.cs.drjava.plugins.eclipse;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.IntegerFieldEditor;
+import org.eclipse.jface.preference.StringFieldEditor;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.swt.SWT;
@@ -91,6 +92,9 @@ public class DrJavaPreferencePage extends FieldEditorPreferencePage
     addField(new IntegerFieldEditor(DrJavaConstants.HISTORY_MAX_SIZE,
                                     "Size of Interactions History",
                                     getFieldEditorParent()));
+    addField(new StringFieldEditor(DrJavaConstants.JVM_ARGS,
+                                   "Arguments to the Interactions JVM",
+                                   getFieldEditorParent()));
   }
 
   /** 

@@ -54,8 +54,7 @@ public interface DrJavaConstants {
    * (This is managed by the FontRegistry and an extension point in plugin.xml,
    * unlike the other preferences.)
    */
-  public static final String FONT_MAIN =
-    "edu.rice.cs.drjava.InteractionsFont";
+  public static final String FONT_MAIN = "edu.rice.cs.drjava.InteractionsFont";
   
   /**
    * Whether to prompt before resetting the interactions pane.
@@ -66,8 +65,7 @@ public interface DrJavaConstants {
   /**
    * Whether to allow users to access to all members in the Interactions Pane.
    */
-  public static final String ALLOW_PRIVATE_ACCESS =
-    "allow.private.access";
+  public static final String ALLOW_PRIVATE_ACCESS = "allow.private.access";
 
   /**
    * Whether to prompt when the interactions pane is unexpectedly reset.
@@ -78,6 +76,10 @@ public interface DrJavaConstants {
   /**
    * Number of lines to remember in the Interactions History.
    */
-  public static final String HISTORY_MAX_SIZE =
-    "history.max.size";
+  public static final String HISTORY_MAX_SIZE = "history.max.size";
+
+  /**
+   * Optional arguments to the interpreter JVM.
+   */
+  public static final String JVM_ARGS = "jvm.args";
 }

@@ -544,4 +544,11 @@ public class EclipseInteractionsModel extends RMIInteractionsModel {
   public void setPrivateAccessible(boolean allow) {
     _interpreterControl.setPrivateAccessible(allow);
   }
+  
+  /**
+   * Sets the optional command-line arguments to the interpreter JVM.
+   */
+  public void setOptionArgs(String optionArgString) {
+    _interpreterControl.setOptionArgs(optionArgString);
+  }
 }
