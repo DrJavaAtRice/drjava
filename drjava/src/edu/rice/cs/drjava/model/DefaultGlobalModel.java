@@ -29,7 +29,7 @@ public class DefaultGlobalModel implements GlobalModel {
   private DefaultListModel _definitionsDocs;
   private InteractionsDocument _interactionsDoc;
   private Document _consoleDoc;
-  private CompilerError[] _compileErrors;
+  private CompilerError[] _compileErrors;  // goes away
   private JavaInterpreter _interpreter;
   private LinkedList _listeners;
 
@@ -42,7 +42,7 @@ public class DefaultGlobalModel implements GlobalModel {
     _definitionsDocs = new DefaultListModel();
     _interactionsDoc = new InteractionsDocument();
     _consoleDoc = new DefaultStyledDocument();
-    _compileErrors = new CompilerError[0];
+    _compileErrors = new CompilerError[0];  // goes away
     _interpreter = new DynamicJavaAdapter();
     _listeners = new LinkedList();
   }
@@ -80,7 +80,7 @@ public class DefaultGlobalModel implements GlobalModel {
   public Document getConsoleDocument() {
     return _consoleDoc;
   }
-  public CompilerError[] getCompileErrors() {
+  public CompilerError[] getCompileErrors() {  // this method goes away
     return _compileErrors;
   }
 
@@ -192,6 +192,35 @@ public class DefaultGlobalModel implements GlobalModel {
     if (closeAllFiles()) {
       System.exit(0);
     }
+  }
+  
+  /**
+   * Returns the OpenDefinitionsDocument for the specified
+   * File, opening a new copy if one is not already open.
+   * @param file File contained by the document to be returned
+   * @return OpenDefinitionsDocument containing file
+   */
+  public OpenDefinitionsDocument getDocumentForFile(File file) 
+    throws IOException, OperationCanceledException
+  {
+    // Check if this file is already open
+    OpenDefinitionsDocument doc = _getOpenDocument(file);
+    if (doc == null) {
+      // If not, open and return it
+      final File f = file;
+      FileOpenSelector selector = new FileOpenSelector() {
+        public File getFile() throws OperationCanceledException {
+          return f;
+        }
+      };
+      try {
+        doc = openFile(selector);
+      }
+      catch (AlreadyOpenException aoe) {
+        doc = aoe.getOpenDocument();
+      }
+    }
+    return doc;
   }
 
   /**

@@ -104,6 +104,15 @@ public interface GlobalModel {
   public void quit();
 
   /**
+   * Returns the OpenDefinitionsDocument for the specified
+   * File, opening a new copy if one is not already open.
+   * @param file File contained by the document to be returned
+   * @return OpenDefinitionsDocument containing file
+   */
+  public OpenDefinitionsDocument getDocumentForFile(File file) 
+    throws IOException, OperationCanceledException;
+  
+  /**
    * Clears and resets the interactions pane.
    * First it makes sure it's in the right package given the
    * package specified by the definitions.  If it can't,
