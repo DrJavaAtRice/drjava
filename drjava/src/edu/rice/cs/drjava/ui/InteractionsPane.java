@@ -41,6 +41,8 @@ package edu.rice.cs.drjava.ui;
 
 import javax.swing.*;
 import javax.swing.text.*;
+import javax.swing.event.DocumentListener;
+import javax.swing.event.DocumentEvent;
 import java.awt.Toolkit;
 import java.awt.event.*;
 
@@ -56,6 +58,29 @@ public class InteractionsPane extends JTextPane {
   private static final EditorKit EDITOR_KIT = new InteractionsEditorKit();
 
   private final GlobalModel _model;
+  
+  /**
+   * Listener to ensure that the caret always stays on or after the
+   * prompt, so that output is always scrolled to the bottom.
+   * (The prompt is always at the bottom.)
+   */
+  private class CaretUpdateListener implements DocumentListener {
+    public void insertUpdate(DocumentEvent e) {
+      int caretPos = getCaretPosition();
+      int frozenPos = _model.getInteractionsFrozenPos();
+      int length = _model.getInteractionsDocument().getLength();
+      
+      // Only update caret if it has fallen behind the prompt.
+      // (And be careful not to move it during a reset, when the
+      //  frozen pos is temporarily far greater than the length.)
+      if ((caretPos < frozenPos) && (frozenPos < length)) {
+        setCaretPosition(frozenPos);
+      }
+    }
+
+    public void removeUpdate(DocumentEvent e) {}
+    public void changedUpdate(DocumentEvent e) {}
+  }
 
   // The fields below were made package private for testing purposes.
   AbstractAction _evalAction = new AbstractAction() {
@@ -187,6 +212,8 @@ public class InteractionsPane extends JTextPane {
                                  _moveRight);
     
     setKeymap(ourMap);
+    
+    getDocument().addDocumentListener(new CaretUpdateListener());
   }
   
   private void moveToEnd() {

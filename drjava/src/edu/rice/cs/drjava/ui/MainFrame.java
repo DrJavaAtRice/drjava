@@ -138,7 +138,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   private JMenu _toolsMenu;
   private JMenu _debugMenu;
   private JMenu _helpMenu;
-  private JCheckBoxMenuItem _debuggerEnabledMenuItem;
+  private JMenuItem _debuggerEnabledMenuItem;
   private JMenuItem _runDebuggerMenuItem;
   private JMenuItem _resumeDebugMenuItem;
   private JMenuItem _stepIntoDebugMenuItem;
@@ -1857,7 +1857,8 @@ public class MainFrame extends JFrame implements OptionConstants {
     JMenu debugMenu = new JMenu("Debugger");
 
     // Enable debugging item
-    _debuggerEnabledMenuItem = new JCheckBoxMenuItem(_toggleDebuggerAction);
+    _debuggerEnabledMenuItem = _newCheckBoxMenuItem(_toggleDebuggerAction);
+    //_debuggerEnabledMenuItem = new JCheckBoxMenuItem(_toggleDebuggerAction);
     _debuggerEnabledMenuItem.setSelected(false);
     debugMenu.add(_debuggerEnabledMenuItem);
 
@@ -2361,6 +2362,32 @@ public class MainFrame extends JFrame implements OptionConstants {
     newbar.revalidate();
     scroll.setHorizontalScrollBar(newbar);
     scroll.revalidate();    
+  }
+  
+  /**
+   * Returns a JRadioButtonMenuItem that looks like a JCheckBoxMenuItem.
+   * This is a workaround for a known bug on OS X's version of Java.
+   * (See http://developer.apple.com/qa/qa2001/qa1154.html)
+   * @param action Action for the menu item
+   * @return JRadioButtonMenuItem with a checkbox icon
+   */
+  private JMenuItem _newCheckBoxMenuItem(Action action) {
+    String RADIO_ICON_KEY = "RadioButtonMenuItem.checkIcon";
+    String CHECK_ICON_KEY = "CheckBoxMenuItem.checkIcon";
+    JRadioButtonMenuItem radio1, radio2, radio3;
+    
+    // Store the default radio button icon to put back later
+    Object radioIcon = UIManager.get(RADIO_ICON_KEY);
+    
+    // Replace radio button's checkIcon with that of JCheckBoxMenuItem
+    // so that our menu item looks like a checkbox
+    UIManager.put(RADIO_ICON_KEY, UIManager.get(CHECK_ICON_KEY));
+    JRadioButtonMenuItem pseudoCheckBox = new JRadioButtonMenuItem(action);
+    
+    // Put original radio button checkIcon back.
+    UIManager.put(RADIO_ICON_KEY, radioIcon);
+
+    return pseudoCheckBox;
   }
   
   /**
