@@ -2412,7 +2412,12 @@ public class MainFrame extends JFrame implements OptionConstants {
   private boolean _saveAs() {
     try {
       //If file becomes project file it should enable the save project option in the menu
-      return _model.getActiveDocument().saveFileAs(_saveSelector);
+      boolean toReturn = _model.getActiveDocument().saveFileAs(_saveSelector);
+      /**
+       * this highlights the document in the navigator
+       */
+      _model.setActiveDocument(_model.getActiveDocument());
+      return toReturn;
     }
     catch (IOException ioe) {
       _showIOError(ioe);
