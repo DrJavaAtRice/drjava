@@ -107,6 +107,15 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
   }
   
   /**
+   * Adds a named JavaDebugInterpreter to the list of interpreters.
+   * @param name the unique name for the debug interpreter
+   * @throws IllegalArgumentException if the name is not unique
+   */
+  public void addDebugInterpreter(String name) {
+    _interpreterControl.addDebugInterpreter(name);
+  }
+  
+  /**
    * Removes the interpreter with the given name, if it exists.
    * @param name Name of the interpreter to remove
    */

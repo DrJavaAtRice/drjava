@@ -269,6 +269,31 @@ public class InterpreterJVM extends AbstractSlaveJVM
   }
   
   /**
+   * Notifies that an assignment has been made in the given interpreter.
+   * Does not notify on declarations.
+   * @param name the name of the interpreter
+   */
+  public void notifyInterpreterAssignment(String name) {
+    try {
+      _mainJVM.notifyDebugInterpreterAssignment(name);
+    }
+    catch (RemoteException re) {
+      // nothing to do
+      _log.log(re.toString());
+    }
+  }
+  
+  /**
+   * Adds a classpath to the given interpreter.
+   * @param interpreter the interpreter
+   */
+  protected void _addClasspath(JavaInterpreter interpreter) {
+    for (int i=0; i < _classpath.size(); i++) {
+      interpreter.addClassPath(_classpath.elementAt(i));
+    }
+  }
+  
+  /**
    * Adds a named DynamicJavaAdapter to the list of interpreters.
    * Presets it to contain the current accumulated classpath.
    * @param name the unique name for the interpreter
@@ -277,9 +302,20 @@ public class InterpreterJVM extends AbstractSlaveJVM
   public void addJavaInterpreter(String name) {
     JavaInterpreter interpreter = new DynamicJavaAdapter();
     // Add each entry on the accumulated classpath
-    for (int i=0; i < _classpath.size(); i++) {
-      interpreter.addClassPath(_classpath.elementAt(i));
-    }
+    _addClasspath(interpreter);
+    addInterpreter(name, interpreter);
+  }
+  
+  /**
+   * Adds a named JavaDebugInterpreter to the list of interpreters.
+   * @param name the unique name for the interpreter
+   * @throws IllegalArgumentException if the name is not unique
+   */
+  public void addDebugInterpreter(String name) {
+    JavaDebugInterpreter interpreter = new JavaDebugInterpreter(name);
+    interpreter.setPrivateAccessible(true);
+    // Add each entry on the accumulated classpath
+    _addClasspath(interpreter);
     addInterpreter(name, interpreter);
   }
   

@@ -52,6 +52,7 @@ import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.model.repl.*;
 import edu.rice.cs.drjava.model.junit.JUnitError;
 import edu.rice.cs.drjava.model.junit.JUnitModelCallback;
+import edu.rice.cs.drjava.model.debug.DebugModelCallback;
 import edu.rice.cs.util.newjvm.*;
 
 /**
@@ -71,6 +72,9 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   
   /** Listens to JUnit-related events. */
   private JUnitModelCallback _junitModel;
+  
+  /** Listens to debug-related events */
+  private DebugModelCallback _debugModel;
 
   /**
    * This flag is set to false to inhibit the automatic restart of the JVM.
@@ -102,6 +106,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
 
     _interactionsModel = new DummyInteractionsModel();
     _junitModel = new DummyJUnitModel();
+    _debugModel = new DummyDebugModel();
     _startupClasspath = System.getProperty("java.class.path");
     //startInterpreterJVM();
   }
@@ -122,6 +127,14 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
    */
   public void setJUnitModel(JUnitModelCallback model) {
     _junitModel = model;
+  }
+  
+  /**
+   * Provides an object to listen to debug-related events.
+   * @param model the debug model
+   */
+  public void setDebugModel(DebugModelCallback model) {
+    _debugModel = model;
   }
   
   /**
@@ -314,6 +327,14 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     _junitModel.testSuiteEnded(errors);
   }
   
+  /**
+   * Notifies the main jvm that an assignment has been made in the given debug 
+   * interpreter.
+   * Does not notify on declarations.
+   * @param name the name of the debug interpreter
+   */
+  public void notifyDebugInterpreterAssignment(String name) {
+  }
   
   /**
    * Adds a named DynamicJavaAdapter to the list of interpreters.
@@ -328,6 +349,27 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     
     try {
       _interpreterJVM().addJavaInterpreter(name);
+    }
+    catch (RemoteException re) {
+      _threwException(re);
+    }
+  }
+  
+  /**
+   * Adds a named JavaDebugInterpreter to the list of interpreters.
+   * @param name the unique name for the interpreter
+   * @throws IllegalArgumentException if the name is not unique
+   */
+  public void addDebugInterpreter(String name) {
+    // silently fail if disabled. see killInterpreter docs for details.
+    if (! _enabled) {
+      return;
+    }
+
+    ensureInterpreterConnected();
+    
+    try {
+      _interpreterJVM().addDebugInterpreter(name);
     }
     catch (RemoteException re) {
       _threwException(re);
@@ -654,5 +696,13 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
                           boolean causedError) {}
     public void testSuiteEnded(JUnitError[] errors) {}
     public void junitJVMReady() {}
+  }
+  
+  /**
+   * DebugModelCallback which does not react to events.
+   */
+  public static class DummyDebugModel implements DebugModelCallback {
+    public void notifyDebugInterpreterAssignment(String name) {
+    }
   }
 }

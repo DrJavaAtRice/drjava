@@ -92,4 +92,12 @@ public interface MainJVMRemoteI extends MasterRemote {
    * @param errors The array of errors from all failed tests in the suite.
    */
   public void testSuiteEnded(JUnitError[] errors) throws RemoteException;
+  
+  /**
+   * Notifies the main jvm that an assignment has been made in the given debug 
+   * interpreter.
+   * Does not notify on declarations.
+   * @param name the name of the debug interpreter
+   */
+  public void notifyDebugInterpreterAssignment(String name) throws RemoteException;
 }

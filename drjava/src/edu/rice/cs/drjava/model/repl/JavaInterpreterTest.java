@@ -375,6 +375,15 @@ public class JavaInterpreterTest extends TestCase {
       // correct, it should fail
     }
   }
+  
+  /**
+   * Tests that a call to user-defined void method returns NO_RESULT, instead of null.
+   * This test does not pass, it is currently broken.
+   */
+//   public void testUserDefinedVoidMethod() throws ExceptionReturnedException {
+//     Object result = _interpreter.interpret("public void foo() {}; foo()");
+//     assertSame("Should have returned NO_RESULT.", Interpreter.NO_RESULT, result);
+//   }
 }
 
 /**

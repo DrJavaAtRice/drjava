@@ -77,7 +77,7 @@ import com.sun.jdi.event.*;
  * 
  * @version $Id$
  */
-public class JPDADebugger implements Debugger {
+public class JPDADebugger implements Debugger, DebugModelCallback {
   /**
    * Reference to DrJava's model.
    */
@@ -1262,6 +1262,15 @@ public class JPDADebugger implements Debugger {
                                                                                      ObjectReference.INVOKE_SINGLE_THREADED);
     return tmpInterpreter;
   }
+
+  /**
+   * Notifies the debugger that an assignment has been made in 
+   * the given debug interpreter.
+   * @param name the name of the interpreter
+   */
+  public void notifyDebugInterpreterAssignment(String name) {
+    System.out.println("notifyDebugInterpreterAssignment(" + name + ")");
+  }
   
   /**
    * Copy the current selected thread's visible variables (those in scope) into
@@ -1272,7 +1281,7 @@ public class JPDADebugger implements Debugger {
     try{
       ThreadReference suspendedThreadRef = _suspendedThreads.peek();
       String interpreterName = _getUniqueThreadName(suspendedThreadRef);
-      ((DefaultGlobalModel)_model).getInteractionsModel().addJavaInterpreter(interpreterName);
+      ((DefaultGlobalModel)_model).getInteractionsModel().addDebugInterpreter(interpreterName);
       StackFrame frame = suspendedThreadRef.frame(0);
       
       List vars = frame.visibleVariables();
@@ -1346,12 +1355,12 @@ public class JPDADebugger implements Debugger {
    * Notifies all listeners that the current thread has been suspended.
    */
   synchronized void currThreadSuspended() {
-//     try{
-      /** 
-       * copy the variables in scope into an interpreter
-       * and switch the current interpreter to that interpreter
-       */
-//       dumpVariablesIntoInterpreterAndSwitch();
+//     try {
+//       /** 
+//        * copy the variables in scope into an interpreter
+//        * and switch the current interpreter to that interpreter
+//        */
+//        dumpVariablesIntoInterpreterAndSwitch();
 //     }
 //     catch(DebugException ex){
 //       throw new UnexpectedException(ex);
@@ -1380,9 +1389,9 @@ public class JPDADebugger implements Debugger {
    * Notifies all listeners that the current thread has been resumed.
    */
   synchronized void currThreadResumed() {
-//     ((DefaultInteractionsModel)_model.getInteractionsModel()).setToDefaultInterpreter();
-//     String oldInterpreterName = _getUniqueThreadName(_runningThread);
-//     ((DefaultInteractionsModel)_model.getInteractionsModel()).removeInterpreter(oldInterpreterName);
+    //     ((DefaultInteractionsModel)_model.getInteractionsModel()).setToDefaultInterpreter();
+    //     String oldInterpreterName = _getUniqueThreadName(_runningThread);
+    //     ((DefaultInteractionsModel)_model.getInteractionsModel()).removeInterpreter(oldInterpreterName);
     notifyListeners(new EventNotifier() {
       public void notifyListener(DebugListener l) {
         l.currThreadResumed();

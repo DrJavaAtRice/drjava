@@ -4,7 +4,7 @@
  * at http://sourceforge.net/projects/drjava
  *
  * Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)
- * 
+ *
  * DrJava is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -37,57 +37,30 @@
  *
 END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava.model.repl.newjvm;
+package edu.rice.cs.drjava.model.repl;
 
-import java.rmi.Remote;
-import java.rmi.RemoteException;
-import edu.rice.cs.util.newjvm.*;
+import koala.dynamicjava.interpreter.context.*;
 
-/**
- * This interface specifies the methods that the interpreter JVM exposes
- * for the MainJVM to call.
- *
- * @version $Id$
- */
-public interface InterpreterJVMRemoteI extends SlaveRemote {
-  public void interpret(String s) throws RemoteException;
-  public void addClassPath(String s) throws RemoteException;
-  public void runTestSuite(String className, String fileName) throws RemoteException;
-  public void setPackageScope(String s) throws RemoteException;
-  public void reset() throws RemoteException;
+public class JavaDebugInterpreter extends DynamicJavaAdapter {
+  /**
+   * This interpreter's name.
+   */
+  protected final String _name;
   
   /**
-   * Adds a named DynamicJavaAdapter to the list of interpreters.
-   * @param name the unique name for the interpreter
-   * @throws IllegalArgumentException if the name is not unique
+   * Creates a new debug interpreter.
+   * @param name the name of the interpreter
    */
-  public void addJavaInterpreter(String name) throws RemoteException;
-  
-  /**
-   * Adds a named JavaDebugInterpreter to the list of interpreters.
-   * @param name the unique name for the interpreter
-   * @throws IllegalArgumentException if the name is not unique
-   */
-  public void addDebugInterpreter(String name) throws RemoteException;
+  public JavaDebugInterpreter(String name) {
+    _name = name;
+  }
 
   /**
-   * Removes the interpreter with the given name, if it exists.
-   * @param name Name of the interpreter to remove
+   * Gets the debug evaluation visitor associated wiht this interpreter.
+   * @param context the context
+   * @return visitor the visitor
    */
-  public void removeInterpreter(String name) throws RemoteException;
-  
-  /**
-   * Sets the current interpreter to be the one specified by the given name
-   * @param name the unique name of the interpreter to set active
-   * @return Whether the new interpreter is currently in progress
-   * with an interaction
-   */
-  public boolean setActiveInterpreter(String name) throws RemoteException;
-  
-  /**
-   * Sets the default interpreter to be active.
-   * @return Whether the new interpreter is currently in progress
-   * with an interaction
-   */
-  public boolean setToDefaultInterpreter() throws RemoteException;
+  public EvaluationVisitorExtension makeEvaluationVisitor(Context context) {
+    return new DebugEvaluationVisitor(context, _name);
+  }
 }

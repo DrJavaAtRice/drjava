@@ -7,7 +7,7 @@
  * 
  * DrJava is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation; either version of the License, or
  * (at your option) any later version.
  *
  * DrJava is distributed in the hope that it will be useful,
@@ -16,7 +16,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
+ * along with this p2rogram; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  * or see http://www.gnu.org/licenses/gpl.html
  *
@@ -37,48 +37,19 @@
  *
 END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava;
-
-import java.util.Date;
-import java.text.SimpleDateFormat;
+package edu.rice.cs.drjava.model.debug;
 
 /**
- * This interface hold the information about this build of DrJava.
- * This file is copied to Version.java by the build process, which also
- * fills in the right values of the date and time.
- *
- * This javadoc corresponds to build drjava-20030414-0614;
- *
+ * Callback interface which allows a Debugger to respond to events fired 
+ * in a remote jvm.
  * @version $Id$
  */
-public abstract class Version {
+public interface DebugModelCallback {
   /**
-   * This string will be automatically expanded upon "ant commit".
-   * Do not edit it by hand!
+   * Notifies the debugger that an assignment has been made in 
+   * the given debug interpreter.
+   * Does not notify on declarations.
+   * @param name the name of the interpreter
    */
-  private static final String BUILD_TIME_STRING = "20030414-0614";
-
-  /** A {@link Date} version of the build time. */
-  private static final Date BUILD_TIME = _getBuildDate();
-
-  public static String getBuildTimeString() {
-    return BUILD_TIME_STRING;
-  }
-
-  public static Date getBuildTime() {
-    return BUILD_TIME;
-  }
-
-  private static Date _getBuildDate() {
-    try {
-      return new SimpleDateFormat("yyyyMMdd-HHmm z").parse(BUILD_TIME_STRING + " GMT");
-    }
-    catch (Exception e) { // parse format or whatever problem
-      return null;
-    }
-  }
-
-  public static void main(String[] args) {
-    System.out.println("Version for edu.rice.cs.drjava: " + BUILD_TIME_STRING);
-  }
-} 
+  public void notifyDebugInterpreterAssignment(String name);
+}

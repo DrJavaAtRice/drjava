@@ -331,6 +331,15 @@ public class DynamicJavaAdapter implements JavaInterpreter {
   }
 
   /**
+   * Gets the evaluation visitor associated wiht this interpreter.
+   * @param context the context
+   * @return visitor the visitor
+   */
+  public EvaluationVisitorExtension makeEvaluationVisitor(Context context) {
+    return new EvaluationVisitorExtension(context);
+  }
+
+  /**
    * An extension of DynamicJava's interpreter that makes sure classes are
    * not loaded by the system class loader (when possible) so that future
    * interpreters will be able to reload the classes.  This extension also
@@ -342,7 +351,7 @@ public class DynamicJavaAdapter implements JavaInterpreter {
    * We also override the evaluation visitor to allow the interpreter to be
    * interrupted and to return NO_RESULT if there was no result.
    */
-  public static class InterpreterExtension extends TreeInterpreter {
+  public class InterpreterExtension extends TreeInterpreter {
 
     /**
      * Constructor.
@@ -394,7 +403,7 @@ public class DynamicJavaAdapter implements JavaInterpreter {
           evalVisitorContext.defineVariables
             (checkVisitorContext.getCurrentScopeVariables());
 
-          v = new EvaluationVisitorExtension(evalVisitorContext);
+          v = makeEvaluationVisitor(evalVisitorContext);
           result = n.acceptVisitor(v);
         }
         

@@ -2560,6 +2560,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
   private void _createDebugger() {
     try {
       _debugger = new JPDADebugger(this);
+      _interpreterControl.setDebugModel((JPDADebugger) _debugger);
     }
     catch( NoClassDefFoundError ncdfe ){
       // JPDA not available, so we won't use it.
