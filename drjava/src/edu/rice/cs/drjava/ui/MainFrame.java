@@ -123,6 +123,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   private JUnitPanel _junitPanel;
   private FindReplaceDialog _findReplace;
   private LinkedList _tabs;
+  private HistorySaveDialog _historySaveDialog;
   
   private JPanel _statusBar;
   private JLabel _fileNameField;
@@ -663,7 +664,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   {
     public void actionPerformed(ActionEvent ae) {
       // Show interactions tab
-      _tabbedPane.setSelectedComponent(_interactionsPane);
+      _tabbedPane.setSelectedIndex(INTERACTIONS_TAB);
       
       // Working directory is default place to start
       File workDir = DrJava.CONFIG.getSetting(WORKING_DIRECTORY);
@@ -719,12 +720,14 @@ public class MainFrame extends JFrame implements OptionConstants {
           return _verifyOverwrite();
         }
       };
-      try {
+      String history = _model.getHistoryAsString();
+      _historySaveDialog = new HistorySaveDialog(MainFrame.this, selector, history);
+      /*try {
         _model.saveHistory(selector);
       }
       catch (IOException ioe) {
         _showIOError(ioe);
-      }
+      }*/
       _interactionsPane.requestFocus();
     }
   };
