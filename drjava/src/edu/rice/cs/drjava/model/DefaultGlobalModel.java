@@ -709,6 +709,29 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
             lof.add(f);
           }
         }
+        List<OpenDefinitionsDocument> lod = getDefinitionsDocuments();
+        for(OpenDefinitionsDocument d: lod){
+          if(d.isAuxiliaryFile()){
+            try{
+              File f;
+              String classname = d.getQualifiedClassName();
+              try{
+                f = d.getFile();
+                lof.add(f);
+                los.add(classname);
+              }catch(FileMovedException fme){
+                // the file's not on disk, but send it in anyways
+                f = fme.getFile();
+                lof.add(f);
+                los.add(classname);
+              }catch(IllegalStateException e){
+                // it doesn't have a file, so don't try and test it...
+              }
+            }catch(ClassNameNotFoundException e){
+              // don't add it if we don't have a classname
+            }
+          }
+        }
         getJUnitModel().junitAll(los, lof);
       }
     };
