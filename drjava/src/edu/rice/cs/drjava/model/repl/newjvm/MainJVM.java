@@ -321,9 +321,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   public void killInterpreter(boolean shouldRestart) {
     try {
       _enabled = shouldRestart;
-      if (shouldRestart) {
-        _cleanlyRestarting = true;
-      }
+      _cleanlyRestarting = true;
       quitSlave();
     }
     catch (RemoteException re) {

@@ -495,6 +495,7 @@
       <fileset dir="${built}">
         <include name="${projpath}/**" />
         <exclude name="**/*Test.class" />
+        <exclude name="**/*TestCase.class" />
         <exclude name="**/*Test$*.class" />
         <exclude name="${projpath}/docs/developer/**" />
         <include name="edu/rice/cs/util/**" />
@@ -523,6 +524,16 @@
     </available>
   </target>
 
+  <!-- Check if docbook2pdf is available -->
+  <target name="docbook2pdf-present">
+    <property environment="env"/>
+    <available file="docbook2pdf" property="docbook2pdf.present">
+      <filepath>
+        <pathelement path="${env.PATH}" />
+      </filepath>
+    </available>
+  </target>
+
   <!-- Create documentation html -->
   <target name="docs" depends="userdocs,devdocs" unless="docbook.present">
     <echo message="Could not find docbook2html.  Not generating docs." />
@@ -536,6 +547,18 @@
     <apply executable="docbook2html" failonerror="yes" type="file">
       <arg value="-o"/>
       <arg value="${doc_dir}/user/"/>
+      <fileset dir="${srcroot}/${projpath}/docs/user">
+        <include name="userdoc.docbook" />
+      </fileset>
+    </apply>
+  </target>
+
+  <!-- Create the user documentation as a PDF -->
+  <target name="userdocs-pdf" depends="docbook2pdf-present" if="docbook2pdf.present">
+    <echo message="Creating documentation PDF..." />
+    <apply executable="docbook2pdf" failonerror="yes" type="file">
+      <arg value="-o"/>
+      <arg value="${srcroot}/../userdocs"/>
       <fileset dir="${srcroot}/${projpath}/docs/user">
         <include name="userdoc.docbook" />
       </fileset>
