@@ -52,6 +52,21 @@ package edu.rice.cs.util.text;
  * @version $Id$
  */
 public interface DocumentAdapter {
+  
+  /**
+   * Gets the object which can determine whether an insert
+   * or remove edit should be applied, based on the inputs.
+   * @param condition Object to determine legality of inputs
+   */
+  public DocumentEditCondition getEditCondition();
+  
+  /**
+   * Provides an object which can determine whether an insert
+   * or remove edit should be applied, based on the inputs.
+   * @param condition Object to determine legality of inputs
+   */
+  public void setEditCondition(DocumentEditCondition condition);
+  
   /**
    * Inserts a string into the document at the given offset
    * and the given named style, if the edit condition allows it.

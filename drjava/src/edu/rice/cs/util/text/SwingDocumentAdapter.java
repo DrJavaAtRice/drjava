@@ -78,6 +78,15 @@ public class SwingDocumentAdapter extends DefaultStyledDocument
   }
   
   /**
+   * Gets the object which can determine whether an insert
+   * or remove edit should be applied, based on the inputs.
+   * @param condition Object to determine legality of inputs
+   */
+  public DocumentEditCondition getEditCondition() {
+    return _condition;
+  }
+  
+  /**
    * Provides an object which can determine whether an insert
    * or remove edit should be applied, based on the inputs.
    * @param condition Object to determine legality of inputs
