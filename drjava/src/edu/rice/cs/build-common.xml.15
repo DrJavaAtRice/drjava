@@ -504,6 +504,7 @@
     <mkdir dir="${clover_db_dir}" />
     <clover-setup initString="${clover_db_dir}/test_coverage.db">
       <files>
+        <exclude name="**/*TestCase*.java" />
         <exclude name="**/*Test.java" />
         <exclude name="**/*TestCase.java" />
         <exclude name="**/*Test$*.java" />
