@@ -39,38 +39,45 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava;
 
+import junit.framework.*;
 import java.util.Date;
 import java.text.SimpleDateFormat;
 
 /**
- * This interface hold the information about this build of DrJava.
- * This file is copied to Version.java by the build process, which also
- * fills in the right values of the date and time.
- *
- * This javadoc corresponds to build drjava-20020220-2337;
+ * Test that ensures all external dependencies are met!
  *
  * @version $Id$
  */
-public abstract class Version {
+public class DependenciesTest extends TestCase {
+  public static final String REQUIRED_UTIL_VERSION = "20020221-0455";
+  
   /**
-   * This string will be automatically expanded upon "ant commit".
-   * Do not edit it by hand!
+   * Constructor.
+   * @param  String name
    */
-  public static final String BUILD_TIME_STRING = "20020220-2337";
-
-  /** A {@link Date} version of the build time. */
-  public static final Date BUILD_TIME = _getBuildDate();
-
-  private static Date _getBuildDate() {
-    try {
-      return new SimpleDateFormat("yyyyMMdd-HHmm").parse(BUILD_TIME_STRING);
-    }
-    catch (Exception e) { // parse format or whatever problem
-      return null;
-    }
+  public DependenciesTest(String name) {
+    super(name);
+  }
+  
+  /**
+   * Creates a test suite for JUnit to run.
+   * @return a test suite based on the methods in this class
+   */
+  public static Test suite() {
+    return  new TestSuite(DependenciesTest.class);
   }
 
-  public static void main(String[] args) {
-    System.out.println("Version for edu.rice.cs.drjava: " + BUILD_TIME_STRING);
+  /**
+   * This test ensures that the util package version is as new as we expect.
+   */
+  public void testUtilVersion() throws Throwable {
+    Date required = new SimpleDateFormat("yyyyMMdd-HHmm").parse(REQUIRED_UTIL_VERSION);
+
+    Date found = edu.rice.cs.util.Version.BUILD_TIME;
+
+    assertTrue("Util package date is " + found + ", but at least " + required +
+                 " was required! You need to update/compile the util package.",
+               ! required.after(found));
   }
-} 
+  
+}
