@@ -97,6 +97,9 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/
    */
   protected AbstractMasterJVM(String slaveClassName) {
     _slaveClassName = slaveClassName;
+    
+    // Make sure RMI doesn't use an IP address that might change
+    System.setProperty("java.rmi.server.hostname", "127.0.0.1");
   }
 
   /**
@@ -150,6 +153,9 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/
         synchronized(AbstractMasterJVM.this) {
           try {
             _stub = UnicastRemoteObject.exportObject(AbstractMasterJVM.this);
+            
+            // Debug: check that the IP address is 127.0.0.1
+            //javax.swing.JOptionPane.showMessageDialog(null, _stub.toString());
           }
           catch (RemoteException re) {
             throw new edu.rice.cs.util.UnexpectedException(re);

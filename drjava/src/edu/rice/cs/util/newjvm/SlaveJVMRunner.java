@@ -73,6 +73,9 @@ public final class SlaveJVMRunner {
    * of the slave JVM implementation class.
    */
   public static void main(String[] args) {
+    // Make sure RMI doesn't use an IP address that might change
+    System.setProperty("java.rmi.server.hostname", "127.0.0.1");
+
     if (args.length != 2) System.exit(1);
 
     try {
@@ -83,9 +86,12 @@ public final class SlaveJVMRunner {
       try {
         Class slaveClass = Class.forName(args[1]);
         SlaveRemote slave = (SlaveRemote) slaveClass.newInstance();
-        
+                
         // Must export slave object to RMI so we can pass stub to the master
         SlaveRemote stub= (SlaveRemote) UnicastRemoteObject.exportObject(slave);
+        
+        // Debug: check that the IP address is 127.0.0.1
+        //javax.swing.JOptionPane.showMessageDialog(null, stub.toString());
 
         // start the slave and notify the master
         remote.registerSlave(slave);
