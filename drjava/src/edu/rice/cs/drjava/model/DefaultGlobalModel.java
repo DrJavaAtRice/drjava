@@ -27,15 +27,18 @@ import edu.rice.cs.drjava.model.compiler.*;
  * @version $Id$
  */
 public class DefaultGlobalModel implements GlobalModel {
-  private DefinitionsEditorKit _editorKit;
-  private DefaultListModel _definitionsDocs;
-  private InteractionsDocument _interactionsDoc;
-  private StyledDocument _consoleDoc;
+  private final DefinitionsEditorKit _editorKit = new DefinitionsEditorKit();
+  private final DefaultListModel _definitionsDocs = new DefaultListModel();
+  private final InteractionsDocument _interactionsDoc
+    = new InteractionsDocument();
+  private final StyledDocument _consoleDoc = new DefaultStyledDocument();
+  private final LinkedList _listeners = new LinkedList();
+
+  // blank final, set differently in the two constructors
+  private final MainJVM _interpreterControl;
+
   private CompilerError[] _compilerErrorsWithoutFiles;
   private int _numErrors;
-  private LinkedList _listeners;
-  //private JavaInterpreter _interpreter;
-  private MainJVM _interpreterControl;
 
   public static final String EXIT_CALLED_MESSAGE
     = "The interaction was aborted by a call to System.exit.";
@@ -64,21 +67,15 @@ public class DefaultGlobalModel implements GlobalModel {
    */
   public DefaultGlobalModel()
   {
-    _editorKit = new DefinitionsEditorKit();
-    _definitionsDocs = new DefaultListModel();
-    _interactionsDoc = new InteractionsDocument();
-    _consoleDoc = new DefaultStyledDocument();
     _compilerErrorsWithoutFiles = new CompilerError[0];
     _numErrors = 0;
-    //_interpreter = new DynamicJavaAdapter();
+
     try {
       _interpreterControl = new MainJVM(this);
     }
     catch (java.rmi.RemoteException re) {
       throw new UnexpectedException(re);
     }
-
-    _listeners = new LinkedList();
   }
 
   /**
@@ -90,14 +87,9 @@ public class DefaultGlobalModel implements GlobalModel {
    */
   public DefaultGlobalModel(DefaultGlobalModel other)
   {
-    _editorKit = new DefinitionsEditorKit();
-    _definitionsDocs = new DefaultListModel();
-    _interactionsDoc = new InteractionsDocument();
-    _consoleDoc = new DefaultStyledDocument();
     _compilerErrorsWithoutFiles = new CompilerError[0];
     _numErrors = 0;
 
-    _listeners = new LinkedList();
     _interpreterControl = other._interpreterControl;
     _interpreterControl.setModel(this);
     _interpreterControl.reset();
