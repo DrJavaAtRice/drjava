@@ -182,57 +182,55 @@ public class KeyBindingManager {
    */
   //precondition ks != KeyStrokeOption.NULL_KEYSTROKE
   private boolean shouldUpdate(KeyStroke ks, Action a) {
-    if (CodeStatus.DEVELOPMENT) {      
-      if (ks == KeyStrokeOption.NULL_KEYSTROKE) 
-        // then there should be no keystroke for this action
-        return true;
+    if (ks == KeyStrokeOption.NULL_KEYSTROKE) {
+      // then there should be no keystroke for this action
+      return true;
+    }
       
-      if (!_keyToDataMap.containsKey(ks) ) { 
-        // the key is not in the Hashtable, put it in
-        //_keyToActionMap.put(ks, a);
-        //need to update map
-        //KeyStrokeData data = (KeyStrokeData)_actionToDataMap.get(a);
-        //data.setKeyStroke(ks);
-        //_keyToDataMap.put(ks,data);
+    if (!_keyToDataMap.containsKey(ks) ) { 
+      // the key is not in the Hashtable, put it in
+      //_keyToActionMap.put(ks, a);
+      //need to update map
+      //KeyStrokeData data = (KeyStrokeData)_actionToDataMap.get(a);
+      //data.setKeyStroke(ks);
+      //_keyToDataMap.put(ks,data);
+      
+      return true;
+    } 
+    else if (((KeyStrokeData)_keyToDataMap.get(ks)).getAction().equals(a)) { 
+      // this KeyStroke/Action pair is already in the Hashtable
+      return false;
+    }
+    else { // key-binding conflict
+      if (_shouldCheckConflict) {
+        KeyStrokeOption opt = new KeyStrokeOption(null,null);
+        KeyStrokeData conflictKSD = (KeyStrokeData)_keyToDataMap.get(ks);
+        String key = opt.format(ks);
+        KeyStrokeData newKSD = (KeyStrokeData)_actionToDataMap.get(a);
+        String text = "\""+ key +"\"" + " is already assigned to \"" + conflictKSD.getName() + 
+          "\".\nWould you like to assign \"" + key + "\" to \"" + newKSD.getName() + "\"?";
+        int rc = JOptionPane.showConfirmDialog(_mainFrame,
+                                               text,
+                                               "DrJava",
+                                               JOptionPane.YES_NO_CANCEL_OPTION);
         
-        return true;
-      } 
-      else if (((KeyStrokeData)_keyToDataMap.get(ks)).getAction().equals(a)) { 
-        // this KeyStroke/Action pair is already in the Hashtable
-        return false;
-      }
-      else { // key-binding conflict
-        if (_shouldCheckConflict) {
-          KeyStrokeOption opt = new KeyStrokeOption(null,null);
-          KeyStrokeData conflictKSD = (KeyStrokeData)_keyToDataMap.get(ks);
-          String key = opt.format(ks);
-          KeyStrokeData newKSD = (KeyStrokeData)_actionToDataMap.get(a);
-          String text = "\""+ key +"\"" + " is already assigned to \"" + conflictKSD.getName() + 
-            "\".\nWould you like to assign \"" + key + "\" to \"" + newKSD.getName() + "\"?";
-          int rc = JOptionPane.showConfirmDialog(_mainFrame,
-                                                 text,
-                                                 "DrJava",
-                                                 JOptionPane.YES_NO_CANCEL_OPTION);
-          
-          switch (rc) {
-            case JOptionPane.YES_OPTION:
-              return true;
-            case JOptionPane.NO_OPTION:
-              return false;
-            case JOptionPane.CLOSED_OPTION:
-              return false;
-            case JOptionPane.CANCEL_OPTION:
-              return false;
-            default:
-              throw new RuntimeException("Invalid rc: " + rc);
-          }
+        switch (rc) {
+          case JOptionPane.YES_OPTION:
+            return true;
+          case JOptionPane.NO_OPTION:
+            return false;
+          case JOptionPane.CLOSED_OPTION:
+            return false;
+          case JOptionPane.CANCEL_OPTION:
+            return false;
+          default:
+            throw new RuntimeException("Invalid rc: " + rc);
         }
-        else
-          return true;
+      }
+      else {
+        return true;
       }
     }
-    else
-      return false;
   }
   
   /**
@@ -268,46 +266,43 @@ public class KeyBindingManager {
     }
     
     public void optionChanged(OptionEvent<KeyStroke> oce) {
-      if (CodeStatus.DEVELOPMENT) {
-        if(shouldUpdate(oce.value, _a)) 
-        {
-          KeyStrokeData data = (KeyStrokeData)_actionToDataMap.get(_a); 
-          _keyToDataMap.remove(_ks);
-          
-          //check for conflicting key binding
-          if (_keyToDataMap.containsKey(oce.value) && _shouldCheckConflict) {
-            //if new key in map, and shouldUpdate returns true, we are overwriting it
-            KeyStrokeData conflictKSD = (KeyStrokeData)_keyToDataMap.get(oce.value);
-            conflictKSD.setKeyStroke(KeyStrokeOption.NULL_KEYSTROKE);
-            _updateMenuItem(conflictKSD);
-            _keyToDataMap.remove(oce.value);
-            DrJava.CONFIG.setSetting(conflictKSD.getOption(), KeyStrokeOption.NULL_KEYSTROKE);
-          }
-          
-          if (oce.value != KeyStrokeOption.NULL_KEYSTROKE) {
-            _keyToDataMap.put(oce.value,data);
-          }
-          data.setKeyStroke(oce.value);
-          _updateMenuItem(data);
-          
-          //Check associated shift-version's binding
-          Action shiftAction = (Action) data.getShiftAction();
-          if (shiftAction != null) {
-            //_keyToActionMap.remove(addShiftModifier(_ks));
-            KeyStrokeData shiftKSD = (KeyStrokeData) _actionToDataMap.get(shiftAction);
-            _keyToDataMap.remove(shiftKSD.getKeyStroke());
-            shiftKSD.setKeyStroke(addShiftModifier(oce.value));
-            _keyToDataMap.put(shiftKSD.getKeyStroke(), shiftKSD);
-            //mapInsert(addShiftModifier(oce.value), shiftAction);
-          }
-          
-          _ks = oce.value;          
+      if(shouldUpdate(oce.value, _a)) 
+      {
+        KeyStrokeData data = (KeyStrokeData)_actionToDataMap.get(_a); 
+        _keyToDataMap.remove(_ks);
+        
+        //check for conflicting key binding
+        if (_keyToDataMap.containsKey(oce.value) && _shouldCheckConflict) {
+          //if new key in map, and shouldUpdate returns true, we are overwriting it
+          KeyStrokeData conflictKSD = (KeyStrokeData)_keyToDataMap.get(oce.value);
+          conflictKSD.setKeyStroke(KeyStrokeOption.NULL_KEYSTROKE);
+          _updateMenuItem(conflictKSD);
+          _keyToDataMap.remove(oce.value);
+          DrJava.CONFIG.setSetting(conflictKSD.getOption(), KeyStrokeOption.NULL_KEYSTROKE);
         }
-        else if (_ks != oce.value)
-          DrJava.CONFIG.setSetting(oce.option, _ks);
+        
+        if (oce.value != KeyStrokeOption.NULL_KEYSTROKE) {
+          _keyToDataMap.put(oce.value,data);
+        }
+        data.setKeyStroke(oce.value);
+        _updateMenuItem(data);
+        
+        //Check associated shift-version's binding
+        Action shiftAction = (Action) data.getShiftAction();
+        if (shiftAction != null) {
+          //_keyToActionMap.remove(addShiftModifier(_ks));
+          KeyStrokeData shiftKSD = (KeyStrokeData) _actionToDataMap.get(shiftAction);
+          _keyToDataMap.remove(shiftKSD.getKeyStroke());
+          shiftKSD.setKeyStroke(addShiftModifier(oce.value));
+          _keyToDataMap.put(shiftKSD.getKeyStroke(), shiftKSD);
+          //mapInsert(addShiftModifier(oce.value), shiftAction);
+        }
+          
+        _ks = oce.value;          
       }
-      
-      
+      else if (_ks != oce.value) {
+        DrJava.CONFIG.setSetting(oce.option, _ks);
+      }
     }
   }
   

@@ -311,11 +311,9 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
     _replaceAction.setEnabled(false);
     _replaceFindAction.setEnabled(false);
     
-    Font font= DrJava.CONFIG.getSetting(FONT_MAIN);
-    
-    _findField.setFont(font);
-    _replaceField.setFont(font);
-    
+    Font font = DrJava.CONFIG.getSetting(FONT_MAIN);
+    setFieldFont(font);
+        
     // set up the layout
     JPanel buttons = new JPanel();
     buttons.setLayout(new GridLayout(1,0));
@@ -422,6 +420,14 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
           _replaceAllAction.setEnabled(true);
       }
     });
+  }
+  
+  /**
+   * Sets the font of the find and replace fields to f.
+   */
+  public void setFieldFont(Font f) {
+    _findField.setFont(f);
+    _replaceField.setFont(f);
   }
   
   private static Container wrap(JComponent comp) {

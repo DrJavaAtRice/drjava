@@ -531,7 +531,6 @@ public class GlobalModelOtherTest extends GlobalModelTestCase implements OptionC
   public void testInteractionsLiveUpdateClasspath()
     throws BadLocationException, IOException
   {
-    if (CodeStatus.DEVELOPMENT) {
       
     OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
     File f = tempFile();
@@ -567,8 +566,6 @@ public class GlobalModelOtherTest extends GlobalModelTestCase implements OptionC
     tempDir = new File(tempPath + "a");
     tempDir.renameTo( new File(tempPath));
 
-    }
-    else return;
   }
   
 }

@@ -63,20 +63,18 @@ public class KeyStrokeOption extends Option<KeyStroke> {
   // ascii codes and Strings that describe the ascii character and are
   // in the form that KeyStroke.getKeyStroke(String s) requires.
   static {
-    if (CodeStatus.DEVELOPMENT) {
-      try {
-        Field[] fields = KeyEvent.class.getFields();
-        for (int i = 0; i < fields.length; i++) {
-          Field currfield = fields[i];
-          String name = currfield.getName();
-          if (name.startsWith("VK_")) {
-            keys.put(new Integer(currfield.getInt(null)), name.substring(3));
-          }
+    try {
+      Field[] fields = KeyEvent.class.getFields();
+      for (int i = 0; i < fields.length; i++) {
+        Field currfield = fields[i];
+        String name = currfield.getName();
+        if (name.startsWith("VK_")) {
+          keys.put(new Integer(currfield.getInt(null)), name.substring(3));
         }
       }
-      catch(IllegalAccessException iae) {
-        throw new UnexpectedException(iae);
-      }
+    }
+    catch(IllegalAccessException iae) {
+      throw new UnexpectedException(iae);
     }
   }
   
@@ -89,37 +87,34 @@ public class KeyStrokeOption extends Option<KeyStroke> {
    * @return The KeyStroke object corresponding to the input string "s".
    */
   public KeyStroke parse(String s) {
-    if (CodeStatus.DEVELOPMENT) {
-      if (s.equals("<none>")) {
-        return NULL_KEYSTROKE;
-      }
-      
-      // Replace "command" with "meta" (OS X)
-      int cIndex = s.indexOf("command");
-      if (cIndex > -1) {
-        StringBuffer sb = new StringBuffer(s.substring(0, cIndex));
-        sb.append("meta");
-        sb.append(s.substring(cIndex + "command".length(), s.length()));
-        s = sb.toString();
-      }
-      
-      // Replace "option" with "alt" (OS X)
-      int oIndex = s.indexOf("option");
-      if (oIndex > -1) {
-        StringBuffer sb = new StringBuffer(s.substring(0, oIndex));
-        sb.append("alt");
-        sb.append(s.substring(oIndex + "option".length(), s.length()));
-        s = sb.toString();
-      }
-      
-      KeyStroke ks = KeyStroke.getKeyStroke(s);
-      if (ks == null) {
-        throw new OptionParseException(name, s,
-                                     "Must be a valid string representation of a Keystroke.");
-      }
-      return ks;
+    if (s.equals("<none>")) {
+      return NULL_KEYSTROKE;
     }
-    else return NULL_KEYSTROKE;
+    
+    // Replace "command" with "meta" (OS X)
+    int cIndex = s.indexOf("command");
+    if (cIndex > -1) {
+      StringBuffer sb = new StringBuffer(s.substring(0, cIndex));
+      sb.append("meta");
+      sb.append(s.substring(cIndex + "command".length(), s.length()));
+      s = sb.toString();
+    }
+    
+    // Replace "option" with "alt" (OS X)
+    int oIndex = s.indexOf("option");
+    if (oIndex > -1) {
+      StringBuffer sb = new StringBuffer(s.substring(0, oIndex));
+      sb.append("alt");
+      sb.append(s.substring(oIndex + "option".length(), s.length()));
+      s = sb.toString();
+    }
+    
+    KeyStroke ks = KeyStroke.getKeyStroke(s);
+    if (ks == null) {
+      throw new OptionParseException(name, s,
+                                     "Must be a valid string representation of a Keystroke.");
+    }
+    return ks;
   }
   
   /**
@@ -127,34 +122,31 @@ public class KeyStrokeOption extends Option<KeyStroke> {
    * @return A String representing the KeyStroke "k".
    */
   public String format(KeyStroke k) {
-    if (CodeStatus.DEVELOPMENT) {
-      if (k == NULL_KEYSTROKE)
-        return "<none>";
-      String s = KeyEvent.getKeyModifiersText(k.getModifiers()).toLowerCase();
-      s = s.replace('+', ' ');
-      if (!s.equals(""))
-        s += " ";
-      // If the key code is undefined, this is a "typed" unicode character
-      if (k.getKeyCode() == KeyEvent.VK_UNDEFINED) {
-        s += "typed ";
-        s += k.getKeyChar();
-      }
-      // else this corresponds to a static KeyEvent constant
-      else {
-        // defaults to pressed
-        if (k.isOnKeyRelease())
-          s += "released ";
-        String key = (String) keys.get(new Integer(k.getKeyCode()));
-        if (key == null)
-          throw new IllegalArgumentException("Invalid keystroke");
-        if (key.equals("CONTROL") || key.equals("ALT") || key.equals("META") ||
-            key.equals("SHIFT") || key.equals("ALT_GRAPH"))
-          return s;
-        s += key;
-        return s;
-      }
-      return s; 
+    if (k == NULL_KEYSTROKE)
+      return "<none>";
+    String s = KeyEvent.getKeyModifiersText(k.getModifiers()).toLowerCase();
+    s = s.replace('+', ' ');
+    if (!s.equals(""))
+      s += " ";
+    // If the key code is undefined, this is a "typed" unicode character
+    if (k.getKeyCode() == KeyEvent.VK_UNDEFINED) {
+      s += "typed ";
+      s += k.getKeyChar();
     }
-    else return "";
+    // else this corresponds to a static KeyEvent constant
+    else {
+      // defaults to pressed
+      if (k.isOnKeyRelease())
+        s += "released ";
+      String key = (String) keys.get(new Integer(k.getKeyCode()));
+      if (key == null)
+        throw new IllegalArgumentException("Invalid keystroke");
+      if (key.equals("CONTROL") || key.equals("ALT") || key.equals("META") ||
+          key.equals("SHIFT") || key.equals("ALT_GRAPH"))
+        return s;
+      s += key;
+      return s;
+    }
+    return s; 
   }
 }

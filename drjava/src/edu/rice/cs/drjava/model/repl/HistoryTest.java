@@ -122,37 +122,35 @@ public class HistoryTest extends TestCase implements OptionConstants{
   
   public void testLiveUpdateOfHistoryMaxSize() {
     
-    if (CodeStatus.DEVELOPMENT) {
-      int maxLength = 20;
-      CONFIG.setSetting(HISTORY_MAX_SIZE, new Integer(20));
-      
-      for (int i = 0; i < maxLength; i++) {
-        _history.add("testing " + i);
-      }
-      
-      CONFIG.setSetting(HISTORY_MAX_SIZE, new Integer(10));
-      
-      assertEquals("History size should be 10",
-                   10, _history.size());
-      
-      CONFIG.setSetting(HISTORY_MAX_SIZE, new Integer(100));
-      
-      assertEquals("History size should still be 10",
-                   10,
-                   _history.size());
-      
-      CONFIG.setSetting(HISTORY_MAX_SIZE, new Integer(0));
-      
-      assertEquals("History size should be 0",
-                   0,
-                   _history.size());
-      
-      CONFIG.setSetting(HISTORY_MAX_SIZE, new Integer(-1));
-      
-      assertEquals("History size should still be 0",
-                   0,
-                   _history.size());
+    int maxLength = 20;
+    CONFIG.setSetting(HISTORY_MAX_SIZE, new Integer(20));
+    
+    for (int i = 0; i < maxLength; i++) {
+      _history.add("testing " + i);
     }
+    
+    CONFIG.setSetting(HISTORY_MAX_SIZE, new Integer(10));
+    
+    assertEquals("History size should be 10",
+                 10, _history.size());
+    
+    CONFIG.setSetting(HISTORY_MAX_SIZE, new Integer(100));
+    
+    assertEquals("History size should still be 10",
+                 10,
+                 _history.size());
+    
+    CONFIG.setSetting(HISTORY_MAX_SIZE, new Integer(0));
+    
+    assertEquals("History size should be 0",
+                 0,
+                 _history.size());
+    
+    CONFIG.setSetting(HISTORY_MAX_SIZE, new Integer(-1));
+    
+    assertEquals("History size should still be 0",
+                 0,
+                 _history.size());
   }
   
 }

@@ -217,12 +217,7 @@ public class DefinitionsPane extends JEditorPane
    * @exception BadLocationException
    */
   private void _addHighlight(int from, int to) throws BadLocationException {
-    if (CodeStatus.DEVELOPMENT) {
-      _matchHighlight = (HighlightManager.HighlightInfo)_highlightManager.addHighlight(from, to, MATCH_PAINTER);
-    }
-    else {
-      _matchHighlight = getHighlighter().addHighlight(from, to, MATCH_PAINTER);
-    }
+    _matchHighlight = (HighlightManager.HighlightInfo)_highlightManager.addHighlight(from, to, MATCH_PAINTER);
   }
 
   /**
@@ -232,7 +227,7 @@ public class DefinitionsPane extends JEditorPane
     public void optionChanged(OptionEvent<Color> oce) {
       //Set the highlightPainter to the most recent one.
       MATCH_PAINTER = 
-      new DefaultHighlighter.DefaultHighlightPainter( DrJava.CONFIG.getSetting(DEFINITIONS_MATCH_COLOR) );
+        new DefaultHighlighter.DefaultHighlightPainter( DrJava.CONFIG.getSetting(DEFINITIONS_MATCH_COLOR) );
     }
     
   }
@@ -242,12 +237,7 @@ public class DefinitionsPane extends JEditorPane
    */
   private void _removePreviousHighlight() {
     if (_matchHighlight != null) {
-      if (CodeStatus.DEVELOPMENT) {
-        _highlightManager.removeHighlight((HighlightManager.HighlightInfo)_matchHighlight);
-      }
-      else {
-        getHighlighter().removeHighlight(_matchHighlight);
-      }
+      _highlightManager.removeHighlight((HighlightManager.HighlightInfo)_matchHighlight);
       _matchHighlight = null;
     }
   }
@@ -349,27 +339,20 @@ public class DefinitionsPane extends JEditorPane
    * normally would be done
    */
   public void processKeyEvent(KeyEvent e) {
-    if (CodeStatus.DEVELOPMENT) {
-      KeyStroke ks = KeyStroke.getKeyStrokeForEvent(e);
-      Action a = KeyBindingManager.Singleton.get(ks);
-      if (a != null) {
-        SwingUtilities.notifyAction(a, ks, e, e.getSource(), e.getModifiers());
-      }
-      else {    
-        // backspace deletes twice without this check, overrides other keystrokes
-        // that use the mask modifier
-        if (((ks.getModifiers() & mask) == 0) && ks.getKeyChar() != '\010') {
-          super.processKeyEvent(e);       
-        }
+    KeyStroke ks = KeyStroke.getKeyStrokeForEvent(e);
+    Action a = KeyBindingManager.Singleton.get(ks);
+    if (a != null) {
+      SwingUtilities.notifyAction(a, ks, e, e.getSource(), e.getModifiers());
+    }
+    else {    
+      // backspace deletes twice without this check, overrides other keystrokes
+      // that use the mask modifier
+      if (((ks.getModifiers() & mask) == 0) && ks.getKeyChar() != '\010') {
+        super.processKeyEvent(e);       
       }
     }
-    else
-      super.processKeyEvent(e);
   }
   
-  /*public void setKeyBindingManager(KeyBindingManager keyBindingManager) {
-    KeyBindingManager.Singleton = keyBindingManager;
-  }*/
   
   /**
    * Constructor.  Sets up all the defaults.
@@ -414,15 +397,13 @@ public class DefinitionsPane extends JEditorPane
  
     DrJava.CONFIG.addOptionListener( OptionConstants.DEFINITIONS_MATCH_COLOR, new MatchColorOptionListener());
         
-    if (CodeStatus.DEVELOPMENT) {
-      createPopupMenu();
+    createPopupMenu();
       
-      //Add listener to components that can bring up popup menus.
-      _popupMenuMA = new PopupMenuMouseAdapter();
-      this.addMouseListener( _popupMenuMA );
+    //Add listener to components that can bring up popup menus.
+    _popupMenuMA = new PopupMenuMouseAdapter();
+    this.addMouseListener( _popupMenuMA );
       
-      _highlightManager = new HighlightManager(this);
-    }
+    _highlightManager = new HighlightManager(this);
      
   }
 
@@ -749,13 +730,8 @@ public class DefinitionsPane extends JEditorPane
     throws BadLocationException
   {
     removeErrorHighlight();
-    if (CodeStatus.DEVELOPMENT) {
-      _errorHighlightTag = (HighlightManager.HighlightInfo)_highlightManager.addHighlight(from, to, ERROR_PAINTER);
-    }
-    else {
-      _errorHighlightTag =
-        getHighlighter().addHighlight(from, to, ERROR_PAINTER);
-    }
+    _errorHighlightTag = (HighlightManager.HighlightInfo)
+      _highlightManager.addHighlight(from, to, ERROR_PAINTER);
   }
 
   /**
@@ -764,12 +740,7 @@ public class DefinitionsPane extends JEditorPane
    */
   public void removeErrorHighlight() {
     if (_errorHighlightTag != null) {
-      if (CodeStatus.DEVELOPMENT) {
-        _highlightManager.removeHighlight( (HighlightManager.HighlightInfo)_errorHighlightTag);
-      }
-      else {
-        getHighlighter().removeHighlight(_errorHighlightTag);
-      }
+      _highlightManager.removeHighlight( (HighlightManager.HighlightInfo)_errorHighlightTag);
       _errorHighlightTag = null;
     }
   }

@@ -124,14 +124,12 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
   static {
     int ind = DrJava.CONFIG.getSetting(OptionConstants.INDENT_LEVEL).intValue();
     INDENTER = new Indenter(ind);
-    if (CodeStatus.DEVELOPMENT) {
-      DrJava.CONFIG.addOptionListener( OptionConstants.INDENT_LEVEL, 
-                                      new OptionListener<Integer>() {
-          public void optionChanged(OptionEvent<Integer> oce) {
-            INDENTER.buildTree(DrJava.CONFIG.getSetting(OptionConstants.INDENT_LEVEL).intValue());
-          }  
-        });
-    }
+    DrJava.CONFIG.addOptionListener( OptionConstants.INDENT_LEVEL, 
+                                    new OptionListener<Integer>() {
+      public void optionChanged(OptionEvent<Integer> oce) {
+        INDENTER.buildTree(DrJava.CONFIG.getSetting(OptionConstants.INDENT_LEVEL).intValue());
+      }  
+    });
   }
 
   public static final String EXIT_CALLED_MESSAGE
@@ -197,9 +195,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
 
     _createDebugger();
     
-    if (CodeStatus.DEVELOPMENT) {
-      DrJava.CONFIG.addOptionListener(EXTRA_CLASSPATH, new ExtraClasspathOptionListener());
-    }
+    DrJava.CONFIG.addOptionListener(EXTRA_CLASSPATH, new ExtraClasspathOptionListener());
   }
 
   /**
@@ -227,9 +223,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
       throw new UnexpectedException(ioe);
     }
     
-    if (CodeStatus.DEVELOPMENT) {    
-      DrJava.CONFIG.addOptionListener(EXTRA_CLASSPATH, new ExtraClasspathOptionListener());
-    }
+    DrJava.CONFIG.addOptionListener(EXTRA_CLASSPATH, new ExtraClasspathOptionListener());
   }
 
   /**
@@ -2099,8 +2093,6 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
    */
   private void _createDebugger() {
     if (CodeStatus.DEVELOPMENT) {
-      //boolean useDebug = DrJava.CONFIG.getSetting(DEBUGGER_ENABLED).booleanValue();
-      //if (useDebug) {
       try {
         _debugManager = new DebugManager(this);
       }

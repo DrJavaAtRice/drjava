@@ -184,10 +184,8 @@ public class CompilerErrorPanel extends TabbedPanel {
     uiBox.add(new JPanel(),BorderLayout.CENTER);
     _mainPanel.add(scroller, BorderLayout.CENTER);
     _mainPanel.add(compilerPanel, BorderLayout.EAST);
-    if (CodeStatus.DEVELOPMENT) {
-      DrJava.CONFIG.addOptionListener( OptionConstants.JAVAC_LOCATION, new CompilerLocationOptionListener());
-      DrJava.CONFIG.addOptionListener( OptionConstants.JSR14_LOCATION, new CompilerLocationOptionListener());
-    }
+    DrJava.CONFIG.addOptionListener( OptionConstants.JAVAC_LOCATION, new CompilerLocationOptionListener());
+    DrJava.CONFIG.addOptionListener( OptionConstants.JSR14_LOCATION, new CompilerLocationOptionListener());
   }
   
   
@@ -483,6 +481,8 @@ public class CompilerErrorPanel extends TabbedPanel {
             (errorsWithPositions.length > 0)) {
 
           // Grab filename for this set of errors
+          String filename = _model.getDisplayFilename(openDoc);
+          /**
           String filename = "(Untitled)";
           try {
             File file = openDoc.getFile();
@@ -492,6 +492,7 @@ public class CompilerErrorPanel extends TabbedPanel {
             // Not possible: compiled documents must have files
             throw new UnexpectedException(ise);
           }
+          */
 
           // Show errors without source locations
           for (int j = 0; j < errorsWithoutPositions.length; j++, errorNum++) {

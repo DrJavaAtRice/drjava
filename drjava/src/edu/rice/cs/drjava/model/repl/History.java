@@ -39,7 +39,7 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.repl;
 
-import  gj.util.Vector;
+import gj.util.Vector;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.model.*;
@@ -63,9 +63,7 @@ public class History implements OptionConstants {
    * Constructor, so we can add a listener to the Config item being used.
    */ 
   public History() {
-    if (CodeStatus.DEVELOPMENT) {
-      DrJava.CONFIG.addOptionListener(HISTORY_MAX_SIZE, new HistorySizeOptionListener());
-    }
+    DrJava.CONFIG.addOptionListener(HISTORY_MAX_SIZE, new HistorySizeOptionListener());
     
     // Sanity check on MAX_SIZE
     if (MAX_SIZE < 0) MAX_SIZE = 0;

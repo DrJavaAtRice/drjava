@@ -80,19 +80,16 @@ public class ColoringView extends PlainView implements OptionConstants {
     super(elem);
     _doc = (DefinitionsDocument)getDocument();
        
-    if (CodeStatus.DEVELOPMENT) {
-      
-      ColorOptionListener col = new ColorOptionListener();
-      
-      DrJava.CONFIG.addOptionListener( OptionConstants.DEFINITIONS_COMMENT_COLOR, col);
-      DrJava.CONFIG.addOptionListener( OptionConstants.DEFINITIONS_DOUBLE_QUOTED_COLOR, col);
-      DrJava.CONFIG.addOptionListener( OptionConstants.DEFINITIONS_SINGLE_QUOTED_COLOR, col);
-      DrJava.CONFIG.addOptionListener( OptionConstants.DEFINITIONS_NORMAL_COLOR, col);
-      DrJava.CONFIG.addOptionListener( OptionConstants.DEFINITIONS_KEYWORD_COLOR, col);
-      DrJava.CONFIG.addOptionListener( OptionConstants.DEFINITIONS_NUMBER_COLOR, col);
-      DrJava.CONFIG.addOptionListener( OptionConstants.DEFINITIONS_TYPE_COLOR, col); 
-    }
+    // Listen for updates to configurable colors
+    ColorOptionListener col = new ColorOptionListener();
     
+    DrJava.CONFIG.addOptionListener( OptionConstants.DEFINITIONS_COMMENT_COLOR, col);
+    DrJava.CONFIG.addOptionListener( OptionConstants.DEFINITIONS_DOUBLE_QUOTED_COLOR, col);
+    DrJava.CONFIG.addOptionListener( OptionConstants.DEFINITIONS_SINGLE_QUOTED_COLOR, col);
+    DrJava.CONFIG.addOptionListener( OptionConstants.DEFINITIONS_NORMAL_COLOR, col);
+    DrJava.CONFIG.addOptionListener( OptionConstants.DEFINITIONS_KEYWORD_COLOR, col);
+    DrJava.CONFIG.addOptionListener( OptionConstants.DEFINITIONS_NUMBER_COLOR, col);
+    DrJava.CONFIG.addOptionListener( OptionConstants.DEFINITIONS_TYPE_COLOR, col); 
  }
 
   /**
@@ -220,22 +217,19 @@ public class ColoringView extends PlainView implements OptionConstants {
    */ 
   public void updateColors() {
     
-    if (CodeStatus.DEVELOPMENT) {
-      
-      COMMENTED_COLOR = DrJava.CONFIG.getSetting(DEFINITIONS_COMMENT_COLOR);
-      DOUBLE_QUOTED_COLOR = DrJava.CONFIG.getSetting(DEFINITIONS_DOUBLE_QUOTED_COLOR);
-      SINGLE_QUOTED_COLOR = DrJava.CONFIG.getSetting(DEFINITIONS_SINGLE_QUOTED_COLOR);
-      NORMAL_COLOR = DrJava.CONFIG.getSetting(DEFINITIONS_NORMAL_COLOR);
-      KEYWORD_COLOR = DrJava.CONFIG.getSetting(DEFINITIONS_KEYWORD_COLOR);
-      NUMBER_COLOR = DrJava.CONFIG.getSetting(DEFINITIONS_NUMBER_COLOR);
-      TYPE_COLOR = DrJava.CONFIG.getSetting(DEFINITIONS_TYPE_COLOR);
-        
-      //Avoid the ColoringView that does not have a container.
-      if ( getContainer() != null) {
-        getContainer().repaint();
-      }
-      
+    COMMENTED_COLOR = DrJava.CONFIG.getSetting(DEFINITIONS_COMMENT_COLOR);
+    DOUBLE_QUOTED_COLOR = DrJava.CONFIG.getSetting(DEFINITIONS_DOUBLE_QUOTED_COLOR);
+    SINGLE_QUOTED_COLOR = DrJava.CONFIG.getSetting(DEFINITIONS_SINGLE_QUOTED_COLOR);
+    NORMAL_COLOR = DrJava.CONFIG.getSetting(DEFINITIONS_NORMAL_COLOR);
+    KEYWORD_COLOR = DrJava.CONFIG.getSetting(DEFINITIONS_KEYWORD_COLOR);
+    NUMBER_COLOR = DrJava.CONFIG.getSetting(DEFINITIONS_NUMBER_COLOR);
+    TYPE_COLOR = DrJava.CONFIG.getSetting(DEFINITIONS_TYPE_COLOR);
+    
+    //Avoid the ColoringView that does not have a container.
+    if ( getContainer() != null) {
+      getContainer().repaint();
     }
+      
   }
   
   /**

@@ -190,13 +190,16 @@ public class ConfigFrame extends JFrame {
       }
     });
     
+    // Make sure each row is expanded (this is harder than it seems...)
+    _tree.expandRow(0);
+    _tree.expandRow(1);
   }
 
   /**
    * Call the update method to propagate down the tree, parsing input values 
    * into their config options.
    */
-  public boolean apply() {   
+  public boolean apply() {
     // returns false if the update did not succeed
     return _rootNode.update();
   }
@@ -281,7 +284,11 @@ public class ConfigFrame extends JFrame {
   private PanelTreeNode _createPanel(String t, PanelTreeNode parent) {
     
     PanelTreeNode ptNode = new PanelTreeNode(t);
-    parent.add(ptNode);
+    //parent.add(ptNode);
+    _treeModel.insertNodeInto(ptNode, parent, parent.getChildCount());
+    
+    // Make sure tree node is visible
+    _tree.expandPath(new TreePath(ptNode.getPath()));
     
     return ptNode;
   }
@@ -325,7 +332,7 @@ public class ConfigFrame extends JFrame {
 
     PanelTreeNode colorNode = _createPanel("Colors", displayNode);
     _setupColorPanel(colorNode.getPanel());
-
+    
     PanelTreeNode keystrokesNode = _createPanel(new KeyStrokeConfigPanel("Key Bindings"),
                                                 _rootNode);
     _setupKeyBindingsPanel(keystrokesNode.getPanel());
@@ -335,7 +342,10 @@ public class ConfigFrame extends JFrame {
 
     PanelTreeNode miscNode = _createPanel("Miscellaneous");
     _setupMiscPanel(miscNode.getPanel());
-    
+
+    // Expand the display options node
+    //DrJava.consoleOut().println("expanding path...");
+    //_tree.expandPath(new TreePath(fontNode.getPath()));
   }
   
   /**
