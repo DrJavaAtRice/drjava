@@ -1247,14 +1247,16 @@ public class JPDADebugger implements Debugger {
   /** 
    * A stack from which you can remove any element, not just the top of the stack 
    */
-  protected class RandomAccessStack extends Vector<ThreadReference>{
+  protected class RandomAccessStack{
+    private Vector<ThreadReference> _data = new Vector<ThreadReference>();
+    
     public void push(ThreadReference t){
-      insertElementAt(t, 0);
+      _data.insertElementAt(t, 0);
     }
     
     public ThreadReference peek() throws NoSuchElementException{
       try{
-        return elementAt(0);
+        return _data.elementAt(0);
       }catch(ArrayIndexOutOfBoundsException e){
         throw new NoSuchElementException("Cannot peek at the top of an empty RandomAccessStack!");
       }
@@ -1262,10 +1264,10 @@ public class JPDADebugger implements Debugger {
     
     public ThreadReference remove(long id) throws NoSuchElementException{
       int i = 0;
-      for(i = 0; i < size(); i++){
-        if( elementAt(i).uniqueID() == id ){
-          ThreadReference t = elementAt(i);
-          removeElementAt(i);
+      for(i = 0; i < _data.size(); i++){
+        if( _data.elementAt(i).uniqueID() == id ){
+          ThreadReference t = _data.elementAt(i);
+          _data.removeElementAt(i);
           return t; 
         }
       }
@@ -1275,8 +1277,8 @@ public class JPDADebugger implements Debugger {
     
     public ThreadReference pop() throws NoSuchElementException{
       try{
-        ThreadReference t = elementAt(0);
-        removeElementAt(0);
+        ThreadReference t = _data.elementAt(0);
+        _data.removeElementAt(0);
         return t; 
       }catch(ArrayIndexOutOfBoundsException e){
         throw new NoSuchElementException("Cannot pop from an empty RandomAccessStack!");
@@ -1285,14 +1287,16 @@ public class JPDADebugger implements Debugger {
     
     public boolean contains(long id){
       int i = 0;
-      for(i = 0; i < size(); i++){
-        if( elementAt(i).uniqueID() == id ){
+      for(i = 0; i < _data.size(); i++){
+        if( _data.elementAt(i).uniqueID() == id ){
           return true;
         }
       }
       
       return false;
     }
+
+    public int size() { return _data.size(); }
   }
   
    /**
