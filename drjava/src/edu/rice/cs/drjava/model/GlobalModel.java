@@ -53,6 +53,7 @@ import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.drjava.model.definitions.*;
 import edu.rice.cs.drjava.model.debug.DebugManager;
 import edu.rice.cs.drjava.model.repl.*;
+import edu.rice.cs.drjava.model.junit.JUnitError;
 import edu.rice.cs.drjava.model.compiler.*;
 
 import junit.framework.TestResult;
@@ -375,4 +376,14 @@ public interface GlobalModel {
    * @param paths An array of directories to search
    */
   public File getSourceFileFromPaths(String filename, gj.util.Vector<File> paths);
+  
+  /**
+   * Called from the JUnitTestManager if its given className is not a test case.
+   */
+  public void nonTestCase();
+  
+  /**
+   * Called from the JUnitTestManager after the test finishes
+   */
+  public void testFinished(JUnitError[] errors);
 }

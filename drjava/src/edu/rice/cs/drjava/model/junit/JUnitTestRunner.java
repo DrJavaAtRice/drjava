@@ -39,8 +39,8 @@
 
 package edu.rice.cs.drjava.model.junit;
 
+import edu.rice.cs.drjava.model.repl.newjvm.InterpreterJVM;
 import edu.rice.cs.util.UnexpectedException;
-import edu.rice.cs.drjava.model.*;
 
 import java.io.PrintStream;
 import javax.swing.*;
@@ -58,44 +58,26 @@ import junit.textui.TestRunner;
  * @version $Id$
  */
 public class JUnitTestRunner extends junit.textui.TestRunner {
-  /**
-   * Variable used to keep track of the currently executing
-   * test case.
-   */
-  private String _currentTest;
 
   /**
-   * The document in the JUnit pane in the UI
-   * to write to.
-   */
-  private StyledDocument _doc;
-
-  /**
-   * Class loader that uses DrJava's classpath
-   */
-  TestSuiteLoader _classLoader;
-
-  /**
-   * Pointer to GlobalModel. Not entirely necessary to
-   * keep around.
-   */
-  private GlobalModel _model;
-
-  /**
-   * Used to tie the output of the ui textrunner
+   * Used to tie the output of the ui textrunner 
    * to nothing.
    */
   private PrintStream _writer;
-
+  
+  /**
+   * Class loader that uses DrJava's classpath. Overrides the super class' loader.
+   */
+  private TestSuiteLoader _classLoader;
+  
+  
   /**
    * Constructor
    */
-  public JUnitTestRunner(GlobalModel model) {
+  public JUnitTestRunner(InterpreterJVM jvm) {
     super();
-    _model = model;
-    _doc = model.getJUnitDocument();
-    _classLoader = new DrJavaTestClassLoader(model);
-    _writer =  new PrintStream(System.out) {
+    _classLoader = new DrJavaTestClassLoader(jvm);
+    _writer = new PrintStream(System.out) {
       public void print(String s) {
       }
       public void println(String s) {
@@ -106,54 +88,23 @@ public class JUnitTestRunner extends junit.textui.TestRunner {
   }
 
   /**
-   * Provides our own PrintStream which outputs
-   * to the appropriate document;
-   */
-  protected PrintStream getWriter() {
-    return _writer;
-  }
-
-  protected PrintStream writer() {
-    return getWriter();
-  }
-
-  /**
-   * Overrides method in super class to always return
-   * a reloading test suite loader.
+   * Overrides method in super class to always return a 
+   * reloading test suite loader.
    */
   public TestSuiteLoader getLoader() {
     return _classLoader;
   }
-
+  
   /**
-   * Checks whether the given file name corresponds to
-   * a valid JUnit TestCase.
+   * Provides our own PrintStream which outputs
+   * to the appropriate document.
    */
-  public boolean isTestCase(String fileName)
-    throws ClassNotFoundException
-  {
-    return Class.forName("junit.framework.TestCase")
-      .isAssignableFrom(getLoader().load(fileName));
+  protected PrintStream getWriter() {
+    return _writer;
   }
-
-  /**
-   * Initiates JUnit on the currently open document.
-   */
-  public TestResult doRun(Test suite, boolean wait, OpenDefinitionsDocument odd) {
-    TestResult tr = super.doRun(suite, wait);
-    
-    odd.setJUnitErrorModel(new JUnitErrorModel(odd.getDocument(), _currentTest, tr));
-
-    
-    return tr;
-  }
-
-  /**
-   * Returns the currently executing TestCase.
-   */
-  public Test getTest(String testCase) {
-    _currentTest = testCase;
-    return super.getTest(_currentTest);
+  
+  protected PrintStream writer() {
+    return getWriter();
   }
 
 }

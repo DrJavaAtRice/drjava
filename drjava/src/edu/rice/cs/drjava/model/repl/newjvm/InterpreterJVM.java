@@ -46,6 +46,8 @@ import java.rmi.*;
 import java.net.MalformedURLException;
 import edu.rice.cs.drjava.model.repl.*;
 import edu.rice.cs.util.OutputStreamRedirector;
+import edu.rice.cs.drjava.model.junit.JUnitTestManager;
+import edu.rice.cs.drjava.model.junit.JUnitError;
 import javax.swing.JOptionPane;
 
 /**
@@ -67,15 +69,20 @@ public class InterpreterJVM extends UnicastRemoteObject
 
   private final MainJVMRemoteI _mainJVM;
   private JavaInterpreter _interpreter;
+  private String _classpath;
+  private JUnitTestManager _junitTestManager;
 
   public InterpreterJVM(String url) throws RemoteException,
                                            NotBoundException,
                                            MalformedURLException
   {
     super();
+    _classpath = "";
 
     //JOptionPane.showMessageDialog(null, "Starting InterpreterJVM initialization");
     reset();
+    
+    _junitTestManager = new JUnitTestManager(this);
 
     _mainJVM = (MainJVMRemoteI) Naming.lookup(url);
     _mainJVM.registerInterpreterJVM(this);
@@ -308,12 +315,41 @@ public class InterpreterJVM extends UnicastRemoteObject
   public void addClassPath(String s) throws RemoteException {
     //_dialog("add classpath: " + s);
     _interpreter.addClassPath(s);
+    _classpath += s;
+    _classpath += System.getProperty("path.separator");
   }
-
+  
+  public String getClasspath() {
+    return _classpath;
+  }
+  
+  public void runTest(String className, String fileName) throws RemoteException {
+    _junitTestManager.runTest(className, fileName);
+  }
+  
+  public void nonTestCase() {
+    try {
+      _mainJVM.nonTestCase();
+    }
+      catch (RemoteException re) {
+        // nothing to do
+      }
+      
+  }
+  
+  public void testFinished(JUnitError[] errors) {
+    try {
+      _mainJVM.testFinished(errors);
+    }
+    catch (RemoteException re) {
+      // nothing to do
+    }    
+  }
+  
   public void setPackageScope(String s) throws RemoteException {
     _interpreter.setPackageScope(s);
   }
-
+  
   public void reset() throws RemoteException {
     _interpreter = new DynamicJavaAdapter();
     

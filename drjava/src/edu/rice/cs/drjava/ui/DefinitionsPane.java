@@ -760,7 +760,6 @@ public class DefinitionsPane extends JEditorPane
   }
   
   public void centerViewOnOffset(int offset) {
-
     try {
       FontMetrics metrics = getFontMetrics(getFont());
       int length = _doc.getDocument().getLength();
@@ -790,14 +789,13 @@ public class DefinitionsPane extends JEditorPane
     catch (BadLocationException e) {
       throw new UnexpectedException(e);
     }
-
   }   
   
   public void centerViewOnLine(int lineNumber) {
     FontMetrics metrics = getFontMetrics(getFont());
     Point p = new Point(0, metrics.getHeight() * (lineNumber));
     int offset = this.viewToModel(p);
-    this.centerViewOnOffset(offset);   
+    this.centerViewOnOffset(offset);
   }
 
   /**

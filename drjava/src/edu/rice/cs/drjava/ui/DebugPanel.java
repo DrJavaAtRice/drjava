@@ -289,6 +289,8 @@ public class DebugPanel extends JPanel implements OptionConstants {
         _debugger.removeWatch(row);
       }
       else {
+        if (row < _watches.size())
+          _debugger.removeWatch(row);
         // Add value
         _debugger.addWatch(String.valueOf(value));
       }

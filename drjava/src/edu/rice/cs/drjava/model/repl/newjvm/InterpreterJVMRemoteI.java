@@ -51,6 +51,7 @@ import java.rmi.RemoteException;
 public interface InterpreterJVMRemoteI extends Remote {
   public void interpret(String s) throws RemoteException;
   public void addClassPath(String s) throws RemoteException;
+  public void runTest(String className, String fileName) throws RemoteException;
   public void setPackageScope(String s) throws RemoteException;
   public void reset() throws RemoteException;
   public void exitJVM() throws RemoteException;

@@ -39,7 +39,7 @@
 
 package edu.rice.cs.drjava.model.junit;
 
-import edu.rice.cs.drjava.model.GlobalModel;
+import edu.rice.cs.drjava.model.repl.newjvm.InterpreterJVM;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
 import gj.util.Vector;
@@ -54,21 +54,21 @@ import junit.runner.*;
  */
 public class DrJavaTestClassLoader implements TestSuiteLoader, OptionConstants {
   
-  GlobalModel _model;
+  private final InterpreterJVM _jvm;
   
-  public DrJavaTestClassLoader(GlobalModel model) {
+  public DrJavaTestClassLoader(InterpreterJVM jvm) {
     super();
-    _model = model;
+    _jvm = jvm;
   }
   
   public Class load(String suiteClassName) throws ClassNotFoundException {
-    String classpath = _model.getClasspath();
+    String classpath = _jvm.getClasspath();
     TestCaseClassLoader loader= new TestCaseClassLoader(classpath);
     return loader.loadClass(suiteClassName, true);
   }
   
   public Class reload(Class aClass) throws ClassNotFoundException {
-    String classpath = _model.getClasspath();
+    String classpath = _jvm.getClasspath();
     TestCaseClassLoader loader= new TestCaseClassLoader(classpath);
     return loader.loadClass(aClass.getName(), true);
   }

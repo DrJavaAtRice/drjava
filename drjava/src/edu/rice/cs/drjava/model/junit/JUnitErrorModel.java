@@ -67,6 +67,7 @@ public class JUnitErrorModel {
   
   private boolean _testsHaveRun = false;
   private int _errorsWithPos = 0;
+  private int _numErrors;
   
   /**
    * Constructs a new JUnitErrorModel to be maintained
@@ -74,30 +75,20 @@ public class JUnitErrorModel {
    * @param doc Document containing the errors
    * @param file File containing the errors, or null
    */
-  public JUnitErrorModel(DefinitionsDocument doc, String theclass, TestResult result) {
+  public JUnitErrorModel(DefinitionsDocument doc, JUnitError[] errors) {
     _document = doc;
     _testsHaveRun = true;
-        
-    JUnitError[] errors = new JUnitError[result.errorCount() + result.failureCount()];
-     
-    Enumeration failures = result.failures();
-    Enumeration errEnum = result.errors(); 
-    
-    int i=0;
-    
-    while ( errEnum.hasMoreElements()) {
-      TestFailure tErr = (TestFailure) errEnum.nextElement();
-      errors[i] = _makeJUnitError(tErr, theclass, true);
-      i++;
+    _numErrors = errors.length;
+    try {
+      _file = doc.getFile();
     }
-    
-    while (failures.hasMoreElements()) {
-      TestFailure tFail = (TestFailure) failures.nextElement();
-      errors[i] = _makeJUnitError(tFail, theclass, false);
-      i++;
+    catch (FileMovedException fme) {
+      // Recover, even though file was deleted
+      _file = fme.getFile();
     }
-      
-    Arrays.sort(errors);
+    catch (IllegalStateException ise) {
+      _file = null;
+    }
     
     //Create the array of errors and failures, ordered by line number
     
@@ -150,6 +141,7 @@ public class JUnitErrorModel {
     _positions = new Position[0];
     _testsHaveRun = false;
     _errorsWithPos = 0;
+    _numErrors = 0;
   }
   
   /**
@@ -163,73 +155,6 @@ public class JUnitErrorModel {
     return theLine;
   }
 
-  /**
-   * 
-   */
-  private int _lineNumber (String sw, String classname) {
-    
-    int lineNum;
-
-    int idxClassname = sw.indexOf(classname);
-    if (idxClassname == -1) return -1;
-
-    String theLine = sw.substring(idxClassname, sw.length());
-    theLine = theLine.substring(theLine.indexOf(classname), theLine.length());
-    theLine = theLine.substring(theLine.indexOf("(") + 1, theLine.length());
-    theLine = theLine.substring(0, theLine.indexOf(")"));
-    
-    try {
-      lineNum = new Integer(theLine.substring(
-                                      theLine.indexOf(":") + 1,
-                                      theLine.length())).intValue() - 1;
-    } 
-    catch (NumberFormatException e) {
-      throw new UnexpectedException(e);
-    }
-    
-    return lineNum;
-  }
-    
-  /**
-   * Constructs a new JUnitError from a TestFailure
-   * @param tF A given TestFailure
-   * @param theclass The class that contains the TestFailure
-   * @param isError The passed TestFailure may signify either an error or a failure
-   * @return JUnitError 
-   */
-  private JUnitError _makeJUnitError ( TestFailure tF, String theclass, boolean isError) {
-   
-    TestFailure tFail = tF;
-    TestCase tcFail = (TestCase) tFail.failedTest();
-    
-    StringWriter swFail = new StringWriter();
-    PrintWriter pwFail  = new PrintWriter(swFail);
-    
-    tFail.thrownException().printStackTrace(pwFail);
-        
-    String classnameFail = theclass + "." + tcFail.getName();
-    
-    int lineNum = _lineNumber( swFail.toString(), classnameFail);
-    if (lineNum > -1) _errorsWithPos++;
-    
-    try {
-      _file = _document.getFile();
-    }
-    catch (FileMovedException fme) {
-      // Recover, even though file was deleted
-      _file = fme.getFile();
-    }
-    
-    String exception =  (isError) ? 
-      tFail.thrownException().toString(): 
-      tFail.thrownException().getMessage();
-      
-      return new JUnitError(_file, lineNum, 0, exception,
-                            ! (tFail.thrownException() instanceof AssertionFailedError),
-                            tcFail.getName(),
-                            swFail.toString());
-  }
-
 
   /**
    * Accessor
@@ -237,6 +162,13 @@ public class JUnitErrorModel {
    */
   public boolean haveTestsRun() {
     return _testsHaveRun;
+  }
+  
+  /**
+   * Returns the number of JUnitErrors
+   */
+  public int getNumErrors() {
+    return _numErrors;
   }
 
   /**

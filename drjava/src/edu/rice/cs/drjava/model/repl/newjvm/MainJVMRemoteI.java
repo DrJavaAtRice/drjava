@@ -42,6 +42,8 @@ package edu.rice.cs.drjava.model.repl.newjvm;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 
+import edu.rice.cs.drjava.model.junit.JUnitError;
+
 /**
  * This interface specifies the methods that the Main JVM exposes
  * for the InterpreterJVM to call.
@@ -94,4 +96,8 @@ public interface MainJVMRemoteI extends Remote {
    * VM is still alive. If it's not, the interpreter just quits.
    */
   public void checkStillAlive() throws RemoteException;
+  
+  public void nonTestCase() throws RemoteException;
+  
+  public void testFinished(JUnitError[] errors) throws RemoteException;
 }

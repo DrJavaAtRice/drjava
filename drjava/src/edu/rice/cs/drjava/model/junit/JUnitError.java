@@ -48,8 +48,9 @@ import java.util.Enumeration;
  * to make the errors as legible as possible.
  * @version $Id$
  */
-public class JUnitError extends TestResult implements Comparable {
-  private File _file;
+public class JUnitError extends TestResult implements Comparable, Serializable {
+  //private File _file;
+  private String _fileName;
 
   /** zero-based line number. */
   private int _lineNumber;
@@ -69,9 +70,9 @@ public class JUnitError extends TestResult implements Comparable {
    * @param     String message  the error message
    * @param     boolean isError true if the error is a warning
    */
-  public JUnitError(File file, int lineNumber, int startColumn, String message,
+  public JUnitError(String fileName, int lineNumber, int startColumn, String message,
       boolean isError, String test, String stackTrace) {
-    _file = file;
+    _fileName = fileName;
     _lineNumber = lineNumber;
     _startColumn = startColumn;
     _message = message;
@@ -91,18 +92,17 @@ public class JUnitError extends TestResult implements Comparable {
   /**
    * Gets the file.
    * @return the file with errors.
-   */
+   *
   public File file() {
     return _file;
-  }
+  }*/
 
   /**
    * Gets the full name of the file.
    * @return the file name.
    */
   public String fileName() {
-    if (_file == null) return "";
-    else return _file.getAbsolutePath();
+    return _fileName;
   }
 
   /**
@@ -156,16 +156,16 @@ public class JUnitError extends TestResult implements Comparable {
    */
   public int compareTo(Object o) {
     JUnitError other = (JUnitError)o;
-
+    
     // Determine if I have a file
-    if (_file != null) {
-      if (other.file() == null) {
+    if (_fileName != null) {
+      if (other.fileName() == null) {
         // Errors with files are bigger
         return 1;
       }
       else {
         // Compare by file
-        int fileComp = _file.compareTo(other.file());
+        int fileComp = new File(_fileName).compareTo(new File(other.fileName()));
         if (fileComp != 0) {
           return fileComp;
         }
@@ -177,7 +177,7 @@ public class JUnitError extends TestResult implements Comparable {
     }
     else {
       // My file is null
-      if (other.file() == null) {
+      if (other.fileName() == null) {
         return 0;
       }
       else {
@@ -193,11 +193,11 @@ public class JUnitError extends TestResult implements Comparable {
    */
   private int compareByPosition(JUnitError other) {
     // Compare by line unless lines are equal
-    if (_lineNumber == other._lineNumber) {
-      return  _startColumn - other._startColumn;
+    if (_lineNumber == other.lineNumber()) {
+      return  _startColumn - other.startColumn();
     }
     else {
-      return  _lineNumber - other._lineNumber;
+      return  _lineNumber - other.lineNumber();
     }
   }
 

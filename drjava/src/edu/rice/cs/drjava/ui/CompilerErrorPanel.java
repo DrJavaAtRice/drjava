@@ -741,14 +741,16 @@ public class CompilerErrorPanel extends TabbedPanel
 
       if ((idx < 0) || (idx >= positions.length)) return;
 
-      int errPos = positions[idx].getOffset();
-
+      Position pos = positions[idx];
       // switch to correct def pane
       _model.setActiveDocument(doc);
 
       // move caret to that position
       DefinitionsPane defPane = _frame.getCurrentDefPane();
-      defPane.setCaretPosition(errPos);
+      if (pos != null) {
+        int errPos = pos.getOffset();
+        defPane.setCaretPosition(errPos);
+      }
       defPane.requestFocus();
       defPane.getCaret().setVisible(true);
     }

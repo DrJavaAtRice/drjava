@@ -75,6 +75,14 @@ public class JUnitPanel extends TabbedPanel
 
   private static final SimpleAttributeSet NORMAL_ATTRIBUTES = _getNormalAttributes();
   private static final SimpleAttributeSet BOLD_ATTRIBUTES = _getBoldAttributes();
+  private static final SimpleAttributeSet OUT_OF_SYNC_ATTRIBUTES = _getOutOfSyncAttributes();
+  
+  private static final SimpleAttributeSet _getOutOfSyncAttributes() {
+    SimpleAttributeSet s = new SimpleAttributeSet();
+    s.addAttribute(StyleConstants.Foreground, Color.red.darker());
+    s.addAttribute(StyleConstants.Bold, new Boolean(true));
+    return s;
+  }
 
   private static final SimpleAttributeSet _getBoldAttributes() {
     SimpleAttributeSet s = new SimpleAttributeSet();
@@ -86,12 +94,16 @@ public class JUnitPanel extends TabbedPanel
     SimpleAttributeSet s = new SimpleAttributeSet();
     return s;
   }
+  
+  private static final String TEST_OUT_OF_SYNC = "The document being tested has been modified " +
+    "and should be recompiled!\n";
 
 
   /** The total number of errors in the list */
   private int _numErrors;
   private final SingleDisplayModel _model;
   private final JUnitErrorListPane _errorListPane;
+  private OpenDefinitionsDocument _docBeingTested;
   
   private JCheckBox _showHighlightsCheckBox;
   
@@ -160,8 +172,8 @@ public class JUnitPanel extends TabbedPanel
   }
 
   /** Called when compilation begins. */
-  public void setJUnitInProgress() {
-    _errorListPane.setJUnitInProgress();
+  public void setJUnitInProgress(OpenDefinitionsDocument doc) {
+    _errorListPane.setJUnitInProgress(doc);
   }
   
   /**
@@ -169,7 +181,9 @@ public class JUnitPanel extends TabbedPanel
    */
   protected void _close() {
     super._close();
-    _model.getActiveDocument().setJUnitErrorModel(new JUnitErrorModel());
+    if (_docBeingTested != null) {
+      _docBeingTested.setJUnitErrorModel(new JUnitErrorModel());
+    }
     _frame.updateErrorListeners();
     reset();
   }
@@ -179,15 +193,17 @@ public class JUnitPanel extends TabbedPanel
    * @param errors the current error information
    */
   public void reset() {
-    JUnitErrorModel juem = _model.getActiveDocument().getJUnitErrorModel();
-    boolean testsHaveRun = false;
-    if (juem != null) {
-      _numErrors = juem.getErrorsWithoutPositions().length + juem.getErrorsWithPositions().length;
-      testsHaveRun = juem.haveTestsRun();
-    } else {
-      _numErrors = 0;
+    if (_docBeingTested != null) {
+      JUnitErrorModel juem = _docBeingTested.getJUnitErrorModel();
+      boolean testsHaveRun = false;
+      if (juem != null) {
+        _numErrors = juem.getErrorsWithoutPositions().length + juem.getErrorsWithPositions().length;
+        testsHaveRun = juem.haveTestsRun();
+      } else {
+        _numErrors = 0;
+      }
+      _errorListPane.updateListPane(testsHaveRun);
     }
-    _errorListPane.updateListPane(testsHaveRun);
     _resetEnabledStatus();
   }
 
@@ -388,11 +404,34 @@ public class JUnitPanel extends TabbedPanel
       
     }
     
+    /**
+     * Checks the document being tested to see if it's in sync. If not,
+     * displays a message in the document in the test output pane.
+     */
+    private void _checkSync(Document doc) {
+      if (_docBeingTested == null) {
+        return;
+      }
+      if (!_docBeingTested.checkIfClassFileInSync()) {
+        try {
+          doc.insertString(doc.getLength(), TEST_OUT_OF_SYNC, OUT_OF_SYNC_ATTRIBUTES); 
+        }
+        catch (BadLocationException ble) {
+          throw new UnexpectedException(ble);
+        }
+      }
+    }
+      
     private void _displayStackTrace (JUnitError e) {
       _errorLabel.setText((e.isWarning() ? "Error: " : "Failure: ") +
                           e.message());
-      _fileLabel.setText("File: "+e.file().getName());
-      _testLabel.setText("Test: "+e.testName());
+      _fileLabel.setText("File: "+(new File(e.fileName())).getName());
+      if (!e.testName().equals("")) {
+        _testLabel.setText("Test: "+e.testName());
+      }
+      else {
+        _testLabel.setText("");
+      }
       _stackTextArea.setText(e.stackTrace());
       _stackTextArea.setCaretPosition(0);
       _stackFrame.show();
@@ -500,20 +539,21 @@ public class JUnitPanel extends TabbedPanel
     }
 
     /** Puts the error pane into "compilation in progress" state. */
-    public void setJUnitInProgress() {
+    public void setJUnitInProgress(OpenDefinitionsDocument odd) {
+      _docBeingTested = odd;
       _errorListPositions = new Position[0];
 
       DefaultStyledDocument doc = new DefaultStyledDocument();
-
+      _checkSync(doc);
+      
       try {
-        doc.insertString(0,
-                         "Testing in progress, please wait...",
+        doc.insertString(doc.getLength(),
+                         "Testing in progress, please wait...\n",
                          NORMAL_ATTRIBUTES);
       }
       catch (BadLocationException ble) {
         throw new UnexpectedException(ble);
       }
-
       setDocument(doc);
 
       selectNothing();
@@ -524,10 +564,10 @@ public class JUnitPanel extends TabbedPanel
      */
     private void _updateNoErrors(boolean haveTestsRun) throws BadLocationException {
       DefaultStyledDocument doc = new DefaultStyledDocument();
-      
+      _checkSync(doc);
       String msg = (haveTestsRun) ? "All tests completed successfully." : "";
       
-      doc.insertString(0,
+      doc.insertString(doc.getLength(),
                        msg,
                        NORMAL_ATTRIBUTES);
       setDocument(doc);
@@ -540,11 +580,11 @@ public class JUnitPanel extends TabbedPanel
      */
     private void _updateWithErrors() throws BadLocationException {
       DefaultStyledDocument doc = new DefaultStyledDocument();
+      _checkSync(doc);
       int errorNum = 0;
 
       // Show errors for each file
-      OpenDefinitionsDocument openDoc = _model.getActiveDocument();
-      JUnitErrorModel errorModel = openDoc.getJUnitErrorModel();
+      JUnitErrorModel errorModel = _docBeingTested.getJUnitErrorModel();
       JUnitError[] errorsWithPositions = errorModel.getErrorsWithPositions();
       JUnitError[] errorsWithoutPositions = errorModel.getErrorsWithoutPositions();
       
@@ -552,7 +592,7 @@ public class JUnitPanel extends TabbedPanel
             (errorsWithPositions.length > 0)) {
 
         // Grab filename for this set of errors
-        String filename = openDoc.getFilename();
+        String filename = _docBeingTested.getFilename();
         
         // Show errors without source locations
         for (int j = 0; j < errorsWithoutPositions.length; j++, errorNum++) {
@@ -617,10 +657,12 @@ public class JUnitPanel extends TabbedPanel
       throws BadLocationException
       {
         JUnitError error = array[i];
-
-        doc.insertString(doc.getLength(), "Test: ", BOLD_ATTRIBUTES);
-        doc.insertString(doc.getLength(), error.testName(), NORMAL_ATTRIBUTES);
-        doc.insertString(doc.getLength(), "\n", NORMAL_ATTRIBUTES);
+        
+        if (!error.testName().equals("")) {
+          doc.insertString(doc.getLength(), "Test: ", BOLD_ATTRIBUTES);
+          doc.insertString(doc.getLength(), error.testName(), NORMAL_ATTRIBUTES);
+          doc.insertString(doc.getLength(), "\n", NORMAL_ATTRIBUTES);
+        }
 
         //TO DO: change isWarning to isError
         if (error.isWarning()) {
@@ -724,7 +766,7 @@ public class JUnitPanel extends TabbedPanel
       
       try {
       
-        OpenDefinitionsDocument doc = _model.getDocumentForFile(error.file());
+        OpenDefinitionsDocument doc = _model.getDocumentForFile(new File(error.fileName()));
         JUnitErrorModel errorModel = doc.getJUnitErrorModel();
         
         if (errorHasLocation) {
@@ -792,7 +834,7 @@ public class JUnitPanel extends TabbedPanel
       //System.out.println("index clicked: " + idx);
       //System.out.println("position: " + errors[idx].lineNumber());
       
-      int errPos = positions[idx].getOffset();
+      Position pos = positions[idx];
  
       //set the active document (implicit call to updateHighlight() )
       _model.setActiveDocument(doc);
@@ -801,10 +843,13 @@ public class JUnitPanel extends TabbedPanel
        // switch to correct def pane, and inform it that it should highlight
       DefinitionsPane defPane = _frame.getCurrentDefPane();
       defPane.getJUnitErrorCaretListener().shouldHighlight(true);
-      defPane.setCaretPosition(errPos);
+      if (pos != null) {
+        int errPos = pos.getOffset();
+        defPane.setCaretPosition(errPos);
+        //defPane.getJUnitErrorCaretListener().updateHighlight(errPos);
+      }
       defPane.grabFocus();
       defPane.getCaret().setVisible(true);
-      defPane.getJUnitErrorCaretListener().updateHighlight(errPos);
     }
     
      /**

@@ -66,8 +66,7 @@ public class JUnitErrorCaretListener implements CaretListener {
 
   private JUnitErrorModel _model;
   private Position[] _positions;
-  private boolean _shouldHighlight = true;
-  
+  private boolean _shouldHighlight = true;  
 
   /**
    * Constructs a new caret listener to highlight JUnit errors.
@@ -122,7 +121,11 @@ public class JUnitErrorCaretListener implements CaretListener {
     // before the newline after the dot, it's on the same line.
     int errorAfter; // index of the first error after the dot
     for (errorAfter = 0; errorAfter < _positions.length; errorAfter++) {   
-      if (_positions[errorAfter].getOffset() >= curPos) {
+      Position pos = _positions[errorAfter];
+      if (pos == null) {
+        return;
+      }
+      if (pos.getOffset() >= curPos) {
         break;
       }
     }
@@ -201,7 +204,11 @@ public class JUnitErrorCaretListener implements CaretListener {
    * @param newIndex Index into _errors array
    */
   private void _highlightErrorInSource(int newIndex) {
-    int errPos = _positions[newIndex].getOffset();
+    Position pos = _positions[newIndex];
+    if (pos == null) {
+      return;
+    }
+    int errPos = pos.getOffset();
 
     if (!_shouldHighlight) return;
     
@@ -225,7 +232,10 @@ public class JUnitErrorCaretListener implements CaretListener {
       if (_errorListPane.getLastDefPane() != null) {
         _errorListPane.getLastDefPane().removeErrorHighlight();
       }
-      _definitionsPane.addErrorHighlight(prevNewline+1, nextNewline);
+      prevNewline++;
+      if (prevNewline <= nextNewline) {
+        _definitionsPane.addErrorHighlight(prevNewline, nextNewline);
+      }
       _errorListPane.setLastDefPane(_definitionsPane);
     }
     catch (BadLocationException impossible) {

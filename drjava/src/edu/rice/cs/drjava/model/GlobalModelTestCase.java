@@ -444,8 +444,8 @@ public abstract class GlobalModelTestCase extends TestCase {
     protected int canAbandonCount;
     protected int compileStartCount;
     protected int compileEndCount;
-    protected int compileErrorDuringJUnitCount;
     protected int junitStartCount;
+    protected int junitRunningCount;
     protected int junitEndCount;
     protected int interactionStartCount;
     protected int interactionEndCount;
@@ -472,7 +472,9 @@ public abstract class GlobalModelTestCase extends TestCase {
       canAbandonCount = 0;
       compileStartCount = 0;
       compileEndCount = 0;
-      compileErrorDuringJUnitCount = 0;
+      junitStartCount = 0;
+      junitRunningCount = 0;
+      junitEndCount = 0;
       interactionStartCount = 0;
       interactionEndCount = 0;
       //interactionCaretPositionChangedCount = 0;
@@ -505,15 +507,13 @@ public abstract class GlobalModelTestCase extends TestCase {
     public void assertSaveCount(int i) {
       assertEquals("number of times saveFile fired", i, saveCount);
     }
-
-    public void assertCompileErrorDuringJUnitCount(int i){
-      assertEquals("number of times compileErrorDuringJUnit fired", 
-                   i, 
-                   compileErrorDuringJUnitCount);
-    }
     
     public void assertJUnitStartCount(int i) {
       assertEquals("number of times junitStarted fired", i, junitStartCount);
+    }
+    
+    public void assertJUnitRunningCount(int i) {
+      assertEquals("number of times junitRunning fired", i, junitRunningCount);
     }
 
     public void assertJUnitEndCount(int i) {
@@ -608,13 +608,13 @@ public abstract class GlobalModelTestCase extends TestCase {
     public void fileReverted(OpenDefinitionsDocument doc) {
       fail("fileReverted fired unexpectedly");
     }
-    
-    public void compileErrorDuringJUnit() {
-      fail("compileErrorDuringJUnit fired unexpectedly");
-    }
 
-    public void junitStarted() {
+    public void junitStarted(OpenDefinitionsDocument doc) {
       fail("junitStarted fired unexpectedly");
+    }
+    
+    public void junitRunning() {
+      fail("junitRunning fired unexpectedly");
     }
 
     public void junitEnded() {
@@ -695,7 +695,6 @@ public abstract class GlobalModelTestCase extends TestCase {
       assertInteractionsResettingCount(0);
       assertInteractionsResetCount(0);
       assertConsoleResetCount(0);
-      assertCompileErrorDuringJUnitCount(0);
       compileEndCount++;
     }
 
@@ -734,7 +733,6 @@ public abstract class GlobalModelTestCase extends TestCase {
       assertInteractionsResettingCount(1);
       assertInteractionsResetCount(1);
       assertConsoleResetCount(1);
-      assertCompileErrorDuringJUnitCount(0);
     }
   }
 

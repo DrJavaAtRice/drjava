@@ -180,7 +180,11 @@ public class CompilerErrorCaretListener implements CaretListener {
    * @param newIndex Index into _errors array
    */
   private void _highlightErrorInSource(int newIndex) {
-    int errPos = _positions[newIndex].getOffset();
+    Position pos = _positions[newIndex];
+    if (pos == null) {
+      return;
+    }
+    int errPos = pos.getOffset();
 
     try {
       String text = _document.getText(0, _document.getLength());
@@ -199,12 +203,16 @@ public class CompilerErrorCaretListener implements CaretListener {
         nextNewline = _document.getLength();
       }
 
-      _errorListPane.getLastDefPane().removeErrorHighlight();
+      if (_errorListPane.getLastDefPane() != null) {
+        _errorListPane.getLastDefPane().removeErrorHighlight();
+      }
       //Add 1 if not the first line of the file, so that the highlight range
       // will match the range chosen for the highlight manager.
-      if (prevNewline>0) prevNewline++;
+      if (prevNewline>0) prevNewline++;      
       
-      _definitionsPane.addErrorHighlight(prevNewline, nextNewline);
+      if (prevNewline <= nextNewline) {
+        _definitionsPane.addErrorHighlight(prevNewline, nextNewline);
+      }
       _errorListPane.setLastDefPane(_definitionsPane);
     }
     catch (BadLocationException impossible) {

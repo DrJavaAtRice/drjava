@@ -131,7 +131,7 @@ public interface OpenDefinitionsDocument {
    * @exception ClassNotFoundException when the class is compiled to a location
    * not on the classpath.
    */
-  public TestResult startJUnit() throws ClassNotFoundException, IOException;
+  public void startJUnit() throws ClassNotFoundException, IOException;
 
   /**
    * Returns the model responsible for maintaining all current errors

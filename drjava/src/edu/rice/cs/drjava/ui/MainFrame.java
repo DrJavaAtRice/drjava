@@ -1683,7 +1683,7 @@ public class MainFrame extends JFrame implements OptionConstants {
         _currentDefPane.centerViewOnLine(lineNum);
         int pos = _model.getActiveDocument().gotoLine(lineNum);
         _currentDefPane.setCaretPosition(pos);
-/*
+        /*
         // Center the destination line on the screen
         // (this code taken from FindReplaceDialog's _selectFoundItem method)
         JScrollPane defScroll = (JScrollPane) 
@@ -2729,13 +2729,14 @@ public class MainFrame extends JFrame implements OptionConstants {
       // Only change GUI from event-dispatching thread
       Runnable doCommand = new Runnable() {
         public void run() {
+          // This listener is used when the document to display is
+          // not the active document. In this case, when setActiveDocument
+          // is called, the document won't yet have positive size and we
+          // don't want to scroll to a line until it does, so we wait
+          // for a call to setSize.
           ActionListener setSizeListener = new ActionListener() {
             public void actionPerformed(ActionEvent ae) {
-              _currentDefPane.centerViewOnLine(lineNumber);
-              _docList.revalidate();
-              _docList.repaint();
-              _docSplitPane.revalidate();
-              _docSplitPane.repaint();
+              _currentDefPane.centerViewOnLine(lineNumber);  
             }
           };
           _currentDefPane.addSetSizeListener(setSizeListener);
@@ -2743,29 +2744,36 @@ public class MainFrame extends JFrame implements OptionConstants {
           if (!_model.getActiveDocument().equals(doc)) {
             _model.setActiveDocument(doc);
           }
-      
+          
+          // this block occurs if the documents is already open and as such
+          // has a positive size
           if (_currentDefPane.getSize().getWidth() > 0 &&
               _currentDefPane.getSize().getHeight() > 0) {
             _currentDefPane.centerViewOnLine(lineNumber); 
           }
-
+          
           _removeThreadLocationHighlight();
           DefinitionsDocument defDoc = doc.getDocument();
           int startOffset = defDoc.getOffset(lineNumber);
-          int endOffset = defDoc.getLineEndPos(startOffset);
-          _currentThreadLocationHighlight = 
-            _currentDefPane.getHighlightManager().addHighlight(startOffset,
-                                                               endOffset,
-                                                               DefinitionsPane.THREAD_PAINTER);
+          if (startOffset > -1) {
+            int endOffset = defDoc.getLineEndPos(startOffset);
+            if (endOffset > -1) {
+              _currentThreadLocationHighlight = 
+                _currentDefPane.getHighlightManager().addHighlight(startOffset,
+                                                                   endOffset,
+                                                                   DefinitionsPane.THREAD_PAINTER);
+            }
+          }
           if (doc.isModifiedSinceSave() && 
               !_currentDefPane.hasWarnedAboutModified()) {
             
             _showDebuggingModifiedFileWarning();
-
+            
             //no need to update flag, because previous method call will do it
             //_hasWarnedAboutModified = true;
           }
           _updateDebugStatus();
+          
         }
       };
       SwingUtilities.invokeLater(doCommand);
@@ -3024,24 +3032,33 @@ public class MainFrame extends JFrame implements OptionConstants {
       _errorPanel.reset();
       if (inDebugMode()) _updateDebugStatus();
     }
-    
-    public void compileErrorDuringJUnit() {
-      removeTab(_junitPanel);
-      _tabbedPane.setSelectedComponent(_errorPanel);
-    }
 
-    public void junitStarted() {
-      showTab(_junitPanel);
-      _saveAction.setEnabled(false);
-      _junitPanel.setJUnitInProgress();
-      hourglassOn();
+    public void junitStarted(final OpenDefinitionsDocument doc) {
+      
+      // Only change GUI from event-dispatching thread
+      Runnable doCommand = new Runnable() {
+        public void run() {
+          showTab(_junitPanel);
+          _junitPanel.setJUnitInProgress(doc);
+          _junitAction.setEnabled(false);
+        }
+      };
+      SwingUtilities.invokeLater(doCommand);
     }
+    
+    public void junitRunning() {}
 
     public void junitEnded() {
-      hourglassOff();
-      updateErrorListeners();
-      _errorPanel.reset();
-      _junitPanel.reset();
+      // Only change GUI from event-dispatching thread
+      Runnable doCommand = new Runnable() {
+        public void run() {
+          showTab(_junitPanel);
+          _junitAction.setEnabled(true);
+          updateErrorListeners();
+          _junitPanel.reset();
+        }
+      };
+      SwingUtilities.invokeLater(doCommand);
     }
 
     public void interactionsExited(int status) {
@@ -3125,10 +3142,13 @@ public class MainFrame extends JFrame implements OptionConstants {
     public void nonTestCase() {
 
       String message =
-        "The  Test  button  (and menu item) in  DrJava  invoke the JUnit\n"  +
+        "The  Test  button  (and menu item) in  DrJava invokes the JUnit\n"  +
         "test  harness  over  the currently open document.  In order for\n" +
-        "that  to  work,  the  currently  open  document  must be a valid\n" +
-        "JUnit TestCase,  i.e., a subclass of junit.framework.TestCase.\n\n" +
+        "that  to  work,  the  current  document  must  be a valid JUnit\n" +
+        "TestCase, i.e., a subclass of junit.framework.TestCase.\n\n" +
+        
+        "Make  sure  the current  document  has been saved and  compiled\n" + 
+        "before using the Test button.\n\n" +
 
         "For information on how to write JUnit TestCases, view the JUnit\n" +
         "chapter in the User Documentation or the online Help, or visit:\n\n" +

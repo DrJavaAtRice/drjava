@@ -299,6 +299,9 @@ public class DebugManager {
             catch (AbsentInformationException aie) {
               // skipping this inner class, look in another
             }
+            catch (ClassNotPreparedException cnpe) {
+              // skipping this inner class, look in another
+            }
           }
         }
       }
@@ -648,18 +651,17 @@ public class DebugManager {
       }
       
       String filename = className + ".java";
-      Vector<File> sourcepath = 
-        DrJava.CONFIG.getSetting(OptionConstants.DEBUG_SOURCEPATH);
-      File f = _model.getSourceFileFromPaths(filename, sourcepath);
-      //File f = null;
+      // If not on sourcepath, check source root set (open files)
+      File[] sourceRoots = _model.getSourceRootSet();
+      Vector<File> roots = new Vector<File>();
+      for (int i=0; i < sourceRoots.length; i++) {
+        roots.addElement(sourceRoots[i]);
+      }
+      File f = _model.getSourceFileFromPaths(filename, roots);
       if (f == null) {
-        // If not on sourcepath, check source root set (open files)
-        File[] sourceRoots = _model.getSourceRootSet();
-        Vector<File> roots = new Vector<File>();
-        for (int i=0; i < sourceRoots.length; i++) {
-          roots.addElement(sourceRoots[i]);
-        }
-        f = _model.getSourceFileFromPaths(filename, roots);
+        Vector<File> sourcepath = 
+          DrJava.CONFIG.getSetting(OptionConstants.DEBUG_SOURCEPATH);
+        f = _model.getSourceFileFromPaths(filename, sourcepath);
       }
       
       if (f != null) {
@@ -707,99 +709,70 @@ public class DebugManager {
   private void _updateWatches() {
     if (!isReady() || (_thread == null)) return;
     
-    int stackIndex = 0;
-    StackFrame currFrame = null;
-    List frames = null;
     try {
+      int stackIndex = 0;
+      StackFrame currFrame = null;
+      List frames = null;
       frames = _thread.frames();
-    }
-    catch (IncompatibleThreadStateException itse) {
-      return;
-    }
-    currFrame = (StackFrame) frames.get(stackIndex);
-    stackIndex++;
-    Location location = currFrame.location();
-    ReferenceType rt = location.declaringType();
-    for (int i = 0; i < _watches.size(); i++) {
-      WatchData currWatch = _watches.elementAt(i);
-      String currName = currWatch.getName();
-      String currValue = currWatch.getValue();
-      // check for "this"
-      if (currName.equals("this")) {
-        ObjectReference obj = currFrame.thisObject();
-        if (obj != null) {
-          currWatch.setValue(obj);
-          currWatch.setType(obj.type());
+      currFrame = (StackFrame) frames.get(stackIndex);
+      stackIndex++;
+      Location location = currFrame.location();
+      ReferenceType rt = location.declaringType();
+      for (int i = 0; i < _watches.size(); i++) {
+        WatchData currWatch = _watches.elementAt(i);
+        String currName = currWatch.getName();
+        String currValue = currWatch.getValue();
+        // check for "this"
+        if (currName.equals("this")) {
+          ObjectReference obj = currFrame.thisObject();
+          if (obj != null) {
+            currWatch.setValue(_getValue(obj));
+            currWatch.setType(obj.type());
+          }
+          else {
+            currWatch.setValue(WatchUndefinedValue.Singleton);
+            currWatch.setType(null);
+          }
+          continue;
+        } 
+        //List frames = null;
+        LocalVariable localVar = null;
+        try {
+          localVar = currFrame.visibleVariableByName(currName);
         }
-        else {
-          currWatch.setValue(WatchUndefinedValue.Singleton);
-          currWatch.setType(null);
+        catch (AbsentInformationException aie) {
         }
-        continue;
-      } 
-      //List frames = null;
-      LocalVariable localVar = null;
-      try {
-        localVar = currFrame.visibleVariableByName(currName);
-      }
-      catch (AbsentInformationException aie) {
-      }
-      
-      ReferenceType outerRt = rt;
-      // if the variable being watched is not a local variable, check if it's a field
-      if (localVar == null) {
-        Field field = outerRt.fieldByName(currName);
         
-        // if the variable is not a field either, it's not defined in this 
-        // ReferenceType's scope, keep going further out in scope.
-        String className = outerRt.name();
-        while (field == null) {
+        ReferenceType outerRt = rt;
+        // if the variable being watched is not a local variable, check if it's a field
+        if (localVar == null) {
+          Field field = outerRt.fieldByName(currName);
           
-          // crop off the $ if there is one and anything after it
-          int indexOfDollar = className.lastIndexOf('$');    
-          if (indexOfDollar > -1) {
-            className = className.substring(0, indexOfDollar);
-          }
-          else {
-            // There is no $ in the className, we're at the outermost class and the
-            // field still was not found
-            break;
-          }
-          outerRt = (ReferenceType)_vm.classesByName(className).get(0);
-          if (outerRt == null) {
-            break;
-          }
-          field = outerRt.fieldByName(currName);
-        }
-        if (field != null) {
-          // check if the field is static
-          if (field.isStatic()) {
-            currWatch.setValue(outerRt.getValue(field));
-            try {
-              currWatch.setType(field.type());
+          // if the variable is not a field either, it's not defined in this 
+          // ReferenceType's scope, keep going further out in scope.
+          String className = outerRt.name();
+          while (field == null) {
+            
+            // crop off the $ if there is one and anything after it
+            int indexOfDollar = className.lastIndexOf('$');    
+            if (indexOfDollar > -1) {
+              className = className.substring(0, indexOfDollar);
             }
-            catch (ClassNotLoadedException cnle) {
-              currWatch.setType(null);
+            else {
+              // There is no $ in the className, we're at the outermost class and the
+              // field still was not found
+              break;
             }
+            outerRt = (ReferenceType)_vm.classesByName(className).get(0);
+            if (outerRt == null) {
+              break;
+            }
+            field = outerRt.fieldByName(currName);
           }
-          else {
-            StackFrame outerFrame = currFrame;
-            // the field is not static
-            // Check if the frame represents a native or static method and
-            // keep going down the stack frame looking for the frame that
-            // has the same ReferenceType that we found the Field in.
-            // This is a hack, remove it to slightly improve performance but
-            // at the loss of ever being able to watch outer instance
-            // fields. If unremoved, this will work sometimes, but not always.
-            while (outerFrame.thisObject() != null && 
-                   !outerFrame.thisObject().referenceType().equals(outerRt) &&
-                   stackIndex < frames.size()) {
-              outerFrame = (StackFrame) frames.get(stackIndex);
-              stackIndex++;
-            }
-            if (stackIndex < frames.size() && outerFrame.thisObject() != null) { 
-              // then we found the right stack frame
-              currWatch.setValue(outerFrame.thisObject().getValue(field));
+          if (field != null) {
+            // check if the field is static
+            if (field.isStatic()) {
+              currWatch.setValue(_getValue(outerRt.getValue(field)));
               try {
                 currWatch.setType(field.type());
               }
@@ -808,28 +781,109 @@ public class DebugManager {
               }
             }
             else {
-              currWatch.setValue(WatchUndefinedValue.Singleton);
-              currWatch.setType(null);
+              StackFrame outerFrame = currFrame;
+              // the field is not static
+              // Check if the frame represents a native or static method and
+              // keep going down the stack frame looking for the frame that
+              // has the same ReferenceType that we found the Field in.
+              // This is a hack, remove it to slightly improve performance but
+              // at the loss of ever being able to watch outer instance
+              // fields. If unremoved, this will work sometimes, but not always.
+              while (outerFrame.thisObject() != null && 
+                     !outerFrame.thisObject().referenceType().equals(outerRt) &&
+                     stackIndex < frames.size()) {
+                outerFrame = (StackFrame) frames.get(stackIndex);
+                stackIndex++;
+              }
+              if (stackIndex < frames.size() && outerFrame.thisObject() != null) { 
+                // then we found the right stack frame
+                currWatch.setValue(_getValue(outerFrame.thisObject().getValue(field)));
+                try {
+                  currWatch.setType(field.type());
+                }
+                catch (ClassNotLoadedException cnle) {
+                  currWatch.setType(null);
+                }
+              }
+              else {
+                currWatch.setValue(WatchUndefinedValue.Singleton);
+                currWatch.setType(null);
+              }
             }
+          }
+          else {
+            currWatch.setValue(WatchUndefinedValue.Singleton);
+            currWatch.setType(null);
           }
         }
         else {
-          currWatch.setValue(WatchUndefinedValue.Singleton);
-          currWatch.setType(null);
-        }
-      }
-      else {
-        currWatch.setValue(currFrame.getValue(localVar));
-        try {
-          currWatch.setType(localVar.type());
-        }
-        catch (ClassNotLoadedException cnle) {
-          currWatch.setType(null);
+          currWatch.setValue(_getValue(currFrame.getValue(localVar)));
+          try {
+            currWatch.setType(localVar.type());
+          }
+          catch (ClassNotLoadedException cnle) {
+            currWatch.setType(null);
+          }
         }
       }
     }
+    catch (IncompatibleThreadStateException itse) {
+      return;
+    }
+    catch (InvalidStackFrameException isfe) {
+      return;
+    }
   }
 
+  /**
+   * Takes a jdi Value and gets its String representation
+   * @param value the Value whose value is requested
+   * @return the String representation of the Value
+   */
+  private String _getValue(Value value) {
+    // Most types work as they are; for the rest, for now, only care about getting
+    // accurate toString for Objects
+    if (!(value instanceof ObjectReference)) {
+      return value.toString();
+    }
+    ObjectReference object = (ObjectReference) value;
+    ReferenceType rt = object.referenceType();
+    ThreadReference thread = null;
+    thread = _thread;
+    /*try {
+      thread = object.owningThread();
+    }
+    catch (IncompatibleThreadStateException itse) {
+      DrJava.consoleOut().println("thread is not suspended");
+      return WatchUndefinedValue.Singleton.toString();
+    }*/
+    List toStrings = rt.methodsByName("toString");
+    if (toStrings.size() == 0) {
+      // not sure how an Object can't have a toString method, but it happens
+      return value.toString();
+    }
+    // Assume that there's only one method named toString
+    Method method = (Method)toStrings.get(0);
+    Value stringValue = null;
+    try {
+      stringValue = object.invokeMethod(thread, method, new LinkedList(), ObjectReference.INVOKE_SINGLE_THREADED);
+    }
+    catch (InvalidTypeException ite) {
+      // shouldn't happen, not passing any arguments to toString()
+    }
+    catch (ClassNotLoadedException cnle) {
+      // once again, no arguments
+    }
+    catch (IncompatibleThreadStateException itse) {
+      DrJava.consoleOut().println("thread is not suspended");
+      return WatchUndefinedValue.Singleton.toString();
+    }
+    catch (InvocationException ie) {
+      DrJava.consoleOut().println("invocation exception");
+      return WatchUndefinedValue.Singleton.toString();
+    }
+    return stringValue.toString();
+  }
   
   /**
    * Notifies all listeners that the current thread has been suspended.

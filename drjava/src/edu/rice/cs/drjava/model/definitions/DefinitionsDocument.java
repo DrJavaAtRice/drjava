@@ -899,6 +899,9 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
    * @return position of the beginning of this line
    */
   public synchronized int getLineStartPos(int pos) {
+    if (pos < 0 || pos > getLength()) {
+      return -1;
+    }
     int location = _reduced.absOffset();
     _reduced.move(pos - location);
     int dist = _reduced.getDistToPreviousNewline(0);
@@ -919,6 +922,9 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
    * @return position of the end of this line
    */
   public synchronized int getLineEndPos(int pos) {
+    if (pos < 0 || pos > getLength()) {
+      return -1;
+    }
     int location = _reduced.absOffset();
     _reduced.move(pos - location);
     int dist = _reduced.getDistToNextNewline();
@@ -1033,7 +1039,9 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
   public int getOffset(int lineNum) {
     
     try {
-     
+      if (lineNum < 0) {
+        return -1;
+      }
       String defsText = getText(0, getLength());
       
       int curLine = 1;

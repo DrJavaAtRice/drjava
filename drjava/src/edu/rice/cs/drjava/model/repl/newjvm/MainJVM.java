@@ -53,6 +53,7 @@ import edu.rice.cs.drjava.CodeStatus;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.model.repl.*;
+import edu.rice.cs.drjava.model.junit.JUnitError;
 
 /**
  * Manages a remote JVM.
@@ -519,6 +520,25 @@ public class MainJVM extends UnicastRemoteObject implements MainJVMRemoteI {
     catch (IOException ioe) { 
       throw new edu.rice.cs.util.UnexpectedException(ioe);
     }
+  }
+  
+  public void runTest(String className, String fileName) {
+    _ensureInterpreterConnected();
+    
+    try {
+      _interpreterJVM.runTest(className, fileName);
+    }
+    catch (RemoteException re) {
+      _threwException(re);
+    }
+  }
+  
+  public void nonTestCase() throws RemoteException {
+    _model.nonTestCase();
+  }
+  
+  public void testFinished(JUnitError[] errors) throws RemoteException {
+    _model.testFinished(errors);
   }
   
   private class RestartThread extends Thread {
