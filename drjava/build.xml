@@ -142,10 +142,11 @@
 
   <!-- Initializes properties used in all Eclipse tasks -->
   <target name="eclipse">
+    <property name="eclipse_plugin_version" value="0.0.1" />
     <property name="eclipse_dir" value="${plugins_dir}/eclipse" />
     <property name="eclipse_srcroot" value="${eclipse_dir}/src" />
     <property name="eclipse_built" value="${eclipse_dir}/bin" />
-    <property name="eclipse_package" value="${eclipse_dir}/package/edu.rice.cs.drjava.plugins.eclipse" />
+    <property name="eclipse_package" value="${eclipse_dir}/package/edu.rice.cs.drjava_${eclipse_plugin_version}" />
   </target>
 
   <target name="clean-eclipse" depends="eclipse">
@@ -177,12 +178,17 @@
       <fileset dir="${eclipse_built}">
         <exclude name="**/*Test.class" />
         <exclude name="**/*Test$*.class" />
-        <include name="edu/rice/cs/**" />
+        <include name="**" />
       </fileset>
-      <fileset dir="${eclipse_dir}/icons"/>
     </jar>
     <!-- Copy the plugin.xml -->
     <copy file="${eclipse_dir}/plugin.xml" todir="${eclipse_package}" />
+    <!-- Copy the icons -->
+    <copy todir="${eclipse_package}">
+      <fileset dir="${eclipse_dir}">
+        <include name="icons/**" />
+      </fileset>
+    </copy>
   </target>
 
 
