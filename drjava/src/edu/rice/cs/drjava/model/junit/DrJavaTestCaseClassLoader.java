@@ -88,7 +88,8 @@ public class DrJavaTestCaseClassLoader extends TestCaseClassLoader {
  private String[] defaultExclusions= {
   "junit.framework.", 
   "junit.extensions.", 
-  "junit.runner."
+   "junit.runner.",
+   "java."
  };
  /** name of excluded properties file */
  static final String EXCLUDED_FILE= "excluded.properties";

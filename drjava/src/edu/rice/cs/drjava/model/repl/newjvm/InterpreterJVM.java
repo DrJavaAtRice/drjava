@@ -1089,7 +1089,7 @@ public class InterpreterJVM extends AbstractSlaveJVM
    * @return fileName of the URL without the protocol infront of it.
    */
   private String formatURL(URL url) {
-    return url.getFile().substring(1);
+    return new File(url.getFile()).toString();
   }
 }
 
