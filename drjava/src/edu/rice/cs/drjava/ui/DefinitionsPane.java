@@ -960,21 +960,23 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants {
       Rectangle startRect;
       startRect = this.modelToView(offset);
       
-      int startRectX = (int)startRect.getX();
-      int startRectY = (int)startRect.getY();
-      startRect.setLocation(startRectX-(int)(viewWidth/2), 
-                            startRectY-(int)(viewHeight/2));
-      Point endPoint = new Point(startRectX+(int)(viewWidth/2), 
-                                 startRectY+(int)(viewHeight/2 + 
-                                                  metrics.getHeight()/2));
+      if (startRect != null) {
+        int startRectX = (int)startRect.getX();
+        int startRectY = (int)startRect.getY();
+        startRect.setLocation(startRectX-(int)(viewWidth/2), 
+                              startRectY-(int)(viewHeight/2));
+        Point endPoint = new Point(startRectX+(int)(viewWidth/2), 
+                                   startRectY+(int)(viewHeight/2 + 
+                                                    metrics.getHeight()/2));
+        
+        // Add the end rect onto the start rect to make a rectangle
+        // that encompasses the entire selection
+        startRect.add(endPoint);     
       
-      // Add the end rect onto the start rect to make a rectangle
-      // that encompasses the entire selection
-      startRect.add(endPoint);     
-      
-      this.scrollRectToVisible(startRect);
+        this.scrollRectToVisible(startRect);
+      }
       removeSetSizeListener();
-      
+        
       setCaretPosition(offset);
     }
     

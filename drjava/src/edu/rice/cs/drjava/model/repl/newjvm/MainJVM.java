@@ -531,7 +531,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
    * and only in carefully controlled test cases or when DrJava is quitting
    * anyway.
    */
-  public void killInterpreter(boolean shouldRestart) {
+  public synchronized void killInterpreter(boolean shouldRestart) {
     try {
       _enabled = shouldRestart;
       _cleanlyRestarting = true;
