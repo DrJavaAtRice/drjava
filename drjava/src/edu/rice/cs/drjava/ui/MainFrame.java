@@ -92,6 +92,7 @@ public class MainFrame extends JFrame {
   private JToolBar _toolBar;
   private JMenu _fileMenu;
   private JMenu _editMenu;
+  private JMenu _toolsMenu;
   private JMenu _helpMenu;
   private FindReplaceDialog _findReplace;
   private JButton _saveButton;
@@ -732,10 +733,12 @@ public class MainFrame extends JFrame {
     _menuBar = new JMenuBar();
     _fileMenu = _setUpFileMenu();
     _editMenu = _setUpEditMenu();
+    _toolsMenu = _setUpToolsMenu();
     _helpMenu = _setUpHelpMenu();
 
     _menuBar.add(_fileMenu);
     _menuBar.add(_editMenu);
+    _menuBar.add(_toolsMenu);
     _menuBar.add(_helpMenu);
     setJMenuBar(_menuBar);
   }
@@ -748,42 +751,38 @@ public class MainFrame extends JFrame {
   private JMenu _setUpFileMenu() {
     JMenuItem tmpItem;
     JMenu fileMenu = new JMenu("File");
+    
+    // New, open
     tmpItem = fileMenu.add(_newAction);
     tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N,
                                                   ActionEvent.CTRL_MASK));
     tmpItem = fileMenu.add(_openAction);
     tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O,
                                                   ActionEvent.CTRL_MASK));
+    // Save, Save as, Save all
+    fileMenu.addSeparator();
+    
     tmpItem = fileMenu.add(_saveAction);
     tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S,
                                                   ActionEvent.CTRL_MASK));
-
     // keep track of the save menu item
     _saveMenuItem = tmpItem;
     _saveAction.setEnabled(false);
 
     tmpItem = fileMenu.add(_saveAsAction);
-
+    
+    tmpItem = fileMenu.add(_saveAllAction);
+    
+    // Close, Close all
+    fileMenu.addSeparator();
+    
     tmpItem = fileMenu.add(_closeAction);
     tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_W,
                                                   ActionEvent.CTRL_MASK));
 
-    tmpItem = fileMenu.add(_saveAllAction);
-
     tmpItem = fileMenu.add(_closeAllAction);
-    fileMenu.addSeparator();
 
-    tmpItem = fileMenu.add(_compileAction);
-    tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F5, 0));
-
-    // keep track of the compile menu item
-    _compileMenuItem = tmpItem;
-    //_compileAction.setEnabled(false);
-
-    _abortInteractionAction.setEnabled(false);
-    _abortInteractionMenuItem = fileMenu.add(_abortInteractionAction);
-    _abortInteractionMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, ActionEvent.CTRL_MASK));
-
+    // Page setup, print preview, print
     fileMenu.addSeparator();
 
     fileMenu.add(_pageSetupAction);
@@ -791,6 +790,8 @@ public class MainFrame extends JFrame {
     tmpItem = fileMenu.add(_printAction);
     tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_P,
                                                   ActionEvent.CTRL_MASK));
+    
+    // Quit
     fileMenu.addSeparator();
 
     tmpItem = fileMenu.add(_quitAction);
@@ -806,12 +807,15 @@ public class MainFrame extends JFrame {
     JMenuItem tmpItem;
     JMenu editMenu = new JMenu("Edit");
 
+    // Undo, redo
     tmpItem = editMenu.add(_undoAction);
     tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Z,
                                                   ActionEvent.CTRL_MASK));
     tmpItem = editMenu.add(_redoAction);
     tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R,
                                                   ActionEvent.CTRL_MASK));
+    
+    // Cut, copy, paste
     editMenu.addSeparator();
 
     tmpItem = editMenu.add(_cutAction);
@@ -823,6 +827,8 @@ public class MainFrame extends JFrame {
     tmpItem = editMenu.add(_pasteAction);
     tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_V,
                                                   ActionEvent.CTRL_MASK));
+    
+    // Find/replace, goto
     editMenu.addSeparator();
     tmpItem = editMenu.add(_findReplaceAction);
     tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F,
@@ -830,10 +836,8 @@ public class MainFrame extends JFrame {
     tmpItem = editMenu.add(_gotoLineAction);
     tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_G,
                                                   ActionEvent.CTRL_MASK));
-    editMenu.add(_clearOutputAction);
-    editMenu.add(_resetInteractionsAction);
 
-
+    // Next, prev doc
     editMenu.addSeparator();
     tmpItem = editMenu.add(_switchToPrevAction);
     tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_COMMA,
@@ -844,6 +848,33 @@ public class MainFrame extends JFrame {
 
     // Add the menus to the menu bar
     return editMenu;
+  }
+  
+  /**
+   * Creates and returns a edit menu.
+   */
+  private JMenu _setUpToolsMenu() {
+    JMenuItem tmpItem;
+    JMenu toolsMenu = new JMenu("Tools");
+
+    // Compile
+    tmpItem = toolsMenu.add(_compileAction);
+    tmpItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F5, 0));
+
+    // keep track of the compile menu item
+    _compileMenuItem = tmpItem;
+
+    // Abort/reset interactions, clear console
+    toolsMenu.addSeparator();
+
+    _abortInteractionAction.setEnabled(false);
+    _abortInteractionMenuItem = toolsMenu.add(_abortInteractionAction);
+    _abortInteractionMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, ActionEvent.CTRL_MASK));
+    toolsMenu.add(_resetInteractionsAction);
+    toolsMenu.add(_clearOutputAction);
+    
+    // Add the menus to the menu bar
+    return toolsMenu;
   }
 
   /**
@@ -891,18 +922,22 @@ public class MainFrame extends JFrame {
 
     _toolBar.addSeparator();
 
-    // New, open, save (disabled)
+    // New, open, save, close
     _toolBar.add(_newAction);
     _toolBar.add(_openAction);
     _saveButton = _toolBar.add(_saveAction);
-    _toolBar.add(_saveAllAction);
     _toolBar.add(_closeAction);
+    
+    // Print preview, print
     _toolBar.addSeparator();
-
     _toolBar.add(_printPreviewAction);
     _toolBar.add(_printAction);
+    
+    // Cut, copy, paste
     _toolBar.addSeparator();
-
+    _toolBar.add(_cutAction);
+    _toolBar.add(_copyAction);
+    _toolBar.add(_pasteAction);
 
     // Simple workaround, for now, for bug # 520742:
     // Undo/Redo button text in JDK 1.3
@@ -911,32 +946,18 @@ public class MainFrame extends JFrame {
     //_toolBar.add(_undoAction);
     //_toolBar.add(_redoAction);
 
+    // Undo, redo
+    _toolBar.addSeparator();
     _toolBar.add(_createManualToolbarButton(_undoAction));
     _toolBar.add(_createManualToolbarButton(_redoAction));
-    _toolBar.addSeparator();
-
-    // Cut, copy, paste
-    _toolBar.add(_cutAction);
-    _toolBar.add(_copyAction);
-    _toolBar.add(_pasteAction);
-
-    _toolBar.addSeparator();
-
+    
     // Find
+    _toolBar.addSeparator();
     _toolBar.add(_findReplaceAction);
 
+    // Compile, reset, abort
     _toolBar.addSeparator();
-
-
-    // Prev, next
-    _toolBar.add(_switchToPrevAction);
-    _toolBar.add(_switchToNextAction);
-
-    _toolBar.addSeparator();
-
-    // Compile (disabled)
     _compileButton = _toolBar.add(_compileAction);
-
     _toolBar.add(_resetInteractionsAction);
     _toolBar.add(_abortInteractionAction);
 
