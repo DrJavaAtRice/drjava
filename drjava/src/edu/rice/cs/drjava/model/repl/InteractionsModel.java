@@ -126,7 +126,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   /** The input listener to listen for requests to System.in. */
   protected InputListener _inputListener;
 
-  protected InteractionsDocumentAdapter _adapter;
+  protected DocumentAdapter _adapter;
   
   /**
    * Constructs an InteractionsModel.
@@ -134,7 +134,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
    * @param historySize Number of lines to store in the history
    * @param writeDelay Number of milliseconds to wait after each println
    */
-  public InteractionsModel(InteractionsDocumentAdapter adapter, int historySize,
+  public InteractionsModel(DocumentAdapter adapter, int historySize,
                            int writeDelay) {
     _writeDelay = writeDelay;
     _document = new InteractionsDocument(adapter, historySize);
@@ -749,8 +749,9 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
         // Oh well, leave it at the previous port
       }
 
+      if (_adapter instanceof InteractionsDocumentAdapter)
+        ((InteractionsDocumentAdapter)_adapter).clearColoring();
       _notifyInterpreterResetting();
-      _adapter.clearColoring();
     }
   }
 

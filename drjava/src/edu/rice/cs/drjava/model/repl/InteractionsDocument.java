@@ -94,7 +94,7 @@ public class InteractionsDocument extends ConsoleDocument {
    * Reset the document on startup.  Uses a history with configurable size.
    * @param document DocumentAdapter to use for the model
    */
-  public InteractionsDocument(InteractionsDocumentAdapter document) {
+  public InteractionsDocument(DocumentAdapter document) {
     this(document, new History());
   }
 
@@ -104,7 +104,7 @@ public class InteractionsDocument extends ConsoleDocument {
    * @param document DocumentAdapter to use for the model
    * @param maxHistorySize Number of commands to remember in the history
    */
-  public InteractionsDocument(InteractionsDocumentAdapter document, int maxHistorySize) {
+  public InteractionsDocument(DocumentAdapter document, int maxHistorySize) {
     this(document, new History(maxHistorySize));
   }
 
@@ -113,7 +113,7 @@ public class InteractionsDocument extends ConsoleDocument {
    * @param document DocumentAdapter to use for the model
    * @param history History of commands
    */
-  public InteractionsDocument(InteractionsDocumentAdapter document, History history) {
+  public InteractionsDocument(DocumentAdapter document, History history) {
     super(document);
     _history = history;
 

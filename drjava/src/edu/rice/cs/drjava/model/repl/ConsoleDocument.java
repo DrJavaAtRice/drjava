@@ -82,7 +82,7 @@ public class ConsoleDocument implements DocumentAdapter {
   /**
    * The document storing the text for this console model.
    */
-  protected InteractionsDocumentAdapter _document;
+  protected DocumentAdapter _document;
 
   /**
    * A runnable command to use for a notification beep.
@@ -108,7 +108,7 @@ public class ConsoleDocument implements DocumentAdapter {
    * Creates a new ConsoleDocument with the given DocumentAdapter.
    * @param adapter the DocumentAdapter to use
    */
-  public ConsoleDocument(InteractionsDocumentAdapter adapter) {
+  public ConsoleDocument(DocumentAdapter adapter) {
     _document = adapter;
 
     _beep = new Runnable() {
@@ -312,7 +312,8 @@ public class ConsoleDocument implements DocumentAdapter {
   }
   
   private void _addToStyleLists(int offs, String str, String style) {
-    _document.addColoring(offs,offs + str.length(),style);
+    if(_document instanceof InteractionsDocumentAdapter) 
+      ((InteractionsDocumentAdapter)_document).addColoring(offs,offs + str.length(),style);
   }
 
   /**

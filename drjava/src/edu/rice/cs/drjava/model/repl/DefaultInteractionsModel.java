@@ -78,7 +78,7 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
    * @param adapter InteractionsDocumentAdapter to use for the document
    */
   public DefaultInteractionsModel(DefaultGlobalModel model, MainJVM control,
-                                  InteractionsDocumentAdapter adapter) {
+                                  DocumentAdapter adapter) {
     super(control, adapter,
           DrJava.getConfig().getSetting(OptionConstants.HISTORY_MAX_SIZE).intValue(),
           DefaultGlobalModel.WRITE_DELAY);

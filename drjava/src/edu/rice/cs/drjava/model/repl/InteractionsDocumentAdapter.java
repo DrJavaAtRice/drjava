@@ -114,6 +114,13 @@ public class InteractionsDocumentAdapter extends AbstractDJDocument {
   }
     
   /**
+   * package protected accessor method used for test cases
+   */
+  List<Pair<Pair<Integer, Integer>, String>> getStylesList() {
+    return _stylesList;
+  }
+    
+  /**
    * Attempts to set the coloring on the graphics based upon the content of the styles list
    * returns false if the point is not in the list.
    */
