@@ -46,6 +46,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.StringTokenizer;
 import javax.swing.ListModel;
 
 import java.util.Enumeration;
@@ -1403,6 +1404,27 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
   synchronized void printMessage(String message) {
     _model.printDebugMessage(message);
   }
+  
+  /**
+   * Returns whether the given className corresponds to a class
+   * that is anonymous or has an anonymous enclosing class.
+   * @param className the className to check
+   * @return whether the class is anonymous
+   */
+  private boolean hasAnonymous(ReferenceType rt) {
+    String className = rt.name();
+    StringTokenizer st = new StringTokenizer(className, "$");     
+    while (st.hasMoreElements()) {
+      String currToken = st.nextToken();
+      try {
+        Integer anonymousNum = Integer.valueOf(currToken);
+        return true;
+      }
+      catch(NumberFormatException nfe) {
+      }
+    }
+    return false;
+  }
 
   /**
    * Updates the stored value of each watched field and variable.
@@ -1524,16 +1546,49 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
             // classes. Start at this$N, where N is the number of dollar signs in
             // the reference type's name, minus one.
             int outerIndex = numDollars - 1;
+            if (hasAnonymous(outerRt)) {
+              // We don't know the appropriate this$N to look for so we have to
+              // search for a field that begins with this$.
+              List fields = outerRt.allFields();
+              Iterator iter = fields.iterator();
+              while (iter.hasNext()) {
+                Field f = (Field)iter.next();
+                String name = f.name();
+                if (name.startsWith("this$")) {
+                  int lastIndex = name.lastIndexOf("$");
+                  outerIndex = Integer.valueOf(name.substring(lastIndex+1, name.length())).intValue();
+                  break;
+                }
+              }
+            }
             Field outerThis = outerRt.fieldByName("this$" + outerIndex);
+            if (field == null) {
+              // Try concatenating "val$" to the beginning of the field in
+              // case it's a final local variable of the outer class
+              field = outerRt.fieldByName("val$" + currName);
+            }
+            
             while ((field == null) && (outerThis != null)) {
               outer = (ObjectReference) outer.getValue(outerThis);
+              if (outer == null) {
+                // We're probably in the constructor and this$N has
+                // not yet been initialized. We can't do anything, so just
+                // break display no value.
+                break;
+              }
               outerRt = outer.referenceType();
               field = outerRt.fieldByName(currName);
               
-              if (field == null) {
-                // Enter the loop again with the next outer enclosing class
-                outerIndex--;
-                outerThis = outerRt.fieldByName("this$" + outerIndex);
+              if (field == null) {  
+                // Try concatenating "val$" to the beginning of the field in
+                // case it's a final local variable of the outer class
+                field = outerRt.fieldByName("val$" + currName);
+                
+                if (field == null) {
+                  // Enter the loop again with the next outer enclosing class
+                  outerIndex--;
+                  outerThis = outerRt.fieldByName("this$" + outerIndex);                  
+                }
               }
             }
           }

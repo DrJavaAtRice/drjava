@@ -109,6 +109,51 @@ public final class JavaDebugInterpreterTest extends DebugTestCase {
     /*16*/"    }\n" +
     /*17*/"  }\n" +
     /*18*/"}";
+  
+  protected static final String MONKEY_WITH_INNER_CLASS =
+    /* 1 */    "class Monkey {\n" +
+    /* 2 */    "  static int foo = 6; \n" +
+    /* 3 */    "  class MonkeyInner { \n" +
+    /* 4 */    "    int innerFoo = 8;\n" +
+    /* 5 */    "    class MonkeyInnerInner { \n" +
+    /* 6 */    "      int innerInnerFoo = 10;\n" +
+    /* 7 */    "      public void innerMethod() { \n" +
+    /* 8 */    "        int innerMethodFoo;\n" +
+    /* 9 */    "        String nullString = null;\n" +
+    /* 10 */   "        innerMethodFoo = 12;\n" +
+    /* 11 */   "        foo++;\n" +
+    /* 12 */   "        innerFoo++;\n" +
+    /* 13 */   "        innerInnerFoo++;\n" +
+    /* 14 */   "        innerMethodFoo++;\n" +
+    /* 15 */   "        staticMethod();\n" +
+    /* 16 */   "        System.out.println(\"innerMethodFoo: \" + innerMethodFoo);\n" +
+    /* 17 */   "      }\n" +
+    /* 18 */   "    }\n" +
+    /* 19 */   "  }\n" +
+    /* 20 */   "  public void bar() {\n" +
+    /* 21 */   "    final MonkeyInner.MonkeyInnerInner mi = \n" +
+    /* 22 */   "      new MonkeyInner().new MonkeyInnerInner();\n" +
+    /* 23 */   "    mi.innerMethod();\n" +
+    /* 24 */   "    final int localVar = 99;\n" +
+    /* 25 */   "    new Thread() {\n" +
+    /* 26 */   "      public void run() {\n" +
+    /* 27 */   "        final int localVar = mi.innerInnerFoo;\n" +
+    /* 28 */   "        new Thread() {\n" +
+    /* 29 */   "          public void run() {\n" +
+    /* 30 */   "            new Thread() {\n" +
+    /* 31 */   "              public void run() {\n" +
+    /* 32 */   "                System.out.println(\"localVar = \" + localVar);\n" +
+    /* 33 */   "              }\n" +
+    /* 34 */   "            }.run();\n" +
+    /* 35 */   "          }\n" +
+    /* 36 */   "        }.run();\n" +
+    /* 37 */   "      }\n" +
+    /* 38 */   "    }.run();\n" +
+    /* 39 */   "  }\n" +
+    /* 40 */   "  public static void staticMethod() {\n" +
+    /* 41 */   "    int z = 3;\n" +
+    /* 42 */   "  }\n" +
+    /* 43 */   "}\n";
 
 
   /**
@@ -418,6 +463,68 @@ public final class JavaDebugInterpreterTest extends DebugTestCase {
       System.out.println("Shut down.");
     }
     _debugger.removeListener(debugListener);  
+  }
+  
+  public void testAccessNullFieldsAndFinalLocalVariables() 
+    throws DebugException, BadLocationException, DocumentAdapterException, IOException, InterruptedException {
+    File file = new File(_tempDir, "Monkey.java");
+    OpenDefinitionsDocument doc = doCompile(MONKEY_WITH_INNER_CLASS, file);
+    BreakpointTestListener debugListener = new BreakpointTestListener();
+    _debugger.addListener(debugListener);
+    // Start debugger
+    synchronized(_notifierLock) {
+      _debugger.startup();
+      _waitForNotifies(1);  // startup
+      _notifierLock.wait();
+    }
+    
+    // Set one breakpoint
+    int index = MONKEY_WITH_INNER_CLASS.indexOf("innerMethodFoo = 12;");
+    _debugger.toggleBreakpoint(doc,index,10);
+    index = MONKEY_WITH_INNER_CLASS.indexOf("System.out.println(\"localVar = \" + localVar);");
+    _debugger.toggleBreakpoint(doc,index,32);
+     
+    // Run the main() method, hitting both breakpoints in different threads
+    synchronized(_notifierLock) {
+      interpretIgnoreResult("new Monkey().bar()");
+       _waitForNotifies(3); // suspended, updated, breakpointReached
+       _notifierLock.wait();
+     }
+    
+    // Test accessing a field initialized to null
+    assertEquals("nullString should be null", "null", interpret("nullString"));    
+    interpret("nullString = new Integer(3)");
+    assertInteractionsContains("Error: Bad types in assignment");
+    assertEquals("nullString should still be null", "null", interpret("nullString"));
+    assertEquals("Should be able to assign a string to nullString", "\"asdf\"", interpret("nullString = \"asdf\""));
+    assertEquals("Should equal \"asdf\"", "true", interpret("nullString.equals(\"asdf\")"));    
+    
+    // Resumes this thread, switching to the next break point
+    synchronized(_notifierLock) {
+      _asyncResume();
+      _waitForNotifies(3);  // breakpointReached, suspended, updated
+      _notifierLock.wait();
+    }    
+    // Test accessing final local variables
+    assertEquals("Should be able to access localVar", "11", interpret("localVar"));
+    interpret("localVar = 5");
+    assertEquals("The value of localVar should not have changed", "11", interpret("localVar"));
+
+    // Shutdown the debugger
+    if (printMessages) {
+      System.out.println("Shutting down...");
+    }
+    synchronized(_notifierLock) {
+      _debugger.shutdown();
+      _waitForNotifies(1);  // shutdown
+      _notifierLock.wait();
+    }
+    
+    debugListener.assertDebuggerShutdownCount(1);  //fires
+    if (printMessages) {
+      System.out.println("Shut down.");
+    }
+    _debugger.removeListener(debugListener);     
   }
 
   /**

@@ -157,14 +157,29 @@ public final class DebugTest extends DebugTestCase
     /* 18 */   "    }\n" +
     /* 19 */   "  }\n" +
     /* 20 */   "  public void bar() {\n" +
-    /* 21 */   "    MonkeyInner.MonkeyInnerInner mi = \n" +
+    /* 21 */   "    final MonkeyInner.MonkeyInnerInner mi = \n" +
     /* 22 */   "      new MonkeyInner().new MonkeyInnerInner();\n" +
     /* 23 */   "    mi.innerMethod();\n" +
-    /* 24 */   "  }\n" +
-    /* 25 */   "  public static void staticMethod() {\n" +
-    /* 26 */   "    int z = 3;\n" +
-    /* 27 */   "  }\n" +
-    /* 28 */   "}\n";
+    /* 24 */   "    final int localVar = 99;\n" +
+    /* 25 */   "    new Thread() {\n" +
+    /* 26 */   "      public void run() {\n" +
+    /* 27 */   "        final int localVar = mi.innerInnerFoo;\n" +
+    /* 28 */   "        new Thread() {\n" +
+    /* 29 */   "          public void run() {\n" +
+    /* 30 */   "            new Thread() {\n" +
+    /* 31 */   "              public void run() {\n" +
+    /* 32 */   "                System.out.println(\"localVar = \" + localVar);\n" +
+    /* 33 */   "              }\n" +
+    /* 34 */   "            }.run();\n" +
+    /* 35 */   "          }\n" +
+    /* 36 */   "        }.run();\n" +
+    /* 37 */   "      }\n" +
+    /* 38 */   "    }.run();\n" +
+    /* 39 */   "  }\n" +
+    /* 40 */   "  public static void staticMethod() {\n" +
+    /* 41 */   "    int z = 3;\n" +
+    /* 42 */   "  }\n" +
+    /* 43 */   "}\n";
   
   protected static final String INNER_CLASS_WITH_LOCAL_VARS =
     /*  1 */ "class InnerClassWithLocalVariables {\n" +
@@ -1275,6 +1290,8 @@ public final class DebugTest extends DebugTestCase
    * Tests that watches can correctly see the values of local
    * variables, fields and fields of outer classes. Also tests
    * that we can watch objects initialized to null (bug #771040).
+   * Also tests that we can watch final local variables of outer
+   * classes (bug #769174).
    */
   public void testNonStaticWatches() throws Exception {
     if (printMessages) {
@@ -1289,11 +1306,12 @@ public final class DebugTest extends DebugTestCase
     
     // Set a breakpoint
     _debugger.toggleBreakpoint(doc,MONKEY_WITH_INNER_CLASS.indexOf("innerMethodFoo = 12;"), 10);
-    debugListener.assertBreakpointSetCount(1);
+    _debugger.toggleBreakpoint(doc,MONKEY_WITH_INNER_CLASS.indexOf("System.out.println(\"localVar = \" + localVar);"), 32);
+    debugListener.assertBreakpointSetCount(2);
 
     // Run an inner method, hitting breakpoint
     synchronized(_notifierLock) {
-      interpretIgnoreResult("new Monkey().new MonkeyInner().new MonkeyInnerInner().innerMethod()");
+      interpretIgnoreResult("new Monkey().bar()");//new MonkeyInner().new MonkeyInnerInner().innerMethod()");
       _waitForNotifies(3);  // suspended, updated, breakpointReached
       _notifierLock.wait();
     }
@@ -1303,6 +1321,7 @@ public final class DebugTest extends DebugTestCase
     _debugger.addWatch("innerMethodFoo");
     _debugger.addWatch("asdf");
     _debugger.addWatch("nullString");
+    _debugger.addWatch("localVar");
     
     if (printMessages) {
       System.out.println("first step");
@@ -1454,6 +1473,28 @@ public final class DebugTest extends DebugTestCase
     assertEquals("watch value incorrect", DebugWatchData.NO_VALUE, watches.elementAt(4).getValue());
     assertEquals("watch value incorrect", DebugWatchData.NO_VALUE, watches.elementAt(5).getValue());
     assertEquals("watch type incorrect", DebugWatchData.NO_TYPE, watches.elementAt(5).getType());
+    
+    // Resumes one thread, finishing it and switching to the next break point
+    synchronized(_notifierLock) {
+      _asyncResume();
+      _waitForNotifies(3);  // breakpointReached, suspended, updated
+      _notifierLock.wait();
+    }
+    debugListener.assertStepRequestedCount(6);  // fires (don't wait)
+    debugListener.assertCurrThreadResumedCount(7); // fires (don't wait)
+    debugListener.assertThreadLocationUpdatedCount(8);  // fires
+    debugListener.assertCurrThreadSuspendedCount(8);  // fires
+    debugListener.assertBreakpointReachedCount(2);
+    debugListener.assertCurrThreadDiedCount(0);    
+    
+    // Test watching a final local variable of an outer class
+    watches = _debugger.getWatches();
+    assertEquals("watch name incorrect", "localVar", watches.elementAt(6).getName());
+    assertEquals("watch value incorrect", "11", watches.elementAt(6).getValue());
+    
+    // Close doc and make sure breakpoints are removed
+    _model.closeFile(doc);
+    debugListener.assertBreakpointRemovedCount(2);  //fires (no waiting)
     
     // Shut down
     _shutdownAndWaitForInteractionEnded();

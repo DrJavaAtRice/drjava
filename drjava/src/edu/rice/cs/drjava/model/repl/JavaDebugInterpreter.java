@@ -49,6 +49,7 @@ import java.util.List;
 import java.util.LinkedList;
 import java.util.Iterator;
 import java.util.StringTokenizer;
+import java.lang.reflect.*;
 
 import edu.rice.cs.util.UnexpectedException;
 
@@ -121,11 +122,34 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
   }
   
   /**
+   * Returns whether the given className corresponds to a class
+   * that is anonymous or has an anonymous enclosing class.
+   * @param className the className to check
+   * @return whether the class is anonymous
+   */
+  private boolean hasAnonymous(String className) {
+    StringTokenizer st = new StringTokenizer(className, "$");     
+    while (st.hasMoreElements()) {
+      String currToken = st.nextToken();
+      try {
+        Integer anonymousNum = Integer.valueOf(currToken);
+        return true;
+      }
+      catch(NumberFormatException nfe) {
+      }
+    }
+    return false;
+  }
+  
+  /**
    * Given a field, looks at enclosing classes until it finds
    * one that contains the field. It returns the ObjectFieldAccess
    * that represents the field.
    * @param field the name of the field
    * @param context the context
+   * @param className the className to search from. Initially is the
+   * className of "this", but may be called recursively if "this" is
+   * an anonymous inner class.
    * @return the ObjectFieldAccess that represents the field or null
    * if it cannot find the field in any enclosing class.
    */
@@ -133,24 +157,59 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
     TypeChecker tc = makeTypeChecker(context);
     int numDollars = _getNumDollars(_thisClassName);
     Expression expr = null;
-    for (int i = 0; i <= numDollars; i++) {          
-      expr = _buildObjectFieldAccess(i, numDollars);
-      expr = new ObjectFieldAccess(expr, field);
+    Expression newExpr = null;
+    
+    // Check if this has an anonymous inner class
+    if (hasAnonymous(_thisClassName)) { 
+      // Get the class
+      Class c;
       try {
-        // the type checker will tell us if it's a field
-        tc.visit((ObjectFieldAccess)expr);
-        return (ObjectFieldAccess)expr;
+        c = context.lookupClass(_thisClassName);
       }
-      catch (ExecutionError e2) {
-        // do nothing, try an outer class
+      catch (ClassNotFoundException e) {
+        throw new UnexpectedException (e);
+      }
+      Field[] fields = c.getDeclaredFields();    
+      int numToWalk;
+      String outerClassName = null;
+      // Check for a field that begins with this$
+      for (int i = 0; i < fields.length; i++) {
+        if (fields[i].getName().startsWith("this$")) {
+          String fieldName = fields[i].getName();
+          int lastIndex = fieldName.lastIndexOf("$");
+          numDollars = Integer.valueOf(fieldName.substring(lastIndex+1, fieldName.length())).intValue() + 1;
+          break;
+        }
       }
     }
+    for (int i = 0; i <= numDollars; i++) {          
+      expr = _buildObjectFieldAccess(i, numDollars);
+      newExpr = new ObjectFieldAccess(expr, field);
+      try {
+        // the type checker will tell us if it's a field
+        tc.visit((ObjectFieldAccess)newExpr);
+        return (ObjectFieldAccess)newExpr;
+      }
+      catch (ExecutionError e) {
+        // try concatenating "val$" to the beginning of field
+        newExpr = new ObjectFieldAccess(expr, "val$" + field);
+        try {
+          // the type checker will tell us if it's a field
+          tc.visit((ObjectFieldAccess)newExpr);
+          return (ObjectFieldAccess)newExpr;
+        }
+        catch (ExecutionError e2) {
+          // do nothing, try an outer class
+        }
+      }
+    }
+    
     return null;
   }
   
   /**
    * Given a method, looks at enclosing classes until it finds
-   * one that contains the field. It returns the ObjectMethodCall
+   * one that contains the method. It returns the ObjectMethodCall
    * that represents the method.
    * @param method the method
    * @param context the context
@@ -515,6 +574,7 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
    */
   public NameVisitor makeNameVisitor(final Context context) {
     return new NameVisitor(context) {
+      // An attempt at fixing the redefinition issue in DynamicJava
 //      public Object visit(VariableDeclaration node) {  
 //        // NameVisitor
 //        Node n = node.getInitializer();
@@ -575,6 +635,8 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
           return super.visit(node);
         }
         catch(ExecutionError e) {
+          // This error is thrown only if this QualifiedName is not 
+          // a local variable or a class
           List ids = node.getIdentifiers();
           Iterator iter = ids.iterator();
           String field = ((IdentifierToken)iter.next()).image();
@@ -582,8 +644,6 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
             IdentifierToken t = (IdentifierToken)iter.next();
             field += "$" + t.image();
           }
-          // This error is thrown only if this QualifiedName is not 
-          // a local variable or a class
           if (context.isDefined("this")) {
             // Check if it's a field or outer field if we're not in a
             // static context.
