@@ -75,21 +75,89 @@ public abstract class StringOps {
     return fullString;
   }
   
+  /**
+   * Verifies that (startRow, startCol) occurs before (endRow, endCol).
+   * @throws IllegalArgumentException if end is before start
+   */
+  private static void _ensureStartBeforeEnd(int startRow, int startCol,
+                                            int endRow, int endCol) {
+    if (startRow > endRow) {
+      throw new IllegalArgumentException("end row before start row: " +
+                                         startRow + " > " + endRow);
+    }
+    else if (startRow == endRow && startCol > endCol) {
+      throw new IllegalArgumentException("end before start: (" +
+                                         startRow + ", " + startCol +
+                                         ") > (" + endRow + ", " + endCol + ")");
+    }
+  }
+
+  /**
+   * Verifies that the given column position is within the row at rowStartIndex
+   * in the given String.
+   * @param fullString the string in which to check the column
+   * @param col the column index that should be within the row
+   * @param rowStartIndex the first index of the row within fullString that col should be in
+   * @throws IllegalArgumentException if col is after the end of the given row
+   */
+  private static void _ensureColInRow(String fullString, int col, int rowStartIndex) {
+    int endOfLine = fullString.indexOf("\n",rowStartIndex);
+    if (endOfLine == -1) {
+      endOfLine = fullString.length();
+    }
+    if (col > (endOfLine - rowStartIndex)) {
+      throw new IllegalArgumentException("the given column is past the end of its row");
+    }
+  }
+
+  /**
+   * Gets the offset and length equivalent to the given pairs start and end row-col.
+   * @param fullString the string in which to compute the offset/length
+   * @param startRow the row on which the error starts, starting at one for the first row
+   * @param startCol the col on which the error starts, starting at one for the first column
+   * @param endRow the row on which the error ends.  Equals the startRow for one-line errors
+   * @param endCol the character position on which the error ends.
+   *               Equals the startCol for one-character errors
+   * @return a Pair of which the first is the offset, the second is the length
+   */
   public static Pair<Integer,Integer> getOffsetAndLength(String fullString, int startRow,
                                                          int startCol, int endRow, int endCol) {
+    _ensureStartBeforeEnd(startRow, startCol, endRow, endCol);
+
+    // find the offset
     int currentChar = 0;
     int linesSeen = 1;
-    while( startRow > linesSeen ){
+    while (startRow > linesSeen) {
       currentChar = fullString.indexOf("\n",currentChar);
+      if (currentChar == -1) {
+        throw new IllegalArgumentException("startRow is beyond the end of the string");
+      }
+      // Must move past the newline
+      currentChar++;
       linesSeen++;
     }
-    int offset = currentChar + startCol - 1; // col is 0 based
-    while( endRow > linesSeen ){
+    
+    _ensureColInRow(fullString, startCol, currentChar);
+    int offset = currentChar + startCol - 1;  // offset is zero-based
+
+    // find the length
+    while (endRow > linesSeen) {
       currentChar = fullString.indexOf("\n",currentChar);
+      if (currentChar == -1) {
+        throw new IllegalArgumentException("endRow is beyond the end of the string");
+      }
+      currentChar++;
       linesSeen++;
     }
+
+    _ensureColInRow(fullString, endCol, currentChar);
     int length = currentChar + endCol - offset;
-    return new Pair<Integer,Integer>( new Integer(offset), new Integer(length) );
+
+    // ensure the length is in bounds
+    if (offset + length > fullString.length()) {
+      throw new IllegalArgumentException("Given positions beyond the end of the string");
+    }
+    return new Pair<Integer,Integer>(new Integer(offset), new Integer(length));
   }
 
   /**

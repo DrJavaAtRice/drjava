@@ -62,21 +62,75 @@ public class StringOpsTest extends TestCase {
    */
   public void testGetOffsetAndLength() {
     String test = "123456789\n123456789\n123456789\n";
-    Pair<Integer,Integer> oAndL = StringOps.getOffsetAndLength( test, 1, 1, 1, 9 );
-    assertEquals("testGetOffsetAndLength- offSet:", new Integer(0), oAndL.getFirst() );
-    assertEquals("testGetOffsetAndLength- length:", new Integer(9), oAndL.getSecond() );
-   
-    oAndL = StringOps.getOffsetAndLength( test, 1, 1, 2, 3 );
-    assertEquals("testGetOffsetAndLength- offSet:", new Integer(0), oAndL.getFirst() );
-    assertEquals("testGetOffsetAndLength- length:", new Integer(12), oAndL.getSecond() );
     
-    oAndL = StringOps.getOffsetAndLength( test, 1, 5, 2, 3 );
-    assertEquals("testGetOffsetAndLength- offSet:", new Integer(4), oAndL.getFirst() );
-    assertEquals("testGetOffsetAndLength- length:", new Integer(8), oAndL.getSecond() );
+    // The offset is always one less than the first row/col
+    // The length includes the start and end positions
+    Pair<Integer,Integer> oAndL = StringOps.getOffsetAndLength(test, 1, 1, 1, 9);
+    assertEquals("testGetOffsetAndLength- offSet:", new Integer(0), oAndL.getFirst());
+    assertEquals("testGetOffsetAndLength- length:", new Integer(9), oAndL.getSecond());
+   
+    oAndL = StringOps.getOffsetAndLength(test, 1, 1, 2, 3);
+    assertEquals("testGetOffsetAndLength- offSet:", new Integer(0), oAndL.getFirst());
+    assertEquals("testGetOffsetAndLength- length:", new Integer(13), oAndL.getSecond());
+    
+    oAndL = StringOps.getOffsetAndLength(test, 1, 5, 2, 3);
+    assertEquals("testGetOffsetAndLength- offSet:", new Integer(4), oAndL.getFirst());
+    assertEquals("testGetOffsetAndLength- length:", new Integer(9), oAndL.getSecond());
 
-    oAndL = StringOps.getOffsetAndLength( test, 1, 1, 1, 1 );
-    assertEquals("testGetOffsetAndLength- offSet:", new Integer(0), oAndL.getFirst() );
-    assertEquals("testGetOffsetAndLength- length:", new Integer(1), oAndL.getSecond() );
+    oAndL = StringOps.getOffsetAndLength(test, 1, 1, 1, 1);
+    assertEquals("testGetOffsetAndLength- offSet:", new Integer(0), oAndL.getFirst());
+    assertEquals("testGetOffsetAndLength- length:", new Integer(1), oAndL.getSecond());
+
+    oAndL = StringOps.getOffsetAndLength(test, 3, 5, 3, 5);
+    assertEquals("testGetOffsetAndLength- offSet:", new Integer(24), oAndL.getFirst());
+    assertEquals("testGetOffsetAndLength- length:", new Integer(1), oAndL.getSecond());
+
+    oAndL = StringOps.getOffsetAndLength(test, 2, 3, 3, 6);
+    assertEquals("testGetOffsetAndLength- offSet:", new Integer(12), oAndL.getFirst());
+    assertEquals("testGetOffsetAndLength- length:", new Integer(14), oAndL.getSecond());
+    
+    try {
+      StringOps.getOffsetAndLength(test, 3, 2, 2, 3);
+      fail("Should not have been able to compute offset where startRow > endRow");
+    }
+    catch (IllegalArgumentException ex) {
+      // correct behavior
+    }
+
+    try {
+      StringOps.getOffsetAndLength(test, 2, 4, 2, 3);
+      fail("Should not have been able to compute offset where start > end");
+    }
+    catch (IllegalArgumentException ex) {
+      // correct behavior
+    }
+
+    try {
+      StringOps.getOffsetAndLength(test, 4, 4, 5, 5);
+      fail("Should not have been able to compute offset where the\n" +
+           "given coordinates are not contained within the string");
+    }
+    catch (IllegalArgumentException ex) {
+      // correct behavior
+    }
+
+    try {
+      StringOps.getOffsetAndLength(test, 3, 4, 3, 12);
+      fail("Should not have been able to compute offset where the\n" +
+           "given coordinates are not contained within the string");
+    }
+    catch (IllegalArgumentException ex) {
+      // correct behavior
+    }
+
+    try {
+      StringOps.getOffsetAndLength(test, 2, 15, 3, 1);
+      fail("Should not have been able to compute offset where the\n" +
+           "given coordinates are not contained within the string");
+    }
+    catch (IllegalArgumentException ex) {
+      // correct behavior
+    }
   }
 
   /**
