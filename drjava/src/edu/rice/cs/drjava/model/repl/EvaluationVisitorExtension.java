@@ -584,6 +584,10 @@ public class EvaluationVisitorExtension extends EvaluationVisitor {
     return Interpreter.NO_RESULT;
   }
   
+  public Object visit(InterfaceDeclaration node) {
+    return Interpreter.NO_RESULT;
+  }
+  
   public Object visit(MethodDeclaration node) {
     return Interpreter.NO_RESULT;
   }
