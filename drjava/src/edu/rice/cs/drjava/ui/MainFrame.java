@@ -136,11 +136,16 @@ public class MainFrame extends JFrame {
 
 
     public boolean verifyOverwrite() {
-      int n = JOptionPane.showConfirmDialog
+      Object[] options = {"Yes","No"};
+      int n = JOptionPane.showOptionDialog
         (MainFrame.this,
          "This file already exists.  Do you wish to overwrite the file?",
          "Confirm Overwrite",
-         JOptionPane.YES_NO_OPTION);
+         JOptionPane.YES_NO_OPTION,
+         JOptionPane.QUESTION_MESSAGE,
+         null,
+         options,
+         options[1]);
       if (n==JOptionPane.YES_OPTION){ return true;}
       else {return false;}
 
