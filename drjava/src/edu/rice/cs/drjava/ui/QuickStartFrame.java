@@ -54,44 +54,22 @@ import java.net.URL;
 import java.net.MalformedURLException;
 
 /**
- * The frame for displaying the HTML help files.
- * @version $Id$
+ * The frame for displaying the HTML quick start files.
  */
-public class HelpFrame extends HTMLFrame {
-  private static final String HELP_PATH =  "/edu/rice/cs/drjava/docs/user/";
-  protected static final String CONTENTS_PAGE = "index.html";
-  protected static final String HOME_PAGE = "intro.html";
-  private static final URL INTRO_URL =
+public class QuickStartFrame extends HelpFrame {
+  private static final String HELP_PATH = "/edu/rice/cs/drjava/docs/quickstart/";
+  protected static final URL INTRO_URL =
     HTMLFrame.class.getResource(HELP_PATH + HOME_PAGE);
-  protected static final String ICON = "DrJavaHelp.png";
-
-  public HelpFrame() {
-    super("Help on using DrJava", INTRO_URL,
-          HelpFrame.class.getResource(HELP_PATH + CONTENTS_PAGE),
+ 
+  
+  public QuickStartFrame() {
+    super("QuickStart Guide to DrJava", INTRO_URL,
+          QuickStartFrame.class.getResource(HELP_PATH + CONTENTS_PAGE),
           ICON);
     addHyperlinkListener(_linkListener);
-
   }
   
-  /**
-   * Used by subclass QuickStartFrame to instantiate fields of frame.
-   */
-  public HelpFrame(String frameName, URL introUrl, URL indexUrl, String iconString) {
-    super(frameName, introUrl, indexUrl, iconString);
-  }
-  
-
-  protected String getErrorText(URL url) {
-    // The help files are made available by running "ant docs"
-    String errorText = "The Help files are currently unavailable.";
-    if (CodeStatus.DEVELOPMENT) {  // don't show this message in stable
-      errorText += "\n\nTo generate the help files, run the \"ant docs\" target" +
-        " after compiling DrJava.";
-    }
-    return errorText;
-  }
-
-  /**
+   /**
    * Shows the page selected by the hyperlink event.
    * (theo) changed to anonymous inner class for encapsulation purposes
    */
@@ -131,4 +109,6 @@ public class HelpFrame extends HTMLFrame {
       }
     }
   };
+
+  
 }

@@ -597,7 +597,38 @@ public final class DefinitionsPaneTest extends TestCase {
     pane.processKeyEvent(ke);
     assertTrue("Alt should have been registered and allowed to pass!", pane.checkAltKey());
   } 
+
+
+
+
+/* We had several problems with the backspace deleting 2 chars instead of one.
+ * Recently the problem reoccured in Java version 1.4, but not in 1.5
+ * This shows that we clearly needs a test for this.
+ */
+  public void testBackspace() throws BadLocationException {
+    DefinitionsPane definitions = _frame.getCurrentDefPane();
+    OpenDefinitionsDocument doc = definitions.getOpenDefDocument();
+    _assertDocumentEmpty(doc, "before testing");
+    doc.insertString(0, "test", null);
+    
+    definitions.setCaretPosition(4);
+    int backspaceCode = KeyEvent.VK_BACK_SPACE;
+     // The following is the sequence of key events for backspace
+     definitions.processKeyEvent(new KeyEvent(definitions,
+                                              KeyEvent.KEY_PRESSED,
+                                              (new Date()).getTime(),
+                                              0,
+                                              backspaceCode));
+     definitions.processKeyEvent(new KeyEvent(definitions,
+                                              KeyEvent.KEY_RELEASED,
+                                              (new Date()).getTime(),
+                                              0,
+					      backspaceCode));
+     _assertDocumentContents(doc, "tes", "Deleting with Backspace went wrong");
+  }
+  
 }
+
 
 class KeyTestListener implements KeyListener {
   

@@ -230,6 +230,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   // Cached frames and dialogs
   private ConfigFrame _configFrame;
   private HelpFrame _helpFrame;
+  private QuickStartFrame _quickStartFrame;
   private AboutDialog _aboutDialog;
   private ProjectPropertiesFrame _projectPropertiesFrame;
 
@@ -1059,6 +1060,17 @@ public class MainFrame extends JFrame implements OptionConstants {
         _helpFrame = new HelpFrame();
       }
       _helpFrame.setVisible(true);
+    }
+  };
+  
+  /** Shows the quick start documentation. */
+  private Action _quickStartAction = new AbstractAction("QuickStart") {
+    public void actionPerformed(ActionEvent ae) {
+      // Create frame if we haven't yet
+      if (_quickStartFrame == null) {
+        _quickStartFrame = new QuickStartFrame();
+      }
+      _quickStartFrame.setVisible(true);
     }
   };
 
@@ -3965,6 +3977,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _setUpAction(_stepOutDebugAction, "Step Out", "Step out of the current method");
 
     _setUpAction(_helpAction, "Help", "Show documentation on how to use DrJava");
+    _setUpAction(_quickStartAction, "Help", "View Quick Start Guide for DrJava");
     _setUpAction(_aboutAction, "About", "About DrJava");
 
   }
@@ -4375,6 +4388,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     JMenu helpMenu = new JMenu("Help");
     helpMenu.setMnemonic(KeyEvent.VK_H);
     _addMenuItem(helpMenu, _helpAction, KEY_HELP);
+    _addMenuItem(helpMenu, _quickStartAction, KEY_QUICKSTART);
     _addMenuItem(helpMenu, _aboutAction, KEY_ABOUT);
     return helpMenu;
   }

@@ -808,6 +808,14 @@ public interface OptionConstants {
                         KeyStroke.getKeyStroke(KeyEvent.VK_F1, 0));
 
   /**
+   * The key binding for quickstart
+   * Currently set to the null keystroke, though we may eventually want to make it configurable
+   */
+  public static final KeyStrokeOption KEY_QUICKSTART =
+    new KeyStrokeOption("key.quickstart",
+                          KeyStrokeOption.NULL_KEYSTROKE);
+  
+  /**
    * The key binding for the about dialog
    */
   public static final KeyStrokeOption KEY_ABOUT =
