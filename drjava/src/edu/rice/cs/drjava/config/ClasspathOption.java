@@ -4,7 +4,7 @@
  * at http://sourceforge.net/projects/drjava
  *
  * Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)
- * 
+ *
  * DrJava is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -39,7 +39,7 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.config;
 import java.io.File;
-import gj.util.Vector;
+import java.util.Vector;
 import java.awt.Color;
 import java.awt.Font;
 import edu.rice.cs.drjava.DrJava;
@@ -62,7 +62,7 @@ class ClasspathOption {
   public VectorOption<File> evaluate(String optionName) {
     // system path separator
     String ps = System.getProperty("path.separator");
-    if(ps.length() > 1) { 
+    if(ps.length() > 1) {
       // spit out warning if it's more than one character.
       System.err.println(warning);
       System.err.println("using '"+ps.charAt(0)+

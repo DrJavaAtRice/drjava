@@ -4,7 +4,7 @@
  * at http://sourceforge.net/projects/drjava
  *
  * Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)
- * 
+ *
  * DrJava is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -39,7 +39,7 @@
 
 package edu.rice.cs.drjava.config;
 
-import gj.util.Vector;
+import java.util.Vector;
 import java.util.StringTokenizer;
 /**
  * Abstract class defining behavior shared by all
@@ -47,7 +47,7 @@ import java.util.StringTokenizer;
  * Vector<T>.
  * @version $Id$
  */
-public class VectorOption<T> extends Option<Vector<T>> {  
+public class VectorOption<T> extends Option<Vector<T>> {
   
   protected ParseStrategy<T> parser;
   protected FormatStrategy<T> formatter;
@@ -62,7 +62,7 @@ public class VectorOption<T> extends Option<Vector<T>> {
    */
   private VectorOption(String key, ParseStrategy<T> parser, FormatStrategy<T> formatter,
                        String header, char delim, String footer, Vector<T> def) {
-    super(key,def); 
+    super(key,def);
     this.parser = parser;
     this.formatter = formatter;
     this.header = header;
@@ -92,15 +92,15 @@ public class VectorOption<T> extends Option<Vector<T>> {
    * @exception IllegalArgumentException if "s" is not formatted
    * according to the method Vector<T>.toString().
    */
-  public Vector<T> parse(String s) {  
+  public Vector<T> parse(String s) {
     s= s.trim();
     int startFirstElement = header.length();
-    int startFooter = s.length() - footer.length(); 
+    int startFooter = s.length() - footer.length();
     
-    if (startFooter < startFirstElement || 
-        !s.startsWith(header) || 
+    if (startFooter < startFirstElement ||
+        !s.startsWith(header) ||
         !s.endsWith(footer)) {
-      throw new OptionParseException(name, s, 
+      throw new OptionParseException(name, s,
                                      "Value must start with "+header+" and end "+
                                      "with "+footer+" to be a valid vector.");
     }
@@ -120,7 +120,7 @@ public class VectorOption<T> extends Option<Vector<T>> {
       } else if(sawDelim) { // isDelim & sawDelim (two delims in a row)
         throw new OptionParseException(name, s,
                                        "Argument contains delimiter with no preceding list element.");
-      } 
+      }
       sawDelim = isDelim;
     }
     if(sawDelim) {

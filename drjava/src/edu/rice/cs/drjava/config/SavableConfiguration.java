@@ -4,7 +4,7 @@
  * at http://sourceforge.net/projects/drjava
  *
  * Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)
- * 
+ *
  * DrJava is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -38,7 +38,7 @@
  END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.config;
 import java.io.*;
-import gj.util.Enumeration;
+import java.util.Iterator;
 import java.util.Properties;
 import java.util.Arrays;
 import java.util.Vector;
@@ -48,7 +48,7 @@ import java.util.Date;
  * A Configuration object that can be read and saved from a Stream.
  * @version $Id$
  */
-public class SavableConfiguration extends Configuration {  
+public class SavableConfiguration extends Configuration {
   
   private File file;
   
@@ -79,7 +79,7 @@ public class SavableConfiguration extends Configuration {
    */
   public void saveConfiguration(OutputStream os, String header) throws IOException {
     OutputStreamWriter osw = new OutputStreamWriter(os);
-    Enumeration<OptionParser> keys = map.keys();
+    Iterator<OptionParser> keys = map.keys();
     //Properties p = new Properties();
     String tmpString;
     StringBuffer buff;
@@ -95,8 +95,8 @@ public class SavableConfiguration extends Configuration {
     osw.write((int)'\n');
     
     // Write each option
-    while (keys.hasMoreElements()) {
-      key = keys.nextElement();
+    while (keys.hasNext()) {
+      key = keys.next();
       
       if (!key.getDefault().equals(map.getOption(key))) {
       
@@ -113,7 +113,7 @@ public class SavableConfiguration extends Configuration {
         // This replaces all backslashes with two backslashes for windows
         int index = 0;
         int pos;
-        while (index < tmpString.length() && 
+        while (index < tmpString.length() &&
                ((pos = tmpString.indexOf('\\', index)) >= 0)) {
           buff = new StringBuffer(tmpString);
           buff.insert(pos, '\\');

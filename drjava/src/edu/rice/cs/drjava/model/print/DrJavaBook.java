@@ -55,7 +55,7 @@ import java.text.*;
  */
 public class DrJavaBook implements Pageable {
 
-  private Vector _pagePrinters;
+  private ArrayList<PagePrinter> _pagePrinters;
   private PageFormat _format;
   private String _filename;
 
@@ -71,7 +71,7 @@ public class DrJavaBook implements Pageable {
    * pageformat.
    */
   public DrJavaBook(String text, String filename, PageFormat format) {
-    _pagePrinters = new Vector();
+    _pagePrinters = new ArrayList<PagePrinter>();
     _format = format;
     _filename = filename;
 
@@ -97,7 +97,7 @@ public class DrJavaBook implements Pageable {
     float lineHeight = textl.getLeading() + textl.getAscent();
     int linesPerPage = (int) (_format.getImageableHeight() / lineHeight) - 1;
 
-    Hashtable map = new Hashtable();
+    HashMap<TextAttribute, Object> map = new HashMap<TextAttribute, Object>();
     map.put(TextAttribute.FONT, PRINT_FONT);
 
     char[] carraigeReturn = {(char) 10};
@@ -113,7 +113,7 @@ public class DrJavaBook implements Pageable {
 
     int page = 0;
     PagePrinter thisPagePrinter = new PagePrinter(page, _filename, this);
-    _pagePrinters.addElement(thisPagePrinter);
+    _pagePrinters.add(thisPagePrinter);
 
     // loop over each of the *real* lines in the document
     while (! (thisText.equals("") && (text.equals("")))) {
@@ -141,7 +141,7 @@ public class DrJavaBook implements Pageable {
         {
           page++;
           thisPagePrinter = new PagePrinter(page, _filename, this);
-          _pagePrinters.addElement(thisPagePrinter);
+          _pagePrinters.add(thisPagePrinter);
         }
 
         isCarryLine = true;
@@ -184,7 +184,7 @@ public class DrJavaBook implements Pageable {
    * @return The Printable object for the given page.
    */
   public Printable getPrintable(int pageIndex) {
-    return (Printable) _pagePrinters.elementAt(pageIndex);
+    return (Printable) _pagePrinters.get(pageIndex);
   }
 
 }

@@ -56,11 +56,11 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.LinkedList;
+import java.util.Vector;
 import java.util.Arrays;
 import java.net.URL;
 import java.net.MalformedURLException;
 
-import gj.util.Vector;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.CodeStatus;
@@ -117,8 +117,9 @@ public class MainFrame extends JFrame implements OptionConstants {
 
   /**
    * Maps an OpenDefDoc to its JScrollPane.
+   * TODO: should this be synchronized?
    */
-  private Hashtable _defScrollPanes;
+  private Hashtable<OpenDefinitionsDocument, JScrollPane> _defScrollPanes;
   
   /**
    * The currently displayed DefinitionsPane.
@@ -145,7 +146,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   private JUnitPanel _junitErrorPanel;
   private JavadocErrorPanel _javadocErrorPanel;
   private FindReplaceDialog _findReplace;
-  private LinkedList _tabs;
+  private LinkedList<TabbedPanel> _tabs;
   
   /**
    * Panel to hold both InteractionsPane and its sync message.
@@ -449,11 +450,11 @@ public class MainFrame extends JFrame implements OptionConstants {
   private Action _javadocAction = new AbstractAction("Create Javadoc") {
       public void actionPerformed(ActionEvent ae) {
         try {
-          Vector<String> gjClasspath = _model.getClasspath();
-          String[] cp = new String[gjClasspath.size()];
-          gjClasspath.copyInto(cp);
-          List<String> javaClasspath = Arrays.asList(cp);
-          _model.javadocAll(_javadocSelector, _saveSelector, javaClasspath, _model.getNotifier());
+//          Vector<String> gjClasspath = _model.getClasspath();
+//          String[] cp = new String[gjClasspath.size()];
+//          gjClasspath.copyInto(cp);
+//          List<String> javaClasspath = Arrays.asList(cp);
+          _model.javadocAll(_javadocSelector, _saveSelector, _model.getClasspath(), _model.getNotifier());
         }
         catch (IOException ioe) {
           _showIOError(ioe);
@@ -1070,7 +1071,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     this.addWindowListener(_windowCloseListener);
     _model.addListener(new ModelListener());
     
-    _defScrollPanes = new Hashtable();
+    _defScrollPanes = new Hashtable<OpenDefinitionsDocument, JScrollPane>();
 
     // Create tabs before DefPane
     _setUpTabs();
@@ -2704,7 +2705,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _tabbedPane.add("Interactions", interactionsScroll);
     _tabbedPane.add("Console", consoleScroll);
     
-    _tabs = new LinkedList();
+    _tabs = new LinkedList<TabbedPanel>();
 
     _tabs.addLast(_compilerErrorPanel);
     _tabs.addLast(_junitErrorPanel);
@@ -2719,6 +2720,7 @@ public class MainFrame extends JFrame implements OptionConstants {
 
   /**
    * Configures the component used for selecting active documents.
+   * TODO: Does the ListModel here need to write through to the model?
    */
   private void _setUpDocumentSelector() {
     _docList = new JList(_model.getDefinitionsDocs());
@@ -3220,7 +3222,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     public void currThreadSet(DebugThreadData dtd) {
     }
     
-    public void threadLocationUpdated(final OpenDefinitionsDocument doc, 
+    public void threadLocationUpdated(final OpenDefinitionsDocument doc,
                                       final int lineNumber,
                                       final boolean shouldHighlight) {
       // Only change GUI from event-dispatching thread
@@ -3257,14 +3259,14 @@ public class MainFrame extends JFrame implements OptionConstants {
             if (startOffset > -1) {
               int endOffset = defDoc.getLineEndPos(startOffset);
               if (endOffset > -1) {
-                _currentThreadLocationHighlight = 
+                _currentThreadLocationHighlight =
                   _currentDefPane.getHighlightManager().addHighlight(startOffset, endOffset,
                                                                      DefinitionsPane.THREAD_PAINTER);
               }
             }
           }
 
-          if (doc.isModifiedSinceSave() && 
+          if (doc.isModifiedSinceSave() &&
               !_currentDefPane.hasWarnedAboutModified()) {
             
             _showDebuggingModifiedFileWarning();

@@ -4,7 +4,7 @@
  * at http://sourceforge.net/projects/drjava
  *
  * Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)
- * 
+ *
  * DrJava is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -42,7 +42,7 @@ package edu.rice.cs.drjava.model.debug;
 import com.sun.jdi.*;
 import com.sun.jdi.request.*;
 
-import gj.util.Vector;
+import java.util.Vector;
 import java.io.File;
 
 import edu.rice.cs.drjava.DrJava;
@@ -51,31 +51,31 @@ import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
 import edu.rice.cs.drjava.model.definitions.ClassNameNotFoundException;
 
 /**
- * Superclasses all DebugActions that are associated with specific 
- * OpenDefinitionsDocuments. 
+ * Superclasses all DebugActions that are associated with specific
+ * OpenDefinitionsDocuments.
  * @version $Id$
  */
-public abstract class DocumentDebugAction<T extends EventRequest> 
-  extends DebugAction<T> {  
+public abstract class DocumentDebugAction<T extends EventRequest>
+  extends DebugAction<T> {
   
   protected String _className;
   protected File _file;
-  protected OpenDefinitionsDocument _doc;  
+  protected OpenDefinitionsDocument _doc;
   
   
   /**
-   * Creates a new DocumentDebugAction.  Automatically tries to create the 
+   * Creates a new DocumentDebugAction.  Automatically tries to create the
    * EventRequest if a ReferenceType can be found, or else adds this object to the
-   * PendingRequestManager. Any subclass should automatically call 
+   * PendingRequestManager. Any subclass should automatically call
    * _initializeRequest in its constructor.
    * @param manager JPDADebugger in charge
    * @param doc Document this action corresponds to
    * @param offset Offset into the document that the action affects
    */
-  public DocumentDebugAction (JPDADebugger manager, 
+  public DocumentDebugAction (JPDADebugger manager,
                               OpenDefinitionsDocument doc,
                               int offset)
-    throws DebugException 
+    throws DebugException
   {
     super(manager);
     try {
@@ -99,7 +99,7 @@ public abstract class DocumentDebugAction<T extends EventRequest>
                                ise.getMessage());
     }
     _doc = doc;
-  }  
+  }
   
   /**
    * Returns the class name this DebugAction occurs in.
@@ -130,7 +130,7 @@ public abstract class DocumentDebugAction<T extends EventRequest>
    * types for the same class if a custom class loader is used.)
    * @return true if the EventRequest is successfully created
    */
-  public boolean createRequests(Vector<ReferenceType> refTypes) 
+  public boolean createRequests(Vector<ReferenceType> refTypes)
     throws DebugException
   {
     _createRequests(refTypes);
@@ -146,7 +146,7 @@ public abstract class DocumentDebugAction<T extends EventRequest>
   /**
    * This should always be called from the constructor of the subclass.
    * Attempts to create EventRequests on the given ReferenceTypes, and
-   * also adds this action to the pending request manager (so identical 
+   * also adds this action to the pending request manager (so identical
    * classes loaded in the future will also have this action).
    */
   protected void _initializeRequests(Vector<ReferenceType> refTypes)
@@ -164,7 +164,7 @@ public abstract class DocumentDebugAction<T extends EventRequest>
   }
   
   /**
-   * Creates appropriate EventRequests from the EventRequestManager and 
+   * Creates appropriate EventRequests from the EventRequestManager and
    * stores them in the _requests field.
    * @param refTypes All (identical) ReferenceTypes to which this action
    * applies.  (There may be multiple if a custom class loader is in use.)

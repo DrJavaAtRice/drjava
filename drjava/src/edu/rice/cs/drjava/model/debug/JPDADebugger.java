@@ -4,7 +4,7 @@
  * at http://sourceforge.net/projects/drjava
  *
  * Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)
- * 
+ *
  * DrJava is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version of the License, or
@@ -48,9 +48,9 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import javax.swing.ListModel;
 
-import gj.util.Enumeration;
-import gj.util.Hashtable;
-import gj.util.Vector;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Vector;
 
 // DrJava stuff
 import edu.rice.cs.util.StringOps;
@@ -75,12 +75,12 @@ import com.sun.jdi.event.*;
 /**
  * An integrated debugger which attaches to the Interactions JVM using
  * Sun's Java Platform Debugger Architecture (JPDA/JDI) interface.
- * 
- * Every public method in this class throws an llegalStateException if 
+ *
+ * Every public method in this class throws an llegalStateException if
  * it is called while the debugger is not active, except for isAvailable,
  * isReady, and startup.  Public methods also throw a DebugException if
  * the EventHandlerThread has caught an exception.
- * 
+ *
  * @version $Id$
  */
 public class JPDADebugger implements Debugger, DebugModelCallback {
@@ -142,7 +142,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
   
   /**
    * Storage to facilitate remembering threads which have died
-   * so that we can filter them out of the the list of threads 
+   * so that we can filter them out of the the list of threads
    * returned by the VM we are debugging
    */
   private DeadThreadFilter _deadThreads;
@@ -259,9 +259,9 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
   public synchronized void startup() throws DebugException {
     if (!isReady()) {
       // check if all open documents are in sync
-      ListModel list = _model.getDefinitionsDocs();
-      for (int i = 0; i < list.getSize(); i++) {
-        OpenDefinitionsDocument currDoc = (OpenDefinitionsDocument)list.getElementAt(i);
+      List<OpenDefinitionsDocument> list = _model.getDefinitionsDocuments();
+      for (int i = 0; i < list.size(); i++) {
+        OpenDefinitionsDocument currDoc = list.get(i);
         currDoc.checkIfClassFileInSync();
       }
       
@@ -318,7 +318,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
    * Returns an attaching connector to use for connecting to the
    * interpreter JVM.
    */
-  protected AttachingConnector _getAttachingConnector() 
+  protected AttachingConnector _getAttachingConnector()
     throws DebugException
   {
     VirtualMachineManager vmm = Bootstrap.virtualMachineManager();
@@ -342,7 +342,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
    * the InterpreterJVM class in the virtual machine being debugged.
    * This is used to mainupulate interpreters at breakpoints.
    */
-  protected ObjectReference _getInterpreterJVMRef() 
+  protected ObjectReference _getInterpreterJVMRef()
     throws DebugException
   {
     String className = "edu.rice.cs.drjava.model.repl.newjvm.InterpreterJVM";
@@ -362,7 +362,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
    * any state.
    * @throws IllegalStateException if debugger is not ready
    */
-  public synchronized void shutdown() {    
+  public synchronized void shutdown() {
     if (!isReady()) {
       throw new IllegalStateException("Cannot shut down if debugger is not active.");
     }
@@ -394,7 +394,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
   
   
   /**
-   * Returns the current EventRequestManager from JDI, or null if 
+   * Returns the current EventRequestManager from JDI, or null if
    * startup() has not been called.
    */
   synchronized EventRequestManager getEventRequestManager() {
@@ -414,10 +414,10 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
    * Returns true if this actually changed the suspended thread
    * by pushing it onto the stack of suspended threads.  Returns
    * false if this thread was already selected.
-   * 
+   *
    * The return value fixes a bug that occurs if the user steps
    * into a breakpoint.
-   * 
+   *
    * @throws IllegalArgumentException if thread is not suspended.
    */
   synchronized boolean setCurrentThread(ThreadReference thread) {
@@ -427,7 +427,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     }
     
     try {
-      if ((_suspendedThreads.isEmpty() || 
+      if ((_suspendedThreads.isEmpty() ||
            !_suspendedThreads.contains(thread.uniqueID()))
             && (thread.frameCount() > 0)) {
         _suspendedThreads.push(thread);
@@ -468,12 +468,12 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     
     // Special case to avoid overhead of scrollToSource() if we
     // are selecting the thread we have already selected currently
-    if ( _suspendedThreads.size() > 0 && 
+    if ( _suspendedThreads.size() > 0 &&
        _suspendedThreads.peek().uniqueID() == threadRef.uniqueID() ) {
       return;
     }
     
-    // if we switch to a currently suspended thread, we need to remove 
+    // if we switch to a currently suspended thread, we need to remove
     // it from the stack and put it on the top
     if ( _suspendedThreads.contains(threadRef.uniqueID()) ) {
       _suspendedThreads.remove(threadRef.uniqueID());
@@ -481,7 +481,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     if ( !threadRef.isSuspended() ) {
       throw new IllegalArgumentException("Given thread must be suspended.");
 //       threadRef.suspend();
-//        
+//
 //       try{
 //         if( threadRef.frameCount() <= 0 ) {
 //           printMessage(threadRef.name() + " could not be suspended. It had no stackframes.");
@@ -493,10 +493,10 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
 //       catch(IncompatibleThreadStateException ex){
 //         throw new UnexpectedException(ex);
 //       }
-//       
-//       // 
-//       // Step now so that we can get an interpreter, 
-//       // do not notify (hence the false argument) 
+//
+//       //
+//       // Step now so that we can get an interpreter,
+//       // do not notify (hence the false argument)
 //       _stepHelper(StepRequest.STEP_OVER, false);
       //return;
     }
@@ -508,7 +508,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
         scrollToSource(threadRef.frame(0).location());
       }
       else {
-        printMessage(threadRef.name() + 
+        printMessage(threadRef.name() +
                      " could not be suspended since it has no stackframes.");
         resume();
         return;
@@ -573,7 +573,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
   
   /**
    * Returns a Vector with all the loaded ReferenceTypes for the given class
-   * name (empty if the class could not be found).  Makes no attempt to load 
+   * name (empty if the class could not be found).  Makes no attempt to load
    * the class if it is not already loaded.
    * <p>
    * If custom class loaders are in use, multiple copies of the class may
@@ -585,8 +585,8 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
   
   /**
    * Returns a Vector with the loaded ReferenceTypes for the given class name
-   * (empty if the class could not be found).  Makes no attempt to load the 
-   * class if it is not already loaded.  If the lineNumber is not 
+   * (empty if the class could not be found).  Makes no attempt to load the
+   * class if it is not already loaded.  If the lineNumber is not
    * DebugAction.ANY_LINE, this method ensures that the returned ReferenceTypes
    * contain the given lineNumber, searching through inner classes if necessary.
    * If no inner classes contain the line number, an empty Vector is returned.
@@ -594,7 +594,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
    * If custom class loaders are in use, multiple copies of the class
    * may be loaded, so all are returned.
    */
-  synchronized Vector<ReferenceType> getReferenceTypes(String className, 
+  synchronized Vector<ReferenceType> getReferenceTypes(String className,
                                                        int lineNumber) {
     // Get all classes that match this name
     List classes = _vm.classesByName(className);
@@ -648,7 +648,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
    * @return The thread in the virtual machine with name d.uniqueID()
    * @throws NoSuchElementException if the thread could not be found
    */
-  protected ThreadReference _getThreadFromDebugThreadData(DebugThreadData d) 
+  protected ThreadReference _getThreadFromDebugThreadData(DebugThreadData d)
     throws NoSuchElementException
   {
     List threads = _vm.allThreads();
@@ -668,7 +668,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
   
   /**
    * Suspends all the currently running threads in the virtual machine.
-   * 
+   *
    * Not currently in use/available, since it is incompatible with
    * the debug interpreters.
    *
@@ -691,12 +691,12 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
   
   /**
    * Suspends execution of the thread referenced by threadData.
-   * 
+   *
    * Not in use/available, since it is currently incompatible with the
    * debug interpreters.  (Can't execute code in a suspended thread unless
    * it was suspended with a breakpoint/step.)
    *
-  public synchronized void suspend(DebugThreadData threadData) 
+  public synchronized void suspend(DebugThreadData threadData)
     throws DebugException
   {
     _ensureReady();
@@ -706,10 +706,10 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
   }*/
   
   /**
-   * Resumes the thread currently being debugged without 
+   * Resumes the thread currently being debugged without
    * copying back any of the variables from the debug interpreter
    */
-  protected synchronized void _resumeWithoutCopyingVariables() 
+  protected synchronized void _resumeWithoutCopyingVariables()
     throws DebugException
   {
     _resumeHelper(false);
@@ -729,7 +729,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
    * @param shouldCopyBack Whether to copy back the variables from
    * the current debug interpreter
    */
-  protected synchronized void _resumeHelper(boolean shouldCopyBack) 
+  protected synchronized void _resumeHelper(boolean shouldCopyBack)
     throws DebugException
   {
     try {
@@ -748,7 +748,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
    * associated debug interpreter.
    * @param threadData Thread to resume
    */
-  public synchronized void resume(DebugThreadData threadData) 
+  public synchronized void resume(DebugThreadData threadData)
     throws DebugException
   {
     _ensureReady();
@@ -797,7 +797,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     // Switch to next suspended thread, if any
   }
   
-  /** 
+  /**
    * Steps the currently suspended thread.
    * @flag The flag denotes what kind of step to take.
    * The following are the valid options:
@@ -861,7 +861,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
    * Adds a watch on the given field or variable.
    * @param field the name of the field we will watch
    */
-  public synchronized void addWatch(String field) 
+  public synchronized void addWatch(String field)
     throws DebugException
   {
     _ensureReady();
@@ -875,7 +875,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
    * Has no effect if the given field is not being watched.
    * @param field the name of the field we will watch
    */
-  public synchronized void removeWatch(String field) 
+  public synchronized void removeWatch(String field)
     throws DebugException
   {
     _ensureReady();
@@ -892,7 +892,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
    * Removes the watch at the given index.
    * @param index Index of the watch to remove
    */
-  public synchronized void removeWatch(int index) 
+  public synchronized void removeWatch(int index)
     throws DebugException
   {
     _ensureReady();
@@ -905,7 +905,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
   /**
    * Removes all watches on existing fields and variables.
    */
-  public synchronized void removeAllWatches() 
+  public synchronized void removeAllWatches()
     throws DebugException
   {
     _ensureReady();
@@ -920,7 +920,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
    * @param offset Start offset on the line to set the breakpoint
    * @param lineNumber Line on which to set or remove the breakpoint
    */
-  public synchronized void toggleBreakpoint(OpenDefinitionsDocument doc, 
+  public synchronized void toggleBreakpoint(OpenDefinitionsDocument doc,
                                             int offset, int lineNum)
     throws DebugException
   {
@@ -964,7 +964,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
   * @param breakpoint The breakpoint to remove.
   * @param className the name of the class the BP is being removed from.
   */
-  public synchronized void removeBreakpoint(final Breakpoint breakpoint) 
+  public synchronized void removeBreakpoint(final Breakpoint breakpoint)
     throws DebugException
   {
     _ensureReady();
@@ -1022,7 +1022,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     Object property = request.getProperty("debugAction");
     if ( (property != null) && (property instanceof Breakpoint) ) {
       final Breakpoint breakpoint = (Breakpoint) property;
-      printMessage("Breakpoint hit in class " + 
+      printMessage("Breakpoint hit in class " +
                                breakpoint.getClassName() + "  [line " +
                                breakpoint.getLineNumber() + "]");
       
@@ -1042,19 +1042,19 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
    * Returns a Vector<Breakpoint> that contains all of the Breakpoint objects that
    * all open documents contain.
    */
-  public synchronized Vector<Breakpoint> getBreakpoints() 
+  public synchronized Vector<Breakpoint> getBreakpoints()
     throws DebugException
   {
     _ensureReady();
     
     Vector<Breakpoint> sortedBreakpoints = new Vector<Breakpoint>();
-    ListModel docs = _model.getDefinitionsDocs();
-    for (int i = 0; i < docs.getSize(); i++) {
-      Vector<Breakpoint> docBreakpoints = 
-        ((OpenDefinitionsDocument)docs.getElementAt(i)).getBreakpoints();
+    List<OpenDefinitionsDocument> docs = _model.getDefinitionsDocuments();
+    for (int i = 0; i < docs.size(); i++) {
+      Vector<Breakpoint> docBreakpoints =
+        docs.get(i).getBreakpoints();
       for (int j = 0; j < docBreakpoints.size(); j++) {
         sortedBreakpoints.addElement(docBreakpoints.elementAt(j));
-      }      
+      }
     }
     return sortedBreakpoints;
   }
@@ -1063,7 +1063,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
    * Prints the list of all breakpoints as a message in DrJava's Interactions
    * Pane.  Both pending and resolved breakpoints are listed.
    */
-  public synchronized void printBreakpoints() 
+  public synchronized void printBreakpoints()
     throws DebugException
   {
     _ensureReady();
@@ -1103,11 +1103,11 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     List listThreads = _vm.allThreads();
 
     // get an iterator that filters out threads that we know are dead from
-    // the list returned by _vm.allThreads() 
+    // the list returned by _vm.allThreads()
     Iterator iter = _deadThreads.filter(listThreads).iterator();
     Vector<DebugThreadData> threads = new Vector<DebugThreadData>();
-    while (iter.hasNext()) {      
-      threads.addElement(new DebugThreadData((ThreadReference)iter.next()));                                                  
+    while (iter.hasNext()) {
+      threads.addElement(new DebugThreadData((ThreadReference)iter.next()));
     }
     return threads;
   }
@@ -1160,7 +1160,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     else {
       scrollToSource(location);
     }
-  }  
+  }
   
   /**
    * Scroll to the location specified by location
@@ -1191,7 +1191,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
       className = StringOps.replace(className, ".", ps);
       
       // crop off the $ if there is one and anything after it
-      int indexOfDollar = className.indexOf('$');    
+      int indexOfDollar = className.indexOf('$');
       if (indexOfDollar > -1) {
         className = className.substring(0, indexOfDollar);
       }
@@ -1207,7 +1207,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     }
     File f = _model.getSourceFileFromPaths(filename, roots);
     if (f == null) {
-      Vector<File> sourcepath = 
+      Vector<File> sourcepath =
         DrJava.getConfig().getSetting(OptionConstants.DEBUG_SOURCEPATH);
       f = _model.getSourceFileFromPaths(filename, sourcepath);
     }
@@ -1255,8 +1255,8 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     while (i.hasNext()) {
       StackFrame frame = (StackFrame) i.next();
 
-      if (frame.location().lineNumber() == stackData.getLine() && 
-          stackData.getMethod().equals(frame.location().declaringType().name() + "." + 
+      if (frame.location().lineNumber() == stackData.getLine() &&
+          stackData.getMethod().equals(frame.location().declaringType().name() + "." +
                                        frame.location().method().name()))
       {
         scrollToSource(frame.location(), false);
@@ -1291,7 +1291,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     return null;
   }
 
-  /** 
+  /**
    * Opens a document and scrolls to the appropriate location.  If
    * doc is null, a message is printed indicating the source file
    * could not be found.
@@ -1304,7 +1304,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     openAndScroll(doc, location.lineNumber(), location.declaringType().name(), shouldHighlight);
   }
   
-  /** 
+  /**
    * Opens a document and scrolls to the appropriate location.  If
    * doc is null, a message is printed indicating the source file
    * could not be found.
@@ -1334,7 +1334,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
    * Returns the relative directory (from the source root) that the source
    * file with this qualifed name will be in, given its package.
    * Returns the empty string for classes without packages.
-   * 
+   *
    * TO DO: Move this to a static utility class
    * @param className The fully qualified class name
    */
@@ -1406,7 +1406,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
             currWatch.setType(null);
           }
           continue;
-        } 
+        }
         //List frames = null;
         LocalVariable localVar = null;
         try {
@@ -1422,7 +1422,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
         if (localVar == null) {
           Field field = outerRt.fieldByName(currName);
           
-          // if the variable is not a field either, it's not defined in this 
+          // if the variable is not a field either, it's not defined in this
           // ReferenceType's scope, keep going further out in scope.
           Field outerThis = outerRt.fieldByName("this$0");
           
@@ -1434,8 +1434,8 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
             
             if (field == null) {
               // Enter the loop again with the next outer enclosing class
-              outerThis = outerRt.fieldByName("this$0");                
-            }    
+              outerThis = outerRt.fieldByName("this$0");
+            }
           }
           
           if (field != null) {
@@ -1450,7 +1450,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
           /*
             
             // crop off the $ if there is one and anything after it
-            int indexOfDollar = className.lastIndexOf('$');    
+            int indexOfDollar = className.lastIndexOf('$');
             if (indexOfDollar > -1) {
               className = className.substring(0, indexOfDollar);
             }
@@ -1497,13 +1497,13 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
               // This is a hack, remove it to slightly improve performance but
               // at the loss of ever being able to watch outer instance
               // fields. If unremoved, this will work sometimes, but not always.
-              while (outerFrame.thisObject() != null && 
+              while (outerFrame.thisObject() != null &&
                      !outerFrame.thisObject().referenceType().equals(outerRt) &&
                      stackIndex < frames.size()) {
                 outerFrame = (StackFrame) frames.get(stackIndex);
                 stackIndex++;
               }
-              if (stackIndex < frames.size() && outerFrame.thisObject() != null) { 
+              if (stackIndex < frames.size() && outerFrame.thisObject() != null) {
                 // then we found the right stack frame
                 currWatch.setValue(_getValue(outerFrame.thisObject().getValue(field)));
                 try {
@@ -1589,11 +1589,11 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     }
   }
 
-  /** 
+  /**
    * @return the approrpiate Method to call in the InterpreterJVM in order
    * to define a variable of the type val
    */
-  private Method _getDefineVariableMethod(ReferenceType interpreterRef, 
+  private Method _getDefineVariableMethod(ReferenceType interpreterRef,
                                           Value val)
     throws DebugException
   {
@@ -1607,7 +1607,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
       signature_mid = "Ljava/lang/Object;";
     }
     else if( val instanceof BooleanValue ){
-      signature_mid = "Z";    
+      signature_mid = "Z";
     }
     else if( val instanceof ByteValue ){
       signature_mid = "B";
@@ -1659,8 +1659,8 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
    * a thread.
    * @param interpreterName Name of the interpreter in the InterpreterJVM
    */
-  private ObjectReference _getDebugInterpreter(String interpreterName) 
-    throws InvalidTypeException, ClassNotLoadedException, 
+  private ObjectReference _getDebugInterpreter(String interpreterName)
+    throws InvalidTypeException, ClassNotLoadedException,
     IncompatibleThreadStateException, InvocationException, DebugException
   {
     ThreadReference threadRef = _suspendedThreads.peek();
@@ -1668,14 +1668,14 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
   }
 
   /**
-   * Gets the debug interpreter with the given name using the given 
+   * Gets the debug interpreter with the given name using the given
    * suspended thread to invoke methods.
    * @param intepreterName Name of the interpreter in the InterpreterJVM
    * @param threadRef Suspended thread to use for invoking methods
    * @throws IllegalStateException if threadRef is not suspended
    */
-  private ObjectReference _getDebugInterpreter(String interpreterName, 
-                                               ThreadReference threadRef) 
+  private ObjectReference _getDebugInterpreter(String interpreterName,
+                                               ThreadReference threadRef)
     throws InvalidTypeException, ClassNotLoadedException,
     IncompatibleThreadStateException, InvocationException, DebugException
   {
@@ -1689,24 +1689,24 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
                           "getJavaInterpreter");
     
     
-    // invokeMethod would throw an ObjectCollectedException if the StringReference 
-    // declared by _vm.mirrorOf(name) had been garbage collected before 
+    // invokeMethod would throw an ObjectCollectedException if the StringReference
+    // declared by _vm.mirrorOf(name) had been garbage collected before
     // invokeMethod could execute. This happened infrequently so by trying this
     // multiple times, the chance of failure each time should be acceptably low.
     
     int tries = 0;
-    while (tries < MAXINVOKETRIES) {      
+    while (tries < MAXINVOKETRIES) {
       LinkedList args = new LinkedList();
       args.add(_vm.mirrorOf(interpreterName)); // make the String a JDI Value
-      if( printMessages ) { 
+      if( printMessages ) {
         System.out.println("Invoking " + m.toString() + " on " + args.toString());
         System.out.println("Thread is " + threadRef.toString() + " <suspended = " + threadRef.isSuspended() + ">");
       }
       
       try {
-        ObjectReference tmpInterpreter = (ObjectReference) _interpreterJVM.invokeMethod(threadRef, m, args, 
+        ObjectReference tmpInterpreter = (ObjectReference) _interpreterJVM.invokeMethod(threadRef, m, args,
                                      ObjectReference.INVOKE_SINGLE_THREADED);
-        if( printMessages ) System.out.println("Returning...");        
+        if( printMessages ) System.out.println("Returning...");
         return tmpInterpreter;
       }
       catch (ObjectCollectedException oce) {
@@ -1718,11 +1718,11 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
   }
   
   /**
-   * Notifies the debugger that an assignment has been made in 
+   * Notifies the debugger that an assignment has been made in
    * the given debug interpreter.
-   * 
+   *
    * Not currently used.
-   * 
+   *
    * @param name the name of the interpreter
    *
   public void notifyDebugInterpreterAssignment(String name) {
@@ -1817,17 +1817,17 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
    * @param name Name of the variable
    * @param val Value of the variable
    */
-  private void _defineVariable(ThreadReference suspendedThreadRef, 
+  private void _defineVariable(ThreadReference suspendedThreadRef,
                                ObjectReference debugInterpreter,
-                               String name, Value val) 
+                               String name, Value val)
     throws InvalidTypeException, AbsentInformationException, IncompatibleThreadStateException,
-    ClassNotLoadedException, InvocationException, DebugException 
+    ClassNotLoadedException, InvocationException, DebugException
   {
     ReferenceType rtDebugInterpreter = debugInterpreter.referenceType();
     Method method2Call = _getDefineVariableMethod(rtDebugInterpreter,  val);
     
-    // invokeMethod would throw an ObjectCollectedException if the StringReference 
-    // declared by _vm.mirrorOf(name) had been garbage collected before 
+    // invokeMethod would throw an ObjectCollectedException if the StringReference
+    // declared by _vm.mirrorOf(name) had been garbage collected before
     // invokeMethod could execute. This happened infrequently so by trying this
     // multiple times, the chance of failure each time should be acceptably low.
      
@@ -1839,7 +1839,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
       
       /* System.out.println("Calling " + method2Call.toString() + "with " + args.get(0).toString()); */
       try {
-        debugInterpreter.invokeMethod(suspendedThreadRef, method2Call, args, 
+        debugInterpreter.invokeMethod(suspendedThreadRef, method2Call, args,
                                       ObjectReference.INVOKE_SINGLE_THREADED);
         return;
       }
@@ -1847,7 +1847,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
         tries++;
       }
     }
-    throw new DebugException("The variable: " + name + 
+    throw new DebugException("The variable: " + name +
                              " could not be defined in the debug interpreter");
   }
   
@@ -1855,11 +1855,11 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
    * Sets the value of "this" as well as its enclosing classes in
    * the debug interpreter.
    */
-  protected void _setThisInInterpreter(ThreadReference suspendedThreadRef, 
+  protected void _setThisInInterpreter(ThreadReference suspendedThreadRef,
                                        ObjectReference debugInterpreter,
                                        Value val)
-    throws InvalidTypeException, AbsentInformationException, 
-    IncompatibleThreadStateException, ClassNotLoadedException, 
+    throws InvalidTypeException, AbsentInformationException,
+    IncompatibleThreadStateException, ClassNotLoadedException,
     InvocationException, DebugException
   {
     // First set "this"
@@ -1883,7 +1883,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
 //      debugInterpreter.invokeMethod(suspendedThreadRef, method2Call, args,
 //                                    ObjectReference.INVOKE_SINGLE_THREADED);
 //    }
-//    
+//
 //    // Then set its enclosing classes
 //    method2Call = _getMethod(rtDebugInterpreter, "addEnclosingClass");
 //    int numEnclosing = 1; // includes "this" class
@@ -1892,13 +1892,13 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
 //      numEnclosing++;
 //      index = className.indexOf("$",index);
 //    }
-//    
+//
 //    Object instance = val;
 //    while (numEnclosing > 0) {
 //      index = className.lastIndexOf("$");
 //      immediateClassName = className.substring(index+1, className.length);
 //      className = className.substring(0,index));
-//      args.clear();     
+//      args.clear();
 //      debugInterpreter.invokeMethod(suspendedThreadRef, method2Call, args,
 //                                    ObjectReference.INVOKE_SINGLE_THREADED);
   }
@@ -1918,7 +1918,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
         // an AbsentInformationException can be thrown if the user does not
         // compile the classes to be debugged with the -g flag
         printMessage("No debug information available for this class.\nMake sure to compile classes to be debugged with the -g flag.");
-      }          
+      }
       _switchToSuspendedThread();
     }
     catch(DebugException de) {
@@ -1992,10 +1992,10 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
    * @param v Value of localVar
    * @return Converted primitive, or v if it was a reference type
    */
-  private Value _convertToActualType(ThreadReference threadRef, LocalVariable localVar, 
+  private Value _convertToActualType(ThreadReference threadRef, LocalVariable localVar,
                                      Value v)
-    throws InvalidTypeException, ClassNotLoadedException, 
-    IncompatibleThreadStateException, AbsentInformationException, 
+    throws InvalidTypeException, ClassNotLoadedException,
+    IncompatibleThreadStateException, AbsentInformationException,
     InvocationException
   {
     String typeSignature;
@@ -2037,17 +2037,17 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
       return v;
     }
     
-    return ref.invokeMethod(threadRef, m, new LinkedList(), 
+    return ref.invokeMethod(threadRef, m, new LinkedList(),
                             ObjectReference.INVOKE_SINGLE_THREADED);
   }
   
   /**
-   * Copies the variables in the current interpreter back into the Thread 
+   * Copies the variables in the current interpreter back into the Thread
    * it refers to.
    */
   private void _copyBack(ThreadReference threadRef)
-    throws InvalidTypeException, ClassNotLoadedException, 
-    IncompatibleThreadStateException, AbsentInformationException, 
+    throws InvalidTypeException, ClassNotLoadedException,
+    IncompatibleThreadStateException, AbsentInformationException,
     InvocationException, DebugException
   {
     if( printMessages ) System.out.println("Getting debug interpreter");
@@ -2060,41 +2060,41 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     
     // Get each variable from the stack frame
     while(varsIterator.hasNext()) {
-      if( printMessages ) System.out.println("Iterating through vars");        
+      if( printMessages ) System.out.println("Iterating through vars");
       LocalVariable localVar = (LocalVariable)varsIterator.next();
       Method method2Call = _getGetVariableMethod(rtInterpreter);
       
-      // invokeMethod would throw an ObjectCollectedException if the StringReference 
-      // declared by _vm.mirrorOf(name) had been garbage collected before 
+      // invokeMethod would throw an ObjectCollectedException if the StringReference
+      // declared by _vm.mirrorOf(name) had been garbage collected before
       // invokeMethod could execute. This happened infrequently so by trying this
       // multiple times, the chance of failure each time should be acceptably low.
       
       int tries = 0;
-      while (tries < MAXINVOKETRIES) {    
-        List args = new LinkedList();          
+      while (tries < MAXINVOKETRIES) {
+        List args = new LinkedList();
         args.add(_vm.mirrorOf(localVar.name()));
         try {
-          Value v = interpreter.invokeMethod(threadRef, method2Call, args, 
+          Value v = interpreter.invokeMethod(threadRef, method2Call, args,
                                              ObjectReference.INVOKE_SINGLE_THREADED);
           if (v != null) {
             v = _convertToActualType(threadRef, localVar, v);
           }
-          frame = threadRef.frame(0);           
+          frame = threadRef.frame(0);
           frame.setValue(localVar, v);
           break;
         }
         catch (ObjectCollectedException oce) {
           if (printMessages) System.out.println("Got ObjectCollectedException");
           tries++;
-        }        
+        }
         catch (ClassNotLoadedException cnle) {
           printMessage("Could not update the value of '" + localVar.name() + "' (class not loaded)");
-          break;          
+          break;
         }
         catch (InvalidTypeException ite) {
           printMessage("Could not update the value of '" + localVar.name() + "' (invalid type exception)");
-          break;          
-        }  
+          break;
+        }
       }
       if (tries >= MAXINVOKETRIES)
         throw new DebugException("The value of the variable: " + localVar.name() + " could not be obtained from interpreterJVM");
@@ -2112,7 +2112,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     }
     catch(InvalidTypeException exc) {
       throw new DebugException(exc.toString());
-    }    
+    }
     catch(AbsentInformationException e2) {
       //throw new DebugException(e2.toString());
       // Silently fail for now to ignore the AbsentInformationException that
@@ -2310,8 +2310,8 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     public abstract void notifyListener(DebugListener l);
   }
  
-  /** 
-   * A stack from which you can remove any element, not just the top of the stack 
+  /**
+   * A stack from which you can remove any element, not just the top of the stack
    */
   protected class RandomAccessStack {
     private Vector<ThreadReference> _data = new Vector<ThreadReference>();
@@ -2344,7 +2344,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
         if( _data.elementAt(i).uniqueID() == id ){
           ThreadReference t = _data.elementAt(i);
           _data.removeElementAt(i);
-          return t; 
+          return t;
         }
       }
       
@@ -2355,7 +2355,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
       try {
         ThreadReference t = _data.elementAt(0);
         _data.removeElementAt(0);
-        return t; 
+        return t;
       }
       catch (ArrayIndexOutOfBoundsException e) {
         throw new NoSuchElementException("Cannot pop from an empty RandomAccessStack!");
@@ -2384,7 +2384,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
   
   /**
    * A class for filtering threads that we know are dead from the List returned by
-   * _vm.allThreads() [thanks sun for returning dead threads in this method call, 
+   * _vm.allThreads() [thanks sun for returning dead threads in this method call,
    * good decision]
    */
   class DeadThreadFilter{
@@ -2400,9 +2400,9 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
       LinkedList retList = new LinkedList();
       Enumeration keys = _theDeadThreads.keys();
       
-      /** 
+      /**
        * The following code removes dead threads from _theDeadThreads if
-       * the threads do not appear in the list of threads threads.  This 
+       * the threads do not appear in the list of threads threads.  This
        * must be done to make sure that _theDeadThreads doesn't grow too
        * large with useless info
        */

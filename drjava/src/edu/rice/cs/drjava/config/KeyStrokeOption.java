@@ -4,7 +4,7 @@
  * at http://sourceforge.net/projects/drjava
  *
  * Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)
- * 
+ *
  * DrJava is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -53,12 +53,16 @@ import java.util.Hashtable;
  */
 public class KeyStrokeOption extends Option<KeyStroke> {
   
-  static Hashtable keys = new Hashtable();
+  /**
+   * Storage for keystrokes.
+   * TODO: Should this be synchronized?
+   */
+  static Hashtable<Integer, String> keys = new Hashtable<Integer, String>();
   public static final KeyStroke NULL_KEYSTROKE = KeyStroke.getKeyStroke(0, 0);
   /**
    * @param key The name of this option.
    */
-  public KeyStrokeOption(String key, KeyStroke def) { 
+  public KeyStrokeOption(String key, KeyStroke def) {
     super(key,def); }
   
   // This sets up the hashtable that has key-value pairs consisting of
@@ -82,7 +86,7 @@ public class KeyStrokeOption extends Option<KeyStroke> {
   
   
   /**
-   * @param s The String to be parsed, must be the string representation of 
+   * @param s The String to be parsed, must be the string representation of
    * the KeyStroke to be created. Uses the method KeyStroke.getKeyStroke(String s)
    * which returns a KeyStroke if the string is correctly formatted or null
    * otherwise.

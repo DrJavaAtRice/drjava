@@ -4,7 +4,7 @@
  * at http://sourceforge.net/projects/drjava
  *
  * Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)
- * 
+ *
  * DrJava is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -57,7 +57,7 @@ public final class ForcedChoiceOptionTest extends TestCase
   public void setUp() {}
   
   public void testGetName()
-  { 
+  {
     ForcedChoiceOption fco = new ForcedChoiceOption("javadoc_access",
                                                     "protected",
                                                     null);
@@ -67,7 +67,7 @@ public final class ForcedChoiceOptionTest extends TestCase
   
   public void testParse()
   {
-    ArrayList aList = new ArrayList(4);
+    ArrayList<String> aList = new ArrayList<String>(4);
     
     aList.add("public");
     aList.add("protected");

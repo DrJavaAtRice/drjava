@@ -4,7 +4,7 @@
  * at http://sourceforge.net/projects/drjava
  *
  * Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)
- * 
+ *
  * DrJava is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -47,11 +47,11 @@ import edu.rice.cs.util.classloader.StickyClassLoader;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.config.FileOption;
 import edu.rice.cs.util.UnexpectedException;
-import gj.util.Vector;
-import gj.util.Enumeration;
+import java.util.Vector;
+import java.util.Enumeration;
 
 /**
- * A compiler interface to search a given 
+ * A compiler interface to search a given
  * @version $Id$
  */
 public class CompilerProxy implements CompilerInterface {
@@ -114,7 +114,7 @@ public class CompilerProxy implements CompilerInterface {
       //}
       _realCompiler.setExtraClassPath(newclasspath.toString());
       
-      boolean allowAssertions = 
+      boolean allowAssertions =
         DrJava.getConfig().getSetting(OptionConstants.JAVAC_ALLOW_ASSERT).booleanValue();
       _realCompiler.setAllowAssertions(allowAssertions);
       
@@ -213,7 +213,7 @@ public class CompilerProxy implements CompilerInterface {
   /**
    * Allows us to set the extra classpath for the compilers without referencing the
    * config object in a loaded class file
-   */ 
+   */
   public void setExtraClassPath( String extraClassPath) {
     _realCompiler.setExtraClassPath(extraClassPath);
   }

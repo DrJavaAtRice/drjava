@@ -4,7 +4,7 @@
  * at http://sourceforge.net/projects/drjava
  *
  * Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)
- * 
+ *
  * DrJava is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -39,20 +39,20 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.debug;
 
-import gj.util.Vector;
+import java.util.Vector;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 
 import com.sun.jdi.request.StepRequest;
 
 /**
  * Interface for any debugger implementation to be used by DrJava.
- * 
+ *
  * @version $Id$
  */
 public interface Debugger {
   public static final int STEP_INTO = StepRequest.STEP_INTO;
   public static final int STEP_OVER = StepRequest.STEP_OVER;
-  public static final int STEP_OUT = StepRequest.STEP_OUT; 
+  public static final int STEP_OUT = StepRequest.STEP_OUT;
   
   /**
    * Returns whether the debugger can be used in this copy of DrJava.
@@ -87,7 +87,7 @@ public interface Debugger {
   public void suspendAll();
   */
   
-  /** 
+  /**
    * Sets the current thread we are debugging to the thread referenced by d
    */
   public void setCurrentThread(DebugThreadData d) throws DebugException;
@@ -103,7 +103,7 @@ public interface Debugger {
    */
   public void resume(DebugThreadData data) throws DebugException;
 
-  /** 
+  /**
    * Steps into the execution of the currently loaded document.
    * @flag The flag denotes what kind of step to take. The following mark valid options:
    * StepRequest.STEP_INTO
@@ -113,7 +113,7 @@ public interface Debugger {
   public void step(int flag) throws DebugException;
   
   /**
-   * Called from interactionsEnded in MainFrame in order to clear any current 
+   * Called from interactionsEnded in MainFrame in order to clear any current
    * StepRequests that remain.
    */
   /**
@@ -152,7 +152,7 @@ public interface Debugger {
    * @param offset Start offset on the line to set the breakpoint
    * @param lineNumber Line on which to set or remove the breakpoint
    */
-  public void toggleBreakpoint(OpenDefinitionsDocument doc, 
+  public void toggleBreakpoint(OpenDefinitionsDocument doc,
                                int offset, int lineNum)
     throws DebugException;
   
@@ -217,7 +217,7 @@ public interface Debugger {
   public void removeListener(DebugListener listener);
   
   /**
-   * @return true if there are any threads in the program currently being 
+   * @return true if there are any threads in the program currently being
    * debugged which have been suspended (by the user or by hitting a breakpoint).
    */
   public boolean hasSuspendedThreads() throws DebugException;

@@ -44,8 +44,6 @@ import javax.swing.ListModel;
 import java.io.*;
 import java.util.*;
 
-import gj.util.Vector;
-
 import edu.rice.cs.util.swing.FindReplaceMachine;
 
 import edu.rice.cs.drjava.DrJava;
@@ -280,7 +278,7 @@ public interface GlobalModel extends IGetDocuments, ILoadDocuments, JavadocModel
    * @param filename Name of the source file to look for
    * @param paths An array of directories to search
    */
-  public File getSourceFileFromPaths(String filename, gj.util.Vector<File> paths);
+  public File getSourceFileFromPaths(String filename, Vector<File> paths);
   
   /**
    * Called from the JUnitTestManager if its given className is not a test case.

@@ -4,7 +4,7 @@
  * at http://sourceforge.net/projects/drjava
  *
  * Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)
- * 
+ *
  * DrJava is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -44,7 +44,7 @@ import java.rmi.server.*;
 import java.rmi.*;
 import java.io.*;
 
-import gj.util.Vector;
+import java.util.Vector;
 
 // NOTE: Do NOT import/use the config framework in this class!
 //  (It seems to crash Eclipse...)
@@ -65,7 +65,7 @@ import edu.rice.cs.util.newjvm.*;
  */
 public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   /** Name of the class to use in the remote JVM. */
-  private static final String SLAVE_CLASS_NAME = 
+  private static final String SLAVE_CLASS_NAME =
     "edu.rice.cs.drjava.model.repl.newjvm.InterpreterJVM";
   
   private Log _log = new Log("MainJVMLog", false);
@@ -313,7 +313,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   }
   
   /**
-   * Forwards a call to System.err from InterpreterJVM to the 
+   * Forwards a call to System.err from InterpreterJVM to the
    * local InteractionsModel.
    * @param s String that was printed in the other JVM
    */
@@ -322,7 +322,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   }
 
   /**
-   * Forwards a call to System.out from InterpreterJVM to the 
+   * Forwards a call to System.out from InterpreterJVM to the
    * local InteractionsModel.
    * @param s String that was printed in the other JVM
    */
@@ -398,13 +398,13 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   }
   
   /**
-   * Notifies the main jvm that an assignment has been made in the given debug 
+   * Notifies the main jvm that an assignment has been made in the given debug
    * interpreter.
    * Does not notify on declarations.
-   * 
+   *
    * This method is not currently necessary, since we don't copy back
    * values in a debug interpreter until the thread has resumed.
-   * 
+   *
    * @param name the name of the debug interpreter
    *
   public void notifyDebugInterpreterAssignment(String name) {
@@ -570,7 +570,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     int debugPort = getDebugPort();
     _log.logTime("starting with debug port: " + debugPort);
     if (debugPort > -1) {
-      jvmArgs.addElement("-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=" + 
+      jvmArgs.addElement("-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=" +
                          debugPort);
       jvmArgs.addElement("-Xdebug");
       jvmArgs.addElement("-Xnoagent");
@@ -791,7 +791,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   /**
    * InteractionsModel which does not react to events.
    */
-  public static class DummyInteractionsModel 
+  public static class DummyInteractionsModel
     implements InteractionsModelCallback
   {
     public int getDebugPort() throws IOException { return -1; }

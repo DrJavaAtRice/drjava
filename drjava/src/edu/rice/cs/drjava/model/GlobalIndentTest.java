@@ -4,7 +4,7 @@
  * at http://sourceforge.net/projects/drjava
  *
  * Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)
- * 
+ *
  * DrJava is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -39,11 +39,12 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model;
 
-import  junit.framework.*;
-import  junit.extensions.*;
-import  javax.swing.text.BadLocationException;
+import junit.framework.*;
+import junit.extensions.*;
+import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import javax.swing.ListModel;
+import java.util.List;
 
 import edu.rice.cs.drjava.model.definitions.*;
 import edu.rice.cs.drjava.model.definitions.indent.Indenter;
@@ -319,15 +320,15 @@ public final class GlobalIndentTest extends GlobalModelTestCase {
     _assertNumOpenDocs(0);
     OpenDefinitionsDocument doc = _model.newFile();
     doc.setDefinitionsIndent(2);
-    ListModel docs = _model.getDefinitionsDocs();
+    List<OpenDefinitionsDocument> docs = _model.getDefinitionsDocuments();
     _assertNumOpenDocs(1);
-    return (OpenDefinitionsDocument) docs.getElementAt(0);
+    return docs.get(0);
   }
 
   private void _assertNumOpenDocs(int num) {
     assertEquals("number of open documents",
                  num,
-                 _model.getDefinitionsDocs().getSize());
+                 _model.getDefinitionsDocuments().size());
   }
 
   private void _assertContents(String expected, Document document)

@@ -42,7 +42,7 @@ package edu.rice.cs.drjava.ui.config;
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
-import gj.util.Vector;
+import java.util.Vector;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.DrJava;
 
@@ -68,42 +68,42 @@ public final class VectorOptionComponentTest extends TestCase {
   
   public void testCancelDoesNotChangeConfig() {
 
-    Vector testVector = new Vector<File>();
+    Vector<File> testVector = new Vector<File>();
     testVector.addElement(new File("test"));
     
     _option.setValue(testVector);
     _option.resetToCurrent(); // should reset to the original.
     _option.updateConfig(); // should update with original values therefore no change.
   
-    assertTrue("Cancel (resetToCurrent) should not change the config", 
+    assertTrue("Cancel (resetToCurrent) should not change the config",
                vectorEquals( OptionConstants.EXTRA_CLASSPATH.getDefault(),
                             DrJava.getConfig().getSetting(OptionConstants.EXTRA_CLASSPATH)));
     
   }
   
   public void testApplyDoesChangeConfig() {
-    Vector testVector = new Vector<File>();
+    Vector<File> testVector = new Vector<File>();
     testVector.addElement(new File("blah"));
     
-    _option.setValue(testVector); 
+    _option.setValue(testVector);
     _option.updateConfig();
     
-    assertTrue("Apply (updateConfig) should write change to file", 
+    assertTrue("Apply (updateConfig) should write change to file",
                vectorEquals( testVector,
                             DrJava.getConfig().getSetting(OptionConstants.EXTRA_CLASSPATH)));
   }
   
   public void testApplyThenResetDefault() {
-    Vector testVector = new Vector<File>();
+    Vector<File> testVector = new Vector<File>();
     testVector.addElement(new File("blah"));
     
     _option.setValue(testVector);
-    _option.updateConfig(); 
+    _option.updateConfig();
     _option.resetToDefault(); // resets to default
     _option.updateConfig();
     
-    assertTrue("Apply (updateConfig) should write change to file", 
-                 vectorEquals( OptionConstants.EXTRA_CLASSPATH.getDefault(), 
+    assertTrue("Apply (updateConfig) should write change to file",
+                 vectorEquals( OptionConstants.EXTRA_CLASSPATH.getDefault(),
                               DrJava.getConfig().getSetting(OptionConstants.EXTRA_CLASSPATH)));
   }
     

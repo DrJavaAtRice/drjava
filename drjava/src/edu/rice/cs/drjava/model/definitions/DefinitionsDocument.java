@@ -4,7 +4,7 @@
  * at http://sourceforge.net/projects/drjava
  *
  * Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)
- * 
+ *
  * DrJava is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -62,18 +62,20 @@ import edu.rice.cs.drjava.model.EventNotifier;
 /**
  * The model for the definitions pane.
  *
- * This implementation of <code>Document</code> contains a 
+ * This implementation of <code>Document</code> contains a
  * "reduced model". The reduced model is automatically kept in sync
  * when this document is updated. Also, that synchronization is maintained
  * even across undo/redo -- this is done by making the undo/redo commands know
  * how to restore the reduced model state.
- * 
+ *
  * The reduced model is not thread-safe, so it is essential that ONLY this
  * DefinitionsDocument call methods on it.  Any information from the reduced
  * model should be obtained through helper methods on DefinitionsDocument,
  * and ALL methods in DefinitionsDocument which reference the reduced model
  * (via the _reduced field) MUST be synchronized.  This prevents any thread
  * from seeing an inconsistent state in the middle of another thread's changes.
+ *
+ * TODO: There are lots of synchronized collections here - unsync if we can.
  *
  * @see BraceReductions
  * @see ReducedModelControl
@@ -86,11 +88,11 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
   /** The maximum number of undos the model can remember */
   private static final int UNDO_LIMIT = 1000;
   /** A set of normal endings for lines. */
-  protected static HashSet _normEndings = _makeNormEndings();
+  protected static HashSet<String> _normEndings = _makeNormEndings();
   /** A set of Java keywords. */
-  protected static HashSet _keywords = _makeKeywords();
+  protected static HashSet<String> _keywords = _makeKeywords();
   /** A set of Java keywords. */
-  protected static HashSet _primTypes = _makePrimTypes();
+  protected static HashSet<String> _primTypes = _makePrimTypes();
   /** The default indent setting. */
   private int _indent = 2;
   /** Determines if tabs are removed on open and converted to spaces. */
@@ -128,7 +130,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
    * Must be cleared every time document is changed.  Use by calling
    * _checkCache and _storeInCache.
    */
-  private final Hashtable _helperCache;
+  private final Hashtable<String, Object> _helperCache;
   
   /**
    * Keeps track of the order of elements added to the helper method cache,
@@ -184,8 +186,8 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
     _cachedNextLineLoc = -1;
     _classFileInSync = false;
     _classFile = null;
-    _helperCache = new Hashtable();
-    _helperCacheHistory = new Vector();
+    _helperCache = new Hashtable<String, Object>();
+    _helperCacheHistory = new Vector<String>();
     _cacheInUse = false;
     _notifier = notifier;
     resetUndoManager();
@@ -205,8 +207,8 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
    * of indenting.
    * @return the set of normal endings
    */
-  protected static HashSet _makeNormEndings() {
-    HashSet normEndings = new HashSet();
+  protected static HashSet<String> _makeNormEndings() {
+    HashSet<String> normEndings = new HashSet<String>();
     normEndings.add(";");
     normEndings.add("{");
     normEndings.add("}");
@@ -218,7 +220,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
    * Create a set of Java/GJ keywords for special coloring.
    * @return the set of keywords
    */
-  protected static HashSet _makeKeywords() {
+  protected static HashSet<String> _makeKeywords() {
     final String[] words =  {
       "import", "native", "package", "goto", "const", "if", "else",
       "switch", "while", "for", "do", "true", "false", "null", "this",
@@ -229,7 +231,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
       "break", "continue", "public", "protected", "private", "abstract",
       "case", "default", "assert"
     };
-    HashSet keywords = new HashSet();
+    HashSet<String> keywords = new HashSet<String>();
     for (int i = 0; i < words.length; i++) {
       keywords.add(words[i]);
     }
@@ -239,12 +241,12 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
    * Create a set of Java/GJ primitive types for special coloring.
    * @return the set of primitive types
    */
-  protected static HashSet _makePrimTypes() {
+  protected static HashSet<String> _makePrimTypes() {
     final String[] words =  {
-      "boolean", "char", "byte", "short", "int", 
-      "long", "float", "double", "void", 
+      "boolean", "char", "byte", "short", "int",
+      "long", "float", "double", "void",
     };
-    HashSet prims = new HashSet();
+    HashSet<String> prims = new HashSet<String>();
     for (int i = 0; i < words.length; i++) {
       prims.add(words[i]);
     }
@@ -267,7 +269,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
    * @throws IllegalStateException if file has not been set
    * @throws FileMovedException if file has been moved or deleted from its previous location
    */
-  public File getFile() 
+  public File getFile()
     throws IllegalStateException , FileMovedException {
     if (_file == null) {
       throw new IllegalStateException(
@@ -325,7 +327,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
     if(position == DefinitionsDocument.ERROR_INDEX) {
       // Should not happen
       throw new UnexpectedException(new
-        IllegalArgumentException("Argument endChar to " + 
+        IllegalArgumentException("Argument endChar to " +
                                  "QuestionExistsCharInStmt must be a char " +
                                  "that exists on the current line."));
     }
@@ -333,7 +335,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
     char[] findCharDelims = {findChar, ';', '{', '}'};
     int prevFindChar;
     
-    // Find the position of the previous occurence findChar from the 
+    // Find the position of the previous occurence findChar from the
     // position of endChar (looking in paren phrases as well)
     try {
       prevFindChar = this.findPrevDelimiter(position, findCharDelims, false);
@@ -452,8 +454,8 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
    * Gets fully qualified class name of the top level class enclosing
    * the given position.
    */
-  public String getQualifiedClassName(int pos) 
-    throws ClassNameNotFoundException 
+  public String getQualifiedClassName(int pos)
+    throws ClassNameNotFoundException
   {
     return _getPackageQualifier() + getEnclosingTopLevelClassName(pos);
   }
@@ -611,7 +613,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
 
   /**
    * Given a String, return a new String will all tabs converted to spaces.
-   * Each tab is converted to one space, since changing the number of 
+   * Each tab is converted to one space, since changing the number of
    * characters within insertString screws things up.
    * @param source the String to be converted.
    * @return a String will all the tabs converted to spaces
@@ -697,7 +699,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
   public void resetModification() {
     try {
       writeLock();
-      _modifiedSinceSave = false;      
+      _modifiedSinceSave = false;
    if (_file != null)
      _timestamp = _file.lastModified();
     }
@@ -776,7 +778,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
     _reduced.move(dist);
   }
   
-  /** 
+  /**
    * Return the current column of the cursor position.
    * Uses a 0 based index.
    */
@@ -792,7 +794,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
    */
   public int getCurrentLine() {
     int here = getCurrentLocation();
-    if ( _cachedLocation > getLength() ){ 
+    if ( _cachedLocation > getLength() ){
       // we can't know the last line number after a delete.
       // starting over.
       _cachedLocation = 0;
@@ -802,7 +804,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
       _cachedNextLineLoc = -1;
     }
     // let's see if we get off easy
-    if( ! ( _cachedPrevLineLoc < here && here < _cachedNextLineLoc ) ){ 
+    if( ! ( _cachedPrevLineLoc < here && here < _cachedNextLineLoc ) ){
     
       // this if improves performance when moving from the
       // end of the document to the beginnning.
@@ -811,9 +813,9 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
       if( _cachedLocation - here > here ){
         _cachedLocation = 0;
         _cachedLineNum = 1;
-      }        
+      }
       int lineOffset = _getRelativeLine();
-      _cachedLineNum = _cachedLineNum+lineOffset;      
+      _cachedLineNum = _cachedLineNum+lineOffset;
       
     }
     _cachedLocation = here;
@@ -1019,7 +1021,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
   /**
    * Returns the indent level of the start of the statement
    * that the cursor is on.  Uses a default set of delimiters.
-   * (';', '{', '}') and a default set of whitespace characters 
+   * (';', '{', '}') and a default set of whitespace characters
    * (' ', '\t', n', ',')
    * @param pos Cursor position
    */
@@ -1116,7 +1118,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
     catch(BadLocationException e) {
       // Should not happen
       throw new UnexpectedException(e);
-    } 
+    }
     
     _storeInCache(key, lineText);
     /*
@@ -1136,7 +1138,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
    * the given cursor position is. Does not search in quotes or comments.
    * <p>
    * <b>Does not work if character being searched for is a '/' or a '*'</b>
-   * @param pos Cursor position 
+   * @param pos Cursor position
    * @param findChar Character to search for
    * @return true if this node's rule holds.
    */
@@ -1281,7 +1283,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
     String text = this.getText(startLinePos, endLinePos - startLinePos);
     int walker = 0;
     while (walker < text.length()) {
-      if (text.charAt(walker) == ' ' || 
+      if (text.charAt(walker) == ' ' ||
           text.charAt(walker) == '\t') {
             walker++;
       }
@@ -1375,7 +1377,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
           //DrJava.consoleOut().println("     token after: " + _reduced.currentToken().getState());
           */
         }
-        else { 
+        else {
           if(_isStartOfComment(text, i - pos)) {
             // Move i past the start of comment characters
             // and continue searching
@@ -1404,7 +1406,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
   }
   
   /**
-   * Returns the offset corresponding to the first character of the given line number, 
+   * Returns the offset corresponding to the first character of the given line number,
    *  or -1 if the lineNum is not found.
    * @param lineNum the line number for which to calculate the offset.
    * @return the offset of the first character in the given line number
@@ -1438,7 +1440,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
         else {
           curLine++;
           offset = nextNewline + 1;
-        } 
+        }
       }
     
       return -1;
@@ -1498,7 +1500,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
            (_reduced.getStateAtCurrent().equals(ReducedModelState.INSIDE_BLOCK_COMMENT))) {
           // Ignore matching char
         }
-        else { 
+        else {
           if(_isEndOfComment(text, i)) {
             // Move i past the start of comment characters
             // and continue searching
@@ -1592,7 +1594,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
   public void indentLines(int selStart, int selEnd, int reason) {
     //long start = System.currentTimeMillis();
     try {
-      // Begins a compound edit. 
+      // Begins a compound edit.
       int key = _undoManager.startCompoundEdit();
       
       if (selStart == selEnd) {
@@ -1824,7 +1826,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
       String text = getText(lineStart, curCol + _reduced.getDistToNextNewline());
       int pos = text.indexOf("//");
       
-//      System.out.println("" + getCurrentLocation() + " " + curCol + " " 
+//      System.out.println("" + getCurrentLocation() + " " + curCol + " "
 //                           + text + " " + pos + " " + _reduced.getDistToNextNewline());
       
       // Look for any non-whitespace chars before the "//" on the line.
@@ -2455,7 +2457,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
       setCurrentLocation(oldLocation);
       
       // Parse out the class name
-      return getNextTopLevelClassName(prevDelimPos, topLevelBracePos);      
+      return getNextTopLevelClassName(prevDelimPos, topLevelBracePos);
     }
     catch (BadLocationException ble) {
       // All positions here should be legal
@@ -2479,7 +2481,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
   
   // note: need to update this to work with pos
   public String getNextTopLevelClassName(int startPos, int endPos)
-    throws ClassNameNotFoundException 
+    throws ClassNameNotFoundException
   {
     // Where we'll build up the package name we find
     int oldLocation = getCurrentLocation();
@@ -2501,7 +2503,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
           // compare indices to find the lesser
           index = (indexOfClass < indexOfInterface) ?
             indexOfClass + "class".length() :
-            indexOfInterface + "interface".length();     
+            indexOfInterface + "interface".length();
         }
         else {
           //top level class declaration found
@@ -2513,7 +2515,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
         if (indexOfInterface > -1) {
           index = indexOfInterface + "interface".length();
         }
-        else { 
+        else {
           // neither index was valid
           throw new ClassNameNotFoundException("No top level class name found");
         }
@@ -2667,7 +2669,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
     }
 
     public void run() {
-      setCurrentLocation(_offset); 
+      setCurrentLocation(_offset);
       
       // (don't move the cursor... I hope this doesn't break too much)
       synchronized(DefinitionsDocument.this){

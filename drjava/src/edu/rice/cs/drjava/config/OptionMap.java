@@ -5,7 +5,7 @@
  * at http://sourceforge.net/projects/drjava
  *
  * Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)
- * 
+ *
  * DrJava is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -39,8 +39,7 @@
 END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.config;
-import gj.util.Hashtable;
-import gj.util.Enumeration;
+import java.util.Iterator;
 public interface OptionMap {
 
     public <T> T getOption(OptionParser<T> o);
@@ -53,7 +52,7 @@ public interface OptionMap {
 
     public <T> T removeOption(OptionParser<T> o);
 
-    public Enumeration<OptionParser> keys();
+    public Iterator<OptionParser> keys();
 }
 
 

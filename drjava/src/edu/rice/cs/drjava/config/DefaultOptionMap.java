@@ -4,7 +4,7 @@
  * at http://sourceforge.net/projects/drjava
  *
  * Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)
- * 
+ *
  * DrJava is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -38,54 +38,54 @@
  END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.config;
-import gj.util.Vector;
-import gj.util.Enumeration;
+import java.util.ArrayList;
+import java.util.Iterator;
 
-public class DefaultOptionMap implements OptionMap {    
+public class DefaultOptionMap implements OptionMap {
+  
+  private final ArrayList<OptionParser> keys = new ArrayList<OptionParser>();
+  
+  public <T> T getOption(OptionParser<T> o) {
+    return o.getOption(this);
+  }
+  
+  public <T> T setOption(Option<T> o, T val) {
+    setOption(o);
+    return o.setOption(this,val);
+  }
+  
+  private <T> void setOption(OptionParser<T> o) {
+    if(keys.indexOf(o)==-1)
+      keys.add(o);
+  }
+  
+  public <T> String getString(OptionParser<T> o) {
+    return o.getString(this);
+  }
+  
+  public <T> T setString(OptionParser<T> o, String s) {
+    setOption(o);
+    return o.setString(this,s);
+  }
+  
+  public <T> T removeOption(OptionParser<T> o) {
+    keys.remove(o);
+    return o.remove(this);
+  }
+  
+  public Iterator<OptionParser> keys() {
+    return keys.iterator();
+  }
+  
+  public String toString() {
+    String result = "\n{ ";
     
-    private final Vector<OptionParser> keys = new Vector();
-
-    public <T> T getOption(OptionParser<T> o) {
- return o.getOption(this);
+    for (int i = 0; i < keys.size(); i++) {
+      OptionParser key = keys.get(i);
+      result += key.name + " = " + getString(key) + '\n';
     }
-  
-    public <T> T setOption(Option<T> o, T val) {
-        setOption(o);
- return o.setOption(this,val); 
-    }
-
-    private <T> void setOption(OptionParser<T> o) {
-        if(keys.indexOf(o)==-1)
-            keys.addElement(o);
-    }
-  
-    public <T> String getString(OptionParser<T> o) {
- return o.getString(this);
-    }
-  
-    public <T> T setString(OptionParser<T> o, String s) {
-        setOption(o);
- return o.setString(this,s);
-    }
-  
-    public <T> T removeOption(OptionParser<T> o) {
- keys.removeElement(o);
- return o.remove(this);
-    }
-  
-    public Enumeration<OptionParser> keys() {
-        return keys.elements();
-    }
-
-    public String toString() {
- String result = "\n{ ";
-
- for (int i = 0; i < keys.size(); i++) {
-     OptionParser key = keys.elementAt(i);
-     result += key.name + " = " + getString(key) + '\n';
- }
- 
- result += '}';
- return result;
-    }
+    
+    result += '}';
+    return result;
+  }
 }

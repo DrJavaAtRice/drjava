@@ -4,7 +4,7 @@
  * at http://sourceforge.net/projects/drjava
  *
  * Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)
- * 
+ *
  * DrJava is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -91,7 +91,7 @@ public class CompilerRegistry {
   private ClassLoader _baseClassLoader;
 
   /** Linked list of class names of registered compilers. */
-  private LinkedList _registeredCompilers = new LinkedList();
+  private LinkedList<String> _registeredCompilers = new LinkedList<String>();
 
   /** The active compiler. Must never be null. */
   private CompilerInterface _activeCompiler = NoCompilerAvailable.ONLY;
@@ -141,7 +141,8 @@ public class CompilerRegistry {
    * {@link NoCompilerAvailable}.
    */
   public CompilerInterface[] getAvailableCompilers() {
-    LinkedList availableCompilers = new LinkedList();
+    LinkedList<CompilerInterface> availableCompilers =
+      new LinkedList<CompilerInterface>();
     ListIterator itor = _registeredCompilers.listIterator();
 
     while (itor.hasNext()) {

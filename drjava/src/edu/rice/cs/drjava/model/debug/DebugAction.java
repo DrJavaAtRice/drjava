@@ -4,7 +4,7 @@
  * at http://sourceforge.net/projects/drjava
  *
  * Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)
- * 
+ *
  * DrJava is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -42,7 +42,7 @@ package edu.rice.cs.drjava.model.debug;
 import com.sun.jdi.*;
 import com.sun.jdi.request.*;
 
-import gj.util.Vector;
+import java.util.Vector;
 import java.io.File;
 
 import javax.swing.text.*;
@@ -78,12 +78,12 @@ public abstract class DebugAction<T extends EventRequest> {
   /**
    * Creates a new DebugAction.  Automatically tries to create the EventRequest
    * if a ReferenceType can be found, or else adds this object to the
-   * PendingRequestManager. Any subclass should automatically call 
+   * PendingRequestManager. Any subclass should automatically call
    * _initializeRequest in its constructor.
    * @param manager JPDADebugger in charge
    * @param doc Document this action corresponds to
    */
-  public DebugAction (JPDADebugger manager) 
+  public DebugAction (JPDADebugger manager)
     throws DebugException, IllegalStateException {
     _manager = manager;
     _requests = new Vector<T>();
@@ -116,7 +116,7 @@ public abstract class DebugAction<T extends EventRequest> {
   //public abstract boolean createRequests(ReferenceType rt) throws DebugException;
   
   public boolean createRequests() throws DebugException
-  {    
+  {
     _createRequests();
     if (_requests.size() > 0) {
       _prepareRequests(_requests);
@@ -132,14 +132,14 @@ public abstract class DebugAction<T extends EventRequest> {
    * to create all applicable EventRequests for this DebugAction.
    */
   protected void _initializeRequests() throws DebugException {
-    createRequests();  
+    createRequests();
     if (_requests.size() == 0) {
       throw new DebugException("Could not create EventRequests for this action!");
     }
   }
   
   /**
-   * Creates an appropriate EventRequest from the EventRequestManager and 
+   * Creates an appropriate EventRequest from the EventRequestManager and
    * stores it in the _request field.
    * @param rt ReferenceType used to try to create the request
    * @throws DebugException if the request could not be created.

@@ -42,7 +42,7 @@ package edu.rice.cs.drjava.ui;
 import javax.swing.*;
 import java.awt.event.*;
 import java.io.File;
-import gj.util.Vector;
+import java.util.Vector;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.model.*;
@@ -77,11 +77,11 @@ public class RecentFileManager implements OptionConstants {
       MAX = newMax;
     }
     
-    public void saveRecentFiles() { 
+    public void saveRecentFiles() {
       DrJava.getConfig().setSetting(RECENT_FILES,_recentFiles);
     }
     
-    public void updateOpenFiles(final File file) {   
+    public void updateOpenFiles(final File file) {
       
       if (_recentMenuItems.size() == 0) {
         _fileMenu.insertSeparator(_pos);  //one at top
@@ -95,9 +95,9 @@ public class RecentFileManager implements OptionConstants {
         }
       };
         
-      JMenuItem newItem = new JMenuItem("");    
+      JMenuItem newItem = new JMenuItem("");
       newItem.addActionListener(new AbstractAction("Open " + file.getName()) {
-        public void actionPerformed(ActionEvent ae) {          
+        public void actionPerformed(ActionEvent ae) {
           _frame.open(_recentSelector);
         }
       });
@@ -125,7 +125,7 @@ public class RecentFileManager implements OptionConstants {
      * remaining files according to their position in the list
      */
     public void numberItems() {
-      int delPos = _recentMenuItems.size(); 
+      int delPos = _recentMenuItems.size();
       boolean wasEmpty = (delPos == 0);
       while (delPos > MAX) {
         JMenuItem delItem = _recentMenuItems.elementAt(delPos - 1);
@@ -139,11 +139,11 @@ public class RecentFileManager implements OptionConstants {
       String itemText;
       for (int i=0; i< _recentMenuItems.size(); i++ ) {
         currItem = _recentMenuItems.elementAt(i);
-        currItem.setText((i+1) + ". " + _recentFiles.elementAt(i).getName());        
+        currItem.setText((i+1) + ". " + _recentFiles.elementAt(i).getName());
       }
       // remove the separator
       if (MAX == 0 && !wasEmpty) {
         _fileMenu.remove(--_pos);
-      }     
+      }
     }
   }

@@ -4,7 +4,7 @@
  * at http://sourceforge.net/projects/drjava
  *
  * Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)
- * 
+ *
  * DrJava is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -43,19 +43,19 @@ package edu.rice.cs.drjava.model.definitions.reducedmodel;
  * A list of reduced model tokens.  Uses ModelList as its base.
  * @version $Id$
  */
-public class TokenList extends ModelList<ReducedToken> 
+public class TokenList extends ModelList<ReducedToken>
                        implements /*imports*/ ReducedModelStates
 {
   /**
    * Gets a TokenList.Iterator for this list.
    * getIterator() returns a ModelList<ReducedToken>.Iterator
    * which is not as fully featured as a TokenList.Iterator.
-   * The underscore differentiates between the two.  This 
+   * The underscore differentiates between the two.  This
    * differentiation was easiest since it allowed us to keep
    * TokenList.Iterator extending ModelList<ReducedToken>.Iterator.
    */
-  public Iterator _getIterator() {
-    return new Iterator();
+  public TokenList.Iterator _getIterator() {
+    return new TokenList.Iterator();
   }
   
   public class Iterator extends ModelList<ReducedToken>.Iterator {
@@ -76,15 +76,15 @@ public class TokenList extends ModelList<ReducedToken>
      * Makes a fresh copy of this TokenList.Iterator.
      * copy() returns a ModelList<ReducedToken>.Iterator copy
      * which is not as fully featured as a TokenList.Iterator.
-     * The underscore differentiates between the two.  This 
+     * The underscore differentiates between the two.  This
      * differentiation was easiest since it allowed us to keep
      * TokenList.Iterator extending ModelList<ReducedToken>.Iterator.
      */
-    public Iterator _copy() {
+    public TokenList.Iterator _copy() {
       return new Iterator(this);
     }
     
-    public void setTo(Iterator that) {
+    public void setTo(TokenList.Iterator that) {
       super.setTo(that);
       _offset = that.getBlockOffset();
     }
@@ -117,7 +117,7 @@ public class TokenList extends ModelList<ReducedToken>
       }
       else if ( prevItem().isBlockCommentStart() ||
                (prevItem().getState() ==
-                INSIDE_BLOCK_COMMENT)) 
+                INSIDE_BLOCK_COMMENT))
       {
         state = INSIDE_BLOCK_COMMENT;
       }
@@ -228,7 +228,7 @@ public class TokenList extends ModelList<ReducedToken>
       }
       
       ReducedModelState curState = this.getStateAtCurrent();
-      // Free if at the beginning     
+      // Free if at the beginning
       while (!this.atEnd()) {
         curState = curState.update(this);
       }
@@ -349,7 +349,7 @@ public class TokenList extends ModelList<ReducedToken>
         }
       }
       return currentOffset - count;
-    }     
+    }
 
 
     /**
@@ -384,7 +384,7 @@ public class TokenList extends ModelList<ReducedToken>
     * @return new offset after deletion
     */
     private int _delete(int count, TokenList.Iterator copyCursor)
-    {                     
+    {
       
       // Guarrantees that it's possible to delete count characters
       if (count >0) {
@@ -496,7 +496,7 @@ public class TokenList extends ModelList<ReducedToken>
       if (!this.eq(delTo)) {
         this.clipLeft();
       }
-      delTo.clipRight();      
+      delTo.clipRight();
       
       if (!this.atStart()) {
         this.prev();
@@ -547,7 +547,7 @@ public class TokenList extends ModelList<ReducedToken>
     private int _calculateOffset(int delToSizePrev, String delToTypePrev,
                                  int delToSizeCurr, String delToTypeCurr,
                                  TokenList.Iterator delTo)
-    {      
+    {
       int offset;
       int delToSizeChange = delTo.current().getSize();
       String delToTypeChange = delTo.current().getType();
@@ -586,7 +586,7 @@ public class TokenList extends ModelList<ReducedToken>
       // In this branch, both the cursor is off and the offset is also not correct.
       if (((delToTypePrev.equals("/")) &&
            // /.../* => //-*
-           ((delToTypeCurr.equals("/*") && 
+           ((delToTypeCurr.equals("/*") &&
              _checkPrevEquals(delTo,"//")) ||
             // /...// => //-/
             (delToTypeCurr.equals("//") &&
@@ -594,7 +594,7 @@ public class TokenList extends ModelList<ReducedToken>
           
           ((delToTypePrev.equals("*")) &&
            // *.../* => */-*
-           ((delToTypeCurr.equals("/*") && 
+           ((delToTypeCurr.equals("/*") &&
              _checkPrevEquals(delTo,"*/")) ||
             // *...// => */-/
             (delToTypeCurr.equals("//") &&
@@ -602,7 +602,7 @@ public class TokenList extends ModelList<ReducedToken>
           
           ((delToTypePrev.equals("\\")) &&
            // \...\\ => \\-\
-           ((delToTypeCurr.equals("\\\\") && 
+           ((delToTypeCurr.equals("\\\\") &&
              _checkPrevEquals(delTo,"\\")) ||
             // \...\' => \\-'
             (delToTypeCurr.equals("\\'") &&
@@ -613,10 +613,10 @@ public class TokenList extends ModelList<ReducedToken>
                delTo.prev();
                offset = 1;
              }
-      // In this branch, the cursor is on the right token, but the offset is not correct. 
+      // In this branch, the cursor is on the right token, but the offset is not correct.
       else if (((delToTypePrev.equals("/")) &&
                 // /-*/
-                ((delToTypeCurr.equals("*/") && 
+                ((delToTypeCurr.equals("*/") &&
                   delTo.current().getType().equals("/*")) ||
                  (delToTypeCurr.equals("*") &&
                   delTo.current().getType().equals("/*")) ||
@@ -636,7 +636,7 @@ public class TokenList extends ModelList<ReducedToken>
                   delTo.current().getType().equals("\\\""))))) {
                     offset = 1;
                   }
-      // otherwise, we're on the right token and our offset is correct 
+      // otherwise, we're on the right token and our offset is correct
       // because no recombinations occurred
       else {
         offset = 0;

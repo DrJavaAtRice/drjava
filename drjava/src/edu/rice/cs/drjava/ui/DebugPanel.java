@@ -4,7 +4,7 @@
  * at http://sourceforge.net/projects/drjava
  *
  * Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)
- * 
+ *
  * DrJava is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -39,7 +39,7 @@
 
 package edu.rice.cs.drjava.ui;
 
-import gj.util.Vector;
+import java.util.Vector;
 
 import java.io.*;
 import java.util.Hashtable;
@@ -65,7 +65,7 @@ import edu.rice.cs.drjava.model.debug.*;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.config.*;
 
-/** 
+/**
  * Panel for displaying the debugger input and output in MainFrame.
  * @version $Id$
  */
@@ -93,7 +93,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
   private final Debugger _debugger;
   
   private JPanel _buttonPanel;
-  private JButton _closeButton; 
+  private JButton _closeButton;
   private JButton _resumeButton;
   private JButton _stepIntoButton;
   private JButton _stepOverButton;
@@ -220,13 +220,13 @@ public class DebugPanel extends JPanel implements OptionConstants {
        _initThreadTable();
     }
 
-    DrJava.getConfig().addOptionListener(OptionConstants.DEBUG_SHOW_THREADS, 
+    DrJava.getConfig().addOptionListener(OptionConstants.DEBUG_SHOW_THREADS,
                                          new OptionListener<Boolean>() {
       public void optionChanged(OptionEvent<Boolean> oce) {
         if (oce.value.booleanValue()) {
           if (_threadTable == null) {
              _initThreadTable();
-          }          
+          }
         }
         else {
           if (_threadTable != null) {
@@ -241,26 +241,26 @@ public class DebugPanel extends JPanel implements OptionConstants {
     TableColumn lineColumn = null;
     methodColumn = _stackTable.getColumnModel().getColumn(0);
     lineColumn = _stackTable.getColumnModel().getColumn(1);
-    methodColumn.setPreferredWidth(7*lineColumn.getPreferredWidth());  
+    methodColumn.setPreferredWidth(7*lineColumn.getPreferredWidth());
   }
   
   private void _initThreadTable() {
     _threadTable = new JTable(new ThreadTableModel());
     _threadTable.addMouseListener(new ThreadMouseAdapter());
-    _rightPane.addTab("Threads", new JScrollPane(_threadTable)); 
+    _rightPane.addTab("Threads", new JScrollPane(_threadTable));
     // Sets the name column to always be 2 times as wide as the status column
     TableColumn nameColumn = null;
     TableColumn statusColumn = null;
     nameColumn = _threadTable.getColumnModel().getColumn(0);
     statusColumn = _threadTable.getColumnModel().getColumn(1);
-    nameColumn.setPreferredWidth(2*statusColumn.getPreferredWidth()); 
+    nameColumn.setPreferredWidth(2*statusColumn.getPreferredWidth());
     
     // Adds a cell renderer to the threads table
     _currentThreadID = 0;
     TableCellRenderer threadTableRenderer = new DefaultTableCellRenderer() {
-      public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, 
+      public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
                                                      boolean hasFocus, int row, int column) {
-        Component renderer = 
+        Component renderer =
           super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
         
         _setThreadCellFont(renderer, row);
@@ -280,8 +280,8 @@ public class DebugPanel extends JPanel implements OptionConstants {
     
     private String[] _columnNames = {"Name", "Value", "Type"};
     
-    public String getColumnName(int col) { 
-      return _columnNames[col]; 
+    public String getColumnName(int col) {
+      return _columnNames[col];
     }
     public int getRowCount() { return _watches.size() + 1; }
     public int getColumnCount() { return _columnNames.length; }
@@ -290,7 +290,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
         DebugWatchData watch = _watches.elementAt(row);
         switch(col) {
           case 0: return watch.getName();
-          case 1: return watch.getValue(); 
+          case 1: return watch.getValue();
           case 2: return watch.getType();
         }
         return null;
@@ -300,7 +300,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
         return "";
       }
     }
-    public boolean isCellEditable(int row, int col) { 
+    public boolean isCellEditable(int row, int col) {
       // First col for entering new values
       if (col == 0) {
         return true;
@@ -336,10 +336,10 @@ public class DebugPanel extends JPanel implements OptionConstants {
     
     private String[] _columnNames = {"Method", "Line"};  // Do we need #?
     
-    public String getColumnName(int col) { 
-      return _columnNames[col]; 
+    public String getColumnName(int col) {
+      return _columnNames[col];
     }
-    public int getRowCount() { 
+    public int getRowCount() {
       if (_stackFrames == null) {
         return 0;
       }
@@ -347,7 +347,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
     }
     public int getColumnCount() { return _columnNames.length; }
     
-    public Object getValueAt(int row, int col) { 
+    public Object getValueAt(int row, int col) {
       DebugStackData frame = _stackFrames.elementAt(row);
       switch(col) {
         case 0: return frame.getMethod();
@@ -355,8 +355,8 @@ public class DebugPanel extends JPanel implements OptionConstants {
       }
       return null;
     }
-    public boolean isCellEditable(int row, int col) { 
-      return false; 
+    public boolean isCellEditable(int row, int col) {
+      return false;
     }
   }
   
@@ -367,22 +367,22 @@ public class DebugPanel extends JPanel implements OptionConstants {
     
     private String[] _columnNames = {"Name", "Status"};
     
-    public String getColumnName(int col) { 
-      return _columnNames[col]; 
+    public String getColumnName(int col) {
+      return _columnNames[col];
     }
     
-    public int getRowCount() { 
+    public int getRowCount() {
       if (_threads == null) {
         return 0;
       }
       return _threads.size();
     }
     
-    public int getColumnCount() { 
-      return _columnNames.length; 
+    public int getColumnCount() {
+      return _columnNames.length;
     }
     
-    public Object getValueAt(int row, int col) { 
+    public Object getValueAt(int row, int col) {
       DebugThreadData threadData  = _threads.elementAt(row);
       switch(col) {
         case 0: return threadData.getName();
@@ -392,8 +392,8 @@ public class DebugPanel extends JPanel implements OptionConstants {
       
     }
 
-    public boolean isCellEditable(int row, int col) { 
-      return false; 
+    public boolean isCellEditable(int row, int col) {
+      return false;
     }
   }
   
@@ -438,8 +438,8 @@ public class DebugPanel extends JPanel implements OptionConstants {
     };
     _stepOutButton = new JButton(stepOutAction);
     
-    ActionListener closeListener = 
-      new ActionListener() { 
+    ActionListener closeListener =
+      new ActionListener() {
       public void actionPerformed(ActionEvent ae) {
         _frame.debuggerToggle();
       }
@@ -451,14 +451,14 @@ public class DebugPanel extends JPanel implements OptionConstants {
     mainButtons.add(_resumeButton);
     mainButtons.add(_stepIntoButton);
     mainButtons.add(_stepOverButton);
-    mainButtons.add(_stepOutButton);     
+    mainButtons.add(_stepOutButton);
     disableButtons();
     _buttonPanel.add(mainButtons, BorderLayout.CENTER);
     _buttonPanel.add(closeButtonPanel, BorderLayout.EAST);
   }
   
   /**
-   * Initializes the pop-up menu that is revealed when the user 
+   * Initializes the pop-up menu that is revealed when the user
    * right-clicks on a row in the thread table or stack table.
    */
   private void _initPopup() {
@@ -485,7 +485,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
           _debugger.setCurrentThread(getSelectedThread());
         }
         catch(DebugException exception) {
-          JOptionPane.showMessageDialog(_frame, "Cannot select thread.", 
+          JOptionPane.showMessageDialog(_frame, "Cannot select thread.",
                                         "Debugger Error", JOptionPane.ERROR_MESSAGE);
         }
       }
@@ -614,7 +614,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
     public void debuggerShutdown() {}
     
     /**
-     * Called when the given line is reached by the current thread in the 
+     * Called when the given line is reached by the current thread in the
      * debugger, to request that the line be displayed.
      * @param doc Document to display
      * @param lineNumber Line to display or highlight
@@ -649,7 +649,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
                 if (((Integer)lineNumber.getUserObject()).intValue() > bp.getLineNumber()) {
                   
                   //else, add to the list
-                  DefaultMutableTreeNode newBreakpoint = 
+                  DefaultMutableTreeNode newBreakpoint =
                     new DefaultMutableTreeNode(new Integer(bp.getLineNumber()));
                   _bpTreeModel.insertNodeInto(newBreakpoint,
                                               doc,
@@ -660,8 +660,8 @@ public class DebugPanel extends JPanel implements OptionConstants {
                   return;
                 }
               }
-              //if none are greater, add at the end 
-              DefaultMutableTreeNode newBreakpoint = 
+              //if none are greater, add at the end
+              DefaultMutableTreeNode newBreakpoint =
                 new DefaultMutableTreeNode(new Integer(bp.getLineNumber()));
               _bpTreeModel.insertNodeInto(newBreakpoint,
                                           doc,
@@ -676,7 +676,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
           _bpTreeModel.insertNodeInto(bpDocNode,
                                       _breakpointRootNode,
                                       _breakpointRootNode.getChildCount());
-          DefaultMutableTreeNode newBreakpoint = 
+          DefaultMutableTreeNode newBreakpoint =
             new DefaultMutableTreeNode(new Integer(bp.getLineNumber()));
           _bpTreeModel.insertNodeInto(newBreakpoint,
                                       bpDocNode,
@@ -704,11 +704,11 @@ public class DebugPanel extends JPanel implements OptionConstants {
           Enumeration documents = _breakpointRootNode.children();
           while (documents.hasMoreElements()) {
             DefaultMutableTreeNode doc = (DefaultMutableTreeNode)documents.nextElement();
-            if (doc.getUserObject().equals(bpDoc.getUserObject())) {              
+            if (doc.getUserObject().equals(bpDoc.getUserObject())) {
               // Find the correct line number node for this breakpoint
               Enumeration lineNumbers = doc.children();
               while (lineNumbers.hasMoreElements()) {
-                DefaultMutableTreeNode lineNumber = 
+                DefaultMutableTreeNode lineNumber =
                   (DefaultMutableTreeNode)lineNumbers.nextElement();
                 if (lineNumber.getUserObject().equals(new Integer(bp.getLineNumber()))) {
                   
@@ -744,14 +744,14 @@ public class DebugPanel extends JPanel implements OptionConstants {
               // Find the correct line number node for this breakpoint
               Enumeration lineNumbers = doc.children();
               while (lineNumbers.hasMoreElements()) {
-                DefaultMutableTreeNode lineNumber = 
+                DefaultMutableTreeNode lineNumber =
                   (DefaultMutableTreeNode)lineNumbers.nextElement();
                 if (lineNumber.getUserObject().equals(new Integer(bp.getLineNumber()))) {
                   _bpTreeModel.removeNodeFromParent(lineNumber);
                   if (doc.getChildCount() == 0) {
                     // this document has no more breakpoints, remove it
                     _bpTreeModel.removeNodeFromParent(doc);
-                  }        
+                  }
                   return;
                 }
               }
@@ -920,7 +920,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
           _debugger.setCurrentThread(thread);
         }
         catch(DebugException exception){
-          JOptionPane.showMessageDialog(_frame, "Cannot select the thread.", 
+          JOptionPane.showMessageDialog(_frame, "Cannot select the thread.",
                                         "Debugger Error", JOptionPane.ERROR_MESSAGE);
         }
       }

@@ -53,8 +53,8 @@ import java.awt.font.*;
 public class PagePrinter implements Printable {
 
   private int _page;
-  private Vector _textLayouts;
-  private Vector _lineNumbers;
+  private ArrayList<TextLayout> _textLayouts;
+  private ArrayList<TextLayout> _lineNumbers;
   private String _filename;
   private DrJavaBook _parent;
 
@@ -64,8 +64,8 @@ public class PagePrinter implements Printable {
    */
   public PagePrinter(int page, String filename, DrJavaBook parent) {
     _page = page;
-    _textLayouts = new Vector();
-    _lineNumbers = new Vector();
+    _textLayouts = new ArrayList<TextLayout>();
+    _lineNumbers = new ArrayList<TextLayout>();
     _filename = filename;
     _parent = parent;
   }
@@ -79,8 +79,8 @@ public class PagePrinter implements Printable {
    * @param lineNumber The Text to write in the lineNumber location.
    */
   public void add(TextLayout text, TextLayout lineNumber) {
-    _textLayouts.addElement(text);
-    _lineNumbers.addElement(lineNumber);
+    _textLayouts.add(text);
+    _lineNumbers.add(lineNumber);
   }
 
   /**
@@ -100,8 +100,8 @@ public class PagePrinter implements Printable {
 
     // loop over the TextLayouts, printing out each one and the line number
     for (int i=0; i<_textLayouts.size(); i++) {
-      TextLayout layout = (TextLayout) _textLayouts.elementAt(i);
-      TextLayout lineNumber = (TextLayout) _lineNumbers.elementAt(i);
+      TextLayout layout = (TextLayout) _textLayouts.get(i);
+      TextLayout lineNumber = (TextLayout) _lineNumbers.get(i);
 
       y += layout.getAscent();
       lineNumber.draw(g2d, 0, y);

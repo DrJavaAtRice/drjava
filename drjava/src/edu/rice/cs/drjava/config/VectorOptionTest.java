@@ -4,7 +4,7 @@
  * at http://sourceforge.net/projects/drjava
  *
  * Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)
- * 
+ *
  * DrJava is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -39,7 +39,7 @@
 
 package edu.rice.cs.drjava.config;
 
-import gj.util.Vector;
+import java.util.Vector;
 import junit.framework.*;
 
 
@@ -106,13 +106,13 @@ public final class VectorOptionTest extends TestCase {
     
     Vector<Boolean> bv = _bvo.parse("[true]");
     
-    assertEquals(1, bv.size()); 
+    assertEquals(1, bv.size());
     assertEquals(Boolean.TRUE, bv.elementAt(0));
     
     bv = _bvo.parse("[true,false,true,true]");
     
-    assertEquals(4, bv.size()); 
-    assertEquals(Boolean.TRUE,  bv.elementAt(0)); 
+    assertEquals(4, bv.size());
+    assertEquals(Boolean.TRUE,  bv.elementAt(0));
     assertEquals(Boolean.FALSE, bv.elementAt(1));
     assertEquals(Boolean.TRUE,  bv.elementAt(2));
     assertEquals(Boolean.TRUE,  bv.elementAt(3));

@@ -43,10 +43,10 @@ import  junit.framework.*;
 
 import java.io.*;
 
-import java.util.Vector;
+import java.util.List;
+import java.util.LinkedList;
 import javax.swing.text.BadLocationException;
 import junit.extensions.*;
-import java.util.LinkedList;
 import javax.swing.text.Document;
 import javax.swing.text.DefaultStyledDocument;
 import javax.swing.ListModel;
@@ -112,12 +112,12 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
     doc3 = setupDocument(FOO_TEXT);
     assertNumOpenDocs(3);
     
-    ListModel docs = _model.getDefinitionsDocs();
-    assertEquals("size of document array", 3, docs.getSize());
+    List<OpenDefinitionsDocument> docs = _model.getDefinitionsDocuments();
+    assertEquals("size of document array", 3, docs.size());
     
-    assertEquals("document 1", doc1, docs.getElementAt(0));
-    assertEquals("document 2", doc2, docs.getElementAt(1));
-    assertEquals("document 3", doc3, docs.getElementAt(2));
+    assertEquals("document 1", doc1, docs.get(0));
+    assertEquals("document 2", doc2, docs.get(1));
+    assertEquals("document 3", doc3, docs.get(2));
   }
   
   
@@ -134,14 +134,14 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
     _model.closeFile(doc1);
     assertNumOpenDocs(1);
     
-    ListModel docs = _model.getDefinitionsDocs();
-    assertEquals("size of document array", 1, docs.getSize());
-    assertContents(BAR_TEXT, (OpenDefinitionsDocument) docs.getElementAt(0));
+    List<OpenDefinitionsDocument> docs = _model.getDefinitionsDocuments();
+    assertEquals("size of document array", 1, docs.size());
+    assertContents(BAR_TEXT, (OpenDefinitionsDocument) docs.get(0));
     
     _model.closeFile(doc2);
     assertNumOpenDocs(0);
-    docs = _model.getDefinitionsDocs();
-    assertEquals("size of document array", 0, docs.getSize());
+    docs = _model.getDefinitionsDocuments();
+    assertEquals("size of document array", 0, docs.size());
   }
   
   
@@ -275,8 +275,8 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
       assertNumOpenDocs(1);
       listener.assertOpenCount(0);
       
-      ListModel docs = _model.getDefinitionsDocs();
-      doc = (OpenDefinitionsDocument) docs.getElementAt(0);
+      List<OpenDefinitionsDocument> docs = _model.getDefinitionsDocuments();
+      doc = docs.get(0);
       assertModified(true, doc);
       assertContents(FOO_TEXT, doc);
     }
@@ -421,10 +421,10 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
       fail("Open was unexpectedly canceled!");
     }
     listener.assertOpenCount(2);
-    ListModel docs = _model.getDefinitionsDocs();
-    assertEquals("size of document array", 2, docs.getSize());
-    assertContents(FOO_TEXT, (OpenDefinitionsDocument) docs.getElementAt(0));
-    assertContents(BAR_TEXT, (OpenDefinitionsDocument) docs.getElementAt(1));
+    List<OpenDefinitionsDocument> docs = _model.getDefinitionsDocuments();
+    assertEquals("size of document array", 2, docs.size());
+    assertContents(FOO_TEXT, docs.get(0));
+    assertContents(BAR_TEXT, docs.get(1));
     
   }
   
@@ -466,12 +466,12 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
       assertNumOpenDocs(2);
       listener.assertOpenCount(0);
       
-      ListModel docs = _model.getDefinitionsDocs();
-      doc1 = (OpenDefinitionsDocument) docs.getElementAt(0);
+      List<OpenDefinitionsDocument> docs = _model.getDefinitionsDocuments();
+      doc1 = docs.get(0);
       assertModified(true, doc1);
       assertContents(FOO_TEXT, doc1);
       
-      doc1 = (OpenDefinitionsDocument) docs.getElementAt(1);
+      doc1 = docs.get(1);
       assertModified(true, doc1);
       assertContents(BAR_TEXT, doc1);
     }

@@ -4,7 +4,7 @@
  * at http://sourceforge.net/projects/drjava
  *
  * Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)
- * 
+ *
  * DrJava is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -123,9 +123,9 @@ public class AboutDialog extends JDialog implements ActionListener {
       rowData[rowNum][1] = (String) entry.getValue();
       rowNum++;
     }
-    java.util.Arrays.sort(rowData,new java.util.Comparator() {
-      public int compare(Object o1, Object o2) {
-        return ((Comparable[]) o1)[0].compareTo(((Comparable[]) o2)[0]);
+    java.util.Arrays.sort(rowData,new java.util.Comparator<String[]>() {
+      public int compare(String[] o1, String[] o2) {
+        return o1[0].compareTo(o2[0]);
       }
     });
     String[] nvStrings = new String[]{"Name","Value"};
@@ -177,7 +177,7 @@ public class AboutDialog extends JDialog implements ActionListener {
     return panel;
   }
   
-  private static class LogoList extends java.util.LinkedList {
+  private static class LogoList extends java.util.LinkedList<JPanel> {
     private int width = Integer.MIN_VALUE;
     private int height = Integer.MIN_VALUE;
     private void addLogo(JPanel logo) {
@@ -200,7 +200,7 @@ public class AboutDialog extends JDialog implements ActionListener {
     }
   }
   
-  public static JPanel createBorderedLabel(ImageInfo info, 
+  public static JPanel createBorderedLabel(ImageInfo info,
                                            EmptyBorder pad) {
     JLabel label = createImageLabel(info,JLabel.CENTER);
     if(label == null) return null;
@@ -258,7 +258,7 @@ public class AboutDialog extends JDialog implements ActionListener {
     " PARTICULAR PURPOSE.  See the GNU General Public License for more details.";
   private static String GPL;
   private static boolean initGPL = false;
-  public static final String DYADE_LICENSE = 
+  public static final String DYADE_LICENSE =
     "DynamicJava - Copyright \u00a9 1999 Dyade\n\nPermission is hereby granted,"+
     " free of charge, to any person obtaining a copy of this software and associated"+
     " documentation files (the \"Software\"), to deal in the Software without restriction,"+
@@ -273,7 +273,7 @@ public class AboutDialog extends JDialog implements ActionListener {
     " OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.\n\n"+
     "Except as contained in this notice, the name of Dyade shall not be used in advertising or otherwise"+
     " to promote the sale, use or other dealings in this Software without prior written authorization from Dyade.";
-  public static final String INTRODUCTION = 
+  public static final String INTRODUCTION =
     "DrJava is a pedagogic programming environment for Java, intended to help students focus more on program"+
     " design than on the features of a complicated development environment. It provides an Interactions"+
     " window based on a \"read-eval-print loop\", which allows programmers to develop, test, and debug"+

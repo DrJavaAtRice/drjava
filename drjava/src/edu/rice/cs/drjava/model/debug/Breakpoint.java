@@ -4,7 +4,7 @@
  * at http://sourceforge.net/projects/drjava
  *
  * Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)
- * 
+ *
  * DrJava is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -45,7 +45,7 @@ import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 
-import gj.util.Vector;
+import java.util.Vector;
 import java.util.List;
 import java.util.Iterator;
 
@@ -56,10 +56,10 @@ import com.sun.jdi.*;
 import com.sun.jdi.request.*;
 
 /**
- * The breakpoint object which has references to its OpenDefinitionsDocument and its 
+ * The breakpoint object which has references to its OpenDefinitionsDocument and its
  * BreakpointRequest
  */
-public class Breakpoint extends DocumentDebugAction<BreakpointRequest> { 
+public class Breakpoint extends DocumentDebugAction<BreakpointRequest> {
   
    private Position _startPos;
    private Position _endPos;
@@ -67,8 +67,8 @@ public class Breakpoint extends DocumentDebugAction<BreakpointRequest> {
   /**
    * @throws DebugException if the document does not have a file
    */
-  public Breakpoint( OpenDefinitionsDocument doc, int offset, int lineNumber, JPDADebugger manager) 
-    throws DebugException {    
+  public Breakpoint( OpenDefinitionsDocument doc, int offset, int lineNumber, JPDADebugger manager)
+    throws DebugException {
     
     super(manager, doc, offset);
     _suspendPolicy = EventRequest.SUSPEND_EVENT_THREAD;
@@ -88,7 +88,7 @@ public class Breakpoint extends DocumentDebugAction<BreakpointRequest> {
   }
   
   /**
-   * Creates appropriate EventRequests from the EventRequestManager and 
+   * Creates appropriate EventRequests from the EventRequestManager and
    * stores them in the _requests field.
    * @param refTypes All (identical) ReferenceTypes to which this action
    * applies.  (There may be multiple if a custom class loader is in use.)
@@ -143,14 +143,14 @@ public class Breakpoint extends DocumentDebugAction<BreakpointRequest> {
     if (_requests.size() > 0) {
       // All BreakpointRequests are identical-- one copy for each loaded
       //  class.  So just print info from the first one, and how many there are.
-      return "Breakpoint[class: " + getClassName() + 
-        ", lineNumber: " + getLineNumber() + 
+      return "Breakpoint[class: " + getClassName() +
+        ", lineNumber: " + getLineNumber() +
         ", method: " + _requests.elementAt(0).location().method() +
         ", codeIndex: " + _requests.elementAt(0).location().codeIndex() +
         ", numRefTypes: " + _requests.size() + "]";
     }
     else {
-      return "Breakpoint[class: " + getClassName() + 
+      return "Breakpoint[class: " + getClassName() +
         ", lineNumber: " + getLineNumber() + "]";
     }
   }

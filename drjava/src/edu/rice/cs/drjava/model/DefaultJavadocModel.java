@@ -188,10 +188,10 @@ public class DefaultJavadocModel implements JavadocModel {
     String destDir = destDirFile.getAbsolutePath();
     
     // Accumulate a set of arguments to JavaDoc - package or file names.
-    HashSet docUnits = new HashSet();  // units to send to Javadoc (packages or files)
-    HashSet sourceRootSet = new HashSet();  // set of unique source roots for open files
-    HashSet defaultRoots = new HashSet();  // source roots for files in default package
-    HashSet topLevelPacks = new HashSet();  // top level package names to include
+    HashSet<String> docUnits = new HashSet<String>();  // units to send to Javadoc (packages or files)
+    HashSet<File> sourceRootSet = new HashSet<File>();  // set of unique source roots for open files
+    HashSet<File> defaultRoots = new HashSet<File>();  // source roots for files in default package
+    HashSet<String> topLevelPacks = new HashSet<String>();  // top level package names to include
 
     // This depends on the current value of the "javadoc.all.packages" option.
     boolean docAll = DrJava.getConfig().getSetting(OptionConstants.JAVADOC_FROM_ROOTS).booleanValue();
@@ -316,7 +316,7 @@ public class DefaultJavadocModel implements JavadocModel {
     accArg.append('-');
     accArg.append(accLevel);
     
-    ArrayList args = new ArrayList();
+    ArrayList<String> args = new ArrayList<String>();
     args.add(accArg.toString());
     args.add("-sourcepath");
     args.add(sourcePath.toString());
@@ -423,8 +423,8 @@ public class DefaultJavadocModel implements JavadocModel {
 //     value = javadocProcess.waitFor();
     
     // We have to use a busy-wait and vent output buffers.
-    LinkedList outLines = new LinkedList();
-    LinkedList errLines = new LinkedList();
+    LinkedList<String> outLines = new LinkedList<String>();
+    LinkedList<String> errLines = new LinkedList<String>();
     boolean done = false;
     while (!done) {
       try {
@@ -441,7 +441,7 @@ public class DefaultJavadocModel implements JavadocModel {
     // Unfortunately, javadoc returns 1 for normal errors and for exceptions.
     // We cannot tell them apart without parsing.
 
-    ArrayList errors = extractErrors(outLines);
+    ArrayList<CompilerError> errors = extractErrors(outLines);
     errors.addAll(extractErrors(errLines));
   
     _javadocErrorModel = new CompilerErrorModel
@@ -459,9 +459,9 @@ public class DefaultJavadocModel implements JavadocModel {
    * @param lines a LinkedList of Strings representing lines of text
    * @return an ArrayList of CompilerErrors corresponding to the text
    */
-  private ArrayList extractErrors(LinkedList lines) {
+  private ArrayList<CompilerError> extractErrors(LinkedList lines) {
     // Javadoc never produces more than 100 errors, so this will never auto-expand.
-    ArrayList errors = new ArrayList(100);
+    ArrayList<CompilerError> errors = new ArrayList<CompilerError>(100);
     
     final String ERROR_INDICATOR = "Error: ";
     final String EXCEPTION_INDICATOR = "Exception: ";

@@ -167,7 +167,7 @@ public class SingleDisplayModel extends DefaultGlobalModel {
    */
   public void setActiveDocument(int index) {
     int oldIndex = _selectionModel.getMinSelectionIndex();
-    if ((index < 0) || (index >= getDefinitionsDocs().getSize())) {
+    if ((index < 0) || (index >= getDefinitionsDocuments().size())) {
       throw new IllegalArgumentException(
         "No such document in model to be set to active.");
     }
@@ -194,7 +194,7 @@ public class SingleDisplayModel extends DefaultGlobalModel {
   public void setNextActiveDocument() {
     int index = _getDocumentIndex(_activeDocument);
 
-    if (index < getDefinitionsDocs().getSize() - 1) {
+    if (index < getDefinitionsDocuments().size() - 1) {
       index++;
       setActiveDocument(index);
     }
@@ -269,8 +269,8 @@ public class SingleDisplayModel extends DefaultGlobalModel {
    * or "(untitled)" if no file exists.
    */
   public String getDisplayFullPath(int index) {
-    OpenDefinitionsDocument doc = (OpenDefinitionsDocument)
-      getDefinitionsDocs().getElementAt(index);
+    OpenDefinitionsDocument doc =
+      getDefinitionsDocuments().get(index);
     if (doc == null) {
       throw new RuntimeException(
         "Document not found with index " + index);
@@ -401,7 +401,7 @@ public class SingleDisplayModel extends DefaultGlobalModel {
         _ensureNotEmpty();
 
         // Select next document
-        int size = getDefinitionsDocs().getSize();
+        int size = getDefinitionsDocuments().size();
         if (index < 0) {
           index = 0;
         }
@@ -448,10 +448,10 @@ public class SingleDisplayModel extends DefaultGlobalModel {
    * in the list of open documents, or -1 if it is not found.
    */
   private int _getDocumentIndex(OpenDefinitionsDocument doc) {
-    ListModel docs = getDefinitionsDocs();
+    List<OpenDefinitionsDocument> docs = getDefinitionsDocuments();
     int index = -1;
-    for (int i=0; (i < docs.getSize()) && (index < 0); i++) {
-      if (docs.getElementAt(i).equals(doc)) {
+    for (int i=0; (i < docs.size()) && (index < 0); i++) {
+      if (docs.get(i).equals(doc)) {
         index = i;
       }
     }
@@ -464,7 +464,7 @@ public class SingleDisplayModel extends DefaultGlobalModel {
    * which is untitled and unchanged.
    */
   private boolean _hasOneEmptyDocument() {
-    return ((getDefinitionsDocs().getSize() == 1) &&
+    return ((getDefinitionsDocuments().size() == 1) &&
             (_activeDocument.isUntitled()) &&
             (!_activeDocument.isModifiedSinceSave()));
   }
@@ -474,7 +474,7 @@ public class SingleDisplayModel extends DefaultGlobalModel {
    */
   private void _ensureNotEmpty() {
     if ((!_isClosingAllDocs) &&
-        (getDefinitionsDocs().getSize() == 0)) {
+        (getDefinitionsDocuments().size() == 0)) {
       super.newFile();
     }
   }
@@ -488,8 +488,8 @@ public class SingleDisplayModel extends DefaultGlobalModel {
    * SelectionModel does not fire a valueChanged event.
    */
   private void _setActiveDoc(int index) {
-    ListModel docs = getDefinitionsDocs();
-    _activeDocument = (OpenDefinitionsDocument) docs.getElementAt(index);
+    List<OpenDefinitionsDocument> docs = getDefinitionsDocuments();
+    _activeDocument = docs.get(index);
     _activeDocument.checkIfClassFileInSync();
 
     // notify single display model listeners
@@ -513,14 +513,14 @@ public class SingleDisplayModel extends DefaultGlobalModel {
     public void valueChanged(ListSelectionEvent e) {
       if (! e.getValueIsAdjusting()) {
         int index = _selectionModel.getMinSelectionIndex();
-        ListModel docs = getDefinitionsDocs();
+        List<OpenDefinitionsDocument> docs = getDefinitionsDocuments();
         //if ((index < 0) || (index > docs.getSize())) {
           //throw new RuntimeException("Document index out of bounds: " + index);
         //}
 
         // not sure why, but i just saw this get called with index=-1
         // let's just ignore that.
-        if ((index >= 0) && (index < docs.getSize())) {
+        if ((index >= 0) && (index < docs.size())) {
           _setActiveDoc(index);
         }
       }

@@ -4,7 +4,7 @@
  * at http://sourceforge.net/projects/drjava
  *
  * Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)
- * 
+ *
  * DrJava is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -55,7 +55,7 @@ class ModelList<T> {
   /** keep track of length for constant time length lookup */
   private int _length;
   /** a set of objects that can trigger and listen for updates to the list */
-  private Set _listeners;
+  private Set<ModelList.Iterator> _listeners;
   
   /**
    * Constructor.
@@ -73,7 +73,7 @@ class ModelList<T> {
     _tail.pred = _head;
     _tail.succ = null;
     _length = 0;
-    _listeners = new HashSet();
+    _listeners = new HashSet<ModelList.Iterator>();
   }
   
   /**
@@ -88,7 +88,7 @@ class ModelList<T> {
   }
    
   public void insertFront(T item) {
-    Iterator it = new Iterator();
+    ModelList.Iterator it = new ModelList.Iterator();
     it.insert(item);
     it.dispose();
   }
@@ -108,11 +108,11 @@ class ModelList<T> {
     }
   }
   
-  private void addListener(Object thing) {
+  private void addListener(ModelList.Iterator thing) {
     this._listeners.add(thing);
   }
   
-  private void removeListener(Object thing) {
+  private void removeListener(ModelList.Iterator thing) {
     this._listeners.remove(thing);
   }
 
@@ -132,11 +132,11 @@ class ModelList<T> {
   
   /**
    * Create a new iterator for this list.  The constructor for the
-   * iterator adds itself to the list's listeners.  The iterator 
+   * iterator adds itself to the list's listeners.  The iterator
    * must be notified of changes so it does not become out-of-date.
    */
-  public Iterator getIterator() {
-    return new Iterator();
+  public ModelList.Iterator getIterator() {
+    return new ModelList.Iterator();
   }
   
   
@@ -173,7 +173,7 @@ class ModelList<T> {
    * Iterators for model list.
    * The iterators are intimately coupled with the ModelList to which they
    * belong.  They are the only public interface for manipulating
-   * ModelList.  The iterators are also fail-safe with regards to 
+   * ModelList.  The iterators are also fail-safe with regards to
    * manipulation of the same list, although probably not thread-safe.
    */
   class Iterator {
@@ -195,7 +195,7 @@ class ModelList<T> {
      * Creates a new iterator with the same values as the progenitor.
      * Adds it to the list's set of listeners.
      */
-    public Iterator(Iterator iter) {
+    public Iterator(ModelList.Iterator iter) {
       _point = iter._point;
       _pos = iter._pos;
       ModelList.this.addListener(this);
@@ -209,13 +209,13 @@ class ModelList<T> {
      * an equals test
      */
     public boolean eq(Object thing) {
-      return this._point == ((Iterator)(thing))._point;
+      return this._point == ((ModelList.Iterator)(thing))._point;
     }
     
     /**
      * Force this iterator to take the values of the given iterator.
      */
-    public void setTo(Iterator it) {
+    public void setTo(ModelList.Iterator it) {
       this._point = it._point;
       this._pos = it._pos;
     }
@@ -374,7 +374,7 @@ class ModelList<T> {
      *
      *D oes not remove points iterators point to.
      */
-    public void collapse(Iterator iter) {
+    public void collapse(ModelList.Iterator iter) {
       int leftPos;
       int rightPos;
       Node<T> rightPoint;
@@ -410,9 +410,10 @@ class ModelList<T> {
      * in the set of listeners so they can stay updated.
      */
     private void notifyOfInsert(int pos) {
-      java.util.Iterator iter = ModelList.this._listeners.iterator();
+      java.util.Iterator<ModelList<T>.Iterator> iter =
+        ModelList.this._listeners.iterator();
       while (iter.hasNext()) {
-        Iterator next = (Iterator)iter.next();
+        ModelList.Iterator next = iter.next();
         if ( next._pos < pos ) {
           // do nothing
         }
@@ -427,9 +428,10 @@ class ModelList<T> {
      * in the set of listeners so they can stay updated.
      */
     private void notifyOfRemove(int pos, Node<T> point) {
-      java.util.Iterator iter = ModelList.this._listeners.iterator();
+      java.util.Iterator<ModelList<T>.Iterator> iter =
+        ModelList.this._listeners.iterator();
       while (iter.hasNext()) {
-        Iterator next = (Iterator)iter.next();
+        ModelList.Iterator next = iter.next();
         if ( next._pos < pos ) {
           // do nothing
         }
@@ -447,9 +449,10 @@ class ModelList<T> {
      * in the set of listeners so they can stay updated.
      */
     private void notifyOfCollapse(int leftPos, int rightPos, Node<T> rightPoint) {
-      java.util.Iterator iter = ModelList.this._listeners.iterator();
+      java.util.Iterator<ModelList<T>.Iterator> iter =
+        ModelList.this._listeners.iterator();
       while (iter.hasNext()) {
-        Iterator next = (Iterator)iter.next();
+        ModelList.Iterator next = iter.next();
         if ( next._pos <= leftPos ) {
           // do nothing
         }

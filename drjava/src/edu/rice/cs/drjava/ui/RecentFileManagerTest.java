@@ -4,7 +4,7 @@
  * at http://sourceforge.net/projects/drjava
  *
  * Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)
- * 
+ *
  * DrJava is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -49,7 +49,7 @@ import java.io.File;
 import java.io.IOException;
 import java.rmi.registry.Registry;
 
-import gj.util.Vector;
+import java.util.Vector;
 
 import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.model.definitions.*;
@@ -102,7 +102,7 @@ public final class RecentFileManagerTest extends TestCase {
     System.gc();
   }
 
-  /** 
+  /**
    * Create a new temporary file in _tempDir.  Calls with the same
    * int will return the same filename, while calls with different
    * ints will return different filenames.
@@ -135,14 +135,14 @@ public final class RecentFileManagerTest extends TestCase {
     _rfm.updateOpenFiles(tempFile2);
     Vector<File> vector = _rfm.getFileVector();
     assertEquals("number of recent files", 1, vector.size());
-    assertEquals("text of recent file", 
+    assertEquals("text of recent file",
                  FOO_TEXT,
                  FileOps.readFileAsString(vector.elementAt(0)));
   }
   
   /**
-   * Tests that the size of the recent files list is reduced in response to a 
-   * decrease in max size. 
+   * Tests that the size of the recent files list is reduced in response to a
+   * decrease in max size.
    */
   public void testShrinksToMaxSize() throws IOException, AlreadyOpenException, OperationCanceledException {
     
@@ -154,17 +154,17 @@ public final class RecentFileManagerTest extends TestCase {
     _rfm.updateOpenFiles(tempFile2);
     Vector<File> vector = _rfm.getFileVector();
     assertEquals("number of recent files", 2, vector.size());
-    assertEquals("text of most-recent file", 
+    assertEquals("text of most-recent file",
                  FOO_TEXT,
                  FileOps.readFileAsString(vector.elementAt(0)));
-    assertEquals("text of second-most recent file", 
+    assertEquals("text of second-most recent file",
                  BAR_TEXT,
                  FileOps.readFileAsString(vector.elementAt(1)));
     _rfm.updateMax(1);
     _rfm.numberItems();
     vector = _rfm.getFileVector();
     assertEquals("number of recent files", 1, vector.size());
-    assertEquals("text of recent file", 
+    assertEquals("text of recent file",
                  FOO_TEXT,
                  FileOps.readFileAsString(vector.elementAt(0)));
     

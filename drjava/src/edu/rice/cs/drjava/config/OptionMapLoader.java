@@ -4,7 +4,7 @@
  * at http://sourceforge.net/projects/drjava
  *
  * Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)
- * 
+ *
  * DrJava is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -40,7 +40,7 @@
 package edu.rice.cs.drjava.config;
 import java.util.Properties; // don't import all of java.util, or gj.util to prevent name collisions
 import gj.util.Vector;
-import gj.util.Enumeration;
+import java.util.Iterator;
 import java.io.*;
 import java.lang.reflect.*;
 public class OptionMapLoader implements OptionConstants {
@@ -81,9 +81,9 @@ public class OptionMapLoader implements OptionConstants {
   
   /**
    * creates an OptionMapLoader from a given input stream.
-   * does not maintain a reference to this input stream after 
+   * does not maintain a reference to this input stream after
    * Constructor creates
-   * @param is the input stream to read. 
+   * @param is the input stream to read.
    */
   public OptionMapLoader(InputStream is) throws IOException {
     this(new Properties(DEFAULT_STRINGS));
@@ -101,9 +101,9 @@ public class OptionMapLoader implements OptionConstants {
    * @param is the inputstream to read from to load these options.
    */
   public void loadInto(OptionMap map) {
-    Enumeration<OptionParser> options = DEFAULTS.keys();
-    while(options.hasMoreElements()) {
-      OptionParser option = options.nextElement();
+    Iterator<OptionParser> options = DEFAULTS.keys();
+    while(options.hasNext()) {
+      OptionParser option = options.next();
       String val = prop.getProperty(option.name);
       map.setString(option,val);
     }

@@ -48,7 +48,7 @@ import java.awt.event.*;
 import java.io.File;
 import javax.swing.filechooser.FileFilter;
 
-import gj.util.Vector;
+import java.util.Vector;
 
 
 /**
@@ -56,9 +56,9 @@ import gj.util.Vector;
  * Uses a file chooser for each String element.
  * @version $Id$
  */
-public class VectorOptionComponent extends OptionComponent<Vector<File>> 
+public class VectorOptionComponent extends OptionComponent<Vector<File>>
   implements OptionConstants
-{  
+{
   private JScrollPane _listScrollPane;
   private JPanel _panel;
   private JList _list;
@@ -206,7 +206,7 @@ public class VectorOptionComponent extends OptionComponent<Vector<File>>
     resetToCurrent();
     
     return true;
-  } 
+  }
  
   /**
    * Displays the given value.

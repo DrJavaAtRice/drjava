@@ -4,7 +4,7 @@
  * at http://sourceforge.net/projects/drjava
  *
  * Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)
- * 
+ *
  * DrJava is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -49,7 +49,7 @@ import java.util.LinkedList;
 import javax.swing.SwingUtilities;
 import javax.swing.text.Document;
 import javax.swing.text.DefaultStyledDocument;
-import gj.util.Vector;
+import java.util.Vector;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.*;
@@ -79,7 +79,7 @@ public final class DebugTest extends GlobalModelTestCase
   private Boolean _userStepJava;
   private Boolean _userStepInterpreter;
   private Boolean _userStepDrJava;
-  protected static final String DEBUG_CLASS = 
+  protected static final String DEBUG_CLASS =
     /*  1 */ "class DrJavaDebugClass {\n" +
     /*  2 */ "  public void foo() {\n" +
     /*  3 */ "    System.out.println(\"Foo Line 1\");\n" +
@@ -88,7 +88,7 @@ public final class DebugTest extends GlobalModelTestCase
     /*  6 */ "  }\n" +
     /*  7 */ "  public void bar() {\n" +
     /*  8 */ "    System.out.println(\"Bar Line 1\");\n" +
-    /*  9 */ "    System.out.println(\"Bar Line 2\");\n" + 
+    /*  9 */ "    System.out.println(\"Bar Line 2\");\n" +
     /* 10 */ "  }\n" +
     /* 11 */ "}\n" +
     /* 12 */ "class DrJavaDebugClass2 {\n" +
@@ -110,18 +110,18 @@ public final class DebugTest extends GlobalModelTestCase
   protected static final String SUSPEND_CLASS =
     "class Suspender {\n" +
     "  public static void main(String[] args) {\n" +
-    "    Thread t1 = new Thread(){\n" + 
-    "      public void run(){\n" + 
-    "        int a = 1;\n" + 
-    "        while(true);\n" + 
-    "      }\n" + 
+    "    Thread t1 = new Thread(){\n" +
+    "      public void run(){\n" +
+    "        int a = 1;\n" +
+    "        while(true);\n" +
+    "      }\n" +
     "    };\n" +
     "    t1.start();\n" +
     "  }\n" +
     "}";
   
-  protected static final String MONKEY_CLASS = 
-/* 1 */    "class Monkey {\n" +  
+  protected static final String MONKEY_CLASS =
+/* 1 */    "class Monkey {\n" +
 /* 2 */    "  public static void main(String[] args) {\n" +
 /* 3 */    "\n" +
 /* 4 */    "    Thread t = new Thread(){\n" +
@@ -145,8 +145,8 @@ public final class DebugTest extends GlobalModelTestCase
 /* 22 */    "  }\n" +
 /* 23 */    "}\n";
   
-  protected static final String MONKEY_WITH_INNER_CLASS = 
-/* 1 */    "class Monkey {\n" +  
+  protected static final String MONKEY_WITH_INNER_CLASS =
+/* 1 */    "class Monkey {\n" +
 /* 2 */    "  int foo = 6; \n" +
 /* 3 */    "  class MonkeyInner { \n" +
 /* 4 */    "    int innerFoo = 8;\n" +
@@ -158,7 +158,7 @@ public final class DebugTest extends GlobalModelTestCase
 /* 10 */   "      innerMethodFoo++;\n" +
 /* 11 */   "      System.out.println(\"innerMethodFoo: \" + innerMethodFoo);\n" +
 /* 11 */   "    }\n" +
-/* 12 */   "  }\n" +  
+/* 12 */   "  }\n" +
 /* 13 */   "  public void bar() {\n" +
 /* 14 */   "    MonkeyInner mi = new MonkeyInner();\n" +
 /* 15 */   "    mi.innerMethod();\n" +
@@ -214,11 +214,11 @@ public final class DebugTest extends GlobalModelTestCase
    * Ensures that the given object will wait for n notifications.
    * Callers must call o.wait() AFTER this is called.  (We can't call it
    * here, because then the synchronized _notifyObject method can never
-   * be entered.)  Use _notifyObject instead of o.notify() when using 
+   * be entered.)  Use _notifyObject instead of o.notify() when using
    * this method.
    * Only one object (o) can use this at a time, since it uses a field
    * to store the number of pending notifications.
-   * 
+   *
    * @param n The number of times to be "notified" through _notifyObject
    */
   protected void _waitForNotifies(int n) throws InterruptedException {
@@ -253,14 +253,14 @@ public final class DebugTest extends GlobalModelTestCase
   }
 
   /**
-   * Sets the current debugger thread to th 
+   * Sets the current debugger thread to th
    */
   private void doSetCurrentThread(final DebugThreadData th) throws DebugException {
     _debugger.setCurrentThread(th);
   }
 
   /**
-   * Resumes the debugger asynchronously so as to aovid 
+   * Resumes the debugger asynchronously so as to aovid
    * getting notified before we start waiting for notifies
    */
   private void _asyncStep(final int whatKind){
@@ -278,7 +278,7 @@ public final class DebugTest extends GlobalModelTestCase
   }
   
   /**
-   * Resumes the debugger asynchronously so as to aovid 
+   * Resumes the debugger asynchronously so as to aovid
    * getting notified before we start waiting for notifies
    */
   private void _asyncResume(){
@@ -353,8 +353,8 @@ public final class DebugTest extends GlobalModelTestCase
     _debugger.removeListener(debugListener);
   }
   
-  /** 
-   * Test that when two threads are suspended setCurrentThread can be used 
+  /**
+   * Test that when two threads are suspended setCurrentThread can be used
    * to switch between them in the debugger
    */
   public synchronized void testMultiThreadedSetCurrentThread()
@@ -427,12 +427,12 @@ public final class DebugTest extends GlobalModelTestCase
      _debugger.removeListener(debugListener);
   }
 
-  /** 
-   * This test has been commented out because we do not support setting the 
+  /**
+   * This test has been commented out because we do not support setting the
    * current thread to be an unsuspended thread right now
    */
 //  /**
-//   * Tests that setCurrentThread works for multiple threads 
+//   * Tests that setCurrentThread works for multiple threads
 //   */
 //   public synchronized void testMultiThreadedSetCurrentThread()
 //     throws DebugException, BadLocationException, DocumentAdapterException,
@@ -440,7 +440,7 @@ public final class DebugTest extends GlobalModelTestCase
 //   {
 //     if (printMessages) System.out.println("----testMultiThreadedSetCurrentThread----");
 //     BreakpointTestListener debugListener = new BreakpointTestListener();
-//    
+//
 //     // Compile the class
 //     OpenDefinitionsDocument doc = doCompile(SUSPEND_CLASS, tempFile());
 //     _debugger.addListener(debugListener);
@@ -453,19 +453,19 @@ public final class DebugTest extends GlobalModelTestCase
 //     debugListener.assertDebuggerStartedCount(1);
 //     debugListener.assertDebuggerShutdownCount(0);
 //     assertTrue("Debug Manager should be ready", _debugger.isReady());
-//     
+//
 //     int index = SUSPEND_CLASS.indexOf("int a = 1;");
 //     _debugger.toggleBreakpoint(doc,index,5);
-//     
+//
 //      // Run the main() method, hitting breakpoints
 //     synchronized(_notifierLock) {
 //       interpretIgnoreResult("java Suspender");
 //       _waitForNotifies(3); // suspended, updated, breakpointReached
 //       _notifierLock.wait();
-//     }    
+//     }
 //     final DebugThreadData thread = new DebugThreadData(_debugger.getCurrentThread());
 //     synchronized(_notifierLock){
-//       /** _debugger.setCurrentThread(...); 
+//       /** _debugger.setCurrentThread(...);
 //        * must be executed in another thread because otherwise the notifies
 //        * will be received before the _notifierLock is released
 //        */
@@ -485,10 +485,10 @@ public final class DebugTest extends GlobalModelTestCase
 //     }
 //     // Ensure thread suspended
 //     debugListener.assertCurrThreadSuspendedCount(2);  //fires
-//     
+//
 //       // Close doc and make sure breakpoints are removed
 //     _model.closeFile(doc);
-//     
+//
 //     // Shutdown the debugger
 //     if (printMessages) System.out.println("Shutting down...");
 //     synchronized(_notifierLock) {
@@ -496,7 +496,7 @@ public final class DebugTest extends GlobalModelTestCase
 //       _waitForNotifies(1);  // shutdown
 //       _notifierLock.wait();
 //     }
-//     
+//
 //     debugListener.assertDebuggerShutdownCount(1);  //fires
 //     if (printMessages) System.out.println("Shut down.");
 //     _debugger.removeListener(debugListener);
@@ -504,7 +504,7 @@ public final class DebugTest extends GlobalModelTestCase
   
   
   /**
-   * Tests that breakpoints behave correctly for multiple threads 
+   * Tests that breakpoints behave correctly for multiple threads
    */
   public synchronized void testMultiThreadedBreakpointsAndStep()
     throws DebugException, BadLocationException, DocumentAdapterException,
@@ -514,7 +514,7 @@ public final class DebugTest extends GlobalModelTestCase
     BreakpointTestListener debugListener = new BreakpointTestListener();
     
     // Compile the class
-    OpenDefinitionsDocument doc = doCompile(MONKEY_CLASS, tempFile());   
+    OpenDefinitionsDocument doc = doCompile(MONKEY_CLASS, tempFile());
     
     _debugger.addListener(debugListener);
     // Start debugger
@@ -538,7 +538,7 @@ public final class DebugTest extends GlobalModelTestCase
       _notifierLock.wait();
     }
     
-    DebugThreadData thread = new DebugThreadData(_debugger.getCurrentThread());    
+    DebugThreadData thread = new DebugThreadData(_debugger.getCurrentThread());
     // Resumes one thread, finishing it and switching to the next break point
     synchronized(_notifierLock) {
       _asyncResume();
@@ -605,7 +605,7 @@ public final class DebugTest extends GlobalModelTestCase
   /**
    * Tests that breakpoints behave correctly.
    */
-  public synchronized void testBreakpoints() 
+  public synchronized void testBreakpoints()
     throws DebugException, BadLocationException, DocumentAdapterException,
     IOException, InterruptedException
   {
@@ -709,7 +709,7 @@ public final class DebugTest extends GlobalModelTestCase
   /**
    * Tests that breakpoints and steps behave correctly.
    */
-  public void testStepInto() 
+  public void testStepInto()
     throws DebugException, BadLocationException, DocumentAdapterException,
     IOException, InterruptedException
   {
@@ -719,7 +719,7 @@ public final class DebugTest extends GlobalModelTestCase
     // Compile the class
     OpenDefinitionsDocument doc = doCompile(DEBUG_CLASS, tempFile());
    
-    _debugger.addListener(debugListener); 
+    _debugger.addListener(debugListener);
     // Start debugger
     synchronized(_notifierLock) {
       _debugger.startup();
@@ -791,7 +791,7 @@ public final class DebugTest extends GlobalModelTestCase
     debugListener.assertThreadLocationUpdatedCount(4);  // fires
     debugListener.assertCurrThreadDiedCount(0);
     debugListener.assertCurrThreadSuspendedCount(4);  // fires
-    debugListener.assertBreakpointReachedCount(1);        
+    debugListener.assertBreakpointReachedCount(1);
     assertInteractionsContains("Bar Line 2");
     assertInteractionsDoesNotContain("Foo Line 3");
     
@@ -811,7 +811,7 @@ public final class DebugTest extends GlobalModelTestCase
     debugListener.assertThreadLocationUpdatedCount(6);  // fires
     debugListener.assertCurrThreadDiedCount(0);
     debugListener.assertCurrThreadSuspendedCount(6);  //fires
-    debugListener.assertBreakpointReachedCount(1);      
+    debugListener.assertBreakpointReachedCount(1);
     assertInteractionsContains("Foo Line 3");
     
     
@@ -846,7 +846,7 @@ public final class DebugTest extends GlobalModelTestCase
   /**
    * Tests that stepping out of a method behaves correctly.
    */
-  public synchronized void testStepOut() 
+  public synchronized void testStepOut()
     throws DebugException, BadLocationException, DocumentAdapterException,
     IOException, InterruptedException
   {
@@ -856,7 +856,7 @@ public final class DebugTest extends GlobalModelTestCase
     // Compile the class
     File file2 = new File(_tempDir, "DrJavaDebugClass.java");
     OpenDefinitionsDocument doc = doCompile(DEBUG_CLASS, file2);
-    _debugger.addListener(debugListener); 
+    _debugger.addListener(debugListener);
     // Start debugger and add breakpoint
     synchronized(_notifierLock) {
       _debugger.startup();
@@ -943,7 +943,7 @@ public final class DebugTest extends GlobalModelTestCase
   /**
    * Tests that stepping works in a public class with a package
    */
-  public synchronized void testStepOverWithPackage() 
+  public synchronized void testStepOverWithPackage()
     throws DebugException, BadLocationException, DocumentAdapterException,
     IOException, InterruptedException
   {
@@ -956,7 +956,7 @@ public final class DebugTest extends GlobalModelTestCase
     File file = new File(aDir, "DrJavaDebugClassWithPackage.java");
     OpenDefinitionsDocument doc = doCompile(DEBUG_CLASS_WITH_PACKAGE, file);
     
-    _debugger.addListener(debugListener); 
+    _debugger.addListener(debugListener);
     // Start debugger
     synchronized(_notifierLock) {
       _debugger.startup();
@@ -1056,7 +1056,7 @@ public final class DebugTest extends GlobalModelTestCase
    * Tests that the sourcepath config option properly adds files to the
    * search directories.
    */
-  public void testDebugSourcepath() 
+  public void testDebugSourcepath()
     throws DebugException, BadLocationException, DocumentAdapterException,
     IOException, InterruptedException
   {
@@ -1069,7 +1069,7 @@ public final class DebugTest extends GlobalModelTestCase
     Vector<File> path = new Vector<File>();
     path.addElement(_tempDir);
     
-    _debugger.addListener(debugListener); 
+    _debugger.addListener(debugListener);
   
     // Start debugger and add breakpoint
     synchronized(_notifierLock) {
@@ -1154,7 +1154,7 @@ public final class DebugTest extends GlobalModelTestCase
   /**
    * Tests that breakpoints behave correctly in non-public classes.
    */
-  public synchronized void testBreakpointsAndStepsInNonPublicClasses() 
+  public synchronized void testBreakpointsAndStepsInNonPublicClasses()
     throws DebugException, BadLocationException, DocumentAdapterException,
     IOException, InterruptedException
   {
@@ -1279,7 +1279,7 @@ public final class DebugTest extends GlobalModelTestCase
     String sep = System.getProperty("file.separator");
     
     assertEquals("package dir with package",
-                 "edu" + sep + "rice" + sep + "cs" + sep + 
+                 "edu" + sep + "rice" + sep + "cs" + sep +
                  "drjava" + sep + "model" + sep,
                  _debugger.getPackageDir(class1));
     assertEquals("package dir without package",
@@ -1290,7 +1290,7 @@ public final class DebugTest extends GlobalModelTestCase
   /**
    * Tests that stepping into a breakpoint works.
    */
-  public synchronized void testStepIntoOverBreakpoint() 
+  public synchronized void testStepIntoOverBreakpoint()
     throws DebugException, BadLocationException, DocumentAdapterException,
     IOException, InterruptedException
   {
@@ -1303,7 +1303,7 @@ public final class DebugTest extends GlobalModelTestCase
     File file = new File(_tempDir, "DrJavaDebugClass.java");
     OpenDefinitionsDocument doc = doCompile(DEBUG_CLASS, file);
     
-    _debugger.addListener(debugListener); 
+    _debugger.addListener(debugListener);
     // Start debugger
     synchronized(_notifierLock) {
       _debugger.startup();
@@ -1648,7 +1648,7 @@ public final class DebugTest extends GlobalModelTestCase
     debugListener.assertThreadLocationUpdatedCount(5);  // fires
     debugListener.assertCurrThreadSuspendedCount(5);  // fires
     debugListener.assertBreakpointReachedCount(1);
-    debugListener.assertCurrThreadDiedCount(0);    
+    debugListener.assertCurrThreadDiedCount(0);
     
     watches = _debugger.getWatches();
     assertEquals("watch name incorrect", "foo", watches.elementAt(0).getName());
@@ -1719,7 +1719,7 @@ public final class DebugTest extends GlobalModelTestCase
     }
     
     public void assertThreadLocationUpdatedCount(int i) {
-      assertEquals("number of times threadLocationUpdated fired", i, 
+      assertEquals("number of times threadLocationUpdated fired", i,
                    threadLocationUpdatedCount);
     }
     
@@ -1812,9 +1812,9 @@ public final class DebugTest extends GlobalModelTestCase
     }
     
     /**
-     * This won't fail because threads could be starting at any time. 
+     * This won't fail because threads could be starting at any time.
      * We have to expect this to be fired.
-     */  
+     */
     public void threadStarted() {
       threadStartedCount++;
     }
@@ -1824,7 +1824,7 @@ public final class DebugTest extends GlobalModelTestCase
     }
     
     /**
-     * This won't fail because threads could be dying at any time. 
+     * This won't fail because threads could be dying at any time.
      * We have to expect this to be fired.
      */
     public void nonCurrThreadDied() {
@@ -1902,7 +1902,7 @@ public final class DebugTest extends GlobalModelTestCase
         _notifyLock();
       }
     }
-    public void threadLocationUpdated(OpenDefinitionsDocument doc, 
+    public void threadLocationUpdated(OpenDefinitionsDocument doc,
                                       int lineNumber, boolean shouldHighlight) {
       // EventHandler's thread: test should wait
       synchronized(_notifierLock) {
@@ -1930,7 +1930,7 @@ public final class DebugTest extends GlobalModelTestCase
    * from overlapping.)
    */
   public class InterpretListener extends TestListener {
-    public void interactionStarted() {      
+    public void interactionStarted() {
       synchronized(_notifierLock) {
         interactionStartCount++;
         if (printEvents) System.out.println("interactionStarted " + interactionStartCount);

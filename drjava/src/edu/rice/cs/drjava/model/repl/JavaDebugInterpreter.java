@@ -45,6 +45,9 @@ import koala.dynamicjava.interpreter.context.*;
 import koala.dynamicjava.tree.*;
 import koala.dynamicjava.tree.visitor.*;
 
+import java.util.List;
+import java.util.LinkedList;
+
 public class JavaDebugInterpreter extends DynamicJavaAdapter {
   /**
    * This interpreter's name.
@@ -59,7 +62,7 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
   
   /**
    * Contains an ordered list of unqualified classnames which
-   * enclose _this along with the instances of each enclosing class. 
+   * enclose _this along with the instances of each enclosing class.
    * The first element of this list contains the outermost
    * enclosing class.
    */
@@ -114,7 +117,7 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
    * @return Corresponding QualifiedName
    */
   protected QualifiedName _convertThisToName(ThisExpression node) {
-    java.util.List ids = new java.util.LinkedList();
+    List ids = new LinkedList();
     ids.add(new Identifier("this", node.getBeginLine(), node.getBeginColumn(),
                            node.getEndLine(), node.getEndColumn()));
     return new QualifiedName(ids, node.getFilename(),

@@ -4,7 +4,7 @@
  * at http://sourceforge.net/projects/drjava
  *
  * Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)
- * 
+ *
  * DrJava is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -46,10 +46,10 @@ import com.sun.jdi.request.*;
 import com.sun.jdi.event.*;
 
 import gj.util.Hashtable;
-import gj.util.Vector;
 
 import java.util.List;
 import java.util.LinkedList;
+import java.util.Vector;
 
 /**
  * Keeps track of DocumentDebugActions that are waiting to be resolved when the
@@ -79,7 +79,7 @@ public class PendingRequestManager {
       actions = new Vector<DocumentDebugAction>();
       
       // only create a ClassPrepareRequest once per class
-      ClassPrepareRequest request = 
+      ClassPrepareRequest request =
         _manager.getEventRequestManager().createClassPrepareRequest();
       request.addClassFilter(className + "*");
       request.setSuspendPolicy(EventRequest.SUSPEND_EVENT_THREAD);
@@ -88,7 +88,7 @@ public class PendingRequestManager {
     }
     actions.addElement(action);
     _pendingActions.put(className, actions);
-  }  
+  }
   
   /**
    * Called if a breakpoint is set and removed before its class is prepared
@@ -116,28 +116,28 @@ public class PendingRequestManager {
    * were pending. Since the keys to the HashTable are the names of the
    * outer class, the $ and everything after it must be cropped off from the
    * class name in order to do the lookup. During the lookup, however, the line
-   * number of each action is checked to see if the line number is contained 
+   * number of each action is checked to see if the line number is contained
    * in the given event's ReferenceType. If not, we ignore that pending action
    * since it is not in the class that was just prepared, but may be in one of its
    * inner classes.
    * @param event The ClassPrepareEvent that just occured
    */
   public void classPrepared (ClassPrepareEvent event) throws DebugException {
-    ReferenceType rt = event.referenceType(); 
+    ReferenceType rt = event.referenceType();
     //DrJava.consoleOut().println("In classPrepared. rt: " + rt);
-    //DrJava.consoleOut().println("equals getReferenceType: " + 
+    //DrJava.consoleOut().println("equals getReferenceType: " +
     //                   rt.equals(_manager.getReferenceType(rt.name())));
     String className = rt.name();
     
     // crop off the $ if there is one and anything after it
-    int indexOfDollar = className.indexOf('$');    
+    int indexOfDollar = className.indexOf('$');
     if (indexOfDollar > 1) {
       className = className.substring(0, indexOfDollar);
     }
     
     // Get the pending actions for this class (and inner classes)
     Vector<DocumentDebugAction> actions = _pendingActions.get(className);
-    Vector<DocumentDebugAction> failedActions = 
+    Vector<DocumentDebugAction> failedActions =
       new Vector<DocumentDebugAction>();
     //DrJava.consoleOut().println("pending actions: " + actions);
     if (actions == null) {
@@ -165,7 +165,7 @@ public class PendingRequestManager {
       // check if the action was successfully created
       try {
         Vector<ReferenceType> refTypes = new Vector<ReferenceType>();
-        refTypes.addElement(rt);
+        refTypes.add(rt);
         if (!actions.elementAt(i).createRequests(refTypes)) {
           // if no request created, skip this action
           //i++;
@@ -201,7 +201,7 @@ public class PendingRequestManager {
     for (int i = 0; i < l.size(); i++) {
       BreakpointRequest br = (BreakpointRequest)l.get(i);
       System.out.println("isEnabled(): " + br.isEnabled() +
-                         " suspendPolicy(): " + br.suspendPolicy() + 
+                         " suspendPolicy(): " + br.suspendPolicy() +
                          " location(): " + br.location());
     }
     */

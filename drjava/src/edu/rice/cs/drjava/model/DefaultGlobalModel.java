@@ -60,9 +60,9 @@ import java.awt.geom.*;
 
 import edu.rice.cs.util.swing.FindReplaceMachine;
 
-import gj.util.Vector;
-import gj.util.Enumeration;
-import gj.util.Hashtable;
+import java.util.Vector;
+import java.util.Enumeration;
+import java.util.Hashtable;
 import edu.rice.cs.util.*;
 import edu.rice.cs.util.newjvm.*;
 import edu.rice.cs.util.text.SwingDocumentAdapter;
@@ -971,7 +971,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
    * uses.
    */
   public File[] getSourceRootSet() {
-    LinkedList roots = new LinkedList();
+    LinkedList<File> roots = new LinkedList<File>();
 
     for (int i = 0; i < _definitionsDocs.size(); i++) {
       OpenDefinitionsDocument doc
@@ -1038,7 +1038,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       else {
         // Get sourceroots and all files
         File[] sourceRoots = getSourceRootSet();
-        ArrayList filesToCompile = new ArrayList();
+        ArrayList<File> filesToCompile = new ArrayList<File>();
         int index = 0;
         for (int i = 0; i < _definitionsDocs.getSize(); i++) {
           OpenDefinitionsDocument doc = (OpenDefinitionsDocument)
@@ -1592,7 +1592,6 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
         if (_docBeingTested != null) {
           return;
         }
-        ListModel docs = getDefinitionsDocs();
 
         //reset the JUnitErrorModel
         // TODO: does this need to be done here?
@@ -2164,7 +2163,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
         return sourceFile.getParentFile();
       }
 
-      Stack packageStack = new Stack();
+      Stack<String> packageStack = new Stack<String>();
       int dotIndex = packageName.indexOf('.');
       int curPartBegins = 0;
 

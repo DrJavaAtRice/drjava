@@ -55,11 +55,15 @@ public class KeyStrokeOptionComponent extends OptionComponent<KeyStroke>
   implements Comparable
 {
   private static final int DIALOG_HEIGHT = 185;
-  public static Hashtable _keyToKSOC = new Hashtable();
+  /**
+   * TODO: should this be synchronized?
+   */
+  public static Hashtable<KeyStroke, KeyStrokeOptionComponent> _keyToKSOC =
+    new Hashtable<KeyStroke, KeyStrokeOptionComponent>();
   private JButton _button;
   private JTextField _keyField;
   private JPanel _panel;
-  private static GetKeyDialog _getKeyDialog =  null;    
+  private static GetKeyDialog _getKeyDialog =  null;
   
   private KeyStroke _currentKey;
   private KeyStroke _newKey;
@@ -77,9 +81,9 @@ public class KeyStrokeOptionComponent extends OptionComponent<KeyStroke>
       public void actionPerformed(ActionEvent ae) {
 
         if (_getKeyDialog == null) {
-          _getKeyDialog =    
-            new GetKeyDialog(parent, 
-                             "Specify Shortcut", 
+          _getKeyDialog =
+            new GetKeyDialog(parent,
+                             "Specify Shortcut",
                              true);
         }
 
@@ -123,7 +127,7 @@ public class KeyStrokeOptionComponent extends OptionComponent<KeyStroke>
   /**
    * Returns a custom string representation of this option component.
    */
-  public String toString() { 
+  public String toString() {
     return "<KSOC>label:" + getLabelText() + "ks: " +
       getKeyStroke() + "jb: " + _button.getText() + "</KSOC>\n";
   }
@@ -197,7 +201,7 @@ public class KeyStrokeOptionComponent extends OptionComponent<KeyStroke>
     private InputField _inputField;
     private JButton _clearButton;
     private JButton _cancelButton;
-    private JButton _okButton;  
+    private JButton _okButton;
     private JLabel _instructionLabel;
     private JLabel _currentLabel;
     private JLabel _actionLabel;
@@ -233,9 +237,9 @@ public class KeyStrokeOptionComponent extends OptionComponent<KeyStroke>
       _okButton.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent ae) {
           if (!_ksoc.getKeyStroke().equals(_currentKeyStroke)) {
-            _keyToKSOC.remove(_ksoc.getKeyStroke());            
+            _keyToKSOC.remove(_ksoc.getKeyStroke());
             
-            KeyStrokeOptionComponent conflict = 
+            KeyStrokeOptionComponent conflict =
               (KeyStrokeOptionComponent)_keyToKSOC.get(_currentKeyStroke);
             
             if (conflict != null) {
@@ -283,7 +287,7 @@ public class KeyStrokeOptionComponent extends OptionComponent<KeyStroke>
     public void promptKey(KeyStrokeOptionComponent k) {
       _ksoc = k;
       _instructionLabel.setText("Type in the keystroke you want to use for \"" +
-                                k.getLabelText() + 
+                                k.getLabelText() +
                                 "\" and click \"OK\"");
       _currentKeyStroke = k.getKeyStroke();
       _actionLabel.setText(k.getLabelText());
@@ -313,9 +317,9 @@ public class KeyStrokeOptionComponent extends OptionComponent<KeyStroke>
         return false;
       }*/
       
-      public void processKeyEvent(KeyEvent e) {    
-        KeyStroke ks = KeyStroke.getKeyStrokeForEvent(e);    
-        if (e.getID() == KeyEvent.KEY_PRESSED) {         
+      public void processKeyEvent(KeyEvent e) {
+        KeyStroke ks = KeyStroke.getKeyStrokeForEvent(e);
+        if (e.getID() == KeyEvent.KEY_PRESSED) {
           this.setText(_option.format(ks));
           KeyStrokeOptionComponent configKs = (KeyStrokeOptionComponent)_keyToKSOC.get(ks);
           if (configKs == null)

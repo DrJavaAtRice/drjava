@@ -4,7 +4,7 @@
  * at http://sourceforge.net/projects/drjava
  *
  * Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)
- * 
+ *
  * DrJava is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -64,7 +64,7 @@ import edu.rice.cs.drjava.ui.KeyBindingManager.KeyStrokeData;
 /**
  * The frame for setting Configuration options on the fly
  * @version $Id$
- */ 
+ */
 public class ConfigFrame extends JFrame {
   
   private static final int FRAME_WIDTH = 750;
@@ -218,8 +218,8 @@ public class ConfigFrame extends JFrame {
     //_splitPane.setDividerLocation(width);
     //_mainPanel.setPreferredSize(new Dimension(getWidth() - width,
     //                                          _splitPane.getHeight()));
-    addWindowListener(new WindowAdapter() { 
-      public void windowClosing(java.awt.event.WindowEvent e) { 
+    addWindowListener(new WindowAdapter() {
+      public void windowClosing(java.awt.event.WindowEvent e) {
         cancel();
       }
     });
@@ -231,7 +231,7 @@ public class ConfigFrame extends JFrame {
   }
 
   /**
-   * Call the update method to propagate down the tree, parsing input values 
+   * Call the update method to propagate down the tree, parsing input values
    * into their config options.
    */
   public boolean apply() {
@@ -240,14 +240,14 @@ public class ConfigFrame extends JFrame {
   }
   
   /**
-   * Resets the field of each option in the Preferences window to its actual 
+   * Resets the field of each option in the Preferences window to its actual
    * stored value.
    */
   public void resetToCurrent() {
     _rootNode.resetToCurrent();
   }
   
-  /** 
+  /**
    * Resets the frame and hides it.
    */
   public void cancel() {
@@ -392,7 +392,7 @@ public class ConfigFrame extends JFrame {
   
   /**
    * Add all of the components for the Resource Locations panel of the preferences window.
-   */ 
+   */
   private void _setupResourceLocPanel(ConfigPanel panel) {
     FileOptionComponent javacLoc =
       new FileOptionComponent(OptionConstants.JAVAC_LOCATION,
@@ -408,7 +408,7 @@ public class ConfigFrame extends JFrame {
                               _fileOptionChooser);
     jsr14Loc.setFileFilter(ClasspathFilter.ONLY);
     panel.addComponent(jsr14Loc);
-    FileOptionComponent jsr14Col = 
+    FileOptionComponent jsr14Col =
       new FileOptionComponent(OptionConstants.JSR14_COLLECTIONSPATH,
                               "JSR-14 Collections Path", this,
                                "Location of the JSR-14 collect.jar file, which contains the collection classes.",
@@ -424,7 +424,7 @@ public class ConfigFrame extends JFrame {
   
   /**
    * Add all of the components for the Display Options panel of the preferences window.
-   */ 
+   */
   private void _setupDisplayPanel(ConfigPanel panel) {
 
     //ToolbarOptionComponent is a degenerate option component
@@ -438,7 +438,7 @@ public class ConfigFrame extends JFrame {
    
   /**
    * Add all of the components for the Font panel of the preferences window.
-   */ 
+   */
   private void _setupFontPanel(ConfigPanel panel) {
     panel.addComponent(new FontOptionComponent(OptionConstants.FONT_MAIN, "Main Font", this,
                                                "The font used for most text in DrJava."));
@@ -450,7 +450,7 @@ public class ConfigFrame extends JFrame {
       panel.addComponent(new BooleanOptionComponent(OptionConstants.TEXT_ANTIALIAS, "Use anti-aliased text in Definitions", this,
                                                     "Whether to graphically smooth the text in the Definitions Pane."));
     }
-    panel.displayComponents(); 
+    panel.displayComponents();
   }
   
   /**
@@ -471,7 +471,7 @@ public class ConfigFrame extends JFrame {
                                                 "The color for quoted characters (eg. 'a') in the Definitions Pane."));
     panel.addComponent(new ColorOptionComponent(OptionConstants.DEFINITIONS_NUMBER_COLOR, "Number Color", this,
                                                 "The color for numbers in the Definitions Pane."));
-    panel.addComponent(new ColorOptionComponent(OptionConstants.DEFINITIONS_BACKGROUND_COLOR, "Background Color", this, 
+    panel.addComponent(new ColorOptionComponent(OptionConstants.DEFINITIONS_BACKGROUND_COLOR, "Background Color", this,
                                                 "The background color of the Definitions Pane.", true));
     panel.addComponent(new ColorOptionComponent(OptionConstants.DEFINITIONS_MATCH_COLOR, "Brace-matching Color", this,
                                                 "The color for matching brace highlights in the Definitions Pane.", true));
@@ -489,7 +489,8 @@ public class ConfigFrame extends JFrame {
    */
   private void _setupKeyBindingsPanel(ConfigPanel panel) {
     // using a treeset because it automatically sorts element upon insertion
-    TreeSet _comps = new TreeSet();
+    TreeSet<KeyStrokeOptionComponent> _comps =
+      new TreeSet<KeyStrokeOptionComponent>();
 
     KeyStrokeData tmpKsd;
     KeyStrokeOptionComponent tmpKsoc;
@@ -508,7 +509,7 @@ public class ConfigFrame extends JFrame {
         
         tmpKsoc = new KeyStrokeOptionComponent((KeyStrokeOption)tmpKsd.getOption(),
                                                tmpKsd.getName(), this, desc);
-        if (tmpKsoc != null) { 
+        if (tmpKsoc != null) {
           _comps.add(tmpKsoc);
         }
       }
@@ -516,9 +517,9 @@ public class ConfigFrame extends JFrame {
     // gives the KeyStrokeConfigPanel a collection of the KeyStrokeOptionComponents
     ((KeyStrokeConfigPanel)panel).setKeyStrokeComponents(_comps);
 
-    Iterator iter = _comps.iterator();
+    Iterator<KeyStrokeOptionComponent> iter = _comps.iterator();
     while (iter.hasNext()) {
-      KeyStrokeOptionComponent x = (KeyStrokeOptionComponent) iter.next();
+      KeyStrokeOptionComponent x = iter.next();
       panel.addComponent(x);
     }
     panel.displayComponents();
@@ -526,11 +527,11 @@ public class ConfigFrame extends JFrame {
   
   /**
    * Add all of the components for the Debugger panel of the preferences window.
-   */ 
+   */
   private void _setupDebugPanel(ConfigPanel panel) {
     if(!_mainFrame.getModel().getDebugger().isAvailable()) {
       // Explain how to use debugger
-      String howto = 
+      String howto =
         "\nThe debugger is not currently active.  To use the debugger, you\n" +
         "must include Sun's tools.jar or jpda.jar on your classpath when\n" +
         "starting DrJava.  Do not use the \"-jar\" option, because it\n" +
@@ -543,7 +544,7 @@ public class ConfigFrame extends JFrame {
     }
     
     VectorOptionComponent sourcePath =
-      new VectorOptionComponent(OptionConstants.DEBUG_SOURCEPATH, 
+      new VectorOptionComponent(OptionConstants.DEBUG_SOURCEPATH,
                                 "Sourcepath", this,
                                 "<html>Any directories in which to search for source<br>" +
                                 "files when stepping in the Debugger.</html>");
@@ -567,11 +568,11 @@ public class ConfigFrame extends JFrame {
     panel.addComponent(new BooleanOptionComponent(OptionConstants.DEBUG_SHOW_THREADS,
                                                   "Show Current Threads Tab", this,
                                                   "Whether to show a tab in the Debugger displaying the current threads."));
-    panel.addComponent(new BooleanOptionComponent(OptionConstants.DEBUG_STEP_JAVA, 
+    panel.addComponent(new BooleanOptionComponent(OptionConstants.DEBUG_STEP_JAVA,
                                                   "Step Into Java Classes", this,
                                                   "<html>Whether the Debugger should step into Java library classes,<br>" +
                                                   "including java.*, javax.*, sun.*, com.sun.*, and com.apple.mrj.*</html>"));
-    panel.addComponent(new BooleanOptionComponent(OptionConstants.DEBUG_STEP_INTERPRETER, 
+    panel.addComponent(new BooleanOptionComponent(OptionConstants.DEBUG_STEP_INTERPRETER,
                                                   "Step Into Interpreter Classes", this,
                                                   "<html>Whether the Debugger should step into the classes<br>" +
                                                   "used by the Interactions Pane (DynamicJava).</html>"));
@@ -589,7 +590,7 @@ public class ConfigFrame extends JFrame {
   
   /**
    * Add all of the components for the Javadoc panel of the preferences window.
-   */ 
+   */
   private void _setupJavadocPanel(ConfigPanel panel) {
     panel.addComponent
       (new ForcedChoiceOptionComponent(OptionConstants.JAVADOC_ACCESS_LEVEL,
@@ -638,7 +639,7 @@ public class ConfigFrame extends JFrame {
     panel.addComponent(new IntegerOptionComponent(OptionConstants.INDENT_LEVEL,
                                                   "Indent Level", this,
                                                   "The number of spaces to use for each level of indentation."));
-    FileOptionComponent workDir = 
+    FileOptionComponent workDir =
       new FileOptionComponent(OptionConstants.WORKING_DIRECTORY,
                               "Working Directory", this,
                               "The directory that DrJava should consider the current working directory.",
@@ -688,7 +689,7 @@ public class ConfigFrame extends JFrame {
     
     public PanelTreeNode(String t) {
       super(t);
-      _panel = new ConfigPanel(t);   
+      _panel = new ConfigPanel(t);
     }
       
     public PanelTreeNode(ConfigPanel c) {
@@ -702,7 +703,7 @@ public class ConfigFrame extends JFrame {
     /**
      * Tells its panel to update, and tells all of its child nodes to update their panels.
      * @return whether the update succeeded.
-     */ 
+     */
     public boolean update() {
       boolean isValidUpdate = _panel.update();
       //if this panel encountered an error while attempting to update, return false
@@ -742,7 +743,7 @@ public class ConfigFrame extends JFrame {
       Enumeration childNodes = this.children();
       while (childNodes.hasMoreElements()) {
         ((PanelTreeNode)childNodes.nextElement()).resetToCurrent();
-      } 
+      }
     }
   }
   

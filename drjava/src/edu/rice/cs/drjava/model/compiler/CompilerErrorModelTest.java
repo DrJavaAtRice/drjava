@@ -4,7 +4,7 @@
  * at http://sourceforge.net/projects/drjava
  *
  * Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)
- * 
+ *
  * DrJava is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -83,7 +83,7 @@ public final class CompilerErrorModelTest extends TestCase {
    */
   public void testConstructDoclessErrors() {
     getter = new TestDocGetter();
-    errors = new CompilerError[] 
+    errors = new CompilerError[]
     { new CompilerError("Test error without File", false),
       new CompilerError("Test warning without File", true),
       new CompilerError("Test error without File", false) };
@@ -106,7 +106,7 @@ public final class CompilerErrorModelTest extends TestCase {
    */
   public void testConstructOneDocWithoutLineNums() {
     setupDoc();
-    errors = new CompilerError[] 
+    errors = new CompilerError[]
     { new CompilerError(files[0], "Test error with File", false),
       new CompilerError(files[0], "Test warning with File", true),
       new CompilerError(files[0], "Test error with File", false) };
@@ -128,7 +128,7 @@ public final class CompilerErrorModelTest extends TestCase {
    */
   public void testConstructOneDocWithLineNums() {
     setupDoc();
-    errors = new CompilerError[] 
+    errors = new CompilerError[]
     { new CompilerError(files[0], 2, 0, "Test error with File and line", false),
       new CompilerError(files[0], 1, 0, "Test warning with File and line", true),
       new CompilerError(files[0], 3, 0, "Test error with File and line", false),
@@ -154,7 +154,7 @@ public final class CompilerErrorModelTest extends TestCase {
    */
   public void testConstructOneDocWithBoth() {
     setupDoc();
-    errors = new CompilerError[] 
+    errors = new CompilerError[]
     { new CompilerError(files[0], 2, 0, "Test error with File and line", false),
       new CompilerError(files[0], "Test warning with File", true),
       new CompilerError(files[0], 3, 0, "Test error with File and line", false),
@@ -186,7 +186,7 @@ public final class CompilerErrorModelTest extends TestCase {
    */
   public void testConstructManyDocsWithoutLineNums() {
     setupDocs();
-    errors = new CompilerError[] 
+    errors = new CompilerError[]
     { new CompilerError(files[0], "Test error with File", false),
       new CompilerError(files[2], "Test warning with File", true),
       new CompilerError(files[4], "Test warning with File", true),
@@ -220,7 +220,7 @@ public final class CompilerErrorModelTest extends TestCase {
    */
   public void testConstructManyDocsWithLineNums() {
     setupDocs();
-    errors = new CompilerError[] 
+    errors = new CompilerError[]
     { new CompilerError(files[0], 2, 0, "Test error with File", false),
       new CompilerError(files[2], 3, 0, "Test warning with File", true),
       new CompilerError(files[4], 1, 0, "Test warning with File", true),
@@ -309,14 +309,14 @@ public final class CompilerErrorModelTest extends TestCase {
     OpenDefinitionsDocument doc = getter.getDocumentForFile(files[4]);
     assertTrue("File should have errors with lines.", model.hasErrorsWithPositions(doc));
     doc = getter.getDocumentForFile(files[1]);
-    assertTrue("File shouldn't have errors with lines.", !model.hasErrorsWithPositions(doc));    
+    assertTrue("File shouldn't have errors with lines.", !model.hasErrorsWithPositions(doc));
   }
   
   public void testErrorsInMultipleDocuments() throws IOException, OperationCanceledException {
     files = new File[]
     { new File("//nowhere1"),
       new File("//nowhere2") };
-    texts = new String[] 
+    texts = new String[]
     { new String("kfgkasjg\n" +
                  "faijskgisgj\n" +
                  "sifjsidgjsd\n"),
@@ -337,7 +337,7 @@ public final class CompilerErrorModelTest extends TestCase {
     { new CompilerError(files[0], 0, 0, "Test error with File", false),
       new CompilerError(files[1], 2, 0, "Test error with File", false)};
     model = new CompilerErrorModel<CompilerError>(errors, getter);
-    model.getErrorAtOffset(getter.getDocumentForFile(files[0]), 10);    
+    model.getErrorAtOffset(getter.getDocumentForFile(files[0]), 10);
   }
   
   /**
@@ -356,7 +356,7 @@ public final class CompilerErrorModelTest extends TestCase {
    * Setup for test cases with several documents.
    */
   private void setupDocs() {
-    files = new File[] 
+    files = new File[]
     { new File("//nowhere1"),
       new File("//nowhere2"),
       new File("//nowhere3"),
@@ -386,7 +386,7 @@ public final class CompilerErrorModelTest extends TestCase {
    */
   private void fullSetup() {
     setupDocs();
-    errors = new CompilerError[] 
+    errors = new CompilerError[]
     { new CompilerError(files[0], "Test error with File", false),
       new CompilerError(files[4], 3, 0, "Test error with File", false),
       new CompilerError(files[2], "Test warning with File", true),
@@ -417,7 +417,7 @@ public final class CompilerErrorModelTest extends TestCase {
     /**
      * Storage for documents and File keys.
      */
-    HashMap docs;  // TODO: <File, OpenDefinitionsDocument>
+    HashMap<File, OpenDefinitionsDocument> docs;
     
     /**
      * Convenience constructor for no-documents case.
@@ -436,7 +436,7 @@ public final class CompilerErrorModelTest extends TestCase {
         throw new IllegalArgumentException("Argument arrays must match in size.");
       }
       
-      docs = new HashMap(texts.length * 2);
+      docs = new HashMap<File, OpenDefinitionsDocument>(texts.length * 2);
       
       EventNotifier en = new EventNotifier();
       for (int i = 0; i < texts.length; i++) {

@@ -39,7 +39,7 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model;
 
-import gj.util.Vector;
+import java.util.Vector;
 import java.io.*;
 import java.awt.print.*;
 import javax.swing.text.BadLocationException;
@@ -271,14 +271,14 @@ public interface OpenDefinitionsDocument {
   
   /**
    * Checks if the document is modified. If not, searches for the class file
-   * corresponding to this document and compares the timestamps of the 
+   * corresponding to this document and compares the timestamps of the
    * class file to that of the source file.
    * @return is the class file and this OpenDefinitionsDocument are in sync
    */
   public boolean checkIfClassFileInSync();
 
   /**
-   * Returns the Breakpoint in this OpenDefinitionsDocument at the given 
+   * Returns the Breakpoint in this OpenDefinitionsDocument at the given
    * linenumber, or null if one does not exist.
    * @param lineNumber the line number of the breakpoint
    * @return the Breakpoint at the given lineNumber, or null if it does not exist.

@@ -46,8 +46,8 @@ import java.util.*;
 import java.awt.event.*;
 
 /**
- * Contains Hashtables that are used in the key-binding process along with 
- * methods to build them and access their contents. Performs the 
+ * Contains Hashtables that are used in the key-binding process along with
+ * methods to build them and access their contents. Performs the
  * assigning of keys to actions, checking for and resolving conflicts, and
  * setting appropriate menu accelerators
  * @version $Id$
@@ -59,9 +59,13 @@ public class KeyBindingManager {
   private KeyBindingManager() {}
   
   // Key-binding configuration tables
-  
-  private Hashtable _keyToDataMap = new Hashtable();
-  private Hashtable _actionToDataMap = new Hashtable();
+  /**
+   * TODO: should these be synchronized?
+   */
+  private Hashtable<KeyStroke, KeyStrokeData> _keyToDataMap =
+    new Hashtable<KeyStroke, KeyStrokeData>();
+  private Hashtable<Action, KeyStrokeData> _actionToDataMap =
+    new Hashtable<Action, KeyStrokeData>();
   
   private MainFrame _mainFrame = null;
   
@@ -72,10 +76,10 @@ public class KeyBindingManager {
    * Should only check conflicts when the keyboard configuration options
    * are first entered into the maps. Afterwards, the GUI configuration
    * will warn the user about actions whose key-bindings will be overwritten
-   * in the GetKeyDialog, and the preferences panel will reflect the changes. 
+   * in the GetKeyDialog, and the preferences panel will reflect the changes.
    * When the user hit apply, no conflicts should exist in the preferences panel,
    * and there should be no need to check for conflicts in the configuration.
-   */  
+   */
   private boolean _shouldCheckConflict = true;
    
   public void setMainFrame (MainFrame mainFrame) {
@@ -86,7 +90,7 @@ public class KeyBindingManager {
    * Sets the ActionMap
    * @param am the ActionMap to set to
    */
-  public void setActionMap (ActionMap actionMap) {      
+  public void setActionMap (ActionMap actionMap) {
     _actionMap = actionMap;
   }
   
@@ -110,7 +114,7 @@ public class KeyBindingManager {
   /**
    * Takes a KeyStroke and gets its Action from the keyToActionMap
    * @param ks KeyStroke to look up
-   * @return the corresponding Action or null if there is no Action associated 
+   * @return the corresponding Action or null if there is no Action associated
    * with the KeyStroke
    */
   public Action get(KeyStroke ks) {
@@ -124,7 +128,7 @@ public class KeyBindingManager {
   public String getName(KeyStroke ks) {
     KeyStrokeData ksd = (KeyStrokeData)_keyToDataMap.get(ks);
     if (ksd == null)
-      return null;    
+      return null;
     return ksd.getName();
   }
   
@@ -138,9 +142,9 @@ public class KeyBindingManager {
  public void addListener(Option<KeyStroke> opt, JMenuItem jmi) {
     KeyStroke ks = DrJava.getConfig().getSetting(opt);
     Action a = (Action)_keyToActionMap.get(ks);
-    DrJava.getConfig().addOptionListener(opt, new KeyStrokeOptionListener(jmi, a, ks));                                    
+    DrJava.getConfig().addOptionListener(opt, new KeyStrokeOptionListener(jmi, a, ks));
   }
-*/ 
+*/
   /**
    * Takes an option, its name, and the name of the corresponding
    * selection action and returns the selection action after putting
@@ -177,7 +181,7 @@ public class KeyBindingManager {
   }
   
   /**
-   * Inserts a KeyStroke/Action pair into the _keyToActionMap. Checks for 
+   * Inserts a KeyStroke/Action pair into the _keyToActionMap. Checks for
    * conflicts and displays an option pane if they are any.
    * @param ks the KeyStroke
    * @param a the Action
@@ -190,7 +194,7 @@ public class KeyBindingManager {
       return true;
     }
       
-    if (!_keyToDataMap.containsKey(ks) ) { 
+    if (!_keyToDataMap.containsKey(ks) ) {
       // the key is not in the Hashtable, put it in
       //_keyToActionMap.put(ks, a);
       //need to update map
@@ -199,8 +203,8 @@ public class KeyBindingManager {
       //_keyToDataMap.put(ks,data);
       
       return true;
-    } 
-    else if (((KeyStrokeData)_keyToDataMap.get(ks)).getAction().equals(a)) { 
+    }
+    else if (((KeyStrokeData)_keyToDataMap.get(ks)).getAction().equals(a)) {
       // this KeyStroke/Action pair is already in the Hashtable
       return false;
     }
@@ -210,7 +214,7 @@ public class KeyBindingManager {
         KeyStrokeData conflictKSD = (KeyStrokeData)_keyToDataMap.get(ks);
         String key = opt.format(ks);
         KeyStrokeData newKSD = (KeyStrokeData)_actionToDataMap.get(a);
-        String text = "\""+ key +"\"" + " is already assigned to \"" + conflictKSD.getName() + 
+        String text = "\""+ key +"\"" + " is already assigned to \"" + conflictKSD.getName() +
           "\".\nWould you like to assign \"" + key + "\" to \"" + newKSD.getName() + "\"?";
         int rc = JOptionPane.showConfirmDialog(_mainFrame,
                                                text,
@@ -269,9 +273,9 @@ public class KeyBindingManager {
     }
     
     public void optionChanged(OptionEvent<KeyStroke> oce) {
-      if(shouldUpdate(oce.value, _a)) 
+      if(shouldUpdate(oce.value, _a))
       {
-        KeyStrokeData data = (KeyStrokeData)_actionToDataMap.get(_a); 
+        KeyStrokeData data = (KeyStrokeData)_actionToDataMap.get(_a);
         _keyToDataMap.remove(_ks);
         
         //check for conflicting key binding
@@ -301,7 +305,7 @@ public class KeyBindingManager {
           //mapInsert(addShiftModifier(oce.value), shiftAction);
         }
           
-        _ks = oce.value;          
+        _ks = oce.value;
       }
       else if (_ks != oce.value) {
         DrJava.getConfig().setSetting(oce.option, _ks);
@@ -317,7 +321,7 @@ public class KeyBindingManager {
     private Option<KeyStroke> _kso;
     private Action _shiftA;
     
-    public KeyStrokeData(KeyStroke ks, Action a, JMenuItem jmi, String name, 
+    public KeyStrokeData(KeyStroke ks, Action a, JMenuItem jmi, String name,
                          Option<KeyStroke> kso) {
       _ks = ks;
       _a = a;

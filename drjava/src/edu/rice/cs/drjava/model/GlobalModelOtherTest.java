@@ -4,7 +4,7 @@
  * at http://sourceforge.net/projects/drjava
  *
  * Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)
- * 
+ *
  * DrJava is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -49,7 +49,7 @@ import junit.extensions.*;
 import java.util.LinkedList;
 import javax.swing.text.Document;
 import javax.swing.text.DefaultStyledDocument;
-import gj.util.Vector;
+import java.util.Vector;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.*;
@@ -219,7 +219,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase
    * on an abort. I fixed the problem in {@link MainJVM#restartInterpreterJVM}.
    */
   public void testInteractionAbort()
-    throws BadLocationException, DocumentAdapterException, 
+    throws BadLocationException, DocumentAdapterException,
     InterruptedException, IOException
   {
     doCompile(setupDocument(FOO_TEXT), tempFile());
@@ -408,7 +408,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase
     IOException, InterruptedException
   {
     // Compile a test file
-    OpenDefinitionsDocument doc1 = 
+    OpenDefinitionsDocument doc1 =
       setupDocument("public class DrJavaTestClass {}");
     File file1 = new File(_tempDir, "DrJavaTestClass.java");
     doCompile(doc1, file1);
@@ -447,7 +447,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase
    * Checks that an anonymous inner class can be defined in the repl!
    */
   public void testInteractionsDefineAnonymousInnerClass()
-    throws BadLocationException, DocumentAdapterException, 
+    throws BadLocationException, DocumentAdapterException,
     IOException, InterruptedException
   {
     final String interface_text = "public interface I { int getValue(); }";
@@ -483,7 +483,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase
     // Get source root (current directory only)
     File[] roots = _model.getSourceRootSet();
     assertEquals("number of source roots", 0, roots.length);
-    /*assertEquals("source root (current directory)", 
+    /*assertEquals("source root (current directory)",
                  workDir,
                  roots[0]);
                  */
@@ -571,7 +571,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase
     // The package name is wrong so this should return only currDir
     File[] roots = _model.getSourceRootSet();
     assertEquals("number of source roots", 0, roots.length);
-    /*assertEquals("source root (current directory)", 
+    /*assertEquals("source root (current directory)",
                  workDir,
                  roots[0]);*/
   }
@@ -653,7 +653,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase
    * can see it.
    */
   public void testInteractionsLiveUpdateClasspath()
-    throws BadLocationException, DocumentAdapterException, 
+    throws BadLocationException, DocumentAdapterException,
     IOException, InterruptedException
   {
       

@@ -4,7 +4,7 @@
  * at http://sourceforge.net/projects/drjava
  *
  * Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)
- * 
+ *
  * DrJava is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -99,10 +99,10 @@ public final class SingleDisplayModelTest extends GlobalModelTestCase {
     throws BadLocationException
   {
     assertTrue("number of documents",
-               getSDModel().getDefinitionsDocs().getSize() > 0);
+               getSDModel().getDefinitionsDocuments().size() > 0);
   }
 
-  protected void assertActiveDocument(OpenDefinitionsDocument doc) 
+  protected void assertActiveDocument(OpenDefinitionsDocument doc)
     throws BadLocationException
   {
     assertEquals("active document",
@@ -111,7 +111,7 @@ public final class SingleDisplayModelTest extends GlobalModelTestCase {
   }
   
   /**
-   * Creates and returns a new document, makes sure newFile and 
+   * Creates and returns a new document, makes sure newFile and
    * activeDocumentChanged events are fired, and then adds some text.
    * @return the new modified document
    */
@@ -131,7 +131,7 @@ public final class SingleDisplayModelTest extends GlobalModelTestCase {
     getSDModel().addListener(listener);
 
     // Open a new document
-    int numOpen = getSDModel().getDefinitionsDocs().getSize();
+    int numOpen = getSDModel().getDefinitionsDocuments().size();
     OpenDefinitionsDocument doc = getSDModel().newFile();
     assertNumOpenDocs(numOpen + 1);
 
@@ -263,8 +263,8 @@ public final class SingleDisplayModelTest extends GlobalModelTestCase {
    * after a file is opened, while a modified document
    * is left open.
    */
-  public void testCloseUnmodifiedAutomatically() 
-    throws BadLocationException, IOException, 
+  public void testCloseUnmodifiedAutomatically()
+    throws BadLocationException, IOException,
       OperationCanceledException, AlreadyOpenException
   {
     assertNumOpenDocs(1);
@@ -388,7 +388,7 @@ public final class SingleDisplayModelTest extends GlobalModelTestCase {
    * Tests that active document is switched on close, and that
    * a new file is created after the last one is closed.
    */
-  public void testDisplayFilename() 
+  public void testDisplayFilename()
     throws BadLocationException, IOException,
       OperationCanceledException, AlreadyOpenException
   {
@@ -396,7 +396,7 @@ public final class SingleDisplayModelTest extends GlobalModelTestCase {
     
     // Untitled
     OpenDefinitionsDocument doc = sdm.getActiveDocument();
-    assertEquals("untitled display filename", "(Untitled)", 
+    assertEquals("untitled display filename", "(Untitled)",
                  sdm.getDisplayFilename(doc));
     
     // Ends in ".java"
@@ -411,7 +411,7 @@ public final class SingleDisplayModelTest extends GlobalModelTestCase {
     file = File.createTempFile("DrJava-filename-test", ".txt", _tempDir);
     name = file.getName();
     doc = sdm.openFile(new FileSelector(file));
-    assertEquals(".txt display filename", 
+    assertEquals(".txt display filename",
                  name,
                  sdm.getDisplayFilename(doc));
     
@@ -419,7 +419,7 @@ public final class SingleDisplayModelTest extends GlobalModelTestCase {
     file = File.createTempFile("DrJava-filename-test", ".java.txt", _tempDir);
     name = file.getName();
     doc = sdm.openFile(new FileSelector(file));
-    assertEquals(".java.txt display filename", 
+    assertEquals(".java.txt display filename",
                  name,
                  sdm.getDisplayFilename(doc));
     

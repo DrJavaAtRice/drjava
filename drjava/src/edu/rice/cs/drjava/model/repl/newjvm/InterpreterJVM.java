@@ -41,9 +41,9 @@ package edu.rice.cs.drjava.model.repl.newjvm;
 
 import java.util.LinkedList;
 import java.util.ListIterator;
-import gj.util.Vector;
-import gj.util.Hashtable;
-import gj.util.Enumeration;
+import java.util.Vector;
+import java.util.Hashtable;
+import java.util.Enumeration;
 import java.io.*;
 import java.rmi.*;
 
@@ -98,7 +98,7 @@ public class InterpreterJVM extends AbstractSlaveJVM
   
   private InterpreterData _activeInterpreter;
 
-  /** 
+  /**
    * The currently accumulated classpath for all Java interpreters.
    * List contains unqiue entries.
    */
@@ -321,10 +321,10 @@ public class InterpreterJVM extends AbstractSlaveJVM
   /**
    * Notifies that an assignment has been made in the given interpreter.
    * Does not notify on declarations.
-   * 
+   *
    * This method is not currently necessary, since we don't copy back
    * values in a debug interpreter until the thread has resumed.
-   * 
+   *
    * @param name the name of the interpreter
    *
   public void notifyInterpreterAssignment(String name) {
@@ -483,7 +483,7 @@ public class InterpreterJVM extends AbstractSlaveJVM
       = new BufferedReader(new StringReader(writer.toString()));
 
     //_dialog("after creating reader");
-    LinkedList traceItems = new LinkedList();
+    LinkedList<String> traceItems = new LinkedList<String>();
     try {
       // we will generate list of trace items
       // skip the first one since it's just the message
