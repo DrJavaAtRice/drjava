@@ -297,38 +297,61 @@ public abstract class FileOps {
     boolean success = false;
     File file = fileSaver.getTargetFile();
     File backup = null;
+    boolean tempFileUsed = true;
     /* First back up the file, if necessary */
     if (makeBackup){
       backup = fileSaver.getBackupFile();
       if (!file.renameTo(backup)){
         throw new IOException("Save failed: Could not create backup file "
-                                + backup.getAbsolutePath());
+                                + backup.getAbsolutePath() + 
+                              "\nIt may be possible to save by disabling file backups\n");
       }
       fileSaver.backupDone();
     }
-
+    
     //Create a temp file in the same directory as the file to be saved.
+    //From this point forward, enclose in try...finally so that we can clean
+    //up the temp file and restore the file from its backup.
     File parent = file.getParentFile();
     File tempFile = File.createTempFile("drjava", ".temp", parent);
     try {
       /* Now, write your output to the temp file, then rename it to the correct
-  name.  This way, if writing fails in the middle, the old file is not
-  lost. */
-      fileSaver.saveTo(tempFile);
-      if (!tempFile.renameTo(fileSaver.getTargetFile())){
- throw new IOException("Save failed: Could not rename temp file " +
-         tempFile + " to " + file);
+       name.  This way, if writing fails in the middle, the old file is not
+       lost. */
+      FileOutputStream fos;
+      try {
+        /* The next line will fail if we can't create the temp file.  This may mean that
+         * the user does not have write permission on the directory the file they
+         * are editing is in.  We may want to go ahead and try writing directly
+         * to the target file in this case
+         */
+        fos = new FileOutputStream(tempFile);
+      } catch (FileNotFoundException fnfe) {
+        if (fileSaver.continueWhenTempFileCreationFails()){
+          fos = new FileOutputStream(file);
+          tempFileUsed = false;
+        } else {
+          throw new IOException("Could not create temp file " + tempFile +
+                                " in attempt to save " + file);
+        }
+      }
+      BufferedOutputStream bos = new BufferedOutputStream(fos);
+      fileSaver.saveTo(bos);
+      bos.close();
+      if (tempFileUsed && !tempFile.renameTo(fileSaver.getTargetFile())){
+        throw new IOException("Save failed: Could not rename temp file " +
+                              tempFile + " to " + file);
       }
       success = true;
-    } finally{
-      if (makeBackup){
- /* On failure, attempt to move the backup back to its original location if we
-    made one.  On success, register that a backup was successfully made */
- if (success){
-   fileSaver.backupDone();
- } else {
-   backup.renameTo(file);
- }
+    } finally {
+      if (makeBackup) {
+        /* On failure, attempt to move the backup back to its original location if we
+         made one.  On success, register that a backup was successfully made */
+        if (success) {
+          fileSaver.backupDone();
+        } else {
+          backup.renameTo(file);
+        }
       }
       /* Delete the temp file */
       tempFile.delete();
@@ -338,15 +361,24 @@ public abstract class FileOps {
   public interface FileSaver {
     
     /**
-     * This method tells what to name the backup of the file, if a backup is to be made
+     * This method tells what to name the backup of the file, if a backup is to be made.
+     * It may depend on getTargetFile(), so it can thrown an IOException
      */
-    public abstract File getBackupFile();
+    public abstract File getBackupFile() throws IOException;
     
     /**
-     * This method indicates whether or not a backup of the file should be made
+     * This method indicates whether or not a backup of the file should be made.  It 
+     * may depend on getTargetFile(), so it can throw an IOException
      */
-    public abstract boolean shouldBackup();
+    public abstract boolean shouldBackup() throws IOException;
 
+    /**
+     * This method specifies if the saving process should continue trying to save 
+     * if it can not create the temp file that is written initially.  If you do
+     * continue saving in this case, the original file may be lost if saving fails.
+     */
+    public abstract boolean continueWhenTempFileCreationFails();
+    
     /**
      * This method is called to tell the file saver that a backup was successfully made
      */
@@ -354,17 +386,20 @@ public abstract class FileOps {
 
     /**
      * This method actually writes info to a file.  NOTE: It is important that this
-     * method write to the file it is passed, not the target file.  If you write
+     * method write to the stream it is passed, not the target file.  If you write
      * directly to the target file, the target file will be destroyed if saving fails.
      * Also, it is important that when saving fails this method throw an IOException
      * @throws IOException when saving fails for any reason
      */
-    public abstract void saveTo(File file) throws IOException;
+    public abstract void saveTo(OutputStream os) throws IOException;
 
     /**
-     * This method tells what the file is that we want to save to
+     * This method tells what the file is that we want to save to.  It should
+     * use the canonical name of the file (this means resolving symlinks).  Otherwise,
+     * the saver would not deal correctly with symlinks.  Resolving symlinks may cause
+     * an IOException, so this method throws an IOException
      */
-    public abstract File getTargetFile();
+    public abstract File getTargetFile() throws IOException;
   }
 
   /**
@@ -378,6 +413,16 @@ public abstract class FileOps {
     private static Set filesNotNeedingBackup = new HashSet();
     private static boolean backupsEnabled = true;
 
+    /**
+     * This keeps track of whether or not outputFile has been resolved to its canonical
+     * name
+     */
+    private boolean isCanonical = false;
+    
+    /**
+     * Globally enables backups for any DefaultFileSaver that does not override
+     * the shouldBackup method
+     */
     public static void setBackupsEnabled(boolean enabled){
       backupsEnabled = enabled;
     }
@@ -386,28 +431,40 @@ public abstract class FileOps {
       outputFile = file.getAbsoluteFile();
     }
     
-    public File getBackupFile(){
-      return new File(outputFile.getPath() + "~");
+    public boolean continueWhenTempFileCreationFails(){
+      return true;
+    }
+    
+    public File getBackupFile() throws IOException{
+      return new File(getTargetFile().getPath() + "~");
     }
 
-    public boolean shouldBackup(){
+    public boolean shouldBackup() throws IOException{
       if (!backupsEnabled){
- return false;
+        return false;
       }
-      if (!outputFile.exists()){
- return false;
+      if (!getTargetFile().exists()){
+        return false;
       }
-      if(filesNotNeedingBackup.contains(outputFile)){
- return false;
+      if(filesNotNeedingBackup.contains(getTargetFile())){
+        return false;
       }
       return true;
     }
-
-    public void backupDone(){
-      filesNotNeedingBackup.add(outputFile);
+    
+    public void backupDone() {
+      try {
+        filesNotNeedingBackup.add(getTargetFile());
+      } catch (IOException ioe) {
+        throw new UnexpectedException(ioe, "getTargetFile should fail earlier");
+      }
     }
 
-    public File getTargetFile() {
+    public File getTargetFile() throws IOException{
+      if (!isCanonical){
+        outputFile = outputFile.getCanonicalFile();
+        isCanonical = true;
+      }
       return outputFile;
     }
   }
