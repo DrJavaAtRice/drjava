@@ -851,12 +851,12 @@ public class MainFrame extends JFrame implements OptionConstants {
               }
           };
 
-	  try {
-	      _model.saveHistory(selector, history);
-	  }
-	  catch (IOException ioe) {
-	      _showIOError(new IOException("An error occured writing the history to a file"));
-	  }
+   try {
+       _model.saveHistory(selector, history);
+   }
+   catch (IOException ioe) {
+       _showIOError(new IOException("An error occured writing the history to a file"));
+   }
 
           _interactionsPane.requestFocus();
       }
@@ -2549,11 +2549,15 @@ public class MainFrame extends JFrame implements OptionConstants {
   /**
    * Create a new DefinitionsPane and JScrollPane for an open
    * definitions document.
+   * 
    * @param doc The open definitions document to wrap
    * @return JScrollPane containing a DefinitionsPane for the
    *         given document.
-   */
-  private JScrollPane _createDefScrollPane(OpenDefinitionsDocument doc) {
+   */ 
+  JScrollPane _createDefScrollPane(OpenDefinitionsDocument doc) {
+    // made this package private to allow testing of disabling editing
+    // during compile and successful switching on and off of ability to
+    // edit
     DefinitionsPane pane = new DefinitionsPane(this, _model, doc);
 
     // Add listeners
@@ -2647,7 +2651,10 @@ public class MainFrame extends JFrame implements OptionConstants {
    * Switch to the JScrollPane containing the DefinitionsPane
    * for the current active document.
    */
-  private void _switchDefScrollPane() {
+  void _switchDefScrollPane() {
+  
+    // demoted to package private protection to test the disabling editing while
+    // compiling functionality.
     
     // Sync caret with location before switching
     _currentDefPane.getOpenDocument().

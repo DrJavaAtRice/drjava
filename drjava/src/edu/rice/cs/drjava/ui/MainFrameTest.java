@@ -224,4 +224,40 @@ public class MainFrameTest extends TestCase {
     assertTrue("UI's int. doc. should equals Model's int. doc.",
                pane.getDocument() == model.getInteractionsDocument());
   }
+  
+  /**
+   * Ensure that a document's editable status is set appropriately throughout
+   * the compile process.  Since the behavior is interesting only when the model
+   * changes its active document, that's what this test looks most like.
+   */
+  public void testGlassPaneEditableState() {
+    SingleDisplayModel model = _frame.getModel();
+    
+    OpenDefinitionsDocument doc1 = model.newFile();
+    OpenDefinitionsDocument doc2 = model.newFile();
+    
+    // doc2 is now active
+    
+    JScrollPane pane1 = _frame._createDefScrollPane(doc1);
+    JScrollPane pane2 = _frame._createDefScrollPane(doc2);
+    
+    DefinitionsPane defPane1 = (DefinitionsPane) pane1.getViewport().getView();
+    DefinitionsPane defPane2 = (DefinitionsPane) pane2.getViewport().getView();
+    
+    _frame._switchDefScrollPane();
+    assertTrue("Start: defPane1",defPane1.isEditable());
+    assertTrue("Start: defPane2",defPane2.isEditable());
+    _frame.hourglassOn();
+    assertTrue("Glass on: defPane1",defPane1.isEditable());
+    assertTrue("Glass on: defPane2",(!defPane2.isEditable()));
+    model.setActiveDocument(doc1);
+    _frame._switchDefScrollPane();
+    assertTrue("Doc Switch: defPane1",(! defPane1.isEditable()));
+    assertTrue("Doc Switch: defPane2",defPane2.isEditable());
+    _frame.hourglassOff();
+    assertTrue("End: defPane1",defPane1.isEditable());
+    assertTrue("End: defPane2",defPane2.isEditable());
+    
+  }
+  
 }
