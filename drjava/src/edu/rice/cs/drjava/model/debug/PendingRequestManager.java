@@ -142,7 +142,7 @@ public class PendingRequestManager {
     }
 
     // Get the pending actions for this class (and inner classes)
-    Vector<DocumentDebugAction> actions = _pendingActions.get(className);  // The type argument should be <DocumentDebugAction<? extends EventRequest>> /**/
+    Vector<DocumentDebugAction> actions = _pendingActions.get(className);
     Vector<DocumentDebugAction> failedActions =
       new Vector<DocumentDebugAction>();
     //DrJava.consoleOut().println("pending actions: " + actions);
@@ -178,8 +178,8 @@ public class PendingRequestManager {
         Vector<ReferenceType> refTypes = new Vector<ReferenceType>();
         refTypes.add(rt);
         // next line was in condition for if
-        actions.get(i).createRequests(refTypes);  // This type warning will go away in JDK 1.5
-        // actions.get(i) has raw type because type parameter in actions is the raw approximation to an existential type /**?
+        actions.get(i).createRequests(refTypes);  // the second receiver has raw type DocumentDebugAction
+                                                  // it should not generate a type warning;
         
 //        if (!) {
           // if no request created, skip this action

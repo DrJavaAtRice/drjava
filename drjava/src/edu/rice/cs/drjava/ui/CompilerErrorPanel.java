@@ -56,10 +56,8 @@ import edu.rice.cs.drjava.model.compiler.CompilerErrorModel;
 import edu.rice.cs.drjava.model.compiler.CompilerInterface;
 import edu.rice.cs.drjava.model.compiler.NoCompilerAvailable;
 import edu.rice.cs.util.UnexpectedException;
-import edu.rice.cs.util.swing.BorderlessScrollPane;
 
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.Position;
@@ -85,36 +83,24 @@ import java.util.Vector;
 public class CompilerErrorPanel extends ErrorPanel {
 
   /** Whether a compile has occurred since the last compiler change. */
-  private boolean _compileHasOccurred;
-
+  private boolean _compileHasOccurred;  
   private CompilerErrorListPane _errorListPane;
-
   private final JComboBox _compilerChoiceBox;
-
-  JButton nextErrorButton = new JButton(MainFrame.getIcon("Down16.gif"));//new JButton("Next Error");
-  JButton prevErrorButton = new JButton(MainFrame.getIcon("Up16.gif"));//new JButton("Prev Error");
-
+  
   /**
    * Constructor.
    * @param model SingleDisplayModel in which we are running
    * @param frame MainFrame in which we are displayed
    */
   public CompilerErrorPanel(SingleDisplayModel model, MainFrame frame) {
-    super(model, frame, "Compiler Output");
+    super(model, frame, "Compiler Output", "Compiler");
     _compileHasOccurred = false;
     _numErrors = 0;
-
-
+    
     _errorListPane = new CompilerErrorListPane();
-
-    nextErrorButton.setMargin(new Insets(0,0,0,0));
-    //nextErrorButton.setBorder(BorderFactory.createEmptyBorder());
-    nextErrorButton.setToolTipText("Go to the next error");
-    prevErrorButton.setMargin(new Insets(0,0,0,0));
-    //prevErrorButton.setBorder(BorderFactory.createEmptyBorder());
-    prevErrorButton.setToolTipText("Go to the previous error");
-//    _showHighlightsCheckBox.setText("Highlight");
-
+    setErrorListPane(_errorListPane);
+    
+    /******** Initialize the drop-down compiler menu ********/
     // Limitation: Only compiler choices are those that were available
     // at the time this box was created.
     // Also: The UI will go out of sync with reality if the active compiler
@@ -142,68 +128,12 @@ public class CompilerErrorPanel extends ErrorPanel {
       }
     });
 
-    _mainPanel.setLayout(new BorderLayout());
-    _mainPanel.setMinimumSize(new Dimension(225,60));
-
-    // We make the vertical scrollbar always there.
-    // If we don't, when it pops up it cuts away the right edge of the
-    // text. Very bad.
-    JScrollPane scroller =
-      new BorderlessScrollPane(_errorListPane,
-                      JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
-                      JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-
-    JPanel compilerPanel = new JPanel(new BorderLayout());
-    compilerPanel.setBorder(new EmptyBorder(0,5,0,5)); // 5 pix padding on sides
-    JPanel uiBox = new JPanel(new BorderLayout());
-    uiBox.setBorder(new EmptyBorder(5,0,0,0)); // 5 pix padding on top
-    compilerPanel.add(new JLabel("Compiler", SwingConstants.LEFT),
-                      BorderLayout.NORTH);
-
-    compilerPanel.add(uiBox,BorderLayout.CENTER);
-//    uiBox.add(_compilerChoiceBox,BorderLayout.NORTH);
-
-    JPanel midPanel = new JPanel();
- //nextErrorButton.setEnabled(false);
-    nextErrorButton.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        _errorListPane.nextError();
-//  prevErrorButton.setEnabled(_errorListPane.hasPrevError());
-//  nextErrorButton.setEnabled(_errorListPane.hasNextError());
-      }
-    });
- //prevErrorButton.setEnabled(false);
-    prevErrorButton.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        _errorListPane.prevError();
-//  prevErrorButton.setEnabled(_errorListPane.hasPrevError());
-//  nextErrorButton.setEnabled(_errorListPane.hasNextError());
-      }
-    });
-    midPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 3, 3));  // 3 pix padding on sides
-    midPanel.setPreferredSize(new Dimension(170,70));
-//    midPanel.add(errorPanel);
-    midPanel.add(_compilerChoiceBox);
-    midPanel.add(_showHighlightsCheckBox);
-    uiBox.add(midPanel,BorderLayout.EAST);
-
+    customPanel.add(_compilerChoiceBox, BorderLayout.NORTH);
     
-    JPanel errorPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 3)); 
-    errorPanel.setPreferredSize(new Dimension(27,35));
-    errorPanel.add(prevErrorButton);
-//    errorLabel.setMargin(new Insets(3,0,3,0));
-//    errorLabel.setBorder(BorderFactory.createEtchedBorder());
-    errorPanel.add(nextErrorButton);
-//    errorPanel.setBorder(BorderFactory.createEtchedBorder());
-    uiBox.add(errorPanel, BorderLayout.WEST);
-
-    _mainPanel.add(scroller, BorderLayout.CENTER);
-    _mainPanel.add(compilerPanel, BorderLayout.EAST);
     DrJava.getConfig().addOptionListener(OptionConstants.JAVAC_LOCATION, new CompilerLocationOptionListener<File>());
     DrJava.getConfig().addOptionListener(OptionConstants.JSR14_LOCATION, new CompilerLocationOptionListener<File>());
     DrJava.getConfig().addOptionListener(OptionConstants.EXTRA_COMPILERS, new CompilerLocationOptionListener<Vector<String>>());
-    //uiBox.add(_showHighlightsCheckBox, BorderLayout.SOUTH);
-  }
+    }
 
 
   /**
@@ -250,13 +180,13 @@ public class CompilerErrorPanel extends ErrorPanel {
    * Reset the errors to the current error information.
    */
   public void reset() {
-// nextErrorButton.setEnabled(false);
-// prevErrorButton.setEnabled(false);
+// _nextErrorButton.setEnabled(false);
+// _prevErrorButton.setEnabled(false);
     _numErrors = getModel().getCompilerModel().getNumErrors();
 
     _errorListPane.updateListPane(true);
-// nextErrorButton.setEnabled(_errorListPane.hasNextError());
-// prevErrorButton.setEnabled(_errorListPane.hasPrevError());
+// _nextErrorButton.setEnabled(_errorListPane.hasNextError());
+// _prevErrorButton.setEnabled(_errorListPane.hasPrevError());
   }
 
   class CompilerErrorListPane extends ErrorPanel.ErrorListPane {

@@ -56,17 +56,21 @@ import edu.rice.cs.drjava.model.compiler.CompilerErrorModel;
 import edu.rice.cs.drjava.platform.PlatformFactory;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.HighlightManager;
+import edu.rice.cs.util.swing.BorderlessScrollPane;
 
 // TODO: Check synchronization.
 import java.util.Hashtable;
 
 import javax.swing.*;
 import javax.swing.text.*;
+import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ChangeEvent;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 import java.io.IOException;
 
 /**
@@ -87,6 +91,24 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
   // TODO: is this necessary, or can we get by with installing a domain-specific
   //       model in the constructor - e.g. JavadocModel
   protected SingleDisplayModel _model;
+  
+  private JScrollPane _scroller;
+  
+  /** This contains the _scroller and the _errorNavPanel. */
+  private JPanel _leftPanel;
+  
+  /** This contains the label, showHighlightsCheckBox, and the customPanel. */
+  private JPanel _rightPanel;
+  
+  private JPanel _errorNavPanel;
+  
+  private JPanel _errorNavButtonsPanel;
+  
+  /** This JPanel contains each child panel's specific UI components. **/
+  protected JPanel customPanel;
+  
+  private JButton _nextErrorButton;
+  private JButton _prevErrorButton;
 
   /** Highlight painter for selected list items. */
   protected static DefaultHighlighter.DefaultHighlightPainter _listHighlightPainter =
@@ -103,9 +125,84 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
     return s;
   }
 
-  public ErrorPanel(SingleDisplayModel model, MainFrame frame, String s){
-    super(frame, s);
+  public ErrorPanel(SingleDisplayModel model, MainFrame frame, String tabString, String labelString){
+    super(frame, tabString);
     _model = model;
+    
+    _mainPanel.setLayout(new BorderLayout());
+    
+    _leftPanel = new JPanel(new BorderLayout());
+    
+    _errorNavPanel = new JPanel(new GridBagLayout());
+    
+    
+    /******** Initialize the error navigation buttons ********/
+    _errorNavButtonsPanel = new JPanel(new BorderLayout());
+    
+    _nextErrorButton = new JButton(MainFrame.getIcon("Down16.gif"));//new JButton("Next Error");
+    _prevErrorButton = new JButton(MainFrame.getIcon("Up16.gif"));//new JButton("Prev Error");
+
+    _nextErrorButton.setMargin(new Insets(0,0,0,0));
+    _nextErrorButton.setToolTipText("Go to the next error");
+    _prevErrorButton.setMargin(new Insets(0,0,0,0));
+    _prevErrorButton.setToolTipText("Go to the previous error");
+
+    
+//    _errorPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 3)); 
+//    _errorPanel.setPreferredSize(new Dimension(27,35));
+//    _errorPanel.add(_prevErrorButton);
+//    _errorPanel.add(_nextErrorButton);
+//    _uiBox.add(_errorPanel, BorderLayout.WEST);
+    _errorNavButtonsPanel.add(_prevErrorButton, BorderLayout.NORTH);
+    _errorNavButtonsPanel.add(_nextErrorButton, BorderLayout.SOUTH);
+    _errorNavButtonsPanel.setBorder(new EmptyBorder(18,5,18,5)); // 5 pix padding on sides
+    
+//    JPanel middlePanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 0));
+//    middlePanel.add(_errorNavButtonsPanel);
+    
+    _errorNavPanel.add(_errorNavButtonsPanel);//, BorderLayout.CENTER);
+    _showHighlightsCheckBox = new JCheckBox( "Highlight source", true);
+    
+//    _mainPanel.setMinimumSize(new Dimension(225,60));
+    // We make the vertical scrollbar always there.
+    // If we don't, when it pops up it cuts away the right edge of the
+    // text. Very bad.
+    _scroller = new BorderlessScrollPane(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+                                         JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+    
+    _leftPanel.add(_scroller, BorderLayout.CENTER);
+    _leftPanel.add(_errorNavPanel, BorderLayout.EAST);
+
+    customPanel = new JPanel(new BorderLayout());
+    _rightPanel = new JPanel(new BorderLayout());
+    _rightPanel.setBorder(new EmptyBorder(0,5,0,5)); // 5 pix padding on sides
+//    uiBox.setBorder(new EmptyBorder(5,0,0,0)); // 5 pix padding on top
+    _rightPanel.add(new JLabel(labelString, SwingConstants.LEFT), BorderLayout.NORTH);
+    _rightPanel.add(customPanel, BorderLayout.CENTER);
+    _rightPanel.add(_showHighlightsCheckBox, BorderLayout.SOUTH);
+    
+    _mainPanel.add(_leftPanel, BorderLayout.CENTER);
+    _mainPanel.add(_rightPanel, BorderLayout.EAST);
+  }
+  
+  protected void setErrorListPane(final ErrorListPane elp) {
+    _scroller.setViewportView(elp);
+    _nextErrorButton.setEnabled(false);
+    _nextErrorButton.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        elp.nextError();
+//      _prevErrorButton.setEnabled(_errorListPane.hasPrevError());
+//      _nextErrorButton.setEnabled(_errorListPane.hasNextError());
+      }
+    });
+    _prevErrorButton.setEnabled(false);
+    _prevErrorButton.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        elp.prevError();
+//      _prevErrorButton.setEnabled(_errorListPane.hasPrevError());
+//      _nextErrorButton.setEnabled(_errorListPane.hasNextError());
+      }
+    });
   }
 
   /** Changes the font of the error list. */
@@ -231,23 +328,21 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
       DrJava.getConfig().addOptionListener(DEFINITIONS_BACKGROUND_COLOR,
                                            new BackgroundColorListener());
 
-      _showHighlightsCheckBox = new JCheckBox( "Highlight source", true);
-      _showHighlightsCheckBox.addChangeListener( new ChangeListener() {
-        public void stateChanged (ChangeEvent ce) {
-          DefinitionsPane lastDefPane = _frame.getCurrentDefPane();
-
-          if (_showHighlightsCheckBox.isSelected()) {
-            lastDefPane.setCaretPosition( lastDefPane.getCaretPosition());
-            getErrorListPane().switchToError(getSelectedIndex());
-            lastDefPane.requestFocus();
-            lastDefPane.getCaret().setVisible(true);
-          }
-          else {
-            lastDefPane.removeErrorHighlight();
-          }
+    _showHighlightsCheckBox.addChangeListener( new ChangeListener() {
+      public void stateChanged (ChangeEvent ce) {
+        DefinitionsPane lastDefPane = _frame.getCurrentDefPane();
+        
+        if (_showHighlightsCheckBox.isSelected()) {
+          lastDefPane.setCaretPosition( lastDefPane.getCaretPosition());
+          getErrorListPane().switchToError(getSelectedIndex());
+          lastDefPane.requestFocus();
+          lastDefPane.getCaret().setVisible(true);
         }
-      });
-
+        else {
+          lastDefPane.removeErrorHighlight();
+        }
+      }
+    });
     }
 
     /**
@@ -377,41 +472,41 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
       getErrorListPane().switchToError(0);
     }
 
-	/**
-	 * returns true if there is an error after the selected error
-	 */
-	public boolean hasNextError(){
-		return this.getSelectedIndex() + 1 < _numErrors;
-	}
+ /**
+  * returns true if there is an error after the selected error
+  */
+ public boolean hasNextError(){
+  return this.getSelectedIndex() + 1 < _numErrors;
+ }
 
-	/**
-	 * returns true if there is an error before the selected error
-	 */
-	public boolean hasPrevError(){
-		return this.getSelectedIndex() > 0;
-	}
+ /**
+  * returns true if there is an error before the selected error
+  */
+ public boolean hasPrevError(){
+  return this.getSelectedIndex() > 0;
+ }
 
-	/**
-	 * switches to the next error
-	 */
-	public void nextError(){
+ /**
+  * switches to the next error
+  */
+ public void nextError(){
       // Select the error
-	  if(hasNextError()){
-		  this._selectedIndex += 1;
-	      getErrorListPane().switchToError(this.getSelectedIndex());
-	  }
-	}
+   if(hasNextError()){
+    this._selectedIndex += 1;
+       getErrorListPane().switchToError(this.getSelectedIndex());
+   }
+ }
 
-	/**
-	 * switches to the previous error
-	 */
-	public void prevError(){
+ /**
+  * switches to the previous error
+  */
+ public void prevError(){
       // Select the error
-	  if(hasPrevError()){
-		  this._selectedIndex -= 1;
-	      getErrorListPane().switchToError(this.getSelectedIndex());
-	  }
-	}
+   if(hasPrevError()){
+    this._selectedIndex -= 1;
+       getErrorListPane().switchToError(this.getSelectedIndex());
+   }
+ }
 
     /**
      * Inserts all of the errors into the given document.
@@ -478,6 +573,8 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
         _listHighlightTag.remove();
         _listHighlightTag = null;
       }
+      _prevErrorButton.setEnabled(false);
+      _nextErrorButton.setEnabled(false);
     }
 
     /**
@@ -529,6 +626,7 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
             //System.err.println("scrll vis: " + startRect);
 
             scrollRectToVisible(startRect);
+            _updateScrollButtons();
           }
           else {
             // Couldn't draw the box to highlight, so don't highlight anything
@@ -543,6 +641,21 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
         // (_getIndexForError throws it.)
         // We'll at least fail a little more gracefully.
         _removeListHighlight();
+      }
+    }
+            
+    private void _updateScrollButtons() {
+      if (hasNextError()) {
+        _nextErrorButton.setEnabled(true);
+      }
+      else {
+        _nextErrorButton.setEnabled(false);
+      }
+      if (hasPrevError()) {
+        _prevErrorButton.setEnabled(true);
+      }
+      else {
+        _prevErrorButton.setEnabled(false);
       }
     }
 

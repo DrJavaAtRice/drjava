@@ -69,19 +69,9 @@ import edu.rice.cs.drjava.model.junit.JUnitTestManager;
 import edu.rice.cs.drjava.model.junit.JUnitError;
 import edu.rice.cs.drjava.model.repl.*;
 
-//<<<<<<< InterpreterJVM.java
-//import edu.rice.cs.javaast.*;  //should be deleted, by end of merging NOT NEEDED DAMMIT!
-//import edu.rice.cs.javaast.tree.*; //should be deleted, by end of merging
-//import edu.rice.cs.javaast.parser.*; //should be deleted, by end of merging
-//
-////import koala.dynamicjava.interpreter.InterpreterException;  //should be using a layer to handle scriptlanguages
-////import koala.dynamicjava.tree.*; //should be using a layer to handle scriptlanguages
-////import koala.dynamicjava.parser.*; //should be using a layer to handle scriptlanguages
-//=======
 //import edu.rice.cs.javaast.*;
 //import edu.rice.cs.javaast.tree.*;
 //import edu.rice.cs.javaast.parser.*;
-//>>>>>>> 1.59
 
 // For Windows focus fix
 import javax.swing.JDialog;
@@ -279,13 +269,8 @@ public class InterpreterJVM extends AbstractSlaveJVM
           try {
             _dialog("to interp: " + s);
 
-//<<<<<<< InterpreterJVM.java
-//            //String s1 = _interactionsProcessor.preProcess(s);
-//            Object result = interpreter.getInterpreter().interpret(s);
-//=======
             String s1 = s;//_interactionsProcessor.preProcess(s);
             Object result = interpreter.getInterpreter().interpret(s1);
-//>>>>>>> 1.59
             String resultString = String.valueOf(result);
 
             if (result == Interpreter.NO_RESULT) {
@@ -313,20 +298,6 @@ public class InterpreterJVM extends AbstractSlaveJVM
                                                          t.getMessage(),
                                                          InterpreterJVM.this.getStackTrace(t)));
           }
-//<<<<<<< InterpreterJVM.java
-////          catch (InterpreterException ie) {
-////            // A ParseException indicates a syntax error in the input window
-////            //_mainJVM.interpretResult( new SyntaxErrorResult( ie, s ) );
-////          }
-////          catch (ParseException pe) {
-////             // A ParseException indicates a syntax error in the input window
-////            _mainJVM.interpretResult( new SyntaxErrorResult( pe, s ) );
-////          }
-//          catch (TokenMgrError tme) {
-//            // A TokenMgrError indicates some lexical difficulty with input.
-//           _mainJVM.interpretResult( new SyntaxErrorResult( tme, s ) );
-//          }
-//=======
 //          catch (ParseException pe) {
 //            // A ParseException indicates a syntax error in the input window
 //            _mainJVM.interpretResult(new SyntaxErrorResult(pe, s));
@@ -335,7 +306,6 @@ public class InterpreterJVM extends AbstractSlaveJVM
 //            // A TokenMgrError indicates some lexical difficulty with input.
 //            _mainJVM.interpretResult(new SyntaxErrorResult(tme, s));
 //          }
-//>>>>>>> 1.59
           catch (Throwable t) {
             // A user's toString method might throw anything, so we need to be careful
             //_dialog("thrown by toString: " + t);

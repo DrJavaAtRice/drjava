@@ -3224,7 +3224,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _currLocationField = new JLabel();
     _currLocationField.setFont(_currLocationField.getFont().deriveFont(Font.PLAIN));
     _currLocationField.setHorizontalAlignment(SwingConstants.RIGHT);
-    _currLocationField.setPreferredSize(new Dimension(65,20));
+    _currLocationField.setPreferredSize(new Dimension(65,12));
     //_currLocationField.setVisible(true);
     
     // Create the status bar panel
@@ -3315,6 +3315,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _tabbedPane = new JTabbedPane();
     _tabbedPane.addChangeListener(new ChangeListener () {
       public void stateChanged(ChangeEvent e) {
+        clearStatusMessage();
         if (_tabbedPane.getSelectedComponent() == _interactionsContainer) {
           _interactionsPane.requestFocus();
         }

@@ -80,37 +80,10 @@ public class JavadocErrorPanel extends ErrorPanel {
    * @param frame MainFrame in which we are displayed
    */
   public JavadocErrorPanel(SingleDisplayModel model, MainFrame frame) {
-    super(model, frame, "Javadoc Output");
+    super(model, frame, "Javadoc Output", "Javadoc");
     _successful = true;
     _errorListPane = new JavadocErrorListPane();
-
-    _mainPanel.setLayout(new BorderLayout());
-
-    // We make the vertical scrollbar always there.
-    // If we don't, when it pops up it cuts away the right edge of the
-    // text. Very bad.
-    JScrollPane scroller =
-      new BorderlessScrollPane(_errorListPane,
-                      JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
-                      JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-
-
-    _mainPanel.add(scroller, BorderLayout.CENTER);
-
-    JPanel sidePanel = new JPanel(new BorderLayout());
-    sidePanel.setBorder(new EmptyBorder(0,5,0,5)); // 5 pix padding on sides
-    JPanel innerPanel = new JPanel(new BorderLayout());  // bar and checkbox
-    innerPanel.setBorder(new EmptyBorder(5,0,0,0)); // 5 pix padding on top
-//     sidePanel.add(new JLabel("Test Progress", SwingConstants.LEFT),
-//                       BorderLayout.NORTH);
-
-    sidePanel.add(innerPanel,BorderLayout.CENTER);
-
-    innerPanel.add(new JPanel(),BorderLayout.CENTER);
-
-    innerPanel.add(_showHighlightsCheckBox, BorderLayout.SOUTH);
-    _mainPanel.add(sidePanel, BorderLayout.EAST);
-
+    setErrorListPane(_errorListPane);
   }
 
   /**

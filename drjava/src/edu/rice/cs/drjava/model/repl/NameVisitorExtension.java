@@ -84,22 +84,24 @@ public class NameVisitorExtension extends NameVisitor {
   }
   
   // Fixes the redefinition issue in DynamicJava
-  public Node visit(VariableDeclaration node) {  
+  public Object visit(VariableDeclaration node) {  
     // NameVisitor
     Node n = node.getInitializer();
     if (n != null) {
-      Node o = n.acceptVisitor(this);
+      Object o = n.acceptVisitor(this);
       if (o != null) {
-        rejectReferenceType(o,n);
+        if (o instanceof ReferenceType) {
+          throw new ExecutionError("malformed.expression", n);
+        }
         node.setInitializer((Expression)o);
       }
     }
     
     // TypeChecker
-    Class lc = node.getType().acceptVisitor(_tc);
+    Class lc = (Class)node.getType().acceptVisitor(_tc);
     Node init = node.getInitializer();
     if (init != null) {
-      Class rc = init.acceptVisitor(_tc);
+      Class rc = (Class)init.acceptVisitor(_tc);
       _checkAssignmentStaticRules(lc, rc, node, init);
     }
     

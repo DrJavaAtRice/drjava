@@ -60,34 +60,40 @@ import koala.dynamicjava.tree.visitor.*;
  * @version $Id$
  */
 
-public class IdentityVisitor implements Visitor<Node> {
+public class IdentityVisitor implements Visitor {
   /**
    * Visits a PackageDeclaration
    * @param node the node to visit
    * @return node
    */
-  public Node visit(PackageDeclaration node) { return node; }
+  public Object visit(PackageDeclaration node) {
+    return node;
+  }
 
   /**
    * Visits an ImportDeclaration
    * @param node the node to visit
    * @return node
    */
-  public Node visit(ImportDeclaration node) { return node; }
+  public Object visit(ImportDeclaration node) {
+    return node;
+  }
 
   /**
    * Visits an EmptyStatement
    * @param node the node to visit
    */
-  public Node visit(EmptyStatement node) { return node; }
+  public Object visit(EmptyStatement node) {
+    return node;
+  }
 
   /**
    * Visits a WhileStatement
    * @param node the node to visit
    */
-  public Node visit(WhileStatement node) {
-    node.setCondition((Expression) node.getCondition().acceptVisitor(this));
-    node.setBody(node.getBody().acceptVisitor(this));
+  public Object visit(WhileStatement node) {
+    node.setCondition((Expression)node.getCondition().acceptVisitor(this));
+    node.setBody((Node)node.getBody().acceptVisitor(this));
     return node;
   }
 
@@ -95,13 +101,13 @@ public class IdentityVisitor implements Visitor<Node> {
    * Visits a ForStatement
    * @param node the node to visit
    */
-  public Node visit(ForStatement node) {
-    LinkedList<Node> init = null; // Add parameterization <Node>. 
+  public Object visit(ForStatement node) {
+    LinkedList init = null; // Add parameterization <Node>. 
     if (node.getInitialization() != null) {
-      init = new LinkedList<Node>(); // Add parameterization <Node>.
-      Iterator<Node> it = node.getInitialization().iterator();
+      init = new LinkedList(); // Add parameterization <Node>.
+      Iterator it = node.getInitialization().iterator();
       while (it.hasNext()) {
-        init.add(it.next().acceptVisitor(this));
+        init.add((Node)((Node)it.next()).acceptVisitor(this));
       }
     }
     node.setInitialization(init);
@@ -110,16 +116,16 @@ public class IdentityVisitor implements Visitor<Node> {
       cond = (Expression)node.getCondition().acceptVisitor(this);
     }
     node.setCondition(cond);
-    LinkedList<Node> updt = null; // Add parameterization <Node>.
+    LinkedList updt = null; // Add parameterization <Node>.
     if (node.getUpdate() != null) {
-      updt = new LinkedList<Node>(); // Add parameterization <Node>.
-      Iterator<Node> it = node.getUpdate().iterator();
+      updt = new LinkedList(); // Add parameterization <Node>.
+      Iterator it = node.getUpdate().iterator();
       while (it.hasNext()) {
-        updt.add(it.next().acceptVisitor(this));
+        updt.add((Node)((Node)it.next()).acceptVisitor(this));
       }
     }
     node.setUpdate(updt);
-    node.setBody(node.getBody().acceptVisitor(this));
+    node.setBody((Node)node.getBody().acceptVisitor(this));
     return node;
   }
 
@@ -127,10 +133,10 @@ public class IdentityVisitor implements Visitor<Node> {
    * Visits a DoStatement
    * @param node the node to visit
    */
-  public Node visit(DoStatement node) {
-    Expression cond = (Expression) node.getCondition().acceptVisitor(this);
+  public Object visit(DoStatement node) {
+    Expression cond = (Expression)node.getCondition().acceptVisitor(this);
     node.setCondition(cond);
-    Node body = node.getBody().acceptVisitor(this);
+    Node body = (Node)node.getBody().acceptVisitor(this);
     node.setBody(body);
     return node;
   }
@@ -139,13 +145,13 @@ public class IdentityVisitor implements Visitor<Node> {
    * Visits a SwitchStatement
    * @param node the node to visit
    */
-  public Node visit(SwitchStatement node) {
-    Expression sel = (Expression) node.getSelector().acceptVisitor(this);
+  public Object visit(SwitchStatement node) {
+    Expression sel = (Expression)node.getSelector().acceptVisitor(this);
     node.setSelector(sel);
-    LinkedList<SwitchBlock> cases = new LinkedList<SwitchBlock>(); // Add parameterization <Node>.
-    Iterator<SwitchBlock> it = node.getBindings().iterator();
+    LinkedList cases = new LinkedList(); // Add parameterization <Node>.
+    Iterator it = node.getBindings().iterator();
     while (it.hasNext()) {
-      cases.add((SwitchBlock)it.next().acceptVisitor(this));
+      cases.add((Node)((Node)it.next()).acceptVisitor(this));
     }
     node.setBindings(cases);
     return node;
@@ -155,18 +161,18 @@ public class IdentityVisitor implements Visitor<Node> {
    * Visits a SwitchBlock
    * @param node the node to visit
    */
-  public Node visit(SwitchBlock node) {
+  public Object visit(SwitchBlock node) {
     Expression e = null;
     if (node.getExpression() != null) {
-      e = (Expression) node.getExpression().acceptVisitor(this);
+      e = (Expression)node.getExpression().acceptVisitor(this);
     }
     node.setExpression(e);
-    LinkedList<Node> statements = null; // Add parameterization <Node>.
+    LinkedList statements = null; // Add parameterization <Node>.
     if (node.getStatements() != null) {
-      statements = new LinkedList<Node>(); // Add parameterization <Node>.
-      Iterator<Node> it = node.getStatements().iterator();
+      statements = new LinkedList(); // Add parameterization <Node>.
+      Iterator it = node.getStatements().iterator();
       while (it.hasNext()) {
-        statements.add(it.next().acceptVisitor(this));
+        statements.add((Node)((Node)it.next()).acceptVisitor(this));
       }
     }
     node.setStatements(statements);
@@ -177,8 +183,8 @@ public class IdentityVisitor implements Visitor<Node> {
    * Visits a LabeledStatement
    * @param node the node to visit
    */
-  public Node visit(LabeledStatement node) {
-    node.setStatement(node.getStatement().acceptVisitor(this));
+  public Object visit(LabeledStatement node) {
+    node.setStatement((Node)node.getStatement().acceptVisitor(this));
     return node;
   }
 
@@ -186,22 +192,24 @@ public class IdentityVisitor implements Visitor<Node> {
    * Visits a BreakStatement
    * @param node the node to visit
    */
-  public Node visit(BreakStatement node) { return node; }
+  public Object visit(BreakStatement node) {
+    return node;
+  }
 
   /**
    * Visits a TryStatement
    * @param node the node to visit
    */
-  public Node visit(TryStatement node) {
-    Node tryBlock = node.getTryBlock().acceptVisitor(this);
-    LinkedList<Node> catchStatements = new LinkedList<Node>(); // Add parameterization <Node>.
-    Iterator<Node> it = node.getCatchStatements().iterator();
+  public Object visit(TryStatement node) {
+    Node tryBlock = (Node)node.getTryBlock().acceptVisitor(this);
+    LinkedList catchStatements = new LinkedList(); // Add parameterization <Node>.
+    Iterator it = node.getCatchStatements().iterator();
     while (it.hasNext()) {
-      catchStatements.add(it.next().acceptVisitor(this));
+      catchStatements.add((Node)((Node)it.next()).acceptVisitor(this));
     }
     Node finallyBlock = null;
     if (node.getFinallyBlock() != null) {
-      finallyBlock = node.getFinallyBlock().acceptVisitor(this);
+      finallyBlock = (Node)node.getFinallyBlock().acceptVisitor(this);
     }
     node = new TryStatement(tryBlock, catchStatements, finallyBlock, null, 0, 0, 0, 0);
     return node;
@@ -211,10 +219,10 @@ public class IdentityVisitor implements Visitor<Node> {
    * Visits a CatchStatement
    * @param node the node to visit
    */
-  public Node visit(CatchStatement node) {
-    Node exp = node.getException().acceptVisitor(this);
-    Node block = node.getBlock().acceptVisitor(this);
-    node = new CatchStatement((FormalParameter)exp, block, null, 0, 0, 0, 0);
+  public Object visit(CatchStatement node) {
+    FormalParameter exp = (FormalParameter)node.getException().acceptVisitor(this);
+    Node block = (Node) node.getBlock().acceptVisitor(this);
+    node = new CatchStatement(exp, block, null, 0, 0, 0, 0);
     return node;
   }
 
@@ -222,7 +230,7 @@ public class IdentityVisitor implements Visitor<Node> {
    * Visits a ThrowStatement
    * @param node the node to visit
    */
-  public Node visit(ThrowStatement node) {
+  public Object visit(ThrowStatement node) {
     node.setExpression((Expression)node.getExpression().acceptVisitor(this));
     return node;
   }
@@ -231,7 +239,7 @@ public class IdentityVisitor implements Visitor<Node> {
    * Visits a ReturnStatement
    * @param node the node to visit
    */
-  public Node visit(ReturnStatement node) {
+  public Object visit(ReturnStatement node) {
     node.setExpression((Expression)node.getExpression().acceptVisitor(this));
     return node;
   }
@@ -240,9 +248,9 @@ public class IdentityVisitor implements Visitor<Node> {
    * Visits a SynchronizedStatement
    * @param node the node to visit
    */
-  public Node visit(SynchronizedStatement node) {
+  public Object visit(SynchronizedStatement node) {
     node.setLock((Expression)node.getLock().acceptVisitor(this));
-    node.setBody(node.getBody().acceptVisitor(this));
+    node.setBody((Node)node.getBody().acceptVisitor(this));
     return node;
   }
 
@@ -250,7 +258,7 @@ public class IdentityVisitor implements Visitor<Node> {
    * Visits a ContinueStatement
    * @param node the node to visit
    */
-  public Node visit(ContinueStatement node) {
+  public Object visit(ContinueStatement node) {
     return node;
   }
 
@@ -258,7 +266,7 @@ public class IdentityVisitor implements Visitor<Node> {
    * Visits a IfThenStatement
    * @param node the node to visit
    */
-  public Node visit(IfThenStatement node) {
+  public Object visit(IfThenStatement node) {
     node.setCondition((Expression)node.getCondition().acceptVisitor(this));
     node.setThenStatement((Node)node.getThenStatement().acceptVisitor(this));
     return node;
@@ -268,10 +276,10 @@ public class IdentityVisitor implements Visitor<Node> {
    * Visits a IfThenElseStatement
    * @param node the node to visit
    */
-  public Node visit(IfThenElseStatement node) {
+  public Object visit(IfThenElseStatement node) {
     node.setCondition((Expression)node.getCondition().acceptVisitor(this));
-    node.setThenStatement(node.getThenStatement().acceptVisitor(this));
-    node.setElseStatement(node.getElseStatement().acceptVisitor(this));
+    node.setThenStatement((Node)node.getThenStatement().acceptVisitor(this));
+    node.setElseStatement((Node)node.getElseStatement().acceptVisitor(this));
     return node;
   }
 
@@ -279,19 +287,23 @@ public class IdentityVisitor implements Visitor<Node> {
    * Visits a Literal
    * @param node the node to visit
    */
-  public Node visit(Literal node) { return node; }
+  public Object visit(Literal node) {
+    return node;
+  }
 
   /**
    * Visits a ThisExpression
    * @param node the node to visit
    */
-  public Node visit(ThisExpression node) { return node; }
+  public Object visit(ThisExpression node) {
+    return node;
+  }
 
   /**
    * Visits a QualifiedName
    * @param node the node to visit
    */
-  public Node visit(QualifiedName node) {
+  public Object visit(QualifiedName node) {
     return node;
   }
 
@@ -299,7 +311,7 @@ public class IdentityVisitor implements Visitor<Node> {
    * Visits a ObjectFieldAccess
    * @param node the node to visit
    */
-  public Node visit(ObjectFieldAccess node) {
+  public Object visit(ObjectFieldAccess node) {
     node.setExpression((Expression)node.getExpression().acceptVisitor(this));
     return node;
   }
@@ -308,7 +320,7 @@ public class IdentityVisitor implements Visitor<Node> {
    * Visits a StaticFieldAccess
    * @param node the node to visit
    */
-  public Node visit(StaticFieldAccess node) {
+  public Object visit(StaticFieldAccess node) {
     node.setFieldType((ReferenceType)node.getFieldType().acceptVisitor(this));
     return node;
   }
@@ -317,7 +329,7 @@ public class IdentityVisitor implements Visitor<Node> {
    * Visits a ArrayAccess
    * @param node the node to visit
    */
-  public Node visit(ArrayAccess node) {
+  public Object visit(ArrayAccess node) {
     node.setExpression((Expression)node.getExpression().acceptVisitor(this));
     node.setCellNumber((Expression)node.getCellNumber().acceptVisitor(this));
     return node;
@@ -327,7 +339,7 @@ public class IdentityVisitor implements Visitor<Node> {
    * Visits a SuperFieldAccess
    * @param node the node to visit
    */
-  public Node visit(SuperFieldAccess node) {
+  public Object visit(SuperFieldAccess node) {
     return node;
   }
 
@@ -335,16 +347,16 @@ public class IdentityVisitor implements Visitor<Node> {
    * Visits a ObjectMethodCall
    * @param node the node to visit
    */
-  public Node visit(ObjectMethodCall node) {
+  public Object visit(ObjectMethodCall node) {
     if (node.getExpression() != null) {
       node.setExpression((Expression)node.getExpression().acceptVisitor(this));
     }
-    LinkedList<Expression> arguments = null; // Add parameterization <Node>.
+    LinkedList arguments = null; // Add parameterization <Node>.
     if (node.getArguments() != null) {
-      arguments = new LinkedList<Expression>(); // Add parameterization <Node>.
-      Iterator<Expression> it = node.getArguments().iterator();
+      arguments = new LinkedList(); // Add parameterization <Node>.
+      Iterator it = node.getArguments().iterator();
       while (it.hasNext()) {
-        arguments.add((Expression) it.next().acceptVisitor(this));
+        arguments.add((Node)((Node)it.next()).acceptVisitor(this));
       }
     }
     node.setArguments(arguments);
@@ -355,13 +367,13 @@ public class IdentityVisitor implements Visitor<Node> {
    * Visits a FunctionCall
    * @param node the node to visit
    */
-  public Node visit(FunctionCall node) {
-    LinkedList<Expression> arguments = null; // Add parameterization <Node>.
+  public Object visit(FunctionCall node) {
+    LinkedList arguments = null; // Add parameterization <Node>.
     if (node.getArguments() != null) {
-      arguments = new LinkedList<Expression>(); // Add parameterization <Node>.
-      Iterator<Expression> it = node.getArguments().iterator();
+      arguments = new LinkedList(); // Add parameterization <Node>.
+      Iterator it = node.getArguments().iterator();
       while (it.hasNext()) {
-        arguments.add((Expression) it.next().acceptVisitor(this));
+        arguments.add((Node)((Node)it.next()).acceptVisitor(this));
       }
     }
     node.setArguments(arguments);
@@ -372,14 +384,14 @@ public class IdentityVisitor implements Visitor<Node> {
    * Visits a StaticMethodCall
    * @param node the node to visit
    */
-  public Node visit(StaticMethodCall node) {
+  public Object visit(StaticMethodCall node) {
     node.setMethodType((ReferenceType)node.getMethodType().acceptVisitor(this));
-    LinkedList<Expression> arguments = null; // Add parameterization <Node>.
+    LinkedList arguments = null; // Add parameterization <Node>.
     if (node.getArguments() != null) {
-      arguments = new LinkedList<Expression>(); // Add parameterization <Node>.
-      Iterator<Expression> it = node.getArguments().iterator();
+      arguments = new LinkedList(); // Add parameterization <Node>.
+      Iterator it = node.getArguments().iterator();
       while (it.hasNext()) {
-        arguments.add((Expression)it.next().acceptVisitor(this));
+        arguments.add((Node)((Node)it.next()).acceptVisitor(this));
       }
     }
     node.setArguments(arguments);
@@ -390,16 +402,16 @@ public class IdentityVisitor implements Visitor<Node> {
      * Visits a ConstructorInvocation
      * @param node the node to visit
      */
-    public Node visit(ConstructorInvocation node) {
+    public Object visit(ConstructorInvocation node) {
       if (node.getExpression() != null) {
         node.setExpression((Expression)node.getExpression().acceptVisitor(this));
       }
-      LinkedList<Expression> arguments = null; // Add parameterization <Node>.
+      LinkedList arguments = null; // Add parameterization <Node>.
       if (node.getArguments() != null) {
-        arguments = new LinkedList<Expression>(); // Add parameterization <Node>.
-        Iterator<Expression> it = node.getArguments().iterator();
+        arguments = new LinkedList(); // Add parameterization <Node>.
+        Iterator it = node.getArguments().iterator();
         while (it.hasNext()) {
-          arguments.add((Expression)it.next().acceptVisitor(this));
+          arguments.add((Expression)((Expression)it.next()).acceptVisitor(this));
         }
       }
       node.setArguments(arguments);
@@ -410,13 +422,13 @@ public class IdentityVisitor implements Visitor<Node> {
      * Visits a SuperMethodCall
      * @param node the node to visit
      */
-    public Node visit(SuperMethodCall node) {
-      LinkedList<Expression> arguments = null; // Add parameterization <Node>.
+    public Object visit(SuperMethodCall node) {
+      LinkedList arguments = null; // Add parameterization <Node>.
       if (node.getArguments() != null) {
-        arguments = new LinkedList<Expression>(); // Add parameterization <Node>.
-        Iterator<Expression> it = node.getArguments().iterator();
+        arguments = new LinkedList(); // Add parameterization <Node>.
+        Iterator it = node.getArguments().iterator();
         while (it.hasNext()) {
-          arguments.add((Expression)it.next().acceptVisitor(this));
+          arguments.add((Expression)((Expression)it.next()).acceptVisitor(this));
         }
       }
       node.setArguments(arguments);
@@ -427,19 +439,23 @@ public class IdentityVisitor implements Visitor<Node> {
      * Visits a PrimitiveType
      * @param node the node to visit
      */
-    public Node visit(PrimitiveType node) { return node; }
+    public Object visit(PrimitiveType node) {
+      return node;
+    }
 
     /**
      * Visits a ReferenceType
      * @param node the node to visit
      */
-    public Node visit(ReferenceType node) { return node; }
+    public Object visit(ReferenceType node) {
+      return node;
+    }
 
     /**
      * Visits a ArrayType
      * @param node the node to visit
      */
-    public Node visit(ArrayType node) {
+    public Object visit(ArrayType node) {
       if (node.getElementType() != null) {
         node.setElementType((Type)node.getElementType().acceptVisitor(this));
       }
@@ -450,7 +466,7 @@ public class IdentityVisitor implements Visitor<Node> {
      * Visits a TypeExpression
      * @param node the node to visit
      */
-    public Node visit(TypeExpression node) {
+    public Object visit(TypeExpression node) {
       // For some reason, the setType expression in node only takes in
       // ReferenceTypes so we have to create a new TypeExpression in
       // case the visitor returns a PrimitiveType (e.g. int.class used
@@ -463,35 +479,43 @@ public class IdentityVisitor implements Visitor<Node> {
      * Visits a PostIncrement
      * @param node the node to visit
      */
-    public Node visit(PostIncrement node) { return _visitUnary(node); }
+    public Object visit(PostIncrement node) {
+      return _visitUnary(node);
+    }
 
     /**
      * Visits a PostDecrement
      * @param node the node to visit
      */
-    public Node visit(PostDecrement node) { return _visitUnary(node); }
+    public Object visit(PostDecrement node) {
+      return _visitUnary(node);
+    }
 
     /**
      * Visits a PreIncrement
      * @param node the node to visit
      */
-    public Node visit(PreIncrement node) { return _visitUnary(node); }
+    public Object visit(PreIncrement node) {
+      return _visitUnary(node);
+    }
 
     /**
      * Visits a PreDecrement
      * @param node the node to visit
      */
-    public Node visit(PreDecrement node) { return _visitUnary(node); }
+    public Object visit(PreDecrement node) {
+      return _visitUnary(node);
+    }
 
     /**
      * Visits a ArrayInitializer
      * @param node the node to visit
      */
-    public Node visit(ArrayInitializer node) {
-      LinkedList<Expression> cells = new LinkedList<Expression>(); // Add parameterization <Node>.
-      Iterator<Expression> it = node.getCells().iterator();
+    public Object visit(ArrayInitializer node) {
+      LinkedList cells = new LinkedList(); // Add parameterization <Node>.
+      Iterator it = node.getCells().iterator();
       while (it.hasNext()) {
-        cells.add((Expression)it.next().acceptVisitor(this));
+        cells.add((Expression)((Expression)it.next()).acceptVisitor(this));
       }
       node.setCells(cells);
       node.setElementType((Type)node.getElementType().acceptVisitor(this));
@@ -502,13 +526,13 @@ public class IdentityVisitor implements Visitor<Node> {
      * Visits an ArrayAllocation, check me on this one.
      * @param node the node to visit
      */
-    public Node visit(ArrayAllocation node) {
+    public Object visit(ArrayAllocation node) {
       int dim = node.getDimension();
       Type creationType = (Type)node.getCreationType().acceptVisitor(this);
-      LinkedList<Expression> sizes = new LinkedList<Expression>(); // Add parameterization <Expression>.
-      Iterator<Expression> it = node.getSizes().iterator();
+      LinkedList sizes = new LinkedList(); // Add parameterization <Expression>.
+      Iterator it = node.getSizes().iterator();
       while (it.hasNext()) {
-        sizes.add((Expression)it.next().acceptVisitor(this));
+        sizes.add((Expression)((Expression)it.next()).acceptVisitor(this));
       }
       ArrayInitializer ai = null;
       if (node.getInitialization() != null) {
@@ -523,14 +547,14 @@ public class IdentityVisitor implements Visitor<Node> {
      * Visits an SimpleAllocation
      * @param node the node to visit
      */
-    public Node visit(SimpleAllocation node) {
+    public Object visit(SimpleAllocation node) {
       node.setCreationType((Type)node.getCreationType().acceptVisitor(this));
-      LinkedList<Expression> arguments = null; // Add parameterization <Expresion>.
+      LinkedList arguments = null; // Add parameterization <Expresion>.
       if (node.getArguments() != null) {
-        arguments = new LinkedList<Expression>(); // Add parameterization <Expression>.
-        Iterator<Expression> it = node.getArguments().iterator();
+        arguments = new LinkedList(); // Add parameterization <Expression>.
+        Iterator it = node.getArguments().iterator();
         while (it.hasNext()) {
-          arguments.add((Expression)it.next().acceptVisitor(this));
+          arguments.add((Expression)((Expression)it.next()).acceptVisitor(this));
         }
       }
       node.setArguments(arguments);
@@ -541,21 +565,21 @@ public class IdentityVisitor implements Visitor<Node> {
      * Visits an ClassAllocation
      * @param node the node to visit
      */
-    public Node visit(ClassAllocation node) {
+    public Object visit(ClassAllocation node) {
       node.setCreationType((Type)node.getCreationType().acceptVisitor(this));
-      LinkedList<Expression> arguments = null; // Add parameterization <Expression>.
+      LinkedList arguments = null; // Add parameterization <Expression>.
       if (node.getArguments() != null) {
-        arguments = new LinkedList<Expression>(); // Add parameterization <Expression>.
-        Iterator<Expression> it = node.getArguments().iterator();
+        arguments = new LinkedList(); // Add parameterization <Expression>.
+        Iterator it = node.getArguments().iterator();
         while (it.hasNext()) {
-          arguments.add((Expression)it.next().acceptVisitor(this));
+          arguments.add((Expression)((Expression)it.next()).acceptVisitor(this));
         }
       }
       node.setArguments(arguments);
-      LinkedList<Node> members = new LinkedList<Node>(); // Add parameterization <Node>.
-      Iterator<Node> it = node.getMembers().iterator();
+      LinkedList members = new LinkedList(); // Add parameterization <Node>.
+      Iterator it = node.getMembers().iterator();
       while (it.hasNext()) {
-        members.add(it.next().acceptVisitor(this));
+        members.add((Node)((Node)it.next()).acceptVisitor(this));
       }
       node.setMembers(members);
       return node;
@@ -565,15 +589,15 @@ public class IdentityVisitor implements Visitor<Node> {
      * Visits an InnerAllocation
      * @param node the node to visit
      */
-    public Node visit(InnerAllocation node) {
+    public Object visit(InnerAllocation node) {
       node.setExpression((Expression)node.getExpression().acceptVisitor(this));
       node.setCreationType((Type)node.getCreationType().acceptVisitor(this));
-      LinkedList<Expression> arguments = null; // Add parameterization <Expression>.
+      LinkedList arguments = null; // Add parameterization <Expression>.
       if (node.getArguments() != null) {
-        arguments = new LinkedList<Expression>(); // Add parameterization <Expression>.
-        Iterator<Expression> it = node.getArguments().iterator();
+        arguments = new LinkedList(); // Add parameterization <Expression>.
+        Iterator it = node.getArguments().iterator();
         while (it.hasNext()) {
-          arguments.add((Expression)it.next().acceptVisitor(this));
+          arguments.add((Expression)((Expression)it.next()).acceptVisitor(this));
         }
       }
       node.setArguments(arguments);
@@ -584,22 +608,22 @@ public class IdentityVisitor implements Visitor<Node> {
      * Visits an InnerClassAllocation
      * @param node the node to visit
      */
-    public Node visit(InnerClassAllocation node) {
+    public Object visit(InnerClassAllocation node) {
       node.setExpression((Expression)node.getExpression().acceptVisitor(this));
       node.setCreationType((Type)node.getCreationType().acceptVisitor(this));
-      LinkedList<Expression> arguments = null; // Add parameterization <Expression>.
+      LinkedList arguments = null; // Add parameterization <Expression>.
       if (node.getArguments() != null) {
-        arguments = new LinkedList<Expression>(); // Add parameterization <Expression>.
-        Iterator<Expression> it = node.getArguments().iterator();
+        arguments = new LinkedList(); // Add parameterization <Expression>.
+        Iterator it = node.getArguments().iterator();
         while (it.hasNext()) {
-          arguments.add((Expression)it.next().acceptVisitor(this));
+          arguments.add((Expression)((Expression)it.next()).acceptVisitor(this));
         }
       }
       node.setArguments(arguments);
-      LinkedList<Node> members = new LinkedList<Node>(); // Add parameterization <Node>.
-      Iterator<Node> it = node.getMembers().iterator();
+      LinkedList members = new LinkedList(); // Add parameterization <Node>.
+      Iterator it = node.getMembers().iterator();
       while (it.hasNext()) {
-        members.add(it.next().acceptVisitor(this));
+        members.add((Node)((Node)it.next()).acceptVisitor(this));
       }
       node.setMembers(members);
       return node;
@@ -609,7 +633,7 @@ public class IdentityVisitor implements Visitor<Node> {
      * Visits a CastExpression
      * @param node the node to visit
      */
-    public Node visit(CastExpression node) {
+    public Object visit(CastExpression node) {
       node.setTargetType((Type)node.getTargetType().acceptVisitor(this));
       node.setExpression((Expression)node.getExpression().acceptVisitor(this));
       return node;
@@ -619,7 +643,7 @@ public class IdentityVisitor implements Visitor<Node> {
      * Visits a NotExpression
      * @param node the node to visit
      */
-    public Node visit(NotExpression node) {
+    public Object visit(NotExpression node) {
       return _visitUnary(node);
     }
 
@@ -627,7 +651,7 @@ public class IdentityVisitor implements Visitor<Node> {
      * Visits a ComplementExpression
      * @param node the node to visit
      */
-    public Node visit(ComplementExpression node) {
+    public Object visit(ComplementExpression node) {
       return _visitUnary(node);
     }
 
@@ -635,7 +659,7 @@ public class IdentityVisitor implements Visitor<Node> {
      * Visits a PlusExpression
      * @param node the node to visit
      */
-    public Node visit(PlusExpression node) {
+    public Object visit(PlusExpression node) {
       return _visitUnary(node);
     }
 
@@ -643,7 +667,7 @@ public class IdentityVisitor implements Visitor<Node> {
      * Visits a MinusExpression
      * @param node the node to visit
      */
-    public Node visit(MinusExpression node) {
+    public Object visit(MinusExpression node) {
       return _visitUnary(node);
     }
 
@@ -651,7 +675,7 @@ public class IdentityVisitor implements Visitor<Node> {
      * Visits a MultiplyExpression
      * @param node the node to visit
      */
-    public Node visit(MultiplyExpression node) {
+    public Object visit(MultiplyExpression node) {
       return _visitBinary(node);
     }
 
@@ -659,7 +683,7 @@ public class IdentityVisitor implements Visitor<Node> {
      * Visits a DivideExpression
      * @param node the node to visit
      */
-    public Node visit(DivideExpression node) {
+    public Object visit(DivideExpression node) {
       return _visitBinary(node);
     }
 
@@ -667,7 +691,7 @@ public class IdentityVisitor implements Visitor<Node> {
      * Visits a RemainderExpression
      * @param node the node to visit
      */
-    public Node visit(RemainderExpression node) {
+    public Object visit(RemainderExpression node) {
       return _visitBinary(node);
     }
 
@@ -675,7 +699,7 @@ public class IdentityVisitor implements Visitor<Node> {
      * Visits a AddExpression
      * @param node the node to visit
      */
-    public Node visit(AddExpression node) {
+    public Object visit(AddExpression node) {
       return _visitBinary(node);
     }
 
@@ -683,7 +707,7 @@ public class IdentityVisitor implements Visitor<Node> {
      * Visits a SubtractExpression
      * @param node the node to visit
      */
-    public Node visit(SubtractExpression node) {
+    public Object visit(SubtractExpression node) {
       return _visitBinary(node);
     }
 
@@ -691,7 +715,7 @@ public class IdentityVisitor implements Visitor<Node> {
      * Visits a ShiftLeftExpression
      * @param node the node to visit
      */
-    public Node visit(ShiftLeftExpression node) {
+    public Object visit(ShiftLeftExpression node) {
       return _visitBinary(node);
     }
 
@@ -699,7 +723,7 @@ public class IdentityVisitor implements Visitor<Node> {
      * Visits a ShiftRightExpression
      * @param node the node to visit
      */
-    public Node visit(ShiftRightExpression node) {
+    public Object visit(ShiftRightExpression node) {
       return _visitBinary(node);
     }
 
@@ -707,7 +731,7 @@ public class IdentityVisitor implements Visitor<Node> {
      * Visits a UnsignedShiftRightExpression
      * @param node the node to visit
      */
-    public Node visit(UnsignedShiftRightExpression node) {
+    public Object visit(UnsignedShiftRightExpression node) {
       return _visitBinary(node);
     }
 
@@ -715,7 +739,7 @@ public class IdentityVisitor implements Visitor<Node> {
      * Visits a LessExpression
      * @param node the node to visit
      */
-    public Node visit(LessExpression node) {
+    public Object visit(LessExpression node) {
       return _visitBinary(node);
     }
 
@@ -723,7 +747,7 @@ public class IdentityVisitor implements Visitor<Node> {
      * Visits a GreaterExpression
      * @param node the node to visit
      */
-    public Node visit(GreaterExpression node) {
+    public Object visit(GreaterExpression node) {
       return _visitBinary(node);
     }
 
@@ -731,7 +755,7 @@ public class IdentityVisitor implements Visitor<Node> {
      * Visits a LessOrEqualExpression
      * @param node the node to visit
      */
-    public Node visit(LessOrEqualExpression node) {
+    public Object visit(LessOrEqualExpression node) {
       return _visitBinary(node);
     }
 
@@ -739,7 +763,7 @@ public class IdentityVisitor implements Visitor<Node> {
      * Visits a GreaterOrEqualExpression
      * @param node the node to visit
      */
-    public Node visit(GreaterOrEqualExpression node) {
+    public Object visit(GreaterOrEqualExpression node) {
       return _visitBinary(node);
     }
 
@@ -747,7 +771,7 @@ public class IdentityVisitor implements Visitor<Node> {
      * Visits a InstanceOfExpression
      * @param node the node to visit
      */
-    public Node visit(InstanceOfExpression node) {
+    public Object visit(InstanceOfExpression node) {
       node.setExpression((Expression)node.getExpression().acceptVisitor(this));
       node.setReferenceType((Type)node.getReferenceType().acceptVisitor(this));
       return node;
@@ -757,7 +781,7 @@ public class IdentityVisitor implements Visitor<Node> {
      * Visits a EqualExpression
      * @param node the node to visit
      */
-    public Node visit(EqualExpression node) {
+    public Object visit(EqualExpression node) {
       return _visitBinary(node);
     }
 
@@ -765,7 +789,7 @@ public class IdentityVisitor implements Visitor<Node> {
      * Visits a NotEqualExpression
      * @param node the node to visit
      */
-    public Node visit(NotEqualExpression node) {
+    public Object visit(NotEqualExpression node) {
       return _visitBinary(node);
     }
 
@@ -773,7 +797,7 @@ public class IdentityVisitor implements Visitor<Node> {
      * Visits a BitAndExpression
      * @param node the node to visit
      */
-    public Node visit(BitAndExpression node) {
+    public Object visit(BitAndExpression node) {
       return _visitBinary(node);
     }
 
@@ -781,7 +805,7 @@ public class IdentityVisitor implements Visitor<Node> {
      * Visits a ExclusiveOrExpression
      * @param node the node to visit
      */
-    public Node visit(ExclusiveOrExpression node) {
+    public Object visit(ExclusiveOrExpression node) {
       return _visitBinary(node);
     }
 
@@ -789,7 +813,7 @@ public class IdentityVisitor implements Visitor<Node> {
      * Visits a BitOrExpression
      * @param node the node to visit
      */
-    public Node visit(BitOrExpression node) {
+    public Object visit(BitOrExpression node) {
       return _visitBinary(node);
     }
 
@@ -797,7 +821,7 @@ public class IdentityVisitor implements Visitor<Node> {
      * Visits an AndExpression
      * @param node the node to visit
      */
-    public Node visit(AndExpression node) {
+    public Object visit(AndExpression node) {
       return _visitBinary(node);
     }
 
@@ -805,7 +829,7 @@ public class IdentityVisitor implements Visitor<Node> {
      * Visits an OrExpression
      * @param node the node to visit
      */
-    public Node visit(OrExpression node) {
+    public Object visit(OrExpression node) {
       return _visitBinary(node);
     }
 
@@ -813,7 +837,7 @@ public class IdentityVisitor implements Visitor<Node> {
      * Visits a ConditionalExpression
      * @param node the node to visit
      */
-    public Node visit(ConditionalExpression node) {
+    public Object visit(ConditionalExpression node) {
       node.setConditionExpression((Expression)node.getConditionExpression().acceptVisitor(this));
       node.setIfTrueExpression((Expression)node.getIfTrueExpression().acceptVisitor(this));
       node.setIfFalseExpression((Expression)node.getIfFalseExpression().acceptVisitor(this));
@@ -824,7 +848,7 @@ public class IdentityVisitor implements Visitor<Node> {
      * Visits an SimpleAssignExpression
      * @param node the node to visit
      */
-    public Node visit(SimpleAssignExpression node) {
+    public Object visit(SimpleAssignExpression node) {
       return _visitBinary(node);
     }
 
@@ -832,7 +856,7 @@ public class IdentityVisitor implements Visitor<Node> {
      * Visits an MultiplyAssignExpression
      * @param node the node to visit
      */
-    public Node visit(MultiplyAssignExpression node) {
+    public Object visit(MultiplyAssignExpression node) {
       return _visitBinary(node);
     }
 
@@ -840,7 +864,7 @@ public class IdentityVisitor implements Visitor<Node> {
      * Visits an DivideAssignExpression
      * @param node the node to visit
      */
-    public Node visit(DivideAssignExpression node) {
+    public Object visit(DivideAssignExpression node) {
       return _visitBinary(node);
     }
 
@@ -848,7 +872,7 @@ public class IdentityVisitor implements Visitor<Node> {
      * Visits an RemainderAssignExpression
      * @param node the node to visit
      */
-    public Node visit(RemainderAssignExpression node) {
+    public Object visit(RemainderAssignExpression node) {
       return _visitBinary(node);
     }
 
@@ -856,7 +880,7 @@ public class IdentityVisitor implements Visitor<Node> {
      * Visits an AddAssignExpression
      * @param node the node to visit
      */
-    public Node visit(AddAssignExpression node) {
+    public Object visit(AddAssignExpression node) {
       return _visitBinary(node);
     }
 
@@ -864,7 +888,7 @@ public class IdentityVisitor implements Visitor<Node> {
      * Visits an SubtractAssignExpression
      * @param node the node to visit
      */
-    public Node visit(SubtractAssignExpression node) {
+    public Object visit(SubtractAssignExpression node) {
       return _visitBinary(node);
     }
 
@@ -872,7 +896,7 @@ public class IdentityVisitor implements Visitor<Node> {
      * Visits an ShiftLeftAssignExpression
      * @param node the node to visit
      */
-    public Node visit(ShiftLeftAssignExpression node) {
+    public Object visit(ShiftLeftAssignExpression node) {
       return _visitBinary(node);
     }
 
@@ -880,7 +904,7 @@ public class IdentityVisitor implements Visitor<Node> {
      * Visits an ShiftRightAssignExpression
      * @param node the node to visit
      */
-    public Node visit(ShiftRightAssignExpression node) {
+    public Object visit(ShiftRightAssignExpression node) {
       return _visitBinary(node);
     }
 
@@ -888,7 +912,7 @@ public class IdentityVisitor implements Visitor<Node> {
      * Visits an UnsignedShiftRightAssignExpression
      * @param node the node to visit
      */
-    public Node visit(UnsignedShiftRightAssignExpression node) {
+    public Object visit(UnsignedShiftRightAssignExpression node) {
       return _visitBinary(node);
     }
 
@@ -896,7 +920,7 @@ public class IdentityVisitor implements Visitor<Node> {
      * Visits a BitAndAssignExpression
      * @param node the node to visit
      */
-    public Node visit(BitAndAssignExpression node) {
+    public Object visit(BitAndAssignExpression node) {
       return _visitBinary(node);
     }
 
@@ -904,7 +928,7 @@ public class IdentityVisitor implements Visitor<Node> {
      * Visits a ExclusiveOrAssignExpression
      * @param node the node to visit
      */
-    public Node visit(ExclusiveOrAssignExpression node) {
+    public Object visit(ExclusiveOrAssignExpression node) {
       return _visitBinary(node);
     }
 
@@ -912,7 +936,7 @@ public class IdentityVisitor implements Visitor<Node> {
      * Visits a BitOrAssignExpression
      * @param node the node to visit
      */
-    public Node visit(BitOrAssignExpression node) {
+    public Object visit(BitOrAssignExpression node) {
       return _visitBinary(node);
     }
 
@@ -920,11 +944,11 @@ public class IdentityVisitor implements Visitor<Node> {
      * Visits a BlockStatement
      * @param node the node to visit
      */
-    public Node visit(BlockStatement node) {
-      LinkedList<Node> statements = new LinkedList<Node>(); // Add parameterization <Node>.
-      Iterator<Node> it = node.getStatements().iterator();
+    public Object visit(BlockStatement node) {
+      LinkedList statements = new LinkedList(); // Add parameterization <Node>.
+      Iterator it = node.getStatements().iterator();
       while (it.hasNext()) {
-        statements.add(it.next().acceptVisitor(this));
+        statements.add((Node)((Node)it.next()).acceptVisitor(this));
       }
       node.setStatements(statements);
       return node;
@@ -934,11 +958,11 @@ public class IdentityVisitor implements Visitor<Node> {
      * Visits a ClassDeclaration
      * @param node the node to visit
      */
-    public Node visit(ClassDeclaration node) {
-      LinkedList<Node> members = new LinkedList<Node>(); // Add parameterization <Node>.
-      Iterator<Node> it = node.getMembers().iterator();
+    public Object visit(ClassDeclaration node) {
+      LinkedList members = new LinkedList(); // Add parameterization <Node>.
+      Iterator it = node.getMembers().iterator();
       while (it.hasNext()) {
-        members.add(it.next().acceptVisitor(this));
+        members.add((Node)((Node)it.next()).acceptVisitor(this));
       }
       node.setMembers(members);
       return node;
@@ -948,11 +972,11 @@ public class IdentityVisitor implements Visitor<Node> {
      * Visits an InterfaceDeclaration
      * @param node the node to visit
      */
-    public Node visit(InterfaceDeclaration node) {
-      LinkedList<Node> members = new LinkedList<Node>(); // Add parameterization <Node>.
-      Iterator<Node> it = node.getMembers().iterator();
+    public Object visit(InterfaceDeclaration node) {
+      LinkedList members = new LinkedList(); // Add parameterization <Node>.
+      Iterator it = node.getMembers().iterator();
       while (it.hasNext()) {
-        members.add(it.next().acceptVisitor(this));
+        members.add((Node)((Node)it.next()).acceptVisitor(this));
       }
       node.setMembers(members);
       return node;
@@ -962,20 +986,20 @@ public class IdentityVisitor implements Visitor<Node> {
      * Visits a ConstructorDeclaration
      * @param node the node to visit
      */
-    public Node visit(ConstructorDeclaration node) {
-      LinkedList<FormalParameter> parameters = new LinkedList<FormalParameter>(); // Add parameterization <Node>.
-      Iterator<FormalParameter> it1 = node.getParameters().iterator();
-      while (it1.hasNext()) {
-        parameters.add((FormalParameter)it1.next().acceptVisitor(this));
+    public Object visit(ConstructorDeclaration node) {
+      LinkedList parameters = new LinkedList(); // Add parameterization <Node>.
+      Iterator it = node.getParameters().iterator();
+      while (it.hasNext()) {
+        parameters.add((Node)((Node)it.next()).acceptVisitor(this));
       }
       node.setParameters(parameters);
       if (node.getConstructorInvocation() != null) {
         node.setConstructorInvocation((ConstructorInvocation)node.getConstructorInvocation().acceptVisitor(this));
       }
-      LinkedList<Node> statements = new LinkedList<Node>(); // Add parameterization <Node>.
-      Iterator<Node> it2 = node.getStatements().iterator();
-      while (it2.hasNext()) {
-        statements.add(it2.next().acceptVisitor(this));
+      LinkedList statements = new LinkedList(); // Add parameterization <Node>.
+      it = node.getStatements().iterator();
+      while (it.hasNext()) {
+        statements.add((Node)((Node)it.next()).acceptVisitor(this));
       }
       node.setStatements(statements);
       return node;
@@ -985,12 +1009,12 @@ public class IdentityVisitor implements Visitor<Node> {
      * Visits a MethodDeclaration
      * @param node the node to visit
      */
-    public Node visit(MethodDeclaration node) {
+    public Object visit(MethodDeclaration node) {
       node.setReturnType((Type)node.getReturnType().acceptVisitor(this));
-      LinkedList<FormalParameter> parameters = new LinkedList<FormalParameter>(); // Add parameterization <Node>.
-      Iterator<FormalParameter> it = node.getParameters().iterator();
+      LinkedList parameters = new LinkedList(); // Add parameterization <Node>.
+      Iterator it = node.getParameters().iterator();
       while (it.hasNext()) {
-        parameters.add((FormalParameter)it.next().acceptVisitor(this));
+        parameters.add((Node)((Node)it.next()).acceptVisitor(this));
       }
       node.setParameters(parameters);
       if (node.getBody() != null) {
@@ -1003,7 +1027,7 @@ public class IdentityVisitor implements Visitor<Node> {
      * Visits a FormalParameter
      * @param node the node to visit
      */
-    public Node visit(FormalParameter node) {
+    public Object visit(FormalParameter node) {
       node.setType((Type)node.getType().acceptVisitor(this));
       return node;
     }
@@ -1012,7 +1036,7 @@ public class IdentityVisitor implements Visitor<Node> {
      * Visits a FieldDeclaration
      * @param node the node to visit
      */
-    public Node visit(FieldDeclaration node) {
+    public Object visit(FieldDeclaration node) {
       node.setType((Type)node.getType().acceptVisitor(this));
       if (node.getInitializer() != null) {
         node.setInitializer((Expression)node.getInitializer().acceptVisitor(this));
@@ -1024,7 +1048,7 @@ public class IdentityVisitor implements Visitor<Node> {
      * Visits a VariableDeclaration
      * @param node the node to visit
      */
-    public Node visit(VariableDeclaration node) {
+    public Object visit(VariableDeclaration node) {
       node.setType((Type)node.getType().acceptVisitor(this));
       if (node.getInitializer() != null) {
         node.setInitializer((Expression)node.getInitializer().acceptVisitor(this));
@@ -1036,7 +1060,7 @@ public class IdentityVisitor implements Visitor<Node> {
      * Visits a ClassInitializer
      * @param node the node to visit
      */
-    public Node visit(ClassInitializer node) {
+    public Object visit(ClassInitializer node) {
       node.setBlock((BlockStatement)node.getBlock().acceptVisitor(this));
       return node;
     }
@@ -1045,17 +1069,17 @@ public class IdentityVisitor implements Visitor<Node> {
      * Visits a InstanceInitializer
      * @param node the node to visit
      */
-    public Node visit(InstanceInitializer node) {
+    public Object visit(InstanceInitializer node) {
       node.setBlock((BlockStatement)node.getBlock().acceptVisitor(this));
       return node;
     }
 
-    private Node _visitUnary(UnaryExpression node) {
+    private Object _visitUnary(UnaryExpression node) {
       node.setExpression((Expression)node.getExpression().acceptVisitor(this));
       return node;
     }
 
-    private Node _visitBinary(BinaryExpression node) {
+    private Object _visitBinary(BinaryExpression node) {
       node.setLeftExpression((Expression)node.getLeftExpression().acceptVisitor(this));
       node.setRightExpression((Expression)node.getRightExpression().acceptVisitor(this));
       return node;

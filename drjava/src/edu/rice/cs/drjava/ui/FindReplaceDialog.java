@@ -172,6 +172,7 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
       _defPane.removeCaretListener(_caretListener);
       _defPane = null;
       _displayed = false;
+      _mainframe.clearStatusMessage(); // _message.setText(""); // JL
     } else {
       // Probably a double-click on close...
       //throw new UnexpectedException(new RuntimeException("FindReplaceDialog should be listening to something"));

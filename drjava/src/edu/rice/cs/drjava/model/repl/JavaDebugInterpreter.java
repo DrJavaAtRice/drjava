@@ -74,14 +74,20 @@ import edu.rice.cs.util.UnexpectedException;
  * @version $Id$
  */
 public class JavaDebugInterpreter extends DynamicJavaAdapter {
-  
-  /** This interpreter's name. */
+  /**
+   * This interpreter's name.
+   */
   protected final String _name;
 
-  /** The class name of the "this" object for the currently suspended thread. */
+  /**
+   * The class name of the "this" object for the currently
+   * suspended thread.
+   */
   protected String _thisClassName;
 
-  /** The name of the package containing _this, if any. */
+  /**
+   * The name of the package containing _this, if any.
+   */
   protected String _thisPackageName;
 
   /**
@@ -89,7 +95,7 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
    * of ThisExpressions in the tree to either
    * QualifiedName or an ObjectFieldAccess
    */
-  protected IdentityVisitor _translationVisitor;
+  protected Visitor _translationVisitor;
 
   /**
    * Creates a new debug interpreter.
@@ -240,7 +246,7 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
     TypeChecker tc = makeTypeChecker(context);
     int numDollars = _getNumDollars(_thisClassName);
     String methodName = method.getMethodName();
-    List<Expression> args = method.getArguments();
+    List args = method.getArguments();
     Expression expr = null;
 
     // Check if this has an anonymous inner class
@@ -320,7 +326,7 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
     TypeChecker tc = makeTypeChecker(context);
     int numDollars = _getNumDollars(_thisClassName);
     String methodName = method.getMethodName();
-    List<Expression> args = method.getArguments();
+    List args = method.getArguments();
     StaticMethodCall expr = null;
     String currClass = _getFullyQualifiedClassNameForThis();
     int index = currClass.length();
@@ -369,7 +375,7 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
           field = field.substring(lastDot + 1, field.length());
         }
       }
-      LinkedList<IdentifierToken> list = new LinkedList<IdentifierToken>();
+      LinkedList list = new LinkedList(); // Add parameterization <Identifier>.
       StringTokenizer st = new StringTokenizer(_getFullyQualifiedClassNameForThis(), "$.");
       String currString = st.nextToken();
       while (!currString.equals(field)) {
@@ -415,7 +421,7 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
    */
   protected QualifiedName _convertThisToName(ThisExpression node) {
     // Can't parametize this List for some reason.
-    List<IdentifierToken> ids = new LinkedList<IdentifierToken>(); // Add parameterization <Identifier>.
+    List ids = new LinkedList(); // Add parameterization <Identifier>.
     ids.add(new Identifier("this", node.getBeginLine(), node.getBeginColumn(),
                            node.getEndLine(), node.getEndColumn()));
     return new QualifiedName(ids, node.getFilename(),
@@ -447,7 +453,7 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
    * @return an unqualified ThisExpression
    */
   protected ThisExpression buildUnqualifiedThis() {
-    LinkedList<IdentifierToken> ids = new LinkedList<IdentifierToken>();
+    LinkedList ids = new LinkedList();
     return new ThisExpression(ids, "", 0, 0, 0, 0);
   }
 
@@ -567,9 +573,9 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
    * visit for a ThisExpresssion to convert it to
    * either a QualifiedName or an ObjectFieldAccess
    */
-  public IdentityVisitor makeTranslationVisitor() {
+  public Visitor makeTranslationVisitor() {
     return new IdentityVisitor() {
-      public Node visit(ThisExpression node) {
+      public Object visit(ThisExpression node) {
         Expression e = visitThis(node);
         if (e instanceof QualifiedName) {
           return visit((QualifiedName)e);
@@ -647,18 +653,18 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
       //          throw e;
       //        }
       //      }
-      public Node visit(QualifiedName node) {
+      public Object visit(QualifiedName node) {
         try {
           return super.visit(node);
         }
         catch(ExecutionError e) {
           // This error is thrown only if this QualifiedName is not
           // a local variable or a class
-          List<IdentifierToken> ids = node.getIdentifiers();
-          Iterator<IdentifierToken> iter = ids.iterator();
-          String field = iter.next().image();
+          List ids = node.getIdentifiers();
+          Iterator iter = ids.iterator();
+          String field = ((IdentifierToken)iter.next()).image();
           while (iter.hasNext()) {
-            IdentifierToken t = iter.next();
+            IdentifierToken t = (IdentifierToken)iter.next();
             field += "$" + t.image();
           }
           if (nameContext.isDefined("this")) {
@@ -690,7 +696,7 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
           throw e;
         }
       }
-      public Node visit(ObjectMethodCall node) {
+      public Object visit(ObjectMethodCall node) {
         MethodCall method = (MethodCall) super.visit(node);
         // if (method != null) this object method call is either a method with no
         // class before it or is a static method call
@@ -737,7 +743,7 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
        * Visits a QualifiedName, returning our class if it is "this"
        * @param node the node to visit
        */
-      public Class visit(QualifiedName node) {
+      public Object visit(QualifiedName node) {
         String var = node.getRepresentation();
         if ("this".equals(var)) {
           //            String cName = _thisClassName.replace('$', '.');

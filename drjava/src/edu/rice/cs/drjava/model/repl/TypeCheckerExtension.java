@@ -78,7 +78,7 @@ public class TypeCheckerExtension extends TypeChecker {
    * since it caused a NullPointerException on "null instanceof Object"
    * @param node the node to visit
    */
-  public Class visit(InstanceOfExpression node) {
+  public Object visit(InstanceOfExpression node) {
     node.getReferenceType().acceptVisitor(this);
     
     // The expression must not have a primitive type
@@ -91,64 +91,6 @@ public class TypeCheckerExtension extends TypeChecker {
     node.setProperty(NodeProperties.TYPE, boolean.class);
     return boolean.class;
   }
-//<<<<<<< TypeCheckerExtension.java
-//  
-//  public Class visit(MethodDeclaration node) {
-//    super.visit(node);
-//    Class c = (Class)node.getProperty(NodeProperties.TYPE);
-//    BlockStatement bs = node.getBody();
-//    List l = bs.getStatements();
-//    Iterator iter = l.iterator();
-//    boolean foundCorrectType = false;
-//    while(iter.hasNext()) {
-//      Statement s = (Statement)iter.next();
-//      if (s instanceof ReturnStatement) {
-//        Class returnExpClass;
-//        Expression expression = ((ReturnStatement)s).getExpression();
-//        if (expression == null) {
-//          returnExpClass = null;
-//        }
-//        else {
-//          returnExpClass = (Class)expression.acceptVisitor(this);
-//        }
-//        // will void return type mean c is null?
-//        if (c == null) {
-//          if (returnExpClass != null) {
-//            // returning a value in a void method
-//            throw new ExecutionError("assignment.types", node);
-//          }
-//        }
-//        else if (returnExpClass == null) {
-//          // returning nothing in a non-void method
-//          throw new ExecutionError("assignment.types", node);    
-//        }
-//        else if (!c.isAssignableFrom(returnExpClass)) {
-//          // returning an unassignable type
-//          throw new ExecutionError("assignment.types", node);
-//        }
-//        else {
-//          // returning an assignable type
-//          foundCorrectType = true;
-//        }
-//      }
-//    }
-//    if (c != null) {
-//      if (!foundCorrectType) {
-//        // we were supposed to return a type, but did not
-//        throw new ExecutionError("assignment.types", node);
-//      }
-//    }
-//    return null;
-//  }
-//  
-//  public Class visit(ReturnStatement node) {
-//    Expression e = node.getExpression();
-//    if (e != null) {
-//      return e.acceptVisitor(this);
-//    }
-//    return null;
-//  }     
-//=======
 //  
 //  public Object visit(MethodDeclaration node) {
 //    super.visit(node);
@@ -205,14 +147,13 @@ public class TypeCheckerExtension extends TypeChecker {
 //    }
 //    return null;
 //  }     
-//>>>>>>> 1.6
     
   
   /**
    * Visits a DivideExpression
    * @param node the node to visit
    */
-  public Class visit(DivideExpression node) {
+  public Object visit(DivideExpression node) {
     Node  ln = node.getLeftExpression();
     Node  rn = node.getRightExpression();
     ln.acceptVisitor(this);
@@ -225,7 +166,7 @@ public class TypeCheckerExtension extends TypeChecker {
    * Visits a RemainderExpression
    * @param node the node to visit
    */
-  public Class visit(RemainderExpression node) {
+  public Object visit(RemainderExpression node) {
     Node  ln = node.getLeftExpression();
     Node  rn = node.getRightExpression();
     ln.acceptVisitor(this);

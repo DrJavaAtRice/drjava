@@ -111,45 +111,42 @@ public class JUnitPanel extends ErrorPanel{
   private JUnitProgressBar _progressBar;
   private List<OpenDefinitionsDocument> _odds = new ArrayList<OpenDefinitionsDocument>();
 
+  private Action _showStackTraceAction = new AbstractAction("Show Stack Trace") {
+        public void actionPerformed(ActionEvent ae) {
+          if (_error != null) {
+            _displayStackTrace(_error);
+          }
+        }
+      };
+  
+  private JButton _showStackTraceButton;
+  
+  /** The currently selected error. */
+  private JUnitError _error = null;
+  private Window _stackFrame = null;
+  private JTextArea _stackTextArea;
+  private final JLabel _errorLabel = new JLabel();
+  private final JLabel _testLabel = new JLabel();
+  private final JLabel _fileLabel = new JLabel();
+  
   /**
    * Constructor.
    * @param model SingleDisplayModel in which we are running
    * @param frame MainFrame in which we are displayed
    */
   public JUnitPanel(SingleDisplayModel model, MainFrame frame) {
-    super(model, frame, "Test Output");
+    super(model, frame, "Test Output", "Test Progress");
     _testCount = 0;
     _testsSuccessful = true;
-    _errorListPane = new JUnitErrorListPane();
-
-    _mainPanel.setLayout(new BorderLayout());
-
-    // We make the vertical scrollbar always there.
-    // If we don't, when it pops up it cuts away the right edge of the
-    // text. Very bad.
-    JScrollPane scroller =
-      new BorderlessScrollPane(_errorListPane,
-                      JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
-                      JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-
-
-    _mainPanel.add(scroller, BorderLayout.CENTER);
-
-    JPanel sidePanel = new JPanel(new BorderLayout());
-    sidePanel.setBorder(new EmptyBorder(0,5,0,5)); // 5 pix padding on sides
-    JPanel innerPanel = new JPanel(new BorderLayout());  // bar and checkbox
-    innerPanel.setBorder(new EmptyBorder(5,0,0,0)); // 5 pix padding on top
-    sidePanel.add(new JLabel("Test Progress", SwingConstants.LEFT),
-                      BorderLayout.NORTH);
-
-    sidePanel.add(innerPanel,BorderLayout.CENTER);
-
+    
     _progressBar = new JUnitProgressBar();
-    innerPanel.add(_progressBar, BorderLayout.NORTH);
-    innerPanel.add(new JPanel(),BorderLayout.CENTER);
-
-    innerPanel.add(_showHighlightsCheckBox, BorderLayout.SOUTH);
-    _mainPanel.add(sidePanel, BorderLayout.EAST);
+    _showStackTraceButton = new JButton(_showStackTraceAction);
+    customPanel.add(_progressBar, BorderLayout.NORTH);
+    customPanel.add(_showStackTraceButton, BorderLayout.SOUTH);
+    
+    _errorListPane = new JUnitErrorListPane();
+    setErrorListPane(_errorListPane);
+    
   }
 
   /**
@@ -228,23 +225,31 @@ public class JUnitPanel extends ErrorPanel{
   public synchronized void testStarted(String className, String testName) {
   }
 
+  private void _displayStackTrace (JUnitError e) {
+    _errorLabel.setText((e.isWarning() ? "Error: " : "Failure: ") +
+                        e.message());
+    _fileLabel.setText("File: "+(new File(e.fileName())).getName());
+    if (!e.testName().equals("")) {
+      _testLabel.setText("Test: "+e.testName());
+    }
+    else {
+      _testLabel.setText("");
+    }
+    _stackTextArea.setText(e.stackTrace());
+    _stackTextArea.setCaretPosition(0);
+    _stackFrame.show();
+  }
+
   /**
    * A pane to show JUnit errors. It acts a bit like a listbox (clicking
    * selects an item) but items can each wrap, etc.
    */
   public class JUnitErrorListPane extends ErrorPanel.ErrorListPane {
     private JPopupMenu _popMenu;
-    private Window _stackFrame = null;
-    private JTextArea _stackTextArea;
-    private final JLabel _errorLabel = new JLabel();
-    private final JLabel _testLabel = new JLabel();
-    private final JLabel _fileLabel = new JLabel();
     private String _runningTestName;
     private boolean _warnedOutOfSync;
     private static final String JUNIT_WARNING = "junit.framework.TestSuite$1.warning";
 
-    /** The currently selected error. */
-    private JUnitError _error = null;
 
     /**
      * Maps any test names in the currently running suite to the position
@@ -258,18 +263,13 @@ public class JUnitPanel extends ErrorPanel{
     public JUnitErrorListPane() {
       removeMouseListener(defaultMouseListener);
       _popMenu = new JPopupMenu();
-      _popMenu.add(new AbstractAction("Show Stack Trace") {
-        public void actionPerformed(ActionEvent ae) {
-          if (_error != null) {
-            _displayStackTrace(_error);
-          }
-        }
-      });
+      _popMenu.add(_showStackTraceAction);
       _error = null;
       _setupStackTraceFrame();
       addMouseListener(new PopupAdapter());
       _runningTestName = null;
       _runningTestNamePositions = new HashMap<String, Position>();
+      _showStackTraceButton.setEnabled(false);
     }
 
     private String _getTestFromName(String name) {
@@ -545,20 +545,24 @@ public class JUnitPanel extends ErrorPanel{
       // initial location is relative to parent (MainFrame)
       _dialog.setLocationRelativeTo(_frame);
     }
-
-    private void _displayStackTrace (JUnitError e) {
-      _errorLabel.setText((e.isWarning() ? "Error: " : "Failure: ") +
-                          e.message());
-      _fileLabel.setText("File: "+(new File(e.fileName())).getName());
-      if (!e.testName().equals("")) {
-        _testLabel.setText("Test: "+e.testName());
-      }
-      else {
-        _testLabel.setText("");
-      }
-      _stackTextArea.setText(e.stackTrace());
-      _stackTextArea.setCaretPosition(0);
-      _stackFrame.show();
+    
+    /**
+     * Overrides selectItem in ErrorListPane to update the current _error selected
+     * and enabling the _showStackTraceButton. 
+     */
+    public void selectItem(CompilerError error) {
+      super.selectItem(error);
+      _error = (JUnitError)error;
+      _showStackTraceButton.setEnabled(true);
+    }
+     
+    
+    /**
+     * Overrides _removeListHighlight in ErrorListPane to disable the _showStackTraceButton. 
+     */
+    protected void _removeListHighlight() {   
+      super._removeListHighlight();
+      _showStackTraceButton.setEnabled(false);        
     }
 
     /**
