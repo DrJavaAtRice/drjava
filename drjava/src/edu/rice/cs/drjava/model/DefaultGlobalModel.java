@@ -1982,6 +1982,11 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
           catch (InvalidPackageException e) {
             // Invalid package-- don't add to classpath
           }
+          
+          /* update the navigator */
+          _documentNavigator.removeDocument(getIDocGivenODD(this));
+          _documentNavigator.addDocument(getIDocGivenODD(this), file.getCanonicalFile().getParent());
+          
         }
 
         return true;
