@@ -58,7 +58,7 @@ import edu.rice.cs.drjava.config.OptionConstants;
 public class DefinitionsDocumentTest extends TestCase
   implements ReducedModelStates 
 {
-  protected DefinitionsDocument defModel;
+  private DefinitionsDocument _defModel;
 
   /**
    * Constructor.
@@ -72,7 +72,7 @@ public class DefinitionsDocumentTest extends TestCase
    * Create a definitions document to work with.
    */
   protected void setUp() {
-    defModel = new DefinitionsDocument();
+    _defModel = new DefinitionsDocument();
     DrJava.getConfig().resetToDefaults();
   }
 
@@ -88,15 +88,15 @@ public class DefinitionsDocumentTest extends TestCase
    * Test insertion.
    */
   public void testInsertToDoc() throws BadLocationException {
-    defModel.insertString(0, "a/*bc */\"\\{}()", null);
-    assertEquals("#0.0", defModel.getText(0, 8), "a/*bc */");
-    assertEquals("#0.1", 14, defModel.getCurrentLocation());
-    defModel.insertString(0, "Start:", null);
-    assertEquals("#1.0", defModel.getText(0, 14), "Start:a/*bc */");
-    assertEquals("#1.1", 6, defModel.getCurrentLocation());
+    _defModel.insertString(0, "a/*bc */\"\\{}()", null);
+    assertEquals("#0.0", _defModel.getText(0, 8), "a/*bc */");
+    assertEquals("#0.1", 14, _defModel.getCurrentLocation());
+    _defModel.insertString(0, "Start:", null);
+    assertEquals("#1.0", _defModel.getText(0, 14), "Start:a/*bc */");
+    assertEquals("#1.1", 6, _defModel.getCurrentLocation());
     // document is:
     // Start:=>a/*bc */"\\{}()
-    BraceReduction rm = defModel.getReduced();
+    BraceReduction rm = _defModel.getReduced();
     assertEquals("2.1", FREE, rm.getStateAtCurrent());
     rm.move(2);
     // document is:
@@ -142,11 +142,11 @@ public class DefinitionsDocumentTest extends TestCase
    * @exception BadLocationException
    */
   public void testInsertStarIntoStarSlash() throws BadLocationException {
-    BraceReduction rm = defModel.getReduced();
-    defModel.insertString(0, "/**/", null);
+    BraceReduction rm = _defModel.getReduced();
+    _defModel.insertString(0, "/**/", null);
     // Put new star between second star and second slash
-    defModel.insertString(3, "*", null);
-    defModel.move(-4);
+    _defModel.insertString(3, "*", null);
+    _defModel.move(-4);
     assertEquals("1", "/*", rm.currentToken().getType());
     assertEquals("2", ReducedToken.FREE, rm.currentToken().getState());
     rm.move(2);
@@ -162,11 +162,11 @@ public class DefinitionsDocumentTest extends TestCase
    * @exception BadLocationException
    */
   public void testInsertSlashIntoStarSlash() throws BadLocationException {
-    BraceReduction rm = defModel.getReduced();
-    defModel.insertString(0, "/**/", null);
+    BraceReduction rm = _defModel.getReduced();
+    _defModel.insertString(0, "/**/", null);
     // Put new slash between second star and second slash
-    defModel.insertString(3, "/", null);
-    defModel.move(-4);
+    _defModel.insertString(3, "/", null);
+    _defModel.move(-4);
     assertEquals("1", "/*", rm.currentToken().getType());
     assertEquals("2", ReducedToken.FREE, rm.currentToken().getState());
     rm.move(2);
@@ -182,11 +182,11 @@ public class DefinitionsDocumentTest extends TestCase
    * @exception BadLocationException
    */
   public void testInsertStarIntoSlashStar() throws BadLocationException {
-    BraceReduction rm = defModel.getReduced();
-    defModel.insertString(0, "/**/", null);
+    BraceReduction rm = _defModel.getReduced();
+    _defModel.insertString(0, "/**/", null);
     // Put new star between second star and second slash
-    defModel.insertString(1, "*", null);
-    defModel.move(-2);
+    _defModel.insertString(1, "*", null);
+    _defModel.move(-2);
     assertEquals("1", "/*", rm.currentToken().getType());
     assertEquals("2", ReducedToken.FREE, rm.currentToken().getState());
     rm.move(2);
@@ -201,11 +201,11 @@ public class DefinitionsDocumentTest extends TestCase
    * Test removal of text.
    */
   public void testDeleteDoc() throws BadLocationException {
-    defModel.insertString(0, "a/*bc */", null);
-    defModel.remove(3, 3);
-    assertEquals("#0.0", "a/**/", defModel.getText(0, 5));
-    assertEquals("#0.1", 3, defModel.getCurrentLocation());
-    BraceReduction rm = defModel.getReduced();
+    _defModel.insertString(0, "a/*bc */", null);
+    _defModel.remove(3, 3);
+    assertEquals("#0.0", "a/**/", _defModel.getText(0, 5));
+    assertEquals("#0.1", 3, _defModel.getCurrentLocation());
+    BraceReduction rm = _defModel.getReduced();
     assertEquals("1.0", "*/", rm.currentToken().getType());
     // no longer support getBlockOffset
     //        assertEquals("1.1",0,rm.getBlockOffset());
@@ -250,9 +250,9 @@ public class DefinitionsDocumentTest extends TestCase
     final String s = "public class Foo {\n" +
       "  private int _x = 0;\n" +
         "}";
-    defModel.insertString(defModel.getLength(), s, null);
-    v = defModel.getHighlightStatus(0, defModel.getLength());
-    _checkHighlightStatusConsistent(v, 0, defModel.getLength());
+    _defModel.insertString(_defModel.getLength(), s, null);
+    v = _defModel.getHighlightStatus(0, _defModel.getLength());
+    _checkHighlightStatusConsistent(v, 0, _defModel.getLength());
     // Make sure the keywords are highlighted
     assertEquals("vector length", 12, v.size());
     assertEquals(HighlightStatus.KEYWORD, v.elementAt(0).getState());
@@ -283,17 +283,17 @@ public class DefinitionsDocumentTest extends TestCase
   public void testHighlightKeywords2() throws BadLocationException {
     Vector<HighlightStatus> v;
     final String s = "int y";
-    defModel.insertString(defModel.getLength(), s, null);
+    _defModel.insertString(_defModel.getLength(), s, null);
     // First sanity check the whole string's status
-    v = defModel.getHighlightStatus(0, defModel.getLength());
-    _checkHighlightStatusConsistent(v, 0, defModel.getLength());
+    v = _defModel.getHighlightStatus(0, _defModel.getLength());
+    _checkHighlightStatusConsistent(v, 0, _defModel.getLength());
     // Make sure the keyword is highlighted
 
     assertEquals("vector length", 2, v.size());
     assertEquals(HighlightStatus.TYPE, v.elementAt(0).getState());
     assertEquals(HighlightStatus.NORMAL, v.elementAt(1).getState());
     // Now only ask for highlights for "in"
-    v = defModel.getHighlightStatus(0, 2);
+    v = _defModel.getHighlightStatus(0, 2);
     _checkHighlightStatusConsistent(v, 0, 2);
     assertEquals("vector length", 1, v.size());
     assertEquals(0, v.elementAt(0).getLocation());
@@ -306,9 +306,9 @@ public class DefinitionsDocumentTest extends TestCase
    */
   public void testGotoLine1() throws BadLocationException {
     final String s = "a\n";
-    defModel.insertString(0, s, null);
-    defModel.gotoLine(2);
-    assertEquals("#0.0", 2, defModel.getCurrentLocation());
+    _defModel.insertString(0, s, null);
+    _defModel.gotoLine(2);
+    assertEquals("#0.0", 2, _defModel.getCurrentLocation());
   }
 
   /**
@@ -317,9 +317,9 @@ public class DefinitionsDocumentTest extends TestCase
    */
   public void testGotoLine2() throws BadLocationException {
     final String s = "abcd\n";
-    defModel.insertString(0, s, null);
-    defModel.gotoLine(2);
-    assertEquals("#0.0", 5, defModel.getCurrentLocation());
+    _defModel.insertString(0, s, null);
+    _defModel.gotoLine(2);
+    assertEquals("#0.0", 5, _defModel.getCurrentLocation());
   }
 
   /**
@@ -328,9 +328,9 @@ public class DefinitionsDocumentTest extends TestCase
    */
   public void testGotoLine3() throws BadLocationException {
     final String s = "a\nb\nc\n";
-    defModel.insertString(0, s, null);
-    defModel.gotoLine(4);
-    assertEquals("#0.0", 6, defModel.getCurrentLocation());
+    _defModel.insertString(0, s, null);
+    _defModel.gotoLine(4);
+    assertEquals("#0.0", 6, _defModel.getCurrentLocation());
   }
 
   /**
@@ -340,9 +340,9 @@ public class DefinitionsDocumentTest extends TestCase
    */
   public void testGotoLine4() throws BadLocationException {
     final String s = "a\nb\nc\n";
-    defModel.insertString(0, s, null);
-    defModel.gotoLine(8);
-    assertEquals("#0.0", 6, defModel.getCurrentLocation());
+    _defModel.insertString(0, s, null);
+    _defModel.gotoLine(8);
+    assertEquals("#0.0", 6, _defModel.getCurrentLocation());
   }
 
   /**
@@ -351,8 +351,8 @@ public class DefinitionsDocumentTest extends TestCase
    * location.
    */
   public void testGotoLine5() {
-    defModel.gotoLine(1);
-    assertEquals("#0.0", 0, defModel.getCurrentLocation());
+    _defModel.gotoLine(1);
+    assertEquals("#0.0", 0, _defModel.getCurrentLocation());
   }
 
   /**
@@ -360,8 +360,8 @@ public class DefinitionsDocumentTest extends TestCase
    * of an empty document just keeps you in your current location.
    */
   public void testGotoLine6() {
-    defModel.gotoLine(4);
-    assertEquals("#0.0", 0, defModel.getCurrentLocation());
+    _defModel.gotoLine(4);
+    assertEquals("#0.0", 0, _defModel.getCurrentLocation());
   }
 
   /**
@@ -371,9 +371,9 @@ public class DefinitionsDocumentTest extends TestCase
    */
   public void testGotoLine7() throws BadLocationException {
     final String s = "11111\n2222\n33333\n44444";
-    defModel.insertString(0, s, null);
-    defModel.gotoLine(3);
-    assertEquals("#0.0", 11, defModel.getCurrentLocation());
+    _defModel.insertString(0, s, null);
+    _defModel.gotoLine(3);
+    assertEquals("#0.0", 11, _defModel.getCurrentLocation());
   }
   
   /**
@@ -381,11 +381,11 @@ public class DefinitionsDocumentTest extends TestCase
    */
   public void testGetColumn1() throws BadLocationException {
     final String s = "1234567890";
-    assertEquals("#0.0", 0, defModel.getCurrentCol());
-    defModel.insertString(0, s, null);
-    assertEquals("#0.1", 10, defModel.getCurrentCol());
-    defModel.gotoLine(0);
-    assertEquals("#0.2", 0, defModel.getCurrentCol());
+    assertEquals("#0.0", 0, _defModel.getCurrentCol());
+    _defModel.insertString(0, s, null);
+    assertEquals("#0.1", 10, _defModel.getCurrentCol());
+    _defModel.gotoLine(0);
+    assertEquals("#0.2", 0, _defModel.getCurrentCol());
   }
   
   
@@ -394,8 +394,8 @@ public class DefinitionsDocumentTest extends TestCase
    */
   public void testGetColumn2() throws BadLocationException {
     final String s = "1234567890\n1234\n12345";
-    defModel.insertString(0, s, null);
-    assertEquals("#0.0", 5, defModel.getCurrentCol() );
+    _defModel.insertString(0, s, null);
+    assertEquals("#0.0", 5, _defModel.getCurrentCol() );
   }
   
   /**
@@ -404,9 +404,9 @@ public class DefinitionsDocumentTest extends TestCase
    */
   public void testGetLine1() throws BadLocationException {
     final String s = "a\n";
-    defModel.insertString(0, s, null);
-    defModel.setCurrentLocation(2);
-    assertEquals("#0.0", 2, defModel.getCurrentLine());
+    _defModel.insertString(0, s, null);
+    _defModel.setCurrentLocation(2);
+    assertEquals("#0.0", 2, _defModel.getCurrentLine());
   }
 
   /**
@@ -415,11 +415,11 @@ public class DefinitionsDocumentTest extends TestCase
    */
   public void testGetLine2() throws BadLocationException {
     final String s = "abcd\n";
-    defModel.insertString(0, s, null);
-    defModel.setCurrentLocation(2);
-    assertEquals("#0.0", 1, defModel.getCurrentLine());
-    defModel.gotoLine(2);
-    assertEquals("#0.1", 2, defModel.getCurrentLine());
+    _defModel.insertString(0, s, null);
+    _defModel.setCurrentLocation(2);
+    assertEquals("#0.0", 1, _defModel.getCurrentLine());
+    _defModel.gotoLine(2);
+    assertEquals("#0.1", 2, _defModel.getCurrentLine());
   }
 
   /**
@@ -428,9 +428,9 @@ public class DefinitionsDocumentTest extends TestCase
    */
   public void testGetLine3() throws BadLocationException {
     final String s = "a\nb\nc\n";
-    defModel.insertString(0, s, null);
-    defModel.setCurrentLocation(6);
-    assertEquals("#0.0", 4, defModel.getCurrentLine());
+    _defModel.insertString(0, s, null);
+    _defModel.setCurrentLocation(6);
+    assertEquals("#0.0", 4, _defModel.getCurrentLine());
   }
 
   /**
@@ -440,9 +440,9 @@ public class DefinitionsDocumentTest extends TestCase
    */
   public void testGetLine4() throws BadLocationException {
     final String s = "a\nb\nc\n";
-    defModel.insertString(0, s, null);
-    defModel.gotoLine(8);
-    assertEquals("#0.0", 4, defModel.getCurrentLine());
+    _defModel.insertString(0, s, null);
+    _defModel.gotoLine(8);
+    assertEquals("#0.0", 4, _defModel.getCurrentLine());
   }
 
   /**
@@ -451,8 +451,8 @@ public class DefinitionsDocumentTest extends TestCase
    * location.
    */
   public void testGetLine5() {
-    defModel.setCurrentLocation(0);
-    assertEquals("#0.0", 1, defModel.getCurrentLine());
+    _defModel.setCurrentLocation(0);
+    assertEquals("#0.0", 1, _defModel.getCurrentLine());
   }
 
   /**
@@ -460,8 +460,8 @@ public class DefinitionsDocumentTest extends TestCase
    * of an empty document just keeps you in your current location.
    */
   public void testGetLine6() {
-    defModel.gotoLine(4);
-    assertEquals("#0.0", 1, defModel.getCurrentLine());
+    _defModel.gotoLine(4);
+    assertEquals("#0.0", 1, _defModel.getCurrentLine());
   }
 
   /**
@@ -471,13 +471,13 @@ public class DefinitionsDocumentTest extends TestCase
    */
   public void testGetLine7() throws BadLocationException {
     final String s = "12345\n7890\n2345\n789";
-    defModel.insertString(0, s, null);
-    defModel.setCurrentLocation(12);
-    assertEquals("#0.0", 3, defModel.getCurrentLine());
-    defModel.move(-5);
-    assertEquals("#0.1", 2, defModel.getCurrentLine());
-    defModel.setCurrentLocation(19);
-    assertEquals("#0.2", 4, defModel.getCurrentLine());
+    _defModel.insertString(0, s, null);
+    _defModel.setCurrentLocation(12);
+    assertEquals("#0.0", 3, _defModel.getCurrentLine());
+    _defModel.move(-5);
+    assertEquals("#0.1", 2, _defModel.getCurrentLine());
+    _defModel.setCurrentLocation(19);
+    assertEquals("#0.2", 4, _defModel.getCurrentLine());
   }
 
   /**
@@ -485,12 +485,12 @@ public class DefinitionsDocumentTest extends TestCase
    */
   public void testGetLineDeleteText() throws BadLocationException{
     final String s = "123456789\n123456789\n123456789\n123456789\n";
-    defModel.insertString(0,s,null);
-    defModel.setCurrentLocation(35);
-    assertEquals("Before delete", 4, defModel.getCurrentLine() );
-    defModel.remove(0,30);
-    defModel.setCurrentLocation(5);
-    assertEquals("After delete", 1, defModel.getCurrentLine() );
+    _defModel.insertString(0,s,null);
+    _defModel.setCurrentLocation(35);
+    assertEquals("Before delete", 4, _defModel.getCurrentLine() );
+    _defModel.remove(0,30);
+    _defModel.setCurrentLocation(5);
+    assertEquals("After delete", 1, _defModel.getCurrentLine() );
   }
   
   /**
@@ -498,20 +498,20 @@ public class DefinitionsDocumentTest extends TestCase
    */
   public void testGetLineDeleteText2() throws BadLocationException {
     final String s = "123456789\n123456789\n123456789\n123456789\n";
-    defModel.insertString(0,s,null);
-    defModel.setCurrentLocation(35);
-    assertEquals("Before delete", 4, defModel.getCurrentLine());
-    defModel.remove(18,7);
-    assertEquals("After delete", 2, defModel.getCurrentLine());
+    _defModel.insertString(0,s,null);
+    _defModel.setCurrentLocation(35);
+    assertEquals("Before delete", 4, _defModel.getCurrentLine());
+    _defModel.remove(18,7);
+    assertEquals("After delete", 2, _defModel.getCurrentLine());
   }
   
   /**
    * Test whether removeTabs actually removes all tabs.
    */
   public void testRemoveTabs1() {
-    defModel.setIndent(1);
+    _defModel.setIndent(1);
     String test = "\t this \t\tis a \t\t\t\t\ttest\t\t";
-    String result = defModel._removeTabs(test);
+    String result = _defModel._removeTabs(test);
     assertEquals( "  this   is a      test  ", result);
   }
   
@@ -539,7 +539,7 @@ public class DefinitionsDocumentTest extends TestCase
       bigExp.append(expected);
     }
 
-    String result = defModel._removeTabs(bigIn.toString());
+    String result = _defModel._removeTabs(bigIn.toString());
     assertEquals(bigExp.toString(), result);
   }
   
@@ -559,7 +559,7 @@ public class DefinitionsDocumentTest extends TestCase
     "   throw new ParseException(\"wrong number of arguments to |\");\n";
 
     for (int i = 0; i < inputs.length; i++) {
-      defModel.insertString(defModel.getLength(), inputs[i], null);
+      _defModel.insertString(_defModel.getLength(), inputs[i], null);
     }
 
     assertEquals(expected, _getAllText());
@@ -569,11 +569,11 @@ public class DefinitionsDocumentTest extends TestCase
    * Test whether tabs are removed as appropriate on call to insertString.
    */
   public void testTabRemovalOnInsertString() throws BadLocationException {
-    defModel.setIndent(1);
-    defModel.insertString(0, " \t yet \t\tanother\ttest\t", null);
-    String result = defModel.getText(0, defModel.getLength());
+    _defModel.setIndent(1);
+    _defModel.insertString(0, " \t yet \t\tanother\ttest\t", null);
+    String result = _defModel.getText(0, _defModel.getLength());
     
-    if (defModel.tabsRemoved()) {
+    if (_defModel.tabsRemoved()) {
       assertEquals("   yet   another test ", result);
     }
     else { // Tabs should have been inserted.
@@ -587,7 +587,7 @@ public class DefinitionsDocumentTest extends TestCase
   {
     assertEquals("Package name for empty document",
                  "",
-                 defModel.getPackageName());
+                 _defModel.getPackageName());
   }
 
   /** Test package-finding on simple document, with no funny comments. */
@@ -608,7 +608,7 @@ public class DefinitionsDocumentTest extends TestCase
         String curComment = comments[j];
 
         setUp();
-        defModel.insertString(0,
+        _defModel.insertString(0,
                               curComment + "\n\n" + 
                                 "package " + curPack +
                                 ";\nclass Foo { int x; }\n",
@@ -616,7 +616,7 @@ public class DefinitionsDocumentTest extends TestCase
 
         assertEquals("Package name for document with comment " + curComment,
                      curPack,
-                     defModel.getPackageName());
+                     _defModel.getPackageName());
       }
     }
   }
@@ -630,11 +630,11 @@ public class DefinitionsDocumentTest extends TestCase
   {
     String weird = "package edu . rice\n./*comment!*/cs.drjava;";
     String normal = "edu.rice.cs.drjava";
-    defModel.insertString(0, weird, null);
+    _defModel.insertString(0, weird, null);
 
     assertEquals("Package name for weird: '" + weird + "'",
                  normal,
-                 defModel.getPackageName());
+                 _defModel.getPackageName());
   }
 
   /**
@@ -646,11 +646,11 @@ public class DefinitionsDocumentTest extends TestCase
   {
     String weird = "package edu . rice //comment!\n.cs.drjava;";
     String normal = "edu.rice.cs.drjava";
-    defModel.insertString(0, weird, null);
+    _defModel.insertString(0, weird, null);
 
     assertEquals("Package name for weird: '" + weird + "'",
                  normal,
-                 defModel.getPackageName());
+                 _defModel.getPackageName());
   }
 
   /**
@@ -663,14 +663,14 @@ public class DefinitionsDocumentTest extends TestCase
     throws BadLocationException, InvalidPackageException
   {
     String text = "import java.util.*;\npackage junk;\nclass Foo {}";
-    defModel.insertString(0, text, null);
+    _defModel.insertString(0, text, null);
     assertEquals("Package name for text with package statement after import",
                  "",
-                 defModel.getPackageName());
+                 _defModel.getPackageName());
   }
 
   private String _getAllText() throws BadLocationException {
-    return defModel.getText(0, defModel.getLength());
+    return _defModel.getText(0, _defModel.getLength());
   }
   /**
    * Test class name-finding on document 
@@ -680,11 +680,11 @@ public class DefinitionsDocumentTest extends TestCase
   {
     String weird = "package edu . rice\n./*comment!*/cs.drjava; class MyClass<T> implements O{";
     String result = "MyClass";
-    defModel.insertString(0, weird, null);
+    _defModel.insertString(0, weird, null);
 
     assertEquals("class name for weird: '" + weird + "'",
                  result,
-                 defModel.getFirstTopLevelClassName());
+                 _defModel.getFirstTopLevelClassName());
   }
 
  /**
@@ -697,11 +697,11 @@ public class DefinitionsDocumentTest extends TestCase
       " interface thisInterface { \n" +
       " class MyClass {";
     String result = "thisInterface";
-    defModel.insertString(0, weird, null);
+    _defModel.insertString(0, weird, null);
 
     assertEquals("class name for interface: '" + weird + "'",
                  result,
-                 defModel.getFirstTopLevelClassName());
+                 _defModel.getFirstTopLevelClassName());
   }
 
  /**
@@ -720,11 +720,11 @@ public class DefinitionsDocumentTest extends TestCase
       "class MyClass {";
 
     String result = "MyClass";
-    defModel.insertString(0, weird, null);
+    _defModel.insertString(0, weird, null);
 
     assertEquals("class name for class: '" + weird + "'",
                  result,
-                 defModel.getFirstTopLevelClassName());
+                 _defModel.getFirstTopLevelClassName());
   }
   
   /**
@@ -736,11 +736,11 @@ public class DefinitionsDocumentTest extends TestCase
   {
     String weird = "import classloader.class; class MyClass {";
     String result = "MyClass";
-    defModel.insertString(0, weird, null);
+    _defModel.insertString(0, weird, null);
 
     assertEquals("class name for weird: '" + weird + "'",
                  result,
-                 defModel.getFirstTopLevelClassName());
+                 _defModel.getFirstTopLevelClassName());
   }
   
   /**
@@ -754,11 +754,11 @@ public class DefinitionsDocumentTest extends TestCase
       " interface thisInterface { \n" +
       " class MyInnerClass {";
     String result = "thisInterface";
-    defModel.insertString(0, weird, null);
+    _defModel.insertString(0, weird, null);
 
     assertEquals("class name for interface: '" + weird + "'",
                  result,
-                 defModel.getFirstTopLevelClassName());
+                 _defModel.getFirstTopLevelClassName());
   }
 
   /**
@@ -772,11 +772,11 @@ public class DefinitionsDocumentTest extends TestCase
       " \"class Foo\"" +
       " class MyClass {";
     String result = "MyClass";
-    defModel.insertString(0, weird, null);
+    _defModel.insertString(0, weird, null);
 
     assertEquals("class name for user interface: '" + weird + "'",
                  result,
-                 defModel.getFirstTopLevelClassName());
+                 _defModel.getFirstTopLevelClassName());
   }
   
   /**
@@ -790,11 +790,11 @@ public class DefinitionsDocumentTest extends TestCase
       " \"class interface Foo\"" +
       " class MyClass extends Foo<T> {";
     String result = "MyClass";
-    defModel.insertString(0, weird, null);
+    _defModel.insertString(0, weird, null);
 
     assertEquals("class name for user interface: '" + weird + "'",
                  result,
-                 defModel.getFirstTopLevelClassName());
+                 _defModel.getFirstTopLevelClassName());
   }
 
   /**
@@ -809,11 +809,11 @@ public class DefinitionsDocumentTest extends TestCase
       " class thatClass {\n" +
       "  }";
     String result = "thisInterface";
-    defModel.insertString(0, weird, null);
+    _defModel.insertString(0, weird, null);
 
     assertEquals("interface should have been chosen, rather than the class: '" + weird + "'",
                  result,
-                 defModel.getFirstTopLevelClassName());
+                 _defModel.getFirstTopLevelClassName());
   }
   
   /**
@@ -825,20 +825,20 @@ public class DefinitionsDocumentTest extends TestCase
     String weird1 = "package edu . rice\n./*comment!*/cs.drjava; \n" +
        " class MyClass<T> {";
     String result1 = "MyClass";
-    defModel.insertString(0, weird1, null);
+    _defModel.insertString(0, weird1, null);
 
     assertEquals("generics should be removed: '" + weird1 + "'",
                  result1,
-                 defModel.getFirstTopLevelClassName());
+                 _defModel.getFirstTopLevelClassName());
     
     String weird2 = "package edu . rice\n./*comment!*/cs.drjava; \n" +
        " class My_Class {";
     String result2 = "My_Class";
-    defModel.insertString(0, weird2, null);
+    _defModel.insertString(0, weird2, null);
 
     assertEquals("underscores should remain: '" + weird1 + "'",
                  result2,
-                 defModel.getFirstTopLevelClassName());
+                 _defModel.getFirstTopLevelClassName());
   }
   
   /**
@@ -862,11 +862,11 @@ public class DefinitionsDocumentTest extends TestCase
       "  }\n" +  // 173
       "} class C7 {}";  // 186
     
-    defModel.insertString(0, classes, null);
+    _defModel.insertString(0, classes, null);
     
     // No enclosing class at start
     try {
-      String result = defModel.getEnclosingTopLevelClassName(3);
+      String result = _defModel.getEnclosingTopLevelClassName(3);
       fail("no enclosing class should be found at start");
     }
     catch (ClassNameNotFoundException cnnfe) {
@@ -875,7 +875,7 @@ public class DefinitionsDocumentTest extends TestCase
     
     // No enclosing class before open brace
     try {
-      String result = defModel.getEnclosingTopLevelClassName(15);
+      String result = _defModel.getEnclosingTopLevelClassName(15);
       fail("no enclosing class should be found before open brace");
     }
     catch (ClassNameNotFoundException cnnfe) {
@@ -883,7 +883,7 @@ public class DefinitionsDocumentTest extends TestCase
     }
     
     try {
-      String result = defModel.getEnclosingTopLevelClassName(186);
+      String result = _defModel.getEnclosingTopLevelClassName(186);
       fail("no enclosing class should be found at end of file");
     }
     catch (ClassNameNotFoundException cnnfe) {
@@ -891,27 +891,27 @@ public class DefinitionsDocumentTest extends TestCase
     }
     
     assertEquals("top level class name after first open brace", "C1",
-                 defModel.getEnclosingTopLevelClassName(22));
+                 _defModel.getEnclosingTopLevelClassName(22));
     assertEquals("top level class name inside C1", "C1",
-                 defModel.getEnclosingTopLevelClassName(26));
+                 _defModel.getEnclosingTopLevelClassName(26));
     assertEquals("top level class name inside method of C1", "C1",
-                 defModel.getEnclosingTopLevelClassName(42));
+                 _defModel.getEnclosingTopLevelClassName(42));
     assertEquals("top level class name on C2's brace", "C1",
-                 defModel.getEnclosingTopLevelClassName(58));
+                 _defModel.getEnclosingTopLevelClassName(58));
     assertEquals("top level class name after C2's brace", "C1",
-                 defModel.getEnclosingTopLevelClassName(59));
+                 _defModel.getEnclosingTopLevelClassName(59));
     assertEquals("top level class name inside C2", "C1",
-                 defModel.getEnclosingTopLevelClassName(68));
+                 _defModel.getEnclosingTopLevelClassName(68));
     assertEquals("top level class name inside C3", "C1",
-                 defModel.getEnclosingTopLevelClassName(92));
+                 _defModel.getEnclosingTopLevelClassName(92));
     assertEquals("top level class name after C3's close brace", "C1",
-                 defModel.getEnclosingTopLevelClassName(93));
+                 _defModel.getEnclosingTopLevelClassName(93));
     assertEquals("top level class name after C2's close brace", "C1",
-                 defModel.getEnclosingTopLevelClassName(100));
+                 _defModel.getEnclosingTopLevelClassName(100));
     
     // No enclosing class between classes
     try {
-      String result = defModel.getEnclosingTopLevelClassName(107);
+      String result = _defModel.getEnclosingTopLevelClassName(107);
       fail("no enclosing class should be found between classes");
     }
     catch (ClassNameNotFoundException cnnfe) {
@@ -919,17 +919,17 @@ public class DefinitionsDocumentTest extends TestCase
     }
     
     assertEquals("class name inside C4", "C4",
-                 defModel.getEnclosingTopLevelClassName(122));
+                 _defModel.getEnclosingTopLevelClassName(122));
     assertEquals("class name inside C5", "C4",
-                 defModel.getEnclosingTopLevelClassName(135));
+                 _defModel.getEnclosingTopLevelClassName(135));
     assertEquals("class name inside C6", "C4",
-                 defModel.getEnclosingTopLevelClassName(167));
+                 _defModel.getEnclosingTopLevelClassName(167));
     assertEquals("class name inside C7", "C7",
-                 defModel.getEnclosingTopLevelClassName(185));
+                 _defModel.getEnclosingTopLevelClassName(185));
     
     // No enclosing class at end
     try {
-      String result = defModel.getEnclosingTopLevelClassName(186);
+      String result = _defModel.getEnclosingTopLevelClassName(186);
       fail("no enclosing class should be found at end");
     }
     catch (ClassNameNotFoundException cnnfe) {
@@ -947,20 +947,20 @@ public class DefinitionsDocumentTest extends TestCase
       "package foo;\n" +  // 13
       "class C1 {}\n" +  // 25
       "class C2 {}";  // 36
-    defModel.insertString(0, classes, null);
+    _defModel.insertString(0, classes, null);
     
     assertEquals("qualified class name without pos", "foo.C1",
-                 defModel.getQualifiedClassName());
+                 _defModel.getQualifiedClassName());
     assertEquals("enclosing class name in C1", "C1",
-                 defModel.getEnclosingTopLevelClassName(23));
+                 _defModel.getEnclosingTopLevelClassName(23));
     assertEquals("qualified class name with pos in C1", "foo.C1",
-                 defModel.getQualifiedClassName(23));
+                 _defModel.getQualifiedClassName(23));
     assertEquals("qualified class name with pos in C2", "foo.C2",
-                 defModel.getQualifiedClassName(35));
+                 _defModel.getQualifiedClassName(35));
     
     // No class name outside classes
     try {
-      String result = defModel.getQualifiedClassName(15);
+      String result = _defModel.getQualifiedClassName(15);
       fail("no qualified class name should be found outside classes");
     }
     catch (ClassNameNotFoundException cnnfe) {
@@ -977,18 +977,18 @@ public class DefinitionsDocumentTest extends TestCase
     String classes =
       "class C1 {}\n" +  // 12
       "class C2 {}";  // 36
-    defModel.insertString(0, classes, null);
+    _defModel.insertString(0, classes, null);
     
     assertEquals("qualified class name without pos", "C1",
-                 defModel.getQualifiedClassName());
+                 _defModel.getQualifiedClassName());
     assertEquals("qualified class name with pos in C1", "C1",
-                 defModel.getQualifiedClassName(10));
+                 _defModel.getQualifiedClassName(10));
     assertEquals("qualified class name with pos in C2", "C2",
-                 defModel.getQualifiedClassName(22));
+                 _defModel.getQualifiedClassName(22));
     
     // No class name outside classes
     try {
-      String result = defModel.getQualifiedClassName(15);
+      String result = _defModel.getQualifiedClassName(15);
       fail("no qualified class name should be found outside classes");
     }
     catch (ClassNameNotFoundException cnnfe) {
@@ -1019,11 +1019,11 @@ public class DefinitionsDocumentTest extends TestCase
       "}\n" +  // 107
       "class C4 {\n" +  // 118
       "} class C5 {}";  // 131
-    defModel.insertString(0, classes, null);
+    _defModel.insertString(0, classes, null);
     
     // No enclosing class at start
     try {
-      String result = defModel.getEnclosingClassName(3);
+      String result = _defModel.getEnclosingClassName(3);
       fail("no enclosing class should be found at start");
     }
     catch (ClassNameNotFoundException cnnfe) {
@@ -1032,7 +1032,7 @@ public class DefinitionsDocumentTest extends TestCase
     
     // No enclosing class before open brace
     try {
-      String result = defModel.getEnclosingClassName(15);
+      String result = _defModel.getEnclosingClassName(15);
       fail("no enclosing class should be found before open brace");
     }
     catch (ClassNameNotFoundException cnnfe) {
@@ -1040,27 +1040,27 @@ public class DefinitionsDocumentTest extends TestCase
     }
     
     assertEquals("class name after first open brace", "C1",
-                 defModel.getEnclosingClassName(22));
+                 _defModel.getEnclosingClassName(22));
     assertEquals("class name inside C1", "C1",
-                 defModel.getEnclosingClassName(26));
+                 _defModel.getEnclosingClassName(26));
     assertEquals("class name inside method of C1", "C1",
-                 defModel.getEnclosingClassName(42));
+                 _defModel.getEnclosingClassName(42));
     assertEquals("class name on C2's brace", "C1",
-                 defModel.getEnclosingClassName(58));
+                 _defModel.getEnclosingClassName(58));
     assertEquals("class name after C2's brace", "C2",
-                 defModel.getEnclosingClassName(59));
+                 _defModel.getEnclosingClassName(59));
     assertEquals("class name inside C2", "C2",
-                 defModel.getEnclosingClassName(68));
+                 _defModel.getEnclosingClassName(68));
     assertEquals("class name inside C3", "C3",
-                 defModel.getEnclosingClassName(92));
+                 _defModel.getEnclosingClassName(92));
     assertEquals("class name after C3's close brace", "C2",
-                 defModel.getEnclosingClassName(93));
+                 _defModel.getEnclosingClassName(93));
     assertEquals("class name after C2's close brace", "C1",
-                 defModel.getEnclosingClassName(100));
+                 _defModel.getEnclosingClassName(100));
     
     // No enclosing class between classes
     try {
-      String result = defModel.getEnclosingClassName(107);
+      String result = _defModel.getEnclosingClassName(107);
       fail("no enclosing class should be found between classes");
     }
     catch (ClassNameNotFoundException cnnfe) {
@@ -1068,13 +1068,13 @@ public class DefinitionsDocumentTest extends TestCase
     }
     
     assertEquals("class name inside C4", "C4",
-                 defModel.getEnclosingClassName(118));
+                 _defModel.getEnclosingClassName(118));
     assertEquals("class name inside C5", "C5",
-                 defModel.getEnclosingClassName(130));
+                 _defModel.getEnclosingClassName(130));
     
     // No enclosing class at end
     try {
-      String result = defModel.getEnclosingClassName(131);
+      String result = _defModel.getEnclosingClassName(131);
       fail("no enclosing class should be found at end");
     }
     catch (ClassNameNotFoundException cnnfe) {
@@ -1105,23 +1105,24 @@ public class DefinitionsDocumentTest extends TestCase
       "  }\n" +
       "}\n";
 
-    defModel.addUndoableEditListener(defModel.getUndoManager());
+    _defModel.addUndoableEditListener(_defModel.getUndoManager());
     DrJava.getConfig().setSetting(OptionConstants.INDENT_LEVEL,new Integer(2));
-    defModel.insertString(0,text,null);
-    assertEquals("insertion",text, defModel.getText(0,defModel.getLength()));
-    defModel.indentLines(0,defModel.getLength());
-    assertEquals("indenting",indented, defModel.getText(0,defModel.getLength()));
-    defModel.getUndoManager().undo();
-    assertEquals("undo",text, defModel.getText(0,defModel.getLength()));
-    defModel.getUndoManager().redo();
-    assertEquals("redo",indented, defModel.getText(0,defModel.getLength()));
+    _defModel.insertString(0,text,null);
+    assertEquals("insertion",text, _defModel.getText(0,_defModel.getLength()));
+    _defModel.indentLines(0,_defModel.getLength());
+    assertEquals("indenting",indented, _defModel.getText(0,_defModel.getLength()));
+    _defModel.getUndoManager().undo();
+    assertEquals("undo",text, _defModel.getText(0,_defModel.getLength()));
+    _defModel.getUndoManager().redo();
+    assertEquals("redo",indented, _defModel.getText(0,_defModel.getLength()));
   }
 
   /**
    * verify that undoing a multiple-line indent will be a single undo action
    * @throws BadLocationException
    */
-  public void testUndoAndRedoAfterMultipleLineCommentAndUncomment() throws BadLocationException {
+  public void testUndoAndRedoAfterMultipleLineCommentAndUncomment() 
+    throws BadLocationException {
     String text =
       "public class stuff {\n" + 
       "  private int _int;\n" + 
@@ -1140,23 +1141,52 @@ public class DefinitionsDocumentTest extends TestCase
       "//   }\n" +
       "// }\n";
 
-    defModel.addUndoableEditListener(defModel.getUndoManager());
+    _defModel.addUndoableEditListener(_defModel.getUndoManager());
     DrJava.getConfig().setSetting(OptionConstants.INDENT_LEVEL,new Integer(2));
-    defModel.insertString(0,text,null);
-    assertEquals("insertion",text, defModel.getText(0,defModel.getLength()));
+    _defModel.insertString(0,text,null);
+    assertEquals("insertion",text, _defModel.getText(0,_defModel.getLength()));
     
-    defModel.commentLines(0,defModel.getLength());
-    assertEquals("commenting",commented, defModel.getText(0,defModel.getLength()));
-    defModel.getUndoManager().undo();
-    assertEquals("undo commenting",text, defModel.getText(0,defModel.getLength()));
-    defModel.getUndoManager().redo();
-    assertEquals("redo commenting",commented, defModel.getText(0,defModel.getLength()));
+    _defModel.commentLines(0,_defModel.getLength());
+    assertEquals("commenting",commented, _defModel.getText(0,_defModel.getLength()));
+    _defModel.getUndoManager().undo();
+    assertEquals("undo commenting",text, _defModel.getText(0,_defModel.getLength()));
+    _defModel.getUndoManager().redo();
+    assertEquals("redo commenting",commented, _defModel.getText(0,_defModel.getLength()));
 
-    defModel.uncommentLines(0,defModel.getLength());
-    assertEquals("uncommenting",text, defModel.getText(0,defModel.getLength()));
-    defModel.getUndoManager().undo();
-    assertEquals("undo uncommenting",commented, defModel.getText(0,defModel.getLength()));
-    defModel.getUndoManager().redo();
-    assertEquals("redo uncommenting",text, defModel.getText(0,defModel.getLength()));
+    _defModel.uncommentLines(0,_defModel.getLength());
+    assertEquals("uncommenting",text, _defModel.getText(0,_defModel.getLength()));
+    _defModel.getUndoManager().undo();
+    assertEquals("undo uncommenting",commented, _defModel.getText(0,_defModel.getLength()));
+    _defModel.getUndoManager().redo();
+    assertEquals("redo uncommenting",text, _defModel.getText(0,_defModel.getLength()));
+  }
+  
+  /**
+   * Test method for hitting enter and then undoing.  Verifies that undoing after 
+   * hitting enter will undo both the newline and the indent at once, instead of one 
+   * at a time.
+   */
+  public void testUndoAndRedoAfterHittingEnter() throws BadLocationException {
+    String text = "public class foo {";
+    
+    String afterEnter =
+      "public class foo {\n" +
+      "  ";
+
+    _defModel.addUndoableEditListener(_defModel.getUndoManager());
+    DrJava.getConfig().setSetting(OptionConstants.INDENT_LEVEL, new Integer(2));
+    _defModel.insertString(0, text, null);
+    assertEquals("Should have inserted correctly.", text, 
+                 _defModel.getText(0, _defModel.getLength()));
+
+    _defModel.insertString(18, "\n", null);
+/*
+    assertEquals("Should have entered the newline correctly.", afterEnter, 
+                 _defModel.getText(0,_defModel.getLength()));
+    _defModel.getUndoManager().undo();
+    assertEquals("undo commenting",text, _defModel.getText(0,_defModel.getLength()));
+    _defModel.getUndoManager().redo();
+    assertEquals("redo commenting",commented, _defModel.getText(0,_defModel.getLength()));
+*/    
   }
 }

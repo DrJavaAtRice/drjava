@@ -120,7 +120,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
   private long _timestamp;
 
   private final Indenter _indenter;
-  private OurUndoManager _undoManager;
+  private CompoundUndoManager _undoManager;
   
   /**
    * Caches calls to the reduced model to speed up indent performance.
@@ -1523,7 +1523,9 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
   public void indentLines(int selStart, int selEnd) {
     //long start = System.currentTimeMillis();
     try {
-      _undoManager.startCompoundEdit();
+      // Begins a compound edit. 
+      int key = _undoManager.startCompoundEdit();
+      
       if (selStart == selEnd) {
         Position oldCurrentPosition = createPosition(_currentLocation);
         _indentLine();
@@ -1537,7 +1539,8 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
       else {
         _indentBlock(selStart, selEnd);
       }
-      _undoManager.endCompoundEdit();
+      // Ends the compound edit.
+      _undoManager.endCompoundEdit(key);
     }
     catch (BadLocationException e) {
       throw new UnexpectedException(e);
@@ -1605,7 +1608,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
    */
   public void commentLines(int selStart, int selEnd) {
     try {
-      _undoManager.startCompoundEdit();
+      int key = _undoManager.startCompoundEdit();
       if (selStart == selEnd) {
         Position oldCurrentPosition = createPosition(_currentLocation);
         _commentLine();
@@ -1616,7 +1619,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
       else {
         _commentBlock(selStart, selEnd);
       }
-      _undoManager.endCompoundEdit();
+      _undoManager.endCompoundEdit(key);
     }
     catch (BadLocationException e) {
       throw new UnexpectedException(e);
@@ -1683,7 +1686,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
    */
   public void uncommentLines(int selStart, int selEnd) {
     try {
-      _undoManager.startCompoundEdit();
+      int key = _undoManager.startCompoundEdit();
       if (selStart == selEnd) {
         Position oldCurrentPosition = createPosition(_currentLocation);
         _uncommentLine();
@@ -1694,7 +1697,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
       else {
         _uncommentBlock(selStart, selEnd);
       }
-      _undoManager.endCompoundEdit();
+      _undoManager.endCompoundEdit(key);
     }
     catch (BadLocationException e) {
       throw new UnexpectedException(e);
@@ -2592,10 +2595,10 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
   }
   
   /**
-   * getter method for OurUndoManager
+   * Getter method for CompoundUndoManager
    * @return _undoManager
    */
-  public UndoManager getUndoManager() {
+  public CompoundUndoManager getUndoManager() {
     return _undoManager;
   }
 
@@ -2603,7 +2606,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
    * resets the undo manager
    */
   public void resetUndoManager() {
-    _undoManager = new OurUndoManager();
+    _undoManager = new CompoundUndoManager();
     _undoManager.setLimit(UNDO_LIMIT);
   }
 
@@ -2625,16 +2628,17 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
    * Is used to be able to call editToBeUndone and editToBeRedone since they
    * are protected methods in UndoManager
    */
+  /*
   private class OurUndoManager extends UndoManager {
     private boolean _compoundEditState = false;
-    private CompoundEdit _compoundEdit;
+    private OurCompoundEdit _compoundEdit;
     
     public void startCompoundEdit() {
       if(_compoundEditState) {
         throw new IllegalStateException("Cannot start a compound edit while making a compound edit");
       }
       _compoundEditState = true;
-      _compoundEdit = new CompoundEdit();
+      _compoundEdit = new OurCompoundEdit();
     }
 
     public void endCompoundEdit() {
@@ -2663,5 +2667,16 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
       }
     }
   }
-
+  
+  
+  public java.util.Vector getEdits() {
+     return _undoManager._compoundEdit.getEdits();
+  }
+  
+  private class OurCompoundEdit extends CompoundEdit {
+     public java.util.Vector getEdits() {
+        return edits;
+     }
+  }
+  */
 }

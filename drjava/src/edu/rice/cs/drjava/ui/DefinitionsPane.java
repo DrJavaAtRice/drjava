@@ -71,8 +71,8 @@ import edu.rice.cs.drjava.model.debug.Breakpoint;
  * changed.
  * @version $Id$
  */
-public class DefinitionsPane extends JEditorPane 
-  implements OptionConstants {
+public class DefinitionsPane extends JEditorPane implements OptionConstants {
+  
   private static final EditorKit EDITOR_KIT = new DefinitionsEditorKit();
 
   /**
@@ -118,7 +118,7 @@ public class DefinitionsPane extends JEditorPane
     MATCH_PAINTER = 
       new DefaultHighlighter.DefaultHighlightPainter(highColor);
   }
-
+  
   /**
    * Our current compiler error matching highlight.
    */
@@ -344,8 +344,9 @@ public class DefinitionsPane extends JEditorPane
    * An action to handle indentation spawned by pressing the tab key.
    */
   private class IndentKeyActionTab extends AbstractAction {
-
-    /** Handle the key typed event from the text field. */
+    /** 
+     * Handle the key typed event from the text field.
+     */
     public void actionPerformed(ActionEvent e) {
       //int pos = getCaretPosition();
       //_doc().setCurrentLocation(pos);
@@ -381,8 +382,10 @@ public class DefinitionsPane extends JEditorPane
      * a call to indentLine().
      */
     public void actionPerformed(ActionEvent e) {
+      int key = _doc.getDocument().getUndoManager().startCompoundEdit();
       _defaultAction.actionPerformed(e);
       indent();
+      _doc.getDocument().getUndoManager().endCompoundEdit(key);
     }
   }
 
@@ -390,6 +393,7 @@ public class DefinitionsPane extends JEditorPane
    * Special action to take care of case when tab key is pressed.
    */
   private Action _indentKeyActionTab = new IndentKeyActionTab();
+
   /**
    * Because the "default" action for the enter key is special, it must be
    * grabbed from the Keymap using getAction(KeyStroke), which returns the
@@ -397,22 +401,17 @@ public class DefinitionsPane extends JEditorPane
    * regular text keys.
    */
   private Action _indentKeyActionLine =
-    new IndentKeyAction("\n",
-                        (Action)this.getActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0)));
+    new IndentKeyAction("\n", 
+                        (Action) this.getActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0)));
 
   /**
    * Likewise, regular text keys like '{', '}', and ':' do not have special actions
    * that are returned by getAction(KeyStroke). To make sure these behave right,
    * we use getDefaultAction() instead.
    */
-  private Action _indentKeyActionSquiggly =
-    new IndentKeyAction("}", getKeymap().getDefaultAction());
-
-  private Action _indentKeyActionOpenSquiggly =
-    new IndentKeyAction("{", getKeymap().getDefaultAction());
-
-  private Action _indentKeyActionColon =
-    new IndentKeyAction(":", getKeymap().getDefaultAction());
+  private Action _indentKeyActionSquiggly = new IndentKeyAction("}", getKeymap().getDefaultAction());
+  private Action _indentKeyActionOpenSquiggly = new IndentKeyAction("{", getKeymap().getDefaultAction());
+  private Action _indentKeyActionColon = new IndentKeyAction(":", getKeymap().getDefaultAction());
 
   /**
    * Takes in any keyboard input, checks to see if it is in the keyToActionMap 
@@ -468,18 +467,18 @@ public class DefinitionsPane extends JEditorPane
     //setSize(new Dimension(1024, 1000));
     setEditable(true);
 
-    //add actions for indent key
+    // add actions for indent key
     Keymap ourMap = addKeymap("INDENT_KEYMAP", getKeymap());
-    ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0),
-                                 (Action)_indentKeyActionLine);
+    ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), 
+                                 (Action) _indentKeyActionLine);
     ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_TAB, 0),
-                                 (Action)_indentKeyActionTab);
+                                 (Action) _indentKeyActionTab);
     ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke('}'),
-      (Action)_indentKeyActionSquiggly);
-    ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke('{'),
-      (Action)_indentKeyActionOpenSquiggly);
+                                 (Action) _indentKeyActionSquiggly);
+    ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke('{'), 
+                                 (Action) _indentKeyActionOpenSquiggly);
     ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke(':'),
-      (Action)_indentKeyActionColon);
+                                 (Action) _indentKeyActionColon);
     setKeymap(ourMap);
                       
     //this.setEditorKit(new StyledEditorKit());
@@ -539,8 +538,7 @@ public class DefinitionsPane extends JEditorPane
    *  Creates the popup menu for the DefinitionsPane
    */
   private void createPopupMenu() {
-    
-    //Create the popup menu.
+    // Create the popup menu.
     _popMenu = new JPopupMenu();
     
     _popMenu.add(_mainFrame.cutAction);
@@ -549,8 +547,8 @@ public class DefinitionsPane extends JEditorPane
     _popMenu.addSeparator();
     
     JMenuItem indentItem = new JMenuItem("Indent Line(s)");
-    indentItem.addActionListener ( new AbstractAction() {
-      public void actionPerformed( ActionEvent ae) {
+    indentItem.addActionListener(new AbstractAction() {
+      public void actionPerformed(ActionEvent ae) {
         _indentLines();
       }
     });
@@ -579,7 +577,7 @@ public class DefinitionsPane extends JEditorPane
       JMenuItem breakpointItem = new JMenuItem("Toggle Breakpoint");
       breakpointItem.addActionListener( new AbstractAction() {
         public void actionPerformed( ActionEvent ae ) {
-          //Make sure that the breakpoint is set on the *clicked* line, if within a selection block.
+          // Make sure that the breakpoint is set on the *clicked* line, if within a selection block.
           setCaretPosition(viewToModel(_popupMenuMA.getLastMouseClick().getPoint()));
           _mainFrame.debuggerToggleBreakpoint();
         }
@@ -603,7 +601,8 @@ public class DefinitionsPane extends JEditorPane
       _lastMouseClick = e;
       
       // if not in the selected area, 
-      if ( (viewToModel(e.getPoint()) < getSelectionStart()) || (viewToModel(e.getPoint()) > getSelectionEnd()) ) {
+      if ((viewToModel(e.getPoint()) < getSelectionStart()) || 
+          (viewToModel(e.getPoint()) > getSelectionEnd()) ) {
         //move caret to clicked position, deselecting previous selection
         setCaretPosition(viewToModel(e.getPoint()));
       }
@@ -818,7 +817,6 @@ public class DefinitionsPane extends JEditorPane
    */
   private void setDocument(OpenDefinitionsDocument doc) {
     super.setDocument(doc.getDocument());
-
     _resetUndo();
   }
 
@@ -942,13 +940,15 @@ public class DefinitionsPane extends JEditorPane
    * pass a document to DefinitionsPane and that's all it cares about.
    */
   public void indent() {
-    // because indent() is a function called directly by the Keymap
-    // it does not go through the regular insertString channels and thus
-    // it may not be in sync with the document's position.  For that
-    // reason, we must sync the document with the pane before we go
-    // ahead and indent.
-    // old: _doc().setCurrentLocation(getCaretPosition());
-    // new:
+    /**
+     * Because indent() is a function called directly by the Keymap,
+     * it does not go through the regular insertString channels and thus
+     * it may not be in sync with the document's position.  For that
+     * reason, we must sync the document with the pane before we go
+     * ahead and indent.
+     * old: _doc().setCurrentLocation(getCaretPosition());
+     * new:
+     */
     _doc.syncCurrentLocationWithDefinitions(getCaretPosition());
     int selStart = getSelectionStart();
     int selEnd = getSelectionEnd();
@@ -960,7 +960,7 @@ public class DefinitionsPane extends JEditorPane
     //  Prompt if more than 10000 characters to be indented
     boolean doIndent = true;
     if (selEnd > (selStart + 10000)) {
-      Object[] options = {"Yes","No"};
+      Object[] options = {"Yes", "No"};
       int n = JOptionPane.showOptionDialog
         (_mainFrame,
          "Re-indenting this block may take a very long time.  Are you sure?",
@@ -970,7 +970,7 @@ public class DefinitionsPane extends JEditorPane
          null,
          options,
          options[1]);
-      if (n==JOptionPane.NO_OPTION) { doIndent = false; }
+      if (n == JOptionPane.NO_OPTION) { doIndent = false; }
     }
 
     // Do the indent
@@ -991,10 +991,9 @@ public class DefinitionsPane extends JEditorPane
    * The undo action.
    */
   private class UndoAction extends AbstractAction {
-    
     /**
      * Constructor.
-    */
+     */
     private UndoAction() {
       super("Undo");
       setEnabled(false);
@@ -1007,20 +1006,20 @@ public class DefinitionsPane extends JEditorPane
     public void actionPerformed(ActionEvent e) {
       try {
         UndoableEdit edit = _doc.getDocument().getNextUndo();
-        int pos = -1;
-        if (edit != null && edit instanceof UndoWithPosition) {
-          pos = ((UndoWithPosition)edit).getPosition();
-        }
-        
-        if (pos > -1) {
-          //centerViewOnOffset(pos);
-          setCaretPosition(pos);
-        }
+//         int pos = -1;
+//         if (edit != null && edit instanceof UndoWithPosition) {
+//           pos = ((UndoWithPosition)edit).getPosition();
+//         }
+//         
+//         if (pos > -1) {
+//           //centerViewOnOffset(pos);
+//           setCaretPosition(pos);
+//         }
         _doc.getDocument().getUndoManager().undo();
-        
         _doc.getDocument().setModifiedSinceSave();
         _mainFrame.updateFileTitle();
-      } catch (CannotUndoException ex) {
+      }
+      catch (CannotUndoException ex) {
         System.out.println("Unable to undo: " + ex);
         ex.printStackTrace();
       }
@@ -1064,16 +1063,16 @@ public class DefinitionsPane extends JEditorPane
     public void actionPerformed(ActionEvent e) {
       try {
         UndoableEdit edit = _doc.getDocument().getNextRedo();
-        int pos = -1;
-        if (edit instanceof UndoWithPosition) {
-          pos = ((UndoWithPosition)edit).getPosition();
-        }
-        _doc.getDocument().getUndoManager().redo();
-        
-        if (pos > -1) {
-          //centerViewOnOffset(pos);
-          setCaretPosition(pos);
-        }
+//         int pos = -1;
+//         if (edit instanceof UndoWithPosition) {
+//           pos = ((UndoWithPosition)edit).getPosition();
+//         }
+         _doc.getDocument().getUndoManager().redo();
+         
+//         if (pos > -1) {
+//           //centerViewOnOffset(pos);
+//           setCaretPosition(pos);
+//         }
         _doc.getDocument().setModifiedSinceSave();
         _mainFrame.updateFileTitle();
       } catch (CannotRedoException ex) {
@@ -1150,6 +1149,9 @@ public class DefinitionsPane extends JEditorPane
     
     public void redo() {
       _undo.redo();
+      if(_pos > -1) {
+        setCaretPosition(_pos);
+      }
     }
     
     public boolean replaceEdit(UndoableEdit ue) {
@@ -1157,6 +1159,9 @@ public class DefinitionsPane extends JEditorPane
     }
     
     public void undo() {
+      if(_pos > -1) {
+        setCaretPosition(_pos);
+      }
       _undo.undo();
     }
   }

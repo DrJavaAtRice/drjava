@@ -59,7 +59,6 @@ import edu.rice.cs.drjava.model.compiler.CompilerErrorModel;
  * @version $Id$
  */
 public interface OpenDefinitionsDocument {
-
   /**
    * Gets the definitions document being handled.
    * @return document being handled
