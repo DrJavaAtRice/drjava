@@ -237,10 +237,7 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
 //    DrJava.consoleErr().println("To: " + to + " , From: " + from);
     boolean toReturn = true;
     for(Integer prompt : _listOfPrompt) {
-      toReturn &= ((to >= prompt && from >= prompt) || (to <= prompt && from <= prompt));
-      if(!((to >= prompt && from >= prompt) || (to <= prompt && from <= prompt)))
-        System.out.println("Prompt pos =" + prompt + "; To =" + to + "; From =" + from);
-      
+      toReturn &= ((to >= prompt && from >= prompt) || (to <= prompt && from <= prompt));      
     }
     return toReturn;
     
