@@ -297,6 +297,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
    * @param key Name of the method and arguments
    */
   protected Object _checkCache(String key) {
+    //_helperCache.put(key+"|time", new Long(System.currentTimeMillis()));
     Object result = _helperCache.get(key);
     //if (result != null) DrJava.consoleOut().println("Using cache for " + key);
     return result;
@@ -312,6 +313,39 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
   protected void _storeInCache(String key, Object result) {
     _cacheInUse = true;
     _helperCache.put(key, result);
+    
+    /*
+    long end = System.currentTimeMillis();
+    Long start = (Long)_helperCache.get(key+"|time");
+    if (start != null) {
+      _helperCache.remove(key+"|time");
+      long delay = end - start.longValue();
+      if (delay > maxHelpDelay) {
+        maxHelpDelay = delay;
+        maxKey = key;
+        DrJava.consoleOut().println("   Longest: " + maxHelpDelay + "ms from " + maxKey +
+                                    ", line " + getCurrentLine());
+      }
+    }
+    else {
+      DrJava.consoleOut().println("  CACHE MISS: " + key);
+    }
+    */
+  }
+  
+  // Fields for monitoring performance
+  /*
+  long maxHelpDelay = 0;
+  String maxKey = "none";
+  */
+  
+  /**
+   * Clears the helper method cache.
+   * Should be called every time the document is modified.
+   */
+  protected void _clearCache() {
+    _helperCache.clear();
+    _cacheInUse = false;
   }
   
   /**
@@ -361,7 +395,6 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
   
   public void setCachedClassFile(File classFile) {
     _classFile = classFile;
-    //DrJava.consoleOut().println("cached classFile = " + _classFile);
   }
   
   public File getCachedClassFile() {
@@ -377,10 +410,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
     throws BadLocationException
   {
     // Clear the helper method cache
-    if (_cacheInUse) {
-      _helperCache.clear();
-      _cacheInUse = false;
-    }
+    if (_cacheInUse) _clearCache();
     
     // If _removeTabs is set to true, remove all tabs from str.
     // It is a current invariant of the tabification functionality that
@@ -413,10 +443,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
                               AttributeSet attr)
   {
     // Clear the helper method cache
-    if (_cacheInUse) {
-      _helperCache.clear();
-      _cacheInUse = false;
-    }
+    if (_cacheInUse) _clearCache();
     
     super.insertUpdate(chng, attr);
 
@@ -445,10 +472,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
    */
   public void remove(int offset, int len) throws BadLocationException {
     // Clear the helper method cache
-    if (_cacheInUse) {
-      _helperCache.clear();
-      _cacheInUse = false;
-    }
+    if (_cacheInUse) _clearCache();
     
     if (!_modifiedSinceSave) {
       _modifiedSinceSave = true;
@@ -470,10 +494,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
    */
   protected void removeUpdate(AbstractDocument.DefaultDocumentEvent chng) {
     // Clear the helper method cache
-    if (_cacheInUse) {
-      _helperCache.clear();
-      _cacheInUse = false;
-    }
+    if (_cacheInUse) _clearCache();
     
     try {
       final int offset = chng.getOffset();
@@ -505,10 +526,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
    */
   String _removeTabs(final String source) {
     // Clear the helper method cache
-    if (_cacheInUse) {
-      _helperCache.clear();
-      _cacheInUse = false;
-    }
+    if (_cacheInUse) _clearCache();
     
     return source.replace('\t', ' ');
   }
@@ -540,10 +558,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
    */
   private synchronized void _addCharToReducedModel(char curChar) {
     // Clear the helper method cache
-    if (_cacheInUse) {
-      _helperCache.clear();
-      _cacheInUse = false;
-    }
+    if (_cacheInUse) _clearCache();
     
     _reduced.insertChar(curChar);
   }
@@ -618,7 +633,6 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
    * @return true if the document has been modified
    */
   public boolean isModifiedOnDisk() {
-      //DrJava.consoleOut().println("Beginning isModifiedOnDisk()");
     boolean ret = false;
     try {
       readLock();
@@ -630,9 +644,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
     finally {
       readUnlock();
     }
-    //DrJava.consoleOut().println("Ending isModifiedOnDisk()");
     return ret;
-
   }
  
   /**
@@ -689,7 +701,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
   public int getCurrentLine() {
     int here = getCurrentLocation();
     if ( _cachedLocation > getLength() ){ 
-      // we can't know the last line number after the delete.
+      // we can't know the last line number after a delete.
       // starting over.
       _cachedLocation = 0;
       _cachedLineNum = 1;
@@ -785,7 +797,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
   public int findPrevDelimiter(int pos, char[] delims) throws BadLocationException {
     return findPrevDelimiter(pos, delims, true);
   }
-  
+    
   /**
    * Searching backwards, finds the position of the first character that is one
    * of the given delimiters.  Will not look for delimiters inside a paren
@@ -819,7 +831,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
     final int origLocation = _currentLocation;
     // Move reduced model to location pos
     _reduced.move(pos - origLocation);
-    
+
     // Walk backwards from specificed position
     for (i = pos-1; i >= DOCSTART; i--) {
       c = text.charAt(i);
@@ -851,7 +863,8 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
       }
     }
     _reduced.move(origLocation - pos);
-    _storeInCache("findPrevDelimiter:" + pos, new Integer(ERROR_INDEX));
+    
+    _storeInCache(key, new Integer(ERROR_INDEX));
     return ERROR_INDEX;
   }
 
@@ -872,12 +885,13 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
     _reduced.move(pos - here);
     boolean inParenPhrase = posInParenPhrase();
     _reduced.move(here - pos);
+    
     _storeInCache(key, new Boolean(inParenPhrase));
     return inParenPhrase;
   }
   
   /**
-   * Returns true if the current position is inside a paren phrase.
+   * Returns true if the reduced model's current position is inside a paren phrase.
    * @return true if pos is immediately inside parentheses
    */
   public synchronized boolean posInParenPhrase() {
@@ -930,6 +944,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
     for (int i=0; i < delims.length; i++) {
       key += ":" + delims[i];
     }
+    //long start = System.currentTimeMillis();
     String cached = (String) _checkCache(key);
     if (cached != null) {
       return cached;
@@ -941,7 +956,9 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
     // Find the previous delimiter that closes a statement
     boolean reachedStart = false;
     boolean ignoreParens;
-    int prevDelimiter = lineStart; 
+    int prevDelimiter = lineStart;
+    
+    //long mid = System.currentTimeMillis();  // START STAGE 2
     do {
       ignoreParens = posInParenPhrase(prevDelimiter);
       prevDelimiter = findPrevDelimiter(prevDelimiter, delims, ignoreParens);
@@ -960,11 +977,10 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
         reachedStart = true;
         break;
       }
-    } while(posInParenPhrase(prevDelimiter));
+    } while(posInParenPhrase(prevDelimiter));  // this is being calculated twice...
+    //long mid2 = System.currentTimeMillis();  // START STAGE 3
 
-
-    // From the previous delimiter, find the next
-    // non-whitespace character
+    // From the previous delimiter, find the next non-whitespace character
     int nextNonWSChar;
     char[] whitespace = {' ', '\t', '\n',','};
     if(reachedStart) {
@@ -973,7 +989,8 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
     else {
       nextNonWSChar = getFirstNonWSCharPos(prevDelimiter+1,whitespace);
     }
-
+    //long mid3 = System.currentTimeMillis();  // START STAGE 4
+    
     // If the end of the document was reached
     if(nextNonWSChar == ERROR_INDEX) {
       nextNonWSChar = getLength();
@@ -982,8 +999,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
     // Get the start of the line of the non-ws char
     int lineStartStmt = getLineStartPos(nextNonWSChar);
 
-    // Get the position of the first non-ws character on 
-    // this line
+    // Get the position of the first non-ws character on this line
     int lineFirstNonWS = getLineFirstCharPos(lineStartStmt);
     String lineText = "";
     try {
@@ -995,6 +1011,15 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
     } 
     
     _storeInCache(key, lineText);
+    /*
+    long end = System.currentTimeMillis();
+    if (maxKey.equals(key)) {
+      DrJava.consoleOut().print("     getIndent: [" + (mid-start));
+      DrJava.consoleOut().print("] (" + (mid2-start));
+      DrJava.consoleOut().print(") [" + (mid3-start));
+      DrJava.consoleOut().println("] total: " + (end-start) + "ms");
+    }
+    */
     return lineText;
   }
 
@@ -1009,7 +1034,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
    */
   public int findCharOnLine(int pos, char findChar) {
     // Check cache
-    String key = "getIndentOfCurrStmt:" + pos + ":" + findChar;
+    String key = "findCharOnLine:" + pos + ":" + findChar;
     Integer cached = (Integer) _checkCache(key);
     if (cached != null) {
       return cached.intValue();
@@ -1180,15 +1205,19 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
     int j, i;
     char c;
     int endPos = getLength();
+    
+    // Get text from pos to end of document
     String text = getText(pos, endPos - pos);
-    //char[] whitespace = {' ', '\t', '\n'};
     
     final int origLocation = _currentLocation;
     // Move reduced model to location pos
     _reduced.move(pos - origLocation);
     
+    //int iter = 0;
+    
     // Walk forward from specificed position
     for (i = pos; i != endPos; i++) {
+      //iter++;
       boolean isWhitespace = false;
       c = text.charAt(i - pos);
       // Check if character is whitespace
@@ -1200,10 +1229,23 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
       if (!isWhitespace) {
         // Move reduced model to walker's location
         _reduced.move(i - pos);
-        // Check if matching char is in comment
+        // Check if non-ws char is in comment
         if((_reduced.getStateAtCurrent().equals(ReducedModelState.INSIDE_LINE_COMMENT)) ||
            (_reduced.getStateAtCurrent().equals(ReducedModelState.INSIDE_BLOCK_COMMENT))) {
-             // Ignore matching char
+          // Ignore non-ws char
+          
+          // Move to next token?  (requires making getBlockOffset public)
+          //  doesn't work yet
+          /*
+          int tokenSize = _reduced.currentToken().getSize();
+          int offset = _reduced.getBlockOffset();
+          //DrJava.consoleOut().println("     token len: " + tokenSize +
+          //                            ", offset: " + offset);
+          //DrJava.consoleOut().println("     token before: " + _reduced.currentToken().getState());
+          _reduced.move(tokenSize - offset);
+          i += tokenSize - offset;
+          //DrJava.consoleOut().println("     token after: " + _reduced.currentToken().getState());
+          */
         }
         else { 
           if(_isStartOfComment(text, i - pos)) {
@@ -1222,6 +1264,8 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
         _reduced.move(pos - i);
       }
     }
+    //DrJava.consoleOut().println("getFirstNonWS iterations: " + iter);
+    
     _reduced.move(origLocation - pos);
     _storeInCache(key, new Integer(ERROR_INDEX));
     return ERROR_INDEX;
@@ -1432,8 +1476,13 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
     catch (BadLocationException e) {
       throw new UnexpectedException(e);
     }
-    //long end = System.currentTimeMillis();
-    //DrJava.consoleOut().println("Elapsed Time (sec): " + ((end-start)/1000));
+    /*
+    long end = System.currentTimeMillis();
+    DrJava.consoleOut().println("Elapsed Time (sec): " + ((end-start)/1000));
+    DrJava.consoleOut().println("   Cache size: " + _helperCache.size());
+    DrJava.consoleOut().println("   Longest: " + maxHelpDelay + "ms from " + maxKey);
+    maxHelpDelay = 0;  maxKey = "none";
+    */
   }
 
   /**
@@ -1461,8 +1510,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
         // Move back to walker spot
         setCurrentLocation(walkerPos.getOffset());
         walker = walkerPos.getOffset();
-        // Adding 1 makes us point to the first character AFTER the
-        // next newline.
+        // Adding 1 makes us point to the first character AFTER the next newline.
         // We don't actually move yet. That happens at the top of the loop,
         // after we check if we're past the end.
         walker += _reduced.getDistToNextNewline() + 1;
@@ -1668,12 +1716,25 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
       int firstNonWSPos = getLineFirstCharPos(pos);
       int len = firstNonWSPos - startPos;
       
-      // Removes old prefix, then adds new one
-      // FIXME: If tab only contains spaces, then just adjust as necessary
-      //   for efficiency, rather than replacing the whole thing
-      if (!_hasOnlySpaces(tab) || (len != tab.length())) {
-        remove(startPos, len);
-        insertString(startPos, tab, null);
+      // Adjust prefix
+      boolean onlySpaces = _hasOnlySpaces(tab);
+      if (!onlySpaces || (len != tab.length())) {
+        
+        if (onlySpaces) {
+          // Only add or remove the difference
+          int diff = tab.length() - len;
+          if (diff > 0) {
+            insertString(firstNonWSPos, tab.substring(0, diff), null);
+          }
+          else {
+            remove(firstNonWSPos + diff, -diff);
+          }
+        }
+        else {
+          // Remove the whole prefix, then add the new one
+          remove(startPos, len);
+          insertString(startPos, tab, null);
+        }
       }
     }
     catch (BadLocationException e) {
@@ -1694,9 +1755,6 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
    * This should collapse adjoining blocks with the same status into one.
    */
   public synchronized Vector<HighlightStatus> getHighlightStatus(int start, int end) {
-    //DrJava.consoleErr().println("getHi: start=" + start + " end=" + end +
-    //" currentLoc=" + _currentLocation);
-
     // First move the reduced model to the start
     int oldLocation = _currentLocation;
     setCurrentLocation(start);
@@ -2004,8 +2062,19 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
     }
   }
 
-  public synchronized IndentInfo getIndentInformation(){
-    return getReduced().getIndentInformation();
+  /**
+   * Returns the indent information for the current location.
+   */
+  public synchronized IndentInfo getIndentInformation() {
+    // Check cache
+    String key = "getIndentInformation:" + _currentLocation;
+    IndentInfo cached = (IndentInfo) _checkCache(key);
+    if (cached != null) {
+      return cached;
+    }
+    IndentInfo info = getReduced().getIndentInformation();
+    _storeInCache(key, info);
+    return info;
   }
   
   public synchronized ReducedModelState stateAtRelLocation(int dist){
@@ -2034,7 +2103,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
     try {
       setCurrentLocation(pos);
       
-      IndentInfo info = _reduced.getIndentInformation();
+      IndentInfo info = getIndentInformation();
       
       // Find top level open brace
       int topLevelBracePos = -1;
@@ -2044,7 +2113,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
           topLevelBracePos = getCurrentLocation() - info.distToBraceCurrent;
         }
         move(-info.distToBraceCurrent);
-        info = _reduced.getIndentInformation();
+        info = getIndentInformation();
         braceType = info.braceTypeCurrent;
       }
       if (topLevelBracePos == -1) {
