@@ -55,21 +55,20 @@ public abstract class IndentRuleAction implements IndentRule {
    * Replaces all whitespace characters at the beginning of the
    * line with the appropriate spacing or characters.
    * @param doc DefinitionsDocument containing the line to be indented.
-   * @param reducedModel reduced model used by the document.
    * @param pos Position within line to be indented.
    */
-  public abstract void indentLine(DefinitionsDocument doc, 
-                                  BraceReduction reducedModel,
-                                  int pos);
+  public void indentLine(DefinitionsDocument doc, int pos) {
+    int oldPos = doc.getCurrentLocation();
+    doc.setCurrentLocation(pos);
+    indentLine(doc);
+    doc.setCurrentLocation(oldPos);
+  }
   
    /**
-   * Properly indents the line that the current position is on.
-   * Replaces all whitespace characters at the beginning of the
-   * line with the appropriate spacing or characters.
-   * @param doc DefinitionsDocument containing the line to be indented.
-   * @param reducedModel reduced model used by the document.
-   */
-  public void indentLine(DefinitionsDocument doc, BraceReduction reducedModel) {
-    indentLine(doc, reducedModel, doc.getCurrentLocation());
-  }
+    * Properly indents the line that the current position is on.
+    * Replaces all whitespace characters at the beginning of the
+    * line with the appropriate spacing or characters.
+    * @param doc DefinitionsDocument containing the line to be indented.
+    */
+  public abstract void indentLine(DefinitionsDocument doc);
 }

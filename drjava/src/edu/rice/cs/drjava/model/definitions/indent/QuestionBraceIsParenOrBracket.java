@@ -64,47 +64,32 @@ public class QuestionBraceIsParenOrBracket extends IndentRuleQuestion
   
   /**
    * @param doc The DefinitionsDocument containing the current line.
-   * @param reducedModel reduced model used by the document.
-   * @param pos The position in the document to set the caret to.
    * @return True iff the last block or expression list opened previous 
    * to the start of the current line was opened by one of the characters 
    * '(' or '['. 
    */
-  boolean applyRule(DefinitionsDocument doc, BraceReduction reducedModel, int pos)
-  {
-    doc.setCurrentLocation(pos);
-    return applyRule(doc, reducedModel);
-  } 
-  
-  /**
-   * @param doc The DefinitionsDocument containing the current line.
-   * @param reducedModel reduced model used by the document.
-   * @return True iff the last block or expression list opened previous 
-   * to the start of the current line was opened by one of the characters 
-   * '(' or '['. 
-   */
-  boolean applyRule(DefinitionsDocument doc, BraceReduction reducedModel)
+  boolean applyRule(DefinitionsDocument doc)
   {
     // PRE: We are not inside a multiline comment.
     
     throw new RuntimeException("Not yet implemented!");
     
     /*
-    * pos := START
-    *   
-    * while (pos < DOCSTART)  
-    *    if char[pos] = '[' or char[pos] = '('
-    *       return TRUE  
-    *    
-    *    else if char[pos] = '{'
-    *       return FALSE  
-    *  
-    *    else   
-    *       pos := pos + 1  
-    *
-    * return FALSE
-    *  
-    * [Note: ensure return char is not in // comment!!]
-    */    
+     * pos := START
+     *   
+     * while (pos < DOCSTART)  
+     *    if char[pos] = '[' or char[pos] = '('
+     *       return TRUE  
+     *    
+     *    else if char[pos] = '{'
+     *       return FALSE  
+     *  
+     *    else   
+     *       pos := pos + 1  
+     *
+     * return FALSE
+     *  
+     * [Note: ensure return char is not in // comment!!]
+     */    
   }
 }

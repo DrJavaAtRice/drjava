@@ -56,11 +56,9 @@ class QuestionCurrLineEmpty extends IndentRuleQuestion {
   /**
    * Determines if the current line in the document is empty.
    * @param doc DefinitionsDocument containing the line to be indented.
-   * @param reducedModel reduced model used by the document.
-   * @param pos Position within line to be indented.
    * @return true if this node's rule holds.
    */
-  boolean applyRule(DefinitionsDocument doc, BraceReduction reducedModel, int pos) {
+  boolean applyRule(DefinitionsDocument doc) {
     // one solution: if startOfLine somehow tells you when 
     //   there's no first WS char on this line
     //   (i.e. the line is empty), just use that.

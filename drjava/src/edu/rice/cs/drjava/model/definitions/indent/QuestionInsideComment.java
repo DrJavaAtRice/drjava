@@ -60,16 +60,14 @@ class QuestionInsideComment extends IndentRuleQuestion {
   /**
    * Determines if the current line in the document is in a block comment.
    * @param doc DefinitionsDocument containing the line to be indented.
-   * @param reducedModel reduced model used by the document.
-   * @param pos Position within line to be indented.
    * @return true if this node's rule holds.
    */
-  boolean applyRule(DefinitionsDocument doc, BraceReduction reducedModel, int pos) {
+  boolean applyRule(DefinitionsDocument doc) {
     int here = doc.getCurrentLocation();
     ReducedModelState state = null;
-    int distToStart = here - doc.getLineStartPos(here);
-    reducedModel.resetLocation();  // Gaaah!
-    state = reducedModel.stateAtRelLocation(-distToStart);
+    int distToStart = here - doc.getLineStartPos();          // no more int argument!
+    //reducedModel.resetLocation();  // Gaaah!               // no more reduced model directly!
+    //state = reducedModel.stateAtRelLocation(-distToStart);
     return (state.equals(ReducedModelStates.INSIDE_BLOCK_COMMENT));
   }
 }

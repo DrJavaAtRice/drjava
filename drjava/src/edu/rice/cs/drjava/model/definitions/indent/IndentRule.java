@@ -53,19 +53,6 @@ public interface IndentRule {
    * Replaces all whitespace characters at the beginning of the
    * line with the appropriate spacing or characters.
    * @param doc DefinitionsDocument containing the line to be indented.
-   * @param reducedModel reduced model used by the document.
-   * @param pos Position in the document within line to indent.
    */
-  public void indentLine(DefinitionsDocument doc, 
-                         BraceReduction reducedModel, 
-                         int pos);
-  
-  /**
-   * Properly indents the line that the current position is on.
-   * Replaces all whitespace characters at the beginning of the
-   * line with the appropriate spacing or characters.
-   * @param doc DefinitionsDocument containing the line to be indented.
-   * @param reducedModel reduced model used by the document.
-   */
-  public void indentLine(DefinitionsDocument doc, BraceReduction reducedModel);
+  public void indentLine(DefinitionsDocument doc);
 }

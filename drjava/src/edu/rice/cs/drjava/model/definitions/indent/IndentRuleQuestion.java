@@ -74,30 +74,37 @@ public abstract class IndentRuleQuestion implements IndentRule {
   /**
    * Determines if the given rule holds in this context.
    * @param doc DefinitionsDocument containing the line to be indented.
-   * @param reducedModel reduced model used by the document.
+   * @return true if this node's rule holds.
+   */
+  abstract boolean applyRule(DefinitionsDocument doc);
+
+  /**
+   * Determines if the given rule holds in this context.
+   * @param doc DefinitionsDocument containing the line to be indented.
    * @param pos Position within line to be indented.
    * @return true if this node's rule holds.
    */
-  abstract boolean applyRule(DefinitionsDocument doc, 
-                             BraceReduction reducedModel, 
-                             int pos);
+  boolean applyRule(DefinitionsDocument doc, int pos) {
+    int oldPos = doc.getCurrentLocation();
+    doc.setCurrentLocation(pos);
+    boolean result = applyRule(doc);
+    doc.setCurrentLocation(oldPos);
+    return result;
+  }
 
   /**
    * Determines if the given rule holds in this context and calls
    * the same method on one of its child nodes.
    * @param doc DefinitionsDocument containing the line to be indented.
    * @param reducedModel reduced model used by the document.
-   * @param pos Position within line to be indented.
    */
-  public void indentLine(DefinitionsDocument doc, 
-                         BraceReduction reducedModel,
-                         int pos)
+  public void indentLine(DefinitionsDocument doc)
   {
-    if (applyRule(doc, reducedModel, pos)) {
-      _yesRule.indentLine(doc, reducedModel, pos);
+    if (applyRule(doc)) {
+      _yesRule.indentLine(doc);
     }
     else {
-      _noRule.indentLine(doc, reducedModel, pos);
+      _noRule.indentLine(doc);
     }
   }
   
@@ -106,10 +113,16 @@ public abstract class IndentRuleQuestion implements IndentRule {
    * Replaces all whitespace characters at the beginning of the
    * line with the appropriate spacing or characters.
    * @param doc DefinitionsDocument containing the line to be indented.
-   * @param reducedModel reduced model used by the document.
    */
-  public void indentLine(DefinitionsDocument doc, BraceReduction reducedModel) {
-    indentLine(doc, reducedModel, doc.getCurrentLocation());
+  public void indentLine(DefinitionsDocument doc, int pos) {
+    int oldPos = doc.getCurrentLocation();
+    doc.setCurrentLocation(pos);
+    indentLine(doc);
+    doc.setCurrentLocation(oldPos);
   }
-
 }
+
+
+
+
+

@@ -81,11 +81,9 @@ public class QuestionPrevLineStartsWith extends IndentRuleQuestion {
    * Determines if the previous line in the document stars with the
    * specified character.
    * @param doc DefinitionsDocument containing the line to be indented.
-   * @param reducedModel reduced model used by the document.
-   * @param pos Position within line to be indented.
    * @return true if this node's rule holds.
    */
-  boolean applyRule(DefinitionsDocument doc, BraceReduction reducedModel, int pos) {
+  boolean applyRule(DefinitionsDocument doc) {
     throw new RuntimeException("Not yet implemented.");
     
     /** FIXME: don't look in comments if _searchComments == false

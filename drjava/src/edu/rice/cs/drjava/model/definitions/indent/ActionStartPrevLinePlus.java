@@ -62,12 +62,8 @@ class ActionStartPrevLinePlus extends IndentRuleAction {
   /**
    * Indents the line according to the previous line, with the suffix string added.
    * @param doc DefinitionsDocument containing the line to be indented.
-   * @param reducedModel reduced model used by the document.
-   * @param pos Position within line to be indented.
    */
-  public void indentLine(DefinitionsDocument doc, 
-                         BraceReduction reducedModel, 
-                         int pos)
+  public void indentLine(DefinitionsDocument doc)
   {
     // START = findPrevDelimiter
     // START' = scoot behind the delimiter we just found

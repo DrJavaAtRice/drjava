@@ -435,18 +435,18 @@ public class DefinitionsDocument extends PlainDocument {
 
   /**
    * For new indent system, not yet implemented
-   *
+   */
   public int findPrevDelimiter(int pos, char[] delims) {
     // Not implemented...
     return 0;
-  }*/
+  }
   
   /**
    * Returns the absolute position of the beginning of the
    * current line.  (Just after most recent newline.)
    * @param pos Any position on the current line
    */
-  public int getLineStartPos(int pos) {
+  public int getLineStartPos() {
     int dist = _reduced.getDistToPreviousNewline(0);
     return _currentLocation - dist;
   }
@@ -456,7 +456,7 @@ public class DefinitionsDocument extends PlainDocument {
    * line.  (Just before the next newline.)
    * @param pos Any position on the current line
    */
-  public int getLineEndPos(int pos) throws BadLocationException {
+  public int getLineEndPos() {
     int dist = _reduced.getDistToNextNewline();
     return _currentLocation + dist;
   }
@@ -464,12 +464,11 @@ public class DefinitionsDocument extends PlainDocument {
   /**
    * Returns the absolute position of the first non-whitespace character
    * on the current line.
-   * @param pos Any position on the current line
    * @return position at the end of the line if no non-whitespace character is found.
    */
-  public int getLineFirstCharPos(int pos) throws BadLocationException {
-    int startLinePos = getLineStartPos(pos);
-    int endLinePos = getLineEndPos(pos);
+  public int getLineFirstCharPos() throws BadLocationException {  
+    int startLinePos = getLineStartPos();
+    int endLinePos = getLineEndPos();
     
     // Get all text on this line
     String text = this.getText(startLinePos, endLinePos - startLinePos);
@@ -566,7 +565,7 @@ public class DefinitionsDocument extends PlainDocument {
    * Indents a line using the Indenter decision tree.
    */
   private void _indentLineNew() {
-    Indenter.ONLY.indent(this, _reduced);
+    Indenter.ONLY.indent(this);
   }
   
   /**
@@ -743,12 +742,11 @@ public class DefinitionsDocument extends PlainDocument {
    * character of the line containing pos to tab.
    * @param tab String to be placed between previous newline and first
    * non-whitespace character
-   * @param pos Position on line to be indented
    */
-  public void setTab(String tab, int pos) {
+  public void setTab(String tab) {
     try {
-      int startPos = getLineStartPos(pos);
-      int firstNonWSPos = getLineFirstCharPos(pos);
+      int startPos = getLineStartPos();
+      int firstNonWSPos = getLineFirstCharPos();
       
       // Removes old prefix, then adds new one
       // FIXME: If tab only contains spaces, then just adjust as necessary

@@ -58,7 +58,7 @@ public class QuestionPrevLineStartsCommentTest extends IndentRulesTestCase {
   // to use until we get the actual implementation
   static IndentRuleQuestion rule2 = new 
     IndentRuleQuestion(new ActionDoNothing(), new ActionDoNothing()) {
-    public boolean applyRule(DefinitionsDocument doc, BraceReduction rm, int pos) {
+	  public boolean applyRule(DefinitionsDocument doc) {  // Modified by Stephan
       return false;
     }
   };

@@ -79,7 +79,8 @@ public class Indenter
   /**
    * For now, create a simple tree to help integration.
    */
-  public void buildSimpleTree() {
+  public void buildSimpleTree() 
+  {
     IndentRule rule = new QuestionInsideComment(new ActionBracePlus(""),
                                                 new ActionDoNothing());
     _topRule = rule;
@@ -93,45 +94,45 @@ public class Indenter
    */
   public void buildTree()
   {
-    /**
+    /*
     String oneLevel = _indentSize;
     
     IndentRule 
       rule05 = new ActionDoNothing(),
       rule04 = new ActionStartPrevLinePlus(" "), 
       rule03 = new QuestionCurrLineEmpty(rule04, rule05);
-
+    
     IndentRule 
       rule33 = new ActionStartStmtPlus(oneLevel),
-        rule32 = new ActionStartStmtOfBracePlus(oneLevel),            
-          rule31 = rule33,
-            rule30 = new QuestionInTernary(rule31, rule32),
-              rule29 = new QuestionLineContains(":", rule30, rule33),
-                rule28 = new ActionStartStmtPlus(""),                           
- rule27 = new QuestionCurrLineStartsWith("{", rule28, rule29),
- rule26 = rule28,
- rule25 = rule32,
- rule24 = rule28,
- rule23 = new QuestionInTernary(rule24, rule25),
- rule22 = new QuestionLineContains(":", rule23, rule24),
- rule21 = new ActionStartStmtOfBracePlus(""),
- rule20 = new QuestionCurrLineStartsWith("}", rule21, rule22),
- rule19 = new QuestionStartingNewStmt(rule20, rule27),
- rule18 = rule19,
- rule17 = rule33,
- rule16 = new QuestionBraceOnPrevLine(rule17, rule18),
- rule15 = new QuestionBraceIsCurly(rule16, rule19),
- rule14 = new ActionBracePlus(" " + oneLevel),
- rule13 = new ActionBracePlus(" "),
- rule12 = new QuestionNewParenPhrase(rule13, rule14),
- rule11 = new QuestionBraceIsParenOrBracket(rule12, rule15),
- rule10 = rule03,      
- rule09 = new ActionStartPrevLinePlus(" * "),
- rule08 = rule04,          
- rule07 = new QuestionCurrLineStartsWith("*", rule08, rule09),
- rule06 = new QuestionPrevLineStartsWith("*", rule07, rule10),
- rule02 = new QuestionPrevLineStartsComment(rule03, rule06),
-   rule01 = new QuestionInsideComment(rule02, rule11);
+      rule32 = new ActionStartStmtOfBracePlus(oneLevel),            
+      rule31 = rule33,
+      rule30 = new QuestionInTernary(rule31, rule32),
+      rule29 = new QuestionLineContains(":", rule30, rule33),
+      rule28 = new ActionStartStmtPlus(""),                           
+      rule27 = new QuestionCurrLineStartsWith("{", rule28, rule29),
+      rule26 = rule28,
+      rule25 = rule32,
+      rule24 = rule28,
+      rule23 = new QuestionInTernary(rule24, rule25),
+      rule22 = new QuestionLineContains(":", rule23, rule24),
+      rule21 = new ActionStartStmtOfBracePlus(""),
+      rule20 = new QuestionCurrLineStartsWith("}", rule21, rule22),
+      rule19 = new QuestionStartingNewStmt(rule20, rule27),
+      rule18 = rule19,
+      rule17 = rule33,
+      rule16 = new QuestionBraceOnPrevLine(rule17, rule18),
+      rule15 = new QuestionBraceIsCurly(rule16, rule19),
+      rule14 = new ActionBracePlus(" " + oneLevel),
+      rule13 = new ActionBracePlus(" "),
+      rule12 = new QuestionNewParenPhrase(rule13, rule14),
+      rule11 = new QuestionBraceIsParenOrBracket(rule12, rule15),
+      rule10 = rule03,      
+      rule09 = new ActionStartPrevLinePlus(" * "),
+      rule08 = rule04,          
+      rule07 = new QuestionCurrLineStartsWith("*", rule08, rule09),
+      rule06 = new QuestionPrevLineStartsWith("*", rule07, rule10),
+      rule02 = new QuestionPrevLineStartsComment(rule03, rule06),
+      rule01 = new QuestionInsideComment(rule02, rule11);
     
     _topRule = rule01;
     */
@@ -150,10 +151,14 @@ public class Indenter
    * Indents the current line based on a decision tree which determines
    * the indent based on context.
    * @param doc document containing line to be indented
-   * @param reducedModel reduced model used by the document
    */
-  public void indent(DefinitionsDocument doc, BraceReduction reducedModel)
+  public void indent(DefinitionsDocument doc)
   {
-    _topRule.indentLine(doc, reducedModel);
+    _topRule.indentLine(doc);
   }
 }
+
+
+
+
+

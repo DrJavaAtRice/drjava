@@ -58,7 +58,7 @@ public class QuestionCurrLineEmptyTest extends IndentRulesTestCase {
   // to use until we get the actual implementation
   static IndentRuleQuestion rule3 = new 
     IndentRuleQuestion(new ActionDoNothing(), new ActionDoNothing()) {
-    public boolean applyRule(DefinitionsDocument doc, BraceReduction rm, int pos) {
+	  public boolean applyRule(DefinitionsDocument doc) {  // Modified by Stephan
       return false;
     }
   };

@@ -57,11 +57,9 @@ class QuestionPrevLineStartsComment extends IndentRuleQuestion {
   /**
    * Determines if the previous line in the document starts the block comment.
    * @param doc DefinitionsDocument containing the line to be indented.
-   * @param reducedModel reduced model used by the document.
-   * @param pos Position within line to be indented.
    * @return true if this node's rule holds.
    */
-  boolean applyRule(DefinitionsDocument doc, BraceReduction reducedModel, int pos) {
+  boolean applyRule(DefinitionsDocument doc) {
     // return 
     //   (stateAtRelLocation(dist. to PREVSTART) != INSIDE_BLOCK_COMMENT)
     // NB: not always accurate.  No false positives, but may give false
