@@ -164,7 +164,6 @@ export ANT_HOME=/usr/local/ant
 export JAVA_HOME=/usr/java/j2sdk1.4.1_01
 export PATH=${JAVA_HOME}/bin:${ANT_HOME}/bin:$PATH
 export CVS_RSH=ssh
-export EDITOR=emacs
           </programlisting>
           <para>You will need to start a new Terminal for the changes to take effect.</para>
         </listitem>
@@ -186,9 +185,6 @@ export EDITOR=emacs
             </listitem>
             <listitem>
               <para>Set <literal>CVS_RSH</literal> to <literal>ssh</literal></para>
-            </listitem>
-            <listitem>
-              <para>Set <literal>EDITOR</literal> to <literal>c:\emacs-21.2\bin\emacs.exe</literal></para>
             </listitem>
 
           </itemizedlist>
