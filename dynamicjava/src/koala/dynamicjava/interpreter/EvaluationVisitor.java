@@ -864,7 +864,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
 
     if (node.hasProperty(NodeProperties.METHOD)) {
       Method m    = (Method)node.getProperty(NodeProperties.METHOD);
-      Class[]  typs = m.getParameterTypes();
+      Class<?>[]  typs = m.getParameterTypes();
 
       // Relax the protection for members?
       if (context.getAccessible()) {
@@ -975,7 +975,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
     List<Expression> larg  = node.getArguments();
     Object[] args  = Constants.EMPTY_OBJECT_ARRAY;
 
-    Class[] typs = m.getParameterTypes();
+    Class<?>[] typs = m.getParameterTypes();
     
     // Fill the arguments
     if (larg != null) {
@@ -1033,7 +1033,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
     List<Expression> larg = node.getArguments();
     Object[] args = Constants.EMPTY_OBJECT_ARRAY;
 
-    Class[] typs = m.getParameterTypes();
+    Class<?>[] typs = m.getParameterTypes();
     
     // Fill the arguments
     if (larg != null) {
