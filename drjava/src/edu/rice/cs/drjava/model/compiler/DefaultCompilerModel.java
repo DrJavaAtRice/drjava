@@ -368,7 +368,7 @@ public class DefaultCompilerModel implements CompilerModel {
     compiler.setBuildDirectory(buildDir);
     if (files.length > 0) {
 //      if (DrJava.getConfig().getSetting(OptionConstants.LANGUAGE_LEVEL) == DrJava.ELEMENTARY_LEVEL) {
-      LanguageLevelConverter llc = new LanguageLevelConverter();
+      LanguageLevelConverter llc = new LanguageLevelConverter(getActiveCompiler().getName());
       // Language level files are moved to another file, copied back
       // in augmented form to be compiled.  This compiled version
       // is also copied to another file with the same path with the 
