@@ -152,7 +152,8 @@ public void testInsertGapBeforeGap()
 
 	public void testInsertBraceAndBreakLineComment()
 		{
-			model1.insertLineComment();
+			model1.insertSlash();
+			model1.insertSlash();
 			assertEquals("#0.0", 2, model1._cursor.prevItem().getSize());			
 			model1._cursor.prev();
 			model1._offset = 1;
@@ -170,7 +171,8 @@ public void testInsertGapBeforeGap()
 
 		public void testInsertBraceAndBreakBlockCommentStart()
 		{
-			model1.insertBlockCommentStart();
+			model1.insertSlash();
+			model1.insertStar();
 			assertEquals("#0.0", 2, model1._cursor.prevItem().getSize());			
 			model1._cursor.prev();
 			model1._offset = 1;
@@ -187,7 +189,8 @@ public void testInsertGapBeforeGap()
 	
 	public void testInsertMultipleBraces()
 		{
-			model1.insertBlockCommentStart();
+			model1.insertSlash();
+			model1.insertStar();
 			model1.insertOpenSquiggly();
 			model1._cursor.prev();
 			// /*#{
@@ -197,7 +200,8 @@ public void testInsertGapBeforeGap()
 									 model1._cursor.prevItem().getState());
 
 			model1._cursor.next();
-			model1.insertBlockCommentEnd();
+			model1.insertStar();
+			model1.insertSlash();
 			// /*{*/#
 			assertEquals("#1.0",ReducedToken.FREE,
 									 model1._cursor.prevItem().getState());
@@ -385,7 +389,8 @@ public void testInsertGapBeforeGap()
 	
 	public void testInsertBraceAndBreakBlockCommentEnd()
 		{
-			model1.insertBlockCommentEnd();
+			model1.insertStar();
+			model1.insertSlash();
 			assertEquals("#0.0", 1, model1._cursor.prevItem().getSize());			
 			model1._cursor.prev();
 			model1.insertOpenSquiggly();
@@ -410,7 +415,8 @@ public void testInsertGapBeforeGap()
 			assertEquals("#1.0", ReducedToken.FREE,
 									 model1._cursor.prevItem().getState());
 
-			model1.insertLineComment();
+			model1.insertSlash();
+			model1.insertSlash();
 			assertEquals("#2.0", ReducedToken.FREE,
 									 model1._cursor.prevItem().getState());
 			assertEquals("#2.1", ReducedToken.INSIDE_LINE_COMMENT,
@@ -418,7 +424,8 @@ public void testInsertGapBeforeGap()
 			// {//#
 			model1._cursor.prev();
 			model1._cursor.prev();
-			model1.insertLineComment();
+			model1.insertSlash();
+			model1.insertSlash();
 			// //#{//
 			assertEquals("#3.0", ReducedToken.FREE,
 									 model1._cursor.prevItem().getState());

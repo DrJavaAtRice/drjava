@@ -7,8 +7,9 @@ import gj.util.Vector;
 
 /**
  * This class provides an implementation of the BraceReduction
- * interface that supports brace matching with support
- * for comment and quote (string) shadowing.
+ * interface for brace matching.  In order to correctly match, this class
+ * keeps track of what is commented (line and block) and what is inside
+ * double quotes and keeps this in mind when matching.
  * To avoid unnecessary complication, this class maintains a few
  * invariants for its consistent states, i.e., between top-level
  * function calls.
@@ -36,7 +37,7 @@ public class ReducedModel implements BraceReduction
   public static final char PTR_CHAR = '#';
   
   /**
-	 * element list
+	 * A list of ReducedTokens (braces and gaps).
 	 * @see ModelList
 	 */
   ModelList<ReducedToken> _braces;
@@ -45,14 +46,13 @@ public class ReducedModel implements BraceReduction
 	 * @see ModelList.Iterator
 	 */
   ModelList<ReducedToken>.Iterator _cursor;
-  /** more refined cursor information */
+  /** a relative offset within the current ReducedToken */
   int _offset;
   
 
   /**
-   * Constructor.  Creates a new reduced model and inserts a blank
-   * node as a placeholder for gaps after the last brace.  The blank
-   * node becomes the current node.
+   * Constructor.  Creates a new reduced model with the cursor
+	 * at the start of a blank "page."
    */
   public ReducedModel()
     {
@@ -64,8 +64,9 @@ public class ReducedModel implements BraceReduction
 
 	/**
 	 * Package private absolute offset for tests.
+	 * We don't keep track of absolute offset as it causes too much confusion
+	 * and trouble.
 	 */
-
 	int absOffset()
 		{
 			int off = _offset;
@@ -83,14 +84,17 @@ public class ReducedModel implements BraceReduction
 			return off;
 		}
 
+	/**
+	 * A toString replacement for testing - easier to read.
+	 */	
 	public String simpleString()
 		{
 			String val = "";
 			ReducedToken tmp;
 
 			ModelList<ReducedToken>.Iterator it = _braces.getIterator();
-			it.next(); // since we start at the head, which doesn't have a current
-			// item
+			it.next(); // since we start at the head, which has no current item
+
 
 			if (_cursor.atStart())
 				{
@@ -127,12 +131,12 @@ public class ReducedModel implements BraceReduction
 
   
 
-	//************************************TOP LEVEL FUNCTIONS****************
-	//**********************************************************************
+
 	//All inserts end up with pointer after inserted item
 	
   /**
-   * Inserts an open brace ({) into the reduced model.	 
+   * Inserts an open brace ({) into the reduced model.
+	 * @return a Vector of highlighting information after the cursor
    */
 	public Vector<StateBlock> insertOpenSquiggly()
 		{
@@ -142,6 +146,7 @@ public class ReducedModel implements BraceReduction
 
   /**
    * Inserts a closed brace (}) into the reduced model.
+	 * @return a Vector of highlighting information after the cursor
    */
   public Vector<StateBlock> insertClosedSquiggly()
 		{
@@ -150,6 +155,7 @@ public class ReducedModel implements BraceReduction
 		}
   /**
    * Inserts an open parenthesis (() into the reduced model.
+	 * @return a Vector of highlighting information after the cursor
    */
   public Vector<StateBlock> insertOpenParen()
 		{
@@ -159,6 +165,7 @@ public class ReducedModel implements BraceReduction
 
   /**
    * Inserts a closed parenthesis ()) into the reduced model.
+	 * @return a Vector of highlighting information after the cursor
    */
   public Vector<StateBlock> insertClosedParen()
 		{
@@ -168,6 +175,7 @@ public class ReducedModel implements BraceReduction
 	
   /**
    * Inserts an open bracket ([) into the reduced model.
+	 * @return a Vector of highlighting information after the cursor
    */
   public Vector<StateBlock> insertOpenBracket()
 		{
@@ -177,6 +185,7 @@ public class ReducedModel implements BraceReduction
 
   /**
    * Inserts a closed bracket (]) into the reduced model.
+	 * @return a Vector of highlighting information after the cursor
    */
   public Vector<StateBlock> insertClosedBracket()
 		{
@@ -186,6 +195,30 @@ public class ReducedModel implements BraceReduction
 	
   /**
    * Inserts a star.
+	 * <OL>
+	 *  <li> empty list: insert star
+	 *  <li> atEnd: check previous and insert star
+	 *  <li> inside multiple character brace:
+	 *   <ol>
+	 *    <li> break current brace
+	 *    <li> move next to make second part current
+	 *    <li> insert brace between broken parts of former brace
+	 *    <li> move previous twice to get before the broken first part
+	 *    <li> walk
+	 *    <li> current = multiple char brace? move next once<BR>
+	 *         current = single char brace?  move next twice<BR>
+	 *				 We moved two previous, but if the broken part combined with
+	 *				 the insert, there's only one brace where once were two.
+	 *   </ol>
+	 *  <li> inside a gap: use helper function
+	 *  <li> before a multiple char brace:
+	 *   <ol>
+	 *    <li> break the current brace
+	 *    <li> check previous and insert
+	 *   </ol>
+	 *  <li>otherwise, check previous and insert
+	 * </OL>
+	 * @return a Vector of highlighting information after the cursor
    */
   public Vector<StateBlock> insertStar()
 		{
@@ -229,7 +262,8 @@ public class ReducedModel implements BraceReduction
 				{
 					//if we're free there won't be a block comment close so if there
 					//is then we don't want to break it.
-					_splitCurrentIfCommentBlock(false,false,_cursor); //leaving us at start
+					_splitCurrentIfCommentBlock(false,false,_cursor);
+          //leaving us at start
 					_checkPreviousInsertStar(_cursor);
 				}
 			else
@@ -239,7 +273,12 @@ public class ReducedModel implements BraceReduction
 			return SBVectorFactory.generate(_cursor.copy(),_offset);
 		}
 	
-			 
+
+	/**
+	 * Checks before the place of insert to make sure there are no preceding
+	 * slashes with which the inserted star must combine.  It then performs
+	 * the insert of either (*), (* /) or (/ *).	 
+	 */
 	private void _checkPreviousInsertStar(ModelList<ReducedToken>.Iterator
 																				copyCursor)
 		{
@@ -267,20 +306,32 @@ public class ReducedModel implements BraceReduction
 		
 	
   /**
-   * Inserts a slash
-	 *1) If at head, or start: insert normally
-	 *2) If previous is a * and inside block comment: unite.
-	 *3) If previous is a / and Free: unite.
-	 *4) If left of or inside of / *: a)break,
-	 *                                b)insert,
-	 *                                c)walk from first of three
-	 *5) If left of or inside of / /: a)break
-	 *                                b)insert
-	 *                                c)walk from the first of three
-	 *6) If inside of * /           : a)break
-	 *                                b)insert
-	 *                                c)walk from first of three
-	 */
+   * Inserts a slash.
+	 * <OL>
+	 *  <li> empty list: insert slash
+	 *  <li> atEnd: check previous and insert slash
+	 *  <li> inside multiple character brace:
+	 *   <ol>
+	 *    <li> break current brace
+	 *    <li> move next to make second part current
+	 *    <li> insert brace between broken parts of former brace
+	 *    <li> move previous twice to get before the broken first part
+	 *    <li> walk
+	 *    <li> current = multiple char brace? move next once<BR>
+	 *         current = single char brace?  move next twice<BR>
+	 *				 We moved two previous, but if the broken part combined with
+	 *				 the insert, there's only one brace where once were two.
+	 *   </ol>
+	 *  <li> inside a gap: use helper function
+	 *  <li> before a multiple char brace:
+	 *   <ol>
+	 *    <li> break the current brace
+	 *    <li> check previous and insert
+	 *   </ol>
+	 *  <li>otherwise, check previous and insert
+	 * </OL>
+	 * @return a Vector of highlighting information after the cursor
+   */
   public Vector<StateBlock> insertSlash()
 		{
 			//check if empty
@@ -336,6 +387,11 @@ public class ReducedModel implements BraceReduction
 		}
 
 	
+	/**
+	 * Checks before the place of insert to make sure there are no preceding
+	 * slashes with which the inserted slash must combine.  It then performs
+	 * the insert of either (/), (/ /), (/ *) or (* /).	 
+	 */
 	private void _checkPreviousInsertSlash(ModelList<ReducedToken>.Iterator
 																				 copyCursor)
 		{
@@ -371,22 +427,25 @@ public class ReducedModel implements BraceReduction
 
 	
   /**
-   * Inserts a new line character (\n) into the reduced model.
-	 * 1) atStart: nothing special
-	 * 2) atEnd: nothing special
-	 * 3) in between multiple char brace: 1) break
-	 *                                    2) insert newline in between
-	 *                                    3) move two back
-	 *                                    4) updateBasedOnCurrentState
-	 *                                    5) move two forward, _offset = 0
-	 * 4) in between Gap: 1) shrink Gap by _offset
-	 *                    2) insert newline
-	 *                    3) insert Gap of size _offset
-	 *                    4) walk from first Gap
-	 *                    5) move two forward, _offset = 0
-	 * 5) otherwise, just insert newline, walk, move next, _offset = 0
+   * Inserts an end-of-line character.
+	 * <OL>
+	 *  <li> atStart: insert
+	 *  <li> atEnd: insert
+	 *  <li> inside multiple character brace:
+	 *   <ol>
+	 *    <li> break current brace
+	 *    <li> move next to make second part current
+	 *    <li> insert brace between broken parts of former brace
+	 *    <li> move previous twice to get before the broken first part
+	 *    <li> walk
+	 *    <li> move next twice to be after newline insertion
+	 *   </ol>
+	 *  <li> inside a gap: use helper function
+	 *  <li>otherwise, just insert normally
+	 * </OL>
+	 * @return a Vector of highlighting information after the cursor
    */
-  public Vector<StateBlock> insertNewline()
+	public Vector<StateBlock> insertNewline()
 		{
 			if (_cursor.atStart())
 				{
@@ -427,21 +486,32 @@ public class ReducedModel implements BraceReduction
 			_offset = 0;
 		}
 	
-/**
-   * Inserts a double quote (") into the reduced model.
-	 * 1) atStart: nothing special
-	 * 2) atEnd: nothing special
-	 * 3) in between multiple char brace: 1) break
-	 *                                    2) insert quote in between
-	 *                                    3) move two back
-	 *                                    4) updateBasedOnCurrentState
-	 *                                    5) move two forward, _offset = 0
-	 * 4) in between Gap: 1) shrink Gap by offset
-	 *                    2) insert quote
-	 *                    3) insert Gap of size offset
-	 *                    4) walk from first Gap
-	 *                    5) move two forward, _offset = 0
-	 * 5) otherwise, just insert, walk, move next, _offset = 0
+  /**
+   * Inserts a double quote character.
+	 * <OL>
+	 *  <li> atStart: insert
+	 *  <li> atEnd: insert
+	 *  <li> inside multiple character brace:
+	 *   <ol>
+	 *    <li> break current brace
+	 *    <li> move next to make second part current
+	 *    <li> insert brace between broken parts of former brace
+	 *    <li> walk
+	 *    <li> current = multiple char brace? move next once<BR>
+	 *         current = single char brace?  move next twice<BR>
+	 *				 We moved two previous, but if the broken part combined with
+	 *				 the insert, there's only one brace where once were two.
+	 *    <li> move next twice to be after newline insertion
+	 *   </ol>
+	 *  <li> inside a gap: use helper function
+	 *  <li> before a multiple char brace:
+	 *   <ol>
+	 *    <li> break the current brace
+	 *    <li> check previous and insert
+	 *   </ol>
+	 *  <li>otherwise, just insert normally
+	 * </OL>
+	 * @return a Vector of highlighting information after the cursor
    */
   public Vector<StateBlock> insertQuote()
 		{
@@ -460,7 +530,8 @@ public class ReducedModel implements BraceReduction
 					_cursor.insert(Brace.MakeBrace("\"", getStateAtCurrent()));
 					_cursor.prev();
 					_updateBasedOnCurrentState();
-					_cursor.next();
+					if (!_cursor.current().isMultipleCharBrace())
+						_cursor.next();
 					_cursor.next();
 					_offset = 0;
 				}
@@ -475,6 +546,9 @@ public class ReducedModel implements BraceReduction
 			return SBVectorFactory.generate(_cursor.copy(),_offset);	
 		}
 
+	/**
+	 * Helper function for insertQuote.
+	 */
 	private void _insertNewQuote()
 		{
 			String insert = _getQuoteType();
@@ -486,6 +560,12 @@ public class ReducedModel implements BraceReduction
 			_offset = 0;
 		}
 
+	/**
+	 * Helper function for insertQuote.  Returns text for either
+	 * a regular (") or escaped (\") quote.  In the case where a backslash
+	 * precedes the point of insertion, it removes the backslash and returns
+	 * the text for an escaped quote.
+	 */
 	private String _getQuoteType()
 		{
 			if (_cursor.atStart() || _cursor.atFirstItem())
@@ -498,11 +578,40 @@ public class ReducedModel implements BraceReduction
 			else
 				return "\"";
 		}
-	
+
+	/**
+	 * Inserts a backslash (\) into the reduced model.
+	 * We need to keep track of backslashes so that we have valid quote
+	 * information.  An escaped quote (\") in a document does not mean
+	 * an open or closed quote for a string.
+	 * <OL>
+	 *  <li> empty: insert
+	 *  <li> atEnd: insert
+	 *  <li> inside multiple character brace:
+	 *   <ol>
+	 *    <li> break current brace
+	 *    <li> move next to make second part current
+	 *    <li> insert brace between broken parts of former brace
+	 *    <li> walk
+	 *    <li> current = multiple char brace? move next once<BR>
+	 *         current = single char brace?  move next twice<BR>
+	 *				 We moved two previous, but if the broken part combined with
+	 *				 the insert, there's only one brace where once were two.
+	 *    <li> move next twice to be after newline insertion
+	 *   </ol>
+	 *  <li> inside a gap: use helper function
+	 *  <li> before a multiple char brace:
+	 *   <ol>
+	 *    <li> break the current brace
+	 *    <li> check previous and insert
+	 *   </ol>
+	 *  <li>otherwise, just insert normally
+	 * </OL>
+	 * @return a Vector of highlighting information after the cursor
+	 */
 	public Vector<StateBlock> insertBackSlash()
 		{			
-		 
-//check if empty
+		 //check if empty
 			if (_braces.isEmpty())
 				{
 					_insertNewBrace("\\",_cursor);//now pointing to tail.
@@ -553,7 +662,11 @@ public class ReducedModel implements BraceReduction
 				}
 			return SBVectorFactory.generate(_cursor.copy(),_offset);
 		}
-	
+
+	/**
+	 * Checks before point of insertion to make sure we don't need to combine
+	 * backslash with another backslash (yes, they too can be escaped).
+	 */
 
 	private void _checkPreviousInsertBackSlash(ModelList<ReducedToken>.Iterator
 																						 copyCursor)
@@ -577,39 +690,21 @@ public class ReducedModel implements BraceReduction
 		}
 
 	
-	void insertLineComment()
-		{
-			insertSlash();
-			insertSlash();
-		}
-
-	void insertBlockCommentStart()
-		{
-			insertSlash();
-			insertStar();
-		}
-
-	void insertBlockCommentEnd()
-		{
-			insertStar();
-			insertSlash();
-		}
-	
   /**
-	 * 0) If at head: check if gap to right, else insert gap / next
-	 * 0) If at tail: check if gap to left, else insert gap / next
-	 * 1) If inside a gap: grow current gap, move offset by length
-	 * 5) Inside a multiple character brace:  a) break brace (updates state
-	 *                                                      	 of braces).
-	 *                                        b) insert gap
-	 *                                        c) goto next / offset = 0	
-	 * 2) If gap to left : a) grow gap to left, set offset to zero
-	 * 3) If gap to right: can never happen because you would be inside gap.
-	 * 4) Inbetween two braces: a) insert gap
-	 *                          b) point to next item / offset = 0.
-	 * <P>Updates the BraceReduction to reflect the insertion of a
-   * regular text string into the document.</P>
-   * @param length the length of the inserted string
+	 * Inserts a block of non-brace text into the reduced model.
+	 * <OL>
+	 *  <li> atStart: if gap to right, augment first gap, else insert
+	 *  <li> atEnd: if gap to left, augment left gap, else insert
+	 *  <li> inside a gap: grow current gap, move offset by length
+	 *  <li> inside a multiple character brace:
+	 *   <ol>
+	 *    <li> break current brace
+	 *    <li> insert new gap
+	 *   </ol>
+	 *  <li> gap to left: grow that gap and set offset to zero
+	 *  <li> gap to right: this case handled by inside gap (offset invariant)
+	 *  <li> between two braces: insert new gap
+   * @param length the length of the inserted text
    */
   public Vector<StateBlock> insertGap( int length )
 		{
@@ -684,7 +779,11 @@ public class ReducedModel implements BraceReduction
 		{
 			return _getStateAtCurrentHelper(_cursor);
 		}
-	
+
+	/**
+	 * Returns the current commented/quoted state at the cursor.
+	 * @return FREE|INSIDE_BLOCK_COMMENT|INSIDE_LINE_COMMENT|INSIDE_QUOTE
+	 */
 	private int _getStateAtCurrentHelper(ModelList<ReducedToken>.Iterator temp)
 		{
 			int state = ReducedToken.FREE;
@@ -710,57 +809,83 @@ public class ReducedModel implements BraceReduction
 		}
 	
 	/**
-	 *Before using, make sure not at last, or tail.
+	 * Returns true if there is a gap immediately to the right.
 	 */
 	private boolean _gapToRight()
 		{
+			// Before using, make sure not at last, or tail.
 			return (!_braces.isEmpty() && !_cursor.atEnd() &&
 							!_cursor.atLastItem() && _cursor.nextItem().isGap());
 		}
 	/**
-	 *Before using, make sure not at first or head.
+	 * Returns true if there is a gap immediately to the left.	 
 	 */
 	private boolean _gapToLeft()
 		{
+			// Before using, make sure not at first or head.
 			return (!_braces.isEmpty() && !_cursor.atStart() &&
 							!_cursor.atFirstItem() &&	_cursor.prevItem().isGap());
 		}
+
 	/**
-	 *Make sure there is a gap to the left. Increases gap.
+	 * Assuming there is a gap to the left, this function increases
+	 * the size of that gap.
+	 * @param length the amount of increase
 	 */
 	private void _augmentGapToLeft(int length)
 		{
 			_cursor.prevItem().grow(length);			
 		}
 
+	/**
+	 * Assuming there is a gap to the right, this function increases
+	 * the size of that gap.
+	 * @param length the amount of increase
+	 */
 	private void _augmentCurrentGap(int length)
 		{
 			_cursor.current().grow(length);
 			_offset = length;
 		}
-	
+	/**
+	 * Helper function for insertGap.
+	 * Performs the actual insert and marks the offset appropriately.
+	 * @param length size of gap to insert
+	 */
 	private void _insertNewGap(int length)
 		{
-			//getStateAtCurrent returns the state of the current location based
-			//upon what the previous item is. If it is //, /*, ", or itself
-			//shadowed then getStateAtCurrent returns some commented state, else
-			//it returns FREE
 			_cursor.insert(new Gap(length, getStateAtCurrent()));
 			_cursor.next();
 			_offset = 0;
 		}
 
 	/**
-	 *1)at Head: not special case
-	 *2)at Tail: not special case
-	 *3)between two things (offset is 0): a) insert,
-	 *                                    b) next, offset = 0;
-	 *4)inside gap:  a)shrink gap to size of gap - offset.
-	 *               b)insert brace
-	 *               c)insert gap the size of offset.
-	 *               d) 2 * next, offset = 0
-	 *5)inside double char comment: a)break
-	 *                              b)insert
+	 * Helper function for top level brace insert functions.
+	 *
+	 * <OL>
+	 *  <li> at Head: not special case
+	 *  <li> at Tail: not special case
+	 *  <li> between two things (offset is 0):
+	 *      <ol>
+	 *       <li> insert brace
+	 *       <li> move next
+	 *       <li> offset = 0
+	 *      </ol>
+	 *  <li> inside gap:
+	 *      <ol>
+	 *       <li> shrink gap to size of gap - offset.
+	 *       <li> insert brace
+	 *       <li> insert gap the size of offset.
+	 *       <li> move next twice
+	 *       <li> offset = 0
+	 *      </ol>
+	 * <li> inside multiple char brace:
+	 *      <ol>
+	 *       <li> break
+	 *       <li> insert brace
+	 *      </ol>
+	 * </OL>
+	 * @param text the String type of the brace to insert
 	 */
 	private void _insertBrace(String text)
 		{
@@ -782,6 +907,11 @@ public class ReducedModel implements BraceReduction
 					_insertNewBrace(text,_cursor);
 				}
 		}
+
+	/**
+	 * Helper function to _insertBrace.
+	 * Handles the details of the case where a brace is inserted into a gap.
+	 */
 	private void _insertBraceToGap(String text,
 																 ModelList<ReducedToken>.Iterator
 																 copyCursor)
@@ -796,6 +926,11 @@ public class ReducedModel implements BraceReduction
 			_offset = 0;
 		}
 	
+	/**
+	 * Helper function to _insertBrace.
+	 * Handles the details of the case where brace is inserted between two
+	 * reduced tokens.  No destructive action is taken.
+	 */
 	private void _insertNewBrace(String text,
 															 ModelList<ReducedToken>.Iterator
 															 copyCursor)
@@ -804,85 +939,51 @@ public class ReducedModel implements BraceReduction
 			copyCursor.next();
 			_offset = 0;
 		}
-	private void _insertTestChar(String text)
-		{
-			_insertBrace(text);
-		}
 	
-	/**
-	 * _breakComment is only called if inside a double-character comment
-	 * i.e., _offset > 0
-	 *1)Line comment:  a)change block comment to "/"
-	 *                 b)set state of slash
-	 * 								 c)make the next slash and insert it before
-	 *	 							 d)move pointer to second slash (old one)
-	 *	 							 e)call walk.
-	 *	 							 f)offset = 0
+  /**
+	 * Breaks a multiple char brace apart and performs an update on the
+	 * following ReducedTokens.
+	 * _breakComment only works on multiple character braces.
+	 * Given a multiple character brace of size 2 (/ /, / *, * /, \", \\),
+	 * get the first and second characters in the brace and call them first
+	 * and second.
+	 *
+	 * <OL>
+	 *  <li> Set the type of the brace to the second character.
+	 *  <li> Set the state using getStateAtCurrent().
+	 *  <li> Insert a new brace of the type denoted by the first character.
+	 *  <li> Move next and walk.  We have to move next so we don't unite
+	 *       the newly split braces.
+	 * </OL>
 	 */
 	private void _breakComment(ModelList<ReducedToken>.Iterator copyCursor)
 		{
-			if (copyCursor.current().isLineComment())
+			if (copyCursor.current().isMultipleCharBrace())
 				{
-					copyCursor.current().setType("/");
+					String type = copyCursor.current().getType();
+					String first = type.substring(0,1);
+					String second = type.substring(1,2);
+					copyCursor.current().setType(second);
 					copyCursor.current().setState(getStateAtCurrent());
-					copyCursor.insert(Brace.MakeBrace("/", getStateAtCurrent()));
-					copyCursor.next(); // pointing to second slash
-					_updateBasedOnCurrentState(); // slashes will not be combined
-					//_offset = 0;
-				}
-			else if (copyCursor.current().isBlockCommentStart())
-				{
-					copyCursor.current().setType("*");
-					copyCursor.current().setState(getStateAtCurrent());
-					copyCursor.insert(Brace.MakeBrace("/", getStateAtCurrent()));
+					copyCursor.insert(Brace.MakeBrace(first, getStateAtCurrent()));
 					copyCursor.next();
 					_updateBasedOnCurrentState();
-					//_offset = 0;
-				}
-			else if (copyCursor.current().isBlockCommentEnd())
-				{
-					copyCursor.current().setType("/");
-					copyCursor.current().setState(getStateAtCurrent());
-					copyCursor.insert(Brace.MakeBrace("*", getStateAtCurrent()));
-					copyCursor.next();
-					_updateBasedOnCurrentState();
-					//_offset = 0;
-				}
-			else if (copyCursor.current().isDoubleEscape())
-				{
-					copyCursor.current().setType("\\");
-					copyCursor.current().setState(getStateAtCurrent());
-					copyCursor.insert(Brace.MakeBrace("\\", getStateAtCurrent()));
-					copyCursor.next();
-					_updateBasedOnCurrentState();
-					//_offset = 0;
-				}
-			else if (copyCursor.current().isEscapedQuote())
-				{
-					copyCursor.current().setType("\"");
-					copyCursor.current().setState(getStateAtCurrent());
-					copyCursor.insert(Brace.MakeBrace("\\", getStateAtCurrent()));
-					copyCursor.next();
-					_updateBasedOnCurrentState();
-					//_offset = 0;
 				}
 			else
 				{
 					throw new RuntimeException("_breakComment miscalled!");
-				}
+				}			
 		}
 
 
 /**
- *USE RULES:
- * In the case of inserting between brackets: This should be called from
- *                               between the two characters of the broken
- *                               double comment.
- * In case of deletion of special character start from previous char...
- *                               unless that char is the head.
- *Begins updating at current character.  /./ would not become // because
+ * USE RULES:
+ * Inserting between braces: This should be called from between the two
+ *                           characters of the broken double comment.
+ * Deleting special chars: Start from previous char if it exists.
+ * Begins updating at current character.  /./ would not become // because
  * current is in the middle. 
- *Double character comments inside of a quote or a comment are broken.
+ * Double character comments inside of a quote or a comment are broken.
  */
 	
 	private void _updateBasedOnCurrentState()
@@ -891,6 +992,12 @@ public class ReducedModel implements BraceReduction
 			_updateBasedOnCurrentStateHelper(copyCursor);
 		}
 
+	/**
+	 * The walk function.
+	 * Walks along the list on which ReducedModel is based from the current
+	 * cursor position.  Which path it takes depends on the
+	 * return value of getStateAtCurrent() at the start of the walk.
+	 */
 	private void _updateBasedOnCurrentStateHelper(
 		ModelList<ReducedToken>.Iterator copyCursor)
 		{
@@ -923,21 +1030,20 @@ public class ReducedModel implements BraceReduction
 					_updateInsideLineComment(copyCursor);
 					break;
 				}
-
-			/*
-				System.err.println("New state for current: " + current().getState()
-				+ " text=" + this);
-			*/
 		}
 
-  /** We're current not in a comment or quote. Things we have to update:
-   *  0. If we've reached the end of the list, return.
-   *  1. If we find / *, * /, or / /, combine them into a single Brace, and
-   *     keep the cursor on that Brace.
-   *  2. If current brace = //, go to next then call updateLineComment.
-   *     If current brace = /*, go to next then call updateBlockComment.
-   *     If current brace = ", go to next then call updateInsideQuote.
-   *     Else, mark current brace as FREE and go to next brace and recur.
+  /**
+	 *	Walk function for when we're not inside a string or comment.
+	 *  Self-recursive and mutually recursive with other walk functions.
+   *  <ol>
+	 *   <li> atEnd: return
+	 *   <li> If we find / *, * /, or / /, combine them into a single Brace,
+	 *        and keep the cursor on that Brace.
+   *   <li> If current brace = //, go to next then call updateLineComment.<BR>
+   *        If current brace = /*, go to next then call updateBlockComment.<BR>
+   *        If current brace = ", go to next then call updateInsideQuote.<BR>
+   *        Else, mark current brace as FREE, go to the next brace, and recur.
+	 * </ol>
    */
   private void _updateFree(ModelList<ReducedToken>.Iterator copyCursor)
 		{
@@ -962,7 +1068,6 @@ public class ReducedModel implements BraceReduction
 			if (type.equals("*/"))
 				{
 					_splitCurrentIfCommentBlock(true,false,copyCursor);
-					//_breakComment(copyCursor);
 					copyCursor.prev();
 					_updateBasedOnCurrentStateHelper(copyCursor);
 				}
@@ -998,13 +1103,17 @@ public class ReducedModel implements BraceReduction
 				}
 		}
 
-  /** We're inside a quoted string. Things we have to update:
-   *  0. If we've reached the end of the list, return.
-   *  1. If we find //, /* or star-slash, split them into two separate braces.
-   *     The cursor will be on the first of the two new braces.
-   *  2. If current brace = \n or ", mark current brace FREE, next(), and
-   *     go to updateFree.
-   *     Else, mark current brace as INSIDE_QUOTE and goto next brace and recur.
+  /**
+	 * Walk function for when inside a quoted string.
+	 *  Self-recursive and mutually recursive with other walk functions.
+   *  <ol>
+   *  <li> If we've reached the end of the list, return.
+   *  <li> If we find //, /* or * /, split them into two separate braces.
+   *       The cursor will be on the first of the two new braces.
+   *  <li> If current brace = \n or ", mark current brace FREE, next(), and
+   *       go to updateFree.
+   *       Else, mark current brace as INSIDE_QUOTE, go to next brace, recur.
+	 * </ol>	 
    */
   private void _updateInsideQuote(ModelList<ReducedToken>.Iterator copyCursor)
 		{
@@ -1043,15 +1152,20 @@ public class ReducedModel implements BraceReduction
 				}
 		}
 
-  /** We're inside a line comment. Things we have to update:
-   *  0. If we've reached the end of the list, return.
-   *  1. If we find //, /* or star-slash, split them into two separate braces.
+  /**
+	 * Walk function for inside line comment.
+	 *  Self-recursive and mutually recursive with other walk functions.
+   *  <ol>
+   *   <li> If we've reached the end of the list, return.
+   *   <li> If we find //, /* or * /, split them into two separate braces.
    *     The cursor will be on the first of the two new braces.
-   *  2. If current brace = \n, mark current brace FREE, next(), and
-   *     go to updateFree.
-   *     Else, mark current brace as LINE_COMMENT and goto next brace and recur.
+   *   <li> If current brace = \n, mark current brace FREE, next(), and
+   *        go to updateFree.<BR>
+   *        Else, mark current brace as LINE_COMMENT, goto next, and recur.
+	 *  </ol>
    */
-  private void _updateInsideLineComment(ModelList<ReducedToken>.Iterator copyCursor)
+  private void _updateInsideLineComment(
+		ModelList<ReducedToken>.Iterator copyCursor)
 		{
 			if (copyCursor.atEnd())
 				return;
@@ -1079,18 +1193,23 @@ public class ReducedModel implements BraceReduction
 				}
 		}
 
-  /** We're inside a block comment. Things we have to update:
-   *  0. If we've reached the end of the list, return.
-   *  1. If we find * /, combine it into a single Brace, and
-   *     keep the cursor on that Brace.
-   *  2. If we find // or /*, split that into two Braces and keep the cursor
-   *     on the first one.
-   *  3. If current brace = star-slash, mark the current brace as FREE,
-   *     go to the next brace, and call updateFree.
-   *     Else, mark current brace as INSIDE_BLOCK_COMMENT
-   *     and go to next brace and recur.
+  /**
+	 * Walk function for inside line comment.
+	 *  Self-recursive and mutually recursive with other walk functions.
+   *  <ol>
+   *   <li> If we've reached the end of the list, return.
+   *   <li> If we find * /, combine it into a single Brace, and
+   *        keep the cursor on that Brace.
+   *   <li> If we find // or /*, split that into two Braces and keep the cursor
+   *        on the first one.
+   *   <li> If current brace = * /, mark the current brace as FREE,
+   *        go to the next brace, and call updateFree.<BR>
+   *        Else, mark current brace as INSIDE_BLOCK_COMMENT
+   *        and go to next brace and recur.
+	 *  </ol>
    */
-  private void _updateInsideBlockComment(ModelList<ReducedToken>.Iterator copyCursor)
+  private void _updateInsideBlockComment(
+		ModelList<ReducedToken>.Iterator copyCursor)
 		{
 			if (copyCursor.atEnd())
 				return;
@@ -1122,13 +1241,16 @@ public class ReducedModel implements BraceReduction
 				}
 		}
 
-  /** If we have braces of first and second in immediate succession, and if
-   *  second's gap is 0, combine them into first+second.
-   *  The cursor remains on the same block after this method is called.
-   *  @return true if we combined two braces or false if not
+  /**
+	 * Combines the current and next braces if they match the given types.
+	 * If we have braces of first and second in immediate succession, and if
+   * second's gap is 0, combine them into first+second.
+   * The cursor remains on the same block after this method is called.
+	 * @param first the first half of a multiple char brace
+	 * @param second the second half of a multiple char brace
+   * @return true if we combined two braces or false if not
    */
-  private boolean
-	_combineCurrentAndNextIfFind(String first, String second,
+  private boolean	_combineCurrentAndNextIfFind(String first, String second,
 															 ModelList<ReducedToken>.Iterator copyCursor)
 		{
 
@@ -1223,9 +1345,13 @@ public class ReducedModel implements BraceReduction
 		}
 
 
-/** If the current brace is a // or /*, split it into two braces.
-   *  Do the same for star-slash (end comment block) as well if
+  /**
+	 * Splits the current brace if it is a multiple character brace and
+	 * fulfills certain conditions.
+	 * If the current brace is a // or /*, split it into two braces.
+   *  Do the same for star-slash (end comment block) if
    *  the parameter splitClose is true.
+	 *  Do the same for \\ and \" if splitEscape is true.
    *  If a split was performed, the first of the two Braces
    *  will be the current one when we're done.
    *  The offset is not changed.
@@ -1258,16 +1384,24 @@ public class ReducedModel implements BraceReduction
 		}
 	
   /**
-   * <P>Updates the BraceReduction to reflect cursor movement.
+   * Updates the BraceReduction to reflect cursor movement.
    * Negative values move left from the cursor, positive values move
-   * right. </P>
+   * right.
    * @param count indicates the direction and magnitude of cursor movement
    */
 	public void move(int count)
 		{
 			_offset = _move(count, _cursor, _offset);			
 		}
-	
+
+	/**
+	 * Helper function for move(int).
+	 * @param count the number of chars to move.  Negative values move back,
+	 * positive values move forward.
+	 * @param copyCursor the cursor being moved
+	 * @param currentOffset the current offset for copyCursor
+	 * @return the updated offset
+	 */
   private int _move(int count, ModelList<ReducedToken>.Iterator copyCursor,
 										int currentOffset)
 		{
@@ -1287,19 +1421,16 @@ public class ReducedModel implements BraceReduction
 		}
 
 	/**
-	 * 1) at head && count>0:  next
-	 * 2) LOOP:
-	 *     at tail:
-	 *        a)count ==0
-	 *            stop;
-	 *        b)else exception
-	 * 3)  count < size
-	 *        a) _offset = count;
-	 *              stop;
-	 * 4)  else
-	 *        a) count = count - size
-	 *           next()
-	 *           loop
+	 * Helper function that performs forward moves.
+	 * <ol>
+	 *  <li> at head && count>0:  next
+	 *  <li> LOOP:<BR>
+	 *     if atEnd and count == 0, stop<BR>
+	 *     if atEnd and count > 0, throw boundary exception<BR>
+	 *     if count < size of current token, offset = count, stop<BR>
+	 *     otherwise, reduce count by size of current token and go to
+	 *     the next token, continuing the loop.
+	 * </ol>
 	 */
 	private int _moveRight(int count,
 												 ModelList<ReducedToken>.Iterator copyCursor,
@@ -1325,6 +1456,18 @@ public class ReducedModel implements BraceReduction
 			return count+currentOffset; //returns the offset
 		}
 
+	/**
+	 * Helper function that performs forward moves.
+	 * <ol>
+	 *  <li> atEnd && count>0:  prev
+	 *  <li> LOOP:<BR>
+	 *     if atStart and count == 0, stop<BR>
+	 *     if atStart and count > 0, throw boundary exception<BR>
+	 *     if count < size of current token, offset = size - count, stop<BR>
+	 *     otherwise, reduce count by size of current token and go to
+	 *     the previous token, continuing the loop.
+	 * </ol>
+	 */
 	private int _moveLeft(int count,
 												ModelList<ReducedToken>.Iterator copyCursor,
 												int currentOffset)
@@ -1378,7 +1521,16 @@ public class ReducedModel implements BraceReduction
 		}
 
 	/**
-	 *
+	 * Helper function for delete.
+	 * If deleting forward, move delTo the distance forward and call
+	 * deleteRight.<BR>
+	 * If deleting backward, move delFrom the distance back and call
+	 * deleteRight.
+	 * @param count size of deletion
+	 * @param offset current offset for cursor
+	 * @param delFrom where to delete from
+	 * @param delTo where to delete to
+	 * @return new offset after deletion
 	 */
 	private int _delete(int count, int offset,
 											ModelList<ReducedToken>.Iterator delFrom,
@@ -1412,15 +1564,10 @@ public class ReducedModel implements BraceReduction
 			}
 		}
 	
-	private int _deleteLeft(int offset,
-													ModelList<ReducedToken>.Iterator delFrom,
-													ModelList<ReducedToken>.Iterator delTo)
-		{
-			return -1;
-		}
 	
 	/**
-	 *
+	 * Deletes from offset in delFrom to endOffset in delTo.
+	 * Uses ModelList's collapse function to facilitate quick deletion.
 	 */
 	private int _deleteRight(int offset,int endOffset,
 													 ModelList<ReducedToken>.Iterator delFrom,
@@ -1487,7 +1634,12 @@ public class ReducedModel implements BraceReduction
 			return temp;
 		}
 	
-
+  /**
+   * Gets rid of extra text.
+	 * Because collapse cannot get rid of all deletion text as some may be
+	 * only partially spanning a token, we need to make sure that
+	 * this partial span into the non-collapsed token on the left is removed.
+   */
 	private void _clipLeft(int offset, ModelList<ReducedToken>.Iterator
 												 copyCursor)
 		{
@@ -1516,6 +1668,12 @@ public class ReducedModel implements BraceReduction
 		}
 	
 
+  /**
+   * Gets rid of extra text.
+	 * Because collapse cannot get rid of all deletion text as some may be
+	 * only partially spanning a token, we need to make sure that
+	 * this partial span into the non-collapsed token on the right is removed.
+   */
 	private void _clipRight(int offset, ModelList<ReducedToken>.Iterator
 													copyCursor)
 		{
@@ -1649,6 +1807,12 @@ public class ReducedModel implements BraceReduction
 			return 0;
 		}
 
+	/**
+	 * Checks if the previous token is of a certain type.
+	 * @param delTo the cursor for calling prevItem on
+	 * @param match the type we want to check
+	 * @return true if the previous token is of type match
+	 */
 	private boolean _checkPrevEquals(ModelList<ReducedToken>.Iterator delTo,
 																	 String match)
 		{

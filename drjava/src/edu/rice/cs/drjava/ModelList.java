@@ -4,13 +4,23 @@ package edu.rice.cs.drjava;
 import java.util.Set;
 import java.util.HashSet;
 
+/**
+ * A list class with some extra features.
+ */
 class ModelList<T>
 {
   private Node<T> _head;
 	private Node<T> _tail;
+	/** keep track of length for constant time length lookup */
 	private int _length;
+	/** a set of objects that can trigger and listen for updates to the list */
 	private Set _listeners;
-	
+
+	/**
+	 * Constructor.
+	 * Initializes the head and tail nodes, as well as the listener table
+	 * and the length variable.
+	 */
 	ModelList()
 		{
 			// This node is the only node that exists in an empty list.
@@ -25,13 +35,10 @@ class ModelList<T>
 			_length = 0;
 			_listeners = new HashSet();
 		}
-/**
- *Ends pointing to inserted item
- *
- *If at head: insert after head.
- *If at node: insert before node being pointed at.
- *If at tail: insert before tail.
- */
+  /**
+   * Insert an item before a certain node in the list.
+   * Can never be called on head node.
+	 */
 	private void insert(Node<T> point, T item)
     {
 			Node<T> ins = new Node<T>(item, point.pred, point);
@@ -41,9 +48,8 @@ class ModelList<T>
     }
 
 	/**
-	 *If at head: can't remove, throw exception
-	 *If at node: remove node point to following node
-	 *If at tail: can't remove, throw exception
+	 * Remove a node from the list.
+	 * Can't remove head or tail node - exception thrown.
 	 */
 	private void remove(Node<T> point)
 		{
@@ -57,6 +63,9 @@ class ModelList<T>
 				}
 		}
 
+	/**
+	 * Returns true if the list is empty.
+	 */
 	public boolean isEmpty()
 		{
 			return (_head.succ == _tail);
@@ -67,6 +76,11 @@ class ModelList<T>
 			return _length;
 		}
 	
+	/**
+	 * Create a new iterator for this list and add it to the set of the
+	 * list's listeners.  The iterator must be notified of changes so it
+	 * does not become out-of-date.
+	 */
 	public Iterator getIterator()
 		{
 			Iterator result = new Iterator();
@@ -74,6 +88,14 @@ class ModelList<T>
 			return result;
 		}
 
+
+	/**
+	 * A node class for the list.
+	 * Each node has a successor and predecessor, which is also a node
+	 * as well as an item of type T.
+	 * We keep it private inside this class so Node is never shown to
+	 * the outside world to wreak havoc upon the list.
+	 */
 	private static class Node<T>
 	{
 		Node<T> pred;
@@ -100,28 +122,37 @@ class ModelList<T>
 			}
 	}
 
+	/**
+	 * Iterators for model list.
+	 * The iterators are intimately coupled with the ModelList to which they
+	 * belong.  They are the only public interface for manipulating
+	 * ModelList.
+	 */
 	class Iterator
 	{
 		private Node<T> _point;
 		private int _pos;
-		private int _moved;
 
-		private final int MOVED_PREV = 0;
-		private final int MOVED_NEXT = 1;
-		
+		/**
+		 * Constructor.
+		 * Initializes an iterator to point to its list's head.
+		 */
 		public Iterator()
 			{
 				_point = ModelList.this._head;
 				_pos = 0;
-				_moved = MOVED_PREV;
 				ModelList.this._listeners.add(this);
 			}
 
+		/**
+		 * Copy constructor.
+		 * Creates a new iterator with the same values as the progenitor.
+		 * Adds it to the list's set of listeners.
+		 */
 		private Iterator(Iterator iter)
 			{
 				_point = iter._point;
 				_pos = iter._pos;
-				_moved = iter._moved;
 				ModelList.this._listeners.add(this);
 			}
 
@@ -130,39 +161,58 @@ class ModelList<T>
 				return new Iterator(this);
 			}
 
-
+		/**
+		 * an equals test
+		 */
 		public boolean eq(Object thing)
 			{
 				return this._point == ((Iterator)(thing))._point;
 			}
-		
+
+		/**
+		 * Force this iterator to take the values of the given iterator.
+		 */
 		public void setTo(Iterator it)
 			{
 				this._point = it._point;
 				this._pos = it._pos;
-				this._moved = it._moved;
 			}
 
+		/**
+		 * Return true if we're pointing at the head.
+		 */
 		public boolean atStart()
 			{
 				return (_point == ModelList.this._head);
 			}
 		
+		/**
+		 * Return true if we're pointing at the tail.
+		 */
 		public boolean atEnd()
 			{
 				return (_point == ModelList.this._tail);
 			}
 
+		/**
+		 * Return true if we're pointing at the node after the head.
+		 */
 		public boolean atFirstItem()
 			{
 				return (_point.pred == ModelList.this._head);
 			}
 		
+		/**
+		 * Return true if we're pointing at the node before the tail.
+		 */
 		public boolean atLastItem()
 			{
 				return (_point.succ == ModelList.this._tail);
 			}
 		
+		/**
+		 * Return the item associated with the current node.
+		 */
 		public T current()
 			{
 				if (atStart())
@@ -179,6 +229,9 @@ class ModelList<T>
 					return _point.getItem();
 			}
 
+		/**
+		 * Return the item associated with the node before the current node.
+		 */
 		public T prevItem()
 			{
 				if (atFirstItem() || atStart() || ModelList.this.isEmpty())
@@ -189,6 +242,9 @@ class ModelList<T>
 					return _point.pred.getItem();
 			}
 
+		/**
+		 * Return the item associated with the node after the current node.
+		 */
 		public T nextItem()
 			{
 				if (atLastItem() || atEnd() || ModelList.this.isEmpty())
@@ -200,7 +256,8 @@ class ModelList<T>
 			}
 		
 		/**
-		 *if at the containing list's head, we need to move to the next node
+		 * Insert an item before the current item.
+		 * If at the containing list's head, we need to move to the next node
 		 * to perform the insert properly.  Otherwise, we'll get a null pointer
 		 * exception because the function will try to insert the new item
 		 * before the head.
@@ -222,8 +279,9 @@ class ModelList<T>
 			}
 
 		/**
-		 *1)Ends pointing to the node following the removed node.
-		 *2)If head or tail removed throws exception
+		 * Remove the current item from the list.
+		 * Ends pointing to the node following the removed node.
+		 * Throws exception if performed atStart() or atEnd().
 		 */
 		public void remove()
 			{
@@ -233,25 +291,33 @@ class ModelList<T>
 				notifyOfRemove(_pos, _point);				
 			}
 
+		/**
+		 * Move to the previous node.
+		 * Throws exception atStart().
+		 */
 		public void prev()
 			{
 				if (atStart())
 					throw new RuntimeException("Can't cross list boundary.");
 				_point = _point.pred;
-				_moved = MOVED_PREV;
 				_pos--;
 			}
 
+		/**
+		 * Move to the next node.
+		 * Throws exception atEnd().
+		 */
 		public void next()
 			{
 				if (atEnd())
 					throw new RuntimeException("Can't cross list boundary.");
 				_point = _point.succ;
-				_moved = MOVED_NEXT;
 				_pos++;
 			}
 
 		/**
+		 * Delete all nodes between the current position of this and the
+		 * current position of the given iterator.
 		 *1)Two iterators pointing to same node: do nothing
 		 *2)Iterator 2 is before iterator 1    : remove between iterator 2 and
 		 *                                       iterator 1
@@ -295,6 +361,10 @@ class ModelList<T>
 					}
 			}
 
+		/**
+		 * When an iterator inserts an item, it notifies other iterators
+		 * in the set of listeners so they can stay updated.
+		 */
 		private void notifyOfInsert(int pos)
 			{
 				java.util.Iterator iter = ModelList.this._listeners.iterator();
@@ -312,6 +382,10 @@ class ModelList<T>
 					}
 			}
 		
+		/**
+		 * When an iterator removes an item, it notifies other iterators
+		 * in the set of listeners so they can stay updated.
+		 */
 		private void notifyOfRemove(int pos, Node<T> point)
 			{
 				java.util.Iterator iter = ModelList.this._listeners.iterator();
@@ -333,6 +407,10 @@ class ModelList<T>
 					}
 			}
 
+		/**
+		 * When an iterator collapses part of the list, it notifies other iterators
+		 * in the set of listeners so they can stay updated.
+		 */
 		private void notifyOfCollapse(int leftPos,
 																	int rightPos,
 																	Node<T> rightPoint)

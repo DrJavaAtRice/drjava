@@ -118,16 +118,15 @@ public class StateBlockTest extends TestCase {
 	public void testQuote()
 		{
 			blocks = model.insertQuote();
-			assertTrue("#0.0",
-								 blocks.elementAt(0).equals(
+			assertEquals("#0.0",
+									 blocks.elementAt(0),
 									 new StateBlock(-1,1,
-																	ReducedToken.INSIDE_QUOTE)));
-
+																	ReducedToken.INSIDE_QUOTE));
+			
 			blocks = model.insertQuote();
-			assertTrue("#1.0",
-								 blocks.elementAt(0).equals(
-									 new StateBlock(-1,1,
-																	ReducedToken.INSIDE_QUOTE)));
+			assertEquals("#1.0",
+									 blocks.elementAt(0),
+									 new StateBlock(-1,1,ReducedToken.INSIDE_QUOTE));
 
 			blocks = model.insertOpenSquiggly();
 			assertTrue("#2.1", blocks.isEmpty());
@@ -135,10 +134,26 @@ public class StateBlockTest extends TestCase {
 			model.move(-2);
 			blocks = model.insertQuote();
 			// ""#"{
-			assertTrue("#3.0",
-								 blocks.elementAt(0).equals(
-									 new StateBlock(-1,3,
-																	ReducedToken.INSIDE_QUOTE)));
+			assertEquals("#3.0",
+									 blocks.elementAt(0),
+									 new StateBlock(-1,3,ReducedToken.INSIDE_QUOTE));
+			blocks = model.insertBackSlash();
+			// ""\#"{
+			assertEquals("#4.0",
+									 blocks.elementAt(0),
+									 new StateBlock(-2,1,ReducedToken.INSIDE_QUOTE));
+
+			blocks = model.insertQuote();
+			// ""\"#"{
+			assertEquals("#5.0",
+									 blocks.elementAt(0),
+									 new StateBlock(0,2,ReducedToken.INSIDE_QUOTE));
+			model.move(-4);
+			blocks = model.delete(1);
+			// #"\""{
+			assertEquals("#6.0",
+									 blocks.elementAt(0),
+									 new StateBlock(0,4,ReducedToken.INSIDE_QUOTE));
 		}
 }
 
