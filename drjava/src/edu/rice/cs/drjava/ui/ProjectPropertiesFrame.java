@@ -328,7 +328,7 @@ public class ProjectPropertiesFrame extends JFrame {
     
     DirectoryChooser chooser = new DirectoryChooser(this,rootFile);
     chooser.setDialogTitle("Select Main Document");
-    chooser.setTopMessage("Select the main doucment for the project:");
+    chooser.setTopMessage("Select the main document for the project:");
     chooser.setApproveButtonText("Select");
     FileFilter filter = new FileFilter(){
       public boolean accept(File f){
