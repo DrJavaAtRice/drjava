@@ -97,7 +97,7 @@ public final class DebugTest extends DebugTestCase
     /*  5 */ "    System.out.println(\"foo line 2\");\n" +
     /*  6 */ "  }\n" +
     /*  7 */ "}";
-
+  
   protected static final String SUSPEND_CLASS =
     "class Suspender {\n" +
     "  public static void main(String[] args) {\n" +
@@ -112,75 +112,98 @@ public final class DebugTest extends DebugTestCase
     "}";
   
   protected static final String MONKEY_CLASS =
-/* 1 */    "class Monkey {\n" +
-/* 2 */    "  public static void main(String[] args) {\n" +
-/* 3 */    "\n" +
-/* 4 */    "    Thread t = new Thread(){\n" +
-/* 5 */    "      public void run(){\n" +
-/* 6 */    "       try{\n" +
-/* 7 */    "         Thread.sleep(1000);\n" +
-/* 8 */    "       }\n" +
-/* 9 */    "       catch(InterruptedException e){\n" +
-/* 10 */    "      }\n" +
-/* 11 */    "      System.out.println(\"I\'m a thread! Yeah!\");\n" +
-/* 12 */    "      }\n" +
-/* 13 */    "    };\n" +
-/* 14 */    "    try{\n" +
-/* 15 */    "      t.start();\n" +
-/* 16 */    "      System.out.println(\"I just woke up.  I\'m a big boy now.\");\n" +
-/* 17 */    "      System.out.println(\"James likes bananas!\");\n" +
-/* 18 */    "      System.out.println(\"Yes they do.\");\n" +
-/* 19 */    "    }catch(Exception e){\n" +
-/* 20 */    "      e.printStackTrace();\n" +
-/* 21 */    "    }\n" +
-/* 22 */    "  }\n" +
-/* 23 */    "}\n";
+    /* 1 */    "class Monkey {\n" +
+    /* 2 */    "  public static void main(String[] args) {\n" +
+    /* 3 */    "\n" +
+    /* 4 */    "    Thread t = new Thread(){\n" +
+    /* 5 */    "      public void run(){\n" +
+    /* 6 */    "       try{\n" +
+    /* 7 */    "         Thread.sleep(1000);\n" +
+    /* 8 */    "       }\n" +
+    /* 9 */    "       catch(InterruptedException e){\n" +
+    /* 10 */    "      }\n" +
+    /* 11 */    "      System.out.println(\"I\'m a thread! Yeah!\");\n" +
+    /* 12 */    "      }\n" +
+    /* 13 */    "    };\n" +
+    /* 14 */    "    try{\n" +
+    /* 15 */    "      t.start();\n" +
+    /* 16 */    "      System.out.println(\"I just woke up.  I\'m a big boy now.\");\n" +
+    /* 17 */    "      System.out.println(\"James likes bananas!\");\n" +
+    /* 18 */    "      System.out.println(\"Yes they do.\");\n" +
+    /* 19 */    "    }catch(Exception e){\n" +
+    /* 20 */    "      e.printStackTrace();\n" +
+    /* 21 */    "    }\n" +
+    /* 22 */    "  }\n" +
+    /* 23 */    "}\n";
   
   protected static final String MONKEY_WITH_INNER_CLASS =
-/* 1 */    "class Monkey {\n" +
-/* 2 */    "  static int foo = 6; \n" +
-/* 3 */    "  class MonkeyInner { \n" +
-/* 4 */    "    int innerFoo = 8;\n" +
-/* 5 */    "    class MonkeyInnerInner { \n" +
-/* 6 */    "      int innerInnerFoo = 10;\n" +
-/* 7 */    "      public void innerMethod() { \n" +
-/* 8 */    "        int innerMethodFoo;\n" +
-/* 9 */    "        innerMethodFoo = 12;\n" +
-/* 10 */   "        foo++;\n" +
-/* 11 */   "        innerFoo++;\n" +
-/* 12 */   "        innerInnerFoo++;\n" +
-/* 13 */   "        innerMethodFoo++;\n" +
-/* 14 */   "        staticMethod();\n" +
-/* 15 */   "        System.out.println(\"innerMethodFoo: \" + innerMethodFoo);\n" +
-/* 16 */   "      }\n" +
-/* 17 */   "    }\n" +
-/* 18 */   "  }\n" +
-/* 19 */   "  public void bar() {\n" +
-/* 20 */   "    MonkeyInner.MonkeyInnerInner mi = \n" +
-/* 21 */   "      new MonkeyInner().new MonkeyInnerInner();\n" +
-/* 22 */   "    mi.innerMethod();\n" +
-/* 23 */   "  }\n" +
-/* 24 */   "  public static void staticMethod() {\n" +
-/* 25 */   "    int z = 3;\n" +
-/* 26 */   "  }\n" +
-/* 27 */   "}\n";
+    /* 1 */    "class Monkey {\n" +
+    /* 2 */    "  static int foo = 6; \n" +
+    /* 3 */    "  class MonkeyInner { \n" +
+    /* 4 */    "    int innerFoo = 8;\n" +
+    /* 5 */    "    class MonkeyInnerInner { \n" +
+    /* 6 */    "      int innerInnerFoo = 10;\n" +
+    /* 7 */    "      public void innerMethod() { \n" +
+    /* 8 */    "        int innerMethodFoo;\n" +
+    /* 9 */    "        innerMethodFoo = 12;\n" +
+    /* 10 */   "        foo++;\n" +
+    /* 11 */   "        innerFoo++;\n" +
+    /* 12 */   "        innerInnerFoo++;\n" +
+    /* 13 */   "        innerMethodFoo++;\n" +
+    /* 14 */   "        staticMethod();\n" +
+    /* 15 */   "        System.out.println(\"innerMethodFoo: \" + innerMethodFoo);\n" +
+    /* 16 */   "      }\n" +
+    /* 17 */   "    }\n" +
+    /* 18 */   "  }\n" +
+    /* 19 */   "  public void bar() {\n" +
+    /* 20 */   "    MonkeyInner.MonkeyInnerInner mi = \n" +
+    /* 21 */   "      new MonkeyInner().new MonkeyInnerInner();\n" +
+    /* 22 */   "    mi.innerMethod();\n" +
+    /* 23 */   "  }\n" +
+    /* 24 */   "  public static void staticMethod() {\n" +
+    /* 25 */   "    int z = 3;\n" +
+    /* 26 */   "  }\n" +
+    /* 27 */   "}\n";
   
   protected static final String CLASS_WITH_STATIC_FIELD =
-/*  1 */    "public class DrJavaDebugStaticField {\n" +
-/*  2 */    "  public static int x = 0;\n" +
-/*  3 */    "  public void bar() {\n" +
-/*  4 */    "    System.out.println(\"x == \" + x);\n" +
-/*  5 */    "    x++;\n" +
-/*  6 */    "  }\n" +
-/*  7 */    "  public static void main(String[] nu) {\n" +
-/*  8 */    "    new Thread(\"stuff\") {\n" +
-/*  9 */    "      public void run() {\n" +
-/* 10 */    "        new DrJavaDebugStaticField().bar();\n" +
-/* 11 */    "      }\n" +
-/* 12 */    "    }.start();\n" +
-/* 13 */    "    new DrJavaDebugStaticField().bar();\n" +
-/* 14 */    "  }\n" +
-/* 15 */    "}";
+    /*  1 */    "public class DrJavaDebugStaticField {\n" +
+    /*  2 */    "  public static int x = 0;\n" +
+    /*  3 */    "  public void bar() {\n" +
+    /*  4 */    "    System.out.println(\"x == \" + x);\n" +
+    /*  5 */    "    x++;\n" +
+    /*  6 */    "  }\n" +
+    /*  7 */    "  public static void main(String[] nu) {\n" +
+    /*  8 */    "    new Thread(\"stuff\") {\n" +
+    /*  9 */    "      public void run() {\n" +
+    /* 10 */    "        new DrJavaDebugStaticField().bar();\n" +
+    /* 11 */    "      }\n" +
+    /* 12 */    "    }.start();\n" +
+    /* 13 */    "    new DrJavaDebugStaticField().bar();\n" +
+    /* 14 */    "  }\n" +
+    /* 15 */    "}";
+  
+  protected static final String MONKEY_STATIC_STUFF =
+    /*1*/ "class MonkeyStaticStuff {\n" +
+    /*2*/ "  static int foo = 6;\n" +
+    /*3*/ "  static class MonkeyInner {\n" +
+    /*4*/ "    static int innerFoo = 8;\n" +
+    /*5*/ "    static public class MonkeyTwoDeep {\n" +
+    /*6*/ "      static int twoDeepFoo = 13;\n" +
+    /*7*/ "      static class MonkeyThreeDeep {\n" +
+    /*8*/ "        public static int threeDeepFoo = 18;\n" +
+    /*9*/ "        public static void threeDeepMethod() {\n" +
+    /*10*/"          System.out.println(MonkeyStaticStuff.MonkeyInner.MonkeyTwoDeep.MonkeyThreeDeep.threeDeepFoo);\n" +
+    /*11*/"          System.out.println(MonkeyTwoDeep.twoDeepFoo);\n" +
+    /*12*/"          System.out.println(MonkeyStaticStuff.foo);\n" +
+    /*13*/"          System.out.println(MonkeyStaticStuff.MonkeyInner.innerFoo);\n" +
+    /*14*/"          System.out.println(MonkeyInner.MonkeyTwoDeep.twoDeepFoo);\n" +
+    /*15*/"          System.out.println(innerFoo);\n" +
+    /*16*/"        }\n" +
+    /*17*/"      }\n" +
+    /*18*/"      static int getNegativeTwo() { return -2; }\n" +    
+    /*19*/"    }\n" +
+    /*20*/"  }\n" +
+    /*21*/"}";
   
   
   /**
@@ -1415,12 +1438,12 @@ public final class DebugTest extends DebugTestCase
    * Tests that watches can correctly see the values of local
    * variables, fields and fields of outer classes.
    */
-  public void testWatches()
+  public void testNonStaticWatches()
     throws DebugException, BadLocationException, DocumentAdapterException,
     IOException, InterruptedException
   {
     if (printMessages) {
-      System.out.println("----testWatches----");
+      System.out.println("----testNonStaticWatches----");
     }
     StepTestListener debugListener = new StepTestListener();
     
@@ -1594,6 +1617,118 @@ public final class DebugTest extends DebugTestCase
     assertEquals("watch value incorrect", DebugWatchData.NO_VALUE, watches.elementAt(2).getValue());
     assertEquals("watch value incorrect", DebugWatchData.NO_VALUE, watches.elementAt(3).getValue());
     assertEquals("watch value incorrect", DebugWatchData.NO_VALUE, watches.elementAt(4).getValue());
+    
+    // Close doc and make sure breakpoints are removed
+    _model.closeFile(doc);
+    debugListener.assertBreakpointRemovedCount(1);  //fires (no waiting)
+    
+    // Shutdown the debugger
+    if (printMessages) {
+      System.out.println("Shutting down...");
+    }
+    InterpretListener interpretListener = new InterpretListener() {
+       public void interpreterChanged(boolean inProgress) {
+         // Don't notify: happens in the same thread
+        interpreterChangedCount++;
+       }
+     };
+    _model.addListener(interpretListener);
+    synchronized(_notifierLock) {
+      _debugger.shutdown();
+      _waitForNotifies(2);  // interactionEnded, shutdown
+      _notifierLock.wait();
+    }
+    interpretListener.assertInteractionEndCount(1);
+    _model.removeListener(interpretListener);
+    
+    debugListener.assertDebuggerShutdownCount(1);  //fires
+    if (printMessages) {
+      System.out.println("Shut down.");
+    }
+    _debugger.removeListener(debugListener);
+  }
+  
+  /**
+   * Tests that watches can correctly see the values of local
+   * variables, fields and fields of outer classes.
+   */
+  public void testStaticWatches()
+    throws DebugException, BadLocationException, DocumentAdapterException,
+    IOException, InterruptedException
+  {
+    if (printMessages) {
+      System.out.println("----teststaticWatches----");
+    }
+    StepTestListener debugListener = new StepTestListener();
+    
+    // Compile the class
+    File file = new File(_tempDir, "MonkeyStaticStuff.java");
+    OpenDefinitionsDocument doc = doCompile(MONKEY_STATIC_STUFF, file);
+    
+    _debugger.addListener(debugListener);
+
+    // Start debugger
+    synchronized(_notifierLock) {
+      _debugger.startup();
+      _waitForNotifies(1);  // startup
+      _notifierLock.wait();
+    }
+    debugListener.assertDebuggerStartedCount(1);
+    
+    int index = MONKEY_STATIC_STUFF.indexOf("System.out.println(MonkeyInner.MonkeyTwoDeep.twoDeepFoo);");
+    _debugger.toggleBreakpoint(doc,
+                               index,
+                               14);
+    debugListener.assertBreakpointSetCount(1);
+
+    // Run the foo() method, hitting breakpoint
+    synchronized(_notifierLock) {
+      interpretIgnoreResult("MonkeyStaticStuff.MonkeyInner.MonkeyTwoDeep.MonkeyThreeDeep.threeDeepMethod();");
+      _waitForNotifies(3);  // suspended, updated, breakpointReached
+      _notifierLock.wait();
+    }
+    _debugger.addWatch("foo");
+    _debugger.addWatch("innerFoo");
+    _debugger.addWatch("twoDeepFoo");
+    _debugger.addWatch("threeDeepFoo");
+    _debugger.addWatch("asdf");
+    
+//    if (printMessages) {
+//      System.out.println("first step");
+//    }
+//    // Step to line 14
+//    synchronized(_notifierLock){
+//      _asyncStep(Debugger.STEP_OVER);
+//      _waitForNotifies(2);  // suspended, updated
+//      _notifierLock.wait();
+//    }
+//    debugListener.assertStepRequestedCount(1);  // fires (don't wait)
+//    debugListener.assertCurrThreadResumedCount(1); // fires (don't wait)
+//    debugListener.assertThreadLocationUpdatedCount(2);  // fires
+//    debugListener.assertCurrThreadSuspendedCount(2);  // fires
+//    debugListener.assertBreakpointReachedCount(1);
+//    debugListener.assertCurrThreadDiedCount(0);
+    
+    Vector<DebugWatchData> watches = _debugger.getWatches();
+    assertEquals("watch name incorrect", "foo", watches.elementAt(0).getName());
+    assertEquals("watch name incorrect", "innerFoo", watches.elementAt(1).getName());
+    assertEquals("watch name incorrect", "twoDeepFoo", watches.elementAt(2).getName());
+    assertEquals("watch name incorrect", "threeDeepFoo", watches.elementAt(3).getName());
+    assertEquals("watch name incorrect", "asdf", watches.elementAt(4).getName());
+    assertEquals("watch value incorrect", "6", watches.elementAt(0).getValue());
+    assertEquals("watch value incorrect", "8", watches.elementAt(1).getValue());
+    assertEquals("watch value incorrect", "13", watches.elementAt(2).getValue());
+    assertEquals("watch value incorrect", "18", watches.elementAt(3).getValue());
+    assertEquals("watch value incorrect", DebugWatchData.NO_VALUE, watches.elementAt(4).getValue());
+
+    interpret("innerFoo = 0");
+    watches = _debugger.getWatches();
+    assertEquals("watch name incorrect", "innerFoo", watches.elementAt(1).getName());
+    assertEquals("watch value incorrect", "0", watches.elementAt(1).getValue());
+
+    interpret("innerFoo = 8");
+    assertEquals("watch name incorrect", "innerFoo", watches.elementAt(1).getName());
+    assertEquals("watch value incorrect", "8", watches.elementAt(1).getValue());
     
     // Close doc and make sure breakpoints are removed
     _model.closeFile(doc);

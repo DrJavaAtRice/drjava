@@ -49,12 +49,12 @@ public class DebugWatchData {
   /**
    * String to display if the value is not in scope.
    */
-  public static final String NO_VALUE = "<not in scope>";
+  public static final String NO_VALUE = "<not found>";
   
   /**
    * String to display if the type is not in scope.
    */
-  public static final String NO_TYPE = "<no type>";
+  public static final String NO_TYPE = "";
   
   private String _name;
   private String _value;

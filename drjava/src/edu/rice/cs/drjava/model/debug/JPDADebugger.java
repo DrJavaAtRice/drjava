@@ -1493,21 +1493,51 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
           ReferenceType outerRt = rt;
           ObjectReference outer = obj;  // (null if static context)
           Field field = outerRt.fieldByName(currName);
-
-          // If we don't find it here, loop through any enclosing classes
-          //  Start at this$N, where N is the number of dollar signs in
-          //  the reference type's name, minus one.
-          int outerIndex = numDollars - 1;
-          Field outerThis = outerRt.fieldByName("this$" + outerIndex);
-          while ((field == null) && (outerThis != null)) {
-            outer = (ObjectReference) outer.getValue(outerThis);
-            outerRt = outer.referenceType();
-            field = outerRt.fieldByName(currName);
+          
+          if (obj != null) {
+            // We're not in a static context
             
-            if (field == null) {
-              // Enter the loop again with the next outer enclosing class
-              outerIndex--;
-              outerThis = outerRt.fieldByName("this$" + outerIndex);
+            // If we don't find it in this class, loop through any enclosing 
+            // classes. Start at this$N, where N is the number of dollar signs in
+            // the reference type's name, minus one.
+            int outerIndex = numDollars - 1;
+            Field outerThis = outerRt.fieldByName("this$" + outerIndex);
+            while ((field == null) && (outerThis != null)) {
+              outer = (ObjectReference) outer.getValue(outerThis);
+              outerRt = outer.referenceType();
+              field = outerRt.fieldByName(currName);
+              
+              if (field == null) {
+                // Enter the loop again with the next outer enclosing class
+                outerIndex--;
+                outerThis = outerRt.fieldByName("this$" + outerIndex);
+              }
+            }
+          }
+          else {
+            // We're in a static context
+            
+            // If we don't find it in this class, loop through any enclosing
+            // classes. Do this by loading any outer classes by invoking the 
+            // method on the class loader that loaded this class and passing
+            // it the class name with the last class removed each time.
+            String rtClassName = outerRt.name();
+            int index = rtClassName.lastIndexOf("$");
+            while ((field == null) && (index != -1)) {
+              rtClassName = rtClassName.substring(0, index);
+              List l = _vm.classesByName(rtClassName);
+              if (l.isEmpty()) {
+                // field is null, we will end up setting
+                // the value to no value
+                break;
+              }
+              outerRt = (ReferenceType)l.get(0);
+              field = outerRt.fieldByName(currName);
+              
+              if (field == null) {
+                // Enter the loop again with the next outer enclosing class
+                index = rtClassName.lastIndexOf("$");
+              }
             }
           }
           
@@ -1541,7 +1571,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
       _log("Exception updating watches.", isfe);
     }
   }
-
+  
   /**
    * Returns a string representation of the given Value from JDI.
    * @param value the Value of interest
@@ -1852,60 +1882,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     }
     throw new DebugException("The variable: " + name +
                              " could not be defined in the debug interpreter");
-  }
-  
-  /**
-   * Sets the value of "this" as well as its enclosing classes in
-   * the debug interpreter.
-   */
-  protected void _setThisInInterpreter(ThreadReference suspendedThreadRef,
-                                       ObjectReference debugInterpreter,
-                                       Value val)
-    throws InvalidTypeException, AbsentInformationException,
-    IncompatibleThreadStateException, ClassNotLoadedException,
-    InvocationException, DebugException
-  {
-    // First set "this"
-    ReferenceType rtDebugInterpreter = debugInterpreter.referenceType();
-//    Method method2Call = _getMethod(rtDebugInterpreter, "setThis");
-//    LinkedList args = new LinkedList();
-//    args.add(val);
-//    debugInterpreter.invokeMethod(suspendedThreadRef, method2Call, args,
-//                                  ObjectReference.INVOKE_SINGLE_THREADED);
-    
-    // Then set its package
-//    ReferenceType thisRt = ((ObjectReference)val).referenceType();
-//    String className = thisRt.name();
-//    int lastDot = className.lastIndexOf(".");
-//    if (lastDot != -1) {
-//      String packageName = className.substring(0,lastDot);
-//      className = className.substring(lastDot+1,className.length()));
-//      method2Call = _getMethod(rtDebugInterpreter, "setThisPackage");
-//      args.clear();
-//      args.add(packageName);
-//      debugInterpreter.invokeMethod(suspendedThreadRef, method2Call, args,
-//                                    ObjectReference.INVOKE_SINGLE_THREADED);
-//    }
-//
-//    // Then set its enclosing classes
-//    method2Call = _getMethod(rtDebugInterpreter, "addEnclosingClass");
-//    int numEnclosing = 1; // includes "this" class
-//    int index = className.indexOf("$");
-//    while (index != -1) {
-//      numEnclosing++;
-//      index = className.indexOf("$",index);
-//    }
-//
-//    Object instance = val;
-//    while (numEnclosing > 0) {
-//      index = className.lastIndexOf("$");
-//      immediateClassName = className.substring(index+1, className.length);
-//      className = className.substring(0,index));
-//      args.clear();
-//      debugInterpreter.invokeMethod(suspendedThreadRef, method2Call, args,
-//                                    ObjectReference.INVOKE_SINGLE_THREADED);
-  }
-  
+  }  
   
   /**
    * Notifies all listeners that the current thread has been suspended.
@@ -2044,6 +2021,41 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
                             ObjectReference.INVOKE_SINGLE_THREADED);
   }
   
+//  private ClassObjectReference _getClassForName(String name, ThreadReference thread, ClassLoaderReference clr)
+//    throws InvalidTypeException, ClassNotLoadedException, AbsentInformationException,
+//    IncompatibleThreadStateException, InvocationException, DebugException
+//  {
+//    Value v = null;
+//    
+//    // invokeMethod would throw an ObjectCollectedException if the StringReference
+//    // declared by _vm.mirrorOf(name) had been garbage collected before
+//    // invokeMethod could execute. This happened infrequently so by trying this
+//    // multiple times, the chance of failure each time should be acceptably low.
+//    int tries = 0;
+//    while (tries < MAXINVOKETRIES) {
+//      try {
+//        ReferenceType rt = clr.referenceType();
+//        Method method2Call = _getMethod(rt, "loadClass");
+//        List args = new LinkedList();
+//        args.add(_vm.mirrorOf(name));
+//        args.add(_vm.mirrorOf(true));
+//        v = clr.invokeMethod(thread, method2Call, args,
+//                                   ObjectReference.INVOKE_SINGLE_THREADED);
+//        break;
+//      }
+//      catch (ObjectCollectedException oce) {
+//        if (printMessages) System.out.println("Got ObjectCollectedException");
+//        tries++;
+//      }
+//    }
+//    if (v != null) {
+//      //v = _convertToActualType(thread, var, v);
+//      return (ClassObjectReference)v;
+//    }
+//
+//    return null;
+//  }
+  
   private Value _getValueOfLocalVariable(LocalVariable var, ThreadReference thread)
     throws InvalidTypeException, ClassNotLoadedException, AbsentInformationException,
     IncompatibleThreadStateException, InvocationException, DebugException
@@ -2051,10 +2063,26 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     ObjectReference interpreter = _getDebugInterpreter(_getUniqueThreadName(thread), thread);
     ReferenceType rtInterpreter = interpreter.referenceType();
     Method method2Call = _getGetVariableMethod(rtInterpreter);
-    List args = new LinkedList();
-    args.add(_vm.mirrorOf(var.name()));
-    Value v = interpreter.invokeMethod(thread, method2Call, args,
-                                       ObjectReference.INVOKE_SINGLE_THREADED);
+    Value v = null;
+    
+    // invokeMethod would throw an ObjectCollectedException if the StringReference
+    // declared by _vm.mirrorOf(name) had been garbage collected before
+    // invokeMethod could execute. This happened infrequently so by trying this
+    // multiple times, the chance of failure each time should be acceptably low.
+    int tries = 0;
+    while (tries < MAXINVOKETRIES) {
+      try {
+        List args = new LinkedList();
+        args.add(_vm.mirrorOf(var.name()));
+        v = interpreter.invokeMethod(thread, method2Call, args,
+                                           ObjectReference.INVOKE_SINGLE_THREADED);
+        break;
+      }
+      catch (ObjectCollectedException oce) {
+        if (printMessages) System.out.println("Got ObjectCollectedException");
+        tries++;      
+      }
+    }
     if (v != null) {
       v = _convertToActualType(thread, var, v);
     }
