@@ -173,13 +173,14 @@ public class MainFrame extends JFrame
 
       // Clear the output window before compilation
       _outputView.clear();
+
+      _selectCompileTab();
       
       File file = new File(filename);
       CompilerError[] errors = DrJava.compiler.compile(new File[] { file });
       _errorPanel.resetErrors(errors);
 
       _resetInteractions();
-      _selectCompileTab();
     }
 
   private Action _compileAction = new AbstractAction("Compile")

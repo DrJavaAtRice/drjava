@@ -22,6 +22,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JEditorPane;
 
 import javax.swing.text.Document;
+import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.Position;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultHighlighter;
@@ -33,8 +34,11 @@ import javax.swing.event.ListSelectionEvent;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 import java.awt.Rectangle;
+import java.awt.Point;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.BorderLayout;
@@ -126,7 +130,6 @@ public class CompilerErrorPanel extends JPanel {
       // if no error is on this line, select the (none) item
       if (shouldSelect == -1) {
         _errorListPane.selectNothing();
-        _removePreviousHighlight();
       }
       else {
         _selectError(shouldSelect);
@@ -176,7 +179,6 @@ public class CompilerErrorPanel extends JPanel {
     });
     
     _errorListPane = new ErrorListPane();
-    _errorListPane.setEditable(false);
 
     // We make the vertical scrollbar always there.
     // If we don't, when it pops up it cuts away the right edge of the 
@@ -205,12 +207,13 @@ public class CompilerErrorPanel extends JPanel {
   private void _gotoError(int newIndex) {
     if (newIndex < 0) return;
 
-    _selectError(newIndex);
     // move caret to that position
     final int idx = newIndex; // final so it's accessible inside inner class
 
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
+        _selectError(idx);
+
         int errPos = _errorPositions[idx].getOffset();
         _definitionsView.setCaretPosition(errPos);
         _definitionsView.grabFocus();
@@ -219,9 +222,7 @@ public class CompilerErrorPanel extends JPanel {
   }
 
   private void _selectError(int newIndex) {
-    if (newIndex != _errorListPane.getSelectedIndex()) {
-      _errorListPane.selectItem(newIndex);
-    }
+    _errorListPane.selectItem(newIndex);
 
     int errPos = _errorPositions[newIndex].getOffset();
     try {
@@ -327,23 +328,67 @@ public class CompilerErrorPanel extends JPanel {
      */
     private Position[] _errorListPositions;
 
-    private Document _doc;
-
     // when we create a highlight we get back a tag we can use to remove it
     private Object _listHighlightTag = null;
+
+    // on mouse click, highlight the error in the list and also in the source
+    private MouseAdapter _mouseListener = new MouseAdapter() {
+      public void mouseClicked(MouseEvent e) {
+        int errorNum = _errorAtPoint(e.getPoint());
+
+        if (errorNum == -1) {
+          selectNothing();
+        }
+        else {
+          // This jumps the caret in the defs doc to the error and
+          // also highlights the error in the defs. The caret movement
+          // then results in the error being highlighted in the list.
+          _gotoError(errorNum);
+        }
+      }
+    };
 
     public ErrorListPane() {
       // If we set this pane to be of type text/rtf, it wraps based on words
       // as opposed to based on characters.
       super("text/rtf", "");
-      _doc = getDocument();
+      addMouseListener(_mouseListener);
+
+      // We set the editor pane disabled so it won't get keyboard focus,
+      // which makes it uneditable, and so you can't select text inside it.
+      setEnabled(false);
+    }
+
+    /**
+     * Returns error number associated with the given visual coordinates.
+     * Returns -1 if none.
+     */
+    private int _errorAtPoint(Point p) {
+      int modelPos = viewToModel(p);
+
+      System.err.println("model pos=" + modelPos);
+
+      if (modelPos == -1)
+        return -1;
+
+      // Find the first error whose position preceeds this model position
+      int errorNum = -1;
+      for (int i = 0; i < _errorListPositions.length; i++) {
+        if (_errorListPositions[i].getOffset() <= modelPos) {
+          errorNum = i;
+        }
+        else { // we've gone past the correct error; the last value was right
+          break;
+        }
+      }
+
+      System.err.println("error num=" + errorNum);
+
+      return errorNum;
     }
 
     public void updateListPane() {
       try {
-        // First clear the editor pane.
-        _doc.remove(0, getDocument().getLength());
-
         _errorListPositions = new Position[_errors.length];
 
         if (_errors.length == 0) {
@@ -354,31 +399,42 @@ public class CompilerErrorPanel extends JPanel {
         }
       }
       catch (BadLocationException impossible) {}
-      
-      selectNothing();
+
+      revalidate();
     }
 
     private void _updateNoErrors() throws BadLocationException {
-      _doc.insertString(0, "Last compilation completed successfully.", null);
+      DefaultStyledDocument doc = new DefaultStyledDocument();
+      doc.insertString(0,
+                       "Last compilation completed successfully.",
+                       null);
+      setDocument(doc);
+
+      selectNothing();
     }
 
     private void _updateWithErrors() throws BadLocationException {
-      _doc.insertString(0,
-                        "Last compilation returned the following errors:",
-                        null);
+      DefaultStyledDocument doc = new DefaultStyledDocument();
+      doc.insertString(0,
+                       "Last compilation returned the following errors:\n",
+                       null);
 
       for (int i = 0; i < _errors.length; i++) {
-        int startPos = _doc.getLength();
-        _doc.insertString(startPos, _errorText(i), null);
-        _errorListPositions[i] = _doc.createPosition(startPos);
+        int startPos = doc.getLength();
+        doc.insertString(startPos, _errorText(i), null);
+        _errorListPositions[i] = doc.createPosition(startPos);
       }
+
+      setDocument(doc);
+
+      // Select the first error
+      _gotoError(0);
     }
 
     private String _errorText(int i) {
       CompilerError error = _errors[i];
 
       StringBuffer buf = new StringBuffer();
-      buf.append("\n");
 
       if (error.isWarning()) {
         buf.append("Warning: ");
@@ -388,6 +444,7 @@ public class CompilerErrorPanel extends JPanel {
       }
 
       buf.append(error.message());
+      buf.append("\n");
 
       return buf.toString();
     }
@@ -402,21 +459,20 @@ public class CompilerErrorPanel extends JPanel {
     public void selectNothing() {
       _selectedIndex = -1;
       _removeListHighlight();
+      _removePreviousHighlight();
     }
 
     public void selectItem(int i) {
       _selectedIndex = i;
       _removeListHighlight();
 
-      // We don't highlight the first char of this error message
-      // because it's the original \n
-      int startPos = _errorListPositions[i].getOffset() + 1;
+      int startPos = _errorListPositions[i].getOffset();
 
       // end pos is either the end of the document (if this is the last error)
       // or the char where the next error starts
       int endPos;
       if (i + 1 == _errors.length) {
-        endPos = _doc.getLength();
+        endPos = getDocument().getLength();
       }
       else {
         endPos = _errorListPositions[i + 1].getOffset();
@@ -433,8 +489,10 @@ public class CompilerErrorPanel extends JPanel {
         Rectangle endRect = modelToView(endPos - 1);
 
         // Add the end rect onto the start rect to make a rectangle
-        // that encompasses the entire errorp
+        // that encompasses the entire error
         startRect.add(endRect);
+
+        System.err.println("scrll vis: " + startRect);
 
         scrollRectToVisible(startRect);
       } 
