@@ -405,6 +405,8 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel
   private void _setActiveDoc(INavigatorItem idoc) {
       //Hashtable<INavigatorItem, OpenDefinitionsDocument> docs = getDefinitionsDocumentsTable();
     
+//    System.out.println(Runtime.getRuntime().freeMemory());
+    
     _activeDocument = super.getODDGivenIDoc(idoc);
     _activeDocument.checkIfClassFileInSync();
     
