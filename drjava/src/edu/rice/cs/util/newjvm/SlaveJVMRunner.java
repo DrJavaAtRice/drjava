@@ -63,7 +63,16 @@ public final class SlaveJVMRunner {
 
   /** Private constructor to prevent instantiation. */
   private SlaveJVMRunner() {}
-  
+
+  private static SlaveRemote _getInstance(Class clazz) throws Exception {
+    try {
+      return (SlaveRemote) clazz.getField("ONLY").get(null);
+    }
+    catch (Throwable t) {
+      return (SlaveRemote) clazz.newInstance();
+    }
+  }
+
   /**
    * The main method for invoking a slave JVM.
    * 
@@ -85,7 +94,7 @@ public final class SlaveJVMRunner {
       
       try {
         Class slaveClass = Class.forName(args[1]);
-        SlaveRemote slave = (SlaveRemote) slaveClass.newInstance();
+        SlaveRemote slave = _getInstance(slaveClass);
                 
         // Must export slave object to RMI so we can pass stub to the master
         SlaveRemote stub= (SlaveRemote) UnicastRemoteObject.exportObject(slave);
