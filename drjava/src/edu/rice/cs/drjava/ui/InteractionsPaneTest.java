@@ -234,4 +234,15 @@ public class InteractionsPaneTest extends TestCase {
                  _doc.getDocLength(),
                  _doc.getPromptPos());
   }
+  
+  /**
+   * Tests that the InteractionsPane cannot be edited before the prompt.
+   */
+  public void testCannotEditBeforePrompt() throws DocumentAdapterException {
+    int origLength = _doc.getDocLength();
+    _doc.insertText(1, "typed text", InteractionsDocument.DEFAULT_STYLE);
+    assertEquals("Document should not have changed.",
+                 origLength,
+                 _doc.getDocLength());
+  }
 }

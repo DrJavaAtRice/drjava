@@ -86,12 +86,35 @@ public abstract class AbstractInteractionsDocument
   protected History _history;
 
   /**
-   * Reset the document on startup.
+   * Reset the document on startup.  Uses a history with configurable size.
+   * @param document DocumentAdapter to use for the model
+   */
+  public AbstractInteractionsDocument(DocumentAdapter document) {
+    this(document, new History());
+  }
+  
+  /**
+   * Reset the document on startup.  Uses a history with the given
+   * maximum size.  This history will not use the config framework.
+   * @param document DocumentAdapter to use for the model
+   * @param maxHistorySize Number of commands to remember in the history
    */
   public AbstractInteractionsDocument(DocumentAdapter document,
                                       int maxHistorySize) {
+    this(document, new History(maxHistorySize));
+  }
+  
+  
+  
+  /**
+   * Reset the document on startup.  Uses the given history.
+   * @param document DocumentAdapter to use for the model
+   * @param history History of commands
+   */
+  public AbstractInteractionsDocument(DocumentAdapter document,
+                                      History history) {
     _document = document;
-    _history = new History(maxHistorySize);
+    _history = history;
     
     // Prevent any edits before the prompt!
     _document.setEditCondition(new InteractionsEditCondition());
@@ -99,14 +122,7 @@ public abstract class AbstractInteractionsDocument
     reset();
   }
   
-  /**
-   * Reset the document on startup.
-   */
-  public AbstractInteractionsDocument(DocumentAdapter document) {
-    _document = document;
-    _history = new History();
-    reset();
-  }
+  
   
   /**
    * Interprets the current command at the prompt.

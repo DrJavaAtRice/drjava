@@ -52,9 +52,11 @@ import java.io.*;
 
 import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.model.definitions.*;
+import edu.rice.cs.drjava.model.repl.*;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.util.*;
+import edu.rice.cs.util.text.*;
 
 /**
  * Test functions of MainFrame.
@@ -235,15 +237,24 @@ public class MainFrameTest extends MultiThreadedTestCase {
 
   /**
    * Make sure that the InteractionsPane is displaying the correct
-   * InteractionsDocument.  (SourceForge bug #681547)
+   * InteractionsDocument.  (SourceForge bug #681547)  Also make sure this
+   * document cannot be edited before the prompt.
    */
-  public void testCorrectInteractionsDocument() {
+  public void testCorrectInteractionsDocument() throws DocumentAdapterException {
     InteractionsPane pane = _frame.getInteractionsPane();
     SingleDisplayModel model = _frame.getModel();
+    SwingDocumentAdapter doc = model.getSwingInteractionsDocument();
 
     // Test for strict == equality
     assertTrue("UI's int. doc. should equals Model's int. doc.",
-               pane.getDocument() == model.getSwingInteractionsDocument());
+               pane.getDocument() == doc);
+    
+    
+    int origLength = doc.getDocLength();
+    doc.insertText(1, "typed text", InteractionsDocument.DEFAULT_STYLE);
+    assertEquals("Document should not have changed.",
+                 origLength,
+                 doc.getDocLength());
   }
 
   /**

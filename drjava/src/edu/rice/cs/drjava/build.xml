@@ -92,33 +92,9 @@
     <cvs dest="${dist}/${version-tag}"
          tag="HEAD"
          quiet="yes"
-         package="src/edu/rice/cs/drjava src/edu/rice/cs/util src/edu/rice/cs/lib src/edu/rice/cs/LICENSE src/edu/rice/cs/README src/edu/rice/cs/build-common.xml src/src-jsr14v1_0 src/src-jsr14v1_2"
-         command="export -N" />
-<!--
-    <cvs dest="${dist}/${version-tag}"
-         tag="HEAD"
-         quiet="yes"
-         package="src/edu/rice/cs/util"
+         package="src/edu/rice/cs/drjava src/edu/rice/cs/util src/edu/rice/cs/lib src/edu/rice/cs/LICENSE src/edu/rice/cs/README src/edu/rice/cs/build-common.xml src/src-jsr14v1_0 src/src-jsr14v1_2 src/src-mac13 src/src-mac14 src/src-eclipse"
          command="export -N" />
 
-    <cvs dest="${dist}/${version-tag}"
-         tag="HEAD"
-         quiet="yes"
-         package="src/edu/rice/cs/lib"
-         command="export -N" />
-
-    <cvs dest="${dist}/${version-tag}"
-         tag="HEAD"
-         quiet="yes"
-         package="src/src-jsr14v1_0/edu/rice/cs/drjava"
-         command="export -N" />
-
-    <cvs dest="${dist}/${version-tag}"
-         tag="HEAD"
-         quiet="yes"
-         package="src/src-jsr14v1_2/edu/rice/cs/drjava"
-         command="export -N" />
--->
     <zip zipfile="${dist}/${version-tag}-src.zip">
       <fileset dir="${dist}">
         <include name="${version-tag}/src/**" />
