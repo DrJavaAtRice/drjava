@@ -277,9 +277,8 @@
      just this project in order for it to realize what files have already
      been compiled (preventing needless recompilation).
 
-     This version works with JDK 1.4.1 and JSR-14 v2.2.
+     This version works with JDK 1.4.1 and JSR-14 v2.2, v2.3.
      (Be sure to have the right version of tools.jar on your classpath.)
--->
 <target name="do-compile" depends="init">
   <mkdir dir="${built}"/>
   <javac srcdir="${srcroot}"
@@ -294,15 +293,16 @@
     <compilerarg value="-J-Xbootclasspath/p:${jsr14_classpath}"/>
   </javac>
 </target>
+-->
 
 
 <!-- Compile. We have to start at srcroot and then selectively include
      just this project in order for it to realize what files have already
      been compiled (preventing needless recompilation).
 
-     This version works with JDK 1.4.2 and JSR-14 v2.3 and JSR-14 v2.4.
+     This version works with JDK 1.4.2 and JSR-14 v2.3 and JSR-14 v2.4., v2.5
      (Be sure to have the right version of tools.jar on your classpath.)
-
+-->
 <target name="do-compile" depends="init">
   <mkdir dir="${built}"/>
   <javac srcdir="${srcroot}"
@@ -319,13 +319,13 @@
     <compilerarg value="-Xlint"/>
   </javac>
 </target>
--->
+
 
 <!-- Checked Compile. Identical to Compile with Generic Warning Checking
      enabled.
 
-     This version works with JDK 1.4.2 and JSR-14 v2.2.
--->
+     This version works with JDK 1.4.2 and JSR-14 v2.2, v2.3
+
 <target name="checked-compile" depends="init">
   <mkdir dir="${built}"/>
   <javac srcdir="${srcroot}"
@@ -341,6 +341,31 @@
     <compilerarg value="-J-Xbootclasspath/p:${jsr14_classpath}"/>
   </javac>
 </target>
+-->
+
+<!-- Checked Compile. Identical to Compile with Generic Warning Checking
+     enabled.
+
+     This version works with JDK 1.4.2 and JSR-14 v2.2, v2.3
+-->
+<target name="checked-compile" depends="init">
+  <mkdir dir="${built}"/>
+  <javac srcdir="${srcroot}"
+         includes="${projpath}/**/*java"
+         destdir="${built}"
+         bootclasspath="${jsr14_classpath}:${jsr14_collect_classpath}:${sun.boot.class.path}" 
+  classpath="${classpath_text}"
+         source="1.5"
+       target="jsr14"
+         debug="on"
+         fork="on"
+         optimize="off">
+    <compilerarg value="-warnunchecked"/>
+    <compilerarg value="-J-Xbootclasspath/p:${jsr14_classpath}"/>
+    <compilerarg value="-Xlint"/>
+  </javac>
+</target>
+
 
 
 <!-- Now you can run a subset of tests by doing:

@@ -82,7 +82,7 @@ public class GenericTreeTest extends TestCase {
     assertEquals("java.util.LinkedList", result.getClass().getName());
   }
   
-  public void testGenericClass(){
+  public void testGenericClass1(){
     // public class C<T extends Number> {
     //   public T n;
     //   public C(T _n){ n = _n; }
@@ -151,7 +151,7 @@ public class GenericTreeTest extends TestCase {
     fiveExps.add(new IntegerLiteral("5"));
     mccargs.add(new SimpleAllocation(new ReferenceType(iIds), fiveExps));
     SimpleAllocation sa = new SimpleAllocation(genericCType, mccargs);
-    MethodCall mc = new ObjectMethodCall(sa, "m", null, "", 0, 0, 0, 0);
+    MethodCall mc = new ObjectMethodCall(sa, "m", new LinkedList<Expression>(), "", 0, 0, 0, 0);
     
     Object result = astInterpreter.interpret(mc);
     assertEquals("java.lang.Integer",result.getClass().getName());
@@ -553,5 +553,89 @@ public class GenericTreeTest extends TestCase {
            "parameter types are essentially the same (duplicate) methods.");
     } catch (ClassFormatError e){
     }
+  }
+  
+   public void testGenericClass2(){
+    // public class C<T extends Number> {
+    //   public T n;
+    //   public C(final T _n){ n = _n; }
+    //   public T m(){ return n; }
+    // }
+    // 
+    // new C<Integer>(new Integer(5)).m()
+    //
+    //   ==> Should return an Integer(5)
+    //
+    int accessFlags = java.lang.reflect.Modifier.PUBLIC;
+    
+    List<IdentifierToken> tIds = new LinkedList<IdentifierToken>();
+    tIds.add(new Identifier("T"));
+    List<IdentifierToken> numberIds = new LinkedList<IdentifierToken>();
+    numberIds.add(new Identifier("Number"));  // "java.lang" is imported automatically by DynamicJava
+    ReferenceType numberType = new ReferenceType(numberIds);
+    TypeParameter t = new TypeParameter(new SourceInfo(), tIds, numberType); // T extends Number
+    TypeParameter[] typeParams = new TypeParameter[1];
+    typeParams[0] = t;
+    
+    List<Node> body = new LinkedList<Node>();
+    FieldDeclaration n = new FieldDeclaration(accessFlags, t, "n", null);
+    body.add(n);
+    FormalParameter param = new FormalParameter(false, t, "_n");   // first arg was true, but it generated an IllegalState exception
+    List<FormalParameter> cparams = new LinkedList<FormalParameter>();
+    cparams.add(param);
+    
+    List<Node> cstmts = new LinkedList<Node>();
+    List<IdentifierToken> nIds = new LinkedList<IdentifierToken>();
+    nIds.add(new Identifier("n"));
+    QualifiedName nName = new QualifiedName(nIds);
+    List<IdentifierToken> _nIds = new LinkedList<IdentifierToken>();
+    _nIds.add(new Identifier("_n"));
+    AssignExpression stmt = new SimpleAssignExpression(nName, new QualifiedName(_nIds));
+    cstmts.add(stmt);
+    ConstructorDeclaration c = new ConstructorDeclaration(accessFlags, "C", cparams, new LinkedList<ReferenceType>(), null, cstmts);
+    body.add(c);
+    List<Node> mstmts = new LinkedList<Node>();
+    ReturnStatement mstmt = new ReturnStatement(nName);
+    mstmts.add(mstmt);
+    List<FormalParameter> mparams = new LinkedList<FormalParameter>();
+    List<ReferenceType> mexcepts = new LinkedList<ReferenceType>();
+    MethodDeclaration m = new MethodDeclaration(accessFlags, t, "m", mparams, mexcepts, new BlockStatement(mstmts));
+    body.add(m);
+    GenericClassDeclaration cls = new GenericClassDeclaration(accessFlags, "C", null, null, body, typeParams);
+    
+    astInterpreter.interpret(cls); // set the context for the following method call
+    
+    
+    
+    IdentifierToken cId = new Identifier("C");
+    List<IdentifierToken> ids = new LinkedList<IdentifierToken>();
+    ids.add(cId);
+    
+    IdentifierToken iId = new Identifier("Integer");
+    List<IdentifierToken> iIds = new LinkedList<IdentifierToken>();
+    iIds.add(iId);
+    
+    List<ReferenceType> targs = new LinkedList<ReferenceType>();
+    targs.add(new ReferenceType(iIds));
+    
+    Type genericCType = new GenericReferenceType(ids, targs);
+    List<Expression> mccargs = new LinkedList<Expression>(); // method call constructor args
+    List<Expression> fiveExps = new LinkedList<Expression>();
+    fiveExps.add(new IntegerLiteral("5"));
+    mccargs.add(new SimpleAllocation(new ReferenceType(iIds), fiveExps));
+    SimpleAllocation sa = new SimpleAllocation(genericCType, mccargs);
+    MethodCall mc = new ObjectMethodCall(sa, "m", new LinkedList<Expression>(), "", 0, 0, 0, 0);
+    
+    
+//    This test failed with the error:  java.lang.illegalStateException: _n
+//    in the evaluation of the arguments to the call.  After inspecting the trace,
+//    I determined that the error is thrown because the formal parameter _n is either
+//    final or not properly defined.  I looked at the code above and _n is final so
+//    I made it unfinal and the test worked.  Is there a bug in DynamicJava's treatment
+//    of final formal parameters?  Corky 29 Mar 04
+    
+    Object result = astInterpreter.interpret(mc);
+    assertEquals("java.lang.Integer",result.getClass().getName());
+    assertEquals(new Integer(5), (Integer)result);
   }
 }

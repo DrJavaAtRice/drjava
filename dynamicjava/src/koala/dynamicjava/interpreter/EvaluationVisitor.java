@@ -1602,7 +1602,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
    * @param tc the target class
    * @param o  the object to cast
    */
-  private static Object performCast(Class tc, Object o) {
+  protected static Object performCast(Class tc, Object o) {
     Class ec = (o != null) ? o.getClass() : null;
     
     if (tc != ec && tc.isPrimitive() && ec != null) {

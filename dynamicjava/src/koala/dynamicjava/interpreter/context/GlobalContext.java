@@ -375,6 +375,7 @@ public class GlobalContext extends VariableContext implements Context {
    * @exception IllegalStateException if the variable is not defined
    */
   public Expression createName(Node node, IdentifierToken name) {
+
     if (!isDefined(name.image())) throw new IllegalStateException();
 
     List<IdentifierToken> l = new LinkedList<IdentifierToken>();
