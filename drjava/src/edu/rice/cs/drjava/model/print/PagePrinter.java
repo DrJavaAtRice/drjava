@@ -106,7 +106,7 @@ public class PagePrinter implements Printable {
       y += layout.getAscent();
       lineNumber.draw(g2d, 0, y);
       layout.draw(g2d, _parent.LINE_NUMBER_WIDTH, y);
-      y += layout.getDescent() + layout.getLeading();
+      y += layout.getLeading();
     }
 
     // print the footer

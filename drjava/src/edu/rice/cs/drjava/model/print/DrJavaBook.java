@@ -94,7 +94,7 @@ public class DrJavaBook implements Pageable {
 
     // determine the number of lines per page
     TextLayout textl = new TextLayout("X", PRINT_FONT, frc);
-    float lineHeight = textl.getDescent() + textl.getLeading() + textl.getAscent();
+    float lineHeight = textl.getLeading() + textl.getAscent();
     int linesPerPage = (int) (_format.getImageableHeight() / lineHeight) - 1;
 
     Hashtable map = new Hashtable();
