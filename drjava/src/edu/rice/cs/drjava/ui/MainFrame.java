@@ -221,6 +221,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   private JPopupMenu _navPanePopupMenu;
   private JPopupMenu _navPanePopupMenuForExternal;
   private JPopupMenu _navPanePopupMenuForAuxiliary;
+  private JPopupMenu _navPanePopupMenuForRoot;
   private JPopupMenu _navPaneFolderPopupMenu;
   private JPopupMenu _interactionsPanePopupMenu;
   private JPopupMenu _consolePanePopupMenu;
@@ -2289,7 +2290,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   private void _openProjectUpdate() {
     if(_model.isProjectActive()) {
       _closeProjectAction.setEnabled(true);
-//      _saveProjectAction.setEnabled(false);
+      _saveProjectAction.setEnabled(true);
       _projectPropertiesAction.setEnabled(true);
       _junitProjectAction.setEnabled(true);
       _compileProjectAction.setEnabled(true);
@@ -2320,7 +2321,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       if(_model.getDocumentCount() == 1)
         _model.setActiveFirstDocument();
       _closeProjectAction.setEnabled(false);
-//      _saveProjectAction.setEnabled(false);
+      _saveProjectAction.setEnabled(false);
       _projectPropertiesAction.setEnabled(false);
       _junitProjectAction.setEnabled(false);
       _compileProjectAction.setEnabled(false);
@@ -2718,7 +2719,6 @@ public class MainFrame extends JFrame implements OptionConstants {
       _showIOError(ioe);
     }
     _recentProjectManager.updateOpenFiles(file);
-//    _saveProjectAction.setEnabled(false);
     _model.setProjectChanged(false);
   }
   
@@ -4436,6 +4436,17 @@ public class MainFrame extends JFrame implements OptionConstants {
     _navPaneFolderPopupMenu.add(_compileFolderAction);
     _navPaneFolderPopupMenu.add(_junitFolderAction);
     
+    _navPanePopupMenuForRoot = new JPopupMenu();
+    _navPanePopupMenuForRoot.add(_saveProjectAction);
+    _navPanePopupMenuForRoot.add(_closeProjectAction);
+    _navPanePopupMenuForRoot.addSeparator();
+    _navPanePopupMenuForRoot.add(_compileProjectAction);
+    _navPanePopupMenuForRoot.add(_runProjectAction);
+    _navPanePopupMenuForRoot.add(_junitProjectAction);
+    _navPanePopupMenuForRoot.addSeparator();
+    _navPanePopupMenuForRoot.add(_projectPropertiesAction);
+    
+    
     _navPanePopupMenuForExternal = new JPopupMenu();
     _navPanePopupMenuForExternal.add(_saveAction);
     _navPanePopupMenuForExternal.add(_saveAsAction);
@@ -4512,7 +4523,8 @@ public class MainFrame extends JFrame implements OptionConstants {
                 _navPanePopupMenuForAuxiliary.show(e.getComponent(), e.getX(), e.getY());
               }
             }catch(GroupNotSelectedException ex){
-              // noop
+              // we're looking at the root of the tree
+              _navPanePopupMenuForRoot.show(e.getComponent(), e.getX(), e.getY());
             }
           }
           
@@ -5369,7 +5381,6 @@ public class MainFrame extends JFrame implements OptionConstants {
       try {
         File f = doc.getFile();
         if(! _model.isProjectFile(f) && _model.isInProjectPath(doc)) {
-//          _saveProjectAction.setEnabled(true);
           _model.setProjectChanged(true);
         }
       }
@@ -5432,7 +5443,6 @@ public class MainFrame extends JFrame implements OptionConstants {
         try {
           File f = doc.getFile();
           if(_model.isProjectFile(f) || doc.isAuxiliaryFile()) {
-//            _saveProjectAction.setEnabled(true);
             _model.setProjectChanged(true);
           }
         }
@@ -6067,7 +6077,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
     
     public void projectModified(){
-      _saveProjectAction.setEnabled(_model.isProjectChanged());
+//      _saveProjectAction.setEnabled(_model.isProjectChanged());
     }
     
     public void projectRunnableChanged(){
