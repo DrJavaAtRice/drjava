@@ -156,10 +156,15 @@
 
     <copy file="${jarfile}" tofile="${osxdir}/${osxtag}/DrJava.app/Contents/Resources/Java/DrJava.jar" />
     
-    <tar tarfile="${osxdir}/${osxtag}.tar" 
-      basedir="${osxdir}/" 
-      includes="${osxtag}/**/*"/>
-
+    <tar tarfile="${osxdir}/${osxtag}.tar">
+      <tarfileset dir="${osxdir}/">
+        <include name="${osxtag}/**/*" />
+        <exclude name="${osxtag}/DrJava.app/Contents/MacOS/DrJava" />
+      </tarfileset>
+      <tarfileset dir="${osxdir}/" mode="755">
+        <include name="${osxtag}/DrJava.app/Contents/MacOS/DrJava" />
+      </tarfileset>
+    </tar>
     <gzip src="${osxdir}/${osxtag}.tar"
       zipfile="${osxdir}/${osxtag}.tar.gz" />
 
