@@ -433,6 +433,29 @@ public class DefinitionsPane extends JEditorPane
 
     _resetUndo();
   }
+  
+  public int getCurrentLine() { 
+    try {
+      int pos = getCaretPosition();
+      FontMetrics metrics = getFontMetrics(getFont());
+      Rectangle startRect = modelToView(pos);
+      //System.out.println("Startrect: " + startRect);
+      if (startRect == null) { 
+        return 1;
+      }
+      //System.out.println("metrics: " + metrics);
+      //top left position is (3,3), so font size<=6 will be off
+      return (new Double (startRect.getY() / metrics.getHeight()).intValue() + 1);
+    } catch (BadLocationException e) {
+      // This shouldnt happen b/c we retrieve the caret pos before calling
+      // modelToView
+      throw new UnexpectedException(e);
+    }
+  }
+  
+  public int getCurrentCol() {
+    return _doc.getDocument().getCurrentCol();
+  }             
 
   /**
    * Reset the document Undo list.

@@ -574,6 +574,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _defScrollPanes = new Hashtable();
     JScrollPane defScroll = _createDefScrollPane(_model.getActiveDocument());
     _currentDefPane = (DefinitionsPane) defScroll.getViewport().getView();
+    _posListener.updateLocation();
 
     // Need to set undo/redo actions to point to the initial def pane
     // on switching documents later these pointers will also switch
@@ -1614,8 +1615,7 @@ public class MainFrame extends JFrame implements OptionConstants {
 
     _currLocationField = new JLabel();
     _currLocationField.setFont(_currLocationField.getFont().deriveFont(Font.PLAIN));
-    // This field currently disabled due to performance concerns.
-    _currLocationField.setVisible(false);
+    _currLocationField.setVisible(true);
 
     _statusBar = new JPanel( new BorderLayout() );
     _statusBar.add( _fileNameField, BorderLayout.WEST );
@@ -1636,13 +1636,18 @@ public class MainFrame extends JFrame implements OptionConstants {
     public void caretUpdate( CaretEvent ce ) {
       _model.getActiveDocument().
         syncCurrentLocationWithDefinitions(ce.getDot());
-      //updateLocation();
+      updateLocation();
     }
 
     public void updateLocation() {
       DefinitionsDocument doc = _model.getActiveDocument().getDocument();
+      /*
       _currLocationField.setText(doc.getCurrentLine() +
                                  ":" + doc.getCurrentCol() + "\t");
+      */
+      DefinitionsPane p = _currentDefPane;
+      _currLocationField.setText(p.getCurrentLine() +
+                                 ":" + p.getCurrentCol() + "\t");
     }
   }
 
@@ -1738,7 +1743,6 @@ public class MainFrame extends JFrame implements OptionConstants {
 
     // add a listener to update line and column.
     pane.addCaretListener( _posListener );
-    _posListener.updateLocation();
     
     // Add to a scroll pane
     JScrollPane scroll = new BorderlessScrollPane(pane,
@@ -1951,8 +1955,9 @@ public class MainFrame extends JFrame implements OptionConstants {
       _setCurrentDirectory(active);
 
       updateFileTitle();
-      _posListener.updateLocation();
+      //_posListener.updateLocation();
       _currentDefPane.requestFocus();
+      _posListener.updateLocation();
       
       try {
         active.revertIfModifiedOnDisk();
