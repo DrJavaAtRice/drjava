@@ -37,7 +37,8 @@ public class MainFrame extends JFrame
   private JMenuBar _menuBar;
   private JMenu _fileMenu;
   private JMenu _editMenu;
-  private Label _status;
+	// status bar at bottom of window
+	public static Label _status = new Label("");
 	
   // Make some actions for menus
   private Action _quitAction = new AbstractAction("Quit")
@@ -230,8 +231,7 @@ public class MainFrame extends JFrame
     
     _interactionsView = new InteractionsView();
 
-		// status bar at bottom of window
-		_status = new Label("");
+	
 
     // Create split pane with defs and output
     JSplitPane split1 = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
@@ -283,9 +283,5 @@ public class MainFrame extends JFrame
 			return _definitionsView;
 		}
 	
-	Label getStatusBar()
-		{
-			return _status;
-		}
 }
 

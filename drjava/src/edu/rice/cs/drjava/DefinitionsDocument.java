@@ -6,8 +6,6 @@ import javax.swing.text.StyleContext.SmallAttributeSet;
 import javax.swing.text.*;
 import gj.util.Vector;
 
-import java.util.Calendar;
-
 /**
 	 hasHighlightChanged()
 	 getHighLightInformation()
@@ -24,10 +22,11 @@ public class DefinitionsDocument extends DefaultStyledDocument
 	//keeps track of all lit blocks
 	Vector<StateBlock> litBlocks = new Vector<StateBlock>(); 
 	Vector<StateBlock> changes = new Vector<StateBlock>();
+
   int _currentLocation = 0;
 
-	
-	
+	StyleUpdateThread styleUpdater = null;
+
 	/**
 	 *1)mark the item previous to the current first insert
 	 *2)insert string
@@ -51,7 +50,7 @@ public class DefinitionsDocument extends DefaultStyledDocument
 
 		//1)adjust location
     _reduced.move(locationChange);
-		
+
 		//3)loop through string inserting characters
     for (int i = 0; i < str.length(); i++)
 			{
@@ -62,36 +61,16 @@ public class DefinitionsDocument extends DefaultStyledDocument
 		_currentLocation = offset + strLength;
 
     super.insertString(offset, str, a);
+		_modifiedSinceSave = true;
 		
 		//get highlight information from mark onward
 		//numbers are off by prevSize + strLength + reducedOffset
 		//the adjustment is the absolute position that newStates started at
-
-		
-		newStates = _reduced.generateHighlights(offset,strLength);
-		
-		updateCurrentHighlights(newStates);
-		
-		_modifiedSinceSave = true;
-
-		updateStyles();
+			newStates = _reduced.generateHighlights(offset,strLength);
+			updateCurrentHighlights(newStates);
+			updateStyles();
   }
 
-	private void updateStyles() {
-		if (hasHighlightChanged()) {
-			SimpleAttributeSet attributes = new SimpleAttributeSet();
-			Vector<StateBlock> changedStates = getHighLightInformation();
-			for (int i = 0; i < changedStates.size(); i++){
-			    StateBlock currentSB = changedStates.elementAt(i);
-			    StyleConstants.setForeground(attributes, currentSB.state);
-			    setCharacterAttributes(currentSB.location, currentSB.size, attributes,false);
-			}
-
-		}
-		else {
-			return;
-		}
-	}
 	private void _addCharToReducedView(char curChar)
   {
     switch (curChar)
@@ -113,7 +92,6 @@ public class DefinitionsDocument extends DefaultStyledDocument
         _reduced.insertOpenSquiggly();
         break;
       case '}':
-        //System.err.println("calling insert }");
         _reduced.insertClosedSquiggly();
         break;
       case '/':
@@ -154,14 +132,10 @@ public class DefinitionsDocument extends DefaultStyledDocument
 		_reduced.delete(len);
 		
     super.remove(offset, len);
-		
-	//		newStates = SBVectorFactory.generate(mark,0,adjustment);
-		newStates = _reduced.generateHighlights(offset,0);
-		
-		updateCurrentHighlights(newStates);
-		//else the absolute location stays the same.
-		//adjust the current location if delete works
     _modifiedSinceSave = true;
+		
+		newStates = _reduced.generateHighlights(offset,0);		
+		updateCurrentHighlights(newStates);
 		updateStyles();
   }
 
@@ -200,10 +174,29 @@ public class DefinitionsDocument extends DefaultStyledDocument
 		{
 			changes = newBlocks;
 		}
+
+	private void updateStyles() {
+		if (hasHighlightChanged()) {
+			Vector<StateBlock> changedStates = getHighLightInformation();
+			int startOfInterimText = changedStates.elementAt(0).location;
+			if (styleUpdater != null) {
+				styleUpdater._breakLocation = startOfInterimText;
+				try { styleUpdater.join(); }
+				catch (InterruptedException ex) {}
+			}
+			styleUpdater = new StyleUpdateThread(this, changedStates);				
+			styleUpdater.start();
+			
+		}
+		else {
+			return;
+		}
+	}
+
 	public int getCurrentLocation()
-  {
-    return _currentLocation;
-  }
+		{
+			return _currentLocation;
+		}
 
 	public void setCurrentLocation(int loc)
   {
@@ -211,13 +204,15 @@ public class DefinitionsDocument extends DefaultStyledDocument
     _currentLocation = loc;
   }
 
+
 	public void move(int dist)
 		{
 			_currentLocation += dist;
 			_reduced.move(dist);
 		}
-
 }
+
+
 
 
 

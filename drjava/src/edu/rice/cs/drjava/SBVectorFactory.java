@@ -53,6 +53,7 @@ public class SBVectorFactory
 				blocks.addElement(new StateBlock(start,length,prevState));
 			return blocks;
 		}
+
 }
 
 

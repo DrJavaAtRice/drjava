@@ -8,6 +8,7 @@ public class StateBlock
 	public static final Color LINE_COMMENT_COLOR = Color.blue;
 	public static final Color QUOTE_COLOR = Color.green;
 	public static final Color DEFAULT_COLOR = Color.black;
+	public static final Color INTERIM_COLOR = Color.yellow;
 	
 	public int location; //location relative to current cursor.
 	public int size;

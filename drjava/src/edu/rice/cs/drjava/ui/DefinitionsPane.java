@@ -63,7 +63,6 @@ public class DefinitionsView extends JEditorPane
 	private CaretListener _matchListener = new CaretListener() {
 		public void caretUpdate(CaretEvent e) {
 			_doc().setCurrentLocation(getCaretPosition());
-			_mainFrame.getStatusBar().setText("");
 			_removePreviousHighlight();
 
 			try {

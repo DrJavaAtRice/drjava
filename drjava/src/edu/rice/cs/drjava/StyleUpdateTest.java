@@ -28,13 +28,18 @@ public class StyleUpdateTest extends TestCase {
 			return new TestSuite(StyleUpdateTest.class);
 		}
 
-	public void testInsertStringUpdate()
+	public void testInsertStringUpdate() throws InterruptedException
 		{
 			try {
 				this.defModel.insertString(0, "class C { /* comment */ }", null);
-				AttributeSet attributes = defModel.getCharacterElement(0).getAttributes();
+				
+				while (defModel.styleUpdater == null);
+				defModel.styleUpdater.join();
+				AttributeSet attributes =
+					defModel.getCharacterElement(0).getAttributes();
 				assertEquals(Color.black, attributes.getAttribute(FOREGROUND));
 				this.defModel.insertString(0, "//", null);
+				defModel.styleUpdater.join();
 				attributes = defModel.getCharacterElement(0).getAttributes();
 				assertEquals(Color.blue, attributes.getAttribute(FOREGROUND));
 			}
@@ -60,12 +65,14 @@ public class StyleUpdateTest extends TestCase {
 			}
 		}
 
-	public void testRemoveStringUpdate()
+	public void testRemoveStringUpdate() throws InterruptedException
 		{
 			try{
 				this.defModel.insertString(0, "class C { /* comment */ }", null);
 				AttributeSet attributes;
 				this.defModel.remove(10,2);
+				while (defModel.styleUpdater == null);
+				defModel.styleUpdater.join();
 				attributes = defModel.getCharacterElement(13).getAttributes();
 				assertEquals(Color.black, attributes.getAttribute(FOREGROUND));
 			}

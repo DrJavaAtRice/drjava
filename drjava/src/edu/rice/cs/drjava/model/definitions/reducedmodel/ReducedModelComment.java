@@ -1037,7 +1037,6 @@ public class ReducedModelComment
 	private void _updateBasedOnCurrentStateHelper(
 		ModelList<ReducedToken>.Iterator copyCursor)
 		{
-
 			if (copyCursor.atStart())
 				{
 					copyCursor.next();
