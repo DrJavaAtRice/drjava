@@ -227,6 +227,11 @@ public class MainFrame extends JFrame implements OptionConstants {
    * Keeps track of the recent files list in the File menu.
    */
   private RecentFileManager _recentFileManager;
+  
+  /**
+   * Keeps track of the recent projects list in the Project menu
+   */
+  private RecentFileManager _recentProjectManager;
 
   private File _currentProjFile;
   
@@ -259,6 +264,11 @@ public class MainFrame extends JFrame implements OptionConstants {
    */
   private JFileChooser _openChooser;
 
+  /**
+   * For opening project files.
+   */
+  private JFileChooser _openProjectChooser;
+  
   /**
    * For saving files.
    * We have a persistent dialog to keep track of the last directory
@@ -310,10 +320,7 @@ public class MainFrame extends JFrame implements OptionConstants {
    */
   private FileOpenSelector _openProjectSelector = new FileOpenSelector() {
     public File[] getFiles() throws OperationCanceledException {
-      //_openChooser.removeChoosableFileFilter(_javaSourceFilter);
-      _openChooser.resetChoosableFileFilters();
-      _openChooser.setFileFilter(_projectFilter);
-      File[] retFiles = getOpenFiles(_openChooser);
+      File[] retFiles = getOpenFiles(_openProjectChooser);
       return retFiles;
     }
   };
@@ -1386,6 +1393,17 @@ public class MainFrame extends JFrame implements OptionConstants {
     _openChooser.setCurrentDirectory(workDir);
     _openChooser.setFileFilter(_javaSourceFilter);
     _openChooser.setMultiSelectionEnabled(true);
+    
+    //Get most recently opened project for filechooser
+    Vector<File> recentProjects = config.getSetting(RECENT_PROJECTS);
+    
+    _openProjectChooser = new JFileChooser();
+    if(recentProjects.size()>0 && recentProjects.elementAt(0).getParentFile() != null)
+      _openProjectChooser.setCurrentDirectory(recentProjects.elementAt(0).getParentFile());
+    else
+      _openProjectChooser.setCurrentDirectory(workDir);
+    _openProjectChooser.setFileFilter(_projectFilter);
+    _openProjectChooser.setMultiSelectionEnabled(false);
     _saveChooser = new JFileChooser();
     _saveChooser.setCurrentDirectory(workDir);
     _saveChooser.setFileFilter(_javaSourceFilter);
@@ -1438,7 +1456,11 @@ public class MainFrame extends JFrame implements OptionConstants {
     // eventually add recent project manager
     _recentFileManager = new RecentFileManager(_fileMenu.getItemCount() - 2,
                                                _fileMenu,
-                                               this);
+                                               this,false);
+    
+    _recentProjectManager = new RecentFileManager(_projectMenu.getItemCount()-2,
+                                                  _projectMenu,
+                                                  this,true);
 
     // Set frame icon
     setIconImage(getIcon("drjava64.png").getImage());
@@ -2023,7 +2045,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     try{
       srcFiles = _model.openProject(projectFile);
       _setUpContextMenus();
-      _recentFileManager.updateOpenFiles(projectFile);
+      _recentProjectManager.updateOpenFiles(projectFile);
     }
     catch(MalformedProjectFileException e){
       _showProjectFileParseError(e);
@@ -2357,7 +2379,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     catch(IOException ioe) {
       _showIOError(ioe);
     }
-    _recentFileManager.updateOpenFiles(file);
+    _recentProjectManager.updateOpenFiles(file);
     _saveProjectAction.setEnabled(false);
   }
   
@@ -2435,6 +2457,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
 
     _recentFileManager.saveRecentFiles();
+    _recentProjectManager.saveRecentFiles();
     _storePositionInfo();
     _saveCurrentDirectory();
 
@@ -5681,6 +5704,8 @@ public class MainFrame extends JFrame implements OptionConstants {
     public void optionChanged(OptionEvent<Integer> oce) {
       _recentFileManager.updateMax(oce.value.intValue());
       _recentFileManager.numberItems();
+      _recentProjectManager.updateMax(oce.value.intValue());
+      _recentProjectManager.numberItems();
     }
   }
 

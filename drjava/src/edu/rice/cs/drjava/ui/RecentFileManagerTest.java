@@ -80,7 +80,7 @@ public final class RecentFileManagerTest extends TestCase {
    */
   public void setUp() throws IOException {
     _menu = new JMenu();
-    _rfm = new RecentFileManager(0, _menu, null);
+    _rfm = new RecentFileManager(0, _menu, null,false);
     String user = System.getProperty("user.name");
     _tempDir = FileOps.createTempDirectory("DrJava-test-" + user);
   }

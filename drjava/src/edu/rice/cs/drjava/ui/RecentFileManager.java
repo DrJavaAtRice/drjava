@@ -87,6 +87,11 @@ public class RecentFileManager implements OptionConstants {
   protected JMenu _fileMenu;
 
   /**
+   * true if the file manager manages recent project files
+   */
+  protected boolean _isProject;
+  
+  /**
    * The action to perform on any of the menu items.
    */
   Action _open;
@@ -102,15 +107,20 @@ public class RecentFileManager implements OptionConstants {
    * @param fileMenu File menu to add the entry to
    * @param frame MainFrame containing the File menu
    */
-  public RecentFileManager(int pos, JMenu fileMenu, MainFrame frame) {
+  public RecentFileManager(int pos, JMenu fileMenu, MainFrame frame, boolean isProject) {
     _pos = pos;
     _fileMenu = fileMenu;
     _frame = frame;
     _recentFiles = new Vector<File>();
     _recentMenuItems = new Vector<JMenuItem>();
+    _isProject = isProject;
 
     // Add each of the files stored in the config
-    Vector<File> files = DrJava.getConfig().getSetting(RECENT_FILES);
+    Vector<File> files;
+    if(! _isProject)
+      files = DrJava.getConfig().getSetting(RECENT_FILES);
+    else
+      files = DrJava.getConfig().getSetting(RECENT_PROJECTS);
     for (int i = files.size() - 1; i >= 0; i--) {
       updateOpenFiles(files.get(i));
     }
@@ -135,7 +145,10 @@ public class RecentFileManager implements OptionConstants {
    * Saves the current list of files to the config object.
    */
   public void saveRecentFiles() {
-    DrJava.getConfig().setSetting(RECENT_FILES,_recentFiles);
+    if(! _isProject)
+      DrJava.getConfig().setSetting(RECENT_FILES,_recentFiles);
+    else
+      DrJava.getConfig().setSetting(RECENT_PROJECTS,_recentFiles);
   }
 
   /**

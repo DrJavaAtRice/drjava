@@ -1056,6 +1056,12 @@ public interface OptionConstants {
     new VectorOption<File>("recent.files",new FileOption("",null),new Vector<File>());
 
   /**
+   * A vector containing the most recently used projects.
+   */
+  public static final VectorOption<File> RECENT_PROJECTS =
+    new VectorOption<File>("recent.projects",new FileOption("",null),new Vector<File>());
+  
+  /**
    * Whether to enabled the Show Debug Console menu item in the Tools menu.
    */
   public static final BooleanOption SHOW_DEBUG_CONSOLE =
