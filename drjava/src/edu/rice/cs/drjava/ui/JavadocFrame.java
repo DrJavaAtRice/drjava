@@ -68,15 +68,18 @@ public class JavadocFrame extends HTMLFrame {
   private static String introPagePath(File destDir, String curClass) {
     // Iterate through possible intro pages, looking for one that exists.
     File test = new File(destDir, curClass + ".html");
-    int i = -1;
-    while (!test.exists() && (i < INTRO_PAGE.length)) {
-      i++;
+    for (int i = 0; !test.exists() && (i < INTRO_PAGE.length); i++) {
       test = new File(destDir, INTRO_PAGE[i]);
     }
     
     // Packages.html might just be a pointer to another file
-    if (test.getName().equals("packages.html")) {
+    if (test.exists()) {
+      if (test.getName().equals("packages.html")) {
       test = _parsePackagesFile(test, destDir);
+      }
+    }
+    else {
+      throw new IllegalStateException("No Javadoc HTML output files found!");
     }
     return test.getAbsolutePath();
   }

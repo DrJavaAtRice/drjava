@@ -3860,6 +3860,18 @@ public class MainFrame extends JFrame implements OptionConstants {
             catch (MalformedURLException me) {
               throw new UnexpectedException(me);
             }
+            catch (IllegalStateException ise) {
+              // JavadocFrame couldn't find any output files!
+              // Display a message.
+              String msg = 
+                "Javadoc completed successfully, but\n" +
+                "did not produce any HTML files.\n" +
+                "Please ensure that your access level\n" +
+                "in Preferences is appropriate.\n";
+              JOptionPane.showMessageDialog(MainFrame.this, msg,
+                                            "No output to display.",
+                                            JOptionPane.INFORMATION_MESSAGE);
+            }
           }
         }
       };
