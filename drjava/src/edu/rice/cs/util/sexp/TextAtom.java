@@ -80,30 +80,6 @@ class QuotedTextAtom extends TextAtom {
   public QuotedTextAtom(String text) { super(text); }
   
   public String toString() { 
-    String output = _text;
-    output = replaceAll(output, "\\", "\\\\"); // convert \ to \\
-    output = replaceAll(output, "\"", "\\\""); // convert " to \"
-    output = replaceAll(output, "\t", "\\t");  // convert [tab] to \t
-    output = replaceAll(output, "\n", "\\n");  // convert [newline] to \n
-    return "\"" + output + "\"";
-  }
-  
-  /**
-   * replaces all occurrences of the given a string with a new string.
-   * This method was reproduced here to remove any dependencies on the
-   * java v1.4 api.
-   * @param str the string in which the replacements should occur
-   * @param toReplace the substring to replace
-   * @param replacement the substring to put in its place
-   * @return the new changed string
-   */
-  private static String replaceAll(String str, String toReplace, String replacement) {
-    String result = str;
-    int i = result.indexOf(toReplace); 
-    while (i >= 0) {
-      result = result.substring(0,i) + replacement + result.substring(i+1);
-      i = result.indexOf(toReplace, i + replacement.length());
-    }
-    return result;
+    return edu.rice.cs.util.StringOps.convertToLiteral(_text);
   }
 }

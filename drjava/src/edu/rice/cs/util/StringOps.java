@@ -82,6 +82,23 @@ public abstract class StringOps {
   }
   
   /**
+   * Converts the given string to a valid Java string literal.
+   * All back slashes, quotes, new-lines, and tabs are converted
+   * to their escap character form, and the sourounding quotes 
+   * are added.
+   * @param s the normal string to turn into a string literal
+   * @return the valid Java string literal
+   */
+  public static String convertToLiteral(String s) {
+    String output = s;
+    output = replace(output, "\\", "\\\\"); // convert \ to \\
+    output = replace(output, "\"", "\\\""); // convert " to \"
+    output = replace(output, "\t", "\\t");  // convert [tab] to \t
+    output = replace(output, "\n", "\\n");  // convert [newline] to \n
+    return "\"" + output + "\"";
+  }
+  
+  /**
    * Verifies that (startRow, startCol) occurs before (endRow, endCol).
    * @throws IllegalArgumentException if end is before start
    */
@@ -177,4 +194,6 @@ public abstract class StringOps {
     t.printStackTrace(pw);
     return sw.toString();
   }
+  
+  
 }

@@ -56,6 +56,7 @@ import java.util.*;
  * @version $Id$
  */
 public abstract class FileOps {
+    
   /**
    * @return an array of Files in the directory specified (not including directories)
    */
