@@ -722,7 +722,7 @@ public class ConfigFrame extends JFrame {
 
 
     // Clean
-    panel.addComponent(new BooleanOptionComponent(OptionConstants.NO_PROMPT_BEFORE_CLEAN,
+    panel.addComponent(new BooleanOptionComponent(OptionConstants.PROMPT_BEFORE_CLEAN,
                                                   "Prompt before Cleaning Built Directory", this,
                                                   "<html>Whether DrJava should prompt before cleaning the<br>" +
                                                     "built directory of a project</html>"));

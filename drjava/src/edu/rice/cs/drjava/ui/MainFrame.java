@@ -3206,7 +3206,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   }
 
   private boolean showCleanWarning(){
-    if (!DrJava.getConfig().getSetting(NO_PROMPT_BEFORE_CLEAN).booleanValue()) {
+    if (DrJava.getConfig().getSetting(PROMPT_BEFORE_CLEAN).booleanValue()) {
       String buildDirTxt = "";
       try {
         buildDirTxt = _model.getBuildDirectory().getCanonicalPath();
@@ -3228,7 +3228,7 @@ public class MainFrame extends JFrame implements OptionConstants {
           _saveAll();
           // Only remember checkbox if they say yes
           if (dialog.getCheckBoxValue()) {
-            DrJava.getConfig().setSetting(NO_PROMPT_BEFORE_CLEAN, Boolean.TRUE);
+            DrJava.getConfig().setSetting(PROMPT_BEFORE_CLEAN, Boolean.FALSE);
           }
           return true;
         case JOptionPane.NO_OPTION:
