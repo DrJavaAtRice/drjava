@@ -48,10 +48,10 @@ public abstract class AssignExpression extends    BinaryExpression
      * @param bc    the begin column
      * @param el    the end line
      * @param ec    the end column
-     * @exception IllegalArgumentException if lexp is null or rexp is null
+     * @exception IllegalArgumentExceptionAddAssignExpression.java if lexp is null or rexp is null
      */
     protected AssignExpression(Expression lexp, Expression rexp,
-			    String fn, int bl, int bc, int el, int ec) {
-	super(lexp, rexp, fn, bl, bc, el, ec);
+       String fn, int bl, int bc, int el, int ec) {
+ super(lexp, rexp, fn, bl, bc, el, ec);
     }
 }

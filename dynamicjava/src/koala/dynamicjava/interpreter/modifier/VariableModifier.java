@@ -80,13 +80,14 @@ public class VariableModifier extends LeftHandSideModifier {
    * Sets the value of the underlying left hand side expression
    */
   public void modify(Context ctx, Object value) {
-    if (type.isPrimitive()                     ||
-        value == null                          ||
+    if (type.isPrimitive() || 
+        value == null      || 
         type.isAssignableFrom(value.getClass())) {
       ctx.set(representation, value);
-    } else {
-      Exception e = new ClassCastException(representation);
-      throw new CatchedExceptionError(e, name);
+    } 
+    else {
+      ClassCastException cce = new ClassCastException(representation);
+      throw new CatchedExceptionError(cce, name);
     }
   }
 }

@@ -989,18 +989,24 @@ public class EvaluationVisitor extends VisitorObject<Object> {
    * @param node the node to visit
    */
   public Object visit(AddAssignExpression node) {
-    Node   left = node.getLeftExpression();
+    Node left = node.getLeftExpression();
     LeftHandSideModifier mod = NodeProperties.getModifier(left);
+    
     Object lhs = mod.prepare(this, context);
-
+    Object rhs = node.getRightExpression().acceptVisitor(this);
+    Class resType = NodeProperties.getType(node);
+    Class calcType = resType; // always a primitive type
+    
+    // This code facilitates autoboxing/unboxing
+    if (_isBoxingType(resType)) {
+      calcType = _correspondingPrimType(resType);
+    }
+    
     // Perform the operation
-    Object result = InterpreterUtilities.add
-      (NodeProperties.getType(node),
-       lhs,
-       node.getRightExpression().acceptVisitor(this));
+    Object result = InterpreterUtilities.add(calcType, lhs,rhs);
 
     // Cast the result
-    result = performCast(NodeProperties.getType(left), result);
+    result = performCast(calcType, result);
 
     // Modify the variable and return
     mod.modify(context, result);
@@ -1030,16 +1036,22 @@ public class EvaluationVisitor extends VisitorObject<Object> {
   public Object visit(SubtractAssignExpression node) {
     Node   left = node.getLeftExpression();
     LeftHandSideModifier mod = NodeProperties.getModifier(left);
+  
     Object lhs = mod.prepare(this, context);
-
+    Object rhs = node.getRightExpression().acceptVisitor(this);
+    Class resType = NodeProperties.getType(node);
+    Class calcType = resType; // always a primitive type
+    
+    // This code facilitates autoboxing/unboxing
+    if (_isBoxingType(resType)) {
+      calcType = _correspondingPrimType(resType);
+    }
+    
     // Perform the operation
-    Object result = InterpreterUtilities.subtract
-      (NodeProperties.getType(node),
-       lhs,
-       node.getRightExpression().acceptVisitor(this));
+    Object result = InterpreterUtilities.subtract(calcType, lhs, rhs);
 
     // Cast the result
-    result = performCast(NodeProperties.getType(left), result);
+    result = performCast(calcType, result);
 
     // Modify the variable and return
     mod.modify(context, result);
@@ -1069,16 +1081,22 @@ public class EvaluationVisitor extends VisitorObject<Object> {
   public Object visit(MultiplyAssignExpression node) {
     Node   left = node.getLeftExpression();
     LeftHandSideModifier mod = NodeProperties.getModifier(left);
-    Object lhs = mod.prepare(this, context);
 
+    Object lhs = mod.prepare(this, context);
+    Object rhs = node.getRightExpression().acceptVisitor(this);
+    Class resType = NodeProperties.getType(node);
+    Class calcType = resType; // always a primitive type
+    
+    // This code facilitates autoboxing/unboxing
+    if (_isBoxingType(resType)) {
+      calcType = _correspondingPrimType(resType);
+    }
+    
     // Perform the operation
-    Object result = InterpreterUtilities.multiply
-      (NodeProperties.getType(node),
-       lhs,
-       node.getRightExpression().acceptVisitor(this));
+    Object result = InterpreterUtilities.multiply(calcType, lhs, rhs);
 
     // Cast the result
-    result = performCast(NodeProperties.getType(left), result);
+    result = performCast(calcType, result);
 
     // Modify the variable and return
     mod.modify(context, result);
@@ -1108,16 +1126,22 @@ public class EvaluationVisitor extends VisitorObject<Object> {
   public Object visit(DivideAssignExpression node) {
     Node   left = node.getLeftExpression();
     LeftHandSideModifier mod = NodeProperties.getModifier(left);
-    Object lhs = mod.prepare(this, context);
 
+    Object lhs = mod.prepare(this, context);
+    Object rhs = node.getRightExpression().acceptVisitor(this);
+    Class resType = NodeProperties.getType(node);
+    Class calcType = resType; // always a primitive type
+    
+    // This code facilitates autoboxing/unboxing
+    if (_isBoxingType(resType)) {
+      calcType = _correspondingPrimType(resType);
+    }
+    
     // Perform the operation
-    Object result = InterpreterUtilities.divide
-      (NodeProperties.getType(node),
-       lhs,
-       node.getRightExpression().acceptVisitor(this));
+    Object result = InterpreterUtilities.divide(calcType, lhs, rhs);
 
     // Cast the result
-    result = performCast(NodeProperties.getType(left), result);
+    result = performCast(calcType, result);
 
     // Modify the variable and return
     mod.modify(context, result);
@@ -1147,16 +1171,22 @@ public class EvaluationVisitor extends VisitorObject<Object> {
   public Object visit(RemainderAssignExpression node) {
     Node   left = node.getLeftExpression();
     LeftHandSideModifier mod = NodeProperties.getModifier(left);
-    Object lhs = mod.prepare(this, context);
 
+    Object lhs = mod.prepare(this, context);
+    Object rhs = node.getRightExpression().acceptVisitor(this);
+    Class resType = NodeProperties.getType(node);
+    Class calcType = resType; // always a primitive type
+    
+    // This code facilitates autoboxing/unboxing
+    if (_isBoxingType(resType)) {
+      calcType = _correspondingPrimType(resType);
+    }
+    
     // Perform the operation
-    Object result = InterpreterUtilities.remainder
-      (NodeProperties.getType(node),
-       lhs,
-       node.getRightExpression().acceptVisitor(this));
+    Object result = InterpreterUtilities.remainder(calcType, lhs, rhs);
 
     // Cast the result
-    result = performCast(NodeProperties.getType(left), result);
+    result = performCast(calcType, result);
 
     // Modify the variable and return
     mod.modify(context, result);
@@ -1282,11 +1312,13 @@ public class EvaluationVisitor extends VisitorObject<Object> {
     if (node.hasProperty(NodeProperties.VALUE)) {
       // The expression is constant
       return node.getProperty(NodeProperties.VALUE);
-    } else {
+    } 
+    else {
       Boolean b = (Boolean)node.getConditionExpression().acceptVisitor(this);
       if (b.booleanValue()) {
         return node.getIfTrueExpression().acceptVisitor(this);
-      } else {
+      } 
+      else {
         return node.getIfFalseExpression().acceptVisitor(this);
       }
     }
@@ -1301,10 +1333,19 @@ public class EvaluationVisitor extends VisitorObject<Object> {
     LeftHandSideModifier mod = NodeProperties.getModifier(exp);
     Object v = mod.prepare(this, context);
 
-    mod.modify(context,
-               InterpreterUtilities.add(NodeProperties.getType(node),
-                                        v,
-                                        InterpreterUtilities.ONE));
+    Class resType = NodeProperties.getType(node);
+    Class calcType = resType; // always a primitive type
+    
+    // This code facilitates autoboxing/unboxing
+    if (_isBoxingType(resType)) {
+      calcType = _correspondingPrimType(resType);
+    }
+    
+    // Perform the operation
+    Object result = InterpreterUtilities.add(calcType, v, InterpreterUtilities.ONE);
+
+    // Cast the result
+    mod.modify(context, result);
     return v;
   }
 
@@ -1317,11 +1358,20 @@ public class EvaluationVisitor extends VisitorObject<Object> {
     LeftHandSideModifier mod = NodeProperties.getModifier(exp);
     Object v = mod.prepare(this, context);
 
-    mod.modify(context,
-               v = InterpreterUtilities.add(NodeProperties.getType(node),
-                                            v,
-                                            InterpreterUtilities.ONE));
-    return v;
+    Class resType = NodeProperties.getType(node);
+    Class calcType = resType; // always a primitive type
+    
+    // This code facilitates autoboxing/unboxing
+    if (_isBoxingType(resType)) {
+      calcType = _correspondingPrimType(resType);
+    }
+    
+    // Perform the operation
+    Object result = InterpreterUtilities.add(calcType, v, InterpreterUtilities.ONE);
+
+    // Cast the result
+    mod.modify(context, result);
+    return result;
   }
 
   /**
@@ -1333,10 +1383,19 @@ public class EvaluationVisitor extends VisitorObject<Object> {
     LeftHandSideModifier mod = NodeProperties.getModifier(exp);
     Object v = mod.prepare(this, context);
 
-    mod.modify(context,
-               InterpreterUtilities.subtract(NodeProperties.getType(node),
-                                             v,
-                                             InterpreterUtilities.ONE));
+    Class resType = NodeProperties.getType(node);
+    Class calcType = resType; // always a primitive type
+    
+    // This code facilitates autoboxing/unboxing
+    if (_isBoxingType(resType)) {
+      calcType = _correspondingPrimType(resType);
+    }
+    
+    // Perform the operation
+    Object result = InterpreterUtilities.subtract(calcType, v, InterpreterUtilities.ONE);
+
+    // Cast the result
+    mod.modify(context, result);
     return v;
   }
 
@@ -1349,11 +1408,20 @@ public class EvaluationVisitor extends VisitorObject<Object> {
     LeftHandSideModifier mod = NodeProperties.getModifier(exp);
     Object v = mod.prepare(this, context);
 
-    mod.modify(context,
-               v = InterpreterUtilities.subtract(NodeProperties.getType(node),
-                                                 v,
-                                                 InterpreterUtilities.ONE));
-    return v;
+    Class resType = NodeProperties.getType(node);
+    Class calcType = resType; // always a primitive type
+    
+    // This code facilitates autoboxing/unboxing
+    if (_isBoxingType(resType)) {
+      calcType = _correspondingPrimType(resType);
+    }
+    
+    // Perform the operation
+    Object result = InterpreterUtilities.subtract(calcType, v, InterpreterUtilities.ONE);
+
+    // Cast the result
+    mod.modify(context, result);
+    return result;
   }
 
   /**
@@ -1388,16 +1456,23 @@ public class EvaluationVisitor extends VisitorObject<Object> {
   public Object visit(BitAndAssignExpression node) {
     Node   left = node.getLeftExpression();
     LeftHandSideModifier mod = NodeProperties.getModifier(left);
-    Object lhs = mod.prepare(this, context);
 
+    Object lhs = mod.prepare(this, context);
+    Object rhs = node.getRightExpression().acceptVisitor(this);
+    Class resType = NodeProperties.getType(node);
+    Class calcType = resType; // always a primitive type
+    
+    // This code facilitates autoboxing/unboxing
+    if (_isBoxingType(resType)) {
+      calcType = _correspondingPrimType(resType);
+    }
+    
     // Perform the operation
-    Object result = InterpreterUtilities.bitAnd
-      (NodeProperties.getType(node),
-       lhs,
-       node.getRightExpression().acceptVisitor(this));
+    Object result = InterpreterUtilities.bitAnd(calcType, lhs,rhs);
 
     // Cast the result
-    result = performCast(NodeProperties.getType(left), result);
+    result = performCast(calcType, result);
+
 
     // Modify the variable and return
     NodeProperties.getModifier(left).modify(context, result);
@@ -1427,16 +1502,22 @@ public class EvaluationVisitor extends VisitorObject<Object> {
   public Object visit(ExclusiveOrAssignExpression node) {
     Node   left = node.getLeftExpression();
     LeftHandSideModifier mod = NodeProperties.getModifier(left);
-    Object lhs = mod.prepare(this, context);
 
+    Object lhs = mod.prepare(this, context);
+    Object rhs = node.getRightExpression().acceptVisitor(this);
+    Class resType = NodeProperties.getType(node);
+    Class calcType = resType; // always a primitive type
+    
+    // This code facilitates autoboxing/unboxing
+    if (_isBoxingType(resType)) {
+      calcType = _correspondingPrimType(resType);
+    }
+    
     // Perform the operation
-    Object result = InterpreterUtilities.xOr
-      (NodeProperties.getType(node),
-       lhs,
-       node.getRightExpression().acceptVisitor(this));
+    Object result = InterpreterUtilities.xOr(calcType, lhs,rhs);
 
     // Cast the result
-    result = performCast(NodeProperties.getType(left), result);
+    result = performCast(calcType, result);
 
     // Modify the variable and return
     mod.modify(context, result);
@@ -1466,16 +1547,22 @@ public class EvaluationVisitor extends VisitorObject<Object> {
   public Object visit(BitOrAssignExpression node) {
     Node   left = node.getLeftExpression();
     LeftHandSideModifier mod = NodeProperties.getModifier(left);
-    Object lhs = mod.prepare(this, context);
 
+    Object lhs = mod.prepare(this, context);
+    Object rhs = node.getRightExpression().acceptVisitor(this);
+    Class resType = NodeProperties.getType(node);
+    Class calcType = resType; // always a primitive type
+    
+    // This code facilitates autoboxing/unboxing
+    if (_isBoxingType(resType)) {
+      calcType = _correspondingPrimType(resType);
+    }
+    
     // Perform the operation
-    Object result = InterpreterUtilities.bitOr
-      (NodeProperties.getType(node),
-       lhs,
-       node.getRightExpression().acceptVisitor(this));
+    Object result = InterpreterUtilities.bitOr(calcType, lhs,rhs);
 
     // Cast the result
-    result = performCast(NodeProperties.getType(left), result);
+    result = performCast(calcType, result);
 
     // Modify the variable and return
     mod.modify(context, result);
@@ -1505,16 +1592,22 @@ public class EvaluationVisitor extends VisitorObject<Object> {
   public Object visit(ShiftLeftAssignExpression node) {
     Node   left = node.getLeftExpression();
     LeftHandSideModifier mod = NodeProperties.getModifier(left);
-    Object lhs = mod.prepare(this, context);
 
+    Object lhs = mod.prepare(this, context);
+    Object rhs = node.getRightExpression().acceptVisitor(this);
+    Class resType = NodeProperties.getType(node);
+    Class calcType = resType; // always a primitive type
+    
+    // This code facilitates autoboxing/unboxing
+    if (_isBoxingType(resType)) {
+      calcType = _correspondingPrimType(resType);
+    }
+    
     // Perform the operation
-    Object result = InterpreterUtilities.shiftLeft
-      (NodeProperties.getType(node),
-       lhs,
-       node.getRightExpression().acceptVisitor(this));
+    Object result = InterpreterUtilities.shiftLeft(calcType, lhs, rhs);
 
     // Cast the result
-    result = performCast(NodeProperties.getType(left), result);
+    result = performCast(calcType, result);
 
     // Modify the variable and return
     mod.modify(context, result);
@@ -1544,16 +1637,22 @@ public class EvaluationVisitor extends VisitorObject<Object> {
   public Object visit(ShiftRightAssignExpression node) {
     Node   left = node.getLeftExpression();
     LeftHandSideModifier mod = NodeProperties.getModifier(left);
-    Object lhs = mod.prepare(this, context);
 
+    Object lhs = mod.prepare(this, context);
+    Object rhs = node.getRightExpression().acceptVisitor(this);
+    Class resType = NodeProperties.getType(node);
+    Class calcType = resType; // always a primitive type
+    
+    // This code facilitates autoboxing/unboxing
+    if (_isBoxingType(resType)) {
+      calcType = _correspondingPrimType(resType);
+    }
+    
     // Perform the operation
-    Object result = InterpreterUtilities.shiftRight
-      (NodeProperties.getType(node),
-       lhs,
-       node.getRightExpression().acceptVisitor(this));
+    Object result = InterpreterUtilities.shiftRight(calcType, lhs, rhs);
 
     // Cast the result
-    result = performCast(NodeProperties.getType(left), result);
+    result = performCast(calcType, result);
 
     // Modify the variable and return
     mod.modify(context, result);
@@ -1583,16 +1682,22 @@ public class EvaluationVisitor extends VisitorObject<Object> {
   public Object visit(UnsignedShiftRightAssignExpression node) {
     Node   left = node.getLeftExpression();
     LeftHandSideModifier mod = NodeProperties.getModifier(left);
-    Object lhs = mod.prepare(this, context);
 
+    Object lhs = mod.prepare(this, context);
+    Object rhs = node.getRightExpression().acceptVisitor(this);
+    Class resType = NodeProperties.getType(node);
+    Class calcType = resType; // always a primitive type
+    
+    // This code facilitates autoboxing/unboxing
+    if (_isBoxingType(resType)) {
+      calcType = _correspondingPrimType(resType);
+    }
+    
     // Perform the operation
-    Object result = InterpreterUtilities.unsignedShiftRight
-      (NodeProperties.getType(node),
-       lhs,
-       node.getRightExpression().acceptVisitor(this));
+    Object result = InterpreterUtilities.unsignedShiftRight(calcType, lhs, rhs);
 
     // Cast the result
-    result = performCast(NodeProperties.getType(left), result);
+    result = performCast(calcType, result);
 
     // Modify the variable and return
     mod.modify(context, result);
@@ -1700,22 +1805,78 @@ public class EvaluationVisitor extends VisitorObject<Object> {
     if (tc != ec && tc.isPrimitive() && ec != null) {
       if (tc != char.class && ec == Character.class) {
         o = new Integer(((Character)o).charValue());
-      } else if (tc == byte.class) {
+      } 
+      else if (tc == byte.class) {
         o = new Byte(((Number)o).byteValue());
-      } else if (tc == short.class) {
+      } 
+      else if (tc == short.class) {
         o = new Short(((Number)o).shortValue());
-      } else if (tc == int.class) {
+      }
+      else if (tc == int.class) {
         o = new Integer(((Number)o).intValue());
-      } else if (tc == long.class) {
+      }
+      else if (tc == long.class) {
         o = new Long(((Number)o).longValue());
-      } else if (tc == float.class) {
+      }
+      else if (tc == float.class) {
         o = new Float(((Number)o).floatValue());
-      } else if (tc == double.class) {
+      }
+      else if (tc == double.class) {
         o = new Double(((Number)o).doubleValue());
-      } else if (tc == char.class && ec != Character.class) {
+      }
+      else if (tc == char.class && ec != Character.class) {
         o = new Character((char)((Number)o).shortValue());
       }
     }
     return o;
   }
+  
+  /**
+   * Returns the primitive type that corresponds to the given reference type.
+   * @param refType the reference type
+   * @return the corresponding primitive type
+   */
+  private static Class _correspondingPrimType(Class refType) {
+    if (refType == Boolean.class) {
+      return boolean.class;
+    }
+    else if (refType == Byte.class) {
+      return byte.class;
+    }
+    else if (refType == Character.class) {
+      return char.class;
+    }
+    else if (refType == Short.class) {
+      return short.class;
+    }
+    else if (refType == Integer.class) {
+      return int.class;
+    }
+    else if (refType == Long.class) {
+      return long.class;
+    }
+    else if (refType == Float.class) {
+      return float.class;
+    }
+    else if (refType == Double.class) {
+      return double.class;
+    }
+    else {
+      throw new RuntimeException("No corresponding primitive type for reference type " + 
+                                 refType + ".");
+    }
+  } // end method: _correspondingPrimType 
+  
+  /**
+   * Returns true iff the given class is a boxing (reference) type.
+   * @param c the <code>Class</code> to check
+   * @return true iff it is a boxing type
+   */
+  private static boolean _isBoxingType(Class c) {
+    return (c == Integer.class   || c == Long.class   ||
+            c == Boolean.class   || c == Double.class ||
+            c == Character.class || c == Short.class  ||
+            c == Byte.class      || c == Float.class );
+  }
+  
 }

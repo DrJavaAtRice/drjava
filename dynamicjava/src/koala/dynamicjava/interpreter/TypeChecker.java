@@ -947,15 +947,25 @@ return null;
    */
   public Class visit(ArrayAllocation node) {
     // Do the checking of the size expressions
-    Iterator it = node.getSizes().iterator();
+    ListIterator<Expression> it = node.getSizes().listIterator();
+    
     while (it.hasNext()) {
-      Class c = ((Node)it.next()).acceptVisitor(this);
+      Expression exp = it.next();
+      Class c = exp.acceptVisitor(this);
+      
       // Dimension expression must be of an integral type, but not long
-      if (c != byte.class && c != short.class && c != int.class) {
+      if (c != char.class      && c != byte.class && c != short.class && c != int.class &&
+          c != Character.class && c != Byte.class && c != Short.class && c != Integer.class) {
         throw new ExecutionError("array.dimension.type", node);
+      }
+      
+      // un-box the size of the array, if necessary
+      if (_isBoxingType(c)) {
+        it.set(_unbox(exp, c));
       }
     }
 
+    // Type-check the type of the array
     Class c = node.getCreationType().acceptVisitor(this);
 
     // Visits the initializer if one
@@ -964,8 +974,7 @@ return null;
     }
 
     // Set the type properties of this node
-    Class  ac = Array.newInstance(c, new int[node.getDimension()]).getClass();
-
+    Class ac = Array.newInstance(c, new int[node.getDimension()]).getClass();
     node.setProperty(NodeProperties.TYPE, ac);
     node.setProperty(NodeProperties.COMPONENT_TYPE, c);
     return ac;
@@ -990,6 +999,7 @@ return null;
     // Visits the expression on which this array access applies
     Class c = node.getExpression().acceptVisitor(this);
 
+    // Make sure this is an array
     if (!c.isArray()) {
       node.setProperty(NodeProperties.ERROR_STRINGS,
                        new String[] { c.getName() });
@@ -997,17 +1007,24 @@ return null;
     }
 
     // Sets the properties of this node
-    Class result;
-    node.setProperty(NodeProperties.TYPE, result = c.getComponentType());
+    Class result = c.getComponentType();
+    node.setProperty(NodeProperties.TYPE, result);
     node.setProperty(NodeProperties.MODIFIER, new ArrayModifier(node));
 
     // Visits the cell number expression
     c = node.getCellNumber().acceptVisitor(this);
 
     // The index must be of an integral type, but not a long
-    if (c != char.class && c != byte.class && c != short.class && c != int.class) {
+    if (c != char.class      && c != byte.class && c != short.class && c != int.class &&
+        c != Character.class && c != Byte.class && c != Short.class && c != Integer.class) {
       throw new ExecutionError("array.index.type", node);
     }
+    
+    // un-box the index into the array, if necessary
+    if (_isBoxingType(c)) {
+      node.setCellNumber(_unbox(node.getCellNumber(), c));
+    }
+    
     return result;
   }
 
@@ -1029,7 +1046,8 @@ return null;
     Class c = null;
     try {
       c = context.lookupClass(node.getRepresentation());
-    } catch (ClassNotFoundException e) {
+    } 
+    catch (ClassNotFoundException e) {
       node.setProperty(NodeProperties.ERROR_STRINGS,
                        new String[] { node.getRepresentation() });
       throw new ExecutionError("undefined.class", node);
@@ -1039,7 +1057,7 @@ return null;
   }
 
   /**
-   * Visits a ArrayType
+   * Visits an ArrayType
    * @param node the node to visit
    */
   public Class visit(ArrayType node) {
@@ -1217,10 +1235,14 @@ return null;
     Class lc = ln.acceptVisitor(this);
     Class rc = node.getRightExpression().acceptVisitor(this);
 
+    // Do some error checking for null, void, etc.
     if (lc != String.class) {
-      if (lc == null || rc == null ||
-          lc == void.class || rc == void.class ||
-          rc == boolean.class || !rc.isPrimitive()) {
+      if (lc == null          || rc == null          ||
+          lc == void.class    || rc == void.class    ||
+          lc == boolean.class || rc == boolean.class || 
+          lc == Boolean.class || rc == Boolean.class ||
+          !(lc.isPrimitive()  || _isBoxingType(lc))  || 
+          !(rc.isPrimitive()  || _isBoxingType(rc)) ) {
         throw new ExecutionError("addition.type", node);
       }
     }
@@ -1268,10 +1290,14 @@ return null;
     Class lc = ln.acceptVisitor(this);
     Class rc = node.getRightExpression().acceptVisitor(this);
 
+
+    // Do some error checking for null, void, etc.
     if (lc == null          || rc == null          ||
         lc == void.class    || rc == void.class    ||
         lc == boolean.class || rc == boolean.class ||
-        !lc.isPrimitive()   || !rc.isPrimitive()) {
+        lc == Boolean.class || rc == Boolean.class ||
+        !(lc.isPrimitive()  || _isBoxingType(lc))  || 
+        !(rc.isPrimitive()  || _isBoxingType(rc)) ) {
       throw new ExecutionError("subtraction.type", node);
     }
 
@@ -1318,10 +1344,13 @@ return null;
     Class lc = ln.acceptVisitor(this);
     Class rc = node.getRightExpression().acceptVisitor(this);
 
+    // Do some error checking for null, void, etc.
     if (lc == null          || rc == null          ||
         lc == void.class    || rc == void.class    ||
         lc == boolean.class || rc == boolean.class ||
-        !lc.isPrimitive()   || !rc.isPrimitive()) {
+        lc == Boolean.class || rc == Boolean.class ||
+        !(lc.isPrimitive()  || _isBoxingType(lc))  || 
+        !(rc.isPrimitive()  || _isBoxingType(rc)) ) {
       throw new ExecutionError("multiplication.type", node);
     }
 
@@ -1368,10 +1397,13 @@ return null;
     Class lc = ln.acceptVisitor(this);
     Class rc = node.getRightExpression().acceptVisitor(this);
 
+    // Do some error checking for null, void, etc.
     if (lc == null          || rc == null          ||
         lc == void.class    || rc == void.class    ||
         lc == boolean.class || rc == boolean.class ||
-        !lc.isPrimitive()   || !rc.isPrimitive()) {
+        lc == Boolean.class || rc == Boolean.class ||
+        !(lc.isPrimitive()  || _isBoxingType(lc))  || 
+        !(rc.isPrimitive()  || _isBoxingType(rc)) ) {
       throw new ExecutionError("division.type", node);
     }
 
@@ -1418,10 +1450,13 @@ return null;
     Class lc = ln.acceptVisitor(this);
     Class rc = node.getRightExpression().acceptVisitor(this);
 
+    // Do some error checking for null, void, etc.
     if (lc == null          || rc == null          ||
         lc == void.class    || rc == void.class    ||
         lc == boolean.class || rc == boolean.class ||
-        !lc.isPrimitive()   || !rc.isPrimitive()) {
+        lc == Boolean.class || rc == Boolean.class ||
+        !(lc.isPrimitive()  || _isBoxingType(lc))  || 
+        !(rc.isPrimitive()  || _isBoxingType(rc)) ) {
       throw new ExecutionError("remainder.type", node);
     }
 
@@ -1899,12 +1934,29 @@ return null;
     }
 
     // Determine the type of the expression
-    Node n1 = node.getIfTrueExpression();
-    Node n2 = node.getIfFalseExpression();
-    Class c1 = n1.acceptVisitor(this);
-    Class c2 = n2.acceptVisitor(this);
+    Expression exp1 = node.getIfTrueExpression();
+    Expression exp2 = node.getIfFalseExpression();
+    Class c1 = exp1.acceptVisitor(this);
+    Class c2 = exp2.acceptVisitor(this);
     Class ec = null;
 
+    // unbox a boxing type, except when the boxing type is 
+    // Boolean and the other is not boolean
+    if (_isBoxingType(c1) && c2.isPrimitive()) {
+      if (!(c1 == Boolean.class && c2 != boolean.class)) {
+        exp1 = _unbox(exp1, c1);
+        c1 = _correspondingPrimType(c1).getValue();
+        node.setIfTrueExpression(exp1);
+      }
+    }
+    else if (_isBoxingType(c2) && c1.isPrimitive()) {
+      if (!(c2 == Boolean.class && c1 != boolean.class)) {
+        exp2 = _unbox(exp2, c2);
+        c2 = _correspondingPrimType(c2).getValue();
+        node.setIfFalseExpression(exp2);
+      }
+    }
+    
     // See if the expression is typable
     if (c1 == c2) {
       ec = c1;
@@ -1923,20 +1975,54 @@ return null;
         ec = c2;
       }
       else {
+        // originally set to throw an error, this case now 
+        // simply returns Object, the lowest common type
+        ec = Object.class;
+      }
+    }
+    else if (c1 == void.class || c2 == void.class) {
+      throw new ExecutionError("incompatible.types", node);
+    }
+    else if (c1 == boolean.class || c2 == boolean.class ||
+             c1 == Boolean.class || c2 == Boolean.class) {
+      if ((c1 == boolean.class && c2.isPrimitive()) || 
+          (c2 == boolean.class && c1.isPrimitive())) {
+        // box both
+        node.setIfTrueExpression (_box(exp1, _correspondingRefType(c1)));
+        node.setIfFalseExpression(_box(exp2, _correspondingRefType(c2)));
+        ec = Object.class;
+      }
+      else if (c1 == Boolean.class && c2.isPrimitive()) {
+        // box c2
+        node.setIfFalseExpression(_box(exp2, _correspondingRefType(c2)));
+        ec = Object.class;
+      }
+      else if (c2 == Boolean.class && c1.isPrimitive()) {
+        // box c1
+        node.setIfTrueExpression(_box(exp1, _correspondingRefType(c1)));
+        ec = Object.class;
+      }
+      else if (c1 == boolean.class && _isBoxingType(c2)) {
+        // box c1
+        node.setIfTrueExpression(_box(exp1, Boolean.class));
+        ec = Object.class;
+      }
+      else if (c2 == boolean.class && _isBoxingType(c1)) {
+        // box c2
+        node.setIfFalseExpression(_box(exp2, Boolean.class));
+        ec = Object.class;
+      }
+      else {
         throw new ExecutionError("incompatible.types", node);
       }
-    } 
-    else if (c1 == boolean.class || c2 == boolean.class ||
-             c1 == void.class    || c2 == void.class) {
-      throw new ExecutionError("incompatible.types", node);
     }
     else if ((c1 == short.class && c2 == byte.class) ||
              (c1 == byte.class  && c2 == short.class)) {
       ec = short.class;
     }
     else if ((c2 == byte.class || c2 == short.class || c2 == char.class) &&
-             n1.hasProperty(NodeProperties.VALUE) && c1 == int.class) {
-      Number n = (Number) n1.getProperty(NodeProperties.VALUE);
+             exp1.hasProperty(NodeProperties.VALUE) && c1 == int.class) {
+      Number n = (Number) exp1.getProperty(NodeProperties.VALUE);
       if (c2 == byte.class) {
         if (n.intValue() == n.byteValue()) {
           ec = byte.class;
@@ -1953,8 +2039,8 @@ return null;
       }
     } 
     else if ((c1 == byte.class || c1 == short.class || c1 == char.class) &&
-               n2.hasProperty(NodeProperties.VALUE) && c2 == int.class) {
-      Number n = (Number)n2.getProperty(NodeProperties.VALUE);
+               exp2.hasProperty(NodeProperties.VALUE) && c2 == int.class) {
+      Number n = (Number)exp2.getProperty(NodeProperties.VALUE);
       if (c1 == byte.class) {
         if (n.intValue() == n.byteValue()) {
           ec = byte.class;
@@ -2014,9 +2100,10 @@ return null;
     Class c  = exp.acceptVisitor(this);
 
     // The type of the subexpression must be numeric
-    if (!c.isPrimitive()   ||
-        c == void.class    ||
-        c == boolean.class) {
+    if (!(c.isPrimitive() || _isBoxingType(c)) ||
+        c == void.class     ||
+        c == boolean.class  ||
+        c == Boolean.class) {
       throw new ExecutionError("post.increment.type", node);
     }
 
@@ -2038,9 +2125,10 @@ return null;
     Class c  = exp.acceptVisitor(this);
 
     // The type of the subexpression must be numeric
-    if (!c.isPrimitive()   ||
-        c == void.class    ||
-        c == boolean.class) {
+    if (!(c.isPrimitive() || _isBoxingType(c)) ||
+        c == void.class     ||
+        c == boolean.class  ||
+        c == Boolean.class) {
       throw new ExecutionError("pre.increment.type", node);
     }
 
@@ -2062,9 +2150,10 @@ return null;
     Class c  = exp.acceptVisitor(this);
 
     // The type of the subexpression must be numeric
-    if (!c.isPrimitive()   ||
-        c == void.class    ||
-        c == boolean.class) {
+    if (!(c.isPrimitive() || _isBoxingType(c)) ||
+        c == void.class     ||
+        c == boolean.class  ||
+        c == Boolean.class) {
       throw new ExecutionError("post.decrement.type", node);
     }
 
@@ -2086,9 +2175,10 @@ return null;
     Class c  = exp.acceptVisitor(this);
 
     // The type of the subexpression must be numeric
-    if (!c.isPrimitive()   ||
-        c == void.class    ||
-        c == boolean.class) {
+    if (!(c.isPrimitive() || _isBoxingType(c)) ||
+        c == void.class     ||
+        c == boolean.class  ||
+        c == Boolean.class) {
       throw new ExecutionError("pre.decrement.type", node);
     }
 
@@ -2214,7 +2304,6 @@ return null;
   
   /**
    * Checks the typing rules for an assignment
-   * !! This method has not yet been modified for boxing/unboxing !!
    * @param lc   the class of the left part of an assignment
    * @param rc   the class of the right part of an assignment
    * @param node the entire assignment node
@@ -2307,7 +2396,7 @@ return null;
       }
       else if (rc != null) {
         if (_boxesTo(rc, lc)) { 
-          return _box(v, rc);
+          return _box(v, lc);
         }
         if (!lc.isAssignableFrom(rc) && !rc.isAssignableFrom(lc)) {
           throw new ExecutionError("assignment.types", node);
@@ -2464,7 +2553,6 @@ return null;
 
   /**
    * Checks a bitwise expression
-   * !!! This method has not been modified for boxing/unboxing !!!
    */
   private Class visitBitwiseAssign(BinaryExpression node) {
     // Check the types
@@ -2472,12 +2560,14 @@ return null;
     Class lc = ln.acceptVisitor(this);
     Class rc = node.getRightExpression().acceptVisitor(this);
 
-    if (lc == null           || rc == null           ||
-        lc == void.class     || rc == void.class     ||
-        lc == float.class    || rc == float.class    ||
-        lc == double.class   || rc == double.class   ||
-        (lc == boolean.class ^ rc == boolean.class)  ||
-        !lc.isPrimitive()    || !rc.isPrimitive()) {
+    if (lc == null           || rc == null             ||
+        lc == void.class     || rc == void.class       ||
+        lc == float.class    || rc == float.class      ||
+        lc == double.class   || rc == double.class     ||
+        ((lc == boolean.class || lc == Boolean.class) ^ 
+         (rc == boolean.class || rc == Boolean.class)) ||
+        !(lc.isPrimitive() || _isBoxingType(lc))       || 
+        !(rc.isPrimitive() || _isBoxingType(rc))) {
       throw new ExecutionError("bitwise.expression.type", node);
     }
 
@@ -2518,8 +2608,7 @@ return null;
         lc == Double.class  || rc == Double.class  ||
         !(lc.isPrimitive()  || _isBoxingType(lc))  || 
         !(rc.isPrimitive()  || _isBoxingType(rc)) ) {
-      throw new RuntimeException("lc: " + lc + ", rc: " + rc);
-//      throw new ExecutionError("shift.expression.type", node);
+      throw new ExecutionError("shift.expression.type", node);
     } 
     
     // Auto-unbox, if necessary
@@ -2541,54 +2630,74 @@ return null;
 
   /**
    * Checks the typing rules in a cast expression
-   * !! This method has not yet been modified for boxing/unboxing !!
    * @param tc the target class
    * @param ec the expression class
+   * @param castExp the entire cast expression that is being type-checked
    */
-  private static void checkCastStaticRules(Class tc, Class ec, Node n) {
+  private static void checkCastStaticRules(Class tc, Class ec, CastExpression castExp) {
     if (tc != ec) {
       if (tc.isPrimitive()) {
-        if (tc == null || !ec.isPrimitive() ||
-            ec == boolean.class || ec == void.class) {
-          throw new ExecutionError("cast", n);
+        boolean isBoxingType = _isBoxingType(ec);
+        if (ec == null          || 
+            ec == boolean.class || 
+            (tc == boolean.class && ec != Boolean.class) ||
+            !(ec.isPrimitive()  || isBoxingType) ||
+            ec == void.class) {
+          throw new ExecutionError("cast", castExp);
         }
-      } else if (ec != null) {
+        
+        if (isBoxingType) {
+          castExp.setExpression(_unbox(castExp.getExpression(), ec));
+        }        
+      } 
+      else if (ec != null) {
         if (ec.isArray()) {
           if (tc.isArray()) {
             Class tec = tc.getComponentType();
             Class eec = ec.getComponentType();
             if (tec.isPrimitive() && eec.isPrimitive()) {
               if (tec != eec) {
-                throw new ExecutionError("cast", n);
+                throw new ExecutionError("cast", castExp);
               }
-            } else {
-              checkCastStaticRules(tec, eec, n);
+            } 
+            else {
+              checkCastStaticRules(tec, eec, castExp);
             }
-          } else if (tc.isInterface() && tc != Cloneable.class) {
-            throw new ExecutionError("cast", n);
-          } else if (tc != Object.class) {
-            throw new ExecutionError("cast", n);
+          } 
+          else if (tc.isInterface() && tc != Cloneable.class) {
+            throw new ExecutionError("cast", castExp);
           }
-        } else if (ec.isInterface()) {
+          else if (tc != Object.class) {
+            throw new ExecutionError("cast", castExp);
+          }
+        }
+        else if (ec.isInterface()) {
           if (tc.isInterface()) {
             // !!! TODO : tests the signatures ?
-          } else if (tc.isArray()) {
+          } 
+          else if (tc.isArray()) {
             if (!Cloneable.class.isAssignableFrom(ec)) {
-              throw new ExecutionError("cast", n);
+              throw new ExecutionError("cast", castExp);
             }
-          } else if (Modifier.isFinal(tc.getModifiers())) {
+          } 
+          else if (Modifier.isFinal(tc.getModifiers())) {
             if (!tc.isAssignableFrom(ec)) {
-              throw new ExecutionError("cast", n);
+              throw new ExecutionError("cast", castExp);
             }
           }
-        } else if (tc.isInterface()) {
+        } 
+        else if (tc.isInterface()) {
           if (Modifier.isFinal(tc.getModifiers())) {
             if (!tc.isAssignableFrom(ec)) {
-              throw new ExecutionError("cast", n);
+              throw new ExecutionError("cast", castExp);
             }
           }
-        } else if (!ec.isAssignableFrom(tc) && !tc.isAssignableFrom(ec)) {
-          throw new ExecutionError("cast", n);
+        }
+        else if (ec.isPrimitive() && _isBoxingType(tc) && ec != boolean.class) {
+          castExp.setExpression(_box(castExp.getExpression(), tc));
+        }
+        else if (!ec.isAssignableFrom(tc) && !tc.isAssignableFrom(ec)) {
+          throw new ExecutionError("cast", castExp);
         }
       }
     }
@@ -2636,14 +2745,104 @@ return null;
   
   private static boolean _boxesTo(Class prim, Class ref) {
     return 
-      (prim == int.class     && ref == Integer.class)   ||
-      (prim == long.class    && ref == Long.class)      ||
-      (prim == byte.class    && ref == Byte.class)      ||
-      (prim == char.class    && ref == Character.class) ||
-      (prim == short.class   && ref == Short.class)     ||
+      (prim == int.class     && (ref == Integer.class   || 
+                                 ref == Long.class      || 
+                                 ref == Double.class    || 
+                                 ref == Float.class))   ||
+      (prim == long.class    && (ref == Long.class      || 
+                                 ref == Double.class    || 
+                                 ref == Float.class))   ||
+      (prim == byte.class    && (ref == Byte.class      || 
+                                 ref == Short.class     || 
+                                 ref == Integer.class   || 
+                                 ref == Long.class      || 
+                                 ref == Double.class    || 
+                                 ref == Float.class))   ||
+      (prim == char.class    && (ref == Character.class || 
+                                 ref == Integer.class   || 
+                                 ref == Long.class      || 
+                                 ref == Double.class    || 
+                                 ref == Float.class))   ||
+      (prim == short.class   && (ref == Short.class     || 
+                                 ref == Integer.class   || 
+                                 ref == Long.class      || 
+                                 ref == Double.class    || 
+                                 ref == Float.class))   ||
       (prim == boolean.class && ref == Boolean.class)   ||
-      (prim == float.class   && ref == Float.class)     ||
+      (prim == float.class   && (ref == Float.class     || 
+                                 ref == Double.class))  ||
       (prim == double.class  && ref == Double.class);
+  }
+    
+  /**
+   * Returns the reference type that corresponds to the given primitive type.
+   * @param primType the primitive type
+   * @return the corresponding reference type
+   */
+  private static Class _correspondingRefType(Class primType) {
+    if (primType == boolean.class) {
+      return Boolean.class;
+    }
+    else if (primType == byte.class) {
+      return Byte.class;
+    }
+    else if (primType == char.class) {
+      return Character.class;
+    }
+    else if (primType == short.class) {
+      return Short.class;
+    }
+    else if (primType == int.class) {
+      return Integer.class;
+    }
+    else if (primType == long.class) {
+      return Long.class;
+    }
+    else if (primType == float.class) {
+      return Float.class;
+    }
+    else if (primType == double.class) {
+      return Double.class;
+    }
+    else {
+      throw new RuntimeException("No corresponding reference type for primitive type " + 
+                                 primType + ".");
+    }
+  }
+  /**
+   * Returns the primitive type that corresponds to the given reference type.
+   * @param refType the reference type
+   * @return the corresponding primitive type
+   */
+  private static PrimitiveType _correspondingPrimType(Class refType) {
+    if (refType == Boolean.class) {
+      return new BooleanType();
+    }
+    else if (refType == Byte.class) {
+      return new ByteType();
+    }
+    else if (refType == Character.class) {
+      return new CharType();
+    }
+    else if (refType == Short.class) {
+      return new ShortType();
+    }
+    else if (refType == Integer.class) {
+      return new IntType();
+    }
+    else if (refType == Long.class) {
+      return new LongType();
+    }
+    else if (refType == Float.class) {
+      return new FloatType();
+    }
+    else if (refType == Double.class) {
+      return new DoubleType();
+    }
+    else {
+      throw new RuntimeException("No corresponding primitive type for reference type " + 
+                                 refType + ".");
+    }
   }
   
   /**
@@ -2651,64 +2850,36 @@ return null;
    * <code>SimpleAllocation</code> corresponding to the given
    * primitive type.
    * @param exp the expression to box
-   * @param primType the type of the primitive expression that is to be boxed
+   * @param refType the reference type to box the primitive type to
    * @return the <code>SimpleAllocation</code> that boxes the expression
    */
-  private static SimpleAllocation _box(Expression exp, Class primType) {
-    String refTypeName = "";
-    Class refType = null;
-    
-    if (primType == boolean.class) {
-      refTypeName = "Boolean";
-      refType = Boolean.class;
-    }
-    else if (primType == byte.class) {
-      refTypeName = "Byte";
-      refType = Byte.class;
-    }
-    else if (primType == char.class) {
-      refTypeName = "Character";
-      refType = Character.class;
-    }
-    else if (primType == short.class) {
-      refTypeName = "Short";
-      refType = Short.class;
-    }
-    else if (primType == int.class) {
-      refTypeName = "Integer";
-      refType = Integer.class;
-    }
-    else if (primType == long.class) {
-      refTypeName = "Long";
-      refType = Long.class;
-    }
-    else if (primType == float.class) {
-      refTypeName = "Float";
-      refType = Float.class;
-    }
-    else if (primType == double.class) {
-      refTypeName = "Double";
-      refType = Double.class;
-    }
-    else {
-      throw new ExecutionError("box.type", exp);
-    }
+  private static SimpleAllocation _box(Expression exp, Class refType) {
+    String refTypeName = refType.getName();
+    PrimitiveType primType = _correspondingPrimType(refType);
     
     Constructor constructor;
     try {
-      constructor = refType.getConstructor(new Class[] {primType});
+      constructor = refType.getConstructor(new Class[] { primType.getValue() });
     }
     catch (NoSuchMethodException nsme) {
       throw new RuntimeException("The constructor for " + refTypeName + " not found.");
     }
+    
     ReferenceType ref = new ReferenceType(refTypeName,
                                           exp.getFilename(),
                                           exp.getBeginLine(),
                                           exp.getBeginColumn(),
                                           exp.getEndLine(),
                                           exp.getEndColumn());
+    CastExpression castExp = new CastExpression(primType, exp, 
+                                                exp.getFilename(),
+                                                exp.getBeginLine(),
+                                                exp.getBeginColumn(),
+                                                exp.getEndLine(),
+                                                exp.getEndColumn());
+    castExp.setProperty(NodeProperties.TYPE, primType.getValue());
     List<Expression> args = new LinkedList<Expression>();
-    args.add(exp);
+    args.add(castExp);
     SimpleAllocation alloc = new SimpleAllocation(ref, args,
                                                   exp.getFilename(),
                                                   exp.getBeginLine(),

@@ -419,7 +419,8 @@ public class NameVisitor extends VisitorObject<Node> {
     
     if (node.isFinal()) {
       context.defineConstant(s, null);
-    } else {
+    } 
+    else {
       context.define(s, null);
     }
     
