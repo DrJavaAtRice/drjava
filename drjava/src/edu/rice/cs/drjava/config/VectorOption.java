@@ -93,6 +93,7 @@ public class VectorOption<T> extends Option<Vector<T>> {
    * according to the method Vector<T>.toString().
    */
   public Vector<T> parse(String s) {  
+    s= s.trim();
     int startFirstElement = header.length();
     int startFooter = s.length() - footer.length(); 
     

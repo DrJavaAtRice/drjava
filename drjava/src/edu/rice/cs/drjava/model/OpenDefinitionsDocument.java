@@ -45,6 +45,7 @@ import javax.swing.text.BadLocationException;
 import junit.framework.TestResult;
 
 import edu.rice.cs.util.swing.FindReplaceMachine;
+import edu.rice.cs.drjava.model.debug.Breakpoint;
 import edu.rice.cs.drjava.model.junit.*;
 import edu.rice.cs.drjava.model.definitions.*;
 import edu.rice.cs.drjava.model.compiler.CompilerErrorModel;
@@ -247,4 +248,23 @@ public interface OpenDefinitionsDocument {
 
   public void cleanUpPrintJob();
 
+  /**
+   * Returns the Breakpoint in this OpenDefinitionsDocument at the given 
+   * linenumber, or null if one does not exist.
+   * @param lineNumber the line number of the breakpoint
+   * @return the Breakpoint at the given lineNumber, or null if it does not exist.
+   */
+  public Breakpoint getBreakpointAt( int lineNumber);
+  
+  /**
+   * Add the supplied Breakpoint to the hashtable, keyed by its BreakpointRequest
+   * @param breakpoint the Breakpoint to be inserted into the hashtable
+   */
+  public void addBreakpoint( Breakpoint breakpoint);
+  
+  /**
+   * Remove the given Breakpoint from the hashtable.
+   * @param breakpoint the Breakpoint to be removed.
+   */
+  public void removeBreakpoint( Breakpoint breakpoint);
 }

@@ -40,7 +40,12 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.model.debug;
 
 import java.io.*;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+//import java.util.Iterator;
+
+import gj.util.Enumeration;
+import gj.util.Hashtable;
 
 // DrJava stuff
 import edu.rice.cs.drjava.DrJava;
@@ -90,12 +95,17 @@ public class DebugManager {
   /**
    * VirtualMachine of the interactions JVM.
    */
-  private VirtualMachine _vm = null;
+  private VirtualMachine _vm;
   
   /**
    * Manages all event requests in JDI.
    */
-  private EventRequestManager _eventManager = null;
+  private EventRequestManager _eventManager;
+  
+  /**
+   * Maps BreakpointRequests to their container Breakpoints
+   */
+  private Hashtable<BreakpointRequest,Breakpoint> _breakpoints;
   
   /**
    * Writer to use for output messages.
@@ -103,7 +113,7 @@ public class DebugManager {
   //private Writer _logwriter;
   
   /**
-   * Builds a new DebugManager which interfaces to JSwat.
+   * Builds a newset DebugManager which interfaces to JSwat.
    * Does not instantiate JSwat until init is called.
    */
   public DebugManager(GlobalModel model) throws DebugException {
@@ -111,6 +121,9 @@ public class DebugManager {
     //session = null;
     //_swat = null;
     _model = model;
+    _vm = null;
+    _eventManager = null;
+    _breakpoints = new Hashtable<BreakpointRequest, Breakpoint>();
     //_logwriter = new PrintWriter(DrJava.consoleOut());
   }
   
@@ -118,7 +131,7 @@ public class DebugManager {
     VirtualMachineManager vmm = Bootstrap.virtualMachineManager();
     List connectors = vmm.attachingConnectors();
     AttachingConnector connector = null;
-    Iterator iter = connectors.iterator();
+    java.util.Iterator iter = connectors.iterator();
     while (iter.hasNext()) {
       AttachingConnector conn = (AttachingConnector)iter.next();
       if (conn.name().equals("com.sun.jdi.SocketAttach")) {
@@ -164,12 +177,23 @@ public class DebugManager {
   public void shutdown() {
     if (isReady()) {
       try {
-        _vm.dispose();
+      _vm.dispose();
       }
       catch (VMDisconnectedException vmde) {
+        //VM was shutdown prematurely
       }
       finally {
         _vm = null;
+        _eventManager = null;
+        //remove all remaining breakpoints
+        Enumeration<Breakpoint> breakpoints = _breakpoints.elements();
+        
+        while (breakpoints.hasMoreElements()) {
+          Breakpoint bp = breakpoints.nextElement();
+          bp.getDocument().removeBreakpoint(bp);
+        }
+        _breakpoints.clear();
+        
       }
     }
   }
@@ -330,40 +354,15 @@ public class DebugManager {
   public void toggleBreakpoint(OpenDefinitionsDocument doc, int lineNumber)
     throws IOException, ClassNotFoundException, DebugException {  
     
-    /**
-    BreakpointManager bpManager = (BreakpointManager)_session.getManager(BreakpointManager.class);
-
-    _model.saveAllBeforeProceeding(GlobalModelListener.DEBUG_REASON);
-
-    if (_model.areAnyModifiedSinceSave()) return; // they cancelled the save.
-
-    String className = mapClassName(doc);
-    if (className == null) {
-      throw new ClassNotFoundException();
+    Breakpoint breakpoint = doc.getBreakpointAt(lineNumber);
+        
+    if (breakpoint != null) {
+      removeBreakpoint( breakpoint);
     }
-
-    Iterator i = bpManager.breakpoints(true);
-    Object o;
-    ResolvableBreakpoint rbp;
-    ReferenceTypeSpec rts;
+    else {
+      setBreakpoint(doc, lineNumber);
+    }
     
-    while (i.hasNext()) {
-      o = i.next();
-      if (o instanceof ResolvableBreakpoint) {
-        rbp = (ResolvableBreakpoint)o;
-        rts = rbp.getReferenceTypeSpec();
-        if (rts.matches(className) &&
-            rbp instanceof LineBreakpoint &&
-            ((LineBreakpoint)(rbp)).getLineNumber() == lineNumber) {
-          // FOUND IT!
-          removeBreakpoint((LineBreakpoint)rbp, className);
-          return;
-        }
-      }
-    }
-
-    setBreakpoint(className, lineNumber);
-    */
   }
 
   /**
@@ -383,66 +382,17 @@ public class DebugManager {
    *
    * @param className the name of the class in which to break
    * @param lineNumber the line number at which to break
-   * @return Whether the breakpoint was successfully set
    */
-  public boolean setBreakpoint(OpenDefinitionsDocument doc, int lineNumber)
+  public void setBreakpoint(OpenDefinitionsDocument doc, int lineNumber)
     throws DebugException
   {
-    String packageName = "";
-    try {
-      doc.getDocument().getPackageName();
-    }
-    catch (InvalidPackageException e) {
-      // Couldn't find package, pretend there's none
-    }
-    String className = packageName + doc.getClassName();
-    //System.out.println("Setting breakpoint in class: " + className + 
-    //                   ", line: " + lineNumber);
+
+    Breakpoint breakpoint = new Breakpoint (doc, lineNumber, _vm);
+
+    System.out.println(breakpoint);
     
-    // Get all classes that match this name
-    List classes = _vm.classesByName(className);
-    //System.out.println("Num of classes found: " + classes.size());
-    ReferenceType rt = null;
-    Iterator it = classes.iterator();
-    // Assume first one is correct, for now
-    if (it.hasNext()) {
-      rt = (ReferenceType) it.next();
-    }
-    if (rt == null) {
-      //System.out.println("No reference type found");
-      return false;
-    }
-    
-    // Get locations for the line number, use the first
-    try {
-      List lines = rt.locationsOfLine(lineNumber);
-      if (lines.size() == 0) {
-        // Can't find a location on this line
-        //System.out.println("No locations found.");
-        return false;
-      }
-      Location loc = (Location) lines.get(0);
-      BreakpointRequest req = _eventManager.createBreakpointRequest(loc);
-      req.setSuspendPolicy(EventRequest.SUSPEND_EVENT_THREAD);
-      req.enable();
-      //System.out.println("Breakpoint: " + req);
-      return true;
-    }
-    catch (AbsentInformationException aie) {
-      throw new DebugException("Could not find line number: " + aie);
-    }
-    
-    /**
-    BreakpointManager bpManager = (BreakpointManager)_session.getManager(BreakpointManager.class);
-    try {
-      bpManager.createBreakpoint(className, lineNumber);
-    } catch (ResolveException re) {
-      throw new DebugException(re.toString());
-    } catch (ClassNotFoundException cnfe) {
-      throw new DebugException(cnfe.toString());
-    }
-    writeToLog("Breakpoint added: " + className + ":" + lineNumber + "\n");
-    */
+    _breakpoints.put(breakpoint.getRequest(), breakpoint);
+    doc.addBreakpoint(breakpoint);
   }
 
  /**
@@ -453,12 +403,12 @@ public class DebugManager {
   *
   * @param bp The breakpoint to remove.
   * @param className the name of the class the BP is being removed from.
-  *
-  protected void removeBreakpoint(LineBreakpoint bp, String className) {
-    BreakpointManager bpManager = (BreakpointManager)_session.getManager(BreakpointManager.class);    
-    bpManager.removeBreakpoint(bp);
-    writeToLog("Breakpoint removed: " + className + ":" + bp.getLineNumber() + "\n");
-  }*/
+  */
+  public void removeBreakpoint(Breakpoint breakpoint) {
+    _breakpoints.remove(breakpoint.getRequest());
+    breakpoint.getDocument().removeBreakpoint(breakpoint);
+    _eventManager.deleteEventRequest(breakpoint.getRequest());
+  }
 
   /**
    * Prints all location breakpoints via writeToLog().
@@ -681,4 +631,13 @@ public class DebugManager {
       notifyAll();
     }*/
   //}
+  
+  
+  public void hitBreakpoint(BreakpointRequest request) {
+    Breakpoint breakpoint = _breakpoints.get(request);
+    System.out.println("Encountered a breakpoint at line "+ 
+                       breakpoint.getLineNumber() +
+                       " in file " + breakpoint.getClassName());
+  }
+  
 }

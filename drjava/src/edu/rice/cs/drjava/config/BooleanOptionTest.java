@@ -68,11 +68,12 @@
      
      assertEquals(Boolean.TRUE, bo.parse("true"));
      assertEquals(Boolean.FALSE, bo.parse("false"));
+     assertEquals(Boolean.FALSE, bo.parse(" faLse "));
      
      try { bo.parse("3"); fail(); }
      catch (OptionParseException e) {}
      
-     try { bo.parse("True"); fail(); }
+     try { bo.parse("Tue"); fail(); }
      catch (OptionParseException e) {}
    }
    

@@ -85,6 +85,7 @@ public class EventHandler extends Thread {
   }
   
   public void handleEvent(Event e) {
+    System.out.println("handleEvent: "+e);
     if (e instanceof BreakpointEvent) {
       _handleBreakpointEvent((BreakpointEvent) e);
     }
@@ -100,6 +101,7 @@ public class EventHandler extends Thread {
   
   private void _handleBreakpointEvent(BreakpointEvent e) {
     System.out.println("Breakpoint reached");
+    _debugManager.hitBreakpoint((BreakpointRequest)e.request());
     //((LocatableEvent) e).thread().suspend();
   }
   

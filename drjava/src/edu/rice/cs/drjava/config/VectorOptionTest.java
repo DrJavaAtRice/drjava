@@ -120,10 +120,6 @@ public class VectorOptionTest extends TestCase {
       _bvo.parse("[11]"); fail("Number instead of boolean.");
     } catch (OptionParseException e) {
     }
-    try {
-      _bvo.parse("[True]"); fail("Boolean String needs to be lowercase.");
-    } catch (OptionParseException e) {
-    }
   }
   
   public void testFormat() {

@@ -59,6 +59,7 @@ public class BooleanOption extends Option<Boolean>
    */
   public Boolean parse(String s) 
   { 
+    s= s.trim().toLowerCase();
     if (s.equals("true")) {
       return Boolean.TRUE;
     }
@@ -67,8 +68,8 @@ public class BooleanOption extends Option<Boolean>
     }
     else {
       throw new OptionParseException(name, s,
-                                     "Must be a lowercase String " +
-                                     "representing a boolean value.");
+                                     "Must be a String representing" +
+                                     "a boolean value.");
     }
   }
 }

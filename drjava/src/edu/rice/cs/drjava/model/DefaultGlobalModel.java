@@ -62,6 +62,7 @@ import edu.rice.cs.util.swing.FindReplaceMachine;
 
 import gj.util.Vector;
 import gj.util.Enumeration;
+import gj.util.Hashtable;
 import edu.rice.cs.util.*;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.CodeStatus;
@@ -1152,7 +1153,8 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
     private CompilerErrorModel _errorModel;
     private JUnitErrorModel _junitErrorModel;
     private DrJavaBook _book;
-
+    private Hashtable<Integer,Breakpoint> _breakpoints;
+    
     /**
      * Constructor.  Initializes this handler's document.
      * @param doc DefinitionsDocument to manage
@@ -1161,6 +1163,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
       _doc = doc;
       _errorModel = new CompilerErrorModel();
       _junitErrorModel = new JUnitErrorModel();
+      _breakpoints = new Hashtable<Integer, Breakpoint>();
     }
 
     /**
@@ -1747,6 +1750,32 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
         //}
     }
 
+    /**
+     * Returns the Breakpoint in this OpenDefinitionsDocument at the given 
+     * linenumber, or null if one does not exist.
+     * @param lineNumber the line number of the breakpoint
+     * @return the Breakpoint at the given lineNumber, or null if it does not exist.
+     */
+    public Breakpoint getBreakpointAt( int lineNumber) {
+      return _breakpoints.get(new Integer(lineNumber));
+    }
+    
+    /**
+     * Add the supplied Breakpoint to the hashtable, keyed by its BreakpointRequest
+     * @param breakpoint the Breakpoint to be inserted into the hashtable
+     */
+    public void addBreakpoint( Breakpoint breakpoint) {
+     _breakpoints.put( new Integer(breakpoint.getLineNumber()), breakpoint); 
+    }
+    
+    /**
+     * Remove the given Breakpoint from the hashtable.
+     * @param breakpoint the Breakpoint to be removed.
+     */
+    public void removeBreakpoint( Breakpoint breakpoint) {
+      _breakpoints.remove( new Integer(breakpoint.getLineNumber())); 
+    }
+    
     /**
      * Finds the root directory of the source files.
      * @return The root directory of the source files,
