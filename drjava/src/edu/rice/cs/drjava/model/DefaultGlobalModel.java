@@ -1265,58 +1265,58 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
     public boolean isModifiedOnDisk() {
       return _doc.isModifiedOnDisk();
     }
-
-		/** Determines if the defintions document has been changed
-		 *  by an outside program. If the document has changed,
-		 *  then asks the listeners if the GlobalModel should 
+    
+    /** Determines if the defintions document has been changed
+     *  by an outside program. If the document has changed,
+     *  then asks the listeners if the GlobalModel should 
      *  revert the document to the most recent version saved.
-		 *  @return true if document has been reverted
-		 */
-		public boolean revertIfModifiedOnDisk() throws IOException{
-			final OpenDefinitionsDocument doc = this;
-			if (isModifiedOnDisk()) {
-				
-				boolean shouldRevert = pollListeners(new EventPoller() {
-          public boolean poll(GlobalModelListener l) {
-						return l.shouldRevertFile(doc);
+     *  @return true if document has been reverted
+     */
+    public boolean revertIfModifiedOnDisk() throws IOException{
+      final OpenDefinitionsDocument doc = this;
+      if (isModifiedOnDisk()) {
+        
+        boolean shouldRevert = pollListeners(new EventPoller() {
+            public boolean poll(GlobalModelListener l) {
+              return l.shouldRevertFile(doc);
+            }
+          });
+        if (shouldRevert) { 
+          doc.revertFile();
         }
-        });
-				if (shouldRevert) { 
-						doc.revertFile();
-				}
-				return shouldRevert;
-			} else {
-				return false;
-			}
+        return shouldRevert;
+      } else {
+        return false;
+      }
     }
     public void revertFile() throws IOException {
-			final OpenDefinitionsDocument doc = this;
-
-		try {
-				File file = doc.getFile();
-				DefinitionsDocument tempDoc = doc.getDocument();
-
-				tempDoc.remove(0,tempDoc.getLength());
-
-				FileReader reader = new FileReader(file);
-				_editorKit.read(reader, tempDoc, 0);
-				reader.close(); // win32 needs readers closed explicitly!
-
-				tempDoc.resetModification();
-				syncCurrentLocationWithDefinitions(0);
-
-    notifyListeners(new EventNotifier() {
-        public void notifyListener(GlobalModelListener l) {
-        l.fileReverted(doc);
+      final OpenDefinitionsDocument doc = this;
+      
+      try {
+        File file = doc.getFile();
+        DefinitionsDocument tempDoc = doc.getDocument();
+        
+        tempDoc.remove(0,tempDoc.getLength());
+        
+        FileReader reader = new FileReader(file);
+        _editorKit.read(reader, tempDoc, 0);
+        reader.close(); // win32 needs readers closed explicitly!
+        
+        tempDoc.resetModification();
+        syncCurrentLocationWithDefinitions(0);
+        
+        notifyListeners(new EventNotifier() {
+            public void notifyListener(GlobalModelListener l) {
+              l.fileReverted(doc);
+            }
+          });
+      } catch (IllegalStateException docFailed) {
+        //cant revert file if doc has no file
+        throw new UnexpectedException(docFailed);
+      } catch (BadLocationException docFailed) {
+        throw new UnexpectedException(docFailed);
       }
-      });
-		} catch (IllegalStateException docFailed) {
-				//cant revert file if doc has no file
-				throw new UnexpectedException(docFailed);
-		} catch (BadLocationException docFailed) {
-				throw new UnexpectedException(docFailed);
     }
-}
     /**
      * Asks the listeners if the GlobalModel can abandon the current document.
      * Fires the canAbandonFile(File) event if isModifiedSinceSave() is true.

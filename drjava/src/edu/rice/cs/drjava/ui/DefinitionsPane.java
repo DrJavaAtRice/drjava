@@ -408,20 +408,31 @@ public class DefinitionsPane extends JEditorPane
     //DrJava.consoleErr().println("Reset doc: " + doc);
     super.setDocument(doc.getDocument());
 
-    if (_undoAction == null) {
-      _undoAction = new UndoAction();
-    }
-    if (_redoAction == null) {
-      _redoAction = new RedoAction();
-    }
     _resetUndo();
   }
 
   /**
    * Reset the document Undo list.
    */
+  public void resetUndo() {
+    _undoManager.discardAllEdits();
+
+    _undoAction.updateUndoState();
+    _redoAction.updateRedoState();
+  }
+
+  /**
+   * Reset the document Undo list.
+   */
   private void _resetUndo() {
+    if (_undoAction == null) {
+      _undoAction = new UndoAction();
+    }
+    if (_redoAction == null) {
+      _redoAction = new RedoAction();
+    }
     _undoManager = new UndoManager();
+
     getDocument().addUndoableEditListener(_undoListener);
     _undoAction.updateUndoState();
     _redoAction.updateRedoState();

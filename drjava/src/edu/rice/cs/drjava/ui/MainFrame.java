@@ -843,6 +843,7 @@ public class MainFrame extends JFrame {
   private void _revert() {
     try {
       _model.getActiveDocument().revertFile();
+      _currentDefPane.resetUndo();
     }
     catch (IOException ioe) {
       _showIOError(ioe);
