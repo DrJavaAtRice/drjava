@@ -460,8 +460,8 @@ public class DynamicJavaAdapter implements JavaInterpreter {
     {
       try {
         SourceCodeParser p = parserFactory.createParser(r, fname);
-        List    statements = p.parseStream();
-        ListIterator    it = statements.listIterator();
+        List<Node>   statements = p.parseStream();
+        ListIterator<Node>   it = statements.listIterator();
         Object result = JavaInterpreter.NO_RESULT;
 
         while (it.hasNext()) {
@@ -470,20 +470,18 @@ public class DynamicJavaAdapter implements JavaInterpreter {
           // Process, if necessary
           n = processTree(n);
           
-          Visitor v = makeNameVisitor(nameVisitorContext, checkVisitorContext);
-          Object o = n.acceptVisitor(v);
-          if (o != null) {
-            n = (Node)o;
-          }
+          NameVisitor nv = makeNameVisitor(nameVisitorContext, checkVisitorContext);
+          Node o = n.acceptVisitor(nv);
+          if (o != null) n = o;
 
-          v = makeTypeChecker(checkVisitorContext);
-          n.acceptVisitor(v);
+          TypeChecker tc = makeTypeChecker(checkVisitorContext);
+          n.acceptVisitor(tc);
 
           evalVisitorContext.defineVariables
             (checkVisitorContext.getCurrentScopeVariables());
 
-          v = makeEvaluationVisitor(evalVisitorContext);
-          result = n.acceptVisitor(v);
+          EvaluationVisitor ev = makeEvaluationVisitor(evalVisitorContext);
+          result = n.acceptVisitor(ev);
         }
         
         if (result instanceof String) {
