@@ -142,7 +142,7 @@ public class FileSelectorComponent extends JPanel {
     });
     _fileField.addFocusListener(new FocusListener() {
       public void focusGained(FocusEvent e) {
-        validateTextField();
+//        validateTextField();
       }
       public void focusLost(FocusEvent e) {
         validateTextField();
@@ -265,16 +265,16 @@ public class FileSelectorComponent extends JPanel {
   // used so that the focus listener and the action listener do not
   // both validate the incorrect text.  This ensures that only the first
   // one gets it.
-  private boolean _validationInProgress = false;
+//  private boolean _validationInProgress = false;
   
   /**
    *  The chooser method for the validation of filenames that are manually entered
    *  into the text field.
    *  @return False, if file does not exist. True, otherwise.
    */
-  public boolean validateTextField() {
-    if (_validationInProgress) return true;
-    _validationInProgress = true;
+  public synchronized boolean validateTextField() {
+//    if (_validationInProgress) return true;
+//    _validationInProgress = true;
     
     String newValue = _fileField.getText().trim();
     
@@ -293,12 +293,12 @@ public class FileSelectorComponent extends JPanel {
       }
       resetFileField(); // revert if not valid
       
-      _validationInProgress = false;
+//      _validationInProgress = false;
       return false;
     }
     else {
       setFileField(newFile);
-      _validationInProgress = false;
+//      _validationInProgress = false;
       return true;
     }
   }

@@ -137,7 +137,7 @@ public class DirectorySelectorComponent extends JPanel {
     });
     _fileField.addFocusListener(new FocusListener() {
       public void focusGained(FocusEvent e) { 
-        validateTextField();
+//        validateTextField();
       }
       public void focusLost(FocusEvent e) {
         validateTextField();

@@ -508,7 +508,7 @@ public class DirectoryChooser extends JPanel {
   }
   
   protected JDialog createDialog() { 
-    final JDialog diag;
+    final JDialog dialog;
     
     String title = null;
     if (_dialogTitle != null)
@@ -517,11 +517,11 @@ public class DirectoryChooser extends JPanel {
       title = "Choose Directory";
     
     if (_ownerIsDialog) 
-      diag = new JDialog((Dialog)_owner, title, true);
+      dialog = new JDialog((Dialog)_owner, title, true);
     else 
-      diag = new JDialog((Frame)_owner, title, true);
+      dialog = new JDialog((Frame)_owner, title, true);
     
-    Container cp = diag.getContentPane();
+    Container cp = dialog.getContentPane();
     cp.setLayout(new BorderLayout());
     
     JPanel spanel = new JPanel(new BorderLayout());
@@ -539,7 +539,7 @@ public class DirectoryChooser extends JPanel {
         if (_tree.getSelectionCount() > 0) {
           _finalResult = APPROVE_OPTION;
         }
-        diag.setVisible(false);
+        dialog.setVisible(false);
       }
     });
     
@@ -550,32 +550,35 @@ public class DirectoryChooser extends JPanel {
       public void actionPerformed(ActionEvent e) {
         _finalResult = CANCEL_OPTION;
         _tree.cancelEditing();
-        diag.setVisible(false);
+        dialog.setVisible(false);
       }
     };
     _cancelButton.setAction(_cancelAction);
     _cancelButton.setEnabled(DirectoryChooser.this.isEnabled());
     
     String key = "dc_cancel";
-    diag.getRootPane().getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE,0), key);
-    diag.getRootPane().getActionMap().put(key, _cancelAction);
+    dialog.getRootPane().getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE,0), key);
+    dialog.getRootPane().getActionMap().put(key, _cancelAction);
     
-    diag.getRootPane().setDefaultButton(_approveButton);
+    dialog.getRootPane().setDefaultButton(_approveButton);
     
     cp.add(_northPanel, BorderLayout.NORTH);
     cp.add(spanel, BorderLayout.CENTER);
     cp.add(_southPanel, BorderLayout.SOUTH);
     
     
-    diag.addWindowListener(new WindowAdapter() {
+    dialog.addWindowListener(new WindowAdapter() {
       public void windowClosing(WindowEvent e) {
         _finalResult = CANCEL_OPTION;
       }
     });
-    diag.setGlassPane(_glassPane);
-    diag.setLocationRelativeTo(null);
-    diag.setSize(330, 400);
-    return diag;
+    dialog.setGlassPane(_glassPane);
+//    dialog.setLocationRelativeTo(_owner);
+    dialog.setSize(330, 400);
+    dialog.setLocationRelativeTo(_owner);
+//    dialog.setLocation(_owner.getLocation().x+_owner.getWidth()/2-dialog.getWidth()/2,
+//                       _owner.getLocation().y+_owner.getHeight()/2-dialog.getHeight()/2);
+    return dialog;
   }
   
   ////////////////////// PUBLIC METHODS //////////////////////
@@ -868,10 +871,10 @@ public class DirectoryChooser extends JPanel {
       updateTreeSelectionPath();
     }
     boolean enable = _tree.getSelectionCount() > 0;
-    JDialog diag = createDialog();
+    JDialog dialog = createDialog();
     _approveButton.setEnabled(enable && DirectoryChooser.this.isEnabled());
     _newFolderButton.setEnabled(enable && DirectoryChooser.this.isEnabled());
-    diag.setVisible(true);
+    dialog.setVisible(true);
     int res = _finalResult;
     _finalResult = ERROR_OPTION;
     return res;
@@ -1019,6 +1022,8 @@ public class DirectoryChooser extends JPanel {
     Object o = node.getUserObject();
     if (o instanceof FileDisplay)
       return ((FileDisplay)o).getFile();
+    else if (o instanceof String)
+      return null;
     else
       throw new IllegalArgumentException("The tree node didn't have a file display: " + node);
   }
@@ -1074,7 +1079,7 @@ public class DirectoryChooser extends JPanel {
       DefaultMutableTreeNode child = (DefaultMutableTreeNode)e.nextElement();
       try {
         File f = getFileForTreeNode(child);
-        if (f.equals(theFile)) {
+        if (f != null && f.equals(theFile)) {
           return child;
         }
       } catch(IllegalArgumentException iae) { } // ignore non-file nodes
@@ -1378,14 +1383,9 @@ public class DirectoryChooser extends JPanel {
                                          hasFocus);
       
       DefaultMutableTreeNode node = (DefaultMutableTreeNode)value;
-      try {
-        File f = getFileForTreeNode(node);
-        Icon ico = _fdManager.getIcon(f); //_jfc.getIcon(f);
-        setIcon(ico);
-      }
-      catch(Exception e) {
-        // if there's a problem getting the icon, don't set it.
-      }
+      File f = getFileForTreeNode(node);
+      Icon ico = _fdManager.getIcon(f); 
+      setIcon(ico);
       
       return this;
     }

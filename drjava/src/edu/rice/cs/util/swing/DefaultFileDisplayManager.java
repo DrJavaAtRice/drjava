@@ -67,6 +67,10 @@ public class DefaultFileDisplayManager implements FileDisplayManager {
    * @return The icon to display for the given file
    */
   public Icon getIcon(File f) {
+    // avoid problem with windows filesystem drivers
+    // that would cause a filenotfound exception
+    if (f != null && !f.exists()) f = null; 
+    
     return _jfc.getIcon(f);
   }
   
