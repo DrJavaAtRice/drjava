@@ -39,8 +39,7 @@ import koala.dynamicjava.tree.visitor.*;
  * @version 1.0 - 1999/04/24
  */
 
-public class ConstructorInvocation extends    PrimaryExpression
-  implements ExpressionContainer {
+public class ConstructorInvocation extends PrimaryExpression implements ExpressionContainer {
   /**
    * The arguments property name
    */

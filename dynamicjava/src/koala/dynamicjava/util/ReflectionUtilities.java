@@ -359,12 +359,12 @@ public class ReflectionUtilities {
     Iterator<Method> it = list.iterator();
     Method best = it.next();
     while(TigerUtilities.isBridge(best)){
-	if(it.hasNext()){
-	    best=it.next();
-	}
-	else{
-	    return null;  //as if the list were empty, indicating nothing in the list could be used, shouldnt really happen, but added for completion.
-	}
+ if(it.hasNext()){
+     best=it.next();
+ }
+ else{
+     return null;  //as if the list were empty, indicating nothing in the list could be used, shouldnt really happen, but added for completion.
+ }
     }    
     Method ambiguous = null; // there is no ambiguous other method at first
     while (it.hasNext()) {
@@ -663,6 +663,7 @@ public class ReflectionUtilities {
    *   both autoboxing and variable arguments
    */
   public static boolean hasVarArgsCompatibleSignatures(Class<?>[] a1, Class<?>[] a2, TigerUsage tu) {
+    
     if (a1.length == 0) {
       return a2.length == 0;
     }
@@ -670,7 +671,6 @@ public class ReflectionUtilities {
     if (a1.length > (a2.length + 1)) {
       return false;
     }
-    
     // Now we know that a1.length > 0;
     for (int i = 0; i < a1.length-1; i++) { //  a2 can have length larger than or equal to a1
       if (!isBoxCompatible(a1[i], a2[i], tu)) {
@@ -678,12 +678,15 @@ public class ReflectionUtilities {
       }
     }
     int lastIdx1 = a1.length - 1;
+    
     Class<?> lastElt1 = a1[lastIdx1];
+    
     if(lastElt1.isArray() && (a2.length == a1.length - 1)) {
       tu.varArgsAreUsed();
       return true; // No varargs given.
     }
-    else if(lastElt1.isArray() && !a2[lastIdx1].isArray()){
+    //gotta check for the a2[lastIdx1]==null, because it caused a nullpointerexception when you call isArray on null. 
+    else if(lastElt1.isArray() && (a2[lastIdx1]==null || !a2[lastIdx1].isArray())){
       tu.varArgsAreUsed();
       Class<?> varArgsType = lastElt1.getComponentType(); // Get the element type of the array
       for( int i = lastIdx1; i < a2.length; i++ ){

@@ -74,6 +74,7 @@ public abstract class MethodCall extends PrimaryExpression
                        String fn, int bl, int bc, int el, int ec) {
     super(fn, bl, bc, el, ec);
     
+
     if (mn == null) throw new IllegalArgumentException("mn == null");
     
     methodName = mn;

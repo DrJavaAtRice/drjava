@@ -495,8 +495,8 @@ public class TreeInterpreter implements Interpreter {
    * @param md     the method declaration
    * @param im     the importation manager
    */
-  public void registerMethod(String             sig,
-                             MethodDeclaration  md,
+  public void registerMethod(String sig,
+                             MethodDeclaration md,
                              ImportationManager im) {
     localMethods.add(sig);
     methods.put(sig, new MethodDescriptor(md, im));
