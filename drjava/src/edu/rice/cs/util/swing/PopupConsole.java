@@ -183,6 +183,12 @@ public class PopupConsole {
     }
   }
   
+  public boolean isConsoleReady() {
+    synchronized(commandLock) {
+      return _interruptCommand != null;
+    }
+  }
+  
   public synchronized void setInputBox(JTextArea inputBox) {
     if (inputBox == null) 
       _inputBox = new PopupConsole.InputBox();

@@ -273,19 +273,48 @@ public abstract class FileOps {
   }
 
   /**
+   * Writest text to the file overwriting whatever was there
+   * 
+   * @param file File to write to
+   * @param text Test to write
+   */
+  public static void writeStringToFile(File file, String text) throws IOException {
+    writeStringToFile(file, text, false);
+  }
+  
+  /**
    * Writes text to the file.
    *
    * @param file File to write to
    * @param text Text to write
+   * @param append whether to append. (false=overwrite)
    */
-  public static void writeStringToFile(File file, String text)
+  public static void writeStringToFile(File file, String text, boolean append)
     throws IOException
   {
-    FileWriter writer = new FileWriter(file);
+    FileWriter writer = new FileWriter(file, append);
     writer.write(text);
     writer.close();
   }
-
+  
+  /**
+   * Writes the text to the given file returning true if it happend and false
+   * if it could not.  This is a simple wrapper for writeStringToFile that
+   * doesn't throw an IOException.
+   * @param file File to write to
+   * @param text Text to write
+   * @param append whether to append. (false=overwrite)
+   */
+  public static boolean writeIfPossible(File file, String text, boolean append) {
+    try {
+      writeStringToFile(file, text, append);
+      return true;
+    }
+    catch(IOException e) {
+      return false;
+    }
+  }
+  
   /**
    * Create a new temporary directory.
    * The directory will be deleted on exit, if empty.
