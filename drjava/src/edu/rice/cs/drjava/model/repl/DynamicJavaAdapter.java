@@ -350,13 +350,16 @@ public class DynamicJavaAdapter implements JavaInterpreter {
    * @param context the context
    * @return visitor the visitor
    */
-  public NameVisitor makeNameVisitor(Context context) {
-    return new NameVisitorExtension(context);
+  public NameVisitor makeNameVisitor(Context nameContext, Context typeContext) {
+    return new NameVisitorExtension(nameContext, typeContext);
   }
   
   /**
    * Factory method to make a new TypeChecker.
-   * @param context the context
+   * @param nameContext Context for the NameVisitor
+   * @param typeContext Context being used for the TypeChecker.  This is
+   * necessary because we want to perform a partial type checking for the
+   * right hand side of a VariableDeclaration.
    * @return visitor the visitor
    */
   public TypeChecker makeTypeChecker(Context context) {
@@ -444,7 +447,7 @@ public class DynamicJavaAdapter implements JavaInterpreter {
           // Process, if necessary
           n = processTree(n);
           
-          Visitor v = makeNameVisitor(nameVisitorContext);
+          Visitor v = makeNameVisitor(nameVisitorContext, checkVisitorContext);
           Object o = n.acceptVisitor(v);
           if (o != null) {
             n = (Node)o;

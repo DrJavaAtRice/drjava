@@ -313,7 +313,8 @@ public class MainFrame extends JFrame implements OptionConstants {
         if (testName.endsWith(ext)) {
           testName = testName.substring(0, testName.length() - ext.length());
         }
-        _model.newTestCase(testName, true, true);
+        // For now, don't include setUp and tearDown
+        _model.newTestCase(testName, false, false);
       }
     }
   };
@@ -2391,9 +2392,12 @@ public class MainFrame extends JFrame implements OptionConstants {
     KeyStroke ks = DrJava.getConfig().getSetting(opt);
     // Checks that "a" is the action associated with the keystroke.
     // Need to check in case two actions were assigned to the same
-    // key in the config file
+    // key in the config file.
+    // Also check that the keystroke isn't the NULL_KEYSTROKE, which
+    //  can strangely be triggered by certain keys in Windows.
     KeyBindingManager.Singleton.put(opt, a, item, item.getText());
-    if (KeyBindingManager.Singleton.get(ks) == a) {
+    if ((ks != KeyStrokeOption.NULL_KEYSTROKE) &&
+        (KeyBindingManager.Singleton.get(ks) == a)) {
       item.setAccelerator(ks);
       //KeyBindingManager.Singleton.addListener(opt, item);
     }
@@ -2408,9 +2412,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     fileMenu.setMnemonic(KeyEvent.VK_F);
     // New, open
     _addMenuItem(fileMenu, _newAction, KEY_NEW_FILE);
-    if (CodeStatus.DEVELOPMENT) {
-      _addMenuItem(fileMenu, _newJUnitTestAction, KEY_NEW_TEST);
-    }
+    _addMenuItem(fileMenu, _newJUnitTestAction, KEY_NEW_TEST);
     _addMenuItem(fileMenu, _openAction, KEY_OPEN_FILE);
     fileMenu.addSeparator();
 

@@ -97,7 +97,7 @@ public final class RecentFileManagerTest extends TestCase {
   public void tearDown() {
     _menu = null;
     _rfm = null;
-    _tempDir.delete();
+    FileOps.deleteDirectory(_tempDir);
     _tempDir = null;
     System.gc();
   }

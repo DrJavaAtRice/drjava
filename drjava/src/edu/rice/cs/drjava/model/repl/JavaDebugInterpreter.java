@@ -594,11 +594,15 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
   /**
    * Factory method to make a new NameChecker that tries to find the
    * right scope for QualifiedNames.
-   * @param context the context
+   * @param nameContext Context for the NameVisitor
+   * @param typeContext Context being used for the TypeChecker.  This is
+   * necessary because we want to perform a partial type checking for the
+   * right hand side of a VariableDeclaration.
    * @return visitor the visitor
    */
-  public NameVisitorExtension makeNameVisitor(final Context context) {
-    return new NameVisitorExtension(context) {
+  public NameVisitorExtension makeNameVisitor(final Context nameContext, 
+                                              final Context typeContext) {
+    return new NameVisitorExtension(nameContext, typeContext) {
       //        try {
       //          return super.visit(node);
       //        }
@@ -607,8 +611,8 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
       //          if (e.getMessage().startsWith("Redefinition of")) {
       //            Type type = node.getType();
       //            String name = node.getName();
-      //            Class oldClass = (Class)context.get(name);
-      //            Class newClass = _getClassForType(type, context);
+      //            Class oldClass = (Class)nameContext.get(name);
+      //            Class newClass = _getClassForType(type, nameContext);
       //            if (oldClass.equals(newClass)) {
       //              // This is a redefinition of the same variable 
       //              // with the same type. Allow the user to do
@@ -637,17 +641,17 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
             IdentifierToken t = (IdentifierToken)iter.next();
             field += "$" + t.image();
           }
-          if (context.isDefined("this")) {
+          if (nameContext.isDefined("this")) {
             // Check if it's a field or outer field if we're not in a
             // static context.
-            ObjectFieldAccess ofa = _getObjectFieldAccessForField(field, context);
+            ObjectFieldAccess ofa = _getObjectFieldAccessForField(field, nameContext);
             if (ofa != null) {
               return ofa;
             }
           }
           else {
             // We're in a static context.
-            StaticFieldAccess sfa = _getStaticFieldAccessForField(field, context);
+            StaticFieldAccess sfa = _getStaticFieldAccessForField(field, nameContext);
             if (sfa != null) {
               return sfa;
             }
@@ -656,7 +660,7 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
               // (e.g. The user is trying to evaluate MonkeyOuter.someField and we
               // have to convert MonkeyOuter to MonkeyMostOuter$MonkeyOuter)
               // Try qualifying it.
-              ReferenceType rt = _getReferenceTypeForField(field, context);
+              ReferenceType rt = _getReferenceTypeForField(field, nameContext);
               if (rt != null) {
                 return rt;
               }
@@ -675,8 +679,8 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
             return method;
           }
           // now we know that method is a FunctionCall
-          else if (context.isDefined("this")) {
-            ObjectMethodCall omc = _getObjectMethodCallForFunction(method, context);
+          else if (nameContext.isDefined("this")) {
+            ObjectMethodCall omc = _getObjectMethodCallForFunction(method, nameContext);
             if (omc != null) {
               return omc;
             }
@@ -686,7 +690,7 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
           }
           // it's a FunctionCall from a static context
           else {
-            StaticMethodCall smc = _getStaticMethodCallForFunction(method, context);
+            StaticMethodCall smc = _getStaticMethodCallForFunction(method, nameContext);
             if (smc != null) {
               return smc;
             }

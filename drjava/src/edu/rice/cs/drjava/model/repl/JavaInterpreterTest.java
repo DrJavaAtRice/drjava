@@ -268,14 +268,26 @@ public final class JavaInterpreterTest extends TestCase {
   }
   
   /**
+   * Tests simple variable definitions which broke the initial implementation
+   * of variable redefinition (tested by testVariableRedefinition).
+   */
+  public void testVariableDefinition() throws ExceptionReturnedException {
+    _interpreter.interpret("int a = 5;");
+    _interpreter.interpret("int b = a;");
+    
+    _interpreter.interpret("int c = a++;");
+  }
+  
+  /**
    * Tests that variable declarations with errors will not allow the interpreter
-   * to not define the variable. This will get rid of annoying "Error: Redefinition 
-   * of 'variable'" messages after fixing the error. Note that if the error occurs
-   * during the evaluation of the right hand side then the variable is defined. This
-   * is for two reasons: The compiler would have accepted this variable declaration
-   * so that no more variables could have been defined with the same name afterwards,
-   * and we don't know how to make sure the evaluation doesn't return errors without
-   * actually evaluating which may have side-effects.
+   * to not define the variable. This will get rid of annoying "Error: 
+   * Redefinition of 'variable'" messages after fixing the error. Note that if 
+   * the error occurs during the evaluation of the right hand side then the 
+   * variable is defined. This is for two reasons: The compiler would have 
+   * accepted this variable declaration so that no more variables could have 
+   * been defined with the same name afterwards, and we don't know how to make 
+   * sure the evaluation doesn't return errors without actually evaluating which
+   * may have side-effects.
    */
   public void testVariableRedefinition() {
     // test error in NameVisitor

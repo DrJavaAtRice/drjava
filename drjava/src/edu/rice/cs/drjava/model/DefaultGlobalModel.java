@@ -477,11 +477,11 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     }
     buf.append("/**\n");
     buf.append("* A test method.\n");
-    buf.append("* (Replace \"X\" with a few words describing the test.  You may write\n");
-    buf.append("* as many \"testSomething\" methods in this class as you wish,\n");
-    buf.append("* and each one will be executed when running JUnit over this class.)\n");
+    buf.append("* (Replace \"X\" with a name describing the test.  You may write as\n");
+    buf.append("* many \"testSomething\" methods in this class as you wish, and each\n");
+    buf.append("* one will be called when running JUnit over this class.)\n");
     buf.append("*/\n");
-    buf.append("public void testX() {\n}\n");
+    buf.append("public void testX() {\n}\n\n");
     buf.append("}\n");
     String test = buf.toString();
 

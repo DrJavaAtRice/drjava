@@ -61,11 +61,18 @@ public class NameVisitorExtension extends NameVisitor {
   private Context _context;
   private TypeChecker _tc;
   
-  public NameVisitorExtension(Context ctx) {    
-    super(ctx);
-    _context = ctx;
-    _tc = new TypeChecker(ctx);
-  }  
+  /**
+   * Creates a new NameVisitorExtension.
+   * @param nameContext Context for the NameVisitor
+   * @param typeContext Context being used for the TypeChecker.  This is
+   * necessary because we want to perform a partial type checking for the
+   * right hand side of a VariableDeclaration.
+   */
+  public NameVisitorExtension(Context nameContext, Context typeContext) {    
+    super(nameContext);
+    _context = nameContext;
+    _tc = new TypeChecker(typeContext);
+  }
   
   // An attempt at fixing the redefinition issue in DynamicJava
   public Object visit(VariableDeclaration node) {  
