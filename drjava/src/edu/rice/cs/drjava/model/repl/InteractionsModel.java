@@ -725,6 +725,14 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
                                       int startCol,
                                       int endRow,
                                       int endCol ) {
+    if (errorMessage!=null) {
+      if (errorMessage.endsWith("<EOF>\"")) {
+        _document.setInProgress(false);
+        _notifyInteractionEnded();
+        return;
+      }
+    }
+    
     edu.rice.cs.util.Pair<Integer,Integer> oAndL =
       StringOps.getOffsetAndLength(interaction, startRow, startCol, endRow, endCol);
 
@@ -732,6 +740,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
                                 oAndL.getSecond().intValue());
 
     _document.appendSyntaxErrorResult(errorMessage,
+                                      interaction,
                                       startRow,
                                       startCol,
                                       endRow,

@@ -843,8 +843,9 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
    * the Interpreter JVM.
    */
   private void _threwException(Throwable t) {
+       
     _interactionsModel.replThrewException(t.getClass().getName(),
-                                          t.getMessage(),
+                                          t.getMessage(), 
                                           StringOps.getStackTrace(t),
                                           ((t instanceof ParseError) &&  ((ParseError) t).getParseException() != null)? ((ParseError) t).getMessage() : null);
   }                                                                                                                                   // getMessage, in this scenario, will return the same as getShortMessage
@@ -929,7 +930,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
      * Returns an exception back to the model.
      * @return null
      */
-    public Object forExceptionResult(ExceptionResult that) {
+    public Object forExceptionResult(ExceptionResult that) { /**/
       _interactionsModel.replThrewException(that.getExceptionClass(),
                                             that.getExceptionMessage(),
                                             that.getStackTrace(),

@@ -87,7 +87,7 @@ public final class InteractionsModelTest extends TestCase {
   protected void _assertProcessedContents(String typed, String expected)
     throws DocumentAdapterException
   {
-    assert(_model instanceof TestInteractionsModel);
+    assertTrue(_model instanceof TestInteractionsModel);
     TestInteractionsModel model = (TestInteractionsModel)_model;
     InteractionsDocument doc = model.getDocument();
     doc.reset();
@@ -114,7 +114,7 @@ public final class InteractionsModelTest extends TestCase {
    * Tests that the correct text is returned when interpreting.
    */
   public void testInterpretCurrentInteraction() throws DocumentAdapterException {
-    assert(_model instanceof TestInteractionsModel);
+    assertTrue(_model instanceof TestInteractionsModel);
     TestInteractionsModel model = (TestInteractionsModel)_model;
     String code = "int x = 3;";
     InteractionsDocument doc = model.getDocument();
@@ -148,7 +148,7 @@ public final class InteractionsModelTest extends TestCase {
   }
   
   protected void assertReplThrewContinuationException(String code) throws DocumentAdapterException {
-    assert(_model instanceof IncompleteInputInteractionsModel);
+    assertTrue(_model instanceof IncompleteInputInteractionsModel);
     IncompleteInputInteractionsModel model = (IncompleteInputInteractionsModel)_model;
     InteractionsDocument doc = model.getDocument();
     doc.insertText(doc.getDocLength(), code,
@@ -160,7 +160,7 @@ public final class InteractionsModelTest extends TestCase {
   }
   
   protected void assertReplThrewSyntaxException(String code) throws DocumentAdapterException {
-    assert(_model instanceof IncompleteInputInteractionsModel);
+    assertTrue(_model instanceof IncompleteInputInteractionsModel);
     IncompleteInputInteractionsModel model = (IncompleteInputInteractionsModel)_model;
     InteractionsDocument doc = model.getDocument();
     doc.insertText(doc.getDocLength(), code,
@@ -321,7 +321,7 @@ public final class InteractionsModelTest extends TestCase {
    * Tests that an interactions history can be loaded in as a script.
    */
   public void testScriptLoading() throws IOException, OperationCanceledException {
-    assert(_model instanceof TestInteractionsModel);
+    assertTrue(_model instanceof TestInteractionsModel);
     TestInteractionsModel model = (TestInteractionsModel)_model;
     // Set up a sample history
     String line1 = "System.out.println(\"hi\")";
@@ -564,6 +564,23 @@ public final class InteractionsModelTest extends TestCase {
                                    String shortMessage) {
       if (shortMessage!=null) {
         if (shortMessage.endsWith("<EOF>\"")) {
+          continuationException = true;
+          syntaxException = false;
+          return;
+        }
+      }
+      syntaxException = true;
+      continuationException = false;
+    }
+    
+    public void replReturnedSyntaxError(String errorMessage,
+                                        String interaction,
+                                        int startRow,
+                                        int startCol,
+                                        int endRow,
+                                        int endCol ) {
+      if (errorMessage!=null) {
+        if (errorMessage.endsWith("<EOF>\"")) {
           continuationException = true;
           syntaxException = false;
           return;

@@ -47,6 +47,7 @@ package edu.rice.cs.drjava.model.repl.newjvm;
 
 //import edu.rice.cs.javaast.parser.*;
 import koala.dynamicjava.parser.*;
+import koala.dynamicjava.parser.wrapper.*;
 
 /**
  * A syntax error to pass back to the main JVM after a call
@@ -73,6 +74,26 @@ public class SyntaxErrorResult implements InterpretResult {
     _interaction = s;
   }
 
+  public SyntaxErrorResult(ParseError pe, String s)
+  {
+    ParseException parseEx = pe.getParseException();
+    if(parseEx != null) {
+      _startRow = parseEx.getBeginLine();
+      _startCol = parseEx.getBeginColumn();
+      _endRow = parseEx.getEndLine();
+      _endCol = parseEx.getEndColumn();
+      _errorMessage = parseEx.getShortMessage();      
+    }      
+    else {
+      _startRow = _endRow = pe.getLine();
+      _startCol = _endCol = pe.getColumn();
+      _errorMessage = pe.getMessage();
+    }
+    
+    _interaction = s;
+  }
+
+  
   public SyntaxErrorResult(TokenMgrError pe, String s)
   {
     _endRow = _startRow = pe.getErrorRow();

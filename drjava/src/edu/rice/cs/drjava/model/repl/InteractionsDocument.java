@@ -358,16 +358,20 @@ public class InteractionsDocument extends ConsoleDocument {
       if (null == message || "null".equals(message)) {
         message = "";
       }
-
+      
       // Simplify the common error messages
       if ("koala.dynamicjava.interpreter.error.ExecutionError".equals(exceptionClass) ||
           "edu.rice.cs.drjava.model.repl.InteractionsException".equals(exceptionClass)) {
         exceptionClass = "Error";
       }
 
-      insertText(getDocLength(),
-                 exceptionClass + ": " + message + "\n", styleName);
+      String c = exceptionClass;
+      if(c.indexOf('.') != -1) 
+        c = c.substring(c.lastIndexOf('.')+1,c.length());      
+      insertText(getDocLength(), c + ": " + message + "\n", styleName);
 
+      
+      
       // An example stack trace:
       //
       // java.lang.IllegalMonitorStateException:
@@ -440,13 +444,23 @@ public class InteractionsDocument extends ConsoleDocument {
 //    }
   }
 
-  public void appendSyntaxErrorResult(String message, int startRow, int startCol,
+  public void appendSyntaxErrorResult(String message, String interaction, int startRow, int startCol,
                                       int endRow, int endCol, String styleName) {
     //writeLock();
     try {
       if (null == message || "null".equals(message)) {
         message = "";
       }
+      
+      if(message.indexOf("Lexical error") != -1) {
+        int i = message.lastIndexOf(':');
+        if(i != -1)
+          message = "Syntax Error:" + message.substring(i+2,message.length());                                
+      }
+      
+      if(message.indexOf("Error") == -1) 
+        message = "Error: " + message;
+      
       insertText(getDocLength(), message + "\n" , styleName );
     }
     catch (DocumentAdapterException ble) {
