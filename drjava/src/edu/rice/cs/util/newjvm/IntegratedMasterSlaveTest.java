@@ -4,7 +4,7 @@
  * at http://sourceforge.net/projects/drjava
  *
  * Copyright (C) 2001-2002 JavaPLT group at Rice University (javaplt@rice.edu)
- * 
+ *
  * DrJava is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -66,7 +66,7 @@ public class IntegratedMasterSlaveTest extends TestCase {
   public static Test suite() {
     return new TestSuite(IntegratedMasterSlaveTest.class);
   }
-  
+
   public void testItAll() throws Exception {
     // run a couple of times. each one forks its own jvm so not
     // too many! we run multiple times to prove that the master
@@ -75,19 +75,19 @@ public class IntegratedMasterSlaveTest extends TestCase {
       _testMaster.runTestSequence();
     }
   }
-  
+
   public void testImmediateQuit() throws Exception {
     for (int i = 0; i < 5; i++) {
       _testMaster.runImmediateQuitTest();
     }
   }
-  
+
   private class MasterImpl extends AbstractMasterJVM implements MasterI
   {
     private char _letter;
     private boolean _justQuit;
     private String _currentTest = "";
-   
+
     public MasterImpl() {
       super(IntegratedMasterSlaveTest.class.getName() + "$CounterSlave");
     }
@@ -106,7 +106,7 @@ public class IntegratedMasterSlaveTest extends TestCase {
       _letter = 'a';
 
       invokeSlave();
-      
+
       // we don't wait for it to start before calling quit.
       // This should not throw an exception! It should quickly return,
       // queueing up a quit to be processes ASAP.
@@ -121,67 +121,67 @@ public class IntegratedMasterSlaveTest extends TestCase {
       // (All of the post-quit invariants are checked in handleSlaveQuit.
       _currentTest = "";
     }
-    
+
     public synchronized void runTestSequence() throws Exception {
       _currentTest = "runTestSequence";
       _justQuit = false;
       _letter = 'a';
-      
-      long start, end;
-      start = System.currentTimeMillis();
+
+//      long start, end;
+//      start = System.currentTimeMillis();
       invokeSlave();
       wait();  // for handleConnected
-      end = System.currentTimeMillis();
-      //System.err.println((end-start) + "ms waiting for invocation");
-      
+//      end = System.currentTimeMillis();
+//      System.err.println((end-start) + "ms waiting for invocation");
+
       ((SlaveI)getSlave()).startLetterTest();
-      
+
       // now, wait until five getletter calls passed
       // (after fifth call letter is 'f' due to the ++
-      start = System.currentTimeMillis();
+//      start = System.currentTimeMillis();
       while (_letter != 'f') {
         wait();  // for getLetter()
       }
 
-      end = System.currentTimeMillis();
-      //System.err.println((end-start) + "ms waiting for 'f'");
-      
+//      end = System.currentTimeMillis();
+//      System.err.println((end-start) + "ms waiting for 'f'");
+
       // now make some slave calls
-      start = System.currentTimeMillis();
+//      start = System.currentTimeMillis();
       for (int i = 0; i < 7; i++) {
         int value = ((SlaveI) getSlave()).getNumber();
         assertEquals("value returned by slave", i, value);
       }
-      end = System.currentTimeMillis();
+//      end = System.currentTimeMillis();
       //System.err.println((end-start) + "ms calling getNumber");
-      
+
       // OK, time to kill the slave
-      start = System.currentTimeMillis();
+//      start = System.currentTimeMillis();
       quitSlave();
       wait(); // for quit to finish
-      end = System.currentTimeMillis();
-      //System.err.println((end-start) + "ms waiting to quit");
+//      end = System.currentTimeMillis();
+//      System.err.println((end-start) + "ms waiting to quit");
       _currentTest = "";
     }
-    
+
     public synchronized char getLetter() {
       char ret = _letter;
       _letter++;
-      
+
       notify();
-      
+
       return ret;
     }
-    
+
     protected synchronized void handleSlaveConnected() {
       SlaveI slave = (SlaveI) getSlave();
       assertTrue("slave is set", slave != null);
       assertTrue("startup not in progress", !isStartupInProgress());
       // getLetter should have never been called.
-      assertEquals("letter value", 'a', _letter);      
+      assertEquals("letter value", 'a', _letter);
       notify();
     }
-    
+
     protected synchronized void handleSlaveQuit(int status) {
       assertEquals("slave result code", 0, status);
       if (_currentTest.equals("runTestSequence")) {
@@ -190,14 +190,14 @@ public class IntegratedMasterSlaveTest extends TestCase {
       }
       assertTrue("slave is not set", getSlave() == null);
       assertTrue("startup not in progress", !isStartupInProgress());
-      
+
       // alert test method that quit occurred.
       notify();
       _justQuit = true;
     }
   }
 
-    
+
   /**
    * The slave will exit with error codes in the case of problems,
    * since there is no other thing it can do!
@@ -216,11 +216,11 @@ public class IntegratedMasterSlaveTest extends TestCase {
     public int getNumber() {
       return _counter++;
     }
-    
+
     protected void handleStart(MasterRemote m) {
       _master = (MasterI) m;
     }
-    
+
     public void startLetterTest() throws RemoteException {
       // Run this part of the test in a new thread, so this call will
       //  immediately return
@@ -233,7 +233,7 @@ public class IntegratedMasterSlaveTest extends TestCase {
                 System.exit(2);
               }
             }
-            
+
             // OK, now wait up till 15 seconds for master jvm to call
             Thread.currentThread().sleep(15000);
             System.exit(4);
@@ -253,12 +253,12 @@ public class IntegratedMasterSlaveTest extends TestCase {
       thread.start();
     }
   }
-  
+
   public interface SlaveI extends SlaveRemote {
     public int getNumber() throws RemoteException;
     public void startLetterTest() throws RemoteException;
   }
-  
+
   public interface MasterI/*<SlaveType extends SlaveRemote>*/ extends MasterRemote/*<SlaveType>*/ {
     public char getLetter() throws RemoteException;
   }

@@ -61,7 +61,7 @@ public abstract class ArgumentTokenizer {
   /**
    * Convenience method redirects to tokenize(arguments, false).
    * Tokenizes the given String into individual argument Strings.
-   * @param arguments A String containing one or more command-line style 
+   * @param arguments A String containing one or more command-line style
    * arguments to be tokenized.
    * @return A list of parsed and properly escaped arguments.
    */
@@ -71,7 +71,7 @@ public abstract class ArgumentTokenizer {
 
   /**
    * Tokenizes the given String into individual argument Strings.
-   * @param arguments A String containing one or more command-line style 
+   * @param arguments A String containing one or more command-line style
    * arguments to be tokenized.
    * @param stringify whether or not to include escape special characters
    * @return A list of parsed and properly escaped arguments.
@@ -83,7 +83,7 @@ public abstract class ArgumentTokenizer {
     boolean escaped = false;
     int state = NO_TOKEN_STATE;  // start in the NO_TOKEN_STATE
     int len = arguments.length();
-    
+
     // Loop over each character in the string
     for (int i = 0; i < len; i++) {
       char c = arguments.charAt(i);
@@ -176,7 +176,7 @@ public abstract class ArgumentTokenizer {
         }
       }
     }
-    
+
     // If we're still escaped, put in the backslash
     if (escaped) {
       currArg.append('\\');
@@ -194,7 +194,7 @@ public abstract class ArgumentTokenizer {
     }
     return argList;
   }
-  
+
   /**
    * Inserts backslashes before any occurrences of a backslash or
    * quote in the given string.  Also converts any special characters
@@ -202,8 +202,7 @@ public abstract class ArgumentTokenizer {
    */
   protected static String _escapeQuotesAndBackslashes(String s) {
     StringBuffer buf = new StringBuffer(s);
-    int lastIndex = 0;
-    
+
     // Walk backwards, looking for quotes or backslashes.
     //  If we see any, insert an extra backslash into the buffer at
     //  the same index.  (By walking backwards, the index into the buffer

@@ -61,12 +61,12 @@ public class DelegatingAction implements Action {
     //ACCELERATOR_KEY,
     //MNEMONIC_KEY,
   };
-  
+
   /**
-   * TODO: Should this use a more specific type parameter?
+   * Can't use a more specific type parameter because of Action interface.
    */
   private HashMap<String, Object> _localProperties = new HashMap<String, Object>();
-  
+
   /**
    * The action to delegate to. If it's null, this action is
    * disabled and all method calls will result in IllegalStateExceptions.

@@ -50,6 +50,7 @@ public abstract class InputStreamRedirector extends InputStream {
   /**
    * Buffer that stores the current set of bytes.
    * TODO: perhaps this should use an array for efficiency
+   * This is only used as a char queue.
    */
   protected ArrayList<Character> _buffer;
 

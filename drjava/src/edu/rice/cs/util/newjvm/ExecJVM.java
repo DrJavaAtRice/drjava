@@ -50,9 +50,9 @@ import java.util.*;
 public final class ExecJVM {
   private static final String PATH_SEPARATOR = System.getProperty("path.separator");
   private static final String OS_NAME = System.getProperty("os.name").toLowerCase(Locale.US);
-  
+
   private ExecJVM() {}
-  
+
   /**
    * Runs a new JVM.
    *
@@ -72,13 +72,13 @@ public final class ExecJVM {
       if (i != 0) {
         buf.append(PATH_SEPARATOR);
       }
-      
+
       buf.append(classPath[i]);
     }
-    
+
     return runJVM(mainClass, classParams, buf.toString(), jvmParams);
   }
-  
+
   /**
    * Runs a new JVM.
    *
@@ -97,11 +97,11 @@ public final class ExecJVM {
     args.add("-classpath");
     args.add(classPath);
     _addArray(args, jvmParams);
-    String[] jvmWithCP = (String[]) args.toArray(new String[0]);
-    
+    String[] jvmWithCP = args.toArray(new String[0]);
+
     return runJVM(mainClass, classParams, jvmWithCP);
   }
-  
+
   /**
    * Runs a new JVM, propogating the present classpath.
    *
@@ -118,7 +118,7 @@ public final class ExecJVM {
     String cp = System.getProperty("java.class.path");
     return runJVM(mainClass, classParams, cp, jvmParams);
   }
-  
+
   /**
    * Runs a new JVM, propogating the present classpath.
    *
@@ -132,7 +132,7 @@ public final class ExecJVM {
     throws IOException {
     return runJVMPropogateClassPath(mainClass, classParams, new String[0]);
   }
-  
+
   /**
    * Runs a new JVM.
    *
@@ -150,16 +150,16 @@ public final class ExecJVM {
     _addArray(args, jvmParams);
     args.add(mainClass);
     _addArray(args, classParams);
-    
-    String[] argArray = (String[]) args.toArray(new String[0]);
-    
+
+    String[] argArray = args.toArray(new String[0]);
+
     //for (int i = 0; i < argArray.length; i++) {
     //System.err.println("arg #" + i + ": " + argArray[i]);
     //}
-    
+
     return Runtime.getRuntime().exec(argArray);
   }
-  
+
   /**
    * Empties BufferedReaders by copying lines into LinkedLists.
    * This is intended for use with the output streams from an ExecJVM process.
@@ -174,10 +174,10 @@ public final class ExecJVM {
     BufferedReader outBuf = new BufferedReader(new InputStreamReader(theProc.getInputStream()));
     BufferedReader errBuf = new BufferedReader(new InputStreamReader(theProc.getErrorStream()));
     String output;
-    
+
     if (outBuf.ready()) {
       output = outBuf.readLine();
-      
+
       while (output != null) {
         //        System.out.println("[stdout]: " + output);
         outLines.add(output);
@@ -189,7 +189,7 @@ public final class ExecJVM {
         }
       }
     }
-    
+
     if (errBuf.ready()) {
       output = errBuf.readLine();
       while (output != null) {
@@ -204,7 +204,7 @@ public final class ExecJVM {
       }
     }
   }
-  
+
   /**
    * Prints the stdout and stderr of the given process, line by line.  Adds a
    * message and tag to identify the source of the output.  Note that this code
@@ -219,26 +219,26 @@ public final class ExecJVM {
     throws IOException {
     // First, write out our opening message.
     System.err.println(msg);
-    
+
     LinkedList<String> outLines = new LinkedList<String>();
     LinkedList<String> errLines = new LinkedList<String>();
-    
+
     ventBuffers(theProc, outLines, errLines);
-    
+
     Iterator<String> it = outLines.iterator();
     String output;
     while (it.hasNext()) {
       output = it.next();
       System.err.println("    [" +sourceName + " stdout]: " + output);
     }
-    
+
     it = errLines.iterator();
     while (it.hasNext()) {
       output = it.next();
       System.err.println("    [" +sourceName + " stderr]: " + output);
     }
   }
-  
+
   private static void _addArray(LinkedList<String> list, String[] array) {
     if (array != null) {
       for (int i = 0; i < array.length; i++) {
@@ -246,16 +246,16 @@ public final class ExecJVM {
       }
     }
   }
-  
+
   /** DOS/Windows family OS's use ; to separate paths. */
   private static boolean _isDOS() {
     return PATH_SEPARATOR.equals(";");
   }
-  
+
   private static boolean _isNetware() {
     return OS_NAME.indexOf("netware") != -1;
   }
-  
+
   /**
    * Find the java executable.
    * This logic comes from Ant.
@@ -265,21 +265,21 @@ public final class ExecJVM {
     if (_isNetware()) {
       return "java";
     }
-    
+
     File executable;
-    
+
     String java_home = System.getProperty("java.home") + "/";
-    
+
     String[] candidates = {
       java_home + "../bin/java",
         java_home + "bin/java",
         java_home + "java",
     };
-    
+
     // search all the candidates to find java
     for (int i = 0; i < candidates.length; i++) {
       String current = candidates[i];
-      
+
       // try javaw.exe first for dos, otherwise try java.exe for dos
       if (_isDOS()) {
         executable = new File(current + "w.exe");
@@ -290,15 +290,15 @@ public final class ExecJVM {
       else {
         executable = new File(current);
       }
-      
+
       //System.err.println("checking: " + executable);
-      
+
       if (executable.exists()) {
         //System.err.println("JVM executable found: " + executable.getAbsolutePath());
         return executable.getAbsolutePath();
       }
     }
-    
+
     // hope for the best using the system's path!
     //System.err.println("Could not find java executable, using 'java'!");
     return "java";
