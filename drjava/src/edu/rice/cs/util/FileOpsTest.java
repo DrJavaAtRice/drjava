@@ -130,8 +130,9 @@ public class FileOpsTest extends TestCase {
 
   
   /**
-   * This method checks that backups are made correctly, and that when a save fails,
-   * no data is lost
+   * This method checks that backups are made correctly, that when a save fails,
+   * no data is lost, and that when a save is attempted on a write-protected file,
+   * the save fails (bug #782963).
    */
   public void testSaveFile() throws IOException {
     File writeTo = File.createTempFile("fileops", ".test");
@@ -182,7 +183,8 @@ public class FileOpsTest extends TestCase {
         }
       });
       fail("IOException not propagated");
-    } catch (IOException ioe){}//do nothing, this is expected
+    } 
+    catch (IOException ioe){}//do nothing, this is expected
     assertEquals("failed save4 w/o backup", "version 3",
                  FileOps.readFileAsString(writeTo));
     assertEquals("failed save4 w/o backup check original backup", "version 1",
@@ -201,9 +203,44 @@ public class FileOpsTest extends TestCase {
         }
       });
       fail("IOException not propagated spot 2");
-    } catch(IOException ioe){} //do nothing, we expected this
+    }
+    catch(IOException ioe){} //do nothing, we expected this
     assertEquals("failed save5 w backup", "version 3",
                  FileOps.readFileAsString(writeTo));
+    
+    // Make sure that the backup file no longer exists since it was 
+    // copied over the original
+    try {
+      FileOps.readFileAsString(backup);
+      fail("The backup file should no longer exist.");
+    }
+    catch(FileNotFoundException e) {} //do nothing, we expected this
+    
+    // Test that save fails if the file is write-protected.
+    writeTo.setReadOnly();
+    try {
+      FileOps.saveFile(new FileOps.DefaultFileSaver(writeTo) {
+        public boolean shouldBackup () {
+          return true;
+        }
+        public void saveTo(OutputStream os) throws IOException {
+          String output =  "version 6";
+          os.write(output.getBytes());
+        }
+      });
+      fail("The file to be saved was read-only!");
+    }
+    catch(IOException ioe){} //do nothing, we expected this
+    assertEquals("failed save6 w backup", "version 3",
+                 FileOps.readFileAsString(writeTo));
+    
+    // Make sure that the backup file still doesn't exist since the file
+    // was read-only.
+    try {
+      FileOps.readFileAsString(backup);
+      fail("The backup file should no longer exist.");
+    }
+    catch(FileNotFoundException e) {} //do nothing, we expected this
   }
 
   /**

@@ -325,11 +325,13 @@ public abstract class FileOps {
   /**
    * This method writes files correctly; it takes care of catching errors and
    * making backups and keeping an unsuccessful file save from destroying the old
-   * file (unless a backup is made).  Note: if saving fails and a backup was being
-   * created, any existing backup will be destroyed (this is because the backup is
-   * written before saving begins, and then moved back over the original file when
-   * saving fails).  As the old backup would have been destroyed anyways if saving
-   * had succeeded, I do not think that this is incorrect or unreasonable behavior.
+   * file (unless a backup is made).  It makes sure that the file to be saved is 
+   * not read-only, throwing an IOException if it is.  Note: if saving fails and a 
+   * backup was being created, any existing backup will be destroyed (this is 
+   * because the backup is written before saving begins, and then moved back over 
+   * the original file when saving fails).  As the old backup would have been destroyed 
+   * anyways if saving had succeeded, I do not think that this is incorrect or 
+   * unreasonable behavior.
    * @param fileSaver keeps track of the name of the file to write, whether to back
    * up the file, and has a method that actually performs the writing of the file
    * @throws IOException if the saving or backing up of the file fails for any reason
@@ -340,6 +342,9 @@ public abstract class FileOps {
     File file = fileSaver.getTargetFile();
     File backup = null;
     boolean tempFileUsed = true;
+    if (!file.canWrite()) {
+      throw new IOException("Permission denied");
+    }
     /* First back up the file, if necessary */
     if (makeBackup){
       backup = fileSaver.getBackupFile();
@@ -381,15 +386,18 @@ public abstract class FileOps {
       fileSaver.saveTo(bos);
       bos.close();
 
-      if (tempFileUsed && !renameFile(tempFile, fileSaver.getTargetFile())) {
+      if (tempFileUsed && !renameFile(tempFile, file)) {
         throw new IOException("Save failed: Could not rename temp file " +
                               tempFile + " to " + file);
       }
-      /* Delete the temp file */
-      tempFile.delete();
 
       success = true;
-    } finally {
+    } 
+    finally {
+      if (tempFileUsed) {
+        /* Delete the temp file */
+        tempFile.delete();
+      }
       if (makeBackup) {
         /* On failure, attempt to move the backup back to its original location if we
          made one.  On success, register that a backup was successfully made */
@@ -448,8 +456,8 @@ public abstract class FileOps {
 
   /**
    * This class is a default implementation of FileSaver that makes only 1 backup
-   * of each file per instantiation of the program.  It backs up to files named
-   * <file>~.  It does not implement the saveTo method.
+   * of each file per instantiation of the program (following Emacs' lead).  It 
+   * backs up to files named <file>~.  It does not implement the saveTo method.
    */
   public abstract static class DefaultFileSaver implements FileSaver{
 
