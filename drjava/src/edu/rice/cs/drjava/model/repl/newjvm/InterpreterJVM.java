@@ -258,7 +258,7 @@ public class InterpreterJVM extends AbstractSlaveJVM
             _dialog("to interp: " + s);
             
             String s1 = _interactionsProcessor.preProcess(s);
-            Object result = interpreter.getInterpreter().interpret(s);
+            Object result = interpreter.getInterpreter().interpret(s1);
             String s2 = _interactionsProcessor.postProcess(s1, result);
             
             if (result == Interpreter.NO_RESULT) {
