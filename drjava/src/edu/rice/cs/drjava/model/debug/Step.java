@@ -59,7 +59,7 @@ public class Step extends DebugAction<StepRequest> implements OptionConstants {
   private int _size;
   private int _depth;
   
-  // Class patterns for which we don't want events
+  // Java class patterns for which we may not want events
   private String[] excludes = {"java.*", "javax.*", "sun.*", 
     "com.sun.*"};
    
@@ -68,18 +68,13 @@ public class Step extends DebugAction<StepRequest> implements OptionConstants {
    */
   public Step(DebugManager manager, int size, int depth) 
     throws DebugException, IllegalStateException {    
-    // change super constructor to not take a doc?
-    
-    super (manager);
+     super (manager);
     _suspendPolicy = EventRequest.SUSPEND_EVENT_THREAD;
     _thread = _manager.getCurrentThread();
     _size = size;
     _depth = depth;
     _countFilter = 1; //only step once.
-    //_lineNumber = lineNumber;
     _initializeRequest();
-    //_doc = doc;
-    
   }
   
   public boolean createRequest(ReferenceType rt) throws DebugException {
@@ -92,13 +87,12 @@ public class Step extends DebugAction<StepRequest> implements OptionConstants {
    * @throws DebugException if the request could not be created.
    */
   protected void _createRequest() throws DebugException {
-    //DrJava.consoleOut().println("Step._createRequest starting...");
     boolean stepJava = DrJava.CONFIG.getSetting(DEBUG_STEP_JAVA).booleanValue();  
     boolean stepInterpreter = DrJava.CONFIG.getSetting(DEBUG_STEP_INTERPRETER).booleanValue();  
     boolean stepDrJava = DrJava.CONFIG.getSetting(DEBUG_STEP_DRJAVA).booleanValue();  
     
     _request = _manager.getEventRequestManager().
-      createStepRequest(_manager.getCurrentThread(), _size, _depth);
+      createStepRequest(_thread, _size, _depth);
     if (!stepJava) {
       for (int i=0; i<excludes.length; ++i) {
         _request.addClassExclusionFilter(excludes[i]);
@@ -111,14 +105,6 @@ public class Step extends DebugAction<StepRequest> implements OptionConstants {
       _request.addClassExclusionFilter("edu.rice.cs.drjava.*");
       _request.addClassExclusionFilter("edu.rice.cs.util.*");
     }
-    
-    //DrJava.consoleOut().println("Created a step request: " + _request + 
-    //                            " size: " + _size + " depth: " + _depth);
-      //DrJava.consoleOut().println("new Step: " + toString());
-      //_breakpointReq.setSuspendPolicy(EventRequest.SUSPEND_EVENT_THREAD);
-      //_breakpointReq.enable();
-      //System.out.println("Step: " + req);
-      //_manager.addStepToMap(this);
   }
   
   public String toString() {

@@ -39,15 +39,7 @@
 
 package edu.rice.cs.drjava.ui;
 
-
-/**
- * FIXME: We CANNOT import JDI classes anywhere outside of model/debug,
- * or DrJava might crash if they aren't on the classpath!
- */
-import com.sun.jdi.*;
-
 import gj.util.Vector;
-
 
 import java.io.*;
 import java.util.Hashtable;
@@ -69,7 +61,7 @@ import edu.rice.cs.drjava.model.GlobalModel;
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 import edu.rice.cs.drjava.model.debug.*;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
-import edu.rice.cs.drjava.config.OptionConstants;
+import edu.rice.cs.drjava.config.*;
 
 /** 
  * Panel for displaying the debugger input and output in MainFrame.
@@ -100,8 +92,8 @@ public class DebugPanel extends JPanel implements OptionConstants {
   private JButton _stepOutButton;
   
   private Vector<DebugManager.WatchData> _watches;
-  private Vector<ThreadReference> _threads;
-  private Vector<StackFrame> _stackFrames;
+  private Vector<DebugManager.ThreadData> _threads;
+  private Vector<DebugManager.StackData> _stackFrames;
   
   /**
    * Constructs a new panel to display debugging information when the
@@ -116,8 +108,8 @@ public class DebugPanel extends JPanel implements OptionConstants {
     _debugger = _model.getDebugManager();
     
     _watches = _debugger.getWatches();
-    _threads = _debugger.getCurrentThreads();
-    _stackFrames = _debugger.getCurrentStackFrames();
+    _threads = _debugger.getCurrentThreadData();
+    _stackFrames = _debugger.getCurrentStackFrameData();
     _leftPane = new JTabbedPane();
     _rightPane = new JTabbedPane();
     
@@ -144,36 +136,33 @@ public class DebugPanel extends JPanel implements OptionConstants {
    * @param updateThreads Whether to check for current stack trace and threads
    */
   public void updateData(boolean updateStack) {
-    //DrJava.consoleOut().println("updating data...");
-    
-    if (_debugger.isReady()) {
+     if (_debugger.isReady()) {
       _watches = _debugger.getWatches();
       if (updateStack) {
         // Get threads and stack (thread suspended)
-        _threads = _debugger.getCurrentThreads();
-        _stackFrames = _debugger.getCurrentStackFrames();
+        _threads = _debugger.getCurrentThreadData();
+        _stackFrames = _debugger.getCurrentStackFrameData();
       }
       else {
         // Empty tables (thread resumed)
-        _threads = new Vector<ThreadReference>();
-        _stackFrames = new Vector<StackFrame>();
+        _threads = new Vector<DebugManager.ThreadData>();
+        _stackFrames = new Vector<DebugManager.StackData>();
       }
     }
     else {
       // Clean up if debugger dies
       _watches = new Vector<DebugManager.WatchData>();
-      _threads = new Vector<ThreadReference>();
-      _stackFrames = new Vector<StackFrame>();
+      _threads = new Vector<DebugManager.ThreadData>();
+      _stackFrames = new Vector<DebugManager.StackData>();
       // also clear breakpoint tree?
     }
 
-    //DrJava.consoleOut().println("firing events...");
-    
     ((AbstractTableModel)_watchTable.getModel()).fireTableDataChanged();
     ((AbstractTableModel)_stackTable.getModel()).fireTableDataChanged();
-    ((AbstractTableModel)_threadTable.getModel()).fireTableDataChanged();
-    
-    //DrJava.consoleOut().println("done firing events...");
+    if (_threadTable != null) {
+      ((AbstractTableModel)_threadTable.getModel()).fireTableDataChanged();
+    }
+
   }
   
   
@@ -207,12 +196,49 @@ public class DebugPanel extends JPanel implements OptionConstants {
     
     // Stack table
     _stackTable = new JTable( new StackTableModel());
+
     _rightPane.addTab("Stack", new JScrollPane(_stackTable));
     
-    // Thread table (maybe only show if debug.show.threads is enabled?)
-    _threadTable = new JTable( new ThreadTableModel());
-    _rightPane.addTab("Threads", new JScrollPane(_threadTable));
-    
+    // Thread table
+    if (DrJava.CONFIG.getSetting(DEBUG_SHOW_THREADS).booleanValue()) {
+      _threadTable = new JTable( new ThreadTableModel());
+      _rightPane.addTab("Threads", new JScrollPane(_threadTable)); 
+      // Sets the name column to always be 2 times as wide as the status column
+      TableColumn nameColumn = null;
+      TableColumn statusColumn = null;
+      nameColumn = _threadTable.getColumnModel().getColumn(0);
+      statusColumn = _threadTable.getColumnModel().getColumn(1);
+      nameColumn.setPreferredWidth(2*statusColumn.getPreferredWidth()); 
+    }
+    DrJava.CONFIG.addOptionListener( OptionConstants.DEBUG_SHOW_THREADS, 
+                                    new OptionListener<Boolean>() {
+      public void optionChanged(OptionEvent<Boolean> oce) {
+        if (oce.value.booleanValue()) {
+          if (_threadTable == null) {
+            _threadTable = new JTable( new ThreadTableModel());
+            _rightPane.addTab("Threads", new JScrollPane(_threadTable));
+            // Sets the name column to always be 2 times as wide as the status column
+            TableColumn nameColumn = null;
+            TableColumn statusColumn = null;
+            nameColumn = _threadTable.getColumnModel().getColumn(0);
+            statusColumn = _threadTable.getColumnModel().getColumn(1);
+            nameColumn.setPreferredWidth(2*statusColumn.getPreferredWidth()); 
+          }          
+        }
+        else {
+          if (_threadTable != null) {
+            _threadTable = null;
+            _rightPane.remove(1);
+          }
+        }
+      }
+    });
+    // Sets the method column to always be 7 times as wide as the line column
+    TableColumn methodColumn = null;
+    TableColumn lineColumn = null;
+    methodColumn = _stackTable.getColumnModel().getColumn(0);
+    lineColumn = _stackTable.getColumnModel().getColumn(1);
+    methodColumn.setPreferredWidth(7*lineColumn.getPreferredWidth());  
   }
   
   /**
@@ -254,12 +280,10 @@ public class DebugPanel extends JPanel implements OptionConstants {
     public void setValueAt(Object value, int row, int col) {
       if ((value == null) || (value.equals(""))) {
         // Remove value
-        //DrJava.consoleOut().println("removing value at index " + row);
         _debugger.removeWatch(row);
       }
       else {
         // Add value
-        //DrJava.consoleOut().println("setting value: " + value);
         _debugger.addWatch(String.valueOf(value));
       }
       fireTableCellUpdated(row, col);
@@ -285,18 +309,10 @@ public class DebugPanel extends JPanel implements OptionConstants {
     public int getColumnCount() { return _columnNames.length; }
     
     public Object getValueAt(int row, int col) { 
-      StackFrame frame = _stackFrames.elementAt(row);
-      String method = "(unknown)";
-      String line = "(unknown)";
-      if (_debugger.isReady()) {
-        method = frame.location().declaringType().name() + "." +
-          frame.location().method().name();
-        line = "" + frame.location().lineNumber();
-      }
+      DebugManager.StackData frame = _stackFrames.elementAt(row);
       switch(col) {
-        //case 0: return new Integer(row);
-        case 0: return method;
-        case 1: return line;
+        case 0: return frame.getMethod();
+        case 1: return new Integer(frame.getLine());
       }
       return null;
     }
@@ -324,32 +340,10 @@ public class DebugPanel extends JPanel implements OptionConstants {
     public int getColumnCount() { return _columnNames.length; }
     
     public Object getValueAt(int row, int col) { 
-      ThreadReference threadRef  = _threads.elementAt(row);
-      String name = "(unknown)";
-      String status = "(unknown)";
-      if (_debugger.isReady()) {
-        name = threadRef.name();
-        switch (threadRef.status()) {
-          case ThreadReference.THREAD_STATUS_MONITOR: 
-            status = "MONITOR"; break;
-          case ThreadReference.THREAD_STATUS_NOT_STARTED:
-            status = "NOT STARTED"; break;
-          case ThreadReference.THREAD_STATUS_RUNNING:
-            status = "RUNNING"; break;
-          case ThreadReference.THREAD_STATUS_SLEEPING:
-            status = "SLEEPING"; break;
-          case ThreadReference.THREAD_STATUS_UNKNOWN:
-            status = "UNKNOWN"; break;
-          case ThreadReference.THREAD_STATUS_WAIT:
-            status = "WAIT"; break;
-          case ThreadReference.THREAD_STATUS_ZOMBIE:
-            status = "ZOMBIE"; break;
-        }
-      }
+      DebugManager.ThreadData threadData  = _threads.elementAt(row);
       switch(col) {
-        //case 0: return new Long(threadRef.uniqueID());
-        case 0: return name;
-        case 1: return status;
+        case 0: return threadData.getName();
+        case 1: return threadData.getStatus();
       }
       
       return null;
@@ -369,7 +363,12 @@ public class DebugPanel extends JPanel implements OptionConstants {
     
     Action resumeAction = new AbstractAction( "Resume" ) {
       public void actionPerformed(ActionEvent ae) {
-        _frame.debuggerResume();
+        try {
+          _frame.debuggerResume();
+        }
+        catch (DebugException de) {
+          _frame._showDebugError(de);
+        }
         _closeButton.requestFocus();
       }
     };
@@ -455,10 +454,8 @@ public class DebugPanel extends JPanel implements OptionConstants {
           while (documents.hasMoreElements()) {
             DefaultMutableTreeNode doc = (DefaultMutableTreeNode)documents.nextElement();
             if (doc.getUserObject().equals(bpDocNode.getUserObject())) {
-              //DrJava.consoleOut().println("matched, classname: " + bpDoc.getUserObject());
               
               // Create a new breakpoint in this node
-
               //Sort breakpoints by line number.
               Enumeration lineNumbers = doc.children();
               while (lineNumbers.hasMoreElements()) {
@@ -504,9 +501,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
           // Make visible
           TreePath pathToNewBreakpoint = new TreePath(newBreakpoint.getPath());
           _bpTree.scrollPathToVisible(pathToNewBreakpoint);
-          //_bpTree.setSelectionPath(pathToNewBreakpoint);
-          }
-        
+        }
       };
       SwingUtilities.invokeLater(doCommand);
     }
@@ -525,22 +520,18 @@ public class DebugPanel extends JPanel implements OptionConstants {
           Enumeration documents = _breakpointRootNode.children();
           while (documents.hasMoreElements()) {
             DefaultMutableTreeNode doc = (DefaultMutableTreeNode)documents.nextElement();
-            if (doc.getUserObject().equals(bpDoc.getUserObject())) {
-              //DrJava.consoleOut().println("matched, classname: " + bpDoc.getUserObject());
-              
+            if (doc.getUserObject().equals(bpDoc.getUserObject())) {              
               // Find the correct line number node for this breakpoint
               Enumeration lineNumbers = doc.children();
               while (lineNumbers.hasMoreElements()) {
                 DefaultMutableTreeNode lineNumber = 
                   (DefaultMutableTreeNode)lineNumbers.nextElement();
                 if (lineNumber.getUserObject().equals(new Integer(bp.getLineNumber()))) {
-                  //DrJava.consoleOut().println("matched, lineNumber: " + bp.getLineNumber());
                   
                   // Select the node which has been hit
                   TreePath pathToNewBreakpoint = new TreePath(lineNumber.getPath());
                   _bpTree.scrollPathToVisible(pathToNewBreakpoint);
                   _bpTree.setSelectionPath(pathToNewBreakpoint);
-                  //DrJava.consoleOut().println("Set selection to new hit breakpoint.");
                 }
               }
             }
@@ -566,15 +557,12 @@ public class DebugPanel extends JPanel implements OptionConstants {
           while (documents.hasMoreElements()) {
             DefaultMutableTreeNode doc = (DefaultMutableTreeNode)documents.nextElement();
             if (doc.getUserObject().equals(bpDocNode.getUserObject())) {
-              //DrJava.consoleOut().println("matched, classname: " + bpDoc.getUserObject());
-              
               // Find the correct line number node for this breakpoint
               Enumeration lineNumbers = doc.children();
               while (lineNumbers.hasMoreElements()) {
                 DefaultMutableTreeNode lineNumber = 
                   (DefaultMutableTreeNode)lineNumbers.nextElement();
                 if (lineNumber.getUserObject().equals(new Integer(bp.getLineNumber()))) {
-                  //DrJava.consoleOut().println("matched, lineNumber: " + bp.getLineNumber());
                   _bpTreeModel.removeNodeFromParent(lineNumber);
                   if (doc.getChildCount() == 0) {
                     // this document has no more breakpoints, remove it
@@ -602,9 +590,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
       // Only change GUI from event-dispatching thread
       Runnable doCommand = new Runnable() {
         public void run() {
-          //DrJava.consoleOut().println("starting DP.currThreadSuspended...");
           updateData(true);
-          //DrJava.consoleOut().println("done with DP.currThreadSuspended...");
         }
       };
       SwingUtilities.invokeLater(doCommand);

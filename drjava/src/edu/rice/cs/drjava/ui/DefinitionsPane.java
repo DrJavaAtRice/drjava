@@ -923,38 +923,7 @@ public class DefinitionsPane extends JEditorPane
     }
 
     //DrJava.consoleOut().println("done with centerViewOnOffset");
-  }
-  /*
-  private void _forceRepaint() {
-    synchronized(this) {
-      _updatePending = true;
-      revalidate();
-      repaint();
-      while(_updatePending) {
-        try {
-          DrJava.consoleOut().println("about to wait");
-          this.wait();
-          DrJava.consoleOut().println("done waiting");
-        }
-        catch (InterruptedException ie) {
-          throw new UnexpectedException(ie);
-        }
-      }
-    }
-  }
-  
-  public void update(Graphics g) {    
-    if (_updatePending) {
-      DrJava.consoleOut().println("update called");
-      synchronized(this) {
-        super.update(g);
-        _updatePending = false;
-        this.notifyAll();
-      }
-    }
-    else
-      super.update(g);
-  } */     
+  }   
   
   public void centerViewOnLine(int lineNumber) {
     //DrJava.consoleOut().println("beginning of centerViewOnLine");

@@ -63,7 +63,6 @@ public class EventHandler extends Thread {
     while (_connected) {
       try {
         EventSet eventSet = queue.remove();
-        //              System.err.println("Got Event Set, policy = " + eventSet.suspendPolicy());
         //boolean resumeStoppedApp = false;
         EventIterator it = eventSet.eventIterator();
         while (it.hasNext()) {
@@ -80,7 +79,6 @@ public class EventHandler extends Thread {
       } catch (InterruptedException exc) {
         // Do nothing. Any changes will be seen at top of loop.
       } catch (VMDisconnectedException discExc) {
-        //System.out.println("Got disc exception");
         handleDisconnectedException();
         break;
       }
@@ -89,7 +87,7 @@ public class EventHandler extends Thread {
   }
   
   public void handleEvent(Event e) {
-    //System.out.println("handleEvent: "+e);
+    //DrJava.consoleOut().println("handleEvent: "+e);
     if (e instanceof BreakpointEvent) {
       _handleBreakpointEvent((BreakpointEvent) e);
     }
@@ -116,20 +114,13 @@ public class EventHandler extends Thread {
   }
   
   private void _handleBreakpointEvent(BreakpointEvent e) {
-    //System.out.println("Breakpoint reached");
     _manager.setCurrentThread(e.thread());
-    //DrJava.consoleOut().println("----EH: Notifying thread suspended on breakpoint");
     _manager.currThreadSuspended();
-    //DrJava.consoleOut().println("----EH: Scrolling to source");
     _manager.scrollToSource(e);
-    //DrJava.consoleOut().println("----EH: Notifying breakpoint reached");
     _manager.reachedBreakpoint((BreakpointRequest)e.request());
-    //DrJava.consoleOut().println("----EH: Done with breakpoint event");
-    //((LocatableEvent) e).thread().suspend();
   }
   
   private void _handleStepEvent(StepEvent e) {
-    //System.out.println("Step executed");
     synchronized(_manager){
       _manager.printMessage("Stepped to " + 
                             e.location().declaringType().name() + "." +
@@ -142,56 +133,38 @@ public class EventHandler extends Thread {
   }
   
   private void _handleModificationWatchpointEvent(ModificationWatchpointEvent e) {
-    //System.out.println("Watchpoint executed");
     _manager.printMessage("ModificationWatchpointEvent occured ");
     _manager.printMessage("Field: " + e.field() + " Value: " +
                           e.valueToBe() +"]");
   }
   
   private void _handleClassPrepareEvent(ClassPrepareEvent e) {
-    //DrJava.consoleOut().println("ClassPrepareEvent occured");
-    //DrJava.consoleOut().println("In " + e.referenceType().name());
-    /*try {
-      DrJava.consoleOut().println("sourcename " + e.referenceType().sourceName());
-    }
-    catch(AbsentInformationException aie) {
-      DrJava.consoleOut().println("no info");
-    }*/
     try {
       _manager.getPendingRequestManager().classPrepared(e);
     }
     catch(DebugException de) {
-      //System.err.println("Error preparing action: " + de);
     }
     // resumes this thread which was suspended because its 
     // suspend policy was SUSPEND_EVENT_THREAD
     e.thread().resume();
-    //DrJava.consoleOut().println("resumed thread");
   }
   
   private void _handleThreadDeathEvent(ThreadDeathEvent e) {
-    //System.out.println("**Thread " + e.thread() + " died**"); 
     if (e.thread().equals(_manager.getCurrentThread())) {
-      //DrJava.consoleOut().println("in handle thread death: event thread: " + e.thread() + " current thread: " +
-      //                            _manager.getCurrentThread());
       _manager.currThreadDied();
       _manager.setCurrentThread(null);
-    }      
-    //e.thread().resume();
+    }
   }
   
   private void _handleVMDeathEvent(VMDeathEvent e) {
-    //System.out.println("VM died");    
     _cleanUp(e);
   }
   
   private void _handleVMDisconnectEvent(VMDisconnectEvent e) {
-    //System.out.println("VM disconnected");    
     _cleanUp(e);
   }
   
   private void _cleanUp(Event e) {
-    //DrJava.consoleOut().println("event: "+e);
     _connected = false;
     if (_manager.getCurrentThread() != null) {
       _manager.currThreadDied();
@@ -199,6 +172,7 @@ public class EventHandler extends Thread {
     }
     _manager.shutdown();
   }
+  
   /**
    * A VMDisconnectedException has happened while dealing with
    * another event. We need to flush the event queue, dealing only

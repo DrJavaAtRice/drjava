@@ -140,21 +140,12 @@ public class DebugManager {
    */
   public synchronized void startup() throws DebugException {
     if (!isReady()) {
-      //DrJava.consoleOut().println("Starting up...");
       _attachToVM();
-      //DrJava.consoleOut().println("Attached. VM = " +_vm);
-    
-      //DrJava.consoleOut().println("EventHandler started...");
       ThreadDeathRequest tdr = _eventManager.createThreadDeathRequest();
       tdr.setSuspendPolicy(EventRequest.SUSPEND_EVENT_THREAD);
       tdr.enable();
       EventHandler eventHandler = new EventHandler(this, _vm);
       eventHandler.start();
-     // notifyListeners(new EventNotifier() {
-       // public void notifyListener(DebugListener l) {
-        //  l.debuggerStarted();
-       // }
-      //});
     }
   }
   
@@ -182,11 +173,10 @@ public class DebugManager {
     Connector.Argument port = (Connector.Argument) args.get("port");
     try {
       int debugPort = _model.getDebugPort();
-      //System.out.println("using port: " + debugPort);
+      //DrJava.consoleOut().println("using port: " + debugPort);
       port.setValue("" + debugPort);
       _vm = connector.attach(args);
       _eventManager = _vm.eventRequestManager();
-      //DrJava.consoleOut().println("Connected to VM @ port "+debugPort);
     }
     catch (IOException ioe) {
       throw new DebugException("Could not connect to VM: " + ioe);
@@ -202,8 +192,6 @@ public class DebugManager {
    */
   public synchronized void shutdown() {
     if (isReady()) {
-      //DrJava.consoleOut().println("Shutting down...");
-      
       removeAllBreakpoints();
       removeAllWatches();
       try {
@@ -215,12 +203,6 @@ public class DebugManager {
       finally {
         _vm = null;
         _eventManager = null;
-        
-        //notifyListeners(new EventNotifier() {
-        //  public void notifyListener(DebugListener l) {
-        //    l.debuggerShutdown();
-        //  }
-        //});
       }
     }
   }
@@ -280,12 +262,8 @@ public class DebugManager {
    * contain the line number, null is returned.
    */
   synchronized ReferenceType getReferenceType(String className, int lineNumber) {
-    //System.out.println("Looking for RefType for class: " + className);
-    //System.out.println("on line number: " + lineNumber);
-    
     // Get all classes that match this name
     List classes = _vm.classesByName(className);
-    //DrJava.consoleOut().println("Num of classes found: " + classes.size());
     ReferenceType ref = null;
     
     // Assume first one is correct, for now
@@ -331,11 +309,11 @@ public class DebugManager {
   /**
    * Suspends execution of the currently running document.
    */
-  public synchronized void suspend() {
+  public synchronized void suspend() throws DebugException {
     if (!isReady()) return;
     
     if (_thread == null)
-      DrJava.consoleOut().println("Suspend called while _thread was null");
+      throw new DebugException("Suspend called while _thread was null");
     _thread.suspend();
     currThreadSuspended();
   }
@@ -343,7 +321,7 @@ public class DebugManager {
   /**
    * Resumes execution of the currently loaded document.
    */
-  public synchronized void resume() {
+  public synchronized void resume() throws DebugException {
     if (!isReady()) return;
     
     if (_thread == null)
@@ -358,7 +336,7 @@ public class DebugManager {
     
   /** 
    * Steps into the execution of the currently loaded document.
-   * The flag denotes what kind of step to take. The following mark valid options:
+   * @flag The flag denotes what kind of step to take. The following mark valid options:
    * StepRequest.STEP_INTO
    * StepRequest.STEP_OVER
    * StepRequest.STEP_OUT
@@ -370,19 +348,36 @@ public class DebugManager {
     // the current thread
     List steps = _eventManager.stepRequests();    
     for (int i = 0; i < steps.size(); i++) {
-      if (((StepRequest)steps.get(i)).thread().equals(_thread)) {
-        //DrJava.consoleOut().println("There's already a StepRequest on the current thread");
-        //DrJava.consoleOut().println("suspendCount: " + _thread.suspendCount());
-        return;
+      StepRequest step = (StepRequest)steps.get(i);
+      if (step.thread().equals(_thread)) {
+        if (!_thread.isSuspended())
+          return;
+        else {
+          _eventManager.deleteEventRequest(step);
+          break;
+        }
       }
     }
         
     Step step = new Step(this, StepRequest.STEP_LINE, flag);
     notifyStepRequested();
     resume();
-    //System.out.println("_thread resumed");
   }
   
+  /**
+   * Called from interactionsEnded in MainFrame in order to clear any current 
+   * StepRequests that remain.
+   */
+  public synchronized void clearCurrentStepRequest() {   
+    List steps = _eventManager.stepRequests();   
+    for (int i = 0; i < steps.size(); i++) {
+      StepRequest step = (StepRequest)steps.get(i);
+      if (step.thread().equals(_thread)) {
+        _eventManager.deleteEventRequest(step);
+        return;
+      }
+    }
+  }
 
   /**
    * Adds a watch on the given field or variable.
@@ -392,6 +387,7 @@ public class DebugManager {
     if (!isReady()) return;
     
     _watches.addElement(new WatchData(field));
+    _updateWatches();
   }
   
   /**
@@ -460,7 +456,6 @@ public class DebugManager {
   {
     if (!isReady()) return;
     
-    //System.out.println("setting: " + breakpoint);
     _breakpoints.addElement(breakpoint);
     breakpoint.getDocument().addBreakpoint(breakpoint);
     
@@ -481,7 +476,6 @@ public class DebugManager {
   public synchronized void removeBreakpoint(final Breakpoint breakpoint) {
     if (!isReady()) return;
     
-    //System.out.println("unsetting: " + breakpoint);
     _breakpoints.removeElement(breakpoint);
     
     if ( breakpoint.getRequest() != null && _eventManager != null) {
@@ -575,28 +569,25 @@ public class DebugManager {
   }
   
   /**
-   * Returns all of the vm's current threads
-   * or null if the vm is null
-   * TO DO: CAN'T RETURN ThreadReference!
+   * Returns a Vector of ThreadData or null if the vm is null
    */
-  public synchronized Vector<ThreadReference> getCurrentThreads() {
+  public synchronized Vector<ThreadData> getCurrentThreadData() {
     if (!isReady()) return null;
 
     Iterator iter = _vm.allThreads().iterator();
-    Vector<ThreadReference> threads = new Vector<ThreadReference>();
-    while (iter.hasNext()) {
-      threads.addElement((ThreadReference)iter.next());
+    Vector<ThreadData> threads = new Vector<ThreadData>();
+    while (iter.hasNext()) {      
+      threads.addElement(new ThreadData((ThreadReference)iter.next()));                                                  
     }
     return threads;
   }
   
   /**
-   * Returns a Vector of StackFrames for the current thread or null if the 
+   * Returns a Vector of StackData for the current thread or null if the 
    * current thread is null
-   * TO DO: CAN'T RETURN StackFrame!
    * TO DO: Config option for hiding DrJava subset of stack trace
    */
-  public synchronized Vector<StackFrame> getCurrentStackFrames() {
+  public synchronized Vector<StackData> getCurrentStackFrameData() {
     if (!isReady() || (_thread == null) || !_thread.isSuspended()) {
       return null;
     }
@@ -604,9 +595,9 @@ public class DebugManager {
     Iterator iter = null;
     try {
       iter = _thread.frames().iterator();
-      Vector<StackFrame> frames = new Vector<StackFrame>();
+      Vector<StackData> frames = new Vector<StackData>();
       while (iter.hasNext()) {
-        frames.addElement((StackFrame)iter.next());
+        frames.addElement(new StackData((StackFrame)iter.next()));
       }
       return frames;
     }
@@ -621,7 +612,6 @@ public class DebugManager {
    * @param e should be a LocatableEvent
    */
   synchronized void scrollToSource(LocatableEvent e) {
-    //DrJava.consoleOut().println("DM: scrolling to source...");
     Location location = e.location();
     OpenDefinitionsDocument doc = null;
     
@@ -662,43 +652,33 @@ public class DebugManager {
       
       if (f != null) {
         // Get a document for this file, forcing it to open
-        //DrJava.consoleOut().println("found file: " + f.getAbsolutePath());
         try {
-          //doc = _model.getDocumentForFile(f, location.lineNumber());
           doc = _model.getDocumentForFile(f);
         }
         catch (IOException ioe) {
           // No doc, so don't notify listener
-          //DrJava.consoleOut().println("Problem opening file, won't scroll: " + ioe);
         }
         catch (OperationCanceledException oce) {
           // No doc, so don't notify listener
-          //DrJava.consoleOut().println("Problem opening file, won't scroll: " + oce);
         }
       }
     }
     
     // Open and scroll if doc was found
     if (doc != null) {
-      //DrJava.consoleOut().println("Will scroll to line: " + location.lineNumber());
-
       final OpenDefinitionsDocument docF = doc;
       final Location locationF = location;
       
-      //DrJava.consoleOut().println("DM: notifying thread location updated...");
       notifyListeners(new EventNotifier() {
         public void notifyListener(DebugListener l) {
           l.threadLocationUpdated(docF, locationF.lineNumber());
         }
       });
-      //DrJava.consoleOut().println("DM: done notifying");
     }
     else {
-      //DrJava.consoleOut().println("couldn't open file to scroll to");
       String className = location.declaringType().name();
       printMessage("  (Source for " + className + " not found.)");
     }
-    //DrJava.consoleOut().println("DM: done scrolling");
   }
   
   /**
@@ -711,8 +691,6 @@ public class DebugManager {
     File f = null;
     for (int i = 0; i < paths.size(); i++) {
       String currRoot = paths.elementAt(i).getAbsolutePath();
-      //DrJava.consoleOut().println("Trying to find " + currRoot + ps + className + 
-      //                            ".java");
       f = new File(currRoot + System.getProperty("file.separator") + filename);
       if (f.exists()) {
         return f;
@@ -745,8 +723,6 @@ public class DebugManager {
     stackIndex++;
     Location location = currFrame.location();
     ReferenceType rt = location.declaringType();
-    //DrJava.consoleOut().println("stack frame: " + frames);
-    //DrJava.consoleOut().println("all fields: " + rt.allFields());
     for (int i = 0; i < _watches.size(); i++) {
       WatchData currWatch = _watches.elementAt(i);
       String currName = currWatch.getName();
@@ -770,7 +746,6 @@ public class DebugManager {
         localVar = currFrame.visibleVariableByName(currName);
       }
       catch (AbsentInformationException aie) {
-        //DrJava.consoleOut().println("No line number information for this method");
       }
       
       // if the variable being watched is not a local variable, check if it's a field
@@ -778,7 +753,7 @@ public class DebugManager {
         Field field = rt.fieldByName(currName);
         
         // if the variable is not a field either, it's not defined in this 
-        // ReferenceType's scope, keep further out in scope.
+        // ReferenceType's scope, keep going further out in scope.
         String className = rt.name();
         //ReferenceType outerRt;
         while (field == null) {
@@ -796,6 +771,11 @@ public class DebugManager {
             break;
           }
           rt = (ReferenceType)_vm.classesByName(className).get(0);
+          if (rt == null) {
+            currWatch.setValue(null);
+            currWatch.setType(null);
+            break;
+          }
           field = rt.fieldByName(currName);
         }
         if (field != null) {
@@ -813,17 +793,16 @@ public class DebugManager {
           else {
             StackFrame outerFrame = currFrame;
             // the field is not static
-            // check if the frame represents a native or static method and
+            // Check if the frame represents a native or static method and
             // keep going down the stack frame looking for the frame that
             // has the same ReferenceType that we found the Field in.
-            // This is a hack, remove it to improve performance, it will
-            // work sometimes, but not always.
-            //DrJava.consoleOut().println("checking frames *");
+            // This is a hack, remove it to slightly improve performance but
+            // at the loss of ever being able to watch outer instance
+            // fields. If unremoved, this will work sometimes, but not always.
             while (outerFrame.thisObject() != null && 
                    !outerFrame.thisObject().referenceType().equals(rt) &&
                    stackIndex < frames.size()) {
               outerFrame = (StackFrame) frames.get(stackIndex);
-              //DrJava.consoleOut().println("outerFrame: " + outerFrame);
               stackIndex++;
             }
             if (stackIndex < frames.size() && outerFrame.thisObject() != null) { 
@@ -862,15 +841,12 @@ public class DebugManager {
    * Notifies all listeners that the current thread has been suspended.
    */
   synchronized void currThreadSuspended() {
-    //DrJava.consoleOut().println("DM: thread suspended (show)");
     _updateWatches();
-    //_displayWatchpoints();
     notifyListeners(new EventNotifier() {
       public void notifyListener(DebugListener l) {
         l.currThreadSuspended();
       }
     });
-    //DrJava.consoleOut().println("done notifying currThreadSuspended...");
   }
   
   
@@ -878,7 +854,6 @@ public class DebugManager {
    * Notifies all listeners that the current thread has been resumed.
    */
   synchronized void currThreadResumed() {
-    //DrJava.consoleOut().println("DM: thread resumed (hide)");
     notifyListeners(new EventNotifier() {
       public void notifyListener(DebugListener l) {
         l.currThreadResumed();
@@ -940,10 +915,9 @@ public class DebugManager {
   }
 
   public synchronized void removeListener(DebugListener listener){
-    //System.out.println("size A: "+_listeners.size());
     _listeners.remove(listener);
-    //System.out.println("size B: "+_listeners.size());    
   }
+  
   /**
    * Lets the listeners know some event has taken place.
    * @param EventNotifier n tells the listener what happened
@@ -1027,4 +1001,62 @@ public class DebugManager {
     }
   }
   
+  public class ThreadData {
+    private ThreadReference _thread;
+    private String _name;
+    private String _status;
+    
+    public ThreadData(ThreadReference thread) {
+      _thread = thread;
+      _name = _thread.name();
+      String status = "(unknown)";
+      switch (_thread.status()) {
+        case ThreadReference.THREAD_STATUS_MONITOR: 
+          status = "MONITOR"; break;
+        case ThreadReference.THREAD_STATUS_NOT_STARTED:
+          status = "NOT STARTED"; break;
+        case ThreadReference.THREAD_STATUS_RUNNING:
+          status = "RUNNING"; break;
+        case ThreadReference.THREAD_STATUS_SLEEPING:
+          status = "SLEEPING"; break;
+        case ThreadReference.THREAD_STATUS_UNKNOWN:
+          status = "UNKNOWN"; break;
+        case ThreadReference.THREAD_STATUS_WAIT:
+          status = "WAIT"; break;
+        case ThreadReference.THREAD_STATUS_ZOMBIE:
+          status = "ZOMBIE"; break;
+      }
+      _status = status;
+    }
+    
+    public String getName() {
+      return _name;
+    }
+    
+    public String getStatus() {
+      return _status;
+    }
+  }
+  
+  public class StackData {
+    private String _method;
+    private int _line;
+    
+    public StackData (StackFrame frame) {
+      String method = "(unknown)";
+      String line = "(unknown)";
+      method = frame.location().declaringType().name() + "." +
+        frame.location().method().name();
+      _method = method;
+      _line = frame.location().lineNumber();
+    }
+    
+    public String getMethod() {
+      return _method;
+    }
+    
+    public int getLine() {
+      return _line;
+    }
+  }
 }

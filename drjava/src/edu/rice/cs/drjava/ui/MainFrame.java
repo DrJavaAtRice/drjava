@@ -470,20 +470,6 @@ public class MainFrame extends JFrame implements OptionConstants {
   private Action _clearOutputAction = new AbstractAction("Clear Console") {
     public void actionPerformed(ActionEvent ae) {
       _model.resetConsole();
-      //CONFIG.setSetting(INDENT_LEVEL, new Integer(8));
-      //CONFIG.setSetting(FONT_MAIN, DrJava.CONFIG.getSetting(FONT_MAIN).deriveFont(32f));
-      //CONFIG.setSetting(FONT_DOCLIST, DrJava.CONFIG.getSetting(FONT_DOCLIST).deriveFont(25f));
-      //CONFIG.setSetting(FONT_TOOLBAR, DrJava.CONFIG.getSetting(FONT_TOOLBAR).deriveFont(18f));
-      //CONFIG.setSetting(TOOLBAR_ICONS_ENABLED, new Boolean(!DrJava.CONFIG.getSetting(TOOLBAR_ICONS_ENABLED).booleanValue()));
-      //CONFIG.setSetting(LINEENUM_ENABLED, new Boolean(!DrJava.CONFIG.getSetting(LINEENUM_ENABLED).booleanValue()));
-      //CONFIG.setSetting(DEFINITIONS_COMMENT_COLOR, Color.red.darker());
-      //CONFIG.setSetting(DEFINITIONS_MATCH_COLOR, Color.gray.brighter());
-      //CONFIG.setSetting(JSR14_LOCATION, new File("/home/javaplt/packages/jsr14_adding_generics-1_0-ea/javac.jar"));
-      //CONFIG.setSetting(JAVAC_LOCATION, new File("/usr/local/bin/javac"));
-      //Vector<String> v = new Vector<String>();
-      //v.addElement("/home/mcgraw/javafiles/");
-      //CONFIG.setSetting(EXTRA_CLASSPATH, v);
-      //CONFIG.setSetting(HISTORY_MAX_SIZE, new Integer(10));
     }
   };
 
@@ -583,7 +569,12 @@ public class MainFrame extends JFrame implements OptionConstants {
     new AbstractAction("Resume Debugger")
   {
     public void actionPerformed(ActionEvent ae) {
-      debuggerResume();
+      try {
+        debuggerResume();
+      }
+      catch (DebugException de) {
+        _showDebugError(de);
+      }
     }
   };
 
@@ -932,7 +923,6 @@ public class MainFrame extends JFrame implements OptionConstants {
     try {
       if (inDebugMode()) {
         // Turn off debugger
-        //DrJava.consoleOut().println("shutting down");
         debugger.shutdown();
       }
       else {
@@ -960,11 +950,6 @@ public class MainFrame extends JFrame implements OptionConstants {
    * Display the debugger tab and update the Debug menu accordingly.
    */
   public void showDebugger() {
-    /*
-    _model.getDebugManager().init(_debugPanel.getUIAdapter());
-    _tabbedPane.add("Debug", _debugPanel);
-    _tabbedPane.setSelectedComponent(_debugPanel);
-    */
     _setDebugMenuItemsEnabled(true);
     _showDebuggerPanel();
   }
@@ -973,12 +958,6 @@ public class MainFrame extends JFrame implements OptionConstants {
    * Hide the debugger tab and update the Debug menu accordingly.
    */
   public void hideDebugger() {
-    //DrJava.consoleOut().println("Calling hideDebugger");
-    /**
-    _model.getDebugManager().cleanUp();
-    _tabbedPane.remove(_debugPanel);
-    _debugPanel.reset();
-    */
     _setDebugMenuItemsEnabled(false);
     _hideDebuggerPanel();
   }
@@ -986,29 +965,11 @@ public class MainFrame extends JFrame implements OptionConstants {
   private void _showDebuggerPanel() {
     _debugSplitPane.setTopComponent(_docSplitPane);
     _mainSplit.setTopComponent(_debugSplitPane);
-    //System.out.println("split max: " + _debugSplitPane.getMaximumDividerLocation());
-    //System.out.println("debug min: " + _debugPanel.getMinimumSize().getHeight());
-    //_debugSplitPane.setDividerLocation(_debugSplitPane.getMaximumDividerLocation() -
-    //                                   _debugPanel.getMinimumSize().getHeight());
-    
-    /**
-    _debugSplitPane.setDividerSize(SPLIT_DIVIDER_SIZE);
-    int height = _debugSplitPane.getTopComponent().getHeight();
-    // int debugHeight = _debugPanel.getPreferredSize().getHeight();
-    _debugSplitPane.setDividerLocation(height - 150);  // height-debugHeight
-    */
+    _debugPanel.updateData(false);
   }
   
   private void _hideDebuggerPanel() {
     _mainSplit.setTopComponent(_docSplitPane);
-    
-    /**
-    _debugSplitPane.setDividerSize(0);
-    int height = _mainSplit.getDividerLocation();
-    //System.out.println("height of mainSplit.top: " + height);
-    //System.out.println("mainSplit.dividerLoc: " + _mainSplit.getDividerLocation());
-    _debugSplitPane.setDividerLocation(height);
-    */
   }
 
 
@@ -1296,7 +1257,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   /**
    * Suspends the current execution of the debugger
    *
-  private void debuggerSuspend() {
+  private void debuggerSuspend() throws DebugException {
     if (inDebugMode())
       _model.getDebugManager().suspend();
   }/
@@ -1304,13 +1265,10 @@ public class MainFrame extends JFrame implements OptionConstants {
   /**
    * Resumes the debugger's current execution
    */
-  void debuggerResume() {
+  void debuggerResume() throws DebugException {
     if (inDebugMode()) {
       _model.getDebugManager().resume();
-      if (_currentThreadLocationHighlight != null) {
-        _currentThreadLocationHighlight.remove();
-      }
-      _currentThreadLocationHighlight = null;
+      _removeThreadLocationHighlight();
     }
   }
 
@@ -1433,25 +1391,25 @@ public class MainFrame extends JFrame implements OptionConstants {
   }
 
 
-  private void _showIOError(IOException ioe) {
+  void _showIOError(IOException ioe) {
     _showError(ioe, "Input/output error",
                "An I/O exception occurred during the last operation.");
   }
 
-  private void _showClassNotFoundError(ClassNotFoundException cnfe) {
+  void _showClassNotFoundError(ClassNotFoundException cnfe) {
     _showError(cnfe, "Class Not Found",
                "A ClassNotFound exception occurred during the last operation.\n" +
                "Please check that your classpath includes all relevant " +
                "directories.\n\n");
   }
 
-  private void _showNoClassDefError(NoClassDefFoundError ncde) {
+  void _showNoClassDefError(NoClassDefFoundError ncde) {
     _showError(ncde, "No Class Def",
                "A NoClassDefFoundError occurred during the last operation.\n" +
                "Please check that your classpath includes all relevant paths.\n\n");
   }
 
-  private void _showDebugError(DebugException de) {
+  void _showDebugError(DebugException de) {
     _showError(de, "Debug Error",
                "A JSwat error occurred in the last operation.\n\n");
   }
@@ -2202,8 +2160,6 @@ public class MainFrame extends JFrame implements OptionConstants {
           
           if (b.getIcon() == null) {
             if (iconsEnabled) {
-              //Icon I = (Icon) b.getAction().getValue(Action.SMALL_ICON);
-              //System.out.println("button["+i+"]: " + I);
               b.setIcon( (Icon) a.getValue(Action.SMALL_ICON));
             }
           }
@@ -2262,8 +2218,8 @@ public class MainFrame extends JFrame implements OptionConstants {
   private class PositionListener implements CaretListener {
 
     public void caretUpdate( CaretEvent ce ) {
-      _model.getActiveDocument().
-        syncCurrentLocationWithDefinitions(ce.getDot());
+      //_model.getActiveDocument().
+      //  syncCurrentLocationWithDefinitions(ce.getDot());
       updateLocation();
     }
 
@@ -2401,6 +2357,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     if (_model.getDebugManager() != null) {
       try {
         _debugPanel = new DebugPanel(this);
+        _debugPanel.setPreferredSize(_debugPanel.getMinimumSize());
       }
       catch(NoClassDefFoundError e) {
         // Don't use the debugger
@@ -2594,6 +2551,27 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
   }
   
+  /**
+   * Removes the current highlight
+   */
+  private void _removeThreadLocationHighlight() {
+    if (_currentThreadLocationHighlight != null) {
+      _currentThreadLocationHighlight.remove();
+    }
+    _currentThreadLocationHighlight = null;
+  }
+  
+  /**
+   * Disable any step timer
+   */
+  private void _disableStepTimer() {
+    synchronized (_debugStepTimerLock) {
+      if ((_debugStepTimer != null) && (_debugStepTimer.isRunning())) {
+        _debugStepTimer.stop();
+        _debugStepTimer = null;
+      }
+    }
+  }
   
   /**
    * Blocks access to DrJava while the hourglass cursor is on
@@ -2626,22 +2604,13 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
     
     public void debuggerShutdown() {
-      // Disable any step timer
-      synchronized (_debugStepTimerLock) {
-        if ((_debugStepTimer != null) && (_debugStepTimer.isRunning())) {
-          _debugStepTimer.stop();
-          _debugStepTimer = null;
-        }
-      }
+      _disableStepTimer();
       
       // Only change GUI from event-dispatching thread
       Runnable doCommand = new Runnable() {
         public void run() {
           hideDebugger();
-          if (_currentThreadLocationHighlight != null) {
-            _currentThreadLocationHighlight.remove();
-          }
-          _currentThreadLocationHighlight = null;
+          _removeThreadLocationHighlight();
         }
       };
       SwingUtilities.invokeLater(doCommand);
@@ -2652,11 +2621,8 @@ public class MainFrame extends JFrame implements OptionConstants {
       // Only change GUI from event-dispatching thread
       Runnable doCommand = new Runnable() {
         public void run() {
-          //DrJava.consoleOut().println("MF: thread location updated");
-          
           ActionListener setSizeListener = new ActionListener() {
             public void actionPerformed(ActionEvent ae) {
-              //DrJava.consoleOut().println("MF: in setSizeListener.actionPerformed");
               _currentDefPane.centerViewOnLine(lineNumber);
               _docList.revalidate();
               _docList.repaint();
@@ -2667,26 +2633,15 @@ public class MainFrame extends JFrame implements OptionConstants {
           _currentDefPane.addSetSizeListener(setSizeListener);
           
           if (!_model.getActiveDocument().equals(doc)) {
-            //DrJava.consoleOut().println("Don't need to setActiveDocument here");
             _model.setActiveDocument(doc);
           }
       
           if (_currentDefPane.getSize().getWidth() > 0 &&
               _currentDefPane.getSize().getHeight() > 0) {
-            //DrJava.consoleOut().println("MF: centering view");
             _currentDefPane.centerViewOnLine(lineNumber); 
-            //_docList.revalidate();
-            //_docList.repaint();
-            //_docSplitPane.revalidate();
-            //_docSplitPane.repaint();
           }
 
-          if (_currentThreadLocationHighlight != null) {
-            _currentThreadLocationHighlight.remove();
-            _currentThreadLocationHighlight = null;
-            //_currentDefPane.revalidate();
-            //_currentDefPane.repaint();
-          }
+          _removeThreadLocationHighlight();
           DefinitionsDocument defDoc = doc.getDocument();
           int startOffset = defDoc.getOffset(lineNumber);
           int endOffset = defDoc.getLineEndPos(startOffset);
@@ -2694,10 +2649,6 @@ public class MainFrame extends JFrame implements OptionConstants {
             _currentDefPane.getHighlightManager().addHighlight(startOffset,
                                                                endOffset,
                                                                DefinitionsPane.THREAD_PAINTER);
-          //DrJava.consoleOut().println("MF: done with thread loc update");
-          
-          //System.out.println("Doc modified? "+ doc.isModifiedSinceSave());
-          //System.out.println("Already warned? " + _hasWarnedAboutModified);
           if (doc.isModifiedSinceSave() && 
               !_currentDefPane.hasWarnedAboutModified()) {
             
@@ -2706,7 +2657,6 @@ public class MainFrame extends JFrame implements OptionConstants {
             //no need to update flag, because previous method call will do it
             //_hasWarnedAboutModified = true;
           }
-          
         }
       };
       SwingUtilities.invokeLater(doCommand);
@@ -2766,20 +2716,12 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
     
     public void currThreadSuspended() {
-      // Disable any step timer
-      synchronized (_debugStepTimerLock) {
-        if ((_debugStepTimer != null) && (_debugStepTimer.isRunning())) {
-          _debugStepTimer.stop();
-          _debugStepTimer = null;
-        }
-      }
+      _disableStepTimer();
       
       // Only change GUI from event-dispatching thread
       Runnable doCommand = new Runnable() {
         public void run() {
-          //DrJava.consoleOut().println("showing resume, etc");
           _setThreadDependentDebugMenuItems(true);
-          //DrJava.consoleOut().println("done with MF.currThreadSuspended...");
         }
       };
       SwingUtilities.invokeLater(doCommand);
@@ -2789,7 +2731,6 @@ public class MainFrame extends JFrame implements OptionConstants {
       // Only change GUI from event-dispatching thread
       Runnable doCommand = new Runnable() {
         public void run() {
-          //DrJava.consoleOut().println("hiding resume, etc");
           _setThreadDependentDebugMenuItems(false);
         }
       };
@@ -2797,23 +2738,12 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
     
     public void currThreadDied() {
-      // Disable any step timer
-      synchronized (_debugStepTimerLock) {
-        if ((_debugStepTimer != null) && (_debugStepTimer.isRunning())) {
-          _debugStepTimer.stop();
-          _debugStepTimer = null;
-        }
-      }
+      _disableStepTimer();
       
       // Only change GUI from event-dispatching thread
       Runnable doCommand = new Runnable() {
         public void run() {
-          if (_currentThreadLocationHighlight != null) {
-            _currentThreadLocationHighlight.remove();
-            _currentThreadLocationHighlight = null;
-            //_currentDefPane.revalidate();
-            //_currentDefPane.repaint();
-          }
+          _removeThreadLocationHighlight();
           if (inDebugMode()) {
             _setDebugMenuItemsEnabled(true);
           }
@@ -2920,6 +2850,18 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
 
     public void interactionEnded() {
+      if (inDebugMode()) {
+        _disableStepTimer();
+        // Only change GUI from event-dispatching thread
+        Runnable doCommand = new Runnable() {
+          public void run() {
+            DebugManager manager = _model.getDebugManager();
+            manager.clearCurrentStepRequest();
+            _removeThreadLocationHighlight();
+          }
+        };
+        SwingUtilities.invokeLater(doCommand);
+      }
       //_abortInteractionAction.setEnabled(false);
       _interactionsPane.setCursor(null);
       _interactionsPane.setEditable(true);

@@ -88,40 +88,7 @@ public class Breakpoint extends DocumentDebugAction<BreakpointRequest> {
     }
     
     _initializeRequest(_manager.getReferenceType(_className, _lineNumber));
-    //_doc = doc;
-    //_createBreakpointRequest();
-    
-    //DrJava.consoleOut().println("Breakpoint lineNumber is " + lineNumber);
   }
- 
-  /*private void _createBreakpointRequest() throws DebugException {
-
-    
-    //System.out.println("Setting breakpoint in class: " + className + 
-    //                   ", line: " + lineNumber);
-    
-    _ref = manager.getReferenceType(_className, vm);
-    
-    
-    // Get locations for the line number, use the first
-    try {
-      List lines = _ref.locationsOfLine(_lineNumber);
-      if (lines.size() == 0) {
-        // Can't find a location on this line
-        //System.out.println("No locations found.");
-        throw new DebugException("Could not find line number: " + _lineNumber);
-      }
-      Location loc = (Location) lines.get(0);
-      _breakpointReq = vm.eventRequestManager().createBreakpointRequest(loc);
-      _breakpointReq.setSuspendPolicy(EventRequest.SUSPEND_EVENT_THREAD);
-      _breakpointReq.enable();
-      //System.out.println("Breakpoint: " + req);
-    }
-    catch (AbsentInformationException aie) {
-      throw new DebugException("Could not find line number: " + aie);
-    }
-    
-  }*/
   
   /**
    * Creates an appropriate EventRequest from the EventRequestManager, using
@@ -129,27 +96,15 @@ public class Breakpoint extends DocumentDebugAction<BreakpointRequest> {
    * @throws DebugException if the request could not be created.
    */
   protected void _createRequest(ReferenceType rt) throws DebugException {
-    //DrJava.consoleOut().println("Breakpoint._createRequest starting...");
-    /*
-    DrJava.consoleOut().println("rt.isVerified: " + rt.isVerified() +
-                                " rt.isInitialized: " + rt.isInitialized() +
-                                " rt.isPrepared: " + rt.isPrepared());
-                                */
     // Get locations for the line number, use the first
     try {
       List lines = rt.locationsOfLine(_lineNumber);
       if (lines.size() == 0) {
         // Can't find a location on this line
-        //System.out.println("No locations found.");
         throw new DebugException("Could not find line number: " + _lineNumber);
       }
       Location loc = (Location) lines.get(0);
       _request = _manager.getEventRequestManager().createBreakpointRequest(loc);
-      //DrJava.consoleOut().println("Created a breakpoint request: " + _request);
-      //DrJava.consoleOut().println("new Breakpoint: " + toString());
-      //_breakpointReq.setSuspendPolicy(EventRequest.SUSPEND_EVENT_THREAD);
-      //_breakpointReq.enable();
-      //System.out.println("Breakpoint: " + req);
     }
     catch (AbsentInformationException aie) {
       throw new DebugException("Could not find line number: " + aie);

@@ -462,7 +462,7 @@ public interface OptionConstants extends ConfigurationTool {
     (!CodeStatus.DEVELOPMENT)?
     null:
     new KeyStrokeOption("key.debug.step.into", 
-                        KeyStroke.getKeyStroke(KeyEvent.VK_F11, 0));
+                        KeyStroke.getKeyStroke(KeyEvent.VK_F12, 0));
   /**
    * The key binding for stepping over in the debugger
    */
@@ -470,7 +470,7 @@ public interface OptionConstants extends ConfigurationTool {
     (!CodeStatus.DEVELOPMENT)?
     null:
     new KeyStrokeOption("key.debug.step.over", 
-                        KeyStroke.getKeyStroke(KeyEvent.VK_F10, 0));
+                        KeyStroke.getKeyStroke(KeyEvent.VK_F11, 0));
   /**
    * The key binding for stepping out in the debugger
    */
@@ -478,7 +478,7 @@ public interface OptionConstants extends ConfigurationTool {
     (!CodeStatus.DEVELOPMENT)?
     null:
     new KeyStrokeOption("key.debug.step.out", 
-                        KeyStroke.getKeyStroke(KeyEvent.VK_F11, 
+                        KeyStroke.getKeyStroke(KeyEvent.VK_F12, 
                                                InputEvent.SHIFT_MASK));
   /**
    * The key binding for toggling a breakpoint

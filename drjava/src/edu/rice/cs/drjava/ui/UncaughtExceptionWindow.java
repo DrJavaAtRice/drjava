@@ -94,25 +94,28 @@ public class UncaughtExceptionWindow extends JFrame {
     _exceptionInfo.setBackground(new Color(204,204,204));
     _exceptionInfo.setMargin(ins);
     _exceptionInfo.setEditable(false);
+    _exceptionInfo.setLineWrap(true);
+    _exceptionInfo.setWrapStyleWord(true);
     
     _stackTrace.setEditable(false);
     
     _okButton = new JButton(_okAction);
     
     _okPanel = new JPanel(new BorderLayout());
-    _okPanel.add(_okButton, BorderLayout.SOUTH);
+    _okPanel.add(_okButton, BorderLayout.EAST);
     _okPanel.setBackground(new Color(204,204,204));
     
-    _topPanel = new JPanel(new BorderLayout());
-    _topPanel.add(_exceptionInfo, BorderLayout.CENTER);
-    _topPanel.add(_okPanel, BorderLayout.EAST);
+    _topPanel = new JPanel();//new BorderLayout());
+    _topPanel.add(_exceptionInfo);//, BorderLayout.CENTER);
+    //_topPanel.add(_okPanel, BorderLayout.EAST);
     
     _stackTraceScroll = new JScrollPane(_stackTrace, 
                                         JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
                                         JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
     this.getContentPane().setLayout(new BorderLayout());
-    this.getContentPane().add(_topPanel, BorderLayout.NORTH);
+    this.getContentPane().add(_exceptionInfo, BorderLayout.NORTH);
     this.getContentPane().add(_stackTraceScroll, BorderLayout.CENTER);
+    this.getContentPane().add(_okPanel, BorderLayout.SOUTH);
     this.setTitle("Uncaught Exception");
     
     this.setVisible(true);

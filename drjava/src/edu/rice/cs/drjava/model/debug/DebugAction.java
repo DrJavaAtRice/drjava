@@ -111,11 +111,9 @@ public abstract class DebugAction<T extends EventRequest> {
     _createRequest();
     if (_request != null) {
       _prepareRequest(_request);
-      //DrJava.consoleOut().println("Request successfully created: " + _request);
       return true;
     }
     else {
-      //DrJava.consoleOut().println("createRequest didn't assign to _request...");
       return false;
     }
   }
@@ -128,19 +126,9 @@ public abstract class DebugAction<T extends EventRequest> {
   protected void _initializeRequest() throws DebugException {
     createRequest();  
     if (_request == null) {
-      // couldn't create the request yet, add to the pending request manager
       throw new DebugException("No ref, and can't add to pendingrequestmanage!");
-      //_manager.getPendingRequestManager().addPendingRequest(this);
     }
   }
-  
-  /**
-   * Overridden in Breakpoint to pass a line number so that getReferenceType
-   * in DebugManager knows to check its inner classes for the line number
-   */
-  /*protected ReferenceType _getReferenceType() {
-    return _manager.getReferenceType(_className);
-  }*/
   
   /**
    * Creates an appropriate EventRequest from the EventRequestManager and 
@@ -167,8 +155,5 @@ public abstract class DebugAction<T extends EventRequest> {
     
     // Add properties
     request.putProperty("debugAction", this);
-    
-    //System.out.println("request.isEnabled(): " + request.isEnabled() +
-    //                   "suspendPolicy: " + request.suspendPolicy());
   }
 }
