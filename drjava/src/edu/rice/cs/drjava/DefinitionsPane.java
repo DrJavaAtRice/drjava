@@ -184,11 +184,8 @@ public class DefinitionsView extends JEditorPane
     _resetDocument("");
     _resetUndo();
 		_findReplace = new FindReplaceDialog(mf, this);
-			
-
-
-		//????KEEP??????
 		_openChooser = new JFileChooser(System.getProperty("user.dir"));
+		_openChooser.setFileFilter(new JavaSourceFilter());
 		_saveChooser = new JFileChooser(System.getProperty("user.dir"));
 				
 

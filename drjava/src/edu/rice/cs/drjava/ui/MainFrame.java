@@ -159,12 +159,20 @@ public class MainFrame extends JFrame
   };
 
   private Action _findReplaceAction = new AbstractAction("Find/Replace")
-  {
-    public void actionPerformed(ActionEvent ae)
-    {
-      _definitionsView.findReplace();
-    }
-  };
+		{
+			public void actionPerformed(ActionEvent ae)
+			{
+				_definitionsView.findReplace();
+			}
+		};
+	
+	private Action _clearOutputAction = new AbstractAction("Clear Output")
+		{
+			public void actionPerformed(ActionEvent ae)
+			{
+				_outputView.clear();
+			}
+		};
 
   private void _resetInteractions() {
     // Reset the interactions window, and add the source directory
@@ -243,6 +251,7 @@ public class MainFrame extends JFrame
     _editMenu.add(pasteAction);
     _editMenu.addSeparator();
     _editMenu.add(_findReplaceAction);
+		_editMenu.add(_clearOutputAction);
 
 
     // Add the menus to the menu bar
