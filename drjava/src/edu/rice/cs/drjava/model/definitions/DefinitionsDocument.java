@@ -650,10 +650,10 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
    * @param delims Delimiter characters denoting end of statement
    */
   public String getIndentOfCurrStmt(int pos, char[] delims) throws BadLocationException {
-    
+
     // Get the start of the current line
     int lineStart = getLineStartPos(pos);
-    
+
     // Find the previous delimiter that closes a statement
     boolean reachedStart = false;
     int prevDelimiter = lineStart; 
@@ -665,29 +665,28 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
         break;
       }
     } while(posInParenPhrase(prevDelimiter));
-    
+
     // From the previous delimiter, find the next
     // non-whitespace character
     int nextNonWSChar;
+    char[] whitespace = {' ', '\t', '\n',','};
     if(reachedStart) {
       nextNonWSChar = getFirstNonWSCharPos(DOCSTART);
     } else {
-      nextNonWSChar = getFirstNonWSCharPos(prevDelimiter+1);
+      nextNonWSChar = getFirstNonWSCharPos(prevDelimiter+1,whitespace);
     }
-    
-    
+
     // If the end of the document was reached
     if(nextNonWSChar == ERROR_INDEX) {
       nextNonWSChar = getLength();
     }
-    
+
     // Get the start of the line of the non-ws char
     int lineStartStmt = getLineStartPos(nextNonWSChar);
-    
+
     // Get the position of the first non-ws character on 
     // this line
     int lineFirstNonWS = getLineFirstCharPos(lineStartStmt);
-    
     String lineText = "";
     try {
       lineText = getText(lineStartStmt, lineFirstNonWS - lineStartStmt);
@@ -811,11 +810,23 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
    * or ERROR_INDEX if end of document is reached
    */
   public int getFirstNonWSCharPos(int pos) throws BadLocationException {
+    char[] whitespace = {' ', '\t', '\n'};
+    return getFirstNonWSCharPos(pos,whitespace);
+  }
+  /**
+   * Finds the position of the first non-whitespace character after pos.
+   * NB: Skips comments and all whitespace, including newlines
+   * @param pos Position to start from
+   * @param whitespace array of whitespace chars to ignore
+   * @return position of first non-whitespace character after pos,
+   * or ERROR_INDEX if end of document is reached
+   */
+  public int getFirstNonWSCharPos(int pos,char[] whitespace) throws BadLocationException {
     int j, i;
     char c;
     int endPos = getLength();
     String text = getText(pos, endPos - pos);
-    char[] whitespace = {' ', '\t', '\n'};
+    //char[] whitespace = {' ', '\t', '\n'};
     
     final int origLocation = _reduced.absOffset();
     // Move reduced model to location pos
@@ -856,6 +867,62 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
     _reduced.move(origLocation - pos);
     return ERROR_INDEX;
   }
+  public int findPrevNonWSCharPos(int pos) throws BadLocationException {
+    char[] whitespace = {' ', '\t', '\n'};
+    return findPrevCharPos(pos, whitespace);
+  }
+  /**
+   * Finds the position of the first non-whitespace character before pos.
+   * NB: Skips comments and all whitespace, including newlines
+   * @param pos Position to start from
+   * @param whitespace chars considered as white space
+   * @return position of first non-whitespace character before pos,
+   * or ERROR_INDEX if begining of document is reached
+   */
+  public int findPrevCharPos(int pos, char[] whitespace) throws BadLocationException {
+    int j, i;
+    char c;
+    String text = getText(0, pos);
+    
+    final int origLocation = _reduced.absOffset();
+    // Move reduced model to location pos
+    _reduced.move(pos - origLocation);
+    
+    // Walk forward from specificed position
+    for (i = pos-1; i >= 0; i--) {
+      boolean isWhitespace = false;
+      c = text.charAt(i);
+      // Check if character is whitespace
+      for (j = 0; j < whitespace.length; j++) {
+        if (c == whitespace[j]) {
+          isWhitespace = true;
+        }
+      }
+      if (!isWhitespace) {
+        // Move reduced model to walker's location
+        _reduced.move(i - pos);
+        // Check if matching char is in comment
+        if((_reduced.getStateAtCurrent().equals(ReducedModelState.INSIDE_LINE_COMMENT)) ||
+           (_reduced.getStateAtCurrent().equals(ReducedModelState.INSIDE_BLOCK_COMMENT))) {
+             // Ignore matching char
+           } else { 
+             if(_isEndOfComment(text, i)) {
+               // Move i past the start of comment characters
+               // and continue searching
+               i = i - 1;
+               _reduced.move(-1);
+             } else {
+               // Return position of matching char
+               _reduced.move(origLocation - i);
+               return i;
+             }
+           }
+        _reduced.move(pos - i);
+      }
+    }
+    _reduced.move(origLocation - pos);
+    return ERROR_INDEX;
+  }
 
   /**
    * Helper method for getFirstNonWSCharPos
@@ -868,6 +935,26 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
       try {
         char afterCurrChar = text.charAt(pos + 1);
         if((afterCurrChar == '/') || (afterCurrChar == '*')) {
+          return true;
+        }
+      } catch (StringIndexOutOfBoundsException e) {
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Helper method for findPrevNonWSCharPos
+   * Determines whether the current character is the end
+   * of a comment: "*\/" or a hanging "//"
+   * @return true if (pos-1,pos) == '*\/' or '//'
+   */
+  protected boolean _isEndOfComment(String text, int pos) {
+    char currChar = text.charAt(pos);
+    if(currChar == '/') {
+      try {
+        char beforeCurrChar = text.charAt(pos - 1);
+        if((beforeCurrChar == '/') || (beforeCurrChar == '*')) {
           return true;
         }
       } catch (StringIndexOutOfBoundsException e) {

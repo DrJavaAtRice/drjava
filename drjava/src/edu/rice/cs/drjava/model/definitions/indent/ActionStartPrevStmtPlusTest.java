@@ -128,6 +128,63 @@ public class ActionStartPrevStmtPlusTest extends IndentRulesTestCase {
                  "foo();\n",
                  _doc.getText(0, _doc.getLength()));
   }
+
+
+  public void testAfterArrayAssign() throws BadLocationException {
+    IndentRuleAction rule = new ActionStartPrevStmtPlus("", false);
+    
+    _setDocText("a = {\n" +
+                "  b,c,d\n" + 
+                "};\n" +
+                "   a;");     // new stmt
+    //rule.indentLine(_doc, 8);
+    rule.indentLine(_doc, 17);
+    assertEquals("After array assignment",
+                 "a = {\n" + 
+                 "  b,c,d\n" +
+                 "};\n" +
+                 "a;",
+                 _doc.getText(0, _doc.getLength()));
+  }
+  public void testAfterArrayAssignMultiSemi() throws BadLocationException {
+    IndentRuleAction rule = new ActionStartPrevStmtPlus("", false);
+    
+    _setDocText("a = {\n" +
+                "  b,c,d\n" + 
+                "};;;\n" +
+                "   a;");     // new stmt
+    //rule.indentLine(_doc, 8);
+    rule.indentLine(_doc, 19);
+    assertEquals("After array assignment multi semi colons",
+                 "a = {\n" + 
+                 "  b,c,d\n" +
+                 "};;;\n" +
+                 "a;",
+                 _doc.getText(0, _doc.getLength()));
+  }
+
+  /** 
+   * not currently supported 
+   * currently assuming single stmt per line
+   */
+  /*
+  public void testAfterArrayAssignMultiSemiAndStmt() throws BadLocationException {
+    IndentRuleAction rule = new ActionStartPrevStmtPlus("", false);
+    
+    _setDocText("a = {\n" +
+                "  b,c,d\n" + 
+                "};b;;\n" +
+                "   a;");     // new stmt
+    //rule.indentLine(_doc, 8);
+    rule.indentLine(_doc, 20);
+    assertEquals("After array assignment multi semi colons and embedded stmt",
+                 "a = {\n" + 
+                 "  b,c,d\n" +
+                 "};b;;\n" +
+                 "a;",
+                 _doc.getText(0, _doc.getLength()));
+  }
+  */
 }
 
 

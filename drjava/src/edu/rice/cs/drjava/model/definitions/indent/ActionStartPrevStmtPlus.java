@@ -75,7 +75,6 @@ public class ActionStartPrevStmtPlus extends IndentRuleAction {
    * @param doc DefinitionsDocument containing the line to be indented.
    */
   public void indentLine(DefinitionsDocument doc) {
-    
     String indent = "";
     int here = doc.getCurrentLocation();
     
@@ -95,9 +94,23 @@ public class ActionStartPrevStmtPlus extends IndentRuleAction {
       doc.setTab(_suffix, here);
       return;
     }
+
+    try {
+      char delim = doc.getText(prevDelimiterPos, 1).charAt(0);
+      char[] ws = {' ', '\t', '\n', ';'};
+      if (delim == ';') {
+        int testPos = doc.findPrevCharPos(prevDelimiterPos, ws);
+        if (doc.getText(testPos,1).charAt(0) == '}') {
+          prevDelimiterPos = testPos;
+        }
+      }
+    } catch (BadLocationException e) {
+      //do nothing
+    }
     try {
       // Jump over {-} region if delimiter was a close brace.
       char delim = doc.getText(prevDelimiterPos, 1).charAt(0);
+
       if (delim == '}') {
         BraceReduction reduced = doc.getReduced();
         reduced.resetLocation();
@@ -124,12 +137,24 @@ public class ActionStartPrevStmtPlus extends IndentRuleAction {
         indentDelims = indentDelimsWithoutColon;
       }
       indent = doc.getIndentOfCurrStmt(prevDelimiterPos, indentDelims);
+
     } catch (BadLocationException e) {
       throw new UnexpectedException(e);
     }
 
     indent = indent + _suffix;
     doc.setTab(indent, here);
+  }
+  
+  private boolean _isPrevNonWSCharEqualTo(DefinitionsDocument doc,int pos,char c) {
+    try {
+      int prevPos = doc.findPrevNonWSCharPos(pos);
+      if (prevPos <0) return false;
+      return (doc.getText(prevPos,1).charAt(0) == c);
+    }
+    catch (BadLocationException e) {
+      return false;
+    }
   }
 }
 

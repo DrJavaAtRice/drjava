@@ -200,6 +200,41 @@ public class IndentTest extends TestCase {
  }
   
   /**
+   * Regression test for arrays.
+   */
+ public void testIndentArray() throws BadLocationException {
+   String text =
+     "int[2][] a ={\n" +
+     "{\n"  +
+     "1,\n" +
+     "2,\n" +
+     "3},\n" + 
+     "{\n" +
+     "4,\n" +
+     "5}\n" +
+     "};\n";
+     
+   String indented =
+     "int[2][] a ={\n" +
+     "  {\n"  +
+     "    1,\n" +
+     "    2,\n" +
+     "    3},\n" + 
+     "  {\n" +
+     "    4,\n" +
+     "    5}\n" +
+     "};\n";
+
+
+
+   
+   doc.insertString(0, text, null);
+   _assertContents(text, doc);
+   doc.indentLines(0, doc.getLength());
+   _assertContents(indented, doc);
+ }
+  
+  /**
    * Regression test for common cases.
    */
   public void testIndentCommonCases() throws BadLocationException {
