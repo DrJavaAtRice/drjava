@@ -18,7 +18,6 @@ class InteractionsDocument extends PlainDocument {
   /** Index in the document of the first place that is editable. */
   int frozenPos = 0;
   private final String banner = "Welcome to DrJava.\n";
-  JavaInterpreter _interpreter;
   /**
    * Command-line history. It's not reset when the interpreter is reset.
    */
@@ -64,22 +63,9 @@ class InteractionsDocument extends PlainDocument {
       super.insertString(0, banner, null);
       prompt();
       _history.moveEnd();
-      _interpreter = new DynamicJavaAdapter();
     } catch (BadLocationException e) {
       throw  new InternalError("repl reset failed");
     }
-  }
-
-  /**
-   * put your documentation comment here
-   * @param path
-   */
-  public void addClassPath(String path) {
-    _interpreter.addClassPath(path);
-  }
-
-  public void setPackageScope(String pack) {
-    _interpreter.setPackageScope(pack);
   }
 
   /**
@@ -110,6 +96,15 @@ class InteractionsDocument extends PlainDocument {
     _replaceCurrentLineFromHistory();
   }
 
+  public String getCurrentInteraction() {
+    try {
+      return getText(frozenPos, getLength() - frozenPos);
+    }
+    catch (BadLocationException e) {
+      throw new UnexpectedException(e);
+    }
+  }
+  
   /**
    * Replaces any text entered past the prompt with the current
    * item in the history.
@@ -121,7 +116,7 @@ class InteractionsDocument extends PlainDocument {
       // Add current.
       insertString(getLength(), _history.getCurrent(), null);
     } catch (BadLocationException ble) {
-    // impossible
+      throw new UnexpectedException(ble);
     }
   }
 
@@ -141,98 +136,8 @@ class InteractionsDocument extends PlainDocument {
     return  _history.hasNext();
   }
 
-  /**
-   * put your documentation comment here
-   */
-  public void eval() {
-    try {
-      String text = getText(frozenPos, getLength() - frozenPos);
-      _history.add(text);
-      String toEval = text.trim();
-      // Result of interpretation, or JavaInterpreter.NO_RESULT if none.
-      Object result;
-      // Do nothing but prompt if there's nothing to evaluate!
-      if (toEval.length() == 0) {
-        result = JavaInterpreter.NO_RESULT;
-      } 
-      else {
-        if (toEval.startsWith("java ")) {
-          toEval = _testClassCall(toEval);
-        }
-        result = _interpreter.interpret(toEval);
-        String resultStr;
-        try {
-          resultStr = String.valueOf(result);
-        } catch (Throwable t) {
-          // Very weird. toString() on result must have thrown this exception!
-          // Let's act like DynamicJava would have if this exception were thrown
-          // and rethrow as RuntimeException
-          throw  new RuntimeException(t.toString());
-        }
-      }
-      if (result != JavaInterpreter.NO_RESULT) {
-        super.insertString(getLength(), "\n" + String.valueOf(result) + "\n", null);
-      } 
-      else {
-        super.insertString(getLength(), "\n", null);
-      }
-      prompt();
-    } catch (BadLocationException e) {
-      throw  new InternalError("getting repl text failed");
-    } catch (Throwable e) {
-      String message = e.getMessage();
-      // Don't let message be null. Java sadly makes getMessage() return
-      // null if you construct an exception without a message.
-      if (message == null) {
-        message = e.toString();
-        e.printStackTrace();
-      }
-      // Hack to prevent long syntax error messages
-      try {
-        if (message.startsWith("koala.dynamicjava.interpreter.InterpreterException: Encountered")) {
-          super.insertString(getLength(), "\nError in evaluation: " + "Invalid syntax\n", 
-              null);
-        } 
-        else {
-          super.insertString(getLength(), "\nError in evaluation: " + message + 
-              "\n", null);
-        }
-        prompt();
-      } catch (BadLocationException willNeverHappen) {}
-    }
-  }
-
-  /**
-   *Assumes a trimmed String. Returns a string of the main call that the
-   *interpretor can use.
-   */
-  private String _testClassCall(String s) {
-    LinkedList ll = new LinkedList();
-    if (s.endsWith(";"))
-      s = _deleteSemiColon(s);
-    StringTokenizer st = new StringTokenizer(s);
-    st.nextToken();             //don't want to get back java
-    String argument = st.nextToken();           // must have a second Token
-    while (st.hasMoreTokens())
-      ll.add(st.nextToken());
-    argument = argument + ".main(new String[]{";
-    ListIterator li = ll.listIterator(0);
-    while (li.hasNext()) {
-      argument = argument + "\"" + (String)(li.next()) + "\"";
-      if (li.hasNext())
-        argument = argument + ",";
-    }
-    argument = argument + "});";
-    return  argument;
-  }
-
-  /**
-   * put your documentation comment here
-   * @param s
-   * @return 
-   */
-  private String _deleteSemiColon(String s) {
-    return  s.substring(0, s.length() - 1);
+  void addToHistory(String text) {
+    _history.add(text);
   }
 }
 

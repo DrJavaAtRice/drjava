@@ -15,6 +15,7 @@ import  java.awt.event.ActionEvent;
  * @version $Id$
  */
 public class InteractionsPane extends JTextArea {
+  private GlobalModel _model;
   private AbstractAction _evalAction = new AbstractAction() {
 
     /**
@@ -22,10 +23,18 @@ public class InteractionsPane extends JTextArea {
      * @param e
      */
     public void actionPerformed(ActionEvent e) {
-      setCaretPosition(getInteractionsDocument().getLength());
-      getInteractionsDocument().eval();
+      setCaretPosition(getDocument().getLength());
+      //getInteractionsDocument().eval();
+      _model.interpretCurrentInteraction();
     }
   };
+  
+  private Runnable BEEP = new Runnable() {
+    public void run() {
+        Toolkit.getDefaultToolkit().beep();      
+    }
+  };
+  
   private AbstractAction _historyPrevAction = new AbstractAction() {
 
     /**
@@ -33,13 +42,7 @@ public class InteractionsPane extends JTextArea {
      * @param e
      */
     public void actionPerformed(ActionEvent e) {
-      InteractionsDocument doc = getInteractionsDocument();
-      if (doc.hasHistoryPrevious()) {
-        doc.moveHistoryPrevious();
-      } 
-      else {
-        Toolkit.getDefaultToolkit().beep();
-      }
+      _model.recallPreviousInteractionInHistory(BEEP);
     }
   };
   private AbstractAction _historyNextAction = new AbstractAction() {
@@ -49,68 +52,35 @@ public class InteractionsPane extends JTextArea {
      * @param e
      */
     public void actionPerformed(ActionEvent e) {
-      InteractionsDocument doc = getInteractionsDocument();
-      if (doc.hasHistoryNext()) {
-        doc.moveHistoryNext();
-      } 
-      else {
-        Toolkit.getDefaultToolkit().beep();
-      }
+      _model.recallNextInteractionInHistory(BEEP);
     }
   };
 
   /**
    * put your documentation comment here
    */
-  public InteractionsPane() {
-    super(new InteractionsDocument());
+  public InteractionsPane(GlobalModel model) {
+    super(model.getInteractionsDocument());
+    _model = model;
     setLineWrap(true);
     setWrapStyleWord(true);
-    reset();
+    _model.resetInteractions();
     //add actions for enter key, etc.
     Keymap ourMap = addKeymap("INTERACTIONS_KEYMAP", getKeymap());
-    ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), _evalAction);
+    ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), 
+                                 _evalAction);
     // Up and down need to be bound both for keypad and not
-    ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_KP_UP, 0), _historyPrevAction);
-    ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0), _historyPrevAction);
+    ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_KP_UP, 0), 
+                                 _historyPrevAction);
+    ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0), 
+                                 _historyPrevAction);
     ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_KP_DOWN, 0), 
-        _historyNextAction);
-    ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0), _historyNextAction);
+                                 _historyNextAction);
+    ourMap.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0), 
+                                 _historyNextAction);
     setKeymap(ourMap);
   }
 
-  /**
-   * put your documentation comment here
-   * @return 
-   */
-  InteractionsDocument getInteractionsDocument() {
-    return  (InteractionsDocument)getDocument();
-  }
-
-  // The class path will be reset on reset().
-  public void addClassPath(String path) {
-    getInteractionsDocument().addClassPath(path);
-  }
-
-  public void setPackageScope(String pack) {
-    getInteractionsDocument().setPackageScope(pack);
-  }
-
-  /**
-   * put your documentation comment here
-   */
-  public void reset() {
-    getInteractionsDocument().reset();
-    setCaretPosition(getInteractionsDocument().getLength());
-  }
-
-  /**
-   * put your documentation comment here
-   */
-  public void prompt() {
-    getInteractionsDocument().prompt();
-  }
-  // public boolean atEnd() { return getCaretPosition() == doc.getLength(); }
 }
 
 

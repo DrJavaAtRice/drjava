@@ -9,7 +9,7 @@ import java.io.*;
 import java.util.Stack;
 import java.util.LinkedList;
 import java.util.ListIterator;
-
+import java.util.StringTokenizer;
 /**
  * Handles the bulk of DrJava's program logic.
  * The UI components interface with the GlobalModel through its public methods,
@@ -26,7 +26,7 @@ public class GlobalModel {
   private Document _consoleDoc;
   private CompilerError[] _compileErrors;
   private LinkedList _listeners;
-  
+  private JavaInterpreter _interpreter;
   /**
    * Constructor.
    */
@@ -38,6 +38,7 @@ public class GlobalModel {
     _consoleDoc = new DefaultStyledDocument();
     _compileErrors = new CompilerError[0];
     _listeners = new LinkedList();
+    _interpreter = new DynamicJavaAdapter();
   }
   
   /**
@@ -314,6 +315,7 @@ public class GlobalModel {
   }
 
 
+  
   public FindReplaceMachine createFindReplaceMachine() {
     try {
       return new FindReplaceMachine(_definitionsDoc,
@@ -326,12 +328,13 @@ public class GlobalModel {
   
   private void _resetInteractions(String packageName, File sourceRoot) {
     _interactionsDoc.reset();
+    _interpreter = new DynamicJavaAdapter();
 
     if (sourceRoot != null) {
-      _interactionsDoc.addClassPath(sourceRoot.getAbsolutePath());
+      _interpreter.addClassPath(sourceRoot.getAbsolutePath());
     }
 
-    _interactionsDoc.setPackageScope(packageName);
+    _interpreter.setPackageScope(packageName);
 
     _notifyListeners(new EventNotifier() {
       public void notifyListener(GlobalModelListener l) {
@@ -340,6 +343,91 @@ public class GlobalModel {
     });
   }
 
+  
+  public void recallPreviousInteractionInHistory(Runnable failed) {
+      if (_interactionsDoc.hasHistoryPrevious()) {
+        _interactionsDoc.moveHistoryPrevious();
+      } 
+      else {
+        failed.run();
+      }
+  }
+
+  public void recallNextInteractionInHistory(Runnable failed) {
+      if (_interactionsDoc.hasHistoryNext()) {
+        _interactionsDoc.moveHistoryNext();
+      } 
+      else {
+        failed.run();
+      }
+  }
+  
+  /**
+   * Interprets the current given text at the prompt in the interactions
+   * pane.
+   */
+  public void interpretCurrentInteraction() {
+    try {
+      String text = _interactionsDoc.getCurrentInteraction();
+      _interactionsDoc.addToHistory(text);
+      String toEval = text.trim();
+      // Result of interpretation, or JavaInterpreter.NO_RESULT if none.
+      Object result;
+      // Do nothing but prompt if there's nothing to evaluate!
+      if (toEval.length() == 0) {
+        result = JavaInterpreter.NO_RESULT;
+      } 
+      else {
+        if (toEval.startsWith("java ")) {
+          toEval = _testClassCall(toEval);
+        }
+        result = _interpreter.interpret(toEval);
+        String resultStr;
+        try {
+          resultStr = String.valueOf(result);
+        } catch (Throwable t) {
+          // Very weird. toString() on result must have thrown this exception!
+          // Let's act like DynamicJava would have if this exception were thrown
+          // and rethrow as RuntimeException
+          throw  new RuntimeException(t.toString());
+        }
+      }
+      if (result != JavaInterpreter.NO_RESULT) {
+       _interactionsDoc.insertString(_interactionsDoc.getLength(),
+                                     "\n" + String.valueOf(result) + "\n", null);
+      } 
+      else {
+        _interactionsDoc.insertString(_interactionsDoc.getLength(), "\n", null);
+      }
+      _interactionsDoc.prompt();
+    } catch (BadLocationException e) {
+      throw  new InternalError("getting repl text failed");
+    } catch (Throwable e) {
+      String message = e.getMessage();
+      // Don't let message be null. Java sadly makes getMessage() return
+      // null if you construct an exception without a message.
+      if (message == null) {
+        message = e.toString();
+        e.printStackTrace();
+      }
+      // Hack to prevent long syntax error messages
+      try {
+        if (message.startsWith("koala.dynamicjava.interpreter.InterpreterException: Encountered")) {
+          _interactionsDoc.insertString(_interactionsDoc.getLength(), 
+                                        "\nError in evaluation: " + 
+                                        "Invalid syntax\n", 
+                                        null);
+        } 
+        else {
+          _interactionsDoc.insertString(_interactionsDoc.getLength(),
+                                        "\nError in evaluation: " + message + 
+                                        "\n", null);
+        }
+        _interactionsDoc.prompt();
+      } catch (BadLocationException willNeverHappen) {}
+    }
+  }
+  
   /**
    * Finds the root directory of the source files.
    * @return The root directory of the source files,
@@ -419,6 +507,42 @@ public class GlobalModel {
     return parentDir;
   }
 
+
+  /**
+   *Assumes a trimmed String. Returns a string of the main call that the
+   *interpretor can use.
+   */
+  private String _testClassCall(String s) {
+    LinkedList ll = new LinkedList();
+    if (s.endsWith(";"))
+      s = _deleteSemiColon(s);
+    StringTokenizer st = new StringTokenizer(s);
+    st.nextToken();             //don't want to get back java
+    String argument = st.nextToken();           // must have a second Token
+    while (st.hasMoreTokens())
+      ll.add(st.nextToken());
+    argument = argument + ".main(new String[]{";
+    ListIterator li = ll.listIterator(0);
+    while (li.hasNext()) {
+      argument = argument + "\"" + (String)(li.next()) + "\"";
+      if (li.hasNext())
+        argument = argument + ",";
+    }
+    argument = argument + "});";
+    return  argument;
+  }
+
+  /**
+   * put your documentation comment here
+   * @param s
+   * @return 
+   */
+  private String _deleteSemiColon(String s) {
+    return  s.substring(0, s.length() - 1);
+  }
+
+  
+  
   /**
    * Allows the GlobalModel to ask its listeners a yes/no question and
    * receive a response.

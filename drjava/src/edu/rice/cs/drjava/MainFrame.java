@@ -316,7 +316,7 @@ public class MainFrame extends JFrame {
     setJMenuBar(_menuBar);
     // Make the output view the active one
     _outputPane.makeActive();
-    _interactionsPane = new InteractionsPane();
+    _interactionsPane = new InteractionsPane(_model);
     _tabbedPane = new JTabbedPane();
     _tabbedPane.add("Interactions", new JScrollPane(_interactionsPane));
     _tabbedPane.add("Compiler output", _errorPanel);

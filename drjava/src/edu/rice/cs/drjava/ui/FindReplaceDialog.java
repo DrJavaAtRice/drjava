@@ -12,6 +12,7 @@ import java.awt.Color;
 import java.awt.Rectangle;
 import  java.awt.event.WindowAdapter;
 import  java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import  java.awt.event.ActionListener;
 import  java.awt.event.ActionEvent;
 import javax.swing.Action;
@@ -43,12 +44,29 @@ class FindReplaceDialog extends JDialog {
   private Label _message;
   private FindReplaceMachine _machine;
   private DefinitionsPane _defPane;
+  private Object _previousHighlightTag;
 
   private static final DefaultHighlighter.DefaultHighlightPainter
     _documentHighlightPainter
       = new DefaultHighlighter.DefaultHighlightPainter(Color.lightGray);
   
-  private Object _previousHighlightTag;
+  
+  /** How the dialog responds to window events. */
+  private WindowListener _dialogListener = new WindowListener() {
+    public void windowActivated(WindowEvent ev) {}
+    public void windowClosed(WindowEvent ev) {}
+    public void windowClosing(WindowEvent ev) {
+      _close();
+    }
+    public void windowDeactivated(WindowEvent ev) {}
+    public void windowDeiconified(WindowEvent ev) {}
+    public void windowIconified(WindowEvent ev) {}
+    public void windowOpened(WindowEvent ev) {
+      _findField.grabFocus();
+      _findField.setCaretPosition(0);
+    }
+  };
+
   private Action _findNextAction = new AbstractAction("Find Next") {
     public void actionPerformed(ActionEvent e) {
       _machine.setFindWord(_findField.getText());
@@ -161,6 +179,9 @@ class FindReplaceDialog extends JDialog {
       public void keyTyped(KeyEvent e) {
       }      
     });
+    
+    addWindowListener(_dialogListener);
+    
     setTitle("Find/Replace");
     final String msgString1 = "Find:";
     final String msgString2 = "Replace:";
@@ -237,7 +258,6 @@ class FindReplaceDialog extends JDialog {
     // given Swing's tendency to muck things up.
     setBounds(100, 200, 520, 300);
     setSize(520, 200);
-    _findField.grabFocus();
   }
   
   public void setMachine(FindReplaceMachine machine) {
