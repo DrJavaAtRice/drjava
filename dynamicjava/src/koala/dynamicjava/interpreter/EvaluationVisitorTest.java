@@ -131,7 +131,33 @@ public class EvaluationVisitorTest extends DynamicJavaTestCase {
     assertEquals("(short) 'a'", new Short((short) 97), res);
     
   }
+  
+  
+  /**
+   * Tests non-primitive casts
+   */
+  public void testCast() throws InterpreterException {
+    
+    Object res  = interpret("Comparable c = \"cat\"; (String) c");
+    assertEquals("Downcast Comparable to String", "cat", res);
+    
+    res  = interpret("String s = \"cat\"; (Comparable) s");
+    assertEquals("Upcast String to Comparable", "cat", res);
 
+    try {
+      res = interpret("Class cl = int.class; (Comparable) cl");
+      fail("Failing upcast from Class to Comparable");
+    }
+    catch(ExecutionError e) {}
+    
+    try {
+      res = interpret("String s1 = \"cat\"; (Number) s1");
+      fail("Failing cast from Class to disjoint Class");
+    }
+    catch(ExecutionError e) {}                   
+  }
+  
+  
   /**
    * Tests the += operator
    */

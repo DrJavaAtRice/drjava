@@ -109,7 +109,7 @@ public abstract class AbstractTypeChecker extends VisitorObject<Class> {
   }
   
   /**
-   * 
+   * Builds an appropriate type checker object
    */
   public static AbstractTypeChecker makeTypeChecker(Context ctx) {
     if(!TigerUtilities.isTigerEnabled()) {
@@ -120,7 +120,6 @@ public abstract class AbstractTypeChecker extends VisitorObject<Class> {
     }    
   }
   
-
   /**
    * Visits a PackageDeclaration
    * @param node the node to visit
@@ -2817,27 +2816,22 @@ public abstract class AbstractTypeChecker extends VisitorObject<Class> {
           }
         }
         else if (ec.isInterface()) {
-          if (tc.isInterface()) {
-            // !!! TODO : tests the signatures ?
-          } 
-          else if (tc.isArray()) {
-            if (!Cloneable.class.isAssignableFrom(ec)) {
-              throw new ExecutionError("cast", castExp);
-            }
-          } 
-          else if (Modifier.isFinal(tc.getModifiers())) {
-            if (!tc.isAssignableFrom(ec)) {
-              throw new ExecutionError("cast", castExp);
+           if (tc.isArray()) {
+             if (!Cloneable.class.isAssignableFrom(ec)) {
+               throw new ExecutionError("cast", castExp);
+             }
+           }
+          else if (!tc.isInterface()) { // ec is an interface, tc is not
+            if (isFinal(tc) && !ec.isAssignableFrom(tc)) {
+                throw new ExecutionError("cast", castExp);
             }
           }
-        } 
-        else if (tc.isInterface()) {
-          if (Modifier.isFinal(tc.getModifiers())) {
-            if (!tc.isAssignableFrom(ec)) {
+        } // ec is not an interface type
+        else if (tc.isInterface()) { // tc is an interface, ec is not
+          if (isFinal(ec) && !tc.isAssignableFrom(ec)) {
               throw new ExecutionError("cast", castExp);
             }
-          }
-        }
+          } // both ec and tc are classes or primitives
         else if (ec.isPrimitive() && TigerUtilities.isBoxingType(tc) && ec != boolean.class) {
           castExp.setExpression(_box(castExp.getExpression(), tc));
         }
@@ -2848,6 +2842,12 @@ public abstract class AbstractTypeChecker extends VisitorObject<Class> {
     }
   }
 
+  /**
+   * Tests if the class/interface c is final
+   */
+  private static boolean isFinal(Class c) { 
+    return Modifier.isFinal(c.getModifiers());
+  }
   
   /**
    * Check a list of node by running this type checker
