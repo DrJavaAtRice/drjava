@@ -407,13 +407,18 @@ public class MainFrame extends JFrame implements OptionConstants {
     public void actionPerformed(ActionEvent ae) {
       if (CodeStatus.DEVELOPMENT) {
         _recentFileManager.saveRecentFiles();
-        try {
-          DrJava.CONFIG.saveConfiguration();
+        
+        // Save recent files, but only if there wasn't a problem at startup
+        // (Don't want to overwrite a custom config file with a simple typo.)
+        if (!DrJava.CONFIG.hadStartupException()) {
+          try {
+            DrJava.CONFIG.saveConfiguration();
+          }
+          catch (IOException ioe) {
+            throw new UnexpectedException(ioe);
+          }
         }
-        catch (IOException ioe) {
-          throw new UnexpectedException(ioe);
-        }
-      }      
+      }
       _model.quit();
     }
   };
@@ -460,8 +465,8 @@ public class MainFrame extends JFrame implements OptionConstants {
       //CONFIG.setSetting(LINEENUM_ENABLED, new Boolean(!DrJava.CONFIG.getSetting(LINEENUM_ENABLED).booleanValue()));
       //CONFIG.setSetting(DEFINITIONS_COMMENT_COLOR, Color.red.darker());
       //CONFIG.setSetting(DEFINITIONS_MATCH_COLOR, Color.gray.brighter());
-      CONFIG.setSetting(JSR14_LOCATION, new File("/home/javaplt/packages/jsr14_adding_generics-1_0-ea/javac.jar"));
-      CONFIG.setSetting(JAVAC_LOCATION, new File("/usr/local/bin/javac"));
+      //CONFIG.setSetting(JSR14_LOCATION, new File("/home/javaplt/packages/jsr14_adding_generics-1_0-ea/javac.jar"));
+      //CONFIG.setSetting(JAVAC_LOCATION, new File("/usr/local/bin/javac"));
       //Vector<String> v = new Vector<String>();
       //v.addElement("/home/mcgraw/javafiles/");
       //CONFIG.setSetting(EXTRA_CLASSPATH, v);
@@ -1327,7 +1332,8 @@ public class MainFrame extends JFrame implements OptionConstants {
       _showError(e, "Error in Config File",
                  "Could not read the '.drjava' configuration file\n" +
                  "in your home directory.  Starting with default\n" +
-                 "values instead.\n");
+                 "values instead.\n\n" +
+                 "The problem was:\n");
     }
   }
 

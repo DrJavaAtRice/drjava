@@ -488,9 +488,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
    */
   public void quit() {
     if (closeAllFiles()) {
-      // Don't kill the interpreter. It'll die in a minute on its own,
-      // and if we kill it using killInterpreter, we'll just start
-      // another one!
+      // Kill the interpreter
       _interpreterControl.killInterpreter();
 
       // Clean up debugger if necessary
@@ -2026,23 +2024,23 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
    */
   private void _createDebugger() {
     if (CodeStatus.DEVELOPMENT) {
-      boolean useDebug = DrJava.CONFIG.getSetting(DEBUGGER_ENABLED).booleanValue();
-      if (useDebug) {
-        try {
-          _debugManager = new DebugManager(this);
-        }
-        catch( NoClassDefFoundError ncdfe ){
-          // JPDA not available, so we won't use it.
-          _debugManager = null;
-        }
-        catch(DebugException de) {
-          // Problem while connecting, so we won't use debugger.
-          _debugManager = null;
-        }
+      //boolean useDebug = DrJava.CONFIG.getSetting(DEBUGGER_ENABLED).booleanValue();
+      //if (useDebug) {
+      try {
+        _debugManager = new DebugManager(this);
       }
-      else {
+      catch( NoClassDefFoundError ncdfe ){
+        // JPDA not available, so we won't use it.
         _debugManager = null;
       }
+      catch(DebugException de) {
+        // Problem while connecting, so we won't use debugger.
+        _debugManager = null;
+      }
+      //}
+      //else {
+      //  _debugManager = null;
+      //}
     }
   }
 

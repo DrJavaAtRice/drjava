@@ -468,19 +468,19 @@ public interface OptionConstants extends ConfigurationTool {
   
   /**
    * Whether the integrated debugger should be displayed as available.
-   */
+   *
   public static final BooleanOption DEBUGGER_ENABLED =
     (CodeStatus.DEVELOPMENT) ?
     new BooleanOption("debugger.enabled", new Boolean(false)):
-    null;
+    null; */
 
   /**
    * Whether the integrated debugger should display the advanced mode JSwat console
-   */    
+   *
   public static final BooleanOption DEBUGGER_ADVANCED =
     (CodeStatus.DEVELOPMENT) ?
     new BooleanOption("debugger.advanced", new Boolean(false)):
-    null;
+    null; */
     
   /**
    * A vector containing the most recently used files
