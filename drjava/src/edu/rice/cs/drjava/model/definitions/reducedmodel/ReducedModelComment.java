@@ -420,67 +420,7 @@ public class ReducedModelComment extends AbstractReducedModel {
     }
     return;
   }
-  
-  public TokenList.Iterator makeCopyCursor() {
-    return _cursor.copy();
-  }
- 
- /**
-  * Wrapper for TokenList.Iterator.getStateAtCurrent that returns the current 
-  * state for some iterator.
-  * Convenience method to return the current state in the cursor iterator.
-  */
-  ReducedModelState getStateAtCurrent() {
-    return _cursor.getStateAtCurrent();
-  }
-  
- /**
-  * Returns true if there is a gap immediately to the right.
-  */
-  private boolean _gapToRight() {
-    // Before using, make sure not at last, or tail.
-    return (!_tokens.isEmpty() && !_cursor.atEnd() &&
-            !_cursor.atLastItem() && _cursor.nextItem().isGap());
-  }
-  /**
-  * Returns true if there is a gap immediately to the left.   
-  */
-  private boolean _gapToLeft() {
-    // Before using, make sure not at first or head.
-    return (!_tokens.isEmpty() && !_cursor.atStart() &&
-            !_cursor.atFirstItem() &&  _cursor.prevItem().isGap());
-  }
-  
-  /**
-  * Assuming there is a gap to the left, this function increases
-  * the size of that gap.
-  * @param length the amount of increase
-  */
-  private void _augmentGapToLeft(int length) {
-    _cursor.prevItem().grow(length);      
-  }
-  
-  /**
-  * Assuming there is a gap to the right, this function increases
-  * the size of that gap.
-  * @param length the amount of increase
-  */
-  private void _augmentCurrentGap(int length) {
-    _cursor.current().grow(length);
-    _cursor.setBlockOffset(length);
-  }
-  /**
-  * Helper function for _insertGap.
-  * Performs the actual insert and marks the offset appropriately.
-  * @param length size of gap to insert
-  */
-  private void _insertNewGap(int length) {
-    _cursor.insert(new Gap(length, getStateAtCurrent()));
-    _cursor.next();
-    _cursor.setBlockOffset(0);
-  }
-    
-  
+
   /**
   * USE RULES:
   * Inserting between braces: This should be called from between the two
@@ -496,9 +436,7 @@ public class ReducedModelComment extends AbstractReducedModel {
     copyCursor.updateBasedOnCurrentState();
     copyCursor.dispose();
   }
-  
-
-  
+     
  /**
   * Updates the BraceReduction to reflect cursor movement.
   * Negative values move left from the cursor, positive values move
@@ -552,33 +490,23 @@ public class ReducedModelComment extends AbstractReducedModel {
   */
   
   /**
-  *Returns the state at the relLocation, where relLocation is the location
-  *relative to the walker
-  *@param relLocation distance from walker to get state at.
-  */
-  ReducedModelState stateAtRelLocation(int relLocation) {
+   * Returns the state at the relLocation, where relLocation is the location
+   * relative to the walker
+   * @param relLocation distance from walker to get state at.
+   */
+  protected ReducedModelState stateAtRelLocation(int relLocation) {
     _walker.move(relLocation);
     return _walker.getStateAtCurrent();
   }
   
   /**
-  *Resets the walker to the current position in document
-  */
-  void resetLocation() {
+   * Resets the walker to the current position in document
+   */
+  protected void resetLocation() {
     _walker.dispose();
     _walker = _cursor.copy();
   }
-  
-  ReducedToken current() {
-    return _cursor.current();
-  }
-  
-  void  next() {
-    _cursor.next();
-  }
-  void prev() {
-    _cursor.prev();
-  }
+
   /**
    * Dist to Previous newline will be -1 if no newline.
    */

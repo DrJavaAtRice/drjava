@@ -48,7 +48,7 @@ public class ReducedModelBrace extends AbstractReducedModel {
    *  <li> between two braces: insert new gap
    * @param length the length of the inserted text
    */
-  private void _insertGap( int length ) {
+  public void _insertGap( int length ) {
     //0 - a
     if (_cursor.atStart()) {
       if (_gapToRight()) {
@@ -89,56 +89,7 @@ public class ReducedModelBrace extends AbstractReducedModel {
     }
     return;
   }
-  
-  public TokenList.Iterator makeCopyCursor() {
-    return _cursor.copy();
-  }
-  
-  private boolean _gapToRight() {
-    // Before using, make sure not at last, or tail.
-    return (!_tokens.isEmpty() && !_cursor.atEnd() &&
-            !_cursor.atLastItem() && _cursor.nextItem().isGap());
-  }
-  
-  /**
-   * Returns true if there is a gap immediately to the left. 
-   */
-  private boolean _gapToLeft() {
-    // Before using, make sure not at first or head.
-    return (!_tokens.isEmpty() && !_cursor.atStart() &&
-            !_cursor.atFirstItem() &&_cursor.prevItem().isGap());
-  }
-  
-  /**
-   * Assuming there is a gap to the left, this function increases
-   * the size of that gap.
-   * @param length the amount of increase
-   */
-  private void _augmentGapToLeft(int length) {
-    _cursor.prevItem().grow(length);
-  }
-  
-  /**
-   * Assuming there is a gap to the right, this function increases
-   * the size of that gap.
-   * @param length the amount of increase
-   */
-  private void _augmentCurrentGap(int length) {
-    _cursor.current().grow(length);
-    _cursor.setBlockOffset(length);
-  }
-  
-  /**
-   * Helper function for _insertGap.
-   * Performs the actual insert and marks the offset appropriately.
-   * @param length size of gap to insert
-   */
-  private void _insertNewGap(int length) {
-    _cursor.insert(new Gap(length,FREE));
-    _cursor.next();
-    _cursor.setBlockOffset(0);
-  }
- 
+
   /**
    * Helper function for top level brace insert functions.
    *
@@ -504,30 +455,20 @@ public class ReducedModelBrace extends AbstractReducedModel {
     }
   }
   
-  ReducedModelState stateAtRelLocation(int relDistance) {
+  protected ReducedModelState stateAtRelLocation(int relDistance) {
     return _parent.stateAtRelLocation(relDistance);
   }
   
-  void resetLocation() {
+  protected void resetLocation() {
     _parent.resetLocation();
   }
-  
-  ReducedToken current() {
-    return _cursor.current();
-  }
-  void  next() {
-    _cursor.next();
-  }
-  void prev() {
-    _cursor.prev();
-  }
-  
+ 
   /*
-  *The braceInfo.distToNewline holds the distance to the previous newline.
-  *To find the enclosing brace one must first move past this newline.
-  *The distance held in this variable is only to the space in front of the
-  *newline hence you must move back that distance + 1.
-  */
+   *The braceInfo.distToNewline holds the distance to the previous newline.
+   *To find the enclosing brace one must first move past this newline.
+   *The distance held in this variable is only to the space in front of the
+   *newline hence you must move back that distance + 1.
+   */
   protected void getDistToEnclosingBrace(IndentInfo braceInfo) {
     Stack<ReducedToken> braceStack = new Stack<ReducedToken>();
     TokenList.Iterator iter = _cursor.copy();
