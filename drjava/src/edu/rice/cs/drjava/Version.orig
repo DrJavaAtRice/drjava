@@ -1,5 +1,3 @@
-/* $Id$ */
-
 package edu.rice.cs.drjava;
 
 import java.util.Date;
@@ -9,6 +7,8 @@ import java.text.SimpleDateFormat;
  * This interface hold the information about this build of DrJava.
  * This file is copied to Version.java by the build process, which also
  * fills in the right values of the date and time.
+ *
+ * @version $Id$
  */
 public abstract class Version {
   /**
