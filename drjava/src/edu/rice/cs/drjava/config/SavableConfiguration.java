@@ -81,12 +81,12 @@ public class SavableConfiguration extends Configuration {
    */
   public void saveConfiguration(OutputStream os, String header) throws IOException {
     OutputStreamWriter osw = new OutputStreamWriter(os);
-    Iterator<OptionParser> keys = map.keys();
+    Iterator<OptionParser<?>> keys = map.keys();
     //Properties p = new Properties();
     String tmpString;
     StringBuffer buff;
-    OptionParser key;
-
+    OptionParser<?> key;
+    
     // Write the header
     Date date = new Date();
     osw.write((int)'#');

@@ -66,6 +66,7 @@ public class IdentityVisitor implements Visitor<Node> {
    * @param node the node to visit
    * @return node
    */
+
   public Node visit(PackageDeclaration node) { return node; }
 
   /**
@@ -73,12 +74,14 @@ public class IdentityVisitor implements Visitor<Node> {
    * @param node the node to visit
    * @return node
    */
+
   public Node visit(ImportDeclaration node) { return node; }
 
   /**
    * Visits an EmptyStatement
    * @param node the node to visit
    */
+
   public Node visit(EmptyStatement node) { return node; }
 
   /**

@@ -49,7 +49,7 @@ import java.util.Iterator;
 
 public class DefaultOptionMap implements OptionMap {
   
-  private final ArrayList<OptionParser> keys = new ArrayList<OptionParser>();
+  private final ArrayList<OptionParser<?>> keys = new ArrayList<OptionParser<?>>();
   
   public <T> T getOption(OptionParser<T> o) {
     return o.getOption(this);
@@ -60,16 +60,16 @@ public class DefaultOptionMap implements OptionMap {
     return o.setOption(this,val);
   }
   
-  private void setOption(OptionParser o) {
+  private <T> void setOption(OptionParser<T> o) {
     if(keys.indexOf(o)==-1)
       keys.add(o);
   }
   
-  public String getString(OptionParser o) {
+  public <T> String getString(OptionParser<T> o) {
     return o.getString(this);
   }
   
-  public void setString(OptionParser o, String s) {
+  public <T> void setString(OptionParser<T> o, String s) {
     setOption(o);
     o.setString(this,s);
   }
@@ -79,7 +79,7 @@ public class DefaultOptionMap implements OptionMap {
     return o.remove(this);
   }
   
-  public Iterator<OptionParser> keys() {
+  public Iterator<OptionParser<?>> keys() {
     return keys.iterator();
   }
   
@@ -87,7 +87,7 @@ public class DefaultOptionMap implements OptionMap {
     String result = "\n{ ";
     
     for (int i = 0; i < keys.size(); i++) {
-      OptionParser key = keys.get(i);
+      OptionParser<?> key = keys.get(i);
       result += key.name + " = " + getString(key) + '\n';
     }
     

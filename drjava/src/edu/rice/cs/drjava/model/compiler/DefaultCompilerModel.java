@@ -76,7 +76,7 @@ public class DefaultCompilerModel implements CompilerModel {
   /**
    * The error model containing all current compiler errors.
    */
-  private CompilerErrorModel<CompilerError> _compilerErrorModel;
+  private CompilerErrorModel<? extends CompilerError> _compilerErrorModel;
 
   /**
    * Lock to prevent multiple threads from accessing the compiler at the
@@ -304,23 +304,13 @@ public class DefaultCompilerModel implements CompilerModel {
 
   //----------------------------- Error Results -----------------------------//
 
-  /**
-   * Gets the CompilerErrorModel representing the last compile.
-   */
-  public CompilerErrorModel getCompilerErrorModel() {
-    return _compilerErrorModel;
-  }
+  /** Gets the CompilerErrorModel representing the last compile. */
+  public CompilerErrorModel<? extends CompilerError> getCompilerErrorModel() { return _compilerErrorModel; }
 
-  /**
-   * Gets the total number of current errors.
-   */
-  public int getNumErrors() {
-    return getCompilerErrorModel().getNumErrors();
-  }
+  /** Gets the total number of current errors. */
+  public int getNumErrors() { return getCompilerErrorModel().getNumErrors(); }
 
-  /**
-   * Resets the compiler error state to have no errors.
-   */
+  /** Resets the compiler error state to have no errors. */
   public void resetCompilerErrors() {
     // TODO: see if we can get by without this function
     _compilerErrorModel =

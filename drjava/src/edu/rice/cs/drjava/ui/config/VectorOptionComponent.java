@@ -82,7 +82,7 @@ public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>
     super(opt, text, parent);
 
     //set up list
-    _listModel = new DefaultListModel();
+    _listModel = new DefaultListModel(); // should be DefaultListModel<T>
     _list = new JList(_listModel);
     _list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
@@ -160,7 +160,7 @@ public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>
   public boolean updateConfig() {
     Vector<T> current = new Vector<T>();
     for (int i = 0; i < _listModel.getSize(); i++) {
-      current.add((T)_listModel.getElementAt(i));
+      current.add((T)_listModel.getElementAt(i));  // The cast (T) will be unnecessary in JDK 1.5
     }
     DrJava.getConfig().setSetting(_option, current);
     resetToCurrent();

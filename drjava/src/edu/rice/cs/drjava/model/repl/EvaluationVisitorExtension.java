@@ -92,6 +92,9 @@ public class EvaluationVisitorExtension extends EvaluationVisitor {
     }
   }
 
+  /* Note:  protected static Object performCast(Class tc, Object o)
+   * is inherited from EvaluationVisitoor */
+  
   public Object visit(WhileStatement node) {
     _checkInterrupted(node);
     super.visit(node);

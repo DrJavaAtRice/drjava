@@ -64,7 +64,7 @@ public class OptionMapLoader implements OptionConstants {
       int mods = field.getModifiers();
       if(Modifier.isStatic(mods) && Modifier.isPublic(mods) && Modifier.isFinal(mods)) {
         // field is public static and final.
-        Option option;
+        Option<?> option;
         try {
           Object o = field.get(null); // we should be able to pass in null as the 'receiver', since it's static.
           //System.out.println("field name: "+field.getName()+"  o: "+o);
@@ -72,7 +72,7 @@ public class OptionMapLoader implements OptionConstants {
             continue; // Development options can be null in the stable version of the code
           }
 
-          option = (Option) o;
+          option = (Option<?>) o;
         }
         catch(IllegalAccessException e) {
           // this cannot happen, since we don't get in here unless the field is public.
@@ -112,9 +112,9 @@ public class OptionMapLoader implements OptionConstants {
   }
 
   public void loadInto(OptionMap map) {
-    Iterator<OptionParser> options = DEFAULTS.keys();
+    Iterator<OptionParser<?>> options = DEFAULTS.keys();
     while(options.hasNext()) {
-      OptionParser option = options.next();
+      OptionParser<?> option = options.next();
       String val = prop.getProperty(option.name);
       map.setString(option,val);
     }

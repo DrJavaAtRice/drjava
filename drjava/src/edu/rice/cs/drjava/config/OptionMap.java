@@ -52,13 +52,13 @@ public interface OptionMap {
 
     public <T> T setOption(Option<T> o, T val);
 
-    public String getString(OptionParser o);
+    public <T> String getString(OptionParser<T> o);
     
-    public void setString(OptionParser o, String s);
+    public <T> void setString(OptionParser<T> o, String s);
 
     public <T> T removeOption(OptionParser<T> o);
 
-    public Iterator<OptionParser> keys();
+    public Iterator<OptionParser<?>> keys();
 }
 
 

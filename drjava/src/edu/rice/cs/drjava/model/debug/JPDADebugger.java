@@ -629,7 +629,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
       ref = classes.get(i);
 
       if (lineNumber != DebugAction.ANY_LINE) {
-        List<Location> lines = new LinkedList();   // Added parameterization <Location> to lines
+        List<Location> lines = new LinkedList<Location>();
         try {
           lines = ref.locationsOfLine(lineNumber); // JDK 1.5 will eliminate this type warning
         }

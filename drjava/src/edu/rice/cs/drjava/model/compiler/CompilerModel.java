@@ -102,7 +102,7 @@ public interface CompilerModel {
   /**
    * Gets the CompilerErrorModel representing the last compile.
    */
-  public CompilerErrorModel getCompilerErrorModel();  // Return type should be CompilerErrorModel<? exends Compiler Error> /**/
+  public CompilerErrorModel<? extends CompilerError> getCompilerErrorModel();  // Return type should be CompilerErrorModel<? extends CompilerError> /**/
 
   /**
    * Gets the total number of current errors.

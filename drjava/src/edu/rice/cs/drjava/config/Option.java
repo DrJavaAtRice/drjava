@@ -51,12 +51,11 @@ import java.util.Vector;
 
 
 /**
- * Represents a configurable option in DrJava that has a static (programmatic) type of T.
- * Classes can magically extend this class and the entire rest of the Configuration magic
- * typing framework will work for it.  Named subclasses aren't even necessary -- but
- * may be convenient in order to re-use code.  For example, to make an anonymous class
- * that handled options of static type Integer, with the name "indent.level", you use the
- * following code:
+ * An instance of this class represents a configurable option in DrJava that has static type T.
+ * Classes can extend this class and the rest of the Configuration typing framework will work 
+ * for it.  Named subclasses aren't even necessary -- but may be convenient in order to re-use 
+ * code.  For example, to make an anonymous class that handles options of static type Integer, 
+ * with the name "indent.level", you could use the following code:
  * <pre>
  * Option&lt;Integer&gt; INDENT_LEVEL = new Option&lt;Integer&gt;("indent.level") {
  *         public Integer parse(String s) {
@@ -64,13 +63,12 @@ import java.util.Vector;
  *         }
  *     };
  * </pre>
- * the above example is simple because Integers (like most Java(tm) standard-lib data-type
- * classes) have handy toString() / parsing methods/constructors.
+ * the above example is simple because Integers (like most data-type classes defined in the Java
+ * ivaewhave handy toString() / parsing methods/constructors.
  *
  * @version $Id$
  */
 public abstract class Option<T> extends OptionParser<T> implements FormatStrategy<T> {
-
 
   /**
    * a hashtable that maps Configuration Objects to a list of listeners for this

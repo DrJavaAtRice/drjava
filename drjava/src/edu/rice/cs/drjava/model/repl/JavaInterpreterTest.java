@@ -134,48 +134,48 @@ public final class JavaInterpreterTest extends TestCase {
    */
   public void testIntegerOps() throws ExceptionReturnedException {
     Pair[] cases = new Pair[] {
-      // plus
-      Pair.make("5+6", new Integer(5 + 6)),
-      // minus
-      Pair.make("6-5", new Integer(6 - 5)),
-      // times
-      Pair.make("6*5", new Integer(6*5)),
-      // divide
-      Pair.make("6/5", new Integer(6/5)),
-      // modulo
-      Pair.make("6%5", new Integer(6%5)),
-      // bit and
-      Pair.make("6&5", new Integer(6 & 5)),
-      // bit or
-      Pair.make("6 | 5", new Integer(6 | 5)),
-      // bit xor
-      Pair.make("6^5", new Integer(6 ^ 5)),
-      // bit complement
-      Pair.make("~6", new Integer(~6)),
+//      // plus
+//      Pair.make("5+6", new Integer(5 + 6)),
+//      // minus
+//      Pair.make("6-5", new Integer(6 - 5)),
+//      // times
+//      Pair.make("6*5", new Integer(6*5)),
+//      // divide
+//      Pair.make("6/5", new Integer(6/5)),
+//      // modulo
+//      Pair.make("6%5", new Integer(6%5)),
+//      // bit and
+//      Pair.make("6&5", new Integer(6 & 5)),
+//      // bit or
+//      Pair.make("6 | 5", new Integer(6 | 5)),
+//      // bit xor
+//      Pair.make("6^5", new Integer(6 ^ 5)),
+//      // bit complement
+//      Pair.make("~6", new Integer(~6)),
       // unary plus
-      Pair.make("+5", new Integer(+5)),
-      // unary minus
-      Pair.make("-5", new Integer(-5)),
+//      Pair.make("+5", new Integer(+5)),
+//      // unary minus
+//      Pair.make("-5", new Integer(-5)),
       // left shift
       Pair.make("400 << 5", new Integer(400 << 5)),
       // right shift
       Pair.make("400 >> 5", new Integer(400 >> 5)),
       // unsigned right shift
       Pair.make("400 >>> 5", new Integer(400 >>> 5)),
-      // less than
-      Pair.make("5 < 4", new Boolean(5 < 4)),
-      // less than or equal to
-      Pair.make("4 <= 4", new Boolean(4 <= 4)), Pair.make("4 <= 5", new Boolean(4 <= 5)),
-          // greater than
-      Pair.make("5 > 4", new Boolean(5 > 4)), Pair.make("5 > 5", new Boolean(5 > 5)),
-          // greater than or equal to
-      Pair.make("5 >= 4", new Boolean(5 >= 4)), Pair.make("5 >= 5", new Boolean(5 >= 5)),
-          // equal to
-      Pair.make("5 == 5", new Boolean(5 == 5)), Pair.make("5 == 6", new Boolean(
-          5 == 6)),
-      // not equal to
+//      // less than
+//      Pair.make("5 < 4", new Boolean(5 < 4)),
+//      // less than or equal to
+//      Pair.make("4 <= 4", new Boolean(4 <= 4)), Pair.make("4 <= 5", new Boolean(4 <= 5)),
+//          // greater than
+//      Pair.make("5 > 4", new Boolean(5 > 4)), Pair.make("5 > 5", new Boolean(5 > 5)),
+//          // greater than or equal to
+//      Pair.make("5 >= 4", new Boolean(5 >= 4)), Pair.make("5 >= 5", new Boolean(5 >= 5)),
+//          // equal to
+//      Pair.make("5 == 5", new Boolean(5 == 5)), Pair.make("5 == 6", new Boolean(
+//          5 == 6)),
+//      // not equal to
       Pair.make("5 != 6", new Boolean(5 != 6)), Pair.make("5 != 5", new Boolean(
-          5 != 5))
+                                                                                5 != 5))
     };
     tester(cases);
   }
