@@ -41,7 +41,7 @@ package edu.rice.cs.drjava.model.repl;
 
 import java.io.IOException;
 
-import edu.rice.cs.drjava.model.repl.newjvm.MainJVM;
+import edu.rice.cs.drjava.model.repl.newjvm.*;
 import edu.rice.cs.util.text.DocumentAdapter;
 
 /**
@@ -95,5 +95,13 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
    */
   public void resetInterpreter() {
     _interpreterControl.killInterpreter(true);
+  }
+  
+  /**
+   * adds a new DynamicJavaInterpreter with the given name
+   * @param name the name of the new interpreter
+   */
+  public void addDebugInterpreter(String name) {
+    InterpreterJVM.ONLY.addDebugInterpreter(name, new DynamicJavaAdapter());
   }
 }

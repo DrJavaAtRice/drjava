@@ -449,9 +449,9 @@ public class DebugPanel extends JPanel implements OptionConstants {
    * @param row the current row
    */
   private void _setCellFont(Component renderer, int row) {
-    if (row == _currentThreadIndex) {
-      renderer.setFont(getFont().deriveFont(Font.BOLD));
-    }
+//     if (row == _currentThreadIndex) {
+//       renderer.setFont(getFont().deriveFont(Font.BOLD));
+//     }
   }
   
   /**

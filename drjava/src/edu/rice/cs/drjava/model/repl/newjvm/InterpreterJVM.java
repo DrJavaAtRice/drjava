@@ -39,7 +39,9 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.repl.newjvm;
 
-import java.util.*;
+import java.util.LinkedList;
+import java.util.ListIterator;
+import gj.util.Hashtable;
 import java.io.*;
 import java.rmi.server.*;
 import java.rmi.*;
@@ -74,12 +76,14 @@ public class InterpreterJVM extends AbstractSlaveJVM
 
   private MainJVMRemoteI _mainJVM;
   private JavaInterpreter _interpreter;
+  private Hashtable<String,JavaInterpreter> _debugInterpreters;
   private String _classpath;
   private JUnitTestManager _junitTestManager;
   
   public static final InterpreterJVM ONLY = new InterpreterJVM();
 
   private InterpreterJVM() {
+    _debugInterpreters = new Hashtable<String,JavaInterpreter>();
     reset();
     _junitTestManager = new JUnitTestManager(this);
   }
@@ -371,6 +375,7 @@ public class InterpreterJVM extends AbstractSlaveJVM
 
   public void reset() {
     _interpreter = new DynamicJavaAdapter();
+    _debugInterpreters.clear();
     _classpath = "";
     
     // do an interpretation to get the interpreter loaded fully
@@ -380,5 +385,25 @@ public class InterpreterJVM extends AbstractSlaveJVM
     catch (ExceptionReturnedException e) {
       throw new edu.rice.cs.util.UnexpectedException(e);
     }
+  }
+  
+  /**
+   * adds a named interpreter to this interpreter's list of debug interpreters
+   * @param name the unique name for the interpreter
+   * @param interpreter the JavaInterpreter
+   */
+  public void addDebugInterpreter(String name, JavaInterpreter interpreter) {
+    if (_debugInterpreters.containsKey(name)) {
+      throw new IllegalArgumentException("Names for debug interpreters must be unique");
+    }
+    _debugInterpreters.put(name, interpreter);
+  }
+  
+  /**
+   * Gets the hashtable containing the debug interpreters
+   * @return said hashtable
+   */
+  public Hashtable<String,JavaInterpreter> getDebugInterpreters() {
+    return _debugInterpreters;
   }
 }
