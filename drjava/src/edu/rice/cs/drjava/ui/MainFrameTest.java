@@ -385,6 +385,42 @@ public final class MainFrameTest extends MultiThreadedTestCase {
 
   }
 
+  
+  /**
+   * a test to make sure the save button does not set itself to enabled right
+   * after opening a file
+   */
+  public void testSaveButtonEnabled() throws IOException {
+     String user = System.getProperty("user.name");
+     _tempDir = FileOps.createTempDirectory("DrJava-test-" + user);
+     File forceOpenClass1_file = new File(_tempDir, "ForceOpenClass1.java");
+     String forceOpenClass1_string =
+       "public class ForceOpenClass1 {\n" +
+       "  ForceOpenClass2 class2;\n" +
+       "  ForceOpenClass3 class3;\n\n" +
+       "  public ForceOpenClass1() {\n" +
+       "    class2 = new ForceOpenClass2();\n" +
+       "    class3 = new ForceOpenClass3();\n" +
+       "  }\n" +
+       "}";
+     FileOps.writeStringToFile(forceOpenClass1_file, forceOpenClass1_string);
+     forceOpenClass1_file.deleteOnExit();
+
+     //_frame.setVisible(true);
+     _frame.pack();
+     _frame.open(new FileOpenSelector(){
+       public File[] getFiles(){
+         File[] return_me = new File[1];
+         return_me[0] = new File(_tempDir, "ForceOpenClass1.java");
+         return return_me;
+       }
+     });
+     
+     
+     assertTrue("the save button should not be enabled after opening a document", !_frame.saveEnabledHuh());
+  }
+  
+  
   /**
    * A Test to guarantee that the Dancing UI bug will not rear its ugly head again.
    * Basically, add a component listener to the leftComponent of _docSplitPane and

@@ -526,10 +526,14 @@ public class MainFrame extends JFrame implements OptionConstants {
     public void actionPerformed(ActionEvent ae) {
       _save();
     }
-    public void setEnabled(boolean e){
-      super.setEnabled(e);
-    }
   };
+  
+  /**
+   * added for use in MainFrameTest
+   */
+  public boolean saveEnabledHuh(){
+    return _saveAction.isEnabled();
+  }
 
   /**
    * Asks the user for a file name and saves the document
@@ -2051,11 +2055,14 @@ public class MainFrame extends JFrame implements OptionConstants {
   private void _installNewDocumentListener(final Document d) {
     d.addDocumentListener(new DocumentUIListener() {
       public void changedUpdate(DocumentEvent e) {
-        _saveAction.setEnabled(true);
-        if (inDebugMode() && _debugPanel.getStatusText().equals("")) {
-          _debugPanel.setStatusText(DEBUGGER_OUT_OF_SYNC);
+        OpenDefinitionsDocument doc = _model.getActiveDocument();
+        if(doc.isModifiedSinceSave()){
+          _saveAction.setEnabled(true);
+          if (inDebugMode() && _debugPanel.getStatusText().equals("")) {
+            _debugPanel.setStatusText(DEBUGGER_OUT_OF_SYNC);
+          }
+          updateFileTitle();
         }
-        updateFileTitle();
       }
       public void insertUpdate(DocumentEvent e) {
         _saveAction.setEnabled(true);
