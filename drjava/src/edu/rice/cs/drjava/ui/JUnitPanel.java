@@ -130,6 +130,7 @@ public class JUnitPanel extends TabbedPanel
           //lastDefPane.setCaretPosition( lastDefPane.getCaretPosition());
           _errorListPane.switchToError(_errorListPane.getSelectedIndex());
           lastDefPane.requestFocus();
+          lastDefPane.getCaret().setVisible(true);
         }
         else {
           lastDefPane.removeErrorHighlight();
@@ -252,11 +253,7 @@ public class JUnitPanel extends TabbedPanel
       
       private JUnitError _error = null;
       
-      public void mouseClicked(MouseEvent e) {
-        maybeShowPopup(e);
-      }
-      
-      public void mouseReleased(MouseEvent e) {
+      public void mousePressed(MouseEvent e) {
         _error = _errorAtPoint(e.getPoint());
 
         if (_error == null) {
@@ -267,9 +264,12 @@ public class JUnitPanel extends TabbedPanel
         }
         maybeShowPopup(e);      
       }
+
+      public void mouseReleased(MouseEvent e) {
+        maybeShowPopup(e);
+      }
       
       private void maybeShowPopup(MouseEvent e) {
-        
         //if (SwingUtilities.isRightMouseButton(e)) {
         if (e.isPopupTrigger()) {
           _popMenu.show(e.getComponent(),
@@ -333,7 +333,7 @@ public class JUnitPanel extends TabbedPanel
             if (_stackFrame == null) {
               _setupStackTraceFrame();
             }
-            _displayStackTrace(_popupAdapter.getError());
+            _displayStackTrace(error);
           }
         }
       });
@@ -507,7 +507,7 @@ public class JUnitPanel extends TabbedPanel
 
       try {
         doc.insertString(0,
-                         "Testing in progress, please wait ...",
+                         "Testing in progress, please wait...",
                          NORMAL_ATTRIBUTES);
       }
       catch (BadLocationException ble) {
@@ -803,6 +803,7 @@ public class JUnitPanel extends TabbedPanel
       defPane.getJUnitErrorCaretListener().shouldHighlight(true);
       defPane.setCaretPosition(errPos);
       defPane.grabFocus();
+      defPane.getCaret().setVisible(true);
       defPane.getJUnitErrorCaretListener().updateHighlight(errPos);
     }
     

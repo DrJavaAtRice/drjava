@@ -334,6 +334,7 @@ public class MainJVM extends UnicastRemoteObject implements MainJVMRemoteI {
             "-Xdebug",
             "-Xnoagent",
             "-Djava.compiler=NONE"
+            //  "-ea"
         };
       }
       else {

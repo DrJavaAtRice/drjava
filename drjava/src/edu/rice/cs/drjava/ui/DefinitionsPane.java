@@ -260,12 +260,23 @@ public class DefinitionsPane extends JEditorPane
   private void _updateMatchHighlight() throws BadLocationException {
     int to = getCaretPosition();
     int from = _doc.balanceBackward(); //_doc()._reduced.balanceBackward();
-    if (from == -1) {}
-    else {
+    if (from > -1) {
+      // Found a matching open brace to this close brace
       from = to - from;
       _addHighlight(from, to);
       Highlighter.Highlight[] _lites = getHighlighter().getHighlights();
     }
+    /** Not ready yet...
+    else {
+      // Try to match a close brace to this open brace
+      from = _doc.balanceForward();
+      if (from > -1) {
+        from = to + from;
+        _addHighlight(to, from);
+        Highlighter.Highlight[] _lites = getHighlighter().getHighlights();
+      }
+    }
+    */
   }
 
   /**
@@ -391,6 +402,9 @@ public class DefinitionsPane extends JEditorPane
     Action a = KeyBindingManager.Singleton.get(ks);
     if (a != null) {
       SwingUtilities.notifyAction(a, ks, e, e.getSource(), e.getModifiers());
+
+      // Make sure we don't consume it again
+      e.consume();
     }
     else {    
       // backspace deletes twice without this check, overrides other keystrokes

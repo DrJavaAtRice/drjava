@@ -2713,6 +2713,12 @@ public class MainFrame extends JFrame implements OptionConstants {
         public void run() {
           hideDebugger();
           _removeThreadLocationHighlight();
+
+          // Ensure all doc breakpoints are gone
+          ListModel docs = _model.getDefinitionsDocuments();
+          for (int i=0; i < docs.getSize(); i++) {
+            ((OpenDefinitionsDocument)docs.getElementAt(i)).removeFromDebugger();
+          }
         }
       };
       SwingUtilities.invokeLater(doCommand);
@@ -3058,6 +3064,9 @@ public class MainFrame extends JFrame implements OptionConstants {
       _resetInteractionsAction.setEnabled(false);
       _interactionsPane.setEditable(false);
       _interactionsPane.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+      if (_model.getDebugManager() != null) {
+        _toggleDebuggerAction.setEnabled(false);
+      }
     }
 
     public void interactionsReset() {
@@ -3068,6 +3077,9 @@ public class MainFrame extends JFrame implements OptionConstants {
       interactionEnded();
       _interactionsPane.getCaret().setVisible(true);
       _resetInteractionsAction.setEnabled(true);
+      if (_model.getDebugManager() != null) {
+        _toggleDebuggerAction.setEnabled(true);
+      }
     }
 
     public void consoleReset() {

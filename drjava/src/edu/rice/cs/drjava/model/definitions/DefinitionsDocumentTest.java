@@ -669,7 +669,7 @@ public class DefinitionsDocumentTest extends TestCase
   }
 
  /**
-   * Test class name-finding on document 
+   * Test interface name-finding on document 
    */
   public void testInterfaceName() throws BadLocationException {
     String weird = "package edu . rice\n./*comment!*/cs.drjava; \n" +
@@ -705,11 +705,26 @@ public class DefinitionsDocumentTest extends TestCase
   }
   
   /**
+   * Tests that the word class is not recognized if it is not followed 
+   * by whitespace.
+   */
+  public void testClassNameWithClassloaderImport()
+    throws BadLocationException {
+    String weird = "import classloader.class; class MyClass {";
+    String result = "MyClass";
+    defModel.insertString(0, weird, null);
+
+    assertEquals("class name for weird: '" + weird + "'",
+                 result,
+                 defModel.getClassName());
+  }
+  
+  /**
    * Test class name-finding on document 
    */
   public void testClassNameMisleading() throws BadLocationException {
     String weird = "package edu . rice\n./*comment!*/cs.drjava; \n" +
-      " {class X} " + 
+      " {class X} \n" + 
       " interface thisInterface { \n" +
       " class MyInnerClass {";
     String result = "thisInterface";

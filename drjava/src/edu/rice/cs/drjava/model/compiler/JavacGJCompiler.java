@@ -287,6 +287,9 @@ public class JavacGJCompiler implements CompilerInterface {
     // Set output classfile version to 1.1
     options.put("-target", "1.1");
 
+    // Allow assertions in 1.4  (config option)
+    //options.put("-source", "1.4");
+
     String sourceRootString = getSourceRootString(sourceRoots);
     options.put("-sourcepath", sourceRootString /*sourceRoot.getAbsolutePath()*/);
 

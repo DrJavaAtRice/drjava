@@ -1889,6 +1889,16 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
     public int balanceBackward() {
       return _doc.balanceBackward();
     }
+    
+    /**
+     * Forwarding method to find the match for the open brace
+     * immediately to the right, assuming there is such a brace.
+     * @return the relative distance forwards to the offset after
+     *         the matching brace.
+     */
+    public int balanceForward() {
+      return _doc.balanceForward();
+    }
 
     /**
      * Set the indent tab size for this document.
@@ -1999,8 +2009,13 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants {
      * all related state from the debug manager.
      */
     public void removeFromDebugger() {
-      while (_breakpoints.size() > 0) {
-        _debugManager.removeBreakpoint(_breakpoints.elementAt(0));
+      if ((_debugManager != null) && (_debugManager.isReady())) {
+        while (_breakpoints.size() > 0) {
+          _debugManager.removeBreakpoint(_breakpoints.elementAt(0));
+        }
+      }
+      else {
+        clearBreakpoints();
       }
     }
   

@@ -51,6 +51,7 @@
 	<command>java -classpath drjava-DATE-TIME.jar:/PATH/tools.jar edu.rice.cs.drjava.DrJava</command>
       </cmdsynopsis>
       <para>(The command should all be on one line, and PATH should be replaced with the correct path to <filename>tools.jar</filename>.  In Windows, replace the colon with a semicolon and forward slashes with backslashes.)</para>
+      <para>Note that <filename>tools.jar</filename> is always on the classpath in Mac OS X, so this additional step is unnecessary.</para>
     </section>
 
     <section id="gs-requirements">
@@ -311,14 +312,16 @@ public static Test suite() {
 
     <section id="debug-setup">
       <title>Starting the Debugger</title>
-      <para>To use DrJava's debugger, Sun's Java Platform Debugger Architecture (JPDA) classes must be on the classpath when DrJava is started.  These classes are usually found in the tools.jar file in the lib directory of the JDK, or can be downloaded in a separate <filename>jpda.jar</filename>.  See <link linkend="gs-running">Running DrJava</link> for the correct method of starting DrJava with the debugger.</para>
+      <para>To use DrJava's debugger, Sun's Java Platform Debugger Architecture (JPDA) classes must be on the classpath when DrJava is started.  These classes are usually found in the <filename>tools.jar</filename> file in the lib directory of the JDK, or can be downloaded in a separate <filename>jpda.jar</filename>.  See <link linkend="gs-running">Running DrJava</link> for the correct method of starting DrJava with the debugger.</para>
 
-      <para>Once DrJava is running with tools.jar on the classpath, a Debugger menu will be available.  To begin using the debugging features, select the "Debug Mode" menu item from the Debugger menu.  Once Debug Mode is on, an informational panel will be displayed between the Definitions Pane and the Interactions Pane.</para>
+      <para>Once DrJava is running with <filename>tools.jar</filename> on the classpath, a Debugger menu will be available.  To begin using the debugging features, select the "Debug Mode" menu item from the Debugger menu.  Once Debug Mode is on, an informational panel will be displayed between the Definitions Pane and the Interactions Pane.</para>
 
       <formalpara>
 	<title>Modifying Files</title>
 	<para>When using the debugger, it is essential to remember that any modifications to source files will not be reflected in the behavior of the Interactions Pane or the debugger until the classes are recompiled.  Changing a source file while the debugger is running is not recommended, since lines which are highlighted by the debugger may no longer correspond to the lines in the class file being run.  To help notify the user of this danger, a warning message is displayed in the Debug Panel if the current document is out of sync with its class file.</para>
       </formalpara>
+
+      <para>Because the debugger depends on the classes used in the Interactions Pane, the debugger is reset each time any files are compiled or the Interactions Pane is reset.</para>
 
     </section>
 
@@ -482,7 +485,7 @@ public static Test suite() {
       <!-- Colors -->
       <formalpara>
 	<title>Color Options</title>
-	<para>Colors are defined similarly to HTML colors: as six hexadecimal digits preceded by a pound sign.  The first two digits specify a red value, the next two specify a green value, the next two specify a blue value.  For example, <constant>#00FF00</constant> would be a bright green.  (In most cases, using the color chooser in the Preferences window is the simplest approach.)</para>
+	<para>Colors are defined similarly to HTML colors: as six hexadecimal digits preceded by a pound sign.  The first two digits specify a red value, the next two specify a green value, and the next two specify a blue value.  For example, <constant>#00FF00</constant> would be a bright green.  (In most cases, using the color chooser in the Preferences window is the simplest approach.)</para>
       </formalpara>
       
       <!-- Definitions Colors -->
@@ -532,7 +535,7 @@ public static Test suite() {
 	</varlistentry>
 	
 	<varlistentry>
-	  <term>Number Color (<varname>definitions.number.color = #007C7C</varname>)</term>
+	  <term>Number Color (<varname>definitions.number.color = #00B2B2</varname>)</term>
 	  <listitem>
 	    <para>Used as the color for all numbers.</para>
 	  </listitem>
@@ -677,48 +680,89 @@ public static Test suite() {
 
   <!-- ---- Appendix: Setting up DrJava ---- -->
   <appendix id="platform-setup">
-    <title>Setting up DrJava on your platform</title>
-    <para>DrJava also has the ability to load or handle files similarly to other applications on your platform.  For example, many platforms such as Windows and MacOS allow you to associate files with a particular application.  In addition, some platforms allow for you to drop files upon an application's icon.</para>
+    <title>Setting up DrJava on your Platform</title>
+    <para>DrJava can be set up to handle files similarly to other applications on your platform.  For example, Windows <!--and Mac OS X--> allows you to associate types of files with particular applications.  <!-- In addition, some platforms even allow you to drop files onto an application's icon to open them.--></para>
 
-    <section id="win32-associations">
-      <title>Associating .java files to DrJava, on Windows</title>
-      <para>There is a fairly involved, yet simple process for making setting up DrJava as your default java editor in Windows.</para>
-      <para>Some pieces of information that you'll need to determine before setting up:
-        <orderedlist>
-          <listitem><para>The complete path to your java launcher.  We recommend javaw.exe, since it lauches without a command prompt window.</para></listitem>
-          <listitem><para>The complete path to your drjava .jar file.  You may wish to make a copy of your build and name it as drjava.jar, and then in order to update your DrJava installation, just copy a new build over the drjava.jar file.</para></listitem>
-        </orderedlist>
-      </para>
-      <para>Once you've decided or determined the above items of information, you can proceed to add or changing your .java file associations.</para>
+    <section id="setup-win32-associations">
+      <title>Associating Java files to DrJava, on Windows</title>
+      <para>To set up DrJava as your default editor for <filename>.java</filename> files in Windows, you will need a few pieces of information:</para>
+
       <orderedlist>
-        <listitem><para>The first step is finding the Folder Settings dialog.  Depending on version, it's accessible on Windows at a couple of common locations:
+        <listitem>
+	  <para>The complete path to your Java executable, likely in <filename>C:\Program Files</filename>.  We recommend using <filename>javaw.exe</filename>, since it launches programs without displaying a command prompt window.</para>
+        </listitem>
+          
+        <listitem>
+	   <para>The complete path to your DrJava Jar file.  To simplify upgrading, we recommend renaming the Jar file to <filename>drjava.jar</filename> each time you download it, and always keeping it in the same folder.</para>
+	</listitem>
+      </orderedlist>
+
+      <para>Using the above information, you can change the file associations for <filename>.java</filename> files:</para>
+
+      <orderedlist>
+        <listitem>
+	  <para>Find the Folder Settings dialog.  Depending on your version of Windows, it might be in one of several locations:</para>
+
           <itemizedlist>
             <listitem><para>The "Settings" group of the Start Menu</para></listitem>
-            <listitem><para>The "Tools" group on Windows Explorer</para></listitem>
-            <listitem><para>A clickable icon in the Control Panel</para></listitem>
+            <listitem><para>The "Tools" menu in Windows Explorer</para></listitem>
+            <listitem><para>An icon in the Control Panel</para></listitem>
           </itemizedlist>
-        </para></listitem>
-        <listitem><para>Within the FolderOptions dialog, click/select the File Types tab.  Windows may make you wait while it makes a list of its known file types.</para></listitem>
-        <listitem><para>Search the list for the ".java" extension type.  It is possible that it is not in the list, in that case do the following:
+
+        </listitem>
+
+        <listitem>
+	  <para>Within the Folder Settings dialog, click on the File Types tab.</para>
+	</listitem>
+
+        <listitem>
+	  <para>Search the list of file types for the <filename>.java</filename> extension.  If it is not already in the list:</para>
           <orderedlist>
-            <listitem><para>Click the the button to create a new File Type.</para></listitem>
-            <listitem><para>Type in "java" as the extension, and then click OK</para></listitem>
+            <listitem>
+	      <para>Click the "New" button to create a new file type.</para>
+	    </listitem>
+            <listitem>
+	      <para>Type in "java" as the extension and click OK.</para>
+	    </listitem>
           </orderedlist>
-        </para></listitem>
-        <listitem><para>Select the ".java" file type, and click "Advanced". It should pop up the "Edit File Type" dialog.</para></listitem>
-        <listitem><para>Where it shows the list of "actions", click "New". It should show a "New Action" dialog.</para></listitem>
-        <listitem><para>Where it prompts you for the action, type in "open".</para></listitem>
-        <listitem><para>Where it asks you for the application to perform the action, type the following into the field:
-          <orderedlist>
-            <listitem><para>First, the path to your java launcher (or javaw launcher).  If your path includes a space character, put the entire path between quotation marks.</para></listitem>
-            <listitem><para>Follow it with a space character, and then a "-jar" (without the quotes).</para></listitem>
-            <listitem><para>After the -jar, input another space character, and then the literal path to the DrJava jar file.  If your path includes a space character, put the entire path in between quotation marks.</para></listitem>
-            <listitem><para>After the jar path, input another space, and then the literal string "%1", including the quotation makrs.</para></listitem>
-          </orderedlist>
-        </para></listitem>
-        <listitem><para>You may select an icon, if you wish.  Then click OK.</para></listitem>
-        <listitem><para>Click the "Close" button on the Folder Options dialog.</para></listitem>
-        <listitem><para>You should be all set, and done configuring your file associations.  Now whenever you see a ".java" file on Windows, double clicking it should launch DrJava for editing it.</para></listitem>
+        </listitem>
+
+        <listitem>
+	  <para>Select the <filename>.java</filename> extension from the list and click on the "Advanced" button.  The "Edit File Type" dialog will be displayed.</para>
+	</listitem>
+
+	<listitem>
+          <para>If the File Type does not have a name in the top text field, type in "Java Source File".</para>
+        </listitem>
+
+        <listitem>
+	  <para>Click the "New" button next to the list of Actions to display the "New Action" dialog.</para>
+	</listitem>
+
+        <listitem>
+	  <para>Type "open" as the action.</para>
+	</listitem>
+
+        <listitem>
+	  <para>For the application to perform the action, type:</para>
+	  <cmdsynopsis>
+	    <command>"C:\PATH\javaw.exe" -jar "C:\PATH\drjava.jar" "%1"</command>
+	  </cmdsynopsis>
+	  <para>(Replace C:\PATH\javaw.exe with the full path to your Java executable, and C:\PATH\drjava.jar with the full path to your DrJava Jar file, as found in the first few steps.)</para>
+        </listitem>
+
+        <listitem>
+	  <para>Optionally select an icon for all <filename>.java</filename> files, then click OK.</para>
+	</listitem>
+
+        <listitem>
+          <para>Click the "Close" button.</para>
+        </listitem>
+
+        <listitem>
+	  <para>All <filename>.java</filename> files should now be associated with DrJava, so double-clicking on one will open it in a new copy of DrJava.</para>
+	</listitem>
+
       </orderedlist>
     </section>
   </appendix>

@@ -205,6 +205,7 @@ public class CompilerErrorPanel extends TabbedPanel
           //lastDefPane.setCaretPosition( lastDefPane.getCaretPosition());
           _errorListPane.switchToError(_errorListPane.getSelectedIndex());
           lastDefPane.requestFocus();
+          lastDefPane.getCaret().setVisible(true);
         }
         else {
           lastDefPane.removeErrorHighlight();
@@ -749,6 +750,7 @@ public class CompilerErrorPanel extends TabbedPanel
       DefinitionsPane defPane = _frame.getCurrentDefPane();
       defPane.setCaretPosition(errPos);
       defPane.requestFocus();
+      defPane.getCaret().setVisible(true);
     }
     
     /**

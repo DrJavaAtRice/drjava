@@ -485,7 +485,13 @@ public class DebugManager {
     _breakpoints.removeElement(breakpoint);
     
     if ( breakpoint.getRequest() != null && _eventManager != null) {
-      _eventManager.deleteEventRequest(breakpoint.getRequest());
+      try {
+        _eventManager.deleteEventRequest(breakpoint.getRequest());
+      }
+      catch (VMMismatchException vme) {
+        // Not associated with this VM; probably from a previous session.
+        // Ignore and make sure it gets removed from the document.
+      }
     }
     else {
       _pendingRequestManager.removePendingRequest(breakpoint);

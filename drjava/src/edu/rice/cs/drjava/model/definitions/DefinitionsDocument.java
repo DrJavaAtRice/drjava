@@ -1175,6 +1175,16 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
   public synchronized int balanceBackward() {
     return _reduced.balanceBackward();
   }
+  
+  /**
+   * Forwarding method to find the match for the open brace
+   * immediately to the right, assuming there is such a brace.
+   * @return the relative distance forwards to the offset after
+   *         the matching brace.
+   */
+  public synchronized int balanceForward() {
+    return _reduced.balanceForward();
+  }
 
 
   public void indentLines(int selStart, int selEnd) {
