@@ -253,6 +253,11 @@ public class ReflectionUtilitiesTest extends DynamicJavaTestCase {
     // java.util.Arrays.asList(Object...) with Integer[]
     m = ReflectionUtilities.lookupMethod(java.util.Arrays.class, "asList", new Class[]{Integer[].class});
     
+    
+    // test5(ONE) -> test5(int,int...)
+    m = ReflectionUtilities.lookupMethod(TestClass.class, "test7", new Class[]{Integer.class});
+    result = ((Integer)m.invoke(null, new Object[]{ONE})).intValue();
+    assertEquals("lookup with test5 ound wrong method", TestClass.test5(new Integer(1)), result);
   }
   
   
@@ -292,6 +297,22 @@ public class ReflectionUtilitiesTest extends DynamicJavaTestCase {
     result = ((TestClass)c.newInstance(new Object[] {new Integer(1)})).value();
     assertEquals("(int) should have found correct constructor",new TestClass(1).value(),result);
   }
+  
+  /**
+   * Tests 
+   */
+  public void testBridgeMethodLookup() 
+    throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+    Method m;
+    String result;
+    C1 instance = new C1();
+    Method m1 = C1.class.getDeclaredMethods()[1];
+    assertTrue(m1+" isBridge?", TigerUtilities.isBridge(m1));
+    m = ReflectionUtilities.lookupMethod(C1.class, "method1", new Class[]{});
+    result = ((String)m.invoke(instance, new Object[]{}));
+    assertEquals("lookup c1.method1", instance.method1(), result);
+  }
+  
   /**
    * This class is created with methods that the tests can look for.
    * They return numbers so that the result of invoking the returned 
@@ -345,6 +366,27 @@ public class ReflectionUtilitiesTest extends DynamicJavaTestCase {
     
     public static int test6(int a) { return 1; }
          
+    public static int test7(Number i) { return 1; }
+    public static int test8(Object o) { return 2; }
+    
     public int value() { return value; }
+  }
+  
+  private interface I1<T extends Comparable<T>> {
+    public T method1();
+    public T method2(int i, T other);
+    public T method3(double d);
+    public T method4(T other);
+  }
+  private static class C1 implements I1<String> {
+    static String M1 = "method1";
+    static String M2 = "method2";
+    static String M3 = "method3";
+    static String M4 = "method4";
+    
+    public String method1() { return M1; }
+    public String method2(int i, String other) { return M2; }
+    public String method3(double d) { return M3; }
+    public String method4(String other) { return M4; }
   }
 }

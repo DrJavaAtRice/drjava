@@ -70,6 +70,16 @@ import koala.dynamicjava.interpreter.throwable.WrongVersionException;
  */
 public class TigerUtilities {
 
+  // The following constants are pulled from
+  // java.lang.reflect.Modifier. This way, 
+  // the utility can run under 1.4
+  
+  static final int BRIDGE     = 0x00000040;
+  static final int VARARGS    = 0x00000080;
+  static final int SYNTHETIC  = 0x00001000;
+  static final int ANNOTATION = 0x00002000;
+  static final int ENUM       = 0x00004000;
+  
   /**
    * The version of the java runtime environment that is in use.
    */
@@ -136,7 +146,7 @@ public class TigerUtilities {
    * @return boolean that is true if tiger is enabled and <code>c.isVarArgs()</code>
    */
   public static boolean isVarArgs(Method m) {
-    return _tigerEnabled && ((m.getModifiers() & 0x00000080) != 0);// m.isVarArgs(); use this for some beta versions of 1.5 did not properly support the isVarArgs() method!
+    return _tigerEnabled && ((m.getModifiers() & VARARGS) != 0);// m.isVarArgs(); use this for some beta versions of 1.5 did not properly support the isVarArgs() method!
   }
 
   /**
@@ -146,7 +156,11 @@ public class TigerUtilities {
    * @return boolean that is true if tiger is enabled and <code>c.isVarArgs()</code>
    */
   public static boolean isVarArgs(Constructor c) {
-    return _tigerEnabled && ((c.getModifiers() & 0x00000080) != 0); //c.isVarArgs(); use this for some beta versions of 1.5 did not properly support the isVarArgs() method!
+    return _tigerEnabled && ((c.getModifiers() & VARARGS) != 0); //c.isVarArgs(); use this for some beta versions of 1.5 did not properly support the isVarArgs() method!
+  }
+  
+  public static boolean isBridge(Method m) {
+    return ((m.getModifiers() & BRIDGE) != 0);
   }
 
   /**
@@ -176,7 +190,7 @@ public class TigerUtilities {
    * @return boolean that is true if tiger is enabled and <code>f.isEnumConstant()</code>
    */
   public static boolean isEnumConstant(Field f) {
-    return _tigerEnabled && f.isEnumConstant();
+    return _tigerEnabled && ((f.getModifiers() & ENUM) != 0);
   }
 
   /**

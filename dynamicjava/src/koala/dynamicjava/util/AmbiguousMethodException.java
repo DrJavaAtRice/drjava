@@ -45,6 +45,7 @@ END_COPYRIGHT_BLOCK*/
 
 package koala.dynamicjava.util;
 
+import java.lang.reflect.Method;
 
 /**
  * This exception is thrown when more than one method is acceptable
@@ -52,11 +53,18 @@ package koala.dynamicjava.util;
  */
 public class AmbiguousMethodException extends RuntimeException {
   
+  private Method[] _methods;
+  
   /**
    * Public constructor - calls the super class constructor
    * @param e - the message to be shown when the exception occurs
    */
   public AmbiguousMethodException(String e) {
     super(e);
+    _methods = new Method[0];
+  }
+  public AmbiguousMethodException(Method m1, Method m2) {
+    super("Both methods match:" + m1 + ", and " + m2);
+    _methods = new Method[]{m1,m2};
   }
 }

@@ -105,7 +105,7 @@ public class ReflectionUtilities {
     else if (compatible.size() > 1) {
       // It is ambiguous if more than one variable-argument 
       // method matches the given parameter type list.
-      throw new AmbiguousMethodException("both methods match: " + 
+      throw new AmbiguousMethodException("both constructors match: " + 
                                          compatible.get(0) + ", and " +
                                          compatible.get(1));
     }
@@ -204,15 +204,13 @@ public class ReflectionUtilities {
     if(compatible.isEmpty()){
       throw new NoSuchMethodException(generateNotFoundMsg("method", cl.getName()+"."+name, ac));
     }
-    else if (compatible.size() > 1) {
-      // It is ambiguous if more than one variable-argument 
-      // method matches the given parameter type list.
-      throw new AmbiguousMethodException("both methods match: " + 
-                                         compatible.get(0) + ", and " +
-                                         compatible.get(1));
+    else if (compatible.size() == 1) {
+      return compatible.get(0); 
     }
     else {
-      return compatible.get(0);
+      // It is ambiguous if more than one variable-argument 
+      // method matches the given parameter type list.
+      throw new AmbiguousMethodException(compatible.get(0), compatible.get(1));
     }
   
   } // end method: lookupMethod 
@@ -348,6 +346,7 @@ public class ReflectionUtilities {
     throw new NoSuchFieldException(name);
   }
   
+  
   /**
    * Selects the method with the most specific signature.  This assumes that 
    * each method does not require the application of any 1.5+ specific features.
@@ -403,7 +402,15 @@ public class ReflectionUtilities {
       }
     }
     if (ambiguous != null) {
-      throw new AmbiguousMethodException("Both methods match: " + best + ", and " + ambiguous);
+      boolean bestBridge = TigerUtilities.isBridge(best);
+      boolean ambiBridge = TigerUtilities.isBridge(ambiguous);
+      if (bestBridge && !ambiBridge) {
+        return ambiguous;
+      }
+      else if (!bestBridge && ambiBridge) {
+        return best;
+      }
+      throw new AmbiguousMethodException(best, ambiguous);
     }
     return best;
   }
@@ -463,7 +470,7 @@ public class ReflectionUtilities {
       }
     }
     if (ambiguous != null) {
-      throw new AmbiguousMethodException("Both contructors match: " + best + ", and " + ambiguous);
+      throw new AmbiguousMethodException("Both constructors match: " + best + ", and " + ambiguous);
     }
     return best;
   }
@@ -526,7 +533,7 @@ public class ReflectionUtilities {
       }
     }
     if (ambiguous != null) {
-      throw new AmbiguousMethodException("Both methods match: " + best + ", and " + ambiguous);
+      throw new AmbiguousMethodException(best, ambiguous);
     }
     return best;
   }
