@@ -56,6 +56,7 @@ import koala.dynamicjava.tree.*;
 import koala.dynamicjava.interpreter.*;
 import koala.dynamicjava.SourceInfo;
 import koala.dynamicjava.util.*;
+import koala.dynamicjava.interpreter.error.*;
 
 import java.io.StringReader;
 import java.util.List;
@@ -140,7 +141,17 @@ public class TigerUtilities {
    * @return boolean that is true if tiger is enabled and <code>c.isEnum()</code>
    */  
   public static boolean isEnum(Class<?> c) {
-    return _tigerEnabled && c.isEnum();
+    try {
+      return _tigerEnabled && (c.getSuperclass() == Class.forName("java.lang.Enum"));
+    }
+    // this try/catch block should in fact not be there, but to use
+    // c.isEnum() instead if the value of the ENUM flag
+    // was known (see commented line below)
+    catch(ClassNotFoundException e){
+      throw new ExecutionError("Tiger is enabled, but cannot find class java.lang.Enum! Please contact the DynamicJava/DrJava team (javaplt@cs.rice.edu).");
+    }
+    
+    //return _tigerEnabled && c.isEnum();
   }
   
   /**

@@ -477,8 +477,9 @@ public class EvaluationVisitor extends VisitorObject<Object> {
       Object sel; // an Enum or a Number - no common ancestor except Object :(
       // used to be n
       
-      if (o instanceof Enum){
-        sel = (Enum) o;
+      Class<?> EnumClass = (TigerUtilities.isTigerEnabled() ? Class.forName("java.lang.Enum") : null);
+      if (TigerUtilities.isTigerEnabled() && o.getClass().getSuperclass() == EnumClass){
+        sel = /*(Enum)*/ o;
       }
       else {
         sel = (Number)o;
@@ -495,8 +496,8 @@ public class EvaluationVisitor extends VisitorObject<Object> {
           if (o instanceof Character) {
             o = new Integer(((Character)o).charValue());
           }
-          if(TigerUtilities.isTigerEnabled() && o instanceof Enum ){
-            bind = (Enum) o;
+          if(TigerUtilities.isTigerEnabled() && o.getClass().getSuperclass() == EnumClass){
+            bind = /*(Enum)*/ o;
           }
           else {
             bind = (Number)o;
@@ -507,7 +508,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
 
         if (bind != null && 
             ((sel instanceof Number) && ((Number)sel).intValue() == ((Number)bind).intValue()) || 
-            (TigerUtilities.isTigerEnabled() && (sel instanceof Enum) && ((Enum)sel).equals((Enum)bind))
+            (TigerUtilities.isTigerEnabled() && (sel.getClass().getSuperclass() == EnumClass) && (/*(Enum)*/sel).equals(/*(Enum)*/bind))
            ){
           processed = true;
           // When a matching label is found, interpret all the
@@ -549,7 +550,12 @@ public class EvaluationVisitor extends VisitorObject<Object> {
       if (e.isLabeled()) {
         throw e;
       }
+    } catch(ClassNotFoundException e){
+      throw new ExecutionError("Tiger is enabled, but cannot find class java.lang.Enum! Please contact the DynamicJava/DrJava team (javaplt@cs.rice.edu).");
+    } catch(NoClassDefFoundError e){
+      throw new ExecutionError("Tiger is enabled, but cannot find class java.lang.Enum! Please contact the DynamicJava/DrJava team (javaplt@cs.rice.edu).");
     }
+    
     return null;
   }
 

@@ -385,7 +385,7 @@ public class Distinction1415Test extends DynamicJavaTestCase {
     try {
       testString =
         "public class C {\n"+
-        "  public enum Suit { CLUBS, DIAMONDS, HEARTS, SPADES }\n"+
+        "  public enum Suit { CLUBS, DIAMONDS, HEARTS, SPADES; }\n"+
         "  public static void m() {\n"+
         "     System.out.println(Suit.CLUBS);\n"+
         "  }\n"+
@@ -410,7 +410,7 @@ public class Distinction1415Test extends DynamicJavaTestCase {
     try {
       testString =
         "public class C {\n"+
-        "  public enum Suit { CLUBS, DIAMONDS, HEARTS, SPADES }\n"+
+        "  public enum Suit { CLUBS, DIAMONDS, HEARTS, SPADES; }\n"+
         "  public static void m() {\n"+
         "     System.out.println(Suit.CLUBS);\n"+
         "  }\n"+
