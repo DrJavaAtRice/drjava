@@ -50,15 +50,19 @@ import edu.rice.cs.util.PreventExitSecurityManager;
 public class DrJava {
   private static final PrintStream _consoleOut = System.out;
   private static final PrintStream _consoleErr = System.err;
-  private static PreventExitSecurityManager _manager
-    = PreventExitSecurityManager.activate();
+  private static PreventExitSecurityManager _manager;
 
   public static void main(String[] args) {
       
     try {
       System.setProperty("com.apple.macos.useScreenMenuBar","true");
-      enableSecurityManager();
+
       MainFrame mf = new MainFrame();
+
+      // This enabling of the security manager must happen *after* the mainframe
+      // is constructed. See bug #518509.
+      enableSecurityManager();
+
       mf.show();
     } catch (Exception ex) {
       _consoleErr.println(ex.getClass().getName() + ": " + ex.getMessage());
@@ -71,6 +75,10 @@ public class DrJava {
   }
 
   public static void enableSecurityManager() {
+    if (_manager == null) {
+      _manager = PreventExitSecurityManager.activate();
+    }
+
     if (System.getSecurityManager() != _manager) {
       System.setSecurityManager(_manager);
     }
