@@ -215,9 +215,12 @@ public class DefinitionsDocument extends PlainDocument
 
   public void move(int dist)
   {
+    int oldLoc = _currentLocation;
+
     _currentLocation += dist;
     if (_currentLocation < 0) {
-      throw new RuntimeException("location < 0?!");
+      throw new RuntimeException("location < 0?! oldLoc=" + oldLoc +
+                                 " dist=" + dist);
     }
     _reduced.move(dist);
   }
@@ -227,27 +230,47 @@ public class DefinitionsDocument extends PlainDocument
     this._indent = indent;
   }
 
-  public void indentBlock(int start, int end)
+  /**
+   * Indents the lines between and including the lines containing
+   * points start and end.
+   * @param start Position in document to start indenting from
+   * @param end Position in document to end indenting at
+   */
+  public void indentBlock(final int start, final int end)
   {
     try {
-      int moved = 0;
-      Position endPos = this.createPosition(end);
+      // Keep marker at the end. This Position will be the 
+      // correct endpoint no matter how we change the doc
+      // doing the indentLine calls.
+      final Position endPos = this.createPosition(end);
 
-      while(start < endPos.getOffset()){
-        moved = _reduced.getDistToNextNewline();
-        start += moved;
-        setCurrentLocation(start);
+      // Iterate, line by line, until we get to/past the end
+      int walker = start;
+
+      while(walker < endPos.getOffset()) {
+        setCurrentLocation(walker);
+
+        // Keep pointer to walker position that will stay current
+        // regardless of how indentLine changes things
+        Position walkerPos = this.createPosition(walker);
+
+        // Indent current line
         indentLine();
-        //keeps track of the start and end position
-        start += endPos.getOffset() - end;
-        end = endPos.getOffset();
 
-        if(start < end)
-          start++;
-        setCurrentLocation(start);
+        // Move back to walker spot
+        setCurrentLocation(walkerPos.getOffset());
+        walker = walkerPos.getOffset();
+
+        // Adding 1 makes us point to the first character AFTER the
+        // next newline.
+        // We don't actually move yet. That happens at the top of the loop,
+        // after we check if we're past the end.
+        walker += _reduced.getDistToNextNewline() + 1;
       }
     }
-    catch (Exception e) {e.printStackTrace();}
+    catch (BadLocationException e) {
+      throw new RuntimeException("Impossible bad loc except: " + e);
+    }
   }
 
   public void indentLine() 

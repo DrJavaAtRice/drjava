@@ -422,11 +422,10 @@ public class DefinitionsView extends JEditorPane
 		  case JFileChooser.ERROR_OPTION:
         return false;
       case JFileChooser.APPROVE_OPTION:
-				_mainFrame.hourglassOn();
-        File chosen = fc.getSelectedFile();
-
         try
         {
+          _mainFrame.hourglassOn();
+          File chosen = fc.getSelectedFile();
           if (chosen == null) {
             return false;
           }

@@ -15,6 +15,7 @@ public class DrJava {
 
   /** Compiler to use everywhere. */
   public static final CompilerInterface compiler = new GJv6Compiler();
+  //public static final CompilerInterface compiler = new JSR14Compiler();
 
   public static void main(String[] args) {
     // Save pointers to stdout and stderr
