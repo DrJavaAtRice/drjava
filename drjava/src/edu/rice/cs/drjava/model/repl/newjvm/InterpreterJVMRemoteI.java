@@ -41,6 +41,7 @@ package edu.rice.cs.drjava.model.repl.newjvm;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
+import edu.rice.cs.util.newjvm.*;
 
 /**
  * This interface specifies the methods that the interpreter JVM exposes
@@ -48,10 +49,9 @@ import java.rmi.RemoteException;
  *
  * @version $Id$
  */
-public interface InterpreterJVMRemoteI extends Remote {
+public interface InterpreterJVMRemoteI extends SlaveRemote {
   public void interpret(String s) throws RemoteException;
   public void addClassPath(String s) throws RemoteException;
   public void setPackageScope(String s) throws RemoteException;
   public void reset() throws RemoteException;
-  public void exitJVM() throws RemoteException;
 }

@@ -495,7 +495,7 @@ public class DefaultGlobalModel implements GlobalModel {
   }
   
   public void abortCurrentInteraction() {
-    _interpreterControl.restartInterpreterJVM();
+    _interpreterControl.killInterpreter();
   }
   
   /**

@@ -44,6 +44,8 @@ import java.io.*;
 import java.rmi.server.*;
 import java.rmi.*;
 import java.net.MalformedURLException;
+
+import edu.rice.cs.util.newjvm.*;
 import edu.rice.cs.drjava.model.repl.*;
 
 /**
@@ -55,27 +57,22 @@ import edu.rice.cs.drjava.model.repl.*;
  *
  * @version $Id$
  */
-public class InterpreterJVM extends UnicastRemoteObject
+public class InterpreterJVM extends AbstractSlaveJVM
                             implements InterpreterJVMRemoteI
 {
-  public static final int WAIT_UNTIL_QUIT_MS = 100;
-  public static final int CHECK_MAIN_VM_ALIVE_MINUTES = 1;
   public static final String EMPTY_TRACE_TEXT = "";
   //public static final String EMPTY_TRACE_TEXT = "  at (the interactions window)";
 
-  private final MainJVMRemoteI _mainJVM;
+  private MainJVMRemoteI _mainJVM;
   private JavaInterpreter _interpreter;
 
-  public InterpreterJVM(String url) throws RemoteException,
-                                           NotBoundException,
-                                           MalformedURLException
-  {
-    super();
-
+  public InterpreterJVM() {
     reset();
+  }
 
-    _mainJVM = (MainJVMRemoteI) Naming.lookup(url);
-    _mainJVM.registerInterpreterJVM(this);
+  protected void handleStart(MasterRemote mainJVM) 
+  {
+    _mainJVM = (MainJVMRemoteI) mainJVM;
 
     // redirect stdout
     System.setOut(new PrintStream(new OutputStreamRedirector() {
@@ -100,32 +97,6 @@ public class InterpreterJVM extends UnicastRemoteObject
         }
       }
     }));
-
-    // Start a thread to periodically ping the main VM and quit when
-    // it's dead
-    // This is just in case the main vm dies without killing us
-    Thread thread = new Thread() {
-      public void run() {
-        while (true) {
-          try {
-            Thread.currentThread().sleep(CHECK_MAIN_VM_ALIVE_MINUTES*60*1000);
-          }
-          catch (InterruptedException ie) {
-          }
-
-          try {
-            _mainJVM.checkStillAlive();
-          }
-          catch (RemoteException re) {
-            // not there anymore. quit!
-            System.exit(0);
-          }
-        }
-      }
-    };
-
-    thread.start();
-
   }
 
   public void interpret(final String s) throws RemoteException {
@@ -271,36 +242,16 @@ public class InterpreterJVM extends UnicastRemoteObject
     return buf.toString();
   }
 
-  public void exitJVM() throws RemoteException {
-    // can't just exit in the middle of the rmi call -- it confuses the other
-    // side. so make a thread start and wait a moment to exit.
-    
-    Thread thread = new Thread() {
-      public void run() {
-        try {
-          Thread.currentThread().sleep(WAIT_UNTIL_QUIT_MS);
-        }
-        catch (InterruptedException ie) {
-          // who cares? time to exit anyway!
-        }
-
-        System.exit(-1);
-      }
-    };
-
-    thread.start();
-  }
-
-  public void addClassPath(String s) throws RemoteException {
+  public void addClassPath(String s) {
     //_dialog("add classpath: " + s);
     _interpreter.addClassPath(s);
   }
 
-  public void setPackageScope(String s) throws RemoteException {
+  public void setPackageScope(String s) {
     _interpreter.setPackageScope(s);
   }
 
-  public void reset() throws RemoteException {
+  public void reset() {
     _interpreter = new DynamicJavaAdapter();
     
     // do an interpretation to get the interpreter loaded fully
@@ -309,27 +260,6 @@ public class InterpreterJVM extends UnicastRemoteObject
     }
     catch (ExceptionReturnedException e) {
       throw new edu.rice.cs.util.UnexpectedException(e);
-    }
-  }
-
-
-  /**
-   * Main entry point for interpreter JVM.
-   *
-   * @param args Command-line arguments. #1 must be the URL to find the 
-   *             MainJVMRemoteI via RMI.
-   */
-  public static void main(String[] args) {
-    //javax.swing.JFrame frame = new javax.swing.JFrame("interpreter up");
-    //frame.show();
-
-    try {
-      InterpreterJVM jvm = new InterpreterJVM(args[0]);
-    }
-    catch (Throwable t) {
-      //javax.swing.JOptionPane.showMessageDialog(null, "Interpreter JVM error: " + t);
-      t.printStackTrace();
-      System.exit(-1);
     }
   }
 }
