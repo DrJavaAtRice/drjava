@@ -133,13 +133,13 @@ public class InteractionsController extends AbstractConsoleController {
     // Error
     SimpleAttributeSet s = new SimpleAttributeSet();
     s.addAttribute(StyleConstants.Foreground, Color.red.darker());
-    s.addAttribute(StyleConstants.Bold, new Boolean(true));
+    s.addAttribute(StyleConstants.Bold, Boolean.TRUE);
     _adapter.addDocStyle(InteractionsDocument.ERROR_STYLE, s);
     
     // Debug
     s = new SimpleAttributeSet();
     s.addAttribute(StyleConstants.Foreground, Color.blue.darker());
-    s.addAttribute(StyleConstants.Bold, new Boolean(true));
+    s.addAttribute(StyleConstants.Bold, Boolean.TRUE);
     _adapter.addDocStyle(InteractionsDocument.DEBUGGER_STYLE, s);
   }
   

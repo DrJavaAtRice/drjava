@@ -71,7 +71,7 @@ public interface OptionConstants {
     new ClasspathOption().evaluate("extra.classpath");
   
   public static final BooleanOption JAVAC_ALLOW_ASSERT =
-    new BooleanOption("javac.allow.assert", new Boolean(false));
+    new BooleanOption("javac.allow.assert", Boolean.FALSE);
   
   
   /* ---------- Color Options ---------- */
@@ -144,26 +144,26 @@ public interface OptionConstants {
    * Whether icons should be displayed on the toolbar buttons.
    */    
   public static final BooleanOption TOOLBAR_ICONS_ENABLED =
-    new BooleanOption("toolbar.icons.enabled", new Boolean(true));
+    new BooleanOption("toolbar.icons.enabled", Boolean.TRUE);
   
   /**
    * Whether text should be displayed on the toolbar buttons.
    * Note: this is only relevant if toolbar icons are enabled
    */    
   public static final BooleanOption TOOLBAR_TEXT_ENABLED =
-    new BooleanOption("toolbar.text.enabled", new Boolean(true));
+    new BooleanOption("toolbar.text.enabled", Boolean.TRUE);
   
   /**
    * Whether the line-numbers should be displayed in a row header.
    */
   public static final BooleanOption LINEENUM_ENABLED = 
-    new BooleanOption("lineenum.enabled", new Boolean(false));
+    new BooleanOption("lineenum.enabled", Boolean.FALSE);
     
   /**
    * Whether to draw anti-aliased text.  (Slightly slower.)
    */
   public static final BooleanOption TEXT_ANTIALIAS =
-    new BooleanOption("text.antialias", new Boolean(false));
+    new BooleanOption("text.antialias", Boolean.FALSE);
   
   /* ---------- Key Binding Options ----------- */
   static int mask = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
@@ -508,25 +508,25 @@ public interface OptionConstants {
    * Whether all current threads should be displayed when a thread suspends
    */    
   public static final BooleanOption DEBUG_SHOW_THREADS =
-    new BooleanOption("debug.show.threads", new Boolean(false));
+    new BooleanOption("debug.show.threads", Boolean.FALSE);
   
   /**
    * Whether stepping should step through Java's source files
    */    
   public static final BooleanOption DEBUG_STEP_JAVA =
-    new BooleanOption("debug.step.java", new Boolean(false));
+    new BooleanOption("debug.step.java", Boolean.FALSE);
   
   /**
    * Whether stepping should step through Dynamic Java's source files
    */    
   public static final BooleanOption DEBUG_STEP_INTERPRETER =
-    new BooleanOption("debug.step.interpreter", new Boolean(false));
+    new BooleanOption("debug.step.interpreter", Boolean.FALSE);
   
   /**
    * Whether stepping should step through DrJava's source files
    */    
   public static final BooleanOption DEBUG_STEP_DRJAVA =
-    new BooleanOption("debug.step.drjava", new Boolean(false));
+    new BooleanOption("debug.step.drjava", Boolean.FALSE);
     
   
   /* ---------- Misc Options ---------- */
@@ -559,19 +559,19 @@ public interface OptionConstants {
    * Whether to prompt when the interactions pane is unexpectedly reset.
    */
   public static final BooleanOption INTERACTIONS_EXIT_PROMPT =
-    new BooleanOption("interactions.exit.prompt", new Boolean(true));
+    new BooleanOption("interactions.exit.prompt", Boolean.TRUE);
   
   /**
    * Whether to prompt before quitting DrJava.
    */
   public static final BooleanOption QUIT_PROMPT =
-    new BooleanOption("quit.prompt", new Boolean(true));
+    new BooleanOption("quit.prompt", Boolean.TRUE);
 
   /**
    * Whether to make file backups
    */
   public static final BooleanOption BACKUP_FILES =
-    new BooleanOption("files.backup", new Boolean(true));
+    new BooleanOption("files.backup", Boolean.TRUE);
   
   /**
    * A vector containing the most recently used files
@@ -584,7 +584,7 @@ public interface OptionConstants {
    * generating JavaDoc output.
    */
   public static final BooleanOption JAVADOC_ALL_PACKAGES =
-    new BooleanOption("javadoc.all.packages", new Boolean(false));
+    new BooleanOption("javadoc.all.packages", Boolean.FALSE);
 }
 
 

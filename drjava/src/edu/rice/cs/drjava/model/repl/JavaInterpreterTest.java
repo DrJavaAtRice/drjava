@@ -111,16 +111,16 @@ public final class JavaInterpreterTest extends TestCase {
   public void testBooleanOps() throws ExceptionReturnedException {
     Pair[] cases = new Pair[] {
       //and
-      Pair.make("true && false", new Boolean(false)), Pair.make("true && true", 
-          new Boolean(true)), 
+      Pair.make("true && false", Boolean.FALSE), Pair.make("true && true", 
+          Boolean.TRUE), 
       //or
-      Pair.make("true || true", new Boolean(true)), Pair.make("false || true", new Boolean(true)), 
-          Pair.make("false || false", new Boolean(false)), 
+      Pair.make("true || true", Boolean.TRUE), Pair.make("false || true", Boolean.TRUE), 
+          Pair.make("false || false", Boolean.FALSE), 
       // not
-      Pair.make("!true", new Boolean(false)), Pair.make("!false", new Boolean(true)), 
+      Pair.make("!true", Boolean.FALSE), Pair.make("!false", Boolean.TRUE), 
           //equals
-      Pair.make("true == true", new Boolean(true)), Pair.make("false == true", new Boolean(false)), 
-          Pair.make("false == false", new Boolean(true)), 
+      Pair.make("true == true", Boolean.TRUE), Pair.make("false == true", Boolean.FALSE), 
+          Pair.make("false == false", Boolean.TRUE), 
       // xor
       Pair.make("false ^ false", new Boolean(false ^ false)), Pair.make("false ^ true ", 
           new Boolean(false ^ true))
@@ -131,8 +131,8 @@ public final class JavaInterpreterTest extends TestCase {
   /** Tests short circuiting */
   public void testShortCircuit() throws ExceptionReturnedException {
     Pair[] cases = new Pair[] {
-      Pair.make("false && (3 == 1/0)", new Boolean(false)),
-        Pair.make("true || (1/0 != 43)", new Boolean(true))        
+      Pair.make("false && (3 == 1/0)", Boolean.FALSE),
+        Pair.make("true || (1/0 != 43)", Boolean.TRUE)        
     };
     tester(cases);
   }

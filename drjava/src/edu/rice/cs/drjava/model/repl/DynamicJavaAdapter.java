@@ -465,7 +465,7 @@ public class DynamicJavaAdapter implements JavaInterpreter {
       Class c = boolean.class;
       nameVisitorContext.defineConstant(name, c);
       checkVisitorContext.defineConstant(name, c);
-      evalVisitorContext.defineConstant(name, Boolean.valueOf(value));
+      evalVisitorContext.defineConstant(name, new Boolean(value));
     }
     
     /**

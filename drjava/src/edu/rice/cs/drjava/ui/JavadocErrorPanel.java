@@ -71,7 +71,7 @@ public class JavadocErrorPanel extends ErrorPanel{
   private static final SimpleAttributeSet _getOutOfSyncAttributes() {
     SimpleAttributeSet s = new SimpleAttributeSet();
     s.addAttribute(StyleConstants.Foreground, Color.red.darker());
-    s.addAttribute(StyleConstants.Bold, new Boolean(true));
+    s.addAttribute(StyleConstants.Bold, Boolean.TRUE);
     return s;
   }
 

@@ -35,7 +35,7 @@
  * present version of DrJava depends on these classes, so you'd want to
  * remove the dependency first!)
  *
- END_COPYRIGHT_BLOCK*/
+END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model;
 
@@ -1189,18 +1189,34 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
                           LinkedList outLines, LinkedList errLines)
     throws IOException {
     String output;
-    output = jdOut.readLine();
-    while (jdOut.ready() && (output != null)) {
-      System.out.println("[stdout]: " + output);
-      outLines.add(output);
+    
+    if (jdOut.ready()) {
       output = jdOut.readLine();
-    }
       
-    output = jdErr.readLine();
-    while (jdErr.ready() && (output != null)) {
-      System.out.println("[stderr] " + output);
-      errLines.add(output);
+      while (jdOut.ready() && (output != null)) {
+//        System.out.println("[stdout]: " + output);
+        outLines.add(output);
+        if (jdOut.ready()) {
+          output = jdOut.readLine();
+        }
+        else {
+          output = null;
+        }
+      }
+    }
+    
+    if (jdErr.ready()) {
       output = jdErr.readLine();
+      while (jdErr.ready() && (output != null)) {
+//        System.out.println("[stderr] " + output);
+        errLines.add(output);
+        if (jdErr.ready()) {
+          output = jdErr.readLine();
+        }
+        else {
+          output = null;
+        }
+      }
     }
   }
 
@@ -1223,7 +1239,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     Class.forName(JAVADOC_CLASS);
     javadocProcess =  ExecJVM.runJVMPropogateClassPath(JAVADOC_CLASS, args);
     
-    System.err.println("javadoc started with args:\n" + Arrays.asList(args));
+//    System.err.println("javadoc started with args:\n" + Arrays.asList(args));
     
     // getInputStream actually gives us the stdout from the Process.
     jdOut = new BufferedReader(new InputStreamReader(javadocProcess.getInputStream()));
@@ -1253,125 +1269,16 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       }
     }
     ventBuffers(jdOut, jdErr, outLines, errLines);
-    System.err.println("got past first waitFor.");
+//    System.err.println("got past first waitFor.");
      
     // Unfortunately, javadoc returns 1 for normal errors and for exceptions.
     // We cannot tell them apart without parsing.
-    
-    
-//     if (value != 0) {
-//       // If we get here, we will just have to try using the javadoc program
-//       // which is hopefully on the system path
-//       if (CodeStatus.DEVELOPMENT) {
-//         String msg = ("Launching Javadoc with ExecJVM failed.  Messages:");
-//         printProcessOutput(javadocProcess, msg, "ExecJVM");
-//         
-//         System.err.println("Attempting to launch Javadoc from command path.");
-//       }
-//       
-//       String[] fullArgs = new String[args.length + 1];
-//       fullArgs[0] = "javadoc";
-//       //TODO: Use System.arraycopy() here.
-//       for(int a = 0; a < args.length; a++) {
-//         fullArgs[a + 1] = args[a];
-//       }
-//       javadocProcess =  Runtime.getRuntime().exec(fullArgs);
-//       
-//       // TODO: try/catch the previous line and prompt for javadoc's location
-//       // on failure....and even keep the location in the drjava config
-//       // DON'T USE waitFor! (See above.)
-// //       value = javadocProcess.waitFor();
-//       
-//       if (value != 0) {
-//         if (CodeStatus.DEVELOPMENT) {
-//           String msg = ("Launching Javadoc with Runtime.Exec failed.  Messages:");
-//           printProcessOutput(javadocProcess, msg, "Runtime.Exec");
-//         }
-//         
-//         // Handle the error condition at the caller!
-//         CompilerError err = new CompilerError(("finished with exit code " + value), false);
-//         _javadocErrorModel = new CompilerErrorModel(new CompilerError[] { err }, this);
-//       }
-//       // else we have a valid javadocProcess from Runtime.Exec - fall through.
-//     }
-//     // else or fall-through means we have a valid javadocProcess from ExecJVM or Runtime.Exec
-    
-    
-    ArrayList errors = new ArrayList(0);
-    
-    // We already know javadoc is done => process its error messages
-//     String output;
-    
-//     jdOut = new BufferedReader(new InputStreamReader(javadocProcess.getInputStream()));
-//     jdErr = new BufferedReader(new InputStreamReader(javadocProcess.getErrorStream()));
-    
-    // Ignore all of javadoc's inane jabber to stdout.
-    // Maybe dump this to console while debugging?
-//     output = jdOut.readLine();
-//     System.out.println("[Javadoc stdout] " + output);
-//     while (output != null) {
-//       System.out.println("[Javadoc stdout] " + output);
-//       output = jdOut.readLine();
-//     }
-    
-    // By this point, the Javadoc process is dead, so we can't block on reads.
-//     output = jdErr.readLine();
-//     while (output != null) {
-//       final String EXCEPTION_INDICATOR = "Exception: ";
-// //         System.out.println("[javadoc raw error] " + output);
-//       
-//       int errStart;
-//       // Check for the telltale signs of a thrown exception.
-//       errStart = output.indexOf(EXCEPTION_INDICATOR);
-//       if (errStart != -1) {
-//         // If we found one, put the entirety of stderr in one CompilerError.
-//         StringBuffer buf = new StringBuffer(2000);
-//         do {
-//           buf.append(output);
-//           output = jdErr.readLine();
-//         } while (output != null);
-//         errors.add(new CompilerError(buf.toString(), false));
-//       }
-//       else {
-//         CompilerError error = parseJavadocErrorLine(output);
-//         if (error != null) {
-//           errors.add(error);
-// //           System.err.println("[javadoc err]" + error);
-//         }
-//       }
-//       output = jdErr.readLine();
-//     }
-    
-    final String EXCEPTION_INDICATOR = "Exception: ";
-    while (errLines.size() > 0) {
-//         System.out.println("[javadoc raw error] " + output);
-      
-      output = (String) errLines.removeFirst();
-      
-      int errStart;
-      // Check for the telltale signs of a thrown exception.
-      errStart = output.indexOf(EXCEPTION_INDICATOR);
-      if (errStart != -1) {
-        // If we found one, put the entirety of stderr in one CompilerError.
-        StringBuffer buf = new StringBuffer(60 * errLines.size());
-        do {
-          buf.append(output);
-          output = (String) errLines.removeFirst();
-        } while (errLines.size() > 0);
-        errors.add(new CompilerError(buf.toString(), false));
-      }
-      else {
-        // Otherwise, parser for a normal error message.
-        CompilerError error = parseJavadocErrorLine(output);
-        if (error != null) {
-          errors.add(error);
-//           System.err.println("[javadoc err]" + error);
-        }
-      }
-    }
+
+    ArrayList errors = extractErrors(outLines);
+    errors.addAll(extractErrors(errLines));
   
     _javadocErrorModel = new CompilerErrorModel((CompilerError[])(errors.toArray(new CompilerError[0])), this);
-    System.out.println("built javadoc error model");
+//    System.out.println("built javadoc error model");
     return (errors.size() == 0);
   }
   
@@ -1402,6 +1309,44 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       output = procErr.readLine();
       System.err.println("    [" +sourceName + " stderr]: " + output);
     }
+  }
+  
+  /**
+   * TODO:
+   */
+  private ArrayList extractErrors(LinkedList lines) {
+    // Javadoc never produces more than 100 errors, so this will never auto-expand.
+    ArrayList errors = new ArrayList(100);
+    
+    final String EXCEPTION_INDICATOR = "Exception: ";
+    while (lines.size() > 0) {
+//         System.out.println("[javadoc raw error] " + output);
+      
+      String output = (String) lines.removeFirst();
+      
+      int errStart;
+      // Check for the telltale signs of a thrown exception.
+      errStart = output.indexOf(EXCEPTION_INDICATOR);
+      if (errStart != -1) {
+        // If we found one, put the entirety of stderr in one CompilerError.
+        StringBuffer buf = new StringBuffer(60 * lines.size());
+        do {
+          buf.append(output);
+          output = (String) lines.removeFirst();
+        } while (lines.size() > 0);
+        errors.add(new CompilerError(buf.toString(), false));
+      }
+      else {
+        // Otherwise, parser for a normal error message.
+        CompilerError error = parseJavadocErrorLine(output);
+        if (error != null) {
+          errors.add(error);
+//           System.err.println("[javadoc err]" + error);
+        }
+      }
+    }
+    
+    return errors;
   }
   
   /**

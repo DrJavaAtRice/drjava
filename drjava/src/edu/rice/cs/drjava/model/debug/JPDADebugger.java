@@ -2304,7 +2304,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
       
       while(iterator.hasNext()){
         temp = ((ThreadReference)iterator.next()).name();
-        _filterThese.put(temp, Boolean.valueOf(true));
+        _filterThese.put(temp, Boolean.TRUE);
       }
     }
     

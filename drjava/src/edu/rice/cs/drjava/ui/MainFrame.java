@@ -1716,6 +1716,14 @@ public class MainFrame extends JFrame implements OptionConstants {
         destDir = getChosenFile(_javadocChooser, returnVal);
       } while (!destDir.exists() || !destDir.canWrite());
       
+      // Lock the interface for edits while generating Javadoc.
+//      Runnable doCommand = new Runnable() {
+//        public void run() {
+//          hourglassOn();
+//        }
+//      };
+//      SwingUtilities.invokeLater(doCommand);
+//      
       // Generate the output with the GlobalModel.
       final File destDirF = destDir;
       final SwingWorker worker = new SwingWorker() {
@@ -1744,6 +1752,15 @@ public class MainFrame extends JFrame implements OptionConstants {
           catch (IOException ioe) {
             _showIOError(ioe);
           }
+//          finally {
+//            // Unlock MainFrame for edits.
+//            Runnable doCommand = new Runnable() {
+//              public void run() {
+//                hourglassOff();
+//              }
+//            };
+//            SwingUtilities.invokeLater(doCommand);
+//          }
           return "XXX: Unused return value!";
         }
       };
@@ -3678,6 +3695,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       // Only change GUI from event-dispatching thread
       Runnable doCommand = new Runnable() {
         public void run() {
+//          MainFrame.this.hourglassOn();
           showTab(_junitErrorPanel);
           _junitErrorPanel.setJUnitInProgress(doc);
           _junitAction.setEnabled(false);
@@ -3716,6 +3734,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       // Only change GUI from event-dispatching thread
       Runnable doCommand = new Runnable() {
         public void run() {
+//          MainFrame.this.hourglassOff();
           showTab(_junitErrorPanel);
           _junitAction.setEnabled(true);
           _junitErrorPanel.reset();
@@ -3729,6 +3748,8 @@ public class MainFrame extends JFrame implements OptionConstants {
       // Only change GUI from event-dispatching thread
       Runnable doCommand = new Runnable() {
         public void run() {
+          // Now done in _javadocAll
+//          MainFrame.this.hourglassOn();
           showTab(_javadocErrorPanel);
           _javadocErrorPanel.setJavadocInProgress();
           _javadocAction.setEnabled(false);
@@ -3741,6 +3762,8 @@ public class MainFrame extends JFrame implements OptionConstants {
       // Only change GUI from event-dispatching thread
       Runnable doCommand = new Runnable() {
         public void run() {
+          // Now done in _javadocAll
+//          MainFrame.this.hourglassOff();
           showTab(_javadocErrorPanel);
           _javadocAction.setEnabled(true);
           _javadocErrorPanel.reset();

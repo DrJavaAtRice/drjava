@@ -981,7 +981,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
     boolean inParenPhrase = posInParenPhrase();
     _reduced.move(here - pos);
     
-    _storeInCache(key, Boolean.valueOf(inParenPhrase));
+    _storeInCache(key, new Boolean(inParenPhrase));
     return inParenPhrase;
   }
   
@@ -1012,7 +1012,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
     IndentInfo info = _reduced.getIndentInformation();
     boolean notInParenPhrase = info.braceTypeCurrent.equals(IndentInfo.noBrace);
     _reduced.move(here - pos);
-    _storeInCache(key, Boolean.valueOf(notInParenPhrase));
+    _storeInCache(key, new Boolean(notInParenPhrase));
     return notInParenPhrase;
   }
 
