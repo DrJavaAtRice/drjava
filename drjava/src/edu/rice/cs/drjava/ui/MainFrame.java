@@ -1817,10 +1817,19 @@ public class MainFrame extends JFrame implements OptionConstants {
         if (chosen == null)
             throw new RuntimeException("filechooser returned null file");
         
-        if (chosen.length == 0) chosen = new File[] { null };
-
-        if (chosen[0] == null)
-          chosen[0] = fc.getSelectedFile();
+        // Following code reviewed for bug 70902-- JVF
+        
+        // this new File[] { null } is totally unaccounted for in originating
+        // method calls
+        //if (chosen.length == 0) chosen = new File[] { null };
+        if (chosen.length == 0) { throw new OperationCanceledException(); }
+        
+        if (chosen[0] == null) { 
+          // why was this here? we shouldn't expect to get
+          // something totally new from fc.
+          //chosen[0] = fc.getSelectedFile();
+          throw new OperationCanceledException();
+        }
         return chosen;
         
       default:                  // impossible since rc must be one of these
