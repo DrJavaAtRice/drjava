@@ -1027,6 +1027,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     File[] projectclasspaths = ir.getClasspaths();
     Vector<File> currentclasspaths = DrJava.getConfig().getSetting(OptionConstants.EXTRA_CLASSPATH);
     for(int i = 0; i<projectclasspaths.length; i++){
+      currentclasspaths.remove(projectclasspaths[i].getAbsoluteFile());
       currentclasspaths.add(projectclasspaths[i].getAbsoluteFile());
     }
     DrJava.getConfig().setSetting(OptionConstants.EXTRA_CLASSPATH, currentclasspaths);
