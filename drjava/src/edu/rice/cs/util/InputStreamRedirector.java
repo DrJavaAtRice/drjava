@@ -55,9 +55,8 @@ public abstract class InputStreamRedirector extends InputStream {
 
   /**
    * constructs a new InputStreamRedirector.
-   * @throws IOException if an I/O error occurs
    */
-  public InputStreamRedirector() throws IOException {
+  public InputStreamRedirector() {
     _buffer = new ArrayList<Character>(60);
   }
 
@@ -91,8 +90,8 @@ public abstract class InputStreamRedirector extends InputStream {
    * @param b the byte array to fill
    * @return the number of bytes successfully read
    */
-  public int read(byte[] b) throws IOException {
-    return this.read(b, 0, b.length);
+  public synchronized int read(byte[] b) throws IOException {
+    return read(b, 0, b.length);
   }
 
   /**
@@ -103,7 +102,7 @@ public abstract class InputStreamRedirector extends InputStream {
    * @param len the number of characters to try to read
    * @return the number of bytes successfully read
    */
-  public int read(byte[] b, int off, int len) throws IOException {
+  public synchronized int read(byte[] b, int off, int len) throws IOException {
     int numRead = 0;
     if (available() == 0) {
       _readInputIntoBuffer();
@@ -113,7 +112,7 @@ public abstract class InputStreamRedirector extends InputStream {
         break;
       }
       else {
-        b[i] = (byte) ((Character) _buffer.remove(0)).charValue();
+        b[i] = (byte) _buffer.remove(0).charValue();
         numRead++;
       }
     }
@@ -126,11 +125,11 @@ public abstract class InputStreamRedirector extends InputStream {
    * @return the next character in the stream
    * @throws IOException if an I/O exception
    */
-  public int read() throws IOException {
+  public synchronized int read() throws IOException {
     if (available() == 0) {
       _readInputIntoBuffer();
     }
-    return (int) ((Character) _buffer.remove(0)).charValue();
+    return _buffer.remove(0).charValue();
   }
 
   /**

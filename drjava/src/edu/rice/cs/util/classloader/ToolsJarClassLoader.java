@@ -81,7 +81,7 @@ public class ToolsJarClassLoader extends URLClassLoader {
       files.add(jar2);
     }
     
-    if (javaHome.indexOf("Program Files") != -1) {
+    if (javaHome.toLowerCase().indexOf("program files") != -1) {
       // Windows: JavaHome is JRE; guess where SDK is
       File jar3 = new File(getWindowsToolsJar(javaHome));
       if (jar3.exists()) {
