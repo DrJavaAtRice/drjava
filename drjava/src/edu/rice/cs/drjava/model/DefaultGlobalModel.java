@@ -714,7 +714,11 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
   private INavigatorItem makeIDocFromODD(final OpenDefinitionsDocument oddoc) {
     final INavigatorItem idoc  = new INavigatorItem() {
       public String getName() {
-        return oddoc.getFilename();
+        try{
+          return oddoc.getFilename();
+        }catch(NoSuchDocumentException e){
+          return "** error **";
+        }
       }
       public boolean equals(Object obj){
         try {
@@ -723,14 +727,20 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
         }
         catch(ClassCastException e) {
           return oddoc.equals(obj);
+        }catch(NoSuchDocumentException e){
+          return false;
         }
       }
       public String toString() {
-        if(oddoc.isModifiedSinceSave()){
-          return oddoc.getFilename() + " *";
-        }
-        else{
-          return oddoc.getFilename() + "  ";
+        try{
+          if(oddoc.isModifiedSinceSave()){
+            return oddoc.getFilename() + " *";
+          }
+          else{
+            return oddoc.getFilename() + "  ";
+          }
+        }catch(NoSuchDocumentException e){
+          return "** error **";
         }
       }
     };
@@ -858,7 +868,8 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     if (files == null) {
       throw new IOException("No Files returned from FileSelector");
     }
-    return _openFiles(files);
+    OpenDefinitionsDocument doc = _openFiles(files);
+    return doc;
     
   }
   
@@ -896,7 +907,6 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     }
     
 //        SHOW_GETDOC = false;
-    
     for(File f: lof){
       _notifier.fileNotFound(f);
     }
@@ -1009,9 +1019,13 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     //File projectRoot = projectFile.getParentFile();
     ir = ProjectFileParser.ONLY.parse(projectFile);
     srcFiles = ir.getSourceFiles();
+    String projfilepath = projectFile.getCanonicalPath();
+
     IAWTContainerNavigatorActor newNav = 
-      AWTContainerNavigatorFactory.Singleton.makeTreeNavigator(projectFile.getName(),
+      AWTContainerNavigatorFactory.Singleton.makeTreeNavigator(projfilepath,
                                                                getDocumentNavigator());
+
+    
     setDocumentNavigator(newNav);
     
     File buildDir = ir.getBuildDirectory();
@@ -1021,9 +1035,6 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     setFileGroupingState(_makeProjectFileGroupingState(mainClass, buildDir, projectFile, srcFiles));
     setBuildDirectory(buildDir);
     
-    String projfilepath = projectFile.getCanonicalPath();
-    String tlp = projfilepath.substring(0, projfilepath.lastIndexOf(File.separator));
-    newNav.setTopLevelPath(tlp);
     
     File[] projectclasspaths = ir.getClasspaths();
     Vector<File> currentclasspaths = DrJava.getConfig().getSetting(OptionConstants.EXTRA_CLASSPATH);
@@ -1066,7 +1077,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
    * @return true if the document was closed
    */
   public boolean closeFile(OpenDefinitionsDocument doc) {
-    
+//    System.err.println("closing " + doc);
     boolean canClose = doc.canAbandonFile();
     final OpenDefinitionsDocument closedDoc = doc;
     if (canClose) {
@@ -1075,6 +1086,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       closedDoc.close();
       
       if (idoc != null) {
+//        System.err.println("removing from navigator "+ _documentNavigator.getClass());
         _documentNavigator.removeDocument(idoc);
         _notifier.fileClosed(closedDoc);
 //        closedDoc.close();

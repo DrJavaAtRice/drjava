@@ -167,7 +167,6 @@ public class DefaultCompilerModel implements CompilerModel {
     
     File buildDir = null;
     if (_getter.getFileGroupingState().isProjectActive()) {
-      buildDir = _getter.getFileGroupingState().getBuildDirectory();
 
       // If we're in project mode, filter out only the 
       // documents that are in the project and leave out
@@ -184,6 +183,18 @@ public class DefaultCompilerModel implements CompilerModel {
       defDocs = projectDocs;
     }
 
+    compile(defDocs);
+  }
+  
+  
+  /**
+   * compiles all documents in the list of opendefinitionsdocuments sent as input
+   */
+  synchronized public void compile(List<OpenDefinitionsDocument> defDocs) throws IOException {
+    File buildDir = null;
+    if (_getter.getFileGroupingState().isProjectActive()) {
+      buildDir = _getter.getFileGroupingState().getBuildDirectory();
+    }
     // Only compile if all are saved
     if (_hasModifiedFiles(defDocs)) {
       //System.out.println("Has modified files");
@@ -243,8 +254,8 @@ public class DefaultCompilerModel implements CompilerModel {
         _notifier.compileEnded();
       }
     }
-  }
-
+  }  
+  
   /**
    * Starts compiling the source.  Demands that the definitions be
    * saved before proceeding with the compile. If the compile can

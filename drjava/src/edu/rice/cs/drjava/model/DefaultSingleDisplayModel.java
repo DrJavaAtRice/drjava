@@ -284,7 +284,6 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel
     if (closeUntitled) {
       super.closeFile(oldDoc);
     }
-
     setActiveDocument(openedDoc);
     return openedDoc;
   }

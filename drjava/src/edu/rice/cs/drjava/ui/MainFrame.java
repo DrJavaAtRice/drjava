@@ -219,6 +219,7 @@ public class MainFrame extends JFrame implements OptionConstants {
 
   // Popup menus
   private JPopupMenu _navPanePopupMenu;
+  private JPopupMenu _navPaneFolderPopupMenu;
   private JPopupMenu _interactionsPanePopupMenu;
   private JPopupMenu _consolePanePopupMenu;
 
@@ -489,6 +490,15 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
   };
 
+  /**
+   * Closes all open documents, prompting to save if necessary.
+   */
+  private Action _closeFolderAction = new AbstractAction("Close Folder") {
+    public void actionPerformed(ActionEvent ae) {
+      _closeFolder();
+    }
+  };
+
 
   /** Saves the current document. */
   private Action _saveAction = new AbstractAction("Save") {
@@ -594,6 +604,16 @@ public class MainFrame extends JFrame implements OptionConstants {
       _compileAll();
     }
   };
+
+  /** Compiles all documents in the navigators active group. */
+  private Action _compileFolderAction = new AbstractAction("Compile Folder") {
+    public void actionPerformed(ActionEvent ae) {
+      // right now, it's the same as compile all
+      _compileFolder();
+    }
+  };
+  
+  
 
   /** Compiles all open documents. */
   private Action _compileAllAction = new AbstractAction("Compile All Documents") {
@@ -1794,12 +1814,28 @@ public class MainFrame extends JFrame implements OptionConstants {
   /**
    * Make the cursor an hourglass.
    */
+  private int hourglassNestLevel = 0;
   public void hourglassOn() {
-    getGlassPane().setVisible(true);
-    _currentDefPane.setEditable(false);
-    setAllowKeyEvents(false);
+    hourglassNestLevel++;
+    if(hourglassNestLevel == 1){
+      getGlassPane().setVisible(true);
+      _currentDefPane.setEditable(false);
+      setAllowKeyEvents(false);
+    }
   }
   
+  /**
+   * Return the cursor to normal.
+   */
+  public void hourglassOff() {
+    hourglassNestLevel--;
+    if(hourglassNestLevel == 0){
+      getGlassPane().setVisible(false);
+      _currentDefPane.setEditable(true);
+      setAllowKeyEvents(true);
+    }
+  }
+
   private boolean allow_key_events = true;
   public void setAllowKeyEvents(boolean a){
     this.allow_key_events = a;
@@ -1807,15 +1843,6 @@ public class MainFrame extends JFrame implements OptionConstants {
   
   public boolean getAllowKeyEvents(){
     return this.allow_key_events;
-  }
-
-  /**
-   * Return the cursor to normal.
-   */
-  public void hourglassOff() {
-    getGlassPane().setVisible(false);
-    _currentDefPane.setEditable(true);
-    setAllowKeyEvents(true);
   }
 
   /**
@@ -2117,7 +2144,6 @@ public class MainFrame extends JFrame implements OptionConstants {
       if(!_model.isProjectActive() || _model.isProjectActive() && _closeProject()) {
         _openProjectHelper(file[0]);
       }
-      
     }
     catch(OperationCanceledException oce) {
       // do nothing, we just won't open anything
@@ -2180,6 +2206,8 @@ public class MainFrame extends JFrame implements OptionConstants {
       }
     }
 
+    for(OpenDefinitionsDocument d: docsToClose){
+    }
     _model.closeFiles(docsToClose);
     
     final DocFile[] files = srcFiles;
@@ -2306,6 +2334,7 @@ public class MainFrame extends JFrame implements OptionConstants {
         // File was deleted, but use the same name anyway
         filename = fme.getFile().getName();
       }
+      
       // Always switch to doc
       _model.setActiveDocument(openDoc);
 
@@ -2423,6 +2452,22 @@ public class MainFrame extends JFrame implements OptionConstants {
     l.add(_model.getActiveDocument());
     _model.closeFiles(l);
     //_model.closeFile(_model.getActiveDocument());
+  }
+  
+  
+  private void _closeFolder(){
+    INavigatorItem n;
+    Enumeration<INavigatorItem> e = _model.getDocumentNavigator().getDocuments();
+    final LinkedList<OpenDefinitionsDocument> l = new LinkedList<OpenDefinitionsDocument>();
+    if(_model.getDocumentNavigator().isGroupSelected()){
+      while (e.hasMoreElements()){
+        n = e.nextElement();
+        if(_model.getDocumentNavigator().isSelectedInGroup(n)){
+          l.add(_model.getODDGivenIDoc(n));
+        }
+      }
+      _model.closeFiles(l);
+    }
   }
 
   private void _print() {
@@ -2803,6 +2848,36 @@ public class MainFrame extends JFrame implements OptionConstants {
       }
     };
     worker.start();
+  }
+
+  private void _compileFolder(){
+    INavigatorItem n;
+    Enumeration<INavigatorItem> e = _model.getDocumentNavigator().getDocuments();
+    final LinkedList<OpenDefinitionsDocument> l = new LinkedList<OpenDefinitionsDocument>();
+    if(_model.getDocumentNavigator().isGroupSelected()){
+      while (e.hasMoreElements()){
+        n = e.nextElement();
+        if(_model.getDocumentNavigator().isSelectedInGroup(n)){
+          l.add(_model.getODDGivenIDoc(n));
+        }
+      }
+      
+      final SwingWorker worker = new SwingWorker() {
+        public Object construct() {
+          try {
+            _model.getCompilerModel().compile(l);
+          }
+          catch (FileMovedException fme) {
+            _showFileMovedError(fme);
+          }
+          catch (IOException ioe) {
+            _showIOError(ioe);
+          }
+          return null;
+        }
+      };
+      worker.start();
+    }
   }
 
   private void _compileAll() {
@@ -4275,6 +4350,12 @@ public class MainFrame extends JFrame implements OptionConstants {
    * Sets up the context menu to show in the document pane.
    */
   private void _setUpContextMenus() {
+    // pop-up menu for a folder in tree view
+    _navPaneFolderPopupMenu = new JPopupMenu();
+    _navPaneFolderPopupMenu.add(_closeFolderAction);
+    _navPaneFolderPopupMenu.add(_compileFolderAction);
+    
+    
     // NavPane menu
     _navPanePopupMenu = new JPopupMenu();
     _navPanePopupMenu.add(_saveAction);
@@ -4293,7 +4374,15 @@ public class MainFrame extends JFrame implements OptionConstants {
     _model.getDocCollectionWidget().addMouseListener(new RightClickMouseAdapter() {
       protected void _popupAction(MouseEvent e) {
         if(_model.getDocumentNavigator().selectDocumentAt(e.getX(), e.getY())){
-          _navPanePopupMenu.show(e.getComponent(), e.getX(), e.getY());
+          
+          if(_model.getDocumentNavigator().isGroupSelected()){
+            _navPaneFolderPopupMenu.show(e.getComponent(), e.getX(), e.getY());
+          }else{
+            _navPanePopupMenu.show(e.getComponent(), e.getX(), e.getY());
+          }
+          
+//          _navPaneFolderPopupMenu.show(e.getComponent(), e.getX(), e.getY());
+          
         }
       }
     });

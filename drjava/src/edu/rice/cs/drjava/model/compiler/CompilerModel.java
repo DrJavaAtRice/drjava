@@ -47,6 +47,7 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.model.compiler;
 
 import java.io.IOException;
+import java.util.List;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 
 /**
@@ -88,6 +89,14 @@ public interface CompilerModel {
    * @throws IOException if a filesystem-related problem prevents compilation
    */
   public void compileAll() throws IOException;
+  
+  /**
+   * Compiles a single document with the active compiler.
+   * This normally requires that the document be saved first.
+   * @param doc the document to be compiled
+   * @throws IOException if a filesystem-related problem prevents compilation
+   */
+  public void compile(List<OpenDefinitionsDocument> defDocs) throws IOException;
   
   /**
    * Compiles a single document with the active compiler.
