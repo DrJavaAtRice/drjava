@@ -83,7 +83,6 @@ public class DefinitionsPane extends JEditorPane
   private UndoManager _undoManager;
   private UndoAction _undoAction;
   private RedoAction _redoAction;
-  private KeyBindingManager _keyBindingManager;
   private HighlightManager _highlightManager;
   
   /**
@@ -139,6 +138,12 @@ public class DefinitionsPane extends JEditorPane
    * disabled depending on Debug Mode
    */
   private JMenuItem _toggleBreakpointMenuItem;
+  
+  /**
+   * The menu item for the "Add Watchpoint" option. Stored in field so that it may be enabled and
+   * disabled depending on Debug Mode
+   */
+  private JMenuItem _addWatchpointMenuItem;
 
   /**
    * The contextual popup menu for the Definitions Pane.
@@ -158,14 +163,7 @@ public class DefinitionsPane extends JEditorPane
   /**
    * Listens to caret to highlight JUnit errors as appropriate.
    */
-  private JUnitErrorCaretListener _junitErrorListener;
-
-  /**
-   * Used in processKeyEvent to disallow the use of the UI's default key-bindings
-   * for commands like cut, copy, and paste
-   */
-  private int _mask = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
-  
+  private JUnitErrorCaretListener _junitErrorListener;  
   
   private ActionListener _setSizeListener = null;
   
@@ -347,28 +345,27 @@ public class DefinitionsPane extends JEditorPane
   public void processKeyEvent(KeyEvent e) {
     if (CodeStatus.DEVELOPMENT) {
       KeyStroke ks = KeyStroke.getKeyStrokeForEvent(e);
-      Action a = _keyBindingManager.get(ks);
+      Action a = KeyBindingManager.Singleton.get(ks);
       if (a != null) {
-        if (a.isEnabled()) {// prevents the user from undoing (for example) if it's not enabled
+        // prevents the user from undoing (for example) if it's not enabled
+        if (a.isEnabled()) {
           a.actionPerformed(null);
         }
-        e.consume();
       }
       else {        
-        if (((ks.getModifiers() & mask) != 0) || 
-            ks.getKeyChar() == '\010') // backspace deletes twice without this check
-          e.consume();
+        // backspace deletes twice without this check, overrides other keystrokes
+        // that use the mask modifier
+        if (((ks.getModifiers() & mask) == 0) && ks.getKeyChar() != '\010')
+          super.processKeyEvent(e);        
       }
-      if (!e.isConsumed())
-        super.processKeyEvent(e);
     }
     else
       super.processKeyEvent(e);
   }
   
-  public void setKeyBindingManager(KeyBindingManager keyBindingManager) {
-    _keyBindingManager = keyBindingManager;
-  }
+  /*public void setKeyBindingManager(KeyBindingManager keyBindingManager) {
+    KeyBindingManager.Singleton = keyBindingManager;
+  }*/
   
   /**
    * Constructor.  Sets up all the defaults.
@@ -458,6 +455,8 @@ public class DefinitionsPane extends JEditorPane
     
     if (_mainFrame.getModel().getDebugManager() != null) {
       _popMenu.addSeparator();
+      
+      // Breakpoint
       JMenuItem breakpointItem = new JMenuItem("Toggle Breakpoint");
       breakpointItem.addActionListener( new AbstractAction() {
         public void actionPerformed( ActionEvent ae ) {
@@ -468,6 +467,18 @@ public class DefinitionsPane extends JEditorPane
       });
       _toggleBreakpointMenuItem = _popMenu.add(breakpointItem);
       _toggleBreakpointMenuItem.setEnabled(false);
+      
+      // Watchpoint
+      JMenuItem watchpointItem = new JMenuItem("Add Watchpoint");
+      watchpointItem.addActionListener( new AbstractAction() {
+        public void actionPerformed( ActionEvent ae ) {
+          //Make sure that the watchpoint is set on the *clicked* line, if within a selection block.
+          setCaretPosition(viewToModel(_popupMenuMA.getLastMouseClick().getPoint()));
+          _mainFrame.addWatchpoint();
+        }
+      });
+      _addWatchpointMenuItem = _popMenu.add(watchpointItem);
+      _addWatchpointMenuItem.setEnabled(false);
     }
    
     /*
@@ -600,6 +611,10 @@ public class DefinitionsPane extends JEditorPane
       //Don't show the "Toggle Breakpoint" option in the contextual menu, if the JMenuItem is null.
       if (_toggleBreakpointMenuItem != null) {
         _toggleBreakpointMenuItem.setEnabled(_mainFrame.inDebugMode());
+      }
+      //Don't show the "Add Watchpoint" option in the contextual menu, if the JMenuItem is null.
+      if (_addWatchpointMenuItem != null) {
+        _addWatchpointMenuItem.setEnabled(_mainFrame.inDebugMode());
       }
       
     }

@@ -83,6 +83,7 @@ import edu.rice.cs.util.swing.HighlightManager;
  * @version $Id$
  */
 public class MainFrame extends JFrame implements OptionConstants {
+  private String _field;
   
   private static final int INTERACTIONS_TAB = 0;
   //private static final int COMPILE_TAB = 1;
@@ -1320,24 +1321,37 @@ public class MainFrame extends JFrame implements OptionConstants {
                    "Could not set a breakpoint at the current line.");
       }
     }
-    
-    /**
-    try {
-      _model.getDebugManager().
-        toggleBreakpoint(doc, doc.getDocument().getCurrentLine());
-    }
-    catch (IOException ioe) {
-      _showIOError(ioe);
-    }
-    catch (ClassNotFoundException cnfe) {
-      _showClassNotFoundError(cnfe);
-    }
-    catch (DebugException de) {
-      _showDebugError(de);
-    }
-    */
   }
-
+  
+  private void _getText(String name) {
+    _field = name;
+  }
+  
+  /**
+   * Adds a watchpoint on the current line
+   */
+  void addWatchpoint() {
+    if (inDebugMode()) {
+      //final String field;
+      OpenDefinitionsDocument doc = _model.getActiveDocument();
+      final JDialog getFieldDialog = new JDialog(this, "Choose Field to be Watched", true);
+      //getFieldDialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
+      final JTextField fieldName = new JTextField();
+      getFieldDialog.setSize(new Dimension(150, 60));
+      getFieldDialog.getContentPane().add(fieldName);
+      fieldName.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent ae) {
+          _getText(fieldName.getText());
+          getFieldDialog.dispose();
+        }
+      });
+      getFieldDialog.setLocation(300,300);
+      getFieldDialog.show();
+      DebugManager debugger = _model.getDebugManager();
+      debugger.addWatchpoint(_field);
+    }
+  }
+  
   /**
    * Displays all breakpoints currently set in the debugger
    */
@@ -2261,9 +2275,9 @@ public class MainFrame extends JFrame implements OptionConstants {
   private JScrollPane _createDefScrollPane(OpenDefinitionsDocument doc) {
     DefinitionsPane pane = new DefinitionsPane(this, _model, doc);
 
-    if (CodeStatus.DEVELOPMENT) {
+    /*if (CodeStatus.DEVELOPMENT) {
       pane.setKeyBindingManager(KeyBindingManager.Singleton);
-    }
+    }*/
     
     // Add listeners
     _installNewDocumentListener(doc.getDocument());

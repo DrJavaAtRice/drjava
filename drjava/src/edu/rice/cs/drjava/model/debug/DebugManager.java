@@ -42,6 +42,7 @@ package edu.rice.cs.drjava.model.debug;
 import java.io.*;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 import javax.swing.ListModel;
@@ -95,6 +96,11 @@ public class DebugManager {
    * Vector of all current Breakpoints, with and without EventRequests.
    */
   private Vector<Breakpoint> _breakpoints;
+
+  /**
+   * Vector of all current Watches
+   */
+  private Vector<WatchpointData> _watchpoints;
   
   /**
    * Keeps track of any DebugActions whose classes have not yet been
@@ -125,6 +131,7 @@ public class DebugManager {
     _thread = null;
     _listeners = new LinkedList();
     _breakpoints = new Vector<Breakpoint>();
+    _watchpoints = new Vector<WatchpointData>();
     _pendingRequestManager = new PendingRequestManager(this);
   }
 
@@ -373,6 +380,16 @@ public class DebugManager {
   
 
   /**
+   * Adds a watchpoint to the given field at the given line in the given
+   * document.
+   * @param field the name of the field we will watch
+   */
+  public synchronized void addWatchpoint(String field) {   
+    _watchpoints.addElement(new WatchpointData(field));//new Watchpoint (doc, field, lineNum, this));
+  }
+  
+
+  /**
    * Toggles whether a breakpoint is set at the given line in the given
    * document.
    * @param doc Document in which to set or remove the breakpoint
@@ -611,18 +628,160 @@ public class DebugManager {
     _model.printDebugMessage(message);
   }
 
+  private void _updateWatchpoints() {
+    int stackIndex = 0;
+    StackFrame currFrame = null;
+    List frames = null;
+    try {
+      frames = _thread.frames();
+    }
+    catch (IncompatibleThreadStateException itse) {
+      DrJava.consoleOut().println("Thread has not been suspended");
+    }
+    currFrame = (StackFrame) frames.get(stackIndex);
+    stackIndex++;
+    Location location = currFrame.location();
+    ReferenceType rt = location.declaringType();
+    //DrJava.consoleOut().println("stack frame: " + frames);
+    //DrJava.consoleOut().println("all fields: " + rt.allFields());
+    for (int i = 0; i < _watchpoints.size(); i++) {
+      WatchpointData currWatchpoint = _watchpoints.elementAt(i);
+      String currName = currWatchpoint.getName();
+      Object currValue = currWatchpoint.getValue();
+      // check for "this"
+      if (currName.equals("this")) {
+        ObjectReference obj = currFrame.thisObject();
+        if (obj != null) {
+          currWatchpoint.setValue(obj);
+          currWatchpoint.setType(obj.type());
+        }
+        else {
+          currWatchpoint.setValue(null);
+          currWatchpoint.setType(null);
+        }
+        continue;
+      }          
+      //List frames = null;
+      LocalVariable localVar = null;
+      try {
+        localVar = currFrame.visibleVariableByName(currName);
+      }
+      catch (AbsentInformationException aie) {
+        DrJava.consoleOut().println("No line number information for this method");
+      }
+      
+      // if the variable being watched is not a local variable, check if it's a field
+      if (localVar == null) {
+        Field field = rt.fieldByName(currName);
+        
+        // if the variable is not a field either, it's not defined in this 
+        // ReferenceType's scope, keep further out in scope.
+        String className = rt.name();
+        //ReferenceType outerRt;
+        while (field == null) {
+          
+          // crop off the $ if there is one and anything after it
+          int indexOfDollar = className.indexOf('$');    
+          if (indexOfDollar > -1) {
+            className = className.substring(0, indexOfDollar);
+          }
+          else {
+            // There is no $ in the className, we're at the outermost class and the
+            // field still was not found
+            currWatchpoint.setValue(null);
+            currWatchpoint.setType(null);
+            break;
+          }
+          rt = (ReferenceType)_vm.classesByName(className).get(0);
+          field = rt.fieldByName(currName);
+        }
+        if (field != null) {
+          // check if the field is static
+          if (field.isStatic()) {
+            currWatchpoint.setValue(rt.getValue(field));
+            try {
+              currWatchpoint.setType(field.type());
+            }
+            catch (ClassNotLoadedException cnle) {
+              DrJava.consoleOut().println("Class not loaded");
+              currWatchpoint.setType(null);
+            }
+          }
+          else {
+            StackFrame outerFrame = currFrame;
+            // the field is not static
+            // check if the frame represents a native or static method and
+            // keep going down the stack frame looking for the frame that
+            // has the same ReferenceType that we found the Field in.
+            // This is a hack, remove it to improve performance, it will
+            // work sometimes, but not always.
+            //DrJava.consoleOut().println("checking frames *");
+            while (outerFrame.thisObject() != null && 
+                   !outerFrame.thisObject().referenceType().equals(rt) &&
+                   stackIndex < frames.size()) {
+              outerFrame = (StackFrame) frames.get(stackIndex);
+              //DrJava.consoleOut().println("outerFrame: " + outerFrame);
+              stackIndex++;
+            }
+            if (stackIndex < frames.size() && outerFrame.thisObject() != null) { 
+              // then we found the right stack frame
+              currWatchpoint.setValue(outerFrame.thisObject().getValue(field));
+              try {
+                currWatchpoint.setType(field.type());
+              }
+              catch (ClassNotLoadedException cnle) {
+                DrJava.consoleOut().println("Class not loaded");
+                currWatchpoint.setType(null);
+              }
+            }
+            else {
+              currWatchpoint.setValue(null);
+              currWatchpoint.setType(null);
+            }
+          }
+        }
+      }
+      else {
+        currWatchpoint.setValue(currFrame.getValue(localVar));
+        try {
+          currWatchpoint.setType(localVar.type());
+        }
+        catch (ClassNotLoadedException cnle) {
+          DrJava.consoleOut().println("Class not loaded");
+          currWatchpoint.setType(null);
+        }
+      }
+    }
+  }
+  
+  private void _displayWatchpoints() {
+    DrJava.consoleOut().println("Watchpoints:");
+    for (int i = 0; i < _watchpoints.size(); i ++) {
+      WatchpointData currWatchpoint = _watchpoints.elementAt(i);  
+      if (currWatchpoint.getChanged()) {
+        DrJava.consoleOut().print("! ");
+        DrJava.consoleOut().println(currWatchpoint);
+      }
+      else {
+        DrJava.consoleOut().println(currWatchpoint);
+      }
+    }
+  }
   
   /**
    * Notifies all listeners that the current thread has been suspended.
    */
   synchronized void currThreadSuspended() {
     //DrJava.consoleOut().println("DM: thread suspended (show)");
+    _updateWatchpoints();
+    _displayWatchpoints();
     notifyListeners(new EventNotifier() {
       public void notifyListener(DebugListener l) {
         l.currThreadSuspended();
       }
     });
   }
+  
   
   /**
    * Notifies all listeners that the current thread has been resumed.
@@ -677,6 +836,61 @@ public class DebugManager {
    */
   protected abstract class EventNotifier {
     public abstract void notifyListener(DebugListener l);
+  }
+  
+  private class WatchpointData {
+    String _name;
+    Object _value;
+    Type _type;
+    boolean _changed;
+    
+    public WatchpointData(String name) {
+      _name = name;
+      _value = null;
+      _type = null;
+      _changed = false;
+    }
+    
+    public String getName() {
+      return _name;
+    }
+    
+    public Object getValue() {
+      return _value;
+    }
+    
+    public Type getType() {
+      return _type;
+    }
+    
+    public void setName(String name) {
+      _name = name;
+    }
+    
+    public void setValue(Object value) {
+      if (value != null) {
+        if (!value.equals(_value)) {
+          _changed = true;
+        }
+        else
+          _changed = false;
+      }
+      else
+        _changed = false;
+      _value = value;
+    }
+    
+    public void setType(Type type) {
+      _type = type;
+    }
+    
+    public boolean getChanged() {
+      return _changed;
+    }
+    
+    public String toString() {
+      return _type + " " + _name + ": " + _value;
+    }
   }
   
 }

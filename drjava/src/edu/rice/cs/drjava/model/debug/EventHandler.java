@@ -94,6 +94,9 @@ public class EventHandler extends Thread {
     else if (e instanceof StepEvent) {
       _handleStepEvent((StepEvent) e);
     }
+    else if (e instanceof ModificationWatchpointEvent) {
+      _handleModificationWatchpointEvent((ModificationWatchpointEvent) e);
+    }
     else if (e instanceof ClassPrepareEvent) {
       _handleClassPrepareEvent((ClassPrepareEvent) e);
     }
@@ -112,8 +115,8 @@ public class EventHandler extends Thread {
   
   private void _handleBreakpointEvent(BreakpointEvent e) {
     //System.out.println("Breakpoint reached");
-    _manager.currThreadSuspended();
     _manager.setCurrentThread(e.thread());
+    _manager.currThreadSuspended();
     _manager.scrollToSource(e);
     _manager.reachedBreakpoint((BreakpointRequest)e.request());
     //((LocatableEvent) e).thread().suspend();
@@ -128,6 +131,13 @@ public class EventHandler extends Thread {
                           e.location().lineNumber() + "]");
     _manager.scrollToSource(e);
     _manager.getEventRequestManager().deleteEventRequest(e.request());
+  }
+  
+  private void _handleModificationWatchpointEvent(ModificationWatchpointEvent e) {
+    //System.out.println("Watchpoint executed");
+    _manager.printMessage("ModificationWatchpointEvent occured ");
+    _manager.printMessage("Field: " + e.field() + " Value: " +
+                          e.valueToBe() +"]");
   }
   
   private void _handleClassPrepareEvent(ClassPrepareEvent e) {

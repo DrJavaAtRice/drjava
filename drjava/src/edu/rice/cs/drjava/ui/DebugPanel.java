@@ -69,6 +69,44 @@ import com.bluemarsh.jswat.view.*;
  * @version $Id$
  */
 public class DebugPanel extends JPanel implements OptionConstants {
+
+  private JSplitPane _tabsPane;
+  private JTabbedPane _leftPane;
+  private JTabbedPane _rightPane;
+  
+  private JTable _watchTable;
+  private JTable _breakpointTable;
+  private JTable _stackTable;
+  private JTable _threadTable;
+    
+  private final SingleDisplayModel _model;
+  private final MainFrame _frame;
+  private final DebugManager _debugger;
+  
+  private JPanel _buttonPanel;
+  private JButton _closeButton; 
+  
+
+  public DebugPanel( SingleDisplayModel model, MainFrame frame, DebugManager debugger) {
+    
+    this.setLayout(new BorderLayout());
+    
+    _model = model;
+    _frame = frame;
+    _debugger = debugger;
+    _leftPane = new JTabbedPane();
+    _rightPane = new JTabbedPane();
+    
+    //_setupTables();
+    
+    _tabsPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
+                               true,
+                               _leftPane,
+                               _rightPane);
+    
+    
+  }
+  
 /*
   private static final String BANNER_TEXT = "JSwat Debugger Console\n\n";
 
