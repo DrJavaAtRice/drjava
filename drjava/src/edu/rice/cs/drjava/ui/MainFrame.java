@@ -1239,6 +1239,10 @@ public class MainFrame extends JFrame {
    * for the current active document.
    */
   private void _switchDefScrollPane() {
+    // Sync caret with location before swtiching
+    _currentDefPane.getOpenDocument().
+      syncCurrentLocationWithDefinitions( _currentDefPane.getCaretPosition() );
+    
     JScrollPane scroll = (JScrollPane)
       _defScrollPanes.get(_model.getActiveDocument());
 
@@ -1330,8 +1334,6 @@ public class MainFrame extends JFrame {
       _errorPanel.getErrorListPane().selectNothing();
       int pos = _currentDefPane.getCaretPosition();
       _currentDefPane.getErrorCaretListener().updateHighlight(pos);
-
-      active.getDocument().setCurrentLocation( pos );
       
       _setCurrentDirectory(active);
 

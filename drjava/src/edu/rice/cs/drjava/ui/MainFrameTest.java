@@ -44,6 +44,10 @@ import  junit.extensions.*;
 
 import java.awt.event.*;
 import javax.swing.*;
+import javax.swing.text.*;
+
+import edu.rice.cs.drjava.model.*;
+import edu.rice.cs.drjava.model.definitions.*;
 
 /**
  * Test functions of MainFrame.
@@ -92,5 +96,36 @@ public class MainFrameTest extends TestCase {
     
     assertTrue("Returned JButton is enabled.", ! b.isEnabled());
     assertEquals("Tooltip text not set.", "test tooltip", b.getToolTipText());
+  }
+  
+  /**
+   * Tests that the current location of a document is equal to the
+   * caret location after documents are switched.
+   */
+  public void testDocLocationAfterSwitch() 
+    throws BadLocationException, InterruptedException
+  {
+    DefinitionsPane pane = _frame.getCurrentDefPane();
+    DefinitionsDocument doc = pane.getOpenDocument().getDocument();
+    doc.insertString(0, "abcd", null);
+    pane.setCaretPosition(3);
+    assertEquals("Location of old doc before switch", 3, doc.getCurrentLocation());
+    
+    // Create a new file
+    SingleDisplayModel model = _frame.getModel();
+    model.newFile();
+    
+    // Current pane should be new doc, pos 0
+    pane = _frame.getCurrentDefPane();
+    doc = pane.getOpenDocument().getDocument();
+    assertEquals("Location of new document", 0, doc.getCurrentLocation());
+    
+    // Switch back
+    model.setPreviousActiveDocument();
+    
+    // Current pane should be old doc, pos 3
+    pane = _frame.getCurrentDefPane();
+    doc = pane.getOpenDocument().getDocument();
+    assertEquals("Location of old document", 3, doc.getCurrentLocation());
   }
 }
