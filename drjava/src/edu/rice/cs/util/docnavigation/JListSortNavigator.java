@@ -71,33 +71,25 @@ class JListSortNavigator extends JListNavigator {
   protected DefaultListCellRenderer _renderer;
   
   
-  /**
-   * the standard constructor for this list navigator
-   */
-  public JListSortNavigator() {
-    super();
-  }
-  
-  /**
-   * add the document to the list
-   * @param doc the document to add
+  /* Relies on the standard default constructor */
+ 
+  /** Adds the document to the list
+   *  @param doc the document to add
    */
   public void addDocument(INavigatorItem doc) {
     insertDoc(doc);
   }
 
-  /**
-   * adds the document to the specified path
-   * @doc the document to add
-   * @path the path to add to
+  /** Adds the document to the specified path
+   *  @doc the document to add
+   *  @path the path to add to
    */
   public void addDocument(INavigatorItem doc, String path) throws IllegalArgumentException {
     insertDoc(doc);
   }
   
-  /**
-   * inserts the document into its sorted position
-   * @param doc the document to add
+  /** Inserts the document into its sorted position
+   *  @param doc the document to add
    */
   private int insertDoc(INavigatorItem doc) {
     int i = 0;

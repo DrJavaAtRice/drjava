@@ -104,7 +104,7 @@ public class JTreeSortNavigator extends JTree
    * Sets the foreground color of this JTree
    * @param c the color to set to
    */
-  public /* synchronized */ void setForeground(Color c) {
+  public void setForeground(Color c) {
     super.setForeground(c);
     _renderer.setTextNonSelectionColor(c);
   }
@@ -113,7 +113,7 @@ public class JTreeSortNavigator extends JTree
    * Sets the background color of this tree
    * @param c the color to set to
    */
-  public /* synchronized */ void setBackground(Color c){
+  public void setBackground(Color c){
     super.setBackground(c);
     if (_renderer != null) _renderer.setBackgroundNonSelectionColor(c);
   }
@@ -192,56 +192,59 @@ public class JTreeSortNavigator extends JTree
    * @throws IllegalArgumentException if this navigator does not contain <code>relativeto</code> as tested by the
    *                                  <code>contains</code> method.
    */
-  public synchronized void addDocument(INavigatorItem doc, String path) throws IllegalArgumentException {
+  public void addDocument(INavigatorItem doc, String path) throws IllegalArgumentException {
     GroupNode _root = null;
     
-    for (GroupNode r: _roots){
-      if (r.getFilter().accept(doc)) {
-        _root = r;
-        break;
-      }
-    }
-    
-    if (_root == null) return;
-    
-    StringTokenizer tok = new StringTokenizer(path, File.separator);
-    //ArrayList<String> elements = new ArrayList<String>();
-    String pathSoFar="";
-    InnerNode lastNode = _root;
-    while (tok.hasMoreTokens()) {
-      String element = tok.nextToken();
-      pathSoFar += (element + "/");
-      InnerNode thisNode;
-      //System.out.println("pathsofar = " + pathSoFar);
-      // if the node is not in the hashmap yet
-      if (!_path2node.containsKey(pathSoFar)) {
-        // make a new node
-        
-        /* this inserts a folder node */
-        thisNode = new FileNode(new File(pathSoFar));
-        insertFolderSortedInto(thisNode, lastNode);
-        this.expandPath(new TreePath(lastNode.getPath()));
-        // associate the path so far with that node
-        _path2node.put(pathSoFar, thisNode);
-      }
-      else {
-        // System.out.println("path2node contains pathSoFar");
-        thisNode = _path2node.getValue(pathSoFar);
+    synchronized(_model) {
+      
+      for (GroupNode r: _roots){
+        if (r.getFilter().accept(doc)) {
+          _root = r;
+          break;
+        }
       }
       
-      lastNode = thisNode;
-       
-      //elements.add(element);
+      if (_root == null) return;
+      
+      StringTokenizer tok = new StringTokenizer(path, File.separator);
+      //ArrayList<String> elements = new ArrayList<String>();
+      String pathSoFar="";
+      InnerNode lastNode = _root;
+      while (tok.hasMoreTokens()) {
+        String element = tok.nextToken();
+        pathSoFar += (element + "/");
+        InnerNode thisNode;
+        //System.out.println("pathsofar = " + pathSoFar);
+        // if the node is not in the hashmap yet
+        if (!_path2node.containsKey(pathSoFar)) {
+          // make a new node
+          
+          /* this inserts a folder node */
+          thisNode = new FileNode(new File(pathSoFar));
+          insertFolderSortedInto(thisNode, lastNode);
+          this.expandPath(new TreePath(lastNode.getPath()));
+          // associate the path so far with that node
+          _path2node.put(pathSoFar, thisNode);
+        }
+        else {
+          // System.out.println("path2node contains pathSoFar");
+          thisNode = _path2node.getValue(pathSoFar);
+        }
+        
+        lastNode = thisNode;
+        
+        //elements.add(element);
+      }
+      
+      /* lastNode is the node of the folder to add into */
+      
+      LeafNode child = new LeafNode(doc);
+      _doc2node.put(doc, child);
+      insertNodeSortedInto(child, lastNode);
+      //    _model.insertNodeInto(child, lastNode, lastNode.getChildCount());
+      this.expandPath(new TreePath(lastNode.getPath()));
+      child.setUserObject(doc);
     }
-    
-    /* lastNode is the node of the folder to add into */
-    
-    LeafNode child = new LeafNode(doc);
-    _doc2node.put(doc, child);
-    insertNodeSortedInto(child, lastNode);
-    //    _model.insertNodeInto(child, lastNode, lastNode.getChildCount());
-    this.expandPath(new TreePath(lastNode.getPath()));
-    child.setUserObject(doc);
   }
   
   
@@ -337,8 +340,10 @@ public class JTreeSortNavigator extends JTree
    *  that is equal to the passed document.
    * 
    */
-  public synchronized INavigatorItem removeDocument(INavigatorItem doc) throws IllegalArgumentException {
-    return removeNode(getNodeForDoc(doc));
+  public INavigatorItem removeDocument(INavigatorItem doc) throws IllegalArgumentException {
+    synchronized(_model) {
+      return removeNode(getNodeForDoc(doc));
+    }
   } 
   
   private LeafNode getNodeForDoc(INavigatorItem doc) { return _doc2node.get(doc); }
@@ -389,102 +394,105 @@ public class JTreeSortNavigator extends JTree
    * @throws IllegalArgumentException if this navigator contains no document
    *  that is equal to the passed document.
    */
-  public synchronized void refreshDocument(INavigatorItem doc, String path) throws IllegalArgumentException {
+  public void refreshDocument(INavigatorItem doc, String path) throws IllegalArgumentException {
     /**
      * This operation is now synchronized which I think should eliminate the 
      * bug where compile all with modified documents would throw an array
      * index out of bounds exception when painting.
      */
     
-    LeafNode node = getNodeForDoc(doc);
-    if (node == null) addDocument(doc, path);
-    
-    InnerNode oldParent = (InnerNode)node.getParent();
-    // Check to see if the new parent (could be same) exists already
-    String newPath = path;
-    if (newPath.length() > 0) {
-      if (newPath.substring(0,1).equals("/")) newPath = newPath.substring(1);
-      if (!newPath.substring(newPath.length()-1).equals("/")) newPath = newPath + "/";
-    }
-    InnerNode newParent = _path2node.getValue(newPath); // node that should be parent
-    
-    //    System.out.println("path="+path);
-    //    System.out.println("newPath="+newPath);
-    //    System.out.println("oldParent="+oldParent);
-    //    System.out.println("newParent="+newParent);
-    //    System.out.println(_path2node);
-    
-    if (newParent == oldParent) { 
-      if (!node.toString().equals(doc.getName())) {
-        LeafNode newLeaf= new LeafNode(doc);
-        _doc2node.put(doc,newLeaf);
-        insertNodeSortedInto(newLeaf, newParent);
-        _model.removeNodeFromParent(node);
-      }
-      // don't do anything if its name or parents haven't changed
-    } else {
-      removeNode(node);
-      addDocument(doc, path);
-    }
-  }
-  
-  public void paint(Graphics g){
-    
-    /* Synchronized so that "this" is in stable form when painted. Doesn't the super call already supply synchronization */
-    super.paint(g);
-  }
-  
-  /** sets the input document to be active */
-  public synchronized void setActiveDoc(INavigatorItem doc){
-    
-    DefaultMutableTreeNode node = _doc2node.get(doc);
-    if (this.contains(doc)) {
-      TreeNode[] nodes = node.getPath();
-      TreePath path = new TreePath(nodes);
-      this.expandPath(path);
+    synchronized(_model) {
+      LeafNode node = getNodeForDoc(doc);
+      if (node == null) addDocument(doc, path);
       
-      this.setSelectionPath(path);
-      this.scrollPathToVisible(path);
+      InnerNode oldParent = (InnerNode)node.getParent();
+      // Check to see if the new parent (could be same) exists already
+      String newPath = path;
+      if (newPath.length() > 0) {
+        if (newPath.substring(0,1).equals("/")) newPath = newPath.substring(1);
+        if (!newPath.substring(newPath.length()-1).equals("/")) newPath = newPath + "/";
+      }
+      InnerNode newParent = _path2node.getValue(newPath); // node that should be parent
+      
+      //    System.out.println("path="+path);
+      //    System.out.println("newPath="+newPath);
+      //    System.out.println("oldParent="+oldParent);
+      //    System.out.println("newParent="+newParent);
+      //    System.out.println(_path2node);
+      
+      if (newParent == oldParent) { 
+        if (!node.toString().equals(doc.getName())) {
+          LeafNode newLeaf= new LeafNode(doc);
+          _doc2node.put(doc,newLeaf);
+          insertNodeSortedInto(newLeaf, newParent);
+          _model.removeNodeFromParent(node);
+        }
+        // don't do anything if its name or parents haven't changed
+      } else {
+        removeNode(node);
+        addDocument(doc, path);
+      }
     }
   }
   
-  /**
-   * Impose some ordering on the documents in the navigator, to facilitate
-   * MainFrame's setActiveNextDocument()
+  /** Sets the input document to be active */
+  public void setActiveDoc(INavigatorItem doc){
+    
+    synchronized (_model) {
+      DefaultMutableTreeNode node = _doc2node.get(doc);
+      if (this.contains(doc)) {
+        TreeNode[] nodes = node.getPath();
+        TreePath path = new TreePath(nodes);
+        this.expandPath(path);
+        
+        this.setSelectionPath(path);
+        this.scrollPathToVisible(path);
+      }
+    }
+  }    
+  
+  /** Imposes some ordering on the documents in the navigator, to facilitate
+   *  MainFrame's setActiveNextDocument()
    *
-   * @param doc the INavigatorItem of interest
-   * @return the INavigatorItem which comes after doc
+   *  @param doc the INavigatorItem of interest
+   *  @return the INavigatorItem which comes after doc
    */
-  public synchronized INavigatorItem getNext(INavigatorItem doc) {
-    DefaultMutableTreeNode node = _doc2node.get(doc);
-    // TODO: check for "package" case
-    DefaultMutableTreeNode next = node.getNextLeaf();
-    if (next == null || next == _model.getRoot()) return doc;
-    return  (INavigatorItem) next.getUserObject();
+  public INavigatorItem getNext(INavigatorItem doc) {
+    synchronized (_model) {
+      DefaultMutableTreeNode node = _doc2node.get(doc);
+      // TODO: check for "package" case
+      DefaultMutableTreeNode next = node.getNextLeaf();
+      if (next == null || next == _model.getRoot()) return doc;
+      return  (INavigatorItem) next.getUserObject();
+    }
   }
   
-  /**
-   * Impose some ordering on the documents in the navigator, to facilitate MainFrame's setActivePrevDocument()
+  /** Imposes some ordering on the documents in the navigator, to facilitate MainFrame's setActivePrevDocument()
    *
-   * @param doc the INavigatorItem of interest
-   * @return the INavigatorItem which comes before doc
+   *  @param doc the INavigatorItem of interest
+   *  @return the INavigatorItem which comes before doc
    */
-  public synchronized INavigatorItem getPrevious(INavigatorItem doc) {
-    DefaultMutableTreeNode node = _doc2node.get(doc);
-    // TODO: check for "package" case
-    DefaultMutableTreeNode prev = node.getPreviousLeaf();
-    if (prev == null || prev == _model.getRoot()) return doc;
-    return  (INavigatorItem) prev.getUserObject();
+  public INavigatorItem getPrevious(INavigatorItem doc) {
+    
+    synchronized (_model) {
+      DefaultMutableTreeNode node = _doc2node.get(doc);
+      // TODO: check for "package" case
+      DefaultMutableTreeNode prev = node.getPreviousLeaf();
+      if (prev == null || prev == _model.getRoot()) return doc;
+      return  (INavigatorItem) prev.getUserObject();
+    }
   }
   
-  /**
-   * Tests to see if a given document is contained in this navigator.
+  /** Tests to see if a given document is contained in this navigator.
    *
-   * @param doc the document to test for containment.
-   * @return <code>true</code> if this navigator contains a document that is "equal" (as tested by the
-   *         <code>equals</code< method) to the passed document, else <code>false</code>.
+   *  @param doc the document to test for containment.
+   *  @return <code>true</code> if this navigator contains a document that is "equal" (as tested by the
+   *          <code>equals</code< method) to the passed document, else <code>false</code>.
    */
-  public synchronized boolean contains(INavigatorItem doc) { return _doc2node.containsKey(doc); }
+  public boolean contains(INavigatorItem doc) { 
+    synchronized (_model) {
+      return _doc2node.containsKey(doc); }
+  }
   
   /**
    * Returns all the <code>IDocuments</code> contained in this
@@ -517,27 +525,31 @@ public class JTreeSortNavigator extends JTree
     };
   }
   
-  /**
-   * Returns the number of <code>IDocuments</code> contained by this
-   * <code>IDocumentNavigator</code>
+  /** Returns the number of <code>IDocuments</code> contained by this
+   *    <code>IDocumentNavigator</code>
+   * 
+   *  Not synchronized on the assumption that size field of a HashMap always has a legitimate
+   *  value (either the size of the current state or the size of its state before some concurrent
+   *  operation started.
    *
-   * @return the number of documents within this navigator.
+   *  @return the number of documents within this navigator.
    */
-  public synchronized int getDocumentCount() { return _doc2node.size(); }
+  public int getDocumentCount() { return _doc2node.size(); }
   
-  /**
-   * Returns whether this <code>IDocumentNavigator</code> contains any <code>IDocuments</code>.
+  /** Returns whether this <code>IDocumentNavigator</code> contains any <code>IDocuments</code>.
    *
-   * @return <code>true</code> if this navigator contains one or more documents, else <code>false</code>.
+   *  @return <code>true</code> if this navigator contains one or more documents, else <code>false</code>.
    */
   public boolean isEmpty() { return _doc2node.isEmpty(); }
   
   /**
    * Removes all <code>IDocuments</code> from this <code>IDocumentNavigator</code>.
    */
-  public synchronized void clear() { 
-    _doc2node.clear();
-    ((DefaultMutableTreeNode)_model.getRoot()).removeAllChildren();
+  public void clear() { 
+    synchronized (_model) {
+      _doc2node.clear();
+      ((DefaultMutableTreeNode)_model.getRoot()).removeAllChildren();
+    }
   }
   
   /**
@@ -548,8 +560,8 @@ public class JTreeSortNavigator extends JTree
    *
    * @param listener the listener to be added to this navigator.
    */
-  public synchronized void addNavigationListener(INavigationListener listener) {
-    navListeners.add(listener);
+  public void addNavigationListener(INavigationListener listener) {
+    synchronized (_model) { navListeners.add(listener); }
   }
   
   /**
@@ -559,8 +571,8 @@ public class JTreeSortNavigator extends JTree
    *
    * @param listener the listener to be removed from this navigator
    */
-  public synchronized void removeNavigationListener(INavigationListener listener) {
-    navListeners.remove(listener);
+  public void removeNavigationListener(INavigationListener listener) {
+    synchronized (_model) { navListeners.remove(listener); }
   }
   
   /**
@@ -584,18 +596,18 @@ public class JTreeSortNavigator extends JTree
    *
    * @param e the event that characterizes the change.
    */
-  public synchronized void valueChanged(TreeSelectionEvent e) {
-    Object treeNode = this.getLastSelectedPathComponent();
-    if(treeNode == null || !(treeNode instanceof NodeData)) {
-      return;
-    }
-    NodeData newSelection = (NodeData)treeNode;
-    if(_current != newSelection) {
-      for(INavigationListener listener : navListeners) {
-        listener.lostSelection(_current);
-        listener.gainedSelection(newSelection);
+  public void valueChanged(TreeSelectionEvent e) {
+    synchronized (_model) {
+      Object treeNode = this.getLastSelectedPathComponent();
+      if (treeNode == null || !(treeNode instanceof NodeData)) return;
+      NodeData newSelection = (NodeData)treeNode;
+      if(_current != newSelection) {
+        for(INavigationListener listener : navListeners) {
+          listener.lostSelection(_current);
+          listener.gainedSelection(newSelection);
+        }
+        _current = newSelection;
       }
-      _current = newSelection;
     }
   }
   
@@ -643,74 +655,79 @@ public class JTreeSortNavigator extends JTree
    * @param x the x coordinate of the navigator pane
    * @param y the y coordinate of the navigator pane
    */
-  public synchronized boolean selectDocumentAt(int x, int y) {
-    TreePath path = getPathForLocation(x, y);
-    if (path == null) return false;
-    else {
-      DefaultMutableTreeNode node = (DefaultMutableTreeNode)path.getLastPathComponent();
-      if (node instanceof LeafNode) {
-        this.expandPath(path);
-        this.setSelectionPath(path);
-        this.scrollPathToVisible(path);
-        return true;
-      } 
-      else if (node instanceof InnerNode) {
-        this.expandPath(path);
-        this.setSelectionPath(path);
-        this.scrollPathToVisible(path);
-        return true;
-      } 
-      else if (node instanceof RootNode) {
-        this.expandPath(path);
-        this.setSelectionPath(path);
-        this.scrollPathToVisible(path);
-        return true;
-      } 
-      else return false;
+  public boolean selectDocumentAt(int x, int y) {
+    synchronized (_model) {
+      TreePath path = getPathForLocation(x, y);
+      if (path == null) return false;
+      else {
+        DefaultMutableTreeNode node = (DefaultMutableTreeNode)path.getLastPathComponent();
+        if (node instanceof LeafNode) {
+          this.expandPath(path);
+          this.setSelectionPath(path);
+          this.scrollPathToVisible(path);
+          return true;
+        } 
+        else if (node instanceof InnerNode) {
+          this.expandPath(path);
+          this.setSelectionPath(path);
+          this.scrollPathToVisible(path);
+          return true;
+        } 
+        else if (node instanceof RootNode) {
+          this.expandPath(path);
+          this.setSelectionPath(path);
+          this.scrollPathToVisible(path);
+          return true;
+        } 
+        else return false;
+      }
     }
   }
   
-  /**
-   * @return true if a group if INavigatorItems selected
-   */
-  public synchronized boolean isGroupSelected() {
-    TreePath p = getSelectionPath();
-    TreeNode n = (TreeNode) p.getLastPathComponent();
-    return (n instanceof InnerNode);
+  /** @return true if a group if INavigatorItems selected */
+  public boolean isGroupSelected() {
+    synchronized (_model) {
+      TreePath p = getSelectionPath();
+      TreeNode n = (TreeNode) p.getLastPathComponent();
+      return (n instanceof InnerNode);
+    }
   }
   
-  /**
-   * Returns true if a top level group is selected
-   */
-  public synchronized boolean isTopLevelGroupSelected(){
-    TreePath p = getSelectionPath();
-    TreeNode n = (TreeNode) p.getLastPathComponent();
-    return (n instanceof GroupNode);
+  /** Returns true if a top level group is selected */
+  public boolean isTopLevelGroupSelected() {
+    synchronized (_model) {
+      TreePath p = getSelectionPath();
+      TreeNode n = (TreeNode) p.getLastPathComponent();
+      return (n instanceof GroupNode);
+    }
   }
   
   /**
    * Returns the name of the top level group that the selected item is a
    * child or grandchild or grand...child of
    */
-  public synchronized String getNameOfSelectedTopLevelGroup() throws GroupNotSelectedException{
-    TreePath p = getSelectionPath();
-    TreeNode n = (TreeNode) p.getLastPathComponent();
-    
-    if(n == _model.getRoot())
-      throw new GroupNotSelectedException("there is no top level group for the root of the tree");
-    
-    while(!_roots.contains(n)) { n = n.getParent(); }
-    
-    return ((GroupNode)n).getData();
+  public String getNameOfSelectedTopLevelGroup() throws GroupNotSelectedException {
+    synchronized (_model) {
+      TreePath p = getSelectionPath();
+      TreeNode n = (TreeNode) p.getLastPathComponent();
+      
+      if (n == _model.getRoot())
+        throw new GroupNotSelectedException("there is no top level group for the root of the tree");
+      
+      while(!_roots.contains(n)) { n = n.getParent(); }
+      
+      return ((GroupNode)n).getData();
+    }
   }
   
-  /**
-   * returns the currently selected leaf node, or null
-   * if the selected node is not a leaf
+  /** Returns the currently selected leaf node, or null
+   *  if the selected node is not a leaf
    */
-  public synchronized INavigatorItem getCurrentSelectedLeaf(){
-    if (_current == null) return null;
-    return _current.execute(_leafVisitor);
+  public INavigatorItem getCurrentSelectedLeaf() {
+    synchronized (_model) {
+      if (_current == null) return null;
+      return _current.execute(_leafVisitor);
+    }
   }
   
   private NodeDataVisitor<INavigatorItem> _leafVisitor = new NodeDataVisitor<INavigatorItem>() {
@@ -719,22 +736,22 @@ public class JTreeSortNavigator extends JTree
     public INavigatorItem itemCase(INavigatorItem ini){ return ini; }
   };
   
-  /**
-   * @return true if the INavigatorItem is in the selected group, if a group is selected
-   */
-  public synchronized boolean isSelectedInGroup(INavigatorItem i){
-    TreePath p = getSelectionPath();
-    TreeNode n = (TreeNode) p.getLastPathComponent();
-    TreeNode l = _doc2node.get(i);
-    
-    if (n == _model.getRoot()) return true;
-    
-    while (l.getParent() != _model.getRoot()) {
-      if(l.getParent() == n) return true;
-      l = l.getParent();
+  /** @return true if the INavigatorItem is in the selected group. */
+  public boolean isSelectedInGroup(INavigatorItem i) {
+    synchronized (_model) {
+      TreePath p = getSelectionPath();
+      TreeNode n = (TreeNode) p.getLastPathComponent();
+      TreeNode l = _doc2node.get(i);
+      
+      if (n == _model.getRoot()) return true;
+      
+      while (l.getParent() != _model.getRoot()) {
+        if(l.getParent() == n) return true;
+        l = l.getParent();
+      }
+      
+      return false;
     }
-    
-    return false;
   }
   
   /**
@@ -761,14 +778,13 @@ public class JTreeSortNavigator extends JTree
     if (o instanceof InnerNode) ((InnerNode)o).setCollapsed(false);
   }
   
-  /**
-   * Collapses all the paths in the tree that match one of the path strings included
-   * in the given hash set.  Path strings must follow a specific format in order for
-   * them to work. See the documentation of <code>generatePathString</code> for 
-   * information on the format of the path strings.
-   * @param paths A hash set of path strings. 
+  /** Collapses all the paths in the tree that match one of the path strings included
+   *  in the given hash set.  Path strings must follow a specific format in order for
+   *  them to work. See the documentation of <code>generatePathString</code> for 
+   *  information on the format of the path strings.
+   *  @param paths A hash set of path strings. 
    * 
-   * Only the call on collapsePaths is synchronized since the prelude only involves private data
+   *  Only the call on collapsePaths is synchronized since the prelude only involves private data
    */
   public void collapsePaths(String[] paths) {
     HashSet<String> set = new HashSet<String>();
@@ -776,18 +792,20 @@ public class JTreeSortNavigator extends JTree
     collapsePaths(set);
   }
   
-  synchronized void collapsePaths(HashSet<String> paths) {
-    DefaultMutableTreeNode rootNode = (DefaultMutableTreeNode)_model.getRoot();
-    Enumeration<TreeNode> nodes = rootNode.depthFirstEnumeration(); /** This warning is expected **/
-    ArrayList<String> list = new ArrayList<String>();
-    while (nodes.hasMoreElements()) {
-      DefaultMutableTreeNode tn = (DefaultMutableTreeNode)nodes.nextElement();
-      if (tn instanceof InnerNode) {
-        TreePath tp = new TreePath(tn.getPath());
-        String s = generatePathString(tp);
-        boolean shouldCollapse = paths.contains(s);
-        if (shouldCollapse) { 
-          collapsePath(tp);
+  void collapsePaths(HashSet<String> paths) {
+    synchronized (_model) {
+      DefaultMutableTreeNode rootNode = (DefaultMutableTreeNode)_model.getRoot();
+      Enumeration<TreeNode> nodes = rootNode.depthFirstEnumeration(); /** This warning is expected **/
+      ArrayList<String> list = new ArrayList<String>();
+      while (nodes.hasMoreElements()) {
+        DefaultMutableTreeNode tn = (DefaultMutableTreeNode)nodes.nextElement();
+        if (tn instanceof InnerNode) {
+          TreePath tp = new TreePath(tn.getPath());
+          String s = generatePathString(tp);
+          boolean shouldCollapse = paths.contains(s);
+          if (shouldCollapse) { 
+            collapsePath(tp);
+          }
         }
       }
     }
@@ -840,12 +858,12 @@ public class JTreeSortNavigator extends JTree
     return path;
   }
   
-  /**
-   * If the currently selected item is not an INavigatorItem, select the one given.
-   */
-  public synchronized void requestSelectionUpdate(INavigatorItem ini) {
-    if (getCurrentSelectedLeaf() == null) { // the currently selected node is not a leaf
-      setActiveDoc(ini);
+  /** If the currently selected item is not an INavigatorItem, select the one given. */
+  public void requestSelectionUpdate(INavigatorItem ini) {
+    synchronized (_model) {
+      if (getCurrentSelectedLeaf() == null) { // the currently selected node is not a leaf
+        setActiveDoc(ini);
+      }
     }
   }
 }
