@@ -37,48 +37,50 @@
  *
 END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava;
+package edu.rice.cs.drjava.model.definitions.indent;
 
-import java.util.Date;
-import java.text.SimpleDateFormat;
+import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
+import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
+import edu.rice.cs.util.UnexpectedException;
+
+import javax.swing.text.BadLocationException;
 
 /**
- * This interface hold the information about this build of DrJava.
- * This file is copied to Version.java by the build process, which also
- * fills in the right values of the date and time.
- *
- * This javadoc corresponds to build drjava-20020326-0642;
+ * Indents the current line in the document to the indent level of the
+ * start of the statement that the cursor is currently on, plus the given 
+ * suffix string.
  *
  * @version $Id$
  */
-public abstract class Version {
+public class ActionStartCurrStmtPlus extends IndentRuleAction {
+  private String _suffix;
+  
   /**
-   * This string will be automatically expanded upon "ant commit".
-   * Do not edit it by hand!
+   * Constructs a new rule with the given suffix string.
+   * @param prefix String to append to indent level of brace
    */
-  private static final String BUILD_TIME_STRING = "20020326-0642";
-
-  /** A {@link Date} version of the build time. */
-  private static final Date BUILD_TIME = _getBuildDate();
-
-  public static String getBuildTimeString() {
-    return BUILD_TIME_STRING;
+  public ActionStartCurrStmtPlus(String suffix) {
+    super();
+    _suffix = suffix;
   }
-
-  public static Date getBuildTime() {
-    return BUILD_TIME;
-  }
-
-  private static Date _getBuildDate() {
+  
+  /**
+   * Properly indents the line that the caret is currently on.
+   * Replaces all whitespace characters at the beginning of the
+   * line with the appropriate spacing or characters.
+   *
+   * @param doc DefinitionsDocument containing the line to be indented.
+   */
+  public void indentLine(DefinitionsDocument doc) {
+    String indent = "";
+    
     try {
-      return new SimpleDateFormat("yyyyMMdd-HHmm z").parse(BUILD_TIME_STRING + " GMT");
+      indent = doc.getIndentOfCurrStmt(doc.getCurrentLocation());
+    } catch (BadLocationException e) {
+      throw new UnexpectedException(e);
     }
-    catch (Exception e) { // parse format or whatever problem
-      return null;
-    }
-  }
 
-  public static void main(String[] args) {
-    System.out.println("Version for edu.rice.cs.drjava: " + BUILD_TIME_STRING);
+    indent = indent + _suffix;
+    doc.setTab(indent, doc.getCurrentLocation());
   }
-} 
+}
