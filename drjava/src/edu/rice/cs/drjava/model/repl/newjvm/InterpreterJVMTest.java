@@ -37,48 +37,42 @@
  *
 END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava;
+package edu.rice.cs.drjava.model.repl.newjvm;
 
-import java.util.Date;
-import java.text.SimpleDateFormat;
+import junit.framework.TestCase;
+import edu.rice.cs.drjava.model.repl.*;
+import gj.util.Hashtable;
 
 /**
- * This interface hold the information about this build of DrJava.
- * This file is copied to Version.java by the build process, which also
- * fills in the right values of the date and time.
- *
- * This javadoc corresponds to build drjava-20030331-0252;
- *
- * @version $Id$
+ * simple test suite over InterpreterJVM
  */
-public abstract class Version {
+public class InterpreterJVMTest extends TestCase {
   /**
-   * This string will be automatically expanded upon "ant commit".
-   * Do not edit it by hand!
+   * ensures that our InterpreterJVM adds named debug interpreters correctly
    */
-  private static final String BUILD_TIME_STRING = "20030331-0252";
+  public void testAddNamedDebugInterpreter() {
+    Hashtable<String,JavaInterpreter> debugInterpreters = InterpreterJVM.ONLY.getDebugInterpreters();
+    JavaInterpreter interpreter1 = new DynamicJavaAdapter();
+    JavaInterpreter interpreter2 = new DynamicJavaAdapter();
+    JavaInterpreter interpreter3 = new DynamicJavaAdapter();
 
-  /** A {@link Date} version of the build time. */
-  private static final Date BUILD_TIME = _getBuildDate();
+    assertTrue(debugInterpreters.isEmpty());
+    InterpreterJVM.ONLY.addDebugInterpreter("interpreter1", interpreter1);
+    assertEquals(interpreter1, debugInterpreters.get("interpreter1"));
+    assertTrue(!debugInterpreters.containsKey("interpreter2"));
 
-  public static String getBuildTimeString() {
-    return BUILD_TIME_STRING;
-  }
+    InterpreterJVM.ONLY.addDebugInterpreter("interpreter2", interpreter2);
+    assertEquals(interpreter1, debugInterpreters.get("interpreter1"));
+    assertEquals(interpreter2, debugInterpreters.get("interpreter2"));
 
-  public static Date getBuildTime() {
-    return BUILD_TIME;
-  }
-
-  private static Date _getBuildDate() {
     try {
-      return new SimpleDateFormat("yyyyMMdd-HHmm z").parse(BUILD_TIME_STRING + " GMT");
+      InterpreterJVM.ONLY.addDebugInterpreter("interpreter1", interpreter3);
+      fail();
     }
-    catch (Exception e) { // parse format or whatever problem
-      return null;
+    catch (IllegalArgumentException ex) {
+      assertEquals(interpreter1, debugInterpreters.get("interpreter1"));
+      assertEquals(interpreter2, debugInterpreters.get("interpreter2"));
+      assertTrue(!debugInterpreters.contains(interpreter3));
     }
   }
-
-  public static void main(String[] args) {
-    System.out.println("Version for edu.rice.cs.drjava: " + BUILD_TIME_STRING);
-  }
-} 
+}

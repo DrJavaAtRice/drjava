@@ -109,6 +109,4 @@ public class DebugThreadData {
   public boolean isSuspended() {
     return _thread.isSuspended();
   }
- 
-  
 }
