@@ -563,8 +563,8 @@
                   excludes="META-INF/MANIFEST.MF" />
       <zipfileset src="${lib_dir}/platform.jar"
                   excludes="META-INF/MANIFEST.MF" />
-      <zipfileset src="${lib_dir}/javaast.jar"
-                  excludes="META-INF/MANIFEST.MF" />
+<!--      <zipfileset src="${lib_dir}/javaast.jar"
+                  excludes="META-INF/MANIFEST.MF" /> -->
     <!-- These two jars to be included when language levels are integrated -->
       <!--zipfileset src="${lib_dir}/jexpression.jar"
                   excludes="META-INF/MANIFEST.MF" /-->
