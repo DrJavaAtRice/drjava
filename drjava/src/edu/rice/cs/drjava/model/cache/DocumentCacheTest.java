@@ -265,6 +265,26 @@ public class DocumentCacheTest extends TestCase {
     assertFalse("The document 1 should still be out of the cache", _adapterTable.get(doc1).isReady());
     assertFalse("The document 2 should still be out of the cache", _adapterTable.get(doc2).isReady());
     
+    // Test the resize cache method by increasing the size of the cache to 5, which is still less than the number of open documents: 6
+    _cache.setCacheSize(5); // 4 3 5 6 | 2 1 
+    assertEquals("The cache size should now be 5", 5, _cache.getCacheSize());
+    assertEquals("There should still only be 4 files in the cache", 4, _cache.getNumInCache());
+    
+    doc2.getLength(); // 2 4 3 5 6 | 1
+    assertTrue("The document 2 should now be in the cache", _adapterTable.get(doc2).isReady());
+    assertFalse("The document 1 should still be out of the cache", _adapterTable.get(doc1).isReady());
+    assertEquals("There should be 5 documents in the cache", 5, _cache.getNumInCache());
+    
+    _cache.setCacheSize(3); // 2 4 3 | 5 6 1
+    
+    assertEquals("The cache size should now be 3", 3, _cache.getCacheSize());
+    assertEquals("There should be 3 documents in the cache", 3, _cache.getNumInCache());
+    assertTrue("The document 2 should be in the cache", _adapterTable.get(doc2).isReady());
+    assertTrue("The document 4 should be in the cache", _adapterTable.get(doc4).isReady());
+    assertTrue("The document 3 should be in the cache", _adapterTable.get(doc3).isReady());
+    assertFalse("The document 5 should now be out of the cache", _adapterTable.get(doc5).isReady());
+    assertFalse("The document 6 should now be out of the cache", _adapterTable.get(doc6).isReady());
+    assertFalse("The document 1 should still be out of the cache", _adapterTable.get(doc1).isReady());
   }
   
   public void testGetDDocFromCache() throws BadLocationException, IOException, OperationCanceledException {
@@ -297,6 +317,7 @@ public class DocumentCacheTest extends TestCase {
     assertFalse("The document should not start out in the cache", _adapterTable.get(doc2).isReady());
     assertEquals("There should be 4 documents in the cache", 4, _cache.getNumInCache());
   }
+  
   
   private DefinitionsDocument _saved; // used for testReconstructor()
   

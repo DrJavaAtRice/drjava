@@ -790,3 +790,4 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
                  _debugger.getPackageDir(class2));
   }
 }
+  

@@ -192,9 +192,12 @@ public class JUnitTestManager {
                                      boolean isError, List<File> files) {
 
     Test failedTest = failure.failedTest();
-    String testName = failedTest.getClass().getName();
+    String testName;
     if (failedTest instanceof TestCase) {
       testName = ((TestCase)failedTest).getName();
+    }
+    else{
+      testName = failedTest.getClass().getName();
     }
     
     String testString = failure.toString();

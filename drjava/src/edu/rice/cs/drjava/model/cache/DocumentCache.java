@@ -121,13 +121,19 @@ public class DocumentCache{
    * Note: modified documents are not managed in the cache.
    */
   public synchronized void setCacheSize(int size) {
+    if(size <= 0)
+    {
+      throw new IllegalArgumentException("Cannot set the cache size to zero or less.");
+    }
     CACHE_SIZE = size;
-    if (_lru.size() >= CACHE_SIZE) {
+    DocManager current;
+    if (_lru.size() > CACHE_SIZE) {
       ListIterator<DocManager> it = _lru.listIterator();
-      int i = 0;
+      int i = 1;
       while (it.hasNext()) {
-        it.next();
-        if (i >= CACHE_SIZE) {
+        current = it.next();
+        if (i > CACHE_SIZE) {
+          current.kickOut();
           it.remove();
         }
         i++;
@@ -168,7 +174,7 @@ public class DocumentCache{
   private synchronized void remove(DocManager toRemove) {
     _lru.remove(toRemove);
     if (toRemove.isFirst()) {
-      toRemove.setOut();
+      toRemove.kickOut();
     }
     if (_lru.size() > 0 )
       _lru.getFirst().setFirst(); // just in case the one removed was first

@@ -43,48 +43,30 @@
  * 
 END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava;
+package edu.rice.cs.drjava.model;
 
-import java.util.Date;
-import java.text.SimpleDateFormat;
+import java.io.*;
+import junit.framework.TestCase;
 
-/**
- * This interface hold the information about this build of DrJava.
- * This file is copied to Version.java by the build process, which also
- * fills in the right values of the date and time.
- *
- * This javadoc corresponds to build drjava-20050214-2127;
- *
- * @version $Id$
- */
-public abstract class Version {
-  /**
-   * This string will be automatically expanded upon "ant commit".
-   * Do not edit it by hand!
-   */
-  private static final String BUILD_TIME_STRING = "20050214-2127";
-
-  /** A {@link Date} version of the build time. */
-  private static final Date BUILD_TIME = _getBuildDate();
-
-  public static String getBuildTimeString() {
-    return BUILD_TIME_STRING;
+public class ClassAndInterfaceFinderTest extends TestCase
+{
+  private String INPUT1 = "model/ClassAndInterfaceFinderTest.java";
+  private String OUTPUT1 = "edu.rice.cs.drjava.model.ClassAndInterfaceFinderTest";
+  
+  private String INPUT2 = "model/OpenDefinitionsDocument.java";
+  private String OUTPUT2 = "edu.rice.cs.drjava.model.OpenDefinitionsDocument";
+  
+  private ClassAndInterfaceFinder one, two;
+ 
+  public void testGetClassInterfaceName()
+  {
+    one = new ClassAndInterfaceFinder(new File(INPUT1));
+    
+    assertEquals("Find a Class", OUTPUT1, one.getClassName());
+    
+    two = new ClassAndInterfaceFinder(new File(INPUT2));
+    
+    assertEquals("Find an Interface", OUTPUT2, two.getClassOrInterfaceName());
   }
-
-  public static Date getBuildTime() {
-    return BUILD_TIME;
-  }
-
-  private static Date _getBuildDate() {
-    try {
-      return new SimpleDateFormat("yyyyMMdd-HHmm z").parse(BUILD_TIME_STRING + " GMT");
-    }
-    catch (Exception e) { // parse format or whatever problem
-      return null;
-    }
-  }
-
-  public static void main(String[] args) {
-    System.out.println("Version for edu.rice.cs.drjava: " + BUILD_TIME_STRING);
-  }
-} 
+}
+    
