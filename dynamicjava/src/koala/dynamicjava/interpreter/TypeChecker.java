@@ -2041,16 +2041,6 @@ public class TypeChecker extends VisitorObject<Class> {
     return c;
   }
   
-  /**
-   * Returns true iff the given class is a boxing (reference) type.
-   * @param c the <code>Class</code> to check
-   * @return true iff it is a boxing type
-   */
-  private static boolean _isBoxingType(Class c) {
-    return (c == Integer.class   || c == Long.class  ||
-            c == Character.class || c == Float.class ||
-            c == Double.class);
-  }
   
   /**
    * Checks the typing rules for an assignment
@@ -2176,22 +2166,48 @@ public class TypeChecker extends VisitorObject<Class> {
    */
   private Class visitBitwiseExpression(BinaryExpression node) {
     // Check the types
-    Class lc = node.getLeftExpression().acceptVisitor(this);
-    Class rc = node.getRightExpression().acceptVisitor(this);
+    Expression leftExp = node.getLeftExpression();
+    Expression rightExp = node.getRightExpression();
+    Class lc = leftExp.acceptVisitor(this);
+    Class rc = rightExp.acceptVisitor(this);
     Class c = null;
-
-    if (lc == null           || rc == null           ||
-        lc == void.class     || rc == void.class     ||
-        lc == float.class    || rc == float.class    ||
-        lc == double.class   || rc == double.class   ||
-        (lc == boolean.class ^ rc == boolean.class)  ||
-        !lc.isPrimitive()    || !rc.isPrimitive()) {
+    
+    boolean intLeft   = _isIntegralType(lc);
+    boolean intRight  = _isIntegralType(rc);
+    boolean boolLeft  = (lc == boolean.class  || lc == Boolean.class);
+    boolean boolRight = (rc == boolean.class  || rc == Boolean.class);
+    
+//    if (lc == null           || rc == null           ||
+//        lc == void.class     || rc == void.class     ||
+//        lc == float.class    || rc == float.class    ||
+//        lc == Float.class    || rc == Float.class    ||
+//        lc == double.class   || rc == double.class   ||
+//        lc == Double.class   || rc == Double.class   ||
+//        (lc == boolean.class ^ rc == boolean.class)  ||
+//        !lc.isPrimitive()    || !rc.isPrimitive()) {
+    
+    if (!(  intLeft &&  intRight ) && 
+        !( boolLeft && boolRight ) ){
       throw new ExecutionError("bitwise.expression.type", node);
-    } else if (lc == long.class || rc == long.class) {
+    } 
+    
+    
+    // Auto-unbox, if necessary
+    if (_isBoxingType(lc)) {
+      node.setLeftExpression(_unbox(leftExp, lc));
+    }
+    if (_isBoxingType(rc)) {
+      node.setRightExpression(_unbox(rightExp, rc));
+    }
+    
+    if (lc == long.class || rc == long.class ||
+        lc == Long.class || rc == Long.class) {
       node.setProperty(NodeProperties.TYPE, c = long.class);
-    } else if (lc == boolean.class) {
+    }
+    else if ( boolLeft ) {
       node.setProperty(NodeProperties.TYPE, c = boolean.class);
-    } else {
+    }
+    else {
       node.setProperty(NodeProperties.TYPE, c = int.class);
     }
     return c;
@@ -2230,20 +2246,37 @@ public class TypeChecker extends VisitorObject<Class> {
    */
   private Class visitShiftExpression(BinaryExpression node) {
     // Check the types
-    Class lc = node.getLeftExpression().acceptVisitor(this);
-    Class rc = node.getRightExpression().acceptVisitor(this);
+    Expression leftExp = node.getLeftExpression();
+    Expression rightExp = node.getRightExpression();
+    Class lc = leftExp.acceptVisitor(this);
+    Class rc = rightExp.acceptVisitor(this);
     Class c  = null;
 
     if (lc == null          || rc == null          ||
         lc == boolean.class || rc == boolean.class ||
         lc == void.class    || rc == void.class    ||
         lc == float.class   || rc == float.class   ||
+        lc == Float.class   || rc == Float.class   ||
         lc == double.class  || rc == double.class  ||
-        !lc.isPrimitive()   || !rc.isPrimitive()) {
-      throw new ExecutionError("shift.expression.type", node);
-    } else if (lc == long.class) {
+        lc == Double.class  || rc == Double.class  ||
+        !(lc.isPrimitive()  || _isBoxingType(lc))  || 
+        !(rc.isPrimitive()  || _isBoxingType(rc)) ) {
+      throw new RuntimeException("lc: " + lc + ", rc: " + rc);
+//      throw new ExecutionError("shift.expression.type", node);
+    } 
+    
+    // Auto-unbox, if necessary
+    if (_isBoxingType(lc) && !leftExp.hasProperty(NodeProperties.MODIFIER)) {
+      node.setLeftExpression(_unbox(leftExp, lc));
+    }
+    if (_isBoxingType(rc)) {
+      node.setRightExpression(_unbox(rightExp, rc));
+    }
+    
+    if (lc == long.class || lc == Long.class) {
       node.setProperty(NodeProperties.TYPE, c = long.class);
-    } else {
+    } 
+    else {
       node.setProperty(NodeProperties.TYPE, c = int.class);
     }
     return c;
@@ -2313,6 +2346,34 @@ public class TypeChecker extends VisitorObject<Class> {
     }
   }
 
+  /**
+   * Returns true iff the given class is an integral type
+   * This includes both primitive and boxing integral types.<br><br>
+   * Allowed primitives: byte, char, short, int, long
+   * Allowed Refrence: Byte, Character, Short, Integer, Long
+   * @param c The class to check
+   * @return true iff the given class is an integral type
+   */
+  private static boolean _isIntegralType(Class c) {
+    return (c == int.class   || c == Integer.class   ||
+            c == long.class  || c == Long.class      ||
+            c == byte.class  || c == Byte.class      ||
+            c == char.class  || c == Character.class ||
+            c == short.class || c == Short.class);
+  }
+  
+  /**
+   * Returns true iff the given class is a boxing (reference) type.
+   * @param c the <code>Class</code> to check
+   * @return true iff it is a boxing type
+   */
+  private static boolean _isBoxingType(Class c) {
+    return (c == Integer.class   || c == Long.class  ||
+            c == Character.class || c == Float.class ||
+            c == Double.class    || c == Short.class ||
+            c == Byte.class);
+  }
+  
   /**
    * Unboxes the given expression by returning the correct
    * <code>ObjectMethodCall</code> corresponding to the given type
