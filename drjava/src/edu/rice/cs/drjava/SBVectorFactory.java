@@ -36,16 +36,20 @@ public class SBVectorFactory
 				currState = it.current().getHighlight();
 				if (prevState == currState){
 					length = length + it.current().getSize();
-					start = start + it.current().getSize();
 					it.next();
 				}
 				else {
-					blocks.addElement(new StateBlock(start,length,prevState));
+					if (prevState != ReducedToken.FREE)
+						blocks.addElement(new StateBlock(start,length,prevState));
 					prevState = currState;
+					start = start + length; 
 					length = 0;
 				}	
-			}	
+			}
+			if ((length > 0) && (prevState != ReducedToken.FREE))
+				blocks.addElement(new StateBlock(start,length,prevState));
 			return blocks;
 		}
 
 }
+

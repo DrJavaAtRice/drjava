@@ -111,7 +111,21 @@ class Gap extends ReducedToken
 		{
 			return false;
 		}
+	public boolean isDoubleEscapeSequence()
+		{
+			return false;
+		}
 
+	public boolean isDoubleEscape()
+		{
+			return false;
+		}
+
+	public boolean isEscapedQuote()
+		{
+			return false;
+		}
+	
 	public boolean isOpen()
 		{
 			return false;

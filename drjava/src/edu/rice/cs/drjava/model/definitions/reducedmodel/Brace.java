@@ -22,7 +22,8 @@ class Brace extends ReducedToken {
 																					"//", "\n",
                                           "/", "*",
 																					"\"", "\"",
-																					"" };
+																					"\\\\","\\\"",
+																					"\\","" };
 
 
   public static final String BLK_CMT_BEG = "/*";
@@ -225,9 +226,25 @@ class Brace extends ReducedToken {
 
 	public boolean isMultipleCharBrace()
 		{
-			return (isLineComment() || isBlockCommentStart() || isBlockCommentEnd());
+			return (isLineComment() || isBlockCommentStart() ||
+							isBlockCommentEnd() || isDoubleEscapeSequence());
 		}
 
+	public boolean isDoubleEscapeSequence()
+		{
+			return isDoubleEscape() || isEscapedQuote();			
+		}
+
+	public boolean isDoubleEscape()
+		{
+			return this.getType().equals("\\\\");
+		}
+
+	public boolean isEscapedQuote()
+		{
+			return this.getType().equals("\\\"");
+		}
+	
 	public boolean isGap()
 		{
 			return false;

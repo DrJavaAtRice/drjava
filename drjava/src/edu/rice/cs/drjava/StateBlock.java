@@ -12,4 +12,27 @@ public class StateBlock
 			this.size = size;
 			this.state = state;
 		}
+
+	public boolean equals(Object other)
+		{
+			return ((this.getClass() == other.getClass()) &&
+							(this.location == ((StateBlock)(other)).location) &&
+							(this.size == ((StateBlock)(other)).size) &&
+							(this.state == ((StateBlock)(other)).state));
+		}
+
+	public String toString()
+		{
+			String hilite = "";
+			switch(this.state){
+			case ReducedToken.FREE: hilite = "FREE";break;
+			case ReducedToken.INSIDE_LINE_COMMENT: hilite = "LINE";break;
+			case ReducedToken.INSIDE_BLOCK_COMMENT: hilite = "BLOCK";break;
+			case ReducedToken.INSIDE_QUOTE: hilite = "QUOTE";break;
+			}
+			return ("loc=" + this.location + ", " +
+							"size=" + this.size + "," +
+							"state=" + hilite);
+		}
 }
+

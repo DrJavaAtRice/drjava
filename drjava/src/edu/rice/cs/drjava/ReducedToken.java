@@ -99,6 +99,12 @@ abstract class ReducedToken
 
 	public abstract boolean isQuote();
 
+	public abstract boolean isDoubleEscapeSequence();
+
+	public abstract boolean isDoubleEscape();
+
+	public abstract boolean isEscapedQuote();
+	
 	public abstract void grow(int delta);
 
 	public abstract void shrink(int delta);

@@ -208,7 +208,7 @@ public class ReducedModel implements BraceReduction
 			//if inside a double character brace, break it.
 			else if ((_offset > 0) && _cursor.current().isMultipleCharBrace())
 				{
-					_splitCurrentIfCommentBlock(true,_cursor);
+					_splitCurrentIfCommentBlock(true,true,_cursor);
           //leaving us at the start
 					_cursor.next(); //leaving us after first char
 					_insertNewBrace("*",_cursor); //leaves us after *
@@ -229,7 +229,7 @@ public class ReducedModel implements BraceReduction
 				{
 					//if we're free there won't be a block comment close so if there
 					//is then we don't want to break it.
-					_splitCurrentIfCommentBlock(false,_cursor); //leaving us at start
+					_splitCurrentIfCommentBlock(false,false,_cursor); //leaving us at start
 					_checkPreviousInsertStar(_cursor);
 				}
 			else
@@ -302,7 +302,7 @@ public class ReducedModel implements BraceReduction
 			//if inside a double character brace, break it.
 			else if ((_offset > 0) && _cursor.current().isMultipleCharBrace())
 				{
-					_splitCurrentIfCommentBlock(true,_cursor);
+					_splitCurrentIfCommentBlock(true,true,_cursor);
           //leaving us at the start
 					_cursor.next(); //leaving us after first char
 					//System.out.println(this.simpleString());
@@ -325,7 +325,7 @@ public class ReducedModel implements BraceReduction
 				{
 					//if we're free there won't be a block comment close so if there
 					//is then we don't want to break it.
-					_splitCurrentIfCommentBlock(false,_cursor); //leaving us at start
+					_splitCurrentIfCommentBlock(false,false,_cursor); //leaving us at start
 					_checkPreviousInsertSlash(_cursor);
 				}
 			else
@@ -398,7 +398,7 @@ public class ReducedModel implements BraceReduction
 				}
 			else if ((_offset > 0) && _cursor.current().isMultipleCharBrace())
 				{
-					_splitCurrentIfCommentBlock(true, _cursor);
+					_splitCurrentIfCommentBlock(true,true, _cursor);
 					_cursor.next();
 					_cursor.insert(Brace.MakeBrace("\n", getStateAtCurrent()));
 					_cursor.prev();
@@ -455,7 +455,7 @@ public class ReducedModel implements BraceReduction
 				}
 			else if ((_offset > 0) && _cursor.current().isMultipleCharBrace())
 				{
-					_splitCurrentIfCommentBlock(true, _cursor);
+					_splitCurrentIfCommentBlock(true,true, _cursor);
 					_cursor.next();
 					_cursor.insert(Brace.MakeBrace("\"", getStateAtCurrent()));
 					_cursor.prev();
@@ -477,12 +477,105 @@ public class ReducedModel implements BraceReduction
 
 	private void _insertNewQuote()
 		{
-			_insertNewBrace("\"", _cursor);
+			String insert = _getQuoteType();
+			
+			_insertNewBrace(insert, _cursor);
 			_cursor.prev();
 			_updateBasedOnCurrentState();
 			_cursor.next();
 			_offset = 0;
 		}
+
+	private String _getQuoteType()
+		{
+			if (_cursor.atStart() || _cursor.atFirstItem())
+				return "\"";
+			else if (_cursor.prevItem().getType().equals("\\")){
+				_cursor.prev();
+				_cursor.remove();
+				return "\\\"";
+			}
+			else
+				return "\"";
+		}
+	
+	public Vector<StateBlock> insertBackSlash()
+		{			
+		 
+//check if empty
+			if (_braces.isEmpty())
+				{
+					_insertNewBrace("\\",_cursor);//now pointing to tail.
+					return SBVectorFactory.generate(_cursor.copy(),_offset);
+				}
+			//check if at start
+			if (_cursor.atStart())
+				_cursor.next();
+			//not empty, not at start, if at end check the previous brace
+			if (_cursor.atEnd())
+				{
+					_checkPreviousInsertBackSlash(_cursor);
+					return SBVectorFactory.generate(_cursor.copy(),_offset);
+				}
+			
+			//if inside a double character brace, break it.
+			else if ((_offset > 0) && _cursor.current().isMultipleCharBrace())
+				{
+					_splitCurrentIfCommentBlock(true,true,_cursor);
+          //leaving us at the start
+					_cursor.next(); //leaving us after first char
+					//System.out.println(this.simpleString());
+					_insertNewBrace("\\",_cursor); //leaves us after /
+					_cursor.prev();
+					_cursor.prev(); //puts us back on first char in double comment
+					_updateBasedOnCurrentState();
+					if (!_cursor.current().isMultipleCharBrace())
+						_cursor.next();
+					_cursor.next();
+				}
+
+			else if ((_offset > 0) && (_cursor.current().isGap()))
+				{
+					_insertBraceToGap("\\", _cursor);
+				}
+			
+			//if at start of double character brace, break it.
+			else if ((_offset == 0) && _cursor.current().isMultipleCharBrace())
+				{
+					//if we're free there won't be a block comment close so if there
+					//is then we don't want to break it.
+					_splitCurrentIfCommentBlock(false,true,_cursor);//leaving us at start
+					_checkPreviousInsertBackSlash(_cursor);
+				}
+			else
+				{
+					_checkPreviousInsertBackSlash(_cursor);
+				}
+			return SBVectorFactory.generate(_cursor.copy(),_offset);
+		}
+	
+
+	private void _checkPreviousInsertBackSlash(ModelList<ReducedToken>.Iterator
+																						 copyCursor)
+		{
+			if ( !copyCursor.atStart()	&& !copyCursor.atFirstItem()){
+				if (copyCursor.prevItem().getType().equals("\\")){
+					copyCursor.prevItem().setType("\\\\");
+					_updateBasedOnCurrentState();
+					return;
+				}
+					// if we're after a star, 
+			}
+			//here we know the / unites with nothing behind it.
+			_insertNewBrace("\\",copyCursor); //leaving us after the brace.
+			copyCursor.prev();
+			_updateBasedOnCurrentState();
+			if (copyCursor.current().getSize() == 2)
+				_offset = 1;
+			else
+				copyCursor.next();
+		}
+
 	
 	void insertLineComment()
 		{
@@ -755,6 +848,24 @@ public class ReducedModel implements BraceReduction
 					_updateBasedOnCurrentState();
 					//_offset = 0;
 				}
+			else if (copyCursor.current().isDoubleEscape())
+				{
+					copyCursor.current().setType("\\");
+					copyCursor.current().setState(getStateAtCurrent());
+					copyCursor.insert(Brace.MakeBrace("\\", getStateAtCurrent()));
+					copyCursor.next();
+					_updateBasedOnCurrentState();
+					//_offset = 0;
+				}
+			else if (copyCursor.current().isEscapedQuote())
+				{
+					copyCursor.current().setType("\"");
+					copyCursor.current().setState(getStateAtCurrent());
+					copyCursor.insert(Brace.MakeBrace("\\", getStateAtCurrent()));
+					copyCursor.next();
+					_updateBasedOnCurrentState();
+					//_offset = 0;
+				}
 			else
 				{
 					throw new RuntimeException("_breakComment miscalled!");
@@ -840,11 +951,17 @@ public class ReducedModel implements BraceReduction
 			//if a / preceeds a /* or a // combine them.
 			_combineCurrentAndNextIfFind("/","/*",copyCursor);
 			_combineCurrentAndNextIfFind("/","//",copyCursor);
-		
+			
+			_combineCurrentAndNextIfFind("\\","\\",copyCursor);  // \-\
+			_combineCurrentAndNextIfFind("\\","\"",copyCursor);  // \-"
+			_combineCurrentAndNextIfFind("\\","\\\"",copyCursor);// \-\"
+			_combineCurrentAndNextIfFind("\\","\\\\",copyCursor);// \-\\
+			
+						
 			String type = copyCursor.current().getType();
 			if (type.equals("*/"))
 				{
-					_splitCurrentIfCommentBlock(true,copyCursor);
+					_splitCurrentIfCommentBlock(true,false,copyCursor);
 					//_breakComment(copyCursor);
 					copyCursor.prev();
 					_updateBasedOnCurrentStateHelper(copyCursor);
@@ -894,9 +1011,12 @@ public class ReducedModel implements BraceReduction
 			if (copyCursor.atEnd())
 				return;
 
-			_splitCurrentIfCommentBlock(true, copyCursor);
+			_splitCurrentIfCommentBlock(true,false, copyCursor);
 			_combineCurrentAndNextIfFind("","", copyCursor);
-
+			_combineCurrentAndNextIfFind("\\","\\",copyCursor);  // \-\
+			_combineCurrentAndNextIfFind("\\","\"",copyCursor);  // \-"
+			_combineCurrentAndNextIfFind("\\","\\\"",copyCursor);// \-\"
+			_combineCurrentAndNextIfFind("\\","\\\\",copyCursor);// \-\\
 			String type = copyCursor.current().getType();
 
 			if (type.equals("\n"))
@@ -936,8 +1056,12 @@ public class ReducedModel implements BraceReduction
 			if (copyCursor.atEnd())
 				return;
 
-			_splitCurrentIfCommentBlock(true, copyCursor);
+			_splitCurrentIfCommentBlock(true, false,copyCursor);
 			_combineCurrentAndNextIfFind("","", copyCursor);
+			_combineCurrentAndNextIfFind("\\","\\",copyCursor);  // \-\
+			_combineCurrentAndNextIfFind("\\","\"",copyCursor);  // \-"
+			_combineCurrentAndNextIfFind("\\","\\\"",copyCursor);// \-\"
+			_combineCurrentAndNextIfFind("\\","\\\\",copyCursor);// \-\\
 
 			String type = copyCursor.current().getType();
 
@@ -975,7 +1099,12 @@ public class ReducedModel implements BraceReduction
 			_combineCurrentAndNextIfFind("*","//", copyCursor);
 			_combineCurrentAndNextIfFind("*","/*", copyCursor);
 			_combineCurrentAndNextIfFind("","", copyCursor);
-			_splitCurrentIfCommentBlock(false, copyCursor);
+			_combineCurrentAndNextIfFind("\\","\\",copyCursor);  // \-\
+			_combineCurrentAndNextIfFind("\\","\"",copyCursor);  // \-"
+			_combineCurrentAndNextIfFind("\\","\\\"",copyCursor);// \-\"
+			_combineCurrentAndNextIfFind("\\","\\\\",copyCursor);// \-\\
+			
+			_splitCurrentIfCommentBlock(false, false,copyCursor);
 
 			String type = copyCursor.current().getType();
 			if (type.equals("*/"))
@@ -1061,7 +1190,27 @@ public class ReducedModel implements BraceReduction
 							copyCursor.current().grow(growth);
 							return true;
 						}
-					// delete the first Brace and augment the second
+					// the backslash examples.
+					// \-\\
+					else if ((copyCursor.current().getType().equals("\\\\")) &&
+									 (copyCursor.prevItem().getType().equals("\\")))
+						{
+							copyCursor.current().setType("\\");
+							copyCursor.prev();
+							copyCursor.current().setType("\\\\");
+							copyCursor.current().setState(ReducedToken.FREE);
+							return true;
+						} // \-\"
+					else if ((copyCursor.current().getType().equals("\\\"")) &&
+									 (copyCursor.prevItem().getType().equals("\\")))
+						{
+							copyCursor.current().setType("\"");
+							copyCursor.prev();
+							copyCursor.current().setType("\\\\");
+							copyCursor.current().setState(ReducedToken.FREE);
+							return true;
+						}
+// delete the first Brace and augment the second
 					copyCursor.prev();
 					copyCursor.remove();
 					copyCursor.current().setType(first + second);
@@ -1084,13 +1233,15 @@ public class ReducedModel implements BraceReduction
    *  as the one they were split from.
    */
   private void
-	_splitCurrentIfCommentBlock(boolean splitClose,
+	_splitCurrentIfCommentBlock(boolean splitClose,boolean splitEscape,
 															ModelList<ReducedToken>.Iterator copyCursor)
 		{
 			String type = copyCursor.current().getType();
 			if (type.equals("//") ||
 					type.equals("/*") ||
-					(splitClose && type.equals("*/")))
+					(splitClose && type.equals("*/")) ||
+					(splitEscape && type.equals("\\\\")) ||
+					(splitEscape && type.equals("\\\"")))
 				{
 					String first = type.substring(0, 1);
 					String second = type.substring(1, 2);
@@ -1226,6 +1377,9 @@ public class ReducedModel implements BraceReduction
 			return SBVectorFactory.generate(_cursor.copy(),_offset);
 		}
 
+	/**
+	 *
+	 */
 	private int _delete(int count, int offset,
 											ModelList<ReducedToken>.Iterator delFrom,
 											ModelList<ReducedToken>.Iterator delTo)
@@ -1266,15 +1420,12 @@ public class ReducedModel implements BraceReduction
 		}
 	
 	/**
-	 *!!!!!!!COMBINE GAPS!!!!!!!!!!!
+	 *
 	 */
 	private int _deleteRight(int offset,int endOffset,
 													 ModelList<ReducedToken>.Iterator delFrom,
 													 ModelList<ReducedToken>.Iterator delTo)
-		{
-			
-		
-
+		{					
 			delFrom.collapse(delTo);
 						
 			// if both pointing to same item, and it's a gap
@@ -1397,6 +1548,10 @@ public class ReducedModel implements BraceReduction
 	/**
 	 *By contrasting the delTo token after the walk to what it was before the
 	 *walk we can see how it has changed and where the offset should go.
+	 *
+	 *Prev is the item previous to the current cursor
+	 *Current is what the current cursor
+	 *delTo is where current is pointing at this moment in time.
 	 */
 	private int _calculateOffset(int delToSizePrev, String delToTypePrev,
 															 int delToSizeCurr, String delToTypeCurr,
@@ -1470,7 +1625,27 @@ public class ReducedModel implements BraceReduction
 								 delTo.current().getType().equals("*/"))
 					return 1;							
 			}
-							
+			else if (delToTypePrev.equals("\\")){
+				if(delToTypeCurr.equals("\\\\") && 
+					 _checkPrevEquals(delTo,"\\")){ //because pointer will be at *
+					delTo.prev();
+					return 1;
+				}
+				else if (delToTypeCurr.equals("\\\"") &&
+								 _checkPrevEquals(delTo,"\"")){
+					delTo.prev();
+					return 1;
+				}
+				else if (delToTypeCurr.equals("\\") &&
+								 delTo.current().getType().equals("\\\\"))
+					return 1;
+				else if (delToTypeCurr.equals("\"") &&
+								 delTo.current().getType().equals("\\\""))
+					return 1;
+				
+				
+			}
+				
 			return 0;
 		}
 
@@ -1496,7 +1671,10 @@ public class ReducedModel implements BraceReduction
 							!(type.equals("/")  ||
 								type.equals("*")  ||
 								type.equals("\n") ||
-								type.equals("//")) &&
+								type.equals("//") ||
+								type.equals("\\") ||
+								type.equals("\\\\") ||
+								type.equals("\\\"")) &&
 							!copyCursor.current().isShadowed());
 		}
   
