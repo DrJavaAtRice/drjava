@@ -90,7 +90,7 @@ public abstract class TabbedPanel extends JPanel {
     _closePanel = new JPanel(new BorderLayout());
     _mainPanel = new JPanel();
     
-    _closeButton = new JButton(_closeAction);
+    _closeButton = new CommonCloseButton(_closeListener);
     _closePanel.add(_closeButton, BorderLayout.NORTH);
     this.add(_closePanel, BorderLayout.EAST);
     this.add(_mainPanel, BorderLayout.CENTER);
@@ -99,7 +99,8 @@ public abstract class TabbedPanel extends JPanel {
   /**
    * defines the action that takes place upon clicking the close button
    */
-  private Action _closeAction = new AbstractAction("X") {
+  private final ActionListener _closeListener = 
+    new ActionListener() {
     public void actionPerformed(ActionEvent e) {
       _close();
     }

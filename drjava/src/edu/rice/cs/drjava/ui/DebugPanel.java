@@ -415,12 +415,14 @@ public class DebugPanel extends JPanel implements OptionConstants {
     };
     _stepOutButton = new JButton(stepOutAction);
     
-    Action closeAction = new AbstractAction( "X" ) {
+    ActionListener closeListener = 
+      new ActionListener() { 
       public void actionPerformed(ActionEvent ae) {
         _frame.debuggerToggle();
       }
     };
-    _closeButton = new JButton(closeAction);
+    
+    _closeButton = new CommonCloseButton(closeListener);
     
     closeButtonPanel.add(_closeButton, BorderLayout.NORTH);
     mainButtons.add(_resumeButton);
