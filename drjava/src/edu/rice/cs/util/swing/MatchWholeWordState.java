@@ -140,9 +140,7 @@ public class MatchWholeWordState extends AFindReplaceMachineState {
         setPosition(nextPotentialMatchLocation);
 
         if (wholeWordFoundAtCurrent(searchDocument)) {
-          System.err.println("I see word as: " +
-                             searchDocument.substring(_current.getOffset(),
-                                                      _current.getOffset() + _findWord.length()));
+         
           if (!_searchBackwards) {
             setPosition(getCurrentOffset() + _findWord.length());
           }
