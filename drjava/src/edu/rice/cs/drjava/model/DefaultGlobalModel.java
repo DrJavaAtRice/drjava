@@ -928,8 +928,8 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
   public void saveProject(String filename, Hashtable<OpenDefinitionsDocument,DocumentInfoGetter> info) 
     throws IOException {
     
-    String base = filename.substring(0, filename.lastIndexOf(File.separator) + 1);
-    ProjectFileBuilder builder = new ProjectFileBuilder(base);
+//    String base = filename.substring(0, filename.lastIndexOf(File.separator) + 1);
+    ProjectFileBuilder builder = new ProjectFileBuilder(filename);
     
     // add opendefinitionsdocument
     Vector<File> srcFileVector = new Vector<File>();

@@ -121,20 +121,20 @@ public class ProjectTest extends TestCase {
     assertEquals("number of aux files", 2, pfir.getAuxiliaryFiles().length);
     assertEquals("number of collapsed", 2, pfir.getCollapsedPaths().length);
     assertEquals("number of classpaths", 1, pfir.getClasspaths().length);
-    
-    assertEquals("first source filename", "sexp/Atom.java", pfir.getSourceFiles()[0].getPath());
-    assertEquals("last source filename", "sexp/SEList.java", pfir.getSourceFiles()[6].getPath());
+    String base = f.getParent();
+    assertEquals("first source filename", base+"/sexp/Atom.java", pfir.getSourceFiles()[0].getPath());
+    assertEquals("last source filename", base+"/sexp/SEList.java", pfir.getSourceFiles()[6].getPath());
     assertEquals("first aux filename", ""+absp+"junk/sexp/Tokens.java", pfir.getAuxiliaryFiles()[0].getPath());
     assertEquals("last collapsed path", "[External]", pfir.getCollapsedPaths()[1].getPath());
     assertEquals("build-dir name", ""+absp+"drjava/built", pfir.getBuildDirectory().getPath());
     assertEquals("classpath name", ""+absp+"drjava/src/edu/rice/cs/lib", pfir.getClasspaths()[0].getPath());
-    assertEquals("main-class name", "sexp/SEList.java", pfir.getMainClass().getPath());
+    assertEquals("main-class name", base+"/sexp/SEList.java", pfir.getMainClass().getPath());
     
   }
   
   public void testParseFile() throws SExpParseException {
     SEList c = SExpParser.parse("(file (name \"file-name\") (select 1 2))").get(0);
-    DocFile df = ProjectFileParser.ONLY.parseFile(c);
+    DocFile df = ProjectFileParser.ONLY.parseFile(c,null);
     Pair<Integer,Integer> p = df.getSelection();
     assertEquals("First int should be a 1", 1, p.getFirst());
     assertEquals("Second int should be a 2", 2, p.getSecond());
@@ -185,13 +185,14 @@ public class ProjectTest extends TestCase {
     assertEquals("number of collapsed", 1, pfir.getCollapsedPaths().length);
     assertEquals("number of classpaths", 1, pfir.getClasspaths().length);
     
-    assertEquals("first source filename", "dir1/testfile1.java", pfir.getSourceFiles()[0].getPath());
-    assertEquals("last source filename", "dir3/testfile5.java", pfir.getSourceFiles()[4].getPath());
+    String base = pf.getParent();
+    assertEquals("first source filename", base+"/dir1/testfile1.java", pfir.getSourceFiles()[0].getPath());
+    assertEquals("last source filename", base+"/dir3/testfile5.java", pfir.getSourceFiles()[4].getPath());
     assertEquals("first aux filename", ""+absp+"test/testfile6.java", pfir.getAuxiliaryFiles()[0].getPath());
     assertEquals("last collapsed path", "dir1", pfir.getCollapsedPaths()[0].getPath());
     assertEquals("build-dir name", ""+absp+"drjava/built", pfir.getBuildDirectory().getPath());
     assertEquals("classpath name", ""+absp+"drjava/lib", pfir.getClasspaths()[0].getPath());
-    assertEquals("main-class name", "dir1/testfile1.java", pfir.getMainClass().getPath());
+    assertEquals("main-class name", base+"/dir1/testfile1.java", pfir.getMainClass().getPath());
     pf.delete();
   }
   

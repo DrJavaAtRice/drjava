@@ -84,45 +84,6 @@ public class ProjectFileParser {
   
   private ProjectFileParser(){}
   
-  ///////////////////// Visitors ///////////////////////
-  
-  /**
-   * Retrieves the name of a node.  The node should either be a list
-   * with its first element being a text atom, or a text atom itself.
-   */
-  private SExpVisitor<String> _nameVisitor = new SExpVisitor<String>() {
-    public String forEmpty(Empty e){
-      throw new PrivateProjectException("Found an empty node, expected a labeled node");
-    }
-    public String forCons(Cons c){
-      return c.getFirst().accept(this);
-    }
-    public String forBoolAtom(BoolAtom b){
-      throw new PrivateProjectException("Found a boolean, expected a label");
-    }
-    public String forNumberAtom(NumberAtom n){
-      throw new PrivateProjectException("Found a number, expected a label");
-    }
-    public String forTextAtom(TextAtom t){
-      return t.getText();
-    }
-  };
-  
-  
-  /**
-   * Parses out a list of file nodes.
-   */
-  private SEListVisitor<List<DocFile>> _fileListVisitor = new SEListVisitor<List<DocFile>>() {
-    public List<DocFile> forEmpty(Empty e) {
-      return new ArrayList<DocFile>();
-    }
-    public List<DocFile> forCons(Cons c) {
-      List<DocFile> list = c.getRest().accept(this);
-      list.add(0,parseFile(c.getFirst()));
-      return list;
-    }
-  };
-  
   ///////////////// methods //////////////////
   
   /**
@@ -143,7 +104,7 @@ public class ProjectFileParser {
     
     try{
       for(SEList exp : forest) {
-        evaluateExpression(exp, pfir);
+        evaluateExpression(exp, pfir, new FileListVisitor(projFile.getParent()));
       }
     }catch(PrivateProjectException e){
       throw new MalformedProjectFileException("Parse Error: " + e.getMessage());
@@ -159,25 +120,25 @@ public class ProjectFileParser {
    * @param e the top-level s-expression to check
    * @param pfir the ProjectFileIR to update
    */
-  private void evaluateExpression(SEList e, ProjectFileIRImpl pfir) {
+  private void evaluateExpression(SEList e, ProjectFileIRImpl pfir, FileListVisitor flv) {
     if (e == Empty.ONLY) return;
     Cons exp = (Cons)e; // If it's not empty, it's a cons
       
-    String name = exp.accept(_nameVisitor);
+    String name = exp.accept(NameVisitor.ONLY);
     if (name.compareToIgnoreCase("source") == 0) {
-      List<DocFile> fList = exp.getRest().accept(_fileListVisitor);
+      List<DocFile> fList = exp.getRest().accept(flv);
       pfir.setSourceFiles(fList);
     }
     else if (name.compareToIgnoreCase("auxiliary") == 0) {
-      List<DocFile> fList = exp.getRest().accept(_fileListVisitor);
+      List<DocFile> fList = exp.getRest().accept(flv);
       pfir.setAuxiliaryFiles(fList);
     }
     else if (name.compareToIgnoreCase("collapsed") == 0) {
-      List<DocFile> fList = exp.getRest().accept(_fileListVisitor);
+      List<DocFile> fList = exp.getRest().accept(new FileListVisitor(null));
       pfir.setCollapsedPaths(fList);
     }
     else if (name.compareToIgnoreCase("build-dir") == 0) {
-      List<DocFile> fList = exp.getRest().accept(_fileListVisitor);
+      List<DocFile> fList = exp.getRest().accept(flv);
       if (fList.size() > 1) {
         throw new PrivateProjectException("Cannot have multiple build directories");
       }
@@ -189,11 +150,11 @@ public class ProjectFileParser {
       }
     }
     else if (name.compareToIgnoreCase("classpaths") == 0) {
-      List<DocFile> fList = exp.getRest().accept(_fileListVisitor);
+      List<DocFile> fList = exp.getRest().accept(flv);
       pfir.setClasspaths(fList);
     }
     else if (name.compareToIgnoreCase("main-class") == 0) {
-      List<DocFile> fList = exp.getRest().accept(_fileListVisitor);
+      List<DocFile> fList = exp.getRest().accept(flv);
       if (fList.size() > 1) {
         throw new PrivateProjectException("Cannot have multiple main classes");
       }
@@ -213,8 +174,8 @@ public class ProjectFileParser {
    * @param s the non-empty list expression
    * @return the DocFile described by this s-expression
    */
-  DocFile parseFile(SExp s) {
-    String name = s.accept(_nameVisitor);
+  DocFile parseFile(SExp s, String parentDir) {
+    String name = s.accept(NameVisitor.ONLY);
     if (name.compareToIgnoreCase("file") != 0) {
       throw new PrivateProjectException("Expected a file tag, found: " + name);
     }
@@ -223,7 +184,7 @@ public class ProjectFileParser {
     }
     SEList c = ((Cons)s).getRest(); // get parameter list
     
-    FilePropertyVisitor v = new FilePropertyVisitor();
+    FilePropertyVisitor v = new FilePropertyVisitor(parentDir);
     return c.accept(v);
   }
   
@@ -233,7 +194,7 @@ public class ProjectFileParser {
       if(l == Empty.ONLY){
         throw new PrivateProjectException("expected filename, but nothing found");
       }else{
-        return l.accept(_nameVisitor);
+        return l.accept(NameVisitor.ONLY);
       }
     }
     else{
@@ -291,7 +252,7 @@ public class ProjectFileParser {
      */
     private String parseStringNode(SExp n){
       if(n instanceof Cons){
-        return ((Cons)n).getRest().accept(_nameVisitor);
+        return ((Cons)n).getRest().accept(NameVisitor.ONLY);
       }else{
         throw new PrivateProjectException("List expected, but found text instead");
       }
@@ -303,41 +264,94 @@ public class ProjectFileParser {
   
   //////////////// nested/inner classes ////////////////////////
   
+  
+  /**
+   * Parses out a list of file nodes.
+   */
+  private static class FileListVisitor implements SEListVisitor<List<DocFile>> {
+    String _parentDir;
+    public FileListVisitor(String parent) {
+      _parentDir = parent;
+    }
+    public List<DocFile> forEmpty(Empty e) {
+      return new ArrayList<DocFile>();
+    }
+    public List<DocFile> forCons(Cons c) {
+      List<DocFile> list = c.getRest().accept(this);
+      list.add(0, ProjectFileParser.ONLY.parseFile(c.getFirst(), _parentDir));
+      return list;
+    }
+  };
+  
   /**
    * Traverses the list of expressions found after the "file" tag
    * and returns the DocFile described by those properties
    */
-  private class FilePropertyVisitor implements SEListVisitor<DocFile>{
-    String fname = "";
-    Pair<Integer,Integer> select = new Pair<Integer,Integer>(0,0);
-    Pair<Integer,Integer> scroll = new Pair<Integer,Integer>(0,0);
-    boolean active = false;
-    String pack = "";
+  private static class FilePropertyVisitor implements SEListVisitor<DocFile> {
+    private String fname = "";
+    private Pair<Integer,Integer> select = new Pair<Integer,Integer>(0,0);
+    private Pair<Integer,Integer> scroll = new Pair<Integer,Integer>(0,0);
+    private boolean active = false;
+    private String pack = "";
+    
+    private String _parentDir;
+    public FilePropertyVisitor(String parentDir){ _parentDir = parentDir; }
     
     public DocFile forCons(Cons c){
-      String name = c.getFirst().accept(_nameVisitor); 
+      String name = c.getFirst().accept(NameVisitor.ONLY); 
       if (name.compareToIgnoreCase("name") == 0) {
-        fname = parseFileName(c.getFirst());
+        fname = ProjectFileParser.ONLY.parseFileName(c.getFirst());
       }
       else if (name.compareToIgnoreCase("select") == 0) {
-        select = parseIntPair(c.getFirst());
+        select = ProjectFileParser.ONLY.parseIntPair(c.getFirst());
       }
       else if (name.compareToIgnoreCase("scroll") == 0) {
-        scroll = parseIntPair(c.getFirst());
+        scroll = ProjectFileParser.ONLY.parseIntPair(c.getFirst());
       }
       else if (name.compareToIgnoreCase("active") == 0) {
         active = true;
       }
       else if (name.compareToIgnoreCase("package") == 0) {
-        pack = parseStringNode(c.getFirst());
+        pack = ProjectFileParser.ONLY.parseStringNode(c.getFirst());
       }
       return c.getRest().accept(this);
     }
     
     public DocFile forEmpty(Empty c){
-      return new DocFile(fname, select, scroll, active, pack);
+      if (_parentDir == null || new File(fname).isAbsolute()){
+        return new DocFile(fname, select, scroll, active, pack);
+      }
+      else {
+        return new DocFile(_parentDir, fname, select, scroll, active, pack);
+      }
     }
   }
+  
+  /**
+   * Retrieves the name of a node.  The node should either be a list
+   * with its first element being a text atom, or a text atom itself.
+   */
+  private static class NameVisitor implements SExpVisitor<String> {
+    public static final NameVisitor ONLY = new NameVisitor();
+    private NameVisitor() { }
+    
+    public String forEmpty(Empty e){
+      throw new PrivateProjectException("Found an empty node, expected a labeled node");
+    }
+    public String forCons(Cons c){
+      return c.getFirst().accept(this);
+    }
+    public String forBoolAtom(BoolAtom b){
+      throw new PrivateProjectException("Found a boolean, expected a label");
+    }
+    public String forNumberAtom(NumberAtom n){
+      throw new PrivateProjectException("Found a number, expected a label");
+    }
+    public String forTextAtom(TextAtom t){
+      return t.getText();
+    }
+  };
+  
   
   /**
    * concrete implementation of the ProjectFileIR which is the intreface through which DrJava
@@ -430,7 +444,7 @@ public class ProjectFileParser {
   } // end ProjectFileIRImpl class
 
   
-  private class PrivateProjectException extends RuntimeException{
+  private static class PrivateProjectException extends RuntimeException{
     public PrivateProjectException(String message){
       super(message);
     }

@@ -139,7 +139,17 @@ public final class ProjectMenuTest extends MultiThreadedTestCase {
     assertTrue("Project should have been opened",_model.isProjectActive());
     _frame.closeAll();
     assertFalse("Project should have been closed",_model.isProjectActive());
-    
+  }
+  
+  public void testSaveProject() {
+    FileOpenSelector fos = new FileOpenSelector() {
+      public File[] getFiles() throws OperationCanceledException {
+        return new File[] {_projFile};
+      }
+    };
+    // right now it's checking to make sure this doensn't throw exceptions
+    _frame.openProject(fos);
+    _frame.saveProject();
   }
   
 }
