@@ -88,10 +88,10 @@ public class UncaughtExceptionWindow extends JFrame {
       // If we set this pane to be of type text/rtf, it wraps based on words
       // as opposed to based on characters.
     _stackTrace = new JTextArea(_getStackTraceString());
-    _stackTrace.setBackground(Color.gray.brighter());
+    _stackTrace.setBackground(new Color(204,204,204));
     _stackTrace.setMargin(ins);
     _exceptionInfo = new JTextArea(_getExceptionString());
-    _exceptionInfo.setBackground(Color.gray.brighter());
+    _exceptionInfo.setBackground(new Color(204,204,204));
     _exceptionInfo.setMargin(ins);
     _exceptionInfo.setEditable(false);
     

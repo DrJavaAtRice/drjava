@@ -485,7 +485,18 @@ public class DebugManager {
    * resolved Breakpoints are listed
    */
   public synchronized void printBreakpoints() {
-    _model.printDebugMessage("Breakpoints: " + getBreakpoints());
+    Enumeration<Breakpoint> breakpoints = getBreakpoints().elements();
+    if (breakpoints.hasMoreElements()) {
+      _model.printDebugMessage("Breakpoints: ");
+      while (breakpoints.hasMoreElements()) {
+        Breakpoint breakpoint = breakpoints.nextElement();
+        _model.printDebugMessage("  " + breakpoint.getClassName() +
+                                 "  [line " + breakpoint.getLineNumber() + "]");
+      }
+    }
+    else {
+      _model.printDebugMessage("No breakpoints set.");
+    }
   }
   
   /**
@@ -596,7 +607,7 @@ public class DebugManager {
    * Prints a message in the Interactions Pane.
    * @param message Message to display
    */
-  void printMessage(String message) {
+  synchronized void printMessage(String message) {
     _model.printDebugMessage(message);
   }
 
@@ -604,7 +615,8 @@ public class DebugManager {
   /**
    * Notifies all listeners that the current thread has been suspended.
    */
-  void currThreadSuspended() {     
+  synchronized void currThreadSuspended() {
+    //DrJava.consoleOut().println("DM: thread suspended (show)");
     notifyListeners(new EventNotifier() {
       public void notifyListener(DebugListener l) {
         l.currThreadSuspended();
@@ -615,7 +627,8 @@ public class DebugManager {
   /**
    * Notifies all listeners that the current thread has been resumed.
    */
-  void currThreadResumed() {     
+  synchronized void currThreadResumed() {
+    //DrJava.consoleOut().println("DM: thread resumed (hide)");
     notifyListeners(new EventNotifier() {
       public void notifyListener(DebugListener l) {
         l.currThreadResumed();
@@ -623,8 +636,11 @@ public class DebugManager {
     });
   }
   
-  void currThreadDied() {
-    _model.printDebugMessage("Current thread has died");
+  /**
+   * Notifies all listeneres that the current thread has died.
+   */
+  synchronized void currThreadDied() {
+    _model.printDebugMessage("The current thread has finished.");
     notifyListeners(new EventNotifier() {
       public void notifyListener(DebugListener l) {
         l.currThreadDied();

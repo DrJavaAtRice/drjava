@@ -68,6 +68,8 @@ public class ConfigFrame extends JFrame {
   private static final int FRAME_WIDTH = 750;
   private static final int FRAME_HEIGHT = 500;
   
+  private MainFrame _mainFrame;
+  
   private JSplitPane _splitPane;
   private JTree _tree;
   private DefaultTreeModel _treeModel;
@@ -82,8 +84,10 @@ public class ConfigFrame extends JFrame {
   /**
    * Sets up the frame and displays it.
    */
-  public ConfigFrame () {
+  public ConfigFrame (MainFrame frame) {
     super("Preferences");
+    
+    _mainFrame = frame;
     
     _createTree();
     _createPanels();
@@ -352,8 +356,8 @@ public class ConfigFrame extends JFrame {
   private void _setupDisplayPanel ( ConfigPanel panel) {
 
     //ToolbarOptionComponent is a degenerate option component
-    panel.addComponent( new BooleanOptionComponent ( OptionConstants.LINEENUM_ENABLED, "Line Number Enumeration", this));
     panel.addComponent( new ToolbarOptionComponent ( "Toolbar Buttons", this));
+    panel.addComponent( new BooleanOptionComponent ( OptionConstants.LINEENUM_ENABLED, "Line Number Enumeration", this));
     panel.displayComponents();
   }
    
@@ -378,7 +382,7 @@ public class ConfigFrame extends JFrame {
     panel.addComponent( new ColorOptionComponent (OptionConstants.DEFINITIONS_DOUBLE_QUOTED_COLOR, "Double-quoted Color", this));
     panel.addComponent( new ColorOptionComponent (OptionConstants.DEFINITIONS_SINGLE_QUOTED_COLOR, "Single-quoted Color", this));
     panel.addComponent( new ColorOptionComponent (OptionConstants.DEFINITIONS_NUMBER_COLOR, "Number Color", this));
-    panel.addComponent( new ColorOptionComponent (OptionConstants.DEFINITIONS_MATCH_COLOR, "Brace-matching Color", this, true));
+    panel.addComponent( new ColorOptionComponent (OptionConstants.DEFINITIONS_MATCH_COLOR, "Brace-matching Color", this));
     panel.displayComponents();
   }
   
@@ -420,9 +424,23 @@ public class ConfigFrame extends JFrame {
    * Add all of the components for the Debugger panel of the preferences window.
    */ 
   private void _setupDebugPanel ( ConfigPanel panel) {
+    if (_mainFrame.getModel().getDebugManager() == null) {
+      // Explain how to use debugger
+      String howto = 
+        "\nThe debugger is not currently active.  To use the debugger, you must\n" +
+        "include Sun's tools.jar or jpda.jar on your classpath when starting DrJava.\n" +
+        "Do not use the \"-jar\" option, because it overrides the classpath.\n" +
+        "For example, in Windows you might type:\n\n" +
+        "  java -classpath drjava.jar;c:\\path\\tools.jar edu.rice.cs.drjava.DrJava\n\n" +
+        "(Substituting the correct path for tools.jar.)\n" +
+        "See the user documentation for more details.\n";
+      panel.addComponent( new LabelComponent(howto, this) );
+    }
+    
     VectorOptionComponent sourcePath = new VectorOptionComponent (OptionConstants.DEBUG_SOURCEPATH, 
                                                                   "Sourcepath", 
                                                                   this);
+    // Source path can only include directories
     sourcePath.setFileFilter(new FileFilter() {
       public boolean accept (File f) {
         if (f.isDirectory()) {

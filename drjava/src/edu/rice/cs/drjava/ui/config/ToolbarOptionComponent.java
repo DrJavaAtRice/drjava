@@ -95,6 +95,7 @@ public class ToolbarOptionComponent extends OptionComponent<Boolean> {
    
     _buttonPanel = new JPanel();
     _buttonPanel.setLayout(new GridLayout(0,1));
+    _buttonPanel.setBorder(BorderFactory.createEtchedBorder());
     _buttonPanel.add(_textButton);
     _buttonPanel.add(_iconsButton);
     _buttonPanel.add(_textAndIconsButton);

@@ -212,6 +212,7 @@ public class VectorOptionComponent extends OptionComponent<Vector<File>>
       workDir = workDir.getParentFile();
     }
     JFileChooser jfc = new JFileChooser(workDir);
+    jfc.setDialogTitle("Select");
     jfc.setApproveButtonText("Select");
     jfc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
     jfc.setFileFilter(_fileFilter);

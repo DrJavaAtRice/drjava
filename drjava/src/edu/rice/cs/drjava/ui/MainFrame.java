@@ -1177,7 +1177,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   private void _editPreferences() {
     if (CodeStatus.DEVELOPMENT) {  // no preferences action in stable
       if (_configFrame == null) {
-        _configFrame = new ConfigFrame();
+        _configFrame = new ConfigFrame(this);
       }
       _configFrame.show();
     }
@@ -2571,10 +2571,12 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
     
     public void currThreadSuspended() {
+      //DrJava.consoleOut().println("showing resume, etc");
       _setThreadDependentDebugMenuItems(true);
     }
     
     public void currThreadResumed() {
+      //DrJava.consoleOut().println("hiding resume, etc");
       _setThreadDependentDebugMenuItems(false);
     }
     
@@ -2587,6 +2589,10 @@ public class MainFrame extends JFrame implements OptionConstants {
       }
       if (inDebugMode())
         _setDebugMenuItemsEnabled(true);
+
+      // Make sure we're at the prompt
+      // (This should really be fixed in InteractionsPane, not here.)
+      _interactionsPane.setCaretPosition(_model.getInteractionsFrozenPos());
     }
   }
 

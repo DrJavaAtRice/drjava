@@ -49,14 +49,11 @@ import edu.rice.cs.drjava.DrJava;
  * while running DrJava and perform live updating of Options.
  * @version $Id$
  */
-//public abstract class OptionComponent<T extends Option<U>> {
 public abstract class OptionComponent<T> {
-//  protected T _option;
   protected Option<T> _option;
   protected JLabel _label;
   protected Frame _parent;
     
-//  public OptionComponent (T option, String labelText, Frame parent) {
   public OptionComponent (Option<T> option, String labelText, Frame parent) {
     _option = option;
     _label = new JLabel(labelText);
@@ -74,7 +71,6 @@ public abstract class OptionComponent<T> {
     this(null, labelText, parent);
   }
   
-//  public T getOption() {
   public Option<T> getOption() {
     return _option;
   }
@@ -100,14 +96,18 @@ public abstract class OptionComponent<T> {
    * Resets the entry field to reflect the actual stored value for the option.
    */
   public void resetToCurrent() {
-    setValue(DrJava.CONFIG.getSetting(_option));
+    if (_option != null) {
+      setValue(DrJava.CONFIG.getSetting(_option));
+    }
   }
   
   /**
    * Resets the actual value of the component to the original default.
    */
   public void resetToDefault() {
-    setValue(_option.getDefault());
+    if (_option != null) {
+      setValue(_option.getDefault());
+    }
   }
   
   /**
