@@ -125,7 +125,7 @@ public abstract class GlobalModelTestCase extends TestCase {
     throws BadLocationException
   {
     TestListener listener = new TestListener() {
-      public void newFileCreated() {
+      public void newFileCreated(OpenDefinitionsDocument doc) {
         newCount++;
       }
     };
@@ -333,11 +333,11 @@ public abstract class GlobalModelTestCase extends TestCase {
                    i,
                    saveBeforeProceedingCount);
     }
-    public void newFileCreated() {
+    public void newFileCreated(OpenDefinitionsDocument doc) {
       fail("newFileCreated fired unexpectedly");
     }
 
-    public void fileOpened(File file) {
+    public void fileOpened(OpenDefinitionsDocument doc) {
       fail("fileOpened fired unexpectedly");
     }
 
@@ -345,7 +345,7 @@ public abstract class GlobalModelTestCase extends TestCase {
       fail("fileClosed fired unexpectedly");
     }
 
-    public void fileSaved(File file) {
+    public void fileSaved(OpenDefinitionsDocument doc) {
       fail("fileSaved fired unexpectedly");
     }
 

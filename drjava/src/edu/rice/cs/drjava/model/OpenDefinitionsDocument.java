@@ -34,7 +34,6 @@ public interface OpenDefinitionsDocument {
    */
   public File getFile() throws IllegalStateException;
 
-
   /**
    * Saves the document with a FileWriter.  If the file name is already
    * set, the method will use that name instead of whatever selector

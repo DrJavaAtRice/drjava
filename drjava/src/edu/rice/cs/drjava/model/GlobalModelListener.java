@@ -23,17 +23,17 @@ public interface GlobalModelListener {
   /**
    * Called after a new document is created.
    */
-  public void newFileCreated();
+  public void newFileCreated(OpenDefinitionsDocument doc);
 
   /**
    * Called after the current document is saved.
    */
-  public void fileSaved(File file);
+  public void fileSaved(OpenDefinitionsDocument doc);
 
   /**
    * Called after a file is opened and read into the current document.
    */
-  public void fileOpened(File file);
+  public void fileOpened(OpenDefinitionsDocument doc);
 
   /**
    * Called after a document is closed.

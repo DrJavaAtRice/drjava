@@ -91,12 +91,12 @@ public class GlobalModel {
    * @return The new open document
    */
   public OpenDefinitionsDocument newFile() {
-    OpenDefinitionsDocument doc = _createOpenDefinitionsDocument();
+    final OpenDefinitionsDocument doc = _createOpenDefinitionsDocument();
     doc.getDocument().setFile(null);
     _definitionsDocs.add(doc);
     _notifyListeners(new EventNotifier() {
       public void notifyListener(GlobalModelListener l) {
-        l.newFileCreated();
+        l.newFileCreated(doc);
       }
     });
     return doc;
@@ -110,24 +110,33 @@ public class GlobalModel {
    *            to open
    * @return The open document, or null if unsuccessful
    * @exception IOException
+   * @exception OperationCanceledException if the open was canceled
+   * @exception AlreadyOpenException if the file is already open
    */
   public OpenDefinitionsDocument openFile(FileOpenSelector com)
-    throws IOException, OperationCanceledException
+    throws IOException, OperationCanceledException, AlreadyOpenException
   {
     DefinitionsDocument tempDoc = (DefinitionsDocument)
       _editorKit.createDefaultDocument();
     try {
       final File file = com.getFile();
+
+      OpenDefinitionsDocument openDoc = _getOpenDocument(file);
+      if (openDoc != null) {
+        throw new AlreadyOpenException(openDoc);
+      }
+
       _editorKit.read(new FileReader(file), tempDoc, 0);
       tempDoc.setFile(file);
       tempDoc.resetModification();
 
-      OpenDefinitionsDocument doc = new DefinitionsDocumentHandler(tempDoc);
+      final OpenDefinitionsDocument doc =
+        new DefinitionsDocumentHandler(tempDoc);
       _definitionsDocs.add(doc);
 
       _notifyListeners(new EventNotifier() {
         public void notifyListener(GlobalModelListener l) {
-          l.fileOpened(file);
+          l.fileOpened(doc);
         }
       });
 
@@ -162,17 +171,25 @@ public class GlobalModel {
   }
 
   /**
+   * Attempts to close all open documents.
+   * @return true if all documents were closed
+   */
+  public boolean closeAllFiles() {
+    boolean closeAll = true;
+    while (!_definitionsDocs.isEmpty() && closeAll) {
+      OpenDefinitionsDocument openDoc = (OpenDefinitionsDocument)
+        _definitionsDocs.getFirst();
+      closeAll = closeFile(openDoc);
+    }
+    return closeAll;
+  }
+
+  /**
    * Exits the program.
    * Only quits if all documents are successfully closed.
    */
   public void quit() {
-    boolean canQuit = true;
-    while (!_definitionsDocs.isEmpty() && canQuit) {
-      OpenDefinitionsDocument openDoc = (OpenDefinitionsDocument)
-        _definitionsDocs.getFirst();
-      canQuit = closeFile(openDoc);
-    }
-    if (canQuit) {
+    if (closeAllFiles()) {
       System.exit(0);
     }
   }
@@ -371,23 +388,20 @@ public class GlobalModel {
    *  of the open documents is invalid.
    */
   public File[] getSourceRootSet() throws InvalidPackageException {
-    // Key: path, value: File
-    Hashtable roots = new Hashtable();
+    LinkedList roots = new LinkedList();
 
     for (int i = 0; i < _definitionsDocs.size(); i++) {
       OpenDefinitionsDocument doc = (OpenDefinitionsDocument)
         _definitionsDocs.get(i);
       File root = doc.getSourceRoot();
-      String path = root.getAbsolutePath();
 
       // Don't add duplicate Files, based on path
-      if (!roots.contains(path)) {
-        roots.put(path, root);
+      if (!roots.contains(root)) {
+        roots.add(root);
       }
     }
 
-    Collection files = roots.values();
-    return (File[]) files.toArray(new File[0]);
+    return (File[]) roots.toArray(new File[0]);
   }
 
 
@@ -481,6 +495,7 @@ public class GlobalModel {
      */
     public void saveFileAs(FileSaveSelector com) throws IOException {
       try {
+        final OpenDefinitionsDocument openDoc = this;
         final File file = com.getFile();
         FileWriter writer = new FileWriter(file);
         _editorKit.write(writer, _doc, 0, _doc.getLength());
@@ -489,7 +504,7 @@ public class GlobalModel {
         _doc.setFile(file);
         _notifyListeners(new EventNotifier() {
           public void notifyListener(GlobalModelListener l) {
-            l.fileSaved(file);
+            l.fileSaved(openDoc);
           }
         });
       }
@@ -786,6 +801,30 @@ public class GlobalModel {
     return new DefinitionsDocumentHandler(doc);
   }
 
+  /**
+   * Returns the OpenDefinitionsDocument corresponding to the given
+   * File, or null if that file is not open.
+   * @param file File object to search for
+   * @return Corresponding OpenDefinitionsDocument, or null
+   */
+  private OpenDefinitionsDocument _getOpenDocument(File file) {
+    OpenDefinitionsDocument doc = null;
+
+    for (int i=0; ((i < _definitionsDocs.size()) && (doc == null)); i++) {
+      OpenDefinitionsDocument thisDoc =
+        (OpenDefinitionsDocument) _definitionsDocs.get(i);
+      try {
+        if (thisDoc.getFile().equals(file)) {
+          doc = thisDoc;
+        }
+      }
+      catch (IllegalStateException ise) {
+        // No file in thisDoc
+      }
+    }
+
+    return doc;
+  }
 
 
   /**

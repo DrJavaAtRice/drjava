@@ -165,7 +165,15 @@ public class GlobalModelIOTest extends GlobalModelTestCase {
     final File tempFile = writeToNewTempFile(BAR_TEXT);
 
     TestListener listener = new TestListener() {
-      public void fileOpened(File file) {
+      public void fileOpened(OpenDefinitionsDocument doc) {
+        File file = null;
+        try {
+          file = doc.getFile();
+        }
+        catch (IllegalStateException ise) {
+          // We know file should exist
+          fail("file does not exist");
+        }
         assertEquals("file to open", tempFile, file);
         openCount++;
       }
@@ -177,6 +185,10 @@ public class GlobalModelIOTest extends GlobalModelTestCase {
       listener.assertOpenCount(1);
       assertModified(false, doc);
       assertContents(BAR_TEXT, doc);
+    }
+    catch (AlreadyOpenException aoe) {
+      // Should not be open
+      fail("File was already open!");
     }
     catch (OperationCanceledException oce) {
       // Should not be canceled
@@ -200,7 +212,7 @@ public class GlobalModelIOTest extends GlobalModelTestCase {
         return true; // yes allow the abandon
       }
 
-      public void fileOpened() {
+      public void fileOpened(OpenDefinitionsDocument doc) {
         openCount++;
       }
     };
@@ -209,6 +221,10 @@ public class GlobalModelIOTest extends GlobalModelTestCase {
     try {
       OpenDefinitionsDocument newDoc =
         _model.openFile(new CancelingSelector());
+    }
+    catch (AlreadyOpenException aoe) {
+      // Should not be open
+      fail("File was already open!");
     }
     catch (OperationCanceledException oce) {
       // we expect this to be thrown
@@ -242,6 +258,10 @@ public class GlobalModelIOTest extends GlobalModelTestCase {
     catch (FileNotFoundException fnf) {
       // As we hoped, the file was not found
     }
+    catch (AlreadyOpenException aoe) {
+      // Should not be open
+      fail("File was already open!");
+    }
     catch (OperationCanceledException oce) {
       // Should not be canceled
       fail("Open was unexpectedly canceled!");
@@ -249,6 +269,62 @@ public class GlobalModelIOTest extends GlobalModelTestCase {
 
     assertEquals("non-existant file", doc, null);
   }
+
+  /**
+   * Attempts to reopen an already open file.
+   */
+  public void testReopenFile()
+    throws BadLocationException, IOException
+  {
+    final File tempFile = writeToNewTempFile(BAR_TEXT);
+
+    TestListener listener = new TestListener() {
+      public void fileOpened(OpenDefinitionsDocument doc) {
+        File file = null;
+        try {
+          file = doc.getFile();
+        }
+        catch (IllegalStateException ise) {
+          // We know file should exist
+          fail("file does not yet exist");
+        }
+        assertEquals("file to open", tempFile, file);
+        openCount++;
+      }
+    };
+
+    _model.addListener(listener);
+    try {
+      OpenDefinitionsDocument doc = _model.openFile(new FileSelector(tempFile));
+      listener.assertOpenCount(1);
+      assertModified(false, doc);
+      assertContents(BAR_TEXT, doc);
+    }
+    catch (AlreadyOpenException aoe) {
+      // Should not be open
+      fail("File was already open!");
+    }
+    catch (OperationCanceledException oce) {
+      // Should not be canceled
+      fail("Open was unexpectedly canceled!");
+    }
+
+    // Now reopen
+    try {
+      OpenDefinitionsDocument doc2 = _model.openFile(new FileSelector(tempFile));
+      fail("file should already be open");
+    }
+    catch (AlreadyOpenException aoe) {
+      // Should not be open
+      listener.assertOpenCount(1);
+    }
+    catch (OperationCanceledException oce) {
+      // Should not be canceled
+      fail("Open was unexpectedly canceled!");
+    }
+
+  }
+
 
   /**
    * Attempts to make the first save of a document, but cancels instead.
@@ -274,7 +350,15 @@ public class GlobalModelIOTest extends GlobalModelTestCase {
     final File file = tempFile();
 
     TestListener listener = new TestListener() {
-      public void fileSaved(File f) {
+      public void fileSaved(OpenDefinitionsDocument doc) {
+        File f = null;
+        try {
+          f = doc.getFile();
+        }
+        catch (IllegalStateException ise) {
+          // We know file exists
+          fail("file does not exist");
+        }
         assertEquals("saved file name", file, f);
         saveCount++;
       }
@@ -310,7 +394,15 @@ public class GlobalModelIOTest extends GlobalModelTestCase {
 
     // Listener to use on future save
     TestListener listener = new TestListener() {
-      public void fileSaved(File f) {
+      public void fileSaved(OpenDefinitionsDocument doc) {
+        File f = null;
+        try {
+          f = doc.getFile();
+        }
+        catch (IllegalStateException ise) {
+          // We know file exists
+          fail("file does not exist");
+        }
         assertEquals("saved file name", file, f);
         saveCount++;
       }
@@ -351,7 +443,15 @@ public class GlobalModelIOTest extends GlobalModelTestCase {
                  FileOps.readFile(file));
 
     TestListener listener = new TestListener() {
-      public void fileSaved(File f) {
+      public void fileSaved(OpenDefinitionsDocument doc) {
+        File f = null;
+        try {
+          f = doc.getFile();
+        }
+        catch (IllegalStateException ise) {
+          // We know file exists
+          fail("file does not exist");
+        }
         assertEquals("saved file name", file, f);
         saveCount++;
       }
@@ -425,7 +525,15 @@ public class GlobalModelIOTest extends GlobalModelTestCase {
 
     // Make sure we save now to the new file name
     TestListener listener = new TestListener() {
-      public void fileSaved(File f) {
+      public void fileSaved(OpenDefinitionsDocument doc) {
+        File f = null;
+        try {
+          f = doc.getFile();
+        }
+        catch (IllegalStateException ise) {
+          // We know file exists
+          fail("file does not exist");
+        }
         assertEquals("saved file name", file2, f);
         saveCount++;
       }

@@ -10,6 +10,7 @@ import javax.swing.text.Document;
 import javax.swing.text.DefaultStyledDocument;
 
 import edu.rice.cs.drjava.model.compiler.*;
+import edu.rice.cs.drjava.util.UnexpectedException;
 
 /**
  * A test on the GlobalModel for compilation.
@@ -342,7 +343,7 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
         saveBeforeProceedingCount++;
       }
 
-      public void fileSaved(File f) {
+      public void fileSaved(OpenDefinitionsDocument doc) {
         assertModified(false, doc);
         assertSaveBeforeProceedingCount(0);
         assertCompileStartCount(0);
@@ -350,6 +351,14 @@ public class GlobalModelCompileTest extends GlobalModelTestCase {
         assertInteractionsResetCount(0);
         assertConsoleResetCount(0);
 
+        File f = null;
+        try {
+          f = doc.getFile();
+        }
+        catch (IllegalStateException ise) {
+          // We know file should exist
+          throw new UnexpectedException(ise);
+        }
         assertEquals(_name() + "file saved", file, f);
         saveCount++;
       }
