@@ -96,7 +96,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
         
     FormalParameter formalparam = node.getParameter();
     Expression collection = node.getCollection();
-    Class collTypeClass = NodeProperties.getType(collection);
+    Class<?> collTypeClass = NodeProperties.getType(collection);
     Node body = node.getBody();
     
     /*examples*/
@@ -135,7 +135,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
      * ============================================================================
      */
     Method m;
-    Class c;
+    Class<?> c;
     Expression exp;
     /************************************************************************************/
     /**  create an initialization  ******************************************************/
@@ -476,10 +476,10 @@ public class EvaluationVisitor extends VisitorObject<Object> {
       Number n = (Number)o;
 
       // Search for the matching label
-      ListIterator it = node.getBindings().listIterator();
-      ListIterator dit = null;
+      ListIterator<SwitchBlock> it = node.getBindings().listIterator();
+      ListIterator<SwitchBlock> dit = null;
       loop: while (it.hasNext()) {
-        SwitchBlock sc = (SwitchBlock)it.next();
+        SwitchBlock sc = it.next();
         Number l = null;
         if (sc.getExpression() != null) {
           o = sc.getExpression().acceptVisitor(this);
@@ -497,13 +497,13 @@ public class EvaluationVisitor extends VisitorObject<Object> {
           // remaining statements
           for(;;) {
             if (sc.getStatements() != null) {
-              Iterator it2 = sc.getStatements().iterator();
+              Iterator<Node> it2 = sc.getStatements().iterator();
                while (it2.hasNext()) {
-                ((Node)it2.next()).acceptVisitor(this);
+                it2.next().acceptVisitor(this);
               }
             }
             if (it.hasNext()) {
-              sc = (SwitchBlock)it.next();
+              sc = it.next();
             } else {
               break loop;
             }
@@ -512,16 +512,16 @@ public class EvaluationVisitor extends VisitorObject<Object> {
       }
 
       if (!processed && dit != null) {
-        SwitchBlock sc = (SwitchBlock)dit.next();
+        SwitchBlock sc = dit.next();
         for(;;) {
           if (sc.getStatements() != null) {
-            Iterator it2 = sc.getStatements().iterator();
+            Iterator<Node> it2 = sc.getStatements().iterator();
             while (it2.hasNext()) {
-              ((Node)it2.next()).acceptVisitor(this);
+              it2.next().acceptVisitor(this);
             }
           }
           if (dit.hasNext()) {
-            sc = (SwitchBlock)dit.next();
+            sc = dit.next();
           } else {
             break;
           }
@@ -596,10 +596,10 @@ public class EvaluationVisitor extends VisitorObject<Object> {
       }
 
       // Find the exception handler
-      Iterator it = node.getCatchStatements().iterator();
+      Iterator<CatchStatement> it = node.getCatchStatements().iterator();
       while (it.hasNext()) {
-        CatchStatement cs = (CatchStatement)it.next();
-        Class c = NodeProperties.getType(cs.getException().getType());
+        CatchStatement cs = it.next();
+        Class<?> c = NodeProperties.getType(cs.getException().getType());
         if (c.isAssignableFrom(t.getClass())) {
           handled = true;
 
@@ -694,9 +694,9 @@ public class EvaluationVisitor extends VisitorObject<Object> {
       context.enterScope(vars);
 
       // Interpret the statements
-      Iterator it = node.getStatements().iterator();
+      Iterator<Node> it = node.getStatements().iterator();
       while (it.hasNext()) {
-        ((Node)it.next()).acceptVisitor(this);
+        it.next().acceptVisitor(this);
       }
     } finally {
       // Always leave the current scope
@@ -718,7 +718,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
    * @param node the node to visit
    */
   public Object visit(VariableDeclaration node) {
-    Class c = NodeProperties.getType(node.getType());
+    Class<?> c = NodeProperties.getType(node.getType());
 
     if (node.getInitializer() != null) {
       Object o = performCast(c, node.getInitializer().acceptVisitor(this));
@@ -743,7 +743,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
    * @param node the node to visit
    */
   public Object visit(ObjectFieldAccess node) {
-    Class c = NodeProperties.getType(node.getExpression());
+    Class<?> c = NodeProperties.getType(node.getExpression());
 
     // Evaluate the object
     Object obj  = node.getExpression().acceptVisitor(this);
@@ -778,7 +778,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
   private Object buildArrayOfRemainingArgs(Class[] typs, int larg_size, Iterator<Expression> it) {
     if(! typs[typs.length-1].isArray())
       throw new RuntimeException("Last argument is not variable arguments");
-    Class componentType = typs[typs.length-1].getComponentType();
+    Class<?> componentType = typs[typs.length-1].getComponentType();
     Object argArray = Array.newInstance(componentType,new int[]{(larg_size-typs.length+1)});
     for(int j = 0; j < larg_size-typs.length+1; j++){
       Object p  = it.next().acceptVisitor(this);
@@ -854,7 +854,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
       // Since the 'clone' method of an array is not a normal
       // method, the only way to invoke it is to simulate its
       // behaviour.
-      Class c = NodeProperties.getType(exp);
+      Class<?> c = NodeProperties.getType(exp);
       int len = Array.getLength(obj);
       Object result = Array.newInstance(c.getComponentType(), len);
       for (int i = 0; i < len; i++) {
@@ -1070,7 +1070,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
 
     // Create the array
     if (node.getDimension() != dims.length) {
-      Class c = NodeProperties.getComponentType(node);
+      Class<?> c = NodeProperties.getComponentType(node);
       c = Array.newInstance(c, 0).getClass();
       return Array.newInstance(c, dims);
     } else {
@@ -1114,7 +1114,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
    */
   public Object visit(InnerAllocation node) {
     Constructor cons = (Constructor)node.getProperty(NodeProperties.CONSTRUCTOR);
-    Class       c    = NodeProperties.getType(node);
+    Class<?>       c    = NodeProperties.getType(node);
 
     List<Expression> larg = node.getArguments();
     Object[]    args = null;
@@ -1214,7 +1214,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
       // The expression is constant
       return node.getProperty(NodeProperties.VALUE);
     } else {
-      Class  c = NodeProperties.getType(node);
+      Class<?>  c = NodeProperties.getType(node);
       Object o = node.getExpression().acceptVisitor(this);
 
       if (o instanceof Character) {
@@ -1284,8 +1284,8 @@ public class EvaluationVisitor extends VisitorObject<Object> {
     
     Object lhs = mod.prepare(this, context);
     Object rhs = node.getRightExpression().acceptVisitor(this);
-    Class resType = NodeProperties.getType(node);
-    Class calcType = resType; // always a primitive type
+    Class<?> resType = NodeProperties.getType(node);
+    Class<?> calcType = resType; // always a primitive type
     
     // This code facilitates autoboxing/unboxing
     if (TigerUtilities.isBoxingType(resType)) {
@@ -1329,8 +1329,8 @@ public class EvaluationVisitor extends VisitorObject<Object> {
   
     Object lhs = mod.prepare(this, context);
     Object rhs = node.getRightExpression().acceptVisitor(this);
-    Class resType = NodeProperties.getType(node);
-    Class calcType = resType; // always a primitive type
+    Class<?> resType = NodeProperties.getType(node);
+    Class<?> calcType = resType; // always a primitive type
     
     // This code facilitates autoboxing/unboxing
     if (TigerUtilities.isBoxingType(resType)) {
@@ -1374,8 +1374,8 @@ public class EvaluationVisitor extends VisitorObject<Object> {
 
     Object lhs = mod.prepare(this, context);
     Object rhs = node.getRightExpression().acceptVisitor(this);
-    Class resType = NodeProperties.getType(node);
-    Class calcType = resType; // always a primitive type
+    Class<?> resType = NodeProperties.getType(node);
+    Class<?> calcType = resType; // always a primitive type
     
     // This code facilitates autoboxing/unboxing
     if (TigerUtilities.isBoxingType(resType)) {
@@ -1419,8 +1419,8 @@ public class EvaluationVisitor extends VisitorObject<Object> {
 
     Object lhs = mod.prepare(this, context);
     Object rhs = node.getRightExpression().acceptVisitor(this);
-    Class resType = NodeProperties.getType(node);
-    Class calcType = resType; // always a primitive type
+    Class<?> resType = NodeProperties.getType(node);
+    Class<?> calcType = resType; // always a primitive type
     
     // This code facilitates autoboxing/unboxing
     if (TigerUtilities.isBoxingType(resType)) {
@@ -1464,8 +1464,8 @@ public class EvaluationVisitor extends VisitorObject<Object> {
 
     Object lhs = mod.prepare(this, context);
     Object rhs = node.getRightExpression().acceptVisitor(this);
-    Class resType = NodeProperties.getType(node);
-    Class calcType = resType; // always a primitive type
+    Class<?> resType = NodeProperties.getType(node);
+    Class<?> calcType = resType; // always a primitive type
     
     // This code facilitates autoboxing/unboxing
     if (TigerUtilities.isBoxingType(resType)) {
@@ -1589,7 +1589,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
    */
   public Object visit(InstanceOfExpression node) {
     Object v = node.getExpression().acceptVisitor(this);
-    Class  c = NodeProperties.getType(node.getReferenceType());
+    Class<?>  c = NodeProperties.getType(node.getReferenceType());
 
     return (c.isInstance(v)) ? Boolean.TRUE : Boolean.FALSE;
   }
@@ -1623,8 +1623,8 @@ public class EvaluationVisitor extends VisitorObject<Object> {
     LeftHandSideModifier mod = NodeProperties.getModifier(exp);
     Object v = mod.prepare(this, context);
 
-    Class resType = NodeProperties.getType(node);
-    Class calcType = resType; // always a primitive type
+    Class<?> resType = NodeProperties.getType(node);
+    Class<?> calcType = resType; // always a primitive type
     
     // This code facilitates autoboxing/unboxing
     if (TigerUtilities.isBoxingType(resType)) {
@@ -1648,8 +1648,8 @@ public class EvaluationVisitor extends VisitorObject<Object> {
     LeftHandSideModifier mod = NodeProperties.getModifier(exp);
     Object v = mod.prepare(this, context);
 
-    Class resType = NodeProperties.getType(node);
-    Class calcType = resType; // always a primitive type
+    Class<?> resType = NodeProperties.getType(node);
+    Class<?> calcType = resType; // always a primitive type
     
     // This code facilitates autoboxing/unboxing
     if (TigerUtilities.isBoxingType(resType)) {
@@ -1673,8 +1673,8 @@ public class EvaluationVisitor extends VisitorObject<Object> {
     LeftHandSideModifier mod = NodeProperties.getModifier(exp);
     Object v = mod.prepare(this, context);
 
-    Class resType = NodeProperties.getType(node);
-    Class calcType = resType; // always a primitive type
+    Class<?> resType = NodeProperties.getType(node);
+    Class<?> calcType = resType; // always a primitive type
     
     // This code facilitates autoboxing/unboxing
     if (TigerUtilities.isBoxingType(resType)) {
@@ -1698,8 +1698,8 @@ public class EvaluationVisitor extends VisitorObject<Object> {
     LeftHandSideModifier mod = NodeProperties.getModifier(exp);
     Object v = mod.prepare(this, context);
 
-    Class resType = NodeProperties.getType(node);
-    Class calcType = resType; // always a primitive type
+    Class<?> resType = NodeProperties.getType(node);
+    Class<?> calcType = resType; // always a primitive type
     
     // This code facilitates autoboxing/unboxing
     if (TigerUtilities.isBoxingType(resType)) {
@@ -1749,8 +1749,8 @@ public class EvaluationVisitor extends VisitorObject<Object> {
 
     Object lhs = mod.prepare(this, context);
     Object rhs = node.getRightExpression().acceptVisitor(this);
-    Class resType = NodeProperties.getType(node);
-    Class calcType = resType; // always a primitive type
+    Class<?> resType = NodeProperties.getType(node);
+    Class<?> calcType = resType; // always a primitive type
     
     // This code facilitates autoboxing/unboxing
     if (TigerUtilities.isBoxingType(resType)) {
@@ -1795,8 +1795,8 @@ public class EvaluationVisitor extends VisitorObject<Object> {
 
     Object lhs = mod.prepare(this, context);
     Object rhs = node.getRightExpression().acceptVisitor(this);
-    Class resType = NodeProperties.getType(node);
-    Class calcType = resType; // always a primitive type
+    Class<?> resType = NodeProperties.getType(node);
+    Class<?> calcType = resType; // always a primitive type
     
     // This code facilitates autoboxing/unboxing
     if (TigerUtilities.isBoxingType(resType)) {
@@ -1840,8 +1840,8 @@ public class EvaluationVisitor extends VisitorObject<Object> {
 
     Object lhs = mod.prepare(this, context);
     Object rhs = node.getRightExpression().acceptVisitor(this);
-    Class resType = NodeProperties.getType(node);
-    Class calcType = resType; // always a primitive type
+    Class<?> resType = NodeProperties.getType(node);
+    Class<?> calcType = resType; // always a primitive type
     
     // This code facilitates autoboxing/unboxing
     if (TigerUtilities.isBoxingType(resType)) {
@@ -1885,8 +1885,8 @@ public class EvaluationVisitor extends VisitorObject<Object> {
 
     Object lhs = mod.prepare(this, context);
     Object rhs = node.getRightExpression().acceptVisitor(this);
-    Class resType = NodeProperties.getType(node);
-    Class calcType = resType; // always a primitive type
+    Class<?> resType = NodeProperties.getType(node);
+    Class<?> calcType = resType; // always a primitive type
     
     // This code facilitates autoboxing/unboxing
     if (TigerUtilities.isBoxingType(resType)) {
@@ -1930,8 +1930,8 @@ public class EvaluationVisitor extends VisitorObject<Object> {
 
     Object lhs = mod.prepare(this, context);
     Object rhs = node.getRightExpression().acceptVisitor(this);
-    Class resType = NodeProperties.getType(node);
-    Class calcType = resType; // always a primitive type
+    Class<?> resType = NodeProperties.getType(node);
+    Class<?> calcType = resType; // always a primitive type
     
     // This code facilitates autoboxing/unboxing
     if (TigerUtilities.isBoxingType(resType)) {
@@ -1975,8 +1975,8 @@ public class EvaluationVisitor extends VisitorObject<Object> {
 
     Object lhs = mod.prepare(this, context);
     Object rhs = node.getRightExpression().acceptVisitor(this);
-    Class resType = NodeProperties.getType(node);
-    Class calcType = resType; // always a primitive type
+    Class<?> resType = NodeProperties.getType(node);
+    Class<?> calcType = resType; // always a primitive type
     
     // This code facilitates autoboxing/unboxing
     if (TigerUtilities.isBoxingType(resType)) {
@@ -2089,8 +2089,8 @@ public class EvaluationVisitor extends VisitorObject<Object> {
    * @param tc the target class
    * @param o  the object to cast
    */
-  protected static Object performCast(Class tc, Object o) {
-    Class ec = (o != null) ? o.getClass() : null;
+  protected static Object performCast(Class<?> tc, Object o) {
+    Class<?> ec = (o != null) ? o.getClass() : null;
 
     if (tc != ec && tc.isPrimitive() && ec != null) {
       if (tc != char.class && ec == Character.class) {

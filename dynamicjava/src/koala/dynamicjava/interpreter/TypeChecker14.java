@@ -82,7 +82,7 @@ public class TypeChecker14 extends AbstractTypeChecker {
    * Visits a ForEachStatement
    * @param node the node to visit
    */
-  public Class visit(ForEachStatement node){
+  public Class<?> visit(ForEachStatement node){
     throw new WrongVersionException("ForEach Statements are only supported in Java 1.5 or better");
   }
 
@@ -122,7 +122,7 @@ public class TypeChecker14 extends AbstractTypeChecker {
    * @param refType the reference type to box the primitive type to
    * @return the <code>SimpleAllocation</code> that boxes the expression
    */
-  protected SimpleAllocation _box(Expression exp, Class refType) {
+  protected SimpleAllocation _box(Expression exp, Class<?> refType) {
     throw new WrongVersionException("Box required to use " + refType + " here. Autoboxing requires minimum Java 1.5");
   }
   
@@ -133,7 +133,7 @@ public class TypeChecker14 extends AbstractTypeChecker {
    * @param type The type of the evaluated expression
    * @return The <code>ObjectMethodCall</code> that unboxes the expression
    */
-  protected ObjectMethodCall _unbox(Expression child, Class type) {
+  protected ObjectMethodCall _unbox(Expression child, Class<?> type) {
     throw new WrongVersionException("Unbox required to use " + type + " here. Auto-unboxing requires minimum Java 1.5");
   }
 }

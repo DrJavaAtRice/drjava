@@ -48,7 +48,7 @@ public class TryStatement extends Statement {
   /**
    * The catch statements
    */
-  private List<Node> catchStatements;
+  private List<CatchStatement> catchStatements;
   
   /**
    * The finally block
@@ -66,7 +66,7 @@ public class TryStatement extends Statement {
    * @param el     the end line
    * @param ec     the end column
    */
-  public TryStatement(Node tryB, List<Node> catchL, Node fin,
+  public TryStatement(Node tryB, List<CatchStatement> catchL, Node fin,
                       String fn, int bl, int bc, int el, int ec) {
     super(fn, bl, bc, el, ec);
     tryBlock        = tryB;
@@ -84,7 +84,7 @@ public class TryStatement extends Statement {
   /**
    * Gets the catch statements
    */
-  public List<Node> getCatchStatements() {
+  public List<CatchStatement> getCatchStatements() {
     return catchStatements;
   }
   

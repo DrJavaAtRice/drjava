@@ -381,7 +381,7 @@ public class ParserTest extends TestCase {
     stmts2.add(new EmptyStatement());
     stmts2.add(new ThrowStatement(new QualifiedName(idnt)));
 
-    List<Node> catchSt = new LinkedList<Node>();
+    List<CatchStatement> catchSt = new LinkedList<CatchStatement>();
     catchSt.add(new CatchStatement(new FormalParameter(false, new ReferenceType("IOException"), "ioe"), new BlockStatement(stmts2), "", -1, -1, -1, -1));
                 
     expectedAST.add(new TryStatement(new BlockStatement(stmts1),

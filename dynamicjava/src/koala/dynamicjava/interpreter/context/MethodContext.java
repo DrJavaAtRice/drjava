@@ -58,7 +58,7 @@ public class MethodContext extends StaticContext {
    * @param obj the current object
    * @param im  the importation manager
    */
-  public MethodContext(Interpreter i, Class c, Object obj, ImportationManager im) {
+  public MethodContext(Interpreter i, Class<?> c, Object obj, ImportationManager im) {
     super(i, c, im);
     importationManager = im;
 
@@ -75,7 +75,7 @@ public class MethodContext extends StaticContext {
    * @param obj the current object
    * @param fp  the formal parameters
    */
-  public MethodContext(Interpreter i, Class c, Object obj, Set<AbstractVariable> fp) {
+  public MethodContext(Interpreter i, Class<?> c, Object obj, Set<AbstractVariable> fp) {
     super(i, c, fp);
 
     List<IdentifierToken> l = new LinkedList<IdentifierToken>();
@@ -93,8 +93,8 @@ public class MethodContext extends StaticContext {
       return defaultQualifier;
     } else {
       try {
-        Class c = lookupClass(tname);
-        Class t = declaringClass;
+        Class<?> c = lookupClass(tname);
+        Class<?> t = declaringClass;
         Node result = defaultQualifier;
         while (t != null) {
           if (t == c) {
@@ -129,8 +129,8 @@ public class MethodContext extends StaticContext {
         try {
           f = InterpreterUtilities.getOuterField(declaringClass, name.image());
           Expression exp = (Expression)defaultQualifier;
-          Class c = declaringClass;
-          Class fc = f.getDeclaringClass();
+          Class<?> c = declaringClass;
+          Class<?> fc = f.getDeclaringClass();
           while (!fc.isAssignableFrom(c)) {
             exp = new ObjectFieldAccess(exp, getOuterThisName(c));
             c = InterpreterUtilities.getDeclaringClass(c);
@@ -156,14 +156,14 @@ public class MethodContext extends StaticContext {
    * @param c the class of the constructor
    * @param cargs the classes of the arguments of the constructor
    */
-  public Class setProperties(SimpleAllocation node, Class c, Class[] cargs) {
+  public Class<?> setProperties(SimpleAllocation node, Class<?> c, Class<?>[] cargs) {
     Constructor cons = null;
     try {
       cons = lookupConstructor(c, cargs);
     } catch (Exception e) {
       // Innerclass management
       if (isInnerclass(c, declaringClass)) {
-        Class[] cs = new Class[cargs.length + 1];
+        Class<?>[] cs = new Class<?>[cargs.length + 1];
         cs[0] = declaringClass;
         for (int i = 1; i < cs.length; i++) {
           cs[i] = cargs[i - 1];
@@ -176,7 +176,7 @@ public class MethodContext extends StaticContext {
         node.setProperty(NodeProperties.INNER_ALLOCATION, null);
       } else if (c.getDeclaringClass() != null &&
                  c.getDeclaringClass() == declaringClass.getDeclaringClass()) {
-        Class[] cs = new Class[cargs.length + 1];
+        Class<?>[] cs = new Class<?>[cargs.length + 1];
         cs[0] = declaringClass.getDeclaringClass();
         for (int i = 1; i < cs.length; i++) {
           cs[i] = cargs[i - 1];
@@ -252,7 +252,7 @@ public class MethodContext extends StaticContext {
    * @param args the classes of the arguments of the constructor
    * @param memb the class members
    */
-  public Class setProperties(ClassAllocation node, Class c, Class[] args, List<Node> memb) {
+  public Class<?> setProperties(ClassAllocation node, Class<?> c, Class<?>[] args, List<Node> memb) {
     String                 dname = declaringClass.getName();
     String                 cname = dname + "$" + classCount++;
     FieldDeclaration       fd;
@@ -356,10 +356,10 @@ public class MethodContext extends StaticContext {
     type.setProperty(TreeClassInfo.ANONYMOUS_DECLARING_CLASS,
                      new JavaClassInfo(declaringClass));
 
-    Class cl = new TreeCompiler(interpreter).compileTree(this, type);
+    Class<?> cl = new TreeCompiler(interpreter).compileTree(this, type);
 
     // Update the argument types
-    Class[] tmp = new Class[args.length+2];
+    Class<?>[] tmp = new Class[args.length+2];
     tmp[0] = declaringClass;
     tmp[1] = Map.class;
     for (int i = 2; i < tmp.length; i++) {
@@ -411,9 +411,9 @@ public class MethodContext extends StaticContext {
    * @param params the parameter types
    * @exception NoSuchMethodException if the method cannot be found
    */
-  public Method lookupMethod(Node prefix, String mname, Class[] params)
+  public Method lookupMethod(Node prefix, String mname, Class<?>[] params)
     throws NoSuchMethodException {
-    Class  c = NodeProperties.getType(prefix);
+    Class<?>  c = NodeProperties.getType(prefix);
     Method m = null;
     try {
       m = ReflectionUtilities.lookupMethod(c, mname, params);
@@ -428,7 +428,7 @@ public class MethodContext extends StaticContext {
           ((QualifiedName)prefix).getRepresentation().equals("this")) {
         m = InterpreterUtilities.lookupOuterMethod(c, mname, params);
         Expression exp = (Expression)defaultQualifier;
-        Class cl = declaringClass;
+        Class<?> cl = declaringClass;
         while (cl != m.getDeclaringClass()) {
           String s = getOuterThisName(cl);
           if (s == null) {
@@ -452,9 +452,9 @@ public class MethodContext extends StaticContext {
    * @param ic the possibly inner class
    * @param oc the possibly outer class
    */
-  protected boolean isInnerclass(Class ic, Class oc) {
+  protected boolean isInnerclass(Class<?> ic, Class<?> oc) {
     do {
-      Class[] cs = oc.getDeclaredClasses();
+      Class<?>[] cs = oc.getDeclaredClasses();
       for (int i = 0; i < cs.length; i++) {
         if (cs[i] == ic) {
           return true;
@@ -467,7 +467,7 @@ public class MethodContext extends StaticContext {
   /**
    * Finds the name of the reference to an outerclass in the given class
    */
-  protected String getOuterThisName(Class c) {
+  protected String getOuterThisName(Class<?> c) {
     Field[] fs = c.getDeclaredFields();
     for (int i = 0; i < fs.length; i++) {
       if (fs[i].getName().startsWith("this$")) {

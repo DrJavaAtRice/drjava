@@ -48,25 +48,25 @@ public class FinalVariableModifier extends VariableModifier {
      * @param name the node of that represents this variable
      * @param type the declared type of the variable
      */
-    public FinalVariableModifier(QualifiedName name, Class type) {
-	super(name, type);
+    public FinalVariableModifier(QualifiedName name, Class<?> type) {
+ super(name, type);
     }
 
     /**
      * Sets the value of the underlying left hand side expression
      */
     public void modify(Context ctx, Object value) {
-	if (type.isPrimitive()                     ||
-	    value == null                          ||
-	    type.isAssignableFrom(value.getClass())) {
-	    if (ctx.get(representation) == UninitializedObject.INSTANCE) {
-		ctx.setConstant(representation, value);
-	    } else {
-		throw new ExecutionError("cannot.modify", name);
-	    }
-	} else {
-	    Exception e = new ClassCastException(name.getRepresentation());
-	    throw new CatchedExceptionError(e, name);
-	}
+ if (type.isPrimitive()                     ||
+     value == null                          ||
+     type.isAssignableFrom(value.getClass())) {
+     if (ctx.get(representation) == UninitializedObject.INSTANCE) {
+  ctx.setConstant(representation, value);
+     } else {
+  throw new ExecutionError("cannot.modify", name);
+     }
+ } else {
+     Exception e = new ClassCastException(name.getRepresentation());
+     throw new CatchedExceptionError(e, name);
+ }
     }
 }

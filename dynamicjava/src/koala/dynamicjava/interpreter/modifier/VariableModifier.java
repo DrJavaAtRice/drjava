@@ -51,7 +51,7 @@ public class VariableModifier extends LeftHandSideModifier {
   /**
    * The type of this variable
    */
-  protected Class type;
+  protected Class<?> type;
   
   /**
    * The representation of the variable
@@ -63,7 +63,7 @@ public class VariableModifier extends LeftHandSideModifier {
    * @param name the node of that represents this variable
    * @param type the declared type of the variable
    */
-  public VariableModifier(QualifiedName name, Class type) {
+  public VariableModifier(QualifiedName name, Class<?> type) {
     this.name = name;
     this.type = type;
     representation = name.getRepresentation();

@@ -53,7 +53,7 @@ public class InterpreterUtilities {
    * @param l  the left operand
    * @param r  the right operand
    */
-  public static Object equalTo(Class lc, Class rc, Object l, Object r) {
+  public static Object equalTo(Class<?> lc, Class<?> rc, Object l, Object r) {
     return equalityOperation(lc, rc, l, r, EqualToPredicate.INSTANCE);
   }
   
@@ -64,7 +64,7 @@ public class InterpreterUtilities {
    * @param l  the left operand
    * @param r  the right operand
    */
-  public static Object notEqualTo(Class lc, Class rc, Object l, Object r) {
+  public static Object notEqualTo(Class<?> lc, Class<?> rc, Object l, Object r) {
     return equalityOperation(lc, rc, l, r, NotEqualToPredicate.INSTANCE);
   }
   
@@ -76,7 +76,7 @@ public class InterpreterUtilities {
    * @param r  the right operand
    * @param p  the predicate to use
    */
-  protected static Object equalityOperation(Class lc, Class rc,
+  protected static Object equalityOperation(Class<?> lc, Class<?> rc,
                                             Object l, Object r,
                                             BinaryPredicate p) {
     if ((lc != null && lc.isPrimitive()) ||
@@ -150,7 +150,7 @@ public class InterpreterUtilities {
    * @param l the left operand
    * @param r the right operand
    */
-  public static Object add(Class c, Object l, Object r) {
+  public static Object add(Class<?> c, Object l, Object r) {
     if (c == String.class) {
       return "" + l + r;
     }
@@ -163,7 +163,7 @@ public class InterpreterUtilities {
    * @param l the left operand
    * @param r the right operand
    */
-  public static Object subtract(Class c, Object l, Object r) {
+  public static Object subtract(Class<?> c, Object l, Object r) {
     return binaryArithmeticOperation(c, l, r, SubtractOperation.INSTANCE);
   }
   
@@ -173,7 +173,7 @@ public class InterpreterUtilities {
    * @param l the left operand
    * @param r the right operand
    */
-  public static Object multiply(Class c, Object l, Object r) {
+  public static Object multiply(Class<?> c, Object l, Object r) {
     return binaryArithmeticOperation(c, l, r, MultiplyOperation.INSTANCE);
   }
   
@@ -183,7 +183,7 @@ public class InterpreterUtilities {
    * @param l the left operand
    * @param r the right operand
    */
-  public static Object divide(Class c, Object l, Object r) {
+  public static Object divide(Class<?> c, Object l, Object r) {
     return binaryArithmeticOperation(c, l, r, DivideOperation.INSTANCE);
   }
   
@@ -193,7 +193,7 @@ public class InterpreterUtilities {
    * @param l the left operand
    * @param r the right operand
    */
-  public static Object remainder(Class c, Object l, Object r) {
+  public static Object remainder(Class<?> c, Object l, Object r) {
     return binaryArithmeticOperation(c, l, r, RemainderOperation.INSTANCE);
   }
   
@@ -204,7 +204,7 @@ public class InterpreterUtilities {
    * @param r the right operand
    * @param o the operation
    */
-  protected static Object binaryArithmeticOperation(Class c, Object l, Object r,
+  protected static Object binaryArithmeticOperation(Class<?> c, Object l, Object r,
                                                     BinaryArithmeticOperation o) {
     if (l instanceof Character) {
       l = new Integer(((Character)l).charValue());
@@ -451,7 +451,7 @@ public class InterpreterUtilities {
    * @param l the left operand
    * @param r the right operand
    */
-  public static Object bitAnd(Class c, Object l, Object r) {
+  public static Object bitAnd(Class<?> c, Object l, Object r) {
     return bitwiseOperation(c, l, r, BitAndOperation.INSTANCE);
   }
   
@@ -461,7 +461,7 @@ public class InterpreterUtilities {
    * @param l the left operand
    * @param r the right operand
    */
-  public static Object xOr(Class c, Object l, Object r) {
+  public static Object xOr(Class<?> c, Object l, Object r) {
     return bitwiseOperation(c, l, r, XOrOperation.INSTANCE);
   }
   
@@ -471,7 +471,7 @@ public class InterpreterUtilities {
    * @param l the left operand
    * @param r the right operand
    */
-  public static Object bitOr(Class c, Object l, Object r) {
+  public static Object bitOr(Class<?> c, Object l, Object r) {
     return bitwiseOperation(c, l, r, BitOrOperation.INSTANCE);
   }
   
@@ -482,7 +482,7 @@ public class InterpreterUtilities {
    * @param r the right operand
    * @param o the operation
    */
-  protected static Object bitwiseOperation(Class c, Object l, Object r,
+  protected static Object bitwiseOperation(Class<?> c, Object l, Object r,
                                            BitwiseOperation o) {
     if (c == boolean.class) {
       return new Boolean(o.invoke(((Boolean)l).booleanValue(),
@@ -569,7 +569,7 @@ public class InterpreterUtilities {
    * @param l the left operand
    * @param r the right operand
    */
-  public static Object shiftLeft(Class c, Object l, Object r) {
+  public static Object shiftLeft(Class<?> c, Object l, Object r) {
     return shiftOperation(c, l, r, ShiftLeftOperation.INSTANCE);
   }    
   
@@ -579,7 +579,7 @@ public class InterpreterUtilities {
    * @param l the left operand
    * @param r the right operand
    */
-  public static Object shiftRight(Class c, Object l, Object r) {
+  public static Object shiftRight(Class<?> c, Object l, Object r) {
     return shiftOperation(c, l, r, ShiftRightOperation.INSTANCE);
   }    
   
@@ -589,7 +589,7 @@ public class InterpreterUtilities {
    * @param l the left operand
    * @param r the right operand
    */
-  public static Object unsignedShiftRight(Class c, Object l, Object r) {
+  public static Object unsignedShiftRight(Class<?> c, Object l, Object r) {
     return shiftOperation(c, l, r, UnsignedShiftRightOperation.INSTANCE);
   }
   
@@ -600,7 +600,7 @@ public class InterpreterUtilities {
    * @param r the right operand
    * @param o the operation
    */
-  protected static Object shiftOperation(Class c, Object l, Object r,
+  protected static Object shiftOperation(Class<?> c, Object l, Object r,
                                          ShiftOperation o) {
     if (l instanceof Character) {
       l = new Integer(((Character)l).charValue());
@@ -672,7 +672,7 @@ public class InterpreterUtilities {
    * @param c the class of the result
    * @param o the operand
    */
-  public static Object plus(Class c, Object o) {
+  public static Object plus(Class<?> c, Object o) {
     return unaryOperation(c, o, PlusOperation.INSTANCE);
   }
   
@@ -681,7 +681,7 @@ public class InterpreterUtilities {
    * @param c the class of the result
    * @param o the operand
    */
-  public static Object minus(Class c, Object o) {
+  public static Object minus(Class<?> c, Object o) {
     return unaryOperation(c, o, MinusOperation.INSTANCE);
   }
   
@@ -691,7 +691,7 @@ public class InterpreterUtilities {
    * @param o the operand
    * @param u the operation
    */
-  public static Object unaryOperation(Class c, Object o, UnaryOperation u) {
+  public static Object unaryOperation(Class<?> c, Object o, UnaryOperation u) {
     if (o instanceof Character) {
       o = new Integer(((Character)o).charValue());
     }
@@ -759,8 +759,8 @@ public class InterpreterUtilities {
   /**
    * Returns the declaring class of the given class
    */
-  public static Class getDeclaringClass(Class c) {
-    Class result = c.getDeclaringClass();
+  public static Class<?> getDeclaringClass(Class<?> c) {
+    Class<?> result = c.getDeclaringClass();
     if (result == null) {
       try {
         Field f = c.getField("declaring$Class$Reference$0");
@@ -777,10 +777,10 @@ public class InterpreterUtilities {
    * @param cl   the inner class
    * @param name the name of the field
    */
-  public static Field getOuterField(Class cl, String name)
+  public static Field getOuterField(Class<?> cl, String name)
     throws NoSuchFieldException, AmbiguousFieldException {
     boolean sc = Modifier.isStatic(cl.getModifiers());
-    Class   c  = (cl != null) ? getDeclaringClass(cl) : null;
+    Class<?>   c  = (cl != null) ? getDeclaringClass(cl) : null;
     while (c != null) {
       try {
         Field f = ReflectionUtilities.getField(c, name);
@@ -801,10 +801,10 @@ public class InterpreterUtilities {
    * @param name the name of the method
    * @param ac   the arguments classes (possibly not the exact declaring classes)
    */
-  public static Method lookupOuterMethod(Class cl, String name, Class [] ac)
+  public static Method lookupOuterMethod(Class<?> cl, String name, Class<?> [] ac)
     throws NoSuchMethodException {
     boolean sc = Modifier.isStatic(cl.getModifiers());
-    Class   c  = (cl != null) ? getDeclaringClass(cl) : null;
+    Class<?>   c  = (cl != null) ? getDeclaringClass(cl) : null;
     while (c != null) {
       try {
         Method m = ReflectionUtilities.lookupMethod(c, name, ac);
@@ -819,8 +819,8 @@ public class InterpreterUtilities {
     throw new NoSuchMethodException(name);
   }
   
-  public static boolean isValidAssignment(Class lc, Object val) {
-    Class rc = (val == null) ? null : val.getClass();
+  public static boolean isValidAssignment(Class<?> lc, Object val) {
+    Class<?> rc = (val == null) ? null : val.getClass();
     if (lc != null) {
       if (lc.isPrimitive()) {
         if (lc == boolean.class && rc != Boolean.class) {

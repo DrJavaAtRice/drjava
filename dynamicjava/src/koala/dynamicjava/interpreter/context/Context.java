@@ -146,7 +146,7 @@ public interface Context extends SimpleContext {
      * @param methodName the method name
      * @param args the argument list for the method
      */
-    List<IdentifierToken> getQualifiedName(String methodName, Class[] args) throws NoSuchMethodException;
+    List<IdentifierToken> getQualifiedName(String methodName, Class<?>[] args) throws NoSuchMethodException;
     
     /**
      * Returns the fully qualified class name that wraps the given staticly imported field
@@ -226,7 +226,7 @@ public interface Context extends SimpleContext {
      * @param cname the class name
      * @exception ClassNotFoundException if the class cannot be found
      */
-    Class lookupClass(String cname) throws ClassNotFoundException;
+    Class<?> lookupClass(String cname) throws ClassNotFoundException;
 
     /**
      * Looks for a class (context-free lookup)
@@ -234,7 +234,7 @@ public interface Context extends SimpleContext {
      * @param ccname the fully qualified name of the context class
      * @exception ClassNotFoundException if the class cannot be found
      */
-    Class lookupClass(String cname, String ccname) throws ClassNotFoundException;
+    Class<?> lookupClass(String cname, String ccname) throws ClassNotFoundException;
 
     /**
      * Sets the properties of a SimpleAllocation node
@@ -242,7 +242,7 @@ public interface Context extends SimpleContext {
      * @param c the class of the constructor
      * @param args the classes of the arguments of the constructor
      */
-    Class setProperties(SimpleAllocation node, Class c, Class[] args);
+    Class<?> setProperties(SimpleAllocation node, Class<?> c, Class<?>[] args);
 
     /**
      * Sets the properties of a ClassAllocation node
@@ -251,7 +251,7 @@ public interface Context extends SimpleContext {
      * @param args the classes of the arguments of the constructor
      * @param memb the class members
      */
-    Class setProperties(ClassAllocation node, Class c, Class[] args, List<Node> memb);
+    Class<?> setProperties(ClassAllocation node, Class<?> c, Class<?>[] args, List<Node> memb);
 
     /**
      * Looks for a constructor
@@ -259,7 +259,7 @@ public interface Context extends SimpleContext {
      * @param params the parameter types
      * @exception NoSuchMethodException if the constructor cannot be found
      */
-    Constructor lookupConstructor(Class c, Class[] params)
+    Constructor lookupConstructor(Class<?> c, Class<?>[] params)
  throws NoSuchMethodException;
 
     /**
@@ -283,7 +283,7 @@ public interface Context extends SimpleContext {
      * @param params the parameter types
      * @exception NoSuchMethodException if the method cannot be found
      */
-    Method lookupMethod(Node prefix, String mname, Class[] params)
+    Method lookupMethod(Node prefix, String mname, Class<?>[] params)
  throws NoSuchMethodException;
 
    
@@ -293,7 +293,7 @@ public interface Context extends SimpleContext {
      * @param params the parameter types
      * @exception NoSuchFunctionException if the function cannot be found
      */
-    MethodDeclaration lookupFunction(String mname, Class[] params)
+    MethodDeclaration lookupFunction(String mname, Class<?>[] params)
  throws NoSuchFunctionException;
 
     /**
@@ -303,7 +303,7 @@ public interface Context extends SimpleContext {
      * @param params the parameter types
      * @exception NoSuchMethodException if the method cannot be found
      */
-    Method lookupSuperMethod(Node node, String mname, Class[] params)
+    Method lookupSuperMethod(Node node, String mname, Class<?>[] params)
  throws NoSuchMethodException;
 
     /**
@@ -313,7 +313,7 @@ public interface Context extends SimpleContext {
      * @exception NoSuchFieldException if the field cannot be found
      * @exception AmbiguousFieldException if the field is ambiguous
      */
-    Field getField(Class fc, String fn) throws NoSuchFieldException,
+    Field getField(Class<?> fc, String fn) throws NoSuchFieldException,
                                                AmbiguousFieldException;
 
     /**

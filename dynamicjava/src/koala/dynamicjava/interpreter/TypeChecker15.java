@@ -78,19 +78,19 @@ public class TypeChecker15 extends AbstractTypeChecker {
    * Visits a ForEachStatement
    * @param node the node to visit
    */
-  public Class visit(ForEachStatement node){
+  public Class<?> visit(ForEachStatement node){
     // Enter a new scope
     context.enterScope();
     context.define(node.getVars().get(0), null);
     context.define(node.getVars().get(1), null);
     
-    Class paramTypeClass;
-    Class collTypeClass;
+    Class<?> paramTypeClass;
+    Class<?> collTypeClass;
 
     FormalParameter param = node.getParameter();
     Expression coll = node.getCollection();
     Node body = node.getBody();
-    Class component;
+    Class<?> component;
     
     paramTypeClass = param.acceptVisitor(this);
     collTypeClass = coll.acceptVisitor(this);
@@ -169,7 +169,7 @@ public class TypeChecker15 extends AbstractTypeChecker {
    * @param refType the reference type to box the primitive type to
    * @return the <code>SimpleAllocation</code> that boxes the expression
    */
-  protected SimpleAllocation _box(Expression exp, Class refType) {
+  protected SimpleAllocation _box(Expression exp, Class<?> refType) {
     String refTypeName = refType.getName();
     PrimitiveType primType = _correspondingPrimType(refType);
     
@@ -213,9 +213,9 @@ public class TypeChecker15 extends AbstractTypeChecker {
    * @param type The type of the evaluated expression
    * @return The <code>ObjectMethodCall</code> that unboxes the expression
    */
-  protected ObjectMethodCall _unbox(Expression child, Class type) {
+  protected ObjectMethodCall _unbox(Expression child, Class<?> type) {
     String methodName = "";
-    Class unboxedType = type;
+    Class<?> unboxedType = type;
     if (type == Boolean.class) {
       methodName = "booleanValue";
       unboxedType = boolean.class;
@@ -257,7 +257,7 @@ public class TypeChecker15 extends AbstractTypeChecker {
     // unboxing
     Method method;
     try {
-      method = type.getMethod(methodName, new Class[] {});
+      method = type.getMethod(methodName, new Class<?>[] {});
     }
     catch (NoSuchMethodException nsme) {
       throw new RuntimeException("The method " + methodName + " not found.");

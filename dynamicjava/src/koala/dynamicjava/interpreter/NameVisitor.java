@@ -345,7 +345,7 @@ public class NameVisitor extends VisitorObject<Node> {
    */
   public Node visit(TryStatement node) {
     node.getTryBlock().acceptVisitor(this);
-    Iterator<Node> it = node.getCatchStatements().iterator();
+    Iterator<CatchStatement> it = node.getCatchStatements().iterator();
     while (it.hasNext()) {
       it.next().acceptVisitor(this);
     }

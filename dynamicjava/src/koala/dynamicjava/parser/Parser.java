@@ -15,7 +15,7 @@ import koala.dynamicjava.tree.tiger.generic.*;
 
 /**
  * This class represents a (interpreted) Java 1.1 language parser
- * adapted for 1.5 language extensions.
+ * adapted for 1.5 language extensions.  The lines 737, 2632, 2652, 2669 have been modified to declare generic types.  These changes need to be backed into the patch table.
  */
 
 public class Parser implements ParserConstants {
@@ -793,7 +793,7 @@ public class Parser implements ParserConstants {
    * @return a list of nodes (possibly empty)
    * @see koala.dynamicjava.tree.Node
    */
-  final public List topLevelStatement() throws ParseException {
+  final public List<Node> topLevelStatement() throws ParseException {
     Node root = null;
     List<Node> l = new LinkedList<Node>();
     try {
@@ -2643,7 +2643,7 @@ public class Parser implements ParserConstants {
    * Parses the body of an enum
    * @see koala.dynamicjava.tree.Node
    */
-  final public List enumBody(String enumTypeName) throws ParseException {
+  final public List<Node> enumBody(String enumTypeName) throws ParseException {
     List<Node>         body = new LinkedList<Node>();
     List<EnumConstant> consts = null;
     List<Node>         decl = null;
@@ -2677,7 +2677,7 @@ public class Parser implements ParserConstants {
     throw new Error("Missing return statement in function");
   }
 
-  final public List enumConstants() throws ParseException {
+  final public List<EnumConstant> enumConstants() throws ParseException {
     List<EnumConstant> list = new LinkedList<EnumConstant>();
     EnumConstant individual = null;
     individual = enumConstant();
@@ -2723,7 +2723,7 @@ public class Parser implements ParserConstants {
     throw new Error("Missing return statement in function");
   }
 
-  final public List enumBodyDeclarations() throws ParseException {
+  final public List<Node> enumBodyDeclarations() throws ParseException {
     List<Node> body = new LinkedList<Node>();
     List<Node> decl = null;
     jj_consume_token(SEMICOLON);
@@ -3911,7 +3911,7 @@ public class Parser implements ParserConstants {
     Token           t, u;
     Node            tryBlock;
     Node            catchBlock;
-    List<Node>      catches = new LinkedList<Node>();
+    List<CatchStatement> catches = new LinkedList<CatchStatement>();
     FormalParameter formal;
     Node            finallyBlock = null;
     int             el = 0, ec = 0;

@@ -50,7 +50,7 @@ public class ReflectionUtilities {
    * @return The constructor with which to instantiate the declaring class given 
    *   the given types of the arguments being given.
    */
-  public static Constructor lookupConstructor(Class cl, Class [] ac)
+  public static Constructor lookupConstructor(Class<?> cl, Class<?> [] ac)
     throws NoSuchMethodException {
     List<Constructor> all = getConstructors(cl, ac.length);
     List<Constructor> compatible = new LinkedList<Constructor>();
@@ -121,7 +121,7 @@ public class ReflectionUtilities {
    * @return a list that contains the found constructors, an empty list if no
    *         matching constructor was found.
    */
-  public static List<Constructor> getConstructors(Class cl, int params) {
+  public static List<Constructor> getConstructors(Class<?> cl, int params) {
     List<Constructor>  result = new LinkedList<Constructor>();
     Constructor[] ms = cl.getDeclaredConstructors();
     
@@ -140,7 +140,7 @@ public class ReflectionUtilities {
    * @param ac   the arguments classes (possibly not the exact declaring classes)
    * @retun the method that should be invoked with arguments of the given types
    */
-  public static Method lookupMethod(Class cl, String name, List<Class> ac)
+  public static Method lookupMethod(Class<?> cl, String name, List<Class> ac)
     throws NoSuchMethodException {
     return lookupMethod(cl, name, ac.toArray(new Class[0]));  
   }
@@ -152,7 +152,7 @@ public class ReflectionUtilities {
    * @param ac   the arguments classes (possibly not the exact declaring classes)
    * @return the method that should be invoked with arguments of the given types
    */
-  public static Method lookupMethod(Class cl, String name, Class[] ac)
+  public static Method lookupMethod(Class<?> cl, String name, Class<?>[] ac)
     throws NoSuchMethodException {
     List<Method> all = getMethods(cl, name, ac.length);
     List<Method> compatible = new LinkedList<Method>();
@@ -226,7 +226,7 @@ public class ReflectionUtilities {
    * @return a list that contains the found methods, an empty list if no
    *         matching method was found.
    */
-  public static List<Method> getMethods(Class cl, String name, int params) {
+  public static List<Method> getMethods(Class<?> cl, String name, int params) {
     List<Method>  result = new LinkedList<Method>();
     
     if (cl.isInterface()) {
@@ -237,7 +237,7 @@ public class ReflectionUtilities {
           result.add(ms[i]);
         }
       }
-      Class[] cs = cl.getInterfaces();
+      Class<?>[] cs = cl.getInterfaces();
       for (int i = 0; i < cs.length; i++) {
         result.addAll(getMethods(cs[i], name, params));
       }
@@ -246,7 +246,7 @@ public class ReflectionUtilities {
       }
     }
     else {
-      Class c = cl;
+      Class<?> c = cl;
       while (c != null) {
         Method[] ms = c.getDeclaredMethods();
         
@@ -268,10 +268,10 @@ public class ReflectionUtilities {
    * @param name the name of the method
    * @param ac   the arguments classes (possibly not the exact declaring classes)
    */
-  public static Method lookupOuterMethod(Class cl, String name, Class[] ac)
+  public static Method lookupOuterMethod(Class<?> cl, String name, Class<?>[] ac)
     throws NoSuchMethodException {
     boolean sc = Modifier.isStatic(cl.getModifiers());
-    Class c = (cl != null) ? cl.getDeclaringClass() : null;
+    Class<?> c = (cl != null) ? cl.getDeclaringClass() : null;
     while (c != null) {
       sc |= Modifier.isStatic(c.getModifiers());
       try {
@@ -292,14 +292,14 @@ public class ReflectionUtilities {
    * @param cl   the class where the field must look for the field
    * @param name the name of the field
    */
-  public static Field getField(Class cl, String name)
+  public static Field getField(Class<?> cl, String name)
     throws NoSuchFieldException, AmbiguousFieldException {
-    Class c = cl;
+    Class<?> c = cl;
     while (c != null) {
       try {
         return c.getDeclaredField(name);
       } catch(NoSuchFieldException e) {
-        Class[] ints = c.getInterfaces();
+        Class<?>[] ints = c.getInterfaces();
         Field f = null;
         for (int i = 0; i < ints.length; i++) {
           Field tmp = null;
@@ -329,10 +329,10 @@ public class ReflectionUtilities {
    * @param cl   the inner class
    * @param name the name of the field
    */
-  public static Field getOuterField(Class cl, String name)
+  public static Field getOuterField(Class<?> cl, String name)
     throws NoSuchFieldException, AmbiguousFieldException {
     boolean sc = Modifier.isStatic(cl.getModifiers());
-    Class   c  = (cl != null) ? cl.getDeclaringClass() : null;
+    Class<?>   c  = (cl != null) ? cl.getDeclaringClass() : null;
     while (c != null) {
       sc |= Modifier.isStatic(c.getModifiers());
       try {
@@ -361,8 +361,8 @@ public class ReflectionUtilities {
     Method ambiguous = null; // there is no ambiguous other method at first
     while (it.hasNext()) {
       Method curr = it.next();
-      Class[] a1 = best.getParameterTypes();
-      Class[] a2 = curr.getParameterTypes();
+      Class<?>[] a1 = best.getParameterTypes();
+      Class<?>[] a2 = curr.getParameterTypes();
       
       boolean better1 = false; // whether 'best' is better than 'curr'
       boolean better2 = false; // whether 'curr' is better than 'best'
@@ -382,8 +382,8 @@ public class ReflectionUtilities {
       if ( !(better1 ^ better2) ) { // neither is better than the other
         // Handle overridden methods
         if (Arrays.equals(a1, a2)) {
-          Class c1 = best.getDeclaringClass();
-          Class c2 = curr.getDeclaringClass();
+          Class<?> c1 = best.getDeclaringClass();
+          Class<?> c2 = curr.getDeclaringClass();
           boolean c1IsSuperOrSame = c1.isAssignableFrom(c2);
           boolean c2IsSuperOrSame = c2.isAssignableFrom(c1);
           if (c1IsSuperOrSame && !c2IsSuperOrSame) { // c2 is more specific
@@ -421,8 +421,8 @@ public class ReflectionUtilities {
     Constructor ambiguous = null; // there is no ambiguous other method at first
     while (it.hasNext()) {
       Constructor curr = it.next();
-      Class[] a1 = best.getParameterTypes();
-      Class[] a2 = curr.getParameterTypes();
+      Class<?>[] a1 = best.getParameterTypes();
+      Class<?>[] a2 = curr.getParameterTypes();
       
       boolean better1 = false; // whether 'best' is better than 'curr'
       boolean better2 = false; // whether 'curr' is better than 'best'
@@ -442,8 +442,8 @@ public class ReflectionUtilities {
       if ( !(better1 ^ better2) ) { // neither is better than the other
         // Handle overridden methods
         if (Arrays.equals(a1, a2)) {
-          Class c1 = best.getDeclaringClass();
-          Class c2 = curr.getDeclaringClass();
+          Class<?> c1 = best.getDeclaringClass();
+          Class<?> c2 = curr.getDeclaringClass();
           boolean c1IsSuperOrSame = c1.isAssignableFrom(c2);
           boolean c2IsSuperOrSame = c2.isAssignableFrom(c1);
           if (c1IsSuperOrSame && !c2IsSuperOrSame) { // c2 is more specific
@@ -484,8 +484,8 @@ public class ReflectionUtilities {
     Method ambiguous = null; // there is no ambiguous other method at first
     while (it.hasNext()) {
       Method curr = it.next();
-      Class[] a1 = best.getParameterTypes();
-      Class[] a2 = curr.getParameterTypes();
+      Class<?>[] a1 = best.getParameterTypes();
+      Class<?>[] a2 = curr.getParameterTypes();
       
       boolean better1 = false; // whether 'best' is better than 'curr'
       boolean better2 = false; // whether 'curr' is better than 'best'
@@ -505,8 +505,8 @@ public class ReflectionUtilities {
       if ( !(better1 ^ better2) ) { // neither is better than the other
         // Handle overridden methods
         if (Arrays.equals(a1, a2)) {
-          Class c1 = best.getDeclaringClass();
-          Class c2 = curr.getDeclaringClass();
+          Class<?> c1 = best.getDeclaringClass();
+          Class<?> c2 = curr.getDeclaringClass();
           boolean c1IsSuperOrSame = c1.isAssignableFrom(c2);
           boolean c2IsSuperOrSame = c2.isAssignableFrom(c1);
           if (c1IsSuperOrSame && !c2IsSuperOrSame) { // c2 is more specific
@@ -546,8 +546,8 @@ public class ReflectionUtilities {
     Constructor ambiguous = null; // there is no ambiguous other method at first
     while (it.hasNext()) {
       Constructor curr = it.next();
-      Class[] a1 = best.getParameterTypes();
-      Class[] a2 = curr.getParameterTypes();
+      Class<?>[] a1 = best.getParameterTypes();
+      Class<?>[] a2 = curr.getParameterTypes();
       
       boolean better1 = false; // whether 'best' is better than 'curr'
       boolean better2 = false; // whether 'curr' is better than 'best'
@@ -567,8 +567,8 @@ public class ReflectionUtilities {
       if ( !(better1 ^ better2) ) { // neither is better than the other
         // Handle overridden methods
         if (Arrays.equals(a1, a2)) {
-          Class c1 = best.getDeclaringClass();
-          Class c2 = curr.getDeclaringClass();
+          Class<?> c1 = best.getDeclaringClass();
+          Class<?> c2 = curr.getDeclaringClass();
           boolean c1IsSuperOrSame = c1.isAssignableFrom(c2);
           boolean c2IsSuperOrSame = c2.isAssignableFrom(c1);
           if (c1IsSuperOrSame && !c2IsSuperOrSame) { // c2 is more specific
@@ -602,7 +602,7 @@ public class ReflectionUtilities {
    *   legitimately called usining arguments of the types in <code>a2</code>
    *   without applying any of the new features introduced in java 2 v1.5.0
    */
-  public static boolean hasCompatibleSignatures(Class[] a1, Class[] a2) {
+  public static boolean hasCompatibleSignatures(Class<?>[] a1, Class<?>[] a2) {
     if (a1.length != a2.length) {
       return false;
     }
@@ -626,7 +626,7 @@ public class ReflectionUtilities {
    *   legitimately called usining arguments of the types in <code>a2</code> 
    *   using autoboxing but not using variabled arguments
    */
-  public static boolean hasAutoBoxingCompatibleSignatures(Class[] a1, Class[] a2, TigerUsage tu) {
+  public static boolean hasAutoBoxingCompatibleSignatures(Class<?>[] a1, Class<?>[] a2, TigerUsage tu) {
     if (a1.length != a2.length) {
       return false;
     }
@@ -652,7 +652,7 @@ public class ReflectionUtilities {
    *   legitimately called usining arguments of the types in <code>a2</code> using
    *   both autoboxing and variable arguments
    */
-  public static boolean hasVarArgsCompatibleSignatures(Class[] a1, Class[] a2, TigerUsage tu) {
+  public static boolean hasVarArgsCompatibleSignatures(Class<?>[] a1, Class<?>[] a2, TigerUsage tu) {
     if (a1.length == 0) {
       return a2.length == 0;
     }
@@ -668,14 +668,14 @@ public class ReflectionUtilities {
       }
     }
     int lastIdx1 = a1.length - 1;
-    Class lastElt1 = a1[lastIdx1];
+    Class<?> lastElt1 = a1[lastIdx1];
     if(lastElt1.isArray() && (a2.length == a1.length - 1)) {
       tu.varArgsAreUsed();
       return true; // No varargs given.
     }
     else if(lastElt1.isArray() && !a2[lastIdx1].isArray()){
       tu.varArgsAreUsed();
-      Class varArgsType = lastElt1.getComponentType(); // Get the element type of the array
+      Class<?> varArgsType = lastElt1.getComponentType(); // Get the element type of the array
       for( int i = lastIdx1; i < a2.length; i++ ){
         if(!isBoxCompatible(varArgsType, a2[i], tu)){
           return false;
@@ -700,7 +700,7 @@ public class ReflectionUtilities {
    * @return whether c2 can be passed to c1 in a method invokation without
    *   the features introduced in java 2 v1.5.0
    */
-  public static boolean isCompatible(Class c1, Class c2) {
+  public static boolean isCompatible(Class<?> c1, Class<?> c2) {
     if (c1.isPrimitive()) {
       if (c1 != c2) {
         if (c1 == int.class) {
@@ -752,7 +752,7 @@ public class ReflectionUtilities {
    * @return whether c2 can be passed to c1 in a method invokation using
    *   autoboxing
    */
-  public static boolean isBoxCompatible(Class c1, Class c2, TigerUsage tu) {
+  public static boolean isBoxCompatible(Class<?> c1, Class<?> c2, TigerUsage tu) {
     if (c1.isPrimitive()) {
       
       if (!c2.isPrimitive()) {
@@ -819,7 +819,7 @@ public class ReflectionUtilities {
    * @param ac The types of the expected parameters
    * @return the message that should be given to the NoSuchMethodException
    */
-  protected static String generateNotFoundMsg(String methodType, String mName, Class[] ac) {
+  protected static String generateNotFoundMsg(String methodType, String mName, Class<?>[] ac) {
     String msg = methodType + " " + mName + "(";
     if (ac.length > 0) {
       msg += ac[0].getName();

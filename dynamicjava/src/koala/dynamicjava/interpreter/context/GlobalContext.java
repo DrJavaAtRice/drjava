@@ -335,7 +335,7 @@ public class GlobalContext extends VariableContext implements Context {
    * @param methodName the method name
    * @param args the argument list for the method
    */
-  public List<IdentifierToken> getQualifiedName(String methodName, Class[] args) throws NoSuchMethodException{
+  public List<IdentifierToken> getQualifiedName(String methodName, Class<?>[] args) throws NoSuchMethodException{
     return importationManager.getQualifiedName(methodName, args);    
   }
   
@@ -427,7 +427,7 @@ public class GlobalContext extends VariableContext implements Context {
    * @param cname the class name
    * @exception ClassNotFoundException if the class cannot be found
    */
-  public Class lookupClass(String cname) throws ClassNotFoundException {
+  public Class<?> lookupClass(String cname) throws ClassNotFoundException {
     return importationManager.lookupClass(cname, null);
   }
 
@@ -437,7 +437,7 @@ public class GlobalContext extends VariableContext implements Context {
    * @param ccname the fully qualified name of the context class
    * @exception ClassNotFoundException if the class cannot be found
    */
-  public Class lookupClass(String cname, String ccname) throws ClassNotFoundException {
+  public Class<?> lookupClass(String cname, String ccname) throws ClassNotFoundException {
     return importationManager.lookupClass(cname, ccname);
   }
 
@@ -447,7 +447,7 @@ public class GlobalContext extends VariableContext implements Context {
    * @param c the class of the constructor
    * @param cargs the classes of the arguments of the constructor
    */
-  public Class setProperties(SimpleAllocation node, Class c, Class[] cargs) {
+  public Class<?> setProperties(SimpleAllocation node, Class<?> c, Class<?>[] cargs) {
     Constructor cons = null;
     try {
       cons = lookupConstructor(c, cargs);
@@ -472,7 +472,7 @@ public class GlobalContext extends VariableContext implements Context {
    * @param args the classes of the arguments of the constructor
    * @param memb the class members
    */
-  public Class setProperties(ClassAllocation node, Class c, Class[] args, List<Node> memb) {
+  public Class<?> setProperties(ClassAllocation node, Class<?> c, Class<?>[] args, List<Node> memb) {
     String cname = "TopLevel" + "$" + classCount++;
     FieldDeclaration fd;
     ConstructorDeclaration csd;
@@ -558,10 +558,10 @@ public class GlobalContext extends VariableContext implements Context {
     type.setProperty(TreeClassInfo.ANONYMOUS_DECLARING_CLASS,
                      new JavaClassInfo(Object.class));
 
-    Class cl = new TreeCompiler(interpreter).compileTree(this, type);
+    Class<?> cl = new TreeCompiler(interpreter).compileTree(this, type);
 
     // Update the argument types
-    Class[] tmp = new Class[args.length+1];
+    Class<?>[] tmp = new Class<?>[args.length+1];
     tmp[0] = Map.class;
     for (int i = 1; i < tmp.length; i++) {
       tmp[i] = args[i - 1];
@@ -592,7 +592,7 @@ public class GlobalContext extends VariableContext implements Context {
       String s = (String)it.next();
       List<Expression> pair = new LinkedList<Expression>();
       pair.add(new StringLiteral('\"' + s + '\"'));
-      Class c = (Class)m.get(s);
+      Class<?> c = (Class)m.get(s);
       pair.add(new TypeExpression(TreeUtilities.classToType(c)));
 
       cell = new ArrayInitializer(pair);
@@ -611,7 +611,7 @@ public class GlobalContext extends VariableContext implements Context {
    * @param params the parameter types
    * @exception NoSuchMethodException if the constructor cannot be found
    */
-  public Constructor lookupConstructor(Class c, Class[] params)
+  public Constructor lookupConstructor(Class<?> c, Class<?>[] params)
     throws NoSuchMethodException {
     Constructor cons = ReflectionUtilities.lookupConstructor(c, params);
     setAccessFlag(cons);
@@ -679,9 +679,9 @@ public class GlobalContext extends VariableContext implements Context {
    * @param params the parameter types
    * @exception NoSuchMethodException if the method cannot be found
    */
-  public Method lookupMethod(Node prefix, String mname, Class[] params)
+  public Method lookupMethod(Node prefix, String mname, Class<?>[] params)
     throws NoSuchMethodException {
-    Class  c = NodeProperties.getType(prefix);
+    Class<?>  c = NodeProperties.getType(prefix);
     Method m = ReflectionUtilities.lookupMethod(c, mname, params);
     setAccessFlag(m);
     if (m.getName().equals("clone")) {
@@ -696,7 +696,7 @@ public class GlobalContext extends VariableContext implements Context {
    * @param params the parameter types
    * @exception NoSuchFunctionException if the function cannot be found
    */
-  public MethodDeclaration lookupFunction(String mname, Class[] params)
+  public MethodDeclaration lookupFunction(String mname, Class<?>[] params)
     throws NoSuchFunctionException {
     Iterator<MethodDeclaration> it = functions.iterator();
     List<MethodDeclaration> f = new LinkedList<MethodDeclaration>();
@@ -717,7 +717,7 @@ public class GlobalContext extends VariableContext implements Context {
         continue;
       }
 
-      Class[] p = new Class[l.size()];
+      Class<?>[] p = new Class<?>[l.size()];
       Iterator<FormalParameter> it2 = l.iterator();
       int i = 0;
       while (it2.hasNext()) {
@@ -740,7 +740,7 @@ public class GlobalContext extends VariableContext implements Context {
    * @param params the parameter types
    * @exception NoSuchMethodException if the method cannot be find
    */
-  public Method lookupSuperMethod(Node node, String mname, Class[] params)
+  public Method lookupSuperMethod(Node node, String mname, Class<?>[] params)
     throws NoSuchMethodException {
     throw new ExecutionError("super.method", node);
   }
@@ -752,7 +752,7 @@ public class GlobalContext extends VariableContext implements Context {
    * @exception NoSuchFieldException if the field cannot be find
    * @exception AmbiguousFieldException if the field is ambiguous
    */
-  public Field getField(Class fc, String fn) throws NoSuchFieldException,
+  public Field getField(Class<?> fc, String fn) throws NoSuchFieldException,
     AmbiguousFieldException {
     Field f =  ReflectionUtilities.getField(fc, fn);
     setAccessFlag(f);
@@ -781,7 +781,7 @@ public class GlobalContext extends VariableContext implements Context {
      * @return the resulting <code>Class</code> object
      * @exception ClassNotFoundException if the class could not be find
      */
-    protected Class findClass(String name) throws ClassNotFoundException {
+    protected Class<?> findClass(String name) throws ClassNotFoundException {
       try {
         if (getAdditionalClassLoader() != null) {
           return Class.forName(name, true, getAdditionalClassLoader());
@@ -868,7 +868,7 @@ public class GlobalContext extends VariableContext implements Context {
    */
   protected void setAccessFlag(Member m) {
     int     mods    = m.getModifiers();
-    Class   c       = m.getDeclaringClass();
+    Class<?>   c       = m.getDeclaringClass();
     int     cmods   = c.getModifiers();
     String  pkg     = importationManager.getCurrentPackage();
     String  mp      = getPackageName(c);
@@ -897,7 +897,7 @@ public class GlobalContext extends VariableContext implements Context {
   /**
    * Gets the package name for the given class
    */
-  protected String getPackageName(Class c) {
+  protected String getPackageName(Class<?> c) {
     String s = c.getName();
     int    i = s.lastIndexOf('.');
     return (i == -1) ? "" : s.substring(0, i);

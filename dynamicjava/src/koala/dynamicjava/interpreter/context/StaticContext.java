@@ -50,7 +50,7 @@ public class StaticContext extends GlobalContext {
   /**
    * The declaring class of the method
    */
-  protected Class declaringClass;
+  protected Class<?> declaringClass;
 
   /**
    * The default qualifier
@@ -63,7 +63,7 @@ public class StaticContext extends GlobalContext {
    * @param c  the declaring class of the method
    * @param im the importation manager
    */
-  public StaticContext(Interpreter i, Class c, ImportationManager im) {
+  public StaticContext(Interpreter i, Class<?> c, ImportationManager im) {
     super(i);
     declaringClass     = c;
     importationManager = im;
@@ -76,7 +76,7 @@ public class StaticContext extends GlobalContext {
    * @param c  the declaring class of the method
    * @param fp the formal parameters
    */
-  public StaticContext(Interpreter i, Class c, Set<AbstractVariable> fp) {
+  public StaticContext(Interpreter i, Class<?> c, Set<AbstractVariable> fp) {
     super(i, fp);
     declaringClass   = c;
     defaultQualifier = new ReferenceType(c.getName());
@@ -98,7 +98,7 @@ public class StaticContext extends GlobalContext {
    * @exception NoSuchFieldException if the field cannot be found
    * @exception AmbiguousFieldException if the field is ambiguous
    */
-  public Field getField(Class fc, String fn) throws NoSuchFieldException,
+  public Field getField(Class<?> fc, String fn) throws NoSuchFieldException,
     AmbiguousFieldException {
     Field f;
     try {
@@ -127,7 +127,7 @@ public class StaticContext extends GlobalContext {
       } catch (Exception e) {
         try {
           Field f = InterpreterUtilities.getOuterField(declaringClass, fname);
-          Class c = f.getDeclaringClass();
+          Class<?> c = f.getDeclaringClass();
           return new StaticFieldAccess(new ReferenceType(c.getName()), fname);
         } catch (Exception ex) {
           throw new CatchedExceptionError(ex, node);
@@ -160,9 +160,9 @@ public class StaticContext extends GlobalContext {
    * @param params the parameter types
    * @exception NoSuchMethodException if the method cannot be found
    */
-  public Method lookupMethod(Node prefix, String mname, Class[] params)
+  public Method lookupMethod(Node prefix, String mname, Class<?>[] params)
     throws NoSuchMethodException {
-    Class  c = NodeProperties.getType(prefix);
+    Class<?>  c = NodeProperties.getType(prefix);
     Method m = null;
     try {
       m = ReflectionUtilities.lookupMethod(c, mname, params);
@@ -191,7 +191,7 @@ public class StaticContext extends GlobalContext {
    */
   public Field getSuperField(Node node, String fn) throws NoSuchFieldException,
     AmbiguousFieldException {
-    Class sc = declaringClass.getSuperclass();
+    Class<?> sc = declaringClass.getSuperclass();
     Field result = ReflectionUtilities.getField(sc, fn);
     setAccessFlag(result);
     return result;
@@ -202,11 +202,11 @@ public class StaticContext extends GlobalContext {
    * @param cname the class name
    * @exception ClassNotFoundException if the class cannot be found
    */
-  public Class lookupClass(String cname) throws ClassNotFoundException {
+  public Class<?> lookupClass(String cname) throws ClassNotFoundException {
     try {
       return importationManager.lookupClass(cname, declaringClass.getName());
     } catch (ClassNotFoundException e) {
-      Class dc = declaringClass.getDeclaringClass();
+      Class<?> dc = declaringClass.getDeclaringClass();
       if (dc != null) {
         try {
           return importationManager.lookupClass(cname, dc.getName());
@@ -248,7 +248,7 @@ public class StaticContext extends GlobalContext {
    * @param args the classes of the arguments of the constructor
    * @param memb the class members
    */
-  public Class setProperties(ClassAllocation node, Class c, Class[] args, List<Node> memb) {
+  public Class<?> setProperties(ClassAllocation node, Class<?> c, Class<?>[] args, List<Node> memb) {
     String dname = declaringClass.getName();
     String cname = dname + "$" + classCount++;
     FieldDeclaration fd;
@@ -335,10 +335,10 @@ public class StaticContext extends GlobalContext {
     type.setProperty(TreeClassInfo.ANONYMOUS_DECLARING_CLASS,
                      new JavaClassInfo(declaringClass));
 
-    Class cl = new TreeCompiler(interpreter).compileTree(this, type);
+    Class<?> cl = new TreeCompiler(interpreter).compileTree(this, type);
 
     // Update the argument types
-    Class[] tmp = new Class[args.length+1];
+    Class<?>[] tmp = new Class[args.length+1];
     tmp[0] = Map.class;
     for (int i = 1; i < tmp.length; i++) {
       tmp[i] = args[i - 1];
@@ -361,7 +361,7 @@ public class StaticContext extends GlobalContext {
    * @param params the parameter types
    * @exception NoSuchMethodException if the method cannot be found
    */
-  public Method lookupSuperMethod(Node node, String mname, Class[] params)
+  public Method lookupSuperMethod(Node node, String mname, Class<?>[] params)
     throws NoSuchMethodException {
     Method m = null;
     try {
@@ -403,7 +403,7 @@ public class StaticContext extends GlobalContext {
    */
   protected void setAccessFlag(Member m) {
     int     mods    = m.getModifiers();
-    Class   c       = m.getDeclaringClass();
+    Class<?>   c       = m.getDeclaringClass();
     int     cmods   = c.getModifiers();
     String  pkg     = importationManager.getCurrentPackage();
     String  mp      = getPackageName(c);
@@ -431,8 +431,8 @@ public class StaticContext extends GlobalContext {
   /**
    * Is c1 an inner class of c2?
    */
-  protected boolean isInnerClass(Class c1, Class c2) {
-    Class c = c1.getDeclaringClass();
+  protected boolean isInnerClass(Class<?> c1, Class<?> c2) {
+    Class<?> c = c1.getDeclaringClass();
     if (c == null) {
       try {
         Field f = c1.getField("declaring$Class$Reference$0");
