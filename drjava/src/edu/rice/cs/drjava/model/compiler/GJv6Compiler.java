@@ -44,9 +44,10 @@ public class GJv6Compiler implements CompilerInterface {
     Hashtable<String, String> options = Hashtable.make();
     // Turn on debug -- maybe this should be setable some day?
     options.put("-g", "");
-    _compiler = JavaCompiler.make(_compilerLog, options);
 
     // Build up classpath attribute
+    // Since GJ doesn't have a sourcepath attribute, we just
+    // put the sourcepath into the classpath instead
     String oldclasspath = System.getProperty("java.class.path");
     String newclasspath = sourceRoot.getAbsolutePath();
     if (oldclasspath.length() > 0) {
@@ -55,6 +56,8 @@ public class GJv6Compiler implements CompilerInterface {
     }
 
     options.put("-classpath", newclasspath);
+
+    _compiler = JavaCompiler.make(_compilerLog, options);
   }
 
   /**

@@ -7,6 +7,8 @@ import edu.rice.cs.drjava.util.classloader.LimitingClassLoader;
  * Test cases for {@link CompilerRegistry}.
  * Here we test that the compiler registry correctly finds
  * available compilers.
+ *
+ * @version $Id$
  */
 public class CompilerRegistryTest extends TestCase {
   private static final CompilerRegistry _registry = CompilerRegistry.ONLY;

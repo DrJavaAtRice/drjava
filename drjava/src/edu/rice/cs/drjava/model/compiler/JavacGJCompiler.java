@@ -1,5 +1,3 @@
-/* $Id$ */
-
 package edu.rice.cs.drjava.model.compiler;
 
 import java.io.File;
@@ -21,6 +19,8 @@ import com.sun.tools.javac.v8.util.Log;
  * An implementation of the CompilerInterface that supports compiling with
  * javac, provided that this is a javac that is based on GJ. This is the case
  * for javac in JDK 1.3+, as well as when using the JSR14 prototype compiler.
+ *
+ * @version $Id$
  */
 public class JavacGJCompiler implements CompilerInterface {
   /** Singleton instance. */
@@ -66,7 +66,7 @@ public class JavacGJCompiler implements CompilerInterface {
   public CompilerError[] compile(File sourceRoot, File[] files) {
     // We must re-initialize the compiler on each compile. Otherwise
     // it gets very confused.
-    _initCompiler();
+    _initCompiler(sourceRoot);
     List<String> filesToCompile = new List<String>();
 
     for (int i = 0; i < files.length; i++) {
@@ -110,7 +110,7 @@ public class JavacGJCompiler implements CompilerInterface {
   }
 
 
-  private void _initCompiler() {
+  private void _initCompiler(File sourceRoot) {
     _compilerLog = new OurLog();
 
     // To use the GJ compiler, we build up the GJ options hashtable.
@@ -126,6 +126,8 @@ public class JavacGJCompiler implements CompilerInterface {
 
     // Set output classfile version to 1.1
     options.put("-target", "1.1");
+
+    options.put("-sourcepath", sourceRoot.getAbsolutePath());
 
     _compiler = JavaCompiler.make(_compilerLog, options);
   }
