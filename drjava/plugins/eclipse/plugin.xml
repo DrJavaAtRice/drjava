@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin
+   id="edu.rice.cs.drjava.plugins.eclipse"
+   name="DrJava"
+   version="1.0.0"
+   provider-name="Rice University"
+   class="edu.rice.cs.drjava.plugins.eclipse.EclipsePlugin">
+
+   <runtime>
+      <library name="drjava-eclipse.jar"/>
+   </runtime>
+   <requires>
+      <import plugin="org.eclipse.core.resources"/>
+      <import plugin="org.eclipse.ui"/>
+      <import plugin="org.eclipse.debug.ui"/>
+      <import plugin="org.eclipse.jdt.ui"/>
+   </requires>
+
+
+   <extension
+         point="org.eclipse.ui.views">
+      <category
+            name="DrJava"
+            id="edu.rice.cs.drjava.plugins.eclipse">
+      </category>
+      <view
+            name="Interactions Pane"
+            icon="icons/sample.gif"
+            category="edu.rice.cs.drjava.plugins.eclipse"
+            class="edu.rice.cs.drjava.plugins.eclipse.views.InteractionsView"
+            id="edu.rice.cs.drjava.plugins.eclipse.views.InteractionsView">
+      </view>
+   </extension>
+   
+   
+   <extension
+         point="org.eclipse.ui.perspectives">
+      <perspective
+            name="DrJava"
+            icon="icons/sample.gif"
+            class="edu.rice.cs.drjava.plugins.eclipse.DrJavaPerspective"
+            id="edu.rice.cs.drjava.plugins.eclipse.drJavaPerspective">
+      </perspective>
+   </extension>
+   <extension
+         point="org.eclipse.ui.perspectiveExtensions">
+      <perspectiveExtension
+            targetID="org.eclipse.jdt.ui.JavaPerspective">
+         <perspectiveShortcut
+               id="edu.rice.cs.drjava.plugins.eclipse.drJavaPerspective">
+         </perspectiveShortcut>
+      </perspectiveExtension>
+      <perspectiveExtension
+            targetID="org.eclipse.debug.ui.DebugPerspective">
+         <perspectiveShortcut
+               id="edu.rice.cs.drjava.plugins.eclipse.drJavaPerspective">
+         </perspectiveShortcut>
+      </perspectiveExtension>
+   </extension>
+
+</plugin>
