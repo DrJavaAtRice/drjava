@@ -54,7 +54,6 @@ import com.sun.tools.javac.util.Context;
 import com.sun.tools.javac.util.Name;
 import com.sun.tools.javac.util.Options;
 import com.sun.tools.javac.util.Position;
-import com.sun.tools.javac.util.Hashtable;
 import com.sun.tools.javac.util.List;
 import com.sun.tools.javac.util.Log;
 
@@ -66,7 +65,10 @@ import edu.rice.cs.util.newjvm.ExecJVM;
 
 /**
  * An implementation of the CompilerInterface that supports compiling with
- * JSR14v20.
+ * JSR14v20 or JSR14v22. This class can only be compiled with one of the 
+ * versions because of the change in the syntax of a variable number of arguments
+ * to a method. It was (Object[] args ...), now it's (Object ... args). Right now
+ * we will use the JSR14v22 version since it is now the current version.
  *
  * @version $Id$
  */
@@ -260,7 +262,7 @@ public class JSR14v20Compiler implements CompilerInterface {
     cp += _extraClassPath;
     cp += File.pathSeparator + sourceRootString;
     
-    options.put("-classpath", cp);
+    options.put("-classpath", cp);    
     return context;
   }
   
@@ -269,9 +271,7 @@ public class JSR14v20Compiler implements CompilerInterface {
    */
   protected void _addSourceAndTargetOptions(Options options) {
     options.put("-source", "1.5");
-    options.put("-target", "1.5");
     options.put("-fork", "on");
-    //options.put("-novariance","");
   }
   
   /**
@@ -314,7 +314,7 @@ public class JSR14v20Compiler implements CompilerInterface {
      * JSR14 uses this crazy signature on warning method because it localizes
      * the warning message.
      */
-    public void warning(int pos, String key, Object[] args ...)
+    public void warning(int pos, String key, Object ... args)
     {
       super.warning(pos, key, args);
       //System.out.println("warning: pos = " + pos);
@@ -332,7 +332,7 @@ public class JSR14v20Compiler implements CompilerInterface {
      * JSR14 uses this crazy signature on error method because it localizes
      * the error message.
      */
-    public void error(int pos, String key, Object[] args ...)
+    public void error(int pos, String key, Object ... args)
     {
       super.error(pos, key, args);
       //System.out.println("error: pos = " + pos);
