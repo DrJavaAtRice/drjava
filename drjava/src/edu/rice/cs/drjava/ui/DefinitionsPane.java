@@ -774,7 +774,58 @@ public class DefinitionsPane extends JEditorPane
   
   public int getCurrentCol() {
     return _doc.getDocument().getCurrentCol();
-  }             
+  }
+  
+  public void centerViewOnOffset(int offset) {
+    //DrJava.consoleOut().println("beginning of centerViewOnOffset");
+    try {
+      FontMetrics metrics = getFontMetrics(getFont());
+      int length = _doc.getDocument().getLength();
+      double viewHeight = _mainFrame.getDefViewport().getHeight();
+      // Scroll to make sure this item is visible
+      // Centers the selection in the viewport
+      Rectangle startRect = this.modelToView(offset);
+      int startRectY = (int)startRect.getY();
+      startRect.setLocation(0, startRectY-(int)(viewHeight/2) - 1);
+      Point endPoint = new Point(0, startRectY+(int)(viewHeight/2 + 
+      metrics.getHeight()/2));
+      
+      
+      // trying to scroll this way, instead of using scrollRectToVisible
+      /*int caretPosAtBottom = this.viewToModel(endPoint);
+      if (caretPosAtBottom >= length)
+        caretPosAtBottom = length - 1;
+      this.setCaretPosition(caretPosAtBottom);
+      //this.paintImmediately(_mainFrame.getDefViewport().getViewRect());
+      this.setCaretPosition(offset);
+      System.out.println("bottom: " + caretPosAtBottom + " offset: " + offset + 
+                         " length: " + length + " metrics: " + metrics.getHeight() +
+                         " viewheight: " + viewHeight + " startRectY: "+startRectY +
+                         " endPoint: " + endPoint.getY());*/
+      
+      // Add the end rect onto the start rect to make a rectangle
+      // that encompasses the entire selection
+      startRect.add(endPoint);     
+      
+      //DrJava.consoleOut().println("right before scrollRectToVisible");
+      this.scrollRectToVisible(startRect);
+      //DrJava.consoleOut().println("right after scrollRectToVisible");
+      
+    }
+    catch (BadLocationException e) {
+      throw new UnexpectedException(e);
+    }
+    
+  }
+  
+  
+  public void centerViewOnLine(int lineNumber) {
+    //DrJava.consoleOut().println("beginning of centerViewOnLine");
+    FontMetrics metrics = getFontMetrics(getFont());
+    Point p = new Point(0, metrics.getHeight() * (lineNumber - 1));
+    int offset = this.viewToModel(p);
+    this.centerViewOnOffset(offset);   
+  }
 
   /**
    * Reset the document Undo list.

@@ -53,7 +53,7 @@ import com.sun.jdi.request.*;
  * The breakpoint object which has references to its OpenDefinitionsDocument and its 
  * BreakpointRequest
  */
-public class Breakpoint extends DebugAction<BreakpointRequest> { 
+public class Breakpoint extends DocumentDebugAction<BreakpointRequest> { 
   
   //private String _className;
   //private int _lineNumber;
@@ -69,7 +69,7 @@ public class Breakpoint extends DebugAction<BreakpointRequest> {
     super (manager, doc);
     _suspendPolicy = EventRequest.SUSPEND_EVENT_THREAD;
     _lineNumber = lineNumber;
-    _initializeRequest();
+    _initializeRequest(_manager.getReferenceType(_className, _lineNumber));
     //_doc = doc;
     //_createBreakpointRequest();
     DrJava.consoleOut().println("Breakpoint lineNumber is " + lineNumber);
@@ -142,8 +142,8 @@ public class Breakpoint extends DebugAction<BreakpointRequest> {
     if (_request != null) {
       return "Breakpoint[class: " + getClassName() + 
         ", lineNumber: " + getLineNumber() + 
-        ", method: " + _request.location().method() +
-        ", codeIndex: " + _request.location().codeIndex() + "]";
+        ", method: " + ((BreakpointRequest)_request).location().method() +
+        ", codeIndex: " + ((BreakpointRequest)_request).location().codeIndex() + "]";
     }
     else
       return "Breakpoint[class: " + getClassName() + 

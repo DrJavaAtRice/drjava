@@ -498,6 +498,15 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
    * change. 
    */ 
   private void _selectFoundItem(int from, int to) {
+    _defPane.select(from, to);
+    _defPane.centerViewOnOffset(from);
+      
+      // Found this little statement that will show the selected text
+      // in _defPane without giving _defPane focus, previously allowing the
+      // user to hit enter repeatedly and change the document while finding
+      // next
+    _defPane.getCaret().setSelectionVisible(true);
+    /*
     try {    
       JViewport v = _frame.getDefViewport();
       int viewHeight = (int)v.getSize().getHeight();
@@ -523,6 +532,7 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
       //_findField.requestFocus();
     } 
     catch (BadLocationException badBadLocation) {}
+    */
   }
   
   /*private void _close() {

@@ -70,7 +70,7 @@ public class PendingRequestManager {
    * Called if a breakpoint is set before its class is prepared
    * @param action The DebugAction that is pending
    */
-  public void addPendingRequest (DebugAction action) {
+  public void addPendingRequest (DocumentDebugAction action) {
     Vector<DebugAction> actions = null;
     String className = action.getClassName();
     actions = _pendingActions.get(className);
@@ -93,7 +93,7 @@ public class PendingRequestManager {
    * Called if a breakpoint is set and removed before its class is prepared
    * @param action The DebugAction that was set and removed
    */
-  public void removePendingRequest (DebugAction action) {
+  public void removePendingRequest (DocumentDebugAction action) {
     Vector<DebugAction> actions = null;
     String className = action.getClassName();
     actions = _pendingActions.get(className);

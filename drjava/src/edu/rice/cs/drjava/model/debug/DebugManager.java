@@ -51,6 +51,7 @@ import gj.util.Hashtable;
 import gj.util.Vector;
 
 // DrJava stuff
+import edu.rice.cs.util.StringOps;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.model.GlobalModel;
 import edu.rice.cs.drjava.model.GlobalModelListener;
@@ -68,6 +69,7 @@ import com.bluemarsh.util.StringTokenizer;
 import com.sun.jdi.*;
 import com.sun.jdi.connect.*;
 import com.sun.jdi.request.*;
+import com.sun.jdi.event.*;
 
 /**
  * Interface between DrJava and JPDA.
@@ -75,6 +77,9 @@ import com.sun.jdi.request.*;
  * @version $Id$
  */
 public class DebugManager {
+  public static final int STEP_INTO = StepRequest.STEP_INTO;
+  public static final int STEP_OVER = StepRequest.STEP_OVER;
+  public static final int STEP_OUT = StepRequest.STEP_OUT;
   /**
    * Whether the debugger has been initialized and is ready for use.
    */
@@ -116,6 +121,16 @@ public class DebugManager {
   private PendingRequestManager _pendingRequestManager;
   
   /**
+   * Provides a way for the DebugManager to communicate with the view
+   */
+  private DebugListener _listener;
+  
+  /**
+   * The Thread that the DebugManager is currently analyzing
+   */
+  private ThreadReference _thread;
+  
+  /**
    * Writer to use for output messages.
    */
   //private Writer _logwriter;
@@ -131,6 +146,7 @@ public class DebugManager {
     _model = model;
     _vm = null;
     _eventManager = null;
+    _thread = null;
     _breakpoints = new Hashtable<BreakpointRequest, Breakpoint>();
     //_logwriter = new PrintWriter(DrJava.consoleOut());
     _pendingRequestManager = new PendingRequestManager(this);
@@ -182,6 +198,9 @@ public class DebugManager {
       EventHandler eventHandler = new EventHandler(this, _vm);
       eventHandler.start();
       DrJava.consoleOut().println("EventHandler started...");
+      ThreadDeathRequest tdr = _eventManager.createThreadDeathRequest();
+      tdr.setSuspendPolicy(EventRequest.SUSPEND_EVENT_THREAD);
+      tdr.enable();
       
       //_vm.setDebugTraceMode(0);
       //String[] excludes = {"java.*", "javax.*", "sun.*", "com.sun.*", "koala.*"};
@@ -255,7 +274,7 @@ public class DebugManager {
     if (classes.size() > 0) {
       ref = (ReferenceType) classes.get(0);
       
-      if (lineNumber > -1) {
+      if (lineNumber > DebugAction.ANY_LINE) {
         List lines = new LinkedList();
         try {
           lines = ref.locationsOfLine(lineNumber);
@@ -399,21 +418,45 @@ public class DebugManager {
   }
     
   /** 
-   * Steps forward in the execution of the currently loaded document.
+   * Steps into the execution of the currently loaded document.
    * Stepping will walk into method calls.
-   *
-  public void step() {
-    performCommand( "step" );
-  }*/
+   */
+  public void step(int flag) throws DebugException {
+    //performCommand( "step" );
+    if (_thread == null) {
+      System.out.println("Current thread is null");
+      return;
+    }
+    Step step = new Step(this, StepRequest.STEP_LINE, flag);
+    _thread.resume();
+    System.out.println("_thread resumed");
+  }
   
   /** 
-   * Executes the next line of the currently loaded document.
+   * Steps over the next line of the currently loaded document.
    * Calling next will not walk into method calls.
    *
-  public void next() {
-    performCommand( "next" );
+  public void stepOver(OpenDefinitionsDocument doc) throws DebugException {
+    //performCommand( "next" );
+    if (_thread == null) {
+      System.out.println("Current thread is null");
+      return;
+    }
+    Step step = new Step(doc, this, StepRequest.STEP_MIN, StepRequest.STEP_OVER);
   }*/
-  
+    
+  /** 
+   * Steps out of the execution of the currently loaded document.
+   * Stepping will jump back to the parent frame.
+   *
+  public void stepOut(OpenDefinitionsDocument doc) throws DebugException {
+    //performCommand( "step" );
+    if (_thread == null) {
+      System.out.println("Current thread is null");
+      return;
+    }
+    Step step = new Step(doc, this, StepRequest.STEP_MIN, StepRequest.STEP_OUT);
+  }  */
   
 
 
@@ -470,7 +513,7 @@ public class DebugManager {
   }
   
   void addBreakpointToMap(Breakpoint breakpoint) {
-    _breakpoints.put(breakpoint.getRequest(), breakpoint);
+    _breakpoints.put((BreakpointRequest)breakpoint.getRequest(), breakpoint);
   }
 
  /**
@@ -485,7 +528,7 @@ public class DebugManager {
   public synchronized void removeBreakpoint(Breakpoint breakpoint) {
     System.out.println("unsetting: " + breakpoint);
     if (breakpoint.getRequest() != null) {
-      _breakpoints.remove(breakpoint.getRequest());
+      _breakpoints.remove((BreakpointRequest)breakpoint.getRequest());
       _eventManager.deleteEventRequest(breakpoint.getRequest());
     }
     else {
@@ -716,7 +759,6 @@ public class DebugManager {
     }*/
   //}
   
-  
   public void hitBreakpoint(BreakpointRequest request) {
     Breakpoint breakpoint = _breakpoints.get(request);
     System.out.println("Encountered a breakpoint at line "+ 
@@ -740,4 +782,78 @@ public class DebugManager {
     }
     return sortedBreakpoints;
   }
+  
+  /**
+   * Takes the location of event e, opens the document corresponding to its class
+   * and centers the definition pane's view on the appropriate line number
+   * @param e should be a LocatableEvent
+   */
+  void scrollToSource(LocatableEvent e) {
+    Location location = e.location();
+    ReferenceType rt = location.declaringType();
+    String className = rt.name();
+    String ps = System.getProperty("file.separator");
+    // replace periods with the System's file separator
+    className = StringOps.replace(className, ".", ps);
+    
+    // crop off the $ if there is one and anything after it
+    int indexOfDollar = className.indexOf('$');    
+    if (indexOfDollar > -1) {
+      className = className.substring(0, indexOfDollar);
+    }
+    
+    File[] roots = _model.getSourceRootSet();
+    File f = null;
+    boolean found = false;
+    for (int i = 0; i < roots.length; i++) {
+      String currRoot = roots[i].getAbsolutePath();
+      DrJava.consoleOut().println("Trying to find " + currRoot + ps + className + 
+                                  ".java");
+      f = new File(currRoot + ps + className + ".java");
+      if (f.exists()) {
+        found = true;
+        break;
+      }
+    }
+    if (found) {
+      DrJava.consoleOut().println("found file: " + f.getAbsolutePath() + 
+                                  ", will scroll to line: " + location.lineNumber());
+      _listener.scrollToLineInSource(f, 
+                                     location.lineNumber());
+    }
+    else {
+      DrJava.consoleOut().println("couldn't open file to scroll to");
+    }
+  }
+  
+  void setCurrentThread(ThreadReference thread) {
+    _thread = thread;
+  }
+  
+  ThreadReference getCurrentThread() {
+    return _thread;
+  }
+
+  /**
+   * Sets the listener to this DebugManager.
+   * @param listener a listener that reacts on events generated by the DebugManager
+   */
+  public void setListener(DebugListener listener) {
+    _listener = listener;
+  }
+
+  /**
+   * Lets the listeners know some event has taken place.
+   * @param EventNotifier n tells the listener what happened
+   */
+/*  protected void notifyListeners(EventNotifier n) {
+    synchronized(_listeners) {
+      ListIterator i = _listeners.listIterator();
+
+      while(i.hasNext()) {
+        DebugListener cur = (DebugListener) i.next();
+        n.notifyListener(cur);
+      }
+    }
+  }*/
 }

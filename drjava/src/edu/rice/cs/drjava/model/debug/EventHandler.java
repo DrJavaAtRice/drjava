@@ -48,12 +48,12 @@ import com.sun.jdi.request.*;
 
 public class EventHandler extends Thread {
   
-  private DebugManager _debugManager;
+  private DebugManager _manager;
   private VirtualMachine _vm;
   private boolean _connected = true;  // Connected to VM
   
-  EventHandler (DebugManager debugManager, VirtualMachine vm) {
-    _debugManager = debugManager;
+  EventHandler (DebugManager manager, VirtualMachine vm) {
+    _manager = manager;
     _vm = vm;
   }
   
@@ -91,8 +91,14 @@ public class EventHandler extends Thread {
     if (e instanceof BreakpointEvent) {
       _handleBreakpointEvent((BreakpointEvent) e);
     }
+    else if (e instanceof StepEvent) {
+      _handleStepEvent((StepEvent) e);
+    }
     else if (e instanceof ClassPrepareEvent) {
       _handleClassPrepareEvent((ClassPrepareEvent) e);
+    }
+    else if (e instanceof ThreadDeathEvent) {
+      _handleThreadDeathEvent((ThreadDeathEvent) e);
     }
     else if (e instanceof VMDeathEvent) {
       _handleVMDeathEvent((VMDeathEvent) e);
@@ -106,8 +112,16 @@ public class EventHandler extends Thread {
   
   private void _handleBreakpointEvent(BreakpointEvent e) {
     System.out.println("Breakpoint reached");
-    _debugManager.hitBreakpoint((BreakpointRequest)e.request());
+    _manager.setCurrentThread(e.thread());
+    _manager.scrollToSource(e);
+    _manager.hitBreakpoint((BreakpointRequest)e.request());
     //((LocatableEvent) e).thread().suspend();
+  }
+  
+  private void _handleStepEvent(StepEvent e) {
+    System.out.println("Step executed");
+    _manager.scrollToSource(e);
+    _manager.getEventRequestManager().deleteEventRequest(e.request());
   }
   
   private void _handleClassPrepareEvent(ClassPrepareEvent e) {
@@ -120,7 +134,7 @@ public class EventHandler extends Thread {
       DrJava.consoleOut().println("no info");
     }
     try {
-      _debugManager.getPendingRequestManager().classPrepared(e);
+      _manager.getPendingRequestManager().classPrepared(e);
     }
     catch(DebugException de) {
       System.err.println("Error preparing action: " + de);
@@ -131,6 +145,14 @@ public class EventHandler extends Thread {
     DrJava.consoleOut().println("resumed thread");
   }
   
+  private void _handleThreadDeathEvent(ThreadDeathEvent e) {
+    //System.out.println("**Thread " + e.thread() + " died**");
+    if (e.thread().equals(_manager.getCurrentThread())) {
+      _manager.setCurrentThread(null);
+    }
+    //e.thread().resume();
+  }
+  
   private void _handleVMDeathEvent(VMDeathEvent e) {
     System.out.println("VM died");    
   }
@@ -139,7 +161,7 @@ public class EventHandler extends Thread {
     System.out.println("VM disconnected");
     DrJava.consoleOut().println("event: "+e);
     _connected = false;
-    _debugManager.shutdown();
+    _manager.shutdown();
   }
   
   /**

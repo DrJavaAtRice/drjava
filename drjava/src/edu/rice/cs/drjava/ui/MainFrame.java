@@ -66,6 +66,7 @@ import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 import edu.rice.cs.drjava.model.debug.DebugManager;
 import edu.rice.cs.drjava.model.debug.DebugException;
+import edu.rice.cs.drjava.model.debug.DebugListener;
 import edu.rice.cs.drjava.ui.config.*;
 import edu.rice.cs.drjava.ui.CompilerErrorPanel.ErrorListPane;
 import edu.rice.cs.drjava.ui.JUnitPanel.JUnitErrorListPane;
@@ -140,8 +141,9 @@ public class MainFrame extends JFrame implements OptionConstants {
   private JCheckBoxMenuItem _debuggerEnabledMenuItem;
   private JMenuItem _runDebuggerMenuItem;
   private JMenuItem _resumeDebugMenuItem;
-  private JMenuItem _stepDebugMenuItem;
-  private JMenuItem _nextDebugMenuItem;
+  private JMenuItem _stepIntoDebugMenuItem;
+  private JMenuItem _stepOverDebugMenuItem;
+  private JMenuItem _stepOutDebugMenuItem;
   private JMenuItem _suspendDebugMenuItem;
   private JMenuItem _toggleBreakpointMenuItem;
   private JMenuItem _printBreakpointsMenuItem;
@@ -557,20 +559,29 @@ public class MainFrame extends JFrame implements OptionConstants {
   };
 
   /** Steps into the next method call */
-  private Action _stepDebugAction =
+  private Action _stepIntoDebugAction =
     new AbstractAction("Step Into")
   {
     public void actionPerformed(ActionEvent ae) {
-      _debugStep();
+      _debugStep(DebugManager.STEP_INTO);
     }
   };
 
   /** Runs the next line, without stepping into methods */
-  private Action _nextDebugAction =
-    new AbstractAction("Next Line")
+  private Action _stepOverDebugAction =
+    new AbstractAction("Step Over")
   {
     public void actionPerformed(ActionEvent ae) {
-      _debugNext();
+      _debugStep(DebugManager.STEP_OVER);
+    }
+  };
+
+  /** Steps out of the next method call */
+  private Action _stepOutDebugAction =
+    new AbstractAction("Step Out")
+  {
+    public void actionPerformed(ActionEvent ae) {
+      _debugStep(DebugManager.STEP_OUT);
     }
   };
 
@@ -743,6 +754,11 @@ public class MainFrame extends JFrame implements OptionConstants {
 
     // create our model
     _model = new SingleDisplayModel();
+    
+    if (CodeStatus.DEVELOPMENT) {
+      // add listener to debug manager
+      _model.getDebugManager().setListener(new UIDebugListener());
+    }
     
     // Working directory is default place to start
     File workDir = DrJava.CONFIG.getSetting(WORKING_DIRECTORY);
@@ -1233,20 +1249,43 @@ public class MainFrame extends JFrame implements OptionConstants {
   }
 
   /**
-   * Steps the debugger
+   * Steps in the debugger
    */
-  private void _debugStep() {
-    //_model.getDebugManager().step();
+  private void _debugStep(int flag) {
+    try {
+      _model.getDebugManager().step(flag);
+    }
+    catch (DebugException de) {
+      _showError(de, "Debugger Error",
+                 "Could not create a step request.");
+    }
   }
 
   /**
-   * Runs the next line through the debugger
-   */
-  private void _debugNext(){
-    //_model.getDebugManager().next();
-  }
+   * Steps next in the debugger
+   *
+  private void _debugStepOver(){
+    try {
+      _model.getDebugManager().stepOver(_model.getActiveDocument());
+    }
+    catch (DebugException de) {
+      _showError(de, "Debugger Error",
+                 "Could not create a step request.");
+    }
+  }*/
 
-  
+  /**
+   * Steps out in the debugger
+   *
+  private void _debugStepOut() {
+    try {
+      _model.getDebugManager().stepOut(_model.getActiveDocument());
+    }
+    catch (DebugException de) {
+      _showError(de, "Debugger Error",
+                 "Could not create a step request.");
+    }
+  }  */
 
   /**
    * Toggles a breakpoint on the current line
@@ -1418,7 +1457,8 @@ public class MainFrame extends JFrame implements OptionConstants {
         int lineNum = Integer.parseInt(lineStr);
         int pos = _model.getActiveDocument().gotoLine(lineNum);
         _currentDefPane.setCaretPosition(pos);
-
+        _currentDefPane.centerViewOnLine(lineNum);
+/*
         // Center the destination line on the screen
         // (this code taken from FindReplaceDialog's _selectFoundItem method)
         JScrollPane defScroll = (JScrollPane) 
@@ -1441,6 +1481,7 @@ public class MainFrame extends JFrame implements OptionConstants {
         //allow this.
         //_currentDefPane.setPositionAndScroll(pos);
         _currentDefPane.requestFocus();
+        */
       }
     } 
     catch (NumberFormatException nfe) {
@@ -1448,7 +1489,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       Toolkit.getDefaultToolkit().beep();
       // Do nothing.
     }
-    catch (BadLocationException ble) {}
+    //catch (BadLocationException ble) {}
   }
 
   /**
@@ -1837,8 +1878,9 @@ public class MainFrame extends JFrame implements OptionConstants {
     //_runDebuggerMenuItem = debugMenu.add(_runDebuggerAction);
     _suspendDebugMenuItem = debugMenu.add(_suspendDebugAction);
     _resumeDebugMenuItem = debugMenu.add(_resumeDebuggerAction);
-    //_stepDebugMenuItem = debugMenu.add(_stepDebugAction);
-    //_nextDebugMenuItem = debugMenu.add(_nextDebugAction);
+    _stepIntoDebugMenuItem = debugMenu.add(_stepIntoDebugAction);
+    _stepOverDebugMenuItem = debugMenu.add(_stepOverDebugAction);
+    _stepOutDebugMenuItem = debugMenu.add(_stepOutDebugAction);
 
     debugMenu.addSeparator(); // breakpoints section:
 
@@ -1861,8 +1903,9 @@ public class MainFrame extends JFrame implements OptionConstants {
     //_runDebuggerMenuItem.setEnabled(enabled);
     _suspendDebugMenuItem.setEnabled(enabled);
     _resumeDebugMenuItem.setEnabled(enabled);
-    //_stepDebugMenuItem.setEnabled(enabled);
-    //_nextDebugMenuItem.setEnabled(enabled);
+    _stepIntoDebugMenuItem.setEnabled(enabled);
+    _stepOverDebugMenuItem.setEnabled(enabled);
+    _stepOutDebugMenuItem.setEnabled(enabled);
     _toggleBreakpointMenuItem.setEnabled(enabled);
     _printBreakpointsMenuItem.setEnabled(enabled);
     //_clearAllBreakpointsMenuItem.setEnabled(enabled);
@@ -2402,6 +2445,19 @@ public class MainFrame extends JFrame implements OptionConstants {
       addKeyListener(new KeyAdapter() {});
       addMouseListener(new MouseAdapter() {});
       super.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+    }
+  }
+  
+  private class UIDebugListener implements DebugListener {
+    public void scrollToLineInSource(File file, int lineNumber) {
+      try {
+        OpenDefinitionsDocument doc = _model.getDocumentForFile(file);
+        _model.setActiveDocument(doc);
+      }
+      catch (IOException ioe) {
+        _showIOError(ioe);
+      }
+      _currentDefPane.centerViewOnLine(lineNumber);
     }
   }
 

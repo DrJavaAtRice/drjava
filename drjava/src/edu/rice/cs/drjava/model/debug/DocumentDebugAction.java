@@ -49,64 +49,70 @@ import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
 
 /**
- * Keeps track of information about any request to the debugger, such
- * as Breakpoints.
+ * Superclasses all DebugActions that are associated with specific 
+ * OpenDefinitionsDocuments. 
  * @version $Id$
  */
-public abstract class DebugAction<T extends EventRequest> {
-  public static final int ANY_LINE = -1;
+public abstract class DocumentDebugAction<T extends EventRequest> 
+  extends DebugAction {  
   
-  protected DebugManager _manager;
+  protected String _className;
+  protected File _file;
+  protected OpenDefinitionsDocument _doc;  
   
-  // Request fields
-  protected T _request = null;
-  protected int _suspendPolicy = EventRequest.SUSPEND_NONE;
-  protected boolean _enabled = true;
-  protected int _countFilter = -1;
-  protected int _lineNumber = ANY_LINE;
   
   /**
-   * Creates a new DebugAction.  Automatically tries to create the EventRequest
-   * if a ReferenceType can be found, or else adds this object to the
+   * Creates a new DocumentDebugAction.  Automatically tries to create the 
+   * EventRequest if a ReferenceType can be found, or else adds this object to the
    * PendingRequestManager. Any subclass should automatically call 
    * _initializeRequest in its constructor.
    * @param manager DebugManager in charge
    * @param doc Document this action corresponds to
    */
-  public DebugAction (DebugManager manager) 
+  public DocumentDebugAction (DebugManager manager, OpenDefinitionsDocument doc) 
     throws DebugException, IllegalStateException {
-    _manager = manager;
+    super(manager);
+    _className = _getQualifiedClassName(doc);
+    _file = doc.getFile();
+    _doc = doc;
+  }  
+  
+  /**
+   * Returns the class name this DebugAction occurs in.
+   */
+  public String getClassName() {
+    return _className;
   }
   
   /**
-   * Returns the EventRequest corresponding to this DebugAction, if it has
-   * been created, null otherwise.
+   * Returns the file this DebugAction occurs in.
    */
-  public T getRequest() {
-    return _request;
+  public File getFile() {
+    return _file;
   }
   
   /**
-   * Returns the line number this DebugAction occurs on
+   * Returns the document this DebugAction occurs in.
    */
-  public int getLineNumber() {
-    return _lineNumber;
+  public OpenDefinitionsDocument getDocument() {
+    return _doc;
   }
   
   /**
    * Creates an EventRequest corresponding to this DebugAction, using the
    * given ReferenceType.  This is called either from the DebugAction
    * constructor or the PendingRequestManager, depending on when the
-   * ReferenceType becomes available. This DebugAction must be an
-   * instance of DocumentDebugAction since a ReferenceType is being
-   * used.
+   * ReferenceType becomes available.
    * @return true if the EventRequest is successfully created
    */
-  public abstract boolean createRequest(ReferenceType rt) throws DebugException;
-  
-  public boolean createRequest() throws DebugException
-  {    
-    _createRequest();
+  public boolean createRequest(ReferenceType rt) throws DebugException {
+    if (!rt.isPrepared()) {
+      // Can't create a request if class not prepared
+      DrJava.consoleOut().println("createRequest: not prepared!");
+      return false;
+    }
+    
+    _createRequest(rt);
     if (_request != null) {
       _prepareRequest(_request);
       DrJava.consoleOut().println("Request successfully created: " + _request);
@@ -123,22 +129,17 @@ public abstract class DebugAction<T extends EventRequest> {
    * to create the request, but if unable, will add the request to the
    * pendingRequestManager
    */
-  protected void _initializeRequest() throws DebugException {
-    createRequest();  
+  protected void _initializeRequest(ReferenceType ref) throws DebugException {
+    if (ref != null) {
+      DrJava.consoleOut().println("Found a ref, creating request right away.");
+      createRequest(ref);
+    }
     if (_request == null) {
       // couldn't create the request yet, add to the pending request manager
-      throw new DebugException("No ref, and can't add to pendingrequestmanage!");
-      //_manager.getPendingRequestManager().addPendingRequest(this);
+      DrJava.consoleOut().println("No ref, add to pending request manager");
+      _manager.getPendingRequestManager().addPendingRequest(this);
     }
   }
-  
-  /**
-   * Overridden in Breakpoint to pass a line number so that getReferenceType
-   * in DebugManager knows to check its inner classes for the line number
-   */
-  /*protected ReferenceType _getReferenceType() {
-    return _manager.getReferenceType(_className);
-  }*/
   
   /**
    * Creates an appropriate EventRequest from the EventRequestManager and 
@@ -146,23 +147,26 @@ public abstract class DebugAction<T extends EventRequest> {
    * @param rt ReferenceType used to try to create the request
    * @throws DebugException if the request could not be created.
    */
-  protected void _createRequest() throws DebugException
-  {}
+  protected abstract void _createRequest(ReferenceType ref) throws DebugException;
   
   /**
-   * Prepares an EventRequest with the current stored values.
-   * @param request the EventRequest to prepare
+   * Gets the package and class name of the given OpenDefinitionsDocument
+   * @param doc OpenDefinitionsDocument whose qualified class name is desired
+   * @return the qualified class name
    */
-  protected void _prepareRequest(EventRequest request) {
-    // the request must be disabled to be edited
-    request.setEnabled(false);
-    
-    if (_countFilter != -1) {
-      request.addCountFilter(_countFilter);
+  protected String _getQualifiedClassName(OpenDefinitionsDocument doc) {
+    String packageName = "";
+    String className = "";
+    try {
+      packageName = doc.getDocument().getPackageName();
     }
-    request.setSuspendPolicy(_suspendPolicy);
-    request.setEnabled(_enabled);
-    //System.out.println("request.isEnabled(): " + request.isEnabled() +
-    //                   "suspendPolicy: " + request.suspendPolicy());
+    catch (InvalidPackageException e) {
+      // Couldn't find package, pretend there's none
+    }
+    if ((packageName != null) && (!packageName.equals(""))) {
+      className = packageName + ".";
+    }
+    className += doc.getClassName();
+    return className;
   }
 }

@@ -1608,6 +1608,7 @@ public class DefinitionsDocument extends PlainDocument implements OptionConstant
       throw new UnexpectedException(ble);
     }
     finally {
+      setCurrentLocation(0);
       setCurrentLocation(oldLocation);
     }
   }
