@@ -113,6 +113,14 @@ public class NameVisitor extends VisitorObject<Node> {
   }
   
   /**
+   * Visits a ForEachStatement
+   * @param node the node to visit
+   */
+  public Node visit(ForEachStatement node){
+    return null;
+  }
+
+  /**
    * Visits a ForStatement
    * @param node the node to visit
    */

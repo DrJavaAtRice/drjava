@@ -81,6 +81,14 @@ public class VisitorObject<T> implements Visitor<T> {
   }
   
   /**
+   * Visits a ForEachStatement
+   * @param node the node to visit
+   */
+  public T visit(ForEachStatement node) {
+    return null;
+  }
+
+  /**
    * Visits a DoStatement
    * @param node the node to visit
    */

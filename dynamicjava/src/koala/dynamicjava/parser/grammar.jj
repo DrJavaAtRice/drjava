@@ -1551,7 +1551,7 @@ PARSER_END(Parser)
     ( LOOKAHEAD(2)
        node=initializer()
        |
-     LOOKAHEAD( classDeclarationLookahead() )
+     LOOKAHEAD( classDeclarationLookahead())
        node=classDeclaration()
        |
      LOOKAHEAD( interfaceDeclarationLookahead() )
@@ -2292,30 +2292,51 @@ PARSER_END(Parser)
   }
   
   /**
-   * Parses a for statement
+   * Parses a for statement (with standard or foreach syntax)
    * @see koala.dynamicjava.tree.ForStatement
+   * Modified by Adam Wulf and David Peters
+   * March 2004: Dr. Java team.
+   * @see koala.dynamicjava.tree.ForSlashEachStatement
+   * @see koala.dynamicjava.tree.ForEachStatement
    */
-  ForStatement forStatement() :
-  {
+ForSlashEachStatement forStatement() :
+{
     Token      t;
-    List/*<Node>*/       init   = null;
+    FormalParameter forEachInit = null;
+    List       init   = null;
     Expression exp    = null;
-    List/*<Node>*/       update = null;
+    List       update = null;
     Node       stmt;
-  }
-  {
-    t="for" "(" [ init=forInit() ] ";"
-      [ exp=expression() ] ";"
-      [ update=statementExpressionList() ] ")"
-      stmt=statement()
+    Token      colon  = null;
+}
+{
+    t="for" "("  
+               (
+                LOOKAHEAD(formalParameterLookahead() ":")
+                  forEachInit=formalParameter() colon=":" exp=expression()
+                  |
+                [ init=forInit()] ";"
+                [ exp=expression() ] ";"
+                [ update=statementExpressionList() ]
+         )
+      ")" stmt=statement()
+     
     {
-      return new ForStatement(init, exp, update, stmt,
-                              filename,
-                              t.beginLine, t.beginColumn,
-                              stmt.getEndLine(), stmt.getEndColumn());
-    }
-  }
-  
+        if(colon != null){
+          return new ForEachStatement(forEachInit, exp, stmt,
+                                  filename,
+                                  t.beginLine, t.beginColumn,
+                                  stmt.getEndLine(), stmt.getEndColumn());
+        }else{
+          return new ForStatement(init, exp, update, stmt,
+                                  filename,
+                                  t.beginLine, t.beginColumn,
+                                  stmt.getEndLine(), stmt.getEndColumn());
+          
+        }
+      }
+}
+
   /**
    * Used internally to parse a 'for' statement
    */
@@ -4358,9 +4379,32 @@ PARSER_END(Parser)
   void forStatementLookahead() :
   {}
   {
-    "for" "(" [ forInitLookahead() ] ";"
-      [ expressionLookahead() ] ";"
-      [ statementExpressionListLookahead() ] ")"
+    LOOKAHEAD(forStatementLookaheadForFor())
+      forStatementLookaheadForFor()
+      |
+      LOOKAHEAD(forStatementLookaheadForForeach())
+      forStatementLookaheadForForeach()
+      
+  }
+  
+  /**
+   * added by Dr. Java team for the for statement lookahead
+   */
+  void forStatementLookaheadForFor():
+  {}
+  {
+    "for" "(" 
+      [ forInitLookahead() ] ";"
+         [ expressionLookahead() ] ";"
+         [ statementExpressionListLookahead() ] ")"
+         statementLookahead()
+  }
+  
+  void forStatementLookaheadForForeach():
+  {}
+  {
+    "for" "("
+      formalParameterLookahead() ":" expressionLookahead() ")"
       statementLookahead()
   }
   

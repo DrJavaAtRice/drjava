@@ -86,6 +86,15 @@ public class EvaluationVisitor extends VisitorObject<Object> {
   }
 
   /**
+   * Visits a ForEachStatement
+   * @param node the node to visit
+   */
+  public Object visit(ForEachStatement node){
+    /* to be filled in shortly */
+    return null;
+  }
+  
+  /**
    * Visits a ForStatement
    * @param node the node to visit
    */

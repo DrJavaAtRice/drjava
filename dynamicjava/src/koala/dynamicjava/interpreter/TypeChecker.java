@@ -114,6 +114,15 @@ public class TypeChecker extends VisitorObject<Class> {
   }
 
   /**
+   * Visits a ForEachStatement
+   * @param node the node to visit
+   */
+  public Class visit(ForEachStatement node){
+    /* to be filled in shortly */
+    return null;
+  }
+
+  /**
    * Visits a ForStatement
    * @param node the node to visit
    */

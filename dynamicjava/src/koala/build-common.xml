@@ -12,7 +12,7 @@
   Assumes these targets exist:
     stable
     development
-
+ 
 -->
 <!-- <taskdef name="javamake" classname="com.sun.tools.javamake.ant.JavaMake"/>  -->
 
@@ -53,8 +53,8 @@
          includes="edu/rice/cs/util/ant/TstampGMT.java"
          destdir="${built}"
          bootclasspath="${jsr14_classpath}:${jsr14_collect_classpath}:${sun.boot.class.path}"
-         source="1.5"
-         target="jsr14"
+source="1.5"         
+target="jsr14"
          fork="on"
          debug="on"
          optimize="off">
@@ -93,7 +93,7 @@
   <filter token="DATE" value="${DSTAMP}" />
   <filter token="TIME" value="${TSTAMP}" />
   <copy file="Version.orig"
-        tofile="Version.java"
+        tofile="Version.java" 
         overwrite="yes"
         filtering="yes" />
 </target>
@@ -116,7 +116,7 @@
   <echo message="All tests passed. Rebuilding to put version tag (${version-tag}) into the code." />
   <antcall target="compile" />
 
-  <tempfile property="commit-comments-filename"
+  <tempfile property="commit-comments-filename" 
             destdir="${java.io.tmpdir}"
             prefix="commit-comments" />
   <antcall target="create-commit-comments">
@@ -144,9 +144,9 @@
      comments can either be typed manually on one line, or copied from an
      existing file; the user is given a choice of which method to use.
 
-     This target uses "file-commit-comments" and "type-commit-comments" to
+     This target uses "file-commit-comments" and "type-commit-comments" to 
      finish the task.
-
+     
      (See the do-commit target above for how to use this file in a cvs commit.)
 -->
 <target name="create-commit-comments">
@@ -182,10 +182,10 @@
   <!-- Read in commit comment, then save to a temp file -->
   <input message="Please enter the comments for the commit:"
          addproperty="commit-comments-contents" />
-  <echo file="${commit-comments-filename}"
+  <echo file="${commit-comments-filename}" 
         message="${commit-comments-contents}" />
 </target>
-
+ 
 
 <!-- By default, commit uses the development version -->
 <target name="commit" depends="development">
@@ -209,7 +209,6 @@
 
      This version works with JDK 1.3 and JSR-14 v1.0.
      (Necessary for releases.)
-
 <target name="do-compile" depends="init">
   <mkdir dir="${built}"/>
   <javac srcdir="${srcroot}"
@@ -224,7 +223,7 @@
   </javac>
 </target>
 -->
-
+       
 
 <!-- Compile. We have to start at srcroot and then selectively include
      just this project in order for it to realize what files have already
@@ -238,7 +237,7 @@
   <javac srcdir="${srcroot}"
          includes="${projpath}/**/*java"
          destdir="${built}"
-         bootclasspath="${jsr14_classpath}:${jsr14_collect_classpath}:${sun.boot.class.path}"
+         bootclasspath="${jsr14_classpath}:${jsr14_collect_classpath}:${sun.boot.class.path}" 
   classpath="${classpath_text}"
          source="1.5"
          target="1.5"
@@ -261,7 +260,7 @@
   <javac srcdir="${srcroot}"
          includes="${projpath}/**/*java"
          destdir="${built}"
-         bootclasspath="${jsr14_classpath}:${jsr14_collect_classpath}:${sun.boot.class.path}"
+         bootclasspath="${jsr14_classpath}:${jsr14_collect_classpath}:${sun.boot.class.path}" 
   classpath="${classpath_text}"
          source="1.5"
          target="1.5"
@@ -279,15 +278,14 @@
      just this project in order for it to realize what files have already
      been compiled (preventing needless recompilation).
 
-     This version works with JDK 1.4.1 and JSR-14 v2.2, v2.3.
+     This version works with JDK 1.4.1 and JSR-14 v2.2.
      (Be sure to have the right version of tools.jar on your classpath.)
-
 <target name="do-compile" depends="init">
   <mkdir dir="${built}"/>
   <javac srcdir="${srcroot}"
          includes="${projpath}/**/*java"
          destdir="${built}"
-         bootclasspath="${jsr14_collect_classpath}:${sun.boot.class.path}"
+         bootclasspath="${jsr14_collect_classpath}:${sun.boot.class.path}" 
   classpath="${classpath_text}"
          source="1.5"
          debug="on"
@@ -297,13 +295,12 @@
   </javac>
 </target>
 -->
-
 
 <!-- Compile. We have to start at srcroot and then selectively include
      just this project in order for it to realize what files have already
      been compiled (preventing needless recompilation).
 
-     This version works with JDK 1.4.2 and JSR-14 v2.3 and JSR-14 v2.4., v2.5
+     This version works with JDK 1.4.2 and JSR-14 v2.3 and JSR-14 v2.4.
      (Be sure to have the right version of tools.jar on your classpath.)
 -->
 <target name="do-compile" depends="init">
@@ -311,67 +308,37 @@
   <javac srcdir="${srcroot}"
          includes="${projpath}/**/*java"
          destdir="${built}"
-         bootclasspath="${jsr14_classpath}:${jsr14_collect_classpath}:${sun.boot.class.path}"
-  classpath="${classpath_text}"
-         source="1.5"
-         target="jsr14"
-         debug="on"
-         fork="on"
-         optimize="off">
-    <compilerarg value="-J-Xbootclasspath/p:${jsr14_classpath}"/>
-<!--    <compilerarg value="-Xlint:deprecation,dep-ann,unchecked"/>-->
-  </javac>
-</target>
-
-
-
-<!-- Checked Compile. Identical to Compile with Generic Warning Checking
-     enabled.
-
-     This version works with JDK 1.4.2 and JSR-14 v2.2, v2.3
-
-<target name="checked-compile" depends="init">
-  <mkdir dir="${built}"/>
-  <javac srcdir="${srcroot}"
-         includes="${projpath}/**/*java"
-         destdir="${built}"
-         bootclasspath="${jsr14_collect_classpath}:${sun.boot.class.path}"
-  classpath="${classpath_text}"
-         source="1.5"
-         debug="on"
-         fork="on"
-         optimize="off">
-    <compilerarg value="-warnunchecked"/>
-    <compilerarg value="-J-Xbootclasspath/p:${jsr14_classpath}"/>
-  </javac>
-</target>
--->
-
-
-<!-- Checked Compile. Identical to Compile with Generic Warning Checking
-     enabled.
-
-     This version works with JDK 1.4.2 and JSR-14 v2.4
--->
-<target name="checked-compile" depends="init">
-  <mkdir dir="${built}"/>
-  <javac srcdir="${srcroot}"
-         includes="${projpath}/**/*java"
-         destdir="${built}"
-         bootclasspath="${jsr14_classpath}:${jsr14_collect_classpath}:${sun.boot.class.path}"
+         bootclasspath="${jsr14_classpath}:${jsr14_collect_classpath}:${sun.boot.class.path}" 
   classpath="${classpath_text}"
          source="1.5"
        target="jsr14"
          debug="on"
          fork="on"
          optimize="off">
-    <compilerarg value="-warnunchecked"/>
     <compilerarg value="-J-Xbootclasspath/p:${jsr14_classpath}"/>
-    <compilerarg value="-Xlint"/>
   </javac>
 </target>
 
+<!-- Checked Compile. Identical to Compile with Generic Warning Checking
+     enabled.
 
+     This version works with JDK 1.4.2 and JSR-14 v2.2.
+-->
+<target name="checked-compile" depends="init">
+  <mkdir dir="${built}"/>
+  <javac srcdir="${srcroot}"
+         includes="${projpath}/**/*java"
+         destdir="${built}"
+         bootclasspath="${jsr14_collect_classpath}:${sun.boot.class.path}" 
+  classpath="${classpath_text}"
+         source="1.5"
+         debug="on"
+         fork="on"
+         optimize="off">
+    <compilerarg value="-warnunchecked"/>
+    <compilerarg value="-J-Xbootclasspath/p:${jsr14_classpath}"/>
+  </javac>
+</target>
 
 
 <!-- Now you can run a subset of tests by doing:
@@ -421,14 +388,14 @@
 <!-- Generate javadoc, removing generics references first.
      The property javadoc_dir must be set when calling this.
      The property javadoc_title must be set when calling this.
-
+       
      If using JSR14v2_4 and Ant 1.6, we can create javadoc containing
-     the generics information.  To do this, comment out the apply task
-     that runs java since we don't want to strip out generics from the
-     source, and then uncomment the lines in the blocks to copy the source
-     code (since we usually do it in the call to java) and, finally
-     uncomment the lines in the call to javadoc which set up the
-     bootclasspath, source, and JVM args.  You'll have to fudge
+     the generics information.  To do this, comment out the apply task 
+     that runs java since we don't want to strip out generics from the 
+     source, and then uncomment the lines in the blocks to copy the source 
+     code (since we usually do it in the call to java) and, finally 
+     uncomment the lines in the call to javadoc which set up the 
+     bootclasspath, source, and JVM args.  You'll have to fudge 
      around a little bit to get the ant syntax correct.
 -->
 <target name="generate_javadoc" if="javadoc_dir" depends="init">
@@ -456,7 +423,7 @@
 
     <arg value="-d" />
     <arg value="${javadoc_dir}/src" />
-
+    
     <fileset dir="${srcroot}">
       <!-- get all projects within this sourceroot -->
       <exclude name="src-*/**/*.java" />
@@ -517,10 +484,10 @@
   <target name="fix-collect-v1_0">
     <delete file="${jsr14_collect_classpath}.fixed" />
     <zip destfile="${jsr14_collect_classpath}.fixed">
-      <zipfileset src="${jsr14_collect_classpath}"
+      <zipfileset src="${jsr14_collect_classpath}" 
                   excludes="java/lang/String.class,java/util/Arrays.class" />
     </zip>
-    <move file="${jsr14_collect_classpath}.fixed"
+    <move file="${jsr14_collect_classpath}.fixed" 
           toFile="${jsr14_collect_classpath}"
           overwrite="true" />
   </target>
@@ -549,7 +516,7 @@
 
   <target name="clover-report" depends="with.clover">
     <clover-report>
-      <current outfile="${clover_dir}/${ant.project.name}"
+      <current outfile="${clover_dir}/${ant.project.name}" 
                title="DrJava">
         <format type="html"/>
       </current>

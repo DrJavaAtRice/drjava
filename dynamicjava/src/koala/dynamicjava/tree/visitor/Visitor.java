@@ -69,6 +69,15 @@ public interface Visitor<T> {
   T visit(ForStatement node);
   
   /**
+   * Visits a ForEachStatement
+   * @param node the node to visit
+   * added by Dr Java team
+   * Adam Wulf and David Peters
+   * March 2004
+   */
+  T visit(ForEachStatement node);
+  
+  /**
    * Visits a DoStatement
    * @param node the node to visit
    */
