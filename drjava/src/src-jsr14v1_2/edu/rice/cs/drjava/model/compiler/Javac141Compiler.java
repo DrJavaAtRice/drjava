@@ -215,7 +215,7 @@ public class Javac141Compiler implements CompilerInterface {
   }
 
   public String getName() {
-    return "javac 1.4.1+";
+    return "javac 1.4.x";
   }
 
   public String toString() {
