@@ -247,7 +247,8 @@ public class JavacGJCompiler implements CompilerInterface {
         // not available since jsr14 v2.0 is on the boot classpath
         return false;
       }
-      catch (SecurityException se) {
+      catch (Throwable t) {
+        // Good, java.lang.Enum is not available
         return true;
       }
     }

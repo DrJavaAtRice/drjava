@@ -81,6 +81,18 @@ public class JSR14v10Compiler extends JavacGJCompiler {
     super();
   }
   
+  public boolean isAvailable() {
+    try {
+      // Main$10 exists in JSR14 v1.0 but not JDK 1.3
+      Class.forName("com.sun.tools.javac.v8.Main$10");
+      return super.isAvailable();
+    }
+    catch (Throwable t) {
+      return false;
+    }
+  }
+      
+  
   protected void updateBootClassPath() {
 
     // add collections path to the bootclasspath
