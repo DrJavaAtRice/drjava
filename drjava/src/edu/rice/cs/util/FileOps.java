@@ -390,8 +390,7 @@ public abstract class FileOps {
       bos.close();
 
       if (tempFileUsed && !renameFile(tempFile, file)) {
-        throw new IOException("Save failed: Could not rename temp file " +
-                              tempFile + " to " + file);
+        throw new IOException("Save failed: Another process may be using " + file + ".");
       }
 
       success = true;
