@@ -861,20 +861,27 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     
   }
   
+  // if set to true, and uncommented, the definitions document will
+  // print out a small stack trace every time getDocument() is called
+
+//    static boolean SHOW_GETDOC = false; 
+    
   private OpenDefinitionsDocument _openFiles(File[] files) 
-  throws IOException, OperationCanceledException, AlreadyOpenException {
+    throws IOException, OperationCanceledException, AlreadyOpenException {
+    
     AlreadyOpenException storedAOE = null;
     OpenDefinitionsDocument retDoc = null;
     
+//        SHOW_GETDOC = true;
+        
     LinkedList<File> lof = new LinkedList<File>();
-    
-    for (int i=0; i < files.length; i++) {
-      if (files[i] == null) {
+    for (File f: files) {
+      if (f == null) {
         throw new IOException("File name returned from FileSelector is null");
       }
       try {
         //always return last opened Doc
-        retDoc = _openFile(files[i].getAbsoluteFile());
+        retDoc = _openFile(f.getAbsoluteFile());
       }
       catch (AlreadyOpenException aoe) {
         retDoc = aoe.getOpenDocument();
@@ -883,9 +890,11 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
           storedAOE = aoe;
         }
       }catch(FileNotFoundException e){
-        lof.add(files[i]);
+        lof.add(f);
       }
     }
+    
+//        SHOW_GETDOC = false;
     
     for(File f: lof){
       _notifier.fileNotFound(f);
@@ -977,7 +986,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     // set the state if all went well
     File[] srcFiles = srcFileVector.toArray(new File[0]);
     setFileGroupingState(_makeProjectFileGroupingState(mainClass, f, new File(filename), srcFiles));
-}
+  }
 
   /**
    * Parses out the given project file, sets up the state and other configurations
@@ -985,9 +994,9 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
    * @param file The project file to parse
    * @return an array of document's files to open
    */
-  public File[] openProject(File projectFile) throws IOException, MalformedProjectFileException {
+  public DocFile[] openProject(File projectFile) throws IOException, MalformedProjectFileException {
     final ProjectFileIR ir;
-    final File[] srcFiles;
+    final DocFile[] srcFiles;
     
     //File projectRoot = projectFile.getParentFile();
     ir = ProjectFileParser.ONLY.parse(projectFile);
@@ -1783,7 +1792,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     private File _file;
     private long _timestamp;
 
-    private String _packageName;
+    private String _packageName = null;
       
 //    boolean _shouldRun;
 //    private GlobalModelListener _notifyListener = new DummySingleDisplayModelListener() {
@@ -1819,6 +1828,15 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       init();
     }
     
+    /** 
+     * Currently, the package name is the only special info saved into
+     * the OpenDefinitionsDocument at this time.
+     */
+    ConcreteOpenDefDoc(File f, String packageName) throws IOException{
+      this(f);
+      _packageName = packageName;
+    }
+    
     public void init(){
       _id = ID_COUNTER++;
       //      _doc = doc;
@@ -1835,7 +1853,6 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
 //      _junitErrorModel = new JUnitErrorModel(new JUnitError[0], null, false);
       _breakpoints = new Vector<Breakpoint>();
       _modifiedSinceSave = false;
-      _packageName = null;
     }
     
     
@@ -1862,7 +1879,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
         return false;
       }
     }
-
+    
     /**
      * makes a default DDReconstructor that will make a Document based on if the Handler has a file or not
      */
@@ -1922,6 +1939,15 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
           _list = doc.getDocumentListeners();
           _finalListeners = doc.getFinalizationListeners();
         }
+        
+        public void addDocumentListener(DocumentListener dl) {
+          ArrayList<DocumentListener> tmp = new ArrayList<DocumentListener>();
+          for (DocumentListener l: _list) {
+            if (dl != l) tmp.add(l);
+          }
+          tmp.add(dl);
+          _list = tmp.toArray(new DocumentListener[0]);
+        }
       };
     }
 
@@ -1934,14 +1960,20 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       getDocument().setModifiedSinceSave();
     }
     
-    
-    
-    
+        
     /**
      * Gets the definitions document being handled.
      * @return document being handled
      */
     protected DefinitionsDocument getDocument() {
+//      if (SHOW_GETDOC) { // SHOW_GETDOC's definitions is at _openFiles(...)
+//        System.out.println(this);
+//        Exception e = new Exception("");
+//        System.out.println("  " + e.getStackTrace()[1]);
+//        System.out.println("  " + e.getStackTrace()[2]);
+//        System.out.println("  " + e.getStackTrace()[3]);
+//        System.out.println("  " + e.getStackTrace()[4]);
+//      }
       try{
         return _cache.get(this);
       }catch(FileMovedException e){
@@ -2875,7 +2907,6 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       else if(_packageName == null){
         _packageName = getDocument().getPackageName();
       }
-      
       return _packageName;
     }
     
@@ -2987,7 +3018,12 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
      * Implementation of the javax.swing.text.Document interface
      */
     public void addDocumentListener(DocumentListener listener){
-      getDocument().addDocumentListener(listener);
+      if(_cache.isDDocInCache(this)){
+        getDocument().addDocumentListener(listener);
+      }
+      else {
+        _cache.getReconstructor(this).addDocumentListener(listener);
+      }
     }
     
     
@@ -3072,7 +3108,20 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
      * end implementation of javax.swing.text.Document interface
      */
     
-    
+    /**
+     * If the undo manager is unavailable, no undos are available
+     * @return whether the undo manager can perform any undo's
+     */
+    public boolean undoManagerCanUndo() {
+      return _cache.isDDocInCache(this) && getUndoManager().canUndo();
+    }
+    /**
+     * If the undo manager is unavailable, no redos are available
+     * @return whether the undo manager can perform any redo's
+     */
+    public boolean undoManagerCanRedo() {
+      return _cache.isDDocInCache(this) && getUndoManager().canRedo();
+    }
     
     /**
      * decorater patter for the definitions document
@@ -3130,7 +3179,11 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     }
 
     public void resetUndoManager() {
-      getDocument().resetUndoManager();
+      // if it's not in the cache, the undo manager will be 
+      // reset when it's reconstructed
+      if(_cache.isDDocInCache(this)){
+        getDocument().resetUndoManager();
+      }
     }
 
     public File getCachedClassFile() {
@@ -3261,10 +3314,7 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
     }
     return projectDocs;
   }
-  
-  
-  
-  
+    
   /**
    * Creates a document from a file.
    * @param file File to read document from
@@ -3277,10 +3327,14 @@ public class DefaultGlobalModel implements GlobalModel, OptionConstants,
       if (openDoc != null) {
         throw new AlreadyOpenException(openDoc);
       }
-
+      final OpenDefinitionsDocument doc;
+      if (file instanceof DocFile) {
+        doc = new ConcreteOpenDefDoc(file, ((DocFile)file).getPackage());
+      }
+      else {
+        doc = new ConcreteOpenDefDoc(file);
+      }
       
-      
-      final OpenDefinitionsDocument doc = new ConcreteOpenDefDoc(file);
       INavigatorItem idoc = makeIDocFromODD(doc);
       _documentsRepos.put(idoc, doc);
       

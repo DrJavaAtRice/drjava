@@ -195,6 +195,9 @@ public class DocumentCacheTest extends GlobalModelTestCase {
       public void saveDocInfo(DefinitionsDocument doc){
         _doc_saved++;
       }
+      public void addDocumentListener(javax.swing.event.DocumentListener dl) {
+        // don't do anything
+      }
     };
     
     OpenDefinitionsDocument doc1 =  _model.newFile();

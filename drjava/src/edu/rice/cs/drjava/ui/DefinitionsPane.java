@@ -1389,7 +1389,7 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants, Fin
      * Updates the undo list, i.e., where we are as regards undo and redo.
      */
     protected void updateUndoState() {
-      if (_doc.getUndoManager().canUndo()) {
+      if (_doc.undoManagerCanUndo()) {
         setEnabled(true);
         putValue(Action.NAME, _doc.getUndoManager().getUndoPresentationName());
       }
@@ -1443,7 +1443,7 @@ public class DefinitionsPane extends JEditorPane implements OptionConstants, Fin
      * Updates the redo state, i.e., where we are as regards undo and redo.
      */
     protected void updateRedoState() {
-      if (_doc.getUndoManager().canRedo()) {
+      if (_doc.undoManagerCanRedo()) {
         setEnabled(true);
         putValue(Action.NAME, _doc.getUndoManager().getRedoPresentationName());
       }

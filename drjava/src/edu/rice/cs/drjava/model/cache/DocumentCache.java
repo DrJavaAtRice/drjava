@@ -91,7 +91,9 @@ public class DocumentCache{
   }
 
   /**
-   * adds the ODD to the cache with the given document and reconstructor as its value (a pair Open)
+   * retrieves the definitions document for the ODD.  If the dd is not available, it is reconstructed
+   * then returned.  When the dd is retrieved, it is placed at the top of the most recently used list
+   * so that it will stay in the cache longer
    * @param odd the ODD to use as the key to the cache
    * @return a DefinitionsDocument for this odd 
    */
@@ -116,6 +118,18 @@ public class DocumentCache{
       }
     }
     return retdoc;
+  }
+  
+  /**
+   * @param the open definitions document who registered the reconstructor
+   * @return the reconstructor associated with the given odd
+   */
+  public DDReconstructor getReconstructor(OpenDefinitionsDocument odd) {
+    Pair<DefinitionsDocument,DDReconstructor> pair = table.get(odd);
+    if(pair == null){
+      throw new NoSuchDocumentException("Cannot obtain the reconstructor for: " + odd);
+    }
+    return pair.getSecond();
   }
   
   /**

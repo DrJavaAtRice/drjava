@@ -59,6 +59,7 @@ import edu.rice.cs.drjava.model.junit.JUnitModel;
 import edu.rice.cs.drjava.model.compiler.CompilerModel;
 import edu.rice.cs.drjava.project.MalformedProjectFileException;
 import edu.rice.cs.drjava.project.DocumentInfoGetter;
+import edu.rice.cs.drjava.project.DocFile;
 import edu.rice.cs.util.docnavigation.*;
 
 /**
@@ -184,7 +185,7 @@ public interface GlobalModel extends IGetDocuments, ILoadDocuments {
    * @param file The project file to parse
    * @return an array of document's files to open
    */
-  public File[] openProject(File fine) throws IOException, MalformedProjectFileException;
+  public DocFile[] openProject(File fine) throws IOException, MalformedProjectFileException;
 
   /**
    * Performs any needed operations on the model before closing the

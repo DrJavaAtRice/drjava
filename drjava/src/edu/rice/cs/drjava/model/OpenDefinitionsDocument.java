@@ -71,7 +71,9 @@ import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
  */
 public interface OpenDefinitionsDocument extends Document, Finalizable<DefinitionsDocument> {
 
-  
+  // The following methods are forwarding methods required by the rest of the
+  // program in order for the OpenDefinitionsDocument to truely handle the
+  // DefinitionsDocument
   public int getIntelligentBeginLinePos(int currPos) throws BadLocationException;
   public void commentLines(int selStart, int selEnd);
   public void indentLines(int selStart, int selEnd);
@@ -92,11 +94,15 @@ public interface OpenDefinitionsDocument extends Document, Finalizable<Definitio
   public int getCurrentLocation();
   
   /**
-   * Gets the definitions document being handled.
-   * @return document being handled
+   * @return whether the undo manager can perform any undos
    */
-//  protected DefinitionsDocument getDocument();
-
+  public boolean undoManagerCanUndo();
+  
+  /**
+   * @return whether the undo manager can perform any redos
+   */
+  public boolean undoManagerCanRedo();
+  
   /**
    * Returns the name of the top level class, if any.
    * @throws ClassNameNotFoundException if no top level class name found.

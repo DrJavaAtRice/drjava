@@ -48,6 +48,7 @@ package edu.rice.cs.drjava.model.cache;
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 import java.io.IOException;
 import javax.swing.text.BadLocationException;
+import javax.swing.event.DocumentListener;
 import edu.rice.cs.drjava.model.FileMovedException;
 
 public interface DDReconstructor{
@@ -66,4 +67,9 @@ public interface DDReconstructor{
    */
   public void saveDocInfo(DefinitionsDocument doc);
   
+  /**
+   * Sets a document listener to be added to the definitions document when it is created
+   * @param DocumentListener the listener to add to the document
+   */
+  public void addDocumentListener(DocumentListener dl);
 }

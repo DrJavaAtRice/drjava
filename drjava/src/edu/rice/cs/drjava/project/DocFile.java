@@ -101,6 +101,16 @@ public class DocFile extends File {
     _active = active;
     _package = pack;
   }
+  ///////////////////// Overriden Methods //////////////////////
+  
+  public File getAbsoluteFile() {
+    if (isAbsolute()) {
+      return this;
+    }
+    else {
+      return new DocFile(getAbsoluteFile(),_sel,_scroll,_active,_package);
+    }
+  }
   
   ///////////////////// Extra Data Methods /////////////////////
   

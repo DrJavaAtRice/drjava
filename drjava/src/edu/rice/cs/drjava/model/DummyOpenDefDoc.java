@@ -670,4 +670,11 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
     throw new UnsupportedOperationException("Dummy method");
   }
 
+  public boolean undoManagerCanUndo() {
+    throw new UnsupportedOperationException("Dummy method");
+  }
+  
+  public boolean undoManagerCanRedo() {
+    throw new UnsupportedOperationException("Dummy method");
+  }
 }
