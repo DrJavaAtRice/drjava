@@ -133,62 +133,19 @@ public class ReducedModelComment
 			return val;
 		}
 
-  
 
-
-	//All inserts end up with pointer after inserted item
-	
-  /**
-   * Inserts an open brace ({) into the reduced model.
-	 * @return a Vector of highlighting information after the cursor
-   */
-	public void insertOpenSquiggly()
+  public void insertChar(char ch)
 		{
-			insertGap(1);
-		}
-
-  /**
-   * Inserts a closed brace (}) into the reduced model.
-	 * @return a Vector of highlighting information after the cursor
-   */
-  public void insertClosedSquiggly()
-		{
-			insertGap(1);
-		}
-  /**
-   * Inserts an open parenthesis (() into the reduced model.
-	 * @return a Vector of highlighting information after the cursor
-   */
-  public void insertOpenParen()
-		{
-			insertGap(1);
-		}
-
-  /**
-   * Inserts a closed parenthesis ()) into the reduced model.
-	 * @return a Vector of highlighting information after the cursor
-   */
-  public void insertClosedParen()
-		{
-			insertGap(1);
-		}
-	
-  /**
-   * Inserts an open bracket ([) into the reduced model.
-	 * @return a Vector of highlighting information after the cursor
-   */
-  public void insertOpenBracket()
-		{
-			insertGap(1);
-		}
-
-  /**
-   * Inserts a closed bracket (]) into the reduced model.
-	 * @return a Vector of highlighting information after the cursor
-   */
-  public void insertClosedBracket()
-		{
-			insertGap(1);
+			switch(ch) {
+			case '*': insertStar(); break;
+			case '/': insertSlash(); break;
+			case '\n': insertNewline(); break;
+			case '\"': insertQuote(); break;
+			case '\\': insertBackSlash(); break;
+			default:
+				insertGap(1);break;
+			}
+																			
 		}
 	
   /**

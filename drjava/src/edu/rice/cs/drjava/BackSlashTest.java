@@ -30,101 +30,101 @@ public class BackSlashTest extends TestCase {
   }
 
   public void testInsideQuotePrevious() {
-    model1.insertQuote();
-    model1.insertBackSlash();
-    model1.insertQuote();
+    model1.insertChar('\"');
+    model1.insertChar('\\');
+    model1.insertChar('\"');
     model1.move(-2);
     assertEquals("#0.0", "\\\"", model1.currentToken().getType());
     assertEquals("#0.1", INSIDE_QUOTE, stateOfCurrentToken(model1));
 
     model1.move(2);
-    model1.insertQuote();
+    model1.insertChar('\"');
     model1.move(-1);
     assertEquals("#1.0", "\"", model1.currentToken().getType());
     assertEquals("#1.1", FREE, stateOfCurrentToken(model1));
     assertTrue("#1.2", model1.currentToken().isClosed());
 
     model1.move(1);
-    model1.insertQuote();     
-    model1.insertBackSlash();
-    model1.insertBackSlash();
+    model1.insertChar('\"');     
+    model1.insertChar('\\');
+    model1.insertChar('\\');
     model1.move(-2);
     assertEquals("#2.0", "\\\\", model1.currentToken().getType());
     assertEquals("#2.1", INSIDE_QUOTE, stateOfCurrentToken(model1));       
 
     model1.move(2);
-    model1.insertBackSlash();
+    model1.insertChar('\\');
     model1.move(-1);
     assertEquals("#3.0", "\\", model1.currentToken().getType());
     assertEquals("#3.1", INSIDE_QUOTE, stateOfCurrentToken(model1));
 
     model1.move(1);
-    model1.insertQuote();
+    model1.insertChar('\"');
     model1.move(-1);
     assertEquals("#4.0", "\\\"", model1.currentToken().getType());
     assertEquals("#4.1", INSIDE_QUOTE, stateOfCurrentToken(model1));
   }
 
   public void testInsideQuoteNext() {
-    model1.insertQuote();
-    model1.insertQuote();
+    model1.insertChar('\"');
+    model1.insertChar('\"');
     model1.move(-1);
-    model1.insertBackSlash();
+    model1.insertChar('\\');
     assertEquals("#0.0", "\\\"", model1.currentToken().getType());
     assertEquals("#0.1", INSIDE_QUOTE, stateOfCurrentToken(model1));
     assertEquals("#0.2", 1, model1.getBlockOffset());
 
     model1.move(1);     
-    model1.insertQuote();
+    model1.insertChar('\"');
     model1.move(-1);
     assertEquals("#1.0", "\"", model1.currentToken().getType());
     assertEquals("#1.1", FREE, stateOfCurrentToken(model1));
     assertTrue("#1.2", model1.currentToken().isClosed());
 
     model1.move(1);
-    model1.insertQuote();     
-    model1.insertBackSlash();
+    model1.insertChar('\"');     
+    model1.insertChar('\\');
     model1.move(-1);
-    model1.insertBackSlash();
+    model1.insertChar('\\');
     assertEquals("#2.0", "\\\\", model1.currentToken().getType());
     assertEquals("#2.1", INSIDE_QUOTE, stateOfCurrentToken(model1));
     assertEquals("#2.2", 6, model1.absOffset());
 
     model1.move(-2);
-    model1.insertOpenSquiggly();
+    model1.insertChar('{');
     model1.move(-1);
     assertEquals("#3.0", "{", model1.currentToken().getType());
     assertEquals("#3.1", FREE, stateOfCurrentToken(model1));
 
     model1.move(1);
     model1.move(3);
-    model1.insertQuote();
+    model1.insertChar('\"');
     model1.move(-1);
     assertEquals("#4.0", "\"", model1.currentToken().getType());
     assertEquals("#4.1", FREE, stateOfCurrentToken(model1));
     assertTrue("#4.2", model1.currentToken().isClosed());
 
-    model1.insertBackSlash();
+    model1.insertChar('\\');
     assertEquals("#5.0", "\\\"", model1.currentToken().getType());
     assertEquals("#5.1", INSIDE_QUOTE, stateOfCurrentToken(model1));
     assertEquals("#5.2", 1, model1.getBlockOffset());         
   }
 
   public void testBackSlashBeforeDoubleEscape() {
-    model1.insertBackSlash();
-    model1.insertBackSlash();
+    model1.insertChar('\\');
+    model1.insertChar('\\');
     model1.move(-2);
-    model1.insertBackSlash();
+    model1.insertChar('\\');
     assertEquals("#0.0", "\\\\", model1.currentToken().getType());
     assertEquals("#0.1", 2, model1.currentToken().getSize());
 
     model1.move(1);
     assertEquals("#0.2", "\\", model1.currentToken().getType());
 
-    model2.insertBackSlash();
-    model2.insertQuote();
+    model2.insertChar('\\');
+    model2.insertChar('\"');
     model2.move(-2);
-    model2.insertBackSlash();
+    model2.insertChar('\\');
     assertEquals("#1.0", "\\\\", model2.currentToken().getType());
     assertEquals("#1.1", 1, model2.absOffset());
 
@@ -133,30 +133,30 @@ public class BackSlashTest extends TestCase {
   }
 
   public void testInsertBetweenDoubleEscape() {
-    model1.insertBackSlash();
-    model1.insertBackSlash();
+    model1.insertChar('\\');
+    model1.insertChar('\\');
     model1.move(-1);
-    model1.insertBackSlash();
+    model1.insertChar('\\');
     model1.move(-2);
     assertEquals("#0.0", "\\\\", model1.currentToken().getType());
 
     model1.move(2);
     assertEquals("#0.1", "\\", model1.currentToken().getType());
 
-    model2.insertBackSlash();
-    model2.insertQuote();
+    model2.insertChar('\\');
+    model2.insertChar('\"');
     model2.move(-1);
-    model2.insertBackSlash();
+    model2.insertChar('\\');
     model2.move(-2);
     assertEquals("#1.0", "\\\\", model2.currentToken().getType());
 
     model2.move(2);
     assertEquals("#1.1", "\"", model2.currentToken().getType());
 
-    model0.insertBackSlash();
-    model0.insertBackSlash();
+    model0.insertChar('\\');
+    model0.insertChar('\\');
     model0.move(-1);
-    model0.insertClosedParen();
+    model0.insertChar(')');
     model0.move(-2);
     assertEquals("#2.0", "\\", model0.currentToken().getType());
 
@@ -168,10 +168,10 @@ public class BackSlashTest extends TestCase {
 
     model0.move(1);
     model0.delete(-3);
-    model0.insertBackSlash();
-    model0.insertQuote();
+    model0.insertChar('\\');
+    model0.insertChar('\"');
     model0.move(-1);
-    model0.insertClosedParen();
+    model0.insertChar(')');
     model0.move(-2);
     assertEquals("#3.0", "\\", model0.currentToken().getType());
 
@@ -183,9 +183,9 @@ public class BackSlashTest extends TestCase {
   }
 
   public void testDeleteAndCombine() {
-    model0.insertBackSlash();
+    model0.insertChar('\\');
     model0.insertGap(2);
-    model0.insertQuote();
+    model0.insertChar('\"');
     model0.move(-1);
     assertEquals("#0.0", "\"", model0.currentToken().getType());
 
@@ -195,7 +195,7 @@ public class BackSlashTest extends TestCase {
     
     model0.delete(1);
     model0.insertGap(2);
-    model0.insertBackSlash();
+    model0.insertChar('\\');
     model0.move(-1);
     assertEquals("#2.0", "\\", model0.currentToken().getType());
 
@@ -205,8 +205,8 @@ public class BackSlashTest extends TestCase {
   }
 
   public void testDeleteAndCombine2() {
-    model0.insertBackSlash();
-    model0.insertQuote();
+    model0.insertChar('\\');
+    model0.insertChar('\"');
     model0.move(-1);
     model0.delete(-1);
     assertEquals("#0.0", "\"", model0.currentToken().getType());
@@ -214,33 +214,33 @@ public class BackSlashTest extends TestCase {
                  FREE,
                  model0.getStateAtCurrent());
     
-    model1.insertBackSlash();
-    model1.insertBackSlash();
+    model1.insertChar('\\');
+    model1.insertChar('\\');
     model1.delete(-1);
     model1.move(-1);
     assertEquals("#1.0", "\\", model1.currentToken().getType());
 
     model1.move(1);
-    model1.insertBackSlash();
+    model1.insertChar('\\');
     model1.move(-1);
     model1.delete(-1);
     assertEquals("#2.0", "\\", model1.currentToken().getType());      
   }
 
   public void testDeleteAndCombine3() {
-    model0.insertBackSlash();
-    model0.insertBackSlash();
+    model0.insertChar('\\');
+    model0.insertChar('\\');
     model0.insertGap(3);
-    model0.insertBackSlash();
+    model0.insertChar('\\');
     model0.move(-1);
     model0.delete(-4);
     assertEquals("#0.0", "\\\\", model0.currentToken().getType());
     assertEquals("#0.1", 1, model0.absOffset());
 
-    model1.insertBackSlash();
+    model1.insertChar('\\');
     model1.insertGap(3);
-    model1.insertBackSlash();
-    model1.insertQuote();
+    model1.insertChar('\\');
+    model1.insertChar('\"');
     model1.move(-1);
     model1.delete(-4);
     assertEquals("#1.0", "\\\"", model1.currentToken().getType());
@@ -248,18 +248,18 @@ public class BackSlashTest extends TestCase {
   }
 
   public void testChainEffect() {
-    model0.insertQuote();
-    model0.insertBackSlash();
-    model0.insertQuote();
-    model0.insertQuote();
-    model0.insertQuote();
-    model0.insertBackSlash();
-    model0.insertQuote();
-    model0.insertQuote();
-    model0.insertQuote();
-    model0.insertBackSlash();
-    model0.insertQuote();
-    model0.insertQuote();
+    model0.insertChar('\"');
+    model0.insertChar('\\');
+    model0.insertChar('\"');
+    model0.insertChar('\"');
+    model0.insertChar('\"');
+    model0.insertChar('\\');
+    model0.insertChar('\"');
+    model0.insertChar('\"');
+    model0.insertChar('\"');
+    model0.insertChar('\\');
+    model0.insertChar('\"');
+    model0.insertChar('\"');
     // "\"""\"""\""#
     model0.move(-1);
     assertEquals("#0.0", "\"", model0.currentToken().getType());
@@ -276,7 +276,7 @@ public class BackSlashTest extends TestCase {
     assertTrue("#1.4", model0.currentToken().isOpen());
     
     model0.move(1);
-    model0.insertBackSlash();
+    model0.insertChar('\\');
     // "\"""\"""\#\""
     assertEquals("#2.0", "\\\\", model0.currentToken().getType());
     assertEquals("#2.1", INSIDE_QUOTE, stateOfCurrentToken(model0));
@@ -293,7 +293,7 @@ public class BackSlashTest extends TestCase {
     assertTrue("#2.8", model0.currentToken().isClosed());
 
     model0.move(-1);
-    model0.insertQuote();
+    model0.insertChar('\"');
     // "\"""\"""\"#\""
     assertEquals("#3.0", "\\\"", model0.currentToken().getType());
     assertEquals("#3.1", INSIDE_QUOTE, stateOfCurrentToken(model0));

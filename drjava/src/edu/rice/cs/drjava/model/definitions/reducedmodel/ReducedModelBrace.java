@@ -133,117 +133,22 @@ public class ReducedModelBrace
 		}
 
   
-
-
-	//All inserts end up with pointer after inserted item
-	
-  /**
-   * Inserts an open brace ({) into the reduced model.
-	 * @return a Vector of highlighting information after the cursor
-   */
-	public void insertOpenSquiggly()
+	public void insertChar(char ch)
 		{
-			_insertBrace("{");
+			switch(ch) {
+			case '{':
+			case '}':
+			case '[':
+			case ']':
+			case '(':
+			case ')':
+				_insertBrace("" + ch);
+				break;
+			default:
+				insertGap(1);
+				break;
+			}
 		}
-
-  /**
-   * Inserts a closed brace (}) into the reduced model.
-	 * @return a Vector of highlighting information after the cursor
-   */
-  public void insertClosedSquiggly()
-		{
-			_insertBrace("}");
-		}
-  /**
-   * Inserts an open parenthesis (() into the reduced model.
-	 * @return a Vector of highlighting information after the cursor
-   */
-  public void insertOpenParen()
-		{
-			_insertBrace("(");
-		}
-
-  /**
-   * Inserts a closed parenthesis ()) into the reduced model.
-	 * @return a Vector of highlighting information after the cursor
-   */
-  public void insertClosedParen()
-		{
-			_insertBrace(")");
-		}
-	
-  /**
-   * Inserts an open bracket ([) into the reduced model.
-	 * @return a Vector of highlighting information after the cursor
-   */
-  public void insertOpenBracket()
-		{
-			_insertBrace("[");
-		}
-
-  /**
-   * Inserts a closed bracket (]) into the reduced model.
-	 * @return a Vector of highlighting information after the cursor
-   */
-  public void insertClosedBracket()
-		{
-			_insertBrace("]");
-		}
-	
-  /**
-   * Inserts a star.
-	 */
-  public void insertStar()
-		{
-			insertGap(1);
-		}
-
-	
-  /**
-   * Inserts a slash.
-	 */
-  public void insertSlash()
-		{
-			insertGap(1);
-		}
-
-	/*
-   * Inserts an end-of-line character.
-	 * <OL>
-	 *  <li> atStart: insert
-	 *  <li> atEnd: insert
-	 *  <li> inside multiple character brace:
-	 *   <ol>
-	 *    <li> break current brace
-	 *    <li> move next to make second part current
-	 *    <li> insert brace between broken parts of former brace
-	 *    <li> move previous twice to get before the broken first part
-	 *    <li> walk
-	 *    <li> move next twice to be after newline insertion
-	 *   </ol>
-	 *  <li> inside a gap: use helper function
-	 *  <li>otherwise, just insert normally
-	 * </OL>
-	 * @return a Vector of highlighting information after the cursor
-   */
-	public void insertNewline()
-		{
-			insertGap(1);
-		}
-	
-  /**
-   * Inserts a double quote character.
-   */
-  public void insertQuote()
-		{
-			insertGap(1);
-		}
-
-	public void insertBackSlash()
-		{			
-			insertGap(1);
-		}
-
 	
   /**
 	 * Inserts a block of non-brace text into the reduced model.

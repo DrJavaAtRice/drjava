@@ -94,46 +94,7 @@ public class DefinitionsDocument extends PlainDocument
   
   private void _addCharToReducedModel(char curChar)
   {
-    switch (curChar)
-      {
-      case '(':
-        _reduced.insertOpenParen();
-        break;
-      case ')':
-        _reduced.insertClosedParen();
-        break;
-      case '[':
-        _reduced.insertOpenBracket();
-        break;
-      case ']':
-        _reduced.insertClosedBracket();
-        break;
-      case '{':
-        _reduced.insertOpenSquiggly();
-        break;
-      case '}':
-        _reduced.insertClosedSquiggly();
-        break;
-      case '/':
-        _reduced.insertSlash();
-        break;
-      case '*':
-        _reduced.insertStar();
-        break;
-      case '"':
-        _reduced.insertQuote();
-        break;
-      case '\\':
-        _reduced.insertBackSlash();
-        break;
-      case '\n':
-      case '\r':
-        _reduced.insertNewline();
-        break;
-      default:
-        _reduced.insertGap(1);
-        break;
-    }
+		_reduced.insertChar(curChar);
   }
 
   /**

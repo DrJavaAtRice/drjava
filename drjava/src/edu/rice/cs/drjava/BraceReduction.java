@@ -41,68 +41,11 @@ public interface BraceReduction
 	 */	
 	int getStateAtCurrent();
 
-  /**
-   * Inserts an open brace ({) into the reduced model.
-   */
-  public void insertOpenSquiggly();
 
-	/**
-   * Inserts a backslash (\) into the reduced model.
-   */
-  public void insertBackSlash();
-
-  /**
-   * Inserts a closed brace (}) into the reduced model.
-   */
-  public void insertClosedSquiggly();
-
-  /**
-   * Inserts an open parenthesis (() into the reduced model.
-   */
-  public void insertOpenParen();
-
-  /**
-   * Inserts a closed parenthesis ()) into the reduced model.
-   */
-  public void insertClosedParen();
-
-  /**
-   * Inserts an open bracket ([) into the reduced model.
-   */
-  public void insertOpenBracket();
-
-  /**
-   * Inserts a closed bracket (]) into the reduced model.
-   */
-  public void insertClosedBracket();
-
-  /**
-   * Inserts a star.
-   */
-  public void insertStar();
-
-  /**
-   * Inserts a slash.
-   */
-  public void insertSlash();
-
-  /**
-   * Inserts a new line character (\n) into the reduced model.
-   */
-  public void insertNewline();
-
-  /**
-   * Inserts a double quote (") into the reduced model.
-   */
-  public void insertQuote();
-  
-  /**
-   * <P>Updates the BraceReduction to reflect the insertion of a
-   * regular text string into the document.</P>
-   * @param length the length of the inserted string
-   */
-  public void insertGap( int length );
-
+	public void insertGap(int length);
+	
+	public void insertChar(char ch);
+	
   /**
    * <P>Updates the BraceReduction to reflect cursor movement.
    * Negative values move left from the cursor, positive values move

@@ -39,116 +39,18 @@ public class ReducedModelControl implements BraceReduction
 			rmc = new ReducedModelComment();
 		}
 	
-	public void insertOpenSquiggly()
+	public void insertChar(char ch)
 		{
-			rmb.insertOpenSquiggly();
-			rmc.insertOpenSquiggly();
-			_offset = 0;
-		}
-	/**
-	 *Makes a copy of the comment block
-	 */
-	//public ModelList<ReducedToken>.Iterator makeCopyCommentCursor()
-	//	{
-	//		rmc.makeCopyCursor();
-	//	}
-	
-  /**
-   * Inserts a closed brace (}) into the reduced model.
-   */
-  public void insertClosedSquiggly()
-		{
-			rmb.insertClosedSquiggly();
-			rmc.insertClosedSquiggly();
-		}
-  /**
-   * Inserts an open parenthesis (() into the reduced model.
-   */
-  public void insertOpenParen()
-		{
-			rmb.insertOpenParen();
-			rmc.insertOpenParen();
+			rmb.insertChar(ch);
+			rmc.insertChar(ch);
 		}
 
-  /**
-   * Inserts a closed parenthesis ()) into the reduced model.
-   */
-  public void insertClosedParen()
+	public void insertGap(int length)
 		{
-			rmb.insertClosedParen();
-			rmc.insertClosedParen();
-		}	
-
-  /**
-   * Inserts an open bracket ([) into the reduced model.
-   */
-  public void insertOpenBracket()
-		{
-			rmb.insertOpenBracket();
-			rmc.insertOpenBracket();
+			rmb.insertGap(length);
+			rmc.insertGap(length);
 		}
 
-  /**
-   * Inserts a closed bracket (]) into the reduced model.
-   */
-  public void insertClosedBracket()
-		{
-			rmb.insertClosedBracket();
-			rmc.insertClosedBracket();
-		}
-	
-
-  /**
-   * Inserts a star.
-   */
-  public void insertStar()
-		{
-			rmb.insertStar();
-			rmc.insertStar();
-		}
-
-  /**
-   * Inserts a slash.
-   */
-  public void insertSlash()
-		{
-			rmb.insertSlash();
-			rmc.insertSlash();
-		}
-
-  /**
-   * Inserts a new line character (\n) into the reduced model.
-   */
-  public void insertNewline()
-		{
-			rmb.insertNewline();
-			rmc.insertNewline();
-		}
-	
-  /**
-   * Inserts a double quote (") into the reduced model.
-   */
-  public void insertQuote()
-		{
-			rmb.insertQuote();
-			rmc.insertQuote();
-		}
-  /**
-   * <P>Updates the BraceReduction to reflect the insertion of a
-   * regular text string into the document.</P>
-   * @param length the length of the inserted string
-   */
-  public void insertGap( int length )
-		{
-			rmb.insertGap(length );
-			rmc.insertGap(length );
-		}
-
-	public void insertBackSlash()
-		{
-			rmb.insertGap(1);
-			rmc.insertBackSlash();
-		}
   /**
    * <P>Updates the BraceReduction to reflect cursor movement.
    * Negative values move left from the cursor, positive values move

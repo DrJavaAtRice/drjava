@@ -31,8 +31,8 @@ public class ReducedModelDeleteTest extends TestCase {
 
 	public void testHalfLineComment()
 		{ 
-			model1.insertSlash();
-			model1.insertSlash();
+			model1.insertChar('/');
+			model1.insertChar('/');
 			model1.move(-2);
 			
 			assertEquals("#0.0","//",model1.currentToken().getType());
@@ -42,7 +42,7 @@ public class ReducedModelDeleteTest extends TestCase {
 			assertEquals("#1.0","/",model1.currentToken().getType());
 			assertEquals("#1.1",0,model1.absOffset());
 
-	 		model1.insertSlash();
+	 		model1.insertChar('/');
 			model1.delete(1);   //This time delete the second slash
 
 			assertEquals("#2.0",1,model1.absOffset());
@@ -72,10 +72,10 @@ public class ReducedModelDeleteTest extends TestCase {
 	public void testDeleteAndMergeTwoGaps()
 		{
 			model1.insertGap(5);
-			model1.insertSlash();
+			model1.insertChar('/');
 			assertEquals("#1.0", 6, model1.absOffset());
 
-			model1.insertStar();
+			model1.insertChar('*');
 			assertEquals("#2.0", 7, model1.absOffset());
 
 			model1.insertGap(6);
@@ -100,12 +100,12 @@ public class ReducedModelDeleteTest extends TestCase {
 		
 	public void testDeleteBlockCommentMakesLineComment()
 		{			
-			model1.insertSlash();
+			model1.insertChar('/');
 			assertEquals("#0.0", 1, model1.absOffset());
 			assertEquals("#0.1", ReducedToken.FREE,
 									 model1.getStateAtCurrent());
 
-			model1.insertStar();
+			model1.insertChar('*');
 			assertEquals("#1.0", 2, model1.absOffset());
 			assertEquals("#1.1", ReducedToken.INSIDE_BLOCK_COMMENT,
 									 model1.getStateAtCurrent());
@@ -115,12 +115,12 @@ public class ReducedModelDeleteTest extends TestCase {
 			assertEquals("#2.1", ReducedToken.INSIDE_BLOCK_COMMENT,
 									 model1.getStateAtCurrent());
 
-			model1.insertStar();
+			model1.insertChar('*');
 			assertEquals("#3.0", 5, model1.absOffset());
 			assertEquals("#3.1", ReducedToken.INSIDE_BLOCK_COMMENT,
 									 model1.getStateAtCurrent());
 
-			model1.insertSlash();
+			model1.insertChar('/');
 			assertEquals("#4.0", 6, model1.absOffset());
 			assertEquals("#4.1", ReducedToken.FREE,
 									 model1.getStateAtCurrent());
@@ -150,16 +150,16 @@ public class ReducedModelDeleteTest extends TestCase {
 
 	public void testLineCommentStealsBlockCommentSlash()
 		{
-			model1.insertSlash();
+			model1.insertChar('/');
 			assertEquals("#0.0", 1, model1.absOffset());
 
 			model1.insertGap(2);
 			assertEquals("#1.0", 3, model1.absOffset());
 
-			model1.insertSlash();
+			model1.insertChar('/');
 			assertEquals("#2.0", 4, model1.absOffset());
 
-			model1.insertStar();
+			model1.insertChar('*');
 			assertEquals("#3.0", 5, model1.absOffset());
 			assertEquals("#3.1", ReducedToken.INSIDE_BLOCK_COMMENT,
 									 model1.getStateAtCurrent());
@@ -182,16 +182,16 @@ public class ReducedModelDeleteTest extends TestCase {
 	
 	public void testLineCommentStealsLineCommentSlash()
 		{
-			model1.insertSlash();
+			model1.insertChar('/');
 			assertEquals("#0.0", 1, model1.absOffset());
 
 			model1.insertGap(2);
 			assertEquals("#1.0", 3, model1.absOffset());
 
-			model1.insertSlash();
+			model1.insertChar('/');
 			assertEquals("#2.0", 4, model1.absOffset());
 
-			model1.insertSlash();
+			model1.insertChar('/');
 			assertEquals("#3.0", 5, model1.absOffset());
 			assertEquals("#3.1", ReducedToken.INSIDE_LINE_COMMENT,
 									 model1.getStateAtCurrent());
@@ -214,32 +214,32 @@ public class ReducedModelDeleteTest extends TestCase {
 
 	public void testDeleteNewlineAndShadowBlockCommentStart()
 		{
-			model1.insertSlash();
+			model1.insertChar('/');
 			assertEquals("#0.0", 1, model1.absOffset());
 			assertEquals("#0.1",ReducedToken.FREE,
 									 model1.getStateAtCurrent());
 
-			model1.insertSlash();
+			model1.insertChar('/');
 			assertEquals("#1.0", 2, model1.absOffset());
 			assertEquals("#1.1",ReducedToken.INSIDE_LINE_COMMENT,
 									 model1.getStateAtCurrent());
 
-			model1.insertStar();
+			model1.insertChar('*');
 			assertEquals("#2.0", 3, model1.absOffset());
 			assertEquals("#2.1",ReducedToken.INSIDE_LINE_COMMENT,
 									 model1.getStateAtCurrent());
 
-			model1.insertNewline();
+			model1.insertChar('\n');
 			assertEquals("#3.0", 4, model1.absOffset());
 			assertEquals("#3.1",ReducedToken.FREE,
 									 model1.getStateAtCurrent());
 
-			model1.insertSlash();
+			model1.insertChar('/');
 			assertEquals("#4.0", 5, model1.absOffset());
 			assertEquals("#4.1",ReducedToken.FREE,
 									 model1.getStateAtCurrent());
 
-			model1.insertStar();
+			model1.insertChar('*');
 			assertEquals("#5.0", 6, model1.absOffset());
 			assertEquals("#5.1",ReducedToken.INSIDE_BLOCK_COMMENT,
 									 model1.getStateAtCurrent());
@@ -266,11 +266,11 @@ public class ReducedModelDeleteTest extends TestCase {
 
 	public void testBlockCommentStartEatsEnd()
 		{
-			model1.insertSlash();
+			model1.insertChar('/');
 			assertEquals("#0.0", 1, model1.absOffset());
 			assertEquals("#0.1",ReducedToken.FREE, model1.getStateAtCurrent());
 			
-			model1.insertStar();
+			model1.insertChar('*');
 			assertEquals("#1.0", 2, model1.absOffset());
 			assertEquals("#1.1",ReducedToken.INSIDE_BLOCK_COMMENT,
 									 model1.getStateAtCurrent());									 
@@ -280,12 +280,12 @@ public class ReducedModelDeleteTest extends TestCase {
 			assertEquals("#2.1",ReducedToken.INSIDE_BLOCK_COMMENT,
 									 model1.getStateAtCurrent());
 
-			model1.insertStar();
+			model1.insertChar('*');
 			assertEquals("#3.0", 5, model1.absOffset());
 			assertEquals("#3.1",ReducedToken.INSIDE_BLOCK_COMMENT,
 									 model1.getStateAtCurrent());
 
-			model1.insertSlash();
+			model1.insertChar('/');
 			assertEquals("#4.0", 6, model1.absOffset());
 			assertEquals("#4.1",ReducedToken.FREE, model1.getStateAtCurrent());
 
@@ -317,14 +317,14 @@ public class ReducedModelDeleteTest extends TestCase {
 
 	public void deleteLineCommentSlashOpensBlockComment()
 		{
-			model1.insertSlash();
-			model1.insertSlash();
-			model1.insertStar();
-			model1.insertNewline();
+			model1.insertChar('/');
+			model1.insertChar('/');
+			model1.insertChar('*');
+			model1.insertChar('\n');
 			model1.insertGap(2);
-			model1.insertOpenParen();
-			model1.insertStar();
-			model1.insertSlash();
+			model1.insertChar('(');
+			model1.insertChar('*');
+			model1.insertChar('/');
 
 			assertEquals("#0.0", 9, model1.absOffset());
 			assertEquals("#0.1", ReducedToken.FREE,
@@ -389,11 +389,11 @@ public class ReducedModelDeleteTest extends TestCase {
 
 	public void testStartDeleteGap()
 		{
-			model1.insertSlash();
-			model1.insertStar();
+			model1.insertChar('/');
+			model1.insertChar('*');
 			model1.insertGap(2);
-			model1.insertStar();
-			model1.insertSlash();
+			model1.insertChar('*');
+			model1.insertChar('/');
 
 			model1.move(-4);
 			model1.delete(2);
@@ -410,11 +410,11 @@ public class ReducedModelDeleteTest extends TestCase {
 
 	public void testDeleteFreesBlockCommentEnd()
 		{
-			model1.insertSlash();
-			model1.insertStar();
+			model1.insertChar('/');
+			model1.insertChar('*');
 			model1.insertGap(2);
-			model1.insertStar();
-			model1.insertSlash();
+			model1.insertChar('*');
+			model1.insertChar('/');
 
 			model1.move(-6);
 			model1.delete(4);
@@ -437,11 +437,11 @@ public class ReducedModelDeleteTest extends TestCase {
 
 	public void testUnmaskBlockCommentedLineComment()
 		{
-			model1.insertSlash();
-			model1.insertStar();
+			model1.insertChar('/');
+			model1.insertChar('*');
 			model1.insertGap(2);
-			model1.insertSlash();
-			model1.insertSlash();
+			model1.insertChar('/');
+			model1.insertChar('/');
 
 
 			model1.move(-1);
@@ -479,13 +479,13 @@ public class ReducedModelDeleteTest extends TestCase {
 	
 	public void testCrazyDelete()
 		{
-			model1.insertSlash();
-			model1.insertSlash();
-			model1.insertStar();
+			model1.insertChar('/');
+			model1.insertChar('/');
+			model1.insertChar('*');
 			model1.insertGap(2);
-			model1.insertNewline();
-			model1.insertSlash();
-			model1.insertSlash();
+			model1.insertChar('\n');
+			model1.insertChar('/');
+			model1.insertChar('/');
 
 			assertEquals("#0.0", 8, model1.absOffset());
 			assertEquals("#0.1", ReducedToken.INSIDE_LINE_COMMENT,

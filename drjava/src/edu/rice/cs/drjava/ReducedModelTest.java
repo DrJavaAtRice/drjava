@@ -97,13 +97,13 @@ public class ReducedModelTest extends TestCase {
 
 	public void testInsertBraceAtStartAndEnd()
 		{
-			model1.insertOpenParen();
+			model1.insertChar('(');
 			assertTrue("#0.0", model1.atEnd());
 			model1.move(-1);
 			assertEquals("#0.1","(", model1.currentToken().getType());
 			assertEquals("#0.2", 1, model1.currentToken().getSize());
 			
-			model2.insertClosedParen();
+			model2.insertChar(')');
 			assertTrue("#1.0", model2.atEnd());
 			model2.move(-1);
 			assertEquals("#1.1",")", model2.currentToken().getType());
@@ -123,7 +123,7 @@ public class ReducedModelTest extends TestCase {
 			model1.insertGap(3);
 			assertEquals("#0.0", 3, model1.absOffset());
 			assertEquals("#0.1", 7, model1.currentToken().getSize());
-			model1.insertOpenSquiggly();
+			model1.insertChar('{');
 			assertEquals("#1.0", 4, model1.absOffset());
 			assertEquals("#1.1", 4, model1.currentToken().getSize());
 			assertTrue("#1.2", model1.currentToken().isGap());
@@ -138,13 +138,13 @@ public class ReducedModelTest extends TestCase {
 
 	public void testInsertBrace()
 		{
-			model1.insertOpenSquiggly();
+			model1.insertChar('{');
 			assertTrue("#0.0", model1.atEnd());
 			model1.move(-1);
 			assertEquals("#1.0", 1, model1.currentToken().getSize());
 			assertEquals("#1.1", "{", model1.currentToken().getType());
-			model1.insertOpenParen();
-			model1.insertOpenBracket();
+			model1.insertChar('(');
+			model1.insertChar('[');
 			assertEquals("#2.0", 1, model1.currentToken().getSize());
 			assertEquals("#2.1", "{", model1.currentToken().getType());
 			model1.move(-1);
@@ -158,13 +158,13 @@ public class ReducedModelTest extends TestCase {
 
 	public void testInsertBraceAndBreakLineComment()
 		{
-			model1.insertSlash();
-			model1.insertSlash();
+			model1.insertChar('/');
+			model1.insertChar('/');
 			model1.move(-1);
 			assertEquals("#0.0", 2, model1.currentToken().getSize());			
 			//move to the middle of the // and break it with a {
 			
-			model1.insertOpenSquiggly();
+			model1.insertChar('{');
 			assertEquals("#1.0", "/", model1.currentToken().getType());
 			assertEquals("#1.1", 1, model1.currentToken().getSize());
 			model1.move(-1);
@@ -177,12 +177,12 @@ public class ReducedModelTest extends TestCase {
 
 		public void testInsertBraceAndBreakBlockCommentStart()
 		{
-			model1.insertSlash();
-			model1.insertStar();
+			model1.insertChar('/');
+			model1.insertChar('*');
 			model1.move(-2);
 			assertEquals("#0.0", 2, model1.currentToken().getSize());			
 			model1.move(1);
-			model1.insertOpenSquiggly();
+			model1.insertChar('{');
 			assertEquals("#1.0", "*", model1.currentToken().getType());
 			assertEquals("#1.1", 1, model1.currentToken().getSize());
 			model1.move(-1);
@@ -197,9 +197,9 @@ public class ReducedModelTest extends TestCase {
 
 	public void testInsertMultipleBraces()
 		{
-			model1.insertSlash();
-			model1.insertStar();
-			model1.insertOpenSquiggly();
+			model1.insertChar('/');
+			model1.insertChar('*');
+			model1.insertChar('{');
 			model1.move(-1);
 			// /*#{
 			assertEquals("#0.0",ReducedToken.INSIDE_BLOCK_COMMENT,
@@ -208,14 +208,14 @@ public class ReducedModelTest extends TestCase {
 			assertEquals("#0.1",ReducedToken.FREE,
 									 model1.currentToken().getState());
 			model1.move(3);
-			model1.insertStar();
-			model1.insertSlash();
+			model1.insertChar('*');
+			model1.insertChar('/');
 			// /*{*/#
 			model1.move(-2);
 			assertEquals("#1.0",ReducedToken.FREE,
 									 model1.currentToken().getState());
 			model1.move(1);
-			model1.insertOpenSquiggly();
+			model1.insertChar('{');
 			model1.move(0);
       // /*{*{#/
 			model1.move(-1);
@@ -229,10 +229,10 @@ public class ReducedModelTest extends TestCase {
 
 	public void testCrazyCase1()
 		{
-			model1.insertSlash();
+			model1.insertChar('/');
 			model1.insertGap(4);
-			model1.insertStar();
-			model1.insertSlash();
+			model1.insertChar('*');
+			model1.insertChar('/');
 			//should not form an end block comment
 			model1.move(-1);
 			assertEquals("#0.0","/",model1.currentToken().getType());
@@ -241,7 +241,7 @@ public class ReducedModelTest extends TestCase {
 			// /____#*/
 			
 			model1.move(1);
-			model1.insertSlash();
+			model1.insertChar('/');
 			// /____*/#/
 			assertEquals("#1.0",2,model1.currentToken().getSize());
 			model1.move(-2);
@@ -249,7 +249,7 @@ public class ReducedModelTest extends TestCase {
 			assertEquals("#1.0","*",model1.currentToken().getType());
 
 			model1.move(-4);
-			model1.insertStar();
+			model1.insertChar('*');
 			// /*#____*//
 			model1.move(-2);
 			assertEquals("#2.0","/*",model1.currentToken().getType());
@@ -268,10 +268,10 @@ public class ReducedModelTest extends TestCase {
 	/**Test sequences of inserts*/
 	public void testCrazyCase2()
 		{
-			model1.insertSlash();
+			model1.insertChar('/');
 			model1.insertGap(4);
 			model1.move(-2);
-			model1.insertSlash();
+			model1.insertChar('/');
 			model1.move(0);
 			model1.move(-3);
 			//check that double slash works.
@@ -281,7 +281,7 @@ public class ReducedModelTest extends TestCase {
 			assertEquals("#0.2", 1, model1.currentToken().getSize());
 			assertEquals("#0.1", "/", model1.currentToken().getType());
 			model1.move(-2);
-			model1.insertSlash();
+			model1.insertChar('/');
 			model1.move(-2);
 			assertEquals("#1.1", "//", model1.currentToken().getType());
 			assertEquals("#1.3",ReducedToken.FREE,
@@ -301,15 +301,15 @@ public class ReducedModelTest extends TestCase {
 	
 	public void testLineCommentBreakCrazy()
 		{
-			model1.insertSlash();
-			model1.insertSlash();
+			model1.insertChar('/');
+			model1.insertChar('/');
 			model1.insertGap(4);
 			model1.move(-2);
-			model1.insertSlash();
+			model1.insertChar('/');
 			// //#__/__
 //break line comment simultaneously forming a new line comment
 			model1.move(-4);
-			model1.insertSlash();
+			model1.insertChar('/');
 			model1.move(0);
 			 // //#/__/__
 			
@@ -329,7 +329,7 @@ public class ReducedModelTest extends TestCase {
 									 model1.currentToken().getState());
 			//break line comment forming a block comment
 			model1.move(-2);
-			model1.insertStar();//  ///__/__ 
+			model1.insertChar('*');//  ///__/__ 
 			model1.move(0);
       // /*#//__/__
 			model1.move(-2);
@@ -352,17 +352,17 @@ public class ReducedModelTest extends TestCase {
 	public void testBreakBlockCommentWithStar()
 		{
 			// /*#//__/__
-			model1.insertSlash();
-			model1.insertStar();
-			model1.insertSlash();
-			model1.insertSlash();
+			model1.insertChar('/');
+			model1.insertChar('*');
+			model1.insertChar('/');
+			model1.insertChar('/');
 			model1.insertGap(2);
-			model1.insertSlash();
+			model1.insertChar('/');
 			model1.insertGap(2);
 			
 			//break block comment start with a star.
 			model1.move(-8);
-			model1.insertStar();
+			model1.insertChar('*');
 			
 			 // /*#*//__/__			
 			model1.move(-2);
@@ -384,13 +384,13 @@ public class ReducedModelTest extends TestCase {
 
 	public void testBreakCloseBlockCommentWithStar()
 		{
-			model1.insertSlash();
-			model1.insertStar();
-			model1.insertStar();
-			model1.insertSlash();
-			model1.insertSlash();
+			model1.insertChar('/');
+			model1.insertChar('*');
+			model1.insertChar('*');
+			model1.insertChar('/');
+			model1.insertChar('/');
 			model1.insertGap(2);
-			model1.insertSlash();
+			model1.insertChar('/');
 			model1.insertGap(2);
 
 			model1.move(-7);
@@ -415,10 +415,10 @@ public class ReducedModelTest extends TestCase {
 
 	public void testBasicBlockComment()
 		{
-			model1.insertSlash();
-			model1.insertStar();
-			model1.insertStar();
-			model1.insertSlash();
+			model1.insertChar('/');
+			model1.insertChar('*');
+			model1.insertChar('*');
+			model1.insertChar('/');
 			model1.move(-4);
 			assertEquals("0.1",ReducedToken.FREE,
 									 model1.currentToken().getState());
@@ -430,7 +430,7 @@ public class ReducedModelTest extends TestCase {
 			assertEquals("0.4","*/",
 									 model1.currentToken().getType());
 
-			model1.insertSlash();
+			model1.insertChar('/');
 			model1.move(-1);
 			assertEquals("1.1",ReducedToken.INSIDE_BLOCK_COMMENT,
 									 model1.currentToken().getState());
@@ -446,14 +446,14 @@ public class ReducedModelTest extends TestCase {
 	
 	public void testInsertBlockInsideBlockComment()
 		{
-			model1.insertSlash();
-			model1.insertStar();
-			model1.insertSlash();
-			model1.insertStar();
-			model1.insertSlash();
+			model1.insertChar('/');
+			model1.insertChar('*');
+			model1.insertChar('/');
+			model1.insertChar('*');
+			model1.insertChar('/');
 			///*/*/#
 			model1.move(-2);
-			model1.insertStar();
+			model1.insertChar('*');
 			///*/*#*/
 			model1.move(-1);
 			assertEquals("1.1",ReducedToken.INSIDE_BLOCK_COMMENT,
@@ -471,8 +471,8 @@ public class ReducedModelTest extends TestCase {
 	
 	public void testInsertBlockCommentEnd()
 		{//should not form an end without a start.
-			model1.insertStar();
-			model1.insertSlash();
+			model1.insertChar('*');
+			model1.insertChar('/');
 			model1.move(-1);
 			assertEquals("#3.0", "/", model1.currentToken().getType());
 			assertEquals("#3.1", 1, model1.currentToken().getSize());						
@@ -483,13 +483,13 @@ public class ReducedModelTest extends TestCase {
 			assertEquals("#0.0", ReducedToken.FREE, model1.getStateAtCurrent());
 			assertEquals("#0.1", ReducedToken.FREE, model1.getStateAtCurrent());
 
-			model1.insertOpenParen();
+			model1.insertChar('(');
 			model1.move(-1);
 			assertEquals("#1.0", ReducedToken.FREE,
 									 model1.currentToken().getState());
 			model1.move(1);
-			model1.insertSlash();
-			model1.insertSlash();
+			model1.insertChar('/');
+			model1.insertChar('/');
 			model1.move(-2);
 			assertEquals("#2.0", ReducedToken.FREE,
 									 model1.currentToken().getState());
@@ -498,8 +498,8 @@ public class ReducedModelTest extends TestCase {
 						 model1.getStateAtCurrent());
 			// {//#
 			model1.move(-3);
-			model1.insertSlash();
-			model1.insertSlash();
+			model1.insertChar('/');
+			model1.insertChar('/');
 			// //#{//
 			model1.move(-2);
 			assertEquals("#3.0", ReducedToken.FREE,
@@ -522,8 +522,8 @@ public class ReducedModelTest extends TestCase {
 
 	public void testQuotesSimple()
 		{
-			model1.insertQuote();
-			model1.insertQuote();
+			model1.insertChar('\"');
+			model1.insertChar('\"');
 			model1.move(-2);
 			assertEquals("#0.0", "\"", model1.currentToken().getType());
 			assertEquals("#0.3", ReducedToken.FREE,
@@ -538,8 +538,8 @@ public class ReducedModelTest extends TestCase {
 
 	public void testQuotesWithGap()
 		{
-			model1.insertQuote();
-			model1.insertQuote();
+			model1.insertChar('\"');
+			model1.insertChar('\"');
 			model1.move(-2);
 			assertEquals("#0.1", "\"", model1.currentToken().getType());
 			assertEquals("#0.3", ReducedToken.FREE,
@@ -565,7 +565,7 @@ public class ReducedModelTest extends TestCase {
 			assertEquals("#1.4", ReducedToken.INSIDE_QUOTE,
 									 model1.getStateAtCurrent());
 			model1.move(-2);
-			model1.insertSlash();
+			model1.insertChar('/');
 			// "__/__"
 			model1.move(-1);
 			assertEquals("#2.1", "/", model1.currentToken().getType());
@@ -583,13 +583,13 @@ public class ReducedModelTest extends TestCase {
 
 	public void testInsertQuoteToQuoteBlock()
 		{
-			model1.insertQuote();
+			model1.insertChar('\"');
 			model1.insertGap(2);
-			model1.insertSlash();
+			model1.insertChar('/');
 			model1.insertGap(2);
-			model1.insertQuote();
+			model1.insertChar('\"');
 			model1.move(-3);
-			model1.insertQuote();
+			model1.insertChar('\"');
 			// "__/"#__"
 			model1.move(-1);
 			assertEquals("#3.1", "\"", model1.currentToken().getType());
@@ -627,7 +627,7 @@ public class ReducedModelTest extends TestCase {
 // "__/#"__"
 
 			//break quote with newline
-			model1.insertNewline();
+			model1.insertChar('\n');
 			// "__\n#/"__"
 			model1.move(-1);
 			assertEquals("#5.5", ReducedToken.FREE,
@@ -648,12 +648,12 @@ public class ReducedModelTest extends TestCase {
 
 	public void testQuoteBreaksComment()
 		{
-			model1.insertSlash();
-			model1.insertStar();
-			model1.insertStar();
-			model1.insertSlash();
+			model1.insertChar('/');
+			model1.insertChar('*');
+			model1.insertChar('*');
+			model1.insertChar('/');
 			model1.move(-2);
-			model1.insertQuote();			
+			model1.insertChar('\"');			
 			model1.move(-1);
 			// /*#"*/
 			model1.move(-2);
@@ -669,7 +669,7 @@ public class ReducedModelTest extends TestCase {
 									 model1.currentToken().getState());
 			model1.move(-3);
 			// #/*"*/
-			model1.insertQuote();
+			model1.insertChar('\"');
 
 			model1.move(-1);
 			assertEquals("#2.2", ReducedToken.FREE,
@@ -699,17 +699,17 @@ public class ReducedModelTest extends TestCase {
 
 	public void testQuoteBreakComment2()
 		{
-			model1.insertSlash();
-			model1.insertStar();
-			model1.insertStar();
-			model1.insertSlash();
+			model1.insertChar('/');
+			model1.insertChar('*');
+			model1.insertChar('*');
+			model1.insertChar('/');
 			model1.move(-4);
 			assertEquals("#0.0", "/*", model1.currentToken().getType());
 			model1.move(2);
 			assertEquals("#0.1", "*/", model1.currentToken().getType());
 			model1.move(-2);
 			// "#/**/
-			model1.insertQuote();
+			model1.insertChar('\"');
 			model1.move(-1);
 			assertEquals("#1.0", ReducedToken.FREE,
 									 model1.currentToken().getState());
@@ -728,11 +728,11 @@ public class ReducedModelTest extends TestCase {
 
 	public void testInsertNewlineEndLineComment()
 		{
-			model1.insertSlash();
-			model1.insertSlash();
+			model1.insertChar('/');
+			model1.insertChar('/');
 			model1.insertGap(5);
 			model1.move(-2);
-			model1.insertNewline();
+			model1.insertChar('\n');
 			// //___\n#__
 			model1.move(-1);
 			assertEquals("#0.2", "\n", model1.currentToken().getType());
@@ -750,10 +750,10 @@ public class ReducedModelTest extends TestCase {
 
 	public void testInsertNewlineEndQuote()
 		{
-			model1.insertQuote();
+			model1.insertChar('\"');
 			model1.insertGap(5);
 			model1.move(-2);
-			model1.insertNewline();
+			model1.insertChar('\n');
 			// "___\n#__
 			model1.move(-1);
 			assertEquals("#0.4", ReducedToken.FREE,
@@ -770,10 +770,10 @@ public class ReducedModelTest extends TestCase {
 
 	public void testInsertNewlineChainReaction()
 		{
-			model1.insertSlash();
-			model1.insertSlash();
-			model1.insertSlash();
-			model1.insertStar();
+			model1.insertChar('/');
+			model1.insertChar('/');
+			model1.insertChar('/');
+			model1.insertChar('*');
 			// ///*#
 			model1.move(-1);
 			// ///#*
@@ -789,10 +789,10 @@ public class ReducedModelTest extends TestCase {
 									 model1.currentToken().getState());
 			
 			model1.move(1);
-			model1.insertNewline();
-			model1.insertQuote();
-			model1.insertStar();
-			model1.insertSlash();
+			model1.insertChar('\n');
+			model1.insertChar('\"');
+			model1.insertChar('*');
+			model1.insertChar('/');
 			model1.move(-1);
 			// ///*
 			// "*#/
@@ -808,7 +808,7 @@ public class ReducedModelTest extends TestCase {
 
 			assertEquals("#2.1", "/", model1.currentToken().getType());
 
-			model1.insertNewline();
+			model1.insertChar('\n');
 			// //
 			// #/*
 			// "*/
@@ -883,11 +883,11 @@ public class ReducedModelTest extends TestCase {
 
   public void testMove0StaysPut()
   {
-    model0.insertSlash();
+    model0.insertChar('/');
     assertEquals("#1", 1, model0.absOffset());
     model0.move(0);
     assertEquals("#2", 1, model0.absOffset());
-    model0.insertSlash();
+    model0.insertChar('/');
     assertEquals("#3", 2, model0.absOffset());
     model0.move(0);
     assertEquals("#4", 2, model0.absOffset());
@@ -903,26 +903,26 @@ public class ReducedModelTest extends TestCase {
 		{
 			assertEquals("#0.0", ReducedToken.FREE, model0.getStateAtCurrent());
 
-			model0.insertSlash();
-			model0.insertStar();
+			model0.insertChar('/');
+			model0.insertChar('*');
 			assertEquals("#0.1", ReducedToken.INSIDE_BLOCK_COMMENT,
 									 model0.getStateAtCurrent());
 
-			model1.insertSlash();
-			model1.insertSlash();
+			model1.insertChar('/');
+			model1.insertChar('/');
 			assertEquals("#0.2", ReducedToken.INSIDE_LINE_COMMENT,
 									 model1.getStateAtCurrent());
 
-			model1.insertOpenParen();
+			model1.insertChar('(');
 			assertEquals("#0.3", ReducedToken.INSIDE_LINE_COMMENT,
 									 model1.getStateAtCurrent());
 
-			model1.insertNewline();
+			model1.insertChar('\n');
 			assertEquals("#0.4", ReducedToken.FREE,
 									 model1.getStateAtCurrent());
 
-			model0.insertStar();
-			model0.insertSlash();
+			model0.insertChar('*');
+			model0.insertChar('/');
 			assertEquals("#0.4", ReducedToken.FREE,
 									 model0.getStateAtCurrent());
 
@@ -934,19 +934,19 @@ public class ReducedModelTest extends TestCase {
 		{
 			assertEquals("#0.0", ReducedToken.FREE,
 									 model0.getStateAtCurrent());
-			model0.insertQuote();
+			model0.insertChar('\"');
 			assertEquals("#0.1", ReducedToken.INSIDE_QUOTE,
 									 model0.getStateAtCurrent());
-			model1.insertQuote();
+			model1.insertChar('\"');
 
 			assertEquals("#0.2", ReducedToken.INSIDE_QUOTE,
 									 model1.getStateAtCurrent());
 
-			model1.insertOpenParen();
+			model1.insertChar('(');
 			assertEquals("#0.3", ReducedToken.INSIDE_QUOTE,
 									 model1.getStateAtCurrent());
 
-			model1.insertQuote();
+			model1.insertChar('\"');
 			assertEquals("#0.4", ReducedToken.FREE,
 									 model1.getStateAtCurrent());
 		}
@@ -955,12 +955,12 @@ public class ReducedModelTest extends TestCase {
 	public void testInsertBraces()
 		{
 			assertEquals("#0.0", 0, model0.absOffset());
-			model0.insertSlash();
+			model0.insertChar('/');
       // /#
       assertEquals("#1.0", ReducedToken.FREE,
 									 model0.getStateAtCurrent());
       
-			model0.insertStar();
+			model0.insertChar('*');
       // /*#
       assertEquals("#2.0", ReducedToken.INSIDE_BLOCK_COMMENT,
 									 model0.getStateAtCurrent());
@@ -970,7 +970,7 @@ public class ReducedModelTest extends TestCase {
       // /#*
 			assertEquals("#3.0", 1, model0.absOffset());
 
-      model0.insertOpenParen();
+      model0.insertChar('(');
       // /(#*
       assertEquals("#4.0", ReducedToken.FREE,
 									 model0.getStateAtCurrent());      
@@ -985,12 +985,12 @@ public class ReducedModelTest extends TestCase {
 									 model0.getStateAtCurrent());
 
 
-			model0.insertStar();
+			model0.insertChar('*');
       // /**#
 			assertEquals("#6.0",ReducedToken.INSIDE_BLOCK_COMMENT,
 									 model0.getStateAtCurrent());
 			
-			model0.insertSlash();
+			model0.insertChar('/');
       // /**/#
 			assertEquals("#7.0", 4, model0.absOffset());
 			assertEquals("#7.1", ReducedToken.FREE,
@@ -1002,7 +1002,7 @@ public class ReducedModelTest extends TestCase {
 									 model0.getStateAtCurrent());
 			assertEquals("#8.1", 2, model0.absOffset());
 
-			model0.insertOpenParen();
+			model0.insertChar('(');
 			assertEquals("#9.0", ReducedToken.INSIDE_BLOCK_COMMENT,
 									 model0.getStateAtCurrent());
       // /*(#*/
@@ -1030,7 +1030,7 @@ public class ReducedModelTest extends TestCase {
       // /*(__#__*/
 			assertEquals("#13.0", 5, model0.absOffset());
 
-			model0.insertClosedParen();
+			model0.insertChar(')');
       // /*(__)#__*/
 			assertEquals("#14.0", 6, model0.absOffset());
 
@@ -1046,11 +1046,11 @@ public class ReducedModelTest extends TestCase {
 	
 	public void testInsertGap2()
 		{
-			model0.insertSlash();
-			model0.insertStar();
+			model0.insertChar('/');
+			model0.insertChar('*');
 			model0.insertGap(5);
 			assertEquals("#0.0",7, model0.absOffset());
-			model0.insertOpenParen();
+			model0.insertChar('(');
 			model0.move(-1);
 			model0.insertGap(3);
 			assertEquals("#1.0", 10, model0.absOffset());
@@ -1060,13 +1060,13 @@ public class ReducedModelTest extends TestCase {
 	
 	public void testMove()
 		{
-			model0.insertOpenParen();
+			model0.insertChar('(');
 			model0.insertGap(5);
-			model0.insertClosedParen();
-			model0.insertNewline();
+			model0.insertChar(')');
+			model0.insertChar('\n');
 			model0.insertGap(2);
-			model0.insertOpenSquiggly();
-			model0.insertClosedSquiggly();
+			model0.insertChar('{');
+			model0.insertChar('}');
 			try {
 				model0.move(-30);
 				assertTrue("#0.0", false);
@@ -1097,35 +1097,35 @@ public class ReducedModelTest extends TestCase {
 	protected ReducedModelControl setUpExample()
 		{
 			ReducedModelControl model = new ReducedModelControl();
-			model.insertOpenSquiggly();
-			model.insertNewline();
+			model.insertChar('{');
+			model.insertChar('\n');
 			model.insertGap(3);
-			model.insertNewline();
-			model.insertOpenParen();
+			model.insertChar('\n');
+			model.insertChar('(');
 			model.insertGap(2);
-			model.insertClosedParen();
-			model.insertNewline();
+			model.insertChar(')');
+			model.insertChar('\n');
 			model.insertGap(3);
-			model.insertSlash();
-			model.insertSlash();
+			model.insertChar('/');
+			model.insertChar('/');
 			model.insertGap(3);
-			model.insertNewline();
-			model.insertQuote();
+			model.insertChar('\n');
+			model.insertChar('\"');
 			model.insertGap(1);
-			model.insertOpenSquiggly();
+			model.insertChar('{');
 			model.insertGap(1);
-			model.insertQuote();
-			model.insertSlash();
-			model.insertStar();
+			model.insertChar('\"');
+			model.insertChar('/');
+			model.insertChar('*');
 			model.insertGap(1);
-			model.insertOpenParen();
+			model.insertChar('(');
 			model.insertGap(1);
-			model.insertClosedParen();
+			model.insertChar(')');
 			model.insertGap(1);
-			model.insertStar();
-			model.insertSlash();
-			model.insertNewline();
-			model.insertClosedSquiggly();
+			model.insertChar('*');
+			model.insertChar('/');
+			model.insertChar('\n');
+			model.insertChar('}');
 			// {
 			// ___
 			// (__)
@@ -1156,11 +1156,11 @@ public class ReducedModelTest extends TestCase {
 			model0.move(-20);
 			assertEquals(-1, model0.balanceForward());
 
-			model1.insertOpenParen();
+			model1.insertChar('(');
 			model1.move(-1);
 			assertEquals("#7.0", -1, model1.balanceForward());
 			model1.move(1);
-			model1.insertClosedSquiggly();
+			model1.insertChar('}');
 			model1.move(-1);
 			assertEquals("#8.0", -1, model1.balanceForward());			
 		}
@@ -1186,10 +1186,10 @@ public class ReducedModelTest extends TestCase {
 			model0.move(-10);
 			assertEquals("#5.0", -1, model0.balanceBackward());			
 
-			model1.insertClosedParen();
+			model1.insertChar(')');
 			assertEquals("#6.0", -1, model1.balanceBackward());
 			model1.move(-1);
-			model1.insertOpenSquiggly();
+			model1.insertChar('{');
 			model1.move(1);
 			assertEquals("#7.0", -1, model1.balanceBackward());
 		}
