@@ -436,6 +436,11 @@ public class ConfigFrame extends JFrame {
     panel.addComponent(new BooleanOptionComponent(OptionConstants.LINEENUM_ENABLED,
                                                   "Line Number Enumeration", this,
                                                   "Whether to show line numbers on the left side of the Definitions Pane."));
+    if (CodeStatus.DEVELOPMENT) {
+      panel.addComponent(new ForcedChoiceOptionComponent(OptionConstants.LOOK_AND_FEEL,
+                                                         "Look and Feel", this,
+                                                         "Sets the look and feel DrJava should use"));
+    }
     panel.displayComponents();
   }
    
@@ -652,6 +657,11 @@ public class ConfigFrame extends JFrame {
     panel.addComponent(new BooleanOptionComponent(OptionConstants.WARN_BREAKPOINT_OUT_OF_SYNC, "Warn on Breakpoint If out of Sync", this,
                                                   "<html>Whether DrJava should prompt the user if the class file<br>" +
                                                   "is out of sync before setting a breakpoint in that file</html>."));
+    if (CodeStatus.DEVELOPMENT) {
+      panel.addComponent(new BooleanOptionComponent(OptionConstants.WARN_CHANGE_LAF, "Warn to Restart to Change Look and Feel", this,
+                                                    "<html>Whether DrJava should warn the user that look and feel<br>" +
+                                                    "changes will not be applied until DrJava is restarted.</html>."));
+    }
 
     panel.displayComponents();
   }

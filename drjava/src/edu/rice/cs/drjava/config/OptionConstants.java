@@ -43,13 +43,16 @@ import java.util.Vector;
 import java.util.ArrayList;
 import java.awt.Color;
 import java.awt.Font;
-import edu.rice.cs.drjava.DrJava;
-import javax.swing.KeyStroke;
+import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 import java.awt.event.InputEvent;
-import java.awt.Toolkit;
+import javax.swing.KeyStroke;
+import javax.swing.LookAndFeel;
+import javax.swing.UIManager;
+import javax.swing.UIManager.LookAndFeelInfo;
+import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.CodeStatus;
-import java.util.ArrayList;
+import edu.rice.cs.drjava.platform.PlatformFactory;
 
 /**
  * @version $Id$
@@ -163,7 +166,60 @@ public interface OptionConstants {
    */
   public static final BooleanOption TEXT_ANTIALIAS =
     new BooleanOption("text.antialias", Boolean.FALSE);
-  
+
+  /**
+   * The current look and feel.
+   */
+  public static final ForcedChoiceOption LOOK_AND_FEEL =
+    new ForcedChoiceOption("look.and.feel",
+                           LookAndFeels.getDefaultLookAndFeel(),
+                           LookAndFeels.getLookAndFeels());
+
+  /**
+   * Class that allows the look and feels to be initialized properly.
+   */
+  static class LookAndFeels {
+    /**
+     * Mac platform should default to aqua; use metal elsewhere.
+     * @return the look-and-feel to use by default
+     */
+    public static String getDefaultLookAndFeel() {
+      if (PlatformFactory.ONLY.isMacPlatform()) {
+        return UIManager.getSystemLookAndFeelClassName();
+      }
+      else {
+        return UIManager.getCrossPlatformLookAndFeelClassName();
+      }
+    }
+    /**
+     * Need to ensure that a look-and-feel can be instantiated and is valid.
+     * TODO:  store the LookAndFeel object rather than its classname.
+     *        This would be much nicer, as we could display a useful name,
+     *        and wouldn't have to reinstantiate it when it's installed.
+     * @return the list of availabe look-and-feel classnames
+     */
+    public static ArrayList<String> getLookAndFeels() {
+      ArrayList<String> lookAndFeels = new ArrayList<String>();
+      LookAndFeelInfo[] lafis = UIManager.getInstalledLookAndFeels();
+      if (lafis != null) {
+        for (int i = 0; i < lafis.length; i++) {
+          try {
+            String currName = lafis[i].getClassName();
+            LookAndFeel currLAF = (LookAndFeel) Class.forName(currName).newInstance();
+            if (currLAF.isSupportedLookAndFeel()) {
+              lookAndFeels.add(currName);
+            }
+          }
+          catch (Exception ex) {
+            // failed to load/instantiate class, or it is not supported.
+            // It is not a valid choice.
+          }
+        }
+      }
+      return lookAndFeels;
+    }
+  }
+
   /* ---------- Key Binding Options ----------- */
   static int mask = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
   /**
@@ -725,6 +781,12 @@ public interface OptionConstants {
     new BooleanOption("warn.breakpoint.out.of.sync", Boolean.TRUE);
 
   /**
+   * Whether to warn that a restart is necessary before the look and feel will change.
+   */
+  public static final BooleanOption WARN_CHANGE_LAF =
+    new BooleanOption("warn.change.laf", Boolean.TRUE);
+
+  /**
    * Whether to make file backups
    */
   public static final BooleanOption BACKUP_FILES =
@@ -749,5 +811,3 @@ public interface OptionConstants {
   public static final StringOption BROWSER_STRING =
     new StringOption("browser.string", "");
 }
-
-

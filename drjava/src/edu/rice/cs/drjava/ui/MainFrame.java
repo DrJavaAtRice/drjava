@@ -1250,14 +1250,51 @@ public class MainFrame extends JFrame implements OptionConstants {
         if (oe.value != FileOption.NULL_FILE) {
           boolean checkForV20 = DrJava.checkForJSR14v20();
           if (checkForV20 && !bootClasspathHasv2) {
-            JOptionPane.showMessageDialog(MainFrame.this,
+            JOptionPane.showMessageDialog(_configFrame,
                                           "You must restart DrJava in order to use the JSR14 v2.0 compiler.",
                                           "JSR14 Warning", JOptionPane.WARNING_MESSAGE);
           }
           else if (!checkForV20 && bootClasspathHasv2) {
-            JOptionPane.showMessageDialog(MainFrame.this,
+            JOptionPane.showMessageDialog(_configFrame,
                                           "You must restart DrJava in order to switch to earlier versions of the JSR14 compiler.",
                                           "JSR14 Warning", JOptionPane.WARNING_MESSAGE);
+          }
+        }
+      }
+    });
+    DrJava.getConfig().addOptionListener(OptionConstants.LOOK_AND_FEEL, new OptionListener<String>() {
+      public void optionChanged(OptionEvent<String> oe) {
+        /*
+        try {
+          UIManager.setLookAndFeel(oe.value);
+          SwingUtilities.updateComponentTreeUI(MainFrame.this);
+          if (_configFrame != null) {
+            SwingUtilities.updateComponentTreeUI(_configFrame);
+          }
+          if (_javadocFrame != null) {
+            SwingUtilities.updateComponentTreeUI(_javadocFrame);
+          }
+          if (_helpFrame != null) {
+            SwingUtilities.updateComponentTreeUI(_helpFrame);
+          }
+          if (_aboutDialog != null) {
+            SwingUtilities.updateComponentTreeUI(_aboutDialog);
+          }
+        }
+        catch (Exception ex) {
+          _showError(ex, "Could Not Set Look and Feel",
+                     "An error occurred while trying to set the look and feel.");
+        }*/
+        String title = "Apply Look and Feel";
+        String msg = "Look and feel changes will take effect when you restart DrJava.";
+        if (DrJava.getConfig().getSetting(OptionConstants.WARN_CHANGE_LAF).booleanValue()) {
+          ConfirmCheckBoxDialog dialog =
+            new ConfirmCheckBoxDialog(_configFrame, title, msg,
+                                      "Do not show this message again",
+                                      JOptionPane.INFORMATION_MESSAGE,
+                                      JOptionPane.DEFAULT_OPTION);
+          if (dialog.show() == JOptionPane.OK_OPTION && dialog.getCheckBoxValue()) {
+            DrJava.getConfig().setSetting(OptionConstants.WARN_CHANGE_LAF, Boolean.FALSE);
           }
         }
       }
@@ -4509,4 +4546,3 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
   }
 }
-

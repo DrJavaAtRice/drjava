@@ -51,14 +51,14 @@ import java.util.Iterator;
  */
 public class ForcedChoiceOption extends Option<String>
 {
-  private Collection _choices;
+  private Collection<String> _choices;
   
   /**
    * @param key The name of this option.
    * @param def The default value of the option.
    * @param choices A collection of all possible values of this Option, as Strings.
    */
-  public ForcedChoiceOption(String key, String def, Collection choices) {
+  public ForcedChoiceOption(String key, String def, Collection<String> choices) {
     super(key,def);
     _choices = choices;
   }
@@ -78,7 +78,7 @@ public class ForcedChoiceOption extends Option<String>
    * Gets all legal values of this option.
    * @return an Iterator containing the set of all Strings for which isLegal returns true.
    */
-  public Iterator getLegalValues() {
+  public Iterator<String> getLegalValues() {
     return _choices.iterator();
   }
   

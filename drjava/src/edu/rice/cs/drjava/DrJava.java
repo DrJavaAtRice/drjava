@@ -135,6 +135,10 @@ public class DrJava implements OptionConstants {
           throw new UnexpectedException(ise);
         }
 
+        if (CodeStatus.DEVELOPMENT) {
+          UIManager.setLookAndFeel(_config.getSetting(LOOK_AND_FEEL));
+        }
+
         _usingJSR14v20 = checkForJSR14v20();
 
         checkForCompilersAndDebugger(args);

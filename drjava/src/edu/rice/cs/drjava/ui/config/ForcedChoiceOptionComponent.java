@@ -53,28 +53,25 @@ import java.util.Iterator;
  * @version $Id$
  */
 public class ForcedChoiceOptionComponent extends OptionComponent<String> {
-  
+
   private JComboBox _comboBox;
-  
+
   /**
    * Main constructor builds a panel containing a set of radio buttons for the
    * legal values of the ForcedChoiceOption.
    */
   public ForcedChoiceOptionComponent(ForcedChoiceOption option, String labelText, Frame parent) {
     super(option, labelText, parent);
-    
+
     // Build the combo box from the Iterator of legal values
-    Iterator values = ((ForcedChoiceOption)_option).getLegalValues();
-    int numValues = ((ForcedChoiceOption)_option).getNumValues();
+    Iterator<String> values = option.getLegalValues();
     _comboBox = new JComboBox();
-    int i = 0;
-    
+
     while(values.hasNext()) {
-      String currValue = (String)values.next();
+      String currValue = values.next();
       _comboBox.addItem(currValue);
-      i++;
     }
-      
+
     resetToCurrent(DrJava.getConfig().getSetting(_option));
   }
   
@@ -101,7 +98,7 @@ public class ForcedChoiceOptionComponent extends OptionComponent<String> {
    */ 
   public void resetToCurrent(String current) {
     _comboBox.setSelectedItem(current);
-    //String current = DrJava.getConfig().getSetting(_option);
+//    String current = DrJava.getConfig().getSetting(_option);
 //    Iterator values = ((ForcedChoiceOption)_option).getLegalValues();
 //    int i = 0;
 //    
@@ -112,16 +109,15 @@ public class ForcedChoiceOptionComponent extends OptionComponent<String> {
 //      }
 //      i++;
 //    }
-      
   }
-  
+
   /**
    * Return's this OptionComponent's configurable component.
    */
   public JComponent getComponent() {
     return _comboBox;
   }
-  
+
   /**
    * Updates the config object with the new setting.
    * @return true if the new value is set successfully
@@ -136,13 +132,11 @@ public class ForcedChoiceOptionComponent extends OptionComponent<String> {
     
     return true;
   }
-  
-  
+
   /**
    * Displays the given value.
    */
   public void setValue(String value) {
     resetToCurrent(value);
   }
-  
 }
