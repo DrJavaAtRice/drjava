@@ -39,7 +39,10 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.util.text;
 
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
 
 import junit.framework.TestCase;
 
@@ -48,6 +51,8 @@ import junit.framework.TestCase;
  * 
  * NOTE: To run this test, you have to put the correct SWT directory on
  * your java.library.path...  (eg. org.eclipse.swt.motif_2.1.0/os/linux/x86)
+ * On Linux, you can set your LD_LIBRARY_PATH to include this.  On other
+ * platforms, you must start java with -Djava.library.path=...
  * 
  * @version $Id$
  */
@@ -57,17 +62,31 @@ public class SWTDocumentAdapterTest extends TestCase {
   // TO DO:
   //  - Figure out how to instantiate a StyledText for a unit test...
   
+  protected Display _display;
+  protected Shell _shell;
   protected StyledText _pane;
   protected SWTDocumentAdapter _doc;
   
+  /**
+   * Creates a new SWTDocumentAdapter for the tests.
+   */
   public void setUp() {
-    _pane = new StyledText(null, 0);  // this doesn't work...
+    _display = new Display();
+    _shell = new Shell(_display, SWT.TITLE | SWT.CLOSE);
+    _pane = new StyledText(_shell, 0);
     _doc = new SWTDocumentAdapter(_pane);
   }
   
+  /**
+   * Disposes any Eclipse resources that were created.
+   */
   public void tearDown() {
     _doc = null;
     _pane = null;
+    _shell.dispose();
+    _shell = null;
+    _display.dispose();
+    _display = null;
     System.gc();
   }
   

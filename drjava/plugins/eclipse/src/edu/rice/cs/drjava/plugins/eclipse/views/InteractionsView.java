@@ -41,10 +41,13 @@ package edu.rice.cs.drjava.plugins.eclipse.views;
 
 import org.eclipse.ui.part.*;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.SWT;
 
-import edu.rice.cs.drjava.model.repl.SimpleInteractionsDocument;
+import edu.rice.cs.drjava.plugins.eclipse.repl.EclipseInteractionsModel;
+import edu.rice.cs.drjava.model.repl.SimpleInteractionsModel;
 import edu.rice.cs.util.text.SWTDocumentAdapter;
 
 /**
@@ -54,11 +57,9 @@ import edu.rice.cs.util.text.SWTDocumentAdapter;
  */
 public class InteractionsView extends ViewPart {
   
-  // TO DO:
-  //  - How to generate a beep?
-  
   /**
    * Glue code between the model and view.
+   * We have to have a reference to it so we can dispose it.
    */
   protected InteractionsController _controller;
   
@@ -68,9 +69,40 @@ public class InteractionsView extends ViewPart {
   protected StyledText _styledText;
   
   /**
+   * An arrow cursor to display when the pane is not busy.
+   */
+  protected Cursor _arrowCursor;
+  
+  /**
+   * An hourglass cursor to display when the pane is busy.
+   */
+  protected Cursor _waitCursor;
+  
+  /**
+   * A runnable command to sound a beep as an alert.
+   */
+  protected Runnable _beep;
+  
+  /**
    * Constructor.
    */
   public InteractionsView() {
+    _beep = new Runnable() {
+      public void run() {
+        _styledText.getDisplay().beep();
+      }
+    };
+  }
+
+  /**
+   * Cleans up any resources this view created.
+   */
+  public void dispose() {
+    _arrowCursor.dispose();
+    _waitCursor.dispose();
+    _controller.dispose();
+    _styledText.dispose();
+    super.dispose();
   }
   
   /**
@@ -84,11 +116,14 @@ public class InteractionsView extends ViewPart {
    * Returns a command that creates a beep when run.
    */
   public Runnable getBeep() {
-    return new Runnable() {
-      public void run() {
-        _styledText.getDisplay().beep();
-      }
-    };
+    return _beep;
+  }
+  
+  /**
+   * Sets the command that creates a beep when run.
+   */
+  public void setBeep(Runnable beep) {
+    _beep = beep;
   }
   
   /**
@@ -96,10 +131,32 @@ public class InteractionsView extends ViewPart {
    */
   public void createPartControl(Composite parent) {
     // NOTE: Do not let anything instantiate the DrJava config framework here...
-    _styledText = new StyledText(parent, SWT.WRAP | SWT.V_SCROLL);
+    setTextPane(new StyledText(parent, SWT.WRAP | SWT.V_SCROLL));
+    
     SWTDocumentAdapter adapter = new SWTDocumentAdapter(_styledText);
-    SimpleInteractionsDocument doc = new SimpleInteractionsDocument(adapter);
-    _controller = new InteractionsController(adapter, doc, this);
+    EclipseInteractionsModel model = new EclipseInteractionsModel(adapter);
+    setController(new InteractionsController(model, adapter, this));
+    
+  }
+  
+  /**
+   * Sets which text pane this view uses.  Package-private; for tests only.
+   * NOTE: Should only be called once!
+   * @param text A StyledText pane to use for the text
+   */
+  void setTextPane(StyledText text) {
+    _styledText = text;
+    _arrowCursor = new Cursor(_styledText.getDisplay(), SWT.CURSOR_ARROW);
+    _waitCursor = new Cursor(_styledText.getDisplay(), SWT.CURSOR_WAIT);
+  }
+  
+  /**
+   * Sets which controller is managing this view, so we can dispose it.
+   * Package-private; for tests only.
+   * @param controller An InteractionsController managing the view
+   */
+  void setController(InteractionsController controller) {
+    _controller = controller;
   }
   
   /**
@@ -114,8 +171,45 @@ public class InteractionsView extends ViewPart {
    * Sets whether the StyledText widget is editable.
    * @param editable whether the widget should be editable
    */
-  public void setEditable(boolean editable) {
-    _styledText.setEditable(editable);
+  public void setEditable(final boolean editable) {
+    _styledText.getDisplay().syncExec(new Runnable() {
+      public void run() {
+        _styledText.setEditable(editable);
+      }
+    });
+  }
+  
+  /**
+   * Sets whether a busy (hourglass) cursor is currently shown.
+   * @param busy Whether to show a busy cursor
+   */
+  public void setBusyCursorShown(final boolean busy) {
+    _styledText.getDisplay().syncExec(new Runnable() {
+      public void run() {
+        if (busy) {
+          _styledText.setCursor(_waitCursor);
+        }
+        else {
+          _styledText.setCursor(_arrowCursor);
+        }
+      }
+    });
+  }
+  
+  /**
+   * Shows a modal dialog without halting the thread of execution.
+   * @param title Title of the dialog box
+   * @param msg Message to display
+   */
+  public void showInfoDialog(final String title, final String msg) {
+    _styledText.getDisplay().asyncExec(new Runnable() {
+      public void run() {
+        MessageBox box = new MessageBox(_styledText.getShell(), 
+                                        SWT.ICON_INFORMATION | SWT.OK);
+        box.setMessage(msg);
+        box.open();
+      }
+    });
   }
   
   /**

@@ -43,6 +43,8 @@ import org.eclipse.ui.plugin.*;
 import org.eclipse.core.runtime.*;
 import org.eclipse.core.resources.*;
 import java.util.*;
+import java.net.URL;
+import java.io.IOException;
 
 /**
  * The main plugin class to be used in the desktop.
@@ -111,5 +113,29 @@ public class EclipsePlugin extends AbstractUIPlugin {
    */
   public ResourceBundle getResourceBundle() {
     return _resourceBundle;
+  }
+
+  /**
+   * Returns the classpath containing all plugin libraries.
+   */
+  public String getPluginClasspath() throws IOException {
+    // Note: This method tries to find a local path from a URL.
+    //  It's possible that if a remote URL is returned, the
+    //  interpreter JVM won't be able to start, which could
+    //  cause the interpreter to lock up.  We should make sure
+    //  this can't happen.
+    URL installURL = getDescriptor().getInstallURL();
+    String installDir = Platform.resolve(installURL).getPath();
+    String pathSep = System.getProperty("path.separator");
+    String fileSep = System.getProperty("file.separator");
+    StringBuffer buf = new StringBuffer();
+    ILibrary[] libs = getDescriptor().getRuntimeLibraries();
+    for (int i=0; i < libs.length; i++) {
+      buf.append(installDir);
+      buf.append(fileSep);
+      buf.append(libs[i].getPath().toOSString());
+      buf.append(pathSep);
+    }
+    return buf.toString();
   }
 }

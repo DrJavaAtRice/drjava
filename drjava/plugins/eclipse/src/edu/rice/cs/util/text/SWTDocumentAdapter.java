@@ -39,7 +39,12 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.util.text;
 
+import gj.util.Hashtable;
+
 import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.custom.StyledTextContent;
+import org.eclipse.swt.custom.StyleRange;
+import org.eclipse.swt.graphics.Color;
 
 import org.eclipse.swt.events.*;
 
@@ -55,24 +60,43 @@ import org.eclipse.swt.events.*;
 public class SWTDocumentAdapter implements DocumentAdapter {
   
   // TO DO:
-  //  - Add support for styles
+  //  - Test multithreaded support
   
   /** StyledText widget containing the view. */
   protected StyledText _pane;
   
+  /** Underlying document used by the view. */
+  protected StyledTextContent _text;
+  
   /** Maps names to attribute sets */
-  //protected Hashtable<String, AttributeSet> _styles;
+  protected Hashtable<String, SWTStyle> _styles;
   
   /** Determines which edits are legal on this document. */
   protected DocumentEditCondition _condition;
+  
+  /** Whether the adapter is in a state of forcing an insertion. */
+  protected boolean _forceInsert;
+  
+  /** Whether the adapter is in a state of forcing a removal. */
+  protected boolean _forceRemove;
+  
+  /** Any exception that occurred in the most recent (asynchronous) edit. */
+  protected DocumentAdapterException _editException;
   
   /**
    * Creates a new document adapter for an SWT StyledText.
    */
   public SWTDocumentAdapter(StyledText pane) {
     _pane = pane;
-    //_styles = new Hashtable<String, AttributeSet>();
+    _text = pane.getContent();
+    _styles = new Hashtable<String, SWTStyle>();
     _condition = new DocumentEditCondition();
+    _forceInsert = false;
+    _forceRemove = false;
+    _editException = null;
+    
+    // Add a listener that enforces the condition
+    addVerifyListener(new ConditionListener());
   }
   
   /**
@@ -82,16 +106,40 @@ public class SWTDocumentAdapter implements DocumentAdapter {
   public void addVerifyListener(VerifyListener l) {
     _pane.addVerifyListener(l);
   }
+    
+  /**
+   * Removes a VerifyListener from the internal SWTStyledText.
+   * @param l VerifyListener to remove from the pane
+   */
+  public void removeVerifyListener(VerifyListener l) {
+    _pane.removeVerifyListener(l);
+  }
   
   /**
-   * Adds the given AttributeSet as a style with the given name.
-   * It can then be used in insertString.
-   * @param name Name of the style, to be passed to insertString
-   * @param s AttributeSet to use for the style
+   * Adds a ModifyListener to the internal SWTStyledText.
+   * @param l ModifyListener to add to the pane
    */
-  //public void addDocStyle(String name, AttributeSet s) {
-    //_styles.put(name, s);
-  //}
+  public void addModifyListener(ModifyListener l) {
+    _pane.addModifyListener(l);
+  }
+    
+  /**
+   * Removes a ModifyListener from the internal SWTStyledText.
+   * @param l ModifyListener to remove from the pane
+   */
+  public void removeModifyListener(ModifyListener l) {
+    _pane.removeModifyListener(l);
+  }
+  
+  /**
+   * Adds the given SWTStyle as a style with the given name.
+   * It can then be used in insertText.
+   * @param name Name of the style, to be passed to insertText
+   * @param s SWTStyle to use for the style
+   */
+  public void addDocStyle(String name, SWTStyle s) {
+    _styles.put(name, s);
+  }
   
   /**
    * Gets the object which can determine whether an insert
@@ -137,18 +185,43 @@ public class SWTDocumentAdapter implements DocumentAdapter {
    * added using addStyle.
    * @throws DocumentAdapterException if the offset is illegal
    */
-  public void forceInsertText(int offs, String str, String style)
+  public synchronized void forceInsertText(final int offs, final String str, 
+                                           final String style)
     throws DocumentAdapterException 
   {
-    //AttributeSet s = null;
-    //if (style != null) {
-    //  s = _styles.get(style);
-    //}
-    try {
-      _pane.replaceTextRange(offs, 0, str);
+    SWTStyle s = null;
+    if (style != null) {
+      s = _styles.get(style);
     }
-    catch (IllegalArgumentException e) {
-      throw new DocumentAdapterException(e);
+    final SWTStyle chosenStyle = s;
+    
+    _editException = null;
+    _forceInsert = true;
+
+    // Do the insert
+    _pane.getDisplay().syncExec(new Runnable() {
+      public void run() {
+        try {
+          _pane.replaceTextRange(offs, 0, str);
+          
+          // Add the style
+          if (chosenStyle != null) {
+            StyleRange range = new StyleRange();
+            range.start = offs;
+            range.length = str.length();
+            range.fontStyle = chosenStyle.getFontStyle();
+            range.foreground = chosenStyle.getColor();
+            _pane.setStyleRange(range);
+          }
+        }
+        catch (IllegalArgumentException e) {
+          _editException = new DocumentAdapterException(e);
+        }
+      }
+    });
+    _forceInsert = false;
+    if (_editException != null) {
+      throw _editException;
     }
   }
   
@@ -170,12 +243,26 @@ public class SWTDocumentAdapter implements DocumentAdapter {
    * @param len Number of characters to remove
    * @throws DocumentAdapterException if the offset or length are illegal
    */
-  public void forceRemoveText(int offs, int len) throws DocumentAdapterException {
-    try {
-      _pane.replaceTextRange(offs, len, "");
-    }
-    catch (IllegalArgumentException e) {
-      throw new DocumentAdapterException(e);
+  public synchronized void forceRemoveText(final int offs, final int len) 
+    throws DocumentAdapterException
+  {
+    _editException = null;
+    _forceRemove = true;
+
+    // Do the remove
+    _pane.getDisplay().syncExec(new Runnable() {
+      public void run() {
+        try {
+          _pane.replaceTextRange(offs, len, "");
+        }
+        catch (IllegalArgumentException e) {
+          _editException = new DocumentAdapterException(e);
+        }
+      }
+    });
+    _forceRemove = false;
+    if (_editException != null) {
+      throw _editException;
     }
   }
   
@@ -183,7 +270,7 @@ public class SWTDocumentAdapter implements DocumentAdapter {
    * Returns the length of the document.
    */
   public int getDocLength() {
-    return _pane.getText().length();
+    return _text.getCharCount();
   }
   
   /**
@@ -194,10 +281,62 @@ public class SWTDocumentAdapter implements DocumentAdapter {
    */
   public String getDocText(int offs, int len) throws DocumentAdapterException {
     try {
-      return _pane.getTextRange(offs, len);
+      return _text.getTextRange(offs, len);
     }
     catch (IllegalArgumentException e) {
       throw new DocumentAdapterException(e);
     }
+  }
+  
+  /**
+   * A VerifyListener that enforces the current edit condition.
+   */
+  protected class ConditionListener implements VerifyListener {
+    public void verifyText(VerifyEvent e) {
+      if (e.text.length() == 0) {
+        // Remove event
+        e.doit = _canRemove(e);
+      }
+      else if (e.start == e.end) {
+        // Insert event
+        e.doit = _canInsert(e);
+      }
+      else {
+        // Replace event
+        e.doit = _canRemove(e) && _canInsert(e);
+      }
+    }
+    /** Returns whether the event should be allowed to insert. */
+    protected boolean _canInsert(VerifyEvent e) {
+      return _forceInsert ||
+        _condition.canInsertText(e.start, e.text, null);
+    }
+    /** Returns whether the event should be allowed to remove. */
+    protected boolean _canRemove(VerifyEvent e) {
+      return _forceRemove || 
+        _condition.canRemoveText(e.start, e.end - e.start);
+    }
+  }
+  
+  /**
+   * Bookkeeping for a particular style in an SWTDocumentAdapter.
+   */
+  public static class SWTStyle {
+    /** Color for this style. */
+    protected Color _color;
+    protected int _fontStyle;
+    
+    /**
+     * Creates a new style to be used in an SWTDocumentAdapter.
+     * @param color Color of the style
+     * @param fontStyle Font style constant (eg. SWT.BOLD)
+     */
+    public SWTStyle(Color color, int fontStyle) {
+      _color = color;
+      _fontStyle = fontStyle;
+    }
+    
+    public Color getColor() { return _color; }
+    public int getFontStyle() { return _fontStyle; }
   }
 }

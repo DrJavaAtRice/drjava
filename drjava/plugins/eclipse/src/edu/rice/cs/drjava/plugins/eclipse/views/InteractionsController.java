@@ -39,16 +39,20 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.plugins.eclipse.views;
 
-
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.custom.VerifyKeyListener;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.events.*;
 import org.eclipse.swt.SWT;
 
+import edu.rice.cs.drjava.plugins.eclipse.repl.EclipseInteractionsModel;
+
+import edu.rice.cs.drjava.model.repl.InteractionsListener;
 import edu.rice.cs.drjava.model.repl.InteractionsDocument;
-import edu.rice.cs.drjava.model.repl.SimpleInteractionsDocument;
-import edu.rice.cs.drjava.model.repl.SimpleInteractionsListener;
+import edu.rice.cs.drjava.model.repl.SimpleInteractionsModel;
 import edu.rice.cs.util.text.SWTDocumentAdapter;
+import edu.rice.cs.util.text.SWTDocumentAdapter.SWTStyle;
 import edu.rice.cs.util.text.DocumentAdapter;
 import edu.rice.cs.util.text.DocumentEditCondition;
 
@@ -65,6 +69,9 @@ public class InteractionsController {
   // TO DO:
   //  - What to do with unexpected exceptions?
   
+  /** InteractionsModel to handle the interpreter */
+  protected EclipseInteractionsModel _model;
+  
   /** Adapter for an SWT document */
   protected SWTDocumentAdapter _adapter;
   
@@ -73,26 +80,52 @@ public class InteractionsController {
   
   /** Pane from the SWT view */
   protected InteractionsView _view;
+
   
+  // Colors created by the controller
+  protected Color _colorRed;
+  protected Color _colorDarkRed;
+  protected Color _colorDarkGreen;
+  protected Color _colorDarkBlue;
   
   /**
    * Glue together the given model and view.
+   * @param model EclipseInteractionsModel to handle the interpreter
    * @param adapter DocumentAdapter that the document uses
-   * @param doc InteractionsDocument from the model
    * @param pane InteractionsPane in the view
    */
-  public InteractionsController(SWTDocumentAdapter adapter,
-                                InteractionsDocument doc,
+  public InteractionsController(EclipseInteractionsModel model,
+                                SWTDocumentAdapter adapter,
                                 InteractionsView view) {
+    _model = model;
     _adapter = adapter;
-    _doc = doc;
+    _doc = model.getDocument();
     _view = view;
     
     // Put the caret at the end
     _view.getTextPane().setCaretOffset(_doc.getDocLength());
     
+    _addDocumentStyles();
     _setupModel();
     _setupView();
+  }
+  
+  /**
+   * Cleans up any resources this controller created, as well as the model.
+   */
+  public void dispose() {
+    _model.dispose();
+    _colorRed.dispose();
+    _colorDarkRed.dispose();
+    _colorDarkGreen.dispose();
+    _colorDarkBlue.dispose();
+  }
+  
+  /**
+   * Accessor method for the InteractionsModel.
+   */
+  public EclipseInteractionsModel getInteractionsModel() {
+    return _model;
   }
   
   /**
@@ -117,47 +150,53 @@ public class InteractionsController {
   }
   
   /**
-   * Adds listeners to the model.
+   * Adds AttributeSets as named styles to the document adapter.
    */
-  protected void _setupModel() {
-    _adapter.addVerifyListener(new DocumentUpdateListener());
-    _doc.setBeep(_view.getBeep());
+  protected void _addDocumentStyles() {
+    Display display = _view.getTextPane().getDisplay();
+    _colorRed = new Color(display, 255, 0, 0);
+    _colorDarkRed = new Color(display, 178, 0, 0);
+    _colorDarkGreen = new Color(display, 0, 124, 0);
+    _colorDarkBlue = new Color(display, 0, 0, 178);
     
-    // Temporary... 
-    //  we will need to change this when using a real InteractionsDocument
-    ((SimpleInteractionsDocument)_doc).addInteractionListener(new SimpleInteractionsListener() {
-      public void interactionStarted() {
-        _view.setEditable(false);
-      }
-      public void interactionEnded() {
-        moveToPrompt();
-        _view.setEditable(true);
-      }
-    });
+    // System.out
+    SWTStyle out = new SWTStyle(_colorDarkGreen, 0);
+    _adapter.addDocStyle(InteractionsDocument.SYSTEM_OUT_STYLE, out);
+    
+    // System.err
+    SWTStyle err = new SWTStyle(_colorRed, 0);
+    _adapter.addDocStyle(InteractionsDocument.SYSTEM_ERR_STYLE, err);
+    
+    // Error
+    SWTStyle error = new SWTStyle(_colorDarkRed, SWT.BOLD);
+    _adapter.addDocStyle(InteractionsDocument.ERROR_STYLE, error);
+    
+    // Debug
+    SWTStyle debug = new SWTStyle(_colorDarkBlue, SWT.BOLD);
+    _adapter.addDocStyle(InteractionsDocument.DEBUGGER_STYLE, debug);
   }
   
   /**
-   * Listener to ensure that the document cannot be edited before the prompt
-   * from the view.  Also ensures that the caret always stays on or after the
+   * Adds listeners to the model.
+   */
+  protected void _setupModel() {
+    _adapter.addModifyListener(new DocumentUpdateListener());
+    _doc.setBeep(_view.getBeep());
+    _model.addInteractionsListener(new EclipseInteractionsListener());
+  }
+  
+  /**
+   * Listener to ensure that the caret always stays on or after the
    * prompt, so that output is always scrolled to the bottom.
    */
-  class DocumentUpdateListener implements VerifyListener {
-    public void verifyText(VerifyEvent e) {
-      // Ensure document cannot be edited before the prompt.
-      DocumentEditCondition cond = _adapter.getEditCondition();
-      if (!cond.canRemoveText(e.start, e.end - e.start) ||
-          !cond.canInsertText(e.start, e.text, InteractionsDocument.DEFAULT_STYLE)) {
-        // EditCondition says we can't
-        e.doit = false;
-        return;
-      }
-      
+  class DocumentUpdateListener implements ModifyListener {
+    public void modifyText(ModifyEvent e) {
       // Update the caret position
       StyledText pane = _view.getTextPane();
       int caretPos = pane.getCaretOffset();
       int promptPos = _doc.getPromptPos();
       int docLength = _doc.getDocLength();
-
+      
       if (_doc.inProgress()) {
         // Scroll to the end of the document, since output has been
         // inserted after the prompt.
@@ -170,10 +209,47 @@ public class InteractionsController {
         if ((caretPos < promptPos) && (promptPos <= docLength)) {
           moveToPrompt();
         }
+        else {
+          pane.showSelection();
+        }
       }
     }
   }
   
+  /**
+   * Listens and reacts to interactions-related events.
+   */
+  class EclipseInteractionsListener implements InteractionsListener {
+    public void interactionStarted() {
+      _view.setBusyCursorShown(true);
+      _view.setEditable(false);
+    }
+    
+    public void interactionEnded() {
+      moveToPrompt();
+      _view.setEditable(true);
+      _view.setBusyCursorShown(false);
+    }
+    
+    public void interpreterResetting() {
+      _view.setBusyCursorShown(true);
+      _view.setEditable(false);
+    }
+    
+    public void interpreterReady() {
+      moveToPrompt();
+      _view.setEditable(true);
+      _view.setBusyCursorShown(false);
+    }
+    
+    public void interpreterExited(int status) {
+      String title = "Interactions terminated by System.exit(" + status + ")";
+      String msg = "The interactions window was terminated by a call " +
+              "to System.exit(" + status + ").\n" +
+              "The interactions window will now be restarted.";
+      _view.showInfoDialog(title, msg);
+    }
+  }
   
   /**
    * Assigns key bindings to the view.
@@ -188,7 +264,6 @@ public class InteractionsController {
   class KeyUpdateListener implements VerifyKeyListener {
     public void verifyKey(VerifyEvent event) {
       StyledText pane = _view.getTextPane();
-      //int caretPos = pane.getCaretOffset();
       //System.out.println("event consumer: keycode: " + event.keyCode + ", char: " + event.character);
       
       // -- Branch to an action on certain keystrokes --
@@ -220,37 +295,23 @@ public class InteractionsController {
       }
       // shift+home
       else if (event.keyCode == SWT.HOME && (event.stateMask & SWT.SHIFT) == 1) {
-      	event.doit = selectToPromptPosAction();
+        event.doit = selectToPromptPosAction();
       }
       // home
       else if (event.keyCode == SWT.HOME) {
-      	event.doit = gotoPromptPosAction();
+        event.doit = gotoPromptPosAction();
       }
       // shortcut for clear command?  (ctrl+B is build project)
     }
   }
   
-  
-  
-  /** Evaluates the interaction on the current line.
-   *  (this version will be used when two JVMs are in place)
-  boolean evalAction() {
-    SwingWorker worker = new SwingWorker() {
-      public Object construct() {
-        _doc.interpretCurrentInteraction();
-        return null;
-      }
-    };
-    worker.start();
-    return false;
-  }*/
-  
+    
   /**
    * Submits the text in the view to the model, and appends the
    * result to the view.
    */
   boolean evalAction() {
-    _doc.interpretCurrentInteraction();
+    _model.interpretCurrentInteraction();
     return false;
   }
   
@@ -263,24 +324,24 @@ public class InteractionsController {
   
   /** Recalls the previous command from the history. */
   boolean historyPrevAction() {
-    _doc.recallPreviousInteractionInHistory(_view.getBeep());
+    _doc.recallPreviousInteractionInHistory();
     moveToEnd();
     return false;
   }
-
+  
   /** Recalls the next command from the history. */
   boolean historyNextAction() {
-    _doc.recallNextInteractionInHistory(_view.getBeep());
+    _doc.recallNextInteractionInHistory();
     moveToEnd();
     return false;
   }
-
+  
   /** Removes all text after the prompt. */
   boolean clearCurrentAction() {
-  	_doc.clearCurrentInteraction();
-  	return false;
+    _doc.clearCurrentInteraction();
+    return false;
   }
-
+  
   /** Moves the caret to the prompt. */
   boolean gotoPromptPosAction() {
     moveToPrompt();
@@ -308,15 +369,17 @@ public class InteractionsController {
     int position = _view.getTextPane().getCaretOffset();
     if (position < _doc.getPromptPos()) {
       moveToPrompt();
+      return false;
     }
     else if (position == _doc.getPromptPos()) {
       // Wrap around to the end
       moveToEnd();
+      return false;
     }
     else { // position > _doc.getPromptPos()
-      _view.getTextPane().setCaretOffset(position - 1);
+      //_view.getTextPane().setCaretOffset(position - 1);
+      return true;
     }
-    return false;
   }
   
   /** Moves the caret right or wraps around. */
@@ -324,26 +387,39 @@ public class InteractionsController {
     int position = _view.getTextPane().getCaretOffset();
     if (position < _doc.getPromptPos()) { 
       moveToEnd();
+      return false;
     }
     else if (position >= _doc.getDocLength()) {
       // Wrap around to the start
       moveToPrompt();
+      return false;
     }
     else { // position between prompt and end
-      _view.getTextPane().setCaretOffset(position + 1);
+      //_view.getTextPane().setCaretOffset(position + 1);
+      return true;
     }
-    return false;
   }
   
   /** Moves the pane's caret to the end of the document. */
   void moveToEnd() {
-    _view.getTextPane().setCaretOffset(_doc.getDocLength());
-	_view.getTextPane().showSelection();
+    final StyledText pane = _view.getTextPane();
+    pane.getDisplay().syncExec(new Runnable() {
+      public void run() {
+        pane.setCaretOffset(_doc.getDocLength());
+        pane.showSelection();
+      }
+    });
+    
   }
   
   /** Moves the pane's caret to the document's prompt. */
   void moveToPrompt() {
-    _view.getTextPane().setCaretOffset(_doc.getPromptPos());
-    _view.getTextPane().showSelection();
+    final StyledText pane = _view.getTextPane();
+    pane.getDisplay().syncExec(new Runnable() {
+      public void run() {
+        pane.setCaretOffset(_doc.getPromptPos());
+        pane.showSelection();
+      }
+    });
   }
 }
