@@ -84,7 +84,7 @@ public class DefaultJavadocModel implements JavadocModel {
    */
   public DefaultJavadocModel(IGetDocuments getter) {
     _getter = getter;
-    this._javadocErrorModel = new CompilerErrorModel<CompilerError>();
+    _javadocErrorModel = new CompilerErrorModel<CompilerError>(new CompilerError[0]);
   }
   
   /**
@@ -99,7 +99,7 @@ public class DefaultJavadocModel implements JavadocModel {
    * Clears all current Javadoc errors.
    */
   public void resetJavadocErrors() {
-    _javadocErrorModel = new CompilerErrorModel<CompilerError>();
+    _javadocErrorModel = new CompilerErrorModel<CompilerError>(new CompilerError[0]);
   }
   
   /**

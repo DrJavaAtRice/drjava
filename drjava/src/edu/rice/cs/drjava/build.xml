@@ -208,7 +208,7 @@
     <delete dir="${built_jsr14v1_2}" />
   </target>
 
-  <!-- Compiles only the JSR-14 v2.0 specific classes, and adds
+  <!-- Compiles the JSR-14 v2.0 and v2.2 specific classes, and adds
        them to compilers.jar in the lib directory.
        Deletes the compiled classes when finished.
     -->
@@ -225,7 +225,6 @@
            destdir="${built_jsr14v2_0}" 
            bootclasspath="${jsr14_classpath}:${sun.boot.class.path}"
            classpath="${classpath_text}"
-           target="1.5"
            debug="on"
            source="1.5"
            fork="on"

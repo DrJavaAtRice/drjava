@@ -41,20 +41,18 @@ package edu.rice.cs.drjava.model.compiler;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
 import javax.swing.text.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.LinkedList;
+import java.util.HashMap;
+import java.lang.reflect.Array;
 
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.drjava.model.IGetDocuments;
 import edu.rice.cs.drjava.model.OperationCanceledException;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.FileMovedException;
-
-
-import java.util.List;
-import java.util.LinkedList;
-import java.util.HashMap;
-import java.lang.reflect.Array;
 
 /**
  * Contains the CompilerErrors for a particular file after
@@ -110,8 +108,9 @@ public class CompilerErrorModel<T extends CompilerError> {
   
   /**
    * Constructs an empty CompilerErrorModel.
+   * @param empty the empty array of T
    */
-  public CompilerErrorModel() {
+  public CompilerErrorModel(T[] empty) {
     _model = new IGetDocuments() {
       public OpenDefinitionsDocument getDocumentForFile(File file) {
         throw new IllegalStateException("No documents to get!");
@@ -126,7 +125,7 @@ public class CompilerErrorModel<T extends CompilerError> {
         return false;
       }
     };
-    _errors = new T[0];
+    _errors = empty;
     _numErrors = 0;
     _positions = new Position[0];
   }
