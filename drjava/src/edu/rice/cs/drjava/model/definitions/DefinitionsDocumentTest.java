@@ -730,6 +730,24 @@ public class DefinitionsDocumentTest extends TestCase
   }
   
   /**
+   * Tests that a keyword with no space following it does not cause
+   * a StringOutOfBoundsException (bug 742226).
+   */
+  public void testTopLevelClassNameNoSpace()
+    throws BadLocationException
+  {
+    String c = "class";
+    _defModel.insertString(0, c, null);
+    try {
+      _defModel.getFirstTopLevelClassName();
+      fail("Should not have found a class name");
+    }
+    catch (ClassNameNotFoundException e) {
+      // Good, we expect this
+    }
+  }
+  
+  /**
    * Tests that the word class is not recognized if it is not followed 
    * by whitespace.
    */

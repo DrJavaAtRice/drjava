@@ -2553,10 +2553,12 @@ void _indentLine(int reason) {
 
   /**
    * Finds the first occurrence of the keyword within the text that is not
-   *  enclosed within a brace or comment
+   *  enclosed within a brace or comment and is followed by whitespace.
    * @param keyword the keyword for which to search
    * @param text in which to search
    * @param textOffset Offset at which the text occurs in the document
+   * @return index of the keyword, or -1 if the keyword is not found or
+   * not followed by whitespace
    */
   private synchronized int _findKeywordAtToplevel(String keyword,
                                                   String text,
@@ -2569,22 +2571,33 @@ void _indentLine(int reason) {
     while (!done) {
       index = text.indexOf(keyword, index);
       if (index == -1) {  //not found
-        done = true; break;
-      } else {
+        done = true;
+        break;
+      }
+      else {
         //found a match, check quality
         setCurrentLocation(textOffset + index);
           
         // check that the keyword is not in a comment and is followed by whitespace
         ReducedToken rt = _reduced.currentToken();
-        if (rt.getState() == ReducedModelStates.FREE && 
-            Character.isWhitespace(text.charAt(index + keyword.length()))) {
-          //if (!_isCommentedOrSpace(index,text)) {
-          done = true;
-          if (!posNotInBlock(index)) { //in a paren phrase, gone too far
-            index = -1;
+        int indexPastKeyword = index + keyword.length();
+        if (indexPastKeyword < text.length()) {
+          if (rt.getState() == ReducedModelStates.FREE &&
+              Character.isWhitespace(text.charAt(indexPastKeyword))) {
+            //if (!_isCommentedOrSpace(index,text)) {
+            done = true;
+            if (!posNotInBlock(index)) { //in a paren phrase, gone too far
+              index = -1;
+            }
           }
-        } else {
-          index++;  //move past so we can search again
+          else {
+            index++;  //move past so we can search again
+          }
+        }
+        else {
+          // No space found past the keyword
+          index = -1;
+          done = true;
         }
       }
     }
