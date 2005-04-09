@@ -90,9 +90,8 @@ public class ConfigFrame extends JFrame {
   private JFileChooser _browserChooser;
   private DirectoryChooser _dirChooser;
   
-  /**
-   * Sets up the frame and displays it.
-   */
+  /** Sets up the frame and displays it.  This a Swing view class!  With the exception of initialization,
+   *  this code should only be executed in the event-handling thread. */
   public ConfigFrame(MainFrame frame) {
     super("Preferences");
 
@@ -837,13 +836,13 @@ public class ConfigFrame extends JFrame {
     
   }
   
-  /**
-   * Private class to handle rendering of tree nodes, each of which
-   * corresponds to a ConfigPanel.
+  /** Private class to handle rendering of tree nodes, each of which
+   *  corresponds to a ConfigPanel.  These nodes should only be accessed
+   *  from the event handling thread.
    */
   private class PanelTreeNode extends DefaultMutableTreeNode {
 
-    private ConfigPanel _panel;
+    private final ConfigPanel _panel;
 
     public PanelTreeNode(String t) {
       super(t);
@@ -854,16 +853,16 @@ public class ConfigFrame extends JFrame {
       super(c.getTitle());
       _panel = c;
     }
-    public ConfigPanel getPanel() {
-      return _panel;
-    }
+    private ConfigPanel getPanel() { return _panel; }
 
     /**
      * Tells its panel to update, and tells all of its child nodes to update their panels.
      * @return whether the update succeeded.
      */
-    public boolean update() {
+    private boolean update() {
+      
       boolean isValidUpdate = _panel.update();
+       
       //if this panel encountered an error while attempting to update, return false
       if (!isValidUpdate) {
         //System.out.println("Panel.update() returned false");

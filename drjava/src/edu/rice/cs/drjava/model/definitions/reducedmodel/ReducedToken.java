@@ -141,68 +141,53 @@ public abstract class ReducedToken implements ReducedModelStates {
     return  _state == INSIDE_DOUBLE_QUOTE;
   }
 
-  /**
-   * Indicates whether this brace is commented out.
-   * @return true if the brace is hidden by comments.
+  /** Indicates whether this brace is commented out.
+   *  @return true if the brace is hidden by comments.
    */
-  public boolean isCommented() {
-    return  isInBlockComment() || isInLineComment();
-  }
+  public boolean isCommented() { return  isInBlockComment() || isInLineComment(); }
 
-  /**
-   * put your documentation comment here
-   * @return
+  /** Determines whether the current location is inside a block comment.
+   *  @return true or false
    */
-  public boolean isInBlockComment() {
-    return  _state == INSIDE_BLOCK_COMMENT;
-  }
+  public boolean isInBlockComment() { return  _state == INSIDE_BLOCK_COMMENT; }
 
-  /**
-   * put your documentation comment here
-   * @return
+  /** Determines whether the current location is inside a line comment.
+   *  @return true or false
    */
-  public boolean isInLineComment() {
-    return  _state == INSIDE_LINE_COMMENT;
-  }
+  public boolean isInLineComment() { return  _state == INSIDE_LINE_COMMENT; }
 
-  /**
-   * put your documentation comment here
-   * @return
+  /** Determines whether the current location is part of a multiple char brace.
+   *  @return true or false
    */
   public abstract boolean isMultipleCharBrace();
 
-  /**
-   * put your documentation comment here
-   * @return
+  /** Determines whether the current location is within in gap.
+   *  @return true or false
    */
   public abstract boolean isGap();
 
-  /**
-   * put your documentation comment here
-   * @return
+  /** Determines whether the current location is a line comment
+   *  @return true or false
    */
   public abstract boolean isLineComment();
 
-  /**
-   * put your documentation comment here
-   * @return
+  /** Determines if current location is the beginning of a block comment
+   * @return true or false
    */
   public abstract boolean isBlockCommentStart();
 
-  /**
-   * Returns whether this is the end of a block comment
-   * @return boolean
+  /** Determines whether the current location is the end of a block comment
+   *  @return boolean
    */
   public abstract boolean isBlockCommentEnd();
 
   /**
-   * Returns whether this is a new line
+   * Determines whether the current location is a new line.
    * @return boolean
    */
   public abstract boolean isNewline();
 
-  /**
-   * Returns whether this is a slash
+  /** Returns whether the current location is a slash
    * @return boolean
    */
   public abstract boolean isSlash();
@@ -261,27 +246,23 @@ public abstract class ReducedToken implements ReducedModelStates {
    */
   public abstract void shrink(int delta);
 
-  /**
-   * put your documentation comment here
-   * @return
+  /** Determines whether the current location is an opening parenthesis.
+   *  @return boolean
    */
   public abstract boolean isOpen();
 
-  /**
-   * put your documentation comment here
-   * @return
+  /** Determines whether the current location is a closing parenthesis.
+   *  @return boolean
    */
   public abstract boolean isClosed();
 
-  /**
-   * put your documentation comment here
-   * @return
+  /** Determines whether the current location is an open brace.
+   * @return boolean
    */
   public abstract boolean isOpenBrace();
 
-  /**
-   * put your documentation comment here
-   * @return
+  /** Determines whether the current location is a closed brace.
+   *  @return boolean
    */
   public abstract boolean isClosedBrace();
 }

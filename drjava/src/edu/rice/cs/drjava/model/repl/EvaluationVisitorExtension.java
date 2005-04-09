@@ -234,7 +234,7 @@ public class EvaluationVisitorExtension extends EvaluationVisitor {
           value = new Character('\u0000');
         }
         else if (c == boolean.class) {
-          value = new Boolean(false);
+          value = Boolean.valueOf(false);
         }
         _context.set(node.getName(), value);
       }

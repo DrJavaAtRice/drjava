@@ -575,17 +575,14 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
    * Constructor.  Sets up all the defaults.
    * @param mf the parent window
    */
-  public DefinitionsPane(MainFrame mf,
-                         final OpenDefinitionsDocument doc)
-  {
+  public DefinitionsPane(MainFrame mf, final OpenDefinitionsDocument doc) {
     super(new DefaultStyledDocument());
     
     _mainFrame = mf;
     
     addFocusListener(new FocusListener(){
-      public void focusGained(FocusEvent e){
-        
-        _mainFrame.getModel().getDocumentNavigator().requestSelectionUpdate(_mainFrame.getModel().getIDocGivenODD(doc));
+      public void focusGained(FocusEvent e){  
+        _mainFrame.getModel().getDocumentNavigator().requestSelectionUpdate(doc);
       }
       public void focusLost(FocusEvent e){  }
     });
@@ -1263,7 +1260,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
    * @param pm - the ProgressMonitor used by the indenter
    */
   protected void indentLines(int selStart, int selEnd, int reason, ProgressMonitor pm) {
-    _mainFrame.hourglassOn();
+    //_mainFrame.hourglassOn();
       // final int key = _doc.getUndoManager().startCompoundEdit(); //Commented out in regards to French KeyBoard Fix
       try {
         _doc.indentLines(selStart, selEnd, reason, pm);
@@ -1283,7 +1280,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
         //catches the exception to turn off the the hourglass
         //and close the compound edit before throwing out to
         //the main frame.
-        _mainFrame.hourglassOff();
+        //_mainFrame.hourglassOff();
         //pm.close();
 
   // _doc.getUndoManager().endCompoundEdit(key); //commented out for french keyboard fix, replaced with endCompoundEdit()
@@ -1293,7 +1290,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
 
       //_doc.setCurrentLocation(caretPos);
       setCaretPosition(_doc.getCurrentLocation());
-      _mainFrame.hourglassOff();
+      //_mainFrame.hourglassOff();
       //pm.close();
 
       //        return null;

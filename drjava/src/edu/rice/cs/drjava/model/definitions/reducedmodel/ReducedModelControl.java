@@ -405,19 +405,15 @@ public class ReducedModelControl implements BraceReduction {
     return rmc.getDistToNextNewline();
   }
 
-  /**
-   * Return all highlight status info for text between the current
-   * location and current location + end.
-   * This should collapse adjoining blocks with the same status into one.
-   * @param start The starting location of the area we want to get status of.
-   *              The reduced model is already at this position, but the
-   *              parameter is needed to determine the absolute positions
-   *              needed in the HighlightStatus objects we return.
-   * @param length How far should we generate info for?
+  /** Return all highlight status info for text between the current location and current location
+   *  + end.  This should collapse adjoining blocks with the same status into one.
+   *  @param start The starting location of the area for which we want the status.  The reduced model 
+   *         is already at this position, but the parameter is needed to determine the absolute positions
+   *         in the HighlightStatus objects we return.
+   *  @param length The length of the text segment for which status information must be generated.
    */
   public /* synchronized */ Vector<HighlightStatus> getHighlightStatus(final int start,
-                                                    final int length)
-  {
+                                                    final int length) {
     Vector<HighlightStatus> vec = new Vector<HighlightStatus>();
 
     int curState;

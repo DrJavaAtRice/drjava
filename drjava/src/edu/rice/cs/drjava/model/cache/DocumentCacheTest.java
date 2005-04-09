@@ -352,14 +352,10 @@ public class DocumentCacheTest extends TestCase {
   
   // not being used.  The new definition of the cache allows for a closed document, if it is used again, to bring its document back.
   // This should be dealt with.
-  public void xtestNoDDocInCache(){
+  public void testNoDDocInCache(){
    OpenDefinitionsDocument doc1 = _model.newFile();
-   assertTrue("The document should now be closed", _model.closeFile(doc1));
-   try{
-     doc1.getLength();
-     fail("the open defintions document should not be in the cache");
-   }catch(NoSuchDocumentException e){     
-   }
+   _model.closeFile(doc1);
+   assertFalse("The document should now be closed", _adapterTable.get(doc1).isReady());
   }
 
 

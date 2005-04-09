@@ -238,77 +238,47 @@ class ModelList<T> {
      * after garbage collection as long as the list itself is not
      * garbage collected.
      */
-    public void dispose() {
-      ModelList.this.removeListener(this);
-    }
+    public void dispose() { ModelList.this.removeListener(this); }
 
-    /**
-     * Return true if we're pointing at the head.
-     */
-    public boolean atStart() {
-      return (_point == ModelList.this._head);
-    }
+    /** Return true if we're pointing at the head.*/
+    public boolean atStart() { return (_point == ModelList.this._head); }
 
-    /**
-     * Return true if we're pointing at the tail.
-     */
-    public boolean atEnd() {
-      return (_point == ModelList.this._tail);
-    }
+    /** Return true if we're pointing at the tail. */
+    public boolean atEnd() { return (_point == ModelList.this._tail); }
 
-    /**
-     * Return true if we're pointing at the node after the head.
-     */
-    public boolean atFirstItem() {
-      return (_point.pred == ModelList.this._head);
-    }
+    /** Return true if we're pointing at the node after the head. */
+    public boolean atFirstItem() { return (_point.pred == ModelList.this._head); }
 
-    /**
-     * Return true if we're pointing at the node before the tail.
-     */
-    public boolean atLastItem() {
-      return (_point.succ == ModelList.this._tail);
-    }
+    /** Return true if we're pointing at the node before the tail. */
+    public boolean atLastItem() { return (_point.succ == ModelList.this._tail); }
 
-    /**
-     * Return the item associated with the current node.
-     */
+    /** Return the item associated with the current node. */
     public T current() {
-      if (atStart()) {
+      if (atStart())
         throw new RuntimeException("Attempt to call current on an " +
                                    "iterator in the initial position");
-      }
-      else if (atEnd()) {
+      if (atEnd())
         throw new RuntimeException("Attempt to call current on an " +
                                    "iterator in the final position");
-      }
-      else {
-        return _point.getItem();
-      }
+      return _point.getItem();
     }
 
     /**
      * Return the item associated with the node before the current node.
      */
     public T prevItem() {
-      if (atFirstItem() || atStart() || ModelList.this.isEmpty()) {
+      if (atFirstItem() || atStart() || ModelList.this.isEmpty())
         throw new RuntimeException("No more previous items.");
-      }
-      else {
-        return _point.pred.getItem();
-      }
+      return _point.pred.getItem();
     }
 
     /**
      * Return the item associated with the node after the current node.
      */
     public T nextItem() {
-      if (atLastItem() || atEnd() || ModelList.this.isEmpty()) {
+      if (atLastItem() || atEnd() || ModelList.this.isEmpty())
         throw new RuntimeException("No more following items.");
-      }
-      else {
-        return _point.succ.getItem();
-      }
+      return _point.succ.getItem();
     }
 
     /**
@@ -322,9 +292,7 @@ class ModelList<T> {
      */
     public void insert(T item) {
       //so as not to insert at head
-      if (this.atStart()) {
-        next();
-      }
+      if (this.atStart()) next();
       ModelList.this.insert(_point, item);
       _point = _point.pred; //puts pointer on inserted item
       notifyOfInsert(_pos);
@@ -363,9 +331,7 @@ class ModelList<T> {
      * Throws exception atEnd().
      */
     public void next() {
-      if (atEnd()) {
-        throw new RuntimeException("Can't cross list boundary.");
-      }
+      if (atEnd()) throw new RuntimeException("Can't cross list boundary.");
       _point = _point.succ;
       _pos++;
     }

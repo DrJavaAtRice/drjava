@@ -325,7 +325,7 @@ public interface DJDocument extends StyledDocument {
   /**
    * Inserts a string of text into the document.
    * It turns out that this is not where we should do custom processing
-   * of the insert; that is done in {@link #insertUpdate}.
+   * of the insert; that is done in {@link AbstractDJDocument.insertUpdate}.
    */
   public void insertString(int offset, String str, AttributeSet a)
     throws BadLocationException;
@@ -333,7 +333,7 @@ public interface DJDocument extends StyledDocument {
   /**
    * Removes a block of text from the specified location.
    * We don't update the reduced model here; that happens
-   * in {@link #removeUpdate}.
+   * in {@link AbstractDJDocument.removeUpdate}.
    */
   public void remove(int offset, int len) throws BadLocationException;
   

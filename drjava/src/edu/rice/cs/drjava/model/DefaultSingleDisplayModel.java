@@ -181,15 +181,17 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel implements Sin
    * @param doc Document to set as active
    */
   public void setActiveDocument(OpenDefinitionsDocument doc) {
-    try { _documentNavigator.setActiveDoc(getIDocGivenODD(doc)); } 
-    catch(DocumentClosedException dce) { /* do nothing */ }
+    try { _documentNavigator.setActiveDoc(doc); } 
+    catch(DocumentClosedException dce) { 
+      /* do nothing; findbugs signals a bug unless this catch clause spans more than two lines */
+    }
   }
   
   public Container getDocCollectionWidget() { return _documentNavigator.asContainer(); }
   
   /** Sets the active document to be the next one in the collection. */
   public void setActiveNextDocument() {
-    INavigatorItem key = getIDocGivenODD(_activeDocument);
+    INavigatorItem key = _activeDocument;
     INavigatorItem nextKey =_documentNavigator.getNext(key);
       if (key != nextKey) _documentNavigator.setActiveDoc(nextKey);
         /* this will select the active document in the navigator, which
@@ -200,7 +202,7 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel implements Sin
    * Sets the active document to be the previous one in the collection
    */
   public void setActivePreviousDocument() {
-    INavigatorItem key = getIDocGivenODD(_activeDocument);
+    INavigatorItem key = _activeDocument;
     INavigatorItem prevKey =_documentNavigator.getPrevious(key);
     if (key != prevKey) {
       /* this will select the active document in the navigator, which
@@ -408,14 +410,14 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel implements Sin
       // Find the one that should be the new active document
       IDocumentNavigator nav = getDocumentNavigator();
       
-      INavigatorItem item = getIDocGivenODD(docs.get(docs.size()-1));
+      INavigatorItem item = docs.get(docs.size()-1);
       INavigatorItem nextActive = nav.getNext(item);
       if (!nextActive.equals(item)) {
         nav.setActiveDoc(nextActive); 
         return;
       }
       
-      item = getIDocGivenODD(docs.get(0));
+      item = docs.get(0);
       nextActive = nav.getPrevious(item);
       if (!nextActive.equals(item)) { 
         nav.setActiveDoc(nextActive);
@@ -442,7 +444,7 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel implements Sin
   private void _setActiveDoc(INavigatorItem idoc) {
     //Hashtable<INavigatorItem, OpenDefinitionsDocument> docs = getDefinitionsDocumentsTable();
     
-    _activeDocument = getODDGivenIDoc(idoc);
+    _activeDocument = (OpenDefinitionsDocument) idoc;  // FIX THIS!
     try {
       _activeDocument.checkIfClassFileInSync();
      

@@ -72,79 +72,56 @@ import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
  */
 public class DefaultJavadocModel implements JavadocModel {
 
-  /**
-   * Used by CompilerErrorModel to open documents that have errors.
-   */
+  /** Used by CompilerErrorModel to open documents that have errors. */
   private IGetDocuments _getter;
 
-  /**
-   * Manages listeners to this model.
-   */
+  /**Manages listeners to this model. */
   private final JavadocEventNotifier _notifier = new JavadocEventNotifier();
 
-  /**
-   * The error model containing all current Javadoc errors.
-   */
+  /** The error model containing all current Javadoc errors. */
   private CompilerErrorModel<CompilerError> _javadocErrorModel;
 
-  /**
-   * Main constructor.
-   * @param getter Source of documents for this JavadocModel
+  /** Main constructor.
+   *  @param getter Source of documents for this JavadocModel
    */
   public DefaultJavadocModel(IGetDocuments getter) {
     _getter = getter;
-    _javadocErrorModel =
-      new CompilerErrorModel<CompilerError>(new CompilerError[0]);
+    _javadocErrorModel = new CompilerErrorModel<CompilerError>(new CompilerError[0]);
   }
 
   //-------------------------- Listener Management --------------------------//
 
-  /**
-   * Add a JavadocListener to the model.
-   * @param listener a listener that reacts to Javadoc events
+  /** Add a JavadocListener to the model.
+   *  @param listener a listener that reacts to Javadoc events
    */
-  public void addListener(JavadocListener listener) {
-    _notifier.addListener(listener);
-  }
+  public void addListener(JavadocListener listener) { _notifier.addListener(listener); }
 
-  /**
-   * Remove a JavadocListener from the model.  If the listener is not currently
-   * listening to this model, this method has no effect.
-   * @param listener a listener that reacts to Javadoc events
+  /** Remove a JavadocListener from the model.  If the listener is not currently
+   *  listening to this model, this method has no effect.
+   *  @param listener a listener that reacts to Javadoc events
    */
-  public void removeListener(JavadocListener listener) {
-    _notifier.removeListener(listener);
-  }
+  public void removeListener(JavadocListener listener) { _notifier.removeListener(listener); }
 
-  /**
-   * Removes all JavadocListeners from this model.
-   */
-  public void removeAllListeners() {
-    _notifier.removeAllListeners();
-  }
+  /** Removes all JavadocListeners from this model. */
+  public void removeAllListeners() { _notifier.removeAllListeners(); }
 
   //----------------------------- Error Results -----------------------------//
 
-  /**
-   * Accessor for the Javadoc error model.
-   * @return the CompilerErrorModel managing Javadoc errors.
+  /** Accessor for the Javadoc error model.
+   *  @return the CompilerErrorModel managing Javadoc errors.
    */
-  public CompilerErrorModel getJavadocErrorModel() {
-    return _javadocErrorModel;
-  }
+  public CompilerErrorModel getJavadocErrorModel() { return _javadocErrorModel; }
 
-  /**
-   * Clears all current Javadoc errors.
-   */
+  /** Clears all current Javadoc errors. */
   public void resetJavadocErrors() {
     _javadocErrorModel = new CompilerErrorModel<CompilerError>(new CompilerError[0]);
   }
 
   // -------------------- Javadoc All Documents --------------------
-
-  /**
-   * Javadocs all open documents, after ensuring that all are saved.
-   * The user provides a destination, and the gm provides the package info.
+  
+  /** Javadocs all open documents, after ensuring that all are saved.
+   *  The user provides a destination, and the gm provides the package info.
+   *  Must run in the event-handling thread.
    *
    * @param select a command object for selecting a directory and warning a user
    *        about bad input
@@ -153,69 +130,46 @@ public class DefaultJavadocModel implements JavadocModel {
    *
    * @throws IOException if there is a problem manipulating files
    */
-  public void javadocAll(DirectorySelector select, final FileSaveSelector saver,
-                         final String classpath)
-    throws IOException
-  {
+  public void javadocAll(DirectorySelector select, final FileSaveSelector saver, final String classpath) 
+    throws IOException {
+    
     // Only javadoc if all are saved.
     _attemptSaveAllDocuments();
-
-    if (_getter.hasModifiedDocuments()) {
-      // if any files haven't been saved after we told our
-      // listeners to do so, don't proceed with the rest
-      // of the operation.
-      return;
-    }
-
+    if (_getter.hasModifiedDocuments()) { return; }  /* abort if files remain unsaved */
+    
     // Make sure that there is at least one saved document.
     List<OpenDefinitionsDocument> docs = _getter.getDefinitionsDocuments();
-
-    boolean noneYet = true;
-    int numDocs = docs.size();
-    for (int i = 0; (noneYet && (i < numDocs)); i++) {
-      OpenDefinitionsDocument doc = docs.get(i);
-      noneYet = doc.isUntitled();
+    
+    for (OpenDefinitionsDocument doc: docs) {
+      if (doc.isUntitled()) return;  // ignore javadoc, since a document is still unsaved
     }
-
-    // If there are no saved files, ignore the javadoc command.
-    if (noneYet) {
-      return;
-    }
-
+    
     Configuration config = DrJava.getConfig();
     File destDir = config.getSetting(OptionConstants.JAVADOC_DESTINATION);
-
+    
     // Get the destination directory via the DirectorySelector, if appropriate.
     try {
       if (destDir.equals(FileOption.NULL_FILE)) {
-        // This is the default, stock behavior of a new install.
-        // If no destination is set, don't pass anything to the ui command.
-        // Let the command object decide what to do.
+        /* This is the default, stock behavior of a new install. If no destination is set, don't pass 
+         anything to the ui command. Let the command object decide what to do. */
         destDir = select.getDirectory(null);
       }
-      else {
+      else
         // Otherwise, tell the command object to prefer the config's default.
         destDir = select.getDirectory(destDir);
-      }
-
+      
       // Make sure the destination is usable.
       while (!destDir.exists() || !destDir.isDirectory() || !destDir.canWrite()) {
         if (!destDir.getPath().equals("") && !destDir.exists()) {
           // If the choice doesn't exist, ask to create it.
           boolean create = select.askUser
-            ("The directory you chose does not exist:\\n" +
-             "'" + destDir + "'\n" +
-             "Would you like to create it?",
+            ("The directory you chose does not exist:\\n'" + destDir + "'\nWould you like to create it?",
              "Create Directory?");
           if (create) {
             boolean dirMade = destDir.mkdirs();
-            if (!dirMade) {
-              throw new IOException("Could not create directory: " + destDir);
-            }
+            if (! dirMade) throw new IOException("Could not create directory: " + destDir);
           }
-          else {
-            return;
-          }
+          else return;
         }
         else if (!destDir.isDirectory() || destDir.getPath().equals("")) {
           // We can't use it if it isn't a directory
@@ -235,19 +189,16 @@ public class DefaultJavadocModel implements JavadocModel {
         }
       }
     }
-    catch (OperationCanceledException oce) {
-      // If the user cancels anywhere, silently return.
-      return;
-    }
-
+    catch (OperationCanceledException oce) { return; } // If the user cancels anywhere, silently return.
+  
     // Start a new thread to do the work.
     final File destDirF = destDir;
     new Thread("DrJava Javadoc Thread") {
-      public void run() {
-        _javadocAllWorker(destDirF, saver, classpath);
-      }
+      public void run() { _javadocAllWorker(destDirF, saver, classpath); }
     }.start();
   }
+    
+   
 
   /**
    * This method handles most of the logic of performing a Javadoc operation,
@@ -257,29 +208,24 @@ public class DefaultJavadocModel implements JavadocModel {
    * @param saver a command object for saving a document (if it moved/changed)
    * @param classpath an array of classpath elements to be used by Javadoc
    */
-  private void _javadocAllWorker(File destDirFile,
-                                 FileSaveSelector saver,
-                                 String classpath)
-  {
-    if (!_ensureValidToolsJar()) {
-      return;
-    }
+  private void _javadocAllWorker(File destDirFile, FileSaveSelector saver, String classpath) {
+    
+    if (!_ensureValidToolsJar()) return;
 
     String destDir = destDirFile.getAbsolutePath();
 
     // Accumulate a set of arguments to JavaDoc - package or file names.
-    HashSet<String> docUnits = new HashSet<String>();  // units to send to Javadoc (packages or files)
-    HashSet<File> sourceRootSet = new HashSet<File>();  // set of unique source roots for open files
-    HashSet<File> defaultRoots = new HashSet<File>();  // source roots for files in default package
-    HashSet<String> topLevelPacks = new HashSet<String>();  // top level package names to include
+    HashSet<String> docUnits      = new HashSet<String>(); // units to send to Javadoc (packages or files)
+    HashSet<File>   sourceRootSet = new HashSet<File>();   // set of unique source roots for open files
+    HashSet<File>   defaultRoots  = new HashSet<File>();   // source roots for files in default package
+    HashSet<String> topLevelPacks = new HashSet<String>(); // top level package names to include
 
     // This depends on the current value of the "javadoc.all.packages" option.
     boolean docAll = DrJava.getConfig().getSetting(OptionConstants.JAVADOC_FROM_ROOTS).booleanValue();
 
     // Each document has a package hierarchy to traverse.
     List<OpenDefinitionsDocument> docs = _getter.getDefinitionsDocuments();
-    for (int i = 0; i < docs.size(); i++) {
-      OpenDefinitionsDocument doc = docs.get(i);
+    for (OpenDefinitionsDocument doc: docs) {
       File file = null;
 
       try {
@@ -287,25 +233,20 @@ public class DefaultJavadocModel implements JavadocModel {
         file = _getFileFromDocument(doc, saver);
 
         // File shouldn't be null here, but just in case...
-        if (file == null) {
-          throw new IllegalStateException("No file for this document.");
-        }
+        if (file == null) throw new IllegalStateException("No file for this document.");
 
         File sourceRoot = doc.getSourceRoot();
         String pack = doc.getPackageName();
 
         if (pack.equals("")) {
           // No package name for this file
-          if (!defaultRoots.contains(sourceRoot)) {
+          if (! defaultRoots.contains(sourceRoot)) {
             // This file uses the default package.
             // Include all the other source files at the source root.
             // But don't do it if we've already done it for this directory.
             defaultRoots.add(sourceRoot);
             File[] javaFiles = sourceRoot.listFiles(FileOps.JAVA_FILE_FILTER);
-
-            for (int j = 0; j < javaFiles.length; j++) {
-              docUnits.add(javaFiles[j].getAbsolutePath());
-            }
+            for (File f: javaFiles) { docUnits.add(f.getAbsolutePath());}
           }
         }
         else {
@@ -325,13 +266,11 @@ public class DefaultJavadocModel implements JavadocModel {
           else {
             // Only look in the current package or deeper
             topLevelPack = pack;
-            searchRoot = new File(sourceRoot,
-                                  pack.replace('.', File.separatorChar));
+            searchRoot = new File(sourceRoot, pack.replace('.', File.separatorChar));
           }
 
           // But we don't want to traverse the hierarchy more than once.
-          if (!topLevelPacks.contains(topLevelPack)
-                || !sourceRootSet.contains(sourceRoot)) {
+          if (! topLevelPacks.contains(topLevelPack) || ! sourceRootSet.contains(sourceRoot)) {
             // HashSets don't have duplicates, so it's ok to add both in either case
             topLevelPacks.add(topLevelPack);
             sourceRootSet.add(sourceRoot);
@@ -359,9 +298,7 @@ public class DefaultJavadocModel implements JavadocModel {
     }
 
     // Don't attempt to create Javadoc if no files are open, or if open file is unnamed.
-    if (docUnits.size() == 0) {
-      return;
-    }
+    if (docUnits.size() == 0) return;
 
     // Build the source path.
     StringBuffer sourcePath = new StringBuffer();
@@ -369,12 +306,9 @@ public class DefaultJavadocModel implements JavadocModel {
     sourceRootSet.addAll(defaultRoots);
     File[] sourceRoots = sourceRootSet.toArray(new File[0]);
     for(int a = 0 ; a  < sourceRoots.length; a++) {
-      if (a != 0) {
-        sourcePath.append(separator);
-      }
+      if (a != 0)  sourcePath.append(separator);
       sourcePath.append(sourceRoots[a].getAbsolutePath());
     }
-
 
     // Generate all command line arguments
     ArrayList<String> args = _buildCommandLineArgs(docUnits, destDir,
@@ -402,14 +336,10 @@ public class DefaultJavadocModel implements JavadocModel {
    */
   public void javadocDocument(final OpenDefinitionsDocument doc,
                               final FileSaveSelector saver,
-                              final String classpath)
-    throws IOException
-  {
+                              final String classpath)           throws IOException {
     // Prompt to save if necessary
     //  (TO DO: should only need to save the current document)
-    if (doc.isUntitled() || doc.isModifiedSinceSave()) {
-      _notifier.saveBeforeJavadoc();
-    }
+    if (doc.isUntitled() || doc.isModifiedSinceSave()) _notifier.saveBeforeJavadoc();
 
     // Make sure it is saved
     if (doc.isUntitled() || doc.isModifiedSinceSave()) {
@@ -438,18 +368,10 @@ public class DefaultJavadocModel implements JavadocModel {
    *
    * @param destDirFile the destination directory for the doc files
    * @param docFile the file of the document
-   * @param document the document to javadoc
-   * @param saver a command object for saving a document (if it moved/changed)
    * @param classpath an array of classpath elements to be used by Javadoc
    */
-  private void _javadocDocumentWorker(File destDirFile, File docFile,
-//                                      OpenDefinitionsDocument document,
-//                                      FileSaveSelector saver,
-                                      String classpath)
-  {
-    if (!_ensureValidToolsJar()) {
-      return;
-    }
+  private void _javadocDocumentWorker(File destDirFile, File docFile, String classpath) {
+    if (!_ensureValidToolsJar()) return;
 
     // Generate all command line arguments
     String destDir = destDirFile.getAbsolutePath();
@@ -482,9 +404,7 @@ public class DefaultJavadocModel implements JavadocModel {
       File sourceRoot = doc.getSourceRoot();
       return new File(sourceRoot, SUGGESTED_DIR_NAME);
     }
-    catch (InvalidPackageException ipe) {
-      return null;
-    }
+    catch (InvalidPackageException ipe) { return null; }
   }
 
   /**
@@ -496,9 +416,7 @@ public class DefaultJavadocModel implements JavadocModel {
    */
   private void _attemptSaveAllDocuments() {
     // Only javadoc if all are saved.
-    if (_getter.hasModifiedDocuments()) {
-      _notifier.saveBeforeJavadoc();
-    }
+    if (_getter.hasModifiedDocuments()) _notifier.saveBeforeJavadoc();
   }
 
   /**
@@ -550,8 +468,7 @@ public class DefaultJavadocModel implements JavadocModel {
    * @param allDocs Whether we are running over all open documents
    */
   private void _runJavadoc(ArrayList<String> args, String classpath,
-                           File destDirFile, boolean allDocs)
-  {
+                           File destDirFile, boolean allDocs) {
     // Start a new process to execute Javadoc and tell listeners it has started
     // And finally, when we're done notify the listeners with a success flag
     boolean result;
@@ -563,9 +480,7 @@ public class DefaultJavadocModel implements JavadocModel {
 
       // If success and we're generating current, make sure the temp
       //  directory gets deleted on exit.
-      if (result && !allDocs) {
-        FileOps.deleteDirectoryOnExit(destDirFile);
-      }
+      if (result && !allDocs) FileOps.deleteDirectoryOnExit(destDirFile);
 
       // Notify all listeners that we're done.
       _notifier.javadocEnded(result, destDirFile, allDocs);

@@ -46,42 +46,34 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.model.definitions.reducedmodel;
 
 /**
- * A subclass of ReducedToken that represents non-special characters.
+ * A subclass of ReducedToken that represents sequences of non-special characters.
  * @version $Id$
  */
 class Gap extends ReducedToken {
   private int _size;
 
-  /**
-   * Creates a new Gap.
-   * @param size the size of the gap
-   * @param state the state of the reduced model
+  /** Creates a new Gap.
+   *  @param size the size of the gap
+   *  @param state the state of the reduced model
    */
   Gap(int size, ReducedModelState state) {
     super(state);
     _size = size;
   }
 
-  /**
-   * Gets the size of this gap.
-   * @return _size
+  /** Gets the size of this gap.
+   *  @return _size
    */
-  public int getSize() {
-    return _size;
-  }
+  public int getSize() { return _size; }
 
-  /**
-   * Gets the token type.
-   * @return the empty string
+  /** Gets the token type.
+   *  @return the empty string
    */
-  public String getType() {
-    return "";
-  }
+  public String getType() { return ""; }
 
-  /**
-   * Blows up.  The type of a Gap cannot be set.
-   * @param type the type to set to
-   * @throws RuntimeException always
+  /** Blows up.  The type of a Gap cannot be set.
+   *  @param type the type to set to
+   *  @throws RuntimeException always
    */
   public void setType(String type) {
     throw new RuntimeException("Can't set type on Gap!");
@@ -109,8 +101,7 @@ class Gap extends ReducedToken {
    * @param delta the amount by which the gap is diminished.
    */
   public void shrink(int delta) {
-    if ((delta <= _size) && (delta >= 0))
-      _size -= delta;
+    if ((delta <= _size) && (delta >= 0)) _size -= delta;
   }
 
   /**
@@ -119,21 +110,19 @@ class Gap extends ReducedToken {
    */
   public String toString() {
 //    String val = "Gap(size: "+_size+"): ";
-    String val = "";
+    StringBuffer val = new StringBuffer();
     int i;
     for (i = 0; i < _size; i++) {
-      val += " _";
+      val.append(" _");
     }
-    return  val;
+    return val.toString();
   }
 
   /**
    * Determines that this is not a multi-char brace.
    * @return <code>false</code>
    */
-  public boolean isMultipleCharBrace() {
-    return false;
-  }
+  public boolean isMultipleCharBrace() { return false; }
 
   /**
    * Determines that this is a gap.

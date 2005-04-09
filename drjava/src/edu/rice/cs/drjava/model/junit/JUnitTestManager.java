@@ -53,9 +53,11 @@ import java.io.*;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.StringOps;
+import edu.rice.cs.util.swing.ScrollableDialog;
 import java.lang.reflect.Modifier;
 
 /**
@@ -65,89 +67,109 @@ import java.lang.reflect.Modifier;
  * @version $Id$
  */
 public class JUnitTestManager {
+  
+  /** The interface to the master JVM via RMI. */
   private final JUnitModelCallback _jmc;
+  
+  /** The current testRunner; initially null.  Each test suite requires a new runner. */
   private JUnitTestRunner _testRunner;
-
+  
+  /** The accumulated test suite; null if no test is pending. */
+  private TestSuite _suite = null;
+  
+  /** The accumulated list of names of TestCase classes; null if no test is pending. */
+  private List<String> _testClassNames = null;
+  
+  /** The list of files corresponding to testClassNames; null if no test is pending. */
+  private List<File> _testFiles = null;
+  
+  /** Standard constructor */
   public JUnitTestManager(JUnitModelCallback jmc) { _jmc = jmc; }
 
   public JUnitTestRunner getTestRunner() { return _testRunner; }
-
-  /**
-   * @param classNames the class names to run in a test
-   * @param files the associated files
-   * @param isTestAll if we're testing all open files or not
-   * @return the class names that are actually test cases
+  
+  /** Find the test classes among the given classNames and accumulate them in
+   *  TestSuite for junit.  Returns null if a test suite is already pending.
+   * @param classNames the class names that are test class candidates
+   * @param files the files corresponding to classNames
    */
-  public List<String> runTest(final List<String> classNames, final List<File> files,
-                              final boolean isTestAll) {
-    final ArrayList<String> testClassNames = new ArrayList<String>();
-    synchronized (testClassNames) {
-      _testRunner = new JUnitTestRunner(_jmc);
-      new Thread("JUnit Test Thread") {
-        public void run() {
-          try {
-            boolean noJUnitTests = true;
-            TestSuite suite = new TestSuite();
-            synchronized (testClassNames) {
-              try {
-                for (int i = 0; i < classNames.size(); i++) {
-                  String className = classNames.get(i);
-                  if (_isTestCase(className)) {
-                    Test test = _testRunner.getTest(className);
-                    suite.addTest(test);
-                    testClassNames.add(className);
-                    noJUnitTests = false;
-                  }
-                }
-              }
-              finally { testClassNames.notify(); }
-            }
-            if (noJUnitTests) {
-              _jmc.nonTestCase(isTestAll);
-              //            _jmc.testSuiteEnded(new JUnitError[] {new JUnitError(null, "No JUnit tests open!", false, "")});
-              return;
-            }
+  public List<String> findTestClasses(final List<String> classNames, final List<File> files) {
+    
+    if (_testClassNames != null && ! _testClassNames.isEmpty()) 
+      throw new IllegalStateException("Test suite is still pending!");
+    
+    _testRunner = new JUnitTestRunner(_jmc);
+    
+    _testClassNames = new ArrayList<String>();
+    _testFiles = new ArrayList<File>();
+    _suite = new TestSuite();
 
-            TestResult result = _testRunner.doRun(suite);
-
-            JUnitError[] errors = new JUnitError[result.errorCount() + result.failureCount()];
-
-            Enumeration failures = result.failures();
-            Enumeration errEnum = result.errors();
-
-            int i = 0;
-
-            while (errEnum.hasMoreElements()) {
-              TestFailure tErr = (TestFailure) errEnum.nextElement();
-              errors[i] = _makeJUnitError(tErr, classNames, true, files);
-              i++;
-            }
-            while (failures.hasMoreElements()) {
-              TestFailure tFail = (TestFailure) failures.nextElement();
-              errors[i] = _makeJUnitError(tFail, classNames, false, files);
-              i++;
-            }
-            _jmc.testSuiteEnded(errors);
-          }
-          catch (Throwable t) {
-            _failedWithError(t);
-          }
-        }
-      }.start();
-      try {
-        testClassNames.wait();
-      }
-      catch (InterruptedException ex) {
+    // new ScrollableDialog(null, "JUnitManager.findTestClasses invoked", "Candidate classes are = " + classNames, "files = " + files).show();
+    
+    for (int i = 0; i < classNames.size(); i++) {
+      String cName = classNames.get(i);
+      // new ScrollableDialog(null, "Class to be checked in JUnitManager: " + cName, "", "").show();
+      if (_isTestCase(cName)) {
+        // new ScrollableDialog(null, "Test class " + cName + " found!", "", "").show();
+        _testClassNames.add(cName);
+        _testFiles.add(files.get(i));
+        _suite.addTest(_testRunner.getTest(cName));
       }
     }
-    return testClassNames;
+              
+    // new ScrollableDialog(null, "TestClassNames are: " + _testClassNames, "", "").show();
+     
+    return _testClassNames;
   }
+    
+  /** Runs the pending test suite set up by the preceding call to findTestClasses
+   *  @return false if no test suite (even an empty one) has been set up
+   */
+  public synchronized boolean runTestSuite() {
+    
+    if (_testClassNames == null || _testClassNames.isEmpty()) return false;
+    
+//    new ScrollableDialog(null, "runTestSuite() in SlaveJVM called", "", "").show();
 
-  private void _failedWithError(Throwable t) {
-    JUnitError[] errors = new JUnitError[1];
-    errors[0] = new JUnitError(null, -1, -1, t.getMessage(),
-                               false, "", "", StringOps.getStackTrace(t));
-    _jmc.testSuiteEnded(errors);
+    try {
+      TestResult result = _testRunner.doRun(_suite);
+    
+      JUnitError[] errors = new JUnitError[result.errorCount() + result.failureCount()];
+      
+      Enumeration failures = result.failures();
+      Enumeration errEnum = result.errors();
+      
+      int i = 0;
+      
+      while (errEnum.hasMoreElements()) {
+        TestFailure tErr = (TestFailure) errEnum.nextElement();
+        errors[i] = _makeJUnitError(tErr, _testClassNames, true, _testFiles);
+        i++;
+      }
+      
+      while (failures.hasMoreElements()) {
+        TestFailure tFail = (TestFailure) failures.nextElement();
+        errors[i] = _makeJUnitError(tFail, _testClassNames, false, _testFiles);
+        i++;
+      }
+//      new ScrollableDialog(null, "Slave JVM: testSuite ended with errors", "", Arrays.toString(errors)).show();
+      
+      _jmc.testSuiteEnded(errors);
+    }
+    catch(Throwable t) { 
+      JUnitError[] errors = new JUnitError[1];
+      errors[0] = new JUnitError(null, -1, -1, t.getMessage(),
+                                 false, "", "", StringOps.getStackTrace(t));
+      _jmc.testSuiteEnded(errors);
+       // new ScrollableDialog(null, "Slave JVM: testSuite ended with errors", "", Arrays.toString(errors)).show();
+      
+    }
+    finally {
+      _suite = null;
+      _testClassNames = null;
+      _testFiles = null;
+    }
+    return true;
   }
 
   /**
@@ -156,7 +178,10 @@ public class JUnitTestManager {
    * @return true iff the given class is an instance of junit.framework.Test
    */
   private boolean _isJUnitTest(Class c) {
-    return Test.class.isAssignableFrom(c) && !Modifier.isAbstract(c.getModifiers()) && !Modifier.isInterface(c.getModifiers());
+//    new ScrollableDialog(null, "_isJUnitTestCase called on " + c, "", "").show();
+                                               
+    return Test.class.isAssignableFrom(c) && !Modifier.isAbstract(c.getModifiers()) && 
+      !Modifier.isInterface(c.getModifiers());
   }
 
   /**

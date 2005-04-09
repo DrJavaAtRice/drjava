@@ -65,6 +65,7 @@ import edu.rice.cs.util.OutputStreamRedirector;
 import edu.rice.cs.util.InputStreamRedirector;
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.ClasspathVector;
+import edu.rice.cs.util.swing.ScrollableDialog;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.platform.PlatformFactory;
 import edu.rice.cs.drjava.model.junit.JUnitModelCallback;
@@ -91,9 +92,8 @@ import koala.dynamicjava.parser.*;
  *
  * @version $Id$
  */
-public class InterpreterJVM extends AbstractSlaveJVM
-  implements InterpreterJVMRemoteI, JUnitModelCallback
-{
+public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRemoteI, JUnitModelCallback {
+  
   private static final boolean printMessages = false;
   /** Singleton instance of this class. */
   public static final InterpreterJVM ONLY = new InterpreterJVM();
@@ -716,18 +716,29 @@ public class InterpreterJVM extends AbstractSlaveJVM
   
   
   // ---------- JUnit methods ----------
-  
   /**
-   * Runs a JUnit Test class in the Interpreter JVM.
+   * Sets up a JUnit test suite in the Interpreter JVM and finds
+   * which classes are really TestCases classes (by loading them)
    * @param classNames the class names to run in a test
-   * @param files the associated files
-   * @param isTestAll if we're testing all open files or not
+   * @param files the associated file
    * @return the class names that are actually test cases
    */
-  public List<String> runTestSuite(List<String> classNames, List<File> files,
-                                   boolean isTestAll) throws RemoteException {
-    List<String> ret = _junitTestManager.runTest(classNames, files, isTestAll);
-    return ret;
+  public List<String> findTestClasses(List<String> classNames, List<File> files)
+    throws RemoteException {
+    // new ScrollableDialog(null, "InterpterJVM.findTestClasses invoked", "", "").show();
+    return _junitTestManager.findTestClasses(classNames, files);
+  }
+  
+  /**
+   * Runs the JUnit test suite already cached in the Interpreter JVM.
+   * @param classNames the class names to run in a test
+   * @param files the associated files
+   *
+   * @return false if no test suite is cached; true otherwise
+   */
+  public boolean runTestSuite() throws RemoteException {
+    // new ScrollableDialog(null, "InterpreterJVM.runTestSuite() called!", "", "").show();
+    return _junitTestManager.runTestSuite();
   }
   
   /**

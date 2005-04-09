@@ -89,13 +89,8 @@ public class DefaultCompilerModel implements CompilerModel {
   /** The error model containing all current compiler errors. */
   private CompilerErrorModel<? extends CompilerError> _compilerErrorModel;
 
-  /**
-   * Main constructor.  Introducing the IGetDocuments interface may have been
-   * a mistake because it hides critical synchronization relationships.  The
-   * code in this class depends on the fact that _getter is bound to the 
-   * global model.  Otherwise, synchronization may break!
-   * 
-   * @param getter Source of documents for this CompilerModel
+  /** Main constructor.  
+   *  @param getter Source of documents for this CompilerModel
    */
   public DefaultCompilerModel(IGetDocuments getter) {
     _getter = getter;
@@ -111,12 +106,11 @@ public class DefaultCompilerModel implements CompilerModel {
    */
   public void addListener(CompilerListener listener) { _notifier.addListener(listener); }
 
-  /**
-   * Remove a CompilerListener from the model.  If the listener is not currently
-   * listening to this model, this method has no effect.
-   * @param listener a listener that reacts to compiler events
+  /** Remove a CompilerListener from the model.  If the listener is not currently
+   *  listening to this model, this method has no effect.
+   *  @param listener a listener that reacts to compiler events
    * 
-   * This operation is synchronized by the readers/writers protocol in EventNotifier<T>.
+   *  This operation is synchronized by the readers/writers protocol in EventNotifier<T>.
    */
   public void removeListener(CompilerListener listener) { _notifier.removeListener(listener); }
 
@@ -126,24 +120,23 @@ public class DefaultCompilerModel implements CompilerModel {
   //-------------------------------- Triggers --------------------------------//
 
 
-  /**
-   * Compiles all open documents, after ensuring that all are saved.
-   * If drjava is in project mode when this method is called, only 
-   * the project files are saved.  Also, at this point, we do not require
-   * external files (files not belonging to the project) to be saved
-   * before we compile the files.
-   * 
-   * <p>In project mode, since only project files are compiled, we
-   * perform the compilation with the specified build directory if 
-   * defined in the project state.</p>
+  /** Compiles all open documents, after ensuring that all are saved.
+   *  If drjava is in project mode when this method is called, only 
+   *  the project files are saved.  Also, at this point, we do not require
+   *  external files (files not belonging to the project) to be saved
+   *  before we compile the files.
+   *  
+   *  <p>In project mode, since only project files are compiled, we
+   *  perform the compilation with the specified build directory if 
+   *  defined in the project state.</p>
    *
-   * <p>This method used to only compile documents which were out of sync
-   * with their class file, as a performance optimization.  However,
-   * bug #634386 pointed out that unmodified files could depend on
-   * modified files, in which case this would not recompile a file in
-   * some situations when it should.  Since we value correctness over
-   * performance, we now always compile all open documents.</p>
-   * @throws IOException if a filesystem-related problem prevents compilation
+   *  <p>This method used to only compile documents which were out of sync
+   *  with their class file, as a performance optimization.  However,
+   *  bug #634386 pointed out that unmodified files could depend on
+   *  modified files, in which case this would not recompile a file in
+   *  some situations when it should.  Since we value correctness over
+   *  performance, we now always compile all open documents.</p>
+   *  @throws IOException if a filesystem-related problem prevents compilation
    */
   public void compileAll() throws IOException {
     
@@ -172,12 +165,15 @@ public class DefaultCompilerModel implements CompilerModel {
   
   /**
    * Compiles all files with the specified source root set.  
-   * @param sourceRootSet, a list of source roots
+   * @param sourceRootSet a list of source roots
    * @param filesToCompile a list of files to compile
    */
   public void compileAll(List<File> sourceRootSet, List<File> filesToCompile) throws IOException {
     
     File buildDir = null;
+    
+    //ScrollableDialog sd1 = new ScrollableDialog(null, "DefaultCompilerModel.compileAll called", "", "");
+    //sd1.show();
     
     if (_getter.getFileGroupingState().isProjectActive()) 
       buildDir = _getter.getFileGroupingState().getBuildDirectory();
@@ -188,6 +184,8 @@ public class DefaultCompilerModel implements CompilerModel {
     // Only compile if all are saved
     if (_hasModifiedFiles(defDocs)) {
       //System.out.println("Has modified files");
+      //ScrollableDialog sd2 = new ScrollableDialog(null, "_hasModifiedFiles(...) returned true!", "", "");
+      //sd2.show();
       _notifier.saveBeforeCompile();
     }
     
@@ -196,11 +194,20 @@ public class DefaultCompilerModel implements CompilerModel {
     // don't proceed with the rest of the compile.
     if (_hasModifiedFiles(defDocs)) return;
     
+//    ScrollableDialog sd3 = new ScrollableDialog(null, "DefaultCompilerModel.compileAll(...,...) has finished file saving", "","");
+//    sd3.show();
+    
     // Get sourceroots and all files
     File[] sourceRoots = sourceRootSet.toArray(new File[0]);;
     File[] files = filesToCompile.toArray(new File[0]);
     
+//    ScrollableDialog sd4 = new ScrollableDialog(null, "Ready to invoke compileStarted() event on _notifier [" + _notifier + "]", "", "");
+//    sd4.show();
+    
     _notifier.compileStarted();
+    
+//    ScrollableDialog sd5 = new ScrollableDialog(null, "compileStarted() event successfully invoked ", "", "");
+//    sd5.show();
     
     try { _compileFiles(sourceRoots, files, buildDir); }
     catch (Throwable t) {
@@ -372,6 +379,10 @@ public class DefaultCompilerModel implements CompilerModel {
   private synchronized void _compileFiles(File[] sourceRoots, File[] files, File buildDir) throws IOException {
 
 //    CompilerError[] errors = new CompilerError[0];
+    
+//    ScrollableDialog sd1 = new ScrollableDialog(null, "DefaultCompilerModel._compileFiles called with args " + sourceRoots + " " + files + " " + buildDir, "", "");
+//    sd1.show();
+    
     Pair<LinkedList<ParseException>, LinkedList<Pair<String, JExpressionIF>>> errors;
     LinkedList<ParseException> parseExceptions;
     LinkedList<Pair<String, JExpressionIF>> visitorErrors;
@@ -390,7 +401,13 @@ public class DefaultCompilerModel implements CompilerModel {
       // user doesn't have to do anything funny.
       //      LinkedList<File> filesToRestore = new LinkedList<File>();
       //      System.out.println("Calling convert!");
+      
+//      ScrollableDialog sd2 = new ScrollableDialog(null, "Ready to call file converter " + llc + " in DefaultCompilerModel", "", "");
+//      sd2.show();
       errors = llc.convert(files);//, filesToRestore);
+      
+//      ScrollableDialog sd3 = new ScrollableDialog(null, "Files successfully converted in DefaultCompilerModel", "", "");
+//      sd3.show();
       
       compiler.setWarningsEnabled(true);
       
@@ -521,8 +538,7 @@ public class DefaultCompilerModel implements CompilerModel {
   /** Resets the compiler error state to have no errors. */
   public void resetCompilerErrors() {
     // TODO: see if we can get by without this function
-    _compilerErrorModel =
-      new CompilerErrorModel<CompilerError>(new CompilerError[0], _getter);
+    _compilerErrorModel = new CompilerErrorModel<CompilerError>(new CompilerError[0], _getter);
   }
 
   //-------------------------- Compiler Management --------------------------//

@@ -47,30 +47,26 @@ package edu.rice.cs.drjava.model;
 
 import java.util.LinkedList;
 import edu.rice.cs.util.ReaderWriterLock;
+import edu.rice.cs.util.swing.ScrollableDialog;
 
-/**
- * Base class for all component-specific EventNotifiers.  This class provides
- * common methods to manage listeners of a specific type.
- * @type T the type of the listener class to be managed
- * @version $Id$
+/** Base class for all component-specific EventNotifiers.  This class provides common methods to 
+ *  manage listeners of a specific type.  T the type of the listener class to be managed.
+ *  @version $Id$
  */
 public abstract class EventNotifier<T> {
 
-  /**
-   * All T Listeners that are listening to the model.
-   * Accesses to this collection are protected by the ReaderWriterLock.
-   * The collection must be synchronized, since multiple readers could
-   * access it at once.
+  /** All T Listeners that are listening to the model.
+   *  Accesses to this collection are protected by the ReaderWriterLock.
+   *  The collection must be synchronized, since multiple readers could access it at once.
    */
   protected final LinkedList<T> _listeners = new LinkedList<T>();
 
-  /**
-   * Provides synchronization primitives for solving the readers/writers
-   * problem.  In EventNotifier, adding and removing listeners are considered
-   * write operations, and all notifications are considered read operations.
+  /** Provides synchronization primitives for solving the readers/writers
+   *  problem.  In EventNotifier, adding and removing listeners are considered
+   *  write operations, and all notifications are considered read operations.
    *
-   * Multiple reads are allowed simultaneously, but only one write can occur
-   * at a time, and no reads can occur during a write.
+   *  Multiple reads are allowed simultaneously, but only one write can occur
+   *  at a time, and no reads can occur during a write.
    */
   protected final ReaderWriterLock _lock = new ReaderWriterLock();
 
@@ -79,39 +75,36 @@ public abstract class EventNotifier<T> {
    * @param listener a listener that reacts on events
    */
   public void addListener(T listener) {
+//    new ScrollableDialog(null, "Grabbing writeLock on event queue", "", "").show();
     _lock.startWrite();
-    try {
-      _listeners.add(listener);
-    }
+    try { _listeners.add(listener); }
     finally {
       _lock.endWrite();
+//      new ScrollableDialog(null, "Released writeLock on event queue", "", "").show();
     }
   }
 
-  /**
-   * Removes a listener from the notifier.
-   * @param listener a listener that reacts on events
+  /** Removes a listener from the notifier.
+   *  @param listener a listener that reacts on events
    */
   public void removeListener(T listener) {
+//    new ScrollableDialog(null, "Grabbing writeLock on event queue", "", "").show();
     _lock.startWrite();
-    try {
-      _listeners.remove(listener);
-    }
+    try { _listeners.remove(listener); }
     finally {
       _lock.endWrite();
+//      new ScrollableDialog(null, "Released writeLock on event queue", "", "").show();
     }
   }
 
-  /**
-   * Removes all listeners from this notifier.
-   */
+  /** Removes all listeners from this notifier.  */
   public void removeAllListeners() {
+//    new ScrollableDialog(null, "Grabbing writeLock on event queue", "", "").show();
     _lock.startWrite();
-    try {
-      _listeners.clear();
-    }
+    try { _listeners.clear(); }
     finally {
       _lock.endWrite();
+//      new ScrollableDialog(null, "Released writeLock on event queue", "", "").show();
     }
   }
 }

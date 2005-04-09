@@ -82,57 +82,32 @@ import java.io.File;
 class JavadocEventNotifier extends EventNotifier<JavadocListener>
     implements JavadocListener {
 
-  /**
-   * Called after Javadoc is started by the GlobalModel.
-   */
+  /** Called after Javadoc is started by the GlobalModel. */
   public void javadocStarted() {
     _lock.startRead();
-    try {
-      int size = _listeners.size();
-      for(int i = 0; i < size; i++) {
-        _listeners.get(i).javadocStarted();
-      }
-    }
-    finally {
-      _lock.endRead();
-    }
+    try { for(JavadocListener jl: _listeners) { jl.javadocStarted(); } }
+    finally { _lock.endRead(); }
   }
 
-  /**
-   * Called after Javadoc is finished.
-   * @param success whether the Javadoc operation generated proper output
-   * @param destDir if (success == true) the location where the output was
-   *                generated, otherwise undefined (possibly null)
-   * @param allDocs Whether Javadoc was run for all open documents
+  /** Called after Javadoc is finished.
+   *  @param success whether the Javadoc operation generated proper output
+   *  @param destDir if (success == true) the location where the output was
+   *                 generated, otherwise undefined (possibly null)
+   *  @param allDocs Whether Javadoc was run for all open documents
    */
   public void javadocEnded(boolean success, File destDir, boolean allDocs) {
     _lock.startRead();
-    try {
-      int size = _listeners.size();
-      for(int i = 0; i < size; i++) {
-        _listeners.get(i).javadocEnded(success, destDir, allDocs);
-      }
-    }
-    finally {
-      _lock.endRead();
-    }
+    try { for(JavadocListener jl: _listeners) { jl.javadocEnded(success, destDir, allDocs); } }
+    finally { _lock.endRead();}
   }
 
-  /**
-   * Called before attempting Javadoc, to give users a chance to save.
-   * Do not continue with Javadoc if the user doesn't save!
+  /** Called before attempting Javadoc, to give users a chance to save.
+   *  Do not continue with Javadoc if the user doesn't save!
    */
   public void saveBeforeJavadoc() {
     _lock.startRead();
-    try {
-      int size = _listeners.size();
-      for(int i = 0; i < size; i++) {
-        _listeners.get(i).saveBeforeJavadoc();
-      }
-    }
-    finally {
-      _lock.endRead();
-    }
+    try { for(JavadocListener jl: _listeners) { jl.saveBeforeJavadoc(); } }
+    finally { _lock.endRead(); }
   }
 }
 

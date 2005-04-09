@@ -52,8 +52,7 @@ package edu.rice.cs.drjava.model.definitions.reducedmodel;
 public class Free extends ReducedModelState {
   public static final Free ONLY = new Free();
   
-  private Free() {
-  }
+  private Free() { }
   
   /**
    *  Walk function for when we're not inside a string or comment.
@@ -69,9 +68,7 @@ public class Free extends ReducedModelState {
    * </ol>
    */
   ReducedModelState update(TokenList.Iterator copyCursor) {
-    if (copyCursor.atEnd()) {
-      return STUTTER;
-    }
+    if (copyCursor.atEnd()) return STUTTER;
     
     _combineCurrentAndNextIfFind("/", "*", copyCursor);
     _combineCurrentAndNextIfFind("/", "/", copyCursor);

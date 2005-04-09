@@ -45,9 +45,11 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model;
 
-import java.util.List;
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
+import java.util.List;
+
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.swing.*;
 
@@ -87,7 +89,7 @@ import edu.rice.cs.util.swing.*;
  * @version $Id$
  */
 public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
-    implements GlobalModelListener {
+    implements GlobalModelListener, Serializable {
 
   public void fileNotFound(File f){
     _lock.startRead();
@@ -138,14 +140,8 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
    */
   public void notifyListeners(Notifier n) {
     _lock.startRead();
-    try {
-      for(GlobalModelListener l : _listeners) {
-        n.notifyListener(l);
-      }
-    }
-    finally {
-      _lock.endRead();
-    }
+    try { for(GlobalModelListener l : _listeners) { n.notifyListener(l); } }
+    finally { _lock.endRead(); }
   }
 
   /**
@@ -167,9 +163,7 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
       }
       return poll;
     }
-    finally {
-      _lock.endRead();
-    }
+    finally { _lock.endRead(); }
   }
 
   /**

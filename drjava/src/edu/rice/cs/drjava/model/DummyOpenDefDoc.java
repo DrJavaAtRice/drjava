@@ -320,12 +320,11 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
     throw new UnsupportedOperationException("Dummy method");
   }
   
-  /**
-   * Returns the name of this file, or "(untitled)" if no file.
-   */
-  public String getFilename() {
-    throw new UnsupportedOperationException("Dummy method");
-  }
+  /** Returns the name of this file, or "(untitled)" if no file. */
+  public String getFilename() { throw new UnsupportedOperationException("Dummy method"); }
+  
+  /** Same as above but INavigatorItem interface */
+  public String getName() { return getFilename(); }
   
   /**
    * Add the supplied Breakpoint to the hashtable, keyed by its BreakpointRequest

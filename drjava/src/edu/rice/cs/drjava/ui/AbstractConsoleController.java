@@ -65,41 +65,27 @@ import edu.rice.cs.drjava.platform.PlatformFactory;
  * @version $Id$
  */
 public abstract class AbstractConsoleController {
-  /**
-   * Adapter for the Swing document used by the model.
-   */
+  /** Adapter for the Swing document used by the model.*/
   protected InteractionsDocumentAdapter _adapter;
 
-  /**
-   * Pane from the view.
-   */
+  /** Pane from the view. */
   protected InteractionsPane _pane;
 
-  /**
-   * Style to use for default text.
-   */
+  /** Style to use for default text. */
   protected SimpleAttributeSet _defaultStyle;
 
-  /**
-   * Style to use for System.out.
-   */
+  /** Style to use for System.out. */
   protected final SimpleAttributeSet _systemOutStyle;
 
-  /**
-   * Style to use for System.err.
-   */
+  /** Style to use for System.err. */
   protected final SimpleAttributeSet _systemErrStyle;
 
   // package private for testing purposes (although I haven't written tests yet)
 
-  /**
-   * Action to change focus to previous pane.
-   */
+  /** Action to change focus to previous pane. */
   Action switchToPrevPaneAction;
 
-  /**
-   * Action to change focus to next pane.
-   */
+  /** Action to change focus to next pane. */
   Action switchToNextPaneAction;
 
   /**

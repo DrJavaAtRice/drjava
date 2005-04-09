@@ -71,7 +71,7 @@ import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
  * @version $Id$
  */
 public interface OpenDefinitionsDocument extends DJDocument, Finalizable<DefinitionsDocument>,
-  Comparable<OpenDefinitionsDocument> {
+  Comparable<OpenDefinitionsDocument>, INavigatorItem {
 
   // The following methods are forwarding methods required by the rest of the
   // program in order for the OpenDefinitionsDocument to handle DefinitionsDocuments
@@ -251,61 +251,42 @@ public interface OpenDefinitionsDocument extends DJDocument, Finalizable<Definit
    */
   public boolean canAbandonFile();
 
-  /**
-   * Moves the definitions document to the given line, and returns
-   * the character position in the document it's gotten to.
-   * @param line Number of the line to go to. If line exceeds the number
-   *             of lines in the document, it is interpreted as the last line.
-   * @return Index into document of where it moved
+  /** Moves the definitions document to the given line, and returns the character position in the 
+   *  document it's gotten to.
+   *  @param line Number of the line to go to. If line exceeds the number of lines in the document, 
+   *              it is interpreted as the last line.
+   *  @return Index into document of where it moved
    */
   public int gotoLine(int line);
 
-  /**
-   * A forwarding method to comment out the current line or selection
-   * in the definitions.
-   */
+  /** A forwarding method to comment out the current line or selection in the definitions. */
   public void commentLinesInDefinitions(int selStart, int selEnd);
 
-  /**
-   * A forwarding method to un-comment the current line or selection
-   * in the definitions.
-   */
+  /** A forwarding method to un-comment the current line or selection in the definitions. */
   public void uncommentLinesInDefinitions(int selStart, int selEnd);
 
-  /**
-   * Create a find and replace mechanism starting at the current
-   * character offset in the definitions.
-   * NOT USED.
-   */
+//  /** Create a find and replace mechanism starting at the current character offset in the definitions. */
 //  public FindReplaceMachine createFindReplaceMachine();
 
-  /**
-   * Finds the root directory of the source files.
-   * @return The root directory of the source files,
-   *         based on the package statement.
-   * @throws InvalidPackageException If the package statement is invalid,
-   *                                 or if it does not match up with the
-   *                                 location of the source file.
+  /** Finds the root directory of the source files.
+   *  @return The root directory of the source files, based on the package statement.
+   *  @throws InvalidPackageException If the package statement is invalid, or if it does not match
+   *          up with the location of the source file.
    */
   public File getSourceRoot() throws InvalidPackageException;
 
-  /**
-   * Gets the name of the package this source file claims it's in (with the
-   * package keyword). It does this by minimally parsing the source file
-   * to find the package statement.
+  /** Gets the name of the package for this source file (as declared in the source text). It does this by 
+   *  minimally parsing the source file to find the package statement.
    *
-   * @return The name of package this source file declares itself to be in,
-   *         or the empty string if there is no package statement (and thus
-   *         the source file is in the empty package).
+   *  @return The declared name of package for this source file (the empty string if there is no package 
+   *          statement).
    *
    * @exception InvalidPackageException if there is some sort of a
    *                                    <TT>package</TT> statement but it
    *                                    is invalid.
    */
   public String getPackageName() throws InvalidPackageException;
-  /**
-   *
-   */
+  
   public void preparePrintJob() throws BadLocationException, FileMovedException;
 
   public void print() throws PrinterException, BadLocationException, FileMovedException;
@@ -314,109 +295,78 @@ public interface OpenDefinitionsDocument extends DJDocument, Finalizable<Definit
 
   public void cleanUpPrintJob();
 
-  /**
-   * Checks if the document is modified. If not, searches for the class file
-   * corresponding to this document and compares the timestamps of the
-   * class file to that of the source file.
-   * @return is the class file and this OpenDefinitionsDocument are in sync
+  /** Checks if the document is modified. If not, searches for the class file
+   *  corresponding to this document and compares the timestamps of the
+   *  class file to that of the source file.
+   *  @return is the class file and this OpenDefinitionsDocument are in sync
    */
   public boolean checkIfClassFileInSync();
 
-  /**
-   * Returns the Breakpoint in this OpenDefinitionsDocument at the given
-   * linenumber, or null if one does not exist.
-   * @param lineNumber the line number of the breakpoint
-   * @return the Breakpoint at the given lineNumber, or null if it does not exist.
+  /** Returns the Breakpoint in this OpenDefinitionsDocument at the given
+   *  linenumber, or null if one does not exist.
+   *  @param lineNumber the line number of the breakpoint
+   *  @return the Breakpoint at the given lineNumber, or null if it does not exist.
    */
   public Breakpoint getBreakpointAt( int lineNumber);
 
-  /**
-   * Add the supplied Breakpoint to the hashtable, keyed by its BreakpointRequest
-   * @param breakpoint the Breakpoint to be inserted into the hashtable
+  /** Add the supplied Breakpoint to the hashtable, keyed by its BreakpointRequest
+   *  @param breakpoint the Breakpoint to be inserted into the hashtable
    */
   public void addBreakpoint( Breakpoint breakpoint);
 
-  /**
-   * Remove the given Breakpoint from the hashtable.
-   * @param breakpoint the Breakpoint to be removed.
+  /** Remove the given Breakpoint from the hashtable.
+   *  @param breakpoint the Breakpoint to be removed.
    */
   public void removeBreakpoint( Breakpoint breakpoint);
 
-  /**
-   * Returns a Vector<Breakpoint> that contains all of the Breakpoint objects that
-   * this document contains
-   */
+  /** @return a Vector<Breakpoint> containing the Breakpoint objects that this document contains. */
   public Vector<Breakpoint> getBreakpoints();
 
-  /**
-   * Tells the document to remove all breakpoints
-   */
+  /** Tells the document to remove all breakpoints. */
   public void clearBreakpoints();
 
-  /**
-   * Called to indicate the document is being closed, so to remove
-   * all related state from the debug manager.
-   */
+  /** Called when this document is being closed, removing related state from the debug manager. */
   public void removeFromDebugger();
   
-  /**
-   * sets this document's file
-   * @param file the file that this OpenDefinitionsDocument is associated with
+  /** Sets this document's file
+   *  @param file the file that this OpenDefinitionsDocument is associated with
    */
   public void setFile(File file);
   
-  /**
-   * resets the document to be unmodified
-   */
+  /** Resets the document to be unmodified. */
   public void resetModification();
   
-  /**
-   * returns the date that this document was last modified
-   */
+  /** Returns the date that this document was last modified. */
   public long getTimestamp();
   
-  /**
-   * sets the document as modified
-   */
+  /** Sets the document as modified. */
   public void setModifiedSinceSave();
 
-  
-  /**
-   * should be called when closing an ODD to let the ODD clean up after itself
-   */
+  /** Should be called when closing an ODD to let the ODD clean up after itself. */
   public void close();
 
-  /**
-   * @return true if the document belongs to this opendefintions document
-   * @param doc the document to test
-   */
-  public boolean belongsHuh(Document doc);
+//  /**
+//   * @return true if the document belongs to this opendefintions document
+//   * @param doc the document to test
+//   */
+//  public boolean belongsHuh(Document doc);
   
-  /**
-   * @return the initial vertical scroll the pane should use when initialized
-   */
+  /** @return the initial vertical scroll the pane should use when initialized. */
   public int getInitialVerticalScroll();
   
-  /**
-   * @return the initial vertical scroll the pane should use when initialized
-   */
+  /** @return the initial vertical scroll the pane should use when initialized. */
   public int getInitialHorizontalScroll();
   
-  /**
-   * @return the starting location of the cursor selection that should be set
-   * in the pane when initialized
-   */
+  /** @return the starting location of the cursor selection that should be set in the pane when 
+   *  initialized. */
   public int getInitialSelectionStart();
   
-  /**
-   * @return the final location of the cursor selection that should be set in
-   * the pane when it is initialized
+  /** @return the final location of the cursor selection that should be set in the pane when it 
+   *  is initialized.
    */
   public int getInitialSelectionEnd();
   
-//  /**
-//   * returns a list of all registered undoable edit listeners
-//   */
+//  /** @return a list of all registered undoable edit listeners */
 //  public List<UndoableEditListener> getUndoableEditListeners();
 
 }

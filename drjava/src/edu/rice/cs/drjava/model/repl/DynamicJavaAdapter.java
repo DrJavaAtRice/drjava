@@ -460,21 +460,16 @@ public class DynamicJavaAdapter implements JavaInterpreter {
    */
   public class InterpreterExtension extends TreeInterpreter {
 
-    /**
-     * Constructor.
-     */
+    /** Only constructor. */
     public InterpreterExtension(ClasspathManager cpm) {
       super(new JavaCCParserFactory());
 
-      
       classLoader = new ClassLoaderExtension(this, cpm);
       // We have to reinitialize these variables because they automatically
       // fetch pointers to classLoader in their constructors.
       nameVisitorContext = makeGlobalContext(this);
       ClassLoaderContainer clc = new ClassLoaderContainer() {
-        public ClassLoader getClassLoader() {
-          return classLoader;
-        }
+        public ClassLoader getClassLoader() { return classLoader; }
       };
       nameVisitorContext.setAdditionalClassLoaderContainer(clc);
       checkVisitorContext = makeGlobalContext(this);
@@ -493,8 +488,7 @@ public class DynamicJavaAdapter implements JavaInterpreter {
      * @param fname the name of the parsed stream
      * @return the result of the evaluation of the last statement
      */
-    public Object interpret(Reader r, String fname) throws InterpreterException
-    {
+    public Object interpret(Reader r, String fname) throws InterpreterException {
       List<Node> statements;
       try {
         SourceCodeParser p = parserFactory.createParser(r, fname);
@@ -573,13 +567,12 @@ public class DynamicJavaAdapter implements JavaInterpreter {
       Class<?> c = boolean.class;
       nameVisitorContext.defineConstant(name, c);
       checkVisitorContext.defineConstant(name, c);
-      evalVisitorContext.defineConstant(name, new Boolean(value));
+      evalVisitorContext.defineConstant(name, Boolean.valueOf(value));
     }
 
-    /**
-     * Assigns the given value to the given name as a constant in the interpreter.
-     * @param name Name of the variable
-     * @param value byte to assign
+    /** Assigns the given value to the given name as a constant in the interpreter.
+     *  @param name Name of the variable
+     *  @param value byte to assign
      */
     public void defineConstant(String name, byte value) {
       Class<?> c = byte.class;

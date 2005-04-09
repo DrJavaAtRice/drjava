@@ -59,13 +59,10 @@ public class Stutter extends ReducedModelState {
   public static final Stutter ONLY = new Stutter();
 
   /** Singleton constructor. */
-  private Stutter() {
-  }
+  private Stutter() { }
 
   ReducedModelState update(TokenList.Iterator copyCursor) {
-    if (copyCursor.atStart()) {
-      copyCursor.next();
-    }
+    if (copyCursor.atStart())  copyCursor.next();
     return copyCursor.getStateAtCurrent();
   }
 }

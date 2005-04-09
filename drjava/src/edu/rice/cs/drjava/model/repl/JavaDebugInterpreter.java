@@ -648,34 +648,29 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
           // a local variable or a class
           List<IdentifierToken> ids = node.getIdentifiers();
           Iterator<IdentifierToken> iter = ids.iterator();
-          String field = iter.next().image();
+          StringBuffer fieldBuf = new StringBuffer(iter.next().image());
           while (iter.hasNext()) {
             IdentifierToken t = iter.next();
-            field += "$" + t.image();
+            fieldBuf.append('$').append(t.image());
           }
+          String field = fieldBuf.toString();
           if (nameContext.isDefined("this")) {
             // Check if it's a field or outer field if we're not in a
             // static context.
             ObjectFieldAccess ofa = _getObjectFieldAccessForField(field, nameContext);
-            if (ofa != null) {
-              return ofa;
-            }
+            if (ofa != null) return ofa;
           }
           else {
             // We're in a static context.
             StaticFieldAccess sfa = _getStaticFieldAccessForField(field, nameContext);
-            if (sfa != null) {
-              return sfa;
-            }
+            if (sfa != null) return sfa;
             else {
               // This is possibly a substring of our current context's class name.
               // (e.g. The user is trying to evaluate MonkeyOuter.someField and we
               // have to convert MonkeyOuter to MonkeyMostOuter$MonkeyOuter)
               // Try qualifying it.
               ReferenceType rt = _getReferenceTypeForField(field, nameContext);
-              if (rt != null) {
-                return rt;
-              }
+              if (rt != null)  return rt;
             }
           }
           // Didn't find this field in any outer class. Throw original exception.

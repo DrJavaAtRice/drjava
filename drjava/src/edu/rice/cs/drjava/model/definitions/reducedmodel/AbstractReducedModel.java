@@ -59,21 +59,17 @@ public abstract class AbstractReducedModel implements ReducedModelStates {
    */
   public static final char PTR_CHAR = '#';
   
-  /**
-   * A list of ReducedTokens (braces and gaps).
+  /** The reduced model for a document is a list of ReducedTokens (braces and gaps).
    * @see ModelList
    */
   TokenList _tokens;
-  /**
-   * keeps track of cursor position in document
+  
+  /** Keeps track of cursor position in document
    * @see ModelList.Iterator
    */
   TokenList.Iterator _cursor;
   
-  /**
-   * Constructor.  Creates a new reduced model with the cursor
-   * at the start of a blank "page."
-   */
+  /** Constructor.  Creates a new reduced model with the cursor at the start of a blank "page." */
   public AbstractReducedModel() {
     _tokens = new TokenList();
     _cursor = _tokens._getIterator();
@@ -85,17 +81,13 @@ public abstract class AbstractReducedModel implements ReducedModelStates {
    * Get the offset into the current ReducedToken.
    * @return the number of characters into the token where the cursor sits
    */
-  int getBlockOffset() {
-    return _cursor.getBlockOffset();
-  }
+  int getBlockOffset() { return _cursor.getBlockOffset(); }
   
   /**
    * Change the offset into the current ReducedToken.
    * @param offset the number of characters into the token to set the cursor
    */
-  void setBlockOffset(int offset) {
-    _cursor.setBlockOffset(offset);
-  }
+  void setBlockOffset(int offset) { _cursor.setBlockOffset(offset); }
   
   /**
    * Package private absolute offset for tests.
@@ -105,8 +97,7 @@ public abstract class AbstractReducedModel implements ReducedModelStates {
   int absOffset() {
     int off = _cursor.getBlockOffset();
     TokenList.Iterator it = _cursor._copy();
-    if (!it.atStart())
-      it.prev();
+    if (!it.atStart()) it.prev();
     
     while (!it.atStart()) {
       off += it.current().getSize();
@@ -116,51 +107,36 @@ public abstract class AbstractReducedModel implements ReducedModelStates {
     return off;
   }
   
-  /**
-   * A toString replacement for testing - easier to read.
-   */
+  /** A toString() replacement for testing - easier to read. */
   public String simpleString() {
-    String val = "";
+    StringBuffer val = new StringBuffer();
     ReducedToken tmp;
     
     TokenList.Iterator it = _tokens._getIterator();
     it.next(); // since we start at the head, which has no current item
     
+    if (_cursor.atStart())  val.append(PTR_CHAR).append(_cursor.getBlockOffset());
     
-    if (_cursor.atStart()) {
-      val += PTR_CHAR;
-      val += _cursor.getBlockOffset();
-    }
-    
-    while(!it.atEnd()) {
+    while (!it.atEnd()) {
       tmp = it.current();
       
       if (!_cursor.atStart() && !_cursor.atEnd() && (tmp == _cursor.current())) {
-        val += PTR_CHAR;
-        val += _cursor.getBlockOffset();
+        val.append(PTR_CHAR).append(_cursor.getBlockOffset());
       }
       
-      val += "|";
-      val += tmp;
-      val += "|\t";
-      
+      val.append('|').append(tmp).append('|').append('\t');
       it.next();
     }
     
-    if (_cursor.atEnd()) {
-      val += PTR_CHAR;
-      val += _cursor.getBlockOffset();
-    }
+    if (_cursor.atEnd()) val.append(PTR_CHAR).append(_cursor.getBlockOffset());
     
-    val += "|end|";
+    val.append("|end|");
     it.dispose();
-    return val;
+    return val.toString();
   }
   
-  /**
-   * Inserts a character into the reduced model.
-   * A method to be implemented in each specific reduced sub-model.
-   */
+  /** Inserts a character into the reduced model. A method to be implemented in each specific reduced
+   *  sub-model. */
   public abstract void insertChar(char ch);
   
   /**
@@ -186,9 +162,7 @@ public abstract class AbstractReducedModel implements ReducedModelStates {
         _cursor.next();
         _augmentCurrentGap(length); //increases gap and moves offset
       }
-      else {
-        _insertNewGap(length);//inserts gap and goes to next item
-      }
+      else _insertNewGap(length);//inserts gap and goes to next item
     }
     else if (_cursor.atEnd()) {
       if (_gapToLeft()) {
@@ -196,26 +170,21 @@ public abstract class AbstractReducedModel implements ReducedModelStates {
         //increases the gap to the left and
         //cursor to next item in list leaving offset 0
       }
-      else {
-        _insertNewGap(length); //inserts gap and moves to next item
-      }
+      else _insertNewGap(length); //inserts gap and moves to next item
     }
     // should we insert a Gap in between the characters of a multiple char brace
-    else if ((_cursor.getBlockOffset() > 0) && _cursor.current().isMultipleCharBrace()) {
+    else if ((_cursor.getBlockOffset() > 0) && _cursor.current().isMultipleCharBrace())
       insertGapBetweenMultiCharBrace(length);
-    }
     // inserting inside a Gap
     else if (_cursor.current().isGap()) {
       _cursor.current().grow(length);
       _cursor.setBlockOffset(_cursor.getBlockOffset() + length);
     }
-    else if (!_cursor.atFirstItem() && _cursor.prevItem().isGap()) {
+    else if (!_cursor.atFirstItem() && _cursor.prevItem().isGap())
       //already pointing to next item
       _cursor.prevItem().grow(length);
-    }
-    else { //between two braces
+    else  //between two braces
       _insertNewGap(length); //inserts a gap and goes to the next item
-    }
     return;
   }
 
@@ -272,9 +241,7 @@ public abstract class AbstractReducedModel implements ReducedModelStates {
    * the size of that gap.
    * @param length the amount of increase
    */
-  protected void _augmentGapToLeft(int length) {
-    _cursor.prevItem().grow(length);
-  }
+  protected void _augmentGapToLeft(int length) { _cursor.prevItem().grow(length); }
   
   /**
    * Assuming there is a gap to the right, this function increases
@@ -313,19 +280,12 @@ public abstract class AbstractReducedModel implements ReducedModelStates {
    * Get the ReducedToken currently pointed at by the cursor.
    * @return the current token
    */
-  protected ReducedToken current() {
-    return _cursor.current();
-  }
+  protected ReducedToken current() { return _cursor.current(); }
   
-  /**
-   * Move to the token immediately right.
-   * This function forwards its responsibilities to the TokenList
-   * iterator.  If the cursor is at the end, it will throw an
-   * exception.
+  /** Move to the token immediately right. This function forwards its responsibilities to the cursor.
+   *  If the cursor is at the end, it will throw an exception.
    */
-  protected void  next() {
-    _cursor.next();
-  }
+  protected void  next() { _cursor.next(); }
 
   /**
    * Move to the token immediately left.

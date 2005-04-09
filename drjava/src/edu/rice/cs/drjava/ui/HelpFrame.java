@@ -91,10 +91,8 @@ public class HelpFrame extends HTMLFrame {
     return errorText;
   }
 
-  /**
-   * Shows the page selected by the hyperlink event.
-   * (theo) changed to anonymous inner class for encapsulation purposes
-   */
+  /** Shows the page selected by the hyperlink event.  Changed to anonymous inner class for 
+   * encapsulation purposes */
   private HyperlinkListener _linkListener = new HyperlinkListener() {
     public void hyperlinkUpdate(HyperlinkEvent event){
       if (event.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
@@ -102,7 +100,7 @@ public class HelpFrame extends HTMLFrame {
         URL url = event.getURL();
         String protocol = url.getProtocol();
 
-        if ((!"file".equals(protocol)) && (!"jar".equals(protocol))) {
+        if (!"file".equals(protocol) && !"jar".equals(protocol)) {
           // try to open in the platform's web browser, since we can't
           //  view it effectively here if it isn't in the jar
           // (we only handle file/jar protocols)
@@ -114,19 +112,14 @@ public class HelpFrame extends HTMLFrame {
         String path = url.getPath();
 
         if(path.indexOf(HELP_PATH+CONTENTS_PAGE) >= 0) {
-          try {
-            url = new URL(url,HOME_PAGE); // redirect to home, not contents
-          }
+          try { url = new URL(url,HOME_PAGE); } // redirect to home, not content
           catch(MalformedURLException murle) {
+            /* do nothing */
           }
         }
-        else if(path.indexOf(HELP_PATH) < 0) {
-          // not anywhere in the help section
-          return;
-        }
-        if(url.sameFile(_history.contents)) {
-          return; // we're already here!
-        }
+        else if(path.indexOf(HELP_PATH) < 0) return; // not anywhere in the help section
+          
+        if (url.sameFile(_history.contents)) return; // we're already here!
         jumpTo(url);
       }
     }

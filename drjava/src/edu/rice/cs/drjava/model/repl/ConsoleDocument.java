@@ -54,54 +54,35 @@ import edu.rice.cs.util.text.DocumentAdapterException;
  * @version $Id$
  */
 public class ConsoleDocument implements DocumentAdapter {
-  /**
-   * Default text style.
-   */
+  
+  /** Default text style.*/
   public static final String DEFAULT_STYLE = "default";
 
-  /**
-   * Style for System.out
-   */
+  /** Style for System.out */
   public static final String SYSTEM_OUT_STYLE = "System.out";
 
-  /**
-   * Style for System.err
-   */
+  /** Style for System.err */
   public static final String SYSTEM_ERR_STYLE = "System.err";
 
-  /**
-   * Style for System.in
-   */
+  /** Style for System.in */
   public static final String SYSTEM_IN_STYLE = "System.in";
 
-  /**
-   * The default prompt to use in the console.
-   */
+  /** The default prompt to use in the console. */
   public static final String DEFAULT_CONSOLE_PROMPT = "";
 
-  /**
-   * The document storing the text for this console model.
-   */
+  /** The document storing the text for this console model. */
   protected DocumentAdapter _document;
 
-  /**
-   * A runnable command to use for a notification beep.
-   */
+  /** A runnable command to use for a notification beep. */
   protected Runnable _beep;
 
-  /**
-   * Index in the document of the first place that is editable.
-   */
+  /** Index in the document of the first place that is editable. */
   protected int _promptPos;
 
-  /**
-   * String to use for the prompt.
-   */
+  /** String to use for the prompt. */
   protected String _prompt;
 
-  /**
-   * Whether the document currently has a prompt and is ready to accept input.
-   */
+  /** Whether the document currently has a prompt and is ready to accept input. */
   protected boolean _hasPrompt;
 
   /**

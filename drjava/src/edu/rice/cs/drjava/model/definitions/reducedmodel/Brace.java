@@ -126,24 +126,21 @@ class Brace extends ReducedToken implements ReducedModelStates {
    */
   public String toString() {
     //String val = "Brace(size: "+ getSize() +"): ";
-    String val = "";
+    StringBuffer val = new StringBuffer();
     int i;
     for (i = 0; i < getSize(); i++) {
-      val += " ";
-      val += getType().charAt(i);
+      val.append(' ');
+      val.append(getType().charAt(i));
     }
-    return val;
+    return val.toString();
   }
 
-  /**
-   * Flips the orientation of the brace.
-   * Useful for updating quote information.
+  /** Flips the orientation of the brace.
+   *  Useful for updating quote information.
    */
   public void flip() {
-    if (isOpen())
-      _type += 1;
-    else if(_type < braces.length - 1)
-      _type -= 1;
+    if (isOpen()) _type += 1;
+    else if(_type < braces.length - 1) _type -= 1;
   }
 
   /**
@@ -252,15 +249,13 @@ class Brace extends ReducedToken implements ReducedModelStates {
     return this.getType().equals(BLK_CMT_END);
   }
 
-  /**
-   * @return true if this is a newline delimiter
+  /** @return true if this is a newline delimiter
    */
   public boolean isNewline() {
     return this.getType().equals(EOLN);
   }
 
-  /**
-   * @return true if this is a multiple character brace
+  /** @return true if this is a multiple character brace
    */
   public boolean isMultipleCharBrace() {
     return isLineComment() || isBlockCommentStart() ||

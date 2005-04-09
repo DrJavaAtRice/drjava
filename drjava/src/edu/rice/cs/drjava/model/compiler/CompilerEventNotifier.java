@@ -84,6 +84,7 @@ class CompilerEventNotifier extends EventNotifier<CompilerListener> implements C
 
   /** Called after a compile is started by the GlobalModel. */
   public void compileStarted() {
+//    new ScrollableDialog(null, "CompilerEventNotifier.compileStarted() called for listeners " + _listeners, "", "").show();
     _lock.startRead();
     try { for (CompilerListener cl : _listeners) { cl.compileStarted(); } }
     finally { _lock.endRead(); }

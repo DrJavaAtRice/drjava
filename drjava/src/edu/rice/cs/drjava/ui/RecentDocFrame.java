@@ -64,7 +64,9 @@ import edu.rice.cs.drjava.model.repl.InteractionsEditorKit;
 import edu.rice.cs.drjava.CodeStatus;
 import edu.rice.cs.util.swing.DisplayManager;
 
-public class RecentDocFrame extends JWindow{
+/** This class extends a Swing view class.  Hence it should only be accessed from
+ *  the event-handling thread. */
+public class RecentDocFrame extends JWindow {
   // MainFrame
   MainFrame _frame;
   
@@ -87,27 +89,19 @@ public class RecentDocFrame extends JWindow{
   LinkedList<OpenDefinitionsDocument> _docs = new LinkedList<OpenDefinitionsDocument>();
   
   private OptionListener<Color> _colorListener = new OptionListener<Color>(){
-    public void optionChanged(OptionEvent<Color> oce){
-      updateFontColor();
-    }
+    public void optionChanged(OptionEvent<Color> oce) { updateFontColor(); }
   };
   
   private OptionListener<Font> _fontListener = new OptionListener<Font>(){
-    public void optionChanged(OptionEvent<Font> oce){
-      updateFontColor();
-    }
+    public void optionChanged(OptionEvent<Font> oce) { updateFontColor(); }
   };
   
   private OptionListener<Boolean> _antialiasListener = new OptionListener<Boolean>(){
-    public void optionChanged(OptionEvent<Boolean> oce){
-      updateFontColor();
-    }
+    public void optionChanged(OptionEvent<Boolean> oce) { updateFontColor(); }
   };
   
   private OptionListener<Boolean> _showSourceListener = new OptionListener<Boolean>(){
-    public void optionChanged(OptionEvent<Boolean> oce){
-      _showSource = oce.value;
-    }
+    public void optionChanged(OptionEvent<Boolean> oce) { _showSource = oce.value; }
   };
   
   /* if the pane should antialias itself */
@@ -170,16 +164,14 @@ public class RecentDocFrame extends JWindow{
     DrJava.getConfig().addOptionListener(OptionConstants.SHOW_SOURCE_WHEN_SWITCHING, _showSourceListener);
   }
 
-  
   private void updateFontColor(){
     Font  mainFont = DrJava.getConfig().getSetting(OptionConstants.FONT_MAIN);
     Color backColor = DrJava.getConfig().getSetting(OptionConstants.DEFINITIONS_BACKGROUND_COLOR);
     Color fontColor = DrJava.getConfig().getSetting(OptionConstants.DEFINITIONS_NORMAL_COLOR);
     /* make it bigger */
     Font titleFont = mainFont.deriveFont((float) (mainFont.getSize() + 3));
-    if (CodeStatus.DEVELOPMENT) {
+    if (CodeStatus.DEVELOPMENT)
       _antiAliasText = DrJava.getConfig().getSetting(OptionConstants.TEXT_ANTIALIAS).booleanValue();
-    }
     
     _label.setForeground(fontColor);
     _panel.setBackground(backColor);
@@ -191,28 +183,22 @@ public class RecentDocFrame extends JWindow{
     _scroller.setBorder(new EmptyBorder(0,0,0,0));
     _panel.setBorder(new LineBorder(fontColor, 1));
   }
-  /**
-   * moves the document d to the beginning of the list
-   * if it's already in the list, or it adds it to the
-   * beginning if its not already in the list
+  /** Moves the document d to the beginning of the list
+   *  if it's already in the list, or it adds it to the
+   *  beginning if its not already in the list
    */
-  public void pokeDocument(OpenDefinitionsDocument d){
-    if(_docs.contains(d)){
+  public void pokeDocument(OpenDefinitionsDocument d) {
+    if (_docs.contains(d)) {
       _current = _docs.indexOf(d);
       reset();
-    }else{
-      _docs.addFirst(d);
     }
+    else _docs.addFirst(d);
   }
   
-  /**
-   * removes the document from the list
-   */
-  public void closeDocument(OpenDefinitionsDocument d){
-    _docs.remove(d);
-  }
+  /** Removes the document from the list. */
+  public void closeDocument(OpenDefinitionsDocument d) { _docs.remove(d); }
   
-  private void show(int _current){
+  private void show(int _current) {
       OpenDefinitionsDocument doc = _docs.get(_current);
       
       String text = getTextFor(doc);
@@ -220,17 +206,16 @@ public class RecentDocFrame extends JWindow{
       _label.setText(_displayManager.getName(doc));
       _label.setIcon(_displayManager.getIcon(doc));
       
-      if(text.length() > 0){
+      if (text.length() > 0) {
         // as wide as the text area wants, but only 200px high
         _textpane.setText(text);
         _scroller.setPreferredSize(_textpane.getPreferredScrollableViewportSize());
-        if(_scroller.getPreferredSize().getHeight() > 200){
+        if (_scroller.getPreferredSize().getHeight() > 200)
           _scroller.setPreferredSize(new Dimension((int)_scroller.getPreferredSize().getWidth(), 200));
-        }
+        
         _scroller.setVisible(_showSource);
-      }else{
-        _scroller.setVisible(false);
       }
+      else _scroller.setVisible(false);
       
       Dimension d = _label.getMinimumSize();
       d.setSize(d.getWidth() + _padding*2, d.getHeight() + _padding*2);
@@ -241,28 +226,20 @@ public class RecentDocFrame extends JWindow{
       centerH();
   }
   
-  /**
-   * sets the current document to be the next document in the list
-   */
-  public void next(){
-    if(_docs.size() > 0){
+  /** Sets the current document to be the next document in the list. */
+  public void next() {
+    if (_docs.size() > 0) {
       _current++;
-      if(_current >= _docs.size()){
-        _current = 0;
-      }
+      if (_current >= _docs.size()) _current = 0;
       show(_current);
     }
   }
   
-  /**
-   * sets the current document to be the previous document in the list
-   */
-  public void prev(){
-    if(_docs.size() > 0){
+  /** Sets the current document to be the previous document in the list. */
+  public void prev() {
+    if (_docs.size() > 0) {
       _current--;
-      if(_current < 0){
-        _current = _docs.size()-1;
-      }
+      if (_current < 0) _current = _docs.size() - 1;
       show(_current);
     }
   }
@@ -274,116 +251,84 @@ public class RecentDocFrame extends JWindow{
     int start = loc;
     int end = loc;
     String text;
-    try{
-      text = doc.getText(0, doc.getLength());
-    }catch(BadLocationException e){
-      text = "";
-    }
+    try { text = doc.getText(0, doc.getLength()); }
+    catch(BadLocationException e) { text = ""; }
+    
     /* get the starting point of 2 lines up... */
-    for(int i=0;i<4;i++){
-      if(start > 0){
-        start = text.lastIndexOf(endl, start-endl.length());
-      }
+    for (int i = 0; i < 4; i++) {
+      if (start > 0) start = text.lastIndexOf(endl, start-endl.length());
     }
-    if(start == -1) start = 0;
+    if (start == -1) start = 0;
+    
     // skip the end line, if we're at one
-    if(doc.getLength() >= endl.length() && text.substring(start, start+endl.length()) == endl) start+=endl.length();
-    
-    
+    // if (doc.getLength() >= endl.length() && text.substring(start, start+endl.length()) == endl) start+=endl.length();
+    if (doc.getLength() >= endl.length() && text.substring(start, start+endl.length()).equals(endl)) start+=endl.length();
     /* get the ending point 2 lines down */
     int index;
-    for(int i=0;i<4;i++){
-      if(end < doc.getLength()){
+    for (int i=0;i<4;i++) {
+      if (end < doc.getLength()) {
         index = text.indexOf(endl, end+endl.length());
-        if(index != -1) end = index;
+        if (index != -1) end = index;
       }
     }
-    if(end < start) end = start;
+    if (end < start) end = start;
     text = text.substring(start, end);
     return text;
   }
     
-  /**
-   * resets the frame to point to the first document in the list
-   */
-  public void first(){
+  /** Resets the frame to point to the first document in the list. */
+  public void first() {
     _current = 0;
     next();
   }
   
-  public void refreshColor(){
-    
-  }
+  public void refreshColor() { }
   
   /**
    * sets this frame as visible only if _docs is non empty.
    * also resets the frame accordingly
    */
-  public void setVisible(boolean v){
+  public void setVisible(boolean v) {
     centerH();
-    if(_docs.size() > 0){
-      if(v){ 
+    if (_docs.size() > 0) {
+      if (v) { 
         centerV();
         refreshColor();
         first();
-      }else{
-        reset();
       }
+      else reset();
       super.setVisible(v);
     }
   }
   
-  /**
-   * centers the frame in the screen
-   */
+  /** Centers the frame in the screen. */
   private void centerH(){
     Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
     Dimension frameSize = getSize();
-    setLocation((screenSize.width - frameSize.width) / 2,
-                (int)getLocation().getY());
+    setLocation((screenSize.width - frameSize.width) / 2, (int)getLocation().getY());
   }
   
-  /**
-   * centers the frame in the screen
-   */
+  /** Centers the frame in the screen. */
   private void centerV(){
     Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
     Dimension frameSize = getSize();
-    setLocation((int)getLocation().getX(),
-                (screenSize.height - frameSize.height) / 2);
+    setLocation((int)getLocation().getX(), (screenSize.height - frameSize.height) / 2);
   }
   
-
-  /**
-   * moves the selected document to the front of the list
-   */
-  public void reset(){
-    if(_current < _docs.size()){
-      _docs.addFirst(_docs.remove(_current));
-    }
+  /** Moves the selected document to the front of the list. */
+  public void reset() {
+    if (_current < _docs.size()) _docs.addFirst(_docs.remove(_current));
   }
   
-  /**
-   * returns null if the list is empty, or the currently
-   * prefered OpenDefinitionsDocument
-   */
-  public OpenDefinitionsDocument getDocument(){
-    if(_docs.size() > 0){
-      return _docs.getFirst();
-    }else{
-      return null;
-    }
-  }
-
-  
-  
-  
-  private ImageIcon _getIconResource(String name) {
-    URL url = RecentDocFrame.class.getResource("icons/" + name);
-    if (url != null) {
-      return new ImageIcon(url);
-    }
+  /** Returns null if the list is empty, or the currently prefered OpenDefinitionsDocument. */
+  public OpenDefinitionsDocument getDocument() {
+    if (_docs.size() > 0) return _docs.getFirst();
     return null;
   }
 
+  private ImageIcon _getIconResource(String name) {
+    URL url = RecentDocFrame.class.getResource("icons/" + name);
+    if (url != null) return new ImageIcon(url);
+    return null;
+  }
 }

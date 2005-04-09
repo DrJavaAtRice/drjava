@@ -79,35 +79,23 @@ import edu.rice.cs.util.UnexpectedException;
  * @version $Id$
  */
 public class InteractionsController extends AbstractConsoleController {
-  /**
-   * InteractionsModel to handle interpretation
-   */
+  /** InteractionsModel to handle interpretation. */
   protected InteractionsModel _model;
 
-  /**
-   * Document from the model.
-   */
+  /** Document from the model.*/
   protected InteractionsDocument _doc;
 
-  /**
-   * Style to use for error messages.
-   */
+  /** Style to use for error messages. */
   protected SimpleAttributeSet _errStyle;
 
-  /**
-   * Style to use for debug messages.
-   */
+  /** Style to use for debug messages. */
   protected final SimpleAttributeSet _debugStyle;
 
   PopupConsole _popupConsole = new PopupConsole(_pane, new InputBox(), "Standard Input (System.in)");
   
-  /**
-   * Listens for input requests from ,System.in displaying an input box as needed.
-   */
+  /** Listens for input requests from ,System.in displaying an input box as needed. */
   protected InputListener _inputListener = new InputListener() {
-    public String getConsoleInput() {
-      return _popupConsole.getConsoleInput();
-    }
+    public String getConsoleInput() { return _popupConsole.getConsoleInput(); }
   };
   
   private InteractionsListener _viewListener = new InteractionsListener() {
@@ -120,8 +108,7 @@ public class InteractionsController extends AbstractConsoleController {
       _pane.resetPrompts();
     }
     
-    public void interpreterReady() {
-    }  
+    public void interpreterReady() { }  
     public void interpreterResetFailed(Throwable t) {}  
     public void interpreterExited(int status) {}  
     public void interpreterChanged(boolean inProgress) {}
@@ -129,10 +116,9 @@ public class InteractionsController extends AbstractConsoleController {
     }
   };
 
-  /**
-   * Glue together the given model and a new view.
-   * @param model An InteractionsModel
-   * @param adapter InteractionsDocumentAdapter being used by the model's doc
+  /** Glue together the given model and a new view.
+   *  @param model An InteractionsModel
+   *  @param adapter InteractionsDocumentAdapter being used by the model's doc
    */
   public InteractionsController(final InteractionsModel model, InteractionsDocumentAdapter adapter) {
     this(model, adapter, 

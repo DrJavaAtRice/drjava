@@ -57,82 +57,62 @@ public interface JUnitModel {
 
   //-------------------------- Listener Management --------------------------//
 
-  /**
-   * Add a JUnitListener to the model.
-   * @param listener a listener that reacts to JUnit events
+  /** Add a JUnitListener to the model.
+   *  @param listener a listener that reacts to JUnit events
    */
   public void addListener(JUnitListener listener);
 
-  /**
-   * Remove a JUnitListener from the model.  If the listener is not currently
-   * listening to this model, this method has no effect.
+  /** Remove a JUnitListener from the model.  If the listener is not currently listening to this 
+   *  model, this method has no effect.
    * @param listener a listener that reacts to JUnit events
    */
   public void removeListener(JUnitListener listener);
 
-  /**
-   * Removes all JUnitListeners from this model.
-   */
+  /** Removes all JUnitListeners from this model. */
   public void removeAllListeners();
 
   //-------------------------------- Triggers --------------------------------//
 
-  /**
-   * This is used by test cases and perhaps other things.  We should kill it.
-   */
+  /** This is used by test cases and perhaps other things.  We should kill it. */
   public StyledDocument getJUnitDocument();
 
-  /**
-   * Creates a JUnit test suite over all currently open documents and runs it.
-   * If the class file associated with a file is not a test case, it will be
-   * ignored.  Synchronized against the compiler model to prevent testing and
-   * compiling at the same time, which would create invalid results.
+  /** Creates a JUnit test suite over all currently open documents and runs it.  If the class file 
+   *  associated with a file is not a test case, it will be ignored.  Synchronized against the compiler 
+   *  model to prevent testing and compiling at the same time, which would create invalid results.
    */
   public void junitAll();
 
-  /**
-   * Creates a JUnit test suite over all currently open project documents and runs it.
-   * If the class file associated with a file is not a test case, it will be
-   * ignored.  Synchronized against the compiler model to prevent testing and
-   * compiling at the same time, which would create invalid results.
+  /** Creates a JUnit test suite over all currently open project documents and runs it.  If 
+   *  the class file associated with a file is not a test case, it will be ignored.  Synchronized 
+   *  against the compiler model to prevent testing and compiling at the same time, which would 
+   *  create invalid results.
    */
   public void junitProject();
 
-  /**
-   * Runs JUnit over a list of documents.  Synchronized against the compiler model
-   * to prevent testing and compiling at the same time, which would create
-   * invalid results.
-   * @param doc the document to be run under JUnit
+  /** Runs JUnit over a list of documents.  Synchronized against the compiler model to prevent 
+   *  testing and compiling at the same time, which would create invalid results.
+   *  @param lod the list of documents that are to be run through JUnit testing.
    */
   public void junitDocs(List<OpenDefinitionsDocument> lod);
   
-  /**
-   * Runs JUnit over a single document.  Synchronized against the compiler model
-   * to prevent testing and compiling at the same time, which would create
-   * invalid results.
-   * @param doc the document to be run under JUnit
+  /** Runs JUnit over a single document.  Synchronized against the compiler model to prevent testing
+   *  and compiling at the same time, which would create invalid results.
+   *  @param doc the document to be run under JUnit
    */
-  public void junit(OpenDefinitionsDocument doc)
-      throws ClassNotFoundException, IOException;
+  public void junit(OpenDefinitionsDocument doc) throws ClassNotFoundException, IOException;
 
-  
-  /**
-   * forwards the classnames and files to the test manager to test all of them
-   * @param a list of all the qualified class names to test
-   * @param a list of their source files in the same order as qualified class names
+  /** Forwards the classnames and files to the test manager to test all of them.
+   *  @param qualifiedClassnames a list of all the qualified class names to test.
+   *  @param files a list of their source files in the same order as qualified class names.
    */
   public void junitAll(List<String> qualifiedClassnames, List<File> files);
   
   //----------------------------- Error Results -----------------------------//
 
-  /**
-   * Gets the JUnitErrorModel, which contains error info for the last test run.
-   */
+  /** Gets the JUnitErrorModel, which contains error info for the last test run. */
   public JUnitErrorModel getJUnitErrorModel();
 
-  /**
-   * Resets the junit error state to have no errors.
-   */
+  /** Resets the junit error state to have no errors. */
   public void resetJUnitErrors();
   
 }

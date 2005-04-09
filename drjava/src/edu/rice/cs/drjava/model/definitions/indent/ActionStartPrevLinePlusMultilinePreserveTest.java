@@ -78,11 +78,11 @@ public class ActionStartPrevLinePlusMultilinePreserveTest extends IndentRulesTes
    * expected results.
    * @param start The text that should be in the document at time rule is called
    * @param loc the location of the cursor when rule is called
-   * @param endSize the expected final size of the document
+   * @param endLoc the expected final size of the document
    * @param finish the text string that remaining after the rule is called
    */
-  public void helperCommentTest(String start, int loc, int endLoc,
-                         String finish) throws BadLocationException{
+  public void helperCommentTest(String start, int loc, int endLoc, String finish) throws 
+    BadLocationException {
       _setDocText(start);
       _doc.setCurrentLocation(loc);
       makeAction(new String[]{" * \n", " */"},0,3,0,3).indentLine(_doc, Indenter.ENTER_KEY_PRESS);

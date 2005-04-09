@@ -50,6 +50,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.Toolkit;
 import java.awt.Event;
+import java.io.Serializable;
 
 import edu.rice.cs.drjava.model.repl.*;
 
@@ -59,53 +60,37 @@ import edu.rice.cs.drjava.model.repl.*;
 public class ConsoleController extends AbstractConsoleController {
   protected ConsoleDocument _doc;
 
-  /**
-   * Object to wait on for input from System.in.
-   */
+  /** Object to wait on for input from System.in. */
   private Object _inputWaitObject = new Object();
 
-  /**
-   * State so that the Enter action will only take place if the console is actually
-   * waiting for input.
-   */
-  private boolean _waiting;
+  /** State so that the Enter action will only take place if the console is actually
+   *  waiting for input. */
+  private boolean _blockedForConsoleInput;
 
   public ConsoleController(final ConsoleDocument doc, InteractionsDocumentAdapter adapter) {
     super(adapter, new InteractionsPane("CONSOLE_KEYMAP", adapter) {
-      public int getPromptPos() {
-        return doc.getPromptPos();
-      }
+      public int getPromptPos() { return doc.getPromptPos(); }
     });
     _doc = doc;
-    _waiting = false;
+    _blockedForConsoleInput = false;
     _pane.setEditable(false);
 //    _pane.getCaret().setVisible(false);
 
     _init();
   }
 
-  /**
-   * Gets the ConsoleDocument.
-   */
-  public ConsoleDocument getConsoleDoc() {
-    return _doc;
-  }
+  /** Gets the ConsoleDocument. */
+  public ConsoleDocument getConsoleDoc() { return _doc; }
 
-  /**
-   * Allows the main controller to install the input listener into the model.
-   */
-  public InputListener getInputListener() {
-    return _inputListener;
-  }
+  /** Allows the main controller to install the input listener into the model. */
+  public InputListener getInputListener() { return _inputListener; }
 
   protected void _setupModel() {
     _adapter.addDocumentListener(new CaretUpdateListener());
     _doc.setBeep(_pane.getBeep());
   }
 
-  /**
-   * Listens for input from System.in
-   */
+  /** Listens for input from System.in. */
   protected InputListener _inputListener = new InputListener() {
     public String getConsoleInput() {
 //     return JOptionPane.showInputDialog(MainFrame.this, "Please enter System.in:",
@@ -119,30 +104,23 @@ public class ConsoleController extends AbstractConsoleController {
     }
   };
 
-  /**
-   * @return the Object that the console waits on
-   */
-  Object getInputWaitObject() {
-    return _inputWaitObject;
-  }
+  /** @return the Object that the console waits on. */
+  Object getInputWaitObject() { return _inputWaitObject; }
 
-  /**
-   * Waits for _inputWaitObject to be notified.
-   */
+  /** Waits for _inputWaitObject to be notified. */
   protected void _waitForInput() {
     synchronized(_inputWaitObject) {
       try {
-        _waiting = true;
-        _inputWaitObject.wait();
+        _blockedForConsoleInput = true;
+        while (_blockedForConsoleInput) _inputWaitObject.wait();
       }
-      catch (InterruptedException ie) {
+      catch (InterruptedException ie) { 
+        /* do nothing */
       }
     }
   }
 
-  /**
-   * Adds actions to the view.
-   */
+  /** Adds actions to the view. */
   protected void _setupView() {
     super._setupView();
 
@@ -182,65 +160,58 @@ public class ConsoleController extends AbstractConsoleController {
                                 moveUpDownAction);
   }
 
-  AbstractAction enterAction = new AbstractAction() {
+  AbstractAction enterAction = new EnterAction();
+  private class EnterAction extends AbstractAction {
     public void actionPerformed(ActionEvent e) {
-      if (_waiting) {
-        _pane.setEditable(false);
-        _pane.getCaret().setVisible(false);
-        _doc.insertNewLine(_doc.getDocLength());
-        synchronized(_inputWaitObject) {
-          _inputWaitObject.notify();
-          _waiting = false;
+      synchronized(_inputWaitObject) {
+        if (_blockedForConsoleInput) {
+          _pane.setEditable(false);
+          _pane.getCaret().setVisible(false);
+          _doc.insertNewLine(_doc.getDocLength());
+          _blockedForConsoleInput = false; 
+          _inputWaitObject.notify();  // notify waiting thread that input is available
         }
       }
     }
-  };
+  }
 
   /** Moves the caret left or beeps at the edge. */
-  AbstractAction moveLeftAction = new AbstractAction() {
+  AbstractAction moveLeftAction = new LeftAction();
+  private class LeftAction extends AbstractAction {
     public void actionPerformed(ActionEvent e) {
       int position = _pane.getCaretPosition();
-      if (position < _doc.getPromptPos()) {
-        moveToPrompt();
-      }
-      else if (position == _doc.getPromptPos()) {
-        _pane.getBeep().run();
-      }
-      else { // position > _doc.getPromptPos()
+      if (position < _doc.getPromptPos()) moveToPrompt();
+      else if (position == _doc.getPromptPos())_pane.getBeep().run();
+      else // position > _doc.getPromptPos()
         _pane.setCaretPosition(position - 1);
-      }
     }
-  };
+  }
 
   /** Moves the caret right or beeps at the edge. */
-  AbstractAction moveRightAction = new AbstractAction() {
+  AbstractAction moveRightAction = new RightAction();
+  
+  private class RightAction extends AbstractAction {
     public void actionPerformed(ActionEvent e) {
       int position = _pane.getCaretPosition();
-      if (position < _doc.getPromptPos()) {
-        moveToEnd();
-      }
-      else if (position >= _doc.getDocLength()) {
-        _pane.getBeep().run();
-      }
-      else { // position between prompt and end
+      if (position < _doc.getPromptPos()) moveToEnd();
+      else if (position >= _doc.getDocLength()) _pane.getBeep().run();
+      else // position between prompt and end
         _pane.setCaretPosition(position + 1);
-      }
     }
-  };
+  }
+
 
   /**
    * Cannot move up or down at console.  Just move to the prompt if not in editable
    * area, or beep if already after the prompt.
    */
-  AbstractAction moveUpDownAction = new AbstractAction() {
+  AbstractAction moveUpDownAction = new UpDownAction();
+  private class UpDownAction extends AbstractAction {
     public void actionPerformed(ActionEvent e) {
       int position = _pane.getCaretPosition();
-      if (position < _doc.getPromptPos()) {
-        moveToPrompt();
-      }
-      else {
-        _pane.getBeep().run();
-      }
+      if (position < _doc.getPromptPos()) moveToPrompt();
+      else _pane.getBeep().run();
     }
-  };
+  }
 }
+

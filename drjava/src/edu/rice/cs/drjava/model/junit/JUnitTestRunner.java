@@ -60,9 +60,8 @@ import junit.runner.*;
 import junit.framework.*;
 import junit.textui.TestRunner;
 
-/**
- * DrJava's own testrunner. It updates the document in the
- * JUnit pane as error and failure events are fired.
+/** DrJava's own testrunner. It updates the document in the JUnit pane as error and failure 
+ *  events are fired.
  *
  * @version $Id$
  */
@@ -72,46 +71,30 @@ public class JUnitTestRunner extends TestRunner {
    */
   private JUnitModelCallback _jmc;
 
-  /**
-   * Used to tie the output of the ui textrunner
-   * to nothing.
-   */
+  /** Used to tie the output of the ui textrunner to nothing. */
   private PrintStream _writer;
 
-  /**
-   * Class loader that uses DrJava's classpath. Overrides the super class' loader.
-   */
+  /** Class loader that uses DrJava's classpath. Overrides the super class' loader. */
   private TestSuiteLoader _classLoader;
 
-  /**
-   * The JUnit TestResult being accumulated.
-   */
+  /** The JUnit TestResult being accumulated. */
   private TestResult _result;
 
-  /**
-   * The current number of errors in the result.
-   */
+  /** The current number of errors in the result. */
   private int _errorCount;
 
-  /**
-   * The current number of failures in the result.
-   */
+  /** The current number of failures in the result. */
   private int _failureCount;
 
-  /**
-   * Constructor
-   */
+  /** Standard constructor. */
   public JUnitTestRunner(JUnitModelCallback jmc) {
     super();
     _jmc = jmc;
     _classLoader = new DrJavaTestSuiteLoader(jmc);
     _writer = new PrintStream(System.out) {
-      public void print(String s) {
-      }
-      public void println(String s) {
-      }
-      public void println() {
-      }
+      public void print(String s) { }
+      public void println(String s) { }
+      public void println() { }
     };
 
     _errorCount = 0;
@@ -135,36 +118,18 @@ public class JUnitTestRunner extends TestRunner {
     return _result;
   }
 
-  /**
-   * Overrides method in super class to always return a
-   * reloading test suite loader.
-   */
-  public TestSuiteLoader getLoader() {
-    return _classLoader;
-  }
+  /** Overrides method in super class to always return a reloading test suite loader. */
+  public TestSuiteLoader getLoader() { return _classLoader; }
 
-  /**
-   * Provides our own PrintStream which outputs
-   * to the appropriate document.
-   */
-  protected PrintStream getWriter() {
-    return _writer;
-  }
+  /** Provides our own PrintStream which outputs to the appropriate document. */
+  protected PrintStream getWriter() { return _writer; }
 
-  protected PrintStream writer() {
-    return getWriter();
-  }
+  protected PrintStream writer() { return getWriter(); }
 
-  /**
-   * Called by JUnit when a test is started.
-   */
-  public synchronized void startTest(Test test) {
-    _jmc.testStarted(test.toString());
-  }
+  /** Called by JUnit when a test is started. */
+  public synchronized void startTest(Test test) { _jmc.testStarted(test.toString()); }
 
-  /**
-   * Called by JUnit when a test has finished.
-   */
+  /** Called by JUnit when a test has finished. */
   public synchronized void endTest(Test test) {
     boolean error = false;
     boolean failure = false;

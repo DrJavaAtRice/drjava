@@ -72,8 +72,8 @@ public class ClasspathManager{
   List<ClasspathEntry> extraCP;
   // the system classpath
   List<ClasspathEntry> systemCP;
-  // the open files classpath (for nonproject mode)
-  List<ClasspathEntry> openFilesCP;
+//  The open files classpath (for nonproject mode)
+//  List<ClasspathEntry> openFilesCP;
   
   public ClasspathManager(){
     projectCP = new LinkedList<ClasspathEntry>();
@@ -82,37 +82,29 @@ public class ClasspathManager{
     externalFilesCP = new LinkedList<ClasspathEntry>();
     extraCP = new LinkedList<ClasspathEntry>();
     systemCP = new LinkedList<ClasspathEntry>();
-    openFilesCP = new LinkedList<ClasspathEntry>();
+//    openFilesCP = new LinkedList<ClasspathEntry>();
   }
   
-  /**
-   * adds the entry to the front of the project classpath
-   * (this is the classpath specified in project properties)
+  /** Adds the entry to the front of the project classpath
+   *  (this is the classpath specified in project properties)
    */
   public void addProjectCP(URL f){
     // add new entry to front of classpath
     projectCP.add(0, new ClasspathEntry(f));
   }
   
-  public List<ClasspathEntry> getProjectCP(){
-    return projectCP;
-  }
+  public List<ClasspathEntry> getProjectCP(){ return projectCP; }
   
-  /**
-   * adds the entry to the front of the build classpath
-   */
-  public void addBuildDirectoryCP(URL f){
+  /** Adds the entry to the front of the build classpath. */
+  public void addBuildDirectoryCP(URL f) {
     // add new entry to front of classpath
     buildCP.add(0, new ClasspathEntry(f));
   }
 
-  public List<ClasspathEntry> getBuildDirectoryCP(){
-    return buildCP;
-  }
+  public List<ClasspathEntry> getBuildDirectoryCP(){ return buildCP; }
   
-  /**
-   * adds the entry to the front of the project files classpath
-   * (this is the classpath for all open project files)
+  /** Adds the entry to the front of the project files classpath
+   *  (this is the classpath for all open project files)
    */
   public void addProjectFilesCP(URL f){
     // add new entry to front of classpath

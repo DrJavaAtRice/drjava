@@ -120,9 +120,9 @@ public interface SingleDisplayModel extends GlobalModel {
    */
   public boolean closeFiles(List<OpenDefinitionsDocument> docList, boolean together);
   
-  public OpenDefinitionsDocument getODDGivenIDoc(INavigatorItem idoc);
+  // public OpenDefinitionsDocument getODDGivenIDoc(INavigatorItem idoc);
     
-  public INavigatorItem getIDocGivenODD(OpenDefinitionsDocument odd);
+  // public INavigatorItem getIDocGivenODD(OpenDefinitionsDocument odd);
   
   public void setActiveFirstDocument();
 

@@ -75,40 +75,28 @@ public final class IndentTest extends TestCase {
   private Integer configIndent;
   private GlobalEventNotifier _notifier;
 
-  /**
-   * put your documentation comment here
-   * @param     String name
+  /** Tests the indent operation.
+   *  @param     String name
    */
-  public IndentTest(String name) {
-    super(name);
-  }
+  public IndentTest(String name) { super(name); }
 
-  /**
-   * put your documentation comment here
-   */
+  /** Sets up the member bindings common to all tests. */
   public void setUp() {
     DrJava.getConfig().resetToDefaults();
     _notifier = new GlobalEventNotifier();
     doc = new DefinitionsDocument(_notifier);
     DrJava.getConfig().setSetting(OptionConstants.INDENT_LEVEL,indentLevel);
   }
-  /**
-   * put your documentation comment here
-   */
-  protected void tearDown() {
-  }
+  
+  /** Tears down any structures built in setUp() that will not be reclaimed by GC */
+  protected void tearDown() { }
 
-  /**
-   * put your documentation comment here
-   * @return
+  /** Builds the suite of tests for Indent.class.
+   * @return the suite.
    */
-  public static Test suite() {
-    return  new TestSuite(IndentTest.class);
-  }
+  public static Test suite() { return  new TestSuite(IndentTest.class); }
 
-  /**
-   * Regression test for comment portion of indent tree.
-   */
+  /** Regression test for comment portion of indent tree. */
   public void testIndentComments() throws BadLocationException {
     String text =
       "  foo();\n" +

@@ -60,8 +60,10 @@ import edu.rice.cs.util.newjvm.*;
  */
 public interface InterpreterJVMRemoteI extends SlaveRemote {
   
-  public List<String> runTestSuite(List<String> classNames, List<File> files, boolean isTestAll)
+  public List<String> findTestClasses(List<String> classNames, List<File> files)
     throws RemoteException;
+  
+  public boolean runTestSuite() throws RemoteException;
   
   public void setPackageScope(String s) throws RemoteException;
   //public void reset() throws RemoteException;

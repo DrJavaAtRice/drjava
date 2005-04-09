@@ -100,47 +100,47 @@ public class JavadocFrame extends HTMLFrame {
     try {
       FileReader fr = new FileReader(packages);
       BufferedReader br = new BufferedReader(fr);
-      boolean found = false;
-      String line = br.readLine();
-      int numLinesRead = 1;
-      while ((!found) &&
-             (numLinesRead < MAX_READ_PACKAGES_LINES) &&
-             (line != null)) {
-        found = (line.indexOf("The front page has been relocated") != -1);
-        if (!found) {
-          line = br.readLine();
-          numLinesRead++;
-        }
-      }
-
-      // Replace packages.html with the No Frames link.
-      if (found) {
-        boolean foundLink = false;
-        while ((!foundLink) &&
-               (numLinesRead < MAX_READ_FOR_LINK_LINES) &&
+      try { // process the opened file
+        String line = br.readLine();
+        int numLinesRead = 1;
+        boolean found = false;
+        while ((!found) &&
+               (numLinesRead < MAX_READ_PACKAGES_LINES) &&
                (line != null)) {
-          foundLink = (line.indexOf("Non-frame version") != -1);
-          if (!foundLink) {
+          found = (line.indexOf("The front page has been relocated") != -1);
+          if (!found) {
             line = br.readLine();
             numLinesRead++;
           }
         }
-
-        if (foundLink) {
-          String start = "HREF=\"";
-          int startIndex = line.indexOf(start) + start.length();
-          int endIndex = line.indexOf("\">");
-          if ((startIndex != -1) && (endIndex != -1)) {
-            String filename = line.substring(startIndex, endIndex);
-            return new File(destDir, filename);
+        
+        // Replace packages.html with the No Frames link.
+        if (found) {
+          boolean foundLink = false;
+          while ((!foundLink) &&
+                 (numLinesRead < MAX_READ_FOR_LINK_LINES) &&
+                 (line != null)) {
+            foundLink = (line.indexOf("Non-frame version") != -1);
+            if (!foundLink) {
+              line = br.readLine();
+              numLinesRead++;
+            }
+          }
+          
+          if (foundLink) {
+            String start = "HREF=\"";
+            int startIndex = line.indexOf(start) + start.length();
+            int endIndex = line.indexOf("\">");
+            if ((startIndex != -1) && (endIndex != -1)) {
+              String filename = line.substring(startIndex, endIndex);
+              return new File(destDir, filename);
+            }
           }
         }
       }
+      finally { br.close(); }
     }
-    catch (IOException ioe) {
-      throw new UnexpectedException(ioe);
-    }
-
+    catch (IOException ioe) { throw new UnexpectedException(ioe); }
     return packages;
   }
 

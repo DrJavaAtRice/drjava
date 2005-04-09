@@ -52,8 +52,7 @@ package edu.rice.cs.drjava.model.definitions.reducedmodel;
 public class InsideBlockComment extends ReducedModelState {
   public static final InsideBlockComment ONLY = new InsideBlockComment();
   
-  private InsideBlockComment() {
-  }
+  private InsideBlockComment() { }
   
     /**
    * Walk function for inside block comment.

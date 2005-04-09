@@ -197,19 +197,17 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
     _machine.setReplaceWord(_replaceField.getText());
     _mainframe.clearStatusMessage(); // _message.setText(""); // JL
 
-    // FindResult contains the document that the result was found in,
-    // offset to the next occurence of the string, and a flag indicating
-    // whether the end of the document was wrapped around while searching
-    // for the string
+    // FindResult contains the document that the result was found in, offset to the next occurence of 
+    // the string, and a flag indicating whether the end of the document was wrapped around while searching
+    // for the string.
     FindResult fr = _machine.findNext();
     OpenDefinitionsDocument openDoc = _defPane.getOpenDefDocument();
     Document doc = fr.getDocument();
     int pos = fr.getFoundOffset();
     
-    // if the result is in another document and
-    // there actually *is* a match, then switch 
+    // If there actually *is* a match, then switch 
     // active documents. otherwise don't
-    if (!openDoc.belongsHuh(doc) && pos != -1) {
+    if (pos != -1) {
       Caret c = _defPane.getCaret();
       c.setDot(c.getDot());
       // XXX: this is fundamentally ugly - we should support direct, ordered
@@ -699,14 +697,14 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
   /*private void _close() {
    hide();
    }*/
-
+  
   /*public void hide() {
    System.err.println("*** Called hide ***");
    if (_open)
    _frame.uninstallFindReplaceDialog(this);
    //super.hide();
    }*/
-
+  
   /*private ContinueCommand CONFIRM_CONTINUE = new ContinueCommand() {
    public boolean shouldContinue() {
    String text = "The search has reached the end of the document.\n" +
@@ -715,7 +713,7 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
    text,
    "Continue search?",
    JOptionPane.YES_NO_OPTION);
-
+   
    switch (rc) {
    case JOptionPane.YES_OPTION:
    return true;
@@ -732,14 +730,12 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
     public void itemStateChanged(ItemEvent e) {
       if (e.getStateChange() == ItemEvent.DESELECTED) {
         _machine.setMatchCase(false);
-        DrJava.getConfig().setSetting(OptionConstants.FIND_MATCH_CASE,
-                                      false);
+        DrJava.getConfig().setSetting(OptionConstants.FIND_MATCH_CASE, false);
 
       }
       else if (e.getStateChange() == ItemEvent.SELECTED) {
         _machine.setMatchCase(true);
-        DrJava.getConfig().setSetting(OptionConstants.FIND_MATCH_CASE,
-                                      true);
+        DrJava.getConfig().setSetting(OptionConstants.FIND_MATCH_CASE, true);
       }
       _findField.requestFocus();
     }

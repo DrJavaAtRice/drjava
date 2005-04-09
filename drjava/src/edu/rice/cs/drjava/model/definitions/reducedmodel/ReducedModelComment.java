@@ -56,7 +56,7 @@ package edu.rice.cs.drjava.model.definitions.reducedmodel;
 
 public class ReducedModelComment extends AbstractReducedModel {
 
-  /**Can be used by other classes to walk through the list of comment chars*/
+  /** Can be used by other classes to walk through the list of comment chars*/
   TokenList.Iterator _walker;
 
   /**
@@ -114,15 +114,13 @@ public class ReducedModelComment extends AbstractReducedModel {
       return;
     }
     // Check if at start.
-    if (_cursor.atStart()) {
-      _cursor.next();
-    }
+    if (_cursor.atStart()) _cursor.next();
+    
     // Not empty, not at start, if at end check the previous brace
-    if (_cursor.atEnd()) {
-      _checkPreviousInsertSpecial(special);
-    }
+    if (_cursor.atEnd()) _checkPreviousInsertSpecial(special);
+    
     // If inside a double character brace, break it.
-    else if ((_cursor.getBlockOffset() > 0) && _cursor.current().isMultipleCharBrace()) {
+    else if (_cursor.getBlockOffset() > 0 && _cursor.current().isMultipleCharBrace()) {
       _cursor._splitCurrentIfCommentBlock(true,true);
       //leaving us at the start
       _cursor.next(); //leaving us after first char
@@ -132,7 +130,7 @@ public class ReducedModelComment extends AbstractReducedModel {
       move(2);
     }
     // inside a gap
-    else if ((_cursor.getBlockOffset() > 0) && (_cursor.current().isGap())) {
+    else if (_cursor.getBlockOffset() > 0 && _cursor.current().isGap()) {
       _cursor.insertBraceToGap(special);
       _cursor.prev();
       _cursor.prev();
@@ -153,9 +151,7 @@ public class ReducedModelComment extends AbstractReducedModel {
 
       _checkPreviousInsertSpecial(special);
     }
-    else {
-      _checkPreviousInsertSpecial(special);
-    }
+    else _checkPreviousInsertSpecial(special);
   }
 
   /**
@@ -189,12 +185,8 @@ public class ReducedModelComment extends AbstractReducedModel {
     _cursor.insertNewBrace("\\"); //leaving us after the brace.
     _cursor.prev();
     _updateBasedOnCurrentState();
-    if (_cursor.current().getSize() == 2) {
-      _cursor.setBlockOffset(1);
-    }
-    else {
-      _cursor.next();
-    }
+    if (_cursor.current().getSize() == 2) _cursor.setBlockOffset(1);
+    else _cursor.next();
   }
 
   /**
@@ -204,18 +196,15 @@ public class ReducedModelComment extends AbstractReducedModel {
   */
   private void _checkPreviousInsertCommentChar(String special) {
     if (!_cursor.atStart()  && !_cursor.atFirstItem()) {
-      if ((_cursor.prevItem().getType().equals("/")) &&
-          (_cursor.prevItem().getState() == FREE))
-          {
+      if ((_cursor.prevItem().getType().equals("/")) && (_cursor.prevItem().getState() == FREE)) {
             _cursor.prevItem().setType("/" + special);
             _updateBasedOnCurrentState();
             return;
           }
       // if we're after a star,
-      else if ((_cursor.prevItem().getType().equals("*")) &&
-               (getStateAtCurrent() == INSIDE_BLOCK_COMMENT) &&
-               special.equals("/"))
-        {
+      else if (_cursor.prevItem().getType().equals("*") &&
+               getStateAtCurrent() == INSIDE_BLOCK_COMMENT &&
+               special.equals("/")) {
           _cursor.prevItem().setType("*" + special);
           _cursor.prevItem().setState(FREE);
           _updateBasedOnCurrentState();
@@ -226,10 +215,8 @@ public class ReducedModelComment extends AbstractReducedModel {
     _cursor.insertNewBrace(special); //leaving us after the brace.
     _cursor.prev();
     _updateBasedOnCurrentState();
-    if (_cursor.current().getSize() == 2)
-      _cursor.setBlockOffset(1);
-    else
-      _cursor.next();
+    if (_cursor.current().getSize() == 2) _cursor.setBlockOffset(1);
+    else _cursor.next();
   }
 
   /**
@@ -347,9 +334,7 @@ public class ReducedModelComment extends AbstractReducedModel {
       _cursor.next();
 
     }
-    else {
-      _insertNewQuote(quote);
-    }
+    else _insertNewQuote(quote);
     return;
   }
 
@@ -376,17 +361,13 @@ public class ReducedModelComment extends AbstractReducedModel {
    * @return a regular or escaped quote, depending on what was previous
    */
   private String _getQuoteType(String quote) {
-    if (_cursor.atStart() || _cursor.atFirstItem()) {
-      return quote;
-    }
+    if (_cursor.atStart() || _cursor.atFirstItem()) return quote;
     else if (_cursor.prevItem().getType().equals("\\")) {
       _cursor.prev();
       _cursor.remove();
       return "\\" + quote;
     }
-    else {
-      return quote;
-    }
+    else return quote;
   }
 
   /**
@@ -399,9 +380,9 @@ public class ReducedModelComment extends AbstractReducedModel {
    * @param length the size of the Gap to be inserted in characters
    */
   protected void insertGapBetweenMultiCharBrace(int length) {
-    if (_cursor.getBlockOffset() > 1) {
+    if (_cursor.getBlockOffset() > 1)
       throw new IllegalArgumentException("OFFSET TOO BIG:  " + _cursor.getBlockOffset());
-    }
+    
     _cursor._splitCurrentIfCommentBlock(true, true);
     _cursor.next();
     _insertNewGap(length);  //inserts gap and goes to next item
@@ -439,9 +420,7 @@ public class ReducedModelComment extends AbstractReducedModel {
   * right.
   * @param count indicates the direction and magnitude of cursor movement
   */
-  public void move(int count) {
-    _cursor.move(count);
-  }
+  public void move(int count) { _cursor.move(count); }
 
   /**
   * <P>Update the BraceReduction to reflect text deletion.</P>
@@ -451,9 +430,8 @@ public class ReducedModelComment extends AbstractReducedModel {
   * Always move count spaces to make sure we can delete.
   */
   public void delete(int count) {
-    if (count == 0) {
-      return;
-    }
+    if (count == 0) return;
+    
     _cursor.delete(count);
 
     // Changes in ReducedModelComment can entail state changes in the
@@ -494,31 +472,23 @@ public class ReducedModelComment extends AbstractReducedModel {
     return _walker.getStateAtCurrent();
   }
 
-  /**
-   * Resets the walker to the current position in document
-   */
+  /** Resets the walker to the current position in document */
   protected void resetWalkerLocationToCursor() {
     _walker.dispose();
     _walker = _cursor._copy();
   }
 
-  /**
-   * Dist to Previous newline will be -1 if no newline.
-   */
+  /** Dist to Previous newline will be -1 if no newline. */
   void getDistToPreviousNewline(IndentInfo braceInfo) {
     braceInfo.distToPrevNewline = _getDistToPreviousNewline(_cursor._copy());
     braceInfo.distToNewline = braceInfo.distToPrevNewline;
     return;
   }
 
-  /**
-   *returns distance to after newline
-   */
+  /** Returns distance to after newline. */
   private int _getDistToPreviousNewline(TokenList.Iterator copyCursor) {
     int walkcount = copyCursor.getBlockOffset();
-    if (!copyCursor.atStart()) {
-      copyCursor.prev();
-    }
+    if (!copyCursor.atStart()) copyCursor.prev();
     while ((!copyCursor.atStart()) &&
            (!(copyCursor.current().getType().equals("\n"))))
            {
@@ -527,18 +497,15 @@ public class ReducedModelComment extends AbstractReducedModel {
              copyCursor.prev();
            }
 
-    if (copyCursor.atStart()) {
-      return -1;
-    }
+    if (copyCursor.atStart()) return -1;
     return walkcount;
   }
 
   void getDistToIndentNewline(IndentInfo braceInfo) {
     TokenList.Iterator copyCursor = _cursor._copy();
 
-    if (braceInfo.distToBrace == -1 || copyCursor.atStart()) {
+    if (braceInfo.distToBrace == -1 || copyCursor.atStart())
       return; // no brace
-    }
 
     copyCursor.move(-braceInfo.distToBrace);
     int walkcount = _getDistToPreviousNewline(copyCursor);

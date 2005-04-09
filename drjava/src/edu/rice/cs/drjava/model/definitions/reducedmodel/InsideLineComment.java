@@ -52,8 +52,7 @@ package edu.rice.cs.drjava.model.definitions.reducedmodel;
 public class InsideLineComment extends ReducedModelState {
   public static final InsideLineComment ONLY = new InsideLineComment();
 
-  private InsideLineComment() {
-  }
+  private InsideLineComment() { }
 
     /**
   * Walk function for inside line comment.
@@ -67,9 +66,7 @@ public class InsideLineComment extends ReducedModelState {
   *  </ol>
   */
   ReducedModelState update(TokenList.Iterator copyCursor) {
-    if (copyCursor.atEnd()) {
-      return STUTTER;
-    }
+    if (copyCursor.atEnd())  return STUTTER;
     copyCursor._splitCurrentIfCommentBlock(true, false);
     _combineCurrentAndNextIfFind("","", copyCursor);
     _combineCurrentAndNextIfEscape(copyCursor);

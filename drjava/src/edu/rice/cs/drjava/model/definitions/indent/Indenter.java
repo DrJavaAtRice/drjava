@@ -60,43 +60,34 @@ import edu.rice.cs.drjava.config.FileConfiguration;
  */
 public class Indenter {
 
-  public Indenter(int indentLevel) {
-      buildTree(indentLevel);
-  }
+  public Indenter(int indentLevel) { buildTree(indentLevel); }
 
-  /**
-   * This constant is used to indicate that an enter key press caused the
-   * indentation.  This is important for some rules dealing with stars
-   * at the line start in multiline comments
+  /** This constant is used to indicate that an enter key press caused the
+   *  indentation.  This is important for some rules dealing with stars
+   *  at the line start in multiline comments
    */
   public static final int ENTER_KEY_PRESS = 1;
 
-  /**
-   * This constant is used to indicate that indentation was started for
-   * some other reason.  This is important for some rules dealing with stars
-   * at the line start in multiline comments
+  /** This constant is used to indicate that indentation was started for
+   *  some other reason.  This is important for some rules dealing with stars
+   *  at the line start in multiline comments
    */
   public static final int OTHER = 0;
 
-  /**
-   * Root of decision tree.
-   */
+  /** Root of decision tree. */
   protected IndentRule _topRule;
 
-  /**
-   * Builds the decision tree for indentation.
+  /** Builds the decision tree for indentation.
    *
-   * For now, this method needs to be called every time the
-   * size of one indent level is being changed!
+   *  For now, this method needs to be called every time the size of one indent level is being changed!
    */
-  public void buildTree(int indentLevel)
-  {
+  public void buildTree(int indentLevel) {
     char[] indent = new char[indentLevel];
     java.util.Arrays.fill(indent,' ');
     String oneLevel = new String(indent);
 
-    boolean autoCloseComments = DrJava.getConfig().getSetting
-      (OptionConstants.AUTO_CLOSE_COMMENTS).booleanValue();
+    boolean autoCloseComments = DrJava.getConfig().
+      getSetting(OptionConstants.AUTO_CLOSE_COMMENTS).booleanValue();
     
     IndentRule
       // Main tree
@@ -141,11 +132,9 @@ public class Indenter {
       rule05 = new ActionStartPrevLinePlus(" "),
       rule04 = new ActionStartPrevLinePlus(" * "),
         
-      rule41 = new ActionStartPrevLinePlusMultilinePreserve
-        (new String[] { " * \n", " */" }, 0, 3, 0, 3),
+      rule41 = new ActionStartPrevLinePlusMultilinePreserve(new String[] { " * \n", " */" }, 0, 3, 0, 3),
       rule42 = new QuestionFollowedByStar(rule04, rule41),
-      rule03 = new QuestionCurrLineEmptyOrEnterPress
-          ((autoCloseComments? rule42 : rule04), rule05),
+      rule03 = new QuestionCurrLineEmptyOrEnterPress((autoCloseComments? rule42 : rule04), rule05),
       rule02 = new QuestionPrevLineStartsComment(rule03, rule06),
         
       rule01 = new QuestionInsideComment(rule02, rule13);
@@ -153,18 +142,14 @@ public class Indenter {
     _topRule = rule01;
   }
   
-  /**
-   * Indents the current line based on a decision tree which determines
-   * the indent based on context.
-   * @param doc document containing line to be indented
-   * @return true if the caller should update the current location itself,
-   * false if the indenter has already handled this
+  /** Indents the current line based on a decision tree which determines the indent based on context.
+   *  @param doc document containing line to be indented
+   *  @return true if the caller should update the current location itself,
+   *          false if the indenter has already handled this
    */
-  public boolean indent(AbstractDJDocument doc, int reason)
-  {
+  public boolean indent(AbstractDJDocument doc, int reason) {
     return _topRule.indentLine(doc, reason);
   }
-
 }
 
 

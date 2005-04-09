@@ -57,11 +57,7 @@ import edu.rice.cs.drjava.model.definitions.indent.IndentRulesTestCase;
  */
 public final class IndentHelperTest extends IndentRulesTestCase {
 
-  /**
-   * @return The position of the first matching character in the given
-   * array of characters found when scanning backwards from the current
-   * position. Returns -1 if no match is found.
-   */
+  /** Tests findPrevDelimiter() */
   public void testFindPrevDelimiter() throws BadLocationException {
     char[] delimiters1 = {';', ':', '?'};
 

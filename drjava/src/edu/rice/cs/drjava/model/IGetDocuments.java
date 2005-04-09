@@ -50,16 +50,14 @@ import java.io.IOException;
 import java.util.List;
 import edu.rice.cs.drjava.model.FileGroupingState;
 
-/**
- * This interface encapsulates the behavior of a document store.
- * Model components which simply need to work with document text
- * should use this interface rather than the entire GlobalModel.
- * Documents which need to be loaded will most likely be retrieved from an
- * ILoadDocuments by a concrete implemention.
- * @see ILoadDocuments
- * @see GlobalModel
- * @see DefaultGlobalModel
- * @version $Id$
+/** This interface encapsulates the behavior of a document store.  Model components which simply 
+ *  need to work with document text should use this interface rather than the entire GlobalModel.
+ *  Documents which need to be loaded will most likely be retrieved from an ILoadDocuments by a 
+ *  concrete implemention.
+ *  @see ILoadDocuments
+ *  @see GlobalModel
+ *  @see DefaultGlobalModel
+ *  @version $Id$
  */
 public interface IGetDocuments {
   /**
@@ -97,8 +95,6 @@ public interface IGetDocuments {
   public boolean hasModifiedDocuments();
   
   
-  /**
-   * gets the project state
-   */
+  /** Gets the project state. */
   public FileGroupingState getFileGroupingState();
 }

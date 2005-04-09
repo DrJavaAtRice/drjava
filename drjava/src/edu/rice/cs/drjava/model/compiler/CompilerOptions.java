@@ -50,18 +50,16 @@ import edu.rice.cs.drjava.DrJava;
 
 import java.util.HashMap;
 
-/**
- * Represents the compiler warnings
- */
+/** Represents the compiler warnings */
 
 public class CompilerOptions implements OptionConstants {
   
-  public static boolean SHOW_UNCHECKED = DrJava.getConfig().getSetting(SHOW_UNCHECKED_WARNINGS);
-  public static boolean SHOW_DEPRECATION = DrJava.getConfig().getSetting(SHOW_DEPRECATION_WARNINGS);
-  public static boolean SHOW_PATH = DrJava.getConfig().getSetting(SHOW_PATH_WARNINGS);
-  public static boolean SHOW_SERIAL = DrJava.getConfig().getSetting(SHOW_SERIAL_WARNINGS);
-  public static boolean SHOW_FINALLY = DrJava.getConfig().getSetting(SHOW_FINALLY_WARNINGS);
-  public static boolean SHOW_FALLTHROUGH = DrJava.getConfig().getSetting(SHOW_FALLTHROUGH_WARNINGS);
+  private static boolean SHOW_UNCHECKED = DrJava.getConfig().getSetting(SHOW_UNCHECKED_WARNINGS);
+  private static boolean SHOW_DEPRECATION = DrJava.getConfig().getSetting(SHOW_DEPRECATION_WARNINGS);
+  private static boolean SHOW_PATH = DrJava.getConfig().getSetting(SHOW_PATH_WARNINGS);
+  private static boolean SHOW_SERIAL = DrJava.getConfig().getSetting(SHOW_SERIAL_WARNINGS);
+  private static boolean SHOW_FINALLY = DrJava.getConfig().getSetting(SHOW_FINALLY_WARNINGS);
+  private static boolean SHOW_FALLTHROUGH = DrJava.getConfig().getSetting(SHOW_FALLTHROUGH_WARNINGS);
    
   private static WarningOptionListener wol = new WarningOptionListener();
   

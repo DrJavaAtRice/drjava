@@ -88,22 +88,16 @@ public class TokenList extends ModelList<ReducedToken>
      * differentiation was easiest since it allowed us to keep
      * TokenList.Iterator extending ModelList<ReducedToken>.Iterator.
      */
-    public TokenList.Iterator _copy() {
-      return new Iterator(this);
-    }
+    public TokenList.Iterator _copy() { return new Iterator(this); }
 
     public void setTo(TokenList.Iterator that) {
       super.setTo(that);
       _offset = that.getBlockOffset();
     }
 
-    public int getBlockOffset() {
-      return _offset;
-    }
+    public int getBlockOffset() { return _offset; }
 
-    public void setBlockOffset(int offset) {
-      _offset = offset;
-    }
+    public void setBlockOffset(int offset) { _offset = offset; }
 
     /**
      * Returns the current commented/quoted state at the cursor.
@@ -637,15 +631,11 @@ public class TokenList extends ModelList<ReducedToken>
      */
     private boolean _checkPrevEquals(TokenList.Iterator delTo,
                                      String match) {
-      if (delTo.atFirstItem() || delTo.atStart()) {
-        return false;
-      }
+      if (delTo.atFirstItem() || delTo.atStart()) return false;
       return delTo.prevItem().getType().equals(match);
     }
 
-    public String toString() {
-      return "" + this.current();
-    }
+    public String toString() { return "" + this.current(); }
 
   }
 }

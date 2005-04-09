@@ -58,9 +58,7 @@ import java.lang.reflect.Field;
  */
 public class CompilerRegistry {
 
-  /**
-   * A subset of DEFAULT_COMPILERS which support Generic Java.
-   */
+  /** A subset of DEFAULT_COMPILERS that support Generic Java. */
   public static final String[] GENERIC_JAVA_COMPILERS = {
     // javac 1.5
     "edu.rice.cs.drjava.model.compiler.Javac150FromSetLocation",
@@ -73,10 +71,8 @@ public class CompilerRegistry {
     "edu.rice.cs.drjava.model.compiler.GJv6FromClasspath"
   };
 
-  /**
-   * The list of compiler interfaces that are distributed with DrJava.
-   */
-  public static final String[][] DEFAULT_COMPILERS = {
+  /** The list of compiler interfaces that are distributed with DrJava. */
+  static final String[][] DEFAULT_COMPILERS = {
     // javac 1.5 and JSR14/GJ
     GENERIC_JAVA_COMPILERS,
     // javac 1.4
@@ -160,15 +156,10 @@ public class CompilerRegistry {
 
 //    while (itor.hasNext()) {
 //    String name = itor.next();
-    for (int i = 0; i < DEFAULT_COMPILERS.length; i++) {
+    for (String[] row:  DEFAULT_COMPILERS) {
       //DrJava.consoleOut().print("REGISTRY:  Checking compiler: " + name + ": ");
-      for (int j = 0; j < DEFAULT_COMPILERS[i].length; j++) {
-        String name = DEFAULT_COMPILERS[i][j];
-        try {
-          if (_createCompiler(name, availableCompilers)) {
-            break;
-          }
-        }
+      for (String name: row) {
+        try { if (_createCompiler(name, availableCompilers)) break; }
         catch (Throwable t) {
         // This compiler didn't load. Keep on going.
 //        DrJava.consoleOut().println("failed to load:");
@@ -213,10 +204,8 @@ public class CompilerRegistry {
       availableCompilers.add(compiler);
       return true;
     }
-    else {
-      return false;
+    else return false;
       //DrJava.consoleOut().println("not available.");
-    }
   }
 
   public boolean isNoCompilerAvailable() {

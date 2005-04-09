@@ -76,15 +76,39 @@ import edu.rice.cs.drjava.model.compiler.*;
  * @version $Id$
  */
 public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
-  /**
-   * the prototype global model to hold the interpreter. This prevents
-   * us from having to re-invoke the interpreter every time!
-   */
-  //protected static final DefaultGlobalModel _originalModel =
-  //  new DefaultGlobalModel();
 
   protected DefaultGlobalModel _model;
   protected File _tempDir;
+  
+  protected boolean _junitDone;
+  protected final Object _lock = new Object();
+  
+  protected void _logJUnitStart() {
+    _junitDone = false;
+  }
+  
+  protected void _runJUnit(OpenDefinitionsDocument doc) throws IOException, ClassNotFoundException, 
+    InterruptedException {
+    //    new ScrollableDialog(null, "Starting JUnit", "", "").show();
+    _logJUnitStart();
+    doc.startJUnit();
+//    new ScrollableDialog(null, "JUnit Started", "", "").show();
+    _waitJUnitDone();
+  }
+  
+  protected void _runJUnit() throws IOException, ClassNotFoundException, InterruptedException {  
+    _logJUnitStart();
+    _model.getJUnitModel().junitAll();
+    _waitJUnitDone();
+  }
+   
+  
+  protected void _waitJUnitDone() throws InterruptedException {
+    synchronized (_lock) {
+      while (!_junitDone) _lock.wait();
+    }
+  }
+  
 
   protected static final String FOO_TEXT = "class DrJavaTestFoo {}";
   protected static final String BAR_TEXT = "class DrJavaTestBar {}";
@@ -144,9 +168,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     super.tearDown();
   }
 
-  /**
-   * Instantiates the GlobalModel to be used in the test cases.
-   */
+  /** Instantiates the GlobalModel to be used in the test cases. */
   protected void createModel() {
     //_model = new DefaultSingleDisplayModel(_originalModel);
     _model = new DefaultSingleDisplayModel();
@@ -155,12 +177,8 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     _model._interpreterControl.ensureInterpreterConnected();
   }
 
-  /**
-   * Clear all old text and insert the given text.
-   */
-  protected void changeDocumentText(String s, OpenDefinitionsDocument doc)
-    throws BadLocationException
-  {
+  /** Clear all old text and insert the given text. */
+  protected void changeDocumentText(String s, OpenDefinitionsDocument doc) throws BadLocationException {
     doc.remove(0, doc.getLength());
     assertLength(0, doc);
     doc.insertString(0, s, null);
@@ -191,21 +209,15 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     return new File(_tempDir, name);
   }
 
-  /**
-   * Given a .java file and a class file name,
-   * returns the corresponding .class file.
-   */
+  /** Given a .java file and a class file name, returns the corresponding .class file. */
   protected File classForJava(File sourceFile, String className) {
     assertTrue(sourceFile.getName().endsWith(".java"));
-
     String cname = className + ".class";
-
     return new File(sourceFile.getParent(), cname);
   }
 
-  /**
-   * Creates a new temporary file and writes the given text to it.
-   * The File object for the new file is returned.
+  /** Creates a new temporary file and writes the given text to it.
+   *  The File object for the new file is returned.
    */
   protected File writeToNewTempFile(String text) throws IOException {
     File temp = tempFile();
@@ -219,13 +231,9 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
    * then adds some text.  When this method is done newCount is reset to 0.
    * @return the new modified document
    */
-  protected OpenDefinitionsDocument setupDocument(String text)
-    throws BadLocationException
-  {
+  protected OpenDefinitionsDocument setupDocument(String text) throws BadLocationException {
     TestListener listener = new TestListener() {
-      public void newFileCreated(OpenDefinitionsDocument doc) {
-        newCount++;
-      }
+      public void newFileCreated(OpenDefinitionsDocument doc) { newCount++; }
     };
 
     _model.addListener(listener);
@@ -270,16 +278,13 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
    * @param doc Document containing the code to be compiled
    * @param file File to save the class in
    */
-  protected void doCompile(OpenDefinitionsDocument doc, File file)
-    throws IOException, InterruptedException
-  {
+  protected void doCompile(OpenDefinitionsDocument doc, File file) throws IOException, 
+    InterruptedException {
     doc.saveFile(new FileSelector(file));
 
     // Perform a mindless interpretation to force interactions to reset.
     //  (only to simplify this method)
-    try {
-      interpret("2+2");
-    }
+    try { interpret("2+2"); }
     catch (DocumentAdapterException e) {
       throw new UnexpectedException(e);
     }
@@ -287,7 +292,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     CompileShouldSucceedListener listener = new CompileShouldSucceedListener(true);
     _model.setResetAfterCompile(true);
     _model.addListener(listener);
-    synchronized(listener) {
+    synchronized (listener) {
       doc.startCompile();
       if (_model.getCompilerModel().getNumErrors() > 0) {
         fail("compile failed: " + getCompilerErrorString());
@@ -299,9 +304,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     _model.removeListener(listener);
   }
 
-  /**
-   * Returns a string with all compiler errors.
-   */
+  /** Returns a string with all compiler errors. */
   protected String getCompilerErrorString() {
     StringBuffer buf = new StringBuffer();
     buf.append(" compiler error(s):\n");
@@ -1108,9 +1111,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     }
   }
 
-  /**
-   * A model listener for situations expecting a compilation to fail.
-   */
+  /** A model listener for situations expecting a compilation to fail. */
   public static class CompileShouldFailListener extends TestListener {
     public void compileStarted() {
       assertCompileStartCount(0);
@@ -1127,6 +1128,76 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     public void checkCompileOccurred() {
       assertCompileEndCount(1);
       assertCompileStartCount(1);
+    }
+  }
+  
+  public class JUnitNonTestListener extends JUnitTestListener {
+    private boolean _shouldBeTestAll;
+    public JUnitNonTestListener() {
+      _shouldBeTestAll = false;
+    }
+    public JUnitNonTestListener(boolean shouldBeTestAll) {
+      _shouldBeTestAll = shouldBeTestAll;
+    }
+    public void nonTestCase(boolean isTestAll) {
+      nonTestCaseCount++;
+      assertEquals("Non test case heard the wrong value for test current/test all",
+                   _shouldBeTestAll, isTestAll);
+      synchronized (_lock) {
+        _junitDone = true;
+        _lock.notify();
+      }
+    }
+  }
+
+  public class JUnitTestListener extends CompileShouldSucceedListener {
+    // handle System.out's separately but default to outter class's printMessage value
+    protected boolean printMessages = GlobalModelJUnitTest.printMessages; 
+    public JUnitTestListener() {
+      this(false,false);  // don't reset interactions after compile by default
+    }
+    public JUnitTestListener(boolean shouldResetAfterCompile) { 
+      this(shouldResetAfterCompile,false); 
+    }
+    public JUnitTestListener(boolean shouldResetAfterCompile, boolean printListenerMessages) {
+      super(shouldResetAfterCompile);
+      this.printMessages = printListenerMessages;
+    }
+    public void junitStarted(List<OpenDefinitionsDocument> odds) {
+      if (printMessages) System.out.println("listener.junitStarted");
+      junitStartCount++;
+    }
+    public void junitSuiteStarted(int numTests) {
+      if (printMessages) System.out.println("listener.junitSuiteStarted, numTests="+numTests);
+      assertJUnitStartCount(1);
+      junitSuiteStartedCount++;
+    }
+    public void junitTestStarted(String name) {
+      if (printMessages) System.out.println("  listener.junitTestStarted, "+name);
+      junitTestStartedCount++;
+    }
+    public void junitTestEnded(String name, boolean wasSuccessful, boolean causedError) {
+      if (printMessages) System.out.println("  listener.junitTestEnded, name="+name+" succ="+wasSuccessful+" err="+causedError);
+      junitTestEndedCount++;
+      assertEquals("junitTestEndedCount should be same as junitTestStartedCount",
+                   junitTestEndedCount, junitTestStartedCount);
+    }
+    public void nonTestCase(boolean isTestAll) {
+      if (printMessages) System.out.println("listener.nonTestCase, isTestAll="+isTestAll);
+      nonTestCaseCount++;
+      synchronized (_lock) {
+        _junitDone = true;
+        _lock.notify();
+      }
+    }
+    public synchronized void junitEnded() {
+      //assertJUnitSuiteStartedCount(1);
+      if (printMessages) System.out.println("junitEnded event!");
+      junitEndCount++;
+      synchronized (_lock) {
+        _junitDone = true;
+        _lock.notify();
+      }
     }
   }
 }

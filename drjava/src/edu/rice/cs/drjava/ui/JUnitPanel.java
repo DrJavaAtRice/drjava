@@ -71,7 +71,7 @@ import java.util.HashMap;
  *
  * @version $Id$
  */
-public class JUnitPanel extends ErrorPanel{
+public class JUnitPanel extends ErrorPanel {
   private static final String START_JUNIT_MSG = "Testing in progress.  Please wait...\n";
   private static final String JUNIT_FINISHED_MSG = "All tests completed successfully.\n";
   private static final String NO_TESTS_MSG = "";
@@ -147,14 +147,10 @@ public class JUnitPanel extends ErrorPanel{
 
   }
 
-  /**
-   * Returns the JUnitErrorListPane that this panel manages.
-   */
-  public JUnitErrorListPane getErrorListPane() {
-    return _errorListPane;
-  }
+  /** Returns the JUnitErrorListPane that this panel manages. */
+  public JUnitErrorListPane getErrorListPane() { return _errorListPane; }
 
-  protected JUnitErrorModel getErrorModel(){
+  protected JUnitErrorModel getErrorModel(){ 
     return getModel().getJUnitModel().getJUnitErrorModel();
   }
 
@@ -172,7 +168,7 @@ public class JUnitPanel extends ErrorPanel{
 
   /** Called when work begins. */
   public void setJUnitInProgress(List<OpenDefinitionsDocument> odds) {
-    _odds = odds;
+    _odds = odds;  // _odds is updated atomically; no interference with _checkSync
     setJUnitInProgress();
   }
   
@@ -302,9 +298,7 @@ public class JUnitPanel extends ErrorPanel{
       String testName = _getTestFromName(name);
       String className = _getClassFromName(name);
       String fullName = className + "." + testName;
-      if (fullName.equals(JUNIT_WARNING)) {
-        return;
-      }
+      if (fullName.equals(JUNIT_WARNING)) return;
       Document doc = getDocument();
       int index = doc.getLength();
 
@@ -342,12 +336,8 @@ public class JUnitPanel extends ErrorPanel{
       Document doc = getDocument();
       Position namePos = _runningTestNamePositions.get(fullName);
       AttributeSet set;
-      if (!wasSuccessful || causedError) {
-        set = TEST_FAIL_ATTRIBUTES;
-      }
-      else {
-        set = TEST_PASS_ATTRIBUTES;
-      }
+      if (!wasSuccessful || causedError) set = TEST_FAIL_ATTRIBUTES;
+      else set = TEST_PASS_ATTRIBUTES;
       if (namePos != null) {
         int index = namePos.getOffset();
         int length = testName.length();
@@ -368,20 +358,13 @@ public class JUnitPanel extends ErrorPanel{
       DefaultStyledDocument doc = new DefaultStyledDocument();
       _checkSync(doc);
 
-      try {
-        doc.insertString(doc.getLength(), START_JUNIT_MSG, BOLD_ATTRIBUTES);
-      }
-      catch (BadLocationException ble) {
-        throw new UnexpectedException(ble);
-      }
+      try { doc.insertString(doc.getLength(), START_JUNIT_MSG, BOLD_ATTRIBUTES); }
+      catch (BadLocationException ble) { throw new UnexpectedException(ble); }
       setDocument(doc);
-
       selectNothing();
     }
 
-    /**
-     * Used to show that testing was unsuccessful.
-     */
+    /** Used to show that testing was unsuccessful. */
     protected synchronized void _updateWithErrors() throws BadLocationException {
       //DefaultStyledDocument doc = new DefaultStyledDocument();
       DefaultStyledDocument doc = (DefaultStyledDocument) getDocument();
@@ -391,8 +374,7 @@ public class JUnitPanel extends ErrorPanel{
 
     protected void _updateWithErrors(String failureName, String failureMeaning,
                                      DefaultStyledDocument doc)
-      throws BadLocationException
-    {
+      throws BadLocationException {
       // Print how many errors
       _replaceInProgressText(_getNumErrorsMessage(failureName, failureMeaning));
 
@@ -450,9 +432,7 @@ public class JUnitPanel extends ErrorPanel{
      */
     private void _replaceInProgressText(String msg) throws BadLocationException {
       int start = 0;
-      if (_warnedOutOfSync) {
-        start = TEST_OUT_OF_SYNC.length();
-      }
+      if (_warnedOutOfSync) { start = TEST_OUT_OF_SYNC.length(); }
       int len = START_JUNIT_MSG.length();
       Document doc = getDocument();
       if (doc.getLength() >= len + start) {
@@ -465,21 +445,15 @@ public class JUnitPanel extends ErrorPanel{
      * Returns the string to identify a warning.
      * In JUnit, warnings (the odd case) indicate errors/exceptions.
      */
-    protected String _getWarningText() {
-      return "Error: ";
-    }
+    protected String _getWarningText() {  return "Error: "; }
 
     /**
      * Returns the string to identify an error.
      * In JUnit, errors (the normal case) indicate TestFailures.
      */
-    protected String _getErrorText() {
-      return "Failure: ";
-    }
+    protected String _getErrorText() { return "Failure: "; }
 
-    /**
-     * updates the list pane with no errors.
-     */
+    /** Updates the list pane with no errors. */
     protected synchronized void _updateNoErrors(boolean haveTestsRun) throws BadLocationException {
       //DefaultStyledDocument doc = new DefaultStyledDocument();
       _checkSync(getDocument());
@@ -494,11 +468,10 @@ public class JUnitPanel extends ErrorPanel{
      * displays a message in the document in the test output pane.
      */
     private void _checkSync(Document doc) {
-      if (_warnedOutOfSync) {
-        return;
-      }
-      for (int i = 0; i < _odds.size(); i++) {
-        if (!_odds.get(i).checkIfClassFileInSync()) {
+      if (_warnedOutOfSync) return;
+      List<OpenDefinitionsDocument> odds = _odds;  // grab current _odds
+      for (OpenDefinitionsDocument odoc: odds) {
+        if (! odoc.checkIfClassFileInSync()) {
           try {
             doc.insertString(0, TEST_OUT_OF_SYNC, OUT_OF_SYNC_ATTRIBUTES);
             _warnedOutOfSync = true;

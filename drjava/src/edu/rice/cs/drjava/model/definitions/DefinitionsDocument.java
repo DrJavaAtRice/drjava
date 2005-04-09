@@ -112,17 +112,14 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   
   // begin debug code
   
-  private boolean _closed = false;
+//  private boolean _closed = false;
+//  
+//  protected void throwErrorHuh(){
+//    if (_closed) throw new RuntimeException("Definitions Document is closed, yet is being used");
+//  }
   
-  protected void throwErrorHuh(){
-    if (_closed) throw new RuntimeException("Definitions Document is closed, yet is being used");
-  }
-  
-  /**
-   * Called when kicked out of the document cache 
-   * so that the references made to it may be released
-   * to let this be GC'd
-   */
+  /** Called when this is kicked out of the document cache so that the references made to it may 
+   *  be released so that this can be GC'd. */
   public void close(){
     _removeIndenter();
     
@@ -131,7 +128,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
       _closedListeners = new LinkedList<DocumentClosedListener>();
     }
     
-    _closed = false;
+//    _closed = false;
   }
   
   // end debug code
@@ -154,11 +151,8 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   private boolean _classFileInSync;
   private File _classFile;
 
-  /**
-   * This reference to the OpenDefinitionsDocument is needed so that
-   * the document iterator (the DefaultGlobalModel) can find the next
-   * ODD given a DD.
-   */
+  /** This reference to the OpenDefinitionsDocument is needed so that the document iterator 
+   * (the DefaultGlobalModel) can find the next ODD given a DD. */
   private OpenDefinitionsDocument _odd;
   
   private CompoundUndoManager _undoManager;
@@ -362,7 +356,9 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   protected String _getPackageQualifier() {
     String packageName = "";
     try { packageName = this.getPackageName(); }
-    catch (InvalidPackageException e) { /* Couldn't find package, pretend there's none */ }
+    catch (InvalidPackageException e) { 
+      /* Couldn't find package, pretend there's none; findbugs requires multi-line formatting of this clause */ 
+    }
     if ((packageName != null) && (!packageName.equals(""))) { packageName = packageName + "."; }
     return packageName;
   }
@@ -420,17 +416,13 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     finally { writeUnlock(); }
   }
 
-  /**
-   * Given a String, return a new String will all tabs converted to spaces.
-   * Each tab is converted to one space, since changing the number of
-   * characters within insertString screws things up.
-   * @param source the String to be converted.
-   * @return a String will all the tabs converted to spaces
+  /** Given a String, return a new String will all tabs converted to spaces.  Each tab is converted 
+   *  to one space, since changing the number of characters within insertString screws things up.
+   *  @param source the String to be converted.
+   *  @return a String will all the tabs converted to spaces
    */
   String _removeTabs(final String source) {
-    // Clear the helper method cache
-    clearCache();
-
+    clearCache(); // Clear the helper method cache
     return source.replace('\t', ' ');
   }
 
@@ -503,33 +495,27 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     return here - startOfLine;
   }
 
-  /**
-   * Return the current line of the cursor position.
-   * Uses a 1 based index.
-   */
+  /** Return the current line of the cursor position.  Uses a 1-based index. */
   public int getCurrentLine() {
     // throwErrorHuh();
     int here = getCurrentLocation();
-    if ( _cachedLocation > getLength() ){
-      // we can't know the last line number after a delete.
-      // starting over.
+    if (_cachedLocation > getLength()) {
+      // we can't know the last line number after a delete; starting over.
       _cachedLocation = 0;
       _cachedLineNum = 1;
     }
-    if ( _cachedNextLineLoc > getLength() ) _cachedNextLineLoc = -1;
+    if (_cachedNextLineLoc > getLength()) _cachedNextLineLoc = -1;
     // let's see if we get off easy
     if( ! (_cachedPrevLineLoc < here && here < _cachedNextLineLoc )) {
 
-      // this if improves performance when moving from the
-      // end of the document to the beginnning.
-      // in essence, it calculates the line number from
-      // scratch
+      // this if improves performance when moving from the end of the document to the beginnning.
+      // in essence, it calculates the line number from scratch
       if (_cachedLocation - here > here) {
         _cachedLocation = 0;
         _cachedLineNum = 1;
       }
       int lineOffset = _getRelativeLine();
-      _cachedLineNum = _cachedLineNum+lineOffset;
+      _cachedLineNum = _cachedLineNum + lineOffset;
 
     }
     _cachedLocation = here;
@@ -539,10 +525,8 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   }
 
 
-  /**
-   * This method returns the relative offset of line number
-   * from the previous location in the document.
-   **/
+  /** This method returns the relative offset of line number from the previous location in the 
+   *  document. */
   private int _getRelativeLine(){
     int count=0;
     int currLoc = getCurrentLocation();

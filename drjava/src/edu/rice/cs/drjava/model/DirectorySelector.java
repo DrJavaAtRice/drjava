@@ -46,36 +46,28 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.model;
 
 import java.io.File;
-/**
- * An interface to give GlobalModel a directory for various operations.
+/** An interface to give GlobalModel a directory for various operations.
  *
  * @version $Id$
  */
 public interface DirectorySelector {
-
-  /**
-   * Gets a directory.
-   * @param start a file to start the search from, or null to allow 
-   * implementation to determine
-   * @return any valid directory on the file system
-   * @throws OperationCanceledException if the selection request is canceled
+  
+  /** Gets a directory.
+   *  @param start a file to start the search from, or null to allow implementation to determine
+   *  @return any valid directory on the file system
+   *  @throws OperationCanceledException if the selection request is canceled
    */
   public File getDirectory(File start) throws OperationCanceledException;
   
-  /**
-   * Asks the user a yes/no question.
-   * @return true if the user responded affirmatively, false if negatively
+  /** Asks the user a yes/no question.
+   *  @return true if the user responded affirmatively, false if negatively
    */
   public boolean askUser(String message, String title);
   
-  /**
-   * Warns the user about an error condition.
-   */
+  /** Warns the user about an error condition. */
   public void warnUser(String message, String title);
-
-  /**
-   * returns true if the user wants the directory to include all subdirectories
-   */
+  
+  /** Returns true if the user wants the directory to include all subdirectories. */
   public boolean isRecursive();
-
+  
 }

@@ -87,9 +87,9 @@ public class JavadocDialog implements DirectorySelector {
   /** Current suggestion for the destination directory, or null. */
   private File _suggestedDir;
 
-  /**
-   * Creates a new JavadocDialog to show from the given frame.
-   * @param frame Parent frame of this dialog
+  /** Creates a new JavadocDialog to show from the given frame.
+   * 
+   *  @param frame Parent frame of this dialog
    */
   public JavadocDialog(JFrame frame) {
     _frame = frame;
@@ -115,19 +115,17 @@ public class JavadocDialog implements DirectorySelector {
   }
 
 
-  public boolean isRecursive(){
-    return false;
-  }
+  public boolean isRecursive() { return false; }
   
-  /**
-   * Shows the dialog prompting the user for a destination directory
-   * in which to generate Javadoc.
+  /** Shows the dialog prompting the user for a destination directory in which to generate Javadoc.
+   * 
+   *  This operation must be executed from the event-handling thread!
    *
-   * @param start The directory to display in the text box.  If null,
-   * the most recent suggested directory (passed in via setSuggestedDir)
-   * is displayed, unless the user has modified a previous suggestion.
-   * @return A directory to use for the Javadoc (which might not exist)
-   * @throws OperationCanceledException if the selection request is canceled
+   *  @param start The directory to display in the text box.  If null,
+   *  the most recent suggested directory (passed in via setSuggestedDir)
+   *  is displayed, unless the user has modified a previous suggestion.
+   *  @return A directory to use for the Javadoc (which might not exist)
+   *  @throws OperationCanceledException if the selection request is canceled
    */
   public File getDirectory(File start) throws OperationCanceledException {
     if (start != null) {
@@ -170,54 +168,38 @@ public class JavadocDialog implements DirectorySelector {
     return _selector.getFileFromField();
   }
 
-  /**
-   * Asks the user a yes/no question.
-   * @return true if the user responded affirmatively, false if negatively
+  /** Asks the user a yes/no question.
+   *  @return true if the user responded affirmatively, false if negatively
    */
   public boolean askUser(String message, String title) {
-    int choice = JOptionPane.showConfirmDialog(_frame, message, title,
-                                               JOptionPane.YES_NO_OPTION);
+    int choice = JOptionPane.showConfirmDialog(_frame, message, title, JOptionPane.YES_NO_OPTION);
     return (choice == JOptionPane.YES_OPTION);
   }
 
-  /**
-   * Warns the user about an error condition.
-   */
+  /** Warns the user about an error condition. */
   public void warnUser(String message, String title) {
-    JOptionPane.showMessageDialog(_frame, message, title,
-                                  JOptionPane.ERROR_MESSAGE);
+    JOptionPane.showMessageDialog(_frame, message, title, JOptionPane.ERROR_MESSAGE);
   }
 
-  /**
-   * Sets the suggested destination directory for Javadoc generation.
-   * This directory will be displayed in the file field if the user
-   * has not modified the suggestion in the past.
+  /** Sets the suggested destination directory for Javadoc generation. This directory will be displayed
+   *  in the file field if the user has not modified the suggestion in the past.
    * @param dir Suggested destination directory
    */
-  public void setSuggestedDir(File dir) {
-    _suggestedDir = dir;
-  }
+  public void setSuggestedDir(File dir) { _suggestedDir = dir; }
 
-  /**
-   * Sets whether the dialog should use the suggested directory provided
-   * to the getDirectory method as the default location.
-   * @param use Whether to use the suggested directory
+  /** Sets whether the dialog should use the suggested directory provided
+   *  to the getDirectory method as the default location.
+   *  @param use Whether to use the suggested directory
    */
-  public void setUseSuggestion(boolean use) {
-    _useSuggestion = use;
-  }
+  public void setUseSuggestion(boolean use) { _useSuggestion = use; }
 
-  /**
-   * Returns whether the JOptionPane currently has the OK_OPTION result.
-   */
+  /** Returns whether the JOptionPane currently has the OK_OPTION result. */
   private boolean _isPositiveResult() {
     Object result = _optionPane.getValue();
     if ((result != null) && (result instanceof Integer)) {
       int rc = ((Integer)result).intValue();
       return rc == JOptionPane.OK_OPTION;
     }
-    else {
-      return false;
-    }
+    else return false;
   }
 }

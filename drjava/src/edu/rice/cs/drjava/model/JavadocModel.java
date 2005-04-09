@@ -77,19 +77,13 @@ public interface JavadocModel {
    */
   public void removeListener(JavadocListener listener);
 
-  /**
-   * Removes all JavadocListeners from this model.
-   */
+  /** Removes all JavadocListeners from this model. */
   public void removeAllListeners();
   
-  /**
-   * Accessor for the Javadoc error model.
-   */
+  /** Accessor for the Javadoc error model. */
   public CompilerErrorModel getJavadocErrorModel();
   
-  /**
-   * Clears all current Javadoc errors.
-   */
+  /** Clears all current Javadoc errors. */
   public void resetJavadocErrors();
   
   /**

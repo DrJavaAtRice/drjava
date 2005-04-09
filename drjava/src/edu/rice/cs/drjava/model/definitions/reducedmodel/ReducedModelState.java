@@ -54,7 +54,8 @@ package edu.rice.cs.drjava.model.definitions.reducedmodel;
  * other editor functions.
  * @version $Id$
  */
-public abstract class ReducedModelState implements ReducedModelStates {
+public abstract class ReducedModelState implements /* imports */ ReducedModelStates {
+  
   abstract ReducedModelState update(TokenList.Iterator copyCursor);
 
   /**
@@ -66,21 +67,17 @@ public abstract class ReducedModelState implements ReducedModelStates {
    * @param second the second half of a multiple char brace
    * @return true if we combined two braces or false if not
    */
-  boolean _combineCurrentAndNextIfFind(String first, String second,
-                                       TokenList.Iterator copyCursor)
-  {
+  boolean _combineCurrentAndNextIfFind(String first, String second, TokenList.Iterator copyCursor) {
     if (copyCursor.atStart() || copyCursor.atEnd() || copyCursor.atLastItem() ||
         !copyCursor.current().getType().equals(first))
-    {
       return false;
-    }
+
     copyCursor.next(); // move to second one to check if we can combine
 
     // The second one is eligible to combine if it exists (atLast is false),
     // if it has the right brace type, and if it has no gap.
     if (copyCursor.current().getType().equals(second)) {
-      if ((copyCursor.current().getType().equals("")) &&
-          (copyCursor.prevItem().getType().equals(""))) {
+      if (copyCursor.current().getType().equals("") && copyCursor.prevItem().getType().equals("")) {
         // delete first Gap and augment the second
         copyCursor.prev();
         int growth = copyCursor.current().getSize();

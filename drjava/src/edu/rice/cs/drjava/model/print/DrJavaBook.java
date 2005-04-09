@@ -72,10 +72,7 @@ public class DrJavaBook implements Pageable {
 
   private static FontRenderContext DEFAULT_FRC = new FontRenderContext(null, false, true);
 
-  /**
-   * Constructs a DrJavaBook which a given content text, filename, and
-   * pageformat.
-   */
+  /** Constructs a DrJavaBook which a given content text, filename, and pageformat. */
   public DrJavaBook(String text, String filename, PageFormat format) {
     _pagePrinters = new ArrayList<PagePrinter>();
     _format = format;
@@ -168,31 +165,19 @@ public class DrJavaBook implements Pageable {
     }
   }
 
-  /**
-   * Method to comply with the Pageable interface
-   * @return The number of pages in this print job.
-   */
-  public int getNumberOfPages() {
-    return _pagePrinters.size();
-  }
+  /** @return The number of pages in this print job. */
+  public int getNumberOfPages() { return _pagePrinters.size(); }
 
-  /**
-   * Method to comply with the Pageable interface
-   * @param pageIndex The page number
-   * @return the PageFormat of this print job.
+  /** Returns the PageFormat for this print job.
+   *  @param pageIndex The page number
+   *  @return the PageFormat of this print job.
    */
-  public PageFormat getPageFormat(int pageIndex) {
-    return _format;
-  }
+  public PageFormat getPageFormat(int pageIndex) { return _format; }
 
-  /**
-   * Method to comply with the Pageable interface, returns
-   * the Printable object for a given page.
-   * @param pageIndex The page number.
-   * @return The Printable object for the given page.
+  /** Returns the Printable object for a given page.
+   *  @param pageIndex The page number.
+   *  @return The Printable object for the given page.
    */
-  public Printable getPrintable(int pageIndex) {
-    return _pagePrinters.get(pageIndex);
-  }
+  public Printable getPrintable(int pageIndex) { return _pagePrinters.get(pageIndex); }
 
 }

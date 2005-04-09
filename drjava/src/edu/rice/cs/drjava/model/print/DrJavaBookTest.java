@@ -56,63 +56,48 @@ import  junit.extensions.*;
  *
  */
 public final class DrJavaBookTest extends TestCase {
-  /**
-   * The DrJavaBook instance we will be testing
-   */
+  /** The DrJavaBook instance we will be testing. */
   private DrJavaBook book = null;
   
-  /**
-   * Constructor.
-   * @param  String name
+  /** Standard constructor.
+   * @param name name of this DrJavaBook test
    */
-  public DrJavaBookTest(String name) {
-    super(name);
-  }
+  public DrJavaBookTest(String name) { super(name); }
   
-  /**
-   * Creates a test suite for JUnit to run.
-   * @return a test suite based on the methods in this class
+  /** Creates a test suite for JUnit to run.
+   *  @return a test suite based on the methods in this class
    */
-  public static Test suite() {
-    return  new TestSuite(DrJavaBookTest.class);
-  }
+  public static Test suite() { return  new TestSuite(DrJavaBookTest.class); }
   
-  public void setUp(){
+  public void setUp() { 
     book = new DrJavaBook("import java.io.*;", "simple_file.java", new PageFormat());
   }
   
-  public void tearDown(){
-    book = null;
-  }
+  public void tearDown() { book = null; }
   
-  public void testGetNumberOfPages(){
+  public void testGetNumberOfPages() {
     assertEquals("testGetNumberOfPages:", new Integer(1), new Integer(book.getNumberOfPages()));
   }
   
-  public void testGetPageFormat(){
+  public void testGetPageFormat() {
     assertEquals("testGetPageFormat:", PageFormat.PORTRAIT, book.getPageFormat(0).getOrientation());
   }
   
-  public void xtestGetPrintable(){ // FAILS for some reason // moez & eliot
+  public void testGetPrintable() { 
     Graphics g = (new BufferedImage(100, 100, BufferedImage.TYPE_INT_RGB)).getGraphics();
     Printable p = book.getPrintable(0);
-    try{
+    try { 
       assertEquals("testGetPrintable:", new Integer(Printable.PAGE_EXISTS), 
                    new Integer(p.print(g, new PageFormat(), 0)));
     }
-    catch(Exception e){
-      fail("testGetPrintable: Unexpected exception!\n" + e);
-    }
+    catch(Exception e){ fail("testGetPrintable: Unexpected exception!\n" + e); }
     
-    p = book.getPrintable(99);
-    
-    try{
-      assertEquals("testGetPrintable:", new Integer(Printable.NO_SUCH_PAGE), 
-                   new Integer(p.print(g, new PageFormat(), 99)));
+    try {
+      p = book.getPrintable(99);
+      fail("previous operation should throw an IndexOutOfBoundsException");
     }
-    catch(Exception e)
-    {
-      fail("testGetPrintable: Unexpected exception!\n" + e);
+    catch(IndexOutOfBoundsException e) {
+      /* test succeeded */
     }
   }
 }

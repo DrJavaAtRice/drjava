@@ -109,14 +109,11 @@ public class CompilerErrorModel<T extends CompilerError> {
   private final HashMap<File, StartAndEndIndex> _filesToIndexes =
     new HashMap<File, StartAndEndIndex>();
 
-  /**
-   * The global model which created/controls this object.
-   */
+  /** The global model which created/controls this object. */
   private final IGetDocuments _model;
 
-  /**
-   * Constructs an empty CompilerErrorModel.
-   * @param empty the empty array of T
+  /** Constructs an empty CompilerErrorModel.
+   *  @param empty the empty array of T
    */
   public CompilerErrorModel(T[] empty) {
     _model = new IGetDocuments() {
@@ -129,9 +126,7 @@ public class CompilerErrorModel<T extends CompilerError> {
       public List<OpenDefinitionsDocument> getDefinitionsDocuments() {
         return new LinkedList<OpenDefinitionsDocument>();
       }
-      public boolean hasModifiedDocuments() {
-        return false;
-      }
+      public boolean hasModifiedDocuments() { return false; }
       public FileGroupingState getFileGroupingState(){
         throw new IllegalStateException("No state to get!");
       }
@@ -171,9 +166,7 @@ public class CompilerErrorModel<T extends CompilerError> {
    * @throws NullPointerException if this object was improperly initialized
    * @throws ArrayIndexOutOfBoundsException if !(0 <= idx < this.getNumErrors())
    */
-  public T getError(int idx) {
-    return _errors[idx];
-  }
+  public T getError(int idx) { return _errors[idx]; }
 
   /**
    * Returns the position of the given error in the document representing its file

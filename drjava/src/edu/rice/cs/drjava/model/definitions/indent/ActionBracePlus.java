@@ -56,16 +56,12 @@ import edu.rice.cs.drjava.model.definitions.reducedmodel.IndentInfo;
  * can be passed through the constructor.
  * @version $Id$
  */
-public class ActionBracePlus extends IndentRuleAction
-{
+public class ActionBracePlus extends IndentRuleAction {
   /** String holding the additional whitespaces to be inserted. */
   private String _suffix;
 
-  /** @param plus The additional whitespaces to be inserted. */
-  public ActionBracePlus(String suffix)
-  {
-    _suffix = suffix;
-  }
+  /** @param suffix The additional whitespaces to be inserted. */
+  public ActionBracePlus(String suffix) { _suffix = suffix; }
 
   /**
    * Properly indents the line that the caret is currently on.
@@ -76,8 +72,7 @@ public class ActionBracePlus extends IndentRuleAction
    * @return true if the caller should update the current location itself,
    * false if the indenter has already handled this
    */
-  public boolean indentLine(AbstractDJDocument doc, int reason)
-  {
+  public boolean indentLine(AbstractDJDocument doc, int reason) {
     boolean supResult = super.indentLine(doc, reason);
     int here = doc.getCurrentLocation();
     int startLine = doc.getLineStartPos(here);

@@ -76,28 +76,20 @@ public class IndentFiles {
     Vector<String> filenames = new Vector<String>();
     int indentLevel = 2;
     boolean silent = false;
-    if (args.length < 1) {
-      _displayUsage();
-    }
+    if (args.length < 1) _displayUsage();
     else {
       for (int i = 0; i < args.length; i++) {
         String arg = args[i];
         if (arg.equals("-indent")) {
           i++;
-          try {
-            indentLevel = Integer.parseInt(args[i]);
-          }
+          try { indentLevel = Integer.parseInt(args[i]); }
           catch (Exception e) {
             _displayUsage();
             System.exit(-1);
           }
         }
-        else if (arg.equals("-silent")) {
-          silent = true;
-        }
-        else {
-          filenames.add(arg);
-        }
+        else if (arg.equals("-silent")) silent = true;
+        else filenames.add(arg);
       }
       indentFiles(filenames, indentLevel, silent);
     }
@@ -120,10 +112,7 @@ public class IndentFiles {
    * @param indentLevel The number of spaces to use for a level of indentation
    * @param silent Whether to print any output to System.out
    */
-  public static void indentFiles(Vector<String> filenames, 
-                                 int indentLevel,
-                                 boolean silent)
-  {
+  public static void indentFiles(Vector<String> filenames, int indentLevel, boolean silent) {
     //System.setProperty("java.awt.headless", "true"); // attempt headless AWT
     //System.out.println("Using Headless AWT: "+isHeadless());
     Indenter indenter = new Indenter(indentLevel);
@@ -155,7 +144,7 @@ public class IndentFiles {
           System.out.println();
         }
       }
-      System.gc();
+      // System.gc();
     }
     if (!silent) System.out.println();
   }

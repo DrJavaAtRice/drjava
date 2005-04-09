@@ -93,7 +93,7 @@ public interface CompilerModel {
   
   /**
    * compiles all files with the specified source root set
-   * @param sourceroots, a list of source roots
+   * @param sourceroots a list of source roots
    * @param files a list of files to compile
    */
   public void compileAll(List<File> sourceroots, List<File> files) throws IOException ;
@@ -104,7 +104,7 @@ public interface CompilerModel {
    * @param doc the document to be compiled
    * @throws IOException if a filesystem-related problem prevents compilation
    */
-  public void compile(List<OpenDefinitionsDocument> defDocs) throws IOException;
+  public void compile(List<OpenDefinitionsDocument> doc) throws IOException;
   
   /**
    * Compiles a single document with the active compiler.

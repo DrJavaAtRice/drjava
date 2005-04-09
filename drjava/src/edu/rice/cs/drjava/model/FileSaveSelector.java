@@ -62,7 +62,7 @@ public interface FileSaveSelector {
   
   /**
    * Informs the user that the chosen file is already open and prompts them asking whether to continue with the save
-   * @param the file being saved
+   * @param f the file being saved
    * @return true iff the save is to occur
    */
   public boolean warnFileOpen(File f);

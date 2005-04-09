@@ -58,8 +58,7 @@ import javax.swing.text.BadLocationException;
  * This questions corresponds to rule 22 in our decision tree.
  * @version $Id$
  */
-public class QuestionHasCharPrecedingOpenBrace extends IndentRuleQuestion 
-{
+public class QuestionHasCharPrecedingOpenBrace extends IndentRuleQuestion {
   private char[] _prefix;
 
   /**
@@ -68,8 +67,7 @@ public class QuestionHasCharPrecedingOpenBrace extends IndentRuleQuestion
    * @param noRule The decision subtree for the case that this rule does not
    * apply in the current context.
    */
-  public QuestionHasCharPrecedingOpenBrace(char[] prefix, IndentRule yesRule, IndentRule noRule)
-  {
+  public QuestionHasCharPrecedingOpenBrace(char[] prefix, IndentRule yesRule, IndentRule noRule) {
     super(yesRule, noRule);
     _prefix = prefix;
   }

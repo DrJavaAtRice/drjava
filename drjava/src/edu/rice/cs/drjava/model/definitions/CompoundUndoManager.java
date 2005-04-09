@@ -63,35 +63,22 @@ public class CompoundUndoManager extends UndoManager {
   
   private int id;
   
-  
-  /**
-   * The compound edits we are storing.
-   */
+  /** The compound edits we are storing. */
   private LinkedList<CompoundEdit> _compoundEdits;
   
-  /**
-   * The keys for the CompoundEdits we are storing.
-   */
+  /** The keys for the CompoundEdits we are storing. */
   private LinkedList<Integer> _keys;
   
-  /**
-   * The next key to use for nested CompoundEdits.
-   */
+  /** The next key to use for nested CompoundEdits. */
   private int _nextKey;
   
-  /**
-   * The last edit that was performed before the last save
-   */
+  /** The last edit that was performed before the last save. */
   private UndoableEdit _savePoint;
   
-  /**
-   * keeps track of the listeners to this undo manager
-   */
+  /** Keeps track of the listeners to this undo manager. */
   private final GlobalEventNotifier _notifier;
   
-  /**
-   * Default constructor.
-   */
+  /** Standard constructor. */
   public CompoundUndoManager(GlobalEventNotifier notifier) {
     super();
     counter++;
@@ -103,32 +90,25 @@ public class CompoundUndoManager extends UndoManager {
     _notifier = notifier;
   }
   
-  /**
-   * Starts a compound edit.
-   * @return the key for the compound edit
+  /** Starts a compound edit.
+   *  @return the key for the compound edit
    */
   public int startCompoundEdit() {
     _compoundEdits.add(0, new CompoundEdit());
     _keys.add(0, new Integer(_nextKey));
-    if(_nextKey < Integer.MAX_VALUE) {
-      _nextKey++;
-    }
-    else {
-      _nextKey = Integer.MIN_VALUE;
-    }
+    if(_nextKey < Integer.MAX_VALUE) _nextKey++;
+    else _nextKey = Integer.MIN_VALUE;
     return _keys.get(0).intValue();
   }
-  
-  
   
   /**
    * Ends the last compound edit that was created.
    * Used when a compound edit is created by the _undoListener in DefinitionsPane and the key is not known in DefinitionsDocument.
    */
   public void endLastCompoundEdit() {
-    if (_keys.size()==0) {
-      return;//NOTE: This can happen if for example uncomment lines does not modify any text: throw new IllegalStateException("There should currently be an open compound edit.");
-    }
+    if (_keys.size() == 0) return;
+    // NOTE: The preceding can happen if for example uncomment lines does not modify any text.
+    
     endCompoundEdit(_keys.get(0).intValue());
   }
   
@@ -139,8 +119,8 @@ public class CompoundUndoManager extends UndoManager {
    * @param key the key that was returned by startCompoundEdit()
    */
   public void endCompoundEdit(int key) {
-    if(_keys.size() > 0) {
-      if(_keys.get(0).intValue() == key) {
+    if (_keys.size() > 0) {
+      if (_keys.get(0).intValue() == key) {
         CompoundEdit compoundEdit = _compoundEdits.remove(0);
         compoundEdit.end();
         
@@ -152,17 +132,13 @@ public class CompoundUndoManager extends UndoManager {
             //          }
             _notifyUndoHappened();
           }
-          else {
-            _compoundEdits.get(0).addEdit(compoundEdit);
-          }
+          else _compoundEdits.get(0).addEdit(compoundEdit);
         }
         _keys.remove(0);
         
         // signal view to update undo state
       }
-      else {
-        throw new IllegalStateException("Improperly nested compound edits.");
-      }
+      else throw new IllegalStateException("Improperly nested compound edits.");
     }
   }
   
@@ -170,25 +146,19 @@ public class CompoundUndoManager extends UndoManager {
    * We are getting the last Compound Edit entered into the list.
    * This is for making a Compound edit for granular undo.
    */
-  public CompoundEdit getLastCompoundEdit(){
-    return _compoundEdits.get(0);
-  }
+  public CompoundEdit getLastCompoundEdit() { return _compoundEdits.get(0); }
   
   /**
    * Gets the next undo.
    * @return the next undo
    */
-  public UndoableEdit getNextUndo() {
-    return editToBeUndone();
-  }
+  public UndoableEdit getNextUndo() { return editToBeUndone(); }
   
   /**
    * Gets the next redo.
    * @return the next redo
    */
-  public UndoableEdit getNextRedo() {
-    return editToBeRedone();
-  }
+  public UndoableEdit getNextRedo() { return editToBeRedone(); }
   
   /**
    * Adds an edit.  Checks whether or not the current edit is a compound edit.
@@ -230,12 +200,8 @@ public class CompoundUndoManager extends UndoManager {
    * @return the undo's presentation name
    */
   public String getUndoPresentationName() {
-    if (_compoundEditInProgress()) {
-      return "Undo Previous Command";
-    }
-    else {
-      return super.getUndoPresentationName();
-    }
+    if (_compoundEditInProgress()) return "Undo Previous Command";
+    return super.getUndoPresentationName();
   }
   
   /**
@@ -260,7 +226,7 @@ public class CompoundUndoManager extends UndoManager {
    * @throws IllegalArgumentException if the key is incorrect
    */
   public void undo(int key) {
-    if(_keys.get(0).intValue() == key) {
+    if (_keys.get(0).intValue() == key) {
       CompoundEdit compoundEdit = _compoundEdits.get(0);
       _compoundEdits.remove(0);
       _keys.remove(0);
@@ -269,9 +235,7 @@ public class CompoundUndoManager extends UndoManager {
       compoundEdit.undo();
       compoundEdit.die();
     }
-    else {
-      throw new IllegalArgumentException("Bad undo key " + key + "!");
-    }
+    else throw new IllegalArgumentException("Bad undo key " + key + "!");
   }
   
   /**
@@ -279,47 +243,31 @@ public class CompoundUndoManager extends UndoManager {
    * be thrown if redo is attempted while in the compound undo state
    */
   public void redo() {
-    if(_compoundEditInProgress()) {
+    if (_compoundEditInProgress()) {
       while (_keys.size() > 0) {
         endCompoundEdit(_keys.get(0).intValue());
       }
-      super.redo();
-      //      throw new CannotRedoException();
+      super.redo(); //      throw new CannotRedoException();
     }
-    else {
-      super.redo();
-    }
+    else super.redo();
   }
   
-  /**
-   * helper method to notify the view that an undoable edit has occured
-   */
-  private void _notifyUndoHappened() {
-    _notifier.undoableEditHappened();
-  }
+  /** Helper method to notify the view that an undoable edit has occured. */
+  private void _notifyUndoHappened() { _notifier.undoableEditHappened(); }
   
-  /**
-   * Informs this undo manager that the document has been saved.
-   */
-  public void documentSaved() {
-    _savePoint = editToBeUndone();
-  }
+  /** Informs this undo manager that the document has been saved. */
+  public void documentSaved() { _savePoint = editToBeUndone(); }
   
   /**
    * Determines if the document is in the same undo state as it was when it
    * was last saved.
    * @return true iff all changes have been undone since the last save
    */
-  public boolean isModified() {
-    return editToBeUndone() != _savePoint;
-  }
+  public boolean isModified() { return editToBeUndone() != _savePoint; }
   
-  public String toString(){
-    return "(CompoundUndoManager: " + id + ")";
-  }
-  /**
-   * Used to help track down memory leaks
-   */
+  public String toString() { return "(CompoundUndoManager: " + id + ")"; }
+  
+  /** Used to help track down memory leaks. */
   //  protected void finalize() throws Throwable{
   //    super.finalize();
   //  }

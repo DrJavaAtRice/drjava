@@ -346,9 +346,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   };
 
 
-  /**
-   * Provides the view's contribution to the Javadoc interaction.
-   */
+  /** Provides the view's contribution to the Javadoc interaction. */
   private JavadocDialog _javadocSelector = new JavadocDialog(this);
   
   /**
@@ -358,8 +356,8 @@ public class MainFrame extends JFrame implements OptionConstants {
   DirectoryChooser _folderChooser;
   private JCheckBox _openRecursiveCheckBox;
 
-  private Action _moveToAuxiliaryAction = new AbstractAction("Convert to Auxiliary"){
-    {
+  private Action _moveToAuxiliaryAction = new AbstractAction("Convert to Auxiliary") {
+    { /* initialization block for anonymous class */
       String msg = 
       "<html>Open this document each time this project is opened.<br>"+
       "This file would then be compiled and tested with the<br>"+
@@ -406,9 +404,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   };
                                                           
 
-  /**
-   * Sets the document in the definitions pane to a new templated junit test class.
-   */
+  /** Sets the document in the definitions pane to a new templated junit test class. */
   private Action _newJUnitTestAction = new AbstractAction("New JUnit Test Case...") {
     public void actionPerformed(ActionEvent ae) {
       String testName = JOptionPane.showInputDialog(MainFrame.this,
@@ -654,12 +650,15 @@ public class MainFrame extends JFrame implements OptionConstants {
     public void actionPerformed(ActionEvent e) {
       new Thread("Running JUnit Tests") {
         public void run() {
+//          new ScrollableDialog(null, "_junitAllAction called", "", "").show();
           try {
-            hourglassOn();
+            // hourglassOn();
             if (_model.isProjectActive()) _model.getJUnitModel().junitProject();
             else _model.getJUnitModel().junitAll();
-          } 
-          finally { hourglassOff(); }
+          }
+          finally { 
+            // hourglassOff(); 
+          }
         }
       }.start();
     }
@@ -680,9 +679,13 @@ public class MainFrame extends JFrame implements OptionConstants {
       new Thread("Running JUnit Tests"){
         public void run(){
           if (_model.isProjectActive()) {
-            hourglassOn();
-            _model.junitAll();
-            hourglassOff();
+            try {
+              // hourglassOn();  // also done in junitStarted
+              _model.junitAll();
+            }
+            finally {
+             //  hourglassOff(); // also done in junitEnded
+            }
           }
         }
       }.start();
@@ -693,6 +696,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   private Action _javadocAllAction = new AbstractAction("Javadoc All Documents") {
       public void actionPerformed(ActionEvent ae) {
         try {
+          // hourglassOn();
           JavadocModel jm = _model.getJavadocModel();
           File suggestedDir = jm.suggestJavadocDestination(_model.getActiveDocument());
           _javadocSelector.setSuggestedDir(suggestedDir);
@@ -700,6 +704,9 @@ public class MainFrame extends JFrame implements OptionConstants {
           jm.javadocAll(_javadocSelector, _saveSelector, cps);
         }
         catch (IOException ioe) { _showIOError(ioe); }
+        finally {
+          // hourglassOff();
+        }
       }
   };
 
@@ -975,8 +982,8 @@ public class MainFrame extends JFrame implements OptionConstants {
       }
       String classpath = cpBuf.toString();
 
-      new DrJavaScrollableDialog(MainFrame.this, "Interactions Classpath",
-                                 "Current Interpreter Classpath", classpath).show();
+//      new DrJavaScrollableDialog(MainFrame.this, "Interactions Classpath",
+//                                 "Current Interpreter Classpath", classpath).show();
     }
   };
 
@@ -1066,7 +1073,7 @@ public class MainFrame extends JFrame implements OptionConstants {
    * pane and all of the open tabs.
    * @param next true if we want to go to the next pane, false if the previous
    */
-  private synchronized void _switchPaneFocus(boolean next) {
+  private void _switchPaneFocus(boolean next) {
     int numTabs = _tabbedPane.getTabCount();
     int selectedIndex = _tabbedPane.indexOfComponent(_lastFocusOwner);
     if (next) {
@@ -1074,9 +1081,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       // switch to the first pane
       if (_currentDefPane == _lastFocusOwner) {
         // switch to the first tab if there is one
-        if (numTabs > 0) {
-          _switchToPane(_tabbedPane.getComponentAt(0));
-        }
+        if (numTabs > 0) _switchToPane(_tabbedPane.getComponentAt(0));
       }
       else if (numTabs == selectedIndex + 1) {
         // we're at the last tab, switch to the current def pane
@@ -1579,11 +1584,12 @@ public class MainFrame extends JFrame implements OptionConstants {
       return new LayeredIcon(new Icon[]{base, star}, new int[]{0, 0}, 
                              new int[]{0, (base.getIconHeight() / 4)});
     }
-    private LayeredIcon makeLayeredIcon(Icon base, Icon star, Icon junit) {
-      int[] x = new int[]{0, 0 ,base.getIconWidth() - junit.getIconWidth()};
-      int[] y = new int[]{0, (base.getIconHeight() / 4), base.getIconHeight() - junit.getIconHeight()};
-      return new LayeredIcon(new Icon[]{base, star, junit}, x, y);
-    }
+//  method is never called     
+//    private LayeredIcon makeLayeredIcon(Icon base, Icon star, Icon junit) {
+//      int[] x = new int[]{0, 0 ,base.getIconWidth() - junit.getIconWidth()};
+//      int[] y = new int[]{0, (base.getIconHeight() / 4), base.getIconHeight() - junit.getIconHeight()};
+//      return new LayeredIcon(new Icon[]{base, star, junit}, x, y);
+//    }
   };
   
   /**
@@ -1592,12 +1598,10 @@ public class MainFrame extends JFrame implements OptionConstants {
    */
   private DisplayManager<INavigatorItem> _navPaneDisplayManager = new DisplayManager<INavigatorItem>() {
     public Icon getIcon(INavigatorItem item) {
-      OpenDefinitionsDocument odd = _model.getODDGivenIDoc(item);
+      OpenDefinitionsDocument odd = (OpenDefinitionsDocument) item;  // FIX THIS!
       return _oddDisplayManager20.getIcon(odd);
     }
-    public String getName(INavigatorItem name) {
-      return name.getName();
-    }
+    public String getName(INavigatorItem name) { return name.getName(); }
   };
   
   
@@ -2077,40 +2081,32 @@ public class MainFrame extends JFrame implements OptionConstants {
     return _interactionsController;
   }
   
-   /**
-   * @return The frame's close button (Package private accessor)
-   */
-  JButton getCloseButton() {
-    return _closeButton;
-  }
+   /** @return The frame's close button (Package private accessor). */
+  JButton getCloseButton() { return _closeButton; }
 
-  /**
-   * For testing purposes.
-   * @return The frame's compileAll button (Package private accessor)
+  /** For testing purposes.
+   *  @return The frame's compileAll button (Package private accessor)
    */
-  JButton getCompileAllButton() {
-    return _compileButton;
-  }
+  JButton getCompileAllButton() { return _compileButton; }
 
-  /**
-   * Make the cursor an hourglass.
-   */
+  /** Make the cursor an hourglass. */
   private int hourglassNestLevel = 0;
   public void hourglassOn() {
+//   new ScrollableDialog(null, "hourglassOn called; old nesting level is: " + hourglassNestLevel, "", "").show();
     hourglassNestLevel++;
-    if(hourglassNestLevel == 1){
+    if (hourglassNestLevel == 1) {
       getGlassPane().setVisible(true);
       _currentDefPane.setEditable(false);
       setAllowKeyEvents(false);
     }
   }
   
-  /**
-   * Return the cursor to normal.
-   */
-  public void hourglassOff() {
+  /** Return the cursor to normal. */
+  public void hourglassOff() { 
     hourglassNestLevel--;
-    if(hourglassNestLevel == 0){
+//   new ScrollableDialog(null, "hourglassOff called; new nesting level is: " + hourglassNestLevel, "", "").show();
+    
+    if (hourglassNestLevel == 0) {
       getGlassPane().setVisible(false);
       _currentDefPane.setEditable(true);
       setAllowKeyEvents(true);
@@ -2118,18 +2114,11 @@ public class MainFrame extends JFrame implements OptionConstants {
   }
 
   private boolean allow_key_events = true;
-  public void setAllowKeyEvents(boolean a){
-    this.allow_key_events = a;
-  }
+  public void setAllowKeyEvents(boolean a) { this.allow_key_events = a; }
   
-  public boolean getAllowKeyEvents(){
-    return this.allow_key_events;
-  }
+  public boolean getAllowKeyEvents() { return this.allow_key_events; }
 
-  /**
-   * Toggles whether the debugger is enabled or disabled,
-   * and updates the display accordingly.
-   */
+  /** Toggles whether the debugger is enabled or disabled, and updates the display accordingly. */
   public void debuggerToggle() {
     // Make sure the debugger is available
     Debugger debugger = _model.getDebugger();
@@ -2147,8 +2136,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       }
     }
     catch (DebugException de) {
-      _showError(de, "Debugger Error",
-                 "Could not start the debugger.");
+      _showError(de, "Debugger Error", "Could not start the debugger.");
     }
     catch (NoClassDefFoundError err) {
       _showError(err, "Debugger Error",
@@ -2157,7 +2145,6 @@ public class MainFrame extends JFrame implements OptionConstants {
                  "in your classpath when you start DrJava.");
       _setDebugMenuItemsEnabled(false);
     }
-
   }
 
   /**
@@ -2363,40 +2350,30 @@ public class MainFrame extends JFrame implements OptionConstants {
     _sbMessage.setForeground(c);
   }
 
-  private void _moveToAuxiliary(){
+  private void _moveToAuxiliary() {
     INavigatorItem n = _model.getDocumentNavigator().getCurrentSelectedLeaf();
-    if(n == null){
-      // false alarm, a document is not really selected...
-    }else{
-      OpenDefinitionsDocument d = _model.getODDGivenIDoc(n);
-      if(d.isUntitled()){
-        // can't move an untitled document to the auxiliary files
-      }else{
+    if (n != null) {
+      OpenDefinitionsDocument d = (OpenDefinitionsDocument) n;  // FIX THIS!
+      if (! d.isUntitled()) {
         _model.addAuxiliaryFile(d);
         try{
           _model.getDocumentNavigator().refreshDocument(n, _model.fixPathForNavigator(d.getFile().getCanonicalPath()));
-        }catch(IOException e){
-          // noop
         }
+        catch(IOException e){ /* do nothing */ }
       }
     }
   }
   
   private void _removeAuxiliary(){
     INavigatorItem n = _model.getDocumentNavigator().getCurrentSelectedLeaf();
-    if(n == null){
-      // false alarm, a document is not really selected...
-    }else{
-      OpenDefinitionsDocument d = _model.getODDGivenIDoc(n);
-      if(d.isUntitled()){
-        // can't move an untitled document to the auxiliary files
-      }else{
+    if (n != null) {
+      OpenDefinitionsDocument d = (OpenDefinitionsDocument) n;  // FIX THIS!
+      if (! d.isUntitled()) {
         _model.removeAuxiliaryFile(d);
         try{
           _model.getDocumentNavigator().refreshDocument(n, _model.fixPathForNavigator(d.getFile().getCanonicalPath()));
-        }catch(IOException e){
-          // noop
         }
+        catch(IOException e) { /* do nothing */ }
       }
     }
   }
@@ -2478,9 +2455,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     catch(Exception e){
       e.printStackTrace(System.err);
     }
-    finally {
-      hourglassOff();
-    }    
+    finally { hourglassOff(); }    
   }
   
   
@@ -2492,10 +2467,8 @@ public class MainFrame extends JFrame implements OptionConstants {
    */
   private void _openProjectHelper(File projectFile) {
     _currentProjFile = projectFile;
-    try{
-      _model.openProject(projectFile);
-    }
-    catch(MalformedProjectFileException e){
+    try { _model.openProject(projectFile); }
+    catch(MalformedProjectFileException e) {
       _showProjectFileParseError(e); // add to an error adapter
       return;
     }
@@ -2503,7 +2476,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       _showFileNotFoundError(e); // add to an error adapter
       return;
     }
-    catch(IOException e){
+    catch(IOException e) {
       _showIOError(e); // add to an error adapter
       return;
     }
@@ -2519,18 +2492,14 @@ public class MainFrame extends JFrame implements OptionConstants {
       _compileOpenProjectAction.setEnabled(true);
       _compileProjectAction.setEnabled(true);
       _jarProjectAction.setEnabled(true);
-      if(_model.getBuildDirectory() != null){
-        _cleanAction.setEnabled(true);
-      }
+      if (_model.getBuildDirectory() != null) _cleanAction.setEnabled(true);
       _model.setProjectChanged(false);
       _resetNavigatorPane();
       _compileButton.setToolTipText("<html>Compile all documents in the project.<br>External files are excluded.</html>");
     }
   }
 
-  /**
-   * Jars all of the files in a project together
-   */
+  /** Jars all of the files in a project together. */
 /*  private void _jarProject() {
     final SwingWorker worker = new SwingWorker() {
           public Object construct() {
@@ -2624,9 +2593,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     catch (AlreadyOpenException aoe) {
       OpenDefinitionsDocument openDoc = aoe.getOpenDocument();
       String filename;
-      try {
-        filename = openDoc.getFile().getName();
-      }
+      try { filename = openDoc.getFile().getName(); }
       catch (IllegalStateException ise) {
         // Can't happen: this open document must have a file
         throw new UnexpectedException(ise);
@@ -2674,9 +2641,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     catch (FileNotFoundException fnf) {
       _showFileNotFoundError(fnf);
     }
-    catch (IOException ioe) {
-      _showIOError(ioe);
-    }
+    catch (IOException ioe) { _showIOError(ioe); }
     finally {
       hourglassOff();
       //_openProjectUpdate();
@@ -2695,30 +2660,24 @@ public class MainFrame extends JFrame implements OptionConstants {
     chooser.setDialogTitle("Open All " + type + "Files In...");
     
     File openDir = null;
-    try{
-      openDir = _model.getActiveDocument().getFile().getParentFile();
-    }catch(FileMovedException e){
-    }catch(IllegalStateException e){
-    }
+    try { openDir = _model.getActiveDocument().getFile().getParentFile(); }
+    catch(FileMovedException e) { /* do nothing */ }
+    catch(IllegalStateException e) { /* do nothing */ }
     
     int result = chooser.showDialog(openDir);
-    if (result != DirectoryChooser.APPROVE_OPTION) {
-      return; // canceled or error
-    }
+    if (result != DirectoryChooser.APPROVE_OPTION)  return; // canceled or error
     
     File dir = chooser.getSelectedDirectory();
     DrJava.getConfig().setSetting(OptionConstants.OPEN_FOLDER_RECURSIVE, _openRecursiveCheckBox.isSelected());
     
-    if(dir == null) return; // just in case
+    if (dir == null) return; // just in case
     
     openFilesInFolder(dir, _openRecursiveCheckBox.isSelected());
-    
   }
   
-  private void openFilesInFolder(File dir, boolean recursive)
-  {
+  private void openFilesInFolder(File dir, boolean recursive) {
     ArrayList<File> files;
-    if(dir != null && dir.isDirectory()){
+    if (dir != null && dir.isDirectory()) {
       files = FileOps.getFilesInDir(dir, recursive, new FileFilter(){
         public boolean accept(File f){ 
           return f.isDirectory() ||
@@ -2727,25 +2686,18 @@ public class MainFrame extends JFrame implements OptionConstants {
         }
       });
       
-      if(_model.isProjectActive()){
-        Collections.sort(files, new Comparator<File>(){
-          public int compare(File o1,File o2){
+      if (_model.isProjectActive())
+        Collections.sort(files, new Comparator<File>() {
+          public int compare(File o1,File o2) {
             return - o1.getAbsolutePath().compareTo(o2.getAbsolutePath());
-          }
-          public boolean equals(Object o){
-            return false;
-          }
-        });
-      }else{
-        Collections.sort(files, new Comparator<File>(){
-          public int compare(File o1,File o2){
+        }
+      });
+      else
+        Collections.sort(files, new Comparator<File>() {
+          public int compare(File o1,File o2) {
             return - o1.getName().compareTo(o2.getName());
-          }
-          public boolean equals(Object o){
-            return false;
-          }
-        });
-      }
+        }
+      });
       
       final File[] sfiles = files.toArray(new File[0]);
       
@@ -2808,11 +2760,11 @@ public class MainFrame extends JFrame implements OptionConstants {
     INavigatorItem n;
     Enumeration<INavigatorItem> e = _model.getDocumentNavigator().getDocuments();
     final LinkedList<OpenDefinitionsDocument> l = new LinkedList<OpenDefinitionsDocument>();
-    if(_model.getDocumentNavigator().isGroupSelected()){
+    if (_model.getDocumentNavigator().isGroupSelected()){
       while (e.hasMoreElements()){
         n = e.nextElement();
         if(_model.getDocumentNavigator().isSelectedInGroup(n)){
-          l.add(_model.getODDGivenIDoc(n));
+          l.add((OpenDefinitionsDocument) n);  // FIX THIS!
         }
       }
       _model.getJUnitModel().junitDocs(l);
@@ -2823,12 +2775,10 @@ public class MainFrame extends JFrame implements OptionConstants {
     INavigatorItem n;
     Enumeration<INavigatorItem> e = _model.getDocumentNavigator().getDocuments();
     final LinkedList<OpenDefinitionsDocument> l = new LinkedList<OpenDefinitionsDocument>();
-    if(_model.getDocumentNavigator().isGroupSelected()){
-      while (e.hasMoreElements()){
+    if (_model.getDocumentNavigator().isGroupSelected()) {
+      while (e.hasMoreElements()) {
         n = e.nextElement();
-        if(_model.getDocumentNavigator().isSelectedInGroup(n)){
-          l.add(_model.getODDGivenIDoc(n));
-        }
+        if (_model.getDocumentNavigator().isSelectedInGroup(n)) { l.add((OpenDefinitionsDocument) n); }  // FIX THIS!
       }
       _model.closeFiles(l, false);
     }
@@ -3200,9 +3150,9 @@ public class MainFrame extends JFrame implements OptionConstants {
     Enumeration<INavigatorItem> e = _model.getDocumentNavigator().getDocuments();
     final LinkedList<OpenDefinitionsDocument> l = new LinkedList<OpenDefinitionsDocument>();
     if (_model.getDocumentNavigator().isGroupSelected()) {
-      while (e.hasMoreElements()){
+      while (e.hasMoreElements()) {
         n = e.nextElement();
-        if (_model.getDocumentNavigator().isSelectedInGroup(n)) l.add(_model.getODDGivenIDoc(n));
+        if (_model.getDocumentNavigator().isSelectedInGroup(n)) l.add( (OpenDefinitionsDocument) n);  // FIX THIS!
       }
       
       final SwingWorker worker = new SwingWorker() {
@@ -3217,7 +3167,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
   }
 
-  private boolean showCleanWarning(){
+  private boolean showCleanWarning() {
     if (DrJava.getConfig().getSetting(PROMPT_BEFORE_CLEAN).booleanValue()) {
       String buildDirTxt = "";
       try {
@@ -3274,28 +3224,29 @@ public class MainFrame extends JFrame implements OptionConstants {
     worker.start();
   }
 
-  private void _compileProject(){
+  private void _compileProject() { 
+    
+//    new ScrollableDialog(null, "MainFrame.compileProject called", "", "").show();
+
     final SwingWorker worker = new SwingWorker() {
       public Object construct() {
         try {
-          hourglassOn();
-          _model.compileAll();
-          hourglassOff();
+          // hourglassOn();
+          _model.compileAll(); 
         }
         catch (FileMovedException fme) { _showFileMovedError(fme); }
         catch (IOException ioe) { _showIOError(ioe); }
+        finally { /* hourglassOff(); */ }
         return null;
       }
     };
     worker.start();
   }
-  //***********
+
   private void _compileAll() {
     final SwingWorker worker = new SwingWorker() {
       public Object construct() {
-        try {
-          _model.getCompilerModel().compileAll();
-        }
+        try { _model.getCompilerModel().compileAll(); }
         catch (FileMovedException fme) { _showFileMovedError(fme); }
         catch (IOException ioe) { _showIOError(ioe); }
         return null;
@@ -3364,21 +3315,11 @@ public class MainFrame extends JFrame implements OptionConstants {
   private void _junit() {
     final SwingWorker worker = new SwingWorker() {
       public Object construct() {
-        try {
-          _model.getActiveDocument().startJUnit();
-        }
-        catch (FileMovedException fme) {
-          _showFileMovedError(fme);
-        }
-        catch (IOException ioe) {
-          _showIOError(ioe);
-        }
-        catch (ClassNotFoundException cnfe) {
-          _showClassNotFoundError(cnfe);
-        }
-        catch (NoClassDefFoundError ncde) {
-          _showNoClassDefError(ncde);
-        }
+        try { _model.getActiveDocument().startJUnit(); }
+        catch (FileMovedException fme) { _showFileMovedError(fme); }
+        catch (IOException ioe) { _showIOError(ioe); }
+        catch (ClassNotFoundException cnfe) { _showClassNotFoundError(cnfe); }
+        catch (NoClassDefFoundError ncde) { _showNoClassDefError(ncde); }
         catch (ExitingNotAllowedException enae) {
           JOptionPane.showMessageDialog(MainFrame.this,
                                         "An exception occurred while running JUnit, which could\n" +
@@ -3597,6 +3538,7 @@ public class MainFrame extends JFrame implements OptionConstants {
                "A Debugger error occurred in the last operation.\n\n");
   }
 
+  
   private void _showError(Throwable e, String title, String message) {
 //    System.out.println(e);
     JOptionPane.showMessageDialog(this,
@@ -4860,37 +4802,33 @@ public class MainFrame extends JFrame implements OptionConstants {
     _navPanePopupMenu.add(_runAction);
     _model.getDocCollectionWidget().addMouseListener(new RightClickMouseAdapter() {
       protected void _popupAction(MouseEvent e) {
-        if(_model.getDocumentNavigator().selectDocumentAt(e.getX(), e.getY())){
+        if (_model.getDocumentNavigator().selectDocumentAt(e.getX(), e.getY())) {
           
-          if(_model.getDocumentNavigator().isGroupSelected()){
+          if (_model.getDocumentNavigator().isGroupSelected()) {
             _navPaneFolderPopupMenu.show(e.getComponent(), e.getX(), e.getY());
-          }else{
+          }
+          else{
             try{
               String groupName = _model.getDocumentNavigator().getNameOfSelectedTopLevelGroup();
-              if(groupName == "[ Source Files ]"){
-                _navPanePopupMenu.show(e.getComponent(), e.getX(), e.getY());
-              }else if(groupName == "[ External Files ]"){
+              if(groupName == "[ Source Files ]") { _navPanePopupMenu.show(e.getComponent(), e.getX(), e.getY()); }
+              else if(groupName == "[ External Files ]"){
                 INavigatorItem n = _model.getDocumentNavigator().getCurrentSelectedLeaf();
-                if(n == null){
-                  // false alarm, a document is not really selected...
-                }else{
-                  OpenDefinitionsDocument d = _model.getODDGivenIDoc(n);
-                  if(d.isUntitled()){
-                    _navPanePopupMenu.show(e.getComponent(), e.getX(), e.getY());
-                  }else{
-                    _navPanePopupMenuForExternal.show(e.getComponent(), e.getX(), e.getY());
-                  }
+                if (n != null) {
+                  OpenDefinitionsDocument d = (OpenDefinitionsDocument) n;
+                  if (d.isUntitled()) { _navPanePopupMenu.show(e.getComponent(), e.getX(), e.getY()); }
+                  else _navPanePopupMenuForExternal.show(e.getComponent(), e.getX(), e.getY());
                 }
-              }else if(groupName == "[ Auxiliary Files ]"){
+              }
+              else if(groupName == "[ Auxiliary Files ]"){
                 _navPanePopupMenuForAuxiliary.show(e.getComponent(), e.getX(), e.getY());
               }
-            }catch(GroupNotSelectedException ex){
+            }
+            catch(GroupNotSelectedException ex){
               // we're looking at the root of the tree, or we're in list view...
               if(_model.isProjectActive()){
                 _navPanePopupMenuForRoot.show(e.getComponent(), e.getX(), e.getY());
-              }else{
-                _navPanePopupMenu.show(e.getComponent(), e.getX(), e.getY());
               }
+              else { _navPanePopupMenu.show(e.getComponent(), e.getX(), e.getY()); }
             }
           }
           
@@ -4953,7 +4891,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       _recentDocFrame.setVisible(false);
       OpenDefinitionsDocument doc = _recentDocFrame.getDocument();
       if(doc != null){
-        _model.getDocumentNavigator().setActiveDoc(_model.getIDocGivenODD(doc));
+        _model.getDocumentNavigator().setActiveDoc(doc);
       }
     }
   }
@@ -5470,12 +5408,10 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
   }
 
-  /**
-   * Ensures that the interactions pane is not editable during an interaction.
-   */
+  /** Ensures that the interactions pane is not editable during an interaction. */
   protected void _disableInteractionsPane() {
     // Only change GUI from event-dispatching thread
-    Runnable doCommand = new Runnable() {
+    Runnable command = new Runnable() {
       public void run() {
         _interactionsPane.setEditable(false);
         _interactionsPane.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
@@ -5484,15 +5420,13 @@ public class MainFrame extends JFrame implements OptionConstants {
         }
       }
     };
-    SwingUtilities.invokeLater(doCommand);
+    SwingUtilities.invokeLater(command);
   }
 
-  /**
-   * Ensures that the interactions pane is editable after an interaction completes.
-   */
+  /** Ensures that the interactions pane is editable after an interaction completes. */
   protected void _enableInteractionsPane() {
     // Only change GUI from event-dispatching thread
-    Runnable doCommand = new Runnable() {
+    Runnable command = new Runnable() {
       public void run() {
         /*
          if (inDebugMode()) {
@@ -5510,7 +5444,7 @@ public class MainFrame extends JFrame implements OptionConstants {
         if (_interactionsScriptController != null) _interactionsScriptController.setActionsEnabled();
       }
     };
-    SwingUtilities.invokeLater(doCommand);
+    SwingUtilities.invokeLater(command);
   }
 
 
@@ -5538,19 +5472,15 @@ public class MainFrame extends JFrame implements OptionConstants {
 
     public void debuggerStarted() {
       // Only change GUI from event-dispatching thread
-      Runnable doCommand = new Runnable() {
-        public void run() {
-          showDebugger(); 
-        }
-      };
-      SwingUtilities.invokeLater(doCommand);
+      Runnable command = new Runnable() { public void run() { showDebugger(); } };
+      SwingUtilities.invokeLater(command);
     }
 
     public void debuggerShutdown() {
       _disableStepTimer();
 
       // Only change GUI from event-dispatching thread
-      Runnable doCommand = new Runnable() {
+      Runnable command = new Runnable() {
         public void run() {
           hideDebugger();
           _removeThreadLocationHighlight();
@@ -5562,17 +5492,16 @@ public class MainFrame extends JFrame implements OptionConstants {
           }
         }
       };
-      SwingUtilities.invokeLater(doCommand);
+      SwingUtilities.invokeLater(command);
     }
 
-    public void currThreadSet(DebugThreadData dtd) {
-    }
+    public void currThreadSet(DebugThreadData dtd) {}
 
     public void threadLocationUpdated(final OpenDefinitionsDocument doc,
                                       final int lineNumber,
                                       final boolean shouldHighlight) {
       // Only change GUI from event-dispatching thread
-      Runnable doCommand = new Runnable() {
+      Runnable command = new Runnable() {
         public void run() {
           // This listener is used when the document to display is
           // not the active document. In this case, when setActiveDocument
@@ -5580,27 +5509,18 @@ public class MainFrame extends JFrame implements OptionConstants {
           // don't want to scroll to a line until it does, so we wait
           // for a call to setSize.
           
-//          _firstCallFromSetSize = true;
           ActionListener setSizeListener = new ActionListener() {
             public void actionPerformed(ActionEvent ae) {
-//              if (_firstCallFromSetSize) {
-//                _firstCallFromSetSize = false;
-//              }
-//              else {
-                _currentDefPane.centerViewOnLine(lineNumber);
-//              }
+              _currentDefPane.centerViewOnLine(lineNumber);
             }
           };
           _currentDefPane.addSetSizeListener(setSizeListener);
 
-          if (!_model.getActiveDocument().equals(doc)) {
-            _model.setActiveDocument(doc);
-          }
+          if (!_model.getActiveDocument().equals(doc)) _model.setActiveDocument(doc);
 
           // this block occurs if the documents is already open and as such
           // has a positive size
-          if (_currentDefPane.getSize().getWidth() > 0 &&
-              _currentDefPane.getSize().getHeight() > 0) {
+          if (_currentDefPane.getSize().getWidth() > 0 && _currentDefPane.getSize().getHeight() > 0) {
             _currentDefPane.centerViewOnLine(lineNumber);
             _currentDefPane.requestFocus();
           }
@@ -5612,8 +5532,8 @@ public class MainFrame extends JFrame implements OptionConstants {
               int endOffset = doc.getLineEndPos(startOffset);
               if (endOffset > -1) {
                 _currentThreadLocationHighlight =
-                  _currentDefPane.getHighlightManager().addHighlight(startOffset, endOffset,
-                                                                     DefinitionsPane.THREAD_PAINTER);
+                  _currentDefPane.getHighlightManager().
+                  addHighlight(startOffset, endOffset, DefinitionsPane.THREAD_PAINTER);
               }
             }
           }
@@ -5632,56 +5552,39 @@ public class MainFrame extends JFrame implements OptionConstants {
           }
           showTab(_interactionsPane);
           _updateDebugStatus();
-
         }
       };
-      SwingUtilities.invokeLater(doCommand);
+      SwingUtilities.invokeLater(command);
     }
 
     public void breakpointSet(final Breakpoint bp) {
       // Only change GUI from event-dispatching thread
-      Runnable doCommand = new Runnable() {
+      Runnable command = new Runnable() {
         public void run() {
           DefinitionsPane bpPane = getDefPaneGivenODD(bp.getDocument());
-          _breakpointHighlights.put(bp,
-                                    bpPane.getHighlightManager().addHighlight(bp.getStartOffset(),
-                                                                              bp.getEndOffset(),
-                                                                              DefinitionsPane.BREAKPOINT_PAINTER));
+          _breakpointHighlights.
+            put(bp, bpPane.getHighlightManager().
+                  addHighlight(bp.getStartOffset(), bp.getEndOffset(), DefinitionsPane.BREAKPOINT_PAINTER));
           _updateDebugStatus();
         }
       };
-      SwingUtilities.invokeLater(doCommand);
+      SwingUtilities.invokeLater(command);
     }
 
-    public void breakpointReached(Breakpoint bp) {
-    }
+    public void breakpointReached(Breakpoint bp) { }
 
     public void breakpointRemoved(final Breakpoint bp) {
-      // Only change GUI from event-dispatching thread
-      /*Runnable doCommand = new Runnable() {
-        public void run() {
-          _model.setActiveDocument(bp.getDocument());
-          _currentDefPane.getHighlightManager().removeHighlight(bp.getStartOffset(),
-                                                                bp.getEndOffset(),
-                                                                DefinitionsPane.BREAKPOINT_PAINTER);
-        }
-      };
-      SwingUtilities.invokeLater(doCommand);*/
 
       HighlightManager.HighlightInfo highlight = _breakpointHighlights.get(bp);
       if (highlight != null) highlight.remove();
       _breakpointHighlights.remove(bp);
     }
 
-    /**
-     * Called when a step is requested on the current thread.
-     */
+    /** Called when a step is requested on the current thread. */
     public void stepRequested() {
       // Print a message if step takes a long time
       synchronized (_debugStepTimer) {  // Why is this synchronized
-        if (!_debugStepTimer.isRunning()) {
-          _debugStepTimer.start();
-        }
+        if (!_debugStepTimer.isRunning()) _debugStepTimer.start();
       }
     }
 
@@ -5689,21 +5592,21 @@ public class MainFrame extends JFrame implements OptionConstants {
       _disableStepTimer();
 
       // Only change GUI from event-dispatching thread
-      Runnable doCommand = new Runnable() {
+      Runnable command = new Runnable() {
         public void run() { _setThreadDependentDebugMenuItems(true); }
       };
-      SwingUtilities.invokeLater(doCommand);
+      SwingUtilities.invokeLater(command);
     }
 
     public void currThreadResumed() {
       // Only change GUI from event-dispatching thread
-      Runnable doCommand = new Runnable() {
+      Runnable command = new Runnable() {
         public void run() {
           _setThreadDependentDebugMenuItems(false);
           _removeThreadLocationHighlight();
         }
       };
-      SwingUtilities.invokeLater(doCommand);
+      SwingUtilities.invokeLater(command);
     }
 
     public void threadStarted() {
@@ -5713,7 +5616,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       _disableStepTimer();
 
       // Only change GUI from event-dispatching thread
-      Runnable doCommand = new Runnable() {
+      Runnable command = new Runnable() {
         public void run() {
           if (inDebugMode()) {
             try {
@@ -5734,7 +5637,7 @@ public class MainFrame extends JFrame implements OptionConstants {
           }
         }
       };
-      SwingUtilities.invokeLater(doCommand);
+      SwingUtilities.invokeLater(command);
     }
 
     public void nonCurrThreadDied() {
@@ -5755,8 +5658,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
 
     public void fileSaved(OpenDefinitionsDocument doc) {
-//      ScrollableDialog sd = new ScrollableDialog(null, "fileSaved called in ModelListener", "", "");
-//      sd.show();
+//      new ScrollableDialog(null, "fileSaved called in ModelListener", "", "").show();
       _saveAction.setEnabled(false);
       _revertAction.setEnabled(true);
       updateFileTitle();
@@ -5796,9 +5698,8 @@ public class MainFrame extends JFrame implements OptionConstants {
       
       try {
         File f = doc.getFile();
-        if(! _model.isProjectFile(f) && _model.isInProjectPath(doc)) {
+        if (! _model.isProjectFile(f) && _model.isInProjectPath(doc))
           _model.setProjectChanged(true);
-        }
       }
       catch(FileMovedException fme) { /* do nothing */ }
     }
@@ -5899,8 +5800,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     public void activeDocumentChanged(final OpenDefinitionsDocument active) {
       // Only change GUI from event-dispatching thread
       // (This can be called from other threads...)
-      //Runnable doCommand = new Runnable() {
-      // public void run() {
+      
       Runnable command = new Runnable() {
         public void run() {
           _recentDocFrame.pokeDocument(active);
@@ -5938,17 +5838,12 @@ public class MainFrame extends JFrame implements OptionConstants {
             //uninstallFindReplaceDialog(_findReplace);
             //installFindReplaceDialog(_findReplace);
           }
-          //  }
-          //};
-          //SwingUtilities.invokeLater(doCommand);
         }
       };
       if ( !SwingUtilities.isEventDispatchThread() && !inDebugMode() ) {
         // Can't invokeAndWait while in debug mode:
         //  UI thread might not respond, so DrJava locks up) {
-        try {
-          SwingUtilities.invokeAndWait(command);
-        }
+        try { SwingUtilities.invokeAndWait(command); }
         catch(InterruptedException e) {
           /** we don't expect to be interrupted */
           throw new UnexpectedException(e);
@@ -5958,9 +5853,7 @@ public class MainFrame extends JFrame implements OptionConstants {
           throw new UnexpectedException(e2.getTargetException());
         }
       }
-      else {
-        command.run();
-      }
+      else command.run();
     }
 
     public void interactionStarted() {
@@ -5984,17 +5877,13 @@ public class MainFrame extends JFrame implements OptionConstants {
      */
     public void interpreterChanged(boolean inProgress) {
       _runAction.setEnabled(!inProgress);
-      if (inProgress) {
-        _disableInteractionsPane();
-      }
-      else {
-        _enableInteractionsPane();
-      }
+      if (inProgress) _disableInteractionsPane();
+      else _enableInteractionsPane();
     }
 
     public void compileStarted() {
       // Only change GUI from event-dispatching thread
-      Runnable doCommand = new Runnable() {
+      Runnable command = new Runnable() {
         public void run() {
           // Is this necessary?
           //CompilerErrorListPane elp = _compilerErrorPanel.getErrorListPane();
@@ -6007,7 +5896,7 @@ public class MainFrame extends JFrame implements OptionConstants {
           _saveAction.setEnabled(false);
         }
       };
-      SwingUtilities.invokeLater(doCommand);
+      SwingUtilities.invokeLater(command);
     }
 
     public void runStarted(final OpenDefinitionsDocument doc) {
@@ -6031,15 +5920,17 @@ public class MainFrame extends JFrame implements OptionConstants {
           }
           hourglassOff();
         }
-
       });
     }
 
     public void junitStarted(final List<OpenDefinitionsDocument> docs) {
       // Only change GUI from event-dispatching thread
+//      new ScrollableDialog(null, "junitStarted(" + docs + ") called in MainFrame", "", "").show();
       SwingUtilities.invokeLater(new Runnable() {
         public void run() {
-          MainFrame.this.hourglassOn();
+          // new ScrollableDialog(null, "Ready for hourglassOn in junitStarted", "", "").show();
+         
+          hourglassOn();
           showTab(_junitErrorPanel);
           _junitErrorPanel.setJUnitInProgress(docs);
           _junitAction.setEnabled(false);
@@ -6048,14 +5939,14 @@ public class MainFrame extends JFrame implements OptionConstants {
       });
     }
 
-    /**
-     * we're junit'ing all files, so we don't need a list of odd's
-     */
-    public void junitAllStarted(){
+    /** We are junit'ing all files, so we don't need a list of odd's */
+    public void junitAllStarted() {
       // Only change GUI from event-dispatching thread
+      // new ScrollableDialog(null, "junitAllStarted called in MainFrame", "", "").show();
       SwingUtilities.invokeLater(new Runnable() {
         public void run() {
-          MainFrame.this.hourglassOn();
+//          new ScrollableDialog(null, "Ready for hourglassOn in junitAllStarted", "", "").show();
+          hourglassOn();
           showTab(_junitErrorPanel);
           _junitErrorPanel.setJUnitInProgress();
           _junitAction.setEnabled(false);
@@ -6064,13 +5955,11 @@ public class MainFrame extends JFrame implements OptionConstants {
       });
     }
     
-    //public void junitRunning() {}
+    //public void junitRunning() { }
 
     public void junitSuiteStarted(final int numTests) {
       SwingUtilities.invokeLater(new Runnable() {
-        public void run() {
-          _junitErrorPanel.progressReset(numTests);
-        }
+        public void run() { _junitErrorPanel.progressReset(numTests); }
       });
     }
 
@@ -6080,11 +5969,12 @@ public class MainFrame extends JFrame implements OptionConstants {
 
     public void junitTestEnded(final String name, final boolean wasSuccessful,
                                final boolean causedError) {
+      // new ScrollableDialog(null, "junitEnded(" + name + ", " + wasSuccessful + ", " + causedError + ") called in MainFrame", "", "").show();
       // syncUI...?
       SwingUtilities.invokeLater(new Runnable() {
         public void run() {
           _junitErrorPanel.getErrorListPane().
-            testEnded(name, wasSuccessful, causedError); // this does nothing!
+           testEnded(name, wasSuccessful, causedError); // this does nothing!
           _junitErrorPanel.progressStep(wasSuccessful);
         }
       });
@@ -6092,13 +5982,19 @@ public class MainFrame extends JFrame implements OptionConstants {
 
     public void junitEnded() {
       // Only change GUI from event-dispatching thread
+//      new ScrollableDialog(null, "MainFrame.junitEnded() called", "", "").show();
       SwingUtilities.invokeLater(new Runnable() {
         public void run() {
-          MainFrame.this.hourglassOff();
-          showTab(_junitErrorPanel);
-          _junitAction.setEnabled(true);
-          _junitAllAction.setEnabled(true);
-          _junitErrorPanel.reset();
+          try {
+            showTab(_junitErrorPanel);
+            _junitAction.setEnabled(true);
+            _junitAllAction.setEnabled(true);
+            _junitErrorPanel.reset();
+          }
+          finally { 
+//            new ScrollableDialog(null, "MainFrame.junitEnded() ready to return", "", "").show();
+            hourglassOff(); 
+          }
         }
       });
     }
@@ -6106,10 +6002,10 @@ public class MainFrame extends JFrame implements OptionConstants {
     public void javadocStarted() {
 
       // Only change GUI from event-dispatching thread
-      Runnable doCommand = new Runnable() {
+      Runnable command = new Runnable() {
         public void run() {
           // if we don't lock edits, our error highlighting might break
-          MainFrame.this.hourglassOn();
+          hourglassOn();
 
           showTab(_javadocErrorPanel);
           _javadocErrorPanel.setJavadocInProgress();
@@ -6117,28 +6013,31 @@ public class MainFrame extends JFrame implements OptionConstants {
           _javadocCurrentAction.setEnabled(false);
         }
       };
-      SwingUtilities.invokeLater(doCommand);
+      SwingUtilities.invokeLater(command);
     }
 
     public void javadocEnded(final boolean success, final File destDir,
                              final boolean allDocs) {
       // Only change GUI from event-dispatching thread
-      Runnable doCommand = new Runnable() {
+      Runnable command = new Runnable() {
         public void run() {
-          MainFrame.this.hourglassOff();
-
-          showTab(_javadocErrorPanel);
-          _javadocAllAction.setEnabled(true);
-          _javadocCurrentAction.setEnabled(true);
-          _javadocErrorPanel.reset();
+          
+          try {
+            showTab(_javadocErrorPanel);
+            _javadocAllAction.setEnabled(true);
+            _javadocCurrentAction.setEnabled(true);
+            _javadocErrorPanel.reset();
+          }
+          finally { 
+            hourglassOff(); 
+          }
 
           // Display the results.
 //             System.out.println("did we get this far?");
           if (success) {
             String className;
             try {
-              className =
-                _model.getActiveDocument().getQualifiedClassName();
+              className = _model.getActiveDocument().getQualifiedClassName();
               className = className.replace('.', File.separatorChar);
             }
             catch (ClassNameNotFoundException cnf) {
@@ -6157,9 +6056,7 @@ public class MainFrame extends JFrame implements OptionConstants {
                 _javadocFrame.setVisible(true);
               }
             }
-            catch (MalformedURLException me) {
-              throw new UnexpectedException(me);
-            }
+            catch (MalformedURLException me) { throw new UnexpectedException(me); }
             catch (IllegalStateException ise) {
               // JavadocFrame couldn't find any output files!
               // Display a message.
@@ -6173,7 +6070,7 @@ public class MainFrame extends JFrame implements OptionConstants {
           }
         }
       };
-      SwingUtilities.invokeLater(doCommand);
+      SwingUtilities.invokeLater(command);
     }
 
     public void interpreterExited(final int status) {
@@ -6181,7 +6078,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       if (DrJava.getConfig().getSetting(INTERACTIONS_EXIT_PROMPT).booleanValue()) {
         // Show the dialog in a Swing thread, so Interactions can
         // start resetting right away.
-        Runnable doCommand = new Runnable() {
+        Runnable command = new Runnable() {
           public void run() {
             String msg = "The interactions window was terminated by a call " +
               "to System.exit(" + status + ").\n" +
@@ -6199,17 +6096,15 @@ public class MainFrame extends JFrame implements OptionConstants {
             }
           }
         };
-        SwingUtilities.invokeLater(doCommand);
+        SwingUtilities.invokeLater(command);
       }
     }
 
-    public void interpreterResetFailed(Throwable t) {
-      interpreterReady();
-    }
+    public void interpreterResetFailed(Throwable t) { interpreterReady(); }
 
     public void interpreterResetting() {
       // Only change GUI from event-dispatching thread
-      Runnable doCommand = new Runnable() {
+      Runnable command = new Runnable() {
         public void run() {
           Debugger dm = _model.getDebugger();
           if (dm.isAvailable() && dm.isReady()) {
@@ -6227,12 +6122,12 @@ public class MainFrame extends JFrame implements OptionConstants {
           }
         }
       };
-      SwingUtilities.invokeLater(doCommand);
+      SwingUtilities.invokeLater(command);
     }
 
     public void interpreterReady() {
       // Only change GUI from event-dispatching thread
-      Runnable doCommand = new Runnable() {
+      Runnable command = new Runnable() {
         public void run() {
           interactionEnded();
           _runAction.setEnabled(true);
@@ -6249,7 +6144,7 @@ public class MainFrame extends JFrame implements OptionConstants {
           _interactionsController.notifyInputEnteredAction();
         }
       };
-      SwingUtilities.invokeLater(doCommand);
+      SwingUtilities.invokeLater(command);
     }
 
     public void consoleReset() { }
@@ -6309,8 +6204,7 @@ public class MainFrame extends JFrame implements OptionConstants {
      * @param checkMsg the description of the checkbox ("Always save before X")
      */
     private void _saveAllBeforeProceeding(String message, BooleanOption option, String checkMsg) {
-//      ScrollableDialog sd = new ScrollableDialog(null, "saveBeforeProceeding called in MainFrame", "", "");
-//      sd.show();
+//      new ScrollableDialog(null, "saveBeforeProceeding called in MainFrame", "", "").show();
       if (_model.hasModifiedDocuments()) {
         if (!DrJava.getConfig().getSetting(option).booleanValue()) {
           ConfirmCheckBoxDialog dialog =
@@ -6360,9 +6254,10 @@ public class MainFrame extends JFrame implements OptionConstants {
       }
     }
 
+    /** Event that is fired with there is nothing to test.  JUnit is never started. */ 
     public void nonTestCase(boolean isTestAll) {
 
-      String message = isTestAll ?
+      final String message = isTestAll ?
         "There are no open JUnit test cases.  Please make sure that:\n" +
         "  - The documents containing tests have been compiled.\n" +
         "  - They are subclasses of junit.framework.TestCase.\n" +
@@ -6390,12 +6285,20 @@ public class MainFrame extends JFrame implements OptionConstants {
 //        "chapter in the User Documentation or the online Help, or visit:\n\n" +
 //
 //        "  http://www.junit.org/\n\n";
+      
+      // Not necessarily invoked from event-handling thread!
 
-      JOptionPane.showMessageDialog(MainFrame.this, message,
-                                    "Test Works Only On JUnit TestCases",
-                                    JOptionPane.ERROR_MESSAGE);
-
-
+      SwingUtilities.invokeLater(new Runnable() {
+        public void run() {
+          JOptionPane.showMessageDialog(MainFrame.this, message,
+                                        "Test Works Only On JUnit TestCases",
+                                        JOptionPane.ERROR_MESSAGE);
+          // clean up as junitEnded except hourglassOff (should factored into a private method)
+           showTab(_junitErrorPanel);
+            _junitAction.setEnabled(true);
+            _junitAllAction.setEnabled(true);
+            _junitErrorPanel.reset();
+        }});
     }
 
     public void currentDirectoryChanged(File dir) {
@@ -6462,25 +6365,19 @@ public class MainFrame extends JFrame implements OptionConstants {
 
       String fname;
 
-      if (! _model.getActiveDocument().equals(doc)) {
-        _model.setActiveDocument(doc);
-      }
+      if (! _model.getActiveDocument().equals(doc)) _model.setActiveDocument(doc);
 
       try {
         File file = doc.getFile();
         fname = file.getName();
       }
-      catch (IllegalStateException ise) {
-        // No file exists
-        fname = "Untitled file";
-      }
-      catch (FileMovedException fme) {
-        // File was deleted, but use the same name anyway
-        fname = fme.getFile().getName();
-      }
+      catch (IllegalStateException ise) { fname = "Untitled file"; } // No file exists
+        
+      catch (FileMovedException fme) { fname = fme.getFile().getName(); }
+      // File was deleted, but use the same name anyway
 
-      String text = fname + " has changed on disk. Would you like to " +
-      "reload it?\nThis will discard any changes you have made.";
+      String text = fname + " has changed on disk. Would you like to reload it?\n" + 
+        "This will discard any changes you have made.";
       int rc = JOptionPane.showConfirmDialog(MainFrame.this,
                                              text,
                                              fname + " Modified on Disk",
@@ -6588,23 +6485,17 @@ public class MainFrame extends JFrame implements OptionConstants {
    */
   public void showTab(Component c) {
     int numVisible = 0;
-    TabbedPanel tp;
 
     // This retarded method doesn't work for our two always-on tabs,
     // so here's a temporary kludge.
-    if (c == _interactionsPane) {
-      _tabbedPane.setSelectedIndex(0);
-    }
-    else if (c == _consolePane) {
-      _tabbedPane.setSelectedIndex(1);
-    }
+    if (c == _interactionsPane) _tabbedPane.setSelectedIndex(0);
+    else if (c == _consolePane) _tabbedPane.setSelectedIndex(1);
     else {
-      for (int i = 0; i < _tabs.size(); i++) {
-        tp = _tabs.get(i);
+      for (TabbedPanel tp: _tabs) {
         if (tp == c) {
           // 2 right now is a magic number for the number of tabs always visible
           // interactions & console
-          if (!tp.isDisplayed()) {
+          if (! tp.isDisplayed()) {
             _tabbedPane.insertTab(tp.getName(), null, tp, null, numVisible + 2);
             tp.setDisplayed(true);
           }
@@ -6612,8 +6503,7 @@ public class MainFrame extends JFrame implements OptionConstants {
           c.requestFocus();
           return;
         }
-        if (tp.isDisplayed())
-          numVisible++;
+        if (tp.isDisplayed()) numVisible++;
       }
     }
   }
@@ -6634,12 +6524,8 @@ public class MainFrame extends JFrame implements OptionConstants {
    */
   private boolean _warnFileOpen(File f) {
     OpenDefinitionsDocument d = null;
-    try {
-      d = _model.getDocumentForFile(f);
-    }
-    catch(IOException ioe) {
-      // this means the file has been deleted. If they're saving over it, don't show an I/O Error
-    }
+    try { d = _model.getDocumentForFile(f); }
+    catch(IOException ioe) { /* do nothing */ }
     Object[] options = {"Yes","No"};
     int choice = JOptionPane.showOptionDialog(MainFrame.this,
                                               "This file is already open in DrJava" + (d.isModifiedSinceSave() ? " and has been modified" : "") 
@@ -6650,9 +6536,7 @@ public class MainFrame extends JFrame implements OptionConstants {
                                               null,
                                               options,
                                               options[1]);
-    if(choice == JOptionPane.YES_OPTION && d != null) {
-      return _model.closeFileWithoutPrompt(d);
-    }
+    if (choice == JOptionPane.YES_OPTION && d != null)  return _model.closeFileWithoutPrompt(d);
     return false;
   }
 
@@ -6662,35 +6546,28 @@ public class MainFrame extends JFrame implements OptionConstants {
    */
   private boolean _verifyOverwrite() {
     Object[] options = {"Yes","No"};
-    int n = JOptionPane.showOptionDialog
-      (MainFrame.this,
-       "This file already exists.  Do you wish to overwrite the file?",
-       "Confirm Overwrite",
-       JOptionPane.YES_NO_OPTION,
-       JOptionPane.QUESTION_MESSAGE,
-       null,
-       options,
-       options[1]);
+    int n = JOptionPane.showOptionDialog(MainFrame.this,
+                                         "This file already exists.  Do you wish to overwrite the file?",
+                                         "Confirm Overwrite",
+                                         JOptionPane.YES_NO_OPTION,
+                                         JOptionPane.QUESTION_MESSAGE,
+                                         null,
+                                         options,
+                                         options[1]);
     return (n == JOptionPane.YES_OPTION);
   }
 
   boolean inDebugMode() {
     Debugger dm = _model.getDebugger();
-    if (dm.isAvailable()) {
-      return dm.isReady() && (_debugPanel != null);
-    }
-    else {
-      return false;
-    }
+    if (dm.isAvailable()) return dm.isReady() && (_debugPanel != null);
+    return false;
   }
 
   /**
    * returns teh find replace dialog
    * package protected for use in tests
    */
-  FindReplaceDialog getFindReplaceDialog(){
-    return _findReplace;
-  }
+  FindReplaceDialog getFindReplaceDialog() { return _findReplace; }
   
 
   /**

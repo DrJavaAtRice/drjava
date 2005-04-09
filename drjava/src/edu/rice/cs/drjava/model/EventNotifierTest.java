@@ -58,13 +58,9 @@ public final class EventNotifierTest extends TestCase {
   
   protected GlobalEventNotifier _notifier;
   
-  public void setUp() {
-    _notifier = new GlobalEventNotifier();
-  }
+  public void setUp() { _notifier = new GlobalEventNotifier(); }
   
-  public void tearDown() {
-    _notifier = null;
-  }
+  public void tearDown() { _notifier = null; }
   
   /**
    * Checks that the notifier adds and removes listeners correctly,

@@ -243,9 +243,7 @@ public class DocumentCache{
      */
     public boolean isReady() { return _doc != null; }
   
-    /**
-     * Closes the corresponding document for this adapter
-     */
+    /** Closes the corresponding document for this adapter. */
     public void close() {
       kickOut(false); // should not save the doc info
       DocumentCache.this.remove(this);

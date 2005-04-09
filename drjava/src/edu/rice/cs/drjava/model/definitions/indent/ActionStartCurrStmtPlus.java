@@ -63,7 +63,7 @@ public class ActionStartCurrStmtPlus extends IndentRuleAction {
 
   /**
    * Constructs a new rule with the given suffix string.
-   * @param prefix String to append to indent level of brace
+   * @param suffix String to append to indent level of brace
    */
   public ActionStartCurrStmtPlus(String suffix) {
     super();

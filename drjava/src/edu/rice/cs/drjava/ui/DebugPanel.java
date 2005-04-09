@@ -61,7 +61,9 @@ import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.config.*;
 
 /**
- * Panel for displaying the debugger input and output in MainFrame.
+ * Panel for displaying the debugger input and output in MainFrame.  This
+ * class is a swing view class and hence should only be accessed from the 
+ * event-handling thread.
  * @version $Id$
  */
 public class DebugPanel extends JPanel implements OptionConstants {
@@ -104,9 +106,9 @@ public class DebugPanel extends JPanel implements OptionConstants {
   
   private DefaultTreeCellRenderer dtcr;
 
-  /**
-   * Constructs a new panel to display debugging information when the
-   * Debugger is active.
+  /** Constructs a new panel to display debugging information when the
+   *  Debugger is active.  This is swing view class and hence should only
+   *  be accessed from the event-handling thread.
    */
   public DebugPanel(MainFrame frame) {
 
@@ -1140,21 +1142,19 @@ public class DebugPanel extends JPanel implements OptionConstants {
     }
   }
   
-  private class BPTree extends JTree{
+  private class BPTree extends JTree {
     public BPTree(DefaultTreeModel s){
       super(s);
     }
     
     public void setForeground(Color c){
       super.setForeground(c);
-      if(dtcr != null)
-        dtcr.setTextNonSelectionColor(c);
+      if (dtcr != null) dtcr.setTextNonSelectionColor(c);
     }
     
     public void setBackground(Color c){
       super.setBackground(c);
-      if(DebugPanel.this != null && dtcr != null)
-        dtcr.setBackgroundNonSelectionColor(c);
+      if (DebugPanel.this != null && dtcr != null) dtcr.setBackgroundNonSelectionColor(c);
     }
   }
 }

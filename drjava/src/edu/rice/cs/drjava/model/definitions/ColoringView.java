@@ -239,19 +239,17 @@ public class ColoringView extends PlainView implements OptionConstants {
     return  x;
   }
 
-  /**
-   * put your documentation comment here
-   * @param g
-   * @param x
-   * @param y
-   * @param p0
-   * @param p1
-   * @return
+  /** Draws the selected text image at the specified location.
+   * @param g the text image
+   * @param x the x coordinate for the drawn text
+   * @param y the y coordinate for the drawn text
+   * @param p0 the beginning position in the model
+   * @param p1 the end position in the model
+   * @return the location of the end of the image (range)
    * @exception BadLocationException
    */
   protected int drawSelectedText(Graphics g, int x, int y, int p0, int p1)
-    throws BadLocationException
-  {
+    throws BadLocationException {
     /*
      DrJava.consoleErr().println("drawSelected: " + p0 + "-" + p1 +
      " doclen=" + _doc.getLength() +" x="+x+" y="+y);

@@ -48,6 +48,7 @@ package edu.rice.cs.drjava.model.junit;
 import java.util.List;
 import edu.rice.cs.drjava.model.EventNotifier;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
+import edu.rice.cs.util.swing.ScrollableDialog;
 import java.io.File;
 import java.io.IOException;
 /**
@@ -145,11 +146,11 @@ class JUnitEventNotifier extends EventNotifier<JUnitListener> implements JUnitLi
     finally { _lock.endRead(); }
   }
 
-  /**
-   * Called after JUnit is finished running tests.
-   */
+  /** Called after JUnit is finished running tests. */
   public void junitEnded() {
+//    new ScrollableDialog(null, "Ready to grab readLock for junitListener queue in junitEnded" + _listeners, "", "").show();
     _lock.startRead();
+//     new ScrollableDialog(null, "Grabbed readLock for junitListener queue in junitEnded" + _listeners, "", "").show();
     try { for(JUnitListener jul : _listeners) { jul.junitEnded(); } }
     finally { _lock.endRead(); }
   }

@@ -48,10 +48,7 @@ package edu.rice.cs.drjava.model.junit;
 import java.io.*;
 
 import edu.rice.cs.drjava.model.*;
-import edu.rice.cs.drjava.model.GlobalModelJUnitTest.JUnitTestListener;
-
-
-
+import edu.rice.cs.drjava.model.GlobalModelTestCase.JUnitTestListener;
 
 /**
  * A test on the GlobalModel for JUnit testing.
@@ -61,7 +58,7 @@ import edu.rice.cs.drjava.model.GlobalModelJUnitTest.JUnitTestListener;
 public final class JUnitErrorModelTest extends GlobalModelTestCase {
 
   private JUnitErrorModel _m;
-
+  
   private static final String MONKEYTEST_FAIL_TEXT =
     "import junit.framework.*; \n" +
     "import java.io.*; \n" +
@@ -152,10 +149,7 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
     "  }\n"+
     "}\n";
 
-  /**
-   * Tests that the errors array contains all encountered failures and errors
-   * in the right order.
-   */
+  /** Tests that the errors array contains all encountered failures and error in the right order. */
   public void testErrorsArrayInOrder() throws Exception {
     _m = new JUnitErrorModel(new JUnitError[0], _model, false);
     OpenDefinitionsDocument doc = setupDocument(MONKEYTEST_FAIL_TEXT);
@@ -165,15 +159,13 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
     JUnitTestListener listener = new JUnitTestListener();
     _model.addListener(listener);
     doc.startCompile();
-    if (_model.getCompilerModel().getNumErrors() > 0) {
+    if (_model.getCompilerModel().getNumErrors() > 0)
       fail("compile failed: " + getCompilerErrorString());
-    }
     listener.checkCompileOccurred();
-    synchronized(listener) {
-      doc.startJUnit();
-      listener.assertJUnitStartCount(1);
-      listener.wait();
-    }
+    
+    _runJUnit(doc);
+    
+    listener.assertJUnitStartCount(1);
     // Clear document so we can make sure it's written to after startJUnit
     _model.getJUnitModel().getJUnitDocument().remove
       (0, _model.getJUnitModel().getJUnitDocument().getLength() - 1);
@@ -237,12 +229,9 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
     // Run the test: a VerifyError will be thrown.
     JUnitTestListener listener2 = new JUnitTestListener();
     _model.addListener(listener2);
-    synchronized(listener2) {
-//      System.out.println("starting junit");
-      doc2.startJUnit();
-      listener2.wait();
-    }
 
+    _runJUnit(doc2);
+    
     assertEquals("test case has one error reported", 1,
                  _model.getJUnitModel().getJUnitErrorModel().getNumErrors());
     _model.removeListener(listener2);
@@ -270,11 +259,10 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
       fail("compile failed: " + getCompilerErrorString());
     }
     listener.checkCompileOccurred();
-    synchronized(listener) {
-      doc.startJUnit();
-      listener.assertJUnitStartCount(1);
-      listener.wait();
-    }
+    
+    _runJUnit(doc);
+    
+    listener.assertJUnitStartCount(1);
 
     // Clear document so we can make sure it's written to after startJUnit
     _model.getJUnitModel().getJUnitDocument().remove
@@ -291,9 +279,7 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
   }
 
 
-  /**
-   * test errors that occur in superclass
-   */
+  /** Test errors that occur in superclass. */
   public void testErrorInSuperClass() throws Exception {
     OpenDefinitionsDocument doc1 = setupDocument(TEST_ONE);
     OpenDefinitionsDocument doc2 = setupDocument(TEST_TWO);
@@ -306,11 +292,11 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
     _model.getCompilerModel().compileAll();
 //        doc1.startCompile();
 //        doc2.startCompile();
-    synchronized(listener) {
-      doc1.startJUnit();
-      listener.assertJUnitStartCount(1);
-      listener.wait();
-    }
+    
+    
+    _runJUnit(doc1);
+    
+    listener.assertJUnitStartCount(1);
     
     _m = _model.getJUnitModel().getJUnitErrorModel();
     
@@ -323,11 +309,9 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
     assertEquals("The first error is on line 5", 19, _m.getError(1).lineNumber());
     assertEquals("The first error is on line 5", 22, _m.getError(2).lineNumber());
     
-    synchronized(listener) {
-      doc2.startJUnit();
-      listener.assertJUnitStartCount(2);
-      listener.wait();
-    }
+    _runJUnit(doc2);
+    
+    listener.assertJUnitStartCount(2);
     
     assertEquals("test case has one error reported", 3, _m.getNumErrors());
     assertTrue("first error should be an error not a warning", !_m.getError(0).isWarning());

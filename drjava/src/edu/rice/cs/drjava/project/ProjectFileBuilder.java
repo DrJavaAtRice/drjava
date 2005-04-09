@@ -221,12 +221,9 @@ public class ProjectFileBuilder {
    */
   private String encodeFile(File f, String prefix, boolean relative) throws IOException {
     String path;
-    if (relative) {
-      path = makeRelative(f);
-    }
-    else {
-      path = f.getCanonicalPath();
-    }
+    if (relative) path = makeRelative(f);
+    else path = f.getCanonicalPath();
+
     path = replace(path,File.separator,"/");
     return prefix + "(file (name " + convertToLiteral(path) + "))";
   }

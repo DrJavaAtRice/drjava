@@ -66,82 +66,54 @@ import edu.rice.cs.util.text.DocumentAdapterException;
  */
 public abstract class InteractionsModel implements InteractionsModelCallback {
 
-  /**
-   * Keeps track of any listeners to the model.
-   */
-  protected final InteractionsEventNotifier _notifier =
-    new InteractionsEventNotifier();
+  /** Keeps track of any listeners to the model. */
+  protected final InteractionsEventNotifier _notifier = new InteractionsEventNotifier();
 
-  /**
-   * System-dependent newline string.
-   */
+  /** System-dependent newline string. */
   protected static final String _newLine = System.getProperty("line.separator");
 
-  /**
-   * InteractionsDocument containing the commands and history.
-   */
+  /** InteractionsDocument containing the commands and history. */
   protected final InteractionsDocument _document;
 
-  /**
-   * Whether we are waiting for the interpreter to register for the first time.
-   */
+  /** Whether we are waiting for the interpreter to register for the first time. */
   protected boolean _waitingForFirstInterpreter;
 
-  /**
-   * Whether the interpreter has been used since its last reset.
-   */
+  /** Whether the interpreter has been used since its last reset. */
   protected boolean _interpreterUsed;
 
-  /**
-   * A lock object to prevent multiple threads from interpreting at once.
-   */
+  /** A lock object to prevent multiple threads from interpreting at once. */
   private final Object _interpreterLock;
 
-  /**
-   * A lock object to prevent print calls to System.out or System.err
-   * from flooding the JVM, ensuring the UI remains responsive.
-   */
+  /** A lock object to prevent print calls to System.out or System.err from flooding 
+   *  the JVM, ensuring the UI remains responsive. */
   private final Object _writerLock;
 
-  /**
-   * Number of milliseconds to wait after each println, to prevent
-   * the JVM from being flooded with print calls.
-   */
+  /** Number of milliseconds to wait after each println, to prevent
+   *  the JVM from being flooded with print calls. */
   private int _writeDelay;
 
-  /**
-   * Port used by the debugger to connect to the Interactions JVM.
-   * Uniquely created in getDebugPort().
-   */
+  /** Port used by the debugger to connect to the Interactions JVM.
+   *  Uniquely created in getDebugPort(). */
   private int _debugPort;
 
-  /**
-   * Whether the debug port has been set already or not.
-   * If not, calling getDebugPort will generate an available port.
-   */
+  /** Whether the debug port has been set already or not.
+   *  If not, calling getDebugPort will generate an available port. */
   private boolean _debugPortSet;
   
-  /**
-   * The String added to history when the interaction is complete or an error is thrown
-   */
+  /** The String added to history when the interaction is complete or an error is thrown */
   private String _toAddToHistory = "";
-
-  /** Interactions processor, currently a pre-processor **/
-  //private InteractionsProcessorI _interactionsProcessor;
 
   /** The input listener to listen for requests to System.in. */
   protected InputListener _inputListener;
 
   protected DocumentAdapter _adapter;
   
-  /**
-   * Constructs an InteractionsModel.
-   * @param adapter DocumentAdapter to use in the InteractionsDocument
-   * @param historySize Number of lines to store in the history
-   * @param writeDelay Number of milliseconds to wait after each println
+  /** Constructs an InteractionsModel.
+   *  @param adapter DocumentAdapter to use in the InteractionsDocument
+   *  @param historySize Number of lines to store in the history
+   *  @param writeDelay Number of milliseconds to wait after each println
    */
-  public InteractionsModel(DocumentAdapter adapter, int historySize,
-                           int writeDelay) {
+  public InteractionsModel(DocumentAdapter adapter, int historySize, int writeDelay) {
     _writeDelay = writeDelay;
     _document = new InteractionsDocument(adapter, historySize);
     _adapter = adapter;
@@ -151,40 +123,26 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     _writerLock = new Object();
     _debugPort = -1;
     _debugPortSet = false;
-    //_interactionsProcessor = new InteractionsProcessor();
     _inputListener = NoInputListener.ONLY;
   }
 
-  /**
-   * Add a JavadocListener to the model.
-   * @param listener a listener that reacts to Interactions events
-   */
-  public void addListener(InteractionsListener listener) {
-    _notifier.addListener(listener);
-  }
+  /** Add a JavadocListener to the model.
+   * @param listener a listener that reacts to Interactions events */
+  public void addListener(InteractionsListener listener) { _notifier.addListener(listener); }
 
-  /**
-   * Remove an InteractionsListener from the model.  If the listener is not
-   * currently listening to this model, this method has no effect.
-   * @param listener a listener that reacts to Interactions events
+  /** Remove an InteractionsListener from the model.  If the listener is not
+   *  currently listening to this model, this method has no effect.
+   *  @param listener a listener that reacts to Interactions events
    */
   public void removeListener(InteractionsListener listener) {
     _notifier.removeListener(listener);
   }
 
-  /**
-   * Removes all InteractionsListeners from this model.
-   */
-  public void removeAllInteractionListeners() {
-    _notifier.removeAllListeners();
-  }
+  /** Removes all InteractionsListeners from this model. */
+  public void removeAllInteractionListeners() { _notifier.removeAllListeners(); }
 
-  /**
-   * Returns the InteractionsDocument stored by this model.
-   */
-  public InteractionsDocument getDocument() {
-    return _document;
-  }
+  /** Returns the InteractionsDocument stored by this model. */
+  public InteractionsDocument getDocument() { return _document; }
 
   public void interactionContinues() {
     _document.setInProgress(false);
@@ -192,40 +150,31 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     _notifyInteractionIncomplete();
   }
   
-  /**
-   * Sets this model's notion of whether it is waiting for the first
-   * interpreter to connect.  The interactionsReady event is not fired
-   * for the first interpreter.
+  /** Sets this model's notion of whether it is waiting for the first
+   *  interpreter to connect.  The interactionsReady event is not fired
+   *  for the first interpreter.
    */
   public void setWaitingForFirstInterpreter(boolean waiting) {
     _waitingForFirstInterpreter = waiting;
   }
 
-  /**
-   * Interprets the current given text at the prompt in the interactions doc.
-   */
+  /** Interprets the current given text at the prompt in the interactions doc. */
   public void interpretCurrentInteraction() {
     synchronized(_interpreterLock) {
       // Don't start a new interaction while one is in progress
-      if (_document.inProgress()) {
-        return;
-      }
+      if (_document.inProgress()) return;
 
       String text = _document.getCurrentInteraction();
       String toEval = text.trim();
-      if (toEval.startsWith("java ")) {
-        toEval = _testClassCall(toEval);
-      }
+      if (toEval.startsWith("java ")) toEval = _testClassCall(toEval);
 
       _prepareToInterpret(text);
       interpret(toEval);
     }
   }
 
-  /**
-   * Performs pre-interpretation preparation of the interactions document and
-   * notifies the view.
-   */
+  /** Performs pre-interpretation preparation of the interactions document and
+   *  notifies the view. */
   private void _prepareToInterpret(String text) {
     addNewLine();
     _notifyInteractionStarted();
@@ -238,19 +187,18 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     _docAppend(_newLine, InteractionsDocument.DEFAULT_STYLE);
   }
 
-  /**
-   * Interprets the given command.
-   * @param toEval command to be evaluated
-   */
+  /** Interprets the given command.
+   *  @param toEval command to be evaluated. */
   public final void interpret(String toEval) {
-    _interpreterUsed = true;
-    _interpret(toEval);
+    synchronized (_interpreterLock) {
+      _interpreterUsed = true;
+      _interpret(toEval);
+    }
   }
 
-  /**
-   * Interprets the given command.  This should only be called from
-   * interpret, never directly.
-   * @param toEval command to be evaluated
+  /** Interprets the given command.  This should only be called from
+   *  interpret, never directly.
+   *  @param toEval command to be evaluated
    */
   protected abstract void _interpret(String toEval);
 
@@ -356,73 +304,58 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
    * @return a list of histories (one for each selected file)
    */
   protected ArrayList<String> _getHistoryText(FileOpenSelector selector)
-    throws IOException, OperationCanceledException
-  {
+    throws IOException, OperationCanceledException {
     File[] files = selector.getFiles();
+    if (files == null) throw new IOException("No Files returned from FileSelector");
+    
     ArrayList<String> histories = new ArrayList<String>();
     ArrayList<String> strings = new ArrayList<String>();
-    if (files == null) {
-      throw new IOException("No Files returned from FileSelector");
-    }
-
-    for (int i=0; i < files.length; i++) {
-      if (files[i] == null) {
-        throw new IOException("File name returned from FileSelector is null");
-      }
-      File c = files[i];
-      if (c != null) {
-        try {
-          FileInputStream fis = new FileInputStream(c);
-          InputStreamReader isr = new InputStreamReader(fis);
-          BufferedReader br = new BufferedReader(isr);
-          String currLine;
-          while ((currLine = br.readLine()) != null) {
-            strings.add(currLine);
-          }
-          br.close(); // win32 needs readers closed explicitly!
+    
+    for (File f: files) {
+      if (f == null) throw new IOException("File name returned from FileSelector is null");
+      try {
+        FileInputStream fis = new FileInputStream(f);
+        InputStreamReader isr = new InputStreamReader(fis);
+        BufferedReader br = new BufferedReader(isr);
+        while (true) {
+          String line = br.readLine();
+          if (line == null) break;
+          strings.add(line);
         }
-        catch (IOException ioe) {
-          throw new IOException("File name returned from FileSelector is null");
-          //_showIOError(ioe);
-        }
+        br.close(); // win32 needs readers closed explicitly!
       }
-
+      catch (IOException ioe) { throw new IOException("File name returned from FileSelector is null"); }
+    
       // Create a single string with all formatted lines from this history
-      String text = "";
-      String currString;
+      StringBuffer text = new StringBuffer();
       boolean firstLine = true;
       int formatVersion = 1;
-      for (int j = 0; j < strings.size(); j++) {
-        currString = strings.get(j);
-        if (currString.length() > 0) {
+      for (String s: strings) {
+        int sl = s.length();
+        if (sl > 0) {
+          
           // check for file format version string.
           // NOTE: the original file format did not have a version string
-          if (firstLine && (currString.trim().equals(History.HISTORY_FORMAT_VERSION_2.trim()))) {
-            formatVersion = 2;
-          }
+          if (firstLine && (s.trim().equals(History.HISTORY_FORMAT_VERSION_2.trim()))) formatVersion = 2;
+          
           switch (formatVersion) {
             case (1):
               // When reading this format, we need to make sure each line ends in a semicolon.
               // This behavior can be buggy; that's why the format was changed.
-              if (currString.charAt(currString.length() - 1) == ';') {
-                text += currString + _newLine;
-              }
-              else {
-                text += currString + ";" + _newLine;
-              }
+              text.append(s);
+              if (s.charAt(sl - 1) != ';') text.append(';');
+              text.append(_newLine);
               break;
             case (2):
-              if (!firstLine) { // don't include format version string in output
-                text += currString + _newLine;
-              }
+              if (!firstLine) text.append(s).append(_newLine); // omit version string from output
               break;
           }
           firstLine = false;
         }
       }
-
+      
       // Add the entire formatted text to the list of histories
-      histories.add(text);
+      histories.add(text.toString());
     }
     return histories;
   }
@@ -467,25 +400,18 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
    */
   public void loadHistory(FileOpenSelector selector) throws IOException {
     ArrayList<String> histories;
-    try {
-      histories = _getHistoryText(selector);
-    }
-    catch (OperationCanceledException oce) {
-      return;
-    }
+    try { histories = _getHistoryText(selector); }
+    catch (OperationCanceledException oce) { return; }
     _document.clearCurrentInteraction();
 
     // Insert into the document and interpret
     StringBuffer buf = new StringBuffer();
-    for (int i = 0; i < histories.size(); i++) {
-      ArrayList<String> interactions = _removeSeparators(histories.get(i));
-      for (int j = 0; j < interactions.size(); j++) {
-        String curr = interactions.get(j);
+    for (String hist: histories) {
+      ArrayList<String> interactions = _removeSeparators(hist);
+      for (String curr: interactions) {
         int len = curr.length();
         buf.append(curr);
-        if (len > 0 && curr.charAt(len - 1) != ';') {
-          buf.append(';');
-        }
+        if (len > 0 && curr.charAt(len - 1) != ';')  buf.append(';');
         buf.append(_newLine);
       }
     }
@@ -494,13 +420,10 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   }
 
   public InteractionsScriptModel loadHistoryAsScript(FileOpenSelector selector)
-    throws IOException, OperationCanceledException
-  {
+    throws IOException, OperationCanceledException {
     ArrayList<String> histories = _getHistoryText(selector);
     ArrayList<String> interactions = new ArrayList<String>();
-    for (int i = 0; i < histories.size(); i++) {
-      interactions.addAll(_removeSeparators(histories.get(i)));
-    }
+    for (String hist: histories) interactions.addAll(_removeSeparators(hist));
     return new InteractionsScriptModel(this, interactions);
   }
 
@@ -594,12 +517,9 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   public void changeInputListener(InputListener oldListener, InputListener newListener) {
     // syncrhonize to prevent concurrent modifications to the listener
     synchronized (NoInputListener.ONLY) {
-      if (_inputListener == oldListener) {
-        _inputListener = newListener;
-      }
-      else {
-        throw new IllegalArgumentException("The given old listener is not installed!");
-      }
+      if (_inputListener == oldListener) _inputListener = newListener;
+      else
+        throw new IllegalArgumentException("The given old listener is not installed!");      
     }
   }
 
@@ -630,20 +550,16 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
    * @param styleName Name of the style to use for s
    */
   protected void _docAppend(String s, String styleName) {
-    synchronized(_document) {
-      synchronized(_writerLock) {
-        try {
-          _document.insertText(_document.getDocLength(), s, styleName);
-
-          // Wait to prevent being flooded with println's
-          _writerLock.wait(_writeDelay);
-        }
-        catch (DocumentAdapterException e) {
-          throw new UnexpectedException(e);
-        }
-        catch (InterruptedException e) {
-          // It's ok, we'll go ahead and resume
-        }
+    synchronized(_writerLock) {
+      try {
+        _document.insertText(_document.getDocLength(), s, styleName);
+        
+        // Wait to prevent being flooded with println's
+        _writerLock.wait(_writeDelay);
+      }
+      catch (DocumentAdapterException e) { throw new UnexpectedException(e); }
+      catch (InterruptedException e) {
+        // It's ok, we'll go ahead and resume
       }
     }
   }

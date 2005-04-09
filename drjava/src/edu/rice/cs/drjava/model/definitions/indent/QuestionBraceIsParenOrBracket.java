@@ -55,16 +55,14 @@ import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
  * This questions corresponds to rule 11 in our decision tree.
  * @version $Id$
  */
-public class QuestionBraceIsParenOrBracket extends IndentRuleQuestion 
-{
+public class QuestionBraceIsParenOrBracket extends IndentRuleQuestion {
   /**
    * @param yesRule The decision subtree for the case that this rule applies
    * in the current context.
    * @param noRule The decision subtree for the case that this rule does not
    * apply in the current context.
    */
-  public QuestionBraceIsParenOrBracket(IndentRule yesRule, IndentRule noRule)
-  {
+  public QuestionBraceIsParenOrBracket(IndentRule yesRule, IndentRule noRule) {
     super(yesRule, noRule);
   }
   
@@ -74,8 +72,7 @@ public class QuestionBraceIsParenOrBracket extends IndentRuleQuestion
    * to the start of the current line was opened by one of the characters 
    * '(' or '['. 
    */
-  boolean applyRule(AbstractDJDocument doc, int reason)
-  {
+  boolean applyRule(AbstractDJDocument doc, int reason) {
     // PRE: We are not inside a multiline comment.
 
     IndentInfo info = doc.getIndentInformation();

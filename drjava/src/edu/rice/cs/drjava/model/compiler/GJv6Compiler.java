@@ -225,7 +225,7 @@ public class GJv6Compiler implements CompilerInterface{
   /**
    * put your documentation comment here
    */
-  private class OurLog extends Log {
+  private static class OurLog extends Log {
     // List of CompilerError
     private LinkedList<CompilerError> _errors = new LinkedList<CompilerError>();
     private String _sourceName = "";

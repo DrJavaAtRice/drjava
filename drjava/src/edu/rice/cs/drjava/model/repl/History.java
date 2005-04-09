@@ -59,7 +59,7 @@ import java.io.*;
  * Keeps track of what was typed in the interactions pane.
  * @version $Id$
  */
-public class History implements OptionConstants {
+public class History implements OptionConstants, Serializable {
 
   public static final String INTERACTION_SEPARATOR = "//End of Interaction//";
 
@@ -233,12 +233,10 @@ public class History implements OptionConstants {
    * separated by the delimiting character
    */
   public String getHistoryAsString() {
-    String s = "";
+    StringBuffer sb = new StringBuffer();
     String delimiter = System.getProperty("line.separator");
-    for (int i = 0; i < _vector.size(); i++) {
-      s +=_vector.get(i) + delimiter;
-    }
-    return s;
+    for (String s: _vector) sb.append(s).append(delimiter);
+    return sb.toString();
   }
 
   /**

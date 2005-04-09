@@ -51,23 +51,16 @@ public class DefaultOptionMap implements OptionMap {
   
   private final ArrayList<OptionParser<?>> keys = new ArrayList<OptionParser<?>>();
   
-  public <T> T getOption(OptionParser<T> o) {
-    return o.getOption(this);
-  }
+  public <T> T getOption(OptionParser<T> o) { return o.getOption(this); }
   
   public <T> T setOption(Option<T> o, T val) {
     setOption(o);
     return o.setOption(this,val);
   }
   
-  private <T> void setOption(OptionParser<T> o) {
-    if(keys.indexOf(o)==-1)
-      keys.add(o);
-  }
+  private <T> void setOption(OptionParser<T> o) { if(keys.indexOf(o) == -1) keys.add(o); }
   
-  public <T> String getString(OptionParser<T> o) {
-    return o.getString(this);
-  }
+  public <T> String getString(OptionParser<T> o) { return o.getString(this); }
   
   public <T> void setString(OptionParser<T> o, String s) {
     setOption(o);
@@ -79,19 +72,16 @@ public class DefaultOptionMap implements OptionMap {
     return o.remove(this);
   }
   
-  public Iterator<OptionParser<?>> keys() {
-    return keys.iterator();
-  }
+  public Iterator<OptionParser<?>> keys() { return keys.iterator(); }
   
   public String toString() {
-    String result = "\n{ ";
+    StringBuffer result = new StringBuffer("\n{ ");
     
-    for (int i = 0; i < keys.size(); i++) {
-      OptionParser<?> key = keys.get(i);
-      result += key.name + " = " + getString(key) + '\n';
+    for (OptionParser<?> key: keys) {
+      result.append(key.name).append(" = ").append(getString(key)).append('\n');
     }
     
-    result += '}';
-    return result;
+    result.append('}');
+    return result.toString();
   }
 }

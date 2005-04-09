@@ -86,15 +86,12 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
   /** The absolute character offset in the document. */
   protected int _currentLocation = 0;
   
-  /* The fields helperCache, _helperCacheHistory, and _cacheInUse function as
-   * a virtual object with synchronization on operations that access or modify
-   * any of these fields.  The helperCache object serves as the lock.
-   */
+  /* The fields _helperCache, _helperCacheHistory, and _cacheInUse function as
+   * a virtual object that is synchronized on operations that access or modify
+   * any of these fields.  The _helperCache object serves as the lock. */
   
-  /**
-   * Caches calls to the reduced model to speed up indent performance.
-   * Must be cleared every time document is changed.  Use by calling
-   * _checkCache and _storeInCache.
+  /** Caches calls to the reduced model to speed up indent performance. Must be cleared every time 
+   *  the document is changed.  Use by calling _checkCache and _storeInCache.
    */
   private final Hashtable<String, Object> _helperCache = new Hashtable<String, Object>();
   
@@ -107,16 +104,13 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
    */
   private final Vector<String> _helperCacheHistory = new Vector<String>();
   
-  /**
-   * Whether anything is stored in the cache.  (Prevents clearing the table
-   * unnecessarily on every change to the document.)
+  /** Whether anything is stored in the cache.  It is used to avoid clearing the table
+   *  unnecessarily on every change to the document.
    */
   protected boolean _cacheInUse;
   
-  /**
-   * Maximum number of elements to allow in the helper method cache.
-   * Only encountered when indenting very large blocks, since the cache
-   * is cleared after each change to the document.
+  /** Maximum number of elements to allow in the helper method cache.  Only encountered when indenting 
+   *  very large blocks, since the cache is cleared after each change to the document.
    */
   private static final int MAX_CACHE_SIZE = 10000;
   
@@ -145,21 +139,18 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
   
   protected AbstractDJDocument(Indenter indent) { _indenter = indent; }
   
-  
   //-------- METHODS ---------
   
   /** Returns a new indenter. */
   protected abstract Indenter makeNewIndenter(int indentLevel);
   
-  /**
-   * Get the indent level.
-   * @return the indent level
+  /** Get the indent level.
+   *  @return the indent level
    */
   public int getIndent() { return _indent; }
   
-  /**
-   * Set the indent to a particular number of spaces.
-   * @param indent the size of indent that you want for the document
+  /** Set the indent to a particular number of spaces.
+   *  @param indent the size of indent that you want for the document
    */
   public void setIndent(final int indent) {
     // throwErrorHuh();
@@ -168,10 +159,8 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
   }
   
   protected void _removeIndenter(){
-    DrJava.getConfig().removeOptionListener(INDENT_LEVEL,
-                                            _listener1);
-    DrJava.getConfig().removeOptionListener(AUTO_CLOSE_COMMENTS,
-                                            _listener2);
+    DrJava.getConfig().removeOptionListener(INDENT_LEVEL, _listener1);
+    DrJava.getConfig().removeOptionListener(AUTO_CLOSE_COMMENTS, _listener2);
   }
   
   private void _initNewIndenter(){
@@ -189,10 +178,8 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
       }
     };
     
-    DrJava.getConfig().addOptionListener(INDENT_LEVEL,
-                                         _listener1);
-    DrJava.getConfig().addOptionListener(AUTO_CLOSE_COMMENTS,
-                                         _listener2);
+    DrJava.getConfig().addOptionListener(INDENT_LEVEL, _listener1);
+    DrJava.getConfig().addOptionListener(AUTO_CLOSE_COMMENTS, _listener2);
   }
   
   
@@ -210,9 +197,8 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
     return  normEndings;
   }
   
-  /**
-   * Create a set of Java/GJ keywords for special coloring.
-   * @return the set of keywords
+  /** Create a set of Java/GJ keywords for special coloring.
+   *  @return the set of keywords
    */
   protected static HashSet<String> _makeKeywords() {
     final String[] words =  {
@@ -226,25 +212,20 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
       "case", "default", "assert", "enum"
     };
     HashSet<String> keywords = new HashSet<String>();
-    for (int i = 0; i < words.length; i++) {
-      keywords.add(words[i]);
-    }
+    for (int i = 0; i < words.length; i++) { keywords.add(words[i]); }
     return  keywords;
   }
-  /**
-   * Create a set of Java/GJ primitive types for special coloring.
-   * @return the set of primitive types
+  
+  /** Create a set of Java/GJ primitive types for special coloring.
+   *  @return the set of primitive types
    */
   protected static HashSet<String> _makePrimTypes() {
     final String[] words =  {
-      "boolean", "char", "byte", "short", "int",
-      "long", "float", "double", "void",
+      "boolean", "char", "byte", "short", "int", "long", "float", "double", "void",
     };
     HashSet<String> prims = new HashSet<String>();
-    for (int i = 0; i < words.length; i++) {
-      prims.add(words[i]);
-    }
-    return  prims;
+    for (String w: words) { prims.add(w); }
+    return prims;
   }
   
   
@@ -448,15 +429,10 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
    * of this cache are invalidated by any modification to the document.
    */
   protected void clearCache() {
-    synchronized (_helperCache) {
-      if (_cacheInUse) _clearCache();
-    }
+    synchronized (_helperCache) { if (_cacheInUse) _clearCache(); }
   }
   
-  /**
-   * Clears the helper method cache.
-   * Should be called every time the document is modified.
-   */
+  /** Clears the helper method cache.  Should be called every time the document is modified. */
   private void _clearCache() {
     // throwErrorHuh();
     _helperCache.clear();
@@ -465,35 +441,27 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
   }
     
   
-  /**
-   * Add a character to the underlying reduced model. ONLY called from already synchronized
-   * code!
-   * @param curChar the character to be added.
-   */
+  /** Add a character to the underlying reduced model. ONLY called from already synchronized code!
+   *  @param curChar the character to be added. */
   private void _addCharToReducedModel(char curChar) {
     // throwErrorHuh();
     
     clearCache();
-    synchronized (_reduced) {
-      _reduced.insertChar(curChar);
-    }
+    synchronized (_reduced) { _reduced.insertChar(curChar); }
   }
   
-  /**
-   * Get the current location of the cursor in the document.
-   * Unlike the usual swing document model, which is stateless, because of our implementation
-   * of the underlying reduced model, we need to keep track of the current location.
-   * @return where the cursor is as the number of characters into the document
+  /** Get the current location of the cursor in the document.  Unlike the usual swing document model, 
+   *  which is stateless, because of our implementation of the underlying reduced model, we need to 
+   *  keep track of the current location.
+   * @return where the cursor is as the number of characters into the document 
    */
   public int getCurrentLocation() {
     // throwErrorHuh();
     return  _currentLocation;
   }
   
-  /**
-   * Change the current location of the document
-   * @param loc the new absolute location
-   */
+  /** Change the current location of the document
+   *  @param loc the new absolute location */
   public void setCurrentLocation(int loc) {
     // throwErrorHuh();
     synchronized (_reduced) {
@@ -501,9 +469,8 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
     }
   }
   
-  /**
-   * The actual cursor movement logic.  Helper for setCurrentLocation(int).
-   * @param dist the distance from the current location to the new location.
+  /** The actual cursor movement logic.  Helper for setCurrentLocation(int).
+   *  @param dist the distance from the current location to the new location.
    */
   public void move(int dist) {
     // throwErrorHuh();
@@ -524,37 +491,26 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
     }
   }
   
-  /**
-   * Forwarding method to find the match for the closing brace
-   * immediately to the left, assuming there is such a brace.
-   * @return the relative distance backwards to the offset before
-   *         the matching brace.
+  /** Forwarding method to find the match for the closing brace immediately to the left, assuming 
+   *  there is such a brace.
+   *  @return the relative distance backwards to the offset before the matching brace.
    */
   public int balanceBackward() {
     // throwErrorHuh();
-    synchronized (_reduced) {
-      return _reduced.balanceBackward();
-    }
+    synchronized (_reduced) { return _reduced.balanceBackward(); }
   }
   
-  /**
-   * Forwarding method to find the match for the open brace
-   * immediately to the right, assuming there is such a brace.
-   * @return the relative distance forwards to the offset after
-   *         the matching brace.
+  /** Forwarding method to find the match for the open brace immediately to the right, assuming there 
+   *  is such a brace.
+   * @return the relative distance forwards to the offset after the matching brace.
    */
   public synchronized int balanceForward() {
     // throwErrorHuh();
-    synchronized (_reduced) {
-      return _reduced.balanceForward();
-    }
+    synchronized (_reduced) { return _reduced.balanceForward(); }
   }
   
-  
-  
-  /**
-   * This method is used ONLY for testing.
-   * @return The reduced model of this document.
+  /** This method is used ONLY for testing.
+   *  @return The reduced model of this document.
    */
   public synchronized BraceReduction getReduced() {
     // throwErrorHuh();
@@ -584,23 +540,17 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
   
   public ReducedModelState stateAtRelLocation(int dist){
     // throwErrorHuh();
-    synchronized (_reduced) {
-      return _reduced.moveWalkerGetState(dist);
-    }
+    synchronized (_reduced) { return _reduced.moveWalkerGetState(dist); }
   }
   
   public ReducedModelState getStateAtCurrent(){
     // throwErrorHuh();
-    synchronized (_reduced) {
-      return _reduced.getStateAtCurrent();
-    }
+    synchronized (_reduced) { return _reduced.getStateAtCurrent(); }
   }
   
   public synchronized void resetReducedModelLocation() {
     // throwErrorHuh();
-    synchronized (_reduced) {
-      _reduced.resetLocation();
-    }
+    synchronized (_reduced) { _reduced.resetLocation(); }
   }
   
   /**
@@ -635,9 +585,10 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
     throws BadLocationException {
     // throwErrorHuh();
     // Check cache
-    String key = "findPrevDelimiter:" + pos;
-    for (int i = 0; i < delims.length; i++) { key += ":" + delims[i]; }
-    key += ":" + skipParenPhrases;
+    StringBuffer keyBuf = new StringBuffer("findPrevDelimiter:").append(pos);
+    for (char ch: delims) { keyBuf.append(':').append(ch); }
+    keyBuf.append(':').append(skipParenPhrases);
+    String key = keyBuf.toString();
     Integer cached = (Integer) _checkCache(key);
     if (cached != null) return cached.intValue();
     
@@ -752,8 +703,9 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
     throws BadLocationException {
     // throwErrorHuh();
     // Check cache
-    String key = "findPrevCharPos:" + pos;
-    for (int i = 0; i < whitespace.length; i++) { key += ":" + whitespace[i]; }
+    StringBuffer keyBuf = new StringBuffer("findPrevCharPos:").append(pos);
+    for (char ch: whitespace) { keyBuf.append( ':').append(ch); }
+    String key = keyBuf.toString();
     Integer cached = (Integer) _checkCache(key);
     if (cached != null)  return cached.intValue();
     
@@ -810,12 +762,9 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
     return result;
   }
   
-  /**
-   * Checks the helper method cache for a stored value.  Returns the
-   * value if it has been cached, or null otherwise.
-   * Calling convention for keys:
-   *   methodName:arg1:arg2
-   * @param key Name of the method and arguments
+  /** Checks the helper method cache for a stored value.  Returns the value if it has been cached, or null 
+   *  otherwise. Calling convention for keys: methodName:arg1:arg2
+   *  @param key Name of the method and arguments
    */
   protected Object _checkCache(String key) {
     // throwErrorHuh();
@@ -825,12 +774,9 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
     return result;
   }
   
-  /**
-   * Stores the given result in the helper method cache.
-   * Calling convention for keys:
-   *   methodName:arg1:arg2
-   * @param key Name of method and arguments
-   * @param result Result of the method call
+  /** Stores the given result in the helper method cache. Calling convention for keys: methodName:arg1:arg2
+   *  @param key Name of method and arguments
+   *  @param result Result of the method call
    */
   protected void _storeInCache(String key, Object result) {
     // throwErrorHuh();
@@ -857,32 +803,27 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
     }
   }
   
-  /**
-   * Default indentation - uses OTHER flag and no progress indicator.
-   * @param selStart the offset of the initial character of the region to indent
-   * @param selEnd the offset of the last character of the region to indent
+  /** Default indentation - uses OTHER flag and no progress indicator.
+   *  @param selStart the offset of the initial character of the region to indent
+   *  @param selEnd the offset of the last character of the region to indent
    */
-  public void indentLines(int selStart, int selEnd){
+  public void indentLines(int selStart, int selEnd) {
     // throwErrorHuh();
-    try {
-      indentLines(selStart, selEnd, Indenter.OTHER, null);
-    }
+    try { indentLines(selStart, selEnd, Indenter.OTHER, null); }
     catch (OperationCanceledException oce) {
       // Indenting without a ProgressMonitor should never be cancelled!
       throw new UnexpectedException(oce);
     }
   }
   
-  /**
-   * Parameterized indentation for special-case handling.
-   * @param selStart the offset of the initial character of the region to indent
-   * @param selEnd the offset of the last character of the region to indent
-   * @param reason a flag from {@link Indenter} to indicate the reason for the indent
-   * (indent logic may vary slightly based on the trigger action)
-   * @param pm used to display progress, null if no reporting is desired
+  /** Parameterized indentation for special-case handling.
+   *  @param selStart the offset of the initial character of the region to indent
+   *  @param selEnd the offset of the last character of the region to indent
+   *  @param reason a flag from {@link Indenter} to indicate the reason for the indent
+   *        (indent logic may vary slightly based on the trigger action)
+   *  @param pm used to display progress, null if no reporting is desired
    */
-  public void indentLines(int selStart, int selEnd,
-                          int reason, ProgressMonitor pm)
+  public void indentLines(int selStart, int selEnd, int reason, ProgressMonitor pm)
     throws OperationCanceledException {
     // throwErrorHuh();
     //long start = System.currentTimeMillis();
@@ -902,16 +843,12 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
           //setCaretPosition(caretPos + space);
         }
       }
-      else {
-        _indentBlock(selStart, selEnd, reason, pm);
-      }
+      else _indentBlock(selStart, selEnd, reason, pm);
       // Ends the compound edit.
       //endCompoundEdit(key);   //Changed to endLastCompoundEdit in connection with the FrenchKeyBoard Fix
       endLastCompoundEdit();
     }
-    catch (BadLocationException e) {
-      throw new UnexpectedException(e);
-    }
+    catch (BadLocationException e) { throw new UnexpectedException(e); }
     
     //long end = System.currentTimeMillis();
     //DrJava.consoleOut().println("Elapsed Time (sec): " + ((end-start)/1000));
@@ -923,23 +860,20 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
     
   }
   
-  /**
-   * Indents the lines between and including the lines containing
-   * points start and end.
-   * @param start Position in document to start indenting from
-   * @param end Position in document to end indenting at
-   * @param reason a flag from {@link Indenter} to indicate the reason for the indent
-   * (indent logic may vary slightly based on the trigger action)
-   * @param pm used to display progress, null if no reporting is desired
+  /** Indents the lines between and including the lines containing points start and end.
+   *  @param start Position in document to start indenting from
+   *  @param end Position in document to end indenting at
+   *  @param reason a flag from {@link Indenter} to indicate the reason for the indent
+   *        (indent logic may vary slightly based on the trigger action)
+   *  @param pm used to display progress, null if no reporting is desired
    */
   private void _indentBlock(final int start, final int end, int reason, ProgressMonitor pm)
     throws OperationCanceledException {
     // throwErrorHuh();
     //DrJava.consoleOut().println("indenting block of " + (end-start));
     try {
-      // Keep marker at the end. This Position will be the
-      // correct endpoint no matter how we change the doc
-      // doing the indentLine calls.
+      // Keep marker at the end. This Position will be the correct endpoint no matter how we change 
+      // the doc doing the indentLine calls.
       final Position endPos = this.createPosition(end);
       // Iterate, line by line, until we get to/past the end
       int walker = start;
@@ -961,9 +895,7 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
           pm.setProgress(walker);
           
           // Check for cancel button-press.
-          if (pm.isCanceled()) {
-            throw new OperationCanceledException();
-          }
+          if (pm.isCanceled()) throw new OperationCanceledException();
         }
         
         // Adding 1 makes us point to the first character AFTER the next newline.
@@ -973,33 +905,22 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
         //DrJava.consoleOut().println("progress: " + (100*(walker-start)/(end-start)));
       }
     }
-    catch (BadLocationException e) {
-      // Should not happen
-      throw new UnexpectedException(e);
-    }
+    catch (BadLocationException e) { throw new UnexpectedException(e); }
   }
   
-  /**
-   * Indents a line using the Indenter decision tree.  Public for testing purposes
-   */
+  /** Indents a line using the Indenter decision tree.  Public for testing purposes */
   public boolean _indentLine(int reason) {
     // throwErrorHuh();
     writeLock();
-    try {
-      return _indenter.indent(this, reason);
-    }
+    try { return _indenter.indent(this, reason); }
     finally { writeUnlock(); }
   }
-
   
-  
-  /**
-   * Returns the "intelligent" beginning of line.  If currPos is to
-   * the right of the first non-whitespace character, the position of the
-   * first non-whitespace character is returned.  If currPos is at or
-   * to the left of the first non-whitespace character, the beginning of
-   * the line is returned.
-   * @param currPos A position on the current line
+  /** Returns the "intelligent" beginning of line.  If currPos is to the right of the first 
+   *  non-whitespace character, the position of the first non-whitespace character is returned.  
+   *  If currPos is at or to the left of the first non-whitespace character, the beginning of
+   *  the line is returned.
+   *  @param currPos A position on the current line
    */
   public int getIntelligentBeginLinePos(int currPos) throws BadLocationException {
     // throwErrorHuh();
@@ -1017,22 +938,15 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
     if (found) {
       i--;  // want the position just before the non-WS char
       int firstRealChar = firstChar + i;
-      if (firstRealChar < currPos) {
-        return firstRealChar;
-      }
+      if (firstRealChar < currPos)  return firstRealChar;
     }
     // Otherwise, return the beginning of the line
     return firstChar;
   }
   
-  
-  
-  /**
-   * Returns the indent level of the start of the statement
-   * that the cursor is on.  Uses a default set of delimiters.
-   * (';', '{', '}') and a default set of whitespace characters
-   * (' ', '\t', n', ',')
-   * @param pos Cursor position
+  /** Returns the indent level of the start of the statement that the cursor is on.  Uses a default 
+   *  set of delimiters. (';', '{', '}') and a default set of whitespace characters (' ', '\t', n', ',')
+   *  @param pos Cursor position
    */
   public String getIndentOfCurrStmt(int pos) throws BadLocationException {
     // throwErrorHuh();
@@ -1041,11 +955,9 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
     return getIndentOfCurrStmt(pos, delims, whitespace);
   }
   
-  /**
-   * Returns the indent level of the start of the statement
-   * that the cursor is on.  Uses a default set of whitespace characters.
-   * (' ', '\t', '\n', ',')
-   * @param pos Cursor position
+  /** Returns the indent level of the start of the statement that the cursor is on.  Uses a default
+   *  set of whitespace characters: {' ', '\t', '\n', ','}
+   *  @param pos Cursor position
    */
   public String getIndentOfCurrStmt(int pos, char[] delims) throws BadLocationException {
     // throwErrorHuh();
@@ -1053,70 +965,59 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
     return getIndentOfCurrStmt(pos, delims, whitespace);
   }
   
-  /**
-   * Returns the indent level of the start of the statement
-   * that the cursor is on.
-   * @param pos Cursor position
-   * @param delims Delimiter characters denoting end of statement
-   * @param whitespace characters to skip when looking for beginning of next statement
+  /** Returns the indent level of the start of the statement that the cursor is on.
+   *  @param pos Cursor position
+   *  @param delims Delimiter characters denoting end of statement
+   *  @param whitespace characters to skip when looking for beginning of next statement
    */
   public String getIndentOfCurrStmt(int pos, char[] delims, char[] whitespace) throws BadLocationException {
     // throwErrorHuh();
     // Check cache
-    String key = "getIndentOfCurrStmt:" + pos;
-    for (int i=0; i < delims.length; i++) {
-      key += ":" + delims[i];
-    }
+    StringBuffer keyBuf = new StringBuffer("getIndentOfCurrStmt:").append(pos);
+    for (char ch: delims) { keyBuf.append(':').append(ch); }
+    String key = keyBuf.toString();
+    
     //long start = System.currentTimeMillis();
     String cached = (String) _checkCache(key);
-    if (cached != null) {
-      return cached;
-    }
+    if (cached != null) return cached;
     
     // Get the start of the current line
     int lineStart = getLineStartPos(pos);
     
     // Find the previous delimiter that closes a statement
     boolean reachedStart = false;
-    boolean ignoreParens;
     int prevDelimiter = lineStart;
+    boolean ignoreParens = posInParenPhrase(prevDelimiter);
     
     //long mid = System.currentTimeMillis();  // START STAGE 2
     do {
-      ignoreParens = posInParenPhrase(prevDelimiter);
       prevDelimiter = findPrevDelimiter(prevDelimiter, delims, ignoreParens);
       try {
-        if ((prevDelimiter > 0) && (prevDelimiter < getLength()) &&
-            (getText(prevDelimiter,1).charAt(0) == '{')) {
+        if (prevDelimiter > 0 && prevDelimiter < getLength() && getText(prevDelimiter,1).charAt(0) == '{')
           break;
-        }
       }
-      catch (BadLocationException e) {
-        // Shouldn't happen
-        throw new UnexpectedException(e);
-      }
+      catch (BadLocationException e) { throw new UnexpectedException(e); }
+      
       // Check delimiter found was start of document
-      if(prevDelimiter == ERROR_INDEX) {
+      if (prevDelimiter == ERROR_INDEX) {
         reachedStart = true;
         break;
       }
-    } while(posInParenPhrase(prevDelimiter));  // this is being calculated twice...
+      ignoreParens = posInParenPhrase(prevDelimiter);
+    } while (ignoreParens);  
+    
     //long mid2 = System.currentTimeMillis();  // START STAGE 3
     
     // From the previous delimiter, find the next non-whitespace character
     int nextNonWSChar;
-    if(reachedStart) {
-      nextNonWSChar = getFirstNonWSCharPos(DOCSTART);
-    }
-    else {
+    if (reachedStart) nextNonWSChar = getFirstNonWSCharPos(DOCSTART);
+    else
       nextNonWSChar = getFirstNonWSCharPos(prevDelimiter+1, whitespace, false);
-    }
+    
     //long mid3 = System.currentTimeMillis();  // START STAGE 4
     
     // If the end of the document was reached
-    if(nextNonWSChar == ERROR_INDEX) {
-      nextNonWSChar = getLength();
-    }
+    if (nextNonWSChar == ERROR_INDEX) nextNonWSChar = getLength();
     
     // Get the start of the line of the non-ws char
     int lineStartStmt = getLineStartPos(nextNonWSChar);
@@ -1124,13 +1025,8 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
     // Get the position of the first non-ws character on this line
     int lineFirstNonWS = getLineFirstCharPos(lineStartStmt);
     String lineText;
-    try {
-      lineText = getText(lineStartStmt, lineFirstNonWS - lineStartStmt);
-    }
-    catch(BadLocationException e) {
-      // Should not happen
-      throw new UnexpectedException(e);
-    }
+    try { lineText = getText(lineStartStmt, lineFirstNonWS - lineStartStmt); }
+    catch(BadLocationException e) { throw new UnexpectedException(e); }
     
     _storeInCache(key, lineText);
     /*
@@ -1145,23 +1041,18 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
     return lineText;
   }
   
-  /**
-   * Determines if the given character exists on the line where
-   * the given cursor position is. Does not search in quotes or comments.
-   * <p>
-   * <b>Does not work if character being searched for is a '/' or a '*'</b>
-   * @param pos Cursor position
-   * @param findChar Character to search for
-   * @return true if this node's rule holds.
+  /** Determines if the given character exists on the line where the given cursor position is.  Does not 
+   *  search in quotes or comments. <b>Does not work if character being searched for is a '/' or a '*'</b>.
+   *  @param pos Cursor position
+   *  @param findChar Character to search for
+   *  @return true if this node's rule holds.
    */
   public int findCharOnLine(int pos, char findChar) {
     // throwErrorHuh();
     // Check cache
     String key = "findCharOnLine:" + pos + ":" + findChar;
     Integer cached = (Integer) _checkCache(key);
-    if (cached != null) {
-      return cached.intValue();
-    }
+    if (cached != null) return cached.intValue();
     
     int i, result;
     
@@ -1171,12 +1062,8 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
       int lineEnd = this.getLineEndPos(pos);
       String lineText;
       
-      try {
-        lineText = this.getText(lineStart, lineEnd - lineStart);
-      } catch(BadLocationException e) {
-        // Should not be here
-        throw new UnexpectedException(e);
-      }
+      try { lineText = this.getText(lineStart, lineEnd - lineStart); } 
+      catch(BadLocationException e) { throw new UnexpectedException(e); }
       
       i = lineText.indexOf(findChar, 0);
       
@@ -1344,8 +1231,10 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
     throws BadLocationException {
     // throwErrorHuh();
     // Check cache
-    String key = "getFirstNonWSCharPos:" + pos;
-    for (int i = 0; i < whitespace.length; i++) { key += ":" + whitespace[i]; }
+    StringBuffer keyBuf = new StringBuffer("getFirstNonWSCharPos:").append(pos);
+    for (char ch: whitespace) { keyBuf.append(':').append(ch); }
+    String key = keyBuf.toString();
+    
     Integer cached = (Integer) _checkCache(key);
     if (cached != null)  return cached.intValue();
     
@@ -1473,7 +1362,7 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
       _reduced.move(here - pos);
     }
 
-    _storeInCache(key, new Boolean(inParenPhrase));
+    _storeInCache(key, Boolean.valueOf(inParenPhrase));
     return inParenPhrase;
   }
 
@@ -1511,7 +1400,7 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
       notInParenPhrase = info.braceTypeCurrent.equals(IndentInfo.noBrace);
       _reduced.move(here - pos);
     }
-    _storeInCache(key, new Boolean(notInParenPhrase));
+    _storeInCache(key, Boolean.valueOf(notInParenPhrase));
     return notInParenPhrase;
   }
   
@@ -1594,16 +1483,14 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
    * This happens after the text has actually been inserted.
    * Here we update the reduced model (via an {@link InsertCommand})
    * and store information for how to undo/redo the reduced model changes
-   * inside the {@link DefaultDocumentEvent}.
+   * inside the {@link AbstractDocument.DefaultDocumentEvent}.
    *
    * @see edu.rice.cs.drjava.model.AbstractDJDocument$InsertCommand
    * @see javax.swing.AbstractDocument$DefaultDocumentEvent
    * @see edu.rice.cs.drjava.model.definitions.DefinitionsDocument$CommandUndoableEdit
    */
   protected void insertUpdate(AbstractDocument.DefaultDocumentEvent chng,
-                              AttributeSet attr)
-  {
-    // throwErrorHuh();
+                              AttributeSet attr) {
     // Clear the helper method cache
     clearCache();
 
@@ -1635,29 +1522,25 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
    * This happens before the text has actually been removed.
    * Here we update the reduced model (via an {@link RemoveCommand})
    * and store information for how to undo/redo the reduced model changes
-   * inside the {@link DefaultDocumentEvent}.
+   * inside the {@link AbstractDocument.DefaultDocumentEvent}.
    *
    * @see RemoveCommand
-   * @see DefaultDocumentEvent
-   * @see CommandUndoableEdit
+   * @see AbstractDocument.DefaultDocumentEvent
    */
   protected void removeUpdate(AbstractDocument.DefaultDocumentEvent chng) {
-    // throwErrorHuh();
-    // Clear the helper method cache
     clearCache();
 
     try {
       final int offset = chng.getOffset();
       final int length = chng.getLength();
       final String removedText = getText(offset, length);
-            super.removeUpdate(chng);
+      super.removeUpdate(chng);
 
       Runnable doCommand = new RemoveCommand(offset, length);
       Runnable undoCommand = new InsertCommand(offset, removedText);
 
       // add the undo/redo info
       addUndoRedo(chng,undoCommand,doCommand);
-      //chng.addEdit(new CommandUndoableEdit(undoCommand, doCommand));
 
       // actually do the removal from the reduced model
       doCommand.run();
@@ -1702,8 +1585,9 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
   protected abstract void endCompoundEdit(int i);
   protected abstract void endLastCompoundEdit();
   protected abstract void addUndoRedo(AbstractDocument.DefaultDocumentEvent chng, Runnable undoCommand, Runnable doCommand);
+  
   //Checks if the document is closed, and then throws an error if it is.
-  protected abstract void throwErrorHuh();
+//  protected abstract void throwErrorHuh();
   
   //-------- INNER CLASSES ------------
   

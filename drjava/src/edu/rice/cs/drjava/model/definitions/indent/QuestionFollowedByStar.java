@@ -65,38 +65,24 @@ public class QuestionFollowedByStar extends IndentRuleQuestion {
   /**
    * Constructs a new rule which determines if the current position is
    * immediately followed by a star '*'.
-   * @param findChar Character to search for
    * @param yesRule Rule to use if this rule holds
    * @param noRule Rule to use if this rule does not hold
    */
-  public QuestionFollowedByStar(IndentRule yesRule, IndentRule noRule) {
-    super(yesRule, noRule);
-  }
+  public QuestionFollowedByStar(IndentRule yesRule, IndentRule noRule) { super(yesRule, noRule); }
   
-  /**
-   * Determines if the given character exists on the current line.
-   * Does not search in quotes or comments.
-   * <p>
-   * <b>Does not work if character being searched for is a '/' or a '*'</b>
-   * @param doc AbstractDJDocument containing the line to be indented.
-   * @return true if this node's rule holds.
+  /** Determines if the next non WS character is '*'. Does not search in quotes or comments.
+   *  <p>
+   *  <b>Does not work if character being searched for is a '/' or a '*'</b>
+   *  @param doc AbstractDJDocument containing the line to be indented.
+   *  @return true if this node's rule holds.
    */
   boolean applyRule(AbstractDJDocument doc, int reason) {
     try {
       int charPos = doc.getFirstNonWSCharPos(doc.getCurrentLocation(), true);
-      if (charPos == AbstractDJDocument.ERROR_INDEX) {
-        return false;
-      } 
-      else if (doc.getText(charPos, 1).equals("*")) {
-        return true;
-      }
-      else {
-        return false;
-      }
+      
+      return !(charPos == AbstractDJDocument.ERROR_INDEX) && doc.getText(charPos, 1).equals("*");
     }
-    catch (BadLocationException ble) {
-      throw new UnexpectedException(ble);
-    }
+    catch (BadLocationException ble) { throw new UnexpectedException(ble); }
   }
 }
 

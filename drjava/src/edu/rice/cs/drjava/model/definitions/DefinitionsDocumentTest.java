@@ -67,8 +67,8 @@ public final class DefinitionsDocumentTest extends TestCase
   private GlobalEventNotifier _notifier;
 
   /**
-   * Constructor.
-   * @param   String name
+   * Standard constructor.
+   * @param name of the test
    */
   public DefinitionsDocumentTest(String name) {
     super(name);
