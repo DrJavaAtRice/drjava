@@ -62,7 +62,7 @@ public class NumberAtom implements Atom {
   
   /**
    * Visitor hook for the NumberAtom
-   * @param the visitor
+   * @param v the visitor
    * @return result of the given algorithm
    */
   public <Ret> Ret accept(SExpVisitor<Ret> v){

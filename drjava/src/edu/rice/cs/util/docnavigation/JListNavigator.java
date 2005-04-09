@@ -59,8 +59,9 @@ import edu.rice.cs.util.UnexpectedException;
  *  Since all of the new fields are conceptually associated with the model rather than the GUI
  *  JList object (the view), the only synchronization constraints are exactly those of the view
  *  associated with JList content (superclass fields) of this.
+ * 
+ *  TODO: generify this class and IDocumentNavigator with respect to its element type once JList is. 
  */
-
 
 class JListNavigator extends JList implements IDocumentNavigator {
   
@@ -68,7 +69,7 @@ class JListNavigator extends JList implements IDocumentNavigator {
   protected DefaultListModel _model;
   
   /** The current selection value.  A cached copy of getSelectedValue(). */
-  private INavigatorItem current = null;
+  private INavigatorItem _current = null;
   
   /** The cell renderer for this JList */
   private DefaultListCellRenderer _renderer;
@@ -83,7 +84,7 @@ class JListNavigator extends JList implements IDocumentNavigator {
     init(new DefaultListModel());
   }
 
-  public void init(DefaultListModel m) {
+  private void init(DefaultListModel m) {
     _model = m;
     setModel(m);
     setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -95,8 +96,8 @@ class JListNavigator extends JList implements IDocumentNavigator {
       public void valueChanged(ListSelectionEvent e) {
         if (!e.getValueIsAdjusting() && !_model.isEmpty()) {
           final INavigatorItem newItem = (INavigatorItem) getSelectedValue();
-          if (current != newItem) {
-            final INavigatorItem oldItem = current;
+          if (_current != newItem) {
+            final INavigatorItem oldItem = _current;
             NodeData oldData = new NodeData() {
               public <T> T execute(NodeDataVisitor<T> v) {
                 return v.itemCase(oldItem);
@@ -111,7 +112,7 @@ class JListNavigator extends JList implements IDocumentNavigator {
               if (oldItem != null) listener.lostSelection(oldData);
               if (newItem != null) listener.gainedSelection(newData);
             }
-            current = newItem;
+            _current = newItem;
           }
         }
       }
@@ -122,67 +123,60 @@ class JListNavigator extends JList implements IDocumentNavigator {
     this.setCellRenderer(_renderer);
   }
   
-  /**
-   * Adds the document to this navigator.
-   * @param doc the document to add
+  /** Adds the document to this navigator.
+   *  @param doc the document to add
    */
   public void addDocument(INavigatorItem doc) { _model.addElement(doc); }
   
-  /**
-   * Adds the document to this navigator with the specified path.
-   * @param doc the document to add
-   * @param path the path the document should be added to
+  /** Adds the document to this navigator and ignores the specified path.
+   *  @param doc the document to add
+   *  @param path  unused parameter in this class 
    */
-  public void addDocument(INavigatorItem doc, String path) throws IllegalArgumentException {
-    _model.addElement(doc);
+  public void addDocument(INavigatorItem doc, String path) {
+    addDocument(doc);
   }
   
-  /**
-   * Gets the next document after doc in the series.
-   * @param doc the document to reference from
-   * @return the document after doc in the list; if doc is the last
+  /** Gets the next document after doc in the series.
+   *  @param doc the document to reference from
+   *  @return the document after doc in the list; if doc is the last
    *  document, returns doc
    */
-  public INavigatorItem getNext(INavigatorItem doc) { 
+  public <T extends INavigatorItem>  T getNext(T doc) { 
     synchronized (_model) {
       int i = _model.indexOf(doc);
       if (i == -1)
         throw new IllegalArgumentException("No such document " + doc.toString() + " found in collection of open documents");
       if ( i + 1 == _model.size()) return doc;
-      return (INavigatorItem) _model.get(i + 1);
+      return (T) _model.get(i + 1);
     }
   }
   
-  /**
-   * Gets the previous document in the series.
-   * @param doc to reference from
-   * @return the document which comes before doc in the list
+  /** Gets the previous document in the series.
+   *  @param doc to reference from
+   *  @return the document which comes before doc in the list
    */
-  public INavigatorItem getPrevious(INavigatorItem doc) {  
+  public <T extends INavigatorItem> T getPrevious(T doc) {  
     synchronized (_model) {
       int i = _model.indexOf(doc);
       if ( i == -1 )
         throw new IllegalArgumentException("No such document " + doc.toString() + " found in collection of open documents");
       if ( i == 0) return doc;
-      return (INavigatorItem) _model.get(i - 1);
+      return (T) _model.get(i - 1);
     }
   }
   
-  /**
-   * Removes the document from the navigator.
-   * @param doc the document to remove
+  /** Removes the document from the navigator.
+   *  @param doc the document to remove
    */
-  public INavigatorItem removeDocument(INavigatorItem doc) throws IllegalArgumentException {
+  public <T extends INavigatorItem> T removeDocument(T doc) {
     synchronized (_model) {
       // System.err.println("removing from old list " + doc);
       int i = _model.indexOf(doc);
       if( i == -1 )
         throw new IllegalArgumentException("Document " + doc + " not found in Document Navigator");
-      INavigatorItem item = (INavigatorItem) _model.remove(i);
-      return item;
+      return (T) _model.remove(i);
     }
   }
-
 
   /**
    * Resets a given <code>INavigatorItem<code> in the tree.  This may affect the
@@ -206,7 +200,7 @@ class JListNavigator extends JList implements IDocumentNavigator {
     synchronized(_model) {
       if(_model.contains(doc)) {
         setSelectedValue(doc, true);
-        // current = doc;  // already done by ListSelectionEvent listener created in init()
+        // _current = doc;  // already done by ListSelectionEvent listener created in init()
       }
     }
   }
@@ -227,59 +221,51 @@ class JListNavigator extends JList implements IDocumentNavigator {
    * The class should be generic: DefaultListModel<T> { ... Enumeration<T> elements() {...} ... } instead of 
    * DefaultListModel { ... Enumeration<?> elements() {...} ... }.
    */
-  public Enumeration<INavigatorItem> getDocuments() { return (Enumeration) _model.elements(); }  
+  public <T extends INavigatorItem> Enumeration<T> getDocuments() { 
+    return (Enumeration<T>) _model.elements();  // Cast forced by lousy generic typing of DefaultListModel in Java 1.5
+  }
   
-  /**
-   * returns the number of documents in the navigator
-   * @return the number of documents
-   */
+  /** @return the number of documents in the navigator. */
   public int getDocumentCount() { return _model.size(); }
   
-  /**
-   * returns whether or not the navigator is empty
-   * @return boolean whether or not the navigator is empty
-   */
+  /** @return whether or not the navigator is empty. */
   public boolean isEmpty() { return _model.isEmpty(); }
   
-  /**
-   * Add listener to the collection of listeners
-   * @param listener
+  /** Adds listener to the collection of listeners.
+   *  @param listener
+   * 
+   *  Unsynchronized because Vector is thread-safe.
    */
   public void addNavigationListener(INavigationListener listener) {
     navListeners.add(listener);
   }
   
-  /**
-   * Unregister the listener listener
-   * @param listener
+  /** Unregisters the listener listener
+   *  @param listener
+   * 
+   *  Unsynchronized because Vector is thread-safe.
    */
   public void removeNavigationListener(INavigationListener listener) {
     navListeners.remove(listener);
+    
   }
   
-  /**
-   * returns all the navigator listeners
-   * @return the navigator listeners
-   */
+  /** @return the navigator listeners. */
   public Collection<INavigationListener> getNavigatorListeners() { return navListeners; }
   
-  /**
-   * clears the navigator and removes all documents
-   */
+  /** Clears the navigator and removes all documents. */
   public void clear() { _model.clear(); }
   
   /**
    * executes the list case of the visitor
-   * @algo the visitor to execute
-   * @input the input to run on the visitor
+   * @param algo the visitor to execute
+   * @param input the input to run on the visitor
    */
   public <InType, ReturnType> ReturnType execute(IDocumentNavigatorAlgo<InType, ReturnType> algo, InType input) {
     return algo.forList(this, input);
   }
   
-  /**
-   * returns a Container representation of this navigator
-   */
+  /** Returns a Container representation of this navigator */
   public Container asContainer() { return this; }
   
   /**
@@ -290,33 +276,27 @@ class JListNavigator extends JList implements IDocumentNavigator {
    * 
    */
   public boolean selectDocumentAt(final int x, final int y) {
-    final int idx = locationToIndex(new java.awt.Point(x,y));
-    java.awt.Rectangle rect = getCellBounds(idx, idx);
-    if (rect.contains(x, y)) {
-      setActiveDoc((INavigatorItem) _model.getElementAt(idx));
-      return true;
+    synchronized (_model) {
+      final int idx = locationToIndex(new java.awt.Point(x,y));
+      java.awt.Rectangle rect = getCellBounds(idx, idx);
+      if (rect.contains(x, y)) {
+        setActiveDoc((INavigatorItem) _model.getElementAt(idx));
+        return true;
+      }
+      return false;
     }
-    return false;
   }
+    
+  /** Returns the currently selected item, or null if none. */
+  public INavigatorItem getCurrentSelectedLeaf() { return _current; }
   
-  /**
-   * returns the currently selected item, or null if none
-   */
-  public INavigatorItem getCurrentSelectedLeaf() { return current; }
-  
-  /**
-   * returns a renderer for this object
-   */
+  /** @return the renderer for this object. */
   public Component getRenderer(){ return _renderer; }
   
-  /**
-   * @return true if a group if INavigatorItems selected
-   */
+  /** @return true if a group if INavigatorItems selected. */
   public boolean isGroupSelected() { return false; }
   
-  /**
-   * @return true if the INavigatorItem is in the selected group, if a group is selected
-   */
+  /** @return true if the INavigatorItem is in the selected group, if a group is selected. */
   public boolean isSelectedInGroup(INavigatorItem i) { return false; }
   
   public void addTopLevelGroup(String name, INavigatorItemFilter f) { /* noop */ }
@@ -327,12 +307,10 @@ class JListNavigator extends JList implements IDocumentNavigator {
     throw new GroupNotSelectedException("A top level group is not selected");
   }
   
-  /**
-   * Since in the JListNavigator it is impossible to select anything but an INavigatorItem,
-   * this method doesn't need to do anything.
+  /** Since in the JListNavigator it is impossible to select anything but an INavigatorItem,
+   *  this method doesn't need to do anything.
    */
   public void requestSelectionUpdate(INavigatorItem ini) { /* nothing */ }
   
-  public String toString() { return "JListNavigator" + _model.toString(); }
-  
+  public String toString() { return _model.toString(); } 
 }

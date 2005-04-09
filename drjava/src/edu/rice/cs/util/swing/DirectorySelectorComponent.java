@@ -284,10 +284,7 @@ public class DirectorySelectorComponent extends JPanel {
     }
   }
   
-  /**
-   * Opens the file chooser to select a file, putting the result
-   * in the file field.
-   */
+  /** Opens the file chooser to select a file, putting the result in the file field. */
   private void _chooseFile() {
 
     // Get the file from the chooser

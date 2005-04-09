@@ -100,7 +100,7 @@ public class BidirectionalHashMap<Type1, Type2> {
   }
   
   public String toString() {
-    String ret = new String();
+    String ret = "";
     ret = "forward = " + forward.values() + "\nbackward = " + backward.values();
     return ret;
   }

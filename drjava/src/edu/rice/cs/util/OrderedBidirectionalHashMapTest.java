@@ -60,8 +60,8 @@ public class OrderedBidirectionalHashMapTest extends TestCase {
     
     // These collections are enumerated in order of insertion
     
-    System.out.println("dbls = " + Arrays.asList(dbls).toString());
-    System.out.println("vals = " + Arrays.asList(vals).toString());
+//    System.out.println("dbls = " + Arrays.asList(dbls).toString());
+//    System.out.println("vals = " + Arrays.asList(vals).toString());
     assertTrue("values() test", Arrays.equals(vals, colVals));
     assertTrue("values test", Arrays.equals(dbls, vals));
                

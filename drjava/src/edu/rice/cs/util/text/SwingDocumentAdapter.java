@@ -57,8 +57,7 @@ import java.util.Hashtable;
  * This document must use the readers/writers locking protocol established in its superclasses
  * @version $Id$
  */
-public class SwingDocumentAdapter extends DefaultStyledDocument
-  implements DocumentAdapter {
+public class SwingDocumentAdapter extends DefaultStyledDocument implements DocumentAdapter {
   
   /** Maps names to attribute sets */
   final protected Hashtable<String, AttributeSet> _styles;
@@ -66,9 +65,7 @@ public class SwingDocumentAdapter extends DefaultStyledDocument
   /** Determines which edits are legal on this document. */
   protected DocumentEditCondition _condition;
 
-  /**
-   * Creates a new document adapter for a Swing StyledDocument.
-   */
+  /** Creates a new document adapter for a Swing StyledDocument. */
   public SwingDocumentAdapter() { 
     _styles = new Hashtable<String, AttributeSet>();
     _condition = new DocumentEditCondition();
@@ -84,10 +81,7 @@ public class SwingDocumentAdapter extends DefaultStyledDocument
     _styles.put(name, s);  // no locking necessary: _styles is final and Hashtable is thread-safe
   }
 
-  /**
-   * Returns the style with the given name, or null if no such named style
-   * exists.
-   */
+  /** Returns the style with the given name, or null if no such named style exists. */
   public AttributeSet getDocStyle(String name) {
     return _styles.get(name);  // no locking necessary: _styles is final and Hashtable is thread-safe
   }
@@ -97,9 +91,7 @@ public class SwingDocumentAdapter extends DefaultStyledDocument
    * or remove edit should be applied, based on the inputs.
    * @return an Object to determine legality of inputs
    */
-  public DocumentEditCondition getEditCondition() {
-    return _condition;
-  }
+  public DocumentEditCondition getEditCondition() { return _condition; }
 
   /**
    * Provides an object which can determine whether an insert
@@ -121,12 +113,9 @@ public class SwingDocumentAdapter extends DefaultStyledDocument
    * added using addStyle.
    * @throws DocumentAdapterException if the offset is illegal
    */
-  public void insertText(int offs, String str, String style)
-    throws DocumentAdapterException {
+  public void insertText(int offs, String str, String style) {
     writeLock();
-    try {
-      if (_condition.canInsertText(offs, str, style)) forceInsertText(offs, str, style);
-    }
+    try { if (_condition.canInsertText(offs, str, style)) forceInsertText(offs, str, style); }
     finally { writeUnlock(); }
   }
 
@@ -139,17 +128,12 @@ public class SwingDocumentAdapter extends DefaultStyledDocument
    * added using addStyle.
    * @throws DocumentAdapterException if the offset is illegal
    */
-  public void forceInsertText(int offs, String str, String style)
-    throws DocumentAdapterException {
+  public void forceInsertText(int offs, String str, String style) {
     AttributeSet s = null;
     if (style != null) s = getDocStyle(style);
     /* Using a writeLock is unnecessary because insertString is already thread-safe */
-    try {
-      super.insertString(offs, str, s);
-    }
-    catch (BadLocationException e) {
-      throw new DocumentAdapterException(e);
-    }
+    try { super.insertString(offs, str, s); }
+    catch (BadLocationException e) { throw new DocumentAdapterException(e); }
   }
 
   /**
@@ -157,12 +141,9 @@ public class SwingDocumentAdapter extends DefaultStyledDocument
    * The AttributeSet is ignored in the condition, which sees a null
    * style name.
    */
-  public void insertString(int offs, String str, AttributeSet set)
-    throws BadLocationException {
+  public void insertString(int offs, String str, AttributeSet set) throws BadLocationException {
     writeLock();  // locking is used to make the test and modification atomic
-    try { 
-      if (_condition.canInsertText(offs, str, null)) super.insertString(offs, str, set);
-    }
+    try { if (_condition.canInsertText(offs, str, null)) super.insertString(offs, str, set); }
     finally { writeUnlock(); }
   }
 
@@ -172,11 +153,9 @@ public class SwingDocumentAdapter extends DefaultStyledDocument
    * @param len Number of characters to remove
    * @throws DocumentAdapterException if the offset or length are illegal
    */
-  public void removeText(int offs, int len) throws DocumentAdapterException {
+  public void removeText(int offs, int len) {
     writeLock();  // locking is used to make the test and modification atomic
-    try {
-      if (_condition.canRemoveText(offs, len)) forceRemoveText(offs, len);
-    }
+    try { if (_condition.canRemoveText(offs, len)) forceRemoveText(offs, len); }
     finally { writeUnlock(); }
   }
 
@@ -186,31 +165,20 @@ public class SwingDocumentAdapter extends DefaultStyledDocument
    * @param len Number of characters to remove
    * @throws DocumentAdapterException if the offset or length are illegal
    */
-  public void forceRemoveText(int offs, int len) throws DocumentAdapterException {
+  public void forceRemoveText(int offs, int len) {
     /* Using a writeLock is unnecessary because remove is already thread-safe */
-    try {
-      super.remove(offs, len);
-    }
-    catch (BadLocationException e) {
-      throw new DocumentAdapterException(e);
-    }
+    try { super.remove(offs, len); }
+    catch (BadLocationException e) { throw new DocumentAdapterException(e); }
   }
 
-  /**
-   * Overrides superclass's remove to impose the edit condition.
-   */
+  /** Overrides superclass's remove to impose the edit condition. */
   public void remove(int offs, int len) throws BadLocationException {
     writeLock(); // locking is used to make the test and modification atomic
-    try {
-      if (_condition.canRemoveText(offs, len))  super.remove(offs, len);
-    }
+    try { if (_condition.canRemoveText(offs, len))  super.remove(offs, len); }
     finally { writeUnlock(); }
-
   }
 
-  /**
-   * Returns the length of the document.
-   */
+  /** Returns the length of the document. */
   public int getDocLength() { return getLength(); } // locking is unnecessary because getLength is already thread-safe
 
   /**
@@ -219,12 +187,8 @@ public class SwingDocumentAdapter extends DefaultStyledDocument
    * @param len Number of characters to return
    * @throws DocumentAdapterException if the offset or length are illegal
    */
-  public String getDocText(int offs, int len) throws DocumentAdapterException {
-    try {
-      return getText(offs, len);  // locking is unnecessary because getText is already thread-safe
-    }
-    catch (BadLocationException e) {
-      throw new DocumentAdapterException(e);
-    }
+  public String getDocText(int offs, int len) {
+    try { return getText(offs, len); }  // locking is unnecessary because getText is already thread-safe
+    catch (BadLocationException e) { throw new DocumentAdapterException(e); }
   }
 }

@@ -58,23 +58,9 @@ import edu.rice.cs.util.*;
 
 class StringNode extends InnerNode<String>{
   
-  public StringNode(String s){
-    super(s);
-  }
-  
-  public void setData(String f){
-    super.setUserObject(f);
-  }
-  
-  public String getData(){
-    return (String) super.getUserObject();
-  }
-  
-  public <T> T execute(NodeDataVisitor<T> v) {
-    return v.stringCase(getData());
-  }
-  
-  public String toString(){
-    return getData();
-  }
+  public StringNode(String s) { super(s); }
+  public void setData(String f) { super.setUserObject(f);}
+  public String getData() { return (String) super.getUserObject(); }
+  public <T> T execute(NodeDataVisitor<T> v) { return v.stringCase(getData()); }
+  public String toString() { return getData(); }
 }

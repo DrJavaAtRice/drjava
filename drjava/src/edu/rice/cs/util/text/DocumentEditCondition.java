@@ -58,16 +58,12 @@ public class DocumentEditCondition {
    * @param style Name of the style to use.  Must have been
    * added using addStyle.
    */
-  public boolean canInsertText(int offs, String str, String style) {
-    return true;
-  }
+  public boolean canInsertText(int offs, String str, String style) { return true; }
   
   /**
    * Returns whether to actually remove, given these inputs.
    * @param offs Offset to start deleting from
    * @param len Number of characters to remove
    */
-  public boolean canRemoveText(int offs, int len) {
-    return true;
-  }
+  public boolean canRemoveText(int offs, int len) { return true; }
 }

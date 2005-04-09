@@ -50,17 +50,13 @@ import java.rmi.server.*;
 import java.io.*;
 import edu.rice.cs.util.FileOps;
 import java.util.*;
-/**
- * An abstract class implementing the logic to invoke and control, via
- * RMI, a second Java virtual machine.
- * This class is used by subclassing it.
- * (See package documentation for more details.)
+/** An abstract class implementing the logic to invoke and control, via RMI, a second Java virtual 
+ *  machine. This class is used by subclassing it. (See package documentation for more details.)
  *
  * @version $Id$
  */
 public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/
-  implements MasterRemote/*<SlaveType>*/
-{
+  implements MasterRemote/*<SlaveType>*/ {
   /**
    * Name for the thread that waits for the slave to exit.
    */
@@ -155,9 +151,7 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/
    * @throws IllegalStateException if slave JVM already connected or
    * startup is in progress.
    */
-  protected synchronized final void invokeSlave()
-    throws IOException, RemoteException
-  {
+  protected synchronized final void invokeSlave() throws IOException, RemoteException {
     invokeSlave(new String[0]);
   }
   
@@ -168,24 +162,21 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/
    * startup is in progress.
    */
   protected synchronized final void invokeSlave(String[] jvmArgs)
-    throws IOException, RemoteException
-  {
+    throws IOException, RemoteException {
     invokeSlave(jvmArgs, System.getProperty("java.class.path"));
   }
   
   final static Object lock = new Object();
     
 
-  /**
-   * Invokes slave JVM.
-   * @param jvmArgs Array of arguments to pass to the JVM on startup
-   * @param cp Classpath to use when starting the JVM
-   * @throws IllegalStateException if slave JVM already connected or
-   * startup is in progress.
+  /** Invokes slave JVM.
+   *  @param jvmArgs Array of arguments to pass to the JVM on startup
+   *  @param cp Classpath to use when starting the JVM
+   *  @throws IllegalStateException if slave JVM already connected or
+   *  startup is in progress.
    */
   protected synchronized final void invokeSlave(String[] jvmArgs, String cp)
-    throws IOException, RemoteException
-  {
+    throws IOException, RemoteException {
     if (_startupInProgress) { 
       throw new IllegalStateException("startup is in progress in invokeSlave");
     }
@@ -216,12 +207,10 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/
         }
       }
     };
-    synchronized(lock){
+    synchronized (lock) {
       t.start();
       while (_stub == null) {
-        try {
-          lock.wait();
-        }
+        try { lock.wait(); }
         catch (InterruptedException ie) {
           throw new edu.rice.cs.util.UnexpectedException(ie);
         }
@@ -339,14 +328,11 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/
    */
   public abstract void errorStartingSlave(Throwable cause) throws RemoteException;
   
-  /**
-   * No-op to prove that the master is still alive.
-   */
+  /** No-op to prove that the master is still alive. */
   public void checkStillAlive() {}
 
   public synchronized void registerSlave(SlaveRemote slave)
-    throws RemoteException
-  {
+    throws RemoteException {
     _slave = slave;
     _startupInProgress = false;
     _stubFile.delete();

@@ -65,28 +65,15 @@ public class JTreeSortNavigatorTest extends TestCase {
     File f = File.createTempFile("project-",".pjt");
     tree = new JTreeSortNavigator(f.getCanonicalPath());
     
-    
     tree.addTopLevelGroup("[ Source Files ]", new INavigatorItemFilter(){
       public boolean accept(INavigatorItem n){
         return true;
       }
     });
-    tree.addDocument(new INavigatorItem() {
-      public String getName() { return "item1"; }
-      public boolean equals(Object o) { return o == this; }
-    }, "folder1");
-    tree.addDocument(new INavigatorItem() {
-      public String getName() { return "item2"; }
-      public boolean equals(Object o) { return o == this; }
-    }, "folder1");
-    tree.addDocument(new INavigatorItem() {
-      public String getName() { return "item1"; }
-      public boolean equals(Object o) { return o == this; }
-    }, "folder2");
-    tree.addDocument(new INavigatorItem() {
-      public String getName() { return "item2"; }
-      public boolean equals(Object o) { return o == this; }
-    }, "folder2");
+    tree.addDocument(new DummyINavigatorItem("item1"), "folder1");
+    tree.addDocument(new DummyINavigatorItem("item2"), "folder1");
+    tree.addDocument(new DummyINavigatorItem("item1"), "folder2");
+    tree.addDocument(new DummyINavigatorItem("item2"), "folder2");
     
     root = (DefaultMutableTreeNode)tree.getModel().getRoot();
     source = (DefaultMutableTreeNode)root.getChildAt(0);
@@ -104,6 +91,7 @@ public class JTreeSortNavigatorTest extends TestCase {
     assertEquals("Path String for source", "./[ Source Files ]/", tree.generatePathString(tp));
     
     tp = new TreePath(folder1.getPath());
+//    System.out.println(tree.generatePathString(tp));
     assertEquals("Path String for folder1", "./[ Source Files ]/folder1/", tree.generatePathString(tp));
     
     tp = new TreePath(folder2.getPath());
@@ -125,6 +113,8 @@ public class JTreeSortNavigatorTest extends TestCase {
     assertTrue("Source InnerNode should say it is collapsed.", 
                ((InnerNode)tp1.getLastPathComponent()).isCollapsed());
     assertTrue("Folder1 should be collapsed.", tree.isCollapsed(tp2));
+//    System.out.println(((InnerNode)tp2.getLastPathComponent()).isCollapsed());
+//    System.out.println(tree.isCollapsed(tp3));
     assertTrue("folder1 InnerNode should say it is collapsed.", 
                ((InnerNode)tp2.getLastPathComponent()).isCollapsed());
     assertTrue("Tree should say Folder2 is collapsed.", tree.isCollapsed(tp3));
@@ -146,10 +136,7 @@ public class JTreeSortNavigatorTest extends TestCase {
    */
   public void testRenameDocument() {
     _name = "MyTest.dj0";
-    INavigatorItem item = new INavigatorItem() {
-      public String getName() { return _name; }
-      public boolean equals(Object o) { return o == this; }
-    };
+    INavigatorItem item = new DummyINavigatorItem("MyTest.dj0");
     Object _lock = new Object();
     synchronized(_lock) {
       tree.addDocument(item, "folder3");
@@ -157,7 +144,6 @@ public class JTreeSortNavigatorTest extends TestCase {
     InnerNode folder3 = (InnerNode)source.getChildAt(2);
     assertEquals("folder3 should have 1 children", 1, folder3.getChildCount());
     synchronized(_lock) {
-      _name = "MyTest.expected";
       tree.refreshDocument(item, "folder3");
     }
     synchronized(_lock) {

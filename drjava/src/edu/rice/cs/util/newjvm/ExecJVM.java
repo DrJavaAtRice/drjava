@@ -76,9 +76,7 @@ public final class ExecJVM {
                                String[] jvmParams) throws IOException {
     StringBuffer buf = new StringBuffer();
     for (int i = 0; i < classPath.length; i++) {
-      if (i != 0) {
-        buf.append(PATH_SEPARATOR);
-      }
+      if (i != 0) buf.append(PATH_SEPARATOR);
 
       buf.append(classPath[i]);
     }
@@ -163,13 +161,12 @@ public final class ExecJVM {
     return Runtime.getRuntime().exec(argArray);
   }
 
-  /**
-   * Empties BufferedReaders by copying lines into LinkedLists.
-   * This is intended for use with the output streams from an ExecJVM process.
-   * Source and destination objects are specified for stdout and for stderr.
-   * @param theProc a Process object whose output will be handled
-   * @param outLines the LinkedList of Strings to be filled with the lines read from outBuf
-   * @param errLines the LinkedList of Strings to be filled with the lines read from errBuf
+  /** Empties BufferedReaders by copying lines into LinkedLists.
+   *  This is intended for use with the output streams from an ExecJVM process.
+   *  Source and destination objects are specified for stdout and for stderr.
+   *  @param theProc a Process object whose output will be handled
+   *  @param outLines the LinkedList of Strings to be filled with the lines read from outBuf
+   *  @param errLines the LinkedList of Strings to be filled with the lines read from errBuf
    */
   public static void ventBuffers(Process theProc, LinkedList<String> outLines,
                                  LinkedList<String> errLines) throws IOException {
@@ -184,12 +181,8 @@ public final class ExecJVM {
       while (output != null) {
         //        System.out.println("[stdout]: " + output);
         outLines.add(output);
-        if (outBuf.ready()) {
-          output = outBuf.readLine();
-        }
-        else {
-          output = null;
-        }
+        if (outBuf.ready()) output = outBuf.readLine();
+        else output = null;
       }
     }
 

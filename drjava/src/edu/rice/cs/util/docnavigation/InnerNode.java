@@ -56,21 +56,17 @@ import java.net.MalformedURLException;
 import java.util.*;
 import edu.rice.cs.util.*;
 
-
+/** This is an unsynchronized swing class and hence should only be accessed from the
+ *  event-handling thread.
+ */
 public abstract class InnerNode<T> extends DefaultMutableTreeNode implements NodeData {
   protected boolean _collapsed; // tree defaults to all NOT collapsed
   
-  public InnerNode(T d){
-    super(d);
-  }
+  public InnerNode(T d) { super(d); }
   abstract public void setData(T d);
   abstract public T getData();
   
-  public void setCollapsed(boolean c) {
-    _collapsed = c;
-  }
-  public boolean isCollapsed() {
-    return _collapsed;
-  }
+  public void setCollapsed(boolean c) { _collapsed = c; }
+  public boolean isCollapsed() {  return _collapsed;  }
 }
 

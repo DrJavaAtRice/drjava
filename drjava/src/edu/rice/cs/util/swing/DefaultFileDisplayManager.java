@@ -95,7 +95,7 @@ public class DefaultFileDisplayManager implements FileDisplayManager {
   /**
    * Creates a FileDisplay representing a new untitled folder that is 
    * yet to be created.
-   * @param f the parent location to place this new folder
+   * @param parent the parent folder of the new folder
    * @return the new file display
    */
   public FileDisplay makeNewFolderDisplay(File parent) {

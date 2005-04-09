@@ -46,11 +46,10 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.util.text;
 
 /**
- * Exception thrown indicating an illegal state or operation
- * on a DocumentAdapter.
+ * Exception thrown indicating an illegal state or operation on a DocumentAdapter.
  * @version $Id$
  */
-public class DocumentAdapterException extends Exception {
+public class DocumentAdapterException extends RuntimeException {
   private Throwable _value;
 
    /**

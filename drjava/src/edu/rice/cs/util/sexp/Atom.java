@@ -53,7 +53,7 @@ package edu.rice.cs.util.sexp;
 public interface Atom extends SExp {
   /**
    * Visitor hook for the different kinds of Atom
-   * @param the visitor
+   * @param v the visitor
    * @return result of the given algorithm
    */
   public <Ret> Ret accept(SExpVisitor<Ret> v);

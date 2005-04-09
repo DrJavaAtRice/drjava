@@ -88,7 +88,7 @@ public interface IDocumentNavigator extends IAWTContainerNavigatorActor{
    * @throws IllegalArgumentException if this navigator contains no document
    *  that is equal to the passed document.
    */
-  public INavigatorItem removeDocument(INavigatorItem doc) throws IllegalArgumentException;
+  public <T extends INavigatorItem> T removeDocument(T doc);
   
   /**
    * Resets a given <code>INavigatorItem<code> in the tree.  This may affect the
@@ -97,12 +97,11 @@ public interface IDocumentNavigator extends IAWTContainerNavigatorActor{
    * @throws IllegalArgumentException if this navigator contains no document
    *  that is equal to the passed document.
    */
-  public void refreshDocument(INavigatorItem doc, String path) throws IllegalArgumentException;
+  public void refreshDocument(INavigatorItem doc, String path);
   
   /**
    * sets the input document as selected
    * @param doc the document to select
-   * @return void
    */
   public void setActiveDoc(INavigatorItem doc);
   
@@ -113,7 +112,7 @@ public interface IDocumentNavigator extends IAWTContainerNavigatorActor{
    * @return the INavigatorItem which comes after doc
    * @param doc the INavigatorItem of interest
    */
-  public INavigatorItem getNext(INavigatorItem doc);
+  public <T extends INavigatorItem> T getNext(T doc);
   
   /**
    * Impose some ordering on the documents in the navigator, to facilitate
@@ -121,7 +120,7 @@ public interface IDocumentNavigator extends IAWTContainerNavigatorActor{
    * @return the INavigatorItem which comes before doc
    * @param doc the INavigatorItem of interest
    */
-  public INavigatorItem getPrevious(INavigatorItem doc);
+  public <T extends INavigatorItem> T getPrevious(T doc);
   
   /**
    * Tests to see if a given document is contained in this navigator.
@@ -139,7 +138,7 @@ public interface IDocumentNavigator extends IAWTContainerNavigatorActor{
    *
    * @return an <code>INavigatorItem<code> enumeration of this navigator's contents.
    */
-  public Enumeration<INavigatorItem> getDocuments();
+  public <T extends INavigatorItem> Enumeration<T> getDocuments();
   
   /**
    * Returns the number of <code>INavigatorItem</code>s contained by this <code>IDocumentNavigator</code>

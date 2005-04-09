@@ -319,23 +319,19 @@ public class HighlightManager {
        */
       public int getEndOffset() { return _endPos.getOffset(); }
 
-      /** Tests to see if the given offsets correspond to the offsets specified within this
-       *  highlight.
-       *  @param from the start offset
-       *  @param to the end offset
+      /** Tests to see if the given offsets correspond to the offsets specified within this highlight.
+       *  @param h a HighlightInfo object given the start and end offsets
        *  @return true, if the supplied offsets are the same as those of this highlight.
        */
       public boolean matchesRegion(HighlightInfo h) {
         return (getStartOffset() == h.getStartOffset() && getEndOffset() == h.getEndOffset());
       }
       
-      /** Refreshes this HighlightInfo object, obtaining a new Highlighter
-       */
+      /** Refreshes this HighlightInfo object, obtaining a new Highlighter. */
       public void refresh (Highlighter.HighlightPainter p ) {
 
         this.remove();
-        HighlightInfo newHighlight = 
-          addHighlight(getStartOffset(), getEndOffset(), p);
+        HighlightInfo newHighlight = addHighlight(getStartOffset(), getEndOffset(), p);
         
         _painter = p;
         // turn this HighlightInfo object into the newHighlight

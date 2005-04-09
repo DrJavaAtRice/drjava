@@ -84,8 +84,7 @@ public interface DocumentAdapter extends Serializable {
    * added using addStyle.
    * @throws DocumentAdapterException if the offset is illegal
    */
-  public void insertText(int offs, String str, String style)
-    throws DocumentAdapterException;
+  public void insertText(int offs, String str, String style);
 
   /**
    * Inserts a string into the document at the given offset
@@ -96,8 +95,7 @@ public interface DocumentAdapter extends Serializable {
    * added using addStyle.
    * @throws DocumentAdapterException if the offset is illegal
    */
-  public void forceInsertText(int offs, String str, String style)
-    throws DocumentAdapterException;
+  public void forceInsertText(int offs, String str, String style);
 
   /**
    * Removes a portion of the document, if the edit condition allows it.
@@ -105,7 +103,7 @@ public interface DocumentAdapter extends Serializable {
    * @param len Number of characters to remove
    * @throws DocumentAdapterException if the offset or length are illegal
    */
-  public void removeText(int offs, int len) throws DocumentAdapterException;
+  public void removeText(int offs, int len);
 
   /**
    * Removes a portion of the document, regardless of the edit condition.
@@ -113,11 +111,9 @@ public interface DocumentAdapter extends Serializable {
    * @param len Number of characters to remove
    * @throws DocumentAdapterException if the offset or length are illegal
    */
-  public void forceRemoveText(int offs, int len) throws DocumentAdapterException;
+  public void forceRemoveText(int offs, int len);
 
-  /**
-   * Returns the length of the document.
-   */
+  /** Returns the length of the document. */
   public int getDocLength();
 
   /**
@@ -126,6 +122,6 @@ public interface DocumentAdapter extends Serializable {
    * @param len Number of characters to return
    * @throws DocumentAdapterException if the offset or length are illegal
    */
-  public String getDocText(int offs, int len) throws DocumentAdapterException;
+  public String getDocText(int offs, int len);
 
 }

@@ -67,9 +67,8 @@ public interface INavigationListener
   
   /**
    * run when an item in a navigator is unselected
-   * @param dat the NodeData data wrapper for the data in the
-   * new deselected node of the navigator
+   * @param dat the NodeData data wrapper for the data in the new deselected node of the navigator
    */
-  public void lostSelection(NodeData doc);
+  public void lostSelection(NodeData dat);
   
 }

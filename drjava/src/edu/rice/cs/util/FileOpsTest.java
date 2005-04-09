@@ -270,12 +270,8 @@ public class FileOpsTest extends TestCase {
   }
 
 
-  /**
-   * Tests that non-empty directories can be deleted on exit.
-   */
-  public void testDeleteDirectoryOnExit()
-    throws IOException, InterruptedException
-  {
+  /** Tests that non-empty directories can be deleted on exit. */
+  public void testDeleteDirectoryOnExit() throws IOException, InterruptedException {
     // Create files:
     //  /tmp/DrJavaTestTempDir#/
     //   DrJavaTest-#.tmp
@@ -293,8 +289,7 @@ public class FileOpsTest extends TestCase {
     String className = "edu.rice.cs.util.FileOpsTest";
     String[] args = new String[] { dir1.getAbsolutePath() };
 
-    Process process = ExecJVM.
-      runJVMPropogateClassPath(className, args);
+    Process process = ExecJVM.runJVMPropogateClassPath(className, args);
     int status = process.waitFor();
     assertEquals("Delete on exit test exited with an error!", 0, status);
 

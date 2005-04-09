@@ -47,8 +47,8 @@ package edu.rice.cs.util.docnavigation;
 
 /**
  * <code>INavigatorItem</code> models (very abstractly) some entity that is
- * eledigable for insertion and removal inside an
- * <code>IDocuemntNavigator</code>. Conceptually, if an
+ * eligible for insertion and removal inside an
+ * <code>IDocumentNavigator</code>. Conceptually, if an
  * <code>IDocumentNavigator</code> represented a file cabinet then each file in
  * the cabinet would be an <code>INavigatorItem</code>. If an
  * <code>IDocumentNavigator</code> represented a wallet then each credit card
@@ -58,21 +58,19 @@ package edu.rice.cs.util.docnavigation;
  * <code>getName</code> method and to devise some notion of equality.
  */
 public interface INavigatorItem {
-  /**
-   * Returns a "simple" name representing this <code>INavigatorItem</code>.
-   * Strings returned by this method may or may not be unique with respect to other <code>INavigatorItem</code>s within or without
-   * a given <code>IDocumentNavigator</code>.
+  
+  public boolean checkIfClassFileInSync();
+  public boolean fileExists();
+  
+  /** Returns a "simple" name representing this <code>INavigatorItem</code>.
+   *  Strings returned by this method may or may not be unique with respect to other <code>INavigatorItem</code>s within or without
+   *  a given <code>IDocumentNavigator</code>.
    * 
-   * @return the simple name for this document.
+   *  @return the simple name for this document.
    * */
   public String getName();
   
-  /**
-   * Tests for conceptual equality between this <code>IDocuemnt<code> and the given <code>Object</code>
-   * It is left up to the implementing class to decide and document what "conceptual equality" means for said class.
-   * 
-   * @param the object to be tested for conceptual equality to this document.
-   * @return <code>true</code> if the passed object is conceptually equal to this document and <code>false</code> if it is not.
-   */
-  public boolean equals(Object obj);
+  public boolean isAuxiliaryFile();
+  public boolean isProjectFile();
+  public boolean isUntitled();
 }

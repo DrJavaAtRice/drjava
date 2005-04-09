@@ -75,9 +75,7 @@ public abstract class FileOps {
   public static File makeRelativeTo(File abs, File base) throws IOException, SecurityException{
     base = base.getCanonicalFile();
     abs  = abs.getCanonicalFile();
-    if (!base.isDirectory()) {
-      base = base.getParentFile();
-    }
+    if (!base.isDirectory()) base = base.getParentFile();
     
     String last = "";
     if (!abs.isDirectory()) {
@@ -89,7 +87,7 @@ public abstract class FileOps {
     String[] basParts = splitFile(base);
     String[] absParts = splitFile(abs);
     
-    String result = "";
+    StringBuffer result = new StringBuffer();
     // loop until elements differ, record what part of absParts to append
     // next find out how many .. to put in.
     int diffIndex = -1;
@@ -99,18 +97,14 @@ public abstract class FileOps {
         different = true;
         diffIndex = i;
       }
-      if (different) {
-        result += ".." + File.separator;
-      }
+      if (different) result.append("..").append(File.separator);
     }
-    if (diffIndex < 0) {
-      diffIndex = basParts.length;
-    }
+    if (diffIndex < 0) diffIndex = basParts.length;
     for (int i = diffIndex; i < absParts.length; i++) {
-      result += absParts[i] + File.separator;
+      result.append(absParts[i]).append(File.separator);
     }
-    result += last;
-    return new File(result);
+    result.append(last);
+    return new File(result.toString());
   }
   
   /**

@@ -54,7 +54,7 @@ public class TextAtom implements Atom {
   
   /**
    * Visitor hook for the TextAtom
-   * @param the visitor
+   * @param v the visitor
    * @return result of the given algorithm
    */
   public <Ret> Ret accept(SExpVisitor<Ret> v){

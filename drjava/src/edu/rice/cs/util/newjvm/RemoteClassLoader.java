@@ -55,10 +55,7 @@ import junit.runner.TestCaseClassLoader;
  */
 public class RemoteClassLoader extends ClassLoader implements IRemoteClassLoader{
 
-  /**
-   * @param the "parent" classloader. this loader will be used to load
-   * any remote requests
-   */
+  /** @param c the "parent" classloader. This loader will be used to load any remote requests.  */
   public RemoteClassLoader(ClassLoader c){
     super(c);
   }

@@ -159,42 +159,37 @@ public class DirectoryChooser extends JPanel {
   protected String _cancelText   = "Cancel";
   protected String _topLabelText = "Select a directory:";
   
-  /**
-   * Creates a DirectoryChooser whose root starts at the root of the 
-   * file system and that allows only one selection at a time.
+  /** Creates a DirectoryChooser whose root starts at the root of the 
+   *  file system and that allows only one selection at a time.
    */
   public DirectoryChooser() {
     this((Frame)null, null, false, false);
   }
   
-  /**
-   * Creates a DirectoryChooser whose root is the file system root, 
-   * allowing only single selection.
+  /** Creates a DirectoryChooser whose root is the file system root, 
+   *  allowing only single selection.
    */
   public DirectoryChooser(Dialog owner) {
     this(owner, null, false, false);
   }
   
-  /**
-   * Creates a DirectoryChooser whose root is the file system root, 
-   * allowing only single selection.
+  /** Creates a DirectoryChooser whose root is the file system root, 
+   *  allowing only single selection.
    */
   public DirectoryChooser(Frame owner) {
     this(owner, null, false, false);
   }
   
-  /**
-   * Creates a DirectoryChooser whose root is the file system root, 
-   * allowing multiple selection as specified
-   * @param allowMultiple whether to allow multiple selection
+  /** Creates a DirectoryChooser whose root is the file system root, 
+   *  allowing multiple selection as specified
+   *  @param allowMultiple whether to allow multiple selection
    */
   public DirectoryChooser(Dialog owner, boolean allowMultiple) {
     this(owner, null, allowMultiple, false);
   }
-  /**
-   * Creates a DirectoryChooser whose root is the file system root, 
-   * allowing multiple selection as specified
-   * @param allowMultiple whether to allow multiple selection
+  /** Creates a DirectoryChooser whose root is the file system root, 
+   *  allowing multiple selection as specified
+   *  @param allowMultiple whether to allow multiple selection
    */
   public DirectoryChooser(Frame owner, boolean allowMultiple) {
     this(owner, null, allowMultiple, false);
@@ -231,9 +226,8 @@ public class DirectoryChooser extends JPanel {
     _init(owner,root,allowMultiple,showHidden);
   }
   
-  /**
-   * Creates a DirectoryChooser with the given root, allowing multiple
-   * selections according to the second parameter.
+  /** Creates a DirectoryChooser with the given root, allowing multiple
+   *  selections according to the second parameter.
    * @param owner the 
    * @param root the root directory to display in the tree. If null, then show entire file system
    * @param allowMultiple whether to allow multiple selection
@@ -246,9 +240,7 @@ public class DirectoryChooser extends JPanel {
   
   ////////////////// INITIALIZATION METHODS /////////////////
     
-  /**
-   * Sets up the GUI components of the dialog
-   */
+  /** Sets up the GUI components of the dialog */
   private void _init(Window owner, File root, boolean allowMultiple, boolean showHidden) {
     if (root != null && !root.isDirectory()) {
       root = root.getAbsoluteFile().getParentFile();
@@ -808,7 +800,7 @@ public class DirectoryChooser extends JPanel {
   /**
    * Sets the text shown in the accept button on the bottom.  The default
    * is "OK"
-   * @param the text to show
+   * @param text the text to show
    */
   public void setApproveButtonText(String text) {
     _approveText = text;

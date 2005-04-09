@@ -55,53 +55,28 @@ import java.awt.event.*;
 
 class JListSortNavigator extends JListNavigator {
   
-  /**
-   * the collection of documents in this navigator
-   */
-//  private Vector<INavigatorItem> _docs = new Vector<INavigatorItem>();
-  
-  /**
-   * the currently selected item or null if none
-   */
-//  private INavigatorItem currentselected = null;
-  
-  /**
-   * the renderer for this list
-   */
-  protected DefaultListCellRenderer _renderer;
-  
-  
   /* Relies on the standard default constructor */
  
   /** Adds the document to the list
    *  @param doc the document to add
    */
-  public void addDocument(INavigatorItem doc) {
-    insertDoc(doc);
-  }
-
-  /** Adds the document to the specified path
-   *  @doc the document to add
-   *  @path the path to add to
-   */
-  public void addDocument(INavigatorItem doc, String path) throws IllegalArgumentException {
-    insertDoc(doc);
-  }
-  
+  public void addDocument(INavigatorItem doc) { insertDoc(doc); }
+ 
   /** Inserts the document into its sorted position
    *  @param doc the document to add
    */
   private int insertDoc(INavigatorItem doc) {
-    int i = 0;
+    int i;
     synchronized (_model) {
-      while (i<_model.size() && ((INavigatorItem)(_model.get(i))).getName().toUpperCase().compareTo(doc.getName().toUpperCase()) < 0) {
-        i++;
+      for (i = 0; i<_model.size(); i++) { 
+        INavigatorItem item = (INavigatorItem) _model.get(i);
+        if (doc.getName().toUpperCase().compareTo(item.getName().toUpperCase()) <= 0) break;
       }
       _model.add(i, doc);
     }
     return i;
   }
   
-   public String toString() { return "JListSortNavigator" + _model.toString(); }
- 
+  public String toString() { return _model.toString(); }
+  
 }

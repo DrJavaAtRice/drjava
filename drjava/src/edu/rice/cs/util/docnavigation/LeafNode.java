@@ -61,23 +61,12 @@ import edu.rice.cs.util.*;
 
 public class LeafNode extends DefaultMutableTreeNode implements NodeData {
   public String _rep;
-  public LeafNode(INavigatorItem i){
+  public LeafNode(INavigatorItem i) {
     super(i);
     _rep = i.getName();
   }
-  public void setData(INavigatorItem i){
-    super.setUserObject(i);
-  }
-  
-  public INavigatorItem getData(){
-    return (INavigatorItem) super.getUserObject();
-  }
-  
-  public <T> T execute(NodeDataVisitor<T> v) {
-    return v.itemCase(getData());
-  }
-  
-  public String toString(){
-    return _rep;
-  }
+  public void setData(INavigatorItem i) { super.setUserObject(i); }
+  public INavigatorItem getData() { return (INavigatorItem) super.getUserObject(); }
+  public <T> T execute(NodeDataVisitor<T> v) { return v.itemCase(getData()); }
+  public String toString() { return _rep; }
 }

@@ -52,30 +52,23 @@ import javax.swing.border.Border;
 
 import edu.rice.cs.util.Lambda;
 
-/**
- * This console is the console that is used to receive <code>System.in</code> 
- * input from the user. 
- * <p>
- * When the <code>getConsoleInput</code> method is called, one of two things may 
- * happen.  When the MainFrame (or which ever frame owns the interactions pane)
- * is visible, this method pops up a dialog box with a text area where the user
- * can type in text.  Hitting <code>Enter</code> terminates the current input and
- * causes the <code>getConsoleInput</code> method to return the inputted text.
- * Text can be inputted programmatically into the text area by calling 
- * <code>insertConsoleText</code> from the PopupConsole object that created the 
- * dialog box.  The input can be forcefully terminated by calling <code>
- * interruptConsole</code>. This method causes the input to terminate as though
- * the user had pressed enter or hit the "done" button.
- * <p>
- * If the MainFrame is not yet visible (which is the case during unit testing), 
- * the console works in "silent" mode.  In silent mode, no dialog box is displayed 
- * to the user. Rather, the only way to input any text is through the <code>
- * inputConsoleText</code> method; and the only way to terminate the current 
- * input is with <code>interruptConsole</code>. In either of the two cases, the
- * <code>inputConsoleText</code> method cannot be used unless the console is 
- * currently receiving input. The <code>interruptConsole</code> method does nothing
- * when the console is not open for input.
- *  
+/** This console is the console that is used to receive <code>System.in</code> input from the user. 
+ *  <p>
+ *  When the <code>getConsoleInput</code> method is called, one of two things may happen.  When the 
+ *  MainFrame (or which ever frame owns the interactions pane) is visible, this method pops up a 
+ *  dialog box with a text area where the user can type in text.  Hitting <code>Enter</code> 
+ *  terminates the current input and causes the <code>getConsoleInput</code> method to return the 
+ *  inputted text.  Text can be inputted programmatically into the text area by calling 
+ *  <code>insertConsoleText</code> from the PopupConsole object that created the dialog box.  The 
+ *  input can be forcefully terminated by calling <code> interruptConsole</code>. This method causes 
+ *  the input to terminate as though the user had pressed enter or hit the "done" button.
+ *  <p>
+ *  If the MainFrame is not yet visible (which is the case during unit testing), the console works 
+ *  in "silent" mode.  In silent mode, no dialog box is displayed to the user. Rather, the only way to 
+ *  input any text is through the <code> inputConsoleText</code> method; and the only way to terminate 
+ *  the current input is with <code>interruptConsole</code>. In either of the two cases, the 
+ *  <code>inputConsoleText</code> method cannot be used unless the console is currently receiving input. 
+ *  The <code>interruptConsole</code> method does nothing when the console is not open for input. 
  */
 public class PopupConsole {
   
@@ -138,12 +131,10 @@ public class PopupConsole {
    * the <code>insertConsoleText</code> method.
    * @return The text inputted by the user
    */
-  public synchronized String getConsoleInput() { 
+  public String getConsoleInput() { 
     Frame parentFrame = JOptionPane.getFrameForComponent(_parentComponent);
-    if (parentFrame.isVisible()) 
-      return showDialog(parentFrame) + "\n";
-    else
-      return silentInput() + "\n";
+    if (parentFrame.isVisible()) return showDialog(parentFrame) + "\n";
+    else return silentInput() + "\n";
   }
   
   /**
@@ -151,9 +142,7 @@ public class PopupConsole {
    * has been inputted so far.
    */
   public void interruptConsole() {
-    synchronized(commandLock) {
-      if (_interruptCommand != null) _interruptCommand.run();
-    }
+    synchronized (commandLock) { if (_interruptCommand != null) _interruptCommand.run(); }
   }
   
   /**
@@ -163,11 +152,9 @@ public class PopupConsole {
    * input from the user
    */
   public void insertConsoleText(String txt) {
-    synchronized(commandLock) {
-      if (_insertTextCommand != null) 
-        _insertTextCommand.apply(txt); 
-      else
-        throw new IllegalStateException("Console not ready for text insertion");
+    synchronized (commandLock) {
+      if (_insertTextCommand != null) _insertTextCommand.apply(txt); 
+      else throw new IllegalStateException("Console not ready for text insertion");
     }
   }
   
@@ -178,52 +165,35 @@ public class PopupConsole {
    * calling these methods before the console starts receiving any input.
    */
   public void waitForConsoleReady() throws InterruptedException {
-    synchronized(commandLock) {
-      if (_interruptCommand == null) commandLock.wait();
-    }
+    synchronized (commandLock) { if (_interruptCommand == null) commandLock.wait(); }
   }
   
   public boolean isConsoleReady() {
-    synchronized(commandLock) {
-      return _interruptCommand != null;
-    }
+    synchronized (commandLock) { return _interruptCommand != null; }
   }
   
-  public synchronized void setInputBox(JTextArea inputBox) {
-    if (inputBox == null) 
-      _inputBox = new PopupConsole.InputBox();
-    else
-      _inputBox = inputBox;
+  public void setInputBox(JTextArea inputBox) {
+    if (inputBox == null) _inputBox = new PopupConsole.InputBox();
+    else _inputBox = inputBox;
     
     InputMap im = _inputBox.getInputMap();
-    im.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER,Event.SHIFT_MASK), 
-           INSERT_NEWLINE_NAME);
+    im.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER,Event.SHIFT_MASK), INSERT_NEWLINE_NAME);
     ActionMap am = _inputBox.getActionMap();
     am.put(INSERT_NEWLINE_NAME, _insertNewlineAction);
   }
   
-  public synchronized JTextArea getInputBox() {
-    return _inputBox;
-  }
+  public JTextArea getInputBox() { return _inputBox; }
   
-  public synchronized void setParent(Component c) {
-    _parentComponent = c;
-  }
+  public void setParent(Component c) { _parentComponent = c; }
   
-  public synchronized Component getParent() {
-    return _parentComponent;
-  }
+  public Component getParent() { return _parentComponent; }
   
   public void setTitle(String title) {
-    if (title == null) 
-      _title = "Console";
-    else
-      _title = title;
+    if (title == null) _title = "Console";
+    else _title = title;
   }
   
-  public String getTitle() {
-    return _title;
-  }
+  public String getTitle() { return _title; }
   
   /**
    * Pops up the dialog box and creates the interrupt and insert commands,
@@ -233,14 +203,12 @@ public class PopupConsole {
    */
   protected String showDialog(Frame parentFrame) {
     final JDialog dialog = createDialog(_inputBox, parentFrame);
-    synchronized(commandLock) {
+    synchronized (commandLock) {
       _interruptCommand = new Runnable() {
-        public synchronized void run() { 
-          dialog.setVisible(false);
-        }
+        public void run() { dialog.setVisible(false); }
       };
       _insertTextCommand = new Lambda<Object,String>() {
-        public synchronized Object apply(String input) {
+        public Object apply(String input) {
           _inputBox.insert(input, _inputBox.getCaretPosition());
           return null;
         }
@@ -251,7 +219,7 @@ public class PopupConsole {
     dialog.setVisible(true);
     dialog.dispose();
     
-    synchronized(commandLock) {
+    synchronized (commandLock) {
       _interruptCommand = null;
       _insertTextCommand = null;
     }
@@ -318,10 +286,10 @@ public class PopupConsole {
   protected String silentInput() {
     final Object monitor = new Object();
     final StringBuffer input = new StringBuffer();
-    synchronized(monitor) {
-      synchronized(commandLock) {
+    synchronized (monitor) {
+      synchronized (commandLock) {
         _insertTextCommand = new Lambda<Object,String>() {
-          public synchronized Object apply(String s) {
+          public Object apply(String s) {
             input.append(s);
             return null;
           }
@@ -331,17 +299,13 @@ public class PopupConsole {
           public void run() {
             _insertTextCommand = null;
             _interruptCommand = null;
-            synchronized(monitor) {
-              monitor.notifyAll();
-            }
+            synchronized (monitor) { monitor.notifyAll(); }
           }
         };
-        
         commandLock.notifyAll();
       }
-      try {
-        monitor.wait();
-      } catch (InterruptedException e) { }
+      try { monitor.wait(); } 
+      catch (InterruptedException e) { }
     }
     return input.toString();
   }

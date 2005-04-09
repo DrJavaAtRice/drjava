@@ -123,14 +123,14 @@ public class ToolsJarClassLoader extends URLClassLoader {
    */
   public static String getToolsJarClasspath() {
     File[] files = getToolsJarFiles();
-    String classpath = "";
+    StringBuffer classpath = new StringBuffer();
     String pathSep = System.getProperty("path.separator");
 
     for (int i=0; i < files.length; i++) {
-      if (i > 0) classpath += pathSep;
-      classpath += files[i].getAbsolutePath();
+      if (i > 0) classpath.append(pathSep);
+      classpath.append(files[i].getAbsolutePath());
     }
-    return classpath;
+    return classpath.toString();
   }
 
   /**
