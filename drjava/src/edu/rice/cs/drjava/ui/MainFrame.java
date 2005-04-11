@@ -1942,7 +1942,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     config.addOptionListener
       (JVM_ARGS, new OptionListener<String>() {
       public void optionChanged(OptionEvent<String> oe) {
-        if(oe.value != "") {
+        if(!oe.value.equals("")) {
           int result = JOptionPane.showConfirmDialog(_configFrame,
                                                      "Specifying JVM Args is an advanced option. Invalid arguments may cause the\n"+
                                                      "Interactions Pane to stop working.\n"+
@@ -2025,7 +2025,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     Container answer = null;
     Component[] cs = container.getComponents();
     for(Component c: cs){
-      if(c instanceof JButton && ((JButton)c).getText() == buttonText){
+      if(c instanceof JButton && ((JButton)c).getText().equals(buttonText)){
         return container;
       }else if(c instanceof Container){
         answer = findButtonContainer((Container)c, buttonText);
@@ -2653,7 +2653,7 @@ public class MainFrame extends JFrame implements OptionConstants {
    * Opens all the files in the directory returned by the FolderSelector prompting
    * the user to handle the cases where files are already open,
    * files are missing, or the action was canceled by the user
-   * @param openSelector the selector that returns the files to open
+   * @param chooser the selector that returns the files to open
    */
   public void openFolder(DirectoryChooser chooser) {
     String type = "'"+DrJava.LANGUAGE_LEVEL_EXTENSIONS[DrJava.getConfig().getSetting(LANGUAGE_LEVEL)] + "' ";
@@ -2668,7 +2668,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     if (result != DirectoryChooser.APPROVE_OPTION)  return; // canceled or error
     
     File dir = chooser.getSelectedDirectory();
-    DrJava.getConfig().setSetting(OptionConstants.OPEN_FOLDER_RECURSIVE, _openRecursiveCheckBox.isSelected());
+    DrJava.getConfig().setSetting(OptionConstants.OPEN_FOLDER_RECURSIVE, Boolean.valueOf(_openRecursiveCheckBox.isSelected()));
     
     if (dir == null) return; // just in case
     
@@ -4445,12 +4445,12 @@ public class MainFrame extends JFrame implements OptionConstants {
           }
         }
         else {
-          if (!iconsEnabled && b.getText() != "") {
+          if (!iconsEnabled && b.getText().equals("")) {
             b.setIcon(null);
           }
         }
 
-        if (b.getText() == "") {
+        if (b.getText().equals("")) {
           if (textEnabled) {
             b.setText( (String) a.getValue(Action.DEFAULT));
           }
@@ -4810,8 +4810,8 @@ public class MainFrame extends JFrame implements OptionConstants {
           else{
             try{
               String groupName = _model.getDocumentNavigator().getNameOfSelectedTopLevelGroup();
-              if(groupName == "[ Source Files ]") { _navPanePopupMenu.show(e.getComponent(), e.getX(), e.getY()); }
-              else if(groupName == "[ External Files ]"){
+              if(groupName.equals("[ Source Files ]")) { _navPanePopupMenu.show(e.getComponent(), e.getX(), e.getY()); }
+              else if(groupName.equals("[ External Files ]")){
                 INavigatorItem n = _model.getDocumentNavigator().getCurrentSelectedLeaf();
                 if (n != null) {
                   OpenDefinitionsDocument d = (OpenDefinitionsDocument) n;
@@ -4819,7 +4819,7 @@ public class MainFrame extends JFrame implements OptionConstants {
                   else _navPanePopupMenuForExternal.show(e.getComponent(), e.getX(), e.getY());
                 }
               }
-              else if(groupName == "[ Auxiliary Files ]"){
+              else if(groupName.equals("[ Auxiliary Files ]")){
                 _navPanePopupMenuForAuxiliary.show(e.getComponent(), e.getX(), e.getY());
               }
             }

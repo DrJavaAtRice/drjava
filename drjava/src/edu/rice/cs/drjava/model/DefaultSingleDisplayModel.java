@@ -130,7 +130,7 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel implements Sin
           _activeDirectory = dir;
           _notifier.currentDirectoryChanged(_activeDirectory);
         }
-        return true; 
+        return Boolean.valueOf(true); 
       }
       public Boolean fileCase(File f) {
         if (!f.isAbsolute()) {
@@ -139,9 +139,9 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel implements Sin
         }
         _activeDirectory = f;
         _notifier.currentDirectoryChanged(f);
-        return true;
+        return Boolean.valueOf(true);
       }
-      public Boolean stringCase(String s) { return false; }
+      public Boolean stringCase(String s) { return Boolean.valueOf(false); }
     };
     
     _documentNavigator.addNavigationListener(new INavigationListener() {

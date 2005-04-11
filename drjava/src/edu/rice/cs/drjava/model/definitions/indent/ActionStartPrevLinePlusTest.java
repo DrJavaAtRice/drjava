@@ -99,7 +99,7 @@ public class ActionStartPrevLinePlusTest extends IndentRulesTestCase {
    * This is a clever (IMHO) factory trick to reuse these methods in TestCases
    * for logically similar IndentActions.
    * @param suffix the text to be added by this rule after indent padding
-   * @see ActionStartPrevLinePlus(String)
+   * @see ActionStartPrevLinePlus#ActionStartPrevLinePlus(String)
    */
   private IndentRuleAction makeAction(String suffix) {
     return new ActionStartPrevLinePlus(suffix);

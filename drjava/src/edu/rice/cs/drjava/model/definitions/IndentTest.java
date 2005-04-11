@@ -75,8 +75,9 @@ public final class IndentTest extends TestCase {
   private Integer configIndent;
   private GlobalEventNotifier _notifier;
 
-  /** Tests the indent operation.
-   *  @param     String name
+  /** 
+   * Tests the indent operation.
+   * @param name {@inheritDoc}
    */
   public IndentTest(String name) { super(name); }
 

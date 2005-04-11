@@ -303,7 +303,7 @@ public class ProjectFileBuilder {
   }
   
   /**
-   * @param the file whose path to make relative to the project path
+   * @param f the file whose path to make relative to the project path
    * @return the string name of the file's path relative to the project path
    */
   private String makeRelative(File f) throws IOException {

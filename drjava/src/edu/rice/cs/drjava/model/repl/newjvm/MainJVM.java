@@ -447,9 +447,6 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   
   /**
    * Runs the JUnit test suite already cached in the Interpreter JVM.
-   * @param classNames the class names to run in a test
-   * @param files the associated files
-   *
    * @return false if no test suite is cached; true otherwise
    */
   public boolean runTestSuite() throws RemoteException {

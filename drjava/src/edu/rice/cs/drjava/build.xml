@@ -586,54 +586,11 @@
     </apply>
 
     <!-- Include the jpgs -->
-    <copy todir="${doc_dir}/quickstart" file="${srcroot}/${projpath}/docs/quickstart/JDKDownload.jpg" />
-    <copy todir="${doc_dir}/quickstart" file="${srcroot}/${projpath}/docs/quickstart/CurrentStableRelease.jpg" />
-    <copy todir="${doc_dir}/quickstart" file="${srcroot}/${projpath}/docs/quickstart/DownloadServer.jpg" />
-    <copy todir="${doc_dir}/quickstart" file="${srcroot}/${projpath}/docs/quickstart/OpenDialog.jpg" />    
-<copy todir="${doc_dir}/quickstart" file="${srcroot}/${projpath}/docs/quickstart/PlainOldDrJavaDefault.jpg" />
-<copy todir="${doc_dir}/quickstart" file="${srcroot}/${projpath}/docs/quickstart/CompilerErrors.jpg" />
-<copy todir="${doc_dir}/quickstart" file="${srcroot}/${projpath}/docs/quickstart/InteractionsPaneFull.jpg" />
-<copy todir="${doc_dir}/quickstart" file="${srcroot}/${projpath}/docs/quickstart/InteractionsPane1Plus1.jpg" />
-<copy todir="${doc_dir}/quickstart" file="${srcroot}/${projpath}/docs/quickstart/InteractionsPaneTom.jpg" />
-<copy todir="${doc_dir}/quickstart" file="${srcroot}/${projpath}/docs/quickstart/InteractionsPaneTryMe.jpg" />
-<copy todir="${doc_dir}/quickstart" file="${srcroot}/${projpath}/docs/quickstart/InteractionsPanePackageImport.jpg" />
-<copy todir="${doc_dir}/quickstart" file="${srcroot}/${projpath}/docs/quickstart/SaveDialog.jpg" />
-<copy todir="${doc_dir}/quickstart" file="${srcroot}/${projpath}/docs/quickstart/FindReplace.jpg" />
-<copy todir="${doc_dir}/quickstart" file="${srcroot}/${projpath}/docs/quickstart/TestsPassed.jpg" />
-<copy todir="${doc_dir}/quickstart" file="${srcroot}/${projpath}/docs/quickstart/TestFails.jpg" />
-<copy todir="${doc_dir}/quickstart" file="${srcroot}/${projpath}/docs/quickstart/JavaDocMenu.jpg" />
-<copy todir="${doc_dir}/quickstart" file="${srcroot}/${projpath}/docs/quickstart/Javadoc.jpg" />
-<copy todir="${doc_dir}/quickstart" file="${srcroot}/${projpath}/docs/quickstart/HitBreakpoint.jpg" />
-<copy todir="${doc_dir}/quickstart" file="${srcroot}/${projpath}/docs/quickstart/BreakpointSet.jpg" />
-<copy todir="${doc_dir}/quickstart" file="${srcroot}/${projpath}/docs/quickstart/ToggleBreakpoint.jpg" />
-<copy todir="${doc_dir}/quickstart" file="${srcroot}/${projpath}/docs/quickstart/Threads.jpg" />
-<copy todir="${doc_dir}/quickstart" file="${srcroot}/${projpath}/docs/quickstart/StackStuff.jpg" />
-<copy todir="${doc_dir}/quickstart" file="${srcroot}/${projpath}/docs/quickstart/BreakpointWatch.jpg" />
-<copy todir="${doc_dir}/quickstart" file="${srcroot}/${projpath}/docs/quickstart/VariableWatch2.jpg" />
-<copy todir="${doc_dir}/quickstart" file="${srcroot}/${projpath}/docs/quickstart/EnableDebugger.jpg" />
-<copy todir="${doc_dir}/quickstart" file="${srcroot}/${projpath}/docs/quickstart/ResourceLocation.jpg" />
-<copy todir="${doc_dir}/quickstart" file="${srcroot}/${projpath}/docs/quickstart/FullTreeView.jpg" />
-<copy todir="${doc_dir}/quickstart" file="${srcroot}/${projpath}/docs/quickstart/ProjectProperties.jpg" />
-<copy todir="${doc_dir}/quickstart" file="${srcroot}/${projpath}/docs/quickstart/ProjectCleanBuildDirectory.jpg" />
-<copy todir="${doc_dir}/quickstart" file="${srcroot}/${projpath}/docs/quickstart/ProjectCompileFromSideMenu.jpg" />
-<copy todir="${doc_dir}/quickstart" file="${srcroot}/${projpath}/docs/quickstart/ProjectCompileFromTopMenu.jpg" />
-<copy todir="${doc_dir}/quickstart" file="${srcroot}/${projpath}/docs/quickstart/ProjectFolderOptions.jpg" />
-<copy todir="${doc_dir}/quickstart" file="${srcroot}/${projpath}/docs/quickstart/ProjectOpen.jpg" />
-<copy todir="${doc_dir}/quickstart" file="${srcroot}/${projpath}/docs/quickstart/ProjectRunMainDocument.jpg" />
-<copy todir="${doc_dir}/quickstart" file="${srcroot}/${projpath}/docs/quickstart/ProjectTest.jpg" />
-<copy todir="${doc_dir}/quickstart" file="${srcroot}/${projpath}/docs/quickstart/ProjectSaveDialogFromFiles.jpg" />
-<copy todir="${doc_dir}/quickstart" file="${srcroot}/${projpath}/docs/quickstart/NewProjectSaveDialog.jpg" />
-<copy todir="${doc_dir}/quickstart" file="${srcroot}/${projpath}/docs/quickstart/DisplayOptions.jpg" />
-<copy todir="${doc_dir}/quickstart" file="${srcroot}/${projpath}/docs/quickstart/DisplayOptionsFonts.jpg" />
-<copy todir="${doc_dir}/quickstart" file="${srcroot}/${projpath}/docs/quickstart/DisplayOptionsColors.jpg" />
-<copy todir="${doc_dir}/quickstart" file="${srcroot}/${projpath}/docs/quickstart/KeyBindings.jpg" />
-<copy todir="${doc_dir}/quickstart" file="${srcroot}/${projpath}/docs/quickstart/CompilerOptions.jpg" />
-<copy todir="${doc_dir}/quickstart" file="${srcroot}/${projpath}/docs/quickstart/DebuggerPreferences.jpg" />
-<copy todir="${doc_dir}/quickstart" file="${srcroot}/${projpath}/docs/quickstart/JavadocPreferences.jpg" />
-<copy todir="${doc_dir}/quickstart" file="${srcroot}/${projpath}/docs/quickstart/Notifications.jpg" />
-<copy todir="${doc_dir}/quickstart" file="${srcroot}/${projpath}/docs/quickstart/Miscellaneous.jpg" />
-<copy todir="${doc_dir}/quickstart" file="${srcroot}/${projpath}/docs/quickstart/SystemInInput.jpg" />
-<copy todir="${doc_dir}/quickstart" file="${srcroot}/${projpath}/docs/quickstart/SystemInInputInteractionsPane.jpg" />
+    <copy todir="${doc_dir}/quickstart">
+      <fileset dir="${srcroot}/${projpath}/docs/quickstart">
+        <include name="*.jpg"/>
+      </fileset>
+    </copy>
   </target>
 
 

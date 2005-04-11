@@ -207,22 +207,22 @@ public class ToolbarOptionComponent extends OptionComponent<Boolean> {
     boolean iconsWereEnabled = DrJava.getConfig().getSetting(OptionConstants.TOOLBAR_ICONS_ENABLED).booleanValue();
     boolean wasEnabled = DrJava.getConfig().getSetting(OptionConstants.TOOLBAR_ENABLED).booleanValue();
     
-    if(btnIdent == NONE) {
+    if(btnIdent.equals(NONE)) {
       if(wasEnabled) DrJava.getConfig().setSetting(OptionConstants.TOOLBAR_ENABLED, Boolean.FALSE);      
     }
-    if (btnIdent == TEXT_ONLY) {
+    if (btnIdent.equals(TEXT_ONLY)) {
       if (!textWasEnabled) DrJava.getConfig().setSetting(OptionConstants.TOOLBAR_TEXT_ENABLED, Boolean.TRUE);
       if (iconsWereEnabled) DrJava.getConfig().setSetting(OptionConstants.TOOLBAR_ICONS_ENABLED, Boolean.FALSE);
       if(!wasEnabled) DrJava.getConfig().setSetting(OptionConstants.TOOLBAR_ENABLED, Boolean.TRUE);   
     }
 
-    if (btnIdent == ICONS_ONLY) {
+    if (btnIdent.equals(ICONS_ONLY)) {
       if (!iconsWereEnabled) DrJava.getConfig().setSetting(OptionConstants.TOOLBAR_ICONS_ENABLED, Boolean.TRUE);
       if (textWasEnabled) DrJava.getConfig().setSetting(OptionConstants.TOOLBAR_TEXT_ENABLED, Boolean.FALSE);
       if(!wasEnabled) DrJava.getConfig().setSetting(OptionConstants.TOOLBAR_ENABLED, Boolean.TRUE);  
     }
 
-    if (btnIdent == TEXT_AND_ICONS) {
+    if (btnIdent.equals(TEXT_AND_ICONS)) {
       if (!textWasEnabled) DrJava.getConfig().setSetting(OptionConstants.TOOLBAR_TEXT_ENABLED, Boolean.TRUE);
       if (!iconsWereEnabled) DrJava.getConfig().setSetting(OptionConstants.TOOLBAR_ICONS_ENABLED, Boolean.TRUE);
       if(!wasEnabled) DrJava.getConfig().setSetting(OptionConstants.TOOLBAR_ENABLED, Boolean.TRUE);        

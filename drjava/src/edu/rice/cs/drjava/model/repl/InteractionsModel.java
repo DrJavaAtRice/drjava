@@ -619,8 +619,8 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
    * @param errorMessage The syntax error message
    * @param startRow The starting row of the error
    * @param startCol The starting column of the error
-   * @param startRow The end row of the error
-   * @param startCol The end column of the error
+   * @param endRow The end row of the error
+   * @param endCol The end column of the error
    */
   public void replReturnedSyntaxError(String errorMessage,
                                       String interaction,
@@ -769,8 +769,8 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   /**
    * Deletes the last character of a string.  Assumes semicolon at the
    * end, but does not check.  Helper for _testClassCall(String).
-   * @param s
-   * @return
+   * @param s the String containing the semicolon
+   * @return a substring of s with one less character
    */
   protected static String _deleteSemiColon(String s) {
     return  s.substring(0, s.length() - 1);

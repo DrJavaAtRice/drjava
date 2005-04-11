@@ -184,7 +184,7 @@ public class DocFile extends File {
    * Sets the lastModified value of this file at the time the including project file
    * was saved. The <code>lastModified</code> date any documents saved after the 
    * project file was written will not match the date recorded in the project file.
-   * @param the last known modification date when the project was saved. 
+   * @param mod the last known modification date when the project was saved. 
    */
   public void setSavedModDate(long mod) {
     _mod = mod;

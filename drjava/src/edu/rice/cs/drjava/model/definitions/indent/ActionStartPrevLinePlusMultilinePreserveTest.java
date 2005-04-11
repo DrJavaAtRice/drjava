@@ -62,7 +62,7 @@ public class ActionStartPrevLinePlusMultilinePreserveTest extends IndentRulesTes
   /**
    * This is a clever (IMHO) factory trick to reuse these methods in TestCases
    * for logically similar IndentActions.
-   * @see ActionStartPrevLinePlusMultilinePreserve(String[], int, int, int, int)
+   * @see ActionStartPrevLinePlusMultilinePreserve#ActionStartPrevLinePlusMultilinePreserve(String[], int, int, int, int)
    */
   private IndentRuleAction makeAction(String[] suffices,
                                       int cursorLine, int cursorPos,

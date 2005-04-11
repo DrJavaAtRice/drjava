@@ -791,7 +791,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
       // ----- FIND ALL DEFINED CLASSES IN FOLDER ---
       public void junitAll() {
         File dir = getProjectFile().getParentFile();
-        ArrayList<String> classNames = new ArrayList<String>();
+//        ArrayList<String> classNames = new ArrayList<String>();
         final ArrayList<File> files = FileOps.getFilesInDir(dir, true, new FileFilter() {
           public boolean accept(File pathname) {
             return pathname.isDirectory() || 
@@ -1241,7 +1241,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
     builder.write();
     
     // set the state if all went well
-    File[] srcFiles = srcFileVector.toArray(new File[0]);
+    File[] srcFiles = srcFileVector.toArray(new File[srcFileVector.size()]);
     
     synchronized (_auxiliaryFiles) {
       _auxiliaryFiles = auxFileList;
@@ -1346,9 +1346,9 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
     }
     if (active != null) al.add(active);
     
-    List<OpenDefinitionsDocument> nonProjDocs = getNonProjectDocuments();
+    //List<OpenDefinitionsDocument> nonProjDocs = getNonProjectDocuments();
     List<OpenDefinitionsDocument> projDocs = getProjectDocuments();
-    File[] projectFiles = getProjectFiles();   
+    //File[] projectFiles = getProjectFiles();   
     
     // keep all nonproject files open.  External files in the previous project
     // may become project files in the new project and must be closed while external
@@ -1371,7 +1371,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
     
     // call on the GUI to finish up by opening the files and making
     // necessary gui component changes
-    final File[] filesToOpen = al.toArray(new File[0]);
+    final File[] filesToOpen = al.toArray(new File[al.size()]);
     _notifier.projectOpened(projectFile, new FileOpenSelector(){
       public File[] getFiles() { return filesToOpen; }
     });
@@ -1871,7 +1871,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
       }
       catch (InvalidPackageException e) { /* file has invalid package statement; ignore it */ }
     }
-    return roots.toArray(new File[0]);
+    return roots.toArray(new File[roots.size()]);
   }
   
   /**
@@ -2185,7 +2185,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
             if (dl != l) tmp.add(l);
           }
           tmp.add(dl);
-          _list = tmp.toArray(new DocumentListener[0]);
+          _list = tmp.toArray(new DocumentListener[tmp.size()]);
         }
       };
     }
@@ -2401,7 +2401,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
           
           _notifier.fileSaved(openDoc);
           
-          INavigatorItem idoc = this;
+//          INavigatorItem idoc = this;
           
           // Make sure this file is on the classpath
           try {

@@ -99,7 +99,7 @@ public class ActionStartPrevLinePlusBackupTest extends ActionStartPrevLinePlusTe
    * This creates an action that should behave identically to an instance of
    * ActionStartPrevLinePlus.
    * @param suffix the text to be added by this rule after indent padding
-   * @see ActionStartPrevLinePlus(String)
+   * @see ActionStartPrevLinePlus#ActionStartPrevLinePlus(String)
    */
   private IndentRuleAction makeAction(String suffix) {
     return new ActionStartPrevLinePlusBackup(suffix, suffix.length());
@@ -107,11 +107,11 @@ public class ActionStartPrevLinePlusBackupTest extends ActionStartPrevLinePlusTe
   
   /**
    * Factory to enable reuse of methods from ActionStartPrevLinePlusBackupTest.
-   * This works similarly to makeAction(String).
+   * This works similarly to {@link #makeAction(String)}.
    * @param suffix the text to be added by this rule after indent padding
    * @param position the character within the suffix string before which to
    * place the cursor
-   * @see ActionStartPrevLinePlusBackup(String, int)
+   * @see ActionStartPrevLinePlusBackup#ActionStartPrevLinePlusBackup(String, int)
    */
   private IndentRuleAction makeBackupAction(String suffix, int position) {
     return new ActionStartPrevLinePlusBackup(suffix, position);

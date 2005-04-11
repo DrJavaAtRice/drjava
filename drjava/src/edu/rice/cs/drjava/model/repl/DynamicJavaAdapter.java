@@ -404,7 +404,7 @@ public class DynamicJavaAdapter implements JavaInterpreter {
 
   /**
    * Factory method to make a new NameVisitor.
-   * @param context the context
+   * @param nameContext the context
    * @return visitor the visitor
    */
   public NameVisitor makeNameVisitor(Context nameContext) {
@@ -484,7 +484,7 @@ public class DynamicJavaAdapter implements JavaInterpreter {
      * Extends the interpret method to deal with possible interrupted
      * exceptions.
      * Unfortunately we have to copy all of this method to override it.
-     * @param is    the reader from which the statements are read
+     * @param r    the reader from which the statements are read
      * @param fname the name of the parsed stream
      * @return the result of the evaluation of the last statement
      */
@@ -671,7 +671,7 @@ public class DynamicJavaAdapter implements JavaInterpreter {
   
   /**
    * Constructor.
-   * @param         Interpreter i
+   * @param i the object used to interpret the classes
    */
   public ClassLoaderExtension(koala.dynamicjava.interpreter.Interpreter i, ClasspathManager c) {
     super(i);

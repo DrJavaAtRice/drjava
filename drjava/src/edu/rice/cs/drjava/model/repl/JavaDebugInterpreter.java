@@ -608,10 +608,7 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
    * Factory method to make a new NameChecker that tries to find the
    * right scope for QualifiedNames.
    * @param nameContext Context for the NameVisitor
-   * @param typeContext Context being used for the TypeChecker.  This is
-   * necessary because we want to perform a partial type checking for the
-   * right hand side of a VariableDeclaration.
-   * @return visitor the visitor
+   * @return the visitor
    */
   public NameVisitor makeNameVisitor(final Context nameContext) {
     return new NameVisitor(nameContext) {

@@ -233,7 +233,7 @@ public class GJv6Compiler implements CompilerInterface{
     /**
      * put your documentation comment here
      * @param source
-     * @return
+     * @return {@inheritDoc}
      */
     public Name useSource(Name source) {
       _sourceName = source.toString();
@@ -273,7 +273,6 @@ public class GJv6Compiler implements CompilerInterface{
 
     /**
      * put your documentation comment here
-     * @return
      */
     public CompilerError[] getErrors() {
       return _errors.toArray(new CompilerError[0]);

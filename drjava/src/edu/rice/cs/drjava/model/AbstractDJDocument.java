@@ -1478,16 +1478,17 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
     }
   }
   
-   /**
+  /**
    * Updates document structure as a result of text insertion.
    * This happens after the text has actually been inserted.
-   * Here we update the reduced model (via an {@link InsertCommand})
-   * and store information for how to undo/redo the reduced model changes
-   * inside the {@link AbstractDocument.DefaultDocumentEvent}.
+   * Here we update the reduced model (using an {@link AbstractDJDocument.InsertCommand
+   * InsertCommand}) and store information for how to undo/redo the reduced model
+   * changes inside the {@link javax.swing.text.AbstractDocument.DefaultDocumentEvent 
+   * DefaultDocumentEvent}.
    *
-   * @see edu.rice.cs.drjava.model.AbstractDJDocument$InsertCommand
-   * @see javax.swing.AbstractDocument$DefaultDocumentEvent
-   * @see edu.rice.cs.drjava.model.definitions.DefinitionsDocument$CommandUndoableEdit
+   * @see edu.rice.cs.drjava.model.AbstractDJDocument.InsertCommand
+   * @see javax.swing.text.AbstractDocument.DefaultDocumentEvent
+   * @see edu.rice.cs.drjava.model.definitions.DefinitionsDocument.CommandUndoableEdit
    */
   protected void insertUpdate(AbstractDocument.DefaultDocumentEvent chng,
                               AttributeSet attr) {
@@ -1520,12 +1521,13 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
   /**
    * Updates document structure as a result of text removal.
    * This happens before the text has actually been removed.
-   * Here we update the reduced model (via an {@link RemoveCommand})
-   * and store information for how to undo/redo the reduced model changes
-   * inside the {@link AbstractDocument.DefaultDocumentEvent}.
+   * Here we update the reduced model (using a {@link AbstractDJDocument.RemoveCommand
+   * RemoveCommand}) and store information for how to undo/redo the reduced
+   * model changes inside the {@link javax.swing.text.AbstractDocument.DefaultDocumentEvent 
+   * DefaultDocumentEvent}.
    *
-   * @see RemoveCommand
-   * @see AbstractDocument.DefaultDocumentEvent
+   * @see AbstractDJDocument.RemoveCommand
+   * @see javax.swing.text.AbstractDocument.DefaultDocumentEvent
    */
   protected void removeUpdate(AbstractDocument.DefaultDocumentEvent chng) {
     clearCache();

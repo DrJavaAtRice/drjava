@@ -132,8 +132,8 @@ public interface InteractionsModelCallback {
    * @param errorMessage The syntax error message
    * @param startRow The starting row of the error
    * @param startCol The starting column of the error
-   * @param startRow The end row of the error
-   * @param startCol The end column of the error
+   * @param endRow The end row of the error
+   * @param endCol The end column of the error
    */
   public void replReturnedSyntaxError(String errorMessage,
                                       String interaction,

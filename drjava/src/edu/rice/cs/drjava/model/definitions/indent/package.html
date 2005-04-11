@@ -12,13 +12,13 @@
   Provides a decision tree used to correctly indent the current line.
   <p>
 
-  The tree is composed of {@link IndentRule}s, and asks a series of yes or no
+  The tree is composed of {@link edu.rice.cs.drjava.model.definitions.indent.IndentRule}s, and asks a series of yes or no
   questions about the current position before determining the appropriate
-  action.  All nodes use helper methods from {@link DefinitionsDocument} and
-  the Reduced Model package for context.
+  action.  All nodes use helper methods from {@link edu.rice.cs.drjava.model.definitions.DefinitionsDocument} and
+  the {@link edu.rice.cs.drjava.model.reducedmodel Reduced Model} package for context.
   <p>
 
-  The tree itself is built in the {@link Indenter} class, where a singleton
+  The tree itself is built in the {@link edu.rice.cs.drjava.model.definitions.indent.Indenter} class, where a singleton
   instance is made available to DefinitionsDocument for using on a single line.
   An outline of the tree is given below.
   <p>
