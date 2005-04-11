@@ -142,8 +142,8 @@ public abstract class FileOps {
   }
   
   /**
-   * helper fuction for getFilesInDir(Filed , boolean recur)
-   * @return an array of Files in the directory specified (not including directories)
+   * helper fuction for getFilesInDir(Filed , boolean recur). {@code acc} is mutated to contain
+   * a list of <c>File</c>s in the directory specified, not including directories.
    */
   private static void getFilesInDir(File d, List<File> acc, boolean recur, FileFilter filter){
     if(d.isDirectory()){
@@ -431,7 +431,7 @@ public abstract class FileOps {
         File dir = subDirectories[a];
         PrefixAndFile paf;
 //         System.out.println("exploring " + dir);
-        if (current.prefix == ""){
+        if (current.prefix.equals("")){
           paf = new PrefixAndFile(dir.getName(), dir);
         } else {
           paf = new PrefixAndFile(current.prefix + "." + dir.getName(), dir);
@@ -441,7 +441,7 @@ public abstract class FileOps {
       File [] javaFiles = current.root.listFiles(JAVA_FILE_FILTER);
 
       //Only add package names if they have java files and are not the root package
-      if (javaFiles.length != 0 && current.prefix != ""){
+      if (javaFiles.length != 0 && !current.prefix.equals("")){
         output.add(current.prefix);
 //         System.out.println("adding " + current.prefix);
       }

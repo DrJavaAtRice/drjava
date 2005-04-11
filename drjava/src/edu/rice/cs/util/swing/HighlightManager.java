@@ -144,8 +144,7 @@ public class HighlightManager {
     /**
      * Returning the Stack corresponding to the given region in the document, or null
      *  if there is none. Requires every Stack in the vector to have a unique region.
-     * @param from the starting offset
-     * @param to the ending offset
+     * @param h the descriptor for the desired region.
      * @return the corresponding Stack, or null
      */
     private Stack<HighlightInfo> _getStackAt (HighlightInfo h) {

@@ -98,8 +98,8 @@ public class SExpParser {
     }
     
     /**
-     * Parse a forest of top-level s-expressions
-     * @param a list of top-level s-expressions
+     * Parse a forest of top-level s-expressions from {@link #parseTopLevelExp()}.
+     * @see #parseTopLevelExp()
      */
     public List<SEList> parseMultiple() {
       ArrayList<SEList> l = new ArrayList<SEList>();
@@ -219,7 +219,7 @@ public class SExpParser {
     /**
      * Creates a runtime exception with the message that is desired for
      * the eventual checked exception
-     * @param the message to display
+     * @param msg the message to display
      */
     public PrivateParseException(String msg) { super(msg); }
   }

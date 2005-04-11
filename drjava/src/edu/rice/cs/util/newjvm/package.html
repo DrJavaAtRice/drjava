@@ -14,40 +14,40 @@ a new Java virtual machine. The two JVMs can communicate by using
 RMI.
 </P>
 <P>
-To simply invoke a new JVM with no communications links, use
-the class {@link ExecJVM}. The rest of this page explains how
-to use this framework to create a new JVM and set up bidirectional
-communications using RMI. This system runs a second JVM using the same
-classpath as the current JVM (by invoking {@link
-ExecJVM#runJVMPropogateClassPath}).
+To simply invoke a new JVM with no communications links, use the class
+{@link edu.rice.cs.util.newjvm.ExecJVM}. The rest of this page
+explains how to use this framework to create a new JVM and set up
+bidirectional communications using RMI. This system runs a second JVM
+using the same classpath as the current JVM (by invoking {@link
+edu.rice.cs.util.newjvm.ExecJVM#runJVMPropogateClassPath}).
 </P>
 <OL>
 <LI>Create a remote interface that the master JVM will support,
-    extending {@link MasterRemote}. This interface must specify of the
-    methods that the slave JVM can call on the master JVM.
-    All methods in this interface must be declared to throw
-    {@link java.rmi.RemoteException.}</LI>
+    extending {@link edu.rice.cs.util.newjvm.MasterRemote}. This
+    interface must specify of the methods that the slave JVM can call
+    on the master JVM.  All methods in this interface must be declared
+    to throw {@link java.rmi.RemoteException.}</LI>
 <LI>Create a remote interface that the slave JVM will support,
-    extending {@link SlaveRemote}. This interface must specify of the
-    methods that the master JVM can call on the slave JVM.
-    All methods in this interface must be declared to throw
-    {@link java.rmi.RemoteException.}</LI>
-<LI>Create the master JVM implementation, which must extend
-    {@link AbstractMasterJVM} and implement
-    YourMasterInterface. Note that the <CODE>super()</CODE> call
-    must pass to AbstractMasterJVM the fully-qualified class name
-    of the slave JVM implementation.</LI>
+    extending {@link edu.rice.cs.util.newjvm.SlaveRemote}. This
+    interface must specify of the methods that the master JVM can call
+    on the slave JVM.  All methods in this interface must be declared
+    to throw {@link java.rmi.RemoteException.}</LI>
+<LI>Create the master JVM implementation, which must extend {@link
+    edu.rice.cs.util.newjvm.AbstractMasterJVM} and implement
+    YourMasterInterface. Note that the <CODE>super()</CODE> call must
+    pass to AbstractMasterJVM the fully-qualified class name of the
+    slave JVM implementation.</LI>
 <LI>Create the slave JVM implementation, which must implement
-    YourSlaveInterface.
-    Don't forget to implement {@link SlaveRemote#quit},
-    which is called when the main JVM requests the slave to quit,
-    and {@link SlaveRemote#start}, which is called when the slave JVM
-    is started.</LI>
+    YourSlaveInterface.  Don't forget to implement {@link
+    edu.rice.cs.util.newjvm.SlaveRemote#quit()}, which is called when
+    the main JVM requests the slave to quit, and {@link
+    edu.rice.cs.util.newjvm.SlaveRemote#start(edu.rice.cs.util.newjvm.MasterRemote)},
+    which is called when the slave JVM is started.</LI>
 </OL>
 <P>
-Now you can create an instance of your master JVM class and use
-its {@link AbstractMasterJVM#invokeSlave} method to start
-the slave JVM.
+Now you can create an instance of your master JVM class and use its
+{@link edu.rice.cs.util.newjvm.AbstractMasterJVM#invokeSlave()} method
+to start the slave JVM.
 </body>
 </html>
 
