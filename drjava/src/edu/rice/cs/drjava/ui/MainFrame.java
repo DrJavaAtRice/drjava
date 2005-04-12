@@ -581,9 +581,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
   };*/
 
-  /**
-   * Saves all documents, prompting for file names as necessary
-   */
+  /** Saves all documents, prompting for file names as necessary. */
   private Action _saveAllAction = new AbstractAction("Save All") {
     public void actionPerformed(ActionEvent ae) {
       _saveAll();
@@ -652,13 +650,11 @@ public class MainFrame extends JFrame implements OptionConstants {
         public void run() {
 //          new ScrollableDialog(null, "_junitAllAction called", "", "").show();
           try {
-            // hourglassOn();
+            hourglassOn();
             if (_model.isProjectActive()) _model.getJUnitModel().junitProject();
             else _model.getJUnitModel().junitAll();
           }
-          finally { 
-            // hourglassOff(); 
-          }
+          finally {  hourglassOff(); }
         }
       }.start();
     }
@@ -668,7 +664,13 @@ public class MainFrame extends JFrame implements OptionConstants {
   private Action _junitOpenProjectFilesAction = new AbstractAction("Test Open Project Files") {
     public void actionPerformed(ActionEvent e) {
       new Thread("Running JUnit Tests") {
-        public void run() { _model.getJUnitModel().junitProject(); }
+        public void run() { 
+          try {
+            hourglassOn();
+            _model.getJUnitModel().junitProject(); 
+          }
+          finally { hourglassOff(); }
+        }
       }.start();
     }
   };
@@ -816,28 +818,25 @@ public class MainFrame extends JFrame implements OptionConstants {
 
   /** Quits DrJava.  Optionally displays a prompt before quitting. */
   private Action _quitAction = new AbstractAction("Quit") {
-    public void actionPerformed(ActionEvent ae) {
-      _quit();
-    }
+    public void actionPerformed(ActionEvent ae) { _quit(); }
   };
 
   /** Selects all text in window. */
   private Action _selectAllAction = new AbstractAction("Select All") {
-    public void actionPerformed(ActionEvent ae) {
-      _selectAll();
-    }
+    public void actionPerformed(ActionEvent ae) { _selectAll(); }
   };
 
   /** Shows the find/replace tab. */
   private Action _findReplaceAction = new AbstractAction("Find/Replace...") {
     public void actionPerformed(ActionEvent ae) {
-      if(!_findReplace.isDisplayed()) {
+      if (!_findReplace.isDisplayed()) {
         showTab(_findReplace);
         _findReplace.beginListeningTo(_currentDefPane);
       }
       _findReplace.setVisible(true);
       _tabbedPane.setSelectedComponent(_findReplace);
-      try { Thread.sleep(100); } catch(Exception e) { e.printStackTrace(); }
+      try { Thread.sleep(100); } 
+      catch(Exception e) { e.printStackTrace(); }
       _findReplace.requestFocus();
       //_setDividerLocation();
     }
@@ -846,7 +845,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   /** Find the next instance of the find word. */
   private Action _findNextAction = new AbstractAction("Find Next") {
     public void actionPerformed(ActionEvent ae) {
-      if(!_findReplace.isDisplayed()) {
+      if (!_findReplace.isDisplayed()) {
         showTab(_findReplace);
         _findReplace.beginListeningTo(_currentDefPane);
       }
@@ -857,9 +856,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       if (_lastFocusOwner == _findReplace) {
         _currentDefPane.requestFocus();
       }
-      else {
-        _lastFocusOwner.requestFocus();
-      }
+      else _lastFocusOwner.requestFocus();
     }
   };
 
@@ -879,9 +876,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
   };
 
-  /**
-   * Action for commenting out a block of text using wing comments.
-   */
+  /** Action for commenting out a block of text using wing comments. */
   private Action _commentLinesAction = new AbstractAction("Comment Line(s)") {
     public void actionPerformed(ActionEvent ae) {
       // Delegate everything to the DefinitionsDocument.
@@ -895,9 +890,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
   };
 
-  /**
-   * Action for un-commenting a block of commented text.
-   */
+  /** Action for un-commenting a block of commented text. */
   private Action _uncommentLinesAction = new AbstractAction("Uncomment Line(s)") {
     public void actionPerformed(ActionEvent ae) {
       // Delegate everything to the DefinitionsDocument.
@@ -1422,8 +1415,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   /**
    * Clears the commands in the interaction history
    */
-  private Action _clearHistoryAction = new AbstractAction("Clear Interactions History")
-  {
+  private Action _clearHistoryAction = new AbstractAction("Clear Interactions History") {
     public void actionPerformed(ActionEvent ae) {
       _model.clearHistory();
       _interactionsPane.requestFocus();
@@ -1434,26 +1426,15 @@ public class MainFrame extends JFrame implements OptionConstants {
   private WindowListener _windowCloseListener = new WindowAdapter() {
     public void windowActivated(WindowEvent ev) {}
     public void windowClosed(WindowEvent ev) {}
-    public void windowClosing(WindowEvent ev) {
-      _quit();
-    }
+    public void windowClosing(WindowEvent ev) { _quit(); }
     public void windowDeactivated(WindowEvent ev) {}
     public void windowDeiconified(WindowEvent ev) {
-      try {
-        _model.getActiveDocument().revertIfModifiedOnDisk();
-      }
-      catch (FileMovedException fme) {
-        _showFileMovedError(fme);
-      }
-      catch (IOException e) {
-        _showIOError(e);
-      }
+      try { _model.getActiveDocument().revertIfModifiedOnDisk(); }
+      catch (FileMovedException fme) { _showFileMovedError(fme); }
+      catch (IOException e) { _showIOError(e);}
     }
-    public void windowIconified(WindowEvent ev) {
-    }
-    public void windowOpened(WindowEvent ev) {
-      _currentDefPane.requestFocus();
-    }
+    public void windowIconified(WindowEvent ev) { }
+    public void windowOpened(WindowEvent ev) { _currentDefPane.requestFocus(); }
   };
 
   // ------------- File Display Managers for File Icons ------------
@@ -2522,7 +2503,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       //    for(OpenDefinitionsDocument d: projDocs){
       //      _model.closeFile(d);
       //    }
-      boolean couldClose = _model.closeFiles(projDocs, true);
+      boolean couldClose = _model.closeFiles(projDocs);
       if (!couldClose) return false;
       _model.closeProject();
       Component renderer = _model.getDocumentNavigator().getRenderer();
@@ -2780,7 +2761,7 @@ public class MainFrame extends JFrame implements OptionConstants {
         n = e.nextElement();
         if (_model.getDocumentNavigator().isSelectedInGroup(n)) { l.add((OpenDefinitionsDocument) n); }  // FIX THIS!
       }
-      _model.closeFiles(l, false);
+      _model.closeFiles(l);
     }
   }
 
@@ -3064,12 +3045,9 @@ public class MainFrame extends JFrame implements OptionConstants {
     if (_promptBeforeQuit) {
       String title = "Quit DrJava?";
       String message = "Are you sure you want to quit DrJava?";
-      ConfirmCheckBoxDialog dialog =
-        new ConfirmCheckBoxDialog(MainFrame.this, title, message);
+      ConfirmCheckBoxDialog dialog = new ConfirmCheckBoxDialog(MainFrame.this, title, message);
       int rc = dialog.show();
-      if (rc != JOptionPane.YES_OPTION) {
-        return;
-      }
+      if (rc != JOptionPane.YES_OPTION) return;
       else {
         // Only remember the checkbox if they say yes
         if (dialog.getCheckBoxValue() == true) {
@@ -3078,8 +3056,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       }
     }
     
-    if(! _checkProjectClose())
-      return;
+    if (! _checkProjectClose()) return;
     
     _recentFileManager.saveRecentFiles();
     _recentProjectManager.saveRecentFiles();
@@ -3089,19 +3066,14 @@ public class MainFrame extends JFrame implements OptionConstants {
     // Save recent files, but only if there wasn't a problem at startup
     // (Don't want to overwrite a custom config file with a simple typo.)
     if (!DrJava.getConfig().hadStartupException()) {
-      try {
-        DrJava.getConfig().saveConfiguration();
-      }
-      catch (IOException ioe) {
-        _showIOError(ioe);
-      }
+      try { DrJava.getConfig().saveConfiguration(); }
+      catch (IOException ioe) { _showIOError(ioe); }
     }
     _model.quit();
   }
 
-  /**
-   * Stores the current position and size info for window and panes to the
-   * config framework.
+  /** Stores the current position and size info for window and panes to the
+   *  config framework.
    */
   private void _storePositionInfo() {
     Configuration config = DrJava.getConfig();

@@ -68,7 +68,7 @@ import edu.rice.cs.util.text.DocumentAdapterException;
  *
  * @version $Id$
  */
-public class GlobalModelCompileSuccessTestCase extends GlobalModelTestCase {
+public abstract class GlobalModelCompileSuccessTestCase extends GlobalModelTestCase {
 
   protected static final String FOO_PACKAGE_AS_PART_OF_FIELD =
     "class DrJavaTestFoo { int cur_package = 5; }";

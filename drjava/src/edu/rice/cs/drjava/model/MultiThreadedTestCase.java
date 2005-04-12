@@ -53,7 +53,7 @@ import java.io.*;
  *
  * @version $Id$
  */
-public class MultiThreadedTestCase extends TestCase {
+public abstract class MultiThreadedTestCase extends TestCase {
   /**
    * Flag to keep track of whether or not a test failed in
    * another thread (other than the testing thread).

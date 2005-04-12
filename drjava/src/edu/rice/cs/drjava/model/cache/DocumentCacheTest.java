@@ -465,6 +465,7 @@ public class DocumentCacheTest extends TestCase {
       throws IOException, OperationCanceledException, AlreadyOpenException {
       return openFilesHelper(com); 
     }
+    public boolean closeAllFiles() { return closeAllFilesOnQuit(); }
     
   }
 }

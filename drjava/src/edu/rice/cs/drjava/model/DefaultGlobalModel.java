@@ -131,15 +131,11 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
    */
   public void removeAuxiliaryFile(OpenDefinitionsDocument doc){
     File file;
-    try {
-      file = doc.getFile();
-    } catch(FileMovedException fme) {
-      file = fme.getFile();
-    }
+    try                           { file = doc.getFile(); } 
+    catch(FileMovedException fme) { file = fme.getFile(); }
+    
     String path = "";
-    try {
-      path = file.getCanonicalPath();
-    }
+    try { path = file.getCanonicalPath(); }
     catch(IOException e) { throw new UnexpectedException(e); }
     
     synchronized (_auxiliaryFiles) {
@@ -1437,18 +1433,17 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
     return true;
   }
   
-  /**
-   * Attempts to close all open documents.
-   * @return true if all documents were closed
+  /** Attempts to close all open documents without creating a new empty document.
+   *  @return true if all documents were closed
    */
-  public boolean closeAllFiles() {
+  public boolean closeAllFilesOnQuit() {
     
     OpenDefinitionsDocument[] docs;
     
     synchronized (_documentsRepos) { docs = _documentsRepos.toArray(new OpenDefinitionsDocument[0]); }
     
     for (OpenDefinitionsDocument doc : docs) {
-      boolean closed = closeFile(doc);  // modifies _documentsRepos
+      boolean closed = closeFileHelper(doc);  // modifies _documentsRepos
       if (! closed) return false;
     }
     return true;
@@ -1457,7 +1452,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
 
   /** Exits the program.  Only quits if all documents are successfully closed. */
   public void quit() {
-    if (closeAllFiles()) {
+    if (closeAllFilesOnQuit()) {
       dispose();  // kills the interpreter
 
       if (DrJava.getSecurityManager() != null) DrJava.getSecurityManager().exitVM(0);
@@ -1467,10 +1462,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
     }
   }
 
-  /**
-   * Prepares this model to be thrown away.  Never called in
-   * practice outside of quit(); only used in tests.
-   */
+  /** Prepares this model to be thrown away.  Never called in practice outside of quit(), except in tests. */
   public void dispose() {
     // Kill the interpreter
     _interpreterControl.killInterpreter(false);
@@ -2773,9 +2765,8 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
      * the document has been modified since the last save).
      */
     public boolean canAbandonFile() {
-      final OpenDefinitionsDocument doc = this;
       if (isModifiedSinceSave() || (_file != null && !_file.exists() && _cacheAdapter.isReady()))
-        return _notifier.canAbandonFile(doc);
+        return _notifier.canAbandonFile(this);
       else return true;
     }
 

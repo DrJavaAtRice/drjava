@@ -114,11 +114,10 @@ public interface SingleDisplayModel extends GlobalModel {
   
   /**
    * Shared code between close project and close All files which only sets 
-   * the new active document after all documents to be closed have been closed
+   * the new active document after all documents to be closed have been closed.
    * @param docList the list of files to close
-   * @param together if true then no file will be closed unless they can all be closed
    */
-  public boolean closeFiles(List<OpenDefinitionsDocument> docList, boolean together);
+  public boolean closeFiles(List<OpenDefinitionsDocument> docList);
   
   // public OpenDefinitionsDocument getODDGivenIDoc(INavigatorItem idoc);
     

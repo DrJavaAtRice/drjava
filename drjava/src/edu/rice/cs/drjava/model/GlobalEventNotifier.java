@@ -144,9 +144,7 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
     finally { _lock.endRead(); }
   }
 
-  /**
-   * Allows the GlobalModel to ask its listeners a yes/no question and
-   * receive a response.
+  /** Allows the GlobalModel to ask its listeners a yes/no question and receive a response.
    * @param p the question being asked of the listeners
    * @return the listeners' responses ANDed together, true if they all
    * agree, false if some disagree
@@ -155,13 +153,8 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
   public boolean pollListeners(Poller p) {
     _lock.startRead();
     try {
-      boolean poll = true;
-
-      int size = _listeners.size();
-      for(int i = 0; (poll && (i < size)); i++) {
-        poll = poll && p.poll(_listeners.get(i));
-      }
-      return poll;
+      for (GlobalModelListener l: _listeners) { if (! p.poll(l)) return false; }
+      return true;
     }
     finally { _lock.endRead(); }
   }
@@ -224,114 +217,59 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
     finally { _lock.endRead(); }
   }
 
-  /**
-   * Called after a file is opened and read into the current document.
-   */
+  /** Called after a file is opened and read into the current document. */
   public void fileOpened(OpenDefinitionsDocument doc) {
     _lock.startRead();
     try { for(GlobalModelListener l : _listeners) { l.fileOpened(doc); } }
     finally { _lock.endRead(); }
   }
 
-  /**
-   * Called after a document is closed.
-   */
+  /** Called after a document is closed. */
   public void fileClosed(OpenDefinitionsDocument doc) {
     _lock.startRead();
-    try {
-      for(GlobalModelListener l : _listeners) {
-        l.fileClosed(doc);
-      }
-    }
-    finally {
-      _lock.endRead();
-    }
+    try { for(GlobalModelListener l : _listeners) { l.fileClosed(doc); } }
+    finally { _lock.endRead(); }
   }
 
-  /**
-   * Called after a document is reverted.
-   */
+  /** Called after a document is reverted. */
   public void fileReverted(OpenDefinitionsDocument doc) {
     _lock.startRead();
-    try {
-      for(GlobalModelListener l : _listeners) {
-        l.fileReverted(doc);
-      }
-    }
-    finally {
-      _lock.endRead();
-    }
+    try { for(GlobalModelListener l : _listeners) { l.fileReverted(doc); } }
+    finally { _lock.endRead(); }
   }
 
-  /**
-   * Called when an undoable edit occurs.
-   */
+  /** Called when an undoable edit occurs. */
   public void undoableEditHappened() {
     _lock.startRead();
-    try {
-      for(GlobalModelListener l : _listeners) {
-        l.undoableEditHappened();
-      }
-    }
-    finally {
-      _lock.endRead();
-    }
+    try { for(GlobalModelListener l : _listeners) { l.undoableEditHappened(); } }
+    finally { _lock.endRead(); }
   }
 
-  /**
-   * Called to ask the listener if it is OK to abandon the current
-   * document.
-   */
+  /** Called to ask the listeners if it is OK to abandon the current document. */
   public boolean canAbandonFile(OpenDefinitionsDocument doc) {
     _lock.startRead();
     try {
-      boolean poll = true;
-      
-      int size = _listeners.size();
-      for(int i = 0; poll && (i < size); i++) {
-        poll = poll && _listeners.get(i).canAbandonFile(doc);
-      }
-      return poll;
+      for (GlobalModelListener l: _listeners) { if (! l.canAbandonFile(doc)) return false; }
+      return true;
     }
-    finally {
-      _lock.endRead();
-    }
+    finally { _lock.endRead(); }
   }
 
-  /**
-   * Called to ask the listener if it is OK to revert the current
-   * document to a newer version saved on file.
-   */
+  /** Called to ask the listeners if it is OK to revert the current document to a newer version saved on file. */
   public boolean shouldRevertFile(OpenDefinitionsDocument doc) {
     _lock.startRead();
-    try {
-      boolean poll = true;
-      
-      int size = _listeners.size();
-      for(int i = 0; (poll && (i < size)); i++) {
-        poll = poll && _listeners.get(i).shouldRevertFile(doc);
-      }
-      return poll;
+    try { 
+      for(GlobalModelListener l: _listeners) { if (! l.shouldRevertFile(doc)) return false; }
+      return true;
     }
-    finally {
-      _lock.endRead();
-    }
+    finally { _lock.endRead(); }
   }
 
-  /**
-   * Called when the selection in the navigator changes
-   * the current directory without changing the active document
-   */
+  /** Called when the selection in the navigator changes the current directory without changing the active document. */
   public void currentDirectoryChanged(File dir) {
     _lock.startRead();
-    try {
-      for(GlobalModelListener l : _listeners) {
-        l.currentDirectoryChanged(dir);
-      }
-    }
-    finally {
-      _lock.endRead();
-    }
+    try { for(GlobalModelListener l : _listeners) { l.currentDirectoryChanged(dir); } }
+    finally { _lock.endRead(); }
   }
   
   /**
@@ -577,24 +515,17 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
     finally { _lock.endRead(); }
   }
 
-  /**
-   * Called to demand that all files be saved before starting the debugger.
-   * It is up to the caller of this method to check if the documents have been
-   * saved, using IGetDocuments.hasModifiedDocuments().
-   *
-   * This is never called currently, but it is commented out in case it is
-   * needed later.
-  public void saveBeforeDebug() {
-    _lock.startRead();
-    try {
-      for(GlobalModelListener l : _listeners) {
-        l.saveBeforeDebug();
-      }
-    }
-    finally {
-      _lock.endRead();
-    }
-  }*/
+//  /** Called to demand that all files be saved before starting the debugger.
+//   *  It is up to the caller of this method to check if the documents have been
+//   *  saved, using IGetDocuments.hasModifiedDocuments().
+//   *
+//   *  This is never called currently, but it is commented out in case it is
+//   *  needed later. */
+//  public void saveBeforeDebug() {
+//    _lock.startRead();
+//    try { for(GlobalModelListener l : _listeners) { l.saveBeforeDebug(); } }
+//    finally { _lock.endRead(); }
+//  }
 
   /** Notifies the view that the current interaction is incomplete. */
   public void interactionIncomplete() {

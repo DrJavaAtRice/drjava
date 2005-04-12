@@ -314,23 +314,19 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel implements Sin
      if (doc.isUntitled()) setActiveDocument(doc);
    }
 
-  /** Closes an open definitions document, prompting to save if
-   *  the document has been changed.  Returns whether the file
-   *  was successfully closed.
-   *  Also ensures the invariant that there is always at least
+  /** Closes an open definitions document, prompting to save if the document has been changed.  Returns whether
+   *  the file was successfully closed.  Also ensures the invariant that there is always at least
    *  one open document holds by creating a new file if necessary.
    *  @return true if the document was closed
    */
    public boolean closeFile(OpenDefinitionsDocument doc) {
      List<OpenDefinitionsDocument> list = new LinkedList<OpenDefinitionsDocument>();
      list.add(doc);
-     return closeFiles(list, false);
+     return closeFiles(list);
    }
    
-   /**
-    * Attempts to close all open documents.
-    * Also ensures the invariant that there is always at least
-    * one open document holds by creating a new file if necessary.
+   /** Attempts to close all open documents. Also ensures the invariant that there is always at least
+    *  one open document holds by creating a new file if necessary.
     //Bug when the first document, in list view, is selected:
     //When "close all" documents is selected, each document in turn is set active
     //Fix: close the currently active document last
@@ -338,51 +334,44 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel implements Sin
     */
    public boolean closeAllFiles() {
      List<OpenDefinitionsDocument> docs = getDefinitionsDocuments();
-     return closeFiles(docs, false);
+     return closeFiles(docs);
    }
   
   /**
-   * This function closes a group of files assuming that there is some sort of 
-   * continuity with the list of documents that are being closed.  This assumption
-   * is mostly made in order to decide which document to activate.
+   * This function closes a group of files assuming that the files are contiguous in the enumeration
+   * provided by the document navigator. This assumption is used in selecting which remaining document
+   * (if any) to activate.
    * <p>
    * The corner cases in which the file that is being closed had been externally
    * deleted have been addressed in a few places, namely DefaultGlobalModel.canAbandonFile()
    * and MainFrame.ModelListener.canAbandonFile().  If the DefinitionsDocument for the 
    * OpenDefinitionsDocument being closed is not in the cache (see model.cache.DocumentCache)
    * then it is closed without prompting the user to save it.  If it is in the cache, then
-   * we can successfully notify the user that the file had been deleted and ask whether to
+   * we can successfully notify the user that the file is selected for closing and ask whether to
    * saveAs, close, or cancel.
    * @param docList the list od OpenDefinitionsDocuments to close
    * @param together if true then no files will be closed if not all can be abandoned
    * @return whether all files were closed
+   * 
+   * Question: what is the together flag for?  How does it affect observable behavior?
    */
-  public boolean closeFiles(List<OpenDefinitionsDocument> docList, boolean together) {
+  public boolean closeFiles(List<OpenDefinitionsDocument> docList) {
     if (docList.size() == 0) return true;
-
-    if (together) { // if together then do all prompting at once
-      for (OpenDefinitionsDocument doc : docList) { if (!doc.canAbandonFile()) return false; }
-    }
     
-    // create new file before you start closing in order to have 
-    // an active file that's not in the list of closing files.
-    // If the current active document is closed before the MainFrame
-    // can switch to a new file, drjava throws some unexpected exceptions
-    // relating to the document not being found.
+    /* Force the user to save or discard all modified files in docList */
+    for (OpenDefinitionsDocument doc : docList) { if (!doc.canAbandonFile()) return false; }
+    
+    // If all files are being closed, create a new file before starTing in order to have 
+    // an active file that is not in the list of closing files.
     OpenDefinitionsDocument newDoc = null;
     if (docList.size() == getDefinitionsDocumentsSize()) newDoc = newFile();
+    
+    // Set the active document to the document just after the last document or the document just before the 
+    // first document in docList.
     _ensureNotActive(docList);
         
-    // Close all files. If together, then don't let it prompt a 2nd time;
-    // but, if not together, then call closeFile which may prompt the user.
-    for (OpenDefinitionsDocument doc : docList) {
-      if (together) closeFileWithoutPrompt(doc);
-      else if (! closeFileHelper(doc)) {
-        setActiveDocument(doc);
-        if (newDoc != null) closeFileHelper(newDoc); // undo previous newFile() 
-        return false;
-      }
-    }  
+    // Close the files in docList. 
+    for (OpenDefinitionsDocument doc : docList) { closeFileWithoutPrompt(doc); }  
     return true;
   }
   
@@ -395,16 +384,12 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel implements Sin
             (!_activeDocument.isModifiedSinceSave()));
   }
 
-  /**
-   * Creates a new document if there are currently no documents open.
-   */
+  /** Creates a new document if there are currently no documents open. */
   private void _ensureNotEmpty() {
     if ((!_isClosingAllDocs) && (getDefinitionsDocumentsSize() == 0)) newFile(null);
   }
   
-  /**
-   * Makes sure that none of the documents in the list are active.
-   */
+  /** Makes sure that none of the documents in the list are active. */
   private void _ensureNotActive(List<OpenDefinitionsDocument> docs) {
     if (docs.contains(getActiveDocument())) {
       // Find the one that should be the new active document
