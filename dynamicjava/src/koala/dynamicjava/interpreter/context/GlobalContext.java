@@ -700,7 +700,9 @@ public class GlobalContext extends VariableContext implements Context {
     throws NoSuchFunctionException {
     Iterator<MethodDeclaration> it = functions.iterator();
     List<MethodDeclaration> f = new LinkedList<MethodDeclaration>();
-
+    List<MethodDeclaration> compatible = new LinkedList<MethodDeclaration>();
+    
+    //Do a first pass to find basic methods that match the parameters
     while (it.hasNext()) {
       MethodDeclaration md = it.next();
       if (md.getName().equals(mname)) {
@@ -714,7 +716,7 @@ public class GlobalContext extends VariableContext implements Context {
       List<FormalParameter> l =  md.getParameters();
 
       if (l.size() != params.length) {
-        continue;
+        //continue;
       }
 
       Class<?>[] p = new Class<?>[l.size()];
@@ -724,13 +726,80 @@ public class GlobalContext extends VariableContext implements Context {
         p[i++] = NodeProperties.getType(it2.next());
       }
 
-      if (ReflectionUtilities.hasCompatibleSignatures(p, params)) {
-        return md;
+      if(ReflectionUtilities.hasCompatibleSignatures(p, params)) {
+        compatible.add(md);
       }
     }
-       
     
-    throw new NoSuchFunctionException(mname);
+    if(!compatible.isEmpty())
+    {
+      return ReflectionUtilities.selectTheMostSpecificFunction(compatible);
+    }
+    
+    //Do a second pass to find methods that match using autoboxing
+    
+    it = f.iterator();
+    
+    while(it.hasNext()) {
+      MethodDeclaration md = it.next();
+      List<FormalParameter> l = md.getParameters();
+      
+      //With autoboxing the arguments must still be the same length
+      if(l.size() != params.length)
+        continue;
+      
+      Class<?>[] p = new Class<?>[l.size()];
+      Iterator<FormalParameter> it2 = l.iterator();
+      int i = 0;
+      while(it2.hasNext()) {
+        p[i++] = NodeProperties.getType(it2.next());
+      }
+      
+      ReflectionUtilities.TigerUsage tu = new ReflectionUtilities.TigerUsage();
+     
+      if(ReflectionUtilities.hasAutoBoxingCompatibleSignatures(p, params, tu)) {
+        compatible.add(md);
+        //throw new RuntimeException("Found a function that matches using Autoboxing!");
+      }
+    }
+    
+    //Select the most specific function using autoboxing
+    if (!compatible.isEmpty()) {
+      return ReflectionUtilities.selectTheMostSpecificBoxingFunction(compatible);
+    }
+    
+    //Do a third pass now trying to find methods that match using varArgs constructs
+    
+    it = f.iterator();
+    while(it.hasNext()) {
+      MethodDeclaration md = it.next();
+      List<FormalParameter> l = md.getParameters();
+     
+      Class<?>[] p = new Class<?>[l.size()];
+      Iterator<FormalParameter> it2 = l.iterator();
+      int i = 0;
+      while(it2.hasNext()) {
+        p[i++] = NodeProperties.getType(it2.next());
+      }
+      ReflectionUtilities.TigerUsage tu = new ReflectionUtilities.TigerUsage();
+      
+      if (ReflectionUtilities.hasVarArgsCompatibleSignatures(p, params, tu)) {
+        tu.checkForCompatibleUsage();
+        compatible.add(md);
+      }
+    }
+    
+    if(compatible.isEmpty()){
+      throw new NoSuchFunctionException("No such function: " + mname);
+    }
+    else if (compatible.size() == 1) {
+      return compatible.get(0); 
+    }
+    else {
+      // It is ambiguous if more than one variable-argument 
+      // method matches the given parameter type list.
+      throw new NoSuchFunctionException("Ambiguous Methods: " + mname + " " + compatible.get(0).getParameters() + ",  " +  compatible.get(1).getParameters());
+    }
   }
 
   /**

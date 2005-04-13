@@ -43,48 +43,28 @@
  * 
 END_COPYRIGHT_BLOCK*/
 
-package koala;
+package koala.dynamicjava.util;
 
-import java.util.Date;
-import java.text.SimpleDateFormat;
+import koala.dynamicjava.tree.MethodDeclaration;
 
 /**
- * This interface hold the information about this build of DrJava.
- * This file is copied to Version.java by the build process, which also
- * fills in the right values of the date and time.
- *
- * This javadoc corresponds to build drjava-20050413-0716;
- *
- * @version $Id$
+ * This exception is thrown when more than one method is acceptable
+ * during a method lookup due to the new features added in 1.5
  */
-public abstract class Version {
+public class AmbiguousFunctionException extends RuntimeException {
+  
+  private MethodDeclaration[] _methods;
+  
   /**
-   * This string will be automatically expanded upon "ant commit".
-   * Do not edit it by hand!
+   * Public constructor - calls the super class constructor
+   * @param e - the message to be shown when the exception occurs
    */
-  private static final String BUILD_TIME_STRING = "20050413-0716";
-
-  /** A {@link Date} version of the build time. */
-  private static final Date BUILD_TIME = _getBuildDate();
-
-  public static String getBuildTimeString() {
-    return BUILD_TIME_STRING;
+  public AmbiguousFunctionException(String e) {
+    super(e);
+    _methods = new MethodDeclaration[0];
   }
-
-  public static Date getBuildTime() {
-    return BUILD_TIME;
+  public AmbiguousFunctionException(MethodDeclaration m1, MethodDeclaration m2) {
+    super("Both functions match:" + m1 + ", and " + m2);
+    _methods = new MethodDeclaration[]{m1,m2};
   }
-
-  private static Date _getBuildDate() {
-    try {
-      return new SimpleDateFormat("yyyyMMdd-HHmm z").parse(BUILD_TIME_STRING + " GMT");
-    }
-    catch (Exception e) { // parse format or whatever problem
-      return null;
-    }
-  }
-
-  public static void main(String[] args) {
-    System.out.println("Version for edu.rice.cs.drjava: " + BUILD_TIME_STRING);
-  }
-} 
+}

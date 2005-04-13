@@ -2227,6 +2227,52 @@ public class EvaluationVisitor extends VisitorObject<Object> {
   public Object visit(FunctionCall node) {
     MethodDeclaration md;
     md = (MethodDeclaration)node.getProperty(NodeProperties.FUNCTION);
+    List<Expression> larg = node.getArguments();
+    
+    //If the invoked method is a varargs method the parameters must be packaged in an array
+    if(md.isVarArgs())
+    {
+      if(larg == null) //A varargs function was called with no parameters
+      {
+        ArrayInitializer array = new ArrayInitializer(new LinkedList<Expression>());
+        List<Expression> le = new LinkedList<Expression>();
+        List<FormalParameter> lfp = md.getParameters();
+        Iterator<FormalParameter> itfp = lfp.iterator();
+        if(!itfp.hasNext())
+          throw new IllegalStateException("Variable Arguments function does not have a formal parameter list");
+        array.setElementType(itfp.next().getType());
+        
+        le.add(array);
+        node.setArguments(le);
+      }
+      else //A varargs function was called with parameters
+      {
+        Iterator<FormalParameter> params = md.getParameters().iterator();
+        Iterator<Expression> args = larg.iterator();
+        LinkedList<Expression> le = new LinkedList<Expression>();
+        FormalParameter fp = null;
+        while(params.hasNext())
+        {
+         fp = params.next();
+         if(params.hasNext())
+           le.add(args.next());
+        }
+        
+        LinkedList<Expression> cells = new LinkedList<Expression>();
+        while(args.hasNext())
+        {
+          cells.add(args.next());
+        }
+        
+        ArrayInitializer array = new ArrayInitializer(cells);
+        koala.dynamicjava.tree.Type t = fp.getType();
+        if(!(t instanceof ArrayType))
+          throw new IllegalStateException("Varargs method does not have an array type for its final parameter");
+        array.setElementType(((ArrayType)t).getElementType());
+        le.add(array);
+        node.setArguments(le);
+      } 
+    }
 
     // Enter a new scope and define the parameters as local variables
     Context c = new GlobalContext(context.getInterpreter());
@@ -2257,6 +2303,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
       while (it.hasNext()) {
         it.next().acceptVisitor(nv);
       }
+
       body.acceptVisitor(nv);
 
       ctx = new GlobalContext(context.getInterpreter());
@@ -2270,7 +2317,18 @@ public class EvaluationVisitor extends VisitorObject<Object> {
       }
       body.acceptVisitor(tc);
     }
-
+    
+    List<FormalParameter> params = md.getParameters();
+    Iterator<FormalParameter> itParam = params.iterator();
+    Class<?>[] typs = new Class<?>[params.size()];
+    
+    //Get the types of parameters that this function accepts
+    int i = 0;
+    while(itParam.hasNext()){
+      typs[i++] = (Class<?>)itParam.next().getProperty(NodeProperties.TYPE);
+    }
+    
+      
     // Interpret the body of the function
     try {
       body.acceptVisitor(new EvaluationVisitor(c));

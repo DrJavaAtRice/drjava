@@ -257,6 +257,12 @@ public class MethodDeclaration extends Node {
   public boolean isVarArgs(){
     return (accessFlags & 0x00000080) != 0; // java.lang.reflect.Modifier.VARARGS == 0x00000080 /**/
   }
+  
+  // Not strictly needed. just added as a convenience /**/
+  public boolean isBridge(){
+    return (accessFlags & 0x00000040) != 0; // java.lang.reflect.Modifier.BRIDGE == 0x00000040 /**/
+  }
+  
 
   /**
    * Allows a visitor to traverse the tree

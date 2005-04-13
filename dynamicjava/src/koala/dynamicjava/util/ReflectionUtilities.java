@@ -33,6 +33,9 @@ import koala.dynamicjava.interpreter.throwable.WrongVersionException;
 
 import java.lang.reflect.*;
 import java.util.*;
+import koala.dynamicjava.tree.MethodDeclaration;
+import koala.dynamicjava.tree.FormalParameter;
+import koala.dynamicjava.interpreter.NodeProperties;
 
 /**
  * This class contains a collection of utility methods for reflection.
@@ -355,16 +358,16 @@ public class ReflectionUtilities {
    */
   protected static Method selectTheMostSpecificMethod(List<Method> list) {
     if (list.isEmpty()) return null;
-        
+    
     Iterator<Method> it = list.iterator();
     Method best = it.next();
     while(TigerUtilities.isBridge(best)){
- if(it.hasNext()){
-     best=it.next();
- }
- else{
-     return null;  //as if the list were empty, indicating nothing in the list could be used, shouldnt really happen, but added for completion.
- }
+      if(it.hasNext()){
+        best=it.next();
+      }
+      else{
+        return null;  //as if the list were empty, indicating nothing in the list could be used, shouldnt really happen, but added for completion.
+      }
     }    
     Method ambiguous = null; // there is no ambiguous other method at first
     while (it.hasNext()) {
@@ -413,6 +416,74 @@ public class ReflectionUtilities {
     }
     if (ambiguous != null) {
       throw new AmbiguousMethodException(best, ambiguous);
+    }
+    return best;
+  }
+  
+  /**
+   * Selects the method with the most specific signature.  This assumes that 
+   * each method does not require the application of any 1.5+ specific features.
+   * @param list The list of methods used 
+   * @return the most specific method among the methods in the given list
+   */
+  public static MethodDeclaration selectTheMostSpecificFunction(List<MethodDeclaration> list) {
+    if (list.isEmpty()) return null;
+        
+    Iterator<MethodDeclaration> it = list.iterator();
+    MethodDeclaration best = it.next();
+    //Working Here -prepicky
+    while(best.isBridge()){
+      if(it.hasNext()){
+        best=it.next();
+      }
+      else{
+        return null;  //as if the list were empty, indicating nothing in the list could be used, shouldnt really happen, but added for completion.
+      }
+    }    
+    MethodDeclaration ambiguous = null; // there is no ambiguous other method at first
+    while (it.hasNext()) {
+      MethodDeclaration curr = it.next();
+      if(curr.isBridge()) continue; //If the method is a bridge method, dont consider it, go to the next
+
+      List<FormalParameter> l1 = best.getParameters();
+      List<FormalParameter> l2 = curr.getParameters();
+      
+      Class<?>[] a1 = new Class<?>[l1.size()];
+      Class<?>[] a2 = new Class<?>[l2.size()];
+      Iterator<FormalParameter> it1 = l1.iterator();
+      Iterator<FormalParameter> it2 = l2.iterator();
+      int i = 0;
+      while(it1.hasNext() && it2.hasNext()) {
+        a1[i] = NodeProperties.getType(it1.next());
+        a2[i++] = NodeProperties.getType(it2.next());
+      }
+      
+      boolean better1 = false; // whether 'best' is better than 'curr'
+      boolean better2 = false; // whether 'curr' is better than 'best'
+      for (i = 0; i < a1.length; i++) {
+        boolean from2to1 = isCompatible(a1[i], a2[i]);
+        boolean from1to2 = isCompatible(a2[i], a1[i]);
+        
+        if (from1to2 && !from2to1) {// best's parameter[i] is more specific than curr's
+          better1 = true; // so best is better than curr
+        }
+        if (from2to1 && !from1to2) {// curr's parameter[i] is more specific than best's
+          better2 = true; // so curr is better than best
+        }
+      }
+      
+      // decide which is more specific or whether they are ambiguous
+      if ( !(better1 ^ better2) ) { // neither is better than the other
+        // For functions there is no concept of overriden methods so it is ambiguous
+        ambiguous = curr;
+      }
+      else if (better2) {
+        best = curr;
+        ambiguous = null; // no more ambiguity
+      }
+    }
+    if (ambiguous != null) {
+      throw new AmbiguousFunctionException("Both functions match: " + best + ", and " + ambiguous);
     }
     return best;
   }
@@ -539,8 +610,57 @@ public class ReflectionUtilities {
     }
     return best;
   }
-   
+  
+  public static MethodDeclaration selectTheMostSpecificBoxingFunction(List<MethodDeclaration> list)
+  {
+    if(list.isEmpty()) return null;
+    TigerUsage tu = new TigerUsage(); // needed for the calls to isBoxCompatible
     
+    Iterator<MethodDeclaration> it = list.iterator();
+    MethodDeclaration best = it.next();
+    MethodDeclaration ambiguous = null;
+    while(it.hasNext()) {
+      MethodDeclaration curr = it.next();
+      List<FormalParameter> l1 = best.getParameters();
+      List<FormalParameter> l2 = curr.getParameters();
+      
+      Class<?>[] a1 = new Class<?>[l1.size()];
+      Class<?>[] a2 = new Class<?>[l2.size()];
+      Iterator<FormalParameter> it1 = l1.iterator();
+      Iterator<FormalParameter> it2 = l2.iterator();
+      int i = 0;
+      while(it1.hasNext() && it2.hasNext()) {
+        a1[i] = NodeProperties.getType(it1.next());
+        a2[i++] = NodeProperties.getType(it2.next());
+      }
+      
+      boolean better1 = false;
+      boolean better2 = false;
+      for(i = 0; i < a1.length; i++){
+        boolean from2to1 = isBoxCompatible(a1[i], a2[i], tu);
+        boolean from1to2 = isBoxCompatible(a2[i], a1[i], tu);
+        
+        if(from1to2 && !from2to1)
+          better1 = true;
+        
+        if(from2to1 && !from1to2)
+          better2 = true; 
+      }
+      
+      if( !(better1 ^ better2) ) // There is no notion of overriden functions or super functions so they must be ambiguous
+        ambiguous = curr;
+      else if (better2) {
+        best = curr;
+        ambiguous = null; // no more ambiguity
+      }
+    }
+    if (ambiguous != null) {
+      throw new AmbiguousFunctionException("Both functions match: " + best + ", and " + ambiguous);
+    }
+    return best;
+  }
+      
+          
   /**
    * Selects the constructor with the most specific signature including autoboxing.
    * It is assumed that m1 and m2 have the same number of parameters.
@@ -854,7 +974,8 @@ public class ReflectionUtilities {
    * features were used in the method/constructor lookup that may not be supported
    * in versions less than 1.5.
    */
-  static class TigerUsage {
+  
+  public static class TigerUsage {
     private boolean _autoBox = false;
     private boolean _varArgs = false;
     
@@ -884,6 +1005,7 @@ public class ReflectionUtilities {
     
     public String toString() { return "TigerUsage: {Boxing:" + _autoBox + ", VarArgs:" + _varArgs + "}"; }
   }
+  
   
   /**
    * This class contains only static methods, so it is not useful
