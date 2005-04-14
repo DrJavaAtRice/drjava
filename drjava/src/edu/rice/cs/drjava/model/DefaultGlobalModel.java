@@ -966,7 +966,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
     synchronized (_documentsRepos) { _documentsRepos.add(doc); }
     
     if (parentDir != null) {
-      try { _documentNavigator.addDocument(doc, fixPathForNavigator(parentDir.getCanonicalPath() + "/")); }
+      try { _documentNavigator.addDocument(doc, fixPathForNavigator(parentDir.getCanonicalPath() + File.separator)); }
       catch(IOException ioe) { _documentNavigator.addDocument(doc); }
     }
     else _documentNavigator.addDocument(doc);
