@@ -226,13 +226,16 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
       fail("compile failed: " + getCompilerErrorString());
     }
     _model.addListener(listener);
-    // Run the test: a VerifyError will be thrown.
+    // Run the test: a VerifyError will be thrown in Java 1.4
 //    JUnitTestListener listener2 = new JUnitTestListener();
 //    _model.addListener(listener2);
 
     listener.assertClassFileErrorCount(0);
     _runJUnit(doc2);
-    listener.assertClassFileErrorCount(1);
+    double version = Double.valueOf(System.getProperty("java.specification.version"));
+    if (version < 1.5) listener.assertClassFileErrorCount(1);
+    else 
+      assertEquals("Should report one error", 1, _model.getJUnitModel().getJUnitErrorModel().getNumErrors());
     
     _model.removeListener(listener);
   }

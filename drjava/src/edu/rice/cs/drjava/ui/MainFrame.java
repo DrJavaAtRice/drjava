@@ -6278,7 +6278,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     public void classFileError(ClassFileError e) {
 
       final String message = 
-        "The class file " + e.getCanonicalPath() + " is illegal.\n " +
+        "The class file for class " + e.getClassName() + "in source file " + e.getCanonicalPath() + " cannot be loaded.\n " +
         "When DrJava tries to load it, the following error is generated:\n" +  e.getError();
       
       // Not necessarily invoked from event-handling thread!

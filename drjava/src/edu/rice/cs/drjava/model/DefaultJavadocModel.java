@@ -476,7 +476,7 @@ public class DefaultJavadocModel implements JavadocModel {
       // Notify all listeners that Javadoc is starting.
       _notifier.javadocStarted();
 
-      result = _javadoc_1_3(args.toArray(new String[0]), classpath);
+      result = _javadoc(args.toArray(new String[0]), classpath);
 
       // If success and we're generating current, make sure the temp
       //  directory gets deleted on exit.
@@ -505,7 +505,7 @@ public class DefaultJavadocModel implements JavadocModel {
    * @param classpath an array of classpath elements to use in the Javadoc JVM
    * @return true if Javadoc succeeded in building the HTML, otherwise false
    */
-  private boolean _javadoc_1_3(String[] args, String classpath) throws IOException {
+  private boolean _javadoc(String[] args, String classpath) throws IOException {
     final String JAVADOC_CLASS = "com.sun.tools.javadoc.Main";
     Process javadocProcess;
     

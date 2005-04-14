@@ -441,7 +441,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
    * @return the class names that are actually test cases
    */
   public List<String> findTestClasses(List<String> classNames, List<File> files) throws RemoteException {
-    // new ScrollableDialog(null, "MainJVM.findTestClasses invoked", "", "").show();
+//    new ScrollableDialog(null, "MainJVM.findTestClasses invoked", "", "").show();
     return _interpreterJVM().findTestClasses(classNames, files);
   }
   
@@ -466,6 +466,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
    * @param e the ClassFileError describing the error when loading the class file
    */
   public void classFileError(ClassFileError e) throws RemoteException {
+//    new ScrollableDialog(null, "classFileError(" + e + ") called in MainJVM", "", "").show();
     _junitModel.classFileError(e);
   }
   /** Called to indicate that a suite of tests has started running.

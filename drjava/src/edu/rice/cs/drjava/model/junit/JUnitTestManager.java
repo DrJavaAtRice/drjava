@@ -107,28 +107,29 @@ public class JUnitTestManager {
     _testFiles = new ArrayList<File>();
     _suite = new TestSuite();
 
-    // new ScrollableDialog(null, "JUnitManager.findTestClasses invoked", "Candidate classes are = " + classNames, "files = " + files).show();
+//    new ScrollableDialog(null, "JUnitManager.findTestClasses invoked", "Candidate classes are = " + classNames, "files = " + files).show();
     
     int i = 0;
     try {
       for (i = 0; i < classNames.size(); i++) {
         String cName = classNames.get(i);
-        // new ScrollableDialog(null, "Class to be checked in JUnitManager: " + cName, "", "").show();
+//        new ScrollableDialog(null, "Class to be checked in JUnitManager: " + cName, "", "").show();
         try {
           if (_isTestCase(cName)) {
-            // new ScrollableDialog(null, "Test class " + cName + " found!", "", "").show();
+//            new ScrollableDialog(null, "Test class " + cName + " found!", "", "").show();
             _testClassNames.add(cName);
             _testFiles.add(files.get(i));
             _suite.addTest(_testRunner.getTest(cName));
           }
         }
         catch(LinkageError e) { 
-          _jmc.classFileError(new ClassFileError(files.get(i).getCanonicalPath(), e));
+//          new ScrollableDialog(null, "LinkageError(" + e + ") encountered in JUnitTestManager", "", "").show();
+          _jmc.classFileError(new ClassFileError(cName, files.get(i).getCanonicalPath(), e));
         }
       }
     }
     catch(IOException e) { throw new UnexpectedException(e); }
-    // new ScrollableDialog(null, "TestClassNames are: " + _testClassNames, "", "").show();
+//    new ScrollableDialog(null, "TestClassNames are: " + _testClassNames, "", "").show();
      
     return _testClassNames;
   }
@@ -172,7 +173,7 @@ public class JUnitTestManager {
       errors[0] = new JUnitError(null, -1, -1, t.getMessage(),
                                  false, "", "", StringOps.getStackTrace(t));
       _jmc.testSuiteEnded(errors);
-       // new ScrollableDialog(null, "Slave JVM: testSuite ended with errors", "", Arrays.toString(errors)).show();
+//      new ScrollableDialog(null, "Slave JVM: testSuite ended with errors", "", Arrays.toString(errors)).show();
       
     }
     finally {

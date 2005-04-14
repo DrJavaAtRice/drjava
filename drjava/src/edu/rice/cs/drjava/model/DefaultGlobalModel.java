@@ -2140,7 +2140,8 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
             _editorKit.read(reader, tempDoc, 0);
             reader.close(); // win32 needs readers closed explicitly!
           }
-          _loc = Math.max(_loc, tempDoc.getLength());
+          _loc = Math.min(_loc, tempDoc.getLength()); // make sure not past end
+          _loc = Math.max(_loc, 0); // make sure not less than 0
           tempDoc.setCurrentLocation(_loc);
           for (DocumentListener d : _list) {
             if (d instanceof DocumentUIListener) {
