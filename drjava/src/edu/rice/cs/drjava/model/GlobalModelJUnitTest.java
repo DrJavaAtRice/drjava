@@ -405,7 +405,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
         junitTestStartedCount++;
       }
       public void junitEnded() {
-        System.err.println("InterpreterReadyCount after reset = " + interpreterReadyCount);
+//        System.err.println("InterpreterReadyCount after reset = " + interpreterReadyCount);
         // assertInterpreterReadyCount(1);  // not true if testing is aborted
         junitEndCount++;
         synchronized (_lock) {

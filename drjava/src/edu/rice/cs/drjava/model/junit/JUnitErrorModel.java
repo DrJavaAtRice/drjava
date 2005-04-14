@@ -72,7 +72,5 @@ public class JUnitErrorModel extends CompilerErrorModel<JUnitError>{
    * Accessor
    * @return whether tests have been run before.
    */
-  public boolean haveTestsRun() {
-    return _testsHaveRun;
-  }
+  public boolean haveTestsRun() { return _testsHaveRun; }
 }

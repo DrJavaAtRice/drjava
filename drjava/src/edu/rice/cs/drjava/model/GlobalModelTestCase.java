@@ -59,6 +59,8 @@ import java.rmi.registry.Registry;
 import edu.rice.cs.util.*;
 import edu.rice.cs.util.text.DocumentAdapter;
 import edu.rice.cs.util.text.DocumentAdapterException;
+import edu.rice.cs.util.classloader.ClassFileError;
+
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.model.definitions.*;
 import edu.rice.cs.drjava.model.repl.*;
@@ -379,8 +381,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     return interactionsDoc.getDocText(resultsStartLocation, resultsLen);
   }
 
-  protected void interpretIgnoreResult(String input) throws DocumentAdapterException
-  {
+  protected void interpretIgnoreResult(String input) throws DocumentAdapterException {
     DocumentAdapter interactionsDoc = _model.getInteractionsDocument();
     interactionsDoc.insertText(interactionsDoc.getDocLength(), input,
                                InteractionsDocument.DEFAULT_STYLE);
@@ -529,24 +530,15 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       _file2 = f2;
     }
 
-    public File getFile() throws OperationCanceledException {
-      return _file;
-    }
+    public File getFile() throws OperationCanceledException { return _file; }
+    
     public File[] getFiles() throws OperationCanceledException {
-      if (_file2 != null) {
-        return new File[] {_file, _file2};
-      } else {
-        return new File[] {_file};
-      }
+      if (_file2 != null) return new File[] {_file, _file2};
+      else return new File[] {_file};
     }
-    public boolean warnFileOpen(File f) {
-      return true;
-    }
-    public boolean verifyOverwrite() {
-      return true;
-    }
-    public boolean shouldSaveAfterFileMoved(OpenDefinitionsDocument doc,
-                                            File oldFile) {
+    public boolean warnFileOpen(File f) { return true; }
+    public boolean verifyOverwrite() { return true; }
+    public boolean shouldSaveAfterFileMoved(OpenDefinitionsDocument doc, File oldFile) {
       return true;
     }
   }
@@ -558,21 +550,14 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     public File[] getFiles() throws OperationCanceledException {
       throw new OperationCanceledException();
     }
-    public boolean warnFileOpen(File f) {
-      return true;
-    }
-    public boolean verifyOverwrite() {
-      return true;
-    }
-    public boolean shouldSaveAfterFileMoved(OpenDefinitionsDocument doc, File oldFile) {
-      return true;
-    }
+    public boolean warnFileOpen(File f) { return true; }
+    public boolean verifyOverwrite() {return true; }
+    public boolean shouldSaveAfterFileMoved(OpenDefinitionsDocument doc, File oldFile) {  return true; }
   }
 
-  /**
-   * A GlobalModelListener for testing.
-   * By default it expects no events to be fired. To customize,
-   * subclass and override one or more methods.
+  /** A GlobalModelListener for testing.
+   *  By default it expects no events to be fired. To customize,
+   *  subclass and override one or more methods.
    */
   public static class TestListener implements SingleDisplayModelListener {
     /** Remembers when this listener was created. */
@@ -583,6 +568,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     protected int closeCount;
     protected int saveCount;
     protected int canAbandonCount;
+    protected int classFileErrorCount;
     protected int compileStartCount;
     protected int compileEndCount;
     protected int runStartCount;
@@ -626,6 +612,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       closeCount = 0;
       saveCount = 0;
       canAbandonCount = 0;
+      classFileErrorCount = 0;
       compileStartCount = 0;
       compileEndCount = 0;
       runStartCount = 0;
@@ -685,6 +672,9 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       assertEquals("number of times canAbandon fired", i, canAbandonCount);
     }
 
+     public void assertClassFileErrorCount(int i) {
+      assertEquals("number of times classFileError fired", i, classFileErrorCount);
+    }
     public void assertNewCount(int i) {
       assertEquals("number of times newFile fired", i, newCount);
     }
@@ -856,6 +846,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
                    interactionIncompleteCount);
     }
 
+   
     public void newFileCreated(OpenDefinitionsDocument doc) {
       listenerFail("newFileCreated fired unexpectedly");
     }
@@ -880,7 +871,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     public void fileReverted(OpenDefinitionsDocument doc) {
       listenerFail("fileReverted fired unexpectedly");
     }
-
+    
     public void undoableEditHappened() {
       listenerFail("undoableEditHappened fired unexpectedly");
     }
@@ -1005,6 +996,9 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
 
       // this is actually unreachable but the compiler won't believe me. sigh.
       throw new RuntimeException();
+    }
+    public void classFileError(ClassFileError e) {
+      listenerFail("classFileError fired unexpectedly");
     }
     public boolean shouldRevertFile(OpenDefinitionsDocument doc) {
       listenerFail("shouldRevertfile fired unexpectedly");
@@ -1185,6 +1179,14 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     public void nonTestCase(boolean isTestAll) {
       if (printMessages) System.out.println("listener.nonTestCase, isTestAll="+isTestAll);
       nonTestCaseCount++;
+      synchronized (_lock) {
+        _junitDone = true;
+        _lock.notify();
+      }
+    }
+    public void classFileError(ClassFileError e) {
+      if (printMessages) System.out.println("listener.classFileError, e="+e);
+      classFileErrorCount++;
       synchronized (_lock) {
         _junitDone = true;
         _lock.notify();

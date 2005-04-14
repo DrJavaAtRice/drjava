@@ -46,6 +46,7 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.model.junit;
 
 import java.util.List;
+import edu.rice.cs.util.classloader.ClassFileError;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 
 /**
@@ -55,11 +56,16 @@ import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
  */
 public interface JUnitListener {
 
-  /**
-   * Called when trying to test a non-TestCase class.
-   * @param isTestAll whether or not it was a use of the test all button
+  /** Called when trying to test a non-TestCase class.
+   *  @param isTestAll whether or not it was a use of the test all button
    */
   public void nonTestCase(boolean isTestAll);
+  
+  /** Called when JUnit encounters an illegal class file.
+   *  @param s the canonical path for the offending path\
+   *  @param e the error or exception thrown by loading and resolving f.
+   */
+  public void classFileError(ClassFileError e);
 
   /**
    * Called to demand that all files be saved before running JUnit tests.

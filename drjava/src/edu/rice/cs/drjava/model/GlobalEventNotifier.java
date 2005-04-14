@@ -51,6 +51,7 @@ import java.io.Serializable;
 import java.util.List;
 
 import edu.rice.cs.util.FileOps;
+import edu.rice.cs.util.classloader.ClassFileError;
 import edu.rice.cs.util.swing.*;
 
 /**
@@ -397,9 +398,8 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
 
   //---------------------------------- JUnit ---------------------------------//
 
-  /**
-   * Called when trying to test a non-TestCase class.
-   * @param isTestAll whether or not it was a use of the test all button
+  /** Called when trying to test a non-TestCase class.
+   *  @param isTestAll whether or not it was a use of the test all button
    */
   public void nonTestCase(boolean isTestAll) {
     _lock.startRead();
@@ -407,6 +407,14 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
     finally { _lock.endRead(); }
   }
 
+  /** Called when trying to test an illegal class file.
+   *  @param e the ClassFileError thrown when DrJava attempted to load the offending file
+   */
+  public void classFileError(ClassFileError e) {
+    _lock.startRead();
+    try { for (GlobalModelListener l : _listeners) { l.classFileError(e); } }
+    finally { _lock.endRead(); }
+  }
   /** Called after JUnit is started by the GlobalModel. */
   public void junitStarted(List<OpenDefinitionsDocument> docs) {
     _lock.startRead();

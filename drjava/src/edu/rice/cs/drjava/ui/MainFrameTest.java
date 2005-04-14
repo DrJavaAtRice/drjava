@@ -581,37 +581,23 @@ public final class MainFrameTest extends MultiThreadedTestCase {
      }
   }
 
-  /**
-   * A CompileListener for SingleDisplayModel (instead of
-   * GlobalModel)
-   */
-  class SingleDisplayModelCompileListener
-    extends GlobalModelTestCase.TestListener
-    implements SingleDisplayModelListener{
+  /** A CompileListener for SingleDisplayModel (instead of GlobalModel) */
+  class SingleDisplayModelCompileListener extends GlobalModelTestCase.TestListener
+    implements SingleDisplayModelListener {
 
-    public void compileStarted(){
-    }
+    public void compileStarted(){}
 
-    /**
-     * Just notify when the compile has ended
-     */
+    /** Just notify when the compile has ended */
     public void compileEnded(){
-      synchronized(this){
-        notify();
-      }
+      synchronized (this){ notify(); }
     }
 
     public void fileOpened(OpenDefinitionsDocument doc) {}
 
-
-    public void activeDocumentChanged(OpenDefinitionsDocument active){
-    }
+    public void activeDocumentChanged(OpenDefinitionsDocument active){ }
   }
 
-    /**
-   * A FileClosedListener for SingleDisplayModel (instead of
-   * GlobalModel)
-   */
+  /** A FileClosedListener for SingleDisplayModel (instead of GlobalModel) */
   class SingleDisplayModelFileClosedListener
     extends GlobalModelTestCase.TestListener
     implements SingleDisplayModelListener{

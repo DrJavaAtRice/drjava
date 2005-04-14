@@ -218,7 +218,7 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
     final File file3 = new File(_tempDir, "ABC2.java");
     doc3.saveFile(new FileSelector(file3));
 
-    JUnitTestListener listener = new JUnitTestListener();
+    JUnitTestListener listener = new JUnitNonTestListener();
     // Compile the incorrect ABC
 //      System.out.println("compiling doc3");
     doc3.startCompile();
@@ -227,14 +227,14 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
     }
     _model.addListener(listener);
     // Run the test: a VerifyError will be thrown.
-    JUnitTestListener listener2 = new JUnitTestListener();
-    _model.addListener(listener2);
+//    JUnitTestListener listener2 = new JUnitTestListener();
+//    _model.addListener(listener2);
 
+    listener.assertClassFileErrorCount(0);
     _runJUnit(doc2);
+    listener.assertClassFileErrorCount(1);
     
-    assertEquals("test case has one error reported", 1,
-                 _model.getJUnitModel().getJUnitErrorModel().getNumErrors());
-    _model.removeListener(listener2);
+    _model.removeListener(listener);
   }
 
 

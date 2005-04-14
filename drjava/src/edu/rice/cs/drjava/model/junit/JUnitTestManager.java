@@ -54,9 +54,12 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
+import javax.swing.JOptionPane;
 
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.StringOps;
+import edu.rice.cs.util.UnexpectedException;
+import edu.rice.cs.util.classloader.ClassFileError;
 import edu.rice.cs.util.swing.ScrollableDialog;
 import java.lang.reflect.Modifier;
 
@@ -106,17 +109,25 @@ public class JUnitTestManager {
 
     // new ScrollableDialog(null, "JUnitManager.findTestClasses invoked", "Candidate classes are = " + classNames, "files = " + files).show();
     
-    for (int i = 0; i < classNames.size(); i++) {
-      String cName = classNames.get(i);
-      // new ScrollableDialog(null, "Class to be checked in JUnitManager: " + cName, "", "").show();
-      if (_isTestCase(cName)) {
-        // new ScrollableDialog(null, "Test class " + cName + " found!", "", "").show();
-        _testClassNames.add(cName);
-        _testFiles.add(files.get(i));
-        _suite.addTest(_testRunner.getTest(cName));
+    int i = 0;
+    try {
+      for (i = 0; i < classNames.size(); i++) {
+        String cName = classNames.get(i);
+        // new ScrollableDialog(null, "Class to be checked in JUnitManager: " + cName, "", "").show();
+        try {
+          if (_isTestCase(cName)) {
+            // new ScrollableDialog(null, "Test class " + cName + " found!", "", "").show();
+            _testClassNames.add(cName);
+            _testFiles.add(files.get(i));
+            _suite.addTest(_testRunner.getTest(cName));
+          }
+        }
+        catch(LinkageError e) { 
+          _jmc.classFileError(new ClassFileError(files.get(i).getCanonicalPath(), e));
+        }
       }
     }
-              
+    catch(IOException e) { throw new UnexpectedException(e); }
     // new ScrollableDialog(null, "TestClassNames are: " + _testClassNames, "", "").show();
      
     return _testClassNames;

@@ -47,6 +47,7 @@ package edu.rice.cs.drjava.model;
 
 import java.io.File;
 import java.util.List;
+import edu.rice.cs.util.classloader.ClassFileError;
 
 /**
  * A dummy, do-nothing GlobalModelListener.
@@ -289,11 +290,15 @@ public class DummySingleDisplayModelListener implements SingleDisplayModelListen
    */
   public void currentDirectoryChanged(File dir) { }
   
-  /**
-   * Called when trying to test a non-TestCase class.
+  /** Called when trying to test a non-TestCase class.
    * @param isTestAll whether or not it was a use of the test all button
    */
   public void nonTestCase(boolean isTestAll) { }
+  
+    /** Called when trying to test an illegal class file.
+   * @param e the ClassFileError thrown when DrJava attempted to load the offending class.
+   */
+  public void classFileError(ClassFileError e) { }
 
   /**
    * Called to ask the listener if it is OK to abandon the current

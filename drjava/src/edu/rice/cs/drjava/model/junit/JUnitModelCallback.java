@@ -47,6 +47,7 @@ package edu.rice.cs.drjava.model.junit;
 
 import java.io.File;
 import edu.rice.cs.util.ClasspathVector;
+import edu.rice.cs.util.classloader.ClassFileError;
 
 /**
  * Callback interface which allows an JUnitModel to respond to
@@ -56,15 +57,17 @@ import edu.rice.cs.util.ClasspathVector;
  */
 public interface JUnitModelCallback {
   
-  /**
-   * Called from the JUnitTestManager if its given className is not a test case.
-   * @param isTestAll whether or not it was a use of the test all button
+  /** Called from the JUnitTestManager if its given className is not a test case.
+   *  @param isTestAll whether or not it was a use of the test all button
    */
   public void nonTestCase(boolean isTestAll);
   
-  /**
-   * Called to indicate that a suite of tests has started running.
-   * @param numTests The number of tests in the suite to be run.
+ /** Called from the JUnitTestManager if it encounters an illegal class file.
+   *  @param e the ClassFileError object describing the error
+   */
+  public void classFileError(ClassFileError e);
+    /** Called to indicate that a suite of tests has started running.
+   *  @param numTests The number of tests in the suite to be run.
    */
   public void testSuiteStarted(int numTests);
   

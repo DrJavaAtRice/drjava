@@ -49,6 +49,7 @@ import java.io.File;
 import java.rmi.RemoteException;
 import edu.rice.cs.util.newjvm.*;
 import edu.rice.cs.drjava.model.junit.JUnitError;
+import edu.rice.cs.util.classloader.ClassFileError;
 
 /**
  * This interface specifies the methods that the Main JVM exposes
@@ -86,12 +87,15 @@ public interface MainJVMRemoteI extends MasterRemote {
    */
   public void quitFailed(Throwable th) throws RemoteException;
 
-  /**
-   * Called if JUnit is invoked on a non TestCase class.
+  /** Called if JUnit is invoked on a non TestCase class.
    * @param isTestAll whether or not it was a use of the test all button
    */
   public void nonTestCase(boolean isTestAll) throws RemoteException;
 
+  /** Called if the slave JVM encounters an illegal class file during testing.
+   * @param e the ClassFileError object describing the error when loading the class file.
+   */
+  public void classFileError(ClassFileError e) throws RemoteException;
   /**
    * Called to indicate that a suite of tests has started running.
    * @param numTests The number of tests in the suite to be run.

@@ -95,6 +95,7 @@ import edu.rice.cs.util.swing.BorderlessScrollPane;
 import edu.rice.cs.util.swing.BorderlessSplitPane;
 import edu.rice.cs.util.swing.FileDisplayManager;
 import edu.rice.cs.util.text.DocumentAdapterException;
+import edu.rice.cs.util.classloader.ClassFileError;
 import edu.rice.cs.util.docnavigation.*;
 import edu.rice.cs.drjava.project.*;
 import edu.rice.cs.util.swing.*;
@@ -6273,6 +6274,27 @@ public class MainFrame extends JFrame implements OptionConstants {
         }});
     }
 
+    /** Event that is fired when testing encounters an illegal class file.  JUnit is never started. */ 
+    public void classFileError(ClassFileError e) {
+
+      final String message = 
+        "The class file " + e.getCanonicalPath() + " is illegal.\n " +
+        "When DrJava tries to load it, the following error is generated:\n" +  e.getError();
+      
+      // Not necessarily invoked from event-handling thread!
+
+      SwingUtilities.invokeLater(new Runnable() {
+        public void run() {
+          JOptionPane.showMessageDialog(MainFrame.this, message,
+                                        "Testing works only on well-formed, verifiable class files",
+                                        JOptionPane.ERROR_MESSAGE);
+          // clean up as junitEnded except hourglassOff (should factored into a private method)
+           showTab(_junitErrorPanel);
+            _junitAction.setEnabled(true);
+            _junitAllAction.setEnabled(true);
+            _junitErrorPanel.reset();
+        }});
+    }
     public void currentDirectoryChanged(File dir) {
       _setCurrentDirectory(dir);
     }

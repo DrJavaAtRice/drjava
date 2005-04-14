@@ -267,11 +267,13 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
                  cem.getNumErrors());
     _model.removeListener(listener);
   }
+  
+  private boolean _compileDone = false;
 
   /**
    * Tests the compiler errors have the correct line numbers.
    *  TODO: rewrite this test for the new error model interface
-   *
+   */
   public void testCompileFailsCorrectLineNumbers() throws BadLocationException, IOException {
     File aDir = new File(_tempDir, "a");
     File bDir = new File(_tempDir, "b");
@@ -284,46 +286,40 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
     final File file2 = new File(bDir, "DrJavaTestBar.java");
     doc2.saveFile(new FileSelector(file2));
 
+    final Object _lock = new Object();
+    _compileDone = false;
+    
     CompileShouldFailListener listener = new CompileShouldFailListener() {
-      public synchronized void compileEnded() {
+      public void compileEnded() {
         super.compileEnded();
-        notify();
+        _compileDone = true;
+        synchronized (_lock) { _lock.notify(); }
       }
     };
+    
     CompilerModel cm = _model.getCompilerModel();
     _model.addListener(listener);
-    synchronized (listener) {
-      cm.compileAll();
-      try {
-        listener.wait(10000);
-      }
+    cm.compileAll();
+    synchronized (_lock) {
+      try { while (! _compileDone) _lock.wait(); }
       catch (InterruptedException ie) {
         fail("Unexpected interrupted exception: " + ie.getMessage());
       }
     }
     assertCompileErrorsPresent(_name(), true);
-//    assertEquals("Should have 2 compiler errors", 2,
-//                 _model.getCompilerModel().getNumErrors());
+    assertEquals("Should have 2 compiler errors", 2, _model.getCompilerModel().getNumErrors());
     listener.checkCompileOccurred();
     _model.removeListener(listener);
 
     CompilerErrorModel cme = cm.getCompilerErrorModel();
     assertEquals("Should have had two errors", 2, cme.getNumErrors());
 
-//    TODO: rewrite these lines for the new interface
-//    Position[] positions = doc.getCompilerErrorModel().getPositions();
-//    Position[] positions2 = doc2.getCompilerErrorModel().getPositions();
-
-//    assertTrue("first doc should have errors", positions.length > 0);
-//    assertTrue("second doc should have errors", positions2.length > 0);
-//    assertTrue("location of first error should be between 20 and 29 inclusive (line 2)",
-//        positions[0].getOffset() <= 20 && positions[0].getOffset() <= 29);
-//    assertTrue("location of error should be after 34 (line 3 or 4)", positions2[0].getOffset() >= 34);
-
     CompilerError ce1 = cme.getError(0);
     CompilerError ce2 = cme.getError(1);
-    assertEquals("first doc should have an error", file, ce1.file());
-    assertEquals("second doc should have an error", file2, ce2.file());
+    assertEquals("first doc should have an error", file.getCanonicalFile(), 
+                 ce1.file().getCanonicalFile());
+    assertEquals("second doc should have an error", file2.getCanonicalFile(), 
+                 ce2.file().getCanonicalFile());
 
     Position p1 = cme.getPosition(ce1);
     Position p2 = cme.getPosition(ce2);
@@ -331,5 +327,5 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
                "inclusive (line 2), but was " + p1.getOffset(),
                p1.getOffset() <= 20 && p1.getOffset() <= 29);
     assertTrue("location of error should be after 34 (line 3 or 4)", p2.getOffset() >= 34);
-  }*/
+  }
 }

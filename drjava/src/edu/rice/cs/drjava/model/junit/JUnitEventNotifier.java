@@ -49,6 +49,8 @@ import java.util.List;
 import edu.rice.cs.drjava.model.EventNotifier;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.util.swing.ScrollableDialog;
+import edu.rice.cs.util.classloader.ClassFileError;
+
 import java.io.File;
 import java.io.IOException;
 /**
@@ -92,6 +94,12 @@ class JUnitEventNotifier extends EventNotifier<JUnitListener> implements JUnitLi
   public void nonTestCase(boolean isTestAll) {
     _lock.startRead();
     try { for (JUnitListener jul : _listeners) { jul.nonTestCase(isTestAll); } }
+    finally { _lock.endRead(); }
+  }
+
+  public void classFileError(ClassFileError e) {
+    _lock.startRead();
+    try { for (JUnitListener jul : _listeners) { jul.classFileError(e); } }
     finally { _lock.endRead(); }
   }
 

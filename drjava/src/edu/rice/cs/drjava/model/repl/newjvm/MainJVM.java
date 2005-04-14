@@ -69,6 +69,7 @@ import edu.rice.cs.util.ArgumentTokenizer;
 import edu.rice.cs.util.newjvm.*;
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.swing.ScrollableDialog;
+import edu.rice.cs.util.classloader.ClassFileError;
 import koala.dynamicjava.parser.wrapper.*;
 
 /**
@@ -439,8 +440,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
    *   @param files the associated file
    * @return the class names that are actually test cases
    */
-  public List<String> findTestClasses(List<String> classNames, List<File> files)
-    throws RemoteException {
+  public List<String> findTestClasses(List<String> classNames, List<File> files) throws RemoteException {
     // new ScrollableDialog(null, "MainJVM.findTestClasses invoked", "", "").show();
     return _interpreterJVM().findTestClasses(classNames, files);
   }
@@ -453,15 +453,21 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     return _interpreterJVM().runTestSuite();
   }
   
-  /**
-   * Called if JUnit is invoked on a non TestCase class.  Forwards from
-   * the other JVM to the local JUnit model.
+  /** Called if JUnit is invoked on a non TestCase class.  Forwards from
+   *  the other JVM to the local JUnit model.
    * @param isTestAll whether or not it was a use of the test all button
    */
   public void nonTestCase(boolean isTestAll) throws RemoteException {
     _junitModel.nonTestCase(isTestAll);
   }
   
+  /** Called if the slave JVM encounters an illegal class file in testing.  Forwards from
+   *  the other JVM to the local JUnit model.
+   * @param e the ClassFileError describing the error when loading the class file
+   */
+  public void classFileError(ClassFileError e) throws RemoteException {
+    _junitModel.classFileError(e);
+  }
   /** Called to indicate that a suite of tests has started running.
    *  Forwards from the other JVM to the local JUnit model.
    *  @param numTests The number of tests in the suite to be run.
@@ -1012,6 +1018,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
    */
   public static class DummyJUnitModel implements JUnitModelCallback {
     public void nonTestCase(boolean isTestAll) {}
+    public void classFileError(ClassFileError e) {}
     public void testSuiteStarted(int numTests) {}
     public void testStarted(String testName) {}
     public void testEnded(String testName, boolean wasSuccessful, boolean causedError) {}

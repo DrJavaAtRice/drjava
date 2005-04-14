@@ -66,6 +66,7 @@ import edu.rice.cs.util.InputStreamRedirector;
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.ClasspathVector;
 import edu.rice.cs.util.swing.ScrollableDialog;
+import edu.rice.cs.util.classloader.ClassFileError;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.platform.PlatformFactory;
 import edu.rice.cs.drjava.model.junit.JUnitModelCallback;
@@ -138,9 +139,7 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
    */
   private boolean _messageOnResetFailure;
   
-  /**
-   * Private constructor; use the singleton ONLY instance.
-   */
+  /** Private constructor; use the singleton ONLY instance. */
   private InterpreterJVM() {
     _quitSlaveThreadName = "Reset Interactions Thread";
     _pollMasterThreadName = "Poll DrJava Thread";
@@ -149,9 +148,7 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     _messageOnResetFailure = true;
   }
   
-  /**
-   * Resets this InterpreterJVM to its default state.
-   */
+  /** Resets this InterpreterJVM to its default state. */
   private void reset() {
     classpathManager = new ClasspathManager();
     _defaultInterpreter = new InterpreterData(new DynamicJavaAdapter(classpathManager));
@@ -161,28 +158,19 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     _junitTestManager = new JUnitTestManager(this);
     
     // do an interpretation to get the interpreter loaded fully
-    try {
-      _activeInterpreter.getInterpreter().interpret("0");
-    }
-    catch (ExceptionReturnedException e) {
-      throw new edu.rice.cs.util.UnexpectedException(e);
-    }
+    try { _activeInterpreter.getInterpreter().interpret("0"); }
+    catch (ExceptionReturnedException e) { throw new edu.rice.cs.util.UnexpectedException(e); }
   }
   
-  /**
-   * updates the security manager in DrJava
-   */
+  /** Updates the security manager in DrJava */
   public void enableSecurityManager() throws RemoteException{
     edu.rice.cs.drjava.DrJava.enableSecurityManager();
   }
   
-  /**
-   * updates the security manager in DrJava
-   */
+  /** Updates the security manager in DrJava */
   public void disableSecurityManager() throws RemoteException{
     edu.rice.cs.drjava.DrJava.disableSecurityManager();
   }
-  
   
   private static final Log _log = new Log("IntJVMLog", false);
   private static void _dialog(String s) {
@@ -738,17 +726,25 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     return _junitTestManager.runTestSuite();
   }
   
-  /**
-   * Notifies the main JVM if JUnit is invoked on a non TestCase class.
-   * @param isTestAll whether or not it was a use of the test all button
+  /** Notifies the main JVM that JUnit has been invoked on a non TestCase class.
+   *  @param isTestAll whether or not it was a use of the test all button
    */
   public void nonTestCase(boolean isTestAll) {
-    try {
-      _mainJVM.nonTestCase(isTestAll);
-    }
+    try { _mainJVM.nonTestCase(isTestAll); }
     catch (RemoteException re) {
       // nothing to do
       _log.logTime("nonTestCase: " + re.toString());
+    }
+  }
+  
+  /** Notifies the main JVM that JUnitTestManager has encountered an illegal class file.
+   *  @param e the ClassFileError object describing the error on loading the file
+   */
+  public void classFileError(ClassFileError e) {
+    try { _mainJVM.classFileError(e); }
+    catch (RemoteException re) {
+      // nothing to do
+      _log.logTime("classFileError: " + re.toString());
     }
   }
   

@@ -55,6 +55,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import edu.rice.cs.util.FileOps;
+import edu.rice.cs.util.classloader.ClassFileError;
 import edu.rice.cs.drjava.model.GlobalModel;
 import edu.rice.cs.drjava.model.IGetDocuments;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
@@ -71,6 +72,7 @@ import edu.rice.cs.util.ExitingNotAllowedException;
 import edu.rice.cs.util.ClasspathVector;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.ScrollableDialog;
+import edu.rice.cs.util.classloader.ClassFileError;
 import org.apache.bcel.classfile.*;
 // TODO: remove swing dependency!
 import javax.swing.text.StyledDocument;
@@ -188,15 +190,16 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
         if (_testInProgress) return;
         _testInProgress = true;
       }
-      try {
-        List<String> testClasses = _jvm.findTestClasses(qualifiedClassnames, files);
-        if (testClasses.isEmpty()) {
-          nonTestCase(true);
-          return;
-        } 
-        _notifier.junitAllStarted(); 
-        _jvm.runTestSuite();
+      List<String> testClasses;
+      try { testClasses = _jvm.findTestClasses(qualifiedClassnames, files); }
+      catch(IOException e) { throw new UnexpectedException(e); }
+      
+      if (testClasses.isEmpty()) {
+        nonTestCase(true);
+        return;
       }
+      _notifier.junitAllStarted(); 
+      try { _jvm.runTestSuite(); }
       catch(IOException e) { 
         _notifier.junitEnded();
         throw new UnexpectedException(e); }
@@ -388,7 +391,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
               catch(ClassFormatException e) { 
               /* class file is bad */ }
               // match source file to odd (if possible)
-              // if match, add clasname to test suite
+              // if match, add classname to test suite
             }
           }
         }
@@ -412,30 +415,29 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     synchronized (_compilerModel) {
 //        new ScrollableDialog(null, "DefaultJunitModel: holding _compileModel lock", "", "").show();
         /** Set up junit test suite on slave JVM; get TestCase classes forming that suite */
-        try {
-          List<String> tests = _jvm.findTestClasses(classNames, files);
-          if (tests == null || tests.isEmpty()) {
-            nonTestCase(allTests);
-            return;
-          }
-          
-          ArrayList<OpenDefinitionsDocument> odds = new ArrayList<OpenDefinitionsDocument>();
-          for (String name: tests) { odds.add(classNamesToODDs.get(name)); }
-   
-          try {
-            /** Run the junit test suite that has already been set up on the slave JVM */
-            _notifier.junitStarted(odds);
-            //          new ScrollableDialog(null, "junitStarted executed in DefaultJunitModel", "", "").show();
-            _jvm.runTestSuite();
-            
-          }
-          catch(IOException e) { 
-            _notifier.junitEnded();  // balances junitStarted()
-            throw new UnexpectedException(e); 
-          }
-        }
-        catch(IOException e) { throw new UnexpectedException(e); }
-          
+      List<String> tests;
+      try { tests = _jvm.findTestClasses(classNames, files); }
+      catch(IOException e) { throw new UnexpectedException(e); }
+      
+      if (tests == null || tests.isEmpty()) {
+        nonTestCase(allTests);
+        return;
+      }
+      
+      ArrayList<OpenDefinitionsDocument> odds = new ArrayList<OpenDefinitionsDocument>();
+      for (String name: tests) { odds.add(classNamesToODDs.get(name)); }
+      
+      try {
+        /** Run the junit test suite that has already been set up on the slave JVM */
+        _notifier.junitStarted(odds);
+        //          new ScrollableDialog(null, "junitStarted executed in DefaultJunitModel", "", "").show();
+        _jvm.runTestSuite();
+        
+      }
+      catch(IOException e) { 
+        _notifier.junitEnded();  // balances junitStarted()
+        throw new UnexpectedException(e); 
+      }
     }
   }
   
@@ -469,18 +471,20 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
       synchronized (this) { _testInProgress = false;}
   }
   
+  /** Called to indicate that an illegal class file was encountered
+   *  @param e the ClassFileObject describing the error.
+   */
+  public void classFileError(ClassFileError e) { _notifier.classFileError(e); }
+  
   /** Called to indicate that a suite of tests has started running.
    *  @param numTests The number of tests in the suite to be run.
    */
-  public void testSuiteStarted(final int numTests) { 
-    _notifier.junitSuiteStarted(numTests);
-  }
+  public void testSuiteStarted(final int numTests) { _notifier.junitSuiteStarted(numTests); }
+  
   /** Called when a particular test is started.
    *  @param testName The name of the test being started.
    */
-  public void testStarted(final String testName) { 
-    _notifier.junitTestStarted(testName);
-  }
+  public void testStarted(final String testName) { _notifier.junitTestStarted(testName); }
   
   /** Called when a particular test has ended.
    *  @param testName The name of the test that has ended.

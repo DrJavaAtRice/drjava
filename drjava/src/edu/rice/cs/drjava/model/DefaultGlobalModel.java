@@ -317,16 +317,12 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
    * the JVM from being flooded with print calls.
    * TODO: why is this here, and why is it public?
    */
-  public static final int WRITE_DELAY = 50;
+  public static final int WRITE_DELAY = 5;
   
-  /**
-   * A PageFormat object for printing to paper.
-   */
+  /** A PageFormat object for printing to paper. */
   private PageFormat _pageFormat = new PageFormat();
   
-  /**
-   * Listens for requests from System.in.
-   */
+  /** Listens for requests from System.in. */
   private InputListener _inputListener;
   
   
@@ -1770,7 +1766,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
       catch (InterruptedException e) {
         // It's ok, we'll go ahead and resume
       }
-    }
+  }
   }
 
 
