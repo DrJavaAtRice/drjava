@@ -454,6 +454,12 @@ public interface OptionConstants {
     new KeyStrokeOption("key.find.next",
                         KeyStroke.getKeyStroke(KeyEvent.VK_F3, 0));
   /**
+   * The key binding for find previous (opposite direction)
+   */
+  public static final KeyStrokeOption KEY_FIND_PREV =
+    new KeyStrokeOption("key.find.prev",
+                        KeyStroke.getKeyStroke(KeyEvent.VK_F3,  InputEvent.SHIFT_MASK));
+  /**
    * The key binding for find and replace
    */
   public static final KeyStrokeOption KEY_FIND_REPLACE =

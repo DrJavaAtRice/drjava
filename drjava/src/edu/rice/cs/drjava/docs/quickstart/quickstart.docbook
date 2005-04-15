@@ -470,14 +470,14 @@ To save a file, either click on the "Save" button or choose "File, Save." If you
 	</formalpara></listitem>
 
 	<listitem><formalpara>
-		<title>Auxiliary Files:</title>
-		<para>Files that are located outside of the project directory but that are still important to the project.  They are compiled and tested with the project and saved as part of the project file.</para>
+		<title>Included External Files:</title>
+		<para>Files that are located outside of the project directory but that are still important to the project.  They are compiled and tested with the project and are opened whenever the project is opened.</para>
 	</formalpara></listitem>
 
 	</itemizedlist>
 
 
-	<para>To move a file from the External Files branch to the Auxiliary Files branch, right click on the file in the tree listing, and select the appropriate move option.</para>
+	<para>To move a file from the External Files branch to the Included External Files branch, right click on the file in the tree listing, and select the appropriate option at the bottom of the menu.</para>
 	
 	
 	<para>The behavior of some of the buttons also changes in Tree View.  The "Compile All" button only compiles open project source and auxiliary files, instead of all open files.  "Test All" will only tess open project source and auxiliary files.  To compile or test the external files, you can right click on the folder and select "Compile Folder" or "Test Folder".</para>

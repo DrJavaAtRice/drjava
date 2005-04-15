@@ -566,6 +566,13 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
       }
     });
   }
+  
+  public void setSearchBackwards(boolean b) {
+    _machine.setSearchBackwards(b);
+  }
+  public boolean getSearchBackwards() {
+    return _machine.getSearchBackwards();
+  }
 
   /**
    * Sets the font of the find and replace fields to f.

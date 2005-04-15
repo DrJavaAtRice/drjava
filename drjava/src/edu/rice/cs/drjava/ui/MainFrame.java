@@ -357,8 +357,8 @@ public class MainFrame extends JFrame implements OptionConstants {
   DirectoryChooser _folderChooser;
   private JCheckBox _openRecursiveCheckBox;
 
-  private Action _moveToAuxiliaryAction = new AbstractAction("Convert to Auxiliary") {
-    { /* initialization block for anonymous class */
+  private Action _moveToAuxiliaryAction = new AbstractAction("Include With Project"){
+    {
       String msg = 
       "<html>Open this document each time this project is opened.<br>"+
       "This file would then be compiled and tested with the<br>"+
@@ -858,6 +858,19 @@ public class MainFrame extends JFrame implements OptionConstants {
         _currentDefPane.requestFocus();
       }
       else _lastFocusOwner.requestFocus();
+    }
+  };
+  
+  /** 
+   * does the find next in the opposite direction. If the 
+   * direction is backward it searches forward 
+   */
+  private Action _findPrevAction = new AbstractAction("Find Previous") {
+    public void actionPerformed(ActionEvent ae) {
+      boolean sb = _findReplace.getSearchBackwards();
+      _findReplace.setSearchBackwards(!sb); // reverse direction
+      _findNextAction.actionPerformed(ae);
+      _findReplace.setSearchBackwards(sb); // restore direction
     }
   };
 
@@ -3070,6 +3083,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       try { DrJava.getConfig().saveConfiguration(); }
       catch (IOException ioe) { _showIOError(ioe); }
     }
+    //DrJava.consoleOut().println("Quitting DrJava...");
     _model.quit();
   }
 
@@ -3785,6 +3799,7 @@ public class MainFrame extends JFrame implements OptionConstants {
 
     _setUpAction(_findReplaceAction, "Find", "Find or replace text in the document");
     _setUpAction(_findNextAction, "Find Next", "Repeats the last find");
+    _setUpAction(_findPrevAction, "Find Previous", "Repeats the last find in the opposite direction");
     _setUpAction(_gotoLineAction, "Go to line", "Go to a line number in the document");
 
     _setUpAction(_switchToPrevAction, "Back", "Switch to the previous document");
@@ -4012,6 +4027,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     editMenu.addSeparator();
     _addMenuItem(editMenu, _findReplaceAction, KEY_FIND_REPLACE);
     _addMenuItem(editMenu, _findNextAction, KEY_FIND_NEXT);
+    _addMenuItem(editMenu, _findPrevAction, KEY_FIND_PREV);
     _addMenuItem(editMenu, _gotoLineAction, KEY_GOTO_LINE);
 
     // Next, prev doc
@@ -4783,16 +4799,16 @@ public class MainFrame extends JFrame implements OptionConstants {
           else{
             try{
               String groupName = _model.getDocumentNavigator().getNameOfSelectedTopLevelGroup();
-              if(groupName.equals("[ Source Files ]")) { _navPanePopupMenu.show(e.getComponent(), e.getX(), e.getY()); }
-              else if(groupName.equals("[ External Files ]")){
+              if(groupName == _model.getSourceBinTitle()){
+                _navPanePopupMenu.show(e.getComponent(), e.getX(), e.getY());
+              }else if(groupName == _model.getExternalBinTitle()){
                 INavigatorItem n = _model.getDocumentNavigator().getCurrentSelectedLeaf();
                 if (n != null) {
                   OpenDefinitionsDocument d = (OpenDefinitionsDocument) n;
                   if (d.isUntitled()) { _navPanePopupMenu.show(e.getComponent(), e.getX(), e.getY()); }
                   else _navPanePopupMenuForExternal.show(e.getComponent(), e.getX(), e.getY());
                 }
-              }
-              else if(groupName.equals("[ Auxiliary Files ]")){
+              }else if(groupName == _model.getAuxiliaryBinTitle()){
                 _navPanePopupMenuForAuxiliary.show(e.getComponent(), e.getX(), e.getY());
               }
             }
@@ -5044,7 +5060,6 @@ public class MainFrame extends JFrame implements OptionConstants {
     _reenableScrollBar();
 
     int oldLocation = _docSplitPane.getDividerLocation();
-    
     _docSplitPane.setRightComponent(scroll);
     _docSplitPane.setDividerLocation(oldLocation);
 

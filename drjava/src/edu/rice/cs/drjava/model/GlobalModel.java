@@ -207,6 +207,24 @@ public interface GlobalModel extends IGetDocuments, ILoadDocuments {
    * formats a string pathname for use in the document navigator
    */
   public String fixPathForNavigator(String path) throws IOException;
+
+  /**
+   * Gives the title of the source bin for the navigator
+   * @return The text used for the source bin in the tree navigator
+   */
+  public String getSourceBinTitle();
+  
+  /**
+   * Gives the title of the external files bin for the navigator
+   * @return The text used for the external files bin in the tree navigator
+   */
+  public String getExternalBinTitle();
+  
+  /**
+   * Gives the title of the aux files bin for the navigator
+   * @return The text used for the aux files bin in the tree navigator
+   */
+  public String getAuxiliaryBinTitle();
   
   /**
    * adds a document to the list of auxiliary files
