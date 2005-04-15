@@ -152,6 +152,18 @@ public class History implements OptionConstants, Serializable {
     setEditedEntry(entry);
     _cursor--;
   }
+  
+  /**
+   * Returns the last entry from the history
+   */
+  public String getLastEntry() {
+    if (!hasPrevious()) {
+      throw new ArrayIndexOutOfBoundsException();
+    }
+    else{
+      return _vector.get(_cursor-1);
+    }
+  }
 
   /**
    * Moves cursor forward 1, or throws exception if there is none.

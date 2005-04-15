@@ -759,7 +759,9 @@ public class MainFrame extends JFrame implements OptionConstants {
 
   /**
    * Action that copies whatever is currently in the interactions pane
-   * at the prompt to the definitions pane.
+   * at the prompt to the definitions pane.  If the current string is 
+   * empty, then it will attempt to return the last entry from the 
+   * interactions pane's history.
    */
   private Action _copyInteractionToDefinitionsAction =
     new AbstractAction("Lift Current Interaction to Definitions")
@@ -768,6 +770,14 @@ public class MainFrame extends JFrame implements OptionConstants {
       String text = _interactionsController.getDocument().getCurrentInput();
       if (!text.equals("")) {
         _putTextIntoDefinitions(text + "\n");
+        return;
+      }
+      History history = _interactionsController.getDocument().getHistory();
+      if (history.hasPrevious()) {
+        text = history.getLastEntry();
+        //It is assumed that empty strings are not put into the history
+        _putTextIntoDefinitions(text + "\n");
+        return;
       }
     }
   };
@@ -2716,8 +2726,8 @@ public class MainFrame extends JFrame implements OptionConstants {
     //    l.add(_model.getActiveDocument());
     //    _model.closeFiles(l);
     
-    if(_model.getActiveDocument().isAuxiliaryFile() || 
-       _model.getActiveDocument().isProjectFile()){
+    if((_model.isProjectActive() && _model.getActiveDocument().isInProjectPath()) ||
+       _model.getActiveDocument().isAuxiliaryFile()){
 
       String filename = null;
       OpenDefinitionsDocument doc = _model.getActiveDocument();
@@ -6354,6 +6364,31 @@ public class MainFrame extends JFrame implements OptionConstants {
           boolean r = false;
           if (notFound) r = _saveAs(); else r = _save();
           _model.setActiveDocument(lastActive);
+          if(r && (doc.isAuxiliaryFile() || 
+                   (_model.isProjectActive() && doc.isInProjectPath()))) {
+            String savedFilename = null;
+            try{
+              savedFilename = doc.getFile().getName();
+            }
+            catch(IllegalStateException ise) {
+              //Shouldn't happen because this file was just saved
+              throw new UnexpectedException(ise);
+            }
+            catch(FileMovedException fme) {
+              savedFilename = "The current file";
+            }
+            rc = JOptionPane.showConfirmDialog(MainFrame.this,
+                                               savedFilename + 
+                                               "  is now in the current project.\n" +
+                                               "If you close it, it will be permanently removed "+
+                                               "from the project.\n" +
+                                               "Do you still wish to close it.",
+                                               "Close Project File",
+                                               JOptionPane.YES_NO_CANCEL_OPTION);
+            if(rc != JOptionPane.YES_OPTION)
+              return false;
+            else return true;
+          }
           return r;
         case JOptionPane.NO_OPTION:
           _model.setActiveDocument(lastActive);
