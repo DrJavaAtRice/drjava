@@ -1388,6 +1388,9 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
     if (_documentNavigator instanceof JTreeSortNavigator) {
       ((JTreeSortNavigator)_documentNavigator).collapsePaths(ir.getCollapsedPaths());
     }
+    
+    resetInteractions(); // Since the classpath is most likely changed.
+    
     return srcFiles; // Unnecessarily returns src files in keeping with the previous interface.
   }
   
@@ -1399,7 +1402,6 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
   public void closeProject() {
     setDocumentNavigator(AWTContainerNavigatorFactory.Singleton.makeListNavigator(getDocumentNavigator()));
     setFileGroupingState(_makeFlatFileGroupingState());
-    
     // Reset rather than telling the user to reset. This was a design decision
     // made by the class Spring 2005 after much debate.
     
