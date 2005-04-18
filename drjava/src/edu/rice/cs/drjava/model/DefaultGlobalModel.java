@@ -1402,12 +1402,13 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
   public void closeProject() {
     setDocumentNavigator(AWTContainerNavigatorFactory.Singleton.makeListNavigator(getDocumentNavigator()));
     setFileGroupingState(_makeFlatFileGroupingState());
+
     // Reset rather than telling the user to reset. This was a design decision
     // made by the class Spring 2005 after much debate.
     
     //_interactionsModel.getDocument().insertBeforeLastPrompt(CLASSPATH_OUT_OF_SYNC_MSG, 
     //                                                        InteractionsDocument.SYSTEM_ERR_STYLE);
-    resetInteractions(); 
+    resetInteractions();
     _notifier.projectClosed();
   }
   

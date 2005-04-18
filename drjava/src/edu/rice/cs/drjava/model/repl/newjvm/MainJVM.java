@@ -980,9 +980,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     }
   }
   
-  /**
-   * InteractionsModel which does not react to events.
-   */
+  /** InteractionsModel which does not react to events. */
   public static class DummyInteractionsModel implements InteractionsModelCallback {
     public int getDebugPort() throws IOException { return -1; }
     public void replSystemOutPrint(String s) {}
@@ -1014,9 +1012,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     public void interpreterReady() {}
   }
   
-  /**
-   * JUnitModel which does not react to events.
-   */
+  /** JUnitModel which does not react to events. */
   public static class DummyJUnitModel implements JUnitModelCallback {
     public void nonTestCase(boolean isTestAll) {}
     public void classFileError(ClassFileError e) {}
@@ -1029,9 +1025,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     public void junitJVMReady() {}
   }
   
-  /**
-   * DebugModelCallback which does not react to events.
-   */
+  /** DebugModelCallback which does not react to events. */
   public static class DummyDebugModel implements DebugModelCallback {
     public void notifyDebugInterpreterAssignment(String name) {
     }

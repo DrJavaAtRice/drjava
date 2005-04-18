@@ -604,11 +604,11 @@ public class MainFrame extends JFrame implements OptionConstants {
     public void actionPerformed(ActionEvent ae) { _pageSetup(); }
   };
 
-  /** Compiles all the project. */
-  private Action _compileOpenProjectAction = new AbstractAction("Compile Open Project Files") {
-    public void actionPerformed(ActionEvent ae) { _compileAll(); } // right now, it's the same as compile all
-  };
-  
+//  /** Compiles all the project. */
+//  private Action _compileOpenProjectAction = new AbstractAction("Compile Open Project Files") {
+//    public void actionPerformed(ActionEvent ae) { _compileAll(); } // right now, it's the same as compile all
+//  };
+ 
   /** Compiles all the project. */
   private Action _compileProjectAction = new AbstractAction("Compile Project") {
     public void actionPerformed(ActionEvent ae) { _compileProject(); }
@@ -646,54 +646,34 @@ public class MainFrame extends JFrame implements OptionConstants {
 
   /** Runs JUnit over all open JUnit tests. */
   private Action _junitAllAction = new AbstractAction("Test All Documents") {
-    public void actionPerformed(ActionEvent e) {
-      new Thread("Running JUnit Tests") {
-        public void run() {
-//          new ScrollableDialog(null, "_junitAllAction called", "", "").show();
-          try {
-            hourglassOn();
-            if (_model.isProjectActive()) _model.getJUnitModel().junitProject();
-            else _model.getJUnitModel().junitAll();
-          }
-          finally {  hourglassOff(); }
-        }
-      }.start();
-    }
+    public void actionPerformed(ActionEvent e) { _junitAll(); }
+
   };
 
   /** Runs JUnit over all open JUnit tests in the project directory. */
-  private Action _junitOpenProjectFilesAction = new AbstractAction("Test Open Project Files") {
-    public void actionPerformed(ActionEvent e) {
-      new Thread("Running JUnit Tests") {
-        public void run() { 
-          try {
-            hourglassOn();
-            _model.getJUnitModel().junitProject(); 
-          }
-          finally { hourglassOff(); }
-        }
-      }.start();
-    }
+  private Action _junitOpenProjectFilesAction = new AbstractAction("Test Project") {
+    public void actionPerformed(ActionEvent e) { _junitProject(); }
   };
+     
   
-  /** JUnit a directory. */
-  private Action _junitProjectAction = new AbstractAction("Test Project"){
-    public void actionPerformed(ActionEvent e){
-      new Thread("Running JUnit Tests"){
-        public void run(){
-          if (_model.isProjectActive()) {
-            try {
-              // hourglassOn();  // also done in junitStarted
-              _model.junitAll();
-            }
-            finally {
-             //  hourglassOff(); // also done in junitEnded
-            }
-          }
-        }
-      }.start();
-    }
-  };
+//  /** JUnit a directory. */
+//  private Action _junitProjectAction = new AbstractAction("Test Project"){
+//    public void actionPerformed(ActionEvent e){
+//      new Thread("Running JUnit Tests"){
+//        public void run(){
+//          if (_model.isProjectActive()) {
+//            try {
+//              // hourglassOn();  // also done in junitStarted
+//              _model.junitAll();
+//            }
+//            finally {
+//             //  hourglassOff(); // also done in junitEnded
+//            }
+//          }
+//        }
+//      }.start();
+//    }
+//  };
 
   /** Runs Javadoc on all open documents (and the files in their packages). */
   private Action _javadocAllAction = new AbstractAction("Javadoc All Documents") {
@@ -2492,9 +2472,9 @@ public class MainFrame extends JFrame implements OptionConstants {
       _closeProjectAction.setEnabled(true);
       _saveProjectAction.setEnabled(true);
       _projectPropertiesAction.setEnabled(true);
-      _junitProjectAction.setEnabled(true);
+//      _junitProjectAction.setEnabled(true);
       _junitOpenProjectFilesAction.setEnabled(true);
-      _compileOpenProjectAction.setEnabled(true);
+//      _compileOpenProjectAction.setEnabled(true);
       _compileProjectAction.setEnabled(true);
       _jarProjectAction.setEnabled(true);
       if (_model.getBuildDirectory() != null) _cleanAction.setEnabled(true);
@@ -2534,23 +2514,21 @@ public class MainFrame extends JFrame implements OptionConstants {
       new ForegroundColorListener(renderer);
       new BackgroundColorListener(renderer);
       _resetNavigatorPane();
-      if(_model.getDocumentCount() == 1)
-        _model.setActiveFirstDocument();
+      if(_model.getDocumentCount() == 1) _model.setActiveFirstDocument();
       _closeProjectAction.setEnabled(false);
       _saveProjectAction.setEnabled(false);
       _projectPropertiesAction.setEnabled(false);
-      _junitProjectAction.setEnabled(false);
+//      _junitProjectAction.setEnabled(false);
       _jarProjectAction.setEnabled(false);
       _junitOpenProjectFilesAction.setEnabled(false);
-      _compileOpenProjectAction.setEnabled(false);
+//      _compileOpenProjectAction.setEnabled(false);
       _compileProjectAction.setEnabled(false);
       _setUpContextMenus();
       _currentProjFile = null;
       _compileButton.setToolTipText("Compile all open documents");
       return true;
-    }else{
-      return false;
     }
+    else return false;
   }
   
   private boolean _checkProjectClose() {
@@ -2752,8 +2730,7 @@ public class MainFrame extends JFrame implements OptionConstants {
                                             null,
                                             options,
                                             options[1]);
-      if(rc != JOptionPane.YES_OPTION)
-        return;
+      if (rc != JOptionPane.YES_OPTION) return;
     }
     
     //Either this is an external file or user actually wants to close it
@@ -2761,21 +2738,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     
   }
   
-  private void _junitFolder(){
-    INavigatorItem n;
-    Enumeration<INavigatorItem> e = _model.getDocumentNavigator().getDocuments();
-    final LinkedList<OpenDefinitionsDocument> l = new LinkedList<OpenDefinitionsDocument>();
-    if (_model.getDocumentNavigator().isGroupSelected()){
-      while (e.hasMoreElements()){
-        n = e.nextElement();
-        if(_model.getDocumentNavigator().isSelectedInGroup(n)){
-          l.add((OpenDefinitionsDocument) n);  // FIX THIS!
-        }
-      }
-      _model.getJUnitModel().junitDocs(l);
-    }
-  }
-  
+ 
   private void _closeFolder(){
     INavigatorItem n;
     Enumeration<INavigatorItem> e = _model.getDocumentNavigator().getDocuments();
@@ -3312,6 +3275,8 @@ public class MainFrame extends JFrame implements OptionConstants {
   private void _junit() {
     final SwingWorker worker = new SwingWorker() {
       public Object construct() {
+        
+        hourglassOn();  // turned off in JUnitStarted/NonTestCase  
         try { _model.getActiveDocument().startJUnit(); }
         catch (FileMovedException fme) { _showFileMovedError(fme); }
         catch (IOException ioe) { _showIOError(ioe); }
@@ -3325,6 +3290,54 @@ public class MainFrame extends JFrame implements OptionConstants {
                                         "Error Running JUnit",
                                         JOptionPane.ERROR_MESSAGE);
         }
+        return null;
+      }
+    };
+    worker.start();
+  }
+  
+  private void _junitFolder() {
+    final SwingWorker worker = new SwingWorker() {
+      public Object construct() {
+        
+        INavigatorItem n;
+        hourglassOn();  // turned off when JUnitStarted event is fired
+        Enumeration<INavigatorItem> e = _model.getDocumentNavigator().getDocuments();
+        final LinkedList<OpenDefinitionsDocument> l = new LinkedList<OpenDefinitionsDocument>();
+        if (_model.getDocumentNavigator().isGroupSelected()) {
+          while (e.hasMoreElements()){
+            n = e.nextElement();
+            if(_model.getDocumentNavigator().isSelectedInGroup(n)){
+              l.add((OpenDefinitionsDocument) n);  // FIX THIS CAST!
+            }
+          }
+          _model.getJUnitModel().junitDocs(l);
+        }
+        return null;
+      }
+    };
+    worker.start(); 
+  }
+  
+  private void _junitProject() {
+    new Thread("Running JUnit Tests") {
+      public void run() { 
+        try {
+          hourglassOn();  // turned off in JUnitStarted/NonTestCase event
+          _model.getJUnitModel().junitProject(); 
+        }
+        finally { /* hourglassOff(); */ }
+      }
+    }.start();
+  }
+  
+  private void _junitAll() {
+    final SwingWorker worker = new SwingWorker() {
+      public Object construct() {
+        hourglassOn();  // turned off in JUnitStarted/NonTestCase event
+        //          new ScrollableDialog(null, "_junitAllAction called", "", "").show();
+        if (_model.isProjectActive()) _model.getJUnitModel().junitProject();
+        else _model.getJUnitModel().junitAll();
         return null;
       }
     };
@@ -3760,14 +3773,14 @@ public class MainFrame extends JFrame implements OptionConstants {
     _setUpAction(_projectPropertiesAction, "Project Properties", "Preferences", "Edit Project Properties");
     _projectPropertiesAction.setEnabled(false);    
 
-    _setUpAction(_junitProjectAction, "Test", "Test", "Test the current project");
-    _junitProjectAction.setEnabled(false);    
-    _setUpAction(_junitOpenProjectFilesAction, "Test", "Test all open project files");
+//    _setUpAction(_junitProjectAction, "Test", "Test", "Test the current project");
+//    _junitProjectAction.setEnabled(false);    
+    _setUpAction(_junitOpenProjectFilesAction, "Test", "Test Project");
     _junitOpenProjectFilesAction.setEnabled(false);
 
-    _setUpAction(_compileOpenProjectAction, "Compile", "Compile", "Compile the open project documents");
+//    _setUpAction(_compileOpenProjectAction, "Compile", "Compile", "Compile the open project documents");
     _setUpAction(_compileProjectAction, "Compile", "Compile", "Compile the current project");
-    _compileOpenProjectAction.setEnabled(false);
+//    _compileOpenProjectAction.setEnabled(false);
     _compileProjectAction.setEnabled(false);
       
     _setUpAction(_runProjectAction, "Run","Run the project's main method");
@@ -4121,12 +4134,12 @@ public class MainFrame extends JFrame implements OptionConstants {
     projectMenu.addSeparator();
     // run project
     projectMenu.add(_cleanAction);
-    projectMenu.add(_compileOpenProjectAction);
+//    projectMenu.add(_compileOpenProjectAction);
     projectMenu.add(_compileProjectAction);
     projectMenu.add(_jarProjectAction);
     _addMenuItem(projectMenu, _runProjectAction, KEY_RUN_MAIN);
     projectMenu.add(_junitOpenProjectFilesAction);
-    projectMenu.add(_junitProjectAction);
+//    projectMenu.add(_junitProjectAction);
     
     projectMenu.addSeparator();
     // eventually add project options
@@ -4741,11 +4754,11 @@ public class MainFrame extends JFrame implements OptionConstants {
     _navPanePopupMenuForRoot.add(_saveProjectAction);
     _navPanePopupMenuForRoot.add(_closeProjectAction);
     _navPanePopupMenuForRoot.addSeparator();
-    _navPanePopupMenuForRoot.add(_compileOpenProjectAction);
+//    _navPanePopupMenuForRoot.add(_compileOpenProjectAction);
     _navPanePopupMenuForRoot.add(_compileProjectAction);
     _navPanePopupMenuForRoot.add(_runProjectAction);
     _navPanePopupMenuForRoot.add(_junitOpenProjectFilesAction);
-    _navPanePopupMenuForRoot.add(_junitProjectAction);
+//    _navPanePopupMenuForRoot.add(_junitProjectAction);
     _navPanePopupMenuForRoot.addSeparator();
     _navPanePopupMenuForRoot.add(_projectPropertiesAction);
     
@@ -5928,11 +5941,11 @@ public class MainFrame extends JFrame implements OptionConstants {
         public void run() {
           // new ScrollableDialog(null, "Ready for hourglassOn in junitStarted", "", "").show();
          
-          hourglassOn();
           showTab(_junitErrorPanel);
           _junitErrorPanel.setJUnitInProgress(docs);
           _junitAction.setEnabled(false);
           _junitAllAction.setEnabled(false);
+          hourglassOff();
         }
       });
     }
@@ -5944,7 +5957,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       SwingUtilities.invokeLater(new Runnable() {
         public void run() {
 //          new ScrollableDialog(null, "Ready for hourglassOn in junitAllStarted", "", "").show();
-          hourglassOn();
+//          hourglassOn();
           showTab(_junitErrorPanel);
           _junitErrorPanel.setJUnitInProgress();
           _junitAction.setEnabled(false);
@@ -5991,7 +6004,7 @@ public class MainFrame extends JFrame implements OptionConstants {
           }
           finally { 
 //            new ScrollableDialog(null, "MainFrame.junitEnded() ready to return", "", "").show();
-            hourglassOff(); 
+//            hourglassOff(); 
           }
         }
       });
@@ -6291,11 +6304,12 @@ public class MainFrame extends JFrame implements OptionConstants {
           JOptionPane.showMessageDialog(MainFrame.this, message,
                                         "Test Works Only On JUnit TestCases",
                                         JOptionPane.ERROR_MESSAGE);
-          // clean up as junitEnded except hourglassOff (should factored into a private method)
+          // clean up as in JUnitEnded 
            showTab(_junitErrorPanel);
             _junitAction.setEnabled(true);
             _junitAllAction.setEnabled(true);
             _junitErrorPanel.reset();
+            hourglassOff();
         }});
     }
 

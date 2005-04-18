@@ -450,9 +450,8 @@ public class DrJava implements OptionConstants {
   }
 
 
-  /**
-   * Try to determine if the preferences specify jsr14 v2.0, so that we can
-   * restart with the proper boot classpath.
+  /** Try to determine if the preferences specify jsr14 v2.0, so that we can restart with the proper 
+   *  boot classpath.
    */
   public static boolean checkForJSR14v20() {
     String fs = "/"; // In jar files, the file separator is always '/'
@@ -630,11 +629,7 @@ public class DrJava implements OptionConstants {
    */
   public static void restartIfNecessary(boolean forToolsJar, String[] args) {
     //JOptionPane.showMessageDialog(null, "forToolsJar = " + forToolsJar);
-    if (!forToolsJar) {
-      if (!_usingJSR14v20 || bootClasspathHasJSR14v20()) {
-        return;
-      }
-    }
+    if (!forToolsJar && (!_usingJSR14v20 || bootClasspathHasJSR14v20())) return;
 
     //System.out.println("restarting with debugger...");
 
@@ -654,9 +649,7 @@ public class DrJava implements OptionConstants {
       String jsr14 = _config.getSetting(JSR14_LOCATION).getAbsolutePath();
       jvmArgs = new String[] { "-Xbootclasspath/p:" + jsr14 };
     }
-    else {
-      jvmArgs = new String[0];
-    }
+    else jvmArgs = new String[0];
 
     if (forToolsJar) {
       // Try to restart with tools.jar on the classpath
