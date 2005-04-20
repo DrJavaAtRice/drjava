@@ -2097,6 +2097,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       setAllowKeyEvents(true);
     }
   }
+  
 
   private boolean allow_key_events = true;
   public void setAllowKeyEvents(boolean a) { this.allow_key_events = a; }
@@ -3271,11 +3272,11 @@ public class MainFrame extends JFrame implements OptionConstants {
       _showIOError(ioe);
     }
   }
-
+    
   private void _junit() {
     final SwingWorker worker = new SwingWorker() {
       public Object construct() {
-        
+        _dissableJUnitActions();
         hourglassOn();  // turned off in JUnitStarted/NonTestCase  
         try { _model.getActiveDocument().startJUnit(); }
         catch (FileMovedException fme) { _showFileMovedError(fme); }
@@ -3301,6 +3302,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       public Object construct() {
         
         INavigatorItem n;
+        _dissableJUnitActions();
         hourglassOn();  // turned off when JUnitStarted event is fired
         Enumeration<INavigatorItem> e = _model.getDocumentNavigator().getDocuments();
         final LinkedList<OpenDefinitionsDocument> l = new LinkedList<OpenDefinitionsDocument>();
@@ -3323,6 +3325,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     new Thread("Running JUnit Tests") {
       public void run() { 
         try {
+          _dissableJUnitActions();
           hourglassOn();  // turned off in JUnitStarted/NonTestCase event
           _model.getJUnitModel().junitProject(); 
         }
@@ -3334,6 +3337,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   private void _junitAll() {
     final SwingWorker worker = new SwingWorker() {
       public Object construct() {
+        _dissableJUnitActions();
         hourglassOn();  // turned off in JUnitStarted/NonTestCase event
         //          new ScrollableDialog(null, "_junitAllAction called", "", "").show();
         if (_model.isProjectActive()) _model.getJUnitModel().junitProject();
@@ -3343,7 +3347,75 @@ public class MainFrame extends JFrame implements OptionConstants {
     };
     worker.start();
   }
-
+  
+  /* These are used to save the state of the enabled property
+   * of the actions dissabled during junit testing */
+  private boolean _compileProjectActionEnabled;
+  private boolean _compileAllActionEnabled;
+  //private boolean _compileOpenProjectActionEnabled;
+  private boolean _compileFolderActionEnabled;
+  private boolean _junitFolderActionEnabled;
+  private boolean _junitAllActionEnabled;
+  private boolean _junitActionEnabled;
+  private boolean _junitOpenProjectFilesActionEnabled;
+  //private boolean _junitProjectActionEnabled;
+  private boolean _cleanActionEnabled;
+  private boolean _projectPropertiesActionEnabled;
+  private boolean _runProjectActionEnabled;
+  private boolean _runActionEnabled;
+  
+  /**
+   * Sets the enabled status to false of all actions that 
+   * could conflict with JUnit while its is running a test.
+   * This method saves aside the previous enable state of
+   * each action so that when the test is finished, any action
+   * dissabled before the test will remain dissabled afterward.
+   */
+  private void _dissableJUnitActions() {
+    _compileProjectActionEnabled = _compileProjectAction.isEnabled();
+    _compileAllActionEnabled = _compileAllAction.isEnabled();
+    //_compileOpenProjectActionEnabled = _compileOpenProjectAction.isEnabled();
+    _compileFolderActionEnabled = _compileFolderAction.isEnabled();
+    _junitFolderActionEnabled = _junitFolderAction.isEnabled();
+    _junitAllActionEnabled = _junitAllAction.isEnabled();
+    _junitActionEnabled = _junitAction.isEnabled();
+    _junitOpenProjectFilesActionEnabled = _junitOpenProjectFilesAction.isEnabled();
+    //_junitProjectActionEnabled = _junitProjectAction.isEnabled();
+    _cleanActionEnabled = _cleanAction.isEnabled();
+    _projectPropertiesActionEnabled = _projectPropertiesAction.isEnabled();
+    _runProjectActionEnabled = _runProjectAction.isEnabled();
+    _runActionEnabled = _runAction.isEnabled();
+  
+    _compileProjectAction.setEnabled(false);
+    _compileAllAction.setEnabled(false);
+    //_compileOpenProjectAction.setEnabled(false);
+    _compileFolderAction.setEnabled(false);
+    _junitFolderAction.setEnabled(false);
+    _junitAllAction.setEnabled(false);
+    _junitAction.setEnabled(false);
+    _junitOpenProjectFilesAction.setEnabled(false);
+    //_junitProjectAction.setEnabled(false);
+    _cleanAction.setEnabled(false);
+    _projectPropertiesAction.setEnabled(false);
+    _runProjectAction.setEnabled(false);
+    _runAction.setEnabled(false);
+  }
+  private void _restoreJUnitActionsEnabled() {
+    _compileProjectAction.setEnabled(_compileProjectActionEnabled);
+    _compileAllAction.setEnabled(_compileAllActionEnabled);
+    //_compileOpenProjectAction.setEnabled(_compileOpenProjectActionEnabled);
+    _compileFolderAction.setEnabled(_compileFolderActionEnabled);
+    _junitFolderAction.setEnabled(_junitFolderActionEnabled);
+    _junitAllAction.setEnabled(_junitAllActionEnabled);
+    _junitAction.setEnabled(_junitActionEnabled);
+    _junitOpenProjectFilesAction.setEnabled(_junitOpenProjectFilesActionEnabled);
+    //_junitProjectAction.setEnabled(_junitProjectActionEnabled);
+    _cleanAction.setEnabled(_cleanActionEnabled);
+    _projectPropertiesAction.setEnabled(_projectPropertiesActionEnabled);
+    _runProjectAction.setEnabled(_runProjectActionEnabled);
+    _runAction.setEnabled(_runActionEnabled);
+  }
+  
   /**
    * Suspends the current execution of the debugger
    *
@@ -5998,8 +6070,7 @@ public class MainFrame extends JFrame implements OptionConstants {
         public void run() {
           try {
             showTab(_junitErrorPanel);
-            _junitAction.setEnabled(true);
-            _junitAllAction.setEnabled(true);
+            _restoreJUnitActionsEnabled();
             _junitErrorPanel.reset();
           }
           finally { 
@@ -6310,6 +6381,7 @@ public class MainFrame extends JFrame implements OptionConstants {
             _junitAllAction.setEnabled(true);
             _junitErrorPanel.reset();
             hourglassOff();
+            _restoreJUnitActionsEnabled();
         }});
     }
 
