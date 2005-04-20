@@ -817,7 +817,7 @@ public class JTreeSortNavigator extends JTree
         }
       }
     }
-    return list.toArray(new String[0]);
+    return list.toArray(new String[list.size()]);
   }
   
   /**

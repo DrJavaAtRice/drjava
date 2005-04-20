@@ -56,13 +56,14 @@ import junit.framework.TestCase;
 public class SwingDocumentAdapterTest extends TestCase {
   protected SwingDocumentAdapter _doc;
   
-  public void setUp() {
+  public void setUp() throws Exception {
+    super.setUp();
     _doc = new SwingDocumentAdapter();
   }
   
-  public void tearDown() {
+  public void tearDown() throws Exception {
     _doc = null;
-    System.gc();
+    super.tearDown();
   }
   
   /**

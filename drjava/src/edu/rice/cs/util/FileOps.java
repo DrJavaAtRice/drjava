@@ -129,7 +129,7 @@ public abstract class FileOps {
         path = path.substring(idx+1);
       }
     }
-    return list.toArray(new String[0]);
+    return list.toArray(new String[list.size()]);
   }
   
   /**

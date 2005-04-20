@@ -907,7 +907,7 @@ public class DirectoryChooser extends JPanel {
       for (TreePath tp : sels) {
         v.add(getFileForTreePath(tp));
       }
-      return v.toArray(new File[0]);
+      return v.toArray(new File[v.size()]);
     }
   }
   

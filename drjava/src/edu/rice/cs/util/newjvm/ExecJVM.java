@@ -102,7 +102,7 @@ public final class ExecJVM {
     args.add("-classpath");
     args.add(classPath);
     _addArray(args, jvmParams);
-    String[] jvmWithCP = args.toArray(new String[0]);
+    String[] jvmWithCP = args.toArray(new String[args.size()]);
 
     return runJVM(mainClass, classParams, jvmWithCP);
   }
@@ -156,7 +156,7 @@ public final class ExecJVM {
     args.add(mainClass);
     _addArray(args, classParams);
 
-    String[] argArray = args.toArray(new String[0]);
+    String[] argArray = args.toArray(new String[args.size()]);
 
     return Runtime.getRuntime().exec(argArray);
   }
