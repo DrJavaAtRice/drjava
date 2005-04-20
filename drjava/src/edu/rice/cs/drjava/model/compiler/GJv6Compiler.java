@@ -54,6 +54,7 @@ import gjc.v6.util.Hashtable;
 import gjc.v6.util.List;
 import gjc.v6.util.Log;
 import edu.rice.cs.util.UnexpectedException;
+import edu.rice.cs.util.ClasspathVector;
 
 /**
  * The GJ compiler used by DrJava.
@@ -181,6 +182,13 @@ public class GJv6Compiler implements CompilerInterface{
   }
 
   /**
+   * @inheritDoc
+   */
+  public void setExtraClassPath(ClasspathVector extraClassPath) {
+    _extraClassPath = extraClassPath.toString();
+  }
+  
+  /**
    * Sets whether to allow assertions in Java 1.4.
    */
   public void setAllowAssertions(boolean allow) {
@@ -275,7 +283,7 @@ public class GJv6Compiler implements CompilerInterface{
      * put your documentation comment here
      */
     public CompilerError[] getErrors() {
-      return _errors.toArray(new CompilerError[0]);
+      return _errors.toArray(new CompilerError[_errors.size()]);
     }
   }
 }

@@ -70,15 +70,16 @@ public final class InteractionsModelTest extends TestCase {
   protected InteractionsDocumentAdapter _adapter;
   protected InteractionsModel _model;
 
-  public void setUp() {
+  public void setUp() throws Exception {
+    super.setUp();
     _adapter = new InteractionsDocumentAdapter();
     _model = new TestInteractionsModel(_adapter);
   }
 
-  public void tearDown() {
+  public void tearDown() throws Exception {
     _model = null;
     _adapter = null;
-    System.gc();
+    super.tearDown();
   }
 
   /**

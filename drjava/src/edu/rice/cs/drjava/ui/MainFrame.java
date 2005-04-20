@@ -2682,7 +2682,7 @@ public class MainFrame extends JFrame implements OptionConstants {
         }
       });
       
-      final File[] sfiles = files.toArray(new File[0]);
+      final File[] sfiles = files.toArray(new File[files.size()]);
       
 
       open(new FileOpenSelector(){
@@ -6585,6 +6585,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     try { d = _model.getDocumentForFile(f); }
     catch(IOException ioe) { /* do nothing */ }
     Object[] options = {"Yes","No"};
+    if(d == null) return false;
     int choice = JOptionPane.showOptionDialog(MainFrame.this,
                                               "This file is already open in DrJava" + (d.isModifiedSinceSave() ? " and has been modified" : "") 
                                                 + ".  Do you wish to overwrite it?",
@@ -6594,7 +6595,7 @@ public class MainFrame extends JFrame implements OptionConstants {
                                               null,
                                               options,
                                               options[1]);
-    if (choice == JOptionPane.YES_OPTION && d != null)  return _model.closeFileWithoutPrompt(d);
+    if (choice == JOptionPane.YES_OPTION)  return _model.closeFileWithoutPrompt(d);
     return false;
   }
 

@@ -62,6 +62,7 @@ import javax.swing.*;
 import edu.rice.cs.util.swing.*;
 import java.lang.reflect.*;
 import edu.rice.cs.util.UnexpectedException;
+import edu.rice.cs.util.ClasspathVector;
 import edu.rice.cs.javalanglevels.*;
 import edu.rice.cs.javalanglevels.parser.*;
 import edu.rice.cs.javalanglevels.tree.*;
@@ -254,7 +255,7 @@ public class DefaultCompilerModel implements CompilerModel {
         // No file for this document; skip it
       }
     }
-    File[] files = filesToCompile.toArray(new File[0]);
+    File[] files = filesToCompile.toArray(new File[filesToCompile.size()]);
     
     _notifier.compileStarted();
     
@@ -390,6 +391,14 @@ public class DefaultCompilerModel implements CompilerModel {
     CompilerInterface compiler = CompilerRegistry.ONLY.getActiveCompiler();
 
     compiler.setBuildDirectory(buildDir);
+    ClasspathVector extraClasspath = new ClasspathVector();
+    if (_getter.getFileGroupingState().isProjectActive()) 
+      extraClasspath.addAll(_getter.getFileGroupingState().getExtraClasspath());
+    for(File f : DrJava.getConfig().getSetting(OptionConstants.EXTRA_CLASSPATH)) {
+      extraClasspath.add(f);
+    }
+//    System.out.println("Extra classpath passed to compiler: " + extraClasspath.toString());
+    compiler.setExtraClassPath(extraClasspath);
     if (files.length > 0) {
 //      if (DrJava.getConfig().getSetting(OptionConstants.LANGUAGE_LEVEL) == DrJava.ELEMENTARY_LEVEL) {
       LanguageLevelConverter llc = new LanguageLevelConverter(getActiveCompiler().getName());
@@ -435,7 +444,7 @@ public class DefaultCompilerModel implements CompilerModel {
           javaFileSet.add(canonicalFile);
         }
       }
-      files = javaFileSet.toArray(new File[0]);
+      files = javaFileSet.toArray(new File[javaFileSet.size()]);
         
       parseExceptions = errors.getFirst();
       compilerErrors.addAll(_parseExceptions2CompilerErrors(parseExceptions));
@@ -443,7 +452,7 @@ public class DefaultCompilerModel implements CompilerModel {
       compilerErrors.addAll(_visitorErrors2CompilerErrors(visitorErrors));
 //      }
 //      System.out.println("Got back " + errors.length + " errors");
-      CompilerError[] compilerErrorsArray = (CompilerError[]) compilerErrors.toArray(new CompilerError[0]);
+      CompilerError[] compilerErrorsArray = (CompilerError[]) compilerErrors.toArray(new CompilerError[compilerErrors.size()]);
       
       /** Compile the files in specified sourceRoots and files */
       if (compilerErrorsArray.length == 0)
@@ -508,7 +517,7 @@ public class DefaultCompilerModel implements CompilerModel {
        * }*/
     }
 
-    return roots.toArray(new File[0]);
+    return roots.toArray(new File[roots.size()]);
   }
 
   /**

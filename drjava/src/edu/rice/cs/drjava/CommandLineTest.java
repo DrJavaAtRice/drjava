@@ -141,14 +141,15 @@ public final class CommandLineTest extends TestCase {
     }
   }
 
-  public void setUp() {
+  public void setUp() throws Exception {
+    super.setUp();
     _mf = new MainFrame();
   }
 
-  public void tearDown() {
+  public void tearDown() throws Exception {
     _mf.dispose();
     _mf = null;
-    System.gc();
+    super.tearDown();
   }
 
   /**

@@ -304,7 +304,7 @@ public class DefaultJavadocModel implements JavadocModel {
     StringBuffer sourcePath = new StringBuffer();
     String separator = System.getProperty("path.separator");
     sourceRootSet.addAll(defaultRoots);
-    File[] sourceRoots = sourceRootSet.toArray(new File[0]);
+    File[] sourceRoots = sourceRootSet.toArray(new File[sourceRootSet.size()]);
     for(int a = 0 ; a  < sourceRoots.length; a++) {
       if (a != 0)  sourcePath.append(separator);
       sourcePath.append(sourceRoots[a].getAbsolutePath());
@@ -476,7 +476,7 @@ public class DefaultJavadocModel implements JavadocModel {
       // Notify all listeners that Javadoc is starting.
       _notifier.javadocStarted();
 
-      result = _javadoc(args.toArray(new String[0]), classpath);
+      result = _javadoc(args.toArray(new String[args.size()]), classpath);
 
       // If success and we're generating current, make sure the temp
       //  directory gets deleted on exit.

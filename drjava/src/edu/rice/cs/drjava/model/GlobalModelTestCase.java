@@ -165,7 +165,6 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     _model.dispose();
     _tempDir = null;
     _model = null;
-    System.gc();
     
     super.tearDown();
   }

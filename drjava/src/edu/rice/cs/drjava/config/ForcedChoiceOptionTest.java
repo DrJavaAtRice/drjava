@@ -80,7 +80,7 @@ public final class ForcedChoiceOptionTest extends TestCase {
                                                     "protected",
                                                     aList);
     
-    assertEquals(new String("private"), fco.parse("private"));
+    assertTrue("Parsing \"private\"", "private".equals(fco.parse("private")));
     try { fco.parse("Private"); fail(); }
     catch (OptionParseException e) {}
     
@@ -96,7 +96,7 @@ public final class ForcedChoiceOptionTest extends TestCase {
                                                     "protected",
                                                     null);
     
-    assertEquals("private",  fco.format(new String("private")));
-    assertEquals("public",  fco.format(new String("public")));
+    assertTrue("Formatting \"private\"", "private".equals(fco.format(new String("private"))));
+    assertTrue("Formatting \"public\"", "public".equals(fco.format(new String("public"))));
   }
 }

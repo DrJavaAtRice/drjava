@@ -49,6 +49,7 @@ import java.io.File;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.util.classloader.StickyClassLoader;
+import edu.rice.cs.util.ClasspathVector;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.config.FileOption;
 import java.util.Vector;
@@ -68,6 +69,7 @@ public class CompilerProxy implements CompilerInterface {
   private final ClassLoader _newLoader;
   private boolean _warningsEnabled = true;
   private File _buildDir;
+  private ClasspathVector _extraClasspath = new ClasspathVector();
   
   /**
    * These classes will always be loaded using the previous classloader.
@@ -108,15 +110,16 @@ public class CompilerProxy implements CompilerInterface {
 
       _realCompiler.setBuildDirectory(_buildDir);
       
-      StringBuffer newclasspath = new StringBuffer();
-      Vector<File> cp = DrJava.getConfig().getSetting(OptionConstants.EXTRA_CLASSPATH);
-      //if(cp!=null) {
-        Enumeration<File> en = cp.elements();
-        while(en.hasMoreElements()) {
-          newclasspath.append(System.getProperty("path.separator")).append(en.nextElement().getAbsolutePath());
-        }
-      //}
-      _realCompiler.setExtraClassPath(newclasspath.toString());
+//      StringBuffer newclasspath = new StringBuffer();
+//      Vector<File> cp = DrJava.getConfig().getSetting(OptionConstants.EXTRA_CLASSPATH);
+//      //if(cp!=null) {
+//        Enumeration<File> en = cp.elements();
+//        while(en.hasMoreElements()) {
+//          newclasspath.append(System.getProperty("path.separator")).append(en.nextElement().getAbsolutePath());
+//        }
+//      //}
+//      _realCompiler.setExtraClassPath(newclasspath.toString());
+      _realCompiler.setExtraClassPath(File.pathSeparator + _extraClasspath.toString());
 
       _realCompiler.setWarningsEnabled(_warningsEnabled);
       
@@ -221,6 +224,16 @@ public class CompilerProxy implements CompilerInterface {
    */
   public void setExtraClassPath( String extraClassPath) {
     _realCompiler.setExtraClassPath(extraClassPath);
+  }
+  
+  /**
+   * Sets the extra classpath in the form of a ClasspathVector. This should include
+   * any classpath entries from the project's classpath, if any, and the entries from
+   * EXTRA_CLASSPATH.
+   * @param extraClassPath the classpath to use as the compiler's extra classpath
+   */
+  public void setExtraClassPath(ClasspathVector extraClassPath) {
+    _extraClasspath = extraClassPath;
   }
 
   /**

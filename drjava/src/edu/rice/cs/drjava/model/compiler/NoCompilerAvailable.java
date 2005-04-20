@@ -47,6 +47,7 @@ package edu.rice.cs.drjava.model.compiler;
 
 import java.io.File;
 import edu.rice.cs.util.UnexpectedException;
+import edu.rice.cs.util.ClasspathVector;
 
 /**
  * A CompilerInterface implementation for signifying that no compiler is
@@ -92,6 +93,12 @@ public class NoCompilerAvailable implements CompilerInterface {
   public void setExtraClassPath( String extraClassPath) {
   }
   
+  /**
+   * @inheritDoc
+   */
+  public void setExtraClassPath(ClasspathVector extraClassPath) {
+  }
+    
   /**
    * Sets whether to allow assertions in Java 1.4.
    */

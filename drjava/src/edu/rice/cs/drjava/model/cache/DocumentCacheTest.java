@@ -79,8 +79,8 @@ public class DocumentCacheTest extends TestCase {
   
   protected File _tempDir;
 
-  public void setUp() throws IOException {
-//    super.setUp();
+  public void setUp() throws Exception {
+    super.setUp();
     createModel();
     
     String user = System.getProperty("user.name");
@@ -98,14 +98,14 @@ public class DocumentCacheTest extends TestCase {
     _doc_saved = 0;
   }
   
-  public void tearDown() throws IOException {
+  public void tearDown() throws Exception {
     boolean ret = FileOps.deleteDirectory(_tempDir);
     assertTrue("delete temp directory " + _tempDir, ret);
     _model.dispose();
 
     _tempDir = null;
     _model = null;
-    System.gc();
+    super.tearDown();
   }
   
   /**

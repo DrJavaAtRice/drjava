@@ -90,7 +90,6 @@ public final class RecentFileManagerTest extends TestCase {
     _rfm = null;
     FileOps.deleteDirectory(_tempDir);
     _tempDir = null;
-    System.gc();
   }
 
   /**

@@ -241,7 +241,7 @@ public class DocumentCache{
      * the document would have to be loaded from disk.
      * @return if the document is already loaded
      */
-    public boolean isReady() { return _doc != null; }
+    public synchronized boolean isReady() { return _doc != null; }
   
     /** Closes the corresponding document for this adapter. */
     public void close() {
@@ -254,7 +254,7 @@ public class DocumentCache{
      */
     void kickOut() { kickOut(true); }
     
-    private void kickOut(boolean save) {
+    private synchronized void kickOut(boolean save) {
       if (_doc != null) {
         if (save) _rec.saveDocInfo(_doc);
         _doc.close();

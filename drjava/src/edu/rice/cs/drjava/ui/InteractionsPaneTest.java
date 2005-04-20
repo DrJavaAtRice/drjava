@@ -75,7 +75,8 @@ public final class InteractionsPaneTest extends TestCase {
   /**
    * Setup method for each JUnit test case.
    */
-  public void setUp() {
+  public void setUp() throws Exception {
+    super.setUp();
     _adapter = new InteractionsDocumentAdapter();
     _model = new TestInteractionsModel(_adapter);
     _doc = _model.getDocument();
@@ -91,13 +92,13 @@ public final class InteractionsPaneTest extends TestCase {
     
   }
 
-  public void tearDown() {
+  public void tearDown() throws Exception {
     _controller = null;
     _doc = null;
     _model = null;
     _pane = null;
     _adapter = null;
-    System.gc();
+    super.tearDown();
   }
 
   /**
@@ -360,7 +361,7 @@ public final class InteractionsPaneTest extends TestCase {
                  2, _pane.getPromptList().size());
     assertEquals("First prompt should be saved as being at position",
                  InteractionsDocument.DEFAULT_BANNER.length() + InteractionsDocument.DEFAULT_PROMPT.length(),
-		 (int) _pane.getPromptList().get(0)); //needs cast to prevent ambiguity
+   (int) _pane.getPromptList().get(0)); //needs cast to prevent ambiguity
     assertEquals("Second prompt should be saved as being at position",
                  InteractionsDocument.DEFAULT_BANNER.length() + InteractionsDocument.DEFAULT_PROMPT.length() * 2 + 1,
                  (int)_pane.getPromptList().get(1)); //needs cast to prevent ambiguity

@@ -186,7 +186,7 @@ public class CompilerRegistry {
       availableCompilers.add(NoCompilerAvailable.ONLY);
     }
 
-    return availableCompilers.toArray(new CompilerInterface[0]);
+    return availableCompilers.toArray(new CompilerInterface[availableCompilers.size()]);
   }
 
   private boolean _createCompiler(String name, LinkedList<CompilerInterface> availableCompilers) throws Throwable {

@@ -91,7 +91,6 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     super.tearDown();
     _frame.dispose();
     _frame = null;
-    System.gc();
   }
 
   /**

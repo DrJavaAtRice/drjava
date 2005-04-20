@@ -119,7 +119,6 @@ public final class ProjectMenuTest extends MultiThreadedTestCase {
     _projFile = null;
     _model = null;
     _frame = null;
-    System.gc();
   }
   
   public void testSetBuildDirectory() throws MalformedProjectFileException, IOException {

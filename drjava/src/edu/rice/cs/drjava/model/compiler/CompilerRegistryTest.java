@@ -48,6 +48,7 @@ package edu.rice.cs.drjava.model.compiler;
 import java.io.*;
 import junit.framework.*;
 import edu.rice.cs.util.classloader.LimitingClassLoader;
+import edu.rice.cs.util.ClasspathVector;
 import edu.rice.cs.drjava.DrJava;
 
 /**
@@ -293,6 +294,7 @@ public final class CompilerRegistryTest extends TestCase {
      public void setAllowAssertions(boolean allow) {}
      public void setWarningsEnabled(boolean warningsEnabled) {}
      public void setExtraClassPath(String extraClassPath) {}
+     public void setExtraClassPath(ClasspathVector extraClassPath) {}
      public String toString(){ return "Without"; }
      public void setBuildDirectory(File builddir){}
   }

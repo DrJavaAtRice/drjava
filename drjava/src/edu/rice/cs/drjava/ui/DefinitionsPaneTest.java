@@ -69,15 +69,16 @@ public final class DefinitionsPaneTest extends TestCase {
   /**
    * Setup method for each JUnit test case.
    */
-  public void setUp() {
+  public void setUp() throws Exception {
+    super.setUp();
     DrJava.getConfig().resetToDefaults();
     _frame = new MainFrame();
   }
   
-  public void tearDown() {
+  public void tearDown() throws Exception {
     _frame.dispose();
     _frame = null;
-    System.gc();
+    super.tearDown();
   }
   
   /**
