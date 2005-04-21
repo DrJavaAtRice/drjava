@@ -103,6 +103,9 @@ public class TypeChecker14 extends AbstractTypeChecker {
    * @param node - the MethodDeclaration which may or may not contain variable arguments
    */
   protected void checkVarArgs(MethodDeclaration node) {
+    if(true){
+    throw new RuntimeException("What the hell!!!");
+    }
     if(node.isVarArgs())
       throw new WrongVersionException("Methods with variable arguments are only allowed in Java 1.5 or higher");
   }

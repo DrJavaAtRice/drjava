@@ -110,8 +110,8 @@ public class TigerUtilities {
     try {
       //Class.forName("java.lang.Enum");
 //      Class.forName("com.sun.javadoc.ParameterizedType");
-      
-      java.lang.reflect.Method.class.getMethod("isVarArgs", new Class<?>[]{});
+      Integer.valueOf(5);  //This method only exists in jsr14 and java 1.5+ isVarArgs doesnt
+      //java.lang.reflect.Method.class.getMethod("isVarArgs", new Class<?>[]{});
       _tigerEnabled = true;
     }
     catch (Throwable t) {
@@ -174,7 +174,7 @@ public class TigerUtilities {
    * @return boolean that is true if tiger is enabled and <code>c.isEnum()</code>
    */
   public static boolean isEnum(Class<?> c) {
-    System.out.println("enabled: "+_tigerEnabled+", "+c+".super: "+c.getSuperclass());
+      //    System.out.println("enabled: "+_tigerEnabled+", "+c+".super: "+c.getSuperclass());
     return _tigerEnabled && c.getSuperclass()!=null && (c.getSuperclass().getName().equals("java.lang.Enum"));
     
     // The following is what it should be.  The reason why this commented is that

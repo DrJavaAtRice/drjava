@@ -139,10 +139,18 @@ public class TypeChecker15 extends AbstractTypeChecker {
   
   /**
    * Does nothing - Variable Arguments are allowed in 1.5
+   * Variable Arguments are currently Not working with jsr14 in the interactionspane
+   * This check here can be deleted when this is fixed.
+   * This is temporarily included to ensure decent feedback to the users of our new beta.
    * @param node - unused
    */
   protected void checkVarArgs(MethodDeclaration node) { 
-   
+    try {
+      java.lang.reflect.Method.class.getMethod("isVarArgs", new Class<?>[]{});
+    }
+    catch (Throwable t) {
+      throw new WrongVersionException("Variable Arguments are currently only supported in the InteractionsPane for Java Version 1.5 or better.");
+    }    
   }
   
   /**
