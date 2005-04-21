@@ -57,8 +57,8 @@ import java.util.Vector;
  */
 public class ClasspathVector extends Vector<URL> {
   
-  public ClasspathVector() {
-  }
+  public ClasspathVector() { }
+  
   public ClasspathVector(int capacity) {
     super(capacity);
   }
@@ -94,13 +94,9 @@ public class ClasspathVector extends Vector<URL> {
   
   public Vector<File> asFileVector() {
     Vector<File> v = new Vector<File>();
-    for(URL url : this) {
-      v.add(new File(url.getFile()));
-    }
+    for(URL url : this) { v.add(new File(url.getFile())); }
     return v;
   }
   
-  private String formatURL(URL url) {
-    return new File(url.getFile()).toString();
-  }
+  private String formatURL(URL url) { return new File(url.getFile()).toString(); }
 }

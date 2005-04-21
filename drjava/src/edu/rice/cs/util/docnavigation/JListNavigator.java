@@ -89,9 +89,8 @@ class JListNavigator extends JList implements IDocumentNavigator {
     setModel(m);
     setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     addListSelectionListener(new ListSelectionListener() {
-      /**
-       * called when the list value has changed
-       * @param e the event corresponding to the change
+      /** Called when the list value has changed
+       *  @param e the event corresponding to the change
        */
       public void valueChanged(ListSelectionEvent e) {
         if (!e.getValueIsAdjusting() && !_model.isEmpty()) {

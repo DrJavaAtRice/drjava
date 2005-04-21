@@ -57,13 +57,11 @@ import java.util.*;
  */
 public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/
   implements MasterRemote/*<SlaveType>*/ {
-  /**
-   * Name for the thread that waits for the slave to exit.
-   */
+  
+  /** Name for the thread that waits for the slave to exit. */
   protected String _waitForQuitThreadName = "Wait for SlaveJVM Exit Thread";
-  /**
-   * Name for the thread that exports the MasterJVM to RMI.
-   */
+  
+  /** Name for the thread that exports the MasterJVM to RMI. */
   protected String _exportMasterThreadName = "Export MasterJVM Thread";
   
   private static final String RUNNER = SlaveJVMRunner.class.getName();
@@ -74,53 +72,38 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/
   /** Is slave JVM in the progress of starting up? */
   private boolean _startupInProgress = false;
 
-  /**
-   * This flag is set when a quit request is issued before the slave has even
-   * finished starting up. In that case, immediately after starting up, we
-   * quit it.
+  /** This flag is set when a quit request is issued before the slave has even finished starting up. 
+   *  In that case, immediately after starting up, we quit it.
    */
   private boolean _quitOnStartup = false;
 
-  /**
-   * The current remote stub for this main JVM object.
-   * This field is null except between the time the slave
-   * JVM is first invoked and the time the slave registers itself.
+  /** The current remote stub for this main JVM object. This field is null except between the time the slave
+   *  JVM is first invoked and the time the slave registers itself.
    */
   private Remote _stub;
 
-  /**
-   * The file containing the serialized remote stub.
-   * This field is null except between the time the slave
-   * JVM is first invoked and the time the slave registers itself.
+  /** The file containing the serialized remote stub. This field is null except between the time the slave
+   *  JVM is first invoked and the time the slave registers itself.
    */
   private File _stubFile;
 
-  
-  /**
-   * The current remote stub for this main JVM's classloader.
-   * This field is null except between the time the slave
-   * JVM is first invoked and the time the slave registers itself.
+  /** The current remote stub for this main JVM's classloader. This field is null except between the time 
+   *  the slave JVM is first invoked and the time the slave registers itself.
    */
   Remote _classLoaderStub;
 
-  /**
-   * The file containing the serialized remote classloader stub.
-   * This field is null except between the time the slave
-   * JVM is first invoked and the time the slave registers itself.
+  /** The file containing the serialized remote classloader stub. This field is null except between the 
+   *  time the slave JVM is first invoked and the time the slave registers itself.
    */
   File _classLoaderStubFile;
   
   /** The fully-qualified name of the slave JVM class. */
   private final String _slaveClassName;
 
-  /**
-   * Sets up the master JVM object, but does not actually
-   * invoke the slave JVM.
-   * 
-   * @param slaveClassName The fully-qualified class name of the 
-   * class to start up in the second JVM. This class must implement
-   * the interface specified by this class's type parameter, which
-   * must be a subclass of {@link SlaveRemote}.
+  /** Sets up the master JVM object, but does not actually invoke the slave JVM.
+   *  @param slaveClassName The fully-qualified class name of the class to start up in the second JVM. This 
+   *  class must implement the interface specified by this class's type parameter, which must be a subclass 
+   *  of {@link SlaveRemote}.
    */
   protected AbstractMasterJVM(String slaveClassName) {
     _slaveClassName = slaveClassName;
@@ -129,61 +112,44 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/
     System.setProperty("java.rmi.server.hostname", "127.0.0.1");
   }
 
-  /**
-   * Callback for when the slave JVM has connected, and the
-   * bidirectional communications link has been established.
-   * During this call, {@link #getSlave} is guaranteed to not
-   * return null.
+  /** Callback for when the slave JVM has connected, and the bidirectional communications link has been 
+   *  established.  During this call, {@link #getSlave} is guaranteed to not return null.
    */
   protected abstract void handleSlaveConnected();
   
-  /**
-   * Callback for when the slave JVM has quit.
-   * During this call, {@link #getSlave} is guaranteed to
-   * return null.
-   * 
-   * @param status The exit code returned by the slave JVM.
+  /** Callback for when the slave JVM has quit. During this call, {@link #getSlave} is guaranteed to
+   *  return null.
+   *  @param status The exit code returned by the slave JVM.
    */
   protected abstract void handleSlaveQuit(int status);
   
-  /**
-   * Invokes slave JVM without any JVM arguments.
-   * @throws IllegalStateException if slave JVM already connected or
-   * startup is in progress.
+  /** Invokes slave JVM without any JVM arguments.
+   *  @throws IllegalStateException if slave JVM already connected or startup is in progress.
    */
   protected synchronized final void invokeSlave() throws IOException, RemoteException {
     invokeSlave(new String[0]);
   }
   
-  /**
-   * Invokes slave JVM, using the system classpath.
-   * @param jvmArgs Array of arguments to pass to the JVM on startup
-   * @throws IllegalStateException if slave JVM already connected or
-   * startup is in progress.
+  /** Invokes slave JVM, using the system classpath.
+   *  @param jvmArgs Array of arguments to pass to the JVM on startup
+   *  @throws IllegalStateException if slave JVM already connected or startup is in progress.
    */
-  protected synchronized final void invokeSlave(String[] jvmArgs)
-    throws IOException, RemoteException {
+  protected synchronized final void invokeSlave(String[] jvmArgs) throws IOException, RemoteException {
     invokeSlave(jvmArgs, System.getProperty("java.class.path"));
   }
   
   final static Object lock = new Object();
     
-
   /** Invokes slave JVM.
    *  @param jvmArgs Array of arguments to pass to the JVM on startup
    *  @param cp Classpath to use when starting the JVM
-   *  @throws IllegalStateException if slave JVM already connected or
-   *  startup is in progress.
+   *  @throws IllegalStateException if slave JVM already connected or startup is in progress.
    */
-  protected synchronized final void invokeSlave(String[] jvmArgs, String cp)
-    throws IOException, RemoteException {
-    if (_startupInProgress) { 
-      throw new IllegalStateException("startup is in progress in invokeSlave");
-    }
+  protected synchronized final void invokeSlave(String[] jvmArgs, String cp) throws IOException, 
+    RemoteException {
+    if (_startupInProgress) throw new IllegalStateException("startup is in progress in invokeSlave");
     
-    if (_slave != null) {
-      throw new IllegalStateException("slave nonnull in invoke: " + _slave);
-    }
+    if (_slave != null) throw new IllegalStateException("slave nonnull in invoke: " + _slave);
     _startupInProgress = true;
     
     //*******************************************
@@ -211,9 +177,7 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/
       t.start();
       while (_stub == null) {
         try { lock.wait(); }
-        catch (InterruptedException ie) {
-          throw new edu.rice.cs.util.UnexpectedException(ie);
-        }
+        catch (InterruptedException ie) { throw new edu.rice.cs.util.UnexpectedException(ie); }
       }
     }
     _stubFile = File.createTempFile("DrJava-remote-stub", ".tmp");
@@ -252,12 +216,8 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/
     synchronized(lock){
       t.start();
       while (_classLoaderStub == null) {
-        try {
-          lock.wait();
-        }
-        catch (InterruptedException ie) {
-          throw new edu.rice.cs.util.UnexpectedException(ie);
-        }
+        try { lock.wait(); }
+        catch (InterruptedException ie) { throw new edu.rice.cs.util.UnexpectedException(ie); }
       }
     }
     _classLoaderStubFile = File.createTempFile("DrJava-remote-stub", ".tmp");
@@ -269,7 +229,6 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/
     ostream.flush();
     fstream.close();
     
-    
     String[] args = new String[] { 
       _stubFile.getAbsolutePath(),
       _slaveClassName,
@@ -278,8 +237,7 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/
     
     final Process process = ExecJVM.runJVM(RUNNER, args, cp, jvmArgs);
     
-    // Start a thread to wait for the slave to die
-    // When it dies, restart it
+    // Start a thread to wait for the slave to die.  When it dies, restart it.
     Thread thread = new Thread(_waitForQuitThreadName) {
       public void run() {
         try {
