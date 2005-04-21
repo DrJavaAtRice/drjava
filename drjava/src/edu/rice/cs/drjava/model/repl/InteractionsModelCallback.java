@@ -47,51 +47,43 @@ package edu.rice.cs.drjava.model.repl;
 
 import java.io.IOException;
 
-/**
- * Callback interface which allows an InteractionsModel to respond to
- * events in a remote Java interpreter.
- * @version $Id$
+/** Callback interface which allows an InteractionsModel to respond to events in a remote Java interpreter.
+ *  @version $Id$
  */
 public interface InteractionsModelCallback {
 
-  /**
-   * Returns an available port number to use for debugging a remote interpreter.
-   * @throws IOException if unable to get a valid port number.
+  /** Returns an available port number to use for debugging a remote interpreter.
+   *  @throws IOException if unable to get a valid port number.
    */
   public int getDebugPort() throws IOException;
 
-  /**
-   * Called when the repl prints to System.out.
-   * @param s String to print
+  /** Called when the repl prints to System.out.
+   *  @param s String to print
    */
   public void replSystemOutPrint(String s);
 
-  /**
-   * Called when input is request from System.in.
-   * @return the input given to System.in
+  /** Called when input is request from System.in.
+   *  @return the input given to System.in
    */
   public String getConsoleInput();
 
-  /**
-   * Sets the listener for any type of single-source input event.
-   * The listener can only be changed with the changeInputListener method.
-   * @param listener a listener that reacts to input requests
-   * @throws IllegalStateException if the input listener is locked
+  /** Sets the listener for any type of single-source input event. The listener can only be changed with 
+   *  the changeInputListener method.
+   *  @param listener a listener that reacts to input requests
+   *  @throws IllegalStateException if the input listener is locked
    */
   public void setInputListener(InputListener listener);
 
-  /**
-   * Changes the input listener. Takes in the old listener to ensure that
-   * the owner of the original listener is aware that it is being changed.
-   * @param oldListener the previous listener
-   * @param newListener the listener to install
-   * @throws IllegalArgumentException if oldListener is not the currently installed listener
+  /** Changes the input listener. Takes in the old listener to ensure that the owner of the original 
+   *  listener is aware that it is being changed.
+   *  @param oldListener the previous listener
+   *  @param newListener the listener to install
+   *  @throws IllegalArgumentException if oldListener is not the currently installed listener
    */
   public void changeInputListener(InputListener oldListener, InputListener newListener);
 
-  /** 
-   * Called when the repl prints to System.err.
-   * @param s String to print
+  /** Called when the repl prints to System.err.
+   *  @param s String to print
    */
   public void replSystemErrPrint(String s);
 
@@ -135,36 +127,23 @@ public interface InteractionsModelCallback {
    * @param endRow The end row of the error
    * @param endCol The end column of the error
    */
-  public void replReturnedSyntaxError(String errorMessage,
-                                      String interaction,
-                                      int startRow,
-                                      int startCol,
-                                      int endRow,
-                                      int endCol );
+  public void replReturnedSyntaxError(String errorMessage, String interaction, int startRow, int startCol,
+                                      int endRow, int endCol);
 
-  /**
-   * Signifies that the most recent interpretation contained a call to
-   * System.exit.
-   *
-   * @param status The exit status that will be returned.
+  /** Signifies that the most recent interpretation contained a call to System.exit.
+   *  @param status The exit status that will be returned.
    */
   public void replCalledSystemExit(int status);
 
-  /**
-   * This method is called by the Main JVM if the Interpreter JVM cannot
-   * be exited (likely because of its having a security manager)
-   * @param th The Throwable thrown by System.exit
+  /** This method is called by the Main JVM if the Interpreter JVM cannot be exited (likely because of its 
+   *  having a security manager)
+   *  @param th The Throwable thrown by System.exit
    */
   public void interpreterResetFailed(Throwable th);
 
-  /**
-   * Called when the interpreter starts to reset.
-   */
+  /** Called when the interpreter starts to reset. */
   public void interpreterResetting();
 
-  /**
-   * Called when a new Java interpreter has registered and is ready for use.
-   */
+  /** Called when a new Java interpreter has registered and is ready for use. */
   public void interpreterReady();
-
 }

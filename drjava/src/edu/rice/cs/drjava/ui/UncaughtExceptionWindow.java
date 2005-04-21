@@ -86,6 +86,7 @@ public class UncaughtExceptionWindow extends JDialog {
    */
   public UncaughtExceptionWindow(JFrame frame, Throwable exception) {
     super(frame,"Unexpected Error");
+    System.out.println("Unexpected Window Exception: " + exception);
     _exception = exception;
 
     this.setSize(600,400);

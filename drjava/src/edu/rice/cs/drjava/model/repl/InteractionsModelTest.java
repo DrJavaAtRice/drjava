@@ -88,18 +88,14 @@ public final class InteractionsModelTest extends TestCase {
    * @param typed A string typed by the user
    * @param expected What the processor should return
    */
-  protected void _assertProcessedContents(String typed, String expected)
-    throws DocumentAdapterException
-  {
+  protected void _assertProcessedContents(String typed, String expected) throws DocumentAdapterException {
     assertTrue(_model instanceof TestInteractionsModel);
     TestInteractionsModel model = (TestInteractionsModel)_model;
     InteractionsDocument doc = model.getDocument();
     doc.reset();
-    doc.insertText(doc.getDocLength(), typed,
-                   InteractionsDocument.DEFAULT_STYLE);
+    doc.insertText(doc.getDocLength(), typed, InteractionsDocument.DEFAULT_STYLE);
     model.interpretCurrentInteraction();
-    assertEquals("processed output should match expected",
-                 expected, model.toEval);
+    assertEquals("processed output should match expected", expected, model.toEval);
   }
 
   /**

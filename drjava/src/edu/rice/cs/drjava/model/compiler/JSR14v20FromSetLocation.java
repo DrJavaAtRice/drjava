@@ -55,20 +55,14 @@ import edu.rice.cs.drjava.config.FileOption;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.classloader.StrictURLClassLoader;
 
-/**
- * A compiler interface to find jsr14 v2.0 from the location
- * specified in Configuration.
- *
- * @version $Id$
+/** A compiler interface to find jsr14 v2.0 from the location specified in Configuration.
+ *  @version $Id$
  */
 public class JSR14v20FromSetLocation extends CompilerProxy implements OptionConstants {
 
-  /**
-   * No longer a Singleton in order to re-determine the compiler's location multiple times.
-   */
+  /** No longer a Singleton in order to re-determine the compiler's location multiple times. */
   public JSR14v20FromSetLocation() {
-    super("edu.rice.cs.drjava.model.compiler.JSR14v20Compiler",
-          _getClassLoader());
+    super("edu.rice.cs.drjava.model.compiler.JSR14v20Compiler", _getClassLoader());
   }
 
   private static ClassLoader _getClassLoader() {
@@ -82,15 +76,9 @@ public class JSR14v20FromSetLocation extends CompilerProxy implements OptionCons
       URL url = loc.toURL();
       return new StrictURLClassLoader(new URL[] { url });
     }
-    catch (MalformedURLException e) {
-      throw new UnexpectedException(e);
-    }
+    catch (MalformedURLException e) { throw new UnexpectedException(e); }
   }
 
-  /**
-   * Returns the name of this compiler, appropriate to show to the user.
-   */
-  public String getName() {
-    return super.getName() + " (user)";
-  }
+  /** Returns the name of this compiler, appropriate to show to the user.  */
+  public String getName() { return super.getName() + " (user)"; }
 }

@@ -961,26 +961,19 @@ public class MainFrame extends JFrame implements OptionConstants {
     worker.start();
   }
 
-  /**
-   * Displays the interactions classpath.
-   */
+  /** Displays the interactions classpath. */
   private Action _viewInteractionsClasspathAction = new AbstractAction("View Interactions Classpath") {
     public void actionPerformed(ActionEvent e) {
-//      String classpath = "";
       StringBuffer cpBuf = new StringBuffer();
       Vector<URL> classpathElements = _model.getClasspath();
       for(int i = 0; i < classpathElements.size(); i++) {
-//        classpath += classpathElements.get(i);
         cpBuf.append(classpathElements.get(i).getPath());
-        if (i + 1 < classpathElements.size()) {
-//          classpath += "\n";
-          cpBuf.append("\n");
-        }
+        if (i + 1 < classpathElements.size()) cpBuf.append("\n");
       }
       String classpath = cpBuf.toString();
 
-//      new DrJavaScrollableDialog(MainFrame.this, "Interactions Classpath",
-//                                 "Current Interpreter Classpath", classpath).show();
+      new DrJavaScrollableDialog(MainFrame.this, "Interactions Classpath",
+                                 "Current Interpreter Classpath", classpath).show();
     }
   };
 
@@ -3192,12 +3185,12 @@ public class MainFrame extends JFrame implements OptionConstants {
     final SwingWorker worker = new SwingWorker() {
       public Object construct() {
         try {
-          // hourglassOn();
+         hourglassOn();
           _model.compileAll(); 
         }
         catch (FileMovedException fme) { _showFileMovedError(fme); }
         catch (IOException ioe) { _showIOError(ioe); }
-        finally { /* hourglassOff(); */ }
+        finally { hourglassOff(); }
         return null;
       }
     };
@@ -3207,9 +3200,11 @@ public class MainFrame extends JFrame implements OptionConstants {
   private void _compileAll() {
     final SwingWorker worker = new SwingWorker() {
       public Object construct() {
+        hourglassOn();
         try { _model.getCompilerModel().compileAll(); }
         catch (FileMovedException fme) { _showFileMovedError(fme); }
         catch (IOException ioe) { _showIOError(ioe); }
+        finally { hourglassOff(); }
         return null;
       }
     };
@@ -6532,20 +6527,20 @@ public class MainFrame extends JFrame implements OptionConstants {
     /* changes to the state */
     
     public void projectBuildDirChanged(){
-      if(_model.getBuildDirectory() != null){
+      if (_model.getBuildDirectory() != null) {
         _cleanAction.setEnabled(true);
-      }else{
-        _cleanAction.setEnabled(false);
       }
+      else _cleanAction.setEnabled(false);
     }
     
     public void projectModified(){
 //      _saveProjectAction.setEnabled(_model.isProjectChanged());
     }
     
-    public void projectClosed(){
+    public void projectClosed() {
       _model.getDocumentNavigator().asContainer().addKeyListener(_historyListener);
       _model.getDocumentNavigator().asContainer().addFocusListener(_focusListenerForRecentDocs);
+      removeTab(_junitErrorPanel);
     }
 
     public void projectOpened(File projectFile, FileOpenSelector files) {
@@ -6558,11 +6553,10 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
     
     public void projectRunnableChanged(){
-      if(_model.getMainClass() != null && _model.getMainClass().exists()){
+      if(_model.getMainClass() != null && _model.getMainClass().exists()) {
         _runProjectAction.setEnabled(true);
-      }else{
-        _runProjectAction.setEnabled(false);
       }
+      else _runProjectAction.setEnabled(false);
     }
     
     public void documentNotFound(OpenDefinitionsDocument d, File f) {

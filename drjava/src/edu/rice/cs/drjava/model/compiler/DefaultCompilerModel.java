@@ -43,7 +43,6 @@
  * 
 END_COPYRIGHT_BLOCK*/
 
-// TODO: should this be in the compiler package?
 package edu.rice.cs.drjava.model.compiler;
 
 import java.io.File;
@@ -353,13 +352,11 @@ public class DefaultCompilerModel implements CompilerModel {
       String message = pair.getFirst();      
 //      System.out.println("Got error message: " + message);
       JExpressionIF jexpr = pair.getSecond();
+      
       SourceInfo si;
-      if (jexpr == null) {
-        si = JExprParser.NO_SOURCE_INFO;
-      }
-      else {
-        si = pair.getSecond().getSourceInfo();
-      }
+      if (jexpr == null) si = JExprParser.NO_SOURCE_INFO;
+      else si = pair.getSecond().getSourceInfo();
+      
       errors.addLast(new CompilerError(si.getFile(), si.getStartLine()-1, si.getStartColumn()-1, message, false));
     }
     return errors;
@@ -440,9 +437,7 @@ public class DefaultCompilerModel implements CompilerModel {
           compiler.setWarningsEnabled(false);
           javaFileSet.add(new File(fileName.substring(0, lastIndex) + ".java"));
         }
-        else {
-          javaFileSet.add(canonicalFile);
-        }
+        else javaFileSet.add(canonicalFile);
       }
       files = javaFileSet.toArray(new File[javaFileSet.size()]);
         
@@ -455,8 +450,7 @@ public class DefaultCompilerModel implements CompilerModel {
       CompilerError[] compilerErrorsArray = (CompilerError[]) compilerErrors.toArray(new CompilerError[compilerErrors.size()]);
       
       /** Compile the files in specified sourceRoots and files */
-      if (compilerErrorsArray.length == 0)
-        compilerErrorsArray = compiler.compile(sourceRoots, files);
+      if (compilerErrorsArray.length == 0) compilerErrorsArray = compiler.compile(sourceRoots, files);
 
       _distributeErrors(compilerErrorsArray);
     }

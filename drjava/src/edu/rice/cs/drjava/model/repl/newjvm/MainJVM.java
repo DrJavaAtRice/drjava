@@ -386,25 +386,6 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     catch (RemoteException re) { _threwException(re); }
   }
   
-  //  /**
-  //   * "Soft" resets the interpreter, without killing the JVM.  This method
-  //   * is not really used anymore, since this doesn't reset any threads that
-  //   * have been spawned.
-  //   */
-  //  public void reset() {
-  //    // silently fail if disabled. see killInterpreter docs for details.
-  //    if (! _enabled) return;
-  //
-  //    ensureInterpreterConnected();
-  //
-  //    try {
-  //      _interpreterJVM().reset();
-  //    }
-  //    catch (RemoteException re) {
-  //      _threwException(re);
-  //    }
-  //  }
-  
   /** @param show Whether to show a message if a reset operation fails. */
   public void setShowMessageOnResetFailure(boolean show) {
     // silently fail if disabled. see killInterpreter docs for details.
@@ -711,19 +692,13 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     _parseStartupClasspath();
   }
   
-  /**
-   * Starts the interpreter if it's not running already.
-   */
+  /** Starts the interpreter if it's not running already. */
   public void startInterpreterJVM() {
-    if (isStartupInProgress() || isInterpreterRunning()) {
-      return;
-    }
+    if (isStartupInProgress() || isInterpreterRunning())  return;
     
     // Pass assertion and debug port information as JVM arguments
     ArrayList<String> jvmArgs = new ArrayList<String>();
-    if (allowAssertions()) {
-      jvmArgs.add("-ea");
-    }
+    if (allowAssertions())  jvmArgs.add("-ea");
     // set the "user.dir" property to the user's working directory so that relative files will resolve correctly.
     //    File workDir = DrJava.getConfig().getSetting(OptionConstants.WORKING_DIRECTORY);
     //    if (workDir != FileOption.NULL_FILE) {
@@ -750,28 +725,22 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     //    List<String> optionArgs = ArgumentTokenizer.tokenize(optionArgString);
     jvmArgs.addAll(_optionArgs);
     String[] jvmArgsArray = new String[jvmArgs.size()];
-    for (int i=0; i < jvmArgs.size(); i++) {
-      jvmArgsArray[i] = jvmArgs.get(i);
-    }
+    for (int i=0; i < jvmArgs.size(); i++) { jvmArgsArray[i] = jvmArgs.get(i); }
     
     // Invoke the Interpreter JVM
     try {
-      //_startupClasspath is sent in as the interactions classpath
-      //      System.out.println("startup: " + _startupClasspath);
+//      _startupClasspath is sent in as the interactions classpath
+//      System.out.println("startup: " + _startupClasspath);
+//      new ScrollableDialog(null, "Calling invokeSlave(" + jvmArgs + ", " + _startupClasspath + ")", "", "").show();
       invokeSlave(jvmArgsArray, _startupClasspath);
     }
-    catch (RemoteException re) {
-      _threwException(re);
-    }
-    catch (IOException ioe) {
-      _threwException(ioe);
-    }
+    catch (RemoteException re) { _threwException(re); }
+    catch (IOException ioe) { _threwException(ioe); }
   }
   
-  /**
-   * React if the slave JVM quits.  Restarts the JVM unless _enabled is false,
-   * and notifies the InteractionsModel if the quit was unexpected.
-   * @param status Status returned by the dead process.
+  /** React if the slave JVM quits.  Restarts the JVM unless _enabled is false, and notifies the 
+   *  InteractionsModel if the quit was unexpected.
+   *  @param status Status returned by the dead process.
    */
   protected void handleSlaveQuit(int status) {
     // Only restart the slave if _enabled is true

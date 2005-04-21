@@ -1007,7 +1007,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
     buf.append("* Every method starting with the word \"test\" will be called when running\n");
     buf.append("* the test with JUnit.\n");
     buf.append("*/\n");
-    if(! elementary) buf.append("public ");
+    if (! elementary) buf.append("public ");
     buf.append("class ");
     buf.append(name);
     buf.append(" extends TestCase {\n\n");
@@ -1447,7 +1447,6 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
     synchronized (_documentsRepos) { found = _documentsRepos.remove(doc); }
     
     if (! found) return false;
-    
     _documentNavigator.removeDocument(doc);
     _notifier.fileClosed(doc);
     doc.close();
@@ -1460,7 +1459,6 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
   public boolean closeAllFilesOnQuit() {
     
     OpenDefinitionsDocument[] docs;
-    
     synchronized (_documentsRepos) { docs = _documentsRepos.toArray(new OpenDefinitionsDocument[0]); }
     
     for (OpenDefinitionsDocument doc : docs) {
@@ -1513,9 +1511,8 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
     return doc;
   }
 
-  /**
-   * Iterates over OpenDefinitionsDocuments, looking for this file.
-   * TODO: This is not very efficient!
+  /** Iterates over OpenDefinitionsDocuments, looking for this file.
+   *  TODO: This is not very efficient!
    */
   public boolean isAlreadyOpen(File file) { return (_getOpenDocument(file) != null); }
 
@@ -2013,14 +2010,12 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
   private static int ID_COUNTER = 0; /* Seed for assigning id numbers to OpenDefinitionsDocuments */
   // ---------- ConcreteOpenDefDoc inner class ----------
 
-  /** Inner class to handle operations on each of the open DefinitionsDocuments by the GlobalModel.
-   * <br><br>
-   * This was at one time called the <code>DefinitionsDocumentHandler</code>
-   * but was renamed (2004-Jun-8) to be more descriptive/intuitive.
+  /** Inner class to handle operations on each of the open DefinitionsDocuments by the GlobalModel. <br><br>
+   *  This was at one time called the <code>DefinitionsDocumentHandler</code>
+   *  but was renamed (2004-Jun-8) to be more descriptive/intuitive.
    */
   private class ConcreteOpenDefDoc implements OpenDefinitionsDocument {
 //    private DefinitionsDocument _doc;
-    // TODO: Should these be document-specific?  They aren't used as such now.
 //    private CompilerErrorModel _errorModel;
 //    private JUnitErrorModel _junitErrorModel;
     
@@ -3060,21 +3055,6 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
     
     /** Orders ODDs by their id's. */
     public int compareTo(OpenDefinitionsDocument o) { return _id - o.id(); }
-    
-//    /**
-//     * @param doc the document to test
-//     * @return true if the document belongs to this open def doc
-//     * 
-//     * Currently it ALWAYS returns false!
-//     */
-//    public boolean belongsHuh(Document doc) { return _belongsHuhHelper(doc); }
-//    
-//    private boolean _belongsHuhHelper(Document doc) { return false; }
-//    
-//    private boolean _belongsHuhHelper(DefinitionsDocument doc){
-//      return (doc.getOpenDefDoc() == this);
-//    }
-//    
     
     /** Implementation of the javax.swing.text.Document interface. */
     public void addDocumentListener(DocumentListener listener) {

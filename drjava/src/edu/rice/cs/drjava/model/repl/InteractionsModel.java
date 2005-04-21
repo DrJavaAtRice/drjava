@@ -58,11 +58,9 @@ import edu.rice.cs.util.*;
 import edu.rice.cs.util.text.DocumentAdapter;
 import edu.rice.cs.util.text.DocumentAdapterException;
 
-/**
- * A model which can serve as the glue between an InteractionsDocument and
- * any JavaInterpreter.  This abstract class provides common functionality
- * for all such models.
- * @version $Id$
+/** A model which can serve as the glue between an InteractionsDocument and any JavaInterpreter.  This 
+ *  abstract class provides common functionality for all such models.
+ *  @version $Id$
  */
 public abstract class InteractionsModel implements InteractionsModelCallback {
 
@@ -92,8 +90,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
    *  the JVM from being flooded with print calls. */
   private int _writeDelay;
 
-  /** Port used by the debugger to connect to the Interactions JVM.
-   *  Uniquely created in getDebugPort(). */
+  /** Port used by the debugger to connect to the Interactions JVM. Uniquely created in getDebugPort(). */
   private int _debugPort;
 
   /** Whether the debug port has been set already or not.
@@ -183,9 +180,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     //Do not add to history immediately in case the user is not finished typing when they press return
   }
   
-  public void addNewLine() {
-    _docAppend(_newLine, InteractionsDocument.DEFAULT_STYLE);
-  }
+  public void addNewLine() { _docAppend(_newLine, InteractionsDocument.DEFAULT_STYLE); }
 
   /** Interprets the given command.
    *  @param toEval command to be evaluated. */
@@ -196,112 +191,62 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     }
   }
 
-  /** Interprets the given command.  This should only be called from
-   *  interpret, never directly.
+  /** Interprets the given command.  This should only be called from interpret, never directly.
    *  @param toEval command to be evaluated
    */
   protected abstract void _interpret(String toEval);
 
-  /**
-   * Verifies that the current interaction is "complete"; i.e. the user has
-   * finished typing.
-   * @param toCheck the String to check
-   * @return true iff the interaction is complete
-   */
-//  protected abstract boolean _checkInteraction(String toCheck);
-  
-  /**
-   * Verifies that the current interaction is "complete"; i.e. the user has
-   * finished typing.
-   * @param toCheck the String to check
-   * @return true iff the interaction is complete
-   */
-//  protected boolean _checkInteraction(String toCheck) {
-//    try {
-//      _interactionsProcessor.preProcess(toCheck);
-//    }
-//    catch (ParseException pe) {
-//      // A ParseException indicates a syntax error in the input window
-//      if (pe.getInteractionsMessage().endsWith("<EOF>\"")) {
-//        _notifyInteractionIncomplete();
-//        return false;
-//      }
-//    }
-//    catch (TokenMgrError tme) {
-//      // A TokenMgrError indicates some lexical difficulty with input.
-//    }
-//    return true;
-//  }
-
-  /**
-   * Notifies the view that the current interaction is incomplete.
-   */
+  /** Notifies the view that the current interaction is incomplete. */
   protected abstract void _notifyInteractionIncomplete();
 
-  /**
-   * Notifies listeners that an interaction has started.
-   * (Subclasses must maintain listeners.)
-   */
+  /** Notifies listeners that an interaction has started. (Subclasses must maintain listeners.) */
   protected abstract void _notifyInteractionStarted();
 
-  /**
-   * Gets the string representation of the value of a variable in the current interpreter.
-   * @param var the name of the variable
+  /** Gets the string representation of the value of a variable in the current interpreter.
+   *  @param var the name of the variable
    */
   public abstract String getVariableToString(String var);
 
-  /**
-   * Gets the class name of a variable in the current interpreter.
-   * @param var the name of the variable
+  /** Gets the class name of a variable in the current interpreter.
+   *  @param var the name of the variable
    */
   public abstract String getVariableClassName(String var);
 
-  /**
-   * Resets the Java interpreter, resetting the flag to indicate whether
-   * the interpreter has been used since the last reset.
+  /** Resets the Java interpreter, resetting the flag to indicate whether the interpreter has been used 
+   *  since the last reset.
    */
   public final void resetInterpreter() {
     _interpreterUsed = false;
     _resetInterpreter();
   }
 
-  /**
-   * Resets the Java interpreter.  This should only be called from
-   * resetInterpreter, never directly.
-   */
+  /** Resets the Java interpreter.  This should only be called from resetInterpreter, never directly. */
   protected abstract void _resetInterpreter();
 
-  /**
-   * Returns whether the interpreter has been used since the last reset
-   * operation.  (Set to true in interpret and false in resetInterpreter.)
+  /** Returns whether the interpreter has been used since the last reset
+   *  operation.  (Set to true in interpret and false in resetInterpreter.)
    */
-  public boolean interpreterUsed() {
-    return _interpreterUsed;
-  }
+  public boolean interpreterUsed() { return _interpreterUsed; }
 
-  /**
-   * These add the given path to the classpaths used in the interpreter.
-   * @param path Path to add
+  /** These add the given path to the classpaths used in the interpreter.
+   *  @param path Path to add
    */
   public abstract void addProjectClassPath(URL path);
   public abstract void addBuildDirectoryClassPath(URL path);
   public abstract void addProjectFilesClassPath(URL path);
   public abstract void addExternalFilesClassPath(URL path);
   public abstract void addExtraClassPath(URL path);
-  
-  
-  /**
-   * Handles a syntax error being returned from an interaction
-   * @param offset the first character of the error in the InteractionsDocument
-   * @param length the length of the error.
+ 
+  /** Handles a syntax error being returned from an interaction
+   *  @param offset the first character of the error in the InteractionsDocument
+   *  @param length the length of the error.
    */
   protected abstract void _notifySyntaxErrorOccurred(int offset, int length);
 
-  /**
-   * Opens the files chosen in the given file selector, and returns an ArrayList
-   * with one history string for each selected file.
-   * @param selector A file selector supporting multiple file selection
-   * @return a list of histories (one for each selected file)
+  /** Opens the files chosen in the given file selector, and returns an ArrayList with one history string 
+   *  for each selected file.
+   *  @param selector A file selector supporting multiple file selection
+   *  @return a list of histories (one for each selected file)
    */
   protected ArrayList<String> _getHistoryText(FileOpenSelector selector)
     throws IOException, OperationCanceledException {
@@ -334,8 +279,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
         int sl = s.length();
         if (sl > 0) {
           
-          // check for file format version string.
-          // NOTE: the original file format did not have a version string
+          // check for format version string. NOTE: the original file format did not have a version string
           if (firstLine && (s.trim().equals(History.HISTORY_FORMAT_VERSION_2.trim()))) formatVersion = 2;
           
           switch (formatVersion) {
@@ -360,14 +304,11 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     return histories;
   }
 
-  /**
-   * Removes the interaction-separator comments from a history, so that they
-   * will not appear when executing the history.
-   * @param text The full, formatted text of an interactions history (obtained
-   * from _getHistoryText)
-   * @return A list of strings representing each interaction in the history.
-   * If no separators are present, the entire history is treated as one
-   * interaction.
+  /** Removes the interaction-separator comments from a history, so that they will not appear when executing
+   *  the history.
+   *  @param text The full, formatted text of an interactions history (obtained from _getHistoryText)
+   *  @return A list of strings representing each interaction in the history. If no separators are present, 
+   *  the entire history is treated as one interaction.
    */
   protected ArrayList<String> _removeSeparators(String text) {
     String sep = History.INTERACTION_SEPARATOR;
@@ -386,17 +327,13 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
 
     // get last interaction
     String last = text.substring(lastIndex, text.length()).trim();
-    if (!"".equals(last)) {
-      interactions.add(last);
-    }
+    if (!"".equals(last)) interactions.add(last);
     return interactions;
   }
 
-  /**
-   * Interprets the files selected in the FileOpenSelector. Assumes all strings
-   * have no trailing whitespace.  Interprets the array all at once so if there
-   * are any errors, none of the statements after the first erroneous one are
-   * processed.
+  /** Interprets the files selected in the FileOpenSelector. Assumes all strings have no trailing whitespace.
+   *  Interprets the array all at once so if there are any errors, none of the statements after the first 
+   *  erroneous one are processed.
    */
   public void loadHistory(FileOpenSelector selector) throws IOException {
     ArrayList<String> histories;
@@ -427,21 +364,17 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     return new InteractionsScriptModel(this, interactions);
   }
 
-  /**
-   * Returns the port number to use for debugging the interactions JVM.
-   * Generates an available port if one has not been set manually.
-   * @throws IOException if unable to get a valid port number.
+  /** Returns the port number to use for debugging the interactions JVM.
+   *  Generates an available port if one has not been set manually.
+   *  @throws IOException if unable to get a valid port number.
    */
   public int getDebugPort() throws IOException {
-    if (!_debugPortSet) {
-      _createNewDebugPort();
-    }
+    if (!_debugPortSet) _createNewDebugPort();
     return _debugPort;
   }
 
-  /**
-   * Generates an available port for use with the debugger.
-   * @throws IOException if unable to get a valid port number.
+  /** Generates an available port for use with the debugger.
+   *  @throws IOException if unable to get a valid port number.
    */
   protected void _createNewDebugPort() throws IOException {
     try {
@@ -459,60 +392,46 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     }
   }
 
-  /**
-   * Sets the port number to use for debugging the interactions JVM.
-   * @param port Port to use to debug the interactions JVM
+  /** Sets the port number to use for debugging the interactions JVM.
+   *  @param port Port to use to debug the interactions JVM
    */
   public void setDebugPort(int port) {
     _debugPort = port;
     _debugPortSet = true;
   }
 
-  /**
-   * Called when the repl prints to System.out.
-   * @param s String to print
+  /** Called when the repl prints to System.out.
+   *  @param s String to print
    */
   public void replSystemOutPrint(String s) {
     _document.insertBeforeLastPrompt(s, InteractionsDocument.SYSTEM_OUT_STYLE);
   }
 
-  /**
-   * Called when the repl prints to System.err.
-   * @param s String to print
+  /** Called when the repl prints to System.err.
+   *  @param s String to print
    */
   public void replSystemErrPrint(String s) {
     _document.insertBeforeLastPrompt(s, InteractionsDocument.SYSTEM_ERR_STYLE);
   }
 
-  /**
-   * Returns a line of text entered by the user at the equivalent
-   * of System.in.
-   */
-  public String getConsoleInput() {
-    return _inputListener.getConsoleInput();
-  }
+  /** Returns a line of text entered by the user at the equivalent of System.in. */
+  public String getConsoleInput() { return _inputListener.getConsoleInput(); }
 
-  /**
-   * Sets the listener for any type of single-source input event.
-   * The listener can only be changed with the changeInputListener method.
-   * @param listener a listener that reacts to input requests
-   * @throws IllegalStateException if the input listener is locked
+  /** Sets the listener for any type of single-source input event.
+   *  The listener can only be changed with the changeInputListener method.
+   *  @param listener a listener that reacts to input requests
+   *  @throws IllegalStateException if the input listener is locked
    */
   public void setInputListener(InputListener listener) {
-    if (_inputListener == NoInputListener.ONLY) {
-      _inputListener = listener;
-    }
-    else {
-      throw new IllegalStateException("Cannot change the input listener until it is released.");
-    }
+    if (_inputListener == NoInputListener.ONLY) _inputListener = listener;
+    else  throw new IllegalStateException("Cannot change the input listener until it is released.");
   }
 
-  /**
-   * Changes the input listener. Takes in the old listener to ensure that the owner
-   * of the original listener is aware that it is being changed. It is therefore
-   * important NOT to include a public accessor to the input listener on the model.
-   * @param oldListener the listener that was installed
-   * @param newListener the listener to be installed
+  /** Changes the input listener. Takes in the old listener to ensure that the owner
+   *  of the original listener is aware that it is being changed. It is therefore
+   *  important NOT to include a public accessor to the input listener on the model.
+   *  @param oldListener the listener that was installed
+   *  @param newListener the listener to be installed
    */
   public void changeInputListener(InputListener oldListener, InputListener newListener) {
     // syncrhonize to prevent concurrent modifications to the listener
@@ -523,10 +442,8 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     }
   }
 
-  /**
-   * Any common behavior when an interaction ends.
-   * Subclasses might want to additionally notify listeners here.
-   * (Do this after calling super())
+  /** Any common behavior when an interaction ends. Subclasses might want to additionally notify listeners 
+   *  here. (Do this after calling super())
    */
   protected void _interactionIsOver() {
     _document.addToHistory(_toAddToHistory);
@@ -535,19 +452,14 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     _notifyInteractionEnded();
   }
 
-  /**
-   * Notifies listeners that an interaction has ended.
-   * (Subclasses must maintain listeners.)
-   */
+  /** Notifies listeners that an interaction has ended. (Subclasses must maintain listeners.) */
   protected abstract void _notifyInteractionEnded();
 
-  /**
-   * Appends a string to the given document using a named style.
-   * Also waits for a small amount of time (_writeDelay) to prevent any one
-   * writer from flooding the model with print calls to the point that the
-   * user interface could become unresponsive.
-   * @param s String to append to the end of the document
-   * @param styleName Name of the style to use for s
+  /** Appends a string to the given document using a named style. Also waits for a small amount of time 
+   *  (_writeDelay) to prevent any one writer from flooding the model with print calls to the point that 
+   *  the user interface could become unresponsive.
+   *  @param s String to append to the end of the document
+   *  @param styleName Name of the style to use for s
    */
   protected void _docAppend(String s, String styleName) {
     synchronized(_writerLock) {
@@ -594,9 +506,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
    * @param message The exception's message
    * @param stackTrace The stack trace of the exception
    */
-  public void replThrewException(String exceptionClass,
-                                 String message,
-                                 String stackTrace,
+  public void replThrewException(String exceptionClass, String message, String stackTrace, 
                                  String shortMessage) {
     if (shortMessage!=null) {
       if (shortMessage.endsWith("<EOF>\"")) {
@@ -604,30 +514,21 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
         return;
       }
     }
-    _document.appendExceptionResult(exceptionClass,
-                                    message,
-                                    stackTrace,
+    _document.appendExceptionResult(exceptionClass, message, stackTrace,
                                     InteractionsDocument.ERROR_STYLE);
     _interactionIsOver();
   }
 
-  /**
-   * Signifies that the most recent interpretation was preempted
-   * by a syntax error.  The integer parameters support future
-   * error highlighting.
-   *
-   * @param errorMessage The syntax error message
-   * @param startRow The starting row of the error
-   * @param startCol The starting column of the error
-   * @param endRow The end row of the error
-   * @param endCol The end column of the error
+  /** Signifies that the most recent interpretation was preempted by a syntax error.  The integer parameters
+   *  support future error highlighting.
+   *  @param errorMessage The syntax error message
+   *  @param startRow The starting row of the error
+   *  @param startCol The starting column of the error
+   *  @param endRow The end row of the error
+   *  param endCol The end column of the error
    */
-  public void replReturnedSyntaxError(String errorMessage,
-                                      String interaction,
-                                      int startRow,
-                                      int startCol,
-                                      int endRow,
-                                      int endCol ) {
+  public void replReturnedSyntaxError(String errorMessage, String interaction, int startRow, int startCol,
+                                      int endRow, int endCol ) {
     if (errorMessage!=null) {
       if (errorMessage.endsWith("<EOF>\"")) {
         interactionContinues();
@@ -641,37 +542,23 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     _notifySyntaxErrorOccurred(_document.getPromptPos() + oAndL.getFirst().intValue(),
                                 oAndL.getSecond().intValue());
 
-    _document.appendSyntaxErrorResult(errorMessage,
-                                      interaction,
-                                      startRow,
-                                      startCol,
-                                      endRow,
-                                      endCol,
+    _document.appendSyntaxErrorResult(errorMessage, interaction, startRow, startCol, endRow, endCol,
                                       InteractionsDocument.ERROR_STYLE);
 
     _interactionIsOver();
   }
 
-  /**
-   * Signifies that the most recent interpretation contained a call to
-   * System.exit.
-   *
-   * @param status The exit status that will be returned.
+  /** Signifies that the most recent interpretation contained a call to System.exit.
+   *  @param status The exit status that will be returned.
    */
-  public void replCalledSystemExit(int status) {
-    _notifyInterpreterExited(status);
-  }
+  public void replCalledSystemExit(int status) { _notifyInterpreterExited(status); }
 
-  /**
-   * Notifies listeners that the interpreter has exited unexpectedly.
-   * @param status Status code of the dead process
-   * (Subclasses must maintain listeners.)
+  /** Notifies listeners that the interpreter has exited unexpectedly. (Subclasses must maintain listeners.)
+   *  @param status Status code of the dead process
    */
   protected abstract void _notifyInterpreterExited(int status);
 
-  /**
-   * Called when the interpreter starts to reset.
-   */
+  /** Called when the interpreter starts to reset. */
   public void interpreterResetting() {
     if (!_waitingForFirstInterpreter) {
       _document.insertBeforeLastPrompt("Resetting Interactions..." + _newLine,
@@ -679,9 +566,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
       _document.setInProgress(true);
 
       // Change to a new debug port to avoid conflicts
-      try {
-        _createNewDebugPort();
-      }
+      try { _createNewDebugPort(); }
       catch (IOException ioe) {
         // Oh well, leave it at the previous port
       }
@@ -689,16 +574,12 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     }
   }
 
-  /**
-   * Notifies listeners that the interpreter is resetting.
-   * (Subclasses must maintain listeners.)
-   */
+  /** Notifies listeners that the interpreter is resetting. (Subclasses must maintain listeners.) */
   protected abstract void _notifyInterpreterResetting();
 
-  /**
-   * This method is called by the Main JVM if the Interpreter JVM cannot
-   * be exited (likely because of its having a security manager)
-   * @param t The Throwable thrown by System.exit
+  /** This method is called by the Main JVM if the Interpreter JVM cannot
+   *  be exited (likely because of its having a security manager)
+   *  @param t The Throwable thrown by System.exit
    */
   public void interpreterResetFailed(Throwable t) {
     _interpreterResetFailed(t);
@@ -706,23 +587,17 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     _notifyInterpreterResetFailed(t);
   }
 
-  /**
-   * Any extra action to perform (beyond notifying listeners) when
-   * the interpreter fails to reset.
-   * @param t The Throwable thrown by System.exit
+  /** Any extra action to perform (beyond notifying listeners) when the interpreter fails to reset.
+   *  @param t The Throwable thrown by System.exit
    */
   protected abstract void _interpreterResetFailed(Throwable t);
 
-  /**
-   * Notifies listeners that the interpreter reset failed.
-   * @param t Throwable explaining why the reset failed.
-   * (Subclasses must maintain listeners.)
+  /** Notifies listeners that the interpreter reset failed. (Subclasses must maintain listeners.)
+   *  @param t Throwable explaining why the reset failed.
    */
   protected abstract void _notifyInterpreterResetFailed(Throwable t);
 
-  /**
-   * Called when a new Java interpreter has registered and is ready for use.
-   */
+  /** Called when a new Java interpreter has registered and is ready for use. */
   public void interpreterReady() {
     if (!_waitingForFirstInterpreter) {
       _document.reset();
@@ -732,21 +607,12 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     _waitingForFirstInterpreter = false;
   }
 
-  /**
-   * Notifies listeners that the interpreter is ready.
-   * (Subclasses must maintain listeners.)
-   */
+  /** Notifies listeners that the interpreter is ready. (Subclasses must maintain listeners.) */
   protected abstract void _notifyInterpreterReady();
 
-
-  /**
-   * Assumes a trimmed String. Returns a string of the main call that the
-   * interpretor can use.
-   */
+  /** Assumes a trimmed String. Returns a string of the main call that the interpretor can use. */
   protected static String _testClassCall(String s) {
-    if (s.endsWith(";")) {
-      s = _deleteSemiColon(s);
-    }
+    if (s.endsWith(";"))  s = _deleteSemiColon(s);
     List<String> args = ArgumentTokenizer.tokenize(s, true);
     boolean seenArg = false;
     String className = args.get(1);
@@ -754,38 +620,26 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     mainCall.append(className.substring(1, className.length() - 1));
     mainCall.append(".main(new String[]{");
     for (int i = 2; i < args.size(); i++) {
-      if (seenArg) {
-        mainCall.append(",");
-      }
-      else {
-        seenArg = true;
-      }
+      if (seenArg) mainCall.append(",");
+      else seenArg = true;
       mainCall.append(args.get(i));
     }
     mainCall.append("});");
     return mainCall.toString();
   }
 
-  /**
-   * Deletes the last character of a string.  Assumes semicolon at the
-   * end, but does not check.  Helper for _testClassCall(String).
-   * @param s the String containing the semicolon
-   * @return a substring of s with one less character
+  /** Deletes the last character of a string.  Assumes semicolon at the end, but does not check.  Helper 
+   *  for _testClassCall(String).
+   *  @param s the String containing the semicolon
+   *  @return a substring of s with one less character
    */
-  protected static String _deleteSemiColon(String s) {
-    return  s.substring(0, s.length() - 1);
-  }
+  protected static String _deleteSemiColon(String s) { return  s.substring(0, s.length() - 1); }
 
-  /**
-   * Singleton InputListener which should never be asked for input.
-   */
+  /** Singleton InputListener which should never be asked for input. */
   private static class NoInputListener implements InputListener {
     public static final NoInputListener ONLY = new NoInputListener();
-    private NoInputListener() {
-    }
+    private NoInputListener() { }
 
-    public String getConsoleInput() {
-      throw new IllegalStateException("No input listener installed!");
-    }
+    public String getConsoleInput() { throw new IllegalStateException("No input listener installed!"); }
   }
 }

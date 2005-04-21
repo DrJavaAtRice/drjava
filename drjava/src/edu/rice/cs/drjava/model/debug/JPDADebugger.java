@@ -1004,10 +1004,9 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     }
   }
 
-  /**
-   * Called when a breakpoint is reached.  The Breakpoint object itself
-   * should be stored in the "debugAction" property on the request.
-   * @param request The BreakPointRequest reached by the debugger
+  /** Called when a breakpoint is reached.  The Breakpoint object itself should be stored in the 
+   *  "debugAction" property on the request.
+   *  @param request The BreakPointRequest reached by the debugger
    */
   synchronized void reachedBreakpoint(BreakpointRequest request) {
     Object property = request.getProperty("debugAction");
@@ -1025,9 +1024,8 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     }
   }
 
-  /**
-   * Returns a Vector<Breakpoint> that contains all of the Breakpoint objects that
-   * all open documents contain.
+  /** Returns a Vector<Breakpoint> that contains all of the Breakpoint objects that
+   *  all open documents contain.
    */
   public synchronized Vector<Breakpoint> getBreakpoints() throws DebugException {
     _ensureReady();

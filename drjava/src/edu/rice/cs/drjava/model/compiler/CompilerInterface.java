@@ -75,58 +75,43 @@ public interface CompilerInterface {
    */
   CompilerError[] compile(File[] sourceRoots, File[] files);
 
-  /**
-   * Indicates whether this compiler is actually available.
-   * As in: Is it installed and located?
-   * This method should load the compiler class, which should
-   * hopefully prove whether the class can load.
-   * If this method returns true, the {@link #compile} method
-   * should not fail due to class not being found.
+  /** Indicates whether this compiler is actually available. As in: Is it installed and located? This method 
+   *  should load the compiler class, which should hopefully prove whether the class can load.  If this 
+   *  method returns true, the {@link #compile} method should not fail due to class not being found.
    */
   boolean isAvailable();
 
-  /**
-   * Returns the name of this compiler, appropriate to show to the user.
-   */
+  /** Returns the name of this compiler, appropriate to show to the user. */
   String getName();
 
   /** Should return info about compiler, at least including name. */
   String toString();
   
-  /**
-   * Allows us to set the extra classpath for the compilers without referencing the
-   * config object in a loaded class file.
+  /** Allows us to set the extra classpath for the compilers without referencing the config object in a loaded class 
+   *  file.
    */ 
   void setExtraClassPath(String extraClassPath);
   
-  /**
-   * Sets the extra classpath in the form of a ClasspathVector. This should include
-   * any classpath entries from the project's classpath, if any, and the entries from
-   * EXTRA_CLASSPATH.
+  /** Sets the extra classpath in the form of a ClasspathVector. This should include any classpath entries from 
+   *  the project's classpath, if any, and the entries from EXTRA_CLASSPATH.
    * @param extraClassPath the classpath to use as the compiler's extra classpath
    */
   void setExtraClassPath(ClasspathVector extraClassPath);
   
-  /**
-   * Sets whether to allow assertions in Java 1.4.  (Allows us not to reference
-   * the config object in a loaded class file.)
+  /** Sets whether to allow assertions in Java 1.4.  (Allows us not to reference the config object in a 
+   *  loaded class file.)
    */
   void setAllowAssertions(boolean allow);
   
-  /**
-   * Sets whether or not warnings are allowed
-   */
+  /** Sets whether or not warnings are allowed. */
   void setWarningsEnabled(boolean warningsEnabled);
   
-  /**
-   * This method allows us to set the JSR14 collections path across a class loader.
-   * (cannot cast a loaded class to a subclass, so all compiler interfaces must have this method)
+  /** This method allows us to set the JSR14 collections path across a class loader.
+   *  (cannot cast a loaded class to a subclass, so all compiler interfaces must have this method)
    */ 
   void addToBootClassPath(File s);
   
-  /**
-   * sets the output directory, or null for default
-   */
+  /** Sets the output directory, or null for default */
   void setBuildDirectory(File dir);
   
 }

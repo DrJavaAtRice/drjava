@@ -125,14 +125,15 @@
   </target>
 
   <target name="compile" depends="do-compile">
-    <rmic base="${built}"
-          classpath="${classpath_text}"
-          classname="edu.rice.cs.drjava.model.repl.newjvm.InterpreterJVM" />
+    <rmic base="${built}" 
+          classname="edu.rice.cs.drjava.model.repl.newjvm.InterpreterJVM"
+          classpath="${classpath_text}">
+    </rmic>
 
-    <rmic base="${built}"
-          classpath="${classpath_text}"
-          classname="edu.rice.cs.drjava.model.repl.newjvm.MainJVM" />
-
+    <rmic base="${built}"  
+          classname="edu.rice.cs.drjava.model.repl.newjvm.MainJVM"
+          classpath="${classpath_text}">
+    </rmic>
     <copy todir="${built}">
       <fileset dir="${srcroot}">
         <!-- include the GPL -->
