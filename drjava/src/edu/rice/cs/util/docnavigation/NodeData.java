@@ -45,10 +45,10 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.util.docnavigation;
 
-/**
- * Since the various nodes hold different types of data,
- * this type allows for a visitor pattern on the nodes without
- * exposing their TreeNode nature
+import javax.swing.tree.TreeNode;
+
+/** Since the various nodes hold different types of data, this type extends TreeNodes to support 
+ *  the visitor pattern.
  */
 public interface NodeData {
   

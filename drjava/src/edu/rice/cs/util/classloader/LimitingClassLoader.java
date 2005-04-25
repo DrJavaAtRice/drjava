@@ -47,44 +47,29 @@ package edu.rice.cs.util.classloader;
 
 import java.util.*;
 
-/**
- * A class loader that does nothing but allow, at runtime,
- * classes to be put on a list of "do not load" classes,
- * which will be rejected from loading, even if they are available.
- *
- * @version $Id$
+/** A class loader that does nothing but allow, at runtime, classes to be put on a list of "do not load" 
+ *  classes, which will be rejected from loading, even if they are available.
+ *  @version $Id$
  */
 public class LimitingClassLoader extends ClassLoader {
   private List<String> _restrictedList = new LinkedList<String>();
 
-  /**
-   * Creates a LimitingClassLoader.
-   * @param parent Parent class loader, which is used to load all classes
-   *               not restricted from loading.
+  /** Creates a LimitingClassLoader.
+   *  @param parent Parent class loader, which is used to load all classes  not restricted from loading.
    */
-  public LimitingClassLoader(ClassLoader parent) {
-    super(parent);
-  }
+  public LimitingClassLoader(ClassLoader parent) { super(parent); }
 
-  public void addToRestrictedList(String name) {
-    _restrictedList.add(name);
-  }
+  public void addToRestrictedList(String name) { _restrictedList.add(name); }
 
-  public void clearRestrictedList() {
-    _restrictedList.clear();
-  }
+  public void clearRestrictedList() { _restrictedList.clear(); }
 
-  /**
-   * Overrides {@link ClassLoader#loadClass(String,boolean)} to
-   * reject classes whose names are on the restricted list.
-   *
-   * @param name Name of class to load
-   * @param resolve If true then resolve the class
-   *
-   * @return {@link Class} object for the loaded class
-   * @throws ClassNotFoundException if name is on the restricted list,
-   *                                or if the parent class loader couldn't
-   *                                find the class.
+  /** Overrides {@link ClassLoader#loadClass(String,boolean)} to reject classes whose names are on the 
+   *  restricted list.
+   *  @param name Name of class to load
+   *  @param resolve If true then resolve the class
+   *  @return {@link Class} object for the loaded class
+   *  @throws ClassNotFoundException if name is on the restricted list, or if the parent class loader couldn't
+   *          find the class.
    */
   protected Class loadClass(String name, boolean resolve)
     throws ClassNotFoundException

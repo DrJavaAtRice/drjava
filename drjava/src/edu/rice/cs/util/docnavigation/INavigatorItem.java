@@ -69,7 +69,6 @@ public interface INavigatorItem {
    *  @return the simple name for this document.
    * */
   public String getName();
-  
   public boolean isAuxiliaryFile();
   public boolean isProjectFile();
   public boolean isUntitled();

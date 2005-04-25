@@ -51,9 +51,7 @@ import javax.swing.text.BadLocationException;
 
 import java.util.Hashtable;
 
-/**
- * Provides a toolkit-independent way to interact with a
- * Swing StyledDocument.
+/** Provides a toolkit-independent way to interact with a Swing StyledDocument.
  * This document must use the readers/writers locking protocol established in its superclasses
  * @version $Id$
  */
@@ -71,11 +69,9 @@ public class SwingDocumentAdapter extends DefaultStyledDocument implements Docum
     _condition = new DocumentEditCondition();
   }
 
-  /**
-   * Adds the given AttributeSet as a style with the given name.
-   * It can then be used in insertString.
-   * @param name Name of the style, to be passed to insertString
-   * @param s AttributeSet to use for the style
+  /** Adds the given AttributeSet as a style with the given name. It can then be used in insertString.
+   *  @param name Name of the style, to be passed to insertString
+   *  @param s AttributeSet to use for the style
    */
   public void setDocStyle(String name, AttributeSet s) {
     _styles.put(name, s);  // no locking necessary: _styles is final and Hashtable is thread-safe

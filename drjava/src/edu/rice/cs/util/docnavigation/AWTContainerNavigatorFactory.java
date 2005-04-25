@@ -55,25 +55,22 @@ public class AWTContainerNavigatorFactory implements IDocumentNavigatorFactory {
   private AWTContainerNavigatorFactory() { }
 
 
-  /**
-   * creates a new List Navigator
-   * @return a list navigator
+  /** Creates a new List Navigator
+   *  @return a list navigator
    */
     public IDocumentNavigator makeListNavigator() { return new JListSortNavigator(); }
 
-  /**
-   * returns a new tree Navigator with the specified root
-   * @param name the name of the root node
-   * @return a tree navigator
+  /** Returns a new tree Navigator with the specified root
+   *  @param name the name of the root node
+   *  @return a tree navigator
    */
     public IDocumentNavigator makeTreeNavigator(String name) {
         return new JTreeSortNavigator(name);
     }
     
-  /**
-   * creates a list navigator and migrates the navigator items from parent to the new navigator
-   * @param parent the navigator to migrate from
-   * @return the new list navigator
+  /** Creates a list navigator and migrates the navigator items from parent to the new navigator
+   *  @param parent the navigator to migrate from
+   *  @return the new list navigator
    */
     public IDocumentNavigator makeListNavigator(IDocumentNavigator parent) {
       IDocumentNavigator tbr = makeListNavigator();
@@ -82,28 +79,24 @@ public class AWTContainerNavigatorFactory implements IDocumentNavigatorFactory {
       return tbr;
     }
   
-  /**
-   * creates a tree navigator and migrates the navigator items from the parent to the new navigator
-   * @param name the name of the root node
-   * @param parent the navigator to migrate from
-   * @return the new tree navigator
+  /** Creates a tree navigator and migrates the navigator items from the parent to the new navigator
+   *  @param name the name of the root node
+   *  @param parent the navigator to migrate from
+   *  @return the new tree navigator
    */
-    public IDocumentNavigator makeTreeNavigator(String name, 
-                                                IDocumentNavigator parent, 
-                                                java.util.List<Pair<String, 
-                                                INavigatorItemFilter>> l) {
+    public IDocumentNavigator makeTreeNavigator(String name, IDocumentNavigator parent, 
+                                                java.util.List<Pair<String, INavigatorItemFilter>> l) {
+      
       IDocumentNavigator tbr = makeTreeNavigator(name);
-      for(Pair<String, INavigatorItemFilter> p:l) {
-        tbr.addTopLevelGroup(p.getFirst(), p.getSecond());
-      }
+      
+      for(Pair<String, INavigatorItemFilter> p:l) { tbr.addTopLevelGroup(p.getFirst(), p.getSecond()); }
       
       migrateNavigatorItems(tbr, parent);
       migrateListeners(tbr, parent);
       return tbr;
     }
     
-    /**
-     * migrates all the navigator items from parent to child
+    /** Migrates all the navigator items from parent to child
      * @param child the navigator to migrate to
      * @param parent the navigator to migrate from
      */
@@ -117,10 +110,9 @@ public class AWTContainerNavigatorFactory implements IDocumentNavigatorFactory {
       }
     }
     
-    /**
-     * migrates all the listeners from parent to child
-     * @param child the navigator to migrate to
-     * @param parent the navigator to migrate from
+    /** Migrates all the listeners from parent to child
+     *  @param child the navigator to migrate to
+     *  @param parent the navigator to migrate from
      */
     private void migrateListeners(IDocumentNavigator child, IDocumentNavigator parent) {
       Collection<INavigationListener> listeners = parent.getNavigatorListeners();

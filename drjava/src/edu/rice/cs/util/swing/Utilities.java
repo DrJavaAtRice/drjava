@@ -43,28 +43,30 @@
  * 
 END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.util.docnavigation;
+package edu.rice.cs.util.swing;
 
-import javax.swing.*;
-import javax.swing.event.TreeModelListener;
-import javax.swing.event.TreeSelectionListener;
-import javax.swing.event.TreeSelectionEvent;
-import javax.swing.tree.*;
-import java.awt.*;
-import java.net.URL;
-import java.net.MalformedURLException;
-import java.util.*;
-import edu.rice.cs.util.*;
+import java.awt.EventQueue;
+import java.lang.reflect.InvocationTargetException;
 
-public class GroupNode extends StringNode{
-  private INavigatorItemFilter _filter;
-  public GroupNode(String name, INavigatorItemFilter filter){
-    super(name);
-    if (filter == null) {
-      throw new IllegalArgumentException("parameter 'filter' must not be null");
+public class Utilities {
+  
+  /** Runs the task synchronously if the current thread is the event thread; otherwise passes it to the
+   *  event thread to be run asynchronously after all events already on the queue have been processed.
+   * */
+  public static void invokeLater(Runnable task) {
+    if (EventQueue.isDispatchThread()) {
+      task.run(); 
+      return;
     }
-    _filter = filter;
+    EventQueue.invokeLater(task);
   }
   
-  public INavigatorItemFilter getFilter(){ return _filter; }
+  public static void invokeAndWait(Runnable task) throws InterruptedException, InvocationTargetException {
+    if (EventQueue.isDispatchThread()) {
+      task.run(); 
+      return;
+    }
+    EventQueue.invokeAndWait(task);
+  }
 }
+    

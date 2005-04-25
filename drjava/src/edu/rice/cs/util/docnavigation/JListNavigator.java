@@ -55,10 +55,12 @@ import edu.rice.cs.util.UnexpectedException;
 
 //import edu.rice.cs.drjava.ui.RightClickMouseAdapter;
 
-/** This class is an extension of JList that adds a shadow version of the associated list model.
- *  Since all of the new fields are conceptually associated with the model rather than the GUI
- *  JList object (the view), the only synchronization constraints are exactly those of the view
- *  associated with JList content (superclass fields) of this.
+/** This class is an extension of JList that adds data shadowing the model embedded in a JList.
+ *  Since all changes to the model (except for the selected item!) must go through this interface,
+ *  we can support access to methods from non-event threads as long as these methods do not modify
+ *  the model.  However, all of the methods that access and modify the model (the latter only running
+ *  in the event thread) must be atomic relative to each other, so synchronization is required in most
+ *  cases.
  * 
  *  TODO: generify this class and IDocumentNavigator with respect to its element type once JList is. 
  */
@@ -71,47 +73,47 @@ class JListNavigator extends JList implements IDocumentNavigator {
   /** The current selection value.  A cached copy of getSelectedValue(). */
   private INavigatorItem _current = null;
   
+  /** The index of _current */
+  private int _currentIndex = -1;
+  
   /** The cell renderer for this JList */
   private DefaultListCellRenderer _renderer;
   
   /** the collection of INavigationListeners listening to this JListNavigator */
   private final Vector<INavigationListener> navListeners = new Vector<INavigationListener>();
   
-  /** Standard constructors */
-  
+  /** Standard constructor. */
   public JListNavigator() { 
     super();
     init(new DefaultListModel());
   }
-
+  
   private void init(DefaultListModel m) {
     _model = m;
     setModel(m);
     setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     addListSelectionListener(new ListSelectionListener() {
-      /** Called when the list value has changed
+      /** Called when the list value has changed. Should only run in the event thread.
        *  @param e the event corresponding to the change
        */
       public void valueChanged(ListSelectionEvent e) {
         if (!e.getValueIsAdjusting() && !_model.isEmpty()) {
           final INavigatorItem newItem = (INavigatorItem) getSelectedValue();
+          final int newIndex = getSelectedIndex();
           if (_current != newItem) {
             final INavigatorItem oldItem = _current;
             NodeData oldData = new NodeData() {
-              public <T> T execute(NodeDataVisitor<T> v) {
-                return v.itemCase(oldItem);
-              }
+              public <T> T execute(NodeDataVisitor<T> v) { return v.itemCase(oldItem); }
             };
             NodeData newData = new NodeData() {
-              public <T> T execute(NodeDataVisitor<T> v) {
-                return v.itemCase(newItem);
-              }
+              public <T> T execute(NodeDataVisitor<T> v) { return v.itemCase(newItem); }
             };
             for(INavigationListener listener: navListeners) {
               if (oldItem != null) listener.lostSelection(oldData);
               if (newItem != null) listener.gainedSelection(newData);
             }
             _current = newItem;
+            _currentIndex = newIndex;
           }
         }
       }
@@ -122,12 +124,15 @@ class JListNavigator extends JList implements IDocumentNavigator {
     this.setCellRenderer(_renderer);
   }
   
-  /** Adds the document to this navigator.
+  /** Adds the document doc to this navigator.  Should only be executed in event thead.
    *  @param doc the document to add
    */
-  public void addDocument(INavigatorItem doc) { _model.addElement(doc); }
+  public void addDocument(INavigatorItem doc) { 
+    synchronized(_model) { _model.addElement(doc); }
+  }
   
-  /** Adds the document to this navigator and ignores the specified path.
+  /** Adds the document to this navigator and ignores the specified path.  Should only be
+   *  executed in event thread.
    *  @param doc the document to add
    *  @param path  unused parameter in this class 
    */
@@ -164,7 +169,7 @@ class JListNavigator extends JList implements IDocumentNavigator {
     }
   }
   
-  /** Removes the document from the navigator.
+  /** Removes the document from the navigator.  Should only be executed in event thread.
    *  @param doc the document to remove
    */
   public <T extends INavigatorItem> T removeDocument(T doc) {
@@ -177,11 +182,10 @@ class JListNavigator extends JList implements IDocumentNavigator {
     }
   }
 
-  /**
-   * Resets a given <code>INavigatorItem<code> in the tree.  This may affect the
-   * placement of the item or its display to reflect any changes made in the model.
-   * @param doc the docment to be refreshed
-   * @throws IllegalArgumentException if this navigator contains no document
+  /** Resets a given <code>INavigatorItem<code> in the tree.  This may affect the placement of the item or its
+   *  display to reflect any changes made in the model.  Should only be executed in event thread.
+   *  @param doc the docment to be refreshed
+   *  @throws IllegalArgumentException if this navigator contains no document
    *  that is equal to the passed document.
    */
   public void refreshDocument(INavigatorItem doc, String path) throws IllegalArgumentException {
@@ -197,20 +201,20 @@ class JListNavigator extends JList implements IDocumentNavigator {
    */
   public void setActiveDoc(INavigatorItem doc) {
     synchronized(_model) {
-      if(_model.contains(doc)) {
+      if (_model.contains(doc)) {
         setSelectedValue(doc, true);
         // _current = doc;  // already done by ListSelectionEvent listener created in init()
       }
     }
   }
   
-  /**
-   * returns whether or not the navigator contains the document
-   * @param doc the document to find
-   * @return true if this list contains doc (using identity as equality
-   * measure), false if not.
+  /** Returns whether or not the navigator contains the document
+   *  @param doc the document to find
+   *  @return true if this list contains doc (using identity as equality measure), false if not.
    */
-  public boolean contains(INavigatorItem doc) { return _model.contains(doc); }
+  public boolean contains(INavigatorItem doc) { 
+    synchronized(_model) { return _model.contains(doc); }
+  }
   
   /**
    * @return an Enumeration of the documents in this list (ordering is
@@ -221,7 +225,9 @@ class JListNavigator extends JList implements IDocumentNavigator {
    * DefaultListModel { ... Enumeration<?> elements() {...} ... }.
    */
   public <T extends INavigatorItem> Enumeration<T> getDocuments() { 
-    return (Enumeration<T>) _model.elements();  // Cast forced by lousy generic typing of DefaultListModel in Java 1.5
+    synchronized (_model) {
+      return (Enumeration<T>) _model.elements();  // Cast forced by lousy generic typing of DefaultListModel in Java 1.5
+    }
   }
   
   /** @return the number of documents in the navigator. */
@@ -235,30 +241,26 @@ class JListNavigator extends JList implements IDocumentNavigator {
    * 
    *  Unsynchronized because Vector is thread-safe.
    */
-  public void addNavigationListener(INavigationListener listener) {
-    navListeners.add(listener);
-  }
+  public void addNavigationListener(INavigationListener listener) { navListeners.add(listener); }
   
   /** Unregisters the listener listener
    *  @param listener
    * 
    *  Unsynchronized because Vector is thread-safe.
    */
-  public void removeNavigationListener(INavigationListener listener) {
-    navListeners.remove(listener);
-    
-  }
+  public void removeNavigationListener(INavigationListener listener) { navListeners.remove(listener); }
   
   /** @return the navigator listeners. */
   public Collection<INavigationListener> getNavigatorListeners() { return navListeners; }
   
   /** Clears the navigator and removes all documents. */
-  public void clear() { _model.clear(); }
+  public void clear() { 
+    synchronized(_model) { _model.clear(); }
+  }
   
-  /**
-   * executes the list case of the visitor
-   * @param algo the visitor to execute
-   * @param input the input to run on the visitor
+  /** Executes the list case of the visitor.
+   *  @param algo the visitor to execute
+   *  @param input the input to run on the visitor
    */
   public <InType, ReturnType> ReturnType execute(IDocumentNavigatorAlgo<InType, ReturnType> algo, InType input) {
     return algo.forList(this, input);
@@ -267,11 +269,10 @@ class JListNavigator extends JList implements IDocumentNavigator {
   /** Returns a Container representation of this navigator */
   public Container asContainer() { return this; }
   
-  /**
-   * Selects the document at the x,y coordinate of the navigator pane and sets it to be
-   * the currently active document.  Should only be called from event-handling thread.
-   * @param x the x coordinate of the navigator pane
-   * @param y the y coordinate of the navigator pane
+  /** Selects the document at the x,y coordinate of the navigator pane and sets it to be
+   *  the currently active document.  Should only be called from event-handling thread.
+   *  @param x the x coordinate of the navigator pane
+   *  @param y the y coordinate of the navigator pane
    * 
    */
   public boolean selectDocumentAt(final int x, final int y) {
@@ -307,9 +308,20 @@ class JListNavigator extends JList implements IDocumentNavigator {
   }
   
   /** Since in the JListNavigator it is impossible to select anything but an INavigatorItem,
-   *  this method doesn't need to do anything.
+   *  this method doesn't need to do anything.  See JTreeSortNavigator and IDocumentNavigator.
    */
-  public void requestSelectionUpdate(INavigatorItem ini) { /* nothing */ }
+  public void requestSelectionUpdate(INavigatorItem doc) { /* nothing */ }
   
-  public String toString() { return _model.toString(); } 
+  /** Notify this ListModel that doc has changed and may need updating (if it has changed
+   *  from modified to unmodified). No synchronization because _model plus local data is
+   *  only read once.  Should only be performed in the event thread
+   */
+  public void activeDocumentModified() {
+    synchronized(_model) {
+      int current = _currentIndex;
+      fireSelectionValueChanged(current, current, false); 
+    }
+  }
+  
+  public String toString() { synchronized (_model) { return _model.toString(); } }
 }

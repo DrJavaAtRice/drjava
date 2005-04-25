@@ -135,24 +135,33 @@ public class JTreeSortNavigatorTest extends TestCase {
    * try to delete the parent.
    */
   public void testRenameDocument() {
-    _name = "MyTest.dj0";
-    INavigatorItem item = new DummyINavigatorItem("MyTest.dj0");
-    Object _lock = new Object();
-    synchronized(_lock) {
+    String name = "MyTest.dj0";
+    String newName = "MyTest.dj0*";
+    DummyINavigatorItem item = new DummyINavigatorItem(name);
+    DummyINavigatorItem newItem = new DummyINavigatorItem(newName);
+//    Object _lock = new Object();
+//    synchronized(_lock) {
       tree.addDocument(item, "folder3");
-    }
+//    }
     InnerNode folder3 = (InnerNode)source.getChildAt(2);
     assertEquals("folder3 should have 1 children", 1, folder3.getChildCount());
-    synchronized(_lock) {
+//    synchronized(_lock) {
       tree.refreshDocument(item, "folder3");
-    }
-    synchronized(_lock) {
+//    }
+//    synchronized(_lock) {
       assertEquals("folder3 should have 1 children", 1, folder3.getChildCount());
-      LeafNode node = (LeafNode)folder3.getChildAt(0);;
-      assertEquals("should have been renamed", _name, node.toString());
-      assertEquals("node should have same parent", folder3, node.getParent());
+      LeafNode node = (LeafNode)folder3.getChildAt(0);
+      assertEquals("node should have correct name", name, node.toString());
       tree.removeDocument(item);
-    }
+      tree.addDocument(newItem, "folder3");
+      folder3 = (InnerNode)source.getChildAt(2);
+      LeafNode newNode = (LeafNode)folder3.getChildAt(0);
+      
+//      tree.refreshDocument(newItem, "folder3")
+      assertEquals("should have been renamed", newName, newNode.toString());
+      assertEquals("node should have same parent", folder3, newNode.getParent());
+      tree.removeDocument(newItem);
+//    }
   }
   
 }

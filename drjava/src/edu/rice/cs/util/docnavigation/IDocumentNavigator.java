@@ -220,21 +220,23 @@ public interface IDocumentNavigator extends IAWTContainerNavigatorActor{
    */
   public boolean isTopLevelGroupSelected();
   
-  /**
-   * returns the name of the top level group that is selected, throws
-   * a GroupNotSelectedException if a top level group is not selected
+  /** Returns the name of the top level group that is selected, throws
+   *  a GroupNotSelectedException if a top level group is not selected
    */
   public String getNameOfSelectedTopLevelGroup() throws GroupNotSelectedException;
   
-  /**
-   * Switches the selection to the given INavigatorItem if the current selection
-   * is not already on an INavigatorItem.  Since it may be possible that the currently 
-   * selected item in the navigator does not correspond to an INavigatorItem, this
-   * method forces the navigator to select an item that does; specifically the one
-   * given.  If the navigator already has an INavigatorItem selected, this method does
-   * nothing.
-   * @param ini The suggested current INavigatorItem.
+  /** Switches the selection to the given INavigatorItem if the current selection is not already on an 
+   *  INavigatorItem.  Since it may be possible that the currently selected item in the navigator does not 
+   *  correspond to an INavigatorItem, this method forces the navigator to select an item that does; 
+   *  specifically the one given.  If the navigator already has an INavigatorItem selected, this method does
+   *  nothing.
+   *  @param ini The suggested current INavigatorItem.
    */
-  public void requestSelectionUpdate(INavigatorItem ini);
   
+   public void requestSelectionUpdate(INavigatorItem i);
+   
+   /** Notify this ListModel that the active document has changed and displaying may need updating (if it has 
+    *  changed from modified to unmodified status).
+    */
+   public void activeDocumentModified();
 }

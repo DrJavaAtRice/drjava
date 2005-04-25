@@ -5,7 +5,7 @@
  *
  * DrJava Open Source License
  * 
- * Copyright (C) 2001-2003 JavaPLT group at Rice University (javaplt@rice.edu)
+ * Copyright (C) 2001-2005 JavaPLT group at Rice University (javaplt@rice.edu)
  * All rights reserved.
  *
  * Developed by:   Java Programming Languages Team
@@ -77,6 +77,7 @@ class JListSortNavigator extends JListNavigator {
     return i;
   }
   
-  public String toString() { return _model.toString(); }
-  
+  public String toString() { 
+    synchronized(_model) { return _model.toString(); } 
+  }
 }

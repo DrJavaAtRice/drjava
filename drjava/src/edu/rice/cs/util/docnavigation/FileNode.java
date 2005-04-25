@@ -59,30 +59,21 @@ import edu.rice.cs.util.*;
 
 
 public class FileNode extends InnerNode<File>{
-  public FileNode(File f){
-    super(f);
-  }
+  public FileNode(File f) { super(f); }
   
-  public void setData(File f){
-    super.setUserObject(f);
-  }
+  public void setData(File f){ super.setUserObject(f); }
   
-  public File getData(){
-    return (File) super.getUserObject();
-  }
+  public File getData(){ return (File) super.getUserObject(); }
   
-  public <T> T execute(NodeDataVisitor<T> v) {
-    return v.fileCase(getData());
-  }
+  public <T> T execute(NodeDataVisitor<T> v) { return v.fileCase(getData()); }
   
-  public String toString(){
-    try{
+  public String toString() {
+    try {
       String path = getData().getCanonicalPath();
       int index = path.lastIndexOf(File.separator);
       path = path.substring(index+1);
       return path;
-    }catch(IOException e){
-      return getData().toString();
     }
+    catch(IOException e) { return getData().toString(); }
   }
 }
