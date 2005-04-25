@@ -95,8 +95,8 @@ public abstract class TabbedPanel extends JPanel {
     _closePanel = new JPanel(new BorderLayout());
     _closeButton = new CommonCloseButton(_closeListener);
     _closePanel.add(_closeButton, BorderLayout.NORTH);
-    this.add(_closePanel, BorderLayout.EAST);
-    this.add(_mainPanel, BorderLayout.CENTER);
+    add(_closePanel, BorderLayout.EAST);
+    add(_mainPanel, BorderLayout.CENTER);
   }
 
   /**

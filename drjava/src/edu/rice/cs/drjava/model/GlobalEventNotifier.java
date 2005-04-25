@@ -366,9 +366,7 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
 
   //-------------------------------- Compiler --------------------------------//
 
-  /**
-   * Called after a compile is started by the GlobalModel.
-   */
+  /** Called after a compile is started by the GlobalModel. */
   public void compileStarted() {
     _lock.startRead();
     try { for(GlobalModelListener l : _listeners) { l.compileStarted(); }
@@ -383,10 +381,8 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
     finally { _lock.endRead(); }
   }
 
-  /**
-   * Called to demand that all files be saved before compiling.
-   * It is up to the caller of this method to check if the documents have been
-   * saved, using IGetDocuments.hasModifiedDocuments().
+  /** Called to demand that all files be saved before compiling. It is up to the caller of this method to check
+   *  if the documents have been saved, using IGetDocuments.hasModifiedDocuments().
    */
   public void saveBeforeCompile() {
 //    ScrollableDialog sd = new ScrollableDialog(null, "saveBeforeCompile called in GlobalEventNotifier", "", "");

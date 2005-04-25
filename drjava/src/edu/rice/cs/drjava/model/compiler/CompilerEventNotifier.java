@@ -46,6 +46,7 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.model.compiler;
 
 import edu.rice.cs.drjava.model.EventNotifier;
+import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.util.swing.*;
 
 /**
@@ -97,10 +98,8 @@ class CompilerEventNotifier extends EventNotifier<CompilerListener> implements C
     finally { _lock.endRead(); }
   }
 
-  /**
-   * Called when files are saved before compiling.
-   * It is up to the caller of this method to check if the documents have been
-   * saved, using IGetDocuments.hasModifiedDocuments().
+  /** Called when files are saved before compiling. It is up to the caller of this method to check if the 
+   *  documents have been saved, using IGetDocuments.hasModifiedDocuments().
    */
   public void saveBeforeCompile() {
 //    ScrollableDialog sd = new ScrollableDialog(null, "CompilerEventNotifier.saveBeforeCompile called", "", _listeners.toString());

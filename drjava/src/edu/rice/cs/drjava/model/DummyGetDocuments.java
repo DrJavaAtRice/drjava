@@ -59,29 +59,24 @@ public class DummyGetDocuments implements IGetDocuments {
    * than the ones it officially supports.
    * @throws UnsupportedOperationException
    */
-  public OpenDefinitionsDocument getDocumentForFile(File file)
-    throws IOException {
+  public OpenDefinitionsDocument getDocumentForFile(File file) throws IOException {
     throw new UnsupportedOperationException
       ("Tried to getDocumentForFile on a Dummy with file: " + file);
   }
 
   public boolean isAlreadyOpen(File file) {
-    throw new UnsupportedOperationException
-      ("Tried to call isAlreadyOpen on a Dummy with file: " + file);
+    throw new UnsupportedOperationException("Tried to call isAlreadyOpen on a Dummy with file: " + file);
   }
 
   public List<OpenDefinitionsDocument> getDefinitionsDocuments() {
-    throw new UnsupportedOperationException
-      ("Tried to getDefinitionsDocuments on a Dummy!");
+    throw new UnsupportedOperationException("Tried to getDefinitionsDocuments on a Dummy!");
   }
 
   public boolean hasModifiedDocuments() {
-    throw new UnsupportedOperationException
-      ("Tried to call hasModifiedDocuments on a Dummy!");
+    throw new UnsupportedOperationException("Tried to call hasModifiedDocuments on a Dummy!");
   }
   
-  public FileGroupingState getFileGroupingState(){
-    throw new UnsupportedOperationException
-      ("Tried to call getFileGroupingState on a Dummy!");
+  public FileGroupingState getFileGroupingState() {
+    throw new UnsupportedOperationException("Tried to call getFileGroupingState on a Dummy!");
   }
 }

@@ -120,27 +120,21 @@ public class CompilerErrorModel<T extends CompilerError> {
       public OpenDefinitionsDocument getDocumentForFile(File file) {
         throw new IllegalStateException("No documents to get!");
       }
-      public boolean isAlreadyOpen(File file) {
-        return false;
-      }
+      public boolean isAlreadyOpen(File file) { return false; }
       public List<OpenDefinitionsDocument> getDefinitionsDocuments() {
         return new LinkedList<OpenDefinitionsDocument>();
       }
       public boolean hasModifiedDocuments() { return false; }
-      public FileGroupingState getFileGroupingState(){
-        throw new IllegalStateException("No state to get!");
-      }
+      public FileGroupingState getFileGroupingState() { throw new IllegalStateException("No state to get!"); }
     };
     _errors = empty;
     _numErrors = 0;
     _positions = new Position[0];
   }
 
-  /**
-   * Constructs a new CompilerErrorModel to be maintained
-   * by a particular OpenDefinitionsDocument.
-   * @param errors the list of CompilerError's (or a subclass).
-   * @param model is the model to find documents from
+  /** Constructs a new CompilerErrorModel to be maintained by a particular OpenDefinitionsDocument.
+   *  @param errors the list of CompilerError's (or a subclass).
+   *  @param model is the model to find documents from
    */
   public CompilerErrorModel(T[] errors, IGetDocuments model) {
     _model = model;

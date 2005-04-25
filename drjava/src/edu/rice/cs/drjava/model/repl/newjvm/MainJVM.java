@@ -220,17 +220,13 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     catch (java.rmi.UnmarshalException ume) {
       // Could not receive result from interpret; system probably exited.
       // We will silently fail and let the interpreter restart.
-      _log.logTime("main.interp: UnmarshalException, so interpreter is dead:\n"
-                     + ume);
+      _log.logTime("main.interp: UnmarshalException, so interpreter is dead:\n" + ume);
     }
-    catch (RemoteException re) {
-      _threwException(re);
-    }
+    catch (RemoteException re) { _threwException(re); }
   }
   
-  /**
-   * Gets the string representation of the value of a variable in the current interpreter.
-   * @param var the name of the variable
+  /** Gets the string representation of the value of a variable in the current interpreter.
+   *  @param var the name of the variable
    */
   public String getVariableToString(String var) {
     // silently fail if disabled. see killInterpreter docs for details.
@@ -397,19 +393,15 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     catch (RemoteException re) { _threwException(re); }
   }
   
-  /**
-   * Forwards a call to System.err from InterpreterJVM to the
-   * local InteractionsModel.
-   * @param s String that was printed in the other JVM
+  /** Forwards a call to System.err from InterpreterJVM to the local InteractionsModel.
+   *  @param s String that was printed in the other JVM
    */
   public void systemErrPrint(String s) throws RemoteException {
     _interactionsModel.replSystemErrPrint(s);
   }
   
-  /**
-   * Forwards a call to System.out from InterpreterJVM to the
-   * local InteractionsModel.
-   * @param s String that was printed in the other JVM
+  /** Forwards a call to System.out from InterpreterJVM to the local InteractionsModel.
+   *  @param s String that was printed in the other JVM
    */
   public void systemOutPrint(String s) throws RemoteException {
     _interactionsModel.replSystemOutPrint(s);
@@ -418,25 +410,23 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   /** Sets up a JUnit test suite in the Interpreter JVM and finds which classes are really TestCases
    *  classes (by loading them)
    *  @param classNames the class names to run in a test
-   *   @param files the associated file
-   * @return the class names that are actually test cases
+   *  @param files the associated file
+   *  @return the class names that are actually test cases
    */
   public List<String> findTestClasses(List<String> classNames, List<File> files) throws RemoteException {
 //    new ScrollableDialog(null, "MainJVM.findTestClasses invoked", "", "").show();
     return _interpreterJVM().findTestClasses(classNames, files);
   }
   
-  /**
-   * Runs the JUnit test suite already cached in the Interpreter JVM.
-   * @return false if no test suite is cached; true otherwise
+  /** Runs the JUnit test suite already cached in the Interpreter JVM.
+   *  @return false if no test suite is cached; true otherwise
    */
   public boolean runTestSuite() throws RemoteException {
     return _interpreterJVM().runTestSuite();
   }
   
-  /** Called if JUnit is invoked on a non TestCase class.  Forwards from
-   *  the other JVM to the local JUnit model.
-   * @param isTestAll whether or not it was a use of the test all button
+  /** Called if JUnit is invoked on a non TestCase class.  Forwards from the other JVM to the local JUnit model.
+   *  @param isTestAll whether or not it was a use of the test all button
    */
   public void nonTestCase(boolean isTestAll) throws RemoteException {
     _junitModel.nonTestCase(isTestAll);
@@ -444,7 +434,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   
   /** Called if the slave JVM encounters an illegal class file in testing.  Forwards from
    *  the other JVM to the local JUnit model.
-   * @param e the ClassFileError describing the error when loading the class file
+   *  @param e the ClassFileError describing the error when loading the class file
    */
   public void classFileError(ClassFileError e) throws RemoteException {
 //    new ScrollableDialog(null, "classFileError(" + e + ") called in MainJVM", "", "").show();
@@ -531,10 +521,9 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   }
   
   
-  /**
-   * Adds a named DynamicJavaAdapter to the list of interpreters.
-   * @param name the unique name for the interpreter
-   * @throws IllegalArgumentException if the name is not unique
+  /** Adds a named DynamicJavaAdapter to the list of interpreters.
+   *  @param name the unique name for the interpreter
+   *  @throws IllegalArgumentException if the name is not unique
    */
   public void addJavaInterpreter(String name) {
     // silently fail if disabled. see killInterpreter docs for details.
@@ -542,12 +531,8 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     
     ensureInterpreterConnected();
     
-    try {
-      _interpreterJVM().addJavaInterpreter(name);
-    }
-    catch (RemoteException re) {
-      _threwException(re);
-    }
+    try { _interpreterJVM().addJavaInterpreter(name);  }
+    catch (RemoteException re) { _threwException(re);  }
   }
   
   /**
@@ -559,41 +544,29 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
    */
   public void addDebugInterpreter(String name, String className) {
     // silently fail if disabled. see killInterpreter docs for details.
-    if (! _enabled) {
-      return;
-    }
+    if (! _enabled) return;
     
     ensureInterpreterConnected();
     
-    try {
-      _interpreterJVM().addDebugInterpreter(name, className);
-    }
-    catch (RemoteException re) {
-      _threwException(re);
-    }
+    try { _interpreterJVM().addDebugInterpreter(name, className); }
+    
+    catch (RemoteException re) { _threwException(re); }
   }
   
-  /**
-   * Removes the interpreter with the given name, if it exists.
-   * @param name Name of the interpreter to remove
+  /** Removes the interpreter with the given name, if it exists.
+   *  @param name Name of the interpreter to remove
    */
   public void removeInterpreter(String name) {
     // silently fail if disabled. see killInterpreter docs for details.
-    if (!_enabled) {
-      return;
-    }
+    if (!_enabled)  return;
     
     ensureInterpreterConnected();
     
     try {
       _interpreterJVM().removeInterpreter(name);
-      if (name.equals(_currentInterpreterName)) {
-        _currentInterpreterName = null;
-      }
+      if (name.equals(_currentInterpreterName))  _currentInterpreterName = null;
     }
-    catch (RemoteException re) {
-      _threwException(re);
-    }
+    catch (RemoteException re) { _threwException(re); }
   }
   
   /**
@@ -647,45 +620,30 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     }
   }
   
-  /**
-   * Accesses the cached current interpreter name.
-   */
-  public String getCurrentInterpreterName() {
-    return _currentInterpreterName;
-  }
+  /** Accesses the cached current interpreter name. */
+  public String getCurrentInterpreterName() { return _currentInterpreterName; }
   
-  /**
-   * Kills the running interpreter JVM, and optionally restarts it
-   *
-   * @param shouldRestart if true, the interpreter will be restarted
-   * automatically.
-   * Note: If the interpreter is not restarted, all of the methods that
-   * delgate to the interpreter will silently fail!
-   * Therefore, killing without restarting should be used with extreme care
-   * and only in carefully controlled test cases or when DrJava is quitting
-   * anyway.
+  /** Kills the running interpreter JVM, and optionally restarts it
+   *  @param shouldRestart if true, the interpreter will be restarted automatically.
+   *  Note: If the interpreter is not restarted, all of the methods that delgate to the interpreter will 
+   *  silently fail! Therefore, killing without restarting should be used with extreme care and only in 
+   *  carefully controlled test cases or when DrJava is quitting anyway.
    */
   public synchronized void killInterpreter(boolean shouldRestart) {
     try {
       _enabled = shouldRestart;
       _cleanlyRestarting = true;
-      if (shouldRestart) {
-        _interactionsModel.interpreterResetting();
-      }
+      if (shouldRestart)  _interactionsModel.interpreterResetting();
       quitSlave();
     }
     catch (ConnectException ce) {
       _log.logTime("Could not connect to the interpreterJVM while trying to kill it", ce);
     }
-    catch (RemoteException re) {
-      _threwException(re);
-    }
+    catch (RemoteException re) { _threwException(re); }
   }
   
-  /**
-   * Sets the classpath to use for starting the interpreter JVM.
-   * Must include the classes for the interpreter.
-   * @param classpath Classpath for the interpreter JVM
+  /** Sets the classpath to use for starting the interpreter JVM. Must include the classes for the interpreter.
+   *  @param classpath Classpath for the interpreter JVM
    */
   public void setStartupClasspath(String classpath) {
     _startupClasspath = classpath;

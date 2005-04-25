@@ -59,6 +59,7 @@ import edu.rice.cs.drjava.model.SingleDisplayModel;
 import edu.rice.cs.drjava.model.debug.*;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.config.*;
+import edu.rice.cs.util.swing.Utilities;
 
 /**
  * Panel for displaying the debugger input and output in MainFrame.  This
@@ -833,7 +834,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
           _bpTree.scrollPathToVisible(pathToNewBreakpoint);
         }
       };
-      SwingUtilities.invokeLater(doCommand);
+      Utilities.invokeLater(doCommand);
     }
 
     /**
@@ -868,7 +869,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
           }
         }
       };
-      SwingUtilities.invokeLater(doCommand);
+      Utilities.invokeLater(doCommand);
     }
 
     /**
@@ -905,7 +906,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
           }
         }
       };
-      SwingUtilities.invokeLater(doCommand);
+      Utilities.invokeLater(doCommand);
     }
 
     /**
@@ -923,7 +924,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
           updateData();
         }
       };
-      SwingUtilities.invokeLater(doCommand);
+      Utilities.invokeLater(doCommand);
     }
 
     /**
@@ -936,7 +937,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
           updateData();
         }
       };
-      SwingUtilities.invokeLater(doCommand);
+      Utilities.invokeLater(doCommand);
     }
 
     /**
@@ -949,7 +950,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
           updateData();
         }
       };
-      SwingUtilities.invokeLater(doCommand);
+      Utilities.invokeLater(doCommand);
     }
 
     /**
@@ -962,7 +963,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
           updateData();
         }
       };
-      SwingUtilities.invokeLater(doCommand);
+      Utilities.invokeLater(doCommand);
     }
 
     /**
@@ -975,7 +976,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
           updateData();
         }
       };
-      SwingUtilities.invokeLater(doCommand);
+      Utilities.invokeLater(doCommand);
     }
 
     /**
@@ -991,7 +992,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
           updateData();
         }
       };
-      SwingUtilities.invokeLater(doCommand);
+      Utilities.invokeLater(doCommand);
     }
   }
 

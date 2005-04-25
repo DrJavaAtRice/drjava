@@ -171,7 +171,7 @@ public class DefaultCompilerModel implements CompilerModel {
   public void compileAll(List<File> sourceRootSet, List<File> filesToCompile) throws IOException {
     
     File buildDir = null;
-    
+   
     //ScrollableDialog sd1 = new ScrollableDialog(null, "DefaultCompilerModel.compileAll called", "", "");
     //sd1.show();
     
@@ -222,6 +222,7 @@ public class DefaultCompilerModel implements CompilerModel {
   public void compile(List<OpenDefinitionsDocument> defDocs) throws IOException {
     
     File buildDir = null;
+    
     if (_getter.getFileGroupingState().isProjectActive()) {
       buildDir = _getter.getFileGroupingState().getBuildDirectory();
     }
@@ -270,25 +271,21 @@ public class DefaultCompilerModel implements CompilerModel {
     finally { _notifier.compileEnded(); }
   }
   
-  /**
-   * Starts compiling the specified source document.  Demands that the definitions be
-   * saved before proceeding with the compile. If the compile can
-   * proceed, a compileStarted event is fired which guarantees that
-   * a compileEnded event will be fired when the compile finishes or
-   * fails.  If the compilation succeeds, then a call is
-   * made to resetInteractions(), which fires an
-   * event of its own, contingent on the conditions.  If the current
-   * package as determined by getSourceRoot(String) and getPackageName()
-   * is invalid, compileStarted and compileEnded will fire, and
-   * an error will be put in compileErrors.
+  /** Starts compiling the specified source document.  Demands that the definitions be saved before proceeding
+   *  with the compile. If the compile can proceed, a compileStarted event is fired which guarantees that a 
+   *  compileEnded event will be fired when the compile finishes or fails.  If the compilation succeeds, then 
+   *  a call is made to resetInteractions(), which fires an event of its own, contingent on the conditions.  
+   *  If the current package as determined by getSourceRoot(String) and getPackageName() is invalid, 
+   *  compileStarted and compileEnded will fire, and an error will be put in compileErrors.
    *
-   * (Interactions are not reset if the _resetAfterCompile field is
-   * set to false, which allows some test cases to run faster.)
+   *  (Interactions are not reset if the _resetAfterCompile field is set to false, which allows some test cases 
+   *  to run faster.)
    *
-   * @throws IOException if a filesystem-related problem prevents compilation
+   *  @throws IOException if a filesystem-related problem prevents compilation
    */
   public void compile(OpenDefinitionsDocument doc) throws IOException {
     File buildDir = null;
+    
     if (doc.isInProjectPath() || doc.isAuxiliaryFile()) {
       buildDir = _getter.getFileGroupingState().getBuildDirectory();
     }
@@ -514,14 +511,11 @@ public class DefaultCompilerModel implements CompilerModel {
     return roots.toArray(new File[roots.size()]);
   }
 
-  /**
-   * This method would normally be called from the getter; however, 
-   * with the introduction of projects, the list of files that may not
-   * be modified is not known.  We pull the relevant documents from
-   * the getter and instead of calling it from there, we check it from
-   * here.
-   * @param defDocs the list of documents to check
-   * @return whether any of the given documents are modified
+  /** This method would normally be called from the getter; however, with the introduction of projects, the 
+   *  list of files that may not be modified is not known.  We pull the relevant documents from the getter 
+   *  and instead of calling it from there, we check it from here.
+   *  @param defDocs the list of documents to check
+   *  @return whether any of the given documents are modified
    */
   protected static boolean _hasModifiedFiles(List<OpenDefinitionsDocument> defDocs) {
     for(OpenDefinitionsDocument doc : defDocs) {

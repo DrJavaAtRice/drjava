@@ -229,7 +229,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
   
   private CompilerListener _clearInteractionsListener =
     new CompilerListener() {
-    public void compileStarted() {}
+    public void compileStarted() { }
     
     public void compileEnded() {  // no synchronization needed because only performed by event thread?
       // Only clear interactions if there were no errors
@@ -593,9 +593,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
       
       /** Initialization Block */
       { 
-        try {
-          for(File file : projectFiles) { _projFilePaths.add(file.getCanonicalPath()); }
-        }
+        try {  for(File file : projectFiles) { _projFilePaths.add(file.getCanonicalPath()); } }
         catch(IOException e) { }
       }
       
@@ -705,7 +703,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
           
           if (f.listFiles().length == 0)  f.delete();
           
-        } else if(f.getName().endsWith(".class")) f.delete();
+        } else if (f.getName().endsWith(".class")) f.delete();
       }
       
       
@@ -1054,34 +1052,27 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
   
   //---------------------- Specified by ILoadDocuments ----------------------//
   
-  /**
-   * Note that .getFile called on the returned OpenDefinitionsDocument
-   * is guaranteed to return a canonical path, as this method makes
-   * it canonical.  This is necessary to ensure proper package detection.
-   * (Also see bug 774896 and 707734)
-   * @see ILoadDocuments
+  /** Note that .getFile called on the returned OpenDefinitionsDocument is guaranteed to return a canonical 
+   *  path, as this method makes it canonical.  This is necessary to ensure proper package detection.
+   *  (Also see bug 774896 and 707734)
+   *  @see ILoadDocuments
    * 
-   * Synchronizing this method creates a deadlock when files are opened from the
-   * command line (and possibly other situations as well).  Why?
-   * The call to addToClassPath performs interJVM communication.  Does this
-   * run GlobalModel operations in the event-handling thread?
    */
-  public abstract OpenDefinitionsDocument openFile(FileOpenSelector com)
-    throws IOException, OperationCanceledException, AlreadyOpenException;
+  public abstract OpenDefinitionsDocument openFile(FileOpenSelector com) throws IOException, 
+    OperationCanceledException, AlreadyOpenException;
   
-  protected OpenDefinitionsDocument openFileHelper(FileOpenSelector com)
-    throws IOException, OperationCanceledException, AlreadyOpenException {
+  protected OpenDefinitionsDocument openFileHelper(FileOpenSelector com) throws IOException, 
+    OperationCanceledException, AlreadyOpenException {
+    
     // This code is duplicated in MainFrame._setCurrentDirectory(File) for safety.
     final File file = (com.getFiles())[0].getCanonicalFile();
     OpenDefinitionsDocument odd = _openFile(file);
     // Make sure this is on the classpath
     try {
       File classpath = odd.getSourceRoot();
-      if(odd.isProjectFile() || odd.isAuxiliaryFile()){
+      if (odd.isProjectFile() || odd.isAuxiliaryFile())
         _interactionsModel.addProjectFilesClassPath(classpath.toURL());
-      }else{
-        _interactionsModel.addExternalFilesClassPath(classpath.toURL());
-      }
+      else _interactionsModel.addExternalFilesClassPath(classpath.toURL());
     }
     catch (InvalidPackageException e) {
       // Invalid package-- don't add it to classpath
@@ -1165,8 +1156,8 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
   
   //----------------------- End ILoadDocuments Methods -----------------------//
   
-  /** Saves all open files, prompting for names if necessary.
-   *  When prompting (ie, untitled document), set that document as active.
+  /** Saves all open files, prompting for names if necessary.  When prompting (ie, untitled document), set 
+   *  that document as active.
    *  @param com a selector that picks the file name, used for each
    *  @exception IOException
    */
@@ -1263,11 +1254,10 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
   }
   
   
-  /**
-   * Parses out the given project file, sets up the state and other configurations
-   * such as the Navigator and the classpath, and returns an array of files to open.
-   * @param projectFile The project file to parse
-   * @return an array of document's files to open
+  /** Parses the given project file, sets up the state and other configurations such as the Navigator and the
+   *  classpath, and returns an array of files to open.
+   *  @param projectFile The project file to parse
+   *  @return an array of document's files to open
    */
   public File[] openProject(File projectFile) throws IOException, MalformedProjectFileException {
     final ProjectFileIR ir;
@@ -1286,27 +1276,26 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
     // what is considered source, aux, and external.
     
     List<Pair<String, INavigatorItemFilter>> l = new LinkedList<Pair<String, INavigatorItemFilter>>();
-    l.add(new Pair<String, INavigatorItemFilter>(getSourceBinTitle(), new INavigatorItemFilter(){
-      public boolean accept(INavigatorItem n){
+    l.add(new Pair<String, INavigatorItemFilter>(getSourceBinTitle(), new INavigatorItemFilter() {
+      public boolean accept(INavigatorItem n) {
         OpenDefinitionsDocument d = (OpenDefinitionsDocument) n;
         return d.isInProjectPath();
       }
     }));
     
-    l.add(new Pair<String, INavigatorItemFilter>(getAuxiliaryBinTitle(), new INavigatorItemFilter(){
-      public boolean accept(INavigatorItem n){
+    l.add(new Pair<String, INavigatorItemFilter>(getAuxiliaryBinTitle(), new INavigatorItemFilter() {
+      public boolean accept(INavigatorItem n) {
         OpenDefinitionsDocument d =  (OpenDefinitionsDocument) n;
         return d.isAuxiliaryFile();
       }
     }));
     
-    l.add(new Pair<String, INavigatorItemFilter>(getExternalBinTitle(), new INavigatorItemFilter(){
-      public boolean accept(INavigatorItem n){
+    l.add(new Pair<String, INavigatorItemFilter>(getExternalBinTitle(), new INavigatorItemFilter() {
+      public boolean accept(INavigatorItem n) {
         OpenDefinitionsDocument d = (OpenDefinitionsDocument) n;
         return !(d.isProjectFile() || d.isAuxiliaryFile()) || d.isUntitled();
       }
     }));
-    
     
     IDocumentNavigator newNav = 
       AWTContainerNavigatorFactory.Singleton.makeTreeNavigator(projfilepath, getDocumentNavigator(), l);
@@ -1324,9 +1313,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
     
     File[] projectclasspaths = ir.getClasspaths();
     ClasspathVector extraClasspaths = new ClasspathVector();
-    for(File f : projectclasspaths) {
-      extraClasspaths.add(f);
-    }
+    for(File f : projectclasspaths) { extraClasspaths.add(f); }
     
     setFileGroupingState(_makeProjectFileGroupingState(mainClass, buildDir, projectFile, srcFiles, extraClasspaths));
     
@@ -1344,7 +1331,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
     for (DocFile f: srcFiles) {
       File file = f;
       if (f.lastModified() > f.getSavedModDate()) file = new File(f.getPath());
-      if (f.isActive() && active == null) active = file;
+      if (f.isActive() && active == null) active = file;  // can more than one file be active?
       else al.add(file);
     }
     for (DocFile f: auxFiles) {
@@ -1353,13 +1340,14 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
       if (f.isActive() && active == null) active = file;
       else al.add(file);
     }
-    if (active != null) al.add(active);
+    // Insert active file as last file on list.
+    if (active != null) al.add(active); 
     
     //List<OpenDefinitionsDocument> nonProjDocs = getNonProjectDocuments();
     List<OpenDefinitionsDocument> projDocs = getProjectDocuments();
     //File[] projectFiles = getProjectFiles();   
     
-    // keep all nonproject files open.  External files in the previous project
+    // Keep all nonproject files open.  External files in the previous project
     // may become project files in the new project and must be closed while external
     // files in the previous project that are still external to the new project 
     // should be kept open.
@@ -1368,7 +1356,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
     for (OpenDefinitionsDocument d: projDocs) {
       if (d.isProjectFile()) closeFile(d);
       else
-        try{
+        try {
         INavigatorItem idoc = d;
         String path = fixPathForNavigator(d.getFile().getCanonicalPath());
         _documentNavigator.refreshDocument(idoc, path);
@@ -1378,8 +1366,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
       }
     }
     
-    // call on the GUI to finish up by opening the files and making
-    // necessary gui component changes
+    // call on the GUI to finish up by opening the files and making necessary gui component changes
     final File[] filesToOpen = al.toArray(new File[al.size()]);
     _notifier.projectOpened(projectFile, new FileOpenSelector(){
       public File[] getFiles() { return filesToOpen; }
@@ -1389,15 +1376,14 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
       ((JTreeSortNavigator)_documentNavigator).collapsePaths(ir.getCollapsedPaths());
     }
     
-    resetInteractions(); // Since the classpath is most likely changed.
+//    new ScrollableDialog(null, "Calling resetInteractions in DefaultGlobalModel.openProject", "", "").show();
+    resetInteractions(); // Since the classpath is most likely changed.  Clears out test pane as well.
     
     return srcFiles; // Unnecessarily returns src files in keeping with the previous interface.
   }
   
-  /**
-   * Performs any needed operations on the model before closing the
-   * project and its files.  This is not responsible for actually
-   * closing the files since that is handled in MainFrame._closeProject()
+  /** Performs any needed operations on the model before closing the project and its files.  This is not 
+   *  responsible for actually closing the files since that is handled in MainFrame._closeProject()
    */
   public void closeProject() {
     setDocumentNavigator(AWTContainerNavigatorFactory.Singleton.makeListNavigator(getDocumentNavigator()));
@@ -1412,8 +1398,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
     _notifier.projectClosed();
   }
   
-  /** If the document is untitled, brings it to the top so that the
-   *  user will know which file she is saving
+  /** If the document is untitled, brings it to the top so that the user will know which file she is saving
    *  @param doc the document which is about to be saved by a save all command
    */
   abstract public void aboutToSaveFromSaveAll(OpenDefinitionsDocument doc);
@@ -1900,7 +1885,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
     }
     
     // Mark if modified
-    if (doc.isModifiedSinceSave()) filename = filename + " *";
+    if (doc.isModifiedSinceSave()) filename = filename + "*";
     
     return filename;
   }
@@ -2301,24 +2286,25 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
       return true; //if file exists
     }
 
-    /**
-     * Returns the name of this file, or "(untitled)" if no file.
-     */
+    /** Returns the name of this file, or "(untitled)" if no file. */
     public String getFilename() {
       if (_file == null) return "(Untitled)";
       return _file.getName();
     }
-    
-    public String getName() { return getFilename(); }
-      
 
-    /**
-     * Saves the document with a FileWriter.  If the file name is already
-     * set, the method will use that name instead of whatever selector
-     * is passed in.
-     * @param com a selector that picks the file name if the doc is untitled
-     * @exception IOException
-     * @return true if the file was saved, false if the operation was canceled
+    /** Returns the name of the file for this document with an appended asterisk (if modified) or spaces */
+    public String getName() {
+      String filename = getFilename();
+      if (isModifiedSinceSave()) filename = filename + "*";
+      else filename = filename + "  ";  // forces the cell renderer to allocate space for an appended "*"
+      return filename;
+    }
+
+    /** Saves the document with a FileWriter.  If the file name is already set, the method will use 
+     *  that name instead of whatever selector is passed in.
+     *  @param com a selector that picks the file name if the doc is untitled
+     *  @exception IOException
+     *  @return true if the file was saved, false if the operation was canceled
      */
     public boolean saveFile(FileSaveSelector com) throws IOException {
       FileSaveSelector realCommand;
@@ -3051,7 +3037,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
       }
     }
     
-    public String toString() { return getFilename(); }
+    public String toString() { return getName(); }
     
     /** Orders ODDs by their id's. */
     public int compareTo(OpenDefinitionsDocument o) { return _id - o.id(); }

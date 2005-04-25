@@ -584,7 +584,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
   class SingleDisplayModelCompileListener extends GlobalModelTestCase.TestListener
     implements SingleDisplayModelListener {
 
-    public void compileStarted(){}
+    public void compileStarted() { }
 
     /** Just notify when the compile has ended */
     public void compileEnded(){

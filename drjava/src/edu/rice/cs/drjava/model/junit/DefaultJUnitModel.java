@@ -202,7 +202,9 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
       try { _jvm.runTestSuite(); }
       catch(IOException e) { 
         _notifier.junitEnded();
-        throw new UnexpectedException(e); }
+        synchronized (this) { _testInProgress = false;}
+       throw new UnexpectedException(e); 
+      }
     }
   }
   
@@ -434,9 +436,12 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
         _jvm.runTestSuite();
         
       }
-      catch(IOException e) { 
+      catch(IOException e) {
+        // Probably a java.rmi.UnmarshalException caused by the interruption of unit testing.
+        // Swallow the exception and proceed.
         _notifier.junitEnded();  // balances junitStarted()
-        throw new UnexpectedException(e); 
+        synchronized (this) { _testInProgress = false;}
+        throw new UnexpectedException(e);
       }
     }
   }
@@ -467,7 +472,6 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     //       junitStarted will never be notified. (same with all terminal events)
     //       The synchronization using _testInProgress takes care of this problem.
       _notifier.nonTestCase(isTestAll);
-      // _notifier.junitEnded();
       synchronized (this) { _testInProgress = false;}
   }
   

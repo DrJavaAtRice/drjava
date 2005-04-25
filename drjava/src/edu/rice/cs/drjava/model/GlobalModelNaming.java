@@ -50,10 +50,8 @@ import java.io.File;
 public class GlobalModelNaming {
     private GlobalModelNaming(){}
 
-  /**
-   * Return the name of the file, or "(untitled)" if no file exists.
-   * Does not include the ".java" if it is present.
-   */
+  /** Return the name of the file, or "(untitled)" if no file exists. Does not include the ".java" 
+   *  if it is present. */
   public static String getDisplayFilename(OpenDefinitionsDocument doc) {
 
     String filename = doc.getFilename();

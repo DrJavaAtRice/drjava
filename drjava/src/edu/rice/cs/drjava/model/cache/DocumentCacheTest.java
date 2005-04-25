@@ -466,6 +466,5 @@ public class DocumentCacheTest extends TestCase {
       return openFilesHelper(com); 
     }
     public boolean closeAllFiles() { return closeAllFilesOnQuit(); }
-    
   }
 }

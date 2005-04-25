@@ -67,8 +67,10 @@ import java.util.HashMap;
 
 /**
  * The panel which displays all the testing errors.
- * In the future, it may also contain a progress bar.
- *
+ * 
+ * Question:  why are methods in this class synchronized?  These methods should only be run from event
+ * handling thread, which makes synchronization unnecessary and undesirable.  Do we violate this invariant?
+ * 
  * @version $Id$
  */
 public class JUnitPanel extends ErrorPanel {

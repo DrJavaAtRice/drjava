@@ -92,9 +92,7 @@ public class JarOptionsDialog extends JDialog {
     _loadSettings();
   }
 
-  /**
-   * Load the initial state from the previous files or with defaults
-   */
+  /** Load the initial state from the previous files or with defaults. */
   private void _loadSettings() {
     // TODO: This is temporary, we would like to save the defaults in the project or something
     //       like that
@@ -113,9 +111,7 @@ public class JarOptionsDialog extends JDialog {
     _jarSources.setSelected(false);
   }
 
-  /**
-   * Build the dialog
-   */
+  /** Build the dialog. */
   private void initComponents() {
     JPanel main = _makePanel();
     super.getContentPane().setLayout(new BorderLayout());
@@ -150,9 +146,7 @@ public class JarOptionsDialog extends JDialog {
     pack();
   }
 
-  /**
-   * Make the options panel
-   *
+  /** Make the options panel. 
    * @return The panel with the options for jarring a project
    */
   private JPanel _makePanel() {
@@ -211,10 +205,8 @@ public class JarOptionsDialog extends JDialog {
     return panel;
   }
 
-  /**
-   * Make the panel that is enabled when you are going to jar class files
-   *
-   * @return the panel containing the sub-options to the jarring classes option
+  /** Make the panel that is enabled when you are going to jar class files
+   *  @return the panel containing the sub-options to the jarring classes option
    */
   private JPanel _makeClassesPanel() {
     JPanel panel = new JPanel();
@@ -263,10 +255,8 @@ public class JarOptionsDialog extends JDialog {
     return panel;
   }
 
-  /**
-   * Create a file selector to select the main class file
-   *
-   * @return The JPanel that contains the selector
+  /** Create a file selector to select the main class file
+   *  @return The JPanel that contains the selector
    */
   private JTextField _mainFileSelector() {
     // JTextFields aren't resized so I add the width
