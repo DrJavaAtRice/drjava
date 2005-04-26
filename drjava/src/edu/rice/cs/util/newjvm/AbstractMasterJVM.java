@@ -308,33 +308,25 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/
     }
   }
 
-  /**
-   * Quits slave JVM.
-   * @throws IllegalStateException if no slave JVM is connected
+  /** Quits slave JVM.
+   *  @throws IllegalStateException if no slave JVM is connected
    */
   protected synchronized final void quitSlave() throws RemoteException {
-    if (isStartupInProgress()) {
+    if (isStartupInProgress())
       // There is a slave to be quit, but we don't have a handle to it yet.
       // Instead we set this flag, which makes it quit immediately after it
       // registers in registerSlave.
       _quitOnStartup = true;
-    }
-    else if (_slave == null) {
+    
+    else if (_slave == null)
       throw new IllegalStateException("tried to quit when no slave running" +
                                       " and startup not in progress");
-    }
-    else {
-      _slave.quit();
-    }
+    else  _slave.quit();
   }
   
   /** Returns slave remote instance, or null if not connected. */
-  protected synchronized final SlaveRemote getSlave() {
-    return _slave;
-  }
+  protected synchronized final SlaveRemote getSlave() { return _slave; }
   
   /** Returns true if the slave is in the process of starting. */
-  protected synchronized boolean isStartupInProgress() {
-    return _startupInProgress;
-  }
+  protected synchronized boolean isStartupInProgress() { return _startupInProgress; }
 }

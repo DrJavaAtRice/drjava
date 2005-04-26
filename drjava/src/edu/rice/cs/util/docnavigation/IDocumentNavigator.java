@@ -56,168 +56,121 @@ public interface IDocumentNavigator extends IAWTContainerNavigatorActor{
   /** @return an AWT component which interacts with this document navigator */
   public Container asContainer();
   
-  /**
-   * Adds an <code>IDocuemnt</code> to this navigator.
-   *
-   * @param doc the document to be added into this navigator.
+  /** Adds an <code>IDocuemnt</code> to this navigator.
+   *  @param doc the document to be added into this navigator.
    */
   public void addDocument(INavigatorItem doc);
   
-  /**
-   * Adds an <code>INavigatorItem</code> into this navigator in a position relavite
-   * to a given path.
-   *
-   * @param doc the document to be added into this navigator.
-   * @param path the relative path to insert this INavigatorItem at.
+  /** Adds an <code>INavigatorItem</code> into this navigator in a position relative to a given path.
+   *  @param doc the document to be added into this navigator.
+   *  @param path the relative path to insert this INavigatorItem at.
    */
   public void addDocument(INavigatorItem doc, String path);
   
-  /**
-   * returns the currently selected navigator item, or null
-   * if no navigator item is selected
-   */
+  /** Returns the currently selected navigator item, or null if no navigator item is selected. */
   public INavigatorItem getCurrentSelectedLeaf();
   
-  /**
-   * Removes a given <code>INavigatorItem<code> from this navigator. Removes all
-   * <code>INavigatorItem</code>s from this navigator that are "equal" (as tested by
-   * the <code>equals</code> method) to the passed argument. Any of the removed
-   * documents may be returned by this method.
-   * @param doc the docment to be removed
-   * @return doc a document removed from this navigator as a result of invoking this method.
-   * @throws IllegalArgumentException if this navigator contains no document
-   *  that is equal to the passed document.
+  /** Removes a given <code>INavigatorItem<code> from this navigator. Removes all <code>INavigatorItem</code>s 
+   *  from this navigator that are "equal" (<code>.equals(...)</code>) to the passed argument. Any of the 
+   *  removed documents may be returned by this method.
+   *  @param doc the docment to be removed
+   *  @return doc a document removed from this navigator as a result of invoking this method.
+   *  @throws IllegalArgumentException if this navigator contains no document equal to the passed document.
    */
   public <T extends INavigatorItem> T removeDocument(T doc);
   
-  /**
-   * Resets a given <code>INavigatorItem<code> in the tree.  This may affect the
-   * placement of the item or its display to reflect any changes made in the model.
-   * @param doc the docment to be refreshed
-   * @throws IllegalArgumentException if this navigator contains no document
-   *  that is equal to the passed document.
+  /** Resets a given <code>INavigatorItem<code> in the tree.  This may affect the placement of the item or its 
+   *  display to reflect any changes made in the model.
+   *  @param doc the docment to be refreshed
+   *  @throws IllegalArgumentException if this navigator contains no document that is equal to the passed document.
    */
   public void refreshDocument(INavigatorItem doc, String path);
   
-  /**
-   * sets the input document as selected
-   * @param doc the document to select
+  /** Sets the active document as specified.
+   *  @param doc the document to select
    */
   public void setActiveDoc(INavigatorItem doc);
   
   
-  /**
-   * Impose some ordering on the documents in the navigator, to facilitate
-   * MainFrame's setActiveNextDocument()
-   * @return the INavigatorItem which comes after doc
-   * @param doc the INavigatorItem of interest
+  /** Impose an ordering on the documents in the navigator to support setActiveNextDocument()
+   *  @return the INavigatorItem which comes after doc
+   *  @param doc the INavigatorItem of interest
    */
   public <T extends INavigatorItem> T getNext(T doc);
   
-  /**
-   * Impose some ordering on the documents in the navigator, to facilitate
-   * MainFrame's setActivePrevDocument()
-   * @return the INavigatorItem which comes before doc
-   * @param doc the INavigatorItem of interest
+  /** Impose an ordering on the documents in the navigator to support setActivePrevDocument()
+   *  @return the INavigatorItem which comes before doc
+   *  @param doc the INavigatorItem of interest
    */
   public <T extends INavigatorItem> T getPrevious(T doc);
   
-  /**
-   * Tests to see if a given document is contained in this navigator.
-   *
-   * @param doc the document to test for containment.
-   * @return <code>true</code> if this navigator contains a document that is
-   *  "equal" (as tested by the <code>equals</code< method)
-   * to the passed document, else <code>false</code>.
+  /** Tests to see if a given document is contained in this navigator.
+   *  @param doc the document to test for containment.
+   *  @return <code>true</code> if this contains a document "equal" (<code>.equals(...)</code> method)
+   *          to the passed document, else <code>false</code>.
    */
   public boolean contains(INavigatorItem doc);
   
-  /**
-   * Returns all the <code>IDocuments</code> contained in this navigator</code>.
-   * Does not assert any type of ordering on the returned structure.
-   *
-   * @return an <code>INavigatorItem<code> enumeration of this navigator's contents.
+  /** Returns all the <code>IDocuments</code> contained in this navigator</code>. Does not assert any 
+   *  type of ordering on the returned structure.
+   *  @return an <code>INavigatorItem<code> enumeration of this navigator's contents.
    */
   public <T extends INavigatorItem> Enumeration<T> getDocuments();
   
-  /**
-   * Returns the number of <code>INavigatorItem</code>s contained by this <code>IDocumentNavigator</code>
-   *
-   * @return the number of documents within this navigator.
+  /** Returns the number of <code>INavigatorItem</code>s contained by this <code>IDocumentNavigator</code>
+   *  @return the number of documents within this navigator.
    */
   public int getDocumentCount();
   
-  /**
-   * Returns whether this <code>IDocumentNavigator</code> contains any <code>INavigatorItem</code>s.
-   *
-   * @return <code>true</code> if this navigator contains one or more documents, else <code>false</code>.
+  /** Returns whether this <code>IDocumentNavigator</code> contains any <code>INavigatorItem</code>s.
+   *  @return <code>true</code> if this navigator contains one or more documents, else <code>false</code>.
    */
   public boolean isEmpty();
   
-  /**
-   * Removes all <code>INavigatorItem</code>s from this <code>IDocumentNavigator</code>.
-   */
+  /**Removes all <code>INavigatorItem</code>s from this <code>IDocumentNavigator</code>. */
   public void clear();
   
-  /**
-   * Adds an <code>INavigationListener</code> to this navigator.
-   * After invoking this method, the passed listener will be eligable for
-   * observing this navigator.  If the provided listener is already observing this
-   * navigator (as tested by the == operator), no action is taken.
-   *
-   * @param listener the listener to be added to this navigator.
+  /** Adds an <code>INavigationListener</code> to this navigator. After invoking this method, the passed listener
+   *  will observe events generated this navigator.  If the provided listener is already observing this navigator
+   *  (<code>==</code>), no action is taken.
+   *  @param listener the listener to be added to this navigator.
    */
   public void addNavigationListener(INavigationListener listener);
   
-  /**
-   * Removes the given listener from observing this navigator.
-   * After invoking this method, all observers observing this navigator
-   * "equal" (as tested by the == operator) will no longer receive observable dispatches.
+  /** Removes the given listener from observing this navigator. After invoking this method, all observers watching
+   *  this navigator "equal" (<code>==</code>) will no longer receive observable dispatches.
    *
    * @param listener the listener to be removed from this navigator
    */
   public void removeNavigationListener(INavigationListener listener);
   
-  /**
-   * Returns a collection of all listeners registered with this navigator.
-   * 
-   * @return the collection of nav listeners listening to this navigator.
+  /** Returns a collection of all listeners registered with this navigator.
+   *  @return the collection of nav listeners listening to this navigator.
    */
   public Collection<INavigationListener> getNavigatorListeners();
   
-  /**
-   * Selects the document at the x,y coordinate of the navigator pane and sets it to be
-   * the currently active document.
-   * @param x the x coordinate of the navigator pane
-   * @param y the y coordinate of the navigator pane
+  /** Selects the document at the x,y coordinates of the navigator pane and makes it the active document.
+   *  @param x the x coordinate of the navigator pane
+   *  @param y the y coordinate of the navigator pane
    */
   public boolean selectDocumentAt(int x, int y);
   
-  /**
-   * visitor pattern
-   * @param algo the algorithm to run on this navigator
-   * @param input the input to the algorithm
+  /** Visitor pattern hook method.
+   *  @param algo the algorithm to run on this navigator
+   *  @param input the input to the algorithm
    */
   public <InType, ReturnType> ReturnType execute(IDocumentNavigatorAlgo<InType, ReturnType> algo, InType input);
   
-  /**
-   * @return true if a group if INavigatorItems selected
-   */
+  /** @return true if a group if INavigatorItems selected. */
   public boolean isGroupSelected();
   
-  /**
-   * @return true if the INavigatorItem is in the selected group, if a group is selected
-   */
+  /** @return true if the INavigatorItem is in the selected group, if a group is selected. */
   public boolean isSelectedInGroup(INavigatorItem i);
   
-  /**
-   * adds the top level group with the specified name and filter
-   */
+  /** Adds the top level group with the specified name and filter. */
   public void addTopLevelGroup(String name, INavigatorItemFilter f);
   
-  /**
-   * returns true if a top level group is selected, false otherwise
-   */
+  /** Returns true if a top level group is selected, false otherwise. */
   public boolean isTopLevelGroupSelected();
   
   /** Returns the name of the top level group that is selected, throws

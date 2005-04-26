@@ -82,9 +82,7 @@ public abstract class AbstractSlaveJVM implements SlaveRemote {
           Thread.sleep(100);
           System.exit(0);
         }
-        catch (Throwable th) {
-          quitFailed(th);
-        }
+        catch (Throwable th) { quitFailed(th); }
       }
     };
 

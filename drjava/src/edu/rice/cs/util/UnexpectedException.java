@@ -77,10 +77,6 @@ public class UnexpectedException extends RuntimeException {
     _value = value;
   }
 
-  /**
-   * Returns the contained exception.
-   */
-  public Throwable getContainedThrowable() {
-    return _value;
-  }
+  /** Returns the contained exception. */
+  public Throwable getCause() { return _value; }
 }
