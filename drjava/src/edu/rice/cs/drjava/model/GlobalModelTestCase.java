@@ -60,6 +60,7 @@ import edu.rice.cs.util.*;
 import edu.rice.cs.util.text.DocumentAdapter;
 import edu.rice.cs.util.text.DocumentAdapterException;
 import edu.rice.cs.util.classloader.ClassFileError;
+import edu.rice.cs.util.swing.Utilities;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.model.definitions.*;
@@ -176,6 +177,13 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
 
     // Wait until it has connected
     _model._interpreterControl.ensureInterpreterConnected();
+    // Wait until all pending events have finished
+    clearEventQueue();
+  }
+  
+  public static void clearEventQueue() {
+    try { Utilities.invokeAndWait(new Runnable() { public void run() { }; }); }
+    catch(Throwable t) { /* should never happen */ }
   }
 
   /** Clear all old text and insert the given text. */
@@ -242,6 +250,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     // Open a new document
     int numOpen = _model.getDefinitionsDocuments().size();
     OpenDefinitionsDocument doc = _model.newFile();
+    clearEventQueue();
     assertNumOpenDocs(numOpen + 1);
 
     listener.assertNewCount(1);

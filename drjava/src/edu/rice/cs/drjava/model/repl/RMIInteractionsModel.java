@@ -134,12 +134,8 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
   }
   
   
-  /**
-   * Resets the Java interpreter.
-   */
-  protected void _resetInterpreter() {
-    _interpreterControl.killInterpreter(true);
-  }
+  /** Resets the Java interpreter. */
+  protected void _resetInterpreter() { _interpreterControl.killInterpreter(true); }
 
   /**
    * Adds a named DynamicJavaAdapter to the list of interpreters.

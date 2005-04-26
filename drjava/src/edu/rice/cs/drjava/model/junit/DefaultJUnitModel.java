@@ -199,20 +199,19 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
         return;
       }
       _notifier.junitAllStarted(); 
-      try { _jvm.runTestSuite(); }
-      catch(IOException e) { 
+      try { _jvm.runTestSuite(); } 
+      catch(Throwable t) {
         _notifier.junitEnded();
         synchronized (this) { _testInProgress = false;}
-       throw new UnexpectedException(e); 
+       throw new UnexpectedException(t); 
       }
     }
   }
   
   public void junitDocs(List<OpenDefinitionsDocument> lod) { junitOpenDefDocs(lod, true); }
   
-  /** Runs JUnit on the current document. It formerly compiled all open documents before testing 
-   *  but have removed that requirement in order to allow the debugging of test cases. If the 
-   *  classes being tested are out of sync, a message is displayed.
+  /** Runs JUnit on the current document as already compiled.  If the classes being tested are out of sync, 
+   *  a message is displayed.
    */
   public void junit(OpenDefinitionsDocument doc) throws ClassNotFoundException, IOException {
 //    new ScrollableDialog(null, "junit(" + doc + ") called in DefaultJunitModel", "", "").show();
@@ -311,7 +310,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
           File temp = new File(new File(classpath).getCanonicalPath());
           if (temp.isDirectory()) {
             temp = new File(temp.getCanonicalPath() + File.separator + packageName);
-            if (!classDirs.contains(temp)) classDirs.addLast(temp);
+            if (! classDirs.contains(temp)) classDirs.addLast(temp);
           }
         }
       }
@@ -436,12 +435,12 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
         _jvm.runTestSuite();
         
       }
-      catch(IOException e) {
+      catch(Throwable t) {
         // Probably a java.rmi.UnmarshalException caused by the interruption of unit testing.
         // Swallow the exception and proceed.
         _notifier.junitEnded();  // balances junitStarted()
         synchronized (this) { _testInProgress = false;}
-        throw new UnexpectedException(e);
+        throw new UnexpectedException(t);
       }
     }
   }
@@ -523,17 +522,14 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     return _model.getSourceFile(className + ".java");
   }
   
-  /**
-   * Returns the current classpath in use by the JUnit JVM,
-   * in the form of a path-separator delimited string.
-   */
+  /** Returns the current classpath in use by the JUnit JVM, in the form of a path-separator delimited string. */
   public ClasspathVector getClasspath() {  return _jvm.getClasspath(); }
   
   /** Called when the JVM used for unit tests has registered. */
   public void junitJVMReady() {
     synchronized (this) { if (! _testInProgress) return; }
     JUnitError[] errors = new JUnitError[1];
-    errors[0] = new JUnitError("Previous test was interrupted", true, "");
+    errors[0] = new JUnitError("Previous test suite was interrupted", true, "");
     _junitErrorModel = new JUnitErrorModel(errors, _getter, true);
     _notifier.junitEnded();
     synchronized (this) { _testInProgress = false; }

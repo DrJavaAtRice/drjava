@@ -1289,12 +1289,8 @@ public class MainFrame extends JFrame implements OptionConstants {
         _tabbedPane.invalidate();
         _tabbedPane.repaint();
       }
-      catch (FileNotFoundException fnf) {
-        _showFileNotFoundError(fnf);
-      }
-      catch (IOException ioe) {
-        _showIOError(ioe);
-      }
+      catch (FileNotFoundException fnf) { _showFileNotFoundError(fnf); }
+      catch (IOException ioe) { _showIOError(ioe); }
       catch (OperationCanceledException oce) {
       }
     }
@@ -1344,39 +1340,27 @@ public class MainFrame extends JFrame implements OptionConstants {
           File c = getChosenFile(_interactionsHistoryChooser, rc);
           //Moved from history itself to here to account for bug #989232, non-existant default
           //history file found
-          if (c.getName().indexOf('.') == -1) {
-            c = new File(c.getAbsolutePath() + "." +
-                         InteractionsHistoryFilter.HIST_EXTENSION);
-          }
+          if (c.getName().indexOf('.') == -1)
+            c = new File(c.getAbsolutePath() + "." + InteractionsHistoryFilter.HIST_EXTENSION);
           _interactionsHistoryChooser.setSelectedFile(c);
           return c;
         }
-        public boolean warnFileOpen(File f) {
-          return true;
-        }
-        public boolean verifyOverwrite() {
-          return _verifyOverwrite();
-        }
-        public boolean shouldSaveAfterFileMoved(OpenDefinitionsDocument doc,
-                                                File oldFile) {
+        public boolean warnFileOpen(File f) { return true; }
+        public boolean verifyOverwrite() { return _verifyOverwrite(); }
+        public boolean shouldSaveAfterFileMoved(OpenDefinitionsDocument doc, File oldFile) {
           return true;
         }
       };
 
-      try {
-        _model.saveHistory(selector, history);
-      }
+      try { _model.saveHistory(selector, history);}
       catch (IOException ioe) {
         _showIOError(new IOException("An error occured writing the history to a file"));
       }
-
       _interactionsPane.requestFocus();
     }
   };
 
-  /**
-   * Clears the commands in the interaction history
-   */
+  /** Clears the commands in the interaction history. */
   private Action _clearHistoryAction = new AbstractAction("Clear Interactions History") {
     public void actionPerformed(ActionEvent ae) {
       _model.clearHistory();
@@ -2502,22 +2486,16 @@ public class MainFrame extends JFrame implements OptionConstants {
     catch (OperationCanceledException oce) {
       // Ok, don't open a file
     }
-    catch (FileNotFoundException fnf) {
-      _showFileNotFoundError(fnf);
-    }
+    catch (FileNotFoundException fnf) { _showFileNotFoundError(fnf); }
     catch (IOException ioe) { _showIOError(ioe); }
-    finally {
-      hourglassOff();
-      //_openProjectUpdate();
-    }
+    finally { hourglassOff(); }
   }
 
   
-  /**
-   * Opens all the files in the directory returned by the FolderSelector prompting
-   * the user to handle the cases where files are already open,
-   * files are missing, or the action was canceled by the user
-   * @param chooser the selector that returns the files to open
+  /** Opens all the files in the directory returned by the FolderSelector prompting
+   *  the user to handle the cases where files are already open,
+   *  files are missing, or the action was canceled by the user
+   *  @param chooser the selector that returns the files to open
    */
   public void openFolder(DirectoryChooser chooser) {
     String type = "'"+DrJava.LANGUAGE_LEVEL_EXTENSIONS[DrJava.getConfig().getSetting(LANGUAGE_LEVEL)] + "' ";
@@ -2800,42 +2778,25 @@ public class MainFrame extends JFrame implements OptionConstants {
       public Pair<Integer,Integer> getSelection() {
         Integer selStart = new Integer(pane.getSelectionStart());
         Integer selEnd = new Integer(pane.getSelectionEnd());
-        if(pane.getCaretPosition() == selStart){
-          return new Pair<Integer,Integer>(selEnd,selStart);
-        }else{
-          return new Pair<Integer,Integer>(selStart,selEnd);
-        }
+        if (pane.getCaretPosition() == selStart) return new Pair<Integer,Integer>(selEnd,selStart);
+        return new Pair<Integer,Integer>(selStart,selEnd);
       }
       public Pair<Integer,Integer> getScroll() {
         Integer scrollv = new Integer(pane.getVerticalScroll());
         Integer scrollh = new Integer(pane.getHorizontalScroll());
         return new Pair<Integer,Integer>(scrollv,scrollh); 
       }
-      public File getFile(){
-        if (doc.isUntitled()) {
-          return null;
-        }
-        else{
-          try {
-            return doc.getFile();
-          }catch(Exception e) {
-            throw new UnexpectedException(e);
-          }
-        }
+      public File getFile() {
+        if (doc.isUntitled()) return null;
+        try { return doc.getFile(); }
+        catch(Exception e) { throw new UnexpectedException(e); }
       }
-      public String getPackage(){
-        try {
-          return doc.getPackageName(); 
-        }catch(InvalidPackageException e) {
-          return null;
-        }
+      public String getPackage() {
+        try { return doc.getPackageName(); }
+        catch(InvalidPackageException e) { return null; }
       }
-      public boolean isActive() { 
-        return _model.getActiveDocument() == doc;
-      }
-      public boolean isUntitled() { 
-        return doc.isUntitled(); 
-      }
+      public boolean isActive() { return _model.getActiveDocument() == doc; }
+      public boolean isUntitled() { return doc.isUntitled(); }
     };
   }
   
@@ -3134,8 +3095,8 @@ public class MainFrame extends JFrame implements OptionConstants {
   }
     
   private void _junit() {
-    final SwingWorker worker = new SwingWorker() {
-      public Object construct() {
+    new Thread("Run JUnit on Current Document") {
+      public void run() {
         _dissableJUnitActions();
         hourglassOn();  // turned off in JUnitStarted/NonTestCase  
         try { _model.getActiveDocument().startJUnit(); }
@@ -3151,65 +3112,48 @@ public class MainFrame extends JFrame implements OptionConstants {
                                         "Error Running JUnit",
                                         JOptionPane.ERROR_MESSAGE);
         }
-        return null;
-      }
-    };
-    worker.start();
-  }
-  
-  private void _junitFolder() {
-    final SwingWorker worker = new SwingWorker() {
-      public Object construct() {
-        
-        INavigatorItem n;
-        _dissableJUnitActions();
-        hourglassOn();  // turned off when JUnitStarted event is fired
-        Enumeration<INavigatorItem> e = _model.getDocumentNavigator().getDocuments();
-        final LinkedList<OpenDefinitionsDocument> l = new LinkedList<OpenDefinitionsDocument>();
-        if (_model.getDocumentNavigator().isGroupSelected()) {
-          while (e.hasMoreElements()){
-            n = e.nextElement();
-            if(_model.getDocumentNavigator().isSelectedInGroup(n)){
-              l.add((OpenDefinitionsDocument) n);  // FIX THIS CAST!
-            }
-          }
-          _model.getJUnitModel().junitDocs(l);
-        }
-        return null;
-      }
-    };
-    worker.start(); 
-  }
-  
-  private void _junitProject() {
-    new Thread("Running JUnit Tests") {
-      public void run() { 
-        try {
-          _dissableJUnitActions();
-          hourglassOn();  // turned off in JUnitStarted/NonTestCase event
-          _model.getJUnitModel().junitProject(); 
-        }
-        finally { /* hourglassOff(); */ }
       }
     }.start();
   }
   
-  private void _junitAll() {
-    final SwingWorker worker = new SwingWorker() {
-      public Object construct() {
+  private void _junitFolder() {
+    new Thread("Run JUnit on specified folder") {
+      public void run() { 
+        INavigatorItem n;
         _dissableJUnitActions();
-        hourglassOn();  // turned off in JUnitStarted/NonTestCase event
-        //          new ScrollableDialog(null, "_junitAllAction called", "", "").show();
-        if (_model.isProjectActive()) _model.getJUnitModel().junitProject();
-        else _model.getJUnitModel().junitAll();
-        return null;
+        hourglassOn();  // turned off when JUnitStarted event is fired
+        if (_model.getDocumentNavigator().isGroupSelected()) {
+          Enumeration<INavigatorItem> docs = _model.getDocumentNavigator().getDocuments();
+          final LinkedList<OpenDefinitionsDocument> l = new LinkedList<OpenDefinitionsDocument>();
+          while (docs.hasMoreElements()) {
+            INavigatorItem doc = docs.nextElement();
+            if (_model.getDocumentNavigator().isSelectedInGroup(doc))
+              l.add((OpenDefinitionsDocument) doc);  // FIX THIS CAST!
+          }
+          try { _model.getJUnitModel().junitDocs(l); }
+          catch(UnexpectedException e) { _showJUnitInterrupted(e); }
+        }
       }
-    };
-    worker.start();
+    }.start();
   }
   
-  /* These are used to save the state of the enabled property
-   * of the actions dissabled during junit testing */
+  private void _junitProject() { _junitAll(); }
+  
+  private void _junitAll() {
+    new Thread("Running Junit Tests") {
+      public void run() {
+        _dissableJUnitActions();
+        hourglassOn();  // turned off in JUnitStarted/NonTestCase even
+        try {
+          if (_model.isProjectActive()) _model.getJUnitModel().junitProject();
+          else _model.getJUnitModel().junitAll();
+        } 
+        catch(UnexpectedException e) { _showJUnitInterrupted(e); }
+      }
+    }.start();
+  }
+  
+  /* These are used to save the state of the enabled property of the actions dissabled during junit testing. */
   private boolean _compileProjectActionEnabled;
   private boolean _compileAllActionEnabled;
   //private boolean _compileOpenProjectActionEnabled;
@@ -3379,92 +3323,67 @@ public class MainFrame extends JFrame implements OptionConstants {
   }
 
 
-  /*
-  private void _getText(String name) {
-    _field = name;
-  }*/
+//  private void _getText(String name) { _field = name; }
 
-  /**
-   * Adds a watch to a given variable or field
-   *
-  void debuggerAddWatch() {
-    if (inDebugMode()) {
-      //final String field;
-      OpenDefinitionsDocument doc = _model.getActiveDocument();
-      final JDialog getFieldDialog = new JDialog(this, "Choose Field to be Watched", true);
-      //getFieldDialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
-      final JTextField fieldName = new JTextField();
-      getFieldDialog.setSize(new Dimension(150, 60));
-      getFieldDialog.getContentPane().add(fieldName);
-      fieldName.addActionListener(new ActionListener() {
-        public void actionPerformed(ActionEvent ae) {
-          _getText(fieldName.getText());
-          getFieldDialog.dispose();
-        }
-      });
-      getFieldDialog.setLocation(300,300);
-      getFieldDialog.show();
-      Debugger debugger = _model.getDebugger();
-      debugger.addWatch(_field);
-    }
-  }*/
+//  /** Adds a watch to a given variable or field. */
+//  void debuggerAddWatch() {
+//    if (inDebugMode()) {
+//      //final String field;
+//      OpenDefinitionsDocument doc = _model.getActiveDocument();
+//      final JDialog getFieldDialog = new JDialog(this, "Choose Field to be Watched", true);
+//      //getFieldDialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
+//      final JTextField fieldName = new JTextField();
+//      getFieldDialog.setSize(new Dimension(150, 60));
+//      getFieldDialog.getContentPane().add(fieldName);
+//      fieldName.addActionListener(new ActionListener() {
+//        public void actionPerformed(ActionEvent ae) {
+//          _getText(fieldName.getText());
+//          getFieldDialog.dispose();
+//        }
+//      });
+//      getFieldDialog.setLocation(300,300);
+//      getFieldDialog.show();
+//      Debugger debugger = _model.getDebugger();
+//      debugger.addWatch(_field);
+//    }
+//  }
 
-  /**
-   * Displays all breakpoints currently set in the debugger
-   *
-  void _printBreakpoints() {
-    _model.getDebugger().printBreakpoints();
-  }*/
+//  /** Displays all breakpoints currently set in the debugger. */
+//  void _printBreakpoints() { _model.getDebugger().printBreakpoints(); }
 
-  /**
-   * Clears all breakpoints from the debugger
-   */
+  /** Clears all breakpoints from the debugger. */
   void debuggerClearAllBreakpoints() {
-    try {
-      _model.getDebugger().removeAllBreakpoints();
-    }
+    try { _model.getDebugger().removeAllBreakpoints(); }
     catch (DebugException de) {
-      _showError(de, "Debugger Error",
-                 "Could not remove all breakpoints.");
+      _showError(de, "Debugger Error", "Could not remove all breakpoints.");
     }
   }
-
 
   void _showFileMovedError(FileMovedException fme) {
     try {
       File f = fme.getFile();
       OpenDefinitionsDocument doc = _model.getDocumentForFile(f);
-      if (doc != null) {
-        if (_saveSelector.shouldSaveAfterFileMoved(doc, f)) {
-          _saveAs();
-        }
-      }
+      if (doc != null && _saveSelector.shouldSaveAfterFileMoved(doc, f)) _saveAs();
     }
-    catch (IOException ioe) {
-      // Couldn't find the document, so ignore the FME
-    }
+    catch (IOException ioe) { /* Couldn't find the document, so ignore the FME */ }
   }
 
   void _showProjectFileParseError(MalformedProjectFileException mpfe) {
-    _showError(mpfe, "Invalid Project File",
-               "DrJava could not read the given project file.");
+    _showError(mpfe, "Invalid Project File", "DrJava could not read the given project file.");
   }
   
   void _showFileNotFoundError(FileNotFoundException fnf) {
-    _showError(fnf, "File Not Found",
-               "The specified file was not found on disk.");
+    _showError(fnf, "File Not Found", "The specified file was not found on disk.");
   }
 
   void _showIOError(IOException ioe) {
-    _showError(ioe, "Input/output error",
-               "An I/O exception occurred during the last operation.");
+    _showError(ioe, "Input/output error", "An I/O exception occurred during the last operation.");
   }
 
   void _showClassNotFoundError(ClassNotFoundException cnfe) {
     _showError(cnfe, "Class Not Found",
                "A ClassNotFound exception occurred during the last operation.\n" +
-               "Please check that your classpath includes all relevant " +
-               "directories.\n\n");
+               "Please check that your classpath includes all relevant directories.\n\n");
   }
 
   void _showNoClassDefError(NoClassDefFoundError ncde) {
@@ -3474,34 +3393,37 @@ public class MainFrame extends JFrame implements OptionConstants {
   }
 
   void _showDebugError(DebugException de) {
-    _showError(de, "Debug Error",
-               "A Debugger error occurred in the last operation.\n\n");
+    _showError(de, "Debug Error", "A Debugger error occurred in the last operation.\n\n");
   }
 
+  void _showJUnitInterrupted(UnexpectedException e) {
+    _showWarning(e.getCause(), "JUnit Testing Interrupted", 
+               "The slave JVM has thrown a RemoteException probably indicating that it has been reset.\n\n");
+  }
   
   private void _showError(Throwable e, String title, String message) {
-//    System.out.println(e);
     JOptionPane.showMessageDialog(this,
                                   message + "\n" + e,
                                   title,
                                   JOptionPane.ERROR_MESSAGE);
   }
 
-  /**
-   * Check if any errors occurred while parsing the config file,
-   * and display a message if necessary.
-   */
+  private void _showWarning(Throwable e, String title, String message) {
+    JOptionPane.showMessageDialog(this,
+                                  message + "\n" + e,
+                                  title,
+                                  JOptionPane.WARNING_MESSAGE);
+  }
+  /** Check if any errors occurred while parsing the config file, and display a message if necessary. */
   private void _showConfigException() {
     if (DrJava.getConfig().hadStartupException()) {
       Exception e = DrJava.getConfig().getStartupException();
       _showError(e, "Error in Config File",
                  "Could not read the '.drjava' configuration file\n" +
                  "in your home directory.  Starting with default\n" +
-                 "values instead.\n\n" +
-                 "The problem was:\n");
+                 "values instead.\n\n" + "The problem was:\n");
     }
   }
-
 
   /** Shows a brief warning to the user, to inform the user that the file he is debugging has been modified 
    *  since its last save and should probably be saved and recompiled. Does not actually save or recompile for 
@@ -3521,24 +3443,21 @@ public class MainFrame extends JFrame implements OptionConstants {
                                   "Do not show this message again",
                                   JOptionPane.WARNING_MESSAGE,
                                   JOptionPane.DEFAULT_OPTION);
-      if (dialog.show() == JOptionPane.OK_OPTION && dialog.getCheckBoxValue()) {
+      if (dialog.show() == JOptionPane.OK_OPTION && dialog.getCheckBoxValue())
         DrJava.getConfig().setSetting(WARN_DEBUG_MODIFIED_FILE, Boolean.FALSE);
-      }
+
       _currentDefPane.hasWarnedAboutModified(true);
     }
   }
 
-   /**
-   * Returns the File selected by the JFileChooser.
-   * @param fc File chooser presented to the user
-   * @param choice return value from fc
-   * @return Selected File
-   * @throws OperationCanceledException if file choice canceled
-   * @throws RuntimeException if fc returns a bad file or choice
+   /** Returns the File selected by the JFileChooser.
+   *  @param fc File chooser presented to the user
+   *  @param choice return value from fc
+   *  @return Selected File
+   *  @throws OperationCanceledException if file choice canceled
+   *  @throws RuntimeException if fc returns a bad file or choice
    */
-  private File getChosenFile(JFileChooser fc, int choice)
-    throws OperationCanceledException
-  {
+  private File getChosenFile(JFileChooser fc, int choice) throws OperationCanceledException {
     switch (choice) {
       case JFileChooser.CANCEL_OPTION:
       case JFileChooser.ERROR_OPTION:
@@ -3670,11 +3589,8 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
   }
 
-  /**
-   * Initializes all action objects.
-   * Adds icons and descriptions to several of the actions.
-   * Note: this initialization will later be done in the
-   * constructor of each action, which will subclass AbstractAction.
+  /** Initializes all action objects.  Adds icons and descriptions to several of the actions. Note: this 
+   *  initialization will later be done in the constructor of each action, which will subclass AbstractAction.
    */
   private void _setUpActions() {
     _setUpAction(_newAction, "New", "Create a new document");
@@ -3810,45 +3726,31 @@ public class MainFrame extends JFrame implements OptionConstants {
   }
 
 
-  /**
-   * Returns the icon with the given name.
-   * All icons are assumed to reside in the /edu/rice/cs/drjava/ui/icons
-   * directory.
-   * @param name Name of icon image file
-   * @return ImageIcon object constructed from the file
+  /** Returns the icon with the given name. All icons are assumed to reside in the /edu/rice/cs/drjava/ui/icons
+   *  directory.
+   *  @param name Name of icon image file
+   *  @return ImageIcon object constructed from the file
    */
-  private ImageIcon _getIcon(String name) {
-    return getIcon(name);
-  }
+  private ImageIcon _getIcon(String name) { return getIcon(name); }
 
   public static ImageIcon getIcon(String name) {
     URL url = MainFrame.class.getResource(ICON_PATH + name);
-    if (url != null) {
-      return new ImageIcon(url);
-    }
-    // System.err.println("url is null!");
+    if (url != null)  return new ImageIcon(url);
+
     return null;
   }
 
   
-  /**
-   * this allows us to intercept key events when compiling testing
-   * and turn them off when the glass pane is up
-   */
-  private class MenuBar extends JMenuBar{
+  /** This allows us to intercept key events when compiling testing and turn them off when the glass pane is up. */
+  private class MenuBar extends JMenuBar {
     public boolean processKeyBinding(KeyStroke ks, KeyEvent e, int condition, boolean pressed) {
-      if(MainFrame.this.getAllowKeyEvents()){
-        return super.processKeyBinding(ks, e, condition, pressed);
-      }else{
-        return false;
-      }
+      if (MainFrame.this.getAllowKeyEvents()) return super.processKeyBinding(ks, e, condition, pressed);
+      return false;
     }
   }
   
-  /**
-   * Sets up the components of the menu bar and links them to the private
-   * fields within MainFrame.  This method serves to make the code
-   * more legible on the higher calling level, i.e., the constructor.
+  /** Sets up the components of the menu bar and links them to the private fields within MainFrame.  This method 
+   *  serves to make the code more legible on the higher calling level, i.e., the constructor.
    */
   private void _setUpMenuBar() {
     boolean showDebugger = (_model.getDebugger().isAvailable());
@@ -3875,12 +3777,10 @@ public class MainFrame extends JFrame implements OptionConstants {
     setJMenuBar(_menuBar);
   }
 
-  /**
-   * Adds an Action as a menu item to the given menu, using the
-   * specified configurable keystroke.
-   * @param menu Menu to add item to
-   * @param a Action for the menu item
-   * @param opt Configurable keystroke for the menu item
+  /** Adds an Action as a menu item to the given menu, using the specified configurable keystroke.
+   *  @param menu Menu to add item to
+   *  @param a Action for the menu item
+   *  @param opt Configurable keystroke for the menu item
    */
   private void _addMenuItem(JMenu menu, Action a, Option<KeyStroke> opt) {
     JMenuItem item;
@@ -3888,11 +3788,10 @@ public class MainFrame extends JFrame implements OptionConstants {
     _setMenuShortcut(item, a, opt);
   }
 
-  /**
-   * Sets the given menu item to have the specified configurable keystroke.
-   * @param item Menu item containing the action
-   * @param a Action for the menu item
-   * @param opt Configurable keystroke for the menu item
+  /** Sets the given menu item to have the specified configurable keystroke.
+   *  @param item Menu item containing the action
+   *  @param a Action for the menu item
+   *  @param opt Configurable keystroke for the menu item
    */
   private void _setMenuShortcut(JMenuItem item, Action a, Option<KeyStroke> opt) {
     KeyStroke ks = DrJava.getConfig().getSetting(opt);
@@ -3909,9 +3808,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
   }
 
-  /**
-   * Creates and returns a file menu.  Side effects: sets values for
-   * _saveMenuItem.
+  /** Creates and returns a file menu.  Side effects: sets values for _saveMenuItem.
    */
   private JMenu _setUpFileMenu(int mask) {
     JMenu fileMenu = new JMenu("File");
@@ -3954,9 +3851,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     return fileMenu;
   }
 
-  /**
-   * Creates and returns a edit menu.
-   */
+  /** Creates and returns a edit menu. */
   private JMenu _setUpEditMenu(int mask) {
     JMenu editMenu = new JMenu("Edit");
     editMenu.setMnemonic(KeyEvent.VK_E);
@@ -4001,9 +3896,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     return editMenu;
   }
 
-  /**
-   * Creates and returns a tools menu.
-   */
+  /** Creates and returns a tools menu. */
   private JMenu _setUpToolsMenu(int mask) {
     JMenu toolsMenu = new JMenu("Tools");
     toolsMenu.setMnemonic(KeyEvent.VK_T);

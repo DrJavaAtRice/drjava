@@ -63,6 +63,7 @@ import edu.rice.cs.drjava.model.definitions.*;
 import edu.rice.cs.drjava.model.repl.*;
 import edu.rice.cs.drjava.model.compiler.*;
 import edu.rice.cs.util.docnavigation.*;
+import edu.rice.cs.util.swing.Utilities;
 
 /**
  * A GlobalModel that enforces invariants associated with having
@@ -123,7 +124,7 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel implements Sin
     
     final NodeDataVisitor<Boolean> _gainVisitor = new NodeDataVisitor<Boolean>() {
       public Boolean itemCase(INavigatorItem docu){
-        _setActiveDoc(docu);  // sets _activeDocument
+        _setActiveDoc(docu);  // sets _activeDocument, the shadow copy of the active document
         File dir = _activeDocument.getParentDirectory();
         
         if (dir != null) {  //If the file is in External or Auxiliary Files then then we do not want to change our project directory to something outside the project
@@ -176,15 +177,23 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel implements Sin
    */
   public OpenDefinitionsDocument getActiveDocument() { return _activeDocument; }
   
-  /**
-   * Sets the currently active document by updating the selection model.
-   * @param doc Document to set as active
+  /** Sets the currently active document by updating the selection model.
+   *  @param doc Document to set as active
    */
-  public void setActiveDocument(OpenDefinitionsDocument doc) {
-    try { _documentNavigator.setActiveDoc(doc); } 
-    catch(DocumentClosedException dce) { 
-      /* do nothing; findbugs signals a bug unless this catch clause spans more than two lines */
-    }
+  public void setActiveDocument(final OpenDefinitionsDocument doc) {
+/* The following code fixes a potential race because this method modifies the documentNavigator which is a swing
+ * component.  It was commented out because it broke at least one unit test which appears to be timing dependent.  
+ * We need to fix the unit tests before we can use the code that has been commented out. The race appears statistically
+ * improbable because the update only changes the DefaultListSelection or DefaultTreeSelection in the navigator and
+ * this operation is very lightweight. The chances of a context switch in the middle are very small. */
+    Runnable command = new Runnable() { 
+      public void run() { _documentNavigator.setActiveDoc(doc); }
+    };
+    Utilities.invokeLater(command);
+//    try { _documentNavigator.setActiveDoc(doc); } 
+//    catch(DocumentClosedException dce) { 
+//      /* do nothing; findbugs signals a bug unless this catch clause spans more than two lines */
+//    }
   }
   
   public Container getDocCollectionWidget() { return _documentNavigator.asContainer(); }
@@ -193,24 +202,18 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel implements Sin
   public void setActiveNextDocument() {
     INavigatorItem key = _activeDocument;
     INavigatorItem nextKey =_documentNavigator.getNext(key);
-      if (key != nextKey) _documentNavigator.setActiveDoc(nextKey);
-        /* this will select the active document in the navigator, which
-         * will signal a listener to call _setActiveDoc(...) */
+    if (key != nextKey) _documentNavigator.setActiveDoc(nextKey);
+    /* this will select the active document in the navigator, which
+     * will signal a listener to call _setActiveDoc(...) */
   }
 
-  /**
-   * Sets the active document to be the previous one in the collection
-   */
+  /** Sets the active document to be the previous one in the collection. */
   public void setActivePreviousDocument() {
     INavigatorItem key = _activeDocument;
     INavigatorItem prevKey =_documentNavigator.getPrevious(key);
-    if (key != prevKey) {
+    if (key != prevKey) _documentNavigator.setActiveDoc(prevKey);
       /* this will select the active document in the navigator, which
-       * will signal a listener to call _setActiveDoc(...)
-       */
-      _documentNavigator.setActiveDoc(prevKey);
-      //   _setActiveDoc(prevKey);
-    }
+       * will signal a listener to call _setActiveDoc(...) */
   }
 //
 //  /**

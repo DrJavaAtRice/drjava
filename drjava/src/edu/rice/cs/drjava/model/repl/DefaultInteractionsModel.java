@@ -121,10 +121,8 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
     _model.systemErrPrint(s);
   }
 
-  /**
-   * Any extra action to perform (beyond notifying listeners) when
-   * the interpreter fails to reset.
-   * @param t The Throwable thrown by System.exit
+  /** Any extra action to perform (beyond notifying listeners) when the interpreter fails to reset.
+   *  @param t The Throwable thrown by System.exit
    */
   protected void _interpreterResetFailed(Throwable t) {
     _document.insertBeforeLastPrompt("Reset Failed! See the console tab for details." + _newLine,
@@ -133,77 +131,51 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
     _model.systemErrPrint(StringOps.getStackTrace(t));
   }
 
-  /**
-   * Called when the Java interpreter is ready to use.
-   * Adds any open documents to the classpath.
-   */
+  /** Called when the Java interpreter is ready to use. Adds any open documents to the classpath. */
   public void interpreterReady() {
     _model.resetInteractionsClasspath();
     super.interpreterReady();
   }
 
-  /**
-   * Notifies listeners that an interaction has started.
-   */
-  protected void _notifyInteractionStarted() {
-    _notifier.interactionStarted();
-  }
+  /** Notifies listeners that an interaction has started. */
+  protected void _notifyInteractionStarted() { _notifier.interactionStarted(); }
 
-  /**
-   * Notifies listeners that an interaction has ended.
-   */
-  protected void _notifyInteractionEnded() {
-    _notifier.interactionEnded();
-  }
+  /** Notifies listeners that an interaction has ended. */
+  protected void _notifyInteractionEnded() { _notifier.interactionEnded(); }
 
-  /**
-   * Notifies listeners that an error was present in the interaction.
-   */
+  /** Notifies listeners that an error was present in the interaction. */
   protected void _notifySyntaxErrorOccurred(final int offset, final int length) {
     _notifier.interactionErrorOccurred(offset,length);
   }
 
-  /**
-   * Notifies listeners that the interpreter has changed.
-   * @param inProgress Whether the new interpreter is currently in progress.
+  /** Notifies listeners that the interpreter has changed.
+   *  @param inProgress Whether the new interpreter is currently in progress.
    */
   protected void _notifyInterpreterChanged(final boolean inProgress) {
     _notifier.interpreterChanged(inProgress);
   }
 
-  /**
-   * Notifies listeners that the interpreter is resetting.
-   */
-  protected void _notifyInterpreterResetting() {
-    _notifier.interpreterResetting();
-  }
+  /** Notifies listeners that the interpreter is resetting. */
+  protected void _notifyInterpreterResetting() { _notifier.interpreterResetting(); }
 
-  /**
-   * Notifies listeners that the interpreter is ready.
-   */
-  protected void _notifyInterpreterReady() {
-    _notifier.interpreterReady();
-  }
+  /** Notifies listeners that the interpreter is ready. */
+  protected void _notifyInterpreterReady() { _notifier.interpreterReady();  }
 
-  /**
-   * Notifies listeners that the interpreter has exited unexpectedly.
-   * @param status Status code of the dead process
+  /** Notifies listeners that the interpreter has exited unexpectedly.
+   *  @param status Status code of the dead process
    */
   protected void _notifyInterpreterExited(final int status) {
     _notifier.interpreterExited(status);
   }
 
-  /**
-   * Notifies listeners that the interpreter reset failed.
-   * @param t Throwable causing the failure
+  /** Notifies listeners that the interpreter reset failed.
+   *  @param t Throwable causing the failure
    */
   protected void _notifyInterpreterResetFailed(final Throwable t) {
     _notifier.interpreterResetFailed(t);
   }
 
-  /**
-   * Notifies the view that the current interaction is incomplete.
-   */
+  /** Notifies the view that the current interaction is incomplete. */
   protected void _notifyInteractionIncomplete() {
     _notifier.interactionIncomplete();
   }

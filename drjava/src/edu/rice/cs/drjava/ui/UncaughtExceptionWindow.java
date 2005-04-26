@@ -80,10 +80,7 @@ public class UncaughtExceptionWindow extends JDialog {
   /** the exception that was passed to this window */
   private Throwable _exception;
 
-  /**
-   * Creates a window to graphically display an exception which
-   * has occurred in the code of DrJava.
-   */
+  /** Creates a window to graphically display an exception which has occurred in the code of DrJava. */
   public UncaughtExceptionWindow(JFrame frame, Throwable exception) {
     super(frame,"Unexpected Error");
     System.out.println("Unexpected Window Exception: " + exception);
@@ -94,7 +91,7 @@ public class UncaughtExceptionWindow extends JDialog {
 
     String trace = StringOps.getStackTrace(_exception);
     if (_exception instanceof UnexpectedException) {
-      Throwable t = ((UnexpectedException)_exception).getContainedThrowable();
+      Throwable t = ((UnexpectedException)_exception).getCause();
       trace = trace + "\nCaused by:\n" + StringOps.getStackTrace(t);
     }
 

@@ -90,9 +90,7 @@ public final class SingleDisplayModelTest extends GlobalModelTestCase {
    * activeDocumentChanged events are fired, and then adds some text.
    * @return the new modified document
    */
-  protected OpenDefinitionsDocument setupDocument(String text)
-    throws BadLocationException
-  {
+  protected OpenDefinitionsDocument setupDocument(String text) throws BadLocationException {
     assertNotEmpty();
     SDTestListener listener = new SDTestListener() {
       public void newFileCreated(OpenDefinitionsDocument doc) {
@@ -107,10 +105,10 @@ public final class SingleDisplayModelTest extends GlobalModelTestCase {
 
     listener.assertSwitchCount(0);
 
-    
     // Open a new document
     int numOpen = getSDModel().getDefinitionsDocuments().size();
     OpenDefinitionsDocument doc = getSDModel().newFile();
+    clearEventQueue();
     assertNumOpenDocs(numOpen + 1);
 
     listener.assertNewCount(1);
@@ -207,6 +205,7 @@ public final class SingleDisplayModelTest extends GlobalModelTestCase {
 
     // Make sure setPrevious doesn't move (at start of list)
     getSDModel().setActivePreviousDocument();
+    clearEventQueue();
     listener.assertSwitchCount(2);
     assertActiveDocument(doc1);
 
@@ -221,16 +220,19 @@ public final class SingleDisplayModelTest extends GlobalModelTestCase {
 
     // Make sure setNext doesn't move (at end of list)
     getSDModel().setActiveNextDocument();
+    clearEventQueue();
     listener.assertSwitchCount(4);
     assertActiveDocument(doc3);
 
     // Test setPrevious
     getSDModel().setActivePreviousDocument();
+    clearEventQueue();
     listener.assertSwitchCount(5);
     assertActiveDocument(doc2);
 
     // Test setActive
     getSDModel().setActiveDocument(doc1);
+    clearEventQueue();
     listener.assertSwitchCount(6);
     assertActiveDocument(doc1);
 
@@ -239,16 +241,13 @@ public final class SingleDisplayModelTest extends GlobalModelTestCase {
     getSDModel().removeListener(listener);
   }
 
-  /**
-   * Ensures that an unmodified, empty document is closed
-   * after a file is opened, while a modified document
-   * is left open.
+  /** Ensures that an unmodified, empty document is closed after a file is opened, while a modified document
+   *  is left open.
    */
-  public void testCloseUnmodifiedAutomatically()
-    throws BadLocationException, IOException,
-      OperationCanceledException, AlreadyOpenException
-  {
-    assertNumOpenDocs(1);
+  public void testCloseUnmodifiedAutomatically() throws BadLocationException, IOException,
+    OperationCanceledException, AlreadyOpenException {
+    
+    assertNumOpenDocs(1); // This assertion depends on the active document being set before setUp() is finished
     OpenDefinitionsDocument doc = getSDModel().getActiveDocument();
     assertModified(false, doc);
     assertLength(0, doc);
@@ -290,6 +289,7 @@ public final class SingleDisplayModelTest extends GlobalModelTestCase {
 
     // Open file, should replace the old
     doc = getSDModel().openFile(new FileSelector(tempFile));
+    clearEventQueue();
     listener.assertOpenCount(1);
     listener.assertCloseCount(1);
     listener.assertSwitchCount(1);
@@ -299,10 +299,7 @@ public final class SingleDisplayModelTest extends GlobalModelTestCase {
     getSDModel().removeListener(listener);
   }
 
-  /**
-   * Tests that active document is switched on close, and that
-   * a new file is created after the last one is closed.
-   */
+  /** Tests that active document is switched on close, and that a new file is created after the last one is closed. */
   public void testCloseFiles() throws BadLocationException {
     // Check for proper events
     SDTestListener listener = new SDTestListener() {
@@ -326,6 +323,7 @@ public final class SingleDisplayModelTest extends GlobalModelTestCase {
     OpenDefinitionsDocument doc1 = _sdModel.getActiveDocument();
     changeDocumentText(FOO_TEXT, doc1);
     OpenDefinitionsDocument doc2 = setupDocument(BAR_TEXT);
+    clearEventQueue();
     assertActiveDocument(doc2);
     assertNumOpenDocs(2);
     listener.assertNewCount(1);
@@ -333,6 +331,7 @@ public final class SingleDisplayModelTest extends GlobalModelTestCase {
 
     // Close one
     _sdModel.closeFile(_sdModel.getActiveDocument());
+    clearEventQueue();
     assertNumOpenDocs(1);
     listener.assertCloseCount(1);
     listener.assertAbandonCount(1);
@@ -342,6 +341,7 @@ public final class SingleDisplayModelTest extends GlobalModelTestCase {
 
     // Close the other
     _sdModel.closeFile(_sdModel.getActiveDocument());
+    clearEventQueue();
     listener.assertCloseCount(2);
     listener.assertAbandonCount(2);
 
@@ -369,17 +369,11 @@ public final class SingleDisplayModelTest extends GlobalModelTestCase {
     _sdModel.removeListener(listener);
   }
 
-  /**
-   * Tests that active document is switched on close, and that
-   * a new file is created after the last one is closed.
-   */
-  public void testDisplayFilename()
-    throws IOException, OperationCanceledException, AlreadyOpenException
-  {
+  /** Tests the displayFileName method. */
+  public void testDisplayFilename() throws IOException, OperationCanceledException, AlreadyOpenException {
     // Untitled
     OpenDefinitionsDocument doc = _sdModel.getActiveDocument();
-    assertEquals("untitled display filename", "(Untitled)",
-                 _sdModel.getDisplayFilename(doc));
+    assertEquals("untitled display filename", "(Untitled)", _sdModel.getDisplayFilename(doc));
 
     // Ends in ".java"
     File file = File.createTempFile("DrJava-filename-test", ".java", _tempDir);
@@ -395,16 +389,14 @@ public final class SingleDisplayModelTest extends GlobalModelTestCase {
     file.deleteOnExit();
     name = file.getName();
     doc = _sdModel.openFile(new FileSelector(file));
-    assertEquals(".txt display filename", name,
-                 _sdModel.getDisplayFilename(doc));
+    assertEquals(".txt display filename", name, _sdModel.getDisplayFilename(doc));
 
     // Doesn't end in ".java"
     file = File.createTempFile("DrJava-filename-test", ".java.txt", _tempDir);
     file.deleteOnExit();
     name = file.getName();
     doc = _sdModel.openFile(new FileSelector(file));
-    assertEquals(".java.txt display filename", name,
-                 _sdModel.getDisplayFilename(doc));
+    assertEquals(".java.txt display filename", name, _sdModel.getDisplayFilename(doc));
 
   }
   

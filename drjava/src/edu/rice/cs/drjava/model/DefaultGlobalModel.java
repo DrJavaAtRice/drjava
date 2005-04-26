@@ -1638,9 +1638,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
    * which fires the interactionsReset() event.)
    */
   public void resetInteractions() {
-    if ((_debugger.isAvailable()) && (_debugger.isReady())) {
-      _debugger.shutdown();
-    }
+    if (_debugger.isAvailable() && _debugger.isReady()) _debugger.shutdown();
 
     _interactionsModel.resetInterpreter();
     if (DrJava.getConfig().getSetting(OptionConstants.RESET_CLEAR_CONSOLE).booleanValue()) {
@@ -3007,9 +3005,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
           String part = packageStack.pop();
           parentDir = parentDir.getParentFile();
 
-          if (parentDir == null) {
-            throw new RuntimeException("parent dir is null?!");
-          }
+          if (parentDir == null) throw new RuntimeException("parent dir is null?!");
 
           // Make sure the package piece matches the directory name
           if (! part.equals(parentDir.getName())) {
