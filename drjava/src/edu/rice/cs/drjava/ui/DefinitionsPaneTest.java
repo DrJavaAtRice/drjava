@@ -511,7 +511,6 @@ public final class DefinitionsPaneTest extends TestCase {
     currpane = _frame.getCurrentDefPane();
     olddoc = oldpane.getDocument();
     ddoc = currpane.getDocument();
-    GlobalModelTestCase.clearEventQueue();
     assertFalse("the old pane should not have an open defintions document", olddoc instanceof OpenDefinitionsDocument);
     assertTrue("the active pane should have an open defintions document", ddoc instanceof OpenDefinitionsDocument);
   }

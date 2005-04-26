@@ -108,7 +108,6 @@ public final class SingleDisplayModelTest extends GlobalModelTestCase {
     // Open a new document
     int numOpen = getSDModel().getDefinitionsDocuments().size();
     OpenDefinitionsDocument doc = getSDModel().newFile();
-    clearEventQueue();
     assertNumOpenDocs(numOpen + 1);
 
     listener.assertNewCount(1);
@@ -205,7 +204,6 @@ public final class SingleDisplayModelTest extends GlobalModelTestCase {
 
     // Make sure setPrevious doesn't move (at start of list)
     getSDModel().setActivePreviousDocument();
-    clearEventQueue();
     listener.assertSwitchCount(2);
     assertActiveDocument(doc1);
 
@@ -220,19 +218,16 @@ public final class SingleDisplayModelTest extends GlobalModelTestCase {
 
     // Make sure setNext doesn't move (at end of list)
     getSDModel().setActiveNextDocument();
-    clearEventQueue();
     listener.assertSwitchCount(4);
     assertActiveDocument(doc3);
 
     // Test setPrevious
     getSDModel().setActivePreviousDocument();
-    clearEventQueue();
     listener.assertSwitchCount(5);
     assertActiveDocument(doc2);
 
     // Test setActive
     getSDModel().setActiveDocument(doc1);
-    clearEventQueue();
     listener.assertSwitchCount(6);
     assertActiveDocument(doc1);
 
@@ -289,7 +284,6 @@ public final class SingleDisplayModelTest extends GlobalModelTestCase {
 
     // Open file, should replace the old
     doc = getSDModel().openFile(new FileSelector(tempFile));
-    clearEventQueue();
     listener.assertOpenCount(1);
     listener.assertCloseCount(1);
     listener.assertSwitchCount(1);
@@ -323,7 +317,6 @@ public final class SingleDisplayModelTest extends GlobalModelTestCase {
     OpenDefinitionsDocument doc1 = _sdModel.getActiveDocument();
     changeDocumentText(FOO_TEXT, doc1);
     OpenDefinitionsDocument doc2 = setupDocument(BAR_TEXT);
-    clearEventQueue();
     assertActiveDocument(doc2);
     assertNumOpenDocs(2);
     listener.assertNewCount(1);
@@ -331,7 +324,6 @@ public final class SingleDisplayModelTest extends GlobalModelTestCase {
 
     // Close one
     _sdModel.closeFile(_sdModel.getActiveDocument());
-    clearEventQueue();
     assertNumOpenDocs(1);
     listener.assertCloseCount(1);
     listener.assertAbandonCount(1);
@@ -341,7 +333,6 @@ public final class SingleDisplayModelTest extends GlobalModelTestCase {
 
     // Close the other
     _sdModel.closeFile(_sdModel.getActiveDocument());
-    clearEventQueue();
     listener.assertCloseCount(2);
     listener.assertAbandonCount(2);
 

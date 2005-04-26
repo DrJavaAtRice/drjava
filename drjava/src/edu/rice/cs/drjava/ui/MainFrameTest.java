@@ -155,13 +155,11 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     // Current pane should be new doc, pos 0
     pane = _frame.getCurrentDefPane();
     doc = pane.getOpenDefDocument();//.getDocument();
-    GlobalModelTestCase.clearEventQueue();
     assertEquals("New curr DefPane's document", newDoc, doc);
     assertEquals("Location of new document", 0, doc.getCurrentLocation());
 
     // Switch back
-    model.setActiveNextDocument();
-    GlobalModelTestCase.clearEventQueue();  
+    model.setActiveNextDocument(); 
     assertEquals("Next active doc", oldDoc, model.getActiveDocument());
                  
     // Current pane should be old doc, pos 3
@@ -418,7 +416,6 @@ public final class MainFrameTest extends MultiThreadedTestCase {
          return return_me;
        }
      });
-     GlobalModelTestCase.clearEventQueue();
      
      assertTrue("the save button should not be enabled after opening a document", !_frame.saveEnabledHuh());
   }
