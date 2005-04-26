@@ -195,9 +195,8 @@ class JListNavigator extends JList implements IDocumentNavigator {
     }
   }
   
-  /**
-   * Sets the specified document as selected.  Should only be called from event-handling thread.
-   * @param doc the document to select
+  /** Sets the specified document as selected.  Should only be called from event-handling thread.
+   *  @param doc the document to select
    */
   public void setActiveDoc(INavigatorItem doc) {
     synchronized(_model) {

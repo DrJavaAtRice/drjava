@@ -47,6 +47,7 @@ package edu.rice.cs.util.swing;
 
 import java.awt.EventQueue;
 import java.lang.reflect.InvocationTargetException;
+import edu.rice.cs.util.UnexpectedException;
 
 public class Utilities {
   
@@ -61,12 +62,17 @@ public class Utilities {
     EventQueue.invokeLater(task);
   }
   
-  public static void invokeAndWait(Runnable task) throws InterruptedException, InvocationTargetException {
+  public static void invokeAndWait(Runnable task) throws InterruptedException {
     if (EventQueue.isDispatchThread()) {
       task.run(); 
       return;
     }
-    EventQueue.invokeAndWait(task);
+    try { EventQueue.invokeAndWait(task); }
+    catch(InvocationTargetException e) { throw new UnexpectedException(e); }
+  }
+  
+  public static void clearEventQueue()  throws InterruptedException {
+    invokeAndWait(new Runnable() { public void run() { }; });
   }
 }
     
