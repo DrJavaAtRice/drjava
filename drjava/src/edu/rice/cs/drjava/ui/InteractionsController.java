@@ -68,15 +68,14 @@ import edu.rice.cs.util.swing.SwingWorker;
 import edu.rice.cs.util.swing.PopupConsole;
 import edu.rice.cs.util.UnexpectedException;
 
-/**
- * This class installs listeners and actions between an InteractionsDocument
- * in the model and an InteractionsPane in the view.
- * <p>
- * We may want to refactor this class into a different package.
- * <p>
- * (The PopupConsole was introduced in version 1.29 of this file)
+/** This class installs listeners and actions between an InteractionsDocument in the model and an InteractionsPane 
+ *  in the view.
+ *  <p>
+ *  We may want to refactor this class into a different package.
+ *  <p>
+ *  (The PopupConsole was introduced in version 1.29 of this file)
  *
- * @version $Id$
+ *  @version $Id$
  */
 public class InteractionsController extends AbstractConsoleController {
   /** InteractionsModel to handle interpretation. */
@@ -121,12 +120,8 @@ public class InteractionsController extends AbstractConsoleController {
    *  @param adapter InteractionsDocumentAdapter being used by the model's doc
    */
   public InteractionsController(final InteractionsModel model, InteractionsDocumentAdapter adapter) {
-    this(model, adapter, 
-         new InteractionsPane(adapter) {
-      public int getPromptPos() {
-        return model.getDocument().getPromptPos();
-      }
-    });
+    this(model, adapter,
+      new InteractionsPane(adapter) { public int getPromptPos() { return model.getDocument().getPromptPos(); }}); 
   }
 
   /**
@@ -163,59 +158,35 @@ public class InteractionsController extends AbstractConsoleController {
   
   
 
-  /**
-   * Gets the input listener for console input requests.
-   */
-  public InputListener getInputListener() {
-    return _inputListener;
-  }
+  /** Gets the input listener for console input requests. */
+  public InputListener getInputListener() { return _inputListener; }
 
-  /**
-   * Notifies the inputEnteredAction. Called by DefaultGlobalModel when reset is called so
-   * that this lock is released.
-   */
-  public void notifyInputEnteredAction() {
-    _popupConsole.interruptConsole();
-  }
+  /** Notifies the inputEnteredAction. Called by DefaultGlobalModel when reset is called so that this lock is 
+   *  released. */
+  public void notifyInputEnteredAction() { _popupConsole.interruptConsole(); }
   
-  /**
-   * Inserts text into the console.  This waits for the console to be 
-   * ready, so it should not be called unless a call to getConsoleInput
-   * has been made or will be made shortly.
+  /** Inserts text into the console.  This waits for the console to be ready, so it should not be called unless
+   *  a call to getConsoleInput has been made or will be made shortly.
    */
   public void insertConsoleText(String input) {
-    try { 
-      _popupConsole.waitForConsoleReady(); 
-    } catch (InterruptedException ie) { }
+    try { _popupConsole.waitForConsoleReady(); } 
+    catch (InterruptedException ie) { }
     
     _popupConsole.insertConsoleText(input);
   }
 
-  /**
-   * Accessor method for the InteractionsModel.
-   */
-  public InteractionsModel getInteractionsModel() {
-    return _model;
-  }
+  /** Accessor method for the InteractionsModel. */
+  public InteractionsModel getInteractionsModel() {  return _model; }
 
-  /**
-   * Allows the abstract superclass to use the document.
-   * @return the InteractionsDocument
+  /** Allows the abstract superclass to use the document.
+   *  @return the InteractionsDocument
    */
-  public ConsoleDocument getConsoleDoc() {
-    return _doc;
-  }
+  public ConsoleDocument getConsoleDoc() { return _doc; }
 
-  /**
-   * Accessor method for the InteractionsDocument.
-   */
-  public InteractionsDocument getDocument() {
-    return _doc;
-  }
+  /** Accessor method for the InteractionsDocument. */
+  public InteractionsDocument getDocument() { return _doc; }
 
-  /**
-   * Adds AttributeSets as named styles to the document adapter.
-   */
+  /** Adds AttributeSets as named styles to the document adapter. */
   protected void _addDocumentStyles() {
     // Add AbstractConsoleController styles
     super._addDocumentStyles();

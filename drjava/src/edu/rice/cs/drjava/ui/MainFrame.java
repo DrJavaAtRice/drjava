@@ -736,26 +736,23 @@ public class MainFrame extends JFrame implements OptionConstants {
    */
   private Action _copyInteractionToDefinitionsAction =
     new AbstractAction("Lift Current Interaction to Definitions") {
-    public void actionPerformed(ActionEvent e) {
+    public void actionPerformed(ActionEvent a) {
       String text = _interactionsController.getDocument().getCurrentInput();
-      if (!text.equals("")) {
+      if (! text.equals("")) {
         _putTextIntoDefinitions(text + "\n");
         return;
       }
-      History history = _interactionsController.getDocument().getHistory();
-      if (history.hasPrevious()) {
-        text = history.getLastEntry();
-        //It is assumed that empty strings are not put into the history
-        _putTextIntoDefinitions(text + "\n");
-        return;
-      }
+      try { text = _interactionsController.getDocument().lastEntry(); }
+      catch(Exception e) { return; } // no entry to promote
+      
+      //It is assumed that empty strings are not put into the history
+      _putTextIntoDefinitions(text + "\n");
+      return;
     }
   };
 
-  /**
-   * Action that copies the previous interaction to the definitions pane.
-   *
-   * is there a good way to get the last history element without perturbing the current document?
+  /** Action that copies the previous interaction to the definitions pane.
+   *  Is there a good way to get the last history element without perturbing the current document?
   Action copyPreviousInteractionToDefinitionsAction = new AbstractAction("Copy previous interaction to definitions") {
     public void actionPerformed(ActionEvent e) {
       _putTextIntoDefinitions(_interactionsController.getDocument().getCurrentInput() + "\n");
@@ -1239,24 +1236,16 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
   };
 
-  /**
-   * Interprets the commands in a file in the interactions window
-   */
+  /** Interprets the commands in a file in the interactions window. */
   private Action _executeHistoryAction = new AbstractAction("Execute Interactions History...") {
     public void actionPerformed(ActionEvent ae) {
       // Show interactions tab
       _tabbedPane.setSelectedIndex(INTERACTIONS_TAB);
 
       _interactionsHistoryChooser.setDialogTitle("Execute Interactions History");
-      try {
-        _model.loadHistory(_interactionsHistoryFileSelector);
-      }
-      catch (FileNotFoundException fnf) {
-        _showFileNotFoundError(fnf);
-      }
-      catch (IOException ioe) {
-        _showIOError(ioe);
-      }
+      try { _model.loadHistory(_interactionsHistoryFileSelector); }
+      catch (FileNotFoundException fnf) { _showFileNotFoundError(fnf); }
+      catch (IOException ioe) { _showIOError(ioe); }
       _interactionsPane.requestFocus();
     }
   };
@@ -1308,18 +1297,14 @@ public class MainFrame extends JFrame implements OptionConstants {
                                               null,options,
                                               options[1]);
       // Cancel
-      if (resp == 2 || resp == JOptionPane.CLOSED_OPTION) {
-        return;
-      }
+      if (resp == 2 || resp == JOptionPane.CLOSED_OPTION) return;
+
       String history = _model.getHistoryAsStringWithSemicolons();
 
       // Edit the history
-      if (resp == 0) {
+      if (resp == 0)
         history = (new HistorySaveDialog(MainFrame.this)).editHistory(history);
-      }
-      if (history == null) {
-        return; // save cancelled
-      }
+      if (history == null) return; // save cancelled
 
       _interactionsHistoryChooser.setDialogTitle("Save Interactions History");
       FileSaveSelector selector = new FileSaveSelector() {
@@ -1950,22 +1935,14 @@ public class MainFrame extends JFrame implements OptionConstants {
     return answer;
   }
   
-  /**
-   * holds/shows the history of documents for ctrl-tab
-   */
+  /** Holds/shows the history of documents for ctrl-tab. */
   RecentDocFrame _recentDocFrame;
   
-  /**
-   * sets up the ctrl-tab listener
-   */
-  private void setUpKeys(){
-    setFocusTraversalKeysEnabled(false);
-  }
+  /** Sets up the ctrl-tab listener. */
+  private void setUpKeys(){ setFocusTraversalKeysEnabled(false); }
   
-  /**
-   * Releases any resources this frame is using to prepare it to
-   * be garbage collected.  Should only be called from tests.
-   * This is implementation specific and may not be needed.
+  /** Releases any resources this frame is using to prepare it to be garbage collected.  Should only be called 
+   *  from tests. This is implementation specific and may not be needed.
    */
   public void dispose() {
     // centgraf: I justify casting here because it is implementation-specific
@@ -1974,26 +1951,14 @@ public class MainFrame extends JFrame implements OptionConstants {
     super.dispose();
   }
 
-  /**
-   * @return The model providing the logic for this view.
-   */
-  public SingleDisplayModel getModel() {
-    return _model;
-  }
+  /** @return The model providing the logic for this view. */
+  public SingleDisplayModel getModel() { return _model; }
 
-  /**
-   * Returns the frame's interactions pane.  (Package private accessor)
-   */
-  InteractionsPane getInteractionsPane() {
-    return _interactionsPane;
-  }
+  /** Returns the frame's interactions pane.  (Package private accessor) */
+  InteractionsPane getInteractionsPane() { return _interactionsPane; }
 
-  /**
-   * Returns the frame's interactions controller. (Package private accessor)
-   */
-  InteractionsController getInteractionsController() {
-    return _interactionsController;
-  }
+  /** Returns the frame's interactions controller. (Package private accessor) */
+  InteractionsController getInteractionsController() { return _interactionsController; }
   
    /** @return The frame's close button (Package private accessor). */
   JButton getCloseButton() { return _closeButton; }
@@ -2674,9 +2639,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   private boolean _saveAs() {
     try {
       boolean toReturn = _model.getActiveDocument().saveFileAs(_saveSelector);
-      /**
-       * this highlights the document in the navigator
-       */
+      /** this highlights the document in the navigator */
       _model.setActiveDocument(_model.getActiveDocument());
       return toReturn;
     }
@@ -6035,10 +5998,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       }
     }
 
-    /**
-     * Called to ask the listener if it is OK to revert the current
-     * document to a newer version saved on file.
-     */
+    /** Called to ask the listener if it is OK to revert the current document to a newer version saved on file. */
     public boolean shouldRevertFile(OpenDefinitionsDocument doc) {
 
       String fname;

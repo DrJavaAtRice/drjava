@@ -172,22 +172,18 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel implements Sin
 
   //----------------------- New SingleDisplay Methods -----------------------//
 
-  /**
-   * Returns the currently active document.
-   */
+  /** Returns the currently active document. */
   public OpenDefinitionsDocument getActiveDocument() { return _activeDocument; }
   
   /** Sets the currently active document by updating the selection model.
    *  @param doc Document to set as active
    */
   public void setActiveDocument(final OpenDefinitionsDocument doc) {
-/* The following code fixes a potential race because this method modifies the documentNavigator which is a swing
- * component.  It was commented out because it broke at least one unit test which appears to be timing dependent.  
- * We need to fix the unit tests before we can use the code that has been commented out. The race appears statistically
- * improbable because the update only changes the DefaultListSelection or DefaultTreeSelection in the navigator and
- * this operation is very lightweight. The chances of a context switch in the middle are very small. */
-    Runnable command = new Runnable() { 
-      public void run() { _documentNavigator.setActiveDoc(doc); }
+    /* The following code fixes a potential race because this method modifies the documentNavigator which is a swing
+     * component. Hence it must run in the event thread.  Note that setting the active document triggers the execution
+     * of listeners some of which also need to run in the event thread. */
+    Runnable command = new Runnable() {  
+      public void run() { _documentNavigator.setActiveDoc(doc); } 
     };
     try { Utilities.invokeAndWait(command); }
     catch(Exception e) { throw new UnexpectedException(e); }
@@ -229,10 +225,8 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel implements Sin
 
   //----------------------- End SingleDisplay Methods -----------------------//
 
-  /**
-   * Creates a new document, adds it to the list of open documents,
-   * and sets it to be active.
-   * @return The new open document
+  /** Creates a new document, adds it to the list of open documents, and sets it to be active.
+   *  @return The new open document
    */
   public OpenDefinitionsDocument newFile() {
     OpenDefinitionsDocument doc = newFile(_activeDirectory);
@@ -243,22 +237,17 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel implements Sin
 
   //---------------------- Specified by ILoadDocuments ----------------------//
 
-  /**
-   * Open a file and read it into the definitions.
-   * The provided file selector chooses a file, and on a successful
-   * open, the fileOpened() event is fired.
-   * This also checks if there was previously a single, unchanged,
-   * untitled document open, and if so, closes it after a successful
-   * opening.
-   * @param com a command pattern command that selects what file
-   *            to open
-   * @return The open document, or null if unsuccessful
-   * @exception IOException
-   * @exception OperationCanceledException if the open was canceled
-   * @exception AlreadyOpenException if the file is already open
+  /** Open a file and add it to the pool of definitions documents. The provided file selector chooses a file, 
+   *  and on a successful open, the fileOpened() event is fired. This method also checks if there was previously 
+   *  a single unchanged, untitled document open, and if so, closes it after a successful opening.
+   *  @param com a command pattern command that selects what file to open
+   *  @return The open document, or null if unsuccessful
+   *  @exception IOException
+   *  @exception OperationCanceledException if the open was canceled
+   *  @exception AlreadyOpenException if the file is already open
    */
-  public OpenDefinitionsDocument openFile(FileOpenSelector com)
-    throws IOException, OperationCanceledException, AlreadyOpenException {
+  public OpenDefinitionsDocument openFile(FileOpenSelector com) throws 
+    IOException, OperationCanceledException, AlreadyOpenException {
     
     // Close an untitled, unchanged document if it is the only one open
     boolean closeUntitled = _hasOneEmptyDocument();
@@ -271,20 +260,17 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel implements Sin
     return openedDoc;
   }
 
- /**
-   * Open multiple files and read it into the definitions.
-   * The provided file selector chooses a file, and on a successful
-   * open, the fileOpened() event is fired.
-   * This also checks if there was previously a single, unchanged,
-   * untitled document open, and if so, closes it after a successful
-   * opening.
-   * @param com a command pattern command that selects what file
-   *            to open
-   * @return The open document, or null if unsuccessful
-   * @exception IOException
-   * @exception OperationCanceledException if the open was canceled
-   * @exception AlreadyOpenException if the file is already open
-   */
+ /** Open multiple files and add them to the pool of definitions documents.  The provided file selector chooses 
+  *  a collection of files, and on successfully opening each file, the fileOpened() event is fired.  This method
+  *  also checks if there was previously a single unchanged, untitled document open, and if so, closes it after 
+  *  a successful opening.
+  *  @param com a command pattern command that selects what file
+  *            to open
+  *  @return The open document, or null if unsuccessful
+  *  @exception IOException
+  *  @exception OperationCanceledException if the open was canceled
+  *  @exception AlreadyOpenException if the file is already open
+  */
   public OpenDefinitionsDocument openFiles(FileOpenSelector com)
     throws IOException, OperationCanceledException, AlreadyOpenException {
     
@@ -301,7 +287,7 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel implements Sin
   //----------------------- End ILoadDocuments Methods -----------------------//
 
   /** Saves all open files, prompting for names if necessary.
-   *  When prompting (ie, untitled document), set that document as active.
+   *  When prompting (i.e., untitled document), set that document as active.
    *  @param com a FileSaveSelector
    *  @exception IOException
    */

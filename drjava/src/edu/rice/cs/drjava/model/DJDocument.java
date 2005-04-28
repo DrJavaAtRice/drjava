@@ -113,9 +113,7 @@ public interface DJDocument extends StyledDocument {
    */
   public int balanceForward();
   
-  /**
-   * Returns the indent information for the current location.
-   */
+  /** Returns the indent information for the current location. */
   public IndentInfo getIndentInformation();
   
   public ReducedModelState stateAtRelLocation(int dist);

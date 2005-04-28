@@ -49,6 +49,7 @@ import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.model.AbstractDJDocument;
 import edu.rice.cs.drjava.model.definitions.ColoringView;
+
 import edu.rice.cs.drjava.model.definitions.indent.Indenter;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 import edu.rice.cs.util.Pair;
@@ -58,16 +59,16 @@ import java.util.List;
 import java.util.LinkedList;
 import javax.swing.text.AbstractDocument;
 
-/**
- * Represents the Interactions Document Adapter. Extends from the Abstract DrJava Document, 
- * which contains shared code between the interactions and definitions documents.
+import static edu.rice.cs.drjava.model.definitions.ColoringView.*;
+
+/** Represents the Interactions Document Adapter. Extends from the Abstract DrJava Document, 
+ *  which contains shared code between the interactions and definitions documents.
  */
 public class InteractionsDocumentAdapter extends AbstractDJDocument {
   
-  /**
-   * Holds a flag telling the adapter that the interpreter was recently reset, and to reset the styles list the next   
-   * time a style is added. 
-   * Cannot reset immediately because then the styles would be lost while the interactions pane is resetting.
+  /** Holds a flag telling the adapter that the interpreter was recently reset, and to reset the styles list 
+   *  the next  time a style is added. Cannot reset immediately because then the styles would be lost while 
+   *  the interactions pane is resetting.
    */
   private boolean _toClear = false;
   
@@ -84,146 +85,125 @@ public class InteractionsDocumentAdapter extends AbstractDJDocument {
   }
   protected void _styleChanged() { /* Do nothing */ }
   
-  /**
-   * Returns a new indenter.
-   * Eventually to be used to return an interactions indenter
-   */
-  protected Indenter makeNewIndenter(int indentLevel) {
-    return new Indenter(indentLevel);
-  }
+  /** Returns a new indenter. Eventually to be used to return an interactions indenter */
+  protected Indenter makeNewIndenter(int indentLevel) { return new Indenter(indentLevel); }
   
-  /**
-   * A list of styles and their locations.
-   * This list holds pairs of locations in the document and styles, which is basically a map of regions 
-   * where the coloring view that is now attached to the Interactions Pane is not allowed to use the 
-   * reduced model to determine the color settings when rendering text. We keep a list of all places 
-   * where styles not considered by the reduced model are being used, such as System.out, System.err, 
-   * and the various return styles for Strings and other Objects.
-   * 
-   * Since the LinkedList class is not thread safe, we have to synchronized all methods that access 
-   * pointers in _stylesList 
+  /** A list of styles and their locations. This list holds pairs of locations in the document and styles, which
+   *  is basically a map of regions where the coloring view that is now attached to the Interactions Pane is not 
+   *  allowed to use the reduced model to determine the color settings when rendering text. We keep a list of all 
+   *  places where styles not considered by the reduced model are being used, such as System.out, System.err, 
+   *  and the various return styles for Strings and other Objects.  Since the LinkedList class is not thread safe, 
+   *  we have to synchronized all methods that access pointers in _stylesList and the associated boolean _toClear.
    */
   private List<Pair<Pair<Integer,Integer>,String>> _stylesList = new LinkedList<Pair<Pair<Integer,Integer>,String>>();
   
   //Adds the given coloring style to the list
-  public synchronized void addColoring(int start, int end, String style) {      
-    if(_toClear) {
-      _stylesList.clear();    
-      _toClear = false;
+  public void addColoring(int start, int end, String style) {
+    synchronized(_stylesList) {
+      if (_toClear) {
+        _stylesList.clear();    
+        _toClear = false;
+      }
+      if (style != null)
+        _stylesList.add(0, new Pair<Pair<Integer,Integer>,String>
+                        (new Pair<Integer,Integer>(new Integer(start),new Integer(end)), style));
     }
-    if(style != null)
-      _stylesList.add(0, new Pair<Pair<Integer,Integer>,String>
-                      (new Pair<Integer,Integer>(new Integer(start),new Integer(end)), style));
   }
   
-  /**
-   * package protected accessor method used for test cases
-   */
+  /** Package protected accessor method used for test cases */
   List<Pair<Pair<Integer, Integer>, String>> getStylesList() { return _stylesList; }
   
-  /**
-   * Attempts to set the coloring on the graphics based upon the content of the styles list
-   * returns false if the point is not in the list.
+  /** Attempts to set the coloring on the graphics based upon the content of the styles list
+   *  returns false if the point is not in the list.
    */
-  public synchronized boolean setColoring(int point, Graphics g) {
-    for(Pair<Pair<Integer,Integer>,String> p :  _stylesList) {
-      Pair<Integer,Integer> loc = p.getFirst();
-      if(loc.getFirst() <= point && loc.getSecond() >= point) {
-        if(p.getSecond().equals(InteractionsDocument.ERROR_STYLE)) {
-          //DrJava.consoleErr().println("Error Style");
-          g.setColor(ColoringView.ERROR_COLOR);   
-          g.setFont(g.getFont().deriveFont(Font.BOLD));
+  public boolean setColoring(int point, Graphics g) {
+    synchronized (_stylesList) {
+      for(Pair<Pair<Integer,Integer>,String> p :  _stylesList) {
+        Pair<Integer,Integer> loc = p.getFirst();
+        if(loc.getFirst() <= point && loc.getSecond() >= point) {
+          if(p.getSecond().equals(InteractionsDocument.ERROR_STYLE)) {
+            //DrJava.consoleErr().println("Error Style");
+            g.setColor(ERROR_COLOR);   
+            g.setFont(g.getFont().deriveFont(Font.BOLD));
+          }
+          else if(p.getSecond().equals(InteractionsDocument.DEBUGGER_STYLE)) {
+            //DrJava.consoleErr().println("Debugger Style");
+            g.setColor(DEBUGGER_COLOR);
+            g.setFont(g.getFont().deriveFont(Font.BOLD));
+          }
+          else if(p.getSecond().equals(ConsoleDocument.SYSTEM_OUT_STYLE)) {
+            //DrJava.consoleErr().println("System.out Style");
+            g.setColor(INTERACTIONS_SYSTEM_OUT_COLOR);
+            g.setFont(MAIN_FONT);
+          }
+          else if(p.getSecond().equals(ConsoleDocument.SYSTEM_IN_STYLE)) {
+            //DrJava.consoleErr().println("System.in Style");
+            g.setColor(INTERACTIONS_SYSTEM_IN_COLOR);
+            g.setFont(MAIN_FONT);
+          }
+          else if(p.getSecond().equals(ConsoleDocument.SYSTEM_ERR_STYLE)) {
+            //DrJava.consoleErr().println("System.err Style");
+            g.setColor(INTERACTIONS_SYSTEM_ERR_COLOR);
+            g.setFont(MAIN_FONT);
+          }
+          else if(p.getSecond().equals(InteractionsDocument.OBJECT_RETURN_STYLE)) {
+            g.setColor(NORMAL_COLOR);
+            g.setFont(MAIN_FONT);
+          }
+          else if(p.getSecond().equals(InteractionsDocument.STRING_RETURN_STYLE)) {
+            g.setColor(DOUBLE_QUOTED_COLOR);
+            g.setFont(MAIN_FONT);
+          }
+          else if(p.getSecond().equals(InteractionsDocument.NUMBER_RETURN_STYLE)) {
+            g.setColor(NUMBER_COLOR);
+            g.setFont(MAIN_FONT);
+          }
+          else if(p.getSecond().equals(InteractionsDocument.CHARACTER_RETURN_STYLE)) {
+            g.setColor(SINGLE_QUOTED_COLOR);
+            g.setFont(MAIN_FONT);
+          }
+          else return false; /* Normal text color */ 
+          
+          return true;
         }
-        else if(p.getSecond().equals(InteractionsDocument.DEBUGGER_STYLE)) {
-          //DrJava.consoleErr().println("Debugger Style");
-          g.setColor(ColoringView.DEBUGGER_COLOR);
-          g.setFont(g.getFont().deriveFont(Font.BOLD));
-        }
-        else if(p.getSecond().equals(ConsoleDocument.SYSTEM_OUT_STYLE)) {
-          //DrJava.consoleErr().println("System.out Style");
-          g.setColor(ColoringView.INTERACTIONS_SYSTEM_OUT_COLOR);
-          g.setFont(ColoringView.MAIN_FONT);
-        }
-        else if(p.getSecond().equals(ConsoleDocument.SYSTEM_IN_STYLE)) {
-          //DrJava.consoleErr().println("System.in Style");
-          g.setColor(ColoringView.INTERACTIONS_SYSTEM_IN_COLOR);
-          g.setFont(ColoringView.MAIN_FONT);
-        }
-        else if(p.getSecond().equals(ConsoleDocument.SYSTEM_ERR_STYLE)) {
-          //DrJava.consoleErr().println("System.err Style");
-          g.setColor(ColoringView.INTERACTIONS_SYSTEM_ERR_COLOR);
-          g.setFont(ColoringView.MAIN_FONT);
-        }
-        else if(p.getSecond().equals(InteractionsDocument.OBJECT_RETURN_STYLE)) {
-          g.setColor(ColoringView.NORMAL_COLOR);
-          g.setFont(ColoringView.MAIN_FONT);
-        }
-        else if(p.getSecond().equals(InteractionsDocument.STRING_RETURN_STYLE)) {
-          g.setColor(ColoringView.DOUBLE_QUOTED_COLOR);
-          g.setFont(ColoringView.MAIN_FONT);
-        }
-        else if(p.getSecond().equals(InteractionsDocument.NUMBER_RETURN_STYLE)) {
-          g.setColor(ColoringView.NUMBER_COLOR);
-          g.setFont(ColoringView.MAIN_FONT);
-        }
-        else if(p.getSecond().equals(InteractionsDocument.CHARACTER_RETURN_STYLE)) {
-          g.setColor(ColoringView.SINGLE_QUOTED_COLOR);
-          g.setFont(ColoringView.MAIN_FONT);
-        }
-        else { //Normal text color
-          return false; 
-        }
-        return true;
       }
-    }
-    return false;
-  }
-  
-  /**
-   * Attempts to set the font on the graphics context based upon the styles held in the styles list
-   */
-  public synchronized void setBoldFonts(int point, Graphics g) {
-    for(Pair<Pair<Integer,Integer>,String> p :  _stylesList) {
-      Pair<Integer,Integer> loc = p.getFirst();
-      if(loc.getFirst() <= point && loc.getSecond() >= point) {
-        if(p.getSecond().equals(InteractionsDocument.ERROR_STYLE)) {
-          g.setFont(g.getFont().deriveFont(Font.BOLD));
-        }
-        else if(p.getSecond().equals(InteractionsDocument.DEBUGGER_STYLE)) {
-          g.setFont(g.getFont().deriveFont(Font.BOLD));
-        }
-        else {
-          g.setFont(ColoringView.MAIN_FONT);
-        }
-        return;
-      }
+      return false;
     }
   }
   
+  /** Attempts to set the font on the graphics context based upon the styles held in the styles list. */
+  public void setBoldFonts(int point, Graphics g) {
+    synchronized (_stylesList) {
+      for(Pair<Pair<Integer,Integer>,String> p :  _stylesList) {
+        Pair<Integer,Integer> loc = p.getFirst();
+        if(loc.getFirst() <= point && loc.getSecond() >= point) {
+          if(p.getSecond().equals(InteractionsDocument.ERROR_STYLE))
+            g.setFont(g.getFont().deriveFont(Font.BOLD));
+          else if(p.getSecond().equals(InteractionsDocument.DEBUGGER_STYLE))
+            g.setFont(g.getFont().deriveFont(Font.BOLD));
+          else  g.setFont(MAIN_FONT);
+          return;
+        }
+      }
+    }
+  }
+    
   
-  //Called when the Interactions pane is reset
-  public synchronized void clearColoring() {
-    //Don't clear immediately or else the colors will disappear while the interactions pane resets
-    //_stylesList.clear();
-    _toClear = true;
+  /** Called when the Interactions pane is reset. */
+  public void clearColoring() { synchronized (_stylesList) { _toClear = true; } }
+  
+  /** Returns true iff the end of the current interaction is an open comment block
+   *  @return true iff the end of the current interaction is an open comment block
+   */
+  public boolean isInCommentBlock() {
+    synchronized(_reduced) {
+      resetReducedModelLocation();
+      ReducedModelState state = stateAtRelLocation(getLength() - _currentLocation);
+      boolean toReturn = (state.equals(ReducedModelStates.INSIDE_BLOCK_COMMENT));
+      return toReturn;
+    }
   }
   
-  
-  /**
-   * Returns true iff the end of the current interaction is an open comment block
-   * @return true iff the end of the current interaction is an open comment block
-   */
-  public synchronized boolean isInCommentBlock() {
-    resetReducedModelLocation();
-    ReducedModelState state = stateAtRelLocation(getLength()-_currentLocation);
-    boolean toReturn = (state.equals(ReducedModelStates.INSIDE_BLOCK_COMMENT));
-    return toReturn;
-  }
-  
-  /**
-   * Public constructor. Currently does nothing
-   */
-  public InteractionsDocumentAdapter() {
-    super();
-  }  
+  /** Standard constructor. Currently does nothing */
+  public InteractionsDocumentAdapter() { super(); }  
 }

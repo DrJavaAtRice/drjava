@@ -138,12 +138,11 @@ public class ReducedModelControl implements BraceReduction {
     return rmc.moveWalkerGetState(relDistance);
   }
 
-  /**
-  *This function resets the location of the walker in the comment list to
-  *where the current cursor is. This allows the walker to keep walking and
-  *using relative distance instead of having to rewalk the same distance
-  *every call to stateAtRelLocation. It is an optimization.
-  */
+  /** This function resets the location of the walker in the comment list to
+   *  where the current cursor is. This allows the walker to keep walking and
+   *  using relative distance instead of having to rewalk the same distance
+   *  every call to stateAtRelLocation. It is an optimization.
+   */
   public /* synchronized */ void resetLocation() {
     rmc.resetWalkerLocationToCursor();
   }

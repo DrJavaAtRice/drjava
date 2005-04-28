@@ -54,21 +54,15 @@ import edu.rice.cs.drjava.model.repl.newjvm.MainJVM;
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.text.*;
 
-/**
- * Interactions model which can notify GlobalModelListeners on events.
- * @version $Id$
+/** Interactions model which can notify GlobalModelListeners on events.
+ *  @version $Id$
  */
 public class DefaultInteractionsModel extends RMIInteractionsModel {
-  /**
-   * Message to signal that input is required from the console.
-   */
+  /** Message to signal that input is required from the console. */
 //  public static final String INPUT_REQUIRED_MESSAGE =
 //    "Please enter input in the Console tab." + _newLine;
 
-  /**
-   * Model that contains the interpreter to use.
-   * (If possible, we'd like to eliminate the need for this field...)
-   */
+  /** Model that contains the interpreter to use. (Can this be eliminated?) */
   protected final DefaultGlobalModel _model;
 
   /**
@@ -84,14 +78,12 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
     _model = model;
 
     // Set whether to allow "assert" statements to be run in the remote JVM.
-    Boolean allow =
-      DrJava.getConfig().getSetting(OptionConstants.JAVAC_ALLOW_ASSERT);
+    Boolean allow = DrJava.getConfig().getSetting(OptionConstants.JAVAC_ALLOW_ASSERT);
     _interpreterControl.setAllowAssertions(allow.booleanValue());
 
     // Add option listeners
     DrJava.getConfig().addOptionListener(OptionConstants.HISTORY_MAX_SIZE,
-                                         _document.getHistory().
-                                           new HistorySizeOptionListener());
+                                         _document.getHistoryOptionListener());
     DrJava.getConfig().addOptionListener(OptionConstants.JAVAC_ALLOW_ASSERT,
                                          new OptionListener<Boolean>() {
       public void optionChanged(OptionEvent<Boolean> oce) {

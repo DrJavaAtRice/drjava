@@ -539,47 +539,35 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
   }
   
   public ReducedModelState stateAtRelLocation(int dist){
-    // throwErrorHuh();
     synchronized (_reduced) { return _reduced.moveWalkerGetState(dist); }
   }
   
   public ReducedModelState getStateAtCurrent(){
-    // throwErrorHuh();
     synchronized (_reduced) { return _reduced.getStateAtCurrent(); }
   }
   
-  public synchronized void resetReducedModelLocation() {
-    // throwErrorHuh();
+  public void resetReducedModelLocation() {
     synchronized (_reduced) { _reduced.resetLocation(); }
   }
   
-  /**
-   * 
-   * Searching backwards, finds the position of the first character that is one
-   * of the given delimiters.  Does not look for delimiters inside paren phrases.
-   * (eg. skips semicolons used inside for statements.)
-   * NB: ignores comments.
-   * @param pos Position to start from
-   * @param delims array of characters to search for
-   * @return position of first matching delimiter, or ERROR_INDEX if beginning
-   * of document is reached.
+  /** Searching backwards, finds the position of the first character that is one
+   *  of the given delimiters.  Does not look for delimiters inside paren phrases.
+   *  (e.g. skips semicolons used inside for statements.)  NB: ignores comments.
+   *  @param pos Position to start from
+   *  @param delims array of characters to search for
+   *  @return position of first matching delimiter, or ERROR_INDEX if beginning of document is reached.
    */
   public int findPrevDelimiter(int pos, char[] delims) throws BadLocationException {
-    // throwErrorHuh();
     return findPrevDelimiter(pos, delims, true);
   }
   
-  /**
-   * Searching backwards, finds the position of the first character that is one
-   * of the given delimiters.  Will not look for delimiters inside a paren
-   * phrase if skipParenPhrases is true.
-   * NB: ignores comments.
-   * @param pos Position to start from
-   * @param delims array of characters to search for
-   * @param skipParenPhrases whether to look for delimiters inside paren phrases
-   *  (eg. semicolons in a for statement)
-   * @return position of first matching delimiter, or ERROR_INDEX if beginning
-   * of document is reached.
+  /** Searching backwards, finds the position of the first character that is one of the given delimiters.  
+   *  Will not look for delimiters inside a paren phrase if skipParenPhrases is true. NB: ignores comments.
+   *  @param pos Position to start from
+   *  @param delims array of characters to search for
+   *  @param skipParenPhrases whether to look for delimiters inside paren phrases
+   *  (e.g. semicolons in a for statement)
+   *  @return position of first matching delimiter, or ERROR_INDEX if beginning of document is reached.
    */
   public int findPrevDelimiter(final int pos, final char[] delims, final boolean skipParenPhrases)
     throws BadLocationException {
