@@ -45,25 +45,22 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.util.text;
 
-/**
- * Class to decide whether a given edit can be applied to the document.
- * Subclasses can impose conditions on which edits will be applied.
- * @version $Id$
+/** Class to decide whether a given edit can be applied to the document. Subclasses can impose conditions on 
+ *  which edits will be applied.
+ *  @version $Id$
  */
 public class DocumentEditCondition {
-  /**
-   * Returns whether to actually insert, given these inputs.
-   * @param offs Offset into the document
-   * @param str String to be inserted
-   * @param style Name of the style to use.  Must have been
-   * added using addStyle.
+
+  /** Returns whether to actually insert, given these inputs.
+   *  @param offs Offset into the document
+   *  @param str String to be inserted
+   *  @param style Name of the style to use.  Must have been added using addStyle.
    */
-  public boolean canInsertText(int offs, String str, String style) { return true; }
+  public boolean canInsertText(int offs) { return true; }
   
-  /**
-   * Returns whether to actually remove, given these inputs.
-   * @param offs Offset to start deleting from
-   * @param len Number of characters to remove
+  /** Returns whether to actually remove, given these inputs.
+   *  @param offs Offset to start deleting from
+   *  @param len Number of characters to remove
    */
-  public boolean canRemoveText(int offs, int len) { return true; }
+  public boolean canRemoveText(int offs) { return true; }
 }

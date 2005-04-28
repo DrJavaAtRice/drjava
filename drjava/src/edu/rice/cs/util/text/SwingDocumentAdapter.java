@@ -82,17 +82,13 @@ public class SwingDocumentAdapter extends DefaultStyledDocument implements Docum
     return _styles.get(name);  // no locking necessary: _styles is final and Hashtable is thread-safe
   }
 
-  /**
-   * Gets the object which can determine whether an insert
-   * or remove edit should be applied, based on the inputs.
-   * @return an Object to determine legality of inputs
+  /** Gets the object which can determine whether an insert or remove edit should be applied, based on the inputs.
+   *  @return an Object to determine legality of inputs
    */
   public DocumentEditCondition getEditCondition() { return _condition; }
 
-  /**
-   * Provides an object which can determine whether an insert
-   * or remove edit should be applied, based on the inputs.
-   * @param condition Object to determine legality of inputs
+  /** Provides an object which can determine whether an insert or remove edit should be applied, based on the inputs.
+   *  @param condition Object to determine legality of inputs
    */
   public void setEditCondition(DocumentEditCondition condition) {
     writeLock();
@@ -100,29 +96,25 @@ public class SwingDocumentAdapter extends DefaultStyledDocument implements Docum
     finally { writeUnlock(); }
   }
 
-  /**
-   * Inserts a string into the document at the given offset
-   * and the given named style, if the edit condition allows it.
-   * @param offs Offset into the document
-   * @param str String to be inserted
-   * @param style Name of the style to use.  Must have been
-   * added using addStyle.
-   * @throws DocumentAdapterException if the offset is illegal
+  /** Inserts a string into the document at the given offset and the given named style, if the edit condition 
+   *  allows it.
+   *  @param offs Offset into the document
+   *  @param str String to be inserted
+   *  @param style Name of the style to use.  Must have been added using addStyle.
+   *  @throws DocumentAdapterException if the offset is illegal
    */
   public void insertText(int offs, String str, String style) {
     writeLock();
-    try { if (_condition.canInsertText(offs, str, style)) forceInsertText(offs, str, style); }
+    try { if (_condition.canInsertText(offs)) forceInsertText(offs, str, style); }
     finally { writeUnlock(); }
   }
 
-  /**
-   * Inserts a string into the document at the given offset
-   * and the given named style, regardless of the edit condition.
-   * @param offs Offset into the document
-   * @param str String to be inserted
-   * @param style Name of the style to use.  Must have been
-   * added using addStyle.
-   * @throws DocumentAdapterException if the offset is illegal
+  /** Inserts a string into the document at the given offset and the given named style, regardless of the edit 
+   *  condition.
+   *  @param offs Offset into the document
+   *  @param str String to be inserted
+   *  @param style Name of the style to use.  Must have been added using addStyle.
+   *  @throws DocumentAdapterException if the offset is illegal
    */
   public void forceInsertText(int offs, String str, String style) {
     AttributeSet s = null;
@@ -132,34 +124,30 @@ public class SwingDocumentAdapter extends DefaultStyledDocument implements Docum
     catch (BadLocationException e) { throw new DocumentAdapterException(e); }
   }
 
-  /**
-   * Overrides superclass's insertString to impose the edit condition.
-   * The AttributeSet is ignored in the condition, which sees a null
-   * style name.
+  /** Overrides superclass's insertString to impose the edit condition. The AttributeSet is ignored in the condition, 
+   *  which sees a null style name.
    */
   public void insertString(int offs, String str, AttributeSet set) throws BadLocationException {
     writeLock();  // locking is used to make the test and modification atomic
-    try { if (_condition.canInsertText(offs, str, null)) super.insertString(offs, str, set); }
+    try { if (_condition.canInsertText(offs)) super.insertString(offs, str, set); }
     finally { writeUnlock(); }
   }
 
-  /**
-   * Removes a portion of the document, if the edit condition allows it.
-   * @param offs Offset to start deleting from
-   * @param len Number of characters to remove
-   * @throws DocumentAdapterException if the offset or length are illegal
+  /** Removes a portion of the document, if the edit condition allows it.
+   *  @param offs Offset to start deleting from
+   *  @param len Number of characters to remove
+   *  @throws DocumentAdapterException if the offset or length are illegal
    */
   public void removeText(int offs, int len) {
     writeLock();  // locking is used to make the test and modification atomic
-    try { if (_condition.canRemoveText(offs, len)) forceRemoveText(offs, len); }
+    try { if (_condition.canRemoveText(offs)) forceRemoveText(offs, len); }
     finally { writeUnlock(); }
   }
 
-  /**
-   * Removes a portion of the document, regardless of the edit condition.
-   * @param offs Offset to start deleting from
-   * @param len Number of characters to remove
-   * @throws DocumentAdapterException if the offset or length are illegal
+  /** Removes a portion of the document, regardless of the edit condition.
+   *  @param offs Offset to start deleting from
+   *  @param len Number of characters to remove
+   *  @throws DocumentAdapterException if the offset or length are illegal
    */
   public void forceRemoveText(int offs, int len) {
     /* Using a writeLock is unnecessary because remove is already thread-safe */
@@ -170,18 +158,17 @@ public class SwingDocumentAdapter extends DefaultStyledDocument implements Docum
   /** Overrides superclass's remove to impose the edit condition. */
   public void remove(int offs, int len) throws BadLocationException {
     writeLock(); // locking is used to make the test and modification atomic
-    try { if (_condition.canRemoveText(offs, len))  super.remove(offs, len); }
+    try { if (_condition.canRemoveText(offs))  super.remove(offs, len); }
     finally { writeUnlock(); }
   }
 
   /** Returns the length of the document. */
   public int getDocLength() { return getLength(); } // locking is unnecessary because getLength is already thread-safe
 
-  /**
-   * Returns a portion of the document.
-   * @param offs First offset of the desired text
-   * @param len Number of characters to return
-   * @throws DocumentAdapterException if the offset or length are illegal
+  /** Returns a portion of the document.
+   *  @param offs First offset of the desired text
+   *  @param len Number of characters to return
+   *  @throws DocumentAdapterException if the offset or length are illegal
    */
   public String getDocText(int offs, int len) {
     try { return getText(offs, len); }  // locking is unnecessary because getText is already thread-safe

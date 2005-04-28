@@ -101,15 +101,13 @@ public class SwingDocumentAdapterTest extends TestCase {
    * Tests that a SwingDocumentAdapter can receive an object that
    * determines whether certain edits are legal.
    */
-  public void testEditCondition() 
-    throws DocumentAdapterException, BadLocationException
-  {
+  public void testEditCondition() throws DocumentAdapterException, BadLocationException {
     DocumentEditCondition c = new DocumentEditCondition() {
-      public boolean canInsertText(int offs, String str, String style) {
+      public boolean canInsertText(int offs) {
         return (offs > 5);
       }
-      public boolean canRemoveText(int offs, int len) {
-        return (len == 2);
+      public boolean canRemoveText(int offs) {
+        return (offs == 1);
       }
     };
     _doc.insertText(0, "initial", null);
@@ -130,7 +128,7 @@ public class SwingDocumentAdapterTest extends TestCase {
     assertEquals("forceInsertText should be accepted", "in3itia2l",
                  _doc.getDocText(0, _doc.getDocLength()));
     
-    _doc.removeText(1, 1);
+    _doc.removeText(3, 1);
     assertEquals("removeText should be rejected", "in3itia2l",
                  _doc.getDocText(0, _doc.getDocLength()));
     _doc.remove(6, 1);
@@ -144,5 +142,4 @@ public class SwingDocumentAdapterTest extends TestCase {
                  _doc.getDocText(0, _doc.getDocLength()));
     
   }
-  
 }

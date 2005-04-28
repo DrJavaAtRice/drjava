@@ -47,80 +47,68 @@ package edu.rice.cs.util.text;
 
 import java.io.Serializable;
 
-/**
- * Provides a toolkit-independent way to interact with a
- * Swing-style document.  Allows components to use documents
- * that can be supplied by Swing, SWT (Eclipse), or other
- * toolkits.
- *
- * The document also has the ability to restrict edits based
- * on a conditional object, unless a separate method is called
- * to force the edit.
+/** Provides a toolkit-independent way to interact with a Swing-style document.  Allows components to use 
+ *  documents that can be supplied by Swing, SWT (Eclipse), or other toolkits.  The document also has the 
+ *  ability to restrict edits based on a conditional object, unless a separate method is called
+ *  to force the edit.
  *
  * @version $Id$
  */
 public interface DocumentAdapter extends Serializable {
 
-  /**
-   * Gets the object which can determine whether an insert
-   * or remove edit should be applied, based on the inputs.
-   * @return an Object to determine legality of inputs
+  /** Gets the object which can determine whether an insert
+   *  or remove edit should be applied, based on the inputs.
+   *  @return an Object to determine legality of inputs
    */
   public DocumentEditCondition getEditCondition();
 
-  /**
-   * Provides an object which can determine whether an insert
-   * or remove edit should be applied, based on the inputs.
-   * @param condition Object to determine legality of inputs
+  /** Provides an object which can determine whether an insert
+   *  or remove edit should be applied, based on the inputs.
+   *  @param condition Object to determine legality of inputs
    */
   public void setEditCondition(DocumentEditCondition condition);
 
-  /**
-   * Inserts a string into the document at the given offset
-   * and the given named style, if the edit condition allows it.
-   * @param offs Offset into the document
-   * @param str String to be inserted
-   * @param style Name of the style to use.  Must have been
-   * added using addStyle.
-   * @throws DocumentAdapterException if the offset is illegal
+  /** Inserts a string into the document at the given offset
+   *  and the given named style, if the edit condition allows it.
+   *  @param offs Offset into the document
+   *  @param str String to be inserted
+   *  @param style Name of the style to use.  Must have been
+   *  added using addStyle.
+   *  @throws DocumentAdapterException if the offset is illegal
    */
   public void insertText(int offs, String str, String style);
 
-  /**
-   * Inserts a string into the document at the given offset
-   * and the given named style, regardless of the edit condition.
-   * @param offs Offset into the document
-   * @param str String to be inserted
-   * @param style Name of the style to use.  Must have been
-   * added using addStyle.
-   * @throws DocumentAdapterException if the offset is illegal
+  /** Inserts a string into the document at the given offset
+   *  and the given named style, regardless of the edit condition.
+   *  @param offs Offset into the document
+   *  @param str String to be inserted
+   *  @param style Name of the style to use.  Must have been
+   *  added using addStyle.
+   *  @throws DocumentAdapterException if the offset is illegal
    */
   public void forceInsertText(int offs, String str, String style);
 
-  /**
-   * Removes a portion of the document, if the edit condition allows it.
-   * @param offs Offset to start deleting from
-   * @param len Number of characters to remove
-   * @throws DocumentAdapterException if the offset or length are illegal
+  /** Removes a portion of the document, if the edit condition allows it.
+   *  @param offs Offset to start deleting from
+   *  @param len Number of characters to remove
+   *  @throws DocumentAdapterException if the offset or length are illegal
    */
   public void removeText(int offs, int len);
 
-  /**
-   * Removes a portion of the document, regardless of the edit condition.
-   * @param offs Offset to start deleting from
-   * @param len Number of characters to remove
-   * @throws DocumentAdapterException if the offset or length are illegal
+  /** Removes a portion of the document, regardless of the edit condition.
+   *  @param offs Offset to start deleting from
+   *  @param len Number of characters to remove
+   *  @throws DocumentAdapterException if the offset or length are illegal
    */
   public void forceRemoveText(int offs, int len);
 
   /** Returns the length of the document. */
   public int getDocLength();
 
-  /**
-   * Returns a portion of the document.
-   * @param offs First offset of the desired text
-   * @param len Number of characters to return
-   * @throws DocumentAdapterException if the offset or length are illegal
+  /** Returns a portion of the document.
+   *  @param offs First offset of the desired text
+   *  @param len Number of characters to return
+   *  @throws DocumentAdapterException if the offset or length are illegal
    */
   public String getDocText(int offs, int len);
 
