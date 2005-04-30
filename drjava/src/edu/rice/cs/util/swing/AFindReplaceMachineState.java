@@ -58,9 +58,8 @@ import javax.swing.text.Position;
  * @version $Id$
  */
 abstract class AFindReplaceMachineState {
-  /**
-   * The document on which FindReplaceMachine is operating.
-   */
+  
+  /** The document on which FindReplaceMachine is operating. */
   static Document _doc;
   /**
    * The position in _doc from which the searches started.
@@ -112,47 +111,30 @@ abstract class AFindReplaceMachineState {
     _skipOneFind = false;
   }
 
-  public void setLastFindWord() {
-    _lastFindWord = _findWord;
-  }
+  public void setLastFindWord() { _lastFindWord = _findWord; }
 
-  public boolean getSearchBackwards() {
-    return _searchBackwards;
-  }
+  public boolean getSearchBackwards() { return _searchBackwards; }
 
   public void setSearchBackwards(boolean searchBackwards) {
     if (_searchBackwards != searchBackwards) {
       // If we switch from searching forward to searching backwards,
       // isOnMatch is true, and _findword is the same as the _lastFindWord,
       // we know the user just found _findWord, so skip one find.
-      if (isOnMatch() && _findWord.equals(_lastFindWord)) {
-        _skipOneFind = true;
-      }else{
-        _skipOneFind = false;
-      }
+      if (isOnMatch() && _findWord.equals(_lastFindWord))  _skipOneFind = true;
+      else _skipOneFind = false;
     }
     _searchBackwards = searchBackwards;
   }
 
-  public void setMatchCase(boolean matchCase) {
-    _matchCase = matchCase;
-  }
+  public void setMatchCase(boolean matchCase) { _matchCase = matchCase; }
 
-  public void setSearchAllDocuments(boolean searchAllDocuments) {
-    _searchAllDocuments = searchAllDocuments;
-  }
+  public void setSearchAllDocuments(boolean searchAllDocuments) { _searchAllDocuments = searchAllDocuments; }
 
-  public void setDocument(Document doc) {
-    _doc = doc;
-  }
+  public void setDocument(Document doc) { _doc = doc; }
 
   public void setPosition(int pos) {
-    try {
-      _current = _doc.createPosition(pos);
-    }
-    catch (BadLocationException ble) {
-      throw new UnexpectedException(ble);
-    }
+    try { _current = _doc.createPosition(pos); }
+    catch (BadLocationException ble) { throw new UnexpectedException(ble); }
   }
 
   public void setStart(int pos) {
@@ -166,69 +148,37 @@ abstract class AFindReplaceMachineState {
     }
   }
 
-  /**
-   * Gets the character offset at which this machine started
-   * operations.
-   */
-  public int getStartOffset() {
-    return _start.getOffset();
-  }
+  /** Gets the character offset at which this machine started operations. */
+  public int getStartOffset() { return _start.getOffset(); }
 
-  /**
-   * Gets the character offset to which this machine is currently pointing.
-   */
-  public int getCurrentOffset() {
-    return _current.getOffset();
-  }
+  /** Gets the character offset to which this machine is currently pointing. */
+  public int getCurrentOffset() { return _current.getOffset(); }
 
   public void makeCurrentOffsetStart() {
-    try {
-      _start = _doc.createPosition(getCurrentOffset());
-    }
-    catch (BadLocationException e) {
-      throw new UnexpectedException(e);
-    }
+    try { _start = _doc.createPosition(getCurrentOffset()); }
+    catch (BadLocationException e) { throw new UnexpectedException(e); }
   }
 
-  public String getFindWord() {
-    return _findWord;
-  }
+  public String getFindWord() { return _findWord; }
 
-  public String getReplaceWord() {
-    return _replaceWord;
-  }
+  public String getReplaceWord() { return _replaceWord; }
 
-  public boolean getSearchAllDocuments() {
-    return _searchAllDocuments;
-  }
+  public boolean getSearchAllDocuments() { return _searchAllDocuments; }
 
-  public Document getDocument() {
-    return _doc;
-  }
+  public Document getDocument() { return _doc; }
 
-  /**
-   * Change the word being sought.
-   *
-   * @param word the new word to seek
+  /** Change the word being sought.
+   *  @param word the new word to seek
    */
-  public void setFindWord(String word) {
-    _findWord = word;
-  }
+  public void setFindWord(String word) { _findWord = word; }
 
-  /**
-   * Change the replacing word.
-   *
-   * @param word the new replacing word
+  /** Change the replacing word.
+   *  @param word the new replacing word
    */
-  public void setReplaceWord(String word) {
-    _replaceWord = word;
-  }
+  public void setReplaceWord(String word) { _replaceWord = word; }
 
-  /**
-   * Determine if the machine is on an instance of the find word.
-   *
-   * @return true if the current position is right after an instance
-   *         of the find word.
+  /** Determine if the machine is on an instance of the find word.
+   *  @return true if the current position is right after an instance of the find word.
    */
   public boolean isOnMatch() {
     String findWord = _findWord;
@@ -237,19 +187,11 @@ abstract class AFindReplaceMachineState {
     if(_current == null) return false;
     
     len = findWord.length();
-    if (!_searchBackwards) {
-      off = _current.getOffset() - len;
-    }
-    else {
-      off = _current.getOffset();
-    }
+    if (!_searchBackwards) off = _current.getOffset() - len;
+    else off = _current.getOffset();
 
-    if (off < 0) {
-      return false;
-    }
-    else if (off + len > _doc.getLength()) {
-      return false;
-    }
+    if (off < 0) return false;
+    if (off + len > _doc.getLength()) return false;
 
     try {
       String matchSpace = _doc.getText(off, len);
@@ -259,9 +201,7 @@ abstract class AFindReplaceMachineState {
       }
       return matchSpace.equals(findWord);
     }
-    catch (BadLocationException e) {
-      throw new UnexpectedException(e);
-    }
+    catch (BadLocationException e) { throw new UnexpectedException(e); }
   }
 
   /**
@@ -282,23 +222,15 @@ abstract class AFindReplaceMachineState {
    */
   abstract public FindResult findNext();
 
-
-  /**
-   * If we're on a match for the find word, replace
-   * it with the replace word.
-   */
+  /** If we're on a match for the find word, replace it with the replace word. */
   public boolean replaceCurrent() {
     try {
       if (isOnMatch()) {
         boolean atStart = false;
         int position = getCurrentOffset();
-        if (!_searchBackwards) {
-          position -= _findWord.length();
-        }
+        if (!_searchBackwards) position -= _findWord.length();
         _doc.remove(position, _findWord.length());
-        if (position == 0) {
-          atStart = true;
-        }
+        if (position == 0) atStart = true;
         _doc.insertString(getCurrentOffset(), _replaceWord, null);
 
         // the current offset will be the end of the inserted word
@@ -308,41 +240,28 @@ abstract class AFindReplaceMachineState {
         //So, current offset is correct for forwards searching unless
         //we were at the start of the document, in which case it is
         //correct for backwards searching.
-        if (atStart && !_searchBackwards) {
-          setPosition(_replaceWord.length());
-        }
-        if (!atStart && _searchBackwards) {
-          setPosition(getCurrentOffset() - _replaceWord.length());
-        }
+        if (atStart && !_searchBackwards) setPosition(_replaceWord.length());
+        else if (!atStart && _searchBackwards) setPosition(getCurrentOffset() - _replaceWord.length());
 
         return true;
       }
-      else {
-        return false;
-      }
+      return false;
     }
-    catch (BadLocationException e) {
-      throw new UnexpectedException(e);
-    }
+    catch (BadLocationException e) { throw new UnexpectedException(e); }
   }
 
-  /**
-   * Replaces all occurences of the find word with the replace
-   * word. Checks to see if the entire document is searched in case
-   * the find word is equivalent to the replace word in which case
-   * an infinite loop would otherwise occur.  Starts at the beginning
-   * or the end of the document (depending on find direction).  This
-   * is so that matches created by string replacement will not be
-   * replaced as in the following example:
-   * findString:    "hello"
-   * replaceString: "e"
-   * document text: "hhellollo"
-   * Depending on the cursor position, clicking replace all could either
-   * make the document text read "hello" (which is correct) or "e".  This
-   * is because of the behavior of findNext(), and it would be incorrect
-   * to change that behavior.
-   *
-   * @return the number of replacements
+  /** Replaces all occurences of the find word with the replace word. Checks to see if the entire document is
+   *  searched in case the find word is equivalent to the replace word in which case an infinite loop would 
+   *  otherwise occur.  Starts at the beginning or the end of the document (depending on find direction).  
+   *  This convention ensures that matches created by string replacement will not be replaced as in the 
+   *  following example:<p>
+   *    findString:    "hello"
+   *    replaceString: "e"
+   *    document text: "hhellollo"<p>
+   *  Depending on the cursor position, clicking replace all could either make the document text read "hello" 
+   *  (which is correct) or "e".  This is because of the behavior of findNext(), and it would be incorrect
+   *  to change that behavior.
+   *  @return the number of replacements
    */
   public int replaceAll() {
     if (_searchAllDocuments) {
@@ -360,16 +279,11 @@ abstract class AFindReplaceMachineState {
       _searchAllDocuments = true;
       return count;
     }
-    else {
-      return _replaceAllInCurrentDoc();
-    }
+    else return _replaceAllInCurrentDoc();
   }
 
-  /**
-   * Replaces all occurences of _findWord with _replaceWord in _doc.
-   * Never searches in other documents.
-   *
-   * @return the number of replacements
+  /** Replaces all occurences of _findWord with _replaceWord in _doc. Never searches in other documents.
+   *  @return the number of replacements
    */
   private int _replaceAllInCurrentDoc() {
     try {
@@ -410,6 +324,4 @@ abstract class AFindReplaceMachineState {
     }
     return count;
   }
-
-
 }

@@ -50,10 +50,8 @@ import edu.rice.cs.util.UnexpectedException;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 
-/**
- * State for finding any occurrences for the FindReplaceMachine.
- *
- * @version $Id$
+/** State for finding any occurrences for the FindReplaceMachine.
+ *  @version $Id$
  */
 class FindAnyOccurrenceState extends AFindReplaceMachineState {
 
@@ -61,21 +59,14 @@ class FindAnyOccurrenceState extends AFindReplaceMachineState {
     super(docIterator);
   }
 
-  /**
-   * Finds the next occurrence of the find word and returns an
-   * offset at the end of that occurrence or -1 if the word was
-   * not found.  Selectors should select backwards the length of
-   * the find word from the find offset.  This position is stored
-   * in the current offset of the machine, and that is why it is
-   * after: in subsequent searches, the same instance won't be found
-   * twice.  In a backward search, the position returned is at the
-   * beginning of the word.  Also returns a flag indicating whether the
-   * end of the document was reached and wrapped around. This is done
-   * using  the FindResult class which just contains an integer and a
-   * flag.
-   *
-   * @return a FindResult object containing foundOffset and aflag
-   *         indicating wrapping to the beginning during a search
+  /** Finds the next occurrence of the find word and returns an offset at the end of that occurrence or -1
+   *  if the word was not found.  Selectors should select backwards the length of the find word from the 
+   *  find offset.  This position is stored in the current offset of the machine, and that is why it is
+   *  after: in subsequent searches, the same instance won't be found twice.  In a backward search, the 
+   *  position returned is at the beginning of the word.  Also returns a flag indicating whether the end of 
+   *  the document was reached and wrapped around. This is done using  the FindResult class which just 
+   *  contains an integer and a flag.
+   *  @return a FindResult object with foundOffset and a flag indicating wrapping to the beginning during a search
    */
   public FindResult findNext() {
     try {
@@ -84,12 +75,8 @@ class FindAnyOccurrenceState extends AFindReplaceMachineState {
       // option, we should skip the first find.
       if (_skipOneFind) {
         int wordLength = _lastFindWord.length();
-        if (!_searchBackwards) {
-          setPosition(getCurrentOffset() + wordLength);
-        }
-        else {
-          setPosition(getCurrentOffset() - wordLength);
-        }
+        if (!_searchBackwards) setPosition(getCurrentOffset() + wordLength);
+        else setPosition(getCurrentOffset() - wordLength);
         positionChanged();
       }
       int start, len;
@@ -114,54 +101,42 @@ class FindAnyOccurrenceState extends AFindReplaceMachineState {
       int foundOffset;
       foundOffset = !_searchBackwards ? findSpace.indexOf(findWord)
                     : findSpace.lastIndexOf(findWord);
-      // if we've found it
-      if (foundOffset >= 0) {
+
+      if (foundOffset >= 0) { // we have found it
         _found = true;
         foundOffset += start;
-        if (!_searchBackwards) {
-          foundOffset += findWord.length();
-        }
+        if (!_searchBackwards) foundOffset += findWord.length();
         _current = _doc.createPosition(foundOffset);
       }
-      else {
-        // if we haven't found it
+      else { // we haven't found it yet
         if (_searchAllDocuments) {
           tempFr = _findNextInAllDocs(!_searchBackwards ? _docIterator.getNextDocument(_doc) :
                                       _docIterator.getPrevDocument(_doc));
           foundOffset = tempFr.getFoundOffset();
         }
-        // we still haven't found it
-        if (foundOffset == -1) {
+        if (foundOffset == -1) {  // we still haven't found it
           _wrapped = true;
           //When we wrap, we need to include some text that was already searched before wrapping.
           //Otherwise, we won't find an only match that has the caret in it already.
           if (!_searchBackwards) {
             start = 0;
             len = _current.getOffset() + (_findWord.length() - 1);
-            if (len > _doc.getLength()) {
-              len = _doc.getLength();
-            }
+            if (len > _doc.getLength()) len = _doc.getLength();
           }
-          else {
+          else {  // found it
             start = _current.getOffset() - (_findWord.length() - 1);
-            if (start < 0) {
-              start = 0;
-            }
+            if (start < 0) start = 0;
             len = _doc.getLength() - start;
           }
           findSpace = _doc.getText(start, len);
 
-          if (!_matchCase) {
-            findSpace = findSpace.toLowerCase();
-          }
+          if (!_matchCase) findSpace = findSpace.toLowerCase();
           foundOffset = !_searchBackwards ? findSpace.indexOf(findWord)
                         : findSpace.lastIndexOf(findWord);
 
           if (foundOffset >= 0) {
             foundOffset += start;
-            if (!_searchBackwards) {
-              foundOffset += findWord.length();
-            }
+            if (!_searchBackwards) foundOffset += findWord.length();
             _current = _doc.createPosition(foundOffset);
           }
         }
@@ -181,24 +156,16 @@ class FindAnyOccurrenceState extends AFindReplaceMachineState {
       return fr;
       //      }
     }
-    catch (BadLocationException e) {
-      throw new UnexpectedException(e);
-    }
+    catch (BadLocationException e) { throw new UnexpectedException(e); }
   }
 
-  /**
-   * Searches docToSearch for _findWord, and continues cycling through the documents
-   * in the direction specified by _searchBackwards. If the original _document is reached,
-   * we stop searching.
-   *
-   * @param docToSearch the document to search
-   * @return the FindResult containing the information for where we found _findWord or
-   *         a dummy FindResult.
+  /** Searches docToSearch for _findWord, and continues cycling through the documents in the direction 
+   *  specified by _searchBackwards. If the original _document is reached, we stop searching.
+   *  @param docToSearch the document to search
+   *  @return the FindResult containing the information for where we found _findWord or a dummy FindResult.
    */
   private FindResult _findNextInAllDocs(Document docToSearch) throws BadLocationException {
-    if (docToSearch == _doc) {
-      return new FindResult(_doc, -1, false);
-    }
+    if (docToSearch == _doc) return new FindResult(_doc, -1, false);
     else {
       String text = docToSearch.getText(0, docToSearch.getLength());
       String findWord = _findWord;
@@ -210,17 +177,12 @@ class FindAnyOccurrenceState extends AFindReplaceMachineState {
       if (index != -1) {
         // We found it in a different document, put the caret at the end of the
         // found word (if we're going forward).
-        if (!_searchBackwards) {
-          index += findWord.length();
-        }
+        if (!_searchBackwards) index += findWord.length();
         return new FindResult(docToSearch, index, false);
       }
-      else {
+      else
         return _findNextInAllDocs(!_searchBackwards ? _docIterator.getNextDocument(docToSearch) :
-                                  _docIterator.getPrevDocument(docToSearch));
-      }
+                                    _docIterator.getPrevDocument(docToSearch));
     }
   }
-
-
 }

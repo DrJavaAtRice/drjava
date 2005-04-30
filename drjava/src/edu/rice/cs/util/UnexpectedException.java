@@ -68,8 +68,7 @@ public class UnexpectedException extends RuntimeException {
     _value = value;
   }
 
-   /**
-   * Constructs an unexpected exception with a custom message string in
+  /** Constructs an unexpected exception with a custom message string in
    * addition to <code>value.toString()</code>.
    */
   public UnexpectedException(Throwable value, String msg) {

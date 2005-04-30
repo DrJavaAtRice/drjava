@@ -59,25 +59,22 @@ public class FindReplaceMachine {
 
     private AFindReplaceMachineState _findAnyOccurrence;
     private AFindReplaceMachineState _matchWholeWord;
-    /**
-    * Constructor.
-    * Creates a new machine to perform find/replace operations
-    * on a particular document starting from a certain position.
-    * @param doc the Document being operated on
-    * @param position the character offset into the document
-    * @exception BadLocationException
-    */
+    
+    /** Standard Constructor.
+     *  Creates a new machine to perform find/replace operations on a particular document starting from a 
+     *  certain position.
+     *  @param doc the Document being operated on
+     *  @param position the character offset into the document
+     *  @exception BadLocationException
+     */
 
-    /**
-    * NonModal version
-    */
+    /** NonModal version */
     public FindReplaceMachine(DocumentIterator docIterator) {
 
         _findAnyOccurrence = new FindAnyOccurrenceState(docIterator);
         _matchWholeWord = new MatchWholeWordState(docIterator);
 
         setFindAnyOccurrence();
-
         setFindWord("");
         setReplaceWord("");
         setMatchCase(true);
@@ -85,126 +82,66 @@ public class FindReplaceMachine {
 
     }
 
-    /**
-    * Called when the current position is updated in the document
-    * and therefore we do not want to skip the instance of the
-    * findWord we are on if the user toggles _searchBackwards
-    */
-    public void positionChanged() {
-        _state.positionChanged();
-    }
+    /** Called when the current position is updated in the document and therefore we do not want to skip the
+     *  instance of the findWord we are on if the user toggles _searchBackwards
+     */
+    public void positionChanged() { _state.positionChanged(); }
 
-    public void setLastFindWord() {
-        _state.setLastFindWord();
-    }
+    public void setLastFindWord() { _state.setLastFindWord(); }
 
-    public boolean getSearchBackwards() {
-        return _state.getSearchBackwards();
-    }
+    public boolean getSearchBackwards() { return _state.getSearchBackwards(); }
 
-    public void setSearchBackwards(boolean searchBackwards) {
-        _state.setSearchBackwards(searchBackwards);
+    public void setSearchBackwards(boolean searchBackwards) { _state.setSearchBackwards(searchBackwards); }
 
-    }
-
-    public void setMatchCase(boolean matchCase) {
-        _state.setMatchCase(matchCase);
-    }
+    public void setMatchCase(boolean matchCase) { _state.setMatchCase(matchCase); }
 
     public void setSearchAllDocuments(boolean searchAllDocuments) {
         _state.setSearchAllDocuments(searchAllDocuments);
     }
 
-    public void setDocument(Document doc) {
-        _state.setDocument(doc);
-    }
+    public void setDocument(Document doc) { _state.setDocument(doc); }
 
-    public void setPosition(int pos)  {
-        _state.setPosition(pos);
-    }
+    public void setPosition(int pos)  { _state.setPosition(pos); }
 
-    public void setStart(int pos)  {
-        _state.setStart(pos);
-    }
+    public void setStart(int pos)  { _state.setStart(pos); }
 
-    /**
-    * Gets the character offset at which this machine started
-    * operations.
+    /** Gets the character offset at which this machine started operations. */
+    public int getStartOffset() { return _state.getStartOffset(); }
+
+    /** Gets the character offset to which this machine is currently pointing.*/
+    public int getCurrentOffset() {  return _state.getCurrentOffset(); }
+
+    public void makeCurrentOffsetStart() { _state.makeCurrentOffsetStart(); }
+
+    public String getFindWord() { return _state.getFindWord(); }
+
+    public String getReplaceWord() { return _state.getReplaceWord(); }
+
+    public boolean getSearchAllDocuments() { return _state.getSearchAllDocuments(); }
+
+    public Document getDocument() { return _state.getDocument(); }
+
+    /** Change the word being sought.
+    *   @param word the new word to seek
     */
-    public int getStartOffset() {
-        return _state.getStartOffset();
-    }
+    public void setFindWord(String word) { _state.setFindWord(word); }
 
-    /**
-    * Gets the character offset to which this machine is currently pointing.
+    /** Change the state to MatchWholeWordState. */
+    public void setMatchWholeWord() { _state = _matchWholeWord; }
+
+    /** Change the state to FindAnyOccurrenceState. */
+    public void setFindAnyOccurrence() { _state = _findAnyOccurrence; }
+
+    /** Change the replacing word.
+    *  @param word the new replacing word
     */
-    public int getCurrentOffset() {
-        return _state.getCurrentOffset();
-    }
+    public void setReplaceWord(String word) { _state.setReplaceWord(word); }
 
-    public void makeCurrentOffsetStart() {
-        _state.makeCurrentOffsetStart();
-    }
-
-    public String getFindWord() {
-        return _state.getFindWord();
-    }
-
-    public String getReplaceWord() {
-        return _state.getReplaceWord();
-    }
-
-    public boolean getSearchAllDocuments() {
-        return _state.getSearchAllDocuments();
-    }
-
-    public Document getDocument() {
-        return _state.getDocument();
-    }
-
-    /**
-    * Change the word being sought.
-    * @param word the new word to seek
-    */
-    public void setFindWord(String word) {
-        _state.setFindWord(word);
-    }
-
-
-    /**
-    * Change the state to MatchWholeWordState.
-    *
-    */
-    public void setMatchWholeWord() {
-        _state = _matchWholeWord;
-    }
-
-
-    /**
-    * Change the state to FindAnyOccurrenceState.
-    *
-    */
-    public void setFindAnyOccurrence() {
-        _state = _findAnyOccurrence;
-    }
-
-    /**
-    * Change the replacing word.
-    * @param word the new replacing word
-    */
-    public void setReplaceWord(String word) {
-        _state.setReplaceWord(word);
-    }
-
-    /**
-    * Determine if the machine is on an instance of the find word.
-    * @return true if the current position is right after an instance
-    *         of the find word.
-    */
-    public boolean isOnMatch() {
-        return _state.isOnMatch();
-    }
-
+    /** Determine if the machine is on an instance of the find word.
+     *  @return true if the current position is right after an instance of the find word.
+     */
+    public boolean isOnMatch() { return _state.isOnMatch(); }
+    
     /**
     * Finds the next occurrence of the find word and returns an
     * offset at the end of that occurrence or -1 if the word was
@@ -220,17 +157,10 @@ public class FindReplaceMachine {
     * @return a FindResult object containing foundOffset and aflag
     * indicating wrapping to the beginning during a search
     */
-    public FindResult findNext() {
-        return _state.findNext();
-    }
+    public FindResult findNext() { return _state.findNext(); }
 
-    /**
-    * If we're on a match for the find word, replace
-    * it with the replace word.
-    */
-    public boolean replaceCurrent() {
-        return _state.replaceCurrent();
-    }
+    /** If we're on a match for the find word, replace it with the replace word. */
+    public boolean replaceCurrent() { return _state.replaceCurrent(); }
 
     /**
     * Replaces all occurences of the find word with the replace
@@ -249,8 +179,6 @@ public class FindReplaceMachine {
     * to change that behavior.
     * @return the number of replacements
     */
-    public int replaceAll() {
-        return _state.replaceAll();
-    }
+    public int replaceAll() { return _state.replaceAll(); }
 
 }
