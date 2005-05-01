@@ -92,7 +92,7 @@ public abstract class IndentRuleWithTrace implements IndentRule{
    */
   protected static void _addToIndentTrace(String ruleName, String direction, boolean terminus){
     if (ruleTraceEnabled){
-      if(startOver){
+      if (startOver){
  trace = new Vector<String>();
       }
       startOver = terminus;

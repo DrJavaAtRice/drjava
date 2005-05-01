@@ -272,9 +272,7 @@ public abstract class AbstractConsoleController {
   }
 
 
-  /**
-   * Sets up the view.
-   */
+  /** Sets up the view. */
   protected void _setupView() {
     KeyStroke beginLineKey = DrJava.getConfig().getSetting(OptionConstants.KEY_BEGIN_LINE);
     _pane.addActionForKeyStroke(beginLineKey, gotoPromptPosAction);
@@ -303,27 +301,16 @@ public abstract class AbstractConsoleController {
     });
   }
 
-  /**
-   * Accessor method for the InteractionsDocumentAdapter.
-   */
-  public InteractionsDocumentAdapter getDocumentAdapter() {
-    return _adapter;
-  }
+  /** Accessor method for the InteractionsDocumentAdapter. */
+  public InteractionsDocumentAdapter getDocumentAdapter() { return _adapter; }
 
-  /**
-   * Accessor method for the InteractionsPane.
-   */
-  public InteractionsPane getPane() {
-    return _pane;
-  }
+  /** Accessor method for the InteractionsPane. */
+  public InteractionsPane getPane() { return _pane; }
 
-  /**
-   * Determines if the associated console pane is currently computing.
-   * @return true iff the console is busy
+  /** Determines if the associated console pane is currently computing.
+   *  @return true iff the console is busy
    */
-  protected boolean _busy() {
-    return !getConsoleDoc().hasPrompt();
-  }
+  protected boolean _busy() { return ! getConsoleDoc().hasPrompt(); }
 
   /** Inserts a new line at the caret position. */
   AbstractAction newLineAction = new AbstractAction() {
@@ -341,9 +328,7 @@ public abstract class AbstractConsoleController {
 
   /** Goes to the end of the current input line. */
   AbstractAction gotoEndAction = new AbstractAction() {
-    public void actionPerformed(ActionEvent e) {
-      moveToEnd();
-    }
+    public void actionPerformed(ActionEvent e) { moveToEnd(); }
   };
 
   /** Selects to the end of the current input line. */
@@ -355,9 +340,7 @@ public abstract class AbstractConsoleController {
 
   /** Moves the caret to the prompt. */
   AbstractAction gotoPromptPosAction = new AbstractAction() {
-    public void actionPerformed(ActionEvent e) {
-      moveToPrompt();
-    }
+    public void actionPerformed(ActionEvent e) { moveToPrompt(); }
   };
 
   /** Selects to the current prompt. */
@@ -369,21 +352,19 @@ public abstract class AbstractConsoleController {
   };
 
   /** Moves the pane's caret to the end of the document. */
-  void moveToEnd() {
-    moveTo(getConsoleDoc().getDocLength());
-  }
+  void moveToEnd() { moveTo(getConsoleDoc().getDocLength()); }
 
   /** Moves the pane's caret to the document's prompt. */
-  void moveToPrompt() {
-    moveTo(getConsoleDoc().getPromptPos());
-  }
+  void moveToPrompt() { moveTo(getConsoleDoc().getPromptPos()); }
 
   /** Moves the pane's caret to the given position, as long as it's legal. */
   void moveTo(int pos) {
     // Sanity check
     if (pos < 0) pos = 0;
-    if (pos > getConsoleDoc().getDocLength()) pos = getConsoleDoc().getDocLength();
-
+    else {
+      int maxLen = getConsoleDoc().getDocLength(); 
+      if (pos > maxLen) pos = maxLen;
+    }
     _pane.setCaretPosition(pos);
   }
 

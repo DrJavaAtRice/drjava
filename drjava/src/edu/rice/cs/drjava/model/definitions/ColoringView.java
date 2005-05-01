@@ -101,7 +101,7 @@ public class ColoringView extends PlainView implements OptionConstants {
     final FontOptionListener fol = new FontOptionListener();
 //
 //    final Document doc = getDocument();
-//    if(doc instanceof DefinitionsDocument){
+//    if (doc instanceof DefinitionsDocument) {
 //      // delete the old color listeners, because they're hanging onto the wrong coloringview
 //      // add color listeners to highlight keywords etc
 //      ((DefinitionsDocument)doc).clearOptionListeners();
@@ -115,14 +115,14 @@ public class ColoringView extends PlainView implements OptionConstants {
     //
     //      
     //      // remove the listeners when the document closes
-    //      ((DefinitionsDocument)doc).addDocumentClosedListener(new DocumentClosedListener(){
-    //        public void close(){
+    //      ((DefinitionsDocument)doc).addDocumentClosedListener(new DocumentClosedListener() {
+    //        public void close() {
     //          ((DefinitionsDocument)doc).clearOptionListeners();
     //        }
     //      });
     
     Document doc = getDocument();
-    if(doc instanceof AbstractDJDocument){
+    if (doc instanceof AbstractDJDocument) {
       // delete the old color listeners, because they're hanging onto the wrong coloringview
       // add color listeners to highlight keywords etc
       DrJava.getConfig().addOptionListener( OptionConstants.DEFINITIONS_COMMENT_COLOR, col);
@@ -142,10 +142,10 @@ public class ColoringView extends PlainView implements OptionConstants {
       
     }
     
-    if(doc instanceof DefinitionsDocument) {
+    if (doc instanceof DefinitionsDocument) {
       // remove the listeners when the document closes
-      ((DefinitionsDocument)doc).addDocumentClosedListener(new DocumentClosedListener(){
-        public void close(){
+      ((DefinitionsDocument)doc).addDocumentClosedListener(new DocumentClosedListener() {
+        public void close() {
           DrJava.getConfig().removeOptionListener( OptionConstants.DEFINITIONS_COMMENT_COLOR, col);
           DrJava.getConfig().removeOptionListener( OptionConstants.DEFINITIONS_DOUBLE_QUOTED_COLOR, col);
           DrJava.getConfig().removeOptionListener( OptionConstants.DEFINITIONS_SINGLE_QUOTED_COLOR, col);
@@ -182,36 +182,23 @@ public class ColoringView extends PlainView implements OptionConstants {
    * @return the x coordinate at the end of the range
    * @throws BadLocationException if the range is invalid
    */
-  protected int drawUnselectedText(Graphics g, int x, int y, int p0, int p1)
-    throws BadLocationException
-  {
-    /*
-     DrJava.consoleErr().println("drawUnselected: " + p0 + "-" + p1 +
-     " doclen=" + _doc.getLength() +" x="+x+" y="+y);
-     */
+  protected int drawUnselectedText(Graphics g, int x, int y, int p0, int p1) throws BadLocationException {
         
     // Might be a PlainDocument (when DefPane is first constructed).
     //   See comments for DefinitionsEditorKit.createNewDocument() for details.
     Document doc = getDocument();
     AbstractDJDocument _doc = null;
-    if (doc instanceof AbstractDJDocument) {
-      _doc = (AbstractDJDocument)doc;
-    }
-    else {
-      return x; // don't do anything if there is no definitions document
-    }
-    
+    if (doc instanceof AbstractDJDocument) _doc = (AbstractDJDocument) doc;
+    else return x; // return if there is no definitions document
     
     // If there's nothing to show, don't do anything!
     // For some reason I don't understand we tend to get called sometimes
     // to render a zero-length area.
-    if (p0 == p1) {
-      return  x;
-    }
+    if (p0 == p1) return  x;
+
     Vector<HighlightStatus> stats = _doc.getHighlightStatus(p0, p1);
-    if (stats.size() < 1) {
-      throw  new RuntimeException("GetHighlightStatus returned nothing!");
-    }
+    if (stats.size() < 1) throw  new RuntimeException("GetHighlightStatus returned nothing!");
+    
     for (int i = 0; i < stats.size(); i++) {
       HighlightStatus stat = stats.get(i);
       int length = stat.getLength();
@@ -222,7 +209,7 @@ public class ColoringView extends PlainView implements OptionConstants {
       }
       Segment text = getLineBuffer();
       
-      if(!(_doc instanceof InteractionsDocumentAdapter) || !((InteractionsDocumentAdapter)_doc).setColoring((p0+p1)/2,g))      
+      if (!(_doc instanceof InteractionsDocumentAdapter) || !((InteractionsDocumentAdapter)_doc).setColoring((p0+p1)/2,g))      
         setFormattingForState(g, stat.getState());
       //      else
       //        DrJava.consoleErr().println("Highlight: p0="+p0+"; p1="+p1+"; location="+location+"; color="+g.getColor()+"; text="+text);
@@ -255,7 +242,7 @@ public class ColoringView extends PlainView implements OptionConstants {
      " doclen=" + _doc.getLength() +" x="+x+" y="+y);
      */
     Document doc = getDocument();
-    if(doc instanceof InteractionsDocumentAdapter)
+    if (doc instanceof InteractionsDocumentAdapter)
       ((InteractionsDocumentAdapter)doc).setBoldFonts(p1,g);
     
     return  super.drawSelectedText(g, x, y, p0, p1);

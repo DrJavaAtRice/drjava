@@ -492,7 +492,7 @@ public class ReducedModelComment extends AbstractReducedModel {
     while ((!copyCursor.atStart()) &&
            (!(copyCursor.current().getType().equals("\n"))))
            {
-             //  copyCursor.current().getState() == FREE))){
+             //  copyCursor.current().getState() == FREE))) {
              walkcount += copyCursor.current().getSize();
              copyCursor.prev();
            }
@@ -551,7 +551,7 @@ public class ReducedModelComment extends AbstractReducedModel {
     copyCursor.move(-relLoc);
     int dist = _getDistToPreviousNewline(copyCursor);
     copyCursor.dispose();
-    if(dist == -1) {
+    if (dist == -1) {
       return -1;
     }
     return dist + relLoc;
@@ -563,10 +563,10 @@ public class ReducedModelComment extends AbstractReducedModel {
   */
   public int getDistToNextNewline() {
     TokenList.Iterator copyCursor = _cursor._copy();
-    if(copyCursor.atStart()) {
+    if (copyCursor.atStart()) {
       copyCursor.next();
     }
-    if(copyCursor.atEnd() || copyCursor.current().getType().equals("\n")) {
+    if (copyCursor.atEnd() || copyCursor.current().getType().equals("\n")) {
       return 0;
     }
     int walkcount = copyCursor.current().getSize() - _cursor.getBlockOffset();
@@ -575,7 +575,7 @@ public class ReducedModelComment extends AbstractReducedModel {
     while ((!copyCursor.atEnd()) &&
            (!(copyCursor.current().getType().equals("\n"))))
     {
-      //copyCursor.current().getState() == FREE))){
+      //copyCursor.current().getState() == FREE))) {
       walkcount += copyCursor.current().getSize();
       copyCursor.next();
     }

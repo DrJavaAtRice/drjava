@@ -53,11 +53,11 @@ import java.net.URL;
 
 public class DeadClassLoader extends ClassLoader{
   
-  public URL getResource(String name){
+  public URL getResource(String name) {
     return null;
   }
   
-  protected URL findResource(String name){
+  protected URL findResource(String name) {
     return null;
   }
   

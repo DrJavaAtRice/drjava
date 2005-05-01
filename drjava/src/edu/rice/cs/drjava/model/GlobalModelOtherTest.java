@@ -291,7 +291,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase
   {
     //System.err.println("Entering testResetConsole");
     TestListener listener = new TestListener() {
-      public void interactionStarted() {}
+      public void interactionStarted() { }
       public void interactionEnded() {
         synchronized(this) {
           interactionEndCount++;

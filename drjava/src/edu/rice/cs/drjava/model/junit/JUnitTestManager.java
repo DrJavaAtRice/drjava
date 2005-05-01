@@ -256,7 +256,7 @@ public class JUnitTestManager {
      * if the classname is not in the stacktrace, then the test that
      * failed was inherited by a superclass. let's look for that classname
      */
-    if (stackTrace.indexOf(className) == -1){
+    if (stackTrace.indexOf(className) == -1) {
       /* get the stack trace of the junit error */
       String trace = failure.trace();
       /* knock off the first line of the stack trace.
@@ -309,7 +309,7 @@ public class JUnitTestManager {
 //      writer.write("className: " + className + "\n");
 //      writer.write("stackTrace: " + stackTrace + "\n");
 //      writer.close();
-//    } catch(IOException e){
+//    } catch(IOException e) {
 //      
 //    }
 

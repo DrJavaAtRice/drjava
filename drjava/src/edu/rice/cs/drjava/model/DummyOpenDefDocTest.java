@@ -70,7 +70,7 @@ public class DummyOpenDefDocTest extends TestCase {
     catch (UnsupportedOperationException e) {
       //Do nothing, this is expected.
     }
-    catch(Exception e){
+    catch(Exception e) {
       fail("DummyOpenDefDoc did not throw UnsupportedOperationException, but "+e);
     }
   }

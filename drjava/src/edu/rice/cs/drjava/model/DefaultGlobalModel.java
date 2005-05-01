@@ -116,8 +116,8 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
   /** Adds a document to the list of auxiliary files.  The LinkedList class is not thread safe, so
    *  the add operation is synchronized.
    */
-  public void addAuxiliaryFile(OpenDefinitionsDocument doc){
-    if (!doc.isUntitled() && !doc.isProjectFile()){
+  public void addAuxiliaryFile(OpenDefinitionsDocument doc) {
+    if (!doc.isUntitled() && !doc.isProjectFile()) {
       File f;
       try { f = doc.getFile(); } 
       catch(FileMovedException fme) { f = fme.getFile(); }
@@ -129,7 +129,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
   /** Removes a document from the list of auxiliary files.  The LinkedList class is not thread safe, so
    *  operations on _auxiliaryFiles are synchronized.
    */
-  public void removeAuxiliaryFile(OpenDefinitionsDocument doc){
+  public void removeAuxiliaryFile(OpenDefinitionsDocument doc) {
     File file;
     try                           { file = doc.getFile(); } 
     catch(FileMovedException fme) { file = fme.getFile(); }
@@ -196,35 +196,35 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
    */
   protected boolean _isClosingAllDocs;
   
-  protected InteractionsListener _interactionsListener = new InteractionsListener(){
+  protected InteractionsListener _interactionsListener = new InteractionsListener() {
     public void interactionStarted() { }
     
     public void interactionEnded() { }
     
     public void interactionErrorOccurred(int offset, int length) { }
     
-    public void interpreterResetting(){    }
+    public void interpreterResetting() {    }
     
-    public void interpreterReady(){
+    public void interpreterReady() {
       File buildDir = _state.getBuildDirectory();
       if (buildDir != null) {
         //        System.out.println("adding for reset: " + _state.getBuildDirectory().getAbsolutePath());
         try {
           _interpreterControl.addBuildDirectoryClassPath(new File(buildDir.getAbsolutePath()).toURL());
-        } catch(MalformedURLException murle){
+        } catch(MalformedURLException murle) {
           // edit this later! this is bad! we should handle this exception better!
           throw new RuntimeException(murle);
         }
       }
     }
     
-    public void interpreterResetFailed(Throwable t){    }
+    public void interpreterResetFailed(Throwable t) {    }
     
-    public void interpreterExited(int status){    }
+    public void interpreterExited(int status) {    }
     
-    public void interpreterChanged(boolean inProgress){    }
+    public void interpreterChanged(boolean inProgress) {    }
     
-    public void interactionIncomplete(){    }
+    public void interactionIncomplete() {    }
   };
   
   private CompilerListener _clearInteractionsListener =
@@ -240,7 +240,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
         resetInteractions();
       }
     }
-    public void saveBeforeCompile() {}
+    public void saveBeforeCompile() { }
   };
   
   
@@ -437,18 +437,18 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
   }
   
   // ----- INTERACTIONS -----
-  public void enableSecurityManager(){
+  public void enableSecurityManager() {
     edu.rice.cs.drjava.DrJava.enableSecurityManager();
     try { _interpreterControl.enableSecurityManager(); } 
-    catch(RemoteException e){
+    catch(RemoteException e) {
       // couldn't enable security on the slave...
     }
   }
   
-  public void disableSecurityManager(){
+  public void disableSecurityManager() {
     edu.rice.cs.drjava.DrJava.disableSecurityManager();
     try { _interpreterControl.disableSecurityManager(); }
-    catch(RemoteException e){
+    catch(RemoteException e) {
       // couldn't enable security on the slave...
     }
   }
@@ -469,7 +469,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
    * @param state the new file grouping state that will handle
    * project specific properties such as the build directory.
    */
-  public void setFileGroupingState(FileGroupingState state){
+  public void setFileGroupingState(FileGroupingState state) {
     _state = state;
     _notifier.projectRunnableChanged();
     _notifier.projectBuildDirChanged();
@@ -493,7 +493,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
   }
   
   /** @return true if the model has a project open, false otherwise. */
-  public boolean isProjectActive(){ return _state.isProjectActive(); }
+  public boolean isProjectActive() { return _state.isProjectActive(); }
   
   /** @return the file that points to the current project file. Null if not currently in project view
    */
@@ -531,14 +531,14 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
   public void junitAll() { _state.junitAll(); }
   
   /** Sets the class with the project's main method. */
-  public void setBuildDirectory(File f){
+  public void setBuildDirectory(File f) {
     _state.setBuildDirectory(f);
     if (f != null) {
       //      System.out.println("adding: " + f.getAbsolutePath());
       try {
         _interpreterControl.addBuildDirectoryClassPath(new File(f.getAbsolutePath()).toURL());
       }
-      catch(MalformedURLException murle){
+      catch(MalformedURLException murle) {
         // this is bad! change this! we should handle this exception better!
         // show a popup like "invalide build directory" or something
         throw new RuntimeException(murle);
@@ -558,14 +558,14 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
   /**
    * @return the class with the project's main method
    */
-  public File getBuildDirectory(){ return _state.getBuildDirectory(); }
+  public File getBuildDirectory() { return _state.getBuildDirectory(); }
   
   public void cleanBuildDirectory() throws FileMovedException, IOException{
     _state.cleanBuildDirectory();
   }
   
   /** Helper method used in subsequent anonymous inner class */
-  private static String getPackageName(String classname){
+  private static String getPackageName(String classname) {
     int index = classname.lastIndexOf(".");
     if (index != -1) return classname.substring(0, index);
     else return "";
@@ -593,7 +593,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
       
       /** Initialization Block */
       { 
-        try {  for(File file : projectFiles) { _projFilePaths.add(file.getCanonicalPath()); } }
+        try {  for (File file : projectFiles) { _projFilePaths.add(file.getCanonicalPath()); } }
         catch(IOException e) { }
       }
       
@@ -640,7 +640,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
         }
         catch(IOException ioe) { return false; }
         /*
-         for(File file : projectFiles) {
+         for (File file : projectFiles) {
          try {
          if(file.getCanonicalPath().equals(path))
          return true;
@@ -690,16 +690,16 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
         if (! dir.exists()) dir.mkdirs();
       }
       
-      private void cleanHelper(File f){
+      private void cleanHelper(File f) {
         if (f.isDirectory()) {
           
-          File fs[] = f.listFiles(new FilenameFilter(){
-            public boolean accept(File parent, String name){
+          File fs[] = f.listFiles(new FilenameFilter() {
+            public boolean accept(File parent, String name) {
               return new File(parent, name).isDirectory() || name.endsWith(".class");
             }
           });
           
-          for(File kid: fs) { cleanHelper(kid); }
+          for (File kid: fs) { cleanHelper(kid); }
           
           if (f.listFiles().length == 0)  f.delete();
           
@@ -813,17 +813,17 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
                 lof.add(f);
                 los.add(classname);
               }
-              catch(FileMovedException fme){
+              catch(FileMovedException fme) {
                 // the file's not on disk, but send it in anyways
                 f = fme.getFile();
                 lof.add(f);
                 los.add(classname);
               }
-              catch(IllegalStateException e){
+              catch(IllegalStateException e) {
                 // it doesn't have a file, so don't try and test it...
               }
             }
-            catch(ClassNameNotFoundException e){
+            catch(ClassNameNotFoundException e) {
               // don't add it if we don't have a classname
             }
           }
@@ -849,10 +849,10 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
   }
   
   public FileGroupingState _makeFlatFileGroupingState() {
-    return new FileGroupingState(){
+    return new FileGroupingState() {
       public File getBuildDirectory() { return null; }
       public boolean isProjectActive() { return false; }
-      public boolean isInProjectPath(OpenDefinitionsDocument doc){ return false; }
+      public boolean isInProjectPath(OpenDefinitionsDocument doc) { return false; }
       public File getProjectFile() { return null; }
       public void setBuildDirectory(File f) {
         // noop, this action is not applicable for flat file
@@ -1134,7 +1134,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
       catch(FileNotFoundException e) { filesNotFound.add(f); }
     }
     
-    for (final OpenDefinitionsDocument d: filesOpened){
+    for (final OpenDefinitionsDocument d: filesOpened) {
       addDocToNavigator(d);
       addDocToClasspath(d);
       _notifier.fileOpened(d);
@@ -1194,7 +1194,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
         // could not use doc.isInProjectPath because we may be in flat file view which returns false
         String projectPath = new File(filename).getParentFile().getCanonicalPath() + File.separator;
         String filePath = doc.getFile().getParentFile().getCanonicalPath() + File.separator;
-        if (filePath.startsWith(projectPath)){
+        if (filePath.startsWith(projectPath)) {
           DocumentInfoGetter g = info.get(doc);
           builder.addSourceFile(g);
           srcFileVector.add(g.getFile());
@@ -1222,7 +1222,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
     ClasspathVector exCp = getProjectExtraClasspath();
     if(exCp != null) {
       Vector<File> exCpF = exCp.asFileVector();
-      for(File f : exCpF) {
+      for (File f : exCpF) {
         builder.addClasspathFile(f);
         //System.out.println("Saving project classpath entry " + f);
       }
@@ -1308,17 +1308,17 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
     
     synchronized (_auxiliaryFiles) {
       _auxiliaryFiles.clear();
-      for(File file: auxFiles) { _auxiliaryFiles.add(file); }
+      for (File file: auxFiles) { _auxiliaryFiles.add(file); }
     }
     
     File[] projectclasspaths = ir.getClasspaths();
     ClasspathVector extraClasspaths = new ClasspathVector();
-    for(File f : projectclasspaths) { extraClasspaths.add(f); }
+    for (File f : projectclasspaths) { extraClasspaths.add(f); }
     
     setFileGroupingState(_makeProjectFileGroupingState(mainClass, buildDir, projectFile, srcFiles, extraClasspaths));
     
 //    Vector<File> currentclasspaths = DrJava.getConfig().getSetting(OptionConstants.EXTRA_CLASSPATH);
-//    for(int i = 0; i<projectclasspaths.length; i++){
+//    for (int i = 0; i<projectclasspaths.length; i++) {
 //      currentclasspaths.remove(projectclasspaths[i].getAbsoluteFile());
 //      currentclasspaths.add(projectclasspaths[i].getAbsoluteFile());
 //    }
@@ -1368,7 +1368,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
     
     // call on the GUI to finish up by opening the files and making necessary gui component changes
     final File[] filesToOpen = al.toArray(new File[al.size()]);
-    _notifier.projectOpened(projectFile, new FileOpenSelector(){
+    _notifier.projectOpened(projectFile, new FileOpenSelector() {
       public File[] getFiles() { return filesToOpen; }
     });
     
@@ -1531,7 +1531,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
       OpenDefinitionsDocument nextdoc = _documentNavigator.getNext(doc);
       if (nextdoc != doc) return getNextDocHelper(nextdoc);
       // We are at the end of the list, so we need to rewind and return doc at the very beginning
-      do{
+      do { // FIX THIS: Go directly to the first document
         doc = nextdoc;
         nextdoc = _documentNavigator.getPrevious(doc);
       }
@@ -1549,11 +1549,10 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
     return toReturn;
   }
 
-  /**
-   * Given a Document, returns the Document corresponding to the previous
-   * OpenDefinitionsDocument in the document list.
-   * @param d the current Document
-   * @return the previous Document
+  /** Given a Document, returns the Document corresponding to the previous OpenDefinitionsDocument in the 
+   *  document list.
+   *  @param d the current Document
+   *  @return the previous Document
    */
   public OpenDefinitionsDocument getPrevDocument(Document d) {
     try {
@@ -1733,7 +1732,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
   /**
    * Registers OptionListeners.  Factored out code from the two constructors
    */
-  private void _registerOptionListeners(){
+  private void _registerOptionListeners() {
     // Listen to any relevant config options
     DrJava.getConfig().addOptionListener(EXTRA_CLASSPATH,
                                          new ExtraClasspathOptionListener());
@@ -2035,10 +2034,8 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
 //      }
 //    };
 
-    /**
-     * 
-     * Constructor.  Initializes this handler's document.
-     * @param f DefinitionsDocument to manage
+    /** Standard Constructor.  Initializes this ODD's DD.
+     *  @param f file describing DefinitionsDocument to manage
      */
     ConcreteOpenDefDoc(File f) throws IOException {
       if (! f.exists()) throw new FileNotFoundException("file " + f + " cannot be found");
@@ -2049,22 +2046,19 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
       init();
     }
     
-    ConcreteOpenDefDoc(){
+    ConcreteOpenDefDoc() {
       _file = null;
       _parentDir = null;
       init();
     }
 //    
-//    /** 
-//     * Currently, the package name is the only special info saved into
-//     * the OpenDefinitionsDocument at this time.
-//     */
+//    /** The package name is the only special info saved in an OpenDefinitionsDocument at this time. */
 //    ConcreteOpenDefDoc(File f, String packageName) throws IOException{
 //      this(f);
 //      _packageName = packageName;
 //    }
     
-    public void init(){
+    public void init() {
       _id = ID_COUNTER++;
       //      _doc = doc;
       try{
@@ -2072,9 +2066,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
         DDReconstructor ddr = makeReconstructor();
         //System.out.println("finished making reconstructor " + this);
         _cacheAdapter = _cache.register(this,ddr);
-      } catch(IllegalStateException e){
-        throw new UnexpectedException(e);
-      }
+      } catch(IllegalStateException e) { throw new UnexpectedException(e); }
 
 //      _errorModel = new CompilerErrorModel<CompilerError> (new CompilerError[0], null);
 //      _junitErrorModel = new JUnitErrorModel(new JUnitError[0], null, false);
@@ -2085,9 +2077,8 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
     /** Getter for document id; used to sort documents into creation order */
     public int id() { return _id; }
     
-    /**
-     * Sets the parent directory of the document only if it is "Untitled"
-     * @param pd The parent directory
+    /** Sets the parent directory of the document only if it is "Untitled"
+     *  @param pd The parent directory
      */
     public void setParentDirectory(File pd) {
       if (_file != null) 
@@ -2104,7 +2095,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
      *  project root. this means that project files must be saved at the
      *  source root. (we query the model through the model's state)
      */
-    public boolean isInProjectPath(){ return _state.isInProjectPath(this); }
+    public boolean isInProjectPath() { return _state.isInProjectPath(this); }
 
         
     /** A file is in the project if the source root is the same as the
@@ -2114,21 +2105,20 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
     public boolean isProjectFile() { return (!isUntitled()) && _state.isProjectFile(_file); }
     
     /** @return true if the file is an auxiliary file. */
-    public boolean isAuxiliaryFile(){ return (!isUntitled()) && _state.isAuxiliaryFile(_file); }
+    public boolean isAuxiliaryFile() { return (!isUntitled()) && _state.isAuxiliaryFile(_file); }
     
-    
-    /** Makes a default DDReconstructor that will make a Document based on if the Handler has a file or not. */
+    /** Makes a default DDReconstructor that will make a Document based on if the ODD has a file or not. */
     protected DDReconstructor makeReconstructor() {
-      return new DDReconstructor(){
+      return new DDReconstructor() {
         
         // Brand New documents start at location 0
         private int _loc = 0;
         // Start out with empty list for the very first time the document is made
-        private DocumentListener[] _list = {};
+        private DocumentListener[] _list = { };
         
 //        private CompoundUndoManager _undo = null;
 //        
-        private UndoableEditListener[] _undoListeners = {};
+        private UndoableEditListener[] _undoListeners = { };
 
         private List<FinalizationListener<DefinitionsDocument>> _finalListeners =
           new LinkedList<FinalizationListener<DefinitionsDocument>>();
@@ -2138,7 +2128,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
           tempDoc = new DefinitionsDocument(_notifier);
           tempDoc.setOpenDefDoc(ConcreteOpenDefDoc.this);
                  
-          if (_file != null){
+          if (_file != null) {
             FileReader reader = new FileReader(_file);
             _editorKit.read(reader, tempDoc, 0);
             reader.close(); // win32 needs readers closed explicitly!
@@ -2147,13 +2137,9 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
           _loc = Math.max(_loc, 0); // make sure not less than 0
           tempDoc.setCurrentLocation(_loc);
           for (DocumentListener d : _list) {
-            if (d instanceof DocumentUIListener) {
-              tempDoc.addDocumentListener(d);
-            }
+            if (d instanceof DocumentUIListener) tempDoc.addDocumentListener(d);
           }
-          for (UndoableEditListener l: _undoListeners) {
-            tempDoc.addUndoableEditListener(l);
-          }
+          for (UndoableEditListener l: _undoListeners) { tempDoc.addUndoableEditListener(l); }
           for (FinalizationListener<DefinitionsDocument> l: _finalListeners) {
             tempDoc.addFinalizationListener(l);
           }
@@ -2173,9 +2159,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
         
         public void addDocumentListener(DocumentListener dl) {
           ArrayList<DocumentListener> tmp = new ArrayList<DocumentListener>();
-          for (DocumentListener l: _list) {
-            if (dl != l) tmp.add(l);
-          }
+          for (DocumentListener l: _list) { if (dl != l) tmp.add(l); }
           tmp.add(dl);
           _list = tmp.toArray(new DocumentListener[tmp.size()]);
         }
@@ -2368,11 +2352,11 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
           if (file.getAbsolutePath().indexOf("#") != -1) _notifier.filePathContainsPound();
           
           // have FileOps save the file
-          FileOps.saveFile(new FileOps.DefaultFileSaver(file){
+          FileOps.saveFile(new FileOps.DefaultFileSaver(file) {
             public void saveTo(OutputStream os) throws IOException {
               DefinitionsDocument doc = getDocument();
               try { _editorKit.write(os, doc, 0, doc.getLength()); } 
-              catch (BadLocationException docFailed){ throw new UnexpectedException(docFailed); }
+              catch (BadLocationException docFailed) { throw new UnexpectedException(docFailed); }
             }
           });
           
@@ -2631,7 +2615,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
         String filename = className + ".class";
 
         // Check source root set (open files)
-        File[] sourceRoots = {};
+        File[] sourceRoots = { };
         Vector<File> roots = new Vector<File>();
         
         
@@ -2715,7 +2699,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
       }
     }
     
-    public void close(){
+    public void close() {
 //      System.err.println("---------------------------");
 //      new RuntimeException().printStackTrace(System.err);
 //      System.err.println("---------------------------");
@@ -3045,12 +3029,12 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
     }
     
     List<UndoableEditListener> _undoableEditListeners = new LinkedList<UndoableEditListener>();
-    public void addUndoableEditListener(UndoableEditListener listener){
+    public void addUndoableEditListener(UndoableEditListener listener) {
       _undoableEditListeners.add(listener);
       getDocument().addUndoableEditListener(listener);
     }
     
-    public void removeUndoableEditListener(UndoableEditListener listener){
+    public void removeUndoableEditListener(UndoableEditListener listener) {
       _undoableEditListeners.remove(listener);
       getDocument().removeUndoableEditListener(listener);
     }
@@ -3078,7 +3062,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
     
     public Element[] getRootElements() { return getDocument().getRootElements(); }
     
-    public Position getStartPosition(){ return getDocument().getStartPosition(); }
+    public Position getStartPosition() { return getDocument().getStartPosition(); }
     
     public String getText(int offset, int length) throws BadLocationException {
       return getDocument().getText(offset, length);
@@ -3253,7 +3237,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
       getDocument().addFinalizationListener(fl);
     }
     
-    public List<FinalizationListener<DefinitionsDocument>> getFinalizationListeners(){
+    public List<FinalizationListener<DefinitionsDocument>> getFinalizationListeners() {
       return getDocument().getFinalizationListeners();
     }
     
@@ -3343,19 +3327,19 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
     return null;
   }
 
-  public List<OpenDefinitionsDocument> getNonProjectDocuments(){
+  public List<OpenDefinitionsDocument> getNonProjectDocuments() {
     List<OpenDefinitionsDocument> allDocs = getDefinitionsDocuments();
     List<OpenDefinitionsDocument> projectDocs = new LinkedList<OpenDefinitionsDocument>();
-    for(OpenDefinitionsDocument tempDoc : allDocs) {
+    for (OpenDefinitionsDocument tempDoc : allDocs) {
       if (!tempDoc.isInProjectPath()) projectDocs.add(tempDoc);
     }
     return projectDocs;
   }
   
-  public List<OpenDefinitionsDocument> getProjectDocuments(){
+  public List<OpenDefinitionsDocument> getProjectDocuments() {
     List<OpenDefinitionsDocument> allDocs = getDefinitionsDocuments();
     List<OpenDefinitionsDocument> projectDocs = new LinkedList<OpenDefinitionsDocument>();
-    for (OpenDefinitionsDocument tempDoc : allDocs){
+    for (OpenDefinitionsDocument tempDoc : allDocs) {
       if (tempDoc.isInProjectPath() || tempDoc.isAuxiliaryFile()) projectDocs.add(tempDoc);
     }
     return projectDocs;
@@ -3364,7 +3348,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
   public String fixPathForNavigator(String path) throws IOException {
     path = path.substring(0, path.lastIndexOf(File.separator));
     String _topLevelPath;
-    if (getProjectFile() != null){
+    if (getProjectFile() != null) {
       _topLevelPath = getProjectFile().getCanonicalPath();
       _topLevelPath = _topLevelPath.substring(0, _topLevelPath.lastIndexOf(File.separator));;
     }
@@ -3423,16 +3407,16 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
    * this function is a helper to open file
    * @param doc the document to add to the classpath
    */
-  private void addDocToClasspath(OpenDefinitionsDocument doc){
+  private void addDocToClasspath(OpenDefinitionsDocument doc) {
     try {
       File classpath = doc.getSourceRoot();
       try{
-        if(doc.isProjectFile() || doc.isAuxiliaryFile()){
+        if(doc.isProjectFile() || doc.isAuxiliaryFile()) {
           _interactionsModel.addProjectFilesClassPath(classpath.toURL());
         }else{
           _interactionsModel.addExternalFilesClassPath(classpath.toURL());
         }
-      }catch(MalformedURLException murle){
+      }catch(MalformedURLException murle) {
         // fail silently
       }
     }
@@ -3465,7 +3449,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
       _debugger = new JPDADebugger(this);
       _interpreterControl.setDebugModel((JPDADebugger) _debugger);
     }
-    catch( NoClassDefFoundError ncdfe ){
+    catch( NoClassDefFoundError ncdfe ) {
       // JPDA not available, so we won't use it.
       _debugger = NoDebuggerAvailable.ONLY;
     }
@@ -3491,12 +3475,12 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
     ClasspathVector projectExtras = getProjectExtraClasspath();
     //System.out.println("Adding project classpath vector to interactions classpath: " + projectExtras);
     if (projectExtras != null) {
-      for(URL cpE : projectExtras) { _interactionsModel.addProjectClassPath(cpE); }
+      for (URL cpE : projectExtras) { _interactionsModel.addProjectClassPath(cpE); }
     }
     
     Vector<File> cp = DrJava.getConfig().getSetting(EXTRA_CLASSPATH);
     if (cp != null) {
-      for(File f : cp) {
+      for (File f : cp) {
         try { _interactionsModel.addExtraClassPath(f.toURL()); }
         catch(MalformedURLException murle) {
           System.err.println("File " + f + " in your extra classpath could not be parsed to a URL, maybe it contains un-URL-encodable characters?");

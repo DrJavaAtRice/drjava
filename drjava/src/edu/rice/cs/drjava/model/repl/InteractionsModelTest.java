@@ -154,7 +154,7 @@ public final class InteractionsModelTest extends TestCase {
     doc.insertText(doc.getDocLength(), code,
                    InteractionsDocument.DEFAULT_STYLE);
     model.interpretCurrentInteraction();
-    try { Thread.sleep(5000); } catch(InterruptedException ie){}; // allow for the exception to be generated!
+    try { Thread.sleep(5000); } catch(InterruptedException ie){ }; // allow for the exception to be generated!
     assertTrue("Code '"+code+"' should generate a continuation exception but not a syntax exception",
                (model.isContinuationException() == true) && (model.isSyntaxException() == false));
   }
@@ -166,7 +166,7 @@ public final class InteractionsModelTest extends TestCase {
     doc.insertText(doc.getDocLength(), code,
                    InteractionsDocument.DEFAULT_STYLE);
     model.interpretCurrentInteraction();
-    try { Thread.sleep(5000); } catch(InterruptedException ie){}; // allow for the exception to be generated!
+    try { Thread.sleep(5000); } catch(InterruptedException ie){ }; // allow for the exception to be generated!
     assertTrue("Code '"+code+"' should generate a syntax exception but not a continuation exception",
                (model.isSyntaxException() == true) && (model.isContinuationException() == false));
   }
@@ -561,15 +561,15 @@ public final class InteractionsModelTest extends TestCase {
     protected void _resetInterpreter() {
       fail("cannot reset interpreter in a test");
     }
-    protected void _notifyInteractionStarted() {}
-    protected void _notifyInteractionEnded() {}
-    protected void _notifySyntaxErrorOccurred(int offset, int length) {}
-    protected void _notifyInterpreterExited(int status) {}
-    protected void _notifyInterpreterResetting() {}
-    protected void _notifyInterpreterResetFailed(Throwable t) {}
-    protected void _notifyInterpreterReady() {}
-    protected void _interpreterResetFailed(Throwable t) {}
-    protected void _notifyInteractionIncomplete() {}
+    protected void _notifyInteractionStarted() { }
+    protected void _notifyInteractionEnded() { }
+    protected void _notifySyntaxErrorOccurred(int offset, int length) { }
+    protected void _notifyInterpreterExited(int status) { }
+    protected void _notifyInterpreterResetting() { }
+    protected void _notifyInterpreterResetFailed(Throwable t) { }
+    protected void _notifyInterpreterReady() { }
+    protected void _interpreterResetFailed(Throwable t) { }
+    protected void _notifyInteractionIncomplete() { }
   }
 
   public static class IncompleteInputInteractionsModel extends RMIInteractionsModel {
@@ -602,17 +602,17 @@ public final class InteractionsModelTest extends TestCase {
 //    protected void _resetInterpreter() {
 //      fail("cannot reset interpreter in a test");
 //    }
-    protected void _notifyInteractionStarted() {}
-    protected void _notifyInteractionEnded() {}
-    protected void _notifySyntaxErrorOccurred(int offset, int length) {}
-    protected void _notifyInterpreterExited(int status) {}
-    protected void _notifyInterpreterResetting() {}
-    protected void _notifyInterpreterResetFailed(Throwable t) {}
-    protected void _notifyInterpreterReady() {}
-    protected void _interpreterResetFailed(Throwable t) {}
-    protected void _notifyInteractionIncomplete() {}
+    protected void _notifyInteractionStarted() { }
+    protected void _notifyInteractionEnded() { }
+    protected void _notifySyntaxErrorOccurred(int offset, int length) { }
+    protected void _notifyInterpreterExited(int status) { }
+    protected void _notifyInterpreterResetting() { }
+    protected void _notifyInterpreterResetFailed(Throwable t) { }
+    protected void _notifyInterpreterReady() { }
+    protected void _interpreterResetFailed(Throwable t) { }
+    protected void _notifyInteractionIncomplete() { }
 
-    protected void _notifyInterpreterChanged(boolean inProgress) {}
+    protected void _notifyInterpreterChanged(boolean inProgress) { }
 
     public void replThrewException(String exceptionClass,
                                    String message,

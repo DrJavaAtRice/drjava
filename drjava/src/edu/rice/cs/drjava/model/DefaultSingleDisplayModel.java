@@ -123,7 +123,7 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel implements Sin
   private void _init() {
     
     final NodeDataVisitor<Boolean> _gainVisitor = new NodeDataVisitor<Boolean>() {
-      public Boolean itemCase(INavigatorItem docu){
+      public Boolean itemCase(INavigatorItem docu) {
         _setActiveDoc(docu);  // sets _activeDocument, the shadow copy of the active document
         File dir = _activeDocument.getParentDirectory();
         

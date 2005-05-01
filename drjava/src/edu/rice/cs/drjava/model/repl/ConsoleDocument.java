@@ -50,6 +50,8 @@ import edu.rice.cs.util.text.DocumentAdapter;
 import edu.rice.cs.util.text.DocumentEditCondition;
 import edu.rice.cs.util.text.DocumentAdapterException;
 
+//TODO: convert this class to use a readers/writers locking protocol.
+
 /** @version $Id$ */
 public class ConsoleDocument implements DocumentAdapter {
   
@@ -89,7 +91,7 @@ public class ConsoleDocument implements DocumentAdapter {
   public ConsoleDocument(DocumentAdapter adapter) {
     _document = adapter;
     
-    _beep = new Runnable() { public void run() {} };
+    _beep = new Runnable() { public void run() { } };
     _promptPos = 0;
     _prompt = DEFAULT_CONSOLE_PROMPT;
     _hasPrompt = false;
@@ -107,7 +109,7 @@ public class ConsoleDocument implements DocumentAdapter {
   /** Sets the string to use for the prompt.
    *  @param prompt String to use for the prompt.
    */
-  public void setPrompt(String prompt) { _prompt = prompt; }
+  public synchronized void setPrompt(String prompt) { _prompt = prompt; }
 
   /** Gets the object which determines whether an insert/remove edit should be applied based on the inputs.
    *  @return the DocumentEditCondition to determine legality of inputs
@@ -118,7 +120,7 @@ public class ConsoleDocument implements DocumentAdapter {
    *  the inputs.
    *  @param condition Object to determine legality of inputs
    */
-  public void setEditCondition(DocumentEditCondition condition) { _document.setEditCondition(condition); }
+  public synchronized void setEditCondition(DocumentEditCondition condition) { _document.setEditCondition(condition); }
 
   /** Returns the first location in the document where editing is allowed. */
   public int getPromptPos() { return _promptPos; }
@@ -126,12 +128,12 @@ public class ConsoleDocument implements DocumentAdapter {
   /** Sets the prompt position.
    *  @param newPos the new position.
    */
-  public void setPromptPos(int newPos) { _promptPos = newPos; }
+  public synchronized void setPromptPos(int newPos) { _promptPos = newPos; }
 
   /** Sets a runnable action to use as a beep.
    *  @param beep Runnable beep command
    */
-  public void setBeep(Runnable beep) { _beep = beep;  }
+  public synchronized void setBeep(Runnable beep) { _beep = beep;  }
 
   /** Resets the document to a clean state. */
   public synchronized void reset() {
@@ -139,9 +141,7 @@ public class ConsoleDocument implements DocumentAdapter {
       forceRemoveText(0, _document.getDocLength());
       _promptPos = 0;
     }
-    catch (DocumentAdapterException e) {
-      throw new UnexpectedException(e);
-    }
+    catch (DocumentAdapterException e) { throw new UnexpectedException(e); }
   }
 
   /** Prints a prompt for a new input. */
@@ -163,7 +163,7 @@ public class ConsoleDocument implements DocumentAdapter {
   /** Inserts a new line at the given position.
    *  @param pos Position to insert the new line
    */
-  public void insertNewLine(int pos) {
+  public synchronized void insertNewLine(int pos) {
     // Correct the position if necessary
     if (pos > getDocLength())  pos = getDocLength();
     else if (pos < 0) pos = 0;
@@ -247,7 +247,7 @@ public class ConsoleDocument implements DocumentAdapter {
    *  @param len Number of characters to remove
    *  @throws DocumentAdapterException if the offset or length are illegal
    */
-  public void forceRemoveText(int offs, int len) throws DocumentAdapterException {
+  public synchronized void forceRemoveText(int offs, int len) throws DocumentAdapterException {
     _document.forceRemoveText(offs, len);
   }
 
@@ -259,7 +259,7 @@ public class ConsoleDocument implements DocumentAdapter {
    *  @param len Number of characters to return
    *  @throws DocumentAdapterException if the offset or length are illegal
    */
-  public String getDocText(int offs, int len) throws DocumentAdapterException {
+  public synchronized String getDocText(int offs, int len) throws DocumentAdapterException {
     return _document.getDocText(offs, len);
   }
 

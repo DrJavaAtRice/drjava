@@ -253,7 +253,7 @@ public class GJv6Compiler implements CompilerInterface{
      * This prevents extraneous prints of compiler error messages
      * to the console.
      */
-    public void print(String s) {}
+    public void print(String s) { }
 
     /**
      * put your documentation comment here

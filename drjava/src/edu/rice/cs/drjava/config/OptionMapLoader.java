@@ -59,10 +59,10 @@ public class OptionMapLoader implements OptionConstants {
   static {
     // initialize DEFAULTS objects, based on OptionConstants using reflection.
     Field[] fields = OptionConstants.class.getDeclaredFields();
-    for(int i = 0; i < fields.length; i++) {
+    for (int i = 0; i < fields.length; i++) {
       Field field = fields[i];
       int mods = field.getModifiers();
-      if(Modifier.isStatic(mods) && Modifier.isPublic(mods) && Modifier.isFinal(mods)) {
+      if (Modifier.isStatic(mods) && Modifier.isPublic(mods) && Modifier.isFinal(mods)) {
         // field is public static and final.
         Option<?> option;
         try {

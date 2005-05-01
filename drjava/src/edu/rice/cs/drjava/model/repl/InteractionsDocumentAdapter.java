@@ -53,7 +53,10 @@ import edu.rice.cs.drjava.model.definitions.ColoringView;
 import edu.rice.cs.drjava.model.definitions.indent.Indenter;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 import edu.rice.cs.util.Pair;
+import edu.rice.cs.util.UnexpectedException;
+import edu.rice.cs.util.text.DocumentAdapterException;
 
+import java.io.*;
 import java.awt.*;
 import java.util.List;
 import java.util.LinkedList;
@@ -63,6 +66,8 @@ import static edu.rice.cs.drjava.model.definitions.ColoringView.*;
 
 /** Represents the Interactions Document Adapter. Extends from the Abstract DrJava Document, 
  *  which contains shared code between the interactions and definitions documents.
+ * 
+ *  TODO: rename this class as InteractionsDJDocument; it is not an adapter!
  */
 public class InteractionsDocumentAdapter extends AbstractDJDocument {
   
@@ -72,6 +77,9 @@ public class InteractionsDocumentAdapter extends AbstractDJDocument {
    */
   private boolean _toClear = false;
   
+   /** Standard constructor. Currently does nothing */
+  public InteractionsDocumentAdapter() { super(); }  
+  
   protected void throwErrorHuh() { /* Do nothing */ }
   
   protected int startCompoundEdit() { return 0; /* Do nothing */ }
@@ -80,9 +88,7 @@ public class InteractionsDocumentAdapter extends AbstractDJDocument {
 
   protected void endLastCompoundEdit() { /* Do nothing */ }
   
-  protected void addUndoRedo(AbstractDocument.DefaultDocumentEvent chng, Runnable undoCommand, Runnable doCommand) {
-    //Do nothing
-  }
+  protected void addUndoRedo(AbstractDocument.DefaultDocumentEvent chng, Runnable undoCommand, Runnable doCommand) { }
   protected void _styleChanged() { /* Do nothing */ }
   
   /** Returns a new indenter. Eventually to be used to return an interactions indenter */
@@ -120,45 +126,45 @@ public class InteractionsDocumentAdapter extends AbstractDJDocument {
     synchronized (_stylesList) {
       for(Pair<Pair<Integer,Integer>,String> p :  _stylesList) {
         Pair<Integer,Integer> loc = p.getFirst();
-        if(loc.getFirst() <= point && loc.getSecond() >= point) {
-          if(p.getSecond().equals(InteractionsDocument.ERROR_STYLE)) {
+        if (loc.getFirst() <= point && loc.getSecond() >= point) {
+          if (p.getSecond().equals(InteractionsDocument.ERROR_STYLE)) {
             //DrJava.consoleErr().println("Error Style");
             g.setColor(ERROR_COLOR);   
             g.setFont(g.getFont().deriveFont(Font.BOLD));
           }
-          else if(p.getSecond().equals(InteractionsDocument.DEBUGGER_STYLE)) {
+          else if (p.getSecond().equals(InteractionsDocument.DEBUGGER_STYLE)) {
             //DrJava.consoleErr().println("Debugger Style");
             g.setColor(DEBUGGER_COLOR);
             g.setFont(g.getFont().deriveFont(Font.BOLD));
           }
-          else if(p.getSecond().equals(ConsoleDocument.SYSTEM_OUT_STYLE)) {
+          else if (p.getSecond().equals(ConsoleDocument.SYSTEM_OUT_STYLE)) {
             //DrJava.consoleErr().println("System.out Style");
             g.setColor(INTERACTIONS_SYSTEM_OUT_COLOR);
             g.setFont(MAIN_FONT);
           }
-          else if(p.getSecond().equals(ConsoleDocument.SYSTEM_IN_STYLE)) {
+          else if (p.getSecond().equals(ConsoleDocument.SYSTEM_IN_STYLE)) {
             //DrJava.consoleErr().println("System.in Style");
             g.setColor(INTERACTIONS_SYSTEM_IN_COLOR);
             g.setFont(MAIN_FONT);
           }
-          else if(p.getSecond().equals(ConsoleDocument.SYSTEM_ERR_STYLE)) {
+          else if (p.getSecond().equals(ConsoleDocument.SYSTEM_ERR_STYLE)) {
             //DrJava.consoleErr().println("System.err Style");
             g.setColor(INTERACTIONS_SYSTEM_ERR_COLOR);
             g.setFont(MAIN_FONT);
           }
-          else if(p.getSecond().equals(InteractionsDocument.OBJECT_RETURN_STYLE)) {
+          else if (p.getSecond().equals(InteractionsDocument.OBJECT_RETURN_STYLE)) {
             g.setColor(NORMAL_COLOR);
             g.setFont(MAIN_FONT);
           }
-          else if(p.getSecond().equals(InteractionsDocument.STRING_RETURN_STYLE)) {
+          else if (p.getSecond().equals(InteractionsDocument.STRING_RETURN_STYLE)) {
             g.setColor(DOUBLE_QUOTED_COLOR);
             g.setFont(MAIN_FONT);
           }
-          else if(p.getSecond().equals(InteractionsDocument.NUMBER_RETURN_STYLE)) {
+          else if (p.getSecond().equals(InteractionsDocument.NUMBER_RETURN_STYLE)) {
             g.setColor(NUMBER_COLOR);
             g.setFont(MAIN_FONT);
           }
-          else if(p.getSecond().equals(InteractionsDocument.CHARACTER_RETURN_STYLE)) {
+          else if (p.getSecond().equals(InteractionsDocument.CHARACTER_RETURN_STYLE)) {
             g.setColor(SINGLE_QUOTED_COLOR);
             g.setFont(MAIN_FONT);
           }
@@ -176,10 +182,10 @@ public class InteractionsDocumentAdapter extends AbstractDJDocument {
     synchronized (_stylesList) {
       for(Pair<Pair<Integer,Integer>,String> p :  _stylesList) {
         Pair<Integer,Integer> loc = p.getFirst();
-        if(loc.getFirst() <= point && loc.getSecond() >= point) {
-          if(p.getSecond().equals(InteractionsDocument.ERROR_STYLE))
+        if (loc.getFirst() <= point && loc.getSecond() >= point) {
+          if (p.getSecond().equals(InteractionsDocument.ERROR_STYLE))
             g.setFont(g.getFont().deriveFont(Font.BOLD));
-          else if(p.getSecond().equals(InteractionsDocument.DEBUGGER_STYLE))
+          else if (p.getSecond().equals(InteractionsDocument.DEBUGGER_STYLE))
             g.setFont(g.getFont().deriveFont(Font.BOLD));
           else  g.setFont(MAIN_FONT);
           return;
@@ -204,6 +210,83 @@ public class InteractionsDocumentAdapter extends AbstractDJDocument {
     }
   }
   
-  /** Standard constructor. Currently does nothing */
-  public InteractionsDocumentAdapter() { super(); }  
+   /** Inserts the given exception data into the document with the given style.
+   *  @param exceptionClass Name of the exception that was thrown
+   *  @param message Message contained in the exception
+   *  @param stackTrace String representation of the stack trace
+   *  @param styleName name of the style for formatting the exception
+   */
+  public void appendExceptionResult(String exceptionClass, String message, String stackTrace, String styleName) {
+    
+    String c = exceptionClass;
+    if (c.indexOf('.') != -1) c = c.substring(c.lastIndexOf('.') + 1, c.length());
+    
+    writeLock();
+    try {
+      insertText(getDocLength(), c + ": " + message + "\n", styleName);
+      
+      // An example stack trace:
+      //
+      // java.lang.IllegalMonitorStateException:
+      // at java.lang.Object.wait(Native Method)
+      // at java.lang.Object.wait(Object.java:425)
+      if (! stackTrace.trim().equals("")) {
+        BufferedReader reader = new BufferedReader(new StringReader(stackTrace));
+        
+        String line;
+        // a line is parsable if it has ( then : then ), with some
+        // text between each of those
+        while ((line = reader.readLine()) != null) {
+          String fileName;
+          int lineNumber;
+          
+          // TODO:  Why is this stuff here??
+          int openLoc = line.indexOf('(');
+          if (openLoc != -1) {
+            int closeLoc = line.indexOf(')', openLoc + 1);
+            
+            if (closeLoc != -1) {
+              int colonLoc = line.indexOf(':', openLoc + 1);
+              if ((colonLoc > openLoc) && (colonLoc < closeLoc)) {
+                // ok this line is parsable!
+                String lineNumStr = line.substring(colonLoc + 1, closeLoc);
+                try {
+                  lineNumber = Integer.parseInt(lineNumStr);
+                  fileName = line.substring(openLoc + 1, colonLoc);
+                }
+                catch (NumberFormatException nfe) {
+                  // do nothing; we failed at parsing
+                }
+              }
+            }
+          }
+          
+          insertText(getDocLength(), line, styleName);
+          
+          // OK, now if fileName != null we did parse out fileName
+          // and lineNumber.
+          // Here's where we'd add the button, etc.
+          /*
+           if (fileName != null) {
+           JButton button = new JButton("go");
+           button.addActionListener(new ExceptionButtonListener(fileName, lineNumber));
+           SimpleAttributeSet buttonSet = new SimpleAttributeSet(set);
+           StyleConstants.setComponent(buttonSet, button);
+           insertString(getDocLength(), "  ", null);
+           insertString(getDocLength() - 1, " ", buttonSet);
+           JOptionPane.showMessageDialog(null, "button in");
+           insertString(getDocLength(), " ", null);
+           JOptionPane.showMessageDialog(null, "extra space");
+           }*/
+          
+          //JOptionPane.showMessageDialog(null, "\\n");
+          insertText(getDocLength(), "\n", styleName);
+          
+        } // end the while
+      }
+    }
+    catch (IOException ioe) { throw new UnexpectedException(ioe); }
+    catch (DocumentAdapterException ble) { throw new UnexpectedException(ble); }
+    finally { writeUnlock(); }
+  }  
 }

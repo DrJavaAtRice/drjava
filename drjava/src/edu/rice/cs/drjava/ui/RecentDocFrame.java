@@ -88,19 +88,19 @@ public class RecentDocFrame extends JWindow {
   
   LinkedList<OpenDefinitionsDocument> _docs = new LinkedList<OpenDefinitionsDocument>();
   
-  private OptionListener<Color> _colorListener = new OptionListener<Color>(){
+  private OptionListener<Color> _colorListener = new OptionListener<Color>() {
     public void optionChanged(OptionEvent<Color> oce) { updateFontColor(); }
   };
   
-  private OptionListener<Font> _fontListener = new OptionListener<Font>(){
+  private OptionListener<Font> _fontListener = new OptionListener<Font>() {
     public void optionChanged(OptionEvent<Font> oce) { updateFontColor(); }
   };
   
-  private OptionListener<Boolean> _antialiasListener = new OptionListener<Boolean>(){
+  private OptionListener<Boolean> _antialiasListener = new OptionListener<Boolean>() {
     public void optionChanged(OptionEvent<Boolean> oce) { updateFontColor(); }
   };
   
-  private OptionListener<Boolean> _showSourceListener = new OptionListener<Boolean>(){
+  private OptionListener<Boolean> _showSourceListener = new OptionListener<Boolean>() {
     public void optionChanged(OptionEvent<Boolean> oce) { _showSource = oce.value; }
   };
   
@@ -110,11 +110,11 @@ public class RecentDocFrame extends JWindow {
   /* if we should show source code when switching */
   boolean _showSource;
   
-  public RecentDocFrame(MainFrame f){
+  public RecentDocFrame(MainFrame f) {
     super();
     _frame = f;
     _current = 0;
-    _label = new JLabel("..."){
+    _label = new JLabel("...") {
       // Enable anti-aliased text by overriding paintComponent.
       protected void paintComponent(Graphics g) {
         if (CodeStatus.DEVELOPMENT) {
@@ -129,7 +129,7 @@ public class RecentDocFrame extends JWindow {
     };
     _panel = new JPanel();
     _scroller = new JScrollPane();
-    _textpane = new JTextPane(){
+    _textpane = new JTextPane() {
       // Enable anti-aliased text by overriding paintComponent.
       protected void paintComponent(Graphics g) {
         if (CodeStatus.DEVELOPMENT) {
@@ -164,7 +164,7 @@ public class RecentDocFrame extends JWindow {
     DrJava.getConfig().addOptionListener(OptionConstants.SHOW_SOURCE_WHEN_SWITCHING, _showSourceListener);
   }
 
-  private void updateFontColor(){
+  private void updateFontColor() {
     Font  mainFont = DrJava.getConfig().getSetting(OptionConstants.FONT_MAIN);
     Color backColor = DrJava.getConfig().getSetting(OptionConstants.DEFINITIONS_BACKGROUND_COLOR);
     Color fontColor = DrJava.getConfig().getSetting(OptionConstants.DEFINITIONS_NORMAL_COLOR);
@@ -244,7 +244,7 @@ public class RecentDocFrame extends JWindow {
     }
   }
   
-  private String getTextFor(OpenDefinitionsDocument doc){
+  private String getTextFor(OpenDefinitionsDocument doc) {
     DefinitionsPane pane = _frame.getDefPaneGivenODD(doc);
     String endl = System.getProperty("line.separator");
     int loc = pane.getCaretPosition();
@@ -302,14 +302,14 @@ public class RecentDocFrame extends JWindow {
   }
   
   /** Centers the frame in the screen. */
-  private void centerH(){
+  private void centerH() {
     Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
     Dimension frameSize = getSize();
     setLocation((screenSize.width - frameSize.width) / 2, (int)getLocation().getY());
   }
   
   /** Centers the frame in the screen. */
-  private void centerV(){
+  private void centerV() {
     Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
     Dimension frameSize = getSize();
     setLocation((int)getLocation().getX(), (screenSize.height - frameSize.height) / 2);

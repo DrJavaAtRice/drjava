@@ -232,7 +232,7 @@ public class ProjectPropertiesFrame extends JFrame {
     
     Vector<File> extras = _extraClasspathList.getValue();
     ClasspathVector cpv = new ClasspathVector();
-    for(File cf : extras) {
+    for (File cf : extras) {
       cpv.add(cf);
     }
     _mainFrame.getModel().setProjectExtraClasspath(cpv);
@@ -383,18 +383,18 @@ public class ProjectPropertiesFrame extends JFrame {
     return _extraClasspathList.getComponent();
   }
   
-  //  public JPanel _jarMainClassSelector(){
+  //  public JPanel _jarMainClassSelector() {
   //    JFileChooser fileChooser = new JFileChooser(_mainFrame.getModel().getProjectFile().getParentFile());
   //    fileChooser.setDialogTitle("Select");
   //    fileChooser.setApproveButtonText("Select");
   //    fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
   //    fileChooser.setMultiSelectionEnabled(false);
   //    _jarMainClassSelector = new FileSelectorComponent(this,fileChooser,20,12f);
-  //    _jarMainClassSelector.setFileFilter(new FileFilter(){
-  //      public boolean accept(File f){
+  //    _jarMainClassSelector.setFileFilter(new FileFilter() {
+  //      public boolean accept(File f) {
   //        return f.getName().endsWith(".java") || f.isDirectory();
   //      }
-  //      public String getDescription(){
+  //      public String getDescription() {
   //        return "Java Files (*.java)";
   //      }
   //      
@@ -402,7 +402,7 @@ public class ProjectPropertiesFrame extends JFrame {
   //    //toReturn.add(_builtDirSelector, BorderLayout.EAST);
   //    return _jarMainClassSelector;
   //  }
-  public JPanel _jarMainClassSelector(){
+  public JPanel _jarMainClassSelector() {
     File rootFile = _mainFrame.getModel().getProjectFile();
     try {
       rootFile = rootFile.getCanonicalFile();
@@ -412,8 +412,8 @@ public class ProjectPropertiesFrame extends JFrame {
     chooser.setDialogTitle("Select Main Document");
     chooser.setTopMessage("Select the main document for the project:");
     chooser.setApproveButtonText("Select");
-    FileFilter filter = new FileFilter(){
-      public boolean accept(File f){
+    FileFilter filter = new FileFilter() {
+      public boolean accept(File f) {
         String name = f.getName();
         return  !f.isDirectory() &&
           (name.endsWith(".java") ||
@@ -421,7 +421,7 @@ public class ProjectPropertiesFrame extends JFrame {
            name.endsWith(".dj1") ||
            name.endsWith(".dj2"));
       }
-      public String getDescription(){
+      public String getDescription() {
         return "Java & DrJava Files (*.java, *.dj0, *.dj1, *.dj2)";
       }
     };
@@ -434,18 +434,18 @@ public class ProjectPropertiesFrame extends JFrame {
     return _jarMainClassSelector;
   }
   
-  public JPanel _manifestFileSelector(){
+  public JPanel _manifestFileSelector() {
     JFileChooser fileChooser = new JFileChooser(_mainFrame.getModel().getProjectFile().getParentFile());
     fileChooser.setDialogTitle("Select Output jar File");
     fileChooser.setApproveButtonText("Select");
     fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
     fileChooser.setMultiSelectionEnabled(false);
     _manifestFileSelector = new FileSelectorComponent(this,fileChooser,20,12f);
-    _manifestFileSelector.setFileFilter(new FileFilter(){
-      public boolean accept(File f){
+    _manifestFileSelector.setFileFilter(new FileFilter() {
+      public boolean accept(File f) {
         return f.getName().endsWith(".jar") || f.isDirectory();
       }
-      public String getDescription(){
+      public String getDescription() {
         return "Java Archive Files (*.jar)";
       }
       
@@ -454,18 +454,18 @@ public class ProjectPropertiesFrame extends JFrame {
     return _manifestFileSelector;
   }
   
-  public JPanel _jarFileSelector(){
+  public JPanel _jarFileSelector() {
     JFileChooser fileChooser = new JFileChooser(_mainFrame.getModel().getProjectFile().getParentFile());
     fileChooser.setDialogTitle("Select Manifest File");
     fileChooser.setApproveButtonText("Select");
     fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
     fileChooser.setMultiSelectionEnabled(false);
     _jarFileSelector = new FileSelectorComponent(this,fileChooser,20,12f);
-    _jarFileSelector.setFileFilter(new FileFilter(){
-      public boolean accept(File f){
+    _jarFileSelector.setFileFilter(new FileFilter() {
+      public boolean accept(File f) {
         return f.getName().endsWith(".jar") || f.isDirectory();
       }
-      public String getDescription(){
+      public String getDescription() {
         return "Java Archive Files (*.jar)";
       }
       
@@ -475,7 +475,7 @@ public class ProjectPropertiesFrame extends JFrame {
     return _jarFileSelector;
   }
   
-  public void setVisible(boolean vis){
+  public void setVisible(boolean vis) {
     super.setVisible(vis);
     reset();
   }

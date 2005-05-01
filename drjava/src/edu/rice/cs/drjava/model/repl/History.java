@@ -45,7 +45,6 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.repl;
 
-// TODO: Is synchronization used properly here?
 import java.util.Vector;
 import java.util.HashMap;
 import edu.rice.cs.util.FileOps;

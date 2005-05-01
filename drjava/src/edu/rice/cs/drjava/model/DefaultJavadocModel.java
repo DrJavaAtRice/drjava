@@ -305,7 +305,7 @@ public class DefaultJavadocModel implements JavadocModel {
     String separator = System.getProperty("path.separator");
     sourceRootSet.addAll(defaultRoots);
     File[] sourceRoots = sourceRootSet.toArray(new File[sourceRootSet.size()]);
-    for(int a = 0 ; a  < sourceRoots.length; a++) {
+    for (int a = 0 ; a  < sourceRoots.length; a++) {
       if (a != 0)  sourcePath.append(separator);
       sourcePath.append(sourceRoots[a].getAbsolutePath());
     }

@@ -94,7 +94,7 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
 
   public void fileNotFound(File f){
     _lock.startRead();
-    try { for(GlobalModelListener l : _listeners) { l.fileNotFound(f); } }
+    try { for (GlobalModelListener l : _listeners) { l.fileNotFound(f); } }
     finally { _lock.endRead(); }
   }
   
@@ -102,31 +102,31 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
   /* -------------- project state ------------------*/
   public void projectOpened(File pfile, FileOpenSelector files) {
     _lock.startRead();
-    try { for(GlobalModelListener l : _listeners) { l.projectOpened(pfile, files); } }
+    try { for (GlobalModelListener l : _listeners) { l.projectOpened(pfile, files); } }
     finally { _lock.endRead(); }
   }
   
   public void projectClosed() {
     _lock.startRead();
-    try { for(GlobalModelListener l : _listeners) { l.projectClosed();} }
+    try { for (GlobalModelListener l : _listeners) { l.projectClosed();} }
     finally { _lock.endRead(); }
   }
   
   public void projectModified(){
     _lock.startRead();
-    try { for(GlobalModelListener l : _listeners) { l.projectModified(); } }
+    try { for (GlobalModelListener l : _listeners) { l.projectModified(); } }
     finally { _lock.endRead(); }
   }
   
   public void projectBuildDirChanged(){
     _lock.startRead();
-    try { for(GlobalModelListener l : _listeners) { l.projectBuildDirChanged(); } }
+    try { for (GlobalModelListener l : _listeners) { l.projectBuildDirChanged(); } }
     finally { _lock.endRead(); }
   }
   
   public void projectRunnableChanged(){
     _lock.startRead();
-    try { for(GlobalModelListener l : _listeners) { l.projectRunnableChanged(); } }
+    try { for (GlobalModelListener l : _listeners) { l.projectRunnableChanged(); } }
     finally { _lock.endRead(); }
   }
   
@@ -141,7 +141,7 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
    */
   public void notifyListeners(Notifier n) {
     _lock.startRead();
-    try { for(GlobalModelListener l : _listeners) { n.notifyListener(l); } }
+    try { for (GlobalModelListener l : _listeners) { n.notifyListener(l); } }
     finally { _lock.endRead(); }
   }
 
@@ -187,7 +187,7 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
    */
   public void runStarted(OpenDefinitionsDocument doc) {
     _lock.startRead();
-    try { for(GlobalModelListener l : _listeners) { l.runStarted(doc); } }
+    try { for (GlobalModelListener l : _listeners) { l.runStarted(doc); } }
     finally { _lock.endRead(); }
   }
 
@@ -196,7 +196,7 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
    */
   public void newFileCreated(OpenDefinitionsDocument doc) {
     _lock.startRead();
-    try { for(GlobalModelListener l : _listeners) { l.newFileCreated(doc); } }
+    try { for (GlobalModelListener l : _listeners) { l.newFileCreated(doc); } }
     finally { _lock.endRead(); }
   }
 
@@ -205,7 +205,7 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
    */
   public void consoleReset() {
     _lock.startRead();
-    try { for(GlobalModelListener l : _listeners) { l.consoleReset(); } }
+    try { for (GlobalModelListener l : _listeners) { l.consoleReset(); } }
     finally { _lock.endRead(); }
   }
 
@@ -214,35 +214,35 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
 //    ScrollableDialog sd = new ScrollableDialog(null, "fileSaved(" + doc + ") called in GlobalEventNotifier.java", "", "");
 //    sd.show();
     _lock.startRead();
-    try { for(GlobalModelListener l : _listeners) { l.fileSaved(doc); } }
+    try { for (GlobalModelListener l : _listeners) { l.fileSaved(doc); } }
     finally { _lock.endRead(); }
   }
 
   /** Called after a file is opened and read into the current document. */
   public void fileOpened(OpenDefinitionsDocument doc) {
     _lock.startRead();
-    try { for(GlobalModelListener l : _listeners) { l.fileOpened(doc); } }
+    try { for (GlobalModelListener l : _listeners) { l.fileOpened(doc); } }
     finally { _lock.endRead(); }
   }
 
   /** Called after a document is closed. */
   public void fileClosed(OpenDefinitionsDocument doc) {
     _lock.startRead();
-    try { for(GlobalModelListener l : _listeners) { l.fileClosed(doc); } }
+    try { for (GlobalModelListener l : _listeners) { l.fileClosed(doc); } }
     finally { _lock.endRead(); }
   }
 
   /** Called after a document is reverted. */
   public void fileReverted(OpenDefinitionsDocument doc) {
     _lock.startRead();
-    try { for(GlobalModelListener l : _listeners) { l.fileReverted(doc); } }
+    try { for (GlobalModelListener l : _listeners) { l.fileReverted(doc); } }
     finally { _lock.endRead(); }
   }
 
   /** Called when an undoable edit occurs. */
   public void undoableEditHappened() {
     _lock.startRead();
-    try { for(GlobalModelListener l : _listeners) { l.undoableEditHappened(); } }
+    try { for (GlobalModelListener l : _listeners) { l.undoableEditHappened(); } }
     finally { _lock.endRead(); }
   }
 
@@ -260,7 +260,7 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
   public boolean shouldRevertFile(OpenDefinitionsDocument doc) {
     _lock.startRead();
     try { 
-      for(GlobalModelListener l: _listeners) { if (! l.shouldRevertFile(doc)) return false; }
+      for (GlobalModelListener l: _listeners) { if (! l.shouldRevertFile(doc)) return false; }
       return true;
     }
     finally { _lock.endRead(); }
@@ -269,7 +269,7 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
   /** Called when the selection in the navigator changes the current directory without changing the active document. */
   public void currentDirectoryChanged(File dir) {
     _lock.startRead();
-    try { for(GlobalModelListener l : _listeners) { l.currentDirectoryChanged(dir); } }
+    try { for (GlobalModelListener l : _listeners) { l.currentDirectoryChanged(dir); } }
     finally { _lock.endRead(); }
   }
   
@@ -282,7 +282,7 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
    * needed later.
   public void saveBeforeRun() {
     _lock.startRead();
-    try { for(GlobalModelListener l : _listeners) { l.saveBeforeRun(); } }
+    try { for (GlobalModelListener l : _listeners) { l.saveBeforeRun(); } }
     finally { _lock.endRead(); }
   }*/
 
@@ -369,7 +369,7 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
   /** Called after a compile is started by the GlobalModel. */
   public void compileStarted() {
     _lock.startRead();
-    try { for(GlobalModelListener l : _listeners) { l.compileStarted(); }
+    try { for (GlobalModelListener l : _listeners) { l.compileStarted(); }
     }
     finally { _lock.endRead(); }
   }
@@ -377,7 +377,7 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
   /** Called when a compile has finished running. */
   public void compileEnded() {
     _lock.startRead();
-    try { for(GlobalModelListener l : _listeners) { l.compileEnded(); } }
+    try { for (GlobalModelListener l : _listeners) { l.compileEnded(); } }
     finally { _lock.endRead(); }
   }
 
@@ -456,7 +456,7 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
   public void junitTestEnded(String name, boolean wasSuccessful, boolean causedError) {
     _lock.startRead();
     try { 
-      for(GlobalModelListener l : _listeners) { l.junitTestEnded(name, wasSuccessful, causedError); }
+      for (GlobalModelListener l : _listeners) { l.junitTestEnded(name, wasSuccessful, causedError); }
     }
     finally { _lock.endRead(); }
   }
@@ -464,7 +464,7 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
   /** Called after JUnit is finished running tests. */
   public void junitEnded() {
     _lock.startRead();
-    try { for(GlobalModelListener l : _listeners) { l.junitEnded(); } }
+    try { for (GlobalModelListener l : _listeners) { l.junitEnded(); } }
     finally { _lock.endRead(); }
   }
 
@@ -478,7 +478,7 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
   public void saveBeforeJUnit() {
     _lock.startRead();
     try {
-      for(GlobalModelListener l : _listeners) {
+      for (GlobalModelListener l : _listeners) {
         l.saveBeforeJUnit();
       }
     }
@@ -515,7 +515,7 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
    */
   public void saveBeforeJavadoc() {
     _lock.startRead();
-    try { for(GlobalModelListener l : _listeners) { l.saveBeforeJavadoc(); } }
+    try { for (GlobalModelListener l : _listeners) { l.saveBeforeJavadoc(); } }
     finally { _lock.endRead(); }
   }
 
@@ -527,7 +527,7 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
 //   *  needed later. */
 //  public void saveBeforeDebug() {
 //    _lock.startRead();
-//    try { for(GlobalModelListener l : _listeners) { l.saveBeforeDebug(); } }
+//    try { for (GlobalModelListener l : _listeners) { l.saveBeforeDebug(); } }
 //    finally { _lock.endRead(); }
 //  }
 
@@ -541,14 +541,14 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
   /** Notifies the view that the current file path contains a #. */
   public void filePathContainsPound() {
     _lock.startRead();
-    try { for(GlobalModelListener l : _listeners) { l.filePathContainsPound(); } }
+    try { for (GlobalModelListener l : _listeners) { l.filePathContainsPound(); } }
     finally { _lock.endRead(); }
   }
   
   // ----- Cache -----
   public void documentNotFound(OpenDefinitionsDocument d, File f) {
     _lock.startRead();
-    try { for(GlobalModelListener l : _listeners) { l.documentNotFound(d,f); } }
+    try { for (GlobalModelListener l : _listeners) { l.documentNotFound(d,f); } }
     finally { _lock.endRead(); } 
   }
   

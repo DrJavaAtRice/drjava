@@ -94,7 +94,7 @@ public class HelpFrame extends HTMLFrame {
   /** Shows the page selected by the hyperlink event.  Changed to anonymous inner class for 
    * encapsulation purposes */
   private HyperlinkListener _linkListener = new HyperlinkListener() {
-    public void hyperlinkUpdate(HyperlinkEvent event){
+    public void hyperlinkUpdate(HyperlinkEvent event) {
       if (event.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
         // Only follow links within the documentation
         URL url = event.getURL();
@@ -111,13 +111,13 @@ public class HelpFrame extends HTMLFrame {
         // perform path testing
         String path = url.getPath();
 
-        if(path.indexOf(HELP_PATH+CONTENTS_PAGE) >= 0) {
+        if (path.indexOf(HELP_PATH+CONTENTS_PAGE) >= 0) {
           try { url = new URL(url,HOME_PAGE); } // redirect to home, not content
           catch(MalformedURLException murle) {
             /* do nothing */
           }
         }
-        else if(path.indexOf(HELP_PATH) < 0) return; // not anywhere in the help section
+        else if (path.indexOf(HELP_PATH) < 0) return; // not anywhere in the help section
           
         if (url.sameFile(_history.contents)) return; // we're already here!
         jumpTo(url);

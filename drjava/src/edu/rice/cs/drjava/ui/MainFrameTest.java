@@ -409,8 +409,8 @@ public final class MainFrameTest extends MultiThreadedTestCase {
 
      //_frame.setVisible(true);
      _frame.pack();
-     _frame.open(new FileOpenSelector(){
-       public File[] getFiles(){
+     _frame.open(new FileOpenSelector() {
+       public File[] getFiles() {
          File[] return_me = new File[1];
          return_me[0] = new File(_tempDir, "ForceOpenClass1.java");
          return return_me;
@@ -468,15 +468,15 @@ public final class MainFrameTest extends MultiThreadedTestCase {
 
      //_frame.setVisible(true);
      _frame.pack();
-     _frame.open(new FileOpenSelector(){
-       public File[] getFiles(){
+     _frame.open(new FileOpenSelector() {
+       public File[] getFiles() {
          File[] return_me = new File[1];
          return_me[0] = new File(_tempDir, "ForceOpenClass1.java");
          return return_me;
        }
      });
-     ComponentAdapter listener = new ComponentAdapter(){
-       public void componentResized(ComponentEvent event){
+     ComponentAdapter listener = new ComponentAdapter() {
+       public void componentResized(ComponentEvent event) {
          _testFailed = true;
          fail("testDancingUI: Open Documents List danced!");
        }
@@ -486,9 +486,9 @@ public final class MainFrameTest extends MultiThreadedTestCase {
        new SingleDisplayModelCompileListener();
      _frame.getModel().addListener(compileListener);
 
-     synchronized(compileListener){
-       SwingUtilities.invokeLater(new Runnable(){
-         public void run(){
+     synchronized(compileListener) {
+       SwingUtilities.invokeLater(new Runnable() {
+         public void run() {
            _frame.getCompileAllButton().doClick();
          }
        });
@@ -496,12 +496,12 @@ public final class MainFrameTest extends MultiThreadedTestCase {
        try{
          compileListener.wait();
        }
-       catch(InterruptedException exception){
+       catch(InterruptedException exception) {
          fail(exception.toString());
        }
      }
 
-     if( !FileOps.deleteDirectory(_tempDir) ){
+     if( !FileOps.deleteDirectory(_tempDir) ) {
        System.err.println("Couldn't fully delete directory " + _tempDir.getAbsolutePath() +
                           "\nDo it by hand.\n");
      }
@@ -538,8 +538,8 @@ public final class MainFrameTest extends MultiThreadedTestCase {
 
      //_frame.setVisible(true);
      _frame.pack();
-     ComponentAdapter listener = new ComponentAdapter(){
-       public void componentResized(ComponentEvent event){
+     ComponentAdapter listener = new ComponentAdapter() {
+       public void componentResized(ComponentEvent event) {
          _testFailed = true;
          fail("testDancingUI: Open Documents List danced!");
        }
@@ -548,8 +548,8 @@ public final class MainFrameTest extends MultiThreadedTestCase {
      SingleDisplayModelFileClosedListener closeListener =
        new SingleDisplayModelFileClosedListener();
 
-     _frame.open(new FileOpenSelector(){
-         public File[] getFiles(){
+     _frame.open(new FileOpenSelector() {
+         public File[] getFiles() {
            File[] return_me = new File[1];
            return_me[0] = new File(_tempDir, "ForceOpenClass1.java");
            return return_me;
@@ -558,9 +558,9 @@ public final class MainFrameTest extends MultiThreadedTestCase {
 
      _frame.getModel().addListener(closeListener);
 
-     synchronized(closeListener){
-       Thread thread = new Thread(new Runnable(){
-         public void run(){
+     synchronized(closeListener) {
+       Thread thread = new Thread(new Runnable() {
+         public void run() {
            _frame.getCloseButton().doClick();
          }
        });
@@ -569,12 +569,12 @@ public final class MainFrameTest extends MultiThreadedTestCase {
        try{
          closeListener.wait();
        }
-       catch(InterruptedException exception){
+       catch(InterruptedException exception) {
          fail(exception.toString());
        }
      }
 
-     if( !FileOps.deleteDirectory(_tempDir) ){
+     if( !FileOps.deleteDirectory(_tempDir) ) {
        System.err.println("Couldn't fully delete directory " + _tempDir.getAbsolutePath() +
                           "\nDo it by hand.\n");
      }
@@ -587,13 +587,13 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     public void compileStarted() { }
 
     /** Just notify when the compile has ended */
-    public void compileEnded(){
-      synchronized (this){ notify(); }
+    public void compileEnded() {
+      synchronized (this) { notify(); }
     }
 
-    public void fileOpened(OpenDefinitionsDocument doc) {}
+    public void fileOpened(OpenDefinitionsDocument doc) { }
 
-    public void activeDocumentChanged(OpenDefinitionsDocument active){ }
+    public void activeDocumentChanged(OpenDefinitionsDocument active) { }
   }
 
   /** A FileClosedListener for SingleDisplayModel (instead of GlobalModel) */
@@ -602,18 +602,18 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     implements SingleDisplayModelListener{
 
     public void fileClosed(OpenDefinitionsDocument doc) {
-      synchronized(this){
+      synchronized(this) {
         notify();
       }
     }
 
-    public void fileOpened(OpenDefinitionsDocument doc){
+    public void fileOpened(OpenDefinitionsDocument doc) {
     }
 
-    public void newFileCreated(OpenDefinitionsDocument doc){
+    public void newFileCreated(OpenDefinitionsDocument doc) {
     }
 
-    public void activeDocumentChanged(OpenDefinitionsDocument active){
+    public void activeDocumentChanged(OpenDefinitionsDocument active) {
     }
   }
 

@@ -398,7 +398,7 @@ public final class CommandLineTest extends TestCase {
   private void checkFile(File relativeFile, String funnyName)
       throws IOException, InvalidPackageException {
     FileOps.writeStringToFile(relativeFile,
-                              "package " + funnyName + "; class X {}");
+                              "package " + funnyName + "; class X { }");
     assertTrue("file exists", relativeFile.exists());
 
     String path = relativeFile.getPath();

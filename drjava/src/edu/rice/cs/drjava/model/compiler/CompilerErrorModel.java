@@ -355,7 +355,7 @@ public class CompilerErrorModel<T extends CompilerError> {
     try {
       int curError = 0;
 
-      // for(; numProcessed < _numErrors; numProcessed++) {
+      // for (; numProcessed < _numErrors; numProcessed++) {
       while ((curError < _numErrors)) {
 
         // find the next error with a line number (skipping others)

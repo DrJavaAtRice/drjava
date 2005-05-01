@@ -150,7 +150,7 @@ public class ProjectFileBuilder {
     }
     
     // write collapsed paths
-    if (!_collapsedPaths.isEmpty()){
+    if (!_collapsedPaths.isEmpty()) {
       fw.write("\n(collapsed");
       for(String s: _collapsedPaths) {
         fw.write("\n  (path " + convertToLiteral(s) + ")");

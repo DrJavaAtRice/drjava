@@ -234,7 +234,7 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
        // must be executed in another thread because otherwise the notifies
        // will be received before the _notifierLock is released
       new Thread() {
-        public void run(){
+        public void run() {
           try {
             _debugger.resume();
             _doSetCurrentThread(thread);
@@ -403,7 +403,7 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
     InterpretListener interpretListener = new InterpretListener();
     _model.addListener(interpretListener);
     synchronized(_notifierLock) {
-      if( printMessages ) System.err.println("-------- Resuming --------");
+      if ( printMessages ) System.err.println("-------- Resuming --------");
       _asyncResume();
       _waitForNotifies(3);  // interactionEnded, interpreterChanged, currThreadDied
                             // here, we get a currThreadDied since it's the last thread
@@ -466,7 +466,7 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
     InterpretListener interpretListener = new InterpretListener();
     _model.addListener(interpretListener);
     synchronized(_notifierLock) {
-      if( printMessages ) System.err.println("-------- Resuming --------");
+      if ( printMessages ) System.err.println("-------- Resuming --------");
       _asyncResume();
       _waitForNotifies(3);  // interactionEnded, interpreterChanged, currThreadDied
                             // here, we get a currThreadDied since it's the last thread
@@ -524,7 +524,7 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
     assertInteractionsDoesNotContain("Bar Line 1");
 
     // Step into bar() method
-    synchronized(_notifierLock){
+    synchronized(_notifierLock) {
       _asyncStep(Debugger.STEP_INTO);
       _waitForNotifies(2);  // suspended, updated
       _notifierLock.wait();

@@ -297,11 +297,11 @@ public class DebugPanel extends JPanel implements OptionConstants {
    */
   static class BreakPointRenderer extends DefaultTreeCellRenderer {
 
-    public void setBackground(Color c){
+    public void setBackground(Color c) {
       this.setBackgroundNonSelectionColor(c);
     }
     
-    public void setForeground(Color c){
+    public void setForeground(Color c) {
       this.setTextNonSelectionColor(c);
     }
     
@@ -753,12 +753,12 @@ public class DebugPanel extends JPanel implements OptionConstants {
     /**
      * Called when debugger mode has been enabled.
      */
-    public void debuggerStarted() {}
+    public void debuggerStarted() { }
 
     /**
      * Called when debugger mode has been disabled.
      */
-    public void debuggerShutdown() {}
+    public void debuggerShutdown() { }
 
     /**
      * Called when the given line is reached by the current thread in the
@@ -767,7 +767,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
      * @param lineNumber Line to display or highlight
      * @param shouldHighlight true iff the line should be highlighted.
      */
-    public void threadLocationUpdated(OpenDefinitionsDocument doc, int lineNumber, boolean shouldHighlight) {}
+    public void threadLocationUpdated(OpenDefinitionsDocument doc, int lineNumber, boolean shouldHighlight) { }
 
     /**
      * Called when a breakpoint is set in a document.
@@ -912,7 +912,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
     /**
      * Called when a step is requested on the current thread.
      */
-    public void stepRequested() {}
+    public void stepRequested() { }
 
     /**
      * Called when the current thread is suspended
@@ -1144,16 +1144,16 @@ public class DebugPanel extends JPanel implements OptionConstants {
   }
   
   private class BPTree extends JTree {
-    public BPTree(DefaultTreeModel s){
+    public BPTree(DefaultTreeModel s) {
       super(s);
     }
     
-    public void setForeground(Color c){
+    public void setForeground(Color c) {
       super.setForeground(c);
       if (dtcr != null) dtcr.setTextNonSelectionColor(c);
     }
     
-    public void setBackground(Color c){
+    public void setBackground(Color c) {
       super.setBackground(c);
       if (DebugPanel.this != null && dtcr != null) dtcr.setBackgroundNonSelectionColor(c);
     }

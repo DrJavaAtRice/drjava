@@ -55,22 +55,22 @@ import edu.rice.cs.util.classloader.ClassFileError;
 public class DummySingleDisplayModelListener implements SingleDisplayModelListener {
   
   /** Called when trying to open a file that does not exist. */
-  public void fileNotFound(File f){   }
+  public void fileNotFound(File f) {   }
   
   /** Called when the project's build directory has changed. */
-  public void projectBuildDirChanged(){  }
+  public void projectBuildDirChanged() {  }
   
   /** Called when the project is being opened and the model needs the gui to do some stuff for it. */
   public void projectOpened(File pfile, FileOpenSelector files) {  }
   
   /** Called when the project is being closed. */
-  public void projectClosed(){  }
+  public void projectClosed() {  }
   
   /** Called when the projects modified state has changed. */
-  public void projectModified(){  }
+  public void projectModified() {  }
 
   /** Called when a project's main class has been set/unset. */
-  public void projectRunnableChanged(){  }
+  public void projectRunnableChanged() {  }
   
   /** Called after a new document is created. */
   public void newFileCreated(OpenDefinitionsDocument doc) { }

@@ -89,7 +89,7 @@ public class InteractionsEventNotifier extends
     _lock.startRead();
     try {
       int size = _listeners.size();
-      for(int i = 0; i < size; i++) {
+      for (int i = 0; i < size; i++) {
         _listeners.get(i).interactionStarted();
       }
     }
@@ -105,7 +105,7 @@ public class InteractionsEventNotifier extends
     _lock.startRead();
     try {
       int size = _listeners.size();
-      for(int i = 0; i < size; i++) {
+      for (int i = 0; i < size; i++) {
         _listeners.get(i).interactionEnded();
       }
     }
@@ -124,7 +124,7 @@ public class InteractionsEventNotifier extends
     _lock.startRead();
     try {
       int size = _listeners.size();
-      for(int i = 0; i < size; i++) {
+      for (int i = 0; i < size; i++) {
         _listeners.get(i).interactionErrorOccurred(offset, length);
       }
     }
@@ -140,7 +140,7 @@ public class InteractionsEventNotifier extends
     _lock.startRead();
     try {
       int size = _listeners.size();
-      for(int i = 0; i < size; i++) {
+      for (int i = 0; i < size; i++) {
         _listeners.get(i).interpreterResetting();
       }
     }
@@ -156,7 +156,7 @@ public class InteractionsEventNotifier extends
     _lock.startRead();
     try {
       int size = _listeners.size();
-      for(int i = 0; i < size; i++) {
+      for (int i = 0; i < size; i++) {
         _listeners.get(i).interpreterReady();
       }
     }
@@ -174,7 +174,7 @@ public class InteractionsEventNotifier extends
     _lock.startRead();
     try {
       int size = _listeners.size();
-      for(int i = 0; i < size; i++) {
+      for (int i = 0; i < size; i++) {
         _listeners.get(i).interpreterResetFailed(t);
       }
     }
@@ -193,7 +193,7 @@ public class InteractionsEventNotifier extends
     _lock.startRead();
     try {
       int size = _listeners.size();
-      for(int i = 0; i < size; i++) {
+      for (int i = 0; i < size; i++) {
         _listeners.get(i).interpreterExited(status);
       }
     }
@@ -211,7 +211,7 @@ public class InteractionsEventNotifier extends
     _lock.startRead();
     try {
       int size = _listeners.size();
-      for(int i = 0; i < size; i++) {
+      for (int i = 0; i < size; i++) {
         _listeners.get(i).interpreterChanged(inProgress);
       }
     }
@@ -227,7 +227,7 @@ public class InteractionsEventNotifier extends
     _lock.startRead();
     try {
       int size = _listeners.size();
-      for(int i = 0; i < size; i++) {
+      for (int i = 0; i < size; i++) {
         _listeners.get(i).interactionIncomplete();
       }
     }

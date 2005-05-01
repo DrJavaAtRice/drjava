@@ -1053,11 +1053,11 @@ public final class IndentTest extends TestCase {
   public void testNestedUnbracedFor() throws BadLocationException {
     String text =
       "for (int a =0; a < 5; a++)\n" +
-      "for (int b = 0; b < 5; b++){\n" +
+      "for (int b = 0; b < 5; b++) {\n" +
       "System.out.println(a + b);";
     String indented =
       "for (int a =0; a < 5; a++)\n" +
-      "  for (int b = 0; b < 5; b++){\n" +
+      "  for (int b = 0; b < 5; b++) {\n" +
       "    System.out.println(a + b);";
     doc.insertString(0, text, null);
     _assertContents(text, doc);
@@ -1082,12 +1082,12 @@ public final class IndentTest extends TestCase {
     text =
       "{\n" +
       "while (a < 5)\n" +
-      "while (b < 5){\n" +
+      "while (b < 5) {\n" +
       "System.out.println(a + b);";
     indented =
       "{\n" +
       "  while (a < 5)\n" +
-      "    while (b < 5){\n" +
+      "    while (b < 5) {\n" +
       "      System.out.println(a + b);";
     doc.insertString(0, text, null);
     _assertContents(text, doc);
@@ -1217,7 +1217,7 @@ public final class IndentTest extends TestCase {
     File[] correctFiles = {new File(directory, "IndentSuccessesCorrect.indent")
       /*, new File(directory, "IndentProblemsCorrect.indent")*/};
 
-    for(int x = 0; x < correctFiles.length; x++) {
+    for (int x = 0; x < correctFiles.length; x++) {
       _indentAndCompare(unindentedFiles[x], correctFiles[x]);
     }
 

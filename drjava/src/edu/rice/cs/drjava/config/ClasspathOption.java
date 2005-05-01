@@ -59,7 +59,7 @@ class ClasspathOption {
   public VectorOption<File> evaluate(String optionName) {
     // system path separator
     String ps = System.getProperty("path.separator");
-    if(ps.length() > 1) {
+    if (ps.length() > 1) {
       // spit out warning if it's more than one character.
       System.err.println(warning);
       System.err.println("using '"+ps.charAt(0)+

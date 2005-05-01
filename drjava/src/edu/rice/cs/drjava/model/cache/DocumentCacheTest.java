@@ -135,7 +135,7 @@ public class DocumentCacheTest extends TestCase {
   
   protected OpenDefinitionsDocument openFile(final File f) throws IOException{
     try{
-      OpenDefinitionsDocument doc = _model.openFile(new FileOpenSelector(){        
+      OpenDefinitionsDocument doc = _model.openFile(new FileOpenSelector() {        
         public File getFile() {
           return f;
         }
@@ -145,9 +145,9 @@ public class DocumentCacheTest extends TestCase {
         }
       });
       return doc;
-    }catch(AlreadyOpenException e){
+    }catch(AlreadyOpenException e) {
       throw new IOException(e.getMessage());
-    }catch(OperationCanceledException e){
+    }catch(OperationCanceledException e) {
       throw new IOException(e.getMessage());
     }
   }
@@ -323,12 +323,12 @@ public class DocumentCacheTest extends TestCase {
   
   public void testReconstructor() throws IOException{
     final int i = 0;
-    DDReconstructor d = new DDReconstructor(){
-      public DefinitionsDocument make(){
+    DDReconstructor d = new DDReconstructor() {
+      public DefinitionsDocument make() {
         _doc_made++;
         return _saved;
       }
-      public void saveDocInfo(DefinitionsDocument doc){
+      public void saveDocInfo(DefinitionsDocument doc) {
         _doc_saved++;
       }
       public void addDocumentListener(javax.swing.event.DocumentListener dl) {
@@ -352,14 +352,14 @@ public class DocumentCacheTest extends TestCase {
   
   // not being used.  The new definition of the cache allows for a closed document, if it is used again, to bring its document back.
   // This should be dealt with.
-  public void testNoDDocInCache(){
+  public void testNoDDocInCache() {
    OpenDefinitionsDocument doc1 = _model.newFile();
    _model.closeFile(doc1);
    assertFalse("The document should now be closed", _adapterTable.get(doc1).isReady());
   }
 
 
-  public void testNumListeners(){
+  public void testNumListeners() {
    OpenDefinitionsDocument doc1 = _model.newFile();
    OpenDefinitionsDocument doc2 = _model.newFile();
    OpenDefinitionsDocument doc3 = _model.newFile();

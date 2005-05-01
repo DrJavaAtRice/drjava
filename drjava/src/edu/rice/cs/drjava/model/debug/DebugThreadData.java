@@ -93,7 +93,7 @@ public class DebugThreadData {
     catch (VMDisconnectedException e) {
       // status will be set to unknown
     }
-    if( isSuspended() && status.equals("RUNNING") ){
+    if ( isSuspended() && status.equals("RUNNING") ) {
       _status = "SUSPENDED";
     }
     else{

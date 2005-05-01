@@ -106,7 +106,7 @@ public class QuestionCurrLineStartsWithSkipComments extends IndentRuleQuestion
         // Get state for walker position.
         //BraceReduction reduced = doc.getReduced();
         
-        synchronized(doc){
+        synchronized(doc) {
           doc.move( startPos - currentPos + i);
           ReducedModelState state = doc.getStateAtCurrent();
           doc.move(-startPos + currentPos - i);

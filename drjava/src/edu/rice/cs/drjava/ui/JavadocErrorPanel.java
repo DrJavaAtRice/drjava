@@ -81,7 +81,7 @@ public class JavadocErrorPanel extends ErrorPanel {
     return _errorListPane;
   }
 
-  protected CompilerErrorModel getErrorModel(){
+  protected CompilerErrorModel getErrorModel() {
     return getModel().getJavadocModel().getJavadocErrorModel();
   }
 

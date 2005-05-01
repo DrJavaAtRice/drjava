@@ -70,7 +70,7 @@ class QuestionCurrLineEmptyOrEnterPress extends IndentRuleQuestion {
    * @return true if this node's rule holds.
    */
   boolean applyRule(AbstractDJDocument doc, int reason) {
-    if (reason == Indenter.ENTER_KEY_PRESS){
+    if (reason == Indenter.ENTER_KEY_PRESS) {
       return true;
     }
     try {

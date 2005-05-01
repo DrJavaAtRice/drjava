@@ -91,7 +91,7 @@ public class CompilerError implements Comparable, Serializable {
   /**
    * Constructor for a CompilerError with an associated file but no location in the source
    */
-  public CompilerError(File file, String message, boolean isWarning){
+  public CompilerError(File file, String message, boolean isWarning) {
     this(file, -1, -1, message, isWarning);
   }
 
@@ -107,7 +107,7 @@ public class CompilerError implements Comparable, Serializable {
   /**
    * This function returns true if and only if the given error has no location
    */
-  public boolean hasNoLocation(){
+  public boolean hasNoLocation() {
     return _noLocation;
   }
 

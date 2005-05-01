@@ -59,7 +59,7 @@ public class NoCompilerAvailable implements CompilerInterface {
   public static final CompilerInterface ONLY = new NoCompilerAvailable();
   private static final String MESSAGE = "No compiler is available.";
 
-  private NoCompilerAvailable() {}
+  private NoCompilerAvailable() { }
 
   public CompilerError[] compile(File sourceRoot, File[] files) {
     File[] sourceRoots = new File[] { sourceRoot };

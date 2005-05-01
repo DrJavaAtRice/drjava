@@ -140,7 +140,7 @@ class Brace extends ReducedToken implements ReducedModelStates {
    */
   public void flip() {
     if (isOpen()) _type += 1;
-    else if(_type < braces.length - 1) _type -= 1;
+    else if (_type < braces.length - 1) _type -= 1;
   }
 
   /**

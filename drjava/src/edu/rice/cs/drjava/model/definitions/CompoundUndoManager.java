@@ -96,7 +96,7 @@ public class CompoundUndoManager extends UndoManager {
   public int startCompoundEdit() {
     _compoundEdits.add(0, new CompoundEdit());
     _keys.add(0, new Integer(_nextKey));
-    if(_nextKey < Integer.MAX_VALUE) _nextKey++;
+    if (_nextKey < Integer.MAX_VALUE) _nextKey++;
     else _nextKey = Integer.MIN_VALUE;
     return _keys.get(0).intValue();
   }
@@ -127,7 +127,7 @@ public class CompoundUndoManager extends UndoManager {
         if (compoundEdit.canUndo()) {
           if (!_compoundEditInProgress()) {
             super.addEdit(compoundEdit);
-            //          if(!canUndo()){
+            //          if (!canUndo()) {
             //            throw new RuntimeException("could not add the edit to the undomanager");
             //          }
             _notifyUndoHappened();

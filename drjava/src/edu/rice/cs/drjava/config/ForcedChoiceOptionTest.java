@@ -59,7 +59,7 @@ public final class ForcedChoiceOptionTest extends TestCase {
    */
   public ForcedChoiceOptionTest(String name) { super(name); }
   
-  public void setUp() {}
+  public void setUp() { }
   
   public void testGetName() {
     ForcedChoiceOption fco = new ForcedChoiceOption("javadoc_access",
@@ -82,13 +82,13 @@ public final class ForcedChoiceOptionTest extends TestCase {
     
     assertTrue("Parsing \"private\"", "private".equals(fco.parse("private")));
     try { fco.parse("Private"); fail(); }
-    catch (OptionParseException e) {}
+    catch (OptionParseException e) { }
     
     try { fco.parse("true"); fail(); }
-    catch (OptionParseException e) {}
+    catch (OptionParseException e) { }
     
     try { fco.parse(".33"); fail(); }
-    catch (OptionParseException e) {}
+    catch (OptionParseException e) { }
   }
   
   public void testFormat() {

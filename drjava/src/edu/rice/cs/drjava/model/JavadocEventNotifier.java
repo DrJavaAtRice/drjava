@@ -85,7 +85,7 @@ class JavadocEventNotifier extends EventNotifier<JavadocListener>
   /** Called after Javadoc is started by the GlobalModel. */
   public void javadocStarted() {
     _lock.startRead();
-    try { for(JavadocListener jl: _listeners) { jl.javadocStarted(); } }
+    try { for (JavadocListener jl: _listeners) { jl.javadocStarted(); } }
     finally { _lock.endRead(); }
   }
 
@@ -97,7 +97,7 @@ class JavadocEventNotifier extends EventNotifier<JavadocListener>
    */
   public void javadocEnded(boolean success, File destDir, boolean allDocs) {
     _lock.startRead();
-    try { for(JavadocListener jl: _listeners) { jl.javadocEnded(success, destDir, allDocs); } }
+    try { for (JavadocListener jl: _listeners) { jl.javadocEnded(success, destDir, allDocs); } }
     finally { _lock.endRead();}
   }
 
@@ -106,7 +106,7 @@ class JavadocEventNotifier extends EventNotifier<JavadocListener>
    */
   public void saveBeforeJavadoc() {
     _lock.startRead();
-    try { for(JavadocListener jl: _listeners) { jl.saveBeforeJavadoc(); } }
+    try { for (JavadocListener jl: _listeners) { jl.saveBeforeJavadoc(); } }
     finally { _lock.endRead(); }
   }
 }

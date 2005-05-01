@@ -292,7 +292,7 @@ public class ReducedModelBrace extends AbstractReducedModel {
     // here we check to make sure there is an open significant brace
     // immediately to the left of the cursor
     if (iter.current().isOpenBrace()) {
-      if(moveWalkerGetState(relDistance) == FREE) {
+      if (moveWalkerGetState(relDistance) == FREE) {
         // initialize the stack with the first brace, the one we are balancing
         braceStack.push(iter.current());
 
@@ -449,7 +449,7 @@ public class ReducedModelBrace extends AbstractReducedModel {
     // here we check to make sure there is an open significant brace
     // immediately to the right of the cursor
     if (iter.current().isClosedBrace()) {
-      if(moveWalkerGetState(-relDistance) == FREE) {
+      if (moveWalkerGetState(-relDistance) == FREE) {
         // initialize the distance and the stack with the first brace,
         // the one we are balancing
 

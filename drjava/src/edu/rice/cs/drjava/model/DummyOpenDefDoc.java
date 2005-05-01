@@ -463,21 +463,21 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
   /**
    * resets the document to be unmodified
    */
-  public void resetModification(){
+  public void resetModification() {
     throw new UnsupportedOperationException("Dummy method");
   }
   
   /**
    * returns the date that this document was last modified
    */
-  public long getTimestamp(){
+  public long getTimestamp() {
     throw new UnsupportedOperationException("Dummy method");
   }
   
   /**
    * sets the document as modified
    */
-  public void setModifiedSinceSave(){
+  public void setModifiedSinceSave() {
     throw new UnsupportedOperationException("Dummy method");
   }
   
@@ -495,27 +495,27 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
     // no body
   }
   
-  public boolean isInProjectPath(){
+  public boolean isInProjectPath() {
     return false;
   }
   
-  public boolean isProjectFile(){
+  public boolean isProjectFile() {
     return false;
   }
   
-  public boolean isAuxiliaryFile(){
+  public boolean isAuxiliaryFile() {
     return false;
   }
   
-  public boolean belongsHuh(Document doc){
+  public boolean belongsHuh(Document doc) {
     return false;
   }
   
-  public int getLineStartPos(int pos){
+  public int getLineStartPos(int pos) {
     throw new UnsupportedOperationException("Dummy method");
   }
   
-  public int getLineEndPos(int pos){
+  public int getLineEndPos(int pos) {
     throw new UnsupportedOperationException("Dummy method");
   }
   
@@ -524,11 +524,11 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
    */
   protected Document _plainDocument = new PlainDocument();
   
-  public void addDocumentListener(DocumentListener listener){
+  public void addDocumentListener(DocumentListener listener) {
     _plainDocument.addDocumentListener(listener);
   }
   
-  public void addUndoableEditListener(UndoableEditListener listener){
+  public void addUndoableEditListener(UndoableEditListener listener) {
     _plainDocument.addUndoableEditListener(listener);
   }
   
@@ -536,7 +536,7 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
     return _plainDocument.createPosition(offs);
   }
   
-  public Element getDefaultRootElement(){
+  public Element getDefaultRootElement() {
     return _plainDocument.getDefaultRootElement();
   }
   
@@ -544,19 +544,19 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
     return _plainDocument.getEndPosition();
   }
   
-  public int getLength(){
+  public int getLength() {
     return _plainDocument.getLength();
   }
   
-  public Object getProperty(Object key){
+  public Object getProperty(Object key) {
     return _plainDocument.getProperty(key);
   }
   
-  public Element[] getRootElements(){
+  public Element[] getRootElements() {
     return _plainDocument.getRootElements();
   }
   
-  public Position getStartPosition(){
+  public Position getStartPosition() {
     return _plainDocument.getStartPosition();
   }
   
@@ -572,7 +572,7 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
     _plainDocument.insertString(offset, str, a);
   }
   
-  public void putProperty(Object key, Object value){
+  public void putProperty(Object key, Object value) {
     _plainDocument.putProperty(key, value);
   }
   
@@ -584,7 +584,7 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
     _plainDocument.removeDocumentListener(listener);
   }
   
-  public void removeUndoableEditListener(UndoableEditListener listener){
+  public void removeUndoableEditListener(UndoableEditListener listener) {
     _plainDocument.removeUndoableEditListener(listener);
   }
   
@@ -601,19 +601,19 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
   /**
    * decorater patter for the definitions document
    */
-  public CompoundUndoManager getUndoManager(){
+  public CompoundUndoManager getUndoManager() {
     throw new UnsupportedOperationException("Dummy method");
   }
   
-  public void commentLines(int selStart, int selEnd){
+  public void commentLines(int selStart, int selEnd) {
     throw new UnsupportedOperationException("Dummy method");
   }
   
-  public void uncommentLines(int selStart, int selEnd){
+  public void uncommentLines(int selStart, int selEnd) {
     throw new UnsupportedOperationException("Dummy method");
   }
   
-  public void indentLines(int selStart, int selEnd){
+  public void indentLines(int selStart, int selEnd) {
     throw new UnsupportedOperationException("Dummy method");
   }
   
@@ -621,7 +621,7 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
     throw new UnsupportedOperationException("Dummy method");
   }
   
-  public boolean getClassFileInSync(){
+  public boolean getClassFileInSync() {
     throw new UnsupportedOperationException("Dummy method");
   }
   
@@ -641,7 +641,7 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
     throw new UnsupportedOperationException("Dummy method");
   }
   
-  public ReducedModelState getStateAtCurrent(){
+  public ReducedModelState getStateAtCurrent() {
     throw new UnsupportedOperationException("Dummy method");
   }
   
@@ -665,7 +665,7 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
     throw new UnsupportedOperationException("Dummy method");
   }
   
-  public List<FinalizationListener<DefinitionsDocument>> getFinalizationListeners(){
+  public List<FinalizationListener<DefinitionsDocument>> getFinalizationListeners() {
     throw new UnsupportedOperationException("Dummy method");
   }
   
@@ -829,19 +829,19 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
     throw new UnsupportedOperationException("Dummy method");
   }
   
-  public int getInitialVerticalScroll(){
+  public int getInitialVerticalScroll() {
     throw new UnsupportedOperationException("Dummy method");
   }
   
-  public int getInitialHorizontalScroll(){
+  public int getInitialHorizontalScroll() {
     throw new UnsupportedOperationException("Dummy method");
   }
   
-  public int getInitialSelectionStart(){
+  public int getInitialSelectionStart() {
     throw new UnsupportedOperationException("Dummy method");
   }
   
-  public int getInitialSelectionEnd(){
+  public int getInitialSelectionEnd() {
     throw new UnsupportedOperationException("Dummy method");
   }
   

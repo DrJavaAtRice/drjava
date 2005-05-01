@@ -59,7 +59,7 @@ public final class IntegerOptionTest extends TestCase
    */
   public IntegerOptionTest(String name) { super(name); }
   
-  public void setUp() {}
+  public void setUp() { }
   
   public void testGetName()
   {
@@ -78,10 +78,10 @@ public final class IntegerOptionTest extends TestCase
     assertEquals(new Integer(-3), io.parse("-3"));
     
     try { io.parse("true"); fail(); }
-    catch (OptionParseException e) {}
+    catch (OptionParseException e) { }
     
     try { io.parse(".33"); fail(); }
-    catch (OptionParseException e) {}
+    catch (OptionParseException e) { }
   }
   
   public void testFormat()

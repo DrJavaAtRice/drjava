@@ -59,7 +59,7 @@ public final class BooleanOptionTest extends TestCase
    */
   public BooleanOptionTest(String name) { super(name); }
   
-  public void setUp() {}
+  public void setUp() { }
   
   public void testGetName()
   {
@@ -79,10 +79,10 @@ public final class BooleanOptionTest extends TestCase
     assertEquals(Boolean.FALSE, bo.parse(" faLse "));
     
     try { bo.parse("3"); fail(); }
-    catch (OptionParseException e) {}
+    catch (OptionParseException e) { }
     
     try { bo.parse("Tue"); fail(); }
-    catch (OptionParseException e) {}
+    catch (OptionParseException e) { }
   }
   
   public void testFormat()

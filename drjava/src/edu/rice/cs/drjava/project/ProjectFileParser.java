@@ -83,7 +83,7 @@ public class ProjectFileParser {
   /* singleton instance of ProjectFileParser */
   public static final ProjectFileParser ONLY = new ProjectFileParser();
   
-  private ProjectFileParser(){}
+  private ProjectFileParser() { }
   
   ///////////////// methods //////////////////
   
@@ -104,10 +104,10 @@ public class ProjectFileParser {
     ProjectFileIRImpl pfir = new ProjectFileIRImpl();
     
     try{
-      for(SEList exp : forest) {
+      for (SEList exp : forest) {
         evaluateExpression(exp, pfir, new FileListVisitor(projFile.getParent()));
       }
-    }catch(PrivateProjectException e){
+    }catch(PrivateProjectException e) {
       throw new MalformedProjectFileException("Parse Error: " + e.getMessage());
     }
     
@@ -202,9 +202,9 @@ public class ProjectFileParser {
   }
   
   private String parseFileName(SExp s) {
-    if(s instanceof Cons){
+    if (s instanceof Cons) {
       SEList l = ((Cons)s).getRest();
-      if(l == Empty.ONLY){
+      if (l == Empty.ONLY) {
         throw new PrivateProjectException("expected filename, but nothing found");
       }else{
         String name = l.accept(NameVisitor.ONLY);
@@ -217,13 +217,13 @@ public class ProjectFileParser {
     }
   }
   
-  private Pair<Integer,Integer> parseIntPair(SExp s){
+  private Pair<Integer,Integer> parseIntPair(SExp s) {
     int row;
     int col;
     /**
      * we're getting in a "(select # #)"
      */
-    if(!(s instanceof Cons)){
+    if (!(s instanceof Cons)) {
       throw new PrivateProjectException("expected name tag, found string");
     }
     
@@ -231,31 +231,31 @@ public class ProjectFileParser {
     final List<Integer> intList = new ArrayList<Integer>();
     SEList l = ((Cons)s).getRest();
     List<Integer> li = l.accept(new SExpVisitor<List<Integer>>() {
-      public List<Integer> forEmpty(Empty e){
+      public List<Integer> forEmpty(Empty e) {
         return intList;
       }
   
-      public List<Integer> forCons(Cons c){
+      public List<Integer> forCons(Cons c) {
         c.getFirst().accept(this);
         return c.getRest().accept(this);
       }
   
-      public List<Integer> forBoolAtom(BoolAtom b){
+      public List<Integer> forBoolAtom(BoolAtom b) {
         throw new PrivateProjectException("unexpected boolean found, int expected");
       }
       
-      public List<Integer> forNumberAtom(NumberAtom n){
+      public List<Integer> forNumberAtom(NumberAtom n) {
         intList.add(new Integer(n.intValue()));
         return intList;
       }
       
-      public List<Integer> forTextAtom(TextAtom t){
+      public List<Integer> forTextAtom(TextAtom t) {
         throw new PrivateProjectException("unexpected string found where number expected: " + t.getText());
       }
       
     });
     
-    if(li.size() == 2){
+    if (li.size() == 2) {
       return new Pair<Integer,Integer>(li.get(0), li.get(1));
     }else{
       throw new PrivateProjectException("expected a list of 2 ints for select, found list of size " + li.size());
@@ -265,8 +265,8 @@ public class ProjectFileParser {
     /**
      * takes input of form "(str str)" and returns the second string
      */
-    private String parseStringNode(SExp n){
-      if(n instanceof Cons){
+    private String parseStringNode(SExp n) {
+      if (n instanceof Cons) {
         return ((Cons)n).getRest().accept(NameVisitor.ONLY);
       }else{
         throw new PrivateProjectException("List expected, but found text instead");
@@ -312,9 +312,9 @@ public class ProjectFileParser {
     private Date modDate = null;
     
     private String _parentDir;
-    public FilePropertyVisitor(String parentDir){ _parentDir = parentDir; }
+    public FilePropertyVisitor(String parentDir) { _parentDir = parentDir; }
     
-    public DocFile forCons(Cons c){
+    public DocFile forCons(Cons c) {
       String name = c.getFirst().accept(NameVisitor.ONLY); 
       if (name.compareToIgnoreCase("name") == 0) {
         fname = ProjectFileParser.ONLY.parseFileName(c.getFirst());
@@ -344,8 +344,8 @@ public class ProjectFileParser {
       return c.getRest().accept(this);
     }
     
-    public DocFile forEmpty(Empty c){
-      if (_parentDir == null || new File(fname).isAbsolute()){
+    public DocFile forEmpty(Empty c) {
+      if (_parentDir == null || new File(fname).isAbsolute()) {
         return new DocFile(fname, select, scroll, active, pack);
       }
       else {
@@ -386,19 +386,19 @@ public class ProjectFileParser {
     public static final NameVisitor ONLY = new NameVisitor();
     private NameVisitor() { }
     
-    public String forEmpty(Empty e){
+    public String forEmpty(Empty e) {
       throw new PrivateProjectException("Found an empty node, expected a labeled node");
     }
-    public String forCons(Cons c){
+    public String forCons(Cons c) {
       return c.getFirst().accept(this);
     }
-    public String forBoolAtom(BoolAtom b){
+    public String forBoolAtom(BoolAtom b) {
       throw new PrivateProjectException("Found a boolean, expected a label");
     }
-    public String forNumberAtom(NumberAtom n){
+    public String forNumberAtom(NumberAtom n) {
       throw new PrivateProjectException("Found a number, expected a label");
     }
-    public String forTextAtom(TextAtom t){
+    public String forTextAtom(TextAtom t) {
       return t.getText();
     }
   };
@@ -508,7 +508,7 @@ public class ProjectFileParser {
 
   
   private static class PrivateProjectException extends RuntimeException{
-    public PrivateProjectException(String message){
+    public PrivateProjectException(String message) {
       super(message);
     }
   }

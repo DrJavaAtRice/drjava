@@ -388,7 +388,7 @@ public class DefaultCompilerModel implements CompilerModel {
     ClasspathVector extraClasspath = new ClasspathVector();
     if (_getter.getFileGroupingState().isProjectActive()) 
       extraClasspath.addAll(_getter.getFileGroupingState().getExtraClasspath());
-    for(File f : DrJava.getConfig().getSetting(OptionConstants.EXTRA_CLASSPATH)) {
+    for (File f : DrJava.getConfig().getSetting(OptionConstants.EXTRA_CLASSPATH)) {
       extraClasspath.add(f);
     }
 //    System.out.println("Extra classpath passed to compiler: " + extraClasspath.toString());
@@ -456,7 +456,7 @@ public class DefaultCompilerModel implements CompilerModel {
   
   /** Determines if file f ends with one of the extensions in exts. */
   private static boolean endsWithExt(File f, String[] exts) {
-    for(String ext: exts) { if (f.getName().endsWith(ext)) return true; }
+    for (String ext: exts) { if (f.getName().endsWith(ext)) return true; }
     return false;
   }
 
@@ -518,7 +518,7 @@ public class DefaultCompilerModel implements CompilerModel {
    *  @return whether any of the given documents are modified
    */
   protected static boolean _hasModifiedFiles(List<OpenDefinitionsDocument> defDocs) {
-    for(OpenDefinitionsDocument doc : defDocs) {
+    for (OpenDefinitionsDocument doc : defDocs) {
       if (doc.isModifiedSinceSave()) return true;  // Not all documents must be inspected
     }
     return false;

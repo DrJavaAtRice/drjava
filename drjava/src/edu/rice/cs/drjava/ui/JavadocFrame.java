@@ -160,7 +160,7 @@ public class JavadocFrame extends HTMLFrame {
            "DrJavadoc.png", destDir);
 
     addHyperlinkListener(new HyperlinkListener() {
-      public void hyperlinkUpdate(HyperlinkEvent event){
+      public void hyperlinkUpdate(HyperlinkEvent event) {
         if (event.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
           URL url = event.getURL();
           jumpTo(url);

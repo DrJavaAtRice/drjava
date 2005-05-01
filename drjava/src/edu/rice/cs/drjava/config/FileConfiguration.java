@@ -85,11 +85,11 @@ public class FileConfiguration extends SavableConfiguration {
    * @param header Description of the properties list
    */
   public void saveConfiguration(final String header) throws IOException {
-    FileOps.saveFile(new FileOps.DefaultFileSaver(file){
+    FileOps.saveFile(new FileOps.DefaultFileSaver(file) {
       public void saveTo(OutputStream os) throws IOException {
         saveConfiguration(os,header);
       }
-      public boolean shouldBackup(){
+      public boolean shouldBackup() {
         return false;
       }
     });

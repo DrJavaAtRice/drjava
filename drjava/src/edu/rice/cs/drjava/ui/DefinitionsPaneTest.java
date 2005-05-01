@@ -493,7 +493,7 @@ public final class DefinitionsPaneTest extends TestCase {
   }
   
   
-  public void testActiveAndInactive(){
+  public void testActiveAndInactive() {
     SingleDisplayModel _model = _frame.getModel();
     
     _model.newFile();
@@ -523,15 +523,15 @@ public final class DefinitionsPaneTest extends TestCase {
     _finalDocCount = 0;
     
     
-    FinalizationListener<DefinitionsPane> fl = new FinalizationListener<DefinitionsPane>(){
-      public void finalized(FinalizationEvent<DefinitionsPane> e){
+    FinalizationListener<DefinitionsPane> fl = new FinalizationListener<DefinitionsPane>() {
+      public void finalized(FinalizationEvent<DefinitionsPane> e) {
         _finalCount++;
 //        System.out.println("Finalizing: " + e.getObject().hashCode());
       }
     };
     
-    FinalizationListener<DefinitionsDocument> fldoc = new FinalizationListener<DefinitionsDocument>(){
-      public void finalized(FinalizationEvent<DefinitionsDocument> e){
+    FinalizationListener<DefinitionsDocument> fldoc = new FinalizationListener<DefinitionsDocument>() {
+      public void finalized(FinalizationEvent<DefinitionsDocument> e) {
         _finalDocCount++;
       }
     };
@@ -640,19 +640,19 @@ public final class DefinitionsPaneTest extends TestCase {
 
 class KeyTestListener implements KeyListener {
   
-  public void keyPressed(KeyEvent e){
+  public void keyPressed(KeyEvent e) {
     DefinitionsPaneTest.fail("Unexpected keypress " + e);
   }
   
-  public void keyReleased(KeyEvent e){
+  public void keyReleased(KeyEvent e) {
     DefinitionsPaneTest.fail("Unexpected keyrelease " + e);
   }
   
-  public void keyTyped(KeyEvent e){
+  public void keyTyped(KeyEvent e) {
     DefinitionsPaneTest.fail("Unexpected keytyped " + e);
   }
   
-  public boolean done(){
+  public boolean done() {
     return true;
   }
 }

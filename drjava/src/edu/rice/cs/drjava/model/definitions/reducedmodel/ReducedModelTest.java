@@ -814,11 +814,11 @@ public final class ReducedModelTest extends BraceReductionTestCase
     try {
       model1.move(-1);
       assertTrue("#0.1", false);
-    } catch (Exception e) {}
+    } catch (Exception e) { }
     try {
       model1.move(1);
       assertTrue("#0.2", false);
-    } catch (Exception e) {}
+    } catch (Exception e) { }
   }
 
   /**
@@ -956,11 +956,11 @@ public final class ReducedModelTest extends BraceReductionTestCase
     try {
       model0.move(-30);
       assertTrue("#0.0", false);
-    } catch (Exception e) {}
+    } catch (Exception e) { }
     try {
       model0.move(1);
       assertTrue("#0.1", false);
-    } catch (Exception e) {}
+    } catch (Exception e) { }
     assertEquals("#0.2", 12, model0.absOffset());
     model0.move(-2);
     assertEquals("#0.3", 10, model0.absOffset());

@@ -300,7 +300,7 @@ public class IdentityVisitor implements Visitor<Node> {
    */
   public Node visit(AssertStatement node) {
     node.setCondition((Expression)node.getCondition().acceptVisitor(this));
-    if(node.getFailString() != null)
+    if (node.getFailString() != null)
       node.setFailString((Expression)node.getFailString().acceptVisitor(this));
     return node;
   }

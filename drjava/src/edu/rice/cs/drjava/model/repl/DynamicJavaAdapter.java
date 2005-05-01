@@ -777,7 +777,7 @@ public class DynamicJavaAdapter implements JavaInterpreter {
    out.close();
    DrJava.consoleErr().println("debug class " + name + " to " + file.getAbsolutePath());
    }
-   catch (Throwable t) {}
+   catch (Throwable t) { }
    
    Class c = super.defineClass(name, code);
    return c;

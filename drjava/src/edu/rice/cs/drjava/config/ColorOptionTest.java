@@ -60,7 +60,7 @@ public final class ColorOptionTest extends TestCase
    */
   public ColorOptionTest(String name) { super(name); }
   
-  public void setUp() {}
+  public void setUp() { }
   
   public void testGetName()
   {
@@ -79,10 +79,10 @@ public final class ColorOptionTest extends TestCase
     assertEquals(Color.green, io.parse("0x00ff00"));
     
     try { io.parse("true"); fail(); }
-    catch (OptionParseException e) {}
+    catch (OptionParseException e) { }
     
     try { io.parse("black"); fail(); }
-    catch (OptionParseException e) {}
+    catch (OptionParseException e) { }
   }
   
  /**

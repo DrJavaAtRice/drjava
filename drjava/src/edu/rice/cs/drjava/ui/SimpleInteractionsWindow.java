@@ -85,30 +85,20 @@ public class SimpleInteractionsWindow extends JFrame {
     _pane.setFont(Font.decode("monospaced"));
 
     _model.addListener(new InteractionsListener() {
-      public void interactionStarted() {
-        _pane.setEditable(false);
-      }
+      public void interactionStarted() { _pane.setEditable(false); }
       public void interactionEnded() {
         _controller.moveToPrompt();
         _pane.setEditable(true);
       }
-      public void interpreterResetting() {
-        _pane.setEditable(false);
-      }
-      public void interactionErrorOccurred(int offset, int length){
-        _pane.highlightError(offset, length);
-      }
+      public void interpreterResetting() { _pane.setEditable(false); }
+      public void interactionErrorOccurred(int offset, int length) { _pane.highlightError(offset, length); }
       public void interpreterReady() {
         _controller.moveToPrompt();
         _pane.setEditable(true);
       }
-      public void interpreterExited(int status) {}
-      public void interpreterChanged(boolean inProgress) {
-        _pane.setEditable(inProgress);
-      }
-      public void interpreterResetFailed(Throwable t) {
-        interpreterReady();
-      }
+      public void interpreterExited(int status) { }
+      public void interpreterChanged(boolean inProgress) { _pane.setEditable(inProgress); }
+      public void interpreterResetFailed(Throwable t) { interpreterReady(); }
       public void interactionIncomplete() {
         int caretPos = _pane.getCaretPosition();
         _controller.getConsoleDoc().insertNewLine(caretPos);
@@ -120,54 +110,30 @@ public class SimpleInteractionsWindow extends JFrame {
 
     // Add listener to quit if window is closed
     this.addWindowListener(new WindowAdapter() {
-      public void windowClosing(WindowEvent ev) {
-        close();
-      }
+      public void windowClosing(WindowEvent ev) { close(); }
     });
-
   }
 
-  /**
-   * Terminates this process. This is overridden in DrJava
-   * so that is disposes of itself instead of calling System.exit(0).
+  /** Terminates this process. This is overridden in DrJava so that is disposes of itself instead of calling 
+   *  System.exit(0).
    */
-  protected void close() {
-    System.exit(0);
-  }
+  protected void close() { System.exit(0); }
 
-  /**
-   * Accessor for the controller.
-   */
-  public InteractionsController getController() {
-    return _controller;
-  }
+  /** Accessor for the controller. */
+  public InteractionsController getController() { return _controller; }
 
-  /**
-   * Defines a variable in this window to the given value.
-   */
-  public void defineVariable(String name, Object value) {
-    _model.defineVariable(name, value);
-  }
+  /** Defines a variable in this window to the given value. */
+  public void defineVariable(String name, Object value) { _model.defineVariable(name, value); }
 
-  /**
-   * Defines a final variable in this window to the given value.
-   */
-  public void defineConstant(String name, Object value) {
-    _model.defineConstant(name, value);
-  }
+  /** Defines a final variable in this window to the given value. */
+  public void defineConstant(String name, Object value) { _model.defineConstant(name, value); }
 
-  /**
-   * Sets whether protected and private variables and methods can be accessed
-   * from within the interpreter.
-   */
+  /** Sets whether protected and private variables and methods can be accessed from within the interpreter. */
   public void setInterpreterPrivateAccessible(boolean accessible) {
     _model.setInterpreterPrivateAccessible(accessible);
   }
 
-  /**
-   * Main method to create a SimpleInteractionsWindow from the console.
-   * Doesn't take any command line arguments.
-   */
+  /** Main method to create a SimpleInteractionsWindow from the console. Doesn't take any command line arguments. */
   public static void main(String[] args) {
     SimpleInteractionsWindow w = new SimpleInteractionsWindow();
     if (args.length > 0 && args[0].equals("-debug")) {

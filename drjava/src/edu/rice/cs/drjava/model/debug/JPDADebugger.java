@@ -186,7 +186,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
    * Removes a listener to this JPDADebugger.
    * @param listener listener to remove
    */
-  public void removeListener(DebugListener listener){
+  public void removeListener(DebugListener listener) {
     _notifier.removeListener(listener);
   }
 
@@ -469,14 +469,14 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
 //       threadRef.suspend();
 //
 //       try{
-//         if( threadRef.frameCount() <= 0 ) {
+//         if ( threadRef.frameCount() <= 0 ) {
 //           printMessage(threadRef.name() + " could not be suspended. It had no stackframes.");
 //           _suspendedThreads.push(threadRef);
 //           resume();
 //           return;
 //         }
 //       }
-//       catch(IncompatibleThreadStateException ex){
+//       catch(IncompatibleThreadStateException ex) {
 //         throw new UnexpectedException(ex);
 //       }
 //
@@ -671,10 +671,10 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     Iterator iterator = threads.iterator();
     ThreadReference threadRef = null;
 
-    while(iterator.hasNext()){
+    while(iterator.hasNext()) {
       threadRef = (ThreadReference)iterator.next();
 
-      if( !threadRef.isSuspended() ){
+      if ( !threadRef.isSuspended() ) {
         threadRef.suspend();
         _suspendedThreads.push(threadRef);
       }
@@ -1700,31 +1700,31 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     String signature_mid;
     String signature;
 
-    if((val == null) || ( val instanceof ObjectReference )){
+    if ((val == null) || ( val instanceof ObjectReference )) {
       signature_mid = "Ljava/lang/Object;Ljava/lang/Class;";
     }
-    else if( val instanceof BooleanValue ){
+    else if ( val instanceof BooleanValue ) {
       signature_mid = "Z";
     }
-    else if( val instanceof ByteValue ){
+    else if ( val instanceof ByteValue ) {
       signature_mid = "B";
     }
-    else if( val instanceof CharValue ){
+    else if ( val instanceof CharValue ) {
       signature_mid = "C";
     }
-    else if( val instanceof DoubleValue ){
+    else if ( val instanceof DoubleValue ) {
       signature_mid = "D";
     }
-    else if( val instanceof FloatValue ){
+    else if ( val instanceof FloatValue ) {
       signature_mid = "F";
     }
-    else if( val instanceof IntegerValue ){
+    else if ( val instanceof IntegerValue ) {
       signature_mid = "I";
     }
-    else if( val instanceof LongValue ){
+    else if ( val instanceof LongValue ) {
       signature_mid = "J";
     }
-    else if( val instanceof ShortValue ){
+    else if ( val instanceof ShortValue ) {
       signature_mid = "S";
     }
     else{
@@ -1799,7 +1799,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
         sr = _vm.mirrorOf(interpreterName);
         sr.disableCollection();
         args.add(sr); // make the String a JDI Value
-        if( printMessages ) {
+        if ( printMessages ) {
           System.out.println("Invoking " + m.toString() + " on " + args.toString());
           System.out.println("Thread is " + threadRef.toString() + " <suspended = " + threadRef.isSuspended() + ">");
         }
@@ -1808,7 +1808,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
                                                                                         ObjectReference.INVOKE_SINGLE_THREADED);
 
 
-        if( printMessages ) System.out.println("Returning...");
+        if ( printMessages ) System.out.println("Returning...");
         return tmpInterpreter;
       }
       catch (ObjectCollectedException e) {
@@ -1866,7 +1866,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
       }
 
       // Define each variable
-      while(varsIterator.hasNext()){
+      while(varsIterator.hasNext()) {
         LocalVariable localVar = varsIterator.next();
         if (printMessages) {
           System.out.println("local variable: " + localVar);
@@ -1918,16 +1918,16 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
         System.out.println("got active interpreter");
       }
     }
-    catch(InvalidTypeException exc){
+    catch(InvalidTypeException exc) {
       throw new DebugException(exc.toString());
     }
-    catch(IncompatibleThreadStateException e2){
+    catch(IncompatibleThreadStateException e2) {
       throw new DebugException(e2.toString());
     }
-    catch(ClassNotLoadedException e3){
+    catch(ClassNotLoadedException e3) {
       throw new DebugException(e3.toString());
     }
-    catch(InvocationException e4){
+    catch(InvocationException e4) {
       throw new DebugException(e4.toString());
     }
   }
@@ -2009,7 +2009,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
         _dumpVariablesIntoInterpreterAndSwitch();
         _switchToSuspendedThread();
       }
-      catch(AbsentInformationException aie){
+      catch(AbsentInformationException aie) {
         // an AbsentInformationException can be thrown if the user does not
         // compile the classes to be debugged with the -g flag
         printMessage("No debug information available for this class.\nMake sure to compile classes to be debugged with the -g flag.");
@@ -2073,7 +2073,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
   /**
    * @return the Method corresponding to DynamicJavaAdapter.getVariable()
    */
-  private Method _getGetVariableMethod(ReferenceType rtInterpreter){
+  private Method _getGetVariableMethod(ReferenceType rtInterpreter) {
     return _getMethod(rtInterpreter, "getVariable");
   }
 
@@ -2083,14 +2083,14 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
    * @param name Name of the method
    * @throws NoSuchElementException if no concrete method could be found
    */
-  private Method _getMethod(ReferenceType rt, String name){
+  private Method _getMethod(ReferenceType rt, String name) {
     List<Method> methods = rt.methodsByName(name);  // JDK 1.5 will eliminate this warning
     Iterator<Method> methodsIterator = methods.iterator();
 
     // iterate over all the methods in the list and return the first non-abstract one
-    while( methodsIterator.hasNext() ){
+    while( methodsIterator.hasNext() ) {
       Method m = methodsIterator.next();
-      if( !m.isAbstract() ){
+      if ( !m.isAbstract() ) {
         return m;
       }
     }
@@ -2123,28 +2123,28 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     ObjectReference ref = (ObjectReference)v;
     ReferenceType rt = ref.referenceType();
 
-    if( typeSignature.equals("Z") ){
+    if ( typeSignature.equals("Z") ) {
       m = _getMethod(rt, "booleanValue");
     }
-    else if( typeSignature.equals("B") ){
+    else if ( typeSignature.equals("B") ) {
       m = _getMethod(rt, "byteValue");
     }
-    else if( typeSignature.equals("C") ){
+    else if ( typeSignature.equals("C") ) {
       m = _getMethod(rt, "charValue");
     }
-    else if( typeSignature.equals("S") ){
+    else if ( typeSignature.equals("S") ) {
       m = _getMethod(rt, "shortValue");
     }
-    else if( typeSignature.equals("I") ){
+    else if ( typeSignature.equals("I") ) {
       m = _getMethod(rt, "intValue");
     }
-    else if( typeSignature.equals("J") ){
+    else if ( typeSignature.equals("J") ) {
       m = _getMethod(rt, "longValue");
     }
-    else if( typeSignature.equals("F") ){
+    else if ( typeSignature.equals("F") ) {
       m = _getMethod(rt, "floatValue");
     }
-    else if( typeSignature.equals("D") ){
+    else if ( typeSignature.equals("D") ) {
       m = _getMethod(rt, "doubleValue");
     }
     else{
@@ -2240,15 +2240,15 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     throws IncompatibleThreadStateException, AbsentInformationException,
       InvocationException, DebugException
   {
-    if(printMessages) System.out.println("Getting debug interpreter");
-    if(printMessages) System.err.println("Getting variables");
+    if (printMessages) System.out.println("Getting debug interpreter");
+    if (printMessages) System.err.println("Getting variables");
     StackFrame frame = threadRef.frame(0);
     List<LocalVariable> vars = frame.visibleVariables();  // Added <LocalVariable> type argument; warning will go away in JDK 1.5
     Iterator<LocalVariable> varsIterator = vars.iterator();
 
     // Get each variable from the stack frame
     while(varsIterator.hasNext()) {
-      if(printMessages) System.out.println("Iterating through vars");
+      if (printMessages) System.out.println("Iterating through vars");
       LocalVariable localVar = varsIterator.next();
 
       try {
@@ -2269,9 +2269,9 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     try {
       // copy variables values out of interpreter's environment and
       // into the relevant stack frame
-      if(printMessages) System.out.println("In _copyBack()");
+      if (printMessages) System.out.println("In _copyBack()");
       _copyBack(_runningThread);
-      if(printMessages) System.out.println("Out of _copyBack()");
+      if (printMessages) System.out.println("Out of _copyBack()");
     }
     catch(AbsentInformationException e2) {
       //throw new DebugException(e2.toString());
@@ -2344,7 +2344,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
    * Switches the current interpreter to the one corresponding to threadRef
    * @param threadRef The ThreadRefernce corresponding to the interpreter to switch to
    */
-  private void _switchToInterpreterForThreadReference(ThreadReference threadRef){
+  private void _switchToInterpreterForThreadReference(ThreadReference threadRef) {
     String threadName = _getUniqueThreadName(threadRef);
     String prompt = _getPromptString(threadRef);
     _model.getInteractionsModel().setActiveInterpreter(threadName, prompt);
@@ -2377,7 +2377,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
           scrollToSource(thread.frame(0).location());
         }
       }
-      catch(IncompatibleThreadStateException e){
+      catch(IncompatibleThreadStateException e) {
         throw new UnexpectedException(e);
       }
 
@@ -2453,7 +2453,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
   protected static class RandomAccessStack {
     private Vector<ThreadReference> _data = new Vector<ThreadReference>();
 
-    public synchronized void push(ThreadReference t){
+    public synchronized void push(ThreadReference t) {
       _data.add(0, t);
     }
 
@@ -2461,7 +2461,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
       try {
         return _data.get(0);
       }
-      catch(ArrayIndexOutOfBoundsException e){
+      catch(ArrayIndexOutOfBoundsException e) {
         throw new NoSuchElementException("Cannot peek at the top of an empty RandomAccessStack!");
       }
     }
@@ -2470,14 +2470,14 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
       try {
         return _data.get(i);
       }
-      catch(ArrayIndexOutOfBoundsException e){
+      catch(ArrayIndexOutOfBoundsException e) {
         throw new NoSuchElementException("Cannot peek at element " + i + " of this stack!");
       }
     }
 
     public synchronized ThreadReference remove(long id) throws NoSuchElementException{
-      for(int i = 0; i < _data.size(); i++){
-        if( _data.get(i).uniqueID() == id ){
+      for(int i = 0; i < _data.size(); i++) {
+        if ( _data.get(i).uniqueID() == id ) {
           ThreadReference t = _data.get(i);
           _data.remove(i);
           return t;
@@ -2498,9 +2498,9 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
       }
     }
 
-    public synchronized boolean contains(long id){
-      for(int i = 0; i < _data.size(); i++){
-        if( _data.get(i).uniqueID() == id ){
+    public synchronized boolean contains(long id) {
+      for(int i = 0; i < _data.size(); i++) {
+        if ( _data.get(i).uniqueID() == id ) {
           return true;
         }
       }
@@ -2524,27 +2524,27 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
   class SystemThreadsFilter{
     private HashMap<String,Boolean> _filterThese;
 
-    public SystemThreadsFilter(List threads){
+    public SystemThreadsFilter(List threads) {
       _filterThese = new HashMap<String,Boolean>();
       Iterator iterator = threads.iterator();
       String temp = null;
 
-      while(iterator.hasNext()){
+      while(iterator.hasNext()) {
         temp = ((ThreadReference)iterator.next()).name();
         _filterThese.put(temp, Boolean.TRUE);
       }
     }
 
-    public List filter(List list){
+    public List filter(List list) {
       LinkedList retList = new LinkedList();
       String temp = null;
       ThreadReference tempThreadRef = null;
       Iterator iterator = list.iterator();
 
-      while(iterator.hasNext()){
+      while(iterator.hasNext()) {
         tempThreadRef = (ThreadReference)iterator.next();
         temp = tempThreadRef.name();
-        if( _filterThese.get(temp) == null ){
+        if ( _filterThese.get(temp) == null ) {
           retList.add(tempThreadRef);
         }
       }

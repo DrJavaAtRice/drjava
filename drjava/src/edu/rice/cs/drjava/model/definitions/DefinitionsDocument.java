@@ -114,13 +114,13 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   
 //  private boolean _closed = false;
 //  
-//  protected void throwErrorHuh(){
+//  protected void throwErrorHuh() {
 //    if (_closed) throw new RuntimeException("Definitions Document is closed, yet is being used");
 //  }
   
   /** Called when this is kicked out of the document cache so that the references made to it may 
    *  be released so that this can be GC'd. */
-  public void close(){
+  public void close() {
     _removeIndenter();
     
     synchronized (_closedListeners) {
@@ -199,8 +199,8 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   }
   
   
-//  public void setUndoManager(CompoundUndoManager undoManager){
-//    if(undoManager != null)
+//  public void setUndoManager(CompoundUndoManager undoManager) {
+//    if (undoManager != null)
 //      _undoManager = undoManager;
 //  }
 
@@ -221,7 +221,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   
 
   /** This function is for use by the OpenDefinitionsDocument. This will lock the Document. */
-  public void aquireWriteLock(){
+  public void aquireWriteLock() {
     // throwErrorHuh();
     writeLock();
   }
@@ -229,7 +229,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   /**
    * this function is for use by the OpenDefinitionsDocument. This will release the lock to the Document.
    */
-  public void releaseWriteLock(){ writeUnlock(); }
+  public void releaseWriteLock() { writeUnlock(); }
   
   /** This function is for use by the OpenDefinitionsDocument. This will lock the Document.  */
   public void aquireReadLock() { readLock(); }
@@ -243,13 +243,13 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
    * (the odd can only be set once)
    * @param odd the OpenDefinitionsDocument to set as this DD's holder
    */
-  public void setOpenDefDoc(OpenDefinitionsDocument odd) { if(_odd == null) _odd = odd; }
+  public void setOpenDefDoc(OpenDefinitionsDocument odd) { if (_odd == null) _odd = odd; }
   
   /**
    * @return the OpenDefinitonsDocument that is associated with this DefinitionsDocument
    */
   public OpenDefinitionsDocument getOpenDefDoc() {
-    if(_odd == null)
+    if (_odd == null)
       throw new IllegalStateException("The OpenDefinitionsDocument for this DefinitionsDocument has never been set");
     else return _odd;
   }
@@ -397,9 +397,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   }
   
   
-  /**
-   * Removes a block of text from the specified location.
-   * We don't update the reduced model here; that happens
+  /** Removes a block of text from the specified location. We don't update the reduced model here; that happens
    * in {@link #removeUpdate}.
    */
   public void remove(int offset, int len) throws BadLocationException {
@@ -490,7 +488,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
    */
   public int getCurrentCol() {
     // throwErrorHuh();
-    int here = getCurrentLocation();
+    int here = _currentLocation;
     int startOfLine = getLineStartPos(here);
     return here - startOfLine;
   }
@@ -498,7 +496,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   /** Return the current line of the cursor position.  Uses a 1-based index. */
   public int getCurrentLine() {
     // throwErrorHuh();
-    int here = getCurrentLocation();
+    int here = _currentLocation;
     if (_cachedLocation > getLength()) {
       // we can't know the last line number after a delete; starting over.
       _cachedLocation = 0;
@@ -506,7 +504,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     }
     if (_cachedNextLineLoc > getLength()) _cachedNextLineLoc = -1;
     // let's see if we get off easy
-    if( ! (_cachedPrevLineLoc < here && here < _cachedNextLineLoc )) {
+    if ( ! (_cachedPrevLineLoc < here && here < _cachedNextLineLoc )) {
 
       // this if improves performance when moving from the end of the document to the beginnning.
       // in essence, it calculates the line number from scratch
@@ -527,9 +525,9 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
 
   /** This method returns the relative offset of line number from the previous location in the 
    *  document. */
-  private int _getRelativeLine(){
+  private int _getRelativeLine() {
     int count=0;
-    int currLoc = getCurrentLocation();
+    int currLoc = _currentLocation;
 
     setCurrentLocation(_cachedLocation);
 
@@ -604,32 +602,36 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
    */
   public void commentLines(int selStart, int selEnd) {
     // throwErrorHuh();
-    try {
       //int key = _undoManager.startCompoundEdit();  //Uncommented in regards to the FrenchKeyBoardFix
       if (selStart == selEnd) {
-        Position oldCurrentPosition = createPosition(_currentLocation);
-        _commentLine();
-        //int caretPos = getCaretPosition();
-        //_doc().setCurrentLocation(caretPos);
-        setCurrentLocation(oldCurrentPosition.getOffset());
+        writeLock();
+        try {
+          
+          synchronized (_reduced) {
+            Position oldCurrentPosition = createPosition(_currentLocation);
+            _commentLine();
+            //int caretPos = getCaretPosition();
+            //_doc().setCurrentLocation(caretPos);
+          }
+        }
+        catch (BadLocationException e) { throw new UnexpectedException(e); }
+        finally { writeUnlock(); }
       }
-      else {
-        _commentBlock(selStart, selEnd);
-      }
+      else _commentBlock(selStart, selEnd);
+        
       _undoManager.endLastCompoundEdit();  //Changed from endCompoundEdit(key) for FrenchKeyBoardFix
-    }
-    catch (BadLocationException e) { throw new UnexpectedException(e); }
   }
+ 
 
-  /**
-   * Comments out the lines between and including the lines containing
-   * points start and end, using wing comments -- "// ".
-   * @param start Position in document to start commenting from
-   * @param end Position in document to end commenting at
+  /** Comments out the lines between and including the lines containing points start and end, using wing 
+   *  comments -- "// ".
+   * 
+   *  @param start Position in document to start commenting from
+   *  @param end Position in document to end commenting at
    */
   private void _commentBlock(final int start, final int end) {
-    // throwErrorHuh();
-    //DrJava.consoleOut().println("commenting out block of " + (end-start));
+    
+    writeLock();
     try {
       // Keep marker at the end. This Position will be the
       // correct endpoint no matter how we change the doc
@@ -637,364 +639,327 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
       final Position endPos = this.createPosition(end);
       // Iterate, line by line, until we get to/past the end
       int walker = start;
- 
-      while (walker < endPos.getOffset()) {
-        setCurrentLocation(walker);
-        // Keep pointer to walker position that will stay current
-        // regardless of how commentLine changes things
-        Position walkerPos = this.createPosition(walker);
-        // Comment out current line
-        _commentLine();  // must be atomic
-
-        // Move back to walker spot
-        setCurrentLocation(walkerPos.getOffset());
-        walker = walkerPos.getOffset();
-        // Adding 1 makes us point to the first character AFTER the next newline.
-        // We don't actually move yet. That happens at the top of the loop,
-        // after we check if we're past the end.
-        walker += _reduced.getDistToNextNewline() + 1;
-        //DrJava.consoleOut().println("progress: " + (100*(walker-start)/(end-start)));
+      synchronized(_reduced) {
+        while (walker < endPos.getOffset()) {
+          setCurrentLocation(walker);
+          // Keep pointer to walker position that will stay current
+          // regardless of how commentLine changes things
+          Position walkerPos = this.createPosition(walker);
+          // Comment out current line
+          _commentLine();  // must be atomic
+          
+          // Move back to walker spot
+          setCurrentLocation(walkerPos.getOffset());
+          walker = walkerPos.getOffset();
+          // Adding 1 makes us point to the first character AFTER the next newline.
+          // We don't actually move yet. That happens at the top of the loop,
+          // after we check if we're past the end.
+          walker += _reduced.getDistToNextNewline() + 1;
+          //DrJava.consoleOut().println("progress: " + (100*(walker-start)/(end-start)));
+        }
       }
-    } catch (BadLocationException e) {
-      // Should not happen
-      throw new UnexpectedException(e);
-    }
+    } 
+    catch (BadLocationException e) { throw new UnexpectedException(e); }
+    finally { writeUnlock(); }
   }
 
-  /**
-   * Comments out a single line with wing comments -- "// ".
-   */
+  /** Comments out a single line with wing comments -- "// ". 
+   *  @pre this.writeLock() and _reduced lock are already held! */
   private void _commentLine() {
-    // throwErrorHuh();
     // Insert "// " at the beginning of the line.
     // Using null for AttributeSet follows convention in this class.
-    try {
-      insertString(getCurrentLocation() - getCurrentCol(), "//", null);   // insertString is already atomic
-    } catch (BadLocationException e) {
-      // Should not happen
-      throw new UnexpectedException(e);
-    }
+    try { insertString(_currentLocation - getCurrentCol(), "//", null); } 
+    catch (BadLocationException e) { throw new UnexpectedException(e); }
   }
 
-  /**
-   * Uncomments all lines between selStart and selEnd, inclusive.
-   * The current cursor position is maintained after the operation.
-   * @param selStart the document offset for the start of the selection
-   * @param selEnd the document offset for the end of the selection
+  /** Uncomments all lines between selStart and selEnd, inclusive.
+   *  The current cursor position is maintained after the operation.
+   *  @param selStart the document offset for the start of the selection
+   *  @param selEnd the document offset for the end of the selection
    */
   public void uncommentLines(int selStart, int selEnd) {
-    synchronized (_reduced) {
+ 
+    //int key = _undoManager.startCompoundEdit(); //commented out for FrenchKeyBoardFix
+    if (selStart == selEnd) {
+      writeLock();
       try {
-        //int key = _undoManager.startCompoundEdit(); //commented out for FrenchKeyBoardFix
-        if (selStart == selEnd) {
+        synchronized (_reduced) {
           Position oldCurrentPosition = createPosition(_currentLocation);
           _uncommentLine();
           //int caretPos = getCaretPosition();
           //_doc().setCurrentLocation(caretPos);
           setCurrentLocation(oldCurrentPosition.getOffset());
         }
-        else _uncommentBlock(selStart, selEnd);
-        //_undoManager.endCompoundEdit(key); //Commented out for FrenchKeyBoardFix, Replaced with endLastCompoundEdit();
-        _undoManager.endLastCompoundEdit();
       }
-      catch (BadLocationException e) {
-        throw new UnexpectedException(e);
-      }
+      catch (BadLocationException e) { throw new UnexpectedException(e); }
+      finally { writeUnlock(); }
     }
+    else _uncommentBlock(selStart, selEnd);
+    //_undoManager.endCompoundEdit(key); //Commented out for FrenchKeyBoardFix, Replaced with endLastCompoundEdit();
+    _undoManager.endLastCompoundEdit();
   }
 
-  /**
-   * Uncomments all lines between and including the lines containing
-   * points start and end.  Only called from a thread already holding
-   * a lock on _reduced.
+  /** Uncomments all lines between and including the lines containing
+   *  points start and end.  
    * @param start Position in document to start commenting from
    * @param end Position in document to end commenting at
    */
   private void _uncommentBlock(final int start, final int end) {
-    // throwErrorHuh();
-    //DrJava.consoleOut().println("uncommenting block of " + (end-start));
-    
+    writeLock();
     try {
-      // Keep marker at the end. This Position will be the
-      // correct endpoint no matter how we change the doc
+      // Keep marker at the end. This Position will be the correct endpoint no matter how we change the doc
       // doing the indentLine calls.
       final Position endPos = this.createPosition(end);
       // Iterate, line by line, until we get to/past the end
       int walker = start;
-      while (walker < endPos.getOffset()) {
-        setCurrentLocation(walker);
-        // Keep pointer to walker position that will stay current
-        // regardless of how commentLine changes things
-        Position walkerPos = this.createPosition(walker);
-        // uncomment current line
-        _uncommentLine();
-        
-        // Move back to walker spot
-        setCurrentLocation(walkerPos.getOffset());
-        walker = walkerPos.getOffset();
-        // Adding 1 makes us point to the first character AFTER the next newline.
-        // We don't actually move yet. That happens at the top of the loop,
-        // after we check if we're past the end.
-        walker += _reduced.getDistToNextNewline() + 1;
-        //DrJava.consoleOut().println("progress: " + (100*(walker-start)/(end-start)));
+      synchronized (_reduced) {
+        while (walker < endPos.getOffset()) {
+          setCurrentLocation(walker);
+          // Keep pointer to walker position that will stay current
+          // regardless of how commentLine changes things
+          Position walkerPos = this.createPosition(walker);
+          // uncomment current line
+          _uncommentLine();
+          
+          // Move back to walker spot
+          setCurrentLocation(walkerPos.getOffset());
+          walker = walkerPos.getOffset();
+          // Adding 1 makes us point to the first character AFTER the next newline.
+          // We don't actually move yet. That happens at the top of the loop,
+          // after we check if we're past the end.
+          walker += _reduced.getDistToNextNewline() + 1;
+          //DrJava.consoleOut().println("progress: " + (100*(walker-start)/(end-start)));
+        }
       }
-    } catch (BadLocationException e) {
-      // Should not happen
-      throw new UnexpectedException(e);
+    }
+    catch (BadLocationException e) { throw new UnexpectedException(e); }
+    finally { writeUnlock(); }
+  }
+
+  /** Uncomments a single line.  This simply looks for a leading "//".
+   *  Also indents the line, once the comments have been removed.
+   *  @pre theads hold this.writeLock() and _reduced lock
+   */
+  private void _uncommentLine() throws BadLocationException {
+    // Look for "//" at the beginning of the line, and remove it.
+    int curCol = getCurrentCol();
+    int lineStart = _currentLocation - curCol;
+    String text = getText(lineStart, curCol + _reduced.getDistToNextNewline());
+    int pos = text.indexOf("//");
+    
+    //      System.out.println("" + _currentLocation + " " + curCol + " "
+    //                           + text + " " + pos + " " + _reduced.getDistToNextNewline());
+    
+    // Look for any non-whitespace chars before the "//" on the line.
+    boolean goodWing = true;
+    for (int i = pos-1; i >= 0; i--) {
+      char c = text.charAt(i);
+      // If a previous char is not whitespace, we're not looking at a wing comment.
+      if (c != ' ') {
+        goodWing = false;
+        break;
+      }
+    }
+    
+    // If a wing comment wasn't found, or if the wings aren't the first
+    // non-whitespace characters on the line, do nothing.
+    if (pos >= 0 && goodWing) {
+      // Otherwise, remove the wings and indent.
+      remove(lineStart + pos, 2);
+      _indentLine(Indenter.OTHER);
     }
   }
 
-  /**
-   * Uncomments a single line.  This simply looks for a leading "//".
-   * Also indents the line, once the comments have been removed.
-   * Only called in threads already holding lock on _reduced 
-   */
-  private void _uncommentLine() {
-    // throwErrorHuh();
-    try {
-      // Look for "//" at the beginning of the line, and remove it.
-      int curCol = getCurrentCol();
-      int lineStart = getCurrentLocation() - curCol;
-      String text = getText(lineStart, curCol + _reduced.getDistToNextNewline());
-      int pos = text.indexOf("//");
+//  /** Indents a line in accordance with the rules that DrJava has set up. This is the old version, 
+//   *  which has been replaced by the indent rule decision tree.
+//   */
+//  private void _indentLine() {
+//    try {
+//      // moves us to the end of the line
+//      move(_reduced.getDistToNextNewline());
+//      IndentInfo ii = _reduced.getIndentInformation();
+//      String braceType = ii.braceType;
+//      int distToNewline = ii.distToNewline;
+//      int distToBrace = ii.distToBrace;
+//      int distToPrevNewline = ii.distToPrevNewline;
+//      int tab = 0;
+//      boolean isSecondLine = false;
+//      if (distToNewline == -1) {
+//        distToNewline = _currentLocation;
+//        isSecondLine = true;
+//      }
+//      if (distToPrevNewline == -1)              //only on the first line
+//        tab = 0;
+//      //takes care of the second line
+//      else if (this._currentLocation - distToPrevNewline < 2)
+//        tab = 0;
+//      else if (distToBrace == -1)
+//        tab = _indentSpecialCases(0, distToPrevNewline);
+//      else if (braceType.equals("("))
+//        tab = distToNewline - distToBrace + 1;
+//      else if (braceType.equals("{")) {
+//        tab = getWhiteSpaceBetween(distToNewline, distToBrace) + _indent;
+//        tab = _indentSpecialCases(tab, distToPrevNewline);
+//      }
+//      else if (braceType.equals("["))
+//        tab = distToNewline - distToBrace + 1;
+//      tab(tab, distToPrevNewline);
+//    } catch (BadLocationException e) {
+//      throw  new UnexpectedException(e);
+//    }
+//  }
 
-//      System.out.println("" + getCurrentLocation() + " " + curCol + " "
-//                           + text + " " + pos + " " + _reduced.getDistToNextNewline());
+//  /** Deals with the special cases. If the first character after the previous \n is a } then -2
+//   *  Replaced by indent rule decision tree.
+//   *  @exception BadLocationException
+//   */
+//  private int _indentSpecialCases(int tab, int distToPrevNewline) throws BadLocationException {
+//    //not a special case.
+//    if (distToPrevNewline == -1)
+//      return  tab;
+//    //setup
+//    int start = _reduced.getDistToPreviousNewline(distToPrevNewline + 1);
+//    if (start == -1)
+//      start = 0;
+//    else
+//      start = _currentLocation - start;
+//    String text = this.getText(start, _currentLocation - start);
+//    //case of  }
+//    int length = text.length();
+//    int k = length - distToPrevNewline;
+//    while (k < length && text.charAt(k) == ' ')
+//      k++;
+//    if (k < length && text.charAt(k) == '}')
+//      tab -= _indent;
+//    // if no matching { then let offset be 0.
+//    if (tab < 0)
+//      tab = 0;
+//    //non-normal endings
+//    int i = length - distToPrevNewline - 2;
+//    int distanceMoved = distToPrevNewline + 2;
+//    move(-distToPrevNewline - 2);               //assumed: we are at end of a line.
+//    while (i >= 0 && _isCommentedOrSpace(i, text)) {
+//      i--;
+//      if (i > 0) {              //gaurentees you don't move into document Start.
+//        distanceMoved++;
+//        move(-1);
+//      }
+//    }
+//    move(distanceMoved);        //move the document bac.
+//    if (i >= 0 && !(_normEndings.contains(text.substring(i, i + 1)))) {
+//      int j = 0;
+//      while ((j < length) && (text.charAt(j) == ' '))
+//        j++;
+//      if ((k < length) && (text.charAt(k) == '{')) {
+//        if ((j < length) && (text.charAt(j) == '{'))
+//          tab = j + _indent;
+//        else
+//          tab = j;
+//      }
+//      else
+//        tab = j + _indent;
+//    }
+//    //return tab
+//    return  tab;
+//  }
 
-      // Look for any non-whitespace chars before the "//" on the line.
-      boolean goodWing = true;
-      for (int i = pos-1; ((i >= 0) && goodWing); i--) {
-        char c = text.charAt(i);
-        // If a previous char is not whitespace, we're not looking at a wing comment.
-        // TODO: why the following???
-        if (!((c == ' ') || (c == ' ') || (c == ' '))) goodWing = false;
-      }
-
-      // If a wing comment wasn't found, or if the wings aren't the first
-      // non-whitespace characters on the line, do nothing.
-      if ((pos >= 0) && goodWing) {
-        // Otherwise, remove the wings and indent.
-        remove(lineStart + pos, 2);
-        _indentLine(Indenter.OTHER);
-      }
-    } catch (BadLocationException e) { throw new UnexpectedException(e); }
-  }
-
-  /**
-   * Indents a line in accordance with the rules that DrJava has set up.
-   *
-   * This is the old version, which has been replaced by the indent
-   * rule decision tree.
-   *
-  private void _indentLine() {
-    try {
-      // moves us to the end of the line
-      move(_reduced.getDistToNextNewline());
-      IndentInfo ii = _reduced.getIndentInformation();
-      String braceType = ii.braceType;
-      int distToNewline = ii.distToNewline;
-      int distToBrace = ii.distToBrace;
-      int distToPrevNewline = ii.distToPrevNewline;
-      int tab = 0;
-      boolean isSecondLine = false;
-      if (distToNewline == -1) {
-        distToNewline = _currentLocation;
-        isSecondLine = true;
-      }
-      if (distToPrevNewline == -1)              //only on the first line
-        tab = 0;
-      //takes care of the second line
-      else if (this._currentLocation - distToPrevNewline < 2)
-        tab = 0;
-      else if (distToBrace == -1)
-        tab = _indentSpecialCases(0, distToPrevNewline);
-      else if (braceType.equals("("))
-        tab = distToNewline - distToBrace + 1;
-      else if (braceType.equals("{")) {
-        tab = getWhiteSpaceBetween(distToNewline, distToBrace) + _indent;
-        tab = _indentSpecialCases(tab, distToPrevNewline);
-      }
-      else if (braceType.equals("["))
-        tab = distToNewline - distToBrace + 1;
-      tab(tab, distToPrevNewline);
-    } catch (BadLocationException e) {
-      throw  new UnexpectedException(e);
-    }
-  }*/
-
-  /**
-   * Deals with the special cases.
-   * If the first character after the previous \n is a } then -2
-   *
-   * Replaced by indent rule decision tree.
-   *
-   * @exception BadLocationException
-   *
-  private int _indentSpecialCases(int tab, int distToPrevNewline) throws BadLocationException {
-    //not a special case.
-    if (distToPrevNewline == -1)
-      return  tab;
-    //setup
-    int start = _reduced.getDistToPreviousNewline(distToPrevNewline + 1);
-    if (start == -1)
-      start = 0;
-    else
-      start = _currentLocation - start;
-    String text = this.getText(start, _currentLocation - start);
-    //case of  }
-    int length = text.length();
-    int k = length - distToPrevNewline;
-    while (k < length && text.charAt(k) == ' ')
-      k++;
-    if (k < length && text.charAt(k) == '}')
-      tab -= _indent;
-    // if no matching { then let offset be 0.
-    if (tab < 0)
-      tab = 0;
-    //non-normal endings
-    int i = length - distToPrevNewline - 2;
-    int distanceMoved = distToPrevNewline + 2;
-    move(-distToPrevNewline - 2);               //assumed: we are at end of a line.
-    while (i >= 0 && _isCommentedOrSpace(i, text)) {
-      i--;
-      if (i > 0) {              //gaurentees you don't move into document Start.
-        distanceMoved++;
-        move(-1);
-      }
-    }
-    move(distanceMoved);        //move the document bac.
-    if (i >= 0 && !(_normEndings.contains(text.substring(i, i + 1)))) {
-      int j = 0;
-      while ((j < length) && (text.charAt(j) == ' '))
-        j++;
-      if ((k < length) && (text.charAt(k) == '{')) {
-        if ((j < length) && (text.charAt(j) == '{'))
-          tab = j + _indent;
-        else
-          tab = j;
-      }
-      else
-        tab = j + _indent;
-    }
-    //return tab
-    return  tab;
-  }*/
-
-  /**
-   * Determines if the current token is part of a comment or if the i'th character
-   * in the given text argument is a space.
-   * @param i the index to look at for the space in text
-   * @param text a block of text
-   * @return true if the conditions are met
-   * doesn't seem to be used/
-  private synchronized boolean _isCommentedOrSpace(int i, String text) {
-    ReducedToken rt = _reduced.currentToken();
-    String type = rt.getType();
-    return  (rt.isCommented() || type.equals("//") || type.equals("")
-        || (text.charAt(i) == ' '));
-  }*/
+//  /** Determines if current token is part of a comment OR text.charAt(i) in the given text argument is a space.
+//   *  @param i the index to look at for the space in text
+//   *  @param text a block of text
+//   *  @return true if the conditions are met
+//   * doesn't seem to be used*/
+//  private synchronized boolean _isCommentedOrSpace(int i, String text) {
+//    ReducedToken rt = _reduced.currentToken();
+//    String type = rt.getType();
+//    return  (rt.isCommented() || type.equals("//") || type.equals("")
+//        || (text.charAt(i) == ' '));
+//  }
 
 
-  /**
-   * The function that handles what happens when a tab key is pressed.
-   * It is given the size of the leading whitespace and based on the
-   * current indent information, either shrinks or expands that whitespace.
-   * @param tab number of indents, i.e., level of nesting
-   * @param distToPrevNewline distance to end of previous line
-   * @exception BadLocationException
-   *
-  void tab(int tab, int distToPrevNewline) throws BadLocationException {
-    if (distToPrevNewline == -1) {
-      distToPrevNewline = _currentLocation;
-    }
-    int currentTab = getWhiteSpaceBetween(distToPrevNewline, 0);
-    if (tab == currentTab) {
-      return;
-    }
-    if (tab > currentTab) {
-      String spaces = "";
+//  /** The function that handles what happens when a tab key is pressed. It is given the size of the leading 
+//   *  whitespace and based on the current indent information, either shrinks or expands that whitespace.
+//   *  @param tab number of indents, i.e., level of nesting
+//   *  @param distToPrevNewline distance to end of previous line
+//   *  @exception BadLocationException
+//   */
+//  void tab(int tab, int distToPrevNewline) throws BadLocationException {
+//    if (distToPrevNewline == -1) distToPrevNewline = _currentLocation;
+//    int currentTab = getWhiteSpaceBetween(distToPrevNewline, 0);
+//    int dist = tab - currentTab;
+//    
+//    if (dist == 0) return;
+//    if (dist > 0) {
+//      String spaces = "";
+//      for (int i = 0; i < dist; i++) { spaces = spaces + " "; }
+//      insertString(_currentLocation - distToPrevNewline, spaces, null);
+//    }
+//    else  remove(_currentLocation - distToPrevNewline, currentTab - tab);
+//  }
 
-      for (int i = 0; i < tab - currentTab; i++) {
-        spaces = spaces + " ";
-      }
-
-      insertString(_currentLocation - distToPrevNewline, spaces, null);
-    }
-    else {
-      remove(_currentLocation - distToPrevNewline, currentTab - tab);
-    }
-  }*/
-
-  /**
-   * Goes to a particular line in the document.
-   */
+  /** Goes to a particular line in the document. */
   public void gotoLine(int line) {
 
     int dist;
     if (line < 0) return;
     int actualLine =1;
     
-    synchronized (_reduced) {
-      setCurrentLocation(0);
-      for (int i = 1; (i < line) && (_currentLocation < getLength()); i++) {
-        dist = _reduced.getDistToNextNewline();
-        if (_currentLocation + dist < getLength()) {
-          dist++;
+    readLock();
+    int len = getLength();
+    try {
+      synchronized (_reduced) {
+        setCurrentLocation(0);
+        for (int i = 1; (i < line) && (_currentLocation < len); i++) {
+          dist = _reduced.getDistToNextNewline();
+          if (_currentLocation + dist < len) dist++;
+          actualLine++;
+          move(dist);
         }
-        actualLine++;
-        move(dist);
+        _cachedLineNum = actualLine;
+        _cachedLocation = _currentLocation;
+        _cachedPrevLineLoc = getLineStartPos(_currentLocation);
+        _cachedNextLineLoc = getLineEndPos(_currentLocation);
       }
-      _cachedLineNum = actualLine;
-      _cachedLocation = _currentLocation;
-      _cachedPrevLineLoc = getLineStartPos(_currentLocation);
-      _cachedNextLineLoc = getLineEndPos(_currentLocation);
     }
+    finally { readUnlock(); }
   }
 
   /**
-   * Gets the name of the package this source file claims it's in (with the
-   * package keyword). It does this by minimally parsing the source file
-   * to find the package statement.
-   *
-   * @return The name of package this source file declares itself to be in,
-   *         or the empty string if there is no package statement (and thus
-   *         the source file is in the empty package).
-   *
-   * @exception InvalidPackageException if there is some sort of a
-   *                                    <TT>package</TT> statement but the
-   *                                    defined package does not match or exist.
+   * Gets the name of the package this source file claims it's in (with the package keyword). It does this by 
+   * minimally parsing the source file to find the package statement.
+   * @return The name of package declared for this source file OR the empty string if there is no package 
+   *         statement (and thus the source file is in the empty package).
+   * @exception InvalidPackageException if there is some sort of a <TT>package</TT> statement but the defined 
+   *            package does not match or exist.
    */
   public String getPackageName() throws InvalidPackageException {
     // throwErrorHuh();
     // Where we'll build up the package name we find
     StringBuffer buf = new StringBuffer();
+    int oldLocation;
     
+    readLock();
     synchronized (_reduced) {
-      int oldLocation = getCurrentLocation();
-      
+      oldLocation = _currentLocation;
       try {
+        int firstNormalLocation;
         
         setCurrentLocation(0);
         final int docLength = getLength();
         final String text = getText(0, docLength);
-        //      System.out.println("oldlocation: " + oldLocation + ", doclength: " + docLength + ", text: \"" + text + "\"");
-        // The location of the first non-whitespace character that
-        // is not inside quote or comment.
-        int firstNormalLocation = 0;
-        while ((firstNormalLocation < docLength)) {
+        // The location of the first non-whitespace character that is not inside a string or comment.
+        firstNormalLocation = 0;
+        while (firstNormalLocation < docLength) {
           setCurrentLocation(firstNormalLocation);
           
           if (_reduced.currentToken().getHighlightState() == HighlightStatus.NORMAL) {
             // OK, it's normal -- so if it's not whitespace, we found the spot
             char curChar = text.charAt(firstNormalLocation);
-            if (!Character.isWhitespace(curChar)) {
-              break;
-            }
+            if (! Character.isWhitespace(curChar)) break;
           }
           
           firstNormalLocation++;
         }
-        
+
         // Now there are two possibilities: firstNormalLocation is at
         // the first spot of a non-whitespace character that's NORMAL,
         // or it's at the end of the document.
@@ -1005,11 +970,9 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
         final int endLocation = firstNormalLocation + strlen;
         
         if ((firstNormalLocation + strlen > docLength) ||
-            ! text.substring(firstNormalLocation, endLocation).equals("package"))
-        {
-          // the first normal text is not "package" or there is not enough
-          // text for there to be a package statement.
-          // thus, there is no valid package statement.
+            ! text.substring(firstNormalLocation, endLocation).equals("package")) {
+          // The first normal text is not "package" or there is not enough text for there to be a package statement.
+          // Thus, there is no valid package statement.
           return "";
         }
         
@@ -1020,11 +983,9 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
         int semicolonLocation = afterPackage;
         do {
           semicolonLocation = text.indexOf(";", semicolonLocation + 1);
-          
-          if (semicolonLocation == -1) {
+          if (semicolonLocation == -1)
             throw new InvalidPackageException(firstNormalLocation,
                                               "No semicolon found to terminate package statement!");
-          }
           setCurrentLocation(semicolonLocation);
         }
         while (_reduced.currentToken().getHighlightState() != HighlightStatus.NORMAL);
@@ -1043,34 +1004,30 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
         }
         
         String toReturn = buf.toString();
-        if (toReturn.equals("")) {
+        if (toReturn.equals(""))
           throw new InvalidPackageException(firstNormalLocation,
                                             "Package name was not specified after the package keyword!");
-        }
         return toReturn;
       }
       catch (BadLocationException ble) { throw new UnexpectedException(ble); }
       finally {
-        setCurrentLocation(0);
+        setCurrentLocation(0);  // Why?
         setCurrentLocation(oldLocation);
+        readUnlock();  // _reduced lock will be released in the next instruction
       }
     }
   }
 
-  /**
-   * Returns the name of the class or interface enclosing the caret position
-   * at the top level.
+  /** Returns the name of the class or interface enclosing the caret position at the top level.
    * @return Name of enclosing class or interface
    * @throws ClassNameNotFoundException if no enclosing class found
    */
   public String getEnclosingTopLevelClassName(int pos) throws ClassNameNotFoundException {
-    
+    readLock();
     synchronized (_reduced) {
-      int oldLocation = getCurrentLocation();
-      
+      int oldLocation = _currentLocation;
       try {
         setCurrentLocation(pos);
-        
         IndentInfo info = getIndentInformation();
         
         // Find top level open brace
@@ -1078,7 +1035,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
         String braceType = info.braceTypeCurrent;
         while (!braceType.equals(IndentInfo.noBrace)) {
           if (braceType.equals(IndentInfo.openSquiggly)) {
-            topLevelBracePos = getCurrentLocation() - info.distToBraceCurrent;
+            topLevelBracePos = _currentLocation - info.distToBraceCurrent;
           }
           move(-info.distToBraceCurrent);
           info = getIndentInformation();
@@ -1096,171 +1053,142 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
           // Search from start of doc
           prevDelimPos = DOCSTART;
         }
-        else {
-          prevDelimPos++;
-        }
+        else prevDelimPos++;
         setCurrentLocation(oldLocation);
         
         // Parse out the class name
         return getNextTopLevelClassName(prevDelimPos, topLevelBracePos);
       }
-      catch (BadLocationException ble) {
-        // All positions here should be legal
-        throw new UnexpectedException(ble);
+      catch (BadLocationException ble) { throw new UnexpectedException(ble); }
+      finally { 
+        setCurrentLocation(oldLocation);
+        readUnlock();
       }
-      finally { setCurrentLocation(oldLocation); }
     }
   }
 
-  /**
-   * Gets the name of the top level class in this source file.
-   * This attempts to find the first declaration of a class or interface.
-   *
-   * @return The name of first class in the file
+  /** Gets the name of the top level class in this source file. This attempts to find the first declaration
+   *  of a class or interface.
+   *   @return The name of first class in the file
    * @throws ClassNameNotFoundException if no top level class found
    */
   public String getFirstTopLevelClassName() throws ClassNameNotFoundException {
-    // throwErrorHuh();
     return getNextTopLevelClassName(0, getLength());
   }
 
   // note: need to update this to work with pos
-  public String getNextTopLevelClassName(int startPos, int endPos)
-    throws ClassNameNotFoundException {
-    // throwErrorHuh();
+  public String getNextTopLevelClassName(int startPos, int endPos) throws ClassNameNotFoundException {
     // Where we'll build up the package name we find
-    int oldLocation = getCurrentLocation();
-
-    try {
-      setCurrentLocation(startPos);
-      final int textLength = endPos - startPos;
-      final String text = getText(startPos, textLength);
-
-      boolean done;
-      int index;
-
-      int indexOfClass = _findKeywordAtToplevel("class", text, startPos);
-      int indexOfInterface = _findKeywordAtToplevel("interface", text, startPos);
-      int indexOfEnum = _findKeywordAtToplevel("enum",text,startPos);
-        
-      //If class exists at top level AND either there is no interface at top level or the index of class precedes the index of the top
-      //level interface, AND the same for top level enum, then the class is the first top level declaration
-      if( (indexOfClass > -1) 
-           && (indexOfInterface <= -1 || indexOfClass < indexOfInterface) 
-           && (indexOfEnum <= -1 || indexOfClass < indexOfEnum) ) {
-        index = indexOfClass + "class".length();
-      }
-      else if( (indexOfInterface > -1) 
-                && (indexOfClass <= -1 || indexOfInterface < indexOfClass) 
-                && (indexOfEnum <= -1 || indexOfInterface < indexOfEnum) ) {
-        index = indexOfInterface + "interface".length();
-      }
-      else if( (indexOfEnum > -1)
-                && (indexOfClass <= -1 || indexOfEnum < indexOfClass)   
-                && (indexOfInterface <= -1 || indexOfEnum < indexOfInterface)) {
-        index = indexOfEnum + "enum".length();
-      }
-      else {
-        // no index was valid
-        throw new ClassNameNotFoundException("No top level class name found");
-      }
-        
-      
-//      if (indexOfClass > -1) {
-//
-//        if (indexOfInterface > -1) {
-//          // compare indices to find the lesser
-//          index = (indexOfClass < indexOfInterface) ?
-//            indexOfClass + "class".length() :
-//            indexOfInterface + "interface".length();
-//        }
-//        else {
-//          //top level class declaration found
-//          index = indexOfClass + "class".length();
-//        }
-//      }
-//      else {
-//        if (indexOfInterface > -1) {
-//          index = indexOfInterface + "interface".length();
-//        }
-//        else {
-//          // neither index was valid
-//          throw new ClassNameNotFoundException("No top level class name found");
-//        }
-//      }
-
-      //if we make it here we have a valid index
-
-      //first find index of first non whitespace (from the index in document)
-      index = getFirstNonWSCharPos(startPos + index) - startPos;
-      if (index == -1) throw new ClassNameNotFoundException("No top level class name found");
-
-      int endIndex = textLength; //just in case no whitespace at end of file
-
-      //find index of next delimiter or whitespace
-      char c;
-      for (int i = index; i < textLength; i++) {
-        c = text.charAt(i);
-        if (!Character.isJavaIdentifierPart(c)) {
-          endIndex = i;
-          break;
-        }
-      }
-
-      setCurrentLocation(oldLocation);
-      return text.substring(index,endIndex);
-    }
-    catch (BadLocationException ble) { throw new UnexpectedException(ble); }
-    finally { setCurrentLocation(oldLocation); }
-  }
-
-  /** Finds the first occurrence of the keyword within the text that is not
-   *  enclosed within a brace or comment and is followed by whitespace.
-   *  @param keyword the keyword for which to search
-   *  @param text in which to search
-   *  @param textOffset Offset at which the text occurs in the document
-   *  @return index of the keyword, or -1 if the keyword is not found or
-   *  not followed by whitespace
-   */
-  private int _findKeywordAtToplevel(String keyword, String text, int textOffset) {
+    int oldLocation = _currentLocation;
     
+    readLock();
     synchronized (_reduced) {
-      int oldLocation = getCurrentLocation();
-      
-      int index = 0;
-      
-      while (true) {
-        index = text.indexOf(keyword, index);
-        if (index == -1) break; // not found
+      try {
+        setCurrentLocation(startPos);
+        final int textLength = endPos - startPos;
+        final String text = getText(startPos, textLength);
+        
+        boolean done;
+        int index;
+        
+        int indexOfClass = _findKeywordAtToplevel("class", text, startPos);
+        int indexOfInterface = _findKeywordAtToplevel("interface", text, startPos);
+        int indexOfEnum = _findKeywordAtToplevel("enum",text,startPos);
+        
+        //If class exists at top level AND either there is no interface at top level or the index of class precedes the index of the top
+        //level interface, AND the same for top level enum, then the class is the first top level declaration
+        if (indexOfClass > -1 && (indexOfInterface <= -1 || indexOfClass < indexOfInterface) 
+              && (indexOfEnum <= -1 || indexOfClass < indexOfEnum)) {
+          index = indexOfClass + "class".length();
+        }
+        else if (indexOfInterface > -1 && (indexOfClass <= -1 || indexOfInterface < indexOfClass) 
+                  && (indexOfEnum <= -1 || indexOfInterface < indexOfEnum)) {
+          index = indexOfInterface + "interface".length();
+        }
+        else if (indexOfEnum > -1 && (indexOfClass <= -1 || indexOfEnum < indexOfClass)   
+                   && (indexOfInterface <= -1 || indexOfEnum < indexOfInterface)) {
+          index = indexOfEnum + "enum".length();
+        }
         else {
-          // found a match, check quality
-          setCurrentLocation(textOffset + index);
-          
-          // check that the keyword is not in a comment and is followed by whitespace
-          ReducedToken rt = _reduced.currentToken();
-          int indexPastKeyword = index + keyword.length();
-          if (indexPastKeyword < text.length()) {
-            if (rt.getState() == ReducedModelStates.FREE &&
-                Character.isWhitespace(text.charAt(indexPastKeyword))) {
-              // found a match but may not be at top level
-              if (!posNotInBlock(index)) index = -1; //in a paren phrase, gone too far
-              break;
-            }
-            else index++;  //move past so we can search again
-          }
-          else { // No space found past the keyword
-            index = -1;
+          // no index was valid
+          throw new ClassNameNotFoundException("No top level class name found");
+        }
+        //if we make it here we have a valid index
+        
+        //first find index of first non whitespace (from the index in document)
+        index = getFirstNonWSCharPos(startPos + index) - startPos;
+        if (index == -1) throw new ClassNameNotFoundException("No top level class name found");
+        
+        int endIndex = textLength; //just in case no whitespace at end of file
+        
+        //find index of next delimiter or whitespace
+        char c;
+        for (int i = index; i < textLength; i++) {
+          c = text.charAt(i);
+          if (!Character.isJavaIdentifierPart(c)) {
+            endIndex = i;
             break;
           }
         }
+        
+        setCurrentLocation(oldLocation);
+        return text.substring(index,endIndex);
       }
-      setCurrentLocation(oldLocation);
-      return index;
+      catch (BadLocationException ble) { throw new UnexpectedException(ble); }
+      finally { 
+        setCurrentLocation(oldLocation);
+        readUnlock();
+      }
     }
   }
-  /**
-   * Appending any information for the reduced model from each undo command
+
+  /** Finds the first occurrence of the keyword within the text that is not enclosed within a brace or comment 
+   *  and is followed by whitespace.
+   *  @param keyword the keyword for which to search
+   *  @param text in which to search
+   *  @param textOffset Offset at which the text occurs in the document
+   *  @return index of the keyword, or -1 if the keyword is not found or not followed by whitespace
    */
+  private int _findKeywordAtToplevel(String keyword, String text, int textOffset) {
+    
+    readLock();
+    synchronized (_reduced) {
+      int oldLocation = _currentLocation;
+      int index = 0;
+      try {
+        while (true) {
+          index = text.indexOf(keyword, index);
+          if (index == -1) break; // not found
+          else {
+            // found a match, check quality
+            setCurrentLocation(textOffset + index);
+            
+            // check that the keyword is not in a comment and is followed by whitespace
+            ReducedToken rt = _reduced.currentToken();
+            int indexPastKeyword = index + keyword.length();
+            if (indexPastKeyword < text.length()) {
+              if (rt.getState() == ReducedModelStates.FREE &&
+                  Character.isWhitespace(text.charAt(indexPastKeyword))) {
+                // found a match but may not be at top level
+                if (!posNotInBlock(index)) index = -1; //in a paren phrase, gone too far
+                break;
+              }
+              else index++;  //move past so we can search again
+            }
+            else { // No space found past the keyword
+              index = -1;
+              break;
+            }
+          }
+        }
+        setCurrentLocation(oldLocation);
+        return index;
+      }
+      finally { readUnlock(); }
+    }
+  }
+  
+  /** Appending any information for the reduced model from each undo command */
   private static class CommandUndoableEdit extends AbstractUndoableEdit {
     private final Runnable _undoCommand;
     private final Runnable _redoCommand;
@@ -1329,7 +1257,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     private OurCompoundEdit _compoundEdit;
 
     public void startCompoundEdit() {
-      if(_compoundEditState) {
+      if (_compoundEditState) {
         throw new IllegalStateException("Cannot start a compound edit while making a compound edit");
       }
       _compoundEditState = true;
@@ -1337,7 +1265,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     }
 
     public void endCompoundEdit() {
-      if(!_compoundEditState) {
+      if (!_compoundEditState) {
         throw new IllegalStateException("Cannot end a compound edit while not making a compound edit");
       }
       _compoundEditState = false;
@@ -1354,7 +1282,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     }
 
     public boolean addEdit(UndoableEdit e) {
-      if(_compoundEditState) {
+      if (_compoundEditState) {
         return _compoundEdit.addEdit(e);
       }
       else {
@@ -1385,14 +1313,14 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
 //  
 //  private List<Pair<Option, OptionListener>> _optionListeners = new LinkedList<Option, OptionListener>>();
 //
-//  public void clearOptionListeners(){
-//    for(Pair<Option, OptionListener> l: _optionListeners){
+//  public void clearOptionListeners() {
+//    for (Pair<Option, OptionListener> l: _optionListeners) {
 //      DrJava.getConfig().removeOptionListener( l.getFirst(), l.getSecond());
 //    }
 //    _optionListeners.clear();
 //  }
 //  
-//  public void addOptionListener(Option op, OptionListener l){
+//  public void addOptionListener(Option op, OptionListener l) {
 //    DrJava.getConfig().addOptionListener(op, l);
 //    _optionListeners.add(new Pair<Option, OptionListener>(op, l));
 //  }
@@ -1414,18 +1342,17 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     synchronized (_finalizationListeners) { _finalizationListeners.add(fl); }
   }
   
-  public List<FinalizationListener<DefinitionsDocument>> getFinalizationListeners(){
+  public List<FinalizationListener<DefinitionsDocument>> getFinalizationListeners() {
     return _finalizationListeners;
   }
 
-  /**
-   * This is called when this method is GC'd.  Since this class implements
-   * edu.rice.cs.drjava.model.Finalizable, it must notify its listeners
+  /** This is called when this method is GC'd.  Since this class implements
+   *  edu.rice.cs.drjava.model.Finalizable, it must notify its listeners
    */
   protected void finalize() {
     FinalizationEvent<DefinitionsDocument> fe = new FinalizationEvent<DefinitionsDocument>(this);
     synchronized (_finalizationListeners) {
-      for(FinalizationListener<DefinitionsDocument> fl: _finalizationListeners) {
+      for (FinalizationListener<DefinitionsDocument> fl: _finalizationListeners) {
         fl.finalized(fe);
       }
     }

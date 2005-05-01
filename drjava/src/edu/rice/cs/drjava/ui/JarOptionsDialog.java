@@ -335,7 +335,7 @@ public class JarOptionsDialog extends JDialog {
    * Method that handels the Cancel button
    */
   private void _cancel() {
-    if( _worker != null ) {
+    if ( _worker != null ) {
       _worker.interrupt();
     }
     this.setVisible(false);

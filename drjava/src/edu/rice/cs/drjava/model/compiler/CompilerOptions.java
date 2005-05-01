@@ -93,28 +93,28 @@ public class CompilerOptions implements OptionConstants {
   
   public static HashMap<String,String> getOptions(boolean warningsEnabled) {    
     HashMap<String,String> options = new HashMap<String,String>();
-    if(warningsEnabled) {
-      if(SHOW_UNCHECKED) {
+    if (warningsEnabled) {
+      if (SHOW_UNCHECKED) {
         options.put("-Xlint:unchecked","");
       }
       
-      if(SHOW_DEPRECATION) {
+      if (SHOW_DEPRECATION) {
         options.put("-Xlint:deprecation","");
       }
       
-      if(SHOW_PATH) {
+      if (SHOW_PATH) {
         options.put("-Xlint:path","");
       }
       
-      if(SHOW_SERIAL) {
+      if (SHOW_SERIAL) {
         options.put("-Xlint:serial","");
       }
       
-      if(SHOW_FINALLY) {
+      if (SHOW_FINALLY) {
         options.put("-Xlint:finally","");
       }
       
-      if(SHOW_FALLTHROUGH) {
+      if (SHOW_FALLTHROUGH) {
         options.put("-Xlint:fallthrough","");
         options.put("-Xlint:switchcheck",""); //Some compilers appear to use this option instead. Anyone know anything about this?
       }

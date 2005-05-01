@@ -59,7 +59,7 @@ public final class StringOptionTest extends TestCase
    */
   public StringOptionTest(String name) { super(name); }
   
-  public void setUp() {}
+  public void setUp() { }
   
   public void testGetName()
   {

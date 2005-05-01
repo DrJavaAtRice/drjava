@@ -152,17 +152,11 @@ public abstract class AbstractDJPane extends JTextPane implements OptionConstant
 //    _doc.setCurrentLocation(pos);
   }
   
-  public void moveCaretPosition(int pos){
-    super.moveCaretPosition(pos);
-  }
+  public void moveCaretPosition(int pos) { super.moveCaretPosition(pos); }
   
   
-  /**
-   * Runs indent(int) with a default value of Indenter.OTHER
-   */
-  public void indent(){
-    indent(Indenter.OTHER);
-  }
+  /** Runs indent(int) with a default value of Indenter.OTHER */
+  public void indent() { indent(Indenter.OTHER); }
 
   /**
    * Perform an indent either on the current line or on the given
@@ -208,9 +202,7 @@ public abstract class AbstractDJPane extends JTextPane implements OptionConstant
     boolean doIndent = shouldIndent(selStart,selEnd);
     
     // Do the indent
-    if (doIndent) {
-      indentLines(selStart, selEnd, reason, pm);
-    }
+    if (doIndent) { indentLines(selStart, selEnd, reason, pm); }
   }
 
   /**

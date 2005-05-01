@@ -59,7 +59,7 @@ public class QuestionExistsCharInPrevStmt extends IndentRuleQuestion {
   
   private char _lookFor;
   
-  public QuestionExistsCharInPrevStmt(char lookFor, IndentRule yesRule, IndentRule noRule){
+  public QuestionExistsCharInPrevStmt(char lookFor, IndentRule yesRule, IndentRule noRule) {
     super(yesRule, noRule);
     _lookFor = lookFor;
   }
@@ -74,13 +74,13 @@ public class QuestionExistsCharInPrevStmt extends IndentRuleQuestion {
     try {
       endPreviousStatement = 
         doc.findPrevDelimiter(doc.getCurrentLocation(), new char[] {';','}','{'});
-    } catch (BadLocationException ble){
+    } catch (BadLocationException ble) {
       //default to reporting the char was not found in the case of a BadLocationeEception
       return false;
     }
     
     // if this is the first line, we'll get an error indicator and just return false
-    if (endPreviousStatement == AbstractDJDocument.ERROR_INDEX){
+    if (endPreviousStatement == AbstractDJDocument.ERROR_INDEX) {
       return false;
     }
     

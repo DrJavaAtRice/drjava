@@ -90,7 +90,7 @@ public final class DrJavaBookTest extends TestCase {
       assertEquals("testGetPrintable:", new Integer(Printable.PAGE_EXISTS), 
                    new Integer(p.print(g, new PageFormat(), 0)));
     }
-    catch(Exception e){ fail("testGetPrintable: Unexpected exception!\n" + e); }
+    catch(Exception e) { fail("testGetPrintable: Unexpected exception!\n" + e); }
     
     try {
       p = book.getPrintable(99);

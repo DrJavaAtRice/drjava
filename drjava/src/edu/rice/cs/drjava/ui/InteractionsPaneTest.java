@@ -317,7 +317,7 @@ public final class InteractionsPaneTest extends TestCase {
     new Thread("Testing System.in") {
       public void run() {
         synchronized (lock) {
-          buf.append(_controller._inputListener.getConsoleInput());
+          buf.append(_controller.getInputListener().getConsoleInput());
         }
       }
     }.start();
@@ -367,7 +367,7 @@ public final class InteractionsPaneTest extends TestCase {
                  (int)_pane.getPromptList().get(1)); //needs cast to prevent ambiguity
     
     
-    synchronized(_model){
+    synchronized(_model) {
       // Reset should clear
       _model.setWaitingForFirstInterpreter(false);
       //this adds the "Resetting Interactions" 
@@ -375,7 +375,7 @@ public final class InteractionsPaneTest extends TestCase {
       _model.interpreterResetting();
     }
     
-    synchronized(_model){
+    synchronized(_model) {
       assertEquals("PromptList after reset should contain no elements",
                    0, _pane.getPromptList().size());
     }  

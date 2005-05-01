@@ -75,7 +75,7 @@ public class ClasspathManager{
 //  The open files classpath (for nonproject mode)
 //  List<ClasspathEntry> openFilesCP;
   
-  public ClasspathManager(){
+  public ClasspathManager() {
     projectCP = new LinkedList<ClasspathEntry>();
     buildCP = new LinkedList<ClasspathEntry>();
     projectFilesCP = new LinkedList<ClasspathEntry>();
@@ -88,12 +88,12 @@ public class ClasspathManager{
   /** Adds the entry to the front of the project classpath
    *  (this is the classpath specified in project properties)
    */
-  public void addProjectCP(URL f){
+  public void addProjectCP(URL f) {
     // add new entry to front of classpath
     projectCP.add(0, new ClasspathEntry(f));
   }
   
-  public List<ClasspathEntry> getProjectCP(){ return projectCP; }
+  public List<ClasspathEntry> getProjectCP() { return projectCP; }
   
   /** Adds the entry to the front of the build classpath. */
   public void addBuildDirectoryCP(URL f) {
@@ -101,45 +101,45 @@ public class ClasspathManager{
     buildCP.add(0, new ClasspathEntry(f));
   }
 
-  public List<ClasspathEntry> getBuildDirectoryCP(){ return buildCP; }
+  public List<ClasspathEntry> getBuildDirectoryCP() { return buildCP; }
   
   /** Adds the entry to the front of the project files classpath
    *  (this is the classpath for all open project files)
    */
-  public void addProjectFilesCP(URL f){
+  public void addProjectFilesCP(URL f) {
     // add new entry to front of classpath
     projectFilesCP.add(0, new ClasspathEntry(f));
   }
   
-  public List<ClasspathEntry> getProjectFilesCP(){
+  public List<ClasspathEntry> getProjectFilesCP() {
     return projectFilesCP;
   }
   
   /**
    * adds the entry to the front of the external classpath
    */
-  public void addExternalFilesCP(URL f){
+  public void addExternalFilesCP(URL f) {
     // add new entry to front of classpath
     externalFilesCP.add(0, new ClasspathEntry(f));
   }
   
-  public List<ClasspathEntry> getExternalFilesCP(){
+  public List<ClasspathEntry> getExternalFilesCP() {
     return externalFilesCP;
   }
   
   /**
    * adds the entry to the front of the extra classpath
    */
-  public void addExtraCP(URL f){
+  public void addExtraCP(URL f) {
     // add new entry to front of classpath
     extraCP.add(0, new ClasspathEntry(f));
   }
   
-  public List<ClasspathEntry> getExtraCP(){
+  public List<ClasspathEntry> getExtraCP() {
     return extraCP;
   }
   
-  public List<ClasspathEntry> getSystemCP(){
+  public List<ClasspathEntry> getSystemCP() {
     return systemCP;
   }
   
@@ -149,7 +149,7 @@ public class ClasspathManager{
    * returns a new classloader that represents the
    * custom classpath
    */
-  public ClassLoader getClassLoader(){
+  public ClassLoader getClassLoader() {
     return new BrainClassLoader(buildClassLoader(projectCP), 
                                 buildClassLoader(buildCP), 
                                 buildClassLoader(projectFilesCP), 
@@ -160,9 +160,9 @@ public class ClasspathManager{
   /**
    * builds a new classloader for the list of classpath entries
    */
-  private ClassLoader buildClassLoader(List<ClasspathEntry>locpe){
+  private ClassLoader buildClassLoader(List<ClasspathEntry>locpe) {
     ClassLoader c = new DeadClassLoader();
-    for(ClasspathEntry cpe: locpe){
+    for(ClasspathEntry cpe: locpe) {
         c = cpe.getClassLoader(c);
     }
     return c;

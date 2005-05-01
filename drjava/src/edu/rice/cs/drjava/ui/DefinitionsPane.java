@@ -93,42 +93,29 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
   private boolean testVariable;   //For Tests ONLY
 //  private Document _defdoc;
   
-  /**
-   * Flag used to determine if the user has already been warned about debugging
-   * when the document within this defpane has been modified since its last save.
+  /** Flag used to determine if the user has already been warned about debugging
+   *  when the document within this defpane has been modified since its last save.
    */
   private boolean _hasWarnedAboutModified = false;
 
-  /**
-   * Used by the centering source mechanism to ensure paints
-   * Not used.
-  private boolean _updatePending = false;*/
+//  /** Used by the centering source mechanism to ensure paints */
+//  private boolean _updatePending = false;
 
-  /**
-   * Whether to draw text as antialiased.
-   */
+  /** Whether to draw text as antialiased. */
   private boolean _antiAliasText = false;
 
-  /**
-   * Our current compiler error matching highlight.
-   */
+  /** Our current compiler error matching highlight. */
   private HighlightManager.HighlightInfo _errorHighlightTag = null;
 
-  /**
-   *  Highlight painter for breakpoints
-   */
+  /** Highlight painter for breakpoints. */
   static DefaultHighlighter.DefaultHighlightPainter BREAKPOINT_PAINTER =
     new DefaultHighlighter.DefaultHighlightPainter(DrJava.getConfig().getSetting(DEBUG_BREAKPOINT_COLOR));
 
-  /**
-   * Highlight painter for thread's current location
-   */
+  /** Highlight painter for thread's current location. */
   static DefaultHighlighter.DefaultHighlightPainter THREAD_PAINTER =
     new DefaultHighlighter.DefaultHighlightPainter(DrJava.getConfig().getSetting(DEBUG_THREAD_COLOR));
 
-  /**
-   * The name of the keymap added to the super class (saved so it can be removed)
-   */
+  /** The name of the keymap added to the super class (saved so it can be removed). */
   public static final String INDENT_KEYMAP_NAME = "INDENT_KEYMAP";
 //  
 //  /**
@@ -152,9 +139,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
 //  };
 //  
   
-  /**
-   * Updates the highlight if there is any.
-   */
+  /** Updates the highlight if there is any. */
   protected void _updateMatchHighlight() {
     int to = getCaretPosition();
     int from = getDJDocument().balanceBackward(); //_doc()._reduced.balanceBackward();
@@ -178,9 +163,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     }
   }
   
-  /**
-   * The OptionListener for DEFINITIONS_MATCH_COLOR
-   */
+  /** The OptionListener for DEFINITIONS_MATCH_COLOR. */
   private class MatchColorOptionListener implements OptionListener<Color> {
     public void optionChanged(OptionEvent<Color> oce) {
       MATCH_PAINTER = new DefaultHighlighter.DefaultHighlightPainter(oce.value);
@@ -193,9 +176,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     }
   }
 
-  /**
-   * The OptionListener for COMPILER_ERROR_COLOR
-   */
+  /** The OptionListener for COMPILER_ERROR_COLOR. */
   private class ErrorColorOptionListener implements OptionListener<Color> {
     public void optionChanged(OptionEvent<Color> oce) {
       ERROR_PAINTER = new DefaultHighlighter.DefaultHighlightPainter(oce.value);
@@ -208,27 +189,21 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     }
   }
 
-  /**
-   * The OptionListener for DEBUG_BREAKPOINT_COLOR
-   */
+  /** The OptionListener for DEBUG_BREAKPOINT_COLOR. */
   private static class BreakpointColorOptionListener implements OptionListener<Color> {
     public void optionChanged(OptionEvent<Color> oce) {
       BREAKPOINT_PAINTER = new DefaultHighlighter.DefaultHighlightPainter(oce.value);
     }
   }
 
-  /**
-   * The OptionListener for DEBUG_THREAD_COLOR
-   */
+  /** The OptionListener for DEBUG_THREAD_COLOR. */
   private static class ThreadColorOptionListener implements OptionListener<Color> {
     public void optionChanged(OptionEvent<Color> oce) {
       THREAD_PAINTER = new DefaultHighlighter.DefaultHighlightPainter(oce.value);
     }
   }
 
-  /**
-   * The OptionListener for TEXT_ANTIALIAS
-   */
+  /** The OptionListener for TEXT_ANTIALIAS. */
   private class AntiAliasOptionListener implements OptionListener<Boolean> {
     public void optionChanged(OptionEvent<Boolean> oce) {
       _antiAliasText = oce.value.booleanValue();
@@ -236,15 +211,14 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     }
   }
 
-  /**
-   * Listens to any undoable events in the document, and adds them
-   * to the undo manager.  Must be done in the view because the edits are
-   * stored along with the caret position at the time of the edit.
+  /** Listens to any undoable events in the document, and adds them
+   *  to the undo manager.  Must be done in the view because the edits are
+   *  stored along with the caret position at the time of the edit.
    */
   private UndoableEditListener _undoListener = new UndoableEditListener() {
-    /**
-     * The function to handle what happens when an UndoableEditEvent occurs.
-     * @param e
+    
+    /** The function to handle what happens when an UndoableEditEvent occurs.
+     *  @param e
      */
     public void undoableEditHappened(UndoableEditEvent e) {
       UndoWithPosition undo = new UndoWithPosition(e.getEdit(), getCaretPosition());
@@ -260,42 +234,31 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     }
   };
 
-  /**
-   * The menu item for the "Toggle Breakpoint" option. Stored in field so that it may be enabled and
-   * disabled depending on Debug Mode
+  /** The menu item for the "Toggle Breakpoint" option. Stored in field so that it may be enabled and
+   *  disabled depending on Debug Mode.
    */
   private JMenuItem _toggleBreakpointMenuItem;
 
-  /**
-   * The menu item for the "Add Watch" option. Stored in field so that it may be enabled and
-   * disabled depending on Debug Mode
-   */
-  //private JMenuItem _addWatchMenuItem;
+//  /** The menu item for the "Add Watch" option. Stored in field so that it may be enabled and
+//   *  disabled depending on Debug Mode.
+//   */
+//  private JMenuItem _addWatchMenuItem;
 
-  /**
-   * The contextual popup menu for the Definitions Pane.
-   */
+  /** The contextual popup menu for the Definitions Pane. */
   private JPopupMenu _popMenu;
 
-  /**
-   * The mouse adapter for handling a popup menu
-   */
+  /** The mouse adapter for handling a popup menu. */
   private PopupMenuMouseAdapter _popupMenuMA;
 
-  /**
-   * Listens to caret to highlight errors as appropriate.
-   */
+  /** Listens to caret to highlight errors as appropriate. */
   private ErrorCaretListener _errorListener;
 
   private ActionListener _setSizeListener = null;
 
-  /**
-   * An action to handle indentation spawned by pressing the tab key.
-   */
+  /** An action to handle indentation spawned by pressing the tab key. */
   private class IndentKeyActionTab extends AbstractAction {
-    /**
-     * Handle the key typed event from the text field.
-     */
+    
+    /** Handle the key typed event from the text field. */
     public void actionPerformed(ActionEvent e) {
       //int pos = getCaretPosition();
       //_doc().setCurrentLocation(pos);
@@ -303,40 +266,32 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     }
   }
 
-  /**
-   * Used for indent action spawned by pressing the enter key, '{', or '}'.
-   */
+  /** Used for indent action spawned by pressing the enter key, '{', or '}'. */
   private class IndentKeyAction extends AbstractAction {
-    /**
-     * The key string ("\n"|"{"|"}") for the key pressed that invokes this
-     * instance. Not used currently, but there for readability and possible
-     * future use, e.g., debugging add-ons or the rewrite of the indention code.
+    
+    /** The key string ("\n"|"{"|"}") for the key pressed that invokes this
+     *  instance. Not used currently, but there for readability and possible
+     *  future use, e.g., debugging add-ons or the rewrite of the indention code.
      */
     private final String _key;
 
-    /**
-     * The default action to take when the specified key is pressed.
-     */
+    /** The default action to take when the specified key is pressed. */
     private final Action _defaultAction;
 
-    /**
-     * Whether to perform the indent if the caret is in a String or comment.
-     */
+    /** Whether to perform the indent if the caret is in a String or comment. */
     private final boolean _indentNonCode;
 
-    /**
-     * Creates an IndentKeyAction which only invokes indent if the caret
-     * is in code, and not Strings or comments.
+    /** Creates an IndentKeyAction which only invokes indent if the caret is in code, and not Strings or 
+     *  comments.
      */
     IndentKeyAction(String key, Action defaultAction) {
       this(key, defaultAction, false);
     }
 
-    /**
-     * Creates a new IndentKeyAction with the specified parameters.
-     * @param key name of the key, for debugging purposes
-     * @param defaultAction action to perform in addition to indenting
-     * @param indentNonCode whether to indent Strings and comments
+    /** Creates a new IndentKeyAction with the specified parameters.
+     *  @param key name of the key, for debugging purposes
+     *  @param defaultAction action to perform in addition to indenting
+     *  @param indentNonCode whether to indent Strings and comments
      */
     IndentKeyAction(String key, Action defaultAction, boolean indentNonCode) {
       _key = key;
@@ -344,41 +299,33 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
       _indentNonCode = indentNonCode;
     }
 
-    /**
-     * This method tells what the reason should be for spawning this indent event
-     * Defaults to Indenter.OTHER
+    /** This method tells what the reason should be for spawning this indent event
+     *  Defaults to Indenter.OTHER
      */
-    protected int getIndentReason(){
-      return Indenter.OTHER;
-    }
+    protected int getIndentReason() { return Indenter.OTHER; }
 
-    /**
-     * Handle the "key typed" event from the text field.
-     * Calls the default action to make sure the right things happen, then makes
-     * a call to indentLine().
+    /** Handle the "key typed" event from the text field.
+     *  Calls the default action to make sure the right things happen, then makes
+     *  a call to indentLine().
      */
     public void actionPerformed(ActionEvent e) {
       _defaultAction.actionPerformed(e);
-
+      
       // Only indent if in code
+      
       _doc.setCurrentLocation(getCaretPosition());
       ReducedModelState state = _doc.getStateAtCurrent();
-      if (state.equals(ReducedModelState.FREE) || _indentNonCode) {
-        indent(getIndentReason());
-      }
+      if (state.equals(ReducedModelState.FREE) || _indentNonCode) indent(getIndentReason());
     }
   }
 
-  /**
-   * Special action to take care of case when tab key is pressed.
-   */
+  /** Special action to take care of case when tab key is pressed. */
   private Action _indentKeyActionTab = new IndentKeyActionTab();
 
-  /**
-   * Because the "default" action for the enter key is special, it must be
-   * grabbed from the Keymap using getAction(KeyStroke), which returns the
-   * "default" action for all keys which have behavior extending beyond
-   * regular text keys.
+  /** Because the "default" action for the enter key is special, it must be
+   *  grabbed from the Keymap using getAction(KeyStroke), which returns the
+   *  "default" action for all keys which have behavior extending beyond
+   *  regular text keys.
    */
   private Action _indentKeyActionLine =
     new IndentKeyAction("\n",
@@ -387,204 +334,42 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     /* overriding this method is important so that pressing the enter key causes
      * different indentation than pressing other keys, for bug 681203
      */
-    protected int getIndentReason(){
+    protected int getIndentReason() {
       return Indenter.ENTER_KEY_PRESS;
     }
   };
 
-  /**
-   * Likewise, regular text keys like '{', '}', and ':' do not have special actions
-   * that are returned by getAction(KeyStroke). To make sure these behave right,
-   * we use getDefaultAction() instead.
+  /** Likewise, regular text keys like '{', '}', and ':' do not have special actions
+   *  that are returned by getAction(KeyStroke). To make sure these behave right,
+   *  we use getDefaultAction() instead.
    */
   private Action _indentKeyActionSquiggly = new IndentKeyAction("}", getKeymap().getDefaultAction());
   private Action _indentKeyActionOpenSquiggly = new IndentKeyAction("{", getKeymap().getDefaultAction());
   private Action _indentKeyActionColon = new IndentKeyAction(":", getKeymap().getDefaultAction());
 
-  /**
-   * Tells us whether we currently are in the middle of a CompoundEdit for regualr keystrokes.
-   * Helps us with granular undo.
+  /** Tells us whether we currently are in the middle of a CompoundEdit for regualr keystrokes.
+   *  Helps us with granular undo.
    */
   private boolean _inCompoundEdit = false;
   private int _compoundEditKey;
 
-  /**
-   * Ends a compound edit.
-   */
-  public void endCompoundEdit() {
-    if (_inCompoundEdit) {
-      CompoundUndoManager undoMan = _doc.getUndoManager();
-      _inCompoundEdit = false;
-      undoMan.endCompoundEdit(_compoundEditKey);
-    }
-  }
 
-  
-  
-  
-  /**
-   * Takes in any keyboard input, checks to see if it is in the keyToActionMap
-   * in KeybindingManager, if so executes the action, otherwise checks if it
-   * contains the current platform's menu shortcut modifier and if so, ignores
-   * that command (this disallows the execution of the UI's default
-   * actions such as cut/copy/paste/select all), otherwise does whatever
-   * normally would be done
-   */
-  public void processKeyEvent(KeyEvent e) {
-    if(_mainFrame.getAllowKeyEvents()){
-      KeyStroke ks = KeyStroke.getKeyStrokeForEvent(e);
-      Action a = KeyBindingManager.Singleton.get(ks);
-      // Don't perform the action if the keystroke is NULL_KEYSTROKE,
-      //  which can get generated by some Windows keys
-      if ((ks != KeyStrokeOption.NULL_KEYSTROKE) && (a != null)) {
-        //      System.out.println("Keystroke was null");
-        endCompoundEdit();
-        // Performs the action a
-        SwingUtilities.notifyAction(a, ks, e, e.getSource(), e.getModifiers());
-        
-        // Make sure we don't consume it again
-        e.consume();
-      }
-      else {
-        // Allows one step undoing of the keystrokes defined on the keymap (e.g. enter, tab, '{', '}', ':').
-        Keymap km = getKeymap();
-        
-        if (km.isLocallyDefined(ks) || km.isLocallyDefined(KeyStroke.getKeyStroke(ks.getKeyChar()))) {
-          // We're breaking up compound edits at the granularity of "enter"'s.
-          if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-            endCompoundEdit();
-          }
-         
-          
-             CompoundUndoManager undoMan = _doc.getUndoManager();
-          //int key = undoMan.startCompoundEdit();
-          //        System.out.println("supering 1 " + isAltF4);
-             
-             super.processKeyEvent(e);
-          // We call endCompoundEdit() here because one will automatically start when processKeyEvent finishes (see the definition of _undoListener).
-          endCompoundEdit();
-//          undoMan.endCompoundEdit(key); //commented out because of frenchkeyboard fix
-          //        e.consume();
-        }
-        else {
-          
-
-          
-          // The following conditional fixes bug #676586 by ignoring typed events when the meta key is down
-          // and fixes bug #905405 "Undo Alt+Anything Causes Exception" by ignoring typed events when
-          // the alt key is down.
-          // NOTE: no longer need to check for alt since we now only start a new compound edit if an undoable edit actually happened.
-          if ((((e.getModifiers() & InputEvent.META_MASK) != 0)) // || ((e.getModifiers() & InputEvent.ALT_MASK) != 0)) //fixed for frenchkeyboard support
-                && e.getKeyCode() == KeyEvent.VK_UNDEFINED) {
-            
-            //            //          System.out.println("not supering 1 " + isAltF4);
-            return;
-          }
-          
-                    
-          // The following conditional fixes ease of use issue 693253 by checking if a typed event is
-          // shift-delete or shift-backspace and then performing a delete or backspace operation,
-          // respectively
-          if ((e.getModifiers() & InputEvent.SHIFT_MASK) != 0) {
-            int newModifiers = e.getModifiers() & ~(InputEvent.SHIFT_MASK);
-            
-            KeyStroke newKs = KeyStroke.getKeyStroke(ks.getKeyCode(), newModifiers, ks.isOnKeyRelease());
-            String name = KeyBindingManager.Singleton.getName(newKs);
-            
-            if (name != null && (name.equals("Delete Previous") || name.equals("Delete Next"))) {
-              endCompoundEdit();
-              // We are unsure about the third and fourth arguments (e and e.getSource()); we simply
-              // reuse the original values
-              SwingUtilities.notifyAction(KeyBindingManager.Singleton.get(newKs), newKs, e, e.getSource(), newModifiers);
-              e.consume();
-              //            System.out.println("not supering 2 " + isAltF4);
-              return;
-            }
-          }
-          
-          // If the KeyEvent is not a pressed event, process it before we do
-          // granular undo or _inCompoundEdit may get set incorrectly.
-          // This code breaks Alt-F4, and may break other system keybindings
-          // since the event is consumed by us.  For now, just check Alt-F4.
-          if (e.getID() != KeyEvent.KEY_TYPED) {
-            //          System.out.println("supering 2 " + isAltF4);
-            //          boolean isAltF4 = e.getKeyCode() == KeyEvent.VK_F4 && (KeyEvent.ALT_MASK & e.getModifiers()) != 0;
-            //          if (!isAltF4) {
-            super.processKeyEvent(e);
-            //            e.consume();
-            //          }
-            return;
-          }
-          
-          // backspace deletes twice without this check, overrides other keystrokes
-          // that use the mask modifier
-// Following IF block is commented out in regards to French Keyboard Fix
-          //          if (((ks.getModifiers() & mask) == 0) && ks.getKeyChar() != '\b') {
-//            int _keyval = (int) e.getKeyChar();
-//            if (_keyval >= 32 && _keyval <= 126) {
-//              CompoundUndoManager undoMan = _doc.getUndoManager();
-//              if (!_inCompoundEdit) {
-//                _inCompoundEdit = true;
-//                _compoundEditKey = undoMan.startCompoundEdit();
-//                getUndoAction().updateUndoState();
-//                getRedoAction().updateRedoState();
-//                //super.processKeyEvent(e);
-//              }
-              //            else {
-              //              UndoableEdit lastEdit = undoMan.getNextUndo();
-              //              lastEdit.die();
-              //              _compoundEditKey = undoMan.startCompoundEdit();
-              //              super.processKeyEvent(e);
-              //              undoMan.addEdit(lastEdit);
-              //              undoMan.endCompoundEdit(_compoundEditKey);
-              //            }
-            }
-            //          System.out.println("supering 3 " + isAltF4);
-        
-        if((e.getModifiers()&InputEvent.ALT_MASK)!=0){   //If ALT_MASK is actually pressed, which means !=0 // For tests only
-          testVariable = true;// For tests only
-        }// For tests only
-        else{// For tests only
-          testVariable = false;// For tests only
-        }// For tests only
-        
-            
-        
-        super.processKeyEvent(e);
-          }
-          //        else {
-          //          e.consume();
-          //          _inCompoundEdit = false;
-          //        }
-        }
-      }
-    
-  
-
-  /**
-   * Sets the editor kit that will be used by all DefinitionsPanes.
-   * @param editorKit The editor kit to use for new DefinitionsPanes.
-   */
-  public static void setEditorKit(DefinitionsEditorKit editorKit) {
-    EDITOR_KIT = editorKit;
-  }
-
-  
+  /** Our keymap containing key bindings.  Takes precedence over the default map. */
   Keymap ourMap;
-  /**
-   * Constructor.  Sets up all the defaults.
-   * @param mf the parent window
+  
+  /** Standard Constructor.  Sets up all the defaults.
+   *  @param mf the parent window
    */
   public DefinitionsPane(MainFrame mf, final OpenDefinitionsDocument doc) {
     super(new DefaultStyledDocument());
     
     _mainFrame = mf;
     
-    addFocusListener(new FocusListener(){
-      public void focusGained(FocusEvent e){  
+    addFocusListener(new FocusListener() {
+      public void focusGained(FocusEvent e) {  
         _mainFrame.getModel().getDocumentNavigator().requestSelectionUpdate(doc);
       }
-      public void focusLost(FocusEvent e){  }
+      public void focusLost(FocusEvent e) {  }
     });
     
 
@@ -606,14 +391,12 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     // If it has changed, check and see if we should be highlighting matching braces.
     this.addCaretListener(_matchListener);
     
-    
     //setFont(new Font("Courier", 0, 12));
     Font mainFont = DrJava.getConfig().getSetting(FONT_MAIN);
     setFont(mainFont);
 
     //setSize(new Dimension(1024, 1000));
     setEditable(true);
-
     
     // add actions for indent key
     ourMap = addKeymap(INDENT_KEYMAP_NAME, getKeymap());
@@ -632,12 +415,12 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
 //    Keymap map = ourMap;
 //    KeyStroke[] ks;
 //     ks = ourMap.getBoundKeyStrokes();
-//     for(KeyStroke k:ks){
+//     for (KeyStroke k:ks) {
 //       System.out.println(k);
 //     }
 //     ourMap = ourMap.getResolveParent();
 //     ks = ourMap.getBoundKeyStrokes();
-//     for(KeyStroke k:ks){
+//     for (KeyStroke k:ks) {
 //       System.out.println(k);
 //     }
 
@@ -713,10 +496,123 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     this.getCaret().setBlinkRate(rate);
 
   }
+  
+    /** Ends a compound edit.*/
+  public void endCompoundEdit() {
+    if (_inCompoundEdit) {
+      CompoundUndoManager undoMan = _doc.getUndoManager();
+      _inCompoundEdit = false;
+      undoMan.endCompoundEdit(_compoundEditKey);
+    }
+  }
 
-  /**
-   * Enable anti-aliased text by overriding paintComponent.
+  /** Takes in any keyboard input, checks to see if it is in the keyToActionMap
+   *  in KeybindingManager, if so executes the action, otherwise checks if it
+   *  contains the current platform's menu shortcut modifier and if so, ignores
+   *  that command (this disallows the execution of the UI's default
+   *  actions such as cut/copy/paste/select all), otherwise does whatever
+   *  normally would be done
    */
+  public void processKeyEvent(KeyEvent e) {
+    if(_mainFrame.getAllowKeyEvents()) {
+      KeyStroke ks = KeyStroke.getKeyStrokeForEvent(e);
+      Action a = KeyBindingManager.Singleton.get(ks);
+      // Don't perform the action if the keystroke is NULL_KEYSTROKE (generated by some Windows keys)
+      if ((ks != KeyStrokeOption.NULL_KEYSTROKE) && (a != null)) {
+        //      System.out.println("Keystroke was null");
+        endCompoundEdit();
+        // Performs the action a
+        SwingUtilities.notifyAction(a, ks, e, e.getSource(), e.getModifiers());
+        
+        // Make sure we don't consume it again
+        e.consume();
+      }
+      else {
+        // Allows one step undoing of the keystrokes defined on the keymap (e.g. enter, tab, '{', '}', ':').
+        Keymap km = getKeymap();
+        
+        if (km.isLocallyDefined(ks) || km.isLocallyDefined(KeyStroke.getKeyStroke(ks.getKeyChar()))) {
+          // We're breaking up compound edits at the granularity of "enter"'s.
+          if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+            endCompoundEdit();
+          }
+         
+          
+             CompoundUndoManager undoMan = _doc.getUndoManager();
+          //int key = undoMan.startCompoundEdit();
+          //        System.out.println("supering 1 " + isAltF4);
+             
+             super.processKeyEvent(e);
+          // We call endCompoundEdit() here because one will automatically start when processKeyEvent finishes (see the definition of _undoListener).
+          endCompoundEdit();
+//          undoMan.endCompoundEdit(key); //commented out because of frenchkeyboard fix
+          //        e.consume();
+        }
+        else {
+          
+
+          
+          // The following conditional fixes bug #676586 by ignoring typed events when the meta key is down
+          // and fixes bug #905405 "Undo Alt+Anything Causes Exception" by ignoring typed events when
+          // the alt key is down.
+          // NOTE: no longer need to check for alt since we now only start a new compound edit if an undoable edit actually happened.
+          if ((((e.getModifiers() & InputEvent.META_MASK) != 0)) // || ((e.getModifiers() & InputEvent.ALT_MASK) != 0)) //fixed for frenchkeyboard support
+                && e.getKeyCode() == KeyEvent.VK_UNDEFINED) {
+            
+            //            //          System.out.println("not supering 1 " + isAltF4);
+            return;
+          }
+          
+                    
+          // The following conditional fixes ease of use issue 693253 by checking if a typed event is
+          // shift-delete or shift-backspace and then performing a delete or backspace operation,
+          // respectively
+          if ((e.getModifiers() & InputEvent.SHIFT_MASK) != 0) {
+            int newModifiers = e.getModifiers() & ~(InputEvent.SHIFT_MASK);
+            
+            KeyStroke newKs = KeyStroke.getKeyStroke(ks.getKeyCode(), newModifiers, ks.isOnKeyRelease());
+            String name = KeyBindingManager.Singleton.getName(newKs);
+            
+            if (name != null && (name.equals("Delete Previous") || name.equals("Delete Next"))) {
+              endCompoundEdit();
+              // We are unsure about the third and fourth arguments (e and e.getSource()); we simply
+              // reuse the original values
+              SwingUtilities.notifyAction(KeyBindingManager.Singleton.get(newKs), newKs, e, e.getSource(), newModifiers);
+              e.consume();
+              //            System.out.println("not supering 2 " + isAltF4);
+              return;
+            }
+          }
+          
+          /* If the KeyEvent is not a pressed event, process it before we do
+           * granular undo or _inCompoundEdit may get set incorrectly.
+           * This code breaks Alt-F4, and may break other system keybindings
+           * since the event is consumed by us.  For now, just check Alt-F4. */
+          if (e.getID() != KeyEvent.KEY_TYPED) {
+            super.processKeyEvent(e);
+            return;
+          }
+          
+          
+        }
+        // This if statement is for tests only
+        if ((e.getModifiers()&InputEvent.ALT_MASK) != 0) testVariable = true; // ALT_MASK actually pressed
+        else testVariable = false;
+        
+        super.processKeyEvent(e);
+      }
+    }
+  }
+
+  /** Sets the editor kit that will be used by all DefinitionsPanes.
+   *  @param editorKit The editor kit to use for new DefinitionsPanes.
+   */
+  public static void setEditorKit(DefinitionsEditorKit editorKit) {
+    EDITOR_KIT = editorKit;
+  }
+
+
+  /** Enable anti-aliased text by overriding paintComponent. */
   protected void paintComponent(Graphics g) {
     if (CodeStatus.DEVELOPMENT) {
       if (_antiAliasText && g instanceof Graphics2D) {
@@ -728,9 +624,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     super.paintComponent(g);
   }
 
-  /**
-   *  Creates the popup menu for the DefinitionsPane
-   */
+  /** Creates the popup menu for the DefinitionsPane. */
   private void createPopupMenu() {
     // Create the popup menu.
     _popMenu = new JPopupMenu();
@@ -742,9 +636,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
 
     JMenuItem indentItem = new JMenuItem("Indent Line(s)");
     indentItem.addActionListener(new AbstractAction() {
-      public void actionPerformed(ActionEvent ae) {
-        indent();
-      }
+      public void actionPerformed(ActionEvent ae) { indent(); }
     });
     _popMenu.add(indentItem);
 
@@ -783,9 +675,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     }
   }
 
-  /*
-   * The private MouseAdapter for responding to various clicks concerning the popup menu
-   */
+  /* The private MouseAdapter for responding to various clicks concerning the popup menu */
   private class PopupMenuMouseAdapter extends RightClickMouseAdapter {
 
     private MouseEvent _lastMouseClick = null;
@@ -824,123 +714,82 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     }
   }
 
-  /**
-   *  Comments out the lines contained within the given selection.
-   */
+  /** Comments out the lines contained within the given selection. */
   private void _commentLines() {
     _doc.commentLinesInDefinitions(getSelectionStart(), getSelectionEnd());
   }
 
-  /**
-   *  Uncomments the lines contained within the given selection.
-   */
+  /** Uncomments the lines contained within the given selection. */
   private void _uncommentLines() {
     _doc.uncommentLinesInDefinitions(getSelectionStart(), getSelectionEnd());
   }
 
 
-  /**
-   * @return the undo action
-   */
-  public UndoAction getUndoAction() {
-    return  _undoAction;
-  }
+  /** @return the undo action. */
+  public UndoAction getUndoAction() { return  _undoAction; }
 
-  /**
-   * @return the redo action
-   */
-  public RedoAction getRedoAction() {
-    return  _redoAction;
-  }
+  /** @return the redo action. */
+  public RedoAction getRedoAction() { return  _redoAction; }
 
-  /**
-   * Get the OpenDefinitionsDocument contained in this DefinitionsPane.
-   */
-  public OpenDefinitionsDocument getOpenDefDocument() {
-    return _doc;
-  }
+  /** Get the OpenDefinitionsDocument contained in this DefinitionsPane. */
+  public OpenDefinitionsDocument getOpenDefDocument() { return _doc; }
   
-  /**
-   * Get the DJDocument (OpenDefinitionsDocument) contained in this pane.
-   * Required by the super class AbstractDJPane
+  /** Get the DJDocument (OpenDefinitionsDocument) contained in this pane.
+   *  Required by the super class AbstractDJPane.
    */
-  public DJDocument getDJDocument() {
-    return _doc;
-  }
+  public DJDocument getDJDocument() { return _doc; }
 
-  /**
-   * Access to the pane's HighlightManager
-   */
-  public HighlightManager getHighlightManager() {
-    return _highlightManager;
-  }
+  /** Access to the pane's HighlightManager */
+  public HighlightManager getHighlightManager() { return _highlightManager; }
 
-  /**
-   * Set the caret position and also scroll to make sure the location is
-   * visible.
-   * @param pos Location to scroll to.
+  /** Set the caret position and also scroll to make sure the location is visible.
+   *  @param pos Location to scroll to.
    */
   public void setPositionAndScroll(int pos) {
     try {
       setCaretPosition(pos);
       scrollRectToVisible(modelToView(pos));
     }
-    catch (BadLocationException ble) {
-      throw new UnexpectedException(ble);
-    }
+    catch (BadLocationException ble) { throw new UnexpectedException(ble); }
   }
 
-
-  /**
-   * Override JEditorPane's setDocument to make sure only
-   * the Document in our final OpenDefinitionsDocument can
-   * be used.
+  /** Override JEditorPane's setDocument to make sure only the Document in our final OpenDefinitionsDocument 
+   *  can be used.
    */
-  public void setDocument(Document doc){
-    if (_doc != null) {
-      if ((doc == null) || (!doc.equals(_doc))) {
-        throw new IllegalStateException("Cannot set the document of " +
-                                        "a DefinitionsPane to a " +
+  public void setDocument(Document d) {
+    if (_doc != null) {  // When can _doc be null?
+      if ((d == null) || (!d.equals(_doc))) {
+        throw new IllegalStateException("Cannot set the document of " + "a DefinitionsPane to a " +
                                         "different document.");
       }
     }
-    super.setDocument(doc);
+    super.setDocument(d);  // If _doc is null should we do this?
   }
 
-  public boolean checkAltKey(){ // For tests only
+  public boolean checkAltKey() { // For tests only
     return testVariable;
   }
   
-  
-  /**
-   * Add a ErrorCaretListener to this pane, keeping it
-   * accessible so its error model can be updated later.
-   */
+  /** Add a ErrorCaretListener to this pane, keeping it accessible so its error model can be updated later. */
   public void addErrorCaretListener(ErrorCaretListener listener) {
     _errorListener = listener;
     addCaretListener(listener);
   }
 
-  /**
-   * Gets the ErrorCaretListener for this pane.
-   */
+  /** Gets the ErrorCaretListener for this pane. */
   public ErrorCaretListener getErrorCaretListener() {
     return _errorListener;
   }
 
-  /**
-   * Switches the location of the error highlight in the document if there
-   * was one. Otherwise adds the highlight. The invariant is that there are
-   * zero or one error highlights at any time.
+  /** Switches the location of the error highlight in the document if there was one. Otherwise adds the 
+   *  highlight. The invariant is that there are zero or one error highlights at any time.
    */
   public void addErrorHighlight(int from, int to)  {
     removeErrorHighlight();
     _errorHighlightTag = _highlightManager.addHighlight(from, to, ERROR_PAINTER);
   }
 
-  /**
-   * Removes the previous compiler error highlight from the document after
-   * the cursor has moved.
+  /** Removes the previous compiler error highlight from the document after the cursor has moved.
    */
   public void removeErrorHighlight() {
     if (_errorHighlightTag != null) {
@@ -986,7 +835,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
    */
   private JScrollPane _scrollPane;
   
-  public void setScrollPane(JScrollPane s){
+  public void setScrollPane(JScrollPane s) {
     _scrollPane = s;
   }
   
@@ -1010,7 +859,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
    * document to help conserve memory (so that the pane will not be holding onto the last
    * reference of a definitions document not allowing it to be garbage collected)
    */
-  public void notifyInactive(){
+  public void notifyInactive() {
     // we catch a NoSuchDocumentException here because during a close/closeAll
     // the model closes the definitions document before the MainFrame switches
     // out the panes.  If this is the case, then the following code does not
@@ -1047,11 +896,11 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
    */
   public void notifyActive() {
     super.setDocument(_doc);
-    if(_doc.getUndoableEditListeners().length == 0){
+    if(_doc.getUndoableEditListeners().length == 0) {
       _resetUndo();
     }
     int len = getDJDocument().getLength();
-    if(len < _position){
+    if(len < _position) {
       // the document changed since we're set inactive
       //so set selection to be none
       _position = len;
@@ -1061,7 +910,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
 //    setCaretPosition(_position);
     Object _lock = new Object();
     synchronized(_lock) {
-      if(_position == _selStart){
+      if(_position == _selStart) {
         setCaretPosition(_selEnd);
         moveCaretPosition(_selStart);
         _doc.setCurrentLocation(_selStart);
@@ -1172,8 +1021,8 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
    * selection to proceed backwards as well as forwards.  If selection is backwards,
    * then the caret will end up at the start of the selection rather than the end.
    */
-  public void select(int selectionStart, int selectionEnd){
-    if (selectionStart < 0){
+  public void select(int selectionStart, int selectionEnd) {
+    if (selectionStart < 0) {
       selectionStart = 0;
     }
     if (selectionEnd < 0) {
@@ -1315,11 +1164,11 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
    * frees up any option listeners that are holding references to
    * this object so this can be garbage collected.
    */
-  public void close(){
-    for(Pair<Option<Color>, OptionListener<Color>> p: _colorOptionListeners){
+  public void close() {
+    for (Pair<Option<Color>, OptionListener<Color>> p: _colorOptionListeners) {
       DrJava.getConfig().removeOptionListener(p.getFirst(), p.getSecond());
     }
-    for(Pair<Option<Boolean>, OptionListener<Boolean>> p: _booleanOptionListeners){
+    for (Pair<Option<Boolean>, OptionListener<Boolean>> p: _booleanOptionListeners) {
       DrJava.getConfig().removeOptionListener(p.getFirst(), p.getSecond());
     }
     _colorOptionListeners.clear();
@@ -1531,7 +1380,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     _finalizationListeners.add(fl);
   }
 
-  public List<FinalizationListener<DefinitionsPane>> getFinalizationListeners(){
+  public List<FinalizationListener<DefinitionsPane>> getFinalizationListeners() {
     return _finalizationListeners;
   }
 
@@ -1541,7 +1390,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
    */
   protected void finalize() {
     FinalizationEvent<DefinitionsPane> fe = new FinalizationEvent<DefinitionsPane>(this);
-    for(FinalizationListener<DefinitionsPane> fl: _finalizationListeners) {
+    for (FinalizationListener<DefinitionsPane> fl: _finalizationListeners) {
       fl.finalized(fe);
     }
   }

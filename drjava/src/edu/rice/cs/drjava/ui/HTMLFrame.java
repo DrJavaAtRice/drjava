@@ -126,7 +126,7 @@ public class HTMLFrame extends JFrame {
       // user is always allowed to move back after a forward.
       _backAction.setEnabled(true);
 
-      if(_history.next == null) {
+      if (_history.next == null) {
         // no more forwards after this
         _forwardAction.setEnabled(false);
       }
@@ -141,7 +141,7 @@ public class HTMLFrame extends JFrame {
       // user is always allowed to move forward after backing up
       _forwardAction.setEnabled(true);
 
-      if(_history.prev == null) {
+      if (_history.prev == null) {
         // no more backing up
         _backAction.setEnabled(false);
       }

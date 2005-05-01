@@ -66,12 +66,11 @@ import edu.rice.cs.drjava.model.repl.*;
 //import edu.rice.cs.drjava.model.repl.InputListener;
 import edu.rice.cs.util.swing.SwingWorker;
 import edu.rice.cs.util.swing.PopupConsole;
+import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.UnexpectedException;
 
 /** This class installs listeners and actions between an InteractionsDocument in the model and an InteractionsPane 
- *  in the view.
- *  <p>
- *  We may want to refactor this class into a different package.
+ *  in the view.  We may want to refactor this class into a different package.
  *  <p>
  *  (The PopupConsole was introduced in version 1.29 of this file)
  *
@@ -79,38 +78,43 @@ import edu.rice.cs.util.UnexpectedException;
  */
 public class InteractionsController extends AbstractConsoleController {
   /** InteractionsModel to handle interpretation. */
-  protected InteractionsModel _model;
+  private InteractionsModel _model;
 
   /** Document from the model.*/
-  protected InteractionsDocument _doc;
+  private InteractionsDocument _doc;
 
   /** Style to use for error messages. */
-  protected SimpleAttributeSet _errStyle;
+  private SimpleAttributeSet _errStyle;
 
   /** Style to use for debug messages. */
-  protected final SimpleAttributeSet _debugStyle;
+  private final SimpleAttributeSet _debugStyle;
 
   PopupConsole _popupConsole = new PopupConsole(_pane, new InputBox(), "Standard Input (System.in)");
   
   /** Listens for input requests from ,System.in displaying an input box as needed. */
-  protected InputListener _inputListener = new InputListener() {
+  private InputListener _inputListener = new InputListener() {
     public String getConsoleInput() { return _popupConsole.getConsoleInput(); }
   };
   
   private InteractionsListener _viewListener = new InteractionsListener() {
-    public void interactionStarted() {}
-    public void interactionEnded() {}    
-    public void interactionErrorOccurred(int offset, int length) {}    
+    public void interactionStarted() { }
+    public void interactionEnded() { }    
+    public void interactionErrorOccurred(int offset, int length) { }    
     
     public void interpreterResetting() {
-      _adapter.clearColoring();
-      _pane.resetPrompts();
+      Runnable command = new Runnable() { 
+        public void run() { 
+          _adapter.clearColoring();
+          _pane.resetPrompts();
+        }
+      };
+      Utilities.invokeLater(command);
     }
     
     public void interpreterReady() { }  
-    public void interpreterResetFailed(Throwable t) {}  
-    public void interpreterExited(int status) {}  
-    public void interpreterChanged(boolean inProgress) {}
+    public void interpreterResetFailed(Throwable t) { }  
+    public void interpreterExited(int status) { }  
+    public void interpreterChanged(boolean inProgress) { }
     public void interactionIncomplete() {
     }
   };
@@ -120,28 +124,23 @@ public class InteractionsController extends AbstractConsoleController {
    *  @param adapter InteractionsDocumentAdapter being used by the model's doc
    */
   public InteractionsController(final InteractionsModel model, InteractionsDocumentAdapter adapter) {
-    this(model, adapter,
-      new InteractionsPane(adapter) { public int getPromptPos() { return model.getDocument().getPromptPos(); }}); 
+    this(model, adapter, new InteractionsPane(adapter) { 
+      public int getPromptPos() { return model.getDocument().getPromptPos(); }}); 
   }
 
-  /**
-   * Glue together the given model and view.
-   * @param model An InteractionsModel
-   * @param adapter InteractionsDocumentAdapter being used by the model's doc
-   * @param pane An InteractionsPane
+  /** Glue together the given model and view.
+   *  @param model An InteractionsModel
+   *  @param adapter InteractionsDocumentAdapter being used by the model's doc
+   *  @param pane An InteractionsPane
    */
-  public InteractionsController(InteractionsModel model,
-                                InteractionsDocumentAdapter adapter,
+  public InteractionsController(InteractionsModel model, InteractionsDocumentAdapter adapter, 
                                 InteractionsPane pane) {
     super(adapter, pane);
     DefaultEditorKit d = pane.EDITOR_KIT;
     
-    for(Action a : d.getActions()) {
-      if(a.getValue(Action.NAME).equals(DefaultEditorKit.upAction)) 
-        defaultUpAction = a;
-      
-      if(a.getValue(Action.NAME).equals(DefaultEditorKit.downAction))
-        defaultDownAction = a;
+    for (Action a : d.getActions()) {
+      if (a.getValue(Action.NAME).equals(DefaultEditorKit.upAction))  defaultUpAction = a;
+      if (a.getValue(Action.NAME).equals(DefaultEditorKit.downAction)) defaultDownAction = a;
     }
     
     _model = model;
@@ -150,14 +149,11 @@ public class InteractionsController extends AbstractConsoleController {
     _debugStyle = new SimpleAttributeSet();
 
     _model.setInputListener(_inputListener);
-    
     _model.addListener(_viewListener);
 
     _init();
   }
   
-  
-
   /** Gets the input listener for console input requests. */
   public InputListener getInputListener() { return _inputListener; }
 
@@ -166,12 +162,10 @@ public class InteractionsController extends AbstractConsoleController {
   public void notifyInputEnteredAction() { _popupConsole.interruptConsole(); }
   
   /** Inserts text into the console.  This waits for the console to be ready, so it should not be called unless
-   *  a call to getConsoleInput has been made or will be made shortly.
-   */
+   *  a call to getConsoleInput has been made or will be made shortly. */
   public void insertConsoleText(String input) {
     try { _popupConsole.waitForConsoleReady(); } 
     catch (InterruptedException ie) { }
-    
     _popupConsole.insertConsoleText(input);
   }
 
@@ -193,11 +187,11 @@ public class InteractionsController extends AbstractConsoleController {
 
     // Error
     _errStyle.addAttributes(_defaultStyle);
-    _errStyle.addAttribute(StyleConstants.Foreground, DrJava.getConfig().getSetting(OptionConstants.INTERACTIONS_ERROR_COLOR));
+    _errStyle.addAttribute(StyleConstants.Foreground, 
+                           DrJava.getConfig().getSetting(OptionConstants.INTERACTIONS_ERROR_COLOR));
     _errStyle.addAttribute(StyleConstants.Bold, Boolean.TRUE);
     _adapter.setDocStyle(InteractionsDocument.ERROR_STYLE, _errStyle);
-    DrJava.getConfig().addOptionListener(OptionConstants.INTERACTIONS_ERROR_COLOR,
-                                         new OptionListener<Color>() {
+    DrJava.getConfig().addOptionListener(OptionConstants.INTERACTIONS_ERROR_COLOR, new OptionListener<Color>() {
       public void optionChanged(OptionEvent<Color> oe) {
         _errStyle.addAttribute(StyleConstants.Foreground, oe.value);
       }
@@ -205,22 +199,20 @@ public class InteractionsController extends AbstractConsoleController {
 
     // Debug
     _debugStyle.addAttributes(_defaultStyle);
-    _debugStyle.addAttribute(StyleConstants.Foreground, DrJava.getConfig().getSetting(OptionConstants.DEBUG_MESSAGE_COLOR));
+    _debugStyle.addAttribute(StyleConstants.Foreground, 
+                             DrJava.getConfig().getSetting(OptionConstants.DEBUG_MESSAGE_COLOR));
     _debugStyle.addAttribute(StyleConstants.Bold, Boolean.TRUE);
     _adapter.setDocStyle(InteractionsDocument.DEBUGGER_STYLE, _debugStyle);
-    DrJava.getConfig().addOptionListener(OptionConstants.DEBUG_MESSAGE_COLOR,
-                                         new OptionListener<Color>() {
+    DrJava.getConfig().addOptionListener(OptionConstants.DEBUG_MESSAGE_COLOR, new OptionListener<Color>() {
       public void optionChanged(OptionEvent<Color> oe) {
         _debugStyle.addAttribute(StyleConstants.Foreground, oe.value);
       }
     });
   }
 
-  /**
-   * Updates all document styles with the attributes contained in newSet.
-   * This behavior is only used in Mac OS X, JDK 1.4.1, since
-   * setFont() works fine on JTextPane on all other tested platforms.
-   * @param newSet Style containing new attributes to use.
+  /** Updates all document styles with the attributes contained in newSet.  This behavior is only used in Mac OS X, 
+   *  JDK 1.4.1, since setFont() works fine on JTextPane on all other tested platforms.
+   *  @param newSet Style containing new attributes to use.
    */
   protected void _updateStyles(AttributeSet newSet) {
     super._updateStyles(newSet);
@@ -230,18 +222,14 @@ public class InteractionsController extends AbstractConsoleController {
     StyleConstants.setBold(_debugStyle, true);  // ensure debug is always bold
   }
 
-  /**
-   * Adds listeners to the model.
-   */
+  /** Adds listeners to the model. */
   protected void _setupModel() {
     _adapter.addDocumentListener(new CaretUpdateListener());
     _doc.setBeep(_pane.getBeep());
   }
 
 
-  /**
-   * Adds actions to the view.
-   */
+  /** Adds actions to the view. */
   protected void _setupView() {
     super._setupView();
 
@@ -249,31 +237,19 @@ public class InteractionsController extends AbstractConsoleController {
     int mask = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
 
     // Add actions with keystrokes
-    _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0),
-                                evalAction);
-    _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER,
-                                                       java.awt.Event.SHIFT_MASK),
-                                newLineAction);
-    _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_B, mask),
-                                clearCurrentAction);
+    _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), evalAction);
+    _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, java.awt.Event.SHIFT_MASK), newLineAction);
+    _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_B, mask), clearCurrentAction);
 
     // Up and down need to be bound both for keypad and not
-    _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_KP_UP, 0),
-                                moveUpAction);
-    _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0),
-                                moveUpAction);
-    _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_UP, mask),
-                                historyPrevAction);
-    _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_KP_DOWN, 0),
-                                moveDownAction);
-    _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0),
-                                moveDownAction);
-    _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, mask),
-                                historyNextAction);
-    _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_TAB, 0),
-                                historyReverseSearchAction);
-    _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_TAB,
-                                                       java.awt.Event.SHIFT_MASK),
+    _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_KP_UP, 0), moveUpAction);
+    _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0), moveUpAction);
+    _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_UP, mask), historyPrevAction);
+    _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_KP_DOWN, 0), moveDownAction);
+    _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0), moveDownAction);
+    _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, mask), historyNextAction);
+    _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_TAB, 0), historyReverseSearchAction);
+    _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_TAB, java.awt.Event.SHIFT_MASK),
                                 historyForwardSearchAction);
 
 
@@ -281,100 +257,75 @@ public class InteractionsController extends AbstractConsoleController {
     // Both left and right should lock when caret is before the prompt.
     // Caret is allowed before the prompt for the purposes of mouse-based copy-
     // and-paste.
-    _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_KP_LEFT, 0),
-                                moveLeftAction);
-    _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, 0),
-                                moveLeftAction);
-    _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_KP_RIGHT, 0),
-                                moveRightAction);
-    _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, 0),
-                                moveRightAction);
+    _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_KP_LEFT, 0), moveLeftAction);
+    _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, 0), moveLeftAction);
+    _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_KP_RIGHT, 0), moveRightAction);
+    _pane.addActionForKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, 0), moveRightAction);
 
     // Prevent previous word action from going past the prompt
-    _pane.addActionForKeyStroke(DrJava.getConfig().getSetting(OptionConstants.KEY_PREVIOUS_WORD),
-                                prevWordAction);
-    DrJava.getConfig().addOptionListener(OptionConstants.KEY_PREVIOUS_WORD,
-                                         new OptionListener<KeyStroke>() {
+    _pane.addActionForKeyStroke(DrJava.getConfig().getSetting(OptionConstants.KEY_PREVIOUS_WORD), prevWordAction);
+    DrJava.getConfig().addOptionListener(OptionConstants.KEY_PREVIOUS_WORD, new OptionListener<KeyStroke>() {
       public void optionChanged(OptionEvent<KeyStroke> oe) {
-        _pane.addActionForKeyStroke(DrJava.getConfig().getSetting(OptionConstants.KEY_PREVIOUS_WORD),
-                                    prevWordAction);
+        _pane.addActionForKeyStroke(DrJava.getConfig().getSetting(OptionConstants.KEY_PREVIOUS_WORD), prevWordAction);
       }
     });
 
-    _pane.addActionForKeyStroke(DrJava.getConfig().getSetting(OptionConstants.KEY_NEXT_WORD),
-                                nextWordAction);
+    _pane.addActionForKeyStroke(DrJava.getConfig().getSetting(OptionConstants.KEY_NEXT_WORD), nextWordAction);
     DrJava.getConfig().addOptionListener(OptionConstants.KEY_NEXT_WORD, new OptionListener<KeyStroke>() {
       public void optionChanged(OptionEvent<KeyStroke> oe) {
-        _pane.addActionForKeyStroke(DrJava.getConfig().getSetting(OptionConstants.KEY_NEXT_WORD),
-                                    nextWordAction);
+        _pane.addActionForKeyStroke(DrJava.getConfig().getSetting(OptionConstants.KEY_NEXT_WORD), nextWordAction);
       }
     });
   }
 
   // The fields below were made package private for testing purposes.
 
-  /**
-   * Evaluates the interaction on the current line.
-   */
+  /** Evaluates the interaction on the current line. */
   AbstractAction evalAction = new AbstractAction() {
     public void actionPerformed(ActionEvent e) {
-      SwingWorker worker = new SwingWorker() {
-        public Object construct() {
-          if(! _adapter.isInCommentBlock()) { //Eventually check if it's in a block statement as well?
-            _model.interpretCurrentInteraction(); 
-          }
-          else {
-            _model.addNewLine();
-            _model.interactionContinues();
-          }
-          return null;
-        }
-      };
-      worker.start();
-    }
-  };
-
-  /**
-   * Recalls the previous command from the history.
-   */
-  AbstractAction historyPrevAction = new AbstractAction() {
-    public void actionPerformed(ActionEvent e) {
-      if (!_busy()) {
-        if(_doc.recallPreviousInteractionInHistory())
-          moveToEnd();
-        if(!_isCursorAfterPrompt())
-          moveToPrompt();
+      if (! _adapter.isInCommentBlock()) {
+        Thread command = new Thread("Evaluating Interaction") { 
+          public void run() { _model.interpretCurrentInteraction(); }
+        };
+        command.start();
+      }
+      else {
+        _model.addNewLine();
+        _model.interactionContinues();
       }
     }
   };
 
-  /**
-   * Recalls the next command from the history.
-   */
+  /** Recalls the previous command from the history. */
+  AbstractAction historyPrevAction = new AbstractAction() {
+    public void actionPerformed(ActionEvent e) {
+      if (!_busy()) {
+        if (_doc.recallPreviousInteractionInHistory()) moveToEnd();
+        if (!_isCursorAfterPrompt()) moveToPrompt();
+      }
+    }
+  };
+
+  /** Recalls the next command from the history. */
   AbstractAction historyNextAction = new AbstractAction() {
     public void actionPerformed(ActionEvent e) {
       if (!_busy()) {
-        if(_doc.recallNextInteractionInHistory() || !_isCursorAfterPrompt())
-          moveToPrompt();
+        if (_doc.recallNextInteractionInHistory() || !_isCursorAfterPrompt()) moveToPrompt();
       }
     }
   };
   
-  /**
-   * Added feature for up. If the cursor is on the first line of the current interaction, it goes into the history.
-   * Otherwise, stays within the current interaction
+  /** Added feature for up. If the cursor is on the first line of the current interaction, it goes into the history.
+   *  Otherwise, stays within the current interaction
    */
   AbstractAction moveUpAction = new AbstractAction() {
     public void actionPerformed(ActionEvent e) {
       if (!_busy()) {
-        if(_shouldGoIntoHistory(_doc.getPromptPos(), _pane.getCaretPosition())) {
+        if (_shouldGoIntoHistory(_doc.getPromptPos(), _pane.getCaretPosition())) 
           historyPrevAction.actionPerformed(e);
-        }
         else {
           defaultUpAction.actionPerformed(e);
-          if(! _isCursorAfterPrompt()) {
-            moveToPrompt();
-          }
+          if (! _isCursorAfterPrompt()) moveToPrompt();
         }
       }
     }
@@ -386,48 +337,35 @@ public class InteractionsController extends AbstractConsoleController {
    */
   AbstractAction moveDownAction = new AbstractAction() {
     public void actionPerformed(ActionEvent e) {
-      if(!_busy()) {
-        if(_shouldGoIntoHistory(_pane.getCaretPosition(), _adapter.getLength())) {
+      if (!_busy()) {
+        if (_shouldGoIntoHistory(_pane.getCaretPosition(), _adapter.getLength()))
           historyNextAction.actionPerformed(e);
-        }
-        else {
-          defaultDownAction.actionPerformed(e);
-        }
+        else defaultDownAction.actionPerformed(e);
       }
     }
   };
   
-  /**
-   * Tests whether or not to move into the history
-   * @return true iff there are no "\n" characters between the start and the end
+  /** Tests whether or not to move into the history
+   *  @return true iff there are no "\n" characters between the start and the end
    */  
   private boolean _shouldGoIntoHistory(int start, int end) {
-    if(_isCursorAfterPrompt() && end >= start) {
+    if (_isCursorAfterPrompt() && end >= start) {
       String text = "";
-      try {
-        text = _adapter.getText(start, end - start);
-      }
+      try { text = _adapter.getText(start, end - start); }
       catch(BadLocationException ble) {
         throw new UnexpectedException(ble); //The conditional should prevent this from ever happening
       }
-      if(text.indexOf("\n") != -1)
-        return false;
-      //moveIntoHistory = true;
+      if (text.indexOf("\n") != -1) return false;
     }
     return true;
   }
   
-  private boolean _isCursorAfterPrompt() {
-    return _pane.getCaretPosition() >= _doc.getPromptPos();
-  }
+  private boolean _isCursorAfterPrompt() { return _pane.getCaretPosition() >= _doc.getPromptPos(); }
   
   Action defaultUpAction;
   Action defaultDownAction;
   
-
-  /**
-   * Reverse searches in the history.
-   */
+  /** Reverse searches in the history. */
   AbstractAction historyReverseSearchAction = new AbstractAction() {
     public void actionPerformed(ActionEvent e) {
       if (!_busy()) {
@@ -532,7 +470,7 @@ public class InteractionsController extends AbstractConsoleController {
   /**
    * A box that can be inserted into the interactions pane for separate input.
    */
-  protected static class InputBox extends JTextArea {
+  private static class InputBox extends JTextArea {
     private static final int BORDER_WIDTH = 1;
     private static final int INNER_BUFFER_WIDTH = 3;
     private static final int OUTER_BUFFER_WIDTH = 2;
@@ -586,14 +524,11 @@ public class InteractionsController extends AbstractConsoleController {
       Border temp = BorderFactory.createCompoundBorder(outer, inner);
       return BorderFactory.createCompoundBorder(outerouter, temp);
     }
-    /**
-     * Enable anti-aliased text by overriding paintComponent.
-     */
+    /** Enable anti-aliased text by overriding paintComponent. */
     protected void paintComponent(Graphics g) {
       if (_antiAliasText && g instanceof Graphics2D) {
         Graphics2D g2d = (Graphics2D)g;
-        g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
-                             RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+        g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
       }
       super.paintComponent(g);
     }

@@ -65,7 +65,7 @@ public final class KeyStrokeOptionTest extends TestCase
    */
   public KeyStrokeOptionTest(String name) { super(name); }
 
-  public void setUp() {}
+  public void setUp() { }
 
   public void testGetName()
   {
@@ -100,16 +100,16 @@ public final class KeyStrokeOptionTest extends TestCase
      io.parse("ctrl alt typed %"));*/
 
     try { io.parse("true"); fail(); }
-    catch (IllegalArgumentException e) {}
+    catch (IllegalArgumentException e) { }
 
     try { io.parse(".33"); fail(); }
-    catch (IllegalArgumentException e) {}
+    catch (IllegalArgumentException e) { }
 
     try { io.parse("Alt Z"); fail(); }
-    catch (IllegalArgumentException e) {}
+    catch (IllegalArgumentException e) { }
 
     try { io.parse("ctrl alt shift typed F1"); fail(); }
-    catch (IllegalArgumentException e) {}
+    catch (IllegalArgumentException e) { }
   }
 
   /**

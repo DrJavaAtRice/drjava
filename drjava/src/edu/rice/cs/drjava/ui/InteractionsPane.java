@@ -73,9 +73,7 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
   /** The custom keymap for the interactions pane. */
   protected Keymap _keymap;
   
-  /**
-   * Whether to draw text as antialiased.
-   */
+  /** Whether to draw text as antialiased. */
   private boolean _antiAliasText = false;
   
   static StyledEditorKit EDITOR_KIT;
@@ -216,16 +214,10 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
     super.paintComponent(g);
   }
 
-  /**
-   * Returns the DJDocument held by the pane
-   */
-  public DJDocument getDJDocument() {
-    return _doc;
-  }
+  /** Returns the DJDocument held by the pane */
+  public DJDocument getDJDocument() { return _doc; }
   
-  /**
-   * Updates the highlight if there is any.
-   */
+  /** Updates the highlight if there is any. */
   protected void _updateMatchHighlight() {
     addToPromptList(getPromptPos());
     int to = getCaretPosition();
@@ -233,7 +225,7 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
     if (from > -1) {
       // Found a matching open brace to this close brace
       from = to - from;
-      if(_notCrossesPrompt(to,from))
+      if (_notCrossesPrompt(to,from))
         _addHighlight(from, to);
       //      Highlighter.Highlight[] _lites = getHighlighter().getHighlights();
     }
@@ -245,7 +237,7 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
       to = getDJDocument().balanceForward();
       if (to > -1) {
         to = to + from;
-        if(_notCrossesPrompt(to,from))
+        if (_notCrossesPrompt(to,from))
           _addHighlight(from - 1, to);
 //        Highlighter.Highlight[] _lites = getHighlighter().getHighlights();
       }
@@ -255,17 +247,10 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
   /**
    * Returns the list of prompts. Used for tests
    */
-  List<Integer> getPromptList() {
-    return _listOfPrompt;
-  }
+  List<Integer> getPromptList() {  return _listOfPrompt; }
   
-  /**
-   * Resets the list of prompts. Called when the interactions pane is reset
-   */
-  public void resetPrompts() {
-    _listOfPrompt.clear();
-  }
-  
+  /** Resets the list of prompts. Called when the interactions pane is reset. */
+  public void resetPrompts() { _listOfPrompt.clear(); }
   
   /**
    * Adds the position to the list of prompt positions. package private for tests
@@ -280,7 +265,7 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
   private boolean _notCrossesPrompt(int to, int from) {
 //    DrJava.consoleErr().println("To: " + to + " , From: " + from);
     boolean toReturn = true;
-    for(Integer prompt : _listOfPrompt) {
+    for (Integer prompt : _listOfPrompt) {
       toReturn &= ((to >= prompt && from >= prompt) || (to <= prompt && from <= prompt));      
     }
     return toReturn;
@@ -317,9 +302,7 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
     return true;
   }
   
-  /**
-   * Gets the current prompt position
-   */
+  /** Gets the current prompt position */
   public abstract int getPromptPos();
   
 }

@@ -108,8 +108,8 @@ public class JavadocModelTest extends TestCase {
       public void saveBeforeJavadoc() {
         _storedFile = file;
       }
-      public void javadocStarted() {}
-      public void javadocEnded(boolean success, File destDir, boolean allDocs) {}
+      public void javadocStarted() { }
+      public void javadocEnded(boolean success, File destDir, boolean allDocs) { }
     };
     jModel.addListener(listener);
     

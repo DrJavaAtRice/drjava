@@ -910,8 +910,8 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   /** InteractionsModel which does not react to events. */
   public static class DummyInteractionsModel implements InteractionsModelCallback {
     public int getDebugPort() throws IOException { return -1; }
-    public void replSystemOutPrint(String s) {}
-    public void replSystemErrPrint(String s) {}
+    public void replSystemOutPrint(String s) { }
+    public void replSystemErrPrint(String s) { }
     public String getConsoleInput() {
       throw new IllegalStateException("Cannot request input from dummy interactions model!");
     }
@@ -921,35 +921,35 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     public void changeInputListener(InputListener from, InputListener to) {
       throw new IllegalStateException("Cannot change the input listener of dummy interactions model!");
     }
-    public void replReturnedVoid() {}
-    public void replReturnedResult(String result, String style) {}
+    public void replReturnedVoid() { }
+    public void replReturnedResult(String result, String style) { }
     public void replThrewException(String exceptionClass,
                                    String message,
                                    String stackTrace,
-                                   String specialMessage) {}
+                                   String specialMessage) { }
     public void replReturnedSyntaxError(String errorMessage,
                                         String interaction,
                                         int startRow,
                                         int startCol,
                                         int endRow,
-                                        int endCol ) {}
-    public void replCalledSystemExit(int status) {}
-    public void interpreterResetting() {}
-    public void interpreterResetFailed(Throwable th) {}
-    public void interpreterReady() {}
+                                        int endCol ) { }
+    public void replCalledSystemExit(int status) { }
+    public void interpreterResetting() { }
+    public void interpreterResetFailed(Throwable th) { }
+    public void interpreterReady() { }
   }
   
   /** JUnitModel which does not react to events. */
   public static class DummyJUnitModel implements JUnitModelCallback {
-    public void nonTestCase(boolean isTestAll) {}
-    public void classFileError(ClassFileError e) {}
-    public void testSuiteStarted(int numTests) {}
-    public void testStarted(String testName) {}
-    public void testEnded(String testName, boolean wasSuccessful, boolean causedError) {}
-    public void testSuiteEnded(JUnitError[] errors) {}
+    public void nonTestCase(boolean isTestAll) { }
+    public void classFileError(ClassFileError e) { }
+    public void testSuiteStarted(int numTests) { }
+    public void testStarted(String testName) { }
+    public void testEnded(String testName, boolean wasSuccessful, boolean causedError) { }
+    public void testSuiteEnded(JUnitError[] errors) { }
     public File getFileForClassName(String className) { return null; }
     public ClasspathVector getClasspath() { return new ClasspathVector(); }
-    public void junitJVMReady() {}
+    public void junitJVMReady() { }
   }
   
   /** DebugModelCallback which does not react to events. */

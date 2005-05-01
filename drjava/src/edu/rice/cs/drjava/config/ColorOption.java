@@ -69,7 +69,7 @@ public class ColorOption extends Option<Color>{
     int len = 6; // always want to display 6 alphanumeric characters 
     String str = Integer.toHexString(c.getRGB() & 0xFFFFFF);
     StringBuffer buff = new StringBuffer(str);
-    for(int i = 0; i < (len - str.length()); i++) {
+    for (int i = 0; i < (len - str.length()); i++) {
       buff.insert(0, '0');
     }
     buff.insert(0, '#');

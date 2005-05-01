@@ -90,7 +90,7 @@ public class DebugEventNotifier extends EventNotifier<DebugListener>
     _lock.startRead();
     try {
       int size = _listeners.size();
-      for(int i = 0; i < size; i++) {
+      for (int i = 0; i < size; i++) {
         _listeners.get(i).debuggerStarted();
       }
     }
@@ -106,7 +106,7 @@ public class DebugEventNotifier extends EventNotifier<DebugListener>
     _lock.startRead();
     try {
       int size = _listeners.size();
-      for(int i = 0; i < size; i++) {
+      for (int i = 0; i < size; i++) {
         _listeners.get(i).debuggerShutdown();
       }
     }
@@ -127,7 +127,7 @@ public class DebugEventNotifier extends EventNotifier<DebugListener>
     _lock.startRead();
     try {
       int size = _listeners.size();
-      for(int i = 0; i < size; i++) {
+      for (int i = 0; i < size; i++) {
         _listeners.get(i).threadLocationUpdated(doc, lineNumber,
                                                 shouldHighlight);
       }
@@ -145,7 +145,7 @@ public class DebugEventNotifier extends EventNotifier<DebugListener>
     _lock.startRead();
     try {
       int size = _listeners.size();
-      for(int i = 0; i < size; i++) {
+      for (int i = 0; i < size; i++) {
         _listeners.get(i).breakpointSet(bp);
       }
     }
@@ -162,7 +162,7 @@ public class DebugEventNotifier extends EventNotifier<DebugListener>
     _lock.startRead();
     try {
       int size = _listeners.size();
-      for(int i = 0; i < size; i++) {
+      for (int i = 0; i < size; i++) {
         _listeners.get(i).breakpointReached(bp);
       }
     }
@@ -179,7 +179,7 @@ public class DebugEventNotifier extends EventNotifier<DebugListener>
     _lock.startRead();
     try {
       int size = _listeners.size();
-      for(int i = 0; i < size; i++) {
+      for (int i = 0; i < size; i++) {
         _listeners.get(i).breakpointRemoved(bp);
       }
     }
@@ -195,7 +195,7 @@ public class DebugEventNotifier extends EventNotifier<DebugListener>
     _lock.startRead();
     try {
       int size = _listeners.size();
-      for(int i = 0; i < size; i++) {
+      for (int i = 0; i < size; i++) {
         _listeners.get(i).stepRequested();
       }
     }
@@ -211,7 +211,7 @@ public class DebugEventNotifier extends EventNotifier<DebugListener>
     _lock.startRead();
     try {
       int size = _listeners.size();
-      for(int i = 0; i < size; i++) {
+      for (int i = 0; i < size; i++) {
         _listeners.get(i).currThreadSuspended();
       }
     }
@@ -227,7 +227,7 @@ public class DebugEventNotifier extends EventNotifier<DebugListener>
     _lock.startRead();
     try {
       int size = _listeners.size();
-      for(int i = 0; i < size; i++) {
+      for (int i = 0; i < size; i++) {
         _listeners.get(i).currThreadResumed();
       }
     }
@@ -243,7 +243,7 @@ public class DebugEventNotifier extends EventNotifier<DebugListener>
     _lock.startRead();
     try {
       int size = _listeners.size();
-      for(int i = 0; i < size; i++) {
+      for (int i = 0; i < size; i++) {
         _listeners.get(i).threadStarted();
       }
     }
@@ -259,7 +259,7 @@ public class DebugEventNotifier extends EventNotifier<DebugListener>
     _lock.startRead();
     try {
       int size = _listeners.size();
-      for(int i = 0; i < size; i++) {
+      for (int i = 0; i < size; i++) {
         _listeners.get(i).currThreadDied();
       }
     }
@@ -275,7 +275,7 @@ public class DebugEventNotifier extends EventNotifier<DebugListener>
     _lock.startRead();
     try {
       int size = _listeners.size();
-      for(int i = 0; i < size; i++) {
+      for (int i = 0; i < size; i++) {
         _listeners.get(i).nonCurrThreadDied();
       }
     }
@@ -292,7 +292,7 @@ public class DebugEventNotifier extends EventNotifier<DebugListener>
     _lock.startRead();
     try {
       int size = _listeners.size();
-      for(int i = 0; i < size; i++) {
+      for (int i = 0; i < size; i++) {
         _listeners.get(i).currThreadSet(thread);
       }
     }

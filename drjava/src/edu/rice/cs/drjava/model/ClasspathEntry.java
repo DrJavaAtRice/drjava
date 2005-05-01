@@ -54,19 +54,19 @@ import java.net.URL;
 public class ClasspathEntry{
   URL item;
   
-  public ClasspathEntry(URL entry){
+  public ClasspathEntry(URL entry) {
     item = entry;
   }
   
-  public URL getEntry(){
+  public URL getEntry() {
     return item;
   }
   
-  public ClassLoader getClassLoader(ClassLoader c){
+  public ClassLoader getClassLoader(ClassLoader c) {
     return new URLClassLoader(new URL[] { item }, c);
   }
   
-  public ClassLoader getClassLoader(){
+  public ClassLoader getClassLoader() {
     return new URLClassLoader(new URL[] { item }, new DeadClassLoader());
   }
 }

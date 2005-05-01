@@ -61,14 +61,14 @@ public class ClassAndInterfaceFinderTest extends TestCase {
   /**
    * Tests to see if string input is properly parsed to obtain interface name.
    */
-  public void testStringInterfaceRecognition(){
+  public void testStringInterfaceRecognition() {
     try {
       Reader r = new StringReader("//\n /**/public Class Interface interface Aa.12_34 {}");
       ClassAndInterfaceFinder finder = new ClassAndInterfaceFinder(r);
       String s = finder.getClassOrInterfaceName();
       assertEquals("stringInterfaceRecognition","Aa.12_34", s);
     }
-    catch (Exception e){
+    catch (Exception e) {
       fail("stringInterfaceRecognition threw "+e);
     }
   }
@@ -77,7 +77,7 @@ public class ClassAndInterfaceFinderTest extends TestCase {
   /**
    * Tests to see if string input is properly parsed to reject interface name.
    */
-  public void testStringInterfaceRejection(){
+  public void testStringInterfaceRejection() {
     try {
       Reader r = new StringReader("//\n /**/public Class Interface interface Aa.12_34 {}");
       ClassAndInterfaceFinder finder = new ClassAndInterfaceFinder(r);
@@ -93,7 +93,7 @@ public class ClassAndInterfaceFinderTest extends TestCase {
   /**
    * Tests to see if string input is properly parsed to obtain class name.
    */
-  public void testStringClassRecognition(){
+  public void testStringClassRecognition() {
     try {
       Reader r = new StringReader("//\n /**/public Class Interface class Aa.12_34 {}");
       ClassAndInterfaceFinder finder = new ClassAndInterfaceFinder(r);
@@ -108,7 +108,7 @@ public class ClassAndInterfaceFinderTest extends TestCase {
   /**
    * Tests to see if string input is properly parsed to insert package name.
    */
-  public void testStringPackageRecognition(){
+  public void testStringPackageRecognition() {
     try {
       Reader r = new StringReader("//\n /**/package x public interface Aa.12_34 {}");
       ClassAndInterfaceFinder finder = new ClassAndInterfaceFinder(r);

@@ -152,7 +152,7 @@ public class JUnitPanel extends ErrorPanel {
   /** Returns the JUnitErrorListPane that this panel manages. */
   public JUnitErrorListPane getErrorListPane() { return _errorListPane; }
 
-  protected JUnitErrorModel getErrorModel(){ 
+  protected JUnitErrorModel getErrorModel() { 
     return getModel().getJUnitModel().getJUnitErrorModel();
   }
 

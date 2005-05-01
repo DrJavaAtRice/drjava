@@ -91,7 +91,7 @@ public class DocumentCache{
   
   private LinkedList<DocManager> _lru;
     
-  public DocumentCache(int size){
+  public DocumentCache(int size) {
     CACHE_SIZE = size;
     _lru = new LinkedList<DocManager>();
   }
@@ -181,11 +181,8 @@ public class DocumentCache{
   private static final int NOT_IN_LRU = 2;   // Inactive and not in the LRU
   private static final int UNMANAGED = 3;    // Possibly open but not managed by LRU
   
-  /**
-   * Manages the retrieval of a document for a corresponding
-   * open definitions document.  This manager only maintains
-   * its document data if it is among the top CACHE_SIZE most
-   * recently used managers in the set.
+  /** Manages the retrieval of a document for a corresponding open definitions document.  This manager 
+   *  only maintains its document data if it is among the top CACHE_SIZE most recently used managers in the set.
    */
   private class DocManager implements DCacheAdapter {
     
@@ -211,14 +208,13 @@ public class DocumentCache{
     
     public synchronized DDReconstructor getReconstructor() { return _rec; }
   
-    /**
-     * Retrieves the document for the corresponding ODD.  If the document
-     * is not in memory, it loads it into memory and then returns it.
+    /** Retrieves the document for the corresponding ODD.  If the document
+     *  is not in memory, it loads it into memory and then returns it.
      * 
-     * If the file is modified in memory, it is unmanaged.  If it's not 
-     * at the front of the LRU and it is managed (unmodified in memory),
-     * then put it at the top of the LRU.  
-     * @return the document that is managed by this adapter
+     *  If the file is modified in memory, it is unmanaged.  If it's not 
+     *  t the front of the LRU and it is managed (unmodified in memory),
+     *  then put it at the top of the LRU.  
+     *  @return the document that is managed by this adapter
      */
     public synchronized DefinitionsDocument getDocument() 
       throws IOException, FileMovedException {
@@ -249,9 +245,7 @@ public class DocumentCache{
       DocumentCache.this.remove(this);
     }
         
-    /**
-     * Should be called by the cache
-     */
+    /** Should be called by the cache */
     void kickOut() { kickOut(true); }
     
     private synchronized void kickOut(boolean save) {
@@ -314,7 +308,7 @@ public class DocumentCache{
     _regListeners.clear();
   }
   private void notifyRegistrationListeners(OpenDefinitionsDocument odd, DocManager man) {
-    for(RegistrationListener list : _regListeners) {
+    for (RegistrationListener list : _regListeners) {
       list.registered(odd,man);
     }
   }

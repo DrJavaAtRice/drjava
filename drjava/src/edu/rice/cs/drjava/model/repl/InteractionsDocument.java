@@ -83,7 +83,8 @@ public class InteractionsDocument extends ConsoleDocument {
 
   /** String to print when the document is reset. Defaults to "Welcome to DrJava." */
   private String _banner;
-
+  
+  /* Constructors */
 
   /** Reset the document on startup.  Uses a history with configurable size.
    *  @param document DocumentAdapter to use for the model
@@ -119,15 +120,15 @@ public class InteractionsDocument extends ConsoleDocument {
   /** Sets the string to use for the banner when the document resets.
    *  @param banner String to be printed when the document resets.
    */
-  public void setBanner(String banner) { _banner = banner; }
+  public synchronized void setBanner(String banner) { _banner = banner; }
 
   /** Lets this document know whether an interaction is in progress.
    *  @param inProgress whether an interaction is in progress
    */
-  public void setInProgress(boolean inProgress) { _hasPrompt = !inProgress; }
+  public synchronized void setInProgress(boolean inProgress) { _hasPrompt = ! inProgress; }
 
   /** Returns whether an interaction is currently in progress. */
-  public boolean inProgress() { return !_hasPrompt; }
+  public boolean inProgress() { return ! _hasPrompt; }
 
   /** Resets the document to a clean state.  Does not reset the history. */
   public synchronized void reset() {
@@ -159,36 +160,35 @@ public class InteractionsDocument extends ConsoleDocument {
   /** Saves the unedited version of the current history to a file
    *  @param selector File to save to
    */
-  public void saveHistory(FileSaveSelector selector) throws IOException {
+  public synchronized void saveHistory(FileSaveSelector selector) throws IOException {
     _history.writeToFile(selector);
   }
 
-  /**
-   * Saves the edited version of the current history to a file
-   * @param selector File to save to
-   * @param editedVersion Edited verison of the history which will be
-   * saved to file instead of the lines saved in the history. The saved
-   * file will still include any tags needed to recognize it as a saved
-   * interactions file.
+  /** Saves the edited version of the current history to a file
+   *  @param selector File to save to
+   *  @param editedVersion Edited verison of the history which will be
+   *  saved to file instead of the lines saved in the history. The saved
+   *  file will still include any tags needed to recognize it as a saved
+   *  interactions file.
    */
-  public void saveHistory(FileSaveSelector selector, String editedVersion) throws IOException {
+  public synchronized void saveHistory(FileSaveSelector selector, String editedVersion) throws IOException {
     _history.writeToFile(selector, editedVersion);
   }
 
   /** Returns the entire history as a single string.  Commands should be separated by semicolons. If an entire
    *  command does not end in a semicolon, one is added.
    */
-  public String getHistoryAsStringWithSemicolons() {
+  public synchronized String getHistoryAsStringWithSemicolons() {
       return _history.getHistoryAsStringWithSemicolons();
   }
 
   /** Returns the entire history as a single string.  Commands should be separated by semicolons. */
-  public String getHistoryAsString() { return _history.getHistoryAsString(); }
+  public synchronized String getHistoryAsString() { return _history.getHistoryAsString(); }
 
   /** Clears the history */
-  public void clearHistory() { _history.clear();  }
+  public synchronized void clearHistory() { _history.clear();  }
   
-  public String lastEntry() { return _history.lastEntry(); }  // may throw a RuntimeException if no such entry
+  public synchronized String lastEntry() { return _history.lastEntry(); }  // may throw a RuntimeException if no such entry
 
   /** Puts the previous line from the history on the current line and moves the history back one line.
    *  @param entry the current entry (perhaps edited from what is in history)
@@ -207,10 +207,10 @@ public class InteractionsDocument extends ConsoleDocument {
   }
 
   /** Returns whether there is a previous command in the history. */
-  public boolean hasHistoryPrevious() { return  _history.hasPrevious(); }
+  public synchronized boolean hasHistoryPrevious() { return  _history.hasPrevious(); }
 
   /** Returns whether there is a next command in the history. */
-  public boolean hasHistoryNext() { return _history.hasNext(); }
+  public synchronized boolean hasHistoryNext() { return _history.hasNext(); }
 
   /** Reverse searches the history for the given string.
    *  @param searchString the string to search for
@@ -243,7 +243,7 @@ public class InteractionsDocument extends ConsoleDocument {
   /** Gets the next interaction in the history and replaces whatever is on the current interactions input line 
    *  with this interaction.
    */
-  public boolean recallNextInteractionInHistory() {
+  public synchronized boolean recallNextInteractionInHistory() {
     if (hasHistoryNext()) {
       moveHistoryNext(getCurrentInteraction());
       return true;
@@ -259,7 +259,7 @@ public class InteractionsDocument extends ConsoleDocument {
   }
 
   /** Forward searches the history for interactions that started with the current interaction. */
-  public void forwardSearchInteractionsInHistory() {
+  public synchronized void forwardSearchInteractionsInHistory() {
     if (hasHistoryNext()) forwardHistorySearch(getCurrentInteraction());
     else _beep.run();
   }
@@ -270,91 +270,25 @@ public class InteractionsDocument extends ConsoleDocument {
    *  @param stackTrace String representation of the stack trace
    *  @param styleName name of the style for formatting the exception
    */
-  public synchronized void appendExceptionResult(String exceptionClass, String message, String stackTrace,
-                                                 String styleName) {
-    try {
-      if (null == message || "null".equals(message)) message = "";
-      
-      // Simplify the common error messages
-      if ("koala.dynamicjava.interpreter.error.ExecutionError".equals(exceptionClass) ||
-          "edu.rice.cs.drjava.model.repl.InteractionsException".equals(exceptionClass)) {
-        exceptionClass = "Error";
-      }
-
-      String c = exceptionClass;
-      if (c.indexOf('.') != -1) c = c.substring(c.lastIndexOf('.') + 1, c.length());      
-      insertText(getDocLength(), c + ": " + message + "\n", styleName);
-
-      // An example stack trace:
-      //
-      // java.lang.IllegalMonitorStateException:
-      // at java.lang.Object.wait(Native Method)
-      // at java.lang.Object.wait(Object.java:425)
-      if (! stackTrace.trim().equals("")) {
-        BufferedReader reader=new BufferedReader(new StringReader(stackTrace));
-
-        String line;
-        // a line is parsable if it has ( then : then ), with some
-        // text between each of those
-        while ((line = reader.readLine()) != null) {
-          String fileName;
-          int lineNumber;
-
-          // TODO:  Why is this stuff here??
-          int openLoc = line.indexOf('(');
-          if (openLoc != -1) {
-            int closeLoc = line.indexOf(')', openLoc + 1);
-
-            if (closeLoc != -1) {
-              int colonLoc = line.indexOf(':', openLoc + 1);
-              if ((colonLoc > openLoc) && (colonLoc < closeLoc)) {
-                // ok this line is parsable!
-                String lineNumStr = line.substring(colonLoc + 1, closeLoc);
-                try {
-                  lineNumber = Integer.parseInt(lineNumStr);
-                  fileName = line.substring(openLoc + 1, colonLoc);
-                }
-                catch (NumberFormatException nfe) {
-                  // do nothing; we failed at parsing
-                }
-              }
-            }
-          }
-
-          insertText(getDocLength(), line, styleName);
-
-          // OK, now if fileName != null we did parse out fileName
-          // and lineNumber.
-          // Here's where we'd add the button, etc.
-          /*
-          if (fileName != null) {
-            JButton button = new JButton("go");
-            button.addActionListener(new ExceptionButtonListener(fileName, lineNumber));
-            SimpleAttributeSet buttonSet = new SimpleAttributeSet(set);
-            StyleConstants.setComponent(buttonSet, button);
-            insertString(getDocLength(), "  ", null);
-            insertString(getDocLength() - 1, " ", buttonSet);
-            JOptionPane.showMessageDialog(null, "button in");
-            insertString(getDocLength(), " ", null);
-            JOptionPane.showMessageDialog(null, "extra space");
-          }*/
-
-          //JOptionPane.showMessageDialog(null, "\\n");
-          insertText(getDocLength(), "\n", styleName);
-
-        } // end the while
-      }
+  public void appendExceptionResult(String exceptionClass, String message, String stackTrace, String styleName) {
+    
+    
+    if (null == message || "null".equals(message)) message = "";
+    
+    // Simplify the common error messages
+    if ("koala.dynamicjava.interpreter.error.ExecutionError".equals(exceptionClass) ||
+        "edu.rice.cs.drjava.model.repl.InteractionsException".equals(exceptionClass)) {
+      exceptionClass = "Error";
     }
-    catch (IOException ioe) {
-      // won't happen; we're readLine'ing from a String!
-      throw new UnexpectedException(ioe);
-    }
-    catch (DocumentAdapterException ble) {
-      throw new UnexpectedException(ble);
-    }
+    
+    // The following is an ugly hack that should be fixed ASAP.  The read/writelock methods need to be added to
+    // the DocumentAdapter interface.  This cast and a similar one in ConsoleDocument must be removed because they
+    // defeat the purpose of the DocumentAdapter interface.
+    InteractionsDocumentAdapter doc = ((InteractionsDocumentAdapter)_document);
+    doc.appendExceptionResult(exceptionClass, message, stackTrace, styleName);
   }
 
-  public void appendSyntaxErrorResult(String message, String interaction, int startRow, int startCol,
+  public synchronized void appendSyntaxErrorResult(String message, String interaction, int startRow, int startCol,
                                       int endRow, int endCol, String styleName) {
     try {
       if (null == message || "null".equals(message))  message = "";

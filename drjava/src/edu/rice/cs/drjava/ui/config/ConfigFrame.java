@@ -607,7 +607,7 @@ public class ConfigFrame extends JFrame {
    * Add all of the components for the Debugger panel of the preferences window.
    */
   private void _setupDebugPanel(ConfigPanel panel) {
-    if(!_mainFrame.getModel().getDebugger().isAvailable()) {
+    if (!_mainFrame.getModel().getDebugger().isAvailable()) {
       // Explain how to use debugger
       String howto =
         "\nThe debugger is not currently active.  To use the debugger, you\n" +

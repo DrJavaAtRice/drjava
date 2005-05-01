@@ -286,17 +286,17 @@ public final class CompilerRegistryTest extends TestCase {
       testField = true;
     }
 
-     public void addToBootClassPath(File s) {}
+     public void addToBootClassPath(File s) { }
      public CompilerError[] compile(File[] sourceRoots, File[] files){ return null; }
      public CompilerError[] compile(File sourceRoot, File[] files) { return null; }
      public String getName() { return "Without"; }
      public boolean isAvailable() { return false; }
-     public void setAllowAssertions(boolean allow) {}
-     public void setWarningsEnabled(boolean warningsEnabled) {}
-     public void setExtraClassPath(String extraClassPath) {}
-     public void setExtraClassPath(ClasspathVector extraClassPath) {}
+     public void setAllowAssertions(boolean allow) { }
+     public void setWarningsEnabled(boolean warningsEnabled) { }
+     public void setExtraClassPath(String extraClassPath) { }
+     public void setExtraClassPath(ClasspathVector extraClassPath) { }
      public String toString(){ return "Without"; }
-     public void setBuildDirectory(File builddir){}
+     public void setBuildDirectory(File builddir){ }
   }
 
   /**

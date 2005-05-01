@@ -245,18 +245,14 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
     /* 11 */ "  }\n" +
     /* 12 */ "}";
 
-  /**
-   * Sets up the debugger for each test.
-   */
+  /** Sets up the debugger for each test. */
   public void setUp() throws IOException {
     super.setUp();
     _debugger = (JPDADebugger) _model.getDebugger();
     assertNotNull("Debug Manager should not be null", _debugger);
   }
 
-  /**
-   * Cleans up the debugger after each test.
-   */
+  /** Cleans up the debugger after each test. */
   public void tearDown() throws IOException {
     _debugger = null;
     super.tearDown();
@@ -407,9 +403,9 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
    * Resumes the debugger asynchronously so as to aovid
    * getting notified before we start waiting for notifies
    */
-  protected void _asyncStep(final int whatKind){
+  protected void _asyncStep(final int whatKind) {
     new Thread("asyncStep Thread") {
-      public void run(){
+      public void run() {
         try{
           _debugger.step(whatKind);
         }
@@ -425,9 +421,9 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
    * Resumes the debugger asynchronously so as to aovid
    * getting notified before we start waiting for notifies
    */
-  protected void _asyncResume(){
+  protected void _asyncResume() {
     new Thread("asyncResume Thread") {
-      public void run(){
+      public void run() {
         try{
           _debugger.resume();
         }
@@ -445,7 +441,7 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
    */
   protected void _asyncDoSetCurrentThread(final DebugThreadData th) {
     new Thread("asyncDoSetCurrentThread Thread") {
-      public void run(){
+      public void run() {
         try {
           _doSetCurrentThread(th);
         }
@@ -719,7 +715,7 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
       }
     }
 
-    public void interpreterChanged(boolean inProgress){
+    public void interpreterChanged(boolean inProgress) {
       synchronized(_notifierLock) {
         interpreterChangedCount++;
         if (printEvents) System.out.println("interpreterChanged " + interpreterChangedCount);

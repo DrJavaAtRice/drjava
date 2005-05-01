@@ -210,13 +210,13 @@ public class ProjectTest extends TestCase {
     return new DocumentInfoGetter() {
       public Pair<Integer,Integer> getSelection() { return new Pair<Integer,Integer>(new Integer(sel1),new Integer(sel2)); }
       public Pair<Integer,Integer> getScroll() { return new Pair<Integer,Integer>(new Integer(scrollv),new Integer(scrollh)); }
-      public File getFile(){
+      public File getFile() {
         if (pf == null)
           return new File(fname);
         else
           return new File(pf.getParentFile(),fname);
       }
-      public String getPackage(){ return pack; }
+      public String getPackage() { return pack; }
       public boolean isActive() { return active; }
       public boolean isUntitled() { return untitled; }
     };

@@ -112,7 +112,7 @@ public final class CompilerErrorModelTest extends TestCase {
       new CompilerError("Test error without File", false) };
     
     CompilerError[] copy = new CompilerError[errors.length];
-    for(int i = 0; i < errors.length; i++) {
+    for (int i = 0; i < errors.length; i++) {
       copy[i] = errors[i];
     }
     model = new CompilerErrorModel<CompilerError>(copy, getter);
@@ -136,7 +136,7 @@ public final class CompilerErrorModelTest extends TestCase {
       new CompilerError(files[0], "Test error with File", false) };
     
     CompilerError[] copy = new CompilerError[errors.length];
-    for(int i = 0; i < errors.length; i++) {
+    for (int i = 0; i < errors.length; i++) {
       copy[i] = errors[i];
     }
     model = new CompilerErrorModel<CompilerError>(copy, getter);
@@ -160,7 +160,7 @@ public final class CompilerErrorModelTest extends TestCase {
       new CompilerError(files[0], 1, 0, "Test error with File and line", false) };
     
     CompilerError[] copy = new CompilerError[errors.length];
-    for(int i = 0; i < errors.length; i++) {
+    for (int i = 0; i < errors.length; i++) {
       copy[i] = errors[i];
     }
     model = new CompilerErrorModel<CompilerError>(copy, getter);
@@ -190,7 +190,7 @@ public final class CompilerErrorModelTest extends TestCase {
       new CompilerError(files[0], 1, 0, "Test error with File and line", false) };
     
     CompilerError[] copy = new CompilerError[errors.length];
-    for(int i = 0; i < errors.length; i++) {
+    for (int i = 0; i < errors.length; i++) {
       copy[i] = errors[i];
     }
     model = new CompilerErrorModel<CompilerError>(copy, getter);
@@ -224,7 +224,7 @@ public final class CompilerErrorModelTest extends TestCase {
       new CompilerError(files[0], "Test error with File", false) };
     
     CompilerError[] copy = new CompilerError[errors.length];
-    for(int i = 0; i < errors.length; i++) {
+    for (int i = 0; i < errors.length; i++) {
       copy[i] = errors[i];
     }
     model = new CompilerErrorModel<CompilerError>(copy, getter);
@@ -259,7 +259,7 @@ public final class CompilerErrorModelTest extends TestCase {
       new CompilerError(files[0], 1, 0, "Test error with File", false) };
     
     CompilerError[] copy = new CompilerError[errors.length];
-    for(int i = 0; i < errors.length; i++) {
+    for (int i = 0; i < errors.length; i++) {
       copy[i] = errors[i];
     }
     model = new CompilerErrorModel<CompilerError>(copy, getter);
@@ -441,7 +441,7 @@ public final class CompilerErrorModelTest extends TestCase {
       new CompilerError(files[0], 1, 0, "Test error with File", false) };
     
     CompilerError[] copy = new CompilerError[errors.length];
-    for(int i = 0; i < errors.length; i++) {
+    for (int i = 0; i < errors.length; i++) {
       copy[i] = errors[i];
     }
     model = new CompilerErrorModel<CompilerError>(copy, getter);

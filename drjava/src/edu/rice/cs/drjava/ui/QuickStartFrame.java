@@ -74,7 +74,7 @@ public class QuickStartFrame extends HelpFrame {
    * (theo) changed to anonymous inner class for encapsulation purposes
    */
   private HyperlinkListener _linkListener = new HyperlinkListener() {
-    public void hyperlinkUpdate(HyperlinkEvent event){
+    public void hyperlinkUpdate(HyperlinkEvent event) {
       if (event.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
         // Only follow links within the documentation
         URL url = event.getURL();

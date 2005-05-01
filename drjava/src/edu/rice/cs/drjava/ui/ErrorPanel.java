@@ -124,7 +124,7 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
     return s;
   }
   
-  public ErrorPanel(SingleDisplayModel model, MainFrame frame, String tabString, String labelString){
+  public ErrorPanel(SingleDisplayModel model, MainFrame frame, String tabString, String labelString) {
     super(frame, tabString);
     _model = model;
     
@@ -474,23 +474,23 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
     /**
      * returns true if there is an error after the selected error
      */
-    public boolean hasNextError(){
+    public boolean hasNextError() {
       return this.getSelectedIndex() + 1 < _numErrors;
     }
     
     /**
      * returns true if there is an error before the selected error
      */
-    public boolean hasPrevError(){
+    public boolean hasPrevError() {
       return this.getSelectedIndex() > 0;
     }
     
     /**
      * switches to the next error
      */
-    public void nextError(){
+    public void nextError() {
       // Select the error
-      if(hasNextError()){
+      if (hasNextError()) {
         this._selectedIndex += 1;
         getErrorListPane().switchToError(this.getSelectedIndex());
       }
@@ -499,9 +499,9 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
     /**
      * switches to the previous error
      */
-    public void prevError(){
+    public void prevError() {
       // Select the error
-      if(hasPrevError()){
+      if (hasPrevError()) {
         this._selectedIndex -= 1;
         getErrorListPane().switchToError(this.getSelectedIndex());
       }
@@ -632,7 +632,7 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
             _removeListHighlight();
           }
         }
-        catch (BadLocationException badBadLocation) {}
+        catch (BadLocationException badBadLocation) { }
         
       }
       catch (IllegalArgumentException iae) {

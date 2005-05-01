@@ -279,7 +279,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   private javax.swing.filechooser.FileFilter _javaSourceFilter = new JavaSourceFilter();
   
   /** Filter for drjava project files (.pjt) */
-  private javax.swing.filechooser.FileFilter _projectFilter = new javax.swing.filechooser.FileFilter(){
+  private javax.swing.filechooser.FileFilter _projectFilter = new javax.swing.filechooser.FileFilter() {
     public boolean accept(File f) {
       return f.isDirectory() || f.getPath().endsWith(PROJECT_FILE_EXTENSION);
     }
@@ -353,7 +353,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   DirectoryChooser _folderChooser;
   private JCheckBox _openRecursiveCheckBox;
 
-  private Action _moveToAuxiliaryAction = new AbstractAction("Include With Project"){
+  private Action _moveToAuxiliaryAction = new AbstractAction("Include With Project") {
     {
       String msg = 
       "<html>Open this document each time this project is opened.<br>"+
@@ -363,7 +363,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
     public void actionPerformed(ActionEvent ae) { _moveToAuxiliary(); }
   };
-  private Action _removeAuxiliaryAction = new AbstractAction("Convert to External"){
+  private Action _removeAuxiliaryAction = new AbstractAction("Convert to External") {
     {
       putValue(Action.SHORT_DESCRIPTION, "Do not open this document next time this project is opened.");
     }
@@ -619,7 +619,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   };
 
   /** cleans the build directory */
-  private Action _cleanAction = new AbstractAction("Clean Build Directory"){
+  private Action _cleanAction = new AbstractAction("Clean Build Directory") {
     public void actionPerformed(ActionEvent ae) { _clean(); }
   };
   
@@ -651,10 +651,10 @@ public class MainFrame extends JFrame implements OptionConstants {
      
   
 //  /** JUnit a directory. */
-//  private Action _junitProjectAction = new AbstractAction("Test Project"){
-//    public void actionPerformed(ActionEvent e){
-//      new Thread("Running JUnit Tests"){
-//        public void run(){
+//  private Action _junitProjectAction = new AbstractAction("Test Project") {
+//    public void actionPerformed(ActionEvent e) {
+//      new Thread("Running JUnit Tests") {
+//        public void run() {
 //          if (_model.isProjectActive()) {
 //            try {
 //              // hourglassOn();  // also done in junitStarted
@@ -976,7 +976,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   private Action _aboutAction = new AbstractAction("About") {
     public void actionPerformed(ActionEvent ae) {
       // Create dialog if we haven't yet
-      if(_aboutDialog == null) {
+      if (_aboutDialog == null) {
         _aboutDialog = new AboutDialog(MainFrame.this);
       }
       _aboutDialog.show();
@@ -1355,10 +1355,10 @@ public class MainFrame extends JFrame implements OptionConstants {
 
   /** How DrJava responds to window events. */
   private WindowListener _windowCloseListener = new WindowAdapter() {
-    public void windowActivated(WindowEvent ev) {}
-    public void windowClosed(WindowEvent ev) {}
+    public void windowActivated(WindowEvent ev) { }
+    public void windowClosed(WindowEvent ev) { }
     public void windowClosing(WindowEvent ev) { _quit(); }
-    public void windowDeactivated(WindowEvent ev) {}
+    public void windowDeactivated(WindowEvent ev) { }
     public void windowDeiconified(WindowEvent ev) {
       try { _model.getActiveDocument().revertIfModifiedOnDisk(); }
       catch (FileMovedException fme) { _showFileMovedError(fme); }
@@ -1597,7 +1597,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     Vector<File> recentProjects = config.getSetting(RECENT_PROJECTS);
     
     _openProjectChooser = new JFileChooser();
-    if(recentProjects.size()>0 && recentProjects.elementAt(0).getParentFile() != null)
+    if (recentProjects.size()>0 && recentProjects.elementAt(0).getParentFile() != null)
       _openProjectChooser.setCurrentDirectory(recentProjects.elementAt(0).getParentFile());
     else
       _openProjectChooser.setCurrentDirectory(workDir);
@@ -1890,7 +1890,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     return dc;
   }
 //  
-//  private JFileChooser makeFolderChooser(File workDir){
+//  private JFileChooser makeFolderChooser(File workDir) {
 //    _folderChooser = new JFileChooser();
 //    _folderChooser.setMultiSelectionEnabled(false);
 //    _folderChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
@@ -1920,17 +1920,17 @@ public class MainFrame extends JFrame implements OptionConstants {
 //    return _folderChooser;
 //  }
   
-  private Container findButtonContainer(Container container, String buttonText){
+  private Container findButtonContainer(Container container, String buttonText) {
     Container answer = null;
     Component[] cs = container.getComponents();
-    for(Component c: cs){
-      if(c instanceof JButton && ((JButton)c).getText().equals(buttonText)){
+    for(Component c: cs) {
+      if (c instanceof JButton && ((JButton)c).getText().equals(buttonText)) {
         return container;
-      }else if(c instanceof Container){
+      }else if (c instanceof Container) {
         answer = findButtonContainer((Container)c, buttonText);
       }
       
-      if(answer != null) break;
+      if (answer != null) break;
     }
     return answer;
   }
@@ -1939,7 +1939,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   RecentDocFrame _recentDocFrame;
   
   /** Sets up the ctrl-tab listener. */
-  private void setUpKeys(){ setFocusTraversalKeysEnabled(false); }
+  private void setUpKeys() { setFocusTraversalKeysEnabled(false); }
   
   /** Releases any resources this frame is using to prepare it to be garbage collected.  Should only be called 
    *  from tests. This is implementation specific and may not be needed.
@@ -2205,7 +2205,7 @@ public class MainFrame extends JFrame implements OptionConstants {
         try{
           _model.getDocumentNavigator().refreshDocument(n, _model.fixPathForNavigator(d.getFile().getCanonicalPath()));
         }
-        catch(IOException e){ /* do nothing */ }
+        catch(IOException e) { /* do nothing */ }
       }
     }
   }
@@ -2310,7 +2310,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   }
   
   private void _openProjectUpdate() {
-    if(_model.isProjectActive()) {
+    if (_model.isProjectActive()) {
       _closeProjectAction.setEnabled(true);
       _saveProjectAction.setEnabled(true);
       _projectPropertiesAction.setEnabled(true);
@@ -2341,10 +2341,10 @@ public class MainFrame extends JFrame implements OptionConstants {
    *  list view navigator
    *  @return true if the project is closed, false if cancelled
    */
-  boolean _closeProject(){
+  boolean _closeProject() {
     if (_checkProjectClose()) {
       List<OpenDefinitionsDocument> projDocs = _model.getProjectDocuments();
-      //    for(OpenDefinitionsDocument d: projDocs){
+      //    for(OpenDefinitionsDocument d: projDocs) {
       //      _model.closeFile(d);
       //    }
       boolean couldClose = _model.closeFiles(projDocs);
@@ -2354,7 +2354,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       new ForegroundColorListener(renderer);
       new BackgroundColorListener(renderer);
       _resetNavigatorPane();
-      if(_model.getDocumentCount() == 1) _model.setActiveFirstDocument();
+      if (_model.getDocumentCount() == 1) _model.setActiveFirstDocument();
       _closeProjectAction.setEnabled(false);
       _saveProjectAction.setEnabled(false);
       _projectPropertiesAction.setEnabled(false);
@@ -2485,8 +2485,8 @@ public class MainFrame extends JFrame implements OptionConstants {
   private void openFilesInFolder(File dir, boolean recursive) {
     ArrayList<File> files;
     if (dir != null && dir.isDirectory()) {
-      files = FileOps.getFilesInDir(dir, recursive, new FileFilter(){
-        public boolean accept(File f){ 
+      files = FileOps.getFilesInDir(dir, recursive, new FileFilter() {
+        public boolean accept(File f) { 
           return f.isDirectory() ||
             f.isFile() && 
             f.getName().endsWith(DrJava.LANGUAGE_LEVEL_EXTENSIONS[DrJava.getConfig().getSetting(LANGUAGE_LEVEL)]);
@@ -2509,7 +2509,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       final File[] sfiles = files.toArray(new File[files.size()]);
       
 
-      open(new FileOpenSelector(){
+      open(new FileOpenSelector() {
         public File[] getFiles() {
           return sfiles;
         }
@@ -2526,7 +2526,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     //    _model.closeFiles(l);
     
     if ((_model.isProjectActive() && _model.getActiveDocument().isInProjectPath()) ||
-       _model.getActiveDocument().isAuxiliaryFile()){
+       _model.getActiveDocument().isAuxiliaryFile()) {
 
       String filename = null;
       OpenDefinitionsDocument doc = _model.getActiveDocument();
@@ -2555,7 +2555,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     
   }
   
-  private void _closeFolder(){
+  private void _closeFolder() {
     INavigatorItem n;
     Enumeration<INavigatorItem> e = _model.getDocumentNavigator().getDocuments();
     final LinkedList<OpenDefinitionsDocument> l = new LinkedList<OpenDefinitionsDocument>();
@@ -2667,7 +2667,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   
   
   /** Closes all files and makes a new project. */
-  private void _newProject(){
+  private void _newProject() {
     _closeAll();
     _saveProjectAs();
   }
@@ -2894,7 +2894,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     worker.start();
   }
 
-  private void _compileFolder(){
+  private void _compileFolder() {
     INavigatorItem n;
     Enumeration<INavigatorItem> e = _model.getDocumentNavigator().getDocuments();
     final LinkedList<OpenDefinitionsDocument> l = new LinkedList<OpenDefinitionsDocument>();
@@ -3007,11 +3007,11 @@ public class MainFrame extends JFrame implements OptionConstants {
     worker.start();
   }
   
-  private void _runProject(){
-    if (_model.isProjectActive()){
+  private void _runProject() {
+    if (_model.isProjectActive()) {
       try {
         final File f = _model.getMainClass();
-        if(f != null){
+        if (f != null) {
           OpenDefinitionsDocument doc = _model.getDocumentForFile(f);
           doc.runMain();
         }
@@ -3536,7 +3536,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       Toolkit.getDefaultToolkit().beep();
       // Do nothing.
     }
-    //catch (BadLocationException ble) {}
+    //catch (BadLocationException ble) { }
   }
 
   /**
@@ -4554,7 +4554,7 @@ public class MainFrame extends JFrame implements OptionConstants {
           else {
             try {
               String groupName = _model.getDocumentNavigator().getNameOfSelectedTopLevelGroup();
-              if(groupName == _model.getSourceBinTitle())
+              if (groupName == _model.getSourceBinTitle())
                 _navPanePopupMenu.show(e.getComponent(), e.getX(), e.getY());
               else if (groupName == _model.getExternalBinTitle()) {
                 INavigatorItem n = _model.getDocumentNavigator().getCurrentSelectedLeaf();
@@ -4609,56 +4609,56 @@ public class MainFrame extends JFrame implements OptionConstants {
     });
   }
 
-  private void nextRecentDoc(){
+  private void nextRecentDoc() {
     if (_recentDocFrame.isVisible()) _recentDocFrame.next();
     else _recentDocFrame.setVisible(true);
   }
   
-  private void prevRecentDoc(){
-    if(_recentDocFrame.isVisible()){
+  private void prevRecentDoc() {
+    if (_recentDocFrame.isVisible()) {
       _recentDocFrame.prev();
     }else{
       _recentDocFrame.setVisible(true);
     }
   }
   
-  private void hideRecentDocFrame(){
-    if(_recentDocFrame.isVisible()){
+  private void hideRecentDocFrame() {
+    if (_recentDocFrame.isVisible()) {
       _recentDocFrame.setVisible(false);
       OpenDefinitionsDocument doc = _recentDocFrame.getDocument();
-      if(doc != null){
+      if (doc != null) {
         _model.getDocumentNavigator().setActiveDoc(doc);
       }
     }
   }
   
-  KeyListener _historyListener = new KeyListener(){
-    public void keyPressed(KeyEvent e){
-      if(e.getKeyCode()==java.awt.event.KeyEvent.VK_BACK_QUOTE && e.isControlDown() && !e.isShiftDown()){
+  KeyListener _historyListener = new KeyListener() {
+    public void keyPressed(KeyEvent e) {
+      if (e.getKeyCode()==java.awt.event.KeyEvent.VK_BACK_QUOTE && e.isControlDown() && !e.isShiftDown()) {
         nextRecentDoc();
       }
-      if(e.getKeyCode()==java.awt.event.KeyEvent.VK_BACK_QUOTE && e.isControlDown() && e.isShiftDown()){
+      if (e.getKeyCode()==java.awt.event.KeyEvent.VK_BACK_QUOTE && e.isControlDown() && e.isShiftDown()) {
         prevRecentDoc();
       }
-//    else if(e.getKeyCode()==java.awt.event.KeyEvent.VK_BACK_QUOTE){
+//    else if (e.getKeyCode()==java.awt.event.KeyEvent.VK_BACK_QUOTE) {
 //        transferFocusUpCycle();
 //    }
     }
-    public void keyReleased(KeyEvent e){
-      if(e.getKeyCode() == java.awt.event.KeyEvent.VK_CONTROL){
+    public void keyReleased(KeyEvent e) {
+      if (e.getKeyCode() == java.awt.event.KeyEvent.VK_CONTROL) {
         hideRecentDocFrame();
       }
     }
-    public void keyTyped(KeyEvent e){
+    public void keyTyped(KeyEvent e) {
       // noop
     }
   };
   
-  FocusListener _focusListenerForRecentDocs = new FocusListener(){
-    public void focusLost(FocusEvent e){
+  FocusListener _focusListenerForRecentDocs = new FocusListener() {
+    public void focusLost(FocusEvent e) {
       hideRecentDocFrame();
     }
-    public void focusGained(FocusEvent e){
+    public void focusGained(FocusEvent e) {
     }
   };
   
@@ -4804,7 +4804,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
     else {
       try { _currentDefPane.setEditable(true); }
-      catch(NoSuchDocumentException e){ /* It's OK */ }
+      catch(NoSuchDocumentException e) { /* It's OK */ }
       
       _currentDefPane = (DefinitionsPane) scroll.getViewport().getView();
       _currentDefPane.notifyActive();
@@ -4817,7 +4817,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     if (inDebugMode()) _updateDebugStatus();
   }
 
-  public DefinitionsPane getDefPaneGivenODD(OpenDefinitionsDocument doc){
+  public DefinitionsPane getDefPaneGivenODD(OpenDefinitionsDocument doc) {
     JScrollPane scroll = _defScrollPanes.get(doc);
     if (scroll == null)
       throw new UnexpectedException(new Exception("Breakpoint set in a closed document."));
@@ -5052,7 +5052,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     } 
     else {
       // Show message
-      if(_debugPanel.getStatusText().equals("")) _debugPanel.setStatusText(DEBUGGER_OUT_OF_SYNC);
+      if (_debugPanel.getStatusText().equals("")) _debugPanel.setStatusText(DEBUGGER_OUT_OF_SYNC);
     }
   }
 
@@ -5100,8 +5100,8 @@ public class MainFrame extends JFrame implements OptionConstants {
 
     /** Creates a new GlassPane over the DrJava window. */
     public GlassPane() {
-      addKeyListener(new KeyAdapter() {});
-      addMouseListener(new MouseAdapter() {});
+      addKeyListener(new KeyAdapter() { });
+      addMouseListener(new MouseAdapter() { });
       super.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
     }
   }
@@ -5293,7 +5293,7 @@ public class MainFrame extends JFrame implements OptionConstants {
    */
   private class ModelListener implements SingleDisplayModelListener {
    
-    public void fileNotFound(File f){
+    public void fileNotFound(File f) {
       _showFileNotFoundError(new FileNotFoundException("File " + f + " cannot be found"));
     }
     
@@ -5309,7 +5309,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       _currentDefPane.requestFocus();
       try {
         File f = doc.getFile();
-        if(! _model.isProjectFile(f)) _recentFileManager.updateOpenFiles(f);
+        if (! _model.isProjectFile(f)) _recentFileManager.updateOpenFiles(f);
       }
       catch (IllegalStateException ise) { throw new UnexpectedException(ise); }
         // Impossible because saved => has a file
@@ -5372,7 +5372,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       if (doc != null) {
         try {
           File f = doc.getFile();
-          if(_model.isProjectFile(f) || doc.isAuxiliaryFile()) _model.setProjectChanged(true);
+          if (_model.isProjectFile(f) || doc.isAuxiliaryFile()) _model.setProjectChanged(true);
         }
         catch(FileMovedException fme) { /* do nothing */ }
         catch(IllegalStateException ise) { /* do nothing */ }
@@ -5454,7 +5454,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       _runAction.setEnabled(true);
     }
 
-    public void interactionErrorOccurred(int offset, int length){
+    public void interactionErrorOccurred(int offset, int length) {
       _interactionsPane.highlightError(offset, length);
     }
 
@@ -5982,7 +5982,7 @@ public class MainFrame extends JFrame implements OptionConstants {
 //                                               "Do you still wish to close it.",
 //                                               "Close Project File",
 //                                               JOptionPane.YES_NO_CANCEL_OPTION);
-//            if(rc != JOptionPane.YES_OPTION)
+//            if (rc != JOptionPane.YES_OPTION)
 //              return false;
 //            else return true;
           }
@@ -6039,14 +6039,14 @@ public class MainFrame extends JFrame implements OptionConstants {
     
     /* changes to the state */
     
-    public void projectBuildDirChanged(){
+    public void projectBuildDirChanged() {
       if (_model.getBuildDirectory() != null) {
         _cleanAction.setEnabled(true);
       }
       else _cleanAction.setEnabled(false);
     }
     
-    public void projectModified(){
+    public void projectModified() {
 //      _saveProjectAction.setEnabled(_model.isProjectChanged());
     }
     
@@ -6066,8 +6066,8 @@ public class MainFrame extends JFrame implements OptionConstants {
       _model.getDocumentNavigator().asContainer().addFocusListener(_focusListenerForRecentDocs);
     }
     
-    public void projectRunnableChanged(){
-      if(_model.getMainClass() != null && _model.getMainClass().exists()) {
+    public void projectRunnableChanged() {
+      if (_model.getMainClass() != null && _model.getMainClass().exists()) {
         _runProjectAction.setEnabled(true);
       }
       else _runProjectAction.setEnabled(false);
@@ -6291,7 +6291,7 @@ public class MainFrame extends JFrame implements OptionConstants {
    * @param listener The ComponentListener to add to the open documents list
    * This method allows for testing of the dancing UI (See MainFrameTest.testDancingUI()).
    */
-  public void addComponentListenerToOpenDocumentsList(ComponentListener listener){
+  public void addComponentListenerToOpenDocumentsList(ComponentListener listener) {
     _docSplitPane.getLeftComponent().addComponentListener(listener);
   }
 

@@ -404,8 +404,8 @@ public final class JavaInterpreterTest extends TestCase {
     try{
       _interpreter.interpret("(false) ? 2/0 : 1 ");
     }
-    catch(ExceptionReturnedException e){
-      if( e.getContainedException() instanceof ArithmeticException ){
+    catch(ExceptionReturnedException e) {
+      if ( e.getContainedException() instanceof ArithmeticException ) {
         fail("testTypeCheckerExtension failed to prevent short circuit DivideByZeroException");
       }
     }
@@ -413,8 +413,8 @@ public final class JavaInterpreterTest extends TestCase {
     try{
       _interpreter.interpret("(false) ? 2%0 : 1 ");
     }
-    catch(ExceptionReturnedException e){
-      if( e.getContainedException() instanceof ArithmeticException ){
+    catch(ExceptionReturnedException e) {
+      if ( e.getContainedException() instanceof ArithmeticException ) {
         fail("testTypeCheckerExtension failed to prevent short circuit DivideByZeroException");
       }
     }
@@ -430,7 +430,7 @@ public final class JavaInterpreterTest extends TestCase {
       Object out = _interpreter.interpret("true;");
       assertEquals("testEvaluationVisitorExtension", JavaInterpreter.NO_RESULT, out);
     }
-    catch(ExceptionReturnedException e){
+    catch(ExceptionReturnedException e) {
       fail("testEvaluationVisitorExtension Exception returned for none exceptional code!" + e);
     }
   }

@@ -113,23 +113,23 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
 //    _interpreterControl.addClassPath(path);
 //  }
 //  
-  public void addProjectClassPath(URL path){
+  public void addProjectClassPath(URL path) {
     _interpreterControl.addProjectClassPath(path);
   }
 
-  public void addBuildDirectoryClassPath(URL path){
+  public void addBuildDirectoryClassPath(URL path) {
     _interpreterControl.addBuildDirectoryClassPath(path);
   }
   
-  public void addProjectFilesClassPath(URL path){
+  public void addProjectFilesClassPath(URL path) {
     _interpreterControl.addProjectFilesClassPath(path);
   }
   
-  public void addExternalFilesClassPath(URL path){
+  public void addExternalFilesClassPath(URL path) {
     _interpreterControl.addExternalFilesClassPath(path);
   }
   
-  public void addExtraClassPath(URL path){
+  public void addExtraClassPath(URL path) {
     _interpreterControl.addExtraClassPath(path);
   }
   

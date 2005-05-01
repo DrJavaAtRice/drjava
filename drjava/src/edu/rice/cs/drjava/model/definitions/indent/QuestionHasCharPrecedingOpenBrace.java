@@ -85,7 +85,7 @@ public class QuestionHasCharPrecedingOpenBrace extends IndentRuleQuestion {
     int lineStart = doc.getLineStartPos(origin);
     
     // Get brace for start of line
-    synchronized(doc){
+    synchronized(doc) {
       doc.move(lineStart - origin);
       IndentInfo info = doc.getIndentInformation();
       doc.move(origin - lineStart);

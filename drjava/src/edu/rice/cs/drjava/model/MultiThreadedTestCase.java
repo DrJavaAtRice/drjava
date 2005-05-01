@@ -72,7 +72,7 @@ public abstract class MultiThreadedTestCase extends TestCase {
    * some tests failed in another thread (other than the testing thread)
    */
   public void tearDown() throws IOException {
-    if( _testFailed ) {
+    if ( _testFailed ) {
       fail("test failed in another thread");
     }
   }

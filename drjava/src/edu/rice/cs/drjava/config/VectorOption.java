@@ -121,15 +121,15 @@ public class VectorOption<T> extends Option<Vector<T>> {
       String token = st.nextToken();
       boolean isDelim = token.equals(d);
 
-      if(!isDelim) {
+      if (!isDelim) {
         res.add(parser.parse(token));
-      } else if(sawDelim) { // isDelim & sawDelim (two delims in a row)
+      } else if (sawDelim) { // isDelim & sawDelim (two delims in a row)
         throw new OptionParseException(name, s,
                                        "Argument contains delimiter with no preceding list element.");
       }
       sawDelim = isDelim;
     }
-    if(sawDelim) {
+    if (sawDelim) {
       throw new OptionParseException(name, s,
                                      "Value shouldn't end with a delimiter.");
     }

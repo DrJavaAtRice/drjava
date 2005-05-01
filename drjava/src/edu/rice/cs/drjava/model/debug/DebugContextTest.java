@@ -100,7 +100,7 @@ public final class DebugContextTest extends DebugTestCase {
     debugListener.assertThreadLocationUpdatedCount(1);  // fires
 
     // Step into bar() method
-    synchronized(_notifierLock){
+    synchronized(_notifierLock) {
       _asyncStep(Debugger.STEP_INTO);
       _waitForNotifies(2);  // suspended, updated
       _notifierLock.wait();
@@ -284,7 +284,7 @@ public final class DebugContextTest extends DebugTestCase {
     assertInteractionsDoesNotContain("Foo Line 1");
 
     // Step over once
-    synchronized(_notifierLock){
+    synchronized(_notifierLock) {
       _asyncStep(Debugger.STEP_OVER);
       _waitForNotifies(2);  // suspended, updated
       _notifierLock.wait();
@@ -400,7 +400,7 @@ public final class DebugContextTest extends DebugTestCase {
     assertEquals("assignment reflected in this", "5", interpret("this.x"));
 
     // Step over once
-    synchronized(_notifierLock){
+    synchronized(_notifierLock) {
       _asyncStep(Debugger.STEP_OVER);
       _waitForNotifies(2);  // suspended, updated
       _notifierLock.wait();
@@ -433,7 +433,7 @@ public final class DebugContextTest extends DebugTestCase {
     assertEquals("x has correct value after increment", "6", interpret("DrJavaDebugStaticField.x"));
     assertEquals("this has correct value for x after increment", "6", interpret("this.x"));
 
-    synchronized(_notifierLock){
+    synchronized(_notifierLock) {
       _asyncDoSetCurrentThread(threadB);
       _waitForNotifies(2);  // suspended, updated
       _notifierLock.wait();
@@ -489,7 +489,7 @@ public final class DebugContextTest extends DebugTestCase {
       System.out.println("first step");
     }
     // Step to line 11
-    synchronized(_notifierLock){
+    synchronized(_notifierLock) {
       _asyncStep(Debugger.STEP_OVER);
       _waitForNotifies(2);  // suspended, updated
       _notifierLock.wait();
@@ -529,7 +529,7 @@ public final class DebugContextTest extends DebugTestCase {
       System.out.println("second step");
     }
     // Step to line 12
-    synchronized(_notifierLock){
+    synchronized(_notifierLock) {
       _asyncStep(Debugger.STEP_OVER);
       _waitForNotifies(2);  // suspended, updated
       _notifierLock.wait();
@@ -545,7 +545,7 @@ public final class DebugContextTest extends DebugTestCase {
       System.out.println("third step");
     }
     // Step to line 13
-    synchronized(_notifierLock){
+    synchronized(_notifierLock) {
       _asyncStep(Debugger.STEP_OVER);
       _waitForNotifies(2);  // suspended, updated
       _notifierLock.wait();
@@ -561,7 +561,7 @@ public final class DebugContextTest extends DebugTestCase {
       System.out.println("fourth step");
     }
     // Step to line 14
-    synchronized(_notifierLock){
+    synchronized(_notifierLock) {
       _asyncStep(Debugger.STEP_OVER);
       _waitForNotifies(2);  // suspended, updated
       _notifierLock.wait();
@@ -577,7 +577,7 @@ public final class DebugContextTest extends DebugTestCase {
       System.out.println("fifth step");
     }
     // Step to line 15
-    synchronized(_notifierLock){
+    synchronized(_notifierLock) {
       _asyncStep(Debugger.STEP_OVER);
       _waitForNotifies(2);  // suspended, updated
       _notifierLock.wait();
@@ -608,7 +608,7 @@ public final class DebugContextTest extends DebugTestCase {
       System.out.println("sixth step");
     }
     // Step into static method
-    synchronized(_notifierLock){
+    synchronized(_notifierLock) {
       _asyncStep(Debugger.STEP_INTO);
       _waitForNotifies(2);  // suspended, updated
       _notifierLock.wait();

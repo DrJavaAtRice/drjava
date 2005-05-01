@@ -85,11 +85,9 @@ public class ReducedModelControl implements BraceReduction {
     rmc.insertChar(ch);
   }
 
-  /**
-  * <P>Updates the BraceReduction to reflect cursor movement.
-  * Negative values move left from the cursor, positive values move
-  * right. </P>
-  * @param count indicates the direction and magnitude of cursor movement
+  /** <P>Updates the BraceReduction to reflect cursor movement. Negative values move left from the cursor, 
+   *  positive values move right. </P>
+  *  @param count indicates the direction and magnitude of cursor movement
   */
   public /* synchronized */ void move(int count) {
     rmb.move(count);
@@ -240,7 +238,7 @@ public class ReducedModelControl implements BraceReduction {
    * Move the reduced model to the next token and update the cursor information.
    */
   void next() {
-    if (rmc._cursor.atStart()){
+    if (rmc._cursor.atStart()) {
       rmc.next();
       rmb.next();
       return;
@@ -332,9 +330,7 @@ public class ReducedModelControl implements BraceReduction {
     return temp;
   }
 
-  /**
-   * Determines if the cursor is at the end of the reduced model.
-   */
+  /** Determines if the cursor is at the end of the reduced model. */
   boolean atEnd() {
     return (rmb._cursor.atEnd() || rmc._cursor.atEnd());
   }

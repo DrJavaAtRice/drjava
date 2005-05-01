@@ -482,9 +482,9 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
 
     // These exceptions are specially used only in this test case.
     // They are used to verify that the code blocks
-  public static class OverwriteException extends RuntimeException{}
-  public static class OpenWarningException extends RuntimeException{}
-  public static class FileMovedWarningException extends RuntimeException{}
+  public static class OverwriteException extends RuntimeException{ }
+  public static class OpenWarningException extends RuntimeException{ }
+  public static class FileMovedWarningException extends RuntimeException{ }
 
   public static class WarningFileSelector implements FileOpenSelector, FileSaveSelector {
     private File _file;

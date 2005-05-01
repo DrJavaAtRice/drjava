@@ -113,10 +113,10 @@ public abstract class Option<T> extends OptionParser<T> implements FormatStrateg
    */
   void notifyListeners(Configuration config, T val) {
     Vector<OptionListener<T>> v = listeners.get(config);
-    if(v==null) return; // no listeners
+    if (v==null) return; // no listeners
     OptionEvent<T> e = new OptionEvent<T>(this,val);
     int size = v.size();
-    for(int i = 0; i < size; i++) {
+    for (int i = 0; i < size; i++) {
       v.get(i).optionChanged(e);
     }
   }
@@ -124,7 +124,7 @@ public abstract class Option<T> extends OptionParser<T> implements FormatStrateg
   /** magic listener-bag adder */
   void addListener(Configuration c, OptionListener<T> l) {
     Vector<OptionListener<T>> v = listeners.get(c);
-    if(v==null) {
+    if (v==null) {
       v = new Vector<OptionListener<T>>();
       listeners.put(c,v);
     }
@@ -134,8 +134,8 @@ public abstract class Option<T> extends OptionParser<T> implements FormatStrateg
   /** magic listener-bag remover */
   void removeListener(Configuration c, OptionListener<T> l) {
     Vector<OptionListener<T>> v = listeners.get(c);
-    if(v==null) return;
-    if(v.remove(l) && v.size() == 0) {
+    if (v==null) return;
+    if (v.remove(l) && v.size() == 0) {
       listeners.remove(c);
     }
   }
