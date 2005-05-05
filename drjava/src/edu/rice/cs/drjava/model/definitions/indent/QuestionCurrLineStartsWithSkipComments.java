@@ -51,46 +51,34 @@ import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.drjava.model.AbstractDJDocument;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 
-/**
- * Determines whether or not the current line in the document starts
- * with a specific character sequence, skipping over any comments on that line.
- * The character sequence is passed to the constructor of the class as a String
- * argument.
- *
- * @version $Id$
+/** Determines whether or not the current line in the document starts with a specific character sequence, 
+ *  skipping over any comments on that line. The character sequence is passed to the constructor of the class 
+ *  as a String argument.
+ *  @version $Id$
  */
-public class QuestionCurrLineStartsWithSkipComments extends IndentRuleQuestion
-{
-  /**
-   * The String to be matched. This String may not contain whitespace characters
-   * or comment-delimiting characters.
+public class QuestionCurrLineStartsWithSkipComments extends IndentRuleQuestion {
+  /** The String to be matched. This String may not contain whitespace characters
+   *  or comment-delimiting characters.
    */
   private String _prefix;
   
-  /**
-   * @param yesRule The decision subtree for the case that this rule applies
-   * in the current context.
-   * @param noRule The decision subtree for the case that this rule does not
-   * apply in the current context.
+  /** @param yesRule The decision subtree for the case that this rule applies in the current context.
+   *  @param noRule The decision subtree for the case that this rule does not apply in the current context.
    */
-  public QuestionCurrLineStartsWithSkipComments(String prefix, IndentRule yesRule, IndentRule noRule)
-  {
+  public QuestionCurrLineStartsWithSkipComments(String prefix, IndentRule yesRule, IndentRule noRule) {
     super(yesRule, noRule);
     _prefix = prefix;
   }
   
-  /**
-   * Determines whether or not the current line in the document starts
-   * with the character sequence specified by the String field _prefix,
+  /** Determines whether or not the current line in the document starts
+   *  with the character sequence specified by the String field _prefix,
    * skipping over any comments on that line.
    * @param doc The AbstractDJDocument containing the current line.
    * @return True iff the current line in the document starts with the
    * character sequence specified by the String field _prefix.
    */
-  boolean applyRule(AbstractDJDocument doc, int reason)
-  {
-    try
-    {
+  boolean applyRule(AbstractDJDocument doc, int reason) {
+    try {
       // Find the first non-whitespace character on the current line.
       
       int currentPos = doc.getCurrentLocation(),
@@ -101,8 +89,7 @@ public class QuestionCurrLineStartsWithSkipComments extends IndentRuleQuestion
       char currentChar, previousChar = '\0';
       String text = doc.getText(startPos, lineLength);
       
-      for (int i = 0; i < lineLength; i++)
-      {
+      for (int i = 0; i < lineLength; i++) {
         // Get state for walker position.
         //BraceReduction reduced = doc.getReduced();
         
@@ -114,52 +101,32 @@ public class QuestionCurrLineStartsWithSkipComments extends IndentRuleQuestion
           
           currentChar = text.charAt(i);
           
-          if (state.equals(ReducedModelState.INSIDE_LINE_COMMENT)) 
-          {
-            return false;
+          if (state.equals(ReducedModelState.INSIDE_LINE_COMMENT)) return false;
+          if (state.equals(ReducedModelState.INSIDE_BLOCK_COMMENT)) {  // Handle case: ...*/*
+            previousChar = '\0'; 
+            continue;
           }
-          if (state.equals(ReducedModelState.INSIDE_BLOCK_COMMENT))
-          {
-            // Handle case: ...*/*
-            previousChar = '\0'; continue;
-          }
-          if (state.equals(ReducedModelState.FREE))
-          {
-            // Can prefix still fit on the current line?
-            if (_prefix.length() > lineLength - i)
-            {
-              return false;
-            }
-            else if (text.substring(i, i+_prefix.length()).equals(_prefix) && previousChar != '/')
-            {
+          if (state.equals(ReducedModelState.FREE)) { // Can prefix still fit on the current line?
+            if (_prefix.length() > lineLength - i) return false;
+            else if (text.substring(i, i+_prefix.length()).equals(_prefix) && previousChar != '/') {
               // '/' is the only non-WS character that we consume without
               // immediately returning false. When we try to match the prefix,
               // we also need to reflect this implicit lookahead mechanism.
               return true;
             }
-            else if (currentChar == '/')
-            {
-              if (previousChar == '/') { return false; }
+            else if (currentChar == '/') {
+              if (previousChar == '/') return false;
             }
-            else if (currentChar == ' ' || currentChar == '\t')
-            {
-            }
-            else if (!(currentChar == '*' && previousChar == '/'))
-            {
-              return false;
-            }
+            else if (currentChar == ' ' || currentChar == '\t') {  }
+            else if (!(currentChar == '*' && previousChar == '/')) return false;
           }
         }
-        if (previousChar == '/' && currentChar != '*')
-        {
-          return false;
-        }
+        if (previousChar == '/' && currentChar != '*') return false;
         previousChar = currentChar;
       }
       return false;
     }
-    catch (BadLocationException e)
-    {
+    catch (BadLocationException e) {
       // Control flow should never reach this point!
       throw new UnexpectedException(new RuntimeException("Bug in QuestionCurrLineStartsWithSkipComments"));
     }

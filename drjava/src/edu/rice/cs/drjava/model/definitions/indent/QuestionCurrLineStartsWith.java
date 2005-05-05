@@ -51,31 +51,26 @@ import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.drjava.model.AbstractDJDocument;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 
-/**
- * Question rule in the indentation decision tree.  Determines if the 
- * current line starts with the specified string.
- * @version $Id$
+/** Question rule in the indentation decision tree.  Determines if the current line starts with the specified
+ *  string.
+ *  @version $Id$
  */
 public class QuestionCurrLineStartsWith extends IndentRuleQuestion {
   private String _prefix;
   
-  /**
-   * Constructs a new rule for the given prefix string.
-   * Does not look inside comments.
-   * @param prefix String to search for
-   * @param yesRule Rule to use if this rule holds
-   * @param noRule Rule to use if this rule does not hold
+  /** Constructs a new rule for the given prefix string. Does not look inside comments.
+   *  @param prefix String to search for
+   *  @param yesRule Rule to use if this rule holds
+   *  @param noRule Rule to use if this rule does not hold
    */
   public QuestionCurrLineStartsWith(String prefix, IndentRule yesRule, IndentRule noRule) {
     super(yesRule, noRule);
     _prefix = prefix;
   }
    
-  /**
-   * Determines if the current line in the document starts with the
-   * specified prefix, ignoring whitespace.
-   * @param doc AbstractDJDocument containing the line to be indented.
-   * @return true if this node's rule holds.
+  /** Determines if the current line in the document starts with the specified prefix, ignoring whitespace.
+   *  @param doc AbstractDJDocument containing the line to be indented.
+   *  @return true if this node's rule holds.
    */
   boolean applyRule(AbstractDJDocument doc, int reason) {
 

@@ -56,20 +56,14 @@ import edu.rice.cs.drjava.model.definitions.reducedmodel.BraceReduction;
  */
 public class ActionDoNothing extends IndentRuleAction {
 
-  /**
-   * Constructs a new rule to do nothing.
-   */
-  public ActionDoNothing() {
-    super();
-  }
+  /** Relying on default constructor. */
+  // public ActionDoNothing() { super(); }
 
-  /**
-   * Properly indents the line that the caret is currently on.
-   * Replaces all whitespace characters at the beginning of the
-   * line with the appropriate spacing or characters.
-   * @param doc AbstractDJDocument containing the line to be indented.
-   * @return true if the caller should update the current location itself,
-   * false if the indenter has already handled this
+  /** Properly indents the line that the caret is currently on. Replaces all whitespace characters at the 
+   *  beginning of the line with the appropriate spacing or characters.
+   *  @param doc AbstractDJDocument containing the line to be indented.
+   *  @return true if the caller should update the current location itself,
+   *          false if the indenter has already handled this
    */
   public boolean indentLine(AbstractDJDocument doc, int reason) {
     return super.indentLine(doc, reason);

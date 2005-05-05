@@ -71,7 +71,7 @@ import edu.rice.cs.util.swing.Utilities;
  *
  * Invariants:
  * <OL>
- * <LI>{@link #getDefinitionsDocuments} will always return an array of
+ * <LI>{@link #getOpenDefinitionsDocuments} will always return an array of
  *     at least size 1.
  * </LI>
  * <LI>(follows from previous) If there is ever no document in the model,
@@ -323,7 +323,7 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel implements Sin
     * @return true if all documents were closed
     */
    public boolean closeAllFiles() {
-     List<OpenDefinitionsDocument> docs = getDefinitionsDocuments();
+     List<OpenDefinitionsDocument> docs = getOpenDefinitionsDocuments();
      return closeFiles(docs);
    }
   
@@ -354,7 +354,7 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel implements Sin
     // If all files are being closed, create a new file before starTing in order to have 
     // an active file that is not in the list of closing files.
     OpenDefinitionsDocument newDoc = null;
-    if (docList.size() == getDefinitionsDocumentsSize()) newDoc = newFile();
+    if (docList.size() == getOpenDefinitionsDocumentsSize()) newDoc = newFile();
     
     // Set the active document to the document just after the last document or the document just before the 
     // first document in docList.
@@ -370,13 +370,13 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel implements Sin
    * which is untitled and unchanged.
    */
   private boolean _hasOneEmptyDocument() {
-    return ((getDefinitionsDocumentsSize() == 1) && (_activeDocument.isUntitled()) &&
+    return ((getOpenDefinitionsDocumentsSize() == 1) && (_activeDocument.isUntitled()) &&
             (!_activeDocument.isModifiedSinceSave()));
   }
 
   /** Creates a new document if there are currently no documents open. */
   private void _ensureNotEmpty() {
-    if ((!_isClosingAllDocs) && (getDefinitionsDocumentsSize() == 0)) newFile(null);
+    if ((!_isClosingAllDocs) && (getOpenDefinitionsDocumentsSize() == 0)) newFile(null);
   }
   
   /** Makes sure that none of the documents in the list are active. */
@@ -407,7 +407,7 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel implements Sin
    * some duplicated work, but avoids duplicated code, which is our nemesis
    */
   public void setActiveFirstDocument() {
-    List<OpenDefinitionsDocument> docs = getDefinitionsDocuments();
+    List<OpenDefinitionsDocument> docs = getOpenDefinitionsDocuments();
     /* this will select the active document in the navigator, which
      * will signal a listener to call _setActiveDoc(...)
      */
@@ -417,7 +417,7 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel implements Sin
   }
   
   private void _setActiveDoc(INavigatorItem idoc) {
-    //Hashtable<INavigatorItem, OpenDefinitionsDocument> docs = getDefinitionsDocumentsTable();
+    //Hashtable<INavigatorItem, OpenDefinitionsDocument> docs = getOpenDefinitionsDocumentsTable();
     
     _activeDocument = (OpenDefinitionsDocument) idoc;  // FIX THIS!
     try {

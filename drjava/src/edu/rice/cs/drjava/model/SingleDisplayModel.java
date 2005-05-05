@@ -54,7 +54,7 @@ import java.util.*;
  *
  * Invariants:
  * <OL>
- * <LI>{@link #getDefinitionsDocuments} will always return an array of
+ * <LI>{@link #getOpenDefinitionsDocuments} will always return an array of
  *     at least size 1.
  * </LI>
  * <LI>(follows from previous) If there is ever no document in the model,

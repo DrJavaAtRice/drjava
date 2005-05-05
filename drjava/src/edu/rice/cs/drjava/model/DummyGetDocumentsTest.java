@@ -70,15 +70,15 @@ public class DummyGetDocumentsTest extends TestCase {
     * @exception java.io.IOException if an error occurs
     */
     public void testGetDocumentForFile() throws java.io.IOException {
-	DummyGetDocuments dummy = new DummyGetDocuments();
-	try {
-	    dummy.getDocumentForFile(new File(""));
-	}
-	catch (UnsupportedOperationException e) {
-	    assertTrue("This message should never be seen", true);
-	    return;
-	}
-	fail("expected that UnsupportedOperationException is thrown");
+ DummyGetDocuments dummy = new DummyGetDocuments();
+ try {
+     dummy.getDocumentForFile(new File(""));
+ }
+ catch (UnsupportedOperationException e) {
+     assertTrue("This message should never be seen", true);
+     return;
+ }
+ fail("expected that UnsupportedOperationException is thrown");
     }
 
     /**
@@ -89,35 +89,35 @@ public class DummyGetDocumentsTest extends TestCase {
     * @exception java.io.IOException if an error occurs
     */
     public void testIsAlreadyOpen() throws java.io.IOException {
-	DummyGetDocuments dummy = new DummyGetDocuments();
-	try {
-	    dummy.getDocumentForFile(new File(""));
-	}
-	catch (UnsupportedOperationException e) {
-	    assertTrue("This message should never be seen", true);
-	    return;
-	}
-	fail("expected that UnsupportedOperationException is thrown");
+ DummyGetDocuments dummy = new DummyGetDocuments();
+ try {
+     dummy.getDocumentForFile(new File(""));
+ }
+ catch (UnsupportedOperationException e) {
+     assertTrue("This message should never be seen", true);
+     return;
+ }
+ fail("expected that UnsupportedOperationException is thrown");
     }
 
 
     /**
     * Creates a new instance of DummyGetDocuments, calls
-    * getDefinitionsDocuments() and ensures the method throws an
+    * getOpenDefinitionsDocuments() and ensures the method throws an
     * UnsupportedOperationException.
     *
     * @exception java.io.IOException if an error occurs
     */
     public void testGetDefinitionsDocuments() {
-	DummyGetDocuments dummy = new DummyGetDocuments();
-	try {
-	    dummy.getDefinitionsDocuments();
-	}
-	catch (UnsupportedOperationException e) {
-	    assertTrue("This message should never be seen", true);
-	    return;
-	}
-	fail("expected that UnsupportedOperationException is thrown");
+ DummyGetDocuments dummy = new DummyGetDocuments();
+ try {
+     dummy.getOpenDefinitionsDocuments();
+ }
+ catch (UnsupportedOperationException e) {
+     assertTrue("This message should never be seen", true);
+     return;
+ }
+ fail("expected that UnsupportedOperationException is thrown");
     }
 
 
@@ -129,16 +129,16 @@ public class DummyGetDocumentsTest extends TestCase {
     * @exception java.io.IOException if an error occurs
     */
     public void testHasModifiedDocuments() {
-	DummyGetDocuments dummy = new DummyGetDocuments();
-	try {
-	    dummy.hasModifiedDocuments();
-	}
-	catch (UnsupportedOperationException e) {
-	    assertTrue("This message should never be seen", true);
-	    return;
-	}
-	fail("expected that UnsupportedOperationException is thrown");
+ DummyGetDocuments dummy = new DummyGetDocuments();
+ try {
+     dummy.hasModifiedDocuments();
+ }
+ catch (UnsupportedOperationException e) {
+     assertTrue("This message should never be seen", true);
+     return;
+ }
+ fail("expected that UnsupportedOperationException is thrown");
     }
-	
+ 
 
 }

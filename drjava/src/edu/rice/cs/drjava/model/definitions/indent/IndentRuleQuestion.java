@@ -77,20 +77,18 @@ public abstract class IndentRuleQuestion extends IndentRuleWithTrace {
     _noRule = noRule;
   }
 
-  /**
-   * Determines if the given rule holds in this context.
-   * @param doc AbstractDJDocument containing the line to be indented.
-   * @param reason - The reason that indentation was initiated, specified in Indenter
-   * @return true if this node's rule holds.
+  /** Determines if the given rule holds in this context.
+   *  @param doc AbstractDJDocument containing the line to be indented.
+   *  @param reason - The reason that indentation was initiated, specified in Indenter
+   *  @return true if this node's rule holds.
    */
   abstract boolean applyRule(AbstractDJDocument doc, int reason);
 
-  /**
-   * Determines if the given rule holds in this context.
-   * @param doc AbstractDJDocument containing the line to be indented.
-   * @param pos Position within line to be indented.
-   * @param reason - The reason that indentation was initiated, specified in Indenter
-   * @return true if this node's rule holds.
+  /** Determines if the given rule holds in this context.
+   *  @param doc AbstractDJDocument containing the line to be indented.
+   *  @param pos Position within line to be indented.
+   *  @param reason - The reason that indentation was initiated, specified in Indenter
+   *  @return true if this node's rule holds.
    */
   boolean applyRule(AbstractDJDocument doc, int pos, int reason) {
     int oldPos = doc.getCurrentLocation();
@@ -111,8 +109,7 @@ public abstract class IndentRuleQuestion extends IndentRuleWithTrace {
    * @return true if the caller should update the current location itself,
    * false if the indenter has already handled this
    */
-  public boolean indentLine(AbstractDJDocument doc, int reason)
-  {
+  public boolean indentLine(AbstractDJDocument doc, int reason) {
     if (applyRule(doc, reason)) {
       _addToIndentTrace(getRuleName(), YES, false);
       return _yesRule.indentLine(doc, reason);
@@ -122,7 +119,6 @@ public abstract class IndentRuleQuestion extends IndentRuleWithTrace {
       return _noRule.indentLine(doc, reason);
     }
   }
-
 }
 
 

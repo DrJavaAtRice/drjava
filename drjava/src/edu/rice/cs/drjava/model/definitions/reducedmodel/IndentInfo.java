@@ -45,9 +45,8 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.definitions.reducedmodel;
 
-/**
- * Indent information block.
- * @version $Id$
+/** Indent information block.
+ *  @version $Id$
  */
 public class IndentInfo {
   public String braceType;      //the type of brace at the beginning of our line
@@ -89,12 +88,11 @@ public class IndentInfo {
     distToBraceCurrent = -1;
   }
 
-  /**
-   * Creates an indent info with the specified parameters
-   * @param _braceType the braceType
-   * @param _distToNewline the distance to the next newline
-   * @param _distToBrace the distance to a brace
-   * @param _distToPrevNewline the distance to the previous newline
+  /** Creates an indent info with the specified parameters
+   *  @param _braceType the braceType
+   *  @param _distToNewline the distance to the next newline
+   *  @param _distToBrace the distance to a brace
+   *  @param _distToPrevNewline the distance to the previous newline
    */
   public IndentInfo(String _braceType, int _distToNewline, int _distToBrace, int _distToPrevNewline) {
     braceType = _braceType;

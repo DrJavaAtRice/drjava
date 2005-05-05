@@ -68,8 +68,8 @@ public class DummyGetDocuments implements IGetDocuments {
     throw new UnsupportedOperationException("Tried to call isAlreadyOpen on a Dummy with file: " + file);
   }
 
-  public List<OpenDefinitionsDocument> getDefinitionsDocuments() {
-    throw new UnsupportedOperationException("Tried to getDefinitionsDocuments on a Dummy!");
+  public List<OpenDefinitionsDocument> getOpenDefinitionsDocuments() {
+    throw new UnsupportedOperationException("Tried to getOpenDefinitionsDocuments on a Dummy!");
   }
 
   public boolean hasModifiedDocuments() {

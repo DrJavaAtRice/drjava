@@ -120,7 +120,7 @@ public class ConsoleDocument implements DocumentAdapter {
    *  the inputs.
    *  @param condition Object to determine legality of inputs
    */
-  public synchronized void setEditCondition(DocumentEditCondition condition) { _document.setEditCondition(condition); }
+  public void setEditCondition(DocumentEditCondition condition) { _document.setEditCondition(condition); }
 
   /** Returns the first location in the document where editing is allowed. */
   public int getPromptPos() { return _promptPos; }

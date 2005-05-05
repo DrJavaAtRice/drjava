@@ -398,7 +398,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   
   
   /** Removes a block of text from the specified location. We don't update the reduced model here; that happens
-   * in {@link #removeUpdate}.
+   *  in {@link #removeUpdate}.
    */
   public void remove(int offset, int len) throws BadLocationException {
     
@@ -424,32 +424,27 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     return source.replace('\t', ' ');
   }
 
-  /*
-  String _removeTabs(String source) {
-    StringBuffer target = new StringBuffer();
-    for (int i = 0; i < source.length(); i++) {
-      char next = source.charAt(i);
+//  String _removeTabs(String source) {
+//    StringBuffer target = new StringBuffer();
+//    for (int i = 0; i < source.length(); i++) {
+//      char next = source.charAt(i);
+//
+//      if (next != '\t') {
+//        target.append(source.charAt(i));
+//      }
+//      else {
+//        // Replace tab with a number of
+//        // spaces according to the value of _indent.
+//        for (int j = 0; j < _indent; j++) {
+//          target.append(' ');
+//        }
+//      }
+//    }
+//    return target.toString();
+//  }
 
-      if (next != '\t') {
-        target.append(source.charAt(i));
-      }
-      else {
-        // Replace tab with a number of
-        // spaces according to the value of _indent.
-        for (int j = 0; j < _indent; j++) {
-          target.append(' ');
-        }
-      }
-    }
-    return target.toString();
-  }
-  */
-
-  /**
-   * Originally designed to allow undoManager to set the current document to
-   * be modified whenever an undo or redo is performed.
-   * Now it actually does this.
-   */
+  /** Originally designed to allow undoManager to set the current document to be modified whenever an undo or 
+   *  redo is performed. Now it actually does this. */
   public void setModifiedSinceSave() {
     writeLock();
     try {
@@ -459,9 +454,8 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     finally { writeUnlock(); }
   }
   
-  /**
-   * Whenever this document has been saved, this method should be called
-   * so that it knows it's no longer in a modified state.
+  /** Whenever this document has been saved, this method should be called so that it knows it's no longer in 
+   *  a modified state.
    */
   public void resetModification() {
     writeLock();
@@ -472,9 +466,8 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     finally { writeUnlock(); }
   }
   
-  /**
-   * Determines if the document has been modified since the last save.
-   * @return true if the document has been modified
+  /** Determines if the document has been modified since the last save.
+   *  @return true if the document has been modified
    */
   public boolean isModifiedSinceSave() {
     readLock();
@@ -482,10 +475,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     finally { readUnlock(); }
   }
   
-  /**
-   * Return the current column of the cursor position.
-   * Uses a 0 based index.
-   */
+  /** Return the current column of the cursor position. Uses a 0 based index. */
   public int getCurrentCol() {
     // throwErrorHuh();
     int here = _currentLocation;
@@ -594,14 +584,13 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   public boolean tabsRemoved() { return _tabsRemoved; }
 
  
-  /**
-   * Comments out all lines between selStart and selEnd, inclusive.
-   * The current cursor position is maintained after the operation.
-   * @param selStart the document offset for the start of the selection
-   * @param selEnd the document offset for the end of the selection
+  /** Comments out all lines between selStart and selEnd, inclusive. The current cursor position is maintained 
+   *  after the operation.
+   *  @param selStart the document offset for the start of the selection
+   *  @param selEnd the document offset for the end of the selection
    */
   public void commentLines(int selStart, int selEnd) {
-    // throwErrorHuh();
+    
       //int key = _undoManager.startCompoundEdit();  //Uncommented in regards to the FrenchKeyBoardFix
       if (selStart == selEnd) {
         writeLock();

@@ -49,13 +49,12 @@ import java.io.IOException;
 import javax.swing.text.BadLocationException;
 
 import edu.rice.cs.drjava.model.FileMovedException;
+import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 
 /**
- * Objects of this type are responsible for getting
- * the definitions documents to their own respective
- * OpenDefinitionsDocuments.  This in effect decouples
- * the OpenDefinitionsDocument from the DocumentCache
+ * Objects of this type are responsible for getting the definitions documents to their own respective
+ * OpenDefinitionsDocuments.  This in effect decouples the OpenDefinitionsDocument from the DocumentCache
  * and allows for some optimizations on document retrieval
  */
 public interface DCacheAdapter {
@@ -66,22 +65,20 @@ public interface DCacheAdapter {
    */
   public DefinitionsDocument getDocument() throws IOException, FileMovedException;
   
-  /**
-   * Checks whether the document is ready to be returned.  If false, then
-   * the document would have to be loaded from disk when getDocument() is 
-   * called.  
-   * @return if the document is already loaded
+  /** Checks whether the document is ready to be returned.  If false, then the document would have to be
+   *  loaded from disk when getDocument() is called.  
+   *  @return if the document is already loaded
    */
   public boolean isReady();
   
-  /**
-   * Closes the corresponding document for this adapter
-   */
+  /** Closes the corresponding document for this adapter. */
   public void close();
   
-  
-  public void setReconstructor(DDReconstructor rec);
+//  public void setReconstructor(DDReconstructor rec);
   
   public DDReconstructor getReconstructor();
+  
+  /* Method for notifying the DCacheAdapter that this document has been saved to a file. */
+  public void documentSaved(String filename);
   
 }

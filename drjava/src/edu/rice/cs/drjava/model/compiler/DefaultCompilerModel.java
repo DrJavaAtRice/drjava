@@ -143,7 +143,7 @@ public class DefaultCompilerModel implements CompilerModel {
     boolean isProjActive = _getter.getFileGroupingState().isProjectActive();
     
     //System.out.println("Running compile all");
-    List<OpenDefinitionsDocument> defDocs = _getter.getDefinitionsDocuments();
+    List<OpenDefinitionsDocument> defDocs = _getter.getOpenDefinitionsDocuments();
     
     if (isProjActive) {
       // If we're in project mode, filter out only the documents that are in the project and leave 
@@ -179,7 +179,7 @@ public class DefaultCompilerModel implements CompilerModel {
       buildDir = _getter.getFileGroupingState().getBuildDirectory();
     List<OpenDefinitionsDocument> defDocs;
     
-    defDocs = _getter.getDefinitionsDocuments(); 
+    defDocs = _getter.getOpenDefinitionsDocuments(); 
     
     // Only compile if all are saved
     if (_hasModifiedFiles(defDocs)) {
@@ -291,7 +291,7 @@ public class DefaultCompilerModel implements CompilerModel {
     }
     
     List<OpenDefinitionsDocument> defDocs;
-    defDocs = _getter.getDefinitionsDocuments(); 
+    defDocs = _getter.getOpenDefinitionsDocuments(); 
     
     // Only compile if all are saved
     if (_hasModifiedFiles(defDocs)) _notifier.saveBeforeCompile();
@@ -478,7 +478,7 @@ public class DefaultCompilerModel implements CompilerModel {
    * to the source root set.
    */
   public File[] getSourceRootSet() {
-    List<OpenDefinitionsDocument> defDocs = _getter.getDefinitionsDocuments();
+    List<OpenDefinitionsDocument> defDocs = _getter.getOpenDefinitionsDocuments();
     return getSourceRootSet(defDocs);
   }
   

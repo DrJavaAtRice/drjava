@@ -89,172 +89,130 @@ public interface OpenDefinitionsDocument extends DJDocument, Finalizable<Definit
   public DocumentListener[] getDocumentListeners();
   public UndoableEditListener[] getUndoableEditListeners();
   
-  /**
-   * @return whether the undo manager can perform any undos
-   */
+  /** @return whether the undo manager can perform any undos. */
   public boolean undoManagerCanUndo();
   
-  /**
-   * @return whether the undo manager can perform any redos
-   */
+  /** @return whether the undo manager can perform any redos. */
   public boolean undoManagerCanRedo();
   
-  /**
-   * Returns the name of the top level class, if any.
-   * @throws ClassNameNotFoundException if no top level class name found.
+  /** Returns the name of the top level class, if any.
+   *  @throws ClassNameNotFoundException if no top level class name found.
    */
   public String getFirstTopLevelClassName() throws ClassNameNotFoundException;
   
-  /**
-   * a file is in the project if the source root is the same as the
+  /** A file is in the project if the source root is the same as the
    * project root. this means that project files must be saved at the
    * source root.
    */
   public boolean isInProjectPath();
   
-  /**
-   * @return true if the document's file is a project auxiliary file
-   */
+  /** @return true if the document's file is a project auxiliary file. */
   public boolean isAuxiliaryFile();
   
-  /**
-   * @return true if the documents file is saved in the current project file
-   */
+  /** @return true if the documents file is saved in the current project file. */
   public boolean isProjectFile();
   
-  /**
-   * Returns whether this document is currently untitled
-   * (indicating whether it has a file yet or not).
-   * @return true if the document is untitled and has no file
+  /** Returns whether this document is currently untitled (indicating whether it has a file yet or not).
+   *  @return true if the document is untitled and has no file
    */
   public boolean isUntitled();
     
-  /**
-   * Returns the file for this document.  If the document
-   * is untitled and has no file, it throws an IllegalStateException.
-   * @return the file for this document
-   * @throws IllegalStateException if document never had a file
-   * @throws FileMovedException if the document's file no longer exists
+  /** Returns the file for this document.  If the document is untitled, it throws an IllegalStateException.
+   *  @return the file for this document
+   *  @throws IllegalStateException if document never had a file
+   *  @throws FileMovedException if the document's file no longer exists
    */
   public File getFile() throws IllegalStateException, FileMovedException;
 
-  /**
-   * Returns true if the file exists on disk, or if the user has located it on disk. Returns false if the file has been moved or deleted
+  /** Returns true if the file exists on disk, or if the user has located it on disk. Returns false if the 
+   *  file has been moved or deleted
    */
   public boolean fileExists();
   
-  /**
-   * If the file exists, returns true. If it does not exist, prompts the user to look it up.
-   * returns true if the user decides to choose a file, false otherwise
-   */
+  /** If the file exists, returns true. If it does not exist, prompts the user to look it up.  If the user
+   *  chooses a file, returns true, false otherwise. */
   public boolean verifyExists();  
   
-  /**
-   * Returns the name of this file, or "(untitled)" if no file.
-   */
+  /** Returns the name of this file, or "(untitled)" if no file. */
   public String getFilename();
   
-  /**
-   * Returns the parent directory of this file, null if it has none
-   */
+  /** Returns the parent directory of this file, null if it has none. */
   public File getParentDirectory();
 
-  /**
-   * Saves the document with a FileWriter.  If the file name is already
-   * set, the method will use that name instead of whatever selector
-   * is passed in.
-   * @param com a selector that picks the file name
-   * @exception IOException
-   * @return true if the file was saved, false if the operation was canceled
+  /** Saves the document with a FileWriter.  If the file name is already set, the method will use that name 
+   *  instead of whatever selector is passed in.
+   *  @param com a selector that picks the file name
+   *  @exception IOException
+   *  @return true if the file was saved, false if the operation was canceled
    */
   public boolean saveFile(FileSaveSelector com) throws IOException;
 
-  /**
-   * Revert the document to the version saved on disk.
-   */
+  /** Revert the document to the version saved on disk. */
   public void revertFile() throws IOException;
 
-  /**
-   * Saves the document with a FileWriter.  The FileSaveSelector will
-   * either provide a file name or prompt the user for one.  It is
-   * up to the caller to decide what needs to be done to choose
-   * a file to save to.  Once the file has been saved succssfully,
-   * this method fires fileSave(File).  If the save fails for any
-   * reason, the event is not fired.
-   * @param com a selector that picks the file name.
-   * @exception IOException
-   * @return true if the file was saved, false if the operation was canceled
+  /** Saves the document with a FileWriter.  The FileSaveSelector will either provide a file name or prompt 
+   *  the user for one.  It is up to the caller to decide what needs to be done to choose a file to save to.  
+   *  Once the file has been saved succssfully, this method fires fileSave(File).  If the save fails for any
+   *  reason, the event is not fired.
+   *  @param com a selector that picks the file name.
+   *  @exception IOException
+   *  @return true if the file was saved, false if the operation was canceled
    */
   public boolean saveFileAs(FileSaveSelector com) throws IOException;
 
-  /**
-   * Starts compiling the source.  Demands that the definitions be
-   * saved before proceeding with the compile.  Fires the appropriate
-   * events as the compiliation proceeds and finishes.
-   * @exception IOException if a file with errors cannot be opened
+  /** Starts compiling the source.  Demands that the definitions be saved before proceeding with the compile.  
+   *  Fires the appropriate events as the compiliation proceeds and finishes.
+   *  @exception IOException if a file with errors cannot be opened
    */
   public void startCompile() throws IOException;
 
-  /**
-   * Runs the main method in this document in the interactions pane.
-   * Demands that the definitions be saved and compiled before proceeding.
-   * Fires an event to signal when execution is about to begin.
-   * @exception ClassNameNotFoundException propagated from getFirstTopLevelClass()
-   * @exception IOException propagated from GlobalModel.compileAll()
+  /** Runs the main method in this document in the interactions pane. Demands that the definitions be saved 
+   *  and compiled before proceeding. Fires an event to signal when execution is about to begin.
+   *  @exception ClassNameNotFoundException propagated from getFirstTopLevelClass()
+   *  @exception IOException propagated from GlobalModel.compileAll()
    */
   public void runMain() throws ClassNameNotFoundException, IOException;
 
-  /**
-   * Starts testing the source using JUnit.  Demands that the definitions be
-   * saved and compiled before proceeding with testing.  Fires the appropriate
-   * events as the testing proceeds and finishes.
-   * @exception IOException if a file with errors cannot be opened
-   * @exception ClassNotFoundException when the class is compiled to a location
-   * not on the classpath.
+  /** Starts testing the source using JUnit.  Demands that the definitions be saved and compiled before proceeding
+   *  with testing.  Fires the appropriate events as the testing proceeds and finishes.
+   *  @exception IOException if a file with errors cannot be opened
+   *  @exception ClassNotFoundException when the class is compiled to a location not on the classpath.
    */
   public void startJUnit() throws ClassNotFoundException, IOException;
 
-  /**
-   * Generates Javadoc for this document, saving the output to a temporary
-   * directory.  The location is provided to the javadocEnded event on
-   * the given listener.
-   * @param saver FileSaveSelector for saving the file if it needs to be saved
+  /** Generates Javadoc for this document, saving the output to a temporary directory.  The location is provided
+   *  to the javadocEnded event on the given listener.
+   *  @param saver FileSaveSelector for saving the file if it needs to be saved
    */
   public void generateJavadoc(FileSaveSelector saver) throws IOException;
 
-  /**
-   * Determines if this definitions document has changed since the
-   * last save.
-   * @return true if the document has been modified
+  /** Determines if this definitions document has changed since the last save.
+   *  @return true if the document has been modified
    */
   public boolean isModifiedSinceSave();
 
-  /**
-   * Determines if this definitions document has changed since the
-   * last save.
-   * @return true if the document has been modified
+  /** Determines if this definitions document has changed since the last save.
+   *  @return true if the document has been modified
    */
   public boolean isModifiedOnDisk();
 
-  /**
-   * Asks the GlobalModel if it can revert current definitions
-   * to version on disk. If ok, it reverts the file to the
-   * version on disk.
-   * @return true if the document has been reverted
+  /** Asks the GlobalModel if it can revert current definitions to version on disk. If ok, it reverts the file 
+   *  to the version on disk.
+   *  @return true if the document has been reverted
    */
   public boolean revertIfModifiedOnDisk() throws IOException;
 
-  /**
-   * Returns whether the GlobalModel can abandon this document,
-   * asking the listeners if isModifiedSinceSave() is true.
-   * @return true if this document can be abandoned
+  /** Returns whether the GlobalModel can abandon this document, asking listeners if isModifiedSinceSave() is true.
+   *  @return true if this document can be abandoned
    */
   public boolean canAbandonFile();
+  
+  /** Saves file at user's discretion before quitting. */
+  public void quitFile();
 
-  /** Moves the definitions document to the given line, and returns the character position in the 
-   *  document it's gotten to.
-   *  @param line Number of the line to go to. If line exceeds the number of lines in the document, 
-   *              it is interpreted as the last line.
+  /** Moves the definitions document to the given line, and returns the resulting character position.
+   *  @param line Destination line number. If line exceeds the number of lines in the document, it is interpreted 
+   *         as the last line.
    *  @return Index into document of where it moved
    */
   public int gotoLine(int line);
@@ -302,6 +260,9 @@ public interface OpenDefinitionsDocument extends DJDocument, Finalizable<Definit
    */
   public boolean checkIfClassFileInSync();
 
+  /** Called when this document is saved so it can notify the cache. */
+  public void documentSaved();
+    
   /** Returns the Breakpoint in this OpenDefinitionsDocument at the given
    *  linenumber, or null if one does not exist.
    *  @param lineNumber the line number of the breakpoint

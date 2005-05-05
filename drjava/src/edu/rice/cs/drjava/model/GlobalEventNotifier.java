@@ -98,7 +98,6 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
     finally { _lock.endRead(); }
   }
   
-  
   /* -------------- project state ------------------*/
   public void projectOpened(File pfile, FileOpenSelector files) {
     _lock.startRead();
@@ -129,7 +128,6 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
     try { for (GlobalModelListener l : _listeners) { l.projectRunnableChanged(); } }
     finally { _lock.endRead(); }
   }
-  
   
   
   // ---------- Deprecated Methods ----------
@@ -182,27 +180,21 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
 
   //------------------------------ GlobalModel -------------------------------//
 
-  /**
-   * Called when a file's main method is about to be run.
-   */
+  /** Called when a file's main method is about to be run. */
   public void runStarted(OpenDefinitionsDocument doc) {
     _lock.startRead();
     try { for (GlobalModelListener l : _listeners) { l.runStarted(doc); } }
     finally { _lock.endRead(); }
   }
 
-  /**
-   * Called after a new document is created.
-   */
+  /** Called after a new document is created. */
   public void newFileCreated(OpenDefinitionsDocument doc) {
     _lock.startRead();
     try { for (GlobalModelListener l : _listeners) { l.newFileCreated(doc); } }
     finally { _lock.endRead(); }
   }
 
-  /**
-   * Called when the console window is reset.
-   */
+  /** Called when the console window is reset. */
   public void consoleReset() {
     _lock.startRead();
     try { for (GlobalModelListener l : _listeners) { l.consoleReset(); } }
@@ -256,7 +248,16 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
     finally { _lock.endRead(); }
   }
 
-  /** Called to ask the listeners if it is OK to revert the current document to a newer version saved on file. */
+   /** Called to ask the listeners save the file before quitting at the user's option. */
+  public void quitFile(OpenDefinitionsDocument doc) {
+    _lock.startRead();
+    try {
+      for (GlobalModelListener l: _listeners) { l.quitFile(doc); }
+    }
+    finally { _lock.endRead(); }
+  }
+
+  /** Called to ask the listeners if it is OK to revert the current document to the version saved on disk. */
   public boolean shouldRevertFile(OpenDefinitionsDocument doc) {
     _lock.startRead();
     try { 
@@ -273,18 +274,14 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
     finally { _lock.endRead(); }
   }
   
-  /**
-   * Called to demand that all files be saved before running the main method of
-   * a document. It is up to the caller of this method to check if the documents
-   * have been saved, using IGetDocuments.hasModifiedDocuments().
-   *
-   * This is never called currently, but it is commented out in case it is
-   * needed later.
-  public void saveBeforeRun() {
-    _lock.startRead();
-    try { for (GlobalModelListener l : _listeners) { l.saveBeforeRun(); } }
-    finally { _lock.endRead(); }
-  }*/
+//  /** Called to demand that all files be saved before running the main method of a document. It is up to the caller
+//   *  of this method to check if the documents have been saved, using IGetDocuments.hasModifiedDocuments(). This is
+//   *  nor used currently, but it is commented out in case it is needed later. */
+//  public void saveBeforeRun() {
+//    _lock.startRead();
+//    try { for (GlobalModelListener l : _listeners) { l.saveBeforeRun(); } }
+//    finally { _lock.endRead(); }
+//  }
 
   //------------------------------ Interactions ------------------------------//
 
@@ -302,17 +299,13 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
     finally { _lock.endRead(); }
   }
 
-  /**
-   * Called when the interactions window generates a syntax error.
-   *
-   * @param offset the error's offset into the InteractionsDocument
-   * @param length the length of the error
+  /** Called when the interactions window generates a syntax error.
+   *  @param offset the error's offset into the InteractionsDocument.
+   *  @param length the length of the error.
    */
   public void interactionErrorOccurred(int offset, int length) {
     _lock.startRead();
-    try {
-      for (GlobalModelListener l : _listeners) { l.interactionErrorOccurred(offset, length); }
-    }
+    try { for (GlobalModelListener l : _listeners) { l.interactionErrorOccurred(offset, length); } }
     finally { _lock.endRead(); }
   }
 
@@ -330,10 +323,9 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
     finally { _lock.endRead(); }
   }
 
-  /**
-   * Called if the interpreter reset failed.
-   * @param t Throwable explaining why the reset failed.
-   * (Subclasses must maintain listeners.)
+  /** Called if the interpreter reset failed.
+   *  @param t Throwable explaining why the reset failed.
+   *  (Subclasses must maintain listeners.)
    */
   public void interpreterResetFailed(final Throwable t) {
     _lock.startRead();
@@ -341,11 +333,9 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
     finally { _lock.endRead(); }
   }
 
-  /**
-   * Called when the interactions JVM was closed by System.exit
-   * or by being aborted. Immediately after this the interactions
-   * will be reset.
-   * @param status the exit code
+  /** Called when the interactions JVM was closed by System.exit or by being aborted. Immediately after this the
+   *  interactions will be reset.
+   *  @param status the exit code
    */
   public void interpreterExited(int status) {
     _lock.startRead();
@@ -353,10 +343,9 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
     finally { _lock.endRead(); }
   }
 
-  /**
-   * Called when the active interpreter is changed.
-   * @param inProgress Whether the new interpreter is currently in progress
-   * with an interaction (ie. whether an interactionEnded event will be fired)
+  /** Called when the active interpreter is changed.
+   *  @param inProgress Whether the new interpreter is processing an interaction (i.e,. whether an interactionEnded
+   *         event will be fired)
    */
   public void interpreterChanged(boolean inProgress) {
     _lock.startRead();
@@ -425,20 +414,17 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
     finally { _lock.endRead(); }
   }
   
-  /**
-   * Called to indicate that a suite of tests has started running.
-   * @param numTests The number of tests in the suite to be run.
+  /** Called to indicate that a suite of tests has started running.
+   *  @param numTests The number of tests in the suite to be run.
    */
   public void junitSuiteStarted(int numTests) {
     _lock.startRead();
-    try { for (GlobalModelListener l : _listeners) { l.junitSuiteStarted(numTests); }
-    }
+    try { for (GlobalModelListener l : _listeners) { l.junitSuiteStarted(numTests); } }
     finally { _lock.endRead(); }
   }
 
-  /**
-   * Called when a particular test is started.
-   * @param name The name of the test being started.
+  /** Called when a particular test is started.
+   *  @param name The name of the test being started.
    */
   public void junitTestStarted(String name) {
     _lock.startRead();
@@ -446,12 +432,10 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
     finally { _lock.endRead(); }
   }
 
-  /**
-   * Called when a particular test has ended.
-   * @param name the name of the test that has ended
-   * @param wasSuccessful whether the test passed or not
-   * @param causedError if not successful, whether the test caused an error or
-   *                    simply failed
+  /** Called when a particular test has ended.
+   *  @param name the name of the test that has ended
+   *  @param wasSuccessful whether the test passed or not
+   *  @param causedError if not successful, whether the test caused an error or simply failed
    */
   public void junitTestEnded(String name, boolean wasSuccessful, boolean causedError) {
     _lock.startRead();
@@ -468,24 +452,20 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
     finally { _lock.endRead(); }
   }
 
-  /**
-   * Called to demand that all files be saved before running JUnit tests.
-   * It is up to the caller of this method to check if the documents have been
-   * saved, using IGetDocuments.hasModifiedDocuments().
-   *
-   * This is never called currently, but it is commented out in case it is
-   * needed later.
-  public void saveBeforeJUnit() {
-    _lock.startRead();
-    try {
-      for (GlobalModelListener l : _listeners) {
-        l.saveBeforeJUnit();
-      }
-    }
-    finally {
-      _lock.endRead();
-    }
-  }*/
+//  /** Called to demand that all files be saved before running JUnit tests. It is up to the caller of this 
+//   *  method to check if the documents have been saved, using IGetDocuments.hasModifiedDocuments(). This is 
+//   *  never called currently, but it is commented out in case it is needed later. */
+//  public void saveBeforeJUnit() {
+//    _lock.startRead();
+//    try {
+//      for (GlobalModelListener l : _listeners) {
+//        l.saveBeforeJUnit();
+//      }
+//    }
+//    finally {
+//      _lock.endRead();
+//    }
+//  }
 
   //--------------------------------- Javadoc --------------------------------//
 
@@ -496,12 +476,10 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
     finally { _lock.endRead(); }
   }
 
-  /**
-   * Called after Javadoc is finished.
-   * @param success whether the Javadoc operation generated proper output
-   * @param destDir if (success == true) the location where the output was
-   *                generated, otherwise undefined (possibly null)
-   * @param allDocs Whether Javadoc was run for all open documents
+  /** Called after Javadoc is finished.
+   *  @param success whether the Javadoc operation generated proper output
+   *  @param destDir if (success) the location where the output was generated, otherwise undefined (possibly null)
+   *  @param allDocs Whether Javadoc was run for all open documents
    */
   public void javadocEnded(boolean success, File destDir, boolean allDocs) {
     _lock.startRead();
@@ -509,9 +487,8 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
     finally { _lock.endRead(); }
   }
 
-  /**
-   * Called before attempting Javadoc, to give users a chance to save.
-   * Do not continue with Javadoc if the user doesn't save!
+  /** Called before attempting Javadoc, to give the user a chance to save. Do not continue with Javadoc if the user 
+   *  doesn't save!
    */
   public void saveBeforeJavadoc() {
     _lock.startRead();
@@ -519,12 +496,9 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
     finally { _lock.endRead(); }
   }
 
-//  /** Called to demand that all files be saved before starting the debugger.
-//   *  It is up to the caller of this method to check if the documents have been
-//   *  saved, using IGetDocuments.hasModifiedDocuments().
-//   *
-//   *  This is never called currently, but it is commented out in case it is
-//   *  needed later. */
+//  /** Called to demand that all files be saved before starting the debugger. It is up to the caller of this method
+//   *  to check if the documents have been saved, using IGetDocuments.hasModifiedDocuments(). This is not used 
+//   *  currently, but it is commented out in case it is needed later. */
 //  public void saveBeforeDebug() {
 //    _lock.startRead();
 //    try { for (GlobalModelListener l : _listeners) { l.saveBeforeDebug(); } }

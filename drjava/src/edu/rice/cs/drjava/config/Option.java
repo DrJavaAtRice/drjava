@@ -88,7 +88,7 @@ public abstract class Option<T> extends OptionParser<T> implements FormatStrateg
    * the ability to format a statically typed T value to a String.  Since T is an Object,
    * the default implementation uses the .toString() method.
    * @param value the statically-typed value to format into a String
-   * @throws NullPointerException if value is null
+   * @throws {@link NullPointerException} if value is null
    */
   public String format(T value) { return value.toString(); }
 

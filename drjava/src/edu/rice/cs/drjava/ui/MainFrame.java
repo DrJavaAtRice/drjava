@@ -223,21 +223,16 @@ public class MainFrame extends JFrame implements OptionConstants {
   private AboutDialog _aboutDialog;
   private ProjectPropertiesFrame _projectPropertiesFrame;
 
-  /**
-   * Keeps track of the recent files list in the File menu.
-   */
+  /** Keeps track of the recent files list in the File menu. */
   private RecentFileManager _recentFileManager;
   
-  /**
-   * Keeps track of the recent projects list in the Project menu
-   */
+  /** Keeps track of the recent projects list in the Project menu */
   private RecentFileManager _recentProjectManager;
 
   private File _currentProjFile;
   
-  /**
-   * Timer to display "Stepping..." message if a step takes longer than
-   * a certain amount of time.  All accesses must be synchronized on it.
+  /** Timer to display "Stepping..." message if a step takes longer than a certain amount of time.  All accesses
+   *  must be synchronized on it.
    */
   private final Timer _debugStepTimer;
 
@@ -2721,7 +2716,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   private Hashtable<OpenDefinitionsDocument,DocumentInfoGetter> _gatherDocInfo() {
     Hashtable<OpenDefinitionsDocument,DocumentInfoGetter> map =
       new Hashtable<OpenDefinitionsDocument,DocumentInfoGetter>();
-    List<OpenDefinitionsDocument> docs = _model.getDefinitionsDocuments();
+    List<OpenDefinitionsDocument> docs = _model.getOpenDefinitionsDocuments();
     for(OpenDefinitionsDocument doc: docs) {
       map.put(doc, _makeInfoGetter(doc));
     }
@@ -3902,9 +3897,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     return toolsMenu;
   }
   
-  /**
-   * Creates and returns a project menu.
-   */
+  /** Creates and returns a project menu. */
   private JMenu _setUpProjectMenu(int mask) {
     JMenu projectMenu = new JMenu("Project");
     projectMenu.setMnemonic(KeyEvent.VK_P);
@@ -5133,7 +5126,7 @@ public class MainFrame extends JFrame implements OptionConstants {
           _removeThreadLocationHighlight();
 
           // Ensure all doc breakpoints are gone
-          List<OpenDefinitionsDocument> docs = _model.getDefinitionsDocuments();
+          List<OpenDefinitionsDocument> docs = _model.getOpenDefinitionsDocuments();
           for (OpenDefinitionsDocument doc: docs) { doc.removeFromDebugger(); }
         }
       };
@@ -5303,6 +5296,7 @@ public class MainFrame extends JFrame implements OptionConstants {
 
     public void fileSaved(OpenDefinitionsDocument doc) {
 //      new ScrollableDialog(null, "fileSaved called in ModelListener", "", "").show();
+      doc.documentSaved();  // used to update the document cache
       _saveAction.setEnabled(false);
       _revertAction.setEnabled(true);
       updateFileTitle();
@@ -5393,8 +5387,6 @@ public class MainFrame extends JFrame implements OptionConstants {
       _currentDefPane.getRedoAction().updateRedoState();
     }
 
-    // NOTE: Not necessarily called from event-dispatching thread...
-    //  Should figure out how to deal with invokeLater here.
     public void activeDocumentChanged(final OpenDefinitionsDocument active) {
       // Only change GUI from event-dispatching thread
       // (This can be called from other threads...)
@@ -5424,9 +5416,6 @@ public class MainFrame extends JFrame implements OptionConstants {
           // update display (adding "*") in navigatgorPane
           if (isModified) _model.getDocumentNavigator().activeDocumentModified();
 
-          // Check if modified
-          // condition commented out because the document shouldn't be changing during
-          // a close-all. Also, because we phased out the isClosingAllFiles method
           
           try { active.revertIfModifiedOnDisk(); }
           catch (FileMovedException fme) { _showFileMovedError(fme); }
@@ -5921,15 +5910,17 @@ public class MainFrame extends JFrame implements OptionConstants {
       _setCurrentDirectory(dir);
     }
     
-    /** Check if the current document has been modified. If it has, ask the user
-     *  if he would like to save or not, and save the document if yes. Also
-     *  give the user a "cancel" option to cancel doing the operation that got
-     *  us here in the first place.
+    /** Check if the current document has been modified. If it has, ask the user if he would like to save it 
+     *  and save the document if yes. Also give the user a "cancel" option to cancel doing the operation 
+     *  that got us here in the first place.
      *
-     *  @return A boolean, if true means the user is OK with the file being saved
-     *          or not as they chose. If false, the user wishes to cancel.
+     *  @return A boolean indicating whether the user cancelled the save process.  False means cancel.
      */
     public boolean canAbandonFile(OpenDefinitionsDocument doc) {
+      return _fileSaveHelper(doc, JOptionPane.YES_NO_CANCEL_OPTION);
+    }
+    
+    private boolean _fileSaveHelper(OpenDefinitionsDocument doc, int paneOption) {
       String text,fname;
       OpenDefinitionsDocument lastActive = _model.getActiveDocument();
       _model.setActiveDocument(doc);
@@ -5951,10 +5942,7 @@ public class MainFrame extends JFrame implements OptionConstants {
         notFound = true;
       }
       
-      int rc = JOptionPane.showConfirmDialog(MainFrame.this,
-                                             text,
-                                             "Save " + fname + "?",
-                                             JOptionPane.YES_NO_CANCEL_OPTION);
+      int rc = JOptionPane.showConfirmDialog(MainFrame.this, text, "Save " + fname + "?", paneOption);
       switch (rc) {
         case JOptionPane.YES_OPTION:
           boolean saved = false;
@@ -5965,62 +5953,42 @@ public class MainFrame extends JFrame implements OptionConstants {
           if (doc.isAuxiliaryFile() || (_model.isProjectActive() && doc.isInProjectPath())) {
             String savedFilename = null;
             try { savedFilename = doc.getFile().getName(); }
-            catch(IllegalStateException ise) {
-              // Shouldn't happen because this file was just saved
-              throw new UnexpectedException(ise);
-            }
-            catch(FileMovedException fme) { 
-              // Shouldn't happend because this file was just saved
-              throw new UnexpectedException(fme);
-//              savedFilename = "The current file"; 
-            }
-//            rc = JOptionPane.showConfirmDialog(MainFrame.this,
-//                                               savedFilename + 
-//                                               "  is now in the current project.\n" +
-//                                               "If you close it, it will be permanently removed "+
-//                                               "from the project.\n" +
-//                                               "Do you still wish to close it.",
-//                                               "Close Project File",
-//                                               JOptionPane.YES_NO_CANCEL_OPTION);
-//            if (rc != JOptionPane.YES_OPTION)
-//              return false;
-//            else return true;
+            catch(IllegalStateException ise) { throw new UnexpectedException(ise); }
+            catch(FileMovedException fme) { throw new UnexpectedException(fme); }
           }
           return true;
         case JOptionPane.NO_OPTION:
           _model.setActiveDocument(lastActive);
           return true;
-        case JOptionPane.CLOSED_OPTION:
-        case JOptionPane.CANCEL_OPTION:
+        case JOptionPane.CLOSED_OPTION:  // never executed
+        case JOptionPane.CANCEL_OPTION:  // never executed if paneOption is JOptionPane.YES_NO_OPTION
           return false;
-        default:
+        default:                         // never executed
           throw new RuntimeException("Invalid option: " + rc);
       }
     }
 
+    /** Check if the current document has been modified. If it has, ask the user if he would like to save it 
+     *  and save the document if yes.  Does NOT support a cancellation option.
+     */
+    public void quitFile(OpenDefinitionsDocument doc) { _fileSaveHelper(doc, JOptionPane.YES_NO_OPTION); }
+    
     /** Called to ask the listener if it is OK to revert the current document to a newer version saved on file. */
     public boolean shouldRevertFile(OpenDefinitionsDocument doc) {
-
       String fname;
-
       if (! _model.getActiveDocument().equals(doc)) _model.setActiveDocument(doc);
-
       try {
         File file = doc.getFile();
         fname = file.getName();
       }
       catch (IllegalStateException ise) { fname = "Untitled file"; } // No file exists
-        
       catch (FileMovedException fme) { fname = fme.getFile().getName(); }
       // File was deleted, but use the same name anyway
 
       String text = fname + " has changed on disk. Would you like to reload it?\n" + 
         "This will discard any changes you have made.";
-      int rc = JOptionPane.showConfirmDialog(MainFrame.this,
-                                             text,
-                                             fname + " Modified on Disk",
+      int rc = JOptionPane.showConfirmDialog(MainFrame.this, text, fname + " Modified on Disk", 
                                              JOptionPane.YES_NO_OPTION);
-
       switch (rc) {
         case JOptionPane.YES_OPTION:
           return true;
@@ -6034,8 +6002,8 @@ public class MainFrame extends JFrame implements OptionConstants {
       }
     }
 
-    public void interactionIncomplete() {
-    }
+   
+    public void interactionIncomplete() { }
     
     /* changes to the state */
     

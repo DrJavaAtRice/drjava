@@ -121,7 +121,7 @@ public class CompilerErrorModel<T extends CompilerError> {
         throw new IllegalStateException("No documents to get!");
       }
       public boolean isAlreadyOpen(File file) { return false; }
-      public List<OpenDefinitionsDocument> getDefinitionsDocuments() {
+      public List<OpenDefinitionsDocument> getOpenDefinitionsDocuments() {
         return new LinkedList<OpenDefinitionsDocument>();
       }
       public boolean hasModifiedDocuments() { return false; }

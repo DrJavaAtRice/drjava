@@ -160,7 +160,7 @@ public final class CommandLineTest extends TestCase {
     DrJava.openCommandLineFiles(_mf, new String[0]);
     // ListModel<DefinitionsDocument> docs =
     // Wouldn't that be nice?
-    List<OpenDefinitionsDocument> docs = _mf.getModel().getDefinitionsDocuments();
+    List<OpenDefinitionsDocument> docs = _mf.getModel().getOpenDefinitionsDocuments();
     assertEquals("Only one document?", 1, docs.size());
     OpenDefinitionsDocument doc = docs.get(0);
     assertTrue("Is new document untitled?", doc.isUntitled());
@@ -173,7 +173,7 @@ public final class CommandLineTest extends TestCase {
     String[] list = new String[1];
     list[0] = f1_name;
     DrJava.openCommandLineFiles(_mf, list);
-    List<OpenDefinitionsDocument> docs = _mf.getModel().getDefinitionsDocuments();
+    List<OpenDefinitionsDocument> docs = _mf.getModel().getOpenDefinitionsDocuments();
     assertEquals("Only one document opened?", 1, docs.size());
     OpenDefinitionsDocument doc = docs.get(0);
     assertEquals("Correct length of file?",
@@ -191,7 +191,7 @@ public final class CommandLineTest extends TestCase {
     String[] list = new String[1];
     list[0] = nof1_name;
     DrJava.openCommandLineFiles(_mf, list);
-    List<OpenDefinitionsDocument> docs = _mf.getModel().getDefinitionsDocuments();
+    List<OpenDefinitionsDocument> docs = _mf.getModel().getOpenDefinitionsDocuments();
     assertEquals("Exactly one document?", 1, docs.size());
     OpenDefinitionsDocument doc = docs.get(0);
     assertTrue("Is document untitled?", doc.isUntitled());
@@ -207,7 +207,7 @@ public final class CommandLineTest extends TestCase {
     list[1] = f2_name;
     list[2] = f3_name;
     DrJava.openCommandLineFiles(_mf, list);
-    List<OpenDefinitionsDocument> docs = _mf.getModel().getDefinitionsDocuments();
+    List<OpenDefinitionsDocument> docs = _mf.getModel().getOpenDefinitionsDocuments();
     assertEquals("Exactly three documents?", 3, docs.size());
     OpenDefinitionsDocument doc1 = docs.get(0);
     assertEquals("Correct length of file 1?",
@@ -251,7 +251,7 @@ public final class CommandLineTest extends TestCase {
     list[4] = f1_name;
     list[5] = nof3_name;
     DrJava.openCommandLineFiles(_mf, list);
-    List<OpenDefinitionsDocument> docs = _mf.getModel().getDefinitionsDocuments();
+    List<OpenDefinitionsDocument> docs = _mf.getModel().getOpenDefinitionsDocuments();
     assertEquals("Exactly three documents?", 3, docs.size());
     OpenDefinitionsDocument doc1 = docs.get(0);
     assertEquals("Correct length of file 1?",
@@ -295,7 +295,7 @@ public final class CommandLineTest extends TestCase {
     list[4] = f2_name;
     list[5] = f1_name;
     DrJava.openCommandLineFiles(_mf, list);
-    List<OpenDefinitionsDocument> docs = _mf.getModel().getDefinitionsDocuments();
+    List<OpenDefinitionsDocument> docs = _mf.getModel().getOpenDefinitionsDocuments();
     assertEquals("Exactly two documents?", 2, docs.size());
     OpenDefinitionsDocument doc1 = docs.get(0);
     assertEquals("Correct length of file 1?",
@@ -404,7 +404,7 @@ public final class CommandLineTest extends TestCase {
     String path = relativeFile.getPath();
     DrJava.openCommandLineFiles(_mf, new String[] { path });
 
-    List<OpenDefinitionsDocument> docs = _mf.getModel().getDefinitionsDocuments();
+    List<OpenDefinitionsDocument> docs = _mf.getModel().getOpenDefinitionsDocuments();
     assertEquals("Number of open documents", 1, docs.size());
 
     OpenDefinitionsDocument doc = docs.get(0);

@@ -51,9 +51,7 @@ package edu.rice.cs.drjava.model.definitions;
  * the document is closing
  */
 public interface DocumentClosedListener{
-  /**
-   * called when the DefinitionsDocument is closing
-   */
+  /** Called when the DefinitionsDocument is closing. */
   public void close();
 }
 

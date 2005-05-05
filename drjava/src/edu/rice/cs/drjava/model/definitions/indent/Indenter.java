@@ -137,7 +137,9 @@ public class Indenter {
       rule03 = new QuestionCurrLineEmptyOrEnterPress((autoCloseComments? rule42 : rule04), rule05),
       rule02 = new QuestionPrevLineStartsComment(rule03, rule06),
         
-      rule01 = new QuestionInsideComment(rule02, rule13);
+      rule01 = new QuestionInsideComment(rule02, rule13);  // to do: rule13 -> rule 43
+//      rule43 = new QuestionWingComment(rule44, rule13);
+//      rule44 = new ActionDoNothing();
 
     _topRule = rule01;
   }

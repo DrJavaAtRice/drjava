@@ -107,7 +107,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
     doc3 = setupDocument(FOO_TEXT);
     assertNumOpenDocs(4);
 
-    List<OpenDefinitionsDocument> docs = _model.getDefinitionsDocuments();
+    List<OpenDefinitionsDocument> docs = _model.getOpenDefinitionsDocuments();
     assertEquals("size of document array", 4, docs.size());
 
     assertEquals("document 1", doc1, docs.get(1));
@@ -129,13 +129,13 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
     _model.closeFile(doc1);
     assertNumOpenDocs(2);
 
-    List<OpenDefinitionsDocument> docs = _model.getDefinitionsDocuments();
+    List<OpenDefinitionsDocument> docs = _model.getOpenDefinitionsDocuments();
     assertEquals("size of document array", 2, docs.size());
     assertContents(BAR_TEXT, docs.get(1));
 
     _model.closeFile(doc2);
     assertNumOpenDocs(1);
-    docs = _model.getDefinitionsDocuments();
+    docs = _model.getOpenDefinitionsDocuments();
     assertEquals("size of document array", 1, docs.size());
   }
 
@@ -284,7 +284,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
       assertNumOpenDocs(2);
       listener.assertOpenCount(0);
 
-      List<OpenDefinitionsDocument> docs = _model.getDefinitionsDocuments();
+      List<OpenDefinitionsDocument> docs = _model.getOpenDefinitionsDocuments();
       doc = docs.get(1);
       assertModified(true, doc);
       assertContents(FOO_TEXT, doc);
@@ -471,7 +471,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
       fail("Open was unexpectedly canceled!");
     }
     listener.assertOpenCount(2);
-    List<OpenDefinitionsDocument> docs = _model.getDefinitionsDocuments();
+    List<OpenDefinitionsDocument> docs = _model.getOpenDefinitionsDocuments();
     assertEquals("size of document array", 2, docs.size());
     assertContents(FOO_TEXT, docs.get(0));
     assertContents(BAR_TEXT, docs.get(1));
@@ -522,7 +522,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
       assertNumOpenDocs(3);
       listener.assertOpenCount(0);
 
-      List<OpenDefinitionsDocument> docs = _model.getDefinitionsDocuments();
+      List<OpenDefinitionsDocument> docs = _model.getOpenDefinitionsDocuments();
       doc1 = docs.get(1);
       assertModified(true, doc1);
       assertContents(FOO_TEXT, doc1);

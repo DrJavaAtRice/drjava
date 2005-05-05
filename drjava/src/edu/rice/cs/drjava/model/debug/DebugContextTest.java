@@ -219,12 +219,12 @@ public final class DebugContextTest extends DebugTestCase {
     assertInteractionsContains("Bar Line 1");
     assertInteractionsDoesNotContain("Bar Line 2");
 
-    if( printMessages ) System.err.println("-------- Adding interpret listener --------");
+    if ( printMessages ) System.err.println("-------- Adding interpret listener --------");
     // Resume until finished, waiting for call to interpret to end
     InterpretListener interpretListener = new InterpretListener();
     _model.addListener(interpretListener);
     synchronized(_notifierLock) {
-      if( printMessages ) System.err.println("-------- resuming --------");
+      if ( printMessages ) System.err.println("-------- resuming --------");
       _asyncResume();
       _waitForNotifies(3);  // interactionEnded, interpreterChanged, currThreadDied
                             // here, we get a currThreadDied since it's the last thread

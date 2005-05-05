@@ -86,7 +86,7 @@ public interface IGetDocuments {
    * documents is the same as in the display of documents in the view.
    * @return a random-access List of the open definitions documents.
    */
-  public List<OpenDefinitionsDocument> getDefinitionsDocuments();
+  public List<OpenDefinitionsDocument> getOpenDefinitionsDocuments();
 
   /**
    * Checks if any open definitions documents have been modified

@@ -82,11 +82,10 @@ public final class InteractionsModelTest extends TestCase {
     super.tearDown();
   }
 
-  /**
-   * Asserts that the given string typed by the user is processed
-   * to become the given expected string for an interpretation.
-   * @param typed A string typed by the user
-   * @param expected What the processor should return
+  /** Asserts that the given string typed by the user is processed to become the given expected string for an
+   *  interpretation.
+   *  @param typed A string typed by the user
+   *  @param expected What the processor should return
    */
   protected void _assertProcessedContents(String typed, String expected) throws DocumentAdapterException {
     assertTrue(_model instanceof TestInteractionsModel);
@@ -98,11 +97,10 @@ public final class InteractionsModelTest extends TestCase {
     assertEquals("processed output should match expected", expected, model.toEval);
   }
 
-  /**
-   * Asserts that the given string typed by the user of the form "java classname"
-   * is transformed to the given expected main method invocation.
-   * @param typed the "java classname args ..." typed by the user
-   * @param expected the expected main class call
+  /** Asserts that the given string typed by the user of the form "java classname" is transformed to the given
+   *  expected main method invocation.
+   *  @param typed the "java classname args ..." typed by the user
+   *  @param expected the expected main class call
    */
   protected void _assertMainTransformation(String typed, String expected) {
     assertEquals("main transformation should match expected",
@@ -110,9 +108,7 @@ public final class InteractionsModelTest extends TestCase {
   }
 
 
-  /**
-   * Tests that the correct text is returned when interpreting.
-   */
+  /** Tests that the correct text is returned when interpreting. */
   public void testInterpretCurrentInteraction() throws DocumentAdapterException {
     assertTrue(_model instanceof TestInteractionsModel);
     TestInteractionsModel model = (TestInteractionsModel)_model;
@@ -151,8 +147,7 @@ public final class InteractionsModelTest extends TestCase {
     assertTrue(_model instanceof IncompleteInputInteractionsModel);
     IncompleteInputInteractionsModel model = (IncompleteInputInteractionsModel)_model;
     InteractionsDocument doc = model.getDocument();
-    doc.insertText(doc.getDocLength(), code,
-                   InteractionsDocument.DEFAULT_STYLE);
+    doc.insertText(doc.getDocLength(), code, InteractionsDocument.DEFAULT_STYLE);
     model.interpretCurrentInteraction();
     try { Thread.sleep(5000); } catch(InterruptedException ie){ }; // allow for the exception to be generated!
     assertTrue("Code '"+code+"' should generate a continuation exception but not a syntax exception",
@@ -163,8 +158,7 @@ public final class InteractionsModelTest extends TestCase {
     assertTrue(_model instanceof IncompleteInputInteractionsModel);
     IncompleteInputInteractionsModel model = (IncompleteInputInteractionsModel)_model;
     InteractionsDocument doc = model.getDocument();
-    doc.insertText(doc.getDocLength(), code,
-                   InteractionsDocument.DEFAULT_STYLE);
+    doc.insertText(doc.getDocLength(), code, InteractionsDocument.DEFAULT_STYLE);
     model.interpretCurrentInteraction();
     try { Thread.sleep(5000); } catch(InterruptedException ie){ }; // allow for the exception to be generated!
     assertTrue("Code '"+code+"' should generate a syntax exception but not a continuation exception",
@@ -295,9 +289,7 @@ public final class InteractionsModelTest extends TestCase {
   // TO DO: test that the correct history is returned (careful of last newline)
 
 
-  /**
-   * Tests that a debug port can be generated.
-   */
+  /** Tests that a debug port can be generated. */
   public void testDebugPort() throws IOException {
     int port = _model.getDebugPort();
     assertTrue("generated debug port", port != -1);
@@ -473,9 +465,7 @@ public final class InteractionsModelTest extends TestCase {
     assertEquals("Second input listener should return correct input", "input2", _model.getConsoleInput());
   }
 
-  /**
-   * Tests that the interactions history is stored correctly. See bug # 992455
-   */
+  /** Tests that the interactions history is stored correctly. See bug # 992455 */
   public void testInteractionsHistoryStoredCorrectly() throws DocumentAdapterException {
     final Object _lock = new Object();
     String code = "public class A {\n";
@@ -483,8 +473,7 @@ public final class InteractionsModelTest extends TestCase {
     InteractionsDocument doc = _model.getDocument();
 
     // Insert text and evaluate
-    doc.insertText(doc.getDocLength(), code,
-                   InteractionsDocument.DEFAULT_STYLE);
+    doc.insertText(doc.getDocLength(), code, InteractionsDocument.DEFAULT_STYLE);
 
     _model.interpretCurrentInteraction();
     //Simulate result
@@ -497,9 +486,7 @@ public final class InteractionsModelTest extends TestCase {
 
     code = "}\n";
 
-    doc.insertText(doc.getDocLength(), code,
-                   InteractionsDocument.DEFAULT_STYLE);
-
+    doc.insertText(doc.getDocLength(), code, InteractionsDocument.DEFAULT_STYLE);
 
     synchronized(_lock) {
       _model.interpretCurrentInteraction();
@@ -510,15 +497,9 @@ public final class InteractionsModelTest extends TestCase {
       assertEquals("Current interaction should not be there - should have interpreted", "", doc.getCurrentInteraction());
       assertEquals("History should contain one interaction", 1, h.size());
     }
-
-
-
-
   }
 
-  /**
-   * A generic InteractionsModel for testing purposes.
-   */
+  /** A generic InteractionsModel for testing purposes. */
   public static class TestInteractionsModel extends InteractionsModel {
     String toEval = null;
     String addedClass = null;

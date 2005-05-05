@@ -294,15 +294,15 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
               //_dialog("about to tell main result was " + resultString);
               //return new ValueResult(resultString);
               String style = InteractionsDocument.OBJECT_RETURN_STYLE;
-              if(result instanceof String) {
+              if (result instanceof String) {
                 style = InteractionsDocument.STRING_RETURN_STYLE;
                 //Single quotes have already been added to chars by now, so they are read as strings
                 String possibleChar = (String)result;
                 
-                if(possibleChar.startsWith("\'") && possibleChar.endsWith("\'") && possibleChar.length()==3)
+                if (possibleChar.startsWith("\'") && possibleChar.endsWith("\'") && possibleChar.length()==3)
                   style = InteractionsDocument.CHARACTER_RETURN_STYLE;                
               }
-              if(result instanceof Number) {
+              if (result instanceof Number) {
                 style = InteractionsDocument.NUMBER_RETURN_STYLE;
               }
               _mainJVM.interpretResult(new ValueResult(resultString, style));
@@ -314,11 +314,11 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
             _dialog("interp exception: " + t);
             
             
-            if(t instanceof ParseException)
+            if (t instanceof ParseException)
               _mainJVM.interpretResult(new SyntaxErrorResult((ParseException)t,input));
-            else if(t instanceof TokenMgrError)
+            else if (t instanceof TokenMgrError)
               _mainJVM.interpretResult(new SyntaxErrorResult((TokenMgrError)t,input));
-            else if(t instanceof ParseError) 
+            else if (t instanceof ParseError) 
               _mainJVM.interpretResult(new SyntaxErrorResult((ParseError)t,input));
             else {
               //Other exceptions are non lexical/parse related exceptions. These include arithmetic exceptions, wrong version exceptions, etc.

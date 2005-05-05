@@ -164,7 +164,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
    *  associated with a file is not a test case, it will be ignored.  Synchronized against the compiler
    *  model to prevent testing and compiling at the same time, which would create invalid results.
    */
-  public void junitAll() { junitDocs(_getter.getDefinitionsDocuments()); }
+  public void junitAll() { junitDocs(_getter.getOpenDefinitionsDocuments()); }
   
   /** Creates a JUnit test suite over all currently open documents and runs it.  If the class file 
    *  associated with a file is not a test case, it will be ignored.  Synchronized against the compiler
@@ -173,7 +173,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   public void junitProject() {
     LinkedList<OpenDefinitionsDocument> lod = new LinkedList<OpenDefinitionsDocument>();
     
-    for (OpenDefinitionsDocument doc : _getter.getDefinitionsDocuments()) { 
+    for (OpenDefinitionsDocument doc : _getter.getOpenDefinitionsDocuments()) { 
       if (doc.isInProjectPath() || doc.isAuxiliaryFile())  lod.add(doc);
     }
     junitDocs(lod);

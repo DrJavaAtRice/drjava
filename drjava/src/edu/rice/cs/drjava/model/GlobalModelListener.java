@@ -58,131 +58,82 @@ import edu.rice.cs.drjava.model.junit.JUnitListener;
  */
 public interface GlobalModelListener extends InteractionsListener,
   JavadocListener, CompilerListener, JUnitListener {
-
   
-  /**
-   * called when trying to open a file that does not exist
-   */
+  /** Called when trying to open a file that does not exist. */
   public void fileNotFound(File f);
   
-  /**
-   * Called after a new document is created.
-   */
+  /** Called after a new document is created. */
   public void newFileCreated(OpenDefinitionsDocument doc);
 
-  /**
-   * Called after the current document is saved.
-   */
+  /** Called after the current document is saved. */
   public void fileSaved(OpenDefinitionsDocument doc);
 
-  /**
-   * Called after a file is opened and read into the current document.
-   */
+  /** Called after a file is opened and read into the current document. */
   public void fileOpened(OpenDefinitionsDocument doc);
 
-  /**
-   * Called after a document is closed.
-   */
+  /** Called after a document is closed. */
   public void fileClosed(OpenDefinitionsDocument doc);
 
-  /**
-   * Called after a document is reverted.
-   */
+  /** Called after a document is reverted. */
   public void fileReverted(OpenDefinitionsDocument doc);
 
-  /**
-   * Called to ask the listener if it is OK to abandon the current
-   * document.
-   */
+  /** Called to ask the listener if it is OK to abandon the current document. */
   public boolean canAbandonFile(OpenDefinitionsDocument doc);
 
-  /**
-   * Called to ask the listener if it is OK to revert the current
-   * document to a newer version saved on file.
-   */
+  /** Called to ask the listener if this document should be saved before quitting. */
+  public void quitFile(OpenDefinitionsDocument doc);
+  
+  /** Called to ask the listener if it is OK to revert the current document to the version saved on disk. */
   public boolean shouldRevertFile(OpenDefinitionsDocument doc);
 
-  /**
-   * Called when a file's main method is about to be run.
-   */
+  /** Called when a file's main method is about to be run. */
   public void runStarted(OpenDefinitionsDocument doc);
 
-  /**
-   * Called to demand that all files be saved before running the main method of
-   * a document. It is up to the caller of this method to check if the documents
-   * have been saved, using IGetDocuments.hasModifiedDocuments().
-   *
-   * This is never called currently, but it is commented out in case it is
-   * needed later.
-  public void saveBeforeRun();
-   */
+//  /** Called to demand that all files be saved before running the main method of a document. It is up to the 
+//   *  caller of this method to check if the documents have been saved, using IGetDocuments.hasModifiedDocuments().
+//   *  This is never called currently, but it is commented out in case it is needed later. */
+//  public void saveBeforeRun();
 
-  /**
-   * Called to demand that all files be saved before starting the debugger.
-   * It is up to the caller of this method to check if the documents have been
-   * saved, using IGetDocuments.hasModifiedDocuments().
-   *
-   * This is never called currently, but it is commented out in case it is
-   * needed later.
-  public void saveBeforeDebug();
-   */
+//  /** Called to demand that all files be saved before starting the debugger. It is up to the caller of this method
+//   *  to check if the documents have been saved, using IGetDocuments.hasModifiedDocuments(). This is never called 
+//   *  currently, but it is commented out in case it is needed later. */
+//  public void saveBeforeDebug();
 
-  /**
-   * Called when the caret position in the interactions pane is changed
-   */
-  //public void interactionCaretPositionChanged(int pos);
+//  /** Called when the caret position in the interactions pane is changed/ */
+//  public void interactionCaretPositionChanged(int pos);
 
-  /**
-   * Called when the console window is reset.
-   */
+  /** Called when the console window is reset. */
   public void consoleReset();
 
-  /**
-   * Called when an undoable edit occurs.
-   */
+  /** Called when an undoable edit occurs. */
   public void undoableEditHappened();
 
-  /**
-   * Called when saving a file whose path contains a '#' symbol.
-   */
+  /** Called when saving a file whose path contains a '#' symbol. */
   public void filePathContainsPound();
   
-  /**
-   * Called when the selection in the navigator changes
-   * the current directory without changing the active document
-   */
+  /** Called when the selection in the navigator changes the current directory without changing the active document. */
   public void currentDirectoryChanged(File dir);
     
-  /**
-   * called when the builddirectory is modified in the model
-   */
+  /** Called when the builddirectory is modified in the model. */
   public void projectBuildDirChanged();
   
-  /**
-   * called while the project is being opened.
-   * @param projectFile the location of the project file
-   * @param files The files the gui should open for the model
+  /** Called while the project is being opened.
+   *  @param projectFile the location of the project file
+   *  @param files The files the gui should open for the model
    */
   public void projectOpened(File projectFile, FileOpenSelector files);
 
-  /**
-   * called when the project is being closed
-   */
+  /** Called when the project is being closed. */
   public void projectClosed();
 
-  /**
-   * called if the project's modified state has changed
-   */
+  /** Called if the project's modified state has changed. */
   public void projectModified();
   
-  /**
-   * called when the project runnability changed (ie, when the main file is set/unset)
-   */
+  /** Called when the project runnability changed (ie, when the main file is set/unset). */
   public void projectRunnableChanged();
   
-  /**
-   * Called when the a document, already opened, is brought back into the cache, and it no longer exists on disk or cannot be accessed
-   */
+  /** Called when the a document, already opened, is brought back into the cache, and it no longer exists on disk
+   *  or cannot be accessed. */
   public void documentNotFound(OpenDefinitionsDocument d, File f);
 }
 

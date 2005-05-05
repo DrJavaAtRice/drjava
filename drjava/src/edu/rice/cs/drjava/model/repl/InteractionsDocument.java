@@ -272,7 +272,6 @@ public class InteractionsDocument extends ConsoleDocument {
    */
   public void appendExceptionResult(String exceptionClass, String message, String stackTrace, String styleName) {
     
-    
     if (null == message || "null".equals(message)) message = "";
     
     // Simplify the common error messages

@@ -58,6 +58,8 @@ import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 
+import edu.rice.cs.util.swing.Utilities;
+
 /**
  * Tests the Definitions Pane
  * @version $Id$
@@ -494,25 +496,27 @@ public final class DefinitionsPaneTest extends TestCase {
   
   
   public void testActiveAndInactive() {
-    SingleDisplayModel _model = _frame.getModel();
+    SingleDisplayModel _model = _frame.getModel();  // creates a frame with a new untitled document and makes it active
     
-    _model.newFile();
+    DefinitionsPane pane1, pane2;
+    Document doc1, doc2;
     
-    DefinitionsPane currpane, oldpane;
-    Document ddoc, olddoc;
+    pane1 = _frame.getCurrentDefPane(); 
+    doc1 = pane1.getDocument();
+    assertTrue("the active pane should have an open definitions document", doc1 instanceof OpenDefinitionsDocument);
     
-    currpane = _frame.getCurrentDefPane();
+    _model.newFile();  // creates a new untitled document and makes it active
+    pane2 = _frame.getCurrentDefPane();  
+    doc2 = pane2.getDocument();
     
-    ddoc = currpane.getDocument();
-    assertTrue("the active pane should have an open defintions document", ddoc instanceof OpenDefinitionsDocument);
+    assertTrue("the active pane should have an open definitions document", doc2 instanceof OpenDefinitionsDocument);
     
-    _model.setActiveNextDocument();
-    oldpane = currpane;
-    currpane = _frame.getCurrentDefPane();
-    olddoc = oldpane.getDocument();
-    ddoc = currpane.getDocument();
-    assertFalse("the old pane should not have an open defintions document", olddoc instanceof OpenDefinitionsDocument);
-    assertTrue("the active pane should have an open defintions document", ddoc instanceof OpenDefinitionsDocument);
+    _model.setActiveNextDocument();    // makes doc1 active
+    DefinitionsPane pane = _frame.getCurrentDefPane();
+    assertEquals("Confirm that next pane is the other pane", pane1, pane);
+    
+    assertTrue("pane2 should have an open definitions document", doc2 instanceof OpenDefinitionsDocument);
+    assertTrue("pane1 should have an open definitions document", doc1 instanceof OpenDefinitionsDocument);
   }
   
   
@@ -556,18 +560,20 @@ public final class DefinitionsPaneTest extends TestCase {
     _frame.getCurrentDefPane().addFinalizationListener(fl);
 //    System.out.println("Created File: " + _frame.getCurrentDefPane().hashCode());
     
-    
-    
     // all the panes have a listener, so lets close all files
     
-    _frame.closeAll();
+    _model.closeAllFiles();
+    Utilities.clearEventQueue();
     
     System.gc();
-    Thread.sleep(100);
+    System.runFinalization();
 //    System.out.println("Current: " + _frame.getCurrentDefPane().hashCode());
     
-//    assertEquals("all the panes should have been garbage collected", 6, _finalCount);
+
     assertEquals("all the defdocs should have been garbage collected", 6, _finalDocCount);
+    assertEquals("all the panes should have been garbage collected", 6, _finalCount);
+//    System.err.println("_finalCount = " + _finalCount);
+
   }
   
   // This testcase checks that we do no longer discard Alt keys that would be used to make the {,},[,] chars that the french keyboards has.

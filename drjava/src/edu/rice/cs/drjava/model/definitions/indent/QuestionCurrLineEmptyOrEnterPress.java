@@ -70,9 +70,7 @@ class QuestionCurrLineEmptyOrEnterPress extends IndentRuleQuestion {
    * @return true if this node's rule holds.
    */
   boolean applyRule(AbstractDJDocument doc, int reason) {
-    if (reason == Indenter.ENTER_KEY_PRESS) {
-      return true;
-    }
+    if (reason == Indenter.ENTER_KEY_PRESS) return true;
     try {
       // Determine if there are only whitespace chars by seeing if the
       //  first non-WS char is the endOfLine

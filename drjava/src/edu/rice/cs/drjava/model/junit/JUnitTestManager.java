@@ -234,7 +234,7 @@ public class JUnitTestManager {
     String className;
     String className1 = testString.substring(firstIndex, secondIndex);
     String className2 = testString.substring(0, firstIndex-1);
-    if(firstIndex == secondIndex) className = className2;
+    if (firstIndex == secondIndex) className = className2;
     else className = className1;
     
 //    String ps = System.getProperty("file.separator");

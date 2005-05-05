@@ -68,30 +68,21 @@ public abstract class AbstractDJPane extends JTextPane implements OptionConstant
 
   static {
     Color highColor = DrJava.getConfig().getSetting(DEFINITIONS_MATCH_COLOR);
-
     MATCH_PAINTER = new DefaultHighlighter.DefaultHighlightPainter(highColor);
   }
   
-  /**
-   * Highlight painter for selected errors in the defs doc.
-   */
+  /** Highlight painter for selected errors in the defs doc. */
   static DefaultHighlighter.DefaultHighlightPainter ERROR_PAINTER =
     new DefaultHighlighter.DefaultHighlightPainter(DrJava.getConfig().getSetting(COMPILER_ERROR_COLOR));
   
-  
   protected HighlightManager _highlightManager;
   
-  /**
-   * Looks for changes in the caret position to see if a paren/brace/bracket
-   * highlight is needed.
-   */
+  /** Looks for changes in the caret position to see if a paren/brace/bracket highlight is needed. */
   protected CaretListener _matchListener = new CaretListener() {
-    /**
-     * Checks caret position to see if it needs to set or remove a highlight
-     * from the document.
-     * When the cursor is immediately right of ')', '}', or ']', it highlights
-     * up to the matching open paren/brace/bracket.
-     * @param e the event fired by the caret position change
+    
+    /** Checks caret position to see if it needs to set or remove a highlight from the document. When the cursor
+     *  is immediately right of ')', '}', or ']', it highlights up to the matching open paren/brace/bracket.
+     *  @param e the event fired by the caret position change
      */
     public void caretUpdate(CaretEvent e) {
       //_doc().setCurrentLocation(getCaretPosition());

@@ -77,7 +77,7 @@ public class SyntaxErrorResult implements InterpretResult {
   public SyntaxErrorResult(ParseError pe, String s)
   {
     ParseException parseEx = pe.getParseException();
-    if(parseEx != null) {
+    if (parseEx != null) {
       _startRow = parseEx.getBeginLine();
       _startCol = parseEx.getBeginColumn();
       _endRow = parseEx.getEndLine();

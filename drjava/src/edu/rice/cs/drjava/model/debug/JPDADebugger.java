@@ -260,7 +260,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
   public synchronized void startup() throws DebugException {
     if (!isReady()) {
       // check if all open documents are in sync
-      for (OpenDefinitionsDocument doc: _model.getDefinitionsDocuments()) {
+      for (OpenDefinitionsDocument doc: _model.getOpenDefinitionsDocuments()) {
         doc.checkIfClassFileInSync();
       }
 
@@ -1031,7 +1031,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     _ensureReady();
 
     Vector<Breakpoint> sortedBreakpoints = new Vector<Breakpoint>();
-    List<OpenDefinitionsDocument> docs = _model.getDefinitionsDocuments();
+    List<OpenDefinitionsDocument> docs = _model.getOpenDefinitionsDocuments();
     for (int i = 0; i < docs.size(); i++) {
       Vector<Breakpoint> docBreakpoints =
         docs.get(i).getBreakpoints();

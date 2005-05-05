@@ -76,7 +76,7 @@ public final class SingleDisplayModelTest extends GlobalModelTestCase {
 
   protected void assertNotEmpty() {
     assertTrue("number of documents",
-               getSDModel().getDefinitionsDocuments().size() > 0);
+               getSDModel().getOpenDefinitionsDocuments().size() > 0);
   }
 
   protected void assertActiveDocument(OpenDefinitionsDocument doc) {
@@ -106,7 +106,7 @@ public final class SingleDisplayModelTest extends GlobalModelTestCase {
     listener.assertSwitchCount(0);
 
     // Open a new document
-    int numOpen = getSDModel().getDefinitionsDocuments().size();
+    int numOpen = getSDModel().getOpenDefinitionsDocuments().size();
     OpenDefinitionsDocument doc = getSDModel().newFile();
     assertNumOpenDocs(numOpen + 1);
 
@@ -126,11 +126,8 @@ public final class SingleDisplayModelTest extends GlobalModelTestCase {
    * By default it expects no events to be fired. To customize,
    * subclass and override one or more methods.
    */
-  public static class SDTestListener extends TestListener
-    implements SingleDisplayModelListener
-  {
+  public static class SDTestListener extends TestListener implements SingleDisplayModelListener {
     protected int switchCount;
-
 
     public void resetCounts() {
       super.resetCounts();
@@ -424,7 +421,7 @@ public final class SingleDisplayModelTest extends GlobalModelTestCase {
       }
     };
     _sdModel.openFiles(fos);
-    OpenDefinitionsDocument doc = _sdModel.getDefinitionsDocuments().get(5);
+    OpenDefinitionsDocument doc = _sdModel.getOpenDefinitionsDocuments().get(5);
     _sdModel.setActiveDocument(doc);
     files[5].delete();
     _sdModel.closeAllFiles();

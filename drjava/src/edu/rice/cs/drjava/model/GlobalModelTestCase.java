@@ -61,6 +61,7 @@ import edu.rice.cs.util.text.DocumentAdapter;
 import edu.rice.cs.util.text.DocumentAdapterException;
 import edu.rice.cs.util.classloader.ClassFileError;
 import edu.rice.cs.util.swing.Utilities;
+import edu.rice.cs.util.UnexpectedException;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.model.definitions.*;
@@ -86,9 +87,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
   protected boolean _junitDone;
   protected final Object _lock = new Object();
   
-  protected void _logJUnitStart() {
-    _junitDone = false;
-  }
+  protected void _logJUnitStart() { _junitDone = false; }
   
   protected void _runJUnit(OpenDefinitionsDocument doc) throws IOException, ClassNotFoundException, 
     InterruptedException {
@@ -242,7 +241,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     _model.addListener(listener);
 
     // Open a new document
-    int numOpen = _model.getDefinitionsDocuments().size();
+    int numOpen = _model.getOpenDefinitionsDocuments().size();
     OpenDefinitionsDocument doc = _model.newFile();
     assertNumOpenDocs(numOpen + 1);
 
@@ -432,7 +431,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
   protected void assertNumOpenDocs(int num) {
     assertEquals("number of open documents",
                  num,
-                 _model.getDefinitionsDocuments().size());
+                 _model.getOpenDefinitionsDocuments().size());
   }
 
   protected void assertModified(boolean b, OpenDefinitionsDocument doc) {
@@ -569,6 +568,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     protected int closeCount;
     protected int saveCount;
     protected int canAbandonCount;
+    protected int quitFileCount;
     protected int classFileErrorCount;
     protected int compileStartCount;
     protected int compileEndCount;
@@ -613,6 +613,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       closeCount = 0;
       saveCount = 0;
       canAbandonCount = 0;
+      quitFileCount = 0;
       classFileErrorCount = 0;
       compileStartCount = 0;
       compileEndCount = 0;
@@ -673,6 +674,9 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       assertEquals("number of times canAbandon fired", i, canAbandonCount);
     }
 
+     public void assertQuitFileCount(int i) {
+      assertEquals("number of times quitFile fired", i, quitFileCount);
+    }
      public void assertClassFileErrorCount(int i) {
       assertEquals("number of times classFileError fired", i, classFileErrorCount);
     }
@@ -982,11 +986,10 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       listenerFail("saveBeforeJavadoc fired unexpectedly");
     }
     
-    /**
-     * Not used.
-    public void saveBeforeDebug() {
-      listenerFail("saveBeforeDebug fired unexpectedly");
-    }*/
+//    /** Not used. */
+//    public void saveBeforeDebug() {
+//      listenerFail("saveBeforeDebug fired unexpectedly");
+//    }
 
     public void nonTestCase(boolean isTestAll) {
       listenerFail("nonTestCase fired unexpectedly");
@@ -994,18 +997,21 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
 
     public boolean canAbandonFile(OpenDefinitionsDocument doc) {
       listenerFail("canAbandonFile fired unexpectedly");
-
-      // this is actually unreachable but the compiler won't believe me. sigh.
-      throw new RuntimeException();
+      throw new UnexpectedException();
     }
+    
+    public void quitFile(OpenDefinitionsDocument doc) {
+      listenerFail("quitFile fired unexpectedly");
+      throw new UnexpectedException();
+    }
+    
     public void classFileError(ClassFileError e) {
       listenerFail("classFileError fired unexpectedly");
     }
+    
     public boolean shouldRevertFile(OpenDefinitionsDocument doc) {
       listenerFail("shouldRevertfile fired unexpectedly");
-
-      // this is actually unreachable but the compiler won't believe me. sigh.
-      throw new RuntimeException();
+      throw new UnexpectedException();
     }
 
     public void interactionIncomplete() {
@@ -1021,26 +1027,21 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     }
     
     public void activeDocumentChanged(OpenDefinitionsDocument active) {
-      // listenerFail("activeDocumentChanged fired unexpectedly"); // this event is not current tested !!
+      // listenerFail("activeDocumentChanged fired unexpectedly"); // this event is not tested !!
     }
   }
 
 
-  /**
-   * If users expect the Interactions to be reset after a compilation, they
-   * must synchronize on this listener when compiling, then wait() on it.
-   * The interactionsReset() method will notify().
+  /** If users expect the Interactions to be reset after a compilation, they must synchronize on this listener 
+   *  when compiling, then wait() on it. The interactionsReset() method will notify().
    */
   public static class CompileShouldSucceedListener extends TestListener {
     private boolean _expectReset;
 
-    /**
-     * @param expectReset Whether to listen for interactions being
-     * reset after a compilation.
+    /** Reset after a compilation.
+     *  @param expectReset Whether to listen for interactions being
      */
-    public CompileShouldSucceedListener(boolean expectReset) {
-      _expectReset = expectReset;
-    }
+    public CompileShouldSucceedListener(boolean expectReset) { _expectReset = expectReset; }
 
     public void compileStarted() {
       assertCompileStartCount(0);

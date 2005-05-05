@@ -95,7 +95,7 @@ public class QuestionStartingNewStmt extends IndentRuleQuestion {
     }
     
     // For DOCSTART, imaginary delimiter at position -1
-    if(prevDelimiterPos == AbstractDJDocument.ERROR_INDEX) {
+    if (prevDelimiterPos == AbstractDJDocument.ERROR_INDEX) {
       prevDelimiterPos = -1;
     }
     
