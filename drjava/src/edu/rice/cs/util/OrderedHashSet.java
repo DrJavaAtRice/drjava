@@ -46,6 +46,9 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.util;
 import java.util.*;
 
+/** A set class patterned after HashSet except that the construction order for elements is scrupulously maintained
+ *  for the sake of supporting obvious list operations based on construction order (addition to the set). */
+
 public class OrderedHashSet<Type> implements Collection<Type> {
   private HashSet<Type> elements = new HashSet<Type>();
   private ArrayList<Type> order = new ArrayList<Type>();
@@ -82,11 +85,20 @@ public class OrderedHashSet<Type> implements Collection<Type> {
   
   public boolean isEmpty() { return order.isEmpty(); }
   
+  public Type get(int i) { return order.get(i); }
+  
   public Iterator<Type> iterator() { return new OHMIterator(); }
+  
+  /** @throws {@link IndexOutOfBoundsException */
+  public Type remove(int i) {
+    Type elt = order.remove(i); // O(n) operation
+    elements.remove(elt);
+    return elt;
+  }
   
   public boolean remove(Object elt) {
     elements.remove(elt);
-    return order.remove(elt);
+    return order.remove(elt);  // O(n) operation
   }
   
   public boolean removeAll(Collection<?> elts) {

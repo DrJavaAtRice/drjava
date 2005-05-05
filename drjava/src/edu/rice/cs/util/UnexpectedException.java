@@ -59,21 +59,21 @@ public class UnexpectedException extends RuntimeException {
 
   private Throwable _value;
 
-   /**
-   * Constructs an unexpected exception with
-   * <code>value.toString()</code> as it's message.
-   */
+   /** Constructs an unexpected exception with <code>value.toString()</code> as it's message. */
   public UnexpectedException(Throwable value) {
     super(value.toString());
     _value = value;
   }
 
-  /** Constructs an unexpected exception with a custom message string in
-   * addition to <code>value.toString()</code>.
-   */
+  /** Constructs an unexpected exception with a custom message string in addition to <code>value.toString()</code>. */
   public UnexpectedException(Throwable value, String msg) {
     super(msg + ": " + value.toString());
     _value = value;
+  }
+  
+  /** Constructs a new RuntimeException to report that unreachable point in code has been reached */
+  public UnexpectedException() {
+    this(new RuntimeException("Unreachable point in code has been reached!"));
   }
 
   /** Returns the contained exception. */

@@ -47,6 +47,7 @@ package edu.rice.cs.util.swing;
 
 import java.awt.EventQueue;
 import java.lang.reflect.InvocationTargetException;
+import javax.swing.JOptionPane;
 import edu.rice.cs.util.UnexpectedException;
 
 public class Utilities {
@@ -71,8 +72,17 @@ public class Utilities {
     catch(InvocationTargetException e) { throw new UnexpectedException(e); }
   }
   
-  public static void clearEventQueue()  throws InterruptedException {
-    invokeAndWait(new Runnable() { public void run() { }; });
+  public static void clearEventQueue() throws InterruptedException {
+    Utilities.invokeAndWait(new Runnable() { public void run() { }; });
+  }
+  
+  public static void showDebug(final String msg) {
+    try {
+      Utilities.invokeAndWait(new Runnable() { 
+        public void run() { JOptionPane.showMessageDialog(null, msg); } }
+      );
+    }
+    catch (InterruptedException e) { /* Do nothing */ }
   }
 }
     

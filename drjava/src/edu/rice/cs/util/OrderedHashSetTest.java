@@ -23,6 +23,11 @@ public class OrderedHashSetTest extends TestCase {
     assertTrue("Empty BHM has no values", iTod.elements().isEmpty());
 
     assertEquals("Initial size of 0", iTod.size(), 0);
+    try {
+      iTod.get(0);
+      fail("Queue should be empty forcing an Exception to be thrown");
+    }
+    catch(IndexOutOfBoundsException e) { /* silently succeed */ }        
 
     assertFalse("Should not find non-existent key", iTod.contains(int1));
     assertFalse("Should not find non-existent key", iTod.contains(int2));
@@ -34,11 +39,15 @@ public class OrderedHashSetTest extends TestCase {
     assertFalse("NonEmpty BHM has some values", iTod.elements().isEmpty());
     
     assertTrue("Should find key", iTod.contains(int1));
+    assertEquals("Should find key using index", int1, iTod.get(0));
     assertFalse("Should not find non-existent key", iTod.contains(int2));
     assertFalse("Should not find non-existent key", iTod.contains(int3));
 
     iTod.add(int2);
     iTod.add(int3);
+    
+    assertEquals("get(1) test", int2, iTod.get(1));  // we should rename int1, int2, int3 as int0, int1, int2
+    assertEquals("get(2) test", int3, iTod.get(2));
     
     Collection<Integer> valsCol = iTod.elements();
     
@@ -48,7 +57,7 @@ public class OrderedHashSetTest extends TestCase {
     // These collections are enumerated in order of insertion
     
     assertTrue("elements() test", Arrays.equals(vals, colVals));
-               
+           
     Iterator<Integer> it = iTod.iterator();
     try {
       it.remove();
@@ -70,7 +79,9 @@ public class OrderedHashSetTest extends TestCase {
 
     assertFalse("Should not find non-existent key", iTod.contains(key));
 
-    iTod.clear();
+    iTod.remove(0);
+    assertTrue("iTod should be empty", iTod.isEmpty());
+    
   }
   
   public void testRemove() {
@@ -114,8 +125,10 @@ public class OrderedHashSetTest extends TestCase {
     assertFalse("Adding existing element should return false", dToi.add(int3));
     assertEquals("Size should be 2", dToi.size(), 2);
 
-    dToi.clear();
-    assertEquals("Cleared size of 0", dToi.size(), 0);
+    Integer i = dToi.remove(1);
+    assertEquals("Deleted element should be int3", i, int3);
+    assertEquals("Deleted element should be int1", dToi.remove(0), int1);
+    assertEquals("Resulting size of 0", dToi.size(), 0);
 
     assertFalse("Iterator to cleared list should be empty", dToi.iterator().hasNext());
   }
