@@ -437,9 +437,7 @@ public class DrJava implements OptionConstants {
     restartIfNecessary(restartForToolsJar, args);
   }
 
-  /**
-   * Returns whether the CompilerRegistry has been able to load a compiler.
-   */
+  /** Returns whether the CompilerRegistry has been able to load a compiler. */
   public static boolean hasAvailableCompiler() {
     return !CompilerRegistry.ONLY.isNoCompilerAvailable();
   }

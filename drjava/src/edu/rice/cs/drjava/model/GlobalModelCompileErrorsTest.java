@@ -63,32 +63,40 @@ import edu.rice.cs.drjava.model.compiler.*;
  * @version $Id$
  */
 public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
-  private static final String FOO_MISSING_CLOSE_TEXT =
-    "class DrJavaTestFoo {";
-
-  private static final String BAR_MISSING_SEMI_TEXT =
-    "class DrJavaTestBar { int x }";
-
-  private static final String FOO_PACKAGE_AFTER_IMPORT =
-    "import java.util.*;\npackage a;\n" + FOO_TEXT;
-
-  private static final String FOO_PACKAGE_INSIDE_CLASS =
-    "class DrJavaTestFoo { package a; }";
-
-  private static final String FOO_PACKAGE_AS_FIELD =
-    "class DrJavaTestFoo { int package; }";
-
-  private static final String FOO_PACKAGE_AS_FIELD_2 =
-    "class DrJavaTestFoo { int package = 5; }";
-
+  
+  /** boolean used to signal when compilation has finished. */
+  private boolean _compileDone = false;
+  
+  /** Lock that protects access to _compileDone. */
+  private final Object _compileLock = new Object();
+  
+  private final CompileShouldFailListener _failListener = new CompileShouldFailListener() {
+      public void compileEnded() {
+        super.compileEnded();
+        _compileDone = true;
+        synchronized (_compileLock) { _compileLock.notify(); }
+      }
+    };
+  
+  private void _waitCompileDone() {
+    synchronized (_compileLock) {
+      try { while (! _compileDone) _compileLock.wait(); }
+      catch (InterruptedException ie) { fail("Unexpected interrupted exception: " + ie.getMessage()); }
+    }
+  }
+  
+  private static final String FOO_MISSING_CLOSE_TEXT = "class DrJavaTestFoo {";
+  private static final String BAR_MISSING_SEMI_TEXT = "class DrJavaTestBar { int x }";
+  private static final String FOO_PACKAGE_AFTER_IMPORT = "import java.util.*;\npackage a;\n" + FOO_TEXT;
+  private static final String FOO_PACKAGE_INSIDE_CLASS = "class DrJavaTestFoo { package a; }";
+  private static final String FOO_PACKAGE_AS_FIELD = "class DrJavaTestFoo { int package; }";
+  private static final String FOO_PACKAGE_AS_FIELD_2 = "class DrJavaTestFoo { int package = 5; }";
   private static final String BAR_MISSING_SEMI_TEXT_MULTIPLE_LINES =
     "class DrJavaTestFoo {\n  int a = 5;\n  int x\n }";
+  
 
-  /**
-   * Overrides {@link TestCase#runBare} to interatively run this
-   * test case for each compiler, without resetting the interactions JVM.
-   * This method is called once per test method, and it magically
-   * invokes the method.
+  /** Overrides {@link TestCase#runBare} to interatively run this test case for each compiler, without resetting
+   *  the interactions JVM.  This method is called once per test method, and it magically invokes the method.
    */
   public void runBare() throws Throwable {
     CompilerInterface[] compilers = CompilerRegistry.ONLY.getAvailableCompilers();
@@ -96,32 +104,24 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
       //System.out.println("Run " + i + ": " + compilers[i]);
       setUp();
       _model.getCompilerModel().setActiveCompiler(compilers[i]);
-
-      try {
-        runTest();
-      }
-      finally {
-        tearDown();
-      }
+      try { runTest();  }
+      finally { tearDown(); }
     }
   }
 
-  /**
-   * Gets the name of the compiler.
-   * @return the string representation of the active compiler
+  /** Gets the name of the compiler.
+   *  @return the string representation of the active compiler
    */
-  private String _name() {
-    return "compiler=" + _model.getCompilerModel().getActiveCompiler().getName() + ": ";
+  private String _name() { 
+    return "compiler=" + _model.getCompilerModel().getActiveCompiler().getName() + ": "; 
   }
 
 
-  /**
-   * Tests calling compileAll with different source roots works
-   * if the files have errors in them.  (Each file has 1 error.)
+  /** Tests calling compileAll with different source roots works if the files have errors in them.  (Each file
+   *  has 1 error.)
    */
-  public void testCompileAllFailsDifferentSourceRoots()
-    throws BadLocationException, IOException
-  {
+  public void testCompileAllFailsDifferentSourceRoots() throws BadLocationException, IOException {
+
     File aDir = new File(_tempDir, "a");
     File bDir = new File(_tempDir, "b");
     aDir.mkdir();
@@ -132,110 +132,89 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
     OpenDefinitionsDocument doc2 = setupDocument(BAR_MISSING_SEMI_TEXT);
     final File file2 = new File(bDir, "DrJavaTestBar.java");
     doc2.saveFile(new FileSelector(file2));
-
-    CompileShouldFailListener listener = new CompileShouldFailListener();
-    _model.addListener(listener);
-    _model.getCompilerModel().compileAll();
+    
+    _compileDone = false;
+    _model.addListener(_failListener);
+    CompilerModel cm = _model.getCompilerModel();
+    cm.compileAll();
+    _waitCompileDone();
+    
     assertCompileErrorsPresent(_name(), true);
-    assertEquals("Should have 2 compiler errors", 2,
-                 _model.getCompilerModel().getNumErrors());
-    listener.checkCompileOccurred();
+    assertEquals("Should have 2 compiler errors", 2, _model.getCompilerModel().getNumErrors());
+    _failListener.checkCompileOccurred();
 
     // Make sure .class does not exist for both files
     File compiled = classForJava(file, "DrJavaTestFoo");
-    assertEquals(_name() + "Class file exists after failing compile (1)",
-                 false,
-                 compiled.exists());
+    assertEquals(_name() + "Class file exists after failing compile (1)", false, compiled.exists());
     File compiled2 = classForJava(file2, "DrJavaTestBar");
-    assertEquals(_name() + "Class file exists after failing compile (2)",
-                 false,
-                 compiled2.exists());
-    _model.removeListener(listener);
+    assertEquals(_name() + "Class file exists after failing compile (2)", false, compiled2.exists());
+    _model.removeListener(_failListener);
   }
 
-  /**
-   * Creates a source file with "package" as a field name and ensures
-   * that compile starts but fails due to the invalid field name.
+  /** Creates a source file with "package" as a field name and ensures that compile starts but fails due to 
+   *  the invalid field name.
    */
-  public void testCompilePackageAsField()
-    throws BadLocationException, IOException
-  {
+  public void testCompilePackageAsField() throws BadLocationException, IOException {
     OpenDefinitionsDocument doc = setupDocument(FOO_PACKAGE_AS_FIELD);
     final File file = tempFile();
     doc.saveFile(new FileSelector(file));
-
-    CompileShouldFailListener listener = new CompileShouldFailListener();
-
-    _model.addListener(listener);
+    
+    _compileDone = false;
+    _model.addListener(_failListener);
     doc.startCompile();
-    listener.checkCompileOccurred();
+    _waitCompileDone();
+    _failListener.checkCompileOccurred();
 
     // There better be an error since "package" can not be an identifier!
     assertCompileErrorsPresent(_name(), true);
 
     File compiled = classForJava(file, "DrJavaTestFoo");
-    assertEquals(_name() + "Class file exists after failing compile",
-                 false,
-                 compiled.exists());
-    _model.removeListener(listener);
+    assertEquals(_name() + "Class file exists after failing compile", false, compiled.exists());
+    _model.removeListener(_failListener);
   }
 
-  /**
-   * Creates a source file with "package" as a field name and ensures
-   * that compile starts but fails due to the invalid field name.
-   * This is different from {@link #testCompilePackageAsField} as it
-   * initializes the field.
+  /** Creates a source file with "package" as a field name and ensures that compile starts but fails due to the
+   *  invalid field name. This is different from {@link #testCompilePackageAsField} as it initializes the field. 
    */
-  public void testCompilePackageAsField2()
-    throws BadLocationException, IOException
-  {
+  public void testCompilePackageAsField2() throws BadLocationException, IOException {
     OpenDefinitionsDocument doc = setupDocument(FOO_PACKAGE_AS_FIELD_2);
     final File file = tempFile();
     doc.saveFile(new FileSelector(file));
 
-    CompileShouldFailListener listener = new CompileShouldFailListener();
-    _model.addListener(listener);
+    _compileDone = false;
+    _model.addListener(_failListener);
     doc.startCompile();
-    listener.checkCompileOccurred();
+    _waitCompileDone();
+    _failListener.checkCompileOccurred();
 
     // There better be an error since "package" can not be an identifier!
     assertCompileErrorsPresent(_name(), true);
 
     File compiled = classForJava(file, "DrJavaTestFoo");
-    assertEquals(_name() + "Class file exists after failing compile",
-                 false,
-                 compiled.exists());
-    _model.removeListener(listener);
+    assertEquals(_name() + "Class file exists after failing compile", false, compiled.exists());
+    _model.removeListener(_failListener);
   }
 
-  /**
-   * Tests compiling an invalid file and checks to make sure the class
-   * file was not created.
-   */
-  public void testCompileMissingCloseSquiggly()
-    throws BadLocationException, IOException
-  {
+  /** Tests compiling an invalid file and checks to make sure the class file was not created.  */
+  public void testCompileMissingCloseSquiggly() throws BadLocationException, IOException {
     OpenDefinitionsDocument doc = setupDocument(FOO_MISSING_CLOSE_TEXT);
     final File file = tempFile();
     doc.saveFile(new FileSelector(file));
-    CompileShouldFailListener listener = new CompileShouldFailListener();
-    _model.addListener(listener);
+   
+    _compileDone = false;
+    _model.addListener(_failListener);
     doc.startCompile();
+    _waitCompileDone();
     assertCompileErrorsPresent(_name(), true);
-    listener.checkCompileOccurred();
+    _failListener.checkCompileOccurred();
 
     File compiled = classForJava(file, "DrJavaTestFoo");
     assertTrue(_name() + "Class file exists after compile?!", !compiled.exists());
-    _model.removeListener(listener);
+    _model.removeListener(_failListener);
   }
 
-  /**
-   * Puts an otherwise valid package statement inside a class declaration.
-   * This better not work!
-   */
-  public void testCompileWithPackageStatementInsideClass()
-    throws BadLocationException, IOException
-  {
+  /** Puts an otherwise valid package statement inside a class declaration. This better not work! */
+  public void testCompileWithPackageStatementInsideClass() throws BadLocationException, IOException {
     // Create temp file
     File baseTempDir = tempDirectory();
     File subdir = new File(baseTempDir, "a");
@@ -250,28 +229,25 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
     doc.saveFileAs(new FileSelector(fooFile));
 
     // do compile -- should fail since package decl is not valid!
-    CompileShouldFailListener listener = new CompileShouldFailListener();
-    _model.addListener(listener);
+    _compileDone = false;
+    _model.addListener(_failListener);
     doc.startCompile();
+    _waitCompileDone();
 
-    listener.checkCompileOccurred();
+    _failListener.checkCompileOccurred();
     assertCompileErrorsPresent(_name(), true);
-    assertTrue(_name() + "Class file exists after failed compile",
-               !compiled.exists());
+    assertTrue(_name() + "Class file exists after failed compile", !compiled.exists());
 
     // check that model.resetCompilerErrors works
     _model.getCompilerModel().resetCompilerErrors();
     CompilerErrorModel cem = _model.getCompilerModel().getCompilerErrorModel();
-    assertEquals("CompilerErrorModel has errors after reset",
-                 0,
-                 cem.getNumErrors());
-    _model.removeListener(listener);
+    assertEquals("CompilerErrorModel has errors after reset", 0, cem.getNumErrors());
+    _model.removeListener(_failListener);
   }
   
-  private boolean _compileDone = false;
+  
 
-  /**
-   * Tests the compiler errors have the correct line numbers.
+  /** Tests the compiler errors have the correct line numbers.
    *  TODO: rewrite this test for the new error model interface
    */
   public void testCompileFailsCorrectLineNumbers() throws BadLocationException, IOException {
@@ -286,30 +262,16 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
     final File file2 = new File(bDir, "DrJavaTestBar.java");
     doc2.saveFile(new FileSelector(file2));
 
-    final Object _lock = new Object();
     _compileDone = false;
-    
-    CompileShouldFailListener listener = new CompileShouldFailListener() {
-      public void compileEnded() {
-        super.compileEnded();
-        _compileDone = true;
-        synchronized (_lock) { _lock.notify(); }
-      }
-    };
-    
+    _model.addListener(_failListener);
     CompilerModel cm = _model.getCompilerModel();
-    _model.addListener(listener);
     cm.compileAll();
-    synchronized (_lock) {
-      try { while (! _compileDone) _lock.wait(); }
-      catch (InterruptedException ie) {
-        fail("Unexpected interrupted exception: " + ie.getMessage());
-      }
-    }
+    _waitCompileDone();
+    
     assertCompileErrorsPresent(_name(), true);
     assertEquals("Should have 2 compiler errors", 2, _model.getCompilerModel().getNumErrors());
-    listener.checkCompileOccurred();
-    _model.removeListener(listener);
+    _failListener.checkCompileOccurred();
+    _model.removeListener(_failListener);
 
     CompilerErrorModel cme = cm.getCompilerErrorModel();
     assertEquals("Should have had two errors", 2, cme.getNumErrors());

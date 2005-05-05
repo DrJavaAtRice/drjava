@@ -49,29 +49,23 @@ import junit.framework.*;
 import java.util.Date;
 import java.text.SimpleDateFormat;
 
-/**
- * Test that ensures all external dependencies are met!
- *
- * @version $Id$
+/** Test that ensures all external dependencies are met!
+ *  @version $Id$
  */
 public final class DependenciesTest extends TestCase {
   public static final String REQUIRED_UTIL_VERSION = "20040521-1616";
 
-  /**
-   * Constructor.
-   * @param name
+  /** Constructor.
+   *  @param name the name of the test
    */
   public DependenciesTest(String name) {
     super(name);
   }
   
-  /**
-   * Creates a test suite for JUnit to run.
-   * @return a test suite based on the methods in this class
+  /** Creates a test suite for JUnit to run.
+   *  @return a test suite based on the methods in this class
    */
-  public static Test suite() {
-    return  new TestSuite(DependenciesTest.class);
-  }
+  public static Test suite() { return  new TestSuite(DependenciesTest.class); }
 
   /**
    * This test ensures that the util package version is as new as we expect.

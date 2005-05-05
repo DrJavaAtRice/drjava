@@ -66,35 +66,22 @@ public final class ConfigFileTest extends TestCase {
     "definitions.keyword.color = #0000ff\n";
   
   
-  /**
-   * Constructor.
-   */
-  public ConfigFileTest(String name) {
-    super(name);
-  }
+  /** Constructor. */
+  public ConfigFileTest(String name) { super(name); }
   
-  /**
-   * Creates a custom properties file, tells DrJava to use it, and
-   * checks that it is being used.
-   */
+  /** Creates a custom properties file, tells DrJava to use it, and checks that it is being used. */
   public void testCustomConfigFile() throws IOException {
-    File propsFile = 
-      FileOps.writeStringToNewTempFile("DrJavaProps", ".txt", CUSTOM_PROPS);
+    File propsFile = FileOps.writeStringToNewTempFile("DrJavaProps", ".txt", CUSTOM_PROPS);
     propsFile.deleteOnExit();
     DrJava.setPropertiesFile(propsFile.getAbsolutePath());
     DrJava.initConfig();
     FileConfiguration config = DrJava.getConfig();
     
-    assertEquals("custom indent level", 5, 
-                 config.getSetting(OptionConstants.INDENT_LEVEL).intValue());
-    assertEquals("custom history size", 1,
-                 config.getSetting(OptionConstants.HISTORY_MAX_SIZE).intValue());
+    assertEquals("custom indent level", 5, config.getSetting(OptionConstants.INDENT_LEVEL).intValue());
+    assertEquals("custom history size", 1, config.getSetting(OptionConstants.HISTORY_MAX_SIZE).intValue());
     //Tests if a user can put a default value in the .drjava file
-    assertEquals("definitions.keyword.color", Color.blue,
-                 config.getSetting(OptionConstants.DEFINITIONS_KEYWORD_COLOR));
-    assertEquals("default javac location", 
-                 OptionConstants.JAVAC_LOCATION.getDefault(),
+    assertEquals("definitions.keyword.color", Color.blue, config.getSetting(OptionConstants.DEFINITIONS_KEYWORD_COLOR));
+    assertEquals("default javac location", OptionConstants.JAVAC_LOCATION.getDefault(),
                  config.getSetting(OptionConstants.JAVAC_LOCATION));
   }
-  
 }

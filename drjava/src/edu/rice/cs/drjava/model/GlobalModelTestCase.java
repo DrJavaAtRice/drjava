@@ -85,7 +85,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
   protected File _tempDir;
   
   protected boolean _junitDone;
-  protected final Object _lock = new Object();
+  protected final Object _junitLock = new Object();
   
   protected void _logJUnitStart() { _junitDone = false; }
   
@@ -106,12 +106,11 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
    
   
   protected void _waitJUnitDone() throws InterruptedException {
-    synchronized (_lock) {
-      while (!_junitDone) _lock.wait();
+    synchronized (_junitLock) {
+      while (!_junitDone) _junitLock.wait();
     }
   }
   
-
   protected static final String FOO_TEXT = "class DrJavaTestFoo {}";
   protected static final String BAR_TEXT = "class DrJavaTestBar {}";
   protected static final String BAZ_TEXT =
@@ -1139,9 +1138,9 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       nonTestCaseCount++;
       assertEquals("Non test case heard the wrong value for test current/test all",
                    _shouldBeTestAll, isTestAll);
-      synchronized (_lock) {
+      synchronized (_junitLock) {
         _junitDone = true;
-        _lock.notify();
+        _junitLock.notify();
       }
     }
   }
@@ -1181,26 +1180,26 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     public void nonTestCase(boolean isTestAll) {
       if (printMessages) System.out.println("listener.nonTestCase, isTestAll="+isTestAll);
       nonTestCaseCount++;
-      synchronized (_lock) {
+      synchronized (_junitLock) {
         _junitDone = true;
-        _lock.notify();
+        _junitLock.notify();
       }
     }
     public void classFileError(ClassFileError e) {
       if (printMessages) System.out.println("listener.classFileError, e="+e);
       classFileErrorCount++;
-      synchronized (_lock) {
+      synchronized (_junitLock) {
         _junitDone = true;
-        _lock.notify();
+        _junitLock.notify();
       }
     }
     public synchronized void junitEnded() {
       //assertJUnitSuiteStartedCount(1);
       if (printMessages) System.out.println("junitEnded event!");
       junitEndCount++;
-      synchronized (_lock) {
+      synchronized (_junitLock) {
         _junitDone = true;
-        _lock.notify();
+        _junitLock.notify();
       }
     }
   }

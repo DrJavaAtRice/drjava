@@ -71,9 +71,7 @@ public final class CommandLineTest extends TestCase {
    */
   private MainFrame _mf;
 
-  /**
-   * Files that exist, and the filenames that represent them.
-   */
+  /** Files that exist, and the filenames that represent them. */
   private final File f1;
   private final String f1_name;
   private final String f1_contents;
@@ -84,9 +82,7 @@ public final class CommandLineTest extends TestCase {
   private final String f3_name;
   private final String f3_contents;
 
-  /**
-   * Files that do not exist (constructor deletes them), and their filenames.
-   */
+  /** Files that do not exist (constructor deletes them), and their filenames. */
   private final File nof1;
   private final File nof2;
   private final File nof3;
@@ -94,11 +90,9 @@ public final class CommandLineTest extends TestCase {
   private final String nof2_name;
   private final String nof3_name;
 
-  /**
-   * Constructor.  Sets up test files for us to use:
-   * - three files that exist and can be opened
-   * - three files that don't exist
-   * @param name
+  /** Constructor.  Sets up test files for us to use: (i) three files that exist and can be opened; (ii) three
+   *  files that don't exist
+   *  @param name the name of the test case
    */
   public CommandLineTest(String name) {
     super(name);
@@ -152,10 +146,7 @@ public final class CommandLineTest extends TestCase {
     super.tearDown();
   }
 
-  /**
-   * Tests DrJava with no command line arguments.
-   * Should open a new, untitled document.
-   */
+  /** Tests DrJava with no command line arguments. Should open a new, untitled document. */
   public void testNone() {
     DrJava.openCommandLineFiles(_mf, new String[0]);
     // ListModel<DefinitionsDocument> docs =
@@ -166,9 +157,7 @@ public final class CommandLineTest extends TestCase {
     assertTrue("Is new document untitled?", doc.isUntitled());
   }
 
-  /**
-   * Open one file on the command line.  Should (obviously) open that file.
-   */
+  /** Open one file on the command line.  Should (obviously) open that file. */
   public void testOpenOne() throws BadLocationException {
     String[] list = new String[1];
     list[0] = f1_name;
@@ -176,17 +165,11 @@ public final class CommandLineTest extends TestCase {
     List<OpenDefinitionsDocument> docs = _mf.getModel().getOpenDefinitionsDocuments();
     assertEquals("Only one document opened?", 1, docs.size());
     OpenDefinitionsDocument doc = docs.get(0);
-    assertEquals("Correct length of file?",
-                 f1_contents.length(),
-                 doc.getLength());
-    assertEquals("Do the contents match?",
-                 f1_contents,
-                 doc.getText(0,f1_contents.length()));
+    assertEquals("Correct length of file?", f1_contents.length(), doc.getLength());
+    assertEquals("Do the contents match?", f1_contents, doc.getText(0,f1_contents.length()));
   }
 
-  /**
-   * A nonexistent file.  Should open a new, untitled document.
-   */
+  /** A nonexistent file.  Should open a new, untitled document. */
   public void testNE() {
     String[] list = new String[1];
     list[0] = nof1_name;
@@ -197,10 +180,7 @@ public final class CommandLineTest extends TestCase {
     assertTrue("Is document untitled?", doc.isUntitled());
   }
 
-  /**
-   * Many files on the command line.  Should open all of them,
-   * displaying the last one.
-   */
+  /** Many files on the command line.  Should open all of them, displaying the last one. */
   public void testOpenMany() throws BadLocationException {
     String[] list = new String[3];
     list[0] = f1_name;
@@ -210,38 +190,21 @@ public final class CommandLineTest extends TestCase {
     List<OpenDefinitionsDocument> docs = _mf.getModel().getOpenDefinitionsDocuments();
     assertEquals("Exactly three documents?", 3, docs.size());
     OpenDefinitionsDocument doc1 = docs.get(0);
-    assertEquals("Correct length of file 1?",
-                 f1_contents.length(),
-                 doc1.getLength());
-    assertEquals("Do the contents of file 1 match?",
-                 f1_contents,
-                 doc1.getText(0,f1_contents.length()));
+    assertEquals("Correct length of file 1?", f1_contents.length(), doc1.getLength());
+    assertEquals("Do the contents of file 1 match?", f1_contents, doc1.getText(0,f1_contents.length()));
 
     OpenDefinitionsDocument doc2 = docs.get(1);
-    assertEquals("Correct length of file 2?",
-                 f2_contents.length(),
-                 doc2.getLength());
-    assertEquals("Do the contents of file 2 match?",
-                 f2_contents,
-                 doc2.getText(0,f2_contents.length()));
+    assertEquals("Correct length of file 2?", f2_contents.length(), doc2.getLength());
+    assertEquals("Do the contents of file 2 match?", f2_contents, doc2.getText(0,f2_contents.length()));
 
     OpenDefinitionsDocument doc3 = docs.get(2);
-    assertEquals("Correct length of file 3?",
-                 f3_contents.length(),
-                 doc3.getLength());
-    assertEquals("Do the contents of file 3 match?",
-                 f3_contents,
-                 doc3.getText(0,f3_contents.length()));
+    assertEquals("Correct length of file 3?", f3_contents.length(), doc3.getLength());
+    assertEquals("Do the contents of file 3 match?", f3_contents, doc3.getText(0,f3_contents.length()));
 
-    assertEquals("Is the last document the active one?",
-                 doc3,
-                 _mf.getModel().getActiveDocument());
+    assertEquals("Is the last document the active one?", doc3, _mf.getModel().getActiveDocument());
   }
 
-  /**
-   * Supplying both valid and invalid filenames on the command line.
-   * Should open only the valid ones.
-   */
+  /** Supplying both valid and invalid filenames on the command line. Should open only the valid ones. */
   public void testMixed() throws BadLocationException {
     String[] list = new String[6];
     list[0] = f2_name;
@@ -254,38 +217,21 @@ public final class CommandLineTest extends TestCase {
     List<OpenDefinitionsDocument> docs = _mf.getModel().getOpenDefinitionsDocuments();
     assertEquals("Exactly three documents?", 3, docs.size());
     OpenDefinitionsDocument doc1 = docs.get(0);
-    assertEquals("Correct length of file 1?",
-                 f2_contents.length(),
-                 doc1.getLength());
-    assertEquals("Do the contents of file 1 match?",
-                 f2_contents,
-                 doc1.getText(0,f2_contents.length()));
+    assertEquals("Correct length of file 1?", f2_contents.length(), doc1.getLength());
+    assertEquals("Do the contents of file 1 match?", f2_contents, doc1.getText(0,f2_contents.length()));
 
     OpenDefinitionsDocument doc2 = docs.get(1);
-    assertEquals("Correct length of file 2?",
-                 f3_contents.length(),
-                 doc2.getLength());
-    assertEquals("Do the contents of file 2 match?",
-                 f3_contents,
-                 doc2.getText(0,f3_contents.length()));
+    assertEquals("Correct length of file 2?", f3_contents.length(), doc2.getLength());
+    assertEquals("Do the contents of file 2 match?", f3_contents, doc2.getText(0,f3_contents.length()));
 
     OpenDefinitionsDocument doc3 = docs.get(2);
-    assertEquals("Correct length of file 3?",
-                 f1_contents.length(),
-                 doc3.getLength());
-    assertEquals("Do the contents of file 3 match?",
-                 f1_contents,
-                 doc3.getText(0,f1_contents.length()));
+    assertEquals("Correct length of file 3?", f1_contents.length(), doc3.getLength());
+    assertEquals("Do the contents of file 3 match?", f1_contents, doc3.getText(0,f1_contents.length()));
 
-    assertEquals("Is the last document the active one?",
-                 doc3,
-                 _mf.getModel().getActiveDocument());
-
+    assertEquals("Is the last document the active one?", doc3, _mf.getModel().getActiveDocument());
   }
 
-  /**
-   * Test duplicate files.
-   */
+  /** Test duplicate files. */
   public void testDups() throws BadLocationException {
     String[] list = new String[6];
     list[0] = f1_name;
@@ -298,65 +244,40 @@ public final class CommandLineTest extends TestCase {
     List<OpenDefinitionsDocument> docs = _mf.getModel().getOpenDefinitionsDocuments();
     assertEquals("Exactly two documents?", 2, docs.size());
     OpenDefinitionsDocument doc1 = docs.get(0);
-    assertEquals("Correct length of file 1?",
-                 f1_contents.length(),
-                 doc1.getLength());
-    assertEquals("Do the contents of file 1 match?",
-                 f1_contents,
-                 doc1.getText(0,f1_contents.length()));
+    assertEquals("Correct length of file 1?", f1_contents.length(), doc1.getLength());
+    assertEquals("Do the contents of file 1 match?", f1_contents, doc1.getText(0,f1_contents.length()));
 
     OpenDefinitionsDocument doc2 = docs.get(1);
-    assertEquals("Correct length of file 2?",
-                 f2_contents.length(),
-                 doc2.getLength());
-    assertEquals("Do the contents of file 2 match?",
-                 f2_contents,
-                 doc2.getText(0,f2_contents.length()));
+    assertEquals("Correct length of file 2?", f2_contents.length(), doc2.getLength());
+    assertEquals("Do the contents of file 2 match?", f2_contents, doc2.getText(0,f2_contents.length()));
 
-    assertEquals("Is the last document the active one?",
-                 doc2,
-                 _mf.getModel().getActiveDocument());
-
+    assertEquals("Is the last document the active one?", doc2, _mf.getModel().getActiveDocument());
   }
 
-  /**
-   * A regression test for bug #542747, which related to opening a file
-   * via the command line using a relative path.
-   * The problem was that getSourceRoot() would fail on the document, because
-   * the filename was not absolute. (The fix will be to absolutize file paths
-   * when opening files.)
+  /** A regression test for bug #542747, which related to opening a file via the command line using a relative path.
+   *  The problem was that getSourceRoot() would fail on the document, because the filename was not absolute. (The
+   *  fix will be to absolutize file paths when opening files.)
    */
   public void testRelativePath() throws IOException, InvalidPackageException {
     String funnyName = "DrJava_automatically_deletes_this";
     File newDirectory = mkTempDir(funnyName);
-
     File relativeFile = new File(newDirectory, "X.java");
 
-    assertEquals(relativeFile + " is absolute?",
-                 false,
-                 relativeFile.isAbsolute());
+    assertEquals(relativeFile + " is absolute?", false, relativeFile.isAbsolute());
 
-    try {
-      checkFile(relativeFile, funnyName);
-    }
-    catch (Exception e) {
-      fail("Exception thrown: " + StringOps.getStackTrace(e));
-    }
-    finally {
-      FileOps.deleteDirectory(newDirectory);
-    }
+    try { checkFile(relativeFile, funnyName); }
+    catch (Exception e) { fail("Exception thrown: " + StringOps.getStackTrace(e)); }
+    finally { FileOps.deleteDirectory(newDirectory); }
   }
 
-  /**
-   * Tests paths with "." and ".." in them.  Windows will blow up if you
-   * use one in a JFileChooser without converting it to a canonical filename.
+  /** Tests paths with "." and ".." in them.  Windows will blow up if you use one in a JFileChooser without
+   *  converting it to a canonical filename.
    */
   public void testDotPaths() {
     String funnyName = "DrJava_automatically_deletes_this";
     File newDirectory = mkTempDir(funnyName);
 
-    assertTrue("child directory created OK",
-               new File(newDirectory, "childDir").mkdir());
+    assertTrue("child directory created OK", new File(newDirectory, "childDir").mkdir());
 
     File relativeFile = new File(newDirectory, "./X.java");
     File relativeFile2 = new File(newDirectory, ".\\Y.java");
@@ -367,38 +288,24 @@ public final class CommandLineTest extends TestCase {
       checkFile(relativeFile2, funnyName);
       checkFile(relativeFile3, funnyName);
     }
-    catch (Exception e) {
-      fail("Exception thrown: " + StringOps.getStackTrace(e));
-    }
-    finally {
-      FileOps.deleteDirectory(newDirectory);
-    }
+    catch (Exception e) { fail("Exception thrown: " + StringOps.getStackTrace(e)); }
+    finally { FileOps.deleteDirectory(newDirectory); }
   }
 
-
-  /**
-   * Helper for testRelativeFile and testDotPaths.
-   */
+  /** Helper for testRelativeFile and testDotPaths. */
   private File mkTempDir(String funnyName) {
-    // OK, we have to create a directory with a hard-coded name in the
-    // current working directory, so we'll make it strange. If this
-    // directory happens to exist, it'll be deleted.
+    // OK, we have to create a directory with a hard-coded name in the current working directory, so we'll make it
+    // strange. If this directory happens to exist, it'll be deleted.
     File newDirectory = new File(funnyName);
-    if (newDirectory.exists()) {
-      FileOps.deleteDirectory(newDirectory);
-    }
+    if (newDirectory.exists()) FileOps.deleteDirectory(newDirectory);
 
     assertTrue("directory created OK", newDirectory.mkdir());
     return newDirectory;
   }
 
-  /**
-   * Helper for testRelativeFile and testDotPaths.
-   */
-  private void checkFile(File relativeFile, String funnyName)
-      throws IOException, InvalidPackageException {
-    FileOps.writeStringToFile(relativeFile,
-                              "package " + funnyName + "; class X { }");
+  /** Helper for testRelativeFile and testDotPaths. */
+  private void checkFile(File relativeFile, String funnyName) throws IOException, InvalidPackageException {
+    FileOps.writeStringToFile(relativeFile, "package " + funnyName + "; class X { }");
     assertTrue("file exists", relativeFile.exists());
 
     String path = relativeFile.getPath();
@@ -409,9 +316,7 @@ public final class CommandLineTest extends TestCase {
 
     OpenDefinitionsDocument doc = docs.get(0);
 
-    assertEquals("OpenDefDoc file is the right one and is canonical",
-                 relativeFile.getCanonicalFile(),
-                 doc.getFile());
+    assertEquals("OpenDefDoc file is the right one and is canonical", relativeFile.getCanonicalFile(), doc.getFile());
 
     // The source root should be the current directory (as
     // a canonical path, of course).
