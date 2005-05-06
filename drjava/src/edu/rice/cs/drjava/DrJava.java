@@ -53,16 +53,18 @@ import java.util.jar.JarFile;
 import javax.swing.UIManager;
 import javax.swing.*;
 
-import edu.rice.cs.drjava.ui.MainFrame;
-import edu.rice.cs.drjava.ui.SplashScreen;
-import edu.rice.cs.drjava.ui.ClasspathFilter;
-import edu.rice.cs.drjava.ui.AWTExceptionHandler;
-import edu.rice.cs.drjava.ui.SimpleInteractionsWindow;
 import edu.rice.cs.util.PreventExitSecurityManager;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.OutputStreamRedirector;
 import edu.rice.cs.util.newjvm.ExecJVM;
 import edu.rice.cs.util.classloader.ToolsJarClassLoader;
+import edu.rice.cs.util.swing.Utilities;
+
+import edu.rice.cs.drjava.ui.MainFrame;
+import edu.rice.cs.drjava.ui.SplashScreen;
+import edu.rice.cs.drjava.ui.ClasspathFilter;
+import edu.rice.cs.drjava.ui.AWTExceptionHandler;
+import edu.rice.cs.drjava.ui.SimpleInteractionsWindow;
 import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.model.compiler.*;
 import edu.rice.cs.drjava.config.FileConfiguration;
@@ -287,21 +289,23 @@ public class DrJava implements OptionConstants {
    *  If file exists, open it in DrJava.  Otherwise, ignore it.
    *  Is there a better way to handle nonexistent files?  Dialog box, maybe?
    */
-  static void openCommandLineFiles(MainFrame mf, String[] filesToOpen) {  
+  static void openCommandLineFiles(final MainFrame mf, final String[] filesToOpen) { 
+    try {
+      Utilities.invokeAndWait(new Runnable() { public void run() { _openCommandLineFiles(mf, filesToOpen); }});
+    }
+    catch(InterruptedException e) { throw new UnexpectedException(); }
+  }
+      
+  private static void _openCommandLineFiles(MainFrame mf, String[] filesToOpen) {
     for(int i = 0; i < filesToOpen.length; i++) {
       String currFileName = filesToOpen[i];
       boolean isProjectFile = currFileName.endsWith(".pjt");
       final File file = new File(currFileName).getAbsoluteFile();
       FileOpenSelector command = new FileOpenSelector() {
-        public File getFile() {
-          return file;
-        }
-        public File[] getFiles() {
-          return new File[] {file};
-        }
+        public File getFile() { return file; }
+        public File[] getFiles() { return new File[] {file}; }
       };
       try {
-        //OpenDefinitionsDocument doc =
         if (isProjectFile) mf.openProject(command);
         else mf.getModel().openFile(command);
       }

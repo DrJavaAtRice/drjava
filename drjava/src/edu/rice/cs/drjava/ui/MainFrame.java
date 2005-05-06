@@ -6054,21 +6054,14 @@ public class MainFrame extends JFrame implements OptionConstants {
         try {
           File[] opened = _openSelector.getFiles(); 
           d.setFile(opened[0]);
-        } catch(OperationCanceledException oce) {
+        } 
+        catch(OperationCanceledException oce) {
           //If canceled, prompt the user again
           documentNotFound(d,f);
           return;
         }
       }
-//      else {
-//        //Close the file that wasn't found
-//        LinkedList<OpenDefinitionsDocument> l = new LinkedList<OpenDefinitionsDocument>();
-//        l.add(d);
-//        _model.closeFiles(l);
-//        _model.closeFile(d);
-//        d.setFile(null);
-//        throw new DocumentClosedException(d,"Document in " + f + "closed unexpectedly");
-//      }
+      else throw new DocumentClosedException(d,"Document in " + f + "closed unexpectedly");  // misnamed exception
     }
   }
 

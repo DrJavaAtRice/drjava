@@ -141,7 +141,12 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   /** Returns the InteractionsDocument stored by this model. */
   public InteractionsDocument getDocument() { return _document; }
 
-  public void interactionContinues() {
+  public void interactionContinues()  
+
+
+
+
+{
     _document.setInProgress(false);
     _notifyInteractionEnded();
     _notifyInteractionIncomplete();
@@ -149,7 +154,9 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   
   /** Sets this model's notion of whether it is waiting for the first
    *  interpreter to connect.  The interactionsReady event is not fired
-   *  for the first interpreter.
+   *  for the first inte
+
+rpreter.
    */
   public void setWaitingForFirstInterpreter(boolean waiting) {
     _waitingForFirstInterpreter = waiting;

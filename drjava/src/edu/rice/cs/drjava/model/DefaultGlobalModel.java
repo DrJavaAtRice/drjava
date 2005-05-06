@@ -1437,6 +1437,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
    *  whether the file was successfully closed. NOTE: This method should not be called unless it can be 
    *  absolutely known that the document being closed is not the active document. The closeFile() method in 
    *  SingleDisplayModel ensures that a new active document is set, but closeFileWithoutPrompt is not.
+   *  Should only be executed in event thread (unless commented out code is added back in).
    *  @return true if the document was closed.
    */
   public boolean closeFileWithoutPrompt(final OpenDefinitionsDocument doc) {
@@ -1446,9 +1447,16 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
     synchronized (_documentsRepos) { found = _documentsRepos.remove(doc); }
     
     if (! found) return false;
-    _documentNavigator.removeDocument(doc);
-    _notifier.fileClosed(doc);
-    doc.close();
+//    Runnable command = new Runnable() { 
+//      public void run() {
+        _documentNavigator.removeDocument(doc);  // can only be done in Event thread!
+        _notifier.fileClosed(doc);
+        doc.close();
+//      }
+//    };
+//    try { Utilities.invokeAndWait(command); }
+//    catch(InterruptedException e) { throw new UnexpectedException(e); }
+    
     return true;
   }
   
@@ -1476,14 +1484,16 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
     // then we have no security manager.  Just exit cleanly.
   }
 
-  /** Prepares this model to be thrown away.  Never called in practice outside of quit(), except in tests. */
+  /** Prepares this model to be thrown away.  Should only be called in event thread.  Never called in practice 
+   *  outside of quit(), which runs in the event thread, EXCEPT IN TESTS
+   */
   public void dispose() {
     // Kill the interpreter
     _interpreterControl.killInterpreter(false);
 
     _notifier.removeAllListeners();
     synchronized (_documentsRepos) { _documentsRepos.clear(); }
-    _documentNavigator.clear();  
+    _documentNavigator.clear();  // should be done in event queue
   }
 
   
@@ -1893,9 +1903,8 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
     return filename;
   }
 
-  /**
-   * Return the absolute path of the file with the given index,
-   * or "(untitled)" if no file exists.
+  /** Return the absolute path of the file with the given index,
+   *  or "(untitled)" if no file exists.
    */
   public String getDisplayFullPath(int index) {
     OpenDefinitionsDocument doc = getOpenDefinitionsDocuments().get(index);
@@ -2166,26 +2175,38 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
      */
     public void setModifiedSinceSave() { getDocument().setModifiedSinceSave(); }
 
-    /** Gets the definitions document being handled.
-     *  @return document being handled
+    /** Gets the definitions document for this OpenDefinitionsDocument.
+     *  @return the DefintionsDocument (which contains the actual file text)
      */
     protected DefinitionsDocument getDocument() {
-
-//      Utilities.showDebug("getDocument() called on " + this);
       try { return _cacheAdapter.getDocument(); } 
-      catch(IOException ioe) {
-//        Utilities.showDebug("getDocument() failed for " + this);
-        try {
-          _notifier.documentNotFound(this, _file);
-          if (! isUntitled())  
-            _documentNavigator.refreshDocument(this, _file.getCanonicalFile().getParent());
-          else throw new UnexpectedException(ioe); // Is this line reachable?
-          
-        } catch(Throwable t) { throw new UnexpectedException(t); }
-        //  System.out.println("DefaultGlobalModel: 1432: IOException should be handled by box that fixes everything.");
+      catch(IOException ioe) { 
+        try { // file has evidently been moved since document was loaded
+          if (isUntitled()) throw new UnexpectedException(ioe);
+          _askUserToLocateFile(); 
+          return _cacheAdapter.getDocument(); // will succeed if user located file
+        }
+        catch(IOException e) { throw new UnexpectedException(e); }
       }
+    }
       
-      return null;
+    /** Prompt the user for the new location of the file because it cannot be found at its original location. 
+     *  _file set for this ODD is updated if the user provides a location. Should only be executed in event thread
+     */
+    private void _askUserToLocateFile() throws IOException {
+//      try {
+//        Runnable command = new Runnable() {
+//          public void run() {
+//            try {
+              _notifier.documentNotFound(ConcreteOpenDefDoc.this, _file);
+              _documentNavigator.refreshDocument(ConcreteOpenDefDoc.this, _file.getCanonicalFile().getParent());
+//            }
+//            catch(IOException e) { throw new UnexpectedException(e); }
+//          }
+//        };
+//        Utilities.invokeAndWait(command);
+//      }
+//      catch(InterruptedException ie) { throw new UnexpectedException(ie); }
     }
 
     /** Returns the name of the top level class, if any.
@@ -2211,9 +2232,8 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
     public File getFile() throws IllegalStateException , FileMovedException {
       
         if (_file == null) throw new IllegalStateException("This document does not yet have a file.");
-
-        if (_file.exists()) return _file;
-        else throw new FileMovedException(_file, "This document's file has been moved or deleted.");
+        if (! _file.exists()) throw new FileMovedException(_file, "This document's file has been moved or deleted.");
+        return _file; 
     }
     
     /** Returns true if the file exists on disk. Returns false if the file has been moved or deleted */
@@ -2221,18 +2241,12 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
     
     /** Returns true if the file exists on disk. Prompts the user otherwise */
     public boolean verifyExists() {
-      if (! fileExists()) {
-        try {
-          //prompt the user to find it
-          try {
-            _notifier.documentNotFound(this,_file);
-            _documentNavigator.refreshDocument(this, _file.getCanonicalFile().getParent());
-          } catch(IOException ioe) { throw new UnexpectedException(ioe); }
-          return true;
-        } 
-        catch(DocumentClosedException dce) { return false; }
-      }
-      return true; //if file exists
+      if (fileExists()) return true;
+      try {
+        _askUserToLocateFile();
+        return fileExists();
+      } 
+      catch(IOException ioe) { throw new UnexpectedException(ioe); }
     }
 
     /** Returns the name of this file, or "(untitled)" if no file. */

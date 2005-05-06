@@ -53,22 +53,23 @@ import javax.swing.DefaultListModel;
 import javax.swing.text.BadLocationException;
 import java.rmi.registry.Registry;
 
+import edu.rice.cs.util.FileOps;
+import edu.rice.cs.util.StringOps;
+import edu.rice.cs.util.swing.Utilities;
+//import edu.rice.cs.util.Logger;
+
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
 import edu.rice.cs.drjava.ui.MainFrame;
-import edu.rice.cs.util.FileOps;
-import edu.rice.cs.util.StringOps;
 import edu.rice.cs.drjava.platform.PlatformFactory;
 
-/**
- * Tests opening/creating files specified as command line arguments.
- * @version $Id$
+
+/** Tests opening/creating files specified as command line arguments.
+ *  @version $Id$
  */
 public final class CommandLineTest extends TestCase {
 
-  /**
-   * The MainFrame we're working with.
-   */
+  /** The MainFrame we're working with. */
   private MainFrame _mf;
 
   /** Files that exist, and the filenames that represent them. */
@@ -89,7 +90,7 @@ public final class CommandLineTest extends TestCase {
   private final String nof1_name;
   private final String nof2_name;
   private final String nof3_name;
-
+  
   /** Constructor.  Sets up test files for us to use: (i) three files that exist and can be opened; (ii) three
    *  files that don't exist
    *  @param name the name of the test case
@@ -128,6 +129,7 @@ public final class CommandLineTest extends TestCase {
       nof3 = File.createTempFile("DrJava-test", ".java");
       nof3_name = nof3.getAbsolutePath();
       nof3.delete();
+//      Logger.log("CommandLineTest init finished");
     }
     catch (IOException e) {
       System.err.print("createTempFile failed.  This should not happen.");
@@ -144,17 +146,56 @@ public final class CommandLineTest extends TestCase {
     _mf.dispose();
     _mf = null;
     super.tearDown();
+  } 
+
+  /** A regression test for bug #542747, which related to opening a file via the command line using a relative path.
+   *  The problem was that getSourceRoot() would fail on the document, because the filename was not absolute. (The
+   *  fix will be to absolutize file paths when opening files.)
+   */
+  public void testRelativePath() throws IOException, InvalidPackageException {
+    String funnyName = "DrJava_automatically_deletes_this_1";
+    final File newDirectory = mkTempDir(funnyName);
+//    Utilities.showDebug(newDirectory.getPath() + " created");
+    File relativeFile = new File(newDirectory, "X.java");
+
+    assertFalse(relativeFile + " is absolute?", relativeFile.isAbsolute());
+
+    try { checkFile(relativeFile, funnyName); }
+    catch (Exception e) { fail("Exception thrown: " + StringOps.getStackTrace(e)); }
+    FileOps.deleteDirectoryOnExit(newDirectory);
+//    Logger.log("testRelativePath complete");
+  }
+
+  /** Tests paths with "." and ".." in them.  Windows will blow up if you use one in a JFileChooser without
+   *  converting it to a canonical filename.
+   */
+  public void testDotPaths() throws IOException {
+    String funnyName = "DrJava_automatically_deletes_this_2";
+    final File newDirectory = mkTempDir(funnyName);
+
+    assertTrue("child directory created OK", new File(newDirectory, "childDir").mkdir());
+
+    File relativeFile = new File(newDirectory, "./X.java");
+    File relativeFile2 = new File(newDirectory, ".\\Y.java");
+    File relativeFile3 = new File(newDirectory, "childDir/../Z.java");
+
+    try {
+      checkFile(relativeFile, funnyName);
+      checkFile(relativeFile2, funnyName);
+      checkFile(relativeFile3, funnyName);
+    }
+    catch (Exception e) { fail("Exception thrown: " + StringOps.getStackTrace(e)); }
+    finally { FileOps.deleteDirectoryOnExit(newDirectory);}
+//    Logger.log("testDotPaths complete");
   }
 
   /** Tests DrJava with no command line arguments. Should open a new, untitled document. */
   public void testNone() {
-    DrJava.openCommandLineFiles(_mf, new String[0]);
-    // ListModel<DefinitionsDocument> docs =
-    // Wouldn't that be nice?
     List<OpenDefinitionsDocument> docs = _mf.getModel().getOpenDefinitionsDocuments();
     assertEquals("Only one document?", 1, docs.size());
     OpenDefinitionsDocument doc = docs.get(0);
     assertTrue("Is new document untitled?", doc.isUntitled());
+//    Logger.log("testNone complete");
   }
 
   /** Open one file on the command line.  Should (obviously) open that file. */
@@ -162,11 +203,14 @@ public final class CommandLineTest extends TestCase {
     String[] list = new String[1];
     list[0] = f1_name;
     DrJava.openCommandLineFiles(_mf, list);
+//    Utilities.clearEventQueue();
+    
     List<OpenDefinitionsDocument> docs = _mf.getModel().getOpenDefinitionsDocuments();
     assertEquals("Only one document opened?", 1, docs.size());
     OpenDefinitionsDocument doc = docs.get(0);
     assertEquals("Correct length of file?", f1_contents.length(), doc.getLength());
     assertEquals("Do the contents match?", f1_contents, doc.getText(0,f1_contents.length()));
+//    Logger.log("testOpenOne complete");
   }
 
   /** A nonexistent file.  Should open a new, untitled document. */
@@ -174,10 +218,13 @@ public final class CommandLineTest extends TestCase {
     String[] list = new String[1];
     list[0] = nof1_name;
     DrJava.openCommandLineFiles(_mf, list);
+//    Utilities.clearEventQueue();    
+    
     List<OpenDefinitionsDocument> docs = _mf.getModel().getOpenDefinitionsDocuments();
     assertEquals("Exactly one document?", 1, docs.size());
     OpenDefinitionsDocument doc = docs.get(0);
     assertTrue("Is document untitled?", doc.isUntitled());
+//    Logger.log("testNE complete");
   }
 
   /** Many files on the command line.  Should open all of them, displaying the last one. */
@@ -187,6 +234,8 @@ public final class CommandLineTest extends TestCase {
     list[1] = f2_name;
     list[2] = f3_name;
     DrJava.openCommandLineFiles(_mf, list);
+//    Utilities.clearEventQueue();
+    
     List<OpenDefinitionsDocument> docs = _mf.getModel().getOpenDefinitionsDocuments();
     assertEquals("Exactly three documents?", 3, docs.size());
     OpenDefinitionsDocument doc1 = docs.get(0);
@@ -202,8 +251,9 @@ public final class CommandLineTest extends TestCase {
     assertEquals("Do the contents of file 3 match?", f3_contents, doc3.getText(0,f3_contents.length()));
 
     assertEquals("Is the last document the active one?", doc3, _mf.getModel().getActiveDocument());
+//    Logger.log("testOpenMany complete");
   }
-
+  
   /** Supplying both valid and invalid filenames on the command line. Should open only the valid ones. */
   public void testMixed() throws BadLocationException {
     String[] list = new String[6];
@@ -214,6 +264,9 @@ public final class CommandLineTest extends TestCase {
     list[4] = f1_name;
     list[5] = nof3_name;
     DrJava.openCommandLineFiles(_mf, list);
+//    Utilities.clearEventQueue();
+//    Logger.log("Event queue cleared in testMixed");
+    
     List<OpenDefinitionsDocument> docs = _mf.getModel().getOpenDefinitionsDocuments();
     assertEquals("Exactly three documents?", 3, docs.size());
     OpenDefinitionsDocument doc1 = docs.get(0);
@@ -229,7 +282,9 @@ public final class CommandLineTest extends TestCase {
     assertEquals("Do the contents of file 3 match?", f1_contents, doc3.getText(0,f1_contents.length()));
 
     assertEquals("Is the last document the active one?", doc3, _mf.getModel().getActiveDocument());
+//    Logger.log("testMixed complete");
   }
+
 
   /** Test duplicate files. */
   public void testDups() throws BadLocationException {
@@ -241,6 +296,8 @@ public final class CommandLineTest extends TestCase {
     list[4] = f2_name;
     list[5] = f1_name;
     DrJava.openCommandLineFiles(_mf, list);
+//    Utilities.clearEventQueue();
+    
     List<OpenDefinitionsDocument> docs = _mf.getModel().getOpenDefinitionsDocuments();
     assertEquals("Exactly two documents?", 2, docs.size());
     OpenDefinitionsDocument doc1 = docs.get(0);
@@ -250,50 +307,12 @@ public final class CommandLineTest extends TestCase {
     OpenDefinitionsDocument doc2 = docs.get(1);
     assertEquals("Correct length of file 2?", f2_contents.length(), doc2.getLength());
     assertEquals("Do the contents of file 2 match?", f2_contents, doc2.getText(0,f2_contents.length()));
-
     assertEquals("Is the last document the active one?", doc2, _mf.getModel().getActiveDocument());
+//    Logger.log("testDups complete");
   }
-
-  /** A regression test for bug #542747, which related to opening a file via the command line using a relative path.
-   *  The problem was that getSourceRoot() would fail on the document, because the filename was not absolute. (The
-   *  fix will be to absolutize file paths when opening files.)
-   */
-  public void testRelativePath() throws IOException, InvalidPackageException {
-    String funnyName = "DrJava_automatically_deletes_this";
-    File newDirectory = mkTempDir(funnyName);
-    File relativeFile = new File(newDirectory, "X.java");
-
-    assertEquals(relativeFile + " is absolute?", false, relativeFile.isAbsolute());
-
-    try { checkFile(relativeFile, funnyName); }
-    catch (Exception e) { fail("Exception thrown: " + StringOps.getStackTrace(e)); }
-    finally { FileOps.deleteDirectory(newDirectory); }
-  }
-
-  /** Tests paths with "." and ".." in them.  Windows will blow up if you use one in a JFileChooser without
-   *  converting it to a canonical filename.
-   */
-  public void testDotPaths() {
-    String funnyName = "DrJava_automatically_deletes_this";
-    File newDirectory = mkTempDir(funnyName);
-
-    assertTrue("child directory created OK", new File(newDirectory, "childDir").mkdir());
-
-    File relativeFile = new File(newDirectory, "./X.java");
-    File relativeFile2 = new File(newDirectory, ".\\Y.java");
-    File relativeFile3 = new File(newDirectory, "childDir/../Z.java");
-
-    try {
-      checkFile(relativeFile, funnyName);
-      checkFile(relativeFile2, funnyName);
-      checkFile(relativeFile3, funnyName);
-    }
-    catch (Exception e) { fail("Exception thrown: " + StringOps.getStackTrace(e)); }
-    finally { FileOps.deleteDirectory(newDirectory); }
-  }
-
+  
   /** Helper for testRelativeFile and testDotPaths. */
-  private File mkTempDir(String funnyName) {
+  private File mkTempDir(String funnyName) throws IOException {
     // OK, we have to create a directory with a hard-coded name in the current working directory, so we'll make it
     // strange. If this directory happens to exist, it'll be deleted.
     File newDirectory = new File(funnyName);
@@ -309,12 +328,15 @@ public final class CommandLineTest extends TestCase {
     assertTrue("file exists", relativeFile.exists());
 
     String path = relativeFile.getPath();
+//    Utilities.showDebug("in checkFile, openCommandLineFiles called on " + path);
     DrJava.openCommandLineFiles(_mf, new String[] { path });
-
+//    Utilities.showDebug("in checkFile, openCommandLineFiles call for " + path + " returned");
+//    Utilities.clearEventQueue();
+    
     List<OpenDefinitionsDocument> docs = _mf.getModel().getOpenDefinitionsDocuments();
     assertEquals("Number of open documents", 1, docs.size());
 
-    OpenDefinitionsDocument doc = docs.get(0);
+    final OpenDefinitionsDocument doc = docs.get(0);
 
     assertEquals("OpenDefDoc file is the right one and is canonical", relativeFile.getCanonicalFile(), doc.getFile());
 

@@ -143,18 +143,13 @@ public final class SingleDisplayModelTest extends GlobalModelTestCase {
     }
   }
 
-  /**
-   * Custom setup for SingleDisplayModel tests.
-   */
+  /** Custom setup for SingleDisplayModel tests. */
   public void setUp() throws IOException {
     super.setUp();
   }
 
 
-  /**
-   * Tests the invariant that at least one document is open
-   * at time of creation.
-   */
+  /** Tests the invariant that at least one document is open at time of creation. */
   public void testNotEmptyOnStartup() throws BadLocationException {
     // Should be one empty document after creation
     assertNumOpenDocs(1);
@@ -163,19 +158,12 @@ public final class SingleDisplayModelTest extends GlobalModelTestCase {
     assertLength(0, doc);
   }
 
-  /**
-   * Tests the setNext and setPrevious functions, making
-   * sure that the activeDocumentChanged event is called.
-   */
+  /** Tests the setNext and setPrevious functions, making sure that the activeDocumentChanged event is called. */
   public void testDocumentSwitching() throws BadLocationException {
     // Check for proper events
     SDTestListener listener = new SDTestListener() {
-      public void newFileCreated(OpenDefinitionsDocument doc) {
-        newCount++;
-      }
-      public void activeDocumentChanged(OpenDefinitionsDocument doc) {
-        switchCount++;
-      }
+      public void newFileCreated(OpenDefinitionsDocument doc) { newCount++; }
+      public void activeDocumentChanged(OpenDefinitionsDocument doc) { switchCount++; }
     };
     getSDModel().addListener(listener);
 
@@ -184,7 +172,6 @@ public final class SingleDisplayModelTest extends GlobalModelTestCase {
     changeDocumentText(FOO_TEXT, doc3);
     listener.assertSwitchCount(0);
 
-    
     // Set up two more documents
     OpenDefinitionsDocument doc2 = setupDocument(BAR_TEXT);
     assertNumOpenDocs(2);
@@ -192,7 +179,6 @@ public final class SingleDisplayModelTest extends GlobalModelTestCase {
     listener.assertSwitchCount(1);
     assertActiveDocument(doc2);
 
-    
     OpenDefinitionsDocument doc1 = setupDocument(BAZ_TEXT);
     assertNumOpenDocs(3);
     listener.assertNewCount(2);
@@ -250,9 +236,7 @@ public final class SingleDisplayModelTest extends GlobalModelTestCase {
     SDTestListener listener = new SDTestListener() {
       public void fileOpened(OpenDefinitionsDocument doc) {
         File file = null;
-        try {
-          file = doc.getFile();
-        }
+        try { file = doc.getFile(); }
         catch (IllegalStateException ise) {
           // We know file should exist
           fail("file does not exist");
@@ -262,20 +246,13 @@ public final class SingleDisplayModelTest extends GlobalModelTestCase {
           fail("file does not exist");
         }
         try {
-          assertEquals("file to open", tempFile.getCanonicalFile(),
-                       file.getCanonicalFile());
+          assertEquals("file to open", tempFile.getCanonicalFile(), file.getCanonicalFile());
           openCount++;
         }
-        catch (IOException ioe) {
-          fail("could not get canonical file");
-        }
+        catch (IOException ioe) { fail("could not get canonical file"); }
       }
-      public void fileClosed(OpenDefinitionsDocument doc) {
-        closeCount++;
-      }
-      public void activeDocumentChanged(OpenDefinitionsDocument doc) {
-        switchCount++;
-      }
+      public void fileClosed(OpenDefinitionsDocument doc) { closeCount++; }
+      public void activeDocumentChanged(OpenDefinitionsDocument doc) { switchCount++; }
     };
     getSDModel().addListener(listener);
 
@@ -298,15 +275,9 @@ public final class SingleDisplayModelTest extends GlobalModelTestCase {
         canAbandonCount++;
         return true; // yes allow the abandon
       }
-      public void newFileCreated(OpenDefinitionsDocument doc) {
-        newCount++;
-      }
-      public void fileClosed(OpenDefinitionsDocument doc) {
-        closeCount++;
-      }
-      public void activeDocumentChanged(OpenDefinitionsDocument doc) {
-        switchCount++;
-      }
+      public void newFileCreated(OpenDefinitionsDocument doc) { newCount++; }
+      public void fileClosed(OpenDefinitionsDocument doc) { closeCount++; }
+      public void activeDocumentChanged(OpenDefinitionsDocument doc) { switchCount++; }
     };
     _sdModel.addListener(listener);
 
@@ -368,9 +339,7 @@ public final class SingleDisplayModelTest extends GlobalModelTestCase {
     file.deleteOnExit();
     String name = file.getName();
     doc = _sdModel.openFile(new FileSelector(file));
-    assertEquals(".java display filename",
-                 name.substring(0, name.length()-5),
-                 _sdModel.getDisplayFilename(doc));
+    assertEquals(".java display filename", name.substring(0, name.length()-5), _sdModel.getDisplayFilename(doc));
 
     // Doesn't contain ".java"
     file = File.createTempFile("DrJava-filename-test", ".txt", _tempDir);
@@ -385,7 +354,6 @@ public final class SingleDisplayModelTest extends GlobalModelTestCase {
     name = file.getName();
     doc = _sdModel.openFile(new FileSelector(file));
     assertEquals(".java.txt display filename", name, _sdModel.getDisplayFilename(doc));
-
   }
   
   public void testDeleteFileWhileOpen() 
@@ -416,9 +384,7 @@ public final class SingleDisplayModelTest extends GlobalModelTestCase {
       files[i] = writeToNewTempFile(txt);
     }
     FileOpenSelector fos = new FileOpenSelector() {
-      public File[] getFiles() throws OperationCanceledException {
-        return files;
-      }
+      public File[] getFiles() throws OperationCanceledException { return files; }
     };
     _sdModel.openFiles(fos);
     OpenDefinitionsDocument doc = _sdModel.getOpenDefinitionsDocuments().get(5);

@@ -58,29 +58,19 @@ import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.util.*;
 import edu.rice.cs.util.text.*;
+import edu.rice.cs.util.swing.Utilities;
 
-/**
- * Test functions of MainFrame.
- *
- * @version $Id$
+/** Test functions of MainFrame.
+ *  @version $Id$
  */
 public final class MainFrameTest extends MultiThreadedTestCase {
 
   private MainFrame _frame;
 
-  /**
-   * A temporary directory
-   */
+  /** A temporary directory */
   private File _tempDir;
-  
-  /**
-   * The user name of the user running the tests.  Used in creating temporary files.
-   * No it's not ...
-  private String user = System.getProperty("user.name");*/
 
-  /**
-   * Setup method for each JUnit test case.
-   */
+  /** Setup method for each JUnit test case. */
   public void setUp() throws IOException {
     _frame = new MainFrame();
     _frame.pack();
@@ -93,8 +83,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     _frame = null;
   }
 
-  /**
-   * Tests that the returned JButton of <code>createManualToolbarButton</code>:
+  /** Tests that the returned JButton of <code>createManualToolbarButton</code>:
    *  1. Is disabled upon return.
    *  2. Inherits the tooltip of the Action parameter <code>a</code>.
    */
@@ -115,58 +104,41 @@ public final class MainFrameTest extends MultiThreadedTestCase {
    * caret location after documents are switched.
    */
   public void testDocLocationAfterSwitch() throws BadLocationException {
-    final Object _lock = new Object();
-    DefinitionsPane pane = _frame.getCurrentDefPane();
-    OpenDefinitionsDocument doc;
-    synchronized(_lock) {
-      doc = pane.getOpenDefDocument();//.getDocument();
+    final DefinitionsPane pane = _frame.getCurrentDefPane();
+    OpenDefinitionsDocument doc = pane.getOpenDefDocument();
+    doc.insertString(0, "abcd", null);
+    try { Utilities.invokeAndWait(new Runnable() { 
+      public void run() {
+        pane.setCaretPosition(3); // not thread-safe!
+      }}); 
     }
-    /**
-     * NOTE: This has been added because MainFrameTest hangs randomly (about every other time) without this line.
-     * It is still unknown why this occurs - being that the above method calls are all accessors, this shouldn't be a situation
-     * where the document is being accessed by insertString before it is ready to be accessed.
-     * Added 5/19/2004 by pakruse 
-     */ /**/
-    /**
-     * UPDATE: 7/16/2004 by pakruse. Synchronizing the two statements prevents this test from hanging. Still don't know why
-     * this happens, but no more need for the Thread.sleep command.
-     * If this test ever takes more than two minutes to run, then it's hanging, and the following lines should be added back in:
-     */
-//    try {
-//      Thread.sleep(1000); 
-//    }
-//    catch(java.lang.InterruptedException e) {
-//    
-//    }
-       
-    synchronized(_lock) {
-      doc.insertString(0, "abcd", null);
-    }
+
+    catch(InterruptedException e) { throw new UnexpectedException(e); }
     
-    
-    pane.setCaretPosition(3);
     assertEquals("Location of old doc before switch", 3, doc.getCurrentLocation());
     
     // Create a new file
     SingleDisplayModel model = _frame.getModel();
-    OpenDefinitionsDocument oldDoc = doc;
-    OpenDefinitionsDocument newDoc = model.newFile();
+    final OpenDefinitionsDocument oldDoc = doc;
+    final OpenDefinitionsDocument newDoc = model.newFile();
 
     // Current pane should be new doc, pos 0
-    pane = _frame.getCurrentDefPane();
-    doc = pane.getOpenDefDocument();//.getDocument();
-    assertEquals("New curr DefPane's document", newDoc, doc);
-    assertEquals("Location of new document", 0, doc.getCurrentLocation());
+    DefinitionsPane curPane;
+    OpenDefinitionsDocument curDoc;
+    curPane = _frame.getCurrentDefPane();
+    curDoc = curPane.getOpenDefDocument();//.getDocument();
+    assertEquals("New curr DefPane's document", newDoc, curDoc);
+    assertEquals("Location in new document", 0, newDoc.getCurrentLocation());
 
-    // Switch back
+    // Switch back to old document
     model.setActiveNextDocument(); 
     assertEquals("Next active doc", oldDoc, model.getActiveDocument());
                  
     // Current pane should be old doc, pos 3
-    pane = _frame.getCurrentDefPane();
-    doc = pane.getOpenDefDocument();//.getDocument();
- 
-    assertEquals("Location of old document", 3, doc.getCurrentLocation());
+    curPane = _frame.getCurrentDefPane();
+    curDoc = curPane.getOpenDefDocument();//.getDocument();
+    assertEquals("Current document is old document", oldDoc, curDoc);
+    assertEquals("Location of old document", 3, curDoc.getCurrentLocation());
   }
 
   /**

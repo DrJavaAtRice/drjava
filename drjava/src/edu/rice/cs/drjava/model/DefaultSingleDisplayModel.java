@@ -252,11 +252,13 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel implements Sin
     // Close an untitled, unchanged document if it is the only one open
     boolean closeUntitled = _hasOneEmptyDocument();
     OpenDefinitionsDocument oldDoc = _activeDocument;
-
+    
     OpenDefinitionsDocument openedDoc = openFileHelper(com);
     if (closeUntitled) closeFileHelper(oldDoc);
-
+    
+//    Utilities.showDebug("DrJava has opened" + openedDoc + " and is setting it active");
     setActiveDocument(openedDoc);
+//    Utilities.showDebug("active doc set; openFile returning");
     return openedDoc;
   }
 
@@ -370,8 +372,8 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel implements Sin
    * which is untitled and unchanged.
    */
   private boolean _hasOneEmptyDocument() {
-    return ((getOpenDefinitionsDocumentsSize() == 1) && (_activeDocument.isUntitled()) &&
-            (!_activeDocument.isModifiedSinceSave()));
+    return getOpenDefinitionsDocumentsSize() == 1 && _activeDocument.isUntitled() &&
+            !_activeDocument.isModifiedSinceSave();
   }
 
   /** Creates a new document if there are currently no documents open. */

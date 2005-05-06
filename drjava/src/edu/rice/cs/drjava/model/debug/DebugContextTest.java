@@ -124,10 +124,10 @@ public final class DebugContextTest extends DebugTestCase {
     debugListener.assertStepRequestedCount(2);  // fires (don't wait)
     debugListener.assertThreadLocationUpdatedCount(2);  // doesn't fire
 
-    synchronized(_debugger) {
+//    synchronized(_debugger) {  // Why synchonize this access to the OptionConstants?
       // Add _tempDir to our sourcepath
       DrJava.getConfig().setSetting(OptionConstants.DEBUG_SOURCEPATH, path);
-    }
+//    }
 
     // Step to next line
     synchronized(_notifierLock) {
@@ -145,10 +145,9 @@ public final class DebugContextTest extends DebugTestCase {
   }
 
   /**
-   * Tests that breakpoints behave correctly in non-public classes.
+   * Tests that breakpoints behave correctly in non-public classes. Why is this method synchronized?
    */
-  public synchronized void testBreakpointsAndStepsInNonPublicClasses()
-    throws Exception
+  public /* synchronized */ void testBreakpointsAndStepsInNonPublicClasses() throws Exception
   {
     if (printMessages) System.out.println("----testBreakpointsAndStepsInNonPublicClasses----");
     StepTestListener debugListener = new StepTestListener();

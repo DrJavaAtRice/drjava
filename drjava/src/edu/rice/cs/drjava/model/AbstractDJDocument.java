@@ -1189,10 +1189,10 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
   protected static boolean _isStartOfComment(String text, int pos) {
     // throwErrorHuh();
     char currChar = text.charAt(pos);
-    if(currChar == '/') {
+    if (currChar == '/') {
       try {
         char afterCurrChar = text.charAt(pos + 1);
-        if((afterCurrChar == '/') || (afterCurrChar == '*')) {
+        if ((afterCurrChar == '/') || (afterCurrChar == '*')) {
           return true;
         }
       } catch (StringIndexOutOfBoundsException e) {
@@ -1210,10 +1210,10 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
   protected static boolean _isEndOfComment(String text, int pos) {
     // throwErrorHuh();
     char currChar = text.charAt(pos);
-    if(currChar == '/') {
+    if (currChar == '/') {
       try {
         char beforeCurrChar = text.charAt(pos - 1);
-        if((beforeCurrChar == '/') || (beforeCurrChar == '*')) {
+        if ((beforeCurrChar == '/') || (beforeCurrChar == '*')) {
           return true;
         }
       } catch (StringIndexOutOfBoundsException e) {
