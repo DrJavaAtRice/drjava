@@ -46,7 +46,6 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.ui;
 
 import java.util.Vector;
-import java.util.Arrays; // for debugging
 
 import java.util.Enumeration;
 
@@ -163,14 +162,19 @@ public class DebugPanel extends JPanel implements OptionConstants {
     new BackgroundColorListener(c);
   }
 
-  /** Causes all display tables to update their information from the debug manager. */
+  /**
+   * Causes all display tables to update their information from the debug manager.
+   */
   public void updateData() {
-//    new ScrollableDialog(null, "updateData() called in DebugPanel", Thread.currentThread().toString(), Arrays.toString(Thread.currentThread().getStackTrace())).show();
     if (_debugger.isReady()) {
       try {
         _watches = _debugger.getWatches();
-        if (_debugger.isCurrentThreadSuspended()) _stackFrames = _debugger.getCurrentStackFrameData();
-        else _stackFrames = new Vector<DebugStackData>();
+        if (_debugger.isCurrentThreadSuspended()) {
+          _stackFrames = _debugger.getCurrentStackFrameData();
+        }
+        else {
+          _stackFrames = new Vector<DebugStackData>();
+        }
         _threads = _debugger.getCurrentThreadData();
       }
       catch (DebugException de) {

@@ -2046,7 +2046,6 @@ public class MainFrame extends JFrame implements OptionConstants {
     _lastFocusOwner.requestFocus();
   }
 
-
   /** Updates the title bar with the name of the active document. */
   public void updateFileTitle() {
     OpenDefinitionsDocument doc = _model.getActiveDocument();
@@ -5413,8 +5412,8 @@ public class MainFrame extends JFrame implements OptionConstants {
           _currentDefPane.requestFocus();
           _posListener.updateLocation();
           
-          // update display (adding "*") in navigatgorPane
-          if (isModified) _model.getDocumentNavigator().activeDocumentModified();
+//          // update display (adding "*") in navigatgorPane
+//          if (isModified) _model.getDocumentNavigator().activeDocumentModified();
 
           
           try { active.revertIfModifiedOnDisk(); }

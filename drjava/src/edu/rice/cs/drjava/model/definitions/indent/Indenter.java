@@ -136,11 +136,12 @@ public class Indenter {
       rule42 = new QuestionFollowedByStar(rule04, rule41),
       rule03 = new QuestionCurrLineEmptyOrEnterPress((autoCloseComments? rule42 : rule04), rule05),
       rule02 = new QuestionPrevLineStartsComment(rule03, rule06),
-        
-      rule01 = new QuestionInsideComment(rule02, rule13);  
-//      rule44 = new QuestionWingComment(rule43, rule13),  /* intended to replace preceding line so that commented lines are left alone
-//      rule43 = new ActionDoNothing(),
-//      rule01 = new QuestionInsideComment(rule02, rule44);
+
+      rule43 = new ActionDoNothing(),
+      rule44 = new QuestionCurrLineIsWingComment(rule43, rule13),
+      rule01 = new QuestionInsideComment(rule02, rule44);
+       
+//      rule01 = new QuestionInsideComment(rule02, rule13);  /* replaced by preceding three rules */
 
     _topRule = rule01;
   }

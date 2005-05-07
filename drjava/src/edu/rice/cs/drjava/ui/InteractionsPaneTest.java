@@ -51,6 +51,7 @@ import edu.rice.cs.drjava.model.repl.*;
 import edu.rice.cs.drjava.model.repl.InteractionsDocumentTest.TestBeep;
 import edu.rice.cs.drjava.model.repl.InteractionsModelTest.TestInteractionsModel;
 import edu.rice.cs.util.text.DocumentAdapterException;
+import edu.rice.cs.util.swing.Utilities;
 
 import java.util.List;
 
@@ -374,7 +375,7 @@ public final class InteractionsPaneTest extends TestCase {
       _model.resetInterpreter();
       _model.interpreterResetting();
     }
-    
+    Utilities.clearEventQueue();
     synchronized(_model) {
       assertEquals("PromptList after reset should contain no elements",
                    0, _pane.getPromptList().size());

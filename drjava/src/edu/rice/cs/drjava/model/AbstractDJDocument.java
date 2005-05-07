@@ -408,7 +408,6 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
   
   /** Clears the helper method cache.  Should be called every time the document is modified. */
   private void _clearCache() {
-    // throwErrorHuh();
     _helperCache.clear();
     _helperCacheHistory.clear();
     _cacheInUse = false;
@@ -418,8 +417,6 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
   /** Add a character to the underlying reduced model. ONLY called from already synchronized code!
    *  @param curChar the character to be added. */
   private void _addCharToReducedModel(char curChar) {
-    // throwErrorHuh();
-    
     clearCache();
     synchronized (_reduced) { _reduced.insertChar(curChar); }
   }
@@ -444,11 +441,9 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
     
     synchronized (_reduced) {
       int newLoc = _currentLocation + dist;
-      if (newLoc < 0) {
-        //      throw new RuntimeException("location < 0?! oldLoc=" + _currentLocation + " dist=" +
-        //                                  dist);
-        throw new IllegalStateException("Tried to cursor to a negative location");
-      }
+      if (newLoc < 0)
+        throw new IllegalStateException("Tried to move cursor to a negative location");
+      
       _currentLocation = newLoc;
       _reduced.move(dist);
     }
@@ -1189,10 +1184,10 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
   protected static boolean _isStartOfComment(String text, int pos) {
     // throwErrorHuh();
     char currChar = text.charAt(pos);
-    if (currChar == '/') {
+    if(currChar == '/') {
       try {
         char afterCurrChar = text.charAt(pos + 1);
-        if ((afterCurrChar == '/') || (afterCurrChar == '*')) {
+        if((afterCurrChar == '/') || (afterCurrChar == '*')) {
           return true;
         }
       } catch (StringIndexOutOfBoundsException e) {
@@ -1210,10 +1205,10 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
   protected static boolean _isEndOfComment(String text, int pos) {
     // throwErrorHuh();
     char currChar = text.charAt(pos);
-    if (currChar == '/') {
+    if(currChar == '/') {
       try {
         char beforeCurrChar = text.charAt(pos - 1);
-        if ((beforeCurrChar == '/') || (beforeCurrChar == '*')) {
+        if((beforeCurrChar == '/') || (beforeCurrChar == '*')) {
           return true;
         }
       } catch (StringIndexOutOfBoundsException e) {

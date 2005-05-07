@@ -513,7 +513,7 @@ public final class DefinitionsPaneTest extends TestCase {
     
     _model.setActiveNextDocument();    // makes doc1 active
     DefinitionsPane pane = _frame.getCurrentDefPane();
-    assertSame("Confirm that next pane is the other pane", pane1, pane);
+    assertEquals("Confirm that next pane is the other pane", pane1, pane);
     
     assertTrue("pane2 should have an open definitions document", doc2 instanceof OpenDefinitionsDocument);
     assertTrue("pane1 should have an open definitions document", doc1 instanceof OpenDefinitionsDocument);

@@ -46,38 +46,29 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.model;
 
 import java.io.File;
-/**
- * An interface to give GlobalModel a file to save a
- * document to.
- *
- * @version $Id$
+
+/** An interface to give GlobalModel a file to save a document to.
+ *  @version $Id$
  */
 public interface FileSaveSelector {
 
-  /**
-   * Returns the file to save.
-   * @throws OperationCanceledException if the save request is cancelled
+  /** Returns the file to save.
+   *  @throws OperationCanceledException if the save request is cancelled
    */
   public File getFile() throws OperationCanceledException;
   
-  /**
-   * Informs the user that the chosen file is already open and prompts them asking whether to continue with the save
-   * @param f the file being saved
-   * @return true iff the save is to occur
+  /** Informs the user that the chosen file is already open and prompts them asking whether to continue with the save
+   *  @param f the file being saved
+   *  @return true iff the save is to occur
    */
   public boolean warnFileOpen(File f);
   
-  /**
-   * Confirms whether the existing chosen file should be overwritten.
-   */
+  /** Confirms whether the existing chosen file should be overwritten. */
   public boolean verifyOverwrite();
   
-  /**
-   * Confirms whether a new file should be selected after the existing chosen
-   * file is detected to have been deleted or moved.
-   * @param oldFile The file that was moved or deleted.
+  /** Confirms whether a new file should be selected since the previously chosen file has been deleted or moved.
+   *  @param oldFile The file that was moved or deleted.
    */
-  public boolean shouldSaveAfterFileMoved(OpenDefinitionsDocument doc, 
-                                          File oldFile);
+  public boolean shouldSaveAfterFileMoved(OpenDefinitionsDocument doc, File oldFile);
 
 }

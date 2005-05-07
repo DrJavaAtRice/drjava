@@ -225,7 +225,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
    * session.  This method will return false if the debugger has not
    * been initialized through startup().
    */
-  public boolean isReady() { return _vm != null; }
+  public synchronized boolean isReady() { return _vm != null; }
 
   /**
    * Ensures that the debugger is active.  Should be called by every

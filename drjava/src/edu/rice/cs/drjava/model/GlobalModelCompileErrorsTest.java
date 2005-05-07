@@ -139,10 +139,9 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
     cm.compileAll();
     _waitCompileDone();
     
-    _failListener.checkCompileOccurred();
     assertCompileErrorsPresent(_name(), true);
     assertEquals("Should have 2 compiler errors", 2, _model.getCompilerModel().getNumErrors());
-
+    _failListener.checkCompileOccurred();
 
     // Make sure .class does not exist for both files
     File compiled = classForJava(file, "DrJavaTestFoo");

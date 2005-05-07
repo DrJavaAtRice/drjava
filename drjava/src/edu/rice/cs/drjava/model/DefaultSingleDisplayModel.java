@@ -198,8 +198,8 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel implements Sin
   /** Sets the active document to be the next one in the collection. */
   public void setActiveNextDocument() {
     INavigatorItem key = _activeDocument;
-    INavigatorItem nextKey =_documentNavigator.getNext(key);
-    if (key != nextKey) _documentNavigator.setActiveDoc(nextKey);
+    OpenDefinitionsDocument nextKey = (OpenDefinitionsDocument) _documentNavigator.getNext(key);
+    if (key != nextKey) setActiveDocument(nextKey);
     /* this will select the active document in the navigator, which
      * will signal a listener to call _setActiveDoc(...) */
   }
@@ -207,8 +207,8 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel implements Sin
   /** Sets the active document to be the previous one in the collection. */
   public void setActivePreviousDocument() {
     INavigatorItem key = _activeDocument;
-    INavigatorItem prevKey =_documentNavigator.getPrevious(key);
-    if (key != prevKey) _documentNavigator.setActiveDoc(prevKey);
+    OpenDefinitionsDocument prevKey = (OpenDefinitionsDocument) _documentNavigator.getPrevious(key);
+    if (key != prevKey) setActiveDocument(prevKey);
       /* this will select the active document in the navigator, which
        * will signal a listener to call _setActiveDoc(...) */
   }
@@ -388,16 +388,16 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel implements Sin
       IDocumentNavigator nav = getDocumentNavigator();
       
       INavigatorItem item = docs.get(docs.size()-1);
-      INavigatorItem nextActive = nav.getNext(item);
+      OpenDefinitionsDocument nextActive = (OpenDefinitionsDocument) nav.getNext(item);
       if (!nextActive.equals(item)) {
-        nav.setActiveDoc(nextActive); 
+        setActiveDocument(nextActive); 
         return;
       }
       
       item = docs.get(0);
-      nextActive = nav.getPrevious(item);
+      nextActive = (OpenDefinitionsDocument) nav.getPrevious(item);
       if (!nextActive.equals(item)) { 
-        nav.setActiveDoc(nextActive);
+        setActiveDocument(nextActive);
         return;
       }
       

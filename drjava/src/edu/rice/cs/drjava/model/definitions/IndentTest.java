@@ -217,7 +217,7 @@ public final class IndentTest extends TestCase {
       "foo(i,\n" +
       "    j.\n" +     // new paren phrase
       "      bar().\n" +     // not new paren phrase
-      "      // foo();\n" +     // not new
+      "// foo();\n" +     // not new
       "      baz(),\n" +     // not new (after comment)
       "    cond1 ||\n" +     // new
       "    cond2);\n" +     // new (after operator)
@@ -1206,9 +1206,7 @@ public final class IndentTest extends TestCase {
     _assertContents(indented, doc);
   }
 
-  /**
-   * Tests a list of files when indented match their correct indentations
-   */
+  /** Tests a list of files when indented match their correct indentations */
   public void testIndentationFromFile() throws IOException {
     File directory = new File("testFiles");
 
@@ -1272,11 +1270,8 @@ public final class IndentTest extends TestCase {
     _assertContents(indented, doc);
   }
 */
-  private void _assertContents(String expected, Document document)
-    throws BadLocationException
-  {
-    assertEquals("document contents", expected,
-                 document.getText(0, document.getLength()));
+  private void _assertContents(String expected, Document document) throws BadLocationException {
+    assertEquals("document contents", expected, document.getText(0, document.getLength()));
   }
 
   private void _assertIndentInfo(IndentInfo ii,

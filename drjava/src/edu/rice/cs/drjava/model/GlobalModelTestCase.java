@@ -113,13 +113,25 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
   
   protected static final String FOO_TEXT = "class DrJavaTestFoo {}";
   protected static final String BAR_TEXT = "class DrJavaTestBar {}";
-  protected static final String BAZ_TEXT = "class DrJavaTestBaz extends DrJavaTestFoo { public static int x = 3; }";
-  protected static final String FOO_MISSING_CLOSE_TEXT   = "class DrJavaTestFoo {";
-  protected static final String FOO_PACKAGE_AFTER_IMPORT = "import java.util.*;\npackage a;\n" + FOO_TEXT;
-  protected static final String FOO_PACKAGE_INSIDE_CLASS = "class DrJavaTestFoo { package a; }";
-  protected static final String FOO_PACKAGE_AS_FIELD     = "class DrJavaTestFoo { int package; }";
-  protected static final String FOO_PACKAGE_AS_FIELD_2   = "class DrJavaTestFoo { int package = 5; }";
-  protected static final String FOO_PACKAGE_AS_PART_OF_FIELD = "class DrJavaTestFoo { int cur_package = 5; }";
+  protected static final String BAZ_TEXT =
+    "class DrJavaTestBaz extends DrJavaTestFoo { public static int x = 3; }";
+  protected static final String FOO_MISSING_CLOSE_TEXT =
+    "class DrJavaTestFoo {";
+
+  protected static final String FOO_PACKAGE_AFTER_IMPORT =
+    "import java.util.*;\npackage a;\n" + FOO_TEXT;
+
+  protected static final String FOO_PACKAGE_INSIDE_CLASS =
+    "class DrJavaTestFoo { package a; }";
+
+  protected static final String FOO_PACKAGE_AS_FIELD =
+    "class DrJavaTestFoo { int package; }";
+
+  protected static final String FOO_PACKAGE_AS_FIELD_2 =
+    "class DrJavaTestFoo { int package = 5; }";
+
+  protected static final String FOO_PACKAGE_AS_PART_OF_FIELD =
+    "class DrJavaTestFoo { int cur_package = 5; }";
 
   /**
    * Setup for each test case, which does the following.
@@ -141,13 +153,18 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     super.setUp();
   }
 
-  /** Teardown for each test case, which recursively deletes the temporary directory created in setUp. */
+  /**
+   * Teardown for each test case, which recursively deletes the
+   * temporary directory created in setUp.
+   */
   public void tearDown() throws IOException {
     boolean ret = FileOps.deleteDirectory(_tempDir);
     assertTrue("delete temp directory " + _tempDir, ret);
+
     _model.dispose();
     _tempDir = null;
     _model = null;
+    
     super.tearDown();
   }
 
@@ -185,11 +202,13 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
   }
 
   /** Create a new temporary directory in _tempDir. */
-  protected File tempDirectory() throws IOException { 
-    return FileOps.createTempDirectory("DrJava-test", _tempDir); 
+  protected File tempDirectory() throws IOException {
+    return FileOps.createTempDirectory("DrJava-test", _tempDir);
   }
 
-  protected File createFile(String name) { return new File(_tempDir, name); }
+  protected File createFile(String name) {
+    return new File(_tempDir, name);
+  }
 
   /** Given a .java file and a class file name, returns the corresponding .class file. */
   protected File classForJava(File sourceFile, String className) {
@@ -208,9 +227,10 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
   }
 
 
-  /** Creates and returns a new document, makes sure newFile is fired, and then adds some text.  When this method
-   *  is done newCount is reset to 0.
-   *  @return the new modified document
+  /**
+   * Creates and returns a new document, makes sure newFile is fired, and
+   * then adds some text.  When this method is done newCount is reset to 0.
+   * @return the new modified document
    */
   protected OpenDefinitionsDocument setupDocument(String text) throws BadLocationException {
     TestListener listener = new TestListener() {
@@ -234,15 +254,18 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     return doc;
   }
 
-  /** Compiles a new file with the given text. The compile is expected to succeed and it is checked to make sure
-   *  it worked reasonably.  This method does not return until the Interactions JVM has reset and is ready to use.
-   *  @param text Code for the class to be compiled
-   *  @param file File to save the class in
-   *  @return Document after it has been saved and compiled
+  /**
+   * Compiles a new file with the given text.
+   * The compile is expected to succeed and it is checked to make sure it worked
+   * reasonably.  This method does not return until the Interactions JVM
+   * has reset and is ready to use.
+   * @param text Code for the class to be compiled
+   * @param file File to save the class in
+   * @return Document after it has been saved and compiled
    */
-  protected synchronized OpenDefinitionsDocument doCompile(String text, File file) throws IOException, 
-    BadLocationException, InterruptedException {
-    
+  protected synchronized OpenDefinitionsDocument doCompile(String text, File file)
+    throws IOException, BadLocationException, InterruptedException
+  {
     OpenDefinitionsDocument doc = setupDocument(text);
     doCompile(doc, file);
     return doc;
@@ -256,21 +279,25 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
    * @param doc Document containing the code to be compiled
    * @param file File to save the class in
    */
-  protected void doCompile(OpenDefinitionsDocument doc, File file) throws IOException, InterruptedException {
-    
+  protected void doCompile(OpenDefinitionsDocument doc, File file) throws IOException, 
+    InterruptedException {
     doc.saveFile(new FileSelector(file));
 
     // Perform a mindless interpretation to force interactions to reset.
     //  (only to simplify this method)
     try { interpret("2+2"); }
-    catch (DocumentAdapterException e) { throw new UnexpectedException(e); }
+    catch (DocumentAdapterException e) {
+      throw new UnexpectedException(e);
+    }
 
     CompileShouldSucceedListener listener = new CompileShouldSucceedListener(true);
     _model.setResetAfterCompile(true);
     _model.addListener(listener);
     synchronized (listener) {
       doc.startCompile();
-      if (_model.getCompilerModel().getNumErrors() > 0) fail("compile failed: " + getCompilerErrorString());
+      if (_model.getCompilerModel().getNumErrors() > 0) {
+        fail("compile failed: " + getCompilerErrorString());
+      }
       listener.wait();
     }
     listener.checkCompileOccurred();

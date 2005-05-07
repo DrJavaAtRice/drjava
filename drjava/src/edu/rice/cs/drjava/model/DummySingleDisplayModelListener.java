@@ -49,7 +49,6 @@ import java.io.File;
 import java.util.List;
 import edu.rice.cs.util.classloader.ClassFileError;
 
-
 /** A dummy, do-nothing GlobalModelListener. Useful for listening to only a small number of events.
  *  @version $Id$
  */
