@@ -812,7 +812,7 @@ public class JTreeSortNavigator extends JTree
     }
   }
   
-  /** Unnecessary since "modified" mark is added by the cell renderer */
-  public void activeDocumentModified() { }  
+//  /** Unnecessary since "modified" mark is added by the cell renderer */
+//  public void activeDocumentModified() { }  
 }
 

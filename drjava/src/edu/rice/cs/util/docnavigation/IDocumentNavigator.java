@@ -188,8 +188,8 @@ public interface IDocumentNavigator extends IAWTContainerNavigatorActor{
   
    public void requestSelectionUpdate(INavigatorItem i);
    
-   /** Notify this ListModel that the active document has changed and displaying may need updating (if it has 
-    *  changed from modified to unmodified status).
-    */
-   public void activeDocumentModified();
+//   /** Notify this ListModel that the active document has changed and displaying may need updating (if it has 
+//    *  changed from modified to unmodified status).
+//    */
+//   public void activeDocumentModified();
 }

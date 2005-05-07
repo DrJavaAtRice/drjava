@@ -311,16 +311,15 @@ class JListNavigator extends JList implements IDocumentNavigator {
    */
   public void requestSelectionUpdate(INavigatorItem doc) { /* nothing */ }
   
-  /** Notify this ListModel that doc has changed and may need updating (if it has changed
-   *  from modified to unmodified). No synchronization because _model plus local data is
-   *  only read once.  Should only be performed in the event thread
-   */
-  public void activeDocumentModified() {
-    synchronized(_model) {
-      int current = _currentIndex;
-      fireSelectionValueChanged(current, current, false); 
-    }
-  }
-  
+//  /** Notify this ListModel that doc has changed and may need updating (if it has changed
+//   *  from modified to unmodified). Should only be performed in the event thread
+//   */
+//  public void activeDocumentModified() {
+//    synchronized(_model) {
+//      int current = _currentIndex;
+//      fireSelectionValueChanged(current, current, false); 
+//    }
+//  }
+//  
   public String toString() { synchronized (_model) { return _model.toString(); } }
 }
