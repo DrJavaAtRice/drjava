@@ -69,7 +69,17 @@ public final class MainFrameTest extends MultiThreadedTestCase {
 
   /** A temporary directory */
   private File _tempDir;
+  
+  /* Flag and lock for signalling when compilation is done. */
+  protected boolean _compileDone;
+  protected Object _compileLock = new Object();
+  
+  /* Flag and lock for signalling when file has been closed. */
+  protected boolean _closeDone;
+  protected Object _closeLock = new Object();
 
+//  private Log _log = new Log("MainFrameTestLog.txt", true);
+  
   /** Setup method for each JUnit test case. */
   public void setUp() throws IOException {
     _frame = new MainFrame();
@@ -97,6 +107,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
 
     assertTrue("Returned JButton is enabled.", ! b.isEnabled());
     assertEquals("Tooltip text not set.", "test tooltip", b.getToolTipText());
+//    _log.log("testCreateManualToobarButton completed");
   }
 
   /**
@@ -139,6 +150,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     curDoc = curPane.getOpenDefDocument();//.getDocument();
     assertEquals("Current document is old document", oldDoc, curDoc);
     assertEquals("Location of old document", 3, curDoc.getCurrentLocation());
+//    _log.log("testDocLocationAfterSwitch completed");
   }
 
   /**
@@ -233,15 +245,12 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     model.getInteractionsModel().getDocument().setBeep(new TestBeep());
 
     // Test for strict == equality
-    assertTrue("UI's int. doc. should equals Model's int. doc.",
-               pane.getDocument() == doc);
-
+    assertTrue("UI's int. doc. should equals Model's int. doc.", pane.getDocument() == doc);
 
     int origLength = doc.getDocLength();
     doc.insertText(1, "typed text", InteractionsDocument.DEFAULT_STYLE);
-    assertEquals("Document should not have changed.",
-                 origLength,
-                 doc.getDocLength());
+    assertEquals("Document should not have changed.", origLength, doc.getDocLength());
+//    _log.log("testCorrectInteractionsDocument completed");
   }
 
   /**
@@ -292,6 +301,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     doc.getUndoManager().redo();
     assertEquals("redo",indented, doc.getText(0,doc.getLength()));
     assertEquals("redo restores caret position", oldPos, pane.getCaretPosition());
+//    _log.log("testMultilineIndentAfterScroll completed");
   }
 
   /**
@@ -320,13 +330,14 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     assertTrue("Glass on: defPane1",defPane1.isEditable());
     assertTrue("Glass on: defPane2",(!defPane2.isEditable()));
     model.setActiveDocument(doc1);
+    
     _frame._switchDefScrollPane();
     assertTrue("Doc Switch: defPane1",(! defPane1.isEditable()));
     assertTrue("Doc Switch: defPane2",defPane2.isEditable());
     _frame.hourglassOff();
     assertTrue("End: defPane1",defPane1.isEditable());
     assertTrue("End: defPane2",defPane2.isEditable());
-
+//    _log.log("testGlassPaneEditableState completed");
   }
 
   /**
@@ -349,20 +360,19 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     _frame.hourglassOn();
 
     defPane1.processKeyEvent(new KeyEvent(defPane1, KeyEvent.KEY_PRESSED, 70, KeyEvent.CTRL_MASK, KeyEvent.VK_F, 'F') );
+
     assertTrue("the find replace dialog should not come up", !_frame.getFindReplaceDialog().isDisplayed());
     
     _frame.getInteractionsPane().processKeyEvent(new KeyEvent(_frame.getInteractionsPane(), KeyEvent.KEY_PRESSED, 0, KeyEvent.CTRL_MASK, KeyEvent.VK_F, 'F') );
+ 
     assertTrue("the find replace dialog should not come up", !_frame.getFindReplaceDialog().isDisplayed());
 
     _frame.hourglassOff();
-
+//    _log.log("testGlassPaneHidesKeyEvents completed");
   }
 
   
-  /**
-   * a test to make sure the save button does not set itself to enabled right
-   * after opening a file
-   */
+  /** Tests that the save button does not set itself as enabled immediately after opening a file. */
   public void testSaveButtonEnabled() throws IOException {
      String user = System.getProperty("user.name");
      _tempDir = FileOps.createTempDirectory("DrJava-test-" + user);
@@ -388,16 +398,15 @@ public final class MainFrameTest extends MultiThreadedTestCase {
          return return_me;
        }
      });
-     
      assertTrue("the save button should not be enabled after opening a document", !_frame.saveEnabledHuh());
+//     _log.log("testSaveButtonEnabled completed");
   }
   
   
-  /**
-   * A Test to guarantee that the Dancing UI bug will not rear its ugly head again.
-   * Basically, add a component listener to the leftComponent of _docSplitPane and
-   * make certain its size does not change while compiling a class which depends on
-   * another class.
+  /** A Test to guarantee that the Dancing UI bug will not rear its ugly head again.
+   *  Basically, add a component listener to the leftComponent of _docSplitPane and
+   *  make certain its size does not change while compiling a class which depends on
+   *  another class.
    */
   public void testDancingUIFileOpened() throws IOException {
       /**
@@ -447,36 +456,34 @@ public final class MainFrameTest extends MultiThreadedTestCase {
          return return_me;
        }
      });
+     
      ComponentAdapter listener = new ComponentAdapter() {
        public void componentResized(ComponentEvent event) {
          _testFailed = true;
          fail("testDancingUI: Open Documents List danced!");
        }
      };
+     
      _frame.addComponentListenerToOpenDocumentsList(listener);
-     SingleDisplayModelCompileListener compileListener =
-       new SingleDisplayModelCompileListener();
+     
+     _compileDone = false;
+     SingleDisplayModelCompileListener compileListener = new SingleDisplayModelCompileListener();
      _frame.getModel().addListener(compileListener);
 
-     synchronized(compileListener) {
-       SwingUtilities.invokeLater(new Runnable() {
-         public void run() {
-           _frame.getCompileAllButton().doClick();
-         }
-       });
+     Utilities.invokeLater(new Runnable() {
+       public void run() { _frame.getCompileAllButton().doClick();}
+     });
 
-       try{
-         compileListener.wait();
-       }
-       catch(InterruptedException exception) {
-         fail(exception.toString());
-       }
+//     _log.log("Waiting for compile");
+     synchronized(_compileLock) {
+       try { while (! _compileDone) _compileLock.wait(); }
+       catch(InterruptedException exception) { fail(exception.toString()); }
      }
 
-     if( !FileOps.deleteDirectory(_tempDir) ) {
-       System.err.println("Couldn't fully delete directory " + _tempDir.getAbsolutePath() +
-                          "\nDo it by hand.\n");
-     }
+     if (! FileOps.deleteDirectory(_tempDir))
+       System.err.println("Couldn't fully delete directory " + _tempDir.getAbsolutePath() + "\nDo it by hand.\n");
+   
+//     _log.log("testDancingUIFileOpened completed");
   }
 
     /**
@@ -517,8 +524,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
        }
      };
      _frame.addComponentListenerToOpenDocumentsList(listener);
-     SingleDisplayModelFileClosedListener closeListener =
-       new SingleDisplayModelFileClosedListener();
+     SingleDisplayModelFileClosedListener closeListener = new SingleDisplayModelFileClosedListener();
 
      _frame.open(new FileOpenSelector() {
          public File[] getFiles() {
@@ -529,27 +535,25 @@ public final class MainFrameTest extends MultiThreadedTestCase {
        });
 
      _frame.getModel().addListener(closeListener);
+     _closeDone = false;
+     
+    
+     Utilities.invokeLater(new Runnable() {
+       public void run() { _frame.getCloseButton().doClick(); }
+     });
 
-     synchronized(closeListener) {
-       Thread thread = new Thread(new Runnable() {
-         public void run() {
-           _frame.getCloseButton().doClick();
-         }
-       });
-       SwingUtilities.invokeLater(thread);
-
-       try{
-         closeListener.wait();
-       }
-       catch(InterruptedException exception) {
-         fail(exception.toString());
-       }
+//     _log.log("Waiting for file closing");
+     
+     synchronized (_closeLock) {
+       try { while (! _closeDone) _closeLock.wait(); }
+       catch(InterruptedException exception) { fail(exception.toString()); }
      }
 
-     if( !FileOps.deleteDirectory(_tempDir) ) {
+     if (! FileOps.deleteDirectory(_tempDir)) {
        System.err.println("Couldn't fully delete directory " + _tempDir.getAbsolutePath() +
                           "\nDo it by hand.\n");
      }
+//     _log.log("testDancingUIClosed completed");
   }
 
   /** A CompileListener for SingleDisplayModel (instead of GlobalModel) */
@@ -560,33 +564,30 @@ public final class MainFrameTest extends MultiThreadedTestCase {
 
     /** Just notify when the compile has ended */
     public void compileEnded() {
-      synchronized (this) { notify(); }
+      synchronized (_compileLock) { 
+        _compileDone = true;
+        _compileLock.notify(); 
+      }
     }
 
     public void fileOpened(OpenDefinitionsDocument doc) { }
-
     public void activeDocumentChanged(OpenDefinitionsDocument active) { }
   }
 
   /** A FileClosedListener for SingleDisplayModel (instead of GlobalModel) */
-  class SingleDisplayModelFileClosedListener
-    extends GlobalModelTestCase.TestListener
-    implements SingleDisplayModelListener{
+  class SingleDisplayModelFileClosedListener extends GlobalModelTestCase.TestListener
+    implements SingleDisplayModelListener {
 
     public void fileClosed(OpenDefinitionsDocument doc) {
-      synchronized(this) {
-        notify();
+      synchronized (_closeLock) {
+        _closeDone = true;
+        _closeLock.notify();
       }
     }
 
-    public void fileOpened(OpenDefinitionsDocument doc) {
-    }
-
-    public void newFileCreated(OpenDefinitionsDocument doc) {
-    }
-
-    public void activeDocumentChanged(OpenDefinitionsDocument active) {
-    }
+    public void fileOpened(OpenDefinitionsDocument doc) { }
+    public void newFileCreated(OpenDefinitionsDocument doc) { }
+    public void activeDocumentChanged(OpenDefinitionsDocument active) { }
   }
 
   /** Create a new temporary file in _tempDir. */

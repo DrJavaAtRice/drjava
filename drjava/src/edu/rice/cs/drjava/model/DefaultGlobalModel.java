@@ -1846,15 +1846,11 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
     //System.out.println("Setting project classpath to: " + cp);
   }
 
-  /**
-   * Gets an array of all sourceRoots for the open definitions
-   * documents, without duplicates. Note that if any of the open
-   * documents has an invalid package statement, it won't be added
-   * to the source root set. On 8.7.02 changed the sourceRootSet such that
-   * the directory DrJava was executed from is now after the sourceRoots
-   * of the currently open documents in order that whatever version the user
-   * is looking at corresponds to the class file the interactions window
-   * uses.
+  /** Gets an array of all sourceRoots for the open definitions documents, without duplicates. Note that if any of
+   *  the open documents has an invalid package statement, it won't be adde to the source root set. On 8.7.02 
+   *  changed the sourceRootSet such that the directory DrJava was executed from is now after the sourceRoots
+   *  of the currently open documents in order that whatever version the user is looking at corresponds to the
+   *  class file the interactions window uses.
    * TODO: Fix out of date comment, possibly remove this here?
    */
   public File[] getSourceRootSet() {
