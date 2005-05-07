@@ -188,7 +188,7 @@ class JListNavigator extends JList implements IDocumentNavigator {
    *  @throws IllegalArgumentException if this navigator contains no document
    *  that is equal to the passed document.
    */
-  public void refreshDocument(INavigatorItem doc, String path) throws IllegalArgumentException {
+  public void refreshDocument(INavigatorItem doc, String path) {
     synchronized (_model) {
       removeDocument(doc);
       addDocument(doc);

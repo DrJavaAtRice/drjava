@@ -75,11 +75,10 @@ public class Log {
    */
   protected PrintWriter _writer;
 
-  /**
-   * Creates a new Log with the given name.  If enabled is true,
-   * a file is created in the current directory with the given name.
-   * @param name File name for the log
-   * @param enabled Whether to actively use this log
+  /** Creates a new Log with the given name.  If enabled is true, a file is created in the current directory 
+   *  with the given name.
+   *  @param name File name for the log
+   *  @param enabled Whether to actively use this log
    */
   public Log(String name, boolean enabled) {
     _name = name;
@@ -87,9 +86,7 @@ public class Log {
     _init();
   }
 
-  /**
-   * Creates the log file, if enabled.
-   */
+  /** Creates the log file, if enabled. */
   protected void _init() {
     if (_writer == null) {
       if (_enabled || ENABLE_ALL) {

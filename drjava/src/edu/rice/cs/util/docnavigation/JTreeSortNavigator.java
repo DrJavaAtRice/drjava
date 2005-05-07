@@ -383,7 +383,7 @@ public class JTreeSortNavigator extends JTree
      *  index out of bounds exception when painting.
      */
     
-    synchronized(_model) {
+    synchronized (_model) {
       LeafNode node = getNodeForDoc(doc);
       InnerNode oldParent;
       if (node == null) {

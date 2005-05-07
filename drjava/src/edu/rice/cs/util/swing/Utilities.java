@@ -72,8 +72,11 @@ public class Utilities {
     catch(InvocationTargetException e) { throw new UnexpectedException(e); }
   }
   
-  public static void clearEventQueue() throws InterruptedException {
-    Utilities.invokeAndWait(new Runnable() { public void run() { }; });
+  public static void clearEventQueue() {
+    try { 
+      Utilities.invokeAndWait(new Runnable() { public void run() { }; }); 
+    }
+    catch(InterruptedException ie) { throw new UnexpectedException(); }
   }
   
   public static void showDebug(final String msg) {
