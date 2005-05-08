@@ -59,6 +59,7 @@ import edu.rice.cs.drjava.ui.MainFrame;
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.drjava.platform.PlatformFactory;
+import edu.rice.cs.util.Log;
 
 /**
  * Tests opening/creating files specified as command line arguments.
@@ -66,9 +67,7 @@ import edu.rice.cs.drjava.platform.PlatformFactory;
  */
 public final class CommandLineTest extends TestCase {
 
-  /**
-   * The MainFrame we're working with.
-   */
+  /** The MainFrame we're working with. */
   private MainFrame _mf;
 
   /** Files that exist, and the filenames that represent them. */
@@ -89,6 +88,8 @@ public final class CommandLineTest extends TestCase {
   private final String nof1_name;
   private final String nof2_name;
   private final String nof3_name;
+  
+  private Log _log = new Log("CommandLineTestLog.txt", true);
 
   /** Constructor.  Sets up test files for us to use: (i) three files that exist and can be opened; (ii) three
    *  files that don't exist
@@ -155,6 +156,7 @@ public final class CommandLineTest extends TestCase {
     assertEquals("Only one document?", 1, docs.size());
     OpenDefinitionsDocument doc = docs.get(0);
     assertTrue("Is new document untitled?", doc.isUntitled());
+//    _log.log("testNone() completed");
   }
 
   /** Open one file on the command line.  Should (obviously) open that file. */
@@ -167,6 +169,7 @@ public final class CommandLineTest extends TestCase {
     OpenDefinitionsDocument doc = docs.get(0);
     assertEquals("Correct length of file?", f1_contents.length(), doc.getLength());
     assertEquals("Do the contents match?", f1_contents, doc.getText(0,f1_contents.length()));
+//     _log.log("testOpenOne completed");
   }
 
   /** A nonexistent file.  Should open a new, untitled document. */
@@ -178,6 +181,7 @@ public final class CommandLineTest extends TestCase {
     assertEquals("Exactly one document?", 1, docs.size());
     OpenDefinitionsDocument doc = docs.get(0);
     assertTrue("Is document untitled?", doc.isUntitled());
+//    _log.log("testNE completed");
   }
 
   /** Many files on the command line.  Should open all of them, displaying the last one. */
@@ -202,6 +206,7 @@ public final class CommandLineTest extends TestCase {
     assertEquals("Do the contents of file 3 match?", f3_contents, doc3.getText(0,f3_contents.length()));
 
     assertEquals("Is the last document the active one?", doc3, _mf.getModel().getActiveDocument());
+//    _log.log("testOpenMany completed");
   }
 
   /** Supplying both valid and invalid filenames on the command line. Should open only the valid ones. */
@@ -229,6 +234,7 @@ public final class CommandLineTest extends TestCase {
     assertEquals("Do the contents of file 3 match?", f1_contents, doc3.getText(0,f1_contents.length()));
 
     assertEquals("Is the last document the active one?", doc3, _mf.getModel().getActiveDocument());
+//     _log.log("testMixed completed");
   }
 
   /** Test duplicate files. */
@@ -259,7 +265,7 @@ public final class CommandLineTest extends TestCase {
    *  fix will be to absolutize file paths when opening files.)
    */
   public void testRelativePath() throws IOException, InvalidPackageException {
-    String funnyName = "DrJava_automatically_deletes_this";
+    String funnyName = "DrJava_automatically_deletes_this_1";
     File newDirectory = mkTempDir(funnyName);
     File relativeFile = new File(newDirectory, "X.java");
 
@@ -267,14 +273,15 @@ public final class CommandLineTest extends TestCase {
 
     try { checkFile(relativeFile, funnyName); }
     catch (Exception e) { fail("Exception thrown: " + StringOps.getStackTrace(e)); }
-    finally { FileOps.deleteDirectory(newDirectory); }
+    finally { FileOps.deleteDirectoryOnExit(newDirectory); }
+//    _log.log("testRelativePath completed");
   }
 
   /** Tests paths with "." and ".." in them.  Windows will blow up if you use one in a JFileChooser without
    *  converting it to a canonical filename.
    */
   public void testDotPaths() {
-    String funnyName = "DrJava_automatically_deletes_this";
+    String funnyName = "DrJava_automatically_deletes_this_2";
     File newDirectory = mkTempDir(funnyName);
 
     assertTrue("child directory created OK", new File(newDirectory, "childDir").mkdir());
@@ -289,7 +296,8 @@ public final class CommandLineTest extends TestCase {
       checkFile(relativeFile3, funnyName);
     }
     catch (Exception e) { fail("Exception thrown: " + StringOps.getStackTrace(e)); }
-    finally { FileOps.deleteDirectory(newDirectory); }
+    finally { FileOps.deleteDirectoryOnExit(newDirectory); }
+//    _log.log("testDotPaths completed");
   }
 
   /** Helper for testRelativeFile and testDotPaths. */
