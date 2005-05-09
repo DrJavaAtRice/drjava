@@ -90,8 +90,6 @@ import edu.rice.cs.drjava.model.*;
  * (via the _reduced field) MUST be synchronized.  This prevents any thread
  * from seeing an inconsistent state in the middle of another thread's changes.
  *
- * TODO: There are lots of synchronized collections here - unsync if we can.
- *
  * @see BraceReduction
  * @see ReducedModelControl
  * @see ReducedModelComment
@@ -106,7 +104,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     synchronized (_closedListeners) { _closedListeners.add(l); }
   }
   
-  public synchronized void removeDocumentClosedListener(DocumentClosedListener l) { 
+  public void removeDocumentClosedListener(DocumentClosedListener l) { 
     synchronized (_closedListeners) { _closedListeners.remove(l); }
   }
   

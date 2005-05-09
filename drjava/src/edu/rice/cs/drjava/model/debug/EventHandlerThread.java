@@ -59,33 +59,22 @@ import java.util.*;
  */
 public class EventHandlerThread extends Thread {
 
-  /**
-   * Debugger to which this class reports events.
-   */
+  /** Debugger to which this class reports events. */
   protected final JPDADebugger _debugger;
 
-  /**
-   * JPDA reference to the VirtualMachine generating the events.
-   */
+  /** JPDA reference to the VirtualMachine generating the events. */
   protected final VirtualMachine _vm;
 
-  /**
-   * Whether this event handler is currently connected to the
-   * JPDA VirtualMachine.
-   */
+  /** Whether this event handler is currently connected to the JPDA VirtualMachine. */
   private boolean _connected;
 
-  /**
-   * A log for recording messages in a file.
-   */
+  /** A log for recording messages in a file. */
   protected final Log _log;
 
-  /**
-   * Creates a new EventHandlerThread to listen to events from the given
-   * debugger and virtual machine.  Calling this Thread's start() method
-   * causes it to begin listenting.
-   * @param debugger Debugger to which to report events
-   * @param vm JPDA reference to the VirtualMachine generating the events
+  /** Creates a new EventHandlerThread to listen to events from the given debugger and virtual machine.  Calling
+   *  this Thread's start() method causes it to begin listenting.
+   *  @param debugger Debugger to which to report events
+   *  @param vm JPDA reference to the VirtualMachine generating the events
    */
   EventHandlerThread(JPDADebugger debugger, VirtualMachine vm) {
     super("DrJava Debug Event Handler");

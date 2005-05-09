@@ -627,7 +627,7 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
    * DebugTestListener for all tests setting breakpoints.
    */
   protected class BreakpointTestListener extends DebugStartAndStopListener {
-    public BreakpointTestListener() {}
+    public BreakpointTestListener() { }
     public void breakpointSet(Breakpoint bp) {
       // Manager's thread: test shouldn't wait
       breakpointSetCount++;

@@ -75,12 +75,12 @@ public class ReducedModelControl implements BraceReduction {
   ReducedModelComment rmc;
   int _offset;
 
-  public  ReducedModelControl() {
+  public ReducedModelControl() {
     rmb = new ReducedModelBrace(this);
     rmc = new ReducedModelComment();
   }
 
-  public /* synchronized */ void insertChar(char ch) {
+  public void insertChar(char ch) {
     rmb.insertChar(ch);
     rmc.insertChar(ch);
   }
@@ -89,7 +89,7 @@ public class ReducedModelControl implements BraceReduction {
    *  positive values move right. </P>
   *  @param count indicates the direction and magnitude of cursor movement
   */
-  public /* synchronized */ void move(int count) {
+  public void move(int count) {
     rmb.move(count);
     rmc.move(count);
   }
@@ -100,7 +100,7 @@ public class ReducedModelControl implements BraceReduction {
   * Negative values delete text to the left of the cursor, positive
   * values delete text to the right.
   */
-  public /* synchronized */ void delete(int count) {
+  public void delete(int count) {
     rmb.delete(count);
     rmc.delete(count);
   }
@@ -113,7 +113,7 @@ public class ReducedModelControl implements BraceReduction {
   * failure, returns -1.
   * @see #balanceBackward()
   */
-  public /* synchronized */ int balanceForward() {
+  public int balanceForward() {
     return rmb.balanceForward();
   }
   /**
@@ -123,7 +123,7 @@ public class ReducedModelControl implements BraceReduction {
   * failure, returns -1.
   * @see #balanceForward()
   */
-  public /* synchronized */ int balanceBackward() {
+  public int balanceBackward() {
     return rmb.balanceBackward();
   }
 
@@ -132,7 +132,7 @@ public class ReducedModelControl implements BraceReduction {
   *is relative to the last time it was called. You can reset the last
   *call to the current offset using resetLocation.
   */
-  public /* synchronized */ ReducedModelState moveWalkerGetState(int relDistance) {
+  public ReducedModelState moveWalkerGetState(int relDistance) {
     return rmc.moveWalkerGetState(relDistance);
   }
 
@@ -141,7 +141,7 @@ public class ReducedModelControl implements BraceReduction {
    *  using relative distance instead of having to rewalk the same distance
    *  every call to stateAtRelLocation. It is an optimization.
    */
-  public /* synchronized */ void resetLocation() {
+  public void resetLocation() {
     rmc.resetWalkerLocationToCursor();
   }
 
@@ -156,7 +156,7 @@ public class ReducedModelControl implements BraceReduction {
    * @return a ReducedToken representative of the unified reduced
    * model
    */
-  public /* synchronized */ ReducedToken currentToken() {
+  public ReducedToken currentToken() {
     // check the reduced comment model for specials
     ReducedToken rmcToken = rmc.current();
     if (!rmcToken.isGap()) {
@@ -178,7 +178,7 @@ public class ReducedModelControl implements BraceReduction {
    * @return FREE|INSIDE_LINE_COMMENT|INSIDE_BLOCK_COMMENT|
    * INSIDE_SINGLE_QUOTE|INSIDE_DOUBLE_QUOTE
    */
-  public /* synchronized */ ReducedModelState getStateAtCurrent() {
+  public ReducedModelState getStateAtCurrent() {
       return rmc.getStateAtCurrent();
   }
 
@@ -303,7 +303,7 @@ public class ReducedModelControl implements BraceReduction {
   /**
    * Get the previous token.
    */
-  public /* synchronized */ ReducedToken prevItem() {
+  public ReducedToken prevItem() {
     int rmbOffset = rmb.getBlockOffset();
     int rmcOffset = rmc.getBlockOffset();
 
@@ -319,7 +319,7 @@ public class ReducedModelControl implements BraceReduction {
   /**
    * Get the next token.
    */
-  public /* synchronized */ ReducedToken nextItem() {
+  public ReducedToken nextItem() {
     int rmbOffset = rmb.getBlockOffset();
     int rmcOffset = rmc.getBlockOffset();
     next();
@@ -355,7 +355,7 @@ public class ReducedModelControl implements BraceReduction {
    * Gets the absolute character offset into the document
    * represented by the reduced model.
    */
-  public /* synchronized */ int absOffset() {
+  public int absOffset() {
     return rmc.absOffset();
   }
 
@@ -363,7 +363,7 @@ public class ReducedModelControl implements BraceReduction {
   /**
    * A toString() substitute.
    */
-  public  String simpleString() {
+  public String simpleString() {
     return "\n********\n" + rmb.simpleString() + "\n________\n" +
       rmc.simpleString();
   }
@@ -374,7 +374,7 @@ public class ReducedModelControl implements BraceReduction {
    * - distance to the brace enclosing the beginning of the current line
    * - distance to the beginning of the line containing that brace
    */
-  public /* synchronized */ IndentInfo getIndentInformation() {
+  public IndentInfo getIndentInformation() {
     IndentInfo braceInfo = new IndentInfo();
     //get distance to the previous newline (in braceInfo.distToNewline)
     rmc.getDistToPreviousNewline(braceInfo);
@@ -392,11 +392,11 @@ public class ReducedModelControl implements BraceReduction {
   /**
    * Gets distance to end of line on the line previous.
    */
-  public /* synchronized */ int getDistToPreviousNewline(int relLoc) {
+  public int getDistToPreviousNewline(int relLoc) {
     return rmc.getDistToPreviousNewline(relLoc);
   }
 
-  public /* synchronized */ int getDistToNextNewline() {
+  public int getDistToNextNewline() {
     return rmc.getDistToNextNewline();
   }
 
@@ -407,7 +407,7 @@ public class ReducedModelControl implements BraceReduction {
    *         in the HighlightStatus objects we return.
    *  @param length The length of the text segment for which status information must be generated.
    */
-  public /* synchronized */ Vector<HighlightStatus> getHighlightStatus(final int start,
+  public Vector<HighlightStatus> getHighlightStatus(final int start,
                                                     final int length) {
     Vector<HighlightStatus> vec = new Vector<HighlightStatus>();
 

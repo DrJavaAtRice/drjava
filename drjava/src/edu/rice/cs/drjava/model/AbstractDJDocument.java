@@ -429,10 +429,11 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
   public int getCurrentLocation() { return  _currentLocation; }
   
   /** Change the current location of the document
-   *  @param loc the new absolute location */
-  public void setCurrentLocation(int loc) {
-    synchronized (_reduced) { move(loc - _currentLocation); }
-  }
+   *  @param loc the new absolute location 
+   *  NOTE: synchronization on _reduced seems pointless here because loc in principle can be stale.  Without
+   *  synchronization on _reduce, _currentLocation can be stale as well.  But why use synchronization to 
+   *  prevent _currentLocation from being stale when loc may be stale? */
+  public void setCurrentLocation(int loc)  { move(loc - _currentLocation); }
   
   /** The actual cursor movement logic.  Helper for setCurrentLocation(int).
    *  @param dist the distance from the current location to the new location.
@@ -461,7 +462,7 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
    *  is such a brace.
    * @return the relative distance forwards to the offset after the matching brace.
    */
-  public synchronized int balanceForward() {
+  public int balanceForward() {
     synchronized (_reduced) { return _reduced.balanceForward(); }
   }
   

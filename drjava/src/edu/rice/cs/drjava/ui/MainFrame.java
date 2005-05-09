@@ -788,7 +788,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   /** Shows the find/replace tab. */
   private Action _findReplaceAction = new AbstractAction("Find/Replace...") {
     public void actionPerformed(ActionEvent ae) {
-      if (!_findReplace.isDisplayed()) {
+      if (! _findReplace.isDisplayed()) {
         showTab(_findReplace);
         _findReplace.beginListeningTo(_currentDefPane);
       }
@@ -809,13 +809,14 @@ public class MainFrame extends JFrame implements OptionConstants {
         _findReplace.beginListeningTo(_currentDefPane);
       }
       _findReplace.findNext();
-      // This is a fix for a highlighting bug when
-      // calling this from _findReplace. Perhaps there
-      // is a better solution.
-      if (_lastFocusOwner == _findReplace) {
-        _currentDefPane.requestFocus();
-      }
-      else _lastFocusOwner.requestFocus();
+//      // This is a fix for a highlighting bug when
+//      // calling this from _findReplace. Perhaps there
+//      // is a better solution.
+//      if (_lastFocusOwner == _findReplace) {
+//        _currentDefPane.requestFocus();
+//      }
+//      else _lastFocusOwner.requestFocus();
+      _currentDefPane.requestFocus();  // atempt to fix intermittent bug where _currentDefPane listens but does not echo and won't undo!
     }
   };
   
@@ -1997,7 +1998,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   public void debuggerToggle() {
     // Make sure the debugger is available
     Debugger debugger = _model.getDebugger();
-    if (!debugger.isAvailable()) return;
+//    if (!debugger.isAvailable()) return;  // Redundant! This test is the first check made by inDebugMode()
 
     try {
       if (inDebugMode()) {
@@ -2265,6 +2266,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   private void _openProject() { openProject(_openProjectSelector); }
   
   public void openProject(FileOpenSelector projectSelector) {
+    if (inDebugMode()) _model.getDebugger().shutdown();  // Opening a project while suspended at a breakpoint caused deadlock
     try {
       final File[] file = projectSelector.getFiles();
       if (file.length < 1)
@@ -3088,7 +3090,7 @@ public class MainFrame extends JFrame implements OptionConstants {
               l.add((OpenDefinitionsDocument) doc);  // FIX THIS CAST!
           }
           try { _model.getJUnitModel().junitDocs(l); }
-          catch(UnexpectedException e) { _showJUnitInterrupted(e); }
+          catch(UnexpectedException e) { _junitInterrupted(e); }
         }
       }
     }.start();
@@ -3105,7 +3107,7 @@ public class MainFrame extends JFrame implements OptionConstants {
           if (_model.isProjectActive()) _model.getJUnitModel().junitProject();
           else _model.getJUnitModel().junitAll();
         } 
-        catch(UnexpectedException e) { _showJUnitInterrupted(e); }
+        catch(UnexpectedException e) { _junitInterrupted(e); }
       }
     }.start();
   }
@@ -3195,9 +3197,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
   }
 
-  /**
-   * Steps in the debugger
-   */
+  /** Steps in the debugger. */
   void debuggerStep(int flag) {
     if (inDebugMode()) {
       try {
@@ -6153,6 +6153,12 @@ public class MainFrame extends JFrame implements OptionConstants {
                                          options[1]);
     return (n == JOptionPane.YES_OPTION);
   }
+  
+  /* Pops up a message and cleans up after unit testing has been interrupted. */
+  private void _junitInterrupted(UnexpectedException e) {
+    _showJUnitInterrupted(e);
+    removeTab(_junitErrorPanel);
+  }
 
   boolean inDebugMode() {
     Debugger dm = _model.getDebugger();
@@ -6160,9 +6166,8 @@ public class MainFrame extends JFrame implements OptionConstants {
     return false;
   }
 
-  /**
-   * returns teh find replace dialog
-   * package protected for use in tests
+  /** Return the find replace dialog.
+   *  Package protected for use in tests
    */
   FindReplaceDialog getFindReplaceDialog() { return _findReplace; }
   

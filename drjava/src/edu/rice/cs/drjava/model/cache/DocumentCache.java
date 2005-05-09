@@ -101,6 +101,8 @@ public class DocumentCache {
   private int CACHE_SIZE;
   
   private OrderedHashSet<DocManager> _residentQueue;
+  
+  private Object _cacheLock = new Object();
     
   public DocumentCache(int size) {
 //    Utilities.showDebug("DocumentCache created with size = " + size);
@@ -129,7 +131,7 @@ public class DocumentCache {
     if (size <= 0) throw new IllegalArgumentException("Cannot set the cache size to zero or less.");
     int dist;
     DocManager[] removed = null;  // bogus initialization makes javac happy
-    synchronized (this) {
+    synchronized (_cacheLock) {
       CACHE_SIZE = size;
       dist = _residentQueue.size() - CACHE_SIZE;
       if (dist > 0) { 
@@ -143,7 +145,7 @@ public class DocumentCache {
   private void kickOut(DocManager[] removed) {
     for (int i = 0; i < removed.length; i++) {
       DocManager dm = removed[i];
-      synchronized (dm) { dm.kickOut(); }
+      dm.kickOut();
     }
   }
     
@@ -157,18 +159,16 @@ public class DocumentCache {
    */
   private void add(DocManager dm) {
 //    Utilities.showDebug("add " + dm + " to the QUEUE\n" + "QUEUE = " + _residentQueue);
-    synchronized (dm) {
-      if (dm == null) throw 
-        new IllegalArgumentException("Cannot add a null document to the DocumentCache");
-      if (dm.isUnmanaged() || dm.isUntitled() ) return;
-    }
+    if (dm == null) throw 
+      new IllegalArgumentException("Cannot add a null document to the DocumentCache");
+    if (dm.isUnmanagedOrUntitled() ) return;
     DocManager removed = null;
-    synchronized (this) {
+    synchronized (_cacheLock) {
       if (_residentQueue.contains(dm)) return;
       _residentQueue.add(dm);
       if (_residentQueue.size() > CACHE_SIZE) removed = _residentQueue.remove(0);
     }
-    if (removed != null) synchronized (removed) { removed.kickOut(); }
+    if (removed != null) removed.kickOut();
   }
   
   ///////////////////////////// DocManager //////////////////////////
@@ -177,6 +177,7 @@ public class DocumentCache {
   private static final int UNTITLED = 1;     // An untitled document not in queue (may or may not be modified)
   private static final int NOT_IN_QUEUE = 2; // Virtualized and not in the QUEUE
   private static final int UNMANAGED = 3;    // A modified, titled document not in the queue
+  /** Note: before extending this table, check that the extension does not conflict with isUnmangedOrUntitled() */
   
   /** Manages the retrieval of a document for a corresponding open definitions document.  This manager only 
    *  maintains its document data if it contained in _residentQueue, which is maintained using a round-robin
@@ -188,6 +189,8 @@ public class DocumentCache {
     private DDReconstructor _rec;
     private DefinitionsDocument _doc;
     private String _filename;
+    
+    private Object _dmLock = new Object();  // private synchronization lock
     
     /** Instantiates a manager for the documents that are produced by the given document reconstructor.
      *  @param rec The reconstructor used to create the document
@@ -211,19 +214,19 @@ public class DocumentCache {
     public DefinitionsDocument getDocument() throws IOException, FileMovedException {
       boolean isResident = false;
       boolean makeUnmanaged = false;  // makeUnmanaged -> isResident
-      synchronized (this) {
+      synchronized (_dmLock) {
         isResident = _doc != null;
         if (isResident) {  // Document is in queue or "unmanaged" (a modified doc or a new doc with no file)
-          if (isUnmanaged() || isUntitled()) return _doc;
+          if (isUnmanagedOrUntitled()) return _doc;
           makeUnmanaged = _doc.isModifiedSinceSave();
           if (makeUnmanaged)  { setUnmanaged(); }
         }
       }
-      if (makeUnmanaged) synchronized (DocumentCache.this) {  _residentQueue.remove(this); }
+      if (makeUnmanaged) synchronized (_cacheLock) {  _residentQueue.remove(this); }
       if (isResident) return _doc;
         
       boolean isUntitled = false;
-      synchronized (this) {
+      synchronized (_dmLock) {
         isUntitled = isUntitled();  // This locking may be overkill; once titled, always titled
         try { // _doc is not in memory
           _doc = _rec.make();
@@ -232,7 +235,7 @@ public class DocumentCache {
         catch(BadLocationException e) { throw new UnexpectedException(e); }
       }
 //      Utilities.showDebug("Document " + _doc + " reconstructed; _stat = " + _stat);
-      if (! isUntitled) synchronized (DocumentCache.this) { addToQueue(); }
+      if (! isUntitled) synchronized (_cacheLock) { addToQueue(); }
       return _doc;
     }
     
@@ -245,25 +248,25 @@ public class DocumentCache {
     /** Closes the corresponding document for this adapter.  Done when a document is closed by the navigator. */
     public void close() {
 //      Utilities.showDebug("close() called on " + this);
-      synchronized (DocumentCache.this) { _residentQueue.remove(this); }
-      synchronized (this) { closingKickOut(); }
+      synchronized (_cacheLock) { _residentQueue.remove(this); }
+      closingKickOut();
     }
     
     public void documentSaved(String fileName) {
       boolean addThis = false;
-      synchronized (this) {
-        addThis = isUntitled() || isUnmanaged();
+      synchronized (_dmLock) {
+        addThis = isUnmanagedOrUntitled();
         if (addThis) {
           setNotInQueue();
           _filename = fileName;
         }
       }
-      if (addThis) synchronized (DocumentCache.this) { addToQueue(); }
+      if (addThis) synchronized (_cacheLock) { addToQueue(); }
     }
     
     private boolean notInQueue() { return ! _residentQueue.contains(this); }
-    private boolean isUnmanaged() { return _stat == UNMANAGED; }
     private boolean isUntitled() { return _stat == UNTITLED; }
+    private boolean isUnmanagedOrUntitled() { return (_stat & 0x1) != 0; }  // tests if _stat is odd
     private void setUnmanaged() { _stat = UNMANAGED; }
     private void setNotInQueue() { _stat = NOT_IN_QUEUE; }
     private void addToQueue() {
@@ -280,16 +283,18 @@ public class DocumentCache {
    
     private void kickOut(boolean isClosing) {
 //      Utilities.showDebug("kickOut(" + isClosing + ") called on " + this);
-      if (! isClosing) {
-        /* virtualize this document */
+      synchronized(_dmLock) {
+        if (! isClosing) {
+          /* virtualize this document */
 //        Utilities.showDebug("Virtualizing " + _doc);
-        _rec.saveDocInfo(_doc);
+          _rec.saveDocInfo(_doc);
+        }
+        if (_doc != null) {
+          _doc.close();  // done elsewhere when isClosing is true?
+          _doc = null;
+        }
+        _stat = NOT_IN_QUEUE;
       }
-      if (_doc != null) {
-        _doc.close();  // done elsewhere when isClosing is true?
-        _doc = null;
-      }
-      _stat = NOT_IN_QUEUE;
     }
     
     public String toString() { return _filename; } 

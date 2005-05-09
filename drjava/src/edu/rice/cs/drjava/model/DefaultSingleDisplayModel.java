@@ -373,7 +373,7 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel implements Sin
    */
   private boolean _hasOneEmptyDocument() {
     return getOpenDefinitionsDocumentsSize() == 1 && _activeDocument.isUntitled() &&
-            !_activeDocument.isModifiedSinceSave();
+            ! _activeDocument.isModifiedSinceSave();
   }
 
   /** Creates a new document if there are currently no documents open. */

@@ -60,7 +60,7 @@ import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.drjava.platform.PlatformFactory;
 import edu.rice.cs.util.Log;
-
+import edu.rice.cs.util.swing.Utilities;
 /**
  * Tests opening/creating files specified as command line arguments.
  * @version $Id$
@@ -89,7 +89,7 @@ public final class CommandLineTest extends TestCase {
   private final String nof2_name;
   private final String nof3_name;
   
-  private Log _log = new Log("CommandLineTestLog.txt", true);
+//  private Log _log = new Log("CommandLineTestLog.txt", true);
 
   /** Constructor.  Sets up test files for us to use: (i) three files that exist and can be opened; (ii) three
    *  files that don't exist
@@ -147,7 +147,7 @@ public final class CommandLineTest extends TestCase {
     super.tearDown();
   }
 
-  /** Tests DrJava with no command line arguments. Should open a new, untitled document. */
+   /** Tests DrJava with no command line arguments. Should open a new, untitled document. */
   public void testNone() {
     DrJava.openCommandLineFiles(_mf, new String[0]);
     // ListModel<DefinitionsDocument> docs =
@@ -164,19 +164,25 @@ public final class CommandLineTest extends TestCase {
     String[] list = new String[1];
     list[0] = f1_name;
     DrJava.openCommandLineFiles(_mf, list);
+//    _log.log("openCommandLineFiles completed");
     List<OpenDefinitionsDocument> docs = _mf.getModel().getOpenDefinitionsDocuments();
+//    _log.log("got OpenDefDocs");
     assertEquals("Only one document opened?", 1, docs.size());
     OpenDefinitionsDocument doc = docs.get(0);
     assertEquals("Correct length of file?", f1_contents.length(), doc.getLength());
+//    _log.log("Ready to perform getText operation");
     assertEquals("Do the contents match?", f1_contents, doc.getText(0,f1_contents.length()));
-//     _log.log("testOpenOne completed");
+//    _log.log("testOpenOne completed");
   }
+  
+ 
 
   /** A nonexistent file.  Should open a new, untitled document. */
   public void testNE() {
     String[] list = new String[1];
     list[0] = nof1_name;
     DrJava.openCommandLineFiles(_mf, list);
+//    _log.log("openCommandLineFiles completed");
     List<OpenDefinitionsDocument> docs = _mf.getModel().getOpenDefinitionsDocuments();
     assertEquals("Exactly one document?", 1, docs.size());
     OpenDefinitionsDocument doc = docs.get(0);
@@ -191,6 +197,7 @@ public final class CommandLineTest extends TestCase {
     list[1] = f2_name;
     list[2] = f3_name;
     DrJava.openCommandLineFiles(_mf, list);
+//    _log.log("openCommandLineFiles completed");
     List<OpenDefinitionsDocument> docs = _mf.getModel().getOpenDefinitionsDocuments();
     assertEquals("Exactly three documents?", 3, docs.size());
     OpenDefinitionsDocument doc1 = docs.get(0);
@@ -219,6 +226,7 @@ public final class CommandLineTest extends TestCase {
     list[4] = f1_name;
     list[5] = nof3_name;
     DrJava.openCommandLineFiles(_mf, list);
+//    _log.log("openCommandLineFiles completed");
     List<OpenDefinitionsDocument> docs = _mf.getModel().getOpenDefinitionsDocuments();
     assertEquals("Exactly three documents?", 3, docs.size());
     OpenDefinitionsDocument doc1 = docs.get(0);
@@ -234,7 +242,7 @@ public final class CommandLineTest extends TestCase {
     assertEquals("Do the contents of file 3 match?", f1_contents, doc3.getText(0,f1_contents.length()));
 
     assertEquals("Is the last document the active one?", doc3, _mf.getModel().getActiveDocument());
-//     _log.log("testMixed completed");
+//    _log.log("testMixed completed");
   }
 
   /** Test duplicate files. */
@@ -247,17 +255,21 @@ public final class CommandLineTest extends TestCase {
     list[4] = f2_name;
     list[5] = f1_name;
     DrJava.openCommandLineFiles(_mf, list);
+//    _log.log("openCommandLineFiles in testDups completed");
+    
     List<OpenDefinitionsDocument> docs = _mf.getModel().getOpenDefinitionsDocuments();
+    Utilities.clearEventQueue();
     assertEquals("Exactly two documents?", 2, docs.size());
     OpenDefinitionsDocument doc1 = docs.get(0);
     assertEquals("Correct length of file 1?", f1_contents.length(), doc1.getLength());
     assertEquals("Do the contents of file 1 match?", f1_contents, doc1.getText(0,f1_contents.length()));
-
+    Utilities.clearEventQueue();
     OpenDefinitionsDocument doc2 = docs.get(1);
     assertEquals("Correct length of file 2?", f2_contents.length(), doc2.getLength());
     assertEquals("Do the contents of file 2 match?", f2_contents, doc2.getText(0,f2_contents.length()));
 
     assertEquals("Is the last document the active one?", doc2, _mf.getModel().getActiveDocument());
+//    _log.log("testDups completed");
   }
 
   /** A regression test for bug #542747, which related to opening a file via the command line using a relative path.
@@ -328,8 +340,11 @@ public final class CommandLineTest extends TestCase {
 
     // The source root should be the current directory (as
     // a canonical path, of course).
+    Utilities.clearEventQueue();
     File root = doc.getSourceRoot();
+    Utilities.clearEventQueue();
     assertEquals("source root", new File("").getCanonicalFile(), root);
+   
 
     // Close this doc to clean up after ourselves for the next check.
     _mf.getModel().closeFile(doc);

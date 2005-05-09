@@ -60,8 +60,7 @@ import edu.rice.cs.drjava.model.AbstractDJDocument;
  * This questions corresponds to rule 15 in our decision tree.
  * @version $Id$
  */
-public final class QuestionBraceIsCurlyTest extends IndentRulesTestCase 
-{
+public final class QuestionBraceIsCurlyTest extends IndentRulesTestCase {
   // PRE: we are not inside a multiline comment
   // PRE: the current block or expression list was *not* 
   //      opened by '[' or '('.
@@ -72,8 +71,7 @@ public final class QuestionBraceIsCurlyTest extends IndentRulesTestCase
   
   public void setUp() { super.setUp(); }
   
-  public void testWithParen() throws BadLocationException 
-  {
+  public void testWithParen() throws BadLocationException {
     int i;
     
     /* (1) */
