@@ -200,6 +200,7 @@ class JListNavigator extends JList implements IDocumentNavigator {
    */
   public void setActiveDoc(INavigatorItem doc) {
     synchronized(_model) {
+      if (_current == doc) return; // doc is already _current (the active doc)
       if (_model.contains(doc)) {
         setSelectedValue(doc, true);
         // _current = doc;  // already done by ListSelectionEvent listener created in init()
