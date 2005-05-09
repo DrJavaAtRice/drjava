@@ -97,7 +97,7 @@ public class ConsoleDocument implements DocumentAdapter {
     _hasPrompt = false;
     
     // Prevent any edits before the prompt!
-    _document.setEditCondition(new InteractionsEditCondition());
+    _document.setEditCondition(new ConsoleEditCondition());
   }
 
   /** @return true iff this document has a prompt and is ready to accept input. */
@@ -284,7 +284,7 @@ public class ConsoleDocument implements DocumentAdapter {
   }
 
   /** Class to ensure that any attempt to edit the document above the prompt is rejected. */
-  class InteractionsEditCondition extends DocumentEditCondition {
+  class ConsoleEditCondition extends DocumentEditCondition {
     public boolean canInsertText(int offs) { return canRemoveText(offs); }
     
     public boolean canRemoveText(int offs) {

@@ -221,13 +221,13 @@ public class KeyStrokeOptionComponent extends OptionComponent<KeyStroke>
           _inputField.setText("");
           _actionLabel.setText("<none>");
           _currentKeyStroke = KeyStrokeOption.NULL_KEYSTROKE;
-          _inputField.requestFocus();
+          _inputField.requestFocusInWindow();
         }
       });
       _cancelButton = new JButton("Cancel");
       _cancelButton.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent ae) {
-          _inputField.requestFocus();
+          _inputField.requestFocusInWindow();
           GetKeyDialog.this.dispose();
         }
       });
@@ -246,7 +246,7 @@ public class KeyStrokeOptionComponent extends OptionComponent<KeyStroke>
             _keyToKSOC.put(_currentKeyStroke, _ksoc);
             _ksoc.setValue(_currentKeyStroke);
           }
-          _inputField.requestFocus();
+          _inputField.requestFocusInWindow();
           GetKeyDialog.this.dispose();
         }
       });

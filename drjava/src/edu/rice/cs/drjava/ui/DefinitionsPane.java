@@ -674,7 +674,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     }
 
     protected void _popupAction(MouseEvent e) {
-      requestFocus();
+      requestFocusInWindow();
       _popMenu.show(e.getComponent(), e.getX(), e.getY());
     }
 

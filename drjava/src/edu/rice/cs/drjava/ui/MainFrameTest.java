@@ -417,11 +417,9 @@ public final class MainFrameTest extends MultiThreadedTestCase {
    *  another class.
    */
   public void testDancingUIFileOpened() throws IOException {
-      /**
-     * Maybe this sequence of calls should be incorporated into one function
-     * createTestDir(), which would get the username and create the temporary
-     * directory
-     * Only sticky part is deciding where to put it, in FileOps maybe?
+    /** Maybe this sequence of calls should be incorporated into one function createTestDir(), which would get 
+     *  the username and create the temporary directory. Only sticky part is deciding where to put it, in FileOps 
+     *  maybe?
      */
      String user = System.getProperty("user.name");
      _tempDir = FileOps.createTempDirectory("DrJava-test-" + user);
@@ -456,31 +454,29 @@ public final class MainFrameTest extends MultiThreadedTestCase {
      forceOpenClass3_file.deleteOnExit();
 
      //_frame.setVisible(true);
-     _frame.pack();
-     _frame.open(new FileOpenSelector() {
-       public File[] getFiles() {
-         File[] return_me = new File[1];
-         return_me[0] = new File(_tempDir, "ForceOpenClass1.java");
-         return return_me;
-       }
-     });
      
-     ComponentAdapter listener = new ComponentAdapter() {
+     final ComponentAdapter listener = new ComponentAdapter() {
        public void componentResized(ComponentEvent event) {
          _testFailed = true;
          fail("testDancingUI: Open Documents List danced!");
        }
      };
-     
-     _frame.addComponentListenerToOpenDocumentsList(listener);
-     
-     _compileDone = false;
-     SingleDisplayModelCompileListener compileListener = new SingleDisplayModelCompileListener();
-     _frame.getModel().addListener(compileListener);
+     final SingleDisplayModelCompileListener compileListener = new SingleDisplayModelCompileListener();
 
-     Utilities.invokeLater(new Runnable() {
-       public void run() { _frame.getCompileAllButton().doClick();}
-     });
+     Utilities.invokeLater(new Runnable() { public void run() {
+       _frame.pack();
+       _frame.open(new FileOpenSelector() {
+         public File[] getFiles() {
+           File[] return_me = new File[1];
+           return_me[0] = new File(_tempDir, "ForceOpenClass1.java");
+           return return_me;
+         }
+       });
+       _frame.getModel().addListener(compileListener);
+       _frame.addComponentListenerToOpenDocumentsList(listener);
+       _compileDone = false;
+       _frame.getCompileAllButton().doClick();
+     }});  
 
 //     _log.log("Waiting for compile");
      synchronized(_compileLock) {
@@ -522,33 +518,33 @@ public final class MainFrameTest extends MultiThreadedTestCase {
 
      FileOps.writeStringToFile(forceOpenClass1_file, forceOpenClass1_string);
      forceOpenClass1_file.deleteOnExit();
-
-     //_frame.setVisible(true);
-     _frame.pack();
-     ComponentAdapter listener = new ComponentAdapter() {
+     
+     final ComponentAdapter listener = new ComponentAdapter() {
        public void componentResized(ComponentEvent event) {
          _testFailed = true;
          fail("testDancingUI: Open Documents List danced!");
        }
      };
-     _frame.addComponentListenerToOpenDocumentsList(listener);
-     SingleDisplayModelFileClosedListener closeListener = new SingleDisplayModelFileClosedListener();
-
-     _frame.open(new FileOpenSelector() {
+     final SingleDisplayModelFileClosedListener closeListener = new SingleDisplayModelFileClosedListener();
+     
+     Utilities.invokeLater(new Runnable() { public void run() {
+//       _frame.setVisible(true);
+       _frame.pack();
+       _frame.addComponentListenerToOpenDocumentsList(listener);
+       
+       _frame.open(new FileOpenSelector() {
          public File[] getFiles() {
            File[] return_me = new File[1];
            return_me[0] = new File(_tempDir, "ForceOpenClass1.java");
            return return_me;
          }
        });
-
-     _frame.getModel().addListener(closeListener);
-     _closeDone = false;
-     
-    
-     Utilities.invokeLater(new Runnable() {
-       public void run() { _frame.getCloseButton().doClick(); }
-     });
+       
+       _frame.getModel().addListener(closeListener);
+       _closeDone = false;
+       
+       _frame.getCloseButton().doClick();
+     }});
 
 //     _log.log("Waiting for file closing");
      

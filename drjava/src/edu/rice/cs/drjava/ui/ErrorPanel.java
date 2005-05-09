@@ -334,7 +334,7 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
           if (_showHighlightsCheckBox.isSelected()) {
             lastDefPane.setCaretPosition( lastDefPane.getCaretPosition());
             getErrorListPane().switchToError(getSelectedIndex());
-            lastDefPane.requestFocus();
+            lastDefPane.requestFocusInWindow();
             lastDefPane.getCaret().setVisible(true);
           }
           else {
@@ -688,7 +688,7 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
                 defPane.centerViewOnOffset(errPos);
               }
             }
-            defPane.requestFocus();
+            defPane.requestFocusInWindow();
             defPane.getCaret().setVisible(true);
           }
           else {

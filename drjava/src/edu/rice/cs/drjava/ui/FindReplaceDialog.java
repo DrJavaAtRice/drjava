@@ -121,7 +121,7 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
     am.put("Find Next", _findNextAction);
     am.put("Close", new AbstractAction("Close") {
       public void actionPerformed(ActionEvent ae) {
-        _frame.getCurrentDefPane().requestFocus();
+        _frame.getCurrentDefPane().requestFocusInWindow();
         _close();
       }
     });
@@ -309,10 +309,10 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
     });
   }
 
-  public void requestFocus() {
-    super.requestFocus();
+  public boolean requestFocusInWindow() {
+    super.requestFocusInWindow();
     _findField.selectAll();
-    _findField.requestFocus();
+    return _findField.requestFocusInWindow();
   }
 
   JTextField getFindField() { return _findField; }
@@ -324,7 +324,7 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
   public void beginListeningTo(DefinitionsPane defPane) {
     if (_defPane==null) {
       // removed so it doesn't give the pane focus when switching documents
-//      requestFocus(); 
+//      requestFocusInWindow(); 
       _displayed = true;
       _defPane = defPane;
       _defPane.addCaretListener(_caretListener);
@@ -366,7 +366,7 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
   private Action _findNextAction = new AbstractAction("Find Next") {
     public void actionPerformed(ActionEvent e) {
       _doFind();
-      _findField.requestFocus();
+      _findField.requestFocusInWindow();
     }
   };
 
@@ -442,25 +442,25 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
       }
       _replaceAction.setEnabled(false);
       _replaceFindAction.setEnabled(false);
-      _replaceButton.requestFocus();
+      _replaceButton.requestFocusInWindow();
     }
   };
 
   private Action _replaceFindAction = new AbstractAction("Replace/Find Next") {
     public void actionPerformed(ActionEvent e) {
-      //_updateMachine();
+      _updateMachine();
       _machine.setFindWord(_findField.getText());
       String replaceWord = _replaceField.getText();
       _machine.setReplaceWord(replaceWord);
-//      _mainframe.clearStatusMessage();
       _mainframe.clearStatusMessage(); // _message.setText(""); // JL
+      
       // replaces the occurance at the current position
       boolean replaced = _machine.replaceCurrent();
       // and finds the next word
       if (replaced) {
         _selectReplacedItem(replaceWord.length());
         _doFind();
-        _replaceFindButton.requestFocus();
+        _replaceFindButton.requestFocusInWindow();
       }
       else {
         _replaceAction.setEnabled(false);
@@ -503,7 +503,7 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
    };*/
 
   protected void _close() {
-    _defPane.requestFocus();
+    _defPane.requestFocusInWindow();
     if (_displayed) stopListening();
     super._close();
     //_frame.uninstallFindReplaceDialog(this);
@@ -575,7 +575,7 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
 ////   if (!isVisible())
 //     _frame.installFindReplaceDialog(this);
 //     _updateMachine();
-//     _findField.requestFocus();
+//     _findField.requestFocusInWindow();
 //     _findField.selectAll();
 //   }
 
@@ -659,7 +659,7 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
         _machine.setMatchCase(true);
         DrJava.getConfig().setSetting(OptionConstants.FIND_MATCH_CASE, Boolean.valueOf(true));
       }
-      _findField.requestFocus();
+      _findField.requestFocusInWindow();
     }
   }
 
@@ -673,7 +673,7 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
         _machine.setSearchBackwards(true);
         DrJava.getConfig().setSetting(OptionConstants.FIND_SEARCH_BACKWARDS, Boolean.valueOf(true));
       }
-      _findField.requestFocus();
+      _findField.requestFocusInWindow();
     }
   }
 
@@ -687,7 +687,7 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
         _machine.setSearchAllDocuments(true);
         DrJava.getConfig().setSetting(OptionConstants.FIND_ALL_DOCUMENTS, Boolean.valueOf(true));
       }
-      _findField.requestFocus();
+      _findField.requestFocusInWindow();
     }
   }
   class MatchWholeWordListener implements ItemListener {
@@ -700,7 +700,7 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
         _machine.setMatchWholeWord();
         DrJava.getConfig().setSetting(OptionConstants.FIND_WHOLE_WORD, Boolean.valueOf(true));
       }
-      _findField.requestFocus();
+      _findField.requestFocusInWindow();
     }
   }
     // JL

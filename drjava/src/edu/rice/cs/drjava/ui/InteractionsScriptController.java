@@ -119,7 +119,7 @@ public class InteractionsScriptController {
     public void actionPerformed(ActionEvent e) {
       _model.prevInteraction();
       setActionsEnabled();
-      _interactionsPane.requestFocus();
+      _interactionsPane.requestFocusInWindow();
     }
   };
   /** Action to go forward in the script. */
@@ -127,14 +127,14 @@ public class InteractionsScriptController {
     public void actionPerformed(ActionEvent e) {
       _model.nextInteraction();
       setActionsEnabled();
-      _interactionsPane.requestFocus();
+      _interactionsPane.requestFocusInWindow();
     }
   };
   /** Action to execute the current interaction. */
   private Action _executeInteractionAction = new AbstractAction("Execute") {
     public void actionPerformed(ActionEvent e) {
       _model.executeInteraction();
-      _interactionsPane.requestFocus();
+      _interactionsPane.requestFocusInWindow();
     }
   };
   /** Action to end the script.  (Defined in constructor.) */

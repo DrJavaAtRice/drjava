@@ -695,7 +695,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     public void actionPerformed(ActionEvent e) {
       Component c = MainFrame.this.getFocusOwner();
       super.actionPerformed(e);
-      if (c != null) c.requestFocus();
+      if (c != null) c.requestFocusInWindow();
     }
   };
 
@@ -704,7 +704,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     public void actionPerformed(ActionEvent e) {
       Component c = MainFrame.this.getFocusOwner();
       super.actionPerformed(e);
-      if (c != null) c.requestFocus();
+      if (c != null) c.requestFocusInWindow();
     }
   };
 
@@ -722,7 +722,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       }
       else super.actionPerformed(e);
       
-      if (c != null) c.requestFocus();
+      if (c != null) c.requestFocusInWindow();
     }
   };
 
@@ -759,7 +759,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     public void actionPerformed(ActionEvent e) {
       _currentDefPane.endCompoundEdit();
       super.actionPerformed(e);
-      _currentDefPane.requestFocus();
+      _currentDefPane.requestFocusInWindow();
       OpenDefinitionsDocument doc = _model.getActiveDocument();
       _saveAction.setEnabled(doc.isModifiedSinceSave() || doc.isUntitled());
     }
@@ -769,7 +769,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   private DelegatingAction _redoAction = new DelegatingAction() {
     public void actionPerformed(ActionEvent e) {
       super.actionPerformed(e);
-      _currentDefPane.requestFocus();
+      _currentDefPane.requestFocusInWindow();
       OpenDefinitionsDocument doc = _model.getActiveDocument();
       _saveAction.setEnabled(doc.isModifiedSinceSave() || doc.isUntitled());
     }
@@ -796,7 +796,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       _tabbedPane.setSelectedComponent(_findReplace);
       try { Thread.sleep(100); } 
       catch(Exception e) { e.printStackTrace(); }
-      _findReplace.requestFocus();
+      _findReplace.requestFocusInWindow();
       //_setDividerLocation();
     }
   };
@@ -813,10 +813,10 @@ public class MainFrame extends JFrame implements OptionConstants {
 //      // calling this from _findReplace. Perhaps there
 //      // is a better solution.
 //      if (_lastFocusOwner == _findReplace) {
-//        _currentDefPane.requestFocus();
+//        _currentDefPane.requestFocusInWindow();
 //      }
-//      else _lastFocusOwner.requestFocus();
-      _currentDefPane.requestFocus();  // atempt to fix intermittent bug where _currentDefPane listens but does not echo and won't undo!
+//      else _lastFocusOwner.requestFocusInWindow();
+      _currentDefPane.requestFocusInWindow();  // atempt to fix intermittent bug where _currentDefPane listens but does not echo and won't undo!
     }
   };
   
@@ -837,7 +837,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   private Action _gotoLineAction = new AbstractAction("Go to Line...") {
     public void actionPerformed(ActionEvent ae) {
       _gotoLine();
-      _currentDefPane.requestFocus();
+      _currentDefPane.requestFocusInWindow();
     }
   };
 
@@ -1019,7 +1019,7 @@ public class MainFrame extends JFrame implements OptionConstants {
 
     showTab(newC);
     // need this when defPane is switched to
-    newC.requestFocus();
+    newC.requestFocusInWindow();
   }
 
   /** This method allows the user to cycle through the definitions pane and all of the open tabs.
@@ -1242,7 +1242,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       try { _model.loadHistory(_interactionsHistoryFileSelector); }
       catch (FileNotFoundException fnf) { _showFileNotFoundError(fnf); }
       catch (IOException ioe) { _showIOError(ioe); }
-      _interactionsPane.requestFocus();
+      _interactionsPane.requestFocusInWindow();
     }
   };
 
@@ -1266,7 +1266,7 @@ public class MainFrame extends JFrame implements OptionConstants {
         _interactionsScriptController = new InteractionsScriptController(ism, new AbstractAction("Close") {
           public void actionPerformed(ActionEvent e) {
             _closeInteractionsScript();
-            _interactionsPane.requestFocus();
+            _interactionsPane.requestFocusInWindow();
           }
         }, _interactionsPane);
         _interactionsScriptPane = _interactionsScriptController.getPane();
@@ -1337,7 +1337,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       catch (IOException ioe) {
         _showIOError(new IOException("An error occured writing the history to a file"));
       }
-      _interactionsPane.requestFocus();
+      _interactionsPane.requestFocusInWindow();
     }
   };
 
@@ -1345,7 +1345,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   private Action _clearHistoryAction = new AbstractAction("Clear Interactions History") {
     public void actionPerformed(ActionEvent ae) {
       _model.clearHistory();
-      _interactionsPane.requestFocus();
+      _interactionsPane.requestFocusInWindow();
     }
   };
 
@@ -1361,7 +1361,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       catch (IOException e) { _showIOError(e);}
     }
     public void windowIconified(WindowEvent ev) { }
-    public void windowOpened(WindowEvent ev) { _currentDefPane.requestFocus(); }
+    public void windowOpened(WindowEvent ev) { _currentDefPane.requestFocusInWindow(); }
   };
 
   // ------------- File Display Managers for File Icons ------------
@@ -2039,12 +2039,12 @@ public class MainFrame extends JFrame implements OptionConstants {
     _debugSplitPane.setTopComponent(_docSplitPane);
     _mainSplit.setTopComponent(_debugSplitPane);
     _debugPanel.updateData();
-    _lastFocusOwner.requestFocus();
+    _lastFocusOwner.requestFocusInWindow();
   }
 
   private void _hideDebuggerPanel() {
     _mainSplit.setTopComponent(_docSplitPane);
-    _lastFocusOwner.requestFocus();
+    _lastFocusOwner.requestFocusInWindow();
   }
 
   /** Updates the title bar with the name of the active document. */
@@ -3521,7 +3521,7 @@ public class MainFrame extends JFrame implements OptionConstants {
         //Perhaps setPositionAndScroll can be changed in the future to
         //allow this.
         //_currentDefPane.setPositionAndScroll(pos);
-        _currentDefPane.requestFocus();
+        _currentDefPane.requestFocusInWindow();
         */
       }
     }
@@ -4375,14 +4375,14 @@ public class MainFrame extends JFrame implements OptionConstants {
     _findReplace = new FindReplaceDialog(this, _model);
 
     _consoleScroll = new BorderlessScrollPane(_consolePane) {
-      public void requestFocus() {
-        _consolePane.requestFocus();
+      public boolean requestFocusInWindow() {
+        return _consolePane.requestFocusInWindow();
       }
     };
     JScrollPane interactionsScroll = new BorderlessScrollPane(_interactionsPane);
     _interactionsContainer = new JPanel(new BorderLayout()) {
-      public void requestFocus() {
-        _interactionsPane.requestFocus();
+      public boolean requestFocusInWindow() {
+         return _interactionsPane.requestFocusInWindow();
       }
     };
     _interactionsContainer.add(interactionsScroll, BorderLayout.CENTER);
@@ -4406,7 +4406,7 @@ public class MainFrame extends JFrame implements OptionConstants {
            * interactions pane.
            */
         }
-        else if (_tabbedPane.getSelectedComponent() == _consoleScroll) _consolePane.requestFocus();
+        else if (_tabbedPane.getSelectedComponent() == _consoleScroll) _consolePane.requestFocusInWindow();
 
         // Update error highlights?
         if (_currentDefPane != null) {
@@ -4586,7 +4586,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _interactionsPanePopupMenu.add(_copyInteractionToDefinitionsAction);
     _interactionsPane.addMouseListener(new RightClickMouseAdapter() {
       protected void _popupAction(MouseEvent e) {
-        _interactionsPane.requestFocus();
+        _interactionsPane.requestFocusInWindow();
         _interactionsPanePopupMenu.show(e.getComponent(), e.getX(), e.getY());
       }
     });
@@ -4595,7 +4595,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _consolePanePopupMenu.add(_clearConsoleAction);
     _consolePane.addMouseListener(new RightClickMouseAdapter() {
       protected void _popupAction(MouseEvent e) {
-        _consolePane.requestFocus();
+        _consolePane.requestFocusInWindow();
         _consolePanePopupMenu.show(e.getComponent(), e.getX(), e.getY());
       }
     });
@@ -5159,7 +5159,7 @@ public class MainFrame extends JFrame implements OptionConstants {
           // has a positive size
           if (_currentDefPane.getSize().getWidth() > 0 && _currentDefPane.getSize().getHeight() > 0) {
             _currentDefPane.centerViewOnLine(lineNumber);
-            _currentDefPane.requestFocus();
+            _currentDefPane.requestFocusInWindow();
           }
 
           if (shouldHighlight) {
@@ -5184,7 +5184,7 @@ public class MainFrame extends JFrame implements OptionConstants {
           }
           if (shouldHighlight) {
             // Give the interactions pane focus so we can debug
-            _interactionsPane.requestFocus();
+            _interactionsPane.requestFocusInWindow();
           }
           showTab(_interactionsPane);
           _updateDebugStatus();
@@ -5299,7 +5299,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       _saveAction.setEnabled(false);
       _revertAction.setEnabled(true);
       updateFileTitle();
-      _currentDefPane.requestFocus();
+      _currentDefPane.requestFocusInWindow();
       try {
         File f = doc.getFile();
         if (! _model.isProjectFile(f)) _recentFileManager.updateOpenFiles(f);
@@ -5409,7 +5409,7 @@ public class MainFrame extends JFrame implements OptionConstants {
 
           // Update title and position
           updateFileTitle();
-          _currentDefPane.requestFocus();
+          _currentDefPane.requestFocusInWindow();
           _posListener.updateLocation();
           
 //          // update display (adding "*") in navigatgorPane
@@ -6075,7 +6075,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _tabbedPane.remove(c);
     ((TabbedPanel)c).setDisplayed(false);
     _tabbedPane.setSelectedIndex(0);
-    _currentDefPane.requestFocus();
+    _currentDefPane.requestFocusInWindow();
   }
 
   /**
@@ -6100,7 +6100,7 @@ public class MainFrame extends JFrame implements OptionConstants {
             tp.setDisplayed(true);
           }
           _tabbedPane.setSelectedIndex(numVisible + 2);
-          c.requestFocus();
+          c.requestFocusInWindow();
           return;
         }
         if (tp.isDisplayed()) numVisible++;
@@ -6252,9 +6252,8 @@ public class MainFrame extends JFrame implements OptionConstants {
                                     _actionMap.get(DefaultEditorKit.deleteNextCharAction), null, "Delete Next");
   }
 
-  /**
-   * @param listener The ComponentListener to add to the open documents list
-   * This method allows for testing of the dancing UI (See MainFrameTest.testDancingUI()).
+  /** @param listener The ComponentListener to add to the open documents list
+   *  This method allows for testing of the dancing UI (See MainFrameTest.testDancingUI()).
    */
   public void addComponentListenerToOpenDocumentsList(ComponentListener listener) {
     _docSplitPane.getLeftComponent().addComponentListener(listener);
