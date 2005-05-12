@@ -64,26 +64,21 @@ import edu.rice.cs.drjava.model.compiler.*;
 import edu.rice.cs.util.*;
 import edu.rice.cs.util.text.DocumentAdapterException;
 import edu.rice.cs.drjava.CodeStatus;
+import edu.rice.cs.util.Log;
 
-/**
- * More tests over the JPDA debugger.
- * @version $Id$
+/** More tests over the JPDA debugger.
+ *  @version $Id$
  */
 public final class DebugContextTest extends DebugTestCase {
-  /**
-   * Tests that the sourcepath config option properly adds files to the
-   * search directories.
-   */
+  
+  /** Tests that the sourcepath config option properly adds files to the search directories. */
   public void testDebugSourcepath() throws Exception {
-    if (printMessages) {
-      System.out.println("----testDebugSourcePath----");
-    }
+    if (printMessages) System.out.println("----testDebugSourcePath----");
     StepTestListener debugListener = new StepTestListener();
     _debugger.addListener(debugListener);
 
     // Start up
-    OpenDefinitionsDocument doc = _startupDebugger("DrJavaDebugClass.java",
-                                                   DEBUG_CLASS);
+    OpenDefinitionsDocument doc = _startupDebugger("DrJavaDebugClass.java", DEBUG_CLASS);
     Vector<File> path = new Vector<File>();
     path.addElement(_tempDir);  // directory where doc's file is saved
 
@@ -92,18 +87,18 @@ public final class DebugContextTest extends DebugTestCase {
 
     // Run the foo() method, hitting breakpoint
     synchronized(_notifierLock) {
+      _setPendingNotifies(3);  // suspended, updated, breakpointReached
       interpretIgnoreResult("new DrJavaDebugClass().foo()");
-      _waitForNotifies(3);  // suspended, updated, breakpointReached
-      _notifierLock.wait();
+      while (_pendingNotifies > 0) _notifierLock.wait();
     }
     // Source is highlighted because document is stored in breakpoint
     debugListener.assertThreadLocationUpdatedCount(1);  // fires
 
     // Step into bar() method
     synchronized(_notifierLock) {
+      _setPendingNotifies(2);  // suspended, updated
       _asyncStep(Debugger.STEP_INTO);
-      _waitForNotifies(2);  // suspended, updated
-      _notifierLock.wait();
+      while (_pendingNotifies > 0) _notifierLock.wait();
     }
     // Source is highlighted because file is in source root set
     debugListener.assertStepRequestedCount(1);  // fires (don't wait)
@@ -116,9 +111,9 @@ public final class DebugContextTest extends DebugTestCase {
 
     // Step to next line
     synchronized(_notifierLock) {
+      _setPendingNotifies(1);  // suspended
       _asyncStep(Debugger.STEP_OVER);
-      _waitForNotifies(1);  // suspended
-      _notifierLock.wait();
+      while (_pendingNotifies > 0) _notifierLock.wait();
     }
     // Source is not highlighted
     debugListener.assertStepRequestedCount(2);  // fires (don't wait)
@@ -132,8 +127,8 @@ public final class DebugContextTest extends DebugTestCase {
     // Step to next line
     synchronized(_notifierLock) {
       _asyncStep(Debugger.STEP_OVER);
-      _waitForNotifies(2);  // suspended, updated
-      _notifierLock.wait();
+      _setPendingNotifies(2);  // suspended, updated
+      while (_pendingNotifies > 0) _notifierLock.wait();
     }
     // Source is highlighted because file is now on sourcepath
     debugListener.assertStepRequestedCount(3);  // fires (don't wait)
@@ -144,29 +139,24 @@ public final class DebugContextTest extends DebugTestCase {
     _debugger.removeListener(debugListener);
   }
 
-  /**
-   * Tests that breakpoints behave correctly in non-public classes.
-   */
-  public synchronized void testBreakpointsAndStepsInNonPublicClasses()
-    throws Exception
-  {
+  /** Tests that breakpoints behave correctly in non-public classes. */
+  public synchronized void testBreakpointsAndStepsInNonPublicClasses() throws Exception {
     if (printMessages) System.out.println("----testBreakpointsAndStepsInNonPublicClasses----");
     StepTestListener debugListener = new StepTestListener();
     _debugger.addListener(debugListener);
 
     // Start up
-    OpenDefinitionsDocument doc = _startupDebugger("DrJavaDebugClass.java",
-                                                   DEBUG_CLASS);
+    OpenDefinitionsDocument doc = _startupDebugger("DrJavaDebugClass.java", DEBUG_CLASS);
 
     // Add a breakpoint
-    _debugger.toggleBreakpoint(doc,DEBUG_CLASS.indexOf("Baz Line 1"),14);
+    _debugger.toggleBreakpoint(doc,DEBUG_CLASS.indexOf("Baz Line 1"), 14);
     debugListener.assertBreakpointSetCount(1);
 
     // Run the baz() method, hitting breakpoint
     synchronized(_notifierLock) {
+      _setPendingNotifies(3);  // suspended, updated, breakpointReached
       interpretIgnoreResult("new DrJavaDebugClass2().baz()");
-      _waitForNotifies(3);  // suspended, updated, breakpointReached
-      _notifierLock.wait();
+      while (_pendingNotifies > 0) _notifierLock.wait();
     }
 
     if (printMessages) System.out.println("----After breakpoint:\n" + getInteractionsText());
@@ -188,9 +178,9 @@ public final class DebugContextTest extends DebugTestCase {
 
     // Step to next line
     synchronized(_notifierLock) {
+      _setPendingNotifies(2);  // suspended, updated
       _asyncStep(Debugger.STEP_OVER);
-      _waitForNotifies(2);  // suspended, updated
-      _notifierLock.wait();
+      while (_pendingNotifies > 0) _notifierLock.wait();
     }
 
     if (printMessages) System.out.println("****"+getInteractionsText());
@@ -206,9 +196,9 @@ public final class DebugContextTest extends DebugTestCase {
     // Resume until next breakpoint
     synchronized(_notifierLock) {
       if (printMessages) System.out.println("resuming");
+      _setPendingNotifies(3);  // suspended, updated, breakpointReached
       _asyncResume();
-      _waitForNotifies(3);  // suspended, updated, breakpointReached
-      _notifierLock.wait();
+      while (_pendingNotifies > 0) _notifierLock.wait();
     }
     if (printMessages) System.out.println("----After one resume:\n" + getInteractionsText());
     debugListener.assertCurrThreadResumedCount(2);  //fires (no waiting)
@@ -225,10 +215,9 @@ public final class DebugContextTest extends DebugTestCase {
     _model.addListener(interpretListener);
     synchronized(_notifierLock) {
       if ( printMessages ) System.err.println("-------- resuming --------");
+      _setPendingNotifies(3);  // interactionEnded, interpreterChanged, currThreadDied (since it's the last thread)
       _asyncResume();
-      _waitForNotifies(3);  // interactionEnded, interpreterChanged, currThreadDied
-                            // here, we get a currThreadDied since it's the last thread
-      _notifierLock.wait();
+      while (_pendingNotifies > 0) _notifierLock.wait();
     }
     interpretListener.assertInteractionEndCount(1);
     _model.removeListener(interpretListener);
@@ -245,9 +234,7 @@ public final class DebugContextTest extends DebugTestCase {
     _debugger.removeListener(debugListener);
   }
 
-  /**
-   * Tests that stepping into a breakpoint works.
-   */
+  /** Tests that stepping into a breakpoint works. */
   public synchronized void testStepIntoOverBreakpoint() throws Exception {
     if (printMessages) {
       System.out.println("----testStepIntoOverBreakpoint----");
@@ -256,8 +243,7 @@ public final class DebugContextTest extends DebugTestCase {
     _debugger.addListener(debugListener);
 
     // Start up
-    OpenDefinitionsDocument doc = _startupDebugger("DrJavaDebugClass.java",
-                                                   DEBUG_CLASS);
+    OpenDefinitionsDocument doc = _startupDebugger("DrJavaDebugClass.java", DEBUG_CLASS);
 
     // Add a breakpoint
     _debugger.toggleBreakpoint(doc,DEBUG_CLASS.indexOf("Foo Line 1"), 3);
@@ -266,14 +252,12 @@ public final class DebugContextTest extends DebugTestCase {
 
     // Run the foo() method, hitting breakpoint
     synchronized(_notifierLock) {
+      _setPendingNotifies(3);  // suspended, updated, breakpointReached
       interpretIgnoreResult("new DrJavaDebugClass().foo()");
-      _waitForNotifies(3);  // suspended, updated, breakpointReached
-      _notifierLock.wait();
+      while (_pendingNotifies > 0) _notifierLock.wait();
     }
 
-    if (printMessages) {
-      System.out.println("----After breakpoint:\n" + getInteractionsText());
-    }
+    if (printMessages) System.out.println("----After breakpoint:\n" + getInteractionsText());
 
     // Ensure breakpoint is hit
     debugListener.assertBreakpointReachedCount(1);  //fires
@@ -285,9 +269,9 @@ public final class DebugContextTest extends DebugTestCase {
 
     // Step over once
     synchronized(_notifierLock) {
+      _setPendingNotifies(2);  // suspended, updated
       _asyncStep(Debugger.STEP_OVER);
-      _waitForNotifies(2);  // suspended, updated
-      _notifierLock.wait();
+      while (_pendingNotifies > 0) _notifierLock.wait();
     }
     debugListener.assertStepRequestedCount(1);  // fires (don't wait)
     debugListener.assertCurrThreadResumedCount(1); // fires (don't wait)
@@ -299,9 +283,9 @@ public final class DebugContextTest extends DebugTestCase {
 
     // Step over again
     synchronized(_notifierLock) {
+      _setPendingNotifies(2);  // suspended, updated
       _asyncStep(Debugger.STEP_OVER);
-      _waitForNotifies(2);  // suspended, updated
-      _notifierLock.wait();
+      while (_pendingNotifies > 0) _notifierLock.wait();
     }
 
     if (printMessages) {
@@ -318,10 +302,9 @@ public final class DebugContextTest extends DebugTestCase {
     InterpretListener interpretListener = new InterpretListener();
     _model.addListener(interpretListener);
     synchronized(_notifierLock) {
+      _setPendingNotifies(3);  // interactionEnded, interpreterChanged, currThreadDied (since it's the last thread)
       _asyncResume();
-      _waitForNotifies(3);  // interactionEnded, interpreterChanged, currThreadDied
-                            // here, we get a currThreadDied since it's the last thread
-      _notifierLock.wait();
+      while (_pendingNotifies > 0) _notifierLock.wait();
     }
     interpretListener.assertInteractionEndCount(1);
     _model.removeListener(interpretListener);
@@ -334,35 +317,27 @@ public final class DebugContextTest extends DebugTestCase {
     debugListener.assertThreadLocationUpdatedCount(3);
     debugListener.assertCurrThreadSuspendedCount(3);
 
-
     // Close doc and make sure breakpoints are removed
     _model.closeFile(doc);
     debugListener.assertBreakpointRemovedCount(2);  //fires (no waiting)
 
     // Shutdown the debugger
-    if (printMessages) {
-      System.out.println("Shutting down...");
-    }
+    if (printMessages) System.out.println("Shutting down...");
+
     synchronized(_notifierLock) {
+      _setPendingNotifies(1);  // shutdown
       _debugger.shutdown();
-      _waitForNotifies(1);  // shutdown
-      _notifierLock.wait();
+      while (_pendingNotifies > 0) _notifierLock.wait();
     }
 
     debugListener.assertDebuggerShutdownCount(1);  //fires
-    if (printMessages) {
-      System.out.println("Shut down.");
-    }
+    if (printMessages) System.out.println("Shut down.");
     _debugger.removeListener(debugListener);
   }
 
-  /**
-   * Tests that static fields are consistent across different interpreter contexts.
-   */
+  /** Tests that static fields are consistent across different interpreter contexts. */
   public void testStaticFieldsConsistent() throws Exception {
-    if (printMessages) {
-      System.out.println("----testStaticFieldsConsistent----");
-    }
+    if (printMessages) System.out.println("----testStaticFieldsConsistent----");
     StepTestListener debugListener = new StepTestListener();
     _debugger.addListener(debugListener);
 
@@ -376,9 +351,9 @@ public final class DebugContextTest extends DebugTestCase {
 
     // Run the main method, hitting breakpoint
     synchronized(_notifierLock) {
+      _setPendingNotifies(6);  // (suspended, updated, breakpointReached) *2
       interpretIgnoreResult("java DrJavaDebugStaticField");
-      _waitForNotifies(6);  // (suspended, updated, breakpointReached) *2
-      _notifierLock.wait();
+      while (_pendingNotifies > 0) _notifierLock.wait();
     }
 
     // TODO: Why is this call being made?
@@ -401,9 +376,9 @@ public final class DebugContextTest extends DebugTestCase {
 
     // Step over once
     synchronized(_notifierLock) {
+      _setPendingNotifies(2);  // suspended, updated
       _asyncStep(Debugger.STEP_OVER);
-      _waitForNotifies(2);  // suspended, updated
-      _notifierLock.wait();
+      while (_pendingNotifies > 0) _notifierLock.wait();
     }
     debugListener.assertStepRequestedCount(1);  // fires (don't wait)
     debugListener.assertCurrThreadResumedCount(1); // fires (don't wait)
@@ -417,9 +392,9 @@ public final class DebugContextTest extends DebugTestCase {
 
     // Step over again
     synchronized(_notifierLock) {
+      _setPendingNotifies(2);  // suspended, updated
       _asyncStep(Debugger.STEP_OVER);
-      _waitForNotifies(2);  // suspended, updated
-      _notifierLock.wait();
+      while (_pendingNotifies > 0) _notifierLock.wait();
     }
     if (printMessages) {
       System.out.println("****"+getInteractionsText());
@@ -434,9 +409,9 @@ public final class DebugContextTest extends DebugTestCase {
     assertEquals("this has correct value for x after increment", "6", interpret("this.x"));
 
     synchronized(_notifierLock) {
+      _setPendingNotifies(2);  // suspended, updated
       _asyncDoSetCurrentThread(threadB);
-      _waitForNotifies(2);  // suspended, updated
-      _notifierLock.wait();
+      while (_pendingNotifies > 0) _notifierLock.wait();
     }
     interpret("");
     assertInteractionsContains("The current thread has changed.");
@@ -473,9 +448,9 @@ public final class DebugContextTest extends DebugTestCase {
 
     // Run an inner method, hitting breakpoint
     synchronized(_notifierLock) {
+      _setPendingNotifies(3);  // suspended, updated, breakpointReached
       interpretIgnoreResult("new Monkey().bar()");//new MonkeyInner().new MonkeyInnerInner().innerMethod()");
-      _waitForNotifies(3);  // suspended, updated, breakpointReached
-      _notifierLock.wait();
+      while (_pendingNotifies > 0) _notifierLock.wait();
     }
     _debugger.addWatch("foo");
     _debugger.addWatch("innerFoo");
@@ -490,9 +465,9 @@ public final class DebugContextTest extends DebugTestCase {
     }
     // Step to line 11
     synchronized(_notifierLock) {
+      _setPendingNotifies(2);  // suspended, updated
       _asyncStep(Debugger.STEP_OVER);
-      _waitForNotifies(2);  // suspended, updated
-      _notifierLock.wait();
+      while (_pendingNotifies > 0) _notifierLock.wait();
     }
     debugListener.assertStepRequestedCount(1);  // fires (don't wait)
     debugListener.assertCurrThreadResumedCount(1); // fires (don't wait)
@@ -530,9 +505,9 @@ public final class DebugContextTest extends DebugTestCase {
     }
     // Step to line 12
     synchronized(_notifierLock) {
+      _setPendingNotifies(2);  // suspended, updated
       _asyncStep(Debugger.STEP_OVER);
-      _waitForNotifies(2);  // suspended, updated
-      _notifierLock.wait();
+      while (_pendingNotifies > 0) _notifierLock.wait();
     }
     debugListener.assertStepRequestedCount(2);  // fires (don't wait)
     debugListener.assertCurrThreadResumedCount(2); // fires (don't wait)
@@ -546,9 +521,9 @@ public final class DebugContextTest extends DebugTestCase {
     }
     // Step to line 13
     synchronized(_notifierLock) {
+      _setPendingNotifies(2);  // suspended, updated
       _asyncStep(Debugger.STEP_OVER);
-      _waitForNotifies(2);  // suspended, updated
-      _notifierLock.wait();
+      while (_pendingNotifies > 0) _notifierLock.wait();
     }
     debugListener.assertStepRequestedCount(3);  // fires (don't wait)
     debugListener.assertCurrThreadResumedCount(3); // fires (don't wait)
@@ -562,9 +537,9 @@ public final class DebugContextTest extends DebugTestCase {
     }
     // Step to line 14
     synchronized(_notifierLock) {
+      _setPendingNotifies(2);  // suspended, updated
       _asyncStep(Debugger.STEP_OVER);
-      _waitForNotifies(2);  // suspended, updated
-      _notifierLock.wait();
+      while (_pendingNotifies > 0) _notifierLock.wait();
     }
     debugListener.assertStepRequestedCount(4);  // fires (don't wait)
     debugListener.assertCurrThreadResumedCount(4); // fires (don't wait)
@@ -578,9 +553,9 @@ public final class DebugContextTest extends DebugTestCase {
     }
     // Step to line 15
     synchronized(_notifierLock) {
+      _setPendingNotifies(2);  // suspended, updated
       _asyncStep(Debugger.STEP_OVER);
-      _waitForNotifies(2);  // suspended, updated
-      _notifierLock.wait();
+      while (_pendingNotifies > 0) _notifierLock.wait();
     }
     debugListener.assertStepRequestedCount(5);  // fires (don't wait)
     debugListener.assertCurrThreadResumedCount(5); // fires (don't wait)
@@ -609,9 +584,9 @@ public final class DebugContextTest extends DebugTestCase {
     }
     // Step into static method
     synchronized(_notifierLock) {
+      _setPendingNotifies(2);  // suspended, updated
       _asyncStep(Debugger.STEP_INTO);
-      _waitForNotifies(2);  // suspended, updated
-      _notifierLock.wait();
+      while (_pendingNotifies > 0) _notifierLock.wait();
     }
     debugListener.assertStepRequestedCount(6);  // fires (don't wait)
     debugListener.assertCurrThreadResumedCount(6); // fires (don't wait)
@@ -638,9 +613,9 @@ public final class DebugContextTest extends DebugTestCase {
 
     // Resumes one thread, finishing it and switching to the next break point
     synchronized(_notifierLock) {
+      _setPendingNotifies(3);  // breakpointReached, suspended, updated
       _asyncResume();
-      _waitForNotifies(3);  // breakpointReached, suspended, updated
-      _notifierLock.wait();
+      while (_pendingNotifies > 0) _notifierLock.wait();
     }
     debugListener.assertStepRequestedCount(6);  // fires (don't wait)
     debugListener.assertCurrThreadResumedCount(7); // fires (don't wait)
@@ -687,9 +662,9 @@ public final class DebugContextTest extends DebugTestCase {
 
     // Run an inner method, hitting breakpoint
     synchronized(_notifierLock) {
+      _setPendingNotifies(3);  // suspended, updated, breakpointReached
       interpretIgnoreResult("MonkeyStaticStuff.MonkeyInner.MonkeyTwoDeep.MonkeyThreeDeep.threeDeepMethod();");
-      _waitForNotifies(3);  // suspended, updated, breakpointReached
-      _notifierLock.wait();
+      while (_pendingNotifies > 0) _notifierLock.wait();
     }
     _debugger.addWatch("foo");
     _debugger.addWatch("innerFoo");
@@ -748,9 +723,9 @@ public final class DebugContextTest extends DebugTestCase {
 
     // Run the main method, hitting breakpoint
     synchronized(_notifierLock) {
+      _setPendingNotifies(3);  // suspended, updated, breakpointReached
       interpretIgnoreResult("java InnerClassWithLocalVariables arg");
-      _waitForNotifies(3);  // suspended, updated, breakpointReached
-      _notifierLock.wait();
+      while (_pendingNotifies > 0) _notifierLock.wait();
     }
     _debugger.addWatch("numArgs");
     _debugger.addWatch("args");

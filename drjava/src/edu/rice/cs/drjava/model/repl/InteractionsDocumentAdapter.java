@@ -202,12 +202,16 @@ public class InteractionsDocumentAdapter extends AbstractDJDocument {
    *  @return true iff the end of the current interaction is an open comment block
    */
   public boolean isInCommentBlock() {
-    synchronized(_reduced) {
-      resetReducedModelLocation();
-      ReducedModelState state = stateAtRelLocation(getLength() - _currentLocation);
-      boolean toReturn = (state.equals(ReducedModelStates.INSIDE_BLOCK_COMMENT));
-      return toReturn;
+    readLock();
+    try {
+      synchronized(_reduced) {
+        resetReducedModelLocation();
+        ReducedModelState state = stateAtRelLocation(getLength() - _currentLocation);
+        boolean toReturn = (state.equals(ReducedModelStates.INSIDE_BLOCK_COMMENT));
+        return toReturn;
+      }
     }
+    finally { readUnlock(); }
   }
   
    /** Inserts the given exception data into the document with the given style.

@@ -57,7 +57,7 @@ import javax.swing.*;
 import java.rmi.registry.Registry;
 
 import edu.rice.cs.util.*;
-import edu.rice.cs.util.text.DocumentAdapter;
+import edu.rice.cs.util.text.ConsoleInterface;
 import edu.rice.cs.util.text.DocumentAdapterException;
 import edu.rice.cs.util.classloader.ClassFileError;
 import edu.rice.cs.util.swing.Utilities;
@@ -381,7 +381,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
   }
 
   protected void interpretIgnoreResult(String input) throws DocumentAdapterException {
-    DocumentAdapter interactionsDoc = _model.getInteractionsDocument();
+    ConsoleInterface interactionsDoc = _model.getInteractionsDocument();
     interactionsDoc.insertText(interactionsDoc.getDocLength(), input,
                                InteractionsDocument.DEFAULT_STYLE);
 
@@ -421,7 +421,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
    * Returns the current contents of the interactions document
    */
   protected String getInteractionsText() throws DocumentAdapterException {
-    DocumentAdapter doc = _model.getInteractionsDocument();
+    ConsoleInterface doc = _model.getInteractionsDocument();
     return doc.getDocText(0, doc.getDocLength());
   }
 

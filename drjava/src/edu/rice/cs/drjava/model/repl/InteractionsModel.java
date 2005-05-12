@@ -55,7 +55,7 @@ import edu.rice.cs.drjava.CodeStatus;
 import edu.rice.cs.drjava.model.FileOpenSelector;
 import edu.rice.cs.drjava.model.OperationCanceledException;
 import edu.rice.cs.util.*;
-import edu.rice.cs.util.text.DocumentAdapter;
+import edu.rice.cs.util.text.ConsoleInterface;
 import edu.rice.cs.util.text.DocumentAdapterException;
 
 /** A model which can serve as the glue between an InteractionsDocument and any JavaInterpreter.  This 
@@ -103,14 +103,14 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   /** The input listener to listen for requests to System.in. */
   protected InputListener _inputListener;
 
-  protected DocumentAdapter _adapter;
+  protected ConsoleInterface _adapter;
   
   /** Constructs an InteractionsModel.
    *  @param adapter DocumentAdapter to use in the InteractionsDocument
    *  @param historySize Number of lines to store in the history
    *  @param writeDelay Number of milliseconds to wait after each println
    */
-  public InteractionsModel(DocumentAdapter adapter, int historySize, int writeDelay) {
+  public InteractionsModel(ConsoleInterface adapter, int historySize, int writeDelay) {
     _writeDelay = writeDelay;
     _document = new InteractionsDocument(adapter, historySize);
     _adapter = adapter;

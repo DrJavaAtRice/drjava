@@ -56,10 +56,8 @@ import edu.rice.cs.util.text.DocumentAdapterException;
  */
 public final class InteractionsDocumentTest extends TestCase {
   protected InteractionsDocument _doc;
-
-  /**
-   * Initialize fields for each test.
-   */
+  
+  /** Initialize fields for each test. */
   protected void setUp() {
     _doc = new InteractionsDocument(new InteractionsDocumentAdapter());
   }
@@ -86,46 +84,29 @@ public final class InteractionsDocumentTest extends TestCase {
     int origLength = _doc.getDocLength();
     _doc.insertText(origLength, "text", InteractionsDocument.DEFAULT_STYLE);
     _doc.insertBeforeLastPrompt("before", InteractionsDocument.DEFAULT_STYLE);
-    assertEquals("Length after inserts",
-                 origLength + 10,  // orig + "before" + "text"
-                 _doc.getDocLength());
+    assertEquals("Length after inserts", origLength + 10, _doc.getDocLength()); // orig + "before" + "text"
     _doc.clearCurrentInteraction();
-    assertEquals("Length after clear",
-                 origLength + 6,  // orig + "before"
-                 _doc.getDocLength());
+    assertEquals("Length after clear", origLength + 6, _doc.getDocLength()); // orig + "before"
   }
 
-  /**
-   * Tests that initial contents are the banner and prompt, and that
-   * reset works.
-   */
+  /** Tests that initial contents are the banner and prompt, and that reset works. */
   public void testContentsAndReset() throws DocumentAdapterException {
     String origText = _doc.getBanner() + _doc.getPrompt();
-    assertEquals("Contents before insert",
-                 origText, _doc.getDocText(0, _doc.getDocLength()));
-
+    assertEquals("Contents before insert", origText, _doc.getDocText(0, _doc.getDocLength()));
     // Insert some text
     _doc.insertText(_doc.getDocLength(), "text", InteractionsDocument.DEFAULT_STYLE);
     _doc.insertBeforeLastPrompt("before", InteractionsDocument.DEFAULT_STYLE);
-    assertEquals("Contents before reset",
-                 _doc.getBanner() + "before" + _doc.getPrompt() + "text",
+    assertEquals("Contents before reset", _doc.getBanner() + "before" + _doc.getPrompt() + "text",
                  _doc.getDocText(0, _doc.getDocLength()));
-
-    // Reset should clear
     _doc.reset();
-    assertEquals("Contents after reset",
-                 origText, _doc.getDocText(0, _doc.getDocLength()));
+    assertEquals("Contents after reset", origText, _doc.getDocText(0, _doc.getDocLength()));
   }
 
-  /**
-   * Tests that inserting a newline works.
-   */
+  /** Tests that inserting a newline works. */
   public void testInsertNewLine() throws DocumentAdapterException {
     int origLength = _doc.getDocLength();
     _doc.insertText(origLength, "command", InteractionsDocument.DEFAULT_STYLE);
-    assertEquals("current interaction before newline",
-                 "command",
-                 _doc.getCurrentInteraction());
+    assertEquals("current interaction before newline", "command", _doc.getCurrentInteraction());
     _doc.insertNewLine(origLength + 2);
     assertEquals("current interaction after newline",
                  "co" + System.getProperty("line.separator") + "mmand",

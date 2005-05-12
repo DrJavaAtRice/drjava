@@ -809,10 +809,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
   }
   
   
-  /**
-   * used to save the caret position, selection, and scroll
-   * when setting the definitions pane to be inactive
-   */
+  /** Uxed to save the caret position, selection, and scroll when setting the definitions pane to be inactive */
   
   private int _savedVScroll;
   private int _savedHScroll;

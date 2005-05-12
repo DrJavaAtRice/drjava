@@ -270,8 +270,8 @@ public final class JavaDebugInterpreterTest extends DebugTestCase {
     // Start debugger
     synchronized(_notifierLock) {
       _debugger.startup();
-      _waitForNotifies(1);  // startup
-      _notifierLock.wait();
+      _setPendingNotifies(1);  // startup
+      while (_pendingNotifies > 0) _notifierLock.wait();
     }
 
     // Set one breakpoint
@@ -281,8 +281,8 @@ public final class JavaDebugInterpreterTest extends DebugTestCase {
     // Run the main() method, hitting the breakpoint
     synchronized(_notifierLock) {
       interpretIgnoreResult("java MonkeyStuff");
-       _waitForNotifies(3); // suspended, updated, breakpointReached
-       _notifierLock.wait();
+       _setPendingNotifies(3); // suspended, updated, breakpointReached
+       while (_pendingNotifies > 0) _notifierLock.wait();
      }
 
     // Calling interpret instead of interpretIgnoreResult because we want
@@ -347,8 +347,8 @@ public final class JavaDebugInterpreterTest extends DebugTestCase {
     if (printMessages) System.out.println("Shutting down...");
     synchronized(_notifierLock) {
       _debugger.shutdown();
-      _waitForNotifies(1);  // shutdown
-      _notifierLock.wait();
+      _setPendingNotifies(1);  // shutdown
+      while (_pendingNotifies > 0) _notifierLock.wait();
     }
 
     debugListener.assertDebuggerShutdownCount(1);  //fires
@@ -371,8 +371,8 @@ public final class JavaDebugInterpreterTest extends DebugTestCase {
     // Start debugger
     synchronized(_notifierLock) {
       _debugger.startup();
-      _waitForNotifies(1);  // startup
-      _notifierLock.wait();
+      _setPendingNotifies(1);  // startup
+      while (_pendingNotifies > 0) _notifierLock.wait();
     }
 
     // Set one breakpoint
@@ -383,8 +383,8 @@ public final class JavaDebugInterpreterTest extends DebugTestCase {
     synchronized(_notifierLock) {
       //interpret("package monkey;");
       interpretIgnoreResult("monkey.MonkeyStaticStuff.MonkeyInner.MonkeyTwoDeep.MonkeyThreeDeep.threeDeepMethod();");
-      _waitForNotifies(3); // suspended, updated, breakpointReached
-      _notifierLock.wait();
+      _setPendingNotifies(3); // suspended, updated, breakpointReached
+      while (_pendingNotifies > 0) _notifierLock.wait();
     }
 
     assertEquals("should find field of static outer class",
@@ -458,8 +458,8 @@ public final class JavaDebugInterpreterTest extends DebugTestCase {
     }
     synchronized(_notifierLock) {
       _debugger.shutdown();
-      _waitForNotifies(1);  // shutdown
-      _notifierLock.wait();
+      _setPendingNotifies(1);  // shutdown
+      while (_pendingNotifies > 0) _notifierLock.wait();
     }
 
     debugListener.assertDebuggerShutdownCount(1);  //fires
@@ -478,8 +478,8 @@ public final class JavaDebugInterpreterTest extends DebugTestCase {
     // Start debugger
     synchronized(_notifierLock) {
       _debugger.startup();
-      _waitForNotifies(1);  // startup
-      _notifierLock.wait();
+      _setPendingNotifies(1);  // startup
+      while (_pendingNotifies > 0) _notifierLock.wait();
     }
 
     // Set one breakpoint
@@ -491,8 +491,8 @@ public final class JavaDebugInterpreterTest extends DebugTestCase {
     // Run the main() method, hitting both breakpoints in different threads
     synchronized(_notifierLock) {
       interpretIgnoreResult("new Monkey().bar()");
-       _waitForNotifies(3); // suspended, updated, breakpointReached
-       _notifierLock.wait();
+       _setPendingNotifies(3); // suspended, updated, breakpointReached
+       while (_pendingNotifies > 0) _notifierLock.wait();
      }
 
     // Test accessing a field initialized to null
@@ -506,8 +506,8 @@ public final class JavaDebugInterpreterTest extends DebugTestCase {
     // Resumes this thread, switching to the next break point
     synchronized(_notifierLock) {
       _asyncResume();
-      _waitForNotifies(3);  // breakpointReached, suspended, updated
-      _notifierLock.wait();
+      _setPendingNotifies(3);  // breakpointReached, suspended, updated
+      while (_pendingNotifies > 0) _notifierLock.wait();
     }
     // Test accessing final local variables
     assertEquals("Should be able to access localVar", "11", interpret("localVar"));
@@ -521,8 +521,8 @@ public final class JavaDebugInterpreterTest extends DebugTestCase {
     }
     synchronized(_notifierLock) {
       _debugger.shutdown();
-      _waitForNotifies(1);  // shutdown
-      _notifierLock.wait();
+      _setPendingNotifies(1);  // shutdown
+      while (_pendingNotifies > 0) _notifierLock.wait();
     }
 
     debugListener.assertDebuggerShutdownCount(1);  //fires

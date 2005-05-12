@@ -137,7 +137,7 @@ public class JUnitTestManager {
   /** Runs the pending test suite set up by the preceding call to findTestClasses
    *  @return false if no test suite (even an empty one) has been set up
    */
-  public synchronized boolean runTestSuite() {
+  public /* synchronized */ boolean runTestSuite() {
     
     if (_testClassNames == null || _testClassNames.isEmpty()) return false;
     

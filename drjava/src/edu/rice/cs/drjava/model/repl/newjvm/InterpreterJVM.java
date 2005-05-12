@@ -362,22 +362,15 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
   }
   
   private String _processReturnValue(Object o) {
-    if (o instanceof String) {
-      return "\"" + o + "\"";
-    }
-    else if (o instanceof Character) {
-      return "'" + o + "'";
-    }
-    else {
-      return o.toString();
-    }
+    if (o instanceof String) return "\"" + o + "\"";
+    if (o instanceof Character) return "'" + o + "'";
+    return o.toString();
   }
   
-  /**
-   * Gets the string representation of the value of a variable in the current interpreter.
-   * @param var the name of the variable
-   * @return null if the variable is not defined, "null" if the value is null, or else
-   * the string representation of the value
+  /** Gets the string representation of the value of a variable in the current interpreter.
+   *  @param var the name of the variable
+   *  @return null if the variable is not defined, "null" if the value is null, or else the string representation
+   *          of the value
    */
   public String getVariableToString(String var) throws RemoteException {
     // Add to the default interpreter, if it is a JavaInterpreter
@@ -385,28 +378,19 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     if (i instanceof JavaInterpreter) {
       try {
         Object value = ((JavaInterpreter)i).getVariable(var);
-        if (value == null) {
-          return "null";
-        }
-        else if (value instanceof koala.dynamicjava.interpreter.UninitializedObject) {
-          return null;
-        }
-        else {
-          return _processReturnValue(value);
-        }
+        if (value == null)  return "null";
+        if (value instanceof koala.dynamicjava.interpreter.UninitializedObject) return null;
+        return _processReturnValue(value);
       }
       catch (IllegalStateException e) {
         // variable was not defined
         return null;
       }
     }
-    else {
-      return null;
-    }
+    return null;
   }
   
-  /**
-   * Gets the class name of a variable in the current interpreter.
+  /** Gets the class name of a variable in the current interpreter.
    * @param var the name of the variable
    */
   public String getVariableClassName(String var) throws RemoteException {
@@ -1144,17 +1128,11 @@ class InterpreterData {
   }
   
   /** Gets the interpreter. */
-  public Interpreter getInterpreter() {
-    return _interpreter;
-  }
+  public Interpreter getInterpreter() { return _interpreter; }
   
   /** Returns whether this interpreter is currently in progress with an interaction. */
-  public boolean isInProgress() {
-    return _inProgress;
-  }
+  public boolean isInProgress() { return _inProgress; }
   
   /** Sets whether this interpreter is currently in progress. */
-  public void setInProgress(boolean inProgress) {
-    _inProgress = inProgress;
-  }
+  public void setInProgress(boolean inProgress) { _inProgress = inProgress; }
 }

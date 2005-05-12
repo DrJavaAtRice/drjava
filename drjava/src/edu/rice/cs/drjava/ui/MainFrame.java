@@ -820,10 +820,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
   };
   
-  /** 
-   * does the find next in the opposite direction. If the 
-   * direction is backward it searches forward 
-   */
+  /** Does the find next in the opposite direction. If the direction is backward it searches forward. */
   private Action _findPrevAction = new AbstractAction("Find Previous") {
     public void actionPerformed(ActionEvent ae) {
       boolean sb = _findReplace.getSearchBackwards();
@@ -836,8 +833,9 @@ public class MainFrame extends JFrame implements OptionConstants {
   /** Asks the user for a line number and goes there. */
   private Action _gotoLineAction = new AbstractAction("Go to Line...") {
     public void actionPerformed(ActionEvent ae) {
-      _gotoLine();
+      int pos = _gotoLine();
       _currentDefPane.requestFocusInWindow();
+      if (pos != -1) _currentDefPane.setCaretPosition(pos);  // brute force attempt to fix intermittent failure to display caret
     }
   };
 
@@ -1090,35 +1088,25 @@ public class MainFrame extends JFrame implements OptionConstants {
 
   /** Enables the debugger */
   private Action _toggleDebuggerAction = new AbstractAction("Debug Mode") {
-    public void actionPerformed(ActionEvent ae) {
-      debuggerToggle();
-    }
+    public void actionPerformed(ActionEvent ae) { debuggerToggle(); }
   };
 
   /** Resumes debugging */
   private Action _resumeDebugAction = new AbstractAction("Resume Debugger") {
     public void actionPerformed(ActionEvent ae) {
-      try {
-        debuggerResume();
-      }
-      catch (DebugException de) {
-        _showDebugError(de);
-      }
+      try { debuggerResume(); }
+      catch (DebugException de) { _showDebugError(de); }
     }
   };
 
   /** Steps into the next method call */
   private Action _stepIntoDebugAction = new AbstractAction("Step Into") {
-    public void actionPerformed(ActionEvent ae) {
-      debuggerStep(Debugger.STEP_INTO);
-    }
+    public void actionPerformed(ActionEvent ae) { debuggerStep(Debugger.STEP_INTO); }
   };
 
   /** Runs the next line, without stepping into methods */
   private Action _stepOverDebugAction = new AbstractAction("Step Over") {
-    public void actionPerformed(ActionEvent ae) {
-      debuggerStep(Debugger.STEP_OVER);
-    }
+    public void actionPerformed(ActionEvent ae) { debuggerStep(Debugger.STEP_OVER); }
   };
 
   /** Steps out of the next method call */
@@ -1138,21 +1126,13 @@ public class MainFrame extends JFrame implements OptionConstants {
   };*/
 
   /** Toggles a breakpoint on the current line */
-  Action _toggleBreakpointAction =
-    new AbstractAction("Toggle Breakpoint on Current Line")
-  {
-    public void actionPerformed(ActionEvent ae) {
-      debuggerToggleBreakpoint();
-    }
+  Action _toggleBreakpointAction = new AbstractAction("Toggle Breakpoint on Current Line") {
+    public void actionPerformed(ActionEvent ae) { debuggerToggleBreakpoint(); }
   };
 
   /** Clears all breakpoints */
-  private Action _clearAllBreakpointsAction =
-    new AbstractAction("Clear All Breakpoints")
-  {
-    public void actionPerformed(ActionEvent ae) {
-      debuggerClearAllBreakpoints();
-    }
+  private Action _clearAllBreakpointsAction = new AbstractAction("Clear All Breakpoints") {
+    public void actionPerformed(ActionEvent ae) { debuggerClearAllBreakpoints(); }
   };
 
   /** Cuts from the caret to the end of the current line to the clipboard. */
@@ -1169,9 +1149,7 @@ public class MainFrame extends JFrame implements OptionConstants {
         _actionMap.get(DefaultEditorKit.selectionForwardAction).actionPerformed(ae);
         cutAction.actionPerformed(ae);
       }
-      else {
-        cutAction.actionPerformed(ae);
-      }
+      else cutAction.actionPerformed(ae);
     }
   };
 
@@ -1184,9 +1162,8 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
   };
 
-  /**
-   * Moves the caret to the "intelligent" beginning of the line.
-   * @see #_getBeginLinePos
+  /** Moves the caret to the "intelligent" beginning of the line.
+   *  @see #_getBeginLinePos
    */
   private Action _beginLineAction = new AbstractAction("Begin Line") {
     public void actionPerformed(ActionEvent ae) {
@@ -1195,9 +1172,8 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
   };
 
-  /**
-   * Selects to the "intelligent" beginning of the line.
-   * @see #_getBeginLinePos
+  /** Selects to the "intelligent" beginning of the line.
+   *  @see #_getBeginLinePos
    */
   private Action _selectionBeginLineAction = new AbstractAction("Select to Beginning of Line") {
     public void actionPerformed(ActionEvent ae) {
@@ -2000,15 +1976,16 @@ public class MainFrame extends JFrame implements OptionConstants {
     Debugger debugger = _model.getDebugger();
 //    if (!debugger.isAvailable()) return;  // Redundant! This test is the first check made by inDebugMode()
 
-    try {
-      if (inDebugMode()) {
-        // Turn off debugger
-        debugger.shutdown();
-      }
+    try { 
+      if (inDebugMode()) debugger.shutdown();
       else {
         // Turn on debugger
-        debugger.startup();
-        _updateDebugStatus();
+        hourglassOn();
+        try {
+          debugger.startup();
+          _updateDebugStatus();
+        }
+        finally { hourglassOff(); }
       }
     }
     catch (DebugException de) {
@@ -2877,39 +2854,49 @@ public class MainFrame extends JFrame implements OptionConstants {
                       new Integer(_docSplitPane.getDividerLocation()));
   }
 
-  private void _compile() {
-    final OpenDefinitionsDocument doc = _model.getActiveDocument();
-    final SwingWorker worker = new SwingWorker() {
-      public Object construct() {
-        try { _model.getCompilerModel().compile(doc); }
-        catch (FileMovedException fme) { _showFileMovedError(fme); }
-        catch (IOException ioe) { _showIOError(ioe); }
-        return null;
-      }
-    };
-    worker.start();
+  private void _cleanUpForCompile() {
+    if (inDebugMode()) _model.getDebugger().shutdown();
   }
-
-  private void _compileFolder() {
-    INavigatorItem n;
-    Enumeration<INavigatorItem> e = _model.getDocumentNavigator().getDocuments();
-    final LinkedList<OpenDefinitionsDocument> l = new LinkedList<OpenDefinitionsDocument>();
-    if (_model.getDocumentNavigator().isGroupSelected()) {
-      while (e.hasMoreElements()) {
-        n = e.nextElement();
-        if (_model.getDocumentNavigator().isSelectedInGroup(n)) l.add( (OpenDefinitionsDocument) n);  // FIX THIS!
-      }
-      
-      final SwingWorker worker = new SwingWorker() {
-        public Object construct() {
-          try { _model.getCompilerModel().compile(l); }
+  
+  private void _compile() {
+    _cleanUpForCompile();
+    hourglassOn();
+    try {
+      final OpenDefinitionsDocument doc = _model.getActiveDocument();
+      new Thread("Compile Document") {
+        public void run() {
+          try { _model.getCompilerModel().compile(doc); }
           catch (FileMovedException fme) { _showFileMovedError(fme); }
           catch (IOException ioe) { _showIOError(ioe); }
-          return null;
         }
-      };
-      worker.start();
+      }.start();
     }
+    finally { hourglassOff(); }
+  }
+  
+  private void _compileFolder() {
+    _cleanUpForCompile();
+    hourglassOn();
+    try {
+      INavigatorItem n;
+      Enumeration<INavigatorItem> e = _model.getDocumentNavigator().getDocuments();
+      final LinkedList<OpenDefinitionsDocument> l = new LinkedList<OpenDefinitionsDocument>();
+      if (_model.getDocumentNavigator().isGroupSelected()) {
+        while (e.hasMoreElements()) {
+          n = e.nextElement();
+          if (_model.getDocumentNavigator().isSelectedInGroup(n)) l.add( (OpenDefinitionsDocument) n);  // FIX THIS!
+        }
+        
+        new Thread("Compile Folder") {
+          public void run() {
+            try { _model.getCompilerModel().compile(l); }
+            catch (FileMovedException fme) { _showFileMovedError(fme); }
+            catch (IOException ioe) { _showIOError(ioe); }
+          }
+        }.start();
+      }
+    }
+    finally { hourglassOff(); }
   }
 
   private boolean showCleanWarning() {
@@ -2970,6 +2957,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   }
 
   private void _compileProject() { 
+    _cleanUpForCompile();
     
 //    new ScrollableDialog(null, "MainFrame.compileProject called", "", "").show();
 
@@ -2990,6 +2978,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   }
 
   private void _compileAll() {
+    _cleanUpForCompile();
     final SwingWorker worker = new SwingWorker() {
       public Object construct() {
         hourglassOn();
@@ -3179,17 +3168,15 @@ public class MainFrame extends JFrame implements OptionConstants {
     _runAction.setEnabled(_runActionEnabled);
   }
   
-  /**
-   * Suspends the current execution of the debugger
-   *
-  private void debuggerSuspend() throws DebugException {
-    if (inDebugMode())
-      _model.getDebugger().suspend();
-  }*/
+//  /**
+//   * Suspends the current execution of the debugger
+//   */
+//  private void debuggerSuspend() throws DebugException {
+//    if (inDebugMode())
+//      _model.getDebugger().suspend();
+//  }
 
-  /**
-   * Resumes the debugger's current execution
-   */
+  /** Resumes the debugger's current execution. */
   void debuggerResume() throws DebugException {
     if (inDebugMode()) {
       _model.getDebugger().resume();
@@ -3200,9 +3187,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   /** Steps in the debugger. */
   void debuggerStep(int flag) {
     if (inDebugMode()) {
-      try {
-        _model.getDebugger().step(flag);
-      }
+      try { _model.getDebugger().step(flag); }
       catch (IllegalStateException ise) {
         // This may happen if the user if stepping very frequently,
         // and is even more likely if they are using both hotkeys
@@ -3486,43 +3471,41 @@ public class MainFrame extends JFrame implements OptionConstants {
   /**
    * Ask the user what line they'd like to jump to, then go there.
    */
-  private void _gotoLine() {
+  private int _gotoLine() {
     final String msg = "What line would you like to go to?";
     final String title = "Go to Line";
-    String lineStr = JOptionPane.showInputDialog(this,
-                                                 msg,
-                                                 title,
-                                                 JOptionPane.QUESTION_MESSAGE);
+    String lineStr = JOptionPane.showInputDialog(this, msg, title, JOptionPane.QUESTION_MESSAGE);
     try {
       if (lineStr != null) {
         int lineNum = Integer.parseInt(lineStr);
         _currentDefPane.centerViewOnLine(lineNum);
         int pos = _model.getActiveDocument().gotoLine(lineNum);
         _currentDefPane.setCaretPosition(pos);
+        return pos;
         /*
-        // Center the destination line on the screen
-        // (this code taken from FindReplaceDialog's _selectFoundItem method)
-        JScrollPane defScroll = (JScrollPane)
-          _defScrollPanes.get(_model.getActiveDocument());
-        int viewHeight = (int)defScroll.getViewport().getSize().getHeight();
-        // Scroll to make sure this item is visible
-        // Centers the selection in the viewport
-        Rectangle startRect = _currentDefPane.modelToView(pos);
-        int startRectY = (int)startRect.getY();
-        startRect.setLocation(0, startRectY-viewHeight/2);
-        //Rectangle endRect = _defPane.modelToView(to - 1);
-        Point endPoint = new Point(0, startRectY+viewHeight/2-1);
-        startRect.add(endPoint);
-
-        _currentDefPane.scrollRectToVisible(startRect);
-
-        //Commented out this call because it would be impossible to
-        //center the viewport on pos without passing in the viewport.
-        //Perhaps setPositionAndScroll can be changed in the future to
-        //allow this.
-        //_currentDefPane.setPositionAndScroll(pos);
-        _currentDefPane.requestFocusInWindow();
-        */
+         // Center the destination line on the screen
+         // (this code taken from FindReplaceDialog's _selectFoundItem method)
+         JScrollPane defScroll = (JScrollPane)
+         _defScrollPanes.get(_model.getActiveDocument());
+         int viewHeight = (int)defScroll.getViewport().getSize().getHeight();
+         // Scroll to make sure this item is visible
+         // Centers the selection in the viewport
+         Rectangle startRect = _currentDefPane.modelToView(pos);
+         int startRectY = (int)startRect.getY();
+         startRect.setLocation(0, startRectY-viewHeight/2);
+         //Rectangle endRect = _defPane.modelToView(to - 1);
+         Point endPoint = new Point(0, startRectY+viewHeight/2-1);
+         startRect.add(endPoint);
+         
+         _currentDefPane.scrollRectToVisible(startRect);
+         
+         //Commented out this call because it would be impossible to
+         //center the viewport on pos without passing in the viewport.
+         //Perhaps setPositionAndScroll can be changed in the future to
+         //allow this.
+         //_currentDefPane.setPositionAndScroll(pos);
+         _currentDefPane.requestFocusInWindow();
+         */
       }
     }
     catch (NumberFormatException nfe) {
@@ -3531,6 +3514,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       // Do nothing.
     }
     //catch (BadLocationException ble) { }
+    return -1;
   }
 
   /**
@@ -4334,22 +4318,18 @@ public class MainFrame extends JFrame implements OptionConstants {
                          SpringLayout.SOUTH, _currLocationField);*/
   }
 
-  /**
-   * Inner class to handle the updating of current position within the
-   * document.  Registered with the definitionspane.
+  /** Inner class to handle the updating of current position within the document.  Registered with the definitionspane.
    **/
   private class PositionListener implements CaretListener {
 
     public void caretUpdate( CaretEvent ce ) {
-      _model.getActiveDocument().
-        setCurrentLocation(ce.getDot());
+      _model.getActiveDocument().setCurrentLocation(ce.getDot());
       updateLocation();
     }
 
     public void updateLocation() {
       DefinitionsPane p = _currentDefPane;
-      _currLocationField.setText(p.getCurrentLine() +
-                                 ":" + p.getCurrentCol() + "\t");
+      _currLocationField.setText(p.getCurrentLine() + ":" + p.getCurrentCol() + "\t");
     }
   }
 
@@ -5026,7 +5006,7 @@ public class MainFrame extends JFrame implements OptionConstants {
 
   /** Disable any step timer. */
   private void _disableStepTimer() {
-    synchronized (_debugStepTimer) {  // Why is this synchronized?
+    synchronized(_debugStepTimer) {  // Why is this synchronized?
       if (_debugStepTimer.isRunning()) _debugStepTimer.stop();
     }
   }
@@ -5101,13 +5081,11 @@ public class MainFrame extends JFrame implements OptionConstants {
   /** Listens to events from the debugger. */
   private class UIDebugListener implements DebugListener {
 
-    // This field is used by threadLocationUpdated. We want to
-    // call centerViewOnLine the second time setSize is called
-    // on _currentDefPane if it is a new definitions pane. This
-    // actually centers the correct line instead of having it
-    // appear at the top of the screen. There ought to be a
-    // cleaner way to do this...
-    // private boolean _firstCallFromSetSize;
+    /* This field is used by threadLocationUpdated. We want to call centerViewOnLine the second time setSize is 
+     * called on _currentDefPane if it is a new definitions pane. This actually centers the correct line instead 
+     * of having it appear at the top of the screen. There ought to be a cleaner way to do this...
+     */
+//    private boolean _firstCallFromSetSize;
 
     public void debuggerStarted() {
       // Only change GUI from event-dispatching thread
@@ -5219,7 +5197,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     /** Called when a step is requested on the current thread. */
     public void stepRequested() {
       // Print a message if step takes a long time
-      synchronized (_debugStepTimer) {  // Why is this synchronized
+      synchronized(_debugStepTimer) {  // Why is this synchronized
         if (!_debugStepTimer.isRunning()) _debugStepTimer.start();
       }
     }
@@ -5267,8 +5245,7 @@ public class MainFrame extends JFrame implements OptionConstants {
               }
             }
             catch (DebugException de) {
-              _showError(de, "Debugger Error",
-                         "Error with a thread in the debugger.");
+              _showError(de, "Debugger Error", "Error with a thread in the debugger.");
             }
           }
         }
@@ -5412,9 +5389,9 @@ public class MainFrame extends JFrame implements OptionConstants {
           _currentDefPane.requestFocusInWindow();
           _posListener.updateLocation();
           
-//          // update display (adding "*") in navigatgorPane
-//          if (isModified) _model.getDocumentNavigator().activeDocumentModified();
-
+          // update display (adding "*") in navigatgorPane
+          if (isModified) _model.getDocumentNavigator().repaint();
+          
           
           try { active.revertIfModifiedOnDisk(); }
           catch (FileMovedException fme) { _showFileMovedError(fme); }

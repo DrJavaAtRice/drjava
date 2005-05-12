@@ -112,8 +112,11 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   /** The error model containing all current JUnit errors. */
   private JUnitErrorModel _junitErrorModel;
   
-  /** State flag to prevent losing results of a test in progress. */
+  /** State flag to prevent starting new tests on top of old ones */
   private boolean _testInProgress = false;
+  
+  /** lock to protect _testInProgress */
+  final private Object _testLock = new Object();
   
   /** The document used to display JUnit test results.
    *  Used only for testing. */
@@ -185,8 +188,8 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
    *  @param files a list of their source files in the same order as qualified class names.
    */
   public void junitAll(List<String> qualifiedClassnames, List<File> files) {
-    synchronized (_compilerModel) {
-      synchronized (this) {
+    synchronized(_compilerModel) {
+      synchronized(_testLock) {
         if (_testInProgress) return;
         _testInProgress = true;
       }
@@ -202,7 +205,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
       try { _jvm.runTestSuite(); } 
       catch(Throwable t) {
         _notifier.junitEnded();
-        synchronized (this) { _testInProgress = false;}
+        synchronized(_testLock) { _testInProgress = false;}
        throw new UnexpectedException(t); 
       }
     }
@@ -231,12 +234,12 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
       // Method getTest in junit.framework.BaseTestRunner can throw a
       // NoClassDefFoundError (via reflection).
         _notifier.junitEnded();
-        synchronized (this) { _testInProgress = false; }
+        synchronized(_testLock) { _testInProgress = false; }
         throw e;
     }
     catch (ExitingNotAllowedException enae) {  // test attempted to call System.exit
       _notifier.junitEnded();  // balances junitStarted()
-      synchronized (this) { _testInProgress = false; }
+      synchronized(_testLock) { _testInProgress = false; }
       throw enae;
     }
   }
@@ -245,7 +248,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     // If a test is running, don't start another one.
     
     // Set _testInProgress flag
-    synchronized (this) { 
+    synchronized(_testLock) { 
       if (_testInProgress) return; 
       _testInProgress = true;
     }
@@ -406,16 +409,10 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
 //      new ScrollableDialog(null, "junit setup loop terminated", classNames.toString(), "").show();
     }
     
-    // synchronized over _compilerModel to ensure that compilation and junit testing
-    // are mutually exclusive.
-    // synchronized over this so that junitStarted is 
-    // called before the testing thread (JUnitTestManager) makes any notifications
-    // to the notifier.  This can happen if the test fails quickly or if the test
-    // class is not found.
-//    new ScrollableDialog(null, "Candidate test class names are:", "", classNames.toString()).show();
-    synchronized (_compilerModel) {
-//        new ScrollableDialog(null, "DefaultJunitModel: holding _compileModel lock", "", "").show();
-        /** Set up junit test suite on slave JVM; get TestCase classes forming that suite */
+    // synchronized over _compilerModel to ensure that compilation and junit testing are mutually exclusive.
+   
+    synchronized(_compilerModel) {
+      /** Set up junit test suite on slave JVM; get TestCase classes forming that suite */
       List<String> tests;
       try { tests = _jvm.findTestClasses(classNames, files); }
       catch(IOException e) { throw new UnexpectedException(e); }
@@ -439,7 +436,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
         // Probably a java.rmi.UnmarshalException caused by the interruption of unit testing.
         // Swallow the exception and proceed.
         _notifier.junitEnded();  // balances junitStarted()
-        synchronized (this) { _testInProgress = false;}
+        synchronized(_testLock) { _testInProgress = false;}
         throw new UnexpectedException(t);
       }
     }
@@ -464,14 +461,10 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
    * @param isTestAll whether or not it was a use of the test all button
    */
   public void nonTestCase(final boolean isTestAll) {
-    // NOTE: junitStarted is called in a different thread from the testing thread,
-    //       so it is possible that this is called before the other thread calls 
-    //       the junitStarted.  We want the test to terminate AFTER it starts. Otherwise
-    //       any thread that starts waiting for the test to end after the firing of
-    //       junitStarted will never be notified. (same with all terminal events)
-    //       The synchronization using _testInProgress takes care of this problem.
+    // NOTE: junitStarted is called in a different thread from the testing thread.  The _testInProgress flag
+    //       is used to prevent a new test from being started and overrunning the existing one.
       _notifier.nonTestCase(isTestAll);
-      synchronized (this) { _testInProgress = false;}
+      synchronized(_testLock) { _testInProgress = false;}
   }
   
   /** Called to indicate that an illegal class file was encountered
@@ -506,7 +499,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
 //    new ScrollableDialog(null, "DefaultJUnitModel.testSuiteEnded(...) called", "", "").show();
     _junitErrorModel = new JUnitErrorModel(errors, _getter, true);
     _notifier.junitEnded();
-    synchronized(this) { _testInProgress = false; }
+    synchronized(_testLock) { _testInProgress = false; }
 //    new ScrollableDialog(null, "DefaultJUnitModel.testSuiteEnded(...) finished", "", "").show();
   }
   
@@ -527,11 +520,11 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   
   /** Called when the JVM used for unit tests has registered. */
   public void junitJVMReady() {
-    synchronized (this) { if (! _testInProgress) return; }
+    synchronized(_testLock) { if (! _testInProgress) return; }
     JUnitError[] errors = new JUnitError[1];
     errors[0] = new JUnitError("Previous test suite was interrupted", true, "");
     _junitErrorModel = new JUnitErrorModel(errors, _getter, true);
     _notifier.junitEnded();
-    synchronized (this) { _testInProgress = false; }
+    synchronized(_testLock) { _testInProgress = false; }
   }
 }

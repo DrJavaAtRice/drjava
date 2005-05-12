@@ -258,106 +258,74 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
     super.tearDown();
   }
 
-
-  /**
-   * Ensures that the given object will wait for n notifications.
-   * Callers must call o.wait() AFTER this is called.  (We can't call it
-   * here, because then the synchronized _notifyObject method can never
-   * be entered.)  Use _notifyObject instead of o.notify() when using
-   * this method.
-   * Only one object (o) can use this at a time, since it uses a field
-   * to store the number of pending notifications.
-   *
-   * @param n The number of times to be "notified" through _notifyObject
+  /** Ensures that the given object will wait for n notifications. Callers must call o.wait() AFTER this is 
+   *  called.  Use _notifyObject instead of o.notify() when using this method. Only one object (o) can use this 
+   *  synchronization protocol at a time, since it uses a field to store the number of pending notifications.
+   *  @param n The number of times to be "notified" through _notifyObject
    */
-  protected void _waitForNotifies(int n) throws InterruptedException {
+  protected void _setPendingNotifies(int n) throws InterruptedException {
     synchronized(_notifierLock) {
-      if (printMessages) {
-        System.out.println("waiting for " + n + " notifications...");
-      }
+      if (printMessages) System.out.println("waiting for " + n + " notifications...");
       _pendingNotifies = n;
     }
   }
 
-  /**
-   * Notifies _notifierLock if the after the notify count has expired.
-   * See _waitForNotifies
-   */
+  /** Notifies _notifierLock if the after the notify count has expired. See _setPendingNotifies. */
   protected void _notifyLock() {
     synchronized(_notifierLock) {
-      if (printMessages) {
-        System.out.println("notified");
-      }
+      if (printMessages) System.out.println("notified");
       _pendingNotifies--;
       if (_pendingNotifies == 0) {
-        if (printMessages) {
-          System.out.println("Notify count reached 0 -- notifying!");
-        }
-        _notifierLock.notify();
+        if (printMessages) System.out.println("Notify count reached 0 -- notifying!");
+        _notifierLock.notifyAll();  // can accommodate multiple threads waiting on this event (NOT USED?)
       }
-      if (_pendingNotifies < 0) {
-        fail("Notified too many times");
-      }
+      if (_pendingNotifies < 0) fail("Notified too many times");
     }
   }
 
-
-  /**
-   * Cleanly starts the debugger with a newly compiled file saved in a
-   * temporary directory.  Assumes that the file will compile successfully.
-   * @param fileName Name of the file to save in a temp directory
-   * @param classText String containing the code for the class to compile
-   * @return OpenDefinitionsDocument containing the compiled source file
+  /** Cleanly starts the debugger with a newly compiled file saved in a temporary directory.  Assumes that the 
+   *  file will compile successfully.
+   *  @param fileName Name of the file to save in a temp directory
+   *  @param classText String containing the code for the class to compile
+   *  @return OpenDefinitionsDocument containing the compiled source file
    */
-  protected OpenDefinitionsDocument _startupDebugger(String fileName, String classText)
-    throws Exception
-  {
+  protected OpenDefinitionsDocument _startupDebugger(String fileName, String classText) throws Exception {
     // Create a file in the temporary directory
     File file = new File(_tempDir, fileName);
     return _startupDebugger(file, classText);
   }
 
-  /**
-   * Cleanly starts the debugger with a newly compiled file saved in a
-   * temporary directory.  Assumes that the file will compile successfully.
-   * @param file File to save the class in
-   * @param classText String containing the code for the class to compile
-   * @return OpenDefinitionsDocument containing the compiled source file
+  /** Cleanly starts the debugger with a newly compiled file saved in a temporary directory.  Assumes that the 
+   *  file will compile successfully.
+   *  @param file File to save the class in
+   *  @param classText String containing the code for the class to compile
+   *  @return OpenDefinitionsDocument containing the compiled source file
    */
-  protected OpenDefinitionsDocument _startupDebugger(File file, String classText)
-    throws Exception
-  {
+  protected OpenDefinitionsDocument _startupDebugger(File file, String classText) throws Exception {
     // Compile the file
     OpenDefinitionsDocument doc = doCompile(classText, file);
 
     // Start debugger
     synchronized(_notifierLock) {
+      _setPendingNotifies(1);  // startup
       _debugger.startup();
-      _waitForNotifies(1);  // startup
-      _notifierLock.wait();
+      while (_pendingNotifies > 0) _notifierLock.wait();
     }
     return doc;
   }
 
-  /**
-   * Cleanly shuts down the debugger, without having to wait for
-   * a suspended interaction to complete.
-   */
+  /** Cleanly shuts down the debugger, without having to wait for a suspended interaction to complete. */
   protected void _shutdownWithoutSuspendedInteraction() throws Exception {
     _debugger.removeAllBreakpoints();
 
     // Shutdown the debugger
-    if (printMessages) {
-      System.out.println("Shutting down...");
-    }
+    if (printMessages) System.out.println("Shutting down...");
     synchronized(_notifierLock) {
+      _setPendingNotifies(1);  // shutdown
       _debugger.shutdown();
-      _waitForNotifies(1);  // shutdown
-      _notifierLock.wait();
+      while (_pendingNotifies > 0) _notifierLock.wait();
     }
-    if (printMessages) {
-      System.out.println("Shut down.");
-    }
+    if (printMessages) System.out.println("Shut down.");
   }
 
   /**
@@ -368,9 +336,7 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
     _debugger.removeAllBreakpoints();
 
     // Shutdown the debugger
-    if (printMessages) {
-      System.out.println("Shutting down...");
-    }
+    if (printMessages) System.out.println("Shutting down...");
     InterpretListener interpretListener = new InterpretListener() {
        public void interpreterChanged(boolean inProgress) {
          // Don't notify: happens in the same thread
@@ -379,36 +345,27 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
      };
     _model.addListener(interpretListener);
     synchronized(_notifierLock) {
+      _setPendingNotifies(2);  // interactionEnded, shutdown
       _debugger.shutdown();
-      _waitForNotifies(2);  // interactionEnded, shutdown
-      _notifierLock.wait();
+      while (_pendingNotifies > 0) _notifierLock.wait();
     }
     interpretListener.assertInteractionEndCount(1);
     interpretListener.assertInterpreterChangedCount(1);  // fires (don't wait)
     _model.removeListener(interpretListener);
 
-    if (printMessages) {
-      System.out.println("Shut down.");
-    }
+    if (printMessages) System.out.println("Shut down.");
   }
 
-  /**
-   * Sets the current debugger thread to th
-   */
-  protected void _doSetCurrentThread(final DebugThreadData th) throws DebugException {
-    _debugger.setCurrentThread(th);
+  /** Sets the current debugger thread to the specified thread t.*/
+  protected void _doSetCurrentThread(final DebugThreadData t) throws DebugException {
+    _debugger.setCurrentThread(t);
   }
 
-  /**
-   * Resumes the debugger asynchronously so as to aovid
-   * getting notified before we start waiting for notifies
-   */
+  /** Resumes the debugger asynchronously so as to avoid getting notified before we start waiting for notifies. */
   protected void _asyncStep(final int whatKind) {
     new Thread("asyncStep Thread") {
       public void run() {
-        try{
-          _debugger.step(whatKind);
-        }
+        try { _debugger.step(whatKind); }
         catch(DebugException dbe) {
           dbe.printStackTrace();
           listenerFail("Debugger couldn't be resumed!\n" + dbe);
@@ -424,9 +381,7 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
   protected void _asyncResume() {
     new Thread("asyncResume Thread") {
       public void run() {
-        try{
-          _debugger.resume();
-        }
+        try { _debugger.resume(); }
         catch(DebugException dbe) {
           dbe.printStackTrace();
           listenerFail("Debugger couldn't be resumed!\n" + dbe);
@@ -435,30 +390,20 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
     }.start();
   }
 
-  /**
-   * Sets the current thread in a new thread to avoid
-   * being notified of events before we start waiting for them
-   */
+  /** Sets the current thread in a new thread to avoid being notified of events before we start waiting for them. */
   protected void _asyncDoSetCurrentThread(final DebugThreadData th) {
     new Thread("asyncDoSetCurrentThread Thread") {
       public void run() {
-        try {
-          _doSetCurrentThread(th);
-        }
+        try { _doSetCurrentThread(th); }
         catch (DebugException dbe) {
           dbe.printStackTrace();
-          listenerFail("Couldn't set current thread in _asyncDoSetCurrentThread\n" +
-                       dbe);
+          listenerFail("Couldn't set current thread in _asyncDoSetCurrentThread\n" + dbe);
         }
       }
     }.start();
   }
 
-
-  /**
-   * Listens to events from the debugger to ensure that they happen at the
-   * correct times.
-   */
+  /** Listens to events from the debugger to ensure that they happen at the correct times. */
   protected class DebugTestListener implements DebugListener {
     protected int debuggerStartedCount = 0;
     protected int debuggerShutdownCount = 0;
@@ -483,8 +428,7 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
     }
 
     public void assertThreadLocationUpdatedCount(int i) {
-      assertEquals("number of times threadLocationUpdated fired", i,
-                   threadLocationUpdatedCount);
+      assertEquals("number of times threadLocationUpdated fired", i, threadLocationUpdatedCount);
     }
 
     public void assertBreakpointSetCount(int i) {
@@ -500,110 +444,70 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
     }
 
     public void assertStepRequestedCount(int i) {
-      assertEquals("number of times stepRequested fired", i,
-                   stepRequestedCount);
+      assertEquals("number of times stepRequested fired", i, stepRequestedCount);
     }
 
     public void assertStepFinishedCount(int i) {
-      assertEquals("number of times stepRequested fired", i,
-                   stepRequestedCount);
+      assertEquals("number of times stepRequested fired", i, stepRequestedCount);
     }
 
     public void assertCurrThreadSuspendedCount(int i) {
-      assertEquals("number of times currThreadSuspended fired", i,
-                   currThreadSuspendedCount);
+      assertEquals("number of times currThreadSuspended fired", i, currThreadSuspendedCount);
     }
 
     public void assertCurrThreadResumedCount(int i) {
-      assertEquals("number of times currThreadResumed fired", i,
-                   currThreadResumedCount);
+      assertEquals("number of times currThreadResumed fired", i, currThreadResumedCount);
     }
 
     public void assertCurrThreadSetCount(int i) {
-      assertEquals("number of times currThreadSet fired", i,
-                   currThreadSetCount);
+      assertEquals("number of times currThreadSet fired", i, currThreadSetCount);
     }
 
     public void assertThreadStartedCount(int i) {
-      assertEquals("number of times threadStarted fired", i,
-                   threadStartedCount);
+      assertEquals("number of times threadStarted fired", i,threadStartedCount);
     }
 
     public void assertCurrThreadDiedCount(int i) {
-      assertEquals("number of times currThreadDied fired", i,
-                   currThreadDiedCount);
+      assertEquals("number of times currThreadDied fired", i, currThreadDiedCount);
     }
 
     public void assertNonCurrThreadDiedCount(int i) {
-      assertEquals("number of times nonCurrThreadDied fired", i,
-                   nonCurrThreadDiedCount);
+      assertEquals("number of times nonCurrThreadDied fired", i, nonCurrThreadDiedCount);
     }
 
 
-    public void debuggerStarted() {
-      fail("debuggerStarted fired unexpectedly");
-    }
+    public void debuggerStarted() { fail("debuggerStarted fired unexpectedly"); }
 
-    public void debuggerShutdown() {
-      fail("debuggerShutdown fired unexpectedly");
-    }
+    public void debuggerShutdown() { fail("debuggerShutdown fired unexpectedly"); }
 
     public void threadLocationUpdated(OpenDefinitionsDocument doc, int lineNumber, boolean shouldHighlight) {
       fail("threadLocationUpdated fired unexpectedly");
     }
 
-    public void breakpointSet(Breakpoint bp) {
-      fail("breakpointSet fired unexpectedly");
-    }
+    public void breakpointSet(Breakpoint bp) { fail("breakpointSet fired unexpectedly"); }
 
-    public void breakpointReached(Breakpoint bp) {
-      fail("breakpointReached fired unexpectedly");
-    }
+    public void breakpointReached(Breakpoint bp) { fail("breakpointReached fired unexpectedly"); }
 
-    public void breakpointRemoved(Breakpoint bp) {
-      fail("breakpointRemoved fired unexpectedly");
-    }
+    public void breakpointRemoved(Breakpoint bp) { fail("breakpointRemoved fired unexpectedly"); }
 
-    public void stepRequested() {
-      fail("stepRequested fired unexpectedly");
-    }
+    public void stepRequested() { fail("stepRequested fired unexpectedly"); }
 
-    public void currThreadSuspended() {
-      fail("currThreadSuspended fired unexpectedly");
-    }
+    public void currThreadSuspended() { fail("currThreadSuspended fired unexpectedly"); }
 
-    public void currThreadResumed() {
-      fail("currThreadResumed fired unexpectedly");
-    }
+    public void currThreadResumed() { fail("currThreadResumed fired unexpectedly"); }
 
-    public void currThreadSet(DebugThreadData dtd) {
-      fail("currThreadSet fired unexpectedly");
-    }
+    public void currThreadSet(DebugThreadData dtd) { fail("currThreadSet fired unexpectedly"); }
 
-    /**
-     * This won't fail because threads could be starting at any time.
-     * We have to expect this to be fired.
-     */
-    public void threadStarted() {
-      threadStartedCount++;
-    }
+    /** This won't fail because threads could be starting at any time. We have to expect this to be fired. */
+    public void threadStarted() { threadStartedCount++; }
 
-    public void currThreadDied() {
-      fail("currThreadDied fired unexpectedly");
-    }
+    public void currThreadDied() { fail("currThreadDied fired unexpectedly"); }
 
-    /**
-     * This won't fail because threads could be dying at any time.
-     * We have to expect this to be fired.
-     */
-    public void nonCurrThreadDied() {
-      nonCurrThreadDiedCount++;
-    }
+    /** This won't fail because threads could be dying at any time. We have to expect this to be fired. */
+    public void nonCurrThreadDied() { nonCurrThreadDiedCount++; }
   }
 
-  /**
-   * DebugTestListener for all tests starting the debugger.
-   */
+  /** DebugTestListener for all tests starting the debugger. */
   protected class DebugStartAndStopListener extends DebugTestListener {
     public void debuggerStarted() {
       // EventHandler's thread: test should wait
@@ -623,9 +527,7 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
     }
   }
 
-  /**
-   * DebugTestListener for all tests setting breakpoints.
-   */
+  /** DebugTestListener for all tests setting breakpoints. */
   protected class BreakpointTestListener extends DebugStartAndStopListener {
     public BreakpointTestListener() { }
     public void breakpointSet(Breakpoint bp) {
@@ -683,9 +585,7 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
     }
   }
 
-  /**
-   * DebugTestListener for all tests using the stepper.
-   */
+  /** DebugTestListener for all tests using the stepper. */
   protected class StepTestListener extends BreakpointTestListener {
     public void stepRequested() {
       // Manager's thread: test shouldn't wait
@@ -694,11 +594,8 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
     }
   }
 
-  /**
-   * TestListener that listens for an interpretation to end, and
-   * then notifies anyone waiting on it.  (Necessary to prevent tests
-   * from overlapping.)
-   */
+  /** TestListener that listens for an interpretation to end, and then notifies anyone waiting on it.  
+   *  (Necessary to prevent tests from overlapping.) */
   protected class InterpretListener extends TestListener {
     public void interactionStarted() {
       synchronized(_notifierLock) {

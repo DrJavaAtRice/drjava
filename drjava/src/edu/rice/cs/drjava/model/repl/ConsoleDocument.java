@@ -46,14 +46,14 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.model.repl;
 
 import edu.rice.cs.util.UnexpectedException;
-import edu.rice.cs.util.text.DocumentAdapter;
+import edu.rice.cs.util.text.ConsoleInterface;
 import edu.rice.cs.util.text.DocumentEditCondition;
 import edu.rice.cs.util.text.DocumentAdapterException;
 
 //TODO: convert this class to use a readers/writers locking protocol.
 
 /** @version $Id$ */
-public class ConsoleDocument implements DocumentAdapter {
+public class ConsoleDocument implements ConsoleInterface {
   
   /** Default text style. */
   public static final String DEFAULT_STYLE = "default";
@@ -71,7 +71,7 @@ public class ConsoleDocument implements DocumentAdapter {
   public static final String DEFAULT_CONSOLE_PROMPT = "";
 
   /** The document storing the text for this console model. */
-  protected final DocumentAdapter _document;
+  protected final ConsoleInterface _document;
 
   /** A runnable command to use for a notification beep. */
   protected volatile Runnable _beep;
@@ -85,10 +85,10 @@ public class ConsoleDocument implements DocumentAdapter {
   /** Whether the document currently has a prompt and is ready to accept input. */
   protected volatile boolean _hasPrompt;
 
-  /** Creates a new ConsoleDocument with the given DocumentAdapter.
-   *  @param adapter the DocumentAdapter to use
+  /** Creates a new ConsoleDocument with the given ConsoleInterface.
+   *  @param adapter the ConsoleInterface to use
    */
-  public ConsoleDocument(DocumentAdapter adapter) {
+  public ConsoleDocument(ConsoleInterface adapter) {
     _document = adapter;
     
     _beep = new Runnable() { public void run() { } };
@@ -109,7 +109,11 @@ public class ConsoleDocument implements DocumentAdapter {
   /** Sets the string to use for the prompt.
    *  @param prompt String to use for the prompt.
    */
-  public synchronized void setPrompt(String prompt) { _prompt = prompt; }
+  public void setPrompt(String prompt) { 
+    acquireWriteLock();
+    _prompt = prompt;
+    releaseWriteLock();
+  }
 
   /** Gets the object which determines whether an insert/remove edit should be applied based on the inputs.
    *  @return the DocumentEditCondition to determine legality of inputs
@@ -128,67 +132,92 @@ public class ConsoleDocument implements DocumentAdapter {
   /** Sets the prompt position.
    *  @param newPos the new position.
    */
-  public synchronized void setPromptPos(int newPos) { _promptPos = newPos; }
+  public void setPromptPos(int newPos) { 
+    acquireReadLock();
+    _promptPos = newPos; 
+    releaseReadLock();
+  }
 
   /** Sets a runnable action to use as a beep.
    *  @param beep Runnable beep command
    */
-  public synchronized void setBeep(Runnable beep) { _beep = beep;  }
+  public void setBeep(Runnable beep) { 
+    acquireReadLock();
+    _beep = beep; 
+    releaseReadLock();
+  }
 
   /** Resets the document to a clean state. */
-  public synchronized void reset() {
+  public void reset() {
+    acquireWriteLock();
     try {
       forceRemoveText(0, _document.getDocLength());
       _promptPos = 0;
     }
     catch (DocumentAdapterException e) { throw new UnexpectedException(e); }
+    finally { releaseWriteLock(); }
   }
 
   /** Prints a prompt for a new input. */
-  public synchronized void insertPrompt() {
+  public void insertPrompt() {
+    acquireWriteLock();
     try {
-      _promptPos = _document.getDocLength() + _prompt.length();
-      _hasPrompt = true;
+//      append(_prompt, DEFAULT_STYLE);  // need forceAppend!
+//      _promptPos = _document.getDocLength();
+//      _hasPrompt = true;
       forceInsertText(_document.getDocLength(), _prompt, DEFAULT_STYLE);
+      _promptPos = _document.getDocLength();
+      _hasPrompt = true;
+       
     }
     catch (DocumentAdapterException e) { throw new UnexpectedException(e);  }
+    finally { releaseWriteLock(); }
   }
 
   /** Disables the prompt in this document. */
-  public synchronized void disablePrompt() {
+  public void disablePrompt() {
+    acquireWriteLock();
+    try {
     _hasPrompt = false;
     _promptPos = _document.getDocLength();
+    }
+    finally { releaseWriteLock(); }
   }
 
   /** Inserts a new line at the given position.
    *  @param pos Position to insert the new line
    */
-  public synchronized void insertNewLine(int pos) {
+  public void insertNewLine(int pos) {
     // Correct the position if necessary
-    if (pos > getDocLength())  pos = getDocLength();
-    else if (pos < 0) pos = 0;
-
+    acquireWriteLock();
     try {
+      int len = _document.getDocLength();
+      if (pos > len)  pos = len;
+      else if (pos < 0) pos = 0;
+      
       String newLine = System.getProperty("line.separator");
       insertText(pos, newLine, DEFAULT_STYLE);
     }
-    catch (DocumentAdapterException e) {
-      // Shouldn't happen after we've corrected it
-      throw new UnexpectedException(e);
-    }
+    catch (DocumentAdapterException e) { throw new UnexpectedException(e); }
+    finally { releaseWriteLock(); }
   }
 
   /** Gets the position immediately before the prompt, or the doc length if there is no prompt. */
-  public synchronized int getPositionBeforePrompt() {
-    if (_hasPrompt) return _promptPos - _prompt.length();
-    return getDocLength();
+  public int getPositionBeforePrompt() {
+    acquireReadLock();
+    try {
+      if (_hasPrompt) return _promptPos - _prompt.length();
+      return _document.getDocLength();
+    }
+    finally { releaseReadLock(); }
   }
 
   /** Inserts the given string with the given attributes just before the most recent prompt.
    *  @param text String to insert
    *  @param style name of style to format the string
    */
-  public synchronized void insertBeforeLastPrompt(String text, String style) {
+  public void insertBeforeLastPrompt(String text, String style) {
+    acquireWriteLock();
     try {
       int pos = getPositionBeforePrompt();
       _promptPos += text.length();
@@ -196,25 +225,45 @@ public class ConsoleDocument implements DocumentAdapter {
       _document.forceInsertText(pos, text, style);
     }
     catch (DocumentAdapterException ble) { throw new UnexpectedException(ble); }
+    finally { releaseWriteLock(); }
   }
 
-  /**
-   * Inserts a string into the document at the given offset
-   * and the given named style, if the edit condition allows it.
-   * @param offs Offset into the document
-   * @param str String to be inserted
-   * @param style Name of the style to use.  Must have been
-   * added using addStyle.
-   * @throws DocumentAdapterException if the offset is illegal
+  /** Inserts a string into the document at the given offset and named style, if the edit condition allows it.
+   *  @param offs Offset into the document
+   *  @param str String to be inserted
+   *  @param style Name of the style to use.  Must have been
+   *  added using addStyle.
+   *  @throws DocumentAdapterException if the offset is illegal
    */
-  public synchronized void insertText(int offs, String str, String style) throws DocumentAdapterException {
-    if (offs < _promptPos) _beep.run();
-    else {
+  public void insertText(int offs, String str, String style) throws DocumentAdapterException {
+    acquireWriteLock();
+    try {
+      if (offs < _promptPos) _beep.run();
+      else {
+        _addToStyleLists(offs,str,style);
+        _document.insertText(offs, str, style);
+      }
+    }
+    finally { releaseWriteLock(); }
+  }
+  
+  /** Appends a string to in the given named style, if the edit condition allows it.
+   *  @param offs Offset into the document
+   *  @param str String to be inserted
+   *  @param style Name of the style to use.  Must have been
+   *  added using addStyle.
+   *  @throws DocumentAdapterException if the offset is illegal
+   */
+  public void append(String str, String style) throws DocumentAdapterException {
+    acquireWriteLock();
+    try {
+      int offs = _document.getDocLength();
       _addToStyleLists(offs,str,style);
       _document.insertText(offs, str, style);
     }
+    finally { releaseWriteLock(); }
   }
-
+  
   /** Inserts a string into the document at the given offset and the given named style, regardless of the edit 
    *  condition.
    *  @param offs Offset into the document
@@ -222,14 +271,18 @@ public class ConsoleDocument implements DocumentAdapter {
    *  @param style Name of the style to use.  Must have been added using addStyle.
    *  @throws DocumentAdapterException if the offset is illegal
    */
-  public synchronized void forceInsertText(int offs, String str, String style) throws DocumentAdapterException {
-    _addToStyleLists(offs,str,style);
-    _document.forceInsertText(offs, str, style);
+  public void forceInsertText(int offs, String str, String style) throws DocumentAdapterException {
+    acquireWriteLock();
+    try {
+      _addToStyleLists(offs,str,style);
+      _document.forceInsertText(offs, str, style);
+    }
+    finally { releaseWriteLock(); }
   }
   
   private void _addToStyleLists(int offs, String str, String style) {
     if (_document instanceof InteractionsDocumentAdapter) 
-      ((InteractionsDocumentAdapter)_document).addColoring(offs,offs + str.length(),style);
+      ((InteractionsDocumentAdapter)_document).addColoring(offs, offs + str.length(), style);
   }
 
   /** Removes a portion of the document, if the edit condition allows it.
@@ -237,9 +290,13 @@ public class ConsoleDocument implements DocumentAdapter {
    *  @param len Number of characters to remove
    *  @throws DocumentAdapterException if the offset or length are illegal
    */
-  public synchronized void removeText(int offs, int len) throws DocumentAdapterException {
-    if (offs < _promptPos) _beep.run();
-    else _document.removeText(offs, len);
+  public void removeText(int offs, int len) throws DocumentAdapterException {
+    acquireWriteLock();
+    try {
+      if (offs < _promptPos) _beep.run();
+      else _document.removeText(offs, len);
+    }
+    finally { releaseWriteLock(); }
   }
 
   /** Removes a portion of the document, regardless of the edit condition.
@@ -247,7 +304,7 @@ public class ConsoleDocument implements DocumentAdapter {
    *  @param len Number of characters to remove
    *  @throws DocumentAdapterException if the offset or length are illegal
    */
-  public synchronized void forceRemoveText(int offs, int len) throws DocumentAdapterException {
+  public void forceRemoveText(int offs, int len) throws DocumentAdapterException {
     _document.forceRemoveText(offs, len);
   }
 
@@ -259,31 +316,37 @@ public class ConsoleDocument implements DocumentAdapter {
    *  @param len Number of characters to return
    *  @throws DocumentAdapterException if the offset or length are illegal
    */
-  public synchronized String getDocText(int offs, int len) throws DocumentAdapterException {
+  public String getDocText(int offs, int len) throws DocumentAdapterException {
     return _document.getDocText(offs, len);
   }
 
   /** Returns the string that the user has entered at the current prompt.
    *  May contain newline characters.
    */
-  public synchronized String getCurrentInput() {
-    try {  return getDocText(_promptPos, getDocLength() - _promptPos); }
-    catch (DocumentAdapterException e) {  throw new UnexpectedException(e); }
+  public String getCurrentInput() {
+    acquireReadLock();
+    try {
+      try { return getDocText(_promptPos, _document.getDocLength() - _promptPos); }
+      catch (DocumentAdapterException e) { throw new UnexpectedException(e); }
+    }
+    finally { releaseReadLock(); }
   }
 
   /** Clears the current input text. */
-  public synchronized void clearCurrentInput() {  _clearCurrentInputText(); }
+  public void clearCurrentInput() {  _clearCurrentInputText(); }
 
   /** Removes the text from the current prompt to the end of the document. */
   protected void _clearCurrentInputText() {
+    acquireWriteLock();
     try {
       // Delete old value of current line
-      removeText(_promptPos, getDocLength() - _promptPos);
+      removeText(_promptPos, _document.getDocLength() - _promptPos);
     }
     catch (DocumentAdapterException ble) { throw new UnexpectedException(ble); }
+    finally { releaseWriteLock(); }
   }
 
-  /** Class to ensure that any attempt to edit the document above the prompt is rejected. */
+  /** Class ensuring that attempts to edit document lines above the prompt are rejected. */
   class ConsoleEditCondition extends DocumentEditCondition {
     public boolean canInsertText(int offs) { return canRemoveText(offs); }
     
@@ -295,4 +358,18 @@ public class ConsoleDocument implements DocumentAdapter {
       return true;
     }
   }
+  
+  /* Locking operations */
+  
+  /** Swing-style readLock(). */
+  public void acquireReadLock() { _document.acquireReadLock(); }
+  
+  /** Swing-style readUnlock(). */
+  public void releaseReadLock() { _document.releaseReadLock(); }
+  
+  /** Swing-style writeLock(). */
+  public void acquireWriteLock() { _document.acquireWriteLock(); }
+  
+  /** Swing-style writeUnlock(). */
+  public void releaseWriteLock() { _document.releaseWriteLock(); }
 }

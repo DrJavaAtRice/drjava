@@ -71,8 +71,8 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
     // Start debugger
     synchronized(_notifierLock) {
       _debugger.startup();
-      _waitForNotifies(1);  // startup
-      _notifierLock.wait();
+      _setPendingNotifies(1);  // startup
+      while (_pendingNotifies > 0) _notifierLock.wait();
     }
     debugListener.assertDebuggerStartedCount(1);  //fires
     debugListener.assertDebuggerShutdownCount(0);
@@ -87,8 +87,8 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
     // Shutdown the debugger
     synchronized(_notifierLock) {
       _debugger.shutdown();
-      _waitForNotifies(1);  // shutdown
-      _notifierLock.wait();
+      _setPendingNotifies(1);  // shutdown
+      while (_pendingNotifies > 0) _notifierLock.wait();
     }
     debugListener.assertDebuggerStartedCount(1);
     debugListener.assertDebuggerShutdownCount(1);  //fires
@@ -96,8 +96,8 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
     // Start debugger again without resetting
     synchronized(_notifierLock) {
       _debugger.startup();
-      _waitForNotifies(1);  // startup
-      _notifierLock.wait();
+      _setPendingNotifies(1);  // startup
+      while (_pendingNotifies > 0) _notifierLock.wait();
     }
     debugListener.assertDebuggerStartedCount(2);  //fires
     debugListener.assertDebuggerShutdownCount(1);
@@ -127,8 +127,8 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
     _model.addListener(resetListener);
     synchronized(_notifierLock) {
       _model.resetInteractions();
-      _waitForNotifies(2);  // shutdown, interpreterReady
-      _notifierLock.wait();
+      _setPendingNotifies(2);  // shutdown, interpreterReady
+      while (_pendingNotifies > 0) _notifierLock.wait();
     }
     _model.removeListener(resetListener);
     resetListener.assertInterpreterResettingCount(1);  //fires (no waiting)
@@ -140,8 +140,8 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
     // Start debugger again after reset
     synchronized(_notifierLock) {
       _debugger.startup();
-      _waitForNotifies(1);  // startup
-      _notifierLock.wait();
+      _setPendingNotifies(1);  // startup
+      while (_pendingNotifies > 0) _notifierLock.wait();
     }
     debugListener.assertDebuggerStartedCount(3);  //fires
     debugListener.assertDebuggerShutdownCount(2);
@@ -149,8 +149,8 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
     // Shutdown the debugger
     synchronized(_notifierLock) {
       _debugger.shutdown();
-      _waitForNotifies(1);  // shutdown
-      _notifierLock.wait();
+      _setPendingNotifies(1);  // shutdown
+      while (_pendingNotifies > 0) _notifierLock.wait();
     }
     debugListener.assertDebuggerStartedCount(3);
     debugListener.assertDebuggerShutdownCount(3);  //fires
@@ -181,15 +181,15 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
     // Run the main() method, hitting both breakpoints in different threads
     synchronized(_notifierLock) {
       interpretIgnoreResult("java Monkey");
-      _waitForNotifies(6); // (suspended, updated, breakpointReached) * 2
-      _notifierLock.wait();
+      _setPendingNotifies(6); // (suspended, updated, breakpointReached) * 2
+      while (_pendingNotifies > 0) _notifierLock.wait();
     }
     DebugThreadData threadA = new DebugThreadData(_debugger.getCurrentThread());
     DebugThreadData threadB = new DebugThreadData(_debugger.getThreadAt(1));
     synchronized(_notifierLock) {
       _asyncDoSetCurrentThread(threadB);
-      _waitForNotifies(2);  // updated, suspended
-      _notifierLock.wait();
+      _setPendingNotifies(2);  // updated, suspended
+      while (_pendingNotifies > 0) _notifierLock.wait();
     }
 
     DebugThreadData thread1 = new DebugThreadData(_debugger.getThreadAt(1));
@@ -225,8 +225,8 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
     // Run the main() method, hitting breakpoints
     synchronized(_notifierLock) {
       interpretIgnoreResult("java Suspender");
-      _waitForNotifies(3); // suspended, updated, breakpointReached
-      _notifierLock.wait();
+      _setPendingNotifies(3); // suspended, updated, breakpointReached
+      while (_pendingNotifies > 0) _notifierLock.wait();
     }
     final DebugThreadData thread = new DebugThreadData(_debugger.getCurrentThread());
     synchronized(_notifierLock) {
@@ -245,8 +245,8 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
           }
         }
       }.start();
-      _waitForNotifies(2);  // suspended, updated
-      _notifierLock.wait();
+      _setPendingNotifies(2);  // suspended, updated
+      while (_pendingNotifies > 0) _notifierLock.wait();
     }
     // Ensure thread suspended
     debugListener.assertCurrThreadSuspendedCount(2);  //fires
@@ -278,18 +278,18 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
     // Run the main method, hitting breakpoints
     synchronized(_notifierLock) {
       interpretIgnoreResult("java Monkey");
-      _waitForNotifies(6);  // (suspended, updated, breakpointReached) x 2
-      _notifierLock.wait();
+      _setPendingNotifies(6);  // (suspended, updated, breakpointReached) x 2
+      while (_pendingNotifies > 0) _notifierLock.wait();
     }
 
     DebugThreadData thread = new DebugThreadData(_debugger.getCurrentThread());
     // Resumes one thread, finishing it and switching to the next break point
     synchronized(_notifierLock) {
       _asyncResume();
-      _waitForNotifies(2);  // suspended, updated
+      _setPendingNotifies(2);  // suspended, updated
                             // no longer get a currThreadDied since we immediately
                             // switch to the next thread
-      _notifierLock.wait();
+      while (_pendingNotifies > 0) _notifierLock.wait();
     }
 
     DebugThreadData thread2 = new DebugThreadData(_debugger.getCurrentThread());
@@ -311,8 +311,8 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
     _debugger.addListener(stepTestListener);
     synchronized(_notifierLock) {
       _asyncStep(Debugger.STEP_INTO);
-      _waitForNotifies(2); // suspended, updated
-      _notifierLock.wait();
+      _setPendingNotifies(2); // suspended, updated
+      while (_pendingNotifies > 0) _notifierLock.wait();
     }
     stepTestListener.assertStepRequestedCount(1);
     _debugger.removeListener(stepTestListener);
@@ -327,9 +327,9 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
     _model.addListener(interpretListener);
     synchronized(_notifierLock) {
       _asyncResume();
-      _waitForNotifies(3);  // interactionEnded, interpreterChanged, currThreadDied
+      _setPendingNotifies(3);  // interactionEnded, interpreterChanged, currThreadDied
                             // we get a currThreadDied here since it's the last thread
-      _notifierLock.wait();
+      while (_pendingNotifies > 0) _notifierLock.wait();
     }
     interpretListener.assertInteractionEndCount(1);
     _model.removeListener(interpretListener);
@@ -360,8 +360,8 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
     // Run the foo() method, hitting breakpoint
     synchronized(_notifierLock) {
       interpretIgnoreResult("new DrJavaDebugClass().foo()");
-      _waitForNotifies(3);  // suspended, updated, breakpointReached
-      _notifierLock.wait();
+      _setPendingNotifies(3);  // suspended, updated, breakpointReached
+      while (_pendingNotifies > 0) _notifierLock.wait();
     }
 
     if (printMessages) System.out.println("----After breakpoint:\n" + getInteractionsText());
@@ -387,8 +387,8 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
     synchronized(_notifierLock) {
       if (printMessages) System.out.println("resuming");
       _asyncResume();
-      _waitForNotifies(3);  // suspended, updated, breakpointReached
-      _notifierLock.wait();
+      _setPendingNotifies(3);  // suspended, updated, breakpointReached
+      while (_pendingNotifies > 0) _notifierLock.wait();
     }
     if (printMessages) System.out.println("----After one resume:\n" + getInteractionsText());
     debugListener.assertCurrThreadResumedCount(1);  //fires (no waiting)
@@ -405,9 +405,9 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
     synchronized(_notifierLock) {
       if ( printMessages ) System.err.println("-------- Resuming --------");
       _asyncResume();
-      _waitForNotifies(3);  // interactionEnded, interpreterChanged, currThreadDied
+      _setPendingNotifies(3);  // interactionEnded, interpreterChanged, currThreadDied
                             // here, we get a currThreadDied since it's the last thread
-      _notifierLock.wait();
+      while (_pendingNotifies > 0) _notifierLock.wait();
     }
     interpretListener.assertInteractionEndCount(1);
     _model.removeListener(interpretListener);
@@ -447,8 +447,8 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
     // Run the baz() method, hitting breakpoint
     synchronized(_notifierLock) {
       interpretIgnoreResult("new DrJavaDebugClass2().baz()");
-      _waitForNotifies(3);  // suspended, updated, breakpointReached
-      _notifierLock.wait();
+      _setPendingNotifies(3);  // suspended, updated, breakpointReached
+      while (_pendingNotifies > 0) _notifierLock.wait();
     }
 
     if (printMessages) System.out.println("----After breakpoint:\n" + getInteractionsText());
@@ -468,9 +468,9 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
     synchronized(_notifierLock) {
       if ( printMessages ) System.err.println("-------- Resuming --------");
       _asyncResume();
-      _waitForNotifies(3);  // interactionEnded, interpreterChanged, currThreadDied
+      _setPendingNotifies(3);  // interactionEnded, interpreterChanged, currThreadDied
                             // here, we get a currThreadDied since it's the last thread
-      _notifierLock.wait();
+      while (_pendingNotifies > 0) _notifierLock.wait();
     }
     interpretListener.assertInteractionEndCount(1);
     _model.removeListener(interpretListener);
@@ -506,8 +506,8 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
     // Run the foo() method, hitting breakpoint
     synchronized(_notifierLock) {
       interpretIgnoreResult("new DrJavaDebugClass().foo()");
-      _waitForNotifies(3);  // suspended, updated, breakpointReached
-      _notifierLock.wait();
+      _setPendingNotifies(3);  // suspended, updated, breakpointReached
+      while (_pendingNotifies > 0) _notifierLock.wait();
     }
 
     if (printMessages) {
@@ -526,8 +526,8 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
     // Step into bar() method
     synchronized(_notifierLock) {
       _asyncStep(Debugger.STEP_INTO);
-      _waitForNotifies(2);  // suspended, updated
-      _notifierLock.wait();
+      _setPendingNotifies(2);  // suspended, updated
+      while (_pendingNotifies > 0) _notifierLock.wait();
     }
     debugListener.assertStepRequestedCount(1);  // fires (don't wait)
     debugListener.assertCurrThreadResumedCount(1); // fires (don't wait)
@@ -540,8 +540,8 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
     // Step to next line
     synchronized(_notifierLock) {
       _asyncStep(Debugger.STEP_OVER);
-      _waitForNotifies(2);  // suspended, updated
-      _notifierLock.wait();
+      _setPendingNotifies(2);  // suspended, updated
+      while (_pendingNotifies > 0) _notifierLock.wait();
     }
 
     if (printMessages) System.out.println("****"+getInteractionsText());
@@ -557,8 +557,8 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
     // Step to next line
     synchronized(_notifierLock) {
       _asyncStep(Debugger.STEP_OVER);
-      _waitForNotifies(2);  // suspended, updated
-      _notifierLock.wait();
+      _setPendingNotifies(2);  // suspended, updated
+      while (_pendingNotifies > 0) _notifierLock.wait();
     }
     debugListener.assertStepRequestedCount(3);  // fires (don't wait)
     debugListener.assertCurrThreadResumedCount(3); // fires (don't wait)
@@ -572,13 +572,13 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
     // Step twice to print last line in Foo
     synchronized(_notifierLock) {
       _asyncStep(Debugger.STEP_OVER);
-      _waitForNotifies(2);  // suspended, updated
-      _notifierLock.wait();
+      _setPendingNotifies(2);  // suspended, updated
+      while (_pendingNotifies > 0) _notifierLock.wait();
     }
     synchronized(_notifierLock) {
       _asyncStep(Debugger.STEP_OVER);
-      _waitForNotifies(2);  // suspended, updated
-      _notifierLock.wait();
+      _setPendingNotifies(2);  // suspended, updated
+      while (_pendingNotifies > 0) _notifierLock.wait();
     }
     debugListener.assertStepRequestedCount(5);  // fires (don't wait)
     debugListener.assertCurrThreadResumedCount(5); // fires (don't wait)
@@ -594,9 +594,9 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
     _model.addListener(interpretListener);
     synchronized(_notifierLock) {
       _asyncStep(Debugger.STEP_OVER);
-      _waitForNotifies(3);  // interactionEnded, interpreterChanged, currThreadDied
+      _setPendingNotifies(3);  // interactionEnded, interpreterChanged, currThreadDied
                             // here, we get a currThreadDied since it's the last thread
-      _notifierLock.wait();
+      while (_pendingNotifies > 0) _notifierLock.wait();
     }
     interpretListener.assertInteractionEndCount(1);
     _model.removeListener(interpretListener);
@@ -630,8 +630,8 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
     // Run the foo() method, hitting breakpoint
     synchronized(_notifierLock) {
       interpretIgnoreResult("new DrJavaDebugClass().foo()");
-      _waitForNotifies(3);  // suspended, updated, breakpointReached
-      _notifierLock.wait();
+      _setPendingNotifies(3);  // suspended, updated, breakpointReached
+      while (_pendingNotifies > 0) _notifierLock.wait();
     }
 
     if (printMessages) System.out.println("----After breakpoint:\n" + getInteractionsText());
@@ -648,8 +648,8 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
     // Step into bar() method
     synchronized(_notifierLock) {
       _asyncStep(Debugger.STEP_INTO);
-      _waitForNotifies(2);  // suspended, updated
-      _notifierLock.wait();
+      _setPendingNotifies(2);  // suspended, updated
+      while (_pendingNotifies > 0) _notifierLock.wait();
     }
     debugListener.assertStepRequestedCount(1);  // fires (don't wait)
     debugListener.assertCurrThreadResumedCount(1); // fires (don't wait)
@@ -662,8 +662,8 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
     // Step out of method
     synchronized(_notifierLock) {
       _asyncStep(Debugger.STEP_OUT);
-      _waitForNotifies(2);  // suspended, updated
-      _notifierLock.wait();
+      _setPendingNotifies(2);  // suspended, updated
+      while (_pendingNotifies > 0) _notifierLock.wait();
     }
 
     if (printMessages) System.out.println("****"+getInteractionsText());
@@ -704,8 +704,8 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
     // Run the foo() method, hitting breakpoint
     synchronized(_notifierLock) {
       interpretIgnoreResult("new a.DrJavaDebugClassWithPackage().foo()");
-      _waitForNotifies(3);  // suspended, updated, breakpointReached
-      _notifierLock.wait();
+      _setPendingNotifies(3);  // suspended, updated, breakpointReached
+      while (_pendingNotifies > 0) _notifierLock.wait();
     }
 
     if (printMessages) System.out.println("----After breakpoint:\n" + getInteractionsText());
@@ -721,8 +721,8 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
     // Step over once
     synchronized(_notifierLock) {
       _asyncStep(Debugger.STEP_OVER);
-      _waitForNotifies(2);  // suspended, updated
-      _notifierLock.wait();
+      _setPendingNotifies(2);  // suspended, updated
+      while (_pendingNotifies > 0) _notifierLock.wait();
     }
     debugListener.assertStepRequestedCount(1);  // fires (don't wait)
     debugListener.assertCurrThreadResumedCount(1); // fires (don't wait)
@@ -736,8 +736,8 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
     // Step over again
     synchronized(_notifierLock) {
       _asyncStep(Debugger.STEP_OVER);
-      _waitForNotifies(2);  // suspended, updated
-      _notifierLock.wait();
+      _setPendingNotifies(2);  // suspended, updated
+      while (_pendingNotifies > 0) _notifierLock.wait();
     }
 
     if (printMessages) System.out.println("****"+getInteractionsText());
@@ -754,9 +754,9 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
     _model.addListener(interpretListener);
     synchronized(_notifierLock) {
       _asyncResume();
-      _waitForNotifies(3);  // interactionEnded, interpreterChanged, currThreadDied
+      _setPendingNotifies(3);  // interactionEnded, interpreterChanged, currThreadDied
                             // here, we get a currThreadDied since it's the last thread
-      _notifierLock.wait();
+      while (_pendingNotifies > 0) _notifierLock.wait();
     }
     interpretListener.assertInteractionEndCount(1);
     _model.removeListener(interpretListener);
