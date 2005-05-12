@@ -64,6 +64,9 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/
   /** Name for the thread that exports the MasterJVM to RMI. */
   protected String _exportMasterThreadName = "Export MasterJVM Thread";
   
+  /** Lock for accessing the state of this AbstractMasterJVM */
+  protected Object _masterJVMLock = new Object();
+  
   private static final String RUNNER = SlaveJVMRunner.class.getName();
   
   /** The slave JVM remote stub, if it's connected, or null if not. */
@@ -126,7 +129,7 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/
   /** Invokes slave JVM without any JVM arguments.
    *  @throws IllegalStateException if slave JVM already connected or startup is in progress.
    */
-  protected synchronized final void invokeSlave() throws IOException, RemoteException {
+  protected final void invokeSlave() throws IOException, RemoteException {
     invokeSlave(new String[0]);
   }
   
@@ -134,7 +137,7 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/
    *  @param jvmArgs Array of arguments to pass to the JVM on startup
    *  @throws IllegalStateException if slave JVM already connected or startup is in progress.
    */
-  protected synchronized final void invokeSlave(String[] jvmArgs) throws IOException, RemoteException {
+  protected final void invokeSlave(String[] jvmArgs) throws IOException, RemoteException {
     invokeSlave(jvmArgs, System.getProperty("java.class.path"));
   }
   
@@ -145,130 +148,132 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/
    *  @param cp Classpath to use when starting the JVM
    *  @throws IllegalStateException if slave JVM already connected or startup is in progress.
    */
-  protected synchronized final void invokeSlave(String[] jvmArgs, String cp) throws IOException, 
-    RemoteException {
-    if (_startupInProgress) throw new IllegalStateException("startup is in progress in invokeSlave");
+  protected final void invokeSlave(String[] jvmArgs, String cp) throws IOException, RemoteException {
     
-    if (_slave != null) throw new IllegalStateException("slave nonnull in invoke: " + _slave);
-    _startupInProgress = true;
-    
-    //*******************************************
-    // first, we we export ourselves to a file...
-    //*******************************************
-    
-    Thread t = new Thread(_exportMasterThreadName) {
-      public void run() {
-        synchronized(lock) {
-          try {
-            _stub = UnicastRemoteObject.exportObject(AbstractMasterJVM.this);
-            
-            // Debug: check that the IP address is 127.0.0.1
-            //javax.swing.JOptionPane.showMessageDialog(null, _stub.toString());
-          }
-          catch (RemoteException re) {
-            //javax.swing.JOptionPane.showMessageDialog(null, edu.rice.cs.util.StringOps.getStackTrace(re));
-            throw new edu.rice.cs.util.UnexpectedException(re);
-          }
-          lock.notify();
-        }
-      }
-    };
-    synchronized (lock) {
-      t.start();
-      while (_stub == null) {
-        try { lock.wait(); }
-        catch (InterruptedException ie) { throw new edu.rice.cs.util.UnexpectedException(ie); }
-      }
-    }
-    _stubFile = File.createTempFile("DrJava-remote-stub", ".tmp");
-    _stubFile.deleteOnExit();
-    // serialize stub to _stubFile
-    FileOutputStream fstream = new FileOutputStream(_stubFile);
-    ObjectOutputStream ostream = new ObjectOutputStream(fstream);
-    ostream.writeObject(_stub);
-    ostream.flush();
-    fstream.close();
-
-    //*******************************************
-    // done exporting ourselves to a file...
-    // now lets export our classloader
-    // this will be used to handle classloading 
-    // requests from the slave jvm
-    //*******************************************
-    final RemoteClassLoader rClassLoader = new RemoteClassLoader(getClass().getClassLoader());
-    t = new Thread(_exportMasterThreadName) {
-      public void run() {
-        synchronized(lock) {
-          try {
-            _classLoaderStub = UnicastRemoteObject.exportObject(rClassLoader);
-            
-            // Debug: check that the IP address is 127.0.0.1
-            //javax.swing.JOptionPane.showMessageDialog(null, _stub.toString());
-          }
-          catch (RemoteException re) {
-            //javax.swing.JOptionPane.showMessageDialog(null, edu.rice.cs.util.StringOps.getStackTrace(re));
-            throw new edu.rice.cs.util.UnexpectedException(re);
-          }
-          lock.notify();
-        }
-      }
-    };
-    synchronized(lock){
-      t.start();
-      while (_classLoaderStub == null) {
-        try { lock.wait(); }
-        catch (InterruptedException ie) { throw new edu.rice.cs.util.UnexpectedException(ie); }
-      }
-    }
-    _classLoaderStubFile = File.createTempFile("DrJava-remote-stub", ".tmp");
-    _classLoaderStubFile.deleteOnExit();
-    // serialize stub to _stubFile
-    fstream = new FileOutputStream(_classLoaderStubFile);
-    ostream = new ObjectOutputStream(fstream);
-    ostream.writeObject(_classLoaderStub);
-    ostream.flush();
-    fstream.close();
-    
-    String[] args = new String[] { 
-      _stubFile.getAbsolutePath(),
-      _slaveClassName,
-      _classLoaderStubFile.getAbsolutePath()
-    };
-    
-    final Process process = ExecJVM.runJVM(RUNNER, args, cp, jvmArgs);
-    
-    // Start a thread to wait for the slave to die.  When it dies, restart it.
-    Thread thread = new Thread(_waitForQuitThreadName) {
-      public void run() {
-        try {
-          int status = process.waitFor();
-          synchronized(AbstractMasterJVM.this) {
-            if (_startupInProgress) {
-              // If we get here, the process died without registering.
-              //  (This might be the case if something was wrong with the
-              //   classpath, or if the new JVM couldn't acquire a port
-              //   for debugging.)
-              //
-              // Proper behavior in this case is unclear, so we'll let
-              //  our subclasses decide.  By default, we print a stack
-              //  trace and do not proceed, to avoid going into a loop.
-              slaveQuitDuringStartup(status);
+    synchronized(_masterJVMLock) {
+      if (_startupInProgress) throw new IllegalStateException("startup is in progress in invokeSlave");
+      
+      if (_slave != null) throw new IllegalStateException("slave nonnull in invoke: " + _slave);
+      _startupInProgress = true;
+      
+      //*******************************************
+      // first, we we export ourselves to a file...
+      //*******************************************
+      
+      Thread t = new Thread(_exportMasterThreadName) {
+        public void run() {
+          synchronized(lock) {
+            try {
+              _stub = UnicastRemoteObject.exportObject(AbstractMasterJVM.this);
+              
+              // Debug: check that the IP address is 127.0.0.1
+              //javax.swing.JOptionPane.showMessageDialog(null, _stub.toString());
             }
-            _slave = null;
-            UnicastRemoteObject.unexportObject(AbstractMasterJVM.this, true);
-            handleSlaveQuit(status);
+            catch (RemoteException re) {
+              //javax.swing.JOptionPane.showMessageDialog(null, edu.rice.cs.util.StringOps.getStackTrace(re));
+              throw new edu.rice.cs.util.UnexpectedException(re);
+            }
+            lock.notify();
           }
         }
-        catch (NoSuchObjectException e) {
-          throw new edu.rice.cs.util.UnexpectedException(e);
-        }
-        catch (InterruptedException ie) {
-          throw new edu.rice.cs.util.UnexpectedException(ie);
+      };
+      synchronized (lock) {
+        t.start();
+        while (_stub == null) {
+          try { lock.wait(); }
+          catch (InterruptedException ie) { throw new edu.rice.cs.util.UnexpectedException(ie); }
         }
       }
-    };
-    
-    thread.start();
+      _stubFile = File.createTempFile("DrJava-remote-stub", ".tmp");
+      _stubFile.deleteOnExit();
+      // serialize stub to _stubFile
+      FileOutputStream fstream = new FileOutputStream(_stubFile);
+      ObjectOutputStream ostream = new ObjectOutputStream(fstream);
+      ostream.writeObject(_stub);
+      ostream.flush();
+      fstream.close();
+      
+      //*******************************************
+      // done exporting ourselves to a file...
+      // now lets export our classloader
+      // this will be used to handle classloading 
+      // requests from the slave jvm
+      //*******************************************
+      final RemoteClassLoader rClassLoader = new RemoteClassLoader(getClass().getClassLoader());
+      t = new Thread(_exportMasterThreadName) {
+        public void run() {
+          synchronized(lock) {
+            try {
+              _classLoaderStub = UnicastRemoteObject.exportObject(rClassLoader);
+              
+              // Debug: check that the IP address is 127.0.0.1
+              //javax.swing.JOptionPane.showMessageDialog(null, _stub.toString());
+            }
+            catch (RemoteException re) {
+              //javax.swing.JOptionPane.showMessageDialog(null, edu.rice.cs.util.StringOps.getStackTrace(re));
+              throw new edu.rice.cs.util.UnexpectedException(re);
+            }
+            lock.notify();
+          }
+        }
+      };
+      synchronized(lock){
+        t.start();
+        while (_classLoaderStub == null) {
+          try { lock.wait(); }
+          catch (InterruptedException ie) { throw new edu.rice.cs.util.UnexpectedException(ie); }
+        }
+      }
+      _classLoaderStubFile = File.createTempFile("DrJava-remote-stub", ".tmp");
+      _classLoaderStubFile.deleteOnExit();
+      // serialize stub to _stubFile
+      fstream = new FileOutputStream(_classLoaderStubFile);
+      ostream = new ObjectOutputStream(fstream);
+      ostream.writeObject(_classLoaderStub);
+      ostream.flush();
+      fstream.close();
+      
+      String[] args = new String[] { 
+        _stubFile.getAbsolutePath(),
+          _slaveClassName,
+          _classLoaderStubFile.getAbsolutePath()
+      };
+      
+      final Process process = ExecJVM.runJVM(RUNNER, args, cp, jvmArgs);
+      
+      // Start a thread to wait for the slave to die.  When it dies, restart it.
+      Thread thread = new Thread(_waitForQuitThreadName) {
+        public void run() {
+          try {
+            int status = process.waitFor();
+            synchronized(AbstractMasterJVM.this) {
+              if (_startupInProgress) {
+                // If we get here, the process died without registering.
+                //  (This might be the case if something was wrong with the
+                //   classpath, or if the new JVM couldn't acquire a port
+                //   for debugging.)
+                //
+                // Proper behavior in this case is unclear, so we'll let
+                //  our subclasses decide.  By default, we print a stack
+                //  trace and do not proceed, to avoid going into a loop.
+                slaveQuitDuringStartup(status);
+              }
+              _slave = null;
+              UnicastRemoteObject.unexportObject(AbstractMasterJVM.this, true);
+              handleSlaveQuit(status);
+            }
+          }
+          catch (NoSuchObjectException e) {
+            throw new edu.rice.cs.util.UnexpectedException(e);
+          }
+          catch (InterruptedException ie) {
+            throw new edu.rice.cs.util.UnexpectedException(ie);
+          }
+        }
+      };
+      
+      thread.start();
+    }
   }
   
   /**
@@ -289,44 +294,46 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/
   /** No-op to prove that the master is still alive. */
   public void checkStillAlive() {}
 
-  public synchronized void registerSlave(SlaveRemote slave)
-    throws RemoteException {
-    _slave = slave;
-    _startupInProgress = false;
-    _stubFile.delete();
-    _stub = null;
-    _classLoaderStub = null;
-    _classLoaderStubFile.delete();
-    
-    handleSlaveConnected();
-
-    if (_quitOnStartup) {
-      // quitSlave was called before the slave registered, so we now act on
-      // the deferred quit request.
-      _quitOnStartup = false;
-      quitSlave();
+  public void registerSlave(SlaveRemote slave) throws RemoteException {
+    synchronized(_masterJVMLock) {
+      _slave = slave;
+      _startupInProgress = false;
+      _stubFile.delete();
+      _stub = null;
+      _classLoaderStub = null;
+      _classLoaderStubFile.delete();
+      
+      handleSlaveConnected();
+      
+      if (_quitOnStartup) {
+        // quitSlave was called before the slave registered, so we now act on
+        // the deferred quit request.
+        _quitOnStartup = false;
+        quitSlave();
+      }
     }
   }
-
   /** Quits slave JVM.
    *  @throws IllegalStateException if no slave JVM is connected
    */
-  protected synchronized final void quitSlave() throws RemoteException {
-    if (isStartupInProgress())
-      // There is a slave to be quit, but we don't have a handle to it yet.
-      // Instead we set this flag, which makes it quit immediately after it
-      // registers in registerSlave.
-      _quitOnStartup = true;
-    
-    else if (_slave == null)
-      throw new IllegalStateException("tried to quit when no slave running" +
-                                      " and startup not in progress");
-    else  _slave.quit();
+  protected final void quitSlave() throws RemoteException {
+    synchronized(_masterJVMLock) {
+      if (isStartupInProgress())
+        // There is a slave to be quit, but we don't have a handle to it yet.
+        // Instead we set this flag, which makes it quit immediately after it
+        // registers in registerSlave.
+        _quitOnStartup = true;
+      
+      else if (_slave == null)
+        throw new IllegalStateException("tried to quit when no slave running" +
+                                        " and startup not in progress");
+      else  _slave.quit();
+    }
   }
   
   /** Returns slave remote instance, or null if not connected. */
-  protected synchronized final SlaveRemote getSlave() { return _slave; }
+  protected final SlaveRemote getSlave() { return _slave; }
   
   /** Returns true if the slave is in the process of starting. */
-  protected synchronized boolean isStartupInProgress() { return _startupInProgress; }
+  protected boolean isStartupInProgress() { return _startupInProgress; }
 }

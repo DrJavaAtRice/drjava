@@ -55,7 +55,7 @@ import java.util.Hashtable;
  * This document must use the readers/writers locking protocol established in its superclasses
  * @version $Id$
  */
-public class SwingDocumentAdapter extends DefaultStyledDocument implements DocumentAdapter {
+public class SwingDocumentAdapter extends DefaultStyledDocument implements ConsoleInterface {
   
   /** Maps names to attribute sets */
   final protected Hashtable<String, AttributeSet> _styles;
@@ -174,4 +174,19 @@ public class SwingDocumentAdapter extends DefaultStyledDocument implements Docum
     try { return getText(offs, len); }  // locking is unnecessary because getText is already thread-safe
     catch (BadLocationException e) { throw new DocumentAdapterException(e); }
   }
+  
+   /* Locking operations */
+  
+  /** Swing-style readLock(). */
+  public void acquireReadLock() { readLock(); }
+  
+   /** Swing-style readUnlock(). */
+  public void releaseReadLock() { readUnlock(); }
+
+    /** Swing-style writeLock(). */
+  public void acquireWriteLock() { writeLock(); }
+  
+   /** Swing-style writeUnlock(). */
+  public void releaseWriteLock() { writeUnlock(); }
 }
+
