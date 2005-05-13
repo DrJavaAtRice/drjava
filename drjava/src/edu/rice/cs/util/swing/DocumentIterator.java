@@ -45,7 +45,7 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.util.swing;
 
-import javax.swing.text.Document;
+import edu.rice.cs.util.text.AbstractDocumentInterface;
 
 /**
  * Used to get the next or previous open document given the current one.
@@ -56,14 +56,14 @@ public interface DocumentIterator {
    * @param doc the current document.
    * @return the next document.
    */
-  Document getNextDocument(Document doc);
+  AbstractDocumentInterface getNextDocument(AbstractDocumentInterface doc);
   
   /**
    * Gets the previous document.
    * @param doc the current document.
    * @return the previous document.
    */
-  Document getPrevDocument(Document doc);
+  AbstractDocumentInterface getPrevDocument(AbstractDocumentInterface doc);
   
   /**
    * @return the number of documents being iterated over

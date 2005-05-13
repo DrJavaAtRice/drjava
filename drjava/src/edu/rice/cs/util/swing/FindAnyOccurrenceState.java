@@ -45,10 +45,10 @@
 
 package edu.rice.cs.util.swing;
 
+import edu.rice.cs.util.text.AbstractDocumentInterface;
 import edu.rice.cs.util.UnexpectedException;
 
 import javax.swing.text.BadLocationException;
-import javax.swing.text.Document;
 
 /** State for finding any occurrences for the FindReplaceMachine.
  *  @version $Id$
@@ -69,6 +69,7 @@ class FindAnyOccurrenceState extends AFindReplaceMachineState {
    *  @return a FindResult object with foundOffset and a flag indicating wrapping to the beginning during a search
    */
   public FindResult findNext() {
+   
     try {
       FindResult tempFr = new FindResult(_doc, -1, false);
       // If the user just found and toggled the "Search Backwards"
@@ -79,19 +80,25 @@ class FindAnyOccurrenceState extends AFindReplaceMachineState {
         else setPosition(getCurrentOffset() - wordLength);
         positionChanged();
       }
-      int start, len;
+      int start, len, docLen;
       String findWord = _findWord;
       // get the search space in the document
       String findSpace;
-      if (!_searchBackwards) {
-        start = _current.getOffset();
-        len = _doc.getLength() - start;
+      _doc.acquireReadLock();  
+      try {
+        docLen = _doc.getLength();
+        if (!_searchBackwards) {
+          start = _current.getOffset();
+          len = docLen - start;
+        }
+        else {
+          start = 0;
+          len = _current.getOffset();
+        }
+        findSpace = _doc.getText(start, len);
       }
-      else {
-        start = 0;
-        len = _current.getOffset();
-      }
-      findSpace = _doc.getText(start, len);
+      finally { _doc.releaseReadLock(); }
+      
       if (!_matchCase) {
         findSpace = findSpace.toLowerCase();
         findWord = findWord.toLowerCase();
@@ -106,7 +113,7 @@ class FindAnyOccurrenceState extends AFindReplaceMachineState {
         _found = true;
         foundOffset += start;
         if (!_searchBackwards) foundOffset += findWord.length();
-        _current = _doc.createPosition(foundOffset);
+        _current = _doc.createPosition(foundOffset);  // thread-safe operation on _doc
       }
       else { // we haven't found it yet
         if (_searchAllDocuments) {
@@ -118,17 +125,23 @@ class FindAnyOccurrenceState extends AFindReplaceMachineState {
           _wrapped = true;
           //When we wrap, we need to include some text that was already searched before wrapping.
           //Otherwise, we won't find an only match that has the caret in it already.
-          if (!_searchBackwards) {
-            start = 0;
-            len = _current.getOffset() + (_findWord.length() - 1);
-            if (len > _doc.getLength()) len = _doc.getLength();
+          
+          _doc.acquireReadLock();  
+          try { 
+            docLen = _doc.getLength(); 
+            if (!_searchBackwards) {
+              start = 0;
+              len = _current.getOffset() + (_findWord.length() - 1);
+              if (len > docLen) len = docLen;
+            }
+            else {  // found it
+              start = _current.getOffset() - (_findWord.length() - 1);
+              if (start < 0) start = 0;
+              len = docLen - start;
+            }
+            findSpace = _doc.getText(start, len);
           }
-          else {  // found it
-            start = _current.getOffset() - (_findWord.length() - 1);
-            if (start < 0) start = 0;
-            len = _doc.getLength() - start;
-          }
-          findSpace = _doc.getText(start, len);
+          finally { _doc.releaseReadLock(); }
 
           if (!_matchCase) findSpace = findSpace.toLowerCase();
           foundOffset = !_searchBackwards ? findSpace.indexOf(findWord)
@@ -137,7 +150,7 @@ class FindAnyOccurrenceState extends AFindReplaceMachineState {
           if (foundOffset >= 0) {
             foundOffset += start;
             if (!_searchBackwards) foundOffset += findWord.length();
-            _current = _doc.createPosition(foundOffset);
+            _current = _doc.createPosition(foundOffset);  // thread-safe operation on _doc
           }
         }
       }
@@ -164,25 +177,28 @@ class FindAnyOccurrenceState extends AFindReplaceMachineState {
    *  @param docToSearch the document to search
    *  @return the FindResult containing the information for where we found _findWord or a dummy FindResult.
    */
-  private FindResult _findNextInAllDocs(Document docToSearch) throws BadLocationException {
+  private FindResult _findNextInAllDocs(AbstractDocumentInterface docToSearch) throws BadLocationException {
     if (docToSearch == _doc) return new FindResult(_doc, -1, false);
-    else {
-      String text = docToSearch.getText(0, docToSearch.getLength());
-      String findWord = _findWord;
-      if (!_matchCase) {
-        text = text.toLowerCase();
-        findWord = findWord.toLowerCase();
-      }
-      int index = !_searchBackwards ? text.indexOf(findWord) : text.lastIndexOf(findWord);
-      if (index != -1) {
-        // We found it in a different document, put the caret at the end of the
-        // found word (if we're going forward).
-        if (!_searchBackwards) index += findWord.length();
-        return new FindResult(docToSearch, index, false);
-      }
-      else
-        return _findNextInAllDocs(!_searchBackwards ? _docIterator.getNextDocument(docToSearch) :
-                                    _docIterator.getPrevDocument(docToSearch));
+    
+    String text;
+    docToSearch.acquireReadLock();
+    try { text = docToSearch.getText(0, docToSearch.getLength()); }
+    finally { docToSearch.releaseReadLock(); }
+    String findWord = _findWord;
+    if (!_matchCase) {
+      text = text.toLowerCase();
+      findWord = findWord.toLowerCase();
     }
+    int index = !_searchBackwards ? text.indexOf(findWord) : text.lastIndexOf(findWord);
+    
+    if (index != -1) {
+      // We found it in a different document, put the caret at the end of the
+      // found word (if we're going forward).
+      if (!_searchBackwards) index += findWord.length();
+      return new FindResult(docToSearch, index, false);
+    }
+    return _findNextInAllDocs(!_searchBackwards ? _docIterator.getNextDocument(docToSearch) :
+                                _docIterator.getPrevDocument(docToSearch));
   }
 }
+

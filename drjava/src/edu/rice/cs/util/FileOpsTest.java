@@ -174,7 +174,7 @@ public class FileOpsTest extends TestCase {
       });
       fail("IOException not propagated");
     }
-    catch (IOException ioe){}//do nothing, this is expected
+    catch (IOException ioe){ }//do nothing, this is expected
     assertEquals("failed save4 w/o backup", "version 3",
                  FileOps.readFileAsString(writeTo));
     assertEquals("failed save4 w/o backup check original backup", "version 1",
@@ -194,7 +194,7 @@ public class FileOpsTest extends TestCase {
       });
       fail("IOException not propagated spot 2");
     }
-    catch(IOException ioe){} //do nothing, we expected this
+    catch(IOException ioe){ } //do nothing, we expected this
     assertEquals("failed save5 w backup", "version 3",
                  FileOps.readFileAsString(writeTo));
 
@@ -204,7 +204,7 @@ public class FileOpsTest extends TestCase {
       FileOps.readFileAsString(backup);
       fail("The backup file should no longer exist.");
     }
-    catch(FileNotFoundException e) {} //do nothing, we expected this
+    catch(FileNotFoundException e) { } //do nothing, we expected this
 
     // Test that save fails if the file is write-protected.
     writeTo.setReadOnly();
@@ -220,7 +220,7 @@ public class FileOpsTest extends TestCase {
       });
       fail("The file to be saved was read-only!");
     }
-    catch(IOException ioe){} //do nothing, we expected this
+    catch(IOException ioe){ } //do nothing, we expected this
     assertEquals("failed save6 w backup", "version 3",
                  FileOps.readFileAsString(writeTo));
 
@@ -230,7 +230,7 @@ public class FileOpsTest extends TestCase {
       FileOps.readFileAsString(backup);
       fail("The backup file should no longer exist.");
     }
-    catch(FileNotFoundException e) {} //do nothing, we expected this
+    catch(FileNotFoundException e) { } //do nothing, we expected this
   }
 
   /**

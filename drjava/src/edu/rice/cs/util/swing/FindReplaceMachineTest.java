@@ -49,17 +49,17 @@ package edu.rice.cs.util.swing;
 import junit.framework.TestCase;
 
 import javax.swing.text.BadLocationException;
-import javax.swing.text.Document;
-import javax.swing.text.PlainDocument;
+import edu.rice.cs.util.text.AbstractDocumentInterface;
+import edu.rice.cs.util.text.SwingDocumentAdapter;
 
 /**
  * Tests the FindReplaceMachine.
  * @version $Id$
  */
 public class FindReplaceMachineTest extends TestCase {
-  private Document _doc;
-  private Document _docPrev;
-  private Document _docNext;
+  private AbstractDocumentInterface _doc;
+  private AbstractDocumentInterface _docPrev;
+  private AbstractDocumentInterface _docNext;
   private FindReplaceMachine _frm;
 
   private static final String EVIL_TEXT =
@@ -85,11 +85,11 @@ public class FindReplaceMachineTest extends TestCase {
    * Initializes the document for the tests.
    */
   protected void setUp() {
-    _doc = new PlainDocument();
-    _docPrev = new PlainDocument();
-    _docNext = new PlainDocument();
+    _doc = new SwingDocumentAdapter();
+    _docPrev = new SwingDocumentAdapter();
+    _docNext = new SwingDocumentAdapter();
     _frm = new FindReplaceMachine(new DocumentIterator() {
-      public Document getPrevDocument(Document d) {
+      public AbstractDocumentInterface getPrevDocument(AbstractDocumentInterface d) {
         if (d == _doc) {
           return _docPrev;
         }
@@ -101,7 +101,7 @@ public class FindReplaceMachineTest extends TestCase {
         }
       }
 
-      public Document getNextDocument(Document d) {
+      public AbstractDocumentInterface getNextDocument(AbstractDocumentInterface d) {
         if (d == _doc) {
           return _docNext;
         }
@@ -474,10 +474,10 @@ public class FindReplaceMachineTest extends TestCase {
   }*/
 
   private void _testFindNextSucceeds(FindReplaceMachine frm, ContinueCommand cont,
-                                     int start, int found, Document doc)
+                                     int start, int found, AbstractDocumentInterface doc)
   {
     FindResult fr = frm.findNext();
-    Document d = fr.getDocument();
+    AbstractDocumentInterface d = fr.getDocument();
     if (frm.getDocument() != d) {
       // do FindReplaceDialog's _updateMachine
       frm.setDocument(d);
@@ -517,7 +517,7 @@ public class FindReplaceMachineTest extends TestCase {
       return true;
     }
   };
-
+  
 //   private static ContinueCommand HALT = new ContinueCommand() {
 //     public boolean shouldContinue() {
 //       return false;

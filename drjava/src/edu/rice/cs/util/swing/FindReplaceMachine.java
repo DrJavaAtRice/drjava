@@ -46,7 +46,7 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.util.swing;
 
 import javax.swing.text.BadLocationException;
-import javax.swing.text.Document;
+import edu.rice.cs.util.text.AbstractDocumentInterface;
 
 /**
 * Implementation of logic of find/replace over a document.
@@ -99,7 +99,7 @@ public class FindReplaceMachine {
         _state.setSearchAllDocuments(searchAllDocuments);
     }
 
-    public void setDocument(Document doc) { _state.setDocument(doc); }
+    public void setDocument(AbstractDocumentInterface doc) { _state.setDocument(doc); }
 
     public void setPosition(int pos)  { _state.setPosition(pos); }
 
@@ -119,7 +119,7 @@ public class FindReplaceMachine {
 
     public boolean getSearchAllDocuments() { return _state.getSearchAllDocuments(); }
 
-    public Document getDocument() { return _state.getDocument(); }
+    public AbstractDocumentInterface getDocument() { return _state.getDocument(); }
 
     /** Change the word being sought.
     *   @param word the new word to seek

@@ -62,7 +62,7 @@ public class OrderedHashSetTest extends TestCase {
     try {
       it.remove();
       fail("Removing non-existent element should generate IllegalStateException");
-    } catch(IllegalStateException e) {}
+    } catch(IllegalStateException e) { }
 
     Integer key = it.next();
     iTod.remove(key);
@@ -157,7 +157,7 @@ public class OrderedHashSetTest extends TestCase {
     try { 
       it.remove();
       fail("Removing non-existent element should generate IllegalStateException");
-    } catch(IllegalStateException e) {}
+    } catch(IllegalStateException e) { }
     
     String key = it.next();
     it.remove();

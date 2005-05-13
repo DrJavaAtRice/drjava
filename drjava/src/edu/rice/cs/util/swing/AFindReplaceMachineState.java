@@ -47,8 +47,9 @@ package edu.rice.cs.util.swing;
 
 import edu.rice.cs.util.UnexpectedException;
 
+import edu.rice.cs.util.text.AbstractDocumentInterface;
+
 import javax.swing.text.BadLocationException;
-import javax.swing.text.Document;
 import javax.swing.text.Position;
 
 
@@ -60,22 +61,14 @@ import javax.swing.text.Position;
 abstract class AFindReplaceMachineState {
   
   /** The document on which FindReplaceMachine is operating. */
-  static Document _doc;
-  /**
-   * The position in _doc from which the searches started.
-   */
+  static AbstractDocumentInterface _doc;
+  /** The position in _doc from which the searches started. */
   static Position _start;
-  /**
-   * The position in _doc which the machine is currently at.
-   */
+  /** The position in _doc which the machine is currently at. */
   static Position _current;
-  /**
-   * The word being sought.
-   */
+  /** The word to find. */
   static String _findWord;
-  /**
-   * The word to replace the word being sought.
-   */
+  /** The word to replace _findword. */
   static String _replaceWord;
   static boolean _found;
   static boolean _wrapped;
@@ -130,7 +123,7 @@ abstract class AFindReplaceMachineState {
 
   public void setSearchAllDocuments(boolean searchAllDocuments) { _searchAllDocuments = searchAllDocuments; }
 
-  public void setDocument(Document doc) { _doc = doc; }
+  public void setDocument(AbstractDocumentInterface doc) { _doc = doc; }
 
   public void setPosition(int pos) {
     try { _current = _doc.createPosition(pos); }
@@ -165,7 +158,7 @@ abstract class AFindReplaceMachineState {
 
   public boolean getSearchAllDocuments() { return _searchAllDocuments; }
 
-  public Document getDocument() { return _doc; }
+  public AbstractDocumentInterface getDocument() { return _doc; }
 
   /** Change the word being sought.
    *  @param word the new word to seek
@@ -224,6 +217,7 @@ abstract class AFindReplaceMachineState {
 
   /** If we're on a match for the find word, replace it with the replace word. */
   public boolean replaceCurrent() {
+    _doc.acquireWriteLock();
     try {
       if (isOnMatch()) {
         boolean atStart = false;
@@ -248,6 +242,7 @@ abstract class AFindReplaceMachineState {
       return false;
     }
     catch (BadLocationException e) { throw new UnexpectedException(e); }
+    finally { _doc.releaseWriteLock(); }
   }
 
   /** Replaces all occurences of the find word with the replace word. Checks to see if the entire document is
@@ -265,7 +260,7 @@ abstract class AFindReplaceMachineState {
    */
   public int replaceAll() {
     if (_searchAllDocuments) {
-      Document startDoc = _doc;
+      AbstractDocumentInterface startDoc = _doc;
       _searchAllDocuments = false;
       // replace all in the first document
       int count = _replaceAllInCurrentDoc();
@@ -286,6 +281,7 @@ abstract class AFindReplaceMachineState {
    *  @return the number of replacements
    */
   private int _replaceAllInCurrentDoc() {
+    _doc.acquireReadLock();
     try {
       if (!_searchBackwards) {
         _start = _doc.createPosition(0);
@@ -296,9 +292,8 @@ abstract class AFindReplaceMachineState {
         setPosition(_doc.getLength());
       }
     }
-    catch (BadLocationException e) {
-      throw new UnexpectedException(e);
-    }
+    catch (BadLocationException e) { throw new UnexpectedException(e); }
+    finally { _doc.releaseReadLock(); }
     int count = 0;
     FindResult fr = findNext();
     _doc = fr.getDocument();

@@ -55,7 +55,7 @@ import java.util.Hashtable;
  * This document must use the readers/writers locking protocol established in its superclasses
  * @version $Id$
  */
-public class SwingDocumentAdapter extends DefaultStyledDocument implements ConsoleInterface {
+public class SwingDocumentAdapter extends DefaultStyledDocument implements ConsoleInterface, AbstractDocumentInterface {
   
   /** Maps names to attribute sets */
   final protected Hashtable<String, AttributeSet> _styles;

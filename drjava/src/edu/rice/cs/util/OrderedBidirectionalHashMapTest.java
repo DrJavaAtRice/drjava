@@ -69,7 +69,7 @@ public class OrderedBidirectionalHashMapTest extends TestCase {
     try {
       it.remove();
       fail("Removing non-existent element should generate IllegalStateException");
-    } catch(IllegalStateException e) {}
+    } catch(IllegalStateException e) { }
 
     Double val = it.next();
     Integer key = iTod.getKey(val);
@@ -126,7 +126,7 @@ public class OrderedBidirectionalHashMapTest extends TestCase {
       dToi.put(dbl3, int3);
       fail("Adding existing element should generate IllegalArgumentException");
     }
-    catch (IllegalArgumentException e) {}
+    catch (IllegalArgumentException e) { }
     assertEquals("Size should be 3", dToi.size(), 3);
 
     // Test of removeValue
@@ -141,7 +141,7 @@ public class OrderedBidirectionalHashMapTest extends TestCase {
       dToi.put(dbl3, int3);
       fail("Adding existing element should generate IllegalArgumentException");
     }
-    catch (IllegalArgumentException e) {}
+    catch (IllegalArgumentException e) { }
     assertEquals("Size should be 2", dToi.size(), 2);
 
     dToi.clear();
@@ -186,7 +186,7 @@ public class OrderedBidirectionalHashMapTest extends TestCase {
     try { 
       it.remove();
       fail("Removing non-existent element should generate IllegalStateException");
-    } catch(IllegalStateException e) {}
+    } catch(IllegalStateException e) { }
     
     Integer value = it.next();
     String key = myhash.getKey(value);

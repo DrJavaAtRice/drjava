@@ -91,49 +91,36 @@ public class MatchWholeWordState extends AFindReplaceMachineState {
       if (_skipOneFind) {
 
         int wordLength = _lastFindWord.length();
-        if (!_searchBackwards) {
-          setPosition(getCurrentOffset() + wordLength);
-        }
-        else {
-          setPosition(getCurrentOffset() - wordLength);
-        }
+        if (!_searchBackwards) setPosition(getCurrentOffset() + wordLength);
+        else setPosition(getCurrentOffset() - wordLength);
         positionChanged();
       }
 
-
+      String searchDocument;
       int searchOriginLocation = getCurrentOffset();
       _wrapped = false;
-      String searchDocument = _doc.getText(0, _doc.getLength());
+      _doc.acquireReadLock();
+      try { searchDocument = _doc.getText(0, _doc.getLength()); }
+      finally { _doc.releaseReadLock(); }
 
-      if (indexOf(searchDocument, _findWord) != -1) {
-        return findNextHelp(searchDocument, searchOriginLocation);
-      }
-      else {
-        return new FindResult(_doc, -1, true);
-      }
+      if (indexOf(searchDocument, _findWord) == -1) return new FindResult(_doc, -1, true);
+      return findNextHelp(searchDocument, searchOriginLocation);
     }
-    catch (BadLocationException e) {
-      throw new RuntimeException(e.getMessage());
-    }
+    catch (BadLocationException e) { throw new RuntimeException(e.getMessage()); }
   }
 
-  private FindResult findNextHelp(String searchDocument, int
-      searchOriginLocation) {
+  private FindResult findNextHelp(String searchDocument, int searchOriginLocation) {
 
-    if (_searchBackwards) {
-      setPosition(getCurrentOffset() - _findWord.length());
-    }
+    if (_searchBackwards) setPosition(getCurrentOffset() - _findWord.length());
 
     int findOffset = _searchBackwards ? -1 : 1;
-    while (!hasLappedOriginalLocation(searchOriginLocation)) {
+    while (! hasLappedOriginalLocation(searchOriginLocation)) {
       // actually, may not even need this first clause... think about it...
 
       int current = getCurrentOffset();
       int nextPotentialMatchLocation = indexOf(searchDocument, _findWord, current);
       if (nextPotentialMatchLocation == -1) {
-        if (_wrapped) {
-          break;
-        }
+        if (_wrapped) break;
         wrapAroundDocument();
       }
       else {
@@ -141,10 +128,7 @@ public class MatchWholeWordState extends AFindReplaceMachineState {
 
         if (wholeWordFoundAtCurrent(searchDocument)) {
          
-          if (!_searchBackwards) {
-            setPosition(getCurrentOffset() + _findWord.length());
-          }
-
+          if (!_searchBackwards) setPosition(getCurrentOffset() + _findWord.length());
           return new FindResult(_doc, getCurrentOffset(), _wrapped);
         }
         else {
@@ -161,68 +145,36 @@ public class MatchWholeWordState extends AFindReplaceMachineState {
   }
 
   private int indexOf(String str, String findword) {
-    if (_matchCase) {
-      return str.indexOf(findword);
-    }
+    if (_matchCase) return str.indexOf(findword);
     else {
       String lowerstr = str.toLowerCase();
       String lowerfindword = findword.toLowerCase();
       return lowerstr.indexOf(lowerfindword);
     }
-
   }
 
-  private int indexOf(String str, String findword, int fromIndex) {
+   private int indexOf(String str, String findword, int fromIndex) {
     if (!_searchBackwards) {
-      if (_matchCase) {
-        return str.indexOf(findword, fromIndex);
-      }
-      else {
-        String lowerstr = str.toLowerCase();
-        String lowerfindword = findword.toLowerCase();
-        return lowerstr.indexOf(lowerfindword, fromIndex);
-      }
+      if (_matchCase) return str.indexOf(findword, fromIndex);
+      String lowerstr = str.toLowerCase();
+      String lowerfindword = findword.toLowerCase();
+      return lowerstr.indexOf(lowerfindword, fromIndex);
     }
-    else {
-      if (_matchCase) {
-        return str.lastIndexOf(findword, fromIndex);
-      }
-      else {
-        String lowerstr = str.toLowerCase();
-        String lowerfindword = findword.toLowerCase();
-        return lowerstr.lastIndexOf(lowerfindword, fromIndex);
-      }
-    }
+    if (_matchCase) return str.lastIndexOf(findword, fromIndex);
+    String lowerstr = str.toLowerCase();
+    String lowerfindword = findword.toLowerCase();
+    return lowerstr.lastIndexOf(lowerfindword, fromIndex);
   }
-
 
   private boolean hasLappedOriginalLocation(int searchOriginLocation) {
-    if (!_searchBackwards) {
-      if (_wrapped && searchOriginLocation <= getCurrentOffset()) {
-        return true;
-      }
-      else {
-        return false;
-      }
-    }
-    else {
-      if (_wrapped && searchOriginLocation >= getCurrentOffset()) {
-        return true;
-      }
-      else {
-        return false;
-      }
-    }
+    if (!_searchBackwards) return _wrapped && searchOriginLocation <= getCurrentOffset();
+    return _wrapped && searchOriginLocation >= getCurrentOffset();
   }
 
   private void wrapAroundDocument() {
     _wrapped = true;
-    if (!_searchBackwards) {
-      setPosition(0);
-    }
-    else {
-      setPosition(_doc.getLength() - 1);
-    }
+    if (!_searchBackwards) setPosition(0);
+    else setPosition(_doc.getLength() - 1);
   }
 
   private boolean wholeWordFoundAtCurrent(String searchDocument) {
@@ -235,49 +187,17 @@ public class MatchWholeWordState extends AFindReplaceMachineState {
     boolean leftOutOfBounds = false;
     boolean rightOutOfBounds = false;
 
-    try {
-      leftOfMatch = new Character(searchDocument.charAt(leftLocation));
-    }
-    catch (IndexOutOfBoundsException e) {
-      leftOutOfBounds = true;
-    }
+    try { leftOfMatch = new Character(searchDocument.charAt(leftLocation)); }
+    catch (IndexOutOfBoundsException e) { leftOutOfBounds = true; }
 
-    try {
-      rightOfMatch = new Character(searchDocument.charAt(rightLocation));
-    }
-    catch (IndexOutOfBoundsException e) {
-      rightOutOfBounds = true;
-    }
+    try { rightOfMatch = new Character(searchDocument.charAt(rightLocation)); }
+    catch (IndexOutOfBoundsException e) { rightOutOfBounds = true; }
 
-    if (!leftOutOfBounds && !rightOutOfBounds) {
-      if (isDelimter(rightOfMatch) && isDelimter(leftOfMatch)) {
-        return true;
-      }
-      else {
-        return false;
-      }
-    }
-    else if (!leftOutOfBounds) {
-      if (isDelimter(leftOfMatch)) {
-        return true;
-      }
-      else {
-        return false;
-      }
-
-    }
-    else if (!rightOutOfBounds) {
-      if (isDelimter(rightOfMatch)) {
-        return true;
-      }
-      else {
-        return false;
-      }
-    }
-    else {
-      //return false;
-      return true;
-    }
+    if (!leftOutOfBounds && !rightOutOfBounds) 
+      return isDelimter(rightOfMatch) && isDelimter(leftOfMatch);
+    if (!leftOutOfBounds) return isDelimter(leftOfMatch);
+    if (!rightOutOfBounds) return isDelimter(rightOfMatch);
+    return true;
   }
 
   private boolean isDelimter(Character ch) {

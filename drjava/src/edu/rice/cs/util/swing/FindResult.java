@@ -45,7 +45,7 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.util.swing;
 
-import javax.swing.text.Document;
+import edu.rice.cs.util.text.AbstractDocumentInterface;
 
 /**
  * Returned to FindMachineDialog with the location of the found string
@@ -55,17 +55,17 @@ import javax.swing.text.Document;
  * @version $Id$
  */
 public class FindResult {
-  private Document _document;
+  private AbstractDocumentInterface _document;
   private int _foundoffset;
   private boolean _wrapped;
   
-  public FindResult(Document document, int foundoffset, boolean wrapped) {
+  public FindResult(AbstractDocumentInterface document, int foundoffset, boolean wrapped) {
     _document = document;
     _foundoffset = foundoffset;
     _wrapped = wrapped;
   }
   
-  public Document getDocument() {
+  public AbstractDocumentInterface getDocument() {
     return _document;
   }
   

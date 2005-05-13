@@ -1671,8 +1671,8 @@ public class DirectoryChooser extends JPanel {
      * Creates a new GlassPane over the DrJava window
      */
     public GlassPane() {
-      addKeyListener(new KeyAdapter() {});
-      addMouseListener(new MouseAdapter() {});
+      addKeyListener(new KeyAdapter() { });
+      addMouseListener(new MouseAdapter() { });
       setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
     }
   }
