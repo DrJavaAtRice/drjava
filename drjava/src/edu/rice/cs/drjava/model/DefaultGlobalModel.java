@@ -82,6 +82,7 @@ import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.docnavigation.*;
 import edu.rice.cs.util.swing.DocumentIterator;
 import edu.rice.cs.util.swing.*;
+import edu.rice.cs.util.text.AbstractDocumentInterface;
 import edu.rice.cs.util.text.DocumentAdapterException;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
@@ -132,7 +133,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
       File f;
       try { f = doc.getFile(); } 
       catch(FileMovedException fme) { f = fme.getFile(); }
-      synchronized (_auxiliaryFiles) { _auxiliaryFiles.add(f); }
+      synchronized(_auxiliaryFiles) { _auxiliaryFiles.add(f); }
       setProjectChanged(true);
     }
   }
@@ -149,7 +150,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
     try { path = file.getCanonicalPath(); }
     catch(IOException e) { throw new UnexpectedException(e); }
     
-    synchronized (_auxiliaryFiles) {
+    synchronized(_auxiliaryFiles) {
       ListIterator<File> it = _auxiliaryFiles.listIterator();
       while (it.hasNext()) {
         try { 
@@ -554,7 +555,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
     }
     
     //        InteractionsDocument iDoc = _interactionsModel.getDocument();
-    //        synchronized (_interpreterControl) {
+    //        synchronized(_interpreterControl) {
     //          iDoc.clearCurrentInput();
     //          iDoc.insertBeforeLastPrompt(CLASSPATH_OUT_OF_SYNC_MSG, InteractionsDocument.ERROR_STYLE);
     //        }
@@ -683,7 +684,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
         try { path = f.getCanonicalPath();}
         catch(IOException ioe) { return false; }
         
-        synchronized (_auxiliaryFiles) {
+        synchronized(_auxiliaryFiles) {
           for (File file : _auxiliaryFiles) {
             try { if (file.getCanonicalPath().equals(path)) return true; }
             catch(IOException ioe) { /* ignore file */ }
@@ -984,7 +985,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
     final ConcreteOpenDefDoc doc = _createOpenDefinitionsDocument();
     doc.setParentDirectory(parentDir);
     doc.setFile(null);
-    synchronized (_documentsRepos) { _documentsRepos.add(doc); }
+    synchronized(_documentsRepos) { _documentsRepos.add(doc); }
     
     if (parentDir != null) {
       try { _documentNavigator.addDocument(doc, fixPathForNavigator(parentDir.getCanonicalPath() + File.separator)); }
@@ -1176,7 +1177,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
   protected void saveAllFilesHelper(FileSaveSelector com) throws IOException {
     
     OpenDefinitionsDocument[] docs;
-    synchronized (_documentsRepos) { docs = _documentsRepos.toArray(new OpenDefinitionsDocument[0]); }
+    synchronized(_documentsRepos) { docs = _documentsRepos.toArray(new OpenDefinitionsDocument[0]); }
     for (final OpenDefinitionsDocument doc: docs) {
       aboutToSaveFromSaveAll(doc);
       doc.saveFile(com);
@@ -1197,7 +1198,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
     
     OpenDefinitionsDocument[] docs;
     
-    synchronized (_documentsRepos) { docs = _documentsRepos.toArray(new OpenDefinitionsDocument[0]); }
+    synchronized(_documentsRepos) { docs = _documentsRepos.toArray(new OpenDefinitionsDocument[0]); }
     for (OpenDefinitionsDocument doc: docs) {
       if (! doc.isUntitled()) {
         // could not use doc.isInProjectPath because we may be in flat file view which returns false
@@ -1253,7 +1254,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
     // set the state if all went well
     File[] srcFiles = srcFileList.toArray(new File[srcFileList.size()]);
     
-    synchronized (_auxiliaryFiles) {
+    synchronized(_auxiliaryFiles) {
       _auxiliaryFiles = auxFileList;
     }
     
@@ -1315,7 +1316,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
     File mainClass;
     mainClass = ir.getMainClass();
     
-    synchronized (_auxiliaryFiles) {
+    synchronized(_auxiliaryFiles) {
       _auxiliaryFiles.clear();
       for (File file: auxFiles) { _auxiliaryFiles.add(file); }
     }
@@ -1443,7 +1444,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
     //    new Exception("Closed document " + doc).printStackTrace();
     
     boolean found;
-    synchronized (_documentsRepos) { found = _documentsRepos.remove(doc); }
+    synchronized(_documentsRepos) { found = _documentsRepos.remove(doc); }
     
     if (! found) return false;
     _documentNavigator.removeDocument(doc);
@@ -1459,7 +1460,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
   public void closeAllFilesOnQuit() {
     
     OpenDefinitionsDocument[] docs;
-    synchronized (_documentsRepos) { docs = _documentsRepos.toArray(new OpenDefinitionsDocument[0]); }
+    synchronized(_documentsRepos) { docs = _documentsRepos.toArray(new OpenDefinitionsDocument[0]); }
     
     for (OpenDefinitionsDocument doc : docs) {
       closeFileOnQuitHelper(doc);  // modifies _documentsRepos
@@ -1482,7 +1483,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
     _interpreterControl.killInterpreter(false);
 
     _notifier.removeAllListeners();
-    synchronized (_documentsRepos) { _documentsRepos.clear(); }
+    synchronized(_documentsRepos) { _documentsRepos.clear(); }
     _documentNavigator.clear();  
   }
 
@@ -1515,7 +1516,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
    *  @param doc the searched for Document
    *  @return its corresponding OpenDefinitionsDocument
    */
-  public OpenDefinitionsDocument getODDForDocument(Document doc) {
+  public OpenDefinitionsDocument getODDForDocument(AbstractDocumentInterface doc) {
     /** This function needs to be phased out altogether; the goal is for the OpenDefinitionsDocument 
      *  to also function as its own Document, so this function will be useless
      */
@@ -1535,7 +1536,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
    * @param d the current Document
    * @return the next Document
    */
-  public OpenDefinitionsDocument getNextDocument(Document d) {
+  public OpenDefinitionsDocument getNextDocument(AbstractDocumentInterface d) {
     try {
       OpenDefinitionsDocument doc = getODDForDocument(d);
       OpenDefinitionsDocument nextdoc = _documentNavigator.getNext(doc);
@@ -1564,7 +1565,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
    *  @param d the current Document
    *  @return the previous Document
    */
-  public OpenDefinitionsDocument getPrevDocument(Document d) {
+  public OpenDefinitionsDocument getPrevDocument(AbstractDocumentInterface d) {
     try {
       OpenDefinitionsDocument doc = getODDForDocument(d);
       OpenDefinitionsDocument nextdoc = _documentNavigator.getPrevious(doc);
@@ -1598,7 +1599,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
    *  This essentially duplicates the method valuesArray() in OrderedHashSet.
    */
   public List<OpenDefinitionsDocument> getOpenDefinitionsDocuments() {
-    synchronized (_documentsRepos) {
+    synchronized(_documentsRepos) {
       ArrayList<OpenDefinitionsDocument> docs = new ArrayList<OpenDefinitionsDocument>(_documentsRepos.size());
       for (OpenDefinitionsDocument doc: _documentsRepos) { docs.add(doc); }
       return docs;
@@ -1609,11 +1610,11 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
   public int getOpenDefinitionsDocumentsSize() { return _documentsRepos.size(); }
   
 //  public OpenDefinitionsDocument getODDGivenIDoc(INavigatorItem idoc) {
-//    synchronized (_documentsRepos) { return _documentsRepos.getValue(idoc); }
+//    synchronized(_documentsRepos) { return _documentsRepos.getValue(idoc); }
 //  } 
   
 //  public INavigatorItem getIDocGivenODD(OpenDefinitionsDocument odd) {
-//    synchronized (_documentsRepos) { return _documentsRepos.getKey(odd); }
+//    synchronized(_documentsRepos) { return _documentsRepos.getKey(odd); }
 //  }
   
   //----------------------- End IGetDocuments Methods -----------------------//
@@ -1626,7 +1627,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
     
     OpenDefinitionsDocument[] docs;
     
-    synchronized (_documentsRepos) { docs = _documentsRepos.toArray(new OpenDefinitionsDocument[0]); }
+    synchronized(_documentsRepos) { docs = _documentsRepos.toArray(new OpenDefinitionsDocument[0]); }
       
     for (OpenDefinitionsDocument doc: docs) { doc.setIndent(indent); }
   }
@@ -1857,7 +1858,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
     LinkedList<File> roots = new LinkedList<File>();
     OpenDefinitionsDocument[] docs;
     
-    synchronized (_documentsRepos) { docs =  _documentsRepos.toArray(new OpenDefinitionsDocument[0]); }
+    synchronized(_documentsRepos) { docs =  _documentsRepos.toArray(new OpenDefinitionsDocument[0]); }
     for (OpenDefinitionsDocument doc: docs) {
       try {
         File root = doc.getSourceRoot();
@@ -1925,7 +1926,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
   public boolean hasModifiedDocuments() {
     OpenDefinitionsDocument[] docs;
     
-    synchronized (_documentsRepos) { docs = _documentsRepos.toArray(new OpenDefinitionsDocument[0]); }
+    synchronized(_documentsRepos) { docs = _documentsRepos.toArray(new OpenDefinitionsDocument[0]); }
     for (OpenDefinitionsDocument doc: docs) { 
       if (doc.isModifiedSinceSave()) return true;  
     }
@@ -1998,7 +1999,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
    *  This was at one time called the <code>DefinitionsDocumentHandler</code>
    *  but was renamed (2004-Jun-8) to be more descriptive/intuitive.
    */
-  private class ConcreteOpenDefDoc implements OpenDefinitionsDocument {
+  private class ConcreteOpenDefDoc implements OpenDefinitionsDocument, AbstractDocumentInterface {
     
     private int _id;
     private DrJavaBook _book;
@@ -2422,7 +2423,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
         // Then clear the current interaction and replace it with a "java X" line.
         InteractionsDocument iDoc = _interactionsModel.getDocument();
         
-        synchronized (_interpreterControl) {  // why is this synchronization here?
+        synchronized(_interpreterControl) {  // why is this synchronization here?
           iDoc.clearCurrentInput();
           if (!checkIfClassFileInSync()) {
             iDoc.insertBeforeLastPrompt(DOCUMENT_OUT_OF_SYNC_MSG, InteractionsDocument.ERROR_STYLE);
@@ -3137,8 +3138,25 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
     public void removeStyle(String nm) { getDocument().removeStyle(nm); }
     
     public Style addStyle(String nm, Style parent) { return getDocument().addStyle(nm, parent); }
-  }
+    
+    /* Locking operations in DJDocument interface */
+    
+    /** Swing-style readLock(). */
+    public void acquireReadLock() { getDocument().readLock(); }
+    
+    /** Swing-style readUnlock(). */
+    public void releaseReadLock() { getDocument().readUnlock(); }
+    
+    /** Swing-style writeLock(). */
+    public void acquireWriteLock() { getDocument().acquireWriteLock(); }
+    
+    /** Swing-style writeUnlock(). */
+    public void releaseWriteLock() { getDocument().releaseWriteLock(); }
+    
+  } /* End of ConcreteOpenDefDoc */
 
+  
+  
   private static class TrivialFSS implements FileSaveSelector {
     private File _file;
     private TrivialFSS(File file) { _file = file; }
@@ -3161,7 +3179,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
     
     OpenDefinitionsDocument[] docs;
     
-    synchronized (_documentsRepos) { docs = _documentsRepos.toArray(new OpenDefinitionsDocument[0]); }
+    synchronized(_documentsRepos) { docs = _documentsRepos.toArray(new OpenDefinitionsDocument[0]); }
     for (OpenDefinitionsDocument doc: docs) {
       try {
         File thisFile = null;
@@ -3252,7 +3270,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
    */
   private void addDocToNavigator(OpenDefinitionsDocument doc) throws IOException{
     // INavigatorItem idoc = makeIDocFromODD(doc);
-    synchronized (_documentsRepos) { _documentsRepos.add(doc); }
+    synchronized(_documentsRepos) { _documentsRepos.add(doc); }
     String path = doc.getFile().getCanonicalPath();
     _documentNavigator.addDocument(doc, fixPathForNavigator(path));
   }

@@ -60,6 +60,7 @@ import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.util.swing.FindReplaceMachine;
 import edu.rice.cs.util.swing.FindResult;
 import edu.rice.cs.util.swing.ScrollableDialog;
+import edu.rice.cs.util.text.AbstractDocumentInterface;
 import edu.rice.cs.util.UnexpectedException;
 
 /** The tabbed panel that handles requests for finding and replacing text.
@@ -381,7 +382,7 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
     // the string, and a flag indicating whether the end of the document was wrapped around while searching
     // for the string.
     FindResult fr = _machine.findNext();
-    Document doc = fr.getDocument();
+    AbstractDocumentInterface doc = fr.getDocument();
     OpenDefinitionsDocument matchDoc = ((DefaultSingleDisplayModel) _model).getODDForDocument(doc);
     OpenDefinitionsDocument openDoc = _defPane.getOpenDefDocument();
 
@@ -454,7 +455,7 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
       _machine.setReplaceWord(replaceWord);
       _mainframe.clearStatusMessage(); // _message.setText(""); // JL
       
-      // replaces the occurance at the current position
+      // replaces the occurrence at the current position
       boolean replaced = _machine.replaceCurrent();
       // and finds the next word
       if (replaced) {

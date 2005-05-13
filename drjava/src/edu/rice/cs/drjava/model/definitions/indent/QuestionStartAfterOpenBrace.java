@@ -57,63 +57,48 @@ import edu.rice.cs.util.UnexpectedException;
  *
  * @version $Id$
  */
-public class QuestionStartAfterOpenBrace extends IndentRuleQuestion 
-{
+public class QuestionStartAfterOpenBrace extends IndentRuleQuestion {
   /**
-  * @param yesRule The decision subtree for the case that this rule applies 
-  * in the current context.
-  * @param noRule The decision subtree for the case that this rule does not
-  * apply in the current context.
+  * @param yesRule The decision subtree for the case that this rule applies in the current context.
+  * @param noRule The decision subtree for the case that this rule does not apply in the current context.
   */
-  public QuestionStartAfterOpenBrace(IndentRule yesRule, IndentRule noRule)
-  {
-    super(yesRule, noRule);
-  }
+  public QuestionStartAfterOpenBrace(IndentRule yesRule, IndentRule noRule) { super(yesRule, noRule); }
   
   /**
-   * @param doc The AbstractDJDocument containing the current line.
-   * @return True the closest non-whitespace character
-   * previous to the start of the current line (excluding any characters
-   * inside comments or strings) is an open brace.
+   *  @param doc The AbstractDJDocument containing the current line.
+   *  @return True the closest non-whitespace character before the start of the current line (excluding any 
+   *  characters inside comments or strings) is an open brace.
    */
-  boolean applyRule(AbstractDJDocument doc, int reason)
-  {
+  boolean applyRule(AbstractDJDocument doc, int reason)  {
     
     int origin = doc.getCurrentLocation();
     //int origin = doc.getReduced().absOffset();
     int lineStart = doc.getLineStartPos(doc.getCurrentLocation());
     
     // Get brace for start of line
-    synchronized(doc){
-      doc.move(lineStart - origin);
-      IndentInfo info = doc.getIndentInformation();
-      doc.move(origin - lineStart);    
-      
-      if ((!info.braceType.equals(IndentInfo.openSquiggly)) ||
-          (info.distToBrace < 0)) {
-        // Precondition not met: we should have a brace
-        return false;
-      }
-      int bracePos = lineStart - info.distToBrace;    
-      
-      // Get brace's end of line
-      int braceEndLinePos = doc.getLineEndPos(bracePos);
-      
-      // Get position of next non-WS char (not in comments)
-      int nextNonWS = -1;
-      try {
-        nextNonWS = doc.getFirstNonWSCharPos(braceEndLinePos);
-      }
-      catch (BadLocationException e) {
-        // This shouldn't happen
-        throw new UnexpectedException(e);
-      }
-      
-      if (nextNonWS == AbstractDJDocument.ERROR_INDEX) {
-        return true;
-      }
-      
-      return (nextNonWS >= lineStart);
+    doc.move(lineStart - origin);
+    IndentInfo info = doc.getIndentInformation();
+    doc.move(origin - lineStart);    
+    
+    if ((!info.braceType.equals(IndentInfo.openSquiggly)) ||
+        (info.distToBrace < 0))
+      // Precondition not met: we should have a brace
+      return false;
+    int bracePos = lineStart - info.distToBrace;    
+    
+    // Get brace's end of line
+    int braceEndLinePos = doc.getLineEndPos(bracePos);
+    
+    // Get position of next non-WS char (not in comments)
+    int nextNonWS = -1;
+    try { nextNonWS = doc.getFirstNonWSCharPos(braceEndLinePos); }
+    catch (BadLocationException e) {
+      // This shouldn't happen
+      throw new UnexpectedException(e);
     }
+    
+    if (nextNonWS == AbstractDJDocument.ERROR_INDEX) return true;
+    
+    return (nextNonWS >= lineStart);
   }
 }

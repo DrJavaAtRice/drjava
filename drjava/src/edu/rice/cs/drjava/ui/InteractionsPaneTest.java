@@ -282,12 +282,12 @@ public final class InteractionsPaneTest extends TestCase {
 //   public void testSystemIn() {
 //     final Object lock = new Object();
 //     final StringBuffer buf = new StringBuffer();
-//     synchronized (_controller._inputEnteredAction) {
+//     synchronized(_controller._inputEnteredAction) {
 //       new Thread("Testing System.in") {
 //         public void run() {
-//           synchronized (_controller._inputEnteredAction) {
+//           synchronized(_controller._inputEnteredAction) {
 //             _controller._inputEnteredAction.notify();
-//             synchronized (lock) {
+//             synchronized(lock) {
 //               buf.append(_controller._inputListener.getConsoleInput());
 //             }
 //           }
@@ -306,7 +306,7 @@ public final class InteractionsPaneTest extends TestCase {
 //     }
 //     _controller._insertNewlineAction.actionPerformed(null);
 //     _controller._inputEnteredAction.actionPerformed(null);
-//     synchronized (lock) {
+//     synchronized(lock) {
 //       assertEquals("Should have returned the correct text.", "\n\n", buf.toString());
 //     }
 //   }
@@ -317,9 +317,7 @@ public final class InteractionsPaneTest extends TestCase {
     
     new Thread("Testing System.in") {
       public void run() {
-        synchronized (lock) {
-          buf.append(_controller.getInputListener().getConsoleInput());
-        }
+        synchronized(lock) { buf.append(_controller.getInputListener().getConsoleInput()); }
       }
     }.start();
     
@@ -328,7 +326,7 @@ public final class InteractionsPaneTest extends TestCase {
     
     _controller._popupConsole.insertConsoleText("test-text");
     _controller._popupConsole.interruptConsole();
-    synchronized (lock) {
+    synchronized(lock) {
       assertEquals("Should have returned the correct text.", "test-text\n", buf.toString());
     }
   }

@@ -58,6 +58,7 @@ import javax.swing.event.UndoableEditListener;
 import javax.swing.text.BadLocationException;
 
 import edu.rice.cs.util.UnexpectedException;
+import edu.rice.cs.util.text.AbstractDocumentInterface;
 import edu.rice.cs.drjava.model.debug.Breakpoint;
 import edu.rice.cs.drjava.model.Finalizable;
 import edu.rice.cs.drjava.model.definitions.*;
@@ -71,7 +72,7 @@ import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
  * @version $Id$
  */
 public interface OpenDefinitionsDocument extends DJDocument, Finalizable<DefinitionsDocument>,
-  Comparable<OpenDefinitionsDocument>, INavigatorItem {
+  Comparable<OpenDefinitionsDocument>, INavigatorItem, AbstractDocumentInterface {
 
   // The following methods are forwarding methods required by the rest of the
   // program in order for the OpenDefinitionsDocument to handle DefinitionsDocuments

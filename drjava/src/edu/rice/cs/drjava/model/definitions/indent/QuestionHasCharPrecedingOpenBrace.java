@@ -85,34 +85,32 @@ public class QuestionHasCharPrecedingOpenBrace extends IndentRuleQuestion {
     int lineStart = doc.getLineStartPos(origin);
     
     // Get brace for start of line
-    synchronized(doc) {
-      doc.move(lineStart - origin);
-      IndentInfo info = doc.getIndentInformation();
-      doc.move(origin - lineStart);
-      
-      
-      if ((!info.braceType.equals(IndentInfo.openSquiggly)) ||
-          (info.distToBrace < 0)) {
-        // Precondition not met: we should have a brace
-        return false;
-      }
-      int bracePos = lineStart - info.distToBrace;
-      
-      // Get position of previous non-WS char (not in comments)
-      int prevNonWS = -1;
-      try {
-        prevNonWS = doc.findPrevNonWSCharPos(bracePos);
-        char c = doc.getText(prevNonWS,1).charAt(0);
-        for (int i=0; i<_prefix.length; i++) {
-          char prefix = _prefix[i];
-          if (c == prefix) {
-            return true;
-          } 
-        }
-      }
-      catch (BadLocationException e) {
-      }    
+    doc.move(lineStart - origin);
+    IndentInfo info = doc.getIndentInformation();
+    doc.move(origin - lineStart);
+    
+    
+    if ((!info.braceType.equals(IndentInfo.openSquiggly)) ||
+        (info.distToBrace < 0)) {
+      // Precondition not met: we should have a brace
+      return false;
     }
+    int bracePos = lineStart - info.distToBrace;
+    
+    // Get position of previous non-WS char (not in comments)
+    int prevNonWS = -1;
+    try {
+      prevNonWS = doc.findPrevNonWSCharPos(bracePos);
+      char c = doc.getText(prevNonWS,1).charAt(0);
+      for (int i=0; i<_prefix.length; i++) {
+        char prefix = _prefix[i];
+        if (c == prefix) {
+          return true;
+        } 
+      }
+    }
+    catch (BadLocationException e) {
+    }    
     return false;
   }
 }

@@ -123,7 +123,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase
       }
 
       public void interpreterReady() {
-        synchronized (this) {
+        synchronized(this) {
           assertInteractionStartCount(1);
           assertInterpreterExitedCount(1);
           assertInterpreterResettingCount(1);

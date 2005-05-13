@@ -82,15 +82,7 @@ import edu.rice.cs.util.OrderedHashSet;
  *  <p>
  *  Since the cache and document managers can both be concurrently accessed from multiple threads, the methods in the
  *  DocumentCache and DocManager classes are synchronized.  Some operations require locks on both the cache and a
- *  document manager, but none of require these locks to be held simultaneously.
- *  at first.  Some operations require locking both the cache and a document manager.  What is the proper ordering for
- *  these locks.  Document managers are accessed much more frequently than the cache so we want to impose minimum overhead
- *  and enable maximum concurrency for document manager operations.  For this reason, we lock a document manager before
- *  locking the cache.  Many document manager operations only need to lock the cache in special situations.  If they
- *  had to lock it before locking the manager itself (this), the cache lock would become a global lock for all document
- *  manager operations.  This discipline works smoothly except for the operation of resizing the cache to a smaller
- *  size.  This operation is split into two phases, modifying the cache (under a cache lock) and then updating the
- *  document managers that were removed (each under the lock of the respective document manager).
+ *  document manager, but the code is written so that none of require these locks to be held simultaneously.
  */
 
 public class DocumentCache {
@@ -131,7 +123,7 @@ public class DocumentCache {
     if (size <= 0) throw new IllegalArgumentException("Cannot set the cache size to zero or less.");
     int dist;
     DocManager[] removed = null;  // bogus initialization makes javac happy
-    synchronized (_cacheLock) {
+    synchronized(_cacheLock) {   // lock the cache so entries can be reomoved if necessary
       CACHE_SIZE = size;
       dist = _residentQueue.size() - CACHE_SIZE;
       if (dist > 0) { 
@@ -163,13 +155,15 @@ public class DocumentCache {
       new IllegalArgumentException("Cannot add a null document to the DocumentCache");
     if (dm.isUnmanagedOrUntitled() ) return;
     DocManager removed = null;
-    synchronized (_cacheLock) {
+    synchronized(_cacheLock) { // lock the cache so that dm can be added if not already present
       if (_residentQueue.contains(dm)) return;
       _residentQueue.add(dm);
       if (_residentQueue.size() > CACHE_SIZE) removed = _residentQueue.remove(0);
     }
     if (removed != null) removed.kickOut();
   }
+  
+  private boolean remove(DocManager dm) { synchronized(_cacheLock) { return _residentQueue.remove(dm); } }
   
   ///////////////////////////// DocManager //////////////////////////
   
@@ -214,7 +208,7 @@ public class DocumentCache {
     public DefinitionsDocument getDocument() throws IOException, FileMovedException {
       boolean isResident = false;
       boolean makeUnmanaged = false;  // makeUnmanaged -> isResident
-      synchronized (_dmLock) {
+      synchronized(_dmLock) { // lock the document manageer so that its state can be updated
         isResident = _doc != null;
         if (isResident) {  // Document is in queue or "unmanaged" (a modified doc or a new doc with no file)
           if (isUnmanagedOrUntitled()) return _doc;
@@ -222,11 +216,11 @@ public class DocumentCache {
           if (makeUnmanaged)  { setUnmanaged(); }
         }
       }
-      if (makeUnmanaged) synchronized (_cacheLock) {  _residentQueue.remove(this); }
+      if (makeUnmanaged) remove(this); // remove this from queue
       if (isResident) return _doc;
         
       boolean isUntitled = false;
-      synchronized (_dmLock) {
+      synchronized(_dmLock) {      // Lock dm so that the _doc field can be updated.
         isUntitled = isUntitled();  // This locking may be overkill; once titled, always titled
         try { // _doc is not in memory
           _doc = _rec.make();
@@ -235,7 +229,7 @@ public class DocumentCache {
         catch(BadLocationException e) { throw new UnexpectedException(e); }
       }
 //      Utilities.showDebug("Document " + _doc + " reconstructed; _stat = " + _stat);
-      if (! isUntitled) synchronized (_cacheLock) { addToQueue(); }
+      if (! isUntitled) addToQueue();  // add this to queue if corresponds to a disk file
       return _doc;
     }
     
@@ -248,20 +242,20 @@ public class DocumentCache {
     /** Closes the corresponding document for this adapter.  Done when a document is closed by the navigator. */
     public void close() {
 //      Utilities.showDebug("close() called on " + this);
-      synchronized (_cacheLock) { _residentQueue.remove(this); }
+      remove(this);
       closingKickOut();
     }
     
     public void documentSaved(String fileName) {
       boolean addThis = false;
-      synchronized (_dmLock) {
+      synchronized(_dmLock) {  // lock the document manager so that document manager fields can be updated
         addThis = isUnmanagedOrUntitled();
         if (addThis) {
           setNotInQueue();
           _filename = fileName;
         }
       }
-      if (addThis) synchronized (_cacheLock) { addToQueue(); }
+      if (addThis) { addToQueue(); }  // synchronization is done in add method for cache
     }
     
     private boolean notInQueue() { return ! _residentQueue.contains(this); }

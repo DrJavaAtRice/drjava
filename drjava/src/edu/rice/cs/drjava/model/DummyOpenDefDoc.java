@@ -588,5 +588,18 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
   public int getInitialSelectionStart() { throw new UnsupportedOperationException("Dummy method"); }
   
   public int getInitialSelectionEnd() { throw new UnsupportedOperationException("Dummy method"); }
+ 
+  
+  /** Swing-style readLock(). */
+  public void acquireReadLock() { throw new UnsupportedOperationException("Dummy method"); }
+  
+   /** Swing-style readUnlock(). */
+  public void releaseReadLock() { throw new UnsupportedOperationException("Dummy method"); }
+
+    /** Swing-style writeLock(). */
+  public void acquireWriteLock() { throw new UnsupportedOperationException("Dummy method"); }
+  
+   /** Swing-style writeUnlock(). */
+  public void releaseWriteLock() { throw new UnsupportedOperationException("Dummy method"); }
   
 }

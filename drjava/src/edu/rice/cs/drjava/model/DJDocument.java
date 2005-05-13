@@ -47,16 +47,17 @@ package edu.rice.cs.drjava.model;
 
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
+import edu.rice.cs.util.text.AbstractDocumentInterface;
+
 
 import java.util.*;
 import javax.swing.text.*;
 import javax.swing.*;
 
-/**
- * Interface to be collectively shared by the Definitions Document, Open Definitions Document,
- * and the Interactions Document. Collectively represents a DrJava Document
+/** Interface to be collectively shared by the Definitions Document, Open Definitions Document,
+ *  and the Interactions Document. Collectively represents a DrJava Document
  */
-public interface DJDocument extends StyledDocument {
+public interface DJDocument extends StyledDocument, AbstractDocumentInterface {
   
   /**
    * Get the indent level.
@@ -336,8 +337,17 @@ public interface DJDocument extends StyledDocument {
    */
   public void remove(int offset, int len) throws BadLocationException;
   
+  /* Locking operations */
   
-    
-    
+  /** Swing-style readLock(). */
+  public void acquireReadLock();
   
+  /** Swing-style readUnlock(). */
+  public void releaseReadLock();
+
+  /** Swing-style writeLock(). */
+  public void acquireWriteLock();
+  
+  /** Swing-style writeUnlock(). */
+  public void releaseWriteLock();
 }

@@ -92,34 +92,32 @@ public class QuestionCurrLineStartsWithSkipComments extends IndentRuleQuestion {
       for (int i = 0; i < lineLength; i++) {
         // Get state for walker position.
         //BraceReduction reduced = doc.getReduced();
+
+        doc.move( startPos - currentPos + i);
+        ReducedModelState state = doc.getStateAtCurrent();
+        doc.move(-startPos + currentPos - i);
         
-        synchronized(doc) {
-          doc.move( startPos - currentPos + i);
-          ReducedModelState state = doc.getStateAtCurrent();
-          doc.move(-startPos + currentPos - i);
-          
-          
-          currentChar = text.charAt(i);
-          
-          if (state.equals(ReducedModelState.INSIDE_LINE_COMMENT)) return false;
-          if (state.equals(ReducedModelState.INSIDE_BLOCK_COMMENT)) {  // Handle case: ...*/*
-            previousChar = '\0'; 
-            continue;
+        
+        currentChar = text.charAt(i);
+        
+        if (state.equals(ReducedModelState.INSIDE_LINE_COMMENT)) return false;
+        if (state.equals(ReducedModelState.INSIDE_BLOCK_COMMENT)) {  // Handle case: ...*/*
+          previousChar = '\0'; 
+          continue;
+        }
+        if (state.equals(ReducedModelState.FREE)) { // Can prefix still fit on the current line?
+          if (_prefix.length() > lineLength - i) return false;
+          else if (text.substring(i, i+_prefix.length()).equals(_prefix) && previousChar != '/') {
+            // '/' is the only non-WS character that we consume without
+            // immediately returning false. When we try to match the prefix,
+            // we also need to reflect this implicit lookahead mechanism.
+            return true;
           }
-          if (state.equals(ReducedModelState.FREE)) { // Can prefix still fit on the current line?
-            if (_prefix.length() > lineLength - i) return false;
-            else if (text.substring(i, i+_prefix.length()).equals(_prefix) && previousChar != '/') {
-              // '/' is the only non-WS character that we consume without
-              // immediately returning false. When we try to match the prefix,
-              // we also need to reflect this implicit lookahead mechanism.
-              return true;
-            }
-            else if (currentChar == '/') {
-              if (previousChar == '/') return false;
-            }
-            else if (currentChar == ' ' || currentChar == '\t') {  }
-            else if (!(currentChar == '*' && previousChar == '/')) return false;
+          else if (currentChar == '/') {
+            if (previousChar == '/') return false;
           }
+          else if (currentChar == ' ' || currentChar == '\t') {  }
+          else if (!(currentChar == '*' && previousChar == '/')) return false;
         }
         if (previousChar == '/' && currentChar != '*') return false;
         previousChar = currentChar;

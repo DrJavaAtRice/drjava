@@ -182,10 +182,8 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
   }
   
   
-  /**
-   * Create a set of normal endings, i.e., semi-colons and braces for the purposes
-   * of indenting.
-   * @return the set of normal endings
+  /** Create a set of normal endings, i.e., semi-colons and braces for the purposes of indenting.
+   *  @return the set of normal endings
    */
   protected static HashSet<String> _makeNormEndings() {
     HashSet<String> normEndings = new HashSet<String>();
@@ -238,7 +236,7 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
     Vector<HighlightStatus> v;
     readLock();
     try {
-      synchronized (_reduced) {
+      synchronized(_reduced) {
         setCurrentLocation(start);
         // Now ask reduced model for highlight status for chars till end
         v = _reduced.getHighlightStatus(start, end - start);
@@ -403,7 +401,7 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
    * of this cache are invalidated by any modification to the document.
    */
   protected void clearCache() {
-    synchronized (_helperCache) { if (_cacheInUse) _clearCache(); }
+    synchronized(_helperCache) { if (_cacheInUse) _clearCache(); }
   }
   
   /** Clears the helper method cache.  Should be called every time the document is modified. */
@@ -418,7 +416,7 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
    *  @param curChar the character to be added. */
   private void _addCharToReducedModel(char curChar) {
     clearCache();
-    synchronized (_reduced) { _reduced.insertChar(curChar); }
+    synchronized(_reduced) { _reduced.insertChar(curChar); }
   }
   
   /** Get the current location of the cursor in the document.  Unlike the usual swing document model, 
@@ -440,7 +438,7 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
    */
   public void move(int dist) {
     
-    synchronized (_reduced) {
+    synchronized(_reduced) {
       int newLoc = _currentLocation + dist;
       if (newLoc < 0)
         throw new IllegalStateException("Tried to move cursor to a negative location");
@@ -455,7 +453,7 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
    *  @return the relative distance backwards to the offset before the matching brace.
    */
   public int balanceBackward() {
-    synchronized (_reduced) { return _reduced.balanceBackward(); }
+    synchronized(_reduced) { return _reduced.balanceBackward(); }
   }
   
   /** Forwarding method to find the match for the open brace immediately to the right, assuming there 
@@ -463,7 +461,7 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
    * @return the relative distance forwards to the offset after the matching brace.
    */
   public int balanceForward() {
-    synchronized (_reduced) { return _reduced.balanceForward(); }
+    synchronized(_reduced) { return _reduced.balanceForward(); }
   }
   
   /** This method is used ONLY for testing.
@@ -480,21 +478,21 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
     if (cached != null) return cached;
     
     IndentInfo info;
-    synchronized (_reduced) { info = _reduced.getIndentInformation(); }
+    synchronized(_reduced) { info = _reduced.getIndentInformation(); }
     _storeInCache(key, info);
     return info;
   }
   
   public ReducedModelState stateAtRelLocation(int dist) {
-    synchronized (_reduced) { return _reduced.moveWalkerGetState(dist); }
+    synchronized(_reduced) { return _reduced.moveWalkerGetState(dist); }
   }
   
   public ReducedModelState getStateAtCurrent() {
-    synchronized (_reduced) { return _reduced.getStateAtCurrent(); }
+    synchronized(_reduced) { return _reduced.getStateAtCurrent(); }
   }
   
   public void resetReducedModelLocation() {
-    synchronized (_reduced) { _reduced.resetLocation(); }
+    synchronized(_reduced) { _reduced.resetLocation(); }
   }
   
   /** Searching backwards, finds the position of the first character that is one of the given delimiters.  Does
@@ -531,7 +529,7 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
     try {
       String text = getText(DOCSTART, pos);
       
-      synchronized (_reduced) {
+      synchronized(_reduced) {
         final int origLocation = _currentLocation;
         // Move reduced model to location pos
         _reduced.move(pos - origLocation);  // reduced model points to pos == reducedPos
@@ -695,7 +693,7 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
    */
   protected void _storeInCache(String key, Object result) {
     // throwErrorHuh();
-    synchronized (_helperCache) {
+    synchronized(_helperCache) {
       _cacheInUse = true;
       
       // Prevent going over max size
@@ -741,7 +739,7 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
     
     writeLock();
     try {
-      synchronized (_reduced) {
+      synchronized(_reduced) {
         if (selStart == selEnd) {  // single line to indent
           Position oldCurrentPosition = createPosition(_currentLocation);
           // Indent, updating current location if necessary.
@@ -876,7 +874,7 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
     
     readLock();
     try {
-      synchronized (_reduced) {
+      synchronized(_reduced) {
         // Get the start of the current line
         int lineStart = getLineStartPos(pos);
         
@@ -936,7 +934,7 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
     
     readLock();
     try {
-      synchronized (_reduced) {
+      synchronized(_reduced) {
         int here = _currentLocation;
         int lineStart = getLineStartPos(pos);
         int lineEnd = getLineEndPos(pos);
@@ -988,7 +986,7 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
     if (cached != null) return cached.intValue();
     
     int dist;
-    synchronized (_reduced) {
+    synchronized(_reduced) {
       int location = _currentLocation;
       _reduced.move(pos - location);
       dist = _reduced.getDistToPreviousNewline(0);
@@ -1021,7 +1019,7 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
     if (cached != null) return cached.intValue();
     
     int dist;
-    synchronized (_reduced) {
+    synchronized(_reduced) {
       int location = _currentLocation;
       _reduced.move(pos - location);
       dist = _reduced.getDistToNextNewline();
@@ -1233,7 +1231,7 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
 
     boolean inParenPhrase;
     
-    synchronized (_reduced) {
+    synchronized(_reduced) {
       int here = _currentLocation;
       _reduced.move(pos - here);
       inParenPhrase = posInParenPhrase();
@@ -1251,7 +1249,7 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
   public boolean posInParenPhrase() {
     // throwErrorHuh();
     IndentInfo info;
-    synchronized (_reduced) {
+    synchronized(_reduced) {
       info = _reduced.getIndentInformation();
     }
     return info.braceTypeCurrent.equals(IndentInfo.openParen);
@@ -1271,7 +1269,7 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
 
     boolean notInParenPhrase;
     
-    synchronized (_reduced) {
+    synchronized(_reduced) {
       int here = _currentLocation;
       _reduced.move(pos - here);
       IndentInfo info = _reduced.getIndentInformation();
@@ -1502,7 +1500,7 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
     }
     
     public void run() {
-      synchronized (_reduced) { 
+      synchronized(_reduced) { 
          setCurrentLocation(_offset);
          _reduced.delete(_length); }
       _styleChanged();

@@ -53,19 +53,15 @@ import java.awt.event.KeyEvent;
 import java.awt.Event;
 import java.util.Hashtable;
 
-/**
- * Class representing all configuration options with values of type KeyStroke.
- */
+/** Class representing all configuration options with values of type KeyStroke.  This code should only run in the 
+ *  event thread, so no synchronization is necessary (or advisable).*/
 public class KeyStrokeOption extends Option<KeyStroke> {
 
-  /**
-   * Storage for keystrokes.
-   * TODO: Should this be synchronized?
-   */
+  /** Storage for keystrokes.*/
   static Hashtable<Integer, String> keys = new Hashtable<Integer, String>();
   public static final KeyStroke NULL_KEYSTROKE = KeyStroke.getKeyStroke(0, 0);
-  /**
-   * @param key The name of this option.
+  /** Standard constructor
+   *  @param key The name of this option.
    */
   public KeyStrokeOption(String key, KeyStroke def) {
     super(key,def); }

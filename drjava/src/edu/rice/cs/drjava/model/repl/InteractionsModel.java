@@ -185,7 +185,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   /** Interprets the given command.
    *  @param toEval command to be evaluated. */
   public final void interpret(String toEval) {
-    synchronized (_interpreterLock) {
+    synchronized(_interpreterLock) {
       _interpreterUsed = true;
       _interpret(toEval);
     }
@@ -434,8 +434,8 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
    *  @param newListener the listener to be installed
    */
   public void changeInputListener(InputListener oldListener, InputListener newListener) {
-    // syncrhonize to prevent concurrent modifications to the listener
-    synchronized (NoInputListener.ONLY) {
+    // synchronize to prevent concurrent modifications to the listener
+    synchronized(NoInputListener.ONLY) {
       if (_inputListener == oldListener) _inputListener = newListener;
       else
         throw new IllegalArgumentException("The given old listener is not installed!");      

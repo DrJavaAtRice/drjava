@@ -80,14 +80,35 @@ public final class CommandLineTest extends TestCase {
   private final File f3;
   private final String f3_name;
   private final String f3_contents;
+  private final File f4;
+  private final String f4_name;
+  private final String f4_contents;
+  private final File f5;
+  private final String f5_name;
+  private final String f5_contents;
+  private final File f6;
+  private final String f6_name;
+  private final String f6_contents;
+  private final File f7;
+  private final String f7_name;
+  private final String f7_contents;
+  private final File f8;
+  private final String f8_name;
+  private final String f8_contents;
 
+  
   /** Files that do not exist (constructor deletes them), and their filenames. */
   private final File nof1;
   private final File nof2;
   private final File nof3;
+  private final File nof4;
+  private final File nof5;
   private final String nof1_name;
   private final String nof2_name;
   private final String nof3_name;
+  private final String nof4_name;
+  private final String nof5_name;
+  
   
 //  private Log _log = new Log("CommandLineTestLog.txt", true);
 
@@ -119,6 +140,41 @@ public final class CommandLineTest extends TestCase {
       FileWriter fw3 = new FileWriter(f3);
       fw3.write(f3_contents,0,f3_contents.length());
       fw3.close();
+      f4 = File.createTempFile("DrJava-test", ".java");
+      f4.deleteOnExit();
+      f4_name = f4.getAbsolutePath();
+      f4_contents = "abcde";
+      FileWriter fw4 = new FileWriter(f4);
+      fw4.write(f4_contents,0,f4_contents.length());
+      fw4.close();
+      f5 = File.createTempFile("DrJava-test", ".java");
+      f5.deleteOnExit();
+      f5_name = f5.getAbsolutePath();
+      f5_contents = "fghijklm";
+      FileWriter fw5 = new FileWriter(f5);
+      fw5.write(f5_contents,0,f5_contents.length());
+      fw5.close();
+      f6 = File.createTempFile("DrJava-test", ".java");
+      f6.deleteOnExit();
+      f6_name = f6.getAbsolutePath();
+      f6_contents = "nopqrstuvwxyz";
+      FileWriter fw6 = new FileWriter(f6);
+      fw6.write(f6_contents,0,f6_contents.length());
+      fw6.close();
+      f7 = File.createTempFile("DrJava-test", ".java");
+      f7.deleteOnExit();
+      f7_name = f7.getAbsolutePath();
+      f7_contents = "abcde";
+      FileWriter fw7 = new FileWriter(f7);
+      fw7.write(f7_contents,0,f7_contents.length());
+      fw7.close();
+      f8 = File.createTempFile("DrJava-test", ".java");
+      f8.deleteOnExit();
+      f8_name = f8.getAbsolutePath();
+      f8_contents = "fghijklm";
+      FileWriter fw8 = new FileWriter(f8);
+      fw8.write(f8_contents,0,f8_contents.length());
+      fw8.close();
 
       nof1 = File.createTempFile("DrJava-test", ".java");
       nof1_name = nof1.getAbsolutePath();
@@ -129,6 +185,12 @@ public final class CommandLineTest extends TestCase {
       nof3 = File.createTempFile("DrJava-test", ".java");
       nof3_name = nof3.getAbsolutePath();
       nof3.delete();
+      nof4 = File.createTempFile("DrJava-test", ".java");
+      nof4_name = nof4.getAbsolutePath();
+      nof4.delete();
+      nof5 = File.createTempFile("DrJava-test", ".java");
+      nof5_name = nof5.getAbsolutePath();
+      nof5.delete();
     }
     catch (IOException e) {
       System.err.print("createTempFile failed.  This should not happen.");
@@ -219,27 +281,27 @@ public final class CommandLineTest extends TestCase {
   /** Supplying both valid and invalid filenames on the command line. Should open only the valid ones. */
   public void testMixed() throws BadLocationException {
     String[] list = new String[6];
-    list[0] = f2_name;
+    list[0] = f4_name;
     list[1] = nof1_name;
     list[2] = nof2_name;
-    list[3] = f3_name;
-    list[4] = f1_name;
+    list[3] = f5_name;
+    list[4] = f6_name;
     list[5] = nof3_name;
     DrJava.openCommandLineFiles(_mf, list);
 //    _log.log("openCommandLineFiles completed");
     List<OpenDefinitionsDocument> docs = _mf.getModel().getOpenDefinitionsDocuments();
     assertEquals("Exactly three documents?", 3, docs.size());
     OpenDefinitionsDocument doc1 = docs.get(0);
-    assertEquals("Correct length of file 1?", f2_contents.length(), doc1.getLength());
-    assertEquals("Do the contents of file 1 match?", f2_contents, doc1.getText(0,f2_contents.length()));
+    assertEquals("Correct length of file 1?", f4_contents.length(), doc1.getLength());
+    assertEquals("Do the contents of file 1 match?", f4_contents, doc1.getText(0,f4_contents.length()));
 
     OpenDefinitionsDocument doc2 = docs.get(1);
-    assertEquals("Correct length of file 2?", f3_contents.length(), doc2.getLength());
-    assertEquals("Do the contents of file 2 match?", f3_contents, doc2.getText(0,f3_contents.length()));
+    assertEquals("Correct length of file 2?", f5_contents.length(), doc2.getLength());
+    assertEquals("Do the contents of file 2 match?", f5_contents, doc2.getText(0,f5_contents.length()));
 
     OpenDefinitionsDocument doc3 = docs.get(2);
-    assertEquals("Correct length of file 3?", f1_contents.length(), doc3.getLength());
-    assertEquals("Do the contents of file 3 match?", f1_contents, doc3.getText(0,f1_contents.length()));
+    assertEquals("Correct length of file 3?", f6_contents.length(), doc3.getLength());
+    assertEquals("Do the contents of file 3 match?", f6_contents, doc3.getText(0,f6_contents.length()));
 
     assertEquals("Is the last document the active one?", doc3, _mf.getModel().getActiveDocument());
 //    _log.log("testMixed completed");
@@ -248,12 +310,12 @@ public final class CommandLineTest extends TestCase {
   /** Test duplicate files. */
   public void testDups() throws BadLocationException {
     String[] list = new String[6];
-    list[0] = f1_name;
-    list[1] = nof1_name;
-    list[2] = nof2_name;
-    list[3] = f2_name;
-    list[4] = f2_name;
-    list[5] = f1_name;
+    list[0] = f7_name;
+    list[1] = nof4_name;
+    list[2] = nof5_name;
+    list[3] = f8_name;
+    list[4] = f8_name;
+    list[5] = f7_name;
     DrJava.openCommandLineFiles(_mf, list);
 //    _log.log("openCommandLineFiles in testDups completed");
     
@@ -261,12 +323,12 @@ public final class CommandLineTest extends TestCase {
     Utilities.clearEventQueue();
     assertEquals("Exactly two documents?", 2, docs.size());
     OpenDefinitionsDocument doc1 = docs.get(0);
-    assertEquals("Correct length of file 1?", f1_contents.length(), doc1.getLength());
-    assertEquals("Do the contents of file 1 match?", f1_contents, doc1.getText(0,f1_contents.length()));
+    assertEquals("Correct length of file 1?", f7_contents.length(), doc1.getLength());
+    assertEquals("Do the contents of file 1 match?", f7_contents, doc1.getText(0,f7_contents.length()));
     Utilities.clearEventQueue();
     OpenDefinitionsDocument doc2 = docs.get(1);
-    assertEquals("Correct length of file 2?", f2_contents.length(), doc2.getLength());
-    assertEquals("Do the contents of file 2 match?", f2_contents, doc2.getText(0,f2_contents.length()));
+    assertEquals("Correct length of file 2?", f8_contents.length(), doc2.getLength());
+    assertEquals("Do the contents of file 2 match?", f8_contents, doc2.getText(0,f8_contents.length()));
 
     assertEquals("Is the last document the active one?", doc2, _mf.getModel().getActiveDocument());
 //    _log.log("testDups completed");

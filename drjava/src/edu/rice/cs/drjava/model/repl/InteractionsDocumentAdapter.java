@@ -123,7 +123,7 @@ public class InteractionsDocumentAdapter extends AbstractDJDocument {
    *  returns false if the point is not in the list.
    */
   public boolean setColoring(int point, Graphics g) {
-    synchronized (_stylesList) {
+    synchronized(_stylesList) {
       for(Pair<Pair<Integer,Integer>,String> p :  _stylesList) {
         Pair<Integer,Integer> loc = p.getFirst();
         if (loc.getFirst() <= point && loc.getSecond() >= point) {
@@ -179,7 +179,7 @@ public class InteractionsDocumentAdapter extends AbstractDJDocument {
   
   /** Attempts to set the font on the graphics context based upon the styles held in the styles list. */
   public void setBoldFonts(int point, Graphics g) {
-    synchronized (_stylesList) {
+    synchronized(_stylesList) {
       for(Pair<Pair<Integer,Integer>,String> p :  _stylesList) {
         Pair<Integer,Integer> loc = p.getFirst();
         if (loc.getFirst() <= point && loc.getSecond() >= point) {
@@ -196,7 +196,7 @@ public class InteractionsDocumentAdapter extends AbstractDJDocument {
     
   
   /** Called when the Interactions pane is reset. */
-  public void clearColoring() { synchronized (_stylesList) { _toClear = true; } }
+  public void clearColoring() { synchronized(_stylesList) { _toClear = true; } }
   
   /** Returns true iff the end of the current interaction is an open comment block
    *  @return true iff the end of the current interaction is an open comment block

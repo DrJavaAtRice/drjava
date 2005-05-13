@@ -74,12 +74,12 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
       public void compileEnded() {
         super.compileEnded();
         _compileDone = true;
-        synchronized (_compileLock) { _compileLock.notify(); }
+        synchronized(_compileLock) { _compileLock.notify(); }
       }
     };
   
   private void _waitCompileDone() {
-    synchronized (_compileLock) {
+    synchronized(_compileLock) {
       try { while (! _compileDone) _compileLock.wait(); }
       catch (InterruptedException ie) { fail("Unexpected interrupted exception: " + ie.getMessage()); }
     }

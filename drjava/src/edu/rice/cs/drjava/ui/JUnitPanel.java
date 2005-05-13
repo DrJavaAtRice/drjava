@@ -206,7 +206,7 @@ public class JUnitPanel extends ErrorPanel {
   /**
    * Resets the progress bar to start counting the given number of tests.
    */
-  public synchronized void progressReset(int numTests) {
+  public void progressReset(int numTests) {
     _progressBar.reset();
     _progressBar.start(numTests);
     _testsSuccessful = true;
@@ -217,13 +217,13 @@ public class JUnitPanel extends ErrorPanel {
    * Steps the progress bar forward by one test.
    * @param successful Whether the last test was successful or not.
    */
-  public synchronized void progressStep(boolean successful) {
+  public void progressStep(boolean successful) {
     _testCount++;
     _testsSuccessful &= successful;
     _progressBar.step(_testCount, _testsSuccessful);
   }
 
-  public synchronized void testStarted(String className, String testName) {
+  public void testStarted(String className, String testName) {
   }
 
   private void _displayStackTrace (JUnitError e) {
@@ -296,7 +296,7 @@ public class JUnitPanel extends ErrorPanel {
     /**
      * Provides the ability to display the name of the test being run.
      */
-    public synchronized void testStarted(String name) {
+    public void testStarted(String name) {
       String testName = _getTestFromName(name);
       String className = _getClassFromName(name);
       String fullName = className + "." + testName;
@@ -329,7 +329,7 @@ public class JUnitPanel extends ErrorPanel {
     /**
      * Provides the ability to display the results of a test that has finished.
      */
-    public synchronized void testEnded(String name, boolean wasSuccessful, boolean causedError) {
+    public void testEnded(String name, boolean wasSuccessful, boolean causedError) {
       String testName = _getTestFromName(name);
       String fullName = _getClassFromName(name) + "." + testName;
       if (fullName.equals(JUNIT_WARNING)) {
@@ -350,7 +350,7 @@ public class JUnitPanel extends ErrorPanel {
     }
 
     /** Puts the error pane into "junit in progress" state. */
-    public synchronized void setJUnitInProgress() {
+    public void setJUnitInProgress() {
       _errorListPositions = new Position[0];
       progressReset(0);
       _runningTestNamePositions.clear();
@@ -367,7 +367,7 @@ public class JUnitPanel extends ErrorPanel {
     }
 
     /** Used to show that testing was unsuccessful. */
-    protected synchronized void _updateWithErrors() throws BadLocationException {
+    protected void _updateWithErrors() throws BadLocationException {
       //DefaultStyledDocument doc = new DefaultStyledDocument();
       DefaultStyledDocument doc = (DefaultStyledDocument) getDocument();
       _checkSync(doc);
@@ -456,7 +456,7 @@ public class JUnitPanel extends ErrorPanel {
     protected String _getErrorText() { return "Failure: "; }
 
     /** Updates the list pane with no errors. */
-    protected synchronized void _updateNoErrors(boolean haveTestsRun) throws BadLocationException {
+    protected void _updateNoErrors(boolean haveTestsRun) throws BadLocationException {
       //DefaultStyledDocument doc = new DefaultStyledDocument();
       _checkSync(getDocument());
       _replaceInProgressText(haveTestsRun ? JUNIT_FINISHED_MSG : NO_TESTS_MSG);

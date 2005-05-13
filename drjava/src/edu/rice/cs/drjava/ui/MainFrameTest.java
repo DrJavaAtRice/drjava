@@ -548,7 +548,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
 
 //     _log.log("Waiting for file closing");
      
-     synchronized (_closeLock) {
+     synchronized(_closeLock) {
        try { while (! _closeDone) _closeLock.wait(); }
        catch(InterruptedException exception) { fail(exception.toString()); }
      }
@@ -568,7 +568,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
 
     /** Just notify when the compile has ended */
     public void compileEnded() {
-      synchronized (_compileLock) { 
+      synchronized(_compileLock) { 
         _compileDone = true;
         _compileLock.notify(); 
       }
@@ -583,7 +583,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     implements SingleDisplayModelListener {
 
     public void fileClosed(OpenDefinitionsDocument doc) {
-      synchronized (_closeLock) {
+      synchronized(_closeLock) {
         _closeDone = true;
         _closeLock.notify();
       }

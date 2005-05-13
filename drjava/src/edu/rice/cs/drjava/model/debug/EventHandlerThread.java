@@ -152,42 +152,22 @@ public class EventHandlerThread extends Thread {
   public void handleEvent(Event e) throws DebugException {
     _log("handling event: " + e);
 
-    if (e instanceof BreakpointEvent) {
-      _handleBreakpointEvent((BreakpointEvent) e);
-    }
-    else if (e instanceof StepEvent) {
-      _handleStepEvent((StepEvent) e);
-    }
+    if (e instanceof BreakpointEvent) _handleBreakpointEvent((BreakpointEvent) e);
+    else if (e instanceof StepEvent) _handleStepEvent((StepEvent) e);
     //else if (e instanceof ModificationWatchpointEvent) {
     //  _handleModificationWatchpointEvent((ModificationWatchpointEvent) e);
     //}
-    else if (e instanceof ClassPrepareEvent) {
-      _handleClassPrepareEvent((ClassPrepareEvent) e);
-    }
-    else if (e instanceof ThreadStartEvent) {
-      _handleThreadStartEvent((ThreadStartEvent) e);
-    }
-    else if (e instanceof ThreadDeathEvent) {
-      _handleThreadDeathEvent((ThreadDeathEvent) e);
-    }
-    else if (e instanceof VMDeathEvent) {
-      _handleVMDeathEvent((VMDeathEvent) e);
-    }
-    else if (e instanceof VMDisconnectEvent) {
-      _handleVMDisconnectEvent((VMDisconnectEvent) e);
-    }
-    else {
+    else if (e instanceof ClassPrepareEvent) _handleClassPrepareEvent((ClassPrepareEvent) e);
+    else if (e instanceof ThreadStartEvent) _handleThreadStartEvent((ThreadStartEvent) e);
+    else if (e instanceof ThreadDeathEvent) _handleThreadDeathEvent((ThreadDeathEvent) e);
+    else if (e instanceof VMDeathEvent) _handleVMDeathEvent((VMDeathEvent) e);
+    else if (e instanceof VMDisconnectEvent) _handleVMDisconnectEvent((VMDisconnectEvent) e);
+    else
       throw new DebugException("Unexpected event type: " + e);
-    }
   }
 
-  /**
-   * Returns whether the given thread is both suspended and has
-   * stack frames.
-   */
-  protected boolean _isSuspendedWithFrames(ThreadReference thread)
-    throws DebugException
-  {
+  /** Returns whether the given thread is both suspended and has stack frames. */
+  protected boolean _isSuspendedWithFrames(ThreadReference thread) throws DebugException {
     try {
       return thread.isSuspended() && thread.frameCount() > 0;
     }
@@ -201,9 +181,7 @@ public class EventHandlerThread extends Thread {
    * Responds to a breakpoint event.
    * @param e breakpoint event from JPDA
    */
-  protected void _handleBreakpointEvent(BreakpointEvent e)
-    throws DebugException
-  {
+  protected void _handleBreakpointEvent(BreakpointEvent e) throws DebugException {
     synchronized(_debugger) {
       if (_isSuspendedWithFrames(e.thread()) &&
           _debugger.setCurrentThread(e.thread())) {
@@ -254,9 +232,7 @@ public class EventHandlerThread extends Thread {
    * @param e class prepare event from JPDA
    * @throws DebugException if actions performed on the prepared class fail
    */
-  protected void _handleClassPrepareEvent(ClassPrepareEvent e)
-    throws DebugException
-  {
+  protected void _handleClassPrepareEvent(ClassPrepareEvent e) throws DebugException {
     synchronized(_debugger) {
       _debugger.getPendingRequestManager().classPrepared(e);
       // resume this thread which was suspended because its
@@ -270,9 +246,7 @@ public class EventHandlerThread extends Thread {
    * @param e thread start event from JPDA
    */
   protected void _handleThreadStartEvent(ThreadStartEvent e) {
-    synchronized(_debugger) {
-      _debugger.threadStarted();
-    }
+    synchronized(_debugger) { _debugger.threadStarted(); }
   }
 
   /**
@@ -342,12 +316,8 @@ public class EventHandlerThread extends Thread {
     }
   }
 
-  /**
-   * Responds if a VMDisconnectedException occurs while dealing with
-   * another event.  We need to flush the event queue, dealing only
-   * with exit events (VMDeath, VMDisconnect) so that we terminate
-   * correctly.
-   */
+  /** Responds if a VMDisconnectedException occurs while dealing with another event.  We need to flush the event
+   *  queue, dealing only with exit events (VMDeath, VMDisconnect) so that we terminate correctly. */
   synchronized void handleDisconnectedException() throws DebugException {
     EventQueue queue = _vm.eventQueue();
     while (_connected) {
@@ -356,12 +326,8 @@ public class EventHandlerThread extends Thread {
         EventIterator iter = eventSet.eventIterator();
         while (iter.hasNext()) {
           Event event = iter.nextEvent();
-          if (event instanceof VMDeathEvent) {
-            _handleVMDeathEvent((VMDeathEvent)event);
-          }
-          else if (event instanceof VMDisconnectEvent) {
-            _handleVMDisconnectEvent((VMDisconnectEvent)event);
-          }
+          if (event instanceof VMDeathEvent) _handleVMDeathEvent((VMDeathEvent)event);
+          else if (event instanceof VMDisconnectEvent)  _handleVMDisconnectEvent((VMDisconnectEvent)event);
           // else ignore the event
         }
         eventSet.resume(); // Resume the VM

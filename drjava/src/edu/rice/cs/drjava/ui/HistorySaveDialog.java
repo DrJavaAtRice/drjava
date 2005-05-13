@@ -62,7 +62,7 @@ public class HistorySaveDialog extends DrJavaScrollableDialog {
    * Lock to ensure this history is only edited by one user at a time.
    * TODO: Is this necessary?
    */
-  private Object _historyLock = new Object();
+//  private Object _historyLock = new Object();
 
   /**
    * Creates a new HistorySaveDialog.
@@ -100,22 +100,21 @@ public class HistorySaveDialog extends DrJavaScrollableDialog {
     _dialog.getRootPane().setDefaultButton(saveButton);
   }
 
-  /**
-   * Shows the dialog for editing the given history.
-   * @param history History to edit
-   * @return Edited history, if it is saved.  Null, if not.
+  /** Shows the dialog for editing the given history.
+   *  @param history History to edit
+   *  @return Edited history, if it is saved.  Null, if not.
    */
   public String editHistory(String history) {
-    synchronized(_historyLock) {
-      _history = null; // make it null by default
-      _textArea.setText(history);
-      _textArea.setEditable(true);
-
-      // Block until the dialog is closed
-      show();
-
-      // The save action will set the history field
-      return _history;
-    }
+//    synchronized(_historyLock) {
+    _history = null; // make it null by default
+    _textArea.setText(history);
+    _textArea.setEditable(true);
+    
+    // Block until the dialog is closed
+    show();
+    
+    // The save action will set the history field
+    return _history;
+//    }
   }
 }

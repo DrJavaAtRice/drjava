@@ -86,7 +86,7 @@ public class ActionStartPrevStmtPlus extends IndentRuleAction {
     boolean supResult = super.indentLine(doc, reason);
     String indent = "";
     int here = doc.getCurrentLocation();
-
+    
     // Find end of previous statement (or end of case statement)
     char[] delims = {';', '{', '}'};
     int lineStart = doc.getLineStartPos(here);
@@ -97,13 +97,13 @@ public class ActionStartPrevStmtPlus extends IndentRuleAction {
       // Should not happen
       throw new UnexpectedException(e);
     }
-
+    
     // For DOCSTART, align to left margin
     if (prevDelimiterPos <= AbstractDJDocument.DOCSTART) {
       doc.setTab(_suffix, here);
       return supResult;
     }
-
+    
     try {
       char delim = doc.getText(prevDelimiterPos, 1).charAt(0);
       char[] ws = {' ', '\t', '\n', ';'};
@@ -116,44 +116,42 @@ public class ActionStartPrevStmtPlus extends IndentRuleAction {
     } catch (BadLocationException e) {
       //do nothing
     }
+    
     try {
       // Jump over {-} region if delimiter was a close brace.
       char delim = doc.getText(prevDelimiterPos, 1).charAt(0);
-
+      
       if (delim == '}') {
         //BraceReduction reduced = doc.getReduced();
         //we're pretty sure the doc is in sync.
         doc.resetReducedModelLocation();
-
+        
         int dist = prevDelimiterPos - here + 1;
-        synchronized(doc){
-          doc.move(dist);
-          prevDelimiterPos -= doc.balanceBackward() - 1;
-          doc.move(-dist);
-        }
+        
+        doc.move(dist);
+        prevDelimiterPos -= doc.balanceBackward() - 1;
+        doc.move(-dist);
+        
       }
     }
-    catch (BadLocationException e) {
-      throw new UnexpectedException(e);
-    }
-
+    catch (BadLocationException e) { throw new UnexpectedException(e); }
+    
+    
     // Get indent of prev statement
     try {
       // Include colons as end of statement (ie. "case")
       char[] indentDelims;
       char[] indentDelimsWithColon = {';', '{', '}', ':'};
       char[] indentDelimsWithoutColon = {';', '{', '}'};
-      if (_useColon) {
-        indentDelims = indentDelimsWithColon;
-      } else {
-        indentDelims = indentDelimsWithoutColon;
-      }
+      if (_useColon) indentDelims = indentDelimsWithColon;
+      else indentDelims = indentDelimsWithoutColon;
+      
       indent = doc.getIndentOfCurrStmt(prevDelimiterPos, indentDelims);
-
+      
     } catch (BadLocationException e) {
       throw new UnexpectedException(e);
     }
-
+    
     indent = indent + _suffix;
     doc.setTab(indent, here);
     return supResult;
@@ -162,7 +160,7 @@ public class ActionStartPrevStmtPlus extends IndentRuleAction {
   private boolean _isPrevNonWSCharEqualTo(AbstractDJDocument doc,int pos,char c) {
     try {
       int prevPos = doc.findPrevNonWSCharPos(pos);
-      if (prevPos <0) return false;
+      if (prevPos < 0) return false;
       return (doc.getText(prevPos,1).charAt(0) == c);
     }
     catch (BadLocationException e) {

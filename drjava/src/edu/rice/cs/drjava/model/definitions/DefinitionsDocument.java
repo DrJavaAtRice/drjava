@@ -101,11 +101,11 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   List<DocumentClosedListener> _closedListeners = new LinkedList<DocumentClosedListener>();
   
   public void addDocumentClosedListener(DocumentClosedListener l) { 
-    synchronized (_closedListeners) { _closedListeners.add(l); }
+    synchronized(_closedListeners) { _closedListeners.add(l); }
   }
   
   public void removeDocumentClosedListener(DocumentClosedListener l) { 
-    synchronized (_closedListeners) { _closedListeners.remove(l); }
+    synchronized(_closedListeners) { _closedListeners.remove(l); }
   }
   
   // begin debug code
@@ -121,7 +121,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   public void close() {
     _removeIndenter();
     
-    synchronized (_closedListeners) {
+    synchronized(_closedListeners) {
       for (DocumentClosedListener l: _closedListeners) { l.close(); }
       _closedListeners = new LinkedList<DocumentClosedListener>();
     }
@@ -594,7 +594,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
         writeLock();
         try {
           
-          synchronized (_reduced) {
+          synchronized(_reduced) {
             Position oldCurrentPosition = createPosition(_currentLocation);
             _commentLine();
             //int caretPos = getCaretPosition();
@@ -670,7 +670,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     if (selStart == selEnd) {
       writeLock();
       try {
-        synchronized (_reduced) {
+        synchronized(_reduced) {
           Position oldCurrentPosition = createPosition(_currentLocation);
           _uncommentLine();
           //int caretPos = getCaretPosition();
@@ -699,7 +699,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
       final Position endPos = this.createPosition(end);
       // Iterate, line by line, until we get to/past the end
       int walker = start;
-      synchronized (_reduced) {
+      synchronized(_reduced) {
         while (walker < endPos.getOffset()) {
           setCurrentLocation(walker);
           // Keep pointer to walker position that will stay current
@@ -893,7 +893,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     readLock();
     int len = getLength();
     try {
-      synchronized (_reduced) {
+      synchronized(_reduced) {
         setCurrentLocation(0);
         for (int i = 1; (i < line) && (_currentLocation < len); i++) {
           dist = _reduced.getDistToNextNewline();
@@ -925,7 +925,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     int oldLocation;
     
     readLock();
-    synchronized (_reduced) {
+    synchronized(_reduced) {
       oldLocation = _currentLocation;
       try {
         int firstNormalLocation;
@@ -1011,7 +1011,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
    */
   public String getEnclosingTopLevelClassName(int pos) throws ClassNameNotFoundException {
     readLock();
-    synchronized (_reduced) {
+    synchronized(_reduced) {
       int oldLocation = _currentLocation;
       try {
         setCurrentLocation(pos);
@@ -1069,7 +1069,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     int oldLocation = _currentLocation;
     
     readLock();
-    synchronized (_reduced) {
+    synchronized(_reduced) {
       try {
         setCurrentLocation(startPos);
         final int textLength = endPos - startPos;
@@ -1139,7 +1139,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   private int _findKeywordAtToplevel(String keyword, String text, int textOffset) {
     
     readLock();
-    synchronized (_reduced) {
+    synchronized(_reduced) {
       int oldLocation = _currentLocation;
       int index = 0;
       try {
@@ -1326,7 +1326,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
    * @param fl the listener to register
    */
   public void addFinalizationListener(FinalizationListener<DefinitionsDocument> fl) {
-    synchronized (_finalizationListeners) { _finalizationListeners.add(fl); }
+    synchronized(_finalizationListeners) { _finalizationListeners.add(fl); }
   }
   
   public List<FinalizationListener<DefinitionsDocument>> getFinalizationListeners() {
@@ -1338,7 +1338,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
    */
   protected void finalize() {
     FinalizationEvent<DefinitionsDocument> fe = new FinalizationEvent<DefinitionsDocument>(this);
-    synchronized (_finalizationListeners) {
+    synchronized(_finalizationListeners) {
       for (FinalizationListener<DefinitionsDocument> fl: _finalizationListeners) {
         fl.finalized(fe);
       }
