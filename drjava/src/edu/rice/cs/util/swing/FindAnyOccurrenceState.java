@@ -178,27 +178,29 @@ class FindAnyOccurrenceState extends AFindReplaceMachineState {
    *  @return the FindResult containing the information for where we found _findWord or a dummy FindResult.
    */
   private FindResult _findNextInAllDocs(AbstractDocumentInterface docToSearch) throws BadLocationException {
-    if (docToSearch == _doc) return new FindResult(_doc, -1, false);
     
-    String text;
-    docToSearch.acquireReadLock();
-    try { text = docToSearch.getText(0, docToSearch.getLength()); }
-    finally { docToSearch.releaseReadLock(); }
-    String findWord = _findWord;
-    if (!_matchCase) {
-      text = text.toLowerCase();
-      findWord = findWord.toLowerCase();
+    while (docToSearch != _doc) {
+      String text;
+      docToSearch.acquireReadLock();
+      try { text = docToSearch.getText(0, docToSearch.getLength()); }
+      finally { docToSearch.releaseReadLock(); }
+      String findWord = _findWord;
+      if (!_matchCase) {
+        text = text.toLowerCase();
+        findWord = findWord.toLowerCase();
+      }
+      int index = !_searchBackwards ? text.indexOf(findWord) : text.lastIndexOf(findWord);
+      
+      if (index != -1) {
+        // We found it in a different document, put the caret at the end of the
+        // found word (if we're going forward).
+        if (!_searchBackwards) index += findWord.length();
+        return new FindResult(docToSearch, index, false);
+      }
+      docToSearch = !_searchBackwards ? _docIterator.getNextDocument(docToSearch) :
+                                        _docIterator.getPrevDocument(docToSearch);
     }
-    int index = !_searchBackwards ? text.indexOf(findWord) : text.lastIndexOf(findWord);
-    
-    if (index != -1) {
-      // We found it in a different document, put the caret at the end of the
-      // found word (if we're going forward).
-      if (!_searchBackwards) index += findWord.length();
-      return new FindResult(docToSearch, index, false);
-    }
-    return _findNextInAllDocs(!_searchBackwards ? _docIterator.getNextDocument(docToSearch) :
-                                _docIterator.getPrevDocument(docToSearch));
+    return new FindResult(_doc, -1, false);
   }
 }
 
