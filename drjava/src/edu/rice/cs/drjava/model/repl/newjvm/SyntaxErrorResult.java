@@ -109,14 +109,14 @@ public class SyntaxErrorResult implements InterpretResult {
     return _errorMessage;
   }
 
-  public String getInteraction(){
+  public String getInteraction() {
     return _interaction;
   }
 
-  public int getStartRow(){ return _startRow; }
-  public int getStartCol(){ return _startCol; }
-  public int getEndRow(){ return _endRow; }
-  public int getEndCol(){ return _endCol; }
+  public int getStartRow() { return _startRow; }
+  public int getStartCol() { return _startCol; }
+  public int getEndRow() { return _endRow; }
+  public int getEndCol() { return _endCol; }
 
   public <T> T apply(InterpretResultVisitor<T> v) {
     return v.forSyntaxErrorResult(this);

@@ -487,7 +487,7 @@ public class DefaultCompilerModel implements CompilerModel {
    *  statement, it won't be added to the source root set.
    *  @param defDocs the list of OpenDefinitionsDocuments to process.
    */
-  public static File[] getSourceRootSet(List<OpenDefinitionsDocument> defDocs){
+  public static File[] getSourceRootSet(List<OpenDefinitionsDocument> defDocs) {
     
     LinkedList<File> roots = new LinkedList<File>();
 
@@ -503,7 +503,7 @@ public class DefaultCompilerModel implements CompilerModel {
       catch (InvalidPackageException e) {
         // oh well, invalid package statement for this one
         // can't add it to roots
-      }/*catch(RuntimeException){
+      }/*catch(RuntimeException) {
        * Adam look here
        * }*/
     }

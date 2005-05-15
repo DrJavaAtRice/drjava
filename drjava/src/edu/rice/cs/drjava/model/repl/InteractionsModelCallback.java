@@ -104,28 +104,19 @@ public interface InteractionsModelCallback {
    */
   public void replReturnedResult(String result, String style);
 
-  /**
-   * Signifies that the most recent interpretation was ended
-   * due to an exception being thrown.
-   *
-   * @param exceptionClass The name of the class of the thrown exception
-   * @param message The exception's message
-   * @param stackTrace The stack trace of the exception
+  /** Signifies that the most recent interpretation was ended due to an exception being thrown.
+   *  @param exceptionClass The name of the class of the thrown exception
+   *  @param message The exception's message
+   *  @param stackTrace The stack trace of the exception
    */
-  public void replThrewException(String exceptionClass,
-                                 String message,
-                                 String stackTrace,
-                                 String specialMessage);
+  public void replThrewException(String exceptionClass, String message, String stackTrace, String specialMessage);
 
-  /**
-   * Signifies that the most recent interpretation was preempted
-   * by a syntax error.
-   *
-   * @param errorMessage The syntax error message
-   * @param startRow The starting row of the error
-   * @param startCol The starting column of the error
-   * @param endRow The end row of the error
-   * @param endCol The end column of the error
+  /** Signifies that the most recent interpretation was preempted by a syntax error.
+   *  @param errorMessage The syntax error message
+   *  @param startRow The starting row of the error
+   *  @param startCol The starting column of the error
+   *  @param endRow The end row of the error
+   *  @param endCol The end column of the error
    */
   public void replReturnedSyntaxError(String errorMessage, String interaction, int startRow, int startCol,
                                       int endRow, int endCol);

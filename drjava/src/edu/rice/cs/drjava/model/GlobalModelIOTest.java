@@ -546,7 +546,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
     //TestListener listener = new TestListener();
     TestListener listener = new TestListener() {
 
-      public void fileNotFound(File f){
+      public void fileNotFound(File f) {
         fileNotFoundCount++;
       }
 

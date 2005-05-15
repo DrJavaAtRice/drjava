@@ -78,7 +78,7 @@ public class ActionStartStmtOfBracePlus extends IndentRuleAction {
    * @return true if the caller should update the current location itself,
    * false if the indenter has already handled this
    */
-  public boolean indentLine(AbstractDJDocument doc, int reason){
+  public boolean indentLine(AbstractDJDocument doc, int reason) {
     boolean supResult = super.indentLine(doc, reason);
     int pos = doc.getCurrentLocation();
 

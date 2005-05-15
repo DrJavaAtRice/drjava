@@ -218,12 +218,12 @@ public class CompilerErrorModel<T extends CompilerError> {
 
 
     StartAndEndIndex saei = _filesToIndexes.get(file);
-    if (saei == null){
+    if (saei == null) {
       return null;
     }
     int start = saei.getStartPos();
     int end = saei.getEndPos();
-    if (start == end){
+    if (start == end) {
       return null;
     }
 
@@ -278,7 +278,7 @@ public class CompilerErrorModel<T extends CompilerError> {
       }
     }
 
-    if (shouldSelect == -1){
+    if (shouldSelect == -1) {
       return null;
     } else {
       return _errors[shouldSelect];
@@ -289,7 +289,7 @@ public class CompilerErrorModel<T extends CompilerError> {
    * This function tells if there are errors with source locations associated
    * with the given file
    */
-  public boolean hasErrorsWithPositions(OpenDefinitionsDocument odd){
+  public boolean hasErrorsWithPositions(OpenDefinitionsDocument odd) {
     File file = null;
     try {
       file = odd.getFile();
@@ -313,10 +313,10 @@ public class CompilerErrorModel<T extends CompilerError> {
     }
 
     StartAndEndIndex saei = _filesToIndexes.get(file);
-    if (saei == null){
+    if (saei == null) {
       return false;
     }
-    if (saei.getStartPos() == saei.getEndPos()){
+    if (saei.getStartPos() == saei.getEndPos()) {
       return false;
     }
     return true;
@@ -360,7 +360,7 @@ public class CompilerErrorModel<T extends CompilerError> {
 
         // find the next error with a line number (skipping others)
         curError = nextErrorWithLine(curError);
-        if (curError >= _numErrors){
+        if (curError >= _numErrors) {
           break;
         }
 
@@ -386,7 +386,7 @@ public class CompilerErrorModel<T extends CompilerError> {
           }
         }
 
-        if (curError >= _numErrors){
+        if (curError >= _numErrors) {
           break;
         }
 
@@ -477,7 +477,7 @@ public class CompilerErrorModel<T extends CompilerError> {
     private int startPos;
     private int endPos;
 
-    public StartAndEndIndex(int startPos, int endPos){
+    public StartAndEndIndex(int startPos, int endPos) {
       this.startPos = startPos;
       this.endPos = endPos;
     }

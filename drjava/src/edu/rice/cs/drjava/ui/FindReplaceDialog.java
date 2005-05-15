@@ -691,6 +691,7 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
       _findField.requestFocusInWindow();
     }
   }
+  
   class MatchWholeWordListener implements ItemListener {
     public void itemStateChanged(ItemEvent e) {
       if (e.getStateChange() == ItemEvent.DESELECTED) {
@@ -704,16 +705,4 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
       _findField.requestFocusInWindow();
     }
   }
-    // JL
-//  class MatchWholeWordListener implements ActionListener {
-//      public void actionPerformed(ActionEvent e) {
-//          _machine.setMatchWholeWord();
-//      }
-//  }
-//
-//  class FindAnyOccurrenceListener implements ActionListener {
-//      public void actionPerformed(ActionEvent e) {
-//          _machine.setFindAnyOccurrence();
-//      }
-//  }
 }

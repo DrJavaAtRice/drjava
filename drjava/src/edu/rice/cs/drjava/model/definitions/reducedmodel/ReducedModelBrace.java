@@ -48,7 +48,7 @@ package edu.rice.cs.drjava.model.definitions.reducedmodel;
 import java.util.Stack;
 
 /**
- * Keeps track of the true braces (i.e., "(){}[]").
+ * Keeps track of the true braces (i.e., "() {}[]").
  * This reduced sub-model is used to balance braces for both indenting
  * and highlighting purposes.  For example, when the user's caret is
  * immediately after a closing brace, this allows the DefinitionsPane
@@ -236,16 +236,16 @@ public class ReducedModelBrace extends AbstractReducedModel {
 
     if ( copyCursor.atStart())
       copyCursor.next();
-    if (_cursor.getBlockOffset() > 0){
+    if (_cursor.getBlockOffset() > 0) {
       dist = copyCursor.current().getSize() - _cursor.getBlockOffset();
       relDistance = dist;
       copyCursor.next();
     }
     // there are no braces on the last brace element - it's empty
-    while (!copyCursor.atEnd() ){
+    while (!copyCursor.atEnd() ) {
       if (!copyCursor.current().isGap()) {
         if (moveWalkerGetState(relDistance) ==
-            FREE){
+            FREE) {
               copyCursor.dispose();
               return dist;
             }
@@ -324,7 +324,7 @@ public class ReducedModelBrace extends AbstractReducedModel {
               // check for closed brace
               if (iter.current().isClosedBrace()) {
                 ReducedToken popped = braceStack.pop();
-                if (!iter.current().isMatch(popped)){
+                if (!iter.current().isMatch(popped)) {
                   iter.dispose();
 //                  System.out.println("! encountered closed brace that didn't match");
                   return -1;
@@ -483,7 +483,7 @@ public class ReducedModelBrace extends AbstractReducedModel {
               // open
               if (iter.current().isOpenBrace()) {
                 ReducedToken popped = braceStack.pop();
-                if (!iter.current().isMatch(popped)){
+                if (!iter.current().isMatch(popped)) {
                   iter.dispose();
                   //System.out.println("! encountered open brace that didn't match");
                   return -1;
@@ -582,7 +582,7 @@ public class ReducedModelBrace extends AbstractReducedModel {
                   return;
                 }
                 ReducedToken popped = braceStack.pop();
-                if (!iter.current().isMatch(popped)){
+                if (!iter.current().isMatch(popped)) {
                   iter.dispose();
                   return;
                 }
@@ -653,7 +653,7 @@ public class ReducedModelBrace extends AbstractReducedModel {
                   return;
                 }
                 ReducedToken popped = braceStack.pop();
-                if (!iter.current().isMatch(popped)){
+                if (!iter.current().isMatch(popped)) {
                   iter.dispose();
                   return;
                 }

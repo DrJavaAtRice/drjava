@@ -313,15 +313,15 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
             Throwable t = e.getContainedException();
             _dialog("interp exception: " + t);
             
-            
-            if (t instanceof ParseException)
-              _mainJVM.interpretResult(new SyntaxErrorResult((ParseException)t,input));
-            else if (t instanceof TokenMgrError)
-              _mainJVM.interpretResult(new SyntaxErrorResult((TokenMgrError)t,input));
+            if (t instanceof ParseException) 
+              _mainJVM.interpretResult(new SyntaxErrorResult((ParseException)t, input));
+            else if (t instanceof TokenMgrError) 
+              _mainJVM.interpretResult(new SyntaxErrorResult((TokenMgrError)t, input));
             else if (t instanceof ParseError) 
-              _mainJVM.interpretResult(new SyntaxErrorResult((ParseError)t,input));
+              _mainJVM.interpretResult(new SyntaxErrorResult((ParseError)t, input));
             else {
-              //Other exceptions are non lexical/parse related exceptions. These include arithmetic exceptions, wrong version exceptions, etc.
+              //Other exceptions are non lexical/parse related exceptions. These include arithmetic exceptions, 
+              //wrong version exceptions, etc.
               
               //_dialog("before call to threwException");
               //return new ExceptionResult(t.getClass().getName(),
@@ -331,21 +331,20 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
                                                            t.getMessage(),
                                                            InterpreterJVM.getStackTrace(t),
                                                            null));
-              //((t instanceof ParseError) && ((ParseError)t).getParseException() != null) ? ((ParseError)t).getMessage() : null));
             }                                                                                                                                        
           }
-          // getMessage, in this scenario, will return the same as getShortMessage
           catch (Throwable t) {
             // A user's toString method might throw anything, so we need to be careful
             //_dialog("thrown by toString: " + t);
             //return new ExceptionResult(t.getClass().getName(),
             //                           t.getMessage(),
             //                           getStackTrace(t));
-            _mainJVM.interpretResult(new ExceptionResult(t.getClass().getName(),
-                                                         t.getMessage(),
-                                                         InterpreterJVM.getStackTrace(t),
-                                                         ((t instanceof ParseError) && ((ParseError)t).getParseException() != null) ? ((ParseError)t).getMessage() : null));
-          }                                                                                                                                        // getMessage, in this scenario, will return the same as getShortMessage
+            String shortMsg = null;
+            if ((t instanceof ParseError) &&  ((ParseError) t).getParseException() != null) 
+              shortMsg = ((ParseError) t).getMessage(); // in this case, getMessage is equivalent to getShortMessage
+            _mainJVM.interpretResult(new ExceptionResult(t.getClass().getName(), t.getMessage(),
+                                                         InterpreterJVM.getStackTrace(t), shortMsg));
+          }          
         }
         catch (RemoteException re) {
           // Can't communicate with MainJVM?  Nothing to do...

@@ -98,21 +98,21 @@ public class NoDebuggerAvailable implements Debugger {
   /**
    * Suspends execution of the currently
    */
-  public void suspend(DebugThreadData d){
+  public void suspend(DebugThreadData d) {
     throw new IllegalStateException("No debugger is available");
   }
 
   /**
    * Suspends all the threads
    */
-  public void suspendAll(){
+  public void suspendAll() {
     throw new IllegalStateException("No debugger is available");
   }
 
   /**
    * Sets the current thread which is being debugged to the thread referenced by d
    */
-  public void setCurrentThread(DebugThreadData d){
+  public void setCurrentThread(DebugThreadData d) {
     throw new IllegalStateException("No debugger is available");
   }
 
@@ -277,7 +277,7 @@ public class NoDebuggerAvailable implements Debugger {
    * @return true if there are any threads in the program currently being
    * debugged which have been suspended (by the user or by hitting a breakpoint).
    */
-  public boolean hasSuspendedThreads(){
+  public boolean hasSuspendedThreads() {
     throw new IllegalStateException("No debugger is available");
   }
 

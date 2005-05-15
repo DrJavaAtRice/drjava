@@ -498,24 +498,19 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     _interactionIsOver();
   }
 
-  /**
-   * Signifies that the most recent interpretation was ended
-   * due to an exception being thrown.
-   *
-   * @param exceptionClass The name of the class of the thrown exception
-   * @param message The exception's message
-   * @param stackTrace The stack trace of the exception
+  /** Signifies that the most recent interpretation was ended due to an exception being thrown.
+   *  @param exceptionClass The name of the class of the thrown exception
+   *  @param message The exception's message
+   *  @param stackTrace The stack trace of the exception
    */
-  public void replThrewException(String exceptionClass, String message, String stackTrace, 
-                                 String shortMessage) {
+  public void replThrewException(String exceptionClass, String message, String stackTrace, String shortMessage) {
     if (shortMessage!=null) {
       if (shortMessage.endsWith("<EOF>\"")) {
         interactionContinues();
         return;
       }
     }
-    _document.appendExceptionResult(exceptionClass, message, stackTrace,
-                                    InteractionsDocument.ERROR_STYLE);
+    _document.appendExceptionResult(exceptionClass, message, stackTrace, InteractionsDocument.ERROR_STYLE);
     _interactionIsOver();
   }
 

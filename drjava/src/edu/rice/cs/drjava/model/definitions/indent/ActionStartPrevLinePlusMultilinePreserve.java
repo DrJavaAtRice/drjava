@@ -89,7 +89,7 @@ class ActionStartPrevLinePlusMultilinePreserve extends IndentRuleAction {
    * @param doc AbstractDJDocument containing the line to be indented.
    * @return this is always false, since we are updating the cursor location
    */
-  public boolean indentLine(AbstractDJDocument doc, int reason){
+  public boolean indentLine(AbstractDJDocument doc, int reason) {
     try {
       // copy it so any changes are not remembered
       String[] suffices = new String[_suffices.length];

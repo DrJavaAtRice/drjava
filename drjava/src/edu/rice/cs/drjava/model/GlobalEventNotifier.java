@@ -1,46 +1,34 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * This file is part of DrJava.  Download the current version of this project:
- * http://sourceforge.net/projects/drjava/ or http://www.drjava.org/
+ * This file is part of DrJava.  Download the current version of this project from http://www.drjava.org/
+ * or http://sourceforge.net/projects/drjava/
  *
  * DrJava Open Source License
+ * 
+ * Copyright (C) 2001-2005 JavaPLT group at Rice University (javaplt@rice.edu).  All rights reserved.
  *
- * Copyright (C) 2001-2003 JavaPLT group at Rice University (javaplt@rice.edu)
- * All rights reserved.
- *
- * Developed by:   Java Programming Languages Team
- *                 Rice University
- *                 http://www.cs.rice.edu/~javaplt/
- *
- * Permission is hereby granted, free of charge, to any person obtaining a
- * copy of this software and associated documentation files (the "Software"),
- * to deal with the Software without restriction, including without
- * limitation the rights to use, copy, modify, merge, publish, distribute,
- * sublicense, and/or sell copies of the Software, and to permit persons to
- * whom the Software is furnished to do so, subject to the following
- * conditions:
- *
- *     - Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimers.
- *     - Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimers in the
- *       documentation and/or other materials provided with the distribution.
- *     - Neither the names of DrJava, the JavaPLT, Rice University, nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this Software without specific prior written permission.
- *     - Products derived from this software may not be called "DrJava" nor
- *       use the term "DrJava" as part of their names without prior written
- *       permission from the JavaPLT group.  For permission, write to
- *       javaplt@rice.edu.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
- * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
- * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
- * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
- * OTHER DEALINGS WITH THE SOFTWARE.
- *
+ * Developed by:   Java Programming Languages Team, Rice University, http://www.cs.rice.edu/~javaplt/
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated 
+ * documentation files (the "Software"), to deal with the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and 
+ * to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ * 
+ *     - Redistributions of source code must retain the above copyright notice, this list of conditions and the 
+ *       following disclaimers.
+ *     - Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the 
+ *       following disclaimers in the documentation and/or other materials provided with the distribution.
+ *     - Neither the names of DrJava, the JavaPLT, Rice University, nor the names of its contributors may be used to 
+ *       endorse or promote products derived from this Software without specific prior written permission.
+ *     - Products derived from this software may not be called "DrJava" nor use the term "DrJava" as part of their 
+ *       names without prior written permission from the JavaPLT group.  For permission, write to javaplt@rice.edu.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO 
+ * THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
+ * CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS 
+ * WITH THE SOFTWARE.
+ * 
 END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model;
@@ -52,47 +40,33 @@ import java.util.List;
 
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.classloader.ClassFileError;
-import edu.rice.cs.util.swing.*;
 
-/**
- * Keeps track of all listeners to the model, and has the ability
- * to notify them of some event.
- * <p>
+/** Keeps track of all listeners to the model, and has the ability to notify them of some event.
+ *  <p>
+ *  This class has a specific role of managing GlobalModelListeners.  Other classes with similar names use similar
+ *  code to perform the same function for other interfaces, e.g. InteractionsEventNotifier and JavadocEventNotifier.
+ *  These classes implement the appropriate interface definition so that they can be used transparently as composite 
+ *  packaging for a particular listener interface.
+ *  <p>
+ *  Components which might otherwise manage their own list of listeners use EventNotifiers instead to simplify their 
+ *  internal implementation.  Notifiers should therefore be considered a private implementation detail of the 
+ *  components, and should not be used directly outside of the "host" component.
+ *  <p>
+ *  TODO: remove direct references to GlobalEventNotifier outside of DefaultGlobalModel
+ *  TODO: remove public modifier from this class when above has happened
  *
- * This class has a specific role of managing GlobalModelListeners.  Other
- * classes with similar names use similar code to perform the same function for
- * other interfaces, e.g. InteractionsEventNotifier and JavadocEventNotifier.
- * These classes implement the appropriate interface definition so that they
- * can be used transparently as composite packaging for a particular listener
- * interface.
- * <p>
- *
- * Components which might otherwise manage their own list of listeners use
- * EventNotifiers instead to simplify their internal implementation.  Notifiers
- * should therefore be considered a private implementation detail of the
- * components, and should not be used directly outside of the "host" component.
- * <p>
- *
- * TODO: remove direct references to GlobalEventNotifier outside of DefaultGlobalModel
- * TODO: remove public modifier from this class when above has happened
- *
- * All methods in this class must use the synchronization methods
- * provided by ReaderWriterLock.  This ensures that multiple notifications
- * (reads) can occur simultaneously, but only one thread can be adding
- * or removing listeners (writing) at a time, and no reads can occur
- * during a write.
- * <p>
- *
- * <i>No</i> methods on this class should be synchronized using traditional
- * Java synchronization!
- * <p>
- *
- * @version $Id$
+ *  All methods in this class must use the synchronization methods provided by ReaderWriterLock.  This ensures that 
+ *  multiple notifications (reads) can occur simultaneously, but only one thread can be adding or removing listeners 
+ *  (writing) at a time, and no reads can occur during a write.
+ *  <p>
+ *  <i>No</i> methods on this class should be synchronized using traditional Java synchronization!
+ *  <p>
+ *  @version $Id$
  */
 public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
     implements GlobalModelListener, Serializable {
 
-  public void fileNotFound(File f){
+  public void fileNotFound(File f) {
     _lock.startRead();
     try { for (GlobalModelListener l : _listeners) { l.fileNotFound(f); } }
     finally { _lock.endRead(); }
@@ -111,31 +85,29 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
     finally { _lock.endRead(); }
   }
   
-  public void projectModified(){
+  public void projectModified() {
     _lock.startRead();
     try { for (GlobalModelListener l : _listeners) { l.projectModified(); } }
     finally { _lock.endRead(); }
   }
   
-  public void projectBuildDirChanged(){
+  public void projectBuildDirChanged() {
     _lock.startRead();
     try { for (GlobalModelListener l : _listeners) { l.projectBuildDirChanged(); } }
     finally { _lock.endRead(); }
   }
   
-  public void projectRunnableChanged(){
+  public void projectRunnableChanged() {
     _lock.startRead();
     try { for (GlobalModelListener l : _listeners) { l.projectRunnableChanged(); } }
     finally { _lock.endRead(); }
   }
   
   
-  // ---------- Deprecated Methods ----------
+  /* ---------- Deprecated Methods ---------- */
 
-  /**
-   * Lets the listeners know some event has taken place.
-   * @param n tells the listener what happened
-   * @deprecated Use listener methods directly instead.
+  /** Lets the listeners know some event has taken place.
+   *  @param n tells the listener what happened.
    */
   public void notifyListeners(Notifier n) {
     _lock.startRead();
@@ -274,6 +246,14 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
     finally { _lock.endRead(); }
   }
   
+  /** Called when the selection in the navigator changes the active document. */
+  public void activeDocumentChanged(OpenDefinitionsDocument active) {
+    _lock.startRead();
+    try { for (GlobalModelListener l : _listeners) { l.activeDocumentChanged(active); } }
+    finally { _lock.endRead(); }
+  }
+  
+  
 //  /** Called to demand that all files be saved before running the main method of a document. It is up to the caller
 //   *  of this method to check if the documents have been saved, using IGetDocuments.hasModifiedDocuments(). This is
 //   *  nor used currently, but it is commented out in case it is needed later. */
@@ -408,7 +388,7 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
   }
 
   /** Called when testing all files. */
-  public void junitAllStarted(){
+  public void junitAllStarted() {
     _lock.startRead();
     try { for (GlobalModelListener l : _listeners) { l.junitAllStarted(); } }
     finally { _lock.endRead(); }

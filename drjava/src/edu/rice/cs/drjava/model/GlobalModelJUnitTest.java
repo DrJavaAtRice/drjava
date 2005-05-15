@@ -140,7 +140,7 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     "public class MonkeyTestInfinite extends TestCase { " +
     "  public MonkeyTestInfinite(String name) { super(name); } " +
     "  public void testInfinite() { " +
-    "    while(true){}" +
+    "    while(true) {}" +
     "  } " +
     "}";
 
@@ -160,10 +160,10 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     "import junit.framework.TestCase;" +
     " public class StaticInnerTestCase{" +
     "   public static class Sadf extends TestCase {" +
-    "     public Sadf(){" +
+    "     public Sadf() {" +
     "       super();" +
     "     }" +
-    "     public Sadf(String name){" +
+    "     public Sadf(String name) {" +
     "       super(name);" +
     "     }" +
     "     public void testX() {" +

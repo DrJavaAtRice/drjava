@@ -1,98 +1,71 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * This file is part of DrJava.  Download the current version of this project:
- * http://sourceforge.net/projects/drjava/ or http://www.drjava.org/
+ * This file is part of DrJava.  Download the current version of this project from http://www.drjava.org/
+ * or http://sourceforge.net/projects/drjava/
  *
  * DrJava Open Source License
+ * 
+ * Copyright (C) 2001-2005 JavaPLT group at Rice University (javaplt@rice.edu).  All rights reserved.
  *
- * Copyright (C) 2001-2003 JavaPLT group at Rice University (javaplt@rice.edu)
- * All rights reserved.
- *
- * Developed by:   Java Programming Languages Team
- *                 Rice University
- *                 http://www.cs.rice.edu/~javaplt/
- *
- * Permission is hereby granted, free of charge, to any person obtaining a
- * copy of this software and associated documentation files (the "Software"),
- * to deal with the Software without restriction, including without
- * limitation the rights to use, copy, modify, merge, publish, distribute,
- * sublicense, and/or sell copies of the Software, and to permit persons to
- * whom the Software is furnished to do so, subject to the following
- * conditions:
- *
- *     - Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimers.
- *     - Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimers in the
- *       documentation and/or other materials provided with the distribution.
- *     - Neither the names of DrJava, the JavaPLT, Rice University, nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this Software without specific prior written permission.
- *     - Products derived from this software may not be called "DrJava" nor
- *       use the term "DrJava" as part of their names without prior written
- *       permission from the JavaPLT group.  For permission, write to
- *       javaplt@rice.edu.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
- * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
- * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
- * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
- * OTHER DEALINGS WITH THE SOFTWARE.
- *
+ * Developed by: Java Programming Languages Team, Rice University, http://www.cs.rice.edu/~javaplt/
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated 
+ * documentation files (the "Software"), to deal with the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and 
+ * to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ * 
+ *     - Redistributions of source code must retain the above copyright notice, this list of conditions and the 
+ *       following disclaimers.
+ *     - Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the 
+ *       following disclaimers in the documentation and/or other materials provided with the distribution.
+ *     - Neither the names of DrJava, the JavaPLT, Rice University, nor the names of its contributors may be used to 
+ *       endorse or promote products derived from this Software without specific prior written permission.
+ *     - Products derived from this software may not be called "DrJava" nor use the term "DrJava" as part of their 
+ *       names without prior written permission from the JavaPLT group.  For permission, write to javaplt@rice.edu.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO 
+ * THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
+ * CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS 
+ * WITH THE SOFTWARE.
+ * 
 END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model;
 
-import javax.swing.text.*;
-import javax.swing.ListSelectionModel;
-import javax.swing.DefaultListSelectionModel;
-import javax.swing.event.ListSelectionListener;
-import javax.swing.event.ListSelectionEvent;
-import java.io.*;
-import java.util.*;
+import java.io.File;
+import java.io.IOException;
+import java.util.LinkedList;
+import java.util.List;
 import java.awt.Container;
 
-
-import edu.rice.cs.util.swing.FindReplaceMachine;
-import edu.rice.cs.drjava.DrJava;
-import edu.rice.cs.drjava.Version;
 import edu.rice.cs.util.UnexpectedException;
-import edu.rice.cs.drjava.model.definitions.*;
-import edu.rice.cs.drjava.model.repl.*;
-import edu.rice.cs.drjava.model.compiler.*;
-import edu.rice.cs.util.docnavigation.*;
+import edu.rice.cs.util.docnavigation.IDocumentNavigator;
+import edu.rice.cs.util.docnavigation.INavigatorItem;
+import edu.rice.cs.util.docnavigation.INavigationListener;
+import edu.rice.cs.util.docnavigation.NodeData;
+import edu.rice.cs.util.docnavigation.NodeDataVisitor;
 import edu.rice.cs.util.swing.Utilities;
 
-/**
- * A GlobalModel that enforces invariants associated with having
- * one active document at a time.
- *
- * Invariants:
- * <OL>
- * <LI>{@link #getOpenDefinitionsDocuments} will always return an array of
- *     at least size 1.
- * </LI>
- * <LI>(follows from previous) If there is ever no document in the model,
- *     a new one will be created.
- * </LI>
- * <LI>There is always exactly one active document, which can be get/set
- *     via {@link #getActiveDocument} and {@link #setActiveDocument}.
- * </LI>
- * </OL>
- *
+/** A GlobalModel that enforces invariants associated with having one active document at a time.
+ *  Invariants:
+ *  <OL>
+ *  <LI>{@link #getOpenDefinitionsDocuments} will always return an array of at least size 1.
+ *  </LI>
+ *  <LI>(follows from previous) If there is ever no document in the model, a new one will be created.
+ *  </LI>
+ *  <LI>There is always exactly one active document, which can be get/set
+ *      via {@link #getActiveDocument} and {@link #setActiveDocument}.
+ *  </LI>
+ *  </OL>
  * Other functions added by this class:
- * <OL>
- * <LI>When calling {@link #openFile}, if there is currently only one open
- *     document, and it is untitled and unchanged, it will be closed after the
- *     new document is opened. This means that, in one atomic transaction, the
- *     model goes from having one totally empty document open to having one
- *     document (the requested one) open.
- * </LI>
- * </OL>
- *
- * @version $Id$
+ *  <OL>
+ *  <LI>When calling {@link #openFile}, if there is currently only one open document, and it is untitled and 
+ *      unchanged, it will be closed after the new document is opened. This means that, in one atomic transaction, 
+ *      the model goes from having one totally empty document open to having one document (the requested one) open.
+ *  </LI>
+ *  </OL>
+ *  @version $Id$
  */
 public class DefaultSingleDisplayModel extends DefaultGlobalModel implements SingleDisplayModel {
 
@@ -108,7 +81,6 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel implements Sin
   private File _activeDirectory;
 
   /** Creates a SingleDisplayModel.
-   *
    *  <ol>
    *    <li>A new document is created to satisfy the invariant.
    *    <li>The first document in the list is set as the active document.
@@ -127,14 +99,16 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel implements Sin
         _setActiveDoc(docu);  // sets _activeDocument, the shadow copy of the active document
         File dir = _activeDocument.getParentDirectory();
         
-        if (dir != null) {  //If the file is in External or Auxiliary Files then then we do not want to change our project directory to something outside the project
+        if (dir != null) {  
+        /* If the file is in External or Auxiliary Files then then we do not want to change our project directory
+         * to something outside the project. */
           _activeDirectory = dir;
           _notifier.currentDirectoryChanged(_activeDirectory);
         }
         return Boolean.valueOf(true); 
       }
       public Boolean fileCase(File f) {
-        if (!f.isAbsolute()) {
+        if (! f.isAbsolute()) {
           File root = _state.getProjectFile().getParentFile().getAbsoluteFile();
           f = new File(root, f.getPath());
         }
@@ -157,18 +131,16 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel implements Sin
     setActiveFirstDocument();
   }
 
-  /**
-   * Add a listener to this global model.
-   * TODO: is this ever actually used?
-   * @param listener a listener that reacts on events generated by the GlobalModel
-   * synchronized using EventNotifier readers/writers protocol
-   */
-  public void addListener(GlobalModelListener listener) {
-    if (! (listener instanceof SingleDisplayModelListener))
-      throw new IllegalArgumentException("Must use SingleDisplayModelListener");
-
-    addListenerHelper(listener);
-  }
+//  /** Add a listener to this global model. Synchronized using EventNotifier readers/writers protocol.
+//   *  TODO: is this ever actually used?
+//   *  @param listener a listener that reacts on events generated by the GlobalModel.
+//   */
+//  public void addListener(GlobalModelListener listener) {
+//    if (! (listener instanceof SingleDisplayModelListener))
+//      throw new IllegalArgumentException("Must use SingleDisplayModelListener");
+//
+//    addListenerHelper(listener);
+//  }
 
   //----------------------- New SingleDisplay Methods -----------------------//
 
@@ -200,8 +172,7 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel implements Sin
     INavigatorItem key = _activeDocument;
     OpenDefinitionsDocument nextKey = (OpenDefinitionsDocument) _documentNavigator.getNext(key);
     if (key != nextKey) setActiveDocument(nextKey);
-    /* this will select the active document in the navigator, which
-     * will signal a listener to call _setActiveDoc(...) */
+    /* selects the active document in the navigator, which signals a listener to call _setActiveDoc(...) */
   }
 
   /** Sets the active document to be the previous one in the collection. */
@@ -426,16 +397,17 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel implements Sin
       _activeDocument.checkIfClassFileInSync();
      
       // notify single display model listeners   // notify single display model listeners
-      _notifier.notifyListeners(new GlobalEventNotifier.Notifier() {
-        public void notifyListener(GlobalModelListener l) {
-          // If it is a SingleDisplayModelListener, let it know that the
-          //  active doc changed
-          if (l instanceof SingleDisplayModelListener) {
-            SingleDisplayModelListener sl = (SingleDisplayModelListener) l;
-            sl.activeDocumentChanged(_activeDocument);
-          }
-        }
-      });
+      _notifier.activeDocumentChanged(_activeDocument);
+//        notifyListeners(new GlobalEventNotifier.Notifier() {
+//        public void notifyListener(GlobalModelListener l) {
+//          // If it is a SingleDisplayModelListener, let it know that the
+//          //  active doc changed
+//          if (l instanceof SingleDisplayModelListener) {
+//            SingleDisplayModelListener sl = (SingleDisplayModelListener) l;
+//            sl.
+//          }
+//        }
+//      });
     } catch(DocumentClosedException dce) { /* do nothing */ }
   }
 }

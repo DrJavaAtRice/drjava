@@ -133,7 +133,7 @@ public class TestDocGetter extends DummyGetDocuments {
       return _file;
     }
     
-    public void setFile(File f){
+    public void setFile(File f) {
       _file = f;
     }
   }

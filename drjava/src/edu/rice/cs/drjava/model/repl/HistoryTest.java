@@ -185,7 +185,7 @@ public final class HistoryTest extends TestCase implements OptionConstants{
   /**
    * Tests the getHistoryAsString() method
    */
-  public void testGetHistoryAsString(){
+  public void testGetHistoryAsString() {
     DrJava.getConfig().setSetting(HISTORY_MAX_SIZE, new Integer(20));
     assertEquals("testGetHistoryAsString:", "", _history.getHistoryAsString());
 

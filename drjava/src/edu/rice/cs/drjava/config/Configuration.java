@@ -71,21 +71,17 @@ public class Configuration {
     _startupException = null;
   }
   
-  /**
-   * Sets the given option to the given value and notifies all
-   * listeners of that option of the change.
-   * @param op Option to set
-   * @param value New value for the option
+  /** Sets the given option to the given value and notifies all listeners of that option of the change.
+   *  @param op Option to set
+   *  @param value New value for the option
    */
   public <T> T setSetting(Option<T> op, T value) {
-    T ret = map.setOption(op,value);
-    op.notifyListeners(this,value);
+    T ret = map.setOption(op, value);
+    op.notifyListeners(this, value);
     return ret;
   }
   
-  /**
-   * Gets the current value of the given Option.
-   */
+  /** Gets the current value of the given Option. */
   public <T> T getSetting(Option<T> op) {
     return map.getOption(op);
   }
@@ -100,47 +96,25 @@ public class Configuration {
     op.addListener(this,l);
   }
   
-  /**
-   * Removes an OptionListener from an Option to which it was listening.
-   */
+  /** Removes an OptionListener from an Option to which it was listening. */
   public <T> void removeOptionListener(Option<T> op, OptionListener<T> l) {
     op.removeListener(this,l);
   }
   
-  /**
-   * Resets to the default values, overwriting any existing values.
-   */
-  public void resetToDefaults() {
-    OptionMapLoader.DEFAULT.loadInto(map);
-  }
+  /** Resets to the default values, overwriting any existing values. */
+  public void resetToDefaults() { OptionMapLoader.DEFAULT.loadInto(map); }
   
-  /**
-   * Returns whether there were any exceptions when starting.
-   */
-  public boolean hadStartupException() {
-    return _startupException != null;
-  }
+  /** Returns whether there were any exceptions when starting. */
+  public boolean hadStartupException() { return _startupException != null; }
   
-  /**
-   * Returns the exception caught during startup, or null if none were caught.
-   */
-  public Exception getStartupException() {
-    return _startupException;
-  }
+  /** Returns the exception caught during startup, or null if none were caught. */
+  public Exception getStartupException() { return _startupException; }
   
-  /**
-   * Stores any exception caught during the creation of this Configuration
-   * object, so it can be displayed later by the UI.
+  /** Stores any exception caught during the creation of this Configuration object, so it can be displayed later by the UI.
    * @param e Exception caught during startup
    */
-  public void storeStartupException(Exception e) {
-    _startupException = e;
-  }
+  public void storeStartupException(Exception e) { _startupException = e; }
   
-  /**
-   * Returns a string representation of the contents of the OptionMap.
-   */
-  public String toString() {
-    return map.toString();
-  }
+  /** Returns a string representation of the contents of the OptionMap. */
+  public String toString() { return map.toString(); }
 }

@@ -287,7 +287,7 @@ public final class CompilerRegistryTest extends TestCase {
     }
 
      public void addToBootClassPath(File s) { }
-     public CompilerError[] compile(File[] sourceRoots, File[] files){ return null; }
+     public CompilerError[] compile(File[] sourceRoots, File[] files) { return null; }
      public CompilerError[] compile(File sourceRoot, File[] files) { return null; }
      public String getName() { return "Without"; }
      public boolean isAvailable() { return false; }
@@ -295,8 +295,8 @@ public final class CompilerRegistryTest extends TestCase {
      public void setWarningsEnabled(boolean warningsEnabled) { }
      public void setExtraClassPath(String extraClassPath) { }
      public void setExtraClassPath(ClasspathVector extraClassPath) { }
-     public String toString(){ return "Without"; }
-     public void setBuildDirectory(File builddir){ }
+     public String toString() { return "Without"; }
+     public void setBuildDirectory(File builddir) { }
   }
 
   /**
@@ -304,11 +304,11 @@ public final class CompilerRegistryTest extends TestCase {
    * compilers that do not have the ONLY static field, and those which
    * do have it.
    */
-   public void testCreateCompiler(){
+   public void testCreateCompiler() {
      try{
        _registry.createCompiler(Without.class);
      }
-     catch(Throwable e){
+     catch(Throwable e) {
        e.printStackTrace();
        fail("testCreateCompiler: Unexpected Exception for class without ONLY field\n" + e);
      }
@@ -316,7 +316,7 @@ public final class CompilerRegistryTest extends TestCase {
      try{
        _registry.createCompiler(JavacFromClasspath.ONLY.getClass());
      }
-     catch(Throwable e2){
+     catch(Throwable e2) {
 
         fail("testCreateCompiler: Unexpected Exception for class with ONLY field\n" + e2);
      }

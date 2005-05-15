@@ -116,7 +116,7 @@ public class DrJavaTestCaseClassLoader extends TestCaseClassLoader {
       item = st.nextToken();
       fPathItems.addElement(item);
       try{ _loader = new DrJavaURLClassLoader(new URL[]{new File(item).toURL()}, _loader); }
-      catch(MalformedURLException e){ 
+      catch(MalformedURLException e) { 
         /* do nothing */
       }
     }
@@ -169,14 +169,14 @@ public class DrJavaTestCaseClassLoader extends TestCaseClassLoader {
     try{
       if (c == null) {
         byte[] data= lookupClassData(name);
-        if (data == null){
+        if (data == null) {
           throw new ClassNotFoundException();
         }
         c= defineClass(name, data, 0, data.length);
       }
       if (resolve) 
         resolveClass(c);
-    }catch(ClassNotFoundException e){
+    }catch(ClassNotFoundException e) {
       // we couldn't load it, try the system
       return findSystemClass(name);
     }
@@ -196,7 +196,7 @@ public class DrJavaTestCaseClassLoader extends TestCaseClassLoader {
       } else {
         data= loadFileData(path, fileName);
       }
-      if (data != null){
+      if (data != null) {
         return data;
       }
     }
@@ -316,9 +316,9 @@ public class DrJavaTestCaseClassLoader extends TestCaseClassLoader {
    */
   private static class DrJavaURLClassLoader extends URLClassLoader{
     
-    public DrJavaURLClassLoader(URL[] urls, ClassLoader c){ super(urls, c); }
+    public DrJavaURLClassLoader(URL[] urls, ClassLoader c) { super(urls, c); }
     
-    public URL getResource(String name){
+    public URL getResource(String name) {
       URL ret = getParent().getResource(name);
       if (ret == null) ret = super.getResource(name);
       return ret;

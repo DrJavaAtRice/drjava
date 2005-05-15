@@ -1,47 +1,35 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * This file is part of DrJava.  Download the current version of this project:
- * http://sourceforge.net/projects/drjava/ or http://www.drjava.org/
+ * This file is part of DrJava.  Download the current version of this project from http://www.drjava.org/
+ * or http://sourceforge.net/projects/drjava/
  *
  * DrJava Open Source License
+ * 
+ * Copyright (C) 2001-2005 JavaPLT group at Rice University (javaplt@rice.edu).  All rights reserved.
  *
- * Copyright (C) 2001-2003 JavaPLT group at Rice University (javaplt@rice.edu)
- * All rights reserved.
- *
- * Developed by:   Java Programming Languages Team
- *                 Rice University
- *                 http://www.cs.rice.edu/~javaplt/
- *
- * Permission is hereby granted, free of charge, to any person obtaining a
- * copy of this software and associated documentation files (the "Software"),
- * to deal with the Software without restriction, including without
- * limitation the rights to use, copy, modify, merge, publish, distribute,
- * sublicense, and/or sell copies of the Software, and to permit persons to
- * whom the Software is furnished to do so, subject to the following
- * conditions:
- *
- *     - Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimers.
- *     - Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimers in the
- *       documentation and/or other materials provided with the distribution.
- *     - Neither the names of DrJava, the JavaPLT, Rice University, nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this Software without specific prior written permission.
- *     - Products derived from this software may not be called "DrJava" nor
- *       use the term "DrJava" as part of their names without prior written
- *       permission from the JavaPLT group.  For permission, write to
- *       javaplt@rice.edu.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
- * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
- * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
- * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
- * OTHER DEALINGS WITH THE SOFTWARE.
- *
- END_COPYRIGHT_BLOCK*/
+ * Developed by:   Java Programming Languages Team, Rice University, http://www.cs.rice.edu/~javaplt/
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated 
+ * documentation files (the "Software"), to deal with the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and 
+ * to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ * 
+ *     - Redistributions of source code must retain the above copyright notice, this list of conditions and the 
+ *       following disclaimers.
+ *     - Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the 
+ *       following disclaimers in the documentation and/or other materials provided with the distribution.
+ *     - Neither the names of DrJava, the JavaPLT, Rice University, nor the names of its contributors may be used to 
+ *       endorse or promote products derived from this Software without specific prior written permission.
+ *     - Products derived from this software may not be called "DrJava" nor use the term "DrJava" as part of their 
+ *       names without prior written permission from the JavaPLT group.  For permission, write to javaplt@rice.edu.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO 
+ * THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
+ * CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS 
+ * WITH THE SOFTWARE.
+ * 
+END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.ui;
 
@@ -728,8 +716,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
   public void setDocument(Document d) {
     if (_doc != null) {  // When can _doc be null?
       if ((d == null) || (!d.equals(_doc))) {
-        throw new IllegalStateException("Cannot set the document of " + "a DefinitionsPane to a " +
-                                        "different document.");
+        throw new IllegalStateException("Cannot set the document of a DefinitionsPane to a different document.");
       }
     }
     super.setDocument(d);  // If _doc is null should we do this?
@@ -788,19 +775,15 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
 
   }
   
-  /**
-   * Reset undo machinery on setDocument.
-   */
+  /** Reset undo machinery on setDocument. */
   private void setDocument(OpenDefinitionsDocument doc) {
     super.setDocument(doc);
     _resetUndo();
   }
 
   
-  /**
-   * This instance of the scroll pane is here in order
-   * to allow for the definitions pane to save the
-   * horizontal and vertical scroll
+  /** This instance of the scroll pane is here in order to allow for the definitions pane to save the
+   *  horizontal and vertical scroll
    */
   private JScrollPane _scrollPane;
   
@@ -817,13 +800,10 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
   private int _selStart;
   private int _selEnd;
   
-  /**
-   * This function is called when the active document is changed. this function
-   * is called on the pane that is replaced by the new active pane. it allows
-   * the pane to "shutdown" when not in use.
-   * currently, this procedure replaces the Definitions Document with a blank dummy
-   * document to help conserve memory (so that the pane will not be holding onto the last
-   * reference of a definitions document not allowing it to be garbage collected)
+  /** This function is called when the active document is changed. this function is called on the pane that is 
+   *  replaced by the new active pane. it allows the pane to "shutdown" when not in use.  Currently, this procedure 
+   *  replaces the Definitions Document with a blank dummy document to help conserve memory (so that the pane will 
+   *  not be holding onto the last reference of a definitions document not allowing it to be garbage collected)
    */
   public void notifyInactive() {
     // we catch a NoSuchDocumentException here because during a close/closeAll
@@ -833,7 +813,6 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     try {
       // Sync caret with location before switching
       getOpenDefDocument().setCurrentLocation(getCaretPosition());
-      
       
       // Remove any error highlighting in the old def pane
       removeErrorHighlight();
@@ -854,17 +833,14 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     }
   }
     
-  /**
-   * this function is called when switching a pane to be the active document pane.
-   * it allows the pane to do any "startup" it needs to. since setInactive swapped
-   * out the document for a dummy document, we need to reload the actual document
-   * and reset its caret position to the saved location.
+  /** This function is called when switching a pane to be the active document pane.
+   *  It allows the pane to do any "startup" it needs to. since setInactive swapped
+   *  out the document for a dummy document, we need to reload the actual document
+   *  and reset its caret position to the saved location.
    */
   public void notifyActive() {
     super.setDocument(_doc);
-    if(_doc.getUndoableEditListeners().length == 0) {
-      _resetUndo();
-    }
+    if(_doc.getUndoableEditListeners().length == 0) _resetUndo();
     int len = getDJDocument().getLength();
     if(len < _position) {
       // the document changed since we're set inactive
@@ -874,36 +850,37 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
       _selEnd = len;
     }
 //    setCaretPosition(_position);
-    Object _lock = new Object();
-    synchronized(_lock) {
-      if(_position == _selStart) {
+//    Object _lock = new Object();
+//    synchronized(_lock) {  // What was the rationale for a local lock here?
+//                              It appears that legacy versions executed this code from non-event context    
+    _doc.acquireWriteLock();
+    try {
+      if (_position == _selStart) {
         setCaretPosition(_selEnd);
         moveCaretPosition(_selStart);
         _doc.setCurrentLocation(_selStart);
-      }else{
+      }
+      else {
         setCaretPosition(_selStart);
         moveCaretPosition(_selEnd);
         _doc.setCurrentLocation(_selEnd);
       }
     }
-    synchronized(_lock) {
-      _scrollPane.getVerticalScrollBar().setValue(_savedVScroll);
-      _scrollPane.getHorizontalScrollBar().setValue(_savedHScroll);
-    }
+    finally { _doc.releaseWriteLock(); }
+//    synchronized(_lock) {  // Why synchronize?  This code now runs in the event thread, but was not in legacy code
+    _scrollPane.getVerticalScrollBar().setValue(_savedVScroll);
+    _scrollPane.getHorizontalScrollBar().setValue(_savedHScroll);
+//    }
   }
   
   public int getVerticalScroll() {
-    if (getDocument() == NULL_DOCUMENT)
-      return _savedVScroll;
-    else 
-      return _scrollPane.getVerticalScrollBar().getValue();    
+    if (getDocument() == NULL_DOCUMENT) return _savedVScroll;
+    else return _scrollPane.getVerticalScrollBar().getValue();    
   }
   
   public int getHorizontalScroll() {
-    if (getDocument() == NULL_DOCUMENT)
-      return _savedHScroll;
-    else 
-      return _scrollPane.getHorizontalScrollBar().getValue();
+    if (getDocument() == NULL_DOCUMENT) return _savedHScroll;
+    else return _scrollPane.getHorizontalScrollBar().getValue();
   }
   
   public int getCurrentLine() {
@@ -911,9 +888,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
       int pos = getCaretPosition();
       FontMetrics metrics = getFontMetrics(getFont());
       Rectangle startRect = modelToView(pos);
-      if (startRect == null) {
-        return 1;
-      }
+      if (startRect == null) return 1;
       //top left position is (3,3), so font size<=6 will be off
       return (new Double (startRect.getY() / metrics.getHeight()).intValue() + 1);
     } catch (BadLocationException e) {
@@ -923,22 +898,15 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     }
   }
 
-  public int getCurrentCol() {
-    return _doc.getCurrentCol();
-  }
+  public int getCurrentCol() { return _doc.getCurrentCol(); }
+  
   public void setSize(int width, int height) {
     super.setSize(width, height);
-    if (_setSizeListener != null) {
-      _setSizeListener.actionPerformed(null);
-    }
+    if (_setSizeListener != null) _setSizeListener.actionPerformed(null);
   }
 
-  public void addSetSizeListener(ActionListener listener) {
-    _setSizeListener = listener;
-  }
-  public void removeSetSizeListener() {
-    _setSizeListener = null;
-  }
+  public void addSetSizeListener(ActionListener listener) { _setSizeListener = listener; }
+  public void removeSetSizeListener() { _setSizeListener = null; }
 
   public void centerViewOnOffset(int offset) {
     try {

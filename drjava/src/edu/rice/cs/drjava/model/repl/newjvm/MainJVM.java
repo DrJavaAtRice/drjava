@@ -72,15 +72,12 @@ import edu.rice.cs.util.swing.ScrollableDialog;
 import edu.rice.cs.util.classloader.ClassFileError;
 import koala.dynamicjava.parser.wrapper.*;
 
-/**
- * Manages a remote JVM.
- *
- * @version $Id$
+/** Manages a remote JVM.
+ *  @version $Id$
  */
 public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   /** Name of the class to use in the remote JVM. */
-  private static final String SLAVE_CLASS_NAME =
-    "edu.rice.cs.drjava.model.repl.newjvm.InterpreterJVM";
+  private static final String SLAVE_CLASS_NAME = "edu.rice.cs.drjava.model.repl.newjvm.InterpreterJVM";
   
   public static final String DEFAULT_INTERPRETER_NAME = "DEFAULT";
   
@@ -151,7 +148,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
       try{
         _startupClasspathVector.add(new File(_startupClasspath.substring(lastIndex, index)).toURL());
       }
-      catch(MalformedURLException murle){
+      catch(MalformedURLException murle) {
         // just don't add bad classpath entry
       }
       lastIndex = index + separator.length();
@@ -162,7 +159,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     try{
       _startupClasspathVector.add(new File(_startupClasspath.substring(lastIndex, index)).toURL());
     }
-    catch(MalformedURLException murle){
+    catch(MalformedURLException murle) {
       // fail silently if the classpath entry is bad
     }
   }
@@ -320,7 +317,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     ensureInterpreterConnected();
     
     try { _interpreterJVM().addExtraClassPath(path.toString()); }
-    catch(RemoteException re){ _threwException(re); }
+    catch(RemoteException re) { _threwException(re); }
   }
   
   /** Returns the current classpath of the interpreter as a list of
@@ -793,13 +790,11 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   
   /** Lets the model know if any exceptions occur while communicating with the Interpreter JVM. */
   private void _threwException(Throwable t) {
-    
-    _interactionsModel.replThrewException(t.getClass().getName(),
-                                          t.getMessage(), 
-                                          StringOps.getStackTrace(t),
-                                          ((t instanceof ParseError) &&  
-                                           ((ParseError) t).getParseException() != null)? ((ParseError) t).getMessage() : null);
-  }                                                                                                                                   // getMessage, in this scenario, will return the same as getShortMessage
+    String shortMsg = null;
+    if ((t instanceof ParseError) && ((ParseError) t).getParseException() != null) 
+      shortMsg = ((ParseError) t).getMessage();  // in this case, getMessage is equivalent to getShortMessage
+    _interactionsModel.replThrewException(t.getClass().getName(), t.getMessage(), StringOps.getStackTrace(t), shortMsg);                                    ;
+  } 
   
   /** Sets the interpreter to allow access to private members. TODO: synchronize? */
   public void setPrivateAccessible(boolean allow) {
@@ -811,16 +806,13 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     catch (RemoteException re) { _threwException(re); }
   }
   
-  /**
-   * If an interpreter has not registered itself, this method will
-   * block until one does.
-   */
+  /** If an interpreter has not registered itself, this method will block until one does.*/
   public void ensureInterpreterConnected() {
     try {
       synchronized(_interpreterLock) {
-        // Now we silently fail if interpreter is disabled instead of
-        // throwing an exception. This situation occurs only in test cases
-        // and when DrJava is about to quit.
+        /* Now we silently fail if interpreter is disabled instead of throwing an exception. This situation
+         * occurs only in test cases and when DrJava is about to quit. 
+         */
         //if (! _enabled) {
         //throw new IllegalStateException("Interpreter is disabled");
         //}

@@ -136,7 +136,7 @@ public class Breakpoint extends DocumentDebugAction<BreakpointRequest> {
    * Accessor for the offset of this breakpoint's end position
    * @return the end offset
    */
-  public int getEndOffset(){
+  public int getEndOffset() {
     return _endPos.getOffset();
   }
 

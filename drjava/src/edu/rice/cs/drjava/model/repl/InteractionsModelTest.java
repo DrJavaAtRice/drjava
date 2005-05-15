@@ -149,7 +149,7 @@ public final class InteractionsModelTest extends TestCase {
     InteractionsDocument doc = model.getDocument();
     doc.insertText(doc.getDocLength(), code, InteractionsDocument.DEFAULT_STYLE);
     model.interpretCurrentInteraction();
-    try { Thread.sleep(5000); } catch(InterruptedException ie){ }; // allow for the exception to be generated!
+    try { Thread.sleep(5000); } catch(InterruptedException ie) { }; // allow for the exception to be generated!
     assertTrue("Code '"+code+"' should generate a continuation exception but not a syntax exception",
                (model.isContinuationException() == true) && (model.isSyntaxException() == false));
   }
@@ -160,7 +160,7 @@ public final class InteractionsModelTest extends TestCase {
     InteractionsDocument doc = model.getDocument();
     doc.insertText(doc.getDocLength(), code, InteractionsDocument.DEFAULT_STYLE);
     model.interpretCurrentInteraction();
-    try { Thread.sleep(5000); } catch(InterruptedException ie){ }; // allow for the exception to be generated!
+    try { Thread.sleep(5000); } catch(InterruptedException ie) { }; // allow for the exception to be generated!
     assertTrue("Code '"+code+"' should generate a syntax exception but not a continuation exception",
                (model.isSyntaxException() == true) && (model.isContinuationException() == false));
   }
@@ -595,10 +595,7 @@ public final class InteractionsModelTest extends TestCase {
 
     protected void _notifyInterpreterChanged(boolean inProgress) { }
 
-    public void replThrewException(String exceptionClass,
-                                   String message,
-                                   String stackTrace,
-                                   String shortMessage) {
+    public void replThrewException(String exceptionClass, String message, String stackTrace, String shortMessage) {
       if (shortMessage!=null) {
         if (shortMessage.endsWith("<EOF>\"")) {
           continuationException = true;

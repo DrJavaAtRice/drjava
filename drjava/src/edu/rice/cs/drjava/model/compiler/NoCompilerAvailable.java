@@ -119,7 +119,7 @@ public class NoCompilerAvailable implements CompilerInterface {
     throw new UnexpectedException( new Exception("Method only implemented in JSR14Compiler"));
   }
   
-  public void setBuildDirectory(File builddir){
+  public void setBuildDirectory(File builddir) {
   }
 }
 

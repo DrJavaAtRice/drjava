@@ -68,31 +68,31 @@ public abstract class IndentRuleWithTrace implements IndentRule{
   public static final String TERMINUS_RULE = "";
 
   /* This method prints the most recent trace through the indent tree */
-  public static void printLastIndentTrace(PrintStream ps){
-    if (trace == null){
+  public static void printLastIndentTrace(PrintStream ps) {
+    if (trace == null) {
       ps.println("No trace to print");
     } else {
-      for (int x = 0; x < trace.size(); x++){
+      for (int x = 0; x < trace.size(); x++) {
         ps.println(trace.get(x));
       }
       ps.println("******************************");
     }
   }
 
-  public static void setRuleTraceEnabled(boolean ruleTraceEnabled){
+  public static void setRuleTraceEnabled(boolean ruleTraceEnabled) {
     IndentRuleWithTrace.ruleTraceEnabled = ruleTraceEnabled;
   }
 
-  static Vector<String> getTrace(){
+  static Vector<String> getTrace() {
     return trace;
   }
 
   /**
    * This rule just adds to the trace kept in trace
    */
-  protected static void _addToIndentTrace(String ruleName, String direction, boolean terminus){
-    if (ruleTraceEnabled){
-      if (startOver){
+  protected static void _addToIndentTrace(String ruleName, String direction, boolean terminus) {
+    if (ruleTraceEnabled) {
+      if (startOver) {
  trace = new Vector<String>();
       }
       startOver = terminus;
@@ -122,7 +122,7 @@ public abstract class IndentRuleWithTrace implements IndentRule{
     return false;
   }
 
-  public boolean indentLine(AbstractDJDocument doc, int reason){
+  public boolean indentLine(AbstractDJDocument doc, int reason) {
     _addToIndentTrace(getRuleName(), TERMINUS_RULE, true);
 
     //Add the next line, and every time something is indented, the indent trace will be printed
@@ -133,7 +133,7 @@ public abstract class IndentRuleWithTrace implements IndentRule{
   /**
    * The rule name to report to _addToIndentTrace
    */
-  public String getRuleName(){
+  public String getRuleName() {
     return this.getClass().getName();
   }
 }

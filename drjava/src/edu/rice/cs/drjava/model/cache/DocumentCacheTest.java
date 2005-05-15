@@ -521,7 +521,6 @@ public class DocumentCacheTest extends TestCase {
    * rather than a single display model.
    */
   private class TestGlobalModel extends DefaultGlobalModel {
-    public void addListener(GlobalModelListener listener) { addListenerHelper(listener); }
     public void aboutToSaveFromSaveAll(OpenDefinitionsDocument doc) { /* dummy method */ }
     public void saveAllFiles(FileSaveSelector fs) throws IOException { saveAllFilesHelper(fs); }
     

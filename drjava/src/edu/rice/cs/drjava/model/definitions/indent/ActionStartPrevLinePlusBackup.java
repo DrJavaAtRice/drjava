@@ -89,7 +89,7 @@ class ActionStartPrevLinePlusBackup extends IndentRuleAction {
    * @param doc AbstractDJDocument containing the line to be indented.
    * @return this is always false, since we are updating the cursor location
    */
-  public boolean indentLine(AbstractDJDocument doc, int reason){
+  public boolean indentLine(AbstractDJDocument doc, int reason) {
     super.indentLine(doc, reason);
     try {
       // Find start of line

@@ -262,7 +262,7 @@ public class CompilerProxy implements CompilerInterface {
   /**
    * sets the build directory for the compilers
    */
-  public void setBuildDirectory(File buildDir){
+  public void setBuildDirectory(File buildDir) {
     _realCompiler.setBuildDirectory(buildDir);
     _buildDir = buildDir;
   }

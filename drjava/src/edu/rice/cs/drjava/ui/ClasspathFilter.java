@@ -49,47 +49,31 @@ import java.io.File;
 import javax.swing.filechooser.FileFilter;
 
 
-/**
- * A file filter for files with extensions ".jar" and ".zip".
- * Used in the file choosers for extra classpath option.
- * @version $Id$
+/** A file filter for files with extensions ".jar"/".zip". Used in file choosers for extra classpath option.
+ *  @version $Id$
  */
 public class ClasspathFilter extends FileFilter {
   public static final ClasspathFilter ONLY = new ClasspathFilter();
 
   protected ClasspathFilter() { }
 
-  /**
-   * Returns true if the file's extension matches JAR or ZIP.
-   */
+  /** Returns true if the file's extension matches JAR or ZIP. */
   public boolean accept(File f) {
-    if (f.isDirectory()) {
-      return true;
-    }
+    if (f.isDirectory()) return true;
     String extension = getExtension(f);
-    if (extension != null) {
-      return (extension.equals("jar") || extension.equals("zip"));
-    }
+    if (extension != null) return (extension.equals("jar") || extension.equals("zip"));
     return false;
   }
 
-  /**
-   * @return A description of this filter to display
-   */
-  public String getDescription() {
-    return "Classpath elements";
-  }
+  /** @return A description of this filter to display. */
+  public String getDescription() { return "Classpath elements"; }
 
-  /*
-   * Get the extension of a file.
-   */
+  /* Get the extension of a file. */
   public static String getExtension(File f) {
     String ext = null;
     String s = f.getName();
     int i = s.lastIndexOf('.');
-    if (i > 0 && i < s.length() - 1) {
-      ext = s.substring(i + 1).toLowerCase();
-    }
+    if (i > 0 && i < s.length() - 1) ext = s.substring(i + 1).toLowerCase();
     return ext;
   }
 }

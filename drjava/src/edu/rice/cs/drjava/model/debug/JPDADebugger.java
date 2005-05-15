@@ -2388,15 +2388,6 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     _notifier.currThreadDied();
   }
 
-//  synchronized void currThreadSet(final DebugThreadData thread) {
-//    printMessage("The current thread has been set.");
-//    notifyListeners(new EventNotifier() {
-//      public void notifyListener(DebugListener l) {
-//        l.currThreadSet(thread);
-//      }
-//    });
-//  }
-
   synchronized void nonCurrThreadDied() {
     _notifier.nonCurrThreadDied();
   }
@@ -2423,21 +2414,6 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
   synchronized void notifyStepRequested() {
     _notifier.stepRequested();
   }
-
-  /**
-   * Lets the listeners know some event has taken place.
-   * @param EventNotifier n tells the listener what happened
-   */
-//  protected void notifyListeners(EventNotifier n) {
-//    synchronized(_listeners) {
-//      ListIterator i = _listeners.listIterator();
-//
-//      while(i.hasNext()) {
-//        DebugListener cur = (DebugListener) i.next();
-//        n.notifyListener(cur);
-//      }
-//    }
-//  }
 
   /**
    * Class model for notifying listeners of an event.

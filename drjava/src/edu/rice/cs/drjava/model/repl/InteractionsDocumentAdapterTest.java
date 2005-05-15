@@ -97,7 +97,7 @@ public final class InteractionsDocumentAdapterTest extends TestCase {
     assertEquals("The third element of StylesList before reset should be",
                  "((0, 19), object.return.style)", _adapter.getStylesList().get(2).toString());
 //    System.out.println(_doc); 
-    synchronized(_model){
+    synchronized(_model) {
       // Reset should clear
       _model.setWaitingForFirstInterpreter(false);
       //this adds the "Resetting Interactions"
