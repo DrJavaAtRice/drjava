@@ -5260,7 +5260,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   /**
    * Inner class to listen to all events in the model.
    */
-  private class ModelListener implements SingleDisplayModelListener {
+  private class ModelListener implements GlobalModelListener {
    
     public void fileNotFound(File f) {
       _showFileNotFoundError(new FileNotFoundException("File " + f + " cannot be found"));

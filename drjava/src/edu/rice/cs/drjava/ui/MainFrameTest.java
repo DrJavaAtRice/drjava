@@ -562,7 +562,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
 
   /** A CompileListener for SingleDisplayModel (instead of GlobalModel) */
   class SingleDisplayModelCompileListener extends GlobalModelTestCase.TestListener
-    implements SingleDisplayModelListener {
+    implements GlobalModelListener {
 
     public void compileStarted() { }
 
@@ -580,7 +580,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
 
   /** A FileClosedListener for SingleDisplayModel (instead of GlobalModel) */
   class SingleDisplayModelFileClosedListener extends GlobalModelTestCase.TestListener
-    implements SingleDisplayModelListener {
+    implements GlobalModelListener {
 
     public void fileClosed(OpenDefinitionsDocument doc) {
       synchronized(_closeLock) {

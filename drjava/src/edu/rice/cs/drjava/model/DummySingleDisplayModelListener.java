@@ -52,7 +52,7 @@ import edu.rice.cs.util.classloader.ClassFileError;
 /** A dummy, do-nothing GlobalModelListener. Useful for listening to only a small number of events.
  *  @version $Id$
  */
-public class DummySingleDisplayModelListener implements SingleDisplayModelListener {
+public class DummySingleDisplayModelListener implements GlobalModelListener {
   
   /** Called when trying to open a file that does not exist. */
   public void fileNotFound(File f) {   }

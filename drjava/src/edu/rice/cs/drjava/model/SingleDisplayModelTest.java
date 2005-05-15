@@ -112,10 +112,10 @@ public final class SingleDisplayModelTest extends GlobalModelTestCase {
     return doc;
   }
 
-  /** A SingleDisplayModelListener for testing. By default it expects no events to be fired. To customize,
+  /** A GlobalModelListener for testing. By default it expects no events to be fired. To customize,
    * subclass and override one or more methods.
    */
-  public static class SDTestListener extends TestListener implements SingleDisplayModelListener {
+  public static class SDTestListener extends TestListener implements GlobalModelListener {
     protected int switchCount;
 
     public void resetCounts() {
