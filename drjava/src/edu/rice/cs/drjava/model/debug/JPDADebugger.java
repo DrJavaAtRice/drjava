@@ -63,7 +63,7 @@ import edu.rice.cs.drjava.model.DefaultGlobalModel;
 import edu.rice.cs.drjava.model.repl.DefaultInteractionsModel;
 import edu.rice.cs.drjava.model.GlobalModelListener;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
-import edu.rice.cs.drjava.model.DummySingleDisplayModelListener;
+import edu.rice.cs.drjava.model.DummyGlobalModelListener;
 import edu.rice.cs.util.Log;
 
 import com.sun.jdi.*;
@@ -162,7 +162,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
 
     // TO DO: Replace this with an InteractionsListener,
     //  since we really can't talk about SingleDisplayModel here!
-    _watchListener = new DummySingleDisplayModelListener() {
+    _watchListener = new DummyGlobalModelListener() {
       public void interactionEnded() {
         try {
           _updateWatches();
