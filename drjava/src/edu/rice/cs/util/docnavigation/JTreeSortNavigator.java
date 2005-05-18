@@ -450,7 +450,7 @@ public class JTreeSortNavigator extends JTree
       // TODO: check for "package" case
       DefaultMutableTreeNode next = node.getNextLeaf();
       if (next == null || next == _model.getRoot()) return doc;
-      return  (T) next.getUserObject();
+      return  (T) next.getUserObject();  // Erasure bites!
     }
   }
   

@@ -119,7 +119,7 @@ public class ConfirmCheckBoxDialog {
    * @return the JOptionPane result of showing the dialog.
    */
   public int show() {
-    _dialog.show();
+    _dialog.show();  // show is deprecated in Java 5.0.
     Object val = _optionPane.getValue();
     if (val == null || !(val instanceof Integer)) {
       return JOptionPane.CLOSED_OPTION;

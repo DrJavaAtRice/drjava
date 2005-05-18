@@ -133,9 +133,8 @@ public class ScrollableDialog implements Serializable {
     _buttonPanel.add(new JButton(_okAction));
   }
 
-  /**
-   * A default "OK" action which disposes this dialog when invoked.
-   */
+  /** A default "OK" action which disposes this dialog when invoked.
+*/
   private Action _okAction = new AbstractAction("OK") {
     public void actionPerformed(ActionEvent e) {
       _dialog.dispose();
@@ -150,10 +149,8 @@ public class ScrollableDialog implements Serializable {
     _textArea.setFont(f);
   }
   
-  /**
-   * Shows this dialog.
-   */
+  /** Shows this dialog. */
   public void show() {
-    _dialog.show();
+    _dialog.show();  // deprecated in Java 5.0
   }
 }

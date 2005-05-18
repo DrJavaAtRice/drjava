@@ -52,21 +52,15 @@ import java.util.Date;
 import java.util.TimeZone;
 import java.text.SimpleDateFormat;
 
-/**
- * A simple, inflexible replacement for Ant's TSTAMP task that
- * always uses GMT.
- * 
- * This simple task never allows parameters or nested elements.
- * It only sets the DSTAMP and TSTAMP variables.
+/** A simple, inflexible replacement for Ant's TSTAMP task that always uses GMT.  This simple task never allows 
+ *  parameters or nested elements.  It only sets the DSTAMP and TSTAMP variables.
  *
- * @version $Id$
+ *  @version $Id$
 */
 public class TstampGMT extends Task {
   private static final TimeZone GMT = TimeZone.getTimeZone("GMT");
-  private static final SimpleDateFormat DATE_FORMAT
-    = new SimpleDateFormat ("yyyyMMdd");
-  private static final SimpleDateFormat TIME_FORMAT
-    = new SimpleDateFormat ("HHmm");
+  private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat ("yyyyMMdd");
+  private static final SimpleDateFormat TIME_FORMAT = new SimpleDateFormat ("HHmm");
 
   {
     DATE_FORMAT.setTimeZone(GMT);
@@ -79,9 +73,7 @@ public class TstampGMT extends Task {
       getProject().setProperty("DSTAMP", DATE_FORMAT.format(d));
       getProject().setProperty("TSTAMP", TIME_FORMAT.format(d));
     }
-    catch (Exception e) {
-      throw new BuildException(e);
-    }
+    catch (Exception e) { throw new BuildException(e); }
   }
 }
 

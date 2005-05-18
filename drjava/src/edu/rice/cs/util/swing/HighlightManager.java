@@ -1,4 +1,4 @@
-/*BEGIN_COPYRIGHT_BLOCK
+ /*BEGIN_COPYRIGHT_BLOCK
  *
  * This file is part of DrJava.  Download the current version of this project:
  * http://sourceforge.net/projects/drjava/ or http://www.drjava.org/
@@ -60,25 +60,22 @@ public class HighlightManager {
 
     //private Hashtable<HighlightPosition, Stack<HighlightInfo>> _highlights;
 
-    /**
-     * An unsorted Vector of Stack<HighlightInfo>, each of which corresponds to a unique
+    /** An unsorted Vector of Stack<HighlightInfo>, each of which corresponds to a unique
      *  region in the document. All HighlightInfo objects within a given stack must correspond
      *  to the same region but must have unique Highlighter.HighlightPainters.
-     * Each stack is ordered so the most recent highlight is at the top.
+     *  Each stack is ordered so the most recent highlight is at the top.
      */
     private Vector<Stack<HighlightInfo>> _highlights;
 
-    /**
-     * The component necessary for creating positions in in the document, which is also
+    /** The component necessary for creating positions in in the document, which is also
      *  contained within this component.
      */
     private JTextComponent _component;
 
-    /**
-     * Constructor
-     * @param jtc the component whose document will have positions created therein.
+    /** Constructor
+     *  @param jtc the component whose document will have positions created therein.
      */
-    public HighlightManager( JTextComponent jtc) {
+    public HighlightManager(JTextComponent jtc) {
       _component = jtc;
       _highlights = new Vector<Stack<HighlightInfo>>();
     }
@@ -91,16 +88,14 @@ public class HighlightManager {
     
     public int size() { return _highlights.size(); }
 
-    /**
-     * Adds a highlight using the supplied painter to the vector element(Stack) that exactly corresponds
-     *  to the specified bounds. The most recently added highlights over a given range appear
-     *  on top of the older highlights. All highlights in a given range(Stack) must be unique, that is,
-     *  each must use a different painter -- redundant highlights are shifted to the top of the
-     *  stack, but not added twice.
-     * @param startOffset the offset at which the highlight is to begin.
-     * @param endOffset the offset at which the highlight is to end.
-     * @param p the Highlighter.HighlightPainter for painting
-     * @return HighlightInfo the HighlightInfo object, for keeping a tag of a given highlight
+    /** Adds a highlight using the supplied painter to the vector element(Stack) that exactly corresponds to the 
+     *  specified bounds. The most recently added highlights over a given range appear on top of the older highlights. 
+     *  All highlights in a given range(Stack) must be unique, that is, each must use a different painter -- redundant 
+     *  highlights are shifted to the top of the stack, but not added twice.
+     *  @param startOffset the offset at which the highlight is to begin.
+     *  @param endOffset the offset at which the highlight is to end.
+     *  @param p the Highlighter.HighlightPainter for painting
+     *  @return HighlightInfo the HighlightInfo object, for keeping a tag of a given highlight
      */
     public HighlightInfo addHighlight(int startOffset, int endOffset, Highlighter.HighlightPainter p) {
 

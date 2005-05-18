@@ -119,21 +119,16 @@ public class ReaderWriterLock {
    */
   private final LinkedList<Thread> _runningThreads;
   
-  /**
-   * Creates a new ReaderWriterLock.
-   */
+  /** Creates a new ReaderWriterLock. */
   public ReaderWriterLock() {
     _waitQueue = new LinkedList<ReaderWriterThread>();
     _runningThreads = new LinkedList<Thread>();
   }
   
-  /**
-   * Must be called by each reader thread before starting to read.  The calling
-   * method must <i>not</i> be synchronized.
-   * 
-   * This method blocks the reader if there are current active or waiting
-   * writers, until those writers have finished.
-   * @throws IllegalStateException if the thread is already a reader or writer
+  /** Must be called by each reader thread before starting to read.  The calling method must <i>not</i> be 
+   *  synchronized.  This method blocks the reader if there are current active or waiting writers, until those 
+   *  writers have finished.
+   *  @throws IllegalStateException if the thread is already a reader or writer
    */
   public synchronized void startRead() {
     // If we're already reading, we can perform another read without waiting
