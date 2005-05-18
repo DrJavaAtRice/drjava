@@ -244,14 +244,14 @@ public final class DefinitionsPaneTest extends TestCase {
     int newPos = 20;
     
     doc.insertString(0, text, null);
-    assertEquals("insertion",text, doc.getText(0,doc.getLength()));
+    assertEquals("insertion",text, doc.getText());
     
     // Need to do this here since the commentLines action in MainFrame usually takes care of this.  
     // I can't run the test here because I'm not sure how to select the text so that we can comment it.
     pane.endCompoundEdit();
     doc.commentLines(0,doc.getLength());
     //    pane.endCompoundEdit();
-    assertEquals("commenting",commented, doc.getText(0,doc.getLength()));
+    assertEquals("commenting",commented, doc.getText());
     int oldPos = pane.getCaretPosition();
     pane.setCaretPosition(newPos);
     doc.getUndoManager().undo();
@@ -279,18 +279,13 @@ public final class DefinitionsPaneTest extends TestCase {
     assertEquals("redoing uncommenting restores caret position", oldPos, pane.getCaretPosition());
   }
   
-  protected void _assertDocumentEmpty(Document doc, String message)
-    throws BadLocationException
-  {
+  protected void _assertDocumentEmpty(DJDocument doc, String message) throws BadLocationException {
     _assertDocumentContents(doc, "", message);
   }
   
-  protected void _assertDocumentContents(Document doc,
-                                         String contents,
-                                         String message)
-    throws BadLocationException
-  {
-    assertEquals(message, contents, doc.getText(0, doc.getLength()));
+  protected void _assertDocumentContents(DJDocument doc, String contents, String message)
+    throws BadLocationException {
+    assertEquals(message, contents, doc.getText());
   }
   
   public void testGranularUndo() throws BadLocationException {
@@ -300,7 +295,7 @@ public final class DefinitionsPaneTest extends TestCase {
     
     // 1
     assertEquals("Should start out empty.", "",
-                 doc.getText(0, doc.getLength()));
+                 doc.getText());
     
     // Type in consecutive characters and see if they are all undone at once.
     // Type 'a'
@@ -375,7 +370,7 @@ public final class DefinitionsPaneTest extends TestCase {
                                              KeyEvent.VK_9, KeyEvent.CHAR_UNDEFINED));
     definitions.setCaretPosition(doc.getLength());
     assertEquals("The text should have been inserted", "a!B9",
-                 doc.getText(0, doc.getLength()));
+                 doc.getText());
     
     // Call the undoAction in MainFrame through the KeyBindingManager.
     final KeyStroke ks = DrJava.getConfig().getSetting(OptionConstants.KEY_UNDO);
@@ -393,7 +388,7 @@ public final class DefinitionsPaneTest extends TestCase {
     //    SwingUtilities.notifyAction(a, ks, e, e.getSource(), e.getModifiers());
     //    doc.getUndoManager().undo();
     assertEquals("Should have undone correctly.", "",
-                 doc.getText(0, doc.getLength()));
+                 doc.getText());
     
     // 2
     /* Test bug #905405 Undo Alt+Anything Causes Exception */
@@ -451,7 +446,7 @@ public final class DefinitionsPaneTest extends TestCase {
      definitions.setCaretPosition(doc.getLength());
      
      assertEquals("The text should have been inserted", "a",
-     doc.getText(0, doc.getLength()));
+     doc.getText());
      
      definitions.processKeyEvent(new KeyEvent(definitions,
      KeyEvent.KEY_PRESSED,
@@ -472,7 +467,7 @@ public final class DefinitionsPaneTest extends TestCase {
      definitions.setCaretPosition(doc.getLength());
      
      assertEquals("The text should have been deleted", "",
-     doc.getText(0, doc.getLength()));
+     doc.getText());
      
      // Call the undoAction in MainFrame through the KeyBindingManager.
      //    KeyStroke ks = DrJava.getConfig().getSetting(OptionConstants.KEY_UNDO);
@@ -491,7 +486,7 @@ public final class DefinitionsPaneTest extends TestCase {
      ks.getKeyCode(), KeyEvent.CHAR_UNDEFINED));
      //    doc.getUndoManager().undo();
      assertEquals("Should have undone correctly.", "a",
-     doc.getText(0, doc.getLength()));*/
+     doc.getText());*/
   }
   
   
@@ -499,15 +494,15 @@ public final class DefinitionsPaneTest extends TestCase {
     SingleDisplayModel _model = _frame.getModel();  // creates a frame with a new untitled document and makes it active
     
     DefinitionsPane pane1, pane2;
-    Document doc1, doc2;
+    DJDocument doc1, doc2;
     
     pane1 = _frame.getCurrentDefPane(); 
-    doc1 = pane1.getDocument();
+    doc1 = pane1.getDJDocument();
     assertTrue("the active pane should have an open definitions document", doc1 instanceof OpenDefinitionsDocument);
     
     _model.newFile();  // creates a new untitled document and makes it active
     pane2 = _frame.getCurrentDefPane();  
-    doc2 = pane2.getDocument();
+    doc2 = pane2.getDJDocument();
     
     assertTrue("the active pane should have an open definitions document", doc2 instanceof OpenDefinitionsDocument);
     

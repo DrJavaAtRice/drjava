@@ -59,14 +59,10 @@ public class DefinitionsEditorKit extends StyledEditorKit {
 
   private GlobalEventNotifier _notifier;
 
-  /**
-   * Creates a new editor kit with the given listeners.
-   * @param notifier Keeps track of the listeners to the model
+  /** Creates a new editor kit with the given listeners.
+   *  @param notifier Keeps track of the listeners to the model
    */
-  public DefinitionsEditorKit(GlobalEventNotifier notifier) {
-    _notifier = notifier;
-  }
-
+  public DefinitionsEditorKit(GlobalEventNotifier notifier) { _notifier = notifier; }
 
   private static ViewFactory _factory = new ViewFactory() {
     public View create(Element elem) {
@@ -76,57 +72,38 @@ public class DefinitionsEditorKit extends StyledEditorKit {
     }
   };
 
-  /**
-   * Creates a new DefinitionsDocument.
-   * This used to be named createDefaultDocument() so that the view
-   * (DefinitionsPane) would create a DefinitionsDocument by default
-   * when it was constructed.  However, we already have an existing
-   * DefinitionsDocument we want to use when the DefinitionsPane is
-   * constructed, so this default one was being created and thrown
-   * away (very expensive).  Ideally, we would have the DefinitionsPane
-   * use our existing document from the beginning, but the JEditorPane
-   * constructor does not take in a Document.  The only possible
-   * approach would be to have this EditorKit return the desired
-   * existing document when the JEditorPane requests a new one, but
-   * since the EditorKit must be kept as a static field on DefinitionsPane
-   * (since we can't set one until after JEditorPane's constructor is
-   * finished), there's no clean way to tell the EditorKit which document
-   * to return at which time.  (It would require a large synchronization
-   * effort each time a DefinitionsPane is constructed.)
+  /** Creates a new DefinitionsDocument. This used to be named createDefaultDocument() so that the view
+   *  (DefinitionsPane) would create a DefinitionsDocument by default when it was constructed.  However, 
+   *  we already have an existing DefinitionsDocument we want to use when the DefinitionsPane is constructed, 
+   *  so this default one was being created and thrown away (very expensive).  Ideally, we would have the
+   *  DefinitionsPane use our existing document from the beginning, but the JEditorPane constructor does 
+   *  not take in a Document.  The only possible approach would be to have this EditorKit return the desired
+   *  existing document when the JEditorPane requests a new one, but since the EditorKit must be kept as a 
+   *  static field on DefinitionsPane since we can't set one until after JEditorPane's constructor is
+   *  finished), there's no clean way to tell the EditorKit which document to return at which time.  (It 
+   *  would require a large synchronization effort each time a DefinitionsPane is constructed.)
    *
-   * As an easier alternative, we just let the DefaultEditorKit return
-   * a PlainDocument (much lighter weight), which can then be thrown
-   * away when the true DefinitionsDocument is assigned.
+   *  As an easier alternative, we just let the DefaultEditorKit return a PlainDocument (much lighter weight),
+   *  which can then be thrown away when the true DefinitionsDocument is assigned.
    *
-   * Improvements to this approach are welcome...  :)
+   *  Improvements to this approach are welcome...  :)
    */
-  public Document createNewDocument() {
-    return  _createDefaultTypedDocument();
-  }
+  public Document createNewDocument() { return  _createDefaultTypedDocument(); }
 
-  /**
-   * Creates a new DefinitionsDocument.
-   * @return a new DefinitionsDocument.
+  /** Creates a new DefinitionsDocument.
+   *  @return a new DefinitionsDocument.
    */
-  private DefinitionsDocument _createDefaultTypedDocument() {
-    return new DefinitionsDocument(_notifier);
-  }
+  private DefinitionsDocument _createDefaultTypedDocument() { return new DefinitionsDocument(_notifier); }
 
-  /**
-   * Get the MIME content type of the document.
-   * @return "text/java"
+  /** Get the MIME content type of the document.
+   *  @return "text/java"
    */
-  public String getContentType() {
-    return "text/java";
-  }
+  public String getContentType() { return "text/java"; }
 
-  /**
-   * We want to use our ColoringView to render text, so here we return
-   * a factory that creates ColoringViews.
+  /** We want to use our ColoringView to render text, so here we return
+   *  a factory that creates ColoringViews.
    */
-  public final ViewFactory getViewFactory() {
-    return _factory;
-  }
+  public final ViewFactory getViewFactory() { return _factory; }
 }
 
 

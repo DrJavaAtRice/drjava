@@ -120,7 +120,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
 //      _updateMatchHighlight();
 //    }
 //  };
-//  
+// 
   
   /** Updates the highlight if there is any. */
   protected void _updateMatchHighlight() {
@@ -842,7 +842,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     super.setDocument(_doc);
     if(_doc.getUndoableEditListeners().length == 0) _resetUndo();
     int len = getDJDocument().getLength();
-    if(len < _position) {
+    if (len < _position) {
       // the document changed since we're set inactive
       //so set selection to be none
       _position = len;
@@ -938,9 +938,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
       setCaretPosition(offset);
     }
 
-    catch (BadLocationException e) {
-      throw new UnexpectedException(e);
-    }
+    catch (BadLocationException e) { throw new UnexpectedException(e); }
   }
 
   public void centerViewOnLine(int lineNumber) {
@@ -956,19 +954,13 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
    * then the caret will end up at the start of the selection rather than the end.
    */
   public void select(int selectionStart, int selectionEnd) {
-    if (selectionStart < 0) {
-      selectionStart = 0;
-    }
-    if (selectionEnd < 0) {
-      selectionEnd = 0;
-    }
+    if (selectionStart < 0) selectionStart = 0;
+    if (selectionEnd < 0) selectionEnd = 0;
     setCaretPosition(selectionStart);
-    moveCaretPosition(selectionEnd);
+    moveCaretPosition(selectionEnd);  // What the caret position in the reduced model?  It is now inconsistent!
   }
 
-  /**
-   * Reset the document Undo list.
-   */
+  /** Reset the document Undo list. */
   public void resetUndo() {
     _doc.getUndoManager().discardAllEdits();
 
@@ -976,16 +968,10 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     _redoAction.updateRedoState();
   }
 
-  /**
-   * Reset the document Undo list.
-   */
+  /** Reset the document Undo list. */
   private void _resetUndo() {
-    if (_undoAction == null) {
-      _undoAction = new UndoAction();
-    }
-    if (_redoAction == null) {
-      _redoAction = new RedoAction();
-    }
+    if (_undoAction == null) _undoAction = new UndoAction();
+    if (_redoAction == null) _redoAction = new RedoAction();
 
     _doc.resetUndoManager();
     
@@ -995,9 +981,8 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
   }
 
 
-  /**
-   * Overriding this method ensures that all new documents created in this
-   * editor pane use our editor kit (and thus our model).
+  /** Overriding this method ensures that all new documents created in this editor pane use our editor 
+   *  kit (and thus our model).
    */
   protected EditorKit createDefaultEditorKit() {
     //return _editorKit;
@@ -1277,37 +1262,28 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
 
     public void redo() {
       _undo.redo();
-      if(_pos > -1) {
-        setCaretPosition(_pos);
-      }
+      if (_pos > -1) setCaretPosition(_pos);
     }
 
-    public boolean replaceEdit(UndoableEdit ue) {
-      return _undo.replaceEdit(ue);
-    }
+    public boolean replaceEdit(UndoableEdit ue) { return _undo.replaceEdit(ue); }
 
     public void undo() {
-      if(_pos > -1) {
-        setCaretPosition(_pos);
-      }
+      if(_pos > -1) setCaretPosition(_pos);
       _undo.undo();
     }
   }
   
   
   
-  /**
-   * This list of listeners to notify when we are finalized
-   */
+  /** This list of listeners to notify when we are finalized */
   private List<FinalizationListener<DefinitionsPane>> _finalizationListeners = 
     new LinkedList<FinalizationListener<DefinitionsPane>>();
   
-  /**
-   * Registers a finalization listener with the specific instance of the ddoc
-   * <p><b>NOTE:</b><i>This should only be used by test cases.  This is to ensure that
-   * we don't spring memory leaks by allowing our unit tests to keep track of 
-   * whether objects are being finalized (garbage collected)</i></p>
-   * @param fl the listener to register
+  /** Registers a finalization listener with the specific instance of the ddoc
+   *  <p><b>NOTE:</b><i>This should only be used by test cases.  This is to ensure that
+   *  we don't spring memory leaks by allowing our unit tests to keep track of 
+   *  whether objects are being finalized (garbage collected)</i></p>
+   *  @param fl the listener to register
    */
   public void addFinalizationListener(FinalizationListener<DefinitionsPane> fl) {
     _finalizationListeners.add(fl);

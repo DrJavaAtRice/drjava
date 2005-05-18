@@ -60,18 +60,14 @@ import edu.rice.cs.drjava.model.AbstractDJDocument;
  * can be passed through the constructor.
  * @version $Id$
  */
-public final class ActionBracePlusTest extends IndentRulesTestCase 
-{
+public final class ActionBracePlusTest extends IndentRulesTestCase {
   private String _text, _aligned;
   
   private IndentRuleAction _action;
   
-  public void setUp() {
-    super.setUp();
-  }
+  public void setUp() { super.setUp(); }
   
-  public void testNoSuffix() throws BadLocationException
-  {
+  public void testNoSuffix() throws BadLocationException {
     _action = new ActionBracePlus("");
     
     // (1) 
@@ -91,7 +87,7 @@ public final class ActionBracePlusTest extends IndentRulesTestCase
     assertEquals("START has no brace.", _text.length(), _doc.getLength());
     _action.indentLine(_doc, 8, Indenter.OTHER); // Aligns second line.
     assertEquals("Line aligned to open paren.", _aligned.length(), _doc.getLength());
-    assertEquals("Line aligned to open paren.", _aligned, _doc.getText(0, _doc.getLength()));
+    assertEquals("Line aligned to open paren.", _aligned, _doc.getText());
   }
   
 
@@ -116,7 +112,7 @@ public final class ActionBracePlusTest extends IndentRulesTestCase
     assertEquals("START has no brace.", _text.length(), _doc.getLength());
     _action.indentLine(_doc, 20, Indenter.OTHER); // Aligns second line.
     assertEquals("Line aligned to open paren.", _aligned.length(), _doc.getLength());
-    assertEquals("Line aligned to open paren.", _aligned, _doc.getText(0, _doc.getLength()));
+    assertEquals("Line aligned to open paren.", _aligned, _doc.getText());
     
     // (3) 
      
@@ -136,7 +132,7 @@ public final class ActionBracePlusTest extends IndentRulesTestCase
     assertEquals("START has no brace.", _text.length(), _doc.getLength());
     _action.indentLine(_doc, 16, Indenter.OTHER); // Aligns second line.
     assertEquals("Line aligned to open paren.", _aligned.length(), _doc.getLength());
-    assertEquals("Line aligned to open paren.", _aligned, _doc.getText(0, _doc.getLength()));
+    assertEquals("Line aligned to open paren.", _aligned, _doc.getText());
  
     // (4) 
  
@@ -157,7 +153,7 @@ public final class ActionBracePlusTest extends IndentRulesTestCase
     _action.indentLine(_doc, 15, Indenter.OTHER); // Does nothing.
     assertEquals("START has no brace.", _text.length(), _doc.getLength());
     _action.indentLine(_doc, 20, Indenter.OTHER); // Aligns second line.
-    assertEquals("Line aligned to open paren.", _aligned, _doc.getText(0, _doc.getLength()));
+    assertEquals("Line aligned to open paren.", _aligned, _doc.getText());
  
     // (5) 
 
@@ -180,7 +176,7 @@ public final class ActionBracePlusTest extends IndentRulesTestCase
     _action.indentLine(_doc, 6, Indenter.OTHER); // Does nothing.
     assertEquals("START has no brace.", _text.length(), _doc.getLength());
     _action.indentLine(_doc, 10, Indenter.OTHER); // Aligns second line.
-    assertEquals("Line aligned to open bracket.", _aligned, _doc.getText(0, _doc.getLength())); 
+    assertEquals("Line aligned to open bracket.", _aligned, _doc.getText()); 
 
   }
   
@@ -205,7 +201,7 @@ public final class ActionBracePlusTest extends IndentRulesTestCase
     assertEquals("START has no brace.", _text.length(), _doc.getLength());
     _action.indentLine(_doc, 25, Indenter.OTHER); // Aligns second line.
     assertEquals("Line aligned to open paren.", _aligned.length(), _doc.getLength());
-    assertEquals("Line aligned to open paren.", _aligned, _doc.getText(0, _doc.getLength()));
+    assertEquals("Line aligned to open paren.", _aligned, _doc.getText());
   }
   
   public void testComment() throws BadLocationException
@@ -235,10 +231,9 @@ public final class ActionBracePlusTest extends IndentRulesTestCase
     _action.indentLine(_doc, 27, Indenter.OTHER); // line 4
     _action.indentLine(_doc, 43, Indenter.OTHER); // line 5
     assertEquals("Lines aligned plus one level.",
-                 _aligned, _doc.getText(0, _doc.getLength()));
+                 _aligned, _doc.getText());
     
     _action.indentLine(_doc, 54, Indenter.OTHER); // after baz()
-    assertEquals("Cursor after baz().",
-                 _aligned, _doc.getText(0, _doc.getLength()));
+    assertEquals("Cursor after baz().", _aligned, _doc.getText());
   }
 }

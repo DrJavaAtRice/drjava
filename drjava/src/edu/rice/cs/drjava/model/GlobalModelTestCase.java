@@ -165,7 +165,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
 
   /** Clear all old text and insert the given text. */
   protected void changeDocumentText(String s, OpenDefinitionsDocument doc) throws BadLocationException {
-    doc.remove(0, doc.getLength());
+    doc.clear();
     assertLength(0, doc);
     doc.insertString(0, s, null);
     assertModified(true, doc);
@@ -419,48 +419,32 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
   }
 
   protected void assertModified(boolean b, OpenDefinitionsDocument doc) {
-    assertEquals("document isModifiedSinceSave",
-                 b,
-                 doc.isModifiedSinceSave());
+    assertEquals("document isModifiedSinceSave", b, doc.isModifiedSinceSave());
   }
 
 
   protected void assertLength(int len, OpenDefinitionsDocument doc) {
-    assertEquals("document length",
-                 len,
-                 doc.getLength());
+    assertEquals("document length", len, doc.getLength());
   }
 
-  protected void assertContents(String s, OpenDefinitionsDocument doc)
-    throws BadLocationException 
-  {
-    int len = doc.getLength();
-
-    assertEquals("document contents",
-                 s,
-                 doc.getText(0, len));
+  protected void assertContents(String s, OpenDefinitionsDocument doc) throws BadLocationException {
+    assertEquals("document contents", s, doc.getText());
   }
 
-  protected void assertCompileErrorsPresent(boolean b) {
-    assertCompileErrorsPresent("", b);
-  }
+  protected void assertCompileErrorsPresent(boolean b) { assertCompileErrorsPresent("", b); }
 
   protected void assertCompileErrorsPresent(String name, boolean b) {
     //CompilerError[] errors = _model.getCompileErrors();
     int numErrors = _model.getCompilerModel().getNumErrors();
 
-    if (name.length() > 0) {
-      name += ": ";
-    }
+    if (name.length() > 0)  name += ": ";
 
     //StringBuffer buf = new StringBuffer();
     //for (int i = 0; i < errors.length; i++) {
     //  buf.append("\nerror #" + i + ": " + errors[i]);
     //}
 
-    assertEquals(name + "compile errors > 0? numErrors=" + numErrors,
-                 b,
-                 numErrors > 0);
+    assertEquals(name + "compile errors > 0? numErrors=" + numErrors, b, numErrors > 0);
   }
 
     // These exceptions are specially used only in this test case.

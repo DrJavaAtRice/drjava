@@ -137,9 +137,7 @@ public final class GlobalModelCompileIOTest extends GlobalModelTestCase {
                !doc.checkIfClassFileInSync());
   }
 
-  /**
-   * Tests a compile after a file has unexpectedly been moved or deleted.
-   */
+  /** Tests a compile after a file has unexpectedly been moved or delete. */
   public void testCompileAfterFileMoved() throws BadLocationException, IOException {
     OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
     final File file = tempFile();

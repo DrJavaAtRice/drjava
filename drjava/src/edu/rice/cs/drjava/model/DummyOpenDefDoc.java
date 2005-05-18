@@ -588,8 +588,11 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
   public int getInitialSelectionStart() { throw new UnsupportedOperationException("Dummy method"); }
   
   public int getInitialSelectionEnd() { throw new UnsupportedOperationException("Dummy method"); }
- 
   
+  public String getText() { throw new UnsupportedOperationException("Dummy method"); }
+  
+  public void clear() { throw new UnsupportedOperationException("Dummy method"); }
+ 
   /** Swing-style readLock(). */
   public void acquireReadLock() { throw new UnsupportedOperationException("Dummy method"); }
   

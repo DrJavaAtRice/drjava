@@ -1,46 +1,34 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * This file is part of DrJava.  Download the current version of this project:
- * http://sourceforge.net/projects/drjava/ or http://www.drjava.org/
+ * This file is part of DrJava.  Download the current version of this project from http://www.drjava.org/
+ * or http://sourceforge.net/projects/drjava/
  *
  * DrJava Open Source License
+ * 
+ * Copyright (C) 2001-2005 JavaPLT group at Rice University (javaplt@rice.edu).  All rights reserved.
  *
- * Copyright (C) 2001-2003 JavaPLT group at Rice University (javaplt@rice.edu)
- * All rights reserved.
- *
- * Developed by:   Java Programming Languages Team
- *                 Rice University
- *                 http://www.cs.rice.edu/~javaplt/
- *
- * Permission is hereby granted, free of charge, to any person obtaining a
- * copy of this software and associated documentation files (the "Software"),
- * to deal with the Software without restriction, including without
- * limitation the rights to use, copy, modify, merge, publish, distribute,
- * sublicense, and/or sell copies of the Software, and to permit persons to
- * whom the Software is furnished to do so, subject to the following
- * conditions:
- *
- *     - Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimers.
- *     - Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimers in the
- *       documentation and/or other materials provided with the distribution.
- *     - Neither the names of DrJava, the JavaPLT, Rice University, nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this Software without specific prior written permission.
- *     - Products derived from this software may not be called "DrJava" nor
- *       use the term "DrJava" as part of their names without prior written
- *       permission from the JavaPLT group.  For permission, write to
- *       javaplt@rice.edu.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
- * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
- * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
- * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
- * OTHER DEALINGS WITH THE SOFTWARE.
- *
+ * Developed by:   Java Programming Languages Team, Rice University, http://www.cs.rice.edu/~javaplt/
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated 
+ * documentation files (the "Software"), to deal with the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and 
+ * to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ * 
+ *     - Redistributions of source code must retain the above copyright notice, this list of conditions and the 
+ *       following disclaimers.
+ *     - Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the 
+ *       following disclaimers in the documentation and/or other materials provided with the distribution.
+ *     - Neither the names of DrJava, the JavaPLT, Rice University, nor the names of its contributors may be used to 
+ *       endorse or promote products derived from this Software without specific prior written permission.
+ *     - Products derived from this software may not be called "DrJava" nor use the term "DrJava" as part of their 
+ *       names without prior written permission from the JavaPLT group.  For permission, write to javaplt@rice.edu.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO 
+ * THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
+ * CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS 
+ * WITH THE SOFTWARE.
+ * 
 END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.compiler;
@@ -68,46 +56,37 @@ import edu.rice.cs.drjava.model.FileMovedException;
  */
 public class CompilerErrorModel<T extends CompilerError> {
   private static final String newLine = System.getProperty("line.separator");
-  /**
-   * An array of errors to be displayed in the CompilerErrorPanel associated
-   * with this model.  After the constructor, this should be sorted in this order:
-   *   Errors with no file.
-   *   Errors for each file in path-alphabetical order.
-   *     within each file:
+  /** An array of errors to be displayed in the CompilerErrorPanel associated with this model.  After model
+   *  construction, this array should be sorted in this order:
+   *   (i) Errors with no file.
+   *   (ii) Errors for each file in path-alphabetical order.
+   *   Within each file:
    *       errors with no line number
    *       errors with line numbers, in order
    * In all cases, where all else is equal, warnings are sorted below errors.
    */
   private final T[] _errors;
 
-  /**
-   * An array of file offsets, parallel to the _errors array.
-   * NOTE: If there is no position associated with an error, its entry here
-   *       should be set to null.
+  /** An array of file offsets, parallel to the _errors array. NOTE: If there is no position associated with an error,
+   *  its entry here should be set to null.
    */
   private final Position[] _positions;
 
-  /**
-   * The size of _errors and _positions.  This should never change after the constructor!
-   */
+  /** The size of _errors and _positions.  This should never change after model construction*/
   private final int _numErrors;
 
-  /**
-   * Cached result of hasOnlyWarnings.
-   * Three-state enum:
+  /** Cached result of hasOnlyWarnings.
+   *  Three-state enum:
    *  -1 => result has not been computed
    *   0 => false
    *   1 => true
    */
   private int _onlyWarnings = -1;
 
-  /**
-   * Used internally in building _positions.
-   * The file used as the index *must* be a canonical file, or else
-   * errors won't always be associated with the right documents.
+  /** Used internally in building _positions.  The file used as the index *must* be a canonical file, or else
+   *  errors won't always be associated with the right documents.
    */
-  private final HashMap<File, StartAndEndIndex> _filesToIndexes =
-    new HashMap<File, StartAndEndIndex>();
+  private final HashMap<File, StartAndEndIndex> _filesToIndexes = new HashMap<File, StartAndEndIndex>();
 
   /** The global model which created/controls this object. */
   private final IGetDocuments _model;
@@ -347,10 +326,7 @@ public class CompilerErrorModel<T extends CompilerError> {
     }
   }
 
-  /**
-   * Create array of positions where each error occurred.
-   * positions are related to the document that each error came from
-   */
+  /** Create array of positions where each error occurred. Positions are related their corresponding documents. */
   private void _calculatePositions() {
     try {
       int curError = 0;
@@ -366,29 +342,22 @@ public class CompilerErrorModel<T extends CompilerError> {
 
         //Now find the file and document we are working on
         File file = _errors[curError].file();
-        Document document;
-        try {
-          document = _model.getDocumentForFile(file);
-        }
+        OpenDefinitionsDocument document;
+        try { document = _model.getDocumentForFile(file); }
         catch (Exception e) {
           // This is intended to catch IOException or OperationCanceledException
           if ((e instanceof IOException) || (e instanceof OperationCanceledException)) {
             // skip positions for these errors if the document couldn't be loaded
-            do {
-              curError++;
-            } while ((curError < _numErrors) && (_errors[curError].file().equals(file)));
+            do { curError++; } 
+            while ((curError < _numErrors) && (_errors[curError].file().equals(file)));
 
             //If the document couldn't be loaded, start the loop over at the top
             continue;
           }
-          else {
-            throw new UnexpectedException(e);
-          }
+          else throw new UnexpectedException(e);
         }
 
-        if (curError >= _numErrors) {
-          break;
-        }
+        if (curError >= _numErrors) break;
 
         // curError is the first error in a file, and its document is open.
         final int fileStartIndex = curError;
@@ -404,12 +373,9 @@ public class CompilerErrorModel<T extends CompilerError> {
                (offset <= defsLength)) { // we haven't gone past the end of the file
 
           // create new positions for all errors on this line
-          while ((curError < _numErrors) &&
-                 file.equals(_errors[curError].file()) &&  // we are still in this file
-                 (_errors[curError].lineNumber() == curLine))
-          {
-            _positions[curError] =
-              document.createPosition(offset +  _errors[curError].startColumn());
+          while ((curError < _numErrors) && file.equals(_errors[curError].file()) &&  // we are still in this file
+                 (_errors[curError].lineNumber() == curLine)) {
+            _positions[curError] = document.createPosition(offset + _errors[curError].startColumn());
             curError++;
           }
 
@@ -424,9 +390,7 @@ public class CompilerErrorModel<T extends CompilerError> {
                      && (nextNewline != -1)
                      && (file.equals(_errors[curError].file()))) {
               nextNewline = defsText.indexOf(newLine, offset);
-              if (nextNewline == -1) {
-                nextNewline = defsText.indexOf("\n", offset);
-              }
+              if (nextNewline == -1) nextNewline = defsText.indexOf("\n", offset);
               if (nextNewline != -1) {
                 curLine++;
                 offset = nextNewline + 1;
@@ -440,9 +404,7 @@ public class CompilerErrorModel<T extends CompilerError> {
         int fileEndIndex = curError;
         if (fileEndIndex != fileStartIndex) {
           // Try to use the canonical file if possible
-          try {
-            file = file.getCanonicalFile();
-          }
+          try { file = file.getCanonicalFile(); }
           catch (IOException ioe) {
             // Oh well, store it as is
           }
@@ -450,28 +412,20 @@ public class CompilerErrorModel<T extends CompilerError> {
         }
       }
     }
-    catch (BadLocationException ble) {
-       throw new UnexpectedException(ble);
-    }
+    catch (BadLocationException ble) { throw new UnexpectedException(ble); }
   }
 
-  /**
-   * Finds the first error after numProcessed which has a file and line number.
-   * @param idx the starting index of the search
-   * @return the index of the found error
+  /** Finds the first error after numProcessed which has a file and line number.
+   *  @param idx the starting index of the search
+   *  @return the index of the found error
    */
   private int nextErrorWithLine(int idx) {
-    while ((idx < _numErrors) && (_errors[idx].hasNoLocation()
-           || (_errors[idx].file() == null)))
-    {
-      idx++;
-    }
+    while (idx < _numErrors && (_errors[idx].hasNoLocation() || _errors[idx].file() == null)) idx++;
     return idx;
   }
 
-  /**
-   * This class is used only to track where the errors with positions for a file
-   * begin and end.  The beginning index is inclusive, the ending index is exclusive.
+  /** This class is used only to track where the errors with positions for a file begin and end.  The beginning index 
+   *  is inclusive, the ending index is exclusive.
    */
   private static class StartAndEndIndex {
     private int startPos;
@@ -481,13 +435,7 @@ public class CompilerErrorModel<T extends CompilerError> {
       this.startPos = startPos;
       this.endPos = endPos;
     }
-    public int getStartPos() {
-      return startPos;
-    }
-
-    public int getEndPos() {
-      return endPos;
-    }
-
+    public int getStartPos() { return startPos; }
+    public int getEndPos() { return endPos; }
   }
 }

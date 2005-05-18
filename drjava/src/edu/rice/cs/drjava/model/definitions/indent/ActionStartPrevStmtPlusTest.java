@@ -70,13 +70,13 @@ public final class ActionStartPrevStmtPlusTest extends IndentRulesTestCase {
     rule1.indentLine(_doc, 2, Indenter.OTHER);
     assertEquals("no prev stmt, no suffix",
                  "foo();\n",
-                 _doc.getText(0, _doc.getLength()));
+                 _doc.getText());
     
     _setDocText("foo();\n");
     rule2.indentLine(_doc, 2, Indenter.OTHER);
     assertEquals("no prev stmt, suffix two spaces",
                  "  foo();\n",
-                 _doc.getText(0, _doc.getLength()));
+                 _doc.getText());
   }
   
   public void testPrevStmtPrevLine() throws BadLocationException {
@@ -87,13 +87,13 @@ public final class ActionStartPrevStmtPlusTest extends IndentRulesTestCase {
     rule1.indentLine(_doc, 44, Indenter.OTHER);
     assertEquals("prev stmt on prev line, no suffix",
                  "  foo().\n//boo();\n/*y=x+1;\nfoo(){}*/\nbar();\n  biz();\n",
-                 _doc.getText(0, _doc.getLength()));
+                 _doc.getText());
     
     _setDocText("  foo().\n//boo();\n/*y=x+1;\nfoo(){}*/\nbar();\nbiz();\n");
     rule2.indentLine(_doc, 44, Indenter.OTHER);
     assertEquals("prev stmt on prev line, suffix two spaces",
                  "  foo().\n//boo();\n/*y=x+1;\nfoo(){}*/\nbar();\n    biz();\n",
-                 _doc.getText(0, _doc.getLength()));
+                 _doc.getText());
   }
 
   public void testPrevStmtSeveralLinesBeforeCurrLocation() throws BadLocationException {
@@ -104,13 +104,13 @@ public final class ActionStartPrevStmtPlusTest extends IndentRulesTestCase {
     rule1.indentLine(_doc, 56, Indenter.OTHER);
     assertEquals("prev stmt serveral lines before, no suffix",
                  "  foo();\n//y=x+1;\n/*void blah {\n}*/\n  ';' + blah.\n//foo\n  x;\n",
-                 _doc.getText(0, _doc.getLength()));
+                 _doc.getText());
     
     _setDocText("  foo();\n//y=x+1;\n/*void blah {\n}*/\n  ';' + blah.\n//foo\nx;\n");
     rule2.indentLine(_doc, 56, Indenter.OTHER);
     assertEquals("prev stmt serveral lines before, suffix two spaces", 
                  "  foo();\n//y=x+1;\n/*void blah {\n}*/\n  ';' + blah.\n//foo\n    x;\n",
-                 _doc.getText(0, _doc.getLength()));
+                 _doc.getText());
   }
   
   public void testColonNotDelim() throws BadLocationException {
@@ -124,7 +124,7 @@ public final class ActionStartPrevStmtPlusTest extends IndentRulesTestCase {
                  "test2 = x ? y :\n" +     // ? and : on one line
                  "  z;\n" +     // unfinished ternary
                  "foo();\n",
-                 _doc.getText(0, _doc.getLength()));
+                 _doc.getText());
   }
 
 
@@ -142,7 +142,7 @@ public final class ActionStartPrevStmtPlusTest extends IndentRulesTestCase {
                  "  b,c,d\n" +
                  "};\n" +
                  "a;",
-                 _doc.getText(0, _doc.getLength()));
+                 _doc.getText());
   }
   public void testAfterArrayAssignMultiSemi() throws BadLocationException {
     IndentRuleAction rule = new ActionStartPrevStmtPlus("", false);
@@ -158,7 +158,7 @@ public final class ActionStartPrevStmtPlusTest extends IndentRulesTestCase {
                  "  b,c,d\n" +
                  "};;;\n" +
                  "a;",
-                 _doc.getText(0, _doc.getLength()));
+                 _doc.getText());
   }
 
   /** 
@@ -180,7 +180,7 @@ public final class ActionStartPrevStmtPlusTest extends IndentRulesTestCase {
                  "  b,c,d\n" +
                  "};b;;\n" +
                  "a;",
-                 _doc.getText(0, _doc.getLength()));
+                 _doc.getText());
   }
   */
 }

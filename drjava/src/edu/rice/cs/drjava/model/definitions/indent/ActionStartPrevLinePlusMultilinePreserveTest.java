@@ -88,7 +88,7 @@ public class ActionStartPrevLinePlusMultilinePreserveTest extends IndentRulesTes
       makeAction(new String[]{" * \n", " */"},0,3,0,3).indentLine(_doc, Indenter.ENTER_KEY_PRESS);
       assertEquals(endLoc, _doc.getCurrentLocation());
       //assertEquals(finish.length(), _doc.getLength());
-      assertEquals(finish, _doc.getText(0, finish.length()));
+      assertEquals(finish, _doc.getText());
   }
 
   public void test1() throws BadLocationException {

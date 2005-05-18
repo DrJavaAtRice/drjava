@@ -1,46 +1,34 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * This file is part of DrJava.  Download the current version of this project:
- * http://sourceforge.net/projects/drjava/ or http://www.drjava.org/
+ * This file is part of DrJava.  Download the current version of this project from http://www.drjava.org/
+ * or http://sourceforge.net/projects/drjava/
  *
  * DrJava Open Source License
+ * 
+ * Copyright (C) 2001-2005 JavaPLT group at Rice University (javaplt@rice.edu).  All rights reserved.
  *
- * Copyright (C) 2001-2003 JavaPLT group at Rice University (javaplt@rice.edu)
- * All rights reserved.
- *
- * Developed by:   Java Programming Languages Team
- *                 Rice University
- *                 http://www.cs.rice.edu/~javaplt/
- *
- * Permission is hereby granted, free of charge, to any person obtaining a
- * copy of this software and associated documentation files (the "Software"),
- * to deal with the Software without restriction, including without
- * limitation the rights to use, copy, modify, merge, publish, distribute,
- * sublicense, and/or sell copies of the Software, and to permit persons to
- * whom the Software is furnished to do so, subject to the following
- * conditions:
- *
- *     - Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimers.
- *     - Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimers in the
- *       documentation and/or other materials provided with the distribution.
- *     - Neither the names of DrJava, the JavaPLT, Rice University, nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this Software without specific prior written permission.
- *     - Products derived from this software may not be called "DrJava" nor
- *       use the term "DrJava" as part of their names without prior written
- *       permission from the JavaPLT group.  For permission, write to
- *       javaplt@rice.edu.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
- * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
- * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
- * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
- * OTHER DEALINGS WITH THE SOFTWARE.
- *
+ * Developed by:   Java Programming Languages Team, Rice University, http://www.cs.rice.edu/~javaplt/
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated 
+ * documentation files (the "Software"), to deal with the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and 
+ * to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ * 
+ *     - Redistributions of source code must retain the above copyright notice, this list of conditions and the 
+ *       following disclaimers.
+ *     - Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the 
+ *       following disclaimers in the documentation and/or other materials provided with the distribution.
+ *     - Neither the names of DrJava, the JavaPLT, Rice University, nor the names of its contributors may be used to 
+ *       endorse or promote products derived from this Software without specific prior written permission.
+ *     - Products derived from this software may not be called "DrJava" nor use the term "DrJava" as part of their 
+ *       names without prior written permission from the JavaPLT group.  For permission, write to javaplt@rice.edu.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO 
+ * THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
+ * CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS 
+ * WITH THE SOFTWARE.
+ * 
 END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.ui;
@@ -1182,12 +1170,9 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
   };
   
-  /**
-   * Returns the "intelligent" beginning of line.  If the caret is to
-   * the right of the first non-whitespace character, the position of the
-   * first non-whitespace character is returned.  If the caret is at or
-   * to the left of the first non-whitespace character, the beginning of
-   * the line is returned.
+  /** Returns the "intelligent" beginning of line.  If the caret is to fhe right of the first non-whitespace character,
+   *  the position of the first non-whitespace character is returned.  If the caret is on or to the left of the first 
+   *  non-whitespace character, the beginning of the line is returned.
    */
   private int _getBeginLinePos() {
     try {
@@ -4323,7 +4308,8 @@ public class MainFrame extends JFrame implements OptionConstants {
   private class PositionListener implements CaretListener {
 
     public void caretUpdate( CaretEvent ce ) {
-      _model.getActiveDocument().setCurrentLocation(ce.getDot());
+      OpenDefinitionsDocument doc = _model.getActiveDocument();
+      doc.setCurrentLocation(ce.getDot());  // locking is done by setCurrentLocation
       updateLocation();
     }
 
@@ -4373,6 +4359,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _tabbedPane = new JTabbedPane();
     _tabbedPane.addChangeListener(new ChangeListener () {
       public void stateChanged(ChangeEvent e) {
+//        Utilities.showDebug("MainFrame.stateChanged called with event");
         clearStatusMessage();
 
         if (_tabbedPane.getSelectedComponent() == _interactionsContainer) {
@@ -4386,12 +4373,13 @@ public class MainFrame extends JFrame implements OptionConstants {
            * interactions pane.
            */
         }
-        else if (_tabbedPane.getSelectedComponent() == _consoleScroll) _consolePane.requestFocusInWindow();
+        else 
+          if (_tabbedPane.getSelectedComponent() == _consoleScroll) _consolePane.requestFocusInWindow();
 
         // Update error highlights?
         if (_currentDefPane != null) {
           int pos = _currentDefPane.getCaretPosition();
-          _currentDefPane.removeErrorHighlight();
+          // _currentDefPane.removeErrorHighlight();
           _currentDefPane.getErrorCaretListener().updateHighlight(pos);
         }
       }
@@ -4636,15 +4624,12 @@ public class MainFrame extends JFrame implements OptionConstants {
   
   
   /** Create a new DefinitionsPane and JScrollPane for an open definitions document.
-   *
    *  @param doc The open definitions document to wrap
-   *  @return JScrollPane containing a DefinitionsPane for the
-   *         given document.
+   *  @return JScrollPane containing a DefinitionsPane for the given document.
    */
   JScrollPane _createDefScrollPane(OpenDefinitionsDocument doc) {
-    // made this package private to allow testing of disabling editing
-    // during compile and successful switching on and off of ability to
-    // edit
+    // made this package private to allow testing of disabling editing during compile and successful switching
+    // on and off of ability to edit
     DefinitionsPane pane = new DefinitionsPane(this, doc);
     pane.addKeyListener(_historyListener);
     pane.addFocusListener(_focusListenerForRecentDocs);
@@ -4752,6 +4737,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   void _switchDefScrollPane() {
 
     // demoted to package private protection to test the disabling editing while compiling functionality.
+    // and to support brute force fix to DefinitionsPane bug on return from compile with errors
 
     // Added 2004-May-27
     // Notify the definitions pane that is being replaced (becoming inactive)
@@ -4783,10 +4769,14 @@ public class MainFrame extends JFrame implements OptionConstants {
       _currentDefPane.setEditable(false);
     }
     // reset the undo/redo menu items
+    resetUndo();
+    if (inDebugMode()) _updateDebugStatus();
+  }
+  
+  /** Resets the undo/redo menu items */
+  public void resetUndo() {
     _undoAction.setDelegatee(_currentDefPane.getUndoAction());
     _redoAction.setDelegatee(_currentDefPane.getRedoAction());
-
-    if (inDebugMode()) _updateDebugStatus();
   }
 
   public DefinitionsPane getDefPaneGivenODD(OpenDefinitionsDocument doc) {
@@ -5367,46 +5357,48 @@ public class MainFrame extends JFrame implements OptionConstants {
       // Only change GUI from event-dispatching thread
       // (This can be called from other threads...)
       
-      Runnable command = new Runnable() {
-        public void run() {
-          _recentDocFrame.pokeDocument(active);
-          _switchDefScrollPane();
-
-          boolean isModified = active.isModifiedSinceSave();
-          boolean canCompile = (!isModified && !active.isUntitled());
-          _saveAction.setEnabled(!canCompile);
-          _revertAction.setEnabled(!active.isUntitled());
-
-          // Update error highlights
-          int pos = _currentDefPane.getCaretPosition();
-          _currentDefPane.getErrorCaretListener().updateHighlight(pos);
-
-          // Update FileChoosers' directory
-          _setCurrentDirectory(active);
-
-          // Update title and position
-          updateFileTitle();
-          _currentDefPane.requestFocusInWindow();
-          _posListener.updateLocation();
-          
-          // update display (adding "*") in navigatgorPane
-          if (isModified) _model.getDocumentNavigator().repaint();
-          
-          
-          try { active.revertIfModifiedOnDisk(); }
-          catch (FileMovedException fme) { _showFileMovedError(fme); }
-          catch (IOException e) { _showIOError(e); }
-
-          // Change Find/Replace to the new defpane
-          if (_findReplace.isDisplayed()) {
-            _findReplace.stopListening();
-            _findReplace.beginListeningTo(_currentDefPane);
-            //uninstallFindReplaceDialog(_findReplace);
-            //installFindReplaceDialog(_findReplace);
+      try {
+        Utilities.invokeAndWait(new Runnable() {
+          public void run() {
+            _recentDocFrame.pokeDocument(active);
+            _switchDefScrollPane();
+            
+            boolean isModified = active.isModifiedSinceSave();
+            boolean canCompile = (!isModified && !active.isUntitled());
+            _saveAction.setEnabled(!canCompile);
+            _revertAction.setEnabled(!active.isUntitled());
+            
+            // Update error highlights
+            int pos = _currentDefPane.getCaretPosition();
+            _currentDefPane.getErrorCaretListener().updateHighlight(pos);
+            
+            // Update FileChoosers' directory
+            _setCurrentDirectory(active);
+            
+            // Update title and position
+            updateFileTitle();
+            _currentDefPane.requestFocusInWindow();
+            _posListener.updateLocation();
+            
+            // update display (adding "*") in navigatgorPane
+            if (isModified) _model.getDocumentNavigator().repaint();
+            
+            
+            try { active.revertIfModifiedOnDisk(); }
+            catch (FileMovedException fme) { _showFileMovedError(fme); }
+            catch (IOException e) { _showIOError(e); }
+            
+            // Change Find/Replace to the new defpane
+            if (_findReplace.isDisplayed()) {
+              _findReplace.stopListening();
+              _findReplace.beginListeningTo(_currentDefPane);
+              //uninstallFindReplaceDialog(_findReplace);
+              //installFindReplaceDialog(_findReplace);
+            }
           }
-        }
-      };
-      Utilities.invokeLater(command);
+        });
+      }
+      catch(InterruptedException e) { throw new UnexpectedException(e); }
     }
 
     public void interactionStarted() {
@@ -6161,72 +6153,50 @@ public class MainFrame extends JFrame implements OptionConstants {
     ActionMap _actionMap = _currentDefPane.getActionMap();
 
     KeyBindingManager.Singleton.put(KEY_BACKWARD, _actionMap.get(DefaultEditorKit.backwardAction),null, "Backward");
-    KeyBindingManager.Singleton.addShiftAction(KEY_BACKWARD,
-                                               DefaultEditorKit.selectionBackwardAction);
+    KeyBindingManager.Singleton.addShiftAction(KEY_BACKWARD, DefaultEditorKit.selectionBackwardAction);
 
     KeyBindingManager.Singleton.put(KEY_BEGIN_DOCUMENT, _actionMap.get(DefaultEditorKit.beginAction), null, 
                                     "Begin Document");
-    KeyBindingManager.Singleton.addShiftAction(KEY_BEGIN_DOCUMENT,
-                                               DefaultEditorKit.selectionBeginAction);
+    KeyBindingManager.Singleton.addShiftAction(KEY_BEGIN_DOCUMENT, DefaultEditorKit.selectionBeginAction);
 
 //    KeyBindingManager.Singleton.put(KEY_BEGIN_LINE, _actionMap.get(DefaultEditorKit.beginLineAction), null, 
 //                                    "Begin Line");
-    KeyBindingManager.Singleton.put(KEY_BEGIN_LINE, _beginLineAction,
-                                    null, "Begin Line");
+    KeyBindingManager.Singleton.put(KEY_BEGIN_LINE, _beginLineAction, null, "Begin Line");
 //    KeyBindingManager.Singleton.addShiftAction(KEY_BEGIN_LINE,
 //                                               DefaultEditorKit.selectionBeginLineAction);
-    KeyBindingManager.Singleton.addShiftAction(KEY_BEGIN_LINE,
-                                               _selectionBeginLineAction);
+    KeyBindingManager.Singleton.addShiftAction(KEY_BEGIN_LINE, _selectionBeginLineAction);
 
-    KeyBindingManager.Singleton.put(KEY_PREVIOUS_WORD,
-                                    _actionMap.get(DefaultEditorKit.previousWordAction), null, "Previous Word");
-    KeyBindingManager.Singleton.addShiftAction(KEY_PREVIOUS_WORD,
-                                               DefaultEditorKit.selectionPreviousWordAction);
+    KeyBindingManager.Singleton.put(KEY_PREVIOUS_WORD, _actionMap.get(DefaultEditorKit.previousWordAction), null, 
+                                    "Previous Word");
+    KeyBindingManager.Singleton.addShiftAction(KEY_PREVIOUS_WORD, DefaultEditorKit.selectionPreviousWordAction);
 
+    KeyBindingManager.Singleton.put(KEY_DOWN, _actionMap.get(DefaultEditorKit.downAction), null, "Down");
+    KeyBindingManager.Singleton.addShiftAction(KEY_DOWN, DefaultEditorKit.selectionDownAction);
 
-    KeyBindingManager.Singleton.put(KEY_DOWN,
-                                    _actionMap.get(DefaultEditorKit.downAction), null, "Down");
-    KeyBindingManager.Singleton.addShiftAction(KEY_DOWN,
-                                               DefaultEditorKit.selectionDownAction);
+    KeyBindingManager.Singleton.put(KEY_END_DOCUMENT, _actionMap.get(DefaultEditorKit.endAction), null, "End Document");
+    KeyBindingManager.Singleton.addShiftAction(KEY_END_DOCUMENT, DefaultEditorKit.selectionEndAction);
 
-    KeyBindingManager.Singleton.put(KEY_END_DOCUMENT,
-                                    _actionMap.get(DefaultEditorKit.endAction), null, "End Document");
-    KeyBindingManager.Singleton.addShiftAction(KEY_END_DOCUMENT,
-                                               DefaultEditorKit.selectionEndAction);
+    KeyBindingManager.Singleton.put(KEY_END_LINE, _actionMap.get(DefaultEditorKit.endLineAction), null, "End Line");
+    KeyBindingManager.Singleton.addShiftAction(KEY_END_LINE, DefaultEditorKit.selectionEndLineAction);
 
-    KeyBindingManager.Singleton.put(KEY_END_LINE,
-                                    _actionMap.get(DefaultEditorKit.endLineAction), null, "End Line");
-    KeyBindingManager.Singleton.addShiftAction(KEY_END_LINE,
-                                               DefaultEditorKit.selectionEndLineAction);
+    KeyBindingManager.Singleton.put(KEY_NEXT_WORD, _actionMap.get(DefaultEditorKit.nextWordAction), null, "Next Word");
+    KeyBindingManager.Singleton.addShiftAction(KEY_NEXT_WORD, DefaultEditorKit.selectionNextWordAction);
 
-    KeyBindingManager.Singleton.put(KEY_NEXT_WORD,
-                                    _actionMap.get(DefaultEditorKit.nextWordAction), null, "Next Word");
-    KeyBindingManager.Singleton.addShiftAction(KEY_NEXT_WORD,
-                                               DefaultEditorKit.selectionNextWordAction);
+    KeyBindingManager.Singleton.put(KEY_FORWARD, _actionMap.get(DefaultEditorKit.forwardAction), null, "Forward");
+    KeyBindingManager.Singleton.addShiftAction(KEY_FORWARD, DefaultEditorKit.selectionForwardAction);
 
-    KeyBindingManager.Singleton.put(KEY_FORWARD,
-                                    _actionMap.get(DefaultEditorKit.forwardAction), null, "Forward");
-    KeyBindingManager.Singleton.addShiftAction(KEY_FORWARD,
-                                               DefaultEditorKit.selectionForwardAction);
-
-    KeyBindingManager.Singleton.put(KEY_UP,
-                                    _actionMap.get(DefaultEditorKit.upAction), null, "Up");
-    KeyBindingManager.Singleton.addShiftAction(KEY_UP,
-                                               DefaultEditorKit.selectionUpAction);
+    KeyBindingManager.Singleton.put(KEY_UP, _actionMap.get(DefaultEditorKit.upAction), null, "Up");
+    KeyBindingManager.Singleton.addShiftAction(KEY_UP, DefaultEditorKit.selectionUpAction);
 
     // These last methods have no default selection methods
-    KeyBindingManager.Singleton.put(KEY_PAGE_DOWN,
-                                    _actionMap.get(DefaultEditorKit.pageDownAction), null, "Page Down");
-    KeyBindingManager.Singleton.put(KEY_PAGE_UP,
-                                    _actionMap.get(DefaultEditorKit.pageUpAction), null, "Page Up");
-    KeyBindingManager.Singleton.put(KEY_CUT_LINE,
-                                    _cutLineAction, null, "Cut Line");
-    KeyBindingManager.Singleton.put(KEY_CLEAR_LINE,
-                                    _clearLineAction, null, "Clear Line");
-    KeyBindingManager.Singleton.put(KEY_SHIFT_DELETE_PREVIOUS,
-                                    _actionMap.get(DefaultEditorKit.deletePrevCharAction), null, "Delete Previous");
-    KeyBindingManager.Singleton.put(KEY_SHIFT_DELETE_NEXT,
-                                    _actionMap.get(DefaultEditorKit.deleteNextCharAction), null, "Delete Next");
+    KeyBindingManager.Singleton.put(KEY_PAGE_DOWN, _actionMap.get(DefaultEditorKit.pageDownAction), null, "Page Down");
+    KeyBindingManager.Singleton.put(KEY_PAGE_UP, _actionMap.get(DefaultEditorKit.pageUpAction), null, "Page Up");
+    KeyBindingManager.Singleton.put(KEY_CUT_LINE, _cutLineAction, null, "Cut Line");
+    KeyBindingManager.Singleton.put(KEY_CLEAR_LINE, _clearLineAction, null, "Clear Line");
+    KeyBindingManager.Singleton.put(KEY_SHIFT_DELETE_PREVIOUS, _actionMap.get(DefaultEditorKit.deletePrevCharAction), 
+                                    null, "Delete Previous");
+    KeyBindingManager.Singleton.put(KEY_SHIFT_DELETE_NEXT, _actionMap.get(DefaultEditorKit.deleteNextCharAction), 
+                                    null, "Delete Next");
   }
 
   /** @param listener The ComponentListener to add to the open documents list

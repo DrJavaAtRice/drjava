@@ -251,8 +251,7 @@ public class RecentDocFrame extends JWindow {
     int start = loc;
     int end = loc;
     String text;
-    try { text = doc.getText(0, doc.getLength()); }
-    catch(BadLocationException e) { text = ""; }
+    text = doc.getText();
     
     /* get the starting point of 2 lines up... */
     for (int i = 0; i < 4; i++) {

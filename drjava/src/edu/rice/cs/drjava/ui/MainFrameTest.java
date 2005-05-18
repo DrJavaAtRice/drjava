@@ -110,10 +110,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
 //    _log.log("testCreateManualToobarButton completed");
   }
 
-  /**
-   * Tests that the current location of a document is equal to the
-   * caret location after documents are switched.
-   */
+  /** Tests that the current location of a document is equal to the caret location after documents are switched. */
   public void testDocLocationAfterSwitch() throws BadLocationException {
     final DefinitionsPane pane = _frame.getCurrentDefPane();
     OpenDefinitionsDocument doc = pane.getOpenDefDocument();
@@ -189,7 +186,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
 
     // Verify that the document text is what we expect.
     assertEquals("Current line of text should be truncated by Clear Line.",
-                 "ab", doc.getText(0, doc.getLength()));
+                 "ab", doc.getText());
   }
   */
 
@@ -227,7 +224,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
 
     // Verify that the document text is what we expect.
     assertEquals("Current line of text should be truncated by Cut Line.",
-                 "ab", doc.getText(0, doc.getLength()));
+                 "ab", doc.getText());
   }
   */
 
@@ -285,21 +282,21 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     
     doc.insertString(0, text, null);
     pane.endCompoundEdit();
-    assertEquals("Should have inserted correctly.", text, doc.getText(0, doc.getLength()));
+    assertEquals("Should have inserted correctly.", text, doc.getText());
 
     pane.setCaretPosition(0);
     doc.indentLines(0, doc.getLength());
-    assertEquals("Should have indented.", indented, doc.getText(0, doc.getLength()));
+    assertEquals("Should have indented.", indented, doc.getText());
 
     oldPos = pane.getCaretPosition();
     pane.setCaretPosition(newPos);
     doc.getUndoManager().undo();
-    assertEquals("Should have undone.", text, doc.getText(0, doc.getLength()));
+    assertEquals("Should have undone.", text, doc.getText());
     assertEquals("Undo should have restored caret position.", oldPos, pane.getCaretPosition());
 
     pane.setCaretPosition(newPos);
     doc.getUndoManager().redo();
-    assertEquals("redo",indented, doc.getText(0,doc.getLength()));
+    assertEquals("redo",indented, doc.getText());
     assertEquals("redo restores caret position", oldPos, pane.getCaretPosition());
 //    _log.log("testMultilineIndentAfterScroll completed");
   }

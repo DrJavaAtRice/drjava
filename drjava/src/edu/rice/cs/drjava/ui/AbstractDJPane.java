@@ -57,6 +57,8 @@ import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.text.*;
 
+/** This class is misnamed!!!  The associated document is NOT necessarily a DJDocument!  It
+ *  can be a ConsoleDocument. */
 public abstract class AbstractDJPane extends JTextPane implements OptionConstants {
   
   // ------------ FIELDS -----------
@@ -108,11 +110,12 @@ public abstract class AbstractDJPane extends JTextPane implements OptionConstant
   }
   
   //--------- METHODS -----------
+  
+ 
     
-  /**
-   * Adds a highlight to the document.  Called by _updateMatchHighlight().
-   * @param from start of highlight
-   * @param to end of highlight
+  /** Adds a highlight to the document.  Called by _updateMatchHighlight().
+   *  @param from start of highlight
+   *  @param to end of highlight
    */
   protected void _addHighlight(int from, int to) {
     _matchHighlight = _highlightManager.addHighlight(from, to, MATCH_PAINTER);
@@ -120,9 +123,7 @@ public abstract class AbstractDJPane extends JTextPane implements OptionConstant
   
   protected abstract void _updateMatchHighlight();
 
-  /**
-   * Removes the previous highlight so document is cleared when caret position changes.
-   */
+  /** Removes the previous highlight so document is cleared when caret position changes. */
   protected void _removePreviousHighlight() {
     if (_matchHighlight != null) {
       _matchHighlight.remove();
@@ -131,11 +132,8 @@ public abstract class AbstractDJPane extends JTextPane implements OptionConstant
     }
   }
   
-  
-  /**
-   * Be sure to update the document (and thus the reduced model) any time
-   * the caret position changes.
-   * @param pos
+  /** Be sure to update the document (and thus the reduced model) any time the caret position changes.
+   *  @param pos
    */
   public void setCaretPosition(int pos) {
     super.setCaretPosition(pos);
@@ -143,8 +141,8 @@ public abstract class AbstractDJPane extends JTextPane implements OptionConstant
 //    _doc.setCurrentLocation(pos);
   }
   
+  /** What is this for?  The override does not nothing! */ 
   public void moveCaretPosition(int pos) { super.moveCaretPosition(pos); }
-  
   
   /** Runs indent(int) with a default value of Indenter.OTHER */
   public void indent() { indent(Indenter.OTHER); }
@@ -162,14 +160,11 @@ public abstract class AbstractDJPane extends JTextPane implements OptionConstant
    */
   public void indent(final int reason) {
 
-    /**
-     * Because indent() is a function called directly by the Keymap,
-     * it does not go through the regular insertString channels and thus
-     * it may not be in sync with the document's position.  For that
-     * reason, we must sync the document with the pane before we go
-     * ahead and indent.
-     * old: _doc().setCurrentLocation(getCaretPosition());
-     * new:
+    /** Because indent() is a function called directly by the Keymap, it does not go through the regular insertString
+     *  channels and thus it may not be in sync with the document's position.  For that reason, we must sync the 
+     *  document with the pane before we goahead and indent.
+     *  old: _doc().setCurrentLocation(getCaretPosition());
+     *  new:
      */
     getDJDocument().setCurrentLocation(getCaretPosition());
 
@@ -212,9 +207,7 @@ public abstract class AbstractDJPane extends JTextPane implements OptionConstant
    */
   protected abstract boolean shouldIndent(int selStart, int selEnd);
   
-  /**
-   * Returns the DJDocument held by the pane
-   */
+  /** Returns the DJDocument held by the pane. */
   public abstract DJDocument getDJDocument();
    
 }

@@ -60,9 +60,7 @@ import edu.rice.cs.drjava.model.GlobalEventNotifier;
  * Tests the functionality of the definitions document.
  * @version $Id$
  */
-public final class DefinitionsDocumentTest extends TestCase
-  implements ReducedModelStates
-{
+public final class DefinitionsDocumentTest extends TestCase implements ReducedModelStates {
   private DefinitionsDocument _defModel;
   private GlobalEventNotifier _notifier;
 
@@ -572,13 +570,11 @@ public final class DefinitionsDocumentTest extends TestCase
     assertEquals(expected, _getAllText());
   }
 
-  /**
-   * Test whether tabs are removed as appropriate on call to insertString.
-   */
+  /** Test whether tabs are removed as appropriate on call to insertString. */
   public void testTabRemovalOnInsertString() throws BadLocationException {
     _defModel.setIndent(1);
     _defModel.insertString(0, " \t yet \t\tanother\ttest\t", null);
-    String result = _defModel.getText(0, _defModel.getLength());
+    String result = _defModel.getText();
 
     if (_defModel.tabsRemoved()) {
       assertEquals("   yet   another test ", result);
@@ -673,7 +669,7 @@ public final class DefinitionsDocumentTest extends TestCase
   }
 
   private String _getAllText() throws BadLocationException {
-    return _defModel.getText(0, _defModel.getLength());
+    return _defModel.getText();
   }
   /**
    * Test class name-finding on document
@@ -1129,7 +1125,7 @@ public final class DefinitionsDocumentTest extends TestCase
     _defModel.addUndoableEditListener(_defModel.getUndoManager());
     DrJava.getConfig().setSetting(OptionConstants.INDENT_LEVEL,new Integer(2));
     _defModel.insertString(0,text,null);
-    assertEquals("insertion",text, _defModel.getText(0,_defModel.getLength())); 
+    assertEquals("insertion",text, _defModel.getText()); 
     /* This is necessary here and other places where indenting or commenting takes place because the undoListener in DefinitionsPane 
      * currently starts compound edits, but here, there's no DefinitionsPane.
      * Perhaps there's some way to factor the undoListener in CompoundUndoManager to be the one that starts compound edits 
@@ -1137,11 +1133,11 @@ public final class DefinitionsDocumentTest extends TestCase
      */
     _defModel.getUndoManager().startCompoundEdit();
     _defModel.indentLines(0,_defModel.getLength());
-    assertEquals("indenting",indented, _defModel.getText(0,_defModel.getLength()));
+    assertEquals("indenting",indented, _defModel.getText());
     _defModel.getUndoManager().undo();
-    assertEquals("undo",text, _defModel.getText(0,_defModel.getLength()));
+    assertEquals("undo",text, _defModel.getText());
     _defModel.getUndoManager().redo();
-    assertEquals("redo",indented, _defModel.getText(0,_defModel.getLength()));
+    assertEquals("redo",indented, _defModel.getText());
   }
 
   /**
@@ -1171,23 +1167,23 @@ public final class DefinitionsDocumentTest extends TestCase
     _defModel.addUndoableEditListener(_defModel.getUndoManager());
     DrJava.getConfig().setSetting(OptionConstants.INDENT_LEVEL,new Integer(2));
     _defModel.insertString(0,text,null);
-    assertEquals("insertion",text, _defModel.getText(0,_defModel.getLength()));
+    assertEquals("insertion",text, _defModel.getText());
 
     _defModel.getUndoManager().startCompoundEdit();
     _defModel.commentLines(0,_defModel.getLength());
-    assertEquals("commenting",commented, _defModel.getText(0,_defModel.getLength()));
+    assertEquals("commenting",commented, _defModel.getText());
     _defModel.getUndoManager().undo();
-    assertEquals("undo commenting",text, _defModel.getText(0,_defModel.getLength()));
+    assertEquals("undo commenting",text, _defModel.getText());
     _defModel.getUndoManager().redo();
-    assertEquals("redo commenting",commented, _defModel.getText(0,_defModel.getLength()));
+    assertEquals("redo commenting",commented, _defModel.getText());
 
     _defModel.getUndoManager().startCompoundEdit();
     _defModel.uncommentLines(0,_defModel.getLength());
-    assertEquals("uncommenting",text, _defModel.getText(0,_defModel.getLength()));
+    assertEquals("uncommenting",text, _defModel.getText());
     _defModel.getUndoManager().undo();
-    assertEquals("undo uncommenting",commented, _defModel.getText(0,_defModel.getLength()));
+    assertEquals("undo uncommenting",commented, _defModel.getText());
     _defModel.getUndoManager().redo();
-    assertEquals("redo uncommenting",text, _defModel.getText(0,_defModel.getLength()));
+    assertEquals("redo uncommenting",text, _defModel.getText());
   }
 
   /**
@@ -1219,17 +1215,17 @@ public final class DefinitionsDocumentTest extends TestCase
     // Insert a test string into the document
     _defModel.insertString(0, text, null);
     assertEquals("Should have inserted the text properly.", text,
-                 _defModel.getText(0, _defModel.getLength()));
+                 _defModel.getText());
 
     // Indent the lines, so as to trigger a nested compound edit
     undoManager.startCompoundEdit();
     _defModel.indentLines(0, _defModel.getLength());
     assertEquals("Should have indented correctly.", indented,
-                 _defModel.getText(0, _defModel.getLength()));
+                 _defModel.getText());
 
     undoManager.undo();
     assertEquals("Should have undone correctly.", "",
-                 _defModel.getText(0, _defModel.getLength()));
+                 _defModel.getText());
 
     // 2
 
@@ -1245,27 +1241,27 @@ public final class DefinitionsDocumentTest extends TestCase
     // Insert a test string into the document
     _defModel.insertString(0, text, null);
     assertEquals("Should have inserted the text properly.", text,
-                 _defModel.getText(0, _defModel.getLength()));
+                 _defModel.getText());
 
     // Indent the lines, so as to trigger a nested compond edit
     _defModel.indentLines(0, _defModel.getLength());
     assertEquals("Should have indented correctly.", indented,
-                 _defModel.getText(0, _defModel.getLength()));
+                 _defModel.getText());
 
     undoManager.startCompoundEdit();
     _defModel.commentLines(0, _defModel.getLength());
     assertEquals("Should have commented correctly.", commented,
-                 _defModel.getText(0, _defModel.getLength()));
+                 _defModel.getText());
 
     // Undo the second compound edit
     _defModel.getUndoManager().undo();
     assertEquals("Should have undone the commenting.", indented,
-                 _defModel.getText(0, _defModel.getLength()));
+                 _defModel.getText());
 
     // Undo the first compound edit
     _defModel.getUndoManager().undo();
     assertEquals("Should have undone the indenting and inserting.", "",
-                 _defModel.getText(0, _defModel.getLength()));
+                 _defModel.getText());
 
     // 3
 
@@ -1276,12 +1272,12 @@ public final class DefinitionsDocumentTest extends TestCase
     // Insert a test string into the document
     _defModel.insertString(0, text, null);
     assertEquals("Should have inserted the text properly.", text,
-                 _defModel.getText(0, _defModel.getLength()));
+                 _defModel.getText());
 
     // Indent the lines, so as to trigger a nested compond edit
     _defModel.indentLines(0, _defModel.getLength());
     assertEquals("Should have indented correctly.", indented,
-                 _defModel.getText(0, _defModel.getLength()));
+                 _defModel.getText());
 
 //    // Try to undo the nested edit
 //    try {
@@ -1314,7 +1310,7 @@ public final class DefinitionsDocumentTest extends TestCase
     undoManager.startCompoundEdit();
     _defModel.indentLines(0, _defModel.getLength());
     assertEquals("Should have indented correctly.", indented,
-                 _defModel.getText(0, _defModel.getLength()));
+                 _defModel.getText());
 
     // We've taken out this part of the test because of our change to
     // undo where we close the nearest open compound edit upon undo-ing,
@@ -1334,7 +1330,7 @@ public final class DefinitionsDocumentTest extends TestCase
 //    _defModel.getUndoManager().endCompoundEdit(key);
     _defModel.getUndoManager().undo();
     assertEquals("Should have undone the indenting and inserting.", "",
-                 _defModel.getText(0, _defModel.getLength()));
+                 _defModel.getText());
   }
 
   /**

@@ -51,6 +51,7 @@ import  javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 
 import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.model.DJDocument;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.model.definitions.indent.*;
@@ -204,11 +205,8 @@ public final class CommentTest extends TestCase {
                     "one level of commenting!", uncommented, doc);
   }
 
-  private static void _assertContents(String msg, String expected, Document document)
-    throws BadLocationException
-  {
-    assertEquals(msg, expected,
-                 document.getText(0, document.getLength()));
+  private static void _assertContents(String msg, String expected, DJDocument document)
+    throws BadLocationException {
+    assertEquals(msg, expected, document.getText());
   }
-
 }

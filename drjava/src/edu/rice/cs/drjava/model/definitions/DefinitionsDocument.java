@@ -551,31 +551,25 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
    * @return the offset of the first character in the given line number
    */
   public int getOffset(int lineNum) {
+    if (lineNum < 0) return -1;
+    String defsText = getText();
+    int curLine = 1;
+    int offset = 0; // offset is number of chars from beginning of file
     
-    try {
-      if (lineNum < 0) return -1;
+    // offset is always pointing to the first character in a line
+    // at the top of the loop
+    while (offset < defsText.length()) {
       
-      String defsText = getText(0, getLength());
-      int curLine = 1;
-      int offset = 0; // offset is number of chars from beginning of file
+      if (curLine==lineNum) return offset;
       
-      // offset is always pointing to the first character in a line
-      // at the top of the loop
-      while (offset < defsText.length()) {
-        
-        if (curLine==lineNum) return offset;
-        
-        int nextNewline = defsText.indexOf('\n', offset);
-        if (nextNewline == -1) return -1; // end of the document, and couldn't find the supplied lineNum
-          
-        curLine++;
-        offset = nextNewline + 1;
-      }
-      return -1;
+      int nextNewline = defsText.indexOf('\n', offset);
+      if (nextNewline == -1) return -1; // end of the document, and couldn't find the supplied lineNum
+      
+      curLine++;
+      offset = nextNewline + 1;
     }
-    catch (BadLocationException ble) { throw new UnexpectedException(ble); }
+    return -1;
   }
-
   
 
   /** Returns true iff tabs are to removed on text insertion. */
@@ -922,17 +916,17 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     // throwErrorHuh();
     // Where we'll build up the package name we find
     StringBuffer buf = new StringBuffer();
-    int oldLocation;
+    int oldLocation = 0;  // javac requires this bogus initialization
     
-    readLock();
-    synchronized(_reduced) {
-      oldLocation = _currentLocation;
-      try {
+    final String text = getText(); // getText() performs a readLock() so we must do this action before locking _reduced.
+    try {  // perturbing reduced model, which is reset in finally clause
+      synchronized(_reduced) {
+        oldLocation = _currentLocation;
         int firstNormalLocation;
         
         setCurrentLocation(0);
-        final int docLength = getLength();
-        final String text = getText(0, docLength);
+        
+        final int docLength = text.length();
         // The location of the first non-whitespace character that is not inside a string or comment.
         firstNormalLocation = 0;
         while (firstNormalLocation < docLength) {
@@ -946,7 +940,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
           
           firstNormalLocation++;
         }
-
+        
         // Now there are two possibilities: firstNormalLocation is at
         // the first spot of a non-whitespace character that's NORMAL,
         // or it's at the end of the document.
@@ -996,12 +990,10 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
                                             "Package name was not specified after the package keyword!");
         return toReturn;
       }
-      catch (BadLocationException ble) { throw new UnexpectedException(ble); }
-      finally {
-        setCurrentLocation(0);  // Why?
-        setCurrentLocation(oldLocation);
-        readUnlock();  // _reduced lock will be released in the next instruction
-      }
+    }
+    finally {
+      setCurrentLocation(0);  // Why?
+      setCurrentLocation(oldLocation);
     }
   }
 

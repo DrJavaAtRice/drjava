@@ -171,7 +171,7 @@ public class ActionStartPrevLinePlusBackupTest extends ActionStartPrevLinePlusTe
     assertEquals("text length",
                  text.length() + deltaLen + suffix.length(),
                  _doc.getLength());
-    assertEquals("text contents", result, _doc.getText(0, _doc.getLength()));
+    assertEquals("text contents", result, _doc.getText());
     assertEquals("location", after, _doc.getCurrentLocation());
   }
 }

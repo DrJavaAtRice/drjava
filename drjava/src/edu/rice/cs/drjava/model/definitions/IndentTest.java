@@ -53,6 +53,7 @@ import java.io.*;
 
 import edu.rice.cs.drjava.IndentFiles;
 import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.model.DJDocument;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.model.definitions.indent.*;
@@ -1270,29 +1271,18 @@ public final class IndentTest extends TestCase {
     _assertContents(indented, doc);
   }
 */
-  private void _assertContents(String expected, Document document) throws BadLocationException {
-    assertEquals("document contents", expected, document.getText(0, document.getLength()));
+  private void _assertContents(String expected, DJDocument document) throws BadLocationException {
+    assertEquals("document contents", expected, document.getText());
   }
 
-  private void _assertIndentInfo(IndentInfo ii,
-                                 String braceType,
-                                 int distToNewline,
-                                 int distToBrace,
-                                 int distToPrevNewline)
-  {
-    assertEquals("indent info: brace type",
-                 braceType, ii.braceType);
-    assertEquals("indent info: dist to new line",
-                 distToNewline, ii.distToNewline);
-    assertEquals("indent info: dist to brace",
-                 distToBrace, ii.distToBrace);
-    assertEquals("indent info: dist to prev new line",
-                 distToPrevNewline, ii.distToPrevNewline);
+  private void _assertIndentInfo(IndentInfo ii, String braceType, int distToNewline, int distToBrace, int distToPrevNewline) {
+    assertEquals("indent info: brace type", braceType, ii.braceType);
+    assertEquals("indent info: dist to new line", distToNewline, ii.distToNewline);
+    assertEquals("indent info: dist to brace", distToBrace, ii.distToBrace);
+    assertEquals("indent info: dist to prev new line", distToPrevNewline, ii.distToPrevNewline);
   }
 
-  /**
-   * copies fromFile to toFile, assuming both files exist
-   */
+  /** Copies fromFile to toFile, assuming both files exist. */
   private void _copyFile(File fromFile, File toFile) throws IOException {
     String text = FileOps.readFileAsString(fromFile);
     FileOps.writeStringToFile(toFile, text);
@@ -1372,7 +1362,7 @@ public final class IndentTest extends TestCase {
     assertEquals("START has no brace.", _text.length(), doc.getLength());
 
     doc.indentLines(0, doc.getLength()); // Aligns second line, a second time.
-    System.out.println(doc.getText(0, doc.getLength()));
+    System.out.println(doc.getText());
     _assertContents(_aligned, doc);
     assertEquals("Line aligned to open paren.", _aligned.length(), doc.getLength());
   }
@@ -1397,7 +1387,7 @@ public final class IndentTest extends TestCase {
     assertEquals("START has no brace.", _text.length(), doc.getLength());
 
     doc.indentLines(0, doc.getLength()); // Aligns second line, a second time.
-    System.out.println(doc.getText(0, doc.getLength()));
+    System.out.println(doc.getText());
     _assertContents(_aligned, doc);
     assertEquals("Line aligned to open paren.", _aligned.length(), doc.getLength());
   }
@@ -1422,7 +1412,7 @@ public final class IndentTest extends TestCase {
     assertEquals("START has no brace.", _text.length(), doc.getLength());
 
     doc.indentLines(0, doc.getLength()); // Aligns second line, a second time.
-    System.out.println(doc.getText(0, doc.getLength()));
+    System.out.println(doc.getText());
     _assertContents(_aligned, doc);
     assertEquals("Line aligned to open paren.", _aligned.length(), doc.getLength());
   }
@@ -1447,7 +1437,7 @@ public final class IndentTest extends TestCase {
     assertEquals("START has no brace.", _text.length(), doc.getLength());
 
     doc.indentLines(0, doc.getLength()); // Aligns second line, a second time.
-    System.out.println(doc.getText(0, doc.getLength()));
+    System.out.println(doc.getText());
     _assertContents(_aligned, doc);
     assertEquals("Line aligned to open paren.", _aligned.length(), doc.getLength());
   }
@@ -1472,7 +1462,7 @@ public final class IndentTest extends TestCase {
     assertEquals("START has no brace.", _text.length(), doc.getLength());
 
     doc.indentLines(0, doc.getLength()); // Aligns second line, a second time.
-    System.out.println(doc.getText(0, doc.getLength()));
+    System.out.println(doc.getText());
     _assertContents(_aligned, doc);
     assertEquals("Line aligned to open paren.", _aligned.length(), doc.getLength());
   }

@@ -53,7 +53,7 @@ package edu.rice.cs.drjava.model.definitions;
  *
  * @version $Id$
  */
-public class InvalidPackageException extends Exception {
+public class InvalidPackageException extends RuntimeException {
   private final int _location;
 
    /**

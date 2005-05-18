@@ -131,8 +131,7 @@ public class IndentFiles {
         doc.insertString(0, fileContents, null); // (no attributes)
         int docLen = doc.getLength();
         doc.indentLines(0, docLen);
-        docLen = doc.getLength();
-        fileContents = doc.getText(0, docLen);
+        fileContents = doc.getText();
         FileOps.writeStringToFile(file, fileContents);
         if (!silent) System.out.println("done.");
       }

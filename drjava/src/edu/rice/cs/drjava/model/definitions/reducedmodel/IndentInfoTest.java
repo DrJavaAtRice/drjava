@@ -117,7 +117,7 @@ public final class IndentInfoTest extends TestCase {
     //       |          |         |           |
     //       0          10        20          30
     
-    _document.remove(0, _document.getLength());
+    _document.clear();
     _document.insertString(0, _text, null);
     
     _infoTestHelper(0, "DOCSTART -- no brace or newline",     -1, -1, -1, -1, -1);

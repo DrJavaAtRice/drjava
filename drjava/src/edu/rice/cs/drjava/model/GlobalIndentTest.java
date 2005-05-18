@@ -318,20 +318,14 @@ public final class GlobalIndentTest extends GlobalModelTestCase {
   }
 
   private void _assertNumOpenDocs(int num) {
-    assertEquals("number of open documents",
-                 num,
-                 _model.getOpenDefinitionsDocuments().size());
+    assertEquals("number of open documents", num, _model.getOpenDefinitionsDocuments().size());
   }
 
-  private void _assertContents(String expected, Document document)
-    throws BadLocationException
-  {
-    assertEquals("document contents", expected,
-                 document.getText(0, document.getLength()));
+  private void _assertContents(String expected, OpenDefinitionsDocument document) throws BadLocationException {
+    assertEquals("document contents", expected, document.getText());
   }
 
   private void _assertLocation(int loc, OpenDefinitionsDocument openDoc) {
-    assertEquals("current def'n loc", loc,
-                 openDoc.getCurrentLocation());
+    assertEquals("current def'n loc", loc, openDoc.getCurrentLocation());
   }
 }

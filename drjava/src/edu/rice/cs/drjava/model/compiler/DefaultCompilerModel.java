@@ -1,45 +1,33 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * This file is part of DrJava.  Download the current version of this project:
- * http://sourceforge.net/projects/drjava/ or http://www.drjava.org/
+ * This file is part of DrJava.  Download the current version of this project from http://www.drjava.org/
+ * or http://sourceforge.net/projects/drjava/
  *
  * DrJava Open Source License
  * 
- * Copyright (C) 2001-2003 JavaPLT group at Rice University (javaplt@rice.edu)
- * All rights reserved.
+ * Copyright (C) 2001-2005 JavaPLT group at Rice University (javaplt@rice.edu).  All rights reserved.
  *
- * Developed by:   Java Programming Languages Team
- *                 Rice University
- *                 http://www.cs.rice.edu/~javaplt/
+ * Developed by:   Java Programming Languages Team, Rice University, http://www.cs.rice.edu/~javaplt/
  * 
- * Permission is hereby granted, free of charge, to any person obtaining a 
- * copy of this software and associated documentation files (the "Software"),
- * to deal with the Software without restriction, including without 
- * limitation the rights to use, copy, modify, merge, publish, distribute, 
- * sublicense, and/or sell copies of the Software, and to permit persons to 
- * whom the Software is furnished to do so, subject to the following 
- * conditions:
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated 
+ * documentation files (the "Software"), to deal with the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and 
+ * to permit persons to whom the Software is furnished to do so, subject to the following conditions:
  * 
- *     - Redistributions of source code must retain the above copyright 
- *       notice, this list of conditions and the following disclaimers.
- *     - Redistributions in binary form must reproduce the above copyright 
- *       notice, this list of conditions and the following disclaimers in the
- *       documentation and/or other materials provided with the distribution.
- *     - Neither the names of DrJava, the JavaPLT, Rice University, nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this Software without specific prior written permission.
- *     - Products derived from this software may not be called "DrJava" nor
- *       use the term "DrJava" as part of their names without prior written
- *       permission from the JavaPLT group.  For permission, write to
- *       javaplt@rice.edu.
+ *     - Redistributions of source code must retain the above copyright notice, this list of conditions and the 
+ *       following disclaimers.
+ *     - Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the 
+ *       following disclaimers in the documentation and/or other materials provided with the distribution.
+ *     - Neither the names of DrJava, the JavaPLT, Rice University, nor the names of its contributors may be used to 
+ *       endorse or promote products derived from this Software without specific prior written permission.
+ *     - Products derived from this software may not be called "DrJava" nor use the term "DrJava" as part of their 
+ *       names without prior written permission from the JavaPLT group.  For permission, write to javaplt@rice.edu.
  * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL 
- * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR 
- * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, 
- * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR 
- * OTHER DEALINGS WITH THE SOFTWARE.
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO 
+ * THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
+ * CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS 
+ * WITH THE SOFTWARE.
  * 
 END_COPYRIGHT_BLOCK*/
 
@@ -67,11 +55,9 @@ import edu.rice.cs.javalanglevels.parser.*;
 import edu.rice.cs.javalanglevels.tree.*;
 
 
-/**
- * Default implementation all compiler functionality in the model, as specified
- * in the CompilerModel interface.  This is the implementation that is used in
- * most circumstances during normal use (as opposed to test-specific purposes).
- *
+/** Default implementation all compiler functionality in the model, as specified in the CompilerModel interface.
+ *  This is the implementation that is used in most circumstances during normal use (as opposed to test-specific 
+ *  purposes).
  * @version $Id$
  */
 public class DefaultCompilerModel implements CompilerModel {
@@ -171,10 +157,6 @@ public class DefaultCompilerModel implements CompilerModel {
   public void compileAll(List<File> sourceRootSet, List<File> filesToCompile) throws IOException {
     
     File buildDir = null;
-   
-    //ScrollableDialog sd1 = new ScrollableDialog(null, "DefaultCompilerModel.compileAll called", "", "");
-    //sd1.show();
-    
     if (_getter.getFileGroupingState().isProjectActive()) 
       buildDir = _getter.getFileGroupingState().getBuildDirectory();
     List<OpenDefinitionsDocument> defDocs;
@@ -182,82 +164,19 @@ public class DefaultCompilerModel implements CompilerModel {
     defDocs = _getter.getOpenDefinitionsDocuments(); 
     
     // Only compile if all are saved
-    if (_hasModifiedFiles(defDocs)) {
-      //System.out.println("Has modified files");
-      //ScrollableDialog sd2 = new ScrollableDialog(null, "_hasModifiedFiles(...) returned true!", "", "");
-      //sd2.show();
-      _notifier.saveBeforeCompile();
-    }
+    if (_hasModifiedFiles(defDocs)) _notifier.saveBeforeCompile();
     
-    // Check for modified project files, in case they didn't save when prompted.
-    // If any files haven't been saved after we told our listeners to do so, 
-    // don't proceed with the rest of the compile.
+    // Check for modified project files, in case they didn't save when prompted. If any files haven't been saved
+    // after we told our listeners to do so, don't proceed with the rest of the compile.
     if (_hasModifiedFiles(defDocs)) return;
     
-//    ScrollableDialog sd3 = new ScrollableDialog(null, "DefaultCompilerModel.compileAll(...,...) has finished file saving", "","");
-//    sd3.show();
-    
     // Get sourceroots and all files
-    File[] sourceRoots = sourceRootSet.toArray(new File[0]);;
-    File[] files = filesToCompile.toArray(new File[0]);
-    
-//    ScrollableDialog sd4 = new ScrollableDialog(null, "Ready to invoke compileStarted() event on _notifier [" + _notifier + "]", "", "");
-//    sd4.show();
-    
-    _notifier.compileStarted();
-    
-//    ScrollableDialog sd5 = new ScrollableDialog(null, "compileStarted() event successfully invoked ", "", "");
-//    sd5.show();
-    
-    try { _compileFiles(sourceRoots, files, buildDir); }
-    catch (Throwable t) {
-      CompilerError err = new CompilerError(t.toString(), false);
-      CompilerError[] errors = new CompilerError[] { err };
-      _distributeErrors(errors);
-    }
-    finally { _notifier.compileEnded(); }
+    _rawCompile(sourceRootSet.toArray(new File[0]), filesToCompile.toArray(new File[0]), buildDir);
   }
   
-  /** Compiles all documents in the list of opendefinitionsdocuments sent as input. */
-  public void compile(List<OpenDefinitionsDocument> defDocs) throws IOException {
+  private void _rawCompile(File[] sourceRoots, File[] files, File buildDir) throws IOException {
     
-    File buildDir = null;
-    
-    if (_getter.getFileGroupingState().isProjectActive()) {
-      buildDir = _getter.getFileGroupingState().getBuildDirectory();
-    }
-    
-    // Only compile if all are saved
-    if (_hasModifiedFiles(defDocs)) {
-      //System.out.println("Has modified files");
-      _notifier.saveBeforeCompile();
-    }
-    
-    
-    // check for modified project files, in case they didn't save when prompted
-    if (_hasModifiedFiles(defDocs)) return;
-    // if any files haven't been saved after we told our
-    // listeners to do so, don't proceed with the rest
-    // of the compile.
-    
-    // Get sourceroots and all files
-    File[] sourceRoots = getSourceRootSet();
-    ArrayList<File> filesToCompile = new ArrayList<File>();
-    
-    File f;
-    String[] exts = getCompilableExtensions();
-    for (OpenDefinitionsDocument doc : defDocs) {
-      try {
-        f = doc.getFile();
-        if (endsWithExt(f, exts)) filesToCompile.add(f);
-      }
-      catch (IllegalStateException ise) {
-        // No file for this document; skip it
-      }
-    }
-    File[] files = filesToCompile.toArray(new File[filesToCompile.size()]);
-    
-    _notifier.compileStarted();
+     _notifier.compileStarted();
     
     try {
       // Compile the files
@@ -270,6 +189,42 @@ public class DefaultCompilerModel implements CompilerModel {
     }
     finally { _notifier.compileEnded(); }
   }
+  
+  /** Compiles all documents in the specified list of OpenDefinitionsDocuments. */
+  public void compile(List<OpenDefinitionsDocument> defDocs) throws IOException {
+    
+    File buildDir = null;
+    
+    if (_getter.getFileGroupingState().isProjectActive()) {
+      buildDir = _getter.getFileGroupingState().getBuildDirectory();
+    }
+    
+    // Only compile if all are saved
+    if (_hasModifiedFiles(defDocs)) _notifier.saveBeforeCompile();
+    
+    // check for modified project files, in case they didn't save when prompted
+    if (_hasModifiedFiles(defDocs)) return;
+    // if any files haven't been saved after we told our
+    // listeners to do so, don't proceed with the rest
+    // of the compile.
+    
+    // Get sourceroots and all files
+    ArrayList<File> filesToCompile = new ArrayList<File>();
+    
+    File f;
+    String[] exts = getCompilableExtensions();
+    for (OpenDefinitionsDocument doc : defDocs) {
+      try {
+        f = doc.getFile();
+        if (endsWithExt(f, exts)) filesToCompile.add(f);
+      }
+      catch (IllegalStateException ise) {
+        // No file for this document; skip it
+      }
+    } 
+    _rawCompile(getSourceRootSet(), filesToCompile.toArray(new File[0]), buildDir);
+  }
+  
   
   /** Starts compiling the specified source document.  Demands that the definitions be saved before proceeding
    *  with the compile. If the compile can proceed, a compileStarted event is fired which guarantees that a 
@@ -298,28 +253,11 @@ public class DefaultCompilerModel implements CompilerModel {
     
     if (_hasModifiedFiles(defDocs)) return;  /* Abort compilation */
     
-    try {
-      File file = doc.getFile();
-      File[] files = new File[] { file };
-      
-      try {
-        _notifier.compileStarted();
-        File[] sourceRoots = new File[] { doc.getSourceRoot() };
-        _compileFiles(sourceRoots, files, buildDir);
-      }
-      catch (Throwable e) {
-        CompilerError err = new CompilerError(file, -1, -1, e.getMessage(), false);
-        CompilerError[] errors = new CompilerError[] { err };
-        _distributeErrors(errors);
-      }
-      finally {
-        // Fire a compileEnded event
-        _notifier.compileEnded();
-      }
-    }
-    catch (IllegalStateException ise) {
-      // No file exists, don't try to compile
-    }
+    File[] files = { doc.getFile() };  
+    // throws a FileMovedException if file has moved, which is preferable to the InvalidPackageException produced
+    // by getSourceRoot for the same circumstances
+     
+    _rawCompile(new File[] { doc.getSourceRoot() }, files, buildDir);
   }
 
   //-------------------------------- Helpers --------------------------------//
@@ -374,10 +312,7 @@ public class DefaultCompilerModel implements CompilerModel {
   private synchronized void _compileFiles(File[] sourceRoots, File[] files, File buildDir) throws IOException {
 
 //    CompilerError[] errors = new CompilerError[0];
-    
-//    ScrollableDialog sd1 = new ScrollableDialog(null, "DefaultCompilerModel._compileFiles called with args " + sourceRoots + " " + files + " " + buildDir, "", "");
-//    sd1.show();
-    
+      
     Pair<LinkedList<ParseException>, LinkedList<Pair<String, JExpressionIF>>> errors;
     LinkedList<ParseException> parseExceptions;
     LinkedList<Pair<String, JExpressionIF>> visitorErrors;
@@ -396,37 +331,25 @@ public class DefaultCompilerModel implements CompilerModel {
     if (files.length > 0) {
 //      if (DrJava.getConfig().getSetting(OptionConstants.LANGUAGE_LEVEL) == DrJava.ELEMENTARY_LEVEL) {
       LanguageLevelConverter llc = new LanguageLevelConverter(getActiveCompiler().getName());
-      // Language level files are moved to another file, copied back
-      // in augmented form to be compiled.  This compiled version
-      // is also copied to another file with the same path with the 
-      // ".augmented" suffix on the end.
-      // We have to copy the original back to its original spot so the
-      // user doesn't have to do anything funny.
-      //      LinkedList<File> filesToRestore = new LinkedList<File>();
-      //      System.out.println("Calling convert!");
-      
-//      ScrollableDialog sd2 = new ScrollableDialog(null, "Ready to call file converter " + llc + " in DefaultCompilerModel", "", "");
-//      sd2.show();
+      /* Language level files are moved to another file, copied back in augmented form to be compiled.  This
+       * compiled version is also copied to another file with the same path with the ".augmented" suffix on the 
+       * end.  We have to copy the original back to its original spot so the user doesn't have to do anything funny.
+       */
+            
       errors = llc.convert(files);//, filesToRestore);
-      
-//      ScrollableDialog sd3 = new ScrollableDialog(null, "Files successfully converted in DefaultCompilerModel", "", "");
-//      sd3.show();
       
       compiler.setWarningsEnabled(true);
       
-      /**Rename any .dj0 files in files to be .java files, so the correct thing is compiled.*/
-      // The hashset is used to make sure we never send in duplicate files. This can happen if
-      // the java file was sent in allong with the corresponding .dj* file. The dj* file
-      // is renamed to a .java file and thus we have two of the same file in the list.  By
-      // adding the renamed file to the hashset, the hashset efficiently removes duplicates.
+      /* Rename any .dj0 files in files to be .java files, so the correct thing is compiled.  The hashset is used to 
+       * make sure we never send in duplicate files. This can happen if the java file was sent in allong with the 
+       * corresponding .dj* file. The dj* file is renamed to a .java file and thus we have two of the same file in 
+       * the list.  By adding the renamed file to the hashset, the hashset efficiently removes duplicates.
+      */
       HashSet<File> javaFileSet = new HashSet<File>();
       for (File f : files) {
         File canonicalFile;
-        try {
-          canonicalFile = f.getCanonicalFile();
-        } catch(IOException e) {
-          canonicalFile = f.getAbsoluteFile();
-        }
+        try { canonicalFile = f.getCanonicalFile(); } 
+        catch(IOException e) { canonicalFile = f.getAbsoluteFile(); }
         String fileName = canonicalFile.getPath();
         int lastIndex = fileName.lastIndexOf(".dj");
         if (lastIndex != -1) {
@@ -442,8 +365,7 @@ public class DefaultCompilerModel implements CompilerModel {
       compilerErrors.addAll(_parseExceptions2CompilerErrors(parseExceptions));
       visitorErrors = errors.getSecond();
       compilerErrors.addAll(_visitorErrors2CompilerErrors(visitorErrors));
-//      }
-//      System.out.println("Got back " + errors.length + " errors");
+
       CompilerError[] compilerErrorsArray = (CompilerError[]) compilerErrors.toArray(new CompilerError[compilerErrors.size()]);
       
       /** Compile the files in specified sourceRoots and files */
@@ -464,10 +386,8 @@ public class DefaultCompilerModel implements CompilerModel {
    *  based on the file, giving each group to the appropriate
    *  OpenDefinitionsDocument, opening files if necessary. 
    */
-  private void _distributeErrors(CompilerError[] errors)
-      throws IOException {
-    resetCompilerErrors();
-
+  private void _distributeErrors(CompilerError[] errors) throws IOException {
+    resetCompilerErrors();  // Why is this done?
     _compilerErrorModel = new CompilerErrorModel<CompilerError>(errors, _getter);
   }
 

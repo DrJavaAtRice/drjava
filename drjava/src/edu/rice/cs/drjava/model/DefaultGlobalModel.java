@@ -270,7 +270,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
     new CompilerListener() {
     public void compileStarted() { }
     
-    public void compileEnded() {  // no synchronization needed because only performed by event thread?
+    public void compileEnded() {
       // Only clear interactions if there were no errors
       if (((_compilerModel.getNumErrors() == 0) || (_compilerModel.getCompilerErrorModel().hasOnlyWarnings()))
             // reset even when the interpreter is not used.
@@ -334,15 +334,11 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
    */
   private final InteractionsDocumentAdapter _interactionsDocAdapter;
   
-  /**
-   * The document used to display System.out and System.err,
-   * and to read from System.in.
+  /** The document used to display System.out and System.err, and to read from System.in.
    */
   private final ConsoleDocument _consoleDoc;
   
-  /**
-   * The document adapter used in the console document.
-   */
+  /** The document adapter used in the console document. */
   private final InteractionsDocumentAdapter _consoleDocAdapter;
   
   /**
@@ -1679,10 +1675,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
   }
 
 
-  /**
-   * Resets the console.
-   * Fires consoleReset() event.
-   */
+  /** Resets the console. Fires consoleReset() event. */
   public void resetConsole() {
     _consoleDoc.reset();
     _notifier.consoleReset();
@@ -1797,19 +1790,13 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
   }
 
 
-  /**
-   * Prints System.out to the DrJava console.
-   */
+  /** Prints System.out to the DrJava console. */
   public void systemOutPrint(String s) {
     _docAppend(_consoleDoc, s, ConsoleDocument.SYSTEM_OUT_STYLE);
   }
 
-  /**
-   * Prints System.err to the DrJava console.
-   */
-  public void systemErrPrint(String s) {
-    _docAppend(_consoleDoc, s, ConsoleDocument.SYSTEM_ERR_STYLE);
-  }
+  /** Prints System.err to the DrJava console. */
+  public void systemErrPrint(String s) { _docAppend(_consoleDoc, s, ConsoleDocument.SYSTEM_ERR_STYLE); }
 
   /** Called when the repl prints to System.out.
   public void replSystemOutPrint(String s) {
@@ -2403,7 +2390,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
       try { filename = getFile().getAbsolutePath(); }
       catch (IllegalStateException e) { /* do nothing */ }
 
-      _book = new DrJavaBook(getDocument().getText(0, getDocument().getLength()), filename, _pageFormat);
+      _book = new DrJavaBook(getDocument().getText(), filename, _pageFormat);
     }
 
     /** Prints the given document by bringing up a "Print" window. */
@@ -2650,7 +2637,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
         //this line precedes .remove() so that an invalid file is not cleared before this fact is discovered.
 
         FileReader reader = new FileReader(file);
-        doc.remove(0,doc.getLength());
+        doc.clear();
 
         _editorKit.read(reader, doc, 0);
         reader.close(); // win32 needs readers closed explicitly!
@@ -3154,6 +3141,23 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
     public void removeStyle(String nm) { getDocument().removeStyle(nm); }
     
     public Style addStyle(String nm, Style parent) { return getDocument().addStyle(nm, parent); }
+    
+    public String getText() {
+      DefinitionsDocument doc = getDocument();
+      doc.acquireReadLock();
+      try { return doc.getText(0, doc.getLength()); }
+      catch(BadLocationException e) { throw new UnexpectedException(e); }
+      finally { releaseReadLock(); }
+    }
+    
+    public void clear() {
+      DefinitionsDocument doc = getDocument();
+      doc.acquireWriteLock();
+      try { doc.remove(0, doc.getLength()); }
+      catch(BadLocationException e) { throw new UnexpectedException(e); }
+      finally { releaseWriteLock(); }
+    }
+    
     
     /* Locking operations in DJDocument interface */
     

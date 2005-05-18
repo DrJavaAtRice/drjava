@@ -58,7 +58,6 @@ public interface DJDocument extends StyledDocument, AbstractDocumentInterface {
    */
   public void setIndent(int indent);
   
-  
   /**
    * Return all highlight status info for text between start and end.
    * This should collapse adjoining blocks with the same status into one.
@@ -288,41 +287,42 @@ public interface DJDocument extends StyledDocument, AbstractDocumentInterface {
    */
   public boolean posInParenPhrase(int pos);
   
-  /**
-   * Returns true if the reduced model's current position is inside a paren phrase.
-   * @return true if pos is immediately inside parentheses
+  /** Returns true if the reduced model's current position is inside a paren phrase.
+   *  @return true if pos is immediately inside parentheses
    */
   public boolean posInParenPhrase();
   
-  /**
-   * Gets the number of whitespace characters between the current location and the rest of
-   * the document or the first non-whitespace character, whichever comes first.
-   * @return the number of whitespace characters
+  /** Gets the number of whitespace characters between the current location and the rest of the document or the 
+   *  first non-whitespace character, whichever comes first.
+   *  @return the number of whitespace characters
    */
   public int getWhiteSpace();
   
-  /**
-   * Sets the text between the previous newline and the first non-whitespace
-   * character of the line containing pos to tab.
-   * @param tab String to be placed between previous newline and first
-   * non-whitespace character
+  /** Sets text between previous newline and first non-whitespace character of the line containing pos to tab.
+   *  @param tab String to be placed between previous newline and first non-whitespace character
    */
   public void setTab(String tab, int pos);
   
-  /**
-   * Inserts a string of text into the document.
-   * It turns out that this is not where we should do custom processing
-   * of the insert; that is done in {@link AbstractDJDocument#insertUpdate}.
+  /** Inserts a string of text into the document. It turns out that this is not where we should do custom processing
+   *  of the insert; that is done in {@link AbstractDJDocument#insertUpdate}.
    */
   public void insertString(int offset, String str, AttributeSet a)
     throws BadLocationException;
   
-  /**
-   * Removes a block of text from the specified location.
-   * We don't update the reduced model here; that happens
-   * in {@link AbstractDJDocument#removeUpdate}.
+  /** Removes a block of text from the specified location.  We don't update the reduced model here; that happens
+   *  in {@link AbstractDJDocument#removeUpdate}.
    */
   public void remove(int offset, int len) throws BadLocationException;
+  
+  /** Gets the entire text of the document.  Without this operation, a client must use locking to perform this
+   *  task safely.
+   */
+  public String getText();
+  
+  /** Clears the entire text of the document.  Without this operation, a client must use locking to perform this
+   *  task safely.
+   */
+  public void clear();
   
   /* Locking operations */
   

@@ -107,9 +107,8 @@ public abstract class IndentRulesTestCase extends TestCase {
    * given string.
    */
   protected final void _setDocText(String text)
-    throws BadLocationException
-  {
-    _doc.remove(0, _doc.getLength());
+    throws BadLocationException {
+    _doc.clear();
     _doc.insertString(0, text, null);
   }
   
@@ -164,7 +163,7 @@ public abstract class IndentRulesTestCase extends TestCase {
   protected void _assertContents(String expected) throws BadLocationException {
     assertEquals("document contents", 
                  expected, 
-                 _doc.getText(0, _doc.getLength()));
+                 _doc.getText());
   }
 
 }
