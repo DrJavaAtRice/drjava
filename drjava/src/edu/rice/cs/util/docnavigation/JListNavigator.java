@@ -52,7 +52,7 @@ import javax.swing.event.*;
 import java.util.*;
 import java.awt.event.*;
 import edu.rice.cs.util.UnexpectedException;
-
+import edu.rice.cs.util.swing.Utilities;
 //import edu.rice.cs.drjava.ui.RightClickMouseAdapter;
 
 /** This class is an extension of JList that adds data shadowing the model embedded in a JList.
@@ -77,7 +77,7 @@ class JListNavigator extends JList implements IDocumentNavigator {
   private int _currentIndex = -1;
   
   /** The cell renderer for this JList */
-  private DefaultListCellRenderer _renderer;
+  private CustomListCellRenderer _renderer;
   
   /** the collection of INavigationListeners listening to this JListNavigator */
   private final Vector<INavigationListener> navListeners = new Vector<INavigationListener>();
@@ -119,7 +119,7 @@ class JListNavigator extends JList implements IDocumentNavigator {
       }
     });
     
-    _renderer = new DefaultListCellRenderer();
+    _renderer = new CustomListCellRenderer();
     _renderer.setOpaque(true);
     this.setCellRenderer(_renderer);
   }
@@ -323,4 +323,20 @@ class JListNavigator extends JList implements IDocumentNavigator {
 //  }
 //  
   public String toString() { synchronized (_model) { return _model.toString(); } }
+  
+  /** The cell renderer for this tree. */
+  private class CustomListCellRenderer extends DefaultListCellRenderer {
+    
+    /** Rreturns the component for a cell
+     *  @param tree
+     */
+    public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean hasFocus) {
+
+      super.getListCellRendererComponent(list, value, index, isSelected, hasFocus);
+      setText(((INavigatorItem)value).getName());
+      this.repaint();  // appears to be required to repaint the text for this list item; inconsistent with JTree analog
+      return this;
+    }
+  }
+  
 }
