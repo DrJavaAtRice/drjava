@@ -90,12 +90,8 @@ public class CompilerError implements Comparable, Serializable {
     this(null, message, isWarning);
   }
 
-  /**
-   * This function returns true if and only if the given error has no location
-   */
-  public boolean hasNoLocation() {
-    return _noLocation;
-  }
+  /** This function returns true if and only if the given error has no location */
+  public boolean hasNoLocation() { return _noLocation; }
 
   /**
    * Gets a String representation of the error.

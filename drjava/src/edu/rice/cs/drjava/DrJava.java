@@ -297,7 +297,7 @@ public class DrJava implements OptionConstants {
   }
       
   private static void _openCommandLineFiles(MainFrame mf, String[] filesToOpen) {
-    for(int i = 0; i < filesToOpen.length; i++) {
+    for (int i = 0; i < filesToOpen.length; i++) {
       String currFileName = filesToOpen[i];
       boolean isProjectFile = currFileName.endsWith(".pjt");
       final File file = new File(currFileName).getAbsoluteFile();

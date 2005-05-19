@@ -141,24 +141,16 @@ public class CompilerErrorModel<T extends CompilerError> {
    */
   public T getError(int idx) { return _errors[idx]; }
 
-  /**
-   * Returns the position of the given error in the document representing its file
-   */
+  /** Returns the position of the given error in the document representing its file. */
   public Position getPosition(CompilerError error) {
     int spot = Arrays.binarySearch(_errors, error);
     return _positions[spot];
   }
 
-  /**
-   * Returns the number of CompilerErrors
-   */
-  public int getNumErrors() {
-    return _numErrors;
-  }
+  /** Returns the number of CompilerErrors. */
+  public int getNumErrors() { return _numErrors; }
 
-  /**
-   * Prints out this model's errors.
-   */
+  /** Prints out this model's errors. */
   public String toString() {
     StringBuffer buf = new StringBuffer();
     buf.append(this.getClass().toString() + ":\n  ");
@@ -177,34 +169,22 @@ public class CompilerErrorModel<T extends CompilerError> {
    */
   public T getErrorAtOffset(OpenDefinitionsDocument odd, int offset) {
     File file;
-    try {
-      file = odd.getFile();
-    }
-    catch (IllegalStateException e) {
-      return null;
-    }
-    catch (FileMovedException e) {
-      file = e.getFile();
-    }
+    try { file = odd.getFile(); }
+    catch (IllegalStateException e) { return null; }
+    catch (FileMovedException e) { file = e.getFile(); }
 
     // Use the canonical file if possible
-    try {
-      file = file.getCanonicalFile();
-    }
+    try { file = file.getCanonicalFile(); }
     catch (IOException ioe) {
       // Oh well, we'll look for it as is.
     }
 
 
     StartAndEndIndex saei = _filesToIndexes.get(file);
-    if (saei == null) {
-      return null;
-    }
+    if (saei == null) return null;
     int start = saei.getStartPos();
     int end = saei.getEndPos();
-    if (start == end) {
-      return null;
-    }
+    if (start == end) return null;
 
     // check if the dot is on a line with an error.
     // Find the first error that is on or after the dot. If this comes
@@ -215,9 +195,7 @@ public class CompilerErrorModel<T extends CompilerError> {
         //This indicates something wrong, but it was happening before so...
         return null;
       }
-      if (_positions[errorAfter].getOffset() >=offset) {
-        break;
-      }
+      if (_positions[errorAfter].getOffset() >=offset) break;
     }
 
     // index of the first error before the dot
@@ -230,14 +208,9 @@ public class CompilerErrorModel<T extends CompilerError> {
       int errPos = _positions[errorBefore].getOffset();
       try {
         String betweenDotAndErr = odd.getText(errPos, offset - errPos);
-
-        if (betweenDotAndErr.indexOf('\n') == -1) {
-          shouldSelect = errorBefore;
-        }
+        if (betweenDotAndErr.indexOf('\n') == -1) shouldSelect = errorBefore;
       }
-      catch (BadLocationException willNeverHappen) {
-        throw new UnexpectedException(willNeverHappen);
-      }
+      catch (BadLocationException willNeverHappen) { throw new UnexpectedException(willNeverHappen); }
     }
 
     if ((shouldSelect == -1) && (errorAfter < end)) {// (errorAfter != _positions.length)) {
@@ -247,73 +220,41 @@ public class CompilerErrorModel<T extends CompilerError> {
       int errPos = _positions[errorAfter].getOffset();
       try {
         String betweenDotAndErr = odd.getText(offset, errPos - offset);
-
-        if (betweenDotAndErr.indexOf('\n') == -1) {
-          shouldSelect = errorAfter;
-        }
+        if (betweenDotAndErr.indexOf('\n') == -1) shouldSelect = errorAfter;
       }
-      catch (BadLocationException willNeverHappen) {
-        throw new UnexpectedException(willNeverHappen);
-      }
+      catch (BadLocationException e) { throw new UnexpectedException(e); }
     }
 
-    if (shouldSelect == -1) {
-      return null;
-    } else {
-      return _errors[shouldSelect];
-    }
+    if (shouldSelect == -1) return null;
+    return _errors[shouldSelect];
   }
 
-  /**
-   * This function tells if there are errors with source locations associated
-   * with the given file
-   */
+  /** This function tells if there are errors with source locations associated with the given file. */
   public boolean hasErrorsWithPositions(OpenDefinitionsDocument odd) {
     File file = null;
-    try {
-      file = odd.getFile();
-    }
-    catch (IllegalStateException ise) {
-      //no associated file, do nothing
-    }
-    catch (FileMovedException fme) {
-      file = fme.getFile();
-    }
-    if (file == null) {
-      return false;
-    }
+    try { file = odd.getFile(); }
+    catch (IllegalStateException ise) { /* no associated file, do nothing */ }
+    catch (FileMovedException fme) { file = fme.getFile(); }
+    if (file == null) return false;
 
     // Try to use the canonical file
-    try {
-      file = file.getCanonicalFile();
-    }
-    catch (IOException ioe) {
-      // Oh well, look for the file as is.
-    }
+    try { file = file.getCanonicalFile(); }
+    catch (IOException ioe) { /* Oh well, look for the file as is.*/ }
 
     StartAndEndIndex saei = _filesToIndexes.get(file);
-    if (saei == null) {
-      return false;
-    }
-    if (saei.getStartPos() == saei.getEndPos()) {
-      return false;
-    }
+    if (saei == null) return false;
+    if (saei.getStartPos() == saei.getEndPos()) return false;
     return true;
   }
 
-  /**
-   * Checks whether all CompilerErrors contained here are actually warnings.
-   * This would indicate that there were no "real" errors, so output is valid.
-   * @return false if any error contained here is not a warning, true otherwise
+  /** Checks whether all CompilerErrors contained here are actually warnings. This would indicate that there were no
+   *  "real" errors, so output is valid.
+   *  @return false if any error contained here is not a warning, true otherwise
    */
   public boolean hasOnlyWarnings() {
     // Check for a cached value.
-    if (_onlyWarnings == 0) {
-      return false;
-    }
-    else if (_onlyWarnings == 1) {
-      return true;
-    }
+    if (_onlyWarnings == 0) return false;
+    if (_onlyWarnings == 1) return true;
     else {
       // If there was no cached value, compute it.
       boolean clean = true;
@@ -336,9 +277,7 @@ public class CompilerErrorModel<T extends CompilerError> {
 
         // find the next error with a line number (skipping others)
         curError = nextErrorWithLine(curError);
-        if (curError >= _numErrors) {
-          break;
-        }
+        if (curError >= _numErrors) break;
 
         //Now find the file and document we are working on
         File file = _errors[curError].file();
@@ -405,9 +344,7 @@ public class CompilerErrorModel<T extends CompilerError> {
         if (fileEndIndex != fileStartIndex) {
           // Try to use the canonical file if possible
           try { file = file.getCanonicalFile(); }
-          catch (IOException ioe) {
-            // Oh well, store it as is
-          }
+          catch (IOException ioe) { /* Oh well, store it as is */ }
           _filesToIndexes.put(file, new StartAndEndIndex(fileStartIndex, fileEndIndex));
         }
       }

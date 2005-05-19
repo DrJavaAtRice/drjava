@@ -106,6 +106,9 @@ public final class CommandLineTest extends TestCase {
    */
   public CommandLineTest(String name) {
     super(name);
+    /* Creating a MainFrame() is costly.  Peforming this operation here achives more overlap with file I/O than 
+     * doing it in setUp() */
+    _mf = new MainFrame();  
     try {
       f1 = File.createTempFile("DrJava-test", ".java");
       f1.deleteOnExit();
@@ -188,7 +191,6 @@ public final class CommandLineTest extends TestCase {
 
   public void setUp() throws Exception {
     super.setUp();
-    _mf = new MainFrame();
   }
 
   public void tearDown() throws Exception {

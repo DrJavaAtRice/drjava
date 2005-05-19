@@ -223,9 +223,8 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
     }
   }
   
-  /**
-   * Updates all document styles with the attributes contained in newSet.
-   * @param newSet Style containing new attributes to use.
+  /** Updates all document styles with the attributes contained in newSet.
+   *  @param newSet Style containing new attributes to use.
    */
   protected void _updateStyles(AttributeSet newSet) {
     NORMAL_ATTRIBUTES.addAttributes(newSet);
@@ -441,6 +440,7 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
       // Select the error
       if (hasNextError()) {
         this._selectedIndex += 1;
+//        Utilities.showDebug("selected index in nextError is " + _selectedIndex + " _numErrors is " + _numErrors);
         getErrorListPane().switchToError(this.getSelectedIndex());
       }
     }
@@ -521,9 +521,7 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
       //      _nextErrorButton.setEnabled(false);
     }
     
-    /**
-     * Don't select any errors in the error pane.
-     */
+    /** Don't select any errors in the error pane. */
     public void selectNothing() {
       //      _selectedIndex = -1;
       _removeListHighlight();
@@ -532,15 +530,15 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
       _frame.getCurrentDefPane().removeErrorHighlight();
     }
     
-    /**
-     * Selects the given error inside the error list pane.
-     */
+    /** Selects the given error inside the error list pane. */
     public void selectItem(CompilerError error) {
+//      Utilities.showDebug("selectItem(" + error + ") called");
       try {
         // Find corresponding index
         int i = _getIndexForError(error);
         
         _selectedIndex = i;
+//        Utilities.showDebug("selected index = " + i);
         _removeListHighlight();
         
         int startPos = _errorListPositions[i].getOffset();
@@ -548,12 +546,10 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
         // end pos is either the end of the document (if this is the last error)
         // or the char where the next error starts
         int endPos;
-        if (i + 1 >= (_numErrors)) {
-          endPos = getDocument().getLength();
-        }
-        else {
-          endPos = _errorListPositions[i + 1].getOffset();
-        }
+        if (i + 1 >= (_numErrors)) endPos = getDocument().getLength();
+        else endPos = _errorListPositions[i + 1].getOffset();
+        
+//        Utilities.showDebug("startpos = " + startPos + " endpos = " + endPos);
         
         try {
           _listHighlightTag = _highlightManager.addHighlight(startPos, endPos, _listHighlightPainter);
@@ -573,6 +569,7 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
             _updateScrollButtons();
           }
           else {
+//            Utilities.showDebug("Either startRect or endRect is null!");
             // Couldn't draw the box to highlight, so don't highlight anything
             _removeListHighlight();
           }
@@ -611,36 +608,44 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
 //      Utilities.showDebug("ErrorPanel.switchToError called");
       if (error == null) return;
       
-      getErrorListPane().selectItem(error);
       _frame.getCurrentDefPane().removeErrorHighlight();  // hide previous error highlight
-      
-      if (error.file() == null || error.hasNoLocation())  return;
-      try {
-        OpenDefinitionsDocument doc = getModel().getDocumentForFile(error.file());
-        CompilerErrorModel errorModel = getErrorModel();
-        Position pos = errorModel.getPosition(error);
-        
-        // switch to correct def pane and move caret to error position
+     
+
+       
+      if (error.file() != null) {
+        try {
+          OpenDefinitionsDocument doc = getModel().getDocumentForFile(error.file());
+          CompilerErrorModel errorModel = getErrorModel();
+          
+          Position pos = errorModel.getPosition(error); // null if error has no Position
+          
+          // switch to correct def pane and move caret to error position
 //        Utilities.showDebug("active document being set to " + doc + " in ErrorPanel.switchToError");
-        getModel().setActiveDocument(doc);
+          getModel().setActiveDocument(doc);
 //        Utilities.showDebug("setting active document has completed");
-        DefinitionsPane defPane = _frame.getCurrentDefPane();
-        if (pos != null) {
-          int errPos = pos.getOffset();
-          if (errPos >= 0 && errPos <= doc.getLength()) defPane.centerViewOnOffset(errPos);
+          DefinitionsPane defPane = _frame.getCurrentDefPane();
+          if (pos != null) {
+            int errPos = pos.getOffset();
+            if (errPos >= 0 && errPos <= doc.getLength()) defPane.centerViewOnOffset(errPos);
+          }
+          // The following line is a brute force hack that fixed a bug plaguing the DefinitionsPane immediately after a compilation
+          // with errors.  In some cases (which were consistently reproducible), the DefinitionsPane editing functions would break
+          // whereby the keystrokes had their usual meaning but incorrect updates were performed in the DefintionsPane.  For example,
+          // the display behaved as if the editor were in "overwrite" mode.
+          _frame._switchDefScrollPane(); // resets an out-of-kilter DefinitionsPane on the first error after a compilation
+          defPane.requestFocusInWindow();
+          defPane.getCaret().setVisible(true);
         }
-        // The following line is a brute force hack that fixed a bug plaguing the DefinitionsPane immediately after a compilation
-        // with errors.  In some cases (which were consistently reproducible), the DefinitionsPane editing functions would break
-        // whereby the keystrokes had their usual meaning but incorrect updates were performed in the DefintionsPane.  For example,
-        // the display behaved as if the editor were in "overwrite" mode.
-        _frame._switchDefScrollPane(); // resets an out-of-kilter DefinitionsPane on the first error after a compilation
-        defPane.requestFocusInWindow();
-        defPane.getCaret().setVisible(true);
+        catch (IOException ioe) {
+          // Don't highlight the source if file can't be opened
+        }
       }
-      catch (IOException ioe) {
-        // Don't highlight the source if file can't be opened
-      }
+//      Utilities.showDebug("Calling selectItem(...) from switchToError");
+      /* setActiveDocument(doc) selects the first error corresponding to the current position (caret location) but this may not
+       * be the correct error if there are multiple errors for this this position.  The following selects the correct error.*/
+      getErrorListPane().selectItem(error); 
     }
+      
     
     /**
      * Another interface to switchToError.
