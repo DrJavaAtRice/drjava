@@ -5357,48 +5357,48 @@ public class MainFrame extends JFrame implements OptionConstants {
       // Only change GUI from event-dispatching thread
       // (This can be called from other threads...)
       
-      try {
-        Utilities.invokeAndWait(new Runnable() {
-          public void run() {
-            _recentDocFrame.pokeDocument(active);
-            _switchDefScrollPane();
-            
-            boolean isModified = active.isModifiedSinceSave();
-            boolean canCompile = (!isModified && !active.isUntitled());
-            _saveAction.setEnabled(!canCompile);
-            _revertAction.setEnabled(!active.isUntitled());
-            
-            // Update error highlights
-            int pos = _currentDefPane.getCaretPosition();
-            _currentDefPane.getErrorCaretListener().updateHighlight(pos);
-            
-            // Update FileChoosers' directory
-            _setCurrentDirectory(active);
-            
-            // Update title and position
-            updateFileTitle();
-            _currentDefPane.requestFocusInWindow();
-            _posListener.updateLocation();
-            
-            // update display (adding "*") in navigatgorPane
-            if (isModified) _model.getDocumentNavigator().repaint();
-            
-            
-            try { active.revertIfModifiedOnDisk(); }
-            catch (FileMovedException fme) { _showFileMovedError(fme); }
-            catch (IOException e) { _showIOError(e); }
-            
-            // Change Find/Replace to the new defpane
-            if (_findReplace.isDisplayed()) {
-              _findReplace.stopListening();
-              _findReplace.beginListeningTo(_currentDefPane);
-              //uninstallFindReplaceDialog(_findReplace);
-              //installFindReplaceDialog(_findReplace);
-            }
+//      try {  // used or invokeAndWait variation
+      Utilities.invokeLater(new Runnable() {  // invokeAndWait is arguably better but it may create occasional deadlocks.
+        public void run() {
+          _recentDocFrame.pokeDocument(active);
+          _switchDefScrollPane();
+          
+          boolean isModified = active.isModifiedSinceSave();
+          boolean canCompile = (!isModified && !active.isUntitled());
+          _saveAction.setEnabled(!canCompile);
+          _revertAction.setEnabled(!active.isUntitled());
+          
+          // Update error highlights
+          int pos = _currentDefPane.getCaretPosition();
+          _currentDefPane.getErrorCaretListener().updateHighlight(pos);
+          
+          // Update FileChoosers' directory
+          _setCurrentDirectory(active);
+          
+          // Update title and position
+          updateFileTitle();
+          _currentDefPane.requestFocusInWindow();
+          _posListener.updateLocation();
+          
+          // update display (adding "*") in navigatgorPane
+          if (isModified) _model.getDocumentNavigator().repaint();
+          
+          
+          try { active.revertIfModifiedOnDisk(); }
+          catch (FileMovedException fme) { _showFileMovedError(fme); }
+          catch (IOException e) { _showIOError(e); }
+          
+          // Change Find/Replace to the new defpane
+          if (_findReplace.isDisplayed()) {
+            _findReplace.stopListening();
+            _findReplace.beginListeningTo(_currentDefPane);
+            //uninstallFindReplaceDialog(_findReplace);
+            //installFindReplaceDialog(_findReplace);
           }
-        });
-      }
-      catch(InterruptedException e) { throw new UnexpectedException(e); }
+        }
+      });
+//      }  // used for invokeAndWait variation
+//      catch(InterruptedException e) { throw new UnexpectedException(e); }
     }
 
     public void interactionStarted() {

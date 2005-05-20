@@ -154,7 +154,7 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel implements Sin
     /* The following code fixes a potential race because this method modifies the documentNavigator which is a swing
      * component. Hence it must run in the event thread.  Note that setting the active document triggers the execution
      * of listeners some of which also need to run in the event thread. */
-    if (_activeDocument == doc) return;
+    // if (_activeDocument == doc) return; // this optimization appears to cause some subtle bugs
     Runnable command = new Runnable() {  
       public void run() { _documentNavigator.setActiveDoc(doc); } 
     };
