@@ -80,12 +80,10 @@ import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.BadLocationException;
 
 
-/**
- * Manages unit testing via JUnit.
+/** Manages unit testing via JUnit.
+ *  TODO: Remove dependence on GlobalModel
  *
- * TODO: Remove dependence on GlobalModel
- *
- * @version $Id$
+ *  @version $Id$
  */
 public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   
@@ -95,16 +93,13 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   /** Used by CompilerErrorModel to open documents that have errors. */
   private final IGetDocuments _getter;
   
-  /**
-   * RMI interface to a secondary JVM for running tests.
-   * Using a second JVM prevents tests from disrupting normal usage of DrJava.
+  /** RMI interface to a secondary JVM for running tests.
+   *  Using a second JVM prevents tests from disrupting normal usage of DrJava.
    */
   private final MainJVM _jvm;
   
-  /** Compiler model, used as a lock to prevent simultaneous test and compile.
-   *  Typed as an Object to prevent usage as anything but a lock.
-   */
-  private final Object _compilerModel;
+  /** Compiler model containing a lock used to prevent simultaneous test and compile. */
+  private final CompilerModel _compilerModel;
   
   /** GlobalModel, used only for getSourceFile. */
   private final GlobalModel _model;
@@ -188,7 +183,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
    *  @param files a list of their source files in the same order as qualified class names.
    */
   public void junitAll(List<String> qualifiedClassnames, List<File> files) {
-    synchronized(_compilerModel) {
+    synchronized(_compilerModel.getSlaveJVMLock()) {
       synchronized(_testLock) {
         if (_testInProgress) return;
         _testInProgress = true;
@@ -411,7 +406,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     
     // synchronized over _compilerModel to ensure that compilation and junit testing are mutually exclusive.
    
-    synchronized(_compilerModel) {
+    synchronized(_compilerModel.getSlaveJVMLock()) {
       /** Set up junit test suite on slave JVM; get TestCase classes forming that suite */
       List<String> tests;
       try { tests = _jvm.findTestClasses(classNames, files); }

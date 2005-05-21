@@ -460,25 +460,28 @@ public final class MainFrameTest extends MultiThreadedTestCase {
      };
      final SingleDisplayModelCompileListener compileListener = new SingleDisplayModelCompileListener();
 
-     Utilities.invokeLater(new Runnable() { public void run() {
-       _frame.pack();
-       _frame.open(new FileOpenSelector() {
-         public File[] getFiles() {
-           File[] return_me = new File[1];
-           return_me[0] = new File(_tempDir, "ForceOpenClass1.java");
-           return return_me;
-         }
-       });
-       _frame.getModel().addListener(compileListener);
-       _frame.addComponentListenerToOpenDocumentsList(listener);
-       _compileDone = false;
-       _frame.getCompileAllButton().doClick();
-     }});  
+     try {
+       Utilities.invokeAndWait(new Runnable() { public void run() {
+         _frame.pack();
+         _frame.open(new FileOpenSelector() {
+           public File[] getFiles() {
+             File[] return_me = new File[1];
+             return_me[0] = new File(_tempDir, "ForceOpenClass1.java");
+             return return_me;
+           }
+         });
+         _frame.getModel().addListener(compileListener);
+         _frame.addComponentListenerToOpenDocumentsList(listener);
+         _compileDone = false;
+         _frame.getCompileAllButton().doClick();
+       }});
+     }
+     catch(InterruptedException e) { fail(e.toString()); }
 
 //     _log.log("Waiting for compile");
      synchronized(_compileLock) {
        try { while (! _compileDone) _compileLock.wait(); }
-       catch(InterruptedException exception) { fail(exception.toString()); }
+       catch(InterruptedException e) { fail(e.toString()); }
      }
 
      if (! FileOps.deleteDirectory(_tempDir))
@@ -500,60 +503,63 @@ public final class MainFrameTest extends MultiThreadedTestCase {
      * directory
      * Only sticky part is deciding where to put it, in FileOps maybe?
      */
-     String user = System.getProperty("user.name");
-     _tempDir = FileOps.createTempDirectory("DrJava-test-" + user);
-     File forceOpenClass1_file = new File(_tempDir, "ForceOpenClass1.java");
-     String forceOpenClass1_string =
-       "public class ForceOpenClass1 {\n" +
-       "  ForceOpenClass2 class2;\n" +
-       "  ForceOpenClass3 class3;\n\n" +
-       "  public ForceOpenClass1() {\n" +
-       "    class2 = new ForceOpenClass2();\n" +
-       "    class3 = new ForceOpenClass3();\n" +
-       "  }\n" +
-       "}";
-
-     FileOps.writeStringToFile(forceOpenClass1_file, forceOpenClass1_string);
-     forceOpenClass1_file.deleteOnExit();
-     
-     final ComponentAdapter listener = new ComponentAdapter() {
-       public void componentResized(ComponentEvent event) {
-         _testFailed = true;
-         fail("testDancingUI: Open Documents List danced!");
-       }
-     };
-     final SingleDisplayModelFileClosedListener closeListener = new SingleDisplayModelFileClosedListener();
-     
-     Utilities.invokeLater(new Runnable() { public void run() {
+    String user = System.getProperty("user.name");
+    _tempDir = FileOps.createTempDirectory("DrJava-test-" + user);
+    File forceOpenClass1_file = new File(_tempDir, "ForceOpenClass1.java");
+    String forceOpenClass1_string =
+      "public class ForceOpenClass1 {\n" +
+      "  ForceOpenClass2 class2;\n" +
+      "  ForceOpenClass3 class3;\n\n" +
+      "  public ForceOpenClass1() {\n" +
+      "    class2 = new ForceOpenClass2();\n" +
+      "    class3 = new ForceOpenClass3();\n" +
+      "  }\n" +
+      "}";
+    
+    FileOps.writeStringToFile(forceOpenClass1_file, forceOpenClass1_string);
+    forceOpenClass1_file.deleteOnExit();
+    
+    final ComponentAdapter listener = new ComponentAdapter() {
+      public void componentResized(ComponentEvent event) {
+        _testFailed = true;
+        fail("testDancingUI: Open Documents List danced!");
+      }
+    };
+    final SingleDisplayModelFileClosedListener closeListener = new SingleDisplayModelFileClosedListener();
+    
+    try {
+      Utilities.invokeAndWait(new Runnable() { public void run() {
 //       _frame.setVisible(true);
-       _frame.pack();
-       _frame.addComponentListenerToOpenDocumentsList(listener);
-       
-       _frame.open(new FileOpenSelector() {
-         public File[] getFiles() {
-           File[] return_me = new File[1];
-           return_me[0] = new File(_tempDir, "ForceOpenClass1.java");
-           return return_me;
-         }
-       });
-       
-       _frame.getModel().addListener(closeListener);
-       _closeDone = false;
-       
-       _frame.getCloseButton().doClick();
-     }});
-
+        _frame.pack();
+        _frame.addComponentListenerToOpenDocumentsList(listener);
+        
+        _frame.open(new FileOpenSelector() {
+          public File[] getFiles() {
+            File[] return_me = new File[1];
+            return_me[0] = new File(_tempDir, "ForceOpenClass1.java");
+            return return_me;
+          }
+        });
+        
+        _frame.getModel().addListener(closeListener);
+        _closeDone = false;
+        
+        _frame.getCloseButton().doClick();
+      }});
+    }
+    catch(InterruptedException e) { fail(e.toString()); }
+    
 //     _log.log("Waiting for file closing");
-     
-     synchronized(_closeLock) {
-       try { while (! _closeDone) _closeLock.wait(); }
-       catch(InterruptedException exception) { fail(exception.toString()); }
-     }
-
-     if (! FileOps.deleteDirectory(_tempDir)) {
-       System.err.println("Couldn't fully delete directory " + _tempDir.getAbsolutePath() +
-                          "\nDo it by hand.\n");
-     }
+    
+    synchronized(_closeLock) {
+      try { while (! _closeDone) _closeLock.wait(); }
+      catch(InterruptedException e) { fail(e.toString()); }
+    }
+    
+    if (! FileOps.deleteDirectory(_tempDir)) {
+      System.err.println("Couldn't fully delete directory " + _tempDir.getAbsolutePath() +
+                         "\nDo it by hand.\n");
+    }
 //     _log.log("testDancingUIClosed completed");
   }
 

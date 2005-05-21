@@ -62,6 +62,11 @@ import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
  */
 public interface CompilerModel {
   
+  //----------------------------Locking--------------------------------------//
+  
+  /** Returns the lock used to prevent simultaneous compilation and JUnit testing */
+  public Object getSlaveJVMLock();
+  
   //-------------------------- Listener Management --------------------------//
   
   /**
@@ -116,51 +121,34 @@ public interface CompilerModel {
   
   //----------------------------- Error Results -----------------------------//
   
-  /**
-   * Gets the CompilerErrorModel representing the last compile.
-   */
-  public CompilerErrorModel<? extends CompilerError> getCompilerErrorModel();  // Return type should be CompilerErrorModel<? extends CompilerError> /**/
-
-  /**
-   * Gets the total number of current errors.
-   */
+  /** Gets the CompilerErrorModel representing the last compile. */
+  public CompilerErrorModel<? extends CompilerError> getCompilerErrorModel();
+  /** Gets the total number of current errors. */
   public int getNumErrors();
   
-  /**
-   * Resets the compiler error state to have no errors.
-   */
+  /** Resets the compiler error state to have no errors. */
   public void resetCompilerErrors();
   
   //-------------------------- Compiler Management --------------------------//
 
-  /**
-   * Returns all registered compilers that are actually available.
-   * That is, for all elements in the returned array, .isAvailable()
-   * is true.
-   * This method will never return null or a zero-length array.
-   * Instead, if no compiler is registered and available, this will return
-   * a one-element array containing an instance of
-   * {@link NoCompilerAvailable}.
-   *
-   * @see CompilerRegistry#getAvailableCompilers
+  /** Returns all registered compilers that are actually available. That is, for all elements in the returned 
+   *  array, .isAvailable() is true. This method will never return null or a zero-length array.  Instead, if 
+   *  no compiler is registered and available, this will return a one-element array containing an instance of
+   *  {@link NoCompilerAvailable}.
+   *  @see CompilerRegistry#getAvailableCompilers
    */
   public CompilerInterface[] getAvailableCompilers();
 
-  /**
-   * Gets the compiler is the "active" compiler.
-   *
+  /** Gets the compiler is the "active" compiler.
    * @see #setActiveCompiler
    * @see CompilerRegistry#getActiveCompiler
    */
   public CompilerInterface getActiveCompiler(); 
 
-  /**
-   * Sets which compiler is the "active" compiler.
-   *
-   * @param compiler Compiler to set active.
-   *
-   * @see #getActiveCompiler
-   * @see CompilerRegistry#setActiveCompiler
+  /** Sets which compiler is the "active" compiler.
+   *  @param compiler Compiler to set active.
+   *  @see #getActiveCompiler
+   *  @see CompilerRegistry#setActiveCompiler
    */
   public void setActiveCompiler(CompilerInterface compiler);
 }

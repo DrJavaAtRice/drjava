@@ -74,6 +74,9 @@ public class DefaultCompilerModel implements CompilerModel {
 
   /** The error model containing all current compiler errors. */
   private CompilerErrorModel<? extends CompilerError> _compilerErrorModel;
+  
+  /** The lock for using the slaveJVM to perform compilation and run unit tests */
+  private Object _slaveJVMLock = new Object();
 
   /** Main constructor.  
    *  @param getter Source of documents for this CompilerModel
@@ -82,6 +85,11 @@ public class DefaultCompilerModel implements CompilerModel {
     _getter = getter;
     _compilerErrorModel = new CompilerErrorModel<CompilerError>(new CompilerError[0], getter);
   }
+  
+  //--------------------------------- Locking -------------------------------//
+  
+  /** Returns the lock used to prevent simultaneous compilation and JUnit testing */
+  public Object getSlaveJVMLock() { return _slaveJVMLock; }
 
   //-------------------------- Listener Management --------------------------//
 
@@ -296,12 +304,9 @@ public class DefaultCompilerModel implements CompilerModel {
     }
     return errors;
   }
-  /**
-   * Compile the given files (with the given sourceroots), and update
-   * the model with any errors that result.  Does not notify listeners;
-   * use compileAll or compile instead.  All public compile methods delegate
-   * to this one so this method is the only one that is synchronized to prevent
-   * compiling and unit testing at the same time.
+  /** Compile the given files (with the given sourceroots), and update the model with any errors that result.  Does 
+   *  not notify listeners; use compileAll or compile instead.  All public compile methods delegate to this one so this 
+   *  method is the only one that uses synchronization to prevent compiling and unit testing at the same time.
    * 
    * @param sourceRoots An array of all sourceroots for the files to be compiled
    * @param files An array of all files to be compiled
@@ -309,7 +314,7 @@ public class DefaultCompilerModel implements CompilerModel {
    *        null means output to the same directory as the source file
    * 
    */
-  private synchronized void _compileFiles(File[] sourceRoots, File[] files, File buildDir) throws IOException {
+  private void _compileFiles(File[] sourceRoots, File[] files, File buildDir) throws IOException {
 
 //    CompilerError[] errors = new CompilerError[0];
       
@@ -323,9 +328,8 @@ public class DefaultCompilerModel implements CompilerModel {
     ClasspathVector extraClasspath = new ClasspathVector();
     if (_getter.getFileGroupingState().isProjectActive()) 
       extraClasspath.addAll(_getter.getFileGroupingState().getExtraClasspath());
-    for (File f : DrJava.getConfig().getSetting(OptionConstants.EXTRA_CLASSPATH)) {
-      extraClasspath.add(f);
-    }
+    for (File f : DrJava.getConfig().getSetting(OptionConstants.EXTRA_CLASSPATH)) extraClasspath.add(f);
+    
 //    System.out.println("Extra classpath passed to compiler: " + extraClasspath.toString());
     compiler.setExtraClassPath(extraClasspath);
     if (files.length > 0) {
@@ -365,8 +369,11 @@ public class DefaultCompilerModel implements CompilerModel {
       compilerErrors.addAll(_parseExceptions2CompilerErrors(parseExceptions));
       visitorErrors = errors.getSecond();
       compilerErrors.addAll(_visitorErrors2CompilerErrors(visitorErrors));
-
-      CompilerError[] compilerErrorsArray = (CompilerError[]) compilerErrors.toArray(new CompilerError[compilerErrors.size()]);
+      CompilerError[] compilerErrorsArray = null;
+      
+      synchronized(_slaveJVMLock) {
+        compilerErrorsArray = (CompilerError[]) compilerErrors.toArray(new CompilerError[compilerErrors.size()]);
+      }
       
       /** Compile the files in specified sourceRoots and files */
       if (compilerErrorsArray.length == 0) compilerErrorsArray = compiler.compile(sourceRoots, files);

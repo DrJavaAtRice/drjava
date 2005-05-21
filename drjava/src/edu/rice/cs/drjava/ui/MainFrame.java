@@ -2012,10 +2012,10 @@ public class MainFrame extends JFrame implements OptionConstants {
   /** Updates the title bar with the name of the active document. */
   public void updateFileTitle() {
     OpenDefinitionsDocument doc = _model.getActiveDocument();
-    String filename = GlobalModelNaming.getDisplayFilename(doc);
+    String filename = GlobalModelNaming.getDisplayFullPath(doc);
     if (!filename.equals(_fileTitle)) {
       _fileTitle = filename;
-      setTitle(filename + " - DrJava");
+      setTitle("File: " + filename);
       _model.getDocCollectionWidget().repaint();
     }
     // Always update this field-- two files in different directories
