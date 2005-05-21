@@ -334,7 +334,7 @@ class JListNavigator extends JList implements IDocumentNavigator {
 
       super.getListCellRendererComponent(list, value, index, isSelected, hasFocus);
       setText(((INavigatorItem)value).getName());
-      this.repaint();  // appears to be required to repaint the text for this list item; inconsistent with JTree analog
+//      repaint();  // appears to be required to repaint the text for this list item; inconsistent with JTree analog
       return this;
     }
   }

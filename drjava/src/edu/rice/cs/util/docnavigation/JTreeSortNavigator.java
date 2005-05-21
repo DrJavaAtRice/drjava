@@ -175,14 +175,13 @@ public class JTreeSortNavigator extends JTree
       //    this.setActiveDoc(doc);
     }
   }
-  /**
-   * Adds an <code>INavigatorItem</code> into this navigator in the position specified a path. 
-   * The actual behavior of the navigator and the position associated with a path are left up 
-   * to the implementing class.  Should only be run in event-handling thread.
+  /** Adds an <code>INavigatorItem</code> into this navigator in the position specified a path. 
+   *  The actual behavior of the navigator and the position associated with a path are left up 
+   *  to the implementing class.  Should only be run in event-handling thread.
    *
-   * @param doc the document to be added into this navigator.
-   * @param path an existing document in the navigator.
-   * @throws IllegalArgumentException if this navigator does not contain <code>relativeto</code> as tested by the
+   *  @param doc the document to be added into this navigator.
+   *  @param path an existing document in the navigator.
+   *  @throws IllegalArgumentException if this navigator does not contain <code>relativeto</code> as tested by the
    *                                  <code>contains</code> method.
    */
   public void addDocument(INavigatorItem doc, String path) {
