@@ -5878,7 +5878,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       _setCurrentDirectory(dir);
     }
     
-    /** Check if the current document has been modified. If it has, ask the user if he would like to save it 
+    /** Check if the specified document has been modified. If it has, ask the user if he would like to save it 
      *  and save the document if yes. Also give the user a "cancel" option to cancel doing the operation 
      *  that got us here in the first place.
      *
@@ -5891,7 +5891,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     private boolean _fileSaveHelper(OpenDefinitionsDocument doc, int paneOption) {
       String text,fname;
       OpenDefinitionsDocument lastActive = _model.getActiveDocument();
-      _model.setActiveDocument(doc);
+      if (lastActive != doc) _model.setActiveDocument(doc);
       boolean notFound = false;
       try {
         File file = doc.getFile();
@@ -5916,7 +5916,7 @@ public class MainFrame extends JFrame implements OptionConstants {
           boolean saved = false;
           if (notFound) saved = _saveAs(); 
           else saved = _save();
-          _model.setActiveDocument(lastActive);
+          if (doc != lastActive) _model.setActiveDocument(lastActive);  // breaks when "if" clause omitted
           if (! saved) return false;
           if (doc.isAuxiliaryFile() || (_model.isProjectActive() && doc.isInProjectPath())) {
             String savedFilename = null;
@@ -5926,7 +5926,7 @@ public class MainFrame extends JFrame implements OptionConstants {
           }
           return true;
         case JOptionPane.NO_OPTION:
-          _model.setActiveDocument(lastActive);
+          if (doc != lastActive) _model.setActiveDocument(lastActive);  // breaks when "if" clause omitted
           return true;
         case JOptionPane.CLOSED_OPTION:  // never executed
         case JOptionPane.CANCEL_OPTION:  // never executed if paneOption is JOptionPane.YES_NO_OPTION

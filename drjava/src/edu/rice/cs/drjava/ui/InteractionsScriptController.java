@@ -47,6 +47,7 @@ package edu.rice.cs.drjava.ui;
 
 import java.awt.event.*;
 import javax.swing.*;
+import java.io.Serializable;
 
 import edu.rice.cs.drjava.model.repl.InteractionsScriptModel;
 
@@ -54,7 +55,7 @@ import edu.rice.cs.drjava.model.repl.InteractionsScriptModel;
  * Controller for an interactions script.
  * @version $Id$
  */
-public class InteractionsScriptController {
+public class InteractionsScriptController implements Serializable {
   /** Associated model. */
   private InteractionsScriptModel _model;
   /** Associated view. */

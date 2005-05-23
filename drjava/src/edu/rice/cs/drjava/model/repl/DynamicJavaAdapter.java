@@ -1,46 +1,34 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * This file is part of DrJava.  Download the current version of this project:
- * http://sourceforge.net/projects/drjava/ or http://www.drjava.org/
+ * This file is part of DrJava.  Download the current version of this project from http://www.drjava.org/
+ * or http://sourceforge.net/projects/drjava/
  *
  * DrJava Open Source License
+ * 
+ * Copyright (C) 2001-2005 JavaPLT group at Rice University (javaplt@rice.edu).  All rights reserved.
  *
- * Copyright (C) 2001-2003 JavaPLT group at Rice University (javaplt@rice.edu)
- * All rights reserved.
- *
- * Developed by:   Java Programming Languages Team
- *                 Rice University
- *                 http://www.cs.rice.edu/~javaplt/
- *
- * Permission is hereby granted, free of charge, to any person obtaining a
- * copy of this software and associated documentation files (the "Software"),
- * to deal with the Software without restriction, including without
- * limitation the rights to use, copy, modify, merge, publish, distribute,
- * sublicense, and/or sell copies of the Software, and to permit persons to
- * whom the Software is furnished to do so, subject to the following
- * conditions:
- *
- *     - Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimers.
- *     - Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimers in the
- *       documentation and/or other materials provided with the distribution.
- *     - Neither the names of DrJava, the JavaPLT, Rice University, nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this Software without specific prior written permission.
- *     - Products derived from this software may not be called "DrJava" nor
- *       use the term "DrJava" as part of their names without prior written
- *       permission from the JavaPLT group.  For permission, write to
- *       javaplt@rice.edu.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
- * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
- * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
- * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
- * OTHER DEALINGS WITH THE SOFTWARE.
- *
+ * Developed by:   Java Programming Languages Team, Rice University, http://www.cs.rice.edu/~javaplt/
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated 
+ * documentation files (the "Software"), to deal with the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and 
+ * to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ * 
+ *     - Redistributions of source code must retain the above copyright notice, this list of conditions and the 
+ *       following disclaimers.
+ *     - Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the 
+ *       following disclaimers in the documentation and/or other materials provided with the distribution.
+ *     - Neither the names of DrJava, the JavaPLT, Rice University, nor the names of its contributors may be used to 
+ *       endorse or promote products derived from this Software without specific prior written permission.
+ *     - Products derived from this software may not be called "DrJava" nor use the term "DrJava" as part of their 
+ *       names without prior written permission from the JavaPLT group.  For permission, write to javaplt@rice.edu.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO 
+ * THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
+ * CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS 
+ * WITH THE SOFTWARE.
+ * 
 END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.repl;
@@ -160,264 +148,209 @@ public class DynamicJavaAdapter implements JavaInterpreter {
 //    _djInterpreter.addClassPath(path);
 //  }
 
-  
-  public void addProjectClassPath(URL path) {
-    cpm.addProjectCP(path);
-  }
+  public void addProjectClassPath(URL path) { cpm.addProjectCP(path); }
 
+  public void addBuildDirectoryClassPath(URL path) { cpm.addBuildDirectoryCP(path); }
 
-  public void addBuildDirectoryClassPath(URL path) {
-    cpm.addBuildDirectoryCP(path);
-  }
+  public void addProjectFilesClassPath(URL path) { cpm.addProjectFilesCP(path); }
 
-  public void addProjectFilesClassPath(URL path) {
-    cpm.addProjectFilesCP(path);
-  }
-
-  public void addExternalFilesClassPath(URL path) {
-    cpm.addExternalFilesCP(path);
-  }
+  public void addExternalFilesClassPath(URL path) { cpm.addExternalFilesCP(path); }
   
-  public void addExtraClassPath(URL path) {
-    cpm.addExtraCP(path);
-  }
+  public void addExtraClassPath(URL path) { cpm.addExtraCP(path); }
   
-  
-  
-  
-  
-  /**
-   * Set the scope for unqualified names to the given package.
-   * @param packageName Package to assume scope of.
+  /** Set the scope for unqualified names to the given package.
+   *  @param packageName Package to assume scope of.
    */
   public void setPackageScope(String packageName) {
     StringReader reader = new StringReader("package " + packageName + ";");
     _djInterpreter.interpret(reader, "DrJava");
   }
 
-  /**
-   * Returns the value of the variable with the given name in
-   * the interpreter.
-   * @param name Name of the variable
-   * @return Value of the variable
+  /** Returns the value of the variable with the given name in the interpreter.
+   *  @param name Name of the variable
+   *  @return Value of the variable
    */
-  public Object getVariable(String name) {
-    return _djInterpreter.getVariable(name);
-  }
+  public Object getVariable(String name) { return _djInterpreter.getVariable(name); }
 
-  /**
-   * Returns the class of the variable with the given name in
-   * the interpreter.
-   * @param name Name of the variable
-   * @return class of the variable
+  /** Returns the class of the variable with the given name in the interpreter.
+   *  @param name Name of the variable
+   *  @return class of the variable
    */
-  public Class<?> getVariableClass(String name) {
-    return _djInterpreter.getVariableClass(name);
-  }
+  public Class<?> getVariableClass(String name) { return _djInterpreter.getVariableClass(name); }
 
-  /**
-   * Assigns the given value to the given name in the interpreter.
-   * If type == null, we assume that the type of this variable
-   * has not been loaded so we set it to Object.
-   * @param name Name of the variable
-   * @param value Value to assign
-   * @param type the type of the variable
+  /** Assigns the given value to the given name in the interpreter.  If type == null, we assume that the type of
+   *  this variable has not been loaded so we set it to Object.
+   *  @param name Name of the variable
+   *  @param value Value to assign
+   *  @param type the type of the variable
    */
   public void defineVariable(String name, Object value, Class<?> type) {
-    if (type == null) {
-      type = java.lang.Object.class;
-    }
+    if (type == null) type = java.lang.Object.class;
     ((TreeInterpreter)_djInterpreter).defineVariable(name, value, type);
   }
 
-  /**
-   * Assigns the given value to the given name in the interpreter.
-   * @param name Name of the variable
-   * @param value Value to assign
+  /** Assigns the given value to the given name in the interpreter.
+   *  @param name Name of the variable
+   *  @param value Value to assign
    */
   public void defineVariable(String name, Object value) {
     ((TreeInterpreter)_djInterpreter).defineVariable(name, value);
   }
 
-  /**
-   * Assigns the given value to the given name in the interpreter.
-   * @param name Name of the variable
-   * @param value boolean to assign
+  /** Assigns the given value to the given name in the interpreter.
+   *  @param name Name of the variable
+   *  @param value boolean to assign
    */
   public void defineVariable(String name, boolean value) {
     ((TreeInterpreter)_djInterpreter).defineVariable(name, value);
   }
 
-  /**
-   * Assigns the given value to the given name in the interpreter.
-   * @param name Name of the variable
-   * @param value byte to assign
+  /** Assigns the given value to the given name in the interpreter.
+   *  @param name Name of the variable
+   *  @param value byte to assign
    */
   public void defineVariable(String name, byte value) {
     ((TreeInterpreter)_djInterpreter).defineVariable(name, value);
   }
 
-  /**
-   * Assigns the given value to the given name in the interpreter.
-   * @param name Name of the variable
-   * @param value char to assign
+  /** Assigns the given value to the given name in the interpreter.
+   *  @param name Name of the variable
+   *  @param value char to assign
    */
   public void defineVariable(String name, char value) {
     ((TreeInterpreter)_djInterpreter).defineVariable(name, value);
   }
 
-  /**
-   * Assigns the given value to the given name in the interpreter.
-   * @param name Name of the variable
-   * @param value double to assign
+  /** Assigns the given value to the given name in the interpreter.
+   *  @param name Name of the variable
+   *  @param value double to assign
    */
   public void defineVariable(String name, double value) {
     ((TreeInterpreter)_djInterpreter).defineVariable(name, value);
   }
 
-  /**
-   * Assigns the given value to the given name in the interpreter.
-   * @param name Name of the variable
-   * @param value float to assign
+  /** Assigns the given value to the given name in the interpreter.
+   *  @param name Name of the variable
+   *  @param value float to assign
    */
   public void defineVariable(String name, float value) {
     ((TreeInterpreter)_djInterpreter).defineVariable(name, value);
   }
 
 
-  /**
-   * Assigns the given value to the given name in the interpreter.
-   * @param name Name of the variable
-   * @param value int to assign
+  /** Assigns the given value to the given name in the interpreter.
+   *  @param name Name of the variable
+   *  @param value int to assign
    */
   public void defineVariable(String name, int value) {
     ((TreeInterpreter)_djInterpreter).defineVariable(name, value);
   }
 
-  /**
-   * Assigns the given value to the given name in the interpreter.
-   * @param name Name of the variable
-   * @param value long to assign
+  /** Assigns the given value to the given name in the interpreter.
+   *  @param name Name of the variable
+   *  @param value long to assign
    */
   public void defineVariable(String name, long value) {
     ((TreeInterpreter)_djInterpreter).defineVariable(name, value);
   }
 
-  /**
-   * Assigns the given value to the given name in the interpreter.
-   * @param name Name of the variable
-   * @param value short to assign
+  /** Assigns the given value to the given name in the interpreter.
+   *  @param name Name of the variable
+   *  @param value short to assign
    */
   public void defineVariable(String name, short value) {
     ((TreeInterpreter)_djInterpreter).defineVariable(name, value);
   }
 
-  /**
-   * Assigns the given value to the given name in the interpreter.
-   * @param name Name of the variable
-   * @param value Value to assign
+  /** Assigns the given value to the given name in the interpreter.
+   *  @param name Name of the variable
+   *  @param value Value to assign
    */
   public void defineConstant(String name, Object value) {
     ((InterpreterExtension)_djInterpreter).defineConstant(name, value);
   }
 
-  /**
-   * Assigns the given value to the given name as a constant in the interpreter.
-   * @param name Name of the variable
-   * @param value boolean to assign
+  /** Assigns the given value to the given name as a constant in the interpreter.
+   *  @param name Name of the variable
+   *  @param value boolean to assign
    */
   public void defineConstant(String name, boolean value) {
     ((InterpreterExtension)_djInterpreter).defineConstant(name, value);
   }
 
-  /**
-   * Assigns the given value to the given name as a constant in the interpreter.
-   * @param name Name of the variable
-   * @param value byte to assign
+  /** Assigns the given value to the given name as a constant in the interpreter.
+   *  @param name Name of the variable
+   *  @param value byte to assign
    */
   public void defineConstant(String name, byte value) {
     ((InterpreterExtension)_djInterpreter).defineConstant(name, value);
   }
 
-  /**
-   * Assigns the given value to the given name as a constant in the interpreter.
-   * @param name Name of the variable
-   * @param value char to assign
+  /** Assigns the given value to the given name as a constant in the interpreter.
+   *  @param name Name of the variable
+   *  @param value char to assign
    */
   public void defineConstant(String name, char value) {
     ((InterpreterExtension)_djInterpreter).defineConstant(name, value);
   }
 
-  /**
-   * Assigns the given value to the given name as a constant in the interpreter.
-   * @param name Name of the variable
-   * @param value double to assign
+  /** Assigns the given value to the given name as a constant in the interpreter.
+   *  @param name Name of the variable
+   *  @param value double to assign
    */
   public void defineConstant(String name, double value) {
     ((InterpreterExtension)_djInterpreter).defineConstant(name, value);
   }
 
-  /**
-   * Assigns the given value to the given name as a constant in the interpreter.
-   * @param name Name of the variable
-   * @param value float to assign
+  /** Assigns the given value to the given name as a constant in the interpreter.
+   *  @param name Name of the variable
+   *  @param value float to assign
    */
   public void defineConstant(String name, float value) {
     ((InterpreterExtension)_djInterpreter).defineConstant(name, value);
   }
 
-  /**
-   * Assigns the given value to the given name as a constant in the interpreter.
-   * @param name Name of the variable
-   * @param value int to assign
+  /** Assigns the given value to the given name as a constant in the interpreter.
+   *  @param name Name of the variable
+   *  @param value int to assign
    */
   public void defineConstant(String name, int value) {
     ((InterpreterExtension)_djInterpreter).defineConstant(name, value);
   }
 
-  /**
-   * Assigns the given value to the given name as a constant in the interpreter.
-   * @param name Name of the variable
-   * @param value long to assign
+  /** Assigns the given value to the given name as a constant in the interpreter.
+   *  @param name Name of the variable
+   *  @param value long to assign
    */
   public void defineConstant(String name, long value) {
     ((InterpreterExtension)_djInterpreter).defineConstant(name, value);
   }
-  /**
-   * Assigns the given value to the given name as a constant in the interpreter.
-   * @param name Name of the variable
-   * @param value short to assign
+  /** Assigns the given value to the given name as a constant in the interpreter.
+   *  @param name Name of the variable
+   *  @param value short to assign
    */
   public void defineConstant(String name, short value) {
     ((InterpreterExtension)_djInterpreter).defineConstant(name, value);
   }
 
-
-  /**
-   * Sets whether protected and private variables should be accessible in
-   * the interpreter.
-   * @param accessible Whether protected and private variable are accessible
+  /** Sets whether protected and private variables should be accessible in the interpreter.
+   *  @param accessible Whether protected and private variable are accessible
    */
   public void setPrivateAccessible(boolean accessible) {
     _djInterpreter.setAccessible(accessible);
   }
 
-  /**
-   * Factory method to make a new NameVisitor.
-   * @param nameContext the context
-   * @return visitor the visitor
+  /** Factory method to make a new NameVisitor.
+   *  @param nameContext the context
+   *  @return visitor the visitor
    */
-  public NameVisitor makeNameVisitor(Context nameContext) {
-    return new NameVisitor(nameContext);
-  }
+  public NameVisitor makeNameVisitor(Context nameContext) { return new NameVisitor(nameContext); }
 
-  /**
-   * Factory method to make a new TypeChecker.
-   * @param nameContext Context for the NameVisitor
-   * @param typeContext Context being used for the TypeChecker.  This is
-   * necessary because we want to perform a partial type checking for the
-   * right hand side of a VariableDeclaration.
-   * @return visitor the visitor
+  /** Factory method to make a new TypeChecker.
+   *  @param nameContext Context for the NameVisitor
+   *  @param typeContext Context being used for the TypeChecker.  This is necessary because we want to perform partial
+   *         type checking for the right hand side of a VariableDeclaration.
+   *  @return visitor the visitor
    */
 //  public AbstractTypeChecker makeTypeChecker(Context context) {
 //    // TO DO: move this into its own class if more methods need to be added
@@ -425,38 +358,27 @@ public class DynamicJavaAdapter implements JavaInterpreter {
 //  }
 // Removed because AbstractTypeChecker contains a makeTypeChecker method
 
-  /**
-   * Factory method to make a new EvaluationVisitor.
-   * @param context the context
-   * @return visitor the visitor
+  /** Factory method to make a new EvaluationVisitor.
+   *  @param context the context
+   *  @return visitor the visitor
    */
   public EvaluationVisitor makeEvaluationVisitor(Context context) {
     return new EvaluationVisitorExtension(context);
   }
 
-  /**
-   * Processes the tree before evaluating it, if necessary.
-   * @param node Tree to process
+  /** Processes the tree before evaluating it, if necessary.
+   *  @param node Tree to process
    */
-  public Node processTree(Node node) {
-    return node;
-  }
+  public Node processTree(Node node) { return node; }
 
-  public GlobalContext makeGlobalContext(TreeInterpreter i) {
-    return new GlobalContext(i);
-  }
+  public GlobalContext makeGlobalContext(TreeInterpreter i) { return new GlobalContext(i); }
 
-  /**
-   * An extension of DynamicJava's interpreter that makes sure classes are
-   * not loaded by the system class loader (when possible) so that future
-   * interpreters will be able to reload the classes.  This extension also
-   * ensures that classes on "extra.classpath" will be loaded if referenced
-   * by user defined classes.  (Without this, classes on "extra.classpath"
-   * can only be referred to directly, and cannot be extended, etc.)
-   * <p>
-   *
-   * We also override the evaluation visitor to allow the interpreter to be
-   * interrupted and to return NO_RESULT if there was no result.
+  /** An extension of DynamicJava's interpreter that makes sure classes are not loaded by the system class loader
+   *  (when possible) so that future interpreters will be able to reload the classes.  This extension also ensures 
+   *  that classes on "extra.classpath" will be loaded if referenced by user defined classes.  (Without this, classes
+   *  on "extra.classpath" can only be referred to directly, and cannot be extended, etc.) <p>
+   *  We also override the evaluation visitor to allow the interpreter to be interrupted and to return NO_RESULT if 
+   *  there was no result.
    */
   public class InterpreterExtension extends TreeInterpreter {
 

@@ -53,6 +53,8 @@ import java.awt.event.ActionEvent;
 import java.awt.Color;
 import java.awt.Font;
 
+import java.io.Serializable;
+
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.config.OptionListener;
@@ -64,7 +66,7 @@ import edu.rice.cs.drjava.platform.PlatformFactory;
  * Abstract class to handle hooking up a console document with its pane.
  * @version $Id$
  */
-public abstract class AbstractConsoleController {
+public abstract class AbstractConsoleController implements Serializable {
   /** Adapter for the Swing document used by the model.*/
   protected InteractionsDocumentAdapter _adapter;
 

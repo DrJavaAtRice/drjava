@@ -57,7 +57,7 @@ import edu.rice.cs.drjava.model.repl.*;
 /**
  * @version $Id$
  */
-public class ConsoleController extends AbstractConsoleController {
+public class ConsoleController extends AbstractConsoleController implements Serializable {
   protected ConsoleDocument _doc;
 
   /** Object to wait on for input from System.in. */
@@ -161,7 +161,7 @@ public class ConsoleController extends AbstractConsoleController {
   }
 
   AbstractAction enterAction = new EnterAction();
-  private class EnterAction extends AbstractAction {
+  private class EnterAction extends AbstractAction implements Serializable {
     public void actionPerformed(ActionEvent e) {
       synchronized(_inputWaitObject) {
         if (_blockedForConsoleInput) {
@@ -177,7 +177,7 @@ public class ConsoleController extends AbstractConsoleController {
 
   /** Moves the caret left or beeps at the edge. */
   AbstractAction moveLeftAction = new LeftAction();
-  private class LeftAction extends AbstractAction {
+  private class LeftAction extends AbstractAction implements Serializable {
     public void actionPerformed(ActionEvent e) {
       int position = _pane.getCaretPosition();
       if (position < _doc.getPromptPos()) moveToPrompt();
@@ -190,7 +190,7 @@ public class ConsoleController extends AbstractConsoleController {
   /** Moves the caret right or beeps at the edge. */
   AbstractAction moveRightAction = new RightAction();
   
-  private class RightAction extends AbstractAction {
+  private class RightAction extends AbstractAction implements Serializable {
     public void actionPerformed(ActionEvent e) {
       int position = _pane.getCaretPosition();
       if (position < _doc.getPromptPos()) moveToEnd();
@@ -206,7 +206,7 @@ public class ConsoleController extends AbstractConsoleController {
    * area, or beep if already after the prompt.
    */
   AbstractAction moveUpDownAction = new UpDownAction();
-  private class UpDownAction extends AbstractAction {
+  private class UpDownAction extends AbstractAction implements Serializable {
     public void actionPerformed(ActionEvent e) {
       int position = _pane.getCaretPosition();
       if (position < _doc.getPromptPos()) moveToPrompt();

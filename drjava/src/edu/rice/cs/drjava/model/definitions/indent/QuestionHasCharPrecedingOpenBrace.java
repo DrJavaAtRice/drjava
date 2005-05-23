@@ -72,13 +72,10 @@ public class QuestionHasCharPrecedingOpenBrace extends IndentRuleQuestion {
     _prefix = prefix;
   }
   
-  /**
-   * @param doc The AbstractDJDocument containing the current line.
-   * @return True iff the last block or expression list opened previous 
-   * to the start of the current line was opened by the character '{'. 
+  /** @param doc The AbstractDJDocument containing the current line.
+   *  @return true iff the last block/expression-list opened before the start of the current line begins with '{'. 
    */
-  boolean applyRule(AbstractDJDocument doc, int reason)
-  {
+  boolean applyRule(AbstractDJDocument doc, int reason) {
     // PRE: We are inside a {.
     
     int origin = doc.getCurrentLocation();
@@ -88,7 +85,6 @@ public class QuestionHasCharPrecedingOpenBrace extends IndentRuleQuestion {
     doc.move(lineStart - origin);
     IndentInfo info = doc.getIndentInformation();
     doc.move(origin - lineStart);
-    
     
     if ((!info.braceType.equals(IndentInfo.openSquiggly)) ||
         (info.distToBrace < 0)) {
@@ -102,12 +98,7 @@ public class QuestionHasCharPrecedingOpenBrace extends IndentRuleQuestion {
     try {
       prevNonWS = doc.findPrevNonWSCharPos(bracePos);
       char c = doc.getText(prevNonWS,1).charAt(0);
-      for (int i=0; i<_prefix.length; i++) {
-        char prefix = _prefix[i];
-        if (c == prefix) {
-          return true;
-        } 
-      }
+      for (char pchar: _prefix) if (c == pchar) return true;
     }
     catch (BadLocationException e) {
     }    
