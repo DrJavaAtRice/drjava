@@ -68,7 +68,7 @@ public interface IDocumentNavigator extends IAWTContainerNavigatorActor{
   public void addDocument(INavigatorItem doc, String path);
   
   /** Returns the currently selected navigator item, or null if no navigator item is selected. */
-  public INavigatorItem getCurrentSelectedLeaf();
+  public INavigatorItem getCurrent();
   
   /** Removes a given <code>INavigatorItem<code> from this navigator. Removes all <code>INavigatorItem</code>s 
    *  from this navigator that are "equal" (<code>.equals(...)</code>) to the passed argument. Any of the 
@@ -91,18 +91,33 @@ public interface IDocumentNavigator extends IAWTContainerNavigatorActor{
    */
   public void setActiveDoc(INavigatorItem doc);
   
-  
-  /** Impose an ordering on the documents in the navigator to support setActiveNextDocument()
-   *  @return the INavigatorItem which comes after doc
+  /** The following five operations impose a natural ordering on the documents in the navigator.
+   *  For lists, it is order of insertion. For trees, it is depth-first enumeration.
+   *  This convention supports operations setActiveNextDocument() in the global model of DrJava
+   *  @returns the INavigatorItem which comes after doc
    *  @param doc the INavigatorItem of interest
    */
   public <T extends INavigatorItem> T getNext(T doc);
   
-  /** Impose an ordering on the documents in the navigator to support setActivePrevDocument()
-   *  @return the INavigatorItem which comes before doc
+  /** @returns the INavigatorItem which comes before doc
    *  @param doc the INavigatorItem of interest
    */
   public <T extends INavigatorItem> T getPrevious(T doc);
+  
+  /** @returns the INavigatorItem which comes first in the enumeration
+   *  @param doc the INavigatorItem of interest
+   */
+  public <T extends INavigatorItem> T getFirst();
+  
+  /** @returns the INavigatorItem which comes last in the enumeration
+   *  @param doc the INavigatorItem of interest
+   */
+  public <T extends INavigatorItem> T getLast();
+  
+  /** Returns all the <code>IDocuments</code> in the collection in enumeration order.
+   *  @return an <code>INavigatorItem<code> enumeration of this navigator's contents.
+   */
+  public <T extends INavigatorItem> Enumeration<T> getDocuments();
   
   /** Tests to see if a given document is contained in this navigator.
    *  @param doc the document to test for containment.
@@ -110,12 +125,6 @@ public interface IDocumentNavigator extends IAWTContainerNavigatorActor{
    *          to the passed document, else <code>false</code>.
    */
   public boolean contains(INavigatorItem doc);
-  
-  /** Returns all the <code>IDocuments</code> contained in this navigator</code>. Does not assert any 
-   *  type of ordering on the returned structure.
-   *  @return an <code>INavigatorItem<code> enumeration of this navigator's contents.
-   */
-  public <T extends INavigatorItem> Enumeration<T> getDocuments();
   
   /** Returns the number of <code>INavigatorItem</code>s contained by this <code>IDocumentNavigator</code>
    *  @return the number of documents within this navigator.

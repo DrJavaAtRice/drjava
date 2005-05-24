@@ -127,18 +127,14 @@ class JListNavigator extends JList implements IDocumentNavigator {
   /** Adds the document doc to this navigator.  Should only be executed in event thead.
    *  @param doc the document to add
    */
-  public void addDocument(INavigatorItem doc) { 
-    synchronized(_model) { _model.addElement(doc); }
-  }
+  public void addDocument(INavigatorItem doc) { synchronized(_model) { _model.addElement(doc); } }
   
   /** Adds the document to this navigator and ignores the specified path.  Should only be
    *  executed in event thread.
    *  @param doc the document to add
    *  @param path  unused parameter in this class 
    */
-  public void addDocument(INavigatorItem doc, String path) {
-    addDocument(doc);
-  }
+  public void addDocument(INavigatorItem doc, String path) { addDocument(doc); }
   
   /** Gets the next document after doc in the series.
    *  @param doc the document to reference from
@@ -169,6 +165,19 @@ class JListNavigator extends JList implements IDocumentNavigator {
     }
   }
   
+  /** Gets the first document in the series.
+   *  @return the first document in the collection
+   */
+  public <T extends INavigatorItem> T getFirst() { synchronized (_model) { return (T) _model.get(0); } }
+  
+  /** Gets the first document in the series.
+   *  @return the first document in the collection
+   */
+  public <T extends INavigatorItem> T getLast() { synchronized (_model) { return (T) _model.get(_model.size() - 1); } }
+  
+  /** Returns the currently selected item, or null if none. */
+  public INavigatorItem getCurrent() { return _current; }
+  
   /** Removes the document from the navigator.  Should only be executed in event thread.
    *  @param doc the document to remove
    */
@@ -195,7 +204,7 @@ class JListNavigator extends JList implements IDocumentNavigator {
     }
   }
   
-  /** Sets the specified document as selected.  Should only be called from event-handling thread.
+  /** Sets the specified document as selected.  Should only be called from event thread.
    *  @param doc the document to select
    */
   public void setActiveDoc(INavigatorItem doc) {
@@ -216,10 +225,7 @@ class JListNavigator extends JList implements IDocumentNavigator {
     synchronized(_model) { return _model.contains(doc); }
   }
   
-  /**
-   * @return an Enumeration of the documents in this list (ordering is
-   * consistent with getNext() and getPrev()).
-   * 
+  /** @return an Enumeration of the documents in this list (ordering is consistent with getNext() and getPrev()).
    * This cast in this method required to work around the stupid partial generification of DefaultListModel in Java 1.5.
    * The class should be generic: DefaultListModel<T> { ... Enumeration<T> elements() {...} ... } instead of 
    * DefaultListModel { ... Enumeration<?> elements() {...} ... }.
@@ -253,10 +259,8 @@ class JListNavigator extends JList implements IDocumentNavigator {
   /** @return the navigator listeners. */
   public Collection<INavigationListener> getNavigatorListeners() { return navListeners; }
   
-  /** Clears the navigator and removes all documents. */
-  public void clear() { 
-    synchronized(_model) { _model.clear(); }
-  }
+  /** Clears the navigator and removes all documents. Should only be executed from event thread. */
+  public void clear() { synchronized(_model) { _model.clear(); } }
   
   /** Executes the list case of the visitor.
    *  @param algo the visitor to execute
@@ -287,9 +291,7 @@ class JListNavigator extends JList implements IDocumentNavigator {
     }
   }
     
-  /** Returns the currently selected item, or null if none. */
-  public INavigatorItem getCurrentSelectedLeaf() { return _current; }
-  
+
   /** @return the renderer for this object. */
   public Component getRenderer(){ return _renderer; }
   

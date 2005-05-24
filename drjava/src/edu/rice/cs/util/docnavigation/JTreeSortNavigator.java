@@ -152,30 +152,30 @@ public class JTreeSortNavigator extends JTree
   /** @return an AWT component which interacts with this document navigator */
   public Container asContainer() { return this; }
   
-  /** Adds an <code>IDocument</code> to this navigator.
+  /** Adds an <code>IDocument</code> to this navigator. Should only executed from event thread.
    *  @param doc the document to be added into this navigator.
    */
   public void addDocument(INavigatorItem doc) {
-    GroupNode _root = null;
-    synchronized(_model) {
-      for (GroupNode r: _roots) {
-        if (r.getFilter().accept(doc)) {
-          _root = r;
-          break;
-        }
-      }
-      if (_root == null) return;
-      
-      LeafNode node = new LeafNode(doc);
-      //_root.add(node);
-      insertNodeSortedInto(node, _root);
-      this.expandPath(new TreePath(_root.getPath()));
-      _doc2node.put(doc, node);
-      _hasNonProjFilesOpen = true;
-      //    this.setActiveDoc(doc);
-    }
+    addDocument(doc, "");
+//    GroupNode _root = null;
+//    synchronized(_model) {
+//      for (GroupNode r: _roots) {
+//        if (r.getFilter().accept(doc)) {
+//          _root = r;
+//          break;
+//        }
+//      }
+//      if (_root == null) return;
+//      
+//      LeafNode node = new LeafNode(doc);
+//      //_root.add(node);
+//      insertNodeSortedInto(node, _root);
+//      this.expandPath(new TreePath(_root.getPath()));
+//      _doc2node.put(doc, node);
+//      _hasNonProjFilesOpen = true;
+//    }
   }
-  /** Adds an <code>INavigatorItem</code> into this navigator in the position specified a path. 
+  /** Adds an <code>INavigatorItem</code> into this navigator in the position specified by path. 
    *  The actual behavior of the navigator and the position associated with a path are left up 
    *  to the implementing class.  Should only be run in event-handling thread.
    *
@@ -235,6 +235,7 @@ public class JTreeSortNavigator extends JTree
       LeafNode child = new LeafNode(doc);
       _doc2node.put(doc, child);
       insertNodeSortedInto(child, lastNode);
+      _hasNonProjFilesOpen = (lastNode == root); 
       //    _model.insertNodeInto(child, lastNode, lastNode.getChildCount());
       this.expandPath(new TreePath(lastNode.getPath()));
       child.setUserObject(doc);
@@ -244,7 +245,6 @@ public class JTreeSortNavigator extends JTree
   private void addTopLevelGroupToRoot(InnerNode parent) {
     
     synchronized(_model) {
-      
       int indexInRoots = _roots.indexOf(parent);
       int num = _model.getChildCount(_model.getRoot());
       int i;
@@ -256,7 +256,8 @@ public class JTreeSortNavigator extends JTree
     }
   }
   
-  /** Inserts the child node (INavigatorItem) into the sorted position as a parent node's child
+  /** Inserts the child node (INavigatorItem) into the sorted position as a parent node's child.  Should only be
+   *  executed from event thread.
    *  @param child the node to add
    *  @param parent the node to add under
    */
@@ -286,7 +287,7 @@ public class JTreeSortNavigator extends JTree
     }
   }
   
-  /** Inserts a folder (String) into sorted position under the parent
+  /** Inserts a folder (String) into sorted position under the parent.  Should only be executed from event thread.
    *  @param child the folder to add
    *  @param parent the folder to add under
    */
@@ -320,7 +321,7 @@ public class JTreeSortNavigator extends JTree
   
   /** Removes a given <code>INavigatorItem<code> from this navigator. Removes all <code>INavigatorItem</code>s
    *  from this navigator that are "equal" (using <code>.equals(...)</code>) to the passed argument. Any of
-   *  the removed documents may be returned by this method.
+   *  the removed documents may be returned by this method. Should only be executed from event thread.
    *  @param doc the docment to be removed
    *  @return doc a document removed from this navigator as a result of invoking this method.
    *  @throws IllegalArgumentException if this navigator contains no document equal to doc
@@ -331,7 +332,8 @@ public class JTreeSortNavigator extends JTree
   
   private LeafNode getNodeForDoc(INavigatorItem doc) { return _doc2node.get(doc); }
   
-  /** Only takes in nodes that have an INavigatorItem as their object */
+  /** Only takes in nodes that have an INavigatorItem as their object; assumes lock on _model is already held.
+   *  Should only be executed from event thread. */
   private INavigatorItem removeNode(LeafNode toRemove) {
     DefaultMutableTreeNode parent = (DefaultMutableTreeNode)toRemove.getParent();
     _model.removeNodeFromParent(toRemove);
@@ -356,9 +358,8 @@ public class JTreeSortNavigator extends JTree
     return (INavigatorItem)toRemove.getUserObject();
   }
   
-  /** If the given node is an InnerNode, it removes it from the tree
-   *  if it has no children.  If the given node is a leaf or the root,
-   *  it does nothing to it.
+  /** If the given node is an InnerNode, it removes it from the tree if it has no children.  If the given node is a 
+   *  leaf or the root, it does nothing to it.  Should only be executed from event thread.
    */
   private void cleanFolderNode(DefaultMutableTreeNode node) {
     synchronized(_model) {
@@ -371,16 +372,12 @@ public class JTreeSortNavigator extends JTree
     }
   }
   
-  /** Resets a given <code>INavigatorItem<code> in the tree.  This may affect the
-   *  placement of the item or its display to reflect any changes made in the model.
+  /** Resets a given <code>INavigatorItem<code> in the tree.  This may affect the placement of the item or its display
+   *  to reflect any changes made in the model.  Should only be executed from event thread.
    *  @param doc the document to be refreshed
    *  @throws IllegalArgumentException if this navigator contains no document equal to doc.
    */
   public void refreshDocument(INavigatorItem doc, String path) {
-    /** This operation is now synchronized which I think should eliminate the 
-     *  bug where compile all with modified documents would throw an array
-     *  index out of bounds exception when painting.
-     */
     
     synchronized (_model) {
       LeafNode node = getNodeForDoc(doc);
@@ -439,7 +436,7 @@ public class JTreeSortNavigator extends JTree
     }
   }    
   
-  /** Imposes some ordering on the documents in the navigator, to facilitate MainFrame's setActiveNextDocument()
+  /** Returns the next document in the collection (using enumeration order)
    *  @param doc the INavigatorItem of interest
    *  @return the INavigatorItem which comes after doc
    */
@@ -453,19 +450,37 @@ public class JTreeSortNavigator extends JTree
     }
   }
   
-  /** Imposes some ordering on the documents in the navigator, to facilitate MainFrame's setActivePrevDocument()
-   *
+  /** Returns the previous document in the collection (using enumeration order)
    *  @param doc the INavigatorItem of interest
    *  @return the INavigatorItem which comes before doc
    */
   public <T extends INavigatorItem> T getPrevious(T doc) {
-    
     synchronized (_model) {
       DefaultMutableTreeNode node = _doc2node.get(doc);
       // TODO: check for "package" case
       DefaultMutableTreeNode prev = node.getPreviousLeaf();
       if (prev == null || prev == _model.getRoot()) return doc;
       return  (T) prev.getUserObject();
+    }
+  }
+  
+  /** Returns the first document in the collection (using enumeration order)
+   *  @return the INavigatorItem which comes before doc
+   */
+  public <T extends INavigatorItem> T getFirst() {
+    synchronized(_model) {
+     DefaultMutableTreeNode root = (DefaultMutableTreeNode) _model.getRoot();
+      return (T) root.getFirstLeaf().getUserObject();
+    }
+  }
+  
+  /** Returns the last document in the collection (using enumeration order)
+   *  @return the INavigatorItem which comes before doc
+   */
+  public <T extends INavigatorItem> T getLast() {
+    synchronized(_model) {
+      DefaultMutableTreeNode root = (DefaultMutableTreeNode) _model.getRoot();
+      return (T) root.getLastLeaf().getUserObject();
     }
   }
   
@@ -674,7 +689,7 @@ public class JTreeSortNavigator extends JTree
   }
   
   /** Returns the currently selected leaf node, or null if the selected node is not a leaf. */
-  public INavigatorItem getCurrentSelectedLeaf() {
+  public INavigatorItem getCurrent() {
     synchronized (_model) {
       if (_current == null) return null;
       return _current.execute(_leafVisitor);
@@ -806,7 +821,7 @@ public class JTreeSortNavigator extends JTree
   /** If the currently selected item is not an INavigatorItem, select the one given. */
   public void requestSelectionUpdate(INavigatorItem ini) {
     synchronized (_model) {
-      if (getCurrentSelectedLeaf() == null) { // the currently selected node is not a leaf
+      if (getCurrent() == null) { // the currently selected node is not a leaf
         setActiveDoc(ini);
       }
     }

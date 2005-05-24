@@ -60,20 +60,23 @@ public class JTreeSortNavigatorTest extends TestCase {
   protected DefaultMutableTreeNode folder1;
   protected DefaultMutableTreeNode folder2;
   protected String projName;
+  INavigatorItem i1, i2, i3, i4;
   
   public void setUp() throws IOException {
     File f = File.createTempFile("project-",".pjt");
     tree = new JTreeSortNavigator(f.getCanonicalPath());
     
     tree.addTopLevelGroup("[ Source Files ]", new INavigatorItemFilter(){
-      public boolean accept(INavigatorItem n){
-        return true;
-      }
+      public boolean accept(INavigatorItem n) { return true; }
     });
-    tree.addDocument(new DummyINavigatorItem("item1"), "folder1");
-    tree.addDocument(new DummyINavigatorItem("item2"), "folder1");
-    tree.addDocument(new DummyINavigatorItem("item1"), "folder2");
-    tree.addDocument(new DummyINavigatorItem("item2"), "folder2");
+    i1 = new DummyINavigatorItem("item1");
+    i2 = new DummyINavigatorItem("item2");
+    i3 = new DummyINavigatorItem("item1");
+    i4 = new DummyINavigatorItem("item2");
+    tree.addDocument(i1, "folder1");
+    tree.addDocument(i2, "folder1");
+    tree.addDocument(i3, "folder2");
+    tree.addDocument(i4, "folder2");
     
     root = (DefaultMutableTreeNode)tree.getModel().getRoot();
     source = (DefaultMutableTreeNode)root.getChildAt(0);
@@ -81,6 +84,22 @@ public class JTreeSortNavigatorTest extends TestCase {
     folder2 = (DefaultMutableTreeNode)source.getChildAt(1);
     
     projName = root.toString();
+  }
+  
+  public void testTraversalOps() {
+    assertEquals("doc count test", 4, tree.getDocumentCount());
+    assertSame("getFirst test", i1, tree.getFirst());
+    assertSame("getLast test", i4, tree.getLast());
+    
+    tree.setActiveDoc(i1);
+    assertSame("getCurrent test", i1, tree.getCurrent());
+    assertSame("getNext test 1", i2, tree.getNext(i1));
+    assertSame("getNext test 2", i3, tree.getNext(i2));
+    assertSame("getNext test 3", i4, tree.getNext(i3));
+
+    assertSame("getPrevious test 1", i3, tree.getPrevious(i4));
+    assertSame("getPrevious test 2", i2, tree.getPrevious(i3));
+    assertSame("getPrevious test 3", i1, tree.getPrevious(i2));
   }
   
   public void testGeneratePathString() {
