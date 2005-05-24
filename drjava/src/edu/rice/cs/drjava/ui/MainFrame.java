@@ -2154,7 +2154,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   public void setStatusMessageColor(Color c) { _sbMessage.setForeground(c); }
 
   private void _moveToAuxiliary() {
-    INavigatorItem n = _model.getDocumentNavigator().getCurrentSelectedLeaf();
+    INavigatorItem n = _model.getDocumentNavigator().getCurrent();
     if (n != null) {
       OpenDefinitionsDocument d = (OpenDefinitionsDocument) n;  // FIX THIS!
       if (! d.isUntitled()) {
@@ -2168,7 +2168,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   }
   
   private void _removeAuxiliary() {
-    INavigatorItem n = _model.getDocumentNavigator().getCurrentSelectedLeaf();
+    INavigatorItem n = _model.getDocumentNavigator().getCurrent();
     if (n != null) {
       OpenDefinitionsDocument d = (OpenDefinitionsDocument) n;  // FIX THIS!
       if (! d.isUntitled()) {
@@ -4517,7 +4517,7 @@ public class MainFrame extends JFrame implements OptionConstants {
               if (groupName == _model.getSourceBinTitle())
                 _navPanePopupMenu.show(e.getComponent(), e.getX(), e.getY());
               else if (groupName == _model.getExternalBinTitle()) {
-                INavigatorItem n = _model.getDocumentNavigator().getCurrentSelectedLeaf();
+                INavigatorItem n = _model.getDocumentNavigator().getCurrent();
                 if (n != null) {
                   OpenDefinitionsDocument d = (OpenDefinitionsDocument) n;
                   if (d.isUntitled()) { _navPanePopupMenu.show(e.getComponent(), e.getX(), e.getY()); }
@@ -6029,7 +6029,8 @@ public class MainFrame extends JFrame implements OptionConstants {
           return;
         }
       }
-      else throw new DocumentClosedException(d,"Document in " + f + "closed unexpectedly");  // misnamed exception
+// The following line was commented out because it breaks when a user want to close but not save a deleted file      
+//      else throw new DocumentClosedException(d,"Document in " + f + "closed unexpectedly");  // misnamed exception
     }
   }
 
