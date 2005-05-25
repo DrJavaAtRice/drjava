@@ -107,23 +107,9 @@ class DefaultPlatform implements PlatformSupport {
   }
 
   /**
-   * Returns whether this is a Mac platform (any JDK version).
+   * Returns whether this is a Mac OS X platform.
    */
   public boolean isMacPlatform() {
-    return false;
-  }
-
-  /**
-   * Returns whether this is a Mac platform with JDK 1.3.1.
-   */
-  public boolean isMac13Platform() {
-    return false;
-  }
-
-  /**
-   * Returns whether this is a Mac platform with JDK 1.4.1.
-   */
-  public boolean isMac14Platform() {
     return false;
   }
 

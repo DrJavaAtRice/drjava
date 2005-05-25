@@ -57,19 +57,9 @@ import java.net.URL;
 public interface PlatformSupport {
   
   /**
-   * Returns whether this is a Mac platform (any JDK version).
+   * Returns whether this is a Mac OS X platform.
    */
   public boolean isMacPlatform();
-  
-  /**
-   * Returns whether this is a Mac platform with JDK 1.3.1.
-   */
-  public boolean isMac13Platform();
-  
-  /**
-   * Returns whether this is a Mac platform with JDK 1.4.1.
-   */
-  public boolean isMac14Platform();
   
   /**
    * Returns whether this is a Windows platform.

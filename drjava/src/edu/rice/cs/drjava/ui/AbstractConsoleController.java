@@ -157,7 +157,7 @@ public abstract class AbstractConsoleController implements Serializable {
 
   /**
    * Sets the font for the document, updating all existing text.
-   * This behavior is only necessary in Mac OS X, JDK 1.4.1, since
+   * This behavior is only necessary in Mac OS X, since
    * setFont() works fine on JTextPane on all other tested platforms.
    * @param f New font to use.
    */
@@ -168,7 +168,7 @@ public abstract class AbstractConsoleController implements Serializable {
 
   /**
    * Sets the color for the document, updating all existing text.
-   * This behavior is only necessary in Mac OS X, JDK 1.4.1, since
+   * This behavior is only necessary in Mac OS X, since
    * changing the main font works on all other tested platforms.
    * @param c New color to use.
    */
@@ -179,13 +179,13 @@ public abstract class AbstractConsoleController implements Serializable {
 
   /**
    * Sets the font and color for the document, updating all existing text.
-   * This behavior is only necessary in Mac OS X, JDK 1.4.1, since setFont() and
+   * This behavior is only necessary in Mac OS X, since setFont() and
    * changing the main font works on all other tested platforms.
    * @param f New font to use.
    * @param c New color to use.
    */
   public void setDefaultFont(Font f, Color c) {
-    if (PlatformFactory.ONLY.isMac14Platform()) {
+    if (PlatformFactory.ONLY.isMacPlatform()) {
       SimpleAttributeSet fontSet = new SimpleAttributeSet();
       StyleConstants.setFontFamily(fontSet, f.getFamily());
       StyleConstants.setFontSize(fontSet, f.getSize());

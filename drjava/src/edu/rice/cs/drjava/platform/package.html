@@ -26,11 +26,11 @@
   and the result is stored as a singleton field for easy access.  Client
   code can access platform-specific calls like so: 
   <code>PlatformFactory.ONLY.method()</code>.  <code>PlatformFactory</code>
-  currently differentiates between Windows, Mac OS X with a 1.3 JVM, Mac OS X
-  with a 1.4 JVM, and the default platform.  Note that in order to reference a
-  new platform implementation, it must already be compiled and added to the
-  classpath.  The current platforms are built with special ant targets which add
-  the class files to platforms.jar in the lib directory.
+  currently differentiates between Windows, Mac OS X, and the default platform.  
+  Note that in order to reference a new platform implementation, it must already 
+  be compiled and added to the classpath.  The current platforms are built 
+  with special ant targets which add the class files to platforms.jar in the 
+  lib directory.
 </p>
 <p>
   In order to add a new platform-specific feature to DrJava, you must follow

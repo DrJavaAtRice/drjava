@@ -171,7 +171,7 @@ public interface OptionConstants {
    */
   static class DefaultFont {
     public static Font getDefaultMainFont() {
-      if (PlatformFactory.ONLY.isMac14Platform()) {
+      if (PlatformFactory.ONLY.isMacPlatform()) {
         return Font.decode("Monaco-12");
       }
       else {
@@ -179,7 +179,7 @@ public interface OptionConstants {
       }
     }
     public static Font getDefaultLineNumberFont() {
-      if (PlatformFactory.ONLY.isMac14Platform()) {
+      if (PlatformFactory.ONLY.isMacPlatform()) {
         return Font.decode("Monaco-12");
       }
       else {
@@ -187,7 +187,7 @@ public interface OptionConstants {
       }
     }
     public static Font getDefaultDocListFont() {
-      if (PlatformFactory.ONLY.isMac14Platform()) {
+      if (PlatformFactory.ONLY.isMacPlatform()) {
         return Font.decode("Monaco-10");
       }
       else {

@@ -101,7 +101,7 @@
     <cvs dest="${dist}/${version-tag}"
          tag="HEAD"
          quiet="yes"
-         package="src/edu/rice/cs/drjava src/edu/rice/cs/util src/edu/rice/cs/lib src/edu/rice/cs/LICENSE src/edu/rice/cs/README src/edu/rice/cs/build-common.xml src/src-mac14 src/src-windows"
+         package="src/edu/rice/cs/drjava src/edu/rice/cs/util src/edu/rice/cs/lib src/edu/rice/cs/LICENSE src/edu/rice/cs/README src/edu/rice/cs/build-common.xml src/src-mac src/src-windows"
          command="export -N" />
 
     <zip zipfile="${dist}/${version-tag}-src.zip">
@@ -244,8 +244,8 @@
 <!--  commented out because the jsr14 v2.0 compiler adapter must be compiled using
       variance, whereas the rest of DrJava should be compiled with -novariance.
     <antcall target="do-compile">
-      <param name="projpath" value="${projpath_jsr14v2_0}" />
-      <param name="built" value="${built_jsr14v2_0}" />
+      <param name="compile-from" value="${srcroot_jsr14v2_0}" />
+      <param name="compile-to" value="${built_jsr14v2_0}" />
     </antcall> -->
 
     <!-- Make a jar in the lib directory. No tests are included. -->
@@ -265,26 +265,26 @@
   </target>
     
     
-  <!-- Compiles only the Mac OS X JDK 1.4 specific classes, and adds
+  <!-- Compiles only the Mac OS X specific classes, and adds
        them to platform.jar in the lib directory.
        Deletes the compiled classes when finished.
     -->
-  <target name="compile-mac14">
-    <property name="srcroot_mac14" 
-              value="${srcroot}/src-mac14" />
-    <property name="built_mac14"
-              value="${srcroot}/../built-mac14/" />
+  <target name="compile-mac">
+    <property name="srcroot_mac" 
+              value="${srcroot}/src-mac" />
+    <property name="built_mac"
+              value="${srcroot}/../built-mac/" />
 
     <!-- Build the classes -->
-    <mkdir dir="${built_mac14}" />
+    <mkdir dir="${built_mac}" />
     <antcall target="do-compile">
-      <param name="srcroot" value="${srcroot_mac14}" />
-      <param name="built" value="${built_mac14}" />
+      <param name="compile-from" value="${srcroot_mac}" />
+      <param name="compile-to" value="${built_mac}" />
     </antcall>
 
     <!-- Make a jar in the lib directory. No tests are included. -->
     <jar jarfile="${lib_dir}/platform.jar" update="yes">
-      <fileset dir="${built_mac14}">
+      <fileset dir="${built_mac}">
         <exclude name="**/*Test.class" />
         <exclude name="**/*Test$*.class" />
         <include name="${projpath}/**" />
@@ -295,31 +295,31 @@
     </jar>
 
     <!-- Delete the compiled classes -->
-    <delete dir="${built_mac14}" />
+    <delete dir="${built_mac}" />
   </target>
     
-  <!-- Compiles only the Mac OS X JDK 1.4 specific classes and runs
+  <!-- Compiles only the Mac OS X specific classes and runs
        all JUnit tests included with the platform support class.
        Deletes the compiled classes when finished.
     -->
-  <target name="test-mac14">
-    <property name="srcroot_mac14" 
-              value="${srcroot}/src-mac14" />
-    <property name="built_mac14"
-              value="${srcroot}/../built-mac14/" />
+  <target name="test-mac">
+    <property name="srcroot_mac" 
+              value="${srcroot}/src-mac" />
+    <property name="built_mac"
+              value="${srcroot}/../built-mac/" />
 
     <!-- Build the classes -->
-    <mkdir dir="${built_mac14}" />
+    <mkdir dir="${built_mac}" />
     <antcall target="do-compile">
-      <param name="srcroot" value="${srcroot_mac14}" />
-      <param name="built" value="${built_mac14}" />
+      <param name="compile-from" value="${srcroot_mac}" />
+      <param name="compile-to" value="${built_mac}" />
     </antcall>
 
     <!-- Run all platform-specific JUnit tests. -->
     <junit printsummary="yes" haltonerror="yes" haltonfailure="yes" fork="yes">
       <classpath>
         <path refid="classpath" />
-        <pathelement path="${built_mac14}" />
+        <pathelement path="${built_mac}" />
       </classpath>
 
       <!-- This makes JUnit display info about each test to console -->
@@ -330,7 +330,7 @@
       -->
       <batchtest>
         <!-- The root of the fileset must be where edu/ is. -->
-        <fileset dir="${srcroot}/src-mac14">
+        <fileset dir="${srcroot}/src-mac">
           <!-- Include only from projpath to only get classes in this project!
           -->
           <include name="${projpath}/**/*${test-spec}*Test.java" />
@@ -341,7 +341,7 @@
     </junit>
 
     <!-- Delete the compiled classes -->
-    <delete dir="${built_mac14}" />
+    <delete dir="${built_mac}" />
   </target>
     
   <!-- Compiles only the Windows specific classes, and adds
@@ -357,8 +357,8 @@
     <!-- Build the classes -->
     <mkdir dir="${built_windows}" />
     <antcall target="do-compile">
-      <param name="srcroot" value="${srcroot_windows}" />
-      <param name="built" value="${built_windows}" />
+      <param name="compile-from" value="${srcroot_windows}" />
+      <param name="compile-to" value="${built_windows}" />
     </antcall>
 
     <!-- Make a jar in the lib directory. No tests are included. -->
@@ -390,8 +390,8 @@
     <!-- Build the classes -->
     <mkdir dir="${built_windows}" />
     <antcall target="do-compile">
-      <param name="srcroot" value="${srcroot_windows}" />
-      <param name="built" value="${built_windows}" />
+      <param name="compile-from" value="${srcroot_windows}" />
+      <param name="compile-to" value="${built_windows}" />
     </antcall>
 
     <!-- Run all platform-specific JUnit tests. -->

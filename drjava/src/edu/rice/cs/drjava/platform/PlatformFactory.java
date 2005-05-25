@@ -64,42 +64,13 @@ public class PlatformFactory {
    * @return a platform-appropriate implementation of PlatformSupport
    */
   private static PlatformSupport getPlatformSupport() {
-    // Check for Mac OS X.
-    String mrjVer = System.getProperty("mrj.version");
+
+    // Get OS name string; we expect one of "windows xp", "mac os x", etc.
+    String os = System.getProperty("os.name").toLowerCase();
     
-    // Check for other OS types.
-    String os = System.getProperty("os.name");
-    
-    if (mrjVer != null) {
-      // This must be a Mac, but what JDK version?
-      String jdkVer = System.getProperty("java.specification.version");
-      
-      if (jdkVer.equals("1.4")) {
-        // This is a 1.4 compliant JDK.
-        // System.out.println("Mac14Platform");
-        return Mac14Platform.ONLY;
-      }
-      else if (jdkVer.equals("1.3")) {
-        // This is a 1.3 compliant JDK.
-        // System.out.println("Mac13Platform");
-        return Mac13Platform.ONLY;
-      }
-      else {
-        // We don't know what version of the JDK this is, so use a default for OS X.
-        // System.out.println("MacPlatform");
-        return MacPlatform.ONLY;
-      }
-    }
-    // Check for Windows platform.
-    else if ((os != null) && (os.toLowerCase().indexOf("windows") == 0)) {
-      // This must be a Windows OS.
-      // System.out.println("WindowsPlatform");
-      return WindowsPlatform.ONLY;
-    }
-    else {
-      // This isn't one of our specifically-supported platforms, so use the default.
-      // System.out.println("DefaultPlatform");
-      return DefaultPlatform.ONLY;
-    }
+	if (os.startsWith("mac os x")) { return MacPlatform.ONLY; }
+	else if (os.startsWith("windows")) { return WindowsPlatform.ONLY; }
+	else { return DefaultPlatform.ONLY; }
   }
+  
 }
