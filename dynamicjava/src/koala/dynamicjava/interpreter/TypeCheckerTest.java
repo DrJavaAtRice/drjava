@@ -848,18 +848,26 @@ public class TypeCheckerTest extends DynamicJavaTestCase {
   
   /**
    * Tests Unsigned Shift on two longs
+   * Note: Test changed on may 25th 2005, as result of altering the parser to handle ints and longs correctly (long x = -9223372036854775808L used to fail).
+   * We now return an IntegerLiteral instead of a MinusExpression if the minus is followed by a number (either int or long).
    */
   public void testUShiftRight() throws InterpreterException {
     String text = "new Long(-1) >>> new Long(1);";
-      
-    String expectedLeft = "(koala.dynamicjava.tree.ObjectMethodCall: longValue null (koala.dynamicjava.tree.SimpleAllocation: (koala.dynamicjava.tree.ReferenceType: Long) [(koala.dynamicjava.tree.MinusExpression: (koala.dynamicjava.tree.IntegerLiteral: 1 1 int))]))";
-    String expectedRight = "(koala.dynamicjava.tree.ObjectMethodCall: longValue null (koala.dynamicjava.tree.SimpleAllocation: (koala.dynamicjava.tree.ReferenceType: Long) [(koala.dynamicjava.tree.IntegerLiteral: 1 1 int)]))";
-
-    _checkBinaryExpression(text, expectedLeft, expectedRight);
+    String result = (_parseCode(text).get(0)).toString();
+    String expected = "(koala.dynamicjava.tree.UnsignedShiftRightExpression: (koala.dynamicjava.tree.SimpleAllocation: (koala.dynamicjava.tree.ReferenceType: Long) [(koala.dynamicjava.tree.IntegerLiteral: -1 -1 int)]) (koala.dynamicjava.tree.SimpleAllocation: (koala.dynamicjava.tree.ReferenceType: Long) [(koala.dynamicjava.tree.IntegerLiteral: 1 1 int)]))";
+    assertEquals("String does not match expected string", expected, result);
+    
+    
+    //String expectedLeft = "(koala.dynamicjava.tree.ObjectMethodCall: longValue null (koala.dynamicjava.tree.SimpleAllocation: (koala.dynamicjava.tree.ReferenceType: Long) [(koala.dynamicjava.tree.MinusExpression: (koala.dynamicjava.tree.IntegerLiteral: 1 1 int))]))";
+    //String expectedRight = "(koala.dynamicjava.tree.ObjectMethodCall: longValue null (koala.dynamicjava.tree.SimpleAllocation: (koala.dynamicjava.tree.ReferenceType: Long) [(koala.dynamicjava.tree.IntegerLiteral: 1 1 int)]))";
+   //    _checkBinaryExpression(text, expectedLeft, expectedRight);
   }
   
   //////////// Shift Assignments ////////////////////////
  
+ 
+  
+    
   /**
    * Tests the <<= operation.
    */

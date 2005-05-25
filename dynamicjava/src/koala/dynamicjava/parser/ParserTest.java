@@ -148,4 +148,115 @@ public class ParserTest extends TestCase {
     return m.getParameters();
   }
   
+  /* This test is added to cover the tests where our parser handles the corner cases of dealing with ints */
+  public void testIntMinValue() throws ParseException{
+    List<Node> list = parseText("int x = Integer.MIN_VALUE");
+    assertEquals("List should be of length one", 1, list.size());
+    Node n = list.get(0);
+    assertEquals("Type of Node", VariableDeclaration.class, n.getClass());
+  }
+  public void testIntMaxValue() throws ParseException{
+    List<Node> list = parseText("int x = Integer.MAX_VALUE");
+    assertEquals("List should be of length one", 1, list.size());
+    Node n = list.get(0);
+    assertEquals("Type of Node", VariableDeclaration.class, n.getClass());
+  }
+  /* This test is added to reveal the bug reported with number: 1201685 - Interactions pane rejects minimum int */
+  public void testSmallestInt() throws ParseException {
+    List<Node> list = parseText("int x = -2147483648");
+    assertEquals("List should be of length one", 1, list.size());
+    Node n = list.get(0);
+    assertEquals("Type of Node", VariableDeclaration.class, n.getClass());
+  }
+  public void testBiggestIntValue() throws ParseException {
+    List<Node> list = parseText("int x = 2147483647");
+    assertEquals("List should be of length one", 1, list.size());
+    Node n = list.get(0);
+    assertEquals("Type of Node", VariableDeclaration.class, n.getClass());
+  }
+  public void testIntTooBig() throws ParseException {
+    try{
+      List<Node> list = parseText("int x = 2147483648");
+     fail("Should have thrown a NumberFormatException!");
+    }
+    catch(NumberFormatException nfe){
+      //Exception expected.
+    }
+  }
+  
+  public void testIntTooSmall() throws ParseException {
+    try{
+      List<Node> list = parseText("int x = -2147483649");
+      fail("Should have thrown a NumberFormatException!");
+    }
+    catch(NumberFormatException nfe){
+      //Exception expected.
+    }
+  }
+  
+ /* This test is added to cover the tests where our parser handles the corner cases of dealing with longs */
+  public void testLongMinValue() throws ParseException{
+    List<Node> list = parseText("long x = Long.MIN_VALUE");
+    assertEquals("List should be of length one", 1, list.size());
+    Node n = list.get(0);
+    assertEquals("Type of Node", VariableDeclaration.class, n.getClass());
+  }
+  
+  /* This test is added to cover the tests where our parser handles the corner cases of dealing with longs */
+  public void testSmallestLong() throws ParseException{
+    List<Node> list = parseText("long x = -9223372036854775808L");
+    assertEquals("List should be of length one", 1, list.size());
+    Node n = list.get(0);
+    assertEquals("Type of Node", VariableDeclaration.class, n.getClass());
+  }
+  
+  /* This test is added to cover the tests where our parser handles the corner cases of dealing with longs */
+  public void testBiggestLongValue() throws ParseException{
+    List<Node> list = parseText("long x = 9223372036854775807L");
+    assertEquals("List should be of length one", 1, list.size());
+    Node n = list.get(0);
+    assertEquals("Type of Node", VariableDeclaration.class, n.getClass());
+  }
+  
+  /* This test is added to cover the tests where our parser handles the corner cases of dealing with longs */
+  public void testLongMaxValue() throws ParseException{
+    List<Node> list = parseText("long x = Long.MAX_VALUE");
+    assertEquals("List should be of length one", 1, list.size());
+    Node n = list.get(0);
+    assertEquals("Type of Node", VariableDeclaration.class, n.getClass());
+  }
+  public void testLongTooBig() throws ParseException {
+    try{
+      List<Node> list = parseText("long x = 9223372036854775808L");
+     fail("Should have thrown a NumberFormatException!");
+    }
+    catch(NumberFormatException nfe){
+      //Exception expected.
+    }
+  }
+  
+  
+  
+  public void testLongTooSmall() throws ParseException {
+    try{
+      List<Node> list = parseText("long x = -9223372036854775809L");
+      fail("Should have thrown a NumberFormatException!");
+    }
+    catch(NumberFormatException nfe){
+      //Exception expected.
+    }
+  }
+   
+//  
+//  /* Test which reflect a test where Dynamicjava allows a number to be declared that is too small to be represented */
+//  public void testFloatingPointNumberTooSmall() throws ParseException {
+//    List<Node> list = parseText("double d = 00000000000000000001E-999");
+//    fail("Dynamicjava allowed a declaration it shouldn't, it should have been an error with error message \"floating point number too small\"");
+//  }
+//  
+//  /* Test which reflect a test where Dynamicjava allows a number to be declared that is too small to be represented */
+//  public void testFloatingPointNumberTooLarge() throws ParseException {
+//    List<Node> list = parseText("double d = 1E999");
+//    fail("Dynamicjava allowed a declaration it shouldn't, it should have been an error with error message \"floating point number too large\"");
+//  }
 }

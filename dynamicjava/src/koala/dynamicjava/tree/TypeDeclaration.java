@@ -139,7 +139,12 @@ public abstract class TypeDeclaration extends Node {
    */
   public void setName(String s) {
     if (s == null) throw new IllegalArgumentException("s == null");
-
+    
+    
+    
+    
+    
+    
     firePropertyChange(NAME, name, name = s);
   }
 

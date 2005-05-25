@@ -123,7 +123,7 @@ public class ClassDeclaration extends TypeDeclaration {
   }
 
   protected String toStringHelper() {
-	  return java.lang.reflect.Modifier.toString(getAccessFlags())+" "+getName()+
-	         " "+getInterfaces()+" "+getMembers();
+   return java.lang.reflect.Modifier.toString(getAccessFlags())+" "+getName()+
+          " "+getInterfaces()+" "+getMembers();
   }
 }

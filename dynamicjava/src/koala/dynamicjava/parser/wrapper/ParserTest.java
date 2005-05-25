@@ -355,7 +355,8 @@ public class ParserTest extends TestCase {
     verifyOutput(" synchronized (mutex) { ; (i)++; lock.release(); ;} ", expectedAST);
   }
   
-//  This syntax (a try without a catch) is not allowed in dynamic java
+//  This syntax (a try without a catch) is not allowed in dynamicjava
+//  And a try without a catch (or finally) is not allowed in regular java either!
 //  ------
 //  public void testTryStatement() throws ParseException {    
 //    List<Node> stmts = new LinkedList<Node>();
@@ -632,7 +633,7 @@ public class ParserTest extends TestCase {
 //    verifyOutput("int x = 0; int y = 1; int z = 2;");
 //  }
 //  
-//  public void testMultipleInputs1() throws ParseException {
+// public void testMultipleInputs1() throws ParseException {
 //    verifyOutput("o.m(); int x = 5; (x) + (y)");
 //  }
 //  
@@ -832,11 +833,26 @@ public class ParserTest extends TestCase {
 //      assertEquals(right, getParser(str).Expression());
 //    }
 //  }
-//
+  
+  
+/*  public void testIntegerLiterals() throws ParseException{
+    int[] values = {0,1,Integer.MAX_VALUE, Integer.MIN_VALUE};
+    
+    String str = "";
+    Parser p;
+    List<Node> statements;
+    
+    for(int i:values){
+      str = String.valueOf(values[i]);
+      p = new Parser(new StringReader(str));
+      statements = p.parseStream();
+      assertEquals("Parser failed to parse the int value correctly.", sizeExpected, actual);
+
+    }
+  */  
+  
 //  public void testIntegerLiterals() throws Throwable {
-//    int[] vals = {
-//      0, 1, Integer.MAX_VALUE, Integer.MIN_VALUE
-//    };
+//    int[] vals = { 0, 1, Integer.MAX_VALUE, Integer.MIN_VALUE };
 //
 //    for (int i = 0; i < vals.length; i++) {
 //      String str = String.valueOf(vals[i]);
@@ -847,7 +863,7 @@ public class ParserTest extends TestCase {
 //    String str = "0xCAFEBABE";
 //    assertEquals(new IntegerLiteral(NULL_INFO, 0xCAFEBABE), getParser(str).Expression());
 //  }
-//
+
 //  public void testLongLiterals() throws Throwable {
 //    long[] vals = {
 //      0L, 1L, Long.MAX_VALUE, Long.MIN_VALUE
