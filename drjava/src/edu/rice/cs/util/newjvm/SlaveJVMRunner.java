@@ -53,23 +53,21 @@ import java.rmi.*;
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.swing.ScrollableDialog;
 import edu.rice.cs.util.FileOps;
+import edu.rice.cs.util.PreventExitSecurityManager;
 
-/**
- * This class is used for its {@link #main} method, which is used
- * when a new slave JVM is invoked. See the main method documentation
- * for information on the command line parameters this class requires.
+/** This class is used for its {@link #main} method, which is used when a new slave JVM is invoked. See the main 
+ *  method documentation for information on the command line parameters this class requires.
  * 
- * If there is an error setting up the slave JVM before the RMI
- * links can be established, this JVM process will exit with an error
- * code according to the following list:
- * <DL>
- * <DT>1</DT><DD>Invalid number of command line arguments.</DD>
- * <DT>2</DT><DD>Error deserializing remote stub</DD>
- * <DT>3</DT><DD>Error instantiating slave implementation class</DD>
- * </DL>
- * If the slave JVM completes successfully, it will exit with code 0.
+ *  If there is an error setting up the slave JVM before the RMI links can be established, this JVM process will 
+ *  exit with an error code according to the following list:
+ *  <DL>
+ *  <DT>1</DT><DD>Invalid number of command line arguments.</DD>
+ *  <DT>2</DT><DD>Error deserializing remote stub</DD>
+ *  <DT>3</DT><DD>Error instantiating slave implementation class</DD>
+ *  </DL>
+ *  If the slave JVM completes successfully, it will exit with code 0.
  *
- * @version $Id$
+ *  @version $Id$
  */
 public final class SlaveJVMRunner {
 
@@ -118,13 +116,13 @@ public final class SlaveJVMRunner {
       if (args.length != 3 && args.length != 2) System.exit(1);
       
       // if we have a remote classloader to use
-      if(args.length == 3){
+      if (args.length == 3) {
         //get the classloader
         IRemoteClassLoader remote = null;
         FileInputStream fstream = new FileInputStream(args[2]);
         ObjectInputStream ostream = new ObjectInputStream(fstream);
         remote = (IRemoteClassLoader) ostream.readObject();
-        if(ClassLoader.getSystemClassLoader() instanceof CustomSystemClassLoader){
+        if (ClassLoader.getSystemClassLoader() instanceof CustomSystemClassLoader) {
           CustomSystemClassLoader loader = (CustomSystemClassLoader) ClassLoader.getSystemClassLoader();
           loader.setMasterRemote(remote);
         }
@@ -140,7 +138,7 @@ public final class SlaveJVMRunner {
         SlaveRemote slave = _getInstance(slaveClass);
         
         // Must export slave object to RMI so we can pass stub to the master
-        SlaveRemote stub= (SlaveRemote) UnicastRemoteObject.exportObject(slave);
+        SlaveRemote stub = (SlaveRemote) UnicastRemoteObject.exportObject(slave);
         
         // Debug: check that the IP address is 127.0.0.1
         //javax.swing.JOptionPane.showMessageDialog(null, stub.toString());

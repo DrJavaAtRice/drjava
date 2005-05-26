@@ -47,27 +47,18 @@ package edu.rice.cs.util;
 
 import junit.framework.*;
 
-/**
- * Test cases for {@link PreventExitSecurityManager}.
+/** Test cases for {@link PreventExitSecurityManager}.
  *
- * @version $Id$
+ *  @version $Id$
  */
 public class PreventExitSecurityManagerTest extends TestCase {
   private PreventExitSecurityManager _manager;
 
-  /**
-   * Activates the security manager before each test.
-   */
-  public void setUp() {
-    _manager = PreventExitSecurityManager.activate();
-  }
+  /** Activates the security manager before each test. */
+  public void setUp() { _manager = PreventExitSecurityManager.activate(); }
 
-  /**
-   * Deactivates the security manager after each test.
-   */
-  public void tearDown() {
-    _manager.deactivate();
-  }
+  /** Deactivates the security manager after each test. */
+  public void tearDown() { _manager.deactivate(); }
 
   public void testSystemExitPrevented() {
     try {
