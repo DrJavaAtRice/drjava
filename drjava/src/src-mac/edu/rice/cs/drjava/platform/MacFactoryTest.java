@@ -51,7 +51,7 @@ import junit.framework.*;
  * A simple test class to verify that PlatformFactory has returned the appropriate
  * PlatformSupport class.
  */
-public class Mac13FactoryTest extends TestCase {
+public class MacFactoryTest extends TestCase {
   /**
    * Gets the PlatformSupport implementation for this platform from the
    * PlatformFactory and verifies that it is an instance of the correct
@@ -61,7 +61,7 @@ public class Mac13FactoryTest extends TestCase {
     PlatformSupport ps = PlatformFactory.ONLY;
     String psClassName = ps.getClass().getName();
     assertEquals("PlatformFactory produced the appropriate PlatformSupport?",
-                "edu.rice.cs.drjava.platform.Mac13Platform",
+                "edu.rice.cs.drjava.platform.MacPlatform",
                 psClassName);
   }
 }

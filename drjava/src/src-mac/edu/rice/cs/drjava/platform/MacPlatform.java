@@ -45,28 +45,61 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.platform;
 
+import java.net.URL;
 import com.apple.eawt.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import javax.swing.*;
 
+
 /**
- * Platform-specific code unique to the 1.4.* version of the JDK on Mac OS X.
+ * Platform-specific code shared by all Mac OS X platforms.
  */
-class Mac14Platform extends MacPlatform {
+class MacPlatform extends DefaultPlatform {
   /**
    * Singleton instance.
    */
-  public static Mac14Platform ONLY = new Mac14Platform();
+  public static MacPlatform ONLY = new MacPlatform();
   
   /**
    * Private constructor for singleton pattern.
    */
-  protected Mac14Platform() {};
+  protected MacPlatform() {};
+ 
+  public boolean openURL(URL address) {
+    // First, try to delegate up.
+    if (super.openURL(address)) {
+      return true;
+    }
+    else {
+      try {
+        // OS X doesn't like how Java formats file URLs:
+        //  "file:/Users/dir/file.html" isn't legal.
+        // Instead, we need to put another slash in the protocol:
+        //  "file:///Users/dir/file.html"
+        String addressString = address.toString();
+        if (addressString.startsWith("file:/")) {
+          String suffix = addressString.substring("file:/".length(), addressString.length());
+          addressString = "file:///" + suffix;
+        }
+
+        // If there is no command specified, or it won't work, try using "open".
+        //Process proc = 
+        Runtime.getRuntime().exec(new String[] { "open", addressString });
+      }
+      catch (Throwable t) {
+        // If there was any kind of problem, ignore it and report failure.
+        return false;
+      }
+    }
+    
+    // Otherwise, trust that it worked.
+    return true;
+  }
   
   /**
    * Hook for performing general UI setup.  Called before all other UI setup is done.
-   * The Mac JDK 1.4 implementation sets a system property to use the screen menu bar.
+   * The Mac JDK implementation sets a system property to use the screen menu bar.
    */
   public void beforeUISetup() {
     System.setProperty("apple.laf.useScreenMenuBar","true");
@@ -74,7 +107,7 @@ class Mac14Platform extends MacPlatform {
    
   /**
    * Hook for performing general UI setup.  Called after all other UI setup is done.
-   * The Mac JDK 1.4 implementation adds handlers for the application menu items.
+   * The Mac JDK implementation adds handlers for the application menu items.
    * @param about the Action associated with openning the About dialog
    * @param prefs the Action associated with openning the Preferences dialog
    * @param quit the Action associated with quitting the DrJava application
@@ -116,16 +149,9 @@ class Mac14Platform extends MacPlatform {
   }
   
   /**
-   * Returns whether this is a Mac platform (any JDK version).
+   * Returns whether this is a Mac platform.
    */
   public boolean isMacPlatform() {
-    return true;
-  }
-  
-  /**
-   * Returns whether this is a Mac platform with JDK 1.4.1.
-   */
-  public boolean isMac14Platform() {
     return true;
   }
   

@@ -8,6 +8,10 @@
     srcroot
     projpath
     public_javadoc_dir
+	
+  These are optional:
+    compile-from
+	compile-to
 
   Assumes these targets exist:
     stable
@@ -15,6 +19,9 @@
  
 -->
 <!-- <taskdef name="javamake" classname="com.sun.tools.javamake.ant.JavaMake"/>  -->
+
+<property name="compile-from" value="${srcroot}" />
+<property name="compile-to" value="${built}" />
 
 <property name="build.sysclasspath" value="last" />
 
@@ -47,26 +54,10 @@
   <pathelement path="${built}" />
 </path>
 
-<target name="compile-tstamp-gmt">
-  <javac srcdir="${srcroot}"
-         includes="edu/rice/cs/util/ant/TstampGMT.java"
-         destdir="${built}"
-         bootclasspath="${sun.boot.class.path}"
-         source="1.5"
-         target="jsr14"
-         fork="on"
-         debug="on"
-         optimize="off">
-  </javac>
-</target>
-
 <!-- Init target. All others depend on it. Initialize the directory. -->
 <target name="init">
   <available type="file" file="${jsr14_classpath}" property="jsr14_ok" />
   <!--antcall target="check_for_jsr14" /-->
-  <antcall target="compile-tstamp-gmt"/>
-  <taskdef name="tstamp_gmt" classname="edu.rice.cs.util.ant.TstampGMT" classpath="${built}"/>
-  <tstamp_gmt /> <!-- Ant requires us to make time stamp -->
   <mkdir dir="${built}" /> <!-- Make the built directory -->
 
   <pathconvert refid="classpath"
@@ -76,14 +67,23 @@
 </target>
 
 
+<!-- Get a timestamp based on GMT, rather than local time -->
+<target name="get-timestamp">
+  <tstamp>
+	<format property="DSTAMP" pattern="yyyyMMdd" timezone="GMT" />
+	<format property="TSTAMP" pattern="HHmm" timezone="GMT" />
+	<format property="TODAY" pattern="MMMM dd yyyy" timezone="GMT" />
+  </tstamp>
+</target>
+
+
+
 <!-- Reconcile source with CVS archive -->
 <target name="update" depends="init">
   <cvs command="update -d -P" compression="true" />
 </target>
 
-<target name="make-version-stamp">
-  <tstamp_gmt /> <!-- get new time stamp to use for CVS tag -->
-
+<target name="make-version-stamp" depends="get-timestamp">
   <!-- Create new Version.java, filling in date and time. -->
   <filter token="DATE" value="${DSTAMP}" />
   <filter token="TIME" value="${TSTAMP}" />
@@ -103,7 +103,7 @@
      After committing, we tag the build we just made with the tag
      projectname-date-time.
 -->
-<target name="do-commit" depends="clean, update, test, make-version-stamp">
+<target name="do-commit" depends="clean, update, test, make-version-stamp, get-timestamp">
   <property name="version-tag"
             value="${ant.project.name}-${DSTAMP}-${TSTAMP}" />
 
@@ -204,10 +204,10 @@
      This version works with JDK 1.5.0
 --> 
 <target name="do-compile" depends="init">
-  <mkdir dir="${built}"/>
-  <javac sourcepath="" srcdir="${srcroot}"
+  <mkdir dir="${compile-to}"/>
+  <javac sourcepath="" srcdir="${compile-from}"
          includes="${projpath}/**/*java"
-         destdir="${built}"
+         destdir="${compile-to}"
          classpath="${classpath_text}"
          source="1.5"
          target="jsr14"
@@ -224,10 +224,10 @@
      This version works with JDK 1.5.0
 -->
 <target name="checked-compile" depends="init">
-  <mkdir dir="${built}"/>
-  <javac sourcepath="" srcdir="${srcroot}"
+  <mkdir dir="${compile-to}"/>
+  <javac sourcepath="" srcdir="${compile-from}"
          includes="${projpath}/**/*java"
-         destdir="${built}"
+         destdir="${compile-to}"
          classpath="${classpath_text}"
          source="1.5"
          debug="on"
@@ -273,8 +273,7 @@
 </target>
 
 <!-- generate private javadoc for current uncommitted version -->
-<target name="javadoc" depends="init">
-  <tstamp_gmt />
+<target name="javadoc" depends="init, get-timestamp">
   <antcall target="generate_javadoc">
     <param name="javadoc_dir" value="${private_javadoc_dir}" />
     <param name="javadoc_title" value="${user.name}-uncommitted-${ant.project.name}-${DSTAMP}-${TSTAMP}" />
