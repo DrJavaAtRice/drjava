@@ -8,6 +8,10 @@
     srcroot
     projpath
     public_javadoc_dir
+	
+  These are optional:
+    compile-from
+	compile-to
 
   Assumes these targets exist:
     stable
@@ -15,6 +19,9 @@
  
 -->
 <!-- <taskdef name="javamake" classname="com.sun.tools.javamake.ant.JavaMake"/>  -->
+
+<property name="compile-from" value="${srcroot}" />
+<property name="compile-to" value="${built}" />
 
 <property name="build.sysclasspath" value="last" />
 
@@ -40,7 +47,7 @@
 
 <!-- classpath to use everywhere. -->
 <path id="classpath">
-<pathelement location="${jsr14_classpath}" />
+  <pathelement location="${jsr14_classpath}" />
 <!--  <pathelement path="${java.class.path}" /> -->
   <fileset dir="${lib_dir}">
     <include name="*.jar" />
@@ -48,27 +55,10 @@
   <pathelement path="${built}" />
 </path>
 
-<target name="compile-tstamp-gmt">
-  <javac srcdir="${srcroot}"
-         includes="edu/rice/cs/util/ant/TstampGMT.java"
-         destdir="${built}"
-         bootclasspath="${sun.boot.class.path}"
-source="1.5"
-target="jsr14"
-         fork="on"
-         debug="on"
-         optimize="off">
-    <!-- compilerarg value="-J-Xbootclasspath/p:${jsr14_classpath}"/-->
-  </javac>
-</target>
-
 <!-- Init target. All others depend on it. Initialize the directory. -->
 <target name="init">
   <available type="file" file="${jsr14_classpath}" property="jsr14_ok" />
-  <antcall target="check_for_jsr14"/>
-  <antcall target="compile-tstamp-gmt"/>
-  <taskdef name="tstamp_gmt" classname="edu.rice.cs.util.ant.TstampGMT" classpath="${built}"/>
-  <tstamp_gmt /> <!-- Ant requires us to make time stamp -->
+  <antcall target="check_for_jsr14" />
   <mkdir dir="${built}" /> <!-- Make the built directory -->
 
   <pathconvert refid="classpath"
@@ -81,14 +71,24 @@ target="jsr14"
   <fail message=" JSR-14 prototype compiler was not found. A jar file containing the compiler must be put in ${lib_dir}/jsr14.jar. (We can not distribute the jar for licensing reasons.) To download jsr14, go to http://developer.java.sun.com/developer/earlyAccess/adding_generics. Then unzip the file you downloaded, and move the included javac.jar (or gjc-rt.jar) to lib/jsr14.jar." />
 </target>
 
-<!-- Reconcile source with CVS archive -->
-<target name="update" depends="init">
-  <cvs command="update -d -P" />
+
+<!-- Get a timestamp based on GMT, rather than local time -->
+<target name="get-timestamp">
+  <tstamp>
+	<format property="DSTAMP" pattern="yyyyMMdd" timezone="GMT" />
+	<format property="TSTAMP" pattern="HHmm" timezone="GMT" />
+	<format property="TODAY" pattern="MMMM dd yyyy" timezone="GMT" />
+  </tstamp>
 </target>
 
-<target name="make-version-stamp">
-  <tstamp_gmt /> <!-- get new time stamp to use for CVS tag -->
 
+
+<!-- Reconcile source with CVS archive -->
+<target name="update" depends="init">
+  <cvs command="update -d -P" compression="true" />
+</target>
+
+<target name="make-version-stamp" depends="get-timestamp">
   <!-- Create new Version.java, filling in date and time. -->
   <filter token="DATE" value="${DSTAMP}" />
   <filter token="TIME" value="${TSTAMP}" />
@@ -108,19 +108,13 @@ target="jsr14"
      After committing, we tag the build we just made with the tag
      projectname-date-time.
 -->
-<target name="do-commit" depends="clean, update, test, jar, make-version-stamp">
+<target name="do-commit" depends="clean, update, test, make-version-stamp, get-timestamp">
   <property name="version-tag"
             value="${ant.project.name}-${DSTAMP}-${TSTAMP}" />
 
   <!-- recompile to make new version number get into code. -->
   <echo message="All tests passed. Rebuilding to put version tag (${version-tag}) into the code." />
   <antcall target="compile" />
-  
-  <!-- Copy the dynamicjava.jar to the lib directory and commit it. -->
-  <copy file="${jarfile}"
-          tofile="${lib_dir}/dynamicjava.jar"
-          overwrite="yes"/>
-  <echo message="Copied current dynamicjava.jar to the lib directory. Please commit it to keep DrJava in sync with the koala code base." />
 
   <tempfile property="commit-comments-filename" 
             destdir="${java.io.tmpdir}"
@@ -137,7 +131,7 @@ target="jsr14"
   </cvs>
   <delete file="${commit-comments-filename}"/>
 
-  <cvs command="tag -c ${version-tag}" quiet="true" />
+  <cvs command="tag -c ${version-tag}" quiet="true" compression="true" />
 
   <echo message="New version ${version-tag} committed to CVS." />
   <echo message="Note: This version has not yet been released. To release it, follow the process described at http://sourceforge.net/docman/display_doc.php?docid=9899&amp;group_id=44253." />
@@ -208,45 +202,140 @@ target="jsr14"
 <target name="commit-and-release" depends="commit, release">
 </target>
 
+
 <!-- Compile. We have to start at srcroot and then selectively include
      just this project in order for it to realize what files have already
      been compiled (preventing needless recompilation).
 
-     This version works with JDK 1.4.2 and JSR-14 v2.3+ as well as JDK 1.5.0.
-     (Be sure to have the right version of tools.jar on your classpath.)
--->
+     This version works with JDK 1.3 and JSR-14 v1.0.
+     (Necessary for releases.)  
 <target name="do-compile" depends="init">
-  <mkdir dir="${built}"/>
-  <javac srcdir="${srcroot}"
+  <mkdir dir="${compile-to}"/>
+  <javac sourcepath="" srcdir="${compile-from}"
          includes="${projpath}/**/*java"
-         destdir="${built}"
+         destdir="${compile-to}"
+         bootclasspath="${jsr14_classpath}:${jsr14_collect_classpath}:${sun.boot.class.path}"
+  classpath="${classpath_text}"
+         target="1.1"
+         debug="on"
+         optimize="off">
+    <compilerarg value="-gj" />
+  </javac>
+</target>    
+-->
+
+<!-- Compile. We have to start at srcroot and then selectively include
+     just this project in order for it to realize what files have already
+     been compiled (preventing needless recompilation).
+
+     This version works with JDK 1.4.1 and JSR-14 v1.3.
+     (Be sure to have the right version of tools.jar on your classpath.)
+
+<target name="do-compile" depends="init">
+  <mkdir dir="${compile-to}"/>
+  <javac sourcepath="" srcdir="${compile-from}"
+         includes="${projpath}/**/*java"
+         destdir="${compile-to}"
          bootclasspath="${jsr14_classpath}:${jsr14_collect_classpath}:${sun.boot.class.path}" 
-         classpath="${classpath_text}"
+  classpath="${classpath_text}"
+         debug="on"
+         optimize="off">
+  </javac>
+</target>
+-->
+
+
+<!-- Compile. We have to start at srcroot and then selectively include
+     just this project in order for it to realize what files have already
+     been compiled (preventing needless recompilation).
+
+     This version works with JDK 1.4.1 and JSR-14 v2.0.
+     (Be sure to have the right version of tools.jar on your classpath.)
+
+<target name="do-compile" depends="init">
+  <mkdir dir="${compile-to}"/>
+  <javac sourcepath="" srcdir="${compile-from}"
+         includes="${projpath}/**/*java"
+         destdir="${compile-to}"
+         bootclasspath="${jsr14_classpath}:${jsr14_collect_classpath}:${sun.boot.class.path}" 
+  classpath="${classpath_text}"
          source="1.5"
-         target="jsr14"
+         target="1.5"
          debug="on"
          fork="on"
          optimize="off">
-    <compilerarg value="-warnunchecked"/>
+    <compilerarg value="-J-Xbootclasspath/p:${jsr14_classpath}"/>
+    <compilerarg value="-novariance"/>
+  </javac>
+</target>
+-->
+
+
+<!-- Compile. We have to start at srcroot and then selectively include
+     just this project in order for it to realize what files have already
+     been compiled (preventing needless recompilation).
+
+     This version works with JDK 1.4.1 and JSR-14 v2.2.
+     (Be sure to have the right version of tools.jar on your classpath.)
+<target name="do-compile" depends="init">
+  <mkdir dir="${compile-to}"/>
+  <javac sourcepath="" srcdir="${compile-from}"
+         includes="${projpath}/**/*java"
+         destdir="${compile-to}"
+         bootclasspath="${jsr14_collect_classpath}:${sun.boot.class.path}" 
+  classpath="${classpath_text}"
+         source="1.5"
+         debug="on"
+         fork="on"
+         optimize="off">
+    <compilerarg value="-J-Xbootclasspath/p:${jsr14_classpath}"/>
+  </javac>
+</target>
+-->
+       
+       
+<!-- Compile. We have to start at srcroot and then selectively include
+     just this project in order for it to realize what files have already
+     been compiled (preventing needless recompilation).
+
+     This version works with JDK 1.4.2 and JSR-14 v2.3, v2.4, or v2.5 as
+     well as with JDK 1.5.0.
+     (Be sure to have the right version of tools.jar on your classpath.) 
+--> 
+
+<target name="do-compile" depends="init">
+  <mkdir dir="${compile-to}"/>
+  <javac sourcepath="" srcdir="${compile-from}"
+         includes="${projpath}/**/*java"
+         destdir="${compile-to}"
+         bootclasspath="${jsr14_classpath}:${jsr14_collect_classpath}:${sun.boot.class.path}" 
+  classpath="${classpath_text}"
+         source="1.5"
+       target="jsr14"
+         debug="on"
+         fork="on"
+         optimize="off">
     <compilerarg value="-J-Xbootclasspath/p:${jsr14_classpath}"/>
   </javac>
 </target>
 
-<!-- Raw Compile. Identical to Compile with Generic Warning Checking
-     disabled.
+<!-- Checked Compile. Identical to Compile with Generic Warning Checking
+     enabled.
+
+     This version works with JDK 1.4.2 and JSR-14 v2.2.
 -->
-<target name="raw-compile" depends="init">
-  <mkdir dir="${built}"/>
-  <javac srcdir="${srcroot}"
+<target name="checked-compile" depends="init">
+  <mkdir dir="${compile-to}"/>
+  <javac sourcepath="" srcdir="${compile-from}"
          includes="${projpath}/**/*java"
-         destdir="${built}"
-         bootclasspath="${sun.boot.class.path}" 
+         destdir="${compile-to}"
+         bootclasspath="${jsr14_collect_classpath}:${sun.boot.class.path}" 
   classpath="${classpath_text}"
          source="1.5"
-         target="jsr14"
          debug="on"
          fork="on"
          optimize="off">
+    <compilerarg value="-warnunchecked"/>
     <compilerarg value="-J-Xbootclasspath/p:${jsr14_classpath}"/>
   </javac>
 </target>
@@ -271,12 +360,12 @@ target="jsr14"
     -->
     <batchtest>
       <!-- The root of the fileset must be where edu/ is. -->
-      <fileset dir="${built}">
+      <fileset dir="${srcroot}">
         <!-- Include only from projpath to only get classes in this project!
         -->
-        <include name="${projpath}/**/*${test-spec}*Test.class" />
-        <exclude name="**/AllTests.class" />
-        <exclude name="**/Test.class" />
+        <include name="${projpath}/**/*${test-spec}*Test.java" />
+        <exclude name="**/AllTests.java" />
+        <exclude name="**/Test.java" />
       </fileset>
     </batchtest>
   </junit>
@@ -287,8 +376,7 @@ target="jsr14"
 </target>
 
 <!-- generate private javadoc for current uncommitted version -->
-<target name="javadoc" depends="init">
-  <tstamp_gmt />
+<target name="javadoc" depends="init, get-timestamp">
   <antcall target="generate_javadoc">
     <param name="javadoc_dir" value="${private_javadoc_dir}" />
     <param name="javadoc_title" value="${user.name}-uncommitted-${ant.project.name}-${DSTAMP}-${TSTAMP}" />
@@ -316,8 +404,8 @@ target="jsr14"
   <mkdir dir="${javadoc_dir}/src" />
 
   <!-- run jsr14 from jsr14.jar to make non-generic source. -->
-  <!-- Comment this block out to produce javadocs with generics -->
-  <apply executable="java" failonerror="yes" parallel="yes" type="file">
+  <!-- Comment this block out to produce javadocs with generics using JSR14v2_4 and Ant 1.6-->
+  <!--apply executable="java" failonerror="yes" parallel="yes" type="file">
     <arg value="-classpath" />
     <arg value="${classpath_text}:${java.class.path}" />
     <arg value="com.sun.tools.javac.Main" />
@@ -326,22 +414,22 @@ target="jsr14"
     <arg value="${srcroot}" />
 
     <arg value="-bootclasspath" />
-    <arg value="${sun.boot.class.path}" />
+    <arg value="${jsr14_collect_classpath}:${sun.boot.class.path}" />
 
 
-    <!-- Generate Java source without generics -->
+    <!- Generate Java source without generics ->
     <arg value="-s" />
 
     <arg value="-d" />
     <arg value="${javadoc_dir}/src" />
     
     <fileset dir="${srcroot}">
-      <!-- get all projects within this sourceroot -->
+      <!- get all projects within this sourceroot ->
       <exclude name="src-*/**/*.java" />
       <include name="**/*.java" />
-      <!-- <include name="${projpath}/**/*.java" /> -->
+      <!- <include name="${projpath}/**/*.java" /> ->
     </fileset>
-  </apply>
+  </apply-->
 
   <!-- Now we need to copy the package.htmls over to the
        directory with the non-generic sources.
@@ -350,8 +438,8 @@ target="jsr14"
   <copy todir="${javadoc_dir}/src">
     <fileset dir="${srcroot}">
       <!-- Uncomment the next two lines to produce javadocs with generics -->
-      <!--exclude name="src-*/**/*.java" /-->
-      <!--include name="**/*.java" /-->
+      <exclude name="src-*/**/*.java" />
+      <include name="**/*.java" />
       <include name="**/package.html" />
       <include name="**/doc-files/**" />
     </fileset>
@@ -363,11 +451,11 @@ target="jsr14"
            Private="yes"
            Use="yes"
            Version="yes"
-           Windowtitle="${javadoc_title}">
-<!--           Bootclasspath ="${sun.boot.class.path}"
-           source="1.5"-->
+           Windowtitle="${javadoc_title}"
+           Bootclasspath ="${jsr14_classpath}:${jsr14_collect_classpath}:${sun.boot.class.path}"
+           source="1.5">
 
-    <!--arg value="-J-Xbootclasspath/p"/-->
+    <arg value="-J-Xbootclasspath/p:${jsr14_classpath}"/>
     <classpath refid="classpath" />
 
     <link href="http://www.junit.org/junit/javadoc/3.7" />
@@ -392,16 +480,16 @@ target="jsr14"
   <!-- Target to fix JSR-14 v1.0's collect.jar to work in JDK 1.3.
        (We have to remove java.lang.String and java.util.Arrays,
         since they were somehow compiled against JDK 1.4.)  -->
-  <!--target name="fix-collect-v1_0">
+  <target name="fix-collect-v1_0">
     <delete file="${jsr14_collect_classpath}.fixed" />
     <zip destfile="${jsr14_collect_classpath}.fixed">
-      <zipfileset src="${jsr14_collect_classpath}"
+      <zipfileset src="${jsr14_collect_classpath}" 
                   excludes="java/lang/String.class,java/util/Arrays.class" />
     </zip>
-    <move file="${jsr14_collect_classpath}.fixed"
+    <move file="${jsr14_collect_classpath}.fixed" 
           toFile="${jsr14_collect_classpath}"
           overwrite="true" />
-  </target-->
+  </target>
 
   <!-- Clover targets -->
   <taskdef resource="clovertasks"/>
@@ -418,6 +506,7 @@ target="jsr14"
     <mkdir dir="${clover_db_dir}" />
     <clover-setup initString="${clover_db_dir}/test_coverage.db">
       <files>
+        <exclude name="**/*TestCase*.java" />
         <exclude name="**/*Test.java" />
         <exclude name="**/*TestCase.java" />
         <exclude name="**/*Test$*.java" />
