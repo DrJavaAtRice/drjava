@@ -1,46 +1,34 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * This file is part of DrJava.  Download the current version of this project:
- * http://sourceforge.net/projects/drjava/ or http://www.drjava.org/
+ * This file is part of DrJava.  Download the current version of this project from http://www.drjava.org/
+ * or http://sourceforge.net/projects/drjava/
  *
  * DrJava Open Source License
+ * 
+ * Copyright (C) 2001-2005 JavaPLT group at Rice University (javaplt@rice.edu).  All rights reserved.
  *
- * Copyright (C) 2001-2003 JavaPLT group at Rice University (javaplt@rice.edu)
- * All rights reserved.
- *
- * Developed by:   Java Programming Languages Team
- *                 Rice University
- *                 http://www.cs.rice.edu/~javaplt/
- *
- * Permission is hereby granted, free of charge, to any person obtaining a
- * copy of this software and associated documentation files (the "Software"),
- * to deal with the Software without restriction, including without
- * limitation the rights to use, copy, modify, merge, publish, distribute,
- * sublicense, and/or sell copies of the Software, and to permit persons to
- * whom the Software is furnished to do so, subject to the following
- * conditions:
- *
- *     - Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimers.
- *     - Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimers in the
- *       documentation and/or other materials provided with the distribution.
- *     - Neither the names of DrJava, the JavaPLT, Rice University, nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this Software without specific prior written permission.
- *     - Products derived from this software may not be called "DrJava" nor
- *       use the term "DrJava" as part of their names without prior written
- *       permission from the JavaPLT group.  For permission, write to
- *       javaplt@rice.edu.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
- * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
- * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
- * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
- * OTHER DEALINGS WITH THE SOFTWARE.
- *
+ * Developed by:   Java Programming Languages Team, Rice University, http://www.cs.rice.edu/~javaplt/
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated 
+ * documentation files (the "Software"), to deal with the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and 
+ * to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ * 
+ *     - Redistributions of source code must retain the above copyright notice, this list of conditions and the 
+ *       following disclaimers.
+ *     - Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the 
+ *       following disclaimers in the documentation and/or other materials provided with the distribution.
+ *     - Neither the names of DrJava, the JavaPLT, Rice University, nor the names of its contributors may be used to 
+ *       endorse or promote products derived from this Software without specific prior written permission.
+ *     - Products derived from this software may not be called "DrJava" nor use the term "DrJava" as part of their 
+ *       names without prior written permission from the JavaPLT group.  For permission, write to javaplt@rice.edu.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO 
+ * THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
+ * CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS 
+ * WITH THE SOFTWARE.
+ * 
 END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.definitions;
@@ -182,9 +170,8 @@ public final class DefinitionsDocumentTest extends TestCase implements ReducedMo
     assertEquals("6", ReducedToken.FREE, rm.currentToken().getState());
   }
 
-  /**
-   * Test inserting a star between a slash-star combo.
-   * @exception BadLocationException
+  /** Test inserting a star between a slash-star combo.
+   *  @exception BadLocationException
    */
   public void testInsertStarIntoSlashStar() throws BadLocationException {
     BraceReduction rm = _defModel.getReduced();
@@ -202,9 +189,7 @@ public final class DefinitionsDocumentTest extends TestCase implements ReducedMo
     assertEquals("6", ReducedToken.FREE, rm.currentToken().getState());
   }
 
-  /**
-   * Test removal of text.
-   */
+  /** Test removal of text. */
   public void testDeleteDoc() throws BadLocationException {
     _defModel.insertString(0, "a/*bc */", null);
     _defModel.remove(3, 3);
@@ -220,10 +205,9 @@ public final class DefinitionsDocumentTest extends TestCase implements ReducedMo
     assertEquals("1.3", ReducedToken.INSIDE_BLOCK_COMMENT, rm.getStateAtCurrent());
   }
 
-  /**
-   * Make sure the vector is consistent: all elements immediately adjoin
-   * one another (no overlap), and make sure all indices between start and end
-   * are in the vector. Vector is guaranteed to not have size zero.
+  /** Make sure the vector is consistent: all elements immediately adjoin
+   *  one another (no overlap), and make sure all indices between start and end
+   *  are in the vector. Vector is guaranteed to not have size zero.
    */
   private void _checkHighlightStatusConsistent(Vector<HighlightStatus> v,
                                                int start,
@@ -246,9 +230,8 @@ public final class DefinitionsDocumentTest extends TestCase implements ReducedMo
                  walk);
   }
 
-  /**
-   * Test that keywords are highlighted properly.
-   * @exception BadLocationException
+  /** Test that keywords are highlighted properly.
+   *  @exception BadLocationException
    */
   public void testHighlightKeywords1() throws BadLocationException {
     Vector<HighlightStatus> v;
@@ -275,15 +258,14 @@ public final class DefinitionsDocumentTest extends TestCase implements ReducedMo
     assertEquals(HighlightStatus.NORMAL, v.get(11).getState());
   }
 
-  /**
-   * This test case simulates what happens when some text is selected
-   * and there is a keyword around too.
-   * In drjava-20010720-1712 there is a bug that if you enter "int Y" and
-   * then try to select "t Y", it exceptions. This is a test for that case.
-   * The important thing about the selecting thing is that because it wants
-   * to render the last three chars selected, it asks for the first two only
-   * in the call to getHighlightStatus.
-   * @exception BadLocationException
+  /** This test case simulates what happens when some text is selected
+   *  and there is a keyword around too.
+   *  In drjava-20010720-1712 there is a bug that if you enter "int Y" and
+   *  then try to select "t Y", it exceptions. This is a test for that case.
+   *  The important thing about the selecting thing is that because it wants
+   *  to render the last three chars selected, it asks for the first two only
+   *  in the call to getHighlightStatus.
+   *  @exception BadLocationException
    */
   public void testHighlightKeywords2() throws BadLocationException {
     Vector<HighlightStatus> v;
@@ -305,9 +287,8 @@ public final class DefinitionsDocumentTest extends TestCase implements ReducedMo
     assertEquals(2, v.get(0).getLength());
   }
 
-  /**
-   * Test going to the second line in a two-line document.
-   * @exception BadLocationException
+  /** Test going to the second line in a two-line document.
+   *  @exception BadLocationException
    */
   public void testGotoLine1() throws BadLocationException {
     final String s = "a\n";
@@ -1099,9 +1080,8 @@ public final class DefinitionsDocumentTest extends TestCase implements ReducedMo
     }
   }*/
 
-  /**
-   * verify that undoing a multiple-line indent will be a single undo action
-   * @throws BadLocationException
+  /** Verify that undoing a multiple-line indent will be a single undo action
+   *  @throws BadLocationException
    */
   public void testUndoAndRedoAfterMultipleLineIndent() throws BadLocationException {  //this fails
     String text =
@@ -1140,9 +1120,8 @@ public final class DefinitionsDocumentTest extends TestCase implements ReducedMo
     assertEquals("redo",indented, _defModel.getText());
   }
 
-  /**
-   * verify that undoing a multiple-line indent will be a single undo action
-   * @throws BadLocationException
+  /** Verify that undoing a multiple-line indent will be a single undo action
+   *  @throws BadLocationException
    */
   public void testUndoAndRedoAfterMultipleLineCommentAndUncomment()
     throws BadLocationException {
@@ -1186,10 +1165,8 @@ public final class DefinitionsDocumentTest extends TestCase implements ReducedMo
     assertEquals("redo uncommenting",text, _defModel.getText());
   }
 
-  /**
-   * Test method for CompoundUndoManager.  Tests that the nested
-   * compound edit functionality works correctly.
-   * @throws BadLocationException
+  /** Test method for CompoundUndoManager.  Tests that the nested compound edit functionality works correctly.
+   *  @throws BadLocationException
    */
   public void testCompoundUndoManager() throws BadLocationException {
     String text =

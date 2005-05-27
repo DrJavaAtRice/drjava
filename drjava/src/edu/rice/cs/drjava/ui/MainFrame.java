@@ -749,7 +749,9 @@ public class MainFrame extends JFrame implements OptionConstants {
       super.actionPerformed(e);
       _currentDefPane.requestFocusInWindow();
       OpenDefinitionsDocument doc = _model.getActiveDocument();
+//      Utilities.showDebug("isModifiedSinceSave() = " + doc.isModifiedSinceSave());
       _saveAction.setEnabled(doc.isModifiedSinceSave() || doc.isUntitled());
+//      Utilities.showDebug("check status");
     }
   };
 

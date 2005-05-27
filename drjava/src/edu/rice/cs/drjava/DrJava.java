@@ -87,7 +87,10 @@ public class DrJava implements OptionConstants {
 
   private static final PrintStream _consoleOut = System.out;
   private static final PrintStream _consoleErr = System.err;
-  private static PreventExitSecurityManager _manager;
+  
+//  /** This field is only used in the instance of this class in the Interpreter JVM. */
+//  private static PreventExitSecurityManager _manager = null;
+  
   private static String[] _filesToOpen = new String[0];
   private static boolean _attemptingAugmentedClasspath = false;
   private static boolean _showDrJavaDebugConsole = false;
@@ -168,7 +171,7 @@ public class DrJava implements OptionConstants {
                 
         // This enabling of the security manager must happen *after* the mainframe
         // is constructed. See bug #518509.
-        enableSecurityManager();
+//        enableSecurityManager();  // makes no sense; this code is only run in the main JVM which does not need a SecurityManager
         openCommandLineFiles(mf, _filesToOpen);
         mf.setVisible(true);
         
@@ -662,8 +665,7 @@ public class DrJava implements OptionConstants {
             // Adjust if we needed a compiler
             if (needCompiler) {
               // need to re-call getAvailable for it to re-check availability
-              CompilerInterface[] compilers
-                = CompilerRegistry.ONLY.getAvailableCompilers();
+              CompilerInterface[] compilers = CompilerRegistry.ONLY.getAvailableCompilers();
 
               if (compilers[0] != NoCompilerAvailable.ONLY) {
                 needCompiler = false;
@@ -720,18 +722,13 @@ public class DrJava implements OptionConstants {
       };
     }
 
-    int result = JOptionPane.showConfirmDialog(null,
-                                               text,
-                                               "Locate 'tools.jar'?",
-                                               JOptionPane.YES_NO_OPTION);
-
+    int result = JOptionPane.showConfirmDialog(null, text, "Locate 'tools.jar'?", JOptionPane.YES_NO_OPTION);
     return result == JOptionPane.YES_OPTION;
   }
 
-  /**
-   * Shows a separate interactions window with a reference to DrJava's
-   * MainFrame defined as "mainFrame".  Useful for debugging DrJava.
-   * @param mf MainFrame to define in the new window
+  /** Shows a separate interactions window with a reference to DrJava's MainFrame defined as "mainFrame".  
+   *  Useful for debugging DrJava.
+   *  @param mf MainFrame to define in the new window
    */
   public static void showDrJavaDebugConsole(MainFrame mf) {
     if (_debugConsole == null) {
@@ -747,44 +744,29 @@ public class DrJava implements OptionConstants {
       _debugConsole.setInterpreterPrivateAccessible(true);
       _debugConsole.setVisible(true);
     }
-    else {
-      _debugConsole.toFront();
-    }
+    else  _debugConsole.toFront();
   }
 
-  public static PreventExitSecurityManager getSecurityManager() {
-    return _manager;
-  }
+//  /** Only called from interpreter JVM. Not in use anymore. */
+//  public static PreventExitSecurityManager getSecurityManager() { return _manager; }
+//  
+//  /** Only called from interpreter JVM. Not in use anymore. */
+//  public static void enableSecurityManager() {
+//    _manager = PreventExitSecurityManager.activate();
+//  }
+//
+//  /** Only called from interpreter JVM. */
+//  public static void disableSecurityManager() { _manager.deactivate(); }
 
-  public static void enableSecurityManager() {
-    if (_manager == null) {
-      _manager = PreventExitSecurityManager.activate();
-    }
-
-    if (System.getSecurityManager() != _manager) {
-      System.setSecurityManager(_manager);
-    }
-  }
-
-  public static void disableSecurityManager() {
-    _manager.deactivate();
-  }
-
-  /**
-   * Get the actual System.err stream.
-   * @return System.err
+  /** Get the actual System.err stream.
+   *  @return System.err
    */
-  public static PrintStream consoleErr() {
-    return  _consoleErr;
-  }
+  public static PrintStream consoleErr() { return  _consoleErr; }
 
-  /**
-   * Get the actual System.out stream.
-   * @return System.out
+  /** Get the actual System.out stream.
+    * @return System.out
    */
-  public static PrintStream consoleOut() {
-    return  _consoleOut;
-  }
+  public static PrintStream consoleOut() { return  _consoleOut; }
   
 }
 

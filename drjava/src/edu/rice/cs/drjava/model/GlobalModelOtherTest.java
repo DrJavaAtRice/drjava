@@ -55,6 +55,7 @@ import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.model.definitions.*;
 import edu.rice.cs.drjava.model.repl.*;
 import edu.rice.cs.util.text.DocumentAdapterException;
+import edu.rice.cs.util.swing.Utilities;
 
 /**
  * A test on the GlobalModel that does deals with everything outside of
@@ -62,9 +63,7 @@ import edu.rice.cs.util.text.DocumentAdapterException;
  *
  * @version $Id$
  */
-public final class GlobalModelOtherTest extends GlobalModelTestCase
-  implements OptionConstants
-{
+public final class GlobalModelOtherTest extends GlobalModelTestCase implements OptionConstants {
   private static final String FOO_CLASS =
     "package bar;\n" +
     "public class Foo {\n" +
@@ -72,11 +71,14 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase
     "    System.out.println(\"Foo\");\n" +
     "  }\n" +
     "}\n";
+  
+  private boolean _resetDone = false;
+  private final Object _resetDoneLock = new Object();
+  
+  private boolean _interactionDone = false;
+  private final Object _interactionDoneLock = new Object();
 
-  /**
-   * Tests that the undoableEditHappened event is fired if the undo manager
-   * is in use.
-   */
+  /** Tests that the undoableEditHappened event is fired if the undo manager is in use. */
   public void testUndoEventsOccur() throws BadLocationException {
     final OpenDefinitionsDocument doc = _model.newFile();
 
@@ -96,125 +98,141 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase
     changeDocumentText("test", doc);
     _model.removeListener(listener);
     listener.assertUndoableEditCount(1);
+//    Utilities.showDebug("testUndoEvents finished");
   }
 
-  /**
-   * Checks that System.exit is handled appropriately from
-   * interactions pane.
-   */
+  /** Checks that System.exit is handled appropriately from interactions pane. */
   public void testExitInteractions() throws DocumentAdapterException, InterruptedException{
     TestListener listener = new TestListener() {
       public void interactionStarted() {
+//        Utilities.showDebug("GlobalModelOtherTest: interaction Started");
         interactionStartCount++;
       }
 
       public void interpreterExited(int status) {
-        assertInteractionStartCount(1);
-        assertInterpreterResettingCount(1);
+//        Utilities.showDebug("GlobalModelOtherTest: interpreterExited");
+//        assertInteractionStartCount(1);
+//        assertInterpreterResettingCount(0);
         interpreterExitedCount++;
+//        Utilities.showDebug("GlobalModelOtherTest: interpreterExitedCount = " + interpreterExitedCount);
         lastExitStatus = status;
       }
 
       public void interpreterResetting() {
-        assertInteractionStartCount(1);
-        assertInterpreterExitedCount(0);
-        assertInterpreterReadyCount(0);
+//        assertInteractionStartCount(1);
+//        assertInterpreterExitedCount(1);
+//        assertInterpreterReadyCount(0);
         interpreterResettingCount++;
+//        Utilities.showDebug("GlobalModelOtherTest: interpreterResetting");
       }
 
       public void interpreterReady() {
-        synchronized(this) {
-          assertInteractionStartCount(1);
-          assertInterpreterExitedCount(1);
-          assertInterpreterResettingCount(1);
+//        Utilities.showDebug("GlobalModelOtherTest: interpreterReady");
+        synchronized(_resetDoneLock) {
+//          assertInteractionStartCount(1);
+//          assertInterpreterExitedCount(1);
+//          assertInterpreterResettingCount(1);
           interpreterReadyCount++;
-          this.notify();
+//          Utilities.showDebug("GlobalModelOtherTest: notifying resetDone");
+          _resetDone = true;
+          _resetDoneLock.notify();
         }
       }
+      
+//      public void consoleReset() { consoleResetCount++; }
     };
 
     _model.addListener(listener);
-    synchronized(listener) {
+    _resetDone = false;
+    synchronized(_resetDoneLock) {
+//      Utilities.showDebug("GlobalModelOtherTest: interpreting System.exit(23)");
       interpretIgnoreResult("System.exit(23);");
-      listener.wait();
+//      _model.resetInteractions();
+//      Utilities.showDebug("GlobalModelOtherTest: waiting on resetDone");
+      while (! _resetDone) { _resetDoneLock.wait(); }
     }
     _model.removeListener(listener);
 
-    listener.assertConsoleResetCount(0);
+//    listener.assertConsoleResetCount(0);
     listener.assertInteractionStartCount(1);
     listener.assertInterpreterResettingCount(1);
     listener.assertInterpreterReadyCount(1);
     listener.assertInterpreterExitedCount(1);
     assertEquals("exit status", 23, listener.lastExitStatus);
+//    Utilities.showDebug("GlobalModelOtherTest: exitInteractions finished");
   }
 
-  /**
-   * Checks that System.exit is handled appropriately from
-   * interactions frame when there is a security manager in
-   * the interpreter JVM.
-   */
-  public void testInteractionResetFailed()
-    throws DocumentAdapterException, InterruptedException
-  {
-    TestListener listener = new TestListener() {
+// No longer relevant since the security manager option has been deleted from the interpreter JVM
+//  /** Checks that System.exit is handled appropriately from interactions frame when there is a security manager in
+//   *  the interpreter JVM.  
+//   */
+//  public void testInteractionResetFailed() throws DocumentAdapterException, InterruptedException {
+//    TestListener listener = new TestListener() {
+//      
+//      public void interactionStarted() { interactionStartCount++; }
+//      
+//      public void interactionEnded() {
+//        synchronized(_interactionDoneLock) {
+////          Utilities.showDebug("interactionEnded");
+//          interactionEndCount++;
+//          _interactionDone = true;
+//          _interactionDoneLock.notify();
+//        }
+//      }
+//
+////      public void interpreterResetting() {
+////        assertInterpreterResetFailedCount(0);
+////        interpreterResettingCount++;
+////      }
+//
+////      public void interpreterResetFailed(Throwable t) {
+////        synchronized(_resetDoneLock) {
+////          interpreterResetFailedCount++;
+////          assertInterpreterResetFailedCount(0);
+////          _resetDone = true;
+////          _resetDoneLock.notify();
+////        }
+////      }
+//
+//      public void consoleReset() { consoleResetCount++; }
+//    };
+//
+//    // Prevent the Interactions JVM from quitting
+////    _model.enableSecurityManager();
+//
+//    // Don't show the pop-up message
+//    _model._interpreterControl.setShowMessageOnResetFailure(false);
+//    
+//    _interactionDone = false;
+//    _model.addListener(listener);
+//    synchronized(_interactionDoneLock) {
+//      interpretIgnoreResult("System.exit(23);");
+//      while (! _interactionDone) { _interactionDoneLock.wait(); }
+////      _model.resetInteractions();
+//    }
+//
+//    _model.removeListener(listener);
+////    _model.disableSecurityManager();
+//
+//    listener.assertConsoleResetCount(0);
+//    listener.assertInterpreterResettingCount(0);
+//    listener.assertInterpreterResetFailedCount(0);
+//    listener.assertInterpreterReadyCount(0);
+//    listener.assertInterpreterExitedCount(0);
+////    Utilities.showDebug("resetFailed finished");
+//  }
 
-      public void interpreterResetting() {
-        assertInterpreterResetFailedCount(0);
-        interpreterResettingCount++;
-      }
-
-      public void interpreterResetFailed(Throwable t) {
-        synchronized(this) {
-          interpreterResetFailedCount++;
-          assertInterpreterResetFailedCount(1);
-          this.notify();
-        }
-      }
-
-      public void consoleReset() {
-        consoleResetCount++;
-      }
-    };
-
-    // Prevent the Interactions JVM from quitting
-    _model.enableSecurityManager();
-
-    // Don't show the pop-up message
-    _model._interpreterControl.setShowMessageOnResetFailure(false);
-
-    _model.addListener(listener);
-    synchronized(listener) {
-      _model.resetInteractions();
-      listener.wait();
-    }
-    _model.removeListener(listener);
-    _model.disableSecurityManager();
-
-    listener.assertConsoleResetCount(1);
-    listener.assertInterpreterResettingCount(1);
-    listener.assertInterpreterResetFailedCount(1);
-    listener.assertInterpreterReadyCount(0);
-    listener.assertInterpreterExitedCount(0);
-  }
-
-  /**
-   * Checks that the interpreter can be aborted and then work
-   * correctly later.
-   * Part of what we check here is that the interactions classpath
-   * is correctly reset after aborting interactions. That is, we ensure
-   * that the compiled class is still visible after aborting. This was
-   * broken in drjava-20020108-0958 -- or so I thought. I can't consistently
-   * reproduce the problem in the UI (seems to show up using IBM's JDK only),
-   * and I can never reproduce it in the test case. Grr.
+  /** Checks that the interpreter can be aborted and then work correctly later. Part of what we check here is that 
+   *  the interactions classpath is correctly reset after aborting interactions. That is, we ensure that the compiled
+   *  class is still visible after aborting. This was broken in drjava-20020108-0958 -- or so I thought. I can't 
+   *  consistently reproduce the problem in the UI (seems to show up using IBM's JDK only), and I can never reproduce 
+   *  it in the test case. Grr. <p> OK, now I found the explanation: We were in some cases running two new JVMs
+   *  on an abort. I fixed the problem in MainJVM#restartInterpreterJVM
    *
-   * OK, now I found the explanation: We were in some cases running two new JVMs
-   * on an abort. I fixed the problem in MainJVM#restartInterpreterJVM
-   *
-   * The above method no longer exists...  Does anyone remember what this meant? -nrh
+   *  The above method no longer exists...  Does anyone remember what this meant? -nrh
    */
-  public void testInteractionAbort() throws BadLocationException,
-      DocumentAdapterException, InterruptedException, IOException
-  {
+  public void testInteractionAbort() throws BadLocationException, DocumentAdapterException, InterruptedException, 
+    IOException {
     doCompile(setupDocument(FOO_TEXT), tempFile());
     final String beforeAbort = interpret("DrJavaTestFoo.class.getName()");
     assertEquals("\"DrJavaTestFoo\"", beforeAbort);
@@ -226,33 +244,34 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase
 
       public void interactionEnded() {
         // this can only happen on the second interpretation!
-        assertInteractionStartCount(2);
+//        assertInteractionStartCount(2);
         interactionEndCount++;
       }
 
-      public void interpreterExited(int status) {
-        try {
-          Thread.sleep(1000);
-        } catch (InterruptedException e) {
-        }
-        assertInteractionStartCount(1);
-        interpreterExitedCount++;
-      }
+//      public void interpreterExited(int status) {
+//        try {
+//          Thread.sleep(1000);
+//        } catch (InterruptedException e) {
+//        }
+//        assertInteractionStartCount(1);
+//        interpreterExitedCount++;
+//      }
 
       public void interpreterResetting() {
-        assertInteractionStartCount(1);
-        assertInterpreterExitedCount(0);
-        assertInterpreterReadyCount(0);
+//        assertInteractionStartCount(1);
+//        assertInterpreterExitedCount(0);
+//        assertInterpreterReadyCount(0);
         interpreterResettingCount++;
       }
 
       public void interpreterReady() {
-        synchronized(this) {
-          assertInteractionStartCount(1);
-          assertInterpreterExitedCount(0);
-          assertInterpreterResettingCount(1);
+        synchronized(_resetDoneLock) {
+//          assertInteractionStartCount(1);
+//          assertInterpreterExitedCount(0);
+//          assertInterpreterResettingCount(1);
           interpreterReadyCount++;
-          this.notify();
+          _resetDone = true;
+          _resetDoneLock.notify();
         }
       }
 
@@ -262,16 +281,16 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase
     };
 
     _model.addListener(listener);
-    synchronized(listener) {
+    _resetDone = false;
+    synchronized(_resetDoneLock) {
       interpretIgnoreResult("while (true) {}");
       listener.assertInteractionStartCount(1);
       _model.resetInteractions();
-      listener.wait();
+      _resetDoneLock.wait();
     }
     listener.assertInterpreterResettingCount(1);
     listener.assertInterpreterReadyCount(1);
     listener.assertInterpreterExitedCount(0);
-
     listener.assertConsoleResetCount(1);
 
     // now make sure it still works!
@@ -283,39 +302,32 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase
     assertEquals("\"DrJavaTestFoo\"", afterAbort);
   }
 
-  /**
-   * Checks that reset console works.
-   */
-  public void testResetConsole()
-    throws DocumentAdapterException, InterruptedException
-  {
+  /** Checks that reset console works. */
+  public void testResetConsole() throws DocumentAdapterException, InterruptedException {
     //System.err.println("Entering testResetConsole");
     TestListener listener = new TestListener() {
       public void interactionStarted() { }
       public void interactionEnded() {
-        synchronized(this) {
+        synchronized(_interactionDoneLock) {
           interactionEndCount++;
-          this.notify();
+          _interactionDone = true;
+          _interactionDoneLock.notify();
         }
       }
 
-      public void consoleReset() {
-        consoleResetCount++;
-      }
+      public void consoleReset() { consoleResetCount++; }
     };
 
     _model.addListener(listener);
 
     _model.resetConsole();
-    assertEquals("Length of console text",
-                 0,
-                 _model.getConsoleDocument().getDocLength());
+    assertEquals("Length of console text", 0, _model.getConsoleDocument().getDocLength());
 
     listener.assertConsoleResetCount(1);
-
-    synchronized(listener) {
+    _interactionDone = false;
+    synchronized(_interactionDoneLock) {
       interpretIgnoreResult("System.out.print(\"a\");");
-      listener.wait();  // notified on interactionEnded
+      _interactionDoneLock.wait();  // notified on interactionEnded
     }
 
     /*
@@ -332,29 +344,20 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase
     //System.err.println("wait i=" + i);
     */
 
-    assertEquals("Length of console text",
-                 1,
-                 _model.getConsoleDocument().getDocLength());
+    assertEquals("Length of console text", 1, _model.getConsoleDocument().getDocLength());
 
 
     _model.resetConsole();
-    assertEquals("Length of console text",
-                 0,
-                 _model.getConsoleDocument().getDocLength());
+    assertEquals("Length of console text", 0, _model.getConsoleDocument().getDocLength());
 
     listener.assertConsoleResetCount(2);
   }
 
-  /**
-   * Creates a new class, compiles it and then checks that the REPL
-   * can see it.  Then checks that a compiled class file in another
-   * directory can be both accessed and extended if it is on the
-   * "extra.classpath" config option.
+  /** Creates a new class, compiles it and then checks that the REPL can see it.  Then checks that a compiled class
+   *  file in another directory can be both accessed and extended if it is on the "extra.classpath" config option.
    */
-  public void testInteractionsCanSeeCompiledClasses()
-    throws BadLocationException, DocumentAdapterException,
-    IOException, InterruptedException
-  {
+  public void testInteractionsCanSeeCompiledClasses() throws BadLocationException, DocumentAdapterException,
+    IOException, InterruptedException {
     // Compile Foo
     OpenDefinitionsDocument doc1 = setupDocument(FOO_TEXT);
     File dir1 = new File(_tempDir, "dir1");
@@ -362,9 +365,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase
     File file1 = new File(dir1, "TestFile1.java");
     doCompile(doc1, file1);
 
-    assertEquals("interactions result",
-                 "\"DrJavaTestFoo\"",
-                 interpret("new DrJavaTestFoo().getClass().getName()"));
+    assertEquals("interactions result", "\"DrJavaTestFoo\"", interpret("new DrJavaTestFoo().getClass().getName()"));
 
     // Add directory 1 to extra classpath and close doc1
     Vector<File> cp = new Vector<File>();
@@ -380,50 +381,33 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase
     doCompile(doc2, file2);
 
     // Ensure that Baz can use the Foo class from extra classpath
-    assertEquals("interactions result",
-                 "\"DrJavaTestBaz\"",
-                 interpret("new DrJavaTestBaz().getClass().getName()"));
+    assertEquals("interactions result", "\"DrJavaTestBaz\"", interpret("new DrJavaTestBaz().getClass().getName()"));
 
     // Ensure that static fields can be seen
-    assertEquals("result of static field",
-                 "3",
-                 interpret("DrJavaTestBaz.x"));
+    assertEquals("result of static field", "3", interpret("DrJavaTestBaz.x"));
 
     // Also ensure that Foo can be used directly
-    assertEquals("interactions result",
-                 "\"DrJavaTestFoo\"",
-                 interpret("new DrJavaTestFoo().getClass().getName()"));
+    assertEquals("interactions result", "\"DrJavaTestFoo\"", interpret("new DrJavaTestFoo().getClass().getName()"));
   }
 
-  /**
-   * Compiles a new class in the default package with a mixed case name,
-   * and ensures that it can be instantiated on a variable with an
-   * identical name (but a lowercase first letter).
-   * Catches SF bug #689026 ("DynamicJava can't handle certain variable names")
+  /**  Compiles a new class in the default package with a mixed case name, and ensures that it can be instantiated on a
+   *  variable with an identical name (but a lowercase first letter).  Catches SF bug #689026 ("DynamicJava can't handle
+   *  certain variable names")
    */
-  public void testInteractionsVariableWithLowercaseClassName()
-    throws BadLocationException, DocumentAdapterException,
-    IOException, InterruptedException
-  {
+  public void testInteractionsVariableWithLowercaseClassName() throws BadLocationException, DocumentAdapterException,
+    IOException, InterruptedException {
     // Compile a test file
-    OpenDefinitionsDocument doc1 =
-      setupDocument("public class DrJavaTestClass {}");
+    OpenDefinitionsDocument doc1 = setupDocument("public class DrJavaTestClass {}");
     File file1 = new File(_tempDir, "DrJavaTestClass.java");
     doCompile(doc1, file1);
 
     // This shouldn't cause an error (no output should be displayed)
-    assertEquals("interactions result", "",
-                 interpret("drJavaTestClass = new DrJavaTestClass();"));
+    assertEquals("interactions result", "", interpret("drJavaTestClass = new DrJavaTestClass();"));
   }
 
-  /**
-   * Checks that updating a class and recompiling it is visible from
-   * the REPL.
-   */
-  public void testInteractionsCanSeeChangedClass()
-    throws BadLocationException, DocumentAdapterException,
-    IOException, InterruptedException
-  {
+  /** Checks that updating a class and recompiling it is visible from the REPL. */
+  public void testInteractionsCanSeeChangedClass() throws BadLocationException, DocumentAdapterException,
+    IOException, InterruptedException {
     final String text_before = "class DrJavaTestFoo { public int m() { return ";
     final String text_after = "; } }";
     final int num_iterations = 3;
@@ -435,19 +419,13 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase
       file = tempFile(i);
       doCompile(doc, file);
 
-      assertEquals("interactions result, i=" + i,
-          String.valueOf(i),
-          interpret("new DrJavaTestFoo().m()"));
+      assertEquals("interactions result, i=" + i, String.valueOf(i), interpret("new DrJavaTestFoo().m()"));
     }
   }
 
-  /**
-   * Checks that an anonymous inner class can be defined in the repl!
-   */
-  public void testInteractionsDefineAnonymousInnerClass()
-    throws BadLocationException, DocumentAdapterException,
-    IOException, InterruptedException
-  {
+  /** Checks that an anonymous inner class can be defined in the repl! */
+  public void testInteractionsDefineAnonymousInnerClass() throws BadLocationException, DocumentAdapterException,
+    IOException, InterruptedException {
     final String interface_text = "public interface I { int getValue(); }";
     final File file = createFile("I.java");
 
@@ -459,16 +437,12 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase
     for (int i = 0; i < 3; i++) {
       String s = "new I() { public int getValue() { return " + i + "; } }.getValue()";
 
-      assertEquals("interactions result, i=" + i,
-                   String.valueOf(i),
-                   interpret(s));
+      assertEquals("interactions result, i=" + i, String.valueOf(i), interpret(s));
     }
   }
 
-  public void testGetSourceRootDefaultPackage()
-    throws BadLocationException, IOException
-  {
-    // Get current working directory (only used in the one test case, currently commented out)
+  public void testGetSourceRootDefaultPackage() throws BadLocationException, IOException {
+// Get current working directory (only used in the one test case. (currently commented out)
 //    File workDir = DrJava.getConfig().getSetting(WORKING_DIRECTORY);
 //    if (workDir == FileOption.NULL_FILE) {
 //      workDir = new File( System.getProperty("user.dir"));

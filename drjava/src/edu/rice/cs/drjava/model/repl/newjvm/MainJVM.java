@@ -1,47 +1,35 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * This file is part of DrJava.  Download the current version of this project:
- * http://sourceforge.net/projects/drjava/ or http://www.drjava.org/
+ * This file is part of DrJava.  Download the current version of this project from http://www.drjava.org/
+ * or http://sourceforge.net/projects/drjava/
  *
  * DrJava Open Source License
+ * 
+ * Copyright (C) 2001-2005 JavaPLT group at Rice University (javaplt@rice.edu).  All rights reserved.
  *
- * Copyright (C) 2001-2003 JavaPLT group at Rice University (javaplt@rice.edu)
- * All rights reserved.
- *
- * Developed by:   Java Programming Languages Team
- *                 Rice University
- *                 http://www.cs.rice.edu/~javaplt/
- *
- * Permission is hereby granted, free of charge, to any person obtaining a
- * copy of this software and associated documentation files (the "Software"),
- * to deal with the Software without restriction, including without
- * limitation the rights to use, copy, modify, merge, publish, distribute,
- * sublicense, and/or sell copies of the Software, and to permit persons to
- * whom the Software is furnished to do so, subject to the following
- * conditions:
- *
- *     - Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimers.
- *     - Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimers in the
- *       documentation and/or other materials provided with the distribution.
- *     - Neither the names of DrJava, the JavaPLT, Rice University, nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this Software without specific prior written permission.
- *     - Products derived from this software may not be called "DrJava" nor
- *       use the term "DrJava" as part of their names without prior written
- *       permission from the JavaPLT group.  For permission, write to
- *       javaplt@rice.edu.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
- * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
- * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
- * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
- * OTHER DEALINGS WITH THE SOFTWARE.
- *
- END_COPYRIGHT_BLOCK*/
+ * Developed by:   Java Programming Languages Team, Rice University, http://www.cs.rice.edu/~javaplt/
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated 
+ * documentation files (the "Software"), to deal with the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and 
+ * to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ * 
+ *     - Redistributions of source code must retain the above copyright notice, this list of conditions and the 
+ *       following disclaimers.
+ *     - Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the 
+ *       following disclaimers in the documentation and/or other materials provided with the distribution.
+ *     - Neither the names of DrJava, the JavaPLT, Rice University, nor the names of its contributors may be used to 
+ *       endorse or promote products derived from this Software without specific prior written permission.
+ *     - Products derived from this software may not be called "DrJava" nor use the term "DrJava" as part of their 
+ *       names without prior written permission from the JavaPLT group.  For permission, write to javaplt@rice.edu.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO 
+ * THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
+ * CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS 
+ * WITH THE SOFTWARE.
+ * 
+END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.repl.newjvm;
 
@@ -68,7 +56,8 @@ import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.ArgumentTokenizer;
 import edu.rice.cs.util.newjvm.*;
 import edu.rice.cs.util.FileOps;
-import edu.rice.cs.util.swing.ScrollableDialog;
+import edu.rice.cs.util.UnexpectedException;
+import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.classloader.ClassFileError;
 import koala.dynamicjava.parser.wrapper.*;
 
@@ -96,7 +85,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   private Object _interpreterLock = new Object();
   
   /** This flag is set to false to inhibit the automatic restart of the JVM. */
-  private boolean _enabled = true;
+  private boolean _restart = true;
   
   /** This flag is set to remember that the JVM is cleanly restarting, so that the replCalledSystemExit method
    *  does not need to be called.
@@ -189,11 +178,11 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     _optionArgs = ArgumentTokenizer.tokenize(argString);
   }
   
-  /** Interprets string s in slave JVM.  No masterJVMLock synchronization because reading _enabled is the only
+  /** Interprets string s in slave JVM.  No masterJVMLock synchronization because reading _restart is the only
    *  access.to master JVM state. */
   public void interpret(final String s) {
     // silently fail if disabled. see killInterpreter docs for details.
-    if (! _enabled) return;
+    if (! _restart) return;
     
     ensureInterpreterConnected();
     
@@ -216,7 +205,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
    */
   public String getVariableToString(String var) {
     // silently fail if disabled. see killInterpreter docs for details.
-    if (! _enabled) return null;
+    if (! _restart) return null;
     
     ensureInterpreterConnected();
     
@@ -232,7 +221,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
    */
   public String getVariableClassName(String var) {
     // silently fail if disabled. see killInterpreter docs for details.
-    if (! _enabled) return null;
+    if (! _restart) return null;
     
     ensureInterpreterConnected();
     
@@ -265,7 +254,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
    */
 //  public void addClassPath(String path) {
 //    // silently fail if disabled. see killInterpreter docs for details.
-//    if (! _enabled) return;
+//    if (! _restart) return;
 //    
 //    ensureInterpreterConnected();
 //    
@@ -280,7 +269,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
 //  }
   
   public void addProjectClassPath(URL path) {
-    if (! _enabled) return;
+    if (! _restart) return;
     ensureInterpreterConnected();
     
     try { _interpreterJVM().addProjectClassPath(path.toString()); }
@@ -288,7 +277,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   }
   
   public void addBuildDirectoryClassPath(URL path) {
-    if (! _enabled) return;
+    if (! _restart) return;
     ensureInterpreterConnected();
     
     try { _interpreterJVM().addBuildDirectoryClassPath(path.toString()); }
@@ -296,7 +285,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   }
   
   public void addProjectFilesClassPath(URL path) {
-    if (! _enabled) return;
+    if (! _restart) return;
     ensureInterpreterConnected();
     
     try { _interpreterJVM().addProjectFilesClassPath(path.toString()); }
@@ -305,7 +294,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   
   
   public void addExternalFilesClassPath(URL path) {
-    if (! _enabled) return;
+    if (! _restart) return;
     ensureInterpreterConnected();
     
     try { _interpreterJVM().addExternalFilesClassPath(path.toString()); }
@@ -313,7 +302,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   }
   
   public void addExtraClassPath(URL path) {
-    if (! _enabled) return;
+    if (! _restart) return;
     ensureInterpreterConnected();
     
     try { _interpreterJVM().addExtraClassPath(path.toString()); }
@@ -325,7 +314,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
    */
   public ClasspathVector getClasspath() {
     // silently fail if disabled. see killInterpreter docs for details.
-    if (_enabled) {
+    if (_restart) {
       
       ensureInterpreterConnected();
       
@@ -358,7 +347,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
    */
   public void setPackageScope(String packageName) {
     // silently fail if disabled. see killInterpreter docs for details.
-    if (! _enabled) return;
+    if (! _restart) return;
     
     ensureInterpreterConnected();
     
@@ -369,7 +358,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   /** @param show Whether to show a message if a reset operation fails. */
   public void setShowMessageOnResetFailure(boolean show) {
     // silently fail if disabled. see killInterpreter docs for details.
-    if (! _enabled) return;
+    if (! _restart) return;
     
     ensureInterpreterConnected();
     
@@ -398,7 +387,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
    *  @return the class names that are actually test cases
    */
   public List<String> findTestClasses(List<String> classNames, List<File> files) throws RemoteException {
-//    new ScrollableDialog(null, "MainJVM.findTestClasses invoked", "", "").show();
+//    Utilities.showDebug("MainJVM.findTestClasses invoked");
     return _interpreterJVM().findTestClasses(classNames, files);
   }
   
@@ -421,7 +410,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
    *  @param e the ClassFileError describing the error when loading the class file
    */
   public void classFileError(ClassFileError e) throws RemoteException {
-//    new ScrollableDialog(null, "classFileError(" + e + ") called in MainJVM", "", "").show();
+//    Utilities.showDebug("classFileError(" + e + ") called in MainJVM");
     _junitModel.classFileError(e);
   }
   /** Called to indicate that a suite of tests has started running.
@@ -457,7 +446,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
    * @param errors The array of errors from all failed tests in the suite.
    */
   public void testSuiteEnded(JUnitError[] errors) throws RemoteException {
-//    new ScrollableDialog(null, "MainKJVM.testSuiteEnded() called", "", "").show();
+//    Utilities.showDebug("MainJVM.testSuiteEnded() called");
     _junitModel.testSuiteEnded(errors);
   }
   
@@ -483,26 +472,18 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
    public void notifyDebugInterpreterAssignment(String name) {
    }*/
   
-  /**
-   * Accessor for the remote interface to the Interpreter JVM.
-   */
-  private InterpreterJVMRemoteI _interpreterJVM() {
-    return (InterpreterJVMRemoteI) getSlave();
-  }
+  /**Accessor for the remote interface to the Interpreter JVM. */
+  private InterpreterJVMRemoteI _interpreterJVM() { return (InterpreterJVMRemoteI) getSlave(); }
   
-  /**
-   * updates the security manager in DrJava
-   */
-  public void enableSecurityManager() throws RemoteException{
-    _interpreterJVM().enableSecurityManager();
-  }
-  
-  /**
-   * updates the security manager in DrJava
-   */
-  public void disableSecurityManager() throws RemoteException{
-    _interpreterJVM().disableSecurityManager();
-  }
+//  /** Updates the security manager in slave JVM */
+//  public void enableSecurityManager() throws RemoteException {
+//    _interpreterJVM().enableSecurityManager();
+//  }
+//  
+//  /** Updates the security manager in slave JVM */
+//  public void disableSecurityManager() throws RemoteException{
+//    _interpreterJVM().disableSecurityManager();
+//  }
   
   
   /** Adds a named DynamicJavaAdapter to the list of interpreters.
@@ -511,7 +492,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
    */
   public void addJavaInterpreter(String name) {
     // silently fail if disabled. see killInterpreter docs for details.
-    if (! _enabled) return;
+    if (! _restart) return;
     
     ensureInterpreterConnected();
     
@@ -519,16 +500,14 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     catch (RemoteException re) { _threwException(re);  }
   }
   
-  /**
-   * Adds a named JavaDebugInterpreter to the list of interpreters.
-   * @param name the unique name for the interpreter
-   * @param className the fully qualified class name of the class
-   * the debug interpreter is in
-   * @throws IllegalArgumentException if the name is not unique
+  /** Adds a named JavaDebugInterpreter to the list of interpreters.
+   *  @param name the unique name for the interpreter
+   *  @param className the fully qualified class name of the class the debug interpreter is in
+   *  @throws IllegalArgumentException if the name is not unique
    */
   public void addDebugInterpreter(String name, String className) {
     // silently fail if disabled. see killInterpreter docs for details.
-    if (! _enabled) return;
+    if (! _restart) return;
     
     ensureInterpreterConnected();
     
@@ -542,7 +521,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
    */
   public void removeInterpreter(String name) {
     // silently fail if disabled. see killInterpreter docs for details.
-    if (!_enabled)  return;
+    if (!_restart)  return;
     
     ensureInterpreterConnected();
     
@@ -561,9 +540,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
    */
   public boolean setActiveInterpreter(String name) {
     // silently fail if disabled. see killInterpreter docs for details.
-    if (!_enabled) {
-      return false;
-    }
+    if (!_restart) return false;
     
     ensureInterpreterConnected();
     
@@ -584,7 +561,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
    */
   public boolean setToDefaultInterpreter() {
     // silently fail if disabled. see killInterpreter docs for details.
-    if (! _enabled) return false;
+    if (! _restart) return false;
     
     ensureInterpreterConnected();
     
@@ -607,7 +584,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   /** Accesses the cached current interpreter name. */
   public String getCurrentInterpreterName() { return _currentInterpreterName; }
   
-  /** Kills the running interpreter JVM, and optionally restarts it
+  /** Kills the running interpreter JVM, and optionally restarts it.
    *  @param shouldRestart if true, the interpreter will be restarted automatically.
    *  Note: If the interpreter is not restarted, all of the methods that delgate to the interpreter will 
    *  silently fail! Therefore, killing without restarting should be used with extreme care and only in 
@@ -616,9 +593,10 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   public void killInterpreter(boolean shouldRestart) {
     synchronized(_masterJVMLock) {
       try {
-        _enabled = shouldRestart;
+//        Utilities.showDebug("MainJVM: killInterpreter called with shouldRestart = " + shouldRestart);
+        _restart = shouldRestart;
         _cleanlyRestarting = true;
-        if (shouldRestart)  _interactionsModel.interpreterResetting();
+        if (shouldRestart) _interactionsModel.interpreterResetting();
         quitSlave();
       }
       catch (ConnectException ce) {
@@ -640,6 +618,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   
   /** Starts the interpreter if it's not running already. */
   public void startInterpreterJVM() {
+//    Utilities.showDebug("MainJVM: startInterpreterJVM() called");
     synchronized(_masterJVMLock) {  // synch is probably overkill
       if (isStartupInProgress() || isInterpreterRunning())  return;
     }
@@ -678,62 +657,56 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     try {
 //      _startupClasspath is sent in as the interactions classpath
 //      System.out.println("startup: " + _startupClasspath);
-//      new ScrollableDialog(null, "Calling invokeSlave(" + jvmArgs + ", " + _startupClasspath + ")", "", "").show();
+//      Utilities.showDebug("Calling invokeSlave(" + jvmArgs + ", " + _startupClasspath + ")");
       invokeSlave(jvmArgsArray, _startupClasspath);
     }
     catch (RemoteException re) { _threwException(re); }
     catch (IOException ioe) { _threwException(ioe); }
   }
   
-  /** React if the slave JVM quits.  Restarts the JVM unless _enabled is false, and notifies the 
+  /** React if the slave JVM quits.  Restarts the JVM unless _restart is false, and notifies the 
    *  InteractionsModel if the quit was unexpected.
    *  @param status Status returned by the dead process.
    */
   protected void handleSlaveQuit(int status) {
-    // Only restart the slave if _enabled is true
-    if (_enabled) {
+    // Only restart the slave if _restart is true
+//    Utilities.showDebug("MainJVM: slaveJVM has quit with status " + status + " _restart = " + _restart + " _cleanlyRestarting = " + _cleanlyRestarting);
+    if (_restart) {
       // We have already fired this event if we are cleanly restarting
-      if (!_cleanlyRestarting) {
-        _interactionsModel.interpreterResetting();
-      }
+      if (!_cleanlyRestarting) _interactionsModel.interpreterResetting();
+//      Utilities.showDebug("MainJVM: calling startInterpreterJVM()");
       startInterpreterJVM();
     }
     
-    if (!_cleanlyRestarting) {
-      _interactionsModel.replCalledSystemExit(status);
-    }
+    if (!_cleanlyRestarting) _interactionsModel.replCalledSystemExit(status);
     _cleanlyRestarting = false;
   }
   
-  /**
-   * Action to take if the slave JVM quits before registering.
-   * @param status Status code of the JVM
+  /** Action to take if the slave JVM quits before registering.
+   *  @param status Status code of the JVM
    */
   protected void slaveQuitDuringStartup(int status) {
     // The slave JVM is not enabled after this.
-    _enabled = false;
+//    Utilities.showDebug("slaveQuitDuringStartup!");
+    _restart = false;
     
-    String msg = "Interpreter JVM exited before registering, status: "
-      + status;
+    String msg = "Interpreter JVM exited before registering, status: " + status;
     IllegalStateException e = new IllegalStateException(msg);
     _interactionsModel.interpreterResetFailed(e);
     _cleanlyRestarting = false;
     throw e;
   }
   
-  /**
-   * Called if the slave JVM dies before it is able to register.
-   * @param cause The Throwable which caused the slave to die.
+  /** Called if the slave JVM dies before it is able to register.
+   *  @param cause The Throwable which caused the slave to die.
    */
   public void errorStartingSlave(Throwable cause) throws RemoteException {
     new edu.rice.cs.drjava.ui.AWTExceptionHandler().handle(cause);
   }
   
-  /**
-   * This method is called by the interpreter JVM if it cannot
-   * be exited (likely because of its having a
-   * security manager)
-   * @param th The Throwable thrown by System.exit
+  /** This method is called by the interpreter JVM if it cannot be exited (likely because of its having a
+   *  security manager)
+   *  @param th The Throwable thrown by System.exit
    */
   public void quitFailed(Throwable th) throws RemoteException {
     synchronized(_masterJVMLock) {
@@ -752,7 +725,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   protected void handleSlaveConnected() {
     // we reset the enabled flag since, unless told otherwise via
     // killInterpreter(false), we want to automatically respawn
-    _enabled = true;
+    _restart = true;
     _cleanlyRestarting = false;
     
     Boolean allowAccess = DrJava.getConfig().getSetting(OptionConstants.ALLOW_PRIVATE_ACCESS);
@@ -799,7 +772,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   /** Sets the interpreter to allow access to private members. TODO: synchronize? */
   public void setPrivateAccessible(boolean allow) {
     // silently fail if disabled. see killInterpreter docs for details.
-    if (!_enabled) return;
+    if (!_restart) return;
     
     ensureInterpreterConnected();
     try { _interpreterJVM().setPrivateAccessible(allow); }
@@ -813,7 +786,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
         /* Now we silently fail if interpreter is disabled instead of throwing an exception. This situation
          * occurs only in test cases and when DrJava is about to quit. 
          */
-        //if (! _enabled) {
+        //if (! _restart) {
         //throw new IllegalStateException("Interpreter is disabled");
         //}
         while (_interpreterJVM() == null) {

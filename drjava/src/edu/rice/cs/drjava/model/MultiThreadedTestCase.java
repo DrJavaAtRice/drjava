@@ -48,40 +48,24 @@ package edu.rice.cs.drjava.model;
 import  junit.framework.*;
 import java.io.*;
 
-/**
- * TestCase which can fail if another thread causes an error or failure.
- *
- * @version $Id$
+/** TestCase which can fail if another thread causes an error or failure.
+ *  @version $Id$
  */
 public abstract class MultiThreadedTestCase extends TestCase {
-  /**
-   * Flag to keep track of whether or not a test failed in
-   * another thread (other than the testing thread).
-   */
+  
+  /** Flag to keep track of whether or not a test failed in another thread (not the testing thread). */
   protected static boolean _testFailed = false;
 
-  /**
-   * Initialize test state to not failed
-   */
-  public void setUp() throws IOException {
-    _testFailed = false;
-  }
+  /** Initialize test state to not failed. */
+  public void setUp() throws IOException { _testFailed = false; }
 
-  /**
-   * If any tests failed, print a message saying that
-   * some tests failed in another thread (other than the testing thread)
-   */
+  /** If any test failed, print a message saying that some test failed in another thread (not the testing thread). */
   public void tearDown() throws IOException {
-    if ( _testFailed ) {
-      fail("test failed in another thread");
-    }
+    if ( _testFailed ) fail("test failed in another thread");
   }
 
-  /**
-   * This method prints the failure message to System.err and
-   * kills the JVM.  Just calling fail() doesn't always cause the
-   * test to fail, because the listener is often called from another
-   * thread.
+  /** This method prints the failure message to System.err and kills the JVM.  Just calling fail() doesn't always cause
+   *  the test to fail, because the listener is often called from another thread.
    */
   protected static void listenerFail(String s) {
     System.err.println("TEST FAILED: " + s);

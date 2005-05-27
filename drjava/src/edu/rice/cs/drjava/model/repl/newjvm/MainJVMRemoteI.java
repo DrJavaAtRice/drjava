@@ -79,16 +79,14 @@ public interface MainJVMRemoteI extends MasterRemote {
    */
   public void interpretResult(InterpretResult result) throws RemoteException;
 
-  /**
-   * This method is called by the interpreter JVM if it cannot
-   * be exited (likely because of its having a
-   * security manager)
-   * @param th The Throwable thrown by System.exit
+  /** This method is called by the interpreter JVM if it cannot be exited (likely because of its having a security 
+   *  manager)
+   *  @param th The Throwable thrown by System.exit
    */
   public void quitFailed(Throwable th) throws RemoteException;
 
   /** Called if JUnit is invoked on a non TestCase class.
-   * @param isTestAll whether or not it was a use of the test all button
+   *  @param isTestAll whether or not it was a use of the test all button
    */
   public void nonTestCase(boolean isTestAll) throws RemoteException;
 
@@ -96,23 +94,21 @@ public interface MainJVMRemoteI extends MasterRemote {
    * @param e the ClassFileError object describing the error when loading the class file.
    */
   public void classFileError(ClassFileError e) throws RemoteException;
-  /**
-   * Called to indicate that a suite of tests has started running.
-   * @param numTests The number of tests in the suite to be run.
+  
+  /** Called to indicate that a suite of tests has started running.
+   *  @param numTests The number of tests in the suite to be run.
    */
   public void testSuiteStarted(int numTests) throws RemoteException;
 
-  /**
-   * Called when a particular test is started.
-   * @param testName The name of the test being started.
+  /** Called when a particular test is started.
+   *  @param testName The name of the test being started.
    */
   public void testStarted(String testName) throws RemoteException;
 
-  /**
-   * Called when a particular test has ended.
-   * @param testName The name of the test that has ended.
-   * @param wasSuccessful Whether the test passed or not.
-   * @param causedError If not successful, whether the test caused an error
+  /** Called when a particular test has ended.
+   *  @param testName The name of the test that has ended.
+   *  @param wasSuccessful Whether the test passed or not.
+   *  @param causedError If not successful, whether the test caused an error
    *  or simply failed.
    */
   public void testEnded(String testName, boolean wasSuccessful, boolean causedError)

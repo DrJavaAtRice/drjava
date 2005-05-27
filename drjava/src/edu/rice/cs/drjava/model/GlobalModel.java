@@ -123,23 +123,17 @@ public interface GlobalModel extends IGetDocuments, ILoadDocuments {
    
   public void setDocumentNavigator(IDocumentNavigator newnav);
   
-  //---------------------------- Interpreter --------------------------------//
-  /**
-   * updates the security manager in DrJava
-   */
-  public void enableSecurityManager();
-  
-  /**
-   * updates the security manager in DrJava
-   */
-  public void disableSecurityManager();
-  
+//  //---------------------------- Interpreter --------------------------------//
+//  /** Updates the security manager in DrJava. */
+//  public void enableSecurityManager();
+//  
+//  /** Updates the security manager in DrJava. */
+//  public void disableSecurityManager();
+//  
   //---------------------------- File Management ----------------------------//
 
-  /**
-   * Creates a new document in the definitions pane and
-   * adds it to the list of open documents.
-   * @return The new open document
+  /** Creates a new document in the definitions pane and adds it to the list of open documents.
+   *  @return The new open document
    */
   public OpenDefinitionsDocument newFile();
 

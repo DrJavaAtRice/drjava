@@ -90,7 +90,6 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     _waitJUnitDone();
   }
    
-  
   protected void _waitJUnitDone() throws InterruptedException {
     synchronized(_junitLock) {
       while (!_junitDone) _junitLock.wait();
@@ -99,36 +98,23 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
   
   protected static final String FOO_TEXT = "class DrJavaTestFoo {}";
   protected static final String BAR_TEXT = "class DrJavaTestBar {}";
-  protected static final String BAZ_TEXT =
-    "class DrJavaTestBaz extends DrJavaTestFoo { public static int x = 3; }";
-  protected static final String FOO_MISSING_CLOSE_TEXT =
-    "class DrJavaTestFoo {";
+  protected static final String BAZ_TEXT = "class DrJavaTestBaz extends DrJavaTestFoo { public static int x = 3; }";
+  protected static final String FOO_MISSING_CLOSE_TEXT = "class DrJavaTestFoo {";
+  protected static final String FOO_PACKAGE_AFTER_IMPORT = "import java.util.*;\npackage a;\n" + FOO_TEXT;
+  protected static final String FOO_PACKAGE_INSIDE_CLASS = "class DrJavaTestFoo { package a; }";
+  protected static final String FOO_PACKAGE_AS_FIELD = "class DrJavaTestFoo { int package; }";
+  protected static final String FOO_PACKAGE_AS_FIELD_2 = "class DrJavaTestFoo { int package = 5; }";
+  protected static final String FOO_PACKAGE_AS_PART_OF_FIELD = "class DrJavaTestFoo { int cur_package = 5; }";
 
-  protected static final String FOO_PACKAGE_AFTER_IMPORT =
-    "import java.util.*;\npackage a;\n" + FOO_TEXT;
-
-  protected static final String FOO_PACKAGE_INSIDE_CLASS =
-    "class DrJavaTestFoo { package a; }";
-
-  protected static final String FOO_PACKAGE_AS_FIELD =
-    "class DrJavaTestFoo { int package; }";
-
-  protected static final String FOO_PACKAGE_AS_FIELD_2 =
-    "class DrJavaTestFoo { int package = 5; }";
-
-  protected static final String FOO_PACKAGE_AS_PART_OF_FIELD =
-    "class DrJavaTestFoo { int cur_package = 5; }";
-
-  /**
-   * Setup for each test case, which does the following.
-   * <OL>
-   * <LI>
+  /** Setup for each test case, which does the following.
+   *  <OL>
+   *  <LI>
    *  Creates a new GlobalModel in {@link #_model} for each test case run.
-   * </LI>
-   * <LI>
+   *  </LI>
+   *  <LI>
    *  Creates a new temporary directory in {@link #_tempDir}.
-   * </LI>
-   * </OL>
+   *  </LI>
+   *  </OL>
    */
   public void setUp() throws IOException {
     DrJava.getConfig().resetToDefaults();
@@ -367,8 +353,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
 
   protected void interpretIgnoreResult(String input) throws DocumentAdapterException {
     ConsoleInterface interactionsDoc = _model.getInteractionsDocument();
-    interactionsDoc.insertText(interactionsDoc.getDocLength(), input,
-                               InteractionsDocument.DEFAULT_STYLE);
+    interactionsDoc.insertText(interactionsDoc.getDocLength(), input, InteractionsDocument.DEFAULT_STYLE);
 
     _model.interpretCurrentInteraction();
   }
@@ -402,9 +387,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
                (contains != -1) == shouldContain);
   }
 
-  /**
-   * Returns the current contents of the interactions document
-   */
+  /** Returns the current contents of the interactions document */
   protected String getInteractionsText() throws DocumentAdapterException {
     ConsoleInterface doc = _model.getInteractionsDocument();
     return doc.getDocText(0, doc.getDocLength());
@@ -455,44 +438,25 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
 
   public static class WarningFileSelector implements FileOpenSelector, FileSaveSelector {
     private File _file;
-    public WarningFileSelector(File f) {
-      _file = f;
-    }
-
-    public File getFile() throws OperationCanceledException {
-      return _file;
-    }
-    public File[] getFiles() throws OperationCanceledException {
-      return new File[] {_file};
-    }
-    public boolean warnFileOpen(File f) {
-      throw new OpenWarningException();
-    }
-    public boolean verifyOverwrite() {
-      throw new OverwriteException();
-    }
-    public boolean shouldSaveAfterFileMoved(OpenDefinitionsDocument doc,
-                                            File oldFile) {
+    public WarningFileSelector(File f) { _file = f; }
+    public File getFile() throws OperationCanceledException { return _file; }
+    public File[] getFiles() throws OperationCanceledException { return new File[] {_file}; }
+    public boolean warnFileOpen(File f) { throw new OpenWarningException(); }
+    public boolean verifyOverwrite() { throw new OverwriteException(); }
+    public boolean shouldSaveAfterFileMoved(OpenDefinitionsDocument doc, File oldFile) {
       throw new FileMovedWarningException();
     }
   }
 
-  /**
-   * this class is used by several test cases in Compile Tests that expect
-   * incorrect behavior concerning the saving of files.  This special
-   * FileSelector is included to ensure compliance with these test cases,
-   * for which the intricacies of saving files are unimportant.
-   *
-   * The only FileSelector that honest-to-supreme-deity matters is
-   * is DefaultGlobalModel.ConcreteOpenDefDoc, which is much
-   * more like WarningFileSelector
+  /** This class is used by several test cases in Compile Tests that expect incorrect behavior concerning the saving 
+   *  of files.  This special FileSelector is included to ensure compliance with these test cases, for which the 
+   *  intricacies of saving files are unimportant.  The only FileSelector that honest-to-supreme-deity matters is
+   *  is DefaultGlobalModel.ConcreteOpenDefDoc, which is much more like WarningFileSelector
    */
 
   public static class FileSelector implements FileOpenSelector, FileSaveSelector {
     private File _file, _file2;
-    public FileSelector(File f) {
-      _file = f;
-    }
+    public FileSelector(File f) { _file = f; }
     public FileSelector(File f1, File f2) {
       _file = f1;
       _file2 = f2;
@@ -623,14 +587,11 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     
     public void currentDirectoryChanged(File dir) { }
     
-    /**
-     * Appends the stack trace from the listener's creation to the
-     * end of the given failure message.
-     */
+    /** Appends the stack trace from the listener's creation to the end of the given failure message. */
     public void listenerFail(String message) {
       String header = "\nTestListener creation stack trace:\n" +
         StringOps.getStackTrace(_startupTrace);
-      GlobalModelTestCase.listenerFail(message + header);
+      MultiThreadedTestCase.listenerFail(message + header);
     }
 
     public void assertFileNotFoundCount(int i) {
@@ -699,11 +660,11 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       assertEquals("number of times interpreterChanged fired", i, interpreterChangedCount);
     }
 
-    /*
-    public void assertInteractionCaretPositionChangedCount(int i) {
-      assertEquals("number of times interactionCaretPositionChanged fired", i, interactionCaretPositionChangedCount);
-    }
-    */
+//    /** Not used */
+//    public void assertInteractionCaretPositionChangedCount(int i) {
+//      assertEquals("number of times interactionCaretPositionChanged fired", i, interactionCaretPositionChangedCount);
+//    }
+
     public void assertCompileStartCount(int i) {
       assertEquals("number of times compileStarted fired", i, compileStartCount);
     }
@@ -717,112 +678,77 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     }
 
     public void assertInterpreterResettingCount(int i) {
-      assertEquals("number of times interactionsResetting fired",
-                   i,
-                   interpreterResettingCount);
+      assertEquals("number of times interactionsResetting fired", i, interpreterResettingCount);
     }
 
     public void assertInterpreterReadyCount(int i) {
-      assertEquals("number of times interactionsReset fired",
-                   i,
-                   interpreterReadyCount);
+      assertEquals("number of times interactionsReset fired", i, interpreterReadyCount);
     }
 
     public void assertInterpreterResetFailedCount(int i) {
-      assertEquals("number of times interactionsResetFailed fired",
-                   i,
-                   interpreterResetFailedCount);
+      assertEquals("number of times interactionsResetFailed fired", i, interpreterResetFailedCount);
     }
 
     public void assertInterpreterExitedCount(int i) {
-      assertEquals("number of times interpreterExited fired",
-                   i,
-                   interpreterExitedCount);
+      assertEquals("number of times interpreterExited fired", i, interpreterExitedCount);
     }
 
     public void assertInteractionsErrorCount(int i) {
-      assertEquals("number of times interactionsError fired",
-                   i,
-                   interactionErrorCount);
+      assertEquals("number of times interactionsError fired", i, interactionErrorCount);
     }
 
     public void assertConsoleResetCount(int i) {
-      assertEquals("number of times consoleReset fired",
-                   i,
-                   consoleResetCount);
+      assertEquals("number of times consoleReset fired", i, consoleResetCount);
     }
 
     public void assertSaveBeforeCompileCount(int i) {
-      assertEquals("number of times saveBeforeCompile fired",
-                   i,
-                   saveBeforeCompileCount);
+      assertEquals("number of times saveBeforeCompile fired", i, saveBeforeCompileCount);
     }
 
-    /**
-     * Not used.
-    public void assertSaveBeforeRunCount(int i) {
-      assertEquals("number of times saveBeforeRun fired",
-                   i,
-                   saveBeforeRunCount);
-    }*/
-
-    /**
-     * Not used.
-    public void assertSaveBeforeJUnitCount(int i) {
-      assertEquals("number of times saveBeforeJUnit fired",
-                   i,
-                   saveBeforeJUnitCount);
-    }*/
+//    /** Not used.*/
+//    public void assertSaveBeforeRunCount(int i) {
+//      assertEquals("number of times saveBeforeRun fired", i, saveBeforeRunCount);
+//    }
+//
+//    /** Not used. */
+//    public void assertSaveBeforeJUnitCount(int i) {
+//      assertEquals("number of times saveBeforeJUnit fired", i, saveBeforeJUnitCount);
+//    }
 
     public void assertSaveBeforeJavadocCount(int i) {
-      assertEquals("number of times saveBeforeJavadoc fired",
-                   i,
-                   saveBeforeJavadocCount);
+      assertEquals("number of times saveBeforeJavadoc fired", i, saveBeforeJavadocCount);
     }
 
-    /**
-     * Not used.
-    public void assertSaveBeforeDebugCount(int i) {
-      assertEquals("number of times saveBeforeDebug fired",
-                   i,
-                   saveBeforeDebugCount);
-    }*/
+//    /** Not used. */
+//    public void assertSaveBeforeDebugCount(int i) {
+//      assertEquals("number of times saveBeforeDebug fired",
+//                   i,
+//                   saveBeforeDebugCount);
+//    }
 
     public void assertNonTestCaseCount(int i) {
-      assertEquals("number of times nonTestCase fired",
-                   i,
-                   nonTestCaseCount);
+      assertEquals("number of times nonTestCase fired", i,  nonTestCaseCount);
     }
 
     public void assertFileRevertedCount(int i) {
-      assertEquals("number of times fileReverted fired",
-                   i,
-                   fileRevertedCount);
+      assertEquals("number of times fileReverted fired", i, fileRevertedCount);
     }
 
     public void assertUndoableEditCount(int i) {
-      assertEquals("number of times undoableEditHappened fired",
-                   i,
-                   undoableEditCount);
+      assertEquals("number of times undoableEditHappened fired", i, undoableEditCount);
     }
 
     public void assertShouldRevertFileCount(int i) {
-      assertEquals("number of times shouldRevertFile fired",
-                   i,
-                   shouldRevertFileCount);
+      assertEquals("number of times shouldRevertFile fired", i, shouldRevertFileCount);
     }
 
     public void assertInteractionIncompleteCount(int i) {
-      assertEquals("number of times interactionIncomplete fired",
-                   i,
-                   interactionIncompleteCount);
+      assertEquals("number of times interactionIncomplete fired", i, interactionIncompleteCount);
     }
 
-   
     public void newFileCreated(OpenDefinitionsDocument doc) {
       listenerFail("newFileCreated fired unexpectedly");
     }
-
     
     public void fileNotFound(File f) {
       listenerFail("fileNotFound fired unexpectedly");
@@ -896,10 +822,10 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       listenerFail("interpreterChanged fired unexpectedly");
     }
 
-    /*
-    public void interactionCaretPositionChanged(int pos) {
-      listenerFail("interactionCaretPosition fired unexpectedly");
-    }*/
+//    /**Not used */
+//    public void interactionCaretPositionChanged(int pos) {
+//      listenerFail("interactionCaretPosition fired unexpectedly");
+//    }
 
     public void compileStarted() {
       listenerFail("compileStarted fired unexpectedly");
@@ -937,17 +863,15 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       listenerFail("saveBeforeCompile fired unexpectedly");
     }
 
-    /**
-     * Not used.
-    public void saveBeforeRun() {
-      listenerFail("saveBeforeRun fired unexpectedly");
-    }*/
+//    /** Not used. */
+//    public void saveBeforeRun() {
+//      listenerFail("saveBeforeRun fired unexpectedly");
+//    }
 
-    /**
-     * Not used.
-    public void saveBeforeJUnit() {
-      listenerFail("saveBeforeJUnit fired unexpectedly");
-    }*/
+//    /** Not used. */
+//    public void saveBeforeJUnit() {
+//      listenerFail("saveBeforeJUnit fired unexpectedly");
+//    }
 
     public void saveBeforeJavadoc() {
       listenerFail("saveBeforeJavadoc fired unexpectedly");

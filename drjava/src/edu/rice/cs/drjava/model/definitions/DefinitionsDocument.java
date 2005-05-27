@@ -49,6 +49,7 @@ import java.io.*;
 import java.io.File;
 
 import edu.rice.cs.util.Pair;
+import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.text.SwingDocumentAdapter;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 import edu.rice.cs.util.UnexpectedException;
@@ -432,12 +433,14 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   /** Originally designed to allow undoManager to set the current document to be modified whenever an undo or 
    *  redo is performed. Now it actually does this. */
   public void setModifiedSinceSave() {
+    
     writeLock();
     try {
     _modifiedSinceSave = _undoManager.isModified();
 //    System.out.println("DefinitionsDocument: set modified? " + _modifiedSinceSave);
     }
     finally { writeUnlock(); }
+//    Utilities.showDebug("DefintionsDocument: _modifiedSinceSave = " + _modifiedSinceSave);
   }
   
   /** Whenever this document has been saved, this method should be called so that it knows it's no longer in 
@@ -532,11 +535,10 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     return count;
   }
 
-  /**
-   * Returns the offset corresponding to the first character of the given line number,
+  /** Returns the offset corresponding to the first character of the given line number,
    *  or -1 if the lineNum is not found.
-   * @param lineNum the line number for which to calculate the offset.
-   * @return the offset of the first character in the given line number
+   *  @param lineNum the line number for which to calculate the offset.
+   *  @return the offset of the first character in the given line number
    */
   public int getOffset(int lineNum) {
     if (lineNum < 0) return -1;
@@ -558,11 +560,9 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     }
     return -1;
   }
-  
 
   /** Returns true iff tabs are to removed on text insertion. */
   public boolean tabsRemoved() { return _tabsRemoved; }
-
  
   /** Comments out all lines between selStart and selEnd, inclusive. The current cursor position is maintained 
    *  after the operation.

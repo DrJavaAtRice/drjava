@@ -1,47 +1,35 @@
 /*BEGIN_COPYRIGHT_BLOCK
  *
- * This file is part of DrJava.  Download the current version of this project:
- * http://sourceforge.net/projects/drjava/ or http://www.drjava.org/
+ * This file is part of DrJava.  Download the current version of this project from http://www.drjava.org/
+ * or http://sourceforge.net/projects/drjava/
  *
  * DrJava Open Source License
+ * 
+ * Copyright (C) 2001-2005 JavaPLT group at Rice University (javaplt@rice.edu).  All rights reserved.
  *
- * Copyright (C) 2001-2003 JavaPLT group at Rice University (javaplt@rice.edu)
- * All rights reserved.
- *
- * Developed by:   Java Programming Languages Team
- *                 Rice University
- *                 http://www.cs.rice.edu/~javaplt/
- *
- * Permission is hereby granted, free of charge, to any person obtaining a
- * copy of this software and associated documentation files (the "Software"),
- * to deal with the Software without restriction, including without
- * limitation the rights to use, copy, modify, merge, publish, distribute,
- * sublicense, and/or sell copies of the Software, and to permit persons to
- * whom the Software is furnished to do so, subject to the following
- * conditions:
- *
- *     - Redistributions of source code must retain the above copyright
- *       notice, this list of conditions and the following disclaimers.
- *     - Redistributions in binary form must reproduce the above copyright
- *       notice, this list of conditions and the following disclaimers in the
- *       documentation and/or other materials provided with the distribution.
- *     - Neither the names of DrJava, the JavaPLT, Rice University, nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this Software without specific prior written permission.
- *     - Products derived from this software may not be called "DrJava" nor
- *       use the term "DrJava" as part of their names without prior written
- *       permission from the JavaPLT group.  For permission, write to
- *       javaplt@rice.edu.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
- * THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
- * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
- * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
- * OTHER DEALINGS WITH THE SOFTWARE.
- *
- END_COPYRIGHT_BLOCK*/
+ * Developed by:   Java Programming Languages Team, Rice University, http://www.cs.rice.edu/~javaplt/
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated 
+ * documentation files (the "Software"), to deal with the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and 
+ * to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ * 
+ *     - Redistributions of source code must retain the above copyright notice, this list of conditions and the 
+ *       following disclaimers.
+ *     - Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the 
+ *       following disclaimers in the documentation and/or other materials provided with the distribution.
+ *     - Neither the names of DrJava, the JavaPLT, Rice University, nor the names of its contributors may be used to 
+ *       endorse or promote products derived from this Software without specific prior written permission.
+ *     - Products derived from this software may not be called "DrJava" nor use the term "DrJava" as part of their 
+ *       names without prior written permission from the JavaPLT group.  For permission, write to javaplt@rice.edu.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO 
+ * THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
+ * CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS 
+ * WITH THE SOFTWARE.
+ * 
+END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.repl.newjvm;
 
@@ -81,17 +69,11 @@ import javax.swing.JDialog;
 import koala.dynamicjava.parser.wrapper.*;
 import koala.dynamicjava.parser.*;
 
-/**
- * This is the main class for the interpreter JVM.
- * Note that this class is specific to using DynamicJava. It would need
- * to be subclassed to use with another interpreter. (Really, there would
- * need to be an abstract base class, but since we don't need it yet I'm
- * not making one.)
- *
- * This class is loaded in the Interpreter JVM, not the Main JVM.
- * (Do not use DrJava's config framework here.)
- *
- * @version $Id$
+/** This is the main class for the interpreter JVM. Note that this class is specific to using DynamicJava. It would need
+ *  to be subclassed to use with another interpreter. (Really, there would need to be an abstract base class, but since 
+ *  we don't need it yet I'm not making one.)
+ *  This class is loaded in the Interpreter JVM, not the Main JVM. (Do not use DrJava's config framework here.)
+ *  @version $Id$
  */
 public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRemoteI, JUnitModelCallback {
   
@@ -103,7 +85,6 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
   public static final String EMPTY_TRACE_TEXT = "";
   //public static final String EMPTY_TRACE_TEXT = "  at (the interactions window)";
   
-  
   /** Remote reference to the MainJVM class in DrJava's primary JVM. */
   private MainJVMRemoteI _mainJVM;
   
@@ -113,15 +94,10 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
   /** Maps names to interpreters with metadata. */
   private Hashtable<String,InterpreterData> _interpreters;
   
-  /**
-   * The current interpreter.
-   */
+  /** The current interpreter. */
   private InterpreterData _activeInterpreter;
   
-  /**
-   * The currently accumulated classpath for all Java interpreters.
-   * List contains unqiue entries.
-   */
+  /** The currently accumulated classpath for all Java interpreters.  List contains unqiue entries. */
   private ClasspathVector _classpath;
   
   /** Responsible for running JUnit tests in this JVM. */
@@ -130,13 +106,10 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
   /** manages the classpath for all of DrJava */
   ClasspathManager classpathManager;
   
-
   /** Interactions processor, currently a pre-processor **/
   //  private InteractionsProcessorI _interactionsProcessor;
   
-  /**
-   * Whether to display an error message if a reset fails.
-   */
+  /** Whether to display an error message if a reset fails. */
   private boolean _messageOnResetFailure;
   
   /** Private constructor; use the singleton ONLY instance. */
@@ -162,15 +135,15 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     catch (ExceptionReturnedException e) { throw new edu.rice.cs.util.UnexpectedException(e); }
   }
   
-  /** Updates the security manager in DrJava */
-  public void enableSecurityManager() throws RemoteException{
-    edu.rice.cs.drjava.DrJava.enableSecurityManager();
-  }
-  
-  /** Updates the security manager in DrJava */
-  public void disableSecurityManager() throws RemoteException{
-    edu.rice.cs.drjava.DrJava.disableSecurityManager();
-  }
+//  /** Updates the security manager in the slave JVM. */
+//  public void enableSecurityManager() throws RemoteException {
+//    edu.rice.cs.drjava.DrJava.enableSecurityManager();
+//  }
+//  
+//  /** Updates the security manager in the slave JVM. */
+//  public void disableSecurityManager() throws RemoteException {
+//    edu.rice.cs.drjava.DrJava.disableSecurityManager();
+//  }
   
   private static final Log _log = new Log("IntJVMLog", false);
   private static void _dialog(String s) {
@@ -178,20 +151,22 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     _log.logTime(s);
   }
   
-  /**
-   * Actions to perform when this JVM is started (through its superclass,
-   * AbstractSlaveJVM).
-   */
+  /** Actions to perform when this JVM is started (through its superclass, AbstractSlaveJVM). */
   protected void handleStart(MasterRemote mainJVM) {
     //_dialog("handleStart");
     _mainJVM = (MainJVMRemoteI) mainJVM;
     
+//    // install special SecurityManager that blocks interpreted code from doing System.exit(...)
+//    try { enableSecurityManager(); }
+//    catch(RemoteException re) {
+//       _log.logTime("PreventExitSecurityManager: " + re.toString());
+//       throw new IllegalStateException("Slave JVM cannot install special SecurityManager.\n" + re);
+//    }
+    
     // redirect stdin
     System.setIn(new InputStreamRedirector() {
       protected String _getInput() {
-        try {
-          return _mainJVM.getConsoleInput();
-        }
+        try { return _mainJVM.getConsoleInput(); }
         catch (RemoteException re) {
           // blow up if no MainJVM found
           _log.logTime("System.in: " + re.toString());
@@ -228,12 +203,10 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
       }
     }));
     
-    // On Windows, any frame or dialog opened from Interactions pane will
-    // appear *behind* DrJava's frame, unless a previous frame or dialog
-    // is shown here.  Not sure what the difference is, but this hack
-    // seems to work.  (I'd be happy to find a better solution, though.)
-    // Only necessary on Windows, since frames and dialogs on other
-    // platforms appear correctly in front of DrJava.
+    /* On Windows, any frame or dialog opened from Interactions pane will appear *behind* DrJava's frame, unless a 
+     * previous frame or dialog is shown here.  Not sure what the difference is, but this hack seems to work.  (I'd
+     * be happy to find a better solution, though.)  Only necessary on Windows, since frames and dialogs on other 
+     * platforms appear correctly in front of DrJava. */
     if (PlatformFactory.ONLY.isWindowsPlatform()) {
       JDialog d = new JDialog();
       d.setSize(0,0);
@@ -244,10 +217,9 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
   }
   
   
-  /**
-   * Interprets the given string of source code in the active interpreter.
-   * The result is returned to MainJVM via the interpretResult method.
-   * @param s Source code to interpret.
+  /** Interprets the given string of source code in the active interpreter. The result is returned to MainJVM via 
+   *  the interpretResult method.
+   *  @param s Source code to interpret.
    */
   public void interpret(String s) {
     interpret(s, _activeInterpreter);
@@ -655,20 +627,14 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     _messageOnResetFailure = show;
   }
   
-  /**
-   * This method is called if the interpreterJVM cannot
-   * be exited (likely because of its having a
-   * security manager)
-   */
+  /** This method is called if the interpreterJVM cannot be exited (likely because of a modified security manager*/
   protected void quitFailed(Throwable th) {
     if (_messageOnResetFailure) {
       String msg = "The interactions pane could not be reset:\n" + th;
       javax.swing.JOptionPane.showMessageDialog(null, msg);
     }
     
-    try {
-      _mainJVM.quitFailed(th);
-    }
+    try { _mainJVM.quitFailed(th); }
     catch (RemoteException re) {
       // nothing to do
       _log.logTime("quitFailed: " + re.toString());

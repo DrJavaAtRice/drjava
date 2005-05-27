@@ -58,40 +58,29 @@ import java.util.Vector;
  */
 public abstract class RMIInteractionsModel extends InteractionsModel {
 
-  /**
-   * RMI interface to the remote Java interpreter.
-   */
+  /** RMI interface to the remote Java interpreter.*/
   protected final MainJVM _interpreterControl;
 
 
-  /**
-   * Constructs an InteractionsModel which can communicate with another JVM.
-   * @param control RMI interface to the Java interpreter
-   * @param adapter InteractionsDocumentAdapter to use in the InteractionsDocument
-   * @param historySize Number of lines to store in the history
-   * @param writeDelay Number of milliseconds to wait after each println
+  /** Constructs an InteractionsModel which can communicate with another JVM.
+   *  @param control RMI interface to the Java interpreter
+   *  @param adapter InteractionsDocumentAdapter to use in the InteractionsDocument
+   *  @param historySize Number of lines to store in the history
+   *  @param writeDelay Number of milliseconds to wait after each println
    */
-  public RMIInteractionsModel(MainJVM control,
-                              ConsoleInterface adapter,
-                              int historySize,
-                              int writeDelay)
-  {
+  public RMIInteractionsModel(MainJVM control, ConsoleInterface adapter, int historySize, int writeDelay) {
     super(adapter, historySize, writeDelay);
     _interpreterControl = control;
   }
 
 
-  /**
-   * Interprets the given command.
-   * @param toEval command to be evaluated
+  /** Interprets the given command.
+   *  @param toEval command to be evaluated
    */
-  protected void _interpret(String toEval) {
-    _interpreterControl.interpret(toEval);
-  }
+  protected void _interpret(String toEval) { _interpreterControl.interpret(toEval); }
 
-  /**
-   * Gets the string representation of the value of a variable in the current interpreter.
-   * @param var the name of the variable
+  /** Gets the string representation of the value of a variable in the current interpreter.
+   *  @param var the name of the variable
    */
   public String getVariableToString(String var) {
     return _interpreterControl.getVariableToString(var);

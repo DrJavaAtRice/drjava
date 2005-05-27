@@ -1098,25 +1098,17 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     _popMenu.removeAll();
   }
   
-  
-  
-  
-  
-  /**
-   * The undo action.
-   */
+  /** The undo action. */
   private class UndoAction extends AbstractAction {
-    /**
-     * Constructor.
-     */
+    
+    /** Constructor. */
     private UndoAction() {
       super("Undo");
       setEnabled(false);
     }
 
-    /**
-     * What to do when user chooses to undo.
-     * @param e
+    /** What to do when user chooses to undo.
+     *  @param e
      */
     public void actionPerformed(ActionEvent e) {
       try {
@@ -1142,9 +1134,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     }
 
 
-    /**
-     * Updates the undo list, i.e., where we are as regards undo and redo.
-     */
+    /** Updates the undo list, i.e., where we are as regards undo and redo. */
     protected void updateUndoState() {
       if (_doc.undoManagerCanUndo()) {
         setEnabled(true);
@@ -1157,22 +1147,17 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     }
   }
 
-  /**
-   * Redo action.
-   */
+  /** Redo action. */
   private class RedoAction extends AbstractAction {
 
-    /**
-     * Constructor.
-     */
+    /** Constructor. */
     private RedoAction() {
       super("Redo");
       setEnabled(false);
     }
 
-    /**
-     * In the event that the user chooses to redo something, this is what's called.
-     * @param e
+    /** In the event that the user chooses to redo something, this is what's called.
+     *  @param e
      */
     public void actionPerformed(ActionEvent e) {
       try {

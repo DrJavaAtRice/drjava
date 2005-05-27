@@ -236,7 +236,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
     
     public void interactionErrorOccurred(int offset, int length) { }
     
-    public void interpreterResetting() {    }
+    public void interpreterResetting() { }
     
     public void interpreterReady() {
       File buildDir = _state.getBuildDirectory();
@@ -291,19 +291,15 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
   
   // ---- JUnit Fields ----
   
-  /**
-   * JUnitModel manages all JUnit functionality.
-   * TODO: remove dependence on GlobalModel
+  /** JUnitModel manages all JUnit functionality.
+   *  TODO: remove dependence on GlobalModel
    */
-  private final DefaultJUnitModel _junitModel =
-    new DefaultJUnitModel(this, _interpreterControl, _compilerModel, this);
+  private final DefaultJUnitModel _junitModel = new DefaultJUnitModel(this, _interpreterControl, _compilerModel, this);
   
   
   // ---- Javadoc Fields ----
   
-  /**
-   * Manages all Javadoc functionality.
-   */
+  /** Manages all Javadoc functionality. */
   protected JavadocModel _javadocModel = new DefaultJavadocModel(this);
   
   // ---- Debugger Fields ----
@@ -369,8 +365,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
     _cache = new DocumentCache();
     
     _interactionsDocAdapter = new InteractionsDocumentAdapter();
-    _interactionsModel =
-      new DefaultInteractionsModel(this, _interpreterControl,_interactionsDocAdapter);
+    _interactionsModel = new DefaultInteractionsModel(this, _interpreterControl,_interactionsDocAdapter);
     _interactionsModel.addListener(_interactionsListener);
     
     _interpreterControl.setInteractionsModel(_interactionsModel);
@@ -462,23 +457,23 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
     }
   }
   
-  // ----- INTERACTIONS -----
-  public void enableSecurityManager() {
-    edu.rice.cs.drjava.DrJava.enableSecurityManager();
-    try { _interpreterControl.enableSecurityManager(); } 
-    catch(RemoteException e) {
-      // couldn't enable security on the slave...
-    }
-  }
-  
-  public void disableSecurityManager() {
-    edu.rice.cs.drjava.DrJava.disableSecurityManager();
-    try { _interpreterControl.disableSecurityManager(); }
-    catch(RemoteException e) {
-      // couldn't enable security on the slave...
-    }
-  }
-  
+//  // ----- INTERACTIONS -----
+//  public void enableSecurityManager() {
+//    try { _interpreterControl.enableSecurityManager(); } 
+//    catch(RemoteException e) {
+//      Utilities.showDebug("Enabling security on the slave failed");
+//      // couldn't enable security on the slave...
+//    }
+//  }
+//  
+//  public void disableSecurityManager() {
+//    try { _interpreterControl.disableSecurityManager(); }
+//    catch(RemoteException e) {
+//      // couldn't enable security on the slave...
+//      Utilities.showDebug("Disabling security on the slave failed");
+//    }
+//  }
+//  
   
   // ----- STATE -----
   protected FileGroupingState _state;
@@ -1473,8 +1468,9 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
     closeAllFilesOnQuit();
     dispose();  // kills the interpreter
     
-    if (DrJava.getSecurityManager() != null) DrJava.getSecurityManager().exitVM(0);
-    else System.exit(0); // If we are being debugged by another copy of DrJava,
+//    if (DrJava.getSecurityManager() != null) DrJava.getSecurityManager().exitVM(0);
+//    else 
+      System.exit(0); // If we are being debugged by another copy of DrJava,
     // then we have no security manager.  Just exit cleanly.
   }
 
@@ -1646,6 +1642,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
     if (_debugger.isAvailable() && _debugger.isReady()) _debugger.shutdown();
 
     _interactionsModel.resetInterpreter();
+//    enableSecurityManager();  // already done by slaveJVM on startup
     if (DrJava.getConfig().getSetting(OptionConstants.RESET_CLEAR_CONSOLE).booleanValue()) {
       resetConsole();
     }
@@ -1800,33 +1797,22 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
   }
 
 
-  /**
-   * Blocks until the interpreter has registered.
-   */
-  public void waitForInterpreter() {
-    _interpreterControl.ensureInterpreterConnected();
-  }
+  /** Blocks until the interpreter has registered. */
+  public void waitForInterpreter() { _interpreterControl.ensureInterpreterConnected(); }
 
 
-  /**
-   * Returns the current classpath in use by the Interpreter JVM.
-   */
-  public ClasspathVector getClasspath() {
-    return _interpreterControl.getClasspath();
-  }
+  /** Returns the current classpath in use by the Interpreter JVM. */
+  public ClasspathVector getClasspath() { return _interpreterControl.getClasspath(); }
   
-  /**
-   * Returns only the project's extra classpaths.
-   * @return The classpath entries loaded along with the project
+  /** Returns only the project's extra classpaths.
+   *  @return The classpath entries loaded along with the project
    */
   public ClasspathVector getProjectExtraClasspath() {
     return _state.getExtraClasspath();
   }
   
-  /**
-   * Sets the set of classpath entries to use as the projects
-   * set of classpath entries.  This is normally used by the
-   * project preferences..
+  /** Sets the set of classpath entries to use as the projects set of classpath entries.  This is normally used by the
+   *  project preferences..
    */
   public void setProjectExtraClasspath(ClasspathVector cp) {
     _state.setExtraClasspath(cp);
@@ -1876,20 +1862,16 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
     return filename;
   }
 
-  /**
-   * Return the absolute path of the file with the given index,
-   * or "(untitled)" if no file exists.
-   */
+  /** Return the absolute path of the file with the given index, or "(untitled)" if no file exists. */
   public String getDisplayFullPath(int index) {
     OpenDefinitionsDocument doc = getOpenDefinitionsDocuments().get(index);
     if (doc == null) throw new RuntimeException( "Document not found with index " + index);
     return GlobalModelNaming.getDisplayFullPath(doc);
   }
    
-  /**
-   * Sets whether or not the Interactions JVM will be reset after
-   * a compilation succeeds.  This should ONLY be used in tests!
-   * @param shouldReset Whether to reset after compiling
+  /** Sets whether or not the Interactions JVM will be reset after a compilation succeeds.  This should ONLY be used 
+   *  in tests!
+   *  @param shouldReset Whether to reset after compiling
    */
   void setResetAfterCompile(boolean shouldReset) { _resetAfterCompile = shouldReset; }
 
