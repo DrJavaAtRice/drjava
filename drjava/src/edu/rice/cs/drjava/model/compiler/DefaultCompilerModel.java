@@ -271,15 +271,15 @@ public class DefaultCompilerModel implements CompilerModel {
   //-------------------------------- Helpers --------------------------------//
 
   /**
-   * Converts ParseExceptions thrown by the JExprParser in language levels to
+   * Converts JExprParseExceptions thrown by the JExprParser in language levels to
    * CompilerErrors.
    */
-  private LinkedList<CompilerError> _parseExceptions2CompilerErrors(LinkedList<ParseException> pes) {
+  private LinkedList<CompilerError> _parseExceptions2CompilerErrors(LinkedList<JExprParseException> pes) {
     LinkedList<CompilerError> errors = new LinkedList<CompilerError>();
-    Iterator<ParseException> iter = pes.iterator();
+    Iterator<JExprParseException> iter = pes.iterator();
     while (iter.hasNext()) {
-      ParseException pe = iter.next();
-      errors.addLast(new CompilerError(pe.file, pe.currentToken.beginLine-1, pe.currentToken.beginColumn-1, pe.getMessage(), false));
+      JExprParseException pe = iter.next();
+      errors.addLast(new CompilerError(pe.getFile(), pe.currentToken.beginLine-1, pe.currentToken.beginColumn-1, pe.getMessage(), false));
     }
     return errors;
   }
@@ -318,8 +318,8 @@ public class DefaultCompilerModel implements CompilerModel {
 
 //    CompilerError[] errors = new CompilerError[0];
       
-    Pair<LinkedList<ParseException>, LinkedList<Pair<String, JExpressionIF>>> errors;
-    LinkedList<ParseException> parseExceptions;
+    Pair<LinkedList<JExprParseException>, LinkedList<Pair<String, JExpressionIF>>> errors;
+    LinkedList<JExprParseException> parseExceptions;
     LinkedList<Pair<String, JExpressionIF>> visitorErrors;
     LinkedList<CompilerError> compilerErrors = new LinkedList<CompilerError>();
     CompilerInterface compiler = CompilerRegistry.ONLY.getActiveCompiler();
