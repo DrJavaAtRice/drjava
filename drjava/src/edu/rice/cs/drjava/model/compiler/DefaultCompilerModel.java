@@ -371,12 +371,12 @@ public class DefaultCompilerModel implements CompilerModel {
       compilerErrors.addAll(_visitorErrors2CompilerErrors(visitorErrors));
       CompilerError[] compilerErrorsArray = null;
       
-      synchronized(_slaveJVMLock) {
-        compilerErrorsArray = (CompilerError[]) compilerErrors.toArray(new CompilerError[compilerErrors.size()]);
-      }
-      
+      compilerErrorsArray = (CompilerError[]) compilerErrors.toArray(new CompilerError[compilerErrors.size()]);
+
       /** Compile the files in specified sourceRoots and files */
-      if (compilerErrorsArray.length == 0) compilerErrorsArray = compiler.compile(sourceRoots, files);
+    
+      if (compilerErrorsArray.length == 0) 
+        synchronized(_slaveJVMLock) { compilerErrorsArray = compiler.compile(sourceRoots, files); }
 
       _distributeErrors(compilerErrorsArray);
     }

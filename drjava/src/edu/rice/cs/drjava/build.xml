@@ -27,7 +27,7 @@
   <property name="jars_dir" value="/home/javaplt/public_html/drjava/builds" />
 
   <!-- put new javadoc in this directory after each commit -->
-  <property name="public_javadoc_dir" value="/home/javaplt/public_html/javadoc/${ant.project.name}" />
+  <property name="public_javadoc_dir" value="/home/cork/drjava/javadoc/${ant.project.name}" />
 
   <!-- put javadoc in this directory if generating private javadoc -->
   <property name="private_javadoc_dir" value="${srcroot}/../javadoc/${ant.project.name}" />

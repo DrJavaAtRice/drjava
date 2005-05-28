@@ -248,7 +248,7 @@ public class AboutDialog extends JDialog implements ActionListener {
   }
 
   public static final String COPYRIGHT =
-    "Copyright \u00a9 2001-2003 JavaPLT group at Rice University\n"+
+    "Copyright \u00a9 2001-2005 JavaPLT group at Rice University\n"+
     "(javaplt@rice.edu)\n\n"+
     "See http://www.drjava.org for more information on DrJava or to\n"+
     "obtain the latest version of the program or its source code.\n\n"+

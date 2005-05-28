@@ -182,9 +182,7 @@ public class ProjectTest extends TestCase {
 
     // parse in the file that was just written.
     ProjectFileIR pfir = null;
-    try {
-       pfir = ProjectFileParser.ONLY.parse(pf);
-    }
+    try { pfir = ProjectFileParser.ONLY.parse(pf); }
     catch(MalformedProjectFileException e) {
       throw new MalformedProjectFileException(e.getMessage() + ", file: " + pf);
     }
