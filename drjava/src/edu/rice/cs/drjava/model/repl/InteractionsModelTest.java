@@ -69,9 +69,9 @@ import edu.rice.cs.drjava.ui.MainFrame;
 public final class InteractionsModelTest extends TestCase {
   protected InteractionsDocumentAdapter _adapter;
   protected InteractionsModel _model;
-
-  public void setUp() throws Exception {
-    super.setUp();
+  
+  public InteractionsModelTest(String name) {
+    super(name);
     _adapter = new InteractionsDocumentAdapter();
     _model = new TestInteractionsModel(_adapter);
   }
@@ -120,8 +120,7 @@ public final class InteractionsModelTest extends TestCase {
     assertEquals("string being interpreted", "", model.toEval);
 
     // Insert text and evaluate
-    doc.insertText(doc.getDocLength(), code,
-                   InteractionsDocument.DEFAULT_STYLE);
+    doc.insertText(doc.getDocLength(), code, InteractionsDocument.DEFAULT_STYLE);
     model.interpretCurrentInteraction();
     // pretend the call completed
     model.replReturnedVoid();
