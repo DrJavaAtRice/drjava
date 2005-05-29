@@ -129,7 +129,7 @@ public class JTreeSortNavigator extends JTree
     setCellRenderer(_renderer);
     getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
     setRowHeight(18);
-    System.err.println(isEditable());
+//    System.err.println(isEditable());
   }
   
   /** Alternate constructor specifying the display manager that provides icons for the navigator.
