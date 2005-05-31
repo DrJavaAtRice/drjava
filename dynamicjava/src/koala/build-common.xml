@@ -8,24 +8,21 @@
     srcroot
     projpath
     public_javadoc_dir
-	
-  These are optional:
-    compile-from
-	compile-to
 
   Assumes these targets exist:
     stable
     development
+    jar
  
 -->
 <!-- <taskdef name="javamake" classname="com.sun.tools.javamake.ant.JavaMake"/>  -->
 
-<property name="compile-from" value="${srcroot}" />
-<property name="compile-to" value="${built}" />
-
 <property name="build.sysclasspath" value="last" />
 
 <property name="lib_dir" value="${srcroot}/edu/rice/cs/lib" />
+
+<property name="jsr14_classpath" value="${lib_dir}/jsr14.jar" />
+<property name="jsr14_collect_classpath" value="${lib_dir}/collect.jar" />
 
 <property name="jars_dir" value="/home/javaplt/public_html/drjava/builds" />
 
@@ -44,20 +41,18 @@
 
 <!-- classpath to use everywhere. -->
 <path id="classpath">
-
+  <pathelement location="${jsr14_classpath}" />
 <!--  <pathelement path="${java.class.path}" /> -->
   <fileset dir="${lib_dir}">
     <include name="*.jar" />
-    <exclude name="jsr14.jar" />
-    <exclude name="collect.jar" />
   </fileset>
   <pathelement path="${built}" />
 </path>
 
 <!-- Init target. All others depend on it. Initialize the directory. -->
 <target name="init">
-  <available type="file" file="${jsr14_classpath}" property="jsr14_ok" />
-  <!--antcall target="check_for_jsr14" /-->
+ <!-- <available type="file" file="${jsr14_classpath}" property="jsr14_ok" />
+  <antcall target="check_for_jsr14" /> -->
   <mkdir dir="${built}" /> <!-- Make the built directory -->
 
   <pathconvert refid="classpath"
@@ -66,24 +61,27 @@
 
 </target>
 
-
 <!-- Get a timestamp based on GMT, rather than local time -->
 <target name="get-timestamp">
   <tstamp>
-	<format property="DSTAMP" pattern="yyyyMMdd" timezone="GMT" />
-	<format property="TSTAMP" pattern="HHmm" timezone="GMT" />
-	<format property="TODAY" pattern="MMMM dd yyyy" timezone="GMT" />
+    <format property="DSTAMP" pattern="yyyyMMdd" timezone="GMT" />
+    <format property="TSTAMP" pattern="HHmm" timezone="GMT" />
+    <format property="TODAY" pattern="MMMM dd yyyy" timezone="GMT" />
   </tstamp>
 </target>
-
-
+ 
+<target name="check_for_jsr14" unless="jsr14_ok">
+  <fail message=" JSR-14 prototype compiler was not found. A jar file containing the compiler must be put in ${lib_dir}/jsr14.jar. (We can not distribute the jar for licensing reasons.) To download jsr14, go to http://developer.java.sun.com/developer/earlyAccess/adding_generics. Then unzip the file you downloaded, and move the included javac.jar (or gjc-rt.jar) to lib/jsr14.jar." />
+</target>
 
 <!-- Reconcile source with CVS archive -->
 <target name="update" depends="init">
-  <cvs command="update -d -P" compression="true" />
+  <cvs command="update -d -P" />
 </target>
 
 <target name="make-version-stamp" depends="get-timestamp">
+  <tstamp_gmt /> <!-- get new time stamp to use for CVS tag -->
+
   <!-- Create new Version.java, filling in date and time. -->
   <filter token="DATE" value="${DSTAMP}" />
   <filter token="TIME" value="${TSTAMP}" />
@@ -98,12 +96,12 @@
 <!-- Commit source to CVS archive
      Before doing do, we update our copy with the CVS copy. This ensures that
      if there were any clashes, we have to resolve them now. Then we
-     recompile (from scratch) and retest. If this all succeeds, we can commit.
+     recompile (from scratch), create a jar file, and retest. If this all succeeds, we can commit.
 
      After committing, we tag the build we just made with the tag
      projectname-date-time.
 -->
-<target name="do-commit" depends="clean, update, test, make-version-stamp, get-timestamp">
+<target name="do-commit" depends="clean, update, jar, test, make-version-stamp, get-timestamp">  
   <property name="version-tag"
             value="${ant.project.name}-${DSTAMP}-${TSTAMP}" />
 
@@ -111,6 +109,9 @@
   <echo message="All tests passed. Rebuilding to put version tag (${version-tag}) into the code." />
   <antcall target="compile" />
 
+  <!-- Remind user to commit the new dynamicjar.jar file. -->
+  <echo message="The built dynamicjava.jar file has been copied to the lib directory. Please commit it to keep DrJava in sync with the koala code base." />
+  
   <tempfile property="commit-comments-filename" 
             destdir="${java.io.tmpdir}"
             prefix="commit-comments" />
@@ -126,7 +127,7 @@
   </cvs>
   <delete file="${commit-comments-filename}"/>
 
-  <cvs command="tag -c ${version-tag}" quiet="true" compression="true" />
+  <cvs command="tag -c ${version-tag}" quiet="true" />
 
   <echo message="New version ${version-tag} committed to CVS." />
   <echo message="Note: This version has not yet been released. To release it, follow the process described at http://sourceforge.net/docman/display_doc.php?docid=9899&amp;group_id=44253." />
@@ -196,44 +197,47 @@
 <!-- commit this version and then release it. -->
 <target name="commit-and-release" depends="commit, release">
 </target>
-    
+
 <!-- Compile. We have to start at srcroot and then selectively include
      just this project in order for it to realize what files have already
      been compiled (preventing needless recompilation).
 
-     This version works with JDK 1.5.0
---> 
+     This version works with JDK 1.4.2 and JSR-14 v2.3+ as well as JDK 1.5.0.
+     (Be sure to have the right version of tools.jar on your classpath.)
+-->
 <target name="do-compile" depends="init">
-  <mkdir dir="${compile-to}"/>
-  <javac sourcepath="" srcdir="${compile-from}"
+  <mkdir dir="${built}"/>
+  <javac srcdir="${srcroot}"
          includes="${projpath}/**/*java"
-         destdir="${compile-to}"
-         classpath="${classpath_text}"
+         destdir="${built}"
+         bootclasspath="${jsr14_classpath}:${jsr14_collect_classpath}:${sun.boot.class.path}" 
+  classpath="${classpath_text}"
+         source="1.5"
+       target="1.5"
+         debug="on"
+         fork="on"
+         optimize="off">
+    <compilerarg value="-warnunchecked"/>
+    <!--compilerarg value="-J-Xbootclasspath/p:${jsr14_classpath}"/-->
+  </javac>
+</target>
+
+<!-- Raw Compile. Identical to Compile with Generic Warning Checking
+     disabled.
+-->
+<target name="checked-compile" depends="init">
+  <mkdir dir="${built}"/>
+  <javac srcdir="${srcroot}"
+         includes="${projpath}/**/*java"
+         destdir="${built}"
+         bootclasspath="${jsr14_collect_classpath}:${sun.boot.class.path}" 
+  classpath="${classpath_text}"
          source="1.5"
          target="jsr14"
          debug="on"
          fork="on"
          optimize="off">
-    <compilerarg value="-warnunchecked"/>
-  </javac>
-</target>
-
-<!-- Checked Compile. Identical to Compile with Generic Warning Checking
-     enabled.
-
-     This version works with JDK 1.5.0
--->
-<target name="checked-compile" depends="init">
-  <mkdir dir="${compile-to}"/>
-  <javac sourcepath="" srcdir="${compile-from}"
-         includes="${projpath}/**/*java"
-         destdir="${compile-to}"
-         classpath="${classpath_text}"
-         source="1.5"
-         debug="on"
-         fork="on"
-         optimize="off">
-    <compilerarg value="-warnunchecked"/>
+    <compilerarg value="-J-Xbootclasspath/p:${jsr14_classpath}"/>
   </javac>
 </target>
 
@@ -257,12 +261,12 @@
     -->
     <batchtest>
       <!-- The root of the fileset must be where edu/ is. -->
-      <fileset dir="${srcroot}">
+      <fileset dir="${built}">
         <!-- Include only from projpath to only get classes in this project!
         -->
-        <include name="${projpath}/**/*${test-spec}*Test.java" />
-        <exclude name="**/AllTests.java" />
-        <exclude name="**/Test.java" />
+        <include name="${projpath}/**/*${test-spec}*Test.class" />
+        <exclude name="**/AllTests.class" />
+        <exclude name="**/Test.class" />
       </fileset>
     </batchtest>
   </junit>
@@ -274,6 +278,7 @@
 
 <!-- generate private javadoc for current uncommitted version -->
 <target name="javadoc" depends="init, get-timestamp">
+  <tstamp_gmt />
   <antcall target="generate_javadoc">
     <param name="javadoc_dir" value="${private_javadoc_dir}" />
     <param name="javadoc_title" value="${user.name}-uncommitted-${ant.project.name}-${DSTAMP}-${TSTAMP}" />
@@ -284,42 +289,84 @@
 <!-- Generate javadoc, removing generics references first.
      The property javadoc_dir must be set when calling this.
      The property javadoc_title must be set when calling this.
+       
+     If using JSR14v2_4 and Ant 1.6, we can create javadoc containing
+     the generics information.  To do this, comment out the apply task 
+     that runs java since we don't want to strip out generics from the 
+     source, and then uncomment the lines in the blocks to copy the source 
+     code (since we usually do it in the call to java) and, finally 
+     uncomment the lines in the call to javadoc which set up the 
+     bootclasspath, source, and JVM args.  You'll have to fudge 
+     around a little bit to get the ant syntax correct.
 -->
 <target name="generate_javadoc" if="javadoc_dir" depends="init">
   <delete dir="${javadoc_dir}" />
   <mkdir dir="${javadoc_dir}" />
 
-  <javadoc sourcepath="${srcroot}"
+  <mkdir dir="${javadoc_dir}/src" />
+
+  <!-- run jsr14 from jsr14.jar to make non-generic source. -->
+  <!-- Comment this block out to produce javadocs with generics -->
+  <apply executable="java" failonerror="yes" parallel="yes" type="file">
+    <arg value="-classpath" />
+    <arg value="${classpath_text}:${java.class.path}" />
+    <arg value="com.sun.tools.javac.Main" />
+
+    <arg value="-sourcepath" />
+    <arg value="${srcroot}" />
+
+    <arg value="-bootclasspath" />
+    <arg value="${jsr14_collect_classpath}:${sun.boot.class.path}" />
+
+
+    <!-- Generate Java source without generics -->
+    <arg value="-s" />
+
+    <arg value="-d" />
+    <arg value="${javadoc_dir}/src" />
+    
+    <fileset dir="${srcroot}">
+      <!-- get all projects within this sourceroot -->
+      <exclude name="src-*/**/*.java" />
+      <include name="**/*.java" />
+      <!-- <include name="${projpath}/**/*.java" /> -->
+    </fileset>
+  </apply>
+
+  <!-- Now we need to copy the package.htmls over to the
+       directory with the non-generic sources.
+       Also copy doc-files subdirectories.
+  -->
+  <copy todir="${javadoc_dir}/src">
+    <fileset dir="${srcroot}">
+      <!-- Uncomment the next two lines to produce javadocs with generics -->
+      <!--exclude name="src-*/**/*.java" /-->
+      <!--include name="**/*.java" /-->
+      <include name="**/package.html" />
+      <include name="**/doc-files/**" />
+    </fileset>
+  </copy>
+
+  <javadoc sourcepath="${javadoc_dir}/src"
            destdir="${javadoc_dir}"
+           packagenames="edu.rice.cs.*"
            Private="yes"
            Use="yes"
            Version="yes"
-           Windowtitle="${javadoc_title}"
-           linksource="yes"
-           packagenames="edu.rice.cs.*,koala,koala.*"
-           maxmemory="128m"
-           author="yes"
-           source="1.5">
+           Windowtitle="${javadoc_title}">
+<!--           Bootclasspath ="${jsr14_classpath}:${jsr14_collect_classpath}:${sun.boot.class.path}"
+           source="1.5"-->
 
+    <!--arg value="-J-Xbootclasspath/p:${jsr14_classpath}"/-->
     <classpath refid="classpath" />
 
-    <arg value="-keywords" />
-
-    <header>
-    <![CDATA[<B>DrJava API Documentation</B>]]>
-    </header>
-
-    <footer>
-    <![CDATA[<B>DrJava API Documentation</B>]]>
-    </footer>
-
-    <group title="DrJava" packages="edu.rice.cs.drjava:edu.rice.cs.drjava.*"/>
-    <group title="Util" packages="edu.rice.cs.util:edu.rice.cs.util.*"/>
-    <group title="DynamicJava" packages="koala:koala.*"/>
-
-    <link href="http://www.junit.org/junit/javadoc/3.8.1" />
-    <link href="http://java.sun.com/j2se/1.5/docs/api" />
+    <link href="http://www.junit.org/junit/javadoc/3.7" />
+    <link href="http://java.sun.com/j2se/1.3/docs/api" />
+    <link href="http://koala.ilog.fr/djava/javadoc" />
   </javadoc>
+
+  <!-- delete source we generated without generics -->
+  <delete dir="${javadoc_dir}/src" />
 </target>
 
 <!-- Delete all generated files (only for this project!) -->
@@ -331,34 +378,48 @@
   <delete dir="${doc_dir}" />
 </target>
 
-<!-- Clover targets -->
-<taskdef resource="clovertasks"/>
 
-<target name="clover"
-        depends="clean-clover, with.clover, clean, test, clover-report" />
+  <!-- Target to fix JSR-14 v1.0's collect.jar to work in JDK 1.3.
+       (We have to remove java.lang.String and java.util.Arrays,
+        since they were somehow compiled against JDK 1.4.)  -->
+  <target name="fix-collect-v1_0">
+    <delete file="${jsr14_collect_classpath}.fixed" />
+    <zip destfile="${jsr14_collect_classpath}.fixed">
+      <zipfileset src="${jsr14_collect_classpath}" 
+                  excludes="java/lang/String.class,java/util/Arrays.class" />
+    </zip>
+    <move file="${jsr14_collect_classpath}.fixed" 
+          toFile="${jsr14_collect_classpath}"
+          overwrite="true" />
+  </target>
 
-<target name="clean-clover">
-  <delete dir="${clover_dir}/${ant.project.name}" />
-  <delete dir="${clover_db_dir}" />
-</target>
+  <!-- Clover targets -->
+  <taskdef resource="clovertasks"/>
 
-<target name="with.clover">
-  <mkdir dir="${clover_db_dir}" />
-  <clover-setup initString="${clover_db_dir}/test_coverage.db">
-    <files>
-      <exclude name="**/*TestCase*.java" />
-      <exclude name="**/*Test.java" />
-      <exclude name="**/*TestCase.java" />
-      <exclude name="**/*Test$*.java" />
-    </files>
-  </clover-setup>
-</target>
+  <target name="clover"
+          depends="clean-clover, with.clover, clean, test, clover-report" />
 
-<target name="clover-report" depends="with.clover">
-  <clover-report>
-    <current outfile="${clover_dir}/${ant.project.name}" 
-             title="DrJava">
-      <format type="html"/>
-    </current>
-  </clover-report>
-</target>
+  <target name="clean-clover">
+    <delete dir="${clover_dir}/${ant.project.name}" />
+    <delete dir="${clover_db_dir}" />
+  </target>
+
+  <target name="with.clover">
+    <mkdir dir="${clover_db_dir}" />
+    <clover-setup initString="${clover_db_dir}/test_coverage.db">
+      <files>
+        <exclude name="**/*Test.java" />
+        <exclude name="**/*TestCase.java" />
+        <exclude name="**/*Test$*.java" />
+      </files>
+    </clover-setup>
+  </target>
+
+  <target name="clover-report" depends="with.clover">
+    <clover-report>
+      <current outfile="${clover_dir}/${ant.project.name}" 
+               title="DrJava">
+        <format type="html"/>
+      </current>
+    </clover-report>
+  </target>
