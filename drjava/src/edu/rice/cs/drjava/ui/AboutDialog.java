@@ -50,7 +50,10 @@ import java.util.Map;
  *
  * @version $Id$
  */
-public class AboutDialog extends JDialog implements ActionListener {
+public class 
+  AboutDialog 
+  extends JDialog 
+  implements ActionListener {
 
   private static ImageInfo CSLOGO = new ImageInfo("RiceCS.gif",new Color(0x423585)),
     SF = new ImageInfo("SourceForge.gif",Color.black),

@@ -363,11 +363,9 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
   public DefaultGlobalModel() {
     
     _cache = new DocumentCache();
-    
     _interactionsDocAdapter = new InteractionsDocumentAdapter();
     _interactionsModel = new DefaultInteractionsModel(this, _interpreterControl,_interactionsDocAdapter);
     _interactionsModel.addListener(_interactionsListener);
-    
     _interpreterControl.setInteractionsModel(_interactionsModel);
     _interpreterControl.setJUnitModel(_junitModel);
     
@@ -377,20 +375,20 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
         _interpreterControl.setOptionArgs(oe.value);
       }
     });
-    
+      
     _consoleDocAdapter = new InteractionsDocumentAdapter();
     _consoleDoc = new ConsoleDocument(_consoleDocAdapter);
     
     _createDebugger();
     
     _registerOptionListeners();
-    
+        
     // Chain notifiers so that all events also go to GlobalModelListeners.
     _interactionsModel.addListener(_notifier);
     _compilerModel.addListener(_notifier);
     _junitModel.addListener(_notifier);
     _javadocModel.addListener(_notifier);
-    
+        
     // Listen to compiler to clear interactions appropriately.
     // XXX: The tests need this to be registered after _notifier, sadly.
     //      This is obnoxiously order-dependent, but it works for now.
@@ -1499,10 +1497,9 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
     if (doc == null) {
       // If not, open and return it
       final File f = file;
-      
       FileOpenSelector selector = 
         new FileOpenSelector() { public File[] getFiles() { return new File[] {f}; } };
-      try { doc = openFile(selector); }
+      try { doc = openFile(selector);}
       catch (AlreadyOpenException e) { doc = e.getOpenDocument(); }
       catch (OperationCanceledException e) { throw new UnexpectedException(e); /* Cannot happen */ }
     }

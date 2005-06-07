@@ -70,8 +70,7 @@ public class NoCompilerAvailable implements CompilerInterface {
     CompilerError error = new CompilerError(files[0],
                                             -1,
                                             -1,
-                                            MESSAGE,
-                                            false);
+                                            MESSAGE, false);
 
     return new CompilerError[] { error };
   }

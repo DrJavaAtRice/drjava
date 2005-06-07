@@ -82,6 +82,8 @@ public final class CompilerErrorModelTest extends TestCase {
     
     // We successfully built the model, now test the basics.
     assertEquals("Should have no compiler errors.", 0, model.getNumErrors());
+    assertEquals("Should have 0 warnings" , 0, model.getNumWarnings());
+    assertEquals("Should have 0 compiler errors" , 0, model.getNumCompErrors());
     assertTrue("hasOnlyWarnings should return true.", model.hasOnlyWarnings());
   }
   
@@ -97,7 +99,9 @@ public final class CompilerErrorModelTest extends TestCase {
     model = new CompilerErrorModel<CompilerError>(errors, getter);
     
     // We successfully built the model, now test the basics.
-    assertEquals("Should have 2 compiler errors.", 2, model.getNumErrors());
+    assertEquals("Should have 2 errors.", 2, model.getNumErrors());
+    assertEquals("Should have 2 warnings" , 2, model.getNumWarnings());
+    assertEquals("Should have 0 compiler errors" , 0, model.getNumCompErrors());
     assertTrue("hasOnlyWarnings should return true.", model.hasOnlyWarnings());
   }
   
@@ -107,9 +111,9 @@ public final class CompilerErrorModelTest extends TestCase {
   public void testConstructDoclessErrors() {
     getter = new TestDocGetter();
     errors = new CompilerError[]
-    { new CompilerError("Test error without File", false),
+    { new CompilerError("Test error without File",false),
       new CompilerError("Test warning without File", true),
-      new CompilerError("Test error without File", false) };
+      new CompilerError("Test error without File",false) };
     
     CompilerError[] copy = new CompilerError[errors.length];
     for (int i = 0; i < errors.length; i++) {
@@ -119,6 +123,8 @@ public final class CompilerErrorModelTest extends TestCase {
     
     // We successfully built the model, now test the basics.
     assertEquals("Should have 3 compiler errors.", 3, model.getNumErrors());
+    assertEquals("Should have 1 warning" , 1, model.getNumWarnings());
+    assertEquals("Should have 2 compiler errors" , 2, model.getNumCompErrors());
 //    System.out.println(model.getError(0) + "\n" + model.getError(1) + "\n" + model.getError(2));
     assertEquals("Errors should be sorted.", errors[1], model.getError(2));
     assertTrue("hasOnlyWarnings should return false.", !model.hasOnlyWarnings());
@@ -143,6 +149,8 @@ public final class CompilerErrorModelTest extends TestCase {
     
     // We successfully built the model, now test the basics.
     assertEquals("Should have 3 compiler errors.", 3, model.getNumErrors());
+    assertEquals("Should have 1 warning" , 1, model.getNumWarnings());
+    assertEquals("Should have 2 compiler errors" , 2, model.getNumCompErrors());
     assertEquals("Errors should be sorted.", errors[1], model.getError(2));
     assertTrue("hasOnlyWarnings should return false.", !model.hasOnlyWarnings());
   }
@@ -167,6 +175,8 @@ public final class CompilerErrorModelTest extends TestCase {
     
     // We successfully built the model, now test the basics.
     assertEquals("Should have 4 compiler errors.", 4, model.getNumErrors());
+    assertEquals("Should have 1 warning" , 1, model.getNumWarnings());
+    assertEquals("Should have  compiler errors" , 3, model.getNumCompErrors());
     assertEquals("Errors should be sorted.", errors[3], model.getError(0));
     assertEquals("Errors should be sorted.", errors[1], model.getError(1));
     assertEquals("Errors should be sorted.", errors[0], model.getError(2));
@@ -182,11 +192,11 @@ public final class CompilerErrorModelTest extends TestCase {
     setupDoc();
     errors = new CompilerError[]
     { new CompilerError(files[0], 2, 0, "Test error with File and line", false),
-      new CompilerError(files[0], "Test warning with File", true),
+      new CompilerError(files[0], "Test warning with File (no line)", true),
       new CompilerError(files[0], 3, 0, "Test error with File and line", false),
-      new CompilerError("Test error without File", false),
+      new CompilerError("Test error without File or line", false),
       new CompilerError(files[0], 3, 0, "Test warning with File and line", true),
-      new CompilerError(files[0], "Test error with File", false),
+      new CompilerError(files[0], "Test error with File (no line)", false),
       new CompilerError(files[0], 1, 0, "Test error with File and line", false) };
     
     CompilerError[] copy = new CompilerError[errors.length];
@@ -197,6 +207,8 @@ public final class CompilerErrorModelTest extends TestCase {
     
     // We successfully built the model, now test the basics.
     assertEquals("Should have 7 compiler errors.", 7, model.getNumErrors());
+    assertEquals("Should have 2 warnings" , 2, model.getNumWarnings());
+    assertEquals("Should have 5 compiler errors" , 5, model.getNumCompErrors());
     assertEquals("Errors should be sorted.", errors[3], model.getError(0));
     assertEquals("Errors should be sorted.", errors[5], model.getError(1));
     assertEquals("Errors should be sorted.", errors[1], model.getError(2));
@@ -231,6 +243,8 @@ public final class CompilerErrorModelTest extends TestCase {
     
     // We successfully built the model, now test the basics.
     assertEquals("Should have 8 compiler errors.", 8, model.getNumErrors());
+    assertEquals("Should have 3 warnings" , 3, model.getNumWarnings());
+    assertEquals("Should have 5 compiler errors" , 5, model.getNumCompErrors());
     assertEquals("Errors should be sorted.", errors[0], model.getError(0));
     assertEquals("Errors should be sorted.", errors[7], model.getError(1));
     assertEquals("Errors should be sorted.", errors[3], model.getError(2));
@@ -266,6 +280,8 @@ public final class CompilerErrorModelTest extends TestCase {
     
     // We successfully built the model, now test the basics.
     assertEquals("Should have 8 compiler errors.", 8, model.getNumErrors());
+    assertEquals("Should have 3 warnings" , 3, model.getNumWarnings());
+    assertEquals("Should have 5 compiler errors" , 5, model.getNumCompErrors());
     assertEquals("Errors should be sorted.", errors[7], model.getError(0));
     assertEquals("Errors should be sorted.", errors[0], model.getError(1));
     assertEquals("Errors should be sorted.", errors[3], model.getError(2));
@@ -286,6 +302,8 @@ public final class CompilerErrorModelTest extends TestCase {
     
     // We successfully built the model, now test the basics.
     assertEquals("Should have 15 compiler errors.", 15, model.getNumErrors());
+    assertEquals("Should have 6 warnings" , 6, model.getNumWarnings());
+    assertEquals("Should have 9 compiler errors" , 9, model.getNumCompErrors());
     assertEquals("Errors should be sorted.", errors[0], model.getError(0));
     assertEquals("Errors should be sorted.", errors[14], model.getError(1));
     assertEquals("Errors should be sorted.", errors[12], model.getError(2));
@@ -424,22 +442,22 @@ public final class CompilerErrorModelTest extends TestCase {
   private void fullSetup() {
     setupDocs();
     errors = new CompilerError[]
-    { new CompilerError(files[0], "Test error with File", false),
+    { new CompilerError(files[0], "Test error with File (no line)", false),
       new CompilerError(files[4], 3, 0, "Test error with File", false),
-      new CompilerError(files[2], "Test warning with File", true),
-      new CompilerError(files[4], "Test warning with File", true),
+      new CompilerError(files[2], "Test warning with File (no line)", true),
+      new CompilerError(files[4], "Test warning with File (no line)", true),
       new CompilerError(files[2], 3, 0, "Test warning with File", true),
       new CompilerError(files[4], 1, 0, "Test warning with File", true),
-      new CompilerError(files[1], "Test warning with File", true),
-      new CompilerError(files[1], "Test error with File", false),
-      new CompilerError(files[2], "Test error with File", false),
-      new CompilerError(files[3], "Test error with File", false),
+      new CompilerError(files[1], "Test warning with File (no line)", true),
+      new CompilerError(files[1], "Test error with File (no line)", false),
+      new CompilerError(files[2], "Test error with File (no line)", false),
+      new CompilerError(files[3], "Test error with File (no line)", false),
       new CompilerError(files[3], 3, 0, "Test error with File", false),
-      new CompilerError(files[4], "Test error with File", false),
+      new CompilerError(files[4], "Test error with File (no line)", false),
       new CompilerError(files[0], 2, 0, "Test error with File", false),
       new CompilerError(files[2], 2, 0, "Test warning with File", true),
       new CompilerError(files[0], 1, 0, "Test error with File", false) };
-    
+        
     CompilerError[] copy = new CompilerError[errors.length];
     for (int i = 0; i < errors.length; i++) {
       copy[i] = errors[i];

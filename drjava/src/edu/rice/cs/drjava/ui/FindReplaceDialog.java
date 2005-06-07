@@ -76,6 +76,7 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
   private JTextField _replaceField = new JTextField(20);
   private JLabel _message; // JL
   private JPanel _labelPanel;
+  private JCheckBox _ignoreCommentsAndStrings;
   private JCheckBox _matchCase;
   private JCheckBox _searchBackwards;
   private JCheckBox _searchAllDocuments;
@@ -84,6 +85,7 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
   private JCheckBox _matchWholeWord; // private JRadioButton _matchWholeWord; // JL
 //  private JRadioButton _findAnyOccurrence; // JL
   private JPanel _matchCaseAndClosePanel;
+  private JPanel _commentsAndStringsPanel;
   private JPanel _rightPanel;
   private FindReplaceMachine _machine;
   private SingleDisplayModel _model;
@@ -173,7 +175,7 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
     // need separate label and field panels so that the find and
     // replace textfields line up
 
-    _labelPanel = new JPanel(new GridLayout(2,1));
+    _labelPanel = new JPanel(new GridLayout(3,1));
     // _labelPanel.setLayout(new BoxLayout(_labelPanel, BoxLayout.Y_AXIS));
 
     //_labelPanel.add(Box.createGlue());
@@ -209,7 +211,14 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
     else  _machine.setFindAnyOccurrence();
     _matchWholeWord.addItemListener(mwwl);
     _matchCase.setPreferredSize(_matchWholeWord.getPreferredSize());
-
+    
+    
+//    haven't completed this functionality yet    
+    IgnoreCommentsAndStringsListener icasl = new IgnoreCommentsAndStringsListener();
+    _ignoreCommentsAndStrings = new JCheckBox("Ignore Comments and Strings", DrJava.getConfig().getSetting(OptionConstants.FIND_NO_COMMENTS_STRINGS));
+    _machine.setIgnoreCommentsAndStrings(DrJava.getConfig().getSetting(OptionConstants.FIND_NO_COMMENTS_STRINGS));
+    _ignoreCommentsAndStrings.addItemListener(icasl);
+    
     //FindAnyOccurrenceListener faol = new FindAnyOccurrenceListener(); // JL
     //_findAnyOccurrence = new JRadioButton("Any Occurrence"); // JL
     //_findAnyOccurrence.addActionListener(faol); // JL
@@ -222,6 +231,9 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
     _closePanel = new JPanel(new BorderLayout());
     _closePanel.add(_closeButton, BorderLayout.NORTH);
 
+    _commentsAndStringsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+    _commentsAndStringsPanel.add(_ignoreCommentsAndStrings);
+        
     _lowerCheckPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
     _lowerCheckPanel.add(_matchWholeWord);
     _lowerCheckPanel.add(_searchAllDocuments); // JL (added)
@@ -239,24 +251,28 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
     //_matchCaseAndClosePanel.add(_findAnyOccurrence);
     _matchCaseAndClosePanel.add(_closePanel);
     //_findAnyOccurrence.setSelected(true); // JL
+    
+    
 
 
     /******** Set up the Panel containing the Text Fields ********/
-    //_rightPanel = new JPanel(new GridLayout(1,2,5,0));
-    JPanel midPanel = new JPanel(new GridLayout(2,1));
-    JPanel farRightPanel = new JPanel(new GridLayout(2,1));
+//    _rightPanel = new JPanel(new GridLayout(1,2,5,0));
+    JPanel midPanel = new JPanel(new GridLayout(3,1));
+    JPanel farRightPanel = new JPanel(new GridLayout(3,1));
     midPanel.add(wrap(_findField));
     midPanel.add(wrap(_replaceField));
 //    midPanel.add(wrap(_message)); // JL
     // midPanel.add(wrap(_lowerCheckPanel)); // JL
 
-    /******** Set up the Panel containing both rows of checkboxes ********/
+    /******** Set up the Panel containing all 3 rows of checkboxes ********/
     farRightPanel.add(_matchCaseAndClosePanel);
     farRightPanel.add(_lowerCheckPanel); // JL
+    farRightPanel.add(_commentsAndStringsPanel);
     //farRightPanel.add(_message); // JL
 
 
-    /******** Set upt the Panel containing the two above main panels ********/
+    /******** Set upt the Panel containing the three above main panels ********/
+     
     _rightPanel = new JPanel(new BorderLayout(5, 0));
     _rightPanel.add(midPanel, BorderLayout.CENTER);
     _rightPanel.add(farRightPanel, BorderLayout.EAST);
@@ -264,7 +280,7 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
 
 
     /******* Put all the main panels onto the Find/Replace tab ********/
-    hookComponents(this,_rightPanel,_labelPanel,buttons);
+    hookComponents(this, _rightPanel, _labelPanel,buttons);
 
 
     _findField.addActionListener(_findNextAction);
@@ -276,7 +292,8 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
     _matchCase.setNextFocusableComponent(_searchBackwards);
     _searchBackwards.setNextFocusableComponent(_matchWholeWord); // JL (edited)
     _matchWholeWord.setNextFocusableComponent(_searchAllDocuments); // JL (edited)
-    _searchAllDocuments.setNextFocusableComponent(_findNextButton); // JL (edited)
+    _searchAllDocuments.setNextFocusableComponent(_ignoreCommentsAndStrings); // JL (edited)
+    _ignoreCommentsAndStrings.setNextFocusableComponent(_findNextButton);
     //_findAnyOccurrence.setNextFocusableComponent(_findNextButton); // JL
     _replaceAllButton.setNextFocusableComponent(_closeButton);
     _closeButton.setNextFocusableComponent(_findField);
@@ -701,6 +718,20 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
       else if (e.getStateChange() == ItemEvent.SELECTED) {
         _machine.setMatchWholeWord();
         DrJava.getConfig().setSetting(OptionConstants.FIND_WHOLE_WORD, Boolean.valueOf(true));
+      }
+      _findField.requestFocusInWindow();
+    }
+  }
+  
+  class IgnoreCommentsAndStringsListener implements ItemListener {
+    public void itemStateChanged(ItemEvent e) {
+      if (e.getStateChange() == ItemEvent.DESELECTED) {
+        _machine.setIgnoreCommentsAndStrings(false);
+        DrJava.getConfig().setSetting(OptionConstants.FIND_NO_COMMENTS_STRINGS, Boolean.valueOf(false));
+      }
+      else if (e.getStateChange() == ItemEvent.SELECTED) {
+        _machine.setIgnoreCommentsAndStrings(true);
+        DrJava.getConfig().setSetting(OptionConstants.FIND_NO_COMMENTS_STRINGS, Boolean.valueOf(true));
       }
       _findField.requestFocusInWindow();
     }

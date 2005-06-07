@@ -31,7 +31,7 @@
  *     - Products derived from this software may not be called "DrJava" nor
  *       use the term "DrJava" as part of their names without prior written
  *       permission from the JavaPLT group.  For permission, write to
- *       javaplt@rice.edu.
+ *       javaplt@rice.edu.0
  *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -78,7 +78,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
   protected boolean _closeDone;
   protected Object _closeLock = new Object();
 
-//  private Log _log = new Log("MainFrameTestLog.txt", true);
+  private Log _log = new Log("MainFrameTestLog.txt", true);
   
   /** Setup method for each JUnit test case. */
   public void setUp() throws IOException {
@@ -98,10 +98,8 @@ public final class MainFrameTest extends MultiThreadedTestCase {
    *  2. Inherits the tooltip of the Action parameter <code>a</code>.
    */
   public void testCreateManualToolbarButton() {
-    Action a = new AbstractAction("Test Action") {
-      public void actionPerformed(ActionEvent ae) {
-      }
-    };
+    Action a = new AbstractAction("Test Action") { public void actionPerformed(ActionEvent ae) {} };
+    
     a.putValue(Action.SHORT_DESCRIPTION, "test tooltip");
     JButton b = _frame._createManualToolbarButton(a);
 
@@ -404,9 +402,8 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     catch(InterruptedException e) { throw new UnexpectedException(e); }                      
     
     assertTrue("the save button should not be enabled after opening a document", !_frame.saveEnabledHuh());
-//     _log.log("testSaveButtonEnabled completed");
+//    _log.log("testSaveButtonEnabled completed");
   }
-  
   
   /** A Test to guarantee that the Dancing UI bug will not rear its ugly head again.
    *  Basically, add a component listener to the leftComponent of _docSplitPane and
@@ -414,6 +411,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
    *  another class.
    */
   public void testDancingUIFileOpened() throws IOException {
+    //System.out.println("DEBUG: Entering messed up test");
     /** Maybe this sequence of calls should be incorporated into one function createTestDir(), which would get 
      *  the username and create the temporary directory. Only sticky part is deciding where to put it, in FileOps 
      *  maybe?
@@ -460,8 +458,8 @@ public final class MainFrameTest extends MultiThreadedTestCase {
      };
      final SingleDisplayModelCompileListener compileListener = new SingleDisplayModelCompileListener();
 
-     try {
-       Utilities.invokeAndWait(new Runnable() { public void run() {
+//     try {
+       Utilities.invokeLater(new Runnable() { public void run() {
          _frame.pack();
          _frame.open(new FileOpenSelector() {
            public File[] getFiles() {
@@ -475,15 +473,14 @@ public final class MainFrameTest extends MultiThreadedTestCase {
          _compileDone = false;
          _frame.getCompileAllButton().doClick();
        }});
-     }
-     catch(InterruptedException e) { fail(e.toString()); }
+//     }
+//     catch(InterruptedException e) { fail(e.toString()); }
 
-//     _log.log("Waiting for compile");
      synchronized(_compileLock) {
        try { while (! _compileDone) _compileLock.wait(); }
        catch(InterruptedException e) { fail(e.toString()); }
      }
-
+     
      if (! FileOps.deleteDirectory(_tempDir))
        System.err.println("Couldn't fully delete directory " + _tempDir.getAbsolutePath() + "\nDo it by hand.\n");
    
@@ -567,13 +564,13 @@ public final class MainFrameTest extends MultiThreadedTestCase {
   class SingleDisplayModelCompileListener extends GlobalModelTestCase.TestListener
     implements GlobalModelListener {
 
-    public void compileStarted() { }
+    public void compileStarted() {}
 
     /** Just notify when the compile has ended */
     public void compileEnded() {
       synchronized(_compileLock) { 
         _compileDone = true;
-        _compileLock.notify(); 
+        _compileLock.notify();
       }
     }
 

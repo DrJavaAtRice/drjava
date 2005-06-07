@@ -47,6 +47,7 @@ import java.util.ArrayList;
 import edu.rice.cs.util.Pair;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.HighlightManager;
+import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.model.definitions.CompoundUndoManager;
 import edu.rice.cs.drjava.model.definitions.DefinitionsEditorKit;
@@ -131,7 +132,15 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
       from = to - from;
       _addHighlight(from, to);
       //      Highlighter.Highlight[] _lites = getHighlighter().getHighlights();
+      
+      String matchText = _matchText(from);
+      
+      if (matchText != null)
+        _mainFrame.updateFileTitle("Matches: " + matchText);
+      else
+        _mainFrame.updateFileTitle();
     }
+    
     // if this wasn't a close brace, check for an open brace
     else {
       // (getCaretPosition will be the start of the highlight)
@@ -143,8 +152,52 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
         _addHighlight(from - 1, to);
 //        Highlighter.Highlight[] _lites = getHighlighter().getHighlights();
       }
+      _mainFrame.updateFileTitle();
+               
     }
   }
+  
+  /* Returns the text of the line where a matching open brace exists whenever the cursor is at a closing brace */
+  private String _matchText(int braceIndex) {
+    DJDocument doc = getDJDocument();
+    String docText;
+    doc.acquireReadLock();
+    try {
+      docText = doc.getText();
+    }
+    finally{doc.releaseReadLock();}
+    
+    if (docText.charAt(braceIndex) == '{') {//match everything before if we found a curly brace
+      Character charBefore = null;
+      int charBeforeIndex = braceIndex-1;
+      boolean previousLine = false;
+      
+      if (charBeforeIndex != -1) {
+        charBefore = docText.charAt(charBeforeIndex);
+        charBeforeIndex--;
+      }
+      
+      while (charBeforeIndex != -1 && (charBefore == '\n' || charBefore == ' ')) {
+        charBefore = docText.charAt(charBeforeIndex);
+        if (!previousLine &&  charBefore != '\n' && charBefore != ' ')
+          charBeforeIndex = braceIndex-1;
+        if (charBefore == '\n') 
+          previousLine = true;
+        charBeforeIndex--;
+      }
+      
+      StringBuffer returnText = new StringBuffer(docText.substring(0, charBeforeIndex+2));          
+      if (previousLine) returnText.append("...");
+      returnText.append("{");
+      
+      int lastNewLineIndex = returnText.lastIndexOf("\n");
+      return returnText.toString().substring(lastNewLineIndex+1);
+    }
+    
+    else //not a curly brace
+      return null;     
+  }  
+    
   
   /** The OptionListener for DEFINITIONS_MATCH_COLOR. */
   private class MatchColorOptionListener implements OptionListener<Color> {
@@ -910,6 +963,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
 
   public void centerViewOnOffset(int offset) {
     try {
+//      Utilities.showDebug("Centering Error");
       FontMetrics metrics = getFontMetrics(getFont());
       double viewWidth = _mainFrame.getDefViewport().getWidth();
       double viewHeight = _mainFrame.getDefViewport().getHeight();
@@ -1097,7 +1151,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     
     _popMenu.removeAll();
   }
-  
+
   /** The undo action. */
   private class UndoAction extends AbstractAction {
     

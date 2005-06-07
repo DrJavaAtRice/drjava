@@ -47,7 +47,7 @@ import javax.swing.text.Position;
 
 /**
  * Listens to the caret in a particular DefinitionsPane and
- * highlights the source containing Errors as appropriate.
+ * highlights the source containing CompilerErrors as appropriate.
  *
  * @version $Id$
  */

@@ -74,6 +74,13 @@ public class CompilerErrorModel<T extends CompilerError> {
 
   /** The size of _errors and _positions.  This should never change after model construction*/
   private final int _numErrors;
+  
+  /** The number of compile errors. Used for display purposes only.*/
+  private int _numCompilerErrors;
+  
+  /** The number of compile errors. Used for display purposes only.*/
+  private int _numWarnings;
+  
 
   /** Cached result of hasOnlyWarnings.
    *  Three-state enum:
@@ -108,6 +115,8 @@ public class CompilerErrorModel<T extends CompilerError> {
     };
     _errors = empty;
     _numErrors = 0;
+    _numWarnings = 0;
+    _numCompilerErrors = 0;
     _positions = new Position[0];
   }
 
@@ -120,14 +129,21 @@ public class CompilerErrorModel<T extends CompilerError> {
 
     // TODO: If we move to NextGen-style generics, ensure _errors is non-null.
     _errors = errors;
-
+    
     // Next two lines are order-dependent!
     _numErrors = errors.length;
     _positions = new Position[_numErrors];
-
+    
+    _numWarnings =0;
+    _numCompilerErrors = 0;
+    for (int i =0; i<errors.length; i++){
+      if (errors[i].isWarning()) _numWarnings++;
+      else _numCompilerErrors++;
+    }
+    
     // Sort the errors by file and position
     Arrays.sort(_errors);
-
+    
     // Populates _positions.
     _calculatePositions();
   }
@@ -142,13 +158,19 @@ public class CompilerErrorModel<T extends CompilerError> {
   public T getError(int idx) { return _errors[idx]; }
 
   /** Returns the position of the given error in the document representing its file. */
-  public Position getPosition(CompilerError error) {
+  public Position getPosition(T error) {
     int spot = Arrays.binarySearch(_errors, error);
     return _positions[spot];
   }
 
   /** Returns the number of CompilerErrors. */
   public int getNumErrors() { return _numErrors; }
+  
+  /** Returns the number of CompilerErrors that are compiler errors */
+  public int getNumCompErrors() { return _numCompilerErrors; }
+  
+  /** Returns the number of CompilerErrors that are warnings */
+  public int getNumWarnings() { return _numWarnings; }
 
   /** Prints out this model's errors. */
   public String toString() {
@@ -274,28 +296,26 @@ public class CompilerErrorModel<T extends CompilerError> {
 
       // for (; numProcessed < _numErrors; numProcessed++) {
       while ((curError < _numErrors)) {
-
         // find the next error with a line number (skipping others)
         curError = nextErrorWithLine(curError);
-        if (curError >= _numErrors) break;
+        if (curError >= _numErrors) {break;} 
 
         //Now find the file and document we are working on
         File file = _errors[curError].file();
         OpenDefinitionsDocument document;
-        try { document = _model.getDocumentForFile(file); }
+        try {document = _model.getDocumentForFile(file); }
         catch (Exception e) {
           // This is intended to catch IOException or OperationCanceledException
           if ((e instanceof IOException) || (e instanceof OperationCanceledException)) {
             // skip positions for these errors if the document couldn't be loaded
-            do { curError++; } 
+            do { curError++;} 
             while ((curError < _numErrors) && (_errors[curError].file().equals(file)));
-
+            
             //If the document couldn't be loaded, start the loop over at the top
             continue;
           }
           else throw new UnexpectedException(e);
         }
-
         if (curError >= _numErrors) break;
 
         // curError is the first error in a file, and its document is open.

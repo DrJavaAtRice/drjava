@@ -674,9 +674,10 @@ public class DefaultJavadocModel implements JavadocModel {
       }
 
       if (lineno >= 0) {
-        error = new CompilerError(new File(filename), lineno, 0, errMessage, isWarning);
+        error = new CompilerError(new File(filename), lineno, 0, errMessage, false);
+          
       } else {
-        error = new CompilerError(new File(filename), errMessage, isWarning);
+        error = new CompilerError(new File(filename), errMessage, false);
       }
     }
     return error;

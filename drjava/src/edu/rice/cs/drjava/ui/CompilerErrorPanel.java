@@ -43,6 +43,7 @@ import edu.rice.cs.drjava.model.compiler.CompilerErrorModel;
 import edu.rice.cs.drjava.model.compiler.CompilerInterface;
 import edu.rice.cs.drjava.model.compiler.NoCompilerAvailable;
 import edu.rice.cs.util.UnexpectedException;
+import edu.rice.cs.util.swing.Utilities;
 
 import javax.swing.*;
 import javax.swing.text.BadLocationException;
@@ -154,6 +155,7 @@ public class CompilerErrorPanel extends ErrorPanel {
   public void reset() {
     // _nextErrorButton.setEnabled(false);
     // _prevErrorButton.setEnabled(false);
+//    Utilities.showDebug("Reset being called by CompilerErrorPanel");
     _numErrors = getModel().getCompilerModel().getNumErrors();
     
     _errorListPane.updateListPane(true);

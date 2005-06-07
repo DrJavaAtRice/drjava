@@ -50,6 +50,7 @@ import java.io.*;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.text.ConsoleInterface;
 import edu.rice.cs.util.text.DocumentAdapterException;
+import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.drjava.model.FileSaveSelector;
 import edu.rice.cs.drjava.config.OptionListener;
 
@@ -110,7 +111,6 @@ public class InteractionsDocument extends ConsoleDocument {
     _hasPrompt = true;
     _banner = DEFAULT_BANNER;
     _prompt = DEFAULT_PROMPT;
-
     reset();
   }
 

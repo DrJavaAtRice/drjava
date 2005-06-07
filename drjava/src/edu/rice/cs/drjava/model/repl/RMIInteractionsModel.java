@@ -47,6 +47,7 @@ package edu.rice.cs.drjava.model.repl;
 
 import edu.rice.cs.drjava.model.repl.newjvm.*;
 import edu.rice.cs.util.text.ConsoleInterface;
+import edu.rice.cs.util.swing.Utilities;
 
 import java.net.URL;
 import java.util.Vector;

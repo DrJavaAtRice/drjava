@@ -200,7 +200,7 @@ public class JUnitPanel extends ErrorPanel {
     } else {
       _numErrors = 0;
     }
-    _errorListPane.updateListPane(testsHaveRun);
+    _errorListPane.updateListPane(testsHaveRun); //changed!!
   }
 
   /**
@@ -394,39 +394,39 @@ public class JUnitPanel extends ErrorPanel {
      * This code inserts the error text underneath the test name (which should be red) in the
      * pane.  However, the highlighter is dependent on the errors being contiguous and at the
      * end of the document, so this is disabled pending an overhaul of the highlight manager.
-     *
-    protected void _insertErrorText(CompilerError error, Document doc) throws BadLocationException {
-      // Show file and line number
-      JUnitError err = (JUnitError)error;
-      String test = err.testName();
-      String name = err.className() + "." + test;
-      int index;
-      Position pos = _runningTestNamePositions.get(name);
-      if (pos != null) {
-        index = pos.getOffset() + test.length() + 1;
-      }
-      else {
-        index = doc.getLength();
-      }
-      String toInsert = "File: ";
-      doc.insertString(index, toInsert, BOLD_ATTRIBUTES);
-      index += toInsert.length();
-      toInsert = error.getFileMessage() + "  [line: " + error.getLineMessage() + "]\n";
-      doc.insertString(index, toInsert, NORMAL_ATTRIBUTES);
-      index += toInsert.length();
-
-      if (error.isWarning()) {
-        toInsert = _getWarningText();
-      }
-      else {
-        toInsert = _getErrorText();
-      }
-      doc.insertString(index, toInsert, BOLD_ATTRIBUTES);
-      index += toInsert.length();
-
-      toInsert = error.message() + "\n";
-      doc.insertString(index, toInsert, NORMAL_ATTRIBUTES);
-    }*/
+     */
+//    protected void _insertErrorText(Error error, Document doc) throws BadLocationException {
+//      // Show file and line number
+//      JUnitError err = (JUnitError)error;
+//      String test = err.testName();
+//      String name = err.className() + "." + test;
+//      int index;
+//      Position pos = _runningTestNamePositions.get(name);
+//      if (pos != null) {
+//        index = pos.getOffset() + test.length() + 1;
+//      }
+//      else {
+//        index = doc.getLength();
+//      }
+//      String toInsert = "File: ";
+//      doc.insertString(index, toInsert, BOLD_ATTRIBUTES);
+//      index += toInsert.length();
+//      toInsert = error.getFileMessage() + "  [line: " + error.getLineMessage() + "]\n";
+//      doc.insertString(index, toInsert, NORMAL_ATTRIBUTES);
+//      index += toInsert.length();
+//
+//      if (error.isWarning()) {
+//        toInsert = _getWarningText();
+//      }
+//      else {
+//        toInsert = _getErrorText();
+//      }
+//      doc.insertString(index, toInsert, BOLD_ATTRIBUTES);
+//      index += toInsert.length();
+//
+//      toInsert = error.message() + "\n";
+//      doc.insertString(index, toInsert, NORMAL_ATTRIBUTES);
+//    }
 
     /**
      * Replaces the "Testing in progress..." text with the given message.

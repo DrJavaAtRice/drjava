@@ -51,6 +51,7 @@ import java.io.File;
 import edu.rice.cs.util.Pair;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.text.SwingDocumentAdapter;
+import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.drjava.DrJava;

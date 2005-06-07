@@ -53,6 +53,7 @@ import edu.rice.cs.drjava.model.DefaultGlobalModel;
 import edu.rice.cs.drjava.model.repl.newjvm.MainJVM;
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.text.*;
+import edu.rice.cs.util.swing.Utilities;
 
 /** Interactions model which can notify GlobalModelListeners on events.
  *  @version $Id$
@@ -76,11 +77,10 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
           DrJava.getConfig().getSetting(OptionConstants.HISTORY_MAX_SIZE).intValue(),
           DefaultGlobalModel.WRITE_DELAY);
     _model = model;
-
     // Set whether to allow "assert" statements to be run in the remote JVM.
     Boolean allow = DrJava.getConfig().getSetting(OptionConstants.JAVAC_ALLOW_ASSERT);
     _interpreterControl.setAllowAssertions(allow.booleanValue());
-
+    
     // Add option listeners
     DrJava.getConfig().addOptionListener(OptionConstants.HISTORY_MAX_SIZE,
                                          _document.getHistoryOptionListener());

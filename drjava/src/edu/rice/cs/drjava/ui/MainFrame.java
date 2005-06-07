@@ -566,7 +566,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
   };
 
-  /** Prints the current document. */
+  /** Prints the cint xurrent document. */
   private Action _printAction = new AbstractAction("Print...") {
     public void actionPerformed(ActionEvent ae) { _print(); }
   };
@@ -847,7 +847,10 @@ public class MainFrame extends JFrame implements OptionConstants {
       int start = _currentDefPane.getSelectionStart();
       int end = _currentDefPane.getSelectionEnd();
       _currentDefPane.endCompoundEdit();
+      DummyOpenDefDoc dummy = new DummyOpenDefDoc();
+      _model.setActiveDocument(dummy);
       openDoc.commentLines(start, end);
+      _model.setActiveDocument(openDoc);
     }
   };
 
@@ -1487,11 +1490,6 @@ public class MainFrame extends JFrame implements OptionConstants {
 
   /* ----------------------- Constructor is here! --------------------------- */
 
-
-
-
-
-
   /** Creates the main window, and shows it. */
   public MainFrame() {
     // Cache the config object, since we use it a zillion times.
@@ -1505,6 +1503,7 @@ public class MainFrame extends JFrame implements OptionConstants {
 
     // create our model
     _model = new DefaultSingleDisplayModel();
+    
     _model.getDocumentNavigator().asContainer().addKeyListener(_historyListener);
     _model.getDocumentNavigator().asContainer().addFocusListener(_focusListenerForRecentDocs);
 
@@ -1513,7 +1512,6 @@ public class MainFrame extends JFrame implements OptionConstants {
     //   the JEditorPane constructor uses it before we get a chance to
     //   assign it to an instance field...
     DefinitionsPane.setEditorKit(_model.getEditorKit());
-
     if (_model.getDebugger().isAvailable()) {
       // add listener to debug manager
       _model.getDebugger().addListener(new UIDebugListener());
@@ -1525,7 +1523,6 @@ public class MainFrame extends JFrame implements OptionConstants {
       }
     });
     _debugStepTimer.setRepeats(false);
-
 
     // Working directory is default place to start, else
     // use user.dir (bug #895998).
@@ -1539,13 +1536,18 @@ public class MainFrame extends JFrame implements OptionConstants {
     if (workDir.isFile() && workDir.getParent() != null) {
       workDir = workDir.getParentFile();
     }
-    _openChooser = new JFileChooser();
+    // Overrides JFileChooser to display the full path of the directory
+    _openChooser = new JFileChooser() {
+      public void setCurrentDirectory(File dir) {
+        //next two lines are order dependent!
+        super.setCurrentDirectory(dir);
+        setDialogTitle("Open:  " + getCurrentDirectory());
+        
+      }
+    };
     _openChooser.setCurrentDirectory(workDir);
     _openChooser.setFileFilter(_javaSourceFilter);
     _openChooser.setMultiSelectionEnabled(true);
-    
-    
-    
     
     _openRecursiveCheckBox = new JCheckBox("Open folders recursively");
     _openRecursiveCheckBox.setSelected(DrJava.getConfig().getSetting(OptionConstants.OPEN_FOLDER_RECURSIVE).booleanValue());
@@ -1554,7 +1556,6 @@ public class MainFrame extends JFrame implements OptionConstants {
     
     //Get most recently opened project for filechooser
     Vector<File> recentProjects = config.getSetting(RECENT_PROJECTS);
-    
     _openProjectChooser = new JFileChooser();
     if (recentProjects.size()>0 && recentProjects.elementAt(0).getParentFile() != null)
       _openProjectChooser.setCurrentDirectory(recentProjects.elementAt(0).getParentFile());
@@ -1562,7 +1563,13 @@ public class MainFrame extends JFrame implements OptionConstants {
       _openProjectChooser.setCurrentDirectory(workDir);
     _openProjectChooser.setFileFilter(_projectFilter);
     _openProjectChooser.setMultiSelectionEnabled(false);
-    _saveChooser = new JFileChooser();
+    _saveChooser = new JFileChooser() {
+      public void setCurrentDirectory(File dir) {
+        //next two lines are order dependent!
+        super.setCurrentDirectory(dir);
+        setDialogTitle("Save:  " + getCurrentDirectory());
+      }
+    };
     _saveChooser.setCurrentDirectory(workDir);
     _saveChooser.setFileFilter(_javaSourceFilter);
     _interactionsHistoryChooser = new JFileChooser();
@@ -1588,7 +1595,6 @@ public class MainFrame extends JFrame implements OptionConstants {
     JScrollPane defScroll = _createDefScrollPane(_model.getActiveDocument());
     _recentDocFrame  = new RecentDocFrame(this);
     _recentDocFrame.pokeDocument(_model.getActiveDocument());
-    
     _currentDefPane = (DefinitionsPane) defScroll.getViewport().getView();
     _currentDefPane.notifyActive();
     
@@ -1694,6 +1700,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     // Set the colors
     _updateNormalColor();
     _updateBackgroundColor();
+    
 
     // Add OptionListeners for the colors.
     config.addOptionListener
@@ -1753,6 +1760,7 @@ public class MainFrame extends JFrame implements OptionConstants {
         }
       }
     });
+    
     config.addOptionListener(LOOK_AND_FEEL, new OptionListener<String>() {
       public void optionChanged(OptionEvent<String> oe) {
 //        try {
@@ -1799,7 +1807,7 @@ public class MainFrame extends JFrame implements OptionConstants {
         }
       }
     });
-
+    
     config.addOptionListener(JVM_ARGS, new OptionListener<String>() {
       public void optionChanged(OptionEvent<String> oe) {
         if (!oe.value.equals("")) {
@@ -1819,7 +1827,7 @@ public class MainFrame extends JFrame implements OptionConstants {
         _model.getInteractionsModel().setPrivateAccessible(oce.value.booleanValue());
       }
     });
-
+    
     // Initialize breakpoint highlights hashtable, for easy removal of highlights
     _breakpointHighlights = new java.util.Hashtable<Breakpoint, HighlightManager.HighlightInfo>();
 
@@ -2011,6 +2019,12 @@ public class MainFrame extends JFrame implements OptionConstants {
     _lastFocusOwner.requestFocusInWindow();
   }
 
+  
+  public void updateFileTitle(String text) {
+    _fileNameField.setText(text);
+  }
+  
+  
   /** Updates the title bar with the name of the active document. */
   public void updateFileTitle() {
     OpenDefinitionsDocument doc = _model.getActiveDocument();
@@ -2858,7 +2872,8 @@ public class MainFrame extends JFrame implements OptionConstants {
         }
       }.start();
     }
-    finally { hourglassOff(); }
+    finally { hourglassOff();}
+    update(getGraphics());
   }
   
   private void _compileFolder() {
@@ -2884,6 +2899,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       }
     }
     finally { hourglassOff(); }
+    update(getGraphics()); 
   }
 
   private boolean showCleanWarning() {
@@ -2953,31 +2969,36 @@ public class MainFrame extends JFrame implements OptionConstants {
         OpenDefinitionsDocument activeDoc = _model.getActiveDocument();
         try {
          hourglassOn();
-          _model.compileAll(); 
+          _model.compileAll();
         }
         catch (FileMovedException fme) { _showFileMovedError(fme); }
         catch (IOException ioe) { _showIOError(ioe); }
-        finally { hourglassOff(); }
+        finally { hourglassOff();}
         return null;
       }
     };
     worker.start();
+    update(getGraphics()); 
   }
 
   private void _compileAll() {
     _cleanUpForCompile();
     final SwingWorker worker = new SwingWorker() {
       public Object construct() {
-        hourglassOn();
-        try { _model.getCompilerModel().compileAll(); }
+        try {
+          hourglassOn();
+          _model.getCompilerModel().compileAll();
+        }
         catch (FileMovedException fme) { _showFileMovedError(fme); }
         catch (IOException ioe) { _showIOError(ioe); }
-        finally { hourglassOff(); }
+        finally { hourglassOff();}
         return null;
       }
     };
     worker.start();
+    update(getGraphics()); 
   }
+  
   
   private void _runProject() {
     if (_model.isProjectActive()) {
@@ -4052,21 +4073,20 @@ public class MainFrame extends JFrame implements OptionConstants {
         ret.setText((String) a.getValue(Action.DEFAULT));
       }
     }
-
     ret.setEnabled(false);
     ret.addActionListener(a);
     ret.setToolTipText( (String) a.getValue(Action.SHORT_DESCRIPTION));
     ret.setFont(buttonFont);
-
+    Boolean test = a instanceof DelegatingAction;
     a.addPropertyChangeListener(new PropertyChangeListener() {
       public void propertyChange(PropertyChangeEvent evt) {
-      if ("enabled".equals(evt.getPropertyName())) {
-        Boolean val = (Boolean) evt.getNewValue();
-        ret.setEnabled(val.booleanValue());
+        if ("enabled".equals(evt.getPropertyName())) {
+          Boolean val = (Boolean) evt.getNewValue();
+          ret.setEnabled(val.booleanValue());
+        }
       }
-    }
     });
-
+          
     return ret;
   }
 
@@ -4381,7 +4401,7 @@ public class MainFrame extends JFrame implements OptionConstants {
         // Update error highlights?
         if (_currentDefPane != null) {
           int pos = _currentDefPane.getCaretPosition();
-          // _currentDefPane.removeErrorHighlight();
+          _currentDefPane.removeErrorHighlight(); //this line removes the highlighting whenever the current tabbed pane is switched
           _currentDefPane.getErrorCaretListener().updateHighlight(pos);
         }
       }
@@ -5354,13 +5374,13 @@ public class MainFrame extends JFrame implements OptionConstants {
       _currentDefPane.getUndoAction().updateUndoState();
       _currentDefPane.getRedoAction().updateRedoState();
     }
-
+    
     public void activeDocumentChanged(final OpenDefinitionsDocument active) {
       // Only change GUI from event-dispatching thread
       // (This can be called from other threads...)
       
-//      try {  // used or invokeAndWait variation
-      Utilities.invokeLater(new Runnable() {  // invokeAndWait is arguably better but it may create occasional deadlocks.
+      try {  // used or invokeAndWait variation
+      Utilities.invokeAndWait(new Runnable() {  // invokeAndWait is arguably better but it may create occasional deadlocks.
         public void run() {
           _recentDocFrame.pokeDocument(active);
           _switchDefScrollPane();
@@ -5384,7 +5404,7 @@ public class MainFrame extends JFrame implements OptionConstants {
           
           // update display (adding "*") in navigatgorPane
           if (isModified) _model.getDocumentNavigator().repaint();
-          
+        
           
           try { active.revertIfModifiedOnDisk(); }
           catch (FileMovedException fme) { _showFileMovedError(fme); }
@@ -5399,8 +5419,8 @@ public class MainFrame extends JFrame implements OptionConstants {
           }
         }
       });
-//      }  // used for invokeAndWait variation
-//      catch(InterruptedException e) { throw new UnexpectedException(e); }
+      }  // used for invokeAndWait variation
+      catch(InterruptedException e) { throw new UnexpectedException(e); }
     }
 
     public void interactionStarted() {
@@ -5445,7 +5465,7 @@ public class MainFrame extends JFrame implements OptionConstants {
         }
       };
       Utilities.invokeLater(command);
-    }
+    }    
     
     public void compileEnded() {
       // Only change GUI from event-dispatching thread
@@ -5538,7 +5558,6 @@ public class MainFrame extends JFrame implements OptionConstants {
       Utilities.invokeLater(new Runnable() {
         public void run() {
           try {
-            showTab(_junitErrorPanel);
             _restoreJUnitActionsEnabled();
             _junitErrorPanel.reset();
           }
@@ -6207,6 +6226,16 @@ public class MainFrame extends JFrame implements OptionConstants {
    */
   public void addComponentListenerToOpenDocumentsList(ComponentListener listener) {
     _docSplitPane.getLeftComponent().addComponentListener(listener);
+  }
+  
+  /**For test purposes only. Returns the text in the status bar. Is used to test brace matching*/
+  public String getFileNameField() {
+    return _fileNameField.getText();
+  }
+  
+   /**For test purposes only. Returns the edit menu*/
+  public JMenu getEditMenu() {
+    return _editMenu;
   }
 
   /**

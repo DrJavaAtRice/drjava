@@ -29,7 +29,7 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS 
  * WITH THE SOFTWARE.
  * 
-END_COPYRIGHT_BLOCK*/
+ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.compiler;
 
@@ -37,34 +37,33 @@ import java.io.File;
 import java.io.Serializable;
 
 /**
- * A class to represent compiler errors.  Having this class allows DrJava
+ * A class to represent compilerr errors and warnings.  Having this class allows DrJava
  * to make the errors as legible as possible.
  * @version $Id$
  */
 public class CompilerError implements Comparable, Serializable {
   private File _file;
-
+  
   /** zero-based line number. */
   private int _lineNumber;
-
+  
   /** zero-based column number. */
   private int _startColumn;
   private String _message;
   private boolean _isWarning;
-
+  
   /**
    * This boolean is true when the CompilerError does not
    * have a location (lineNumber is -1)
    */
   private boolean _noLocation;
-
+  
   /**
    * Constructor.
    * @param     file the file where the error occurred
    * @param     lineNumber the line number of the error
    * @param     startColumn the starting column of the error
    * @param     message  the error message
-   * @param     isWarning true if the error is a warning
    */
   public CompilerError(File file, int lineNumber, int startColumn, String message, boolean isWarning) {
     _file = file;
@@ -74,40 +73,40 @@ public class CompilerError implements Comparable, Serializable {
     _isWarning = isWarning;
     if (lineNumber < 0) _noLocation = true;
   }
-
+    
   /**
-   * Constructor for a CompilerError with an associated file but no location in the source
+   * Constructor for an CompilerError with an associated file but no location in the source
    */
   public CompilerError(File file, String message, boolean isWarning) {
     this(file, -1, -1, message, isWarning);
   }
-
+  
   /** Constructor for CompilerErrors without files.
    *  @param message the error message
-   *  @param isWarning true if the error is a warning
    */
   public CompilerError(String message, boolean isWarning) {
     this(null, message, isWarning);
   }
-
+  
+  
   /** This function returns true if and only if the given error has no location */
   public boolean hasNoLocation() { return _noLocation; }
-
+  
   /**
-   * Gets a String representation of the error.
+   * Gets a String representation of the error. Abstract.
    * @return the error as a String
    */
   public String toString() {
     return this.getClass().toString() + "(file=" + fileName() + ", line=" +
       _lineNumber + ", col=" + _startColumn + ", msg=" + _message + ")";
   }
-
+  
   /**
    * Gets the file.
    * @return the file with errors.
    */
   public File file() { return _file; }
-
+  
   /**
    * Gets the full name of the file.
    * @return the file name.
@@ -116,7 +115,7 @@ public class CompilerError implements Comparable, Serializable {
     if (_file == null) return "";
     return _file.getAbsolutePath();
   }
-
+  
   /**
    * Gets the zero-based line number of the error.
    * NOTE: javac/javadoc produces zero-based line numbers internally, but
@@ -124,19 +123,19 @@ public class CompilerError implements Comparable, Serializable {
    * @return the zero-based line number
    */
   public int lineNumber() { return  _lineNumber; }
-
+  
   /**
    * Gets the column where the error begins.
    * @return the starting column
    */
   public int startColumn() { return  _startColumn; }
-
+  
   /**
    * Gets the error message.
    * @return the error message.
    */
   public String message() { return  _message; }
-
+  
   /**
    * This function returns a message telling the file this error is from
    * appropriate to display to a user, indicating if there is no file
@@ -146,7 +145,7 @@ public class CompilerError implements Comparable, Serializable {
     if (_file == null) return "(no associated file)";
     return fileName();
   }
-
+  
   /**
    * This function returns a message telling the line this error is from
    * appropriate to display to a user, indicating if there is no file
@@ -157,13 +156,13 @@ public class CompilerError implements Comparable, Serializable {
     if (_file == null || this._lineNumber < 0) return "(no source location)";
     return "" + (_lineNumber + 1);
   }
-
+  
   /**
    * Determines if the error is a warning.
    * @return true if the error is a warning.
    */
   public boolean isWarning() { return  _isWarning; }
-
+  
   /**
    * Compares by file, then by line, then by column.
    * Errors without files are considered equal, but less than any errors with
@@ -189,11 +188,11 @@ public class CompilerError implements Comparable, Serializable {
     if (other.file() == null) {
       // All else equal.
       //                        I'm a warning.           I'm not a warning.
-      return (this._isWarning? (other._isWarning? 0:1):(other._isWarning? -1:0));
+      return (this.isWarning()? (other.isWarning()? 0:1):(other.isWarning()? -1:0));
     }
     else return -1; // Errors without files are smaller
   }
-
+  
   /**
    * Compares this error with the given one, based first
    * on line number, and then by column.
@@ -203,9 +202,9 @@ public class CompilerError implements Comparable, Serializable {
     if (_lineNumber == other._lineNumber) {
       int byCol = _startColumn - other._startColumn;
       //                        I'm a warning.               I'm not a warning.
-      return (this._isWarning? (other._isWarning? byCol:1):(other._isWarning? -1:byCol));
+      return (this.isWarning()? (other.isWarning()? byCol:1):(other.isWarning()? -1:byCol));
     }
     else return  _lineNumber - other._lineNumber;
   }
-
+  
 }

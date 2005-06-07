@@ -29,7 +29,7 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS 
  * WITH THE SOFTWARE.
  * 
-END_COPYRIGHT_BLOCK*/
+ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.ui;
 
@@ -53,17 +53,16 @@ import javax.swing.*;
 import javax.swing.text.*;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.border.EmptyBorder;
-import javax.swing.event.ChangeListener;
-import javax.swing.event.ChangeEvent;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.ItemListener;
+import java.awt.event.ItemEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.io.IOException;
 
-/** This class contains common code and interfaces from CompilerErrorPanel, JUnitPanel,
- *  and JavadocErrorPanel.
+/** This class contains common code and interfaces from CompilerErrorPanel, JUnitPanel, and JavadocErrorPanel.
  *  TODO: parameterize the types of CompilerErrors used here
  *  @version $Id$
  */
@@ -235,7 +234,7 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
    * A pane to show compiler errors. It acts a bit like a listbox (clicking
    * selects an item) but items can each wrap, etc.
    */
-  abstract public class ErrorListPane extends JEditorPane {
+  public abstract class ErrorListPane extends JEditorPane {
     
     /**
      * Index into _errorListPositions of the currently selected error.
@@ -275,17 +274,21 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
       }
     };
     
+    private Hashtable<Position, CompilerError> _setUpErrorTable() {
+      return new Hashtable<Position, CompilerError>();
+    }
+    
     /** Constructs the CompilerErrorListPane.*/
     public ErrorListPane() {
-      // If we set this pane to be of type text/rtf, it wraps based on words
-      // as opposed to based on characters.
+//      // If we set this pane to be of type text/rtf, it wraps based on words
+//      // as opposed to based on characters.
       super("text/rtf", "");
       
       addMouseListener(defaultMouseListener);
       
       _selectedIndex = 0;
       _errorListPositions = new Position[0];
-      
+        
       this.setFont(new Font("Courier", 0, 20));
       
       // We set the editor pane disabled so it won't get keyboard focus,
@@ -313,21 +316,27 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
       DrJava.getConfig().addOptionListener(DEFINITIONS_BACKGROUND_COLOR,
                                            new BackgroundColorListener());
       
-      _showHighlightsCheckBox.addChangeListener( new ChangeListener() {
-        public void stateChanged(ChangeEvent ce) {
+      /* Item listener instead of change listener so that this code won't be called (twice) every time the mouse moves
+       * over the _showHighlightsCheckBox (5/26/05)
+       */
+      _showHighlightsCheckBox.addItemListener(new ItemListener() {
+        public void itemStateChanged(ItemEvent e) {
           DefinitionsPane lastDefPane = _frame.getCurrentDefPane();
           
-          if (_showHighlightsCheckBox.isSelected()) {
+          if (e.getStateChange() == ItemEvent.DESELECTED) {
+            lastDefPane.removeErrorHighlight();
+          }
+          
+          else if (e.getStateChange() == ItemEvent.SELECTED) {   
             getErrorListPane().switchToError(getSelectedIndex());
 // Commented out because they are redudant; done in switchToError(...)            
-//            DefinitionsPane curDefPane = _frame.getCurrentDefPane(); 
-//            curDefPane.requestFocusInWindow();
-//            curDefPane.getCaret().setVisible(true);
+//          DefinitionsPane curDefPane = _frame.getCurrentDefPane(); 
+//            lastDefPane.requestFocusInWindow();
+//            lastDefPane.getCaret().setVisible(true);
           }
-          else  lastDefPane.removeErrorHighlight();
         }
       });
-    }
+    }     
     
     /**
      * Returns true if the errors should be highlighted in the source
@@ -361,7 +370,7 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
       if (error == null) throw new IllegalArgumentException("Couldn't find index for null error");
       
       for (int i = 0; i < _errorListPositions.length; i++) {
-        CompilerError e = _errorTable.get(_errorListPositions[i]);
+        CompilerError e= _errorTable.get(_errorListPositions[i]);
         if (error.equals(e))  return i;
       }
       
@@ -383,25 +392,60 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
       catch (BadLocationException e) { throw new UnexpectedException(e); }
       
       // Force UI to redraw
-      revalidate();
+//      revalidate();
     }
     
     abstract protected void _updateNoErrors(boolean done) throws BadLocationException;
     
     abstract protected void _updateWithErrors() throws BadLocationException;
     
-    /**
-     * Gets the message indicating the number of errors.
-     */
+    /** Gets the message indicating the number of errors and warnings.*/
     protected String _getNumErrorsMessage(String failureName, String failureMeaning) {
-      StringBuffer numErrMsg = new StringBuffer("" + _numErrors);
-      numErrMsg.append(" " + failureName);
-      if (_numErrors > 1) {
-        numErrMsg.append("s");
+      StringBuffer numErrMsg;
+      
+      /** Used for display purposes only */
+      int numCompErrs = getErrorModel().getNumCompErrors();
+      int numWarnings = getErrorModel().getNumWarnings();     
+      
+      if (!getErrorModel().hasOnlyWarnings()) {
+        numErrMsg = new StringBuffer(numCompErrs + " " + failureName);   //failureName = error or test (for compilation and JUnit testing respectively)
+        if (numCompErrs > 1) numErrMsg.append("s");
+        if (numWarnings > 0) numErrMsg.append(" and " + numWarnings + " warning");          
       }
+      
+      else  numErrMsg = new StringBuffer(numWarnings + " warning"); 
+      
+      if (numWarnings > 1) numErrMsg.append("s");
+     
       numErrMsg.append(" " + failureMeaning + ":\n");
       return numErrMsg.toString();
     }
+    
+    /**
+     * Gets the message to title the block containing only errors.
+     */
+    protected String _getErrorTitle() {
+      CompilerErrorModel cem = getErrorModel();
+      if (cem.getNumCompErrors() > 1)
+        return "--------------\n*** Errors ***\n--------------\n";
+      if (cem.getNumCompErrors() > 0)
+        return "-------------\n*** Error ***\n-------------\n";
+      return "";
+    }
+      
+    /**
+     * Gets the message to title the block containing only warnings.
+     */
+    protected String _getWarningTitle() {
+      CompilerErrorModel cem = getErrorModel();
+      if (cem.getNumWarnings() > 1)
+        return "--------------\n** Warnings **\n--------------\n";
+      if (cem.getNumWarnings() > 0)
+        return "-------------\n** Warning **\n-------------\n";
+      return "";
+    }
+    
+    
     
     /** Used to show that the last compile was unsuccessful.*/
     protected void _updateWithErrors(String failureName, String failureMeaning, DefaultStyledDocument doc)
@@ -448,17 +492,46 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
     protected void _insertErrors(DefaultStyledDocument doc) throws BadLocationException {
       CompilerErrorModel cem = getErrorModel();
       int numErrors = cem.getNumErrors();
-      // Show errors
+      
+      //Added this counter in order to add errors and warnings in correct order and select them correctly
+      //Previous version used errorNum as a counter, but this doesn't work anymore because we are not doing
+      //errors and variables at the same time.
+      int errorPositionInListOfErrors = 0;
+      // Show errors first and warnings second
+      
+      String errorTitle = _getErrorTitle();
+      if (cem.getNumWarnings() > 0)   
+        doc.insertString(doc.getLength(), errorTitle, BOLD_ATTRIBUTES);
+      
       for (int errorNum = 0; errorNum < numErrors; errorNum++) {
         int startPos = doc.getLength();
         CompilerError err = cem.getError(errorNum);
         
-        _insertErrorText(err, doc);
-        
-        Position pos = doc.createPosition(startPos);
-        _errorListPositions[errorNum] = pos;
-        _errorTable.put(pos, err);
+        if (!err.isWarning()){
+          _insertErrorText(err, doc);
+          Position pos = doc.createPosition(startPos);
+          _errorListPositions[errorPositionInListOfErrors] = pos;
+          _errorTable.put(pos, err);
+          errorPositionInListOfErrors++;
+        }
       }
+      
+      String warningTitle = _getWarningTitle();
+      if (cem.getNumCompErrors() > 0)   
+        doc.insertString(doc.getLength(), warningTitle, BOLD_ATTRIBUTES);
+      
+      for (int errorNum = 0; errorNum < numErrors; errorNum++) {
+        int startPos = doc.getLength();
+        CompilerError err = cem.getError(errorNum);
+        
+        if (err.isWarning()){
+          _insertErrorText(err, doc);
+          Position pos = doc.createPosition(startPos);
+          _errorListPositions[errorPositionInListOfErrors] = pos;
+          _errorTable.put(pos, err);
+          errorPositionInListOfErrors++;
+        }
+      }      
     }
     
     /** Prints a message for the given error
@@ -521,6 +594,7 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
     /** Selects the given error inside the error list pane. */
     public void selectItem(CompilerError error) {
 //      Utilities.showDebug("selectItem(" + error + ") called");
+      CompilerErrorModel cem = getErrorModel();
       try {
         // Find corresponding index
         int i = _getIndexForError(error);
@@ -530,20 +604,34 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
         _removeListHighlight();
         
         int startPos = _errorListPositions[i].getOffset();
+//        Utilities.showDebug("startPos = " + startPos);
         
         // end pos is either the end of the document (if this is the last error)
+        // or the end of the error if the last error (i.e. before the warnings title)
         // or the char where the next error starts
         int endPos;
-        if (i + 1 >= (_numErrors)) endPos = getDocument().getLength();
-        else endPos = _errorListPositions[i + 1].getOffset();
+        if (i + 1 >= (_numErrors)) endPos = getDocument().getLength();   
+        else { 
+          endPos = _errorListPositions[i + 1].getOffset();
+//          Utilities.showDebug("endPos(before) = " + endPos);
+          CompilerError nextError = _errorTable.get(_errorListPositions[i+1]);
+//          Utilities.showDebug("nextError = " + nextError);
+          if (!error.isWarning() && nextError.isWarning()) endPos = endPos - _getWarningTitle().length();
+//          Utilities.showDebug("endPos(after) = " + endPos);
+        }            
         
 //        Utilities.showDebug("startpos = " + startPos + " endpos = " + endPos);
         
         try {
           _listHighlightTag = _highlightManager.addHighlight(startPos, endPos, _listHighlightPainter);
           
-          // Scroll to make sure this item is visible
-          Rectangle startRect = modelToView(startPos);
+          // If first error, show number of errors and warnings preferentially to showing the error
+          // Otherwise, scroll to make sure this item is visible
+          Rectangle startRect;
+          if (i == 0)  startRect = modelToView(0);
+          
+          else startRect = modelToView(startPos);
+          
           Rectangle endRect = modelToView(endPos - 1);
           
           if (startRect != null && endRect != null) {
@@ -597,30 +685,42 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
       if (error == null) return;
       
       _frame.getCurrentDefPane().removeErrorHighlight();  // hide previous error highlight
-     
-
-       
+      
+      
+      
       if (error.file() != null) {
         try {
           OpenDefinitionsDocument doc = getModel().getDocumentForFile(error.file());
           CompilerErrorModel errorModel = getErrorModel();
           
           Position pos = errorModel.getPosition(error); // null if error has no Position
-          
+//          Utilities.showDebug("The position of the error is: " + pos);
           // switch to correct def pane and move caret to error position
-//        Utilities.showDebug("active document being set to " + doc + " in ErrorPanel.switchToError");
+//          Utilities.showDebug("active document being set to " + doc + " in ErrorPanel.switchToError");
+          
           getModel().setActiveDocument(doc);
-//        Utilities.showDebug("setting active document has completed");
+          
+//          Utilities.showDebug("setting active document has completed");
+          
           DefinitionsPane defPane = _frame.getCurrentDefPane();
+          
           if (pos != null) {
             int errPos = pos.getOffset();
-            if (errPos >= 0 && errPos <= doc.getLength()) defPane.centerViewOnOffset(errPos);
+            if (errPos >= 0 && errPos <= doc.getLength()) {
+              defPane.centerViewOnOffset(errPos);
+              
+              /* The folowing fixes a bug where, if two consecutive errors are in the same position, the previous error
+               * is unhighlighted and the new error is not highlighted because the CaretListener does not act because there
+               * is no change in caret position. (This is the only place where updateHighlight was called from before) */
+              defPane.getErrorCaretListener().updateHighlight(errPos);
+            }
+            
           }
           // The following line is a brute force hack that fixed a bug plaguing the DefinitionsPane immediately after a compilation
           // with errors.  In some cases (which were consistently reproducible), the DefinitionsPane editing functions would break
           // whereby the keystrokes had their usual meaning but incorrect updates were performed in the DefintionsPane.  For example,
           // the display behaved as if the editor were in "overwrite" mode.
-          _frame._switchDefScrollPane(); // resets an out-of-kilter DefinitionsPane on the first error after a compilation
+//          _frame._switchDefScrollPane(); // resets an out-of-kilter DefinitionsPane on the first error after a compilation
           defPane.requestFocusInWindow();
           defPane.getCaret().setVisible(true);
         }
@@ -633,7 +733,7 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
        * be the correct error if there are multiple errors for this this position.  The following selects the correct error.*/
       getErrorListPane().selectItem(error); 
     }
-      
+    
     
     /**
      * Another interface to switchToError.
@@ -642,7 +742,7 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
     void switchToError(int index) {
       if ((index >= 0) && (index < _errorListPositions.length)) {
         Position pos = _errorListPositions[index];
-        CompilerError error = _errorTable.get(pos);
+        CompilerError error= _errorTable.get(pos);
         switchToError(error);
       }
     }

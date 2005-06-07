@@ -131,7 +131,6 @@ public class DrJava implements OptionConstants {
   }
 
   private static void createAndShowGUI(final String[] args) {
-       
     try {
       // handleCommandLineArgs will return true if the program should load
       if (handleCommandLineArgs(args)) {

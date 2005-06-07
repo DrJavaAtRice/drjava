@@ -89,10 +89,7 @@ public class JUnitError extends CompilerError implements Comparable, Serializabl
    * @param test the name of the test that failed
    */
   public JUnitError(String message, boolean isWarning, String test) {
-    super(message, isWarning);
-    _stackTrace = "No associated stack trace";
-    _test = test;
-    _className = "";
+    this(null, -1, -1, message, isWarning, test, "", "No associated stack trace");
   }
 
   /**
@@ -119,4 +116,5 @@ public class JUnitError extends CompilerError implements Comparable, Serializabl
   public String stackTrace() {
     return _stackTrace;
   }
+  
 }

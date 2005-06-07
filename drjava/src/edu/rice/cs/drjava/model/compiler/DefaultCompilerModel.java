@@ -83,7 +83,7 @@ public class DefaultCompilerModel implements CompilerModel {
    */
   public DefaultCompilerModel(IGetDocuments getter) {
     _getter = getter;
-    _compilerErrorModel = new CompilerErrorModel<CompilerError>(new CompilerError[0], getter);
+    _compilerErrorModel = new CompilerErrorModel<CompilerError>(new CompilerError[0], _getter);
   }
   
   //--------------------------------- Locking -------------------------------//
@@ -136,7 +136,6 @@ public class DefaultCompilerModel implements CompilerModel {
     
     boolean isProjActive = _getter.getFileGroupingState().isProjectActive();
     
-    //System.out.println("Running compile all");
     List<OpenDefinitionsDocument> defDocs = _getter.getOpenDefinitionsDocuments();
     
     if (isProjActive) {
@@ -147,10 +146,8 @@ public class DefaultCompilerModel implements CompilerModel {
       for (OpenDefinitionsDocument doc : defDocs) {
         if (doc.isInProjectPath() || doc.isAuxiliaryFile()) projectDocs.add(doc);
       }
-      //System.out.println("Project is active");
       defDocs = projectDocs;
     }
-    
     compile(defDocs);
   }
   
@@ -184,8 +181,7 @@ public class DefaultCompilerModel implements CompilerModel {
   
   private void _rawCompile(File[] sourceRoots, File[] files, File buildDir) throws IOException {
     
-     _notifier.compileStarted();
-    
+    _notifier.compileStarted();
     try {
       // Compile the files
       _compileFiles(sourceRoots, files, buildDir);
@@ -209,7 +205,6 @@ public class DefaultCompilerModel implements CompilerModel {
     
     // Only compile if all are saved
     if (_hasModifiedFiles(defDocs)) _notifier.saveBeforeCompile();
-    
     // check for modified project files, in case they didn't save when prompted
     if (_hasModifiedFiles(defDocs)) return;
     // if any files haven't been saved after we told our
@@ -320,6 +315,7 @@ public class DefaultCompilerModel implements CompilerModel {
       
     Pair<LinkedList<JExprParseException>, LinkedList<Pair<String, JExpressionIF>>> errors;
     LinkedList<JExprParseException> parseExceptions;
+
     LinkedList<Pair<String, JExpressionIF>> visitorErrors;
     LinkedList<CompilerError> compilerErrors = new LinkedList<CompilerError>();
     CompilerInterface compiler = CompilerRegistry.ONLY.getActiveCompiler();
@@ -339,13 +335,12 @@ public class DefaultCompilerModel implements CompilerModel {
        * compiled version is also copied to another file with the same path with the ".augmented" suffix on the 
        * end.  We have to copy the original back to its original spot so the user doesn't have to do anything funny.
        */
-            
       errors = llc.convert(files);//, filesToRestore);
       
       compiler.setWarningsEnabled(true);
       
       /* Rename any .dj0 files in files to be .java files, so the correct thing is compiled.  The hashset is used to 
-       * make sure we never send in duplicate files. This can happen if the java file was sent in allong with the 
+       * make sure we never send in duplicate files. This can happen if the java file was sent in along with the 
        * corresponding .dj* file. The dj* file is renamed to a .java file and thus we have two of the same file in 
        * the list.  By adding the renamed file to the hashset, the hashset efficiently removes duplicates.
       */
@@ -458,6 +453,12 @@ public class DefaultCompilerModel implements CompilerModel {
 
   /** Gets the total number of current errors. */
   public int getNumErrors() { return getCompilerErrorModel().getNumErrors(); }
+  
+  /** Gets the total number of current compiler errors. */
+  public int getNumCompErrors() { return getCompilerErrorModel().getNumCompErrors(); }
+  
+  /** Gets the total number of current warnings. */  
+  public int getNumWarnings() { return getCompilerErrorModel().getNumWarnings(); }
 
   /** Resets the compiler error state to have no errors. */
   public void resetCompilerErrors() {

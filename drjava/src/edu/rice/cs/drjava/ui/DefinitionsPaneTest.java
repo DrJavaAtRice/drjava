@@ -58,6 +58,7 @@ import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 
+import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.Utilities;
 
 /**
@@ -636,25 +637,59 @@ public final class DefinitionsPaneTest extends TestCase {
      _assertDocumentContents(doc, "tes", "Deleting with Backspace went wrong");
   }
   
-}
+  
+  /** Tests the functionality that allows brace matching that displays the line matched in the status bar */
+  public void testMatchBraceText() {
+    try{
+      DefinitionsPane definitions = _frame.getCurrentDefPane();
+      OpenDefinitionsDocument doc = definitions.getOpenDefDocument();
+      _assertDocumentEmpty(doc, "before testing");
+      doc.insertString(0, 
+                       "public class Foo {\n" + //19
+                       "  private int whatev\n" + //40
+                       "  private void _method()\n" + //65
+                       "  {\n" + //69
+                       "     do stuff\n" + //83
+                       "     new Object() {\n" + //103
+                       "         }\n" + //114
+                       "  }\n" +
+                       "} "
+                         , null);
+      
+      String filename = GlobalModelNaming.getDisplayFullPath(doc);
+      
+      definitions.setCaretPosition(2);
+      assertEquals("Should display the document path", filename, _frame.getFileNameField());
+      definitions.setCaretPosition(113);
+      assertEquals("Should display the line matched", "Matches:      new Object() {", _frame.getFileNameField());
+      definitions.setCaretPosition(100);
+      assertEquals("Should display the document matched", filename, _frame.getFileNameField());
+      definitions.setCaretPosition(117);
+      assertEquals("Should display the line matched", "Matches:   private void _method()...{", _frame.getFileNameField());
+      definitions.setCaretPosition(119);
+      assertEquals("Should display the line matched", "Matches: public class Foo {", _frame.getFileNameField());
+    }
+    catch (BadLocationException e) {throw new UnexpectedException(e);}
+  }
 
 
-class KeyTestListener implements KeyListener {
-  
-  public void keyPressed(KeyEvent e) {
-    DefinitionsPaneTest.fail("Unexpected keypress " + e);
-  }
-  
-  public void keyReleased(KeyEvent e) {
-    DefinitionsPaneTest.fail("Unexpected keyrelease " + e);
-  }
-  
-  public void keyTyped(KeyEvent e) {
-    DefinitionsPaneTest.fail("Unexpected keytyped " + e);
-  }
-  
-  public boolean done() {
-    return true;
+  class KeyTestListener implements KeyListener {
+    
+    public void keyPressed(KeyEvent e) {
+      DefinitionsPaneTest.fail("Unexpected keypress " + e);
+    }
+    
+    public void keyReleased(KeyEvent e) {
+      DefinitionsPaneTest.fail("Unexpected keyrelease " + e);
+    }
+    
+    public void keyTyped(KeyEvent e) {
+      DefinitionsPaneTest.fail("Unexpected keytyped " + e);
+    }
+    
+    public boolean done() {
+      return true;
+    }
   }
 }
 

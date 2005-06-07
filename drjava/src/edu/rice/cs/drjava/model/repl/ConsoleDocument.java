@@ -37,6 +37,7 @@ import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.text.ConsoleInterface;
 import edu.rice.cs.util.text.DocumentEditCondition;
 import edu.rice.cs.util.text.DocumentAdapterException;
+import edu.rice.cs.util.swing.Utilities;
 
 //TODO: convert this class to use a readers/writers locking protocol.
 
@@ -83,7 +84,7 @@ public class ConsoleDocument implements ConsoleInterface {
     _promptPos = 0;
     _prompt = DEFAULT_CONSOLE_PROMPT;
     _hasPrompt = false;
-    
+   
     // Prevent any edits before the prompt!
     _document.setEditCondition(new ConsoleEditCondition());
   }

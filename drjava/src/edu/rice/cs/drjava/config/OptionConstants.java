@@ -855,6 +855,9 @@ public interface OptionConstants {
   public static final BooleanOption FIND_ALL_DOCUMENTS = 
     new BooleanOption("find.replace.all.documents", Boolean.FALSE);
   
+  public static final BooleanOption FIND_NO_COMMENTS_STRINGS =
+    new BooleanOption("find.replace.no.comments.strings", Boolean.FALSE);
+  
 
   /* ---------- Debugger Options ---------- */
 

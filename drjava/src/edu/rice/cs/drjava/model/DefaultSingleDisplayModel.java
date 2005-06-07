@@ -93,7 +93,6 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel implements Sin
 
   /** Initiates this SingleDisplayModel.  Should only be called from the constructor. */
   private void _init() {
-    
     final NodeDataVisitor<Boolean> _gainVisitor = new NodeDataVisitor<Boolean>() {
       public Boolean itemCase(INavigatorItem docu) {
         _setActiveDoc(docu);  // sets _activeDocument, the shadow copy of the active document
@@ -126,6 +125,7 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel implements Sin
       }
     });
     
+    
     _isClosingAllDocs = false;
     _ensureNotEmpty();
     setActiveFirstDocument();
@@ -154,12 +154,14 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel implements Sin
     /* The following code fixes a potential race because this method modifies the documentNavigator which is a swing
      * component. Hence it must run in the event thread.  Note that setting the active document triggers the execution
      * of listeners some of which also need to run in the event thread. */
-//    if (_activeDocument == doc) return;
+
+//    if (_activeDocument == doc) return; // this optimization appears to cause some subtle bugs   
+    
     Runnable command = new Runnable() {  
-      public void run() { _documentNavigator.setActiveDoc(doc); } 
+      public void run() { _documentNavigator.setActiveDoc(doc);} 
     };
-    try { Utilities.invokeAndWait(command); }
-    catch(Exception e) { throw new UnexpectedException(e); }
+    try {Utilities.invokeAndWait(command);}
+    catch(Exception e) { throw new UnexpectedException(e); } 
 //    try { _documentNavigator.setActiveDoc(doc); } 
 //    catch(DocumentClosedException dce) { 
 //      /* do nothing; findbugs signals a bug unless this catch clause spans more than two lines */
@@ -220,14 +222,12 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel implements Sin
    */
   public OpenDefinitionsDocument openFile(FileOpenSelector com) throws 
     IOException, OperationCanceledException, AlreadyOpenException {
-    
     // Close an untitled, unchanged document if it is the only one open
     boolean closeUntitled = _hasOneEmptyDocument();
     OpenDefinitionsDocument oldDoc = _activeDocument;
     
     OpenDefinitionsDocument openedDoc = openFileHelper(com);
     if (closeUntitled) closeFileHelper(oldDoc);
-    
 //    Utilities.showDebug("DrJava has opened" + openedDoc + " and is setting it active");
     setActiveDocument(openedDoc);
 //    Utilities.showDebug("active doc set; openFile returning");
