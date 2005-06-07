@@ -200,7 +200,7 @@ public final class CommandLineTest extends TestCase {
   }
 
    /** Tests DrJava with no command line arguments. Should open a new, untitled document. */
-  public void xtestNone() {
+  public void testNone() {
     DrJava.openCommandLineFiles(_mf, new String[0]);
     // ListModel<DefinitionsDocument> docs =
     // Wouldn't that be nice?
@@ -212,7 +212,7 @@ public final class CommandLineTest extends TestCase {
   }
 
   /** Open one file on the command line.  Should (obviously) open that file. */
-  public void xtestOpenOne() throws BadLocationException {
+  public void testOpenOne() throws BadLocationException {
     String[] list = new String[1];
     list[0] = f1_name;
     DrJava.openCommandLineFiles(_mf, list);
@@ -230,7 +230,7 @@ public final class CommandLineTest extends TestCase {
  
 
   /** A nonexistent file.  Should open a new, untitled document. */
-  public void xtestNE() {
+  public void testNE() {
     String[] list = new String[1];
     list[0] = nof1_name;
     DrJava.openCommandLineFiles(_mf, list);
@@ -243,7 +243,7 @@ public final class CommandLineTest extends TestCase {
   }
 
   /** Many files on the command line.  Should open all of them, displaying the last one. */
-  public void xtestOpenMany() throws BadLocationException {
+  public void testOpenMany() throws BadLocationException {
     String[] list = new String[3];
     list[0] = f1_name;
     list[1] = f2_name;
@@ -269,7 +269,7 @@ public final class CommandLineTest extends TestCase {
   }
 
   /** Supplying both valid and invalid filenames on the command line. Should open only the valid ones. */
-  public void xtestMixed() throws BadLocationException {
+  public void testMixed() throws BadLocationException {
     String[] list = new String[6];
     list[0] = f4_name;
     list[1] = nof1_name;
@@ -298,7 +298,7 @@ public final class CommandLineTest extends TestCase {
   }
 
   /** Test duplicate files. */
-  public void xtestDups() throws BadLocationException {
+  public void testDups() throws BadLocationException {
     String[] list = new String[6];
     list[0] = f7_name;
     list[1] = nof4_name;
@@ -328,7 +328,7 @@ public final class CommandLineTest extends TestCase {
    *  The problem was that getSourceRoot() would fail on the document, because the filename was not absolute. (The
    *  fix will be to absolutize file paths when opening files.)
    */
-  public void xtestRelativePath() throws IOException, InvalidPackageException {
+  public void testRelativePath() throws IOException, InvalidPackageException {
     String funnyName = "DrJava_automatically_deletes_this_1";
     File newDirectory = mkTempDir(funnyName);
     File relativeFile = new File(newDirectory, "X.java");
