@@ -58,7 +58,7 @@ public class AWTContainerNavigatorFactory implements IDocumentNavigatorFactory {
   /** Creates a new List Navigator
    *  @return a list navigator
    */
-    public IDocumentNavigator makeListNavigator() { return new JListSortNavigator(); }
+    public IDocumentNavigator makeListNavigator() {return new JListSortNavigator(); }
 
   /** Returns a new tree Navigator with the specified root
    *  @param name the name of the root node

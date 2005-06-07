@@ -55,6 +55,7 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Position;
 
 import edu.rice.cs.util.UnexpectedException;
+import edu.rice.cs.util.swing.Utilities;
 
 public class HighlightManager {
 
@@ -101,7 +102,7 @@ public class HighlightManager {
 
       HighlightInfo newLite = new HighlightInfo(startOffset,endOffset,p);
 
-      //System.out.println("Adding highlight from "+startOffset+" to "+endOffset);
+//      Utilities.showDebug("Adding highlight from "+startOffset+" to "+endOffset);
       Stack<HighlightInfo> lineStack = _getStackAt(newLite);
 
       if (lineStack != null) {

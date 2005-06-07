@@ -85,6 +85,7 @@ class JListNavigator extends JList implements IDocumentNavigator {
   /** Standard constructor. */
   public JListNavigator() { 
     super();
+    //System.out.println("DEBUG: Is the problem in the constructor?");
     init(new DefaultListModel());
   }
   
@@ -207,16 +208,20 @@ class JListNavigator extends JList implements IDocumentNavigator {
   /** Sets the specified document as selected.  Should only be called from event thread.
    *  @param doc the document to select
    */
-  public void setActiveDoc(INavigatorItem doc) {
+  public void setActiveDoc(INavigatorItem doc) { 
+    //System.out.println("DEBUG: Are we in setActiveDoc");
     synchronized(_model) {
+      //System.out.println("DEBUG: Do we get into the synchronized?");
       if (_current == doc) return; // doc is already _current (the active doc)
       if (_model.contains(doc)) {
+        //System.out.println("DEBUG: Are we in this if-statement?");
         setSelectedValue(doc, true);
-        // _current = doc;  // already done by ListSelectionEvent listener created in init()
+        //System.out.println("DEBUG: We have finished setting the selected value.");
+        //_current = doc;  // already done by ListSelectionEvent listener created in init()
       }
     }
   }
-  
+    
   /** Returns whether or not the navigator contains the document
    *  @param doc the document to find
    *  @return true if this list contains doc (using identity as equality measure), false if not.
@@ -326,11 +331,15 @@ class JListNavigator extends JList implements IDocumentNavigator {
 //  
   public String toString() { synchronized (_model) { return _model.toString(); } }
   
-  /** The cell renderer for this tree. */
+  /** The cell renderer for this list. */
   private class CustomListCellRenderer extends DefaultListCellRenderer {
     
-    /** Rreturns the component for a cell
-     *  @param tree
+    /** Rreturns the renderer component for a cell
+     *  @param list
+     *  @param value
+     *  @param index
+     *  @param isSelected
+     *  @param hasFocus
      */
     public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean hasFocus) {
 
@@ -340,5 +349,4 @@ class JListNavigator extends JList implements IDocumentNavigator {
       return this;
     }
   }
-  
 }
