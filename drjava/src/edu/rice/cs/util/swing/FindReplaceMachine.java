@@ -576,6 +576,8 @@ public class FindReplaceMachine {
       }
       docToSearch = !_searchBackwards ? _docIterator.getNextDocument(docToSearch) :
                                         _docIterator.getPrevDocument(docToSearch);
+      start = 0;
+      end = docToSearch.getLength();
     }
     return new FindResult(docToSearch, -1, false);
   } 
