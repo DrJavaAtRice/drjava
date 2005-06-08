@@ -86,7 +86,7 @@ public class StickyClassLoaderTest extends TestCase {
    * loader.
    */
   public void testLoaderFindsNonSystemJavaClasses() throws Throwable {
-    class LoadingClassException extends RuntimeException {}
+    class LoadingClassException extends RuntimeException { }
 
     ClassLoader testLoader = new SecureClassLoader() {
       public URL getResource(String name) {
@@ -161,15 +161,15 @@ public class StickyClassLoaderTest extends TestCase {
     loader.loadClass(myName + "$One");
   }
 
-  public static class One {}
-  public static class Two extends One {}
+  public static class One { }
+  public static class Two extends One { }
 
   public interface BMaker {
     public Object makeB();
   }
 
   public static class A implements BMaker {
-    private static class B {}
+    private static class B { }
 
     public Object makeB() { return new B(); }
   }

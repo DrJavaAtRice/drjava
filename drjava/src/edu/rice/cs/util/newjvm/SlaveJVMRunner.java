@@ -85,7 +85,7 @@ public final class SlaveJVMRunner {
   public static final boolean SHOW_DEBUG_DIALOGS = false;
   
   /** Private constructor to prevent instantiation. */
-  private SlaveJVMRunner() {}
+  private SlaveJVMRunner() { }
 
   private static SlaveRemote _getInstance(Class clazz) throws Exception {
     try {

@@ -44,7 +44,7 @@ public final class ExecJVM {
   private static final String PATH_SEPARATOR = System.getProperty("path.separator");
   private static final String OS_NAME = System.getProperty("os.name").toLowerCase(Locale.US);
 
-  private ExecJVM() {}
+  private ExecJVM() { }
 
   /**
    * Runs a new JVM.

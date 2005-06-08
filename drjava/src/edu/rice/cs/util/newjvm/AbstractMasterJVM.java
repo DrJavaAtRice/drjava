@@ -281,7 +281,7 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/
   public abstract void errorStartingSlave(Throwable cause) throws RemoteException;
   
   /** No-op to prove that the master is still alive. */
-  public void checkStillAlive() {}
+  public void checkStillAlive() { }
 
   public void registerSlave(SlaveRemote slave) throws RemoteException {
     synchronized(_masterJVMLock) {

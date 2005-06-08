@@ -94,10 +94,10 @@ public abstract class AbstractSlaveJVM implements SlaveRemote {
   }
 
   /** This method is called just before the JVM is quit.  It can be overridden to provide cleanup code, etc. */
-  protected void beforeQuit() {}
+  protected void beforeQuit() { }
 
   /** This method is called if the interpreterJVM cannot be exited (likely because of a unexpected security manager.) */
-  protected void quitFailed(Throwable th) {}
+  protected void quitFailed(Throwable th) { }
 
   /** Starts background thread to periodically poll the master JVM and automatically quit if it's dead.
    *  It delegates the actual start to {@link #handleStart}.

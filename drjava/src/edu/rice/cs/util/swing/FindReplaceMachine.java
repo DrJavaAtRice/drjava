@@ -48,35 +48,35 @@ import javax.swing.text.Position;
 public class FindReplaceMachine {
   
  /** The document on which FindReplaceMachine is operating. */
-  static AbstractDocumentInterface _doc;
+  private AbstractDocumentInterface _doc;
   /** The position in _doc from which the searches started. */
-  static Position _start;
+  private Position _start;
   /** The position in _doc which the machine is currently at. */
-  static Position _current;
+  private Position _current;
   /** The word to find. */
-  static String _findWord;
+  private String _findWord;
   /** The word to replace _findword. */
-  static String _replaceWord;
-  static boolean _found;
-  static boolean _wrapped;
-  static boolean _matchCase;
-  static boolean _matchWholeWord;
-  static boolean _searchBackwards;
-  static boolean _searchAllDocuments;
-  static boolean _ignoreCommentsAndStrings;
+  private String _replaceWord;
+  private boolean _found;
+  private boolean _wrapped;
+  private boolean _matchCase;
+  private boolean _matchWholeWord;
+  private boolean _searchBackwards;
+  private boolean _searchAllDocuments;
+  private boolean _ignoreCommentsAndStrings;
   // The last word that was found. This is set to null by the
   // FindReplaceDialog if the caret is updated. We keep this
   // so we know to ignore finding this instance of the word
   // if the user toggles the _searchBackwards flag and has not
   // moved the caret.
-  static String _lastFindWord;
+  private String _lastFindWord;
   // Set to true if we should skip the first instance of the
   // word that we find (if the user toggled _searchBackwards
   // under certain circumstances).
-  static boolean _skipOneFind;
+  private boolean _skipOneFind;
   // An interface for the FindReplaceMachine to get the
   // next or previous document.
-  DocumentIterator _docIterator;
+  private DocumentIterator _docIterator;
   
   
   /** Standard Constructor.
@@ -189,7 +189,7 @@ public class FindReplaceMachine {
     String findWord = _findWord;
     int len, off;
     
-    if(_current == null) return false;
+    if (_current == null) return false;
     
     len = findWord.length();
     if (!_searchBackwards) off = _current.getOffset() - len;

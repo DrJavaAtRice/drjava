@@ -54,28 +54,23 @@ public class Utilities {
     EventQueue.invokeLater(task);
   }
   
-  public static void invokeAndWait(Runnable task) throws InterruptedException {
+  public static void invokeAndWait(Runnable task) {
     if (EventQueue.isDispatchThread()) {
-
       task.run(); 
       return;
     }
     try { EventQueue.invokeAndWait(task); }
-    catch(InvocationTargetException e) { throw new UnexpectedException(e); }
+    catch(Exception e) { throw new UnexpectedException(e); }
   }
   
   public static void main(String[] args) { clearEventQueue(); }
   
   public static void clearEventQueue() {
-    try { Utilities.invokeAndWait(new Runnable() { public void run() { } }); }
-    catch(InterruptedException ie) { throw new UnexpectedException(); }
+    Utilities.invokeAndWait(new Runnable() { public void run() { } });
   }
   
   public static void showDebug(final String msg) {
-    try {
-      Utilities.invokeAndWait(new Runnable() { public void run() { JOptionPane.showMessageDialog(null, msg); } } );
-    }
-    catch (InterruptedException e) { /* Do nothing */ }
+    Utilities.invokeAndWait(new Runnable() { public void run() { JOptionPane.showMessageDialog(null, msg); } } );
   }
 }
     
