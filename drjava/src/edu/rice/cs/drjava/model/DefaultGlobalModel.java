@@ -1360,7 +1360,6 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
             public void run() { _documentNavigator.refreshDocument(idoc, path); }
           });
         }
-        catch(InterruptedException e) { throw new UnexpectedException(e); }
         catch(IOException e) { 
           /* Do nothing; findbugs signals a bug unless this catch clause spans more than two lines */ 
         }
@@ -1436,12 +1435,10 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
     synchronized(_documentsRepos) { found = _documentsRepos.remove(doc); }
     
     if (! found) return false;
-    try {
-      Utilities.invokeAndWait(new Runnable() { 
-        public void run() { _documentNavigator.removeDocument(doc); }
-      });
-    }
-    catch(InterruptedException e) { throw new UnexpectedException(e); }
+    
+    Utilities.invokeAndWait(new Runnable() { 
+      public void run() { _documentNavigator.removeDocument(doc); }
+    });
     _notifier.fileClosed(doc);
     doc.close();
     return true;
@@ -1476,15 +1473,12 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
   public void dispose() {
     // Kill the interpreter
     _interpreterControl.killInterpreter(false);
-
+    
     _notifier.removeAllListeners();
     synchronized(_documentsRepos) { _documentsRepos.clear(); }
-    try {
-      Utilities.invokeAndWait(new Runnable() { 
-        public void run() { _documentNavigator.clear(); }
-      });
-    }
-    catch(InterruptedException e) { throw new UnexpectedException(e); }
+    Utilities.invokeAndWait(new Runnable() { 
+      public void run() { _documentNavigator.clear(); }
+    });
   }
 
   
@@ -2140,13 +2134,10 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
         try {
           _notifier.documentNotFound(this, _file);
           final String path = _file.getCanonicalFile().getParent();
-          try {
-            Utilities.invokeAndWait(new Runnable() {
-              public void run() { _documentNavigator.refreshDocument(ConcreteOpenDefDoc.this, path); }
-            });
-            return _cacheAdapter.getDocument(); 
-          }
-          catch(InterruptedException e) { throw new UnexpectedException(e); }
+          Utilities.invokeAndWait(new Runnable() {
+            public void run() { _documentNavigator.refreshDocument(ConcreteOpenDefDoc.this, path); }
+          });
+          return _cacheAdapter.getDocument(); 
         }
         catch(Throwable t) { throw new UnexpectedException(t); }
       }
@@ -3254,21 +3245,18 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
    *  @param doc the document to add to the navigator
    */
   private void addDocToNavigator(final OpenDefinitionsDocument doc) {
-    try {
-      Utilities.invokeAndWait(new Runnable() {
-        public void run() {
-          try {
-            if (doc.isUntitled()) _documentNavigator.addDocument(doc);
-            else {
-              String path = doc.getFile().getCanonicalPath();
-              _documentNavigator.addDocument(doc, fixPathForNavigator(path)); 
-            }
+    Utilities.invokeAndWait(new Runnable() {
+      public void run() {
+        try {
+          if (doc.isUntitled()) _documentNavigator.addDocument(doc);
+          else {
+            String path = doc.getFile().getCanonicalPath();
+            _documentNavigator.addDocument(doc, fixPathForNavigator(path)); 
           }
-          catch(IOException e) { _documentNavigator.addDocument(doc); }
-        }});
-    }
-    catch(InterruptedException e) { throw new UnexpectedException(e); }
-    synchronized(_documentsRepos) { _documentsRepos.add(doc); }
+        }
+        catch(IOException e) { _documentNavigator.addDocument(doc); }
+      }});
+      synchronized(_documentsRepos) { _documentsRepos.add(doc); }
   }
   
   /** Adds a documents source root to the interactions classpath this function is a helper to open file.

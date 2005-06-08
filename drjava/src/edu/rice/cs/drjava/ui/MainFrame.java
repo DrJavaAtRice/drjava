@@ -1550,7 +1550,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _openChooser.setMultiSelectionEnabled(true);
     
     _openRecursiveCheckBox = new JCheckBox("Open folders recursively");
-    _openRecursiveCheckBox.setSelected(DrJava.getConfig().getSetting(OptionConstants.OPEN_FOLDER_RECURSIVE).booleanValue());
+    _openRecursiveCheckBox.setSelected(config.getSetting(OptionConstants.OPEN_FOLDER_RECURSIVE).booleanValue());
     
     _folderChooser = makeFolderChooser(workDir);
     
@@ -1712,30 +1712,19 @@ public class MainFrame extends JFrame implements OptionConstants {
     //  NOTE: We should only add listeners to view-related (or view-dependent)
     //        config options here.  Model options should go in
     //        DefaultGlobalModel._registerOptionListeners().
-    config.addOptionListener
-      (FONT_MAIN, new MainFontOptionListener());
-    config.addOptionListener
-      (FONT_LINE_NUMBERS, new LineNumbersFontOptionListener());
-    config.addOptionListener
-      (FONT_DOCLIST, new DoclistFontOptionListener());
-    config.addOptionListener
-      (FONT_TOOLBAR, new ToolbarFontOptionListener());
-    config.addOptionListener
-      (TOOLBAR_ICONS_ENABLED, new ToolbarOptionListener());
-    config.addOptionListener
-      (TOOLBAR_TEXT_ENABLED, new ToolbarOptionListener());
-    config.addOptionListener
-      (TOOLBAR_ENABLED, new ToolbarOptionListener());
-    config.addOptionListener
-      (WORKING_DIRECTORY, new WorkingDirOptionListener());
-    config.addOptionListener
-      (LINEENUM_ENABLED, new LineEnumOptionListener());
-    config.addOptionListener
-      (QUIT_PROMPT, new QuitPromptOptionListener());
-    config.addOptionListener
-      (RECENT_FILES_MAX_SIZE, new RecentFilesOptionListener());
-    config.addOptionListener
-      (JSR14_LOCATION, new OptionListener<File>() {
+    config.addOptionListener(FONT_MAIN, new MainFontOptionListener());
+    config.addOptionListener(FONT_LINE_NUMBERS, new LineNumbersFontOptionListener());
+    config.addOptionListener(FONT_DOCLIST, new DoclistFontOptionListener());
+    config.addOptionListener(FONT_TOOLBAR, new ToolbarFontOptionListener());
+    config.addOptionListener(TOOLBAR_ICONS_ENABLED, new ToolbarOptionListener());
+    config.addOptionListener(TOOLBAR_TEXT_ENABLED, new ToolbarOptionListener());
+    config.addOptionListener(TOOLBAR_ENABLED, new ToolbarOptionListener());
+    config.addOptionListener(WORKING_DIRECTORY, new WorkingDirOptionListener());
+    config.addOptionListener(LINEENUM_ENABLED, new LineEnumOptionListener());
+    config.addOptionListener(QUIT_PROMPT, new QuitPromptOptionListener());
+    config.addOptionListener(RECENT_FILES_MAX_SIZE, new RecentFilesOptionListener());
+    
+    config.addOptionListener(JSR14_LOCATION, new OptionListener<File>() {
       public void optionChanged(OptionEvent<File> oe) {
         boolean bootClasspathHasv2 = DrJava.bootClasspathHasJSR14v20();
         boolean bootClasspathHasv24 = DrJava.bootClasspathHasJSR14v24();
@@ -1938,28 +1927,31 @@ public class MainFrame extends JFrame implements OptionConstants {
   /** Make the cursor an hourglass. */
   private int hourglassNestLevel = 0;
   public void hourglassOn() {
-//   new ScrollableDialog(null, "hourglassOn called; old nesting level is: " + hourglassNestLevel, "", "").show();
     hourglassNestLevel++;
-    if (hourglassNestLevel == 1) {
-      getGlassPane().setVisible(true);
-      _currentDefPane.setEditable(false);
-      setAllowKeyEvents(false);
+    if (hourglassNestLevel == 1) {      
+      Utilities.invokeAndWait(new Runnable() {
+        public void run() { 
+          getGlassPane().setVisible(true);
+          _currentDefPane.setEditable(false);
+          setAllowKeyEvents(false); }
+      });
     }
   }
   
   /** Return the cursor to normal. */
   public void hourglassOff() { 
     hourglassNestLevel--;
-//   new ScrollableDialog(null, "hourglassOff called; new nesting level is: " + hourglassNestLevel, "", "").show();
-    
     if (hourglassNestLevel == 0) {
-      getGlassPane().setVisible(false);
-      _currentDefPane.setEditable(true);
-      setAllowKeyEvents(true);
+      Utilities.invokeAndWait(new Runnable() {
+        public void run() {
+          getGlassPane().setVisible(false);
+          _currentDefPane.setEditable(true);
+          setAllowKeyEvents(true);
+        }
+      });
     }
   }
   
-
   private boolean allow_key_events = true;
   public void setAllowKeyEvents(boolean a) { this.allow_key_events = a; }
   
@@ -2901,6 +2893,43 @@ public class MainFrame extends JFrame implements OptionConstants {
     finally { hourglassOff(); }
     update(getGraphics()); 
   }
+  
+    private void _compileProject() { 
+    _compileAll();  
+//    _cleanUpForCompile();
+//
+//    final SwingWorker worker = new SwingWorker() {
+//      public Object construct() {
+//        OpenDefinitionsDocument activeDoc = _model.getActiveDocument();
+//        try {
+//         hourglassOn();
+//          _model.compileAll();
+//        }
+//        catch (FileMovedException fme) { _showFileMovedError(fme); }
+//        catch (IOException ioe) { _showIOError(ioe); }
+//        finally { hourglassOff();}
+//        return null;
+//      }
+//    };
+//    worker.start();
+//    update(getGraphics()); 
+  }
+
+  private void _compileAll() {
+    _cleanUpForCompile();
+    new Thread("Compile All") {
+      public void run() {
+        try {
+          hourglassOn();
+          _model.getCompilerModel().compileAll();
+        }
+        catch (FileMovedException fme) { _showFileMovedError(fme); }
+        catch (IOException ioe) { _showIOError(ioe); }
+        finally { hourglassOff();}
+      }
+    }.start();
+    update(getGraphics()); 
+  }
 
   private boolean showCleanWarning() {
     if (DrJava.getConfig().getSetting(PROMPT_BEFORE_CLEAN).booleanValue()) {
@@ -2959,47 +2988,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     worker.start();
   }
 
-  private void _compileProject() { 
-    _cleanUpForCompile();
-    
-//    new ScrollableDialog(null, "MainFrame.compileProject called", "", "").show();
 
-    final SwingWorker worker = new SwingWorker() {
-      public Object construct() {
-        OpenDefinitionsDocument activeDoc = _model.getActiveDocument();
-        try {
-         hourglassOn();
-          _model.compileAll();
-        }
-        catch (FileMovedException fme) { _showFileMovedError(fme); }
-        catch (IOException ioe) { _showIOError(ioe); }
-        finally { hourglassOff();}
-        return null;
-      }
-    };
-    worker.start();
-    update(getGraphics()); 
-  }
-
-  private void _compileAll() {
-    _cleanUpForCompile();
-    final SwingWorker worker = new SwingWorker() {
-      public Object construct() {
-        try {
-          hourglassOn();
-          _model.getCompilerModel().compileAll();
-        }
-        catch (FileMovedException fme) { _showFileMovedError(fme); }
-        catch (IOException ioe) { _showIOError(ioe); }
-        finally { hourglassOff();}
-        return null;
-      }
-    };
-    worker.start();
-    update(getGraphics()); 
-  }
-  
-  
   private void _runProject() {
     if (_model.isProjectActive()) {
       try {
@@ -5379,7 +5368,6 @@ public class MainFrame extends JFrame implements OptionConstants {
       // Only change GUI from event-dispatching thread
       // (This can be called from other threads...)
       
-      try {  // used or invokeAndWait variation
       Utilities.invokeAndWait(new Runnable() {  // invokeAndWait is arguably better but it may create occasional deadlocks.
         public void run() {
           _recentDocFrame.pokeDocument(active);
@@ -5404,7 +5392,7 @@ public class MainFrame extends JFrame implements OptionConstants {
           
           // update display (adding "*") in navigatgorPane
           if (isModified) _model.getDocumentNavigator().repaint();
-        
+          
           
           try { active.revertIfModifiedOnDisk(); }
           catch (FileMovedException fme) { _showFileMovedError(fme); }
@@ -5419,8 +5407,6 @@ public class MainFrame extends JFrame implements OptionConstants {
           }
         }
       });
-      }  // used for invokeAndWait variation
-      catch(InterruptedException e) { throw new UnexpectedException(e); }
     }
 
     public void interactionStarted() {

@@ -105,17 +105,13 @@ public class DrJava implements OptionConstants {
   private static File _propertiesFile = new File(System.getProperty("user.home"), ".drjava");
 
   /** Configuration object with all customized and default values. */
-  private static FileConfiguration _config = null;
+  private static FileConfiguration _config = _initConfig();
 
   /** Returns the properties file used by the configuration object. */
   public static File getPropertiesFile() { return _propertiesFile; }
 
   /** Returns the configuration object with all customized and default values. */
-  public static synchronized FileConfiguration getConfig() {
-    // Ensure config has been created (eg. in a test)
-    if (_config == null) initConfig();
-    return _config;
-  }
+  public static FileConfiguration getConfig() { return _config; }
 
   /** Starts running DrJava.
    *  @param args Command line argument array
@@ -134,12 +130,6 @@ public class DrJava implements OptionConstants {
     try {
       // handleCommandLineArgs will return true if the program should load
       if (handleCommandLineArgs(args)) {
-                
-        try { initConfig(); }
-        catch (IllegalStateException ise) {
-          // Shouldn't happen: _config shouldn't be assigned yet
-          throw new UnexpectedException(ise);
-        }
         
         String configLAFName = _config.getSetting(LOOK_AND_FEEL);
         String currLAFName = UIManager.getLookAndFeel().getClass().getName();
@@ -203,11 +193,12 @@ public class DrJava implements OptionConstants {
     int firstFile = 0;
 
     // Loop through arguments looking for known options
-    for (int i=0; i < args.length; i++) {
+    for (int i = 0; i < args.length; i++) {
       if (args[i].equals("-config")) {
         if (args.length > i+1) {
           setPropertiesFile(args[i+1]);
           firstFile = i+2;
+          _config = _initConfig();
         }
         else firstFile = i+1;
       }
@@ -251,9 +242,11 @@ public class DrJava implements OptionConstants {
   /** Initializes the configuration object with the current notion of the properties file.
    *  @throws IllegalStateException if config has already been assigned
    */
-  static synchronized void initConfig() throws IllegalStateException {
-    // Make sure someone doesn't try to change the config object.
-    if (_config != null) throw new IllegalStateException("Can only call initConfig once!");
+  static FileConfiguration _initConfig() throws IllegalStateException {
+//    // Make sure someone doesn't try to change the config object.
+//    if (_config != null) throw new IllegalStateException("Can only call initConfig once!");
+    
+    FileConfiguration config;
 
     try {
       _propertiesFile.createNewFile();
@@ -262,14 +255,17 @@ public class DrJava implements OptionConstants {
     catch (IOException e) {
       // IOException occurred, continue without a real file
     }
-    _config = new FileConfiguration(_propertiesFile);
-    try { _config.loadConfiguration(); }
+    config = new FileConfiguration(_propertiesFile);
+    try { config.loadConfiguration(); }
     catch (Exception e) {
       // problem parsing the config file.
       // Use defaults and remember what happened (for the UI)
-      _config.resetToDefaults();
-      _config.storeStartupException(e);
+      config.resetToDefaults();
+//      Utilities.showDebug("Config Exception is: " + e.toString());
+      config.storeStartupException(e);
     }
+    _config = config; // required to support calls on DrJava._initConfig() in unit tests
+    return config;
   }
 
   /** Saves the contents of the config file. TO DO: log any IOExceptions that occur. */
@@ -292,10 +288,7 @@ public class DrJava implements OptionConstants {
    *  Is there a better way to handle nonexistent files?  Dialog box, maybe?
    */
   static void openCommandLineFiles(final MainFrame mf, final String[] filesToOpen) { 
-    try {
-      Utilities.invokeAndWait(new Runnable() { public void run() { _openCommandLineFiles(mf, filesToOpen); }});
-    }
-    catch(InterruptedException e) { throw new UnexpectedException(); }
+    Utilities.invokeAndWait(new Runnable() { public void run() { _openCommandLineFiles(mf, filesToOpen); }});
   }
       
   private static void _openCommandLineFiles(MainFrame mf, String[] filesToOpen) {
@@ -519,20 +512,15 @@ public class DrJava implements OptionConstants {
     }
   }
 
-  /**
-   * Tries to run a new DrJava process with our notion of tools.jar
-   * appended to the end of the classpath.  This should allow us to
-   * always make the debugger available.
-   *
-   * Note: this used to take in a flag for JSR-14 in addition to tools.jar,
-   * but that isn't needed anymore.  I'll leave the contract like this in
-   * case another condition becomes necessary.  For now, it just returns
-   * if you pass in false for the first argument.
-   * Also, this function now restarts when using jsr14 v2.0, since it has to be
-   * on the JVM's boot classpath.
-   *
-   * @param forToolsJar Whether to restart DrJava to find tools.jar
-   * @param args Array of command line arguments to pass
+  /** Tries to run a new DrJava process with our notion of tools.jar appended to the end of the classpath.  This 
+   *  should allow us to always make the debugger available.
+   *  <p>
+   *  Note: this used to take in a flag for JSR-14 in addition to tools.jar, but that isn't needed anymore.  I'll 
+   *  leave the contract like this in case another condition becomes necessary.  For now, it just returns if you pass
+   *  in false for the first argument.  Also, this function now restarts when using jsr14 v2.0, since it has to be
+   *  on the JVM's boot classpath.
+   *  @param forToolsJar Whether to restart DrJava to find tools.jar
+   *  @param args Array of command line arguments to pass
    */
   public static void restartIfNecessary(boolean forToolsJar, String[] args) {
     //JOptionPane.showMessageDialog(null, "forToolsJar = " + forToolsJar);

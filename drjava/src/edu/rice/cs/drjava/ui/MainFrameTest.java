@@ -98,7 +98,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
    *  2. Inherits the tooltip of the Action parameter <code>a</code>.
    */
   public void testCreateManualToolbarButton() {
-    Action a = new AbstractAction("Test Action") { public void actionPerformed(ActionEvent ae) {} };
+    Action a = new AbstractAction("Test Action") { public void actionPerformed(ActionEvent ae) { } };
     
     a.putValue(Action.SHORT_DESCRIPTION, "test tooltip");
     JButton b = _frame._createManualToolbarButton(a);
@@ -113,16 +113,14 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     final DefinitionsPane pane = _frame.getCurrentDefPane();
     OpenDefinitionsDocument doc = pane.getOpenDefDocument();
     doc.insertString(0, "abcd", null);
-    try { Utilities.invokeAndWait(new Runnable() { 
+    Utilities.invokeAndWait(new Runnable() { 
       public void run() {
         pane.setCaretPosition(3); // not thread-safe!
-      }}); 
-    }
-
-    catch(InterruptedException e) { throw new UnexpectedException(e); }
-    
+      }
+    }); 
+      
     assertEquals("Location of old doc before switch", 3, doc.getCurrentLocation());
-    
+      
     // Create a new file
     SingleDisplayModel model = _frame.getModel();
     final OpenDefinitionsDocument oldDoc = doc;
@@ -385,21 +383,18 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     forceOpenClass1_file.deleteOnExit();
     
     //_frame.setVisible(true);
-    try {
-      Utilities.invokeAndWait(new Runnable() { 
-        public void run() {
-          _frame.pack();
-          _frame.open(new FileOpenSelector() {
-            public File[] getFiles() {
-              File[] return_me = new File[1];
-              return_me[0] = new File(_tempDir, "ForceOpenClass1.java");
-              return return_me;
-            }
-          });
-        }
-      });
-    }
-    catch(InterruptedException e) { throw new UnexpectedException(e); }                      
+    Utilities.invokeAndWait(new Runnable() { 
+      public void run() {
+        _frame.pack();
+        _frame.open(new FileOpenSelector() {
+          public File[] getFiles() {
+            File[] return_me = new File[1];
+            return_me[0] = new File(_tempDir, "ForceOpenClass1.java");
+            return return_me;
+          }
+        });
+      }
+    });                
     
     assertTrue("the save button should not be enabled after opening a document", !_frame.saveEnabledHuh());
 //    _log.log("testSaveButtonEnabled completed");
@@ -544,7 +539,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
         _frame.getCloseButton().doClick();
       }});
     }
-    catch(InterruptedException e) { fail(e.toString()); }
+    catch(UnexpectedException e) { fail(e.toString()); }
     
 //     _log.log("Waiting for file closing");
     
@@ -564,7 +559,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
   class SingleDisplayModelCompileListener extends GlobalModelTestCase.TestListener
     implements GlobalModelListener {
 
-    public void compileStarted() {}
+    public void compileStarted() { }
 
     /** Just notify when the compile has ended */
     public void compileEnded() {

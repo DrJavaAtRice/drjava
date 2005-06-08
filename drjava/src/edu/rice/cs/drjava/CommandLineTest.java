@@ -108,6 +108,7 @@ public final class CommandLineTest extends TestCase {
     super(name);
     /* Creating a MainFrame() is costly.  Peforming this operation here achives more overlap with file I/O than 
      * doing it in setUp() */
+    DrJava._initConfig();
     _mf = new MainFrame();  
     try {
       f1 = File.createTempFile("DrJava-test", ".java");
@@ -226,8 +227,6 @@ public final class CommandLineTest extends TestCase {
     assertEquals("Do the contents match?", f1_contents, doc.getText(0,f1_contents.length()));
 //    _log.log("testOpenOne completed");
   }
-  
- 
 
   /** A nonexistent file.  Should open a new, untitled document. */
   public void testNE() {

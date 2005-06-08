@@ -74,7 +74,7 @@ public final class ConfigFileTest extends TestCase {
     File propsFile = FileOps.writeStringToNewTempFile("DrJavaProps", ".txt", CUSTOM_PROPS);
     propsFile.deleteOnExit();
     DrJava.setPropertiesFile(propsFile.getAbsolutePath());
-    DrJava.initConfig();
+    DrJava._initConfig();
     FileConfiguration config = DrJava.getConfig();
     
     assertEquals("custom indent level", 5, config.getSetting(OptionConstants.INDENT_LEVEL).intValue());
