@@ -87,6 +87,7 @@ public class FindReplaceMachineTest extends TestCase {
     "\" /* \"  plt \n" +           //opening block comment inside string
     "/* // */  plt \n" +           //opening line comment inside block comment
     "\" // \"  plt \n" +           //opening line comment inside string
+    "\" \\\" \"  plt \n" +         //double quotes inside a string  
     "\'\"\' plt \n" +              //double quotes inside char delimiters
     "\'//\' plt \n" +              //opening line comment inside char delimiters (syntax error irrelevant in find)
     "\'/*\' plt \n" +              //opening block comment inside char delmimites (syntax error irrelevant in find)
@@ -476,71 +477,66 @@ public class FindReplaceMachineTest extends TestCase {
     _testFindNextFails(_frm, CONTINUE, 0, 163);
   }
   
-//  public void testWholeWordSearchIgnore() throws BadLocationException {
-//    _doc.insertString(0, IGNORE_TEXT, null);
-////        System.err.println(IGNORE_TEXT);
-//    _initFrm(0);
-//    _frm.setFindWord("plt");
-//    _frm.setMatchWholeWord();
-//    _frm.setIgnoreCommentsAndStrings(true);
-//    _frm.setSearchBackwards(false);
-//
-//    _testFindNextSucceeds(_frm, CONTINUE, 0, 12);
-//    _testFindNextSucceeds(_frm, CONTINUE, 0, 25);
-//    _testFindNextSucceeds(_frm, CONTINUE, 0, 40);
-//    _testFindNextSucceeds(_frm, CONTINUE, 0, 53);
-//    _testFindNextSucceeds(_frm, CONTINUE, 0, 62);
-//    _testFindNextSucceeds(_frm, CONTINUE, 0, 72);
-//    _testFindNextSucceeds(_frm, CONTINUE, 0, 82);
-//    _frm.setLastFindWord();
-//    _frm.setSearchBackwards(true);
-//    _testFindNextSucceeds(_frm, CONTINUE, 0, 69);
-//    _testFindNextSucceeds(_frm, CONTINUE, 0, 59);
-//    _testFindNextSucceeds(_frm, CONTINUE, 0, 50);
-//    _testFindNextSucceeds(_frm, CONTINUE, 0, 37);
-//    _testFindNextSucceeds(_frm, CONTINUE, 0, 22);
-//    _testFindNextSucceeds(_frm, CONTINUE, 0, 9);
-//    _testFindNextSucceeds(_frm, CONTINUE, 0, 79);
-//
-//    _frm.setSearchBackwards(false);
-//    _frm.setFindWord("comment");
-//    _testFindNextFails(_frm, CONTINUE, 0, 110);
-//    _testFindNextSucceeds(_frm, CONTINUE, 0, 140);
-//    _testFindNextFails(_frm, CONTINUE, 0, 165);
-//    _testFindNextSucceeds(_frm, CONTINUE, 0, 194);
-//    _testFindNextFails(_frm, CONTINUE, 0, 312);
-//    _testFindNextSucceeds(_frm, CONTINUE, 0, 346);
-//    
-//    _frm.setSearchBackwards(true);
-//    _testFindNextFails(_frm, CONTINUE, 0, 305);
-//    _testFindNextSucceeds(_frm, CONTINUE, 0, 187);
-//    _testFindNextFails(_frm, CONTINUE, 0, 158);
-//    _testFindNextSucceeds(_frm, CONTINUE, 0, 133);
-//    _testFindNextFails(_frm, CONTINUE, 0, 103);
-//    _testFindNextSucceeds(_frm, CONTINUE, 0, 339);
-//
-//    _frm.setSearchBackwards(false);
-//    _frm.setFindWord("@");
-//    _testFindNextFails(_frm, CONTINUE, 0, 238);
-//    _testFindNextSucceeds(_frm, CONTINUE, 0, 279);
-//    
-//    _frm.setSearchBackwards(true);
-//    _testFindNextFails(_frm, CONTINUE, 0, 237);
-//    _testFindNextSucceeds(_frm, CONTINUE, 0, 278);
-//    
-//    _frm.setSearchBackwards(false);
-//    _frm.setFindWord("string");
-//    _testFindNextFails(_frm, CONTINUE, 0, 212);
-//    _testFindNextSucceeds(_frm, CONTINUE, 0, 234);
-//    
-//    _frm.setSearchBackwards(true);
-//    _testFindNextFails(_frm, CONTINUE, 0, 206);
-//    _testFindNextSucceeds(_frm, CONTINUE, 0, 228);
-//  }
+  public void testWholeWordSearchIgnore() throws BadLocationException {
+    _doc.insertString(0, IGNORE_TEXT, null);
+//        System.err.println(IGNORE_TEXT);
+    _initFrm(0);
+    _frm.setFindWord("plt");
+    _frm.setMatchWholeWord();
+    _frm.setIgnoreCommentsAndStrings(true);
+    _frm.setSearchBackwards(false);
+
+    _testFindNextSucceeds(_frm, CONTINUE, 0, 12);
+    _testFindNextSucceeds(_frm, CONTINUE, 0, 25);
+    _testFindNextSucceeds(_frm, CONTINUE, 0, 40);
+    _testFindNextSucceeds(_frm, CONTINUE, 0, 53);
+    _testFindNextSucceeds(_frm, CONTINUE, 0, 66);
+    _testFindNextSucceeds(_frm, CONTINUE, 0, 75);
+    _testFindNextSucceeds(_frm, CONTINUE, 0, 85);
+    _testFindNextSucceeds(_frm, CONTINUE, 0, 95);
+    _frm.setLastFindWord();
+    _frm.setSearchBackwards(true);
+    _testFindNextSucceeds(_frm, CONTINUE, 0, 82);
+    _testFindNextSucceeds(_frm, CONTINUE, 0, 72);
+    _testFindNextSucceeds(_frm, CONTINUE, 0, 63);
+    _testFindNextSucceeds(_frm, CONTINUE, 0, 50);
+    _testFindNextSucceeds(_frm, CONTINUE, 0, 37);
+    _testFindNextSucceeds(_frm, CONTINUE, 0, 22);
+    _testFindNextSucceeds(_frm, CONTINUE, 0, 9);
+    _testFindNextSucceeds(_frm, CONTINUE, 0, 92);
+
+     _frm.setSearchBackwards(false);
+    _frm.setFindWord("comment");
+    _testFindNextSucceeds(_frm, CONTINUE, 0, 152);
+    _testFindNextSucceeds(_frm, CONTINUE, 0, 206);
+    _testFindNextSucceeds(_frm, CONTINUE, 0, 358);
+    
+    _frm.setLastFindWord();
+    _frm.setSearchBackwards(true);
+    _testFindNextSucceeds(_frm, CONTINUE, 0, 199);
+    _testFindNextSucceeds(_frm, CONTINUE, 0, 145);
+    _testFindNextSucceeds(_frm, CONTINUE, 0, 351);
+
+    _frm.setSearchBackwards(false);
+    _frm.setFindWord("@");
+    _testFindNextSucceeds(_frm, CONTINUE, 0, 291);
+    
+    _frm.setLastFindWord();
+    _frm.setSearchBackwards(true);
+    _testFindNextSucceeds(_frm, CONTINUE, 0, 290);
+    
+    _frm.setSearchBackwards(false);
+    _frm.setFindWord("string");
+    _testFindNextSucceeds(_frm, CONTINUE, 0, 246);
+    
+    _frm.setLastFindWord();
+    _frm.setSearchBackwards(true);
+    _testFindNextSucceeds(_frm, CONTINUE, 0, 240);
+  }
   
   public void testAnyOccurrenceSearchIgnore() throws BadLocationException {
     _doc.insertString(0, IGNORE_TEXT, null);
-    System.err.println(IGNORE_TEXT);
+//    System.err.println(IGNORE_TEXT);
     _initFrm(0);
     _frm.setFindWord("lt");
     _frm.setIgnoreCommentsAndStrings(true);
@@ -550,46 +546,48 @@ public class FindReplaceMachineTest extends TestCase {
     _testFindNextSucceeds(_frm, CONTINUE, 0, 25);
     _testFindNextSucceeds(_frm, CONTINUE, 0, 40);
     _testFindNextSucceeds(_frm, CONTINUE, 0, 53);
-    _testFindNextSucceeds(_frm, CONTINUE, 0, 62);
-    _testFindNextSucceeds(_frm, CONTINUE, 0, 72);
-    _testFindNextSucceeds(_frm, CONTINUE, 0, 82);
+    _testFindNextSucceeds(_frm, CONTINUE, 0, 66);
+    _testFindNextSucceeds(_frm, CONTINUE, 0, 75);
+    _testFindNextSucceeds(_frm, CONTINUE, 0, 85);
+    _testFindNextSucceeds(_frm, CONTINUE, 0, 95);
     _frm.setLastFindWord();
     _frm.setSearchBackwards(true);
-    _testFindNextSucceeds(_frm, CONTINUE, 0, 70);
-    _testFindNextSucceeds(_frm, CONTINUE, 0, 60);
+    _testFindNextSucceeds(_frm, CONTINUE, 0, 83);
+    _testFindNextSucceeds(_frm, CONTINUE, 0, 73);
+    _testFindNextSucceeds(_frm, CONTINUE, 0, 64);
     _testFindNextSucceeds(_frm, CONTINUE, 0, 51);
     _testFindNextSucceeds(_frm, CONTINUE, 0, 38);
     _testFindNextSucceeds(_frm, CONTINUE, 0, 23);
     _testFindNextSucceeds(_frm, CONTINUE, 0, 10);
-    _testFindNextSucceeds(_frm, CONTINUE, 0, 80);
+    _testFindNextSucceeds(_frm, CONTINUE, 0, 93);
 
     _frm.setSearchBackwards(false);
     _frm.setFindWord("ment");
-    _testFindNextSucceeds(_frm, CONTINUE, 0, 139);
-    _testFindNextSucceeds(_frm, CONTINUE, 0, 193);
-    _testFindNextSucceeds(_frm, CONTINUE, 0, 345);
+    _testFindNextSucceeds(_frm, CONTINUE, 0, 152);
+    _testFindNextSucceeds(_frm, CONTINUE, 0, 206);
+    _testFindNextSucceeds(_frm, CONTINUE, 0, 358);
     
     _frm.setLastFindWord();
     _frm.setSearchBackwards(true);
-    _testFindNextSucceeds(_frm, CONTINUE, 0, 189);
-    _testFindNextSucceeds(_frm, CONTINUE, 0, 135);
-    _testFindNextSucceeds(_frm, CONTINUE, 0, 341);
+    _testFindNextSucceeds(_frm, CONTINUE, 0, 202);
+    _testFindNextSucceeds(_frm, CONTINUE, 0, 148);
+    _testFindNextSucceeds(_frm, CONTINUE, 0, 354);
 
     _frm.setSearchBackwards(false);
     _frm.setFindWord("@");
-    _testFindNextSucceeds(_frm, CONTINUE, 0, 278);
+    _testFindNextSucceeds(_frm, CONTINUE, 0, 291);
     
     _frm.setLastFindWord();
     _frm.setSearchBackwards(true);
-    _testFindNextSucceeds(_frm, CONTINUE, 0, 277);
+    _testFindNextSucceeds(_frm, CONTINUE, 0, 290);
     
     _frm.setSearchBackwards(false);
     _frm.setFindWord("ring");
-    _testFindNextSucceeds(_frm, CONTINUE, 0, 233);
+    _testFindNextSucceeds(_frm, CONTINUE, 0, 246);
     
     _frm.setLastFindWord();
     _frm.setSearchBackwards(true);
-    _testFindNextSucceeds(_frm, CONTINUE, 0, 229);
+    _testFindNextSucceeds(_frm, CONTINUE, 0, 242);
   }
   
 

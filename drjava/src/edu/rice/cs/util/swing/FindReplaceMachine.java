@@ -46,7 +46,6 @@ import javax.swing.text.Position;
  * @version $Id$
  */
 public class FindReplaceMachine {
-  
  /** The document on which FindReplaceMachine is operating. */
   private AbstractDocumentInterface _doc;
   /** The position in _doc from which the searches started. */
@@ -78,7 +77,6 @@ public class FindReplaceMachine {
   // next or previous document.
   private DocumentIterator _docIterator;
   
-  
   /** Standard Constructor.
    *  Creates a new machine to perform find/replace operations on a particular document starting from a 
    *  certain position.
@@ -95,7 +93,6 @@ public class FindReplaceMachine {
     setMatchCase(true);
     setSearchAllDocuments(false);
     setIgnoreCommentsAndStrings(false);
-    
   }
   
   /**
@@ -189,7 +186,7 @@ public class FindReplaceMachine {
     String findWord = _findWord;
     int len, off;
     
-    if (_current == null) return false;
+    if(_current == null) return false;
     
     len = findWord.length();
     if (!_searchBackwards) off = _current.getOffset() - len;
@@ -271,6 +268,7 @@ public class FindReplaceMachine {
     }
     else return _replaceAllInCurrentDoc();
   }
+  
 
   /** Replaces all occurences of _findWord with _replaceWord in _doc. Never searches in other documents.
    *  @return the number of replacements
@@ -292,29 +290,16 @@ public class FindReplaceMachine {
     int count = 0;
     FindResult fr = findNext();
     _doc = fr.getDocument();
-//    int found = fr.getFoundOffset(); // This is never used
-//    int wrapped = 0;
-//    if (fr.getWrapped())
-//      wrapped++;
-// Checks that the findNext method has found something and has not
-// wrapped once and gone beyond start.
-//    while (found >= 0 && (wrapped == 0 ||
-//                         ((found < _start.getOffset() + _findWord.length() && !_searchBackwards)  ||
-//                          (found > _start.getOffset() - _findWord.length() && _searchBackwards))) && wrapped < 2) {
 
-//new while condition, since I started replacing from the beginning/end of the document only
-    while (!fr.getWrapped()) {// wrapped == 0) {
+    while (!fr.getWrapped()) {
       replaceCurrent();
       count++;
       fr = findNext();
       _doc = fr.getDocument();
-//      found = fr.getFoundOffset();
-      //      if (fr.getWrapped())
-      //        wrapped++;
+
     }
     return count;
   }
-  
 
   /**
    * Finds the next occurrence of the find word and returns an
@@ -332,13 +317,10 @@ public class FindReplaceMachine {
    * @return a FindResult object containing foundOffset and aflag
    *         indicating wrapping to the beginning during a search
    */
-  public FindResult findNext() {
-//    Utilities.showDebug("DEBUG: findNext() in FindAnyOccurrenceState called");
-    
+  public FindResult findNext() {    
     // If the user just found and toggled the "Search Backwards"
     // option, we should skip the first find.
     if (_skipOneFind) {
-//      Utilities.showDebug("DEBUG: We should skip one");
       int wordLength = _lastFindWord.length();
       if (!_searchBackwards) setPosition(getCurrentOffset() + wordLength);
       else setPosition(getCurrentOffset() - wordLength);
@@ -349,42 +331,29 @@ public class FindReplaceMachine {
   }        
   
   
-  /** Finds the next occurrence of the find word and returns an offset at the end of that occurrence or -1
-   *  if the word was not found.  Selectors should select backwards the length of the find word from the 
-   *  find offset.  This position is stored in the current offset of the machine, and that is why it is
-   *  after: in subsequent searches, the same instance won't be found twice.  In a backward search, the 
-   *  position returned is at the beginning of the word.  Also returns a flag indicating whether the end of 
-   *  the document was reached and wrapped around. This is done using  the FindResult class which just 
-   *  contains an integer and a flag.
+  /** Helper method for findNext that searches for _findWord inside a document. If necessary (i.e. an instance wasn't
+   *  found), it delegates to _findNextInAllDocuments (if searching through all open documents) and/or to _findWrapped.
    * 
-   *  @return a FindResult object with foundOffset and a flag indicating wrapping to the beginning during a search
+   *  @param start the location to begin searching in the document
+   *  @param end the location to end searching in the document
+   *  @return a FindResult object with foundOffset and a flag indicating wrapping to the beginning during a search. The
+   *  foundOffset returned insided the FindResult is -1 if no instance was found.
    */
   private FindResult _findNext(int start, int end) {
-//    Utilities.showDebug("DEBUG: Inside _findNext()");
     try {
       FindResult tempFr = new FindResult(_doc, -1, false);      
-      int /*len,*/ docLen;
+      int docLen;
       String findWord = _findWord;
       // get the search space in the document
       String findSpace;
-//      Utilities.showDebug("DEBUG: Acquiring the lock on document");
       _doc.acquireReadLock();
-//      Utilities.showDebug("DEBUG: Lock acquired on document");
       try {
         docLen = _doc.getLength();
-//        Utilities.showDebug("DEBUG: Length of document: " + docLen);
-//        if (!_searchBackwards) {
-//          end = docLen - start;
         findSpace = _doc.getText(start, end);
-//        }  
-//        else findSpace = _doc.getText(start, end);        
-        
       }
       finally { _doc.releaseReadLock(); }
-//      Utilities.showDebug("DEBUG: Lock released");
       
       if (!_matchCase) {
-//        Utilities.showDebug("DEBUG: We shouldn't match the case");
         findSpace = findSpace.toLowerCase();
         findWord = findWord.toLowerCase();
       }
@@ -393,15 +362,10 @@ public class FindReplaceMachine {
       int foundOffset;
       foundOffset = !_searchBackwards ? findSpace.indexOf(findWord)
         : findSpace.lastIndexOf(findWord);
-      
-//      Utilities.showDebug("DEBUG: foundOffset = " + foundOffset);
-      
+          
       if (foundOffset >= 0) {
-//        Utilities.showDebug("DEBUG: Offset is greater than 0");
-        // the found location is inside a comment or a string that the user has asked to ignore
         int locationToIgnore = foundOffset + start;
         if (_shouldIgnore(locationToIgnore, _doc)) {
-//          Utilities.showDebug("DEBUG: We are at a position to be ignored");
           foundOffset += start;
           if (!_searchBackwards) {
             foundOffset += findWord.length();
@@ -410,16 +374,13 @@ public class FindReplaceMachine {
           return _findNext(start, foundOffset); //searching backwards
         }       
         // otherwise we have found it
-//        Utilities.showDebug("DEBUG: We don't have to ignore anything, and we have found the word!");
         _found = true;
         foundOffset += start;
         if (!_searchBackwards) foundOffset += findWord.length();
         _current = _doc.createPosition(foundOffset);  // thread-safe operation on _doc
       }
       else { // we haven't found it yet
-//        Utilities.showDebug("DEBUG: We didn't find it on the first pass.");
         if (_searchAllDocuments) {
-//          Utilities.showDebug("DEBUG: Searching the rest of the documents");
           AbstractDocumentInterface nextDocToSearch = (!_searchBackwards ? _docIterator.getNextDocument(_doc) :
                                                          _docIterator.getPrevDocument(_doc));
           
@@ -427,67 +388,48 @@ public class FindReplaceMachine {
           foundOffset = tempFr.getFoundOffset();
         }
         if (foundOffset == -1) {   // we still haven't found it 
-//          Utilities.showDebug("DEBUG: Search has wrapped");
           if (!_searchBackwards) foundOffset = _findWrapped(0, _current.getOffset() + (_findWord.length() -1));
           else {
             int startBackOffset = _current.getOffset() - (_findWord.length() - 1);
             foundOffset = _findWrapped(startBackOffset, docLen - startBackOffset);
           }
-//          Utilities.showDebug("DEBUG: foundOffset = " + foundOffset);
         }
       }
-      // flag the return value so that they can tell that we had to wrap
-      // the file to determine the info.
       
-      //This means we have found the word before, just not in this call
-      //      if(foundOffset == -1 && _found) {
-      //        _current = _start;
-      //        _found = false;
-      //        return findNext();
-      //      }
-      //      else {
       FindResult fr = new FindResult(tempFr.getDocument(), foundOffset, _wrapped);
       _wrapped = false;
       return fr;
-      //      }
     }
     catch (BadLocationException e) { throw new UnexpectedException(e); }
   }
   
-  /** Helper method for finding after it has wrapped*/
+  /** Helper method for findNext that searches whenever a search has wrapped to the beginning or end of the starting
+   *  document.
+   * 
+   *  @param start the location to begin searching
+   *  @param end the location to end searching
+   *  @return the offset where the instance was found. Returns -1 if no instance was found between start and end
+   */
   private int _findWrapped(int start, int end) {
     try{
       _wrapped = true;
-      //When we wrap, we need to include some text that was already searched before wrapping.
-      //Otherwise, we won't find an only match that has the caret in it already.
       int docLen;
       String findSpace;
       
-//      Utilities.showDebug("DEBUG: Acquiring wrapped lock");
       _doc.acquireReadLock();  
-//      Utilities.showDebug("DEBUG: Lock acquired");
       try { 
         docLen = _doc.getLength(); 
-//        Utilities.showDebug("DEBUG: Length of doc = " + docLen);
         if (!_searchBackwards) {
-//          end = _current.getOffset() + (_findWord.length() - 1);
           if (end > docLen) end = docLen;
         }
-        
-        //combine all these if/elses into single, becasue took away commented stuff 
-        
+              
         else {  // searching backwards
           if (start < 0){ 
             start = 0;
             end = docLen;
           }
         }
-
-//        Utilities.showDebug("DEBUG: start =  " + start);
-//        Utilities.showDebug("DEBUG: end = " + end);
-        
         findSpace = _doc.getText(start, end);
-//        Utilities.showDebug("DEBUG: Text to be used is = " + findSpace);
       }
       finally { _doc.releaseReadLock(); }
       
@@ -503,7 +445,6 @@ public class FindReplaceMachine {
         : findSpace.lastIndexOf(findWord);
       
       if (foundOffset >= 0) {
-        // the found location is inside a comment or a string that the user has asked to ignore
         int locationToIgnore = start + foundOffset;
         if (_shouldIgnore(locationToIgnore, _doc)) {
           foundOffset += start;
@@ -536,30 +477,21 @@ public class FindReplaceMachine {
     while (docToSearch != _doc) {
       String text;
       int docLen;
-//      Utilities.showDebug("DEBUG: Acquiring other documents lock");
       docToSearch.acquireReadLock();
-//      Utilities.showDebug("DEBUG: Lock acquired");
       try { 
-//        Utilities.showDebug("DEBUG: startPos = " + start);
-//        Utilities.showDebug("DEBUG: end = " + end);
         docLen = docToSearch.getLength();
-        if (!_searchBackwards) text = docToSearch.getText(start, end /*docToSearch.getLength() - start*/);
-        else text = docToSearch.getText(start, end);
+        text = docToSearch.getText(start, end);
       }
       finally { docToSearch.releaseReadLock(); }
-//      Utilities.showDebug("DEBUG: text = " + text);
       String findWord = _findWord;
       if (!_matchCase) {
         text = text.toLowerCase();
         findWord = findWord.toLowerCase();
       }
       int foundOffset = !_searchBackwards ? text.indexOf(findWord) : text.lastIndexOf(findWord);
-//      Utilities.showDebug("DEBUG: foundOffset = " + foundOffset);
       if (foundOffset >= 0) {
-        // the found location is inside a comment or a string that the user has asked to ignore
         int locationToIgnore = start + foundOffset;
         if (_shouldIgnore(locationToIgnore, docToSearch)) {
-//          Utilities.showDebug("DEBUG: We are in a position to be ignored in another document");
           foundOffset += start;
           if (!_searchBackwards) {
             foundOffset += findWord.length();
@@ -629,17 +561,21 @@ public class FindReplaceMachine {
     return !Character.isLetterOrDigit(ch.charValue());
   }
   
-  /** Returns true if comments and Strings should be ignored, false otherwise*/
+  /** Returns true if the currently found instance should be ignored (either because it is inside a string or comment or
+   *  because it does not match the whole word when either or both of those conditions are set to true).
+   * 
+   *  @param foundOffset the location of the instance found
+   *  @param doc the current document where the instance was found
+   *  @return true if the location should be ignored, false otherwise
+   */
   private boolean _shouldIgnore(int foundOffset, AbstractDocumentInterface doc) {
     try{
-//      Utilities.showDebug("DEBUG: _shouldIgnore called");
       doc.acquireReadLock();
       String docText;
       try{
         docText = doc.getText(0, foundOffset);
       }
       finally{doc.releaseReadLock();}
-//      Utilities.showDebug("DEBUG: docText acquired: " + docText);
     
       return ((_matchWholeWord && !wholeWordFoundAtCurrent(doc, foundOffset)) 
                 || (_ignoreCommentsAndStrings && (_insideBlockComment(docText) || _insideLineComment(docText) 
@@ -650,10 +586,12 @@ public class FindReplaceMachine {
   
   
   
-  /** Checks whether the offset input is within a block comment. Haven't implemented the case where a comment "brace" 
-   * (i.e /* or  (star)/ ) is within a string */ 
+  /** Checks whether the offset right after the input text is inside a block comment. 
+   *  
+   *  @param docText all the text of the document before the location of the found instance
+   *  @return true if the found instance is inside a block comment
+   */
   private boolean _insideBlockComment (String docText) {
-//    Utilities.showDebug("DEBUG: _insideBlockComment called");
     int previousOpenCommentOffset = docText.lastIndexOf("/*");
     int previousCloseCommentOffset = docText.lastIndexOf("*/");
     
@@ -681,17 +619,16 @@ public class FindReplaceMachine {
       if (previousCloseCommentOffset != -1) tempText = tempText.substring(0, previousCloseCommentOffset);
     }
     
-//    Utilities.showDebug("DEBUG: value of previousOpenCommentOffset = " +  previousOpenCommentOffset);
-//    Utilities.showDebug("DEBUG: value of previousCloseCommentOffset = " +  previousCloseCommentOffset);
-    
     if (previousCloseCommentOffset < previousOpenCommentOffset) return true;
     return false;
   }
   
-  /** Checks whether the offset input is within a line comment. Haven't implemented the case where a comment "brace" 
-   * (//) is within a string */
+  /** Checks whether the offset right after the input text is inside a line comment. 
+   *  
+   *  @param docText all the text of the document before the location of the found instance
+   *  @return true if the found instance is inside a line comment
+   */
   private boolean _insideLineComment (String docText) {
-//    Utilities.showDebug("DEBUG: _insideLineComment called");
     int previousNewLineOffset = docText.lastIndexOf("\n");
     int previousOpenCommentOffset = docText.lastIndexOf("//");    
 
@@ -707,22 +644,17 @@ public class FindReplaceMachine {
       if (previousOpenCommentOffset != -1) docText = docText.substring(0, previousOpenCommentOffset);
     }
     
-
-//    Utilities.showDebug("DEBUG: value of previousOpenCommentOffset = " +  previousOpenCommentOffset);
-//    Utilities.showDebug("DEBUG: value of previousNewLineOffset = " +  previousNewLineOffset);
-    
     if (previousNewLineOffset < previousOpenCommentOffset) return true;
     return false;
   }
       
-  /** Checks whether the offset input is within a string. Haven't implemented the case where an unpaired double quote
-   * is within a comment on the same line as the string*/
-  private boolean _insideString(String docText) {
-//    Utilities.showDebug("DEBUG: _insideString called");  
+  /** Checks whether the offset right after the input text is inside a string literal. 
+   *  
+   *  @param docText all the text of the document before the location of the found instance
+   *  @return true if the found instance is inside a string 
+   */
+  private boolean _insideString(String docText) {    
     int previousNewLineOffset = docText.lastIndexOf("\n");
-
-//    Utilities.showDebug("DEBUG: value of previousNewLineOffset = " +  previousNewLineOffset);    
-    
     String tempText = docText;
     
     if (previousNewLineOffset != -1) docText = docText.substring(previousNewLineOffset+1);
@@ -736,7 +668,8 @@ public class FindReplaceMachine {
       // the conditional below ensures the following correct behavior:
       //     - a quotation mark inside a block comment should not count as opening or closing a string
       //     - a quotation mark inside character delimeters (i.e ') should not count as opening or closing a string
-      if (!_insideBlockComment(tempText) && !_insideChar(tempText))
+      //     - a quotation mark inside a string should not count as opening or closing a string
+      if (!_insideBlockComment(tempText) && !_insideChar(tempText) && (tempText.lastIndexOf("\\") != tempText.length()-1))
         doubleQuoteCount++;
       docText = docText.substring(0, doubleQuoteIndex); 
       doubleQuoteIndex = docText.lastIndexOf("\"");
@@ -748,13 +681,14 @@ public class FindReplaceMachine {
     return false;
   }
   
-  
-  /** Checks whether the offset input is within a char. */
+  /** Checks whether the offset right after the input text is inside char delimiters. 
+   *  
+   *  @param docText all the text of the document before the location of the found instance
+   *  @return true if the found instance is inside char delimiters
+   */
   private boolean _insideChar(String docText) {
-//    Utilities.showDebug("DEBUG: _insideChar called");
     int singleQuoteIndex = docText.lastIndexOf("\'");
-    if (singleQuoteIndex != -1 && singleQuoteIndex == docText.length()-1)
-      return true;    
+    if (singleQuoteIndex != -1 && singleQuoteIndex == docText.length()-1)  return true;    
     return false;
   } 
 }
