@@ -123,17 +123,18 @@ public class DocumentCache {
     if (size <= 0) throw new IllegalArgumentException("Cannot set the cache size to zero or less.");
     int dist;
     DocManager[] removed = null;  // bogus initialization makes javac happy
-    synchronized(_cacheLock) {   // lock the cache so entries can be reomoved if necessary
+    synchronized(_cacheLock) {    // lock the cache so entries can be removed if necessary
       CACHE_SIZE = size;
       dist = _residentQueue.size() - CACHE_SIZE;
       if (dist > 0) { 
         removed = new DocManager[dist];
         for (int i = 0; i < dist; i++) removed[i] = _residentQueue.remove(0);
       }
+      if (dist > 0) kickOut(removed);
     }
-    if (dist > 0) kickOut(removed);
   }
   
+  /** Kicks out all documents in removed.  Assumes that _cacheLock is already held. */
   private void kickOut(DocManager[] removed) {
     for (int i = 0; i < removed.length; i++) {
       DocManager dm = removed[i];
@@ -144,26 +145,7 @@ public class DocumentCache {
   public int getCacheSize() { return CACHE_SIZE; }
   public int getNumInCache() { return _residentQueue.size(); }
     
-  /** Called by a manager dm when it is accessed by the model (using getDocument). This operation adds the document
-   *  manager dm to the queue unless it is an UNMANAGED document or it is already in the queue.
-   *  @param dm The document manager that was just accessed by the model.
-   *  @pre the lock for thi is already held.
-   */
-  private void add(DocManager dm) {
-//    Utilities.showDebug("add " + dm + " to the QUEUE\n" + "QUEUE = " + _residentQueue);
-    if (dm == null) throw 
-      new IllegalArgumentException("Cannot add a null document to the DocumentCache");
-    if (dm.isUnmanagedOrUntitled() ) return;
-    DocManager removed = null;
-    synchronized(_cacheLock) { // lock the cache so that dm can be added if not already present
-      if (_residentQueue.contains(dm)) return;
-      _residentQueue.add(dm);
-      if (_residentQueue.size() > CACHE_SIZE) removed = _residentQueue.remove(0);
-    }
-    if (removed != null) removed.kickOut();
-  }
   
-  private boolean remove(DocManager dm) { synchronized(_cacheLock) { return _residentQueue.remove(dm); } }
   
   ///////////////////////////// DocManager //////////////////////////
   
@@ -184,14 +166,12 @@ public class DocumentCache {
     private DefinitionsDocument _doc;
     private String _filename;
     
-    private Object _dmLock = new Object();  // private synchronization lock
-    
     /** Instantiates a manager for the documents that are produced by the given document reconstructor.
      *  @param rec The reconstructor used to create the document
      */
     public DocManager(DDReconstructor rec, String fn, boolean isUntitled) {
 //      Utilities.showDebug("DocManager(" + rec + ", " + fn + ", " + isUntitled + ")");
-      if (isUntitled) _stat = UNTITLED;
+      if (isUntitled) _stat = UNTITLED; 
       else _stat = NOT_IN_QUEUE;
       _rec = rec;
       _doc = null;
@@ -206,31 +186,20 @@ public class DocumentCache {
      *  @return the physical document that is managed by this adapter
      */
     public DefinitionsDocument getDocument() throws IOException, FileMovedException {
-      boolean isResident = false;
-      boolean makeUnmanaged = false;  // makeUnmanaged -> isResident
-      synchronized(_dmLock) { // lock the document manageer so that its state can be updated
-        isResident = _doc != null;
-        if (isResident) {  // Document is in queue or "unmanaged" (a modified doc or a new doc with no file)
-          if (isUnmanagedOrUntitled()) return _doc;
-          makeUnmanaged = _doc.isModifiedSinceSave();
-          if (makeUnmanaged)  { setUnmanaged(); }
-        }
-      }
-      if (makeUnmanaged) remove(this); // remove this from queue
-      if (isResident) return _doc;
-        
-      boolean isUntitled = false;
-      synchronized(_dmLock) {      // Lock dm so that the _doc field can be updated.
-        isUntitled = isUntitled();  // This locking may be overkill; once titled, always titled
+//      Utilities.showDebug("getDocument called on " + this + " with _stat = " + _stat);
+      DefinitionsDocument doc = _doc;
+      if (doc != null) return doc;
+      synchronized(_cacheLock) { // lock the cache so that this DocManager's state can be updated
+        if (_doc != null) return _doc;  // _doc may have changed since test outside of _cacheLock
         try { // _doc is not in memory
           _doc = _rec.make();
-          if (_doc == null) throw new IllegalStateException("the reconstructor made a null document");
+          assert _doc != null;
         }
         catch(BadLocationException e) { throw new UnexpectedException(e); }
+//        Utilities.showDebug("Document " + _doc + " reconstructed; _stat = " + _stat);
+        if (_stat == NOT_IN_QUEUE) add();       // add this to queue 
+        return _doc;
       }
-//      Utilities.showDebug("Document " + _doc + " reconstructed; _stat = " + _stat);
-      if (! isUntitled) addToQueue();  // add this to queue if corresponds to a disk file
-      return _doc;
     }
     
     /** Checks whether the document is ready to be returned.  If false, then the document would have to be 
@@ -242,32 +211,55 @@ public class DocumentCache {
     /** Closes the corresponding document for this adapter.  Done when a document is closed by the navigator. */
     public void close() {
 //      Utilities.showDebug("close() called on " + this);
-      remove(this);
-      closingKickOut();
+      synchronized(_cacheLock) {
+        _residentQueue.remove(this);
+        closingKickOut();
+      }
     }
     
+    public void documentModified() {
+      synchronized(_cacheLock) { 
+        _residentQueue.remove(this); // remove modified document from queue if present
+        _stat = UNMANAGED;
+      }
+    }
+    
+     public void documentReset() {
+      synchronized(_cacheLock) { 
+        if (_stat == UNMANAGED) add(); // add document to queue if it was formerly unmanaged
+      }
+    }
+     
+    /** Updates status of this document in the cache. */
     public void documentSaved(String fileName) {
-      boolean addThis = false;
-      synchronized(_dmLock) {  // lock the document manager so that document manager fields can be updated
-        addThis = isUnmanagedOrUntitled();
-        if (addThis) {
-          setNotInQueue();
+//      Utilities.showDebug("Document " + _doc + " has been saved as " + fileName);
+      synchronized(_cacheLock) {  // lock the document manager so that document manager fields can be updated
+        if (isUnmanagedOrUntitled()) {
           _filename = fileName;
+          add();  // add formerly unmanaged/untitled document to queue
         }
       }
-      if (addThis) { addToQueue(); }  // synchronization is done in add method for cache
     }
     
-    private boolean notInQueue() { return ! _residentQueue.contains(this); }
-    private boolean isUntitled() { return _stat == UNTITLED; }
-    private boolean isUnmanagedOrUntitled() { return (_stat & 0x1) != 0; }  // tests if _stat is odd
-    private void setUnmanaged() { _stat = UNMANAGED; }
-    private void setNotInQueue() { _stat = NOT_IN_QUEUE; }
-    private void addToQueue() {
-      add(this);
-      _stat = IN_QUEUE;
+    /** Adds this DocManager to the queue and sets status to IN_QUEUE.  Assumes _cacheLock is already held. */
+    private void add() {
+//      Utilities.showDebug("add " + this + " to the QUEUE\n" + "QUEUE = " + _residentQueue);
+      if (! _residentQueue.contains(this)) {
+        _residentQueue.add(this);
+        _stat = IN_QUEUE;
+      }
+      if (_residentQueue.size() > CACHE_SIZE) _residentQueue.get(0).remove();
     }
-        
+    
+    /** Removes this DocManager from the queue and sets status to NOT_IN_QUEUE.  Assumes _cacheLock is already held. */
+    private void remove() { 
+      boolean removed = _residentQueue.remove(this);
+      kickOut();
+    }
+    
+    /** All of the following private methods presume that _cacheLock is held */
+    private boolean isUnmanagedOrUntitled() { return (_stat & 0x1) != 0; }  // tests if _stat is odd
+     
     /** Called by the cache when the document is removed from the active queue and subject to virtualization. 
      *  @pre lock for this already held. */
     void kickOut() { kickOut(false); }
@@ -277,18 +269,16 @@ public class DocumentCache {
    
     private void kickOut(boolean isClosing) {
 //      Utilities.showDebug("kickOut(" + isClosing + ") called on " + this);
-      synchronized(_dmLock) {
-        if (! isClosing) {
-          /* virtualize this document */
+      if (! isClosing) {
+        /* virtualize this document */
 //        Utilities.showDebug("Virtualizing " + _doc);
-          _rec.saveDocInfo(_doc);
-        }
-        if (_doc != null) {
-          _doc.close();  // done elsewhere when isClosing is true?
-          _doc = null;
-        }
-        _stat = NOT_IN_QUEUE;
+        _rec.saveDocInfo(_doc);
       }
+      if (_doc != null) {
+        _doc.close(); 
+        _doc = null;
+      }
+      _stat = NOT_IN_QUEUE;
     }
     
     public String toString() { return _filename; } 

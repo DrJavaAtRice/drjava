@@ -105,9 +105,7 @@ public class IndentFiles {
       "  Where N is the number of spaces in an indentation level");
   }
   
-  /**
-   * Applies the indent logic to each file in the list of file names,
-   * saving the new copy of each one.
+  /** Applies the indent logic to each file in the list of file names, saving the new copy of each one.
    * @param filenames Vector of filenames of files to be indented
    * @param indentLevel The number of spaces to use for a level of indentation
    * @param silent Whether to print any output to System.out

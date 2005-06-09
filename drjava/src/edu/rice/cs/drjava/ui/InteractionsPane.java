@@ -244,24 +244,18 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
     }
   }
   
-  /**
-   * Returns the list of prompts. Used for tests
-   */
+  /** Returns the list of prompts. Used for tests. */
   List<Integer> getPromptList() {  return _listOfPrompt; }
   
   /** Resets the list of prompts. Called when the interactions pane is reset. */
   public void resetPrompts() { _listOfPrompt.clear(); }
   
-  /**
-   * Adds the position to the list of prompt positions. package private for tests
-   */
+  /** Adds the position to the list of prompt positions. package private for tests. */
   void addToPromptList(int pos) {
     if (!_listOfPrompt.contains(new Integer(pos))) _listOfPrompt.add(new Integer(pos));
   }
   
-  /**
-   * returns true if the two locations do not have a prompt between them
-   */
+  /** Returns true if the two locations do not have a prompt between them. */
   private boolean _notCrossesPrompt(int to, int from) {
 //    DrJava.consoleErr().println("To: " + to + " , From: " + from);
     boolean toReturn = true;
@@ -272,31 +266,27 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
     
   }
   
-  /**
-   * Indent the given selection, for the given reason, in the current document.
-   * @param selStart - the selection start
-   * @param selEnd - the selection end
-   * @param reason - the reason for the indent
-   * @param pm - the ProgressMonitor used by the indenter
+  /** Indent the given selection, for the given reason, in the current document.
+   *  @param selStart - the selection start
+   *  @param selEnd - the selection end
+   *  @param reason - the reason for the indent
+   *  @param pm - the ProgressMonitor used by the indenter
    */
-  protected void indentLines(int selStart, int selEnd, int reason, ProgressMonitor pm) {
+  protected void indentLines(int selStart, int selEnd, int reason, ProgressMonitor pm, int loc) {
     try {
-      _doc.indentLines(selStart, selEnd, reason, pm);
+      _doc.indentLines(selStart, selEnd, reason, pm, loc);
       setCaretPosition(_doc.getCurrentLocation());
     }
-    catch (OperationCanceledException oce) {
-      throw new UnexpectedException(oce);
-    }
+    catch (OperationCanceledException oce) { throw new UnexpectedException(oce); }
   }
   
   
-  /**
-   * Returns true if the indent is to be performed.
-   * The code in the definitions pane prompts the user, but this requires a copy of mainframe,
-   * and a reason to do so. The user does not need to be prompted here. The cutoff in the definitions
-   * pane for the prompt is 10000 characters, which is unlikely to occur in the interactions pane very often if at all.
-   * @param selStart - the selection start
-   * @param selEnd - the selection end
+  /** Returns true if the indent is to be performed. The code in the definitions pane prompts the user, but this 
+   *  requires a copy of mainframe, and a reason to do so. The user does not need to be prompted here. The cutoff 
+   *  in the definitions pane for the prompt is 10000 characters, which is unlikely to occur in the interactions 
+   *  pane very often if at all.
+   *  @param selStart - the selection start
+   *  @param selEnd - the selection end
    */
   protected boolean shouldIndent(int selStart, int selEnd) {
     return true;

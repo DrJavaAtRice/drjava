@@ -52,16 +52,14 @@ import edu.rice.cs.drjava.model.FileMovedException;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 
-/**
- * Objects of this type are responsible for getting the definitions documents to their own respective
- * OpenDefinitionsDocuments.  This in effect decouples the OpenDefinitionsDocument from the DocumentCache
- * and allows for some optimizations on document retrieval
+/** A lightweight wrapper type for DefinitionsDocuments that may or may not be resident in memory.
+ *  An object of within OpenDefinitionsDocument holds the DefinitionsDocument associated with the
+ *  OpenDefinitionsDocument.
  */
 public interface DCacheAdapter {
   
-  /**
-   * Retrieves the document for its corresponding ODD
-   * @return the definitions document for the corresponding ODD
+  /** Retrieves the document for its corresponding ODD
+   *  @return the definitions document for the corresponding ODD
    */
   public DefinitionsDocument getDocument() throws IOException, FileMovedException;
   
@@ -74,11 +72,15 @@ public interface DCacheAdapter {
   /** Closes the corresponding document for this adapter. */
   public void close();
   
-//  public void setReconstructor(DDReconstructor rec);
-  
   public DDReconstructor getReconstructor();
   
   /* Method for notifying the DCacheAdapter that this document has been saved to a file. */
   public void documentSaved(String filename);
+  
+  /* Method for notifying the DCacheAdapter that this document has been modified. */
+  public void documentModified();
+  
+  /* Method for notifying the DCacheAdapter that this document has been reset via undo commands. */
+  public void documentReset();
   
 }

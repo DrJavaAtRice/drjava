@@ -124,10 +124,12 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   
   /** The maximum number of undos the model can remember */
   private static final int UNDO_LIMIT = 1000;
-  /** Determines if tabs are removed on open and converted to spaces. */
+  /** Specifies if tabs are removed on open and converted to spaces. */
   private static boolean _tabsRemoved = true;
-  /** Determines if the document has been modified since the last save. */
+  /** Specifies if the document has been modified since the last save. */
   private boolean _modifiedSinceSave = false;
+  /** Specifies if classFile is in sync with current state of the document */
+  private boolean _classFileInSync = false;
   /** Cached location, aides in determining line number. */
   private int _cachedLocation;
   /** Cached current line number. */
@@ -136,7 +138,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   private int _cachedPrevLineLoc;
   /** Cached location of next line. */
   private int _cachedNextLineLoc;
-  private boolean _classFileInSync;
+
   private File _classFile;
 
   /** This reference to the OpenDefinitionsDocument is needed so that the document iterator 
@@ -202,7 +204,6 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     _cachedLineNum = 1;
     _cachedPrevLineLoc = -1;
     _cachedNextLineLoc = -1;
-    _classFileInSync = false;
     _classFile = null;
     _cacheInUse = false;
   }
@@ -243,13 +244,16 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   }
   
   protected void _styleChanged() {
-    // throwErrorHuh();
-    int length = getLength() - _currentLocation;
-    //DrJava.consoleErr().println("Changed: " + _currentLocation + ", " + length);
-    DocumentEvent evt = new DefaultDocumentEvent(_currentLocation,
-                                                 length,
-                                                 DocumentEvent.EventType.CHANGE);
-    fireChangedUpdate(evt);
+    writeLock();
+    try {
+      int length = getLength() - _currentLocation;
+      //DrJava.consoleErr().println("Changed: " + _currentLocation + ", " + length);
+      DocumentEvent evt = new DefaultDocumentEvent(_currentLocation,
+                                                   length,
+                                                   DocumentEvent.EventType.CHANGE);
+      fireChangedUpdate(evt);
+    }
+    finally { writeUnlock(); }
   } 
   
   
@@ -374,11 +378,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     writeLock();
     try {
       if (_tabsRemoved) str = _removeTabs(str);
-      
-      if (!_modifiedSinceSave) {
-        _modifiedSinceSave = true;
-        _classFileInSync = false;
-      }
+      setModifiedSinceSave();
       super.insertString(offset, str, a);
     }
     finally { writeUnlock(); }
@@ -392,11 +392,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     
     writeLock();
     try {
-      
-      if (!_modifiedSinceSave) {
-        _modifiedSinceSave = true;
-        _classFileInSync = false;
-      }
+      setModifiedSinceSave();
       super.remove(offset, len);
     }
     finally { writeUnlock(); }
@@ -407,62 +403,68 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
    *  @param source the String to be converted.
    *  @return a String will all the tabs converted to spaces
    */
-  String _removeTabs(final String source) {
-    clearCache(); // Clear the helper method cache
+  static String _removeTabs(final String source) {
+//    clearCache(); // Clear the helper method cache  // Goofy code! Eliminated when method was converted to static.
     return source.replace('\t', ' ');
   }
 
-//  String _removeTabs(String source) {
-//    StringBuffer target = new StringBuffer();
-//    for (int i = 0; i < source.length(); i++) {
-//      char next = source.charAt(i);
-//
-//      if (next != '\t') {
-//        target.append(source.charAt(i));
-//      }
-//      else {
-//        // Replace tab with a number of
-//        // spaces according to the value of _indent.
-//        for (int j = 0; j < _indent; j++) {
-//          target.append(' ');
-//        }
-//      }
-//    }
-//    return target.toString();
-//  }
-
-  /** Originally designed to allow undoManager to set the current document to be modified whenever an undo or 
-   *  redo is performed. Now it actually does this. */
-  public void setModifiedSinceSave() {
+  /** Resets the modification state of this document to be consistent with state of _undoManager.  Called whenever
+   *  an undo or redo is performed. */
+  public void updateModifiedSinceSave() {
     
     writeLock();
     try {
     _modifiedSinceSave = _undoManager.isModified();
 //    System.out.println("DefinitionsDocument: set modified? " + _modifiedSinceSave);
     }
-    finally { writeUnlock(); }
+    finally { 
+      writeUnlock(); 
+      if (! _modifiedSinceSave && _odd != null) _odd.documentReset();
 //    Utilities.showDebug("DefintionsDocument: _modifiedSinceSave = " + _modifiedSinceSave);
+    }
   }
   
-  /** Whenever this document has been saved, this method should be called so that it knows it's no longer in 
-   *  a modified state.
-   */
+   /** Sets the modification state of this document to true and updates the state of the associated _odd. */
+  private void setModifiedSinceSave() {
+    if (!_modifiedSinceSave) {
+      _modifiedSinceSave = true;
+      _classFileInSync = false;
+      if (_odd != null) _odd.documentModified();
+    }    
+  }
+  
+  /** Resets the modification state of this document.  Used after a document has been saved or reverted. */
   public void resetModification() {
     writeLock();
     try {
       _modifiedSinceSave = false;
       _undoManager.documentSaved();
     }
-    finally { writeUnlock(); }
+    finally { 
+      writeUnlock(); 
+      if (_odd != null) _odd.documentReset();  // null test required for some unit tests
+    }
   }
+  
+//  /** Initializes the modification state of this document. */
+//  public void initModification() {
+//    writeLock();
+//    try {
+//      _modifiedSinceSave = false;
+//      _undoManager.documentSaved();
+//    }
+//    finally { writeUnlock(); }
+//  }
   
   /** Determines if the document has been modified since the last save.
    *  @return true if the document has been modified
    */
   public boolean isModifiedSinceSave() {
-    readLock();
-    try { return  _modifiedSinceSave; }
-    finally { readUnlock(); }
+//    readLock();
+//    try { 
+      return  _modifiedSinceSave; 
+//    }
+//    finally { readUnlock(); }
   }
   
   /** Return the current column of the cursor position. Uses a 0 based index. */

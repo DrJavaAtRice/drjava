@@ -56,7 +56,7 @@ import edu.rice.cs.drjava.model.FileMovedException;
  * a lambda.  This class is used by the DocumentCache in order
  * to be able to load DefinitionsDocuments lazily from disk.
  */
-public interface DDReconstructor{
+public interface DDReconstructor {
   
   /**
    * @return a new DefinitionsDocument

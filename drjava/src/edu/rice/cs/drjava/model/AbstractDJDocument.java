@@ -425,7 +425,7 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
    *  prevent _currentLocation from being stale when loc may be stale? */
   public void setCurrentLocation(int loc)  { 
     synchronized(_reduced) { // locked because reading _currentLocation is not protected by locking in move
-    move(loc - _currentLocation); 
+      move(loc - _currentLocation);  // sets _currentLocation
     }
   }
   
@@ -435,8 +435,7 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
   public void move(int dist) {
     synchronized(_reduced) {
       int newLoc = _currentLocation + dist;
-      if (newLoc < 0)
-        throw new IllegalStateException("Tried to move cursor to a negative location");
+      if (newLoc < 0) throw new IllegalStateException("Tried to move cursor to a negative location");
       _currentLocation = newLoc;
       _reduced.move(dist);
     }
@@ -718,16 +717,23 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
     }
   }
   
+  /** Parameterized indentation called from within DJDocument */
+  public void indentLines(int selStart, int selEnd, int reason, ProgressMonitor pm)
+    throws OperationCanceledException {
+    indentLines(selStart, selEnd, reason, pm, _currentLocation);
+  }
+  
   /** Parameterized indentation for special-case handling.
    *  @param selStart the offset of the initial character of the region to indent
    *  @param selEnd the offset of the last character of the region to indent
    *  @param reason a flag from {@link Indenter} to indicate the reason for the indent
    *        (indent logic may vary slightly based on the trigger action)
    *  @param pm used to display progress, null if no reporting is desired
+   *  @param loc the cursor location for the indent (only relevant if selStart = selEnd)
    */
-  public void indentLines(int selStart, int selEnd, int reason, ProgressMonitor pm)
+  public void indentLines(int selStart, int selEnd, int reason, ProgressMonitor pm, int loc)
     throws OperationCanceledException {
- 
+    
     // Begins a compound edit.
     // int key = startCompoundEdit(); // commented out in connection with the FrenchKeyBoard Fix
     
@@ -735,7 +741,7 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
     try {
       synchronized(_reduced) {
         if (selStart == selEnd) {  // single line to indent
-          Position oldCurrentPosition = createPosition(_currentLocation);
+          Position oldCurrentPosition = createPosition(loc);
           // Indent, updating current location if necessary.
           if (_indentLine(reason)) {
             setCurrentLocation(oldCurrentPosition.getOffset());
@@ -754,8 +760,8 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
     endLastCompoundEdit();
   }
   
-  /** Indents the lines between and including the lines containing points start and end.  This operation is not
-   *  atomic; each line is indented separately for synchronization purposes.
+  /** Indents the lines between and including the lines containing points start and end.  Assumes that writeLock
+   *  is already held.
    *  @param start Position in document to start indenting from
    *  @param end Position in document to end indenting at
    *  @param reason a flag from {@link Indenter} to indicate the reason for the indent
@@ -795,7 +801,7 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
     }
   }
   
-  /** Indents a line using the Indenter decision tree.  Public ONLY for testing purposes */
+  /** Indents a line using the Indenter.  Public ONLY for testing purposes. Assumes writeLock is already held.*/
   public boolean _indentLine(int reason) { return _indenter.indent(this, reason); }
   
   /** Returns the "intelligent" beginning of line.  If currPos is to the right of the first 
@@ -1277,32 +1283,23 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
   }
   
   
-  /**
-   * Gets the number of whitespace characters between the current location and the rest of
-   * the document or the first non-whitespace character, whichever comes first.
-   * @return the number of whitespace characters
+  /** Gets the number of whitespace characters between the current location and the end of
+   *  the document or the first non-whitespace character, whichever comes first.
+   *  @return the number of whitespace characters
    */
   public int getWhiteSpace() {
-    // throwErrorHuh();
-    try {
-      return  getWhiteSpaceBetween(0, getLength() - _currentLocation);
-    } catch (BadLocationException e) {
-      e.printStackTrace();
-    }
+    try { return  getWhiteSpaceBetween(0, getLength() - _currentLocation); } 
+    catch (BadLocationException e) { e.printStackTrace(); }
     return  -1;
   }
 
-  /**
-   *Starts at start and gets whitespace starting at relStart and either
-   *stopping at relEnd or at the first non-white space char.
-   *NOTE: relStart and relEnd are relative to where we are in the document
-   *relStart must be <= _currentLocation
-   * @exception BadLocationException
+  /** Starts at start and gets whitespace starting at relStart and either stopping at relEnd or at the first 
+   *  non-white space char.
+   *  NOTE: relStart and relEnd are relative to where we are in the document relStart must be <= _currentLocation
+   *  @exception BadLocationException
    */
   private int getWhiteSpaceBetween(int relStart, int relEnd) throws BadLocationException {
-    // throwErrorHuh();
-    String text = this.getText(_currentLocation - relStart, Math.abs(relStart -
-        relEnd));
+    String text = this.getText(_currentLocation - relStart, Math.abs(relStart - relEnd));
     int i = 0;
     int length = text.length();
     while ((i < length) && (text.charAt(i) == ' '))
@@ -1494,6 +1491,7 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
       _styleChanged();
     }
   }
+
   
   protected class RemoveCommand implements Runnable {
     private final int _offset;

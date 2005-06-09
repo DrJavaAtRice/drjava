@@ -96,9 +96,7 @@ public abstract class AbstractDJPane extends JTextPane implements OptionConstant
   };
   
   
-  /**
-   * Our current paren/brace/bracket matching highlight.
-   */
+  /** Our current paren/brace/bracket matching highlight. */
   protected HighlightManager.HighlightInfo _matchHighlight = null;
   
   protected final StyledDocument NULL_DOCUMENT = new DefaultStyledDocument();
@@ -147,58 +145,53 @@ public abstract class AbstractDJPane extends JTextPane implements OptionConstant
   /** Runs indent(int) with a default value of Indenter.OTHER */
   public void indent() { indent(Indenter.OTHER); }
 
-  /**
-   * Perform an indent either on the current line or on the given
-   * selected box of text.  Calls are sent to GlobalModel which are then
-   * forwarded on to the document.  Hopefully the indent code
-   * will be fixed and corrected so this doesn't look so ugly.
-   * The purpose is to divorce the pane from the document so we can just
-   * pass a document to DefinitionsPane and that's all it cares about.
-   * @param reason the action that spawned this indent action.  Enter presses
-   * are special, so that stars are inserted when lines in a multiline comment
-   * are broken up.
+  /** Perform an indent either on the current line or on the given selected box of text.  Calls are sent to GlobalModel
+   *  which are then forwarded on to the document.  Hopefully the indent code will be fixed and corrected so this 
+   *  doesn't look so ugly. The purpose is to divorce the pane from the document so we can just pass a document to 
+   *  DefinitionsPane and that's all it cares about.
+   *  @param reason the action that spawned this indent action.  Enter presses are special, so that stars are inserted 
+   *  when lines in a multiline comment are broken up.
    */
   public void indent(final int reason) {
 
     /** Because indent() is a function called directly by the Keymap, it does not go through the regular insertString
-     *  channels and thus it may not be in sync with the document's position.  For that reason, we must sync the 
-     *  document with the pane before we goahead and indent.
+     *  channels and thus it may not be in sync with the document's position.  For that reason, we must grab the
+     *  caretPostion and pass it as the cursor location for the insertLine operation (relevant for single line insert).
      *  old: _doc().setCurrentLocation(getCaretPosition());
      *  new:
      */
-    getDJDocument().setCurrentLocation(getCaretPosition());
-
+    DJDocument doc = getDJDocument();
+    int loc = getCaretPosition();
+    
+    // The _reduced lock within DefinitionsDocument should be probably be set as well
+    
     final int selStart = getSelectionStart();
     final int selEnd = getSelectionEnd();
-
-    //    final SwingWorker worker = new SwingWorker() {
-    //      public Object construct() {
-
-    //        // Use a progress monitor to show a progress dialog only if necessary.
+    
     ProgressMonitor pm = null;
     //= new ProgressMonitor(_mainFrame, "Indenting...",
     //                    null, 0, selEnd - selStart);
-
+    
     //pm.setProgress(0);
     // 3 seconds before displaying the progress bar.
     //pm.setMillisToDecideToPopup(3000);
-
+    
     // XXX: Temporary hack because of slow indent...
     //  Prompt if more than 10000 characters to be indented
     boolean doIndent = shouldIndent(selStart,selEnd);
     
     // Do the indent
-    if (doIndent) { indentLines(selStart, selEnd, reason, pm); }
+    if (doIndent) { indentLines(selStart, selEnd, reason, pm, loc); }
+
   }
 
-  /**
-   * Indent the given selection, for the given reason, in the current document.
-   * @param selStart - the selection start
-   * @param selEnd - the selection end
-   * @param reason - the reason for the indent
-   * @param pm - the ProgressMonitor used by the indenter
+  /** Indent the given selection, for the given reason, in the current document.
+   *  @param selStart - the selection start
+   *  @param selEnd - the selection end
+   *  @param reason - the reason for the indent
+   *  @param pm - the ProgressMonitor used by the indenter
    */
-  protected abstract void indentLines(int selStart, int selEnd, int reason, ProgressMonitor pm);
+  protected abstract void indentLines(int selStart, int selEnd, int reason, ProgressMonitor pm, int loc);
      
   /**
    * Returns true if the indent is to be performed.

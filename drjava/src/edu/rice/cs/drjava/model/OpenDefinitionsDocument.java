@@ -263,6 +263,12 @@ public interface OpenDefinitionsDocument extends DJDocument, Finalizable<Definit
 
   /** Called when this document is saved so it can notify the cache. */
   public void documentSaved();
+  
+   /** Called when this document is modified so it can notify the cache. */
+  public void documentModified();
+  
+   /** Called when this document is reset so it can notify the cache. */
+  public void documentReset();
     
   /** Returns the Breakpoint in this OpenDefinitionsDocument at the given
    *  linenumber, or null if one does not exist.
@@ -302,7 +308,7 @@ public interface OpenDefinitionsDocument extends DJDocument, Finalizable<Definit
   public long getTimestamp();
   
   /** Sets the document as modified. */
-  public void setModifiedSinceSave();
+  public void updateModifiedSinceSave();
 
   /** Should be called when closing an ODD to let the ODD clean up after itself. */
   public void close();

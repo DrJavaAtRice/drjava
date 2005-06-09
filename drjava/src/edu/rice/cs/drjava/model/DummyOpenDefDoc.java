@@ -325,6 +325,12 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
   /** Called when this document is saved so it can notify the cache. */
   public void documentSaved() { throw new UnsupportedOperationException("Dummy method"); }
   
+   /** Called when this document is modified so it can notify the cache. */
+  public void documentModified() { throw new UnsupportedOperationException("Dummy method"); }
+  
+   /** Called when this document is reset (by an undo operation) so it can notify the cache. */
+  public void documentReset() { throw new UnsupportedOperationException("Dummy method"); }
+  
   /** Get the location of the cursor in the definitions according to the definitions document. */
   public int getCurrentLocation() { throw new UnsupportedOperationException("Dummy method"); }
   
@@ -338,7 +344,7 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
   public long getTimestamp() { throw new UnsupportedOperationException("Dummy method"); }
   
   /** Sets the document as modified */
-  public void setModifiedSinceSave() { throw new UnsupportedOperationException("Dummy method"); }
+  public void updateModifiedSinceSave() { throw new UnsupportedOperationException("Dummy method"); }
   
   /** Sets the file for this openDefinitionsDocument. */
   public void setFile(File file) { throw new UnsupportedOperationException("Dummy method"); }
@@ -549,6 +555,10 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
     throw new UnsupportedOperationException("Dummy method");
   }
   
+  public void indentLines(int selStart, int selEnd, int reason, ProgressMonitor pm, int loc) 
+    throws OperationCanceledException {
+    throw new UnsupportedOperationException("Dummy method");
+  }
   public int findPrevCharPos(int pos, char[] whitespace) throws BadLocationException {
     throw new UnsupportedOperationException("Dummy method");
   }

@@ -126,5 +126,7 @@ public interface SingleDisplayModel extends GlobalModel {
   public void setActiveFirstDocument();
 
   public void jarAll();
+  
+  public void dispose();
 
 }

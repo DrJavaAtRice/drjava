@@ -94,14 +94,6 @@ import edu.rice.cs.util.*;
 public class MainFrame extends JFrame implements OptionConstants {
 
   private static final int INTERACTIONS_TAB = 0;
-//  private static final int COMPILE_TAB = 1;
-//  private static final int OUTPUT_TAB = 2;
-//  private static final int JUNIT_TAB = 3;
-//  private static final int JAVADOC_TAB = 4;
-//   GUI Dimensions
-//  private static final int GUI_WIDTH = 800;
-//  private static final int GUI_HEIGHT = 700;
-//  private static final int DOC_LIST_WIDTH = 150;
   private static final String ICON_PATH = "/edu/rice/cs/drjava/ui/icons/";
   private static final String DEBUGGER_OUT_OF_SYNC =
     " Current document is out of sync with the debugger and should be recompiled!";
@@ -498,6 +490,16 @@ public class MainFrame extends JFrame implements OptionConstants {
     public void actionPerformed(ActionEvent ae) { _save(); }
   };
   
+  /** Ensures that pack() is run in the event thread. Only used in test code */
+  public void pack() {
+    Utilities.invokeAndWait(new Runnable() { 
+      public void run() { packHelp(); }
+    });
+  }
+  
+  /** Helper method that provides access to super.pack() within the anonymous class new Runnable() {...} above */
+  private void packHelp() { super.pack(); }
+                           
   /** Supports MainFrameTest.*/
   public boolean saveEnabledHuh() { return _saveAction.isEnabled(); }
 
@@ -828,7 +830,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       if (pos != -1) _currentDefPane.setCaretPosition(pos);  // brute force attempt to fix intermittent failure to display caret
     }
   };
-
+  
   /** Indents the current selection. */
   private Action _indentLinesAction = new AbstractAction("Indent Line(s)") {
     public void actionPerformed(ActionEvent ae) {
@@ -1577,7 +1579,6 @@ public class MainFrame extends JFrame implements OptionConstants {
     _interactionsHistoryChooser.setFileFilter(new InteractionsHistoryFilter());
     _interactionsHistoryChooser.setMultiSelectionEnabled(true);
 
-
     //set up the hourglass cursor
     setGlassPane(new GlassPane());
     this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
@@ -1701,7 +1702,6 @@ public class MainFrame extends JFrame implements OptionConstants {
     _updateNormalColor();
     _updateBackgroundColor();
     
-
     // Add OptionListeners for the colors.
     config.addOptionListener
       (DEFINITIONS_NORMAL_COLOR, new NormalColorOptionListener());
@@ -1901,11 +1901,12 @@ public class MainFrame extends JFrame implements OptionConstants {
    *  from tests. This is implementation specific and may not be needed.
    */
   public void dispose() {
-    // centgraf: I justify casting here because it is implementation-specific
-    //           and doc'ed as such.
-    ((DefaultSingleDisplayModel) _model).dispose();
-    super.dispose();
+    _model.dispose();
+    Utilities.invokeAndWait(new Runnable() { public void run() { disposeHelp(); }});
   }
+  
+  /** Helper that enables new Runnable() { ...} above to invoke super.dispose() */
+  private void disposeHelp() { super.dispose(); }
 
   /** @return The model providing the logic for this view. */
   public SingleDisplayModel getModel() { return _model; }
@@ -6330,3 +6331,4 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
   };
 }
+

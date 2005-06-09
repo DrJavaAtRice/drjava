@@ -130,7 +130,7 @@ public class DocumentCacheTest extends TestCase {
     return File.createTempFile("DrJava-test" + i, ".java", _tempDir);
   }
   
-  protected OpenDefinitionsDocument openFile(final File f) throws IOException{
+  protected OpenDefinitionsDocument openFile(final File f) throws IOException {
     try{
       OpenDefinitionsDocument doc = _model.openFile(new FileOpenSelector() {        
         public File getFile() { return f; }
@@ -141,6 +141,7 @@ public class DocumentCacheTest extends TestCase {
     catch(AlreadyOpenException e) { throw new IOException(e.getMessage()); }
     catch(OperationCanceledException e) { throw new IOException(e.getMessage());}
   }
+  
   /** A good warmup test case. */
   public void testCacheSize() {
     _cache.setCacheSize(6);
@@ -190,8 +191,7 @@ public class DocumentCacheTest extends TestCase {
     assertFalse("Document 6 shouldn't be ready", _adapterTable.get(doc6).isReady());
     
     
-    // Reactivate all documents and make sure that the right ones get kicked out
-    // Front of QUEUE -> a b c d | e f <- out of QUEUE
+    // Reactivate all documents 
     doc1.getLength();
     doc2.getLength();
     doc3.getLength();
@@ -199,7 +199,6 @@ public class DocumentCacheTest extends TestCase {
     doc5.getLength();
     doc6.getLength();
     
-    // 6 5 4 3 | 2 1
     assertTrue("Document 1 should be ready", _adapterTable.get(doc1).isReady());
     assertTrue("Document 2 should be ready", _adapterTable.get(doc2).isReady());
     assertTrue("Document 3 should be ready", _adapterTable.get(doc3).isReady());
@@ -448,8 +447,10 @@ public class DocumentCacheTest extends TestCase {
    // this will reconstruct document 1
    doc1.getLength();
    
-   assertEquals("the number of document listeners is the same after reconstruction", numDocListeners, doc1.getDocumentListeners().length);
-   assertEquals("the number of undoableEditListeners is the same after reconstruction", numUndoListeners, doc1.getUndoableEditListeners().length);
+   assertEquals("the number of document listeners is the same after reconstruction", numDocListeners, 
+                doc1.getDocumentListeners().length);
+   assertEquals("the number of undoableEditListeners is the same after reconstruction", numUndoListeners, 
+                doc1.getUndoableEditListeners().length);
 
   }
   

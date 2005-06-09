@@ -51,12 +51,12 @@ import java.util.LinkedList;
 import edu.rice.cs.drjava.model.GlobalEventNotifier;
 import edu.rice.cs.util.swing.Utilities;
 
-/**
- * Extended UndoManager with increased functionality.  Can handle aggregating
- * multiple edits into one for the purposes of undoing and redoing.
- * Is used to be able to call editToBeUndone and editToBeRedone since they
- * are protected methods in UndoManager.
- * @version $Id$
+/** Extended UndoManager with increased functionality.  Can handle aggregating multiple edits into one for the purposes
+ *  of undoing and redoing.  Is used to be able to call editToBeUndone and editToBeRedone since they are protected 
+ *  methods in UndoManager.
+ * 
+ *  Many methods are synchronized because _compoundEdits and _keys data structures are not thread safe.
+ *  @version $Id$
  */
 public class CompoundUndoManager extends UndoManager {
   
@@ -64,7 +64,7 @@ public class CompoundUndoManager extends UndoManager {
   
   private int id;
   
-  /** The compound edits we are storing. */
+  /** The compound edits we are storing. Not thread safe! */
   private LinkedList<CompoundEdit> _compoundEdits;
   
   /** The keys for the CompoundEdits we are storing. */
@@ -94,7 +94,7 @@ public class CompoundUndoManager extends UndoManager {
   /** Starts a compound edit.
    *  @return the key for the compound edit
    */
-  public int startCompoundEdit() {
+  public synchronized int startCompoundEdit() {
     _compoundEdits.add(0, new CompoundEdit());
     _keys.add(0, new Integer(_nextKey));
     if (_nextKey < Integer.MAX_VALUE) _nextKey++;
@@ -105,7 +105,7 @@ public class CompoundUndoManager extends UndoManager {
   /** Ends the last compound edit that was created.
    *  Used when a compound edit is created by the _undoListener in DefinitionsPane and the key is not known in DefinitionsDocument.
    */
-  public void endLastCompoundEdit() {
+  public synchronized void endLastCompoundEdit() {
     if (_keys.size() == 0) return;
     // NOTE: The preceding can happen if for example uncomment lines does not modify any text.
     
@@ -113,11 +113,10 @@ public class CompoundUndoManager extends UndoManager {
   }
   
   
-  
   /** Ends a compound edit.
    *  @param key the key that was returned by startCompoundEdit()
    */
-  public void endCompoundEdit(int key) {
+  public synchronized void endCompoundEdit(int key) {
     if (_keys.size() > 0) {
       if (_keys.get(0).intValue() == key) {
         CompoundEdit compoundEdit = _compoundEdits.remove(0);
@@ -144,7 +143,7 @@ public class CompoundUndoManager extends UndoManager {
   /** We are getting the last Compound Edit entered into the list.
    *  This is for making a Compound edit for granular undo.
    */
-  public CompoundEdit getLastCompoundEdit() { return _compoundEdits.get(0); }
+  public synchronized CompoundEdit getLastCompoundEdit() { return _compoundEdits.get(0); }
   
   /** Gets the next undo.
    *  @return the next undo
@@ -160,7 +159,7 @@ public class CompoundUndoManager extends UndoManager {
    *  @param e the edit to be added
    *  @return true if the add is successful, false otherwise
    */
-  public boolean addEdit(UndoableEdit e) {
+  public synchronized boolean addEdit(UndoableEdit e) {
     if (_compoundEditInProgress()) {
       //      _notifyUndoHappened(); // added this for granular undo
       return _compoundEdits.get(0).addEdit(e);
@@ -203,7 +202,7 @@ public class CompoundUndoManager extends UndoManager {
    *  @param key the key returned by the last call to startCompoundEdit
    *  @throws IllegalArgumentException if the key is incorrect
    */
-  public void undo(int key) {
+  public synchronized void undo(int key) {
     if (_keys.get(0).intValue() == key) {
       CompoundEdit compoundEdit = _compoundEdits.get(0);
       _compoundEdits.remove(0);
@@ -226,7 +225,7 @@ public class CompoundUndoManager extends UndoManager {
   private void _notifyUndoHappened() { _notifier.undoableEditHappened(); }
   
   /** Ends the compoundEdit in progress if any.  Used by undo(), redo(), documentSaved(). */
-  private void endCompoundEdit() {
+  private synchronized void endCompoundEdit() {
     if (_compoundEditInProgress()) {
       while (_keys.size() > 0) {
         endCompoundEdit(_keys.get(0).intValue());

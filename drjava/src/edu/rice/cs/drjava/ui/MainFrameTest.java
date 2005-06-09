@@ -82,7 +82,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
   
   /** Setup method for each JUnit test case. */
   public void setUp() throws IOException {
-    _frame = new MainFrame();
+    Utilities.invokeAndWait(new Runnable() { public void run() { _frame = new MainFrame(); }});
     _frame.pack();
     super.setUp();
   }

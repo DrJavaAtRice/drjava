@@ -1319,16 +1319,16 @@ public final class DefinitionsDocumentTest extends TestCase implements ReducedMo
     _defModel.insertString(0, "This is text", null);
     assertTrue("Document should be modified.", _defModel.isModifiedSinceSave());
     _defModel.getUndoManager().undo();
-    _defModel.setModifiedSinceSave();
+    _defModel.updateModifiedSinceSave();
     assertFalse("Document should no longer be modified after undo.", _defModel.isModifiedSinceSave());
     _defModel.insertString(0, "This is text", null);
     _defModel.resetModification();
     assertFalse("Document should not be modified after \"save\".", _defModel.isModifiedSinceSave());
     _defModel.getUndoManager().undo();
-    _defModel.setModifiedSinceSave();
+    _defModel.updateModifiedSinceSave();
     assertTrue("Document should be modified after undo.", _defModel.isModifiedSinceSave());
     _defModel.getUndoManager().redo();
-    _defModel.setModifiedSinceSave();
+    _defModel.updateModifiedSinceSave();
     assertFalse("Document should no longer be modified after redo.", _defModel.isModifiedSinceSave());
   }
 }

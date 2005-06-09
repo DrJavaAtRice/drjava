@@ -153,23 +153,24 @@ public interface DJDocument extends StyledDocument, AbstractDocumentInterface {
    */
   public int findPrevCharPos(int pos, char[] whitespace) throws BadLocationException;
   
-  /**
-   * Default indentation - uses OTHER flag and no progress indicator.
-   * @param selStart the offset of the initial character of the region to indent
-   * @param selEnd the offset of the last character of the region to indent
+  /** Default indentation - uses OTHER flag and no progress indicator.
+   *  @param selStart the offset of the initial character of the region to indent
+   *  @param selEnd the offset of the last character of the region to indent
    */
   public void indentLines(int selStart, int selEnd);
   
-  /**
-   * Parameterized indentation for special-case handling.
-   * @param selStart the offset of the initial character of the region to indent
-   * @param selEnd the offset of the last character of the region to indent
-   * @param reason a flag from {@link edu.rice.cs.drjava.model.definitions.indent.Indenter Indenter}
-   * to indicate the reason for the indent (indent logic may vary slightly based 
-   * on the trigger action)
-   * @param pm used to display progress, null if no reporting is desired
-   */
+  /** Partially parameterized version of indentLines that uses _currentLocation for loc */
   public void indentLines(int selStart, int selEnd, int reason, ProgressMonitor pm)
+    throws OperationCanceledException;
+  
+  /** Parameterized indentation for special-case handling.
+   *  @param selStart the offset of the initial character of the region to indent
+   *  @param selEnd the offset of the last character of the region to indent
+   *  @param reason a flag from {@link edu.rice.cs.drjava.model.definitions.indent.Indenter Indenter}
+   *         to indicate the reason for the indent (indent logic may vary slightly based on the trigger action)
+   *  @param pm used to display progress, null if no reporting is desired
+   */
+  public void indentLines(int selStart, int selEnd, int reason, ProgressMonitor pm, int loc)
     throws OperationCanceledException;
   
   /**

@@ -2062,7 +2062,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
         private List<FinalizationListener<DefinitionsDocument>> _finalListeners =
           new LinkedList<FinalizationListener<DefinitionsDocument>>();
         
-        public DefinitionsDocument make() throws IOException, BadLocationException, FileMovedException{
+        public DefinitionsDocument make() throws IOException, BadLocationException, FileMovedException {
           DefinitionsDocument tempDoc;
           tempDoc = new DefinitionsDocument(_notifier);
           tempDoc.setOpenDefDoc(ConcreteOpenDefDoc.this);
@@ -2082,8 +2082,9 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
           for (FinalizationListener<DefinitionsDocument> l: _finalListeners) {
             tempDoc.addFinalizationListener(l);
           }
-          tempDoc.resetModification();
+          tempDoc.resetModification();  // Why is this necessary? A reconstructed document is already unmodified.
           //            tempDoc.setUndoManager(_undo);
+          assert ! tempDoc.isModifiedSinceSave();
           try { _packageName = tempDoc.getPackageName(); } 
           catch(InvalidPackageException e) { _packageName = null; }
           return tempDoc;
@@ -2120,7 +2121,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
     /** Originally designed to allow undoManager to set the current document to be modified whenever an undo
      *  or redo is performed.  Now it actually does this.
      */
-    public void setModifiedSinceSave() { getDocument().setModifiedSinceSave(); }
+    public void updateModifiedSinceSave() { getDocument().updateModifiedSinceSave(); }
 
     /** Gets the definitions document being handled.
      *  @return document being handled
@@ -2431,7 +2432,11 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
       else return false;
     }
     
-    public void documentSaved() {  _cacheAdapter.documentSaved(getFilename()); }
+    public void documentSaved() { _cacheAdapter.documentSaved(getFilename()); }
+    
+    public void documentModified() { _cacheAdapter.documentModified(); }
+    
+    public void documentReset() { _cacheAdapter.documentReset(); }
     
     /** Determines if the file for this document has been modified since it was loaded.
      *  @return true if the file has been modified
@@ -3023,6 +3028,11 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
     public void indentLines(int selStart, int selEnd, int reason, ProgressMonitor pm) 
       throws OperationCanceledException {
       getDocument().indentLines(selStart, selEnd, reason, pm);
+    }
+    
+     public void indentLines(int selStart, int selEnd, int reason, ProgressMonitor pm, int loc) 
+      throws OperationCanceledException {
+      getDocument().indentLines(selStart, selEnd, reason, pm, loc);
     }
     
     public int findPrevCharPos(int pos, char[] whitespace) throws BadLocationException {

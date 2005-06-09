@@ -135,10 +135,8 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
       
       String matchText = _matchText(from);
       
-      if (matchText != null)
-        _mainFrame.updateFileTitle("Matches: " + matchText);
-      else
-        _mainFrame.updateFileTitle();
+      if (matchText != null) _mainFrame.updateFileTitle("Matches: " + matchText);
+      else _mainFrame.updateFileTitle();
     }
     
     // if this wasn't a close brace, check for an open brace
@@ -161,12 +159,8 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
   private String _matchText(int braceIndex) {
     DJDocument doc = getDJDocument();
     String docText;
-    doc.acquireReadLock();
-    try {
-      docText = doc.getText();
-    }
-    finally{doc.releaseReadLock();}
-    
+    docText = doc.getText();
+   
     if (docText.charAt(braceIndex) == '{') {//match everything before if we found a curly brace
       Character charBefore = null;
       int charBeforeIndex = braceIndex-1;
@@ -1070,51 +1064,51 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
   }
   
   
-  /**
-   * Indent the given selection, for the given reason, in the current document.
-   * @param selStart - the selection start
-   * @param selEnd - the selection end
-   * @param reason - the reason for the indent
-   * @param pm - the ProgressMonitor used by the indenter
+  /** Indent the given selection, for the given reason, in the current document.
+   *  @param selStart - the selection start
+   *  @param selEnd - the selection end
+   *  @param reason - the reason for the indent
+   *  @param pm - the ProgressMonitor used by the indenter
+   *  @param loc - the offset of the caret (which may not match _currentLocation)
    */
-  protected void indentLines(int selStart, int selEnd, int reason, ProgressMonitor pm) {
+  protected void indentLines(int selStart, int selEnd, int reason, ProgressMonitor pm, int loc) {
     //_mainFrame.hourglassOn();
-      // final int key = _doc.getUndoManager().startCompoundEdit(); //Commented out in regards to French KeyBoard Fix
-      try {
-        _doc.indentLines(selStart, selEnd, reason, pm);
-        //      _indentLines(reason, pm);
-        //_doc.getUndoManager().endCompoundEdit(key); //commented out for french keyboard fix, replaced with endCompoundEdit
-        endCompoundEdit();
-      }
-      catch (OperationCanceledException oce) {
-        // if canceled, undo the indent; but first, end compound edit
-        //        _doc.getUndoManager().endCompoundEdit(key); fixed for french keyboard fix
-        endCompoundEdit();
-        _doc.getUndoManager().undo();
-        // pm = null, so cancel can't be pressed
-        throw new UnexpectedException(oce);
-      }
-      catch (RuntimeException e) {
-        //catches the exception to turn off the the hourglass
-        //and close the compound edit before throwing out to
-        //the main frame.
-        //_mainFrame.hourglassOff();
-        //pm.close();
-
-  // _doc.getUndoManager().endCompoundEdit(key); //commented out for french keyboard fix, replaced with endCompoundEdit()
-        endCompoundEdit();
-        throw e;
-      }
-
-      //_doc.setCurrentLocation(caretPos);
-      setCaretPosition(_doc.getCurrentLocation());
+    // final int key = _doc.getUndoManager().startCompoundEdit(); //Commented out in regards to French KeyBoard Fix
+    try {
+      _doc.indentLines(selStart, selEnd, reason, pm, loc);
+      //      _indentLines(reason, pm);
+      //_doc.getUndoManager().endCompoundEdit(key); //commented out for french keyboard fix, replaced with endCompoundEdit
+      endCompoundEdit();
+    }
+    catch (OperationCanceledException oce) {
+      // if canceled, undo the indent; but first, end compound edit
+      //        _doc.getUndoManager().endCompoundEdit(key); fixed for french keyboard fix
+      endCompoundEdit();
+      _doc.getUndoManager().undo();
+      // pm = null, so cancel can't be pressed
+      throw new UnexpectedException(oce);
+    }
+    catch (RuntimeException e) {
+      //catches the exception to turn off the the hourglass
+      //and close the compound edit before throwing out to
+      //the main frame.
       //_mainFrame.hourglassOff();
       //pm.close();
-
-      //        return null;
-      //      }
-      //    };
-      //    worker.start();
+      
+      // _doc.getUndoManager().endCompoundEdit(key); //commented out for french keyboard fix, replaced with endCompoundEdit()
+      endCompoundEdit();
+      throw e;
+    }
+    
+    //_doc.setCurrentLocation(caretPos);
+    setCaretPosition(_doc.getCurrentLocation());
+    //_mainFrame.hourglassOff();
+    //pm.close();
+    
+    //        return null;
+    //      }
+    //    };
+    //    worker.start();
   }
     
   
@@ -1174,7 +1168,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
         //           setCaretPosition(pos);
         //         }
         _doc.getUndoManager().undo();
-        _doc.setModifiedSinceSave();
+        _doc.updateModifiedSinceSave();
         _mainFrame.updateFileTitle();
       }
       catch (CannotUndoException ex) {
@@ -1223,7 +1217,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
         //           //centerViewOnOffset(pos);
         //           setCaretPosition(pos);
         //         }
-        _doc.setModifiedSinceSave();
+        _doc.updateModifiedSinceSave();
         _mainFrame.updateFileTitle();
       } catch (CannotRedoException ex) {
         throw new UnexpectedException(ex);
