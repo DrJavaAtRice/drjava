@@ -60,8 +60,10 @@ import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.util.swing.FindReplaceMachine;
 import edu.rice.cs.util.swing.FindResult;
 import edu.rice.cs.util.swing.ScrollableDialog;
+import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.text.AbstractDocumentInterface;
 import edu.rice.cs.util.UnexpectedException;
+
 
 /** The tabbed panel that handles requests for finding and replacing text.
  *  (Used to be a dialog box, hence the name. We should fix this.)
@@ -410,9 +412,10 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
       Caret c = _defPane.getCaret();
       c.setDot(c.getDot());
       
-      if (! matchDoc.equals(openDoc)) {
-        _model.setActiveDocument(matchDoc);  // set active doc if matchDoc != openDoc
-      }
+
+      if (! matchDoc.equals(openDoc)) 
+          _model.setActiveDocument(matchDoc);  // set active doc if matchDoc != openDoc
+      
       _defPane.setCaretPosition(pos);
       _caretChanged = true;
       _updateMachine();
@@ -430,6 +433,7 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
     }
     if (pos >= 0) {
       _selectFoundItem();
+
       _replaceAction.setEnabled(true);
       _replaceFindAction.setEnabled(true);
       _machine.setLastFindWord();

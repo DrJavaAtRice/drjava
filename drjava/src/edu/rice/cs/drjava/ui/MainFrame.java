@@ -4753,9 +4753,13 @@ public class MainFrame extends JFrame implements OptionConstants {
     // Added 2004-May-27
     // Notify the definitions pane that is being replaced (becoming inactive)
     _currentDefPane.notifyInactive();
-
+    
+//    Utilities.showDebug("Right before getting the scrollPane");
     JScrollPane scroll = _defScrollPanes.get(_model.getActiveDocument());
-    if (scroll == null) scroll = _createDefScrollPane(_model.getActiveDocument());
+   
+    if (scroll == null) {
+      scroll = _createDefScrollPane(_model.getActiveDocument());
+    }
 
     // Fix OS X scrollbar bug before switching
     _reenableScrollBar();
@@ -6044,6 +6048,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   public JViewport getDefViewport() {
     OpenDefinitionsDocument doc = _model.getActiveDocument();
 //    new ScrollableDialog(null, "Active Document is " + doc, "", "").show();
+    
     JScrollPane defScroll = _defScrollPanes.get(doc);
     return defScroll.getViewport();
   }

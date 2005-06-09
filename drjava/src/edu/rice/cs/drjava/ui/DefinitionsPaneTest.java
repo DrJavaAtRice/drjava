@@ -645,29 +645,34 @@ public final class DefinitionsPaneTest extends TestCase {
       OpenDefinitionsDocument doc = definitions.getOpenDefDocument();
       _assertDocumentEmpty(doc, "before testing");
       doc.insertString(0, 
-                       "public class Foo {\n" + //19
-                       "  private int whatev\n" + //40
-                       "  private void _method()\n" + //65
-                       "  {\n" + //69
-                       "     do stuff\n" + //83
-                       "     new Object() {\n" + //103
-                       "         }\n" + //114
+                       "{\n" +
+                       "public class Foo {\n" + //21
+                       "  private int whatev\n" + //42
+                       "  private void _method()\n" + //67
+                       "  {\n" + //71
+                       "     do stuff\n" + //85
+                       "     new Object() {\n" + //105
+                       "         }\n" + //116
                        "  }\n" +
-                       "} "
+                       "}" +
+                       "}"
                          , null);
       
       String filename = GlobalModelNaming.getDisplayFullPath(doc);
       
-      definitions.setCaretPosition(2);
+      definitions.setCaretPosition(4);
       assertEquals("Should display the document path", filename, _frame.getFileNameField());
-      definitions.setCaretPosition(113);
+      definitions.setCaretPosition(115);
       assertEquals("Should display the line matched", "Matches:      new Object() {", _frame.getFileNameField());
-      definitions.setCaretPosition(100);
+      definitions.setCaretPosition(102);
       assertEquals("Should display the document matched", filename, _frame.getFileNameField());
-      definitions.setCaretPosition(117);
-      assertEquals("Should display the line matched", "Matches:   private void _method()...{", _frame.getFileNameField());
       definitions.setCaretPosition(119);
+      assertEquals("Should display the line matched", "Matches:   private void _method()...{", _frame.getFileNameField());
+      definitions.setCaretPosition(121);
       assertEquals("Should display the line matched", "Matches: public class Foo {", _frame.getFileNameField());
+      definitions.setCaretPosition(122);
+      assertEquals("Should display only one brace when matching an open brace that is the first character in a line",
+                   "Matches: {", _frame.getFileNameField());
     }
     catch (BadLocationException e) {throw new UnexpectedException(e);}
   }

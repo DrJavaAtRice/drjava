@@ -172,12 +172,12 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
       int charBeforeIndex = braceIndex-1;
       boolean previousLine = false;
       
-      if (charBeforeIndex != -1) {
+      if (charBeforeIndex != -1)
         charBefore = docText.charAt(charBeforeIndex);
-        charBeforeIndex--;
-      }
       
-      while (charBeforeIndex != -1 && (charBefore == '\n' || charBefore == ' ')) {
+      charBeforeIndex--;
+      
+      while (charBeforeIndex >= 0 && (charBefore == '\n' || charBefore == ' ')) {
         charBefore = docText.charAt(charBeforeIndex);
         if (!previousLine &&  charBefore != '\n' && charBefore != ' ')
           charBeforeIndex = braceIndex-1;
@@ -903,7 +903,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
       _selEnd = len;
     }
 //    setCaretPosition(_position);
-//    Object _lock = new Object();
+    Object _lock = new Object();
 //    synchronized(_lock) {  // What was the rationale for a local lock here?
 //                              It appears that legacy versions executed this code from non-event context    
     _doc.acquireWriteLock();
@@ -923,7 +923,6 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
 //    synchronized(_lock) {  // Why synchronize?  This code now runs in the event thread, but was not in legacy code
     _scrollPane.getVerticalScrollBar().setValue(_savedVScroll);
     _scrollPane.getHorizontalScrollBar().setValue(_savedHScroll);
-//    }
   }
   
   public int getVerticalScroll() {
@@ -963,7 +962,6 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
 
   public void centerViewOnOffset(int offset) {
     try {
-//      Utilities.showDebug("Centering Error");
       FontMetrics metrics = getFontMetrics(getFont());
       double viewWidth = _mainFrame.getDefViewport().getWidth();
       double viewHeight = _mainFrame.getDefViewport().getHeight();
@@ -991,7 +989,6 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
 
       setCaretPosition(offset);
     }
-
     catch (BadLocationException e) { throw new UnexpectedException(e); }
   }
 

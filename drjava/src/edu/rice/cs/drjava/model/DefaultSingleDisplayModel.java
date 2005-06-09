@@ -156,9 +156,8 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel implements Sin
      * of listeners some of which also need to run in the event thread. */
 
 //    if (_activeDocument == doc) return; // this optimization appears to cause some subtle bugs   
-    
     Runnable command = new Runnable() {  
-      public void run() { _documentNavigator.setActiveDoc(doc);} 
+      public void run() {_documentNavigator.setActiveDoc(doc);} 
     };
     try {Utilities.invokeAndWait(command);}
     catch(Exception e) { throw new UnexpectedException(e); } 
