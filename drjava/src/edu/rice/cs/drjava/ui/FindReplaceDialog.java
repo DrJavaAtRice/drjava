@@ -107,6 +107,19 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
   };
   
   
+  /** Listens for the pressing of the Enter key (only activated after the Ctrl key has been pressed)*/
+  private KeyListener _findEnterListener = new KeyListener() {
+      public void keyPressed(KeyEvent e) {
+        if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+          _doFind();
+          _findField.requestFocusInWindow();
+        }
+      }
+      public void keyReleased(KeyEvent e) {}
+      public void keyTyped(KeyEvent e){}
+    };
+  
+  
   /** Standard Constructor.
    *  @param frame the overall enclosing window
    *  @param model the model containing the documents to search
@@ -286,9 +299,17 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
     /******* Put all the main panels onto the Find/Replace tab ********/
     hookComponents(this, _rightPanel, _labelPanel,buttons);
 
-
-//    _findField.addActionListener(_findNextAction);
-
+    /** Listens for the Ctrl key being pressed and adds a listener for the Enter key. When Ctrl is released, the listener is removed. */
+    _findField.addKeyListener(new KeyListener() {
+      public void keyPressed(KeyEvent e) {
+        if (e.getKeyCode() == KeyEvent.VK_CONTROL) _findField.addKeyListener(_findEnterListener);
+      }
+      public void keyReleased(KeyEvent e) {
+        if (e.getKeyCode() == KeyEvent.VK_CONTROL) _findField.removeKeyListener(_findEnterListener);
+      }
+      public void keyTyped(KeyEvent e) {}
+    });
+    
 
     /******** Set the Tab order ********/
     _findField.setNextFocusableComponent(_replaceField);
@@ -443,10 +464,11 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
     // was found
     else {
       Toolkit.getDefaultToolkit().beep();
-      _mainframe.setStatusMessage("Search text \"" + _machine.getFindWord() +
-                                  "\" not found."); // JL
-//      _message.setText("Search text \"" + _machine.getFindWord() +
-//                       "\" not found."); // JL
+      StringBuffer statusMessage = new StringBuffer("Search text \"");
+      if (_machine.getFindWord().length() <= 50) statusMessage.append(_machine.getFindWord());
+      else statusMessage.append(_machine.getFindWord().substring(0, 49) + "...");
+      statusMessage.append("\" not found.");
+      _mainframe.setStatusMessage(statusMessage.toString());
     }
   }
 
@@ -456,9 +478,9 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
       _machine.setFindWord(_findField.getText());
       String replaceWord = _replaceField.getText();
       _machine.setReplaceWord(replaceWord);
-      _mainframe.clearStatusMessage(); // _message.setText(""); // JL
+      _mainframe.clearStatusMessage();
 
-      // replaces the occurance at the current position
+      // replaces the occurrence at the current position
       boolean replaced = _machine.replaceCurrent();
       if (replaced) {
         _selectReplacedItem(replaceWord.length());
