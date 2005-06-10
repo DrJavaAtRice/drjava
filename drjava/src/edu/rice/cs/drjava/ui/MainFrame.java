@@ -2700,7 +2700,9 @@ public class MainFrame extends JFrame implements OptionConstants {
    */
   private DocumentInfoGetter _makeInfoGetter(final OpenDefinitionsDocument doc) {
     JScrollPane s = _defScrollPanes.get(doc);
-    if (s == null) s = _createDefScrollPane(doc);
+    if (s == null) {
+      s = _createDefScrollPane(doc);
+    }
     final JScrollPane scroller = s;
     final DefinitionsPane pane = (DefinitionsPane)scroller.getViewport().getView();
     
@@ -4747,26 +4749,23 @@ public class MainFrame extends JFrame implements OptionConstants {
 
   /** Switch to the JScrollPane containing the DefinitionsPane for the current active document. */
   void _switchDefScrollPane() {
-
     // demoted to package private protection to test the disabling editing while compiling functionality.
     // and to support brute force fix to DefinitionsPane bug on return from compile with errors
-
     // Added 2004-May-27
     // Notify the definitions pane that is being replaced (becoming inactive)
     _currentDefPane.notifyInactive();
     
+//    Utilities.showDebug("_switchDefScrollPane called");
 //    Utilities.showDebug("Right before getting the scrollPane");
     JScrollPane scroll = _defScrollPanes.get(_model.getActiveDocument());
    
-    if (scroll == null) {
-      scroll = _createDefScrollPane(_model.getActiveDocument());
-    }
-
+    if (scroll == null)  scroll = _createDefScrollPane(_model.getActiveDocument());
     // Fix OS X scrollbar bug before switching
+
     _reenableScrollBar();
 
     int oldLocation = _docSplitPane.getDividerLocation();
-    _docSplitPane.setRightComponent(scroll);
+    _docSplitPane.setRightComponent(scroll); //crazy line
     _docSplitPane.setDividerLocation(oldLocation);
 
     // if the current def pane is uneditable, that means we arrived here from a compile with errors.  We're
@@ -5372,7 +5371,6 @@ public class MainFrame extends JFrame implements OptionConstants {
     public void activeDocumentChanged(final OpenDefinitionsDocument active) {
       // Only change GUI from event-dispatching thread
       // (This can be called from other threads...)
-      
       Utilities.invokeAndWait(new Runnable() {  // invokeAndWait is arguably better but it may create occasional deadlocks.
         public void run() {
           _recentDocFrame.pokeDocument(active);
@@ -6049,7 +6047,6 @@ public class MainFrame extends JFrame implements OptionConstants {
   public JViewport getDefViewport() {
     OpenDefinitionsDocument doc = _model.getActiveDocument();
 //    new ScrollableDialog(null, "Active Document is " + doc, "", "").show();
-    
     JScrollPane defScroll = _defScrollPanes.get(doc);
     return defScroll.getViewport();
   }

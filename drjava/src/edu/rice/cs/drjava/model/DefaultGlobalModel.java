@@ -354,7 +354,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
   /** The abstract container which contains views of open documents and allows user to navigate document focus among
    *  this collection of open documents
    */
-  protected IDocumentNavigator _documentNavigator = AWTContainerNavigatorFactory.Singleton.makeListNavigator();
+  protected IDocumentNavigator _documentNavigator = AWTContainerNavigatorFactory.Singleton.makeListNavigator(); 
   
   
   // ----- CONSTRUCTORS -----
@@ -374,8 +374,8 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
       public void optionChanged(OptionEvent<String> oe) {
         _interpreterControl.setOptionArgs(oe.value);
       }
-    });
-      
+    }); 
+    
     _consoleDocAdapter = new InteractionsDocumentAdapter();
     _consoleDoc = new ConsoleDocument(_consoleDocAdapter);
     

@@ -57,9 +57,9 @@ import edu.rice.cs.drjava.model.DefaultSingleDisplayModel;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.*;
+import edu.rice.cs.util.swing.BorderlessScrollPane;
 import edu.rice.cs.util.swing.FindReplaceMachine;
 import edu.rice.cs.util.swing.FindResult;
-import edu.rice.cs.util.swing.ScrollableDialog;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.text.AbstractDocumentInterface;
 import edu.rice.cs.util.UnexpectedException;
@@ -74,8 +74,10 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
   private JButton _replaceButton;
   private JButton _replaceFindButton;
   private JButton _replaceAllButton;
-  private JTextField _findField = new JTextField(20);
-  private JTextField _replaceField = new JTextField(20);
+  private JTextPane _findField = new JTextPane(new DefaultStyledDocument());
+  private BorderlessScrollPane _findPane = new BorderlessScrollPane(_findField);
+  private JTextPane _replaceField = new JTextPane(new DefaultStyledDocument());
+  private BorderlessScrollPane _replacePane = new BorderlessScrollPane(_replaceField);
   private JLabel _message; // JL
   private JPanel _labelPanel;
   private JCheckBox _ignoreCommentsAndStrings;
@@ -259,10 +261,10 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
 
     /******** Set up the Panel containing the Text Fields ********/
 //    _rightPanel = new JPanel(new GridLayout(1,2,5,0));
-    JPanel midPanel = new JPanel(new GridLayout(3,1));
+    JPanel midPanel = new JPanel(new GridLayout(2,1));
     JPanel farRightPanel = new JPanel(new GridLayout(3,1));
-    midPanel.add(wrap(_findField));
-    midPanel.add(wrap(_replaceField));
+    midPanel.add(_findPane);
+    midPanel.add(_replacePane);
 //    midPanel.add(wrap(_message)); // JL
     // midPanel.add(wrap(_lowerCheckPanel)); // JL
 
@@ -285,7 +287,7 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
     hookComponents(this, _rightPanel, _labelPanel,buttons);
 
 
-    _findField.addActionListener(_findNextAction);
+//    _findField.addActionListener(_findNextAction);
 
 
     /******** Set the Tab order ********/
@@ -335,7 +337,7 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
     return _findField.requestFocusInWindow();
   }
 
-  JTextField getFindField() { return _findField; }
+  JTextPane getFindField() { return _findField; }
 
   /** Called when the user presses the key assigned to find next. */
   public void findNext() { if (_findField.getText().length() > 0) _doFind(); }
@@ -405,17 +407,16 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
     OpenDefinitionsDocument matchDoc = ((DefaultSingleDisplayModel) _model).getODDForDocument(doc);
     OpenDefinitionsDocument openDoc = _defPane.getOpenDefDocument();
 
-    int pos = fr.getFoundOffset();
+    final int pos = fr.getFoundOffset();
     
     // If there actually *is* a match, then switch active documents. otherwise don't
     if (pos != -1) { // found a match
       Caret c = _defPane.getCaret();
       c.setDot(c.getDot());
       
-
       if (! matchDoc.equals(openDoc)) 
-          _model.setActiveDocument(matchDoc);  // set active doc if matchDoc != openDoc
-      
+        _model.setActiveDocument(matchDoc);  // set active doc if matchDoc != openDoc
+   
       _defPane.setCaretPosition(pos);
       _caretChanged = true;
       _updateMachine();

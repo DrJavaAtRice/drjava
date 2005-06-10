@@ -96,6 +96,7 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel implements Sin
     final NodeDataVisitor<Boolean> _gainVisitor = new NodeDataVisitor<Boolean>() {
       public Boolean itemCase(INavigatorItem docu) {
         _setActiveDoc(docu);  // sets _activeDocument, the shadow copy of the active document
+//        Utilities.showDebug("Setting the active doc done");
         File dir = _activeDocument.getParentDirectory();
         
         if (dir != null) {  
@@ -125,7 +126,6 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel implements Sin
       }
     });
     
-    
     _isClosingAllDocs = false;
     _ensureNotEmpty();
     setActiveFirstDocument();
@@ -145,7 +145,8 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel implements Sin
   //----------------------- New SingleDisplay Methods -----------------------//
 
   /** Returns the currently active document. */
-  public OpenDefinitionsDocument getActiveDocument() { return _activeDocument; }
+  public OpenDefinitionsDocument getActiveDocument() {return  _activeDocument; }
+  
   
   /** Sets the currently active document by updating the selection model.
    *  @param doc Document to set as active
@@ -155,16 +156,18 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel implements Sin
      * component. Hence it must run in the event thread.  Note that setting the active document triggers the execution
      * of listeners some of which also need to run in the event thread. */
 
-//    if (_activeDocument == doc) return; // this optimization appears to cause some subtle bugs   
+//    if (_activeDocument == doc) return; // this optimization appears to cause some subtle bugs 
+//    Utilities.showDebug("DEBUG: Called setActiveDocument()");
+
     Runnable command = new Runnable() {  
       public void run() {_documentNavigator.setActiveDoc(doc);} 
     };
-    try {Utilities.invokeAndWait(command);}
+    try {Utilities.invokeAndWait(command); }
     catch(Exception e) { throw new UnexpectedException(e); } 
 //    try { _documentNavigator.setActiveDoc(doc); } 
 //    catch(DocumentClosedException dce) { 
 //      /* do nothing; findbugs signals a bug unless this catch clause spans more than two lines */
-//    }
+//  }
   }
   
   public Container getDocCollectionWidget() { return _documentNavigator.asContainer(); }
@@ -203,7 +206,6 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel implements Sin
    */
   public OpenDefinitionsDocument newFile() {
     OpenDefinitionsDocument doc = newFile(_activeDirectory);
-    
     setActiveDocument(doc);
     return doc;
   }
@@ -389,15 +391,18 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel implements Sin
     //      _setActiveDoc(getIDocGivenODD(docs.get(0)));
   }
   
-  private void _setActiveDoc(INavigatorItem idoc) {
+  private synchronized void _setActiveDoc(INavigatorItem idoc) {
     //Hashtable<INavigatorItem, OpenDefinitionsDocument> docs = getOpenDefinitionsDocumentsTable();
-    
-    _activeDocument = (OpenDefinitionsDocument) idoc;  // FIX THIS!
-    try {
-      _activeDocument.checkIfClassFileInSync();
-     
-      // notify single display model listeners   // notify single display model listeners
-      _notifier.activeDocumentChanged(_activeDocument);
+//    Utilities.showDebug("DEBUG: _setActiveDoc called");
+//    if (_activeDocument != null) 
+//      _activeDocument.acquireReadLock();
+//    try{
+      _activeDocument = (OpenDefinitionsDocument) idoc;  // FIX THIS!
+      try {
+        _activeDocument.checkIfClassFileInSync();
+        
+        // notify single display model listeners   // notify single display model listeners
+        _notifier.activeDocumentChanged(_activeDocument);
 //        notifyListeners(new GlobalEventNotifier.Notifier() {
 //        public void notifyListener(GlobalModelListener l) {
 //          // If it is a SingleDisplayModelListener, let it know that the
@@ -408,6 +413,8 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel implements Sin
 //          }
 //        }
 //      });
-    } catch(DocumentClosedException dce) { /* do nothing */ }
-  }
+      } catch(DocumentClosedException dce) { /* do nothing */ }
+    }
+//    finally {_activeDocument.releaseReadLock();}
+//  }
 }

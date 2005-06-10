@@ -51,6 +51,7 @@ import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.model.definitions.indent.Indenter;
 
 import edu.rice.cs.util.swing.*;
+import edu.rice.cs.util.swing.Utilities;
 
 import java.awt.*;
 import javax.swing.*;
@@ -133,11 +134,12 @@ public abstract class AbstractDJPane extends JTextPane implements OptionConstant
   /** Be sure to update the document (and thus the reduced model) any time the caret position changes.
    *  @param pos
    */
-  public void setCaretPosition(int pos) {
-    super.setCaretPosition(pos);
-    getDJDocument().setCurrentLocation(pos);
+  public void setCaretPosition(final int pos) {
+        super.setCaretPosition(pos);
+        getDJDocument().setCurrentLocation(pos);
 //    _doc.setCurrentLocation(pos);
   }
+  
   
   /** What is this for?  The override does not nothing! */ 
   public void moveCaretPosition(int pos) { super.moveCaretPosition(pos); }

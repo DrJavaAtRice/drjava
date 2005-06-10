@@ -510,6 +510,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
       public void focusLost(FocusEvent e) { setVisible(false); }
     });
     this.getCaret().setBlinkRate(rate);
+//    Utilities.showDebug("DP constructor finished");    
   }
   
   /** Ends a compound edit.*/
