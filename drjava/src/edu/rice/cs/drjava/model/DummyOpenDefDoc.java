@@ -422,11 +422,11 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
   /** Decorater pattern for the definitions document */
   public CompoundUndoManager getUndoManager() { throw new UnsupportedOperationException("Dummy method"); }
   
-  public void commentLines(int selStart, int selEnd) {
+  public int commentLines(int selStart, int selEnd) {
     throw new UnsupportedOperationException("Dummy method");
   }
   
-  public void uncommentLines(int selStart, int selEnd) {
+  public int uncommentLines(int selStart, int selEnd) {
     throw new UnsupportedOperationException("Dummy method");
   }
   

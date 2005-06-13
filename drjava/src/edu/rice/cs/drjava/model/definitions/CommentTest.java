@@ -170,12 +170,12 @@ public final class CommentTest extends TestCase {
       "// /* along with a little bit of code, just to spice\n" +
       "      //* things up.\n" +
       "//                    */ \n" +
-      "System.out.println(\"Aren't comments fun? // (yeah!)\")";
+      "         System.out.println(\"Aren't comments fun? // (yeah!)\")";
 
     doc.insertString(0, text, null);
     _assertContents("Sample text is inserted improperly.", text, doc);
     doc.uncommentLines(doc.getLength()-1, doc.getLength());
-    _assertContents("The last line should be indented and have no commenting!",
+    _assertContents("The last line should have no commenting!",
                     uncommented, doc);
   }
 
@@ -185,24 +185,23 @@ public final class CommentTest extends TestCase {
    */
   public void testUncommentMultipleLines() throws BadLocationException {
     String text =
-      "// // Here is some abritrary text that should be uncommented.\n" +
+      "//// Here is some abritrary text that should be uncommented.\n" +
       "// /* along with a little bit of code, just to spice\n" +
-      "      //* things up.\n" +
-      "//                    */ \n" +
-      "//         System.out.println(\"Aren't comments fun? // (yeah!)\")";
+      "//  * things up.\n" +
+      "//  */ \n" +
+      "// System.out.println(\"Aren't comments fun? // (yeah!)\")";
 
     String uncommented =
       "// Here is some abritrary text that should be uncommented.\n" +
-      "/* along with a little bit of code, just to spice\n" +
-      " * things up.\n" +
-      " */ \n" +
-      "System.out.println(\"Aren't comments fun? // (yeah!)\")";
+      " /* along with a little bit of code, just to spice\n" +
+      "  * things up.\n" +
+      "  */ \n" +
+      " System.out.println(\"Aren't comments fun? // (yeah!)\")";
 
     doc.insertString(0, text, null);
     _assertContents("Sample text is inserted improperly.", text, doc);
     doc.uncommentLines(0, doc.getLength());
-    _assertContents("These lines should be indented and have at most"+
-                    "one level of commenting!", uncommented, doc);
+    _assertContents("These lines should have at most one level of commenting!", uncommented, doc);
   }
 
   private static void _assertContents(String msg, String expected, DJDocument document)

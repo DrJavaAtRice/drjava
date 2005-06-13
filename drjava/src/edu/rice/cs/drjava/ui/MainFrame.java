@@ -850,9 +850,11 @@ public class MainFrame extends JFrame implements OptionConstants {
       int end = _currentDefPane.getSelectionEnd();
       _currentDefPane.endCompoundEdit();
       DummyOpenDefDoc dummy = new DummyOpenDefDoc();
-      _model.setActiveDocument(dummy);
-      openDoc.commentLines(start, end);
-      _model.setActiveDocument(openDoc);
+      _currentDefPane.notifyInactive();
+      int newEnd = openDoc.commentLines(start, end);
+      _currentDefPane.notifyActive();
+      _currentDefPane.setCaretPosition(start+2);
+      if (start != end) _currentDefPane.moveCaretPosition(newEnd);
     }
   };
 
@@ -866,7 +868,18 @@ public class MainFrame extends JFrame implements OptionConstants {
       int start = _currentDefPane.getSelectionStart();
       int end = _currentDefPane.getSelectionEnd();
       _currentDefPane.endCompoundEdit();
-      openDoc.uncommentLines(start, end);
+      DummyOpenDefDoc dummy = new DummyOpenDefDoc();
+      _currentDefPane.notifyInactive();
+      openDoc.setCurrentLocation(start);
+      int startCol = openDoc.getCurrentCol();
+      int newEnd = openDoc.uncommentLines(start, end);
+      if (startCol != openDoc.getCurrentCol()) start -= 2;
+      
+//      Utilities.showDebug("" + startCol + "  .... " + openDoc.getCurrentCol());
+      
+      _currentDefPane.notifyActive();
+      _currentDefPane.setCaretPosition(start);
+      if (start != end)   _currentDefPane.moveCaretPosition(newEnd);
     }
   };
 

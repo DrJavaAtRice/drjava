@@ -77,8 +77,8 @@ public interface OpenDefinitionsDocument extends DJDocument, Finalizable<Definit
   // The following methods are forwarding methods required by the rest of the
   // program in order for the OpenDefinitionsDocument to handle DefinitionsDocuments
   public int id();
-  public void commentLines(int selStart, int selEnd);
-  public void uncommentLines(int selStart, int selEnd);
+  public int commentLines(int selStart, int selEnd);
+  public int uncommentLines(int selStart, int selEnd);
   public boolean getClassFileInSync();
   public int getCurrentCol();
   public int getOffset(int lineNum);

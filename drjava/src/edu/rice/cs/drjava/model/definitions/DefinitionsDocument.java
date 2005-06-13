@@ -572,26 +572,29 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
    *  @param selStart the document offset for the start of the selection
    *  @param selEnd the document offset for the end of the selection
    */
-  public void commentLines(int selStart, int selEnd) {
+  public int commentLines(int selStart, int selEnd) {
     
-      //int key = _undoManager.startCompoundEdit();  //Uncommented in regards to the FrenchKeyBoardFix
-      if (selStart == selEnd) {
-        writeLock();
-        try {
-          
-          synchronized(_reduced) {
-            Position oldCurrentPosition = createPosition(_currentLocation);
-            _commentLine();
-            //int caretPos = getCaretPosition();
-            //_doc().setCurrentLocation(caretPos);
-          }
-        }
-        catch (BadLocationException e) { throw new UnexpectedException(e); }
-        finally { writeUnlock(); }
-      }
-      else _commentBlock(selStart, selEnd);
+    //int key = _undoManager.startCompoundEdit();  //Uncommented in regards to the FrenchKeyBoardFix
+    int toReturn = selEnd;
+    if (selStart == selEnd) {
+      writeLock();
+      try {
         
-      _undoManager.endLastCompoundEdit();  //Changed from endCompoundEdit(key) for FrenchKeyBoardFix
+        synchronized(_reduced) {
+          setCurrentLocation(selStart);
+          Position oldCurrentPosition = createPosition(_currentLocation);
+          _commentLine();   
+          toReturn+=2;
+          //int caretPos = getCaretPosition();
+          //_doc().setCurrentLocation(caretPos);
+        }
+      }
+      catch (BadLocationException e) { throw new UnexpectedException(e); }
+      finally { writeUnlock(); }
+    }
+    else toReturn = _commentBlock(selStart, selEnd);   
+    _undoManager.endLastCompoundEdit();  //Changed from endCompoundEdit(key) for FrenchKeyBoardFix
+    return toReturn;
   }
  
 
@@ -601,8 +604,8 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
    *  @param start Position in document to start commenting from
    *  @param end Position in document to end commenting at
    */
-  private void _commentBlock(final int start, final int end) {
-    
+  private int _commentBlock(final int start, final int end) {
+    int afterCommentEnd = end;
     writeLock();
     try {
       // Keep marker at the end. This Position will be the
@@ -619,7 +622,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
           Position walkerPos = this.createPosition(walker);
           // Comment out current line
           _commentLine();  // must be atomic
-          
+          afterCommentEnd += 2;
           // Move back to walker spot
           setCurrentLocation(walkerPos.getOffset());
           walker = walkerPos.getOffset();
@@ -633,6 +636,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     } 
     catch (BadLocationException e) { throw new UnexpectedException(e); }
     finally { writeUnlock(); }
+    return afterCommentEnd;
   }
 
   /** Comments out a single line with wing comments -- "// ". 
@@ -640,7 +644,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   private void _commentLine() {
     // Insert "// " at the beginning of the line.
     // Using null for AttributeSet follows convention in this class.
-    try { insertString(_currentLocation - getCurrentCol(), "//", null); } 
+    try { insertString(_currentLocation - getCurrentCol(), "//", null); }
     catch (BadLocationException e) { throw new UnexpectedException(e); }
   }
 
@@ -649,26 +653,30 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
    *  @param selStart the document offset for the start of the selection
    *  @param selEnd the document offset for the end of the selection
    */
-  public void uncommentLines(int selStart, int selEnd) {
+  public int uncommentLines(int selStart, int selEnd) {
  
     //int key = _undoManager.startCompoundEdit(); //commented out for FrenchKeyBoardFix
+    int toReturn = selEnd;
     if (selStart == selEnd) {
       writeLock();
       try {
         synchronized(_reduced) {
+          setCurrentLocation(selStart);
           Position oldCurrentPosition = createPosition(_currentLocation);
           _uncommentLine();
+          toReturn-=2;
           //int caretPos = getCaretPosition();
           //_doc().setCurrentLocation(caretPos);
-          setCurrentLocation(oldCurrentPosition.getOffset());
+          //setCurrentLocation(oldCurrentPosition.getOffset());
         }
       }
       catch (BadLocationException e) { throw new UnexpectedException(e); }
       finally { writeUnlock(); }
     }
-    else _uncommentBlock(selStart, selEnd);
+    else  toReturn = _uncommentBlock(selStart, selEnd);
     //_undoManager.endCompoundEdit(key); //Commented out for FrenchKeyBoardFix, Replaced with endLastCompoundEdit();
     _undoManager.endLastCompoundEdit();
+    return toReturn;
   }
 
   /** Uncomments all lines between and including the lines containing
@@ -676,7 +684,8 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
    * @param start Position in document to start commenting from
    * @param end Position in document to end commenting at
    */
-  private void _uncommentBlock(final int start, final int end) {
+  private int _uncommentBlock(final int start, final int end) {
+    int afterUncommentEnd = end;
     writeLock();
     try {
       // Keep marker at the end. This Position will be the correct endpoint no matter how we change the doc
@@ -691,8 +700,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
           // regardless of how commentLine changes things
           Position walkerPos = this.createPosition(walker);
           // uncomment current line
-          _uncommentLine();
-          
+          afterUncommentEnd-= _uncommentLine();
           // Move back to walker spot
           setCurrentLocation(walkerPos.getOffset());
           walker = walkerPos.getOffset();
@@ -706,13 +714,14 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     }
     catch (BadLocationException e) { throw new UnexpectedException(e); }
     finally { writeUnlock(); }
+    return afterUncommentEnd;
   }
 
   /** Uncomments a single line.  This simply looks for a leading "//".
    *  Also indents the line, once the comments have been removed.
    *  @pre theads hold this.writeLock() and _reduced lock
    */
-  private void _uncommentLine() throws BadLocationException {
+  private int _uncommentLine() throws BadLocationException {
     // Look for "//" at the beginning of the line, and remove it.
     int curCol = getCurrentCol();
     int lineStart = _currentLocation - curCol;
@@ -729,7 +738,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
       // If a previous char is not whitespace, we're not looking at a wing comment.
       if (c != ' ') {
         goodWing = false;
-        break;
+        return 0;
       }
     }
     
@@ -738,8 +747,10 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     if (pos >= 0 && goodWing) {
       // Otherwise, remove the wings and indent.
       remove(lineStart + pos, 2);
-      _indentLine(Indenter.OTHER);
+      //_indentLine(Indenter.OTHER);
+      return 2;
     }
+    return 0;
   }
 
 //  /** Indents a line in accordance with the rules that DrJava has set up. This is the old version, 

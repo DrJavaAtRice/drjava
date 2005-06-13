@@ -2940,10 +2940,10 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
     
     public int getLineEndPos(int pos) { return getDocument().getLineEndPos(pos); }
     
-    public void commentLines(int selStart, int selEnd) { getDocument().commentLines(selStart, selEnd); }
+    public int commentLines(int selStart, int selEnd) { return getDocument().commentLines(selStart, selEnd); }
     
-    public void uncommentLines(int selStart, int selEnd) {
-      getDocument().uncommentLines(selStart, selEnd);
+    public int uncommentLines(int selStart, int selEnd) {
+      return getDocument().uncommentLines(selStart, selEnd);
     }
     
     public void indentLines(int selStart, int selEnd) { getDocument().indentLines(selStart, selEnd); }

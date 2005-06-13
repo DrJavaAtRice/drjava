@@ -107,18 +107,45 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
   };
   
   
-  /** Listens for the pressing of the Enter key (only activated after the Ctrl key has been pressed)*/
-  private KeyListener _findEnterListener = new KeyListener() {
-      public void keyPressed(KeyEvent e) {
+  /** Listens for the pressing of the Enter key (only activated after the Ctrl key is not pressed). Finds the next
+   *  occurrence
+   */
+  private final KeyListener _findEnterListener = new KeyListener() {
+      public void keyPressed(KeyEvent e) {}
+      public void keyReleased(KeyEvent e) {
         if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-          _doFind();
-          _findField.requestFocusInWindow();
+          Utilities.invokeLater( new Runnable() {
+            public void run() {   
+              String text = _findField.getText();
+              if (text.lastIndexOf("\n") == text.length()-1){
+                text = text.substring(0, text.lastIndexOf("\n"));
+              }
+              _findField.setText(text);
+              _findField.setCaretPosition(text.length());
+              _doFind();
+              _findField.requestFocusInWindow();
+            }
+          });
         }
       }
-      public void keyReleased(KeyEvent e) {}
       public void keyTyped(KeyEvent e){}
     };
   
+  /** Listens for the pressing of the Enter key (only activated after the Ctrl key has been pressed). Inserts a new line
+   *  in the findField
+   */
+  private final KeyListener _newLineEnterListener = new KeyListener() {
+    public void keyPressed(KeyEvent e) {
+      if (e.getKeyCode() == KeyEvent.VK_ENTER)  {
+        String text = _findField.getText();
+        _findField.setText(text + "\n"); 
+      }        
+    }
+    public void keyReleased(KeyEvent e) {}
+    public void keyTyped(KeyEvent e) {}
+  };
+  
+            
   
   /** Standard Constructor.
    *  @param frame the overall enclosing window
@@ -151,7 +178,6 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
     new BackgroundColorListener(_findField);
     new ForegroundColorListener(_replaceField);
     new BackgroundColorListener(_replaceField);
-
     /********* Lower Button Panel Initialization ********/
     _findNextButton = new JButton(_findNextAction);
     _replaceButton = new JButton(_replaceAction);
@@ -298,17 +324,6 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
 
     /******* Put all the main panels onto the Find/Replace tab ********/
     hookComponents(this, _rightPanel, _labelPanel,buttons);
-
-    /** Listens for the Ctrl key being pressed and adds a listener for the Enter key. When Ctrl is released, the listener is removed. */
-    _findField.addKeyListener(new KeyListener() {
-      public void keyPressed(KeyEvent e) {
-        if (e.getKeyCode() == KeyEvent.VK_CONTROL) _findField.addKeyListener(_findEnterListener);
-      }
-      public void keyReleased(KeyEvent e) {
-        if (e.getKeyCode() == KeyEvent.VK_CONTROL) _findField.removeKeyListener(_findEnterListener);
-      }
-      public void keyTyped(KeyEvent e) {}
-    });
     
 
     /******** Set the Tab order ********/
@@ -350,6 +365,29 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
         else                                 _replaceAllAction.setEnabled(true);
       }
     });
+    
+    _findField.addKeyListener(_findEnterListener);
+    
+    /** Listens for the Ctrl key being pressed and adds a listener for the Enter key. When Ctrl is released, the listener is removed. */
+    _findField.addKeyListener(new KeyListener() {
+      public void keyPressed(KeyEvent e) {
+        if (e.getKeyCode() == KeyEvent.VK_CONTROL) {
+          _findField.removeKeyListener(_findEnterListener);
+          if (_findField.getKeyListeners().length <= 1 )
+            _findField.addKeyListener(_newLineEnterListener); 
+        }
+      }
+      public void keyReleased(KeyEvent e) {
+        if (e.getKeyCode() == KeyEvent.VK_CONTROL) {
+          _findField.removeKeyListener(_newLineEnterListener);
+          if (_findField.getKeyListeners().length <= 1)
+            _findField.addKeyListener(_findEnterListener);
+          }
+      }
+      public void keyTyped(KeyEvent e) {}
+    });
+    
+    
   }
 
   public boolean requestFocusInWindow() {
