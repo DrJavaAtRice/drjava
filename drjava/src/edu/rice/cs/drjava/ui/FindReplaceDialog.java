@@ -106,30 +106,47 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
     }
   };
   
+  /**Action to replace the newLine default Action when pressing the Enter key. Instead, does a find*/
+  Action _findEnterAction = new TextAction("Find on Pressing Enter") {
+    public void actionPerformed(ActionEvent ae) {
+      _doFind();
+      _findField.requestFocusInWindow();
+    }};
   
-  /** Listens for the pressing of the Enter key (only activated after the Ctrl key is not pressed). Finds the next
-   *  occurrence
-   */
-  private final KeyListener _findEnterListener = new KeyListener() {
-      public void keyPressed(KeyEvent e) {}
-      public void keyReleased(KeyEvent e) {
-        if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-          Utilities.invokeLater( new Runnable() {
-            public void run() {   
-              String text = _findField.getText();
-              if (text.lastIndexOf("\n") == text.length()-1){
-                text = text.substring(0, text.lastIndexOf("\n"));
-              }
-              _findField.setText(text);
-              _findField.setCaretPosition(text.length());
-              _doFind();
-              _findField.requestFocusInWindow();
-            }
-          });
-        }
-      }
-      public void keyTyped(KeyEvent e){}
-    };
+  
+//  /** Listens for the pressing of the Enter key (only activated after the Ctrl key is not pressed). Finds the next
+//   *  occurrence of the findWord. Uses logic to "undo" the default behavior of the Enter key. If someone can find a way
+//   *  to remove the default Enter key behavior (i.e. go to the next line) that would be a better solution (solved above)
+//   */
+//  private final KeyListener _findEnterListener = new KeyListener() {
+//      public void keyPressed(KeyEvent e) {}
+//      
+//      public void keyReleased(KeyEvent e) {
+//        if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+//          Utilities.invokeAndWait( new Runnable() {
+//            public void run() {   
+//              int caretPosition = _findField.getCaretPosition();
+//              String text = _findField.getText();
+//              String textBeforeCaret = text.substring(0, caretPosition);
+//              String textAfterCaret = "";
+//              if (caretPosition < text.length()) textAfterCaret = text.substring(caretPosition);
+//              
+//              int previousNewLineOffset = textBeforeCaret.lastIndexOf("\n");
+//              if (previousNewLineOffset == textBeforeCaret.length()-1)
+//                text = textBeforeCaret.substring(0, previousNewLineOffset).concat(textAfterCaret);
+//              
+//              _findField.setText(text);
+//              //put the caret where it was before
+//              _findField.setCaretPosition(textBeforeCaret.length()-1);
+//              _doFind();
+//              _findField.requestFocusInWindow();
+//            }
+//          });
+//        }
+//      }
+//      
+//      public void keyTyped(KeyEvent e){}
+//    };
   
   /** Listens for the pressing of the Enter key (only activated after the Ctrl key has been pressed). Inserts a new line
    *  in the findField
@@ -218,7 +235,7 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
     // need separate label and field panels so that the find and
     // replace textfields line up
 
-    _labelPanel = new JPanel(new GridLayout(3,1));
+    _labelPanel = new JPanel(new GridLayout(2,1));
     // _labelPanel.setLayout(new BoxLayout(_labelPanel, BoxLayout.Y_AXIS));
 
     //_labelPanel.add(Box.createGlue());
@@ -366,22 +383,27 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
       }
     });
     
-    _findField.addKeyListener(_findEnterListener);
+       
+    // Overrides the default behavior for the Enter key. Replaces it with behavior that executes _doFind  
+    KeyStroke returnKS = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0);
+    _findField.getKeymap().addActionForKeyStroke(returnKS, _findEnterAction);
+    
+//    _findField.addKeyListener(_findEnterListener);
     
     /** Listens for the Ctrl key being pressed and adds a listener for the Enter key. When Ctrl is released, the listener is removed. */
     _findField.addKeyListener(new KeyListener() {
       public void keyPressed(KeyEvent e) {
         if (e.getKeyCode() == KeyEvent.VK_CONTROL) {
-          _findField.removeKeyListener(_findEnterListener);
-          if (_findField.getKeyListeners().length <= 1 )
+//          _findField.removeKeyListener(_findEnterListener);
+//          if (_findField.getKeyListeners().length <= 1 )
             _findField.addKeyListener(_newLineEnterListener); 
         }
       }
       public void keyReleased(KeyEvent e) {
         if (e.getKeyCode() == KeyEvent.VK_CONTROL) {
           _findField.removeKeyListener(_newLineEnterListener);
-          if (_findField.getKeyListeners().length <= 1)
-            _findField.addKeyListener(_findEnterListener);
+//          if (_findField.getKeyListeners().length <= 1)
+//            _findField.addKeyListener(_findEnterListener);
           }
       }
       public void keyTyped(KeyEvent e) {}
@@ -499,7 +521,7 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
       _machine.setLastFindWord();
     }
     // else the entire document was searched and no instance of the string
-    // was found
+    // was found. display at most 50 characters of the non-found string
     else {
       Toolkit.getDefaultToolkit().beep();
       StringBuffer statusMessage = new StringBuffer("Search text \"");

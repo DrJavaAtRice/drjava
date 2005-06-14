@@ -860,7 +860,7 @@ public class MainFrame extends JFrame implements OptionConstants {
 
   /** Action for un-commenting a block of commented text. */
   private Action _uncommentLinesAction = new AbstractAction("Uncomment Line(s)") {
-    public void actionPerformed(ActionEvent ae) {
+    public void actionPerformed(ActionEvent ae){
       // Delegate everything to the DefinitionsDocument.
       OpenDefinitionsDocument openDoc = _model.getActiveDocument();
       int caretPos = _currentDefPane.getCaretPosition();
@@ -868,16 +868,27 @@ public class MainFrame extends JFrame implements OptionConstants {
       int start = _currentDefPane.getSelectionStart();
       int end = _currentDefPane.getSelectionEnd();
       _currentDefPane.endCompoundEdit();
-      DummyOpenDefDoc dummy = new DummyOpenDefDoc();
+     
+      //notify inactive to prevent refreshing of the DefPane every time an insertion is made
       _currentDefPane.notifyInactive();
-      openDoc.setCurrentLocation(start);
-      int startCol = openDoc.getCurrentCol();
-      int newEnd = openDoc.uncommentLines(start, end);
-      if (startCol != openDoc.getCurrentCol()) start -= 2;
       
-//      Utilities.showDebug("" + startCol + "  .... " + openDoc.getCurrentCol());
+      openDoc.setCurrentLocation(start);
+      
+      Position startPos;
+      
+      try {startPos = openDoc.createPosition(start);}
+      catch (BadLocationException e) {throw new UnexpectedException(e);}
+      
+      int startOffset = startPos.getOffset();        
+      
+      int newEnd = openDoc.uncommentLines(start, end);
       
       _currentDefPane.notifyActive();
+      
+      if (startOffset != startPos.getOffset()) start-=2;
+      
+      Utilities.showDebug("" + startOffset + "  .... " + startPos.getOffset());
+        
       _currentDefPane.setCaretPosition(start);
       if (start != end)   _currentDefPane.moveCaretPosition(newEnd);
     }
