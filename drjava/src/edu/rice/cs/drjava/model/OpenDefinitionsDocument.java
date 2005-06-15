@@ -218,11 +218,12 @@ public interface OpenDefinitionsDocument extends DJDocument, Finalizable<Definit
    */
   public int gotoLine(int line);
 
-  /** A forwarding method to comment out the current line or selection in the definitions. */
-  public void commentLinesInDefinitions(int selStart, int selEnd);
-
-  /** A forwarding method to un-comment the current line or selection in the definitions. */
-  public void uncommentLinesInDefinitions(int selStart, int selEnd);
+  // unnecessary: only called from DefPane and defPane has reference to mainFrame which deals with commenting code
+//  /** A forwarding method to comment out the current line or selection in the definitions. */
+//  public void commentLinesInDefinitions(int selStart, int selEnd);
+//
+//  /** A forwarding method to un-comment the current line or selection in the definitions. */
+//  public void uncommentLinesInDefinitions(int selStart, int selEnd);
 
 //  /** Create a find and replace mechanism starting at the current character offset in the definitions. */
 //  public FindReplaceMachine createFindReplaceMachine();

@@ -98,10 +98,10 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
     throw new UnsupportedOperationException("Dummy method");
   }
   
-  /** A forwarding method to un-comment the current line or selection in the definitions. */
-  public void uncommentLinesInDefinitions(int selStart, int selEnd) {
-    throw new UnsupportedOperationException("Dummy method");
-  }
+//  /** A forwarding method to un-comment the current line or selection in the definitions. */
+//  public void uncommentLinesInDefinitions(int selStart, int selEnd) {
+//    throw new UnsupportedOperationException("Dummy method");
+//  }
   
   /** Returns whether the GlobalModel can abandon this document, asking listeners if isModifiedSinceSave() is true.
    *  @return true if this document can be abandoned
@@ -285,10 +285,10 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
   /** Tells the document to remove all breakpoints. */
   public void clearBreakpoints() { throw new UnsupportedOperationException("Dummy method"); }
   
-  /** A forwardidefDocng method to comment out the current line or selection in the definitions. */
-  public void commentLinesInDefinitions(int selStart, int selEnd) {
-    throw new UnsupportedOperationException("Dummy method");
-  }
+//  /** A forwardidefDocng method to comment out the current line or selection in the definitions. */
+//  public void commentLinesInDefinitions(int selStart, int selEnd) {
+//    throw new UnsupportedOperationException("Dummy method");
+//  }
   
   /** Saves the document with a FileWriter.  The FileSaveSelector will either provide a file name or prompt the 
    *  user for one.  It is up to the caller to decide what needs to be done to choose a file to save to.  Once 

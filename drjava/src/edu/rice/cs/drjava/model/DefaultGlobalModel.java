@@ -2665,15 +2665,17 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
      */
     public int balanceForward() { return getDocument().balanceForward(); }
 
-    /** A forwarding method to comment out the current line or selection in the definitions. */
-    public void commentLinesInDefinitions(int selStart, int selEnd) {
-      getDocument().commentLines(selStart, selEnd);
-    }
-
-    /** A forwarding method to un-comment the current line or selection in the definitions. */
-    public void uncommentLinesInDefinitions(int selStart, int selEnd) {
-      getDocument().uncommentLines(selStart, selEnd);
-    }
+    
+  //Unnecessary: only called from DefPane, which has a reference to MainFrame in which commenting logic currently exists
+//    /** A forwarding method to comment out the current line or selection in the definitions. */
+//    public void commentLinesInDefinitions(int selStart, int selEnd) {
+//      getDocument().commentLines(selStart, selEnd);
+//    }
+//
+//    /** A forwarding method to un-comment the current line or selection in the definitions. */
+//    public void uncommentLinesInDefinitions(int selStart, int selEnd) {
+//      getDocument().uncommentLines(selStart, selEnd);
+//    }
 
 //    /** Create a find and replace mechanism starting at the current character offset in the definitions.
 //     *  NOT USED.
