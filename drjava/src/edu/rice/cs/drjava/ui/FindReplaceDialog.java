@@ -106,12 +106,22 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
     }
   };
   
-  /**Action to replace the newLine default Action when pressing the Enter key. Instead, does a find*/
-  Action _findEnterAction = new TextAction("Find on Pressing Enter") {
-    public void actionPerformed(ActionEvent ae) {
-      _doFind();
-      _findField.requestFocusInWindow();
-    }};
+  //Action to replace the newLine defaultAction when pressing the Enter key inside the _findField.
+    private Action _findEnterAction = new TextAction ("Find on Pressing Enter") {    
+      public void actionPerformed(ActionEvent ae) {
+        _doFind();
+        _findField.requestFocusInWindow();
+      }
+    };
+  
+  private FocusListener _findEnterListener = new FocusListener() {
+    private KeyStroke returnKS = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0);
+    private Keymap km = _findField.getKeymap();
+    private Action defaultAction = km.getAction(returnKS);
+   
+    public void focusGained(FocusEvent e) { km.addActionForKeyStroke(returnKS, _findEnterAction);}
+    public void focusLost(FocusEvent e) { if (defaultAction != null) km.addActionForKeyStroke(returnKS, defaultAction); }
+  };
   
   
 //  /** Listens for the pressing of the Enter key (only activated after the Ctrl key is not pressed). Finds the next
@@ -155,7 +165,11 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
     public void keyPressed(KeyEvent e) {
       if (e.getKeyCode() == KeyEvent.VK_ENTER)  {
         String text = _findField.getText();
-        _findField.setText(text + "\n"); 
+        int caretPos = _findField.getCaretPosition();
+        String textBeforeCaret = text.substring(0, caretPos);
+        String textAfterCaret = text.substring(caretPos);
+        _findField.setText(textBeforeCaret.concat("\n").concat(textAfterCaret));
+        _findField.setCaretPosition(caretPos+1);
       }        
     }
     public void keyReleased(KeyEvent e) {}
@@ -384,18 +398,15 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
     });
     
        
-    // Overrides the default behavior for the Enter key. Replaces it with behavior that executes _doFind  
-    KeyStroke returnKS = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0);
-    _findField.getKeymap().addActionForKeyStroke(returnKS, _findEnterAction);
-    
-//    _findField.addKeyListener(_findEnterListener);
+    _findField.addFocusListener(_findEnterListener);
+      
     
     /** Listens for the Ctrl key being pressed and adds a listener for the Enter key. When Ctrl is released, the listener is removed. */
     _findField.addKeyListener(new KeyListener() {
       public void keyPressed(KeyEvent e) {
         if (e.getKeyCode() == KeyEvent.VK_CONTROL) {
 //          _findField.removeKeyListener(_findEnterListener);
-//          if (_findField.getKeyListeners().length <= 1 )
+          if (_findField.getKeyListeners().length <= 1 )
             _findField.addKeyListener(_newLineEnterListener); 
         }
       }
