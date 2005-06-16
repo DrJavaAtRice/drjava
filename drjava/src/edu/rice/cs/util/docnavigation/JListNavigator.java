@@ -85,7 +85,6 @@ class JListNavigator extends JList implements IDocumentNavigator {
   /** Standard constructor. */
   public JListNavigator() { 
     super();
-    //System.out.println("DEBUG: Is the problem in the constructor?");
     init(new DefaultListModel());
   }
   
@@ -209,14 +208,10 @@ class JListNavigator extends JList implements IDocumentNavigator {
    *  @param doc the document to select
    */
   public void setActiveDoc(INavigatorItem doc) { 
-    //System.out.println("DEBUG: Are we in setActiveDoc");
     synchronized(_model) {
-      //System.out.println("DEBUG: Do we get into the synchronized?");
       if (_current == doc) return; // doc is already _current (the active doc)
       if (_model.contains(doc)) {
-        //System.out.println("DEBUG: Are we in this if-statement?");
-        setSelectedValue(doc, true);
-        //System.out.println("DEBUG: We have finished setting the selected value.");
+        setSelectedValue(doc, true);   
         //_current = doc;  // already done by ListSelectionEvent listener created in init()
       }
     }

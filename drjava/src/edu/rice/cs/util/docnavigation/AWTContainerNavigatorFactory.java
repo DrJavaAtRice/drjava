@@ -45,6 +45,7 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.util.docnavigation;
 import edu.rice.cs.util.Pair;
+import edu.rice.cs.util.swing.Utilities;
 import java.util.*;
 import java.awt.*;
 import java.awt.event.*;
@@ -58,14 +59,14 @@ public class AWTContainerNavigatorFactory implements IDocumentNavigatorFactory {
   /** Creates a new List Navigator
    *  @return a list navigator
    */
-    public IDocumentNavigator makeListNavigator() {return new JListSortNavigator(); }
+    public IDocumentNavigator makeListNavigator() { return new JListSortNavigator(); }
 
   /** Returns a new tree Navigator with the specified root
    *  @param name the name of the root node
    *  @return a tree navigator
    */
     public IDocumentNavigator makeTreeNavigator(String name) {
-        return new JTreeSortNavigator(name);
+      return new JTreeSortNavigator(name);
     }
     
   /** Creates a list navigator and migrates the navigator items from parent to the new navigator

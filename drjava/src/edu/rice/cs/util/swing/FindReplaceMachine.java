@@ -48,6 +48,8 @@ import javax.swing.text.Position;
 public class FindReplaceMachine {
  /** The document on which FindReplaceMachine is operating. */
   private AbstractDocumentInterface _doc;
+  /** The first document that the current search was executed on (used for wrapping around all docs). */
+  private AbstractDocumentInterface _firstDoc;
   /** The position in _doc from which the searches started. */
   private Position _start;
   /** The position in _doc which the machine is currently at. */
@@ -58,6 +60,8 @@ public class FindReplaceMachine {
   private String _replaceWord;
   private boolean _found;
   private boolean _wrapped;
+  private boolean _allDocsWrapped;
+  private boolean _checkAllDocsWrapped;
   private boolean _matchCase;
   private boolean _matchWholeWord;
   private boolean _searchBackwards;
@@ -85,6 +89,8 @@ public class FindReplaceMachine {
    */
   public FindReplaceMachine(DocumentIterator docIterator) {    
     _skipOneFind = false;
+    _checkAllDocsWrapped = false;
+    _allDocsWrapped = false;
     _docIterator = docIterator;
     setFindAnyOccurrence();
     setFindWord("");
@@ -133,7 +139,9 @@ public class FindReplaceMachine {
   }
 
   public void setDocument(AbstractDocumentInterface doc) { _doc = doc; }
-
+  
+  public void setFirstDoc(AbstractDocumentInterface firstDoc) { _firstDoc = firstDoc; }
+ 
   public void setPosition(int pos) {
     try { _current = _doc.createPosition(pos); }
     catch (BadLocationException ble) { throw new UnexpectedException(ble); }
@@ -168,6 +176,8 @@ public class FindReplaceMachine {
   public boolean getSearchAllDocuments() { return _searchAllDocuments; }
 
   public AbstractDocumentInterface getDocument() { return _doc; }
+  
+  public AbstractDocumentInterface getFirstDoc() { return _firstDoc; }
 
   /** Change the word being sought.
    *  @param word the new word to seek
@@ -341,7 +351,7 @@ public class FindReplaceMachine {
    */
   private FindResult _findNext(int start, int end) {
     try {
-      FindResult tempFr = new FindResult(_doc, -1, false);      
+      FindResult tempFr = new FindResult(_doc, -1, false, false);      
       int docLen;
       String findWord = _findWord;
       // get the search space in the document
@@ -387,7 +397,12 @@ public class FindReplaceMachine {
           tempFr = _findNextInAllDocs(nextDocToSearch, 0, nextDocToSearch.getLength());
           foundOffset = tempFr.getFoundOffset();
         }
-        if (foundOffset == -1) {   // we still haven't found it 
+        else { 
+          _checkAllDocsWrapped = false;
+          _allDocsWrapped = false;
+        }
+        
+        if (foundOffset == -1) {   // we still haven't found it            
           if (!_searchBackwards) foundOffset = _findWrapped(0, _current.getOffset() + (_findWord.length() -1));
           else {
             int startBackOffset = _current.getOffset() - (_findWord.length() - 1);
@@ -396,8 +411,14 @@ public class FindReplaceMachine {
         }
       }
       
-      FindResult fr = new FindResult(tempFr.getDocument(), foundOffset, _wrapped);
+      if (_checkAllDocsWrapped && tempFr.getDocument() == _firstDoc) {
+        _allDocsWrapped = true;
+        _checkAllDocsWrapped = false;
+      }
+      
+      FindResult fr = new FindResult(tempFr.getDocument(), foundOffset, _wrapped, _allDocsWrapped);
       _wrapped = false;
+      if (_allDocsWrapped = true) _allDocsWrapped = false;
       return fr;
     }
     catch (BadLocationException e) { throw new UnexpectedException(e); }
@@ -473,8 +494,13 @@ public class FindReplaceMachine {
    *  @return the FindResult containing the information for where we found _findWord or a dummy FindResult.
    */
   private FindResult _findNextInAllDocs(AbstractDocumentInterface docToSearch, int start, int end) throws BadLocationException {
-    
+    _checkAllDocsWrapped = true;    
     while (docToSearch != _doc) {
+      if (docToSearch == _firstDoc) {
+        _allDocsWrapped = true;
+        _checkAllDocsWrapped = false;
+      }
+      
       String text;
       int docLen;
       docToSearch.acquireReadLock();
@@ -499,19 +525,19 @@ public class FindReplaceMachine {
           }
           return _findNextInAllDocs(docToSearch, start, foundOffset-start);
         }       
-      
+            
         // We found it in a different document, put the caret at the end of the
         // found word (if we're going forward).
         foundOffset += start;
         if (!_searchBackwards) foundOffset += findWord.length();
-        return new FindResult(docToSearch, foundOffset, false);
+        return new FindResult(docToSearch, foundOffset, false, _allDocsWrapped);
       }
       docToSearch = !_searchBackwards ? _docIterator.getNextDocument(docToSearch) :
                                         _docIterator.getPrevDocument(docToSearch);
       start = 0;
       end = docToSearch.getLength();
     }
-    return new FindResult(docToSearch, -1, false);
+    return new FindResult(docToSearch, -1, false, _allDocsWrapped);
   } 
   
   
