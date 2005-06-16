@@ -60,8 +60,7 @@ import edu.rice.cs.drjava.config.FileOption;
  *
  * @version $Id$
  */
-public class Javac150FromSetLocation extends CompilerProxy
-  implements OptionConstants {
+public class Javac150FromSetLocation extends CompilerProxy implements OptionConstants {
   // To implement #523222, we had to make this not a singleton,
   // to allow it to re-determine the location of the compiler multiple times.
   //public static final CompilerInterface ONLY = new JavacFromSetLocation();

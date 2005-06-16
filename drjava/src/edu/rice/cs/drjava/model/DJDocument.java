@@ -159,10 +159,6 @@ public interface DJDocument extends StyledDocument, AbstractDocumentInterface {
    */
   public void indentLines(int selStart, int selEnd);
   
-  /** Partially parameterized version of indentLines that uses _currentLocation for loc */
-  public void indentLines(int selStart, int selEnd, int reason, ProgressMonitor pm)
-    throws OperationCanceledException;
-  
   /** Parameterized indentation for special-case handling.
    *  @param selStart the offset of the initial character of the region to indent
    *  @param selEnd the offset of the last character of the region to indent
@@ -170,7 +166,7 @@ public interface DJDocument extends StyledDocument, AbstractDocumentInterface {
    *         to indicate the reason for the indent (indent logic may vary slightly based on the trigger action)
    *  @param pm used to display progress, null if no reporting is desired
    */
-  public void indentLines(int selStart, int selEnd, int reason, ProgressMonitor pm, int loc)
+  public void indentLines(int selStart, int selEnd, int reason, ProgressMonitor pm)
     throws OperationCanceledException;
   
   /**

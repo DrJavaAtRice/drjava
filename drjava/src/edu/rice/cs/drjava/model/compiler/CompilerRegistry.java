@@ -48,13 +48,10 @@ package edu.rice.cs.drjava.model.compiler;
 import java.util.LinkedList;
 import java.lang.reflect.Field;
 
-/**
- * Registry for all CompilerInterface implementations.
- * Allows registration, by class name, of {@link CompilerInterface}
- * implementations. Later, the list of these registered compilers (but only
- * those that successfully loaded) can be retrieved.
- *
- * @version $Id$
+/** Registry for all CompilerInterface implementations. Allows registration, by class name, of {@link CompilerInterface}
+ *  implementations. Later, the list of these registered compilers (but only those that successfully loaded) can be 
+ *  retrieved.
+ *  @version $Id$
  */
 public class CompilerRegistry {
 
@@ -95,11 +92,10 @@ public class CompilerRegistry {
   /** Class loader to use to fetch compiler classes. */
   private ClassLoader _baseClassLoader;
 
-  /**
-   * Linked list of class names of registered compilers.
-   * Added to allow the user to specify extra compilers, but not currently used.
-   *
-  private LinkedList<String> _registeredCompilers = new LinkedList<String>();*/
+//  /** Linked list of class names of registered compilers.
+//   *  Added to allow the user to specify extra compilers, but not currently used.
+//   */
+//  private LinkedList<String> _registeredCompilers = new LinkedList<String>();
 
   /** The active compiler. Must never be null. */
   private CompilerInterface _activeCompiler = NoCompilerAvailable.ONLY;
@@ -110,54 +106,41 @@ public class CompilerRegistry {
 //    _registerDefaultCompilers();
   }
 
-  /**
-   * Sets the base class loader used to load compiler classes.
-   */
+  /** Sets the base class loader used to load compiler classes. */
   public void setBaseClassLoader(ClassLoader l) {
     _baseClassLoader = l;
   }
 
-  /**
-   * Gets the base class loader used to load compiler classes.
-   */
+  /**  Gets the base class loader used to load compiler classes. */
   public ClassLoader getBaseClassLoader() {
     return _baseClassLoader;
   }
 
-  /**
-   * Register the given compiler, adding it to the list of potential
-   * compilers. This function adds the compiler to the list, regardless
-   * of whether the compiler is actualy available.
-   * This method will not add a duplicate instance of the same compiler.
-   * NOTE: We're no longer using this as of 3.28.2004.  Re-add if we implement custom compilers.
-   *
-   * @param name Name of the {@link CompilerInterface} implementation class.
-   */
+//  /**
+//   * Register the given compiler, adding it to the list of potential
+//   * compilers. This function adds the compiler to the list, regardless
+//   * of whether the compiler is actualy available.
+//   * This method will not add a duplicate instance of the same compiler.
+//   * NOTE: We're no longer using this as of 3.28.2004.  Re-add if we implement custom compilers.
+//   *
+//   * @param name Name of the {@link CompilerInterface} implementation class.
+//   */
 //  public void registerCompiler(String name) {
 //    if (!_registeredCompilers.contains(name)) {
 //      _registeredCompilers.add(name);
 //    }
 //  }
 
-  /**
-   * Returns all registered compilers that are actually available.
-   * That is, for all elements in the returned array, .isAvailable()
-   * is true.
-   * <P>
-   * This method will never return null or a zero-length array.
-   * Instead, if no compiler is registered and available, this will return
-   * a one-element array containing an instance of
-   * {@link NoCompilerAvailable}.
+  /** Returns all registered compilers that are actually available. That is, for all elements in the returned array,
+   *  .isAvailable() is true. <P> This method will never return null or a zero-length array. Instead, if no compiler
+   *  is registered and available, this will return a one-element array containing an instance of {@link 
+   *  NoCompilerAvailable}.
    */
   public CompilerInterface[] getAvailableCompilers() {
-    LinkedList<CompilerInterface> availableCompilers =
-      new LinkedList<CompilerInterface>();
-//    Iterator<String> itor = _registeredCompilers.listIterator();
+    LinkedList<CompilerInterface> availableCompilers = new LinkedList<CompilerInterface>();
 
-//    while (itor.hasNext()) {
-//    String name = itor.next();
     for (String[] row:  DEFAULT_COMPILERS) {
-      //DrJava.consoleOut().print("REGISTRY:  Checking compiler: " + name + ": ");
+//      DrJava.consoleOut().print("REGISTRY:  Checking compiler: " + name + ": ");
       for (String name: row) {
         try { if (_createCompiler(name, availableCompilers)) break; }
         catch (Throwable t) {
@@ -225,63 +208,52 @@ public class CompilerRegistry {
       // Can't let active compiler be null
       throw new IllegalArgumentException("Cannot set active compiler to null.");
     }
-    else {
-      _activeCompiler = compiler;
-    }
+    else _activeCompiler = compiler;
   }
 
-  /**
-   * Gets the compiler is the "active" compiler.
-   * If there is no "active" compiler or if the active compiler is
-   * not available, this will return {@link NoCompilerAvailable}.
-   *
-   * @see #setActiveCompiler
+  /** Gets the compiler is the "active" compiler. If there is no "active" compiler or if the active compiler is
+   *  not available, this will return {@link NoCompilerAvailable}.
+   *  @see #setActiveCompiler
    */
   public CompilerInterface getActiveCompiler() {
     // If no compiler is available now, try to see if we can get one
-    if (_activeCompiler == NoCompilerAvailable.ONLY) {
-      getAvailableCompilers();
-    }
+    if (_activeCompiler == NoCompilerAvailable.ONLY) getAvailableCompilers();
 
     //DrJava.consoleErr().println("active compiler: " + _activeCompiler);
 
-    if (_activeCompiler.isAvailable()) {
-      return _activeCompiler;
-    }
-    else {
-      return NoCompilerAvailable.ONLY;
-    }
+    if (_activeCompiler.isAvailable()) return _activeCompiler;
+    return NoCompilerAvailable.ONLY;
   }
 
-  /**
-   * NOTE: We're no longer using this as of 3.28.2004.  Re-add if we implement custom compilers.
-   *
-  private void _registerDefaultCompilers() {
-    for (int i = 0; i < DEFAULT_COMPILERS.length; i++) {
-      registerCompiler(DEFAULT_COMPILERS[i]);
-    }
-  }*/
+//  /**
+//   * NOTE: We're no longer using this as of 3.28.2004.  Re-add if we implement custom compilers.
+//   */
+//  private void _registerDefaultCompilers() {
+//    for (int i = 0; i < DEFAULT_COMPILERS.length; i++) {
+//      registerCompiler(DEFAULT_COMPILERS[i]);
+//    }
+//  }
 
-  /**
-   * Sets as active the first compiler that's available.
-   * If no compiler is available, the active compiler will not be changed.
-   *
-  private void _setFirstAvailableCompilerActive() {
-    ListIterator itor = _registeredCompilers.listIterator();
-
-    while (itor.hasNext()) {
-      String current = (String) itor.next();
-
-      try {
-        CompilerInterface compiler = _instantiateCompiler(current);
-        _activeCompiler = compiler;
-        return;
-      }
-      catch (Throwable t) {
-        // This compiler didn't load. Keep on going.
-      }
-    }
-  }*/
+//  /**
+//   * Sets as active the first compiler that's available.
+//   * If no compiler is available, the active compiler will not be changed.
+//   */
+//  private void _setFirstAvailableCompilerActive() {
+//    ListIterator itor = _registeredCompilers.listIterator();
+//
+//    while (itor.hasNext()) {
+//      String current = (String) itor.next();
+//
+//      try {
+//        CompilerInterface compiler = _instantiateCompiler(current);
+//        _activeCompiler = compiler;
+//        return;
+//      }
+//      catch (Throwable t) {
+//        // This compiler didn't load. Keep on going.
+//      }
+//    }
+//  }
 
   /**
    * Instantiate the given compiler.

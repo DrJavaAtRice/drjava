@@ -219,6 +219,7 @@ public final class CommandLineTest extends TestCase {
     DrJava.openCommandLineFiles(_mf, list);
 //    _log.log("openCommandLineFiles completed");
     List<OpenDefinitionsDocument> docs = _mf.getModel().getOpenDefinitionsDocuments();
+//    Utilities.showDebug(docs.toString());
 //    _log.log("got OpenDefDocs");
     assertEquals("Only one document opened?", 1, docs.size());
     OpenDefinitionsDocument doc = docs.get(0);
@@ -371,6 +372,7 @@ public final class CommandLineTest extends TestCase {
     if (newDirectory.exists()) FileOps.deleteDirectory(newDirectory);
 
     assertTrue("directory created OK", newDirectory.mkdir());
+//    _log.log("Temporary directory " + funnyName + " created");
     return newDirectory;
   }
 
@@ -396,7 +398,6 @@ public final class CommandLineTest extends TestCase {
     Utilities.clearEventQueue();
     assertEquals("source root", new File("").getCanonicalFile(), root);
    
-
     // Close this doc to clean up after ourselves for the next check.
     _mf.getModel().closeFile(doc);
   }

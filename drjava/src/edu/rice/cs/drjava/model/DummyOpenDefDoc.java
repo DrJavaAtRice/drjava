@@ -555,10 +555,6 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
     throw new UnsupportedOperationException("Dummy method");
   }
   
-  public void indentLines(int selStart, int selEnd, int reason, ProgressMonitor pm, int loc) 
-    throws OperationCanceledException {
-    throw new UnsupportedOperationException("Dummy method");
-  }
   public int findPrevCharPos(int pos, char[] whitespace) throws BadLocationException {
     throw new UnsupportedOperationException("Dummy method");
   }

@@ -158,12 +158,12 @@ public abstract class AbstractDJPane extends JTextPane implements OptionConstant
 
     /** Because indent() is a function called directly by the Keymap, it does not go through the regular insertString
      *  channels and thus it may not be in sync with the document's position.  For that reason, we must grab the
-     *  caretPostion and pass it as the cursor location for the insertLine operation (relevant for single line insert).
+     *  caretPostion and set the current location to that value before calling the insertLine operation.  The logic
+     *  for a single line insert is very dependent on the current location.
      *  old: _doc().setCurrentLocation(getCaretPosition());
      *  new:
      */
-    DJDocument doc = getDJDocument();
-    int loc = getCaretPosition();
+    getDJDocument().setCurrentLocation(getCaretPosition());
     
     // The _reduced lock within DefinitionsDocument should be probably be set as well
     
@@ -179,11 +179,8 @@ public abstract class AbstractDJPane extends JTextPane implements OptionConstant
     //pm.setMillisToDecideToPopup(3000);
     
     // XXX: Temporary hack because of slow indent...
-    //  Prompt if more than 10000 characters to be indented
-    boolean doIndent = shouldIndent(selStart,selEnd);
-    
-    // Do the indent
-    if (doIndent) { indentLines(selStart, selEnd, reason, pm, loc); }
+    //  Prompt if more than 10000 characters to be indented, then do the indent
+    if (shouldIndent(selStart,selEnd)) { indentLines(selStart, selEnd, reason, pm); }
 
   }
 
@@ -193,7 +190,7 @@ public abstract class AbstractDJPane extends JTextPane implements OptionConstant
    *  @param reason - the reason for the indent
    *  @param pm - the ProgressMonitor used by the indenter
    */
-  protected abstract void indentLines(int selStart, int selEnd, int reason, ProgressMonitor pm, int loc);
+  protected abstract void indentLines(int selStart, int selEnd, int reason, ProgressMonitor pm);
      
   /**
    * Returns true if the indent is to be performed.

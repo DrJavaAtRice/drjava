@@ -1047,88 +1047,85 @@ public final class IndentTest extends TestCase {
   }
 
 
-  /**
-   * This method tests that multiple unbraced nested lines are indented
-   * correctly.  This is currently incorrect.  Bug #627753.  Uncomment when
-   * it has been fixed
-  public void testNestedUnbracedFor() throws BadLocationException {
-    String text =
-      "for (int a =0; a < 5; a++)\n" +
-      "for (int b = 0; b < 5; b++) {\n" +
-      "System.out.println(a + b);";
-    String indented =
-      "for (int a =0; a < 5; a++)\n" +
-      "  for (int b = 0; b < 5; b++) {\n" +
-      "    System.out.println(a + b);";
-    doc.insertString(0, text, null);
-    _assertContents(text, doc);
-    doc.indentLines(0, doc.getLength());
-    _assertContents(indented, doc);
-    doc.remove(0,doc.getLength() - 1);
-
-    text =
-      "if (true)\n" +
-      "if (true)\n" +
-      "System.out.println(\"Hello\");";
-    indented =
-      "if (true)\n" +
-      "  if (true)\n" +
-      "    System.out.println(\"Hello\");";
-    doc.insertString(0, text, null);
-    _assertContents(text, doc);
-    doc.indentLines(0, doc.getLength());
-    _assertContents(indented, doc);
-    doc.remove(0,doc.getLength() - 1);
-
-    text =
-      "{\n" +
-      "while (a < 5)\n" +
-      "while (b < 5) {\n" +
-      "System.out.println(a + b);";
-    indented =
-      "{\n" +
-      "  while (a < 5)\n" +
-      "    while (b < 5) {\n" +
-      "      System.out.println(a + b);";
-    doc.insertString(0, text, null);
-    _assertContents(text, doc);
-    doc.indentLines(0, doc.getLength());
-    _assertContents(indented, doc);
-    doc.remove(0,doc.getLength() - 1);
-
-    text =
-      "while (a < 5)\n" +
-      "while (b < 5);\n" +
-      "System.out.println(a + b);";
-    indented =
-      "while (a < 5)\n" +
-      "  while (b < 5);\n" +
-      "System.out.println(a + b);";
-    doc.insertString(0, text, null);
-    _assertContents(text, doc);
-    doc.indentLines(0, doc.getLength());
-    _assertContents(indented, doc);
-    doc.remove(0,doc.getLength() - 1);
-
-    text =
-      "do\n" +
-      "do\n" +
-      "x=5;\n" +
-      "while(false);\n" +
-      "while(false);\n";
-    indented =
-      "do\n" +
-      "  do\n" +
-      "    x=5;\n" +
-      "  while(false);\n" +
-      "while(false);\n";
-    doc.insertString(0, text, null);
-    _assertContents(text, doc);
-    doc.indentLines(0, doc.getLength());
-    _assertContents(indented, doc);
-    doc.remove(0,doc.getLength() - 1);
-  }
- */
+//  /** Regression test for Bug #627753.  Uncomment when it is fixed.
+//   */
+//  public void testNestedUnbracedFor() throws BadLocationException {
+//    String text =
+//      "for (int a =0; a < 5; a++)\n" +
+//      "for (int b = 0; b < 5; b++) {\n" +
+//      "System.out.println(a + b);";
+//    String indented =
+//      "for (int a =0; a < 5; a++)\n" +
+//      "  for (int b = 0; b < 5; b++) {\n" +
+//      "    System.out.println(a + b);";
+//    doc.insertString(0, text, null);
+//    _assertContents(text, doc);
+//    doc.indentLines(0, doc.getLength());
+//    _assertContents(indented, doc);
+//    doc.remove(0,doc.getLength() - 1);
+//
+//    text =
+//      "if (true)\n" +
+//      "if (true)\n" +
+//      "System.out.println(\"Hello\");";
+//    indented =
+//      "if (true)\n" +
+//      "  if (true)\n" +
+//      "    System.out.println(\"Hello\");";
+//    doc.insertString(0, text, null);
+//    _assertContents(text, doc);
+//    doc.indentLines(0, doc.getLength());
+//    _assertContents(indented, doc);
+//    doc.remove(0,doc.getLength() - 1);
+//
+//    text =
+//      "{\n" +
+//      "while (a < 5)\n" +
+//      "while (b < 5) {\n" +
+//      "System.out.println(a + b);";
+//    indented =
+//      "{\n" +
+//      "  while (a < 5)\n" +
+//      "    while (b < 5) {\n" +
+//      "      System.out.println(a + b);";
+//    doc.insertString(0, text, null);
+//    _assertContents(text, doc);
+//    doc.indentLines(0, doc.getLength());
+//    _assertContents(indented, doc);
+//    doc.remove(0,doc.getLength() - 1);
+//
+//    text =
+//      "while (a < 5)\n" +
+//      "while (b < 5);\n" +
+//      "System.out.println(a + b);";
+//    indented =
+//      "while (a < 5)\n" +
+//      "  while (b < 5);\n" +
+//      "System.out.println(a + b);";
+//    doc.insertString(0, text, null);
+//    _assertContents(text, doc);
+//    doc.indentLines(0, doc.getLength());
+//    _assertContents(indented, doc);
+//    doc.remove(0,doc.getLength() - 1);
+//
+//    text =
+//      "do\n" +
+//      "do\n" +
+//      "x=5;\n" +
+//      "while(false);\n" +
+//      "while(false);\n";
+//    indented =
+//      "do\n" +
+//      "  do\n" +
+//      "    x=5;\n" +
+//      "  while(false);\n" +
+//      "while(false);\n";
+//    doc.insertString(0, text, null);
+//    _assertContents(text, doc);
+//    doc.indentLines(0, doc.getLength());
+//    _assertContents(indented, doc);
+//    doc.remove(0,doc.getLength() - 1);
+//  }
 
   public void testLiveUpdateOfIndentLevel() throws BadLocationException {
 

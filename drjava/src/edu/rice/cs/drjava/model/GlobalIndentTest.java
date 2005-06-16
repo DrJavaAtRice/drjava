@@ -86,11 +86,9 @@ public final class GlobalIndentTest extends GlobalModelTestCase {
     _assertLocation(FOO_EX_1.length() + 2, openDoc);
   }
 
-  /**
-   * Tests indent that increases the size of the tab when the
-   * cursor is in the middle of the line.  The cursor stays in the
-   * same place.
-   * @throws BadLocationException
+  /** Tests indent that increases the size of the tab when the cursor is in the middle of the line.  
+   *  The cursor stays in the same place.
+   *  @throws BadLocationException
    */
   public void testIndentGrowTabAtMiddle()
       throws BadLocationException, OperationCanceledException {

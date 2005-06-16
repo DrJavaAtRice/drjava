@@ -1064,6 +1064,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
     // This code is duplicated in MainFrame._setCurrentDirectory(File) for safety.
     final File file = (com.getFiles())[0].getCanonicalFile();
     OpenDefinitionsDocument odd = _openFile(file);
+//    Utilities.showDebug("File " + file + " opened");
     // Make sure this is on the classpath
     try {
       File classpath = odd.getSourceRoot();
@@ -1652,26 +1653,20 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
     _notifier.consoleReset();
   }
 
-  /**
-   * Interprets the current given text at the prompt in the interactions
-   * pane.
-   */
+  /** Interprets the current given text at the prompt in the interactions pane. */
   public void interpretCurrentInteraction() {
     _interactionsModel.interpretCurrentInteraction();
   }
 
-  /**
-   * Interprets the file selected in the FileOpenSelector. Assumes all strings
-   * have no trailing whitespace. Interprets the array all at once so if there are
-   * any errors, none of the statements after the first erroneous one are processed.
+  /** Interprets the file selected in the FileOpenSelector. Assumes all strings have no trailing whitespace. 
+   *  Interprets the array all at once so if there are any errors, none of the statements after the first erroneous
+   *  one are processed.
    */
   public void loadHistory(FileOpenSelector selector) throws IOException {
     _interactionsModel.loadHistory(selector);
   }
 
-  /**
-   * Loads the history/histories from the given selector.
-   */
+  /** Loads the history/histories from the given selector. */
   public InteractionsScriptModel loadHistoryAsScript(FileOpenSelector selector)
     throws IOException, OperationCanceledException {
     return _interactionsModel.loadHistoryAsScript(selector);
@@ -2082,7 +2077,9 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
           for (FinalizationListener<DefinitionsDocument> l: _finalListeners) {
             tempDoc.addFinalizationListener(l);
           }
+
           tempDoc.resetModification();  // Why is this necessary? A reconstructed document is already unmodified.
+
           //            tempDoc.setUndoManager(_undo);
           assert ! tempDoc.isModifiedSinceSave();
           try { _packageName = tempDoc.getPackageName(); } 
@@ -3030,12 +3027,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
     public void indentLines(int selStart, int selEnd, int reason, ProgressMonitor pm) 
       throws OperationCanceledException {
       getDocument().indentLines(selStart, selEnd, reason, pm);
-    }
-    
-     public void indentLines(int selStart, int selEnd, int reason, ProgressMonitor pm, int loc) 
-      throws OperationCanceledException {
-      getDocument().indentLines(selStart, selEnd, reason, pm, loc);
-    }
+    }     
     
     public int findPrevCharPos(int pos, char[] whitespace) throws BadLocationException {
       return getDocument().findPrevCharPos(pos, whitespace);

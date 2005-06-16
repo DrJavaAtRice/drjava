@@ -50,6 +50,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.net.MalformedURLException;
 import java.util.jar.JarFile;
+import java.util.Arrays;
 import javax.swing.UIManager;
 import javax.swing.*;
 
@@ -292,6 +293,7 @@ public class DrJava implements OptionConstants {
   }
       
   private static void _openCommandLineFiles(MainFrame mf, String[] filesToOpen) {
+//    Utilities.showDebug("Files to open: " + Arrays.toString(filesToOpen));
     for (int i = 0; i < filesToOpen.length; i++) {
       String currFileName = filesToOpen[i];
       boolean isProjectFile = currFileName.endsWith(".pjt");
@@ -304,6 +306,7 @@ public class DrJava implements OptionConstants {
         if (isProjectFile) mf.openProject(command);
         else mf.getModel().openFile(command);
       }
+
       catch (FileNotFoundException ex) {
         // TODO: show a dialog? (file not found)
       }
@@ -319,7 +322,7 @@ public class DrJava implements OptionConstants {
       catch (IOException ex) {
         // TODO: show a dialog? (file not found)
       }
-      catch (Exception ex) { throw new UnexpectedException(ex); }
+      catch (Exception ex) { throw new UnexpectedException(ex); }  
     }
   }
 

@@ -566,8 +566,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   /** Notifies listeners that the interpreter is resetting. (Subclasses must maintain listeners.) */
   protected abstract void _notifyInterpreterResetting();
 
-  /** This method is called by the Main JVM if the Interpreter JVM cannot be exited (likely because of its having 
-   *  a security manager)
+  /** This method is called by the Main JVM if the Interpreter JVM cannot be exited
    *  @param t The Throwable thrown by System.exit
    */
   public void interpreterResetFailed(Throwable t) {

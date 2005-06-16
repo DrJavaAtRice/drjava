@@ -101,15 +101,14 @@ public abstract class IndentRuleWithTrace implements IndentRule{
   }
 
 
-  /**
-   * Properly indents the line that the current position is on.
-   * Replaces all whitespace characters at the beginning of the
-   * line with the appropriate spacing or characters.
-   * @param doc AbstractDJDocument containing the line to be indented.
-   * @param pos ?
-   * @param reason ?
-   * @return true if the caller should update the current location itself,
-   * false if the indenter has already handled this
+  /** Properly indents the line that the current position is on.
+   *  Replaces all whitespace characters at the beginning of the
+   *  line with the appropriate spacing or characters.
+   *  @param doc AbstractDJDocument containing the line to be indented.
+   *  @param pos ?
+   *  @param reason ?
+   *  @return true if the caller should update the current location itself,
+   *          false if the indenter has already handled this
    */
   public boolean indentLine(AbstractDJDocument doc, int pos, int reason) {
     int oldPos = doc.getCurrentLocation();

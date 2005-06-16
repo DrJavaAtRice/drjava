@@ -1074,11 +1074,11 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
    *  @param pm - the ProgressMonitor used by the indenter
    *  @param loc - the offset of the caret (which may not match _currentLocation)
    */
-  protected void indentLines(int selStart, int selEnd, int reason, ProgressMonitor pm, int loc) {
+  protected void indentLines(int selStart, int selEnd, int reason, ProgressMonitor pm) {
     //_mainFrame.hourglassOn();
     // final int key = _doc.getUndoManager().startCompoundEdit(); //Commented out in regards to French KeyBoard Fix
     try {
-      _doc.indentLines(selStart, selEnd, reason, pm, loc);
+      _doc.indentLines(selStart, selEnd, reason, pm);
       //      _indentLines(reason, pm);
       //_doc.getUndoManager().endCompoundEdit(key); //commented out for french keyboard fix, replaced with endCompoundEdit
       endCompoundEdit();

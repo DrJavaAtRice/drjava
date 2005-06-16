@@ -717,11 +717,6 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
     }
   }
   
-  /** Parameterized indentation called from within DJDocument */
-  public void indentLines(int selStart, int selEnd, int reason, ProgressMonitor pm)
-    throws OperationCanceledException {
-    indentLines(selStart, selEnd, reason, pm, _currentLocation);
-  }
   
   /** Parameterized indentation for special-case handling.
    *  @param selStart the offset of the initial character of the region to indent
@@ -729,9 +724,8 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
    *  @param reason a flag from {@link Indenter} to indicate the reason for the indent
    *        (indent logic may vary slightly based on the trigger action)
    *  @param pm used to display progress, null if no reporting is desired
-   *  @param loc the cursor location for the indent (only relevant if selStart = selEnd)
    */
-  public void indentLines(int selStart, int selEnd, int reason, ProgressMonitor pm, int loc)
+  public void indentLines(int selStart, int selEnd, int reason, ProgressMonitor pm)
     throws OperationCanceledException {
     
     // Begins a compound edit.
@@ -741,8 +735,11 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
     try {
       synchronized(_reduced) {
         if (selStart == selEnd) {  // single line to indent
-          Position oldCurrentPosition = createPosition(loc);
+//          Utilities.showDebug("selStart = " + selStart + " currentLocation = " + _currentLocation);
+          Position oldCurrentPosition = createPosition(_currentLocation);
+          
           // Indent, updating current location if necessary.
+//          Utilities.showDebug("Indenting line at offset " + selStart);
           if (_indentLine(reason)) {
             setCurrentLocation(oldCurrentPosition.getOffset());
             int space = getWhiteSpace();
@@ -1031,22 +1028,18 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
     return pos + dist;
   }
   
-  /**
-   * Returns the absolute position of the first non-whitespace character
-   * on the current line.
-   * NB: Doesn't ignore comments.
-   * @param pos position on the line
-   * @return position of first non-whitespace character on this line, or the end
-   * of the line if no non-whitespace character is found.
+  /** Returns the absolute position of the first non-whitespace character on the current line.
+   *  NB: Doesn't ignore comments.
+   *  @param pos position on the line
+   *  @return position of first non-whitespace character on this line, or the end
+   *  of the line if no non-whitespace character is found.
    */
   public int getLineFirstCharPos(int pos) throws BadLocationException {
     // throwErrorHuh();
     // Check cache
     String key = "getLineFirstCharPos:" + pos;
     Integer cached = (Integer) _checkCache(key);
-    if (cached != null) {
-      return cached.intValue();
-    }
+    if (cached != null)  return cached.intValue();
     
     int startLinePos = getLineStartPos(pos);
     int endLinePos = getLineEndPos(pos);

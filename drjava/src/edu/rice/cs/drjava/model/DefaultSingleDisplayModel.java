@@ -225,13 +225,12 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel implements Sin
     IOException, OperationCanceledException, AlreadyOpenException {
     // Close an untitled, unchanged document if it is the only one open
     boolean closeUntitled = _hasOneEmptyDocument();
-    OpenDefinitionsDocument oldDoc = _activeDocument;
-    
+    OpenDefinitionsDocument oldDoc = _activeDocument; 
     OpenDefinitionsDocument openedDoc = openFileHelper(com);
     if (closeUntitled) closeFileHelper(oldDoc);
 //    Utilities.showDebug("DrJava has opened" + openedDoc + " and is setting it active");
     setActiveDocument(openedDoc);
-//    Utilities.showDebug("active doc set; openFile returning");
+//    Utilities.showDebug("active doc set; openFile returning"); 
     return openedDoc;
   }
 

@@ -272,9 +272,9 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
    *  @param reason - the reason for the indent
    *  @param pm - the ProgressMonitor used by the indenter
    */
-  protected void indentLines(int selStart, int selEnd, int reason, ProgressMonitor pm, int loc) {
+  protected void indentLines(int selStart, int selEnd, int reason, ProgressMonitor pm) {
     try {
-      _doc.indentLines(selStart, selEnd, reason, pm, loc);
+      _doc.indentLines(selStart, selEnd, reason, pm);
       setCaretPosition(_doc.getCurrentLocation());
     }
     catch (OperationCanceledException oce) { throw new UnexpectedException(oce); }

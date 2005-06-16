@@ -53,6 +53,8 @@ import edu.rice.cs.drjava.config.OptionEvent;
 import edu.rice.cs.drjava.config.OptionListener;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.config.FileConfiguration;
+
+import edu.rice.cs.util.swing.Utilities;
 /**
  * Singleton class to construct and use the indentation decision tree.
  *
@@ -61,15 +63,15 @@ import edu.rice.cs.drjava.config.FileConfiguration;
 public class Indenter {
 
   public Indenter(int indentLevel) { buildTree(indentLevel); }
+  
+  /* Indenting Reasons */
 
-  /** This constant is used to indicate that an enter key press caused the
-   *  indentation.  This is important for some rules dealing with stars
+  /** Indicates that an enter key press caused the indentation.  This is important for some rules dealing with stars
    *  at the line start in multiline comments
    */
   public static final int ENTER_KEY_PRESS = 1;
 
-  /** This constant is used to indicate that indentation was started for
-   *  some other reason.  This is important for some rules dealing with stars
+  /** Indicates that indentation was started for some other reason.  This is important for some rules dealing with stars
    *  at the line start in multiline comments
    */
   public static final int OTHER = 0;
@@ -148,10 +150,11 @@ public class Indenter {
   
   /** Indents the current line based on a decision tree which determines the indent based on context.
    *  @param doc document containing line to be indented
-   *  @return true if the caller should update the current location itself,
-   *          false if the indenter has already handled this
+   *  @return true if the condition tested by the top rule holds
+   *          false otherwise
    */
   public boolean indent(AbstractDJDocument doc, int reason) {
+//    Utilities.showDebug("Indenter.indent called on doc "  + doc);
     return _topRule.indentLine(doc, reason);
   }
 }
