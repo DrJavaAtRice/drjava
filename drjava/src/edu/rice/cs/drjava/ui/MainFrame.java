@@ -1457,6 +1457,11 @@ public class MainFrame extends JFrame implements OptionConstants {
     
     _model.getDocumentNavigator().asContainer().addKeyListener(_historyListener);
     _model.getDocumentNavigator().asContainer().addFocusListener(_focusListenerForRecentDocs);
+//    _model.getDocumentNavigator().addNavigationListener(new INavigationListener() {
+//      public void gainedSelection (NodeData dat) { _findReplace.updateFirstDocumentInSearch(); }
+//      public void lostSelection (NodeData dat) {}
+//    });
+      
     
     // Ensure that DefinitionsPane uses the correct EditorKit!
     //   This has to be stored as a static field on DefinitionsPane because
