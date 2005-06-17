@@ -1204,6 +1204,7 @@ public final class IndentTest extends TestCase {
     _assertContents(indented, doc);
   }
 
+//  Commented out because reference files are missing!
 //  /** Tests a list of files when indented match their correct indentations */
 //  public void testIndentationFromFile() throws IOException {
 //    File directory = new File("testFiles");
@@ -1232,46 +1233,50 @@ public final class IndentTest extends TestCase {
 //    }
 //  }
   
-//  public void testIndentingCorrectLine() throws BadLocationException {
-//    String test1 = 
-//      "class A {\n" +
-//      "  int a = 5;\n" +
-//      "     }";
-//    
-//    String test1Correct =
-//      "class A {\n" +
-//      "  int a = 5;\n" +
-//      "}";
-//    
-//    String test2 = 
-//      "     {\n" +
-//      "  int a = 5;\n" +
-//      "  }\n";
-//    
-//    String test2Correct =
-//      "{\n" +
-//      "  int a = 5;\n" +
-//      "  }\n";
-//    
-//    doc.insertString(0, test1, null);
-//    _assertContents(test1, doc);
-//    doc.indentLines(20,20);
-//    _assertContents(test1, doc);
-//    
-//    doc = new DefinitionsDocument(_notifier);
-//    
-//    doc.insertString(0, test1, null);
-//    _assertContents(test1, doc);
-//    doc.indentLines(28,28);
-//    _assertContents(test1Correct, doc);
-//    
-//    doc = new DefinitionsDocument(_notifier);
-//    
-//    doc.insertString(0, test2, null);
-//    _assertContents(test2, doc);
-//    doc.indentLines(5,5);
-//    _assertContents(test2Correct, doc);
-//  }
+  public void testIndentingCorrectLine() throws BadLocationException {
+    String test1 = 
+      "class A {\n" +
+      "  int a = 5;\n" +
+      "     }";
+    
+    String test1Correct =
+      "class A {\n" +
+      "  int a = 5;\n" +
+      "}";
+    
+    String test2 = 
+      "     {\n" +
+      "  int a = 5;\n" +
+      "  }\n";
+    
+    String test2Correct =
+      "{\n" +
+      "  int a = 5;\n" +
+      "  }\n";
+    
+    doc.insertString(0, test1, null);
+    _assertContents(test1, doc);
+    doc.setCurrentLocation(20);
+    doc.indentLines(20,20);
+//    System.out.println("test1 = \n" + test1 + "\n length = " + test1.length());
+//    System.out.println("test1 = \n" + doc.getText() + "\n length = " + doc.getLength());
+    _assertContents(test1, doc);
+    
+    doc = new DefinitionsDocument(_notifier);
+    
+    doc.insertString(0, test1, null);
+    _assertContents(test1, doc);
+    doc.indentLines(28,28);
+    _assertContents(test1Correct, doc);
+    
+    doc = new DefinitionsDocument(_notifier);
+    
+    doc.insertString(0, test2, null);
+    _assertContents(test2, doc);
+    doc.setCurrentLocation(5);
+    doc.indentLines(5,5);
+    _assertContents(test2Correct, doc);
+  }
     
 
   /**

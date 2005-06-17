@@ -178,7 +178,7 @@ public class ToolbarOptionComponent extends OptionComponent<Boolean> {
    * @param iconsEnabled Whether toolbar icons are enabled
    */
   private void _setSelected(boolean textEnabled, boolean iconsEnabled, boolean isEnabled) {
-    if(! isEnabled) {
+    if (! isEnabled) {
       _noneButton.setSelected(true);
     }
     else if (textEnabled && iconsEnabled) {
@@ -207,25 +207,25 @@ public class ToolbarOptionComponent extends OptionComponent<Boolean> {
     boolean iconsWereEnabled = DrJava.getConfig().getSetting(OptionConstants.TOOLBAR_ICONS_ENABLED).booleanValue();
     boolean wasEnabled = DrJava.getConfig().getSetting(OptionConstants.TOOLBAR_ENABLED).booleanValue();
     
-    if(btnIdent.equals(NONE)) {
-      if(wasEnabled) DrJava.getConfig().setSetting(OptionConstants.TOOLBAR_ENABLED, Boolean.FALSE);      
+    if (btnIdent.equals(NONE)) {
+      if (wasEnabled) DrJava.getConfig().setSetting(OptionConstants.TOOLBAR_ENABLED, Boolean.FALSE);      
     }
     if (btnIdent.equals(TEXT_ONLY)) {
       if (!textWasEnabled) DrJava.getConfig().setSetting(OptionConstants.TOOLBAR_TEXT_ENABLED, Boolean.TRUE);
       if (iconsWereEnabled) DrJava.getConfig().setSetting(OptionConstants.TOOLBAR_ICONS_ENABLED, Boolean.FALSE);
-      if(!wasEnabled) DrJava.getConfig().setSetting(OptionConstants.TOOLBAR_ENABLED, Boolean.TRUE);   
+      if (!wasEnabled) DrJava.getConfig().setSetting(OptionConstants.TOOLBAR_ENABLED, Boolean.TRUE);   
     }
 
     if (btnIdent.equals(ICONS_ONLY)) {
       if (!iconsWereEnabled) DrJava.getConfig().setSetting(OptionConstants.TOOLBAR_ICONS_ENABLED, Boolean.TRUE);
       if (textWasEnabled) DrJava.getConfig().setSetting(OptionConstants.TOOLBAR_TEXT_ENABLED, Boolean.FALSE);
-      if(!wasEnabled) DrJava.getConfig().setSetting(OptionConstants.TOOLBAR_ENABLED, Boolean.TRUE);  
+      if (!wasEnabled) DrJava.getConfig().setSetting(OptionConstants.TOOLBAR_ENABLED, Boolean.TRUE);  
     }
 
     if (btnIdent.equals(TEXT_AND_ICONS)) {
       if (!textWasEnabled) DrJava.getConfig().setSetting(OptionConstants.TOOLBAR_TEXT_ENABLED, Boolean.TRUE);
       if (!iconsWereEnabled) DrJava.getConfig().setSetting(OptionConstants.TOOLBAR_ICONS_ENABLED, Boolean.TRUE);
-      if(!wasEnabled) DrJava.getConfig().setSetting(OptionConstants.TOOLBAR_ENABLED, Boolean.TRUE);        
+      if (!wasEnabled) DrJava.getConfig().setSetting(OptionConstants.TOOLBAR_ENABLED, Boolean.TRUE);        
     }
 
     return true;

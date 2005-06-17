@@ -58,7 +58,7 @@ public class DefaultOptionMap implements OptionMap {
     return o.setOption(this,val);
   }
   
-  private <T> void setOption(OptionParser<T> o) { if(keys.indexOf(o) == -1) keys.add(o); }
+  private <T> void setOption(OptionParser<T> o) { if (keys.indexOf(o) == -1) keys.add(o); }
   
   public <T> String getString(OptionParser<T> o) { return o.getString(this); }
   

@@ -107,7 +107,7 @@ public class ForcedChoiceOptionComponent extends OptionComponent<String> {
 //    int i = 0;
 //
 //    while(values.hasNext()) {
-//      if(current.equals(values.next())) {
+//      if (current.equals(values.next())) {
 //
 //        return;
 //      }

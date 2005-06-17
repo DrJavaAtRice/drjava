@@ -199,7 +199,7 @@ public class ProjectPropertiesFrame extends JFrame {
   private void reset() {
     File f = _mainFrame.getModel().getBuildDirectory();
     JTextField textField = _builtDirSelector.getFileField();
-    if(f == null)
+    if (f == null)
       textField.setText("");
     else
       _builtDirSelector.setFileField(f);
@@ -207,7 +207,7 @@ public class ProjectPropertiesFrame extends JFrame {
     f = _mainFrame.getModel().getMainClass();
     
     textField = _jarMainClassSelector.getFileField();
-    if(f == null)
+    if (f == null)
       textField.setText("");
     else
       _jarMainClassSelector.setFileField(f);
@@ -221,12 +221,12 @@ public class ProjectPropertiesFrame extends JFrame {
    */
   public boolean saveSettings() {//throws IOException {
     File f = _builtDirSelector.getFileFromField();
-    if(_builtDirSelector.getFileField().getText().equals("")) 
+    if (_builtDirSelector.getFileField().getText().equals("")) 
       f = null;
     _mainFrame.getModel().setBuildDirectory(f);
     
     f = _jarMainClassSelector.getFileFromField();
-    if(_jarMainClassSelector.getFileField().getText().equals(""))
+    if (_jarMainClassSelector.getFileField().getText().equals(""))
       f = null;
     _mainFrame.getModel().setJarMainClass(f);
     

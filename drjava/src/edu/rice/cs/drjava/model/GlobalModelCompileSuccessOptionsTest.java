@@ -119,7 +119,7 @@ public final class GlobalModelCompileSuccessOptionsTest extends GlobalModelCompi
     throws BadLocationException, IOException, InterruptedException {
 //    System.out.println("testCompileWithJavaAssert()");
     // No assert support by default (or in 1.3)
-    if(Float.valueOf(System.getProperty("java.specification.version")) < 1.5) {
+    if (Float.valueOf(System.getProperty("java.specification.version")) < 1.5) {
       OpenDefinitionsDocument doc = setupDocument(FOO_WITH_ASSERT);
       final File file = tempFile();
       doc.saveFile(new FileSelector(file));

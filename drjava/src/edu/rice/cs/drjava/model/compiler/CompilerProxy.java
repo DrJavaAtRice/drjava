@@ -92,7 +92,7 @@ public class CompilerProxy implements CompilerInterface {
       
 //      StringBuffer newclasspath = new StringBuffer();
 //      Vector<File> cp = DrJava.getConfig().getSetting(OptionConstants.EXTRA_CLASSPATH);
-//      //if(cp!=null) {
+//      //if (cp!=null) {
 //        Enumeration<File> en = cp.elements();
 //        while(en.hasMoreElements()) {
 //          newclasspath.append(System.getProperty("path.separator")).append(en.nextElement().getAbsolutePath());

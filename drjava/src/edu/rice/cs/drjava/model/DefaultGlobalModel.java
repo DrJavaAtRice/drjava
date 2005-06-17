@@ -661,7 +661,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
         /*
          for (File file : projectFiles) {
          try {
-         if(file.getCanonicalPath().equals(path))
+         if (file.getCanonicalPath().equals(path))
          return true;
          }
          catch(IOException ioe) {
@@ -1011,7 +1011,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
       buf.append("* This method is called before each test method, to perform any common\n");
       buf.append("* setup if necessary.\n");
       buf.append("*/\n");
-      if(! elementary) buf.append("public ");
+      if (! elementary) buf.append("public ");
       buf.append("void setUp() {\n}\n\n");
     }
     if (makeTearDown) {
@@ -1019,7 +1019,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
       buf.append("* This method is called after each test method, to perform any common\n");
       buf.append("* clean-up if necessary.\n");
       buf.append("*/\n");
-      if(! elementary) buf.append("public ");
+      if (! elementary) buf.append("public ");
       buf.append("void tearDown() {\n}\n\n");
     }
     buf.append("/**\n");
@@ -1028,7 +1028,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
     buf.append("* many \"testSomething\" methods in this class as you wish, and each\n");
     buf.append("* one will be called when running JUnit over this class.)\n");
     buf.append("*/\n");
-    if(! elementary) buf.append("public ");
+    if (! elementary) buf.append("public ");
     buf.append("void testX() {\n}\n\n");
     buf.append("}\n");
     String test = buf.toString();
@@ -1216,7 +1216,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
 //    for (File f: currentclasspaths) { builder.addClasspathFile(f); }
     // New behavior: only save project-specific classpaths.
     ClasspathVector exCp = getProjectExtraClasspath();
-    if(exCp != null) {
+    if (exCp != null) {
       Vector<File> exCpF = exCp.asFileVector();
       for (File f : exCpF) {
         builder.addClasspathFile(f);

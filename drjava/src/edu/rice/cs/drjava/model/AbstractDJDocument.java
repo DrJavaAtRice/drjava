@@ -144,7 +144,6 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
    *  @param indent the size of indent that you want for the document
    */
   public void setIndent(final int indent) {
-    // throwErrorHuh();
     DrJava.getConfig().setSetting(INDENT_LEVEL,new Integer(indent));
     this._indent = indent;
   }
@@ -673,7 +672,6 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
    *  @param key Name of the method and arguments
    */
   protected Object _checkCache(String key) {
-    // throwErrorHuh();
     //_helperCache.put(key+"|time", new Long(System.currentTimeMillis()));
     Object result = _helperCache.get(key);  /* already synchronized by Hashtable */
     //if (result != null) DrJava.consoleOut().println("Using cache for " + key);
@@ -685,7 +683,6 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
    *  @param result Result of the method call
    */
   protected void _storeInCache(String key, Object result) {
-    // throwErrorHuh();
     synchronized(_helperCache) {
       _cacheInUse = true;
       
@@ -718,7 +715,8 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
   }
   
   
-  /** Parameterized indentation for special-case handling.
+  /** Parameterized indentation for special-case handling.  If selStart == selEnd, then the line containing the
+   *  _currentLocation is indented.  The values of selStart and selEnd are ignored!
    *  @param selStart the offset of the initial character of the region to indent
    *  @param selEnd the offset of the last character of the region to indent
    *  @param reason a flag from {@link Indenter} to indicate the reason for the indent
@@ -808,8 +806,6 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
    *  @param currPos A position on the current line
    */
   public int getIntelligentBeginLinePos(int currPos) throws BadLocationException {
-    // throwErrorHuh();
-
     String prefix;
     int firstChar;
     readLock();
@@ -839,7 +835,6 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
    *  @param pos Cursor position
    */
   public String getIndentOfCurrStmt(int pos) throws BadLocationException {
-    // throwErrorHuh();
     char[] delims = {';', '{', '}'};
     char[] whitespace = {' ', '\t', '\n',','};
     return getIndentOfCurrStmt(pos, delims, whitespace);
@@ -850,7 +845,6 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
    *  @param pos Cursor position
    */
   public String getIndentOfCurrStmt(int pos, char[] delims) throws BadLocationException {
-    // throwErrorHuh();
     char[] whitespace = {' ', '\t', '\n',','};
     return getIndentOfCurrStmt(pos, delims, whitespace);
   }
@@ -861,7 +855,6 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
    *  @param whitespace characters to skip when looking for beginning of next statement
    */
   public String getIndentOfCurrStmt(int pos, char[] delims, char[] whitespace) throws BadLocationException {
-    // throwErrorHuh();
     // Check cache
     StringBuffer keyBuf = new StringBuffer("getIndentOfCurrStmt:").append(pos);
     for (char ch: delims) { keyBuf.append(':').append(ch); }
@@ -922,7 +915,6 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
    *  @return true if this node's rule holds.
    */
   public int findCharOnLine(int pos, char findChar) {
-    // throwErrorHuh();
     // Check cache
     String key = "findCharOnLine:" + pos + ":" + findChar;
     Integer cached = (Integer) _checkCache(key);
@@ -969,15 +961,12 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
     return matchIndex;
   }
   
-  /**
-   * Returns the absolute position of the beginning of the
-   * current line.  (Just after most recent newline, or DOCSTART)
-   * Doesn't ignore comments.
-   * @param pos Any position on the current line
-   * @return position of the beginning of this line
+  /** Returns the absolute position of the beginning of the current line.  (Just after most recent newline, or DOCSTART)
+   *  Doesn't ignore comments.
+   *  @param pos Any position on the current line
+   *  @return position of the beginning of this line
    */
   public int getLineStartPos(final int pos) {
-    // throwErrorHuh();
     if (pos < 0 || pos > getLength()) return -1;
     // Check cache
     String key = "getLineStartPos:" + pos;
@@ -1002,14 +991,11 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
     return pos - dist;
   }
   
-  /**
-   * Returns the absolute position of the end of the current
-   * line.  (At the next newline, or the end of the document.)
-   * @param pos Any position on the current line
-   * @return position of the end of this line
+  /** Returns the absolute position of the end of the current line.  (At the next newline, or the end of the document.)
+   *  @param pos Any position on the current line
+   *  @return position of the end of this line
    */
   public int getLineEndPos(final int pos) {
-    // throwErrorHuh();
     if (pos < 0 || pos > getLength()) return -1;
     
     // Check cache
@@ -1035,7 +1021,6 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
    *  of the line if no non-whitespace character is found.
    */
   public int getLineFirstCharPos(int pos) throws BadLocationException {
-    // throwErrorHuh();
     // Check cache
     String key = "getLineFirstCharPos:" + pos;
     Integer cached = (Integer) _checkCache(key);
@@ -1070,7 +1055,6 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
    * or ERROR_INDEX if end of document is reached
    */
   public int getFirstNonWSCharPos(int pos) throws BadLocationException {
-    // throwErrorHuh();
     char[] whitespace = {' ', '\t', '\n'};
     return getFirstNonWSCharPos(pos, whitespace, false);
   }
@@ -1082,9 +1066,7 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
    * @return position of first non-whitespace character after pos,
    * or ERROR_INDEX if end of document is reached
    */
-  public int getFirstNonWSCharPos(int pos, boolean acceptComments)
-    throws BadLocationException {
-    // throwErrorHuh();
+  public int getFirstNonWSCharPos(int pos, boolean acceptComments) throws BadLocationException {
     char[] whitespace = {' ', '\t', '\n'};
     return getFirstNonWSCharPos(pos, whitespace, acceptComments);
   }
@@ -1098,9 +1080,7 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
    * @return position of first non-whitespace character after pos,
    * or ERROR_INDEX if end of document is reached
    */
-  public int getFirstNonWSCharPos(int pos, char[] whitespace, boolean acceptComments) 
-    throws BadLocationException {
-    // throwErrorHuh();
+  public int getFirstNonWSCharPos(int pos, char[] whitespace, boolean acceptComments) throws BadLocationException {
     // Check cache
     StringBuffer keyBuf = new StringBuffer("getFirstNonWSCharPos:").append(pos);
     for (char ch: whitespace) { keyBuf.append(':').append(ch); }
@@ -1136,7 +1116,7 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
       reducedPos = i;                 // reduced mdoel points to location reducedPos
       
       // Check if non-ws char is within comment and if we want to ignore them.
-      if (!acceptComments &&
+      if (! acceptComments &&
           ((_reduced.getStateAtCurrent().equals(ReducedModelState.INSIDE_LINE_COMMENT)) ||
            (_reduced.getStateAtCurrent().equals(ReducedModelState.INSIDE_BLOCK_COMMENT)))) {
         i++;
@@ -1144,7 +1124,7 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
       }
       
       // Check if non-ws char is part of comment opening market and if we want to ignore them
-      if (!acceptComments && _isStartOfComment(text, i - pos)) {
+      if (! acceptComments && _isStartOfComment(text, i - pos)) {
         // ith char is first char in comment open market; skip past this marker
         // and continue searching
         i = i + 2;
@@ -1163,48 +1143,35 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
     return result;
   }
   
-  
   public int findPrevNonWSCharPos(int pos) throws BadLocationException {
-    // throwErrorHuh();
     char[] whitespace = {' ', '\t', '\n'};
     return findPrevCharPos(pos, whitespace);
   }
   
-  /**
-   * Helper method for getFirstNonWSCharPos
-   * Determines whether the current character is the start
-   * of a comment: "/*" or "//"
+  /** Helper method for getFirstNonWSCharPos Determines whether the current character is the start of a comment: 
+   *  "/*" or "//"
    */
   protected static boolean _isStartOfComment(String text, int pos) {
-    // throwErrorHuh();
     char currChar = text.charAt(pos);
-    if(currChar == '/') {
+    if (currChar == '/') {
       try {
         char afterCurrChar = text.charAt(pos + 1);
-        if((afterCurrChar == '/') || (afterCurrChar == '*')) {
-          return true;
-        }
-      } catch (StringIndexOutOfBoundsException e) {
-      }
+        if ((afterCurrChar == '/') || (afterCurrChar == '*'))  return true;
+      } catch (StringIndexOutOfBoundsException e) { }
     }
     return false;
   }
 
-  /**
-   * Helper method for findPrevNonWSCharPos
-   * Determines whether the current character is the end
-   * of a comment: "*\/" or a hanging "//"
-   * @return true if (pos-1,pos) == '*\/' or '//'
+  /** Helper method for findPrevNonWSCharPos. Determines whether the current character is the end of a comment: 
+   *  "*\/" or a hanging "//"
+   *  @return true if (pos-1,pos) == '*\/' or '//'
    */
   protected static boolean _isEndOfComment(String text, int pos) {
-    // throwErrorHuh();
     char currChar = text.charAt(pos);
-    if(currChar == '/') {
+    if (currChar == '/') {
       try {
         char beforeCurrChar = text.charAt(pos - 1);
-        if((beforeCurrChar == '/') || (beforeCurrChar == '*')) {
-          return true;
-        }
+        if ((beforeCurrChar == '/') || (beforeCurrChar == '*'))  return true;
       } catch (StringIndexOutOfBoundsException e) {
       }
     }
@@ -1218,7 +1185,6 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
    * @return true if pos is immediately inside parentheses
    */
   public boolean posInParenPhrase(int pos) {
-    // throwErrorHuh();
     // Check cache
     String key = "posInParenPhrase:" + pos;
     Boolean cached = (Boolean) _checkCache(key);
@@ -1242,7 +1208,6 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
    * @return true if pos is immediately inside parentheses
    */
   public boolean posInParenPhrase() {
-    // throwErrorHuh();
     IndentInfo info;
     synchronized(_reduced) {
       info = _reduced.getIndentInformation();
@@ -1256,7 +1221,6 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
    * @return true if pos is immediately inside a paren/brace/etc
    */
   protected boolean posNotInBlock(int pos) {
-    // throwErrorHuh();
     // Check cache
     String key = "posNotInBlock:" + pos;
     Boolean cached = (Boolean) _checkCache(key);
@@ -1300,14 +1264,11 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
     return  i;
   }
   
-  /**
-   * Sets the text between the previous newline and the first non-whitespace
-   * character of the line containing pos to tab.
-   * @param tab String to be placed between previous newline and first
-   * non-whitespace character
+  /** Sets text between previous newline and first non-whitespace character of line containing pos to tab.
+   *  @param tab String to be placed between previous newline and first
+   *  non-whitespace character
    */
   public void setTab(String tab, int pos) {
-    // throwErrorHuh();
     try {
       int startPos = getLineStartPos(pos);
       int firstNonWSPos = getLineFirstCharPos(pos);
@@ -1415,7 +1376,6 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
    * of the insert; that is done in {@link #insertUpdate}.
    */
   public void insertString(int offset, String str, AttributeSet a) throws BadLocationException {
-    // throwErrorHuh();
     // Clear the helper method cache
     clearCache();
 
@@ -1428,7 +1388,6 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
    * in {@link #removeUpdate}.
    */
   public void remove(int offset, int len) throws BadLocationException {
-    // throwErrorHuh();
     // Clear the helper method cache
     clearCache();
     

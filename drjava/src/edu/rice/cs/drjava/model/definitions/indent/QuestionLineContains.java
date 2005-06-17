@@ -89,7 +89,7 @@ public class QuestionLineContains extends IndentRuleQuestion {
   boolean applyRule(AbstractDJDocument doc, int reason) {
 
     int charPos = doc.findCharOnLine(doc.getCurrentLocation(), _findChar);
-    if(charPos == AbstractDJDocument.ERROR_INDEX) {
+    if (charPos == AbstractDJDocument.ERROR_INDEX) {
       return false;
     } else {
       return true;

@@ -112,7 +112,7 @@ public class RecentFileManager implements OptionConstants {
 
     // Add each of the files stored in the config
     Vector<File> files;
-    if(! _isProject)
+    if (! _isProject)
       files = DrJava.getConfig().getSetting(RECENT_FILES);
     else
       files = DrJava.getConfig().getSetting(RECENT_PROJECTS);
@@ -140,7 +140,7 @@ public class RecentFileManager implements OptionConstants {
    * Saves the current list of files to the config object.
    */
   public void saveRecentFiles() {
-    if(! _isProject)
+    if (! _isProject)
       DrJava.getConfig().setSetting(RECENT_FILES,_recentFiles);
     else
       DrJava.getConfig().setSetting(RECENT_PROJECTS,_recentFiles);
@@ -166,7 +166,7 @@ public class RecentFileManager implements OptionConstants {
     JMenuItem newItem = new JMenuItem("");
     newItem.addActionListener(new AbstractAction("Open " + file.getName()) {
       public void actionPerformed(ActionEvent ae) {
-        if(file.getName().endsWith(".pjt"))
+        if (file.getName().endsWith(".pjt"))
           _frame.openProject(_recentSelector);
         else
           _frame.open(_recentSelector);

@@ -118,7 +118,7 @@ public class ClassAndInterfaceFinder {
 
       if (isEOF(tokenType)) return "";
       
-      if(keyword.equals("class")) return tokenizer.sval;  // a class defined without a package
+      if (keyword.equals("class")) return tokenizer.sval;  // a class defined without a package
         
       if (interfaceOK && keyword.equals("interface")) return tokenizer.sval; // an interface without a package
   

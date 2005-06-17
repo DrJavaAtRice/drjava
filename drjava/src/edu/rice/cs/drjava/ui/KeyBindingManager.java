@@ -301,7 +301,7 @@ public class KeyBindingManager {
     }
 
     public void optionChanged(OptionEvent<KeyStroke> oce) {
-      if(shouldUpdate(oce.value, _a))
+      if (shouldUpdate(oce.value, _a))
       {
         KeyStrokeData data = _actionToDataMap.get(_a);
         if (data == null) {

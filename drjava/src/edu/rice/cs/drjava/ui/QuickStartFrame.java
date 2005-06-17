@@ -91,18 +91,18 @@ public class QuickStartFrame extends HelpFrame {
         // perform path testing
         String path = url.getPath();
 
-        if(path.indexOf(HELP_PATH+CONTENTS_PAGE) >= 0) {
+        if (path.indexOf(HELP_PATH+CONTENTS_PAGE) >= 0) {
           try {
             url = new URL(url,HOME_PAGE); // redirect to home, not contents
           }
           catch(MalformedURLException murle) {
           }
         }
-        else if(path.indexOf(HELP_PATH) < 0) {
+        else if (path.indexOf(HELP_PATH) < 0) {
           // not anywhere in the help section
           return;
         }
-        if(url.sameFile(_history.contents)) {
+        if (url.sameFile(_history.contents)) {
           return; // we're already here!
         }
         jumpTo(url);

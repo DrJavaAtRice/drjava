@@ -80,7 +80,7 @@ public class AboutDialog extends JDialog implements ActionListener {
   }
 
   public void setVisible(boolean vis) {
-    if(vis)
+    if (vis)
       show();
     else
       hide();
@@ -203,7 +203,7 @@ public class AboutDialog extends JDialog implements ActionListener {
   public static JPanel createBorderedLabel(ImageInfo info,
                                            EmptyBorder pad) {
     JLabel label = createImageLabel(info,JLabel.CENTER);
-    if(label == null) return null;
+    if (label == null) return null;
     JPanel panel = new JPanel(new GridLayout(1,1));
     panel.setOpaque(true);
     panel.setBackground(info.color);
@@ -215,7 +215,7 @@ public class AboutDialog extends JDialog implements ActionListener {
 
   public static JLabel createImageLabel(ImageInfo info, int align) {
     ImageIcon icon = MainFrame.getIcon(info.name);
-    if(icon==null) return null;
+    if (icon==null) return null;
     JLabel label = new JLabel(icon,align);
     label.setOpaque(true);
     label.setBackground(info.color);
@@ -290,7 +290,7 @@ public class AboutDialog extends JDialog implements ActionListener {
   }
 
   public static String getLicense() {
-    if(initLicense) return LICENSE;
+    if (initLicense) return LICENSE;
 
     try {
       InputStream is = AboutDialog.class.getResourceAsStream("/edu/rice/cs/LICENSE");
