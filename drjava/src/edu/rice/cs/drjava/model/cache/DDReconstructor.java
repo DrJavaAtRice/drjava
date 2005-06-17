@@ -58,23 +58,17 @@ import edu.rice.cs.drjava.model.FileMovedException;
  */
 public interface DDReconstructor {
   
-  /**
-   * @return a new DefinitionsDocument
-   */
+  /** @return a new DefinitionsDocument */
   public DefinitionsDocument make() throws IOException, BadLocationException, FileMovedException;
   
-  /**
-   * Saves information (like cursor location, highlight, etc.) from the 
-   * definitions document before the cache deletes the definitions 
-   * document so that those pieces of info can be reinstated when 
-   * reconstructing the DefinitionsDocument again.
-   * @param doc the DefinitionsDocument whose data needs saving
+  /** Saves information (like cursor location, highlight, etc.) from the DefinitionsDocument before the cache deletes it
+   *  so that those pieces of info can be restored when reconstructing the DefinitionsDocument again.
+   *  @param doc the DefinitionsDocument whose data needs saving
    */
   public void saveDocInfo(DefinitionsDocument doc);
   
-  /**
-   * Sets a document listener to be added to the definitions document when it is created
-   * @param dl the listener to add to the document
+  /** Sets a document listener to be added to the definitions document when it is created
+   *  @param dl the listener to add to the document
    */
   public void addDocumentListener(DocumentListener dl);
 }

@@ -1339,8 +1339,6 @@ public abstract class AbstractDJDocument extends SwingDocumentAdapter implements
     }
   }
   
-  
-  
   /** Updates document structure as a result of text removal. This happens within the swing remove operation before
    *  the text has actually been removed. Here we update the reduced model (using a {@link AbstractDJDocument.RemoveCommand
    *  RemoveCommand}) and store information for how to undo/redo the reduced model changes inside the 

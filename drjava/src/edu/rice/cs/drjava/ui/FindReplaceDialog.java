@@ -102,10 +102,14 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
   /** Listens for changes to the cursor position in order to reset the start position */
   private CaretListener _caretListener = new CaretListener() {
     public void caretUpdate(CaretEvent e) {
-      _replaceAction.setEnabled(false);
-      _replaceFindNextAction.setEnabled(false);
-      _machine.positionChanged();
-      _caretChanged = true;
+//      Utilities.invokeLater(new Runnable() {
+//        public void run() {
+          _replaceAction.setEnabled(false);
+          _replaceFindNextAction.setEnabled(false);
+          _machine.positionChanged();
+          _caretChanged = true;
+//        }
+//      });
     }
   };
   
@@ -362,13 +366,17 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
       public void removeUpdate(DocumentEvent e) { _updateHelper(); }
       
       private void _updateHelper() {
-        _machine.makeCurrentOffsetStart();
-        updateFirstDocumentInSearch();
-        _replaceAction.setEnabled(false);
-        _replaceFindNextAction.setEnabled(false);
-        _machine.positionChanged();
-        if (_findField.getText().equals("")) _replaceAllAction.setEnabled(false);
-        else                                 _replaceAllAction.setEnabled(true);
+        Utilities.invokeLater(new Runnable() {
+          public void run() {
+            _machine.makeCurrentOffsetStart();
+            updateFirstDocumentInSearch();
+            _replaceAction.setEnabled(false);
+            _replaceFindNextAction.setEnabled(false);
+            _machine.positionChanged();
+            if (_findField.getText().equals("")) _replaceAllAction.setEnabled(false);
+            else                                 _replaceAllAction.setEnabled(true);
+          }
+        });
       }
     });  
     

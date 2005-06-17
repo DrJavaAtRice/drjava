@@ -101,28 +101,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
 
   /** The name of the keymap added to the super class (saved so it can be removed). */
   public static final String INDENT_KEYMAP_NAME = "INDENT_KEYMAP";
-//  
-//  /**
-//   * Looks for changes in the caret position to see if a paren/brace/bracket
-//   * highlight is needed.
-//   */
-//  private CaretListener _matchListener = new CaretListener() {
-//    /**
-//     * Checks caret position to see if it needs to set or remove a highlight
-//     * from the document.
-//     * When the cursor is immediately right of ')', '}', or ']', it highlights
-//     * up to the matching open paren/brace/bracket.
-//     * @param e the event fired by the caret position change
-//     */
-//    public void caretUpdate(CaretEvent e) {
-//      //_doc().setCurrentLocation(getCaretPosition());
-//      getDJDocument().setCurrentLocation(getCaretPosition());
-//      _removePreviousHighlight();
-//      _updateMatchHighlight();
-//    }
-//  };
-// 
-  
+
   /** Updates the highlight if there is any. */
   protected void _updateMatchHighlight() {
     int to = getCaretPosition();

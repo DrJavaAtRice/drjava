@@ -715,130 +715,78 @@ public interface OptionConstants {
   public static final KeyStrokeOption KEY_END_LINE =
     new KeyStrokeOption("key.end.line",
                         KeyStroke.getKeyStroke(KeyEvent.VK_END, 0));
-  /**
-   * The key binding for moving the cursor to the end of the current paragraph.
-   * (Doesn't seem to do anything useful...)
-   *
-  public static final KeyStrokeOption KEY_END_PARAGRAPH =
-    new KeyStrokeOption("key.end.paragraph",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, mask));
-   */
-
-  /**
-   * The key binding for moving the cursor to the beginning of the next word
-   */
-  public static final KeyStrokeOption KEY_NEXT_WORD =
-    new KeyStrokeOption("key.next.word",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, mask));
-  /**
-   * The key binding for moving the cursor forwards
-   */
-  public static final KeyStrokeOption KEY_FORWARD =
-    new KeyStrokeOption("key.forward",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, 0));
-  /**
-   * The key binding for page down
-   */
-  public static final KeyStrokeOption KEY_PAGE_DOWN =
-    new KeyStrokeOption("key.page.down",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_PAGE_DOWN, 0));
-  /**
-   * The key binding for page up
-   */
-  public static final KeyStrokeOption KEY_PAGE_UP =
-    new KeyStrokeOption("key.page.up",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_PAGE_UP, 0));
-
-  /**
-   * The key binding for cutting a line
-   */
-  public static final KeyStrokeOption KEY_CUT_LINE =
-    new KeyStrokeOption("key.cut.line",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_K,
-                                               (mask | InputEvent.ALT_MASK)));
-
-  /**
-   * The key binding for clearing a line, emacs-style
-   */
-  public static final KeyStrokeOption KEY_CLEAR_LINE =
-    new KeyStrokeOption("key.clear.line",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_K, mask));
-
-  /**
-   * The key binding for toggling debug mode
-   */
-  public static final KeyStrokeOption KEY_DEBUG_MODE_TOGGLE =
-    new KeyStrokeOption("key.debug.mode.toggle",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_D, mask));
-
-  /**
-   * The key binding for suspending the debugger
-   *
-  public static final KeyStrokeOption KEY_DEBUG_SUSPEND =
-    new KeyStrokeOption("key.debug.suspend",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_F6, 0));
-                        */
-
-  /**
-   * The key binding for resuming the debugger
-   */
-  public static final KeyStrokeOption KEY_DEBUG_RESUME =
-    new KeyStrokeOption("key.debug.resume",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_F7, 0));
-  /**
-   * The key binding for stepping into in the debugger
-   */
-  public static final KeyStrokeOption KEY_DEBUG_STEP_INTO =
-    new KeyStrokeOption("key.debug.step.into",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_F12, 0));
-  /**
-   * The key binding for stepping over in the debugger
-   */
-  public static final KeyStrokeOption KEY_DEBUG_STEP_OVER =
-    new KeyStrokeOption("key.debug.step.over",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_F11, 0));
-  /**
-   * The key binding for stepping out in the debugger
-   */
-  public static final KeyStrokeOption KEY_DEBUG_STEP_OUT =
-    new KeyStrokeOption("key.debug.step.out",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_F12,
-                                               InputEvent.SHIFT_MASK));
-  /**
-   * The key binding for toggling a breakpoint
-   */
-  public static final KeyStrokeOption KEY_DEBUG_BREAKPOINT_TOGGLE =
-    new KeyStrokeOption("key.debug.breakpoint.toggle",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_B, mask));
-
-  /**
-   * The key binding for clearing all breakpoints
-   */
-  public static final KeyStrokeOption KEY_DEBUG_CLEAR_ALL_BREAKPOINTS =
-    new KeyStrokeOption("key.debug.clear.all.breakpoints",
-                        KeyStrokeOption.NULL_KEYSTROKE);
-
-  /**
-   * The key binding for help
-   */
-  public static final KeyStrokeOption KEY_HELP =
-    new KeyStrokeOption("key.help",
-                        KeyStroke.getKeyStroke(KeyEvent.VK_F1, 0));
-
-  /**
-   * The key binding for quickstart
-   * Currently set to the null keystroke, though we may eventually want to make it configurable
-   */
-  public static final KeyStrokeOption KEY_QUICKSTART =
-    new KeyStrokeOption("key.quickstart",
-                          KeyStrokeOption.NULL_KEYSTROKE);
   
-  /**
-   * The key binding for the about dialog
-   */
-  public static final KeyStrokeOption KEY_ABOUT =
-    new KeyStrokeOption("key.about",
-                        KeyStrokeOption.NULL_KEYSTROKE);
+//  /** The key binding for moving the cursor to the end of the current paragraph. */
+//  public static final KeyStrokeOption KEY_END_PARAGRAPH =
+//    new KeyStrokeOption("key.end.paragraph", KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, mask));
+
+  /** The key binding for moving the cursor to the beginning of the next word. */
+  public static final KeyStrokeOption KEY_NEXT_WORD =
+    new KeyStrokeOption("key.next.word", KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, mask));
+  
+  /** The key binding for moving the cursor forwards. */
+  public static final KeyStrokeOption KEY_FORWARD =
+    new KeyStrokeOption("key.forward", KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, 0));
+  
+  /** The key binding for page down. */
+  public static final KeyStrokeOption KEY_PAGE_DOWN =
+    new KeyStrokeOption("key.page.down", KeyStroke.getKeyStroke(KeyEvent.VK_PAGE_DOWN, 0));
+  
+  /** The key binding for page up. */
+  public static final KeyStrokeOption KEY_PAGE_UP =
+    new KeyStrokeOption("key.page.up", KeyStroke.getKeyStroke(KeyEvent.VK_PAGE_UP, 0));
+
+  /** The key binding for cutting a line. */
+  public static final KeyStrokeOption KEY_CUT_LINE =
+    new KeyStrokeOption("key.cut.line", KeyStroke.getKeyStroke(KeyEvent.VK_K, (mask | InputEvent.ALT_MASK)));
+
+  /** The key binding for clearing a line, emacs-style. */
+  public static final KeyStrokeOption KEY_CLEAR_LINE =
+    new KeyStrokeOption("key.clear.line", KeyStroke.getKeyStroke(KeyEvent.VK_K, mask));
+
+  /** The key binding for toggling debug mode. */
+  public static final KeyStrokeOption KEY_DEBUG_MODE_TOGGLE =
+    new KeyStrokeOption("key.debug.mode.toggle", KeyStroke.getKeyStroke(KeyEvent.VK_D, mask));
+
+//  /** The key binding for suspending the debugger. */
+//  public static final KeyStrokeOption KEY_DEBUG_SUSPEND =
+//    new KeyStrokeOption("key.debug.suspend", KeyStroke.getKeyStroke(KeyEvent.VK_F6, 0));
+
+  /** The key binding for resuming the debugger. */
+  public static final KeyStrokeOption KEY_DEBUG_RESUME =
+    new KeyStrokeOption("key.debug.resume", KeyStroke.getKeyStroke(KeyEvent.VK_F7, 0));
+  
+  /** The key binding for stepping into in the debugger */
+  public static final KeyStrokeOption KEY_DEBUG_STEP_INTO =
+    new KeyStrokeOption("key.debug.step.into", KeyStroke.getKeyStroke(KeyEvent.VK_F12, 0));
+  
+  /** The key binding for stepping over in the debugger. */
+  public static final KeyStrokeOption KEY_DEBUG_STEP_OVER =
+    new KeyStrokeOption("key.debug.step.over", KeyStroke.getKeyStroke(KeyEvent.VK_F11, 0));
+  
+  /** The key binding for stepping out in the debugger. */
+  public static final KeyStrokeOption KEY_DEBUG_STEP_OUT =
+    new KeyStrokeOption("key.debug.step.out", KeyStroke.getKeyStroke(KeyEvent.VK_F12, InputEvent.SHIFT_MASK));
+  
+  /** The key binding for toggling a breakpoint. */
+  public static final KeyStrokeOption KEY_DEBUG_BREAKPOINT_TOGGLE =
+    new KeyStrokeOption("key.debug.breakpoint.toggle", KeyStroke.getKeyStroke(KeyEvent.VK_B, mask));
+
+  /** The key binding for clearing all breakpoints. */
+  public static final KeyStrokeOption KEY_DEBUG_CLEAR_ALL_BREAKPOINTS =
+    new KeyStrokeOption("key.debug.clear.all.breakpoints", KeyStrokeOption.NULL_KEYSTROKE);
+
+  /** The key binding for help */
+  public static final KeyStrokeOption KEY_HELP =
+    new KeyStrokeOption("key.help", KeyStroke.getKeyStroke(KeyEvent.VK_F1, 0));
+
+  /** The key binding for quickstart. Currently set to the null keystroke. */
+  public static final KeyStrokeOption KEY_QUICKSTART = 
+    new KeyStrokeOption("key.quickstart", KeyStrokeOption.NULL_KEYSTROKE);
+  
+  /** The key binding for the about dialog */
+  public static final KeyStrokeOption KEY_ABOUT = 
+    new KeyStrokeOption("key.about", KeyStrokeOption.NULL_KEYSTROKE);
 
   
   /* ---------- Find Replace Options ---------- */

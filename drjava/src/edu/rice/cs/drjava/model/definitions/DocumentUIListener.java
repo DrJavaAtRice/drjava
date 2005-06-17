@@ -49,14 +49,10 @@ import javax.swing.text.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
-/**
- * The purpose for this interface's existence is to make the document listener
- * added by our MainFrame distinguishable to the model (specifically the DDReconstructor)
- * from the other registered DocumentListeners when saving the necessary info
- * from the DefinitionsDocument before the document cache boots it out.
+/** The purpose for this interface's existence is to make the document listener added by our MainFrame distinguishable
+ *  by the model (specifically the DDReconstructor) from the other registered DocumentListeners when saving the 
+ *  necessary info from the DefinitionsDocument before the document cache boots it out.
  */
 public interface DocumentUIListener extends DocumentListener {
-  
-  // Share the same methods as the DocumentListener interface
-  
+  /* Share the same methods as the DocumentListener interface */
 }

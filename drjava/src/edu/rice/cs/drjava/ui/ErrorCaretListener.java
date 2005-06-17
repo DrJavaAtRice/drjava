@@ -45,10 +45,7 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import javax.swing.text.Position;
 
-/**
- * Listens to the caret in a particular DefinitionsPane and
- * highlights the source containing CompilerErrors as appropriate.
- *
+/** Listens to the caret in the associated DefinitionsPane and highlights the text containing CompilerErrors.
  * @version $Id$
  */
 public class ErrorCaretListener implements CaretListener {

@@ -90,12 +90,15 @@ public abstract class AbstractDJPane extends JTextPane implements OptionConstant
     public void caretUpdate(CaretEvent e) {
       //_doc().setCurrentLocation(getCaretPosition());
       getDJDocument().setCurrentLocation(getCaretPosition());
-      _removePreviousHighlight();
-      _updateMatchHighlight();
+//      Utilities.invokeLater(new Runnable() {
+//        public void run() {
+          _removePreviousHighlight();
+          _updateMatchHighlight();
 //      DrJava.consoleErr().println(getPromptPos());
+//        }
+//      });
     }
   };
-  
   
   /** Our current paren/brace/bracket matching highlight. */
   protected HighlightManager.HighlightInfo _matchHighlight = null;
@@ -103,15 +106,14 @@ public abstract class AbstractDJPane extends JTextPane implements OptionConstant
   protected final StyledDocument NULL_DOCUMENT = new DefaultStyledDocument();
   
   //--------- CONSTRUCTOR ----------
+  
   AbstractDJPane(StyledDocument doc) {
     super(doc);
     setContentType("text/java");
   }
   
   //--------- METHODS -----------
-  
  
-    
   /** Adds a highlight to the document.  Called by _updateMatchHighlight().
    *  @param from start of highlight
    *  @param to end of highlight

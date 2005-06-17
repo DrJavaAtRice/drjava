@@ -244,12 +244,9 @@ public final class InteractionsPaneTest extends TestCase {
                  _doc.getDocLength());
   }
 
-  /**
-   * Tests that the caret is put in the correct position after an insert.
-   */
+  /** Tests that the caret is put in the correct position after an insert. */
   public void testCaretUpdatedOnInsert() throws DocumentAdapterException {
-    _doc.insertText(_doc.getDocLength(), "typed text",
-                    InteractionsDocument.DEFAULT_STYLE);
+    _doc.insertText(_doc.getDocLength(), "typed text", InteractionsDocument.DEFAULT_STYLE);
     int pos = _doc.getDocLength() - 5;
     _pane.setCaretPosition(pos);
 

@@ -55,6 +55,8 @@ import java.awt.Font;
 
 import java.io.Serializable;
 
+import edu.rice.cs.util.swing.Utilities;
+
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.config.OptionListener;
@@ -210,66 +212,65 @@ public abstract class AbstractConsoleController implements Serializable {
     _systemErrStyle.addAttributes(newSet);
   }
 
-  /**
-   * Sets up the model.
-   */
+  /** Sets up the model.*/
   protected abstract void _setupModel();
 
-  /**
-   * Listener to ensure that the caret always stays on or after the
-   * prompt, so that output is always scrolled to the bottom.
+  /** Ensures that the caret always stays on or after the prompt, so that output is always scrolled to the bottom.
    * (The prompt is always at the bottom.)
    */
   class CaretUpdateListener implements DocumentListener {
-    public void insertUpdate(DocumentEvent e) {
-      ConsoleDocument doc = getConsoleDoc();
-      int caretPos = _pane.getCaretPosition();
-      int promptPos = doc.getPromptPos();
-      int length = doc.getDocLength();
-
-      // Figure out where the prompt was before the update
-      int prevPromptPos = promptPos;
-      if (e.getOffset() < promptPos) {
-        // Insert happened before prompt,
-        //  so previous position was further back
-        prevPromptPos = promptPos - e.getLength();
-      }
-
-      if (!doc.hasPrompt()) {
-        // Scroll to the end of the document, since output has been
-        // inserted after the prompt.
-        moveToEnd();
-      }
-      // (Be careful not to move caret during a reset, when the
-      //  prompt pos is temporarily far greater than the length.)
-      else if (promptPos <= length) {
-        if (caretPos < prevPromptPos) {
-          // Caret has fallen behind prompt, so make it catch up so
-          //  the new input is visible.
-          moveToPrompt();
-        }
-        else {
-          // Caret was on or after prompt, so move it right by the size
-          //  of the insert.
-          int size = promptPos - prevPromptPos;
-          if (size > 0) {
-            moveTo(caretPos + size);
+    public void insertUpdate(final DocumentEvent e) {
+      Utilities.invokeLater(new Runnable() {
+        public void run() {
+          ConsoleDocument doc = getConsoleDoc();
+          int caretPos = _pane.getCaretPosition();
+          int promptPos = doc.getPromptPos();
+          int length = doc.getDocLength();
+          
+          // Figure out where the prompt was before the update
+          int prevPromptPos = promptPos;
+          if (e.getOffset() < promptPos) {
+            // Insert happened before prompt,
+            //  so previous position was further back
+            prevPromptPos = promptPos - e.getLength();
+          }
+          
+          if (!doc.hasPrompt()) {
+            // Scroll to the end of the document, since output has been
+            // inserted after the prompt.
+            moveToEnd();
+          }
+          // (Be careful not to move caret during a reset, when the
+          //  prompt pos is temporarily far greater than the length.)
+          else if (promptPos <= length) {
+            if (caretPos < prevPromptPos) {
+              // Caret has fallen behind prompt, so make it catch up so
+              //  the new input is visible.
+              moveToPrompt();
+            }
+            else {
+              // Caret was on or after prompt, so move it right by the size
+              //  of the insert.
+              int size = promptPos - prevPromptPos;
+              if (size > 0)  moveTo(caretPos + size);
+            }
           }
         }
-      }
+      });
     }
 
-    public void removeUpdate(DocumentEvent e) {
-      _ensureLegalCaretPos();
-    }
-    public void changedUpdate(DocumentEvent e) {
-      _ensureLegalCaretPos();
-    }
+    public void removeUpdate(DocumentEvent e) { _ensureLegalCaretPos(); }
+    public void changedUpdate(DocumentEvent e) { _ensureLegalCaretPos(); }
+    
     protected void _ensureLegalCaretPos() {
-      int length = getConsoleDoc().getDocLength();
-      if (_pane.getCaretPosition() > length) {
-        _pane.setCaretPosition(length);
-      }
+      Utilities.invokeLater(new Runnable() {
+        public void run() { 
+          int length = getConsoleDoc().getDocLength();
+          if (_pane.getCaretPosition() > length) {
+            _pane.setCaretPosition(length);
+          }
+        }
+      });
     }
   }
 
@@ -373,8 +374,7 @@ public abstract class AbstractConsoleController implements Serializable {
   public void setPrevPaneAction(Action a) {
     switchToPrevPaneAction = a;
 
-    // We do this here since switchToPrevPaneAction is set after the
-    // constructor is called.
+    // We do this here since switchToPrevPaneAction is set after the constructor is called.
     _pane.addActionForKeyStroke(DrJava.getConfig().getSetting(OptionConstants.KEY_PREVIOUS_PANE),
                                 switchToPrevPaneAction);
     DrJava.getConfig().addOptionListener(OptionConstants.KEY_PREVIOUS_PANE, new OptionListener<KeyStroke>() {

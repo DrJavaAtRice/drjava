@@ -947,9 +947,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   private Action _aboutAction = new AbstractAction("About") {
     public void actionPerformed(ActionEvent ae) {
       // Create dialog if we haven't yet
-      if (_aboutDialog == null) {
-        _aboutDialog = new AboutDialog(MainFrame.this);
-      }
+      if (_aboutDialog == null) _aboutDialog = new AboutDialog(MainFrame.this);
       _aboutDialog.show();
     }
   };
@@ -2073,25 +2071,37 @@ public class MainFrame extends JFrame implements OptionConstants {
   private void _installNewDocumentListener(final Document d) {
     d.addDocumentListener(new DocumentUIListener() {
       public void changedUpdate(DocumentEvent e) {
-        OpenDefinitionsDocument doc = _model.getActiveDocument();
-        if (doc.isModifiedSinceSave()) {
-          _saveAction.setEnabled(true);
-          if (inDebugMode() && _debugPanel.getStatusText().equals(""))
-            _debugPanel.setStatusText(DEBUGGER_OUT_OF_SYNC);
-          updateFileTitle();
-        }
+        Utilities.invokeAndWait(new Runnable() {
+          public void run() {
+            OpenDefinitionsDocument doc = _model.getActiveDocument();
+            if (doc.isModifiedSinceSave()) {
+              _saveAction.setEnabled(true);
+              if (inDebugMode() && _debugPanel.getStatusText().equals(""))
+                _debugPanel.setStatusText(DEBUGGER_OUT_OF_SYNC);
+              updateFileTitle();
+            }
+          }
+        });
       }
       public void insertUpdate(DocumentEvent e) {
-        _saveAction.setEnabled(true);
-        if (inDebugMode() && _debugPanel.getStatusText().equals(""))
-          _debugPanel.setStatusText(DEBUGGER_OUT_OF_SYNC);
-        updateFileTitle();
+        Utilities.invokeAndWait(new Runnable() {
+          public void run() {
+            _saveAction.setEnabled(true);
+            if (inDebugMode() && _debugPanel.getStatusText().equals(""))
+              _debugPanel.setStatusText(DEBUGGER_OUT_OF_SYNC);
+            updateFileTitle();
+          }
+        });
       }
       public void removeUpdate(DocumentEvent e) {
-        _saveAction.setEnabled(true);
-        if (inDebugMode() && _debugPanel.getStatusText().equals(""))
-          _debugPanel.setStatusText(DEBUGGER_OUT_OF_SYNC);
-        updateFileTitle();
+        Utilities.invokeAndWait(new Runnable() {
+          public void run() {
+            _saveAction.setEnabled(true);
+            if (inDebugMode() && _debugPanel.getStatusText().equals(""))
+              _debugPanel.setStatusText(DEBUGGER_OUT_OF_SYNC);
+            updateFileTitle();
+          }
+        });
       }
     });
   }
@@ -3422,9 +3432,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _currentDefPane.selectAll();
   }
   
-  /**
-   * Ask the user what line they'd like to jump to, then go there.
-   */
+  /** Ask the user what line they'd like to jump to, then go there. */
   private int _gotoLine() {
     final String msg = "What line would you like to go to?";
     final String title = "Go to Line";
@@ -5025,6 +5033,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     Utilities.invokeLater(command);
   }
   
+  // Comment out current selection using wing commenting.  Public for testing purposes only. */
   public void commentLines() {
     // Delegate everything to the DefinitionsDocument.
     OpenDefinitionsDocument openDoc = _model.getActiveDocument();
@@ -5041,6 +5050,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     if (start != end) _currentDefPane.moveCaretPosition(newEnd);
   }
   
+  // Uncomment out current selection using wing commenting.  Public for testing purposes only. */
   public void uncommentLines() {
     // Delegate everything to the DefinitionsDocument.
     OpenDefinitionsDocument openDoc = _model.getActiveDocument();
