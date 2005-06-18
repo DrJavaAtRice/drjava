@@ -62,6 +62,8 @@ public interface AbstractDocumentInterface extends ReadersWritersLocking {
   
   String getText(int offset, int length) throws BadLocationException;
   
+  String getText();
+  
   void insertString(int offset, String str, AttributeSet a) throws BadLocationException;
   
   void remove(int offs, int len) throws BadLocationException;

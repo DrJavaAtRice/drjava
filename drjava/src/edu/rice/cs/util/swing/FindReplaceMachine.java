@@ -101,10 +101,8 @@ public class FindReplaceMachine {
     setIgnoreCommentsAndStrings(false);
   }
   
-  /**
-   * Called when the current position is updated in the document
-   * and therefore we do not want to skip the instance of the
-   * findWord we are on if the user toggles _searchBackwards
+  /** Called when the current position is updated in the document and therefore we do not want to skip the instance of
+   *  the findWord we are on if the user toggles _searchBackwards
    */
   public void positionChanged() {
     _lastFindWord = null;
@@ -203,45 +201,48 @@ public class FindReplaceMachine {
     else off = _current.getOffset();
 
     if (off < 0) return false;
-    if (off + len > _doc.getLength()) return false;
-
+    
+     String matchSpace;
+    _doc.acquireReadLock();
     try {
-      String matchSpace = _doc.getText(off, len);
-      if (!_matchCase) {
-        matchSpace = matchSpace.toLowerCase();
-        findWord = findWord.toLowerCase();
-      }
-      return matchSpace.equals(findWord);
+      if (off + len > _doc.getLength()) return false;
+      matchSpace = _doc.getText(off, len);
     }
     catch (BadLocationException e) { throw new UnexpectedException(e); }
+    finally { _doc.releaseReadLock(); }
+    
+    if (!_matchCase) {
+      matchSpace = matchSpace.toLowerCase();
+      findWord = findWord.toLowerCase();
+    }
+    return matchSpace.equals(findWord);
   }
   
   
   /** If we're on a match for the find word, replace it with the replace word. */
   public boolean replaceCurrent() {
+
+    if (! isOnMatch()) return false;
     _doc.acquireWriteLock();
     try {
-      if (isOnMatch()) {
-        boolean atStart = false;
-        int position = getCurrentOffset();
-        if (!_searchBackwards) position -= _findWord.length();
-        _doc.remove(position, _findWord.length());
-        if (position == 0) atStart = true;
-        _doc.insertString(getCurrentOffset(), _replaceWord, null);
-
-        // the current offset will be the end of the inserted word
-        //since we keep track of current as a Position.
-        //The exception is if we are at the beginning of the document,
-        //in which case the text is inserted AFTER the current position
-        //So, current offset is correct for forwards searching unless
-        //we were at the start of the document, in which case it is
-        //correct for backwards searching.
-        if (atStart && !_searchBackwards) setPosition(_replaceWord.length());
-        else if (!atStart && _searchBackwards) setPosition(getCurrentOffset() - _replaceWord.length());
-
-        return true;
-      }
-      return false;
+      boolean atStart = false;
+      int position = getCurrentOffset();
+      if (!_searchBackwards) position -= _findWord.length();
+      _doc.remove(position, _findWord.length());
+      if (position == 0) atStart = true;
+      _doc.insertString(getCurrentOffset(), _replaceWord, null);
+      
+      // the current offset will be the end of the inserted word
+      //since we keep track of current as a Position.
+      //The exception is if we are at the beginning of the document,
+      //in which case the text is inserted AFTER the current position
+      //So, current offset is correct for forwards searching unless
+      //we were at the start of the document, in which case it is
+      //correct for backwards searching.
+      if (atStart && !_searchBackwards) setPosition(_replaceWord.length());
+      else if (!atStart && _searchBackwards) setPosition(getCurrentOffset() - _replaceWord.length());
+      
+      return true;
     }
     catch (BadLocationException e) { throw new UnexpectedException(e); }
     finally { _doc.releaseWriteLock(); }
@@ -279,7 +280,6 @@ public class FindReplaceMachine {
     else return _replaceAllInCurrentDoc();
   }
   
-
   /** Replaces all occurences of _findWord with _replaceWord in _doc. Never searches in other documents.
    *  @return the number of replacements
    */
@@ -548,34 +548,31 @@ public class FindReplaceMachine {
    * @return true if the whole word is found at foundOffset, false otherwise
    */
   private boolean wholeWordFoundAtCurrent(AbstractDocumentInterface doc, int foundOffset) {    
+    String docText;
+    doc.acquireReadLock();
     try {
-      String docText;
-      doc.acquireReadLock();
-      try {
-        docText = doc.getText(0, doc.getLength());
-      }
-      finally {doc.releaseReadLock();}      
-      
-      Character leftOfMatch = null;
-      Character rightOfMatch = null;
-      int leftLocation = foundOffset - 1;
-      int rightLocation = foundOffset + _findWord.length();
-      boolean leftOutOfBounds = false;
-      boolean rightOutOfBounds = false;
-      
-      try { leftOfMatch = new Character(docText.charAt(leftLocation)); }
-      catch (IndexOutOfBoundsException e) { leftOutOfBounds = true; }
-      
-      try { rightOfMatch = new Character(docText.charAt(rightLocation)); }
-      catch (IndexOutOfBoundsException e) { rightOutOfBounds = true; }
-      
-      if (!leftOutOfBounds && !rightOutOfBounds) 
-        return isDelimiter(rightOfMatch) && isDelimiter(leftOfMatch);
-      if (!leftOutOfBounds) return isDelimiter(leftOfMatch);
-      if (!rightOutOfBounds) return isDelimiter(rightOfMatch);
-      return true;
+      docText = doc.getText();
     }
-    catch (BadLocationException e) { throw new UnexpectedException(e); }
+    finally {doc.releaseReadLock();}      
+    
+    Character leftOfMatch = null;
+    Character rightOfMatch = null;
+    int leftLocation = foundOffset - 1;
+    int rightLocation = foundOffset + _findWord.length();
+    boolean leftOutOfBounds = false;
+    boolean rightOutOfBounds = false;
+    
+    try { leftOfMatch = new Character(docText.charAt(leftLocation)); }
+    catch (IndexOutOfBoundsException e) { leftOutOfBounds = true; }
+    
+    try { rightOfMatch = new Character(docText.charAt(rightLocation)); }
+    catch (IndexOutOfBoundsException e) { rightOutOfBounds = true; }
+    
+    if (!leftOutOfBounds && !rightOutOfBounds) 
+      return isDelimiter(rightOfMatch) && isDelimiter(leftOfMatch);
+    if (!leftOutOfBounds) return isDelimiter(leftOfMatch);
+    if (!rightOutOfBounds) return isDelimiter(rightOfMatch);
+    return true;
   }
 
   /** Determines whether a character is a delimiter (not a letter or digit) as a helper to wholeWordFoundAtCurrent

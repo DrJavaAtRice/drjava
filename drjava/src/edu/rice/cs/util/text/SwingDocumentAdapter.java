@@ -46,6 +46,7 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.util.text;
 
 import edu.rice.cs.util.swing.Utilities;
+import edu.rice.cs.util.UnexpectedException;
 
 import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.AttributeSet;
@@ -177,7 +178,15 @@ public class SwingDocumentAdapter extends DefaultStyledDocument implements Conso
     catch (BadLocationException e) { throw new DocumentAdapterException(e); }
   }
   
-   /* Locking operations */
+  /** Returns entire text of this document. */
+  public String getText() {
+    acquireReadLock();
+    try { return getText(0, getLength()); }
+    catch (BadLocationException e) { throw new UnexpectedException(e); }  // impossible
+    finally { releaseReadLock(); }
+  }
+  
+  /* Locking operations */
   
   /** Swing-style readLock(). */
   public void acquireReadLock() { readLock(); }

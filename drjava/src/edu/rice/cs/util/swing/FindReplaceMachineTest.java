@@ -240,9 +240,7 @@ public class FindReplaceMachineTest extends TestCase {
     _frm.setReplaceWord("monkey");
     _testFindNextSucceeds(_frm, CONTINUE, 0, 12);
     _frm.replaceCurrent();
-    assertEquals("new replaced text",
-                 "Hear no monkey, see no evil, speak no evil.",
-                 _doc.getText(0, _doc.getLength()));
+    assertEquals("new replaced text", "Hear no monkey, see no evil, speak no evil.", _doc.getText());
   }
 
   public void testReplaceAllContinue() throws BadLocationException {
@@ -252,9 +250,7 @@ public class FindReplaceMachineTest extends TestCase {
     _frm.setFindWord("evil");
     _frm.setReplaceWord("monkey");
     _frm.replaceAll();
-    assertEquals("revised text",
-                 "Hear no monkey, see no monkey, speak no monkey.",
-                 _doc.getText(0, _doc.getLength()));
+    assertEquals("revised text", "Hear no monkey, see no monkey, speak no monkey.", _doc.getText());
   }
 
   public void testFindNoMatchCase() throws BadLocationException {
@@ -274,9 +270,7 @@ public class FindReplaceMachineTest extends TestCase {
     _frm.setReplaceWord("monkey");
     _frm.setMatchCase(false);
     _frm.replaceAll();
-    assertEquals("revised text",
-                 "Hear no monkey, see no monkey, speak no monkey.",
-                 _doc.getText(0, _doc.getLength()));
+    assertEquals("revised text", "Hear no monkey, see no monkey, speak no monkey.", _doc.getText());
   }
 
   public void testReplaceAllBackwards() throws BadLocationException {
@@ -287,7 +281,7 @@ public class FindReplaceMachineTest extends TestCase {
     _frm.setMatchCase(false);
     _frm.setSearchBackwards(true);
     _frm.replaceAll();
-    assertEquals("backwards replace", "cool cool", _doc.getText(0, _doc.getLength()));
+    assertEquals("backwards replace", "cool cool", _doc.getText());
   }
 
   public void testFindMatchWithCaretInMiddle() throws BadLocationException {
@@ -322,7 +316,7 @@ public class FindReplaceMachineTest extends TestCase {
     _frm.setSearchBackwards(false);
     _frm.setReplaceWord("");
     _frm.replaceAll();
-    assertEquals("replace creates new match", "hello", _doc.getText(0, _doc.getLength()));
+    assertEquals("replace creates new match", "hello", _doc.getText());
   }
 
   /**
@@ -337,7 +331,7 @@ public class FindReplaceMachineTest extends TestCase {
     _frm.setSearchBackwards(true);
     _frm.setReplaceWord("");
     _frm.replaceAll();
-    assertEquals("replace creates new match", "hello", _doc.getText(0, _doc.getLength()));
+    assertEquals("replace creates new match", "hello", _doc.getText());
   }
 
   /**
@@ -353,7 +347,7 @@ public class FindReplaceMachineTest extends TestCase {
     _frm.replaceAll();
     _frm.setSearchBackwards(true);
     _frm.replaceAll();
-    assertEquals("replace all with the same word", "cool cool", _doc.getText(0, _doc.getLength()));
+    assertEquals("replace all with the same word", "cool cool", _doc.getText());
   }
 
   /**
@@ -436,15 +430,9 @@ public class FindReplaceMachineTest extends TestCase {
     _testFindNextSucceeds(_frm, CONTINUE, 44, 44, _docPrev);
     _frm.setReplaceWord("monkey");
     _frm.replaceAll();
-    assertEquals("revised text",
-                 "Hear no monkey, see no monkey, speak no monkey.",
-                 _doc.getText(0, _doc.getLength()));
-    assertEquals("revised text",
-                 "Hear no monkeyprev, see no monkeyprev, speak no monkeyprev.",
-                 _docPrev.getText(0, _docPrev.getLength()));
-    assertEquals("revised text",
-                 "Hear no monkeynext, see no monkeynext, speak no monkeynext.",
-                 _docNext.getText(0, _docNext.getLength()));
+    assertEquals("revised text", "Hear no monkey, see no monkey, speak no monkey.", _doc.getText());
+    assertEquals("revised text", "Hear no monkeyprev, see no monkeyprev, speak no monkeyprev.", _docPrev.getText());
+    assertEquals("revised text", "Hear no monkeynext, see no monkeynext, speak no monkeynext.", _docNext.getText());
   }
 
 
