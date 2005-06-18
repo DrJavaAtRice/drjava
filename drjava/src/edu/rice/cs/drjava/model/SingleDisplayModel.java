@@ -83,45 +83,28 @@ public interface SingleDisplayModel extends GlobalModel {
    */
   public OpenDefinitionsDocument getActiveDocument();
 
-  /**
-   * Sets the currently active document by updating the selection model.
-   * @param doc Document to set as active
+  /** Sets the currently active document by updating the selection model.
+   *  @param doc Document to set as active
    */
   public void setActiveDocument(OpenDefinitionsDocument doc);
+  
+  /** Invokes the activeDocumentChanged method in the global listener on the argument _activeDocument. */
+  public void refreshActiveDocument();
 
-  /**
-   * @return the IDocumentNavigator container expressed as an AWT component
-   */
+  /** @return the IDocumentNavigator container expressed as an AWT component. */
   public java.awt.Container getDocCollectionWidget();
 
-  /**
-   * Sets the active document to be the next one in the list.
-   */
+  /** Sets the active document to be the next one in the list. */
   public void setActiveNextDocument();
 
-  /**
-   * Sets the active document to be the previous one in the list.
-   */
+  /** Sets the active document to be the previous one in the list. */
   public void setActivePreviousDocument();
-//
-//  /**
-//   * Returns whether we are in the process of closing all documents.
-//   * (Don't want to prompt the user to revert files that have become
-//   * modified on disk if we're just closing everything.)
-//   * TODO: Move to DGM?  Make private?
-//   */
-//  public boolean isClosingAllFiles();
-  
-  /**
-   * Shared code between close project and close All files which only sets 
-   * the new active document after all documents to be closed have been closed.
-   * @param docList the list of files to close
+
+  /** Shared code between close project and close All files which only sets the new active document after all documents
+   *  to be closed have been closed.
+   *  @param docList the list of files to close
    */
-  public boolean closeFiles(List<OpenDefinitionsDocument> docList);
-  
-  // public OpenDefinitionsDocument getODDGivenIDoc(INavigatorItem idoc);
-    
-  // public INavigatorItem getIDocGivenODD(OpenDefinitionsDocument odd);
+  public boolean closeFiles(List<OpenDefinitionsDocument> docList);  
   
   public void setActiveFirstDocument();
 

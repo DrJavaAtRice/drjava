@@ -185,8 +185,7 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel implements Sin
     INavigatorItem key = _activeDocument;
     OpenDefinitionsDocument prevKey = (OpenDefinitionsDocument) _documentNavigator.getPrevious(key);
     if (key != prevKey) setActiveDocument(prevKey);
-      /* this will select the active document in the navigator, which
-       * will signal a listener to call _setActiveDoc(...) */
+      /* selects the active document in the navigator, which signals a listener to call _setActiveDoc(...) */
   }
 //
 //  /**
@@ -377,43 +376,27 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel implements Sin
     }
   }
   
-  /**
-   * some duplicated work, but avoids duplicated code, which is our nemesis
-   */
+  /** Sets the first document in the navigator as active. */
   public void setActiveFirstDocument() {
     List<OpenDefinitionsDocument> docs = getOpenDefinitionsDocuments();
-    /* this will select the active document in the navigator, which
-     * will signal a listener to call _setActiveDoc(...)
+    /* The follwoing will select the active document in the navigator, which will signal a listener to call _setActiveDoc(...)
      */
     setActiveDocument(docs.get(0));
-    //      _documentNavigator.setActiveDoc(getIDocGivenODD(docs.get(0)));
-    //      _setActiveDoc(getIDocGivenODD(docs.get(0)));
   }
   
   private synchronized void _setActiveDoc(INavigatorItem idoc) {
-    //Hashtable<INavigatorItem, OpenDefinitionsDocument> docs = getOpenDefinitionsDocumentsTable();
-//    Utilities.showDebug("DEBUG: _setActiveDoc called");
-//    if (_activeDocument != null) 
-//      _activeDocument.acquireReadLock();
-//    try{
       _activeDocument = (OpenDefinitionsDocument) idoc;  // FIX THIS!
-      try {
-        _activeDocument.checkIfClassFileInSync();
-        
-        // notify single display model listeners   // notify single display model listeners
-        _notifier.activeDocumentChanged(_activeDocument);
-//        notifyListeners(new GlobalEventNotifier.Notifier() {
-//        public void notifyListener(GlobalModelListener l) {
-//          // If it is a SingleDisplayModelListener, let it know that the
-//          //  active doc changed
-//          if (l instanceof SingleDisplayModelListener) {
-//            SingleDisplayModelListener sl = (SingleDisplayModelListener) l;
-//            sl.
-//          }
-//        }
-//      });
-      } catch(DocumentClosedException dce) { /* do nothing */ }
-    }
-//    finally {_activeDocument.releaseReadLock();}
-//  }
+      refreshActiveDocument();
+  }
+  
+  /** Invokes the activeDocumentChanged method in the global listener on the argument _activeDocument.  This process sets up
+   *  _activeDocument as the document in the definitions pane.  It is also necessary after an "All Documents" search that wraps
+   *  around. */
+  public void refreshActiveDocument() {
+    try {
+      _activeDocument.checkIfClassFileInSync();
+      // notify single display model listeners   // notify single display model listeners
+      _notifier.activeDocumentChanged(_activeDocument);
+    } catch(DocumentClosedException dce) { /* do nothing */ }
+  }
 }

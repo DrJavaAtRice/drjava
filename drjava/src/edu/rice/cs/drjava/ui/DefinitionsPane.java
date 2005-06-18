@@ -939,8 +939,9 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
   public void centerViewOnOffset(int offset) {
     try {
       FontMetrics metrics = getFontMetrics(getFont());
-      double viewWidth = _mainFrame.getDefViewport().getWidth();
-      double viewHeight = _mainFrame.getDefViewport().getHeight();
+      JViewport defViewPort = _mainFrame.getDefViewport();
+      double viewWidth = defViewPort.getWidth();
+      double viewHeight = defViewPort.getHeight();
       // Scroll to make sure this item is visible
       // Centers the selection in the viewport
       Rectangle startRect;

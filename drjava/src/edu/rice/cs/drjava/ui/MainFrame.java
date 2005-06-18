@@ -34,6 +34,7 @@
 package edu.rice.cs.drjava.ui;
 
 import javax.swing.JFileChooser;
+import javax.swing.SwingUtilities;
 import javax.swing.*;
 import javax.swing.text.*;
 import javax.swing.event.*;
@@ -2832,7 +2833,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       }.start();
     }
     finally { hourglassOff();}
-    update(getGraphics());
+//    update(getGraphics());
   }
   
   private void _compileFolder() {
@@ -2858,7 +2859,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       }
     }
     finally { hourglassOff(); }
-    update(getGraphics()); 
+//    update(getGraphics()); 
   }
   
   private void _compileProject() { 
@@ -2895,7 +2896,7 @@ public class MainFrame extends JFrame implements OptionConstants {
         finally { hourglassOff();}
       }
     }.start();
-    update(getGraphics()); 
+//    update(getGraphics()); 
   }
   
   private boolean showCleanWarning() {
@@ -4338,19 +4339,22 @@ public class MainFrame extends JFrame implements OptionConstants {
 //        Utilities.showDebug("MainFrame.stateChanged called with event");
         clearStatusMessage();
         
-        if (_tabbedPane.getSelectedComponent() == _interactionsContainer) {
-          /**
-           * This was probably a bad design decision but I couldn't think
-           * of any other way around it.  When the interactions tab gains
-           * focus we want the interactions pane (editor pane) to receive
-           * the focus.  But focus is given to the tab itself *AFTER* this
-           * listener is called on.  This code waits for a bit for Swing
-           * to give the tab focus, then steals the focus back to the
-           * interactions pane.
-           */
-        }
-        else 
-          if (_tabbedPane.getSelectedComponent() == _consoleScroll) _consolePane.requestFocusInWindow();
+//        if (_tabbedPane.getSelectedComponent() == _interactionsContainer) {
+//          /**
+//           * This was probably a bad design decision but I couldn't think
+//           * of any other way around it.  When the interactions tab gains
+//           * focus we want the interactions pane (editor pane) to receive
+//           * the focus.  But focus is given to the tab itself *AFTER* this
+//           * listener is called on.  This code waits for a bit for Swing
+//           * to give the tab focus, then steals the focus back to the
+//           * interactions pane.  
+//           * This commented-out code looks like an ugly kluge that is dependent on fortuitous timing.  
+//           */
+//        }
+//        else 
+        if (_tabbedPane.getSelectedComponent() == _consoleScroll)
+          SwingUtilities.invokeLater(new Runnable() { public void run() { _consolePane.requestFocusInWindow(); } });
+          // SwingUtilities used above because this action must execute after all pending events in the event queue */
         
         // Update error highlights?
         if (_currentDefPane != null) {
@@ -5140,7 +5144,8 @@ public class MainFrame extends JFrame implements OptionConstants {
           };
           _currentDefPane.addSetSizeListener(setSizeListener);
           
-          if (!_model.getActiveDocument().equals(doc)) _model.setActiveDocument(doc);
+//          if (!_model.getActiveDocument().equals(doc)) 
+            _model.setActiveDocument(doc);
           
           // this block occurs if the documents is already open and as such
           // has a positive size
@@ -5266,50 +5271,46 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
   }
   
-  /**
-   * Inner class to listen to all events in the model.
-   */
+  /** Inner class to listen to all events in the model. */
   private class ModelListener implements GlobalModelListener {
     
     public void fileNotFound(File f) {
       _showFileNotFoundError(new FileNotFoundException("File " + f + " cannot be found"));
     }
     
-    public void newFileCreated(OpenDefinitionsDocument doc) {
-      _createDefScrollPane(doc);
+    public void newFileCreated(final OpenDefinitionsDocument doc) {
+      Utilities.invokeLater(new Runnable() { public void run() { _createDefScrollPane(doc); } });
     }
     
-    public void fileSaved(OpenDefinitionsDocument doc) {
+    public void fileSaved(final OpenDefinitionsDocument doc) {
 //      new ScrollableDialog(null, "fileSaved called in ModelListener", "", "").show();
-      doc.documentSaved();  // used to update the document cache
-      _saveAction.setEnabled(false);
-      _revertAction.setEnabled(true);
-      updateFileTitle();
-      _currentDefPane.requestFocusInWindow();
-      try {
-        File f = doc.getFile();
-        if (! _model.isProjectFile(f)) _recentFileManager.updateOpenFiles(f);
-      }
-      catch (IllegalStateException ise) { throw new UnexpectedException(ise); }
-      // Impossible because saved => has a file
-      
-      catch (FileMovedException fme) {
-        File f = fme.getFile();
-        // Recover, show it in the list anyway
-        if (! _model.isProjectFile(f)) _recentFileManager.updateOpenFiles(f);
-      }
-      // Check class file sync status, in case file was renamed
-      if (inDebugMode()) _updateDebugStatus();
+      Utilities.invokeLater(new Runnable() {
+        public void run() {
+          doc.documentSaved();  // used to update the document cache
+          _saveAction.setEnabled(false);
+          _revertAction.setEnabled(true);
+          updateFileTitle();
+          _currentDefPane.requestFocusInWindow();
+          try {
+            File f = doc.getFile();
+            if (! _model.isProjectFile(f)) _recentFileManager.updateOpenFiles(f);
+          }
+          catch (IllegalStateException ise) { throw new UnexpectedException(ise); }
+          // Impossible because saved => has a file
+          
+          catch (FileMovedException fme) {
+            File f = fme.getFile();
+            // Recover, show it in the list anyway
+            if (! _model.isProjectFile(f)) _recentFileManager.updateOpenFiles(f);
+          }
+          // Check class file sync status, in case file was renamed
+          if (inDebugMode()) _updateDebugStatus();
+        }
+      });
     }
     
-    // NOTE: Not necessarily called from event-dispatching thread...
-    //  Should figure out how to deal with invokeLater here.
-    public void fileOpened(final OpenDefinitionsDocument doc) {
-      
-      Runnable command = new Runnable() {
-        public void run() { _fileOpened(doc); }
-      };
-      Utilities.invokeLater(command);   
+    public void fileOpened(final OpenDefinitionsDocument doc) { 
+      Utilities.invokeLater(new Runnable() { public void run() { _fileOpened(doc); } });  
     }
     
     private void _fileOpened(final OpenDefinitionsDocument doc) {
@@ -5331,12 +5332,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     
     /** NOTE: Makes certain that this action occurs in the event dispatching thread */
     public void fileClosed(final OpenDefinitionsDocument doc) {
-      Runnable command = new Runnable() {
-        public void run() { _fileClosed(doc); }
-      };
-      
-      // Must run this command in event thread 
-      Utilities.invokeLater(command);
+      Utilities.invokeLater(new Runnable() { public void run() { _fileClosed(doc); } });
     }
     
     /** Does the work of closing a file */
@@ -5359,23 +5355,31 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
     
     public void fileReverted(OpenDefinitionsDocument doc) {
-      updateFileTitle();
-      _saveAction.setEnabled(false);
-      _currentDefPane.resetUndo();
-      _currentDefPane.hasWarnedAboutModified(false);
-      _currentDefPane.setPositionAndScroll(0);
-      if (inDebugMode()) _updateDebugStatus();
+      Utilities.invokeLater(new Runnable() {
+        public void run() {
+          updateFileTitle();
+          _saveAction.setEnabled(false);
+          _currentDefPane.resetUndo();
+          _currentDefPane.hasWarnedAboutModified(false);
+          _currentDefPane.setPositionAndScroll(0);
+          if (inDebugMode()) _updateDebugStatus();
+        }
+      });
     }
     
     public void undoableEditHappened() {
-      _currentDefPane.getUndoAction().updateUndoState();
-      _currentDefPane.getRedoAction().updateRedoState();
+      Utilities.invokeLater(new Runnable() {
+        public void run() {      
+          _currentDefPane.getUndoAction().updateUndoState();
+          _currentDefPane.getRedoAction().updateRedoState();
+        }
+      });
     }
     
     public void activeDocumentChanged(final OpenDefinitionsDocument active) {
-      // Only change GUI from event-dispatching thread
-      // (This can be called from other threads...)
-      Utilities.invokeAndWait(new Runnable() {  // invokeAndWait is arguably better but it may create occasional deadlocks.
+//      Utilities.showDebug("MainFrame Listener: ActiveDocument changed to " + active);
+      // code that accesses the GUI must run in the event-dispatching thread. 
+      Utilities.invokeLater(new Runnable() {  // invokeAndWait is arguably better but it may create occasional deadlocks.
         public void run() {
           _recentDocFrame.pokeDocument(active);
           _switchDefScrollPane();
@@ -5400,7 +5404,6 @@ public class MainFrame extends JFrame implements OptionConstants {
           // update display (adding "*") in navigatgorPane
           if (isModified) _model.getDocumentNavigator().repaint();
           
-          
           try { active.revertIfModifiedOnDisk(); }
           catch (FileMovedException fme) { _showFileMovedError(fme); }
           catch (IOException e) { _showIOError(e); }
@@ -5417,47 +5420,52 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
     
     public void interactionStarted() {
-      _disableInteractionsPane();
-      _runAction.setEnabled(false);
+      Utilities.invokeLater(new Runnable() {
+        public void run() {
+          _disableInteractionsPane();
+          _runAction.setEnabled(false);
+        }
+      });
     }
     
     public void interactionEnded() {
-      _enableInteractionsPane();
-      _runAction.setEnabled(true);
+      Utilities.invokeLater(new Runnable() {
+        public void run() {
+          _enableInteractionsPane();
+          _runAction.setEnabled(true);
+        }
+      });
     }
     
-    public void interactionErrorOccurred(int offset, int length) {
-      _interactionsPane.highlightError(offset, length);
+    public void interactionErrorOccurred(final int offset, final int length) {
+      Utilities.invokeLater(new Runnable() { public void run() { _interactionsPane.highlightError(offset, length); } });
     }
     
-    /**
-     * Called when the active interpreter is changed.
-     * @param inProgress Whether the new interpreter is currently in progress
-     * with an interaction (ie. whether an interactionEnded event will be fired)
+    /** Called when the active interpreter is changed.
+     *  @param inProgress Whether the new interpreter is currently in progress
+     *         with an interaction (ie. whether an interactionEnded event will be fired)
      */
-    public void interpreterChanged(boolean inProgress) {
-      _runAction.setEnabled(!inProgress);
-      if (inProgress) _disableInteractionsPane();
-      else _enableInteractionsPane();
+    public void interpreterChanged(final boolean inProgress) {
+      Utilities.invokeLater(new Runnable() {
+        public void run() {
+          _runAction.setEnabled(! inProgress);
+          if (inProgress) _disableInteractionsPane();
+          else _enableInteractionsPane();
+        }
+      });
     }
     
     
     public void compileStarted() {
       // Only change GUI from event-dispatching thread
-      Runnable command = new Runnable() {
+     Utilities.invokeLater(new Runnable() {
         public void run() {
-          // Is this necessary?
-          //CompilerErrorListPane elp = _compilerErrorPanel.getErrorListPane();
-          //elp.setSize(_tabbedPane.getMinimumSize());
-          //_setDividerLocation();
-          
           hourglassOn();
           showTab(_compilerErrorPanel);
           _compilerErrorPanel.setCompilationInProgress();
           _saveAction.setEnabled(false);
         }
-      };
-      Utilities.invokeLater(command);
+      });
     }    
     
     public void compileEnded() {
@@ -5530,7 +5538,9 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
     
     public void junitTestStarted(final String name) {
-      _junitErrorPanel.getErrorListPane().testStarted(name); // this does nothing!
+      Utilities.invokeLater(new Runnable() {
+        public void run() { _junitErrorPanel.getErrorListPane().testStarted(name); /* this does nothing! */ }
+      });          
     }
     
     public void junitTestEnded(final String name, final boolean succeeded, final boolean causedError) {
@@ -5711,52 +5721,57 @@ public class MainFrame extends JFrame implements OptionConstants {
     public void consoleReset() { }
     
     public void saveBeforeCompile() {
-      _saveAllBeforeProceeding
-        ("To compile, you must first save ALL modified files.\n" + "Would you like to save and then compile?",
-         ALWAYS_SAVE_BEFORE_COMPILE,
-         "Always save before compiling");
+      Utilities.invokeLater(new Runnable() {
+        public void run() {
+          _saveAllBeforeProceeding
+            ("To compile, you must first save ALL modified files.\n" + "Would you like to save and then compile?",
+             ALWAYS_SAVE_BEFORE_COMPILE,
+             "Always save before compiling");
+        }
+      });
     }
     
-    /**
-     * Prompts the user to save and compile before running a modified file.
-     *
-     * Not currently used.
-     public void saveBeforeRun() {
-     _saveAllBeforeProceeding
-     ("To run this document's main method, you must first\n" +
-     "save ALL modified files and compile this document.\n" +
-     "Would you like to save and compile now?",
-     ALWAYS_SAVE_BEFORE_RUN,
-     "Always save and compile before running");
-     }*/
+//    /** Prompts the user to save and compile before running a modified file.
+//     *  Not currently used.
+//     */
+//     public void saveBeforeRun() {
+//     _saveAllBeforeProceeding
+//     ("To run this document's main method, you must first\n" +
+//     "save ALL modified files and compile this document.\n" +
+//     "Would you like to save and compile now?",
+//     ALWAYS_SAVE_BEFORE_RUN,
+//     "Always save and compile before running");
+//     }
     
-    /**
-     * Not currently used.
-     public void saveBeforeJUnit() {
-     _saveAllBeforeProceeding
-     ("To run JUnit, you must first save and compile ALL modified\n" +
-     "files. Would you like to save and compile now?",
-     ALWAYS_SAVE_BEFORE_JUNIT,
-     "Always save and compile before testing with JUnit");
-     }*/
+//    /** Not currently used. */
+//     public void saveBeforeJUnit() {
+//     _saveAllBeforeProceeding
+//     ("To run JUnit, you must first save and compile ALL modified\n" +
+//     "files. Would you like to save and compile now?",
+//     ALWAYS_SAVE_BEFORE_JUNIT,
+//     "Always save and compile before testing with JUnit");
+//     }
     
     public void saveBeforeJavadoc() {
-      _saveAllBeforeProceeding
-        ("To run Javadoc, you must first save ALL modified files.\n" +
-         "Would you like to save and then run Javadoc?",
-         ALWAYS_SAVE_BEFORE_JAVADOC,
-         "Always save before running Javadoc");
+      Utilities.invokeLater(new Runnable() {
+        public void run() {
+          _saveAllBeforeProceeding
+            ("To run Javadoc, you must first save ALL modified files.\n" +
+             "Would you like to save and then run Javadoc?",
+             ALWAYS_SAVE_BEFORE_JAVADOC,
+             "Always save before running Javadoc");
+        }
+      });
     }
     
-    /**
-     * Not currently used.
-     public void saveBeforeDebug() {
-     _saveAllBeforeProceeding
-     ("To use debugging commands, you must first save and compile\n" +
-     "ALL modified files. Would you like to save and then compile?",
-     ALWAYS_SAVE_BEFORE_DEBUG,
-     "Always save and compile before debugging");
-     }*/
+//    /** Not currently used. */
+//     public void saveBeforeDebug() {
+//     _saveAllBeforeProceeding
+//     ("To use debugging commands, you must first save and compile\n" +
+//     "ALL modified files. Would you like to save and then compile?",
+//     ALWAYS_SAVE_BEFORE_DEBUG,
+//     "Always save and compile before debugging");
+//     }
     
     /** Helper method shared by all "saveBeforeX" methods.
      * @param message a prompt message to be displayed to the user
@@ -5794,24 +5809,28 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
     
     public void filePathContainsPound() {
-      if (DrJava.getConfig().getSetting(WARN_PATH_CONTAINS_POUND).booleanValue()) {
-        String msg =
-          "Files whose paths contain the '#' symbol cannot be used in the\n" +
-          "Interactions Pane due to a bug in Java's file to URL conversion.\n" +
-          "It is suggested that you change the name of the directory\n" +
-          "containing the '#' symbol.";
-        
-        String title = "Path Contains Pound Sign";
-        
-        ConfirmCheckBoxDialog dialog =
-          new ConfirmCheckBoxDialog(MainFrame.this, title, msg,
-                                    "Do not show this message again",
-                                    JOptionPane.WARNING_MESSAGE,
-                                    JOptionPane.DEFAULT_OPTION);
-        if (dialog.show() == JOptionPane.OK_OPTION && dialog.getCheckBoxValue()) {
-          DrJava.getConfig().setSetting(WARN_PATH_CONTAINS_POUND, Boolean.FALSE);
+      Utilities.invokeLater(new Runnable() {
+        public void run() {
+          if (DrJava.getConfig().getSetting(WARN_PATH_CONTAINS_POUND).booleanValue()) {
+            String msg =
+              "Files whose paths contain the '#' symbol cannot be used in the\n" +
+              "Interactions Pane due to a bug in Java's file to URL conversion.\n" +
+              "It is suggested that you change the name of the directory\n" +
+              "containing the '#' symbol.";
+            
+            String title = "Path Contains Pound Sign";
+            
+            ConfirmCheckBoxDialog dialog =
+              new ConfirmCheckBoxDialog(MainFrame.this, title, msg,
+                                        "Do not show this message again",
+                                        JOptionPane.WARNING_MESSAGE,
+                                        JOptionPane.DEFAULT_OPTION);
+            if (dialog.show() == JOptionPane.OK_OPTION && dialog.getCheckBoxValue()) {
+              DrJava.getConfig().setSetting(WARN_PATH_CONTAINS_POUND, Boolean.FALSE);
+            }
+          }
         }
-      }
+      });
     }
     
     /** Event that is fired with there is nothing to test.  JUnit is never started. */ 
@@ -6028,10 +6047,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       String text = "File " + f.getAbsolutePath() +
         "\ncould not be found on disk!  It was probably moved\n" +
         "or deleted.  Would you like to try to find it?";
-      int rc = JOptionPane.showConfirmDialog(MainFrame.this,
-                                             text,
-                                             "File Moved or Deleted",
-                                             JOptionPane.YES_NO_OPTION);
+      int rc = JOptionPane.showConfirmDialog(MainFrame.this, text, "File Moved or Deleted", JOptionPane.YES_NO_OPTION);
       if (rc == JOptionPane.YES_OPTION) {
         try {
           File[] opened = _openSelector.getFiles(); 
@@ -6055,42 +6071,48 @@ public class MainFrame extends JFrame implements OptionConstants {
     return defScroll.getViewport();
   }
   
-  public void removeTab(Component c) {
-    _tabbedPane.remove(c);
-    ((TabbedPanel)c).setDisplayed(false);
-    _tabbedPane.setSelectedIndex(0);
-    _currentDefPane.requestFocusInWindow();
+  public void removeTab(final Component c) {
+    Utilities.invokeLater(new Runnable() {
+      public void run() {  
+        _tabbedPane.remove(c);
+        ((TabbedPanel)c).setDisplayed(false);
+        _tabbedPane.setSelectedIndex(0);
+        _currentDefPane.requestFocusInWindow();
+      }
+    });
   }
   
-  /**
-   * Shows the components passed in in the appropriate place in the tabbedPane depending on the position of
-   * the component in the _tabs list.
-   * @param c the component to show in the tabbedPane
+  /** Shows the components passed in in the appropriate place in the tabbedPane depending on the position of
+   *  the component in the _tabs list.
+   *  @param c the component to show in the tabbedPane
    */
-  public void showTab(Component c) {
-    int numVisible = 0;
+  public void showTab(final Component c) {
     
-    // This retarded method doesn't work for our two always-on tabs,
-    // so here's a temporary kludge.
-    if (c == _interactionsPane) _tabbedPane.setSelectedIndex(0);
-    else if (c == _consolePane) _tabbedPane.setSelectedIndex(1);
-    else {
-      for (TabbedPanel tp: _tabs) {
-        if (tp == c) {
-          // 2 right now is a magic number for the number of tabs always visible
-          // interactions & console
-          if (! tp.isDisplayed()) {
-            _tabbedPane.insertTab(tp.getName(), null, tp, null, numVisible + 2);
-            tp.setDisplayed(true);
+    // This retarded method doesn't work for our two always-on tabs, so here's a temporary kludge.
+    Utilities.invokeLater(new Runnable() {
+      public void run() {
+        int numVisible = 0;
+        if (c == _interactionsPane) _tabbedPane.setSelectedIndex(0);
+        else if (c == _consolePane) _tabbedPane.setSelectedIndex(1);
+        else {
+          for (TabbedPanel tp: _tabs) {
+            if (tp == c) {
+              // 2 right now is a magic number for the number of tabs always visible
+              // interactions & console
+              if (! tp.isDisplayed()) {
+                _tabbedPane.insertTab(tp.getName(), null, tp, null, numVisible + 2);
+                tp.setDisplayed(true);
+              }
+              _tabbedPane.setSelectedIndex(numVisible + 2);
+              
+              c.requestFocusInWindow();
+              return;
+            }
+            if (tp.isDisplayed()) numVisible++;
           }
-          _tabbedPane.setSelectedIndex(numVisible + 2);
-          
-          c.requestFocusInWindow();
-          return;
         }
-        if (tp.isDisplayed()) numVisible++;
       }
-    }
+    });
   }
   
   /**
@@ -6104,9 +6126,7 @@ public class MainFrame extends JFrame implements OptionConstants {
    _mainSplit.setDividerLocation(divLocation);
    }*/
   
-  /**
-   * Warns the user that the current file is open and query them if they wish to save over the currently open file.
-   */
+  /** Warns the user that the current file is open and query them if they wish to save over the currently open file. */
   private boolean _warnFileOpen(File f) {
     OpenDefinitionsDocument d = null;
     try { d = _model.getDocumentForFile(f); }
@@ -6143,6 +6163,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   private void _junitInterrupted(UnexpectedException e) {
     _showJUnitInterrupted(e);
     removeTab(_junitErrorPanel);
+    hourglassOff();
   }
   
   boolean inDebugMode() {

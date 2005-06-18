@@ -391,8 +391,7 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
       actions.put(a.getValue(Action.NAME), a);
     }
     
-    Keymap km = _findField.addKeymap("Find Field Bindings",
-                                         _findField.getKeymap());
+    Keymap km = _findField.addKeymap("Find Field Bindings", _findField.getKeymap());
       
     KeyStroke findKey = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0);
     km.addActionForKeyStroke(findKey, _findEnterAction); 
@@ -410,8 +409,7 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
     _findField.setKeymap(km);
 
   
-    Keymap rkm = _replaceField.addKeymap("Replace Field Bindings",
-                                         _replaceField.getKeymap());
+    Keymap rkm = _replaceField.addKeymap("Replace Field Bindings", _replaceField.getKeymap());
       
     rkm.addActionForKeyStroke(switchFocusKey, _replaceFieldSwitchFocusAction); 
     rkm.addActionForKeyStroke(tabKey, tabAction); 
@@ -446,11 +444,11 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
   /** Getter method for the _findField component */
   JTextPane getFindField() { return _findField; }
 
-  /** Called when the user presses the key assigned to find next. */
-  public void findNext() { if (_findField.getText().length() > 0) _doFind(); }
+  /** Called when user the activates "find next" command.  Package visibility to accommodate calls from MainFrame. */
+  void findNext() { if (_findField.getText().length() > 0) _doFind(); }
 
-  /** Called from MainFrame upon opening this Dialog or changes in the active document. */
-  public void beginListeningTo(DefinitionsPane defPane) {
+  /** Called from MainFrame in response to opening this or changes in the active document. */
+  void beginListeningTo(DefinitionsPane defPane) {
     if (_defPane==null) {
       // removed so it doesn't give the pane focus when switching documents
 //      requestFocusInWindow(); 
@@ -511,7 +509,6 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
     }
   };
                                                             
-
   /** Abstracted out since this is called from find and replace/find. */
   private void _doFind() {
     _updateMachine();
@@ -534,8 +531,8 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
       Caret c = _defPane.getCaret();
       c.setDot(c.getDot());
       
-      if (! matchDoc.equals(openDoc)) 
-        _model.setActiveDocument(matchDoc);  // set active doc if matchDoc != openDoc
+      if (! matchDoc.equals(openDoc)) _model.setActiveDocument(matchDoc);  // set active doc if matchDoc != openDoc
+      else _model.refreshActiveDocument();  // re-establish openDoc (which is the _activeDocument) as active
    
       _defPane.setCaretPosition(pos);
       _caretChanged = true;
@@ -740,6 +737,7 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
   private void _updateMachine() {
     if (_caretChanged) {
       OpenDefinitionsDocument doc = _model.getActiveDocument();
+      OpenDefinitionsDocument currentDoc = _defPane.getOpenDefDocument();
       _machine.setDocument(doc);
       if (_machine.getFirstDoc() == null) _machine.setFirstDoc(doc);
       _machine.setStart(_defPane.getCaretPosition());
