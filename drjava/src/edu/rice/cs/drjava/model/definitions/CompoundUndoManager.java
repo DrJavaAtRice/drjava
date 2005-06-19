@@ -56,6 +56,7 @@ import edu.rice.cs.util.swing.Utilities;
  *  methods in UndoManager.
  * 
  *  Many methods are synchronized because _compoundEdits and _keys data structures are not thread safe.
+ *  The synchronization scheme (locking on this) follows that of UndoManager.
  *  @version $Id$
  */
 public class CompoundUndoManager extends UndoManager {
@@ -111,7 +112,6 @@ public class CompoundUndoManager extends UndoManager {
     
     endCompoundEdit(_keys.get(0).intValue());
   }
-  
   
   /** Ends a compound edit.
    *  @param key the key that was returned by startCompoundEdit()

@@ -105,7 +105,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
 
     assertTrue("Returned JButton is enabled.", ! b.isEnabled());
     assertEquals("Tooltip text not set.", "test tooltip", b.getToolTipText());
-//    _log.log("testCreateManualToobarButton completed");
+    _log.log("testCreateManualToobarButton completed");
   }
 
   /** Tests that the current location of a document is equal to the caret location after documents are switched. */
@@ -143,7 +143,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     curDoc = curPane.getOpenDefDocument();//.getDocument();
     assertEquals("Current document is old document", oldDoc, curDoc);
     assertEquals("Location of old document", 3, curDoc.getCurrentLocation());
-//    _log.log("testDocLocationAfterSwitch completed");
+    _log.log("testDocLocationAfterSwitch completed");
   }
 
   /**
@@ -243,7 +243,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     int origLength = doc.getDocLength();
     doc.insertText(1, "typed text", InteractionsDocument.DEFAULT_STYLE);
     assertEquals("Document should not have changed.", origLength, doc.getDocLength());
-//    _log.log("testCorrectInteractionsDocument completed");
+    _log.log("testCorrectInteractionsDocument completed");
   }
 
   /**
@@ -251,8 +251,6 @@ public final class MainFrameTest extends MultiThreadedTestCase {
    * the caret position.
    */
   public void testMultilineIndentAfterScroll() throws BadLocationException {
-    DefinitionsPane pane = _frame.getCurrentDefPane();
-    OpenDefinitionsDocument doc = pane.getOpenDefDocument();
     String text =
       "public class stuff {\n" +
       "private int _int;\n" +
@@ -261,7 +259,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
       "_bar.baz(_int);\n" +
       "}\n" +
       "}\n";
-
+    
     String indented =
       "public class stuff {\n" +
       "  private int _int;\n" +
@@ -270,31 +268,52 @@ public final class MainFrameTest extends MultiThreadedTestCase {
       "    _bar.baz(_int);\n" +
       "  }\n" +
       "}\n";
-
-    int oldPos;
-    int newPos = 20;
-
-    DrJava.getConfig().setSetting(OptionConstants.INDENT_LEVEL, new Integer(2));
     
+    int oldPos;
+    final int newPos = 20;
+    
+    final DefinitionsPane pane = _frame.getCurrentDefPane();
+    final OpenDefinitionsDocument doc = pane.getOpenDefDocument();
+    
+    DrJava.getConfig().setSetting(OptionConstants.INDENT_LEVEL, new Integer(2));
     doc.insertString(0, text, null);
-    pane.endCompoundEdit();
+    Utilities.invokeAndWait(new Runnable() { 
+      public void run() { 
+        pane.setCaretPosition(0);
+        pane.endCompoundEdit(); } 
+    });
+    
     assertEquals("Should have inserted correctly.", text, doc.getText());
-
-    pane.setCaretPosition(0);
+    
     doc.indentLines(0, doc.getLength());
     assertEquals("Should have indented.", indented, doc.getText());
-
     oldPos = pane.getCaretPosition();
-    pane.setCaretPosition(newPos);
-    doc.getUndoManager().undo();
-    assertEquals("Should have undone.", text, doc.getText());
-    assertEquals("Undo should have restored caret position.", oldPos, pane.getCaretPosition());
+    System.err.println("Old position is: " + oldPos);
 
-    pane.setCaretPosition(newPos);
-    doc.getUndoManager().redo();
+    Utilities.invokeAndWait(new Runnable() {
+      public void run() {
+        pane.setCaretPosition(newPos);
+        System.err.println("New position is: " + pane.getCaretPosition());
+      }
+    });
+    doc.getUndoManager().undo();  
+    // Moving this statement inside the invokeAndWait above breaks "Undo should have restored ..."  Why?
+    assertEquals("Should have undone.", text, doc.getText());
+    Utilities.clearEventQueue();
+    
+    int rePos = pane.getCaretPosition();
+    System.err.println("Restored position is: " + rePos);
+    assertEquals("Undo should have restored caret position.", oldPos, rePos);
+    
+    Utilities.invokeAndWait(new Runnable() {
+      public void run() {
+        pane.setCaretPosition(newPos);
+        doc.getUndoManager().redo();
+      }
+    });
     assertEquals("redo",indented, doc.getText());
     assertEquals("redo restores caret position", oldPos, pane.getCaretPosition());
-//    _log.log("testMultilineIndentAfterScroll completed");
+    _log.log("testMultilineIndentAfterScroll completed");
   }
 
   /**
@@ -330,7 +349,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     _frame.hourglassOff();
     assertTrue("End: defPane1",defPane1.isEditable());
     assertTrue("End: defPane2",defPane2.isEditable());
-//    _log.log("testGlassPaneEditableState completed");
+    _log.log("testGlassPaneEditableState completed");
   }
 
   /**
@@ -361,7 +380,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     assertTrue("the find replace dialog should not come up", !_frame.getFindReplaceDialog().isDisplayed());
 
     _frame.hourglassOff();
-//    _log.log("testGlassPaneHidesKeyEvents completed");
+    _log.log("testGlassPaneHidesKeyEvents completed");
   }
 
   
@@ -397,7 +416,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     });                
     
     assertTrue("the save button should not be enabled after opening a document", !_frame.saveEnabledHuh());
-//    _log.log("testSaveButtonEnabled completed");
+    _log.log("testSaveButtonEnabled completed");
   }
   
   /** A Test to guarantee that the Dancing UI bug will not rear its ugly head again.
@@ -479,7 +498,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
      if (! FileOps.deleteDirectory(_tempDir))
        System.err.println("Couldn't fully delete directory " + _tempDir.getAbsolutePath() + "\nDo it by hand.\n");
    
-//     _log.log("testDancingUIFileOpened completed");
+     _log.log("testDancingUIFileOpened completed");
   }
 
     /**
@@ -541,7 +560,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     }
     catch(UnexpectedException e) { fail(e.toString()); }
     
-//     _log.log("Waiting for file closing");
+    _log.log("Waiting for file closing");
     
     synchronized(_closeLock) {
       try { while (! _closeDone) _closeLock.wait(); }
@@ -552,7 +571,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
       System.err.println("Couldn't fully delete directory " + _tempDir.getAbsolutePath() +
                          "\nDo it by hand.\n");
     }
-//     _log.log("testDancingUIClosed completed");
+    _log.log("testDancingUIClosed completed");
   }
 
   /** A CompileListener for SingleDisplayModel (instead of GlobalModel) */

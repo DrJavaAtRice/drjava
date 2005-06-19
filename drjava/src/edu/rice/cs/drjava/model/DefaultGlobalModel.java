@@ -1342,7 +1342,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
 //    Utilities.showDebug("Project files are: " + projFiles);
     
 //    List<OpenDefinitionsDocument> nonProjDocs = getNonProjectDocuments();
-    List<OpenDefinitionsDocument> projDocs = getProjectDocuments();  // opened documents in the project source tree
+    final List<OpenDefinitionsDocument> projDocs = getProjectDocuments();  // opened documents in the project source tree
     
 //    File[] projectFiles = getProjectFiles();   
     
@@ -1351,21 +1351,23 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
     // previous project that are still external to the new project should be kept open (except for a new file).
     
     //List<OpenDefinitionsDocument> docsToClose = new LinkedList<OpenDefinitionsDocument>();
-    for (OpenDefinitionsDocument d: projDocs) {
-      if (d.isProjectFile()) closeFile(d);
-      else {
-        try {
-          final INavigatorItem idoc = d;
-          final String path = fixPathForNavigator(d.getFile().getCanonicalPath());
-          Utilities.invokeAndWait(new Runnable() { 
-            public void run() { _documentNavigator.refreshDocument(idoc, path); }
-          });
-        }
-        catch(IOException e) { 
-          /* Do nothing; findbugs signals a bug unless this catch clause spans more than two lines */ 
+    Utilities.invokeAndWait(new Runnable() {
+      public void run() {
+        for (OpenDefinitionsDocument d: projDocs) {
+          if (d.isProjectFile()) closeFile(d);
+          else {
+            try {
+              final INavigatorItem idoc = d;
+              final String path = fixPathForNavigator(d.getFile().getCanonicalPath());
+              _documentNavigator.refreshDocument(idoc, path);  // this operation must run in event thread
+            }
+            catch(IOException e) { 
+              /* Do nothing; findbugs signals a bug unless this catch clause spans more than two lines */ 
+            }
+          }
         }
       }
-    }
+    });
 //    Utilities.showDebug("Preparing to refresh navigator GUI");
     // call on the GUI to finish up by opening the files and making necessary gui component changes
     final File[] filesToOpen = projFiles.toArray(new File[projFiles.size()]);
@@ -1437,8 +1439,8 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
     
     if (! found) return false;
     
-    Utilities.invokeAndWait(new Runnable() { 
-      public void run() { _documentNavigator.removeDocument(doc); }
+    Utilities.invokeLater(new Runnable() { 
+      public void run() { _documentNavigator.removeDocument(doc); }   // this operation must run in event thread
     });
     _notifier.fileClosed(doc);
     doc.close();
@@ -1478,7 +1480,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
     _notifier.removeAllListeners();
     synchronized(_documentsRepos) { _documentsRepos.clear(); }
     Utilities.invokeAndWait(new Runnable() { 
-      public void run() { _documentNavigator.clear(); }
+      public void run() { _documentNavigator.clear(); }  // this operation must run in event thread
     });
   }
 
@@ -3249,7 +3251,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
    *  @param doc the document to add to the navigator
    */
   private void addDocToNavigator(final OpenDefinitionsDocument doc) {
-    Utilities.invokeAndWait(new Runnable() {
+    Utilities.invokeLater(new Runnable() {
       public void run() {
         try {
           if (doc.isUntitled()) _documentNavigator.addDocument(doc);

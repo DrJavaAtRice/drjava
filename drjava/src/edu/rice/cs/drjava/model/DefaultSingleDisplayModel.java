@@ -162,7 +162,7 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel implements Sin
     Runnable command = new Runnable() {  
       public void run() {_documentNavigator.setActiveDoc(doc);} 
     };
-    try {Utilities.invokeAndWait(command); }
+    try {Utilities.invokeAndWait(command); }  // might be relaxed to invokeLater
     catch(Exception e) { throw new UnexpectedException(e); } 
 //    try { _documentNavigator.setActiveDoc(doc); } 
 //    catch(DocumentClosedException dce) { 

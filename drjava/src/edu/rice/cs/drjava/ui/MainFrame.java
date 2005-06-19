@@ -2072,7 +2072,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   private void _installNewDocumentListener(final Document d) {
     d.addDocumentListener(new DocumentUIListener() {
       public void changedUpdate(DocumentEvent e) {
-        Utilities.invokeAndWait(new Runnable() {
+        Utilities.invokeLater(new Runnable() {
           public void run() {
             OpenDefinitionsDocument doc = _model.getActiveDocument();
             if (doc.isModifiedSinceSave()) {
@@ -2085,7 +2085,7 @@ public class MainFrame extends JFrame implements OptionConstants {
         });
       }
       public void insertUpdate(DocumentEvent e) {
-        Utilities.invokeAndWait(new Runnable() {
+        Utilities.invokeLater(new Runnable() {
           public void run() {
             _saveAction.setEnabled(true);
             if (inDebugMode() && _debugPanel.getStatusText().equals(""))
@@ -2095,7 +2095,7 @@ public class MainFrame extends JFrame implements OptionConstants {
         });
       }
       public void removeUpdate(DocumentEvent e) {
-        Utilities.invokeAndWait(new Runnable() {
+        Utilities.invokeLater(new Runnable() {
           public void run() {
             _saveAction.setEnabled(true);
             if (inDebugMode() && _debugPanel.getStatusText().equals(""))
