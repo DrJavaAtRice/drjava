@@ -75,7 +75,8 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
   private JButton _findNextButton;
   private JButton _findPreviousButton;
   private JButton _replaceButton;
-  private JButton _replaceFindButton;
+  private JButton _replaceFindNextButton;
+  private JButton _replaceFindPreviousButton;
   private JButton _replaceAllButton;
   private JLabel _findLabel;
   private JLabel _replaceLabel;
@@ -106,6 +107,7 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
 //        public void run() {
           _replaceAction.setEnabled(false);
           _replaceFindNextAction.setEnabled(false);
+          _replaceFindPreviousAction.setEnabled(false);
           _machine.positionChanged();
           _caretChanged = true;
 //        }
@@ -123,18 +125,34 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
   
   
   //Action to move to switch focus when pressing the Tab key inside the _findField.
-  private Action _findFieldSwitchFocusAction = new TextAction ("Switch Focus from Find Field") {    
+  private Action _findFieldSwitchFocusForwardAction = new TextAction ("Switch Focus from Find Field") {    
     public void actionPerformed(ActionEvent ae) {
       _findField.getNextFocusableComponent().requestFocusInWindow();
     }
   };
   
   //Action to move to switch focus when pressing the Tab key inside the _replaceField.
-  private Action _replaceFieldSwitchFocusAction = new TextAction ("Switch Focus from Replace Field") {    
+  private Action _replaceFieldSwitchFocusForwardAction = new TextAction ("Switch Focus from Replace Field") {    
     public void actionPerformed(ActionEvent ae) {
       _replaceField.getNextFocusableComponent().requestFocusInWindow();
     }
   };
+  
+  
+  //Action to move to switch focus when pressing Shift-Tab inside the _findField.
+  private Action _findFieldSwitchFocusBackAction = new TextAction ("Switch Focus from Find Field") {    
+    public void actionPerformed(ActionEvent ae) {
+      _closeButton.requestFocusInWindow();
+    }
+  };
+  
+   //Action to move to switch focus when pressing Shift-Tab inside the _replaceField.
+  private Action _replaceFieldSwitchFocusBackAction = new TextAction ("Switch Focus from Replace Field") {    
+    public void actionPerformed(ActionEvent ae) {
+      _findField.requestFocusInWindow();
+    }
+  };
+  
   
 //  private KeyStroke tabKS = KeyStroke.getKeyStroke(KeyEvent.VK_TAB, 0);
 //  private Keymap km = _findField.getKeymap();
@@ -188,7 +206,9 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
     InputMap fim = _findField.getInputMap(i);
     fim.put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE,0), "Close");
     fim.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER,0), "Find Next");
-    fim.put(KeyStroke.getKeyStroke(KeyEvent.VK_TAB, 0), "Switch Focus");
+    fim.put(KeyStroke.getKeyStroke(KeyEvent.VK_TAB, 0), "Switch Focus Forward");
+    fim.put(KeyStroke.getKeyStroke(KeyEvent.VK_TAB, Event.SHIFT_MASK), "Switch Focus Back");
+    
     ActionMap fam = _findField.getActionMap();
     fam.put("Find Next", _findNextAction);
     fam.put("Close", new AbstractAction("Close") {
@@ -197,16 +217,24 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
         _close();
       }
     });
-    
-    fam.put("Switch Focus", new AbstractAction("Switch Focus") {
+    fam.put("Switch Focus Forward", new AbstractAction("Switch Focus Forward") {
       public void actionPerformed(ActionEvent ae) { _findField.getNextFocusableComponent().requestFocusInWindow(); }
     });
+    fam.put("Switch Focus Back", new AbstractAction("Switch Focus Back") {
+      public void actionPerformed(ActionEvent ae) { _closeButton.requestFocusInWindow(); }
+    });
+    
     
     InputMap rim = _replaceField.getInputMap(i);
-    rim.put(KeyStroke.getKeyStroke(KeyEvent.VK_TAB, 0), "Switch Focus");
+    rim.put(KeyStroke.getKeyStroke(KeyEvent.VK_TAB, 0), "Switch Focus Forward");
+    rim.put(KeyStroke.getKeyStroke(KeyEvent.VK_TAB, Event.SHIFT_MASK), "Switch Focus Back");
+    
     ActionMap ram = _replaceField.getActionMap();
     ram.put("Switch Focus", new AbstractAction("Switch Focus") {
       public void actionPerformed(ActionEvent ae) { _replaceField.getNextFocusableComponent().requestFocusInWindow(); }
+    });
+    ram.put("Switch Focus Back", new AbstractAction("Switch Focus Back") {
+      public void actionPerformed(ActionEvent ae) { _findField.requestFocusInWindow(); }
     });
     
     
@@ -220,20 +248,23 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
     _findNextButton = new JButton(_findNextAction);
     _findPreviousButton = new JButton(_findPreviousAction);
     _replaceButton = new JButton(_replaceAction);
-    _replaceFindButton = new JButton(_replaceFindNextAction);
+    _replaceFindNextButton = new JButton(_replaceFindNextAction);
+    _replaceFindPreviousButton = new JButton(_replaceFindPreviousAction);
     _replaceAllButton = new JButton(_replaceAllAction);
     _message = new JLabel(""); // JL
 
     _replaceAction.setEnabled(false);
     _replaceFindNextAction.setEnabled(false);
+    _replaceFindPreviousAction.setEnabled(false);
 
     // set up the layout
     JPanel buttons = new JPanel();
     buttons.setLayout(new GridLayout(1,0,5,0));
     buttons.add(_findNextButton);
     buttons.add(_findPreviousButton);
+    buttons.add(_replaceFindNextButton);
+    buttons.add(_replaceFindPreviousButton);
     buttons.add(_replaceButton);
-    buttons.add(_replaceFindButton);
     buttons.add(_replaceAllButton);
     
 
@@ -338,9 +369,10 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
     _matchWholeWord.setNextFocusableComponent(_ignoreCommentsAndStrings); // JL (edited)
     _ignoreCommentsAndStrings.setNextFocusableComponent(_findNextButton);
     _findNextButton.setNextFocusableComponent(_findPreviousButton);
-    _findPreviousButton.setNextFocusableComponent(_replaceButton);
-    _replaceButton.setNextFocusableComponent(_replaceFindButton);
-    _replaceFindButton.setNextFocusableComponent(_replaceAllButton);
+    _findPreviousButton.setNextFocusableComponent(_replaceFindNextButton);
+    _replaceFindNextButton.setNextFocusableComponent(_replaceFindPreviousButton);
+    _replaceFindPreviousButton.setNextFocusableComponent(_replaceButton);
+    _replaceButton.setNextFocusableComponent(_replaceAllButton);
     _replaceAllButton.setNextFocusableComponent(_closeButton);
     _closeButton.setNextFocusableComponent(_findField);
     
@@ -369,9 +401,10 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
         Utilities.invokeLater(new Runnable() {
           public void run() {
             _machine.makeCurrentOffsetStart();
-            updateFirstDocumentInSearch();
+            updateFirstDocInSearch();
             _replaceAction.setEnabled(false);
             _replaceFindNextAction.setEnabled(false);
+            _replaceFindPreviousAction.setEnabled(false);
             _machine.positionChanged();
             if (_findField.getText().equals("")) _replaceAllAction.setEnabled(false);
             else                                 _replaceAllAction.setEnabled(true);
@@ -381,7 +414,7 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
     });  
     
     
-    //Information necessary to change the behavior of the Enter key in the _findField */
+    //Change the behavior of the Enter, Tab, and Ctrl-Enter keys in the _findField and _replaeField */
     final Hashtable<Object, Action> actions = new Hashtable<Object, Action>();
     EditorKit ek = _findField.getEditorKit();
     Action[] actionsArray = ek.getActions();
@@ -396,10 +429,25 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
     KeyStroke findKey = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0);
     km.addActionForKeyStroke(findKey, _findEnterAction); 
     
-    KeyStroke switchFocusKey = KeyStroke.getKeyStroke(KeyEvent.VK_TAB, 0);
-    km.addActionForKeyStroke(switchFocusKey, _findFieldSwitchFocusAction); 
+    KeyStroke switchFocusForwardKey = KeyStroke.getKeyStroke(KeyEvent.VK_TAB, 0);
+    km.addActionForKeyStroke(switchFocusForwardKey, _findFieldSwitchFocusForwardAction); 
     
-    Action newLineAction = actions.get(DefaultEditorKit.insertBreakAction);
+    KeyStroke switchFocusBackKey = KeyStroke.getKeyStroke(KeyEvent.VK_TAB, Event.SHIFT_MASK);
+    km.addActionForKeyStroke(switchFocusBackKey, _findFieldSwitchFocusBackAction); 
+    
+//    Action newLineAction = new TextAction("NewLine Action") {
+//      public void actionPerformed(ActionEvent e) {
+//        String text = _findField.getText();
+//        int caretPos = _findField.getCaretPosition();
+//        String textBeforeCaret = text.substring(0, caretPos);
+//        String textAfterCaret = text.substring(caretPos);
+//        _findField.setText(textBeforeCaret.concat("\n"/*System.getProperty("line.separator")*/).concat(textAfterCaret));
+//        _findField.setCaretPosition(caretPos+1);
+//      }
+//    };
+    
+    Action newLineAction = new DefaultEditorKit.InsertBreakAction();
+    
     KeyStroke newLineKey = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, Event.CTRL_MASK);
     km.addActionForKeyStroke(newLineKey, newLineAction); 
     
@@ -411,7 +459,8 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
   
     Keymap rkm = _replaceField.addKeymap("Replace Field Bindings", _replaceField.getKeymap());
       
-    rkm.addActionForKeyStroke(switchFocusKey, _replaceFieldSwitchFocusAction); 
+    rkm.addActionForKeyStroke(switchFocusForwardKey, _replaceFieldSwitchFocusForwardAction); 
+    rkm.addActionForKeyStroke(switchFocusBackKey, _replaceFieldSwitchFocusBackAction);
     rkm.addActionForKeyStroke(tabKey, tabAction); 
     _replaceField.setKeymap(rkm);
     
@@ -464,10 +513,12 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
       if (!_machine.isOnMatch() || _findField.getText().equals("")) {
         _replaceAction.setEnabled(false);
         _replaceFindNextAction.setEnabled(false);
+        _replaceFindPreviousAction.setEnabled(false);
       }
       else {
         _replaceAction.setEnabled(true);
         _replaceFindNextAction.setEnabled(true);
+        _replaceFindPreviousAction.setEnabled(true);
         _machine.setLastFindWord();
       }
 
@@ -555,6 +606,7 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
 
       _replaceAction.setEnabled(true);
       _replaceFindNextAction.setEnabled(true);
+      _replaceFindPreviousAction.setEnabled(true);
       _machine.setLastFindWord();
     }
     // else the entire document was searched and no instance of the string
@@ -585,13 +637,18 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
       }
       _replaceAction.setEnabled(false);
       _replaceFindNextAction.setEnabled(false);
+      _replaceFindPreviousAction.setEnabled(false);
       _replaceButton.requestFocusInWindow();
     }
   };
 
   private Action _replaceFindNextAction = new AbstractAction("Replace/Find Next") {
     public void actionPerformed(ActionEvent e) {
-      setSearchBackwards(false);
+      if (getSearchBackwards() == true) {
+        setSearchBackwards(false);
+        _machine.positionChanged();
+        findNext();
+      }
       _updateMachine();
       _machine.setFindWord(_findField.getText());
       String replaceWord = _replaceField.getText();
@@ -604,11 +661,12 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
       if (replaced) {
         _selectReplacedItem(replaceWord.length());
         findNext();
-        _replaceFindButton.requestFocusInWindow();
+        _replaceFindNextButton.requestFocusInWindow();
       }
       else {
         _replaceAction.setEnabled(false);
         _replaceFindNextAction.setEnabled(false);
+        _replaceFindPreviousAction.setEnabled(false);
         Toolkit.getDefaultToolkit().beep();
         _mainframe.setStatusMessage("Replace failed.");
       }
@@ -617,7 +675,11 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
   
   private Action _replaceFindPreviousAction = new AbstractAction("Replace/Find Previous") {
     public void actionPerformed(ActionEvent e) {
-      setSearchBackwards(true);
+      if (getSearchBackwards() == false) {
+        setSearchBackwards(true);
+        _machine.positionChanged();
+        findNext();
+      }
       _updateMachine();
       _machine.setFindWord(_findField.getText());
       String replaceWord = _replaceField.getText();
@@ -630,11 +692,12 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
       if (replaced) {
         _selectReplacedItem(replaceWord.length());
         findNext();
-        _replaceFindButton.requestFocusInWindow();
+        _replaceFindPreviousButton.requestFocusInWindow();
       }
       else {
         _replaceAction.setEnabled(false);
         _replaceFindNextAction.setEnabled(false);
+        _replaceFindPreviousAction.setEnabled(false);
         Toolkit.getDefaultToolkit().beep();
         _mainframe.setStatusMessage("Replace failed.");
       }
@@ -660,6 +723,7 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
 //                                                                "s") + ".");
       _replaceAction.setEnabled(false);
       _replaceFindNextAction.setEnabled(false);
+      _replaceFindPreviousAction.setEnabled(false);
     }
   };
 
@@ -692,7 +756,7 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
   /** Updates the first document where the current all-document search began (called in two places: either when the 
    * _findField is updated, or when the user changes documents.
    */
-  public void updateFirstDocumentInSearch() {
+  public void updateFirstDocInSearch() {
     _machine.setFirstDoc(_model.getActiveDocument());
   }
 
@@ -825,6 +889,12 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
 
    }
    };*/
+  
+  
+  /***************** METHODS FOR TESTING PURPOSES ONLY  ***********************/
+  public DefinitionsPane getDefPane() { return _defPane; }
+  public JButton getFindNextButton() {return _findNextButton; }
+  
 
   class MatchCaseListener implements ItemListener {
     public void itemStateChanged(ItemEvent e) {

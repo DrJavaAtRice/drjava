@@ -88,7 +88,7 @@ public abstract class AbstractDJPane extends JTextPane implements OptionConstant
      *  @param e the event fired by the caret position change
      */
     public void caretUpdate(CaretEvent e) {
-      //_doc().setCurrentLocation(getCaretPosition());
+//      _doc().setCurrentLocation(getCaretPosition());
       getDJDocument().setCurrentLocation(getCaretPosition());
 //      Utilities.invokeLater(new Runnable() {
 //        public void run() {
@@ -136,7 +136,7 @@ public abstract class AbstractDJPane extends JTextPane implements OptionConstant
   /** Be sure to update the document (and thus the reduced model) any time the caret position changes.
    *  @param pos
    */
-  public void setCaretPosition(final int pos) {
+  public void setCaretPosition(int pos) {
         super.setCaretPosition(pos);
         getDJDocument().setCurrentLocation(pos);
 //    _doc.setCurrentLocation(pos);

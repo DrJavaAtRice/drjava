@@ -60,6 +60,7 @@ import edu.rice.cs.drjava.model.definitions.indent.*;
 import edu.rice.cs.drjava.model.GlobalEventNotifier;
 import edu.rice.cs.drjava.CodeStatus;
 import edu.rice.cs.util.*;
+import edu.rice.cs.util.swing.Utilities;
 
 /**
  * Test the tab/enter/squiggly indenting functionality.
@@ -1277,7 +1278,6 @@ public final class IndentTest extends TestCase {
     doc.indentLines(5,5);
     _assertContents(test2Correct, doc);
   }
-    
 
   /**
    * tests that an if statment nested in a switch will be indented properly

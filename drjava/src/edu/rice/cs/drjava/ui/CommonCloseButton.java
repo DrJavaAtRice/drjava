@@ -55,6 +55,7 @@ import java.awt.*;
  * @version $Id$
  */
 public class CommonCloseButton extends JButton {
+
   public CommonCloseButton() {
     super(MainFrame.getIcon("CloseX10.gif"));
     setMargin(new Insets(0,0,0,0));

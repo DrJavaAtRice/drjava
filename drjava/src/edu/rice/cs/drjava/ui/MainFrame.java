@@ -402,6 +402,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   private Action _openAction = new AbstractAction("Open...") {
     public void actionPerformed(ActionEvent ae) {
       _open();
+      _findReplace.updateFirstDocInSearch();
     }
   };
   
@@ -410,7 +411,10 @@ public class MainFrame extends JFrame implements OptionConstants {
    * the definitions pane.
    */
   private Action _openFolderAction  = new AbstractAction("Open Folder...") {
-    public void actionPerformed(ActionEvent ae) { _openFolder(); }
+    public void actionPerformed(ActionEvent ae) { 
+      _openFolder();
+      _findReplace.updateFirstDocInSearch();
+    }
   };
   
   /**
@@ -418,7 +422,10 @@ public class MainFrame extends JFrame implements OptionConstants {
    * the definitions pane.
    */
   private Action _openFileOrProjectAction = new AbstractAction("Open...") {
-    public void actionPerformed(ActionEvent ae) { _openFileOrProject(); }
+    public void actionPerformed(ActionEvent ae) { 
+      _openFileOrProject(); 
+      _findReplace.updateFirstDocInSearch();
+    }
   };
   
   /**
@@ -430,23 +437,35 @@ public class MainFrame extends JFrame implements OptionConstants {
   };
   
   private Action _closeProjectAction = new AbstractAction("Close") {
-    public void actionPerformed(ActionEvent ae) { _closeProject(); }
+    public void actionPerformed(ActionEvent ae) { 
+      _closeProject();
+      _findReplace.updateFirstDocInSearch();
+    }
   };
   
   
   /** Closes the current active document, prompting to save if necessary. */
   private Action _closeAction = new AbstractAction("Close") {
-    public void actionPerformed(ActionEvent ae) { _close(); }
+    public void actionPerformed(ActionEvent ae) { 
+      _close();
+      _findReplace.updateFirstDocInSearch();
+    }
   };
   
   /** Closes all open documents, prompting to save if necessary. */
   private Action _closeAllAction = new AbstractAction("Close All") {
-    public void actionPerformed(ActionEvent ae) { _closeAll(); }
+    public void actionPerformed(ActionEvent ae) { 
+      _closeAll();
+      _findReplace.updateFirstDocInSearch();
+    }
   };
   
   /** Closes all open documents, prompting to save if necessary. */
   private Action _closeFolderAction = new AbstractAction("Close Folder") {
-    public void actionPerformed(ActionEvent ae) { _closeFolder(); }
+    public void actionPerformed(ActionEvent ae) { 
+      _closeFolder();
+      _findReplace.updateFirstDocInSearch();
+    }
   };
   
   /* Phil Repicky -smallproj
@@ -463,13 +482,17 @@ public class MainFrame extends JFrame implements OptionConstants {
       // navigation pane, the current directory is updated in the openChooser JFileChooser component.  So the 
       // clicked on directory is obtained in this way
       File dir = _openChooser.getCurrentDirectory();
-      openFilesInFolder(dir, false);     
+      openFilesInFolder(dir, false);  
+      _findReplace.updateFirstDocInSearch();
     }
   };
   
   /** Opens a files in the current folder. */
   private Action _openOneFolderAction = new AbstractAction("Open File in Folder") {
-    public void actionPerformed(ActionEvent ae)  { _open(); }
+    public void actionPerformed(ActionEvent ae)  { 
+      _open();
+      _findReplace.updateFirstDocInSearch();
+    }
   };
   
   /** Creates a new untitled, empty file in the current folder. */
@@ -477,6 +500,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     public void actionPerformed(ActionEvent ae)  {
       //make this new document the document in the document pane
       _new();
+      _findReplace.updateFirstDocInSearch();
     }
   };
   
@@ -595,17 +619,26 @@ public class MainFrame extends JFrame implements OptionConstants {
   
   /** Compiles all the project. */
   private Action _compileProjectAction = new AbstractAction("Compile Project") {
-    public void actionPerformed(ActionEvent ae) { _compileProject(); }
+    public void actionPerformed(ActionEvent ae) { 
+      _compileProject(); 
+      _findReplace.updateFirstDocInSearch();
+    }
   };
   
   /** Compiles all documents in the navigators active group. */
   private Action _compileFolderAction = new AbstractAction("Compile Folder") {
-    public void actionPerformed(ActionEvent ae) { _compileFolder(); }
+    public void actionPerformed(ActionEvent ae) { 
+      _compileFolder();
+      _findReplace.updateFirstDocInSearch();
+    }
   };
   
   /** Compiles all open documents. */
   private Action _compileAllAction = new AbstractAction("Compile All Documents") {
-    public void actionPerformed(ActionEvent ae) { _compileAll(); }
+    public void actionPerformed(ActionEvent ae) { 
+      _compileAll();
+      _findReplace.updateFirstDocInSearch();
+    }
   };
   
   /** cleans the build directory */
@@ -625,13 +658,19 @@ public class MainFrame extends JFrame implements OptionConstants {
   
   /** Runs JUnit over all open JUnit tests. */
   private Action _junitAllAction = new AbstractAction("Test All Documents") {
-    public void actionPerformed(ActionEvent e) { _junitAll(); }
+    public void actionPerformed(ActionEvent e) {
+      _junitAll();
+      _findReplace.updateFirstDocInSearch();
+    }
     
   };
   
   /** Runs JUnit over all open JUnit tests in the project directory. */
   private Action _junitOpenProjectFilesAction = new AbstractAction("Test Project") {
-    public void actionPerformed(ActionEvent e) { _junitProject(); }
+    public void actionPerformed(ActionEvent e) {
+      _junitProject();
+      _findReplace.updateFirstDocInSearch();
+    }
   };
   
   
@@ -957,6 +996,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   private Action _switchToNextAction = new AbstractAction("Next Document") {
     public void actionPerformed(ActionEvent ae) {
       _model.setActiveNextDocument();
+      _findReplace.updateFirstDocInSearch();
     }
   };
   
@@ -964,6 +1004,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   private Action _switchToPrevAction = new AbstractAction("Previous Document") {
     public void actionPerformed(ActionEvent ae) {
       _model.setActivePreviousDocument();
+      _findReplace.updateFirstDocInSearch();
     }
   };
   
@@ -1280,6 +1321,15 @@ public class MainFrame extends JFrame implements OptionConstants {
     public void windowOpened(WindowEvent ev) { _currentDefPane.requestFocusInWindow(); }
   };
   
+  private MouseListener _resetFindReplaceListener = new MouseListener() {
+    public void mouseClicked (MouseEvent e) {}
+    public void mousePressed (MouseEvent e) {}
+    //as mouseReleased event so that it happens after the document has been set in the model and defPane
+    public void mouseReleased (MouseEvent e) {_findReplace.updateFirstDocInSearch();}
+    public void mouseEntered (MouseEvent e) {}
+    public void mouseExited (MouseEvent e) {}
+  };
+  
   // ------------- File Display Managers for File Icons ------------
   
   private static DJFileDisplayManager _djFileDisplayManager20;
@@ -1456,10 +1506,9 @@ public class MainFrame extends JFrame implements OptionConstants {
     
     _model.getDocumentNavigator().asContainer().addKeyListener(_historyListener);
     _model.getDocumentNavigator().asContainer().addFocusListener(_focusListenerForRecentDocs);
-//    _model.getDocumentNavigator().addNavigationListener(new INavigationListener() {
-//      public void gainedSelection (NodeData dat) { _findReplace.updateFirstDocumentInSearch(); }
-//      public void lostSelection (NodeData dat) {}
-//    });
+    
+    //Listens for clicks in the document navigator to reset the first document in an all-documents search for wrapping purposes
+    _model.getDocumentNavigator().asContainer().addMouseListener(_resetFindReplaceListener);
       
     
     // Ensure that DefinitionsPane uses the correct EditorKit!
@@ -2484,7 +2533,6 @@ public class MainFrame extends JFrame implements OptionConstants {
     
     //Either this is an external file or user actually wants to close it
     _model.closeFile(_model.getActiveDocument());
-    
   }
   
   private void _closeFolder() {
@@ -5069,7 +5117,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     int startOffset = startPos.getOffset();        
     int newEnd = openDoc.uncommentLines(start, end);
     _currentDefPane.notifyActive();
-    if (startOffset != startPos.getOffset()) start-=2;      
+    if (startOffset != startPos.getOffset()) start -= 2;      
     _currentDefPane.setCaretPosition(start);
     if (start != end)   _currentDefPane.moveCaretPosition(newEnd);
   }
@@ -6019,6 +6067,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     public void projectClosed() {
       _model.getDocumentNavigator().asContainer().addKeyListener(_historyListener);
       _model.getDocumentNavigator().asContainer().addFocusListener(_focusListenerForRecentDocs);
+      _model.getDocumentNavigator().asContainer().addMouseListener(_resetFindReplaceListener);
 //      new ScrollableDialog(null, "Closing JUnit Error Panel in MainFrame", "", "").show();
       removeTab(_junitErrorPanel);
     }
@@ -6030,6 +6079,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       _openProjectUpdate();
       _model.getDocumentNavigator().asContainer().addKeyListener(_historyListener);
       _model.getDocumentNavigator().asContainer().addFocusListener(_focusListenerForRecentDocs);
+      _model.getDocumentNavigator().asContainer().addMouseListener(_resetFindReplaceListener);
     }
     
     public void projectRunnableChanged() {

@@ -88,6 +88,9 @@ import edu.rice.cs.drjava.model.*;
  */
 public class DefinitionsDocument extends AbstractDJDocument implements Finalizable<DefinitionsDocument> {
   
+  private final int NO_COMMENT_OFFSET = 0;
+  private final int WING_COMMENT_OFFSET = 2;
+  
   List<DocumentClosedListener> _closedListeners = new LinkedList<DocumentClosedListener>();
   
   public void addDocumentClosedListener(DocumentClosedListener l) { 
@@ -584,7 +587,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
           setCurrentLocation(selStart);
           Position oldCurrentPosition = createPosition(_currentLocation);
           _commentLine();   
-          toReturn+=2;
+          toReturn += WING_COMMENT_OFFSET;
           //int caretPos = getCaretPosition();
           //_doc().setCurrentLocation(caretPos);
         }
@@ -622,7 +625,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
           Position walkerPos = this.createPosition(walker);
           // Comment out current line
           _commentLine();  // must be atomic
-          afterCommentEnd += 2;
+          afterCommentEnd += WING_COMMENT_OFFSET;
           // Move back to walker spot
           setCurrentLocation(walkerPos.getOffset());
           walker = walkerPos.getOffset();
@@ -664,7 +667,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
           setCurrentLocation(selStart);
           Position oldCurrentPosition = createPosition(_currentLocation);
           _uncommentLine();
-          toReturn-=2;
+          toReturn -= WING_COMMENT_OFFSET;
           //int caretPos = getCaretPosition();
           //_doc().setCurrentLocation(caretPos);
           //setCurrentLocation(oldCurrentPosition.getOffset());
@@ -738,7 +741,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
       // If a previous char is not whitespace, we're not looking at a wing comment.
       if (c != ' ') {
         goodWing = false;
-        return 0;
+        return NO_COMMENT_OFFSET;
       }
     }
     
@@ -748,9 +751,9 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
       // Otherwise, remove the wings and indent.
       remove(lineStart + pos, 2);
       //_indentLine(Indenter.OTHER);
-      return 2;
+      return WING_COMMENT_OFFSET;
     }
-    return 0;
+    return NO_COMMENT_OFFSET;
   }
 
 //  /** Indents a line in accordance with the rules that DrJava has set up. This is the old version, 
