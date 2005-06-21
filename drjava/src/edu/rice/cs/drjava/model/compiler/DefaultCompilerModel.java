@@ -114,21 +114,13 @@ public class DefaultCompilerModel implements CompilerModel {
   //-------------------------------- Triggers --------------------------------//
 
 
-  /** Compiles all open documents, after ensuring that all are saved.
-   *  If drjava is in project mode when this method is called, only 
-   *  the project files are saved.  Also, at this point, we do not require
-   *  external files (files not belonging to the project) to be saved
-   *  before we compile the files.
-   *  
-   *  <p>In project mode, since only project files are compiled, we
-   *  perform the compilation with the specified build directory if 
-   *  defined in the project state.</p>
-   *
-   *  <p>This method used to only compile documents which were out of sync
-   *  with their class file, as a performance optimization.  However,
-   *  bug #634386 pointed out that unmodified files could depend on
-   *  modified files, in which case this would not recompile a file in
-   *  some situations when it should.  Since we value correctness over
+  /** Compiles all open documents, after ensuring that all are saved.  If drjava is in project mode when this method is
+   *  called, only the project files are saved.  We do not require external files (files not belonging to the project) 
+   *  to be saved before we compile the files.  In project mode, we perform the compilation with the specified build 
+   *  directory if defined in the project state.<p>
+   *  This method formerly only compiled documents which were out of sync with their class file, as a performance 
+   *  optimization.  However, bug #634386 pointed out that unmodified files could depend on modified files, in which 
+   *  case this command would not recompile a file in some situations when it should.  Since we value correctness over
    *  performance, we now always compile all open documents.</p>
    *  @throws IOException if a filesystem-related problem prevents compilation
    */

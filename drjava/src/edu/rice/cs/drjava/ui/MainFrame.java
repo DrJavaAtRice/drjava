@@ -2824,13 +2824,13 @@ public class MainFrame extends JFrame implements OptionConstants {
     hourglassOn();
     try {
       final OpenDefinitionsDocument doc = _model.getActiveDocument();
-      new Thread("Compile Document") {
-        public void run() {
+//      new Thread("Compile Document") {
+//        public void run() {
           try { _model.getCompilerModel().compile(doc); }
           catch (FileMovedException fme) { _showFileMovedError(fme); }
           catch (IOException ioe) { _showIOError(ioe); }
-        }
-      }.start();
+//        }
+//      }.start();
     }
     finally { hourglassOff();}
 //    update(getGraphics());
@@ -2849,13 +2849,13 @@ public class MainFrame extends JFrame implements OptionConstants {
           if (_model.getDocumentNavigator().isSelectedInGroup(n)) l.add( (OpenDefinitionsDocument) n);  // FIX THIS!
         }
         
-        new Thread("Compile Folder") {
-          public void run() {
+//        new Thread("Compile Folder") {
+//          public void run() {
             try { _model.getCompilerModel().compile(l); }
             catch (FileMovedException fme) { _showFileMovedError(fme); }
             catch (IOException ioe) { _showIOError(ioe); }
-          }
-        }.start();
+//          }
+//        }.start();
       }
     }
     finally { hourglassOff(); }
@@ -2885,8 +2885,8 @@ public class MainFrame extends JFrame implements OptionConstants {
   
   private void _compileAll() {
     _cleanUpForCompile();
-    new Thread("Compile All") {
-      public void run() {
+//    new Thread("Compile All") {
+//      public void run() {
         try {
           hourglassOn();
           _model.getCompilerModel().compileAll();
@@ -2894,8 +2894,8 @@ public class MainFrame extends JFrame implements OptionConstants {
         catch (FileMovedException fme) { _showFileMovedError(fme); }
         catch (IOException ioe) { _showIOError(ioe); }
         finally { hourglassOff();}
-      }
-    }.start();
+//      }
+//    }.start();
 //    update(getGraphics()); 
   }
   
@@ -3309,18 +3309,13 @@ public class MainFrame extends JFrame implements OptionConstants {
   }
   
   private void _showError(Throwable e, String title, String message) {
-    JOptionPane.showMessageDialog(this,
-                                  message + "\n" + e,
-                                  title,
-                                  JOptionPane.ERROR_MESSAGE);
+    JOptionPane.showMessageDialog(this, message + "\n" + e, title, JOptionPane.ERROR_MESSAGE);
   }
   
   private void _showWarning(Throwable e, String title, String message) {
-    JOptionPane.showMessageDialog(this,
-                                  message + "\n" + e,
-                                  title,
-                                  JOptionPane.WARNING_MESSAGE);
+    JOptionPane.showMessageDialog(this, message + "\n" + e, title, JOptionPane.WARNING_MESSAGE);
   }
+  
   /** Check if any errors occurred while parsing the config file, and display a message if necessary. */
   private void _showConfigException() {
     if (DrJava.getConfig().hadStartupException()) {
@@ -5721,7 +5716,9 @@ public class MainFrame extends JFrame implements OptionConstants {
     public void consoleReset() { }
     
     public void saveBeforeCompile() {
-      Utilities.invokeAndWait(new Runnable() {  // wait is necessary because compilation process cannot proceed 
+      // The following event thread switch supports legacy test code that calls compile methods outside of the
+      // event thread.  The wait is necessary because compilation process cannot proceed until saving is complete.
+      Utilities.invokeAndWait(new Runnable() {  
         public void run() {
           _saveAllBeforeProceeding
             ("To compile, you must first save ALL modified files.\n" + "Would you like to save and then compile?",
