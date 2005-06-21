@@ -98,6 +98,7 @@ public class FindReplaceMachineTest extends TestCase {
     "\"This is a string\" This is not a string\n" +
     "\'@\' That was a character, but this is not: @\n" +
     "/*This is a two-lined \n commment*/ This is not a two-lined comment";
+    
                  
   /**
    * Initializes the document for the tests.
@@ -435,6 +436,46 @@ public class FindReplaceMachineTest extends TestCase {
     assertEquals("revised text", "Hear no monkeynext, see no monkeynext, speak no monkeynext.", _docNext.getText());
   }
 
+  public void testFindReplaceInAllOpenFilesWholeWord() throws BadLocationException {
+    _doc.insertString(0, EVIL_TEXT, null);
+    _docPrev.insertString(0, EVIL_TEXT_PREV, null);
+    _docNext.insertString(0, EVIL_TEXT_NEXT, null);
+    // put the caret after the last instance of the findWord in doc
+    _initFrm(40);
+    _frm.setFindWord("no");
+    _frm.setMatchWholeWord();
+    _frm.setMatchCase(false);
+    _frm.setSearchBackwards(false);
+    _frm.setSearchAllDocuments(true);
+    _testFindNextSucceeds(_frm, CONTINUE, 7, 7, _docNext);
+    _testFindNextSucceeds(_frm, CONTINUE, 7, 24, _docNext);
+    _testFindNextSucceeds(_frm, CONTINUE, 7, 43, _docNext);
+    _testFindNextSucceeds(_frm, CONTINUE, 7, 7, _docPrev);
+    _testFindNextSucceeds(_frm, CONTINUE, 7, 24, _docPrev);
+    _testFindNextSucceeds(_frm, CONTINUE, 7, 43, _docPrev);
+    _testFindNextSucceeds(_frm, CONTINUE, 7, 7, _doc);
+    _testFindNextSucceeds(_frm, CONTINUE, 7, 20, _doc);
+    _testFindNextSucceeds(_frm, CONTINUE, 7, 35, _doc);
+    _testFindNextSucceeds(_frm, CONTINUE, 7, 7, _docNext);
+    _frm.setLastFindWord();
+    _frm.setSearchBackwards(true);
+    _testFindNextSucceeds(_frm, CONTINUE, 33, 33, _doc);
+    _testFindNextSucceeds(_frm, CONTINUE, 33, 18, _doc);
+    _testFindNextSucceeds(_frm, CONTINUE, 33, 5, _doc);
+    _testFindNextSucceeds(_frm, CONTINUE, 41, 41, _docPrev);
+    _frm.setReplaceWord("monkey");
+    _frm.replaceAll();
+    assertEquals("revised text",
+                 "Hear monkey evil, see monkey evil, speak monkey evil.",
+                 _doc.getText(0, _doc.getLength()));
+    assertEquals("revised text",
+                 "Hear monkey evilprev, see monkey evilprev, speak monkey evilprev.",
+                 _docPrev.getText(0, _docPrev.getLength()));
+    assertEquals("revised text",
+                 "Hear monkey evilnext, see monkey evilnext, speak monkey evilnext.",
+                 _docNext.getText(0, _docNext.getLength()));
+  }
+  
 
   public void testWholeWordSearchOnTestString1() throws BadLocationException {
     _doc.insertString(0, FIND_WHOLE_WORD_TEST_1, null);
@@ -578,22 +619,6 @@ public class FindReplaceMachineTest extends TestCase {
     _testFindNextSucceeds(_frm, CONTINUE, 0, 242);
   }
   
-
-  /**
-   * test case no longer applies -- we always wrap
-   *
-   public void testReplaceAllHalt() throws BadLocationException {
-    _doc.insertString(0, EVIL_TEXT, null);
-    _initFrm(15);
-    _assertOffsets(_frm, 15, 15);
-    _frm.setFindWord("evil");
-    _frm.setReplaceWord("monkey");
-    _frm.replaceAll(HALT);
-    assertEquals("revised text",
-                 "Hear no evil, see no monkey, speak no monkey.",
-                 _doc.getText(0, _doc.getLength()));
-  }*/
-
   private void _testFindNextSucceeds(FindReplaceMachine frm, ContinueCommand cont,
                                      int start, int found, AbstractDocumentInterface doc)
   {
