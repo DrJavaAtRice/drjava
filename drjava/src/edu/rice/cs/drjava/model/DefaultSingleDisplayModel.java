@@ -177,6 +177,7 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel implements Sin
     INavigatorItem key = _activeDocument;
     OpenDefinitionsDocument nextKey = (OpenDefinitionsDocument) _documentNavigator.getNext(key);
     if (key != nextKey) setActiveDocument(nextKey);
+    else setActiveDocument((OpenDefinitionsDocument)_documentNavigator.getFirst());
     /* selects the active document in the navigator, which signals a listener to call _setActiveDoc(...) */
   }
 
@@ -185,6 +186,7 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel implements Sin
     INavigatorItem key = _activeDocument;
     OpenDefinitionsDocument prevKey = (OpenDefinitionsDocument) _documentNavigator.getPrevious(key);
     if (key != prevKey) setActiveDocument(prevKey);
+    else setActiveDocument((OpenDefinitionsDocument)_documentNavigator.getLast());
       /* selects the active document in the navigator, which signals a listener to call _setActiveDoc(...) */
   }
 //

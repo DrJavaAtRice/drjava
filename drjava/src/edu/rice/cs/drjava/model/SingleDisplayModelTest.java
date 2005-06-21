@@ -174,31 +174,36 @@ public final class SingleDisplayModelTest extends GlobalModelTestCase {
 
     // Make sure setPrevious doesn't move (at start of list)
     getSDModel().setActivePreviousDocument();
-    listener.assertSwitchCount(2);
-    assertActiveDocument(doc1);
+    listener.assertSwitchCount(3);
+    assertActiveDocument(doc3);
 
     // Test setPrevious
     getSDModel().setActiveNextDocument();
-    listener.assertSwitchCount(3);
+    listener.assertSwitchCount(4);
+    assertActiveDocument(doc1);
+    
+    // Test setPrevious
+    getSDModel().setActiveNextDocument();
+    listener.assertSwitchCount(5);
     assertActiveDocument(doc2);
 
     getSDModel().setActiveNextDocument();
-    listener.assertSwitchCount(4);
+    listener.assertSwitchCount(6);
     assertActiveDocument(doc3);
 
     // Make sure setNext doesn't move (at end of list)
     getSDModel().setActiveNextDocument();
-    listener.assertSwitchCount(4);
-    assertActiveDocument(doc3);
+    listener.assertSwitchCount(7);
+    assertActiveDocument(doc1);
 
     // Test setPrevious
     getSDModel().setActivePreviousDocument();
-    listener.assertSwitchCount(5);
-    assertActiveDocument(doc2);
+    listener.assertSwitchCount(8);
+    assertActiveDocument(doc3);
 
     // Test setActive
     getSDModel().setActiveDocument(doc1);
-    listener.assertSwitchCount(6);
+    listener.assertSwitchCount(9);
     assertActiveDocument(doc1);
 
     // Make sure number of docs hasn't changed

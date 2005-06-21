@@ -118,6 +118,8 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
 
   /** Tests calling compileAll with different source roots works if the files have errors in them.  (Each file
    *  has 1 error.)
+   * Note that this testcase will fail if several compilers can be found through the .drjava file.
+   * As the test is then run one time per compiler it can find. 
    */
   public void testCompileAllFailsDifferentSourceRoots() throws BadLocationException, IOException {
 
@@ -131,13 +133,11 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
     OpenDefinitionsDocument doc2 = setupDocument(BAR_MISSING_SEMI_TEXT);
     final File file2 = new File(bDir, "DrJavaTestBar.java");
     doc2.saveFile(new FileSelector(file2));
-    
     _compileDone = false;
     _model.addListener(_failListener);
     CompilerModel cm = _model.getCompilerModel();
     cm.compileAll();
     _waitCompileDone();
-    
     assertCompileErrorsPresent(_name(), true);
     assertEquals("Should have 2 compiler errors", 2, _model.getCompilerModel().getNumErrors());
     _failListener.checkCompileOccurred();
