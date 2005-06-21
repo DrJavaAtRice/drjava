@@ -588,6 +588,11 @@ public class MainFrame extends JFrame implements OptionConstants {
 //    public void actionPerformed(ActionEvent ae) { _compileAll(); } // right now, it's the same as compile all
 //  };
   
+ /** Compiles the document in the definitions pane. */
+  private Action _compileAction = new AbstractAction("Compile Current Document") {
+    public void actionPerformed(ActionEvent ae) { _compile(); }
+  };
+  
   /** Compiles all the project. */
   private Action _compileProjectAction = new AbstractAction("Compile Project") {
     public void actionPerformed(ActionEvent ae) { _compileProject(); }
@@ -606,11 +611,6 @@ public class MainFrame extends JFrame implements OptionConstants {
   /** cleans the build directory */
   private Action _cleanAction = new AbstractAction("Clean Build Directory") {
     public void actionPerformed(ActionEvent ae) { _clean(); }
-  };
-  
-  /** Compiles the document in the definitions pane. */
-  private Action _compileAction = new AbstractAction("Compile Current Document") {
-    public void actionPerformed(ActionEvent ae) { _compile(); }
   };
   
   /** Finds and runs the main method of the current document, if it exists. */
@@ -5460,7 +5460,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       // Only change GUI from event-dispatching thread
      Utilities.invokeLater(new Runnable() {
         public void run() {
-          hourglassOn();
+//          hourglassOn();
           showTab(_compilerErrorPanel);
           _compilerErrorPanel.setCompilationInProgress();
           _saveAction.setEnabled(false);
@@ -5472,14 +5472,14 @@ public class MainFrame extends JFrame implements OptionConstants {
       // Only change GUI from event-dispatching thread
       Utilities.invokeLater(new Runnable() {
         public void run() {
-          try {
+//          try {
             _compilerErrorPanel.reset();
             if (inDebugMode()) {
               _model.getActiveDocument().checkIfClassFileInSync();
               _updateDebugStatus();
             }
-          }
-          finally { hourglassOff(); }
+//          }
+//          finally { hourglassOff(); }
         }
       });
     }
@@ -5721,7 +5721,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     public void consoleReset() { }
     
     public void saveBeforeCompile() {
-      Utilities.invokeLater(new Runnable() {
+      Utilities.invokeAndWait(new Runnable() {  // wait is necessary because compilation process cannot proceed 
         public void run() {
           _saveAllBeforeProceeding
             ("To compile, you must first save ALL modified files.\n" + "Would you like to save and then compile?",
