@@ -98,8 +98,8 @@ public class AWTContainerNavigatorFactory implements IDocumentNavigatorFactory {
     }
     
     /** Migrates all the navigator items from parent to child
-     * @param child the navigator to migrate to
-     * @param parent the navigator to migrate from
+     *  @param child the navigator to migrate to
+     *  @param parent the navigator to migrate from
      */
     private void migrateNavigatorItems(IDocumentNavigator child, IDocumentNavigator parent) {
       Enumeration<INavigatorItem> enumerator =  parent.getDocuments();

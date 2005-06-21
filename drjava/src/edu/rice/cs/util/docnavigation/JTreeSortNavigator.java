@@ -330,7 +330,9 @@ public class JTreeSortNavigator extends JTree
     synchronized(_model) { return (T) removeNode(getNodeForDoc(doc)); }
   } 
   
-  private LeafNode getNodeForDoc(INavigatorItem doc) { return _doc2node.get(doc); }
+  private LeafNode getNodeForDoc(INavigatorItem doc) { 
+    synchronized(_model) { return _doc2node.get(doc); }
+  }
   
   /** Only takes in nodes that have an INavigatorItem as their object; assumes lock on _model is already held.
    *  Should only be executed from event thread. */
@@ -501,10 +503,10 @@ public class JTreeSortNavigator extends JTree
     final ArrayList<T> list = new ArrayList<T>();
     
     synchronized(_model) {
-      Enumeration e_tmp = ((DefaultMutableTreeNode)_model.getRoot()).depthFirstEnumeration();
+      Enumeration e = ((DefaultMutableTreeNode)_model.getRoot()).depthFirstEnumeration();
       
-      while(e_tmp.hasMoreElements()) {
-        DefaultMutableTreeNode node = (DefaultMutableTreeNode)e_tmp.nextElement();
+      while(e.hasMoreElements()) {
+        DefaultMutableTreeNode node = (DefaultMutableTreeNode) e.nextElement();
         if (node.isLeaf() && node != _model.getRoot()) 
           list.add((T)node.getUserObject());
       }
