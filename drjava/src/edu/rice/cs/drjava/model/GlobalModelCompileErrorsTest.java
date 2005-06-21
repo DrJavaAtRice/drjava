@@ -54,13 +54,12 @@ import javax.swing.text.Position;
 
 import edu.rice.cs.drjava.model.compiler.*;
 
-/**
- * Tests to ensure that compilation fails when expected, and that the errors
- * are reported correctly.
+/** Tests to ensure that compilation fails when expected, and that the errors
+ *  are reported correctly.
  *
- * Every test in this class is run for *each* of the compilers that is available.
+ *  Every test in this class is run for *each* of the compilers that is available.
  *
- * @version $Id$
+ *  @version $Id$
  */
 public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
   

@@ -201,19 +201,20 @@ public final class InteractionsPaneTest extends TestCase {
    * output is displayed.
    */
   public void testCaretMovesUpToPromptAfterInsert() throws DocumentAdapterException {
-    _doc.insertText(_doc.getDocLength(), "typed text", InteractionsDocument.DEFAULT_STYLE);
-    _pane.setCaretPosition(1);
+    _doc.append("typed text", InteractionsDocument.DEFAULT_STYLE);
+    Utilities.invokeAndWait(new Runnable() { public void run() { _pane.setCaretPosition(1); } });
+//    System.err.println("caretPostion = " + _pane.getCaretPosition());
     _doc.insertBeforeLastPrompt("simulated output", InteractionsDocument.DEFAULT_STYLE);
-    assertEquals("Caret is at the prompt after output inserted.",
-                 _doc.getPromptPos(),
-                 _pane.getCaretPosition());
+//     System.err.println("caretPostion = " + _pane.getCaretPosition());
+    Utilities.clearEventQueue();
+//     System.err.println("caretPostion = " + _pane.getCaretPosition());
+    assertEquals("Caret is at the prompt after output inserted.", _doc.getPromptPos(), _pane.getCaretPosition());
 
     _doc.insertPrompt();
-    _pane.setCaretPosition(1);
+    Utilities.invokeAndWait(new Runnable() { public void run() { _pane.setCaretPosition(1); } });
     _doc.insertBeforeLastPrompt("simulated output", InteractionsDocument.DEFAULT_STYLE);
-    assertEquals("Caret is at the end after output inserted.",
-                 _doc.getPromptPos(),
-                 _pane.getCaretPosition());
+    Utilities.clearEventQueue();
+    assertEquals("Caret is at the end after output inserted.", _doc.getPromptPos(), _pane.getCaretPosition());
   }
 
   /**
@@ -247,33 +248,33 @@ public final class InteractionsPaneTest extends TestCase {
   /** Tests that the caret is put in the correct position after an insert. */
   public void testCaretUpdatedOnInsert() throws DocumentAdapterException {
     _doc.insertText(_doc.getDocLength(), "typed text", InteractionsDocument.DEFAULT_STYLE);
-    int pos = _doc.getDocLength() - 5;
-    _pane.setCaretPosition(pos);
+    final int pos = _doc.getDocLength() - 5;
+    Utilities.invokeAndWait(new Runnable() { public void run() { _pane.setCaretPosition(pos); } });
 
     // Insert text before the prompt
     _doc.insertBeforeLastPrompt("aa", InteractionsDocument.DEFAULT_STYLE);
-    assertEquals("caret should be in correct position",
-                 pos + 2, _pane.getCaretPosition());
+     Utilities.clearEventQueue();
+    assertEquals("caret should be in correct position", pos + 2, _pane.getCaretPosition());
 
     // Move caret to prompt and insert more text
-    _pane.setCaretPosition(_doc.getPromptPos());
+    Utilities.invokeAndWait(new Runnable() { public void run() { _pane.setCaretPosition(_doc.getPromptPos()); } });
     _doc.insertBeforeLastPrompt("b", InteractionsDocument.DEFAULT_STYLE);
-    assertEquals("caret should be at prompt",
-                 _doc.getPromptPos(), _pane.getCaretPosition());
+    Utilities.clearEventQueue();
+    assertEquals("caret should be at prompt", _doc.getPromptPos(), _pane.getCaretPosition());
 
     // Move caret before prompt and insert more text
-    _pane.setCaretPosition(0);
+    Utilities.invokeAndWait(new Runnable() { public void run() { _pane.setCaretPosition(0); } });
     _doc.insertBeforeLastPrompt("ccc", InteractionsDocument.DEFAULT_STYLE);
-    assertEquals("caret should be at prompt",
-                 _doc.getPromptPos(), _pane.getCaretPosition());
+    Utilities.clearEventQueue();
+    assertEquals("caret should be at prompt", _doc.getPromptPos(), _pane.getCaretPosition());
 
     // Move caret after prompt and insert more text
-    pos = _doc.getPromptPos();
+    final int newPos = _doc.getPromptPos();
     // simulate a keystroke by putting caret just *after* pos of insert
-    _pane.setCaretPosition(pos+1);
-    _doc.insertText(pos, "d", InteractionsDocument.DEFAULT_STYLE);
-    assertEquals("caret should be immediately after the d",
-                 pos + 1, _pane.getCaretPosition());
+    Utilities.invokeAndWait(new Runnable() { public void run() { _pane.setCaretPosition(newPos+1); } });
+    _doc.insertText(newPos, "d", InteractionsDocument.DEFAULT_STYLE);
+    Utilities.clearEventQueue();
+    assertEquals("caret should be immediately after the d", newPos + 1, _pane.getCaretPosition());
   }
 
 //   public void testSystemIn() {
