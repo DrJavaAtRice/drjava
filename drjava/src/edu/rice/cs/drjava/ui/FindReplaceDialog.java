@@ -153,44 +153,7 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
     }
   };
   
-  
-//  private KeyStroke tabKS = KeyStroke.getKeyStroke(KeyEvent.VK_TAB, 0);
-//  private Keymap km = _findField.getKeymap();
-//  private Action defaultAction = km.getAction(tabKS);
-//  
-//  /** Changes the behavior of the Tab key when pressed inside the _findField. Switches focus to _replaceField. */
-//  private FocusListener _findFieldSwitchFocusListener = new FocusListener() {
-//    public void focusGained(FocusEvent e) { km.addActionForKeyStroke(tabKS, _findFieldSwitchFocusAction);}
-//    public void focusLost(FocusEvent e) { if (defaultAction != null) km.addActionForKeyStroke(tabKS, defaultAction); }
-//  };
-//  
-//  /** Changes the behavior of the Tab key when pressed inside the _replaceField. Switches focus to _matchCase checkBox. */
-//  private FocusListener _replaceFieldSwitchFocusListener = new FocusListener() {
-//    public void focusGained(FocusEvent e) { km.addActionForKeyStroke(tabKS, _replaceFieldSwitchFocusAction);}
-//    public void focusLost(FocusEvent e) { if (defaultAction != null) km.addActionForKeyStroke(tabKS, defaultAction); }
-//  };
-//  
-//  
-//  /** Listens for the pressing of the Enter key (only activated after the Ctrl key has been pressed). Inserts a new line
-//   *  in the findField
-//   */
-//  private final KeyListener _newLineEnterListener = new KeyListener() {
-//    public void keyPressed(KeyEvent e) {
-//      if (e.getKeyCode() == KeyEvent.VK_ENTER)  {
-//        String text = _findField.getText();
-//        int caretPos = _findField.getCaretPosition();
-//        String textBeforeCaret = text.substring(0, caretPos);
-//        String textAfterCaret = text.substring(caretPos);
-//        _findField.setText(textBeforeCaret.concat("\n").concat(textAfterCaret));
-//        _findField.setCaretPosition(caretPos+1);
-//      }        
-//    }
-//    public void keyReleased(KeyEvent e) {}
-//    public void keyTyped(KeyEvent e) {}
-//  };
-  
             
-  
   /** Standard Constructor.
    *  @param frame the overall enclosing window
    *  @param model the model containing the documents to search
@@ -414,16 +377,8 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
     });  
     
     
-    //Change the behavior of the Enter, Tab, and Ctrl-Enter keys in the _findField and _replaeField */
-    final Hashtable<Object, Action> actions = new Hashtable<Object, Action>();
-    EditorKit ek = _findField.getEditorKit();
-    Action[] actionsArray = ek.getActions();
-    
-    for (int k = 0; k < actionsArray.length; k++) {
-      Action a = actionsArray[k];
-      actions.put(a.getValue(Action.NAME), a);
-    }
-    
+    /************** Change behavior of findField ****************/
+     
     Keymap km = _findField.addKeymap("Find Field Bindings", _findField.getKeymap());
       
     KeyStroke findKey = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0);
@@ -435,53 +390,51 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
     KeyStroke switchFocusBackKey = KeyStroke.getKeyStroke(KeyEvent.VK_TAB, Event.SHIFT_MASK);
     km.addActionForKeyStroke(switchFocusBackKey, _findFieldSwitchFocusBackAction); 
     
-//    Action newLineAction = new TextAction("NewLine Action") {
-//      public void actionPerformed(ActionEvent e) {
-//        String text = _findField.getText();
-//        int caretPos = _findField.getCaretPosition();
-//        String textBeforeCaret = text.substring(0, caretPos);
-//        String textAfterCaret = text.substring(caretPos);
-//        _findField.setText(textBeforeCaret.concat("\n"/*System.getProperty("line.separator")*/).concat(textAfterCaret));
-//        _findField.setCaretPosition(caretPos+1);
-//      }
-//    };
     
-    Action newLineAction = new DefaultEditorKit.InsertBreakAction();
+    Action findNewLineAction = new TextAction("NewLine Action") {
+      public void actionPerformed(ActionEvent e) {
+        String text = _findField.getText();
+        int caretPos = _findField.getCaretPosition();
+        String textBeforeCaret = text.substring(0, caretPos);
+        String textAfterCaret = text.substring(caretPos);
+        _findField.setText(textBeforeCaret.concat("\n").concat(textAfterCaret));
+        _findField.setCaretPosition(caretPos+1);
+      }
+    };    
+//    Action newLineAction = new DefaultEditorKit.InsertBreakAction();
     
     KeyStroke newLineKey = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, Event.CTRL_MASK);
-    km.addActionForKeyStroke(newLineKey, newLineAction); 
+    km.addActionForKeyStroke(newLineKey, findNewLineAction); 
     
-    Action tabAction = actions.get(DefaultEditorKit.insertTabAction);
+    Action tabAction = new DefaultEditorKit.InsertTabAction();
     KeyStroke tabKey = KeyStroke.getKeyStroke(KeyEvent.VK_TAB, Event.CTRL_MASK);
     km.addActionForKeyStroke(tabKey, tabAction); 
     _findField.setKeymap(km);
 
+    
+    /************** Change behavior of replaceField ****************/
   
     Keymap rkm = _replaceField.addKeymap("Replace Field Bindings", _replaceField.getKeymap());
-      
+    
+    Action replaceNewLineAction = new TextAction("NewLine Action") {
+      public void actionPerformed(ActionEvent e) {
+        String text = _replaceField.getText();
+        int caretPos = _replaceField.getCaretPosition();
+        String textBeforeCaret = text.substring(0, caretPos);
+        String textAfterCaret = text.substring(caretPos);
+        _replaceField.setText(textBeforeCaret.concat("\n").concat(textAfterCaret));
+        _replaceField.setCaretPosition(caretPos+1);
+      }
+    };    
+    
+    rkm.addActionForKeyStroke(newLineKey, replaceNewLineAction);
     rkm.addActionForKeyStroke(switchFocusForwardKey, _replaceFieldSwitchFocusForwardAction); 
     rkm.addActionForKeyStroke(switchFocusBackKey, _replaceFieldSwitchFocusBackAction);
     rkm.addActionForKeyStroke(tabKey, tabAction); 
     _replaceField.setKeymap(rkm);
-    
-    
-//    _findField.addFocusListener(_findEnterListener);
-//    _findField.addFocusListener(_findFieldSwitchFocusListener);
-//    _replaceField.addFocusListener(_replaceFieldSwitchFocusListener);
-//          
-//    /** Listens for the Ctrl key being pressed and adds a listener for the Enter key. When Ctrl is released, the listener is removed. */
-//    _findField.addKeyListener(new KeyListener() {
-//      public void keyPressed(KeyEvent e) {
-//        if (e.getKeyCode() == KeyEvent.VK_CONTROL)
-//          if (_findField.getKeyListeners().length <= 1 )  _findField.addKeyListener(_newLineEnterListener); 
-//      }
-//      public void keyReleased(KeyEvent e) {
-//        if (e.getKeyCode() == KeyEvent.VK_CONTROL) _findField.removeKeyListener(_newLineEnterListener);
-//      }
-//      public void keyTyped(KeyEvent e) {}
-//    });   
   }
-  
+    
+    
 
   /** Focuses the find/replace dialog in the window, placing the focus on the _findField, and selecting all the text.*/
   public boolean requestFocusInWindow() {
@@ -645,6 +598,7 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
   private Action _replaceFindNextAction = new AbstractAction("Replace/Find Next") {
     public void actionPerformed(ActionEvent e) {
       if (getSearchBackwards() == true) {
+        _findLabel.setText("Find Next");
         setSearchBackwards(false);
         _machine.positionChanged();
         findNext();
@@ -676,6 +630,7 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
   private Action _replaceFindPreviousAction = new AbstractAction("Replace/Find Previous") {
     public void actionPerformed(ActionEvent e) {
       if (getSearchBackwards() == false) {
+        _findLabel.setText("Find Prev");
         setSearchBackwards(true);
         _machine.positionChanged();
         findNext();
