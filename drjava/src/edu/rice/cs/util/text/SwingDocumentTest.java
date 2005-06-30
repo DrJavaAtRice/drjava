@@ -50,15 +50,15 @@ import javax.swing.text.BadLocationException;
 import junit.framework.TestCase;
 
 /**
- * Tests the SwingDocumentAdapter.
+ * Tests the SwingDocument.
  * @version $Id$
  */
-public class SwingDocumentAdapterTest extends TestCase {
-  protected SwingDocumentAdapter _doc;
+public class SwingDocumentTest extends TestCase {
+  protected SwingDocument _doc;
   
   public void setUp() throws Exception {
     super.setUp();
-    _doc = new SwingDocumentAdapter();
+    _doc = new SwingDocument();
   }
   
   public void tearDown() throws Exception {
@@ -72,21 +72,21 @@ public class SwingDocumentAdapterTest extends TestCase {
   public void testBasicDocOps() throws DocumentAdapterException {
     _doc.insertText(0, "one", null);
     assertEquals("first doc contents", "one",
-                 _doc.getDocText(0, _doc.getDocLength()));
+                 _doc.getDocText(0, _doc.getLength()));
     
     _doc.insertText(_doc.getDocLength(), " three", null);
     assertEquals("second doc contents", "one three",
-                 _doc.getDocText(0, _doc.getDocLength()));
+                 _doc.getDocText(0, _doc.getLength()));
     
     _doc.removeText(0, 3);
     _doc.insertText(0, "two", null);
-    assertEquals("third doc contents", "two thr",
-                 _doc.getDocText(0, 7));
+    assertEquals("third doc contents", "two thr", _doc.getDocText(0, 7));
+    
+    _doc.append(" four", null);
+    assertEquals("fourth doc contents", "two three four", _doc.getText());
   }
   
-  /**
-   * Tests that a DocumentAdapterException is thrown when it should be.
-   */
+  /** Tests that a DocumentAdapterException is thrown when it should be. */
   public void testException() {
     try {
       _doc.insertText(5, "test", null);
@@ -98,7 +98,7 @@ public class SwingDocumentAdapterTest extends TestCase {
   }
   
   /**
-   * Tests that a SwingDocumentAdapter can receive an object that
+   * Tests that a SwingDocument can receive an object that
    * determines whether certain edits are legal.
    */
   public void testEditCondition() throws DocumentAdapterException, BadLocationException {

@@ -37,6 +37,8 @@ import edu.rice.cs.util.UnexpectedException;
 
 import edu.rice.cs.util.text.AbstractDocumentInterface;
 
+import java.io.FileNotFoundException;
+
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Position;
 
@@ -311,21 +313,14 @@ public class FindReplaceMachine {
     return count;
   }
 
-  /**
-   * Finds the next occurrence of the find word and returns an
-   * offset at the end of that occurrence or -1 if the word was
-   * not found.  Selectors should select backwards the length of
-   * the find word from the find offset.  This position is stored
-   * in the current offset of the machine, and that is why it is
-   * after: in subsequent searches, the same instance won't be found
-   * twice.  In a backward search, the position returned is at the
-   * beginning of the word.  Also returns a flag indicating whether the
-   * end of the document was reached and wrapped around. This is done
-   * using  the FindResult class which just contains an integer and a
-   * flag.
+  /** Finds the next occurrence of the find word and returns an offset at the end of that occurrence or -1 if the word
+   *  was not found.  Selectors should select backwards the length of the find word from the find offset.  This 
+   *  position is stored in the current offset of the machine, and that is why it is after: in subsequent searches, the
+   *  same instance won't be found twice.  In a backward search, the position returned is at the beginning of the word.  
+   *  Also returns a flag indicating whether the end of the document was reached and wrapped around. This is done
+   *  using the FindResult class which just contains an integer and a flag.
    *
-   * @return a FindResult object containing foundOffset and aflag
-   *         indicating wrapping to the beginning during a search
+   *  @return a FindResult object containing foundOffset and a flag indicating wrapping to the beginning during a search
    */
   public FindResult findNext() {    
     // If the user just found and toggled the "Search Backwards"
@@ -391,8 +386,10 @@ public class FindReplaceMachine {
       }
       else { // we haven't found it yet
         if (_searchAllDocuments) {
-          AbstractDocumentInterface nextDocToSearch = (!_searchBackwards ? _docIterator.getNextDocument(_doc) :
-                                                         _docIterator.getPrevDocument(_doc));
+          AbstractDocumentInterface nextDocToSearch;
+          
+          nextDocToSearch = (!_searchBackwards ? _docIterator.getNextDocument(_doc) :
+                                                 _docIterator.getPrevDocument(_doc));
           
           tempFr = _findNextInAllDocs(nextDocToSearch, 0, nextDocToSearch.getLength());
           foundOffset = tempFr.getFoundOffset();

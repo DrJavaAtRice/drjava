@@ -180,7 +180,7 @@ public class JTreeSortNavigator extends JTree
    *  to the implementing class.  Should only be run in event-handling thread.
    *
    *  @param doc the document to be added into this navigator.
-   *  @param path an existing document in the navigator.
+   *  @param path in navigator to parent directory for doc
    *  @throws IllegalArgumentException if this navigator does not contain <code>relativeto</code> as tested by the
    *                                  <code>contains</code> method.
    */
@@ -188,6 +188,7 @@ public class JTreeSortNavigator extends JTree
     
     synchronized(_model) {
       
+      /* Identify root matching doc if any */
       GroupNode root = null;
       
       for (GroupNode r: _roots) {
@@ -199,6 +200,7 @@ public class JTreeSortNavigator extends JTree
       
       if (root == null) return;
       
+      /* Embed path in matching root, creating folder nodes if necessary */
       StringTokenizer tok = new StringTokenizer(path, File.separator);
       //ArrayList<String> elements = new ArrayList<String>();
       StringBuffer pathSoFarBuf = new StringBuffer();

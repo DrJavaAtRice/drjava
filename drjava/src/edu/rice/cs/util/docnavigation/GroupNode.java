@@ -56,13 +56,11 @@ import java.net.MalformedURLException;
 import java.util.*;
 import edu.rice.cs.util.*;
 
-public class GroupNode extends StringNode{
+public class GroupNode extends StringNode {
   private INavigatorItemFilter _filter;
-  public GroupNode(String name, INavigatorItemFilter filter){
+  public GroupNode(String name, INavigatorItemFilter filter) {
     super(name);
-    if (filter == null) {
-      throw new IllegalArgumentException("parameter 'filter' must not be null");
-    }
+    if (filter == null) throw new IllegalArgumentException("parameter 'filter' must not be null");
     _filter = filter;
   }
   

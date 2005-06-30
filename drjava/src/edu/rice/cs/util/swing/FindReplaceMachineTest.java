@@ -50,7 +50,7 @@ import junit.framework.TestCase;
 
 import javax.swing.text.BadLocationException;
 import edu.rice.cs.util.text.AbstractDocumentInterface;
-import edu.rice.cs.util.text.SwingDocumentAdapter;
+import edu.rice.cs.util.text.SwingDocument;
 
 /**
  * Tests the FindReplaceMachine.
@@ -104,9 +104,9 @@ public class FindReplaceMachineTest extends TestCase {
    * Initializes the document for the tests.
    */
   protected void setUp() {
-    _doc = new SwingDocumentAdapter();
-    _docPrev = new SwingDocumentAdapter();
-    _docNext = new SwingDocumentAdapter();
+    _doc = new SwingDocument();
+    _docPrev = new SwingDocument();
+    _docNext = new SwingDocument();
     _frm = new FindReplaceMachine(new DocumentIterator() {
       public AbstractDocumentInterface getPrevDocument(AbstractDocumentInterface d) {
         if (d == _doc) {

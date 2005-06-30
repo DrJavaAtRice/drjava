@@ -48,17 +48,18 @@ package edu.rice.cs.util.text;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.UnexpectedException;
 
+import javax.swing.text.Style;
 import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 
 import java.util.Hashtable;
 
-/** Provides a toolkit-independent way to interact with a Swing StyledDocument.
+/** Provides a toolkit-independent way to interact with an enhanced Swing StyledDocument.
  * This document must use the readers/writers locking protocol established in its superclasses
  * @version $Id$
  */
-public class SwingDocumentAdapter extends DefaultStyledDocument implements ConsoleInterface, AbstractDocumentInterface {
+public class SwingDocument extends DefaultStyledDocument implements ConsoleInterface, AbstractDocumentInterface {
   
   /** Maps names to attribute sets */
   final protected Hashtable<String, AttributeSet> _styles;
@@ -67,7 +68,7 @@ public class SwingDocumentAdapter extends DefaultStyledDocument implements Conso
   protected DocumentEditCondition _condition;
 
   /** Creates a new document adapter for a Swing StyledDocument. */
-  public SwingDocumentAdapter() { 
+  public SwingDocument() { 
     _styles = new Hashtable<String, AttributeSet>();
     _condition = new DocumentEditCondition();
   }
@@ -180,12 +181,27 @@ public class SwingDocumentAdapter extends DefaultStyledDocument implements Conso
   
   /** Returns entire text of this document. */
   public String getText() {
-    acquireReadLock();
+    readLock();
     try { return getText(0, getLength()); }
     catch (BadLocationException e) { throw new UnexpectedException(e); }  // impossible
-    finally { releaseReadLock(); }
+    finally { readUnlock(); }
   }
   
+  /** Appends given string with specified attributes to end of this document. */
+  public void append(String str, AttributeSet set) {
+    writeLock();
+    try { insertString(getLength(), str, set); }
+    catch (BadLocationException e) { throw new UnexpectedException(e); }  // impossible
+    finally { writeUnlock(); }
+  }
+  
+  /** Appends given string with specified style to end of this document. */
+  public void append(String str, Style style) {
+    writeLock();
+    try { insertString(getLength(), str, style); }
+    catch (BadLocationException e) { throw new UnexpectedException(e); }  // impossible
+    finally { writeUnlock(); }
+  }
   /* Locking operations */
   
   /** Swing-style readLock(). */

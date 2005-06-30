@@ -54,7 +54,7 @@ import java.io.Serializable;
  *
  * @version $Id$
  */
-public interface ConsoleInterface extends Serializable {
+public interface ConsoleInterface extends ReadersWritersLocking, Serializable {
 
   /** Gets the object which can determine whether an insert
    *  or remove edit should be applied, based on the inputs.
@@ -103,26 +103,13 @@ public interface ConsoleInterface extends Serializable {
   public void forceRemoveText(int offs, int len);
 
   /** Returns the length of the document. */
-  public int getDocLength();
+  public int getLength();
 
-  /** Returns a portion of the document.
+  /** Returns a portion of the document.  Differs from getText in AbstractDocumentInterface by throwing
+   *  DocumentAdapterException instead of BadLocationException.  (Why bother?)
    *  @param offs First offset of the desired text
    *  @param len Number of characters to return
    *  @throws DocumentAdapterException if the offset or length are illegal
    */
   public String getDocText(int offs, int len);
-  
-   /* Locking operations */
-  
-  /** Swing-style readLock(). */
-  public void acquireReadLock();
-  
-   /** Swing-style readUnlock(). */
-  public void releaseReadLock();
-
-    /** Swing-style writeLock(). */
-  public void acquireWriteLock();
-  
-   /** Swing-style writeUnlock(). */
-  public void releaseWriteLock();
 }
