@@ -323,13 +323,17 @@ public class JTreeSortNavigator extends JTree
   
   /** Removes a given <code>INavigatorItem<code> from this navigator. Removes all <code>INavigatorItem</code>s
    *  from this navigator that are "equal" (using <code>.equals(...)</code>) to the passed argument. Any of
-   *  the removed documents may be returned by this method. Should only be executed from event thread.
+   *  the removed documents may be returned by this method. If the NavigatorItem is found in the navigator, null
+   *  is returned.  Should only be executed from event thread.
    *  @param doc the docment to be removed
    *  @return doc a document removed from this navigator as a result of invoking this method.
    *  @throws IllegalArgumentException if this navigator contains no document equal to doc
    */
   public <T extends INavigatorItem> T removeDocument(T doc) {
-    synchronized(_model) { return (T) removeNode(getNodeForDoc(doc)); }
+    synchronized(_model) { 
+      LeafNode toRemove = getNodeForDoc(doc);
+      if (toRemove == null) return null;
+      return (T) removeNode(getNodeForDoc(doc)); }
   } 
   
   private LeafNode getNodeForDoc(INavigatorItem doc) { 
