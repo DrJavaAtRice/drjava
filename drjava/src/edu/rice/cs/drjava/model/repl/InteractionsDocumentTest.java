@@ -69,42 +69,42 @@ public final class InteractionsDocumentTest extends TestCase {
   public void testCannotEditBeforePrompt() throws DocumentAdapterException {
     TestBeep testBeep = new TestBeep();
     _doc.setBeep(testBeep);
-    int origLength = _doc.getDocLength();
+    int origLength = _doc.getLength();
 
     // Try to insert into the banner
     _doc.insertText(1, "text", InteractionsDocument.DEFAULT_STYLE);
     assertEquals("Number of beeps", 1, testBeep.numBeeps);
-    assertEquals("Doc length", origLength, _doc.getDocLength());
+    assertEquals("Doc length", origLength, _doc.getLength());
   }
 
   /**
    * Tests that clear current interaction works.
    */
   public void testClearCurrent() throws DocumentAdapterException {
-    int origLength = _doc.getDocLength();
+    int origLength = _doc.getLength();
     _doc.insertText(origLength, "text", InteractionsDocument.DEFAULT_STYLE);
     _doc.insertBeforeLastPrompt("before", InteractionsDocument.DEFAULT_STYLE);
-    assertEquals("Length after inserts", origLength + 10, _doc.getDocLength()); // orig + "before" + "text"
+    assertEquals("Length after inserts", origLength + 10, _doc.getLength()); // orig + "before" + "text"
     _doc.clearCurrentInteraction();
-    assertEquals("Length after clear", origLength + 6, _doc.getDocLength()); // orig + "before"
+    assertEquals("Length after clear", origLength + 6, _doc.getLength()); // orig + "before"
   }
 
   /** Tests that initial contents are the banner and prompt, and that reset works. */
   public void testContentsAndReset() throws DocumentAdapterException {
     String origText = _doc.getBanner() + _doc.getPrompt();
-    assertEquals("Contents before insert", origText, _doc.getDocText(0, _doc.getDocLength()));
+    assertEquals("Contents before insert", origText, _doc.getDocText(0, _doc.getLength()));
     // Insert some text
-    _doc.insertText(_doc.getDocLength(), "text", InteractionsDocument.DEFAULT_STYLE);
+    _doc.insertText(_doc.getLength(), "text", InteractionsDocument.DEFAULT_STYLE);
     _doc.insertBeforeLastPrompt("before", InteractionsDocument.DEFAULT_STYLE);
     assertEquals("Contents before reset", _doc.getBanner() + "before" + _doc.getPrompt() + "text",
-                 _doc.getDocText(0, _doc.getDocLength()));
+                 _doc.getDocText(0, _doc.getLength()));
     _doc.reset();
-    assertEquals("Contents after reset", origText, _doc.getDocText(0, _doc.getDocLength()));
+    assertEquals("Contents after reset", origText, _doc.getDocText(0, _doc.getLength()));
   }
 
   /** Tests that inserting a newline works. */
   public void testInsertNewLine() throws DocumentAdapterException {
-    int origLength = _doc.getDocLength();
+    int origLength = _doc.getLength();
     _doc.insertText(origLength, "command", InteractionsDocument.DEFAULT_STYLE);
     assertEquals("current interaction before newline", "command", _doc.getCurrentInteraction());
     _doc.insertNewLine(origLength + 2);
@@ -117,18 +117,18 @@ public final class InteractionsDocumentTest extends TestCase {
    * Tests that recalling commands from the history works.
    */
   public void testRecallFromHistory() throws DocumentAdapterException {
-    String origText = _doc.getDocText(0, _doc.getDocLength());
+    String origText = _doc.getDocText(0, _doc.getLength());
     _doc.addToHistory("command");
     assertEquals("Contents before recall prev",
-                 origText, _doc.getDocText(0, _doc.getDocLength()));
+                 origText, _doc.getDocText(0, _doc.getLength()));
 
     _doc.recallPreviousInteractionInHistory();
     assertEquals("Contents after recall prev",
-                 origText + "command", _doc.getDocText(0, _doc.getDocLength()));
+                 origText + "command", _doc.getDocText(0, _doc.getLength()));
 
     _doc.recallNextInteractionInHistory();
     assertEquals("Contents after recall next",
-                 origText, _doc.getDocText(0, _doc.getDocLength()));
+                 origText, _doc.getDocText(0, _doc.getLength()));
   }
 
 

@@ -48,6 +48,7 @@ import edu.rice.cs.util.Pair;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.HighlightManager;
 import edu.rice.cs.util.swing.Utilities;
+import edu.rice.cs.util.text.SwingDocument;
 import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.model.definitions.CompoundUndoManager;
 import edu.rice.cs.drjava.model.definitions.DefinitionsEditorKit;
@@ -367,7 +368,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
    *  @param mf the parent window
    */
   public DefinitionsPane(MainFrame mf, final OpenDefinitionsDocument doc) {
-    super(new DefaultStyledDocument());
+    super(new SwingDocument());
     
     _mainFrame = mf;
     

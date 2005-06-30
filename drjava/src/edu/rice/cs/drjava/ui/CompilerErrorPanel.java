@@ -44,10 +44,10 @@ import edu.rice.cs.drjava.model.compiler.CompilerInterface;
 import edu.rice.cs.drjava.model.compiler.NoCompilerAvailable;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.Utilities;
+import edu.rice.cs.util.text.SwingDocument;
 
 import javax.swing.*;
 import javax.swing.text.BadLocationException;
-import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.Position;
 import java.awt.*;
 import java.awt.event.ItemEvent;
@@ -166,7 +166,7 @@ public class CompilerErrorPanel extends ErrorPanel {
   class CompilerErrorListPane extends ErrorPanel.ErrorListPane {
     
     protected void _updateWithErrors() throws BadLocationException {
-      DefaultStyledDocument doc = new DefaultStyledDocument();
+      SwingDocument doc = new SwingDocument();
       String failureName = "error";
       if (getErrorModel().hasOnlyWarnings()) failureName = "warning";
 
@@ -178,7 +178,7 @@ public class CompilerErrorPanel extends ErrorPanel {
       _errorListPositions = new Position[0];
       _compileHasOccurred = true;
       
-      DefaultStyledDocument doc = new DefaultStyledDocument();
+      SwingDocument doc = new SwingDocument();
        
       try {
         doc.insertString(0, "Compilation in progress, please wait...", NORMAL_ATTRIBUTES);
@@ -193,7 +193,7 @@ public class CompilerErrorPanel extends ErrorPanel {
      *  @param done ignored: we assume that this is only called after compilation is completed
      */
     protected void _updateNoErrors(boolean done) throws BadLocationException {
-      DefaultStyledDocument doc = new DefaultStyledDocument();
+      SwingDocument doc = new SwingDocument();
       String message;
       if (_compileHasOccurred) 
         message = "Last compilation completed successfully.";

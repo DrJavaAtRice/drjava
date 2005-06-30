@@ -685,11 +685,9 @@ public class DebugPanel extends JPanel implements OptionConstants {
     }
   }
 
-  /**
-   * Gets the currently selected breakpoint in the breakpoint tree,
-   * or null if the selected node is a classname and not a breakpoint.
-   * @return the current breakpoint in the tree
-   * @throws DebugException if the node is not a valid breakpoint
+  /** Gets the currently selected breakpoint in the breakpoint tree, or null if the selected node is a classname and not a breakpoint.
+   *  @return the current breakpoint in the tree
+   *  @throws DebugException if the node is not a valid breakpoint
    */
   private Breakpoint _getSelectedBreakpoint() throws DebugException {
     TreePath path = _bpTree.getSelectionPath();

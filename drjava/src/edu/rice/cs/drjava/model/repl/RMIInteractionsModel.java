@@ -190,7 +190,7 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
   protected void _updateDocument(String prompt, boolean inProgress, boolean updatePrompt) {
     if (updatePrompt) {
       _document.setPrompt(prompt);
-      _document.insertNewLine(_document.getDocLength());
+      _document.insertNewLine(_document.getLength());
       _document.insertPrompt();
     }
     _document.setInProgress(inProgress);

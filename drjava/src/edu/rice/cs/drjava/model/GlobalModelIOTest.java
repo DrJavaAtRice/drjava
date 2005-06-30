@@ -1352,7 +1352,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
     ConsoleDocument con = _model.getConsoleDocument();
     assertEquals("Output of loaded history is not correct",
                  "x = 5",
-                 con.getDocText(0, con.getDocLength()).trim());
+                 con.getDocText(0, con.getLength()).trim());
     listener.assertInteractionStartCount(4);
     listener.assertInteractionEndCount(4);
     _model.removeListener(listener);
@@ -1418,9 +1418,9 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
     // check that output of loaded history is correct
     ConsoleDocument con = _model.getConsoleDocument();
     assertEquals("Output of loaded history is not correct: " +
-                 con.getDocText(0, con.getDocLength()).trim(),
+                 con.getDocText(0, con.getLength()).trim(),
                  "x = 5"+System.getProperty("line.separator")+"x = 5",
-                 con.getDocText(0, con.getDocLength()).trim());
+                 con.getDocText(0, con.getLength()).trim());
   }
 
   /**

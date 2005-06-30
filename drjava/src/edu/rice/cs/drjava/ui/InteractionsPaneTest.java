@@ -116,12 +116,12 @@ public final class InteractionsPaneTest extends TestCase {
    * cycle it to the end of the line.
    */
   public void testCaretMovementCyclesWhenAtPrompt() throws DocumentAdapterException {
-    _doc.insertText(_doc.getDocLength(), "test text", InteractionsDocument.DEFAULT_STYLE);
+    _doc.insertText(_doc.getLength(), "test text", InteractionsDocument.DEFAULT_STYLE);
     _controller.moveToPrompt();
 
     _controller.moveLeftAction.actionPerformed(null);
     assertEquals("Caret was not cycled when moved left at the prompt.",
-                 _doc.getDocLength(),
+                 _doc.getLength(),
                  _pane.getCaretPosition());
   }
 
@@ -130,7 +130,7 @@ public final class InteractionsPaneTest extends TestCase {
    * cycle it to the prompt.
    */
   public void testCaretMovementCyclesWhenAtEnd() throws DocumentAdapterException {
-    _doc.insertText(_doc.getDocLength(), "test text", InteractionsDocument.DEFAULT_STYLE);
+    _doc.insertText(_doc.getLength(), "test text", InteractionsDocument.DEFAULT_STYLE);
     _controller.moveToEnd();
 
     _controller.moveRightAction.actionPerformed(null);
@@ -159,7 +159,7 @@ public final class InteractionsPaneTest extends TestCase {
     _pane.setCaretPosition(1);
     _controller.moveRightAction.actionPerformed(null);
     assertEquals("Right arrow doesn't move to end when caret is before prompt.",
-                 _doc.getDocLength(),
+                 _doc.getLength(),
                  _pane.getCaretPosition());
   }
 
@@ -171,7 +171,7 @@ public final class InteractionsPaneTest extends TestCase {
     _pane.setCaretPosition(1);
     _controller.historyPrevAction.actionPerformed(null);
     assertEquals("Caret not moved to end on up arrow.",
-                 _doc.getDocLength(),
+                 _doc.getLength(),
                  _pane.getCaretPosition());
   }
 
@@ -183,16 +183,16 @@ public final class InteractionsPaneTest extends TestCase {
     _pane.setCaretPosition(1);
     _controller.historyNextAction.actionPerformed(null);
     assertEquals("Caret not moved to end on down arrow.",
-                 _doc.getDocLength(),
+                 _doc.getLength(),
                  _pane.getCaretPosition());
   }
 
   public void testCaretStaysAtEndDuringInteraction() throws DocumentAdapterException {
     _doc.setInProgress(true);
-    _doc.insertText(_doc.getDocLength(), "simulated output", InteractionsDocument.DEFAULT_STYLE);
+    _doc.insertText(_doc.getLength(), "simulated output", InteractionsDocument.DEFAULT_STYLE);
     _doc.setInProgress(false);
     assertEquals("Caret is at the end after output while in progress.",
-                 _doc.getDocLength(),
+                 _doc.getLength(),
                  _pane.getCaretPosition());
   }
 
@@ -222,7 +222,7 @@ public final class InteractionsPaneTest extends TestCase {
    * is cleared.
    */
   public void testClearCurrentInteraction() throws DocumentAdapterException {
-    _doc.insertText(_doc.getDocLength(), "typed text", InteractionsDocument.DEFAULT_STYLE);
+    _doc.insertText(_doc.getLength(), "typed text", InteractionsDocument.DEFAULT_STYLE);
     _controller.moveToEnd();
 
     _doc.clearCurrentInteraction();
@@ -230,7 +230,7 @@ public final class InteractionsPaneTest extends TestCase {
                  _doc.getPromptPos(),
                  _pane.getCaretPosition());
     assertEquals("Prompt is at the end after output cleared.",
-                 _doc.getDocLength(),
+                 _doc.getLength(),
                  _doc.getPromptPos());
   }
 
@@ -238,17 +238,17 @@ public final class InteractionsPaneTest extends TestCase {
    * Tests that the InteractionsPane cannot be edited before the prompt.
    */
   public void testCannotEditBeforePrompt() throws DocumentAdapterException {
-    int origLength = _doc.getDocLength();
+    int origLength = _doc.getLength();
     _doc.insertText(1, "typed text", InteractionsDocument.DEFAULT_STYLE);
     assertEquals("Document should not have changed.",
                  origLength,
-                 _doc.getDocLength());
+                 _doc.getLength());
   }
 
   /** Tests that the caret is put in the correct position after an insert. */
   public void testCaretUpdatedOnInsert() throws DocumentAdapterException {
-    _doc.insertText(_doc.getDocLength(), "typed text", InteractionsDocument.DEFAULT_STYLE);
-    final int pos = _doc.getDocLength() - 5;
+    _doc.insertText(_doc.getLength(), "typed text", InteractionsDocument.DEFAULT_STYLE);
+    final int pos = _doc.getLength() - 5;
     Utilities.invokeAndWait(new Runnable() { public void run() { _pane.setCaretPosition(pos); } });
 
     // Insert text before the prompt
@@ -343,8 +343,8 @@ public final class InteractionsPaneTest extends TestCase {
                  0, _pane.getPromptList().size());
         
     // Insert some text                   
-    _doc.insertText(_doc.getDocLength(), "5", InteractionsDocument.NUMBER_RETURN_STYLE);
-    _pane.setCaretPosition(_doc.getDocLength());
+    _doc.insertText(_doc.getLength(), "5", InteractionsDocument.NUMBER_RETURN_STYLE);
+    _pane.setCaretPosition(_doc.getLength());
     
     assertEquals("PromptList after insert should contain 1 element",
                  1, _pane.getPromptList().size());    
@@ -353,7 +353,7 @@ public final class InteractionsPaneTest extends TestCase {
                  (int)_pane.getPromptList().get(0)); //needs cast to prevent ambiguity
     
     _doc.insertPrompt();
-    _pane.setCaretPosition(_doc.getDocLength());
+    _pane.setCaretPosition(_doc.getLength());
     assertEquals("PromptList after insertion of new prompt should contain 2 elements",
                  2, _pane.getPromptList().size());
     assertEquals("First prompt should be saved as being at position",

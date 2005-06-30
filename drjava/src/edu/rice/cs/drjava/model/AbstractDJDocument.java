@@ -37,7 +37,7 @@ import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.config.OptionEvent;
 import edu.rice.cs.drjava.config.OptionListener;
-import edu.rice.cs.util.text.SwingDocumentAdapter;
+import edu.rice.cs.util.text.SwingDocument;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
@@ -59,7 +59,7 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Position;
 
 /** Class containing code shared between the DefinitionsDocument and the InteractionsDocumentAdapter. */
-public abstract class AbstractDJDocument extends SwingDocumentAdapter implements DJDocument, OptionConstants {
+public abstract class AbstractDJDocument extends SwingDocument implements DJDocument, OptionConstants {
   
   /*-------- FIELDS ----------*/
   

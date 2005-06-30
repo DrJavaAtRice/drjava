@@ -60,7 +60,7 @@ import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
 import edu.rice.cs.util.ExitingNotAllowedException;
 import edu.rice.cs.util.ClasspathVector;
 import edu.rice.cs.util.UnexpectedException;
-import edu.rice.cs.util.swing.ScrollableDialog;
+import edu.rice.cs.util.text.SwingDocument;
 import edu.rice.cs.util.classloader.ClassFileError;
 import org.apache.bcel.classfile.*;
 // TODO: remove swing dependency!
@@ -104,7 +104,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   
   /** The document used to display JUnit test results.
    *  Used only for testing. */
-  private final StyledDocument _junitDoc = new DefaultStyledDocument();
+  private final SwingDocument _junitDoc = new SwingDocument();
   
   /**
    * Main constructor.
@@ -145,7 +145,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   //-------------------------------- Triggers --------------------------------//
   
   /** Used only for testing. */
-  public StyledDocument getJUnitDocument() { return _junitDoc; }
+  public SwingDocument getJUnitDocument() { return _junitDoc; }
   
   /** Creates a JUnit test suite over all currently open documents and runs it.  If the class file 
    *  associated with a file is not a test case, it will be ignored.  Synchronized against the compiler

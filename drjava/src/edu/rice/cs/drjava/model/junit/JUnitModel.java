@@ -37,6 +37,7 @@ import java.io.IOException;
 import java.io.File;
 import java.util.List;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
+import edu.rice.cs.util.text.SwingDocument;
 
 // TODO: remove this gratuitous swing dependency!
 import javax.swing.text.StyledDocument;
@@ -62,7 +63,7 @@ public interface JUnitModel {
   //-------------------------------- Triggers --------------------------------//
 
   /** This is used by test cases and perhaps other things.  We should kill it. */
-  public StyledDocument getJUnitDocument();
+  public SwingDocument getJUnitDocument();
 
   /** Creates a JUnit test suite over all currently open documents and runs it.  If the class file 
    *  associated with a file is not a test case, it will be ignored.  Synchronized against the compiler 

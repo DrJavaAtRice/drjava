@@ -297,12 +297,12 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
    */
   protected String interpret(String input) throws DocumentAdapterException {
     InteractionsDocument interactionsDoc = _model.getInteractionsDocument();
-    interactionsDoc.insertText(interactionsDoc.getDocLength(), input,
+    interactionsDoc.insertText(interactionsDoc.getLength(), input,
                                InteractionsDocument.DEFAULT_STYLE);
 
     // skip the right length for the newline
     int newLineLen = System.getProperty("line.separator").length();
-    final int resultsStartLocation = interactionsDoc.getDocLength() + newLineLen;
+    final int resultsStartLocation = interactionsDoc.getLength() + newLineLen;
 
     TestListener listener = new TestListener() {
       public void interactionStarted() {
@@ -340,7 +340,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     listener.assertInteractionEndCount(1);
 
     // skip the right length for the newline
-    final int resultsEndLocation = interactionsDoc.getDocLength() - newLineLen -
+    final int resultsEndLocation = interactionsDoc.getLength() - newLineLen -
                                    interactionsDoc.getPrompt().length();
 
     final int resultsLen = resultsEndLocation - resultsStartLocation;
@@ -353,7 +353,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
 
   protected void interpretIgnoreResult(String input) throws DocumentAdapterException {
     ConsoleInterface interactionsDoc = _model.getInteractionsDocument();
-    interactionsDoc.insertText(interactionsDoc.getDocLength(), input, InteractionsDocument.DEFAULT_STYLE);
+    interactionsDoc.insertText(interactionsDoc.getLength(), input, InteractionsDocument.DEFAULT_STYLE);
 
     _model.interpretCurrentInteraction();
   }
@@ -390,7 +390,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
   /** Returns the current contents of the interactions document */
   protected String getInteractionsText() throws DocumentAdapterException {
     ConsoleInterface doc = _model.getInteractionsDocument();
-    return doc.getDocText(0, doc.getDocLength());
+    return doc.getDocText(0, doc.getLength());
   }
 
 

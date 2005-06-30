@@ -454,7 +454,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   protected void _docAppend(String s, String styleName) {
     synchronized(_writerLock) {
       try {
-        _document.insertText(_document.getDocLength(), s, styleName);
+        _document.insertText(_document.getLength(), s, styleName);
         
         // Wait to prevent being flooded with println's
         _writerLock.wait(_writeDelay);

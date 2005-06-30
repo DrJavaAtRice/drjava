@@ -167,7 +167,7 @@ public class ConsoleController extends AbstractConsoleController implements Seri
         if (_blockedForConsoleInput) {
           _pane.setEditable(false);
           _pane.getCaret().setVisible(false);
-          _doc.insertNewLine(_doc.getDocLength());
+          _doc.insertNewLine(_doc.getLength());
           _blockedForConsoleInput = false; 
           _inputWaitObject.notify();  // notify waiting thread that input is available
         }
@@ -194,7 +194,7 @@ public class ConsoleController extends AbstractConsoleController implements Seri
     public void actionPerformed(ActionEvent e) {
       int position = _pane.getCaretPosition();
       if (position < _doc.getPromptPos()) moveToEnd();
-      else if (position >= _doc.getDocLength()) _pane.getBeep().run();
+      else if (position >= _doc.getLength()) _pane.getBeep().run();
       else // position between prompt and end
         _pane.setCaretPosition(position + 1);
     }

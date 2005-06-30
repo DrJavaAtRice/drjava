@@ -80,8 +80,6 @@ public class InteractionsDocumentAdapter extends AbstractDJDocument {
    /** Standard constructor. Currently does nothing */
   public InteractionsDocumentAdapter() { super(); }  
   
-  protected void throwErrorHuh() { /* Do nothing */ }
-  
   protected int startCompoundEdit() { return 0; /* Do nothing */ }
   
   protected void endCompoundEdit(int key) { /* Do nothing */ }
@@ -227,7 +225,7 @@ public class InteractionsDocumentAdapter extends AbstractDJDocument {
     
     writeLock();
     try {
-      insertText(getDocLength(), c + ": " + message + "\n", styleName);
+      insertText(getLength(), c + ": " + message + "\n", styleName);
       
       // An example stack trace:
       //
@@ -265,7 +263,7 @@ public class InteractionsDocumentAdapter extends AbstractDJDocument {
             }
           }
           
-          insertText(getDocLength(), line, styleName);
+          insertText(getLength(), line, styleName);
           
           // OK, now if fileName != null we did parse out fileName
           // and lineNumber.
@@ -276,15 +274,15 @@ public class InteractionsDocumentAdapter extends AbstractDJDocument {
            button.addActionListener(new ExceptionButtonListener(fileName, lineNumber));
            SimpleAttributeSet buttonSet = new SimpleAttributeSet(set);
            StyleConstants.setComponent(buttonSet, button);
-           insertString(getDocLength(), "  ", null);
-           insertString(getDocLength() - 1, " ", buttonSet);
+           insertString(getLength(), "  ", null);
+           insertString(getLength() - 1, " ", buttonSet);
            JOptionPane.showMessageDialog(null, "button in");
-           insertString(getDocLength(), " ", null);
+           insertString(getLength(), " ", null);
            JOptionPane.showMessageDialog(null, "extra space");
            }*/
           
           //JOptionPane.showMessageDialog(null, "\\n");
-          insertText(getDocLength(), "\n", styleName);
+          insertText(getLength(), "\n", styleName);
           
         } // end the while
       }

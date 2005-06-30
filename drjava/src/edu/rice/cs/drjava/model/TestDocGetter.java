@@ -113,9 +113,9 @@ public class TestDocGetter extends DummyGetDocuments {
   private static class TestOpenDoc extends DummyOpenDefDoc {
     DefinitionsDocument _doc;
     File _file;
-    TestOpenDoc(DefinitionsDocument doc) {
-      _doc = doc;
-      _plainDocument = doc;
+    TestOpenDoc(DefinitionsDocument d) {
+      _doc = d;
+      _defDoc = d;
       _file = null;
     }
 

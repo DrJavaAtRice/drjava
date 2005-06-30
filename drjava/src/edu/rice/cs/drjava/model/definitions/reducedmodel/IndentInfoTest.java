@@ -69,9 +69,6 @@ public final class IndentInfoTest extends TestCase {
     //_notifier = new GlobalEventNotifier();
     // _document = new DefinitionsDocument(_notifier);
     _document = new AbstractDJDocument() {
-      protected void throwErrorHuh() {
-        //Do nothing
-      }
       protected int startCompoundEdit() {
         //Do nothing
         return 0;

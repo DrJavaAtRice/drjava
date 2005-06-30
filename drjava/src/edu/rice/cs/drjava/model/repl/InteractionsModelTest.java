@@ -92,7 +92,7 @@ public final class InteractionsModelTest extends TestCase {
     TestInteractionsModel model = (TestInteractionsModel)_model;
     InteractionsDocument doc = model.getDocument();
     doc.reset();
-    doc.insertText(doc.getDocLength(), typed, InteractionsDocument.DEFAULT_STYLE);
+    doc.insertText(doc.getLength(), typed, InteractionsDocument.DEFAULT_STYLE);
     model.interpretCurrentInteraction();
     assertEquals("processed output should match expected", expected, model.toEval);
   }
@@ -120,7 +120,7 @@ public final class InteractionsModelTest extends TestCase {
     assertEquals("string being interpreted", "", model.toEval);
 
     // Insert text and evaluate
-    doc.insertText(doc.getDocLength(), code, InteractionsDocument.DEFAULT_STYLE);
+    doc.insertText(doc.getLength(), code, InteractionsDocument.DEFAULT_STYLE);
     model.interpretCurrentInteraction();
     // pretend the call completed
     model.replReturnedVoid();
@@ -146,7 +146,7 @@ public final class InteractionsModelTest extends TestCase {
     assertTrue(_model instanceof IncompleteInputInteractionsModel);
     IncompleteInputInteractionsModel model = (IncompleteInputInteractionsModel)_model;
     InteractionsDocument doc = model.getDocument();
-    doc.insertText(doc.getDocLength(), code, InteractionsDocument.DEFAULT_STYLE);
+    doc.insertText(doc.getLength(), code, InteractionsDocument.DEFAULT_STYLE);
     model.interpretCurrentInteraction();
     try { Thread.sleep(5000); } catch(InterruptedException ie) { }; // allow for the exception to be generated!
     assertTrue("Code '"+code+"' should generate a continuation exception but not a syntax exception",
@@ -157,7 +157,7 @@ public final class InteractionsModelTest extends TestCase {
     assertTrue(_model instanceof IncompleteInputInteractionsModel);
     IncompleteInputInteractionsModel model = (IncompleteInputInteractionsModel)_model;
     InteractionsDocument doc = model.getDocument();
-    doc.insertText(doc.getDocLength(), code, InteractionsDocument.DEFAULT_STYLE);
+    doc.insertText(doc.getLength(), code, InteractionsDocument.DEFAULT_STYLE);
     model.interpretCurrentInteraction();
     try { Thread.sleep(5000); } catch(InterruptedException ie) { }; // allow for the exception to be generated!
     assertTrue("Code '"+code+"' should generate a syntax exception but not a continuation exception",
@@ -472,7 +472,7 @@ public final class InteractionsModelTest extends TestCase {
     InteractionsDocument doc = _model.getDocument();
 
     // Insert text and evaluate
-    doc.insertText(doc.getDocLength(), code, InteractionsDocument.DEFAULT_STYLE);
+    doc.insertText(doc.getLength(), code, InteractionsDocument.DEFAULT_STYLE);
 
     _model.interpretCurrentInteraction();
     //Simulate result
@@ -485,7 +485,7 @@ public final class InteractionsModelTest extends TestCase {
 
     code = "}\n";
 
-    doc.insertText(doc.getDocLength(), code, InteractionsDocument.DEFAULT_STYLE);
+    doc.insertText(doc.getLength(), code, InteractionsDocument.DEFAULT_STYLE);
 
     synchronized(_lock) {
       _model.interpretCurrentInteraction();

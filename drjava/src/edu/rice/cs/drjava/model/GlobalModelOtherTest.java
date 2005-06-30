@@ -321,7 +321,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     _model.addListener(listener);
 
     _model.resetConsole();
-    assertEquals("Length of console text", 0, _model.getConsoleDocument().getDocLength());
+    assertEquals("Length of console text", 0, _model.getConsoleDocument().getLength());
 
     listener.assertConsoleResetCount(1);
     _interactionDone = false;
@@ -344,11 +344,11 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     //System.err.println("wait i=" + i);
     */
 
-    assertEquals("Length of console text", 1, _model.getConsoleDocument().getDocLength());
+    assertEquals("Length of console text", 1, _model.getConsoleDocument().getLength());
 
 
     _model.resetConsole();
-    assertEquals("Length of console text", 0, _model.getConsoleDocument().getDocLength());
+    assertEquals("Length of console text", 0, _model.getConsoleDocument().getLength());
 
     listener.assertConsoleResetCount(2);
   }

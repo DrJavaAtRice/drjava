@@ -421,7 +421,7 @@ public class InteractionsController extends AbstractConsoleController {
       if (position < _doc.getPromptPos()) {
         moveToEnd();
       }
-      else if (position >= _doc.getDocLength()) {
+      else if (position >= _doc.getLength()) {
         // Wrap around to the start
         moveToPrompt();
       }
@@ -461,7 +461,7 @@ public class InteractionsController extends AbstractConsoleController {
       if (position < promptPos) {
         moveToEnd();
       }
-      else if (position >= _doc.getDocLength()) {
+      else if (position >= _doc.getLength()) {
         // Wrap around to the start
         moveToPrompt();
       }

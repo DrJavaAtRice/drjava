@@ -536,14 +536,14 @@ public class MainFrame extends JFrame implements OptionConstants {
   
   private Action _saveProjectAction = new AbstractAction("Save") {
     public void actionPerformed(ActionEvent ae) {
-      _saveProject(); // isn't this redundant since _saveAll saves the project file if one is active
+//      _saveProject(); // isn't this redundant since _saveAll saves the project file if one is active
       _saveAll();
     }
   };
   
   private Action _saveProjectAsAction = new AbstractAction("Save As...") {
     public void actionPerformed(ActionEvent ae) {
-      _saveProjectAs();
+//      _saveProjectAs();
       _saveAll();
     }
   };
@@ -2318,8 +2318,7 @@ public class MainFrame extends JFrame implements OptionConstants {
    worker.start();
    }*/
   
-  /** Signals the model to close the project, then closes all open files.  It also restores the
-   *  list view navigator
+  /** Signals the model to close the project, then closes all open files.  It also restores the list view navigator
    *  @return true if the project is closed, false if cancelled
    */
   boolean _closeProject() {
@@ -2356,11 +2355,8 @@ public class MainFrame extends JFrame implements OptionConstants {
     if (_model.isProjectChanged()) {
       String fname = _model.getProjectFile().getName();
       String text = fname + " has been modified. Would you like to save it?";
-      int rc = JOptionPane.showConfirmDialog(MainFrame.this,
-                                             text,
-                                             "Save " + fname + "?",
-                                             JOptionPane.YES_NO_CANCEL_OPTION);
-      
+      int rc = 
+        JOptionPane.showConfirmDialog(MainFrame.this, text, "Save " + fname + "?", JOptionPane.YES_NO_CANCEL_OPTION);
       switch (rc) {
         case JOptionPane.YES_OPTION:
           _saveProject();
@@ -6091,19 +6087,20 @@ public class MainFrame extends JFrame implements OptionConstants {
     
     public void documentNotFound(OpenDefinitionsDocument d, File f) {
       
+      if (_model.isProjectActive()) _model.setProjectChanged(true);
+     
       String text = "File " + f.getAbsolutePath() +
         "\ncould not be found on disk!  It was probably moved\n" +
         "or deleted.  Would you like to try to find it?";
       int rc = JOptionPane.showConfirmDialog(MainFrame.this, text, "File Moved or Deleted", JOptionPane.YES_NO_OPTION);
+      if (rc == JOptionPane.NO_OPTION) return;
       if (rc == JOptionPane.YES_OPTION) {
         try {
           File[] opened = _openSelector.getFiles(); 
           d.setFile(opened[0]);
         } 
         catch(OperationCanceledException oce) {
-          //If canceled, prompt the user again
-          documentNotFound(d,f);
-          return;
+          // Interpret cancelled as "NO"
         }
       }
 // The following line was commented out because it breaks when a user want to close but not save a deleted file      

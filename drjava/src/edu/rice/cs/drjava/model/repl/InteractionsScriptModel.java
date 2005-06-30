@@ -107,7 +107,7 @@ public class InteractionsScriptModel {
     try {
       _doc.clearCurrentInteraction();
       String text = _interactions.get(_currentInteraction);
-      _doc.insertText(_doc.getDocLength(), text, _doc.DEFAULT_STYLE);
+      _doc.insertText(_doc.getLength(), text, _doc.DEFAULT_STYLE);
     }
     catch (DocumentAdapterException dae) {
       throw new UnexpectedException(dae);
@@ -137,7 +137,7 @@ public class InteractionsScriptModel {
     try {
       _doc.clearCurrentInteraction();
       String text = _interactions.get(_currentInteraction);
-      _doc.insertText(_doc.getDocLength(), text, _doc.DEFAULT_STYLE);
+      _doc.insertText(_doc.getLength(), text, _doc.DEFAULT_STYLE);
     }
     catch (DocumentAdapterException dae) {
       throw new UnexpectedException(dae);

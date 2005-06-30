@@ -114,9 +114,7 @@ public abstract class IndentRuleWithTrace implements IndentRule{
     int oldPos = doc.getCurrentLocation();
     doc.setCurrentLocation(pos);
     indentLine(doc, reason);
-    if (oldPos > doc.getLength()) {
-      oldPos = doc.getLength();
-    }
+    if (oldPos > doc.getLength()) oldPos = doc.getLength();
     doc.setCurrentLocation(oldPos);
     return false;
   }
@@ -129,10 +127,6 @@ public abstract class IndentRuleWithTrace implements IndentRule{
     return true;
   }
 
-  /**
-   * The rule name to report to _addToIndentTrace
-   */
-  public String getRuleName() {
-    return this.getClass().getName();
-  }
+  /** The rule name to report to _addToIndentTrace */
+  public String getRuleName() { return this.getClass().getName(); }
 }

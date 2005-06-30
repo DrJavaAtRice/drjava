@@ -50,7 +50,7 @@ import java.io.File;
 
 import edu.rice.cs.util.Pair;
 import edu.rice.cs.util.swing.Utilities;
-import edu.rice.cs.util.text.SwingDocumentAdapter;
+import edu.rice.cs.util.text.SwingDocument;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 import edu.rice.cs.util.UnexpectedException;
@@ -64,27 +64,21 @@ import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.*;
 
 
-/**
- * The model for the definitions pane.
+/** The model for the definitions pane.
  *
- * This implementation of <code>Document</code> contains a
- * "reduced model". The reduced model is automatically kept in sync
- * when this document is updated. Also, that synchronization is maintained
- * even across undo/redo -- this is done by making the undo/redo commands know
- * how to restore the reduced model state.
+ *  This implementation of <code>Document</code> contains a "reduced model". The reduced model is automatically kept
+ *  in sync when this document is updated. Also, that synchronization is maintained even across undo/redo -- this is 
+ *  done by making the undo/redo commands know how to restore the reduced model state.
  *
- * The reduced model is not thread-safe, so it is essential that ONLY this
- * DefinitionsDocument call methods on it.  Any information from the reduced
- * model should be obtained through helper methods on DefinitionsDocument,
- * and ALL methods in DefinitionsDocument which reference the reduced model
- * (via the _reduced field) MUST be synchronized.  This prevents any thread
- * from seeing an inconsistent state in the middle of another thread's changes.
+ *  The reduced model is not thread-safe, so it is essential that ONLY this DefinitionsDocument call methods on it.  
+ *  Any information from the reduced model should be obtained through helper methods on DefinitionsDocument, and ALL 
+ *  methods in DefinitionsDocument which reference the reduced model (via the _reduced field) MUST be synchronized.  
+ *  This prevents any thread from seeing an inconsistent state in the middle of another thread's changes.
  *
- * @see BraceReduction
- * @see ReducedModelControl
- * @see ReducedModelComment
- * @see ReducedModelBrace
- *
+ *  @see BraceReduction
+ *  @see ReducedModelControl
+ *  @see ReducedModelComment
+ *  @see ReducedModelBrace
  */
 public class DefinitionsDocument extends AbstractDJDocument implements Finalizable<DefinitionsDocument> {
   

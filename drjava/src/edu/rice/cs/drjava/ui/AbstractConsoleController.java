@@ -196,7 +196,7 @@ public abstract class AbstractConsoleController implements Serializable {
       if (c != null) {
         StyleConstants.setForeground(fontSet, c);
       }
-      _adapter.setCharacterAttributes(0, _adapter.getDocLength()+1, fontSet, false);
+      _adapter.setCharacterAttributes(0, _adapter.getLength()+1, fontSet, false);
       _pane.setCharacterAttributes(fontSet, false);
       _updateStyles(fontSet);
     }
@@ -225,7 +225,7 @@ public abstract class AbstractConsoleController implements Serializable {
           ConsoleDocument doc = getConsoleDoc();
           int caretPos = _pane.getCaretPosition();
           int promptPos = doc.getPromptPos();
-          int length = doc.getDocLength();
+          int length = doc.getLength();
           
           // Figure out where the prompt was before the update
           int prevPromptPos = promptPos;
@@ -265,7 +265,7 @@ public abstract class AbstractConsoleController implements Serializable {
     protected void _ensureLegalCaretPos() {
       Utilities.invokeLater(new Runnable() {
         public void run() { 
-          int length = getConsoleDoc().getDocLength();
+          int length = getConsoleDoc().getLength();
           if (_pane.getCaretPosition() > length) {
             _pane.setCaretPosition(length);
           }
@@ -337,7 +337,7 @@ public abstract class AbstractConsoleController implements Serializable {
   /** Selects to the end of the current input line. */
   AbstractAction selectToEndAction = new AbstractAction() {
     public void actionPerformed(ActionEvent e) {
-      _pane.moveCaretPosition(getConsoleDoc().getDocLength());
+      _pane.moveCaretPosition(getConsoleDoc().getLength());
     }
   };
 
@@ -355,7 +355,7 @@ public abstract class AbstractConsoleController implements Serializable {
   };
 
   /** Moves the pane's caret to the end of the document. */
-  void moveToEnd() { moveTo(getConsoleDoc().getDocLength()); }
+  void moveToEnd() { moveTo(getConsoleDoc().getLength()); }
 
   /** Moves the pane's caret to the document's prompt. */
   void moveToPrompt() { moveTo(getConsoleDoc().getPromptPos()); }
@@ -365,7 +365,7 @@ public abstract class AbstractConsoleController implements Serializable {
     // Sanity check
     if (pos < 0) pos = 0;
     else {
-      int maxLen = getConsoleDoc().getDocLength(); 
+      int maxLen = getConsoleDoc().getLength(); 
       if (pos > maxLen) pos = maxLen;
     }
     _pane.setCaretPosition(pos);

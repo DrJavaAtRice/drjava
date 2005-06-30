@@ -240,9 +240,9 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     // Test for strict == equality
     assertTrue("UI's int. doc. should equals Model's int. doc.", pane.getDocument() == doc);
 
-    int origLength = doc.getDocLength();
+    int origLength = doc.getLength();
     doc.insertText(1, "typed text", InteractionsDocument.DEFAULT_STYLE);
-    assertEquals("Document should not have changed.", origLength, doc.getDocLength());
+    assertEquals("Document should not have changed.", origLength, doc.getLength());
 //    _log.log("testCorrectInteractionsDocument completed");
   }
 

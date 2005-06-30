@@ -67,6 +67,7 @@ import edu.rice.cs.drjava.model.Finalizable;
 import edu.rice.cs.drjava.model.FinalizationListener;
 import edu.rice.cs.drjava.model.FinalizationEvent;
 import edu.rice.cs.util.docnavigation.*;
+import edu.rice.cs.util.text.SwingDocument;
 
 public class DummyOpenDefDoc implements OpenDefinitionsDocument { 
   
@@ -349,7 +350,7 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
   /** Sets the file for this openDefinitionsDocument. */
   public void setFile(File file) { throw new UnsupportedOperationException("Dummy method"); }
   
-  /** Cleans up the doc before closing it. */
+  /** Cleans up the document before closing it. */
   public void close() { }
   
   public boolean isInProjectPath() { return false; }
@@ -365,57 +366,61 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
   public int getLineEndPos(int pos) { throw new UnsupportedOperationException("Dummy method"); }
   
   /** Implementation of the javax.swing.text.Document interface. */
-  protected Document _plainDocument = new PlainDocument();
+  protected SwingDocument _defDoc = new SwingDocument();
   
-  public void addDocumentListener(DocumentListener listener) { _plainDocument.addDocumentListener(listener); }
+  public void addDocumentListener(DocumentListener listener) { _defDoc.addDocumentListener(listener); }
   
   public void addUndoableEditListener(UndoableEditListener listener) {
-    _plainDocument.addUndoableEditListener(listener);
+    _defDoc.addUndoableEditListener(listener);
   }
   
   public Position createPosition(int offs) throws BadLocationException {
-    return _plainDocument.createPosition(offs);
+    return _defDoc.createPosition(offs);
   }
   
-  public Element getDefaultRootElement() { return _plainDocument.getDefaultRootElement(); }
+  public Element getDefaultRootElement() { return _defDoc.getDefaultRootElement(); }
   
-  public Position getEndPosition() { return _plainDocument.getEndPosition(); }
+  public Position getEndPosition() { return _defDoc.getEndPosition(); }
   
-  public int getLength() { return _plainDocument.getLength(); }
+  public int getLength() { return _defDoc.getLength(); }
   
-  public Object getProperty(Object key) { return _plainDocument.getProperty(key); }
+  public Object getProperty(Object key) { return _defDoc.getProperty(key); }
   
-  public Element[] getRootElements() { return _plainDocument.getRootElements(); }
+  public Element[] getRootElements() { return _defDoc.getRootElements(); }
   
-  public Position getStartPosition() { return _plainDocument.getStartPosition(); }
+  public Position getStartPosition() { return _defDoc.getStartPosition(); }
   
   public String getText(int offset, int length) throws BadLocationException {
-    return _plainDocument.getText(offset, length);
+    return _defDoc.getText(offset, length);
   }
   
   public void getText(int offset, int length, Segment txt) throws BadLocationException {
-    _plainDocument.getText(offset, length, txt);
+    _defDoc.getText(offset, length, txt);
   }
   
-  public void insertString(int offset, String str, AttributeSet a) throws BadLocationException {
-    _plainDocument.insertString(offset, str, a);
+  public void insertString(int offset, String str, AttributeSet set) throws BadLocationException {
+    _defDoc.insertString(offset, str, set);
   }
   
-  public void putProperty(Object key, Object value) { _plainDocument.putProperty(key, value); }
+  public void append(String str, AttributeSet set) { _defDoc.append(str, set); }
+  
+  public void append(String str, Style style) { _defDoc.append(str, style); }
+  
+  public void putProperty(Object key, Object value) { _defDoc.putProperty(key, value); }
   
   public void remove(int offs, int len) throws BadLocationException {
-    _plainDocument.remove(offs, len);
+    _defDoc.remove(offs, len);
   }
   
   public void removeDocumentListener(DocumentListener listener) {
-    _plainDocument.removeDocumentListener(listener);
+    _defDoc.removeDocumentListener(listener);
   }
   
   public void removeUndoableEditListener(UndoableEditListener listener) {
-    _plainDocument.removeUndoableEditListener(listener);
+    _defDoc.removeUndoableEditListener(listener);
   }
   
-  public void render(Runnable r) { _plainDocument.render(r); }
+  public void render(Runnable r) { _defDoc.render(r); }
   
   /** End implementation of javax.swing.text.Document interface. */
   

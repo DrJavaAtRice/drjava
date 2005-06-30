@@ -63,16 +63,11 @@ public abstract class IndentRulesTestCase extends TestCase {
   private String _indent;
  // private GlobalEventNotifier _notifier;
 
-  /**
-   * Sets up the test environment.
-   */
+  /** Sets up the test environment. */
   public void setUp() {
     //_notifier = new GlobalEventNotifier();
     //_doc = new DefinitionsDocument(_notifier);
     _doc = new AbstractDJDocument() {
-      protected void throwErrorHuh() {
-        //Do nothing
-      }
       protected int startCompoundEdit() {
         //Do nothing
         return 0;
@@ -102,9 +97,7 @@ public abstract class IndentRulesTestCase extends TestCase {
     System.gc();
   }
   
-  /**
-   * Clears the text of the _doc field and sets it to the
-   * given string.
+  /** Clears the text of the _doc field and sets it to the given string.
    */
   protected final void _setDocText(String text)
     throws BadLocationException {

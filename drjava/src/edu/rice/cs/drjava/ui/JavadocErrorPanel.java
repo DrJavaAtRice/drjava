@@ -48,6 +48,7 @@ package edu.rice.cs.drjava.ui;
 import edu.rice.cs.drjava.model.SingleDisplayModel;
 import edu.rice.cs.drjava.model.compiler.CompilerErrorModel;
 import edu.rice.cs.util.UnexpectedException;
+import edu.rice.cs.util.text.SwingDocument;
 
 import javax.swing.text.*;
 
@@ -125,30 +126,17 @@ public class JavadocErrorPanel extends ErrorPanel {
     public void setJavadocInProgress() {
       _errorListPositions = new Position[0];
 
-      DefaultStyledDocument doc = new DefaultStyledDocument();
-
-      try {
-        doc.insertString(doc.getLength(),
-                         "Generating Javadoc.  Please wait...\n",
-                         NORMAL_ATTRIBUTES);
-      }
-      catch (BadLocationException ble) {
-        throw new UnexpectedException(ble);
-      }
+      SwingDocument doc = new SwingDocument();
+      doc.append("Generating Javadoc.  Please wait...\n", NORMAL_ATTRIBUTES);
       setDocument(doc);
-
       selectNothing();
     }
 
-    /**
-     * Used to show that the last javadoc command was unsuccessful.
-     */
+    /** Used to show that the last javadoc command was unsuccessful. */
     protected void _updateWithErrors() throws BadLocationException {
-      DefaultStyledDocument doc = new DefaultStyledDocument();
+      SwingDocument doc = new SwingDocument();
       String failureName = "error";
-      if (getErrorModel().hasOnlyWarnings()) {
-        failureName = "warning";
-      }
+      if (getErrorModel().hasOnlyWarnings()) failureName = "warning";
       _updateWithErrors(failureName, "found", doc);
     }
 
@@ -156,14 +144,10 @@ public class JavadocErrorPanel extends ErrorPanel {
      * Used to show that the last compile was successful.
      */
     protected void _updateNoErrors(boolean done) throws BadLocationException {
-      DefaultStyledDocument doc = new DefaultStyledDocument();
+      SwingDocument doc = new SwingDocument();
       String msg = (done) ? "Javadoc generated successfully." : "";
-
-      doc.insertString(doc.getLength(),
-                       msg,
-                       NORMAL_ATTRIBUTES);
+      doc.append(msg, NORMAL_ATTRIBUTES);
       setDocument(doc);
-
       selectNothing();
     }
 

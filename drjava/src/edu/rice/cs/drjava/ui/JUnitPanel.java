@@ -52,6 +52,8 @@ import edu.rice.cs.drjava.model.junit.JUnitError;
 import edu.rice.cs.drjava.model.junit.JUnitErrorModel;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.BorderlessScrollPane;
+import edu.rice.cs.util.text.SwingDocument;
+
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -343,8 +345,8 @@ public class JUnitPanel extends ErrorPanel {
       if (namePos != null) {
         int index = namePos.getOffset();
         int length = testName.length();
-        if (doc instanceof StyledDocument) {
-          ((StyledDocument)doc).setCharacterAttributes(index, length, set, false);
+        if (doc instanceof SwingDocument) {
+          ((SwingDocument)doc).setCharacterAttributes(index, length, set, false);
         }
       }
     }
@@ -357,11 +359,10 @@ public class JUnitPanel extends ErrorPanel {
       _runningTestName = null;
       _warnedOutOfSync = false;
 
-      DefaultStyledDocument doc = new DefaultStyledDocument();
+      SwingDocument doc = new SwingDocument();
       _checkSync(doc);
 
-      try { doc.insertString(doc.getLength(), START_JUNIT_MSG, BOLD_ATTRIBUTES); }
-      catch (BadLocationException ble) { throw new UnexpectedException(ble); }
+      doc.append(START_JUNIT_MSG, BOLD_ATTRIBUTES);
       setDocument(doc);
       selectNothing();
     }
@@ -369,13 +370,12 @@ public class JUnitPanel extends ErrorPanel {
     /** Used to show that testing was unsuccessful. */
     protected void _updateWithErrors() throws BadLocationException {
       //DefaultStyledDocument doc = new DefaultStyledDocument();
-      DefaultStyledDocument doc = (DefaultStyledDocument) getDocument();
+      SwingDocument doc = (SwingDocument) getDocument();
       _checkSync(doc);
       _updateWithErrors("test", "failed", doc);
     }
 
-    protected void _updateWithErrors(String failureName, String failureMeaning,
-                                     DefaultStyledDocument doc)
+    protected void _updateWithErrors(String failureName, String failureMeaning, SwingDocument doc)
       throws BadLocationException {
       // Print how many errors
       _replaceInProgressText(_getNumErrorsMessage(failureName, failureMeaning));

@@ -141,7 +141,7 @@ public final class ConsoleControllerTest extends GlobalModelTestCase {
           _lock.notify(); // notifies main test thread that this thread has started
           _lock.wait();   // wait to be notified by RMI thread that input is needed
           // cannot proceed until RMI thread starts waiting on _lock (_controller._inputWaitObject)
-          _doc.insertText(_doc.getDocLength(), _text, ConsoleDocument.DEFAULT_STYLE);
+          _doc.insertText(_doc.getLength(), _text, ConsoleDocument.DEFAULT_STYLE);
           _controller.enterAction.actionPerformed(null);
         }
       }

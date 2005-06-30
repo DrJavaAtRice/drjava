@@ -64,6 +64,7 @@ import edu.rice.cs.util.swing.FindReplaceMachine;
 import edu.rice.cs.util.swing.FindResult;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.text.AbstractDocumentInterface;
+import edu.rice.cs.util.text.SwingDocument;
 import edu.rice.cs.util.UnexpectedException;
 
 
@@ -80,9 +81,9 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
   private JButton _replaceAllButton;
   private JLabel _findLabel;
   private JLabel _replaceLabel;
-  private JTextPane _findField = new JTextPane(new DefaultStyledDocument());
+  private JTextPane _findField = new JTextPane(new SwingDocument());
   private BorderlessScrollPane _findPane = new BorderlessScrollPane(_findField);
-  private JTextPane _replaceField = new JTextPane(new DefaultStyledDocument());
+  private JTextPane _replaceField = new JTextPane(new SwingDocument());
   private BorderlessScrollPane _replacePane = new BorderlessScrollPane(_replaceField);
   private JLabel _message; // JL
   private JPanel _labelPanel;

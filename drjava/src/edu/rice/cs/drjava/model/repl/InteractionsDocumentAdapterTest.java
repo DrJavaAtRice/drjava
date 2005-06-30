@@ -85,7 +85,7 @@ public final class InteractionsDocumentAdapterTest extends TestCase {
                  2, _adapter.getStylesList().size());
 
     // Insert some text
-    _doc.insertText(_doc.getDocLength(), "5", InteractionsDocument.NUMBER_RETURN_STYLE);
+    _doc.insertText(_doc.getLength(), "5", InteractionsDocument.NUMBER_RETURN_STYLE);
 
     assertEquals("StylesList before reset should contain 3 pairs",
                  3, _adapter.getStylesList().size());
@@ -123,13 +123,13 @@ public final class InteractionsDocumentAdapterTest extends TestCase {
                  2, _adapter.getStylesList().size());
 
     // Insert some text
-    _doc.insertText(_doc.getDocLength(), "5", InteractionsDocument.NUMBER_RETURN_STYLE);
+    _doc.insertText(_doc.getLength(), "5", InteractionsDocument.NUMBER_RETURN_STYLE);
 
     assertEquals("StylesList should contain 3 pairs",
                  3, _adapter.getStylesList().size());
 
     // Insert some text with a null style
-    _doc.insertText(_doc.getDocLength(), "6", null);
+    _doc.insertText(_doc.getLength(), "6", null);
 
     assertEquals("StylesList should still contain 3 pairs - null string should not have been inserted",
                  3, _adapter.getStylesList().size());

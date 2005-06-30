@@ -142,7 +142,7 @@ public class InteractionsDocument extends ConsoleDocument {
   public void reset() {
     acquireWriteLock();
     try {
-      forceRemoveText(0, _document.getDocLength());
+      forceRemoveText(0, _document.getLength());
       forceInsertText(0, _banner, OBJECT_RETURN_STYLE);
       insertPrompt();
       _history.moveEnd();
@@ -361,7 +361,7 @@ public class InteractionsDocument extends ConsoleDocument {
     
     acquireWriteLock();
     try {
-      insertText(getDocLength(), c + ": " + message + "\n", styleName);
+      insertText(getLength(), c + ": " + message + "\n", styleName);
       
       // An example stack trace:
       //
@@ -399,10 +399,10 @@ public class InteractionsDocument extends ConsoleDocument {
             }
           }
           
-          insertText(getDocLength(), line, styleName);
+          insertText(getLength(), line, styleName);
           
           //JOptionPane.showMessageDialog(null, "\\n");
-          insertText(getDocLength(), "\n", styleName);
+          insertText(getLength(), "\n", styleName);
           
         } // end the while
       }

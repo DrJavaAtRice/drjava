@@ -1079,11 +1079,9 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
     return odd;
   }
   
-  /**
-   * Note that .getFile called on the returned OpenDefinitionsDocument
-   * is guaranteed to return an absolute path, as this method makes
-   * it absolute.
-   * @see ILoadDocuments
+  /** Note that .getFile called on the returned OpenDefinitionsDocument is guaranteed to return an absolute path,
+   *  as this method makes it absolute.
+   *  @see ILoadDocuments
    */
   abstract public OpenDefinitionsDocument openFiles(FileOpenSelector com)
     throws IOException, OperationCanceledException, AlreadyOpenException;
@@ -1524,8 +1522,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
   /** Gets a DocumentIterator to allow navigating through open Swing Documents. */
   public DocumentIterator getDocumentIterator() { return this; }
 
-  /** Given an AbstractDocument (generalized to an interface type), returns the Document corresponding to the next 
-   *  OpenDefinitionsDocument in the document list.
+  /** Returns the ODD preceding the given document in the document list.
    *  @param d the current Document
    *  @return the next Document
    */
@@ -1535,22 +1532,22 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
       OpenDefinitionsDocument doc = getODDForDocument(d);
       nextdoc = _documentNavigator.getNext(doc);
       if (nextdoc == doc) nextdoc = _documentNavigator.getFirst();  // wrap around if necessary
-      return getNextDocHelper(nextdoc);
+      OpenDefinitionsDocument res = getNextDocHelper(nextdoc);
+//      Utilities.showDebug("nextDocument(" + d + ") = " + res);
+      return res;
 //    } 
 //    catch(DocumentClosedException dce) { return getNextDocument(nextdoc); }
   }
   
   private OpenDefinitionsDocument getNextDocHelper(OpenDefinitionsDocument nextdoc) {
-    if (nextdoc.fileExists() || nextdoc.isUntitled()) return nextdoc;
-    // prompt user for location of nextdoc
-    if (nextdoc.verifyExists()) return nextdoc;
+    if (nextdoc.isUntitled() || nextdoc.verifyExists()) return nextdoc;
+    // Note: verifyExists prompts user for location of the file if it is not found
     
     // cannot find nextdoc; move on to next document 
     return getNextDocument(nextdoc);
   }
 
-  /** Given a Document, returns the Document corresponding to the previous OpenDefinitionsDocument in the 
-   *  document list.
+  /** Returns the ODD preceding the given document in the document list.
    *  @param d the current Document
    *  @return the previous Document
    */
@@ -1566,9 +1563,8 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
   }
   
   private OpenDefinitionsDocument getPrevDocHelper(OpenDefinitionsDocument prevdoc) { 
-    if (prevdoc.fileExists() || prevdoc.isUntitled()) return prevdoc;
-      // prompt user for location of prevdoc
-    if (prevdoc.verifyExists()) return prevdoc;
+    if (prevdoc.isUntitled() || prevdoc.verifyExists()) return prevdoc;
+    // Note: verifyExists() prompts user for location of prevdoc
     
     // cannot find prevdoc; move on to preceding document 
     return getPrevDocument(prevdoc);
@@ -2133,7 +2129,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
 //        Utilities.showDebug("getDocument() failed for " + this);
         try {
           _notifier.documentNotFound(this, _file);
-          final String path = _file.getCanonicalFile().getParent();
+          final String path = fixPathForNavigator(getFile().getCanonicalFile().getCanonicalPath());
           Utilities.invokeAndWait(new Runnable() {
             public void run() { _documentNavigator.refreshDocument(ConcreteOpenDefDoc.this, path); }
           });
@@ -2166,7 +2162,6 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
     public File getFile() throws IllegalStateException , FileMovedException {
       
         if (_file == null) throw new IllegalStateException("This document does not yet have a file.");
-
         if (_file.exists()) return _file;
         else throw new FileMovedException(_file, "This document's file has been moved or deleted.");
     }
@@ -2176,18 +2171,17 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
     
     /** Returns true if the file exists on disk. Prompts the user otherwise */
     public boolean verifyExists() {
-      if (! fileExists()) {
-        try {
-          //prompt the user to find it
-          try {
-            _notifier.documentNotFound(this,_file);
-            _documentNavigator.refreshDocument(this, _file.getCanonicalFile().getParent());
-          } catch(IOException ioe) { throw new UnexpectedException(ioe); }
-          return true;
-        } 
-        catch(DocumentClosedException dce) { return false; }
-      }
-      return true; //if file exists
+//      Utilities.showDebug("verifyExists called on " + _file);
+      if (fileExists()) return true;
+      //prompt the user to find it
+      try {
+        _notifier.documentNotFound(this, _file);
+        String path = fixPathForNavigator(getFile().getCanonicalPath());
+        _documentNavigator.refreshDocument(this, path);
+        return true;
+      } 
+      catch(Throwable t) { return false; }
+//      catch(DocumentFileClosed e) { /* not clear what to do here */ }
     }
 
     /** Returns the name of this file, or "(untitled)" if no file. */
@@ -2386,7 +2380,7 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
           if (!checkIfClassFileInSync()) {
             iDoc.insertBeforeLastPrompt(DOCUMENT_OUT_OF_SYNC_MSG, InteractionsDocument.ERROR_STYLE);
           }
-          iDoc.insertText(iDoc.getDocLength(), "java " + className, null);
+          iDoc.insertText(iDoc.getLength(), "java " + className, null);
 
           // Notify listeners that the file is about to be run.
           _notifier.runStarted(this);
@@ -2912,6 +2906,10 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
       getDocument().insertString(offset, str, a);
     }
     
+    public void append(String str, AttributeSet set) { getDocument().append(str, set); }
+    
+    public void append(String str, Style style) { getDocument().append(str, style); }
+    
     public void putProperty(Object key, Object value) { getDocument().putProperty(key, value); }
     
     public void remove(int offs, int len) throws BadLocationException { getDocument().remove(offs, len); }
@@ -3203,7 +3201,8 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
       if (tempDoc.isInProjectPath() || tempDoc.isAuxiliaryFile()) projectDocs.add(tempDoc);
     return projectDocs;
   }
-  
+  /* Extracts relative path (from project origin) to parent of file identified by path.  Assumes path does not end in 
+   * File.separator. */
   public String fixPathForNavigator(String path) throws IOException {
     path = path.substring(0, path.lastIndexOf(File.separator));
     String _topLevelPath;

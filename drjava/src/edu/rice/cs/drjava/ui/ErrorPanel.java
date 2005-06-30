@@ -39,12 +39,14 @@ import edu.rice.cs.drjava.config.OptionEvent;
 import edu.rice.cs.drjava.config.OptionListener;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.SingleDisplayModel;
+//import edu.rice.cs.drjava.model.DefaultDJDocument;
 import edu.rice.cs.drjava.model.compiler.CompilerError;
 import edu.rice.cs.drjava.model.compiler.CompilerErrorModel;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.HighlightManager;
 import edu.rice.cs.util.swing.BorderlessScrollPane;
 import edu.rice.cs.util.swing.Utilities;
+import edu.rice.cs.util.text.SwingDocument;
 
 // TODO: Check synchronization.
 import java.util.Hashtable;
@@ -204,9 +206,11 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
     
     getErrorListPane().setFont(f);
     
-    Document doc = getErrorListPane().getDocument();
-    if (doc instanceof StyledDocument) {
-      ((StyledDocument)doc).setCharacterAttributes(0, doc.getLength()+1, set, false);
+    SwingDocument doc = (SwingDocument) getErrorListPane().getDocument();
+    if (doc instanceof SwingDocument) {
+      doc.acquireWriteLock();
+      try { ((SwingDocument)doc).setCharacterAttributes(0, doc.getLength() + 1, set, false); }
+      finally { doc.releaseWriteLock(); }
     }
   }
   
@@ -282,7 +286,9 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
     public ErrorListPane() {
 //      // If we set this pane to be of type text/rtf, it wraps based on words
 //      // as opposed to based on characters.
-      super("text/rtf", "");
+ 
+      setContentType("text/rtf");
+      setDocument(new SwingDocument());
       
       addMouseListener(defaultMouseListener);
       
@@ -448,11 +454,11 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
     
     
     /** Used to show that the last compile was unsuccessful.*/
-    protected void _updateWithErrors(String failureName, String failureMeaning, DefaultStyledDocument doc)
+    protected void _updateWithErrors(String failureName, String failureMeaning, SwingDocument doc)
       throws BadLocationException {
       // Print how many errors
       String numErrsMsg = _getNumErrorsMessage(failureName, failureMeaning);
-      doc.insertString(doc.getLength(), numErrsMsg, BOLD_ATTRIBUTES);
+      doc.append(numErrsMsg, BOLD_ATTRIBUTES);
       
       _insertErrors(doc);
       setDocument(doc);
@@ -489,7 +495,7 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
     /** Inserts all of the errors into the given document.
      *  @param doc the document into which to insert the errors
      */
-    protected void _insertErrors(DefaultStyledDocument doc) throws BadLocationException {
+    protected void _insertErrors(SwingDocument doc) throws BadLocationException {
       CompilerErrorModel cem = getErrorModel();
       int numErrors = cem.getNumErrors();
       
@@ -501,7 +507,7 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
       
       String errorTitle = _getErrorTitle();
       if (cem.getNumWarnings() > 0)   
-        doc.insertString(doc.getLength(), errorTitle, BOLD_ATTRIBUTES);
+        doc.append(errorTitle, BOLD_ATTRIBUTES);
       
       for (int errorNum = 0; errorNum < numErrors; errorNum++) {
         int startPos = doc.getLength();
@@ -518,7 +524,7 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
       
       String warningTitle = _getWarningTitle();
       if (cem.getNumCompErrors() > 0)   
-        doc.insertString(doc.getLength(), warningTitle, BOLD_ATTRIBUTES);
+        doc.append(warningTitle, BOLD_ATTRIBUTES);
       
       for (int errorNum = 0; errorNum < numErrors; errorNum++) {
         int startPos = doc.getLength();
@@ -538,29 +544,25 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
      *  @param error the error to print
      *  @param doc the document in the error pane
      */
-    protected void _insertErrorText(CompilerError error, Document doc) throws BadLocationException {
+    protected void _insertErrorText(CompilerError error, SwingDocument doc) throws BadLocationException {
       // Show file and line number
-      doc.insertString(doc.getLength(), "File: ", BOLD_ATTRIBUTES);
+      doc.append("File: ", BOLD_ATTRIBUTES);
       String fileAndLineNumber = error.getFileMessage() + "  [line: " + error.getLineMessage() + "]";
-      doc.insertString(doc.getLength(), fileAndLineNumber + "\n", NORMAL_ATTRIBUTES);
+      doc.append(fileAndLineNumber + "\n", NORMAL_ATTRIBUTES);
       
       if (error.isWarning()) {
-        doc.insertString(doc.getLength(), _getWarningText(), BOLD_ATTRIBUTES);
+        doc.append(_getWarningText(), BOLD_ATTRIBUTES);
       }
       else {
-        doc.insertString(doc.getLength(), _getErrorText(), BOLD_ATTRIBUTES);
+        doc.append(_getErrorText(), BOLD_ATTRIBUTES);
       }
       
-      doc.insertString(doc.getLength(), error.message(), NORMAL_ATTRIBUTES);
-      doc.insertString(doc.getLength(), "\n", NORMAL_ATTRIBUTES);
+      doc.append(error.message(), NORMAL_ATTRIBUTES);
+      doc.append("\n", NORMAL_ATTRIBUTES);
     }
     
-    /**
-     * Returns the string to identify a warning.
-     */
-    protected String _getWarningText() {
-      return "Warning: ";
-    }
+    /** Returns the string to identify a warning. */
+    protected String _getWarningText() { return "Warning: "; }
     
     /**
      * Returns the string to identify an error.
@@ -684,13 +686,15 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
 //      Utilities.showDebug("ErrorPanel.switchToError called");
       if (error == null) return;
       
-      _frame.getCurrentDefPane().removeErrorHighlight();  // hide previous error highlight
+      SingleDisplayModel model = getModel();
       
-      
+      DefinitionsPane prevPane = _frame.getCurrentDefPane();
+      prevPane.removeErrorHighlight();  // hide previous error highlight
+      OpenDefinitionsDocument prevDoc = prevPane.getOpenDefDocument();
       
       if (error.file() != null) {
         try {
-          OpenDefinitionsDocument doc = getModel().getDocumentForFile(error.file());
+          OpenDefinitionsDocument doc = model.getDocumentForFile(error.file());
           CompilerErrorModel errorModel = getErrorModel();
           
           Position pos = errorModel.getPosition(error); // null if error has no Position
@@ -698,7 +702,8 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
           // switch to correct def pane and move caret to error position
 //          Utilities.showDebug("active document being set to " + doc + " in ErrorPanel.switchToError");
           
-          getModel().setActiveDocument(doc);
+          if (! prevDoc.equals(doc)) model.setActiveDocument(doc);
+          else model.refreshActiveDocument();
           
 //          Utilities.showDebug("setting active document has completed");
           
@@ -770,12 +775,15 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
         
         // Re-attribute the existing text with the new color.
         Document doc = getErrorListPane().getDocument();
-        if (doc instanceof StyledDocument) {
+        if (doc instanceof SwingDocument) {
           SimpleAttributeSet set = new SimpleAttributeSet();
           set.addAttribute(StyleConstants.Foreground, oce.value);
-          ((StyledDocument)doc).setCharacterAttributes(0, doc.getLength(), set, false);
-        }
+          SwingDocument sdoc = (SwingDocument) doc;
+          sdoc.acquireWriteLock();
+          try { sdoc.setCharacterAttributes(0, sdoc.getLength(), set, false); }
+          finally { sdoc.releaseWriteLock(); }
         //        ErrorListPane.this.repaint();
+        }
       }
     }
     

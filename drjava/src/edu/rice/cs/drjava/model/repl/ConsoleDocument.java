@@ -140,7 +140,7 @@ public class ConsoleDocument implements ConsoleInterface {
   public void reset() {
     acquireWriteLock();
     try {
-      forceRemoveText(0, _document.getDocLength());
+      forceRemoveText(0, _document.getLength());
       _promptPos = 0;
     }
     catch (DocumentAdapterException e) { throw new UnexpectedException(e); }
@@ -152,10 +152,10 @@ public class ConsoleDocument implements ConsoleInterface {
     acquireWriteLock();
     try {
 //      append(_prompt, DEFAULT_STYLE);  // need forceAppend!
-//      _promptPos = _document.getDocLength();
+//      _promptPos = _document.getLength();
 //      _hasPrompt = true;
-      forceInsertText(_document.getDocLength(), _prompt, DEFAULT_STYLE);
-      _promptPos = _document.getDocLength();
+      forceInsertText(_document.getLength(), _prompt, DEFAULT_STYLE);
+      _promptPos = _document.getLength();
       _hasPrompt = true;
        
     }
@@ -168,7 +168,7 @@ public class ConsoleDocument implements ConsoleInterface {
     acquireWriteLock();
     try {
     _hasPrompt = false;
-    _promptPos = _document.getDocLength();
+    _promptPos = _document.getLength();
     }
     finally { releaseWriteLock(); }
   }
@@ -180,7 +180,7 @@ public class ConsoleDocument implements ConsoleInterface {
     // Correct the position if necessary
     acquireWriteLock();
     try {
-      int len = _document.getDocLength();
+      int len = _document.getLength();
       if (pos > len)  pos = len;
       else if (pos < 0) pos = 0;
       
@@ -196,7 +196,7 @@ public class ConsoleDocument implements ConsoleInterface {
     acquireReadLock();
     try {
       if (_hasPrompt) return _promptPos - _prompt.length();
-      return _document.getDocLength();
+      return _document.getLength();
     }
     finally { releaseReadLock(); }
   }
@@ -246,7 +246,7 @@ public class ConsoleDocument implements ConsoleInterface {
   public void append(String str, String style) throws DocumentAdapterException {
     acquireWriteLock();
     try {
-      int offs = _document.getDocLength();
+      int offs = _document.getLength();
       _addToStyleLists(offs,str,style);
       _document.insertText(offs, str, style);
     }
@@ -298,7 +298,7 @@ public class ConsoleDocument implements ConsoleInterface {
   }
 
   /** Returns the length of the document. */
-  public int getDocLength() { return _document.getDocLength(); }
+  public int getLength() { return _document.getLength(); }
 
   /** Returns a portion of the document.
    *  @param offs First offset of the desired text
@@ -315,7 +315,7 @@ public class ConsoleDocument implements ConsoleInterface {
   public String getCurrentInput() {
     acquireReadLock();
     try {
-      try { return getDocText(_promptPos, _document.getDocLength() - _promptPos); }
+      try { return getDocText(_promptPos, _document.getLength() - _promptPos); }
       catch (DocumentAdapterException e) { throw new UnexpectedException(e); }
     }
     finally { releaseReadLock(); }
@@ -329,7 +329,7 @@ public class ConsoleDocument implements ConsoleInterface {
     acquireWriteLock();
     try {
       // Delete old value of current line
-      removeText(_promptPos, _document.getDocLength() - _promptPos);
+      removeText(_promptPos, _document.getLength() - _promptPos);
     }
     catch (DocumentAdapterException ble) { throw new UnexpectedException(ble); }
     finally { releaseWriteLock(); }

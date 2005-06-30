@@ -52,6 +52,7 @@ import edu.rice.cs.drjava.model.definitions.indent.Indenter;
 
 import edu.rice.cs.util.swing.*;
 import edu.rice.cs.util.swing.Utilities;
+import edu.rice.cs.util.text.SwingDocument;
 
 import java.awt.*;
 import javax.swing.*;
@@ -103,11 +104,11 @@ public abstract class AbstractDJPane extends JTextPane implements OptionConstant
   /** Our current paren/brace/bracket matching highlight. */
   protected HighlightManager.HighlightInfo _matchHighlight = null;
   
-  protected final StyledDocument NULL_DOCUMENT = new DefaultStyledDocument();
+  protected final SwingDocument NULL_DOCUMENT = new SwingDocument();
   
   //--------- CONSTRUCTOR ----------
   
-  AbstractDJPane(StyledDocument doc) {
+  AbstractDJPane(SwingDocument doc) {
     super(doc);
     setContentType("text/java");
   }
