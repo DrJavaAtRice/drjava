@@ -111,6 +111,7 @@ public class CompilerErrorModel<T extends CompilerError> {
         return new LinkedList<OpenDefinitionsDocument>();
       }
       public boolean hasModifiedDocuments() { return false; }
+      public boolean hasUntitledDocuments() { return false; }
       public FileGroupingState getFileGroupingState() { throw new IllegalStateException("No state to get!"); }
     };
     _errors = empty;

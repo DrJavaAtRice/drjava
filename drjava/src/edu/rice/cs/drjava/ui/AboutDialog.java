@@ -69,7 +69,7 @@ public class AboutDialog extends JDialog implements ActionListener {
     // suggested from zaq@nosi.com, to keep the frame on the screen!
     //System.out.println("Dialog created...");
   }
-
+  
   public void show() {
     // suggested from zaq@nosi.com, to keep the frame on the screen!
     Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();

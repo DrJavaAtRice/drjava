@@ -74,6 +74,9 @@ public class JavadocModelTest extends TestCase {
       public boolean hasModifiedDocuments() {
         return false;  // pretend all docs are saved
       }
+      public boolean hasUntitledDocuments() {
+        return false; // pretend no docs are untitled
+      }
     };
     JavadocModel jModel = new DefaultJavadocModel(getDocs);
     final File file = new File(System.getProperty("user.dir"));
@@ -132,6 +135,9 @@ public class JavadocModelTest extends TestCase {
     IGetDocuments getDocs = new DummyGetDocuments() {
       public boolean hasModifiedDocuments() {
         return false;  // pretend all docs are saved
+      }
+      public boolean hasUntitledDocuments() {
+        return false;  // pretent no docs are untitled
       }
     };
     JavadocModel jModel = new DefaultJavadocModel(getDocs);

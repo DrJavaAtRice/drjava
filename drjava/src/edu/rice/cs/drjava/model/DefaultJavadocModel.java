@@ -44,6 +44,7 @@ import java.util.Collection;
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.ArgumentTokenizer;
 import edu.rice.cs.util.newjvm.ExecJVM;
+import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.Configuration;
 import edu.rice.cs.drjava.config.OptionConstants;
@@ -119,18 +120,18 @@ public class DefaultJavadocModel implements JavadocModel {
    */
   public void javadocAll(DirectorySelector select, final FileSaveSelector saver, final String classpath) 
     throws IOException {
-    
-    // Only javadoc if all are saved.
-    _attemptSaveAllDocuments();
-    if (_getter.hasModifiedDocuments()) { return; }  /* abort if files remain unsaved */
+        
+    // Only javadoc if all are saved. Removed because it is already done inside suggestJavadocDestination (fixes bug where pop-up is shown twice)
+//    _attemptSaveAllDocuments();
+    if (_getter.hasModifiedDocuments() || _getter.hasUntitledDocuments()) { return; }  /* abort if files remain unsaved */
     
     // Make sure that there is at least one saved document.
     List<OpenDefinitionsDocument> docs = _getter.getOpenDefinitionsDocuments();
-    
-    for (OpenDefinitionsDocument doc: docs) {
-      if (doc.isUntitled()) return;  // ignore javadoc, since a document is still unsaved
-    }
-    
+       
+//    for (OpenDefinitionsDocument doc: docs) {
+//      if (doc.isUntitled()) return;  // ignore javadoc, since a document is still unsaved
+//    }
+//    
     Configuration config = DrJava.getConfig();
     File destDir = config.getSetting(OptionConstants.JAVADOC_DESTINATION);
     
@@ -403,7 +404,7 @@ public class DefaultJavadocModel implements JavadocModel {
    */
   private void _attemptSaveAllDocuments() {
     // Only javadoc if all are saved.
-    if (_getter.hasModifiedDocuments()) _notifier.saveBeforeJavadoc();
+    if (_getter.hasModifiedDocuments() || _getter.hasUntitledDocuments()) _notifier.saveBeforeJavadoc();
   }
 
   /**

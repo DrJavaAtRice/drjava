@@ -79,9 +79,11 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
   private JButton _replaceFindNextButton;
   private JButton _replaceFindPreviousButton;
   private JButton _replaceAllButton;
-  private JLabel _findLabel;
-  private JLabel _replaceLabel;
-  private JTextPane _findField = new JTextPane(new SwingDocument());
+  private JLabel _findLabelTop;
+  private JLabel _findLabelBot;
+  private JLabel _replaceLabelTop;
+  private JLabel _replaceLabelBot;
+  private JTextPane _findField = new JTextPane(new DefaultStyledDocument());
   private BorderlessScrollPane _findPane = new BorderlessScrollPane(_findField);
   private JTextPane _replaceField = new JTextPane(new SwingDocument());
   private BorderlessScrollPane _replacePane = new BorderlessScrollPane(_replaceField);
@@ -129,7 +131,7 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
   private Action _findFieldSwitchFocusForwardAction = new TextAction ("Switch Focus from Find Field") {    
     public void actionPerformed(ActionEvent ae) {
       _findField.getNextFocusableComponent().requestFocusInWindow();
-    }
+    } //Added findPrevious button which replaces the SearchBackwards CheckBox by actually e
   };
   
   //Action to move to switch focus when pressing the Tab key inside the _replaceField.
@@ -222,6 +224,51 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
     _replaceFindPreviousAction.setEnabled(false);
 
     // set up the layout
+    
+    /******** Text Field Initializations ********/
+    // Sets font for the "Find" field
+    Font font = DrJava.getConfig().getSetting(FONT_MAIN);
+    setFieldFont(font);
+
+    // Create the Structure for the replace label
+    _replaceLabelTop = new JLabel("Replace", SwingConstants.RIGHT);
+    _replaceLabelBot = new JLabel("With", SwingConstants.RIGHT);
+    
+    JPanel replaceLabelPanelTop = new JPanel(new BorderLayout(5,5));
+    JPanel replaceLabelPanelBot = new JPanel(new BorderLayout(5,5));
+    JPanel replaceLabelPanel = new JPanel(new GridLayout(2,1));
+    
+    replaceLabelPanelTop.add(_replaceLabelTop, BorderLayout.SOUTH);
+    replaceLabelPanelBot.add(_replaceLabelBot, BorderLayout.NORTH);
+    
+    replaceLabelPanel.add(replaceLabelPanelTop);
+    replaceLabelPanel.add(replaceLabelPanelBot);
+    
+    
+    // Create the stucture for the find label
+    _findLabelTop = new JLabel("Find", SwingConstants.RIGHT);
+    _findLabelBot = new JLabel("Next", SwingConstants.RIGHT);
+    
+    JPanel findLabelPanelTop = new JPanel(new BorderLayout(5,5));
+    JPanel findLabelPanelBot = new JPanel(new BorderLayout(5,5));
+    JPanel findLabelPanel = new JPanel(new GridLayout(2,1));
+    
+    findLabelPanelTop.add(_findLabelTop, BorderLayout.SOUTH);
+    findLabelPanelBot.add(_findLabelBot, BorderLayout.NORTH);
+    
+    findLabelPanel.add(findLabelPanelTop);
+    findLabelPanel.add(findLabelPanelBot);                     
+
+    
+//    // need separate label and field panels so that the find and
+//    // replace textfields line up
+//    _labelPanel = new JPanel(new GridLayout(2,1));
+//    _labelPanel.add(_findLabel);
+//    _labelPanel.add(_replaceLabel);
+//    _labelPanel.setBorder(new EmptyBorder(0,5,0,5)); // 5 pix on sides
+//    _labelPanel.setFocusable(false);
+    
+    /******** Button Panel ********/
     JPanel buttons = new JPanel();
     buttons.setLayout(new GridLayout(1,0,5,0));
     buttons.add(_findNextButton);
@@ -230,28 +277,6 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
     buttons.add(_replaceFindPreviousButton);
     buttons.add(_replaceButton);
     buttons.add(_replaceAllButton);
-    
-
-    /******** Text Field Initializations ********/
-    // Sets font for the "Find" field
-    Font font = DrJava.getConfig().getSetting(FONT_MAIN);
-    setFieldFont(font);
-
-    // Create the Labels
-    _findLabel = new JLabel("Find Next", SwingConstants.LEFT);
-    _findLabel.setHorizontalAlignment(SwingConstants.LEFT);
-
-    _replaceLabel = new JLabel("Replace With", SwingConstants.LEFT);
-    _replaceLabel.setHorizontalAlignment(SwingConstants.LEFT);
-    
-
-    // need separate label and field panels so that the find and
-    // replace textfields line up
-    _labelPanel = new JPanel(new GridLayout(2,1));
-    _labelPanel.add(_findLabel);
-    _labelPanel.add(_replaceLabel);
-    _labelPanel.setBorder(new EmptyBorder(0,5,0,5)); // 5 pix on sides
-    _labelPanel.setFocusable(false);
    
     
     /******** Listeners for the right-hand check boxes ********/
@@ -290,39 +315,65 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
     _lowerCheckPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
     _lowerCheckPanel.add(_matchWholeWord); 
     _lowerCheckPanel.add(_ignoreCommentsAndStrings);
+    _lowerCheckPanel.setMaximumSize(new Dimension(1000, 40));
 
     _matchCaseAndAllDocsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
     _matchCaseAndAllDocsPanel.add(_matchCase);
-    _matchCaseAndAllDocsPanel.add(_searchAllDocuments); 
+    _matchCaseAndAllDocsPanel.add(_searchAllDocuments);
+    _matchCaseAndAllDocsPanel.setMaximumSize(new Dimension(1000, 40));
     _searchAllDocuments.setSelected(false);
-    
-    
-    /******** Set up the Panel containing the Text Fields ********/
-    JPanel fieldsPanel = new JPanel(new GridLayout(2,1));
-    fieldsPanel.add(_findPane);
-    fieldsPanel.add(_replacePane);
 
+
+    _findPane.setHorizontalScrollBarPolicy(BorderlessScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+    _replacePane.setHorizontalScrollBarPolicy(BorderlessScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+    
+    JPanel findPanel = new JPanel(new BorderLayout(5,5));
+    findPanel.add(findLabelPanel, BorderLayout.WEST);
+    findPanel.add(_findPane, BorderLayout.CENTER);
+//    findPanel.add(Box.createVerticalGlue());
+    
+    JPanel replacePanel = new JPanel(new BorderLayout(5,5));
+    replacePanel.add(replaceLabelPanel, BorderLayout.WEST);
+    replacePanel.add(_replacePane, BorderLayout.CENTER);
+//    replacePanel.add(Box.createVerticalGlue());
+        
+    /******** Set up the Panel containing the Text Fields ********/
+    JPanel leftPanel = new JPanel(new GridLayout(1,2,5,5));
+    leftPanel.add(findPanel);
+    leftPanel.add(replacePanel);
 
     /******** Set up the Panel containing both rows of checkboxes ********/
-    JPanel optionsPanel = new JPanel(new GridLayout(2,1));
+    Box optionsPanel = new Box(BoxLayout.Y_AXIS);
     optionsPanel.add(_matchCaseAndAllDocsPanel);
     optionsPanel.add(_lowerCheckPanel);
+    optionsPanel.add(Box.createGlue());
 
 
     /******** Set upt the Panel containing the two above main panels ********/
     JPanel midPanel = new JPanel(new BorderLayout(5,5));
-    midPanel.add(fieldsPanel, BorderLayout.CENTER);
+    midPanel.add(leftPanel, BorderLayout.CENTER);
     midPanel.add(optionsPanel, BorderLayout.EAST);
     
     
     /******** Set upt the Panel containing the midPanel and the closePanel ********/
     _rightPanel = new JPanel(new BorderLayout(5, 5));
     _rightPanel.add(midPanel, BorderLayout.CENTER);
-    _rightPanel.add(_closePanel, BorderLayout.EAST);    
+    _rightPanel.add(_closePanel, BorderLayout.EAST); 
+    
+    JPanel newPanel = new JPanel();
+    newPanel.setLayout(new BoxLayout(newPanel, BoxLayout.Y_AXIS));
+    newPanel.add(_rightPanel);
+    newPanel.add(Box.createVerticalStrut(5));
+    newPanel.add(buttons);
+    newPanel.add(Box.createVerticalStrut(5));
+    
+    this.setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
+    this.add(Box.createHorizontalStrut(5));
+    this.add(newPanel);
 
 
     /******* Put all the main panels onto the Find/Replace tab ********/
-    hookComponents(this, _rightPanel, _labelPanel, buttons);
+//    hookComponents(this, _rightPanel, new JPanel(), buttons);
     
 
     /******** Set the Tab order ********/
@@ -372,6 +423,7 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
             _machine.positionChanged();
             if (_findField.getText().equals("")) _replaceAllAction.setEnabled(false);
             else                                 _replaceAllAction.setEnabled(true);
+            updateUI();
           }
         });
       }
@@ -499,7 +551,7 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
   private Action _findNextAction = new AbstractAction("Find Next") {
     public void actionPerformed(ActionEvent e) {
       _machine.setSearchBackwards(false);
-      _findLabel.setText("Find Next");
+      _findLabelBot.setText("Next");
       findNext();
       _findField.requestFocusInWindow();
     }
@@ -508,7 +560,7 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
   private Action _findPreviousAction =  new AbstractAction("Find Previous") {
     public void actionPerformed(ActionEvent e) {
       _machine.setSearchBackwards(true);
-      _findLabel.setText("Find Prev");
+      _findLabelBot.setText("Prev");
       findNext();
       _findField.requestFocusInWindow();
     }
@@ -599,7 +651,7 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
   private Action _replaceFindNextAction = new AbstractAction("Replace/Find Next") {
     public void actionPerformed(ActionEvent e) {
       if (getSearchBackwards() == true) {
-        _findLabel.setText("Find Next");
+        _findLabelBot.setText("Next");
         setSearchBackwards(false);
         _machine.positionChanged();
         findNext();
@@ -631,7 +683,7 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
   private Action _replaceFindPreviousAction = new AbstractAction("Replace/Find Previous") {
     public void actionPerformed(ActionEvent e) {
       if (getSearchBackwards() == false) {
-        _findLabel.setText("Find Prev");
+        _findLabelBot.setText("Prev");
         setSearchBackwards(true);
         _machine.positionChanged();
         findNext();

@@ -1871,11 +1871,10 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
   }
 
   /**
-   * Checks if any open definitions documents have been modified
-   * since last being saved.
+   * Checks if any open definitions documents have been modified since last being saved.
    * @return whether any documents have been modified
    */
-  public boolean hasModifiedDocuments() {
+  public boolean hasModifiedDocuments() { 
     OpenDefinitionsDocument[] docs;
     
     synchronized(_documentsRepos) { docs = _documentsRepos.toArray(new OpenDefinitionsDocument[0]); }
@@ -1884,6 +1883,21 @@ public abstract class DefaultGlobalModel implements GlobalModel, OptionConstants
     }
     return false;
   }
+  
+  /**
+   * Checks if any open definitions documents are untitled.
+   * @return whether any documents are untitled
+   */
+  public boolean hasUntitledDocuments() {
+    OpenDefinitionsDocument[] docs;
+    
+    synchronized(_documentsRepos) { docs = _documentsRepos.toArray(new OpenDefinitionsDocument[0]); }
+    for (OpenDefinitionsDocument doc: docs) { 
+      if (doc.isUntitled()) return true;  
+    }
+    return false;
+  }
+  
 
   /**
    * 

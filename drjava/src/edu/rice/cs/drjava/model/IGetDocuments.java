@@ -74,6 +74,11 @@ public interface IGetDocuments {
    */
   public boolean hasModifiedDocuments();
   
+  /** Checks if any open definitions documents are untitled.
+   *  @return whether any documents are untitled
+   */
+  public boolean hasUntitledDocuments();
+  
   /** Gets the project state. */
   public FileGroupingState getFileGroupingState();
 }

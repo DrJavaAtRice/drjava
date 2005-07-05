@@ -50,6 +50,7 @@ import javax.swing.text.Document;
 import java.util.List;
 
 import edu.rice.cs.drjava.model.definitions.indent.Indenter;
+import edu.rice.cs.util.swing.Utilities;
 
 /**
  * Tests the indenting functionality on the level of the GlobalModel.

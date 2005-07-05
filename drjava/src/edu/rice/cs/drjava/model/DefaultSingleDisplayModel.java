@@ -94,18 +94,18 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel implements Sin
   /** Initiates this SingleDisplayModel.  Should only be called from the constructor. */
   private void _init() {
     final NodeDataVisitor<Boolean> _gainVisitor = new NodeDataVisitor<Boolean>() {
-      public Boolean itemCase(INavigatorItem docu) {
+      public Boolean itemCase(final INavigatorItem docu) {
         _setActiveDoc(docu);  // sets _activeDocument, the shadow copy of the active document
 //        Utilities.showDebug("Setting the active doc done");
         File dir = _activeDocument.getParentDirectory();
         
         if (dir != null) {  
-        /* If the file is in External or Auxiliary Files then then we do not want to change our project directory
-         * to something outside the project. */
+          /* If the file is in External or Auxiliary Files then then we do not want to change our project directory
+           * to something outside the project. */
           _activeDirectory = dir;
           _notifier.currentDirectoryChanged(_activeDirectory);
         }
-        return Boolean.valueOf(true); 
+        return Boolean.valueOf(true);
       }
       public Boolean fileCase(File f) {
         if (! f.isAbsolute()) {
@@ -120,7 +120,7 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel implements Sin
     };
     
     _documentNavigator.addNavigationListener(new INavigationListener() {
-      public void gainedSelection(NodeData dat) { dat.execute(_gainVisitor); }
+      public void gainedSelection(NodeData dat) { dat.execute(_gainVisitor);}
       public void lostSelection(NodeData dat) {
         // not important, only one document selected at a time
       }
@@ -160,12 +160,10 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel implements Sin
 //    Utilities.showDebug("DEBUG: Called setActiveDocument()");
 
     Runnable command = new Runnable() {  
-      public void run() {_documentNavigator.setActiveDoc(doc);} 
-    };
+      public void run() { _documentNavigator.setActiveDoc(doc); } };
     try {Utilities.invokeAndWait(command); }  // might be relaxed to invokeLater
     catch(Exception e) { throw new UnexpectedException(e); } 
-//    try { _documentNavigator.setActiveDoc(doc); } 
-//    catch(DocumentClosedException dce) { 
+
 //      /* do nothing; findbugs signals a bug unless this catch clause spans more than two lines */
 //  }
   }
@@ -387,8 +385,9 @@ public class DefaultSingleDisplayModel extends DefaultGlobalModel implements Sin
   }
   
   private synchronized void _setActiveDoc(INavigatorItem idoc) {
-      _activeDocument = (OpenDefinitionsDocument) idoc;  // FIX THIS!
-      refreshActiveDocument();
+    _activeDocument = (OpenDefinitionsDocument) idoc;  // FIX THIS!
+    refreshActiveDocument();
+
   }
   
   /** Invokes the activeDocumentChanged method in the global listener on the argument _activeDocument.  This process sets up

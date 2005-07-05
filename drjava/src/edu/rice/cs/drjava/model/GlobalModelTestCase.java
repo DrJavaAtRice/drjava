@@ -123,6 +123,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     String user = System.getProperty("user.name");
     _tempDir = FileOps.createTempDirectory("DrJava-test-" + user);
 //    FileOps.deleteDirectoryOnExit(_tempDir);
+//    _model.getOpenDefinitionsDocuments().get(0).saveFile(new FileSelector(new File(_tempDir, "blank document")));
     super.setUp();
   }
 
@@ -220,7 +221,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     assertModified(false, doc);
 
     changeDocumentText(text, doc);
-    _model.removeListener(listener);
+    _model.removeListener(listener); 
 
     return doc;
   }

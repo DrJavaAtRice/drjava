@@ -54,6 +54,8 @@ import javax.swing.text.Position;
 
 import edu.rice.cs.drjava.model.compiler.*;
 
+import edu.rice.cs.util.swing.Utilities;
+
 /** Tests to ensure that compilation fails when expected, and that the errors
  *  are reported correctly.
  *
@@ -93,7 +95,12 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
   private static final String BAR_MISSING_SEMI_TEXT_MULTIPLE_LINES =
     "class DrJavaTestFoo {\n  int a = 5;\n  int x\n }";
   
-
+//  /** Overrides setUp in order to save the Untitled file that resides in the model currently, so that saveBeforeCompile will not cause a failure*/
+//  public void setUp() throws IOException{
+//    super.setUp();
+//    _model.getOpenDefinitionsDocuments().get(0).saveFile(new FileSelector(new File(_tempDir, "blank document")));
+//  }
+  
   /** Overrides {@link TestCase#runBare} to interatively run this test case for each compiler, without resetting
    *  the interactions JVM.  This method is called once per test method, and it magically invokes the method.
    */
@@ -122,20 +129,25 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
    * As the test is then run one time per compiler it can find. 
    */
   public void testCompileAllFailsDifferentSourceRoots() throws BadLocationException, IOException {
-
+    
     File aDir = new File(_tempDir, "a");
     File bDir = new File(_tempDir, "b");
     aDir.mkdir();
     bDir.mkdir();
+    
+    
     OpenDefinitionsDocument doc = setupDocument(FOO_MISSING_CLOSE_TEXT);
     final File file = new File(aDir, "DrJavaTestFoo.java");
     doc.saveFile(new FileSelector(file));
     OpenDefinitionsDocument doc2 = setupDocument(BAR_MISSING_SEMI_TEXT);
     final File file2 = new File(bDir, "DrJavaTestBar.java");
+    
     doc2.saveFile(new FileSelector(file2));
+
     _compileDone = false;
     _model.addListener(_failListener);
-    CompilerModel cm = _model.getCompilerModel();
+    
+    CompilerModel cm = _model.getCompilerModel();    
     cm.compileAll();
     _waitCompileDone();
     assertCompileErrorsPresent(_name(), true);
@@ -244,7 +256,7 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
     _model.removeListener(_failListener);
   }
   
-  
+   
 
   /** Tests the compiler errors have the correct line numbers.
    *  TODO: rewrite this test for the new error model interface
@@ -259,8 +271,7 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
     doc.saveFile(new FileSelector(file));
     OpenDefinitionsDocument doc2 = setupDocument(BAR_MISSING_SEMI_TEXT_MULTIPLE_LINES);
     final File file2 = new File(bDir, "DrJavaTestBar.java");
-    doc2.saveFile(new FileSelector(file2));
-
+    doc2.saveFile(new FileSelector(file2));    
     _compileDone = false;
     _model.addListener(_failListener);
     CompilerModel cm = _model.getCompilerModel();
