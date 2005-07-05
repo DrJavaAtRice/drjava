@@ -96,26 +96,30 @@ class JListNavigator extends JList implements IDocumentNavigator {
       /** Called when the list value has changed. Should only run in the event thread.
        *  @param e the event corresponding to the change
        */
-      public void valueChanged(ListSelectionEvent e) {
-        if (!e.getValueIsAdjusting() && !_model.isEmpty()) {
-          final INavigatorItem newItem = (INavigatorItem) getSelectedValue();
-          final int newIndex = getSelectedIndex();
-          if (_current != newItem) {
-            final INavigatorItem oldItem = _current;
-            NodeData oldData = new NodeData() {
-              public <T> T execute(NodeDataVisitor<T> v) { return v.itemCase(oldItem); }
-            };
-            NodeData newData = new NodeData() {
-              public <T> T execute(NodeDataVisitor<T> v) { return v.itemCase(newItem); }
-            };
-            for(INavigationListener listener: navListeners) {
-              if (oldItem != null) listener.lostSelection(oldData);
-              if (newItem != null) listener.gainedSelection(newData);
+      public void valueChanged(final ListSelectionEvent e) {
+        Utilities.invokeLater( new Runnable() {
+          public void run() {
+            if (!e.getValueIsAdjusting() && !_model.isEmpty()) {
+              final INavigatorItem newItem = (INavigatorItem) getSelectedValue();
+              final int newIndex = getSelectedIndex();
+              if (_current != newItem) {
+                final INavigatorItem oldItem = _current;
+                NodeData oldData = new NodeData() {
+                  public <T> T execute(NodeDataVisitor<T> v) { return v.itemCase(oldItem); }
+                };
+                NodeData newData = new NodeData() {
+                  public <T> T execute(NodeDataVisitor<T> v) { return v.itemCase(newItem); }
+                };
+                for(INavigationListener listener: navListeners) {
+                  if (oldItem != null) listener.lostSelection(oldData);
+                  if (newItem != null) listener.gainedSelection(newData);
+                }
+                _current = newItem;
+                _currentIndex = newIndex;
+              }
             }
-            _current = newItem;
-            _currentIndex = newIndex;
           }
-        }
+        });
       }
     });
     
@@ -212,7 +216,7 @@ class JListNavigator extends JList implements IDocumentNavigator {
       if (_current == doc) return; // doc is already _current (the active doc)
       if (_model.contains(doc)) {
         setSelectedValue(doc, true);   
-        //_current = doc;  // already done by ListSelectionEvent listener created in init()
+//        _current = doc;  // already done by ListSelectionEvent listener created in init()
       }
     }
   }
