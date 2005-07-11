@@ -92,7 +92,7 @@ public class HTMLFrame extends JFrame {
     }
   };
 
-  private static class HistoryList {
+  protected static class HistoryList {
     private HistoryList next = null;
     private final HistoryList prev;
     protected final URL contents;

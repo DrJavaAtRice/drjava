@@ -740,8 +740,10 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
 //          Utilities.showDebug("Indenting line at offset " + selStart);
           if (_indentLine(reason)) {
             setCurrentLocation(oldCurrentPosition.getOffset());
-            int space = getWhiteSpace();
-            move(space);
+            if (onlyWhiteSpaceBeforeCurrent()) {
+              int space = getWhiteSpace();
+              move(space);
+            }
           }
         }
         else _indentBlock(selStart, selEnd, reason, pm);
@@ -1263,6 +1265,30 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
       i++;
     return  i;
   }
+  
+  /** Returns true if the current line has only white space before the current location. Serves as a check so that
+   * indentation will only move the caret when it is at or before the "smart" beginning of a line (i.e. the first
+   * non-whitespace character
+   * @return true if there are only whitespace characters before the current location on the current line.
+   */
+  private boolean onlyWhiteSpaceBeforeCurrent() throws BadLocationException{
+    String text = this.getText(0, _currentLocation);
+    //get the text after the previous new line, but before the current location
+    text = text.substring(text.lastIndexOf("\n")+1);
+    
+    //check all positions in the new text to determine if there are any non-whitespace chars
+    int index = text.length()-1;
+    char lastChar = ' ';
+    while(lastChar == ' ' && index >= 0){
+      lastChar = text.charAt(index);
+      index--;
+    }
+    
+    if (index < 0) return true;
+    return false;
+  }
+      
+                          
   
   /** Sets text between previous newline and first non-whitespace character of line containing pos to tab.
    *  @param tab String to be placed between previous newline and first

@@ -463,8 +463,9 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
       _insertErrors(doc);
       setDocument(doc);
       
-      // Select the first error
-      getErrorListPane().switchToError(0);
+      // Select the first error if there are some errors (i.e. does not select if there are only warnings)
+      if (!getErrorModel().hasOnlyWarnings())
+        getErrorListPane().switchToError(0);
     }
     
     /** Returns true if there is an error after the selected error. */

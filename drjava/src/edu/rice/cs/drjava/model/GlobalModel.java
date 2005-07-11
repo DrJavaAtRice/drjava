@@ -42,6 +42,7 @@ import java.util.Vector;
 import java.net.URL;
 
 import edu.rice.cs.util.ClasspathVector;
+import edu.rice.cs.util.text.AbstractDocumentInterface;
 import edu.rice.cs.util.swing.DocumentIterator;
 import edu.rice.cs.util.docnavigation.IDocumentNavigator;
 
@@ -446,6 +447,10 @@ public interface GlobalModel extends IGetDocuments, ILoadDocuments {
    * Returns the document count
    */
   public int getDocumentCount();
+  
+  /** Returnt an OOD given an AbstractDocumentInterface */
+  /**CHECK IF NEEDED! */
+  public OpenDefinitionsDocument getODDForDocument(AbstractDocumentInterface doc);
   
   /**
    * returns a list of OpenDefinitionsDocuments that do not belong

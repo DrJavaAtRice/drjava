@@ -46,22 +46,24 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.ui;
 
 import java.util.Hashtable;
+
 import java.awt.*;
 import java.awt.event.*;
+
 import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.text.*;
 import javax.swing.border.EmptyBorder;
 
-
+import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.model.SingleDisplayModel;
 import edu.rice.cs.drjava.model.DefaultSingleDisplayModel;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
-import edu.rice.cs.drjava.DrJava;
-import edu.rice.cs.drjava.config.*;
+import edu.rice.cs.drjava.model.FindReplaceMachine;
+import edu.rice.cs.drjava.model.FindResult;
+
 import edu.rice.cs.util.swing.BorderlessScrollPane;
-import edu.rice.cs.util.swing.FindReplaceMachine;
-import edu.rice.cs.util.swing.FindResult;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.text.AbstractDocumentInterface;
 import edu.rice.cs.util.text.SwingDocument;
@@ -120,10 +122,7 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
   
   //Action to replace the newLine defaultAction when pressing the Enter key inside the _findField.
   private Action _findEnterAction = new TextAction ("Find on Pressing Enter") {    
-    public void actionPerformed(ActionEvent ae) {
-      findNext();
-      _findField.requestFocusInWindow();
-    }
+    public void actionPerformed(ActionEvent ae) { _doFind(); }
   };
   
   
@@ -165,7 +164,7 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
     super(frame, "Find/Replace");
     _model = model;
     _mainframe = frame;
-    _machine = new FindReplaceMachine(_model.getDocumentIterator());
+    _machine = new FindReplaceMachine(_model, _model.getDocumentIterator());
     _updateMachine();
 
     int i = WHEN_ANCESTOR_OF_FOCUSED_COMPONENT;
@@ -500,8 +499,20 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
   JTextPane getFindField() { return _findField; }
 
   /** Called when user the activates "find next" command.  Package visibility to accommodate calls from MainFrame. */
-  void findNext() { if (_findField.getText().length() > 0) _doFind(); }
-
+  void findNext() { 
+    _machine.setSearchBackwards(false);
+    _findLabelTop.setText("Find");
+    _findLabelBot.setText("Next");
+    _doFind();
+  }
+  
+  /** Called when user the activates "find previous" command.  Package visibility to accommodate calls from MainFrame. */
+  void findPrevious() {
+    _machine.setSearchBackwards(true);
+    _findLabelBot.setText("Prev");
+    _doFind();
+  }
+  
   /** Called from MainFrame in response to opening this or changes in the active document. */
   void beginListeningTo(DefinitionsPane defPane) {
     if (_defPane==null) {
@@ -549,82 +560,75 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
 
   /** The action performed when searching forwards */
   private Action _findNextAction = new AbstractAction("Find Next") {
-    public void actionPerformed(ActionEvent e) {
-      _machine.setSearchBackwards(false);
-      _findLabelBot.setText("Next");
-      findNext();
-      _findField.requestFocusInWindow();
-    }
+    public void actionPerformed(ActionEvent e) { findNext(); }
   };
   
   private Action _findPreviousAction =  new AbstractAction("Find Previous") {
-    public void actionPerformed(ActionEvent e) {
-      _machine.setSearchBackwards(true);
-      _findLabelBot.setText("Prev");
-      findNext();
-      _findField.requestFocusInWindow();
-    }
+    public void actionPerformed(ActionEvent e) { findPrevious(); }
   };
                                                             
   /** Abstracted out since this is called from find and replace/find. */
   private void _doFind() {
-    _updateMachine();
-    _machine.setFindWord(_findField.getText());
-    _machine.setReplaceWord(_replaceField.getText());
-    _mainframe.clearStatusMessage(); // _message.setText(""); // JL
-    
-    // FindResult contains the document that the result was found in, offset to the next occurrence of 
-    // the string, and a flag indicating whether the end of the document was wrapped around while searching
-    // for the string.
-    FindResult fr = _machine.findNext();
-    AbstractDocumentInterface doc = fr.getDocument();
-    OpenDefinitionsDocument matchDoc = ((DefaultSingleDisplayModel) _model).getODDForDocument(doc);
-    OpenDefinitionsDocument openDoc = _defPane.getOpenDefDocument();
-
-    final int pos = fr.getFoundOffset();
-    
-    // If there actually *is* a match, then switch active documents. otherwise don't
-    if (pos != -1) { // found a match
-      Caret c = _defPane.getCaret();
-      c.setDot(c.getDot());
-      
-      if (! matchDoc.equals(openDoc)) _model.setActiveDocument(matchDoc);  // set active doc if matchDoc != openDoc
-      else _model.refreshActiveDocument();  // re-establish openDoc (which is the _activeDocument) as active
-   
-      _defPane.setCaretPosition(pos);
-      _caretChanged = true;
+    if (_findField.getText().length() > 0) {
       _updateMachine();
+      _machine.setFindWord(_findField.getText());
+      _machine.setReplaceWord(_replaceField.getText());
+      _mainframe.clearStatusMessage(); // _message.setText(""); // JL
+      
+      // FindResult contains the document that the result was found in, offset to the next occurrence of 
+      // the string, and a flag indicating whether the end of the document was wrapped around while searching
+      // for the string.
+      FindResult fr = _machine.findNext();
+      AbstractDocumentInterface doc = fr.getDocument();
+      OpenDefinitionsDocument matchDoc = ((DefaultSingleDisplayModel) _model).getODDForDocument(doc);
+      OpenDefinitionsDocument openDoc = _defPane.getOpenDefDocument();
+      
+      final int pos = fr.getFoundOffset();
+      
+      // If there actually *is* a match, then switch active documents. otherwise don't
+      if (pos != -1) { // found a match
+        Caret c = _defPane.getCaret();
+        c.setDot(c.getDot());
+        
+        if (! matchDoc.equals(openDoc)) _model.setActiveDocument(matchDoc);  // set active doc if matchDoc != openDoc
+        else _model.refreshActiveDocument();  // re-establish openDoc (which is the _activeDocument) as active
+        
+        _defPane.setCaretPosition(pos);
+        _caretChanged = true;
+        _updateMachine();
+      }
+      
+      if (fr.getWrapped() && !_machine.getSearchAllDocuments()) {
+        Toolkit.getDefaultToolkit().beep();
+        if (!_machine.getSearchBackwards()) _mainframe.setStatusMessage("Search wrapped to beginning.");
+        else  _mainframe.setStatusMessage("Search wrapped to end.");
+      }
+      
+      if (fr.getAllDocsWrapped() && _machine.getSearchAllDocuments()) {
+        Toolkit.getDefaultToolkit().beep();
+        _mainframe.setStatusMessage("Search wrapped around all documents.");
+      }
+      
+      if (pos >= 0) {
+        _selectFoundItem();
+        
+        _replaceAction.setEnabled(true);
+        _replaceFindNextAction.setEnabled(true);
+        _replaceFindPreviousAction.setEnabled(true);
+        _machine.setLastFindWord();
+      }
+      // else the entire document was searched and no instance of the string
+      // was found. display at most 50 characters of the non-found string
+      else {
+        Toolkit.getDefaultToolkit().beep();
+        StringBuffer statusMessage = new StringBuffer("Search text \"");
+        if (_machine.getFindWord().length() <= 50) statusMessage.append(_machine.getFindWord());
+        else statusMessage.append(_machine.getFindWord().substring(0, 49) + "...");
+        statusMessage.append("\" not found.");
+        _mainframe.setStatusMessage(statusMessage.toString());
+      }
     }
-
-    if (fr.getWrapped() && !_machine.getSearchAllDocuments()) {
-      Toolkit.getDefaultToolkit().beep();
-      if (!_machine.getSearchBackwards()) _mainframe.setStatusMessage("Search wrapped to beginning.");
-      else  _mainframe.setStatusMessage("Search wrapped to end.");
-    }
-    
-    if (fr.getAllDocsWrapped() && _machine.getSearchAllDocuments()) {
-      Toolkit.getDefaultToolkit().beep();
-      _mainframe.setStatusMessage("Search wrapped around all documents.");
-    }
-    
-    if (pos >= 0) {
-      _selectFoundItem();
-
-      _replaceAction.setEnabled(true);
-      _replaceFindNextAction.setEnabled(true);
-      _replaceFindPreviousAction.setEnabled(true);
-      _machine.setLastFindWord();
-    }
-    // else the entire document was searched and no instance of the string
-    // was found. display at most 50 characters of the non-found string
-    else {
-      Toolkit.getDefaultToolkit().beep();
-      StringBuffer statusMessage = new StringBuffer("Search text \"");
-      if (_machine.getFindWord().length() <= 50) statusMessage.append(_machine.getFindWord());
-      else statusMessage.append(_machine.getFindWord().substring(0, 49) + "...");
-      statusMessage.append("\" not found.");
-      _mainframe.setStatusMessage(statusMessage.toString());
-    }
+    _findField.requestFocusInWindow();
   }
 
   
@@ -651,8 +655,6 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
   private Action _replaceFindNextAction = new AbstractAction("Replace/Find Next") {
     public void actionPerformed(ActionEvent e) {
       if (getSearchBackwards() == true) {
-        _findLabelBot.setText("Next");
-        setSearchBackwards(false);
         _machine.positionChanged();
         findNext();
       }
@@ -683,10 +685,8 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
   private Action _replaceFindPreviousAction = new AbstractAction("Replace/Find Previous") {
     public void actionPerformed(ActionEvent e) {
       if (getSearchBackwards() == false) {
-        _findLabelBot.setText("Prev");
-        setSearchBackwards(true);
         _machine.positionChanged();
-        findNext();
+        findPrevious();
       }
       _updateMachine();
       _machine.setFindWord(_findField.getText());
@@ -699,7 +699,7 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
       // and finds the previous word
       if (replaced) {
         _selectReplacedItem(replaceWord.length());
-        findNext();
+        findPrevious();
         _replaceFindPreviousButton.requestFocusInWindow();
       }
       else {

@@ -605,9 +605,8 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     int afterCommentEnd = end;
     writeLock();
     try {
-      // Keep marker at the end. This Position will be the
-      // correct endpoint no matter how we change the doc
-      // doing the indentLine calls.
+      // Keep marker at the end. This Position will be the correct endpoint no matter how we change the doc doing the
+      // indentLine calls.
       final Position endPos = this.createPosition(end);
       // Iterate, line by line, until we get to/past the end
       int walker = start;
@@ -715,7 +714,6 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   }
 
   /** Uncomments a single line.  This simply looks for a leading "//".
-   *  Also indents the line, once the comments have been removed.
    *  @pre theads hold this.writeLock() and _reduced lock
    */
   private int _uncommentLine() throws BadLocationException {
@@ -742,7 +740,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     // If a wing comment wasn't found, or if the wings aren't the first
     // non-whitespace characters on the line, do nothing.
     if (pos >= 0 && goodWing) {
-      // Otherwise, remove the wings and indent.
+      // Otherwise, remove the wings.
       remove(lineStart + pos, 2);
       //_indentLine(Indenter.OTHER);
       return WING_COMMENT_OFFSET;

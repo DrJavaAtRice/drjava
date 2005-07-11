@@ -55,7 +55,7 @@ import edu.rice.cs.util.Log;
  *
  * @version $Id$
  */
-public final class SingleDisplayModelTest extends GlobalModelTestCase {
+public class SingleDisplayModelTest extends GlobalModelTestCase {
   /** Cached copy of the model, typed more strongly than _model. */
   protected DefaultSingleDisplayModel _sdModel;
 

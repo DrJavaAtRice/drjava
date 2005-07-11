@@ -628,8 +628,12 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     JMenuItem commentLinesItem = new JMenuItem("Comment Line(s)");
     commentLinesItem.addActionListener ( new AbstractAction() {
       public void actionPerformed( ActionEvent ae) {
-        _doc.setCurrentLocation(getCaretPosition());
-        _commentLines();
+        _mainFrame.hourglassOn();
+        try{
+          _doc.setCurrentLocation(getCaretPosition());
+          _commentLines();
+        }
+        finally{ _mainFrame.hourglassOff(); }
       }
     });
     _popMenu.add(commentLinesItem);
@@ -1128,7 +1132,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
   }
 
   /** The undo action. */
-  private class UndoAction extends AbstractAction {
+  public class UndoAction extends AbstractAction {
     
     /** Constructor. */
     private UndoAction() {
@@ -1177,7 +1181,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
   }
 
   /** Redo action. */
-  private class RedoAction extends AbstractAction {
+  public class RedoAction extends AbstractAction {
 
     /** Constructor. */
     private RedoAction() {

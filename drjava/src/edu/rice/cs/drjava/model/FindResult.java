@@ -43,48 +43,46 @@
  * 
 END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava;
+package edu.rice.cs.drjava.model;
 
-import java.util.Date;
-import java.text.SimpleDateFormat;
+import edu.rice.cs.util.text.AbstractDocumentInterface;
 
 /**
- * This interface hold the information about this build of DrJava.
- * This file is copied to Version.java by the build process, which also
- * fills in the right values of the date and time.
- *
- * This javadoc corresponds to build drjava-20050711-2136;
+ * Returned to FindMachineDialog with the location of the found string
+ * (or -1 if the string was not found) as well as a flag indicating
+ * whether the machine wrapped around the end of the document.
  *
  * @version $Id$
  */
-public abstract class Version {
+public class FindResult {
+  private AbstractDocumentInterface _document;
+  private int _foundoffset;
+  private boolean _wrapped;
+  private boolean _allDocsWrapped;
+  
   /**
-   * This string will be automatically expanded upon "ant commit".
-   * Do not edit it by hand!
+   * Constructor for a FindResult.
+   * @param document the document where the found instance is located
+   * @param foundOffset the offset of the instance found
+   * @param wrapped true if the search wrapped to the beginning (or end) of the document
+   * @param allDocumentsWrapped true if the search wrapped to the start document
    */
-  private static final String BUILD_TIME_STRING = "20050711-2136";
-
-  /** A {@link Date} version of the build time. */
-  private static final Date BUILD_TIME = _getBuildDate();
-
-  public static String getBuildTimeString() {
-    return BUILD_TIME_STRING;
+  public FindResult(AbstractDocumentInterface document, int foundoffset, boolean wrapped, boolean allDocsWrapped) {
+    _document = document;
+    _foundoffset = foundoffset;
+    _wrapped = wrapped;
+    _allDocsWrapped = allDocsWrapped;
   }
-
-  public static Date getBuildTime() {
-    return BUILD_TIME;
-  }
-
-  private static Date _getBuildDate() {
-    try {
-      return new SimpleDateFormat("yyyyMMdd-HHmm z").parse(BUILD_TIME_STRING + " GMT");
-    }
-    catch (Exception e) { // parse format or whatever problem
-      return null;
-    }
-  }
-
-  public static void main(String[] args) {
-    System.out.println("Version for edu.rice.cs.drjava: " + BUILD_TIME_STRING);
-  }
-} 
+  
+  /** Returns the document where the found instance is located */
+  public AbstractDocumentInterface getDocument() { return _document; }
+  
+  /** Returns the offset of the instance found */ 
+  public int getFoundOffset() { return _foundoffset; }
+  
+  /** Returns true if the search wrapped to the beginning (or end) of the document */
+  public boolean getWrapped() { return _wrapped; }
+  
+  /** Returns true if the search wrapped to the start document */
+  public boolean getAllDocsWrapped() { return _allDocsWrapped; }
+}

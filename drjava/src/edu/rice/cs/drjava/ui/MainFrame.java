@@ -614,12 +614,18 @@ public class MainFrame extends JFrame implements OptionConstants {
   
  /** Compiles the document in the definitions pane. */
   private Action _compileAction = new AbstractAction("Compile Current Document") {
-    public void actionPerformed(ActionEvent ae) { _compile(); }
+    public void actionPerformed(ActionEvent ae) { 
+      if (_mainSplit.getDividerLocation() > _mainSplit.getMaximumDividerLocation()) 
+        _mainSplit.resetToPreferredSizes(); 
+      _compile(); 
+    }
   };
   
   /** Compiles all the project. */
   private Action _compileProjectAction = new AbstractAction("Compile Project") {
-    public void actionPerformed(ActionEvent ae) { 
+    public void actionPerformed(ActionEvent ae) {
+      if (_mainSplit.getDividerLocation() > _mainSplit.getMaximumDividerLocation()) 
+        _mainSplit.resetToPreferredSizes();
       _compileProject(); 
       _findReplace.updateFirstDocInSearch();
     }
@@ -628,6 +634,8 @@ public class MainFrame extends JFrame implements OptionConstants {
   /** Compiles all documents in the navigators active group. */
   private Action _compileFolderAction = new AbstractAction("Compile Folder") {
     public void actionPerformed(ActionEvent ae) { 
+      if (_mainSplit.getDividerLocation() > _mainSplit.getMaximumDividerLocation()) 
+        _mainSplit.resetToPreferredSizes();
       _compileFolder();
       _findReplace.updateFirstDocInSearch();
     }
@@ -635,7 +643,9 @@ public class MainFrame extends JFrame implements OptionConstants {
   
   /** Compiles all open documents. */
   private Action _compileAllAction = new AbstractAction("Compile All Documents") {
-    public void actionPerformed(ActionEvent ae) { 
+    public void actionPerformed(ActionEvent ae) {
+      if (_mainSplit.getDividerLocation() > _mainSplit.getMaximumDividerLocation()) 
+        _mainSplit.resetToPreferredSizes();
       _compileAll();
       _findReplace.updateFirstDocInSearch();
     }
@@ -653,12 +663,18 @@ public class MainFrame extends JFrame implements OptionConstants {
   
   /** Runs JUnit on the document in the definitions pane. */
   private Action _junitAction = new AbstractAction("Test Current Document") {
-    public void actionPerformed(ActionEvent ae) { _junit(); }
+    public void actionPerformed(ActionEvent ae) { 
+      if (_mainSplit.getDividerLocation() > _mainSplit.getMaximumDividerLocation()) 
+        _mainSplit.resetToPreferredSizes();
+      _junit(); 
+    }
   };
   
   /** Runs JUnit over all open JUnit tests. */
   private Action _junitAllAction = new AbstractAction("Test All Documents") {
     public void actionPerformed(ActionEvent e) {
+      if (_mainSplit.getDividerLocation() > _mainSplit.getMaximumDividerLocation()) 
+        _mainSplit.resetToPreferredSizes();
       _junitAll();
       _findReplace.updateFirstDocInSearch();
     }
@@ -668,6 +684,8 @@ public class MainFrame extends JFrame implements OptionConstants {
   /** Runs JUnit over all open JUnit tests in the project directory. */
   private Action _junitOpenProjectFilesAction = new AbstractAction("Test Project") {
     public void actionPerformed(ActionEvent e) {
+      if (_mainSplit.getDividerLocation() > _mainSplit.getMaximumDividerLocation()) 
+        _mainSplit.resetToPreferredSizes();
       _junitProject();
       _findReplace.updateFirstDocInSearch();
     }
@@ -696,6 +714,8 @@ public class MainFrame extends JFrame implements OptionConstants {
   /** Runs Javadoc on all open documents (and the files in their packages). */
   private Action _javadocAllAction = new AbstractAction("Javadoc All Documents") {
     public void actionPerformed(ActionEvent ae) {
+      if (_mainSplit.getDividerLocation() > _mainSplit.getMaximumDividerLocation()) 
+        _mainSplit.resetToPreferredSizes();
       try {
         // hourglassOn();
         JavadocModel jm = _model.getJavadocModel();
@@ -714,6 +734,8 @@ public class MainFrame extends JFrame implements OptionConstants {
   /** Runs Javadoc on the current document. */
   private Action _javadocCurrentAction = new AbstractAction("Preview Javadoc for Current Document") {
     public void actionPerformed(ActionEvent ae) {
+      if (_mainSplit.getDividerLocation() > _mainSplit.getMaximumDividerLocation()) 
+        _mainSplit.resetToPreferredSizes();
       try { _model.getActiveDocument().generateJavadoc(_saveSelector); }
       catch (IOException ioe) { _showIOError(ioe); }
     }
@@ -819,6 +841,8 @@ public class MainFrame extends JFrame implements OptionConstants {
   /** Shows the find/replace tab. */
   private Action _findReplaceAction = new AbstractAction("Find/Replace...") {
     public void actionPerformed(ActionEvent ae) {
+      if (_mainSplit.getDividerLocation() > _mainSplit.getMaximumDividerLocation()) 
+        _mainSplit.resetToPreferredSizes(); 
       if (! _findReplace.isDisplayed()) {
         showTab(_findReplace);
         _findReplace.beginListeningTo(_currentDefPane);
@@ -835,18 +859,8 @@ public class MainFrame extends JFrame implements OptionConstants {
   /** Find the next instance of the find word. */
   private Action _findNextAction = new AbstractAction("Find Next") {
     public void actionPerformed(ActionEvent ae) {
-      if (!_findReplace.isDisplayed()) {
-        showTab(_findReplace);
-        _findReplace.beginListeningTo(_currentDefPane);
-      }
+      _findReplaceAction.actionPerformed(ae);
       _findReplace.findNext();
-//      // This is a fix for a highlighting bug when
-//      // calling this from _findReplace. Perhaps there
-//      // is a better solution.
-//      if (_lastFocusOwner == _findReplace) {
-//        _currentDefPane.requestFocusInWindow();
-//      }
-//      else _lastFocusOwner.requestFocusInWindow();
       _currentDefPane.requestFocusInWindow();  // atempt to fix intermittent bug where _currentDefPane listens but does not echo and won't undo!
     }
   };
@@ -854,10 +868,8 @@ public class MainFrame extends JFrame implements OptionConstants {
   /** Does the find next in the opposite direction. If the direction is backward it searches forward. */
   private Action _findPrevAction = new AbstractAction("Find Previous") {
     public void actionPerformed(ActionEvent ae) {
-      boolean sb = _findReplace.getSearchBackwards();
-      _findReplace.setSearchBackwards(!sb); // reverse direction
-      _findNextAction.actionPerformed(ae);
-      _findReplace.setSearchBackwards(sb); // restore direction
+      _findReplace.findPrevious();
+      _currentDefPane.requestFocusInWindow();
     }
   };
   
@@ -881,14 +893,18 @@ public class MainFrame extends JFrame implements OptionConstants {
   /** Action for commenting out a block of text using wing comments. */
   private Action _commentLinesAction = new AbstractAction("Comment Line(s)") {
     public void actionPerformed(ActionEvent ae) {
-      commentLines();
+      hourglassOn();
+      try{ commentLines(); }
+      finally{ hourglassOff(); }
     }
   };
   
   /** Action for un-commenting a block of commented text. */
   private Action _uncommentLinesAction = new AbstractAction("Uncomment Line(s)") {
     public void actionPerformed(ActionEvent ae){
-      uncommentLines();
+      hourglassOn();
+      try{ uncommentLines(); }
+      finally{ hourglassOff(); }
     }
   };
   
@@ -995,30 +1011,47 @@ public class MainFrame extends JFrame implements OptionConstants {
   /** Switches to next document. */
   private Action _switchToNextAction = new AbstractAction("Next Document") {
     public void actionPerformed(ActionEvent ae) {
+      this.setEnabled(false);
+      if (_docSplitPane.getDividerLocation() < _docSplitPane.getMinimumDividerLocation())
+        _docSplitPane.setDividerLocation(DrJava.getConfig().getSetting(DOC_LIST_WIDTH).intValue());
+      //disables switching documents while the next one is opening up, in order to prevent out of control switching
       _model.setActiveNextDocument();
       _findReplace.updateFirstDocInSearch();
+      this.setEnabled(true);
     }
   };
   
   /** Switches to previous document. */
   private Action _switchToPrevAction = new AbstractAction("Previous Document") {
     public void actionPerformed(ActionEvent ae) {
+      this.setEnabled(false);
+      if (_docSplitPane.getDividerLocation() < _docSplitPane.getMinimumDividerLocation())
+        _docSplitPane.setDividerLocation(DrJava.getConfig().getSetting(DOC_LIST_WIDTH).intValue());
       _model.setActivePreviousDocument();
       _findReplace.updateFirstDocInSearch();
+      this.setEnabled(true);
     }
   };
   
   /** Switches focus to next pane. */
   private Action _switchToNextPaneAction =  new AbstractAction("Next Pane") {
     public void actionPerformed(ActionEvent ae) {
+      if (_mainSplit.getDividerLocation() > _mainSplit.getMaximumDividerLocation()) 
+        _mainSplit.resetToPreferredSizes(); 
+      this.setEnabled(false);
       _switchPaneFocus(true);
+      this.setEnabled(true);
     }
   };
   
   /** Switches focus to previous pane. */
   private Action _switchToPreviousPaneAction =  new AbstractAction("Previous Pane") {
     public void actionPerformed(ActionEvent ae) {
+      if (_mainSplit.getDividerLocation() > _mainSplit.getMaximumDividerLocation()) 
+        _mainSplit.resetToPreferredSizes(); 
+      this.setEnabled(false);
       _switchPaneFocus(false);
+      this.setEnabled(true);
     }
   };
   
@@ -1072,7 +1105,11 @@ public class MainFrame extends JFrame implements OptionConstants {
   
   /** Enables the debugger */
   private Action _toggleDebuggerAction = new AbstractAction("Debug Mode") {
-    public void actionPerformed(ActionEvent ae) { debuggerToggle(); }
+    public void actionPerformed(ActionEvent ae) { 
+      this.setEnabled(false);
+      debuggerToggle();
+      this.setEnabled(true);
+    }
   };
   
   /** Resumes debugging */
@@ -1549,6 +1586,7 @@ public class MainFrame extends JFrame implements OptionConstants {
         
       }
     };
+    _openChooser.setPreferredSize(new Dimension(650, 410));
     _openChooser.setCurrentDirectory(workDir);
     _openChooser.setFileFilter(_javaSourceFilter);
     _openChooser.setMultiSelectionEnabled(true);
@@ -1561,6 +1599,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     //Get most recently opened project for filechooser
     Vector<File> recentProjects = config.getSetting(RECENT_PROJECTS);
     _openProjectChooser = new JFileChooser();
+    _openProjectChooser.setPreferredSize(new Dimension(650, 410));
     if (recentProjects.size()>0 && recentProjects.elementAt(0).getParentFile() != null)
       _openProjectChooser.setCurrentDirectory(recentProjects.elementAt(0).getParentFile());
     else
@@ -1574,9 +1613,12 @@ public class MainFrame extends JFrame implements OptionConstants {
         setDialogTitle("Save:  " + getCurrentDirectory());
       }
     };
+    _saveChooser.setPreferredSize(new Dimension(650, 410));
     _saveChooser.setCurrentDirectory(workDir);
     _saveChooser.setFileFilter(_javaSourceFilter);
+    
     _interactionsHistoryChooser = new JFileChooser();
+    _interactionsHistoryChooser.setPreferredSize(new Dimension(650, 410));
     _interactionsHistoryChooser.setCurrentDirectory(workDir);
     _interactionsHistoryChooser.setFileFilter(new InteractionsHistoryFilter());
     _interactionsHistoryChooser.setMultiSelectionEnabled(true);
