@@ -66,6 +66,7 @@ import com.sun.tools.javac.util.List;
 import com.sun.tools.javac.util.Log;
 
 import edu.rice.cs.util.FileOps;
+import edu.rice.cs.util.ClasspathVector;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.newjvm.ExecJVM;
 
@@ -272,6 +273,10 @@ public class JSR14v20Compiler implements CompilerInterface {
    */ 
   public void setExtraClassPath( String extraClassPath) {
       _extraClassPath = extraClassPath;
+  }
+
+  public void setExtraClassPath(ClasspathVector extraClassPath) {
+    setExtraClassPath(extraClassPath.toString());
   }
   
   /**
