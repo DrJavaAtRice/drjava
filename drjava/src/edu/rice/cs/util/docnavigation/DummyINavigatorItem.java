@@ -57,7 +57,7 @@ class DummyINavigatorItem implements INavigatorItem {
   
   public boolean fileExists() { throw new UnsupportedOperationException("fileExists() not implemented"); }
   public boolean isAuxiliaryFile() { throw new UnsupportedOperationException("isAuxiliaryFile() not implemented"); }
-  public boolean isProjectFile() { throw new UnsupportedOperationException("isProjectFile() not implemented"); }
+  public boolean inProject() { throw new UnsupportedOperationException("inProject() not implemented"); }
   public boolean isUntitled() { throw new UnsupportedOperationException("isUntitled() not implemented"); }
   public String toString() { return getName(); }
 }

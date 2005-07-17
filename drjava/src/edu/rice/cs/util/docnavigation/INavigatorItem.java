@@ -70,6 +70,6 @@ public interface INavigatorItem {
    * */
   public String getName();
   public boolean isAuxiliaryFile();
-  public boolean isProjectFile();
+  public boolean inProject();
   public boolean isUntitled();
 }
