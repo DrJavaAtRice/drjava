@@ -358,7 +358,7 @@ public class FindReplaceMachine {
    */
   private FindResult _findNext(int start, int end) {
     try {
-//      Utilities.showDebug(""+ ((DefaultSingleDisplayModel)_model).getODDForDocument(_doc).getStateAtCurrent());
+//      Utilities.showDebug(""+ _model.getODDForDocument(_doc).getStateAtCurrent());
       FindResult tempFr = new FindResult(_doc, -1, false, false);      
       int docLen;
       String findWord = _findWord;

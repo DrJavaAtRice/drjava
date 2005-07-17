@@ -101,17 +101,14 @@ public interface OpenDefinitionsDocument extends DJDocument, Finalizable<Definit
    */
   public String getFirstTopLevelClassName() throws ClassNameNotFoundException;
   
-  /** A file is in the project if the source root is the same as the
-   * project root. this means that project files must be saved at the
-   * source root.
-   */
+  /** Determines if this document in the file system tree below the active project root. */
   public boolean isInProjectPath();
   
   /** @return true if the document's file is a project auxiliary file. */
   public boolean isAuxiliaryFile();
   
   /** @return true if the documents file is saved in the current project file. */
-  public boolean isProjectFile();
+  public boolean inProject();
   
   /** Returns whether this document is currently untitled (indicating whether it has a file yet or not).
    *  @return true if the document is untitled and has no file
@@ -124,6 +121,14 @@ public interface OpenDefinitionsDocument extends DJDocument, Finalizable<Definit
    *  @throws FileMovedException if the document's file no longer exists
    */
   public File getFile() throws IllegalStateException, FileMovedException;
+  
+  /** Returns the file for this document; does not check for null. */
+  public File file();
+  
+  /** Sets this document's file
+   *  @param file the file that this OpenDefinitionsDocument is associated with
+   */
+  public void setFile(File file);
 
   /** Returns true if the file exists on disk, or if the user has located it on disk. Returns false if the 
    *  file has been moved or deleted
@@ -296,11 +301,6 @@ public interface OpenDefinitionsDocument extends DJDocument, Finalizable<Definit
 
   /** Called when this document is being closed, removing related state from the debug manager. */
   public void removeFromDebugger();
-  
-  /** Sets this document's file
-   *  @param file the file that this OpenDefinitionsDocument is associated with
-   */
-  public void setFile(File file);
   
   /** Resets the document to be unmodified. */
   public void resetModification();

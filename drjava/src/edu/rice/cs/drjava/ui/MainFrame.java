@@ -273,9 +273,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
   };
   
-  /**
-   * Returns the files to open to the model (command pattern).
-   */
+  /** Returns the files to open to the model (command pattern). */
   private FileOpenSelector _openFileOrProjectSelector = new FileOpenSelector() {
     public File[] getFiles() throws OperationCanceledException {
       //_openChooser.removeChoosableFileFilter(_projectFilter);
@@ -286,12 +284,8 @@ public class MainFrame extends JFrame implements OptionConstants {
       return getOpenFiles(_openChooser);
     }
   };
-  
-  
-  
-  /**
-   * Returns the project file to open.
-   */
+ 
+  /** Returns the project file to open. */
   private FileOpenSelector _openProjectSelector = new FileOpenSelector() {
     public File[] getFiles() throws OperationCanceledException {
       File[] retFiles = getOpenFiles(_openProjectChooser);
@@ -317,6 +311,13 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
   };
   
+  /** Returns the file to save to the model (command pattern). */
+  private FileSaveSelector _saveAsSelector = new FileSaveSelector() {
+    public File getFile() throws OperationCanceledException { return getSaveFile(_saveChooser); }
+    public boolean warnFileOpen(File f) { return _warnFileOpen(f); }
+    public boolean verifyOverwrite() { return _verifyOverwrite(); }
+    public boolean shouldSaveAfterFileMoved(OpenDefinitionsDocument doc, File oldFile) { return true; }
+  };
   
   /** Provides the view's contribution to the Javadoc interaction. */
   private JavadocDialog _javadocSelector = new JavadocDialog(this);
@@ -482,7 +483,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       // navigation pane, the current directory is updated in the openChooser JFileChooser component.  So the 
       // clicked on directory is obtained in this way
       File dir = _openChooser.getCurrentDirectory();
-      openFilesInFolder(dir, false);  
+      _openFolder(dir, false);  
       _findReplace.updateFirstDocInSearch();
     }
   };
@@ -961,21 +962,24 @@ public class MainFrame extends JFrame implements OptionConstants {
     worker.start();
   }
   
-  /** Displays the interactions classpath. */
+  /** Defines actions that displays the interactions classpath. */
   private Action _viewInteractionsClasspathAction = new AbstractAction("View Interactions Classpath") {
-    public void actionPerformed(ActionEvent e) {
-      StringBuffer cpBuf = new StringBuffer();
-      Vector<URL> classpathElements = _model.getClasspath();
-      for(int i = 0; i < classpathElements.size(); i++) {
-        cpBuf.append(classpathElements.get(i).getPath());
-        if (i + 1 < classpathElements.size()) cpBuf.append("\n");
-      }
-      String classpath = cpBuf.toString();
-      
-      new DrJavaScrollableDialog(MainFrame.this, "Interactions Classpath",
-                                 "Current Interpreter Classpath", classpath).show();
-    }
+    public void actionPerformed(ActionEvent e) { viewInteractionsClasspath(); }
   };
+  
+  /** Displays the interactions classpath. */  
+  public void viewInteractionsClasspath() {
+    StringBuffer cpBuf = new StringBuffer();
+    Vector<URL> classpathElements = _model.getClasspath();
+    for(int i = 0; i < classpathElements.size(); i++) {
+      cpBuf.append(classpathElements.get(i).getPath());
+      if (i + 1 < classpathElements.size()) cpBuf.append("\n");
+    }
+    String classpath = cpBuf.toString();
+    
+    new DrJavaScrollableDialog(MainFrame.this, "Interactions Classpath",
+                               "Current Interpreter Classpath", classpath).show();
+  }
   
   /** Shows the user documentation. */
   private Action _helpAction = new AbstractAction("Help") {
@@ -1539,7 +1543,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _setUpStatusBar();
     
     // create our model
-    _model = new DefaultSingleDisplayModel();
+    _model = new DefaultGlobalModel();
     
     _model.getDocumentNavigator().asContainer().addKeyListener(_historyListener);
     _model.getDocumentNavigator().asContainer().addFocusListener(_focusListenerForRecentDocs);
@@ -2343,7 +2347,6 @@ public class MainFrame extends JFrame implements OptionConstants {
       _compileProjectAction.setEnabled(true);
       _jarProjectAction.setEnabled(true);
       if (_model.getBuildDirectory() != null) _cleanAction.setEnabled(true);
-      _model.setProjectChanged(false);
       _resetNavigatorPane();
       _compileButton.setToolTipText("<html>Compile all documents in the project.<br>External files are excluded.</html>");
     }
@@ -2417,13 +2420,11 @@ public class MainFrame extends JFrame implements OptionConstants {
   
   public File getCurrentProject() { return _currentProjFile;  }
   
-  /**
-   * Opens all the files returned by the FileOpenSelector prompting
-   * the user to handle the cases where files are already open,
-   * files are missing, or the action was canceled by the user
-   * @param openSelector the selector that returns the files to open
+  /** Opens all the files returned by the FileOpenSelector prompting the user to handle the cases where files are 
+   *  already open, files are missing, or the action was canceled by the user
+   *  @param openSelector the selector that returns the files to open
    */
-  void open(FileOpenSelector openSelector) {
+  public void open(FileOpenSelector openSelector) {
     try {
       hourglassOn();
       _model.openFiles(openSelector);
@@ -2454,7 +2455,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       }
       try {
         File f = openDoc.getFile();
-        if (! _model.isProjectFile(f)) _recentFileManager.updateOpenFiles(f);
+        if (! _model.inProject(f)) _recentFileManager.updateOpenFiles(f);
       }
       catch (IllegalStateException ise) {
         // Impossible: saved => has a file
@@ -2463,26 +2464,24 @@ public class MainFrame extends JFrame implements OptionConstants {
       catch (FileMovedException fme) {
         File f = fme.getFile();
         // Recover, show it in the list anyway
-        if (! _model.isProjectFile(f))
+        if (! _model.inProject(f))
           _recentFileManager.updateOpenFiles(f);
       }
+    }  
+    catch (OperationCanceledException oce) { /* do not open file */ }
+    catch (FileNotFoundException fnf) { 
+      _showFileNotFoundError(fnf); 
     }
-    catch (OperationCanceledException oce) {
-      // Ok, don't open a file
-    }
-    catch (FileNotFoundException fnf) { _showFileNotFoundError(fnf); }
     catch (IOException ioe) { _showIOError(ioe); }
     finally { hourglassOff(); }
   }
   
   
-  /** Opens all the files in the directory returned by the FolderSelector prompting
-   *  the user to handle the cases where files are already open,
-   *  files are missing, or the action was canceled by the user
+  /** Opens all the files in the directory returned by the FolderSelector.
    *  @param chooser the selector that returns the files to open
    */
   public void openFolder(DirectoryChooser chooser) {
-    String type = "'"+DrJava.LANGUAGE_LEVEL_EXTENSIONS[DrJava.getConfig().getSetting(LANGUAGE_LEVEL)] + "' ";
+    String type = "'" + DrJava.LANGUAGE_LEVEL_EXTENSIONS[DrJava.getConfig().getSetting(LANGUAGE_LEVEL)] + "' ";
     chooser.setDialogTitle("Open All " + type + "Files In...");
     
     File openDir = null;
@@ -2494,50 +2493,24 @@ public class MainFrame extends JFrame implements OptionConstants {
     if (result != DirectoryChooser.APPROVE_OPTION)  return; // canceled or error
     
     File dir = chooser.getSelectedDirectory();
-    DrJava.getConfig().setSetting(OptionConstants.OPEN_FOLDER_RECURSIVE, Boolean.valueOf(_openRecursiveCheckBox.isSelected()));
-    
-    if (dir == null) return; // just in case
-    
-    openFilesInFolder(dir, _openRecursiveCheckBox.isSelected());
+    boolean rec = _openRecursiveCheckBox.isSelected();
+    DrJava.getConfig().setSetting(OptionConstants.OPEN_FOLDER_RECURSIVE, Boolean.valueOf(rec));
+    _openFolder(dir, rec);
   }
   
-  private void openFilesInFolder(File dir, boolean recursive) {
-    ArrayList<File> files;
-    if (dir != null && dir.isDirectory()) {
-      files = FileOps.getFilesInDir(dir, recursive, new FileFilter() {
-        public boolean accept(File f) { 
-          return f.isDirectory() ||
-            f.isFile() && 
-            f.getName().endsWith(DrJava.LANGUAGE_LEVEL_EXTENSIONS[DrJava.getConfig().getSetting(LANGUAGE_LEVEL)]);
-        }
-      });
-      
-      if (_model.isProjectActive())
-        Collections.sort(files, new Comparator<File>() {
-        public int compare(File o1,File o2) {
-          return - o1.getAbsolutePath().compareTo(o2.getAbsolutePath());
-        }
-      });
-      else
-        Collections.sort(files, new Comparator<File>() {
-        public int compare(File o1,File o2) {
-          return - o1.getName().compareTo(o2.getName());
-        }
-      });
-      
-      final File[] sfiles = files.toArray(new File[files.size()]);
-      
-      
-      open(new FileOpenSelector() {
-        public File[] getFiles() {
-          return sfiles;
-        }
-      });
-    }else{
-      // our directory was bad, so don't open anything.
-    }
+  /** Opens all the files in the specified directory; it opens all files in nested folders if rec is true.
+   *  @param dir the specified directory
+   *  @param rec true if files in nested folders should be opened
+   */
+  private void _openFolder(File dir, boolean rec) {
+    hourglassOn();
+    try { _model.openFolder(dir, rec); }
+    catch(AlreadyOpenException e) { /* do nothing */ }
+    catch(IOException e) { _showIOError(e); }
+    catch(OperationCanceledException oce) { /* do nothing */ }
+    finally { hourglassOff(); }
   }
-  
+    
   /** Delegates directly to the model to close the active document */
   private void _close() {
     //    LinkedList<OpenDefinitionsDocument> l = new LinkedList<OpenDefinitionsDocument>();
@@ -2567,6 +2540,7 @@ public class MainFrame extends JFrame implements OptionConstants {
                                             options,
                                             options[1]);
       if (rc != JOptionPane.YES_OPTION) return;
+      _model.setProjectChanged(true);
     }
     
     //Either this is an external file or user actually wants to close it
@@ -2583,6 +2557,7 @@ public class MainFrame extends JFrame implements OptionConstants {
         if (_model.getDocumentNavigator().isSelectedInGroup(n)) { l.add((OpenDefinitionsDocument) n); }  // FIX THIS!
       }
       _model.closeFiles(l);
+      if (! l.isEmpty()) _model.setProjectChanged(true);
     }
   }
   
@@ -2656,7 +2631,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   
   private boolean _saveAs() {
     try {
-      boolean toReturn = _model.getActiveDocument().saveFileAs(_saveSelector);
+      boolean toReturn = _model.getActiveDocument().saveFileAs(_saveAsSelector);
       /** this highlights the document in the navigator */
       _model.setActiveDocument(_model.getActiveDocument());
       return toReturn;
@@ -3475,9 +3450,7 @@ public class MainFrame extends JFrame implements OptionConstants {
    * @throws OperationCanceledException if file choice canceled
    * @throws RuntimeException if fc returns a bad file or choice
    */
-  private File[] getChosenFiles(JFileChooser fc, int choice)
-    throws OperationCanceledException
-  {
+  private File[] getChosenFiles(JFileChooser fc, int choice) throws OperationCanceledException {
     switch (choice) {
       case JFileChooser.CANCEL_OPTION:case JFileChooser.ERROR_OPTION:
         throw new OperationCanceledException();
@@ -5356,6 +5329,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   private class ModelListener implements GlobalModelListener {
     
     public void fileNotFound(File f) {
+      _model.setProjectChanged(true);
       _showFileNotFoundError(new FileNotFoundException("File " + f + " cannot be found"));
     }
     
@@ -5374,7 +5348,7 @@ public class MainFrame extends JFrame implements OptionConstants {
           _currentDefPane.requestFocusInWindow();
           try {
             File f = doc.getFile();
-            if (! _model.isProjectFile(f)) _recentFileManager.updateOpenFiles(f);
+            if (! _model.inProject(f)) _recentFileManager.updateOpenFiles(f);
           }
           catch (IllegalStateException ise) { throw new UnexpectedException(ise); }
           // Impossible because saved => has a file
@@ -5382,7 +5356,7 @@ public class MainFrame extends JFrame implements OptionConstants {
           catch (FileMovedException fme) {
             File f = fme.getFile();
             // Recover, show it in the list anyway
-            if (! _model.isProjectFile(f)) _recentFileManager.updateOpenFiles(f);
+            if (! _model.inProject(f)) _recentFileManager.updateOpenFiles(f);
           }
           // Check class file sync status, in case file was renamed
           if (inDebugMode()) _updateDebugStatus();
@@ -5398,7 +5372,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       
       try {
         File f = doc.getFile();
-        if (! _model.isProjectFile(f)) {
+        if (! _model.inProject(f)) {
           _recentFileManager.updateOpenFiles(f);
           if (_model.isInProjectPath(doc)) _model.setProjectChanged(true);
         }
@@ -5407,7 +5381,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       catch (FileMovedException fme) {
         File f = fme.getFile();
         // Recover, show it in the list anyway
-        if (! _model.isProjectFile(f)) _recentFileManager.updateOpenFiles(f);
+        if (! _model.inProject(f)) _recentFileManager.updateOpenFiles(f);
       }
     }
     
@@ -5428,7 +5402,6 @@ public class MainFrame extends JFrame implements OptionConstants {
       if (doc != null) {
         try {
           File f = doc.getFile();
-          if (_model.isProjectFile(f) || doc.isAuxiliaryFile()) _model.setProjectChanged(true);
         }
         catch(FileMovedException fme) { /* do nothing */ }
         catch(IllegalStateException ise) { /* do nothing */ }
@@ -6129,7 +6102,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     
     public void documentNotFound(OpenDefinitionsDocument d, File f) {
       
-      if (_model.isProjectActive()) _model.setProjectChanged(true);
+      _model.setProjectChanged(true);
      
       String text = "File " + f.getAbsolutePath() +
         "\ncould not be found on disk!  It was probably moved\n" +

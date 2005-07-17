@@ -63,6 +63,7 @@ import edu.rice.cs.drjava.model.repl.*;
 import edu.rice.cs.drjava.model.compiler.*;
 import edu.rice.cs.util.*;
 import edu.rice.cs.util.text.DocumentAdapterException;
+import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.drjava.CodeStatus;
 import edu.rice.cs.util.Log;
 
@@ -104,9 +105,9 @@ public final class DebugContextTest extends DebugTestCase {
     debugListener.assertStepRequestedCount(1);  // fires (don't wait)
     debugListener.assertThreadLocationUpdatedCount(2);  // fires
 
-
     // Close file so it won't be in source root set
     _model.closeFile(doc);
+    Utilities.clearEventQueue();
     debugListener.assertBreakpointRemovedCount(1);
 
     // Step to next line
@@ -319,6 +320,7 @@ public final class DebugContextTest extends DebugTestCase {
 
     // Close doc and make sure breakpoints are removed
     _model.closeFile(doc);
+    Utilities.clearEventQueue();
     debugListener.assertBreakpointRemovedCount(2);  //fires (no waiting)
 
     // Shutdown the debugger
@@ -631,6 +633,7 @@ public final class DebugContextTest extends DebugTestCase {
 
     // Close doc and make sure breakpoints are removed
     _model.closeFile(doc);
+    Utilities.clearEventQueue();
     debugListener.assertBreakpointRemovedCount(2);  //fires (no waiting)
 
     // Shut down

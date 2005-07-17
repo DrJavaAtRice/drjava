@@ -58,7 +58,7 @@ import javax.swing.border.EmptyBorder;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.model.SingleDisplayModel;
-import edu.rice.cs.drjava.model.DefaultSingleDisplayModel;
+import edu.rice.cs.drjava.model.DefaultGlobalModel;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.FindReplaceMachine;
 import edu.rice.cs.drjava.model.FindResult;
@@ -580,7 +580,7 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
       // for the string.
       FindResult fr = _machine.findNext();
       AbstractDocumentInterface doc = fr.getDocument();
-      OpenDefinitionsDocument matchDoc = ((DefaultSingleDisplayModel) _model).getODDForDocument(doc);
+      OpenDefinitionsDocument matchDoc = _model.getODDForDocument(doc);
       OpenDefinitionsDocument openDoc = _defPane.getOpenDefDocument();
       
       final int pos = fr.getFoundOffset();

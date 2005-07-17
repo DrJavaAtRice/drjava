@@ -61,9 +61,7 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
    * initialized.  Ensures multiple startups and shutdowns work, even
    * after a reset, which changes the debug port.
    */
-  public void testStartupAndShutdown()
-    throws DebugException, InterruptedException
-  {
+  public void testStartupAndShutdown() throws DebugException, InterruptedException {
     if (printMessages) System.out.println("----testStartupAndShutdown----");
     DebugTestListener debugListener = new DebugStartAndStopListener();
     _debugger.addListener(debugListener);

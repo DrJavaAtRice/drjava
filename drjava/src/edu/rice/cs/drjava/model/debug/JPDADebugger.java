@@ -959,9 +959,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
   * Called from toggleBreakpoint -- even with BPs that are not active.
   * @param breakpoint The breakpoint to remove.
   */
-  public synchronized void removeBreakpoint(final Breakpoint breakpoint)
-    throws DebugException
-  {
+  public synchronized void removeBreakpoint(final Breakpoint breakpoint) throws DebugException {
     _ensureReady();
 
     _breakpoints.remove(breakpoint);

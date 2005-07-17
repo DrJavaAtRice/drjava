@@ -55,19 +55,7 @@ import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.model.definitions.*;
 import edu.rice.cs.util.*;
 
-/**
- * This used to extend GlobalModelTestCase, but now it 
- * extends just TestCase because the GlobalModelTestCase
- * was changed to use a DefaultSingleDisplayModel rather
- * than a DefaultGlobalModel.  The extra code in Single
- * Display makes it very difficult to predict which documents
- * will be in the cache and in which order.  This is because 
- * The single display model has extra algorithms that 
- * maintain the single-active-document invariant.  Given that
- * the SingleDisplayModel is not keeping any references to
- * DefinitionsDocuments, that should not be a source of a
- * memory leak for the DocumentCache
- */
+/** This used to extend GlobalModelTestCase, but now it extends just TestCase.  Perhaps it should be changed back. */
 public class DocumentCacheTest extends TestCase {
   
   private DefaultGlobalModel _model;
@@ -110,7 +98,7 @@ public class DocumentCacheTest extends TestCase {
   
   /** Instantiates the GlobalModel to be used in the test cases. */
   protected void createModel() {
-    //_model = new DefaultSingleDisplayModel(_originalModel);
+    //_model = new DefaultGlobalModel(_originalModel);
     _model = new TestGlobalModel();
 
     // Wait until it has connected

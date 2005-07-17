@@ -127,9 +127,7 @@ public class ClasspathManager{
     return externalFilesCP;
   }
   
-  /**
-   * adds the entry to the front of the extra classpath
-   */
+  /** Adds the entry to the front of the extra classpath. */
   public void addExtraCP(URL f) {
     // add new entry to front of classpath
     extraCP.add(0, new ClasspathEntry(f));

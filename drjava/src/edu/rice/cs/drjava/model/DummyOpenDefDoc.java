@@ -150,6 +150,9 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
    */
   public File getParentDirectory() { throw new UnsupportedOperationException("Dummy method"); }
   
+  /** Pure getter for _file; does not check for null. */
+  public File file() { throw new UnsupportedOperationException("Dummy method"); }    
+  
   /** Returns true if the file exists on disk. Returns false if the file has been moved or deleted. */
   public boolean fileExists() { throw new UnsupportedOperationException("Dummy method"); }
   
@@ -359,7 +362,7 @@ public class DummyOpenDefDoc implements OpenDefinitionsDocument {
   
   public boolean isInProjectPath() { return false; }
   
-  public boolean isProjectFile() { return false; }
+  public boolean inProject() { return false; }
   
   public boolean isAuxiliaryFile() { return false; }
   

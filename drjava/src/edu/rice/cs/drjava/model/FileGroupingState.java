@@ -60,71 +60,55 @@ import edu.rice.cs.util.ClasspathVector;
  */
 public interface FileGroupingState {
   
-  /**
-   * @return true if the model is in project mode, false otherwise
-   */
+  /** @return true if the model is in project mode, false otherwi */
   public boolean isProjectActive();
   
-  /**
-   * @return true if the document is part of the active project (in the project path), or false
-   * if it is not (or the model is not in project mode)
+  /** @return true if the document is part of the active project (in the project path), or false
+   *  if it is not (or the model is not in project mode)
    */
   public boolean isInProjectPath(OpenDefinitionsDocument doc);
   
-  /**
-   * junits all files that the state considers "all" (ie, all files in project directory in project mode)
+  /** @return true if the file is part of the active project (in the project path), or false
+   *  if it is not (or the model is not in project mode)
    */
+  public boolean isInProjectPath(File f);
+  
+  /** junits all files that the state considers "all" (ie, all files in project directory in project mode). */
   public void junitAll();
   
-  /**
-   * compiles all files that the state considers "all" (ie, all files in project directory in project mode)
-   */
+  /** Compiles all files that the state considers "all" (ie, all files in project directory in project mode). */
   public void compileAll() throws IOException;
   
-  /**
-   * Returns the current project file
-   * @return null if not currently in a project
+  /** Returns the current project file
+   *  @return null if not currently in a project
    */
   public File getProjectFile();
   
-  /**
-   * Returns the directory in which to put the class files
-   * after compilation
-   * @return null if no build directory is specified
+  /** Returns the directory in which to put the class files after compilation
+   *  @return null if no build directory is specified
    */
   public File getBuildDirectory();
   
-  /**
-   * Sets the current built directory
-   */
+  /** Sets the current built directory. */
   public void setBuildDirectory(File f);
   
-  /**
-   * Returns the source file that has the main method of the project
-   * @return null if no build directory is specified
+  /** Returns the source file that has the main method of the project
+   *  @return null if no build directory is specified
    */
   public File getMainClass();
   
-  /**
-   * Sets the file that has the main method of the project
-   * (Note: should point to the sourcefile of the document, not the class file)
+  /** Sets the file that has the main method of the project
+   *  (Note: should point to the sourcefile of the document, not the class file)
    */
   public void setJarMainClass(File f);
   
-  /**
-   * Return all files currently saved as source files in the project file
-   * If not in project mode, returns null
-   */
+  /** Return all files saved as source files in the project file. If not in project mode, returns null. */
   public File[] getProjectFiles();
   
-  /**
-   * Returns true the given file is in the current project file.
-   */
-  public boolean isProjectFile(File f);
+  /** Returns true the given file is in the current project file. */
+  public boolean inProject(File f);
   
-  /**
-   * @return true if the file is a project auxiliary file
-   */
+  /** @return true if the file is a project auxiliary file */
   public boolean isAuxiliaryFile(File f);
   
   /**
@@ -157,10 +141,5 @@ public interface FileGroupingState {
    * Sets the list of project-specific classpath entries.
    */
   public void setExtraClasspath(ClasspathVector cp);
-  
-  
-  
-  
-  
   
 }

@@ -127,23 +127,21 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     super.setUp();
   }
 
-  /** Teardown for each test case, which recursively deletes the temporary directory created in setUp.
-   */
+  /** Teardown for each test case, which recursively deletes the temporary directory created in setUp. */
   public void tearDown() throws IOException {
+    super.tearDown();
     boolean ret = FileOps.deleteDirectory(_tempDir);
     assertTrue("delete temp directory " + _tempDir, ret);
 
     _model.dispose();
     _tempDir = null;
     _model = null;
-    
-    super.tearDown();
   }
 
   /** Instantiates the GlobalModel to be used in the test cases. */
   protected void createModel() {
-    //_model = new DefaultSingleDisplayModel(_originalModel);
-    _model = new DefaultSingleDisplayModel();
+    //_model = new DefaultGlobalModel(_originalModel);
+    _model = new DefaultGlobalModel();
 
     // Wait until it has connected
     _model._interpreterControl.ensureInterpreterConnected();
@@ -285,21 +283,17 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     return buf.toString();
   }
 
-  /**
-   * Puts the given input into the interactions document and then interprets
-   * it, returning the result that was put into the interactions document.
-   * This assumes the interactions document is in a state with no text
-   * after the prompt. To be sure this is the case, you can reset interactions
-   * first.
+  /** Puts the given input into the interactions document and then interprets it, returning the result that was put
+   *  into the interactions document. This assumes the interactions document is in a state with no text after the 
+   *  prompt. To be sure this is the case, you can reset interactions first.
    *
-   * @param input text to interpret
-   * @return The output from this interpretation, in String form, as it was
+   *  @param input text to interpret
+   *  @return The output from this interpretation, in String form, as it was
    *         printed to the interactions document.
    */
   protected String interpret(String input) throws DocumentAdapterException {
     InteractionsDocument interactionsDoc = _model.getInteractionsDocument();
-    interactionsDoc.insertText(interactionsDoc.getLength(), input,
-                               InteractionsDocument.DEFAULT_STYLE);
+    interactionsDoc.insertText(interactionsDoc.getLength(), input, InteractionsDocument.DEFAULT_STYLE);
 
     // skip the right length for the newline
     int newLineLen = System.getProperty("line.separator").length();
@@ -359,16 +353,12 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     _model.interpretCurrentInteraction();
   }
 
-  /**
-   * Asserts that the given string exists in the Interactions Document.
-   */
+  /** Asserts that the given string exists in the Interactions Document. */
   protected void assertInteractionsContains(String text) throws DocumentAdapterException {
     _assertInteractionContainsHelper(text, true);
   }
 
-  /**
-   * Asserts that the given string does not exist in the Interactions Document.
-   */
+  /** Asserts that the given string does not exist in the Interactions Document. */
   protected void assertInteractionsDoesNotContain(String text)
     throws DocumentAdapterException {
     _assertInteractionContainsHelper(text, false);

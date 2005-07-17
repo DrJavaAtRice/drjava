@@ -162,66 +162,6 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
 //    Utilities.showDebug("GlobalModelOtherTest: exitInteractions finished");
   }
 
-// No longer relevant since the security manager option has been deleted from the interpreter JVM
-//  /** Checks that System.exit is handled appropriately from interactions frame when there is a security manager in
-//   *  the interpreter JVM.  
-//   */
-//  public void testInteractionResetFailed() throws DocumentAdapterException, InterruptedException {
-//    TestListener listener = new TestListener() {
-//      
-//      public void interactionStarted() { interactionStartCount++; }
-//      
-//      public void interactionEnded() {
-//        synchronized(_interactionDoneLock) {
-////          Utilities.showDebug("interactionEnded");
-//          interactionEndCount++;
-//          _interactionDone = true;
-//          _interactionDoneLock.notify();
-//        }
-//      }
-//
-////      public void interpreterResetting() {
-////        assertInterpreterResetFailedCount(0);
-////        interpreterResettingCount++;
-////      }
-//
-////      public void interpreterResetFailed(Throwable t) {
-////        synchronized(_resetDoneLock) {
-////          interpreterResetFailedCount++;
-////          assertInterpreterResetFailedCount(0);
-////          _resetDone = true;
-////          _resetDoneLock.notify();
-////        }
-////      }
-//
-//      public void consoleReset() { consoleResetCount++; }
-//    };
-//
-//    // Prevent the Interactions JVM from quitting
-////    _model.enableSecurityManager();
-//
-//    // Don't show the pop-up message
-//    _model._interpreterControl.setShowMessageOnResetFailure(false);
-//    
-//    _interactionDone = false;
-//    _model.addListener(listener);
-//    synchronized(_interactionDoneLock) {
-//      interpretIgnoreResult("System.exit(23);");
-//      while (! _interactionDone) { _interactionDoneLock.wait(); }
-////      _model.resetInteractions();
-//    }
-//
-//    _model.removeListener(listener);
-////    _model.disableSecurityManager();
-//
-//    listener.assertConsoleResetCount(0);
-//    listener.assertInterpreterResettingCount(0);
-//    listener.assertInterpreterResetFailedCount(0);
-//    listener.assertInterpreterReadyCount(0);
-//    listener.assertInterpreterExitedCount(0);
-////    Utilities.showDebug("resetFailed finished");
-//  }
-
   /** Checks that the interpreter can be aborted and then work correctly later. Part of what we check here is that 
    *  the interactions classpath is correctly reset after aborting interactions. That is, we ensure that the compiled
    *  class is still visible after aborting. This was broken in drjava-20020108-0958 -- or so I thought. I can't 
@@ -329,20 +269,6 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
       interpretIgnoreResult("System.out.print(\"a\");");
       _interactionDoneLock.wait();  // notified on interactionEnded
     }
-
-    /*
-    // alas, there's no very good way to know when it's done
-    // so we just wait some time hoping the println will have happened
-    int i;
-    for (i = 0; i < 50; i++) {
-      if (_model.getConsoleDocument().getLength() == 1) {
-        break;
-      }
-
-      Thread.currentThread().sleep(100);
-    }
-    //System.err.println("wait i=" + i);
-    */
 
     assertEquals("Length of console text", 1, _model.getConsoleDocument().getLength());
 
@@ -510,13 +436,8 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
 
   }
 
-  /**
-   * Tests that getSourceRoot works with a relative path
-   * when a package name is present.
-   */
-  public void testGetSourceRootPackageThreeDeepValidRelative()
-    throws BadLocationException, IOException
-  {
+  /** Tests that getSourceRoot works with a relative path when a package name is present. */
+  public void testGetSourceRootPackageThreeDeepValidRelative() throws BadLocationException, IOException {
     // Create temp directory
     File baseTempDir = tempDirectory();
     File subdir = new File(baseTempDir, "a");
@@ -543,9 +464,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
 
   }
 
-  public void testGetSourceRootPackageThreeDeepInvalid()
-    throws BadLocationException, IOException
-  {
+  public void testGetSourceRootPackageThreeDeepInvalid() throws BadLocationException, IOException {
     // Create temp directory
     File baseTempDir = tempDirectory();
 
@@ -581,9 +500,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
                  roots[0].getCanonicalFile());*/
   }
 
-  public void testGetSourceRootPackageOneDeepValid()
-    throws BadLocationException, IOException
-  {
+  public void testGetSourceRootPackageOneDeepValid() throws BadLocationException, IOException {
     // Create temp directory
     File baseTempDir = tempDirectory();
 
@@ -602,15 +519,11 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     // Since we had the package statement the source root should be base dir
     File[] roots = _model.getSourceRootSet();
     assertEquals("number of source roots", 1, roots.length);
-    assertEquals("source root", baseTempDir.getCanonicalFile(),
-                 roots[0].getCanonicalFile());
-
+    assertEquals("source root", baseTempDir.getCanonicalFile(), roots[0].getCanonicalFile());
   }
 
 
-  public void testGetMultipleSourceRootsDefaultPackage()
-    throws BadLocationException, IOException
-  {
+  public void testGetMultipleSourceRootsDefaultPackage() throws BadLocationException, IOException {
     // Create temp directory
     File baseTempDir = tempDirectory();
 
@@ -646,22 +559,14 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
 
     // Make sure both source roots are in set
     // But we don't care about the order
-    if (!( (root1.equals(subdir1) && root2.equals(subdir2)) ||
-           (root1.equals(subdir2) && root2.equals(subdir1)) ))
-    {
+    if (!( (root1.equals(subdir1) && root2.equals(subdir2)) || (root1.equals(subdir2) && root2.equals(subdir1)) )) {
       fail("source roots did not match");
     }
   }
 
-
-  /**
-   * Creates a new class, compiles it and then checks that the REPL
-   * can see it.
-   */
-  public void testInteractionsLiveUpdateClasspath()
-    throws BadLocationException, DocumentAdapterException,
-    IOException, InterruptedException
-  {
+  /** Creates a new class, compiles it and then checks that the REPL can see it. */
+  public void testInteractionsLiveUpdateClasspath() throws BadLocationException, DocumentAdapterException,
+    IOException, InterruptedException {
 
     OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
     File f = tempFile();
@@ -671,32 +576,32 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     // Rename the directory so it's not on the classpath anymore
     String tempPath = f.getParent();
     File tempDir = new File(tempPath);
-    tempDir.renameTo(new File(tempPath+"a"));
+    tempDir.renameTo(new File(tempPath + "a"));
 
     String result = interpret("new DrJavaTestFoo().getClass().getName()");
 
     // Should cause a NoClassDefFound, but we shouldn't check exact syntax.
     //  Instead, make sure it isn't "DrJavaTestFoo", as if the class was found.
-    assertTrue("interactions should have an error, not the correct answer",
-               !"\"DrJavaTestFoo\"".equals(result));
+    assertFalse("interactions should have an error, not the correct answer", "\"DrJavaTestFoo\"".equals(result));
+//    System.err.println("Result1 is: " + result);
 
     // Add new directory to classpath through Config
     Vector<File> cp = new Vector<File>();
     cp.add(new File(tempPath + "a"));
     DrJava.getConfig().setSetting(EXTRA_CLASSPATH, cp);
+    _model.resetInteractionsClasspath();
+//    System.err.println("Classpath = " + _model.getClasspath());
 
     result = interpret("new DrJavaTestFoo().getClass().getName()");
 
     // Now it should be on the classpath
-    assertEquals("interactions result",
-                 "\"DrJavaTestFoo\"",
-                 result);
-
+    assertEquals("interactions result", "\"DrJavaTestFoo\"", result);
+//    System.err.println("Result2 is: " + result);
 
     // Rename directory back to clean up
     tempDir = new File(tempPath + "a");
-    tempDir.renameTo( new File(tempPath));
-
+    boolean renamed = tempDir.renameTo(new File(tempPath));
+//    System.out.println("Renaming of " + tempPath + "a yielded " + renamed);
   }
 
   /**

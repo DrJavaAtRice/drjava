@@ -59,13 +59,6 @@ import edu.rice.cs.drjava.config.OptionConstants;
 
 /**
  * Test I/O functions of the global model.
- * 
- * These tests are complicated by the fact that they were originally written
- * for DefaultGlobalModel rather than DefaultSingleDisplayModel.  The critical
- * change introduced by DefaultSingleDisplayModel is that at least one document
- * is always open; the constructor establishes this invariant.  As a result, 
- * calling setupDocument on a new instance of DefaultSingleDisplayModel creates 
- * the second document (index 1) instead of the first document (index 0).
  *
  * @version $Id$
  */

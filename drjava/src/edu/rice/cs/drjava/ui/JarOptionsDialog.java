@@ -393,7 +393,7 @@ public class JarOptionsDialog extends JDialog {
         Iterator<OpenDefinitionsDocument> iter = srcs.iterator();
         while (iter.hasNext()) {
           OpenDefinitionsDocument doc = iter.next();
-          if (doc.isProjectFile() && !doc.isAuxiliaryFile()) {
+          if (doc.inProject() && !doc.isAuxiliaryFile()) {
             try {
               // Since the file compiled without any errors, this shouldn't have any problems
               jar.addFile(doc.getFile(), packageNameToPath(doc.getPackageName()), doc.getFilename());

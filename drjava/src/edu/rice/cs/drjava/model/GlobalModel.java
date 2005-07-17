@@ -170,20 +170,13 @@ public interface GlobalModel extends IGetDocuments, ILoadDocuments {
    */
   public boolean closeAllFiles();
 
-  /**
-   * Reverts all open files.
-   * (Not working yet.)
-  public void revertAllFiles() throws IOException;
-  */
+  /* Opens all files in specified folder.  If rec is true, open all files in the tree rooted at dir. */
+  public void openFolder(File dir, boolean rec) throws IOException, OperationCanceledException, AlreadyOpenException;
 
-  /**
-   * Saves all open documents, prompting when necessary.
-   */
+  /** Saves all open documents, prompting when necessary. */
   public void saveAllFiles(FileSaveSelector com) throws IOException;
   
-  
-  /**
-   * Writes the project file to disk
+  /**Writes the project file to disk
    * @param filename where to save the project
    */
   public void saveProject(String filename, 
@@ -501,26 +494,17 @@ public interface GlobalModel extends IGetDocuments, ILoadDocuments {
    */
   public File getBuildDirectory();
 
-  /**
-   * Sets the main file of the project
-   */
+  /** Sets the main file of the project. */
   public void setJarMainClass(File f);
   
-  /**
-   * Return the main file for the project
-   * If not in project mode, returns null
-   */
+  /** Return the main file for the project If not in project mode, returns null. */
   public File getMainClass();
   
-  /**
-   * Returns true the given file is in the current project file.
-   */
-  public boolean isProjectFile(File f);
+  /** Returns true the given file is in the current project file. */
+  public boolean inProject(File f);
   
-  /**
-   * a file is in the project if the source root is the same as the
-   * project root. this means that project files must be saved at the
-   * source root. (we query the model through the model's state)
+  /** A file is in the project if the source root is the same as the project root. This means that project files must
+   *  be saved in the source root. (we query the model through the model's state)
    */
   public boolean isInProjectPath(OpenDefinitionsDocument doc);
   

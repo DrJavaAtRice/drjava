@@ -57,19 +57,19 @@ import edu.rice.cs.util.Log;
  */
 public class SingleDisplayModelTest extends GlobalModelTestCase {
   /** Cached copy of the model, typed more strongly than _model. */
-  protected DefaultSingleDisplayModel _sdModel;
+  protected DefaultGlobalModel _sdModel;
 
 //  private Log _log = new Log("SingleDisplayModelTestLog.txt", true);
 
   /** Instantiates the SingleDisplayModel to be used in the test cases. */
   protected void createModel() {
     //_model = new SingleDisplayModel(_originalModel);
-    _model = new DefaultSingleDisplayModel();
+    _model = new DefaultGlobalModel();
     _sdModel = getSDModel();
   }
 
   /** Get the instance of the SingleDisplayModel.*/
-  private DefaultSingleDisplayModel getSDModel() { return (DefaultSingleDisplayModel) _model; }
+  private DefaultGlobalModel getSDModel() { return  _model; }
 
   protected void assertNotEmpty() {
     assertTrue("number of documents", getSDModel().getOpenDefinitionsDocuments().size() > 0);
