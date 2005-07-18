@@ -92,12 +92,10 @@ public abstract class AbstractConsoleController implements Serializable {
   /** Action to change focus to next pane. */
   Action switchToNextPaneAction;
 
-  /**
-   * Initializes the document adapter and interactions pane.
-   * Subclasses *must* call _init() at the end of their constructors.
+  /** Initializes the document adapter and interactions pane. Subclasses *must* call _init() at the end 
+   *  of their constructors.
    */
-  protected AbstractConsoleController(InteractionsDocumentAdapter adapter,
-                                      InteractionsPane pane) {
+  protected AbstractConsoleController(InteractionsDocumentAdapter adapter, InteractionsPane pane) {
     _adapter = adapter;
     _pane = pane;
     _defaultStyle = new SimpleAttributeSet();
@@ -105,23 +103,17 @@ public abstract class AbstractConsoleController implements Serializable {
     _systemErrStyle = new SimpleAttributeSet();
   }
 
-  /**
-   * Gets the console document for this console.
-   */
+  /** Gets the console document for this console.*/
   public abstract ConsoleDocument getConsoleDoc();
 
-  /**
-   * Initialization method.  *Must* be called in constructor by all subclasses.
-   */
+  /** Initialization method.  *Must* be called in constructor by all subclasses. */
   protected void _init() {
     _addDocumentStyles();
     _setupModel();
     _setupView();
   }
 
-  /**
-   * Adds AttributeSets as named styles to the document adapter.
-   */
+  /** Adds AttributeSets as named styles to the document adapter. */
   protected void _addDocumentStyles() {
     // Default
     _adapter.setDocStyle(ConsoleDocument.DEFAULT_STYLE, _defaultStyle);
@@ -354,12 +346,16 @@ public abstract class AbstractConsoleController implements Serializable {
     }
   };
 
-  /** Moves the pane's caret to the end of the document. */
-  void moveToEnd() { moveTo(getConsoleDoc().getLength()); }
+  /** Moves the pane's caret to the end of the document. Only affects reduced_model not the document model. */
+  void moveToEnd() { 
+    moveTo(getConsoleDoc().getLength());
+  }
 
-  /** Moves the pane's caret to the document's prompt. */
-  void moveToPrompt() { moveTo(getConsoleDoc().getPromptPos()); }
-
+  /** Moves the pane's caret to the document's prompt. Only affects reduced_model not the document model. */
+  void moveToPrompt() { 
+    moveTo(getConsoleDoc().getPromptPos()); 
+  }
+  
   /** Moves the pane's caret to the given position, as long as it's legal. */
   void moveTo(int pos) {
     // Sanity check

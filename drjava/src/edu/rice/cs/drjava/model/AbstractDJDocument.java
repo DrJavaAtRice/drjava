@@ -403,11 +403,11 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   }
     
   
-  /** Add a character to the underlying reduced model. ONLY called from already synchronized code!
+  /** Add a character to the underlying reduced model. ONLY called from _reduced synchronized code!
    *  @param curChar the character to be added. */
   private void _addCharToReducedModel(char curChar) {
     clearCache();
-    synchronized(_reduced) { _reduced.insertChar(curChar); }
+   _reduced.insertChar(curChar);
   }
   
   /** Get the current location of the cursor in the document.  Unlike the usual swing document model, 
@@ -1457,13 +1457,14 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
       // adjust location to the start of the text to input
       synchronized(_reduced) {
         _reduced.move(_offset - _currentLocation);  
+        int len = _text.length();
         // loop over string, inserting characters into reduced model
-        for (int i = 0; i < _text.length(); i++) {
+        for (int i = 0; i < len; i++) {
           char curChar = _text.charAt(i);
           _addCharToReducedModel(curChar);
         }
+        _currentLocation = _offset + len;  // current location is at end of inserted string
       }
-      _currentLocation = _offset + _text.length();
       _styleChanged();
     }
   }

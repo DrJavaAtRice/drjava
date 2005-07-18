@@ -45,6 +45,7 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.ui;
 
+import java.awt.Component;
 import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.text.*;
@@ -352,9 +353,11 @@ public final class MainFrameTest extends MultiThreadedTestCase {
 //    _log.log("testGlassPaneEditableState completed");
   }
 
-  /**
-   * Ensure that all key events are disabled when the glass pane is up
-   */
+  private KeyEvent makeFindKeyEvent(Component c, long when) {
+    return new KeyEvent(c, KeyEvent.KEY_PRESSED, when, KeyEvent.CTRL_MASK, KeyEvent.VK_F, 'F');
+  }
+  
+  /** Ensure that all key events are disabled when the glass pane is up. */
   public void testGlassPaneHidesKeyEvents() {
     SingleDisplayModel model = _frame.getModel();
 
@@ -368,14 +371,15 @@ public final class MainFrameTest extends MultiThreadedTestCase {
 
     DefinitionsPane defPane1 = (DefinitionsPane) pane1.getViewport().getView();
     DefinitionsPane defPane2 = (DefinitionsPane) pane2.getViewport().getView();
+    
 
     _frame.hourglassOn();
 
-    defPane1.processKeyEvent(new KeyEvent(defPane1, KeyEvent.KEY_PRESSED, 70, KeyEvent.CTRL_MASK, KeyEvent.VK_F, 'F') );
+    defPane1.processKeyEvent(makeFindKeyEvent(defPane1, 70));
 
     assertTrue("the find replace dialog should not come up", !_frame.getFindReplaceDialog().isDisplayed());
     
-    _frame.getInteractionsPane().processKeyEvent(new KeyEvent(_frame.getInteractionsPane(), KeyEvent.KEY_PRESSED, 0, KeyEvent.CTRL_MASK, KeyEvent.VK_F, 'F') );
+    _frame.getInteractionsPane().processKeyEvent(makeFindKeyEvent(_frame.getInteractionsPane(), 0));
  
     assertTrue("the find replace dialog should not come up", !_frame.getFindReplaceDialog().isDisplayed());
 
