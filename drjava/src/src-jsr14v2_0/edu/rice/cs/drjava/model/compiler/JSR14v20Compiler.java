@@ -191,7 +191,7 @@ public class JSR14v20Compiler implements CompilerInterface {
     //  DrJava.consoleOut().println(sourceRoots[i]);
     //}
     initCompiler(sourceRoots);
-    List<String> filesToCompile = new List<String>();
+    List<String> filesToCompile = _emptyStringList();
 
     for (int i = 0; i < files.length; i++) {
       filesToCompile = filesToCompile.prepend(files[i].getAbsolutePath());
@@ -425,6 +425,26 @@ public class JSR14v20Compiler implements CompilerInterface {
       }
       catch (Exception e2) {
         return false;
+      }
+    }
+  }
+
+  /**
+   * Get an empty List using reflection, since the method to do so changed
+   * with version 1.5.0_04.
+   */
+  private List<String> _emptyStringList() {
+    try {
+      Method nil = List.class.getMethod("nil");
+      return (List<String>) nil.invoke(null);
+    }
+    catch (InvocationTargetException e) {
+      throw new RuntimeException("Exception occured when invoking com.sun.tools.javac.util.List.nil()", e);
+    }
+    catch (Exception e) {
+      try { return (List<String>) List.class.newInstance(); }
+      catch (Exception e2) {
+        throw new RuntimeException("Unable to create an instance of com.sun.tools.javac.util.List", e);
       }
     }
   }
