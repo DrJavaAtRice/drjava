@@ -72,42 +72,30 @@ public interface Debugger {
    */
   public void removeListener(DebugListener listener);
 
-  /**
-   * Returns whether the debugger can be used in this copy of DrJava.
-   * This does not indicate whether it is ready to be used, which is
-   * indicated by isReady().
+  /** Returns whether the debugger can be used in this copy of DrJava. This does not indicate whether it is ready to be
+   *  used, which is indicated by isReady().
    */
   public boolean isAvailable();
 
-  /**
-   * Attaches the debugger to the Interactions JVM to prepare for debugging.
-   */
+  /** Attaches the debugger to the Interactions JVM to prepare for debugging. */
   public void startup() throws DebugException;
 
-  /**
-   * Disconnects the debugger from the Interactions JVM and cleans up
-   * any state.
-   */
+  /** Disconnects the debugger from the Interactions JVM and cleans up any state. */
   public void shutdown();
 
-  /**
-   * Returns the status of the debugger
-   */
+  /** Returns the status of the debugger. */
   public boolean isReady();
+  
+  /** Returns whether debugger is available and ready. */
+  public boolean inDebugMode();
 
-  /**
-   * Suspends execution of the thread referenced by d
-   *
-  public void suspend(DebugThreadData d) throws DebugException;
-  */
+//  /** Suspends execution of the thread referenced by d */
+//  public void suspend(DebugThreadData d) throws DebugException;
 
-  /** Suspends all the threads in the VM the debugger is attached to
-  public void suspendAll();
-  */
+//  /** Suspends all the threads in the VM the debugger is attached to. */
+//  public void suspendAll();
 
-  /**
-   * Sets the current thread we are debugging to the thread referenced by d
-   */
+  /** Sets the current thread we are debugging to the thread referenced by d. */
   public void setCurrentThread(DebugThreadData d) throws DebugException;
 
   /**

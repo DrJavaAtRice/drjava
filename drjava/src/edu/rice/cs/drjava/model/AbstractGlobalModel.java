@@ -1238,7 +1238,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       ((JTreeSortNavigator)_documentNavigator).collapsePaths(ir.getCollapsedPaths());
     }
    
-    resetInteractions(); // Since the classpath is most likely changed.  Clears out test pane as well.
+// The following line is commented out because it is done in MainFrame.openProject before this method is called.
+//    resetInteractions(); // Since the classpath is most likely changed.  Clears out test pane as well.
     
     return srcFiles; // Unnecessarily returns src files in keeping with the previous interface.
   }

@@ -240,8 +240,6 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   /** Interface to the integrated debugger.  If unavailable, set NoDebuggerAvailable.ONLY. */
   private Debugger _debugger = NoDebuggerAvailable.ONLY;
   
-  
-  
   // ----- CONSTRUCTORS -----
   
   /** Constructs a new GlobalModel. Creates a new MainJVM and starts its Interpreter JVM. */
@@ -805,7 +803,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
    * which fires the interactionsReset() event.)
    */
   public void resetInteractions() {
-    if (_debugger.isAvailable() && _debugger.isReady()) _debugger.shutdown();
+    if (_debugger.inDebugMode()) _debugger.shutdown();
 
     _interactionsModel.resetInterpreter();
 //    enableSecurityManager();  // already done by slaveJVM on startup

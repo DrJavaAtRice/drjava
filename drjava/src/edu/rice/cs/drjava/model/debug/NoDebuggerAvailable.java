@@ -54,138 +54,105 @@ import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
  * @version $Id$
  */
 public class NoDebuggerAvailable implements Debugger {
-  /**
-   * Singleton instance of this class.
-   */
+  
+  /** Singleton instance of this class. */
   public static final NoDebuggerAvailable ONLY = new NoDebuggerAvailable();
 
-  /**
-   * Private constructor: use the ONLY field.
-   */
-  private NoDebuggerAvailable() {
-  }
+  /** Private constructor: use the ONLY field. */
+  private NoDebuggerAvailable() { }
 
-  /**
-   * Returns whether the debugger is currently available in this JVM.
-   * This does not indicate whether it is ready to be used.
+  /** Returns whether the debugger is currently available in this JVM. This does not indicate whether it is ready to
+   *  be used.
    */
-  public boolean isAvailable() {
-    return false;
-  }
+  public boolean isAvailable() { return false; }
 
-  /**
-   * Attaches the debugger to the Interactions JVM to prepare for debugging.
-   */
+  /** Attaches the debugger to the Interactions JVM to prepare for debugging. */
   public void startup() throws DebugException {
     throw new IllegalStateException("No debugger is available");
   }
 
-  /**
-   * Disconnects the debugger from the Interactions JVM and cleans up
-   * any state.
-   */
+  /** Disconnects the debugger from the Interactions JVM and cleans up any state. */
   public void shutdown() {
     throw new IllegalStateException("No debugger is available");
   }
 
-  /**
-   * Returns the status of the debugger
-   */
+  /** Returns the status of the debugger. */
   public boolean isReady() {
     throw new IllegalStateException("No debugger is available");
   }
+  
+  public boolean inDebugMode() { return false; }
 
-  /**
-   * Suspends execution of the currently
-   */
+  /** Suspends execution of the currently. */
   public void suspend(DebugThreadData d) {
     throw new IllegalStateException("No debugger is available");
   }
 
-  /**
-   * Suspends all the threads
-   */
+  /** Suspends all the threads. */
   public void suspendAll() {
     throw new IllegalStateException("No debugger is available");
   }
 
-  /**
-   * Sets the current thread which is being debugged to the thread referenced by d
-   */
+  /** Sets the current thread which is being debugged to the thread referenced by d. */
   public void setCurrentThread(DebugThreadData d) {
     throw new IllegalStateException("No debugger is available");
   }
 
-  /**
-   * Resumes execution of the currently loaded document.
-   */
+  /** Resumes execution of the currently loaded document. */
   public void resume() {
     throw new IllegalStateException("No debugger is available");
   }
 
-  /**
-   * Resumes execution of the given thread.
-   * @param data the DebugThreadData representing the thread to resume
+  /** Resumes execution of the given thread.
+   *  @param data the DebugThreadData representing the thread to resume
    */
   public void resume(DebugThreadData data) {
     throw new IllegalStateException("No debugger is available");
   }
 
-  /**
-   * Steps into the execution of the currently loaded document.
-   * @param flag The flag denotes what kind of step to take. The following mark valid options:
-   * StepRequest.STEP_INTO, StepRequest.STEP_OVER, StepRequest.STEP_OUT
+  /** Steps into the execution of the currently loaded document.
+   *  @param flag The flag denotes what kind of step to take. The following mark valid options:
+   *  StepRequest.STEP_INTO, StepRequest.STEP_OVER, StepRequest.STEP_OUT
    */
   public void step(int flag) throws DebugException {
     throw new IllegalStateException("No debugger is available");
   }
 
-  /**
-   * Called from interactionsEnded in MainFrame in order to clear any current
-   * StepRequests that remain.
-   */
+  /** Called from interactionsEnded in MainFrame in order to clear any current StepRequests that remain. */
   public void clearCurrentStepRequest() {
     throw new IllegalStateException("No debugger is available");
   }
 
-  /**
-   * Adds a watch on the given field or variable.
-   * @param field the name of the field we will watch
+  /** Adds a watch on the given field or variable.
+   *  @param field the name of the field we will watch
    */
   public void addWatch(String field) {
     throw new IllegalStateException("No debugger is available");
   }
 
-  /**
-   * Removes any watches on the given field or variable.
-   * @param field the name of the field we will watch
+  /** Removes any watches on the given field or variable.
+   *  @param field the name of the field we will watch
    */
   public void removeWatch(String field) {
     throw new IllegalStateException("No debugger is available");
   }
 
-  /**
-   * Removes the watch at the given index.
-   * @param index Index of the watch to remove
+  /** Removes the watch at the given index.
+   *  @param index Index of the watch to remove
    */
   public void removeWatch(int index) {
     throw new IllegalStateException("No debugger is available");
   }
 
-  /**
-   * Removes all watches on existing fields and variables.
-   */
+  /** Removes all watches on existing fields and variables. */
   public void removeAllWatches() {
     throw new IllegalStateException("No debugger is available");
   }
 
-
-  /**
-   * Toggles whether a breakpoint is set at the given line in the given
-   * document.
-   * @param doc Document in which to set or remove the breakpoint
-   * @param offset Start offset on the line to set the breakpoint
-   * @param lineNum Line on which to set or remove the breakpoint
+  /** Toggles whether a breakpoint is set at the given line in the given document.
+   *  @param doc Document in which to set or remove the breakpoint
+   *  @param offset Start offset on the line to set the breakpoint
+   *  @param lineNum Line on which to set or remove the breakpoint
    */
   public void toggleBreakpoint(OpenDefinitionsDocument doc,
                                int offset, int lineNum)

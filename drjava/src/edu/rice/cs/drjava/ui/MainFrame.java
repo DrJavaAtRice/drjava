@@ -239,9 +239,7 @@ public class MainFrame extends JFrame implements OptionConstants {
    */
   private JFileChooser _openChooser;
   
-  /**
-   * For opening project files.
-   */
+  /** For opening project files. */
   private JFileChooser _openProjectChooser;
   
   /** For saving files. We have a persistent dialog to keep track of the last directory
@@ -2129,17 +2127,10 @@ public class MainFrame extends JFrame implements OptionConstants {
     return getChosenFile(jfc, rc);
   }
   
-  /**
-   * Returns the current DefinitionsPane.
-   */
-  public DefinitionsPane getCurrentDefPane() {
-    return _currentDefPane;
-  }
+  /** Returns the current DefinitionsPane. */
+  public DefinitionsPane getCurrentDefPane() { return _currentDefPane; }
   
-  /**
-   * Returns the currently shown error panel if there is one.
-   * Otherwise returns null.
-   */
+  /** Returns the currently shown error panel if there is one. Otherwise returns null. */
   public ErrorPanel getSelectedErrorPanel() {
     Component c = _tabbedPane.getSelectedComponent();
     if (c instanceof ErrorPanel) return (ErrorPanel) c;
@@ -2297,7 +2288,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   private void _openProject() { openProject(_openProjectSelector); }
   
   public void openProject(FileOpenSelector projectSelector) {
-    if (inDebugMode()) _model.getDebugger().shutdown();  // Opening a project while suspended at a breakpoint caused deadlock
+    _model.resetInteractions();  // Shuts down debugger as well as resetting interactions pane.
     try {
       final File[] file = projectSelector.getFiles();
       if (file.length < 1)
@@ -3229,7 +3220,6 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
   }
   
-  
   /** Toggles a breakpoint on the current line. */
   void debuggerToggleBreakpoint() {
     if (inDebugMode()) {
@@ -3967,6 +3957,7 @@ public class MainFrame extends JFrame implements OptionConstants {
    * functions should always be disabled.
    */
   private void _setDebugMenuItemsEnabled(boolean enabled) {
+    
     _debuggerEnabledMenuItem.setSelected(enabled);
     //_suspendDebugAction.setEnabled(false);
     _resumeDebugAction.setEnabled(false);
@@ -3976,15 +3967,13 @@ public class MainFrame extends JFrame implements OptionConstants {
     _toggleBreakpointAction.setEnabled(enabled);
     //_printBreakpointsAction.setEnabled(enabled);
     _clearAllBreakpointsAction.setEnabled(enabled);
-    if (_debugPanel != null)
-      _debugPanel.disableButtons();
+    
+    if (_debugPanel != null) _debugPanel.disableButtons();
   }
   
-  /**
-   * Enables and disables the appropriate menu items in the debug menu
-   * depending upon the state of the current thread
-   * @param isSuspended is true when the current thread has just been suspended
-   * false if the current thread has just been resumed
+  /** Enables and disables the appropriate menu items in the debug menu depending upon the state of the current thread.
+   *  @param isSuspended is true when the current thread has just been suspended
+   *         false if the current thread has just been resumed
    */
   private void _setThreadDependentDebugMenuItems(boolean isSuspended) {
     //_suspendDebugAction.setEnabled(!isSuspended);
@@ -3995,9 +3984,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _debugPanel.setThreadDependentButtons(isSuspended);
   }
   
-  /**
-   * Creates and returns the language levels menu
-   */
+  /** Creates and returns the language levels menu. */
   private JMenu _setUpLanguageLevelMenu(int mask) {
     JMenu languageLevelMenu = new JMenu("Language Level");
     languageLevelMenu.setMnemonic(KeyEvent.VK_L);
@@ -4359,8 +4346,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     
     // Interactions
     _interactionsController =
-      new InteractionsController(_model.getInteractionsModel(),
-                                 _model.getSwingInteractionsDocument());
+      new InteractionsController(_model.getInteractionsModel(), _model.getSwingInteractionsDocument());
     _interactionsController.setPrevPaneAction(_switchToPreviousPaneAction);
     _interactionsController.setNextPaneAction(_switchToNextPaneAction);
     _interactionsPane = _interactionsController.getPane();
@@ -4805,7 +4791,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
     // reset the undo/redo menu items
     resetUndo();
-    if (inDebugMode()) _updateDebugStatus();
+    _updateDebugStatus();
   }
   
   /** Resets the undo/redo menu items */
@@ -5037,10 +5023,10 @@ public class MainFrame extends JFrame implements OptionConstants {
   }
   
   /** Checks if debugPanel's status bar displays the DEBUGGER_OUT_OF_SYNC message but the current document is 
-   *  in sync.  Clears the debugPanel's status bar in this case.
+   *  in sync.  Clears the debugPanel's status bar in this case.  Does not assume that frame is in debug mode.
    */
   private void _updateDebugStatus() {
-    if (!inDebugMode()) return;
+    if (! inDebugMode()) return;
     
     // if the document is untitled, don't show that it is out of sync since it can't be debugged anyway
     if (_model.getActiveDocument().isUntitled() || _model.getActiveDocument().getClassFileInSync()) {
@@ -5253,7 +5239,12 @@ public class MainFrame extends JFrame implements OptionConstants {
       Utilities.invokeLater(command);
     }
     
-    public void breakpointReached(Breakpoint bp) { }
+    /** Called when a breakpoint is reached. */
+    public void breakpointReached(Breakpoint bp) { 
+      // This code was added to address bug #1238994 which it appears to fix. 
+      // TODO: figure out how to write a unit test to test for this bug.
+      Utilities.invokeLater(new Runnable() { public void run() { _currentDefPane.notifyActive(); } });
+    }
     
     public void breakpointRemoved(final Breakpoint bp) {
       
@@ -5291,8 +5282,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       Utilities.invokeLater(command);
     }
     
-    public void threadStarted() {
-    }
+    public void threadStarted() { }
     
     public void currThreadDied() {
       _disableStepTimer();
@@ -5359,7 +5349,7 @@ public class MainFrame extends JFrame implements OptionConstants {
             if (! _model.inProject(f)) _recentFileManager.updateOpenFiles(f);
           }
           // Check class file sync status, in case file was renamed
-          if (inDebugMode()) _updateDebugStatus();
+          _updateDebugStatus();
         }
       });
     }
@@ -5416,7 +5406,7 @@ public class MainFrame extends JFrame implements OptionConstants {
           _currentDefPane.resetUndo();
           _currentDefPane.hasWarnedAboutModified(false);
           _currentDefPane.setPositionAndScroll(0);
-          if (inDebugMode()) _updateDebugStatus();
+          _updateDebugStatus();
         }
       });
     }
@@ -5509,7 +5499,6 @@ public class MainFrame extends JFrame implements OptionConstants {
       });
     }
     
-    
     public void compileStarted() {
       // Only change GUI from event-dispatching thread
      Utilities.invokeLater(new Runnable() {
@@ -5547,8 +5536,6 @@ public class MainFrame extends JFrame implements OptionConstants {
         }
       });
     }
-    
-    
     
     public void junitStarted(final List<OpenDefinitionsDocument> docs) {
       // Only change GUI from event-dispatching thread
@@ -6227,8 +6214,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   
   boolean inDebugMode() {
     Debugger dm = _model.getDebugger();
-    if (dm.isAvailable()) return dm.isReady() && (_debugPanel != null);
-    return false;
+    return (dm.isAvailable()) && dm.isReady() && (_debugPanel != null);
   }
   
   /** Return the find replace dialog.

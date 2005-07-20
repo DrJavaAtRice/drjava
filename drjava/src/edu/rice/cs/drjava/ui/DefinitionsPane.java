@@ -883,10 +883,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
       _selStart = len;
       _selEnd = len;
     }
-//    setCaretPosition(_position);
-    Object _lock = new Object();
-//    synchronized(_lock) {  // What was the rationale for a local lock here?
-//                              It appears that legacy versions executed this code from non-event context    
+
     _doc.acquireWriteLock();
     try {
       if (_position == _selStart) {

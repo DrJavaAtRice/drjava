@@ -367,23 +367,21 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   /** Returns whether the given text only has spaces. */
   private boolean _hasOnlySpaces(String text) { return (text.trim().length() == 0); }
   
-  /**
-   * Fire event that styles changed from current location to the end.
-   * Right now we do this every time there is an insertion or removal.
-   * Two possible future optimizations:
-   * <ol>
-   * <li>Only fire changed event if text other than that which was inserted
+  /** Fire event that styles changed from current location to the end.
+   *  Right now we do this every time there is an insertion or removal.
+   *  Two possible future optimizations:
+   *  <ol>
+   *  <li>Only fire changed event if text other than that which was inserted
    *     or removed *actually* changed status. If we didn't changed the status
    *     of other text (by inserting or deleting unmatched pair of quote or
    *     comment chars), no change need be fired.
-   * <li>If a change must be fired, we could figure out the exact end
+   *  <li>If a change must be fired, we could figure out the exact end
    *     of what has been changed. Right now we fire the event saying that
    *     everything changed to the end of the document.
-   * </ol>
+   *  </ol>
    *
-   * I don't think we'll need to do either one since it's still fast now.
-   * I think this is because the UI only actually paints the things on the
-   * screen anyway.
+   *  I don't think we'll need to do either one since it's still fast now.
+   *  I think this is because the UI only actually paints the things on the screen anyway.
    */
   protected abstract void _styleChanged(); 
   
@@ -1464,8 +1462,8 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
           _addCharToReducedModel(curChar);
         }
         _currentLocation = _offset + len;  // current location is at end of inserted string
+        _styleChanged();
       }
-      _styleChanged();
     }
   }
 
@@ -1482,9 +1480,9 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     public void run() {
       synchronized(_reduced) { 
         setCurrentLocation(_offset);
-        _reduced.delete(_length); 
+        _reduced.delete(_length);    
+        _styleChanged();
       }
-      _styleChanged();
     }
   }
 }
