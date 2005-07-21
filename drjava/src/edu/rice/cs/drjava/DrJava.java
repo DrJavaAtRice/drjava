@@ -161,9 +161,12 @@ public class DrJava implements OptionConstants {
                 
         // This enabling of the security manager must happen *after* the mainframe
         // is constructed. See bug #518509.
-//        enableSecurityManager();  // makes no sense; this code is only run in the main JVM which does not need a SecurityManager
-        openCommandLineFiles(mf, _filesToOpen);
-        mf.setVisible(true);
+
+        _openCommandLineFiles(mf, _filesToOpen);
+        /* setVibible is moved to the end of the eventqueue to be sure all files has finished loading and added to the fileview before the MainFrame is set visible.
+         * When this was not done, occassionally a NullPointerException was encountered on startup when specifying a file (ex: java -jar drjava.jar somefile.java)
+         */
+        Utilities.invokeLater(new Runnable(){ public void run(){mf.setVisible(true);}});
         
         // redirect stdout to DrJava's console
         System.setOut(new PrintStream(new OutputStreamRedirector() {
