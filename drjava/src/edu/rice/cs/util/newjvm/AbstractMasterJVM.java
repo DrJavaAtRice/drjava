@@ -133,7 +133,7 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/
   
   final static Object lock = new Object();
     
-  /** Invokes slave JVM.
+  /** Creates and nvokes slave JVM.
    *  @param jvmArgs Array of arguments to pass to the JVM on startup
    *  @param cp Classpath to use when starting the JVM
    *  @throws IllegalStateException if slave JVM already connected or startup is in progress.
@@ -229,6 +229,7 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/
           _classLoaderStubFile.getAbsolutePath()
       };
       
+      /* Create the slave JVM. */
       final Process process = ExecJVM.runJVM(RUNNER, args, cp, jvmArgs);
       
       // Start a thread to wait for the slave to die.  When it dies, restart it.

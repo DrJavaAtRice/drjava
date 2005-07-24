@@ -166,8 +166,8 @@ public class SwingDocument extends DefaultStyledDocument implements ConsoleInter
     finally { writeUnlock(); }
   }
 
-  /** Returns the length of the document. */
-  public int getDocLength() { return getLength(); } // locking is unnecessary because getLength is already thread-safe
+//  /** Returns the length of the document. */
+//  public int getDocLength() { return getLength(); } // locking is unnecessary because getLength is already thread-safe
 
   /** Returns a portion of the document.
    *  @param offs First offset of the desired text

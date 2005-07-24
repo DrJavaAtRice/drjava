@@ -124,8 +124,7 @@ public final class ExecJVM {
     return runJVMPropogateClassPath(mainClass, classParams, new String[0]);
   }
 
-  /**
-   * Runs a new JVM.
+  /** Creates and runs a new JVM.
    *
    * @param mainClass Class to run
    * @param classParams Parameters to pass to the main class
