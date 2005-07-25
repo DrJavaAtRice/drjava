@@ -249,6 +249,7 @@ public final class DebugContextTest extends DebugTestCase {
     // Add a breakpoint
     _debugger.toggleBreakpoint(doc,DEBUG_CLASS.indexOf("Foo Line 1"), 3);
     _debugger.toggleBreakpoint(doc,DEBUG_CLASS.indexOf("bar();\n"), 4);
+    Utilities.clearEventQueue();
     debugListener.assertBreakpointSetCount(2);
 
     // Run the foo() method, hitting breakpoint
