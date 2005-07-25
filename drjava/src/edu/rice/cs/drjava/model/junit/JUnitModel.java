@@ -94,7 +94,7 @@ public interface JUnitModel {
    *  @param qualifiedClassnames a list of all the qualified class names to test.
    *  @param files a list of their source files in the same order as qualified class names.
    */
-  public void junitAll(List<String> qualifiedClassnames, List<File> files);
+  public void junitClasses(List<String> qualifiedClassnames, List<File> files);
   
   //----------------------------- Error Results -----------------------------//
 

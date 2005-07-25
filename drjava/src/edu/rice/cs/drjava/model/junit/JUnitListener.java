@@ -67,44 +67,33 @@ public interface JUnitListener {
    */
   public void classFileError(ClassFileError e);
 
-  /**
-   * Called to demand that all files be saved before running JUnit tests.
-   * It is up to the caller of this method to check if the documents have been
-   * saved, using IGetDocuments.hasModifiedDocuments().
-   *
-   * This is never called currently, but it is commented out in case it is
-   * needed later.
-  public void saveBeforeJUnit();
-   */
+//  /** Called to demand that all files be saved before running JUnit tests.
+//   *  It is up to the caller of this method to check if the documents have been
+//   *  saved, using IGetDocuments.hasModifiedDocuments().
+//   *
+//   * This is never called currently, but it is commented out in case it is  needed later.*/
+//  public void saveBeforeJUnit();
 
-  /**
-   * Called after JUnit is started by the GlobalModel.
-   */
+  /** Called after JUnit is started by the GlobalModel. */
   public void junitStarted(List<OpenDefinitionsDocument> docs);
 
-  /**
-   * called when testing all files
-   */
-  public void junitAllStarted();
+  /** Called when testing a specific list of classes given their source files. */
+  public void junitClassesStarted();
   
-  /**
-   * Called to indicate that a suite of tests has started running.
-   * @param numTests The number of tests in the suite to be run.
+  /** Called to indicate that a suite of tests has started running.
+   *  @param numTests The number of tests in the suite to be run.
    */
   public void junitSuiteStarted(int numTests);
 
-  /**
-   * Called when a particular test is started.
-   * @param name The name of the test being started.
+  /** Called when a particular test is started.
+   *  @param name The name of the test being started.
    */
   public void junitTestStarted(String name);
 
-  /**
-   * Called when a particular test has ended.
-   * @param name The name of the test that has ended.
-   * @param wasSuccessful Whether the test passed or not.
-   * @param causedError If not successful, whether the test caused an error
-   *  or simply failed.
+  /** Called when a particular test has ended.
+   *  @param name The name of the test that has ended.
+   *  @param wasSuccessful Whether the test passed or not.
+   *  @param causedError If not successful, whether the test caused an error or simply failed.
    */
   public void junitTestEnded(String name, boolean wasSuccessful, boolean causedError);
 

@@ -393,9 +393,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     //super.setDocument(NULL_DOCUMENT);
     _resetUndo();
     
-    // Add listener that checks if position in the document has changed.
-    // If it has changed, check and see if we should be highlighting matching braces.
-    this.addCaretListener(_matchListener);
+    
     
     //setFont(new Font("Courier", 0, 12));
     Font mainFont = DrJava.getConfig().getSetting(FONT_MAIN);

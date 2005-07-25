@@ -90,9 +90,7 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
   };
 
   
-  /**
-   * The OptionListener for TEXT_ANTIALIAS
-   */
+  /** The OptionListener for TEXT_ANTIALIAS. */
   private class AntiAliasOptionListener implements OptionListener<Boolean> {
     public void optionChanged(OptionEvent<Boolean> oce) {
       _antiAliasText = oce.value.booleanValue();
@@ -100,30 +98,22 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
     }
   }
   
-  /**
-   * Returns a runnable object that beeps to the user.
-   */
-  public Runnable getBeep() {
-    return _beep;
-  }
+  /** Returns a runnable object that beeps to the user. */
+  public Runnable getBeep() { return _beep; }
 
   private InteractionsDocumentAdapter _doc;
   
   private List<Integer> _listOfPrompt = new LinkedList<Integer> ();
     
-  /**
-   * Creates an InteractionsPane with the given document.
-   * Uses default keymap name ("INTERACTIONS_KEYMAP")
-   * @param doc StyledDocument containing the interactions history.
+  /** Creates an InteractionsPane with the given document.
+   *  Uses default keymap name ("INTERACTIONS_KEYMAP")
+   *  @param doc StyledDocument containing the interactions history.
    */
-  public InteractionsPane(InteractionsDocumentAdapter doc) {
-    this("INTERACTIONS_KEYMAP", doc);
-  }
+  public InteractionsPane(InteractionsDocumentAdapter doc) { this("INTERACTIONS_KEYMAP", doc); }
 
-  /**
-   * Creates an InteractionsPane with the given document.
-   * @param keymapName the name of the keymap for this pane
-   * @param doc StyledDocument containing the interactions history.
+  /** Creates an InteractionsPane with the given document.
+   *  @param keymapName the name of the keymap for this pane
+   *  @param doc StyledDocument containing the interactions history.
    */
   public InteractionsPane(String keymapName, InteractionsDocumentAdapter doc) {
     super(doc);
@@ -132,7 +122,6 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
     _keymap = addKeymap(keymapName, getKeymap());
 
     setCaretPosition(doc.getLength());
-    this.addCaretListener(_matchListener);
     _highlightManager = new HighlightManager(this);
     
     if (CodeStatus.DEVELOPMENT) {
@@ -252,7 +241,7 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
   
   /** Adds the position to the list of prompt positions. package private for tests. */
   void addToPromptList(int pos) {
-    if (!_listOfPrompt.contains(new Integer(pos))) _listOfPrompt.add(new Integer(pos));
+    if (! _listOfPrompt.contains(new Integer(pos))) _listOfPrompt.add(new Integer(pos));
   }
   
   /** Returns true if the two locations do not have a prompt between them. */

@@ -332,30 +332,35 @@ public final class InteractionsPaneTest extends TestCase {
   public void testPromptListClearedOnReset() throws Exception {
     //Can't use the fields declared in setUp - it doesn't use a real InteractionsModel
     MainFrame mf = new MainFrame();
+    
+    Utilities.clearEventQueue();
     GlobalModel gm = mf.getModel();
     _controller = mf.getInteractionsController();
     _model = gm.getInteractionsModel();
     _adapter = gm.getSwingInteractionsDocument();
     _doc = gm.getInteractionsDocument();
     _pane = mf.getInteractionsPane();
-    
-    assertEquals("PromptList before insert should contain 0 elements",
-                 0, _pane.getPromptList().size());
+    _pane.resetPrompts();
+
+    Utilities.clearEventQueue();
+//    System.err.println(_pane.getPromptList());
+    assertEquals("PromptList before insert should contain 0 elements", 0, _pane.getPromptList().size());
         
     // Insert some text                   
     _doc.insertText(_doc.getLength(), "5", InteractionsDocument.NUMBER_RETURN_STYLE);
     _pane.setCaretPosition(_doc.getLength());
     
-    assertEquals("PromptList after insert should contain 1 element",
-                 1, _pane.getPromptList().size());    
+    Utilities.clearEventQueue();
+    assertEquals("PromptList after insert should contain 1 element", 1, _pane.getPromptList().size());    
     assertEquals("First prompt should be saved as being at position",
                  InteractionsDocument.DEFAULT_BANNER.length() + InteractionsDocument.DEFAULT_PROMPT.length(),
                  (int)_pane.getPromptList().get(0)); //needs cast to prevent ambiguity
     
     _doc.insertPrompt();
     _pane.setCaretPosition(_doc.getLength());
-    assertEquals("PromptList after insertion of new prompt should contain 2 elements",
-                 2, _pane.getPromptList().size());
+    
+    Utilities.clearEventQueue();
+    assertEquals("PromptList after insertion of new prompt should contain 2 elements", 2, _pane.getPromptList().size());
     assertEquals("First prompt should be saved as being at position",
                  InteractionsDocument.DEFAULT_BANNER.length() + InteractionsDocument.DEFAULT_PROMPT.length(),
    (int) _pane.getPromptList().get(0)); //needs cast to prevent ambiguity
@@ -373,8 +378,7 @@ public final class InteractionsPaneTest extends TestCase {
     }
     Utilities.clearEventQueue();
     synchronized(_model) {
-      assertEquals("PromptList after reset should contain no elements",
-                   0, _pane.getPromptList().size());
+      assertEquals("PromptList after reset should contain no elements", 0, _pane.getPromptList().size());
     }  
   }
     

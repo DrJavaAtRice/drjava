@@ -653,7 +653,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     String[] jvmArgsArray = new String[jvmArgs.size()];
     for (int i=0; i < jvmArgs.size(); i++) { jvmArgsArray[i] = jvmArgs.get(i); }
     
-    // Invoke the Interpreter JVM
+    // Create and invoke the Interpreter JVM
     try {
 //      _startupClasspath is sent in as the interactions classpath
 //      System.out.println("startup: " + _startupClasspath);

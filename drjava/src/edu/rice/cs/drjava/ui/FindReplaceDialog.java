@@ -108,15 +108,15 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
   /** Listens for changes to the cursor position in order to reset the start position */
   private CaretListener _caretListener = new CaretListener() {
     public void caretUpdate(CaretEvent e) {
-//      Utilities.invokeLater(new Runnable() {
-//        public void run() {
+      Utilities.invokeAndWait(new Runnable() {
+        public void run() {
           _replaceAction.setEnabled(false);
           _replaceFindNextAction.setEnabled(false);
           _replaceFindPreviousAction.setEnabled(false);
           _machine.positionChanged();
           _caretChanged = true;
-//        }
-//      });
+        }
+      });
     }
   };
   
@@ -441,7 +441,6 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
     
     KeyStroke switchFocusBackKey = KeyStroke.getKeyStroke(KeyEvent.VK_TAB, Event.SHIFT_MASK);
     km.addActionForKeyStroke(switchFocusBackKey, _findFieldSwitchFocusBackAction); 
-    
     
     Action findNewLineAction = new TextAction("NewLine Action") {
       public void actionPerformed(ActionEvent e) {
@@ -866,37 +865,35 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
     _defPane.getCaret().setSelectionVisible(true);
   }
 
-  /*private void _close() {
-   hide();
-   }*/
+//  private void _close() { hide(); }
   
-  /*public void hide() {
-   System.err.println("*** Called hide ***");
-   if (_open)
-   _frame.uninstallFindReplaceDialog(this);
-   //super.hide();
-   }*/
+//  public void hide() {
+//   System.err.println("*** Called hide ***");
+//   if (_open)
+//   _frame.uninstallFindReplaceDialog(this);
+//   //super.hide();
+//   }
   
-  /*private ContinueCommand CONFIRM_CONTINUE = new ContinueCommand() {
-   public boolean shouldContinue() {
-   String text = "The search has reached the end of the document.\n" +
-   "Continue searching from the start?";
-   int rc = JOptionPane.showConfirmDialog(FindReplaceDialog.this,
-   text,
-   "Continue search?",
-   JOptionPane.YES_NO_OPTION);
-   
-   switch (rc) {
-   case JOptionPane.YES_OPTION:
-   return true;
-   case JOptionPane.NO_OPTION:
-   return false;
-   default:
-   throw new RuntimeException("Invalid rc: " + rc);
-   }
-
-   }
-   };*/
+//  private ContinueCommand CONFIRM_CONTINUE = new ContinueCommand() {
+//    public boolean shouldContinue() {
+//      String text = "The search has reached the end of the document.\n" +
+//        "Continue searching from the start?";
+//      int rc = JOptionPane.showConfirmDialog(FindReplaceDialog.this,
+//                                             text,
+//                                             "Continue search?",
+//                                             JOptionPane.YES_NO_OPTION);
+//      
+//      switch (rc) {
+//        case JOptionPane.YES_OPTION:
+//          return true;
+//        case JOptionPane.NO_OPTION:
+//          return false;
+//        default:
+//          throw new RuntimeException("Invalid rc: " + rc);
+//      }
+//      
+//    }
+//  };
   
   
   /***************** METHODS FOR TESTING PURPOSES ONLY  ***********************/

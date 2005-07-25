@@ -52,6 +52,7 @@ import edu.rice.cs.drjava.model.GlobalModel;
 import edu.rice.cs.drjava.model.repl.InteractionsDocumentTest.TestBeep;
 
 import edu.rice.cs.util.text.DocumentAdapterException;
+import edu.rice.cs.util.swing.Utilities;
 
 /**
  * Tests the functionality of the InteractionsDocumentAdapter.
@@ -102,9 +103,12 @@ public final class InteractionsDocumentAdapterTest extends TestCase {
       _model.setWaitingForFirstInterpreter(false);
       //this adds the "Resetting Interactions"
       _model.resetInterpreter();
+      Utilities.clearEventQueue();
       _model.interpreterResetting();
+      Utilities.clearEventQueue();
+//      Utilities.clearEventQueue();
  
-      assertEquals("StylesList after reset should contain 1 pair",1, _adapter.getStylesList().size());
+      assertEquals("StylesList after reset should contain 1 pair", 1, _adapter.getStylesList().size());
       //Resetting Interactions piece
 //      int returnNum = System.getProperty("line.separator").length();
 //      assertEquals("The only element of the StylesList after reset should be",

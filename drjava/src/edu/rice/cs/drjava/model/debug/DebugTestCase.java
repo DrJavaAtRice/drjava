@@ -574,8 +574,7 @@ public abstract class DebugTestCase extends GlobalModelTestCase {
         _notifyLock();
       }
     }
-    public void threadLocationUpdated(OpenDefinitionsDocument doc,
-                                      int lineNumber, boolean shouldHighlight) {
+    public void threadLocationUpdated(OpenDefinitionsDocument doc, int lineNumber, boolean shouldHighlight) {
       // EventHandler's thread: test should wait
       synchronized(_notifierLock) {
         threadLocationUpdatedCount++;

@@ -47,14 +47,11 @@ package edu.rice.cs.drjava.model.definitions.reducedmodel;
 
 import java.util.Stack;
 
-/**
- * Keeps track of the true braces (i.e., "() {}[]").
- * This reduced sub-model is used to balance braces for both indenting
- * and highlighting purposes.  For example, when the user's caret is
- * immediately after a closing brace, this allows the DefinitionsPane
- * to produced a highlight extending from the closing brace to its match.
- * @version $Id$
- * @author JavaPLT
+/** Keeps track of the true braces (i.e., "() {}[]"). This reduced sub-model is used to balance braces for both 
+ *  indenting and highlighting purposes.  For example, when the user's caret is immediately after a closing brace, 
+ *  this allows the DefinitionsPane to produced a highlight extending from the closing brace to its match.
+ *  @version $Id$
+ *  @author JavaPLT
  */
 public class ReducedModelBrace extends AbstractReducedModel {
 
@@ -73,7 +70,7 @@ public class ReducedModelBrace extends AbstractReducedModel {
       case ']':
       case '(':
       case ')':
-        _insertBrace("" + ch);
+        _insertBrace(String.valueOf(ch));
       break;
       default:
         _insertGap(1);

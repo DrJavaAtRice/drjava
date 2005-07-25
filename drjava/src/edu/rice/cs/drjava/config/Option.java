@@ -44,11 +44,13 @@
 END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.config;
+
+import edu.rice.cs.util.swing.Utilities;
+
 import java.util.Hashtable;
 import java.util.Vector;
 // TODO: Change the usage of these classes to Collections style.
 // TODO: Do these need to be synchronized?
-
 
 /**
  * An instance of this class represents a configurable option in DrJava that has static type T.
@@ -74,7 +76,7 @@ public abstract class Option<T> extends OptionParser<T> implements FormatStrateg
    * a hashtable that maps Configuration Objects to a list of listeners for this
    * particular option.  Part of the magic inner workings of this package.
    */
-  final Hashtable<Configuration,Vector<OptionListener<T>>> listeners=
+  final Hashtable<Configuration,Vector<OptionListener<T>>> listeners =
     new Hashtable<Configuration,Vector<OptionListener<T>>>();
 
   /**
@@ -108,17 +110,17 @@ public abstract class Option<T> extends OptionParser<T> implements FormatStrateg
   }
 
 
-  /**
-   * Sends an OptionEvent to all OptionListeners who have registered on this Option.
-   */
+  /** Sends an OptionEvent to all OptionListeners who have registered on this Option. */
   void notifyListeners(Configuration config, T val) {
-    Vector<OptionListener<T>> v = listeners.get(config);
-    if (v==null) return; // no listeners
-    OptionEvent<T> e = new OptionEvent<T>(this,val);
-    int size = v.size();
-    for (int i = 0; i < size; i++) {
-      v.get(i).optionChanged(e);
-    }
+    final Vector<OptionListener<T>> v = listeners.get(config);
+    if (v == null) return; // no listeners
+    final OptionEvent<T> e = new OptionEvent<T>(this,val);
+    final int size = v.size();
+    Utilities.invokeLater(new Runnable() { 
+      public void run() {
+        for (int i = 0; i < size; i++) v.get(i).optionChanged(e);
+      }
+    });
   }
 
   /** magic listener-bag adder */

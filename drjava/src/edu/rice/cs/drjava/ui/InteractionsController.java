@@ -431,9 +431,7 @@ public class InteractionsController extends AbstractConsoleController {
     }
   };
 
-  /**
-   * Skips back one word.  Doesn't move past the prompt.
-   */
+  /** Skips back one word.  Doesn't move past the prompt. */
   AbstractAction prevWordAction = new AbstractAction() {
     public void actionPerformed(ActionEvent e) {
       int position = _pane.getCaretPosition();
@@ -451,9 +449,7 @@ public class InteractionsController extends AbstractConsoleController {
     }
   };
 
-  /**
-   * Skips forward one word.  Doesn't move past the prompt.
-   */
+  /** Skips forward one word.  Doesn't move past the prompt. */
   AbstractAction nextWordAction = new AbstractAction() {
     public void actionPerformed(ActionEvent e) {
       int position = _pane.getCaretPosition();
@@ -471,9 +467,7 @@ public class InteractionsController extends AbstractConsoleController {
     }
   };
 
-  /**
-   * A box that can be inserted into the interactions pane for separate input.
-   */
+  /** A box that can be inserted into the interactions pane for separate input. */
   private static class InputBox extends JTextArea {
     private static final int BORDER_WIDTH = 1;
     private static final int INNER_BUFFER_WIDTH = 3;

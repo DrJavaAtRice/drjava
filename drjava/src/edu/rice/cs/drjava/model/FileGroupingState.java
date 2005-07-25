@@ -100,7 +100,7 @@ public interface FileGroupingState {
   /** Sets the file that has the main method of the project
    *  (Note: should point to the sourcefile of the document, not the class file)
    */
-  public void setJarMainClass(File f);
+  public void setMainClass(File f);
   
   /** Return all files saved as source files in the project file. If not in project mode, returns null. */
   public File[] getProjectFiles();

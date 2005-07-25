@@ -44,12 +44,12 @@
 END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.config;
-import java.util.ArrayList;
+import java.util.Vector;
 import java.util.Iterator;
 
 public class DefaultOptionMap implements OptionMap {
   
-  private final ArrayList<OptionParser<?>> keys = new ArrayList<OptionParser<?>>();
+  private final Vector<OptionParser<?>> keys = new Vector<OptionParser<?>>();
   
   public <T> T getOption(OptionParser<T> o) { return o.getOption(this); }
   

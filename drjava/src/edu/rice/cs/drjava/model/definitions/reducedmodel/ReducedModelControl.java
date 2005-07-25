@@ -407,8 +407,7 @@ public class ReducedModelControl implements BraceReduction {
    *         in the HighlightStatus objects we return.
    *  @param length The length of the text segment for which status information must be generated.
    */
-  public Vector<HighlightStatus> getHighlightStatus(final int start,
-                                                    final int length) {
+  public Vector<HighlightStatus> getHighlightStatus(final int start, final int length) {
     Vector<HighlightStatus> vec = new Vector<HighlightStatus>();
 
     int curState;

@@ -526,6 +526,8 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     
     // ----- FIND ALL DEFINED CLASSES IN FOLDER ---
     public void junitAll() {
+      // Is this code reachable? I don't think so.  MainFrame bypasses it by calling junitProject() on the junit model
+      // instead of junitAll on the global model
       File dir = getProjectFile().getParentFile();
 //        ArrayList<String> classNames = new ArrayList<String>();
       final ArrayList<File> files = FileOps.getFilesInDir(dir, true, new FileFilter() {
@@ -574,7 +576,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
           }
         }
       }
-      getJUnitModel().junitAll(los, lof);
+      getJUnitModel().junitClasses(los, lof);
     }
     
     /** Jars all the files in this project */

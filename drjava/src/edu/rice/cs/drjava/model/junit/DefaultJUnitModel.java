@@ -148,7 +148,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   public SwingDocument getJUnitDocument() { return _junitDoc; }
   
   /** Creates a JUnit test suite over all currently open documents and runs it.  If the class file 
-   *  associated with a file is not a test case, it will be ignored.  Synchronized against the compiler
+   *  associated with a file is not a test case, it is ignored.  Synchronized against the compiler
    *  model to prevent testing and compiling at the same time, which would create invalid results.
    */
   public void junitAll() { junitDocs(_getter.getOpenDefinitionsDocuments()); }
@@ -166,12 +166,12 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     junitDocs(lod);
   }
   
-  /** Forwards the classnames and files to the test manager to test all of them does not notify 
+  /** Forwards the classnames and files to the test manager to test all of them; does not notify 
    *  since we don't have ODD's to send out with the notification of junit start.
    *  @param qualifiedClassnames a list of all the qualified class names to test.
    *  @param files a list of their source files in the same order as qualified class names.
    */
-  public void junitAll(List<String> qualifiedClassnames, List<File> files) {
+  public void junitClasses(List<String> qualifiedClassnames, List<File> files) {
     synchronized(_compilerModel.getSlaveJVMLock()) {
       synchronized(_testLock) {
         if (_testInProgress) return;
@@ -185,7 +185,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
         nonTestCase(true);
         return;
       }
-      _notifier.junitAllStarted(); 
+      _notifier.junitClassesStarted(); 
       try { _jvm.runTestSuite(); } 
       catch(Throwable t) {
         _notifier.junitEnded();
@@ -217,7 +217,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     catch (NoClassDefFoundError e) {
       // Method getTest in junit.framework.BaseTestRunner can throw a
       // NoClassDefFoundError (via reflection).
-        _notifier.junitEnded();
+        _notifier.junitEnded();  // balances junitStarted()
         synchronized(_testLock) { _testInProgress = false; }
         throw e;
     }
@@ -228,6 +228,9 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     }
   }
   
+  /* Determines which class files in the built directories are test cases and correspond to open source
+   * files.  At this point (if no fatal errors are encountered) it informs listeners that junit has started
+   * (JUnitStarted) and performs the tests. */
   private void junitOpenDefDocs(List<OpenDefinitionsDocument> lod, boolean allTests) {
     // If a test is running, don't start another one.
     
@@ -338,7 +341,8 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
                 /** The (relative) path name for the class. */
                 String pathName = filePath.substring(0, indexOfExtDot);
                 
-                for (OpenDefinitionsDocument doc: lod) {
+                for (OpenDefinitionsDocument doc: lod) {  
+                // Why are searching through all documents here?  We know the path name.
                   try {
                     
                     /** The file for the next document in lod. */
@@ -411,7 +415,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
       
       try {
         /** Run the junit test suite that has already been set up on the slave JVM */
-        _notifier.junitStarted(odds);
+        _notifier.junitStarted(odds); // notify listeners that JUnit testing has finally started!
         //          new ScrollableDialog(null, "junitStarted executed in DefaultJunitModel", "", "").show();
         _jvm.runTestSuite();
         

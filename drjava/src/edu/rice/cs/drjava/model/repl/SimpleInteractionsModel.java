@@ -50,6 +50,8 @@ import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.model.repl.newjvm.InterpreterJVM;
 import edu.rice.cs.drjava.model.repl.newjvm.ClasspathManager;
 
+import edu.rice.cs.util.swing.Utilities;
+
 /**
  * A simple implementation of an InteractionsModel, which uses a
  * DynamicJavaAdapter directly (in the same JVM) to interpret code.
@@ -184,34 +186,24 @@ public class SimpleInteractionsModel extends InteractionsModel {
     _interpreter.defineVariable(name, value);
   }
 
-  /**
-   * Defines a final variable in the interpreter to the given value.
-   */
+  /** Defines a final variable in the interpreter to the given value. */
   public void defineConstant(String name, Object value) {
     _interpreter.defineConstant(name, value);
   }
 
-  /**
-   * Sets whether protected and private variables and methods can be accessed
-   * from within the interpreter.
-   */
+  /** Sets whether protected and private variables and methods can be accessed from within the interpreter. */
   public void setInterpreterPrivateAccessible(boolean accessible) {
     _interpreter.setPrivateAccessible(accessible);
   }
 
-  /**
-   * Any extra action to perform (beyond notifying listeners) when
-   * the interpreter fails to reset.
-   * @param t The Throwable thrown by System.exit
+  /** Any extra action to perform (beyond notifying listeners) when the interpreter fails to reset.
+   *  @param t The Throwable thrown by System.exit
    */
   protected void _interpreterResetFailed(Throwable t) {
-    _document.insertBeforeLastPrompt("Reset Failed!" + _newLine,
-                                     InteractionsDocument.ERROR_STYLE);
+    _document.insertBeforeLastPrompt("Reset Failed!" + _newLine, InteractionsDocument.ERROR_STYLE);
   }
 
-  /**
-   * Resets the Java interpreter.
-   */
+  /** Resets the Java interpreter. */
   protected void _resetInterpreter() {
     interpreterResetting();
     _interpreter = new DynamicJavaAdapter(new ClasspathManager());
@@ -219,60 +211,44 @@ public class SimpleInteractionsModel extends InteractionsModel {
   }
 
 
-  /**
-   * Notifies listeners that an interaction has started.
-   */
-  protected void _notifyInteractionStarted() {
-    _notifier.interactionStarted();
+  /** Notifies listeners that an interaction has started. */
+  protected void _notifyInteractionStarted() { 
+    Utilities.invokeLater(new Runnable() { public void run() { _notifier.interactionStarted(); } });
   }
 
-  /**
-   * Notifies listeners that an interaction has ended.
-   */
+  /** Notifies listeners that an interaction has ended. */
   protected void _notifyInteractionEnded() {
-    _notifier.interactionEnded();
+    Utilities.invokeLater(new Runnable() { public void run() { _notifier.interactionEnded(); } });
   }
 
-  /**
-   * Notifies listeners that an interaction contained
-   * a syntax error.
-   */
+  /** Notifies listeners that an interaction contained a syntax error. */
   protected void _notifySyntaxErrorOccurred(final int offset, final int length) {
-    _notifier.interactionErrorOccurred(offset, length);
+    Utilities.invokeLater(new Runnable() { public void run() { _notifier.interactionErrorOccurred(offset, length); } });
   }
 
-  /**
-   * Notifies listeners that the interpreter is resetting.
-   */
+  /** Notifies listeners that the interpreter is resetting. */
   protected void _notifyInterpreterResetting() {
     // Ok, we don't need to do anything special
   }
 
-  /**
-   * Notifies listeners that the interpreter is ready.
-   */
+  /** Notifies listeners that the interpreter is ready.  */
   protected void _notifyInterpreterReady() {
     //  Ok, we don't need to do anything special
   }
 
-  /**
-   * Notifies listeners that the interpreter has exited unexpectedly.
-   * @param status Status code of the dead process
+  /** Notifies listeners that the interpreter has exited unexpectedly.
+   *  @param status Status code of the dead process
    */
   protected void _notifyInterpreterExited(final int status) {
     // Won't happen in a single JVM
   }
 
-  /**
-   * Notifies listeners that the interpreter reset failed.
-   */
+  /** Notifies listeners that the interpreter reset failed. */
   protected void _notifyInterpreterResetFailed(Throwable t) {
     // Won't happen in a single JVM
   }
 
-  /**
-   * Notifies listeners that the interperaction was incomplete.
-   */
+  /** Notifies listeners that the interperaction was incomplete. */
   protected void _notifyInteractionIncomplete() {
     // Oh well.  Nothing to do.
   }

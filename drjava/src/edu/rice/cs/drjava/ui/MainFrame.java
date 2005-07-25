@@ -216,27 +216,18 @@ public class MainFrame extends JFrame implements OptionConstants {
    */
   private final Timer _debugStepTimer;
   
-  /**
-   * The current highlight displaying the location of the debugger's thread,
-   * if there is one.  If there is none, this is null.
+  /** The current highlight displaying the location of the debugger's thread,
+   *  if there is one.  If there is none, this is null.
    */
   private HighlightManager.HighlightInfo _currentThreadLocationHighlight = null;
   
-  /**
-   * Table to map breakpoints to their corresponding highlight objects.
-   */
+  /** Table to map breakpoints to their corresponding highlight objects. */
   private java.util.Hashtable<Breakpoint, HighlightManager.HighlightInfo> _breakpointHighlights;
   
-  /**
-   * Whether to display a prompt message before quitting.
-   */
+  /** Whether to display a prompt message before quitting. */
   private boolean _promptBeforeQuit;
   
-  /**
-   * For opening files.
-   * We have a persistent dialog to keep track of the last directory
-   * from which we opened.
-   */
+  /** For opening files.  We have a persistent dialog to keep track of the last directory from which we opened. */
   private JFileChooser _openChooser;
   
   /** For opening project files. */
@@ -540,12 +531,13 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
   };
   
-  private Action _saveProjectAsAction = new AbstractAction("Save As...") {
-    public void actionPerformed(ActionEvent ae) {
+  // Not clear what "save as" should do for a project
+//  private Action _saveProjectAsAction = new AbstractAction("Save As...") {
+//    public void actionPerformed(ActionEvent ae) {
 //      _saveProjectAs();
-      _saveAll();
-    }
-  };
+//      _saveAll();
+//    }
+//  };
   
   /** Reverts the current document. */
   private Action _revertAction = new AbstractAction("Revert to Saved") {
@@ -1988,6 +1980,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   /** Return the cursor to normal. */
   public void hourglassOff() { 
     hourglassNestLevel--;
+//    Utilities.showDebug("hourglassOff() called; level = " + hourglassNestLevel);
     if (hourglassNestLevel == 0) {
       Utilities.invokeAndWait(new Runnable() {
         public void run() {
@@ -2290,10 +2283,10 @@ public class MainFrame extends JFrame implements OptionConstants {
   public void openProject(FileOpenSelector projectSelector) {
     _model.resetInteractions();  // Shuts down debugger as well as resetting interactions pane.
     try {
+      hourglassOn();
       final File[] file = projectSelector.getFiles();
       if (file.length < 1)
         throw new IllegalStateException("Open project file selection not canceled but no project file was selected.");
-      hourglassOn();
       
       // make sure there are no open projects
       if (!_model.isProjectActive() || (_model.isProjectActive() && _closeProject())) _openProjectHelper(file[0]);
@@ -3108,7 +3101,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     new Thread("Running Junit Tests") {
       public void run() {
         _dissableJUnitActions();
-        hourglassOn();  // turned off in JUnitStarted/NonTestCase even
+        hourglassOn();  // turned off in JUnitStarted/NonTestCase event
         try {
           if (_model.isProjectActive()) _model.getJUnitModel().junitProject();
           else _model.getJUnitModel().junitAll();
@@ -3269,13 +3262,10 @@ public class MainFrame extends JFrame implements OptionConstants {
       
       try {
         Debugger debugger = _model.getDebugger();
-        debugger.toggleBreakpoint(doc,
-                                  _currentDefPane.getCaretPosition(),
-                                  _currentDefPane.getCurrentLine());
+        debugger.toggleBreakpoint(doc, _currentDefPane.getCaretPosition(), _currentDefPane.getCurrentLine());
       }
       catch (DebugException de) {
-        _showError(de, "Debugger Error",
-                   "Could not set a breakpoint at the current line.");
+        _showError(de, "Debugger Error", "Could not set a breakpoint at the current line.");
       }
     }
   }
@@ -3553,11 +3543,13 @@ public class MainFrame extends JFrame implements OptionConstants {
                  "Save the current document with a new name");
     _setUpAction(_saveProjectAction, "Save", "Save", "Save the current project");
     _saveProjectAction.setEnabled(false);
-    _setUpAction(_saveProjectAsAction, "Save As", "SaveAs", 
-                 "Save all currently open files to new project file");
+    // No longer used
+//    _setUpAction(_saveProjectAsAction, "Save As", "SaveAs", 
+//                 "Save all currently open files to new project file");
     _setUpAction(_revertAction, "Revert", "Revert the current document to the saved version");
-    //_setUpAction(_revertAllAction, "Revert All", "RevertAll",
-    //             "Revert all open documents to the saved versions");
+    // No longer used
+//    _setUpAction(_revertAllAction, "Revert All", "RevertAll",
+//                 "Revert all open documents to the saved versions");
     
     _setUpAction(_closeAction, "Close", "Close the current document");
     _setUpAction(_closeAllAction, "Close All", "CloseAll", "Close all documents");
@@ -3898,7 +3890,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     //Save
     projectMenu.add(_saveProjectAction);
     //SaveAs
-    projectMenu.add(_saveProjectAsAction);
+//    projectMenu.add(_saveProjectAsAction);
     
     // Close
     _addMenuItem(projectMenu, _closeProjectAction, KEY_CLOSE_PROJECT);
@@ -3920,9 +3912,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     return projectMenu;
   }
   
-  /**
-   * Creates and returns a debug menu.
-   */
+  /** Creates and returns a debug menu. */
   private JMenu _setUpDebugMenu(int mask) {
     JMenu debugMenu = new JMenu("Debugger");
     debugMenu.setMnemonic(KeyEvent.VK_D);
@@ -5140,112 +5130,130 @@ public class MainFrame extends JFrame implements OptionConstants {
      */
 //    private boolean _firstCallFromSetSize;
     
-    public void debuggerStarted() {
-      // Only change GUI from event-dispatching thread
-      Runnable command = new Runnable() { public void run() { showDebugger(); } };
-      Utilities.invokeLater(command);
-    }
+    /* Must be executed in evevt thread.*/
+    public void debuggerStarted() { showDebugger(); }
     
+    /* Must be executed in evevt thread.*/
     public void debuggerShutdown() {
       _disableStepTimer();
       
-      // Only change GUI from event-dispatching thread
-      Runnable command = new Runnable() {
-        public void run() {
+//      // Only change GUI from event-dispatching thread
+//      Runnable command = new Runnable() {
+//        public void run() {
           hideDebugger();
           _removeThreadLocationHighlight();
           
           // Ensure all doc breakpoints are gone
           List<OpenDefinitionsDocument> docs = _model.getOpenDefinitionsDocuments();
           for (OpenDefinitionsDocument doc: docs) { doc.removeFromDebugger(); }
-        }
-      };
-      Utilities.invokeLater(command);
+//        }
+//      };
+//      Utilities.invokeLater(command);
     }
     
     public void currThreadSet(DebugThreadData dtd) { }
     
-    public void threadLocationUpdated(final OpenDefinitionsDocument doc,
-                                      final int lineNumber,
+    /** Called when the given line is reached by the current thread in the debugger, to request that the line be 
+     *  displayed.  Must be executed only in the event thread.
+     *  @param doc Document to display
+     *  @param lineNumber Line to display or highlight
+     *  @param shouldHighlight true iff the line should be highlighted.
+     */
+    public void threadLocationUpdated(final OpenDefinitionsDocument doc, final int lineNumber,
                                       final boolean shouldHighlight) {
-      // Only change GUI from event-dispatching thread
-      Runnable command = new Runnable() {
-        public void run() {
+//      Utilities.invokeLater(new Runnable() {
+//        public void run() {
           // This listener is used when the document to display is
           // not the active document. In this case, when setActiveDocument
           // is called, the document won't yet have positive size and we
           // don't want to scroll to a line until it does, so we wait
           // for a call to setSize.
           
-          ActionListener setSizeListener = new ActionListener() {
-            public void actionPerformed(ActionEvent ae) {
-              _currentDefPane.centerViewOnLine(lineNumber);
-            }
-          };
-          _currentDefPane.addSetSizeListener(setSizeListener);
+//          ActionListener setSizeListener = new ActionListener() {
+//            public void actionPerformed(ActionEvent ae) {
+//              Utilities.showDebug("custon setSizeListener called in MainFrame with event " + ae);
+//              _currentDefPane.centerViewOnLine(lineNumber);
+//              _currentDefPane.requestFocusInWindow();
+//            }
+//          };
+//          _currentDefPane.addSetSizeListener(setSizeListener);
           
-//          if (!_model.getActiveDocument().equals(doc)) 
-            _model.setActiveDocument(doc);
+          if (!_model.getActiveDocument().equals(doc)) _model.setActiveDocument(doc);
+          else _model.refreshActiveDocument();
           
           // this block occurs if the documents is already open and as such
           // has a positive size
           if (_currentDefPane.getSize().getWidth() > 0 && _currentDefPane.getSize().getHeight() > 0) {
-            _currentDefPane.centerViewOnLine(lineNumber);
-            _currentDefPane.requestFocusInWindow();
+//            SwingUtilities.invokeLater(new Runnable() {  
+//              public void run() {
+//                Utilities.showDebug("Getting ready to reset defintions pane");
+                _currentDefPane.centerViewOnLine(lineNumber);
+                _currentDefPane.requestFocusInWindow();
+//              }
+//            });
           }
           
-          if (shouldHighlight) {
-            _removeThreadLocationHighlight();
-            int startOffset = doc.getOffset(lineNumber);
-            if (startOffset > -1) {
-              int endOffset = doc.getLineEndPos(startOffset);
-              if (endOffset > -1) {
-                _currentThreadLocationHighlight =
-                  _currentDefPane.getHighlightManager().
-                  addHighlight(startOffset, endOffset, DefinitionsPane.THREAD_PAINTER);
+          SwingUtilities.invokeLater(new Runnable() {  
+          /* The execution of this block of code is deferred to fix bug #1243993.  It is not clear why this deferral
+           * works. */
+            public void run() {
+              if (shouldHighlight) {
+                _removeThreadLocationHighlight();
+                int startOffset = doc.getOffset(lineNumber);
+                if (startOffset > -1) {
+                  int endOffset = doc.getLineEndPos(startOffset);
+                  if (endOffset > -1) {
+                    _currentThreadLocationHighlight =
+                      _currentDefPane.getHighlightManager().
+                      addHighlight(startOffset, endOffset, DefinitionsPane.THREAD_PAINTER);
+                  }
+                }
               }
+              
+              if (doc.isModifiedSinceSave() && !_currentDefPane.hasWarnedAboutModified()) {
+                
+                _showDebuggingModifiedFileWarning();
+                
+                //no need to update flag, because previous method call will do it
+                //_hasWarnedAboutModified = true;
+              }
+              if (shouldHighlight) {
+                // Give the interactions pane focus so we can debug
+                _interactionsPane.requestFocusInWindow();
+              }
+              showTab(_interactionsPane);
+              _updateDebugStatus();
             }
-          }
-          
-          if (doc.isModifiedSinceSave() && !_currentDefPane.hasWarnedAboutModified()) {
-            
-            _showDebuggingModifiedFileWarning();
-            
-            //no need to update flag, because previous method call will do it
-            //_hasWarnedAboutModified = true;
-          }
-          if (shouldHighlight) {
-            // Give the interactions pane focus so we can debug
-            _interactionsPane.requestFocusInWindow();
-          }
-          showTab(_interactionsPane);
-          _updateDebugStatus();
-        }
-      };
-      Utilities.invokeLater(command);
+          });
+//        }
+//      });
     }
-    
+                            
+    /* Must be executed in event thread. */
     public void breakpointSet(final Breakpoint bp) {
-      // Only change GUI from event-dispatching thread
-      Runnable command = new Runnable() {
-        public void run() {
+//      // Only change GUI from event-dispatching thread
+//      Runnable command = new Runnable() {
+//        public void run() {
           DefinitionsPane bpPane = getDefPaneGivenODD(bp.getDocument());
           _breakpointHighlights.
             put(bp, bpPane.getHighlightManager().
                   addHighlight(bp.getStartOffset(), bp.getEndOffset(), DefinitionsPane.BREAKPOINT_PAINTER));
           _updateDebugStatus();
-        }
-      };
-      Utilities.invokeLater(command);
+//        }
+//      };
+//      Utilities.invokeLater(command);
     }
     
-    /** Called when a breakpoint is reached. */
+    /** Called when a breakpoint is reached. Must execute in event thread. */
     public void breakpointReached(Breakpoint bp) { 
-      // This code was added to address bug #1238994 which it appears to fix. 
-      // TODO: figure out how to write a unit test to test for this bug.
-      Utilities.invokeLater(new Runnable() { public void run() { _currentDefPane.notifyActive(); } });
+      /* The following commented-out code was added to address bug #1238994 which it appeared to fix.  But subsequent
+       * moving of debugger event code into event thread appears to make it unnecessary.
+       * TODO: figure out how to write a unit test to test for this bug. */
+//      _model.getDebugger().scrollToSource(bp);     
+//      _currentDefPane.notifyActive();
     }
     
+    /* Must be executed in event thread. */
     public void breakpointRemoved(final Breakpoint bp) {
       
       HighlightManager.HighlightInfo highlight = _breakpointHighlights.get(bp);
@@ -5253,7 +5261,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       _breakpointHighlights.remove(bp);
     }
     
-    /** Called when a step is requested on the current thread. */
+    /** Called when a step is requested on the current thread.  Must be executed in event thread. */
     public void stepRequested() {
       // Print a message if step takes a long time
       synchronized(_debugStepTimer) {  // Why is this synchronized
@@ -5271,25 +5279,27 @@ public class MainFrame extends JFrame implements OptionConstants {
       Utilities.invokeLater(command);
     }
     
+    /* Must be executed in the event thread. */
     public void currThreadResumed() {
       // Only change GUI from event-dispatching thread
-      Runnable command = new Runnable() {
-        public void run() {
+//      Runnable command = new Runnable() {
+//        public void run() {
           _setThreadDependentDebugMenuItems(false);
           _removeThreadLocationHighlight();
-        }
-      };
-      Utilities.invokeLater(command);
+//        }
+//      };
+//      Utilities.invokeLater(command);
     }
     
+    /* Must be executed in event thread. */
     public void threadStarted() { }
     
+    /* Must be executed in event thread. */
     public void currThreadDied() {
       _disableStepTimer();
       
-      // Only change GUI from event-dispatching thread
-      Runnable command = new Runnable() {
-        public void run() {
+//      Runnable command = new Runnable() {
+//        public void run() {
           if (inDebugMode()) {
             try {
               if (!_model.getDebugger().hasSuspendedThreads()) {
@@ -5306,13 +5316,13 @@ public class MainFrame extends JFrame implements OptionConstants {
               _showError(de, "Debugger Error", "Error with a thread in the debugger.");
             }
           }
-        }
-      };
-      Utilities.invokeLater(command);
+//        }
+//      };
+//      Utilities.invokeLater(command);
     }
     
-    public void nonCurrThreadDied() {
-    }
+    /* Must be executed in event thread. */
+    public void nonCurrThreadDied() { }
   }
   
   /** Inner class to listen to all events in the model. */
@@ -5538,6 +5548,8 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
     
     public void junitStarted(final List<OpenDefinitionsDocument> docs) {
+      /* Note: hourglassOn() is done by various junit commands (other than junitClasses); hourglass must be off for 
+       * actual testing; the balancing hourglassOff() is located here and in nonTestCase */
       // Only change GUI from event-dispatching thread
 //      new ScrollableDialog(null, "junitStarted(" + docs + ") called in MainFrame", "", "").show();
       Utilities.invokeLater(new Runnable() {
@@ -5549,24 +5561,24 @@ public class MainFrame extends JFrame implements OptionConstants {
             _junitAction.setEnabled(false);
             _junitAllAction.setEnabled(false);
           }
-          finally { hourglassOff(); }
+          finally { hourglassOff(); }  
         }
       });
     }
     
-    /** We are junit'ing all files, so we don't need a list of odd's */
-    public void junitAllStarted() {
+    /** We are junit'ing a specific list of classes given their source files. */
+    public void junitClassesStarted() {
       // Only change GUI from event-dispatching thread
-      // new ScrollableDialog(null, "junitAllStarted called in MainFrame", "", "").show();
+      // new ScrollableDialog(null, "junitClassesStarted called in MainFrame", "", "").show();
       Utilities.invokeLater(new Runnable() {
         public void run() {
-//          new ScrollableDialog(null, "Ready for hourglassOn in junitAllStarted", "", "").show();
+//          new ScrollableDialog(null, "Ready for hourglassOn in junitClassesStarted", "", "").show();
 //          hourglassOn();
           showTab(_junitErrorPanel);
           _junitErrorPanel.setJUnitInProgress();
           _junitAction.setEnabled(false);
           _junitAllAction.setEnabled(false);
-        }
+        } // no hourglassOff here because junitClasses does not perform hourglassOn
       });
     }
     
@@ -6063,11 +6075,15 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
     
     public void projectClosed() {
-      _model.getDocumentNavigator().asContainer().addKeyListener(_historyListener);
-      _model.getDocumentNavigator().asContainer().addFocusListener(_focusListenerForRecentDocs);
-      _model.getDocumentNavigator().asContainer().addMouseListener(_resetFindReplaceListener);
+      Utilities.invokeAndWait(new Runnable() {
+        public void run() {
+          _model.getDocumentNavigator().asContainer().addKeyListener(_historyListener);
+          _model.getDocumentNavigator().asContainer().addFocusListener(_focusListenerForRecentDocs);
+          _model.getDocumentNavigator().asContainer().addMouseListener(_resetFindReplaceListener);
 //      new ScrollableDialog(null, "Closing JUnit Error Panel in MainFrame", "", "").show();
-      removeTab(_junitErrorPanel);
+          removeTab(_junitErrorPanel);
+        }
+      });
     }
     
     public void projectOpened(File projectFile, FileOpenSelector files) {
@@ -6078,6 +6094,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       _model.getDocumentNavigator().asContainer().addKeyListener(_historyListener);
       _model.getDocumentNavigator().asContainer().addFocusListener(_focusListenerForRecentDocs);
       _model.getDocumentNavigator().asContainer().addMouseListener(_resetFindReplaceListener);
+//      _model.refreshActiveDocument();
     }
     
     public void projectRunnableChanged() {
@@ -6206,12 +6223,17 @@ public class MainFrame extends JFrame implements OptionConstants {
   }
   
   /* Pops up a message and cleans up after unit testing has been interrupted. */
-  private void _junitInterrupted(UnexpectedException e) {
-    _showJUnitInterrupted(e);
-    removeTab(_junitErrorPanel);
-    hourglassOff();
+  private void _junitInterrupted(final UnexpectedException e) {
+    Utilities.invokeLater(new Runnable() {
+      public void run() {
+        _showJUnitInterrupted(e);
+        removeTab(_junitErrorPanel);
+        _model.refreshActiveDocument();
+        // hourglassOff();
+      }
+    });
   }
-  
+      
   boolean inDebugMode() {
     Debugger dm = _model.getDebugger();
     return (dm.isAvailable()) && dm.isReady() && (_debugPanel != null);

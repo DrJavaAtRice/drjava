@@ -58,18 +58,14 @@ import javax.swing.text.Position;
 import com.sun.jdi.*;
 import com.sun.jdi.request.*;
 
-/**
- * The breakpoint object which has references to its OpenDefinitionsDocument and its
- * BreakpointRequest
+/** The breakpoint object which has references to its OpenDefinitionsDocument and its BreakpointRequest
  */
 public class Breakpoint extends DocumentDebugAction<BreakpointRequest> {
 
    private Position _startPos;
    private Position _endPos;
 
-  /**
-   * @throws DebugException if the document does not have a file
-   */
+  /** @throws DebugException if the document does not have a file */
   public Breakpoint(OpenDefinitionsDocument doc, int offset, int lineNumber, JPDADebugger manager)
     throws DebugException {
 
@@ -88,15 +84,13 @@ public class Breakpoint extends DocumentDebugAction<BreakpointRequest> {
     _initializeRequests(_manager.getReferenceTypes(_className, _lineNumber));
   }
 
-  /**
-   * Creates appropriate EventRequests from the EventRequestManager and
-   * stores them in the _requests field.
-   * @param refTypes All (identical) ReferenceTypes to which this action
-   * applies.  (There may be multiple if a custom class loader is in use.)
-   * @throws DebugException if the requests could not be created.
+  /** Creates appropriate EventRequests from the EventRequestManager and
+   *  stores them in the _requests field.
+   *  @param refTypes All (identical) ReferenceTypes to which this action
+   *  applies.  (There may be multiple if a custom class loader is in use.)
+   *  @throws DebugException if the requests could not be created.
    */
-  protected void _createRequests(Vector<ReferenceType> refTypes)
-    throws DebugException
+  protected void _createRequests(Vector<ReferenceType> refTypes) throws DebugException
   {
     try {
       for (int i=0; i < refTypes.size(); i++) {
@@ -132,9 +126,8 @@ public class Breakpoint extends DocumentDebugAction<BreakpointRequest> {
     return _startPos.getOffset();
   }
 
-  /**
-   * Accessor for the offset of this breakpoint's end position
-   * @return the end offset
+  /** Accessor for the offset of this breakpoint's end position
+   *  @return the end offset
    */
   public int getEndOffset() {
     return _endPos.getOffset();

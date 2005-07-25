@@ -46,6 +46,7 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.model.debug;
 
 import edu.rice.cs.util.Log;
+import edu.rice.cs.util.swing.Utilities;
 
 import com.sun.jdi.*;
 import com.sun.jdi.event.*;
@@ -103,10 +104,8 @@ public class EventHandlerThread extends Thread {
     _log.logTime(message, t);
   }
 
-  /**
-   * Main functionality for this thread.  Continually consumes events
-   * from the VM's event queue until it is disconnected.
-   */
+  /** Main functionality of this thread.  Continually consumes events from the VM's event queue until it is 
+   *  disconnected.*/
   public void run() {
     _debugger.notifyDebuggerStarted();
 
@@ -117,9 +116,8 @@ public class EventHandlerThread extends Thread {
           // Remove and consume a set of events from the queue
           EventSet eventSet = queue.remove();
           EventIterator it = eventSet.eventIterator();
-          while (it.hasNext()) {
-            handleEvent(it.nextEvent());
-          }
+          
+          while (it.hasNext()) handleEvent(it.nextEvent());
         }
         catch (InterruptedException ie) {
           // Don't need to do anything.  If the VM was disconnected,
@@ -144,12 +142,11 @@ public class EventHandlerThread extends Thread {
     _debugger.notifyDebuggerShutdown();
   }
 
-  /**
-   * Processes a given event from JPDA.
-   * A visitor approach would be much better for this, but Sun's Event
-   * class doesn't have an appropriate visit() method.
+  /** Processes a given event from JPDA. A visitor approach would be much better for this, but Sun's Event class 
+   *  doesn't have an appropriate visit() method.
    */
   public void handleEvent(Event e) throws DebugException {
+//    Utilities.showDebug("EventHandler.handleEvent(" + e + ") called");
     _log("handling event: " + e);
 
     if (e instanceof BreakpointEvent) _handleBreakpointEvent((BreakpointEvent) e);
@@ -177,28 +174,24 @@ public class EventHandlerThread extends Thread {
     }
   }
 
-  /**
-   * Responds to a breakpoint event.
-   * @param e breakpoint event from JPDA
+  /** Responds to a breakpoint event.
+   *  @param e breakpoint event from JPDA
    */
   protected void _handleBreakpointEvent(BreakpointEvent e) throws DebugException {
     synchronized(_debugger) {
-      if (_isSuspendedWithFrames(e.thread()) &&
-          _debugger.setCurrentThread(e.thread())) {
+      if (_isSuspendedWithFrames(e.thread()) && _debugger.setCurrentThread(e.thread())) {
+//        Utilities.showDebug("EventHandlerThread._handleBreakpointEvent(" + e + ") called");
         _debugger.currThreadSuspended();
 //        _debugger.scrollToSource(e);
-        _debugger.reachedBreakpoint((BreakpointRequest)e.request());
+        _debugger.reachedBreakpoint((BreakpointRequest) e.request());
       }
     }
   }
 
-  /**
-   * Responds to a step event.
-   * @param e step event from JPDA
+  /** Responds to a step event.
+   *  @param e step event from JPDA
    */
-  protected void _handleStepEvent(StepEvent e)
-    throws DebugException
-  {
+  protected void _handleStepEvent(StepEvent e) throws DebugException {
     synchronized(_debugger) {
       if (_isSuspendedWithFrames(e.thread()) &&
           _debugger.setCurrentThread(e.thread())) {
@@ -214,23 +207,20 @@ public class EventHandlerThread extends Thread {
     }
   }
 
-  /**
-   * Responds to an event for a modified watchpoint.
-   * This event is not currently expected in DrJava.
-   * @param e modification watchpoint event from JPDA
-   *
-  protected void _handleModificationWatchpointEvent(ModificationWatchpointEvent e) {
-    _debugger.printMessage("ModificationWatchpointEvent occured ");
-    _debugger.printMessage("Field: " + e.field() + " Value: " +
-                          e.valueToBe() +"]");
-  }*/
+//  /** Responds to an event for a modified watchpoint.
+//   *  This event is not currently expected in DrJava.
+//   *  @param e modification watchpoint event from JPDA
+//   */
+//  protected void _handleModificationWatchpointEvent(ModificationWatchpointEvent e) {
+//    _debugger.printMessage("ModificationWatchpointEvent occured ");
+//    _debugger.printMessage("Field: " + e.field() + " Value: " +
+//                          e.valueToBe() +"]");
+//  }
 
-  /**
-   * Responds when a class of interest has been prepared.
-   * Allows the debugger to set a pending breakpoint before any code in
-   * the class is executed.
-   * @param e class prepare event from JPDA
-   * @throws DebugException if actions performed on the prepared class fail
+  /** Responds when a class of interest has been prepared. Allows the debugger to set a pending breakpoint before any 
+   *  code in the class is executed.
+   *  @param e class prepare event from JPDA
+   *  @throws DebugException if actions performed on the prepared class fail
    */
   protected void _handleClassPrepareEvent(ClassPrepareEvent e) throws DebugException {
     synchronized(_debugger) {
@@ -274,9 +264,8 @@ public class EventHandlerThread extends Thread {
         }
         _debugger.currThreadDied();
       }
-      else {
+      else
         _debugger.nonCurrThreadDied();
-      }
     }
 
     // Thread is suspended on death, so resume it now.
@@ -308,9 +297,7 @@ public class EventHandlerThread extends Thread {
     synchronized(_debugger) {
       _connected = false;
       if (_debugger.isReady()) {
-        if (_debugger.hasSuspendedThreads()) {
-          _debugger.currThreadDied();
-        }
+        if (_debugger.hasSuspendedThreads()) _debugger.currThreadDied();
         _debugger.shutdown();
       }
     }

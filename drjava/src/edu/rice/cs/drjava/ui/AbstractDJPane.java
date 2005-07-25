@@ -99,6 +99,9 @@ public abstract class AbstractDJPane extends JTextPane implements OptionConstant
   AbstractDJPane(SwingDocument doc) {
     super(doc);
     setContentType("text/java");
+    
+    // Add listener that checks if highlighting matching braces must be updated
+    this.addCaretListener(_matchListener);
   }
   
   //--------- METHODS -----------

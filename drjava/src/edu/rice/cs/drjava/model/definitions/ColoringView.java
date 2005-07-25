@@ -158,8 +158,7 @@ public class ColoringView extends PlainView implements OptionConstants {
           DrJava.getConfig().removeOptionListener( OptionConstants.SYSTEM_IN_COLOR, col);
           DrJava.getConfig().removeOptionListener( OptionConstants.SYSTEM_OUT_COLOR, col);
           DrJava.getConfig().removeOptionListener( OptionConstants.INTERACTIONS_ERROR_COLOR, col);
-          DrJava.getConfig().removeOptionListener( OptionConstants.DEBUG_MESSAGE_COLOR, col);
-          
+          DrJava.getConfig().removeOptionListener( OptionConstants.DEBUG_MESSAGE_COLOR, col); 
         }
       });
     }

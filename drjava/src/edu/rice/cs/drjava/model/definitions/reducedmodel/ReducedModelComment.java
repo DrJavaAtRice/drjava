@@ -45,13 +45,11 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.definitions.reducedmodel;
 
-/**
- * Keeps track of newlines, comment blocks, and single and double-quoted strings.
- * This reduced sub-model is used for coloring purposes.  Given the information
- * contained here, the DefinitionsEditorKit can paint strings, comments, and
- * regular code in different colors.  DefinitionsEditorKit colors keywords
- * by directly reading DefinitionsDocument, the "full-scale" model.
- * @version $Id$
+/** Keeps track of newlines, comment blocks, and single and double-quoted strings. This reduced sub-model is used for 
+ *  coloring purposes.  Given the information contained here, the DefinitionsEditorKit can paint strings, comments, and
+ *  regular code in different colors.  DefinitionsEditorKit colors keywords by directly reading DefinitionsDocument, 
+ *  the "full-scale" model.
+ *  @version $Id$
  */
 
 public class ReducedModelComment extends AbstractReducedModel {
@@ -59,10 +57,7 @@ public class ReducedModelComment extends AbstractReducedModel {
   /** Can be used by other classes to walk through the list of comment chars*/
   TokenList.Iterator _walker;
 
-  /**
-  * Constructor.  Creates a new reduced model with the cursor
-  * at the start of a blank "page."
-  */
+  /** Constructor.  Creates a new reduced model with the cursor at the start of a blank "page." */
   public ReducedModelComment() {
     super();
     _walker = _cursor._copy();

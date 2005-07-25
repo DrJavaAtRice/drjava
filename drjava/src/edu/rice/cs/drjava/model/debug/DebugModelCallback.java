@@ -51,15 +51,10 @@ package edu.rice.cs.drjava.model.debug;
  * @version $Id$
  */
 public interface DebugModelCallback {
-  /**
-   * Notifies the debugger that an assignment has been made in 
-   * the given debug interpreter.
-   * Does not notify on declarations.
-   * 
-   * Not currently used.
-   * 
-   * @param name the name of the interpreter
-   *
-  public void notifyDebugInterpreterAssignment(String name);
-  */
+//  /** Notifies the debugger that an assignment has been made in the given debug interpreter.
+//   *  Does not notify on declarations.
+//   *  Not currently used.
+//   * @param name the name of the interpreter
+//   */
+//  public void notifyDebugInterpreterAssignment(String name);
 }

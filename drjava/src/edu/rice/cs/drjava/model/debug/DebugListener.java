@@ -47,83 +47,61 @@ package edu.rice.cs.drjava.model.debug;
 
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 
-/**
- * Any class which wants to listen to events fired by the Debugger should
- * implement this interface and use Debugger's addDebugListener() method.
- * @version $Id$
+/** Any class which wants to listen to events fired by the Debugger should implement this interface and use Debugger's
+ *  addDebugListener() method.
+ *  @version $Id$
  */
 public interface DebugListener {
   
-  /**
-   * Called when debugger mode has been enabled.
-   */
+  /** Called when debugger mode has been enabled. Must be executed in event thread. */
   public void debuggerStarted();
   
-  /**
-   * Called when debugger mode has been disabled.
-   */
+  /** Called when debugger mode has been disabled.  Must be executed in event thread. */
   public void debuggerShutdown();
 
-  /**
-   * Called when the given line is reached by the current thread in the 
-   * debugger, to request that the line be displayed.
-   * @param doc Document to display
-   * @param lineNumber Line to display or highlight
-   * @param shouldHighlight whether to highlight the given line or not
+  /** Called when the given line is reached by the current thread in the debugger, to request that the line be 
+   *  displayed.  Must be executed only in the event thread.
+   *  @param doc Document to display
+   *  @param lineNumber Line to display or highlight
+   *  @param shouldHighlight true iff the line should be highlighted.
    */
   public void threadLocationUpdated(OpenDefinitionsDocument doc, int lineNumber, boolean shouldHighlight);  
   
-  /**
-   * Called when a breakpoint is set in a document.
-   * @param bp the breakpoint
+  /** Called when a breakpoint is set in a document.  Must be executed in event thread.
+   *  @param bp the breakpoint
    */
   public void breakpointSet(Breakpoint bp);
   
-  /**
-   * Called when a breakpoint is reached during execution.
-   * @param bp the breakpoint
+  /** Called when a breakpoint is reached during execution.
+   *  @param bp the breakpoint
    */
   public void breakpointReached(Breakpoint bp);
   
-  /**
-   * Called when a breakpoint is removed from a document.
-   * @param bp the breakpoint
+  /** Called when a breakpoint is removed from a document.  Must be executed in event thread.
+   *  @param bp the breakpoint
    */
   public void breakpointRemoved(Breakpoint bp);
   
-  /**
-   * Called when a step is requested on the current thread.
-   */
+  /** Called when a step is requested on the current thread.  Must be executed in event thread. */
   public void stepRequested();
   
-  /**
-   * Called when the current thread is suspended
-   */
+  /** Called when the current thread is suspended. */
   public void currThreadSuspended();
   
-  /**
-   * Called when the current thread is resumed
-   */
+  /** Called when the current thread is resumed. Must be executed in event thread. */
   public void currThreadResumed();
   
-  /**
-   * Called when a thread starts
-   */
+  /** Called when a thread starts. Must be executed in event thread. */
   public void threadStarted();
   
-  /**
-   * Called when the current thread dies
-   */
+  /** Called when the current thread dies. Must be executed in event thread. */
   public void currThreadDied();
   
-  /**
-   * Called when any thread other than the current thread dies
-   */
+  /** Called when any thread other than the current thread dies. Must be executed in event thread. */
   public void nonCurrThreadDied();
 
-  /**
-   * Called when the current (selected) thread is set in the debugger.
-   * @param thread the thread that was set as current
+  /** Called when the current (selected) thread is set in the debugger.
+   *  @param thread the thread that was set as current
    */
   public void currThreadSet(DebugThreadData thread);
 }

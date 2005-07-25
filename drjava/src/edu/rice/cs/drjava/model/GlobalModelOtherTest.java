@@ -224,6 +224,8 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     _resetDone = false;
     synchronized(_resetDoneLock) {
       interpretIgnoreResult("while (true) {}");
+      
+      Utilities.clearEventQueue();
       listener.assertInteractionStartCount(1);
       _model.resetInteractions();
       _resetDoneLock.wait();
@@ -272,8 +274,9 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
 
     assertEquals("Length of console text", 1, _model.getConsoleDocument().getLength());
 
-
     _model.resetConsole();
+    
+    Utilities.clearEventQueue();
     assertEquals("Length of console text", 0, _model.getConsoleDocument().getLength());
 
     listener.assertConsoleResetCount(2);
@@ -547,6 +550,8 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     File file3 = new File(subdir2, "Bar.java");
     OpenDefinitionsDocument doc3 = setupDocument(BAR_TEXT);
     doc3.saveFileAs(new FileSelector(file3));
+    
+    Utilities.clearEventQueue();
 
     // No events should fire
     _model.addListener(new TestListener());
@@ -569,9 +574,13 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     IOException, InterruptedException {
 
     OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
+    Utilities.clearEventQueue();
+        
     File f = tempFile();
 
     doCompile(doc, f);
+    
+    Utilities.clearEventQueue();
 
     // Rename the directory so it's not on the classpath anymore
     String tempPath = f.getParent();
@@ -591,6 +600,8 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     DrJava.getConfig().setSetting(EXTRA_CLASSPATH, cp);
     _model.resetInteractionsClasspath();
 //    System.err.println("Classpath = " + _model.getClasspath());
+    
+    Utilities.clearEventQueue();
 
     result = interpret("new DrJavaTestFoo().getClass().getName()");
 
@@ -604,9 +615,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
 //    System.out.println("Renaming of " + tempPath + "a yielded " + renamed);
   }
 
-  /**
-   * Tests that the appropriate event is fired when the model's interpreter changes.
-   */
+  /** Tests that the appropriate event is fired when the model's interpreter changes.*/
   public void testSwitchInterpreters() {
     TestListener listener = new TestListener() {
       public void interpreterChanged(boolean inProgress) {
@@ -621,7 +630,8 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     // Create a new Java interpreter, and set it to be active
     dim.addJavaInterpreter("testInterpreter");
     dim.setActiveInterpreter("testInterpreter", "myPrompt>");
-
+    
+    Utilities.clearEventQueue();
     listener.assertInterpreterChangedCount(1);
     _model.removeListener(listener);
   }
@@ -632,9 +642,13 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     File file = new File(dir, "Foo.java");
     OpenDefinitionsDocument doc = doCompile(FOO_CLASS, file);
     doc.runMain();
+    
+    Utilities.clearEventQueue();
     assertInteractionsContains("Foo");
     doc.insertString(doc.getLength(), " ", null);
     doc.runMain();
+    
+    Utilities.clearEventQueue();
     assertInteractionsContains(DefaultGlobalModel.DOCUMENT_OUT_OF_SYNC_MSG);
   }
 }

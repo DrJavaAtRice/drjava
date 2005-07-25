@@ -104,7 +104,7 @@ class JUnitEventNotifier extends EventNotifier<JUnitListener> implements JUnitLi
   }
 
   /**
-   * Called after JUnit is started by the GlobalModel.
+   * Called after junit/junitAll is started by the GlobalModel.
    */
   public void junitStarted(List<OpenDefinitionsDocument> docs) {
     _lock.startRead();
@@ -112,12 +112,10 @@ class JUnitEventNotifier extends EventNotifier<JUnitListener> implements JUnitLi
     finally { _lock.endRead(); }
   }
 
-  /**
-   * Called after JUnit is started by the GlobalModel.
-   */
-  public void junitAllStarted() {
+  /** Called after junitClasses is started by the GlobalModel. */
+  public void junitClassesStarted() {
     _lock.startRead();
-    try { for (JUnitListener jul : _listeners) { jul.junitAllStarted(); } }
+    try { for (JUnitListener jul : _listeners) { jul.junitClassesStarted(); } }
     finally { _lock.endRead(); }
   }
 

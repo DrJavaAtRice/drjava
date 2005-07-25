@@ -130,45 +130,53 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
   }
 
   /** Notifies listeners that an interaction has started. */
-  protected void _notifyInteractionStarted() { _notifier.interactionStarted(); }
+  protected void _notifyInteractionStarted() { 
+    Utilities.invokeLater(new Runnable() { public void run() { _notifier.interactionStarted(); } });
+  }
 
   /** Notifies listeners that an interaction has ended. */
-  protected void _notifyInteractionEnded() { _notifier.interactionEnded(); }
+  protected void _notifyInteractionEnded() { 
+    Utilities.invokeLater(new Runnable() { public void run() { _notifier.interactionEnded(); } });
+  }
 
   /** Notifies listeners that an error was present in the interaction. */
   protected void _notifySyntaxErrorOccurred(final int offset, final int length) {
-    _notifier.interactionErrorOccurred(offset,length);
+    Utilities.invokeLater(new Runnable() { public void run() { _notifier.interactionErrorOccurred(offset,length); } });
   }
 
   /** Notifies listeners that the interpreter has changed.
    *  @param inProgress Whether the new interpreter is currently in progress.
    */
   protected void _notifyInterpreterChanged(final boolean inProgress) {
-    _notifier.interpreterChanged(inProgress);
+    Utilities.invokeLater(new Runnable() { public void run() { _notifier.interpreterChanged(inProgress); } });
   }
 
   /** Notifies listeners that the interpreter is resetting. */
-  protected void _notifyInterpreterResetting() { _notifier.interpreterResetting(); }
+  protected void _notifyInterpreterResetting() { 
+    Utilities.invokeLater(new Runnable() { public void run() { _notifier.interpreterResetting(); } });
+  }
 
   /** Notifies listeners that the interpreter is ready. */
-  protected void _notifyInterpreterReady() { _notifier.interpreterReady();  }
+  protected void _notifyInterpreterReady() { 
+    Utilities.invokeLater(new Runnable() { public void run() { _notifier.interpreterReady(); } });
+  }
 
   /** Notifies listeners that the interpreter has exited unexpectedly.
    *  @param status Status code of the dead process
    */
   protected void _notifyInterpreterExited(final int status) {
-    _notifier.interpreterExited(status);
+    Utilities.invokeLater(new Runnable() { public void run() { _notifier.interpreterExited(status); } });
   }
 
   /** Notifies listeners that the interpreter reset failed.
    *  @param t Throwable causing the failure
    */
   protected void _notifyInterpreterResetFailed(final Throwable t) {
-    _notifier.interpreterResetFailed(t);
+    Utilities.invokeLater(new Runnable() { public void run() { _notifier.interpreterResetFailed(t); } });
   }
 
   /** Notifies the view that the current interaction is incomplete. */
   protected void _notifyInteractionIncomplete() {
-    _notifier.interactionIncomplete();
+    Utilities.invokeLater(new Runnable() { public void run() { _notifier.interactionIncomplete(); } });
   }
 }

@@ -80,12 +80,9 @@ import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
  *
  * @version $Id$
  */
-public class DebugEventNotifier extends EventNotifier<DebugListener>
-    implements DebugListener
- {
-  /**
-   * Called when debugger mode has been enabled.
-   */
+public class DebugEventNotifier extends EventNotifier<DebugListener> implements DebugListener {
+  
+  /** Called when debugger mode has been enabled.  Must be executed in event thread. */
   public void debuggerStarted() {
     _lock.startRead();
     try {
@@ -94,14 +91,10 @@ public class DebugEventNotifier extends EventNotifier<DebugListener>
         _listeners.get(i).debuggerStarted();
       }
     }
-    finally {
-      _lock.endRead();
-    }
+    finally { _lock.endRead(); }
   }
 
-  /**
-   * Called when debugger mode has been disabled.
-   */
+  /** Called when debugger mode has been disabled.  Must be executed in event thread. */
   public void debuggerShutdown() {
     _lock.startRead();
     try {
@@ -110,52 +103,39 @@ public class DebugEventNotifier extends EventNotifier<DebugListener>
         _listeners.get(i).debuggerShutdown();
       }
     }
-    finally {
-      _lock.endRead();
-    }
+    finally { _lock.endRead(); }
   }
 
-  /**
-   * Called when the given line is reached by the current thread in the
-   * debugger, to request that the line be displayed.
-   * @param doc Document to display
-   * @param lineNumber Line to display or highlight
-   * @param shouldHighlight whether to highlight the given line or not
-   */
-  public void threadLocationUpdated(OpenDefinitionsDocument doc, int lineNumber,
-                                    boolean shouldHighlight) {
+  /** Called when the given line is reached by the current thread in the debugger, to request that the line be 
+    *  displayed.  Must be executed only in the event thread.
+    *  @param doc Document to display
+    *  @param lineNumber Line to display or highlight
+    *  @param shouldHighlight true iff the line should be highlighted.
+    */
+  public void threadLocationUpdated(OpenDefinitionsDocument doc, int lineNumber,  boolean shouldHighlight) {
     _lock.startRead();
     try {
       int size = _listeners.size();
       for (int i = 0; i < size; i++) {
-        _listeners.get(i).threadLocationUpdated(doc, lineNumber,
-                                                shouldHighlight);
+        _listeners.get(i).threadLocationUpdated(doc, lineNumber, shouldHighlight);
       }
     }
-    finally {
-      _lock.endRead();
-    }
+    finally { _lock.endRead(); }
   }
 
-  /**
-   * Called when a breakpoint is set in a document.
-   * @param bp the breakpoint
+  /** Called when a breakpoint is set in a document.  Must be executed in event thread.
+   *  @param bp the breakpoint
    */
   public void breakpointSet(Breakpoint bp) {
     _lock.startRead();
     try {
       int size = _listeners.size();
-      for (int i = 0; i < size; i++) {
-        _listeners.get(i).breakpointSet(bp);
-      }
+      for (int i = 0; i < size; i++) { _listeners.get(i).breakpointSet(bp); }
     }
-    finally {
-      _lock.endRead();
-    }
+    finally { _lock.endRead(); }
   }
 
-  /**
-   * Called when a breakpoint is reached during execution.
+  /** Called when a breakpoint is reached during execution. Must be executed in event thread.
    * @param bp the breakpoint
    */
   public void breakpointReached(Breakpoint bp) {
@@ -171,122 +151,80 @@ public class DebugEventNotifier extends EventNotifier<DebugListener>
     }
   }
 
-  /**
-   * Called when a breakpoint is removed from a document.
-   * @param bp the breakpoint
+  /** Called when a breakpoint is removed from a document.  Must be executed in event thread.
+   *  @param bp the breakpoint
    */
   public void breakpointRemoved(Breakpoint bp) {
     _lock.startRead();
     try {
       int size = _listeners.size();
-      for (int i = 0; i < size; i++) {
-        _listeners.get(i).breakpointRemoved(bp);
-      }
+      for (int i = 0; i < size; i++) _listeners.get(i).breakpointRemoved(bp);
     }
-    finally {
-      _lock.endRead();
-    }
+    finally { _lock.endRead(); }
   }
 
-  /**
-   * Called when a step is requested on the current thread.
-   */
+  /** Called when a step is requested on the current thread. Must be executed in event thread. */
   public void stepRequested() {
     _lock.startRead();
     try {
       int size = _listeners.size();
-      for (int i = 0; i < size; i++) {
-        _listeners.get(i).stepRequested();
-      }
+      for (int i = 0; i < size; i++) _listeners.get(i).stepRequested();
     }
-    finally {
-      _lock.endRead();
-    }
+    finally { _lock.endRead(); }
   }
 
-  /**
-   * Called when the current thread is suspended
-   */
+  /** Called when the current thread is suspended.  */
   public void currThreadSuspended() {
     _lock.startRead();
     try {
       int size = _listeners.size();
-      for (int i = 0; i < size; i++) {
-        _listeners.get(i).currThreadSuspended();
-      }
+      for (int i = 0; i < size; i++) _listeners.get(i).currThreadSuspended();
     }
-    finally {
-      _lock.endRead();
-    }
+    finally { _lock.endRead(); }
   }
 
-  /**
-   * Called when the current thread is resumed
-   */
+  /** Called when the current thread is resumed.  Must be executed in event thread. */
   public void currThreadResumed() {
     _lock.startRead();
     try {
       int size = _listeners.size();
-      for (int i = 0; i < size; i++) {
-        _listeners.get(i).currThreadResumed();
-      }
+      for (int i = 0; i < size; i++) _listeners.get(i).currThreadResumed();
     }
-    finally {
-      _lock.endRead();
-    }
+    finally { _lock.endRead(); }
   }
 
-  /**
-   * Called when a thread starts
-   */
+  /** Called when a thread starts. Must be executed in event thread. */
   public void threadStarted() {
     _lock.startRead();
     try {
       int size = _listeners.size();
-      for (int i = 0; i < size; i++) {
-        _listeners.get(i).threadStarted();
-      }
+      for (int i = 0; i < size; i++) _listeners.get(i).threadStarted();
     }
-    finally {
-      _lock.endRead();
-    }
+    finally { _lock.endRead(); }
   }
 
-  /**
-   * Called when the current thread dies
-   */
+  /** Called when the current thread dies. Must be executed in event thread. */
   public void currThreadDied() {
     _lock.startRead();
     try {
       int size = _listeners.size();
-      for (int i = 0; i < size; i++) {
-        _listeners.get(i).currThreadDied();
-      }
+      for (int i = 0; i < size; i++) _listeners.get(i).currThreadDied();
     }
-    finally {
-      _lock.endRead();
-    }
+    finally { _lock.endRead(); }
   }
 
-  /**
-   * Called when any thread other than the current thread dies
-   */
+  /** Called when any thread other than the current thread dies. Must be executed in event thread. */
   public void nonCurrThreadDied() {
     _lock.startRead();
     try {
       int size = _listeners.size();
-      for (int i = 0; i < size; i++) {
-        _listeners.get(i).nonCurrThreadDied();
-      }
+      for (int i = 0; i < size; i++) _listeners.get(i).nonCurrThreadDied();
     }
-    finally {
-      _lock.endRead();
-    }
+    finally { _lock.endRead(); }
   }
 
-  /**
-   * Called when the current (selected) thread is set in the debugger.
-   * @param thread the thread that was set as current
+  /** Called when the current (selected) thread is set in the debugger.
+   *  @param thread the thread that was set as current
    */
   public void currThreadSet(DebugThreadData thread) {
     _lock.startRead();
@@ -296,8 +234,6 @@ public class DebugEventNotifier extends EventNotifier<DebugListener>
         _listeners.get(i).currThreadSet(thread);
       }
     }
-    finally {
-      _lock.endRead();
-    }
+    finally { _lock.endRead(); }
   }
 }

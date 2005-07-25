@@ -459,24 +459,16 @@ public interface GlobalModel extends IGetDocuments, ILoadDocuments {
    */
   public List<OpenDefinitionsDocument> getProjectDocuments();
   
-  /**
-   * Compiles all open files (all files in project (??) in project mode)
-   */
+  /** Compiles all open files (all files in project (??) in project mode) */
   public void compileAll() throws IOException;
   
-  /**
-   * @return true if the model has a project open, false otherwise.
-   */
+  /** @return true if the model has a project open, false otherwise. */
   public boolean isProjectActive();
   
-  /**
-   * junits all the appropriate files
-   */
+  /** junits all the appropriate files */
   public void junitAll();
   
-  /**
-   * @return the file that points to the current project file. Null if not currently in project view
-   */
+  /** @return the file that points to the current project file. Null if not currently in project view */
   public File getProjectFile();
   
   /**
@@ -495,7 +487,7 @@ public interface GlobalModel extends IGetDocuments, ILoadDocuments {
   public File getBuildDirectory();
 
   /** Sets the main file of the project. */
-  public void setJarMainClass(File f);
+  public void setMainClass(File f);
   
   /** Return the main file for the project If not in project mode, returns null. */
   public File getMainClass();

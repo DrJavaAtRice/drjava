@@ -380,6 +380,7 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
     try { for (GlobalModelListener l : _listeners) { l.classFileError(e); } }
     finally { _lock.endRead(); }
   }
+  
   /** Called after JUnit is started by the GlobalModel. */
   public void junitStarted(List<OpenDefinitionsDocument> docs) {
     _lock.startRead();
@@ -387,10 +388,10 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
     finally { _lock.endRead(); }
   }
 
-  /** Called when testing all files. */
-  public void junitAllStarted() {
+  /** Called when testing specific list of classes. */
+  public void junitClassesStarted() {
     _lock.startRead();
-    try { for (GlobalModelListener l : _listeners) { l.junitAllStarted(); } }
+    try { for (GlobalModelListener l : _listeners) { l.junitClassesStarted(); } }
     finally { _lock.endRead(); }
   }
   

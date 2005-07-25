@@ -216,7 +216,7 @@ public class ProjectPropertiesFrame extends JFrame {
     f = _jarMainClassSelector.getFileFromField();
     if (_jarMainClassSelector.getFileField().getText().equals(""))
       f = null;
-    _mainFrame.getModel().setJarMainClass(f);
+    _mainFrame.getModel().setMainClass(f);
     
     Vector<File> extras = _extraClasspathList.getValue();
     ClasspathVector cpv = new ClasspathVector();

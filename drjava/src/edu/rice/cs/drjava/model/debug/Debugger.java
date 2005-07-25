@@ -139,73 +139,50 @@ public interface Debugger {
    */
   public void removeWatch(String field) throws DebugException;
 
-  /**
-   * Removes the watch at the given index.
-   * @param index Index of the watch to remove
+  /** Removes the watch at the given index.
+   *  @param index Index of the watch to remove
    */
   public void removeWatch(int index) throws DebugException;
 
-  /**
-   * Removes all watches on existing fields and variables.
-   */
+  /** Removes all watches on existing fields and variables. */
   public void removeAllWatches() throws DebugException;
 
 
-  /**
-   * Toggles whether a breakpoint is set at the given line in the given
-   * document.
-   * @param doc Document in which to set or remove the breakpoint
-   * @param offset Start offset on the line to set the breakpoint
-   * @param lineNum Line on which to set or remove the breakpoint
+  /** Toggles whether a breakpoint is set at the given line in the given document.
+   *  @param doc Document in which to set or remove the breakpoint
+   *  @param offset Start offset on the line to set the breakpoint
+   *  @param lineNum Line on which to set or remove the breakpoint
    */
-  public void toggleBreakpoint(OpenDefinitionsDocument doc,
-                               int offset, int lineNum)
-    throws DebugException;
+  public void toggleBreakpoint(OpenDefinitionsDocument doc, int offset, int lineNum) throws DebugException;
 
-  /**
-   * Sets a breakpoint.
-   *
-   * @param breakpoint The new breakpoint to set
+  /** Sets a breakpoint.
+   *  @param breakpoint The new breakpoint to set
    */
   public void setBreakpoint(final Breakpoint breakpoint) throws DebugException;
 
- /**
-  * Removes a breakpoint.
-  * Called from ToggleBreakpoint -- even with BPs that are not active.
-  * @param breakpoint The breakpoint to remove.
+ /** Removes a breakpoint. Called from ToggleBreakpoint -- even with BPs that are not active.
+  *  @param breakpoint The breakpoint to remove.
   */
   public void removeBreakpoint(final Breakpoint breakpoint) throws DebugException;
 
-  /**
-   * Removes all the breakpoints from the manager's vector of breakpoints.
-   */
+  /** Removes all the breakpoints from the manager's vector of breakpoints. */
   public void removeAllBreakpoints() throws DebugException;
 
-  /**
-   * Returns a Vector<Breakpoint> that contains all of the Breakpoint objects that
-   * all open documents contain.
+  /** Returns a Vector<Breakpoint> that contains all of the Breakpoint objects that
+   *  all open documents contain.
    */
   public Vector<Breakpoint> getBreakpoints() throws DebugException;
 
-  /**
-   * Prints the list of breakpoints in the current session of DrJava, both pending
-   * resolved Breakpoints are listed
-   */
+  /** Prints the list of breakpoints in the current session of DrJava, both pending resolved Breakpoints are listed. */
   public void printBreakpoints() throws DebugException;
 
-  /**
-   * Returns all currently watched fields and variables.
-   */
+  /** Returns all currently watched fields and variables. */
   public Vector<DebugWatchData> getWatches() throws DebugException;
 
-  /**
-   * Returns a Vector of ThreadData.
-   */
+  /** Returns a Vector of ThreadData. */
   public Vector<DebugThreadData> getCurrentThreadData() throws DebugException;
 
-  /**
-   * Returns a Vector of StackData for the current thread.
-   */
+  /** Returns a Vector of StackData for the current thread. */
   public Vector<DebugStackData> getCurrentStackFrameData() throws DebugException;
 
   /**

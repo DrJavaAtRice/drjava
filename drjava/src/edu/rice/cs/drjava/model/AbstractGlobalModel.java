@@ -463,8 +463,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   public boolean isInProjectPath(OpenDefinitionsDocument doc) { return _state.isInProjectPath(doc); }
   
   /** Sets the class with the project's main method. */
-  public void setJarMainClass(File f) {
-    _state.setJarMainClass(f);
+  public void setMainClass(File f) {
+    _state.setMainClass(f);
     _notifier.projectRunnableChanged();
     setProjectChanged(true);
   }
@@ -580,7 +580,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     public File getMainClass() { return _mainFile; }
     
-    public void setJarMainClass(File f) { _mainFile = f; }
+    public void setMainClass(File f) { _mainFile = f; }
     
     public boolean isProjectChanged() { return _isProjectChanged; }
     
@@ -665,7 +665,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     public File[] getProjectFiles() { return null; }
     public boolean inProject(File f) { return false; }
     public File getMainClass() { return null; }
-    public void setJarMainClass(File f) { }
+    public void setMainClass(File f) { }
     public boolean isProjectChanged() { return false; }
     public void setProjectChanged(boolean changed) { /* Do nothing  */  }
     public boolean isAuxiliaryFile(File f) { return false; }

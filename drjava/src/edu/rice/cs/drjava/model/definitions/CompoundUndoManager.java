@@ -210,7 +210,9 @@ public class CompoundUndoManager extends UndoManager {
   }
   
   /** Helper method to notify the view that an undoable edit has occured. */
-  private void _notifyUndoHappened() { _notifier.undoableEditHappened(); }
+  private void _notifyUndoHappened() { 
+    Utilities.invokeLater(new Runnable() { public void run() { _notifier.undoableEditHappened(); } });
+  }
   
   /** Ends the compoundEdit in progress if any.  Used by undo(), redo(), documentSaved(). */
   private synchronized void endCompoundEdit() {

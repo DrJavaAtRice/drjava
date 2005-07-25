@@ -45,26 +45,23 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.config;
 
-/**
- * Class to store and retrieve all configurable options.
- * @version $Id$
+import edu.rice.cs.util.swing.Utilities;
+
+/** Class to store and retrieve all configurable options.
+ *  @version $Id$
  */
 public class Configuration {  
   
-  /**
-   * OptionMap used to store all option settings.
-   */
+  /** OptionMap used to store all option settings. */
   protected OptionMap map;
   
-  /**
-   * Any exception that is caught when initializing this Configuration object.
-   * Used later by the UI to display a useful message to the user.
+  /** Any exception that is caught when initializing this Configuration object.
+   *  Used later by the UI to display a useful message to the user.
    */
   protected Exception _startupException;
   
-  /**
-   * Initializes this Configuration object with the given OptionMap.
-   * @param om An empty OptionMap.
+  /** Initializes this Configuration object with the given OptionMap.
+   *  @param om An empty OptionMap.
    */
   public Configuration(OptionMap om) {
     map = om;
@@ -75,9 +72,9 @@ public class Configuration {
    *  @param op Option to set
    *  @param value New value for the option
    */
-  public <T> T setSetting(Option<T> op, T value) {
+  public <T> T setSetting(final Option<T> op, final T value) {
     T ret = map.setOption(op, value);
-    op.notifyListeners(this, value);
+    Utilities.invokeLater(new Runnable() { public void run() { op.notifyListeners(Configuration.this, value); } });
     return ret;
   }
   
@@ -86,11 +83,9 @@ public class Configuration {
     return map.getOption(op);
   }
   
-  /**
-   * Adds an OptionListener to the given Option, to be notified each
-   * time the option changes.
-   * @param op Option to listen for changes on
-   * @param l OptionListener wishing to listen
+  /** Adds an OptionListener to the given Option, to be notified each time the option changes.
+   *  @param op Option to listen for changes on
+   *  @param l OptionListener wishing to listen
    */
   public <T> void addOptionListener(Option<T> op, OptionListener<T> l) {
     op.addListener(this,l);

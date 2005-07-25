@@ -298,7 +298,9 @@ public class DocumentCache {
   public void addRegistrationListener(RegistrationListener list) { _regListeners.add(list); }
   public void removeRegistrationListener(RegistrationListener list) { _regListeners.remove(list); }
   public void clearRegistrationListeners() { _regListeners.clear(); }
-  private void notifyRegistrationListeners(OpenDefinitionsDocument odd, DocManager man) {
-    for (RegistrationListener list : _regListeners) { list.registered(odd,man); }
+  private void notifyRegistrationListeners(final OpenDefinitionsDocument odd, final DocManager man) {
+    Utilities.invokeAndWait(new Runnable() {
+      public void run() { for (RegistrationListener list : _regListeners) { list.registered(odd, man); } }
+    });
   }
 }

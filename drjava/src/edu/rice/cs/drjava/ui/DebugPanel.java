@@ -107,8 +107,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
   
   private DefaultTreeCellRenderer dtcr;
 
-  /** Constructs a new panel to display debugging information when the
-   *  Debugger is active.  This is swing view class and hence should only
+  /** Constructs a new panel to display debugging information when the Debugger is active.  This is swing view class and hence should only
    *  be accessed from the event-handling thread.
    */
   public DebugPanel(MainFrame frame) {
@@ -154,27 +153,21 @@ public class DebugPanel extends JPanel implements OptionConstants {
     _setColors(_threadTable);
   }
 
-  /**
-   * Quick helper for setting up color listeners.
-   */
+  /** Quick helper for setting up color listeners. */
   private static void _setColors(Component c) {
     new ForegroundColorListener(c);
     new BackgroundColorListener(c);
   }
 
-  /**
-   * Causes all display tables to update their information from the debug manager.
-   */
+  /** Causes all display tables to update their information from the debug manager. */
   public void updateData() {
     if (_debugger.isReady()) {
       try {
         _watches = _debugger.getWatches();
-        if (_debugger.isCurrentThreadSuspended()) {
-          _stackFrames = _debugger.getCurrentStackFrameData();
-        }
-        else {
-          _stackFrames = new Vector<DebugStackData>();
-        }
+        
+        if (_debugger.isCurrentThreadSuspended())  _stackFrames = _debugger.getCurrentStackFrameData();
+        else  _stackFrames = new Vector<DebugStackData>();
+        
         _threads = _debugger.getCurrentThreadData();
       }
       catch (DebugException de) {
@@ -196,10 +189,8 @@ public class DebugPanel extends JPanel implements OptionConstants {
   }
 
 
-  /**
-   * Creates the tabbed panes in the debug panel.
-   */
-  public void _setupTabPanes() {
+  /** Creates the tabbed panes in the debug panel. */
+  private void _setupTabPanes() {
 
     // Watches table
     _initWatchTable();
@@ -243,10 +234,8 @@ public class DebugPanel extends JPanel implements OptionConstants {
 
   private void _initWatchTable() {
     _watchTable = new JTable( new WatchTableModel());
-    _watchTable.setDefaultEditor(_watchTable.getColumnClass(0),
-                                 new WatchEditor());
-    _watchTable.setDefaultRenderer(_watchTable.getColumnClass(0),
-                                   new WatchRenderer());
+    _watchTable.setDefaultEditor(_watchTable.getColumnClass(0), new WatchEditor());
+    _watchTable.setDefaultRenderer(_watchTable.getColumnClass(0), new WatchRenderer());
 
     _leftPane.addTab("Watches", new JScrollPane(_watchTable));
   }
@@ -292,9 +281,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
     _threadTable.getColumnModel().getColumn(1).setCellRenderer(threadTableRenderer);
   }
 
-  /**
-   * Adds config color support to DefaultTreeCellEditor.
-   */
+  /** Adds config color support to DefaultTreeCellEditor. */
   static class BreakPointRenderer extends DefaultTreeCellRenderer {
 
     public void setBackground(Color c) {
@@ -330,14 +317,10 @@ public class DebugPanel extends JPanel implements OptionConstants {
     }
   }
 
-  /**
-   * Adds config color support to DefaultCellEditor.
-   */
-  static class WatchEditor extends DefaultCellEditor {
+  /** Adds config color support to DefaultCellEditor. */
+  private static class WatchEditor extends DefaultCellEditor {
 
-    WatchEditor() {
-      super(new JTextField());
-    }
+    WatchEditor() { super(new JTextField()); }
 
     /**
      * Overrides the default editor component to use proper coloring.
@@ -351,10 +334,8 @@ public class DebugPanel extends JPanel implements OptionConstants {
     }
   }
 
-  /**
-   * Adds config color support to DefaultTableCellRenderer.
-   */
-  class WatchRenderer extends DefaultTableCellRenderer {
+  /** Adds config color support to DefaultTableCellRenderer. */
+  private class WatchRenderer extends DefaultTableCellRenderer {
 
     /**
      * Overrides the default rederer component to use proper coloring.
@@ -384,16 +365,12 @@ public class DebugPanel extends JPanel implements OptionConstants {
     }
   }
 
-  /**
-   * A table for displaying the watched variables and fields.
-   */
+  /** A table for displaying the watched variables and fields. Where is the synchronization for this class? */
   public class WatchTableModel extends AbstractTableModel {
 
     private String[] _columnNames = {"Name", "Value", "Type"};
 
-    public String getColumnName(int col) {
-      return _columnNames[col];
-    }
+    public String getColumnName(int col) { return _columnNames[col]; }
     public int getRowCount() { return _watches.size() + 1; }
     public int getColumnCount() { return _columnNames.length; }
     public Object getValueAt(int row, int col) {
@@ -415,12 +392,8 @@ public class DebugPanel extends JPanel implements OptionConstants {
     }
     public boolean isCellEditable(int row, int col) {
       // First col for entering new values
-      if (col == 0) {
-        return true;
-      }
-      else {
-        return false;
-      }
+      if (col == 0) return true;
+      return false;
     }
     public void setValueAt(Object value, int row, int col) {
       try {
@@ -437,26 +410,19 @@ public class DebugPanel extends JPanel implements OptionConstants {
         //fireTableCellUpdated(row, col);
         fireTableRowsUpdated(row, _watches.size()-1);
       }
-      catch (DebugException de) {
-        _frame._showDebugError(de);
-      }
+      catch (DebugException de) { _frame._showDebugError(de); }
     }
   }
 
-  /**
-   * A table for displaying the current stack trace.
-   */
+  /** A table for displaying the current stack trace. */
   public class StackTableModel extends AbstractTableModel {
 
     private String[] _columnNames = {"Method", "Line"};  // Do we need #?
 
-    public String getColumnName(int col) {
-      return _columnNames[col];
-    }
+    public String getColumnName(int col) { return _columnNames[col]; }
+    
     public int getRowCount() {
-      if (_stackFrames == null) {
-        return 0;
-      }
+      if (_stackFrames == null)  return 0;
       return _stackFrames.size();
     }
     public int getColumnCount() { return _columnNames.length; }
@@ -474,21 +440,15 @@ public class DebugPanel extends JPanel implements OptionConstants {
     }
   }
 
-  /**
-   * A table for displaying all current threads.
-   */
+  /** A table for displaying all current threads.  Where is the synchronization for this class? */
   public class ThreadTableModel extends AbstractTableModel {
 
     private String[] _columnNames = {"Name", "Status"};
 
-    public String getColumnName(int col) {
-      return _columnNames[col];
-    }
+    public String getColumnName(int col) { return _columnNames[col]; }
 
     public int getRowCount() {
-      if (_threads == null) {
-        return 0;
-      }
+      if (_threads == null) return 0;
       return _threads.size();
     }
 
@@ -506,14 +466,10 @@ public class DebugPanel extends JPanel implements OptionConstants {
 
     }
 
-    public boolean isCellEditable(int row, int col) {
-      return false;
-    }
+    public boolean isCellEditable(int row, int col) { return false; }
   }
 
-  /**
-   * Creates the buttons for controlling the debugger.
-   */
+  /** Creates the buttons for controlling the debugger. */
   private void _setupButtonPanel() {
     JPanel mainButtons = new JPanel();
     JPanel closeButtonPanel = new JPanel(new BorderLayout());
@@ -521,12 +477,8 @@ public class DebugPanel extends JPanel implements OptionConstants {
 
     Action resumeAction = new AbstractAction("Resume") {
       public void actionPerformed(ActionEvent ae) {
-        try {
-          _frame.debuggerResume();
-        }
-        catch (DebugException de) {
-          _frame._showDebugError(de);
-        }
+        try { _frame.debuggerResume(); }
+        catch (DebugException de) { _frame._showDebugError(de); }
       }
     };
     _resumeButton = new JButton(resumeAction);
@@ -595,9 +547,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
 //     threadRunningSuspend.setText("Suspend and Select Thread");
 
     Action selectAction = new AbstractAction("Select Thread") {
-      public void actionPerformed(ActionEvent e) {
-        _selectCurrentThread();
-      }
+      public void actionPerformed(ActionEvent e) { _selectCurrentThread(); }
     };
 
     _threadSuspendedPopupMenu = new JPopupMenu("Thread Selection");
@@ -605,13 +555,9 @@ public class DebugPanel extends JPanel implements OptionConstants {
     _threadSuspendedPopupMenu.add(new AbstractAction("Resume Thread") {
       public void actionPerformed(ActionEvent e) {
         try {
-          if (_threadInPopup.isSuspended()) {
-            _debugger.resume(_threadInPopup);
-          }
+          if (_threadInPopup.isSuspended()) _debugger.resume(_threadInPopup);
         }
-        catch (DebugException dbe) {
-          _frame._showDebugError(dbe);
-        }
+        catch (DebugException dbe) { _frame._showDebugError(dbe); }
       }
     });
 
@@ -621,9 +567,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
         try {
           _debugger.scrollToSource(getSelectedStackItem());
         }
-        catch (DebugException de) {
-          _frame._showDebugError(de);
-        }
+        catch (DebugException de) { _frame._showDebugError(de); }
       }
     });
 
@@ -637,13 +581,9 @@ public class DebugPanel extends JPanel implements OptionConstants {
       public void actionPerformed(ActionEvent e) {
         try {
           Breakpoint bp = _getSelectedBreakpoint();
-          if (bp != null) {
-            _debugger.removeBreakpoint(bp);
-          }
+          if (bp != null) _debugger.removeBreakpoint(bp);
         }
-        catch (DebugException de) {
-          _frame._showDebugError(de);
-        }
+        catch (DebugException de) { _frame._showDebugError(de); }
       }
     });
     _bpTree.addMouseListener(new BreakpointMouseAdapter());
@@ -656,9 +596,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
           _watchTable.revalidate();
           _watchTable.repaint();
         }
-        catch (DebugException de) {
-          _frame._showDebugError(de);
-        }
+        catch (DebugException de) { _frame._showDebugError(de); }
       }
     });
     _watchTable.addMouseListener(new DebugTableMouseAdapter(_watchTable) {
@@ -729,64 +667,54 @@ public class DebugPanel extends JPanel implements OptionConstants {
     return _threads.get(row);
   }
 
-  /**
-   * gets the DebugStackData that is currently selected in the stack table
-   * @return the highlighted stack element
+  /** Gets the DebugStackData that is currently selected in the stack table
+   *  @return the highlighted stack element
    */
   public DebugStackData getSelectedStackItem() {
     return _stackFrames.get(_stackTable.getSelectedRow());
   }
 
-  /**
-   * @return the selected watch
-   */
+  /** @return the selected watch */
   public DebugWatchData getSelectedWatch() {
     return _watches.get(_watchTable.getSelectedRow());
   }
 
-  /**
-   * Listens to events from the debug manager to keep the panel updated.
-   */
+  /** Listens to events from the debug manager to keep the panel updated. */
   class DebugPanelListener implements DebugListener {
-    /**
-     * Called when debugger mode has been enabled.
-     */
+    
+    /** Called when debugger mode has been enabled. Must be executed in event thread. */
     public void debuggerStarted() { }
 
-    /**
-     * Called when debugger mode has been disabled.
-     */
+    /** Called when debugger mode has been disabled. Must be executed in event thread. */
     public void debuggerShutdown() { }
 
-    /**
-     * Called when the given line is reached by the current thread in the
-     * debugger, to request that the line be displayed.
-     * @param doc Document to display
-     * @param lineNumber Line to display or highlight
-     * @param shouldHighlight true iff the line should be highlighted.
+    /** Called when the given line is reached by the current thread in the debugger, to request that the line be 
+     *  displayed.  Must be executed only in the event thread.
+     *  @param doc Document to display
+     *  @param lineNumber Line to display or highlight
+     *  @param shouldHighlight true iff the line should be highlighted.
      */
     public void threadLocationUpdated(OpenDefinitionsDocument doc, int lineNumber, boolean shouldHighlight) { }
 
-    /**
-     * Called when a breakpoint is set in a document.
-     * Adds the breakpoint to the tree of breakpoints.
-     * @param bp the breakpoint
+    /** Called when a breakpoint is set in a document. Adds the breakpoint to the tree of breakpoints.
+     *  Must be executed in event thread.
+     *  @param bp the breakpoint
      */
     public void breakpointSet(final Breakpoint bp) {
-      // Only change GUI from event-dispatching thread
-      Runnable doCommand = new Runnable() {
-        public void run() {
+//      // Only change GUI from event-dispatching thread
+//      Runnable doCommand = new Runnable() {
+//        public void run() {
           DefaultMutableTreeNode bpDocNode = new DefaultMutableTreeNode(bp.getClassName());
 
           // Look for matching document node
-          Enumeration documents = _breakpointRootNode.children();
+          Enumeration<TreeNode> documents = _breakpointRootNode.children();
           while (documents.hasMoreElements()) {
             DefaultMutableTreeNode doc = (DefaultMutableTreeNode)documents.nextElement();
             if (doc.getUserObject().equals(bpDocNode.getUserObject())) {
 
               // Create a new breakpoint in this node
               //Sort breakpoints by line number.
-              Enumeration lineNumbers = doc.children();
+              Enumeration<TreeNode> lineNumbers = doc.children();
               while (lineNumbers.hasMoreElements()) {
                 DefaultMutableTreeNode lineNumber = (DefaultMutableTreeNode)lineNumbers.nextElement();
 
@@ -796,9 +724,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
                   //else, add to the list
                   DefaultMutableTreeNode newBreakpoint =
                     new DefaultMutableTreeNode(new Integer(bp.getLineNumber()));
-                  _bpTreeModel.insertNodeInto(newBreakpoint,
-                                              doc,
-                                              doc.getIndex(lineNumber));
+                  _bpTreeModel.insertNodeInto(newBreakpoint, doc, doc.getIndex(lineNumber));
 
                   // Make sure this node is visible
                   _bpTree.scrollPathToVisible(new TreePath(newBreakpoint.getPath()));
@@ -808,9 +734,7 @@ public class DebugPanel extends JPanel implements OptionConstants {
               //if none are greater, add at the end
               DefaultMutableTreeNode newBreakpoint =
                 new DefaultMutableTreeNode(new Integer(bp.getLineNumber()));
-              _bpTreeModel.insertNodeInto(newBreakpoint,
-                                          doc,
-                                          doc.getChildCount());
+              _bpTreeModel.insertNodeInto(newBreakpoint, doc, doc.getChildCount());
 
               // Make sure this node is visible
               _bpTree.scrollPathToVisible(new TreePath(newBreakpoint.getPath()));
@@ -818,21 +742,17 @@ public class DebugPanel extends JPanel implements OptionConstants {
             }
           }
           // No matching document node was found, so create one
-          _bpTreeModel.insertNodeInto(bpDocNode,
-                                      _breakpointRootNode,
-                                      _breakpointRootNode.getChildCount());
+          _bpTreeModel.insertNodeInto(bpDocNode, _breakpointRootNode, _breakpointRootNode.getChildCount());
           DefaultMutableTreeNode newBreakpoint =
             new DefaultMutableTreeNode(new Integer(bp.getLineNumber()));
-          _bpTreeModel.insertNodeInto(newBreakpoint,
-                                      bpDocNode,
-                                      bpDocNode.getChildCount());
+          _bpTreeModel.insertNodeInto(newBreakpoint, bpDocNode, bpDocNode.getChildCount());
 
           // Make visible
           TreePath pathToNewBreakpoint = new TreePath(newBreakpoint.getPath());
           _bpTree.scrollPathToVisible(pathToNewBreakpoint);
-        }
-      };
-      Utilities.invokeLater(doCommand);
+//        }
+//      };
+//      Utilities.invokeLater(doCommand);
     }
 
     /**
@@ -907,90 +827,38 @@ public class DebugPanel extends JPanel implements OptionConstants {
       Utilities.invokeLater(doCommand);
     }
 
-    /**
-     * Called when a step is requested on the current thread.
-     */
+    /** Called when a step is requested on the current thread. */
     public void stepRequested() { }
 
-    /**
-     * Called when the current thread is suspended
-     */
+    /** Called when the current thread is suspended. */
     public void currThreadSuspended() {
       // Only change GUI from event-dispatching thread
-      Runnable doCommand = new Runnable() {
-        public void run() {
-          updateData();
-        }
-      };
-      Utilities.invokeLater(doCommand);
+      Utilities.invokeLater(new Runnable() { public void run() { updateData(); } });
     }
 
-    /**
-     * Called when the current thread is resumed
-     */
+    /** Called when the current thread is resumed */
     public void currThreadResumed() {
       // Only change GUI from event-dispatching thread
-      Runnable doCommand = new Runnable() {
-        public void run() {
-          updateData();
-        }
-      };
-      Utilities.invokeLater(doCommand);
+      Utilities.invokeLater(new Runnable() { public void run() { updateData(); } });
     }
 
-    /**
-     * Called when a thread starts
-     */
-    public void threadStarted() {
-      // Only change GUI from event-dispatching thread
-      Runnable doCommand = new Runnable() {
-        public void run() {
-          updateData();
-        }
-      };
-      Utilities.invokeLater(doCommand);
-    }
+    /** Called when a thread starts.  Must be executed in event thread. */
+    public void threadStarted() { updateData(); }
 
-    /**
-     * Called when the current thread dies
-     */
-    public void currThreadDied() {
-      // Only change GUI from event-dispatching thread
-      Runnable doCommand = new Runnable() {
-        public void run() {
-          updateData();
-        }
-      };
-      Utilities.invokeLater(doCommand);
-    }
+    /** Called when the current thread dies. Must be executed in event thread. */
+    public void currThreadDied() { updateData(); }
 
-    /**
-     * Called when any thread other than the current thread dies
-     */
-    public void nonCurrThreadDied() {
-      // Only change GUI from event-dispatching thread
-      Runnable doCommand = new Runnable() {
-        public void run() {
-          updateData();
-        }
-      };
-      Utilities.invokeLater(doCommand);
-    }
+    /** Called when any thread other than the current thread dies. Must be executed in event thread. */
+    public void nonCurrThreadDied() { updateData(); }
 
-    /**
-     * Called when the current (selected) thread is set in the debugger.
-     * @param thread the thread that was set as current
+    /** Called when the current (selected) thread is set in the debugger.
+     *  @param thread the thread that was set as current
      */
     public void currThreadSet(DebugThreadData thread) {
       _currentThreadID = thread.getUniqueID();
 
       // Only change GUI from event-dispatching thread
-      Runnable doCommand = new Runnable() {
-        public void run() {
-          updateData();
-        }
-      };
-      Utilities.invokeLater(doCommand);
+      Utilities.invokeLater(new Runnable() { public void run() { updateData(); } });
     }
   }
 

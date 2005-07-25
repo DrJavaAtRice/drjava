@@ -769,7 +769,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       listenerFail("junitStarted fired unexpectedly");
     }
 
-    public void junitAllStarted() {
+    public void junitClassesStarted() {
       listenerFail("junitAllStarted fired unexpectedly");
     }
 

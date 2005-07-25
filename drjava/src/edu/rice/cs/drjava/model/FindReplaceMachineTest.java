@@ -49,6 +49,7 @@ import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.model.AbstractGlobalModel;
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.UnexpectedException;
+import edu.rice.cs.util.swing.Utilities;
 
 import junit.framework.TestCase;
 
@@ -619,6 +620,7 @@ public class FindReplaceMachineTest extends TestCase{
       frm.setStart(found);
       frm.setPosition(found);
     }
+    Utilities.clearEventQueue();
 //    assertEquals("documents should equal", doc, frm.getDocument());
     assertEquals("findNext return value", found, fr.getFoundOffset());
     _assertOffsets(frm, start, found);

@@ -49,18 +49,15 @@ import java.io.*;
 import java.util.Iterator;
 import java.util.Date;
 
-/**
- * A Configuration object that can be read and saved from a Stream.
- * @version $Id$
+/** A Configuration object that can be read and saved from a Stream.
+ *  @version $Id$
  */
 public class SavableConfiguration extends Configuration {
   /**
    * Creates a new Configuration based on the given OptionMap.
    * @param map an empty OptionMap
    */
-  public SavableConfiguration(OptionMap map) {
-    super(map);
-  }
+  public SavableConfiguration(OptionMap map) { super(map); }
 
   /**
    * Creates an OptionMapLoader with the values loaded from the InputStream
@@ -69,7 +66,6 @@ public class SavableConfiguration extends Configuration {
    * @param is InputStream containing properties-style keys and values
    */
   public void loadConfiguration(InputStream is) throws IOException {
-
     new OptionMapLoader(is).loadInto(map);
   }
 

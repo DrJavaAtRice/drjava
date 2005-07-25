@@ -192,14 +192,14 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     JUnitTestListener listener = new JUnitTestListener();
     _model.addListener(listener);
     
-    doc.startCompile();
+    doc.startCompile(); // synchronously compiles doc
     listener.checkCompileOccurred();
     
     _runJUnit(doc);
     
     listener.assertJUnitStartCount(1);
     
-    if (printMessages) System.out.println("erros: "+_model.getJUnitModel().getJUnitErrorModel());
+    if (printMessages) System.out.println("errors: "+_model.getJUnitModel().getJUnitErrorModel());
     
     listener.assertNonTestCaseCount(0);
     assertEquals("test case should have no errors reported",  0,

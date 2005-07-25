@@ -106,8 +106,7 @@ public class DummyGlobalModelListener implements GlobalModelListener {
   public void junitStarted(List<OpenDefinitionsDocument> docs) { }
   
   /** Called when testing all files. */
-  public void junitAllStarted() {  }
-
+  public void junitClassesStarted() {  }
 
   /** Called to indicate that a suite of tests has started running.
    *  @param numTests The number of tests in the suite to be run.

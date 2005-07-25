@@ -345,6 +345,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     interpretCurrentInteraction();
   }
 
+  /* Loads the contents of the specified file(s) into the histories buffer. */
   public InteractionsScriptModel loadHistoryAsScript(FileOpenSelector selector)
     throws IOException, OperationCanceledException {
     ArrayList<String> histories = _getHistoryText(selector);
@@ -353,8 +354,8 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     return new InteractionsScriptModel(this, interactions);
   }
 
-  /** Returns the port number to use for debugging the interactions JVM.
-   *  Generates an available port if one has not been set manually.
+  /** Returns the port number to use for debugging the interactions JVM. Generates an available port if one has 
+   *  not been set manually.
    *  @throws IOException if unable to get a valid port number.
    */
   public int getDebugPort() throws IOException {
@@ -466,22 +467,15 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     }
   }
 
-  /**
-   * Signifies that the most recent interpretation completed successfully,
-   * returning no value.
-   */
+  /** Signifies that the most recent interpretation completed successfully, returning no value. */
   public void replReturnedVoid() {
     _interactionIsOver();
   }
 
-  /**
-   * Signifies that the most recent interpretation completed successfully,
-   * returning a value.
+  /** Signifies that the most recent interpretation completed successfully, returning a value.
    *
-   * @param result The .toString-ed version of the value that was returned
-   *               by the interpretation. We must return the String form
-   *               because returning the Object directly would require the
-   *               data type to be serializable.
+   *  @param result The .toString-ed version of the value that was returned by the interpretation. We must return the 
+   *         String form because returning the Object directly would require the data type to be serializable.
    */
   public void replReturnedResult(String result, String style) {
     _docAppend(result + _newLine, style);
@@ -524,8 +518,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
     edu.rice.cs.util.Pair<Integer,Integer> oAndL =
       StringOps.getOffsetAndLength(interaction, startRow, startCol, endRow, endCol);
 
-    _notifySyntaxErrorOccurred(_document.getPromptPos() + oAndL.getFirst().intValue(),
-                                oAndL.getSecond().intValue());
+    _notifySyntaxErrorOccurred(_document.getPromptPos() + oAndL.getFirst().intValue(),oAndL.getSecond().intValue());
 
     _document.appendSyntaxErrorResult(errorMessage, interaction, startRow, startCol, endRow, endCol,
                                       InteractionsDocument.ERROR_STYLE);

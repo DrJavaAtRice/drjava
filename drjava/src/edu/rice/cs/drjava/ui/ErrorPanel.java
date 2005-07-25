@@ -269,12 +269,8 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
       public void mouseReleased(MouseEvent e) {
         CompilerError error = _errorAtPoint(e.getPoint());
         
-        if (_isEmptySelection() && error != null) {
-          getErrorListPane().switchToError(error);
-        }
-        else {
-          selectNothing();
-        }
+        if (_isEmptySelection() && error != null) getErrorListPane().switchToError(error);
+        else  selectNothing();
       }
     };
     

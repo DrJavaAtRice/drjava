@@ -109,7 +109,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     _removeIndenter();
     
     synchronized(_closedListeners) {
-      for (DocumentClosedListener l: _closedListeners) { l.close(); }
+      for (DocumentClosedListener l: _closedListeners)  { l.close(); }
       _closedListeners = new LinkedList<DocumentClosedListener>();
     }
     
@@ -321,18 +321,14 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
 //  }
 
 
-  /**
-   * Gets the package and class name of this OpenDefinitionsDocument
-   * @return the qualified class name
+  /** Gets the package and class name of this OpenDefinitionsDocument
+   *  @return the qualified class name
    */
   public String getQualifiedClassName() throws ClassNameNotFoundException {
     return _getPackageQualifier() + getFirstTopLevelClassName();
   }
 
-  /**
-   * Gets fully qualified class name of the top level class enclosing
-   * the given position.
-   */
+  /** Gets fully qualified class name of the top level class enclosing the given position. */
   public String getQualifiedClassName(int pos) throws ClassNameNotFoundException {
     return _getPackageQualifier() + getEnclosingTopLevelClassName(pos);
   }
@@ -995,8 +991,8 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   }
 
   /** Returns the name of the class or interface enclosing the caret position at the top level.
-   * @return Name of enclosing class or interface
-   * @throws ClassNameNotFoundException if no enclosing class found
+   *  @return Name of enclosing class or interface
+   *  @throws ClassNameNotFoundException if no enclosing class found
    */
   public String getEnclosingTopLevelClassName(int pos) throws ClassNameNotFoundException {
     readLock();
@@ -1301,9 +1297,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
 //    _optionListeners.add(new Pair<Option, OptionListener>(op, l));
 //  }
   
-  /**
-   * This list of listeners to notify when we are finalized
-   */
+  /** This list of listeners to notify when we are finalized. */
   private List<FinalizationListener<DefinitionsDocument>> _finalizationListeners = 
     new LinkedList<FinalizationListener<DefinitionsDocument>>();
   
