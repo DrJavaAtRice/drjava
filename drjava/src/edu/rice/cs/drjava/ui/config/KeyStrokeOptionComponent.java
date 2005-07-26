@@ -56,9 +56,7 @@ import java.util.Hashtable;
  * Graphical form of a KeyStrokeOption.
  * @version $Id$
  */
-public class KeyStrokeOptionComponent extends OptionComponent<KeyStroke>
-  implements Comparable
-{
+public class KeyStrokeOptionComponent extends OptionComponent<KeyStroke> implements Comparable {
   private static final int DIALOG_HEIGHT = 185;
   /**
    * TODO: should this be synchronized?

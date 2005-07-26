@@ -50,12 +50,11 @@ import java.awt.*;
 import java.awt.event.*;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.DrJava;
+import edu.rice.cs.util.swing.Utilities;
 
 import junit.framework.*;
 
-/**
- * Tests functionality of this OptionComponent
- */
+/** Tests functionality of this OptionComponent. */
 public final class KeyStrokeOptionComponentTest extends TestCase {
 
   private static KeyStrokeOptionComponent _option;
@@ -72,6 +71,7 @@ public final class KeyStrokeOptionComponentTest extends TestCase {
     _option.resetToCurrent(); // should reset to the original.
     _option.updateConfig(); // should update with original values therefore no change.
 
+    Utilities.clearEventQueue();
     assertEquals("Cancel (resetToCurrent) should not change the config",
                  OptionConstants.KEY_NEW_FILE.getDefault(),
                  DrJava.getConfig().getSetting(OptionConstants.KEY_NEW_FILE));
@@ -83,6 +83,7 @@ public final class KeyStrokeOptionComponentTest extends TestCase {
     _option.setValue(testKeyStroke);
     _option.updateConfig();
 
+    Utilities.clearEventQueue();
     assertEquals("Apply (updateConfig) should write change to file",
                  testKeyStroke,
                  DrJava.getConfig().getSetting(OptionConstants.KEY_NEW_FILE));
@@ -96,6 +97,7 @@ public final class KeyStrokeOptionComponentTest extends TestCase {
     _option.resetToDefault(); // resets to default
     _option.updateConfig();
 
+    Utilities.clearEventQueue();
     assertEquals("Apply (updateConfig) should write change to file",
                  OptionConstants.KEY_NEW_FILE.getDefault(),
                  DrJava.getConfig().getSetting(OptionConstants.KEY_NEW_FILE));

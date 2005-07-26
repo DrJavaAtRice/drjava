@@ -5451,7 +5451,7 @@ public class MainFrame extends JFrame implements OptionConstants {
           
           // Update title and position
           updateFileTitle();
-//          _currentDefPane.requestFocusInWindow();
+          _currentDefPane.requestFocusInWindow();
           _posListener.updateLocation();
           
           // update display (adding "*") in navigatgorPane
