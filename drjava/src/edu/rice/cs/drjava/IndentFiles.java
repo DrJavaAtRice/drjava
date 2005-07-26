@@ -55,12 +55,10 @@ import edu.rice.cs.drjava.model.definitions.indent.Indenter;
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 import edu.rice.cs.drjava.model.GlobalEventNotifier;
 
-/**
- * Allows users to pass filenames to a command-line indenter.
- * Unfortunately, this uses the Swing API (high overhead), but we attempt
- * to run the indentation in "headless AWT" mode to prevent a Java icon
- * from showing up on the OS X dock.
- * @version $Id$
+/** Allows users to pass filenames to a command-line indenter.  Unfortunately, this uses the Swing API (high 
+ *  overhead), but we attempt to run the indentation in "headless AWT" mode to prevent a Java icon from showing 
+ *  up on the OS X dock.
+ *  @version $Id$
  */
 public class IndentFiles {
   

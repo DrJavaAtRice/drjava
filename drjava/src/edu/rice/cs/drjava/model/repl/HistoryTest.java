@@ -55,10 +55,10 @@ import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.model.GlobalModelTestCase.WarningFileSelector;
 import edu.rice.cs.drjava.model.GlobalModelTestCase.OverwriteException;
 import edu.rice.cs.util.FileOps;
+import edu.rice.cs.util.swing.Utilities;
 
-/**
- * Tests the functionality of the repl History.
- * @version $Id$
+/** Tests the functionality of the repl History.
+ *  @version $Id$
  */
 public final class HistoryTest extends TestCase implements OptionConstants{
   private History _history;
@@ -137,49 +137,40 @@ public final class HistoryTest extends TestCase implements OptionConstants{
       _history.movePrevious("testing " + i);
     }
 
-    assertEquals("History length is not bound to " + maxLength,
-                 maxLength,
-                 _history.size());
-    assertEquals("History elements are not removed in FILO order",
-                 "testing 100",
-                 _history.getCurrent());
+    assertEquals("History length is not bound to " + maxLength, maxLength, _history.size());
+    assertEquals("History elements are not removed in FILO order", "testing 100", _history.getCurrent());
   }
 
-  /**
-   * Tests that the history size can be updated, both through
-   * the config framework and the setMaxSize method.
+  /** Tests that the history size can be updated, both through the config framework and the setMaxSize method.
    */
   public void testLiveUpdateOfHistoryMaxSize() {
 
     int maxLength = 20;
     DrJava.getConfig().setSetting(HISTORY_MAX_SIZE, new Integer(20));
+    
+    Utilities.clearEventQueue();
 
     for (int i = 0; i < maxLength; i++) {
       _history.add("testing " + i);
     }
 
-    assertEquals("History size should be 20",
-                 20, _history.size());
+    assertEquals("History size should be 20", 20, _history.size());
 
     DrJava.getConfig().setSetting(HISTORY_MAX_SIZE, new Integer(10));
-
-    assertEquals("History size should be 10",
-                 10, _history.size());
-
+   
+    Utilities.clearEventQueue();
+    assertEquals("History size should be 10", 10, _history.size());
     _history.setMaxSize(100);
 
-    assertEquals("History size should still be 10",
-                 10, _history.size());
+    assertEquals("History size should still be 10", 10, _history.size());
 
     _history.setMaxSize(0);
-
-    assertEquals("History size should be 0",
-                 0, _history.size());
+    assertEquals("History size should be 0", 0, _history.size());
 
     DrJava.getConfig().setSetting(HISTORY_MAX_SIZE, new Integer(-1));
 
-    assertEquals("History size should still be 0",
-                 0, _history.size());
+    Utilities.clearEventQueue();
+    assertEquals("History size should still be 0", 0, _history.size());
   }
 
   /**
@@ -187,6 +178,8 @@ public final class HistoryTest extends TestCase implements OptionConstants{
    */
   public void testGetHistoryAsString() {
     DrJava.getConfig().setSetting(HISTORY_MAX_SIZE, new Integer(20));
+
+    Utilities.clearEventQueue();
     assertEquals("testGetHistoryAsString:", "", _history.getHistoryAsString());
 
     String newLine = System.getProperty("line.separator");
@@ -196,15 +189,12 @@ public final class HistoryTest extends TestCase implements OptionConstants{
 
     _history.add("some more text");
     _history.add("some text followed by a newline" + newLine);
-    assertEquals("testGetHistoryAsString:",
-                 "some text" + newLine + "some more text" + newLine +
-                 "some text followed by a newline" + newLine + newLine,
-                 _history.getHistoryAsString());
+    String str = 
+      "some text" + newLine + "some more text" + newLine + "some text followed by a newline" + newLine + newLine;
+    assertEquals("testGetHistoryAsString:", str, _history.getHistoryAsString());
   }
 
-  /**
-   * Tests that the history remembers one edited entry for the given command.
-   */
+  /** Tests that the history remembers one edited entry for the given command. */
   public void testRemembersOneEditedEntry() {
     _history.add("some text");
     _history.movePrevious("");
@@ -214,14 +204,11 @@ public final class HistoryTest extends TestCase implements OptionConstants{
     _history.moveNext(newEntry);
     _history.movePrevious("");
 
-    assertEquals("Did not remember the edited entry correctly.",
-                 newEntry,
-                 _history.getCurrent());
+    Utilities.clearEventQueue();
+    assertEquals("Did not remember the edited entry correctly.", newEntry, _history.getCurrent());
   }
 
-  /**
-   * Tests that the history remembers multiple edited entries for the given command.
-   */
+  /** Tests that the history remembers multiple edited entries for the given command. */
   public void testRemembersMultipleEditedEntries() {
     _history.add("some text");
     _history.add("some more text");
@@ -233,19 +220,16 @@ public final class HistoryTest extends TestCase implements OptionConstants{
     _history.movePrevious(newEntry1);
     _history.moveNext(newEntry2);
 
-    assertEquals("Did not remember the edited entry correctly.",
-                 newEntry1,
-                 _history.getCurrent());
+    Utilities.clearEventQueue();
+    assertEquals("Did not remember the edited entry correctly.", newEntry1, _history.getCurrent());
 
     _history.movePrevious(newEntry1);
-    assertEquals("Did not remember the edited entry correctly.",
-                 newEntry2,
-                 _history.getCurrent());
+    
+    Utilities.clearEventQueue();
+    assertEquals("Did not remember the edited entry correctly.", newEntry2, _history.getCurrent());
   }
 
-  /**
-   * Tests that the original copy of an edited entry remains in the history.
-   */
+  /** Tests that the original copy of an edited entry remains in the history. */
   public void testOriginalCopyRemains() {
     String entry = "some text";
     String newEntry = "some different text";
@@ -257,19 +241,17 @@ public final class HistoryTest extends TestCase implements OptionConstants{
     _history.add(newEntry);
 
     _history.movePrevious("");
-    assertEquals("Did not add edited entry to end of history.",
-                 newEntry,
-                 _history.getCurrent());
+    
+    Utilities.clearEventQueue();
+    assertEquals("Did not add edited entry to end of history.", newEntry, _history.getCurrent());
 
     _history.movePrevious(newEntry);
-    assertEquals("Did not keep a copy of the original entry.",
-                 entry,
-                 _history.getCurrent());
+    
+    Utilities.clearEventQueue();
+    assertEquals("Did not keep a copy of the original entry.", entry, _history.getCurrent());
   }
 
-  /**
-   * Tests that the tab completion of the most recent entry is correct.
-   */
+  /** Tests that the tab completion of the most recent entry is correct. */
   public void testSearchHistory() {
     String entry1 = "some text";
     String entry2 = "blah";
@@ -278,19 +260,17 @@ public final class HistoryTest extends TestCase implements OptionConstants{
     _history.add(entry2);
 
     _history.reverseSearch("s");
-    assertEquals("Did not find the correct entry in history.",
-                 entry1,
-                 _history.getCurrent());
+    
+    Utilities.clearEventQueue();
+    assertEquals("Did not find the correct entry in history.", entry1, _history.getCurrent());
 
     _history.forwardSearch("b");
-    assertEquals("Did not find the correct entry in history.",
-                 entry2,
-                 _history.getCurrent());
+    
+    Utilities.clearEventQueue();
+    assertEquals("Did not find the correct entry in history.", entry2, _history.getCurrent());
   }
 
-  /**
-   * Tests that if "tab completion" does not find a match, then cursor goes back to "end".
-   */
+  /** Tests that if "tab completion" does not find a match, then cursor goes back to "end". */
   public void testNoMatch() {
     String entry1 = "some text";
     String entry2 = "blah";
@@ -300,14 +280,11 @@ public final class HistoryTest extends TestCase implements OptionConstants{
 
     _history.reverseSearch("a");
 
-    assertEquals("Did not reset cursor correctly.",
-                 "a",
-                 _history.getCurrent());
+    Utilities.clearEventQueue();
+    assertEquals("Did not reset cursor correctly.", "a", _history.getCurrent());
   }
 
-  /**
-   * Tests reverse searching twice.
-   */
+  /** Tests reverse searching twice. */
   public void testReverseSearchTwice() {
     String entry1 = "same";
     String entry2 = "some";
@@ -316,13 +293,13 @@ public final class HistoryTest extends TestCase implements OptionConstants{
     _history.add(entry2);
 
     _history.reverseSearch("s");
-    assertEquals("Did not reset cursor correctly.",
-                 entry2,
-                 _history.getCurrent());
+    
+    Utilities.clearEventQueue();
+    assertEquals("Did not reset cursor correctly.", entry2, _history.getCurrent());
 
     _history.reverseSearch(_history.getCurrent());
-    assertEquals("Did not reset cursor correctly.",
-                 entry1,
-                 _history.getCurrent());
+    
+    Utilities.clearEventQueue();
+    assertEquals("Did not reset cursor correctly.", entry1, _history.getCurrent());
   }
 }

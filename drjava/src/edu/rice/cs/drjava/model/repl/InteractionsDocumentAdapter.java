@@ -180,7 +180,6 @@ public class InteractionsDocumentAdapter extends AbstractDJDocument {
     }
   }
     
-  
   /** Called when the Interactions pane is reset. */
   public void clearColoring() { synchronized(_stylesList) { _toClear = true; } }
   
@@ -200,7 +199,7 @@ public class InteractionsDocumentAdapter extends AbstractDJDocument {
     finally { readUnlock(); }
   }
   
-   /** Inserts the given exception data into the document with the given style.
+  /** Inserts the given exception data into the document with the given style.
    *  @param exceptionClass Name of the exception that was thrown
    *  @param message Message contained in the exception
    *  @param stackTrace String representation of the stack trace

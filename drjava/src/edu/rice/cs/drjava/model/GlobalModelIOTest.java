@@ -53,6 +53,7 @@ import javax.swing.text.BadLocationException;
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.text.DocumentAdapterException;
+import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.drjava.model.repl.*;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
@@ -816,31 +817,26 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
 
     // Save over top of the previous file
     doc.saveFile(new FileSelector(file));
+    
+    Utilities.clearEventQueue();
     listener.assertSaveCount(1);
-
-    assertEquals("contents of saved file 2nd write",
-                 BAR_TEXT,
-                 FileOps.readFileAsString(file));
-
+    assertEquals("contents of saved file 2nd write", BAR_TEXT, FileOps.readFileAsString(file));
     assertFalse("no backup was made", backup.exists());
-
 
     //enable file backups
     DrJava.getConfig().setSetting(BACKUP_FILES, Boolean.TRUE);
 
     // Muck up the document
     changeDocumentText(FOO_TEXT, doc);
-
+    Utilities.clearEventQueue();
+    
     // Save over top of the previous file
     doc.saveFile(new FileSelector(file));
+        
+    Utilities.clearEventQueue();
     listener.assertSaveCount(2);
-
-    assertEquals("contents of saved file 3rd write",
-                 FOO_TEXT,
-                 FileOps.readFileAsString(file));
-    assertEquals("contents of backup file 3rd write",
-                 BAR_TEXT,
-                 FileOps.readFileAsString(backup));
+    assertEquals("contents of saved file 3rd write", FOO_TEXT, FileOps.readFileAsString(file));
+    assertEquals("contents of backup file 3rd write", BAR_TEXT, FileOps.readFileAsString(backup));
 
     /* Set the config back to the original option */
     DrJava.getConfig().setSetting(BACKUP_FILES, backupStatus);

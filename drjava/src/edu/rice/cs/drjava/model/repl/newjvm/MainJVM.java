@@ -81,7 +81,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
   /** Listens to debug-related events */
   private DebugModelCallback _debugModel;
   
-  /** Used to protect ?? */
+  /** Used to protect interpreterJVM setting */
   private Object _interpreterLock = new Object();
   
   /** This flag is set to false to inhibit the automatic restart of the JVM. */
@@ -590,6 +590,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
    *  silently fail! Therefore, killing without restarting should be used with extreme care and only in 
    *  carefully controlled test cases or when DrJava is quitting anyway.
    */
+
   public void killInterpreter(boolean shouldRestart) {
     synchronized(_masterJVMLock) {
       try {

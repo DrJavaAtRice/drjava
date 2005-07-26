@@ -193,8 +193,7 @@ public class EventHandlerThread extends Thread {
    */
   protected void _handleStepEvent(StepEvent e) throws DebugException {
     synchronized(_debugger) {
-      if (_isSuspendedWithFrames(e.thread()) &&
-          _debugger.setCurrentThread(e.thread())) {
+      if (_isSuspendedWithFrames(e.thread()) && _debugger.setCurrentThread(e.thread())) {
         _debugger.printMessage("Stepped to " +
                                e.location().declaringType().name() + "." +
                                e.location().method().name() + "(...)  [line " +

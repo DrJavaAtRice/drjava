@@ -53,7 +53,7 @@ import edu.rice.cs.util.OutputStreamRedirector;
 import edu.rice.cs.util.InputStreamRedirector;
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.ClasspathVector;
-import edu.rice.cs.util.swing.ScrollableDialog;
+import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.classloader.ClassFileError;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.platform.PlatformFactory;
@@ -237,13 +237,13 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     interpret(s, getInterpreter(interpreterName));
   }
   
-  /**
-   * Interprets the given string of source code with the given interpreter.
-   * The result is returned to MainJVM via the interpretResult method.
-   * @param input Source code to interpret.
-   * @param interpreter The interpreter (plus metadata) to use
+  /** Interprets the given string of source code with the given interpreter.  The result is returned to MainJVM via
+   *  the interpretResult method.
+   *  @param input Source code to interpret.
+   *  @param interpreter The interpreter (plus metadata) to use
    */
-  public synchronized void interpret(final String input, final InterpreterData interpreter) {
+  public void interpret(final String input, final InterpreterData interpreter) {
+//    Utilities.showDebug("InterpreterJVM.interpret(" + input + ", ...) called");
     Thread thread = new Thread("interpret thread: " + input) {
       public void run() {
         String s = input;

@@ -151,6 +151,8 @@ public final class DebugContextTest extends DebugTestCase {
 
     // Add a breakpoint
     _debugger.toggleBreakpoint(doc,DEBUG_CLASS.indexOf("Baz Line 1"), 14);
+    
+    Utilities.clearEventQueue();
     debugListener.assertBreakpointSetCount(1);
 
     // Run the baz() method, hitting breakpoint
@@ -173,8 +175,9 @@ public final class DebugContextTest extends DebugTestCase {
     if (printMessages) System.out.println("adding another breakpoint");
 
     // Set another breakpoint (after is class loaded)
-    _debugger.toggleBreakpoint(doc,
-       DEBUG_CLASS.indexOf("System.out.println(\"Bar Line 2\")"), 9);
+    _debugger.toggleBreakpoint(doc, DEBUG_CLASS.indexOf("System.out.println(\"Bar Line 2\")"), 9);
+    
+    Utilities.clearEventQueue();
     debugListener.assertBreakpointSetCount(2);
 
     // Step to next line
@@ -249,6 +252,7 @@ public final class DebugContextTest extends DebugTestCase {
     // Add a breakpoint
     _debugger.toggleBreakpoint(doc,DEBUG_CLASS.indexOf("Foo Line 1"), 3);
     _debugger.toggleBreakpoint(doc,DEBUG_CLASS.indexOf("bar();\n"), 4);
+    
     Utilities.clearEventQueue();
     debugListener.assertBreakpointSetCount(2);
 
@@ -350,6 +354,8 @@ public final class DebugContextTest extends DebugTestCase {
 
     // Set a breakpoint
     _debugger.toggleBreakpoint(doc,CLASS_WITH_STATIC_FIELD.indexOf("System.out.println"), 4);
+    
+    Utilities.clearEventQueue();
     debugListener.assertBreakpointSetCount(1);
 
     // Run the main method, hitting breakpoint
@@ -447,6 +453,8 @@ public final class DebugContextTest extends DebugTestCase {
     // Set a breakpoint
     _debugger.toggleBreakpoint(doc,MONKEY_WITH_INNER_CLASS.indexOf("innerMethodFoo = 12;"), 10);
     _debugger.toggleBreakpoint(doc,MONKEY_WITH_INNER_CLASS.indexOf("System.out.println(\"localVar = \" + localVar);"), 32);
+    
+    Utilities.clearEventQueue();
     debugListener.assertBreakpointSetCount(2);
 
     // Run an inner method, hitting breakpoint
@@ -659,9 +667,9 @@ public final class DebugContextTest extends DebugTestCase {
 
     // Set a breakpoint
     int index = MONKEY_STATIC_STUFF.indexOf("System.out.println(MonkeyInner.MonkeyTwoDeep.twoDeepFoo);");
-    _debugger.toggleBreakpoint(doc,
-                               index,
-                               14);
+    _debugger.toggleBreakpoint(doc, index, 14);
+    
+    Utilities.clearEventQueue();
     debugListener.assertBreakpointSetCount(1);
 
     // Run an inner method, hitting breakpoint
@@ -723,6 +731,8 @@ public final class DebugContextTest extends DebugTestCase {
     // Set a breakpoint
     int index = INNER_CLASS_WITH_LOCAL_VARS.indexOf("numArgs:");
     _debugger.toggleBreakpoint(doc, index, 7);
+    
+    Utilities.clearEventQueue();
     debugListener.assertBreakpointSetCount(1);
 
     // Run the main method, hitting breakpoint

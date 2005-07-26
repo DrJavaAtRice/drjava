@@ -50,6 +50,8 @@ import java.io.*;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.model.*;
 
+import edu.rice.cs.util.swing.Utilities;
+
 /**
  * Tests the JPDA-based debugger.
  *
@@ -271,6 +273,8 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
     _debugger.toggleBreakpoint(doc,index,11);
     index = MONKEY_CLASS.indexOf("System.out.println(\"I just woke up.  I\'m a big boy now.\");");
     _debugger.toggleBreakpoint(doc,index,16);
+    
+    Utilities.clearEventQueue();
     debugListener.assertBreakpointSetCount(2);
 
     // Run the main method, hitting breakpoints
@@ -353,6 +357,8 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
 
    // Add breakpoint before class is loaded
     _debugger.toggleBreakpoint(doc,DEBUG_CLASS.indexOf("bar();"),4);
+    
+    Utilities.clearEventQueue();
     debugListener.assertBreakpointSetCount(1);
 
     // Run the foo() method, hitting breakpoint
@@ -376,10 +382,10 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
     if (printMessages) System.out.println("adding another breakpoint");
 
     // Set another breakpoint (after is class loaded)
-    _debugger.toggleBreakpoint(doc,
-       DEBUG_CLASS.indexOf("System.out.println(\"Bar Line 2\")"), 9);
+    _debugger.toggleBreakpoint(doc, DEBUG_CLASS.indexOf("System.out.println(\"Bar Line 2\")"), 9);
+    
+    Utilities.clearEventQueue();
     debugListener.assertBreakpointSetCount(2);
-
 
     // Resume until next breakpoint
     synchronized(_notifierLock) {
@@ -440,6 +446,8 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
 
    // Add breakpoint in DrJavaDebugClass before class is loaded
     _debugger.toggleBreakpoint(doc,DEBUG_CLASS.indexOf("Bar Line 1"),8);
+    
+    Utilities.clearEventQueue();
     debugListener.assertBreakpointSetCount(1);
 
     // Run the baz() method, hitting breakpoint
@@ -499,6 +507,8 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
 
     // Add a breakpoint
     _debugger.toggleBreakpoint(doc,DEBUG_CLASS.indexOf("bar();"),4);
+    
+    Utilities.clearEventQueue();
     debugListener.assertBreakpointSetCount(1);
 
     // Run the foo() method, hitting breakpoint
@@ -623,6 +633,8 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
 
     // Set breakpoint
     _debugger.toggleBreakpoint(doc,DEBUG_CLASS.indexOf("bar();"),4);
+    
+    Utilities.clearEventQueue();
     debugListener.assertBreakpointSetCount(1);
 
     // Run the foo() method, hitting breakpoint
@@ -697,6 +709,8 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
 
     // Add a breakpoint
     _debugger.toggleBreakpoint(doc,DEBUG_CLASS_WITH_PACKAGE.indexOf("foo line 1"), 4);
+    
+    Utilities.clearEventQueue();
     debugListener.assertBreakpointSetCount(1);
 
     // Run the foo() method, hitting breakpoint

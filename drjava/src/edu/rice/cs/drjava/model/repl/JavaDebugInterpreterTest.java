@@ -48,6 +48,7 @@ package edu.rice.cs.drjava.model.repl;
 import edu.rice.cs.drjava.model.debug.*;
 import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.util.text.DocumentAdapterException;
+import edu.rice.cs.util.swing.Utilities;
 
 import java.util.LinkedList;
 import java.io.*;
@@ -315,32 +316,22 @@ public final class JavaDebugInterpreterTest extends DebugTestCase {
     assertInteractionsContains("6");
 
     interpret("foo = 123");
-    assertEquals("foo should have been modified" ,
-                 "123",
-                 interpret("MonkeyStuff.this.foo"));
+    assertEquals("foo should have been modified" , "123", interpret("MonkeyStuff.this.foo"));
     interpret("int foo = 999;");
-    assertEquals("foo should refer to the foo that was declared",
-                 "999",
-                 interpret("foo"));
-    assertEquals("declaring foo should not have changed MonkeyStuff.this.foo",
-                 "123",
-                 interpret("MonkeyStuff.this.foo"));
+    assertEquals("foo should refer to defined foo", "999", interpret("foo"));
+    assertEquals("declaring foo should not change MonkeyStuff.this.foo", "123", interpret("MonkeyStuff.this.foo"));
 
-    assertEquals("should be able to call method of outer class",
-                 "-2",
-                 interpret("getNegativeTwo()"));
-    assertEquals("should be able to call method of outer class",
-                 "-2",
-                 interpret("MonkeyTwoDeep.this.getNegativeTwo()"));
-    assertEquals("should be able to call method of outer class",
-                 "-2",
+    assertEquals("call method of outer class #1", "-2", interpret("getNegativeTwo()"));
+    assertEquals("call method of outer class #2", "-2", interpret("MonkeyTwoDeep.this.getNegativeTwo()"));
+    assertEquals("call method of outer class #3", "-2",
                  interpret("MonkeyInner.MonkeyTwoDeep.this.getNegativeTwo()"));
-    assertEquals("should be able to call method of outer class",
-                 "-2",
+    assertEquals("call method of outer class #4", "-2",
                  interpret("MonkeyStuff.MonkeyInner.MonkeyTwoDeep.this.getNegativeTwo()"));
 
     // Close doc and make sure breakpoints are removed
     _model.closeFile(doc);
+    
+    Utilities.clearEventQueue();
     debugListener.assertBreakpointRemovedCount(1);  //fires once
 
     // Shutdown the debugger

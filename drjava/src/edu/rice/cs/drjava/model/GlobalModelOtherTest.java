@@ -96,6 +96,8 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     };
     _model.addListener(listener);
     changeDocumentText("test", doc);
+    
+    Utilities.clearEventQueue();
     _model.removeListener(listener);
     listener.assertUndoableEditCount(1);
 //    Utilities.showDebug("testUndoEvents finished");

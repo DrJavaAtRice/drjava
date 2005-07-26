@@ -1186,7 +1186,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       _currentDefPane.setCaretPosition(beginLinePos);
     }
   };
-  
+
   /** Selects to the "intelligent" beginning of the line.
    *  @see #_getBeginLinePos
    */
@@ -4311,8 +4311,7 @@ public class MainFrame extends JFrame implements OptionConstants {
      SpringLayout.SOUTH, _currLocationField);*/
   }
   
-  /** Inner class to handle the updating of current position within the document.  Registered with the definitionspane.
-   **/
+  /** Inner class to handle updating the current position in the document.  Registered with the DefinitionsPane.**/
   private class PositionListener implements CaretListener {
     
     public void caretUpdate( CaretEvent ce ) {

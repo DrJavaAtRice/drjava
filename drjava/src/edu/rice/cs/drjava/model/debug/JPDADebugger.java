@@ -351,15 +351,10 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
   }
 
 
-  /**
-   * Returns the current EventRequestManager from JDI, or null if
-   * startup() has not been called.
-   */
+  /** Returns the current EventRequestManager from JDI, or null if startup() has not been called. */
   synchronized EventRequestManager getEventRequestManager() { return _eventManager; }
 
-  /**
-   * Returns the pending request manager used by the debugger.
-   */
+  /** Returns the pending request manager used by the debugger. */
   synchronized PendingRequestManager getPendingRequestManager() { return _pendingRequestManager; }
 
   /**
@@ -406,9 +401,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
    * @throws IllegalStateException if debugger is not ready
    * @throws IllegalArgumentException if threadData is null or not suspended
    */
-  public synchronized void setCurrentThread(DebugThreadData threadData)
-    throws DebugException
-  {
+  public synchronized void setCurrentThread(DebugThreadData threadData) throws DebugException {
     _ensureReady();
 
     if (threadData == null) {
