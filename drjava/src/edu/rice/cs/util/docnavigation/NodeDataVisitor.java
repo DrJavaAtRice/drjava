@@ -57,9 +57,6 @@ import java.io.File;
 public interface NodeDataVisitor<Ret> {
  
   public Ret fileCase(File f);
-  
   public Ret stringCase(String s);
-  
-  public Ret itemCase(INavigatorItem ini);
-  
+  public Ret itemCase(INavigatorItem i);
 }

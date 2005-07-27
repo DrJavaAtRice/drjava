@@ -566,10 +566,8 @@ public class JTreeSortNavigator extends JTree
     synchronized (_model) { navListeners.remove(listener); }
   }
   
-  /**
-   * Returns a collection of all navigator listeners.
-   * Note: this is a dangerous method since it exposes a shared data structure that must
-   * be synchronized.
+  /** Returns a collection of all navigator listeners. Note: this is a dangerous method since it exposes a shared data 
+   *  structure that must be synchronized with _model.
    */
   public Collection<INavigationListener> getNavigatorListeners() { return navListeners; }
   

@@ -46,6 +46,7 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.util.docnavigation;
 import edu.rice.cs.util.Pair;
 import edu.rice.cs.util.swing.Utilities;
+import java.util.List;
 import java.util.*;
 import java.awt.*;
 import java.awt.event.*;
@@ -54,7 +55,6 @@ public class AWTContainerNavigatorFactory implements IDocumentNavigatorFactory {
   public static final AWTContainerNavigatorFactory Singleton = new AWTContainerNavigatorFactory();
   
   private AWTContainerNavigatorFactory() { }
-
 
   /** Creates a new List Navigator
    *  @return a list navigator
@@ -65,18 +65,20 @@ public class AWTContainerNavigatorFactory implements IDocumentNavigatorFactory {
    *  @param name the name of the root node
    *  @return a tree navigator
    */
-    public IDocumentNavigator makeTreeNavigator(String name) {
-      return new JTreeSortNavigator(name);
-    }
+    public IDocumentNavigator makeTreeNavigator(String name) { return new JTreeSortNavigator(name); }
     
   /** Creates a list navigator and migrates the navigator items from parent to the new navigator
    *  @param parent the navigator to migrate from
    *  @return the new list navigator
    */
-    public IDocumentNavigator makeListNavigator(IDocumentNavigator parent) {
-      IDocumentNavigator tbr = makeListNavigator();
-      migrateNavigatorItems(tbr, parent);
-      migrateListeners(tbr, parent);
+    public IDocumentNavigator makeListNavigator(final IDocumentNavigator parent) {
+      final IDocumentNavigator tbr = makeListNavigator();
+      Utilities.invokeAndWait(new Runnable() { 
+        public void run() { 
+          migrateNavigatorItems(tbr, parent);
+          migrateListeners(tbr, parent);
+        }
+      });
       return tbr;
     }
   
@@ -85,15 +87,20 @@ public class AWTContainerNavigatorFactory implements IDocumentNavigatorFactory {
    *  @param parent the navigator to migrate from
    *  @return the new tree navigator
    */
-    public IDocumentNavigator makeTreeNavigator(String name, IDocumentNavigator parent, 
-                                                java.util.List<Pair<String, INavigatorItemFilter>> l) {
+    public IDocumentNavigator makeTreeNavigator(String name, final IDocumentNavigator parent, 
+                                                final List<Pair<String, INavigatorItemFilter>> l) {
       
-      IDocumentNavigator tbr = makeTreeNavigator(name);
+      final IDocumentNavigator tbr = makeTreeNavigator(name);
       
-      for(Pair<String, INavigatorItemFilter> p:l) { tbr.addTopLevelGroup(p.getFirst(), p.getSecond()); }
-      
-      migrateNavigatorItems(tbr, parent);
-      migrateListeners(tbr, parent);
+      Utilities.invokeAndWait(new Runnable() { 
+        public void run() { 
+          
+          for(Pair<String, INavigatorItemFilter> p: l) { tbr.addTopLevelGroup(p.getFirst(), p.getSecond()); }
+          
+          migrateNavigatorItems(tbr, parent);
+          migrateListeners(tbr, parent);
+        }
+      });     
       return tbr;
     }
     
@@ -103,7 +110,7 @@ public class AWTContainerNavigatorFactory implements IDocumentNavigatorFactory {
      */
     private void migrateNavigatorItems(IDocumentNavigator child, IDocumentNavigator parent) {
       Enumeration<INavigatorItem> enumerator =  parent.getDocuments();
-      while(enumerator.hasMoreElements()) {
+      while (enumerator.hasMoreElements()) {
         INavigatorItem navitem = enumerator.nextElement();
         parent.removeDocument(navitem);
         child.addDocument(navitem);
@@ -118,7 +125,7 @@ public class AWTContainerNavigatorFactory implements IDocumentNavigatorFactory {
     private void migrateListeners(IDocumentNavigator child, IDocumentNavigator parent) {
       Collection<INavigationListener> listeners = parent.getNavigatorListeners();
       Iterator<INavigationListener> it = listeners.iterator();
-      while(it.hasNext()) {
+      while (it.hasNext()) {
         INavigationListener listener = it.next();
         child.addNavigationListener(listener);
         parent.removeNavigationListener(listener);

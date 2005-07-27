@@ -46,30 +46,25 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.util.docnavigation;
 import edu.rice.cs.util.Pair;
 import java.util.List;
-/**
- * Factory which produces IDocumentNavigators (i.e. returns implementing class instances represented as IDocumentNavigators)
- */
 
-public interface IDocumentNavigatorFactory
-{
+/** Factory that produces bbjects that implement IDocumentNavigator. */
+
+public interface IDocumentNavigatorFactory {
   
-  /**
-   * creates a new List Navigator
-   * @return a list navigator
+  /** Creates a new List Navigator
+   *  @return a list navigator
    */
   public IDocumentNavigator makeListNavigator();
   
-  /**
-   * returns a new tree Navigator with the specified root
-   * @param name the name of the root node
-   * @return a tree navigator
+  /** Returns a new tree Navigator with the specified root
+   *  @param name the name of the root node
+   *  @return a tree navigator
    */
   public IDocumentNavigator makeTreeNavigator(String name);
   
-  /**
-   * creates a list navigator and migrates the navigator items from parent to the new navigator
-   * @param parent the navigator to migrate from
-   * @return the new list navigator
+  /** Creates a list navigator and migrates the navigator items from parent to the new navigator
+   *  @param parent the navigator to migrate from
+   *  @return the new list navigator
    */
   public IDocumentNavigator makeListNavigator(IDocumentNavigator parent);
   
@@ -79,5 +74,6 @@ public interface IDocumentNavigatorFactory
    * @param parent the navigator to migrate from
    * @return the new tree navigator
    */
-  public IDocumentNavigator makeTreeNavigator(String name, IDocumentNavigator parent, java.util.List<Pair<String, INavigatorItemFilter>> l);
+  public IDocumentNavigator makeTreeNavigator(String name, IDocumentNavigator parent, 
+                                              List<Pair<String, INavigatorItemFilter>> l);
 }

@@ -45,25 +45,20 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.util.docnavigation;
 
-/**
- * A listener which listens for when a document was selected in the navigator as well as for when a document is 
- * deselected. The object passed to the listener is a NodeData.  The only way to retrieve the data from that classis to
- * use a NodeDataVisitor, whose methods, rather than getting the NodeData host, receive the data they were holding.  
- * This way, the listener does not need to know what type of information was in the selected node until the data is used.
+/** A listener that runs when a document is selected in the navigator and when a document is deselected. The object 
+ *  passed to the listener is a NodeData, which only supports processing via the interface NodeDataVisitor, whose 
+ *  methods, rather than getting the NodeData host, receive the data they were holding.  
+ *  This way, the listener does not need to know what type of information is in the selected node until it is used.
  */
 
-public interface INavigationListener
-{
-  /**
-   * run when an item in a navigator is selected
-   * @param dat the NodeData data wrapper for the data in the newly selected node of the navigator
+public interface INavigationListener {
+  /** Runs when an item in a navigator is selected
+   *  @param dat the NodeData data wrapper for the data in the newly selected node of the navigator
    */
   public void gainedSelection(NodeData dat);
   
-  /**
-   * run when an item in a navigator is unselected
-   * @param dat the NodeData data wrapper for the data in the new deselected node of the navigator
+  /** Runs when an item in a navigator is unselected
+   *  @param dat the NodeData data wrapper for the data in the new deselected node of the navigator
    */
   public void lostSelection(NodeData dat);
-  
 }

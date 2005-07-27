@@ -248,17 +248,17 @@ class JListNavigator extends JList implements IDocumentNavigator {
   
   /** Adds listener to the collection of listeners.
    *  @param listener
-   * 
-   *  Unsynchronized because Vector is thread-safe.
    */
-  public void addNavigationListener(INavigationListener listener) { navListeners.add(listener); }
+  public void addNavigationListener(INavigationListener listener) { 
+    synchronized(_model) { navListeners.add(listener); }
+  }
   
   /** Unregisters the listener listener
    *  @param listener
-   * 
-   *  Unsynchronized because Vector is thread-safe.
    */
-  public void removeNavigationListener(INavigationListener listener) { navListeners.remove(listener); }
+  public void removeNavigationListener(INavigationListener listener) { 
+    synchronized (_model) { navListeners.remove(listener); }
+  }
   
   /** @return the navigator listeners. */
   public Collection<INavigationListener> getNavigatorListeners() { return navListeners; }

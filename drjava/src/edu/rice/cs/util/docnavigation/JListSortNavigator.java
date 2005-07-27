@@ -62,7 +62,7 @@ class JListSortNavigator extends JListNavigator {
    */
   public void addDocument(INavigatorItem doc) { insertDoc(doc); }
  
-  /** Inserts the document into its sorted position. Should only be executed form event thread.
+  /** Inserts the document into its sorted position. Should only be executed in the event thread.
    *  @param doc the document to add
    */
   private int insertDoc(INavigatorItem doc) {
