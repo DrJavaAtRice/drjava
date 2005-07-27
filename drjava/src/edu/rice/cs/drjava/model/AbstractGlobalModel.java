@@ -1038,9 +1038,12 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   /** Called by saveAllFiles in DefaultGlobalModel */
   protected void saveAllFilesHelper(FileSaveSelector com) throws IOException {
     
+    boolean isProjActive = isProjectActive();
+    
     OpenDefinitionsDocument[] docs;
     synchronized(_documentsRepos) { docs = _documentsRepos.toArray(new OpenDefinitionsDocument[0]); }
     for (final OpenDefinitionsDocument doc: docs) {
+      if (doc.isUntitled() && isProjActive) continue;  // do not force Untitled document to be saved if projectActive()
       aboutToSaveFromSaveAll(doc);
       doc.saveFile(com);
     }
@@ -1729,10 +1732,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     throw new UnsupportedOperationException("AbstractGlobalModel does not support debugging");
   }
 
-  /**
-   * Checks if any open definitions documents have been modified
-   * since last being saved.
-   * @return whether any documents have been modified
+  /** Checks if any open definitions documents have been modified since last being saved.
+   *  @return whether any documents have been modified
    */
   public boolean hasModifiedDocuments() {
     OpenDefinitionsDocument[] docs;
@@ -3062,10 +3063,11 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
 //    if (_activeDocument == doc) return; // this optimization appears to cause some subtle bugs 
 //    Utilities.showDebug("DEBUG: Called setActiveDocument()");
     
-    Runnable command = new Runnable() {  
-      public void run() {_documentNavigator.setActiveDoc(doc);} 
-    };
-    try {Utilities.invokeAndWait(command); }  // might be relaxed to invokeLater
+    try {
+      Utilities.invokeAndWait(new Runnable() {  
+        public void run() { _documentNavigator.setActiveDoc(doc); }
+      }); // might be relaxed to invokeLater
+    }
     catch(Exception e) { throw new UnexpectedException(e); } 
   }
   
@@ -3088,25 +3090,10 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     else setActiveDocument((OpenDefinitionsDocument)_documentNavigator.getLast());
       /* selects the active document in the navigator, which signals a listener to call _setActiveDoc(...) */
   }
-//
-//  /**
-//   * Returns whether we are in the process of closing all documents.
-//   * (Don't want to prompt the user to revert files that have become
-//   * modified on disk if we're just closing everything.)
-//   * TODO: Move to DGM?  Make private?
-//   */
-//  public boolean isClosingAllFiles() {
-//    return _isClosingAllDocs;
-//  }
 
   //----------------------- End SingleDisplay Methods -----------------------//
 
-  
-  
-  /**
-   * Returns whether there is currently only one open document
-   * which is untitled and unchanged.
-   */
+  /** Returns whether there is currently only one open document which is untitled and unchanged. */
   private boolean _hasOneEmptyDocument() {
     return getOpenDefinitionsDocumentsSize() == 1 && _activeDocument.isUntitled() &&
             ! _activeDocument.isModifiedSinceSave();

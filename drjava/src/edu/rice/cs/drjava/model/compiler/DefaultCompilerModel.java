@@ -70,7 +70,7 @@ public class DefaultCompilerModel implements CompilerModel {
 
   /** Used by CompilerErrorModel to open documents that have errors. 
    *  A reference to the global model. */
-  private final IGetDocuments _getter;
+  private final IGetDocuments _model;
 
   /** The error model containing all current compiler errors. */
   private CompilerErrorModel<? extends CompilerError> _compilerErrorModel;
@@ -82,8 +82,8 @@ public class DefaultCompilerModel implements CompilerModel {
    *  @param getter Source of documents for this CompilerModel
    */
   public DefaultCompilerModel(IGetDocuments getter) {
-    _getter = getter;
-    _compilerErrorModel = new CompilerErrorModel<CompilerError>(new CompilerError[0], _getter);
+    _model = getter;
+    _compilerErrorModel = new CompilerErrorModel<CompilerError>(new CompilerError[0], _model);
   }
   
   //--------------------------------- Locking -------------------------------//
@@ -126,9 +126,9 @@ public class DefaultCompilerModel implements CompilerModel {
    */
   public void compileAll() throws IOException {
     
-    boolean isProjActive = _getter.getFileGroupingState().isProjectActive();
+    boolean isProjActive = _model.getFileGroupingState().isProjectActive();
     
-    List<OpenDefinitionsDocument> defDocs = _getter.getOpenDefinitionsDocuments();
+    List<OpenDefinitionsDocument> defDocs = _model.getOpenDefinitionsDocuments();
     
     if (isProjActive) {
       // If we're in project mode, filter out only the documents that are in the project and leave 
@@ -154,11 +154,11 @@ public class DefaultCompilerModel implements CompilerModel {
   public void compileAll(List<File> sourceRootSet, List<File> filesToCompile) throws IOException {
     
     File buildDir = null;
-    if (_getter.getFileGroupingState().isProjectActive()) 
-      buildDir = _getter.getFileGroupingState().getBuildDirectory();
+    if (_model.getFileGroupingState().isProjectActive()) 
+      buildDir = _model.getFileGroupingState().getBuildDirectory();
     List<OpenDefinitionsDocument> defDocs;
     
-    defDocs = _getter.getOpenDefinitionsDocuments(); 
+    defDocs = _model.getOpenDefinitionsDocuments(); 
     
     // Only compile if all are saved
     if (_hasModifiedFiles(defDocs)) _notifier.saveBeforeCompile();
@@ -191,8 +191,8 @@ public class DefaultCompilerModel implements CompilerModel {
     
     File buildDir = null;
     
-    if (_getter.getFileGroupingState().isProjectActive()) {
-      buildDir = _getter.getFileGroupingState().getBuildDirectory();
+    if (_model.getFileGroupingState().isProjectActive()) {
+      buildDir = _model.getFileGroupingState().getBuildDirectory();
     }
     
     // Only compile if all are saved
@@ -237,11 +237,11 @@ public class DefaultCompilerModel implements CompilerModel {
     File buildDir = null;
     
     if (doc.isInProjectPath() || doc.isAuxiliaryFile()) {
-      buildDir = _getter.getFileGroupingState().getBuildDirectory();
+      buildDir = _model.getFileGroupingState().getBuildDirectory();
     }
     
     List<OpenDefinitionsDocument> defDocs;
-    defDocs = _getter.getOpenDefinitionsDocuments(); 
+    defDocs = _model.getOpenDefinitionsDocuments(); 
     
     // Only compile if all are saved
     if (_hasModifiedFiles(defDocs)) _notifier.saveBeforeCompile();
@@ -314,8 +314,8 @@ public class DefaultCompilerModel implements CompilerModel {
 
     compiler.setBuildDirectory(buildDir);
     ClasspathVector extraClasspath = new ClasspathVector();
-    if (_getter.getFileGroupingState().isProjectActive()) 
-      extraClasspath.addAll(_getter.getFileGroupingState().getExtraClasspath());
+    if (_model.getFileGroupingState().isProjectActive()) 
+      extraClasspath.addAll(_model.getFileGroupingState().getExtraClasspath());
     for (File f : DrJava.getConfig().getSetting(OptionConstants.EXTRA_CLASSPATH)) extraClasspath.add(f);
     
 //    System.out.println("Extra classpath passed to compiler: " + extraClasspath.toString());
@@ -382,7 +382,7 @@ public class DefaultCompilerModel implements CompilerModel {
    */
   private void _distributeErrors(CompilerError[] errors) throws IOException {
     resetCompilerErrors();  // Why is this done?
-    _compilerErrorModel = new CompilerErrorModel<CompilerError>(errors, _getter);
+    _compilerErrorModel = new CompilerErrorModel<CompilerError>(errors, _model);
   }
 
   /**
@@ -392,7 +392,7 @@ public class DefaultCompilerModel implements CompilerModel {
    * to the source root set.
    */
   public File[] getSourceRootSet() {
-    List<OpenDefinitionsDocument> defDocs = _getter.getOpenDefinitionsDocuments();
+    List<OpenDefinitionsDocument> defDocs = _model.getOpenDefinitionsDocuments();
     return getSourceRootSet(defDocs);
   }
   
@@ -431,9 +431,10 @@ public class DefaultCompilerModel implements CompilerModel {
    *  @param defDocs the list of documents to check
    *  @return whether any of the given documents are modified
    */
-  protected static boolean _hasModifiedFiles(List<OpenDefinitionsDocument> defDocs) {
+  protected boolean _hasModifiedFiles(List<OpenDefinitionsDocument> defDocs) {
+    boolean isProjActive = _model.getFileGroupingState().isProjectActive();
     for (OpenDefinitionsDocument doc : defDocs) {
-      if (doc.isModifiedSinceSave()) return true;  // Not all documents must be inspected
+      if (doc.isModifiedSinceSave() && (! isProjActive || ! doc.isUntitled())) return true;
     }
     return false;
   }
@@ -455,7 +456,7 @@ public class DefaultCompilerModel implements CompilerModel {
   /** Resets the compiler error state to have no errors. */
   public void resetCompilerErrors() {
     // TODO: see if we can get by without this function
-    _compilerErrorModel = new CompilerErrorModel<CompilerError>(new CompilerError[0], _getter);
+    _compilerErrorModel = new CompilerErrorModel<CompilerError>(new CompilerError[0], _model);
   }
 
   //-------------------------- Compiler Management --------------------------//

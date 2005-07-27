@@ -120,15 +120,10 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
     _model.removeListener(listener);
   }
 
-
-  /**
-   * If we try to compile an unsaved file, and if we don't save when
-   * asked to saveAllBeforeProceeding, it should not do the compile
-   * or any other actions.
+  /** If we try to compile an unsaved file, and if we don't save when asked to saveAllBeforeProceeding, it should
+   *  not do the compile or any other actions.
    */
-  public void testCompileAbortsIfUnsaved()
-    throws BadLocationException, IOException
-  {
+  public void testCompileAbortsIfUnsaved() throws BadLocationException, IOException {
     final OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
 
     TestListener listener = new TestListener() {
@@ -147,14 +142,10 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
     _model.removeListener(listener);
   }
 
-  /**
-   * If we try to compile while any files are unsaved, and if we don't
-   * save when asked to saveAllBeforeProceeding, it should not do the compile
-   * or any other actions.
+  /** If we try to compile while any files are unsaved, and if we don't save when asked to saveAllBeforeProceeding,
+   *  it should not do the compile or any other actions.
    */
-  public void testCompileAbortsIfAnyUnsaved()
-    throws BadLocationException, IOException
-  {
+  public void testCompileAbortsIfAnyUnsaved() throws BadLocationException, IOException {
     final OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
     final OpenDefinitionsDocument doc2 = setupDocument(BAR_TEXT);
 
@@ -183,9 +174,7 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
    * compile should occur happily.
    * Doesn't reset interactions because no interpretations are performed.
    */
-  public void testCompileAnyUnsavedButSaveWhenAsked()
-    throws BadLocationException, IOException, InterruptedException
-  {
+  public void testCompileAnyUnsavedButSaveWhenAsked() throws BadLocationException, IOException, InterruptedException {
     final OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
     final OpenDefinitionsDocument doc2 = setupDocument(BAR_TEXT);
     final File file = tempFile();

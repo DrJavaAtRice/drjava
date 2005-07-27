@@ -1353,12 +1353,12 @@ public class MainFrame extends JFrame implements OptionConstants {
   };
   
   private MouseListener _resetFindReplaceListener = new MouseListener() {
-    public void mouseClicked (MouseEvent e) {}
-    public void mousePressed (MouseEvent e) {}
+    public void mouseClicked (MouseEvent e) { }
+    public void mousePressed (MouseEvent e) { }
     //as mouseReleased event so that it happens after the document has been set in the model and defPane
     public void mouseReleased (MouseEvent e) {_findReplace.updateFirstDocInSearch();}
-    public void mouseEntered (MouseEvent e) {}
-    public void mouseExited (MouseEvent e) {}
+    public void mouseEntered (MouseEvent e) { }
+    public void mouseExited (MouseEvent e) { }
   };
   
   // ------------- File Display Managers for File Icons ------------
@@ -1997,7 +1997,8 @@ public class MainFrame extends JFrame implements OptionConstants {
   
   public boolean getAllowKeyEvents() { return this.allow_key_events; }
   
-  /** Toggles whether the debugger is enabled or disabled, and updates the display accordingly. */
+  /** Toggles whether the debugger is enabled or disabled, and updates the display accordingly. Must execute in the 
+   *  event thread. */
   public void debuggerToggle() {
     // Make sure the debugger is available
     Debugger debugger = _model.getDebugger();
@@ -4742,7 +4743,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     _docSplitPane.setOneTouchExpandable(true);
   }
   
-  /** Switch to the JScrollPane containing the DefinitionsPane for the current active document. */
+  /** Switch to the JScrollPane containing the DefinitionsPane for the active document. Must run in event thread.*/
   void _switchDefScrollPane() {
     // demoted to package private protection to test the disabling editing while compiling functionality.
     // and to support brute force fix to DefinitionsPane bug on return from compile with errors
@@ -5026,6 +5027,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       // Show message
       if (_debugPanel.getStatusText().equals("")) _debugPanel.setStatusText(DEBUGGER_OUT_OF_SYNC);
     }
+    _debugPanel.repaint();  // display the updated panel
   }
   
   /** Ensures that the interactions pane is not editable during an interaction. */
@@ -5784,27 +5786,6 @@ public class MainFrame extends JFrame implements OptionConstants {
         }
       });
     }
-    
-//    /** Prompts the user to save and compile before running a modified file.
-//     *  Not currently used.
-//     */
-//     public void saveBeforeRun() {
-//     _saveAllBeforeProceeding
-//     ("To run this document's main method, you must first\n" +
-//     "save ALL modified files and compile this document.\n" +
-//     "Would you like to save and compile now?",
-//     ALWAYS_SAVE_BEFORE_RUN,
-//     "Always save and compile before running");
-//     }
-    
-//    /** Not currently used. */
-//     public void saveBeforeJUnit() {
-//     _saveAllBeforeProceeding
-//     ("To run JUnit, you must first save and compile ALL modified\n" +
-//     "files. Would you like to save and compile now?",
-//     ALWAYS_SAVE_BEFORE_JUNIT,
-//     "Always save and compile before testing with JUnit");
-//     }
     
     public void saveBeforeJavadoc() {
       Utilities.invokeLater(new Runnable() {

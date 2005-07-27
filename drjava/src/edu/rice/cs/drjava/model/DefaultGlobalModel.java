@@ -227,7 +227,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   /** JUnitModel manages all JUnit functionality.
    *  TODO: remove dependence on GlobalModel
    */
-  private final DefaultJUnitModel _junitModel = new DefaultJUnitModel(this, _interpreterControl, _compilerModel, this);
+  private final DefaultJUnitModel _junitModel = new DefaultJUnitModel(_interpreterControl, _compilerModel, this);
   
   
   // ---- Javadoc Fields ----
@@ -643,145 +643,6 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   /** Gets the JavadocModel, which provides all methods relating to Javadoc. */
   public JavadocModel getJavadocModel() { return _javadocModel; }
   
-
-//  /** Parses the given project file, sets up the state and other configurations such as the Navigator and the
-//   *  classpath, and returns an array of files to open.
-//   *  @param projectFile The project file to parse
-//   *  @return an array of document's files to open
-//   */
-//  public File[] openProject(File projectFile) throws IOException, MalformedProjectFileException {
-//    final ProjectFileIR ir;
-//    final DocFile[] srcFiles;
-//    final DocFile[] auxFiles;
-//    
-////    Utilities.showDebug("openProject called with file " + projectFile);
-//    ir = ProjectFileParser.ONLY.parse(projectFile);
-//    srcFiles = ir.getSourceFiles();
-//    auxFiles = ir.getAuxiliaryFiles();
-//    String projfilepath = projectFile.getCanonicalPath();
-//    
-//    // Sets up the filters that cause documents to load in differentnsections of the tree.  The names of these 
-//    // sections are set from the methods such as getSourceBinTitle().  Changing this changes what is considered 
-//    // source, aux, and external.
-//    
-//    List<Pair<String, INavigatorItemFilter>> l = new LinkedList<Pair<String, INavigatorItemFilter>>();
-//    l.add(new Pair<String, INavigatorItemFilter>(getSourceBinTitle(), new INavigatorItemFilter() {
-//      public boolean accept(INavigatorItem n) {
-//        OpenDefinitionsDocument d = (OpenDefinitionsDocument) n;
-//        return d.isInProjectPath();
-//      }
-//    }));
-//    
-//    l.add(new Pair<String, INavigatorItemFilter>(getAuxiliaryBinTitle(), new INavigatorItemFilter() {
-//      public boolean accept(INavigatorItem n) {
-//        OpenDefinitionsDocument d =  (OpenDefinitionsDocument) n;
-//        return d.isAuxiliaryFile();
-//      }
-//    }));
-//    
-//    l.add(new Pair<String, INavigatorItemFilter>(getExternalBinTitle(), new INavigatorItemFilter() {
-//      public boolean accept(INavigatorItem n) {
-//        OpenDefinitionsDocument d = (OpenDefinitionsDocument) n;
-//        return !(d.inProject() || d.isAuxiliaryFile()) || d.isUntitled();
-//      }
-//    }));
-//    
-//    IDocumentNavigator newNav = 
-//      AWTContainerNavigatorFactory.Singleton.makeTreeNavigator(projfilepath, getDocumentNavigator(), l);
-//    
-//    setDocumentNavigator(newNav);
-//    
-//    File buildDir = ir.getBuildDirectory();
-//    File mainClass;
-//    mainClass = ir.getMainClass();
-//    
-//    synchronized(_auxiliaryFiles) {
-//      _auxiliaryFiles.clear();
-//      for (File file: auxFiles) { _auxiliaryFiles.add(file); }
-//    }
-//    
-//    File[] projectclasspaths = ir.getClasspaths();
-//    ClasspathVector extraClasspaths = new ClasspathVector();
-//    for (File f : projectclasspaths) { extraClasspaths.add(f); }
-//    
-//    setFileGroupingState(makeProjectFileGroupingState(mainClass, buildDir, projectFile, srcFiles, extraClasspaths));
-//    setProjectChanged(false);
-//    
-//    ArrayList<File> projFiles = new ArrayList<File>();
-//    File active = null;
-//    for (DocFile f: srcFiles) {
-//      File file = f;
-//      if (f.lastModified() > f.getSavedModDate()) file = new File(f.getPath());
-//      if (f.isActive() && active == null) active = file;
-//      else projFiles.add(file);
-//    }
-//    for (DocFile f: auxFiles) {
-//      File file = f;
-//      if (f.lastModified() > f.getSavedModDate()) file = new File(f.getPath());
-//      if (f.isActive() && active == null) active = file;
-//      else projFiles.add(file);
-//    }
-//    // Insert active file as last file on list.
-//    if (active != null) projFiles.add(active); 
-//    
-////    Utilities.showDebug("Project files are: " + projFiles);
-//    
-//    final List<OpenDefinitionsDocument> projDocs = getProjectDocuments();  // opened documents in the project source tree
-//    
-//    // Keep all nonproject files open other than a new file (untitled).  External files in the previous 
-//    // project may become project files in the new project and must be closed while external files in the 
-//    // previous project that are still external to the new project should be kept open (except for a new file).
-//    
-//    Utilities.invokeAndWait(new Runnable() {
-//      public void run() {
-//        for (OpenDefinitionsDocument d: projDocs) {
-//          if (d.inProject()) closeFile(d);
-//          else {
-//            try {
-//              final INavigatorItem idoc = d;
-//              final String path = fixPathForNavigator(d.getFile().getCanonicalPath());
-//              _documentNavigator.refreshDocument(idoc, path);  // this operation must run in event thread
-//            }
-//            catch(IOException e) { 
-//              /* Do nothing; findbugs signals a bug unless this catch clause spans more than two lines */ 
-//            }
-//          }
-//        }
-//      }
-//    });
-////    Utilities.showDebug("Preparing to refresh navigator GUI");
-//    // call on the GUI to finish up by opening the files and making necessary gui component changes
-//    final File[] filesToOpen = projFiles.toArray(new File[projFiles.size()]);
-//    _notifier.projectOpened(projectFile, new FileOpenSelector() {
-//      public File[] getFiles() { return filesToOpen; }
-//    });
-//    
-//    if (_documentNavigator instanceof JTreeSortNavigator) {
-//      ((JTreeSortNavigator)_documentNavigator).collapsePaths(ir.getCollapsedPaths());
-//    }
-//   
-//    resetInteractions(); // Since the classpath is most likely changed.  Clears out test pane as well.
-//    
-//    return srcFiles; // Unnecessarily returns src files in keeping with the previous interface.
-//  }
-  
-//  /** Performs any needed operations on the model before closing the project and its files.  This is not 
-//   *  responsible for actually closing the files since that is handled in MainFrame._closeProject()
-//   */
-//  public void closeProject() {
-//    setDocumentNavigator(AWTContainerNavigatorFactory.Singleton.makeListNavigator(getDocumentNavigator()));
-//    setFileGroupingState(makeFlatFileGroupingState());
-//
-//    // Reset rather than telling the user to reset. This was a design decision
-//    // made by the class Spring 2005 after much debate.
-//    
-//    //_interactionsModel.getDocument().insertBeforeLastPrompt(CLASSPATH_OUT_OF_SYNC_MSG, 
-//    //                                                        InteractionsDocument.SYSTEM_ERR_STYLE);
-//    resetInteractions();
-//    _notifier.projectClosed();
-//  }
-  
-
   /** Prepares this model to be thrown away.  Never called in practice outside of quit(), except in tests. */
   public void dispose() {
     // Kill the interpreter
@@ -912,10 +773,9 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
     return roots.toArray(new File[roots.size()]);
   }
   
-  /**
-   * Return the name of the file, or "(untitled)" if no file exists.
-   * Does not include the ".java" if it is present.
-   * TODO: move to a static utility class?
+  /** Return the name of the file, or "(untitled)" if no file exists.
+   *  Does not include the ".java" if it is present.
+   *  TODO: move to a static utility class?
    */
   public String getDisplayFilename(OpenDefinitionsDocument doc) {
 

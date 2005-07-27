@@ -61,7 +61,7 @@ import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
 public class DefaultJavadocModel implements JavadocModel {
 
   /** Used by CompilerErrorModel to open documents that have errors. */
-  private IGetDocuments _getter;
+  private IGetDocuments _model;
 
   /**Manages listeners to this model. */
   private final JavadocEventNotifier _notifier = new JavadocEventNotifier();
@@ -72,8 +72,8 @@ public class DefaultJavadocModel implements JavadocModel {
   /** Main constructor.
    *  @param getter Source of documents for this JavadocModel
    */
-  public DefaultJavadocModel(IGetDocuments getter) {
-    _getter = getter;
+  public DefaultJavadocModel(IGetDocuments model) {
+    _model = model;
     _javadocErrorModel = new CompilerErrorModel<CompilerError>(new CompilerError[0]);
   }
 
@@ -123,10 +123,10 @@ public class DefaultJavadocModel implements JavadocModel {
         
     // Only javadoc if all are saved. Removed because it is already done inside suggestJavadocDestination (fixes bug where pop-up is shown twice)
 //    _attemptSaveAllDocuments();
-    if (_getter.hasModifiedDocuments() || _getter.hasUntitledDocuments()) { return; }  /* abort if files remain unsaved */
+    if (_model.hasModifiedDocuments() || _model.hasUntitledDocuments()) { return; }  /* abort if files remain unsaved */
     
     // Make sure that there is at least one saved document.
-    List<OpenDefinitionsDocument> docs = _getter.getOpenDefinitionsDocuments();
+    List<OpenDefinitionsDocument> docs = _model.getOpenDefinitionsDocuments();
        
 //    for (OpenDefinitionsDocument doc: docs) {
 //      if (doc.isUntitled()) return;  // ignore javadoc, since a document is still unsaved
@@ -212,7 +212,7 @@ public class DefaultJavadocModel implements JavadocModel {
     boolean docAll = DrJava.getConfig().getSetting(OptionConstants.JAVADOC_FROM_ROOTS).booleanValue();
 
     // Each document has a package hierarchy to traverse.
-    List<OpenDefinitionsDocument> docs = _getter.getOpenDefinitionsDocuments();
+    List<OpenDefinitionsDocument> docs = _model.getOpenDefinitionsDocuments();
     for (OpenDefinitionsDocument doc: docs) {
       File file = null;
 
@@ -404,7 +404,7 @@ public class DefaultJavadocModel implements JavadocModel {
    */
   private void _attemptSaveAllDocuments() {
     // Only javadoc if all are saved.
-    if (_getter.hasModifiedDocuments() || _getter.hasUntitledDocuments()) _notifier.saveBeforeJavadoc();
+    if (_model.hasModifiedDocuments() || _model.hasUntitledDocuments()) _notifier.saveBeforeJavadoc();
   }
 
   /**
@@ -441,7 +441,7 @@ public class DefaultJavadocModel implements JavadocModel {
   private void _showCompilerError(String msg, File f) {
     CompilerError[] errors = new CompilerError[1];
     errors[0] = new CompilerError(f, -1, -1, msg, false);
-    _javadocErrorModel = new CompilerErrorModel<CompilerError>(errors, _getter);
+    _javadocErrorModel = new CompilerErrorModel<CompilerError>(errors, _model);
     _notifier.javadocEnded(false, null, false);
   }
 
@@ -544,7 +544,7 @@ public class DefaultJavadocModel implements JavadocModel {
     errors.addAll(_extractErrors(errLines));
 
     _javadocErrorModel = new CompilerErrorModel<CompilerError>
-      (errors.toArray(new CompilerError[errors.size()]), _getter);
+      (errors.toArray(new CompilerError[errors.size()]), _model);
 //    System.out.println("built Javadoc error model");
 
     // Returns true if no "real" errors have occurred.

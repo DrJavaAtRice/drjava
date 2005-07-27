@@ -79,9 +79,6 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   /** Manages listeners to this model. */
   private final JUnitEventNotifier _notifier = new JUnitEventNotifier();
   
-  /** Used by CompilerErrorModel to open documents that have errors. */
-  private final IGetDocuments _getter;
-  
   /** RMI interface to a secondary JVM for running tests.
    *  Using a second JVM prevents tests from disrupting normal usage of DrJava.
    */
@@ -106,21 +103,17 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
    *  Used only for testing. */
   private final SwingDocument _junitDoc = new SwingDocument();
   
-  /**
-   * Main constructor.
-   * @param getter source of documents for this JUnitModel
-   * @param jvm RMI interface to a secondary JVM for running tests
-   * @param compilerModel the CompilerModel, used only as a lock to prevent
-   *                      simultaneous test and compile
-   * @param model used only for getSourceFile
+  /** Main constructor.
+   *  @param jvm RMI interface to a secondary JVM for running tests
+   *  @param compilerModel the CompilerModel, used only as a lock to prevent
+   *                       simultaneous test and compile
+   *  @param model used only for getSourceFile
    */
-  public DefaultJUnitModel(IGetDocuments getter, MainJVM jvm,
-                           CompilerModel compilerModel, GlobalModel model) {
-    _getter = getter;
+  public DefaultJUnitModel(MainJVM jvm, CompilerModel compilerModel, GlobalModel model) {
     _jvm = jvm;
     _compilerModel = compilerModel;
     _model = model;
-    _junitErrorModel = new JUnitErrorModel(new JUnitError[0], getter, false);
+    _junitErrorModel = new JUnitErrorModel(new JUnitError[0], _model, false);
   }
   
   
@@ -151,7 +144,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
    *  associated with a file is not a test case, it is ignored.  Synchronized against the compiler
    *  model to prevent testing and compiling at the same time, which would create invalid results.
    */
-  public void junitAll() { junitDocs(_getter.getOpenDefinitionsDocuments()); }
+  public void junitAll() { junitDocs(_model.getOpenDefinitionsDocuments()); }
   
   /** Creates a JUnit test suite over all currently open documents and runs it.  If the class file 
    *  associated with a file is not a test case, it will be ignored.  Synchronized against the compiler
@@ -160,7 +153,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   public void junitProject() {
     LinkedList<OpenDefinitionsDocument> lod = new LinkedList<OpenDefinitionsDocument>();
     
-    for (OpenDefinitionsDocument doc : _getter.getOpenDefinitionsDocuments()) { 
+    for (OpenDefinitionsDocument doc : _model.getOpenDefinitionsDocuments()) { 
       if (doc.isInProjectPath() || doc.isAuxiliaryFile())  lod.add(doc);
     }
     junitDocs(lod);
@@ -439,7 +432,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   
   /** Resets the junit error state to have no errors. */
   public void resetJUnitErrors() {
-    _junitErrorModel = new JUnitErrorModel(new JUnitError[0], _getter, false);
+    _junitErrorModel = new JUnitErrorModel(new JUnitError[0], _model, false);
   }
   
   //---------------------------- Model Callbacks ----------------------------//
@@ -485,7 +478,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
    */
   public void testSuiteEnded(JUnitError[] errors) {
 //    new ScrollableDialog(null, "DefaultJUnitModel.testSuiteEnded(...) called", "", "").show();
-    _junitErrorModel = new JUnitErrorModel(errors, _getter, true);
+    _junitErrorModel = new JUnitErrorModel(errors, _model, true);
     _notifier.junitEnded();
     synchronized(_testLock) { _testInProgress = false; }
 //    new ScrollableDialog(null, "DefaultJUnitModel.testSuiteEnded(...) finished", "", "").show();
@@ -511,7 +504,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     synchronized(_testLock) { if (! _testInProgress) return; }
     JUnitError[] errors = new JUnitError[1];
     errors[0] = new JUnitError("Previous test suite was interrupted", true, "");
-    _junitErrorModel = new JUnitErrorModel(errors, _getter, true);
+    _junitErrorModel = new JUnitErrorModel(errors, _model, true);
     _notifier.junitEnded();
     synchronized(_testLock) { _testInProgress = false; }
   }
