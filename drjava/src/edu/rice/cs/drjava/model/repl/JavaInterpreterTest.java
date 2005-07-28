@@ -50,6 +50,7 @@ import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.config.OptionListener;
 import edu.rice.cs.drjava.config.OptionEvent;
 import edu.rice.cs.drjava.model.repl.newjvm.ClasspathManager;
+import edu.rice.cs.util.swing.Utilities;
 
 import junit.framework.*;
 
@@ -517,6 +518,7 @@ public final class JavaInterpreterTest extends TestCase {
       assertTrue(ere.getContainedException() instanceof IllegalAccessException);
     }
     DrJava.getConfig().setSetting(OptionConstants.ALLOW_PRIVATE_ACCESS, new Boolean(true));
+    Utilities.clearEventQueue();
     assertEquals("Should be able to access private field i whose value should be 0",
                  new Integer(0),
                  _interpreter.interpret("new A().i"));

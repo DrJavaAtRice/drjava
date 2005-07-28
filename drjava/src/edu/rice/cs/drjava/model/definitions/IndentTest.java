@@ -1164,14 +1164,14 @@ public final class IndentTest extends TestCase {
       "};\n";
 
     doc.insertString(0, text, null);
-     Utilities.clearEventQueue();
+
     _assertContents(text, doc);
     doc.indentLines(0, doc.getLength());
-    Utilities.clearEventQueue();
     _assertContents(indentedBefore, doc);
-    DrJava.getConfig().setSetting(OptionConstants.INDENT_LEVEL, new Integer(8));    Utilities.clearEventQueue();
-    doc.indentLines(0, doc.getLength());
+    DrJava.getConfig().setSetting(OptionConstants.INDENT_LEVEL, new Integer(8));
+    
     Utilities.clearEventQueue();
+    doc.indentLines(0, doc.getLength());
     _assertContents(indentedAfter, doc);
   }
 
