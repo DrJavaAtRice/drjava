@@ -48,7 +48,7 @@ package edu.rice.cs.drjava.ui.config;
 import java.awt.*;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.DrJava;
-
+import edu.rice.cs.util.swing.Utilities;
 import junit.framework.*;
 
 /**
@@ -98,9 +98,13 @@ public final class ColorOptionComponentTest extends TestCase {
     Color testColor = Color.decode("#ABCDEF");
 
     _option.setValue(testColor);
+    Utilities.clearEventQueue();
     _option.updateConfig();
+    Utilities.clearEventQueue();
     _option.resetToDefault(); // resets to default
+    Utilities.clearEventQueue();
     _option.updateConfig();
+    Utilities.clearEventQueue();
 
     assertEquals("Apply (updateConfig) should write change to file",
                  OptionConstants.DEFINITIONS_NORMAL_COLOR.getDefault(),
