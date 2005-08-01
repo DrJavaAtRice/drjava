@@ -53,6 +53,9 @@ public abstract class AbstractDJPane extends JTextPane implements OptionConstant
   
   // ------------ FIELDS -----------
   
+  /* The amount of the visible pane to scroll on a single click (Swing's default is .1) */
+  private static final double SCROLL_UNIT = .05;
+  
   /**
    * Paren/brace/bracket matching highlight color.
    */
@@ -132,6 +135,10 @@ public abstract class AbstractDJPane extends JTextPane implements OptionConstant
         super.setCaretPosition(pos);
         getDJDocument().setCurrentLocation(pos);
 //    _doc.setCurrentLocation(pos);
+  }
+  
+  public int getScrollableUnitIncrement(Rectangle visibleRectangle, int orientation, int direction) {
+    return (int) (visibleRectangle.getHeight() * SCROLL_UNIT);
   }
   
   
