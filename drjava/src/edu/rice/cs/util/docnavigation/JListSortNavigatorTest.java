@@ -47,6 +47,8 @@ package edu.rice.cs.util.docnavigation;
 
 import junit.framework.TestCase;
 
+import edu.rice.cs.util.swing.Utilities;
+
 import java.io.*;
 import java.util.*;
 
@@ -77,6 +79,8 @@ public class JListSortNavigatorTest extends TestCase {
     assertSame("getLast test", i4, list.getLast());
     
     list.setActiveDoc(i1);
+    
+    Utilities.clearEventQueue();
     assertSame("getCurrent test", i1, list.getCurrent());
     assertSame("getNext test 1", i2, list.getNext(i1));
     assertSame("getNext test 2", i3, list.getNext(i2));
