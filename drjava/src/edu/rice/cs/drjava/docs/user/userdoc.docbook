@@ -7,7 +7,7 @@
 <book id="index">
   <!-- Meta info -->
   <bookinfo>
-    <date>2002-6-20</date>
+    <date>2005-8-03</date>
     <title>DrJava User Documentation</title>
   </bookinfo>
   <toc></toc>
@@ -80,7 +80,7 @@ DrJava Open Source License
 </para>
 
 <para>
-Copyright (C) 2001-2003 JavaPLT group at Rice University (javaplt@rice.edu)
+Copyright (C) 2001-2005 JavaPLT group at Rice University (javaplt@rice.edu)
 All rights reserved.
 </para>
 
@@ -174,7 +174,8 @@ OTHER DEALINGS WITH THE SOFTWARE.
 
       <formalpara>
  <title>Brace Matching</title>
- <para>To help you match open and close braces, DrJava highlights the region enclosed by a pair of braces.  If you place the cursor immediately after a close brace, parenthesis, or bracket, all text between that character and the corresponding open brace is highlighted in another color.  Like syntax coloring, brace matching is also done in a <emphasis>fully correct</emphasis> manner, updated with each keystroke.</para>
+ <para>To help you match open and close braces, DrJava highlights the region enclosed by a pair of braces.  If you place the cursor immediately after a close brace, parenthesis, or bracket, all text between that character and the corresponding open brace is highlighted in another color.  Like syntax coloring, brace matching is also done in a <emphasis>fully correct</emphasis> manner, updated with each keystroke. In addition, when the cursor is right after a closing curly brace, the line containing the matching open brace is displayed in the lower status bar.</para>
+
       </formalpara>
       
       <formalpara>
@@ -191,7 +192,7 @@ OTHER DEALINGS WITH THE SOFTWARE.
     <section id="edit-multiple">
       <title>Multiple Documents</title>
       <para>Most Java programs have several closely related source files, so DrJava supports having multiple documents open at the same time.  A list of all of the names of the open documents appears in a pane to the left of the Definitions Pane, listing files in the order in which they were opened.  You can view and edit a particular document by selecting it in the list, or by using the Previous and Next Document commands in the Edit Menu.  These commands will switch to the next for previous document in alphabetical order. (These commands have keyboard shortcuts as well: <keycode>Ctrl+Comma</keycode> and <keycode>Ctrl+Period</keycode>.)  You can also press <keycode>Ctrl+Back Quote</keycode> to switch between recently active documents. This short cut is similar to Window's shortcut for switching windows. Hold down <keycode>Control</keycode> and press <keycode>Back Quote</keycode> to activate it. A small window will show the filename of the document about to be switched to. Press <keycode>Back Quote</keycode> to cycle filenames and release <keycode>Control</keycode> to switch docments.</para>
-      <para>Only the filename of a source file is shown in the list and in the title bar, but the full file path of the current document is always displayed in the status bar at the bottom of the window.</para>
+      <para>The full file path of the current document is displayed both in the title bar and in the status bar at the bottom of the window.</para>
 
       <formalpara>
  <title>Context Menu</title>
@@ -205,7 +206,8 @@ OTHER DEALINGS WITH THE SOFTWARE.
 
       <formalpara>
  <title>Find/Replace</title>
- <para>DrJava has a Find and Replace utility, which is conveniently displayed as one of the tabs at the bottom of the window, rather than as a dialog blocking part of the window.  The tab is first displayed when you Find/Replace from the Edit Menu (or using the keyboard shortcut, <keycode>Ctrl+F</keycode>), and it can be closed by clicking on the "X" button in the upper right corner of the tab (or by hitting the <keycode>Escape</keycode> key).  To search for a term, type it in the Find text field and click "Find Next" (or press <keycode>Enter</keycode>).  To replace the term with another, type the new term in the Replace text field, find an occurrence using "Find Next", and then click "Replace".  The "Replace/Find Next" and "Replace All" buttons help to speed up this process.  There are also three checkboxes to customize each search: "Match Case", "Search Backwards", and "Search All Documents".  Unchecking the first box will return case-insensitive results, checking the second box will reverse the direction of searching, and checking the third box will tell DrJava to search through all of the open documents in sequence.  Note that if "Search All Documents" is enabled, the search will not wrap to the beginning of the current document until all other documents have first been searched.</para>
+ <para>DrJava has a Find and Replace utility, which is conveniently displayed as one of the tabs at the bottom of the window, rather than as a dialog blocking part of the window.  The tab is first displayed when you Find/Replace from the Edit Menu (or using the keyboard shortcut, <keycode>Ctrl+F</keycode>), and it can be closed by clicking on the "X" button in the upper right corner of the tab (or by hitting the <keycode>Escape</keycode> key).  To search for a term, type it in the Find text field and click "Find Next" or "Find Previous" (or press <keycode>Enter</keycode>).  To replace the term with another, type the new term in the Replace text field, find an occurrence using "Find Next" or "Find Previous", and then click "Replace".  The "Replace/Find Next", "Replace/FindPrevious"  and "Replace All" buttons help to speed up this process.  There are also four checkboxes to customize each search: "Match Case","Search All Documents", "Whole Word", and "No Comments/Strings".  Unchecking the first box will return case-insensitive results, checking the second box will tell DrJava to search through all of the open documents in sequence, checking the third box will ignore partial matches (i.e. it will ignore "hello" if the search text is "lo"), and checking the last box ignores instances found within comments and strings .  Note that if "Search All Documents" is enabled, the search will not wrap to the beginning of the current document until all other documents have first been searched.
+A recent feature is the ability to search across more than one line of text. For detailed instructions on its usage, see the "Find and Replace" section in the Quickstart documents under the Help menu.</para>
       </formalpara>
 
       <formalpara>

@@ -240,10 +240,11 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     else return _odd;
   }
   
-  protected void _styleChanged() {
+  protected void _styleChanged() {    
     writeLock();
     try {
       int length = getLength() - _currentLocation;
+      
       //DrJava.consoleErr().println("Changed: " + _currentLocation + ", " + length);
       DocumentEvent evt = new DefaultDocumentEvent(_currentLocation,
                                                    length,

@@ -1415,7 +1415,6 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
 
       // add the undo/redo info
       addUndoRedo(chng,undoCommand,doCommand);
-
       // actually do the removal from the reduced model
       doCommand.run();
     }
@@ -1508,7 +1507,6 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     }
   }
 
-  
   protected class RemoveCommand implements Runnable {
     private final int _offset;
     private final int _length;

@@ -7,7 +7,7 @@
 <book id="index">
   <!-- Meta info -->
   <bookinfo>
-    <date>2002-6-20</date>
+    <date>2005-8-03</date>
     <title>A Quick Start Guide to DrJava</title>
   </bookinfo>
   <toc></toc>
@@ -106,7 +106,7 @@ Development Build jar instead. To do so, click on the "more download options" li
 
     <section id="openingfiles">
       <title>Opening and Creating Files</title>
-      <para>To create a new file, choose "File, New" from the File menu, or click on the "New" button on the toolbar.  A new file is created for you, and you can begin typing in it.  To open a file, choose "File, Open" from the File menu, or click on the "Open" button on the toolbar.  A file chooser window will then be opened.  Navigate through this and select the file or files you wish to open.</para>
+      <para>To create a new file, choose "File, New" from the File menu, or click on the "New" button on the toolbar.  A new file is created for you, and you can begin typing in it.  To open a file, choose "File, Open" from the File menu, or click on the "Open" button on the toolbar.  A file chooser window will then be opened. The current directory is displayed at the top of the pop-up window. Navigate through this and select the file or files you wish to open.</para>
 
 		<mediaobject>
        		<imageobject>
@@ -125,7 +125,7 @@ Development Build jar instead. To do so, click on the "more download options" li
     <section id="savingfiles">
       <title>Saving Files</title>
 <para>
-To save a file, either click on the "Save" button or choose "File, Save." If your file has been saved in the past, this will just overwrite the old version. If your file has never been saved, you will be prompted for where you wish to save the file. You can also use "File, Save As" to save the file with a different name, and "File, Save All" to save all open files.
+To save a file, either click on the "Save" button or choose "File, Save." If your file has been saved in the past, this will just overwrite the old version. If your file has never been saved, you will be prompted for where you wish to save the file. The current directory is displayed at the top of the pop-up window. You can also use "File, Save As" to save the file with a different name, and "File, Save All" to save all open files.
 </para>
 
 		<mediaobject>
@@ -138,7 +138,7 @@ To save a file, either click on the "Save" button or choose "File, Save." If you
 
     <section id="compilingfiles">
 	<title>Compiling Files</title>
-	<para> To compile all open files, click on the "Compile" button. If you want to just compile a specific file, right click on its name on the left listing of files, and select Compile Current Document. Once the compile is completed, the results are displayed on the Compiler Output tab at the bottom of the screen. If there are no errors, you will see "Last compilation completed successfully". If there are errors, they will be listed. If you click on an error, it will highlight the place in your source code where the error is. Use the up and down arrow buttons to navigate between error messages.</para>	
+	<para> To compile all open files, click on the "Compile" button. If you want to just compile a specific file, right click on its name on the left listing of files, and select Compile Current Document. Once the compile is completed, the results are displayed on the Compiler Output tab at the bottom of the screen. If there are no errors, you will see "Last compilation completed successfully". If there are errors, they will be listed. If both errors and warnings are found, the number of each is listed, and errors will be listed before warnings. If you click on an error, it will highlight the place in your source code where the error is. Use the up and down arrow buttons to navigate between error messages.</para>	
 
 		<mediaobject>
        		<imageobject>
@@ -220,15 +220,15 @@ To save a file, either click on the "Save" button or choose "File, Save." If you
        		<imagedata fileref="FindReplace.jpg" format="jpg" scale=50 scalefit="1">
        		</imageobject>
      	</mediaobject>	
-	<para> The Find and Replace menu is a useful way to search for specific text in your files, and replace it, if you so choose. To launch the Find/Replace tab, either use the keyboard shortcut Ctrl-F or choose "Edit, Find and Replace" from the menu at the top of the DrJava window. Once you do this, the Find/Replace tab will appear at the bottom of the screen. Type the text you want to search for in the "Find" box, and if you want to replace it with anything, type that in the "Replace" box. Then, chose which of the four options to the right of those text boxes that you want to use.</para>
+	<para> The Find and Replace menu is a useful way to search for specific text in your files, and replace it, if you so choose. To launch the Find/Replace tab, either use the keyboard shortcut Ctrl-F or choose "Edit, Find and Replace" from the menu at the top of the DrJava window. Once you do this, the Find/Replace tab will appear at the bottom of the screen. Type the text you want to search for in the "Find Next" box, and if you want to replace it with anything, type that in the "Replace With" box. Then, chose which of the four options to the right of those text boxes that you want to use, and press one of the buttons at the bottom, or the Enter key. The direction of the search executed by pressing the Enter key depends on the direction of the last search. (The last direction is indicated by the label of the Find box: "Find Next" or "Find Prev").</para>
 
 	<itemizedlist mark=opencircle>
 	<listitem><formalpara>
 	<title>Match Case:</title> <para> Makes the search becomes case sensitive.</para>
 	</formalpara></listitem>
-	
+
 	<listitem><formalpara>
-	<title>Search Backwards:</title> <para> Causes the search to go from the current location up through the file, instead of searching from the current cursor location down through the file.</para>
+	<title>Search All Documents:</title> <para> Causes your search text to be looked for in all open files. </para>
 	</formalpara></listitem>
 
 	<listitem><formalpara>
@@ -236,22 +236,31 @@ To save a file, either click on the "Save" button or choose "File, Save." If you
 	</formalpara></listitem>
 
 	<listitem><formalpara>
-	<title>Search All Documents:</title> <para> Causes your search text to be looked for in all open files. </para>
+	<title>No Comments/String:</title> <para> Ignores any instances found within comments or strings. </para>
 	</formalpara></listitem>
+
 	</itemizedlist>
 
 	<para>To go from instance to instance of your search text, use the four buttons at the bottom.  </para>
 	<itemizedlist mark=opencircle>
       <listitem><formalpara>
-	<title>Find Next:</title> <para>Finds the next instance.</para>
+	<title>Find Next:</title> <para>Finds the next instance. Switches the label of the Find box to "Find Next", indicating the direction of the next search.</para>
+	</formalpara></listitem>
+
+	<listitem><formalpara>
+	<title>Find Previous:</title> <para>Finds the previous instance. Switches the label of the Find box to "Find Prev", indicating the direction of the next search. </para>
+	</formalpara></listitem>
+	
+	<listitem><formalpara>
+	<title>Replace/Find Next:</title> <para> Replaces the current instance with your replace text and then finds the next instance. Switches the label of the Find box to "Find Next", indicating the direction of the next search </para>
+	</formalpara></listitem>
+
+	<listitem><formalpara>
+	<title>Replace/Find Previous:</title> <para> Replaces the current instance with your replace text and then finds the previous instance. Switches the label of the Find box to "Find Previous", indicating the direction of the next search </para>
 	</formalpara></listitem>
 
 	<listitem><formalpara>
 	<title>Replace:</title> <para> Replaces the current instance with your replace text. </para>
-	</formalpara></listitem>
-	
-	<listitem><formalpara>
-	<title>Replace/Find Next:</title> <para> Replaces the current instance with your replace text and then finds the next instance. </para>
 	</formalpara></listitem>
 
 	<listitem><formalpara>
@@ -259,6 +268,13 @@ To save a file, either click on the "Save" button or choose "File, Save." If you
 	</formalpara></listitem>
 	</itemizedlist>
 
+	<para> A relatively new feature of Find and Replace is the ability to search across more than one line of text. The Find and Replace text boxes can accept more than one line of text. To use this feature you have two options. First, you can copy/paste directly into the Find and Replace boxes and search/replace as normal. Second, you can type text directly into the boxes, and when you want to create a new line press Ctrl-Enter (Note: Pressing only the Enter key when inside the Find box executes a Find. It DOES NOT create a new line. Both Enter and Ctrl-Enter create a new line inside the Replace box).</para>
+
+	<mediaobject>
+       		<imageobject>
+       		<imagedata fileref="FindReplaceTwoLines.jpg" format="jpg" scale=50 scalefit="2">
+       		</imageobject>
+     	</mediaobject>
 
 	</section>
 	

@@ -1094,21 +1094,15 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     //    worker.start();
   }
     
-  
-  /**
-   * Saved option listeners kept in this field so they can
-   * be removed for garbage collection 
-   */
+  /** Saved option listeners kept in this field so they can be removed for garbage collection  */
   private List<Pair<Option<Color>, OptionListener<Color>>> _colorOptionListeners = 
     new LinkedList<Pair<Option<Color>, OptionListener<Color>>>();
     
   private List<Pair<Option<Boolean>, OptionListener<Boolean>>> _booleanOptionListeners = 
     new LinkedList<Pair<Option<Boolean>, OptionListener<Boolean>>>();
   
-  /**
-   * Called when the definitions pane is released from duty.  This
-   * frees up any option listeners that are holding references to
-   * this object so this can be garbage collected.
+  /** Called when the definitions pane is released from duty.  This frees up any option listeners that are holding 
+   *  references to this object so this can be garbage collected.
    */
   public void close() {
     for (Pair<Option<Color>, OptionListener<Color>> p: _colorOptionListeners) {
