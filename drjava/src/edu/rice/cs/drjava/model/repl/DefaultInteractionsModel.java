@@ -93,23 +93,19 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
   }
 
 
-  /**
-   * Called when the repl prints to System.out.
-   * @param s String to print
+  /** Called when the repl prints to System.out.
+   *  @param s String to print
    */
   public void replSystemOutPrint(String s) {
     super.replSystemOutPrint(s);
-    // TO DO: How can we print to the console without having a model field?
     _model.systemOutPrint(s);
   }
 
-  /**
-   * Called when the repl prints to System.err.
-   * @param s String to print
+  /** Called when the repl prints to System.err.
+   *  @param s String to print
    */
   public void replSystemErrPrint(String s) {
     super.replSystemErrPrint(s);
-    // TODO: How can we print to the console without having a model field?
     _model.systemErrPrint(s);
   }
 

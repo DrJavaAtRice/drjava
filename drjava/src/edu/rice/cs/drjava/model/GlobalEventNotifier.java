@@ -354,13 +354,18 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
    *  if the documents have been saved, using IGetDocuments.hasModifiedDocuments().
    */
   public void saveBeforeCompile() {
-//    ScrollableDialog sd = new ScrollableDialog(null, "saveBeforeCompile called in GlobalEventNotifier", "", "");
-//    sd.show();
     _lock.startRead();
     try { for (GlobalModelListener l : _listeners) { l.saveBeforeCompile(); } }
     finally { _lock.endRead(); }
   }
 
+  /** Called to demand that the active document, which is untitled, is saved before compiling.  */
+  public void saveUntitled() {
+    _lock.startRead();
+    try { for (GlobalModelListener l : _listeners) { l.saveUntitled(); } }
+    finally { _lock.endRead(); }
+  }
+  
   //---------------------------------- JUnit ---------------------------------//
 
   /** Called when trying to test a non-TestCase class.

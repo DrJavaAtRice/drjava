@@ -77,19 +77,6 @@ public interface GlobalModelListener extends InteractionsListener,
   /** Called when a file's main method is about to be run. */
   public void runStarted(OpenDefinitionsDocument doc);
 
-//  /** Called to demand that all files be saved before running the main method of a document. It is up to the 
-//   *  caller of this method to check if the documents have been saved, using IGetDocuments.hasModifiedDocuments().
-//   *  This is never called currently, but it is commented out in case it is needed later. */
-//  public void saveBeforeRun();
-
-//  /** Called to demand that all files be saved before starting the debugger. It is up to the caller of this method
-//   *  to check if the documents have been saved, using IGetDocuments.hasModifiedDocuments(). This is never called 
-//   *  currently, but it is commented out in case it is needed later. */
-//  public void saveBeforeDebug();
-
-//  /** Called when the caret position in the interactions pane is changed/ */
-//  public void interactionCaretPositionChanged(int pos);
-
   /** Called when the console window is reset. */
   public void consoleReset();
 

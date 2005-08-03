@@ -71,9 +71,7 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
    * Tests calling compileAll with no source files works.
    * Doesn't reset interactions because Interactions Pane isn't used.
    */
-  public void testCompileAllWithNoFiles()
-    throws BadLocationException, IOException, InterruptedException
-  {
+  public void testCompileAllWithNoFiles() throws BadLocationException, IOException, InterruptedException {
     // Open one empty doc
     _model.newFile();
 
@@ -88,15 +86,10 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
     _model.removeListener(listener);
   }
 
-
-  /**
-   * Tests that the interactions pane is reset after a successful
-   * compile if it has been used.
-   */
-  public void testCompileResetsInteractions()
-    throws BadLocationException, IOException, InterruptedException,
-    DocumentAdapterException
-  {
+  /** Tests that the interactions pane is reset after a successful compile if it has been used. */
+  public void testCompileResetsInteractions() throws BadLocationException, IOException, InterruptedException,
+    DocumentAdapterException {
+    
     OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
     final File file = new File(_tempDir, "DrJavaTestFoo.java");
     doc.saveFile(new FileSelector(file));

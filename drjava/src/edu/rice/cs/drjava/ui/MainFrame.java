@@ -238,7 +238,6 @@ public class MainFrame extends JFrame implements OptionConstants {
    */
   private JFileChooser _saveChooser;
   
-  
   /** Filter for regular java files (.java and .j). */
   private javax.swing.filechooser.FileFilter _javaSourceFilter = new JavaSourceFilter();
   
@@ -5799,15 +5798,6 @@ public class MainFrame extends JFrame implements OptionConstants {
       });
     }
     
-//    /** Not currently used. */
-//     public void saveBeforeDebug() {
-//     _saveAllBeforeProceeding
-//     ("To use debugging commands, you must first save and compile\n" +
-//     "ALL modified files. Would you like to save and then compile?",
-//     ALWAYS_SAVE_BEFORE_DEBUG,
-//     "Always save and compile before debugging");
-//     }
-    
     /** Helper method shared by all "saveBeforeX" methods.
      * @param message a prompt message to be displayed to the user
      * @param option the BooleanOption for the prompt dialog checkbox
@@ -5842,6 +5832,9 @@ public class MainFrame extends JFrame implements OptionConstants {
         else _saveAll();
       }
     }
+    
+    /** Saves the active document which is untitled. */
+    public void saveUntitled() { _saveAs(); }
     
     public void filePathContainsPound() {
       Utilities.invokeLater(new Runnable() {

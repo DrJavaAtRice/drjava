@@ -64,9 +64,8 @@ import edu.rice.cs.drjava.config.OptionEvent;
 import edu.rice.cs.drjava.model.repl.*;
 import edu.rice.cs.drjava.platform.PlatformFactory;
 
-/**
- * Abstract class to handle hooking up a console document with its pane.
- * @version $Id$
+/** Abstract class to handle hooking up a console document with its pane.
+ *  @version $Id$
  */
 public abstract class AbstractConsoleController implements Serializable {
   /** Adapter for the Swing document used by the model.*/
@@ -350,7 +349,7 @@ public abstract class AbstractConsoleController implements Serializable {
   void moveToEnd() { 
     moveTo(getConsoleDoc().getLength());
   }
-
+  
   /** Moves the pane's caret to the document's prompt. Only affects reduced_model not the document model. */
   void moveToPrompt() { 
     moveTo(getConsoleDoc().getPromptPos()); 

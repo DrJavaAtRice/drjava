@@ -51,10 +51,8 @@ import junit.extensions.*;
 import java.rmi.*;
 import java.io.*;
 import edu.rice.cs.util.FileOps;
-/**
- * Tests the functionality of the new JVM manager.
- *
- * @version $Id$
+/** Tests the functionality of the new JVM manager.
+ *  @version $Id$
  */
 public final class NewJVMTest extends TestCase {
   private final boolean printMessages = false;

@@ -129,10 +129,12 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
 
   /** Teardown for each test case, which recursively deletes the temporary directory created in setUp. */
   public void tearDown() throws IOException {
+    
     super.tearDown();
+    
     boolean ret = FileOps.deleteDirectory(_tempDir);
     assertTrue("delete temp directory " + _tempDir, ret);
-
+    
     _model.dispose();
     _tempDir = null;
     _model = null;
@@ -197,10 +199,9 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
   }
 
 
-  /**
-   * Creates and returns a new document, makes sure newFile is fired, and
-   * then adds some text.  When this method is done newCount is reset to 0.
-   * @return the new modified document
+  /** Creates and returns a new document, makes sure newFile is fired, and then adds some text.  When this method is
+   *  done newCount is reset to 0.
+   *  @return the new modified document
    */
   protected OpenDefinitionsDocument setupDocument(String text) throws BadLocationException {
     TestListener listener = new TestListener() {
@@ -854,25 +855,14 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       listenerFail("saveBeforeCompile fired unexpectedly");
     }
 
-//    /** Not used. */
-//    public void saveBeforeRun() {
-//      listenerFail("saveBeforeRun fired unexpectedly");
-//    }
-
-//    /** Not used. */
-//    public void saveBeforeJUnit() {
-//      listenerFail("saveBeforeJUnit fired unexpectedly");
-//    }
+    public void saveUntitled() {
+      listenerFail("saveUntitled fired unexpectedly");
+    }
 
     public void saveBeforeJavadoc() {
       listenerFail("saveBeforeJavadoc fired unexpectedly");
     }
     
-//    /** Not used. */
-//    public void saveBeforeDebug() {
-//      listenerFail("saveBeforeDebug fired unexpectedly");
-//    }
-
     public void nonTestCase(boolean isTestAll) {
       listenerFail("nonTestCase fired unexpectedly");
     }

@@ -177,18 +177,7 @@ public class DummyGlobalModelListener implements GlobalModelListener {
    */
   public void saveBeforeCompile() { }
 
-  /** Called to demand that all files be saved before running the main method of a document. It is up to the 
-   *  caller of this method to check if the documents have been saved, using IGetDocuments.hasModifiedDocuments().
-   *
-   *  Not currently used.*/
-//  public void saveBeforeRun() { }
-
-  /** Called to demand that all files be saved before running JUnit tests. It is up to the caller of this method 
-   *  to check if the documents have been saved, using IGetDocuments.hasModifiedDocuments().
-   *
-   *  Not currently used. */
-//  public void saveBeforeJUnit() { }
-
+  public void saveUntitled() { }
   
   /** Called to demand that all files be saved before generating Javadoc. It is up to the caller of this method to 
    *  check if the documents have been saved, using IGetDocuments.hasModifiedDocuments().

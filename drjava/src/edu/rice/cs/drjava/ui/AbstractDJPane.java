@@ -202,5 +202,4 @@ public abstract class AbstractDJPane extends JTextPane implements OptionConstant
   
   /** Returns the DJDocument held by the pane. */
   public abstract DJDocument getDJDocument();
-   
 }

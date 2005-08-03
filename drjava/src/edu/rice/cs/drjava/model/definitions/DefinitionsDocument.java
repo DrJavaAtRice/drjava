@@ -571,8 +571,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     int toReturn = selEnd;
     if (selStart == selEnd) {
       writeLock();
-      try {
-        
+      try {     
         synchronized(_reduced) {
           setCurrentLocation(selStart);
           Position oldCurrentPosition = createPosition(_currentLocation);
@@ -911,8 +910,10 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     StringBuffer buf = new StringBuffer();
     int oldLocation = 0;  // javac requires this bogus initialization
     
-    final String text = getText(); // getText() performs a readLock() so we must do this action before locking _reduced.
-    try {  // perturbing reduced model, which is reset in finally clause
+    readLock();
+    try {
+      final String text = getText();
+      // perturbing reduced model, which is reset in finally clause
       synchronized(_reduced) {
         oldLocation = _currentLocation;
         int firstNormalLocation;
@@ -987,6 +988,7 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     finally {
       setCurrentLocation(0);  // Why?
       setCurrentLocation(oldLocation);
+      readUnlock();
     }
   }
 

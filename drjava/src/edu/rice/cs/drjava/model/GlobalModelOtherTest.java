@@ -56,12 +56,10 @@ import edu.rice.cs.drjava.model.definitions.*;
 import edu.rice.cs.drjava.model.repl.*;
 import edu.rice.cs.util.text.DocumentAdapterException;
 import edu.rice.cs.util.swing.Utilities;
+import edu.rice.cs.util.Log;
 
-/**
- * A test on the GlobalModel that does deals with everything outside of
- * simple file operations, e.g., compile, quit.
- *
- * @version $Id$
+/** A test on the GlobalModel that does deals with everything outside of simple file operations, e.g., compile, quit.
+ *  @version $Id$
  */
 public final class GlobalModelOtherTest extends GlobalModelTestCase implements OptionConstants {
   private static final String FOO_CLASS =
@@ -77,6 +75,8 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
   
   private boolean _interactionDone = false;
   private final Object _interactionDoneLock = new Object();
+  
+//  private Log _log = new Log("GlobalModelOtherTestLog.txt", true);
 
   /** Tests that the undoableEditHappened event is fired if the undo manager is in use. */
   public void testUndoEventsOccur() throws BadLocationException {
@@ -101,6 +101,8 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     _model.removeListener(listener);
     listener.assertUndoableEditCount(1);
 //    Utilities.showDebug("testUndoEvents finished");
+    
+//    _log.log("testUndoEvents() completed");
   }
 
   /** Checks that System.exit is handled appropriately from interactions pane. */
@@ -162,6 +164,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     listener.assertInterpreterExitedCount(1);
     assertEquals("exit status", 23, listener.lastExitStatus);
 //    Utilities.showDebug("GlobalModelOtherTest: exitInteractions finished");
+//    _log.log("testExitInteractions() completed");
   }
 
   /** Checks that the interpreter can be aborted and then work correctly later. Part of what we check here is that 
@@ -244,6 +247,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     // make sure we can still see class foo
     final String afterAbort = interpret("DrJavaTestFoo.class.getName()");
     assertEquals("\"DrJavaTestFoo\"", afterAbort);
+//    _log.log("testInteractionAbort() completed");
   }
 
   /** Checks that reset console works. */
@@ -282,6 +286,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     assertEquals("Length of console text", 0, _model.getConsoleDocument().getLength());
 
     listener.assertConsoleResetCount(2);
+//    _log.log("testResetConsole() completed");
   }
 
   /** Creates a new class, compiles it and then checks that the REPL can see it.  Then checks that a compiled class
@@ -302,6 +307,8 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     Vector<File> cp = new Vector<File>();
     cp.add(dir1);
     DrJava.getConfig().setSetting(EXTRA_CLASSPATH, cp);
+    
+    Utilities.clearEventQueue();
     _model.closeFile(doc1);
 
     // Compile Baz which extends Foo in another directory.
@@ -319,6 +326,8 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
 
     // Also ensure that Foo can be used directly
     assertEquals("interactions result", "\"DrJavaTestFoo\"", interpret("new DrJavaTestFoo().getClass().getName()"));
+    
+//    _log.log("testInteractionsCanSeeCompletedClasses() completed");
   }
 
   /**  Compiles a new class in the default package with a mixed case name, and ensures that it can be instantiated on a
@@ -334,6 +343,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
 
     // This shouldn't cause an error (no output should be displayed)
     assertEquals("interactions result", "", interpret("drJavaTestClass = new DrJavaTestClass();"));
+//    _log.log("testInteractionsVariableWithLowercaseClassName() completed");
   }
 
   /** Checks that updating a class and recompiling it is visible from the REPL. */
@@ -352,6 +362,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
 
       assertEquals("interactions result, i=" + i, String.valueOf(i), interpret("new DrJavaTestFoo().m()"));
     }
+//    _log.log("testInteractionsCanSeeChangedClass() completed");
   }
 
   /** Checks that an anonymous inner class can be defined in the repl! */
@@ -370,17 +381,10 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
 
       assertEquals("interactions result, i=" + i, String.valueOf(i), interpret(s));
     }
+//    _log.log("testInteractionsDefineAnonymousInnerClass() completed");
   }
 
   public void testGetSourceRootDefaultPackage() throws BadLocationException, IOException {
-// Get current working directory (only used in the one test case. (currently commented out)
-//    File workDir = DrJava.getConfig().getSetting(WORKING_DIRECTORY);
-//    if (workDir == FileOption.NULL_FILE) {
-//      workDir = new File( System.getProperty("user.dir"));
-//    }
-//    if (workDir.isFile() && workDir.getParent() != null) {
-//      workDir = workDir.getParentFile();
-//    }
 
     // Get source root (current directory only)
     File[] roots = _model.getSourceRootSet();
@@ -410,11 +414,11 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     roots = _model.getSourceRootSet();
     assertEquals("number of source roots", 1, roots.length);
     assertEquals("source root", subdir, roots[0]);
+    
+//    _log.log("testGetSourceRootDefaultPackage() completed");
   }
 
-  public void testGetSourceRootPackageThreeDeepValid()
-    throws BadLocationException, IOException
-  {
+  public void testGetSourceRootPackageThreeDeepValid() throws BadLocationException, IOException {
     // Create temp directory
     File baseTempDir = tempDirectory();
 
@@ -436,9 +440,9 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     // Since we had the package statement the source root should be base dir
     File[] roots = _model.getSourceRootSet();
     assertEquals("number of source roots", 1, roots.length);
-    assertEquals("source root", baseTempDir.getCanonicalFile(),
-                 roots[0].getCanonicalFile());
-
+    assertEquals("source root", baseTempDir.getCanonicalFile(), roots[0].getCanonicalFile());
+    
+//    _log.log("testGetSourceRootPackageThreeDeepValid() completed");
   }
 
   /** Tests that getSourceRoot works with a relative path when a package name is present. */
@@ -464,9 +468,9 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     // Since we had the package statement the source root should be base dir
     File[] roots = _model.getSourceRootSet();
     assertEquals("number of source roots", 1, roots.length);
-    assertEquals("source root", baseTempDir.getCanonicalFile(),
-                 roots[0].getCanonicalFile());
-
+    assertEquals("source root", baseTempDir.getCanonicalFile(), roots[0].getCanonicalFile());
+    
+//    _log.log("testGetSourceRootPackageThreeDeepValidRelative() completed");
   }
 
   public void testGetSourceRootPackageThreeDeepInvalid() throws BadLocationException, IOException {
@@ -500,9 +504,8 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     // The package name is wrong so this should return only currDir
     File[] roots = _model.getSourceRootSet();
     assertEquals("number of source roots", 0, roots.length);
-    /*assertEquals("source root (current directory)",
-                 workDir.getCanonicalFile(),
-                 roots[0].getCanonicalFile());*/
+    
+//    _log.log("testGetSourceRootPackageThreeDeepInvalid() completed");
   }
 
   public void testGetSourceRootPackageOneDeepValid() throws BadLocationException, IOException {
@@ -525,6 +528,8 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     File[] roots = _model.getSourceRootSet();
     assertEquals("number of source roots", 1, roots.length);
     assertEquals("source root", baseTempDir.getCanonicalFile(), roots[0].getCanonicalFile());
+    
+//    _log.log("testGetSourceRootPackageOneDeepValid() completed");
   }
 
 
@@ -569,6 +574,8 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     if (!( (root1.equals(subdir1) && root2.equals(subdir2)) || (root1.equals(subdir2) && root2.equals(subdir1)) )) {
       fail("source roots did not match");
     }
+    
+//    _log.log("testGetMultipleSourceRootsDefaultPackage() completed");
   }
 
   /** Creates a new class, compiles it and then checks that the REPL can see it. */
@@ -581,8 +588,6 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     File f = tempFile();
 
     doCompile(doc, f);
-    
-    Utilities.clearEventQueue();
 
     // Rename the directory so it's not on the classpath anymore
     String tempPath = f.getParent();
@@ -600,10 +605,10 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     Vector<File> cp = new Vector<File>();
     cp.add(new File(tempPath + "a"));
     DrJava.getConfig().setSetting(EXTRA_CLASSPATH, cp);
-    _model.resetInteractionsClasspath();
-//    System.err.println("Classpath = " + _model.getClasspath());
     
     Utilities.clearEventQueue();
+    _model.resetInteractionsClasspath();
+//    System.err.println("Classpath = " + _model.getClasspath());
 
     result = interpret("new DrJavaTestFoo().getClass().getName()");
 
@@ -615,6 +620,8 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     tempDir = new File(tempPath + "a");
     boolean renamed = tempDir.renameTo(new File(tempPath));
 //    System.out.println("Renaming of " + tempPath + "a yielded " + renamed);
+    
+//    _log.log("testInteractionsLiveUpdateClasspath() completed");
   }
 
   /** Tests that the appropriate event is fired when the model's interpreter changes.*/
@@ -636,6 +643,8 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     Utilities.clearEventQueue();
     listener.assertInterpreterChangedCount(1);
     _model.removeListener(listener);
+    
+//    _log.log("testSwitchInterpreters() completed");
   }
 
   public void testRunMainMethod() throws Exception {
@@ -652,5 +661,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     
     Utilities.clearEventQueue();
     assertInteractionsContains(DefaultGlobalModel.DOCUMENT_OUT_OF_SYNC_MSG);
+    
+//    _log.log("testRunMainMethod() completed");
   }
 }

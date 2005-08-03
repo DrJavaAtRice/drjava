@@ -62,37 +62,24 @@ import edu.rice.cs.util.swing.Utilities;
 public class SimpleInteractionsModel extends InteractionsModel {
 
   /** Milliseconds to wait after each println */
-  protected static final int WRITE_DELAY = 50;
+  protected static final int WRITE_DELAY = 5;
 
-  /**
-   * An interpreter to evaluate interactions.
-   */
+  /** An interpreter to evaluate interactions. */
   protected JavaInterpreter _interpreter;
 
-  /**
-   * Creates a new InteractionsModel using a InteractionsDocumentAdapter.
-   */
+  /** Creates a new InteractionsModel using a InteractionsDocumentAdapter. */
   public SimpleInteractionsModel() {
     this(new InteractionsDocumentAdapter());
   }
 
-  /**
-   * Creates a new InteractionsModel with the given document adapter.
-   * @param document Toolkit-independent document adapter
+  /** Creates a new InteractionsModel with the given document adapter.
+   *  @param document Toolkit-independent document adapter
    */
   public SimpleInteractionsModel(InteractionsDocumentAdapter document) {
     super(document, 1000, WRITE_DELAY);
     _interpreter = new DynamicJavaAdapter(new ClasspathManager());
 
     _interpreter.defineVariable("INTERPRETER", _interpreter);
-
-//    setInputListener(new InputListener() {
-//      public String getConsoleInput() {
-//        _document.insertBeforeLastPrompt("Cannot read from System.in." + _newLine,
-//                                         InteractionsDocument.ERROR_STYLE);
-//        return null;
-//      }
-//    });
   }
 
   /**

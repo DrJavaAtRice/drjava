@@ -243,10 +243,15 @@ public class DefaultCompilerModel implements CompilerModel {
     List<OpenDefinitionsDocument> defDocs;
     defDocs = _model.getOpenDefinitionsDocuments(); 
     
-    // Only compile if all are saved
+    // Only compile if all docs are saved.  In project mode, untitled docs are ignored.
     if (_hasModifiedFiles(defDocs)) _notifier.saveBeforeCompile();
-    
     if (_hasModifiedFiles(defDocs)) return;  /* Abort compilation */
+    
+    // In project mode, untitled files are ignored; check if doc is untitled. 
+    if (doc.isUntitled()) {
+      _notifier.saveUntitled();
+      if (doc.isUntitled()) return;
+    }
     
     File[] files = { doc.getFile() };  
     // throws a FileMovedException if file has moved, which is preferable to the InvalidPackageException produced

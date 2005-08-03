@@ -874,16 +874,9 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     }
     public void replReturnedVoid() { }
     public void replReturnedResult(String result, String style) { }
-    public void replThrewException(String exceptionClass,
-                                   String message,
-                                   String stackTrace,
-                                   String specialMessage) { }
-    public void replReturnedSyntaxError(String errorMessage,
-                                        String interaction,
-                                        int startRow,
-                                        int startCol,
-                                        int endRow,
-                                        int endCol ) { }
+    public void replThrewException(String exceptionClass, String message, String stackTrace, String specialMessage) { }
+    public void replReturnedSyntaxError(String errorMessage, String interaction, int startRow, int startCol, int endRow,
+                                        int endCol) { }
     public void replCalledSystemExit(int status) { }
     public void interpreterResetting() { }
     public void interpreterResetFailed(Throwable th) { }
