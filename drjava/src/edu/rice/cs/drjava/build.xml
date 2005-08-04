@@ -468,7 +468,7 @@
                   excludes="META-INF/MANIFEST.MF" />
       <zipfileset src="${lib_dir}/platform.jar"
                   excludes="META-INF/MANIFEST.MF" />
-      <zipfileset src="${lib_dir}/winlaf-0.4.1.jar"
+      <zipfileset src="${lib_dir}/winlaf-0.5.1.jar"
                   excludes="META-INF/MANIFEST.MF" />
 
 <!--      <zipfileset src="${lib_dir}/javaast.jar"
