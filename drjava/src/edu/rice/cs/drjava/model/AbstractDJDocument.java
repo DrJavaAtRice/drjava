@@ -251,18 +251,14 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     return v;
   }
   
-  /**
-   * Separates out keywords from normal text for the given HighlightStatus element.
+  /** Separates out keywords from normal text for the given HighlightStatus element. What this does is it looks to see
+   *  if the given part of the text contains a keyword. If it does, it splits the HighlightStatus into separate blocks
+   *  so that each keyword is in its own block. This will find all keywords in a given block.
+   *  Note that the given block must have state NORMAL.
    *
-   * What this does is it looks to see if the given part of the text contains a keyword. If it does, it splits
-   * the HighlightStatus into separate blocks so that each keyword is in its own block. This will find all 
-   * keywords in a given block.
-   *
-   * Note that the given block must have state NORMAL.
-   *
-   * @param v Vector with highlight info
-   * @param i Index of the single HighlightStatus to check for keywords in
-   * @return the index into the vector of the last processed element
+   *  @param v Vector with highlight info
+   *  @param i Index of the single HighlightStatus to check for keywords in
+   *  @return the index into the vector of the last processed element
    */
   private int _highlightKeywords(Vector<HighlightStatus> v, int i) {
     // Basically all non-alphanumeric chars are delimiters
@@ -1357,17 +1353,14 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     }
   }
   
-  /**
-   * Updates document structure as a result of text insertion.
-   * This happens after the text has actually been inserted.
-   * Here we update the reduced model (using an {@link AbstractDJDocument.InsertCommand
-   * InsertCommand}) and store information for how to undo/redo the reduced model
-   * changes inside the {@link javax.swing.text.AbstractDocument.DefaultDocumentEvent 
-   * DefaultDocumentEvent}.
+  /** Updates document structure as a result of text insertion. This happens after the text has actually been inserted.
+   *  Here we update the reduced model (using an {@link AbstractDJDocument.InsertCommand InsertCommand}) and store 
+   *  information for how to undo/redo the reduced model changes inside the {@link 
+   *  javax.swing.text.AbstractDocument.DefaultDocumentEvent DefaultDocumentEvent}.
    *
-   * @see edu.rice.cs.drjava.model.AbstractDJDocument.InsertCommand
-   * @see javax.swing.text.AbstractDocument.DefaultDocumentEvent
-   * @see edu.rice.cs.drjava.model.definitions.DefinitionsDocument.CommandUndoableEdit
+   *  @see edu.rice.cs.drjava.model.AbstractDJDocument.InsertCommand
+   *  @see javax.swing.text.AbstractDocument.DefaultDocumentEvent
+   *  @see edu.rice.cs.drjava.model.definitions.DefinitionsDocument.CommandUndoableEdit
    */
   protected void insertUpdate(AbstractDocument.DefaultDocumentEvent chng, AttributeSet attr) {
     // Clear the helper method cache

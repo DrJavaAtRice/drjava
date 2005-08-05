@@ -133,9 +133,8 @@ public class TokenList extends ModelList<ReducedToken>
     }
 
 
-    /**
-     * Handles the details of the case where a brace is inserted into a gap.
-     * Do not call this unless the current token is a gap!
+    /** Handles the details of the case where a brace is inserted into a gap.
+     *  Do not call this unless the current token is a gap!
      */
     void insertBraceToGap(String text) {
       this.current().shrink(this.getBlockOffset());
@@ -150,10 +149,9 @@ public class TokenList extends ModelList<ReducedToken>
       this.setBlockOffset(0);
     }
 
-    /**
-     * Helper function to _insertBrace.
-     * Handles the details of the case where brace is inserted between two
-     * reduced tokens.  No destructive action is taken.
+    /** Helper function to _insertBrace.
+     *  Handles the details of the case where brace is inserted between two
+     *  reduced tokens.  No destructive action is taken.
      */
     void insertNewBrace(String text) {
       this.insert(Brace.MakeBrace(text, getStateAtCurrent()));
@@ -198,54 +196,41 @@ public class TokenList extends ModelList<ReducedToken>
     }
 
 
-    /**
-     * The walk function.
-     * Walks along the list on which ReducedModel is based from the current
-     * cursor position.  Which path it takes depends on the
-     * return value of getStateAtCurrent() at the start of the walk.
+    /** The walk function.
+     *  Walks along the list on which ReducedModel is based from the current
+     *  cursor position.  Which path it takes depends on the
+     *  return value of getStateAtCurrent() at the start of the walk.
      */
     void updateBasedOnCurrentState() {
-      if (this.atStart()) {
-        this.next();
-      }
+      if (this.atStart()) this.next();
 
       // If there's no text after here, nothing to update!
-      if (this.atEnd()) {
-        return;
-      }
+      if (this.atEnd()) return;
 
       ReducedModelState curState = this.getStateAtCurrent();
       // Free if at the beginning
-      while (!this.atEnd()) {
+      while (! this.atEnd()) {
         curState = curState.update(this);
       }
     }
 
 
-    /**
-     * Updates the BraceReduction to reflect cursor movement.
-     * Negative values move left from the cursor, positive values move
-     * right.
-     *
-     * @param count indicates the direction and magnitude of cursor movement
+    /** Updates the BraceReduction to reflect cursor movement. Negative values move left from the cursor, positive
+     *  values move right.
+     *  @param count indicates the direction and magnitude of cursor movement
      */
-    public void move(int count) {
-      _offset = _move(count, _offset);
-    }
+    public void move(int count) { _offset = _move(count, _offset); }
 
-    /**
-     * Helper function for move(int).
+    /** Helper function for move(int).
      *
-     * @param count         the number of chars to move.  Negative values move back,
-     *                      positive values move forward.
-     * @param currentOffset the current offset for copyCursor
-     * @return the updated offset
+     *  @param count         the number of chars to move.  Negative values move back,
+     *                       positive values move forward.
+     *  @param currentOffset the current offset for copyCursor
+     *  @return the updated offset
      */
     private int _move(int count, int currentOffset) {
       int retval = currentOffset;
-      if (count == 0) {
-        return retval;
-      }
+      if (count == 0)  return retval;
 
       TokenList.Iterator it = this._copy();
 
@@ -351,9 +336,7 @@ public class TokenList extends ModelList<ReducedToken>
      *              Always move count spaces to make sure we can delete.
      */
     public void delete(int count) {
-      if (count == 0) {
-        return;
-      }
+      if (count == 0) return;
       TokenList.Iterator copyCursor = this._copy();
       // from = this iterator
       // to = this iterator's copy
@@ -455,9 +438,8 @@ public class TokenList extends ModelList<ReducedToken>
       }
     }
 
-    /**
-     * Deletes from offset in delFrom to endOffset in delTo.
-     * Uses ModelList's collapse function to facilitate quick deletion.
+    /** Deletes from offset in delFrom to endOffset in delTo.
+     *  Uses ModelList's collapse function to facilitate quick deletion.
      */
     int deleteRight(TokenList.Iterator delTo) {
       this.collapse(delTo);

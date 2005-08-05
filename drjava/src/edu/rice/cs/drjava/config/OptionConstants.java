@@ -1045,39 +1045,26 @@ public interface OptionConstants {
   public static final NonNegativeIntegerOption HISTORY_MAX_SIZE =
     new NonNegativeIntegerOption("history.max.size", new Integer(500));
 
-  /**
-   * Number of files to list in the recent file list
-   */
+  /** Number of files to list in the recent file list */
   public static final NonNegativeIntegerOption RECENT_FILES_MAX_SIZE =
     new NonNegativeIntegerOption("recent.files.max.size", new Integer(5));
 
-  /**
-   * Whether to automatically close comments.
-   */
+  /** Whether to automatically close comments. */
   public static final BooleanOption AUTO_CLOSE_COMMENTS =
     new BooleanOption("auto.close.comments", Boolean.FALSE);
 
-  /**
-   * Whether to clear the console when manually resetting the interactions pane.
-   */
+  /** Whether to clear the console when manually resetting the interactions pane. */
   public static final BooleanOption RESET_CLEAR_CONSOLE =
     new BooleanOption("reset.clear.console", Boolean.TRUE);
 
-  /**
-   * Whether to allow the assert keyword in Java 1.4+.
-   */
+  /** Whether to allow the assert keyword in Java 1.4+. */
   public static final BooleanOption JAVAC_ALLOW_ASSERT =
     new BooleanOption("javac.allow.assert", Boolean.FALSE);
 
-  /**
-   * Whether to make emacs-style backup files.
-   */
-  public static final BooleanOption BACKUP_FILES =
-    new BooleanOption("files.backup", Boolean.TRUE);
+  /** Whether to make emacs-style backup files. */
+  public static final BooleanOption BACKUP_FILES = new BooleanOption("files.backup", Boolean.TRUE);
 
-  /**
-   * Whether to allow users to access to all members in the Interactions Pane.
-   */
+  /** Whether to allow users to access to all members in the Interactions Pane. */
   public static final BooleanOption ALLOW_PRIVATE_ACCESS =
     new BooleanOption("allow.private.access", Boolean.FALSE);
 

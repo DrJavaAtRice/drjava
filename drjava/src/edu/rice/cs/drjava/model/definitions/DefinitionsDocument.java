@@ -897,13 +897,12 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     finally { readUnlock(); }
   }
 
-  /**
-   * Gets the name of the package this source file claims it's in (with the package keyword). It does this by 
-   * minimally parsing the source file to find the package statement.
-   * @return The name of package declared for this source file OR the empty string if there is no package 
-   *         statement (and thus the source file is in the empty package).
-   * @exception InvalidPackageException if there is some sort of a <TT>package</TT> statement but the defined 
-   *            package does not match or exist.
+  /** Gets the name of the package this source file claims it's in (with the package keyword). It does this by 
+   *  minimally parsing the source file to find the package statement.
+   *  @return The name of package declared for this source file OR the empty string if there is no package 
+   *          statement (and thus the source file is in the empty package).
+   *  @exception InvalidPackageException if there is some sort of a <TT>package</TT> statement but the defined 
+   *             package does not match or exist.
    */
   public String getPackageName() throws InvalidPackageException {
     // throwErrorHuh();

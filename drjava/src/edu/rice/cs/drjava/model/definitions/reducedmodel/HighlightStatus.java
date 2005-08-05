@@ -45,10 +45,8 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.definitions.reducedmodel;
 
-/**
- * A block that represents some information about the highlighting status in
- * a particular section in the document.
- * @version $Id$
+/** A block that represents information about the highlighting status of a particular section in the document.
+ *  @version $Id$
  */
 public class HighlightStatus {
   public static final int NORMAL = 0;

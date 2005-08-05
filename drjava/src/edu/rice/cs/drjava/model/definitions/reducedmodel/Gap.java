@@ -45,9 +45,8 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.definitions.reducedmodel;
 
-/**
- * A subclass of ReducedToken that represents sequences of non-special characters.
- * @version $Id$
+/** A subclass of ReducedToken that represents sequences of non-special characters.
+ *  @version $Id$
  */
 class Gap extends ReducedToken {
   private int _size;
@@ -79,193 +78,132 @@ class Gap extends ReducedToken {
     throw new RuntimeException("Can't set type on Gap!");
   }
 
-  /**
-   * Blows up.  A Gap cannot be flipped.
-   * @throws RuntimeException always
+  /** Blows up.  A Gap cannot be flipped.
+   *  @throws RuntimeException always
    */
   public void flip() {
     throw  new RuntimeException("Can't flip a Gap!");
   }
 
-  /**
-   * Increases the size of the gap.
-   * @param delta the amount by which the gap is augmented.
+  /** Increases the size of the gap.
+   *  @param delta the amount by which the gap is augmented.
    */
   public void grow(int delta) {
     if (delta >= 0)
       _size += delta;
   }
 
-  /**
-   * Decreases the size of the gap.
-   * @param delta the amount by which the gap is diminished.
+  /** Decreases the size of the gap.
+   *  @param delta the amount by which the gap is diminished.
    */
   public void shrink(int delta) {
     if ((delta <= _size) && (delta >= 0)) _size -= delta;
   }
 
-  /**
-   * Converts a Brace to a String.  Used for debugging.
-   * @return the String representation of the Brace
+  /** Converts a Brace to a String.  Used for debugging.
+   *  @return the String representation of the Brace
    */
   public String toString() {
 //    String val = "Gap(size: "+_size+"): ";
     StringBuffer val = new StringBuffer();
     int i;
-    for (i = 0; i < _size; i++) {
-      val.append(" _");
-    }
+    for (i = 0; i < _size; i++) val.append(" _");
     return val.toString();
   }
 
-  /**
-   * Determines that this is not a multi-char brace.
-   * @return <code>false</code>
+  /** Determines that this is not a multi-char brace.
+   *  @return <code>false</code>
    */
   public boolean isMultipleCharBrace() { return false; }
 
-  /**
-   * Determines that this is a gap.
-   * @return <code>true</code>
+  /** Determines that this is a gap.
+   *  @return <code>true</code>
    */
-  public boolean isGap() {
-    return true;
-  }
+  public boolean isGap() { return true; }
 
-  /**
-   * Determines that this is not a line comment.
-   * @return <code>false</code>
+  /** Determines that this is not a line comment.
+   *  @return <code>false</code>
    */
-  public boolean isLineComment() {
-    return false;
-  }
+  public boolean isLineComment() { return false; }
 
-  /**
-   * Determines that this is not the start of a block comment.
-   * @return <code>false</code>
+  /** Determines that this is not the start of a block comment.
+   *  @return <code>false</code>
    */
-  public boolean isBlockCommentStart() {
-    return false;
-  }
+  public boolean isBlockCommentStart() { return false; }
 
-  /**
-   * Determines that this is not the end of a block comment.
-   * @return <code>false</code>
+  /** Determines that this is not the end of a block comment.
+   *  @return <code>false</code>
    */
-  public boolean isBlockCommentEnd() {
-    return false;
-  }
+  public boolean isBlockCommentEnd() { return false; }
 
-  /**
-   * Determines that this is not a newline.
-   * @return <code>false</code>
+  /** Determines that this is not a newline.
+   *  @return <code>false</code>
    */
-  public boolean isNewline() {
-    return false;
-  }
+  public boolean isNewline() { return false; }
 
-  /**
-   * Determines that this is not a /.
-   * @return <code>false</code>
+  /** Determines that this is not a /.
+   *  @return <code>false</code>
    */
-  public boolean isSlash() {
-    return false;
-  }
+  public boolean isSlash() { return false; }
 
-  /**
-   * Determines that this is not a *.
-   * @return <code>false</code>
+  /** Determines that this is not a *.
+   *  @return <code>false</code>
    */
-  public boolean isStar() {
-    return false;
-  }
+  public boolean isStar() { return false; }
 
-  /**
-   * Determines that this is not a ".
-   * @return <code>false</code>
+  /** Determines that this is not a ".
+   *  @return <code>false</code>
    */
-  public boolean isDoubleQuote() {
-    return false;
-  }
+  public boolean isDoubleQuote() { return false; }
 
-  /**
-   * Determines that this is not a '.
-   * @return <code>false</code>
+  /** Determines that this is not a '.
+   *  @return <code>false</code>
    */
-  public boolean isSingleQuote() {
-    return false;
-  }
+  public boolean isSingleQuote() { return false; }
 
-  /**
-   * Determines that this is not a double escape sequence.
-   * @return <code>false</code>
+  /** Determines that this is not a double escape sequence.
+   *  @return <code>false</code>
    */
-  public boolean isDoubleEscapeSequence() {
-    return false;
-  }
+  public boolean isDoubleEscapeSequence() { return false; }
 
-  /**
-   * Determines that this is not a double escape.
-   * @return <code>false</code>
+  /** Determines that this is not a double escape.
+   *  @return <code>false</code>
    */
-  public boolean isDoubleEscape() {
-    return false;
-  }
+  public boolean isDoubleEscape() { return false; }
 
-  /**
-   * Determines that this is not a \'.
-   * @return <code>false</code>
+  /** Determines that this is not a \'.
+   *  @return <code>false</code>
    */
-  public boolean isEscapedSingleQuote() {
-    return false;
-  }
+  public boolean isEscapedSingleQuote() { return false; }
 
-  /**
-   * Determines that this is not a \".
-   * @return <code>false</code>
+  /** Determines that this is not a \".
+   *  @return <code>false</code>
    */
-  public boolean isEscapedDoubleQuote() {
-    return false;
-  }
+  public boolean isEscapedDoubleQuote() { return false; }
 
-  /**
-   * Determines that this is not open.
-   * @return <code>false</code>
+  /** Determines that this is not open.
+   *  @return <code>false</code>
    */
-  public boolean isOpen() {
-    return false;
-  }
+  public boolean isOpen() { return false; }
 
-  /**
-   * Determines that this is not closed.
-   * @return <code>false</code>
+  /** Determines that this is not closed.
+   *  @return <code>false</code>
    */
-  public boolean isClosed() {
-    return false;
-  }
+  public boolean isClosed() { return false; }
 
-  /**
-   * Determines that this is not a match.
-   * @param other the token to compare to
-   * @return <code>false</code>
+  /** Determines that this is not a match.
+   *  @param other the token to compare to
+   *  @return <code>false</code>
    */
-  public boolean isMatch(ReducedToken other) {
-    return false;
-  }
+  public boolean isMatch(ReducedToken other) { return false; }
 
-  /**
-   * Determines that this is not an open brace.
-   * @return <code>false</code>
+  /** Determines that this is not an open brace.
+   *  @return <code>false</code>
    */
-  public boolean isOpenBrace() {
-    return false;
-  }
+  public boolean isOpenBrace() { return false; }
 
-  /**
-   * Determines that this is not a closed brace.
-   * @return <code>false</code>
+  /** Determines that this is not a closed brace.
+   *  @return <code>false</code>
    */
-  public boolean isClosedBrace() {
-    return false;
-  }
+  public boolean isClosedBrace() { return false; }
 }

@@ -99,27 +99,6 @@ public class ColoringView extends PlainView implements OptionConstants {
     // Listen for updates to configurable colors
     final ColorOptionListener col = new ColorOptionListener();
     final FontOptionListener fol = new FontOptionListener();
-//
-//    final Document doc = getDocument();
-//    if (doc instanceof DefinitionsDocument) {
-//      // delete the old color listeners, because they're hanging onto the wrong coloringview
-//      // add color listeners to highlight keywords etc
-//      ((DefinitionsDocument)doc).clearOptionListeners();
-//      ((DefinitionsDocument)doc).addOptionListener( OptionConstants.DEFINITIONS_COMMENT_COLOR, col);
-//      ((DefinitionsDocument)doc).addOptionListener( OptionConstants.DEFINITIONS_DOUBLE_QUOTED_COLOR, col);
-//      ((DefinitionsDocument)doc).addOptionListener( OptionConstants.DEFINITIONS_SINGLE_QUOTED_COLOR, col);
-//      ((DefinitionsDocument)doc).addOptionListener( OptionConstants.DEFINITIONS_NORMAL_COLOR, col);
-//      ((DefinitionsDocument)doc).addOptionListener( OptionConstants.DEFINITIONS_KEYWORD_COLOR, col);
-//      ((DefinitionsDocument)doc).addOptionListener( OptionConstants.DEFINITIONS_NUMBER_COLOR, col);
-    //      ((DefinitionsDocument)doc).addOptionListener( OptionConstants.DEFINITIONS_TYPE_COLOR, col);
-    //
-    //      
-    //      // remove the listeners when the document closes
-    //      ((DefinitionsDocument)doc).addDocumentClosedListener(new DocumentClosedListener() {
-    //        public void close() {
-    //          ((DefinitionsDocument)doc).clearOptionListeners();
-    //        }
-    //      });
     
     Document doc = getDocument();
     if (doc instanceof AbstractDJDocument) {

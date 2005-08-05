@@ -214,45 +214,34 @@ public abstract class AbstractReducedModel implements ReducedModelStates {
     return _cursor.getStateAtCurrent();
   }
 
-  /**
-   * Determines there is a Gap immediately to the right of the cursor.
-   */
+  /** Determines if there is a Gap immediately to the right of the cursor. */
   protected boolean _gapToRight() {
     // Before using, make sure not at last, or tail.
     return (!_tokens.isEmpty() && !_cursor.atEnd() &&
             !_cursor.atLastItem() && _cursor.nextItem().isGap());
   }
   
-  /**
-   * Determines if there is a gap immediately to the left of the cursor.
-   */
+  /** Determines if there is a gap immediately to the left of the cursor. */
   protected boolean _gapToLeft() {
     // Before using, make sure not at first or head.
-    return (!_tokens.isEmpty() && !_cursor.atStart() &&
-            !_cursor.atFirstItem() &&_cursor.prevItem().isGap());
+    return (!_tokens.isEmpty() && !_cursor.atStart() && !_cursor.atFirstItem() &&_cursor.prevItem().isGap());
   }
   
-  /**
-   * Assuming there is a gap to the left, this function increases
-   * the size of that gap.
-   * @param length the amount of increase
+  /** Assuming there is a gap to the left, this function increases the size of that gap.
+   *  @param length the amount of increase
    */
   protected void _augmentGapToLeft(int length) { _cursor.prevItem().grow(length); }
   
-  /**
-   * Assuming there is a gap to the right, this function increases
-   * the size of that gap.
-   * @param length the amount of increase
+  /** Assuming there is a gap to the right, this function increases the size of that gap.
+   *  @param length the amount of increase
    */
   protected void _augmentCurrentGap(int length) {
     _cursor.current().grow(length);
     _cursor.setBlockOffset(length);
   }
   
-  /**
-   * Helper function for _insertGap.
-   * Performs the actual insert and marks the offset appropriately.
-   * @param length size of gap to insert
+  /** Helper function for _insertGap. Performs the actual insert and marks the offset appropriately.
+   *  @param length size of gap to insert
    */
   protected void _insertNewGap(int length) {
     _cursor.insert(new Gap(length, getStateAtCurrent()));
@@ -260,16 +249,13 @@ public abstract class AbstractReducedModel implements ReducedModelStates {
     _cursor.setBlockOffset(0);
   }
   
-  /**
-   * Returns the state at the relLocation, where relLocation is the location
-   * relative to the walker
-   * @param relLocation distance from walker to get state at.
+  /** Returns the state at the relLocation, where relLocation is the location
+   *  relative to the walker
+   *  @param relLocation distance from walker to get state at.
    */
   protected abstract ReducedModelState moveWalkerGetState(int relLocation);
   
-  /**
-   * Resets the walker to the current position in document
-   */
+  /** Resets the walker to the current position in document. */
   protected abstract void resetWalkerLocationToCursor();
 
   /**

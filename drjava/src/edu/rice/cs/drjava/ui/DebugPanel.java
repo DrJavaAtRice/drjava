@@ -878,13 +878,9 @@ public class DebugPanel extends JPanel implements OptionConstants {
     setThreadDependentButtons(false);
   }
 
-  public void setStatusText(String text) {
-    _statusBar.setText(text);
-  }
+  public void setStatusText(String text) { _statusBar.setText(text); }
 
-  public String getStatusText() {
-    return _statusBar.getText();
-  }
+  public String getStatusText() { return _statusBar.getText(); }
 
   /**
    * Updates the UI to a new look and feel.

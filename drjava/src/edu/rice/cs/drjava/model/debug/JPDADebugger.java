@@ -224,11 +224,9 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     _eventHandlerError = t;
   }
 
-  /**
-   * Attaches the debugger to the Interactions JVM to prepare for debugging.
-   */
+  /** Attaches the debugger to the Interactions JVM to prepare for debugging. */
   public synchronized void startup() throws DebugException {
-    if (!isReady()) {
+    if (! isReady()) {
       // check if all open documents are in sync
       for (OpenDefinitionsDocument doc: _model.getOpenDefinitionsDocuments()) {
         doc.checkIfClassFileInSync();
@@ -252,9 +250,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
       throw new IllegalStateException("Debugger has already been started.");
   }
 
-  /**
-   * Handles the details of attaching to the interpreterJVM.
-   */
+  /** Handles the details of attaching to the interpreterJVM. */
   private void _attachToVM() throws DebugException {
     // Blocks until the interpreter has registered if hasn't already
     _model.waitForInterpreter();

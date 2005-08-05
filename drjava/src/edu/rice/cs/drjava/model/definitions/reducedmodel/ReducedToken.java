@@ -45,10 +45,9 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.definitions.reducedmodel;
 
-/**
- * The representation of document text in the reduced model.
- * It is the core atomic piece.
- * @version $Id$
+/** The representation of document text in the reduced model.
+ *  It is the core atomic piece.
+ *  @version $Id$
  */
 public abstract class ReducedToken implements ReducedModelStates {
   private ReducedModelState _state;
@@ -57,48 +56,37 @@ public abstract class ReducedToken implements ReducedModelStates {
     _state = state;
   }
 
-  /**
-   * Get the size of the token.
-   * @return the number of characters represented by the token
+  /** Get the size of the token.
+   *  @return the number of characters represented by the token
    */
   public abstract int getSize();
 
-  /**
-   * Get the type of the token.
-   * @return a String representation of the token type
+  /** Get the type of the token.
+   *  @return a String representation of the token type
    */
   public abstract String getType();
 
-  /**
-   * Set the type of the token
-   * @param type a String representation of the new token type
+  /** Set the type of the token
+   *  @param type a String representation of the new token type
    */
   public abstract void setType(String type);
 
-  /**
-   * Flip between open and closed.  Valid only for braces.
-   */
+  /** Flip between open and closed.  Valid only for braces. */
   public abstract void flip();
 
-  /**
-   * Determine if the given token is a open/close match with this.
-   * @param other another ReducedToken
-   * @return true if there is a match
+  /** Determine if the given token is a open/close match with this.
+   *  @param other another ReducedToken
+   *  @return true if there is a match
    */
   public abstract boolean isMatch(ReducedToken other);
 
-  /**
-   * Get the shadowing state of the token.
-   * @return FREE|INSIDE_SINGLE_QUOTE|INSIDE_DOUBLE_QUOTE|INSIDE_LINE_COMMENT|
-   * INSIDE_BLOCK_COMMENT
+  /** Get the shadowing state of the token.
+   *  @return FREE | INSIDE_SINGLE_QUOTE | INSIDE_DOUBLE_QUOTE | INSIDE_LINE_COMMENT| INSIDE_BLOCK_COMMENT
    */
-  public ReducedModelState getState() {
-    return  _state;
-  }
+  public ReducedModelState getState() { return  _state; }
 
-  /**
-   *returns whether the current char is highlighted. / / beginning a comment
-   * would be highlighted but free, so its not the same as getState
+  /** Returns whether the current char is highlighted. / / beginning a comment
+   *  would be highlighted but free, so its not the same as getState
    */
   public int getHighlightState() {
     String type = getType();
@@ -115,27 +103,21 @@ public abstract class ReducedToken implements ReducedModelStates {
     return  HighlightStatus.NORMAL;
   }
 
-  /**
-   * put your documentation comment here
-   * @param state
+  /** Set the shadowing state of the token.
+   *  @param state
    */
   public void setState(ReducedModelState state) {
     _state = state;
   }
 
-  /**
-   * Indicates whether this brace is shadowed.
-   * Shadowing occurs when a brace has been swallowed by a
-   * comment or an open quote.
-   * @return true if the brace is shadowed.
+  /** Indicates whether this brace is shadowed. Shadowing occurs when a brace has been swallowed by a
+   *  comment or an open quote.
+   *  @return true if the brace is shadowed.
    */
-  public boolean isShadowed() {
-    return  _state != FREE;
-  }
+  public boolean isShadowed() { return  _state != FREE; }
 
-  /**
-   * Indicates whether this brace is inside quotes.
-   * @return true if the brace is inside quotes.
+  /** Indicates whether this brace is inside quotes.
+   *  @return true if the brace is inside quotes.
    */
   public boolean isQuoted() {
     return  _state == INSIDE_DOUBLE_QUOTE;
@@ -192,57 +174,48 @@ public abstract class ReducedToken implements ReducedModelStates {
    */
   public abstract boolean isSlash();
 
-  /**
-   * Returns whether this is a star
-   * @return boolean
+  /** Returns whether this is a star
+   *  @return boolean
    */
   public abstract boolean isStar();
 
-  /**
-   * Returns whether this is a double quote
-   * @return boolean
+  /** Returns whether this is a double quote
+   *  @return boolean
    */
   public abstract boolean isDoubleQuote();
 
-  /**
-   * Returns whether this is a single quote
-   * @return boolean
+  /** Returns whether this is a single quote
+   *  @return boolean
    */
   public abstract boolean isSingleQuote();
 
-  /**
-   * Returns whether this is a double escape sequence
-   * @return boolean
+  /** Returns whether this is a double escape sequence
+   *  @return boolean
    */
   public abstract boolean isDoubleEscapeSequence();
 
-  /**
-   * Returns whether this is a double escape
-   * @return boolean
+  /** Returns whether this is a double escape
+   *  @return boolean
    */
   public abstract boolean isDoubleEscape();
 
-  /**
-   * Returns whether this is an escaped single quote
-   * @return boolean
+  /** Returns whether this is an escaped single quote
+   *  @return boolean
    */
   public abstract boolean isEscapedSingleQuote();
 
-  /**
-   * Return whether this is an escaped double quote
-   * @return boolean
+  /** Return whether this is an escaped double quote
+   *  @return boolean
    */
   public abstract boolean isEscapedDoubleQuote();
 
-  /**
-   * put your documentation comment here
+  /** Increases the size of the gap.
    * @param delta
    */
   public abstract void grow(int delta);
 
-  /**
-   * put your documentation comment here
-   * @param delta
+  /** Decreases the size of the gap.
+   *  @param delta
    */
   public abstract void shrink(int delta);
 

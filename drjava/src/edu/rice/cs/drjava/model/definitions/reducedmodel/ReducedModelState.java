@@ -45,27 +45,25 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.definitions.reducedmodel;
 
-/**
- * The abstract notion of a shadowing state.  We use shadowing to mean
- * the state of text as it is interpreted during compile.  Commented text
- * is ignored, and quoted text does not factor into the ASTs generated
- * by the compiler except as a text constant. This buys us a lot in
- * terms of correctness when highlighting, indenting, and performing
- * other editor functions.
- * @version $Id$
+/** The abstract notion of a shadowing state.  We use shadowing to mean
+ *  the state of text as it is interpreted during compile.  Commented text
+ *  is ignored, and quoted text does not factor into the ASTs generated
+ *  by the compiler except as a text constant. This buys us a lot in
+ *  terms of correctness when highlighting, indenting, and performing
+ *  other editor functions.
+ *  @version $Id$
  */
 public abstract class ReducedModelState implements /* imports */ ReducedModelStates {
   
   abstract ReducedModelState update(TokenList.Iterator copyCursor);
 
-  /**
-   * Combines the current and next braces if they match the given types.
-   * If we have braces of first and second in immediate succession, and if
-   * second's gap is 0, combine them into first+second.
-   * The cursor remains on the same block after this method is called.
-   * @param first the first half of a multiple char brace
-   * @param second the second half of a multiple char brace
-   * @return true if we combined two braces or false if not
+  /** Combines the current and next braces if they match the given types.
+   *  If we have braces of first and second in immediate succession, and if
+   *  second's gap is 0, combine them into first+second.
+   *  The cursor remains on the same block after this method is called.
+   *  @param first the first half of a multiple char brace
+   *  @param second the second half of a multiple char brace
+   *  @return true if we combined two braces or false if not
    */
   boolean _combineCurrentAndNextIfFind(String first, String second, TokenList.Iterator copyCursor) {
     if (copyCursor.atStart() || copyCursor.atEnd() || copyCursor.atLastItem() ||

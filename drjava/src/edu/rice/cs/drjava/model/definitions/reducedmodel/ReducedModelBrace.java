@@ -132,25 +132,21 @@ public class ReducedModelBrace extends AbstractReducedModel {
   }
 
 
-  /**
-   * Updates ReducedModelBrace to reflect cursor movement.
-   * Negative values move left from the cursor, positive values move
-   * right.  All functionality has been refactored into TokenList.
-   * @param count indicates the direction and magnitude of cursor movement
+  /** Updates ReducedModelBrace to reflect cursor movement.
+   *  Negative values move left from the cursor, positive values move
+   *  right.  All functionality has been refactored into TokenList.
+   *  @param count indicates the direction and magnitude of cursor movement
    */
   public void move(int count) {
     _cursor.move(count);
   }
 
-  /**
-   * Updates ReducedModelBrace to reflect text deletion.
-   * Negative values mean text left of the cursor, positive values mean
-   * text to the right.  All functionality has been refactored into TokenList.
+  /** Updates ReducedModelBrace to reflect text deletion.
+   *  Negative values mean text left of the cursor, positive values mean
+   *  text to the right.  All functionality has been refactored into TokenList.
    */
   public void delete( int count ) {
-    if (count == 0) {
-      return;
-    }
+    if (count == 0)  return;
     _cursor.delete(count);
     return;
   }
@@ -160,8 +156,7 @@ public class ReducedModelBrace extends AbstractReducedModel {
   *  This means it is ignored on balancing and on next/prev brace finding.
   *  All other braces are matchable.
   */
-  private boolean _isCurrentBraceMatchable()
-  {
+  private boolean _isCurrentBraceMatchable() {
     String type = _cursor.current().getType();
     return (((type.equals("{")) ||
              (type.equals("}")) ||

@@ -163,10 +163,9 @@ public class ReducedModelComment extends AbstractReducedModel {
     }
   }
 
-  /**
-  * Checks before point of insertion to make sure we don't need to combine
-  * backslash with another backslash (yes, they too can be escaped).
-  */
+  /** Checks before point of insertion to make sure we don't need to combine
+   *  backslash with another backslash (yes, they too can be escaped).
+   */
 
   private void _checkPreviousInsertBackSlash() {
     if (!_cursor.atStart()  && !_cursor.atFirstItem()) {
@@ -184,11 +183,10 @@ public class ReducedModelComment extends AbstractReducedModel {
     else _cursor.next();
   }
 
-  /**
-  * Checks before the place of insert to make sure there are no preceding
-  * slashes with which the inserted slash must combine.  It then performs
-  * the insert of either (/), (/ /), (/ *) or (* /).
-  */
+  /** Checks before the place of insert to make sure there are no preceding
+   *  slashes with which the inserted slash must combine.  It then performs
+   *  the insert of either (/), (/ /), (/ *) or (* /).
+   */
   private void _checkPreviousInsertCommentChar(String special) {
     if (!_cursor.atStart()  && !_cursor.atFirstItem()) {
       if ((_cursor.prevItem().getType().equals("/")) && (_cursor.prevItem().getState() == FREE)) {
@@ -393,15 +391,13 @@ public class ReducedModelComment extends AbstractReducedModel {
     _cursor.next();
     return;
   }
-  /**
-  * USE RULES:
-  * Inserting between braces: This should be called from between the two
-  *                           characters of the broken double comment.
-  * Deleting special chars: Start from previous char if it exists.
-  * Begins updating at current character.  /./ would not become // because
-  * current is in the middle.
-  * Double character comments inside of a quote or a comment are broken.
-  */
+  /** USE RULES:
+   *  Inserting between braces: This should be called from between the two
+   *                            characters of the broken double comment.
+   *  Deleting special chars: Start from previous char if it exists.
+   *  Begins updating at current character.  /./ would not become // because current is in the middle.
+   *  Double character comments inside of a quote or a comment are broken.
+   */
 
   private void _updateBasedOnCurrentState() {
     TokenList.Iterator copyCursor = _cursor._copy();
@@ -409,21 +405,17 @@ public class ReducedModelComment extends AbstractReducedModel {
     copyCursor.dispose();
   }
 
- /**
-  * Updates the BraceReduction to reflect cursor movement.
-  * Negative values move left from the cursor, positive values move
-  * right.
-  * @param count indicates the direction and magnitude of cursor movement
+ /** Updates the BraceReduction to reflect cursor movement. Negative values move left from the cursor, positive values
+  *  move right.
+  *  @param count indicates the direction and magnitude of cursor movement
   */
   public void move(int count) { _cursor.move(count); }
 
-  /**
-  * <P>Update the BraceReduction to reflect text deletion.</P>
-  * @param count indicates the size and direction of text deletion.
-  * Negative values delete text to the left of the cursor, positive
-  * values delete text to the right.
-  * Always move count spaces to make sure we can delete.
-  */
+  /** <P>Update the BraceReduction to reflect text deletion.</P>
+   *  @param count indicates the size and direction of text deletion.
+   *  Negative values delete text to the left of the cursor, positive values delete text to the right.
+   *  Always move count spaces to make sure we can delete.
+   */
   public void delete(int count) {
     if (count == 0) return;
     
@@ -438,10 +430,8 @@ public class ReducedModelComment extends AbstractReducedModel {
     // Move back 2 or as far back as the document will allow
     int absOff = this.absOffset();
     int movement;
-    if (absOff < 2)
-      movement = absOff;
-    else
-      movement = 2;
+    if (absOff < 2) movement = absOff;
+    else movement = 2;
     _cursor.move(-movement);
     // update state information
     _updateBasedOnCurrentState();

@@ -346,7 +346,7 @@ class ModelList<T> {
      * 3)Iterator 1 is before iterator 2    : remove between iterator 1 and
      *                                       iterator 2
      *
-     *D oes not remove points iterators point to.
+     * Does not remove points iterators point to.
      */
     public void collapse(Iterator iter) {
       int leftPos;
@@ -379,9 +379,8 @@ class ModelList<T> {
       }
     }
 
-    /**
-     * When an iterator inserts an item, it notifies other iterators
-     * in the set of listeners so they can stay updated.
+    /** When an iterator inserts an item, it notifies other iterators
+     *  in the set of listeners so they can stay updated.
      */
     private void notifyOfInsert(int pos) {
       java.util.Iterator<Iterator> iter =
@@ -418,13 +417,11 @@ class ModelList<T> {
       }
     }
 
-    /**
-     * When an iterator collapses part of the list, it notifies other iterators
-     * in the set of listeners so they can stay updated.
+    /** When an iterator collapses part of the list, it notifies other iterators
+     *  in the set of listeners so they can stay updated.
      */
     private void notifyOfCollapse(int leftPos, int rightPos, Node<T> rightPoint) {
-      java.util.Iterator<Iterator> iter =
-        ModelList.this._listeners.iterator();
+      java.util.Iterator<Iterator> iter = ModelList.this._listeners.iterator();
       while (iter.hasNext()) {
         Iterator next = iter.next();
         if ( next._pos <= leftPos ) {
