@@ -6,6 +6,7 @@ import koala.dynamicjava.parser.*;
 
 import java.io.*;
 import java.lang.reflect.*;
+import java.lang.reflect.Type;
 import java.net.*;
 import java.util.*;
 
@@ -31,7 +32,7 @@ public class ForEachNamingTest extends TestCase {
    * test that a foreach statement creates necessary variables
    */
   public void testMinimalForEach() throws ParseException {
-    Context cntxt = new GlobalContext(new TreeInterpreter(new JavaCCParserFactory()));
+    Context<Type> cntxt = new GlobalContext<Type>(new TreeInterpreter(new JavaCCParserFactory()));
     cntxt.define("crazyCollection", Collection.class);
     
     NameVisitor nv = new NameVisitor(cntxt);
@@ -61,7 +62,7 @@ public class ForEachNamingTest extends TestCase {
    * test that nested for each statements don't create overlapping variables
    */
   public void testSuperForEach() throws ParseException {
-    Context cntxt = new GlobalContext(new TreeInterpreter(new JavaCCParserFactory()));
+    Context<Type> cntxt = new GlobalContext<Type>(new TreeInterpreter(new JavaCCParserFactory()));
     cntxt.define("crazyCollection", Collection.class);
     
     NameVisitor nv = new NameVisitor(cntxt);

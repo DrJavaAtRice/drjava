@@ -29,6 +29,7 @@
 package koala.dynamicjava.interpreter;
 
 import java.lang.reflect.*;
+import java.lang.reflect.Type;
 import java.util.*;
 
 import koala.dynamicjava.interpreter.context.*;
@@ -39,42 +40,38 @@ import koala.dynamicjava.tree.*;
 import koala.dynamicjava.tree.tiger.generic.*;
 import koala.dynamicjava.tree.visitor.*;
 import koala.dynamicjava.util.*;
+import koala.dynamicjava.util.UnexpectedException;
 
-/**
- * This tree visitor evaluates each node of a syntax tree
+/** This tree visitor evaluates each node of a syntax tree
  *
- * @author Stephane Hillion
- * @version 1.2 - 2001/01/23
+ *  @author Stephane Hillion
+ *  @version 1.2 - 2001/01/23
  */
 
 public class EvaluationVisitor extends VisitorObject<Object> {
-  /**
-   * The current context
-   */
-  private Context context;
+  
+  /** The current context */
+  private Context<Object> context;
 
-  /**
-   * Creates a new visitor
-   * @param ctx the current context
+  /** Creates a new visitor
+   *  @param ctx the current context
    */
-  public EvaluationVisitor(Context ctx) {
+  public EvaluationVisitor(Context<Object> ctx) {
     context = ctx;
   }
 
-  /**
-   * Visits a WhileStatement
-   * @param node the node to visit
+  /** Visits a WhileStatement
+   *  @param node the node to visit
    */
   public Object visit(WhileStatement node) {
     try {
       while (((Boolean)node.getCondition().acceptVisitor(this)).booleanValue()) {
         try {
           node.getBody().acceptVisitor(this);
-        } catch (ContinueException e) {
+        } 
+        catch (ContinueException e) {
           // 'continue' statement management
-          if (e.isLabeled() && !node.hasLabel(e.getLabel())) {
-            throw e;
-          }
+          if (e.isLabeled() && !node.hasLabel(e.getLabel())) throw e;
         }
       }
     } catch (BreakException e) {
@@ -165,15 +162,17 @@ public class EvaluationVisitor extends VisitorObject<Object> {
       m = null;
       try {
         m = context.lookupMethod(((ObjectMethodCall)exp).getExpression(), "iterator", Constants.EMPTY_CLASS_ARRAY);
-      }catch(NoSuchMethodException e){
-        /* this is very bad */
+      }
+      catch(NoSuchMethodException e) { 
+        throw new UnexpectedException(e); 
         /* should never happen, b/c everything has typechecked etc and been ok'd */
-      }catch(MethodModificationError e){
-        /* ths is very bad */
+      }
+      catch(MethodModificationError e) {
+        throw new UnexpectedException(e); 
         /* should never happen, b/c everything has typechecked etc and been ok'd */
       } 
       exp.setProperty(NodeProperties.METHOD, m);
-      exp.setProperty(NodeProperties.TYPE,   m.getReturnType());
+      exp.setProperty(NodeProperties.TYPE, m.getReturnType());
       
       /* done setting properties */
       IdentifierToken javaId = new Identifier("java");
@@ -283,17 +282,17 @@ public class EvaluationVisitor extends VisitorObject<Object> {
        * but there isn't any source, b/c i'm making it... */
       /* set properties of condition */
       Method m2 = null;
-      try {
-        m2 = context.lookupMethod(exp, "hasNext", Constants.EMPTY_CLASS_ARRAY);
-      }catch(NoSuchMethodException e){
+      try { m2 = context.lookupMethod(exp, "hasNext", Constants.EMPTY_CLASS_ARRAY); }
+      catch(NoSuchMethodException e){
         /* this is very bad */
         /* should never happen, b/c everything has typechecked etc and been ok'd */
-      }catch(MethodModificationError e){
+      }
+      catch(MethodModificationError e){
         /* ths is very bad */
         /* should never happen, b/c everything has typechecked etc and been ok'd */
       }
       condition.setProperty(NodeProperties.METHOD, m2);
-      condition.setProperty(NodeProperties.TYPE,   m2.getReturnType());
+      condition.setProperty(NodeProperties.TYPE, m2.getReturnType());
       /* done setting properties */
     }
 
@@ -2275,7 +2274,7 @@ public class EvaluationVisitor extends VisitorObject<Object> {
     }
 
     // Enter a new scope and define the parameters as local variables
-    Context c = new GlobalContext(context.getInterpreter());
+    Context<Object> c = new GlobalContext<Object>(context.getInterpreter());
     if (node.getArguments() != null) {
       Iterator<FormalParameter> it1  = md.getParameters().iterator();
       Iterator<Expression> it2 = node.getArguments().iterator();
@@ -2293,12 +2292,12 @@ public class EvaluationVisitor extends VisitorObject<Object> {
     Node body = md.getBody();
     if (!body.hasProperty("visited")) {
       body.setProperty("visited", null);
-      ImportationManager im =
-        (ImportationManager)md.getProperty(NodeProperties.IMPORTATION_MANAGER);
-      Context ctx = new GlobalContext(context.getInterpreter());
+      ImportationManager im = (ImportationManager)md.getProperty(NodeProperties.IMPORTATION_MANAGER);
+      Context<Type> ctx = new GlobalContext<Type>(context.getInterpreter());
+      Context<Type>typeCtx = new GlobalContext<Type>(context.getInterpreter());
       ctx.setImportationManager(im);
 
-      NameVisitor nv = new NameVisitor(ctx,ctx);
+      NameVisitor nv = new NameVisitor(ctx,typeCtx);
       Iterator<FormalParameter> it = md.getParameters().iterator();
       while (it.hasNext()) {
         it.next().acceptVisitor(nv);
@@ -2306,11 +2305,11 @@ public class EvaluationVisitor extends VisitorObject<Object> {
 
       body.acceptVisitor(nv);
 
-      ctx = new GlobalContext(context.getInterpreter());
-      ctx.setImportationManager(im);
-      ctx.setFunctions((List<MethodDeclaration>)md.getProperty(NodeProperties.FUNCTIONS)); /* Type erasure bites */
+      typeCtx = new GlobalContext<Type>(context.getInterpreter());
+      typeCtx.setImportationManager(im);
+      typeCtx.setFunctions((List<MethodDeclaration>)md.getProperty(NodeProperties.FUNCTIONS)); /* Type erasure bites */
 
-      AbstractTypeChecker tc = AbstractTypeChecker.makeTypeChecker(ctx);
+      AbstractTypeChecker tc = AbstractTypeChecker.makeTypeChecker(typeCtx);
       it = md.getParameters().iterator();
       while (it.hasNext()) {
         it.next().acceptVisitor(tc);

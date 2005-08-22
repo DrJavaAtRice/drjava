@@ -46,7 +46,7 @@ import koala.dynamicjava.util.*;
  * @version 1.1 - 1999/11/28
  */
 
-public class StaticContext extends GlobalContext {
+public class StaticContext<V> extends GlobalContext<V> {
   /**
    * The declaring class of the method
    */
@@ -335,7 +335,7 @@ public class StaticContext extends GlobalContext {
     type.setProperty(TreeClassInfo.ANONYMOUS_DECLARING_CLASS,
                      new JavaClassInfo(declaringClass));
 
-    Class<?> cl = new TreeCompiler(interpreter).compileTree(this, type);
+    Class<?> cl = new TreeCompiler(interpreter).compileTree((Context<Object>)this, type); /* Type erasure bites! */
 
     // Update the argument types
     Class<?>[] tmp = new Class[args.length+1];

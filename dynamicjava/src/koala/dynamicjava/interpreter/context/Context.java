@@ -44,7 +44,7 @@ import koala.dynamicjava.util.*;
  * @version 1.0 - 1999/07/03
  */
 
-public interface Context extends SimpleContext {
+public interface Context<V> extends SimpleContext<V> {
     /**
      * Sets the additional class loader container
      */
@@ -80,9 +80,7 @@ public interface Context extends SimpleContext {
      */
     ImportationManager getImportationManager();
 
-    /**
-     * Sets the importation manager
-     */
+    /** Sets the importation manager. */
     void setImportationManager(ImportationManager im);
 
     /**
@@ -92,28 +90,23 @@ public interface Context extends SimpleContext {
      */
     boolean exists(String name);
 
-    /**
-     * Whether a simple identifier is a class
-     * @param name the identifier
+    /** Whether a simple identifier is a class
+     *  @param name the identifier
      */
     boolean classExists(String name);
 
-    /**
-     * Tests whether a variable or a field is defined in this context
-     * @param name the name of the entry
-     * @return false if the variable is undefined
+    /** Tests whether a variable or a field is defined in this context
+     *  @param name the name of the entry
+     *  @return false if the variable is undefined
      */
     boolean isDefined(String name);
 
-    /**
-     * Sets the current package
-     * @param pkg the package name
+    /** Sets the current package
+     *  @param pkg the package name
      */
     void setCurrentPackage(String pkg);
 
-    /**
-     * Returns the current package
-     */
+    /** Returns the current package. */
     String getCurrentPackage();
 
     /**

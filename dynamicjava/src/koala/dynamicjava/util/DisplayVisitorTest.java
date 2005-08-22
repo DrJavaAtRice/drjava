@@ -11,6 +11,7 @@ import koala.dynamicjava.tree.visitor.Visitor;
 
 import java.io.*;
 import java.util.List;
+import java.lang.reflect.Type;
 
 public class DisplayVisitorTest extends DynamicJavaTestCase {
   ////// Internal Initialization ////////////////////////
@@ -18,12 +19,12 @@ public class DisplayVisitorTest extends DynamicJavaTestCase {
   /**
    * The global context we are using for the type checker.
    */
-  private GlobalContext _globalContext;
+  private GlobalContext<Type> _globalContext;
 
   /**
    * The global context we are using for the name visitor.
    */
-  private GlobalContext _globalNameContext;
+  private GlobalContext<Type> _globalNameContext;
 
   /**
    * The type checker we are testing.
@@ -55,14 +56,14 @@ public class DisplayVisitorTest extends DynamicJavaTestCase {
     setTigerEnabled(true);
 
     parserFactory = new JavaCCParserFactory();
-    _globalContext = new GlobalContext(new TreeInterpreter(parserFactory));
+    _globalContext = new GlobalContext<Type>(new TreeInterpreter(parserFactory));
     _globalContext.define("x", int.class);
     _globalContext.define("X", Integer.class);
     _globalContext.define("b", boolean.class);
     _globalContext.define("B", Boolean.class);
     _globalContext.define("I", int[].class);
 
-    _globalNameContext = new GlobalContext(new TreeInterpreter(parserFactory));
+    _globalNameContext = new GlobalContext<Type>(new TreeInterpreter(parserFactory));
     _globalNameContext.define("x", int.class);
     _globalNameContext.define("X", Integer.class);
     _globalNameContext.define("B", Boolean.class);

@@ -43,25 +43,19 @@ import koala.dynamicjava.util.*;
  */
 
 public class VariableModifier extends LeftHandSideModifier {
-  /**
-   * The name of the variable
-   */
+  
+  /**The name of the variable. */
   protected QualifiedName name;
   
-  /**
-   * The type of this variable
-   */
+  /** The type of this variable. */
   protected Class<?> type;
   
-  /**
-   * The representation of the variable
-   */
+  /** The representation of the variable. */
   protected String representation;
   
-  /**
-   * Creates a new variable modifier
-   * @param name the node of that represents this variable
-   * @param type the declared type of the variable
+  /** Creates a new variable modifier
+   *  @param name the node of that represents this variable
+   *  @param type the declared type of the variable
    */
   public VariableModifier(QualifiedName name, Class<?> type) {
     this.name = name;
@@ -69,20 +63,12 @@ public class VariableModifier extends LeftHandSideModifier {
     representation = name.getRepresentation();
   }
   
-  /**
-   * Prepares the modifier for modification
-   */
-  public Object prepare(Visitor<Object> v, Context ctx) {
-    return ctx.get(representation);
-  }
+  /** Prepares the modifier for modification */
+  public Object prepare(Visitor<Object> v, Context<Object> ctx) { return ctx.get(representation); }
   
-  /**
-   * Sets the value of the underlying left hand side expression
-   */
-  public void modify(Context ctx, Object value) {
-    if (type.isPrimitive() || 
-        value == null      || 
-        type.isAssignableFrom(value.getClass())) {
+  /** Sets the value of the underlying left hand side expression. */
+  public void modify(Context<Object> ctx, Object value) {
+    if (type.isPrimitive() || value == null || type.isAssignableFrom(value.getClass())) {
       ctx.set(representation, value);
     } 
     else {

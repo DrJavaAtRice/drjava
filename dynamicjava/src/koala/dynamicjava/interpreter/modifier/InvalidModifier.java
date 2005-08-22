@@ -58,13 +58,13 @@ public class InvalidModifier extends LeftHandSideModifier {
   /**
    * Prepares the modifier for modification
    */
-  public Object prepare(Visitor<Object> v, Context ctx) {
+  public Object prepare(Visitor<Object> v, Context<Object> ctx) {
     throw new ExecutionError("cannot.modify", node);
   }
   
   /**
    * Sets the value of the underlying left hand side expression
    */
-  public void modify(Context ctx, Object value) {
+  public void modify(Context<Object> ctx, Object value) {
   }
 }

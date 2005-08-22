@@ -80,8 +80,6 @@
 </target>
 
 <target name="make-version-stamp" depends="get-timestamp">
-  <tstamp_gmt /> <!-- get new time stamp to use for CVS tag -->
-
   <!-- Create new Version.java, filling in date and time. -->
   <filter token="DATE" value="${DSTAMP}" />
   <filter token="TIME" value="${TSTAMP}" />
@@ -90,7 +88,6 @@
         overwrite="yes"
         filtering="yes" />
 </target>
-
 
 
 <!-- Commit source to CVS archive

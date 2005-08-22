@@ -82,7 +82,7 @@ public class ArrayModifier extends LeftHandSideModifier {
    * @param v    a Node visitor that returns either a Character or a Number
    * @param ctx  Ignored!!
    */
-  public Object prepare(Visitor<Object> v, Context ctx) {
+  public Object prepare(Visitor<Object> v, Context<Object> ctx) {
     arrays.add(0, array);
     cells.add(0, cell);
     
@@ -100,7 +100,7 @@ public class ArrayModifier extends LeftHandSideModifier {
    * @param ctx  Ignored!!
    * @param value  the value to be assigned to the cell in this
    */
-  public void modify(Context ctx, Object value) {
+  public void modify(Context<Object> ctx, Object value) {
     try {
       Array.set(array, cell.intValue(), value);
     } catch (IllegalArgumentException e) {
