@@ -98,7 +98,7 @@
      After committing, we tag the build we just made with the tag
      projectname-date-time.
 -->
-<target name="do-commit" depends="clean, update, jar, test, make-version-stamp, get-timestamp">  
+<target name="do-commit" depends="clean, update, compile, jar, test-only, make-version-stamp">  
   <property name="version-tag"
             value="${ant.project.name}-${DSTAMP}-${TSTAMP}" />
 
