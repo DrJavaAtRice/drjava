@@ -56,59 +56,44 @@ import java.net.URL;
  */
 public interface PlatformSupport {
   
-  /**
-   * Returns whether this is a Mac OS X platform.
-   */
+  /** Returns whether this is a Mac OS X platform. */
   public boolean isMacPlatform();
   
-  /**
-   * Returns whether this is a Windows platform.
-   */
+  /** Returns whether this is a Windows platform. */
   public boolean isWindowsPlatform();
   
-  /**
-   * Returns the current Java specification version.
-   */
+  /** Returns the current Java specification version. */
   public String getJavaSpecVersion();
   
-  /**
-   * Returns true if the classpath's tools.jar is from version 1.3.
-   */
+  /** Returns true if the classpath's tools.jar is from version 1.3. */
   public boolean has13ToolsJar();
   
-  /**
-   * Returns true if the classpath's tools.jar is from version 1.4.
-   */
+  /** Returns true if the classpath's tools.jar is from version 1.4. */
   public boolean has14ToolsJar();
   
-  /**
-   * Utility method to determine if the current Swing look and feel is the
-   * platform-specific look and feel for the client platform.
-   * @return true if current Swing look and feel is the system look and feel
+  /** Utility method to determine if the current Swing look and feel is the
+   *  platform-specific look and feel for the client platform.
+   *  @return true if current Swing look and feel is the system look and feel
    */
   public boolean isUsingSystemLAF();
   
-  /**
-   * Hook for performing general UI setup.  Called before all other UI setup is done.
-   */
+  /** Hook for performing general UI setup.  Called before all other UI setup is done. */
   public void beforeUISetup();
   
-  /**
-   * Hook for performing general UI setup.  Called after all other UI setup is done.
-   * @param about the Action associated with openning the About dialog
-   * @param prefs the Action associated with openning the Preferences dialog
-   * @param quit the Action associated with quitting the DrJava application
+  /** Hook for performing general UI setup.  Called after all other UI setup is done.
+   *  @param about the Action associated with openning the About dialog
+   *  @param prefs the Action associated with openning the Preferences dialog
+   *  @param quit the Action associated with quitting the DrJava application
    */
   public void afterUISetup(Action about, Action prefs, Action quit);
   
-  /**
-   * Utility method for opening a URL in a browser in a platform-specific way.
-   * The default implementation uses Runtime.exec to execute a command specified
-   * in Preferences.  Platform implementations should attempt the default method
-   * first, then try to use a "default browser", if such a thing exists on the
-   * specific platform.
-   * @param address the URL to open
-   * @return true if the URL was successfully handled, false otherwise
+  /** Utility method for opening a URL in a browser in a platform-specific way.
+   *  The default implementation uses Runtime.exec to execute a command specified
+   *  in Preferences.  Platform implementations should attempt the default method
+   *  first, then try to use a "default browser", if such a thing exists on the
+   *  specific platform.
+   *  @param address the URL to open
+   *  @return true if the URL was successfully handled, false otherwise
    */
   public boolean openURL(URL address);
 }

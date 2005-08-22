@@ -1603,14 +1603,8 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     }
   }
 
-  /**
-   * @return the approrpiate Method to call in the InterpreterJVM in order
-   * to define a variable of the type val
-   */
-  private Method _getDefineVariableMethod(ReferenceType interpreterRef,
-                                          Value val)
-    throws DebugException
-  {
+  /** @return the appropriate Method to call in the InterpreterJVM in order to define a variable of the type val. */
+  private Method _getDefineVariableMethod(ReferenceType interpreterRef, Value val) throws DebugException {
     List<Method> methods;
     String signature_beginning = "(Ljava/lang/String;";
     String signature_end = ")V";
@@ -1668,40 +1662,30 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
     return tempMethod;
   }
 
-  /**
-   * Assumes that this method is only called immedeately after suspending
-   * a thread.
-   */
-  private ObjectReference _getDebugInterpreter()
-    throws InvalidTypeException, ClassNotLoadedException,
-    IncompatibleThreadStateException, InvocationException, DebugException
-  {
+  /** Assumes that this method is only called immedeately after suspending a thread. */
+  private ObjectReference _getDebugInterpreter() throws InvalidTypeException, ClassNotLoadedException,
+    IncompatibleThreadStateException, InvocationException, DebugException {
+    
     ThreadReference threadRef = _suspendedThreads.peek();
     String interpreterName = _getUniqueThreadName(threadRef);
     return _getDebugInterpreter(interpreterName, threadRef);
   }
 
-  /**
-   * Gets the debug interpreter with the given name using the given
-   * suspended thread to invoke methods.
-   * @param interpreterName Name of the interpreter in the InterpreterJVM
-   * @param threadRef Suspended thread to use for invoking methods
-   * @throws IllegalStateException if threadRef is not suspended
+  /** Gets the debug interpreter with the given name using the given suspended thread to invoke methods.
+   *  @param interpreterName Name of the interpreter in the InterpreterJVM
+   *  @param threadRef Suspended thread to use for invoking methods
+   *  @throws IllegalStateException if threadRef is not suspended
    */
-  private ObjectReference _getDebugInterpreter(String interpreterName,
-                                               ThreadReference threadRef)
-    throws InvalidTypeException, ClassNotLoadedException,
-    IncompatibleThreadStateException, InvocationException, DebugException
-  {
+  private ObjectReference _getDebugInterpreter(String interpreterName, ThreadReference threadRef) throws 
+    InvalidTypeException, ClassNotLoadedException, IncompatibleThreadStateException, InvocationException, 
+    DebugException {
+    
     if (!threadRef.isSuspended()) {
-      throw new IllegalStateException("threadRef must be suspended to " +
-                                      "get a debug interpreter.");
+      throw new IllegalStateException("threadRef must be suspended to get a debug interpreter.");
     }
 
     // Get the method to return the interpreter
-    Method m = _getMethod(_interpreterJVM.referenceType(),
-                          "getJavaInterpreter");
-
+    Method m = _getMethod(_interpreterJVM.referenceType(), "getJavaInterpreter");
 
     // invokeMethod would throw an ObjectCollectedException if the StringReference
     // declared by _vm.mirrorOf(name) had been garbage collected before

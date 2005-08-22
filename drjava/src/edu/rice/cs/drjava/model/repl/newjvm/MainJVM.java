@@ -656,7 +656,7 @@ public class MainJVM extends AbstractMasterJVM implements MainJVMRemoteI {
     
     // Create and invoke the Interpreter JVM
     try {
-//      _startupClasspath is sent in as the interactions classpath
+      // _startupClasspath is sent in as the interactions classpath
 //      System.out.println("startup: " + _startupClasspath);
 //      Utilities.showDebug("Calling invokeSlave(" + jvmArgs + ", " + _startupClasspath + ")");
       invokeSlave(jvmArgsArray, _startupClasspath);

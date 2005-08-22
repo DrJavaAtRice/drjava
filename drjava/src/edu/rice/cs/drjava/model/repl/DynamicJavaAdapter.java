@@ -35,6 +35,7 @@ package edu.rice.cs.drjava.model.repl;
 
 import java.util.*;
 import java.io.*;
+import java.lang.reflect.Type;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.net.MalformedURLException;
@@ -50,6 +51,7 @@ import koala.dynamicjava.util.*;
 
 import edu.rice.cs.util.classloader.StickyClassLoader;
 import edu.rice.cs.util.*;
+import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.drjava.DrJava;
 
 // NOTE: Do NOT import/use the config framework in this class!
@@ -65,14 +67,11 @@ import edu.rice.cs.drjava.DrJava;
  * @version $Id$
  */
 public class DynamicJavaAdapter implements JavaInterpreter {
-  private koala.dynamicjava.interpreter.Interpreter _djInterpreter;
+  private InterpreterExtension _djInterpreter;
 
-  /**
-   * Constructor.
-   */
-  
   ClasspathManager cpm;
   
+   /** Constructor */
   public DynamicJavaAdapter(ClasspathManager c) {
     cpm = c;
     _djInterpreter = new InterpreterExtension(c);
@@ -267,7 +266,7 @@ public class DynamicJavaAdapter implements JavaInterpreter {
    *  @param value Value to assign
    */
   public void defineConstant(String name, Object value) {
-    ((InterpreterExtension)_djInterpreter).defineConstant(name, value);
+    _djInterpreter.defineConstant(name, value);
   }
 
   /** Assigns the given value to the given name as a constant in the interpreter.
@@ -275,7 +274,7 @@ public class DynamicJavaAdapter implements JavaInterpreter {
    *  @param value boolean to assign
    */
   public void defineConstant(String name, boolean value) {
-    ((InterpreterExtension)_djInterpreter).defineConstant(name, value);
+    _djInterpreter.defineConstant(name, value);
   }
 
   /** Assigns the given value to the given name as a constant in the interpreter.
@@ -283,7 +282,7 @@ public class DynamicJavaAdapter implements JavaInterpreter {
    *  @param value byte to assign
    */
   public void defineConstant(String name, byte value) {
-    ((InterpreterExtension)_djInterpreter).defineConstant(name, value);
+    _djInterpreter.defineConstant(name, value);
   }
 
   /** Assigns the given value to the given name as a constant in the interpreter.
@@ -291,7 +290,7 @@ public class DynamicJavaAdapter implements JavaInterpreter {
    *  @param value char to assign
    */
   public void defineConstant(String name, char value) {
-    ((InterpreterExtension)_djInterpreter).defineConstant(name, value);
+    _djInterpreter.defineConstant(name, value);
   }
 
   /** Assigns the given value to the given name as a constant in the interpreter.
@@ -299,7 +298,7 @@ public class DynamicJavaAdapter implements JavaInterpreter {
    *  @param value double to assign
    */
   public void defineConstant(String name, double value) {
-    ((InterpreterExtension)_djInterpreter).defineConstant(name, value);
+    _djInterpreter.defineConstant(name, value);
   }
 
   /** Assigns the given value to the given name as a constant in the interpreter.
@@ -307,7 +306,7 @@ public class DynamicJavaAdapter implements JavaInterpreter {
    *  @param value float to assign
    */
   public void defineConstant(String name, float value) {
-    ((InterpreterExtension)_djInterpreter).defineConstant(name, value);
+    _djInterpreter.defineConstant(name, value);
   }
 
   /** Assigns the given value to the given name as a constant in the interpreter.
@@ -315,7 +314,7 @@ public class DynamicJavaAdapter implements JavaInterpreter {
    *  @param value int to assign
    */
   public void defineConstant(String name, int value) {
-    ((InterpreterExtension)_djInterpreter).defineConstant(name, value);
+    _djInterpreter.defineConstant(name, value);
   }
 
   /** Assigns the given value to the given name as a constant in the interpreter.
@@ -323,14 +322,14 @@ public class DynamicJavaAdapter implements JavaInterpreter {
    *  @param value long to assign
    */
   public void defineConstant(String name, long value) {
-    ((InterpreterExtension)_djInterpreter).defineConstant(name, value);
+    _djInterpreter.defineConstant(name, value);
   }
   /** Assigns the given value to the given name as a constant in the interpreter.
    *  @param name Name of the variable
    *  @param value short to assign
    */
   public void defineConstant(String name, short value) {
-    ((InterpreterExtension)_djInterpreter).defineConstant(name, value);
+    _djInterpreter.defineConstant(name, value);
   }
 
   /** Sets whether protected and private variables should be accessible in the interpreter.
@@ -344,7 +343,7 @@ public class DynamicJavaAdapter implements JavaInterpreter {
    *  @param nameContext the context
    *  @return visitor the visitor
    */
-  public NameVisitor makeNameVisitor(Context nameContext) { return new NameVisitor(nameContext); }
+  public NameVisitor makeNameVisitor(Context<Type> nameContext) { return new NameVisitor(nameContext); }
 
   /** Factory method to make a new TypeChecker.
    *  @param nameContext Context for the NameVisitor
@@ -362,7 +361,7 @@ public class DynamicJavaAdapter implements JavaInterpreter {
    *  @param context the context
    *  @return visitor the visitor
    */
-  public EvaluationVisitor makeEvaluationVisitor(Context context) {
+  public EvaluationVisitor makeEvaluationVisitor(Context<Object> context) {
     return new EvaluationVisitorExtension(context);
   }
 
@@ -371,7 +370,9 @@ public class DynamicJavaAdapter implements JavaInterpreter {
    */
   public Node processTree(Node node) { return node; }
 
-  public GlobalContext makeGlobalContext(TreeInterpreter i) { return new GlobalContext(i); }
+  public GlobalContext<Type> makeGlobalTypeContext(TreeInterpreter i) { return new GlobalContext<Type>(i); }
+  
+  public GlobalContext<Object> makeGlobalObjectContext(TreeInterpreter i) { return new GlobalContext<Object>(i); }
 
   /** An extension of DynamicJava's interpreter that makes sure classes are not loaded by the system class loader
    *  (when possible) so that future interpreters will be able to reload the classes.  This extension also ensures 
@@ -389,32 +390,31 @@ public class DynamicJavaAdapter implements JavaInterpreter {
       classLoader = new ClassLoaderExtension(this, cpm);
       // We have to reinitialize these variables because they automatically
       // fetch pointers to classLoader in their constructors.
-      nameVisitorContext = makeGlobalContext(this);
+      nameVisitorContext = makeGlobalTypeContext(this);
       ClassLoaderContainer clc = new ClassLoaderContainer() {
         public ClassLoader getClassLoader() { return classLoader; }
       };
       nameVisitorContext.setAdditionalClassLoaderContainer(clc);
-      checkVisitorContext = makeGlobalContext(this);
+      checkVisitorContext = makeGlobalTypeContext(this);
       checkVisitorContext.setAdditionalClassLoaderContainer(clc);
-      evalVisitorContext = makeGlobalContext(this);
+      evalVisitorContext = makeGlobalObjectContext(this);
       evalVisitorContext.setAdditionalClassLoaderContainer(clc);
       //System.err.println("set loader: " + classLoader);
 
     }
 
-    /**
-     * Extends the interpret method to deal with possible interrupted
-     * exceptions.
-     * Unfortunately we have to copy all of this method to override it.
-     * @param r    the reader from which the statements are read
-     * @param fname the name of the parsed stream
-     * @return the result of the evaluation of the last statement
+    /** Extends the interpret method to deal with possible interrupted exceptions.
+     *  Unfortunately we have to copy all of this method to override it.
+     *  @param r    the reader from which the statements are read
+     *  @param fname the name of the parsed stream
+     *  @return the result of the evaluation of the last statement
      */
     public Object interpret(Reader r, String fname) throws InterpreterException {
       List<Node> statements;
       try {
         SourceCodeParser p = parserFactory.createParser(r, fname);
         statements = p.parseStream();
+//        Utilities.showDebug("Interpreting: " + statements);
       } 
       catch (ParseError e) {
         //throw new InteractionsException("There was a syntax error in the " +
@@ -440,8 +440,7 @@ public class DynamicJavaAdapter implements JavaInterpreter {
           
           n.acceptVisitor(tc);
           
-          evalVisitorContext.defineVariables
-            (checkVisitorContext.getCurrentScopeVariables());
+          evalVisitorContext.defineVariables(checkVisitorContext.getCurrentScopeVariables());
           
           EvaluationVisitor ev = makeEvaluationVisitor(evalVisitorContext);
           result = n.acceptVisitor(ev);
@@ -458,13 +457,8 @@ public class DynamicJavaAdapter implements JavaInterpreter {
         throw new InterpreterException(e);
       }
       
-      if (result instanceof String) {
-        result = "\"" + result + "\"";
-      }
-      else if (result instanceof Character) {
-        result = "'" + result + "'";
-      }
-      
+      if (result instanceof String) return  "\"" + result + "\"";
+      if (result instanceof Character) return "'" + result + "'";
       return result;
     }
     
@@ -480,10 +474,9 @@ public class DynamicJavaAdapter implements JavaInterpreter {
       evalVisitorContext.defineConstant(name, value);
     }
 
-    /**
-     * Assigns the given value to the given name as a constant in the interpreter.
-     * @param name Name of the variable
-     * @param value boolean to assign
+    /** Assigns the given value to the given name as a constant in the interpreter.
+     *  @param name Name of the variable
+     *  @param value boolean to assign
      */
     public void defineConstant(String name, boolean value) {
       Class<?> c = boolean.class;
@@ -503,10 +496,9 @@ public class DynamicJavaAdapter implements JavaInterpreter {
       evalVisitorContext.defineConstant(name, new Byte(value));
     }
 
-    /**
-     * Assigns the given value to the given name as a constant in the interpreter.
-     * @param name Name of the variable
-     * @param value char to assign
+    /** Assigns the given value to the given name as a constant in the interpreter.
+     *  @param name Name of the variable
+     *  @param value char to assign
      */
     public void defineConstant(String name, char value) {
       Class<?> c = char.class;
@@ -515,10 +507,9 @@ public class DynamicJavaAdapter implements JavaInterpreter {
       evalVisitorContext.defineConstant(name, new Character(value));
     }
 
-    /**
-     * Assigns the given value to the given name as a constant in the interpreter.
-     * @param name Name of the variable
-     * @param value double to assign
+    /** Assigns the given value to the given name as a constant in the interpreter.
+     *  @param name Name of the variable
+     *  @param value double to assign
      */
     public void defineConstant(String name, double value) {
       Class<?> c = double.class;
@@ -527,10 +518,9 @@ public class DynamicJavaAdapter implements JavaInterpreter {
       evalVisitorContext.defineConstant(name, new Double(value));
     }
 
-    /**
-     * Assigns the given value to the given name as a constant in the interpreter.
-     * @param name Name of the variable
-     * @param value float to assign
+    /** Assigns the given value to the given name as a constant in the interpreter.
+     *  @param name Name of the variable
+     *  @param value float to assign
      */
     public void defineConstant(String name, float value) {
       Class<?> c = float.class;
@@ -539,10 +529,9 @@ public class DynamicJavaAdapter implements JavaInterpreter {
       evalVisitorContext.defineConstant(name, new Float(value));
     }
 
-    /**
-     * Assigns the given value to the given name as a constant in the interpreter.
-     * @param name Name of the variable
-     * @param value int to assign
+    /** Assigns the given value to the given name as a constant in the interpreter.
+     *  @param name Name of the variable
+     *  @param value int to assign
      */
     public void defineConstant(String name, int value) {
       Class<?> c = int.class;
@@ -551,10 +540,9 @@ public class DynamicJavaAdapter implements JavaInterpreter {
       evalVisitorContext.defineConstant(name, new Integer(value));
     }
 
-    /**
-     * Assigns the given value to the given name as a constant in the interpreter.
-     * @param name Name of the variable
-     * @param value long to assign
+    /** Assigns the given value to the given name as a constant in the interpreter.
+     *  @param name Name of the variable
+     *  @param value long to assign
      */
     public void defineConstant(String name, long value) {
       Class<?> c = long.class;
@@ -562,10 +550,10 @@ public class DynamicJavaAdapter implements JavaInterpreter {
       checkVisitorContext.defineConstant(name, c);
       evalVisitorContext.defineConstant(name, new Long(value));
     }
-    /**
-     * Assigns the given value to the given name as a constant in the interpreter.
-     * @param name Name of the variable
-     * @param value short to assign
+    
+    /** Assigns the given value to the given name as a constant in the interpreter.
+     *  @param name Name of the variable
+     *  @param value short to assign
      */
     public void defineConstant(String name, short value) {
       Class<?> c = short.class;
@@ -575,14 +563,11 @@ public class DynamicJavaAdapter implements JavaInterpreter {
     }
   }
 
-  /**
-   * A class loader for the interpreter.
-   */
+  /** A class loader for the interpreter. */
   public static class ClassLoaderExtension extends TreeClassLoader {
     
     // the classpath is augmented by calling addURL(URL url) on this class
     // this will update the classloader variable to contain the new classpath entry
-    
     
   private static boolean classLoaderCreated = false;
   
@@ -591,9 +576,8 @@ public class DynamicJavaAdapter implements JavaInterpreter {
   // manages the classpath for the interpreter
   ClasspathManager cpm;
   
-  /**
-   * Constructor.
-   * @param i the object used to interpret the classes
+  /** Constructor.
+   *  @param i the object used to interpret the classes
    */
   public ClassLoaderExtension(koala.dynamicjava.interpreter.Interpreter i, ClasspathManager c) {
     super(i);
@@ -624,16 +608,14 @@ public class DynamicJavaAdapter implements JavaInterpreter {
     // we will use this to getResource classes
   }
   
-  /**
-   * Delegates all resource requests to {@link #classLoader} (the system class loader by default).
-   * This method is called by the {@link StickyClassLoader}.
+  /** Delegates all resource requests to {@link #classLoader} (the system class loader by default).
+   *  This method is called by the {@link StickyClassLoader}.
    */
   public URL getResource(String name) {
     // use the cpm to get the resource for the specified name
     return cpm.getClassLoader().getResource(name);
     //return classLoader.getResource(name);
   }
-  
   
   protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException{
     Class<?> clazz;
@@ -658,52 +640,50 @@ public class DynamicJavaAdapter implements JavaInterpreter {
   }
   
   
-  /**
-   * Adds an URL to the class path.  DynamicJava's version of this creates a
-   * new URLClassLoader with the given URL, using the old loader as a parent.
-   * This seems to cause problems for us in certain cases, such as accessing
-   * static fields or methods in a class that extends a superclass which is
-   * loaded by "child" classloader...
-   *
-   * Instead, we'll replace the old URLClassLoader with a new one containing
-   * all the known URLs.
-   *
-   * (I don't know if this really works yet, so I'm not including it in
-   * the current release.  CSR, 3-13-2003)
-   *
-   public void addURL(URL url) {
-   if (classLoader == null) {
-   classLoader = new URLClassLoader(new URL[] { url });
-   }
-   else if (classLoader instanceof URLClassLoader) {
-   URL[] oldURLs = ((URLClassLoader)classLoader).getURLs();
-   URL[] newURLs = new URL[oldURLs.length + 1];
-   System.arraycopy(oldURLs, 0, newURLs, 0, oldURLs.length);
-   newURLs[oldURLs.length] = url;
-   
-   // Create a new class loader with all the URLs
-   classLoader = new URLClassLoader(newURLs);
-   }
-   else {
-   classLoader = new URLClassLoader(new URL[] { url }, classLoader);
-   }
-   }*/
+//  /** Adds a URL to the class path.  DynamicJava's version of this creates a
+//   *  new URLClassLoader with the given URL, using the old loader as a parent.
+//   *  This seems to cause problems for us in certain cases, such as accessing
+//   *  static fields or methods in a class that extends a superclass which is
+//   *  loaded by "child" classloader...
+//   *
+//   *  Instead, we'll replace the old URLClassLoader with a new one containing
+//   *  all the known URLs.
+//   *
+//   * (I don't know if this really works yet, so I'm not including it in
+//   * the current release.  CSR, 3-13-2003)
+//   */
+//  public void addURL(URL url) {
+//    if (classLoader == null) {
+//      classLoader = new URLClassLoader(new URL[] { url });
+//    }
+//    else if (classLoader instanceof URLClassLoader) {
+//      URL[] oldURLs = ((URLClassLoader)classLoader).getURLs();
+//      URL[] newURLs = new URL[oldURLs.length + 1];
+//      System.arraycopy(oldURLs, 0, newURLs, 0, oldURLs.length);
+//      newURLs[oldURLs.length] = url;
+//      
+//      // Create a new class loader with all the URLs
+//      classLoader = new URLClassLoader(newURLs);
+//    }
+//    else {
+//      classLoader = new URLClassLoader(new URL[] { url }, classLoader);
+//    }
+//  }
   
-  /*
-   public Class defineClass(String name, byte[] code)  {
-   File file = new File("debug-" + name + ".class");
-   
-   try {
-   FileOutputStream out = new FileOutputStream(file);
-   out.write(code);
-   out.close();
-   DrJava.consoleErr().println("debug class " + name + " to " + file.getAbsolutePath());
-   }
-   catch (Throwable t) { }
-   
-   Class c = super.defineClass(name, code);
-   return c;
-   }
-   */
+//   public Class defineClass(String name, byte[] code)  {
+//   File file = new File("debug-" + name + ".class");
+//   
+//   try {
+//   FileOutputStream out = new FileOutputStream(file);
+//   out.write(code);
+//   out.close();
+//   DrJava.consoleErr().println("debug class " + name + " to " + file.getAbsolutePath());
+//   }
+//   catch (Throwable t) { }
+//   
+//   Class c = super.defineClass(name, code);
+//   return c;
+//   }
+
   }
 }

@@ -72,22 +72,18 @@ import koala.dynamicjava.util.*;
  */
 
 public class EvaluationVisitorExtension extends EvaluationVisitor {
-  private Context _context;
-  public EvaluationVisitorExtension(Context ctx) {
+  private Context<Object> _context;
+  public EvaluationVisitorExtension(Context<Object> ctx) {
     super(ctx);
     _context = ctx;
   }
 
   private void _checkInterrupted(Node node) {
-    // An interesting and arcane Thread fact: There are two different
-    // methods to check if a Thread is interrupted. (See the javadocs.)
-    // Thread.isInterrupted() gets the status but doesn't reset it,
-    // while Thread.interrupted() gets the status and resets it.
-    // This code did not work when I used isInterrupted.
+    // An interesting and arcane Thread fact: There are two different methods to check if a Thread is interrupted.
+    // (See the javadocs.) Thread.isInterrupted() gets the status but doesn't reset it, while Thread.interrupted() 
+    // gets the status and resets it.  This code did not work when I used isInterrupted.
     if (Thread.currentThread().interrupted()) {
-      throw new InterpreterInterruptedException(node.getBeginLine(),
-                                                node.getBeginColumn(),
-                                                node.getEndLine(),
+      throw new InterpreterInterruptedException(node.getBeginLine(), node.getBeginColumn(), node.getEndLine(),
                                                 node.getEndColumn());
     }
   }
@@ -172,11 +168,8 @@ public class EvaluationVisitorExtension extends EvaluationVisitor {
     return super.visit(node);
   }
 
-  /**
-   * Overrides EvaluationVisitor to enforce a proper type check at
-   * runtime. It combines code from the actual visit code in
-   * EvaluationVisitor as well as code from the modify method
-   * in VariableModifier.
+  /** Overrides EvaluationVisitor to enforce a proper type check at runtime. It combines code from the actual visit 
+   *  code in EvaluationVisitor as well as code from the modify method in VariableModifier.
    */
   public Object visit(VariableDeclaration node) {
     _checkInterrupted(node);
@@ -188,56 +181,31 @@ public class EvaluationVisitorExtension extends EvaluationVisitor {
       // Forces a runtime type-check on the cast.
       String name = node.getName();
 
-      if (!(c.isPrimitive()                    ||
-            o == null                          ||
-            c.isAssignableFrom(o.getClass()))) {
+      if (!(c.isPrimitive() || o == null || c.isAssignableFrom(o.getClass()))) {
         Exception e = new ClassCastException(name);
         throw new CatchedExceptionError(e, node);
       }
 
-      if (node.isFinal()) {
-        _context.setConstant(node.getName(), o);
-      } else {
-        _context.set(node.getName(), o);
-      }
-    } else {
-      if (node.isFinal()) {
-        _context.setConstant(node.getName(), UninitializedObject.INSTANCE);
-      } else {
-        // Non-final variables have default values, and are not uninitialized.
-        // Primitive variables have special default values, Objects default to null.
-        // Fixes bug #797515.
-//        _context.set(node.getName(), UninitializedObject.INSTANCE);
-        Object value = null;
-        if (!c.isPrimitive()) {
-          value = null;
-        }
-        else if (c == byte.class) {
-          value = new Byte((byte)0);
-        }
-        else if (c == short.class) {
-          value = new Short((short)0);
-        }
-        else if (c == int.class) {
-          value = new Integer(0);
-        }
-        else if (c == long.class) {
-          value = new Long(0L);
-        }
-        else if (c == float.class) {
-          value = new Float(0.0f);
-        }
-        else if (c == double.class) {
-          value = new Double(0.0d);
-        }
-        else if (c == char.class) {
-          value = new Character('\u0000');
-        }
-        else if (c == boolean.class) {
-          value = Boolean.valueOf(false);
-        }
-        _context.set(node.getName(), value);
-      }
+      if (node.isFinal()) _context.setConstant(node.getName(), o);
+      else _context.set(node.getName(), o);
+    } 
+    else if (node.isFinal()) _context.setConstant(node.getName(), UninitializedObject.INSTANCE);
+    else {
+      // Non-final variables have default values, and are not uninitialized.
+      // Primitive variables have special default values, Objects default to null.
+      // Fixes bug #797515.
+//      _context.set(node.getName(), UninitializedObject.INSTANCE);
+      Object value = null;
+      if (!c.isPrimitive()) value = null;
+      else if (c == byte.class)  value = new Byte((byte) 0);
+      else if (c == short.class) value = new Short((short) 0);
+      else if (c == int.class) value = new Integer(0);
+      else if (c == long.class)  value = new Long(0L);
+      else if (c == float.class) value = new Float(0.0f);
+      else if (c == double.class) value = new Double(0.0d);
+      else if (c == char.class) value = new Character('\u0000');
+      else if (c == boolean.class)  value = Boolean.valueOf(false);
+      _context.set(node.getName(), value);
     }
     return Interpreter.NO_RESULT;
   }
@@ -254,12 +222,8 @@ public class EvaluationVisitorExtension extends EvaluationVisitor {
     Object ret = super.visit(node);
 
     // workaround to not return null for void returns
-    if (m.getReturnType().equals(Void.TYPE)) {
-      return Interpreter.NO_RESULT;
-    }
-    else {
-      return ret;
-    }
+    if (m.getReturnType().equals(Void.TYPE)) return Interpreter.NO_RESULT;
+    else return ret;
   }
 
   public Object visit(StaticFieldAccess node) {
@@ -292,13 +256,8 @@ public class EvaluationVisitorExtension extends EvaluationVisitor {
       boolean first = true;
       Class<?>[] params = m.getParameterTypes();
       for (int i = 0; i < params.length; i++) {
-        if (first) {
-          first = false;
-        }
-        else {
-          buf.append(", ");
-        }
-
+        if (first) first = false;
+        else buf.append(", ");
         buf.append(params[i].getName());
       }
 
@@ -311,12 +270,8 @@ public class EvaluationVisitorExtension extends EvaluationVisitor {
     Object ret = super.visit(node);
 
     // workaround to not return null for void returns
-    if (m.getReturnType().equals(Void.TYPE)) {
-      return Interpreter.NO_RESULT;
-    }
-    else {
-      return ret;
-    }
+    if (m.getReturnType().equals(Void.TYPE)) return Interpreter.NO_RESULT;
+    else return ret;
   }
 
   public Object visit(SimpleAssignExpression node) {
@@ -575,66 +530,19 @@ public class EvaluationVisitorExtension extends EvaluationVisitor {
     Object ret = super.visit(node);
 
     // workaround to not return null for void returns
-    if (Void.TYPE.equals(node.getProperty(NodeProperties.TYPE))) {
-      return Interpreter.NO_RESULT;
-    }
-    else {
-      return ret;
-    }
+    if (Void.TYPE.equals(node.getProperty(NodeProperties.TYPE))) return Interpreter.NO_RESULT;
+    else return ret;
   }
 
-  public Object visit(PackageDeclaration node) {
-    return Interpreter.NO_RESULT;
-  }
+  public Object visit(PackageDeclaration node) { return Interpreter.NO_RESULT; }
 
-  public Object visit(ImportDeclaration node) {
-    return Interpreter.NO_RESULT;
-  }
+  public Object visit(ImportDeclaration node) { return Interpreter.NO_RESULT; }
 
-  public Object visit(EmptyStatement node) {
-    return Interpreter.NO_RESULT;
-  }
+  public Object visit(EmptyStatement node) { return Interpreter.NO_RESULT; }
 
-  public Object visit(ClassDeclaration node) {
-    return Interpreter.NO_RESULT;
-  }
+  public Object visit(ClassDeclaration node) { return Interpreter.NO_RESULT; }
   
-  public Object visit(InterfaceDeclaration node) {
-    return Interpreter.NO_RESULT;
-  }
+  public Object visit(InterfaceDeclaration node) { return Interpreter.NO_RESULT; }
   
-  public Object visit(MethodDeclaration node) {
-    return Interpreter.NO_RESULT;
-  }
-  
-//    /**  THIS CODE IS REDUNDANT AND STALE; THE SAME METHOD IS DEFINED IN 
-//     * the superclass EvaluationVisitor.
-//     * Performs a dynamic cast. This method acts on primitive wrappers.
-//     * @param tc the target class
-//     * @param o  the object to cast
-//     */
-//  protected static Object performCast(Class<?> tc, Object o) {
-//    Class<?> ec = (o != null) ? o.getClass() : null;
-//    
-//    if (tc != ec && tc.isPrimitive() && ec != null) {
-//      if (tc != char.class && ec == Character.class) {
-//        o = new Integer(((Character)o).charValue());
-//      } else if (tc == byte.class) {
-//        o = new Byte(((Number)o).byteValue());
-//      } else if (tc == short.class) {
-//        o = new Short(((Number)o).shortValue());
-//      } else if (tc == int.class) {
-//        o = new Integer(((Number)o).intValue());
-//      } else if (tc == long.class) {
-//        o = new Long(((Number)o).longValue());
-//      } else if (tc == float.class) {
-//        o = new Float(((Number)o).floatValue());
-//      } else if (tc == double.class) {
-//        o = new Double(((Number)o).doubleValue());
-//      } else if (tc == char.class && ec != Character.class) {
-//        o = new Character((char)((Number)o).shortValue());
-//      }
-//    }
-//    return o;
-//  }
+  public Object visit(MethodDeclaration node) { return Interpreter.NO_RESULT; }
 }

@@ -31,7 +31,7 @@
  * 
 END_COPYRIGHT_BLOCK*/
 
-package edu.rice.cs.drjava.model;
+package edu.rice.cs.drjava.model;   
 
 import edu.rice.cs.drjava.model.definitions.reducedmodel.ReducedModelState;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.ReducedModelStates;
@@ -45,13 +45,11 @@ import java.io.FileNotFoundException;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Position;
 
-/**
- * Implementation of logic of find/replace over a document.
- *
- * @version $Id$
+/** Implementation of logic of find/replace over a document.
+ *  @version $Id$
  */
 public class FindReplaceMachine {
- /** The document on which FindReplaceMachine is operating. */
+  /** The document on which FindReplaceMachine is operating. */
   private AbstractDocumentInterface _doc;
   /** The first document that the current search was executed on (used for wrapping around all docs). */
   private AbstractDocumentInterface _firstDoc;
@@ -72,25 +70,20 @@ public class FindReplaceMachine {
   private boolean _searchBackwards;
   private boolean _searchAllDocuments;
   private boolean _ignoreCommentsAndStrings;
-  // The last word that was found. This is set to null by the
-  // FindReplaceDialog if the caret is updated. We keep this
-  // so we know to ignore finding this instance of the word
-  // if the user toggles the _searchBackwards flag and has not
+  // The last word that was found. This is set to null by the FindReplaceDialog if the caret is updated. We keep this
+  // so we know to ignore finding this instance of the word if the user toggles the _searchBackwards flag and has not
   // moved the caret.
   private String _lastFindWord;
-  // Set to true if we should skip the first instance of the
-  // word that we find (if the user toggled _searchBackwards
+  // Set to true if we should skip the first instance of the word that we find (if the user toggled _searchBackwards
   // under certain circumstances).
   private boolean _skipOneFind;
-  // An interface for the FindReplaceMachine to get the
-  // next or previous document.
+  // An interface for the FindReplaceMachine to get the next or previous document.
   private DocumentIterator _docIterator;
-  //The model currently being used. Used to get the ReducedModelState
+  // The model currently being used. Used to get the ReducedModelState
   private SingleDisplayModel _model;
   
   /** Standard Constructor.
-   *  Creates a new machine to perform find/replace operations on a particular document starting from a 
-   *  certain position.
+   *  Creates new machine to perform find/replace operations on a particular document starting from a given position.
    *  @param docIterator an object that allows navigation through open Swing documents (it is DefaultGlobalModel)
    *  @exception BadLocationException
    */
@@ -129,10 +122,9 @@ public class FindReplaceMachine {
 
   public void setSearchBackwards(boolean searchBackwards) {
     if (_searchBackwards != searchBackwards) {
-      // If we switch from searching forward to searching backwards or viceversa,
-      // isOnMatch is true, and _findword is the same as the _lastFindWord,
-      // we know the user just found _findWord, so skip one find.
-      if (isOnMatch() && _findWord.equals(_lastFindWord))  _skipOneFind = true;
+      // If we switch from searching forward to searching backwards or viceversa, isOnMatch is true, and _findword is the
+      // same as the _lastFindWord, we know the user just found _findWord, so skip one find.
+      if (isOnMatch() && _findWord.equals(_lastFindWord)) _skipOneFind = true;
       else _skipOneFind = false;
     }
     _searchBackwards = searchBackwards;
@@ -246,15 +238,12 @@ public class FindReplaceMachine {
       if (position == 0) atStart = true;
       _doc.insertString(getCurrentOffset(), _replaceWord, null);
       
-      // the current offset will be the end of the inserted word
-      //since we keep track of current as a Position.
-      //The exception is if we are at the beginning of the document,
-      //in which case the text is inserted AFTER the current position
-      //So, current offset is correct for forwards searching unless
-      //we were at the start of the document, in which case it is
-      //correct for backwards searching.
+      // The current offset will be the end of the inserted word since we keep track of current as a Position. The 
+      // exception is if we are at the beginning of the document, in which case the text is inserted AFTER the current 
+      // position.  So, current offset is correct for forwards searching unless we were at the start of the document, 
+      // in which case it is correct for backwards searching.
       if (atStart && !_searchBackwards) setPosition(_replaceWord.length());
-      else if (!atStart && _searchBackwards) setPosition(getCurrentOffset() - _replaceWord.length());
+      else if (! atStart && _searchBackwards) setPosition(getCurrentOffset() - _replaceWord.length());
       
       return true;
     }
@@ -378,8 +367,7 @@ public class FindReplaceMachine {
       
       // find the first occurrence of findWord
       int foundOffset;
-      foundOffset = !_searchBackwards ? findSpace.indexOf(findWord)
-        : findSpace.lastIndexOf(findWord);
+      foundOffset = !_searchBackwards ? findSpace.indexOf(findWord) : findSpace.lastIndexOf(findWord);
           
       if (foundOffset >= 0) {
         int locationToIgnore = foundOffset + start;
@@ -414,7 +402,7 @@ public class FindReplaceMachine {
         }
         
         if (foundOffset == -1) {   // we still haven't found it            
-          if (!_searchBackwards) foundOffset = _findWrapped(0, _current.getOffset() + (_findWord.length() -1));
+          if (!_searchBackwards) foundOffset = _findWrapped(0, _current.getOffset() + (_findWord.length() - 1));
           else {
             int startBackOffset = _current.getOffset() - (_findWord.length() - 1);
             foundOffset = _findWrapped(startBackOffset, docLen - startBackOffset);
@@ -498,8 +486,6 @@ public class FindReplaceMachine {
     catch (BadLocationException e) { throw new UnexpectedException(e); }
   }   
   
-    
-
   /** Searches docToSearch for _findWord, and continues cycling through the documents in the direction 
    *  specified by _searchBackwards. If the original _document is reached, we stop searching.
    *  @param docToSearch the document to search
@@ -539,8 +525,7 @@ public class FindReplaceMachine {
           return _findNextInAllDocs(docToSearch, start, foundOffset-start);
         }       
             
-        // We found it in a different document, put the caret at the end of the
-        // found word (if we're going forward).
+        // We found it in a different document, put the caret at the end of the found word (if we're going forward).
         foundOffset += start;
         if (!_searchBackwards) foundOffset += findWord.length();
         return new FindResult(docToSearch, foundOffset, false, _allDocsWrapped);
@@ -552,7 +537,6 @@ public class FindReplaceMachine {
     }
     return new FindResult(docToSearch, -1, false, _allDocsWrapped);
   } 
-  
   
   /** Determines whether the whole find word is found at the input position
    * 

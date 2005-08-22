@@ -49,239 +49,181 @@ import koala.dynamicjava.tree.*;
 import koala.dynamicjava.interpreter.*;
 import koala.dynamicjava.interpreter.context.*;
 
-/**
- * Extension of EvaluationVisitorExtension that notifies InterpreterJVM
- * every time a variable assignment is made.
+/** Extension of EvaluationVisitorExtension that notifies InterpreterJVM every time a variable assignment is made.
+ *  (But this functionality has been commented out.)
+ *  This class is loaded in the Interpreter JVM, not the Main JVM.
+ *  (Do not use DrJava's config framework here.)
  *
- * This class is loaded in the Interpreter JVM, not the Main JVM.
- * (Do not use DrJava's config framework here.)
- *
- * @version $Id$
+ *  @version $Id$
  */
 public class DebugEvaluationVisitor extends EvaluationVisitorExtension {
-  /**
-   * The context associated with this visitor.
-   */
-  protected Context _context;
+  
+  /** The context associated with this visitor. */
+  protected Context<Object> _context;
 
-  /**
-   * The name of the interpreter enclosing this visitor.
-   */
+  /** The name of the interpreter enclosing this visitor. */
   protected final String _name;
 
-  /**
-   * Creates a new debug visitor.
-   * @param ctx the context
-   * @param name the name of the enclosing interpreter
+  /** Creates a new debug visitor.
+   *  @param ctx the context
+   *  @param name the name of the enclosing interpreter
    */
-  public DebugEvaluationVisitor(Context ctx, String name) {
+  public DebugEvaluationVisitor(Context<Object> ctx, String name) {
     super(ctx);
     _context = ctx;
     _name = name;
   }
 
-  /**
-   * Visits the node, as per the superclass, then notifies the interpreter
-   * that something has been assigned.
-   *
-   * Not currently necessary, since variables aren't copied back
-   * until the thread is resumed.
-   *
-   * @param node the node to visit
-   *
-  protected void _notifyAssigned(Expression e) {
-    InterpreterJVM.ONLY.notifyInterpreterAssignment(_name);
-  }*/
+//  /** Visits the node, as per the superclass, then notifies the interpreter that something has been assigned.
+//   *  Not currently necessary, since variables aren't copied back until the thread is resumed.
+//   *
+//   *  @param node the node to visit
+//   */
+//  protected void _notifyAssigned(Expression e) {
+//    InterpreterJVM.ONLY.notifyInterpreterAssignment(_name);
+//  }
 
-  /**
-   * Notifies the InterpreterJVM that an assignment has been made
-   * and delegates to the superclass.
-   *
-   * Not currently necessary, since variables aren't copied back
-   * until the thread is resumed.
-   *
-   * @param node the node to visit
-   * @return the result of calling this method on the superclass
-   *
-  public Object visit(SimpleAssignExpression node) {
-    Object result = super.visit(node);
-    _notifyAssigned(node.getLeftExpression());
-    return result;
-  }*/
+//  /** Notifies the InterpreterJVM that an assignment has been made and delegates to the superclass.
+//   *  Not currently necessary, since variables aren't copied back until the thread is resumed.
+//   *
+//   *  @param node the node to visit
+//   *  @return the result of calling this method on the superclass
+//   */
+//  public Object visit(SimpleAssignExpression node) {
+//    Object result = super.visit(node);
+//    _notifyAssigned(node.getLeftExpression());
+//    return result;
+//  }
 
-  /**
-   * Notifies the InterpreterJVM that an assignment has been made
-   * and delegates to the superclass.
-   *
-   * Not currently necessary, since variables aren't copied back
-   * until the thread is resumed.
-   *
-   * @param node the node to visit
-   * @return the result of calling this method on the superclass
-   *
-  public Object visit(AddAssignExpression node) {
-    Object result = super.visit(node);
-    _notifyAssigned(node.getLeftExpression());
-    return result;
-  }*/
+//  /** Notifies the InterpreterJVM that an assignment has been made and delegates to the superclass.
+//   *  Not currently necessary, since variables aren't copied back until the thread is resumed.
+//   *
+//   *  @param node the node to visit
+//   *  @return the result of calling this method on the superclass
+//   */
+//  public Object visit(AddAssignExpression node) {
+//    Object result = super.visit(node);
+//    _notifyAssigned(node.getLeftExpression());
+//    return result;
+//  }
 
-  /**
-   * Notifies the InterpreterJVM that an assignment has been made
-   * and delegates to the superclass.
-   *
-   * Not currently necessary, since variables aren't copied back
-   * until the thread is resumed.
-   *
-   * @param node the node to visit
-   * @return the result of calling this method on the superclass
-   *
-  public Object visit(SubtractAssignExpression node) {
-    Object result = super.visit(node);
-    _notifyAssigned(node.getLeftExpression());
-    return result;
-  }*/
+//  /** Notifies the InterpreterJVM that an assignment has been made and delegates to the superclass.
+//   *  Not currently necessary, since variables aren't copied back until the thread is resumed.
+//   *
+//   *  @param node the node to visit
+//   *  @return the result of calling this method on the superclass
+//   */
+//  public Object visit(SubtractAssignExpression node) {
+//    Object result = super.visit(node);
+//    _notifyAssigned(node.getLeftExpression());
+//    return result;
+//  }
 
-  /**
-   * Notifies the InterpreterJVM that an assignment has been made
-   * and delegates to the superclass.
-   *
-   * Not currently necessary, since variables aren't copied back
-   * until the thread is resumed.
-   *
-   * @param node the node to visit
-   * @return the result of calling this method on the superclass
-   *
-  public Object visit(MultiplyAssignExpression node) {
-    Object result = super.visit(node);
-    _notifyAssigned(node.getLeftExpression());
-    return result;
-  }*/
+//  /** Notifies the InterpreterJVM that an assignment has been made and delegates to the superclass.
+//   *  Not currently necessary, since variables aren't copied back until the thread is resumed.
+//   *
+//   *  @param node the node to visit
+//   *  @return the result of calling this method on the superclass
+//   */
+//  public Object visit(MultiplyAssignExpression node) {
+//    Object result = super.visit(node);
+//    _notifyAssigned(node.getLeftExpression());
+//    return result;
+//  }
 
-  /**
-   * Notifies the InterpreterJVM that an assignment has been made
-   * and delegates to the superclass.
-   *
-   * Not currently necessary, since variables aren't copied back
-   * until the thread is resumed.
-   *
-   * @param node the node to visit
-   * @return the result of calling this method on the superclass
-   *
-  public Object visit(DivideAssignExpression node) {
-    Object result = super.visit(node);
-    _notifyAssigned(node.getLeftExpression());
-    return result;
-  }*/
+//  /** Notifies the InterpreterJVM that an assignment has been made and delegates to the superclass.
+//   *  Not currently necessary, since variables aren't copied bac until the thread is resumed.
+//   *
+//   *  @param node the node to visit
+//   *  @return the result of calling this method on the superclass
+//   */
+//  public Object visit(DivideAssignExpression node) {
+//    Object result = super.visit(node);
+//    _notifyAssigned(node.getLeftExpression());
+//    return result;
+//  }
 
-  /**
-   * Notifies the InterpreterJVM that an assignment has been made
-   * and delegates to the superclass.
-   *
-   * Not currently necessary, since variables aren't copied back
-   * until the thread is resumed.
-   *
-   * @param node the node to visit
-   * @return the result of calling this method on the superclass
-   *
-  public Object visit(RemainderAssignExpression node) {
-    Object result = super.visit(node);
-    _notifyAssigned(node.getLeftExpression());
-    return result;
-  }*/
+//  /** Notifies the InterpreterJVM that an assignment has been made and delegates to the superclass.
+//   *  Not currently necessary, since variables aren't copied back until the thread is resumed.
+//   *
+//   *  @param node the node to visit
+//   *  @return the result of calling this method on the superclass
+//   */
+//  public Object visit(RemainderAssignExpression node) {
+//    Object result = super.visit(node);
+//    _notifyAssigned(node.getLeftExpression());
+//    return result;
+//  }
 
-  /**
-   * Notifies the InterpreterJVM that an assignment has been made
-   * and delegates to the superclass.
-   *
-   * Not currently necessary, since variables aren't copied back
-   * until the thread is resumed.
-   *
-   * @param node the node to visit
-   * @return the result of calling this method on the superclass
-   *
-  public Object visit(BitAndAssignExpression node) {
-    Object result = super.visit(node);
-    _notifyAssigned(node.getLeftExpression());
-    return result;
-  }*/
+//  /** Notifies the InterpreterJVM that an assignment has been made and delegates to the superclass.
+//   *  Not currently necessary, since variables aren't copied back until the thread is resumed.
+//   *
+//   *  @param node the node to visit
+//   *  @return the result of calling this method on the superclass
+//   */
+//  public Object visit(BitAndAssignExpression node) {
+//    Object result = super.visit(node);
+//    _notifyAssigned(node.getLeftExpression());
+//    return result;
+//  }
 
-  /**
-   * Notifies the InterpreterJVM that an assignment has been made
-   * and delegates to the superclass.
-   *
-   * Not currently necessary, since variables aren't copied back
-   * until the thread is resumed.
-   *
-   * @param node the node to visit
-   * @return the result of calling this method on the superclass
-   *
-  public Object visit(ExclusiveOrAssignExpression node) {
-    Object result = super.visit(node);
-    _notifyAssigned(node.getLeftExpression());
-    return result;
-  }*/
+//  /** Notifies the InterpreterJVM that an assignment has been made and delegates to the superclass.
+//   *  Not currently necessary, since variables aren't copied back until the thread is resumed.
+//   *
+//   *  @param node the node to visit
+//   *  @return the result of calling this method on the superclass
+//   */
+//  public Object visit(ExclusiveOrAssignExpression node) {
+//    Object result = super.visit(node);
+//    _notifyAssigned(node.getLeftExpression());
+//    return result;
+//  }
 
-  /**
-   * Notifies the InterpreterJVM that an assignment has been made
-   * and delegates to the superclass.
-   *
-   * Not currently necessary, since variables aren't copied back
-   * until the thread is resumed.
-   *
-   * @param node the node to visit
-   * @return the result of calling this method on the superclass
-   *
-  public Object visit(BitOrAssignExpression node) {
-    Object result = super.visit(node);
-    _notifyAssigned(node.getLeftExpression());
-    return result;
-  }*/
+//  /** Notifies the InterpreterJVM that an assignment has been made and delegates to the superclass.
+//   *  Not currently necessary, since variables aren't copied back until the thread is resumed.
+//   *
+//   *  @param node the node to visit
+//   *  @return the result of calling this method on the superclass
+//   */
+//  public Object visit(BitOrAssignExpression node) {
+//    Object result = super.visit(node);
+//    _notifyAssigned(node.getLeftExpression());
+//    return result;
+//  }
 
-  /**
-   * Notifies the InterpreterJVM that an assignment has been made
-   * and delegates to the superclass.
-   *
-   * Not currently necessary, since variables aren't copied back
-   * until the thread is resumed.
-   *
-   * @param node the node to visit
-   * @return the result of calling this method on the superclass
-   *
-  public Object visit(ShiftLeftAssignExpression node) {
-    Object result = super.visit(node);
-    _notifyAssigned(node.getLeftExpression());
-    return result;
-  }*/
+//  /** Notifies the InterpreterJVM that an assignment has been made and delegates to the superclass.
+//   *  Not currently necessary, since variables aren't copied back until the thread is resumed.
+//   *
+//   *  @param node the node to visit
+//   *  @return the result of calling this method on the superclass
+//   */
+//  public Object visit(ShiftLeftAssignExpression node) {
+//    Object result = super.visit(node);
+//    _notifyAssigned(node.getLeftExpression());
+//    return result;
+//  }
 
-  /**
-   * Notifies the InterpreterJVM that an assignment has been made
-   * and delegates to the superclass.
-   *
-   * Not currently necessary, since variables aren't copied back
-   * until the thread is resumed.
-   *
-   * @param node the node to visit
-   * @return the result of calling this method on the superclass
-   *
-  public Object visit(ShiftRightAssignExpression node) {
-    Object result = super.visit(node);
-    _notifyAssigned(node.getLeftExpression());
-    return result;
-  }
+//  /** Notifies the InterpreterJVM that an assignment has been made and delegates to the superclass.
+//   *  Not currently necessary, since variables aren't copied back until the thread is resumed.
+//   *
+//   *  @param node the node to visit
+//   *  @return the result of calling this method on the superclass
+//   */
+//  public Object visit(ShiftRightAssignExpression node) {
+//    Object result = super.visit(node);
+//    _notifyAssigned(node.getLeftExpression());
+//    return result;
+//  }
 
-  /**
-   * Notifies the InterpreterJVM that an assignment has been made
-   * and delegates to the superclass.
-   *
-   * Not currently necessary, since variables aren't copied back
-   * until the thread is resumed.
-   *
-   * @param node the node to visit
-   * @return the result of calling this method on the superclass
-   *
-  public Object visit(UnsignedShiftRightAssignExpression node) {
-    Object result = super.visit(node);
-    _notifyAssigned(node.getLeftExpression());
-    return result;
-  }*/
+//  /** Notifies the InterpreterJVM that an assignment has been made and delegates to the superclass.
+//   *  Not currently necessary, since variables aren't copied back until the thread is resumed.
+//   *
+//   *  @param node the node to visit
+//   *  @return the result of calling this method on the superclass
+//   */
+//  public Object visit(UnsignedShiftRightAssignExpression node) {
+//    Object result = super.visit(node);
+//    _notifyAssigned(node.getLeftExpression());
+//    return result;
+//  }
 }

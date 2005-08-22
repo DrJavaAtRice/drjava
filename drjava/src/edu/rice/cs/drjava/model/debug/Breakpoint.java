@@ -90,8 +90,7 @@ public class Breakpoint extends DocumentDebugAction<BreakpointRequest> {
    *  applies.  (There may be multiple if a custom class loader is in use.)
    *  @throws DebugException if the requests could not be created.
    */
-  protected void _createRequests(Vector<ReferenceType> refTypes) throws DebugException
-  {
+  protected void _createRequests(Vector<ReferenceType> refTypes) throws DebugException {
     try {
       for (int i=0; i < refTypes.size(); i++) {
         ReferenceType rt = refTypes.get(i);

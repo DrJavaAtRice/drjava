@@ -171,20 +171,12 @@ public interface OptionConstants {
    */
   static class DefaultFont {
     public static Font getDefaultMainFont() {
-      if (PlatformFactory.ONLY.isMacPlatform()) {
-        return Font.decode("Monaco-12");
-      }
-      else {
-        return Font.decode("Monospaced-12");
-      }
+      if (PlatformFactory.ONLY.isMacPlatform())  return Font.decode("Monaco-12");
+      else return Font.decode("Monospaced-12");
     }
     public static Font getDefaultLineNumberFont() {
-      if (PlatformFactory.ONLY.isMacPlatform()) {
-        return Font.decode("Monaco-12");
-      }
-      else {
-        return Font.decode("Monospaced-12");
-      }
+      if (PlatformFactory.ONLY.isMacPlatform()) return Font.decode("Monaco-12");
+      else return Font.decode("Monospaced-12");
     }
     public static Font getDefaultDocListFont() {
       if (PlatformFactory.ONLY.isMacPlatform()) {
@@ -254,26 +246,20 @@ public interface OptionConstants {
   public static final BooleanOption SHOW_SOURCE_WHEN_SWITCHING = 
     new BooleanOption("show.source.for.fast.switch", Boolean.TRUE);
   
-  /**
-   * The current look and feel.
-   */
+  /** The current look and feel. */
   public static final ForcedChoiceOption LOOK_AND_FEEL =
     new ForcedChoiceOption("look.and.feel",
                            LookAndFeels.getDefaultLookAndFeel(),
                            LookAndFeels.getLookAndFeels());
 
-  /**
-   * Class that allows the look and feels to be initialized properly.
-   */
+  /** Class that allows the look and feels to be initialized properly. */
   static class LookAndFeels {
-    /**
-     * Mac platform should default to aqua; use metal elsewhere.
-     * @return the look-and-feel to use by default
+    
+    /** Mac platform should default to aqua; use metal elsewhere.
+     *  @return the look-and-feel to use by default
      */
     public static String getDefaultLookAndFeel() {
-      if (PlatformFactory.ONLY.isMacPlatform()) {
-        return UIManager.getSystemLookAndFeelClassName();
-      }
+      if (PlatformFactory.ONLY.isMacPlatform()) return UIManager.getSystemLookAndFeelClassName();
       else {
         return UIManager.getCrossPlatformLookAndFeelClassName();
       }

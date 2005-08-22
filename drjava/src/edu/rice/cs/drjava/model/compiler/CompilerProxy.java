@@ -75,7 +75,6 @@ public class CompilerProxy implements CompilerInterface {
   public CompilerProxy(String className, ClassLoader newLoader) {
     _className = className;
     _newLoader = newLoader;
-
     _recreateCompiler();
   }
 
@@ -90,15 +89,6 @@ public class CompilerProxy implements CompilerInterface {
 
       _realCompiler.setBuildDirectory(_buildDir);
       
-//      StringBuffer newclasspath = new StringBuffer();
-//      Vector<File> cp = DrJava.getConfig().getSetting(OptionConstants.EXTRA_CLASSPATH);
-//      //if (cp!=null) {
-//        Enumeration<File> en = cp.elements();
-//        while(en.hasMoreElements()) {
-//          newclasspath.append(System.getProperty("path.separator")).append(en.nextElement().getAbsolutePath());
-//        }
-//      //}
-//      _realCompiler.setExtraClassPath(newclasspath.toString());
       _realCompiler.setExtraClassPath(File.pathSeparator + _extraClasspath.toString());
 
       _realCompiler.setWarningsEnabled(_warningsEnabled);
@@ -115,12 +105,12 @@ public class CompilerProxy implements CompilerInterface {
         _realCompiler.addToBootClassPath(collectionsPath);
       }
 
-      //DrJava.consoleErr().println("real compiler: " + _realCompiler + " this: " + this);
+//      DrJava.consoleErr().println("real compiler: " + _realCompiler + " this: " + this);
     }
     catch (Throwable t) {
         // don't do anything. realCompiler stays null.
-        //DrJava.consoleErr().println("loadClass fails: " + t);
-        //t.printStackTrace(DrJava.consoleErr());
+//        DrJava.consoleErr().println("loadClass fails: " + t);
+//        t.printStackTrace(DrJava.consoleErr());
     }
   }
 
@@ -132,118 +122,89 @@ public class CompilerProxy implements CompilerInterface {
    */
   public CompilerError[] compile(File sourceRoot, File[] files) {
     _recreateCompiler();
-    //DrJava.consoleOut().println("realCompiler is " + _realCompiler.getClass());
+//    DrJava.consoleOut().println("realCompiler is " + _realCompiler.getClass());
     CompilerError[] ret =  _realCompiler.compile(sourceRoot, files);
 
     return ret;
   }
 
-  /**
-   * Compile the given files.
-   * @param files Source files to compile.
-   * @param sourceRoots Array of source root directories, the base of
-   *  the package structure for all files to compile.
+  /** Compile the given files.
+   *  @param files Source files to compile.
+   *  @param sourceRoots Array of source root directories, the base of the package structure for all files to compile.
    *
-   * @return Array of errors that occurred. If no errors, should be zero
-   * length array (not null).
+   *  @return Array of errors that occurred. If no errors, should be zero length array (not null).
    */
   public CompilerError[] compile(File[] sourceRoots, File[] files) {
-    //DrJava.consoleErr().println("proxy to compile: " + files[0]);
+//    DrJava.consoleErr().println("proxy to compile: " + files[0]);
 
-    /*DrJava.consoleOut().println("-- In CompilerProxy: SourceRoots:");
-    for (int i = 0 ; i < sourceRoots.length; i ++) {
-      DrJava.consoleOut().println(sourceRoots[i]);
-    }*/
+//    DrJava.consoleOut().println("-- In CompilerProxy: SourceRoots:");
+//    for (int i = 0 ; i < sourceRoots.length; i ++) {
+//      DrJava.consoleOut().println(sourceRoots[i]);
+//    }
 
     _recreateCompiler();
-    //DrJava.consoleOut().println("realCompiler is " + _realCompiler.getClass());
+//    DrJava.consoleOut().println("realCompiler is " + _realCompiler.getClass());
     CompilerError[] ret =  _realCompiler.compile(sourceRoots, files);
 
     return ret;
   }
 
-  /**
-   * Indicates whether this compiler is actually available.
-   * As in: Is it installed and located?
-   * This method should load the compiler class, which should
-   * hopefully prove whether the class can load.
-   * If this method returns true, the {@link #compile} method
-   * should not fail due to class not being found.
+  /** Indicates whether this compiler is actually available. As in: Is it installed and located? This method should
+   *  load the compiler class, which should hopefully prove whether the class can load.  If this method returns true,
+   *  the {@link #compile} method should not fail due to class not being found.
    */
   public boolean isAvailable() {
-    if (_realCompiler == null) {
-      return false;
-    }
-    else {
-      return _realCompiler.isAvailable();
-    }
+    if (_realCompiler == null) return false;
+    else return _realCompiler.isAvailable();
   }
 
-  /**
-   * Returns the name of this compiler, appropriate to show to the user.
-   */
+  /** Returns the name of this compiler, appropriate to show to the user. */
   public String getName() {
-    if (!isAvailable()) {
-      return "(unavailable)";
-    }
-
+    if (!isAvailable())  return "(unavailable)";
     return _realCompiler.getName();
   }
 
   /** Should return info about compiler, at least including name. */
-  public String toString() {
-    return getName();
-  }
+  public String toString() { return getName(); }
 
-  /**
-   * Allows us to set the extra classpath for the compilers without referencing the
-   * config object in a loaded class file
+  /** Allows us to set the extra classpath for the compilers without referencing the
+   *  config object in a loaded class file
    */
   public void setExtraClassPath( String extraClassPath) {
     _realCompiler.setExtraClassPath(extraClassPath);
   }
   
-  /**
-   * Sets the extra classpath in the form of a ClasspathVector. This should include
-   * any classpath entries from the project's classpath, if any, and the entries from
-   * EXTRA_CLASSPATH.
-   * @param extraClassPath the classpath to use as the compiler's extra classpath
+  /** Sets the extra classpath in the form of a ClasspathVector. This should include any classpath entries from the
+   *  project's classpath, if any, and the entries from EXTRA_CLASSPATH.
+   *  @param extraClassPath the classpath to use as the compiler's extra classpath
    */
   public void setExtraClassPath(ClasspathVector extraClassPath) {
     _extraClasspath = extraClassPath;
   }
 
-  /**
-   * Sets whether to allow assertions in Java 1.4.
-   */
+  /** Sets whether to allow assertions in Java 1.4. */
   public void setAllowAssertions(boolean allow) {
     _realCompiler.setAllowAssertions(allow);
   }
   
-  /**
-   * Sets whether or not warnings are allowed
-   */
+  /** Sets whether or not warnings are allowed. */
   public void setWarningsEnabled(boolean warningsEnabled) {
     _realCompiler.setWarningsEnabled(warningsEnabled);
     _warningsEnabled = warningsEnabled;
   }
 
-  /**
-   * This method allows us to set the JSR14 collections path across a class loader.
-   * (cannot cast a loaded class to a subclass, so all compiler interfaces must have this method)
+  /** This method allows us to set the JSR14 collections path across a class loader.
+   *  (cannot cast a loaded class to a subclass, so all compiler interfaces must have this method)
    */
   public void addToBootClassPath( File cp) {
     _realCompiler.addToBootClassPath(cp);
   }
 
-  /**
-   * sets the build directory for the compilers
-   */
+  /** Sets the build directory for the compilers. */
   public void setBuildDirectory(File buildDir) {
     _realCompiler.setBuildDirectory(buildDir);
     _buildDir = buildDir;
   }
-  
 }
 
 

@@ -65,22 +65,16 @@ import java.util.List;
  * @version $Id$
  */
 class DefaultPlatform implements PlatformSupport {
-  /**
-   * Singleton instance.
-   */
+  /** Singleton instance. */
   public static DefaultPlatform ONLY = new DefaultPlatform();
 
-  /**
-   * Private constructor for singleton pattern.
-   */
-  protected DefaultPlatform() {
-  };
+  /** Private constructor for singleton pattern. */
+  protected DefaultPlatform() { }
 
-  /**
-   * Utility method to determine if the current Swing look and feel is the
-   * platform-specific look and feel for the client platform.
+  /** Utility method to determine if the current Swing look and feel is the
+   *  platform-specific look and feel for the client platform.
    *
-   * @return true if current Swing look and feel is the system look and feel
+   *  @return true if current Swing look and feel is the system look and feel
    */
   public boolean isUsingSystemLAF() {
     String sysLAF = UIManager.getSystemLookAndFeelClassName();
@@ -92,8 +86,7 @@ class DefaultPlatform implements PlatformSupport {
    * Hook for performing general UI setup.  Called before all other UI setup is done.
    * The default implementation does nothing.
    */
-  public void beforeUISetup() {
-  }
+  public void beforeUISetup() { }
 
   /**
    * Hook for performing general UI setup.  Called after all other UI setup is done.
@@ -103,62 +96,42 @@ class DefaultPlatform implements PlatformSupport {
    * @param prefs the Action associated with openning the Preferences dialog
    * @param quit  the Action associated with quitting the DrJava application
    */
-  public void afterUISetup(Action about, Action prefs, Action quit) {
-  }
+  public void afterUISetup(Action about, Action prefs, Action quit) { }
 
-  /**
-   * Returns whether this is a Mac OS X platform.
-   */
-  public boolean isMacPlatform() {
-    return false;
-  }
+  /** Returns whether this is a Mac OS X platform. */
+  public boolean isMacPlatform() { return false; }
 
-  /**
-   * Returns whether this is a Windows platform.
-   */
-  public boolean isWindowsPlatform() {
-    return false;
-  }
+  /** Returns whether this is a Windows platform. */
+  public boolean isWindowsPlatform() { return false; }
 
-  /**
-   * Returns the current Java specification version.
-   */
+  /** Returns the current Java specification version. */
   public String getJavaSpecVersion() {
     return System.getProperty("java.specification.version");
   }
 
-  /**
-   * Returns true if the classpath's tools.jar is from version 1.3.
-   */
+  /** Returns true if the classpath's tools.jar is from version 1.3. */
   public boolean has13ToolsJar() {
     // Javadoc's Main class should not have an execute(String[]) method.
     try {
       Class<?> main = Class.forName("com.sun.tools.javadoc.Main");
       return !_javadocMainHasExecuteMethod(main);
     }
-    catch (Throwable t) {
-      return false;
-    }
+    catch (Throwable t) { return false; }
   }
 
-  /**
-   * Returns true if the classpath's tools.jar is from version 1.4.
-   */
+  /** Returns true if the classpath's tools.jar is from version 1.4. */
   public boolean has14ToolsJar() {
     // Javadoc's Main class should have an execute(String[]) method.
     try {
       Class<?> main = Class.forName("com.sun.tools.javadoc.Main");
       return _javadocMainHasExecuteMethod(main);
     }
-    catch (Throwable t) {
-      return false;
-    }
+    catch (Throwable t) { return false; }
   }
 
-  /**
-   * Returns true if the given class object for com.sun.tools.javadoc.Main
-   * has an execute(String[]) method.  If so, that means we have a 1.4
-   * version of tools.jar.
+  /** Returns true if the given class object for com.sun.tools.javadoc.Main
+   *  has an execute(String[]) method.  If so, that means we have a 1.4
+   *  version of tools.jar.
    *
    * @param main Class object for com.sun.tools.javadoc.Main
    */
@@ -167,20 +140,17 @@ class DefaultPlatform implements PlatformSupport {
       Method m = main.getMethod("execute", new Class[]{String[].class});
       return true;
     }
-    catch (Throwable t) {
-      return false;
-    }
+    catch (Throwable t) { return false; }
   }
 
-  /**
-   * Utility method for opening a URL in a browser in a platform-specific way.
-   * The default implementation uses Runtime.exec to execute a command specified
-   * in Preferences.  Platform implementations should attempt the default method
-   * first, then try to use a "default browser", if such a thing exists on the
-   * specific platform.
+  /** Utility method for opening a URL in a browser in a platform-specific way.
+   *  The default implementation uses Runtime.exec to execute a command specified
+   *  in Preferences.  Platform implementations should attempt the default method
+   *  first, then try to use a "default browser", if such a thing exists on the
+   *  specific platform.
    *
-   * @param address the URL to open
-   * @return true if the URL was successfully handled, false otherwise
+   *  @param address the URL to open
+   *  @return true if the URL was successfully handled, false otherwise
    */
   public boolean openURL(URL address) {
     // Get the two config options.

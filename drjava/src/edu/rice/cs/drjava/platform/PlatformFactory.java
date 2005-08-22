@@ -53,9 +53,8 @@ package edu.rice.cs.drjava.platform;
  */
 public class PlatformFactory {
   
-  /**
-   * A platform-appropriate implementation of the PlatformSupport interface
-   * Singleton field populated by the static factory method.
+  /** A platform-appropriate implementation of the PlatformSupport interface
+   *  Singleton field populated by the static factory method.
    */
   public static final PlatformSupport ONLY = getPlatformSupport();
   
@@ -64,13 +63,12 @@ public class PlatformFactory {
    * @return a platform-appropriate implementation of PlatformSupport
    */
   private static PlatformSupport getPlatformSupport() {
-
+    
     // Get OS name string; we expect one of "windows xp", "mac os x", etc.
     String os = System.getProperty("os.name").toLowerCase();
     
-	if (os.startsWith("mac os x")) { return MacPlatform.ONLY; }
-	else if (os.startsWith("windows")) { return WindowsPlatform.ONLY; }
-	else { return DefaultPlatform.ONLY; }
+    if (os.startsWith("mac os x")) return MacPlatform.ONLY;
+    else if (os.startsWith("windows")) return WindowsPlatform.ONLY;
+    else return DefaultPlatform.ONLY; 
   }
-  
 }

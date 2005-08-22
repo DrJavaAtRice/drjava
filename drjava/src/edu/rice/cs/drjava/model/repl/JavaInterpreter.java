@@ -53,9 +53,8 @@ import java.net.URL;
  */
 public interface JavaInterpreter extends Interpreter {
   
-  /**
-   * Adds the given path to the interpreter's classpath.
-   * @param path Path to add
+  /** Adds the given path to the interpreter's classpath.
+   *  @param path Path to add
    */
   //public void addClassPath(String path);
   public void addProjectClassPath(URL path);
@@ -64,28 +63,20 @@ public interface JavaInterpreter extends Interpreter {
   public void addExternalFilesClassPath(URL path);
   public void addExtraClassPath(URL path);
   
-  
-  
-  
-  /**
-   * Set the scope for unqualified names to be the given package.
-   * @param packageName Package to use for the current scope.
+  /** Set the scope for unqualified names to be the given package.
+   *  @param packageName Package to use for the current scope.
    */
   public void setPackageScope(String packageName);
   
-  /**
-   * Returns the value of the variable with the given name in
-   * the interpreter.
-   * @param name Name of the variable
-   * @return Value of the variable
+  /** Returns the value of the variable with the given name in the interpreter.
+   *  @param name Name of the variable
+   *  @return Value of the variable
    */
   public Object getVariable(String name);
   
-  /**
-   * Returns the class of the variable with the given name in
-   * the interpreter.
-   * @param name Name of the variable
-   * @return class of the variable
+  /** Returns the class of the variable with the given name in the interpreter.
+   *  @param name Name of the variable
+   *  @return class of the variable
    */
   public Class getVariableClass(String name);
   

@@ -470,11 +470,10 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     }
   }
   
-  /**
-   * Returns the Java interpreter with the given name
-   * @param name the unique name of the desired interpreter
-   * @throws IllegalArgumentException if no such named interpreter exists, or if
-   * the named interpreter is not a Java interpreter
+  /** Returns the Java interpreter with the given name
+   *  @param name the unique name of the desired interpreter
+   *  @throws IllegalArgumentException if no such named interpreter exists, or if the named interpreter is not a Java
+   *          interpreter
    */
   public JavaInterpreter getJavaInterpreter(String name) {
     if (printMessages) System.err.println("Getting interpreter data");
@@ -483,19 +482,15 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     Interpreter interpreter = interpreterData.getInterpreter();
     if (printMessages) System.out.println("returning");
     
-    if (interpreter instanceof JavaInterpreter) {
-      return (JavaInterpreter) interpreter;
-    }
+    if (interpreter instanceof JavaInterpreter) return (JavaInterpreter) interpreter;
     else {
       throw new IllegalArgumentException("Interpreter '" + name + "' is not a JavaInterpreter.");
     }
   }
   
-  /**
-   * Sets the current interpreter to be the one specified by the given name
-   * @param name the unique name of the interpreter to set active
-   * @return Whether the new interpreter is currently in progress
-   * with an interaction
+  /** Sets the current interpreter to be the one specified by the given name
+   *  @param name the unique name of the interpreter to set active
+   *  @return Whether the new interpreter is currently in progress with an interaction
    */
   public boolean setActiveInterpreter(String name) {
     _activeInterpreter = getInterpreter(name);

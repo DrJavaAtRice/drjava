@@ -596,6 +596,9 @@ class FindReplaceDialog extends TabbedPanel implements OptionConstants {
         _caretChanged = true;
         _updateMachine();
       }
+      else {  // If searching all documents, the current document may have been kicked out of the cache
+        _model.refreshActiveDocument();
+      }
       
       if (fr.getWrapped() && !_machine.getSearchAllDocuments()) {
         Toolkit.getDefaultToolkit().beep();

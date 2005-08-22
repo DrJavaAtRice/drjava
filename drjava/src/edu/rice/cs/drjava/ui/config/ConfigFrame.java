@@ -480,9 +480,7 @@ public class ConfigFrame extends JFrame {
     panel.displayComponents();
   }
 
-  /**
-   * Add all of the components for the Display Options panel of the preferences window.
-   */
+  /** Add all of the components for the Display Options panel of the preferences window. */
   private void _setupDisplayPanel(ConfigPanel panel) {
 
     panel.addComponent(new ForcedChoiceOptionComponent(OptionConstants.LOOK_AND_FEEL,
@@ -501,9 +499,7 @@ public class ConfigFrame extends JFrame {
     panel.displayComponents();
   }
 
-  /**
-   * Add all of the components for the Font panel of the preferences window.
-   */
+  /** Add all of the components for the Font panel of the preferences window. */
   private void _setupFontPanel(ConfigPanel panel) {
     panel.addComponent(new FontOptionComponent(OptionConstants.FONT_MAIN, "Main Font", this,
                                                "The font used for most text in DrJava."));

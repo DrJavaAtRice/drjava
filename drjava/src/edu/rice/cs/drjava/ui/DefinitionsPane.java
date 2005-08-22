@@ -130,8 +130,7 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
         _addHighlight(from - 1, to);
 //        Highlighter.Highlight[] _lites = getHighlighter().getHighlights();
       }
-      _mainFrame.updateFileTitle();
-               
+      _mainFrame.updateFileTitle();         
     }
   }
   
@@ -146,17 +145,14 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
       int charBeforeIndex = braceIndex-1;
       boolean previousLine = false;
       
-      if (charBeforeIndex != -1)
-        charBefore = docText.charAt(charBeforeIndex);
+      if (charBeforeIndex != -1) charBefore = docText.charAt(charBeforeIndex);
       
       charBeforeIndex--;
       
       while (charBeforeIndex >= 0 && (charBefore == '\n' || charBefore == ' ')) {
         charBefore = docText.charAt(charBeforeIndex);
-        if (!previousLine &&  charBefore != '\n' && charBefore != ' ')
-          charBeforeIndex = braceIndex-1;
-        if (charBefore == '\n') 
-          previousLine = true;
+        if (!previousLine &&  charBefore != '\n' && charBefore != ' ') charBeforeIndex = braceIndex-1;
+        if (charBefore == '\n')  previousLine = true;
         charBeforeIndex--;
       }
       
@@ -167,12 +163,10 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
       int lastNewLineIndex = returnText.lastIndexOf("\n");
       return returnText.toString().substring(lastNewLineIndex+1);
     }
-    
     else //not a curly brace
       return null;     
   }  
     
-  
   /** The OptionListener for DEFINITIONS_MATCH_COLOR. */
   private class MatchColorOptionListener implements OptionListener<Color> {
     public void optionChanged(OptionEvent<Color> oce) {

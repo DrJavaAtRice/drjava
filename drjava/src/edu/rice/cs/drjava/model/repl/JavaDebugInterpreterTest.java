@@ -168,7 +168,7 @@ public final class JavaDebugInterpreterTest extends DebugTestCase {
     // Creating a JavaDebugInterpreter with a custom
     // notifyInterpreterAssignment() method
     _debugInterpreter = new JavaDebugInterpreter("test", "") {
-      public EvaluationVisitorExtension makeEvaluationVisitor(Context context) {
+      public EvaluationVisitorExtension makeEvaluationVisitor(Context<Object> context) {
         return new DebugEvaluationVisitor(context, _name) {
           protected void _notifyAssigned(Expression e) {
             notifyInterpreterAssignment(_name);

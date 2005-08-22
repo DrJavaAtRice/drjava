@@ -136,21 +136,13 @@ public class DrJava implements OptionConstants {
         String currLAFName = UIManager.getLookAndFeel().getClass().getName();
         if (!configLAFName.equals(currLAFName)) UIManager.setLookAndFeel(configLAFName);
         
-        // This line uses the winlaf-0.5.1.jar in the lib directory to
-        // install L&F upgrades for windows XP.
+        // Install L&F upgrades for windows XP from winlaf-0.5.1.jar
         // For more information see: https://winlaf.dev.java.net/release_0.5.html
-        
-//        // winlaf-0.5 initialization
-//        try { UIManager.setLookAndFeel("net.java.plaf.windows.WindowsLookAndFeel"); }
-//        catch (Exception e) {}
-        
-        
-       // winlaf-0.4 initialization 
-       net.java.plaf.LookAndFeelPatchManager.initialize();  //  old winlaf setup
+       net.java.plaf.LookAndFeelPatchManager.initialize();  
                 
-        // Don't use JSR14v20 if running with Java 1.5 because we putting it on the bootclasspath causes DrJava to
+        // Don't use JSR14v20 if running with Java 1.5 because putting it on the bootclasspath causes DrJava to
         // hang on startup.
-        _usingJSR14v20 = checkForJSR14v20() && !System.getProperty("java.specification.version").equals("1.5");
+        _usingJSR14v20 = checkForJSR14v20() && ! System.getProperty("java.specification.version").equals("1.5");
 
         checkForCompilersAndDebugger(args);
  
@@ -166,14 +158,13 @@ public class DrJava implements OptionConstants {
         AWTExceptionHandler.setFrame(mf);
         System.setProperty("sun.awt.exception.handler", "edu.rice.cs.drjava.ui.AWTExceptionHandler");
                 
-        // This enabling of the security manager must happen *after* the mainframe
-        // is constructed. See bug #518509.
-
         _openCommandLineFiles(mf, _filesToOpen);
-        /* setVibible is moved to the end of the eventqueue to be sure all files has finished loading and added to the fileview before the MainFrame is set visible.
-         * When this was not done, occassionally a NullPointerException was encountered on startup when specifying a file (ex: java -jar drjava.jar somefile.java)
+        
+        /* setVibible is moved to the end of the eventqueue to be sure all files has finished loading and added to the
+         * fileview before the MainFrame is set visible.  When this was not done, occassionally a NullPointerException 
+         * was encountered on startup when specifying a file (ex: java -jar drjava.jar somefile.java)
          */
-        Utilities.invokeLater(new Runnable(){ public void run(){mf.setVisible(true);}});
+        SwingUtilities.invokeLater(new Runnable(){ public void run(){mf.setVisible(true);}});
         
         // redirect stdout to DrJava's console
         System.setOut(new PrintStream(new OutputStreamRedirector() {
