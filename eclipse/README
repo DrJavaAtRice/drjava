@@ -1,0 +1,13 @@
+DrJava Plug-in for Eclipse
+
+
+About ----
+  This plug-in for IBM's Eclipse platform integrates features from the 
+DrJava development environment.  The plug-in provides an Interactions Pane 
+and a simplified user interface to Eclipse.
+
+
+Installation ----
+  Copy this directory into the "plugins" directory of your Eclipse 
+installation.  After you restart Eclipse, DrJava will appear in the list 
+of available Perspectives.  (Window->Open Perspective->Other...)

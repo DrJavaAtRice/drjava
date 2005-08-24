@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<!DOCTYPE DOCKABLES SYSTEM "dockables.dtd">
+<DOCKABLES>
+  <DOCKABLE NAME="drjava">
+    edu.rice.cs.drjava.plugins.jedit.JEditPlugin.getDefault().newPane(view);
+  </DOCKABLE>
+</DOCKABLES>

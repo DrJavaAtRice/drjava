@@ -1,0 +1,32 @@
+# DrJava Plugin Properties
+plugin.edu.rice.cs.drjava.plugins.jedit.JEditPlugin.name=DrJava
+plugin.edu.rice.cs.drjava.plugins.jedit.JEditPlugin.author=Rice University JavaPLT
+plugin.edu.rice.cs.drjava.plugins.jedit.JEditPlugin.version=0.6
+plugin.edu.rice.cs.drjava.plugins.jedit.JEditPlugin.depend.0=jedit 04.02.01.00
+plugin.edu.rice.cs.drjava.plugins.jedit.JEditPlugin.depend.1=jdk 1.3
+plugin.edu.rice.cs.drjava.plugins.jedit.JEditPlugin.activate=defer
+# plugin.edu.rice.cs.drjava.plugins.jedit.JEditPlugin.docs=help.html
+plugin.edu.rice.cs.drjava.plugins.jedit.JEditPlugin.jars=drjava-jedit.jar
+
+plugin.edu.rice.cs.drjava.plugins.jedit.JEditPlugin.menu.label=DrJava
+plugin.edu.rice.cs.drjava.plugins.jedit.JEditPlugin.menu=\
+  drjava-toggle \
+  - \
+  reset-interactions \
+  show-classpath
+#   load-interactions-history \
+#   save-interactions-history \
+#   clear-interactions-history
+
+drjava.title=Interactions Pane
+drjava.label=Interactions Pane
+drjava-toggle.label=Toggle Interactions Pane
+reset-interactions.label=Reset Interactions Pane
+show-classpath.label=Show Interpreter Classpath
+# load-interactions-history.label=Load Interactions History...
+# save-interactions-history.label=Save Interactions History...
+# clear-interactions-history.label=Clear Interactions History
+
+# plugin.edu.rice.cs.drjava.plugins.jedit.JEditPlugin.option-pane=drjava-option-pane
+# options.drjava-option-pane.label=DrJava
+# options.drjava-option-pane.code=new edu.rice.cs.drjava.plugins.jedit.OptionPane()

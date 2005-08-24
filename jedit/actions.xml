@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<!DOCTYPE ACTIONS SYSTEM "actions.dtd">
+<ACTIONS>
+  <ACTION NAME="reset-interactions">
+    <CODE>
+      edu.rice.cs.drjava.plugins.jedit.JEditPlugin.getDefault().resetInteractions();
+    </CODE>
+  </ACTION>
+  <ACTION NAME="show-classpath">
+    <CODE>
+      edu.rice.cs.drjava.plugins.jedit.JEditPlugin.getDefault().showClasspath();
+    </CODE>
+  </ACTION>
+<!--
+  <ACTION NAME="load-interactions-history">
+    <CODE>
+      edu.rice.cs.drjava.plugins.jedit.JEditPlugin.getDefault()...
+    </CODE>
+  </ACTION>
+  <ACTION NAME="save-interactions-history">
+    <CODE>
+      edu.rice.cs.drjava.plugins.jedit.JEditPlugin.getDefault()...
+    </CODE>
+  </ACTION>
+  <ACTION NAME="clear-interactions-history">
+    <CODE>
+      edu.rice.cs.drjava.plugins.jedit.JEditPlugin.getDefault()...
+    </CODE>
+  </ACTION>
+-->
+</ACTIONS>
