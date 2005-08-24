@@ -1,0 +1,461 @@
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook V3.1//EN">
+
+<!--
+  Developer Documentation for DrJava
+  Charles Reis
+  @version $Id$
+-->
+<book id="index">
+  <!-- Meta info -->
+  <bookinfo>
+    <date>2003-1-9</date>
+    <title>DrJava Developer Documentation</title>
+  </bookinfo>
+  <toc></toc>
+
+
+  <!-- Chapter: Intro -->
+  <chapter id="intro">
+    <title>Introduction</title>
+
+    <para>By releasing DrJava as an open source project, our team welcomes anyone to download, modify, and use the source code for their own benefit.  We hope that this outreach to the development community can continue to help DrJava achieve its educational goals and improve its quality as a stable and full-featured development environment.  This documentation will help you get started with downloading and compiling the DrJava code base.</para>
+
+    <para>To ensure that DrJava's reliability and robustness is maintained, the DrJava development team adheres to several guidelines and philosophies when making changes.  We will soon add chapters to this documentation describing these design philosophies and coding conventions, in an effort to help DrJava developers keep the quality of the project high.</para>
+  </chapter>
+
+
+  <!-- Chapter: Project Goals
+  <chapter id="goals">
+    <title>Project Goals</title>
+
+    <para>text...</para>
+  </chapter>
+  -->
+
+
+  <!-- Chapter: Design Philosophies
+  <chapter id="philosophies">
+    <title>Design Philosophies</title>
+
+    <para>text...</para>
+  </chapter>
+  -->
+
+
+  <!-- Chapter: Code Layout
+  <chapter id="layout">
+    <title>Code Layout</title>
+
+    <para>text...</para>
+  </chapter>
+  -->
+
+
+  <!-- Chapter: Coding Conventions
+  <chapter id="conventions">
+    <title>Coding Conventions</title>
+
+    <para>text...</para>
+  </chapter>
+  -->
+
+
+  <!-- Chapter: Build Environment -->
+  <chapter id="environment">
+    <title>Setting Up A Build Environment</title>
+    <para>This chapter walks you through setting up your build environment to develop DrJava.  It is addressed to both independent developers and members of the DrJava development team who will be committing code to the CVS repository.  We attempt to support development on Linux, Mac OS X, Solaris, and Windows.</para>
+
+    <section id="env-sf-account">
+      <title>SourceForge Account</title>
+      <para>Regardless of whether you will be committing code or not, we recommend registering for a SourceForge user account to check out code and submit or respond to bugs and feature requests.  If you will be a member of the DrJava development team, the DrJava project administrators will add your account to the project to allow you to commit code and perform related tasks.  If you already have a SourceForge account, you can skip the first two steps.</para>
+      <itemizedlist>
+        <listitem>
+          <para>Go to <ulink url="http://sourceforge.net">http://sourceforge.net</ulink> and click on "New User via SSL"</para>
+        </listitem>
+        <listitem>
+          <para>Fill in the form to create a user account.</para>
+        </listitem>
+        <listitem>
+          <para>We recommend that you sign up for the <literal>drjava-hackers</literal> mailing list, since we send out messages when developers need to update parts of their build environment or when new releases become available.  You can sign up at <ulink url="http://lists.sourceforge.net/lists/listinfo/drjava-hackers">http://lists.sourceforge.net/lists/listinfo/drjava-hackers</ulink>.</para>
+        </listitem>
+        <listitem>
+          <para>If you will be a member of the DrJava development team, email one of the DrJava project administrators with your SourceForge username so that you can be added to the DrJava project.</para>
+        </listitem>
+      </itemizedlist>
+    </section>
+
+
+    <section id="env-install">
+      <title>Install Necessary Programs</title>
+      <para>You will need to have several programs installed to be able to develop and run DrJava.  This section will help you install each of them, if you do not already have them installed.</para>
+
+      <itemizedlist>
+        <listitem>
+          <formalpara>
+            <title>Java Software Development Kit</title>
+            <para>If you don't have it already, you will need to install Sun's Java SDK (not just the JRE).  If you are using Linux or Windows, install version 1.4.1 or later.  If you are using Mac OS X 10.2 or higher, you should already have version 1.4.1 installed.  (Earlier versions of Mac OS X have JDK 1.3.1.)  You can download the SDK for your platform from <ulink url="http://java.sun.com">http://java.sun.com</ulink>.</para>
+          </formalpara>
+          <para>Note: If you wish for your builds of DrJava to be compatible with JDK 1.3.1, you must compile with JDK 1.3.1.</para>
+        </listitem>
+
+        <listitem>
+          <formalpara>
+            <title>Cygwin (Windows only)</title>
+            <para>If you will be developing on a Windows platform, you will need to install Cygwin (a Unix-like shell for Windows) to run the DrJava build script.</para>
+          </formalpara>
+          <itemizedlist>
+            <listitem>
+              <para>Download and run the latest Cygwin installer from <ulink url="http://www.cygwin.com">http://www.cygwin.com</ulink>.</para>
+            </listitem>
+            <listitem>
+              <para>On the "Select Packages" screen of the installer, make sure that "cvs" (in the Dev category) and "openssh" (in the Net category) are selected to be installed.</para>
+            </listitem>
+          </itemizedlist>
+        </listitem>
+
+        <listitem>
+          <formalpara>
+            <title>Mac OS X Developer Tools (Mac OS X only)</title>
+            <para>If you will be developing on a Mac OS X platform, you will need to install the Developer Tools to get build tools like CVS.  This package can be downloaded for free from the Apple Developer Connection, <ulink url="http://connect.apple.com">http://connect.apple.com</ulink>, or you can install their equivalents from the Fink project at <ulink url="http://fink.sourceforge.net">http://fink.sourceforge.net</ulink>.</para>
+          </formalpara>
+        </listitem>
+
+        <listitem>
+          <formalpara>
+            <title>Ant</title>
+            <para>Ant is a build tool similar to "make", but which uses XML build scripts.  We use Ant to compile, test, and commit DrJava code.  You will need to download version 1.5.1 or later from <ulink url="http://www.apache.org/dist/ant/binaries/">http://www.apache.org/dist/ant/binaries/</ulink>.  Decompress the package and copy the <filename>jakarta-ant-1.5.1</filename> folder to a convenient location (eg. <filename>/usr/local/ant</filename>, <filename>~/ant/</filename>, or <filename>c:\jakarta-ant-1.5.1</filename>).</para>
+          </formalpara>
+        </listitem>
+
+      </itemizedlist>
+    </section>
+
+
+    <section id="env-sf-keypair">
+      <title>SourceForge SSH Key Pairs</title>
+      <para>If you will developing frequently from the same computer or on a Windows platform, we recommend setting up a SSH key pair to allow you to check out and commit code without having to enter your SourceForge password every time.  (This is required to commit code in a Windows environment due to a complication with Cygwin.)  However, you should not set up a key pair on a public Windows computer-- only on your personal computer, or on a personal account on a Unix server.  Follow the directions below to set up a key pair.</para>
+      <itemizedlist>
+        <listitem>
+          <para>Read through the <ulink url="http://sourceforge.net/docman/display_doc.php?docid=761&amp;group_id=1">SourceForge documentation</ulink> to understand the security implications of using SSH key pairs.</para>
+        </listitem>
+        <listitem>
+          <para>Generate a key pair on your local computer by running the following command at a Terminal (Linux / Mac OS X) or a Cygwin prompt (Windows).  Be sure to use a blank passphrase, and save to the default location.</para>
+          <cmdsynopsis>
+            <command>ssh-keygen -t dsa</command>
+          </cmdsynopsis>
+        </listitem>
+        <listitem>
+          <para>Log into SourceForge using your user account, click on "Account Options", and then "Edit Keys" under the "Shell Account Information" section.</para>
+        </listitem>
+        <listitem>
+          <para>Copy the contents of your <filename>id_dsa.pub</filename> file into the form and click update.  <emphasis>Note: This will take up to 6 hours to go into effect!</emphasis></para>
+        </listitem>
+      </itemizedlist>
+    </section>
+
+
+    <section id="env-variables">
+      <title>Set Up Environment Variables</title>
+      <para>There are several environment variables you will need to set to run the build scripts.  The method to set these variables depends heavily on your platform.</para>
+      <itemizedlist>
+        <listitem>
+          <formalpara>
+            <title>Linux / Mac OS X (Bash)</title>
+            <para>If you are using a Bash shell, you can simply add the lines below to your <filename>~/.bashrc</filename> (Linux) or <filename>~/.profile</filename> (Mac OS X) file, substituting the correct paths for each program.  If you are using a different shell (eg. csh, tcsh), you will have to adapt the lines accordingly.  Be sure to use the correct paths for Ant and Java.  (In Mac OS X, use <filename>/usr</filename> for <literal>JAVA_HOME</literal>.)</para>
+          </formalpara>
+          <programlisting>
+export ANT_HOME=/usr/local/ant
+export JAVA_HOME=/usr/java/j2sdk1.4.2
+export PATH=${JAVA_HOME}/bin:${ANT_HOME}/bin:$PATH
+export CVS_RSH=ssh
+          </programlisting>
+          <para>You will need to start a new Terminal for the changes to take effect.</para>
+        </listitem>
+
+        <listitem>
+          <formalpara>
+            <title>Windows</title>
+            <para>Each version of Windows has a slightly different method for setting environment variables.  In most cases, you can double click on the "System" icon in the Control Panel (or choose "Properties" after right-clicking on "My Computer"), and then find a button for "Environment Variables" (usually on the "Advanced" tab.  Then add the following system-level variables, adjusting the paths for Java, Cygwin, and Ant accordingly.</para>
+          </formalpara>
+          <itemizedlist>
+            <listitem>
+              <para>Include the following <emphasis>at the beginning</emphasis> of the <literal>Path</literal> variable: <literal>c:\j2sdk1.4.2\bin;c:\jakarta-ant-1.5.1\bin</literal></para>
+            </listitem>
+            <listitem>
+              <para>Set <literal>ANT_HOME</literal> to <literal>c:\jakarta-ant-1.5.1</literal></para>
+            </listitem>
+            <listitem>
+              <para>Set <literal>JAVA_HOME</literal> to <literal>c:\j2sdk1.4.2</literal></para>
+            </listitem>
+            <listitem>
+              <para>Set <literal>CVS_RSH</literal> to <literal>ssh</literal></para>
+            </listitem>
+
+          </itemizedlist>
+          <para>After setting these environment variables in Windows, you will need to either log out and log back in or restart your computer.</para>
+        </listitem>
+      </itemizedlist>
+    </section>
+
+
+    <section id="env-drjava-source">
+      <title>Download DrJava Source</title>
+      <para>After setting the environment variables, you should be ready to check out the DrJava source code from the CVS repository.</para>
+      <itemizedlist>
+        <listitem>
+          <para>If this is the first time you have used your SourceForge account, you might need to SSH into the CVS server to initialize it.  You will be logged out immediately, but your account will be ready to use.  Do this with the following command, replacing [USERNAME] with your SourceForge username.</para>
+          <programlisting>ssh cvs.sf.net -l [USERNAME]</programlisting>
+        </listitem>
+
+        <listitem>
+          <para>Create a <filename>drjava</filename> folder in your home directory, and then a <filename>built</filename> folder within it:</para>
+          <programlisting>
+mkdir ~/drjava
+mkdir ~/drjava/built
+          </programlisting>
+        </listitem>
+
+        <listitem>
+          <para>Change to the <filename>drjava</filename> directory and check out the code.</para>
+          <programlisting>
+cd ~/drjava
+cvs -d [USERNAME]@cvs.sf.net:/cvsroot/drjava co src
+          </programlisting>
+        </listitem>
+      </itemizedlist>
+
+      <formalpara>
+        <title>Anonymous CVS</title>
+        <para>You can also download the DrJava source code from CVS without a SourceForge account.  Simply replace the last line in the instructions above with the lines below.</para>
+      </formalpara>
+      <programlisting>
+cvs -d:pserver:anonymous@cvs.sf.net:/cvsroot/drjava login
+cvs -z3 -d:pserver:anonymous@cvs.sf.net:/cvsroot/drjava co src
+      </programlisting>
+    </section>
+
+
+    <section id="env-jsr14">
+      <title>Download the JSR-14 Compiler</title>
+      <para>The DrJava code uses generics (parametric types), which will not officially be supported in Java until version 1.5.  Until then, we use Sun's JSR-14 prototype compiler to compile the code.  You can download this compiler from Sun, though it requires registering for a free user account.</para>
+      <itemizedlist>
+        <listitem>
+          <para>Download the most recent JSR-14 compiler from <ulink url="http://developer.java.sun.com/developer/earlyAccess/adding_generics/">http://developer.java.sun.com/developer/earlyAccess/adding_generics/</ulink>.</para>
+        </listitem>
+        <listitem>
+          <para>Unzip the package you downloaded and copy the included <filename>javac.jar</filename> to <filename>~/drjava/src/edu/rice/cs/lib/jsr14.jar</filename>.  (Note that in JSR-14 version 2.0, <filename>javac.jar</filename> has been renamed to <filename>gjc-rt.jar</filename>.)  Also copy <filename>collect.jar</filename> to <filename>~/drjava/src/edu/rice/cs/lib/collect.jar</filename>.</para>
+        </listitem>
+        <listitem>
+          <para>Note: The current version of the JSR-14 compiler will not work with any version of Java prior to 1.4.1.  If you want to compile with JDK 1.3.1 (eg. in Mac OS X 10.1 or to create builds compatible with JDK 1.3), you will need to use JSR-14 version 1.0.  (This version is no longer available from Sun; please contact a DrJava project administrator if you need help.)</para>
+        </listitem>
+      </itemizedlist>
+    </section>
+
+
+    <section id="env-classpath">
+      <title>Set Your Classpath</title>
+      <para>You will need to have all the DrJava libraries on your classpath, along with the JDK's <filename>tools.jar</filename> file.  It is important that <filename>jsr14.jar</filename> occurs <emphasis>before</emphasis> <filename>tools.jar</filename> on the classpath.  (Note that you cannot have <filename>tools.jar</filename> copied into <filename>$JAVA_HOME\jre\lib\ext\</filename>, which would automatically put it at the front of the classpath.)  Add <literal>CLASSPATH</literal> as an environment variable, just as you did in the <link linkend="env-variables">Set Up Environment Variables</link> section.</para>
+      <itemizedlist>
+        <listitem>
+          <formalpara>
+            <title>Linux / Mac OS X (Bash)</title>
+            <para>Add the following items in order to the front of your <literal>CLASSPATH</literal> environment variable in your <filename>~/.bashrc</filename> (Linux) or <filename>~/.profile</filename> (Mac OS X) file.  Separate the items with a colon, and make sure the line occurs after the definition of the <literal>JAVA_HOME</literal> variable.  Note that <filename>tools.jar</filename> is not necessary in Mac OS X.  You will need to start a new Terminal for the changes to take effect.</para>
+          </formalpara>
+          <programlisting>
+${HOME}/drjava/src/edu/rice/cs/lib/jsr14.jar
+${HOME}/drjava/src/edu/rice/cs/lib/collect.jar
+${HOME}/drjava/src/edu/rice/cs/lib/GJv6.jar
+${HOME}/drjava/src/edu/rice/cs/lib/compilers.jar
+${HOME}/drjava/src/edu/rice/cs/lib/dynamicjava.jar
+${HOME}/drjava/src/edu/rice/cs/lib/gj-util.jar
+${HOME}/drjava/src/edu/rice/cs/lib/junit.jar
+${HOME}/drjava/src/edu/rice/cs/lib/platform.jar
+${HOME}/drjava/src/edu/rice/cs/lib/javaast.jar
+${HOME}/drjava/src/edu/rice/cs/lib/clover.jar
+${HOME}/drjava/built/
+${JAVA_HOME}/lib/tools.jar
+          </programlisting>
+          <para>In Mac OS X 10.2 ("Jaguar") or earlier, you will likely also need to set the ANT_OPTS variable to include the JSR-14 compiler on the front of the "bootclasspath".  This is not necessary in OS X 10.3 ("Panther"), and should not be used if you encounter a "checkOverride" error from RMIC when compiling.  To set the ANT_OPTS variable, add the following line to your <filename>~/.profile</filename> file, subsituting the correct home directory.</para>
+          <programlisting>export ANT_OPTS='-Xbootclasspath/p:/Users/USERNAME/drjava/src/edu/rice/cs/lib/jsr14.jar'</programlisting>
+        </listitem>
+        <listitem>
+          <formalpara>
+            <title>Windows</title>
+            <para>Add the following items in order to the front of your <literal>CLASSPATH</literal> environment variable, substituting the correct path for your Cygwin home directory and <filename>tools.jar</filename>.  Separate the items with a semicolon.  You will need to log out and log back in or restart for the changes to take effect.</para>
+          </formalpara>
+          <programlisting>
+c:\cygwin\home\USERNAME\drjava\src\edu\rice\cs\lib\jsr14.jar
+c:\cygwin\home\USERNAME\drjava\src\edu\rice\cs\lib\collect.jar
+c:\cygwin\home\USERNAME\drjava\src\edu\rice\cs\lib\GJv6.jar
+c:\cygwin\home\USERNAME\drjava\src\edu\rice\cs\lib\compilers.jar
+c:\cygwin\home\USERNAME\drjava\src\edu\rice\cs\lib\dynamicjava.jar
+c:\cygwin\home\USERNAME\drjava\src\edu\rice\cs\lib\gj-util.jar
+c:\cygwin\home\USERNAME\drjava\src\edu\rice\cs\lib\junit.jar
+c:\cygwin\home\USERNAME\drjava\src\edu\rice\cs\lib\platform.jar
+c:\cygwin\home\USERNAME\drjava\src\edu\rice\cs\lib\javaast.jar
+c:\cygwin\home\USERNAME\drjava\src\edu\rice\cs\lib\clover.jar
+c:\cygwin\home\USERNAME\drjava\built\
+c:\j2sdk1.4.2\lib\tools.jar
+          </programlisting>
+        </listitem>
+      </itemizedlist>
+    </section>
+
+
+    <section id="env-compile">
+      <title>Compile the DrJava Source</title>
+      <para>You should finally be ready to compile the DrJava source code.  First compile the source for
+the <literal>util</literal> package, and then the <literal>drjava</literal> package, as shown
+below.</para>
+      <programlisting>
+cd ~/drjava/src/edu/rice/cs/util
+ant clean compile
+cd ~/drjava/src/edu/rice/cs/drjava
+ant clean compile
+      </programlisting>
+      <para>You can now start DrJava with the following command:</para>
+      <programlisting>java edu.rice.cs.drjava.DrJava</programlisting>
+      <para>You can also run DrJava from within Ant with <literal>ant run</literal>, or you can create a jar file to run with <literal>ant jar</literal>.  (On most platforms, you can double-click on the jar file to start DrJava.)</para>
+
+      <formalpara>
+        <title>Note for Older Versions of Java</title>
+        <para>If you are using a version of JSR-14 earlier than 2.0, you will need to make a change to the <filename>src/edu/rice/cs/build-common.xml</filename> file.  There are three copies of the <literal>"do-compile"</literal> target; uncomment the one appropriate for your version.</para>
+      </formalpara>
+    </section>
+
+  </chapter>
+  
+  
+  <!-- Chapter: General Overview -->
+
+
+
+  <!-- Chapter: Using Ant -->
+  <chapter id="ant">
+    <title>Using Ant with DrJava</title>
+    <para>We use an Ant build script to handle all compilation and code repository tasks for DrJava.  It is important that you use Ant rather than Javac and CVS directly, both because we use a specialized compiler (JSR-14) and because we <emphasis>require</emphasis> that all the tests pass before any commit.  Our Ant build script allows us to enforce this, while also simplifying the process of compiling and committing.</para>
+
+    <section id="ant-common">
+      <title>Commonly Used Ant Tasks</title>
+      <para>This section lists several of the Ant tasks you will frequently use while developing DrJava.  You can run these tasks in either the <filename>src/edu/rice/cs/util</filename> or <filename>src/edu/rice/cs/drjava</filename> directories by typing <literal>ant</literal> and then the task name.  For example, to run the <literal>clean compile</literal> task for the <literal>util</literal> package, type the following:</para>
+
+      <programlisting>
+cd ~/drjava/src/edu/rice/cs/util
+ant clean compile
+      </programlisting>
+
+      <para>Note that you can list as many task names at once as you like.</para>
+
+      <itemizedlist>
+        <listitem>
+          <formalpara>
+            <title>Updating from CVS: "<literal>update</literal>"</title>
+            <para>This will update the current package with all of the changes that have been made in the CVS repository.  It is important to run this frequently to be sure your code is not out of date.  Note that this will be run automatically when you commit code to ensure your copy is not outdated.</para>
+          </formalpara>
+        </listitem>
+
+        <listitem>
+          <formalpara>
+            <title>Compiling: "<literal>clean compile</literal>"</title>
+            <para>This will compile all the classes in the current package.  The <literal>clean</literal> task first deletes all existing class files from the <filename>built</filename> directory, and can be run on its own.  Unfortunately, if you are using a version of JSR-14 prior to 2.2, it is required to use <literal>clean</literal> every time you compile DrJava, because the use of generics prevents the compiler from knowing which specific class files need to be recompiled.  Thus, if you run the <literal>compile</literal> target on its own, you will probably get compile errors.</para>
+          </formalpara>
+        </listitem>
+
+        <listitem>
+          <formalpara>
+            <title>Testing the code: "<literal>test</literal>"</title>
+            <para>This will run all of the unit tests in the current package.  Specifically, this looks for all JUnit tests in classes with names that end in <literal>Test</literal>, compiling classes if necessary.  This can be a very time consuming task (ie. over 15 minutes on slower computers).  Note that this task is run automatically when you commit code to ensure that nothing breaks.  As a side note, <literal>test</literal> is the default Ant task for DrJava, so running Ant with no arguments will invoke this task.</para>
+          </formalpara>
+          
+          <para>If you are running the tests on Windows over an SSH connection to a Unix server, you will need to have an X server running (such as X-Win32), and you will need to enable "X11 Tunneling" in the preferences of your SSH client.  This is because Swing components will be created in the tests, which require an X server even if they are not explicitly shown.</para>
+
+          <para>Since running all the tests can take a very long time, there is an option to run only those tests which match a certain regular expression.  When running Ant, specify a <literal>-Dtest-spec</literal> argument with the regular expression matching the tests you want to run, <emphasis>not including the word <literal>Test</literal></emphasis>.  For example, to run only the GlobalModelCompileTest, use the following command.</para>
+
+          <programlisting>ant -Dtest-spec="GlobalModelCompile" test</programlisting>
+        </listitem>
+
+        <listitem>
+          <formalpara>
+            <title>Running DrJava: "<literal>run</literal>"</title>
+            <para>This task can only be run in the <filename>src/edu/rice/cs/drjava</filename> directory, and will start DrJava from within Ant.  You can also start DrJava manually using the command below, which does not require the overhead of Ant.  (You might want to set up an alias for this command, such as <filename>drj</filename>.)</para>
+          </formalpara>
+          <programlisting>java edu.rice.cs.drjava.DrJava</programlisting>
+        </listitem>
+
+        <listitem>
+          <formalpara>
+            <title>Creating a Jar file: "<literal>jar</literal>"</title>
+            <para>This task can only be run in the <filename>src/edu/rice/cs/drjava</filename> directory, and it will create a <filename>~/drjava/drjava.jar</filename> file.  On most operating systems, you can double click on this Jar file to start DrJava.  Note that this file will be deleted as part of the <literal>clean</literal> task.</para>
+          </formalpara>
+        </listitem>
+
+        <listitem>
+          <formalpara>
+            <title>Committing changes: "<literal>commit</literal>"</title>
+            <para>This will commit the code on your computer to the CVS repository.  This task incorporates most of the other tasks:  it updates your code to ensure it is not out of date, it compiles your code, and it runs all the unit tests.  If these tasks pass, it will ask for a commit message and commit the code.  (You can either type the message manually on one line, or specify the name of a file containing the message, if you want to have multiple lines.)  If you have not set up an SSH key pair (see <link linkend="env-sf-keypair">Sourceforge SSH Key Pairs</link>), you will have to enter your Sourceforge password several times.  (Once to update, once to commit, and once to tag the code for a potential release.)</para>
+          </formalpara>
+          
+          <para>If you will be adding new files as part of your commit, you will need to first let the CVS server know that the new files exist.  Run "<literal>cvs add [FILE]</literal>" for each new file that you will be adding before running <literal>ant commit</literal>.  Also, it is very important that you copy the license comment from another file into your new file.  We also prefer that you include a "<literal>@version &#36;Id&#36;</literal>" tag in your class-level Javadoc comment, which helps us note the last time the file was modified.</para>
+        </listitem>
+
+      </itemizedlist>
+    </section>
+
+  </chapter>
+
+  <!-- Chapter: Updating the docs -->
+  <chapter id="documentation">
+    <title>Updating the Documentation</title>
+    <para>The DrJava User and Developer Documentation files are written in DocBook, a form of XML.  It is important to keep these files up to date for both the user help documentation and instructions to help developers get started.</para>
+      
+    <section id="doc-files">
+      <title>Documentation Files</title>
+      <para>The user, quickstart, and developer DocBook files are named <filename>user/userdoc.docbook</filename>, <filename>quickstart/quickstart.docbook</filename>, and <filename>developer/devdoc.docbook</filename>, respectively, and they are located in the <filename>src/edu/rice/cs/drjava/docs/</filename> directory.  Emacs and modern versions of KDE's KWrite are both good editors for DocBook files.  Please try to maintain a consistent style within the documentation, both in tone (eg. somewhat informal-- "you" instead of "the user") and formatting (eg. literal tags for small bits of code, paragraphs on one line, etc).</para>
+    </section>
+    
+    <section id="doc-builds">
+      <title>Building the Documentation</title>
+      <para>There are Ant build targets for creating HTML and PDF versions of the user documentation.  There is also an Ant build target to create an HTML version of the quickstart guide and developer documentation.  To use these targets, you must have <filename>docbook2html</filename> (and optionally <filename>docbook2pdf</filename>) installed and on your path.  Beware that some versions of these tools may not work with our build script or may generate HTML files without an <filename>index.html</filename> file.  (If this is the case, as it is currently on the greenland server, you'll probably want to copy <filename>book1.html</filename> to <filename>index.html</filename>.  Don't just rename it, because other files will link to the old one.)</para>
+      
+      <formalpara>
+        <title>Ant Targets</title>
+        <para>You can build HTML files for the user, quickstart, and developer documentation at once with <literal>ant docs</literal>, which places the HTML in <filename>built/edu/rice/cs/drjava/docs/</filename>.  The three sets can be built independently with <literal>ant userdocs</literal>, <literal>ant userqsdocs</literal> and <literal>ant devdocs</literal>.  You can calso build a PDF file for the user documentation with <literal>ant userdocs-pdf</literal>.  (There is currently no target for a developer documentation PDF or quickstart PDF, though it would not be difficult to add.)</para>
+      </formalpara>
+      
+      <formalpara>
+        <title>Updating the Website</title>
+        <para>It is important to update the DrJava website after all changes to the documentation.  This involves copying the HTML files for the user, quickstart, and developer documentation (and the PDF file for the user documentation) to <filename>drjava.sf.net:/home/groups/d/dr/drjava/htdocs/</filename>.  The HTML files should go in the <filename>userdocs/</filename>, <filename>quickstartdocs</filename>, and <filename>devdocs/</filename> directories, respectively, while the PDF should be saved as <filename>drjava-userdoc.pdf</filename> directly in <filename>htdocs/</filename>.</para>
+      </formalpara>
+      
+      <formalpara>
+        <title>Committing Documentation</title>
+        <para>The documentation is committed automatically with any <literal>ant commit</literal>, but it is hardly necessary to run the full suite of unit tests for a change that does not affect the codebase.  Instead, the documentation can be committed in isolation with <literal>ant commit-docs</literal>.</para>
+      </formalpara>
+    </section>
+
+  </chapter>
+
+    <!-- Chapter: Miscellaneous Tips -->
+  <chapter id="misc">
+    <title>Miscellaneous Tips</title>
+    <para>This chapter includes miscellaneous development tips that haven't found a home in another chapter yet.  Feel free to move them to a more appropriate place as the documentation grows.</para>
+    
+    <section id="misc-architecture">
+      <title>Architectural Notes</title>
+      <para>This section includes general notes on DrJava's architecture.  (We don't want to get too specific, since many aspects change over time.)</para>
+      
+      <itemizedlist>
+        <listitem>
+          <formalpara>
+            <title>Use of the Configuration Framework</title>
+            <para>DrJava's configurable options are managed through a framework in the <literal>edu.rice.cs.drjava.config</literal> package.  This framework takes care of loading and saving options from the <filename>.drjava</filename> file, as well as managing listeners to changed configuration options.  The main class of interest is <literal>OptionConstants</literal>, which defines all options and their default values.  You can get and change settings using the static <literal>DrJava.getConfig()</literal> method.</para>
+          </formalpara>
+          <para>It is very important never to use the configuration framework in the Interpreter JVM, since this will instantiate a new copy of the framework inconsistent with the one in the Main JVM.  (It also causes the "SlaveJVMRunner" icon to appear in Mac OS X.)  It is also very important never to use the configuration framework in the Eclipse plug-in, because it causes Eclipse to crash.  (We're not sure why, but it's better for us to use Eclipse's preferences in that world anyway.)</para>
+        </listitem>
+      </itemizedlist>
+      
+    </section>
+    
+  </chapter>
+  
+</book>

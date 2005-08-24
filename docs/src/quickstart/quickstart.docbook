@@ -1,0 +1,962 @@
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook V3.1//EN">
+
+<!--
+  Quick Start Documentation for DrJava
+  @version $Id$
+-->
+<book id="index">
+  <!-- Meta info -->
+  <bookinfo>
+    <date>2005-8-03</date>
+    <title>A Quick Start Guide to DrJava</title>
+  </bookinfo>
+  <toc></toc>
+
+  <!-- Chapter: Intro -->
+  <chapter id="intro">
+    <title>Introduction</title>
+
+    <para>DrJava is a programming environment for Java designed specifically for beginners, but it is also suitable for advanced program development.  
+<!-- Some advanced developers prefer the lightweight, highly interactive interface of DrJava to more complex and ponderous "professional IDEs".-->
+This document is a quick introduction to DrJava that will help you set it up properly on your computer and 
+introduce you to some of its key features.</para>
+    <para>For more detailed and technical user documentation, see the User Documentation available from our website: <ulink url="http://www.drjava.org">http://www.drjava.org</ulink></para>
+
+
+  </chapter>
+
+
+  <!-- ---- Chapter: Starts and Beginnings (Getting Ready to Use DrJava) ---- -->
+  <chapter id="gettingready">
+    <title>Getting Ready to Use DrJava</title>
+    <para>This chapter describes how to start using DrJava, including where to get the program and how to run it.</para>
+
+    <section id="downloadJDK">
+      <title>Downloading the JDK</title>
+      <para> To compile programs in DrJava, you must make sure you have a Java JDK (Java Development Kit) installed on your machine.  All Java distributions available for downloading come in two forms: a JDK and a JRE (Java Runtime Environment).  A JDK distribution consists of a JRE distribution (a Java Virtual Machine implementation) plus a collection of development tools including <command>javac</command>, a Java compiler, and <command>javadoc</command>, Java documentation generator. DrJava requires a JDK installation because it uses both <command>javac</command> and <command>javadoc</command> as plugin components.  Without these components, DrJava can only edit Java programs; it cannot execute them or generate documentation for them. If you do not have a JDK installed already, you can download one for Windows, Linux, or Solaris computers directly from the Sun Microsystems webite.  Apple Macintosh machines running Mac OS X already have a JDK installed.  To download a JDK from the Sun website, just follow these steps!  </para>
+
+<itemizedlist mark=number>
+	<listitem> <para>
+   	 Go to <ulink url="http://java.sun.com">http://java.sun.com.</ulink>
+	</para> </listitem>
+	<listitem> <para>
+	Do a search for "Download Java JDK"
+	</para> </listitem>
+	<listitem> <para>
+	Select the most recent build of Java from the list of options you see.  We recommend Java 5.0 (formerly called Java 1.5) assuming that you are using the current beta release of DrJava.  Recent releases of DrJava are not compatible with versions of the JDK prior to 1.4.  Older versions of DrJava are compatible with Java 1.3 and Java 1.4 but not Java 5.0.
+	</para> </listitem>
+	<listitem> <para>
+	Click on the link to download the JDK.
+    	<mediaobject>
+       		<imageobject>
+       		<imagedata fileref="JDKDownload.jpg" format="jpg" scale=50 scalefit="1">
+       		</imageobject>
+     	</mediaobject>
+	</para></listitem>
+	<listitem><para>
+	Now, install the JDK, and you are ready to install and run DrJava!
+	</para> </listitem>
+</itemizedlist>
+      
+    </section>
+
+    <section id="downloading">
+      <title>Downloading DrJava</title>
+      <para>Follow these easy step by step instructions to download DrJava:</para>
+	<itemizedlist mark=opencircle>
+      <listitem><para>
+	Go to <ulink url="http://www.drjava.org">http://www.drjava.org.</ulink>
+	</para></listitem>
+	<listitem><para>
+	Select which build of DrJava is right for you, and click on the appropriate button.  We using the most recent beta release since it supports all of the Java 5.0 language extensions, which make Java programming simpler.  We also recommend that Windows users download the <filename>.exe</filename> file, that Mac OS X users use the <filename>osx.tar.gz</filename> version, and that other users download the <filename>.jar</filename> version.  If you have problems with the beta release of DrJava, you can roll back to the stable version but it does not support Java 1.5 langauge.  Experienced users may want to experiment with other versions of DrJava including the most recent 
+Development Build jar instead. To do so, click on the "more download options" link.
+	<mediaobject>
+       		<imageobject>
+       		<imagedata fileref="CurrentStableRelease.jpg" format="jpg" scale=50 scalefit="1">
+       		</imageobject>
+     	</mediaobject>
+
+	</para></listitem>
+	<listitem><para>
+	Click on one of the Download buttons to go to the download server.  Choose a site to download the file from, and then click on the corresponding icon in the "Download" column on the far right to start the download.
+		<mediaobject>
+       		<imageobject>
+       		<imagedata fileref="DownloadServer.jpg" format="jpg" scale=50 scalefit="1">
+       		</imageobject>
+     	</mediaobject>
+	</para></listitem>
+	<listitem><para>
+	 The download should begin automatically.  When prompted, select where you wish to save the file to disk, and it will be downloaded to your computer.
+	</para></listitem>
+	<listitem><para>
+	Congratulations!  You have now downloaded DrJava!  Now let's get DrJava running on your machine.
+	</para></listitem>
+	</itemizedlist>
+    </section>
+</chapter>
+
+  <!-- ---- Using DrJava: Basics ---- -->
+  <chapter id="usingdj">
+    <title>Using DrJava, the Basics</title>
+	<para> Okay, you've downloaded DrJava.  Now, how do you use it?  You're about to find out.  This chapter will tell you how to run DrJava as well as how to do basic file editing and compilation. You'll also learn how to use the most powerful feature of DrJava: The Interactions Pane</para>   
+    <section id="running">
+      <title>Running DrJava</title>
+      <para>If you are running on Windows, all you need to do is double-click DrJava's <filename>.exe</filename> file, and DrJava will launch.  On Mac OSX, unpack the <filename>osx.tar.gz</filename> (you can use StuffIt), and drag the file to Applications.  On all other platforms, run DrJava from the command line by giving the command <command>java -jar nameOfJar.jar</command> (nameOfJar.jar should be the name of the DrJava jar you downloaded).</para>
+      </section>
+
+    <section id="openingfiles">
+      <title>Opening and Creating Files</title>
+      <para>To create a new file, choose "File, New" from the File menu, or click on the "New" button on the toolbar.  A new file is created for you, and you can begin typing in it.  To open a file, choose "File, Open" from the File menu, or click on the "Open" button on the toolbar.  A file chooser window will then be opened. The current directory is displayed at the top of the pop-up window. Navigate through this and select the file or files you wish to open.</para>
+
+		<mediaobject>
+       		<imageobject>
+       		<imagedata fileref="OpenDialog.jpg" format="jpg" scale=50 scalefit="1">
+       		</imageobject>
+     	</mediaobject>
+	
+      <para>Once you have opened an existing file or created a new file, you will notice that the names of all open files are listed on the left of the screen, and the text of one file is displayed on the right.  Select a file name on the left to have the file's text display on the right.  The right pane is called the Definitions Pane.  It is where you edit your files.</para>
+		<mediaobject>
+       		<imageobject>
+       		<imagedata fileref="PlainOldDrJavaDefault.jpg" format="jpg" scale=50 scalefit="1">
+       		</imageobject>
+     	</mediaobject>
+    </section>
+
+    <section id="savingfiles">
+      <title>Saving Files</title>
+<para>
+To save a file, either click on the "Save" button or choose "File, Save." If your file has been saved in the past, this will just overwrite the old version. If your file has never been saved, you will be prompted for where you wish to save the file. The current directory is displayed at the top of the pop-up window. You can also use "File, Save As" to save the file with a different name, and "File, Save All" to save all open files.
+</para>
+
+		<mediaobject>
+       		<imageobject>
+       		<imagedata fileref="SaveDialog.jpg" format="jpg" scale=50 scalefit="1">
+       		</imageobject>
+     	</mediaobject>
+    </section>
+
+
+    <section id="compilingfiles">
+	<title>Compiling Files</title>
+	<para> To compile all open files, click on the "Compile" button. If you want to just compile a specific file, right click on its name on the left listing of files, and select Compile Current Document. Once the compile is completed, the results are displayed on the Compiler Output tab at the bottom of the screen. If there are no errors, you will see "Last compilation completed successfully". If there are errors, they will be listed. If both errors and warnings are found, the number of each is listed, and errors will be listed before warnings. If you click on an error, it will highlight the place in your source code where the error is. Use the up and down arrow buttons to navigate between error messages.</para>	
+
+		<mediaobject>
+       		<imageobject>
+       		<imagedata fileref="CompilerErrors.jpg" format="jpg" scale=50 scalefit="1">
+       		</imageobject>
+     	</mediaobject>
+    </section>
+
+    <section id="interactionspane">
+	<title>The Interactions Pane</title>
+
+		<mediaobject>
+       		<imageobject>
+       		<imagedata fileref="InteractionsPaneFull.jpg" format="jpg" scale=50 scalefit="1">
+       		</imageobject>
+     	</mediaobject>	
+
+	<para> The Interactions Pane is one of the best and most distinctive features of DrJava. It offers both beginning students and more experienced programmers the ability to quickly try out code without having to write cumbersome main methods. </para>
+	<para> 1. One way to use the Interactions Pane is to input basic Java expressions like 1+1.  Those expressions will then be interpreted and evaluated, and the result will be displayed.  This example shows how to do basic calculations in the Interactions Pane:</para>
+
+		<mediaobject>
+       		<imageobject>
+       		<imagedata fileref="InteractionsPane1Plus1.jpg" format="jpg" scale=50 scalefit="1">
+       		</imageobject>
+     	</mediaobject>
+
+	<para>2. Another way to use the Interactions Pane is to instantiate classes and then call their methods--this allows you to quickly and easily verify the behavior of methods. This example shows how to instantiate a class and call one of its methods:</para>
+
+		<mediaobject>
+       		<imageobject>
+       		<imagedata fileref="InteractionsPaneTom.jpg" format="jpg" scale=50 scalefit="1">
+       		</imageobject>
+     	</mediaobject>
+
+	<para>3. In addition, you can define classes and interfaces in the Interactions Pane, and then instantiate these classes and test them.  This example shows how to create a class and call one of its methods:</para>
+		<mediaobject>
+       		<imageobject>
+       		<imagedata fileref="InteractionsPaneTryMe.jpg" format="jpg" scale=50 scalefit="1">
+       		</imageobject>
+     	</mediaobject>
+
+	<para>4. It is important to remember that if you are working with classes that are packaged in the Definitions Pane (where the file's text is), it is important to make the same package declaration in the Interactions Pane.  Also, you need to import any other packages you wish to use, like you would in a normal <filename>.java</filename> file.  In this example, you can see how the package is used, and also that until the <filename>java.util</filename> package is imported, <filename>Vector</filename> cannot be used:</para>
+
+		<mediaobject>
+       		<imageobject>
+       		<imagedata fileref="InteractionsPanePackageImport.jpg" format="jpg" scale=50 scalefit="1">
+       		</imageobject>
+     	</mediaobject>
+	</section>
+
+
+	<section id="systemim">
+		<title>System.in</title>
+
+		<para>Many beginner programs rely on keyboard input read through <filename>System.in</filename>.  DrJava provides full support for this.  There are two ways to use <filename>System.in</filename> in DrJava.  First, you can invoke a method in your code that relies on <filename>System.in</filename> in the Interactions Pane.  When you do this, the System.in input box will appear.  Type your input, and press return or click on the "Done" button.</para>
+
+		<mediaobject>
+       		<imageobject>
+       		<imagedata fileref="SystemInInput.jpg" format="jpg" scale=50 scalefit="1">
+       		</imageobject>
+     	</mediaobject>
+
+	<para>Alternatively, you can use the <filename>System.in.read()</filename> method in the Interactions Pane directly.  When the input box appears, type your text and then either press return or click on the "Done" button.</para>
+
+		<mediaobject>
+       		<imageobject>
+       		<imagedata fileref="SystemInInputInteractionsPane.jpg" format="jpg" scale=50 scalefit="1">
+       		</imageobject>
+     	</mediaobject>	
+
+	</section>
+
+
+	<section id="findandreplace">
+		<title>Find and Replace</title>
+	
+		<mediaobject>
+       		<imageobject>
+       		<imagedata fileref="FindReplace.jpg" format="jpg" scale=50 scalefit="1">
+       		</imageobject>
+     	</mediaobject>	
+	<para> The Find and Replace menu is a useful way to search for specific text in your files, and replace it, if you so choose. To launch the Find/Replace tab, either use the keyboard shortcut Ctrl-F or choose "Edit, Find and Replace" from the menu at the top of the DrJava window. Once you do this, the Find/Replace tab will appear at the bottom of the screen. Type the text you want to search for in the "Find Next" box, and if you want to replace it with anything, type that in the "Replace With" box. Then, chose which of the four options to the right of those text boxes that you want to use, and press one of the buttons at the bottom, or the Enter key. The direction of the search executed by pressing the Enter key depends on the direction of the last search. (The last direction is indicated by the label of the Find box: "Find Next" or "Find Prev").</para>
+
+	<itemizedlist mark=opencircle>
+	<listitem><formalpara>
+	<title>Match Case:</title> <para> Makes the search becomes case sensitive.</para>
+	</formalpara></listitem>
+
+	<listitem><formalpara>
+	<title>Search All Documents:</title> <para> Causes your search text to be looked for in all open files. </para>
+	</formalpara></listitem>
+
+	<listitem><formalpara>
+	<title>Whole Word:</title> <para> Only finds instances of your search text that are preceeded and followed by either a space, a period, or an open or close parenthesis. </para>
+	</formalpara></listitem>
+
+	<listitem><formalpara>
+	<title>No Comments/String:</title> <para> Ignores any instances found within comments or strings. </para>
+	</formalpara></listitem>
+
+	</itemizedlist>
+
+	<para>To go from instance to instance of your search text, use the four buttons at the bottom.  </para>
+	<itemizedlist mark=opencircle>
+      <listitem><formalpara>
+	<title>Find Next:</title> <para>Finds the next instance. Switches the label of the Find box to "Find Next", indicating the direction of the next search.</para>
+	</formalpara></listitem>
+
+	<listitem><formalpara>
+	<title>Find Previous:</title> <para>Finds the previous instance. Switches the label of the Find box to "Find Prev", indicating the direction of the next search. </para>
+	</formalpara></listitem>
+	
+	<listitem><formalpara>
+	<title>Replace/Find Next:</title> <para> Replaces the current instance with your replace text and then finds the next instance. Switches the label of the Find box to "Find Next", indicating the direction of the next search </para>
+	</formalpara></listitem>
+
+	<listitem><formalpara>
+	<title>Replace/Find Previous:</title> <para> Replaces the current instance with your replace text and then finds the previous instance. Switches the label of the Find box to "Find Previous", indicating the direction of the next search </para>
+	</formalpara></listitem>
+
+	<listitem><formalpara>
+	<title>Replace:</title> <para> Replaces the current instance with your replace text. </para>
+	</formalpara></listitem>
+
+	<listitem><formalpara>
+	<title>Replace All:</title> <para> Replaces all instances of the search text with the replace text automatically </para>
+	</formalpara></listitem>
+	</itemizedlist>
+
+	<para> A relatively new feature of Find and Replace is the ability to search across more than one line of text. The Find and Replace text boxes can accept more than one line of text. To use this feature you have two options. First, you can copy/paste directly into the Find and Replace boxes and search/replace as normal. Second, you can type text directly into the boxes, and when you want to create a new line press Ctrl-Enter (Note: Pressing only the Enter key when inside the Find box executes a Find. It DOES NOT create a new line. Both Enter and Ctrl-Enter create a new line inside the Replace box).</para>
+
+	<mediaobject>
+       		<imageobject>
+       		<imagedata fileref="FindReplaceTwoLines.jpg" format="jpg" scale=50 scalefit="2">
+       		</imageobject>
+     	</mediaobject>
+
+	</section>
+	
+
+  </chapter>
+
+  <!-- Chapter: Advanced Features -->
+  <chapter id="advanced">
+    <title>Advanced Features</title>
+    <para>DrJava provides support for many advanced features.</para>
+
+    <section id="junittesting">
+      <title>JUnit Testing of Files</title>
+      <para> DrJava offers a JUnit test facility. For information about JUnit and JUnit tests, check out <ulink url="http://www.junit.org">http://www.junit.org.</ulink> Click the "Test" button to test all open JUnit tests, or select the file you want to test on the left menu, right click, and select "Test Current Document". The tests will be run, and the output will be displayed on the Test Output tab at the bottom of the screen. If all your tests passed, you will see a green bar.</para>
+
+<mediaobject>
+       		<imageobject>
+       		<imagedata fileref="TestsPassed.jpg" format="jpg" scale=50 scalefit="1">
+       		</imageobject>
+     	</mediaobject>	
+
+	<para>  If any tests failed, you will see a red bar.  All failing tests will be listed in the test pane.  Click on one, and its location in the source code will be highlighted.</para>
+
+<mediaobject>
+       		<imageobject>
+       		<imagedata fileref="TestFails.jpg" format="jpg" scale=50 scalefit="1">
+       		</imageobject>
+     	</mediaobject>	
+  
+    </section>
+
+    <section id="javadocgen">
+      <title>Generating JavaDoc Documentation</title>
+	<para>DrJava offers the ability to generate JavaDoc documentation for the user's java files.  For information about what JavaDoc is and how to format your comments to take advantage of it, see <ulink url="http://java.sun.com/j2se/javadoc/writingdoccomments/index.html">http://java.sun.com/j2se/javadoc/writingdoccomments/index.html</ulink>.</para>
+
+	<para>To generate JavaDoc for all files in the same directories as your open files, click the "JavaDoc" button on the toolbar.  You will then be asked where you want to save the javadoc files.  Select a location and click OK.  Your JavaDoc will be generated for you.</para>
+
+<mediaobject>
+       		<imageobject>
+       		<imagedata fileref="JavaDocMenu.jpg" format="jpg" scale=50 scalefit="1">
+       		</imageobject>
+     	</mediaobject>
+	
+	<para>To generate JavaDoc for one specific file, select it from the open list of files and right click and select "Preview JavaDoc" for current Document.  You will be able to view the JavaDoc for that file in the JavaDoc viewer.</para>
+
+<mediaobject>
+       		<imageobject>
+       		<imagedata fileref="Javadoc.jpg" format="jpg" scale=50 scalefit="1">
+       		</imageobject>
+     	</mediaobject>	
+
+	</section>
+
+    <section id="thedebuger">
+      <title>The Debugger</title>
+      <para>The debugger allows you to step through the execution of a program and stop at any point you choose so that you can track down bugs in your code.  What makes our debugger an unusually powerful tool is that it allows you to modify the values of fields and variables <emphasis>while debugging!</emphasis>.  First, we will explain a little bit about how the debugger works in general, and then we will explain how you can use the Interactions Pane to modify field and variable values during runtime and thus more quickly zero in on problems in your code.</para>
+
+	<para>To enable the debugger, select "Debugger, Debug Mode".  This will launch the debug panel in the lower part of DrJava, right above the Interactions Pane.</para>
+
+<mediaobject>
+       		<imageobject>
+       		<imagedata fileref="EnableDebugger.jpg" format="jpg" scale=50 scalefit="1">
+       		</imageobject>
+     	</mediaobject>
+
+	<formalpara>
+	   <title>Debug Panel:</title>
+		<para>The Debug Panel has four tabs to help you track control flow in your program.  These tabs are labeled Watches, Breakpoints, Stack, and Threads.</para>
+	</formalpara>
+
+	<itemizedlist mark=opencircle>
+	<listitem><formalpara>
+		<title>Watches:</title> 
+		<para> This is a table that displays the instantaneous values of specified fields and variables given the current line that the debugger is on.  To add a watch, click in the leftmost column on the first empty row.  A cursor should appear and you can type in the name of the field or variable.  You can also put in expressions that require evaluation such as x + 1 or array accesses.</para> </formalpara>
+	<mediaobject>
+       		<imageobject>
+       		<imagedata fileref="VariableWatch2.jpg" format="jpg" scale=50 scalefit="1">
+       		</imageobject>
+     	</mediaobject>
+	</listitem>
+
+	<listitem><formalpara>
+		<title>Breakpoints:</title>
+		<para> This is a tree displaying the files that contain breakpoints and the corresponding line numbers.  Double-click a breakpoint in the tree to center the screen on the corresponding code.  Right-click on a breakpoint to scroll to it or to remove it. </para>
+		</formalpara>
+
+	<mediaobject>
+       		<imageobject>
+       		<imagedata fileref="BreakpointWatch.jpg" format="jpg" scale=50 scalefit="1">
+       		</imageobject>
+     	</mediaobject>
+	</listitem>
+
+	<listitem><formalpara>
+		<title>Stack:</title>
+		<para>This a table that lists the current stackframes.  Use this to determine the trail of methods that have been invoked to arrive at the current line in the execution.  You can double-click on a particular stack frame to scroll to center it in the Definitions Pane.</para>
+		</formalpara>
+
+	<mediaobject>
+       		<imageobject>
+       		<imagedata fileref="StackStuff.jpg" format="jpg" scale=50 scalefit="1">
+       		</imageobject>
+     	</mediaobject>
+	</listitem>
+
+
+	<listitem> <formalpara>
+		<title>Threads:</title>
+		<para> This is list of the threads that are running in the virtual machine.  If there are multiple threads that are suspended, you can set the active thread (the thread whose execution you're examining) by double-clicking on the desired thread. </para>
+		</formalpara>
+	<mediaobject>
+       		<imageobject>
+       		<imagedata fileref="Threads.jpg" format="jpg" scale=50 scalefit="1">
+       		</imageobject>
+     	</mediaobject>
+	</listitem>
+	</itemizedlist>
+	
+	</section>
+ 
+<section id="usingDebugger">
+<title>Using the Debugger:</title>
+  <para>To use the debugger, you must first set a <emphasis>breakpoint</emphasis> on the line(s) of code on which you want execution to stop.  To do this, right click on the line of code that you want the breakpoint on and select Toggle Breakpoint from the menu.</para>
+
+	<mediaobject>
+       		<imageobject>
+       		<imagedata fileref="ToggleBreakpoint.jpg" format="jpg" scale=50 scalefit="1">
+       		</imageobject>
+     	</mediaobject>
+
+<para>Once a breakpoint is set, it is highlighted in red, like this:</para>
+	<mediaobject>
+       		<imageobject>
+       		<imagedata fileref="BreakpointSet.jpg" format="jpg" scale=50 scalefit="1">
+       		</imageobject>
+     	</mediaobject>
+
+<para>Once you have set the breakpoint(s), enter a statement in the Interactions Pane that will run the method containing the breakpoint(s).  Once execution reaches a breakpoint, it will halt, awaiting input from you.  </para>
+
+	<mediaobject>
+       		<imageobject>
+       		<imagedata fileref="HitBreakpoint.jpg" format="jpg" scale=50 scalefit="1">
+       		</imageobject>
+     	</mediaobject
+
+<para>At this point, the line that is about to be executed is highlighted in a special color (light blue by default), the "resume", "step into", "step over", and "step out" buttons are enabled, and a special prompt appears in the Interactions Pane.</para>
+
+	<itemizedlist>
+	<listitem><formalpara>
+		<title>The Resume Button:</title>
+		<para>runs the program until another breakpoint is reached, or the interaction has ended.</para>
+		</formalpara></listitem>
+
+	<listitem><formalpara>
+		<title>The Step Into Button:</title>
+		<para>steps through the execution of the method invocations in the current line.</para>
+	</formalpara></listitem>
+
+	<listitem><formalpara>
+		<title>The Step Over Button:</title>
+		<para>executes the current line and stops execution on the next line.</para>
+	</formalpara></listitem>
+
+	<listitem><formalpara>
+		<title>The Step Out Button:</title>
+		<para>executes the rest of the current method and stops execution at the line from which the current method was called.</para>
+		</formalpara></listitem>
+	</itemizedlist>
+
+	<para>At the prompt, you can still type arbitrary Java expressions like usual, but you have additional power--all the fields, variables, methods, and classes than can be seen from the current point in the execution can be viewed and modified.  This gives you incredible power--you can actually modify the values of your fields and variables while debugging.  All you have to do is type in an assignment statement.</para>
+</section>
+
+  </chapter>
+  
+  <!-- Chapter: Project Facility -->
+  <chapter id="projects">
+   <title>The Project Facility</title>
+    <section id="project-overview">
+     <title>Overview</title>
+     <para>The project facility is intended to provide a lightweight approach to managing a large number of files spread between different subfolders and packages.</para>
+
+	<para>The project facility makes it easy to work with larger projects, and allows you to save open java files into a project file and then reopen the project at a later time. This means that you don't have to waste time reopening files in multiple folders.  The project facility was designed with two goals in mind:</para>
+<para>1. To allow sets of related files to be opened together.</para>
+<para>2. To allow DrJava's tools and options to manage a set of related files as a single entity.</para>
+
+	<para>The fundamental difference between the DrJava project facility and the project facilities of most professional development environments is that DrJava does not distinguish between "Open" files and "Project" files--if a file is open and in the project source directory, it is part of the project.</para>
+
+	</section>
+
+
+	<section id="project-treeview">
+	<title>Tree View</title>
+
+	<para>This project facility introduces a new view in DrJava called <emphasis>Tree View</emphasis>.  When you are working with a project, the left hand pane displays the files in a tree view rather than the traditional list view.  This means that you can see where your files are in relationship to each other.  If you select a folder in the tree view, when you select "Open" or "Save", the default directory DrJava looks in will correspond to that folder.</para>
+
+		<mediaobject>
+       		<imageobject>
+       		<imagedata fileref="FullTreeView.jpg" format="jpg" scale=50 scalefit="1">
+       		</imageobject>
+		</mediaobject>
+
+	<para>There are three main categories of files in Tree View: Source, External, and Auxilary files.</para>
+
+	<itemizedlist mark="opencircle">
+	<listitem><formalpara>
+		<title>Source Files:</title>
+		<para>All files located in or below the project file's directory(project directory).  Thus, the location of your project file determines what files are part of your project.  It is important to put the project file in the root of your project hierarchy.</para>
+	</formalpara></listitem>
+
+	<listitem><formalpara>
+		<title>External Files:</title>
+		<para>Files that are not in the project directory.  They will never be compiled or tested as part of your project.  They are not saved in the project file.</para>
+	</formalpara></listitem>
+
+	<listitem><formalpara>
+		<title>Included External Files:</title>
+		<para>Files that are located outside of the project directory but that are still important to the project.  They are compiled and tested with the project and are opened whenever the project is opened.</para>
+	</formalpara></listitem>
+
+	</itemizedlist>
+
+
+	<para>To move a file from the External Files branch to the Included External Files branch, right click on the file in the tree listing, and select the appropriate option at the bottom of the menu.</para>
+	
+	
+	<para>The behavior of some of the buttons also changes in Tree View.  The "Compile All" button only compiles open project source and auxiliary files, instead of all open files.  "Test All" will only tess open project source and auxiliary files.  To compile or test the external files, you can right click on the folder and select "Compile Folder" or "Test Folder".</para>
+
+		<mediaobject>
+       		<imageobject>
+       		<imagedata fileref="ProjectFolderOptions.jpg" format="jpg" scale=50 scalefit="1">
+       		</imageobject>
+		</mediaobject>
+
+	</section>
+
+	<section id="project-new">
+	<title>Creating and Saving a Project</title>
+	
+	<para>When you want to create a new project, you have two options. The first is that you can chose "Project, New" from the top menu to create a brand new project. Once you have done this, a Save dialog box pops up. Specifiy where you want the project file to be saved, and you are ready to go. It is important to note that all project files must be in the directory or a subdirectory of where the project file is saved.</para>
+
+	<mediaobject>
+       		<imageobject>
+       		<imagedata fileref="NewProjectSaveDialog.jpg" format="jpg" scale=50 scalefit="1">
+       		</imageobject>
+     	</mediaobject>
+
+	<para>The other way to create a project is to open up the java files you want to include in the project, and then select "Project, Save As".  This will create a new project consisting of those files.</para>
+	
+		<mediaobject>
+       		<imageobject>
+       		<imagedata fileref="ProjectSaveDialogFromFiles.jpg" format="jpg" scale=50 scalefit="1">
+       		</imageobject>
+     	</mediaobject>
+
+	<para> To add new files to your project, just open them.  They will automatically be sorted into the correct folder.  When you save the project, they will be saved with it.</para>
+</section>
+<section id="project-save">
+<title>Saving Your Project</title>
+	<para>If you make any changes to the structure or state of your project (for instance, collapsing a folder tree or opening or closing files), you will want to save it so your preferences are maintained.  To save a project, select "Project, Save".  Note that saving a project only saves the list of what files are in the project; it does not save the files themselves.  Use "File, Save All" to save all the files in the project.</para>
+
+	<para>Saving a project will also save which document you are currently viewing so that it will be re-displayed the next time you open the project.  It also saves the cursor location in each file as well as whether a folder in the project tree is collapsed or expanded.</para>
+
+	</section>
+
+	<section id="project-open">
+	<title>Opening a Project</title>
+
+
+	<para>To open a project file, just select "Project, Open" and select the project file you wish to open.</para>
+
+	
+	<mediaobject>
+      	<imageobject>
+     	<imagedata fileref="ProjectOpen.jpg" format="jpg" scale=50 scalefit="1">
+       	</imageobject>
+     	</mediaobject>
+	</section>
+
+	<section id="project--compiling">
+	<title>Compiling Your Project</title>
+	<para> When compiling a project, you must decide whether you want to compile only the open project files or all of the files in a project.  Compiling all open files will only compile those files that are open in the project view (source files and auxiliary files).  To do this, sellect "Project, Compile Open Project Files" or right click on the root of the project tree and select "Compile Open Project Files".  You can also click on the "Compile All" button.</para>
+	
+	<para>To compile all project files (source and auxiliary), even ones not currently open in DrJava, select "Project, Compile Project", or right click on the root of the project and click "Compile Project".</para>
+
+	<para>Note that all files in the External Files folder will not be compiled as part of the project--you must do this seperately.</para>
+
+	<para>You can compile from the Project Menu:</para>
+	
+	<mediaobject>
+      	<imageobject>
+     	<imagedata fileref="ProjectCompileFromTopMenu.jpg" format="jpg" scale=50 scalefit="1">
+       	</imageobject>
+     	</mediaobject>
+
+	<para>Or from the Navigator Pane:</para>
+
+	
+	<mediaobject>
+      	<imageobject>
+     	<imagedata fileref="ProjectCompileFromSideMenu.jpg" format="jpg" scale=50 scalefit="1">
+       	</imageobject>
+     	</mediaobject>
+
+	</section>
+
+	<section id="project-testing">
+	<title>Testing Your Project</title>
+	<para>There are also two options for testing a project: test just the open project files or test the entire project.  These have the same meaning that they do for compiling.  To test only the open project files, select "Project, Test Open Project Files".  This will test all JUnit test files currently open in the source files and auxiliary files branches.</para>
+	<para>To test all project files, even those not open in DrJava, select "Project, TestProject".  This will test all JUnit test files in the project directory and its subfolders as well as all of the auxiliary files.</para>
+	<para>External files will never be tested.</para>
+
+	
+	<mediaobject>
+      	<imageobject>
+     	<imagedata fileref="ProjectTest.jpg" format="jpg" scale=50 scalefit="1">
+       	</imageobject>
+     	</mediaobject>
+
+	</section>
+
+	<section id="project-running">
+	<title>Running a Project</title>
+	<para>To run the main method of a project, select "Project, Run Main Document."  This will load the class specified as the project's main method in Project Properties, and run its main method.  If you have not specified the file to load in Project Properties, this option is grayed out</para>
+	
+
+	<mediaobject>
+      	<imageobject>
+     	<imagedata fileref="ProjectRunMainDocument.jpg" format="jpg" scale=50 scalefit="1">
+       	</imageobject>
+     	</mediaobject>
+	
+	</section>
+
+
+	<section id="project-cleanbuilddir">
+	<title>Clean Build Directory</title>
+	<para> This option is only enabled once you have specified a build directory in the Project Properties dialog box.  Once you have specified a build directory, selecting this option will remove all <filename>.class</filename> files and empty directories in the build directory.</para>
+
+	<mediaobject>
+      	<imageobject>
+     	<imagedata fileref="ProjectCleanBuildDirectory.jpg" format="jpg" scale=50 scalefit="1">
+       	</imageobject>
+     	</mediaobject>
+	</section>
+
+	<section id="project-properties">
+	<title>Project Properties</title>
+	<para>The Project Properties dialog box allows you to set two optional properties to better utilize the project facility.  To access the Project Properties dialog, select "Project, Project Properties".</para>
+
+	<formalpara>
+		<title>Build Directory:</title>
+		<para>Set this if you want your compiled files to be compiled to a directory other than the source directory.  This is often useful if your project is large or you want to be able to clean the build directory (see the option on the Project menu).</para>
+	</formalpara>
+
+	<formalpara>	
+		<title>Main Document:</title>
+		<para>This allows you to specify the class that holds the main method for the project.  When this is set, you can use "Project, Run Main Document" to launch the program.</para>
+	</formalpara>
+
+	<mediaobject>
+      	<imageobject>
+     	<imagedata fileref="ProjectProperties.jpg" format="jpg" scale=50 scalefit="1">
+       	</imageobject>
+     	</mediaobject>
+	</section>
+
+	</chapter>
+
+  <!-- Chapter: Preferences Menu -->
+  <chapter id="preferences">
+    <title>The Preferences Menu</title>
+    <para> The Preferences menu in DrJava can be accessed by selecting "Edit, Preferences" on the main toolbar, or by the keyboard shortcut Ctrl-semi-colon.  This menu gives you the ability to tweak your configuration of DrJava so that it better serves your needs.  To switch between Preference Categories, click on the names in the left part of the Preferences window.</para>
+
+
+	<section id="resourcelocations">
+		<title>Resource Locations:</title>
+		<para>The Resource Locations menu allows you to specify the location of many important resources.  All of these fields are optional and can be left blank if you want default values to take effect.  </para>
+    
+	<itemizedlist>
+	<listitem><formalpara>
+      <title>Web Browser and Web Browser Command:</title>
+	<para> Allow you to specify which web browser you want to use for viewing Javadoc and Help files.  You can choose to specify the Web Browser program directly, state the command you use to launch your browser, or leave both blank if your system has a default browser.</para>
+	</formalpara></listitem>
+
+	<listitem><formalpara>
+	<title>Tools.jar Location:</title> 
+		<para>The directory of your tools.jar file which has the compiler and debugger. This file is usually created during the installation of the Java JDK.</para>
+	</formalpara></listitem>
+
+	<listitem><formalpara>
+	<title>JSR-14 and JSR-14 Collections Path:</title>
+	<para>The JSR-14 jar is the location of the JSR14 compiler, while the JSR-14 Collections path is a collection of the generified collection classes, such as Vector<?>.  If you are not using the JSR14 compiler, you can just leave these blank.</para>
+	</formalpara></listitem>
+	
+	<listitem><formalpara>
+	<title>Extra Classpath:</title>
+	<para> A way for you to specify extra directories you want the compiler to look in when it is trying to find class files.  Use "Add" and "Remove" to control which directories are on the classpath, and "Move Up" and "Move Down" to order the directories in the order you want them to be looked through.  If no directories are specified here, the compiler will look in the directories of the files you are compiling.</para>
+	</formalpara></listitem>
+
+	</itemizedlist>
+
+		<mediaobject>
+       		<imageobject>
+       		<imagedata fileref="ResourceLocation.jpg" format="jpg" scale=50 scalefit="1">
+       		</imageobject>
+     	</mediaobject>	
+
+	</section>
+
+	<section id="displayoptions"
+	<title>Display Options</title>
+	<para>The Display Options menu allows you to control how DrJava looks. </para>
+
+	<itemizedlist>
+	<listitem><formalpara>
+		<title>Look and Feel:</title>
+		<para> Specify what theme DrJava uses</para>
+	</formalpara></listitem>
+	
+	<listitem><formalpara>
+		<title>Toolbar Buttons:</title> 
+	<para>Choose the configuration of text and graphics that you want on your toolbar.</para>
+	</formalpara></listitem>
+
+	<listitem><formalpara>
+		<title>Line Numbers:</title>
+		<para>Choose whether you want these shown on the left hand side of the definitions pane.</para>
+	</formalpara></listitem>
+
+	<listitem><formalpara>
+		<title>Window Size and Position:</title>
+		<para>Check this if you want the size and position of the main DrJava window to be saved on exit.</para>
+	</formalpara></listitem>
+	</itemizedlist>
+
+		<mediaobject>
+       		<imageobject>
+       		<imagedata fileref="DisplayOptions.jpg" format="jpg" scale=50 scalefit="1">
+       		</imageobject>
+     	</mediaobject>	
+
+	<para>There are two submenus under Display Options, Fonts and Colors.</para>
+	</section>
+
+	<section id="fontdisplayoptions">
+		<title>The Font Menu</title>
+	<para>The Fonts Menu allows you to specify how the font should look.  There are four font categories.</para>
+	<itemizedlist>
+	<listitem> <formalpara>
+	<title>Main Font:</title>
+	<para>Specifies the font for the text in the definitions pane and the Interactions Pane.</para>
+	</formalpara></listitem>
+
+	<listitem><formalpara>
+	<title>Line Numbers Font:</title>
+	<para>Specifies the font for the line numbers in the definitions pane, if you enabled them.</para>
+	</formalpara></listitem>
+
+	<listitem><formalpara>
+	<title>Document List Font:</title>
+	<para>Specifies the font for the file names in the navigator pane on the left.</para>
+	</formalpara></listitem>
+
+	<listitem><formalpara>
+	<title>Toolbar Font:</title>
+	<para>Specifies the font used on the toolbar</para>
+	</formalpara></listitem>
+	</itemizedlist>
+
+	<para>You also have the option of using anti-aliased text.  If this is selected, DrJava displays a smoothed version of the text. In some situations, this is more pleasant to view.</para>
+
+	
+		<mediaobject>
+       		<imageobject>
+       		<imagedata fileref="DisplayOptionsFonts.jpg" format="jpg" scale=50 scalefit="1">
+       		</imageobject>
+     	</mediaobject>	
+
+	</section>
+
+	<section id="displayoptionscolors">
+		<title>The Color Menu</title>
+
+	<para>The Colors Menu allows you to specify colors for a variety of types of text.  Click on the "..." button to change the color for a type of text.  The color is then demonstrated on the colors menu.</para>
+
+		<mediaobject>
+       		<imageobject>
+       		<imagedata fileref="DisplayOptionsColors.jpg" format="jpg" scale=50 scalefit="1">
+       		</imageobject>
+     	</mediaobject>
+
+	</section>
+
+	<section id="keybindings">
+	<title>Key Bindings</title>
+
+	<para>The Key Bindings menu allows you to specify the keyboard shortcuts you use for everything from compiling a document to cutting text to resetting the Interactions Pane.  The only restriction is that the shortcut you choose must be one basic entry--for example, you cannot use Ctrl-X, Ctrl-S to save a file, but you could use Ctrl-Alt-S.  Adding support for a wider range of keyboard shortcuts is a feature request currently under review.</para>
+
+		<mediaobject>
+       		<imageobject>
+       		<imagedata fileref="KeyBindings.jpg" format="jpg" scale=50 scalefit="1">
+       		</imageobject>
+     	</mediaobject>
+
+	</section>
+
+	<section id="compileroptions">
+	<title>Compiler Options</title>
+
+	<para> The Compiler Options menu allows you to set what warnings you will be shown in the compilation window on a normal compile. An explaination of each warning is given if you hover the mouse over it.  We recommend that beginning programmers uncheck all of these boxes until they have a solid understanding of what the warnings mean.  </para>
+
+		<mediaobject>
+       		<imageobject>
+       		<imagedata fileref="CompilerOptions.jpg" format="jpg" scale=50 scalefit="1">
+       		</imageobject>
+     	</mediaobject>
+
+	</section>
+
+	<section id="debuggeroptions">
+	<title>The Debugger Menu</title>
+	<para>The Debugger Menu gives you more control over the debugger.</para>
+
+	<itemizedlist>
+	<listitem><formalpara>
+		<title>The Sourcepath Box:</title>
+		<para>Allows you to specify any libraries that you want the debugger to look through.  The order of libraries in the list specifies the order in which they are searched for matching .java files.  Use "Add" and "Remove" to control what is on the Sourcepath, and "Move Up" and "Move Down" to control the order.  </para>
+	</formalpara></listitem>
+
+	<listitem><formalpara>	
+		<title>Stepped Into Checkboxes:</title>
+		<para>Allow you to specify what will be stepped into.  If you tell the debugger to step into a file, it will open up the source and show you line by line what is being executed.  You would only do this if you were curious about behavior that was expected to occur within the method being executed.  Normally, you would not step into Java classes and Interpreter classes, because you assume their code is correct and are intstead interested in how your code interacts with them.  You should never select Step Into DrJava classes unless you are debugging DrJava itself.  </para>
+	</formalpara></listitem>
+
+	<listitem><formalpara>
+		<title>Classes/Packages to Exclude:</title>
+		<para> Allows you to  specify other classes/packages to step over.  This should be a comma seperated list with fully qualified names.  You might use this box to exclude instructor provided libraries, for example.</para>
+	</formalpara></listitem>
+	</itemizedlist>
+
+
+		<mediaobject>
+       		<imageobject>
+       		<imagedata fileref="DebuggerPreferences.jpg" format="jpg" scale=50 scalefit="1">
+       		</imageobject>
+     	</mediaobject>	
+
+	</section>
+
+	<section id="javadocoptions">
+		<title>Javadoc</title>
+	
+	<para>The Javadoc menu lets you specify everything you need to generate perfect Javadoc for your source files. For information on Javadoc in general, see the Javadoc section above.</para>
+
+	<itemizedlist>
+	<listitem><formalpara>
+		<title>Access Level:</title>
+		<para>Allows you to set the level of what will be shown in your documentation.  Choose the most restrictive access you want displayed, and everything less restrictive will also be included. </para>
+	</formalpara></listitem>
+
+	<listitem><formalpara>
+		<title>Java Version for Javadoc Links and URL:</title>
+		<para>Set the version to whatever version of java your code relies on, and maek sure the corresponding URL is set appropriately.  Because most Javadoc documentation references library files in the Java API, it is important to specify which version of the API to link to.  </para>
+	</formalpara></listitem>
+
+	<listitem><formalpara>
+		<title>Default Desination Directory:</title>
+		<para>Specifies where the generated documentation will be saved.  Click on the "..." button to specify it.</para>
+	</formalpara></listitem>
+
+	<listitem><formalpara>
+		<title>Custom Javadoc Parameters:</title>
+		<para>Allows the expert user to pass more complicated flags to Javadoc.</para>
+	</formalpara></listitem>
+	
+	<listitem><formalpara>
+		<title>Generate Javadoc from Source Roots</title>
+		<para>Controls whether all packages in a file's directory have Javadoc run over them, or whether just the immediate package and subpackage do.</para>
+	</formalpara></listitem>
+	</itemizedlist>
+	
+		<mediaobject>
+       		<imageobject>
+       		<imagedata fileref="JavadocPreferences.jpg" format="jpg" scale=50 scalefit="1">
+       		</imageobject>
+     	</mediaobject>	
+
+	</section>	
+
+	<section id="notificationpreferences">
+		<title>Notifications Menu</title>
+	<para>The Notifications menu lets you say whether or not you want notifications on certain actions.  This is the place to come if you accidentally turn off a warning and want to turn it back on.</para>
+
+		<mediaobject>
+       		<imageobject>
+       		<imagedata fileref="Notifications.jpg" format="jpg" scale=50 scalefit="1">
+       		</imageobject>
+     	</mediaobject>	
+
+	</section>
+
+	<section id="miscellaneouspreferences">
+		<title>Miscellaneous Menu</title>
+
+	<para> The Miscellaneous menu contains all of the options that did not fit neatly into one of the above categories.</para>
+
+	<itemizedlist mark="opencircle">
+	<listitem><formalpara>
+		<title>Indent Level:</title> 
+		<para>Specifies the number of spaces that make up a "tab" in DrJava.  This is used for auto-indenting.</para>
+	</formalpara></listitem>
+	
+	<listitem><formalpara>
+		<title>Working Directory:</title> 
+		<para>The directory you are currently working from--where DrJava should first try to open and safe files from, and where DrJava should tell the compiler to look for class files.</para>
+	</formalpara></listitem>
+	
+	<listitem><formalpara>
+		<title>Size of Interactions History:</title> 
+		<para>Specifies how many interactions will be stored in the history for you to scroll through using the up arrow.</para>
+	</formalpara></listitem>
+
+	<listitem><formalpara>
+		<title>Recent Files List Size:</title> 
+		<para>Specifies how many of your most recently open files are displayed when you open the "File" menu on the toolbar.</para>
+	</formalpara></listitem>
+
+	<listitem>
+	<formalpara> 
+	<title>The Checkboxes:</title>
+	<para> Specify a variety of options that are personal preference:</para>
+	</formalpara>
+		<itemizedlist>
+		<listitem><formalpara>
+			<title>Automatically Close Block Comments:</title> 
+			<para>Puts a "*/" after every "/**" or "/*" you type, so you don't have to remember to close the comment.</para>
+		</formalpara></listitem>
+		
+		<listitem><formalpara>
+			<title>Allow Assert Keyword in Java 1.4:</title> 
+			<para>Passes a flag to the 1.4 compiler that specifies the assert keyword is okay.</para>
+		</formalpara></listitem>
+
+		<listitem><formalpara>
+			<title>Keep Emacs-style Backup Files:</title>
+			<para>Tells DrJava to automatically make backups of files such that file file.java would be backed up as file.java~.  This is a nice option, because it provides an additional level of protection against lost code.</para>
+		</formalpara></listitem>
+
+		<listitem><formalpara>
+			<title>Clear Console After Interactions Reset:</title>
+			<para>Makes the Interactions Pane clear when it is reset.  After a reset, any previous objects built in the Interactions Pane have been lost and must be recreated.  Clearing the console helps you remember that you need to recreate everything.</para>
+		</formalpara></listitem>
+
+		<listitem><formalpara>
+		<title>Allow Access of Private Members in Interactions Pane:</title> 
+		<para>A great option for testing, because it gives you more flexibility than normal.  However, it can also lead to confusion for beginning students since private fields cannot normally be accessed outside of their classes.</para>
+		</formalpara></listitem>
+
+		<listitem><formalpara>
+			<title>Show Sample of Source Code when Fast Switching:</title> 
+			<para>Shows part of the source code when you use ctrl-tilde to quickly switch between documents.</para>
+		</formalpara></listitem>
+	
+		<listitem><formalpara>
+			<title>JVM Args for Interactions</title> 
+			<para>Allows you to pass arguments to the JVM that controls the Interactions Pane.</para>
+		</formalpara></listitem>
+		</itemizedlist>
+	</listitem>
+	</itemizedlist>
+
+		<mediaobject>
+       		<imageobject>
+       		<imagedata fileref="Miscellaneous.jpg" format="jpg" scale=50 scalefit="1">
+       		</imageobject>
+     	</mediaobject>	
+
+	</section>	
+    
+  </chapter>
+
+
+
+
+</book>
