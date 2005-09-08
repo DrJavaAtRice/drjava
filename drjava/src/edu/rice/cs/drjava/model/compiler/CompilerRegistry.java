@@ -64,8 +64,7 @@ public class CompilerRegistry {
     // JSR14 (and GJ)
     "edu.rice.cs.drjava.model.compiler.JSR14v20FromSetLocation",
     "edu.rice.cs.drjava.model.compiler.JSR14v12FromSetLocation",
-    "edu.rice.cs.drjava.model.compiler.JSR14FromSetLocation",
-    "edu.rice.cs.drjava.model.compiler.GJv6FromClasspath"
+    "edu.rice.cs.drjava.model.compiler.JSR14FromSetLocation"
   };
 
   /** The list of compiler interfaces that are distributed with DrJava. */

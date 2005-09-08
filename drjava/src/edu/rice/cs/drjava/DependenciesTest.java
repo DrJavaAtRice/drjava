@@ -69,15 +69,20 @@ public final class DependenciesTest extends TestCase {
 
   /**
    * This test ensures that the util package version is as new as we expect.
+   * It is no longer used (since util is no longer a separate jar), but is
+   * left here as an example of what could be done with other modules
+   * (although it might be worth discussing whether this is really the right way
+   * to test that the right support libs are present).
    */
   public void testUtilVersion() throws Throwable {
-    Date required = new SimpleDateFormat("yyyyMMdd-HHmm z").parse(REQUIRED_UTIL_VERSION + " GMT");
+    /*Date required = new SimpleDateFormat("yyyyMMdd-HHmm z").parse(REQUIRED_UTIL_VERSION + " GMT");
 
     Date found = edu.rice.cs.util.Version.getBuildTime();
 
     assertTrue("Util package date is " + found + ", but at least " + required +
                  " was required! You need to update/compile the util package.",
                ! required.after(found));
+    */
   }
   
 }
