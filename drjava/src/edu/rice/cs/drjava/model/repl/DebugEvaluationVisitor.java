@@ -59,7 +59,7 @@ import koala.dynamicjava.interpreter.context.*;
 public class DebugEvaluationVisitor extends EvaluationVisitorExtension {
   
   /** The context associated with this visitor. */
-  protected Context<Object> _context;
+  protected Context _context;
 
   /** The name of the interpreter enclosing this visitor. */
   protected final String _name;
@@ -68,7 +68,7 @@ public class DebugEvaluationVisitor extends EvaluationVisitorExtension {
    *  @param ctx the context
    *  @param name the name of the enclosing interpreter
    */
-  public DebugEvaluationVisitor(Context<Object> ctx, String name) {
+  public DebugEvaluationVisitor(Context ctx, String name) {
     super(ctx);
     _context = ctx;
     _name = name;

@@ -72,8 +72,8 @@ import koala.dynamicjava.util.*;
  */
 
 public class EvaluationVisitorExtension extends EvaluationVisitor {
-  private Context<Object> _context;
-  public EvaluationVisitorExtension(Context<Object> ctx) {
+  private Context _context;
+  public EvaluationVisitorExtension(Context ctx) {
     super(ctx);
     _context = ctx;
   }

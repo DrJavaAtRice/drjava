@@ -55,7 +55,6 @@ import java.util.LinkedList;
 import java.util.Iterator;
 import java.util.StringTokenizer;
 import java.lang.reflect.*;
-import java.lang.reflect.Type;
 
 import edu.rice.cs.drjava.model.repl.newjvm.ClasspathManager;
 import edu.rice.cs.util.UnexpectedException;
@@ -103,8 +102,8 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
    */
   public Node processTree(Node node) { return node.acceptVisitor(_translationVisitor); }
 
-  public GlobalContext<Type> makeGlobalTypeContext(TreeInterpreter i) {
-    return new GlobalContext<Type>(i) {
+  public GlobalContext makeGlobalTypeContext(TreeInterpreter i) {
+    return new GlobalContext(i) {
       public boolean exists(String name) {
         return (super.exists(name)) ||
           (_getObjectFieldAccessForField(name, this) != null) ||
@@ -149,7 +148,7 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
     return cName;
   }
 
-  private Class<?> _loadClassForThis(Context<Type> context) {
+  private Class<?> _loadClassForThis(Context context) {
     try {
       return context.lookupClass(_getFullyQualifiedClassNameForThis());
     }
@@ -167,7 +166,7 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
    * @return the ObjectFieldAccess that represents the field or null
    * if it cannot find the field in any enclosing class.
    */
-  protected ObjectFieldAccess _getObjectFieldAccessForField(String field, Context<Type> context) {
+  protected ObjectFieldAccess _getObjectFieldAccessForField(String field, Context context) {
     AbstractTypeChecker tc = makeTypeChecker(context);
     int numDollars = _getNumDollars(_thisClassName);
 
@@ -221,7 +220,7 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
    * @return the ObjectMethodCall that represents the method or null
    * if it cannot find the method in any enclosing class.
    */
-  protected ObjectMethodCall _getObjectMethodCallForFunction(MethodCall method, Context<Type> context) {
+  protected ObjectMethodCall _getObjectMethodCallForFunction(MethodCall method, Context context) {
     AbstractTypeChecker tc = makeTypeChecker(context);
     int numDollars = _getNumDollars(_thisClassName);
     String methodName = method.getMethodName();
@@ -267,7 +266,7 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
    * @return the StaticFieldAccess that represents the field or null
    * if it cannot find the field in any enclosing class.
    */
-  protected StaticFieldAccess _getStaticFieldAccessForField(String field, Context<Type> context) {
+  protected StaticFieldAccess _getStaticFieldAccessForField(String field, Context context) {
     AbstractTypeChecker tc = makeTypeChecker(context);
     int numDollars = _getNumDollars(_thisClassName);
     String currClass = _getFullyQualifiedClassNameForThis();
@@ -299,7 +298,7 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
    * @return the StaticMethodCall that represents the method or null
    * if it cannot find the method in any enclosing class.
    */
-  protected StaticMethodCall _getStaticMethodCallForFunction(MethodCall method, Context<Type> context) {
+  protected StaticMethodCall _getStaticMethodCallForFunction(MethodCall method, Context context) {
     AbstractTypeChecker tc = makeTypeChecker(context);
     int numDollars = _getNumDollars(_thisClassName);
     String methodName = method.getMethodName();
@@ -334,7 +333,7 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
    * really a class) or null if it cannot load the corresponding class in the
    * class loader.
    */
-  protected ReferenceType _getReferenceTypeForField(String field, Context<Type> context) {
+  protected ReferenceType _getReferenceTypeForField(String field, Context context) {
     AbstractTypeChecker tc = makeTypeChecker(context);
     int index = _indexOfWithinBoundaries(_getFullyQualifiedClassNameForThis(), field);
     if (index != -1) {
@@ -599,7 +598,7 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
    * @param nameContext Context for the NameVisitor
    * @return the visitor
    */
-  public NameVisitor makeNameVisitor(final Context<Type> nameContext) {
+  public NameVisitor makeNameVisitor(final Context nameContext) {
     return new NameVisitor(nameContext) {
       //        try {
       //          return super.visit(node);
@@ -704,14 +703,14 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
    * @param context the context
    * @return visitor the visitor
    */
-  public AbstractTypeChecker makeTypeChecker(final Context<Type> context) {
+  public AbstractTypeChecker makeTypeChecker(final Context context) {
     if (Float.valueOf(System.getProperty("java.specification.version")) < 1.5) { 
       return new TypeChecker14(context) {
       /**
        * Visits a QualifiedName, returning our class if it is "this"
        * @param node the node to visit
        */
-      public Type visit(QualifiedName node) {
+      public Class<?> visit(QualifiedName node) {
         String var = node.getRepresentation();
         if ("this".equals(var)) {
           //            String cName = _thisClassName.replace('$', '.');
@@ -735,7 +734,7 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
        * Visits a QualifiedName, returning our class if it is "this"
        * @param node the node to visit
        */
-      public Type visit(QualifiedName node) {
+      public Class<?> visit(QualifiedName node) {
         String var = node.getRepresentation();
         if ("this".equals(var)) {
           //            String cName = _thisClassName.replace('$', '.');

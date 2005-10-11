@@ -35,7 +35,6 @@ package edu.rice.cs.drjava.model.repl;
 
 import java.util.*;
 import java.io.*;
-import java.lang.reflect.Type;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.net.MalformedURLException;
@@ -343,7 +342,7 @@ public class DynamicJavaAdapter implements JavaInterpreter {
    *  @param nameContext the context
    *  @return visitor the visitor
    */
-  public NameVisitor makeNameVisitor(Context<Type> nameContext) { return new NameVisitor(nameContext); }
+  public NameVisitor makeNameVisitor(Context nameContext) { return new NameVisitor(nameContext); }
 
   /** Factory method to make a new TypeChecker.
    *  @param nameContext Context for the NameVisitor
@@ -361,7 +360,7 @@ public class DynamicJavaAdapter implements JavaInterpreter {
    *  @param context the context
    *  @return visitor the visitor
    */
-  public EvaluationVisitor makeEvaluationVisitor(Context<Object> context) {
+  public EvaluationVisitor makeEvaluationVisitor(Context context) {
     return new EvaluationVisitorExtension(context);
   }
 
@@ -370,9 +369,7 @@ public class DynamicJavaAdapter implements JavaInterpreter {
    */
   public Node processTree(Node node) { return node; }
 
-  public GlobalContext<Type> makeGlobalTypeContext(TreeInterpreter i) { return new GlobalContext<Type>(i); }
-  
-  public GlobalContext<Object> makeGlobalObjectContext(TreeInterpreter i) { return new GlobalContext<Object>(i); }
+  public GlobalContext makeGlobalContext(TreeInterpreter i) { return new GlobalContext(i); }
 
   /** An extension of DynamicJava's interpreter that makes sure classes are not loaded by the system class loader
    *  (when possible) so that future interpreters will be able to reload the classes.  This extension also ensures 
@@ -390,14 +387,14 @@ public class DynamicJavaAdapter implements JavaInterpreter {
       classLoader = new ClassLoaderExtension(this, cpm);
       // We have to reinitialize these variables because they automatically
       // fetch pointers to classLoader in their constructors.
-      nameVisitorContext = makeGlobalTypeContext(this);
+      nameVisitorContext = makeGlobalContext(this);
       ClassLoaderContainer clc = new ClassLoaderContainer() {
         public ClassLoader getClassLoader() { return classLoader; }
       };
       nameVisitorContext.setAdditionalClassLoaderContainer(clc);
-      checkVisitorContext = makeGlobalTypeContext(this);
+      checkVisitorContext = makeGlobalContext(this);
       checkVisitorContext.setAdditionalClassLoaderContainer(clc);
-      evalVisitorContext = makeGlobalObjectContext(this);
+      evalVisitorContext = makeGlobalContext(this);
       evalVisitorContext.setAdditionalClassLoaderContainer(clc);
       //System.err.println("set loader: " + classLoader);
 
