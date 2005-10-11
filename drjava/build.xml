@@ -181,6 +181,19 @@
     <fail message="Can't find the java executable in the Java 1.4 home: ${java14-home}" unless="java14-exec" />
   </target>
   
+  <target name="resolve-java15-tools" depends="assert-15">
+    <!-- We rely on "location" to generate a platform-specific path; note that properties
+         are immutable and so java15-tools will only be set the *first* time. -->
+
+    <property name="java15-tools-1" location="${java.home}/../lib/tools.jar" />
+    <available property="java15-tools" value="${java15-tools-1}" file="${java15-tools-1}" />
+    
+    <property name="java15-tools-2" location="${java.home}/../Classes/classes.jar" />
+    <available property="java15-tools" value="${java15-tools-2}" file="${java15-tools-2}" />
+    
+    <fail message="Can't find tools.jar in the Java 1.5 home: ${java.home}" unless="java15-tools" />
+  </target>
+  
   <target name="assert-15">
     <fail message="The specified target requires Ant to be run under Java 5.0">
       <condition>
@@ -277,7 +290,7 @@
           description="Compile all source files and make them 1.4 compatible (after generating the source)">
   </target>
   
-  <target name="do-compile" depends="assert-15">
+  <target name="do-compile" depends="assert-15, resolve-java15-tools">
     <echo message="Compiling src directory to classes/base and classes/test" />
     <mkdir dir="classes/base" />
     <mkdir dir="classes/test" />
@@ -288,6 +301,9 @@
     <javac srcdir="src" destdir="classes/base" source="1.5" target="1.5" sourcepath="" 
            debug="on" optimize="off" deprecation="on" includeAntRuntime="no" fork="yes">
       <classpath>
+        <!-- TODO: Remove this dependency on tools.jar by refactoring and moving all the dependent
+             debugger code into the "platform" module -->
+        <pathelement location="${java15-tools}" />
         <fileset refid="libs" />
         <pathelement location="lib/buildlib/junit.jar" />
         <pathelement location="classes/base" />
