@@ -371,11 +371,12 @@
     </condition>
   </target>
   
-  <target name="rmi-compile" depends="check-rmi-compile" unless="rmi-classes-uptodate">
+  <target name="rmi-compile" depends="check-rmi-compile, resolve-java15-tools" unless="rmi-classes-uptodate">
     <echo message="Compiling RMI classes" />
     <rmic base="classes/base" includeAntRuntime="no">
       <patternset refid="rmi-base-classes" />
       <classpath>
+        <pathelement location="${java15-tools}" />
         <fileset refid="libs" />
         <pathelement location="classes/base" />
       </classpath>
@@ -383,6 +384,7 @@
     <rmic base="classes/test" includeAntRuntime="no">
       <patternset refid="rmi-test-classes" />
       <classpath>
+        <pathelement location="${java15-tools}" />
         <fileset refid="libs" />
         <pathelement location="classes/base" />
         <pathelement location="classes/test" />
@@ -474,13 +476,14 @@
   <target name="test" depends="test-15" description="Shortcut for 'test-15'">
   </target>
   
-  <target name="test-15" depends="compile, assert-15"
+  <target name="test-15" depends="compile, assert-15, resolve-java15-tools"
           description="Run all tests under Java 5.0 (after compiling); use -Dtest-spec=... to filter the tests">
     <echo message="Running all tests matching '${test-spec}' under Java 5.0" />
     <!-- TODO: Experiment with performance under different forkmodes -->
     <junit printsummary="on" haltonerror="on" haltonfailure="on" fork="on" 
            maxmemory="256M" dir="${basedir}">
       <classpath>
+        <pathelement location="${java15-tools}" />
         <pathelement location="lib/buildlib/junit.jar" />
         <pathelement location="classes/test" />
         <pathelement location="classes/base" />
@@ -493,13 +496,14 @@
     </junit>
   </target>
 
-  <target name="test-14" depends="compile, resolve-java14-exec"
+  <target name="test-14" depends="compile, resolve-java14-exec, resolve-java14-tools"
           description="Run all tests under Java 1.4 (after compiling); use -Dtest-spec=... to filter the tests">
     <echo message="Running all tests matching '${test-spec}' under Java 1.4" />
     <!-- TODO: Experiment with performance under different forkmodes -->
     <junit printsummary="on" haltonerror="on" haltonfailure="on" fork="on" 
            maxmemory="256M" jvm="${java14-exec}" dir="${basedir}">
       <classpath>
+        <pathelement location="${java14-tools}" />
         <pathelement location="lib/buildlib/junit.jar" />
         <pathelement location="classes/test-14" />
         <pathelement location="classes/base-14" />
@@ -571,7 +575,7 @@
        Javadoc Targets
        *************** -->
   
-  <target name="javadoc" depends="generate-source, assert-15, check-javadoc, resolve-version-tag" unless="javadocs-exist"
+  <target name="javadoc" depends="generate-source, assert-15, check-javadoc, resolve-version-tag, resolve-java15-tools" unless="javadocs-exist"
           description="Generate javadocs from the source folder (generating source first)">
     <echo message="Generating javadocs" />
     <!-- Unfortunately, dependset doesn't delete nested directories, so we have
@@ -581,6 +585,7 @@
     <javadoc sourcepath="src" packagenames="*" destdir="docs/javadoc"
              access="protected" Use="yes" Version="yes" Author="yes" Windowtitle="${version tag} API">
       <classpath>
+        <pathelement location="${java15-tools}" />
         <fileset refid="libs" />
         <pathelement location="lib/buildlib/junit.jar" />
       </classpath>
