@@ -102,7 +102,7 @@ public class JavaDebugInterpreter extends DynamicJavaAdapter {
    */
   public Node processTree(Node node) { return node.acceptVisitor(_translationVisitor); }
 
-  public GlobalContext makeGlobalTypeContext(TreeInterpreter i) {
+  public GlobalContext makeGlobalContext(TreeInterpreter i) {
     return new GlobalContext(i) {
       public boolean exists(String name) {
         return (super.exists(name)) ||

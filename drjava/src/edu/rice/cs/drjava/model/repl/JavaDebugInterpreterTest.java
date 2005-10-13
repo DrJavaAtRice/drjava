@@ -315,19 +315,18 @@ public final class JavaDebugInterpreterTest extends DebugTestCase {
     interpret("foo");
     assertInteractionsContains("6");
 
-// TEMPORARILY commented out because this test is failing
-//    interpret("foo = 123");
-//    assertEquals("foo should have been modified" , "123", interpret("MonkeyStuff.this.foo"));
-//    interpret("int foo = 999;");
-//    assertEquals("foo should refer to defined foo", "999", interpret("foo"));
-//    assertEquals("declaring foo should not change MonkeyStuff.this.foo", "123", interpret("MonkeyStuff.this.foo"));
-//
-//    assertEquals("call method of outer class #1", "-2", interpret("getNegativeTwo()"));
-//    assertEquals("call method of outer class #2", "-2", interpret("MonkeyTwoDeep.this.getNegativeTwo()"));
-//    assertEquals("call method of outer class #3", "-2",
-//                 interpret("MonkeyInner.MonkeyTwoDeep.this.getNegativeTwo()"));
-//    assertEquals("call method of outer class #4", "-2",
-//                 interpret("MonkeyStuff.MonkeyInner.MonkeyTwoDeep.this.getNegativeTwo()"));
+    interpret("foo = 123");
+    assertEquals("foo should have been modified" , "123", interpret("MonkeyStuff.this.foo"));
+    interpret("int foo = 999;");
+    assertEquals("foo should refer to defined foo", "999", interpret("foo"));
+    assertEquals("declaring foo should not change MonkeyStuff.this.foo", "123", interpret("MonkeyStuff.this.foo"));
+
+    assertEquals("call method of outer class #1", "-2", interpret("getNegativeTwo()"));
+    assertEquals("call method of outer class #2", "-2", interpret("MonkeyTwoDeep.this.getNegativeTwo()"));
+    assertEquals("call method of outer class #3", "-2",
+                 interpret("MonkeyInner.MonkeyTwoDeep.this.getNegativeTwo()"));
+    assertEquals("call method of outer class #4", "-2",
+                 interpret("MonkeyStuff.MonkeyInner.MonkeyTwoDeep.this.getNegativeTwo()"));
 
     // Close doc and make sure breakpoints are removed
     _model.closeFile(doc);
@@ -386,64 +385,63 @@ public final class JavaDebugInterpreterTest extends DebugTestCase {
                  "13",
                  interpret("MonkeyInner.MonkeyTwoDeep.twoDeepFoo"));
 
-// TEMPORARILY commented out because this test is failing
-//    interpret("twoDeepFoo = 100;");
-//    assertEquals("should have assigned field of static outer class",
-//                 "100",
-//                 interpret("twoDeepFoo"));
-//    assertEquals("should have assigned the field of static outer class",
-//                 "100",
-//                 interpret("MonkeyStaticStuff.MonkeyInner.MonkeyTwoDeep.twoDeepFoo"));
-//    assertEquals("should have assigned the field of static outer class",
-//                 "100",
-//                 interpret("monkey.MonkeyStaticStuff.MonkeyInner.MonkeyTwoDeep.twoDeepFoo"));
-//
-//    interpret("int twoDeepFoo = -10;");
-//    assertEquals("Should have successfully shadowed field of static outer class",
-//                 "-10",
-//                 interpret("twoDeepFoo"));
-//    assertEquals("should have assigned the field of static outer class",
-//                 "100",
-//                 interpret("MonkeyTwoDeep.twoDeepFoo"));
-//    assertEquals("should have assigned the field of static outer class",
-//                 "100",
-//                 interpret("MonkeyStaticStuff.MonkeyInner.MonkeyTwoDeep.twoDeepFoo"));
-//
-//    assertEquals("Should be able to access a static field of a non-static outer class",
-//                 "6",
-//                 interpret("foo"));
-//    assertEquals("Should be able to access a static field of a non-static outer class",
-//                 "6",
-//                 interpret("MonkeyStaticStuff.foo"));
-//
-//    interpret("foo = 987;");
-//    assertEquals("Should have changed the value of a static field of a non-static outer class",
-//                 "987",
-//                 interpret("foo"));
-//    assertEquals("Should have changed the value of a static field of a non-static outer class",
-//                 "987",
-//                 interpret("MonkeyStaticStuff.foo"));
-//
-//    interpret("int foo = 56;");
-//    assertEquals("Should have defined a new variable",
-//                 "56",
-//                 interpret("foo"));
-//    assertEquals("Should have shadowed the value of a static field of a non-static outer class",
-//                 "987",
-//                 interpret("MonkeyStaticStuff.foo"));
-//
-//    assertEquals("should be able to call method of outer class",
-//                 "-2",
-//                 interpret("getNegativeTwo()"));
-//    assertEquals("should be able to call method of outer class",
-//                 "-2",
-//                 interpret("MonkeyTwoDeep.getNegativeTwo()"));
-//    assertEquals("should be able to call method of outer class",
-//                 "-2",
-//                 interpret("MonkeyInner.MonkeyTwoDeep.getNegativeTwo()"));
-//    assertEquals("should be able to call method of outer class",
-//                 "-2",
-//                 interpret("MonkeyStaticStuff.MonkeyInner.MonkeyTwoDeep.getNegativeTwo()"));
+    interpret("twoDeepFoo = 100;");
+    assertEquals("should have assigned field of static outer class",
+                 "100",
+                 interpret("twoDeepFoo"));
+    assertEquals("should have assigned the field of static outer class",
+                 "100",
+                 interpret("MonkeyStaticStuff.MonkeyInner.MonkeyTwoDeep.twoDeepFoo"));
+    assertEquals("should have assigned the field of static outer class",
+                 "100",
+                 interpret("monkey.MonkeyStaticStuff.MonkeyInner.MonkeyTwoDeep.twoDeepFoo"));
+
+    interpret("int twoDeepFoo = -10;");
+    assertEquals("Should have successfully shadowed field of static outer class",
+                 "-10",
+                 interpret("twoDeepFoo"));
+    assertEquals("should have assigned the field of static outer class",
+                 "100",
+                 interpret("MonkeyTwoDeep.twoDeepFoo"));
+    assertEquals("should have assigned the field of static outer class",
+                 "100",
+                 interpret("MonkeyStaticStuff.MonkeyInner.MonkeyTwoDeep.twoDeepFoo"));
+
+    assertEquals("Should be able to access a static field of a non-static outer class",
+                 "6",
+                 interpret("foo"));
+    assertEquals("Should be able to access a static field of a non-static outer class",
+                 "6",
+                 interpret("MonkeyStaticStuff.foo"));
+
+    interpret("foo = 987;");
+    assertEquals("Should have changed the value of a static field of a non-static outer class",
+                 "987",
+                 interpret("foo"));
+    assertEquals("Should have changed the value of a static field of a non-static outer class",
+                 "987",
+                 interpret("MonkeyStaticStuff.foo"));
+
+    interpret("int foo = 56;");
+    assertEquals("Should have defined a new variable",
+                 "56",
+                 interpret("foo"));
+    assertEquals("Should have shadowed the value of a static field of a non-static outer class",
+                 "987",
+                 interpret("MonkeyStaticStuff.foo"));
+
+    assertEquals("should be able to call method of outer class",
+                 "-2",
+                 interpret("getNegativeTwo()"));
+    assertEquals("should be able to call method of outer class",
+                 "-2",
+                 interpret("MonkeyTwoDeep.getNegativeTwo()"));
+    assertEquals("should be able to call method of outer class",
+                 "-2",
+                 interpret("MonkeyInner.MonkeyTwoDeep.getNegativeTwo()"));
+    assertEquals("should be able to call method of outer class",
+                 "-2",
+                 interpret("MonkeyStaticStuff.MonkeyInner.MonkeyTwoDeep.getNegativeTwo()"));
 
     // Shutdown the debugger
     if (printMessages) {
@@ -506,6 +504,7 @@ public final class JavaDebugInterpreterTest extends DebugTestCase {
     assertEquals("Should be able to access localVar", "11", interpret("localVar"));
     interpret("localVar = 5");
     /* The Following test is commented out TEMPORARILY to work around bug in JDK 1.5 Beta2 JVM */
+    /* Update (10/12/2005): The test still fails under a current JDK 1.5 JVM.  I'm not sure it's the JDK's fault */
     // assertEquals("The value of localVar should not have changed", "11", interpret("localVar"));
 
     // Shutdown the debugger
