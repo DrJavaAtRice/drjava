@@ -50,8 +50,8 @@
   <!-- Matches documentation files that should be included in the jar.  The search is relative
        to the docs directory. -->
   <patternset id="jar-docs">
-    <include name="user/**">
-    <include name="quickstart/**">
+    <include name="user/**" />
+    <include name="quickstart/**" />
   </patternset>
   
   <property name="readable-project-name" value="DrJava-Docs" />
