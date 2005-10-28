@@ -176,11 +176,12 @@
   </target>
   
   <target name="run-docbook2html" depends="assert-docbook2html-present">
+    <mkdir dir="docs/${docbook-dir}" />
     <apply executable="docbook2html" failonerror="yes" type="file">
-      <arg value="-o"/>
-      <arg value="docs/${docbook-dir}"/>
-      <arg value="-V"/>
-      <arg value="%use-id-as-filename%"/>
+      <arg value="-o" />
+      <arg value="docs/${docbook-dir}" />
+      <arg value="-V" />
+      <arg value="%use-id-as-filename%" />
       <fileset dir="src/${docbook-dir}">
         <include name="${docbook-srcfile}" />
       </fileset>
@@ -188,9 +189,10 @@
   </target>
   
   <target name="run-docbook2pdf" depends="assert-docbook2pdf-present">
+    <mkdir dir="docs/${docbook-dir}" />
     <apply executable="docbook2pdf" failonerror="yes" type="file">
-      <arg value="-o"/>
-      <arg value="docs"/>
+      <arg value="-o" />
+      <arg value="docs" />
       <fileset dir="src/${docbook-dir}">
         <include name="${docbook-srcfile}" />
       </fileset>
@@ -217,9 +219,9 @@
         <attribute name="Built-By" value="${user.name}" />
         <attribute name="Build-Version" value="${version-tag}" />
       </manifest>
-      <fileset dir="docs">
-        <patternset refid="test-classes" />
-      </fileset>
+      <zipfileset dir="docs" prefix="edu/rice/cs/drjava/docs">
+        <patternset refid="jar-docs" />
+      </zipfileset>
     </jar>
   </target>
 
