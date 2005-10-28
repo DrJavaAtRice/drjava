@@ -1,0 +1,329 @@
+<!--
+  $Header$
+-->
+<!-- *** BUILD FILE HEADER ***
+
+     This project file, along with these others, are all quite similar:
+     drjava: docs/build.xml
+     drjava: drjava/build.xml
+     drjava: dynamicjava/build.xml
+     drjava: eclipse/build.xml
+     drjava: jedit/build.xml
+     drjava: platforms/build.xml
+     javalanglevels: javalanglevels/build.xml
+     ricejst: ricejst/build.xml
+     
+     In order to avoid inconsistency, changes made to one should, in general, be reflected in each of the others.
+     PLEASE DON'T FIX OR UPDATE ONE BUILD SCRIPT WITHOUT MIRRORING THE CHANGES IN THE OTHERS.  While this approach 
+     leads to a lot of "repeated code," the advantage is that each module is able in this way to maintain a simple, 
+     understandable build process without external dependencies.
+     
+     The following should be customized (or, if unneeded, removed) in each build file:
+     - The name of the project
+     - The test-classes, test-products, and resources patternsets
+     - The readable-project-name, jar-filename, src-working-dir, etc. properties
+     - The list of generated sources
+     - The list of environment variables
+     - The list of additional taskdefs
+     - The help target description
+     - The build target behavior (specifying the default build process)
+     - The list of source-generating targets
+     - The test target behavior (specifying the default test target)
+     - The list of files removed by "clean"
+     - The command to export CVS sources in "src-zip"
+-->
+     
+     
+<project name="docs" default="help">
+
+  <!-- Matches non-class-file resources that should be available to the executable.
+       The search is relative to the src directory. -->
+  <patternset id="resources">
+    <include name="**/LICENSE" />
+    <include name="**/README" />
+    <include name="**/*.gif" />
+    <include name="**/*.png" />
+    <include name="**/*.jpg" />
+    <include name="**/*.jpeg" />
+  </patternset>
+  
+  <!-- Matches documentation files that should be included in the jar.  The search is relative
+       to the docs directory. -->
+  <patternset id="jar-docs">
+    <include name="user/**">
+    <include name="quickstart/**">
+  </patternset>
+  
+  <property name="readable-project-name" value="DrJava-Docs" />
+  <property name="jar-filename" value="docs.jar" />
+
+  <property environment="env" />
+  <property name="java14-home" value="${env.JAVA14_HOME}" />
+  
+  <!-- By default, delete jar files when cleaning -->
+  <property name="delete-jars" value="yes" />
+  
+  <!-- By default, don't append anything extra to the tag -->
+  <property name="tag-append" value="" />
+  
+  <!-- Don't use or inherit the CLASSPATH environment variable for anything -->
+  <property name="build.sysclasspath" value="ignore" />
+  
+  <fileset id="libs" dir="lib" includes="*.jar" /> <!-- Only include jars that are at the top level (not in buildlib) -->
+  
+                                    
+  <!-- ***********
+       Help Target
+       *********** -->
+  
+  <target name="help" description="Print general build script information">
+    <echo message="--------------------------------------------------------------------" />
+    <echo message="DrJava Docs Build Scripts" />
+    <echo message="--------------------------------------------------------------------" />
+    <echo message="Type 'ant -projecthelp' or 'ant -p' to see the list of targets." />
+    <echo message="" />
+    <echo message="For this build file to function properly, the following environment " />
+    <echo message="variables should be defined:" />
+    <echo message="PATH: 'cvs' needs to refer to the CVS executable; 'docbook2html' and " />
+    <echo message="      'docbook2pdf' should also be available." />
+    <echo message="" />
+    <echo message="Ant may also require ANT_HOME to be set."
+  </target>
+  
+  
+  <!-- ***************************
+       Property-resolution Targets 
+       *************************** -->
+  
+  <target name="assert-docbook2html-present">
+    <available file="docbook2html" property="docbook2html-present" filepath="${env.PATH}" />
+    <fail message="The specified target requires docbook2html to be present on the path" unless="docbook2html-present" />
+  </target>
+      
+  <target name="assert-docbook2pdf-present">
+    <available file="docbook2pdf" property="docbook2pdf-present" filepath="${env.PATH}" />
+    <fail message="The specified target requires docbook2pdf to be present on the path" unless="docbook2pdf-present" />
+  </target>
+  
+  <target name="assert-jar-exists">
+    <available property="jar-exists" file="${ant.project.name}.jar" />
+    <fail message="Can't find ${ant.project.name}.jar" unless="jar-exists" />
+  </target>
+  
+  <target name="resolve-version-tag">
+    <!-- Get a timestamp based on GMT, rather than local time -->
+    <tstamp>
+      <format property="DSTAMP" pattern="yyyyMMdd" timezone="GMT" />
+      <format property="TSTAMP" pattern="HHmm" timezone="GMT" />
+      <format property="TODAY" pattern="MMMM dd yyyy" timezone="GMT" />
+    </tstamp>
+    <property name="version-tag"
+              value="${ant.project.name}${tag-append}-${DSTAMP}-${TSTAMP}" />
+  </target>  
+
+  
+  <!-- ************
+       Build Target
+       ************ -->
+  
+  <target name="build" depends="doc, jar" 
+          description="Shortcut for 'doc jar'">
+  </target>
+  
+
+  <!-- *********************
+       Documentation Targets
+       ********************* -->
+  
+  <target name="doc" depends="doc-user, doc-developer, doc-quickstart"
+          description="Generate all documentation">
+  </target>
+  
+  <target name="doc-user">
+    <echo message="Creating user documentation" />
+    <antcall target="run-docbook2html" inheritall="false">
+      <param name="docbook-dir" value="user" />
+      <param name="docbook-srcfile" value="userdoc.docbook" />
+    </antcall>
+    <antcall target="run-docbook2pdf" inheritall="false">
+      <param name="docbook-dir" value="user" />
+      <param name="docbook-srcfile" value="userdoc.docbook" />
+    </antcall>
+  </target>
+  
+  <target name="doc-quickstart">
+    <echo message="Creating quickstart documentation" />
+    <antcall target="run-docbook2html" inheritall="false">
+      <param name="docbook-dir" value="quickstart" />
+      <param name="docbook-srcfile" value="quickstart.docbook" />
+    </antcall>
+    <antcall target="run-docbook2pdf" inheritall="false">
+      <param name="docbook-dir" value="quickstart" />
+      <param name="docbook-srcfile" value="quickstart.docbook" />
+    </antcall>
+  </target>
+  
+  <target name="doc-developer">
+    <echo message="Creating developer documentation" />
+    <antcall target="run-docbook2html" inheritall="false">
+      <param name="docbook-dir" value="developer" />
+      <param name="docbook-srcfile" value="devdoc.docbook" />
+    </antcall>
+    <antcall target="run-docbook2pdf" inheritall="false">
+      <param name="docbook-dir" value="developer" />
+      <param name="docbook-srcfile" value="devdoc.docbook" />
+    </antcall>
+  </target>
+  
+  <target name="run-docbook2html" depends="assert-docbook2html-present">
+    <apply executable="docbook2html" failonerror="yes" type="file">
+      <arg value="-o"/>
+      <arg value="docs/${docbook-dir}"/>
+      <arg value="-V"/>
+      <arg value="%use-id-as-filename%"/>
+      <fileset dir="src/${docbook-dir}">
+        <include name="${docbook-srcfile}" />
+      </fileset>
+    </apply>
+  </target>
+  
+  <target name="run-docbook2pdf" depends="assert-docbook2pdf-present">
+    <apply executable="docbook2pdf" failonerror="yes" type="file">
+      <arg value="-o"/>
+      <arg value="docs"/>
+      <fileset dir="src/${docbook-dir}">
+        <include name="${docbook-srcfile}" />
+      </fileset>
+    </apply>
+  </target>
+  
+  <target name="copy-resources">
+    <copy todir="classes/base">
+      <fileset dir="src">
+        <patternset refid="resources" />
+      </fileset>
+    </copy>
+  </target>
+  
+
+  <!-- ***********
+       Jar Targets
+       *********** -->
+       
+  <target name="jar" depends="doc, resolve-version-tag" 
+          description="Create the jar file with all docs (generating docs first)">
+    <jar jarfile="${jar-filename}">
+      <manifest>
+        <attribute name="Built-By" value="${user.name}" />
+        <attribute name="Build-Version" value="${version-tag}" />
+      </manifest>
+      <fileset dir="docs">
+        <patternset refid="test-classes" />
+      </fileset>
+    </jar>
+  </target>
+
+  
+  <!-- ************
+       Clean Target
+       ************ -->
+       
+  <target name="clean" description="Remove all build products; the result should match the intended CVS contents">
+    <echo message="Deleting all build products" />
+    <delete dir="docs" />
+
+    <condition property="do-delete-jars">
+      <istrue value="${delete-jars}" />
+    </condition>
+    <delete includeemptydirs="true">
+      <fileset dir="${basedir}" defaultexcludes="no">
+        <include name="*.jar" if="do-delete-jars" />
+        <!-- We could get rid of backups, but "update" ignores them, so they're okay.
+             (doesn't work if defaultexcludes is "yes") -->
+        <!-- <include name="**/*~" /> -->
+        <!-- Get rid of pesky OS helper files (doesn't work if defaultexcludes is "yes") -->
+        <include name="**/.DS_Store" />
+        <include name="**/Thumbs.db" />
+      </fileset>
+    </delete>
+    
+  </target>
+
+
+  <!-- ***********
+       CVS Targets 
+       *********** -->
+  
+  <target name="update" depends="clean" description="Reconcile source with the CVS archive">
+    <echo message="Running CVS update ('-q' -- you will only see output for files that don't match)" />
+    <!-- TODO: Experiment with the 'compression' option -->
+    <cvs command="update -d -P" quiet="true" />
+  </target>
+  
+  <target name="commit" depends="update, build, do-commit, tag" 
+          description="Commit source to the CVS archive (after building)">
+    <echo message="New version is committed to CVS" />
+  </target>
+
+  <target name="do-commit">
+    <antcall target="clean" inheritall="false"> <!-- Clean up after the latest build -->
+      <param name="delete-jars" value="no" />
+    </antcall>
+    <input message="Please enter a log message for the commit: "
+           addproperty="cvs.commit.message" />
+    <echo message="Running CVS commit"/>
+    <cvs quiet="true">
+      <commandline> 
+         <argument value="commit" />
+         <argument value="-m" />
+         <argument value="${cvs.commit.message}" />
+      </commandline>
+    </cvs>
+  </target>
+  
+  <target name="tag" depends="resolve-version-tag">
+    <echo message="Running CVS tag with version ${version-tag}"/>
+    <cvs command="tag -c ${version-tag}" reallyquiet="true" />
+  </target>
+
+  
+  <!-- ********************************
+       Misc Occasionally-Useful Targets
+       ******************************** -->
+  
+  <patternset id="exclude-binaries">
+    <exclude name="**/*.jar" />
+    <exclude name="**/*.class" />
+    <exclude name="**/DrJava" />
+    <exclude name="**/*.png" />
+    <exclude name="**/*.icns" />
+    <exclude name="**/*.gif" />
+    <exclude name="**/*.jpg" />
+    <exclude name="**/*.jpeg" />
+  </patternset>
+
+  <!-- Run a batch find-and-replace on all text files in the project.
+       Assumes the properties "find" and "replace" have been defined
+       (e.g. "ant -Dfind=foo -Dreplace=bar find-and-replace"). -->
+  <target name="find-and-replace">
+    <replace dir="${basedir}" token="${find}" value="${replace}" summary="yes">
+      <patternset refid="exclude-binaries" />
+    </replace>
+  </target>
+  
+  <!-- Standardize all newline character sequences.  CVS takes care of this 
+       automatically, but sometimes files crop up with the wrong sequence.
+       Use "cvs update" after running this to see which files were fixed. -->
+  <target name="fix-newlines">
+    <!-- If we're in Windows, use \r\n -->
+    <condition property="newline-code" value="crlf">
+      <os family="windows" />
+    </condition>
+    <!-- Otherwise, use \n -->
+    <property name="newline-code" value="lf" />
+    <fixcrlf srcdir="${basedir}" eol="${newline-code}" fixlast="no">
+      <patternset refid="exclude-binaries" />
+    </fixcrlf>
+  </target>
+  
+</project>
