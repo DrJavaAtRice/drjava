@@ -126,8 +126,8 @@
        Build Target
        ************ -->
   
-  <target name="build" depends="doc, jar" 
-          description="Shortcut for 'doc jar'">
+  <target name="build" depends="doc-html, jar" 
+          description="Shortcut for 'doc-html jar'">
   </target>
   
 
@@ -135,45 +135,52 @@
        Documentation Targets
        ********************* -->
   
-  <target name="doc" depends="doc-user, doc-developer, doc-quickstart"
-          description="Generate all documentation">
+  <target name="doc" depends="doc-html doc-pdf"
+          description="Shortcut for 'doc-html doc-pdf'">
   </target>
   
-  <target name="doc-user">
+  
+  <target name="doc-html" description="Generate all html documentation">
     <echo message="Creating user documentation" />
     <antcall target="run-docbook2html" inheritall="false">
       <param name="docbook-dir" value="user" />
       <param name="docbook-srcfile" value="userdoc.docbook" />
     </antcall>
-    <antcall target="run-docbook2pdf" inheritall="false">
-      <param name="docbook-dir" value="user" />
-      <param name="docbook-srcfile" value="userdoc.docbook" />
-    </antcall>
-  </target>
-  
-  <target name="doc-quickstart">
+
     <echo message="Creating quickstart documentation" />
     <antcall target="run-docbook2html" inheritall="false">
       <param name="docbook-dir" value="quickstart" />
       <param name="docbook-srcfile" value="quickstart.docbook" />
     </antcall>
-    <antcall target="run-docbook2pdf" inheritall="false">
-      <param name="docbook-dir" value="quickstart" />
-      <param name="docbook-srcfile" value="quickstart.docbook" />
-    </antcall>
-  </target>
   
-  <target name="doc-developer">
     <echo message="Creating developer documentation" />
     <antcall target="run-docbook2html" inheritall="false">
       <param name="docbook-dir" value="developer" />
       <param name="docbook-srcfile" value="devdoc.docbook" />
     </antcall>
+  </target>
+  
+  
+  <target name="doc-pdf" description="Generate all pdf documentation">
+    <echo message="Creating user documentation" />
+    <antcall target="run-docbook2pdf" inheritall="false">
+      <param name="docbook-dir" value="user" />
+      <param name="docbook-srcfile" value="userdoc.docbook" />
+    </antcall>
+
+    <echo message="Creating quickstart documentation" />
+    <antcall target="run-docbook2pdf" inheritall="false">
+      <param name="docbook-dir" value="quickstart" />
+      <param name="docbook-srcfile" value="quickstart.docbook" />
+    </antcall>
+
+    <echo message="Creating developer documentation" />
     <antcall target="run-docbook2pdf" inheritall="false">
       <param name="docbook-dir" value="developer" />
       <param name="docbook-srcfile" value="devdoc.docbook" />
     </antcall>
   </target>
+  
   
   <target name="run-docbook2html" depends="assert-docbook2html-present">
     <mkdir dir="docs/${docbook-dir}" />
@@ -212,8 +219,8 @@
        Jar Targets
        *********** -->
        
-  <target name="jar" depends="doc, resolve-version-tag" 
-          description="Create the jar file with all docs (generating docs first)">
+  <target name="jar" depends="doc-html, resolve-version-tag" 
+          description="Create the jar file with distributed docs (generating html docs first)">
     <jar jarfile="${jar-filename}">
       <manifest>
         <attribute name="Built-By" value="${user.name}" />
