@@ -87,7 +87,7 @@
     <echo message="PATH: 'cvs' needs to refer to the CVS executable; 'docbook2html' and " />
     <echo message="      'docbook2pdf' should also be available." />
     <echo message="" />
-    <echo message="Ant may also require ANT_HOME to be set."
+    <echo message="Ant may also require ANT_HOME to be set." />
   </target>
   
   
