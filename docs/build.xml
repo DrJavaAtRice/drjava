@@ -135,46 +135,39 @@
        Documentation Targets
        ********************* -->
   
-  <target name="doc" depends="doc-html doc-pdf"
+  <target name="doc" depends="doc-html, doc-pdf"
           description="Shortcut for 'doc-html doc-pdf'">
   </target>
   
   
   <target name="doc-html" description="Generate all html documentation">
-    <echo message="Creating user documentation" />
+    <echo message="Creating html documentation" />
     <antcall target="run-docbook2html" inheritall="false">
       <param name="docbook-dir" value="user" />
       <param name="docbook-srcfile" value="userdoc.docbook" />
     </antcall>
-
-    <echo message="Creating quickstart documentation" />
     <antcall target="run-docbook2html" inheritall="false">
       <param name="docbook-dir" value="quickstart" />
       <param name="docbook-srcfile" value="quickstart.docbook" />
     </antcall>
-  
-    <echo message="Creating developer documentation" />
     <antcall target="run-docbook2html" inheritall="false">
       <param name="docbook-dir" value="developer" />
       <param name="docbook-srcfile" value="devdoc.docbook" />
     </antcall>
+    <antcall target="copy-resources" inheritall="false" />
   </target>
   
   
   <target name="doc-pdf" description="Generate all pdf documentation">
-    <echo message="Creating user documentation" />
+    <echo message="Creating pdf documentation" />
     <antcall target="run-docbook2pdf" inheritall="false">
       <param name="docbook-dir" value="user" />
       <param name="docbook-srcfile" value="userdoc.docbook" />
     </antcall>
-
-    <echo message="Creating quickstart documentation" />
     <antcall target="run-docbook2pdf" inheritall="false">
       <param name="docbook-dir" value="quickstart" />
       <param name="docbook-srcfile" value="quickstart.docbook" />
     </antcall>
-
-    <echo message="Creating developer documentation" />
     <antcall target="run-docbook2pdf" inheritall="false">
       <param name="docbook-dir" value="developer" />
       <param name="docbook-srcfile" value="devdoc.docbook" />
@@ -207,7 +200,7 @@
   </target>
   
   <target name="copy-resources">
-    <copy todir="classes/base">
+    <copy todir="docs">
       <fileset dir="src">
         <patternset refid="resources" />
       </fileset>
