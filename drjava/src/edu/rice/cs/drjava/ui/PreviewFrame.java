@@ -62,13 +62,12 @@ import edu.rice.cs.drjava.model.*;
  * DrJava's print preview window
  * @version $Id$
  */
-public class PreviewFrame extends JFrame {
+public abstract class PreviewFrame extends JFrame {
 
-  private SingleDisplayModel _model;
-  private OpenDefinitionsDocument _document;
-  private MainFrame _mainFrame;
-  private Pageable _print;
-  private int _pageNumber;
+  protected SingleDisplayModel _model;
+  protected MainFrame _mainFrame;
+  protected Pageable _print;
+  protected int _pageNumber;
 
 //  private JTextField _pageTextField = new JTextField("" + (_pageNumber + 1), 2) {
 //    public Dimension getMaximumSize() {
@@ -167,16 +166,14 @@ public class PreviewFrame extends JFrame {
    * Contructs a new PreviewFrame using a parent model and
    * a Pageable object print to show.
    */
-  public PreviewFrame(SingleDisplayModel model, MainFrame mainFrame)
+  public PreviewFrame(SingleDisplayModel model, MainFrame mainFrame, boolean interactions)
     throws IllegalStateException {
     super("Print Preview");
     mainFrame.hourglassOn();
     _model = model;
     _mainFrame = mainFrame;
-    _document = model.getActiveDocument();
     _toolBar = new JToolBar();
-
-    _print = _document.getPageable();
+    _print = setUpDocument(model, interactions);
     _pageChanger = createPageChanger();
 
     _setUpActions();
@@ -209,20 +206,18 @@ public class PreviewFrame extends JFrame {
     setVisible(true);
   }
 
-  private void _print() {
-    try {
-      _document.print();
-    }
-    catch (FileMovedException fme) {
-      _mainFrame._showFileMovedError(fme);
-    }
-    catch (PrinterException e) {
-      _showError(e, "Print Error", "An error occured while printing.");
-    }
-    catch (BadLocationException e) {
-      _showError(e, "Print Error", "An error occured while printing.");
-    }
-  }
+  /** Prints the document being previewed */
+  abstract protected void _print();
+  
+   /** Sets up the document to be displayed and returns the Pageable object that allows display by pages
+   * 
+   *  @param model the current display model
+   *  @param interactions whether the document is an interactions document
+   *  
+   *  @return a Pageable object that allows the document to be displayed by pages
+   */
+  abstract protected Pageable setUpDocument(SingleDisplayModel model, boolean interactions);
+
 
   private void _close() {
     dispose();
@@ -245,7 +240,7 @@ public class PreviewFrame extends JFrame {
     _updateActions();
   }
 
-  private void _showError(Exception e, String title, String message) {
+  protected void _showError(Exception e, String title, String message) {
     JOptionPane.showMessageDialog(this,
                                   message + "\n" + e,
                                   title,
@@ -480,7 +475,7 @@ public class PreviewFrame extends JFrame {
      * Scales the interal image to the appropriate
      * size.
      */
-    private void updateScaled() {
+    protected void updateScaled() {
       _image = _source.getScaledInstance(_width, _height, Image.SCALE_SMOOTH);
       _image.flush();
     }
@@ -514,6 +509,4 @@ public class PreviewFrame extends JFrame {
       paintBorder(g);
     }
   }
-
-
 }

@@ -599,6 +599,12 @@ public interface OptionConstants {
    */
   public static final KeyStrokeOption KEY_VIEW_INTERACTIONS_CLASSPATH =
     new KeyStrokeOption("key.view.interactions.classpath", KeyStrokeOption.NULL_KEYSTROKE);
+  
+  /**
+   * The key binding for printing the interactions.
+   */
+  public static final KeyStrokeOption KEY_PRINT_INTERACTIONS =
+    new KeyStrokeOption("key.view.print.interactions", KeyStrokeOption.NULL_KEYSTROKE);
 
   /**
    * The key binding for lifting the current interaction to definitions.
@@ -619,6 +625,12 @@ public interface OptionConstants {
    */
   public static final KeyStrokeOption KEY_CLEAR_CONSOLE =
     new KeyStrokeOption("key.clear.console", KeyStrokeOption.NULL_KEYSTROKE);
+  
+  /**
+   * The key binding for printing the console.
+   */
+  public static final KeyStrokeOption KEY_PRINT_CONSOLE =
+    new KeyStrokeOption("key.view.print.console", KeyStrokeOption.NULL_KEYSTROKE);
 
   /**
    * The key binding for moving the cursor backwards

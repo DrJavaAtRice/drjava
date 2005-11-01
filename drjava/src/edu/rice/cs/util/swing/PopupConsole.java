@@ -33,6 +33,9 @@
 
 package edu.rice.cs.util.swing;
 
+import java.io.*;
+import java.util.*;
+
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
@@ -215,6 +218,10 @@ public class PopupConsole {
     return _inputBox.getText();
   }
   
+  private void abort() throws IOException {
+    System.in.close();
+  }
+  
   /**
    * Sets up the swing dialog box and its GUI items.  The input 
    * text box is not included so that the calle of this method may
@@ -239,7 +246,8 @@ public class PopupConsole {
       public void actionPerformed(ActionEvent e) {
         dialog.setVisible(false);
       }
-    };    
+    };
+    
     JButton doneButton = new JButton(inputEnteredAction);
     doneButton.setMargin(new Insets(1,5,1,5));
     buttonPanel.add(doneButton);

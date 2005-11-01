@@ -33,6 +33,10 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.repl;
 
+import java.awt.print.*;
+
+import edu.rice.cs.drjava.model.print.DrJavaBook;
+
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.text.ConsoleInterface;
 import edu.rice.cs.util.text.DocumentEditCondition;
@@ -73,6 +77,13 @@ public class ConsoleDocument implements ConsoleInterface {
 
   /** Whether the document currently has a prompt and is ready to accept input. */
   protected volatile boolean _hasPrompt;
+  
+  /** The book object used for printing that represents several pages */
+  protected DrJavaBook _book;
+  
+//  /** The format of the page to be printed (i.e. orientation, size, etc) */
+//  protected PageFormat _pageFormat = new PageFormat();
+  
 
   /** Creates a new ConsoleDocument with the given ConsoleInterface.
    *  @param adapter the ConsoleInterface to use
@@ -334,7 +345,30 @@ public class ConsoleDocument implements ConsoleInterface {
     catch (DocumentAdapterException ble) { throw new UnexpectedException(ble); }
     finally { releaseWriteLock(); }
   }
-
+  
+  
+  /** Returns the Pageable object for printing.
+   *  @return A Pageable representing this document.
+   */
+  public Pageable getPageable() throws IllegalStateException { return _book; }
+  
+  /** This method tells the document to prepare all the DrJavaBook and PagePrinter objects. */
+  public void preparePrintJob() {
+    _book = new DrJavaBook(getDocText(0, getLength()), "Console", new PageFormat());
+  }
+  
+  /** Prints the given document by bringing up a "Print" window. */
+  public void print() throws PrinterException {
+    preparePrintJob();
+    PrinterJob printJob = PrinterJob.getPrinterJob();
+    printJob.setPageable(_book);
+    if (printJob.printDialog()) printJob.print();
+    cleanUpPrintJob();
+  }
+  
+  /** Clears the pageable object used to hold the print job. */
+  public void cleanUpPrintJob() { _book = null; }
+  
   /** Class ensuring that attempts to edit document lines above the prompt are rejected. */
   class ConsoleEditCondition extends DocumentEditCondition {
     public boolean canInsertText(int offs) { return canRemoveText(offs); }

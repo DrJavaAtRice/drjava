@@ -48,6 +48,8 @@ package edu.rice.cs.util.text;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.UnexpectedException;
 
+import java.awt.print.*;
+
 import javax.swing.text.Style;
 import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.AttributeSet;
@@ -202,6 +204,17 @@ public class SwingDocument extends DefaultStyledDocument implements ConsoleInter
     catch (BadLocationException e) { throw new UnexpectedException(e); }  // impossible
     finally { writeUnlock(); }
   }
+  
+  public void print() {
+    throw new UnsupportedOperationException("Printing not supported");
+  }
+  
+  public Pageable getPageable() {
+    throw new UnsupportedOperationException("Printing not supported");
+  }
+  
+  
+  
   /* Locking operations */
   
   /** Swing-style readLock(). */

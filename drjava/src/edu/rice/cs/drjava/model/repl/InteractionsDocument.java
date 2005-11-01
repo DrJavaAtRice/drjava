@@ -46,6 +46,9 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.model.repl;
 
 import java.io.*;
+import java.awt.print.*;
+
+import edu.rice.cs.drjava.model.print.DrJavaBook;
 
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.text.ConsoleInterface;
@@ -442,6 +445,11 @@ public class InteractionsDocument extends ConsoleDocument {
   /** Returns the string that the user has entered at the current prompt. Forwards to getCurrentInput(). */
   public String getCurrentInteraction() {
     return getCurrentInput();
+  }
+  
+  /** This method tells the document to prepare all the DrJavaBook and PagePrinter objects. */
+  public void preparePrintJob() {
+    _book = new DrJavaBook(getDocText(0, getLength()), "Interactions", new PageFormat());
   }
   
   /* Only used for testing. */

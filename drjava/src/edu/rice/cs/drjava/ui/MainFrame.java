@@ -582,14 +582,34 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
   };
   
-  /** Prints the cint xurrent document. */
-  private Action _printAction = new AbstractAction("Print...") {
-    public void actionPerformed(ActionEvent ae) { _print(); }
+  /** Prints the current document. */
+  private Action _printDefDocAction = new AbstractAction("Print...") {
+    public void actionPerformed(ActionEvent ae) { _printDefDoc(); }
+  };
+  
+  /** Prints the console document. */
+  private Action _printConsoleAction = new AbstractAction("Print Console...") {
+    public void actionPerformed(ActionEvent ae) { _printConsole(); }
+  };
+  
+  /** Prints the interactions document. */
+  private Action _printInteractionsAction = new AbstractAction("Print Interactions...") {
+    public void actionPerformed(ActionEvent ae) { _printInteractions(); }
   };
   
   /** Opens the print preview window. */
-  private Action _printPreviewAction = new AbstractAction("Print Preview...") {
-    public void actionPerformed(ActionEvent ae) { _printPreview(); }
+  private Action _printDefDocPreviewAction = new AbstractAction("Print Preview...") {
+    public void actionPerformed(ActionEvent ae) { _printDefDocPreview(); }
+  };
+  
+  /** Opens the print preview window. */
+  private Action _printConsolePreviewAction = new AbstractAction("Print Preview...") {
+    public void actionPerformed(ActionEvent ae) { _printConsolePreview(); }
+  };
+  
+  /** Opens the print preview window. */
+  private Action _printInteractionsPreviewAction = new AbstractAction("Print Preview...") {
+    public void actionPerformed(ActionEvent ae) { _printInteractionsPreview(); }
   };
   
   /** Opens the page setup window. */
@@ -2546,7 +2566,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
   }
   
-  private void _print() {
+  private void _printDefDoc() {
     try {
       _model.getActiveDocument().print();
     }
@@ -2561,13 +2581,31 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
   }
   
+  private void _printConsole() {
+    try {
+      _model.getConsoleDocument().print();
+    }
+    catch (PrinterException e) {
+      _showError(e, "Print Error", "An error occured while printing.");
+    }
+  }
+  
+  private void _printInteractions() {
+    try {
+      _model.getInteractionsDocument().print();
+    }
+    catch (PrinterException e) {
+      _showError(e, "Print Error", "An error occured while printing.");
+    }
+  }
+  
   /**
    * Opens a new PrintPreview frame.
    */
-  private void _printPreview() {
+  private void _printDefDocPreview() {
     try {
       _model.getActiveDocument().preparePrintJob();
-      new PreviewFrame(_model, this);
+      new PreviewDefDocFrame(_model, this);
     }
     catch (FileMovedException fme) {
       _showFileMovedError(fme);
@@ -2575,6 +2613,28 @@ public class MainFrame extends JFrame implements OptionConstants {
     catch (BadLocationException e) {
       _showError(e, "Print Error",
                  "An error occured while preparing the print preview.");
+    }
+    catch (IllegalStateException e) {
+      _showError(e, "Print Error",
+                 "An error occured while preparing the print preview.");
+    }
+  }
+
+  private void _printConsolePreview() {
+    try {
+      _model.getConsoleDocument().preparePrintJob();
+      new PreviewConsoleFrame(_model, this, false);
+    }
+    catch (IllegalStateException e) {
+      _showError(e, "Print Error",
+                 "An error occured while preparing the print preview.");
+    }
+  }
+  
+  private void _printInteractionsPreview() {
+    try {
+      _model.getInteractionsDocument().preparePrintJob();
+      new PreviewConsoleFrame(_model, this, true);
     }
     catch (IllegalStateException e) {
       _showError(e, "Print Error",
@@ -3559,9 +3619,13 @@ public class MainFrame extends JFrame implements OptionConstants {
     _setUpAction(_compileAction, "Compile", "Compile the current document");
     _setUpAction(_compileAllAction, "Compile All", "CompileAll",
                  "Compile all open documents");
-    _setUpAction(_printAction, "Print", "Print the current document");
+    _setUpAction(_printDefDocAction, "Print", "Print the current main document");
+    _setUpAction(_printConsoleAction, "Print", "Print the Console pane");
+    _setUpAction(_printInteractionsAction, "Print", "Print the Interactions pane");
     _setUpAction(_pageSetupAction, "Page Setup", "PageSetup", "Change the printer settings");
-    _setUpAction(_printPreviewAction, "Print Preview", "PrintPreview", "Preview how the document will be printed");
+    _setUpAction(_printDefDocPreviewAction, "Print Preview", "PrintPreview", "Preview how the document will be printed");
+    _setUpAction(_printConsolePreviewAction, "Print Preview", "PrintPreview", "Preview how the console document will be printed");
+    _setUpAction(_printInteractionsPreviewAction, "Print Preview", "PrintPreview", "Preview how the interactions document will be printed");    
     
     _setUpAction(_quitAction, "Quit", "Quit", "Quit DrJava");
     
@@ -3758,8 +3822,8 @@ public class MainFrame extends JFrame implements OptionConstants {
     // Page setup, print preview, print
     fileMenu.addSeparator();
     _addMenuItem(fileMenu, _pageSetupAction, KEY_PAGE_SETUP);
-    _addMenuItem(fileMenu, _printPreviewAction, KEY_PRINT_PREVIEW);
-    _addMenuItem(fileMenu, _printAction, KEY_PRINT);
+    _addMenuItem(fileMenu, _printDefDocPreviewAction, KEY_PRINT_PREVIEW);
+    _addMenuItem(fileMenu, _printDefDocAction, KEY_PRINT);
     
     // Quit
     fileMenu.addSeparator();
@@ -3845,9 +3909,11 @@ public class MainFrame extends JFrame implements OptionConstants {
     _addMenuItem(toolsMenu, _resetInteractionsAction, KEY_RESET_INTERACTIONS);
     _addMenuItem(toolsMenu, _viewInteractionsClasspathAction, KEY_VIEW_INTERACTIONS_CLASSPATH);
     _addMenuItem(toolsMenu, _copyInteractionToDefinitionsAction, KEY_LIFT_CURRENT_INTERACTION);
+    _addMenuItem(toolsMenu, _printInteractionsAction, KEY_PRINT_INTERACTIONS);
     toolsMenu.addSeparator();
     
     _addMenuItem(toolsMenu, _clearConsoleAction, KEY_CLEAR_CONSOLE);
+    _addMenuItem(toolsMenu, _printConsoleAction, KEY_PRINT_CONSOLE);
     if (DrJava.getConfig().getSetting(SHOW_DEBUG_CONSOLE).booleanValue()) {
       toolsMenu.add(_showDebugConsoleAction);
     }
@@ -4449,8 +4515,8 @@ public class MainFrame extends JFrame implements OptionConstants {
     _navPanePopupMenuForExternal.addSeparator();
     _navPanePopupMenuForExternal.add(_closeAction);
     _navPanePopupMenuForExternal.addSeparator();
-    _navPanePopupMenuForExternal.add(_printAction);
-    _navPanePopupMenuForExternal.add(_printPreviewAction);
+    _navPanePopupMenuForExternal.add(_printDefDocAction);
+    _navPanePopupMenuForExternal.add(_printDefDocPreviewAction);
     _navPanePopupMenuForExternal.addSeparator();
     _navPanePopupMenuForExternal.add(_compileAction);
     _navPanePopupMenuForExternal.add(_junitAction);
@@ -4466,8 +4532,8 @@ public class MainFrame extends JFrame implements OptionConstants {
     _navPanePopupMenuForAuxiliary.addSeparator();
     _navPanePopupMenuForAuxiliary.add(_closeAction);
     _navPanePopupMenuForAuxiliary.addSeparator();
-    _navPanePopupMenuForAuxiliary.add(_printAction);
-    _navPanePopupMenuForAuxiliary.add(_printPreviewAction);
+    _navPanePopupMenuForAuxiliary.add(_printDefDocAction);
+    _navPanePopupMenuForAuxiliary.add(_printDefDocPreviewAction);
     _navPanePopupMenuForAuxiliary.addSeparator();
     _navPanePopupMenuForAuxiliary.add(_compileAction);
     _navPanePopupMenuForAuxiliary.add(_junitAction);
@@ -4484,8 +4550,8 @@ public class MainFrame extends JFrame implements OptionConstants {
     _navPanePopupMenu.addSeparator();
     _navPanePopupMenu.add(_closeAction);
     _navPanePopupMenu.addSeparator();
-    _navPanePopupMenu.add(_printAction);
-    _navPanePopupMenu.add(_printPreviewAction);
+    _navPanePopupMenu.add(_printDefDocAction);
+    _navPanePopupMenu.add(_printDefDocPreviewAction);
     _navPanePopupMenu.addSeparator();
     _navPanePopupMenu.add(_compileAction);
     _navPanePopupMenu.add(_junitAction);
@@ -4530,6 +4596,9 @@ public class MainFrame extends JFrame implements OptionConstants {
     _interactionsPanePopupMenu.add(copyAction);
     _interactionsPanePopupMenu.add(pasteAction);
     _interactionsPanePopupMenu.addSeparator();
+    _interactionsPanePopupMenu.add(_printInteractionsAction);
+    _interactionsPanePopupMenu.add(_printInteractionsPreviewAction);
+    _interactionsPanePopupMenu.addSeparator();
     _interactionsPanePopupMenu.add(_executeHistoryAction);
     _interactionsPanePopupMenu.add(_loadHistoryScriptAction);
     _interactionsPanePopupMenu.add(_saveHistoryAction);
@@ -4547,6 +4616,9 @@ public class MainFrame extends JFrame implements OptionConstants {
     
     _consolePanePopupMenu = new JPopupMenu();
     _consolePanePopupMenu.add(_clearConsoleAction);
+    _consolePanePopupMenu.addSeparator();
+    _consolePanePopupMenu.add(_printConsoleAction);
+    _consolePanePopupMenu.add(_printConsolePreviewAction);
     _consolePane.addMouseListener(new RightClickMouseAdapter() {
       protected void _popupAction(MouseEvent e) {
         _consolePane.requestFocusInWindow();

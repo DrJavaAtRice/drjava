@@ -46,6 +46,7 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.util.text;
 
 import java.io.Serializable;
+import java.awt.print.*;
 
 /** Provides a toolkit-independent way to interact with a console document.  Allows components to use 
  *  documents that can be supplied by Swing, SWT (Eclipse), or other toolkits.  The document also has the 
@@ -112,4 +113,21 @@ public interface ConsoleInterface extends ReadersWritersLocking, Serializable {
    *  @throws DocumentAdapterException if the offset or length are illegal
    */
   public String getDocText(int offs, int len);
+    
+  /** Returns the Pageable object for printing.
+   *  @return A Pageable representing this document.
+   */
+  public Pageable getPageable() throws IllegalStateException;
+  
+//  /** This method tells the document to prepare all the DrJavaBook and PagePrinter objects. */
+//  public void preparePrintJob() {
+//    _book = new DrJavaBook(getDocText(0, getLength()), "Console", _pageFormat);
+//  }
+  
+  /** Prints the given console document */
+  public void print() throws PrinterException;
+  
+//  /** Clears the pageable object used to hold the print job. */
+//  public void cleanUpPrintJob() { _book = null; }
+  
 }
