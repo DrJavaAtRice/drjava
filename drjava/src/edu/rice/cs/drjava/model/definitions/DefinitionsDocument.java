@@ -64,7 +64,7 @@ import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.*;
 
 
-/** The model for the definitions pane.
+/** The document model for the definitions pane.
  *
  *  This implementation of <code>Document</code> contains a "reduced model". The reduced model is automatically kept
  *  in sync when this document is updated. Also, that synchronization is maintained even across undo/redo -- this is 
@@ -147,10 +147,9 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
   /** Keeps track of the listeners to this model. */
   private final GlobalEventNotifier _notifier;
   
-  /**
-   * Convenience constructor for using a custom indenter.
-   * @param indenter custom indenter class
-   * @param notifier used by CompoundUndoManager to announce undoable edits
+  /** Convenience constructor for using a custom indenter.
+   *  @param indenter custom indenter class
+   *  @param notifier used by CompoundUndoManager to announce undoable edits
    */
   public DefinitionsDocument(Indenter indenter, GlobalEventNotifier notifier) {
     super(indenter);
@@ -498,13 +497,11 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
     return _cachedLineNum;
   }
 
-
-  /** This method returns the relative offset of line number from the previous location in the 
-   *  document. */
+  /** This method returns the relative offset of line number from the previous location in the document. */
   private int _getRelativeLine() {
-    int count=0;
+    
+    int count = 0;
     int currLoc = _currentLocation;
-
     setCurrentLocation(_cachedLocation);
 
     if (_cachedLocation > currLoc) {
@@ -1193,7 +1190,6 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
 
   /** Resets the undo manager. */
   public void resetUndoManager() {
-    // throwErrorHuh();
     _undoManager = new CompoundUndoManager(_notifier);
     _undoManager.setLimit(UNDO_LIMIT);
   }

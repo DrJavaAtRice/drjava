@@ -53,7 +53,7 @@ import java.util.Vector;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.model.*;
-import edu.rice.cs.drjava.model.repl.InteractionsDocumentAdapter;
+import edu.rice.cs.drjava.model.repl.InteractionsDJDocument;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.config.OptionEvent;
 import edu.rice.cs.drjava.config.OptionListener;
@@ -187,7 +187,7 @@ public class ColoringView extends PlainView implements OptionConstants {
       }
       Segment text = getLineBuffer();
       
-      if (!(_doc instanceof InteractionsDocumentAdapter) || !((InteractionsDocumentAdapter)_doc).setColoring((p0+p1)/2,g))      
+      if (!(_doc instanceof InteractionsDJDocument) || !((InteractionsDJDocument)_doc).setColoring((p0+p1)/2,g))      
         setFormattingForState(g, stat.getState());
       //      else
       //        DrJava.consoleErr().println("Highlight: p0="+p0+"; p1="+p1+"; location="+location+"; color="+g.getColor()+"; text="+text);
@@ -220,8 +220,8 @@ public class ColoringView extends PlainView implements OptionConstants {
      " doclen=" + _doc.getLength() +" x="+x+" y="+y);
      */
     Document doc = getDocument();
-    if (doc instanceof InteractionsDocumentAdapter)
-      ((InteractionsDocumentAdapter)doc).setBoldFonts(p1,g);
+    if (doc instanceof InteractionsDJDocument)
+      ((InteractionsDJDocument)doc).setBoldFonts(p1,g);
     
     return  super.drawSelectedText(g, x, y, p0, p1);
   }

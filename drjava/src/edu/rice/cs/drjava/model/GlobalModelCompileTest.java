@@ -59,7 +59,7 @@ import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
 //import edu.rice.cs.drjava.model.compiler.*;
 import edu.rice.cs.util.UnexpectedException;
-import edu.rice.cs.util.text.DocumentAdapterException;
+import edu.rice.cs.util.text.EditDocumentException;
 
 /**
  * Tests to ensure that compilation behaves correctly in border cases.
@@ -88,7 +88,7 @@ public final class GlobalModelCompileTest extends GlobalModelTestCase {
 
   /** Tests that the interactions pane is reset after a successful compile if it has been used. */
   public void testCompileResetsInteractions() throws BadLocationException, IOException, InterruptedException,
-    DocumentAdapterException {
+    EditDocumentException {
     
     OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);
     final File file = new File(_tempDir, "DrJavaTestFoo.java");

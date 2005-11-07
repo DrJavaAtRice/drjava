@@ -372,10 +372,7 @@ public final class JavaInterpreterTest extends TestCase {
     
   }
 
-  /**
-   * Ensure that the interpreter rejects assignments where the right type
-   * is not a subclass of the left type.
-   */
+  /** Ensure that the interpreter rejects assignments where the right type is not a subclass of the left type. */
   public void testIncompatibleAssignment() throws ExceptionReturnedException {
     try {
       _interpreter.interpret("Integer i = new Object()");
@@ -396,24 +393,18 @@ public final class JavaInterpreterTest extends TestCase {
     _interpreter.interpret("Object o = new Integer(3)");
   }
 
- /**
-  * Tests the operation of the TypeCheckerExtension by performing the
-  * operations ((false) ? 2/0 : 1) and ((false) ? 2%0 : 1), which should
-  * not throw Exceptions in the Java interpreter.
+ /** Test the operation of the TypeCheckerExtension by performing the operations ((false) ? 2/0 : 1) and 
+  *  ((false) ? 2%0 : 1), which should not throw Exceptions in the Java interpreter.
   */
   public void testTypeCheckerExtension() {
-    try{
-      _interpreter.interpret("(false) ? 2/0 : 1 ");
-    }
+    try { _interpreter.interpret("(false) ? 2/0 : 1 "); }
     catch(ExceptionReturnedException e) {
       if ( e.getContainedException() instanceof ArithmeticException ) {
         fail("testTypeCheckerExtension failed to prevent short circuit DivideByZeroException");
       }
     }
 
-    try{
-      _interpreter.interpret("(false) ? 2%0 : 1 ");
-    }
+    try { _interpreter.interpret("(false) ? 2%0 : 1 "); }
     catch(ExceptionReturnedException e) {
       if ( e.getContainedException() instanceof ArithmeticException ) {
         fail("testTypeCheckerExtension failed to prevent short circuit DivideByZeroException");
@@ -421,13 +412,11 @@ public final class JavaInterpreterTest extends TestCase {
     }
   }
 
-  /**
-  * Tests the operation of the EvaluationVisitorExtension by
-  * Performing a computation with no results (interpreter
-  * should return NO_RESULT and not null)
-  */
+  /** Test the operation of the EvaluationVisitorExtension by performing a computation with no results (interpreter
+   *  should return NO_RESULT and not null)
+   */
   public void testEvaluationVisitorExtensionNO_RESULT() {
-    try{
+    try {
       Object out = _interpreter.interpret("true;");
       assertEquals("testEvaluationVisitorExtension", JavaInterpreter.NO_RESULT, out);
     }
@@ -436,9 +425,7 @@ public final class JavaInterpreterTest extends TestCase {
     }
   }
 
-  /**
-   * Tests that a variable can be defined in the interpreter by an external source.
-   */
+  /** Test that a variable can be defined in the interpreter by an external source. */
   public void testDefineVariableExternally() throws ExceptionReturnedException {
     _interpreter.defineVariable("foo", new String("hello"));
     assertEquals("manipulated externally defined variable",
@@ -450,9 +437,7 @@ public final class JavaInterpreterTest extends TestCase {
                  new Integer(4), _interpreter.interpret("++x"));
   }
 
-  /**
-   * Tests that the value of a variable can be queried externally.
-   */
+  /** Test that the value of a variable can be queried externally. */
   public void testQueryVariableExternally() {
     _interpreter.defineVariable("x", 7);
     // Get value of variable externally
@@ -469,9 +454,7 @@ public final class JavaInterpreterTest extends TestCase {
     }
   }
 
-  /**
-   * Tests that a constant can be defined in the interpreter by an external source.
-   */
+  /** Test that a constant can be defined in the interpreter by an external source. */
   public void testDefineConstantExternally() {
     _interpreter.defineConstant("y", 3);
     try {
@@ -483,9 +466,7 @@ public final class JavaInterpreterTest extends TestCase {
     }
   }
 
-  /**
-   * Tests that arrays initializers are accepted.
-   */
+  /** Test that arrays initializers are accepted. */
   public void testInitializeArrays() throws ExceptionReturnedException {
     try {
       _interpreter.interpret("int i[] = new int[]{1,2,3};");
@@ -497,9 +478,14 @@ public final class JavaInterpreterTest extends TestCase {
     }
   }
 
-  /**
-   * Tests that the Interactions Pane will or won't allow access to private members
-   * given the value of the ALLOW_PRIVATE_ACCESS configuration option.
+  /** Test that array cloning works. */
+  public void testArrayCloning() throws ExceptionReturnedException {
+    try { _interpreter.interpret("new int[]{0}.clone()"); }
+    catch(RuntimeException e) { fail("Array cloning failed."); }
+  }
+  
+  /** Test that the Interactions Pane will or won't allow access to private members
+   *  given the value of the ALLOW_PRIVATE_ACCESS configuration option.
    */
   public void testAllowPrivateAccess() throws ExceptionReturnedException {
     // The real option listener is in DefaultGlobalModel, so add one here.

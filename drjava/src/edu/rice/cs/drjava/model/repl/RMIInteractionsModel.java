@@ -46,7 +46,8 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.model.repl;
 
 import edu.rice.cs.drjava.model.repl.newjvm.*;
-import edu.rice.cs.util.text.ConsoleInterface;
+import edu.rice.cs.util.text.EditDocumentInterface;
+import edu.rice.cs.util.text.ConsoleDocument;
 import edu.rice.cs.util.swing.Utilities;
 
 import java.net.URL;
@@ -62,18 +63,16 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
   /** RMI interface to the remote Java interpreter.*/
   protected final MainJVM _interpreterControl;
 
-
   /** Constructs an InteractionsModel which can communicate with another JVM.
    *  @param control RMI interface to the Java interpreter
-   *  @param adapter InteractionsDocumentAdapter to use in the InteractionsDocument
+   *  @param adapter InteractionsDJDocument to use in the InteractionsDocument
    *  @param historySize Number of lines to store in the history
    *  @param writeDelay Number of milliseconds to wait after each println
    */
-  public RMIInteractionsModel(MainJVM control, ConsoleInterface adapter, int historySize, int writeDelay) {
+  public RMIInteractionsModel(MainJVM control, EditDocumentInterface adapter, int historySize, int writeDelay) {
     super(adapter, historySize, writeDelay);
     _interpreterControl = control;
   }
-
 
   /** Interprets the given command.
    *  @param toEval command to be evaluated
@@ -123,42 +122,36 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
     _interpreterControl.addExtraClassPath(path);
   }
   
-  
   /** Resets the Java interpreter. */
   protected void _resetInterpreter() { _interpreterControl.killInterpreter(true); }
 
-  /**
-   * Adds a named DynamicJavaAdapter to the list of interpreters.
-   * @param name the unique name for the interpreter
-   * @throws IllegalArgumentException if the name is not unique
+  /** Adds a named DynamicJavaAdapter to the list of interpreters.
+   *  @param name the unique name for the interpreter
+   *  @throws IllegalArgumentException if the name is not unique
    */
   public void addJavaInterpreter(String name) {
     _interpreterControl.addJavaInterpreter(name);
   }
 
-  /**
-   * Adds a named JavaDebugInterpreter to the list of interpreters.
-   * @param name the unique name for the debug interpreter
-   * @param className the fully qualified class name of the class
-   * the debug interpreter is in
-   * @throws IllegalArgumentException if the name is not unique
+  /** Adds a named JavaDebugInterpreter to the list of interpreters.
+   *  @param name the unique name for the debug interpreter
+   *  @param className the fully qualified class name of the class the debug interpreter is in
+   *  @throws IllegalArgumentException if the name is not unique
    */
   public void addDebugInterpreter(String name, String className) {
     _interpreterControl.addDebugInterpreter(name, className);
   }
 
-  /**
-   * Removes the interpreter with the given name, if it exists.
-   * @param name Name of the interpreter to remove
+  /** Removes the interpreter with the given name, if it exists.
+   *  @param name Name of the interpreter to remove
    */
   public void removeInterpreter(String name) {
     _interpreterControl.removeInterpreter(name);
   }
 
-  /**
-   * Sets the active interpreter.
-   * @param name the (unique) name of the interpreter.
-   * @param prompt the prompt the interpreter should have.
+  /** Sets the active interpreter.
+   *  @param name the (unique) name of the interpreter.
+   *  @param prompt the prompt the interpreter should have.
    */
   public void setActiveInterpreter(String name, String prompt) {
     String currName = _interpreterControl.getCurrentInterpreterName();
@@ -167,9 +160,7 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
     _notifyInterpreterChanged(inProgress);
   }
 
-  /**
-   * Sets the default interpreter to be the current one.
-   */
+  /** Sets the default interpreter to be the current one. */
   public void setToDefaultInterpreter() {
     // Only print prompt if we're not already the default
     String currName = _interpreterControl.getCurrentInterpreterName();
@@ -181,11 +172,10 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
     _notifyInterpreterChanged(inProgress);
   }
 
-  /**
-   * Updates the prompt and status of the document after an interpreter change.
-   * @param prompt New prompt to display
-   * @param inProgress whether the interpreter is currently in progress
-   * @param updatePrompt whether or not the interpreter has changed
+  /** Updates the prompt and status of the document after an interpreter change.
+   *  @param prompt New prompt to display
+   *  @param inProgress whether the interpreter is currently in progress
+   *  @param updatePrompt whether or not the interpreter has changed
    */
   protected void _updateDocument(String prompt, boolean inProgress, boolean updatePrompt) {
     if (updatePrompt) {
@@ -196,26 +186,19 @@ public abstract class RMIInteractionsModel extends InteractionsModel {
     _document.setInProgress(inProgress);
   }
 
-  /**
-   * Notifies listeners that the interpreter has changed.
-   * (Subclasses must maintain listeners.)
-   * @param inProgress Whether the new interpreter is currently in progress
-   * with an interaction (ie. whether an interactionEnded event will be fired)
+  /** Notifies listeners that the interpreter has changed. (Subclasses must maintain listeners.)
+   *  @param inProgress Whether the new interpreter is currently in progress with an interaction, i.e., whether 
+   *         an interactionEnded event will be fired)
    */
   protected abstract void _notifyInterpreterChanged(boolean inProgress);
 
-  /**
-   * Sets whether or not the interpreter should allow access to private members.
-   */
+  /** Sets whether or not the interpreter should allow access to private members. */
   public void setPrivateAccessible(boolean allow) {
     _interpreterControl.setPrivateAccessible(allow);
   }
 
-  /**
-   * Gets the interpreter classpath from the interpreter jvm.
+  /** Gets the interpreter classpath from the interpreter jvm.
    * @return a vector of classpath elements
    */
-  public Vector<URL> getClasspath() {
-    return _interpreterControl.getClasspath();
-  }
+  public Vector<URL> getClasspath() { return _interpreterControl.getClasspath(); }
 }

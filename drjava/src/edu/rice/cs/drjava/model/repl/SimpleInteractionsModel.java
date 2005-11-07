@@ -52,12 +52,11 @@ import edu.rice.cs.drjava.model.repl.newjvm.ClasspathManager;
 
 import edu.rice.cs.util.swing.Utilities;
 
-/**
- * A simple implementation of an InteractionsModel, which uses a
- * DynamicJavaAdapter directly (in the same JVM) to interpret code.
- * This can be used in a standalone interface, such as
- * edu.rice.cs.drjava.ui.SimpleInteractionsWindow.
- * @version $Id$
+import edu.rice.cs.util.text.ConsoleDocument;
+
+/** A simple implementation of InteractionsModel, which uses a DynamicJavaAdapter directly (in the same JVM) to 
+ *  interpret code.  It can be used in a standalone interface, such as edu.rice.cs.drjava.ui.SimpleInteractionsWindow.
+ *  @version $Id$
  */
 public class SimpleInteractionsModel extends InteractionsModel {
 
@@ -67,15 +66,13 @@ public class SimpleInteractionsModel extends InteractionsModel {
   /** An interpreter to evaluate interactions. */
   protected JavaInterpreter _interpreter;
 
-  /** Creates a new InteractionsModel using a InteractionsDocumentAdapter. */
-  public SimpleInteractionsModel() {
-    this(new InteractionsDocumentAdapter());
-  }
+  /** Creates a new InteractionsModel using a InteractionsDJDocument. */
+  public SimpleInteractionsModel() { this(new InteractionsDJDocument()); }
 
   /** Creates a new InteractionsModel with the given document adapter.
    *  @param document Toolkit-independent document adapter
    */
-  public SimpleInteractionsModel(InteractionsDocumentAdapter document) {
+  public SimpleInteractionsModel(InteractionsDJDocument document) {
     super(document, 1000, WRITE_DELAY);
     _interpreter = new DynamicJavaAdapter(new ClasspathManager());
 
@@ -239,4 +236,7 @@ public class SimpleInteractionsModel extends InteractionsModel {
   protected void _notifyInteractionIncomplete() {
     // Oh well.  Nothing to do.
   }
+   
+  /** Returns null because console tab document is not supported in this model */
+  public ConsoleDocument getConsoleDocument() { return null; }
 }

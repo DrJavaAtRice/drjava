@@ -58,9 +58,8 @@ import java.net.*;
 import java.lang.reflect.Method;
 import edu.rice.cs.drjava.model.*;
 
-/**
- * DrJava's print preview window
- * @version $Id$
+/** DrJava's print preview window
+ *  @version $Id$
  */
 public abstract class PreviewFrame extends JFrame {
 

@@ -51,28 +51,24 @@ import java.awt.event.*;
 
 import edu.rice.cs.drjava.model.repl.*;
 
-/**
- * A standalone Interactions Window that provides the functionality of
- * DrJava's Interactions Pane in a single JVM.  Useful for quickly
- * testing small pieces of code if DrJava is not running.
- * @version $Id$
+/** A standalone Interactions Window that provides the functionality of DrJava's Interactions Pane in a single JVM.
+ *  Useful for quickly testing small pieces of code if DrJava is not running.
+ *  @version $Id$
  */
 public class SimpleInteractionsWindow extends JFrame {
   //private final SimpleRMIInteractionsModel _rmiModel;
   private final SimpleInteractionsModel _model;
-  private final InteractionsDocumentAdapter _adapter;
+  private final InteractionsDJDocument _adapter;
   private final InteractionsPane _pane;
   private final InteractionsController _controller;
 
-  public SimpleInteractionsWindow() {
-    this("Interactions Window");
-  }
+  public SimpleInteractionsWindow() { this("Interactions Window"); }
 
   public SimpleInteractionsWindow(String title) {
     super(title);
     setSize(600, 400);
 
-    _adapter = new InteractionsDocumentAdapter();
+    _adapter = new InteractionsDJDocument();
     //_rmiModel = new SimpleRMIInteractionsModel(_adapter);
     _model = new SimpleInteractionsModel(_adapter);
     _pane = new InteractionsPane(_adapter) {

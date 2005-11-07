@@ -42,6 +42,8 @@ import javax.swing.*;
 import javax.swing.border.Border;
 
 import edu.rice.cs.util.Lambda;
+import edu.rice.cs.util.text.ConsoleDocument;
+import edu.rice.cs.util.text.EditDocumentInterface;
 
 /** This console is the console that is used to receive <code>System.in</code> input from the user. 
  *  <p>
@@ -67,9 +69,8 @@ public class PopupConsole {
   protected static final String INSERT_NEWLINE_NAME = "Insert Newline";
     
   protected JTextArea _inputBox;
-  /**
-   * Shift-Enter action in a System.in box.  Inserts a newline.
-   */
+  
+  /** Shift-Enter action in a System.in box.  Inserts a newline. */
   private Action _insertNewlineAction = new AbstractAction() {
     public void actionPerformed(ActionEvent e) {
       JTextArea source = (JTextArea)e.getSource();
@@ -79,48 +80,52 @@ public class PopupConsole {
   
   protected String _title;
   protected Component _parentComponent;
+  
+  /** Associated InteractionsDocument */
+  protected EditDocumentInterface _doc;
+  
+  /** Associated console tab document */
+  protected ConsoleDocument _console;
+  
   protected Runnable _interruptCommand;
   protected Lambda<Object,String> _insertTextCommand;
   
   // used to ensure thread safety when using insertConsoleText and interruptConsole
   protected final Object commandLock = new Object();
   
-  /**
-   * Creates a generic PopupConsole that belongs to the given compone
-   * @param owner The component that owns the dialogs created by the PopupConsole
-   */
-  public PopupConsole(Component owner) {
-    this(owner, null, null);
-  }
+  /** Flag that signals input via System.in has been aborted.  Without this feature, an executing program that is 
+   *  waiting for input cannot be aborted. */
+  private boolean inputAborted = false;
   
-  /**
-   * Creates a PopupConsole that belongs to the given component.
-   * @param owner The component to which all popup dialogs should belong.
-   * @param title The title of the dialog box that pops up
-   */
-  public PopupConsole(Component owner, String title) {
-    this(owner, null, title);
-  }
+//  /** Creates a generic PopupConsole that belongs to the given component.
+//   *  @param owner The component that owns the dialogs created by the PopupConsole
+//   */
+//  public PopupConsole(Component owner) { this(owner, null, null, null); }
+//  
+//  /** Creates a PopupConsole that belongs to the given component.
+//   *  @param owner The component to which all popup dialogs should belong.
+//   *  @param title The title of the dialog box that pops up
+//   */
+//  public PopupConsole(Component owner, String title) { this(owner, null, null, title); }
   
-  /**
-   * Creates a PopupConsole that belongs to the given component. The given
-   * text component will be placed in the console dialog box to receive text.
-   * @param owner The component that owns the dialogs created by the PopupConsole
-   * @param inputBox The JTextArea that will receive input from the user. The 
-   * Shift+<Enter> key binding is set here to insert "\n", so that functionality 
-   * need not be implemented in this text area.
-   * @param title The title of the dialog box that pops up
+  /** Creates a PopupConsole that belongs to the given component (typically the interactions pane). The given
+   *  text component will be placed in the console dialog box to receive text.
+   *  @param owner The component that owns the dialogs created by the PopupConsole
+   *  @param inputBox The JTextArea that will receive input from the user. The Shift+<Enter> key binding is set
+   *         here to insert "\n", so that functionality need not be implemented in this text area.
+   *  @param title The title of the dialog box that pops up
    */
-  public PopupConsole(Component owner, JTextArea inputBox, String title) {
+  public PopupConsole(Component owner, EditDocumentInterface doc, ConsoleDocument console, JTextArea inputBox, 
+                      String title) {
     setParent(owner);
+    _doc = doc;
+    _console = console;
     setInputBox(inputBox);
     setTitle(title);
   }
   
-  /**
-   * Receives input either from the user via a dialog box or programatically through
-   * the <code>insertConsoleText</code> method.
-   * @return The text inputted by the user
+  /** Receives input from the user dialog box or programatically through the <code>insertConsoleText</code> method.
+   *  @return The text inputted by the user
    */
   public String getConsoleInput() { 
     Frame parentFrame = JOptionPane.getFrameForComponent(_parentComponent);
@@ -128,10 +133,7 @@ public class PopupConsole {
     else return silentInput() + "\n";
   }
   
-  /**
-   * Forces the console to stop receiving input from the user and return what
-   * has been inputted so far.
-   */
+  /** Forces the console to stop receiving input from the user and return what has been inputted so far. */
   public void interruptConsole() {
     synchronized (commandLock) { if (_interruptCommand != null) _interruptCommand.run(); }
   }
@@ -149,11 +151,10 @@ public class PopupConsole {
     }
   }
   
-  /**
-   * Causes the current thread to wait until the console is ready for input 
-   * via the insertConsoleText method. This should be used right before a call to 
-   * <code>insertConsoleText</code> or <code>interruptConsole</code> to avoid
-   * calling these methods before the console starts receiving any input.
+  /** Causes the current thread to wait until the console is ready for input 
+   *  via the insertConsoleText method. This should be used right before a call to 
+   *  <code>insertConsoleText</code> or <code>interruptConsole</code> to avoid
+   *  calling these methods before the console starts receiving any input.
    */
   public void waitForConsoleReady() throws InterruptedException {
     synchronized (commandLock) { if (_interruptCommand == null) commandLock.wait(); }
@@ -186,11 +187,10 @@ public class PopupConsole {
   
   public String getTitle() { return _title; }
   
-  /**
-   * Pops up the dialog box and creates the interrupt and insert commands,
-   * returning when the user is done inputting text.
-   * @param parentFrame the frame to set as the dialog's parent
-   * @return The text inputted by the user through the dialog box.
+  /** Pops up the dialog box and creates the interrupt and insert commands,
+   *  returning when the user is done inputting text.
+   *  @param parentFrame the frame to set as the dialog's parent
+   *  @return The text inputted by the user through the dialog box.
    */
   protected String showDialog(Frame parentFrame) {
     final JDialog dialog = createDialog(_inputBox, parentFrame);
@@ -215,21 +215,24 @@ public class PopupConsole {
       _insertTextCommand = null;
     }
     
-    return _inputBox.getText();
+    String input = _inputBox.getText();
+    if (inputAborted) {
+      inputAborted = true;
+      throw new IllegalStateException("System.in aborted");
+    }
+    _doc.append(input + '\n', _doc.getDefaultStyle());
+    _console.append(input + '\n', _console.getDefaultStyle());
+    return input;
   }
   
-  private void abort() throws IOException {
-    System.in.close();
-  }
-  
-  /**
-   * Sets up the swing dialog box and its GUI items.  The input 
-   * text box is not included so that the calle of this method may
-   * add any desired listeners etc. to the TextArea.
-   * @param inputBox The text area that receives input.
-   * @param parentFrame The frame to set as the dialog's parent
-   * @return A fully decorated and functional dialog to receive input
+  /** Sets up the swing dialog box and its GUI items.  The input 
+   *  text box is not included so that the calle of this method may
+   *  add any desired listeners etc. to the TextArea.
+   *  @param inputBox The text area that receives input.
+   *  @param parentFrame The frame to set as the dialog's parent
+   *  @return A fully decorated and functional dialog to receive input
    */
+  
   protected JDialog createDialog(JTextArea inputBox, Frame parentFrame) {
     
     final JDialog dialog = new JDialog(parentFrame, _title, true);
@@ -243,22 +246,29 @@ public class PopupConsole {
     buttonPanel.add(label);
     
     Action inputEnteredAction = new AbstractAction("Done") {
-      public void actionPerformed(ActionEvent e) {
-        dialog.setVisible(false);
-      }
-    };
+      public void actionPerformed(ActionEvent e) { dialog.setVisible(false); }
+    };    
     
     JButton doneButton = new JButton(inputEnteredAction);
     doneButton.setMargin(new Insets(1,5,1,5));
     buttonPanel.add(doneButton);
     dialog.getRootPane().setDefaultButton(doneButton);
     
+    Action inputAbortedAction = new AbstractAction("Abort") {
+      public void actionPerformed(ActionEvent e) {
+        inputAborted = true;
+        PopupConsole.this.interruptConsole();
+      }
+    };
+    
+    JButton abortButton = new JButton(inputAbortedAction);
+    abortButton.setMargin(new Insets(1,5,1,5));
+    buttonPanel.add(abortButton);
+    
     cp.add(buttonPanel, BorderLayout.SOUTH);
     
-    inputBox.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER,0), 
-                               INPUT_ENTERED_NAME);
-    inputBox.getActionMap().put(INPUT_ENTERED_NAME, 
-                                inputEnteredAction);
+    inputBox.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER,0), INPUT_ENTERED_NAME);
+    inputBox.getActionMap().put(INPUT_ENTERED_NAME, inputEnteredAction);
     
     dialog.setSize(400,115);
     dialog.setLocationRelativeTo(parentFrame);
@@ -306,10 +316,7 @@ public class PopupConsole {
     return input.toString();
   }
   
-  /**
-   * A box that can be inserted into the console box 
-   * if no external JTextArea is spceified.
-   */
+  /** A box that can be inserted into the console box if no external JTextArea is spceified. */
   protected static class InputBox extends JTextArea {
     private static final int BORDER_WIDTH = 1;
     private static final int INNER_BUFFER_WIDTH = 3;
@@ -319,6 +326,7 @@ public class PopupConsole {
       setBorder(_createBorder());
       setLineWrap(true);
     }
+    
     private Border _createBorder() {
       Border outerouter = BorderFactory.createLineBorder(getBackground(), OUTER_BUFFER_WIDTH);
       Border outer = BorderFactory.createLineBorder(getForeground(), BORDER_WIDTH);

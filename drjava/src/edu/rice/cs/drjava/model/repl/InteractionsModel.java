@@ -43,8 +43,9 @@ import edu.rice.cs.drjava.CodeStatus;
 import edu.rice.cs.drjava.model.FileOpenSelector;
 import edu.rice.cs.drjava.model.OperationCanceledException;
 import edu.rice.cs.util.*;
-import edu.rice.cs.util.text.ConsoleInterface;
-import edu.rice.cs.util.text.DocumentAdapterException;
+import edu.rice.cs.util.text.EditDocumentInterface;
+import edu.rice.cs.util.text.ConsoleDocument;
+import edu.rice.cs.util.text.EditDocumentException;
 import edu.rice.cs.util.swing.Utilities;
 
 /** A model which can serve as the glue between an InteractionsDocument and any JavaInterpreter.  This 
@@ -92,14 +93,14 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
   /** The input listener to listen for requests to System.in. */
   protected InputListener _inputListener;
 
-  protected ConsoleInterface _adapter;
+  protected EditDocumentInterface _adapter;
   
   /** Constructs an InteractionsModel.
    *  @param adapter DocumentAdapter to use in the InteractionsDocument
    *  @param historySize Number of lines to store in the history
    *  @param writeDelay Number of milliseconds to wait after each println
    */
-  public InteractionsModel(ConsoleInterface adapter, int historySize, int writeDelay) {
+  public InteractionsModel(EditDocumentInterface adapter, int historySize, int writeDelay) {
     _writeDelay = writeDelay;
     _document = new InteractionsDocument(adapter, historySize);
     _adapter = adapter;
@@ -460,7 +461,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
         // Wait to prevent being flooded with println's
         _writerLock.wait(_writeDelay);
       }
-      catch (DocumentAdapterException e) { throw new UnexpectedException(e); }
+      catch (EditDocumentException e) { throw new UnexpectedException(e); }
       catch (InterruptedException e) {
         // It's ok, we'll go ahead and resume
       }
@@ -623,4 +624,7 @@ public abstract class InteractionsModel implements InteractionsModelCallback {
 
     public String getConsoleInput() { throw new IllegalStateException("No input listener installed!"); }
   }
+  
+  /** Gets the console tab document for this interactions model */
+  public abstract ConsoleDocument getConsoleDocument();
 }

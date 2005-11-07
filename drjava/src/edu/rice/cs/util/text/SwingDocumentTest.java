@@ -46,6 +46,7 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.util.text;
 
 import javax.swing.text.BadLocationException;
+import javax.swing.text.AttributeSet;
 
 import junit.framework.TestCase;
 
@@ -69,7 +70,7 @@ public class SwingDocumentTest extends TestCase {
   /**
    * Tests basic interactions with a DocumentAdapter.
    */
-  public void testBasicDocOps() throws DocumentAdapterException {
+  public void testBasicDocOps() throws EditDocumentException {
     _doc.insertText(0, "one", null);
     assertEquals("first doc contents", "one",
                  _doc.getDocText(0, _doc.getLength()));
@@ -82,17 +83,17 @@ public class SwingDocumentTest extends TestCase {
     _doc.insertText(0, "two", null);
     assertEquals("third doc contents", "two thr", _doc.getDocText(0, 7));
     
-    _doc.append(" four", null);
+    _doc.append(" four", (AttributeSet) null);
     assertEquals("fourth doc contents", "two three four", _doc.getText());
   }
   
-  /** Tests that a DocumentAdapterException is thrown when it should be. */
+  /** Tests that a EditDocumentException is thrown when it should be. */
   public void testException() {
     try {
       _doc.insertText(5, "test", null);
       fail("should have thrown an exception");
     }
-    catch (DocumentAdapterException e) {
+    catch (EditDocumentException e) {
       // That's what we expect.
     }
   }
@@ -101,7 +102,7 @@ public class SwingDocumentTest extends TestCase {
    * Tests that a SwingDocument can receive an object that
    * determines whether certain edits are legal.
    */
-  public void testEditCondition() throws DocumentAdapterException, BadLocationException {
+  public void testEditCondition() throws EditDocumentException, BadLocationException {
     DocumentEditCondition c = new DocumentEditCondition() {
       public boolean canInsertText(int offs) {
         return (offs > 5);

@@ -67,12 +67,11 @@ public abstract class InputStreamRedirector extends InputStream {
     _buffer = new ArrayList<Character>(60);
   }
 
-  /**
-   * This method gets called whenever input is requested from the stream and
-   * nothing is currently available.  Subclasses should return the appropriate
-   * input to feed to the input stream.  When using a readLine() method, be sure
-   * to append a newline to the end of the input.
-   * @return the input to the stream, not the empty string
+  /** This method gets called whenever input is requested from the stream and
+   *  nothing is currently available.  Subclasses should return the appropriate
+   *  input to feed to the input stream.  When using a readLine() method, be sure
+   *  to append a newline to the end of the input.
+   *  @return the input to the stream, not the empty string
    */
   protected abstract String _getInput() throws IOException;
 

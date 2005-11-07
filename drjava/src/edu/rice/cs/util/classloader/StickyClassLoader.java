@@ -237,9 +237,7 @@ public class StickyClassLoader extends ClassLoader {
    * loader.  Uses getResource to find the class.
    * @param name Name of the class to load.
    */
-  protected Class _loadWithSecondary(String name) 
-    throws ClassNotFoundException
-  {
+  protected Class _loadWithSecondary(String name) throws ClassNotFoundException {
     // we get the data using getResource because if we just delegate
     // the call to loadClass on old or new loader, it will use that
     // loader as the associated class loader for the class. that's bad.

@@ -62,7 +62,7 @@ import edu.rice.cs.drjava.model.definitions.*;
 import edu.rice.cs.drjava.model.repl.*;
 import edu.rice.cs.drjava.model.compiler.*;
 import edu.rice.cs.util.*;
-import edu.rice.cs.util.text.DocumentAdapterException;
+import edu.rice.cs.util.text.EditDocumentException;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.drjava.CodeStatus;
 import edu.rice.cs.util.Log;

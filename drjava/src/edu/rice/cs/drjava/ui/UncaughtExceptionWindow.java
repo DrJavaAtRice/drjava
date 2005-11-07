@@ -55,11 +55,10 @@ import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.swing.BorderlessScrollPane;
 
-/**
- * Displayed whenever an uncaught exception is thrown and propagates back to an
- * action. Displays information about the exception, asks the user to submit a
- * bug report, and prints the stack trace.
- * @version $Id$
+/** Displayed whenever an uncaught exception is thrown and propagates back to an
+ *  action. Displays information about the exception, asks the user to submit a
+ *  bug report, and prints the stack trace.
+ *  @version $Id$
  */
 public class UncaughtExceptionWindow extends JDialog {
 
@@ -82,7 +81,7 @@ public class UncaughtExceptionWindow extends JDialog {
 
   /** Creates a window to graphically display an exception which has occurred in the code of DrJava. */
   public UncaughtExceptionWindow(JFrame frame, Throwable exception) {
-    super(frame,"Unexpected Error");
+    super(frame, "Unexpected Error");
     System.out.println("Unexpected Window Exception: " + exception);
     _exception = exception;
 

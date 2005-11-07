@@ -99,8 +99,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   /** lock to protect _testInProgress */
   final private Object _testLock = new Object();
   
-  /** The document used to display JUnit test results.
-   *  Used only for testing. */
+  /** The document used to display JUnit test results.  Used only for testing. */
   private final SwingDocument _junitDoc = new SwingDocument();
   
   /** Main constructor.

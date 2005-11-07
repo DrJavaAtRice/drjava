@@ -51,8 +51,9 @@ import java.awt.print.*;
 import edu.rice.cs.drjava.model.print.DrJavaBook;
 
 import edu.rice.cs.util.UnexpectedException;
-import edu.rice.cs.util.text.ConsoleInterface;
-import edu.rice.cs.util.text.DocumentAdapterException;
+import edu.rice.cs.util.text.EditDocumentInterface;
+import edu.rice.cs.util.text.EditDocumentException;
+import edu.rice.cs.util.text.ConsoleDocument;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.drjava.model.FileSaveSelector;
 import edu.rice.cs.drjava.config.OptionListener;
@@ -91,24 +92,24 @@ public class InteractionsDocument extends ConsoleDocument {
   /* Constructors */
 
   /** Reset the document on startup.  Uses a history with configurable size.
-   *  @param document ConsoleInterface to use for the model
+   *  @param document the edit document to use for the model
    */
-  public InteractionsDocument(ConsoleInterface document) { this(document, new History()); }
+  public InteractionsDocument(EditDocumentInterface document) { this(document, new History()); }
 
   /** Reset the document on startup.  Uses a history with the given
    *  maximum size.  This history will not use the config framework.
-   *  @param document ConsoleInterface to use for the model
+   *  @param document EditDocumentInterface to use for the model
    *  @param maxHistorySize Number of commands to remember in the history
    */
-  public InteractionsDocument(ConsoleInterface document, int maxHistorySize) {
+  public InteractionsDocument(EditDocumentInterface document, int maxHistorySize) {
     this(document, new History(maxHistorySize));
   }
 
   /** Reset the document on startup.  Uses the given history.
-   *  @param document ConsoleInterface to use for the model
+   *  @param document EditDocumentInterface to use for the model
    *  @param history History of commands
    */
-  public InteractionsDocument(ConsoleInterface document, History history) {
+  public InteractionsDocument(EditDocumentInterface document, History history) {
     super(document);
     _history = history;
     _hasPrompt = true;
@@ -151,7 +152,7 @@ public class InteractionsDocument extends ConsoleDocument {
       _history.moveEnd();
       setInProgress(false);
     }
-    catch (DocumentAdapterException e) { throw new UnexpectedException(e); }
+    catch (EditDocumentException e) { throw new UnexpectedException(e); }
     finally { releaseWriteLock(); }
   }
 
@@ -161,7 +162,7 @@ public class InteractionsDocument extends ConsoleDocument {
       _clearCurrentInputText();
       append(_history.getCurrent(), DEFAULT_STYLE);
     }
-    catch (DocumentAdapterException ble) { throw new UnexpectedException(ble); }
+    catch (EditDocumentException ble) { throw new UnexpectedException(ble); }
   }
 
   /** Accessor method for the history of commands. */
@@ -356,8 +357,8 @@ public class InteractionsDocument extends ConsoleDocument {
     }
     
     // The following is an ugly hack that should be fixed ASAP.  The read/writelock methods need to be added to
-    // the ConsoleInterface interface.  This cast and a similar one in ConsoleDocument must be removed because they
-    // defeat the purpose of the ConsoleInterface interface.
+    // the EditDocumentInterface interface.  This cast and a similar one in ConsoleDocument must be removed because they
+    // defeat the purpose of the EditDocumentInterface interface.
     
     String c = exceptionClass;
     if (c.indexOf('.') != -1) c = c.substring(c.lastIndexOf('.') + 1, c.length());
@@ -411,7 +412,7 @@ public class InteractionsDocument extends ConsoleDocument {
       }
     }
     catch (IOException ioe) { throw new UnexpectedException(ioe); }
-    catch (DocumentAdapterException ble) { throw new UnexpectedException(ble); }
+    catch (EditDocumentException ble) { throw new UnexpectedException(ble); }
     finally { releaseWriteLock(); }
   }  
 
@@ -429,7 +430,7 @@ public class InteractionsDocument extends ConsoleDocument {
       
       append(message + "\n" , styleName);
     }
-    catch (DocumentAdapterException ble) { throw new UnexpectedException(ble); }
+    catch (EditDocumentException ble) { throw new UnexpectedException(ble); }
   }
 
   /** Clears the current input text and then moves to the end of the command history. */
@@ -443,9 +444,9 @@ public class InteractionsDocument extends ConsoleDocument {
   }  
 
   /** Returns the string that the user has entered at the current prompt. Forwards to getCurrentInput(). */
-  public String getCurrentInteraction() {
-    return getCurrentInput();
-  }
+  public String getCurrentInteraction() { return getCurrentInput(); }
+  
+  public String getDefaultStyle() { return InteractionsDocument.DEFAULT_STYLE; }
   
   /** This method tells the document to prepare all the DrJavaBook and PagePrinter objects. */
   public void preparePrintJob() {

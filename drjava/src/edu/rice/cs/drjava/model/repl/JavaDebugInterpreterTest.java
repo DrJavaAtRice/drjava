@@ -47,7 +47,7 @@ package edu.rice.cs.drjava.model.repl;
 
 import edu.rice.cs.drjava.model.debug.*;
 import edu.rice.cs.drjava.model.*;
-import edu.rice.cs.util.text.DocumentAdapterException;
+import edu.rice.cs.util.text.EditDocumentException;
 import edu.rice.cs.util.swing.Utilities;
 
 import java.util.LinkedList;
@@ -263,7 +263,7 @@ public final class JavaDebugInterpreterTest extends DebugTestCase {
    * in the debug interpreter.
    */
   public void testAccessFieldsAndMethodsOfOuterClasses()
-    throws DebugException, BadLocationException, DocumentAdapterException, IOException, InterruptedException {
+    throws DebugException, BadLocationException, EditDocumentException, IOException, InterruptedException {
     File file = new File(_tempDir, "MonkeyStuff.java");
     OpenDefinitionsDocument doc = doCompile(MONKEY_STUFF, file);
     BreakpointTestListener debugListener = new BreakpointTestListener();
@@ -352,7 +352,7 @@ public final class JavaDebugInterpreterTest extends DebugTestCase {
    * in the debug interpreter.
    */
   public void testAccessStaticFieldsAndMethodsOfOuterClasses()
-    throws DebugException, BadLocationException, DocumentAdapterException, IOException, InterruptedException {
+    throws DebugException, BadLocationException, EditDocumentException, IOException, InterruptedException {
     File dir = new File(_tempDir, "monkey");
     dir.mkdir();
     File file = new File(dir, "MonkeyStaticStuff.java");
@@ -461,7 +461,7 @@ public final class JavaDebugInterpreterTest extends DebugTestCase {
   }
 
   public void testAccessNullFieldsAndFinalLocalVariables()
-    throws DebugException, BadLocationException, DocumentAdapterException, IOException, InterruptedException {
+    throws DebugException, BadLocationException, EditDocumentException, IOException, InterruptedException {
     File file = new File(_tempDir, "Monkey.java");
     OpenDefinitionsDocument doc = doCompile(MONKEY_WITH_INNER_CLASS, file);
     BreakpointTestListener debugListener = new BreakpointTestListener();

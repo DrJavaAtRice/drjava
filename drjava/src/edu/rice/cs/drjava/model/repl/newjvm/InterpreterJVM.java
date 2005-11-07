@@ -40,9 +40,12 @@ import java.util.Hashtable;
 import java.util.Enumeration;
 import java.util.List;
 import java.io.*;
+import javax.swing.JFrame;
+
 import java.rmi.*;
 import java.net.URL;
 import java.net.MalformedURLException;
+
 
 // NOTE: Do NOT import/use the config framework in this class!
 //  (This class runs in a different JVM, and will not share the config object)
@@ -62,6 +65,7 @@ import edu.rice.cs.drjava.model.junit.JUnitTestManager;
 import edu.rice.cs.drjava.model.junit.JUnitError;
 import edu.rice.cs.drjava.model.repl.*;
 import edu.rice.cs.drjava.model.ClasspathEntry;
+import edu.rice.cs.drjava.ui.UncaughtExceptionWindow;
 
 // For Windows focus fix
 import javax.swing.JDialog;
@@ -167,7 +171,7 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
     System.setIn(new InputStreamRedirector() {
       protected String _getInput() {
         try { return _mainJVM.getConsoleInput(); }
-        catch (RemoteException re) {
+        catch(RemoteException re) {
           // blow up if no MainJVM found
           _log.logTime("System.in: " + re.toString());
           throw new IllegalStateException("Main JVM can't be reached for input.\n" + re);
@@ -221,17 +225,13 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
    *  the interpretResult method.
    *  @param s Source code to interpret.
    */
-  public void interpret(String s) {
-    interpret(s, _activeInterpreter);
-  }
+  public void interpret(String s) { interpret(s, _activeInterpreter); }
   
-  /**
-   * Interprets the given string of source code in the interpreter with the
-   * given name.
-   * The result is returned to MainJVM via the interpretResult method.
-   * @param s Source code to interpret.
-   * @param interpreterName Name of the interpreter to use
-   * @throws IllegalArgumentException if the named interpreter does not exist
+  /** Interprets the given string of source code with the given interpreter. The result is returned to MainJVM via 
+   *  the interpretResult method.
+   *  @param s Source code to interpret.
+   *  @param interpreterName Name of the interpreter to use
+   *  @throws IllegalArgumentException if the named interpreter does not exist
    */
   public void interpret(String s, String interpreterName) {
     interpret(s, getInterpreter(interpreterName));
@@ -252,9 +252,11 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
           try {
             _dialog("to interp: " + s);
             
-            String s1 = s;//_interactionsProcessor.preProcess(s);
+            String s1 = s;  //_interactionsProcessor.preProcess(s);
+//            Utilities.showDebug("Preparing to invoke interpret method on " + s1);
             Object result = interpreter.getInterpreter().interpret(s1);
             String resultString = String.valueOf(result);
+//            Utilities.showDebug("Result string is: " + resultString);
             
             if (result == Interpreter.NO_RESULT) {
               //return new VoidResult();
@@ -274,15 +276,14 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
                 if (possibleChar.startsWith("\'") && possibleChar.endsWith("\'") && possibleChar.length()==3)
                   style = InteractionsDocument.CHARACTER_RETURN_STYLE;                
               }
-              if (result instanceof Number) {
-                style = InteractionsDocument.NUMBER_RETURN_STYLE;
-              }
+              if (result instanceof Number) style = InteractionsDocument.NUMBER_RETURN_STYLE;
               _mainJVM.interpretResult(new ValueResult(resultString, style));
               
             }
           }
           catch (ExceptionReturnedException e) {
             Throwable t = e.getContainedException();
+//            Utilities.showStackTrace(t);
             _dialog("interp exception: " + t);
             
             if (t instanceof ParseException) 
@@ -307,10 +308,8 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
           }
           catch (Throwable t) {
             // A user's toString method might throw anything, so we need to be careful
-            //_dialog("thrown by toString: " + t);
-            //return new ExceptionResult(t.getClass().getName(),
-            //                           t.getMessage(),
-            //                           getStackTrace(t));
+            _dialog("irregular interp exception: " + t);
+//            Utilities.showStackTrace(t);
             String shortMsg = null;
             if ((t instanceof ParseError) &&  ((ParseError) t).getParseException() != null) 
               shortMsg = ((ParseError) t).getMessage(); // in this case, getMessage is equivalent to getShortMessage

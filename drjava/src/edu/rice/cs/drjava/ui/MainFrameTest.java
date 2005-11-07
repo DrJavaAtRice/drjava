@@ -230,10 +230,10 @@ public final class MainFrameTest extends MultiThreadedTestCase {
    * InteractionsDocument.  (SourceForge bug #681547)  Also make sure this
    * document cannot be edited before the prompt.
    */
-  public void testCorrectInteractionsDocument() throws DocumentAdapterException {
+  public void testCorrectInteractionsDocument() throws EditDocumentException {
     InteractionsPane pane = _frame.getInteractionsPane();
     SingleDisplayModel model = _frame.getModel();
-    InteractionsDocumentAdapter doc = model.getSwingInteractionsDocument();
+    InteractionsDJDocument doc = model.getSwingInteractionsDocument();
 
     // Make the test silent
     model.getInteractionsModel().getDocument().setBeep(new TestBeep());

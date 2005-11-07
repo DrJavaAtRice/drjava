@@ -42,7 +42,8 @@ import edu.rice.cs.drjava.model.definitions.indent.Indenter;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 import edu.rice.cs.util.Pair;
 import edu.rice.cs.util.UnexpectedException;
-import edu.rice.cs.util.text.DocumentAdapterException;
+import edu.rice.cs.util.text.EditDocumentException;
+import edu.rice.cs.util.text.ConsoleDocument;
 
 import java.io.*;
 import java.awt.*;
@@ -57,7 +58,7 @@ import static edu.rice.cs.drjava.model.definitions.ColoringView.*;
  * 
  *  TODO: rename this class as InteractionsDJDocument; it is not an adapter!
  */
-public class InteractionsDocumentAdapter extends AbstractDJDocument {
+public class InteractionsDJDocument extends AbstractDJDocument {
   
   /** Holds a flag telling the adapter that the interpreter was recently reset, and to reset the styles list 
    *  the next  time a style is added. Cannot reset immediately because then the styles would be lost while 
@@ -65,8 +66,8 @@ public class InteractionsDocumentAdapter extends AbstractDJDocument {
    */
   private boolean _toClear = false;
   
-   /** Standard constructor. Currently does nothing */
-  public InteractionsDocumentAdapter() { super(); }  
+  /** Standard constructor. Currently does nothing */
+  public InteractionsDJDocument() { super(); }  
   
   protected int startCompoundEdit() { return 0; /* Do nothing */ }
   
@@ -89,7 +90,7 @@ public class InteractionsDocumentAdapter extends AbstractDJDocument {
    */
   private List<Pair<Pair<Integer,Integer>,String>> _stylesList = new LinkedList<Pair<Pair<Integer,Integer>,String>>();
   
-  //Adds the given coloring style to the list
+  /** Adds the given coloring style to the styles list. */
   public void addColoring(int start, int end, String style) {
     synchronized(_stylesList) {
       if (_toClear) {
@@ -275,7 +276,7 @@ public class InteractionsDocumentAdapter extends AbstractDJDocument {
       }
     }
     catch (IOException ioe) { throw new UnexpectedException(ioe); }
-    catch (DocumentAdapterException ble) { throw new UnexpectedException(ble); }
+    catch (EditDocumentException ble) { throw new UnexpectedException(ble); }
     finally { writeUnlock(); }
   }  
 }

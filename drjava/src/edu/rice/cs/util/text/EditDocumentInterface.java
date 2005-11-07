@@ -45,8 +45,9 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.util.text;
 
+import java.awt.print.Pageable;
+import java.awt.print.PrinterException;
 import java.io.Serializable;
-import java.awt.print.*;
 
 /** Provides a toolkit-independent way to interact with a console document.  Allows components to use 
  *  documents that can be supplied by Swing, SWT (Eclipse), or other toolkits.  The document also has the 
@@ -55,7 +56,7 @@ import java.awt.print.*;
  *
  * @version $Id$
  */
-public interface ConsoleInterface extends ReadersWritersLocking, Serializable {
+public interface EditDocumentInterface extends ReadersWritersLocking, Serializable {
 
   /** Gets the object which can determine whether an insert
    *  or remove edit should be applied, based on the inputs.
@@ -75,31 +76,30 @@ public interface ConsoleInterface extends ReadersWritersLocking, Serializable {
    *  @param str String to be inserted
    *  @param style Name of the style to use.  Must have been
    *  added using addStyle.
-   *  @throws DocumentAdapterException if the offset is illegal
+   *  @throws EditDocumentException if the offset is illegal
    */
   public void insertText(int offs, String str, String style);
 
-  /** Inserts a string into the document at the given offset
-   *  and the given named style, regardless of the edit condition.
+  /** Inserts a string into the document at the given offset and named style, regardless of the edit condition.
    *  @param offs Offset into the document
    *  @param str String to be inserted
    *  @param style Name of the style to use.  Must have been
    *  added using addStyle.
-   *  @throws DocumentAdapterException if the offset is illegal
+   *  @throws EditDocumentException if the offset is illegal
    */
   public void forceInsertText(int offs, String str, String style);
 
   /** Removes a portion of the document, if the edit condition allows it.
    *  @param offs Offset to start deleting from
    *  @param len Number of characters to remove
-   *  @throws DocumentAdapterException if the offset or length are illegal
+   *  @throws EditDocumentException if the offset or length are illegal
    */
   public void removeText(int offs, int len);
 
   /** Removes a portion of the document, regardless of the edit condition.
    *  @param offs Offset to start deleting from
    *  @param len Number of characters to remove
-   *  @throws DocumentAdapterException if the offset or length are illegal
+   *  @throws EditDocumentException if the offset or length are illegal
    */
   public void forceRemoveText(int offs, int len);
 
@@ -107,27 +107,29 @@ public interface ConsoleInterface extends ReadersWritersLocking, Serializable {
   public int getLength();
 
   /** Returns a portion of the document.  Differs from getText in AbstractDocumentInterface by throwing
-   *  DocumentAdapterException instead of BadLocationException.  (Why bother?)
+   *  EditDocumentException instead of BadLocationException.  (Why bother?)
    *  @param offs First offset of the desired text
    *  @param len Number of characters to return
-   *  @throws DocumentAdapterException if the offset or length are illegal
+   *  @throws EditDocumentException if the offset or length are illegal
    */
   public String getDocText(int offs, int len);
-    
+  
+  /** Appends a string to this in the given named style, if the edit condition allows it.
+   *  @param str String to be inserted
+   *  @param style Name of the style to use.  Must have been added using addStyle.
+   *  @throws EditDocumentException if the offset is illegal
+   */
+  public void append(String str, String style);
+  
+  /** Gets the String identifying the default style for this document if one exists; null otherwise. */
+  public String getDefaultStyle();
+  
   /** Returns the Pageable object for printing.
    *  @return A Pageable representing this document.
    */
   public Pageable getPageable() throws IllegalStateException;
   
-//  /** This method tells the document to prepare all the DrJavaBook and PagePrinter objects. */
-//  public void preparePrintJob() {
-//    _book = new DrJavaBook(getDocText(0, getLength()), "Console", _pageFormat);
-//  }
-  
   /** Prints the given console document */
   public void print() throws PrinterException;
-  
-//  /** Clears the pageable object used to hold the print job. */
-//  public void cleanUpPrintJob() { _book = null; }
   
 }

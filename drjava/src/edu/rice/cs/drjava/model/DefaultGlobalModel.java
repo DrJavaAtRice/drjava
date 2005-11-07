@@ -85,10 +85,10 @@ import edu.rice.cs.util.docnavigation.IDocumentNavigator;
 import edu.rice.cs.util.docnavigation.INavigatorItem;
 import edu.rice.cs.util.docnavigation.INavigatorItemFilter;
 import edu.rice.cs.util.docnavigation.JTreeSortNavigator;
-import edu.rice.cs.util.swing.DocumentIterator;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.text.AbstractDocumentInterface;
-import edu.rice.cs.util.text.DocumentAdapterException;
+import edu.rice.cs.util.text.ConsoleDocument;
+import edu.rice.cs.util.text.EditDocumentException;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
@@ -110,11 +110,10 @@ import edu.rice.cs.drjava.model.debug.Debugger;
 import edu.rice.cs.drjava.model.debug.DebugException;
 import edu.rice.cs.drjava.model.debug.JPDADebugger;
 import edu.rice.cs.drjava.model.debug.NoDebuggerAvailable;
-import edu.rice.cs.drjava.model.repl.ConsoleDocument;
 import edu.rice.cs.drjava.model.repl.DefaultInteractionsModel;
 import edu.rice.cs.drjava.model.repl.InputListener;
 import edu.rice.cs.drjava.model.repl.InteractionsDocument;
-import edu.rice.cs.drjava.model.repl.InteractionsDocumentAdapter;
+import edu.rice.cs.drjava.model.repl.InteractionsDJDocument;
 import edu.rice.cs.drjava.model.repl.InteractionsListener;
 import edu.rice.cs.drjava.model.repl.InteractionsScriptModel;
 import edu.rice.cs.drjava.model.repl.newjvm.MainJVM;
@@ -149,7 +148,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   // ---- Interpreter fields ----
   
   /** The document adapter used in the Interactions model. */
-  protected final InteractionsDocumentAdapter _interactionsDocAdapter;
+  protected final InteractionsDJDocument _interactionsDocAdapter;
   
   /** RMI interface to the Interactions JVM. Package private so we can access it from test cases. */
   final MainJVM _interpreterControl = new MainJVM();
@@ -246,7 +245,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   /** Constructs a new GlobalModel. Creates a new MainJVM and starts its Interpreter JVM. */
   public DefaultGlobalModel() {
     super();
-    _interactionsDocAdapter = new InteractionsDocumentAdapter();
+    _interactionsDocAdapter = new InteractionsDJDocument();
     _interactionsModel = new DefaultInteractionsModel(this, _interpreterControl,_interactionsDocAdapter);
     _interactionsModel.addListener(_interactionsListener);
     _interpreterControl.setInteractionsModel(_interactionsModel);
@@ -628,8 +627,8 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   /** @return the interactions model. */
   public DefaultInteractionsModel getInteractionsModel() { return _interactionsModel; }
   
-  /** @return InteractionsDocumentAdapter in use by the InteractionsDocument. */
-  public InteractionsDocumentAdapter getSwingInteractionsDocument() {
+  /** @return InteractionsDJDocument in use by the InteractionsDocument. */
+  public InteractionsDJDocument getSwingInteractionsDocument() {
     return _interactionsDocAdapter;
   }
   
@@ -1037,7 +1036,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
           _interactionsModel.interpretCurrentInteraction();
         }
       }
-      catch (DocumentAdapterException e) {
+      catch (EditDocumentException e) {
         // This was thrown by insertText - and shouldn't have happened.
         throw new UnexpectedException(e);
       }

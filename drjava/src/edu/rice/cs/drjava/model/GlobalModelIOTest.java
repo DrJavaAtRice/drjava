@@ -52,7 +52,8 @@ import javax.swing.text.BadLocationException;
 
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.UnexpectedException;
-import edu.rice.cs.util.text.DocumentAdapterException;
+import edu.rice.cs.util.text.ConsoleDocument;
+import edu.rice.cs.util.text.EditDocumentException;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.drjava.model.repl.*;
 import edu.rice.cs.drjava.DrJava;
@@ -1241,7 +1242,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
    * the history.
    */
   public void testSaveClearAndLoadHistory()
-      throws DocumentAdapterException, IOException
+      throws EditDocumentException, IOException
   {
     String newLine = System.getProperty("line.separator");
     TestListener listener = new TestListener() {
@@ -1351,9 +1352,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
    * Loads two history files, one whose statements end in semicolons, and one whose statements do not.
    * Makes sure that it doesn't matter.
    */
-  public void testLoadHistoryWithAndWithoutSemicolons()
-      throws IOException, DocumentAdapterException
-  {
+  public void testLoadHistoryWithAndWithoutSemicolons() throws IOException, EditDocumentException {
     TestListener listener = new TestListener() {
       public void interactionStarted() {
         synchronized(this) {
@@ -1446,7 +1445,7 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
   /**
    * Tests that input can be written to and read from the console correctly.
    */
-  public void testConsoleInput() throws DocumentAdapterException {
+  public void testConsoleInput() throws EditDocumentException {
     _model.getInteractionsModel().setInputListener(new InputListener() {
       int n = 0;
       public String getConsoleInput() {

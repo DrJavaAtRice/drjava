@@ -63,10 +63,8 @@ import edu.rice.cs.drjava.model.DJDocument;
 import edu.rice.cs.drjava.model.OperationCanceledException;
 import edu.rice.cs.drjava.model.repl.*;
 
-/**
- * The view component for repl interaction.
- *
- * @version $Id$
+/** The view component for repl interaction.
+ *  @version $Id$
  */
 public abstract class InteractionsPane extends AbstractDJPane implements OptionConstants {
 
@@ -84,12 +82,9 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
   
   /** A runnable object that causes the editor to beep. */
   protected Runnable _beep = new Runnable() {
-    public void run() {
-      Toolkit.getDefaultToolkit().beep();
-    }
+    public void run() { Toolkit.getDefaultToolkit().beep(); }
   };
 
-  
   /** The OptionListener for TEXT_ANTIALIAS. */
   private class AntiAliasOptionListener implements OptionListener<Boolean> {
     public void optionChanged(OptionEvent<Boolean> oce) {
@@ -101,7 +96,7 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
   /** Returns a runnable object that beeps to the user. */
   public Runnable getBeep() { return _beep; }
 
-  private InteractionsDocumentAdapter _doc;
+  private InteractionsDJDocument _doc;
   
   private List<Integer> _listOfPrompt = new LinkedList<Integer> ();
     
@@ -109,13 +104,13 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
    *  Uses default keymap name ("INTERACTIONS_KEYMAP")
    *  @param doc StyledDocument containing the interactions history.
    */
-  public InteractionsPane(InteractionsDocumentAdapter doc) { this("INTERACTIONS_KEYMAP", doc); }
+  public InteractionsPane(InteractionsDJDocument doc) { this("INTERACTIONS_KEYMAP", doc); }
 
   /** Creates an InteractionsPane with the given document.
    *  @param keymapName the name of the keymap for this pane
    *  @param doc StyledDocument containing the interactions history.
    */
-  public InteractionsPane(String keymapName, InteractionsDocumentAdapter doc) {
+  public InteractionsPane(String keymapName, InteractionsDJDocument doc) {
     super(doc);
     _doc = doc;
     //add actions for enter key, etc.
@@ -133,21 +128,17 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
     new ForegroundColorListener(this);
     new BackgroundColorListener(this);
     
-    
     if (CodeStatus.DEVELOPMENT) {
       OptionListener<Boolean> aaTemp = new AntiAliasOptionListener();
       DrJava.getConfig().addOptionListener(OptionConstants.TEXT_ANTIALIAS, aaTemp);
     }
   }
 
-  public void processKeyEvent(KeyEvent e) {
-    super.processKeyEvent(e);
-  }
+  public void processKeyEvent(KeyEvent e) { super.processKeyEvent(e); }
   
-  /**
-   * Assigns the given keystroke to the given action in this pane.
-   * @param stroke keystroke that triggers the action
-   * @param action Action to perform
+  /** Assigns the given keystroke to the given action in this pane.
+   *  @param stroke keystroke that triggers the action
+   *  @param action Action to perform
    */
   public void addActionForKeyStroke(KeyStroke stroke, Action action) {
     // we don't want multiple keys bound to the same action
@@ -161,43 +152,30 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
     setKeymap(_keymap);
   }
 
-  /**
-   * Sets this pane's beep to be a different runnable object.
-   * (Defaults to Toolkit.getDefaultToolkit().beep().)
-   * @param beep Runnable command to notify the user
+  /** Sets this pane's beep to be a different runnable object. Defaults to Toolkit.getDefaultToolkit().beep().
+   *  @param beep Runnable command to notify the user
    */
-  public void setBeep(Runnable beep) {
-    _beep = beep;
-  }
+  public void setBeep(Runnable beep) { _beep = beep; }
 
-  /**
-   * Highlights the given text with error highlight.
-   * @param offset the offset in the text
-   * @param length the length of the error to highlight
+  /** Highlights the given text with error highlight.
+   *  @param offset the offset in the text
+   *  @param length the length of the error to highlight
    */
   public void highlightError(int offset, int length) {
     _highlightManager.addHighlight(offset, offset+length, ERROR_PAINTER);
   }
   
-  
-  /**
-   * Overriding this method ensures that all new documents created in this
-   * editor pane use our editor kit (and thus our model).
+  /** Overriding this method ensures that all new documents created in this editor pane use our editor kit 
+   *  (and thus our model).
    */
-  protected EditorKit createDefaultEditorKit() {
-    //return _editorKit;
-    return EDITOR_KIT;
-  }
+  protected EditorKit createDefaultEditorKit() { return EDITOR_KIT; }
   
-  /**
-   * Enable anti-aliased text by overriding paintComponent.
-   */
+  /** Enable anti-aliased text by overriding paintComponent. */
   protected void paintComponent(Graphics g) {
     if (CodeStatus.DEVELOPMENT) {
       if (_antiAliasText && g instanceof Graphics2D) {
         Graphics2D g2d = (Graphics2D)g;
-        g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
-                             RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+        g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
       }
     }
     super.paintComponent(g);
@@ -214,20 +192,18 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
     if (from > -1) {
       // Found a matching open brace to this close brace
       from = to - from;
-      if (_notCrossesPrompt(to,from))
-        _addHighlight(from, to);
+      if (_notCrossesPrompt(to,from)) _addHighlight(from, to);
       //      Highlighter.Highlight[] _lites = getHighlighter().getHighlights();
     }
     // if this wasn't a close brace, check for an open brace
     else {
       // (getCaretPosition will be the start of the highlight)
       from = to;
-
       to = getDJDocument().balanceForward();
+      
       if (to > -1) {
         to = to + from;
-        if (_notCrossesPrompt(to,from))
-          _addHighlight(from - 1, to);
+        if (_notCrossesPrompt(to,from)) _addHighlight(from - 1, to);
 //        Highlighter.Highlight[] _lites = getHighlighter().getHighlights();
       }
     }
@@ -269,7 +245,6 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
     catch (OperationCanceledException oce) { throw new UnexpectedException(oce); }
   }
   
-  
   /** Returns true if the indent is to be performed. The code in the definitions pane prompts the user, but this 
    *  requires a copy of mainframe, and a reason to do so. The user does not need to be prompted here. The cutoff 
    *  in the definitions pane for the prompt is 10000 characters, which is unlikely to occur in the interactions 
@@ -277,11 +252,8 @@ public abstract class InteractionsPane extends AbstractDJPane implements OptionC
    *  @param selStart - the selection start
    *  @param selEnd - the selection end
    */
-  protected boolean shouldIndent(int selStart, int selEnd) {
-    return true;
-  }
+  protected boolean shouldIndent(int selStart, int selEnd) { return true; }
   
   /** Gets the current prompt position */
   public abstract int getPromptPos();
-  
 }

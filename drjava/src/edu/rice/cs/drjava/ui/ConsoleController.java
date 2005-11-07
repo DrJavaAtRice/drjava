@@ -53,21 +53,19 @@ import java.awt.Event;
 import java.io.Serializable;
 
 import edu.rice.cs.drjava.model.repl.*;
+import edu.rice.cs.util.text.ConsoleDocument;
 
-/**
- * @version $Id$
- */
+/** @version $Id$ */
 public class ConsoleController extends AbstractConsoleController implements Serializable {
   protected ConsoleDocument _doc;
 
   /** Object to wait on for input from System.in. */
   private Object _inputWaitObject = new Object();
 
-  /** State so that the Enter action will only take place if the console is actually
-   *  waiting for input. */
+  /** State so that the Enter action will only take place if the console is actually waiting for input. */
   private boolean _blockedForConsoleInput;
 
-  public ConsoleController(final ConsoleDocument doc, InteractionsDocumentAdapter adapter) {
+  public ConsoleController(final ConsoleDocument doc, InteractionsDJDocument adapter) {
     super(adapter, new InteractionsPane("CONSOLE_KEYMAP", adapter) {
       public int getPromptPos() { return doc.getPromptPos(); }
     });

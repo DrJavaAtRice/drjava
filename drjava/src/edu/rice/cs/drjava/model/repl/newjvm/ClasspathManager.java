@@ -60,18 +60,19 @@ import java.io.File;
 
 public class ClasspathManager{
   
-  // the custom project classpath
+  /** The custom project classpath. */
   List<ClasspathEntry> projectCP;
-  // the build directory
+  /** The build directory. */
   List<ClasspathEntry> buildCP;
-  // the open project files
+  /** The open project files. */
   List<ClasspathEntry> projectFilesCP;
-  // the open external files
+  /** The open external files. */
   List<ClasspathEntry> externalFilesCP;
-  // the extra preferences classpath
+  /** The extra preferences classpath. */
   List<ClasspathEntry> extraCP;
-  // the system classpath
+  /** The system classpath. */
   List<ClasspathEntry> systemCP;
+  
 //  The open files classpath (for nonproject mode)
 //  List<ClasspathEntry> openFilesCP;
   
@@ -111,21 +112,12 @@ public class ClasspathManager{
     projectFilesCP.add(0, new ClasspathEntry(f));
   }
   
-  public List<ClasspathEntry> getProjectFilesCP() {
-    return projectFilesCP;
-  }
+  public List<ClasspathEntry> getProjectFilesCP() { return projectFilesCP; }
   
-  /**
-   * adds the entry to the front of the external classpath
-   */
-  public void addExternalFilesCP(URL f) {
-    // add new entry to front of classpath
-    externalFilesCP.add(0, new ClasspathEntry(f));
-  }
+  /** Adds new entry containing f to the front of the external classpath. */
+  public void addExternalFilesCP(URL f) { externalFilesCP.add(0, new ClasspathEntry(f)); }
   
-  public List<ClasspathEntry> getExternalFilesCP() {
-    return externalFilesCP;
-  }
+  public List<ClasspathEntry> getExternalFilesCP() { return externalFilesCP; }
   
   /** Adds the entry to the front of the extra classpath. */
   public void addExtraCP(URL f) {
@@ -133,20 +125,11 @@ public class ClasspathManager{
     extraCP.add(0, new ClasspathEntry(f));
   }
   
-  public List<ClasspathEntry> getExtraCP() {
-    return extraCP;
-  }
+  public List<ClasspathEntry> getExtraCP() { return extraCP; }
   
-  public List<ClasspathEntry> getSystemCP() {
-    return systemCP;
-  }
+  public List<ClasspathEntry> getSystemCP() { return systemCP; }
   
-  
-  
-  /**
-   * returns a new classloader that represents the
-   * custom classpath
-   */
+  /** Returns a new classloader that represents the custom classpath. */
   public ClassLoader getClassLoader() {
     return new BrainClassLoader(buildClassLoader(projectCP), 
                                 buildClassLoader(buildCP), 
@@ -155,46 +138,30 @@ public class ClasspathManager{
                                 buildClassLoader(extraCP));
   }
   
-  /**
-   * builds a new classloader for the list of classpath entries
-   */
+  /** Builds a new classloader for the list of classpath entries. */
   private ClassLoader buildClassLoader(List<ClasspathEntry>locpe) {
     ClassLoader c = new DeadClassLoader();
-    for(ClasspathEntry cpe: locpe) {
-        c = cpe.getClassLoader(c);
-    }
+    for(ClasspathEntry cpe: locpe) { c = cpe.getClassLoader(c); }
     return c;
   }
 
-  /**
-   * Returns a copy of the list of unique entries on the classpath.
-   */
+  /** Returns a copy of the list of unique entries on the classpath. */
   public ClasspathVector getAugmentedClasspath() {
     ClasspathVector ret = new ClasspathVector();
     List<ClasspathEntry> locpe = getProjectCP();
-    for (ClasspathEntry e: locpe) {
-      ret.add(e.getEntry());
-    }
+    for (ClasspathEntry e: locpe) { ret.add(e.getEntry()); }
 
     locpe = getBuildDirectoryCP();
-    for (ClasspathEntry e: locpe) {
-      ret.add(e.getEntry());
-    }
+    for (ClasspathEntry e: locpe) { ret.add(e.getEntry()); }
 
     locpe = getProjectFilesCP();
-    for (ClasspathEntry e: locpe) {
-      ret.add(e.getEntry());
-    }
+    for (ClasspathEntry e: locpe) { ret.add(e.getEntry()); }
 
     locpe = getExternalFilesCP();
-    for (ClasspathEntry e: locpe) {
-      ret.add(e.getEntry());
-    }
+    for (ClasspathEntry e: locpe) { ret.add(e.getEntry()); }
 
     locpe = getExtraCP();
-    for (ClasspathEntry e: locpe) {
-      ret.add(e.getEntry());
-    }
+    for (ClasspathEntry e: locpe) { ret.add(e.getEntry()); }
     return ret;
   }
 

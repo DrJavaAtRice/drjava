@@ -84,7 +84,7 @@ import edu.rice.cs.util.swing.BorderlessScrollPane;
 import edu.rice.cs.util.swing.BorderlessSplitPane;
 import edu.rice.cs.util.swing.FileDisplayManager;
 import edu.rice.cs.util.swing.Utilities;
-import edu.rice.cs.util.text.DocumentAdapterException;
+import edu.rice.cs.util.text.EditDocumentException;
 import edu.rice.cs.util.classloader.ClassFileError;
 import edu.rice.cs.util.docnavigation.*;
 import edu.rice.cs.drjava.project.*;
@@ -921,14 +921,10 @@ public class MainFrame extends JFrame implements OptionConstants {
   
   /** Clears DrJava's output console. */
   private Action _clearConsoleAction = new AbstractAction("Clear Console") {
-    public void actionPerformed(ActionEvent ae) {
-      _model.resetConsole();
-    }
+    public void actionPerformed(ActionEvent ae) { _model.resetConsole(); }
   };
   
-  /**
-   * Shows the DebugConsole.
-   */
+  /** Shows the DebugConsole. */
   private Action _showDebugConsoleAction = new AbstractAction("Show DrJava Debug Console") {
     public void actionPerformed(ActionEvent e) {
       DrJava.showDrJavaDebugConsole(MainFrame.this);
@@ -4372,8 +4368,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   private void _setUpTabs() {
     _compilerErrorPanel = new CompilerErrorPanel(_model, this);
     
-    _consoleController = new ConsoleController(_model.getConsoleDocument(),
-                                               _model.getSwingConsoleDocument());
+    _consoleController = new ConsoleController(_model.getConsoleDocument(), _model.getSwingConsoleDocument());
     _consolePane = _consoleController.getPane();
     
     // Interactions
@@ -4390,15 +4385,11 @@ public class MainFrame extends JFrame implements OptionConstants {
     _findReplace = new FindReplaceDialog(this, _model);
     
     _consoleScroll = new BorderlessScrollPane(_consolePane) {
-      public boolean requestFocusInWindow() {
-        return _consolePane.requestFocusInWindow();
-      }
+      public boolean requestFocusInWindow() { return _consolePane.requestFocusInWindow(); }
     };
     JScrollPane interactionsScroll = new BorderlessScrollPane(_interactionsPane);
     _interactionsContainer = new JPanel(new BorderLayout()) {
-      public boolean requestFocusInWindow() {
-        return _interactionsPane.requestFocusInWindow();
-      }
+      public boolean requestFocusInWindow() { return _interactionsPane.requestFocusInWindow(); }
     };
     _interactionsContainer.add(interactionsScroll, BorderLayout.CENTER);
     

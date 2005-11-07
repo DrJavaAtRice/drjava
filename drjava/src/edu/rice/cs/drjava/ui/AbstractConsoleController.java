@@ -56,6 +56,7 @@ import java.awt.Font;
 import java.io.Serializable;
 
 import edu.rice.cs.util.swing.Utilities;
+import edu.rice.cs.util.text.ConsoleDocument;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
@@ -69,7 +70,7 @@ import edu.rice.cs.drjava.platform.PlatformFactory;
  */
 public abstract class AbstractConsoleController implements Serializable {
   /** Adapter for the Swing document used by the model.*/
-  protected InteractionsDocumentAdapter _adapter;
+  protected InteractionsDJDocument _adapter;
 
   /** Pane from the view. */
   protected InteractionsPane _pane;
@@ -94,7 +95,7 @@ public abstract class AbstractConsoleController implements Serializable {
   /** Initializes the document adapter and interactions pane. Subclasses *must* call _init() at the end 
    *  of their constructors.
    */
-  protected AbstractConsoleController(InteractionsDocumentAdapter adapter, InteractionsPane pane) {
+  protected AbstractConsoleController(InteractionsDJDocument adapter, InteractionsPane pane) {
     _adapter = adapter;
     _pane = pane;
     _defaultStyle = new SimpleAttributeSet();
@@ -257,9 +258,7 @@ public abstract class AbstractConsoleController implements Serializable {
       Utilities.invokeLater(new Runnable() {
         public void run() { 
           int length = getConsoleDoc().getLength();
-          if (_pane.getCaretPosition() > length) {
-            _pane.setCaretPosition(length);
-          }
+          if (_pane.getCaretPosition() > length) _pane.setCaretPosition(length);
         }
       });
     }
@@ -295,8 +294,8 @@ public abstract class AbstractConsoleController implements Serializable {
     });
   }
 
-  /** Accessor method for the InteractionsDocumentAdapter. */
-  public InteractionsDocumentAdapter getDocumentAdapter() { return _adapter; }
+  /** Accessor method for the InteractionsDJDocument. */
+  public InteractionsDJDocument getDocumentAdapter() { return _adapter; }
 
   /** Accessor method for the InteractionsPane. */
   public InteractionsPane getPane() { return _pane; }
@@ -308,16 +307,12 @@ public abstract class AbstractConsoleController implements Serializable {
 
   /** Inserts a new line at the caret position. */
   AbstractAction newLineAction = new AbstractAction() {
-    public void actionPerformed(ActionEvent e) {
-      getConsoleDoc().insertNewLine(_pane.getCaretPosition());
-    }
+    public void actionPerformed(ActionEvent e) { getConsoleDoc().insertNewLine(_pane.getCaretPosition()); }
   };
 
   /** Removes all text after the prompt. */
   AbstractAction clearCurrentAction = new AbstractAction() {
-    public void actionPerformed(ActionEvent e) {
-      getConsoleDoc().clearCurrentInput();
-    }
+    public void actionPerformed(ActionEvent e) { getConsoleDoc().clearCurrentInput(); }
   };
 
   /** Goes to the end of the current input line. */
@@ -327,9 +322,7 @@ public abstract class AbstractConsoleController implements Serializable {
 
   /** Selects to the end of the current input line. */
   AbstractAction selectToEndAction = new AbstractAction() {
-    public void actionPerformed(ActionEvent e) {
-      _pane.moveCaretPosition(getConsoleDoc().getLength());
-    }
+    public void actionPerformed(ActionEvent e) { _pane.moveCaretPosition(getConsoleDoc().getLength()); }
   };
 
   /** Moves the caret to the prompt. */
@@ -346,14 +339,10 @@ public abstract class AbstractConsoleController implements Serializable {
   };
 
   /** Moves the pane's caret to the end of the document. Only affects reduced_model not the document model. */
-  void moveToEnd() { 
-    moveTo(getConsoleDoc().getLength());
-  }
+  void moveToEnd() { moveTo(getConsoleDoc().getLength()); }
   
   /** Moves the pane's caret to the document's prompt. Only affects reduced_model not the document model. */
-  void moveToPrompt() { 
-    moveTo(getConsoleDoc().getPromptPos()); 
-  }
+  void moveToPrompt() { moveTo(getConsoleDoc().getPromptPos()); }
   
   /** Moves the pane's caret to the given position, as long as it's legal. */
   void moveTo(int pos) {

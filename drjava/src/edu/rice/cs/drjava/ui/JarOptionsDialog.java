@@ -79,10 +79,8 @@ public class JarOptionsDialog extends JDialog {
 
   private SingleDisplayModel _model;
 
-  /**
-   * Create a configuration diaglog
-   *
-   * @param mf the instance of mainframe to query into the project
+  /** Create a configuration diaglog
+   *  @param mf the instance of mainframe to query into the project
    */
   public JarOptionsDialog(JFrame parent, SingleDisplayModel mf) {
     super(parent, "Jar Options", false);

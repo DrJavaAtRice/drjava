@@ -47,9 +47,8 @@ package edu.rice.cs.drjava.model.repl;
 
 import java.net.URL;
 
-/**
- * Interface for an interpreter of Java source code.
- * @version $Id$
+/** Interface for an interpreter of Java source code.
+ *  @version $Id$
  */
 public interface JavaInterpreter extends Interpreter {
   
@@ -80,137 +79,117 @@ public interface JavaInterpreter extends Interpreter {
    */
   public Class getVariableClass(String name);
   
-  /**
-   * Assigns the given value to the given name in the interpreter.
-   * @param name Name of the variable
-   * @param value Value to assign
+  /** Assigns the given value to the given name in the interpreter.
+   *  @param name Name of the variable
+   *  @param value Value to assign
    */
   public void defineVariable(String name, Object value);
   
-  /**
-   * Assigns the given value to the given name in the interpreter.
-   * @param name Name of the variable
-   * @param value boolean to assign
+  /** Assigns the given value to the given name in the interpreter.
+   *  @param name Name of the variable
+   *  @param value boolean to assign
    */
   public void defineVariable(String name, boolean value);
   
-  /**
-   * Assigns the given value to the given name in the interpreter.
-   * @param name Name of the variable
-   * @param value byte to assign
+  /** Assigns the given value to the given name in the interpreter.
+   *  @param name Name of the variable
+   *  @param value byte to assign
    */
   public void defineVariable(String name, byte value);
   
-  /**
-   * Assigns the given value to the given name in the interpreter.
-   * @param name Name of the variable
-   * @param value char to assign
+  /** Assigns the given value to the given name in the interpreter.
+   *  @param name Name of the variable
+   *  @param value char to assign
    */
   public void defineVariable(String name, char value);
   
-  /**
-   * Assigns the given value to the given name in the interpreter.
-   * @param name Name of the variable
-   * @param value double to assign
+  /** Assigns the given value to the given name in the interpreter.
+   *  @param name Name of the variable
+   *  @param value double to assign
    */
   public void defineVariable(String name, double value);
   
-  /**
-   * Assigns the given value to the given name in the interpreter.
-   * @param name Name of the variable
-   * @param value float to assign
+  /** Assigns the given value to the given name in the interpreter.
+   *  @param name Name of the variable
+   *  @param value float to assign
    */
   public void defineVariable(String name, float value);
   
   
-  /**
-   * Assigns the given value to the given name in the interpreter.
-   * @param name Name of the variable
-   * @param value int to assign
+  /** Assigns the given value to the given name in the interpreter.
+   *  @param name Name of the variable
+   *  @param value int to assign
    */
   public void defineVariable(String name, int value);
   
-  /**
-   * Assigns the given value to the given name in the interpreter.
-   * @param name Name of the variable
-   * @param value long to assign
+  /** Assigns the given value to the given name in the interpreter.
+   *  @param name Name of the variable
+   *  @param value long to assign
    */
   public void defineVariable(String name, long value);
   
-  /**
-   * Assigns the given value to the given name as a constant in the interpreter.
-   * @param name Name of the variable
-   * @param value short to assign
+  /** Assigns the given value to the given name as a constant in the interpreter.
+   *  @param name Name of the variable
+   *  @param value short to assign
    */
   public void defineVariable(String name, short value);
   
-  /**
-   * Assigns the given value to the given name in the interpreter.
-   * @param name Name of the variable
-   * @param value Value to assign
+  /** Assigns the given value to the given name in the interpreter.
+   *  @param name Name of the variable
+   *  @param value Value to assign
    */
   public void defineConstant(String name, Object value);
   
-  /**
-   * Assigns the given value to the given name as a constant in the interpreter.
-   * @param name Name of the variable
-   * @param value boolean to assign
+  /** Assigns the given value to the given name as a constant in the interpreter.
+   *  @param name Name of the variable
+   *  @param value boolean to assign
    */
   public void defineConstant(String name, boolean value);
   
-  /**
-   * Assigns the given value to the given name as a constant in the interpreter.
-   * @param name Name of the variable
-   * @param value byte to assign
+  /** Assigns the given value to the given name as a constant in the interpreter.
+   *  @param name Name of the variable
+   *  @param value byte to assign
    */
   public void defineConstant(String name, byte value);
   
-  /**
-   * Assigns the given value to the given name as a constant in the interpreter.
-   * @param name Name of the variable
-   * @param value char to assign
+  /** Assigns the given value to the given name as a constant in the interpreter.
+   *  @param name Name of the variable
+   *  @param value char to assign
    */
   public void defineConstant(String name, char value);
   
-  /**
-   * Assigns the given value to the given name as a constant in the interpreter.
-   * @param name Name of the variable
-   * @param value double to assign
+  /** Assigns the given value to the given name as a constant in the interpreter.
+   *  @param name Name of the variable
+   *  @param value double to assign
    */
   public void defineConstant(String name, double value);
   
-  /**
-   * Assigns the given value to the given name as a constant in the interpreter.
-   * @param name Name of the variable
-   * @param value float to assign
+  /** Assigns the given value to the given name as a constant in the interpreter.
+   *  @param name Name of the variable
+   *  @param value float to assign
    */
   public void defineConstant(String name, float value);
   
-  /**
-   * Assigns the given value to the given name as a constant in the interpreter.
-   * @param name Name of the variable
-   * @param value int to assign
+  /** Assigns the given value to the given name as a constant in the interpreter.
+   *  @param name Name of the variable
+   *  @param value int to assign
    */
   public void defineConstant(String name, int value);
   
-  /**
-   * Assigns the given value to the given name as a constant in the interpreter.
-   * @param name Name of the variable
-   * @param value long to assign
+  /** Assigns the given value to the given name as a constant in the interpreter.
+   *  @param name Name of the variable
+   *  @param value long to assign
    */
   public void defineConstant(String name, long value);
   
-  /**
-   * Assigns the given value to the given name as a constant in the interpreter.
-   * @param name Name of the variable
-   * @param value short to assign
+  /** Assigns the given value to the given name as a constant in the interpreter.
+   *  @param name Name of the variable
+   *  @param value short to assign
    */
   public void defineConstant(String name, short value);
   
-  /**
-   * Sets whether protected and private variables should be accessible in
-   * the interpreter.
-   * @param accessible Whether protected and private variable are accessible
+  /** Sets whether protected and private variables should be accessible in the interpreter.
+   *  @param accessible Whether protected and private variable are accessible
    */
   public void setPrivateAccessible(boolean accessible);
 }

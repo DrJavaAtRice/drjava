@@ -48,7 +48,7 @@ package edu.rice.cs.util.text;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.UnexpectedException;
 
-import java.awt.print.*;
+import java.awt.print.Pageable;
 
 import javax.swing.text.Style;
 import javax.swing.text.DefaultStyledDocument;
@@ -57,11 +57,12 @@ import javax.swing.text.BadLocationException;
 
 import java.util.Hashtable;
 
-/** Provides a toolkit-independent way to interact with an enhanced Swing StyledDocument.
- * This document must use the readers/writers locking protocol established in its superclasses
- * @version $Id$
+/** A swing implementation of the toolkit-independent EditDocumentInterface.  This class is instantiated only
+ *  by test code. This document must use the readers/writers locking protocol established in its superclasses.
+ *  TODO: create a separate DummySwingDocument class for testing and make SwingDocument abstract.
+ *  @version $Id$
  */
-public class SwingDocument extends DefaultStyledDocument implements ConsoleInterface, AbstractDocumentInterface {
+public class SwingDocument extends DefaultStyledDocument implements EditDocumentInterface, AbstractDocumentInterface {
   
   /** Maps names to attribute sets */
   final protected Hashtable<String, AttributeSet> _styles;
@@ -87,6 +88,9 @@ public class SwingDocument extends DefaultStyledDocument implements ConsoleInter
   public AttributeSet getDocStyle(String name) {
     return _styles.get(name);  // no locking necessary: _styles is final and Hashtable is thread-safe
   }
+    
+  /** Adds the given coloring style to the styles list.  Not supported in SwingDocument. */
+  public void addColoring(int start, int end, String style) { }
 
   /** Gets the object which can determine whether an insert or remove edit should be applied, based on the inputs.
    *  @return an Object to determine legality of inputs
@@ -107,7 +111,7 @@ public class SwingDocument extends DefaultStyledDocument implements ConsoleInter
    *  @param offs Offset into the document
    *  @param str String to be inserted
    *  @param style Name of the style to use.  Must have been added using addStyle.
-   *  @throws DocumentAdapterException if the offset is illegal
+   *  @throws EditDocumentException if the offset is illegal
    */
   public void insertText(int offs, String str, String style) {
     writeLock();
@@ -120,14 +124,14 @@ public class SwingDocument extends DefaultStyledDocument implements ConsoleInter
    *  @param offs Offset into the document
    *  @param str String to be inserted
    *  @param style Name of the style to use.  Must have been added using addStyle.
-   *  @throws DocumentAdapterException if the offset is illegal
+   *  @throws EditDocumentException if the offset is illegal
    */
   public void forceInsertText(int offs, String str, String style) {
     AttributeSet s = null;
     if (style != null) s = getDocStyle(style);
     /* Using a writeLock is unnecessary because insertString is already thread-safe */
     try { super.insertString(offs, str, s); }
-    catch (BadLocationException e) { throw new DocumentAdapterException(e); }
+    catch (BadLocationException e) { throw new EditDocumentException(e); }
   }
 
   /** Overrides superclass's insertString to impose the edit condition. The AttributeSet is ignored in the condition, 
@@ -142,7 +146,7 @@ public class SwingDocument extends DefaultStyledDocument implements ConsoleInter
   /** Removes a portion of the document, if the edit condition allows it.
    *  @param offs Offset to start deleting from
    *  @param len Number of characters to remove
-   *  @throws DocumentAdapterException if the offset or length are illegal
+   *  @throws EditDocumentException if the offset or length are illegal
    */
   public void removeText(int offs, int len) {
     writeLock();  // locking is used to make the test and modification atomic
@@ -153,12 +157,12 @@ public class SwingDocument extends DefaultStyledDocument implements ConsoleInter
   /** Removes a portion of the document, regardless of the edit condition.
    *  @param offs Offset to start deleting from
    *  @param len Number of characters to remove
-   *  @throws DocumentAdapterException if the offset or length are illegal
+   *  @throws EditDocumentException if the offset or length are illegal
    */
   public void forceRemoveText(int offs, int len) {
     /* Using a writeLock is unnecessary because remove is already thread-safe */
     try { super.remove(offs, len); }
-    catch (BadLocationException e) { throw new DocumentAdapterException(e); }
+    catch (BadLocationException e) { throw new EditDocumentException(e); }
   }
 
   /** Overrides superclass's remove to impose the edit condition. */
@@ -174,11 +178,11 @@ public class SwingDocument extends DefaultStyledDocument implements ConsoleInter
   /** Returns a portion of the document.
    *  @param offs First offset of the desired text
    *  @param len Number of characters to return
-   *  @throws DocumentAdapterException if the offset or length are illegal
+   *  @throws EditDocumentException if the offset or length are illegal
    */
   public String getDocText(int offs, int len) {
     try { return getText(offs, len); }  // locking is unnecessary because getText is already thread-safe
-    catch (BadLocationException e) { throw new DocumentAdapterException(e); }
+    catch (BadLocationException e) { throw new EditDocumentException(e); }
   }
   
   /** Returns entire text of this document. */
@@ -197,13 +201,11 @@ public class SwingDocument extends DefaultStyledDocument implements ConsoleInter
     finally { writeUnlock(); }
   }
   
-  /** Appends given string with specified style to end of this document. */
-  public void append(String str, Style style) {
-    writeLock();
-    try { insertString(getLength(), str, style); }
-    catch (BadLocationException e) { throw new UnexpectedException(e); }  // impossible
-    finally { writeUnlock(); }
-  }
+  /** Appends given string with specified named style to end of this document. */
+  public void append(String str, String style) { append(str, getDocStyle(style)); }
+  
+  /** A SwingDocument instance does not have a default style */
+  public String getDefaultStyle() { return null; }
   
   public void print() {
     throw new UnsupportedOperationException("Printing not supported");
@@ -212,8 +214,6 @@ public class SwingDocument extends DefaultStyledDocument implements ConsoleInter
   public Pageable getPageable() {
     throw new UnsupportedOperationException("Printing not supported");
   }
-  
-  
   
   /* Locking operations */
   

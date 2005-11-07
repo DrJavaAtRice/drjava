@@ -45,18 +45,17 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.util.text;
 
-/**
- * Exception thrown indicating an illegal state or operation on a DocumentAdapter.
- * @version $Id$
+/** Exception thrown indicating an illegal state or operation on an EditDocument.
+ *  @version $Id$
  */
-public class DocumentAdapterException extends RuntimeException {
+public class EditDocumentException extends RuntimeException {
   private Throwable _value;
 
    /**
    * Constructs an exception with
    * <code>value.toString()</code> as it's message.
    */
-  public DocumentAdapterException(Throwable value) {
+  public EditDocumentException(Throwable value) {
     super(value.toString());
     _value = value;
   }
@@ -65,7 +64,7 @@ public class DocumentAdapterException extends RuntimeException {
    * Constructs an exception with a custom message string in
    * addition to <code>value.toString()</code>.
    */
-  public DocumentAdapterException(Throwable value, String msg) {
+  public EditDocumentException(Throwable value, String msg) {
     super(msg + ": " + value.toString());
     _value = value;
   }

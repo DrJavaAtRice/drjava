@@ -970,10 +970,9 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
     this.centerViewOnOffset(offset);
   }
 
-  /**
-   * This method overrides a broken version in JTextComponent.  It allows
-   * selection to proceed backwards as well as forwards.  If selection is backwards,
-   * then the caret will end up at the start of the selection rather than the end.
+  /** This method overrides a broken version in JTextComponent.  It allows
+   *  selection to proceed backwards as well as forwards.  If selection is backwards,
+   *  then the caret will end up at the start of the selection rather than the end.
    */
   public void select(int selectionStart, int selectionEnd) {
     if (selectionStart < 0) selectionStart = 0;

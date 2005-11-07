@@ -54,7 +54,7 @@ import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.model.definitions.*;
 import edu.rice.cs.drjava.model.repl.*;
-import edu.rice.cs.util.text.DocumentAdapterException;
+import edu.rice.cs.util.text.EditDocumentException;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.Log;
 
@@ -106,7 +106,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
   }
 
   /** Checks that System.exit is handled appropriately from interactions pane. */
-  public void testExitInteractions() throws DocumentAdapterException, InterruptedException{
+  public void testExitInteractions() throws EditDocumentException, InterruptedException{
     TestListener listener = new TestListener() {
       public void interactionStarted() {
 //        Utilities.showDebug("GlobalModelOtherTest: interaction Started");
@@ -176,7 +176,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
    *
    *  The above method no longer exists...  Does anyone remember what this meant? -nrh
    */
-  public void testInteractionAbort() throws BadLocationException, DocumentAdapterException, InterruptedException, 
+  public void testInteractionAbort() throws BadLocationException, EditDocumentException, InterruptedException, 
     IOException {
     doCompile(setupDocument(FOO_TEXT), tempFile());
     final String beforeAbort = interpret("DrJavaTestFoo.class.getName()");
@@ -251,7 +251,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
   }
 
   /** Checks that reset console works. */
-  public void testResetConsole() throws DocumentAdapterException, InterruptedException {
+  public void testResetConsole() throws EditDocumentException, InterruptedException {
     //System.err.println("Entering testResetConsole");
     TestListener listener = new TestListener() {
       public void interactionStarted() { }
@@ -292,7 +292,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
   /** Creates a new class, compiles it and then checks that the REPL can see it.  Then checks that a compiled class
    *  file in another directory can be both accessed and extended if it is on the "extra.classpath" config option.
    */
-  public void testInteractionsCanSeeCompiledClasses() throws BadLocationException, DocumentAdapterException,
+  public void testInteractionsCanSeeCompiledClasses() throws BadLocationException, EditDocumentException,
     IOException, InterruptedException {
     // Compile Foo
     OpenDefinitionsDocument doc1 = setupDocument(FOO_TEXT);
@@ -334,7 +334,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
    *  variable with an identical name (but a lowercase first letter).  Catches SF bug #689026 ("DynamicJava can't handle
    *  certain variable names")
    */
-  public void testInteractionsVariableWithLowercaseClassName() throws BadLocationException, DocumentAdapterException,
+  public void testInteractionsVariableWithLowercaseClassName() throws BadLocationException, EditDocumentException,
     IOException, InterruptedException {
     // Compile a test file
     OpenDefinitionsDocument doc1 = setupDocument("public class DrJavaTestClass {}");
@@ -347,7 +347,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
   }
 
   /** Checks that updating a class and recompiling it is visible from the REPL. */
-  public void testInteractionsCanSeeChangedClass() throws BadLocationException, DocumentAdapterException,
+  public void testInteractionsCanSeeChangedClass() throws BadLocationException, EditDocumentException,
     IOException, InterruptedException {
     final String text_before = "class DrJavaTestFoo { public int m() { return ";
     final String text_after = "; } }";
@@ -366,7 +366,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
   }
 
   /** Checks that an anonymous inner class can be defined in the repl! */
-  public void testInteractionsDefineAnonymousInnerClass() throws BadLocationException, DocumentAdapterException,
+  public void testInteractionsDefineAnonymousInnerClass() throws BadLocationException, EditDocumentException,
     IOException, InterruptedException {
     final String interface_text = "public interface I { int getValue(); }";
     final File file = createFile("I.java");
@@ -579,7 +579,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
   }
 
   /** Creates a new class, compiles it and then checks that the REPL can see it. */
-  public void testInteractionsLiveUpdateClasspath() throws BadLocationException, DocumentAdapterException,
+  public void testInteractionsLiveUpdateClasspath() throws BadLocationException, EditDocumentException,
     IOException, InterruptedException {
 
     OpenDefinitionsDocument doc = setupDocument(FOO_TEXT);

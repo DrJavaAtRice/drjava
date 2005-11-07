@@ -51,16 +51,13 @@ import edu.rice.cs.drjava.ui.*;
 import edu.rice.cs.drjava.model.GlobalModel;
 import edu.rice.cs.drjava.model.repl.InteractionsDocumentTest.TestBeep;
 
-import edu.rice.cs.util.text.DocumentAdapterException;
+import edu.rice.cs.util.text.EditDocumentException;
 import edu.rice.cs.util.swing.Utilities;
 
-/**
- * Tests the functionality of the InteractionsDocumentAdapter.
- */
-public final class InteractionsDocumentAdapterTest extends TestCase {
+/** Tests the functionality of the InteractionsDJDocument. */
+public final class InteractionsDJDocumentTest extends TestCase {
 
-
-  protected InteractionsDocumentAdapter _adapter;
+  protected InteractionsDJDocument _adapter;
   protected InteractionsModel _model;
   protected InteractionsDocument _doc;
   protected InteractionsPane _pane;
@@ -80,7 +77,7 @@ public final class InteractionsDocumentAdapterTest extends TestCase {
   /**
    * Tests that the styles list is updated and reset properly
    */
-  public void testStylesListContentAndReset() throws DocumentAdapterException {
+  public void testStylesListContentAndReset() throws EditDocumentException {
     // the banner and the prompt are inserted in the styles list when the document is constructed
     assertEquals("StylesList before insert should contain 2 pairs",
                  2, _adapter.getStylesList().size());
@@ -121,7 +118,7 @@ public final class InteractionsDocumentAdapterTest extends TestCase {
   /**
    * Tests that a null style is not added to the list. Fix for bug #995719
    */
-  public void testCannotAddNullStyleToList() throws DocumentAdapterException {
+  public void testCannotAddNullStyleToList() throws EditDocumentException {
     // the banner and the prompt are inserted in the styles list when the document is constructed
     assertEquals("StylesList before insert should contain 2 pairs",
                  2, _adapter.getStylesList().size());

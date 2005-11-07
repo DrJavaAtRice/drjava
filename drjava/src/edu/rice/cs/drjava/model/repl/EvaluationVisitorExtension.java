@@ -55,6 +55,8 @@ import koala.dynamicjava.tree.*;
 import koala.dynamicjava.tree.visitor.*;
 import koala.dynamicjava.util.*;
 
+import edu.rice.cs.util.swing.Utilities;
+
 /**
  * A subclass of EvaluationVisitor to do two new things.
  * <OL>
@@ -88,8 +90,7 @@ public class EvaluationVisitorExtension extends EvaluationVisitor {
     }
   }
 
-  /* Note:  protected static Object performCast(Class<?> tc, Object o)
-   * is inherited from EvaluationVisitoor */
+  /* Note:  protected static Object performCast(Class<?> tc, Object o) is inherited from EvaluationVisitor */
   
   public Object visit(WhileStatement node) {
     _checkInterrupted(node);
@@ -173,7 +174,7 @@ public class EvaluationVisitorExtension extends EvaluationVisitor {
    */
   public Object visit(VariableDeclaration node) {
     _checkInterrupted(node);
-    Class<?> c = NodeProperties.getType(node.getType());
+    Class<?> c = (Class<?>) NodeProperties.getType(node.getType());
 
     if (node.getInitializer() != null) {
       Object o = performCast(c, node.getInitializer().acceptVisitor(this));
@@ -220,10 +221,11 @@ public class EvaluationVisitorExtension extends EvaluationVisitor {
     Method m = (Method) node.getProperty(NodeProperties.METHOD);
 //    m.setAccessible(true);
     Object ret = super.visit(node);
-
-    // workaround to not return null for void returns
-    if (m.getReturnType().equals(Void.TYPE)) return Interpreter.NO_RESULT;
-    else return ret;
+    
+    // this workaround avoids returning null for void returns; null test intercepts array clone invocation which has 
+    // no METHOD property
+    if (m != null && m.getReturnType().equals(Void.TYPE)) return Interpreter.NO_RESULT;
+    return ret;
   }
 
   public Object visit(StaticFieldAccess node) {

@@ -61,18 +61,19 @@ import edu.rice.cs.drjava.model.repl.newjvm.MainJVM;
 import edu.rice.cs.drjava.model.DefaultGlobalModel;
 
 import edu.rice.cs.drjava.ui.MainFrame;
+import edu.rice.cs.util.text.ConsoleDocument;
 
 /**
  * Tests the functionality of an InteractionsModel.
  * @version $Id$
  */
 public final class InteractionsModelTest extends TestCase {
-  protected InteractionsDocumentAdapter _adapter;
+  protected InteractionsDJDocument _adapter;
   protected InteractionsModel _model;
   
   public InteractionsModelTest(String name) {
     super(name);
-    _adapter = new InteractionsDocumentAdapter();
+    _adapter = new InteractionsDJDocument();
     _model = new TestInteractionsModel(_adapter);
   }
 
@@ -87,7 +88,7 @@ public final class InteractionsModelTest extends TestCase {
    *  @param typed A string typed by the user
    *  @param expected What the processor should return
    */
-  protected void _assertProcessedContents(String typed, String expected) throws DocumentAdapterException {
+  protected void _assertProcessedContents(String typed, String expected) throws EditDocumentException {
     assertTrue(_model instanceof TestInteractionsModel);
     TestInteractionsModel model = (TestInteractionsModel)_model;
     InteractionsDocument doc = model.getDocument();
@@ -109,7 +110,7 @@ public final class InteractionsModelTest extends TestCase {
 
 
   /** Tests that the correct text is returned when interpreting. */
-  public void testInterpretCurrentInteraction() throws DocumentAdapterException {
+  public void testInterpretCurrentInteraction() throws EditDocumentException {
     assertTrue(_model instanceof TestInteractionsModel);
     TestInteractionsModel model = (TestInteractionsModel)_model;
     String code = "int x = 3;";
@@ -127,7 +128,7 @@ public final class InteractionsModelTest extends TestCase {
     assertEquals("string being interpreted", code, model.toEval);
   }
 
-  public void testInterpretCurrentInteractionWithIncompleteInput() throws DocumentAdapterException {
+  public void testInterpretCurrentInteractionWithIncompleteInput() throws EditDocumentException {
     _model = new IncompleteInputInteractionsModel(_adapter);   // override the one initialized in setUp()
     assertReplThrewContinuationException("void m() {");
     _model = new IncompleteInputInteractionsModel(_adapter);
@@ -142,7 +143,7 @@ public final class InteractionsModelTest extends TestCase {
     assertReplThrewContinuationException("for (;;");
   }
 
-  protected void assertReplThrewContinuationException(String code) throws DocumentAdapterException {
+  protected void assertReplThrewContinuationException(String code) throws EditDocumentException {
     assertTrue(_model instanceof IncompleteInputInteractionsModel);
     IncompleteInputInteractionsModel model = (IncompleteInputInteractionsModel)_model;
     InteractionsDocument doc = model.getDocument();
@@ -153,7 +154,7 @@ public final class InteractionsModelTest extends TestCase {
                (model.isContinuationException() == true) && (model.isSyntaxException() == false));
   }
 
-  protected void assertReplThrewSyntaxException(String code) throws DocumentAdapterException {
+  protected void assertReplThrewSyntaxException(String code) throws EditDocumentException {
     assertTrue(_model instanceof IncompleteInputInteractionsModel);
     IncompleteInputInteractionsModel model = (IncompleteInputInteractionsModel)_model;
     InteractionsDocument doc = model.getDocument();
@@ -465,7 +466,7 @@ public final class InteractionsModelTest extends TestCase {
   }
 
   /** Tests that the interactions history is stored correctly. See bug # 992455 */
-  public void testInteractionsHistoryStoredCorrectly() throws DocumentAdapterException {
+  public void testInteractionsHistoryStoredCorrectly() throws EditDocumentException {
     final Object _lock = new Object();
     String code = "public class A {\n";
 
@@ -506,7 +507,7 @@ public final class InteractionsModelTest extends TestCase {
     /**
      * Constructs a new InteractionsModel.
      */
-    public TestInteractionsModel(InteractionsDocumentAdapter adapter) {
+    public TestInteractionsModel(InteractionsDJDocument adapter) {
       // Adapter, history size, write delay
       super(adapter, 1000, 25);
     }
@@ -550,16 +551,15 @@ public final class InteractionsModelTest extends TestCase {
     protected void _notifyInterpreterReady() { }
     protected void _interpreterResetFailed(Throwable t) { }
     protected void _notifyInteractionIncomplete() { }
+    public ConsoleDocument getConsoleDocument() { return null; }
   }
 
   public static class IncompleteInputInteractionsModel extends RMIInteractionsModel {
     boolean continuationException;
     boolean syntaxException;
 
-    /**
-     * Constructs a new InteractionsModel.
-     */
-    public IncompleteInputInteractionsModel(InteractionsDocumentAdapter adapter) {
+    /** Constructs a new IncompleteInputInteractionsModel. */
+    public IncompleteInputInteractionsModel(InteractionsDJDocument adapter) {
       // MainJVM, Adapter, history size, write delay
       super(new MainJVM(), adapter, 1000, 25);
       _interpreterControl.setInteractionsModel(this);
@@ -567,21 +567,7 @@ public final class InteractionsModelTest extends TestCase {
       continuationException = false;
       syntaxException = false;
     }
-
-//    public String getVariableToString(String var) {
-//      fail("cannot getVariableToString in a test");
-//      return null;
-//    }
-//    public String getVariableClassName(String var) {
-//      fail("cannot getVariableClassName in a test");
-//      return null;
-//    }
-//    public void addToClassPath(String path) {
-//      fail("cannot add to classpath in a test");
-//    }
-//    protected void _resetInterpreter() {
-//      fail("cannot reset interpreter in a test");
-//    }
+    
     protected void _notifyInteractionStarted() { }
     protected void _notifyInteractionEnded() { }
     protected void _notifySyntaxErrorOccurred(int offset, int length) { }
@@ -591,8 +577,9 @@ public final class InteractionsModelTest extends TestCase {
     protected void _notifyInterpreterReady() { }
     protected void _interpreterResetFailed(Throwable t) { }
     protected void _notifyInteractionIncomplete() { }
-
     protected void _notifyInterpreterChanged(boolean inProgress) { }
+    
+    public ConsoleDocument getConsoleDocument() { return null; }
 
     public void replThrewException(String exceptionClass, String message, String stackTrace, String shortMessage) {
       if (shortMessage!=null) {
@@ -606,12 +593,8 @@ public final class InteractionsModelTest extends TestCase {
       continuationException = false;
     }
 
-    public void replReturnedSyntaxError(String errorMessage,
-                                        String interaction,
-                                        int startRow,
-                                        int startCol,
-                                        int endRow,
-                                        int endCol ) {
+    public void replReturnedSyntaxError(String errorMessage, String interaction, int startRow, int startCol, int endRow,
+                                        int endCol) {
       if (errorMessage!=null) {
         if (errorMessage.endsWith("<EOF>\"")) {
           continuationException = true;

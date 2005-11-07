@@ -59,7 +59,7 @@ import java.lang.reflect.Method;
 
 import edu.rice.cs.drjava.model.*;
 
-import edu.rice.cs.util.text.ConsoleInterface;
+import edu.rice.cs.util.text.EditDocumentInterface;
 
 /**
  * DrJava's print preview window for a console document (interactions or console)
@@ -67,7 +67,7 @@ import edu.rice.cs.util.text.ConsoleInterface;
  */
 public class PreviewConsoleFrame extends PreviewFrame {
 
-  private ConsoleInterface _document;
+  private EditDocumentInterface _document;
 
   /**
    * Contructs a new PreviewConsoleFrame using a parent model and a MainFrame. The boolean determines whether

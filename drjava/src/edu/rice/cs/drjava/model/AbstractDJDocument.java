@@ -58,7 +58,7 @@ import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Position;
 
-/** Class containing code shared between the DefinitionsDocument and the InteractionsDocumentAdapter. */
+/** Class containing code shared between the DefinitionsDocument and the InteractionsDJDocument. */
 public abstract class AbstractDJDocument extends SwingDocument implements DJDocument, OptionConstants {
   
   /*-------- FIELDS ----------*/
@@ -190,14 +190,10 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
    */
   protected static HashSet<String> _makeKeywords() {
     final String[] words =  {
-      "import", "native", "package", "goto", "const", "if", "else",
-      "switch", "while", "for", "do", "true", "false", "null", "this",
-      "super", "new", "instanceof",    "return",
-      "static", "synchronized", "transient", "volatile", "final",
-      "strictfp", "throw", "try", "catch", "finally",
-      "throws", "extends", "implements", "interface", "class",
-      "break", "continue", "public", "protected", "private", "abstract",
-      "case", "default", "assert", "enum"
+      "import", "native", "package", "goto", "const", "if", "else", "switch", "while", "for", "do", "true", "false",
+      "null", "this", "super", "new", "instanceof", "return", "static", "synchronized", "transient", "volatile", 
+      "final", "strictfp", "throw", "try", "catch", "finally", "throws", "extends", "implements", "interface", "class",
+      "break", "continue", "public", "protected", "private", "abstract", "case", "default", "assert", "enum"
     };
     HashSet<String> keywords = new HashSet<String>();
     for (int i = 0; i < words.length; i++) { keywords.add(words[i]); }
@@ -215,8 +211,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     for (String w: words) { prims.add(w); }
     return prims;
   }
-  
-  
+    
   /** Return all highlight status info for text between start and end. This should collapse adjoining blocks 
    *  with the same status into one.
    */
@@ -1458,8 +1453,7 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
     catch(BadLocationException e) { throw new UnexpectedException(e); }
     finally { writeUnlock(); }
   }
-  
-  
+   
   //Two abstract methods to delegate to the undo manager, if one exists.
   protected abstract int startCompoundEdit();
   protected abstract void endCompoundEdit(int i);
@@ -1467,7 +1461,6 @@ public abstract class AbstractDJDocument extends SwingDocument implements DJDocu
   protected abstract void addUndoRedo(AbstractDocument.DefaultDocumentEvent chng, Runnable undoCommand, Runnable doCommand);
   
   //Checks if the document is closed, and then throws an error if it is.
-//  protected abstract void throwErrorHuh();
   
   //-------- INNER CLASSES ------------
   

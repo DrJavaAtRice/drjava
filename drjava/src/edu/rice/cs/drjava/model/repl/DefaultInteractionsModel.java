@@ -66,13 +66,12 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
   /** Model that contains the interpreter to use. (Can this be eliminated?) */
   protected final DefaultGlobalModel _model;
 
-  /**
-   * Creates a new InteractionsModel.
-   * @param model DefaultGlobalModel to do the interpretation
-   * @param control RMI interface to the Interpreter JVM
-   * @param adapter InteractionsDocumentAdapter to use for the document
+  /** Creates a new InteractionsModel.
+   *  @param model DefaultGlobalModel to do the interpretation
+   *  @param control RMI interface to the Interpreter JVM
+   *  @param adapter InteractionsDJDocument to use for the document
    */
-  public DefaultInteractionsModel(DefaultGlobalModel model, MainJVM control, ConsoleInterface adapter) {
+  public DefaultInteractionsModel(DefaultGlobalModel model, MainJVM control, EditDocumentInterface adapter) {
     super(control, adapter,
           DrJava.getConfig().getSetting(OptionConstants.HISTORY_MAX_SIZE).intValue(),
           DefaultGlobalModel.WRITE_DELAY);
@@ -175,4 +174,6 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
   protected void _notifyInteractionIncomplete() {
     Utilities.invokeLater(new Runnable() { public void run() { _notifier.interactionIncomplete(); } });
   }
+  
+  public ConsoleDocument getConsoleDocument() { return _model.getConsoleDocument(); }
 }

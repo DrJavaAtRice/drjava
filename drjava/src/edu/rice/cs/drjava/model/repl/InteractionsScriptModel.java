@@ -47,7 +47,7 @@ package edu.rice.cs.drjava.model.repl;
 
 import java.util.List;
 import edu.rice.cs.util.UnexpectedException;
-import edu.rice.cs.util.text.DocumentAdapterException;
+import edu.rice.cs.util.text.EditDocumentException;
 
 /**
  * Manages the execution of a Interactions History as a script of
@@ -109,7 +109,7 @@ public class InteractionsScriptModel {
       String text = _interactions.get(_currentInteraction);
       _doc.insertText(_doc.getLength(), text, _doc.DEFAULT_STYLE);
     }
-    catch (DocumentAdapterException dae) {
+    catch (EditDocumentException dae) {
       throw new UnexpectedException(dae);
     }
   }*/
@@ -139,7 +139,7 @@ public class InteractionsScriptModel {
       String text = _interactions.get(_currentInteraction);
       _doc.insertText(_doc.getLength(), text, _doc.DEFAULT_STYLE);
     }
-    catch (DocumentAdapterException dae) {
+    catch (EditDocumentException dae) {
       throw new UnexpectedException(dae);
     }
   }

@@ -56,9 +56,7 @@ public abstract class AbstractDJPane extends JTextPane implements OptionConstant
   /* The amount of the visible pane to scroll on a single click (Swing's default is .1) */
   private static final double SCROLL_UNIT = .05;
   
-  /**
-   * Paren/brace/bracket matching highlight color.
-   */
+  /** Paren/brace/bracket matching highlight color. */
   static DefaultHighlighter.DefaultHighlightPainter MATCH_PAINTER;
 
   static {

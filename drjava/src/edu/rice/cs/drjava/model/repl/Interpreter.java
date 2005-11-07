@@ -45,10 +45,9 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.repl;
 
-/**
- * Interface for any language interpreter which can be used with DrJava's RMI
- * framework to safely interpret code in another JVM.
- * @version $Id$
+/** Interface for any language interpreter which can be used with DrJava's RMI framework to safely interpret code in
+ *  another JVM.
+ *  @version $Id$
  */
 public interface Interpreter {
   /** Value returned to indicate no result. */

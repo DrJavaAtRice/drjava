@@ -50,7 +50,7 @@ import edu.rice.cs.drjava.model.GlobalModel;
 import edu.rice.cs.drjava.model.repl.*;
 import edu.rice.cs.drjava.model.repl.InteractionsDocumentTest.TestBeep;
 import edu.rice.cs.drjava.model.repl.InteractionsModelTest.TestInteractionsModel;
-import edu.rice.cs.util.text.DocumentAdapterException;
+import edu.rice.cs.util.text.EditDocumentException;
 import edu.rice.cs.util.swing.Utilities;
 
 import java.util.List;
@@ -67,7 +67,7 @@ import junit.framework.*;
  */
 public final class InteractionsPaneTest extends TestCase {
 
-  protected InteractionsDocumentAdapter _adapter;
+  protected InteractionsDJDocument _adapter;
   protected InteractionsModel _model;
   protected InteractionsDocument _doc;
   protected InteractionsPane _pane;
@@ -78,7 +78,7 @@ public final class InteractionsPaneTest extends TestCase {
    */
   public void setUp() throws Exception {
     super.setUp();
-    _adapter = new InteractionsDocumentAdapter();
+    _adapter = new InteractionsDJDocument();
     _model = new TestInteractionsModel(_adapter);
     _doc = _model.getDocument();
     _pane = new InteractionsPane(_adapter) {
@@ -115,7 +115,7 @@ public final class InteractionsPaneTest extends TestCase {
    * Tests that moving the caret left when it's already at the prompt will
    * cycle it to the end of the line.
    */
-  public void testCaretMovementCyclesWhenAtPrompt() throws DocumentAdapterException {
+  public void testCaretMovementCyclesWhenAtPrompt() throws EditDocumentException {
     _doc.insertText(_doc.getLength(), "test text", InteractionsDocument.DEFAULT_STYLE);
     Utilities.invokeAndWait(new Runnable() {
       public void run() {
@@ -132,7 +132,7 @@ public final class InteractionsPaneTest extends TestCase {
    * Tests that moving the caret right when it's already at the end will
    * cycle it to the prompt.
    */
-  public void testCaretMovementCyclesWhenAtEnd() throws DocumentAdapterException {
+  public void testCaretMovementCyclesWhenAtEnd() throws EditDocumentException {
     _doc.insertText(_doc.getLength(), "test text", InteractionsDocument.DEFAULT_STYLE);
     Utilities.invokeAndWait(new Runnable() { 
       public void run() {
@@ -209,7 +209,7 @@ public final class InteractionsPaneTest extends TestCase {
                  _pane.getCaretPosition());
   }
 
-  public void testCaretStaysAtEndDuringInteraction() throws DocumentAdapterException {
+  public void testCaretStaysAtEndDuringInteraction() throws EditDocumentException {
     
     _doc.setInProgress(true);
     _doc.insertText(_doc.getLength(), "simulated output", InteractionsDocument.DEFAULT_STYLE);
@@ -224,7 +224,7 @@ public final class InteractionsPaneTest extends TestCase {
    * Tests that the caret catches up to the prompt if it is before it and
    * output is displayed.
    */
-  public void testCaretMovesUpToPromptAfterInsert() throws DocumentAdapterException {
+  public void testCaretMovesUpToPromptAfterInsert() throws EditDocumentException {
     _doc.append("typed text", InteractionsDocument.DEFAULT_STYLE);
     Utilities.invokeAndWait(new Runnable() { public void run() { _pane.setCaretPosition(1); } });
 //    System.err.println("caretPostion = " + _pane.getCaretPosition());
@@ -245,7 +245,7 @@ public final class InteractionsPaneTest extends TestCase {
    * Tests that the caret is moved properly when the current interaction
    * is cleared.
    */
-  public void testClearCurrentInteraction() throws DocumentAdapterException {
+  public void testClearCurrentInteraction() throws EditDocumentException {
     _doc.insertText(_doc.getLength(), "typed text", InteractionsDocument.DEFAULT_STYLE);
     Utilities.invokeAndWait(new Runnable() { public void run() { _controller.moveToEnd(); } });
 
@@ -262,7 +262,7 @@ public final class InteractionsPaneTest extends TestCase {
   /**
    * Tests that the InteractionsPane cannot be edited before the prompt.
    */
-  public void testCannotEditBeforePrompt() throws DocumentAdapterException {
+  public void testCannotEditBeforePrompt() throws EditDocumentException {
     int origLength = _doc.getLength();
     _doc.insertText(1, "typed text", InteractionsDocument.DEFAULT_STYLE);
     Utilities.clearEventQueue();
@@ -272,7 +272,7 @@ public final class InteractionsPaneTest extends TestCase {
   }
 
   /** Tests that the caret is put in the correct position after an insert. */
-  public void testCaretUpdatedOnInsert() throws DocumentAdapterException {
+  public void testCaretUpdatedOnInsert() throws EditDocumentException {
     _doc.insertText(_doc.getLength(), "typed text", InteractionsDocument.DEFAULT_STYLE);
     final int pos = _doc.getLength() - 5;
     Utilities.invokeAndWait(new Runnable() { public void run() { _pane.setCaretPosition(pos); } });

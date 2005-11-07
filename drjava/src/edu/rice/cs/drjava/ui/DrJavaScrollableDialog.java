@@ -52,19 +52,16 @@ import edu.rice.cs.util.swing.ScrollableDialog;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
 
-/**
- * A JDialog with a scrollable text area and a button panel.
- * Uses DrJava's configurable Main Font in the text area.
- * @version $Id$
+/** A JDialog with a scrollable text area and a button panel. Uses DrJava's configurable Main Font in the text area.
+ *  @version $Id$
  */
 public class DrJavaScrollableDialog extends ScrollableDialog {
 
-  /**
-   * Creates a new DrJavaScrollableDialog with the default width and height.
-   * @param parent Parent frame for this dialog
-   * @param title Title for this dialog
-   * @param header Message to display at the top of this dialog
-   * @param text Text to insert into the scrollable JTextArea
+  /** Creates a new DrJavaScrollableDialog with the default width and height.
+   *  @param parent Parent frame for this dialog
+   *  @param title Title for this dialog
+   *  @param header Message to display at the top of this dialog
+   *  @param text Text to insert into the scrollable JTextArea
    */
   public DrJavaScrollableDialog(JFrame parent, String title, String header, String text) {
     this(parent, title, header, text, DEFAULT_WIDTH, DEFAULT_HEIGHT);

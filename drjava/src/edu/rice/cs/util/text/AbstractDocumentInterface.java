@@ -75,9 +75,6 @@ public interface AbstractDocumentInterface extends ReadersWritersLocking {
   
   /** Appends given string with specified attributes to end of this document. */
   void append(String str, AttributeSet set);
-  
-  /** Appends given string with specified style to end of this document. */
-  void append(String str, Style style);
 }
 
 

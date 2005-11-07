@@ -94,7 +94,8 @@ import edu.rice.cs.util.docnavigation.JTreeSortNavigator;
 import edu.rice.cs.util.swing.DocumentIterator;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.text.AbstractDocumentInterface;
-import edu.rice.cs.util.text.DocumentAdapterException;
+import edu.rice.cs.util.text.ConsoleDocument;
+import edu.rice.cs.util.text.EditDocumentException;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
@@ -116,11 +117,10 @@ import edu.rice.cs.drjava.model.debug.Debugger;
 import edu.rice.cs.drjava.model.debug.DebugException;
 import edu.rice.cs.drjava.model.debug.JPDADebugger;
 import edu.rice.cs.drjava.model.debug.NoDebuggerAvailable;
-import edu.rice.cs.drjava.model.repl.ConsoleDocument;
 import edu.rice.cs.drjava.model.repl.DefaultInteractionsModel;
 import edu.rice.cs.drjava.model.repl.InputListener;
 import edu.rice.cs.drjava.model.repl.InteractionsDocument;
-import edu.rice.cs.drjava.model.repl.InteractionsDocumentAdapter;
+import edu.rice.cs.drjava.model.repl.InteractionsDJDocument;
 import edu.rice.cs.drjava.model.repl.InteractionsListener;
 import edu.rice.cs.drjava.model.repl.InteractionsScriptModel;
 import edu.rice.cs.drjava.model.repl.newjvm.MainJVM;
@@ -224,7 +224,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   protected final ConsoleDocument _consoleDoc;
   
   /** The document adapter used in the console document. */
-  protected final InteractionsDocumentAdapter _consoleDocAdapter;
+  protected final InteractionsDJDocument _consoleDocAdapter;
   
   /** Indicates whether the model is currently trying to close all documents, and thus that a new one should not be 
    *  created, and whether or not to update the navigator
@@ -270,7 +270,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   /** Constructs a new GlobalModel. Creates a new MainJVM and starts its Interpreter JVM. */
   public AbstractGlobalModel() {
     _cache = new DocumentCache();
-//    _interactionsDocAdapter = new InteractionsDocumentAdapter();
+//    _interactionsDocAdapter = new InteractionsDJDocument();
 //    _interactionsModel = new DefaultInteractionsModel(this, _interpreterControl,_interactionsDocAdapter);
 //    _interactionsModel.addListener(_interactionsListener);
 //    _interpreterControl.setInteractionsModel(_interactionsModel);
@@ -283,7 +283,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
 //      }
 //    }); 
     
-    _consoleDocAdapter = new InteractionsDocumentAdapter();
+    _consoleDocAdapter = new InteractionsDJDocument();
     _consoleDoc = new ConsoleDocument(_consoleDocAdapter);
     
 //    _createDebugger();
@@ -733,7 +733,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   }
   
   /** throws UnsupportedOperationException */
-  public InteractionsDocumentAdapter getSwingInteractionsDocument() {
+  public InteractionsDJDocument getSwingInteractionsDocument() {
     throw new UnsupportedOperationException("AbstractGlobalModel does not support interaction");
   }
   
@@ -744,7 +744,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   
   public ConsoleDocument getConsoleDocument() { return _consoleDoc; }
   
-  public InteractionsDocumentAdapter getSwingConsoleDocument() { return _consoleDocAdapter; }
+  public InteractionsDJDocument getSwingConsoleDocument() { return _consoleDocAdapter; }
   
   public PageFormat getPageFormat() { return _pageFormat; }
   
@@ -1820,9 +1820,10 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   private static int ID_COUNTER = 0; /* Seed for assigning id numbers to OpenDefinitionsDocuments */
   // ---------- ConcreteOpenDefDoc inner class ----------
 
-  /** Inner class to handle operations on each of the open DefinitionsDocuments by the GlobalModel. <br><br>
-   *  This was at one time called the <code>DefinitionsDocumentHandler</code>
-   *  but was renamed (2004-Jun-8) to be more descriptive/intuitive.
+  /** A wrapper around a DefinitionsDocument or potential DefinitionsDocument (if it has been kicked out of the cache)
+   *  The GlobalModel interacts with DefinitionsDocuments through this wrapper.<br>
+   *  This call was formerly called the <code>DefinitionsDocumentHandler</code> but was renamed (2004-Jun-8) to be more
+   *  descriptive/intuitive.  (Really? CC)
    */
   class ConcreteOpenDefDoc implements OpenDefinitionsDocument, AbstractDocumentInterface {
     
@@ -1901,8 +1902,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
      *  source root. (we query the model through the model's state)
      */
     public boolean isInProjectPath() { return _state.isInProjectPath(this); }
-
-        
+  
     /** A file is in the project if the source root is the same as the
      *  project root. this means that project files must be saved at the
      *  source root. (we query the model through the model's state)
@@ -1912,19 +1912,15 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     /** @return true if the file is an auxiliary file. */
     public boolean isAuxiliaryFile() { return ! isUntitled() && _state.isAuxiliaryFile(_file); }
     
-    /** Makes a default DDReconstructor that will make a Document based on if the ODD has a file or not. */
+    /** Makes a default DDReconstructor that will make the corresponding DefinitionsDocument. */
     protected DDReconstructor makeReconstructor() {
       return new DDReconstructor() {
         
         // Brand New documents start at location 0
         private int _loc = 0;
-        // Start out with empty list for the very first time the document is made
-        private DocumentListener[] _list = { };
         
-//        private CompoundUndoManager _undo = null;
-//        
-        private UndoableEditListener[] _undoListeners = { };
-
+        // Start out with empty lists of listeners on the very first time the document is made
+        private DocumentListener[] _list = { };
         private List<FinalizationListener<DefinitionsDocument>> _finalListeners =
           new LinkedList<FinalizationListener<DefinitionsDocument>>();
         
@@ -1944,7 +1940,6 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
           for (DocumentListener d : _list) {
             if (d instanceof DocumentUIListener) tempDoc.addDocumentListener(d);
           }
-          for (UndoableEditListener l: _undoListeners) { tempDoc.addUndoableEditListener(l); }
           for (FinalizationListener<DefinitionsDocument> l: _finalListeners) {
             tempDoc.addFinalizationListener(l);
           }
@@ -1957,7 +1952,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
           catch(InvalidPackageException e) { _packageName = null; }
           return tempDoc;
         }
+        
         public void saveDocInfo(DefinitionsDocument doc) {
+// These lines were commented out to fix a memory leak; evidently, the undomanager holds on to the document          
 //          _undo = doc.getUndoManager();
 //          _undoListeners = doc.getUndoableEditListeners();
           _loc = doc.getCurrentLocation();
@@ -2448,9 +2445,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     }
     
     /** Moves the definitions document to the given line, and returns the resulting character position.
-     * @param line Destination line number. If it exceeds the number of lines in the document, it is 
-     *             interpreted as the last line.
-     * @return Index into document of where it moved
+     *  @param line Destination line number. If it exceeds the number of lines in the document, it is 
+     *              interpreted as the last line.
+     *  @return Index into document of where it moved
      */
     public int gotoLine(int line) {
       getDocument().gotoLine(line);
@@ -2722,8 +2719,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     public ReducedModelState getStateAtCurrent() { return getDocument().getStateAtCurrent(); }
     
     public void resetUndoManager() {
-      // if it's not in the cache, the undo manager will be 
-      // reset when it's reconstructed
+      // if it's not in the cache, the undo manager will be reset when it's reconstructed
       if (_cacheAdapter.isReady()) getDocument().resetUndoManager();
     }
       

@@ -104,47 +104,36 @@ public class CustomSystemClassLoader extends ClassLoader{
       URL resource = getParent().getResource(fileName); // only dependency on newLoader!
       if (resource == null) {
         throw new ClassNotFoundException("Resource not found: " + fileName);
-      }else if(fileName.startsWith("edu/rice/cs/util/newjvm/SlaveJVMRunner.class")){
+      }
+      else if(fileName.startsWith("edu/rice/cs/util/newjvm/SlaveJVMRunner.class")){
         byte[] data = FileOps.readStreamAsBytes(resource.openStream());
-        try {
-          return defineClass(name, data, 0, data.length);
-        }
-        catch (Error t) {
-          throw t;
-        }
+        try { return defineClass(name, data, 0, data.length); }
+        catch (Error t) { throw t; }
       }
       // the system couldn't find it, so let's try something else
       return getParent().loadClass(name);
-    }catch(ClassNotFoundException e){
-      // the system couldn't find it, so let's try something else
-    }catch(IOException e){
-      // the system couldn't find it, so let's try something else
     }
+    catch(ClassNotFoundException e) { /* the system couldn't find it, so let's try something else */ }
+    catch(IOException e) { /* the system couldn't find it, so let's try something else */ }
     
     // try to load remotely
-    try{
-      if(_master != null){
+    try {
+      if (_master != null) {
         String fileName = name.replace('.', '/') + ".class";
         URL resource = _master.getRemoteResource(fileName); // only dependency on newLoader!
         if (resource == null) {
           throw new ClassNotFoundException("Resource not found: " + fileName);
-        }else{
-          byte[] data = FileOps.readStreamAsBytes(resource.openStream());
-          try {
-            return defineClass(name, data, 0, data.length);
-          }
-          catch (Error t) {
-            throw t;
-          }
         }
-      }else{
-        throw new ClassNotFoundException();
+        else {
+          byte[] data = FileOps.readStreamAsBytes(resource.openStream());
+          try { return defineClass(name, data, 0, data.length); }
+          catch (Error t) { throw t; }
+        }
       }
-    }catch(RemoteException e){
-      throw new ClassNotFoundException();
-    }catch(IOException e){
-      throw new ClassNotFoundException();
+      else throw new ClassNotFoundException();
     }
+    catch(RemoteException e) { throw new ClassNotFoundException(); }
+    catch(IOException e) { throw new ClassNotFoundException(); }
   }
 }
 

@@ -43,8 +43,8 @@ import java.rmi.registry.Registry;
 
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.StringOps;
-import edu.rice.cs.util.text.ConsoleInterface;
-import edu.rice.cs.util.text.DocumentAdapterException;
+import edu.rice.cs.util.text.EditDocumentInterface;
+import edu.rice.cs.util.text.EditDocumentException;
 import edu.rice.cs.util.classloader.ClassFileError;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.UnexpectedException;
@@ -257,7 +257,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     // Perform a mindless interpretation to force interactions to reset.
     //  (only to simplify this method)
     try { interpret("2+2"); }
-    catch (DocumentAdapterException e) {
+    catch (EditDocumentException e) {
       throw new UnexpectedException(e);
     }
 
@@ -292,7 +292,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
    *  @return The output from this interpretation, in String form, as it was
    *         printed to the interactions document.
    */
-  protected String interpret(String input) throws DocumentAdapterException {
+  protected String interpret(String input) throws EditDocumentException {
     InteractionsDocument interactionsDoc = _model.getInteractionsDocument();
     interactionsDoc.insertText(interactionsDoc.getLength(), input, InteractionsDocument.DEFAULT_STYLE);
 
@@ -347,26 +347,26 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     return interactionsDoc.getDocText(resultsStartLocation, resultsLen);
   }
 
-  protected void interpretIgnoreResult(String input) throws DocumentAdapterException {
-    ConsoleInterface interactionsDoc = _model.getInteractionsDocument();
+  protected void interpretIgnoreResult(String input) throws EditDocumentException {
+    EditDocumentInterface interactionsDoc = _model.getInteractionsDocument();
     interactionsDoc.insertText(interactionsDoc.getLength(), input, InteractionsDocument.DEFAULT_STYLE);
 
     _model.interpretCurrentInteraction();
   }
 
   /** Asserts that the given string exists in the Interactions Document. */
-  protected void assertInteractionsContains(String text) throws DocumentAdapterException {
+  protected void assertInteractionsContains(String text) throws EditDocumentException {
     _assertInteractionContainsHelper(text, true);
   }
 
   /** Asserts that the given string does not exist in the Interactions Document. */
   protected void assertInteractionsDoesNotContain(String text)
-    throws DocumentAdapterException {
+    throws EditDocumentException {
     _assertInteractionContainsHelper(text, false);
   }
 
   private void _assertInteractionContainsHelper(String text, boolean shouldContain)
-    throws DocumentAdapterException {
+    throws EditDocumentException {
 
     String interactText = getInteractionsText();
     int contains = interactText.lastIndexOf(text);
@@ -380,8 +380,8 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
   }
 
   /** Returns the current contents of the interactions document */
-  protected String getInteractionsText() throws DocumentAdapterException {
-    ConsoleInterface doc = _model.getInteractionsDocument();
+  protected String getInteractionsText() throws EditDocumentException {
+    EditDocumentInterface doc = _model.getInteractionsDocument();
     return doc.getDocText(0, doc.getLength());
   }
 

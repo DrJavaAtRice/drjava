@@ -62,16 +62,16 @@ import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.config.OptionListener;
 import edu.rice.cs.drjava.config.OptionEvent;
 
-import edu.rice.cs.drjava.model.repl.ConsoleDocument;
 import edu.rice.cs.drjava.model.repl.InputListener;
 import edu.rice.cs.drjava.model.repl.InteractionsDocument;
-import edu.rice.cs.drjava.model.repl.InteractionsDocumentAdapter;
+import edu.rice.cs.drjava.model.repl.InteractionsDJDocument;
 import edu.rice.cs.drjava.model.repl.InteractionsListener;
 import edu.rice.cs.drjava.model.repl.InteractionsModel;
 
 import edu.rice.cs.util.swing.SwingWorker;
 import edu.rice.cs.util.swing.PopupConsole;
 import edu.rice.cs.util.swing.Utilities;
+import edu.rice.cs.util.text.ConsoleDocument;
 import edu.rice.cs.util.UnexpectedException;
 
 /** This class installs listeners and actions between an InteractionsDocument in the model and an InteractionsPane 
@@ -93,7 +93,7 @@ public class InteractionsController extends AbstractConsoleController {
   /** Style to use for debug messages. */
   private final SimpleAttributeSet _debugStyle;
 
-  PopupConsole _popupConsole = new PopupConsole(_pane, new InputBox(), "Standard Input (System.in)");
+  PopupConsole _popupConsole;
   
   /** Listens for input requests from ,System.in displaying an input box as needed. */
   private InputListener _inputListener = new InputListener() {
@@ -125,19 +125,19 @@ public class InteractionsController extends AbstractConsoleController {
 
   /** Glue together the given model and a new view.
    *  @param model An InteractionsModel
-   *  @param adapter InteractionsDocumentAdapter being used by the model's doc
+   *  @param adapter InteractionsDJDocument being used by the model's doc
    */
-  public InteractionsController(final InteractionsModel model, InteractionsDocumentAdapter adapter) {
+  public InteractionsController(final InteractionsModel model, InteractionsDJDocument adapter) {
     this(model, adapter, new InteractionsPane(adapter) { 
       public int getPromptPos() { return model.getDocument().getPromptPos(); }}); 
   }
 
   /** Glue together the given model and view.
    *  @param model An InteractionsModel
-   *  @param adapter InteractionsDocumentAdapter being used by the model's doc
+   *  @param adapter InteractionsDJDocument being used by the model's doc
    *  @param pane An InteractionsPane
    */
-  public InteractionsController(InteractionsModel model, InteractionsDocumentAdapter adapter, 
+  public InteractionsController(InteractionsModel model, InteractionsDJDocument adapter, 
                                 InteractionsPane pane) {
     super(adapter, pane);
     DefaultEditorKit d = pane.EDITOR_KIT;
@@ -154,6 +154,8 @@ public class InteractionsController extends AbstractConsoleController {
 
     _model.setInputListener(_inputListener);
     _model.addListener(_viewListener);
+    _popupConsole = 
+      new PopupConsole(_pane, _doc, _model.getConsoleDocument(), new InputBox(), "Standard Input (System.in)");
 
     _init();
   }

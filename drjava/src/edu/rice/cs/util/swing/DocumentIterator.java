@@ -47,26 +47,20 @@ package edu.rice.cs.util.swing;
 
 import edu.rice.cs.util.text.AbstractDocumentInterface;
 
-/**
- * Used to get the next or previous open document given the current one.
- */
+/** Used to get the next or previous open document given the current one. */
 public interface DocumentIterator {
-  /**
-   * Gets the next document.
-   * @param doc the current document.
-   * @return the next document.
+  /** Gets the next document.
+   *  @param doc the current document.
+   *  @return the next document.
    */
   AbstractDocumentInterface getNextDocument(AbstractDocumentInterface doc);
   
-  /**
-   * Gets the previous document.
-   * @param doc the current document.
-   * @return the previous document.
+  /** Gets the previous document.
+   *  @param doc the current document.
+   *  @return the previous document.
    */
   AbstractDocumentInterface getPrevDocument(AbstractDocumentInterface doc);
   
-  /**
-   * @return the number of documents being iterated over
-   */
+  /** @return the number of documents being iterated over */
   int getDocumentCount();
 }

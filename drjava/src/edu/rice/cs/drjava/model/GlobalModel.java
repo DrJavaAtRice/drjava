@@ -43,16 +43,16 @@ import java.net.URL;
 
 import edu.rice.cs.util.ClasspathVector;
 import edu.rice.cs.util.text.AbstractDocumentInterface;
+import edu.rice.cs.util.text.ConsoleDocument;
 import edu.rice.cs.util.swing.DocumentIterator;
 import edu.rice.cs.util.docnavigation.IDocumentNavigator;
 
 import edu.rice.cs.drjava.model.definitions.DefinitionsEditorKit;
 import edu.rice.cs.drjava.model.debug.Debugger;
-import edu.rice.cs.drjava.model.repl.ConsoleDocument;
 
 import edu.rice.cs.drjava.model.repl.DefaultInteractionsModel;
 import edu.rice.cs.drjava.model.repl.InteractionsDocument;
-import edu.rice.cs.drjava.model.repl.InteractionsDocumentAdapter;
+import edu.rice.cs.drjava.model.repl.InteractionsDJDocument;
 import edu.rice.cs.drjava.model.repl.InteractionsScriptModel;
 import edu.rice.cs.drjava.model.junit.JUnitModel;
 import edu.rice.cs.drjava.model.compiler.CompilerModel;
@@ -283,16 +283,13 @@ public interface GlobalModel extends IGetDocuments, ILoadDocuments {
 
   //---------------------------------- I/O ----------------------------------//
 
-  /**
-   * Gets the console document.
-   */
+  /** Gets the console document. */
   public ConsoleDocument getConsoleDocument();
 
-  /**
-   * TODO: remove this swing dependency.
-   * @return InteractionsDocumentAdapter in use by the ConsoleDocument.
+  /** TODO: remove this swing dependency.
+   *  @return InteractionsDJDocument in use by the ConsoleDocument.
    */
-  public InteractionsDocumentAdapter getSwingConsoleDocument();
+  public InteractionsDJDocument getSwingConsoleDocument();
 
   /**
    * Resets the console.
@@ -319,9 +316,9 @@ public interface GlobalModel extends IGetDocuments, ILoadDocuments {
 
   /**
    * TODO: remove this swing dependency.
-   * @return InteractionsDocumentAdapter in use by the InteractionsDocument.
+   * @return InteractionsDJDocument in use by the InteractionsDocument.
    */
-  public InteractionsDocumentAdapter getSwingInteractionsDocument();
+  public InteractionsDJDocument getSwingInteractionsDocument();
 
   /**
    * Clears and resets the interactions pane.

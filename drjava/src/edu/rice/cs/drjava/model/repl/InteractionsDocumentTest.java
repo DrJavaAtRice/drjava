@@ -47,7 +47,7 @@ package edu.rice.cs.drjava.model.repl;
 
 import junit.framework.*;
 
-import edu.rice.cs.util.text.DocumentAdapterException;
+import edu.rice.cs.util.text.EditDocumentException;
 
 /**
  * Tests the functionality of the AbstractInteractionsDocument.
@@ -59,14 +59,14 @@ public final class InteractionsDocumentTest extends TestCase {
   
   /** Initialize fields for each test. */
   protected void setUp() {
-    _doc = new InteractionsDocument(new InteractionsDocumentAdapter());
+    _doc = new InteractionsDocument(new InteractionsDJDocument());
   }
 
   /**
    * Tests that the document prevents editing before the
    * prompt, and beeps if you try.
    */
-  public void testCannotEditBeforePrompt() throws DocumentAdapterException {
+  public void testCannotEditBeforePrompt() throws EditDocumentException {
     TestBeep testBeep = new TestBeep();
     _doc.setBeep(testBeep);
     int origLength = _doc.getLength();
@@ -80,7 +80,7 @@ public final class InteractionsDocumentTest extends TestCase {
   /**
    * Tests that clear current interaction works.
    */
-  public void testClearCurrent() throws DocumentAdapterException {
+  public void testClearCurrent() throws EditDocumentException {
     int origLength = _doc.getLength();
     _doc.insertText(origLength, "text", InteractionsDocument.DEFAULT_STYLE);
     _doc.insertBeforeLastPrompt("before", InteractionsDocument.DEFAULT_STYLE);
@@ -90,7 +90,7 @@ public final class InteractionsDocumentTest extends TestCase {
   }
 
   /** Tests that initial contents are the banner and prompt, and that reset works. */
-  public void testContentsAndReset() throws DocumentAdapterException {
+  public void testContentsAndReset() throws EditDocumentException {
     String origText = _doc.getBanner() + _doc.getPrompt();
     assertEquals("Contents before insert", origText, _doc.getDocText(0, _doc.getLength()));
     // Insert some text
@@ -103,7 +103,7 @@ public final class InteractionsDocumentTest extends TestCase {
   }
 
   /** Tests that inserting a newline works. */
-  public void testInsertNewLine() throws DocumentAdapterException {
+  public void testInsertNewLine() throws EditDocumentException {
     int origLength = _doc.getLength();
     _doc.insertText(origLength, "command", InteractionsDocument.DEFAULT_STYLE);
     assertEquals("current interaction before newline", "command", _doc.getCurrentInteraction());
@@ -116,7 +116,7 @@ public final class InteractionsDocumentTest extends TestCase {
   /**
    * Tests that recalling commands from the history works.
    */
-  public void testRecallFromHistory() throws DocumentAdapterException {
+  public void testRecallFromHistory() throws EditDocumentException {
     String origText = _doc.getDocText(0, _doc.getLength());
     _doc.addToHistory("command");
     assertEquals("Contents before recall prev",

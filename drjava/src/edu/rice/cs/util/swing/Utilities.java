@@ -40,6 +40,7 @@ import java.awt.EventQueue;
 import java.lang.reflect.InvocationTargetException;
 import javax.swing.JOptionPane;
 import edu.rice.cs.util.UnexpectedException;
+import edu.rice.cs.util.StringOps;
 
 public class Utilities {
   
@@ -71,6 +72,12 @@ public class Utilities {
   
   public static void showDebug(final String msg) {
     Utilities.invokeAndWait(new Runnable() { public void run() { JOptionPane.showMessageDialog(null, msg); } } );
+  }
+  
+  public static void showStackTrace(final Throwable t) {
+    Utilities.invokeAndWait(new Runnable() { public void run() { 
+      JOptionPane.showMessageDialog(null, StringOps.getStackTrace(t));
+    } } );
   }
 }
     
