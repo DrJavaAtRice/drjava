@@ -707,14 +707,16 @@ public class DebugPanel extends JPanel implements OptionConstants {
           DefaultMutableTreeNode bpDocNode = new DefaultMutableTreeNode(bp.getClassName());
 
           // Look for matching document node
-          Enumeration<TreeNode> documents = _breakpointRootNode.children();
+          // Raw type here due to Swing's use of raw types.
+          Enumeration documents = _breakpointRootNode.children();
           while (documents.hasMoreElements()) {
             DefaultMutableTreeNode doc = (DefaultMutableTreeNode)documents.nextElement();
             if (doc.getUserObject().equals(bpDocNode.getUserObject())) {
 
               // Create a new breakpoint in this node
               //Sort breakpoints by line number.
-              Enumeration<TreeNode> lineNumbers = doc.children();
+              // Raw type here due to Swing's use of raw types.
+              Enumeration lineNumbers = doc.children();
               while (lineNumbers.hasMoreElements()) {
                 DefaultMutableTreeNode lineNumber = (DefaultMutableTreeNode)lineNumbers.nextElement();
 

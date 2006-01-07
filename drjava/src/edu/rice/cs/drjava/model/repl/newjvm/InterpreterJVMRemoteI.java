@@ -37,7 +37,6 @@ import java.rmi.RemoteException;
 import java.util.Vector;
 import java.util.List;
 import java.io.File;
-import java.net.URL;
 import edu.rice.cs.util.newjvm.*;
 
 /**

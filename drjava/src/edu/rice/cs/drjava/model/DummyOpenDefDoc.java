@@ -58,17 +58,10 @@ import javax.swing.event.DocumentListener;
 import javax.swing.event.UndoableEditListener;
 import javax.swing.text.*;
 
-import junit.framework.TestResult;
-
 import edu.rice.cs.drjava.model.debug.Breakpoint;
-import edu.rice.cs.drjava.model.junit.*;
 import edu.rice.cs.drjava.model.definitions.*;
-import edu.rice.cs.drjava.model.compiler.CompilerErrorModel;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
-import edu.rice.cs.drjava.model.Finalizable;
 import edu.rice.cs.drjava.model.FinalizationListener;
-import edu.rice.cs.drjava.model.FinalizationEvent;
-import edu.rice.cs.drjava.model.FindReplaceMachine;
 
 import edu.rice.cs.util.docnavigation.*;
 import edu.rice.cs.util.text.SwingDocument;

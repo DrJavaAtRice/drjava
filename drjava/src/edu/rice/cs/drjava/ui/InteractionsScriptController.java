@@ -83,7 +83,7 @@ public class InteractionsScriptController implements Serializable {
     _pane.addButton(_nextInteractionAction);
     // Execute
     _setupAction(_executeInteractionAction, "Execute", "Execute Current Interaction");
-    _pane.addButton(_executeInteractionAction, _interactionsPane);
+    _pane.addButton(_executeInteractionAction);
     // Close
     _setupAction(_closeScriptAction, "Close", "Close Interactions Script");
     _pane.addButton(_closeScriptAction);

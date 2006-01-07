@@ -172,7 +172,9 @@ public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>
   public Vector<T> getValue() {
     Vector<T> current = new Vector<T>();
     for (int i = 0; i < _listModel.getSize(); i++) {
-      current.add((T) _listModel.getElementAt(i));  /* javax.swing.DefaultListModel should be generified! */
+      /* javax.swing.DefaultListModel should be generified! */
+      @SuppressWarnings("unchecked") T element = (T) _listModel.getElementAt(i);
+      current.add(element);
     }
     return current;
   }

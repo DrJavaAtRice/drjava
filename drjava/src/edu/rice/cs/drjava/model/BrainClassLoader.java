@@ -46,11 +46,7 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.model;
 
 import java.lang.ClassLoader;
-import java.lang.ClassNotFoundException;
 import java.net.URL;
-
-import edu.rice.cs.util.FileOps;
-import java.io.File;
 
 import edu.rice.cs.drjava.model.repl.WrapperClassLoader;
 

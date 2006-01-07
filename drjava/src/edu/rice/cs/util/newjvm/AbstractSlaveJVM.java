@@ -36,11 +36,8 @@ package edu.rice.cs.util.newjvm;
 //import edu.rice.cs.util.PreventExitSecurityManager;
 
 import java.rmi.*;
-import edu.rice.cs.util.FileOps;
-import edu.rice.cs.util.swing.Utilities;
 //import edu.rice.cs.util.PreventExitSecurityManager;
 
-import java.io.*;
 /** A partial implementation of a {@link SlaveRemote} that provides the quit functionality and that also periodically 
  *  checks if the master is still alive and automatically quits if not.
  *  @version $Id$

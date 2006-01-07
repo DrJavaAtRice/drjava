@@ -45,12 +45,8 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.definitions.indent;
 
-import javax.swing.text.*;
-
 import edu.rice.cs.drjava.model.AbstractDJDocument;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
-
-import edu.rice.cs.util.UnexpectedException;
 
 /** Asks whether the beginning of the current line is inside a C-style comment.
  *

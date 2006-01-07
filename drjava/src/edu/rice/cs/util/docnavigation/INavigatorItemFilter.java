@@ -45,6 +45,6 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.util.docnavigation;
 
-abstract public class INavigatorItemFilter{
-  abstract public boolean accept(INavigatorItem n);
+abstract public class INavigatorItemFilter<ItemT extends INavigatorItem> {
+  abstract public boolean accept(ItemT n);
 }

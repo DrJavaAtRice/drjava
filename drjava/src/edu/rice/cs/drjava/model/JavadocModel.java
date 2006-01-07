@@ -49,8 +49,6 @@ import java.io.File;
 import java.io.IOException;
 
 import edu.rice.cs.drjava.model.compiler.CompilerErrorModel;
-import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
-import java.util.List;
 
 /**
  * Model interface for Javadoc integration features.

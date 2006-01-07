@@ -54,7 +54,6 @@ import java.io.File;
  */
 public interface FileOpenSelector {
 
-  //public File getFile() throws OperationCanceledException;
   public File[] getFiles() throws OperationCanceledException;
   
 }

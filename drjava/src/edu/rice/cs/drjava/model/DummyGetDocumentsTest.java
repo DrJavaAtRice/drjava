@@ -45,10 +45,7 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model;
 
-import edu.rice.cs.util.*;
-
 import junit.framework.*;
-import junit.extensions.*;
 
 import java.io.File;
 

@@ -214,13 +214,14 @@ public class ProjectFileBuilder {
     path = replace(path,File.separator,"/");
     return prefix + "(file (name " + convertToLiteral(path) + "))";
   }
-  /** Encodes a file.  The path defaults to relative.
-   *  @param f the file to encode
-   *  @param prefix the indent level
-   */
-  private String encodeFile(File f, String prefix) throws IOException {
-    return encodeFile(f, prefix, true);
-  }
+  
+//  /** Encodes a file.  The path defaults to relative.
+//   *  @param f the file to encode
+//   *  @param prefix the indent level
+//   */
+//  private String encodeFile(File f, String prefix) throws IOException {
+//    return encodeFile(f, prefix, true);
+//  }
   
   /**
    * This encodes a docfile, adding all the special tags that store

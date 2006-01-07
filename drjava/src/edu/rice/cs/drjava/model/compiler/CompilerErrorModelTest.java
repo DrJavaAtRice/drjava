@@ -51,16 +51,12 @@ END_COPYRIGHT_BLOCK*/
  */
 package edu.rice.cs.drjava.model.compiler;
 
-import java.util.HashMap;
 import java.io.File;
 import java.io.IOException;
-import javax.swing.text.BadLocationException;
 import javax.swing.text.Position;
 
 import junit.framework.TestCase;
 import edu.rice.cs.drjava.model.*;
-import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
-import edu.rice.cs.util.UnexpectedException;
 
 /**
  * Tests the CompilerErrorModel.

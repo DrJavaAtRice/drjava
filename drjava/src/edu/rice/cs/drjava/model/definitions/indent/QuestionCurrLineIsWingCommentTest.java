@@ -84,12 +84,6 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.definitions.indent;
 
-import javax.swing.text.BadLocationException;
-
-import junit.framework.*;
-import edu.rice.cs.drjava.model.AbstractDJDocument;
-import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
-
 /** Tests visitor class that determines whether the current line is a wing comment.
  * 
  * @version $Id$

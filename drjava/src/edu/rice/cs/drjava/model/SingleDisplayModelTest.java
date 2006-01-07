@@ -48,7 +48,6 @@ package edu.rice.cs.drjava.model;
 import java.io.*;
 
 import javax.swing.text.BadLocationException;
-import edu.rice.cs.util.Log;
 
 /**
  * Test functions of the single display model.

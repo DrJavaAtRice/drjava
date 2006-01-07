@@ -46,7 +46,6 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.model.repl;
 
 import java.net.URL;
-import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.model.repl.newjvm.InterpreterJVM;
 import edu.rice.cs.drjava.model.repl.newjvm.ClasspathManager;
 

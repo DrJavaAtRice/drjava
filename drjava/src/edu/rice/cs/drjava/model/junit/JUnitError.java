@@ -48,9 +48,6 @@ package edu.rice.cs.drjava.model.junit;
 import edu.rice.cs.drjava.model.compiler.CompilerError;
 
 
-import java.io.IOException;
-import edu.rice.cs.util.FileOps;
-
 import java.io.File;
 import java.io.Serializable;
 

@@ -46,16 +46,11 @@ END_COPYRIGHT_BLOCK*/
 package  edu.rice.cs.drjava.model.definitions;
 
 import  junit.framework.*;
-import  junit.extensions.*;
 import  javax.swing.text.BadLocationException;
-import javax.swing.text.Document;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.model.DJDocument;
-import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 import edu.rice.cs.drjava.config.*;
-import edu.rice.cs.drjava.model.definitions.indent.*;
-import edu.rice.cs.drjava.CodeStatus;
 import edu.rice.cs.drjava.model.GlobalEventNotifier;
 
 /**

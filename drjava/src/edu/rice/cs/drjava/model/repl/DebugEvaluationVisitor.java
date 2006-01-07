@@ -45,8 +45,6 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.repl;
 
-import koala.dynamicjava.tree.*;
-import koala.dynamicjava.interpreter.*;
 import koala.dynamicjava.interpreter.context.*;
 
 /** Extension of EvaluationVisitorExtension that notifies InterpreterJVM every time a variable assignment is made.

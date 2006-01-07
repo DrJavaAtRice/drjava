@@ -51,14 +51,14 @@ package edu.rice.cs.util.docnavigation;
  *  This way, the listener does not need to know what type of information is in the selected node until it is used.
  */
 
-public interface INavigationListener {
+public interface INavigationListener<ItemT extends INavigatorItem> {
   /** Runs when an item in a navigator is selected
    *  @param dat the NodeData data wrapper for the data in the newly selected node of the navigator
    */
-  public void gainedSelection(NodeData dat);
+  public void gainedSelection(NodeData<? extends ItemT> dat);
   
   /** Runs when an item in a navigator is unselected
    *  @param dat the NodeData data wrapper for the data in the new deselected node of the navigator
    */
-  public void lostSelection(NodeData dat);
+  public void lostSelection(NodeData<? extends ItemT> dat);
 }

@@ -46,21 +46,13 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.ui;
 
 import javax.swing.*;
-import java.net.URL;
 import javax.swing.border.LineBorder;
-import javax.swing.border.BevelBorder;
 import javax.swing.border.EmptyBorder;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.EditorKit;
 import java.awt.*;
-import java.util.List;
 import java.util.LinkedList;
-import java.io.*;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.*;
-import edu.rice.cs.drjava.model.definitions.DefinitionsEditorKit;
-import edu.rice.cs.drjava.model.repl.InteractionsEditorKit;
 import edu.rice.cs.drjava.CodeStatus;
 import edu.rice.cs.util.swing.DisplayManager;
 
@@ -325,9 +317,10 @@ public class RecentDocFrame extends JWindow {
     return null;
   }
 
-  private ImageIcon _getIconResource(String name) {
-    URL url = RecentDocFrame.class.getResource("icons/" + name);
-    if (url != null) return new ImageIcon(url);
-    return null;
-  }
+//  private ImageIcon _getIconResource(String name) {
+//    URL url = RecentDocFrame.class.getResource("icons/" + name);
+//    if (url != null) return new ImageIcon(url);
+//    return null;
+//  }
+  
 }

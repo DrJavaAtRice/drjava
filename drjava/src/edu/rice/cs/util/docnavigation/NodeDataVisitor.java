@@ -54,9 +54,9 @@ import java.io.File;
  * of the data the host was meant to hold.  This allows the host
  * to be considered a simple data wrapper.
  */
-public interface NodeDataVisitor<Ret> {
+public interface NodeDataVisitor<ItemT extends INavigatorItem, Ret> {
  
   public Ret fileCase(File f);
   public Ret stringCase(String s);
-  public Ret itemCase(INavigatorItem i);
+  public Ret itemCase(ItemT i);
 }

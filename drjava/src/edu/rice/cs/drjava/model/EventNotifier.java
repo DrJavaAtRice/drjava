@@ -47,7 +47,6 @@ package edu.rice.cs.drjava.model;
 
 import java.util.LinkedList;
 import edu.rice.cs.util.ReaderWriterLock;
-import edu.rice.cs.util.swing.ScrollableDialog;
 
 /** Base class for all component-specific EventNotifiers.  This class provides common methods to 
  *  manage listeners of a specific type.  T the type of the listener class to be managed.

@@ -44,7 +44,6 @@ import java.util.Collection;
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.ArgumentTokenizer;
 import edu.rice.cs.util.newjvm.ExecJVM;
-import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.Configuration;
 import edu.rice.cs.drjava.config.OptionConstants;
@@ -126,7 +125,7 @@ public class DefaultJavadocModel implements JavadocModel {
     if (_model.hasModifiedDocuments() || _model.hasUntitledDocuments()) { return; }  /* abort if files remain unsaved */
     
     // Make sure that there is at least one saved document.
-    List<OpenDefinitionsDocument> docs = _model.getOpenDefinitionsDocuments();
+//    List<OpenDefinitionsDocument> docs = _model.getOpenDefinitionsDocuments();
        
 //    for (OpenDefinitionsDocument doc: docs) {
 //      if (doc.isUntitled()) return;  // ignore javadoc, since a document is still unsaved

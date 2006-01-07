@@ -36,23 +36,18 @@ package edu.rice.cs.drjava.model;
 import java.io.File;
 import java.io.IOException;
 
-import java.util.LinkedList;
 import java.util.List;
 import javax.swing.text.BadLocationException;
-import java.rmi.registry.Registry;
 
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.text.EditDocumentInterface;
 import edu.rice.cs.util.text.EditDocumentException;
 import edu.rice.cs.util.classloader.ClassFileError;
-import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.UnexpectedException;
 
 import edu.rice.cs.drjava.DrJava;
-import edu.rice.cs.drjava.model.definitions.*;
 import edu.rice.cs.drjava.model.repl.*;
-import edu.rice.cs.drjava.model.compiler.*;
 
 /**
  * Base class for tests over the {@link GlobalModel}.

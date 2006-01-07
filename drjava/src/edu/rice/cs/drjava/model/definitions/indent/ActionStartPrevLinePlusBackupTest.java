@@ -84,8 +84,6 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.definitions.indent;
 
-import junit.framework.TestCase;
-
 /**
  * Test class for an indent rule with a really long name.  :-)
  * Inherits from ActionStartPrevLinePlusTest, since this rule's functionality

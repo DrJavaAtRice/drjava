@@ -45,7 +45,6 @@
 
 package edu.rice.cs.util.swing;
 
-import javax.swing.Icon;
 import java.io.File;
 
 /**

@@ -46,8 +46,6 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.model.compiler;
 
 import edu.rice.cs.drjava.model.EventNotifier;
-import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
-import edu.rice.cs.util.swing.*;
 
 /**
  * Keeps track of all listeners to a CompilerModel, and has the ability

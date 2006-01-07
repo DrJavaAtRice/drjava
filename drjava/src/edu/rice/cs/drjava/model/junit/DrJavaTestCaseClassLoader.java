@@ -38,8 +38,6 @@ import java.util.*;
 import java.io.*;
 import java.net.*;
 import java.util.zip.*;
-import java.net.*;
-import edu.rice.cs.util.*;
 
 
 /**
@@ -194,7 +192,7 @@ public final class DrJavaTestCaseClassLoader extends TestCaseClassLoader {
   /**
    * returns true if the pathEntry points to a jar file
    */
-  boolean isJar(String pathEntry) {
+  private boolean isJar(String pathEntry) {
     return pathEntry.endsWith(".jar") || pathEntry.endsWith(".zip");
   }
   
@@ -287,9 +285,12 @@ public final class DrJavaTestCaseClassLoader extends TestCaseClassLoader {
         /* do nothing */
       }
     }
-    Enumeration<String> pnames = (Enumeration<String>) p.propertyNames();
+    
+    // Raw type because Properties is not generified.
+    Enumeration pnames = p.propertyNames();
+    
     while (pnames.hasMoreElements()) {
-      String key = pnames.nextElement();
+      String key = (String) pnames.nextElement();
       if (key.startsWith("excluded.")) {
         String path = p.getProperty(key);
         path = path.trim();

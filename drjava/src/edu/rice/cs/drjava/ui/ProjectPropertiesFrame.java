@@ -35,7 +35,6 @@ package edu.rice.cs.drjava.ui;
 
 
 import javax.swing.*;
-import javax.swing.event.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.event.*;
 import java.awt.*;
@@ -43,11 +42,7 @@ import java.io.IOException;
 import java.io.File;
 import java.util.Vector;
 
-import javax.swing.tree.*;
-
-import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.DrJava;
-import edu.rice.cs.drjava.CodeStatus;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.ui.config.*;
 
@@ -55,7 +50,6 @@ import edu.rice.cs.util.ClasspathVector;
 import edu.rice.cs.util.swing.FileSelectorComponent;
 import edu.rice.cs.util.swing.DirectorySelectorComponent;
 import edu.rice.cs.util.swing.DirectoryChooser;
-import edu.rice.cs.util.swing.FileDisplayManager;
 import javax.swing.filechooser.FileFilter;
 
 /**

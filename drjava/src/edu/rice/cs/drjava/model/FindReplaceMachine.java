@@ -33,14 +33,11 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model;   
 
-import edu.rice.cs.drjava.model.definitions.reducedmodel.ReducedModelState;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.ReducedModelStates;
   
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.DocumentIterator;
 import edu.rice.cs.util.text.AbstractDocumentInterface;
-
-import java.io.FileNotFoundException;
 
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Position;
@@ -61,7 +58,7 @@ public class FindReplaceMachine {
   private String _findWord;
   /** The word to replace _findword. */
   private String _replaceWord;
-  private boolean _found;
+//  private boolean _found;
   private boolean _wrapped;
   private boolean _allDocsWrapped;
   private boolean _checkAllDocsWrapped;
@@ -154,7 +151,7 @@ public class FindReplaceMachine {
   public void setStart(int pos) {
     try {
       _start = _doc.createPosition(pos);
-      _found = false;
+//      _found = false;
       _wrapped = false;
     }
     catch (BadLocationException ble) {
@@ -381,7 +378,7 @@ public class FindReplaceMachine {
           return _findNext(start, foundOffset); //searching backwards
         }       
         // otherwise we have found it
-        _found = true;
+//        _found = true;
         foundOffset += start;
         if (!_searchBackwards) foundOffset += findWord.length();
         _current = _doc.createPosition(foundOffset);  // thread-safe operation on _doc
@@ -476,7 +473,7 @@ public class FindReplaceMachine {
           return _findWrapped(start, foundOffset-start);
         }       
         // otherwise we have found it
-        _found = true;
+//        _found = true;
         foundOffset += start;
         if (!_searchBackwards) foundOffset += findWord.length();
         _current = _doc.createPosition(foundOffset);  // thread-safe operation on _doc

@@ -84,9 +84,6 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.definitions.indent;
 
-import junit.framework.TestCase;
-import edu.rice.cs.drjava.model.AbstractDJDocument;
-
 /**
  * Test class for an indent rule with a really long name.  :-)
  * Inherits from ActionStartPrevLinePlusBackupTest, since this rule's 
@@ -96,30 +93,30 @@ import edu.rice.cs.drjava.model.AbstractDJDocument;
 public final class ActionStartPrevLinePlusMultilineTest
     extends ActionStartPrevLinePlusBackupTest {
   
-  /**
-   * Factory to enable reuse of methods from ActionStartPrevLinePlusTest.
-   * This creates an action that should behave identically to an instance of
-   * ActionStartPrevLinePlus.
-   * @param suffix the text to be added by this rule after indent padding
-   * @see ActionStartPrevLinePlus#ActionStartPrevLinePlus(String)
-   */
-  private IndentRuleAction makeAction(String suffix) {
-    return new ActionStartPrevLinePlusMultiline(new String[] {suffix},
-                                                0, suffix.length());
-  }
+//  /**
+//   * Factory to enable reuse of methods from ActionStartPrevLinePlusTest.
+//   * This creates an action that should behave identically to an instance of
+//   * ActionStartPrevLinePlus.
+//   * @param suffix the text to be added by this rule after indent padding
+//   * @see ActionStartPrevLinePlus#ActionStartPrevLinePlus(String)
+//   */
+//  private IndentRuleAction makeAction(String suffix) {
+//    return new ActionStartPrevLinePlusMultiline(new String[] {suffix},
+//                                                0, suffix.length());
+//  }
   
-  /**
-   * Factory to enable reuse of methods from ActionStartPrevLinePlusBackupTest.
-   * This works similarly to makeAction(String).
-   * @param suffix the text to be added by this rule after indent padding
-   * @param position the character within the suffix string before which to
-   * place the cursor
-   * @see ActionStartPrevLinePlusBackup#ActionStartPrevLinePlusBackup(String, int)
-   */
-  private IndentRuleAction makeBackupAction(String suffix, int position) {
-    return new ActionStartPrevLinePlusMultiline(new String[] {suffix},
-                                                0, position);
-  }
+//  /**
+//   * Factory to enable reuse of methods from ActionStartPrevLinePlusBackupTest.
+//   * This works similarly to makeAction(String).
+//   * @param suffix the text to be added by this rule after indent padding
+//   * @param position the character within the suffix string before which to
+//   * place the cursor
+//   * @see ActionStartPrevLinePlusBackup#ActionStartPrevLinePlusBackup(String, int)
+//   */
+//  private IndentRuleAction makeBackupAction(String suffix, int position) {
+//    return new ActionStartPrevLinePlusMultiline(new String[] {suffix},
+//                                                0, position);
+//  }
   
   
 }

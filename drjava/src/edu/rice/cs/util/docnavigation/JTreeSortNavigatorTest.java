@@ -54,19 +54,19 @@ import javax.swing.tree.*;
 
 public class JTreeSortNavigatorTest extends TestCase {
   
-  protected JTreeSortNavigator tree;
+  protected JTreeSortNavigator<DummyINavigatorItem> tree;
   protected DefaultMutableTreeNode root;
   protected DefaultMutableTreeNode source;
   protected DefaultMutableTreeNode folder1;
   protected DefaultMutableTreeNode folder2;
   protected String projName;
-  INavigatorItem i1, i2, i3, i4;
+  DummyINavigatorItem i1, i2, i3, i4;
   
   public void setUp() throws IOException {
     File f = File.createTempFile("project-",".pjt");
-    tree = new JTreeSortNavigator(f.getCanonicalPath());
+    tree = new JTreeSortNavigator<DummyINavigatorItem>(f.getCanonicalPath());
     
-    tree.addTopLevelGroup("[ Source Files ]", new INavigatorItemFilter(){
+    tree.addTopLevelGroup("[ Source Files ]", new INavigatorItemFilter<INavigatorItem>(){
       public boolean accept(INavigatorItem n) { return true; }
     });
     i1 = new DummyINavigatorItem("item1");
@@ -130,15 +130,15 @@ public class JTreeSortNavigatorTest extends TestCase {
     tree.collapsePaths(set);
     assertTrue("Source should be collapsed.", tree.isCollapsed(tp1));
     assertTrue("Source InnerNode should say it is collapsed.", 
-               ((InnerNode)tp1.getLastPathComponent()).isCollapsed());
+               ((InnerNode<?, ?>)tp1.getLastPathComponent()).isCollapsed());
     assertTrue("Folder1 should be collapsed.", tree.isCollapsed(tp2));
 //    System.out.println(((InnerNode)tp2.getLastPathComponent()).isCollapsed());
 //    System.out.println(tree.isCollapsed(tp3));
     assertTrue("folder1 InnerNode should say it is collapsed.", 
-               ((InnerNode)tp2.getLastPathComponent()).isCollapsed());
+               ((InnerNode<?, ?>)tp2.getLastPathComponent()).isCollapsed());
     assertTrue("Tree should say Folder2 is collapsed.", tree.isCollapsed(tp3));
     assertFalse("folder2 InnerNode should not say it is collapsed.",
-                ((InnerNode)tp3.getLastPathComponent()).isCollapsed());
+                ((InnerNode<?, ?>)tp3.getLastPathComponent()).isCollapsed());
     
     HashSet<String> tmp = new HashSet<String>();
     for(String s : tree.getCollapsedPaths()) {
@@ -148,7 +148,7 @@ public class JTreeSortNavigatorTest extends TestCase {
     
   }
   
-  private String _name;
+//  private String _name;
   /**
    * When the node is the only child of its parent and it is refreshed it should not
    * try to delete the parent.
@@ -169,12 +169,12 @@ public class JTreeSortNavigatorTest extends TestCase {
 //    }
 //    synchronized(_lock) {
       assertEquals("folder3 should have 1 children", 1, folder3.getChildCount());
-      LeafNode node = (LeafNode)folder3.getChildAt(0);
+      LeafNode<?> node = (LeafNode<?>)folder3.getChildAt(0);
       assertEquals("node should have correct name", name, node.toString());
       tree.removeDocument(item);
       tree.addDocument(newItem, "folder3");
       folder3 = (InnerNode)source.getChildAt(2);
-      LeafNode newNode = (LeafNode)folder3.getChildAt(0);
+      LeafNode<?> newNode = (LeafNode<?>)folder3.getChildAt(0);
       
 //      tree.refreshDocument(newItem, "folder3")
       assertEquals("should have been renamed", newName, newNode.toString());

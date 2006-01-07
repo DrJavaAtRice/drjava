@@ -58,9 +58,6 @@ import edu.rice.cs.drjava.model.OperationCanceledException;
 import edu.rice.cs.util.text.*;
 
 import edu.rice.cs.drjava.model.repl.newjvm.MainJVM;
-import edu.rice.cs.drjava.model.DefaultGlobalModel;
-
-import edu.rice.cs.drjava.ui.MainFrame;
 import edu.rice.cs.util.text.ConsoleDocument;
 
 /**

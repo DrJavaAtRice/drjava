@@ -45,10 +45,7 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.junit;
 
-import edu.rice.cs.drjava.model.repl.newjvm.InterpreterJVM;
-import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
-import java.io.*;
 import junit.runner.*;
 
 /**

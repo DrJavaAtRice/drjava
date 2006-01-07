@@ -45,16 +45,7 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.junit;
 
-import edu.rice.cs.drjava.model.repl.newjvm.InterpreterJVM;
-import edu.rice.cs.util.UnexpectedException;
-
-import java.io.File;
-import java.io.IOException;
 import java.io.PrintStream;
-import javax.swing.*;
-import javax.swing.text.StyledDocument;
-import javax.swing.text.BadLocationException;
-import java.awt.Color;
 
 import junit.runner.*;
 import junit.framework.*;

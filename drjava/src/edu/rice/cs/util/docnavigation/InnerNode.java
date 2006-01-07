@@ -45,21 +45,16 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.util.docnavigation;
 
-import javax.swing.*;
-import javax.swing.event.TreeModelListener;
-import javax.swing.event.TreeSelectionListener;
-import javax.swing.event.TreeSelectionEvent;
 import javax.swing.tree.*;
-import java.awt.*;
-import java.net.URL;
-import java.net.MalformedURLException;
-import java.util.*;
-import edu.rice.cs.util.*;
 
 /** This is an unsynchronized swing class and hence should only be accessed from the
  *  event-handling thread.
+ *  @param T  The type of the value wrapped by this node.
+ *  @param ItemT  
  */
-public abstract class InnerNode<T> extends DefaultMutableTreeNode implements NodeData {
+public abstract class InnerNode<T, ItemT extends INavigatorItem> 
+    extends DefaultMutableTreeNode implements NodeData<ItemT> {
+  
   protected boolean _collapsed; // tree defaults to all NOT collapsed
   
   public InnerNode(T d) { super(d); }

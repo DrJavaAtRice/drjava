@@ -33,13 +33,10 @@
 
 package edu.rice.cs.drjava.model.repl;
 
-import edu.rice.cs.drjava.DrJava;
-import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.model.AbstractDJDocument;
-import edu.rice.cs.drjava.model.definitions.ColoringView;
-
 import edu.rice.cs.drjava.model.definitions.indent.Indenter;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
+
 import edu.rice.cs.util.Pair;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.text.EditDocumentException;

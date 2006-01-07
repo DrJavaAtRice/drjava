@@ -34,40 +34,23 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.model.junit;
 
 import java.io.File;
-import java.io.FileFilter;
 import java.io.IOException;
 
 import java.util.List;
 import java.util.LinkedList;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
-import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.classloader.ClassFileError;
 import edu.rice.cs.drjava.model.GlobalModel;
-import edu.rice.cs.drjava.model.IGetDocuments;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
-import edu.rice.cs.drjava.model.FileMovedException;
-import edu.rice.cs.drjava.model.FileOpenSelector;
-import edu.rice.cs.drjava.model.OperationCanceledException;
-import edu.rice.cs.drjava.model.AlreadyOpenException;
 import edu.rice.cs.drjava.model.repl.newjvm.MainJVM;
 import edu.rice.cs.drjava.model.compiler.CompilerModel;
-import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
-import edu.rice.cs.drjava.model.definitions.ClassNameNotFoundException;
 import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
 import edu.rice.cs.util.ExitingNotAllowedException;
 import edu.rice.cs.util.ClasspathVector;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.text.SwingDocument;
-import edu.rice.cs.util.classloader.ClassFileError;
 import org.apache.bcel.classfile.*;
-// TODO: remove swing dependency!
-import javax.swing.text.StyledDocument;
-import javax.swing.text.DefaultStyledDocument;
-import javax.swing.text.BadLocationException;
-
 
 /** Manages unit testing via JUnit.
  *  TODO: Remove dependence on GlobalModel

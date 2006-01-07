@@ -45,8 +45,6 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.definitions;
 
-import javax.swing.text.*;
-import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
 /** The purpose for this interface's existence is to make the document listener added by our MainFrame distinguishable

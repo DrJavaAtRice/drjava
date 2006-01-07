@@ -36,19 +36,15 @@ package edu.rice.cs.drjava;
 import junit.framework.*;
 import java.io.*;
 import java.util.List;
-import javax.swing.ListModel;
-import javax.swing.DefaultListModel;
 import javax.swing.text.BadLocationException;
-import java.rmi.registry.Registry;
 
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
 import edu.rice.cs.drjava.ui.MainFrame;
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.StringOps;
-import edu.rice.cs.drjava.platform.PlatformFactory;
-import edu.rice.cs.util.Log;
 import edu.rice.cs.util.swing.Utilities;
+
 /**
  * Tests opening/creating files specified as command line arguments.
  * @version $Id$

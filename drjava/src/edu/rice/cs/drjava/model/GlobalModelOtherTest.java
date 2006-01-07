@@ -52,11 +52,9 @@ import java.util.Vector;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.*;
-import edu.rice.cs.drjava.model.definitions.*;
 import edu.rice.cs.drjava.model.repl.*;
 import edu.rice.cs.util.text.EditDocumentException;
 import edu.rice.cs.util.swing.Utilities;
-import edu.rice.cs.util.Log;
 
 /** A test on the GlobalModel that does deals with everything outside of simple file operations, e.g., compile, quit.
  *  @version $Id$
@@ -73,7 +71,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
   private boolean _resetDone = false;
   private final Object _resetDoneLock = new Object();
   
-  private boolean _interactionDone = false;
+//  private boolean _interactionDone = false;
   private final Object _interactionDoneLock = new Object();
   
 //  private Log _log = new Log("GlobalModelOtherTestLog.txt", true);
@@ -258,7 +256,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
       public void interactionEnded() {
         synchronized(_interactionDoneLock) {
           interactionEndCount++;
-          _interactionDone = true;
+//          _interactionDone = true;
           _interactionDoneLock.notify();
         }
       }
@@ -272,7 +270,7 @@ public final class GlobalModelOtherTest extends GlobalModelTestCase implements O
     assertEquals("Length of console text", 0, _model.getConsoleDocument().getLength());
 
     listener.assertConsoleResetCount(1);
-    _interactionDone = false;
+//    _interactionDone = false;
     synchronized(_interactionDoneLock) {
       interpretIgnoreResult("System.out.print(\"a\");");
       _interactionDoneLock.wait();  // notified on interactionEnded

@@ -45,17 +45,6 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.util.docnavigation;
 
-import javax.swing.*;
-import javax.swing.event.TreeModelListener;
-import javax.swing.event.TreeSelectionListener;
-import javax.swing.event.TreeSelectionEvent;
-import javax.swing.tree.*;
-import java.awt.*;
-import java.net.URL;
-import java.net.MalformedURLException;
-import java.util.*;
-import edu.rice.cs.util.*;
-
 public class GroupNotSelectedException extends Exception{
   
   public GroupNotSelectedException(String m){

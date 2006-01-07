@@ -35,21 +35,22 @@ package edu.rice.cs.drjava.model.compiler;
 
 import java.io.File;
 import java.io.IOException;
+
 import java.util.List;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Iterator;
+
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
+
 import edu.rice.cs.drjava.model.IGetDocuments;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
-import javax.swing.*;
-import edu.rice.cs.util.swing.*;
-import java.lang.reflect.*;
-import edu.rice.cs.util.UnexpectedException;
+
 import edu.rice.cs.util.ClasspathVector;
+
 import edu.rice.cs.javalanglevels.*;
 import edu.rice.cs.javalanglevels.parser.*;
 import edu.rice.cs.javalanglevels.tree.*;

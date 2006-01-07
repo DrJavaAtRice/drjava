@@ -46,10 +46,8 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.model.cache;
 
 import java.io.IOException;
-import javax.swing.text.BadLocationException;
 
 import edu.rice.cs.drjava.model.FileMovedException;
-import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 
 /** A lightweight wrapper type for DefinitionsDocuments that may or may not be resident in memory.

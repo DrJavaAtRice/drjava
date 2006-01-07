@@ -45,14 +45,7 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.definitions.indent;
 
-import junit.framework.*;
-import junit.extensions.*;
 import javax.swing.text.BadLocationException;
-import javax.swing.text.Document;
-
-import edu.rice.cs.drjava.model.AbstractDJDocument;
-import edu.rice.cs.drjava.model.definitions.reducedmodel.IndentInfo;
-import edu.rice.cs.util.UnexpectedException;
 
 /**
  * Test class according to the JUnit protocol.

@@ -45,11 +45,9 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.definitions.indent;
 
-import junit.framework.*;
 import javax.swing.text.*;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.drjava.model.AbstractDJDocument;
-import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 
 /**
  * Indents the current line in the document to the indent level of the

@@ -46,8 +46,6 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava;
 
 import junit.framework.*;
-import java.util.Date;
-import java.text.SimpleDateFormat;
 
 /** Test that ensures all external dependencies are met!
  *  @version $Id$

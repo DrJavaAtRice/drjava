@@ -45,31 +45,23 @@
 
 package edu.rice.cs.util.docnavigation;
 
-import java.awt.*;
-import javax.swing.*;
-import javax.swing.event.*;
-import java.util.*;
-import java.awt.event.*;
-//import edu.rice.cs.drjava.model.*;
-//import edu.rice.cs.drjava.ui.RightClickMouseAdapter;
-
-class JListSortNavigator extends JListNavigator {
+class JListSortNavigator<ItemT extends INavigatorItem> extends JListNavigator<ItemT> {
   
   /* Relies on the standard default constructor */
  
   /** Adds the document to the list.  Should only be executed from event thread.
    *  @param doc the document to add
    */
-  public void addDocument(INavigatorItem doc) { insertDoc(doc); }
+  public void addDocument(ItemT doc) { insertDoc(doc); }
  
   /** Inserts the document into its sorted position. Should only be executed in the event thread.
    *  @param doc the document to add
    */
-  private int insertDoc(INavigatorItem doc) {
+  private int insertDoc(ItemT doc) {
     int i;
     synchronized (_model) {
       for (i = 0; i<_model.size(); i++) { 
-        INavigatorItem item = (INavigatorItem) _model.get(i);
+        ItemT item = getFromModel(i);
         if (doc.getName().toUpperCase().compareTo(item.getName().toUpperCase()) <= 0) break;
       }
       _model.add(i, doc);

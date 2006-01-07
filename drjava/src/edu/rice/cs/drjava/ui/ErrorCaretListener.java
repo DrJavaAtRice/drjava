@@ -36,13 +36,9 @@ package edu.rice.cs.drjava.ui;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.compiler.CompilerError;
 import edu.rice.cs.drjava.model.compiler.CompilerErrorModel;
-import edu.rice.cs.util.UnexpectedException;
-import edu.rice.cs.util.swing.Utilities;
 
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.Document;
 import javax.swing.text.Position;
 
 /** Listens to the caret in the associated DefinitionsPane and highlights the text containing CompilerErrors.

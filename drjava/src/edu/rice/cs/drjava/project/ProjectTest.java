@@ -47,7 +47,6 @@ package edu.rice.cs.drjava.project;
 
 import junit.framework.TestCase;
 import java.io.*;
-import java.util.Date;
 import java.text.SimpleDateFormat;
 
 import edu.rice.cs.util.sexp.*;

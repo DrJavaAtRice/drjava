@@ -41,14 +41,11 @@ import java.awt.print.Pageable;
 import java.awt.Font;
 import java.awt.Color;
 
-import javax.swing.DefaultListModel;
-import javax.swing.ListModel;
 import javax.swing.ProgressMonitor;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.UndoableEditListener;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
-import javax.swing.text.Document;
 import javax.swing.text.Element;
 import javax.swing.text.Position;
 import javax.swing.text.Segment;
@@ -62,14 +59,9 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import java.rmi.RemoteException;
-import java.net.MalformedURLException;
-import java.net.URL;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.LinkedList;
@@ -95,7 +87,6 @@ import edu.rice.cs.util.swing.DocumentIterator;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.text.AbstractDocumentInterface;
 import edu.rice.cs.util.text.ConsoleDocument;
-import edu.rice.cs.util.text.EditDocumentException;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
@@ -114,29 +105,18 @@ import edu.rice.cs.drjava.model.definitions.reducedmodel.IndentInfo;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.ReducedModelState;
 import edu.rice.cs.drjava.model.debug.Breakpoint;
 import edu.rice.cs.drjava.model.debug.Debugger;
-import edu.rice.cs.drjava.model.debug.DebugException;
-import edu.rice.cs.drjava.model.debug.JPDADebugger;
-import edu.rice.cs.drjava.model.debug.NoDebuggerAvailable;
 import edu.rice.cs.drjava.model.repl.DefaultInteractionsModel;
-import edu.rice.cs.drjava.model.repl.InputListener;
 import edu.rice.cs.drjava.model.repl.InteractionsDocument;
 import edu.rice.cs.drjava.model.repl.InteractionsDJDocument;
-import edu.rice.cs.drjava.model.repl.InteractionsListener;
 import edu.rice.cs.drjava.model.repl.InteractionsScriptModel;
-import edu.rice.cs.drjava.model.repl.newjvm.MainJVM;
-import edu.rice.cs.drjava.model.compiler.CompilerListener;
 import edu.rice.cs.drjava.model.compiler.CompilerModel;
-import edu.rice.cs.drjava.model.compiler.DefaultCompilerModel;
-import edu.rice.cs.drjava.model.junit.DefaultJUnitModel;
 import edu.rice.cs.drjava.model.junit.JUnitModel;
-import edu.rice.cs.drjava.model.definitions.indent.Indenter;
 import edu.rice.cs.drjava.project.DocFile;
 import edu.rice.cs.drjava.project.DocumentInfoGetter;
 import edu.rice.cs.drjava.project.MalformedProjectFileException;
 import edu.rice.cs.drjava.project.ProjectFileBuilder;
 import edu.rice.cs.drjava.project.ProjectFileIR;
 import edu.rice.cs.drjava.project.ProjectFileParser;
-import edu.rice.cs.drjava.platform.PlatformFactory;
 import edu.rice.cs.drjava.model.cache.DCacheAdapter;
 import edu.rice.cs.drjava.model.cache.DDReconstructor;
 import edu.rice.cs.drjava.model.cache.DocumentCache;
@@ -244,9 +224,6 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   /** A PageFormat object for printing to paper. */
   protected PageFormat _pageFormat = new PageFormat();
   
-  /** Listens for requests from System.in. */
-  private InputListener _inputListener;
-  
   /** The active document pointer, which will never be null once the constructor is done.
    *  Maintained by the _gainVisitor with a navigation listener.
    */
@@ -262,7 +239,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   /** The abstract container which contains views of open documents and allows user to navigate document focus among
    *  this collection of open documents
    */
-  protected IDocumentNavigator _documentNavigator = AWTContainerNavigatorFactory.Singleton.makeListNavigator(); 
+  protected IDocumentNavigator<OpenDefinitionsDocument> _documentNavigator = 
+      new AWTContainerNavigatorFactory<OpenDefinitionsDocument>().makeListNavigator(); 
   
   
   // ----- CONSTRUCTORS -----
@@ -310,8 +288,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   }
   
   private void _init() {
-    final NodeDataVisitor<Boolean> _gainVisitor = new NodeDataVisitor<Boolean>() {
-      public Boolean itemCase(INavigatorItem docu) {
+    final NodeDataVisitor<OpenDefinitionsDocument, Boolean> _gainVisitor = new NodeDataVisitor<OpenDefinitionsDocument, Boolean>() {
+      public Boolean itemCase(OpenDefinitionsDocument docu) {
         _setActiveDoc(docu);  // sets _activeDocument, the shadow copy of the active document
 //        Utilities.showDebug("Setting the active doc done");
         File dir = _activeDocument.getParentDirectory();
@@ -336,9 +314,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       public Boolean stringCase(String s) { return Boolean.valueOf(false); }
     };
     
-    _documentNavigator.addNavigationListener(new INavigationListener() {
-      public void gainedSelection(NodeData dat) { dat.execute(_gainVisitor); }
-      public void lostSelection(NodeData dat) {
+    _documentNavigator.addNavigationListener(new INavigationListener<OpenDefinitionsDocument>() {
+      public void gainedSelection(NodeData<? extends OpenDefinitionsDocument> dat) { dat.execute(_gainVisitor); }
+      public void lostSelection(NodeData<? extends OpenDefinitionsDocument> dat) {
       // not important, only one document selected at a time
       }
     });
@@ -765,9 +743,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     throw new UnsupportedOperationException("AbstractGlobalModel does not support javadoc");
   }
   
-  public IDocumentNavigator getDocumentNavigator() { return _documentNavigator; }
+  public IDocumentNavigator<OpenDefinitionsDocument> getDocumentNavigator() { return _documentNavigator; }
   
-  public void setDocumentNavigator(IDocumentNavigator newnav) { _documentNavigator = newnav; }
+  public void setDocumentNavigator(IDocumentNavigator<OpenDefinitionsDocument> newnav) { _documentNavigator = newnav; }
   
   /** Creates a new open definitions document and adds it to the list.
    *  @return The new open document
@@ -1084,7 +1062,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       
     // add collapsed path info
     if (_documentNavigator instanceof JTreeSortNavigator) {
-      String[] paths = ((JTreeSortNavigator)_documentNavigator).getCollapsedPaths();
+      String[] paths = ((JTreeSortNavigator<?>)_documentNavigator).getCollapsedPaths();
       for (String s : paths) { builder.addCollapsedPath(s); }
     }
     
@@ -1151,30 +1129,31 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     // sections are set from the methods such as getSourceBinTitle().  Changing this changes what is considered 
     // source, aux, and external.
     
-    List<Pair<String, INavigatorItemFilter>> l = new LinkedList<Pair<String, INavigatorItemFilter>>();
-    l.add(new Pair<String, INavigatorItemFilter>(getSourceBinTitle(), new INavigatorItemFilter() {
-      public boolean accept(INavigatorItem n) {
-        OpenDefinitionsDocument d = (OpenDefinitionsDocument) n;
-        return d.isInProjectPath();
-      }
-    }));
+    List<Pair<String, INavigatorItemFilter<OpenDefinitionsDocument>>> l = 
+        new LinkedList<Pair<String, INavigatorItemFilter<OpenDefinitionsDocument>>>();
+    l.add(new Pair<String, INavigatorItemFilter<OpenDefinitionsDocument>>(getSourceBinTitle(), 
+        new INavigatorItemFilter<OpenDefinitionsDocument>() {
+          public boolean accept(OpenDefinitionsDocument n) {
+            return n.isInProjectPath();
+          }
+        }));
     
-    l.add(new Pair<String, INavigatorItemFilter>(getAuxiliaryBinTitle(), new INavigatorItemFilter() {
-      public boolean accept(INavigatorItem n) {
-        OpenDefinitionsDocument d =  (OpenDefinitionsDocument) n;
-        return d.isAuxiliaryFile();
-      }
-    }));
+    l.add(new Pair<String, INavigatorItemFilter<OpenDefinitionsDocument>>(getAuxiliaryBinTitle(), 
+        new INavigatorItemFilter<OpenDefinitionsDocument>() {
+          public boolean accept(OpenDefinitionsDocument n) {
+            return n.isAuxiliaryFile();
+          }
+        }));
     
-    l.add(new Pair<String, INavigatorItemFilter>(getExternalBinTitle(), new INavigatorItemFilter() {
-      public boolean accept(INavigatorItem n) {
-        OpenDefinitionsDocument d = (OpenDefinitionsDocument) n;
-        return !(d.inProject() || d.isAuxiliaryFile()) || d.isUntitled();
-      }
-    }));
+    l.add(new Pair<String, INavigatorItemFilter<OpenDefinitionsDocument>>(getExternalBinTitle(), 
+        new INavigatorItemFilter<OpenDefinitionsDocument>() {
+          public boolean accept(OpenDefinitionsDocument d) {
+            return !(d.inProject() || d.isAuxiliaryFile()) || d.isUntitled();
+          }
+        }));
     
-    IDocumentNavigator newNav = 
-      AWTContainerNavigatorFactory.Singleton.makeTreeNavigator(projfilepath, getDocumentNavigator(), l);
+    IDocumentNavigator<OpenDefinitionsDocument> newNav = 
+      new AWTContainerNavigatorFactory<OpenDefinitionsDocument>().makeTreeNavigator(projfilepath, getDocumentNavigator(), l);
     
     setDocumentNavigator(newNav);
     
@@ -1219,9 +1198,8 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
           if (oldState.inProject(d.file())) closeFile(d);
           else {
             try {
-              final INavigatorItem idoc = d;
               final String path = fixPathForNavigator(d.getFile().getCanonicalPath());
-              _documentNavigator.refreshDocument(idoc, path);  // this operation must run in event thread
+              _documentNavigator.refreshDocument(d, path);  // this operation must run in event thread
             }
             catch(IOException e) { 
               /* Do nothing; findbugs signals a bug unless this catch clause spans more than two lines */ 
@@ -1238,7 +1216,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     });
     
     if (_documentNavigator instanceof JTreeSortNavigator) {
-      ((JTreeSortNavigator)_documentNavigator).collapsePaths(ir.getCollapsedPaths());
+      ((JTreeSortNavigator<?>)_documentNavigator).collapsePaths(ir.getCollapsedPaths());
     }
    
 // The following line is commented out because it is done in MainFrame.openProject before this method is called.
@@ -1252,7 +1230,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
    *  This version is degenerate; it does not reset the interactions pane.
    */
   public void closeProject() {
-    setDocumentNavigator(AWTContainerNavigatorFactory.Singleton.makeListNavigator(getDocumentNavigator()));
+    setDocumentNavigator(new AWTContainerNavigatorFactory<OpenDefinitionsDocument>().makeListNavigator(getDocumentNavigator()));
     setFileGroupingState(makeFlatFileGroupingState());
 
     // Reset rather than telling the user to reset. This was a design decision
@@ -3071,7 +3049,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   
   /** Sets the active document to be the next one in the collection. */
   public void setActiveNextDocument() {
-    INavigatorItem key = _activeDocument;
+    OpenDefinitionsDocument key = _activeDocument;
     OpenDefinitionsDocument nextKey = (OpenDefinitionsDocument) _documentNavigator.getNext(key);
     if (key != nextKey) setActiveDocument(nextKey);
     else setActiveDocument((OpenDefinitionsDocument)_documentNavigator.getFirst());
@@ -3080,7 +3058,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
 
   /** Sets the active document to be the previous one in the collection. */
   public void setActivePreviousDocument() {
-    INavigatorItem key = _activeDocument;
+    OpenDefinitionsDocument key = _activeDocument;
     OpenDefinitionsDocument prevKey = (OpenDefinitionsDocument) _documentNavigator.getPrevious(key);
     if (key != prevKey) setActiveDocument(prevKey);
     else setActiveDocument((OpenDefinitionsDocument)_documentNavigator.getLast());
@@ -3104,9 +3082,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   private void _ensureNotActive(List<OpenDefinitionsDocument> docs) {
     if (docs.contains(getActiveDocument())) {
       // Find the one that should be the new active document
-      IDocumentNavigator nav = getDocumentNavigator();
+      IDocumentNavigator<OpenDefinitionsDocument> nav = getDocumentNavigator();
       
-      INavigatorItem item = docs.get(docs.size()-1);
+      OpenDefinitionsDocument item = docs.get(docs.size()-1);
       OpenDefinitionsDocument nextActive = (OpenDefinitionsDocument) nav.getNext(item);
       if (!nextActive.equals(item)) {
         setActiveDocument(nextActive); 

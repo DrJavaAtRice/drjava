@@ -55,9 +55,6 @@ import edu.rice.cs.util.ClasspathVector;
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.ArgumentTokenizer;
 import edu.rice.cs.util.newjvm.*;
-import edu.rice.cs.util.FileOps;
-import edu.rice.cs.util.UnexpectedException;
-import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.classloader.ClassFileError;
 import koala.dynamicjava.parser.wrapper.*;
 

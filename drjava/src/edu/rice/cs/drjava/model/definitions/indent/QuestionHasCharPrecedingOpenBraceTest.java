@@ -45,12 +45,7 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.definitions.indent;
 
-import junit.framework.*;
-import junit.extensions.*;
 import javax.swing.text.BadLocationException;
-import javax.swing.text.Document;
-
-import edu.rice.cs.drjava.model.AbstractDJDocument;
 
 /**
  * Test class according to the JUnit protocol. Tests the proper functionality
@@ -61,7 +56,7 @@ public final class QuestionHasCharPrecedingOpenBraceTest extends IndentRulesTest
 {
   private String _text;
     
-  private IndentRuleQuestion _rule;
+//  private IndentRuleQuestion _rule;
 
   public void setUp() { super.setUp(); }
 

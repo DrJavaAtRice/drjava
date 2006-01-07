@@ -45,9 +45,7 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model;
 
-import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.model.definitions.*;
-import edu.rice.cs.util.UnexpectedException;
 
 import java.io.*;
 

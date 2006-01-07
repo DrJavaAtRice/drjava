@@ -45,7 +45,6 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.definitions.indent;
 
-import java.lang.Math;
 import javax.swing.text.BadLocationException;
 
 import edu.rice.cs.util.UnexpectedException;

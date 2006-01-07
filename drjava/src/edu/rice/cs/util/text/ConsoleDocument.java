@@ -41,7 +41,6 @@ import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.text.EditDocumentInterface;
 import edu.rice.cs.util.text.DocumentEditCondition;
 import edu.rice.cs.util.text.EditDocumentException;
-import edu.rice.cs.util.swing.Utilities;
 
 /** @version $Id$ */
 public class ConsoleDocument implements EditDocumentInterface {

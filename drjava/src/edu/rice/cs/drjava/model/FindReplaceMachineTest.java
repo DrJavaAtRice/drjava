@@ -45,10 +45,8 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model;
 
-import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.model.AbstractGlobalModel;
 import edu.rice.cs.util.FileOps;
-import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.Utilities;
 
 import junit.framework.TestCase;
@@ -57,7 +55,6 @@ import java.io.IOException;
 import java.io.File;
 import javax.swing.text.BadLocationException;
 import edu.rice.cs.util.text.AbstractDocumentInterface;
-import edu.rice.cs.util.text.SwingDocument;
 
 /**
  * Tests the FindReplaceMachine.

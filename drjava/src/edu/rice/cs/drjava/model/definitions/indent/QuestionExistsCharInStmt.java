@@ -45,11 +45,7 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.definitions.indent;
 
-import javax.swing.text.BadLocationException;
-
-import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.drjava.model.AbstractDJDocument;
-import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 
 /**
  * Determines if the given search character is found between

@@ -45,28 +45,19 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.util.docnavigation;
 
-import javax.swing.*;
-import javax.swing.event.TreeModelListener;
-import javax.swing.event.TreeSelectionListener;
-import javax.swing.event.TreeSelectionEvent;
 import javax.swing.tree.*;
-import java.io.File;
-import java.awt.*;
-import java.net.URL;
-import java.net.MalformedURLException;
-import java.util.*;
-import java.io.IOException;
-import java.io.FileFilter;
-import edu.rice.cs.util.*;
 
-public class LeafNode extends DefaultMutableTreeNode implements NodeData {
+public class LeafNode<ItemT extends INavigatorItem> extends DefaultMutableTreeNode implements NodeData<ItemT> {
   public String _rep;
-  public LeafNode(INavigatorItem i) {
+  public LeafNode(ItemT i) {
     super(i);
     _rep = i.getName();
   }
-  public void setData(INavigatorItem i) { super.setUserObject(i); }
-  public INavigatorItem getData() { return (INavigatorItem) super.getUserObject(); }
-  public <T> T execute(NodeDataVisitor<T> v) { return v.itemCase(getData()); }
+  public void setData(ItemT i) { super.setUserObject(i); }
+  public ItemT getData() {
+    @SuppressWarnings("unchecked") ItemT result = (ItemT) super.getUserObject();
+    return result;
+  }
+  public <Ret> Ret execute(NodeDataVisitor<? super ItemT, Ret> v) { return v.itemCase(getData()); }
   public String toString() { return _rep; }
 }

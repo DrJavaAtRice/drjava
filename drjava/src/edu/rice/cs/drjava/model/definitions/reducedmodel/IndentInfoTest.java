@@ -38,7 +38,6 @@ import  javax.swing.text.*;
 import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.model.definitions.indent.Indenter;
 //import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
-import edu.rice.cs.drjava.model.GlobalEventNotifier;
 
 /**
  * 

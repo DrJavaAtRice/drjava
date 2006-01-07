@@ -49,10 +49,10 @@ package edu.rice.cs.util.docnavigation;
 import javax.swing.AbstractListModel;
 import java.util.*;
 
-class IDocList extends AbstractListModel {
-    private Vector<INavigatorItem> _docs = new Vector<INavigatorItem>();
+class IDocList<ItemT extends INavigatorItem> extends AbstractListModel {
+    private Vector<ItemT> _docs = new Vector<ItemT>();
 
-    public Enumeration<INavigatorItem> elements() {
+    public Enumeration<ItemT> elements() {
         return _docs.elements();
     }
 
@@ -60,7 +60,7 @@ class IDocList extends AbstractListModel {
 
     public boolean isEmpty() { return _docs.isEmpty(); }
 
-    public INavigatorItem get(int index) {
+    public ItemT get(int index) {
         return _docs.get(index);
     }
 
@@ -71,7 +71,7 @@ class IDocList extends AbstractListModel {
     public int size() { return _docs.size(); }
     public int getSize() { return size(); }
 
-    public void add(INavigatorItem d) {
+    public void add(ItemT d) {
         _docs.addElement(d);
         fireIntervalAdded(this, size() - 1, size() - 1);
     }
@@ -81,13 +81,13 @@ class IDocList extends AbstractListModel {
      * @return the removed INavigatorItem
      * @exception NoSuchElementException if doc is not present in the DocumentNavigator
      */
-    public INavigatorItem remove(INavigatorItem doc) {
+    public INavigatorItem remove(ItemT doc) {
         int index = _docs.indexOf(doc);
         if( index == -1 ) {
             return null;
         }
 
-        INavigatorItem ret = _docs.remove(index);
+        ItemT ret = _docs.remove(index);
         fireIntervalRemoved(this, index, index);
         return ret;
     }

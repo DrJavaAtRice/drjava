@@ -45,17 +45,12 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.ui;
 
-import edu.rice.cs.drjava.model.definitions.ColoringView;
 import edu.rice.cs.drjava.model.GlobalModel;
 import edu.rice.cs.drjava.model.repl.*;
 import edu.rice.cs.drjava.model.repl.InteractionsDocumentTest.TestBeep;
 import edu.rice.cs.drjava.model.repl.InteractionsModelTest.TestInteractionsModel;
 import edu.rice.cs.util.text.EditDocumentException;
 import edu.rice.cs.util.swing.Utilities;
-
-import java.util.List;
-
-import javax.swing.text.*;
 
 import junit.framework.*;
 

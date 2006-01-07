@@ -49,7 +49,6 @@ import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 //import javax.swing.text.Document;
 import javax.swing.text.Position;
-import javax.swing.text.Style;
 
 /** Swing Document interface augmented by readers/writers locking operations */
 public interface AbstractDocumentInterface extends ReadersWritersLocking { 

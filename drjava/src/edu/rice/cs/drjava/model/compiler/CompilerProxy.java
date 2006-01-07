@@ -40,8 +40,6 @@ import edu.rice.cs.util.classloader.StickyClassLoader;
 import edu.rice.cs.util.ClasspathVector;
 import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.config.FileOption;
-import java.util.Vector;
-import java.util.Enumeration;
 
 /** A compiler interface to search a given
  *  @version $Id$

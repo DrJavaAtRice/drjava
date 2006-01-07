@@ -53,7 +53,6 @@ import java.util.List;
 
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.drjava.model.junit.*;
-import edu.rice.cs.util.swing.ScrollableDialog;
 
 /**
  * A test on the GlobalModel for JUnit testing.
@@ -114,14 +113,14 @@ public final class GlobalModelJUnitTest extends GlobalModelTestCase {
     "  } " +
     "}";
 
-  private static final String MONKEYTEST_COMPILEERROR_TEXT =
-    "import junit.framework.*; " +
-    "public class MonkeyTestCompileError extends TestCase { " +
-    "  Object MonkeyTestFail(String name) { super(name); } " +
-    "  public void testShouldFail() { " +
-    "    assertEquals(\"monkey\", \"baboon\"); " +
-    "  } " +
-    "}";
+//  private static final String MONKEYTEST_COMPILEERROR_TEXT =
+//    "import junit.framework.*; " +
+//    "public class MonkeyTestCompileError extends TestCase { " +
+//    "  Object MonkeyTestFail(String name) { super(name); } " +
+//    "  public void testShouldFail() { " +
+//    "    assertEquals(\"monkey\", \"baboon\"); " +
+//    "  } " +
+//    "}";
 
   private static final String NONPUBLIC_TEXT =
     "import junit.framework.*; " +

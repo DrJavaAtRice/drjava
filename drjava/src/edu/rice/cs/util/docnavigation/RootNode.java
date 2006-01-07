@@ -45,24 +45,15 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.util.docnavigation;
 
-import javax.swing.*;
-import javax.swing.event.TreeModelListener;
-import javax.swing.event.TreeSelectionListener;
-import javax.swing.event.TreeSelectionEvent;
 import javax.swing.tree.*;
-import java.awt.*;
-import java.net.URL;
-import java.net.MalformedURLException;
-import java.util.*;
 import java.io.File;
-import edu.rice.cs.util.*;
 
-class RootNode extends DefaultMutableTreeNode implements NodeData {
+class RootNode<ItemT extends INavigatorItem> extends DefaultMutableTreeNode implements NodeData<ItemT> {
   
   public RootNode(File f) { super(f); }
   public RootNode(String s) { this(new File(s)); }
   public void setData(File f) { super.setUserObject(f); }
   public File getData() { return (File) super.getUserObject(); }
   public String toString() { return getData().toString(); }
-  public <T> T execute(NodeDataVisitor<T> v) { return v.fileCase(getData()); }
+  public <Ret> Ret execute(NodeDataVisitor<? super ItemT, Ret> v) { return v.fileCase(getData()); }
 }

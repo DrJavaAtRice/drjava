@@ -52,16 +52,14 @@ import edu.rice.cs.util.swing.Utilities;
 import java.io.*;
 import java.util.*;
 
-import javax.swing.tree.*;
-
 public class JListSortNavigatorTest extends TestCase {
   
-  protected JListSortNavigator list;
-  protected INavigatorItem i1, i2, i3, i4;
+  protected JListSortNavigator<DummyINavigatorItem> list;
+  protected DummyINavigatorItem i1, i2, i3, i4;
   
   public void setUp() throws IOException {
     
-    list = new JListSortNavigator();
+    list = new JListSortNavigator<DummyINavigatorItem>();
     
     i1 = new DummyINavigatorItem("item1");
     i2 = new DummyINavigatorItem("item2");
@@ -97,10 +95,10 @@ public class JListSortNavigatorTest extends TestCase {
     
     assertFalse("contains test 5", list.contains(new DummyINavigatorItem("item1")));
     
-    Enumeration<INavigatorItem> docs = list.getDocuments();
-    INavigatorItem[] docsArray = new INavigatorItem[4];
+    Enumeration<DummyINavigatorItem> docs = list.getDocuments();
+    DummyINavigatorItem[] docsArray = new DummyINavigatorItem[4];
     for (int i = 0; i < 4; i++) docsArray[i] = docs.nextElement();
-    assertTrue("getDocuments test", Arrays.equals(docsArray, new INavigatorItem[] {i1, i2, i3, i4}));
+    assertTrue("getDocuments test", Arrays.equals(docsArray, new DummyINavigatorItem[] {i1, i2, i3, i4}));
   }
   
 }

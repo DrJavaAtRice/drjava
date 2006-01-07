@@ -46,10 +46,8 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.ui;
 
 import java.io.*;
-import java.util.*;
 
 import edu.rice.cs.drjava.model.*;
-import edu.rice.cs.drjava.ui.*;
 import edu.rice.cs.drjava.project.MalformedProjectFileException;
 import edu.rice.cs.drjava.project.ProjectFileParser;
 import edu.rice.cs.drjava.project.ProjectFileIR;

@@ -51,15 +51,15 @@ import java.awt.event.*;
  * MouseListener extended to provide an INavigatorItem context in which clicks occurred
  */
 
-public interface  IDocumentAwareMouseListener
+public interface  IDocumentAwareMouseListener<ItemT extends INavigatorItem>
 {
-  public void mouseClicked(MouseEvent e, INavigatorItem clickee);
+  public void mouseClicked(MouseEvent e, ItemT clickee);
   
-  public void mouseEntered(MouseEvent e, INavigatorItem onDocument);
+  public void mouseEntered(MouseEvent e, ItemT onDocument);
   
-  public void mouseExited(MouseEvent e, INavigatorItem fromDocument);
+  public void mouseExited(MouseEvent e, ItemT fromDocument);
   
-  public void mousePressed(MouseEvent e, INavigatorItem pressee);
+  public void mousePressed(MouseEvent e, ItemT pressee);
   
-  public void mouseReleased(MouseEvent e, INavigatorItem releaseee);
+  public void mouseReleased(MouseEvent e, ItemT releaseee);
 }

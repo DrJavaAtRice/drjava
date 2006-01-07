@@ -54,8 +54,6 @@ import javax.swing.text.Position;
 
 import edu.rice.cs.drjava.model.compiler.*;
 
-import edu.rice.cs.util.swing.Utilities;
-
 /** Tests to ensure that compilation fails when expected, and that the errors
  *  are reported correctly.
  *

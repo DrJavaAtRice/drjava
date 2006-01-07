@@ -50,7 +50,6 @@ import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.*;
 import edu.rice.cs.util.swing.FileSelectorComponent;
 import java.awt.*;
-import java.awt.event.*;
 import java.io.File;
 import javax.swing.filechooser.FileFilter;
 

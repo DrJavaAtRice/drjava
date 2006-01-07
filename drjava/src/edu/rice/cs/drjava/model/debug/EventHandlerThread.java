@@ -46,7 +46,6 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.model.debug;
 
 import edu.rice.cs.util.Log;
-import edu.rice.cs.util.swing.Utilities;
 
 import com.sun.jdi.*;
 import com.sun.jdi.event.*;

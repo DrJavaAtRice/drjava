@@ -45,7 +45,6 @@ import edu.rice.cs.drjava.model.compiler.CompilerErrorModel;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.HighlightManager;
 import edu.rice.cs.util.swing.BorderlessScrollPane;
-import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.text.SwingDocument;
 
 // TODO: Check synchronization.
@@ -274,9 +273,9 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
       }
     };
     
-    private Hashtable<Position, CompilerError> _setUpErrorTable() {
-      return new Hashtable<Position, CompilerError>();
-    }
+//    private Hashtable<Position, CompilerError> _setUpErrorTable() {
+//      return new Hashtable<Position, CompilerError>();
+//    }
     
     /** Constructs the CompilerErrorListPane.*/
     public ErrorListPane() {

@@ -122,7 +122,10 @@ public class ScrollableDialog implements Serializable {
     content.add(scrollWrapper, BorderLayout.CENTER);
     content.add(bottomPanel, BorderLayout.SOUTH);
     
-    _textArea.requestDefaultFocus();
+    // This method is deprecated.  There are alternatives, but it is
+    // probably best to let defer to the standard focus-management
+    // policy rather than trying to customize it.
+    //_textArea.requestDefaultFocus();
   }
 
   /**
@@ -151,6 +154,6 @@ public class ScrollableDialog implements Serializable {
   
   /** Shows this dialog. */
   public void show() {
-    _dialog.show();  // deprecated in Java 5.0
+    _dialog.setVisible(true);
   }
 }

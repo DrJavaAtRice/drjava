@@ -45,12 +45,10 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.util.text;
 
-import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.UnexpectedException;
 
 import java.awt.print.Pageable;
 
-import javax.swing.text.Style;
 import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;

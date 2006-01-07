@@ -89,6 +89,7 @@ public abstract class TabbedPanel extends JPanel {
    * center. Also adds the action to the close button.
    */
   private void _setUpPanes() {
+    this.setFocusCycleRoot(true);
     this.setLayout(new BorderLayout());
 
     _mainPanel = new JPanel();

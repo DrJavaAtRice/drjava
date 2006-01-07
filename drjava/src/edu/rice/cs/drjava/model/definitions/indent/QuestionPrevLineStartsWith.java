@@ -49,7 +49,6 @@ import javax.swing.text.*;
 import edu.rice.cs.util.UnexpectedException;
 
 import edu.rice.cs.drjava.model.AbstractDJDocument;
-import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 
 /**
  * Question rule in the indentation decision tree.  Determines if the 

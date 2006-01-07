@@ -180,11 +180,11 @@ public class StickyClassLoader extends ClassLoader {
    * </LI>
    * </OL>
    */
-  protected Class loadClass(String name, boolean resolve) 
+  protected Class<?> loadClass(String name, boolean resolve) 
     throws ClassNotFoundException
   {
     // check if it's already loaded in the JVM!
-    Class clazz;
+    Class<?> clazz;
     clazz = findLoadedClass(name);
     if (clazz != null) {
       return clazz;

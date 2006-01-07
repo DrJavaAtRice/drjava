@@ -46,7 +46,6 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.model.definitions.indent;
 
 import edu.rice.cs.drjava.model.AbstractDJDocument;
-import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 import edu.rice.cs.util.UnexpectedException;
 
 import javax.swing.text.BadLocationException;
@@ -157,15 +156,15 @@ public class ActionStartPrevStmtPlus extends IndentRuleAction {
     return supResult;
   }
 
-  private boolean _isPrevNonWSCharEqualTo(AbstractDJDocument doc,int pos,char c) {
-    try {
-      int prevPos = doc.findPrevNonWSCharPos(pos);
-      if (prevPos < 0) return false;
-      return (doc.getText(prevPos,1).charAt(0) == c);
-    }
-    catch (BadLocationException e) {
-      return false;
-    }
-  }
+//  private boolean _isPrevNonWSCharEqualTo(AbstractDJDocument doc,int pos,char c) {
+//    try {
+//      int prevPos = doc.findPrevNonWSCharPos(pos);
+//      if (prevPos < 0) return false;
+//      return (doc.getText(prevPos,1).charAt(0) == c);
+//    }
+//    catch (BadLocationException e) {
+//      return false;
+//    }
+//  }
 }
 

@@ -45,7 +45,6 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model;
 
-import java.io.File;
 import java.io.IOException;
 
 /** This interface encapsulates the behavior of a document loader. Components which provide a means to load 

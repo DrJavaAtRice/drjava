@@ -39,9 +39,6 @@ import java.util.List;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.util.text.SwingDocument;
 
-// TODO: remove this gratuitous swing dependency!
-import javax.swing.text.StyledDocument;
-
 public interface JUnitModel {
 
   //-------------------------- Listener Management --------------------------//

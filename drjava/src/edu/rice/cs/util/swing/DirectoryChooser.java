@@ -1004,11 +1004,12 @@ public class DirectoryChooser extends JPanel {
       
     // Case 3: Non-empty Case (has been expanded and may or may not have children)
       
-    Enumeration<DefaultMutableTreeNode> e = node.children();/** The Swing API uses raw types!  This warning should be corrected in J2SE 6.0 **/
+    // Raw type due to the use of raw types in Swing.
+    Enumeration e = node.children();
     HashSet<File> set = new HashSet<File>();
     LinkedList<DefaultMutableTreeNode> nodesToRemove = new LinkedList<DefaultMutableTreeNode>();
     while (e.hasMoreElements()) {
-      DefaultMutableTreeNode n = e.nextElement();
+      DefaultMutableTreeNode n = (DefaultMutableTreeNode) e.nextElement();
       if (nodeShouldBeRemoved(n)) 
         nodesToRemove.add(n); 
       else
@@ -1412,9 +1413,11 @@ public class DirectoryChooser extends JPanel {
       return; // children are not generated yet
     }
     File parentFile = ((FileDisplay)parent.getUserObject()).getFile();
-    Enumeration<TreeNode> e = parent.children(); /** The Swing API uses raw types!  This warning should be corrected in J2SE 6.0 **/
+    
+    // Raw type due to the use of raw types in Swing.
+    Enumeration e = parent.children();
     while (e.hasMoreElements()) {
-      DefaultMutableTreeNode child = (DefaultMutableTreeNode)e.nextElement();
+      DefaultMutableTreeNode child = (DefaultMutableTreeNode) e.nextElement();
       File oldFile = getFileForTreeNode(child);
       File newFile = new File(parentFile, oldFile.getName());
       child.setUserObject(_fdManager.makeFileDisplay(newFile));
@@ -1427,9 +1430,11 @@ public class DirectoryChooser extends JPanel {
     if (!_treeIsGenerated) return;
     DefaultMutableTreeNode parent = (DefaultMutableTreeNode)node.getParent();
     node.removeFromParent();
-    Enumeration<TreeNode> e = parent.children(); /** The Swing API uses raw types!  This warning should be corrected in J2SE 6.0 **/
+    
+    // Raw type due to the use of raw types in Swing.
+    Enumeration e = parent.children(); 
     while (e.hasMoreElements()) {
-      DefaultMutableTreeNode child = (DefaultMutableTreeNode)e.nextElement();
+      DefaultMutableTreeNode child = (DefaultMutableTreeNode) e.nextElement();
       if (node.toString().compareTo(child.toString()) < 0) {
         int idx = parent.getIndex(child);
         getModel().insertNodeInto(node,parent,idx);

@@ -40,7 +40,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.LinkedList;
 import java.util.HashMap;
-import javax.swing.text.*;
 
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.drjava.model.FileGroupingState;

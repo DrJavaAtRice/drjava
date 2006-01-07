@@ -53,9 +53,7 @@ import edu.rice.cs.drjava.model.ClasspathEntry;
 import edu.rice.cs.drjava.model.DeadClassLoader;
 import edu.rice.cs.drjava.model.BrainClassLoader;
 
-import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.ClasspathVector;
-import java.io.File;
 
 
 public class ClasspathManager{

@@ -37,7 +37,6 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.util.swing;
 
 import java.awt.EventQueue;
-import java.lang.reflect.InvocationTargetException;
 import javax.swing.JOptionPane;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.StringOps;

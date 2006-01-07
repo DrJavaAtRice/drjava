@@ -46,26 +46,12 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.model.debug;
 
 import java.io.*;
-import javax.swing.text.BadLocationException;
-import junit.extensions.*;
-import java.util.LinkedList;
-import javax.swing.SwingUtilities;
-import javax.swing.text.Document;
-import javax.swing.text.DefaultStyledDocument;
 import java.util.Vector;
-import java.util.Date;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.model.*;
-import edu.rice.cs.drjava.model.definitions.*;
-import edu.rice.cs.drjava.model.repl.*;
-import edu.rice.cs.drjava.model.compiler.*;
-import edu.rice.cs.util.*;
-import edu.rice.cs.util.text.EditDocumentException;
 import edu.rice.cs.util.swing.Utilities;
-import edu.rice.cs.drjava.CodeStatus;
-import edu.rice.cs.util.Log;
 
 /** More tests over the JPDA debugger.
  *  @version $Id$

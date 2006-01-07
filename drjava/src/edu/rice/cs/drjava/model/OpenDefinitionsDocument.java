@@ -47,22 +47,16 @@ package edu.rice.cs.drjava.model;
 
 import edu.rice.cs.util.docnavigation.*;
 import java.util.Vector;
-import java.util.List;
 import java.io.*;
 import java.awt.print.*;
-import javax.swing.ProgressMonitor;
-import javax.swing.text.Document;
-import javax.swing.text.StyledDocument;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.UndoableEditListener;
 import javax.swing.text.BadLocationException;
 
-import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.text.AbstractDocumentInterface;
 import edu.rice.cs.drjava.model.debug.Breakpoint;
 import edu.rice.cs.drjava.model.Finalizable;
 import edu.rice.cs.drjava.model.definitions.*;
-import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 
 /**
  * Interface for the GlobalModel's handler of an open

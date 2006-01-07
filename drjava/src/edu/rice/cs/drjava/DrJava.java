@@ -50,11 +50,9 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.net.MalformedURLException;
 import java.util.jar.JarFile;
-import java.util.Arrays;
 import javax.swing.UIManager;
 import javax.swing.*;
 
-import edu.rice.cs.util.PreventExitSecurityManager;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.OutputStreamRedirector;
 import edu.rice.cs.util.newjvm.ExecJVM;
@@ -300,7 +298,6 @@ public class DrJava implements OptionConstants {
       boolean isProjectFile = currFileName.endsWith(".pjt");
       final File file = new File(currFileName).getAbsoluteFile();
       FileOpenSelector command = new FileOpenSelector() {
-        public File getFile() { return file; }
         public File[] getFiles() { return new File[] {file}; }
       };
       try {

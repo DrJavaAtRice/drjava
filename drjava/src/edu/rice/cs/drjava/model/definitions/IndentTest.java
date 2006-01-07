@@ -46,20 +46,19 @@ END_COPYRIGHT_BLOCK*/
 package  edu.rice.cs.drjava.model.definitions;
 
 import  junit.framework.*;
-import  junit.extensions.*;
 import  javax.swing.text.BadLocationException;
-import javax.swing.text.Document;
-import java.io.*;
+//import java.io.File;
+//import java.io.FileReader;
+//import java.io.BufferedReader;
+//import java.io.IOException;
 
-import edu.rice.cs.drjava.IndentFiles;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.model.DJDocument;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.model.definitions.indent.*;
 import edu.rice.cs.drjava.model.GlobalEventNotifier;
-import edu.rice.cs.drjava.CodeStatus;
-import edu.rice.cs.util.*;
+//import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.swing.Utilities;
 
 /**
@@ -74,7 +73,6 @@ public final class IndentTest extends TestCase {
   static String openParen = IndentInfo.openParen;
   static String openBracket = IndentInfo.openBracket;
   private Integer indentLevel = new Integer(2);
-  private Integer configIndent;
   private GlobalEventNotifier _notifier;
 
   /** 
@@ -1328,65 +1326,65 @@ public final class IndentTest extends TestCase {
     assertEquals("indent info: dist to prev new line", distToPrevNewline, ii.distToPrevNewline);
   }
 
-  /** Copies fromFile to toFile, assuming both files exist. */
-  private void _copyFile(File fromFile, File toFile) throws IOException {
-    String text = FileOps.readFileAsString(fromFile);
-    FileOps.writeStringToFile(toFile, text);
-    String newText = FileOps.readFileAsString(toFile);
-    assertEquals("File copy verify", text, newText);
-  }
+//  /** Copies fromFile to toFile, assuming both files exist. */
+//  private void _copyFile(File fromFile, File toFile) throws IOException {
+//    String text = FileOps.readFileAsString(fromFile);
+//    FileOps.writeStringToFile(toFile, text);
+//    String newText = FileOps.readFileAsString(toFile);
+//    assertEquals("File copy verify", text, newText);
+//  }
 
-  /**
-   * indents one file, compares it to the other, reindents and recompares
-   * to make sure indent(x) = indent(indent(x))
-   */
-  private void _indentAndCompare(File unindented, File correct)
-    throws IOException
-  {
-    File test = null;
-    try {
-      test = File.createTempFile("test", ".java");
-      _copyFile(unindented, test);
-      test.deleteOnExit();
-      IndentFiles.main(new String[] {"-silent", test.toString()});
-      _fileCompare(test, correct);
-      IndentFiles.main(new String[] {"-silent", test.toString()});
-      _fileCompare(test, correct);
-    }
-    finally {
-      if (test != null) {
-        test.delete();
-      }
-    }
+//  /**
+//   * indents one file, compares it to the other, reindents and recompares
+//   * to make sure indent(x) = indent(indent(x))
+//   */
+//  private void _indentAndCompare(File unindented, File correct)
+//    throws IOException
+//  {
+//    File test = null;
+//    try {
+//      test = File.createTempFile("test", ".java");
+//      _copyFile(unindented, test);
+//      test.deleteOnExit();
+//      IndentFiles.main(new String[] {"-silent", test.toString()});
+//      _fileCompare(test, correct);
+//      IndentFiles.main(new String[] {"-silent", test.toString()});
+//      _fileCompare(test, correct);
+//    }
+//    finally {
+//      if (test != null) {
+//        test.delete();
+//      }
+//    }
+//
+//  }
 
-  }
-
-  /**
-   * @throws AssertionFailedError if the files are not identical
-   */
-  private void _fileCompare(File test, File correct) throws IOException {
-    FileReader fr = new FileReader(correct);
-    FileReader fr2 = new FileReader(test);
-    BufferedReader correctBufferedReader = new BufferedReader(fr);
-    BufferedReader testBufferedReader = new BufferedReader(fr2);
-
-    String correctString = correctBufferedReader.readLine();
-    String testString = testBufferedReader.readLine();
-    int lineNo = 1;
-    while (correctString != null && testString != null) {
-      assertEquals("File: " + correct + " line: " + lineNo, correctString, testString);
-      correctString = correctBufferedReader.readLine();
-      testString = testBufferedReader.readLine();
-      lineNo++;
-    }
-    assertTrue("Indented file longer than expected", correctString == null);
-    assertTrue("Indented file shorter than expected", testString == null);
-
-    testBufferedReader.close();
-    correctBufferedReader.close();
-    fr.close();
-    fr2.close();
-  }
+//  /**
+//   * @throws AssertionFailedError if the files are not identical
+//   */
+//  private void _fileCompare(File test, File correct) throws IOException {
+//    FileReader fr = new FileReader(correct);
+//    FileReader fr2 = new FileReader(test);
+//    BufferedReader correctBufferedReader = new BufferedReader(fr);
+//    BufferedReader testBufferedReader = new BufferedReader(fr2);
+//
+//    String correctString = correctBufferedReader.readLine();
+//    String testString = testBufferedReader.readLine();
+//    int lineNo = 1;
+//    while (correctString != null && testString != null) {
+//      assertEquals("File: " + correct + " line: " + lineNo, correctString, testString);
+//      correctString = correctBufferedReader.readLine();
+//      testString = testBufferedReader.readLine();
+//      lineNo++;
+//    }
+//    assertTrue("Indented file longer than expected", correctString == null);
+//    assertTrue("Indented file shorter than expected", testString == null);
+//
+//    testBufferedReader.close();
+//    correctBufferedReader.close();
+//    fr.close();
+//    fr2.close();
+//  }
 
 /*
   public void testNoParameters() throws BadLocationException

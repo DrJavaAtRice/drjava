@@ -49,7 +49,6 @@ import  java.awt.print.*;
 import  java.awt.*;
 import  java.awt.image.*;
 import  junit.framework.*;
-import  junit.extensions.*;
 
 /**
  * Test functions of DrJavaBook

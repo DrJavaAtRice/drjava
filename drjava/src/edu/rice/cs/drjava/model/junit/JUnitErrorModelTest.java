@@ -48,7 +48,6 @@ package edu.rice.cs.drjava.model.junit;
 import java.io.*;
 
 import edu.rice.cs.drjava.model.*;
-import edu.rice.cs.drjava.model.GlobalModelTestCase.JUnitTestListener;
 
 /**
  * A test on the GlobalModel for JUnit testing.

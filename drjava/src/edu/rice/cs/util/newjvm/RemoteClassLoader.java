@@ -47,9 +47,7 @@ package edu.rice.cs.util.newjvm;
 
 import java.rmi.*;
 import java.net.URL;
-import edu.rice.cs.util.FileOps;
-import java.io.*;
-import junit.runner.TestCaseClassLoader;
+
 /**
  * defines a classloader that can be used across jvm's
  */

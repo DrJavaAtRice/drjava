@@ -45,17 +45,8 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.ui;
 
-import javax.swing.*;
 import javax.swing.text.*;
-import javax.swing.event.*;
-import javax.swing.border.MatteBorder;
-import javax.swing.border.EmptyBorder;
-import java.awt.event.*;
-import java.awt.*;
 import java.awt.print.*;
-import java.awt.image.*;
-import java.net.*;
-import java.lang.reflect.Method;
 import edu.rice.cs.drjava.model.*;
 
 /**

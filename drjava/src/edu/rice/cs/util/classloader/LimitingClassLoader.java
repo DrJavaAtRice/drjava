@@ -71,7 +71,7 @@ public class LimitingClassLoader extends ClassLoader {
    *  @throws ClassNotFoundException if name is on the restricted list, or if the parent class loader couldn't
    *          find the class.
    */
-  protected Class loadClass(String name, boolean resolve)
+  protected Class<?> loadClass(String name, boolean resolve)
     throws ClassNotFoundException
   {
     ListIterator itor = _restrictedList.listIterator();
@@ -85,7 +85,7 @@ public class LimitingClassLoader extends ClassLoader {
     }
 
     // If we got here, the class was not restricted.
-    Class clazz = getParent().loadClass(name);
+    Class<?> clazz = getParent().loadClass(name);
 
     // Because we couldn't call the protected loadClass(String,boolean)
     // on the parent, here we handle resolution if needed.

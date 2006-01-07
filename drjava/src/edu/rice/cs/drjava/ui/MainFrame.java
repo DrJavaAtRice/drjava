@@ -43,20 +43,12 @@ import java.awt.event.*;
 import java.awt.*;
 import java.awt.print.*;
 import java.beans.*;
-import java.lang.reflect.InvocationTargetException;
 
 import java.io.*;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.List;
 import java.util.LinkedList;
-import java.util.ArrayList;
 import java.util.Vector;
-import java.util.Arrays;
-import java.util.StringTokenizer;
 import java.util.Enumeration;
 import java.net.URL;
 import java.net.MalformedURLException;
@@ -66,7 +58,6 @@ import edu.rice.cs.drjava.platform.*;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.model.definitions.NoSuchDocumentException;
-import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 import edu.rice.cs.drjava.model.definitions.DocumentUIListener;
 import edu.rice.cs.drjava.model.definitions.CompoundUndoManager;
 import edu.rice.cs.drjava.model.definitions.ClassNameNotFoundException;
@@ -84,7 +75,6 @@ import edu.rice.cs.util.swing.BorderlessScrollPane;
 import edu.rice.cs.util.swing.BorderlessSplitPane;
 import edu.rice.cs.util.swing.FileDisplayManager;
 import edu.rice.cs.util.swing.Utilities;
-import edu.rice.cs.util.text.EditDocumentException;
 import edu.rice.cs.util.classloader.ClassFileError;
 import edu.rice.cs.util.docnavigation.*;
 import edu.rice.cs.drjava.project.*;
@@ -357,7 +347,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     public void actionPerformed(ActionEvent ae) {
       new SwingWorker() {
         public Object construct() {
-          new JarOptionsDialog(MainFrame.this, MainFrame.this.getModel()).show();
+          new JarOptionsDialog(MainFrame.this, MainFrame.this.getModel()).setVisible(true);
           return null;
         }
       }.start();
@@ -1013,7 +1003,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     public void actionPerformed(ActionEvent ae) {
       // Create dialog if we haven't yet
       if (_aboutDialog == null) _aboutDialog = new AboutDialog(MainFrame.this);
-      _aboutDialog.show();
+      _aboutDialog.setVisible(true);
     }
   };
   
@@ -1929,20 +1919,20 @@ public class MainFrame extends JFrame implements OptionConstants {
 //    return _folderChooser;
 //  }
   
-  private Container findButtonContainer(Container container, String buttonText) {
-    Container answer = null;
-    Component[] cs = container.getComponents();
-    for(Component c: cs) {
-      if (c instanceof JButton && ((JButton)c).getText().equals(buttonText)) {
-        return container;
-      }else if (c instanceof Container) {
-        answer = findButtonContainer((Container)c, buttonText);
-      }
-      
-      if (answer != null) break;
-    }
-    return answer;
-  }
+//  private Container findButtonContainer(Container container, String buttonText) {
+//    Container answer = null;
+//    Component[] cs = container.getComponents();
+//    for(Component c: cs) {
+//      if (c instanceof JButton && ((JButton)c).getText().equals(buttonText)) {
+//        return container;
+//      }else if (c instanceof Container) {
+//        answer = findButtonContainer((Container)c, buttonText);
+//      }
+//      
+//      if (answer != null) break;
+//    }
+//    return answer;
+//  }
   
   /** Holds/shows the history of documents for ctrl-tab. */
   RecentDocFrame _recentDocFrame;
@@ -2224,13 +2214,12 @@ public class MainFrame extends JFrame implements OptionConstants {
   public void setStatusMessageColor(Color c) { _sbMessage.setForeground(c); }
   
   private void _moveToAuxiliary() {
-    INavigatorItem n = _model.getDocumentNavigator().getCurrent();
-    if (n != null) {
-      OpenDefinitionsDocument d = (OpenDefinitionsDocument) n;  // FIX THIS!
+    OpenDefinitionsDocument d = _model.getDocumentNavigator().getCurrent();
+    if (d != null) {
       if (! d.isUntitled()) {
         _model.addAuxiliaryFile(d);
         try{
-          _model.getDocumentNavigator().refreshDocument(n, _model.fixPathForNavigator(d.getFile().getCanonicalPath()));
+          _model.getDocumentNavigator().refreshDocument(d, _model.fixPathForNavigator(d.getFile().getCanonicalPath()));
         }
         catch(IOException e) { /* do nothing */ }
       }
@@ -2238,13 +2227,12 @@ public class MainFrame extends JFrame implements OptionConstants {
   }
   
   private void _removeAuxiliary() {
-    INavigatorItem n = _model.getDocumentNavigator().getCurrent();
-    if (n != null) {
-      OpenDefinitionsDocument d = (OpenDefinitionsDocument) n;  // FIX THIS!
+    OpenDefinitionsDocument d = _model.getDocumentNavigator().getCurrent();
+    if (d != null) {
       if (! d.isUntitled()) {
         _model.removeAuxiliaryFile(d);
         try{
-          _model.getDocumentNavigator().refreshDocument(n, _model.fixPathForNavigator(d.getFile().getCanonicalPath()));
+          _model.getDocumentNavigator().refreshDocument(d, _model.fixPathForNavigator(d.getFile().getCanonicalPath()));
         }
         catch(IOException e) { /* do nothing */ }
       }
@@ -2282,7 +2270,7 @@ public class MainFrame extends JFrame implements OptionConstants {
   /** Sets the left navigator pane to the correct component as dictated by the model. */
   private void _resetNavigatorPane() {
     if (_model.getDocumentNavigator() instanceof JTreeSortNavigator) {
-      JTreeSortNavigator nav = (JTreeSortNavigator)_model.getDocumentNavigator();
+      JTreeSortNavigator<?> nav = (JTreeSortNavigator<?>)_model.getDocumentNavigator();
       nav.setDisplayManager(getNavPaneDisplayManager());
       nav.setRootIcon(_djProjectIcon);
     }
@@ -2549,13 +2537,13 @@ public class MainFrame extends JFrame implements OptionConstants {
   }
   
   private void _closeFolder() {
-    INavigatorItem n;
-    Enumeration<INavigatorItem> e = _model.getDocumentNavigator().getDocuments();
+    OpenDefinitionsDocument d;
+    Enumeration<OpenDefinitionsDocument> e = _model.getDocumentNavigator().getDocuments();
     final LinkedList<OpenDefinitionsDocument> l = new LinkedList<OpenDefinitionsDocument>();
     if (_model.getDocumentNavigator().isGroupSelected()) {
       while (e.hasMoreElements()) {
-        n = e.nextElement();
-        if (_model.getDocumentNavigator().isSelectedInGroup(n)) { l.add((OpenDefinitionsDocument) n); }  // FIX THIS!
+        d = e.nextElement();
+        if (_model.getDocumentNavigator().isSelectedInGroup(d)) { l.add(d); }
       }
       _model.closeFiles(l);
       if (! l.isEmpty()) _model.setProjectChanged(true);
@@ -2942,13 +2930,13 @@ public class MainFrame extends JFrame implements OptionConstants {
     _cleanUpForCompile();
     hourglassOn();
     try {
-      INavigatorItem n;
-      Enumeration<INavigatorItem> e = _model.getDocumentNavigator().getDocuments();
+      OpenDefinitionsDocument d;
+      Enumeration<OpenDefinitionsDocument> e = _model.getDocumentNavigator().getDocuments();
       final LinkedList<OpenDefinitionsDocument> l = new LinkedList<OpenDefinitionsDocument>();
       if (_model.getDocumentNavigator().isGroupSelected()) {
         while (e.hasMoreElements()) {
-          n = e.nextElement();
-          if (_model.getDocumentNavigator().isSelectedInGroup(n)) l.add( (OpenDefinitionsDocument) n);  // FIX THIS!
+          d = e.nextElement();
+          if (_model.getDocumentNavigator().isSelectedInGroup(d)) l.add(d);
         }
         
 //        new Thread("Compile Folder") {
@@ -3138,12 +3126,12 @@ public class MainFrame extends JFrame implements OptionConstants {
         _dissableJUnitActions();
         hourglassOn();  // turned off when JUnitStarted event is fired
         if (_model.getDocumentNavigator().isGroupSelected()) {
-          Enumeration<INavigatorItem> docs = _model.getDocumentNavigator().getDocuments();
+          Enumeration<OpenDefinitionsDocument> docs = _model.getDocumentNavigator().getDocuments();
           final LinkedList<OpenDefinitionsDocument> l = new LinkedList<OpenDefinitionsDocument>();
           while (docs.hasMoreElements()) {
-            INavigatorItem doc = docs.nextElement();
+            OpenDefinitionsDocument doc = docs.nextElement();
             if (_model.getDocumentNavigator().isSelectedInGroup(doc))
-              l.add((OpenDefinitionsDocument) doc);  // FIX THIS CAST!
+              l.add(doc);
           }
           try { _model.getJUnitModel().junitDocs(l); }
           catch(UnexpectedException e) { _junitInterrupted(e); }
@@ -3301,16 +3289,22 @@ public class MainFrame extends JFrame implements OptionConstants {
         switch (rc) {
           case JOptionPane.YES_OPTION:
             _currentDefPane.hasWarnedAboutModified(true);
-            // don't break -- maybe update option
+            if (dialog.getCheckBoxValue()) {
+              DrJava.getConfig().setSetting(WARN_BREAKPOINT_OUT_OF_SYNC, Boolean.FALSE);
+            }
+            break;
+            
           case JOptionPane.NO_OPTION:
             if (dialog.getCheckBoxValue()) {
-            DrJava.getConfig().setSetting(WARN_BREAKPOINT_OUT_OF_SYNC, Boolean.FALSE);
-          }
+                DrJava.getConfig().setSetting(WARN_BREAKPOINT_OUT_OF_SYNC, Boolean.FALSE);
+            }
             break;
+            
           case JOptionPane.CANCEL_OPTION:
           case JOptionPane.CLOSED_OPTION:
             // do nothing
             return;
+            
           default:
             throw new RuntimeException("Invalid rc from showConfirmDialog: " + rc);
         }

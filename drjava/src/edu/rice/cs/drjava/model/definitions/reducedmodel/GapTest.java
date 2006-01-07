@@ -46,9 +46,6 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.model.definitions.reducedmodel;
 
 import  junit.framework.*;
-import  java.util.Vector;
-import  junit.extensions.*;
-
 
 /**
  * Tests the functionality of the Gap class.

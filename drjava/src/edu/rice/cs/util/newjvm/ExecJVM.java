@@ -35,7 +35,6 @@ package edu.rice.cs.util.newjvm;
 
 import java.io.*;
 import java.util.*;
-import edu.rice.cs.util.FileOps;
 
 /** A utility class to allow executing another JVM.
  *  @version $Id$

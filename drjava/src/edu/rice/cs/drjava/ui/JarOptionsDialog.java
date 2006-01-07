@@ -56,13 +56,12 @@ import edu.rice.cs.util.swing.SwingWorker;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
-import javax.swing.border.EtchedBorder;
 import javax.swing.filechooser.FileFilter;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.io.File;
-import java.io.FilenameFilter;
 import java.io.IOException;
+// import java.io.FileFilter;  // Collides with javax.swing.filechooser.FileFilter
 import java.util.Iterator;
 import java.util.List;
 
@@ -360,9 +359,6 @@ public class JarOptionsDialog extends JDialog {
           public boolean accept(File f) {
             return f.isDirectory() || f.getName().endsWith(".class");
           }
-          public String getDescription() {
-            return null;
-          }
         };
 
         File[] files = dir.listFiles(classFilter);
@@ -446,7 +442,7 @@ public class JarOptionsDialog extends JDialog {
               jarOut.createNewFile();
             }
             catch (IOException e) {
-              JarOptionsDialog.this.hide();
+              JarOptionsDialog.this.setVisible(false);
               e.printStackTrace();
               throw new UnexpectedException(e);
             }
@@ -546,17 +542,15 @@ public class JarOptionsDialog extends JDialog {
     return true;
   }
 
-  // Code to keep this on the screen
-  public void show() {
-    // suggested from zaq@nosi.com, to keep the frame on the screen!
-    Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-    Dimension frameSize = this.getSize();
-    this.setLocation((screenSize.width - frameSize.width) / 2,
-            (screenSize.height - frameSize.height) / 2);
-    super.show();
-  }
   public void setVisible(boolean vis) {
-    if (vis) show();
-    else hide();
+    if (vis) {
+//    suggested from zaq@nosi.com, to keep the frame on the screen!
+      Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+      Dimension frameSize = this.getSize();
+      this.setLocation((screenSize.width - frameSize.width) / 2,
+              (screenSize.height - frameSize.height) / 2);
+    }
+    super.setVisible(vis);
   }
+  
 }

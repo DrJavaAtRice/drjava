@@ -47,7 +47,6 @@ package edu.rice.cs.drjava.ui;
 
 import edu.rice.cs.drjava.model.SingleDisplayModel;
 import edu.rice.cs.drjava.model.compiler.CompilerErrorModel;
-import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.text.SwingDocument;
 
 import javax.swing.text.*;

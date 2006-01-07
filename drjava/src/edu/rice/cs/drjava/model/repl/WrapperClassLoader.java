@@ -46,7 +46,6 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.model.repl;
 
 import java.net.URL;
-import java.net.URLClassLoader;
 
 
 public class WrapperClassLoader extends ClassLoader{

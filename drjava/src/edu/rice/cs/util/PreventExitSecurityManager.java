@@ -46,7 +46,6 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.util;
 
 import java.security.*;
-import edu.rice.cs.util.swing.Utilities;
 
 /** Not used anymore. <p>
  *  A security manager to prevent exiting the slaveVM indiscriminately.  This manager disallows System.exit 

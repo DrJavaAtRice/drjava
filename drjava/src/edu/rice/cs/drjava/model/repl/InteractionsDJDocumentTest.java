@@ -49,7 +49,6 @@ import junit.framework.*;
 
 import edu.rice.cs.drjava.ui.*;
 import edu.rice.cs.drjava.model.GlobalModel;
-import edu.rice.cs.drjava.model.repl.InteractionsDocumentTest.TestBeep;
 
 import edu.rice.cs.util.text.EditDocumentException;
 import edu.rice.cs.util.swing.Utilities;

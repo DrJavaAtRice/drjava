@@ -121,7 +121,6 @@ public class DocumentCacheTest extends TestCase {
   protected OpenDefinitionsDocument openFile(final File f) throws IOException {
     try{
       OpenDefinitionsDocument doc = _model.openFile(new FileOpenSelector() {        
-        public File getFile() { return f; }
         public File[] getFiles() { return new File[] {f}; }
       });
       return doc;
@@ -377,7 +376,6 @@ public class DocumentCacheTest extends TestCase {
   private DefinitionsDocument _saved; // used for testReconstructor()
   
   public void testReconstructor() throws IOException{
-    final int i = 0;
     DDReconstructor d = new DDReconstructor() {
       public DefinitionsDocument make() {
         _doc_made++;

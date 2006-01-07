@@ -50,6 +50,7 @@ package edu.rice.cs.drjava.model;
  * @deprecated No longer needed.
  * @version $Id$
  */
+@Deprecated
 public class JavadocException extends Exception {
   public JavadocException(String s) {
     super(s);

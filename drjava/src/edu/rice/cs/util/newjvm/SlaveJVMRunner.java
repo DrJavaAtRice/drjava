@@ -48,11 +48,9 @@ package edu.rice.cs.util.newjvm;
 import java.io.*;
 import java.rmi.server.UnicastRemoteObject;
 import java.rmi.RemoteException;
-import java.rmi.*;
   
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.swing.ScrollableDialog;
-import edu.rice.cs.util.FileOps;
 //import edu.rice.cs.util.PreventExitSecurityManager;
 
 /** This class is used for its {@link #main} method, which is used when a new slave JVM is invoked. See the main 

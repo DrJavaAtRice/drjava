@@ -45,10 +45,7 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.definitions;
 
-import junit.framework.*;
-import junit.extensions.*;
 import javax.swing.text.BadLocationException;
-import javax.swing.text.Document;
 import edu.rice.cs.drjava.model.definitions.indent.IndentRulesTestCase;
 
 /**

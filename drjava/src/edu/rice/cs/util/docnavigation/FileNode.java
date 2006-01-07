@@ -45,27 +45,18 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.util.docnavigation;
 
-import javax.swing.*;
-import javax.swing.event.TreeModelListener;
-import javax.swing.event.TreeSelectionListener;
-import javax.swing.event.TreeSelectionEvent;
-import javax.swing.tree.*;
-import java.awt.*;
-import java.net.URL;
-import java.net.MalformedURLException;
-import java.util.*;
 import java.io.*;
-import edu.rice.cs.util.*;
 
 
-public class FileNode extends InnerNode<File>{
+public class FileNode<ItemT extends INavigatorItem> extends InnerNode<File, ItemT>{
+  
   public FileNode(File f) { super(f); }
   
   public void setData(File f){ super.setUserObject(f); }
   
   public File getData(){ return (File) super.getUserObject(); }
   
-  public <T> T execute(NodeDataVisitor<T> v) { return v.fileCase(getData()); }
+  public <Ret> Ret execute(NodeDataVisitor<? super ItemT, Ret> v) { return v.fileCase(getData()); }
   
   public String toString() {
     try {

@@ -33,11 +33,10 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.repl;
 
-import java.util.*;
-import java.io.*;
+import java.util.List;
+import java.io.StringReader;
+import java.io.Reader;
 import java.net.URL;
-import java.net.URLClassLoader;
-import java.net.MalformedURLException;
 import edu.rice.cs.drjava.model.repl.newjvm.ClasspathManager;
 import koala.dynamicjava.interpreter.*;
 import koala.dynamicjava.interpreter.context.*;
@@ -45,13 +44,9 @@ import koala.dynamicjava.interpreter.error.*;
 import koala.dynamicjava.interpreter.throwable.*;
 import koala.dynamicjava.parser.wrapper.*;
 import koala.dynamicjava.tree.*;
-import koala.dynamicjava.tree.visitor.*;
-import koala.dynamicjava.util.*;
 
 import edu.rice.cs.util.classloader.StickyClassLoader;
 import edu.rice.cs.util.*;
-import edu.rice.cs.util.swing.Utilities;
-import edu.rice.cs.drjava.DrJava;
 
 // NOTE: Do NOT import/use the config framework in this class!
 //  (This class runs in a different JVM, and will not share the config object)

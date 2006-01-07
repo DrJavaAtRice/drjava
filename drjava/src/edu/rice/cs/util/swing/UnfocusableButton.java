@@ -33,11 +33,11 @@ public class UnfocusableButton extends JButton {
   /** Returns that this button cannot be given focus.
    *  @return <code>false</code>
    */
+  @Deprecated
   public boolean isFocusTraversable() { return false; }
 
   /** Returns that this button cannot be given focus.
    *  @return <code>false</code>
    */
-  public boolean isFocusable() { return false;
-  }
+  public boolean isFocusable() { return false; }
 }

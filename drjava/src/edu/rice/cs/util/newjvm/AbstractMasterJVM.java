@@ -33,14 +33,9 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.util.newjvm;
 
-import edu.rice.cs.util.FileOps;
-import edu.rice.cs.util.swing.Utilities;
-
 import java.rmi.*;
 import java.rmi.server.*;
 import java.io.*;
-
-import java.util.*;
 
 /** An abstract class implementing the logic to invoke and control, via RMI, a second Java virtual 
  *  machine. This class is used by subclassing it. (See package documentation for more details.)

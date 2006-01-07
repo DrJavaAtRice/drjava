@@ -40,7 +40,6 @@ import java.util.Hashtable;
 import java.util.Enumeration;
 import java.util.List;
 import java.io.*;
-import javax.swing.JFrame;
 
 import java.rmi.*;
 import java.net.URL;
@@ -56,16 +55,13 @@ import edu.rice.cs.util.OutputStreamRedirector;
 import edu.rice.cs.util.InputStreamRedirector;
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.ClasspathVector;
-import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.classloader.ClassFileError;
-import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.platform.PlatformFactory;
 import edu.rice.cs.drjava.model.junit.JUnitModelCallback;
 import edu.rice.cs.drjava.model.junit.JUnitTestManager;
 import edu.rice.cs.drjava.model.junit.JUnitError;
 import edu.rice.cs.drjava.model.repl.*;
 import edu.rice.cs.drjava.model.ClasspathEntry;
-import edu.rice.cs.drjava.ui.UncaughtExceptionWindow;
 
 // For Windows focus fix
 import javax.swing.JDialog;

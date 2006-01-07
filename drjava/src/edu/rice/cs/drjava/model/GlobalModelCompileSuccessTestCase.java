@@ -47,19 +47,7 @@ package edu.rice.cs.drjava.model;
 
 import  junit.framework.*;
 
-import java.io.*;
-
-import java.util.LinkedList;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.Document;
-import javax.swing.text.DefaultStyledDocument;
-import javax.swing.text.Position;
-
-import edu.rice.cs.drjava.DrJava;
-import edu.rice.cs.drjava.config.OptionConstants;
 import edu.rice.cs.drjava.model.compiler.*;
-import edu.rice.cs.util.UnexpectedException;
-import edu.rice.cs.util.text.EditDocumentException;
 
 /**
  * Tests to ensure that compilation succeeds when expected.

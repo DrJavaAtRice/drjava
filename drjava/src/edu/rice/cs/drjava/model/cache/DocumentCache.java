@@ -49,10 +49,7 @@ import javax.swing.text.BadLocationException;
 import java.util.*;
 import java.io.IOException;
 
-import edu.rice.cs.util.Pair;
-
 import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
-import edu.rice.cs.drjava.model.definitions.NoSuchDocumentException;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.FileMovedException;
 import edu.rice.cs.util.UnexpectedException;

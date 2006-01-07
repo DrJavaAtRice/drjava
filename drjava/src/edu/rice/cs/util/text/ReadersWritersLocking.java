@@ -45,7 +45,6 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.util.text;
 
-import javax.swing.text.Document;
 
 /** Interface with readers/writers locking operations. Can't use names from swing AbstractDocument class because
  *  write locking operations are protected not public.*/

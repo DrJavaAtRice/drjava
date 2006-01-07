@@ -46,7 +46,6 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava;
 
 import java.io.*;
-import java.lang.reflect.Method;
 import java.util.Vector;
 // TODO: Change the usage of these classes to Collections style.
 // TODO: Do these need to be synchronized?

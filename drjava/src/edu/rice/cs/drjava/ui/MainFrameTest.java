@@ -52,7 +52,6 @@ import javax.swing.text.*;
 import java.io.*;
 
 import edu.rice.cs.drjava.model.*;
-import edu.rice.cs.drjava.model.definitions.*;
 import edu.rice.cs.drjava.model.repl.*;
 import edu.rice.cs.drjava.model.repl.InteractionsDocumentTest.TestBeep;
 import edu.rice.cs.drjava.DrJava;

@@ -71,7 +71,7 @@ public final class JavaDebugInterpreterTest extends DebugTestCase {
   private static final String _newLine = System.getProperty("line.separator");
   private JavaDebugInterpreter _debugInterpreter;
 
-  private String _assignedInterpreterName;
+//  private String _assignedInterpreterName;
 
   protected static final String MONKEY_STUFF =
     /*1*/ "class MonkeyStuff {\n" +
@@ -169,18 +169,19 @@ public final class JavaDebugInterpreterTest extends DebugTestCase {
     // notifyInterpreterAssignment() method
     _debugInterpreter = new JavaDebugInterpreter("test", "") {
       public EvaluationVisitorExtension makeEvaluationVisitor(Context context) {
-        return new DebugEvaluationVisitor(context, _name) {
-          protected void _notifyAssigned(Expression e) {
-            notifyInterpreterAssignment(_name);
-          }
-        };
+        return new DebugEvaluationVisitor(context, _name);
+//        return new DebugEvaluationVisitor(context, _name) {
+//          protected void _notifyAssigned(Expression e) {
+//            notifyInterpreterAssignment(_name);
+//          }
+//        };
       }
     };
-    _assignedInterpreterName = "";
+//    _assignedInterpreterName = "";
   }
 
   public void notifyInterpreterAssignment(String name) {
-    _assignedInterpreterName = name;
+//    _assignedInterpreterName = name;
   }
 
   public void testVerifyClassName() {

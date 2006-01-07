@@ -33,32 +33,16 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.definitions;
 
-import javax.swing.ProgressMonitor;
 import javax.swing.text.*;
 import javax.swing.undo.*;
 import javax.swing.event.DocumentEvent;
-import java.util.Vector;
 import java.util.LinkedList;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Hashtable;
-import java.util.HashSet;
-import java.util.StringTokenizer;
-import java.io.*;
 
 import java.io.File;
 
-import edu.rice.cs.util.Pair;
-import edu.rice.cs.util.swing.Utilities;
-import edu.rice.cs.util.text.SwingDocument;
-import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 import edu.rice.cs.util.UnexpectedException;
-import edu.rice.cs.drjava.DrJava;
-import edu.rice.cs.drjava.config.OptionConstants;
-import edu.rice.cs.drjava.config.OptionListener;
-import edu.rice.cs.drjava.config.OptionEvent;
-import edu.rice.cs.drjava.config.Option;
 import edu.rice.cs.drjava.model.definitions.indent.Indenter;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.*;
@@ -1059,7 +1043,6 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
         final int textLength = endPos - startPos;
         final String text = getText(startPos, textLength);
         
-        boolean done;
         int index;
         
         int indexOfClass = _findKeywordAtToplevel("class", text, startPos);

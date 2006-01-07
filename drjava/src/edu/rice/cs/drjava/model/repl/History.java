@@ -39,8 +39,13 @@ import edu.rice.cs.util.FileOps;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.model.*;
-import edu.rice.cs.drjava.ui.InteractionsHistoryFilter;
-import java.io.*;
+
+import java.io.Serializable;
+import java.io.IOException;
+import java.io.File;
+import java.io.OutputStreamWriter;
+import java.io.OutputStream;
+import java.io.BufferedWriter;
 
 /** History class that records what has been typed in the interactions pane.  This class is not thread safe;
  *  it is only accessed from InteractionsDocument which takes responsibility for synchronization.

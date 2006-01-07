@@ -39,7 +39,6 @@ import java.io.IOException;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Vector;
-import java.net.URL;
 
 import edu.rice.cs.util.ClasspathVector;
 import edu.rice.cs.util.text.AbstractDocumentInterface;
@@ -58,7 +57,6 @@ import edu.rice.cs.drjava.model.junit.JUnitModel;
 import edu.rice.cs.drjava.model.compiler.CompilerModel;
 import edu.rice.cs.drjava.project.MalformedProjectFileException;
 import edu.rice.cs.drjava.project.DocumentInfoGetter;
-import edu.rice.cs.drjava.project.DocFile;
 
 /** Handles the bulk of DrJava's program logic.  The UI components interface with the GlobalModel through its 
  *  public methods, and GlobalModel responds via the GlobalModelListener interface.  This removes the dependency 
@@ -120,9 +118,9 @@ public interface GlobalModel extends IGetDocuments, ILoadDocuments {
   /**
    * Gets the DocumentNavigator, which controls the document view.
    */
-  public IDocumentNavigator getDocumentNavigator();
+  public IDocumentNavigator<OpenDefinitionsDocument> getDocumentNavigator();
    
-  public void setDocumentNavigator(IDocumentNavigator newnav);
+  public void setDocumentNavigator(IDocumentNavigator<OpenDefinitionsDocument> newnav);
   
 //  //---------------------------- Interpreter --------------------------------//
 //  /** Updates the security manager in DrJava. */

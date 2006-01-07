@@ -51,7 +51,6 @@ import edu.rice.cs.drjava.*;
 import edu.rice.cs.util.swing.DirectorySelectorComponent;
 import edu.rice.cs.util.swing.DirectoryChooser;
 import java.awt.*;
-import java.awt.event.*;
 import java.io.File;
 import javax.swing.filechooser.FileFilter;
 

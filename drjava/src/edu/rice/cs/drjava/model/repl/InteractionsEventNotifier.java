@@ -34,7 +34,6 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.model.repl;
 
 import edu.rice.cs.drjava.model.EventNotifier;
-import edu.rice.cs.util.swing.Utilities;
 
 /** Keeps track of all listeners to an InteractionsModel, and has the ability to notify them of some event. <p>
  *  This class has a specific role of managing InteractionsListeners.  Other classes with similar names use similar 

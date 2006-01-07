@@ -46,7 +46,6 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.ui;
 
 import javax.swing.*;
-import javax.swing.text.*;
 import javax.swing.event.*;
 import javax.swing.border.MatteBorder;
 import javax.swing.border.EmptyBorder;
@@ -99,9 +98,7 @@ public abstract class PreviewFrame extends JFrame {
     private JSpinnerChanger(Class spinnerClass, JComponent spinnerObj)
       throws Exception {
       spinner = spinnerObj;
-      setValueMethod = spinnerClass.getMethod("setValue", new Class<?>[] {
-        Object.class
-      });
+      setValueMethod = spinnerClass.getMethod("setValue", Object.class);
     }
     void update(int pageNumber) throws Exception {
       args[0] = new Integer(pageNumber);

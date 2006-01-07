@@ -47,7 +47,6 @@ package edu.rice.cs.util;
 
 import java.io.*;
 import java.util.*;
-import edu.rice.cs.util.swing.*;
 
 /**
  * A class to provide some convenient file operations as static methods.

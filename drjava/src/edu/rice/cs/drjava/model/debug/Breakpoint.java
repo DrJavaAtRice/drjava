@@ -47,7 +47,6 @@ package edu.rice.cs.drjava.model.debug;
 
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
-import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
 
 import java.util.Vector;
 import java.util.List;

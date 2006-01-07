@@ -45,8 +45,7 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model;
 
-import edu.rice.cs.util.docnavigation.*;
-import java.util.*;
+import java.util.List;
 
 /**
  * A GlobalModel that enforces invariants associated with having

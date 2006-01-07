@@ -49,8 +49,7 @@ import junit.framework.*;
 import junit.extensions.*;
 
 import java.rmi.*;
-import java.io.*;
-import edu.rice.cs.util.FileOps;
+
 /** Tests the functionality of the new JVM manager.
  *  @version $Id$
  */

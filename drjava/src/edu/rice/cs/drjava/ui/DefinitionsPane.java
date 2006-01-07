@@ -41,13 +41,11 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.List;
 import java.util.LinkedList;
-import java.util.ArrayList;
 
 // TODO: Check synchronization.
 import edu.rice.cs.util.Pair;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.swing.HighlightManager;
-import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.text.SwingDocument;
 import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.model.definitions.CompoundUndoManager;
@@ -801,11 +799,11 @@ public class DefinitionsPane extends AbstractDJPane implements Finalizable<Defin
 
   }
   
-  /** Reset undo machinery on setDocument. */
-  private void setDocument(OpenDefinitionsDocument doc) {
-    super.setDocument(doc);
-    _resetUndo();
-  }
+//  /** Reset undo machinery on setDocument. */
+//  private void setDocument(OpenDefinitionsDocument doc) {
+//    super.setDocument(doc);
+//    _resetUndo();
+//  }
 
   
   /** This instance of the scroll pane is here in order to allow for the definitions pane to save the

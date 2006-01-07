@@ -46,15 +46,9 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.model.definitions.indent;
 
 import edu.rice.cs.drjava.model.AbstractDJDocument;
-import edu.rice.cs.drjava.model.definitions.reducedmodel.BraceReduction;
 import edu.rice.cs.drjava.DrJava;
-import edu.rice.cs.drjava.CodeStatus;
-import edu.rice.cs.drjava.config.OptionEvent;
-import edu.rice.cs.drjava.config.OptionListener;
 import edu.rice.cs.drjava.config.OptionConstants;
-import edu.rice.cs.drjava.config.FileConfiguration;
 
-import edu.rice.cs.util.swing.Utilities;
 /**
  * Singleton class to construct and use the indentation decision tree.
  *

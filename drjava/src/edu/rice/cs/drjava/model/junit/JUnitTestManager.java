@@ -45,22 +45,17 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.junit;
 
-import junit.runner.*;
 import junit.framework.*;
-import junit.textui.TestRunner;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.ArrayList;
-import java.util.Arrays;
-import javax.swing.JOptionPane;
 
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.StringOps;
-import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.classloader.ClassFileError;
-import edu.rice.cs.util.swing.ScrollableDialog;
 import java.lang.reflect.Modifier;
 
 /**

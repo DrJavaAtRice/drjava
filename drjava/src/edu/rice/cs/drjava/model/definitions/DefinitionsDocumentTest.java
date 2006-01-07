@@ -37,7 +37,6 @@ import javax.swing.text.*;
 import java.util.Vector;
 
 import junit.framework.*;
-import junit.extensions.*;
 
 import edu.rice.cs.drjava.model.definitions.reducedmodel.*;
 import edu.rice.cs.drjava.DrJava;

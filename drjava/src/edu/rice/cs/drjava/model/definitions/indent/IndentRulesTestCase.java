@@ -46,12 +46,10 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.model.definitions.indent;
 
 import junit.framework.*;
-import junit.extensions.*;
 import javax.swing.text.*;
 
 import edu.rice.cs.drjava.model.AbstractDJDocument;
 //import edu.rice.cs.drjava.model.definitions.DefinitionsDocument;
-import edu.rice.cs.drjava.model.GlobalEventNotifier;
 
 /**
  * Superclass for all test classes for the indentation decision tree.
@@ -60,7 +58,7 @@ import edu.rice.cs.drjava.model.GlobalEventNotifier;
 public abstract class IndentRulesTestCase extends TestCase {
 
   protected AbstractDJDocument _doc;
-  private String _indent;
+//  private String _indent;
  // private GlobalEventNotifier _notifier;
 
   /** Sets up the test environment. */

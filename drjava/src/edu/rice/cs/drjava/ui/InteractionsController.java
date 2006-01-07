@@ -51,11 +51,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.Toolkit;
 import java.awt.Color;
-import java.awt.Event;
 import java.awt.RenderingHints;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.io.Serializable;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.config.OptionConstants;
@@ -68,7 +66,6 @@ import edu.rice.cs.drjava.model.repl.InteractionsDJDocument;
 import edu.rice.cs.drjava.model.repl.InteractionsListener;
 import edu.rice.cs.drjava.model.repl.InteractionsModel;
 
-import edu.rice.cs.util.swing.SwingWorker;
 import edu.rice.cs.util.swing.PopupConsole;
 import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.text.ConsoleDocument;

@@ -39,7 +39,6 @@ import edu.rice.cs.drjava.model.*;
 import edu.rice.cs.drjava.model.definitions.indent.Indenter;
 
 import edu.rice.cs.util.swing.*;
-import edu.rice.cs.util.swing.Utilities;
 import edu.rice.cs.util.text.SwingDocument;
 
 import java.awt.*;

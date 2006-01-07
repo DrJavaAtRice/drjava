@@ -608,9 +608,6 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
 
     try {
       doc = _model.openFiles(new FileOpenSelector() {
-        public File getFile() {
-          return null;
-        }
         public File[] getFiles() {
           return new File[] {null};
         }
@@ -626,9 +623,6 @@ public final class GlobalModelIOTest extends GlobalModelTestCase
 
     try {
       doc = _model.openFiles(new FileOpenSelector() {
-        public File getFile() {
-          return null;
-        }
         public File[] getFiles() {
           return null;
         }

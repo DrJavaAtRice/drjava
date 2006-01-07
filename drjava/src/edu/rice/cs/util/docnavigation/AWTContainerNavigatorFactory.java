@@ -48,31 +48,28 @@ import edu.rice.cs.util.Pair;
 import edu.rice.cs.util.swing.Utilities;
 import java.util.List;
 import java.util.*;
-import java.awt.*;
-import java.awt.event.*;
 
-public class AWTContainerNavigatorFactory implements IDocumentNavigatorFactory {
-  public static final AWTContainerNavigatorFactory Singleton = new AWTContainerNavigatorFactory();
+public class AWTContainerNavigatorFactory<ItemT extends INavigatorItem> implements IDocumentNavigatorFactory<ItemT> {
   
-  private AWTContainerNavigatorFactory() { }
+  public AWTContainerNavigatorFactory() { }
 
   /** Creates a new List Navigator
    *  @return a list navigator
    */
-    public IDocumentNavigator makeListNavigator() { return new JListSortNavigator(); }
+    public IDocumentNavigator<ItemT> makeListNavigator() { return new JListSortNavigator<ItemT>(); }
 
   /** Returns a new tree Navigator with the specified root
    *  @param name the name of the root node
    *  @return a tree navigator
    */
-    public IDocumentNavigator makeTreeNavigator(String name) { return new JTreeSortNavigator(name); }
+    public IDocumentNavigator<ItemT> makeTreeNavigator(String name) { return new JTreeSortNavigator<ItemT>(name); }
     
   /** Creates a list navigator and migrates the navigator items from parent to the new navigator
    *  @param parent the navigator to migrate from
    *  @return the new list navigator
    */
-    public IDocumentNavigator makeListNavigator(final IDocumentNavigator parent) {
-      final IDocumentNavigator tbr = makeListNavigator();
+    public IDocumentNavigator<ItemT> makeListNavigator(final IDocumentNavigator<ItemT> parent) {
+      final IDocumentNavigator<ItemT> tbr = makeListNavigator();
       Utilities.invokeAndWait(new Runnable() { 
         public void run() { 
           migrateNavigatorItems(tbr, parent);
@@ -87,15 +84,15 @@ public class AWTContainerNavigatorFactory implements IDocumentNavigatorFactory {
    *  @param parent the navigator to migrate from
    *  @return the new tree navigator
    */
-    public IDocumentNavigator makeTreeNavigator(String name, final IDocumentNavigator parent, 
-                                                final List<Pair<String, INavigatorItemFilter>> l) {
+    public IDocumentNavigator<ItemT> makeTreeNavigator(String name, final IDocumentNavigator<ItemT> parent, 
+                                                final List<Pair<String, INavigatorItemFilter<ItemT>>> l) {
       
-      final IDocumentNavigator tbr = makeTreeNavigator(name);
+      final IDocumentNavigator<ItemT> tbr = makeTreeNavigator(name);
       
       Utilities.invokeAndWait(new Runnable() { 
         public void run() { 
           
-          for(Pair<String, INavigatorItemFilter> p: l) { tbr.addTopLevelGroup(p.getFirst(), p.getSecond()); }
+          for(Pair<String, INavigatorItemFilter<ItemT>> p: l) { tbr.addTopLevelGroup(p.getFirst(), p.getSecond()); }
           
           migrateNavigatorItems(tbr, parent);
           migrateListeners(tbr, parent);
@@ -108,13 +105,19 @@ public class AWTContainerNavigatorFactory implements IDocumentNavigatorFactory {
      *  @param child the navigator to migrate to
      *  @param parent the navigator to migrate from
      */
-    private void migrateNavigatorItems(IDocumentNavigator child, IDocumentNavigator parent) {
-      Enumeration<INavigatorItem> enumerator =  parent.getDocuments();
+    // As a first step to weakening the restriction on parent's type, this allows parent to be based on an arbitrary item type, as
+    // long as it extends ItemT.
+    private void migrateNavigatorItems(IDocumentNavigator<ItemT> child, IDocumentNavigator<ItemT> parent) {
+      Enumeration<ItemT> enumerator =  parent.getDocuments();
       while (enumerator.hasMoreElements()) {
-        INavigatorItem navitem = enumerator.nextElement();
+        ItemT navitem = enumerator.nextElement();
         parent.removeDocument(navitem);
         child.addDocument(navitem);
-        enumerator = parent.getDocuments();
+        
+        // I don't understand the motivation behind this line.  Is it possible for
+        // enumerator to become invalid?  If so, what's to prevent that from happening
+        // again after this line but before we call nextElement()?
+        enumerator = parent.getDocuments(); 
       }
     }
     
@@ -122,13 +125,19 @@ public class AWTContainerNavigatorFactory implements IDocumentNavigatorFactory {
      *  @param child the navigator to migrate to
      *  @param parent the navigator to migrate from
      */
-    private void migrateListeners(IDocumentNavigator child, IDocumentNavigator parent) {
-      Collection<INavigationListener> listeners = parent.getNavigatorListeners();
-      Iterator<INavigationListener> it = listeners.iterator();
+    // As a first step to weakening the restriction on parent's type, this allows parent to be based on an arbitrary item type, as
+    // long as it extends ItemT.
+    private void migrateListeners(IDocumentNavigator<ItemT> child, IDocumentNavigator<ItemT> parent) {
+      Collection<INavigationListener<? super ItemT>> listeners = parent.getNavigatorListeners();
+      Iterator<INavigationListener<? super ItemT>> it = listeners.iterator();
       while (it.hasNext()) {
-        INavigationListener listener = it.next();
+        INavigationListener<? super ItemT> listener = it.next();
         child.addNavigationListener(listener);
         parent.removeNavigationListener(listener);
+        
+        // I don't understand the motivation behind this line.  Is it possible for
+        // it to become invalid?  If so, what's to prevent that from happening
+        // again after this line but before we call next()?
         it = listeners.iterator();
       }
     }

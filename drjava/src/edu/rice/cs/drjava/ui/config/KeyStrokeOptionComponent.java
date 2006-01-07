@@ -202,15 +202,15 @@ public class KeyStrokeOptionComponent extends OptionComponent<KeyStroke> impleme
     private JLabel _currentLabel;
     private JLabel _actionLabel;
     private JPanel _inputAndClearPanel;
-    private JPanel _labelsPanel;
+//    private JPanel _labelsPanel;
     private JPanel _cancelAndOKPanel;
     private KeyStroke _currentKeyStroke;
     private KeyStrokeOptionComponent _ksoc;
-    private Frame frame;
+//    private Frame frame;
 
     public GetKeyDialog(Frame f, String title, boolean modal) {
       super(f, title, modal);
-      frame = f;
+//      frame = f;
 
       _inputField = new InputField();
       _clearButton = new JButton("Clear");

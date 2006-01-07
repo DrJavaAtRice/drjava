@@ -47,8 +47,6 @@ package edu.rice.cs.util.newjvm;
 
 import junit.framework.*;
 import java.rmi.*;
-import edu.rice.cs.util.FileOps;
-import java.io.*;
 
 /**
  * Test cases for the master/slave jvm control framework.

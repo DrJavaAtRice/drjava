@@ -83,22 +83,17 @@ public final class EventNotifierTest extends TestCase {
     
     _notifier.addListener(listener1);
     _notifier.addListener(listener2);
-    _notifier.notifyListeners(new GlobalEventNotifier.Notifier() {
-      public void notifyListener(GlobalModelListener l) {
-        l.junitSuiteStarted(1);
-      }
-    });
+    _notifier.junitSuiteStarted(1);
+    
     listener1.assertJUnitSuiteStartedCount(1);
     listener2.assertJUnitSuiteStartedCount(1);
 
     //remove one listener and fire another event
     _notifier.removeListener(listener2);
-    _notifier.notifyListeners(new GlobalEventNotifier.Notifier() {
-      public void notifyListener(GlobalModelListener l) {
-        l.interpreterExited(1);
-      }
-    });
+    _notifier.interpreterExited(1);
+
     listener1.assertInterpreterExitedCount(1);
+    listener2.assertInterpreterExitedCount(0);
   }
   
   /**
@@ -118,20 +113,12 @@ public final class EventNotifierTest extends TestCase {
 
     // Make sure trueListener says yes
     _notifier.addListener(trueListener);
-    boolean result = _notifier.pollListeners(new GlobalEventNotifier.Poller() {
-      public boolean poll(GlobalModelListener l) {
-        return l.canAbandonFile(null);
-      }
-    });
+    boolean result = _notifier.canAbandonFile(null);
     assertTrue("should be able to abandon file", result);
     
     // Make sure falseListener says no
     _notifier.addListener(falseListener);
-    result = _notifier.pollListeners(new GlobalEventNotifier.Poller() {
-      public boolean poll(GlobalModelListener l) {
-        return l.canAbandonFile(null);
-      }
-    });
+    result = _notifier.canAbandonFile(null);
     assertTrue("should not be able to abandon file", !result);
   }
 }

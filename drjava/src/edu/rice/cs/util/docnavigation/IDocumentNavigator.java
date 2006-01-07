@@ -40,23 +40,23 @@ import java.awt.Container;
  * <code>IDocumentNavigator</code> provides a framework through which
  * individual <code>IDocuments</code> can be navigated.
  */ 
-public interface IDocumentNavigator extends IAWTContainerNavigatorActor{
+public interface IDocumentNavigator<ItemT extends INavigatorItem> extends IAWTContainerNavigatorActor{
   /** @return an AWT component which interacts with this document navigator */
   public Container asContainer();
   
   /** Adds an <code>IDocuemnt</code> to this navigator.
    *  @param doc the document to be added into this navigator.
    */
-  public void addDocument(INavigatorItem doc);
+  public void addDocument(ItemT doc);
   
   /** Adds an <code>INavigatorItem</code> into this navigator in a position relative to a given path.
    *  @param doc the document to be added into this navigator.
    *  @param path the relative path to insert this INavigatorItem at.
    */
-  public void addDocument(INavigatorItem doc, String path);
+  public void addDocument(ItemT doc, String path);
   
   /** Returns the currently selected navigator item, or null if no navigator item is selected. */
-  public INavigatorItem getCurrent();
+  public ItemT getCurrent();
   
   /** Removes a given <code>INavigatorItem<code> from this navigator. Removes all <code>INavigatorItem</code>s 
    *  from this navigator that are "equal" (<code>.equals(...)</code>) to the passed argument. Any of the 
@@ -65,19 +65,19 @@ public interface IDocumentNavigator extends IAWTContainerNavigatorActor{
    *  @return doc a document removed from this navigator as a result of invoking this method.
    *  @throws IllegalArgumentException if this navigator contains no document equal to the passed document.
    */
-  public <T extends INavigatorItem> T removeDocument(T doc);
+  public ItemT removeDocument(ItemT doc);
   
   /** Resets a given <code>INavigatorItem<code> in the tree.  This may affect the placement of the item or its 
    *  display to reflect any changes made in the model.
    *  @param doc the docment to be refreshed
    *  @throws IllegalArgumentException if this navigator contains no document that is equal to the passed document.
    */
-  public void refreshDocument(INavigatorItem doc, String path);
+  public void refreshDocument(ItemT doc, String path);
   
   /** Sets the active document as specified.
    *  @param doc the document to select
    */
-  public void setActiveDoc(INavigatorItem doc);
+  public void setActiveDoc(ItemT doc);
   
   /** The following five operations impose a natural ordering on the documents in the navigator.
    *  For lists, it is order of insertion. For trees, it is depth-first enumeration.
@@ -85,34 +85,34 @@ public interface IDocumentNavigator extends IAWTContainerNavigatorActor{
    *  @returns the INavigatorItem which comes after doc
    *  @param doc the INavigatorItem of interest
    */
-  public <T extends INavigatorItem> T getNext(T doc);
+  public ItemT getNext(ItemT doc);
   
   /** @returns the INavigatorItem which comes before doc
    *  @param doc the INavigatorItem of interest
    */
-  public <T extends INavigatorItem> T getPrevious(T doc);
+  public ItemT getPrevious(ItemT doc);
   
   /** @returns the INavigatorItem which comes first in the enumeration
    *  @param doc the INavigatorItem of interest
    */
-  public <T extends INavigatorItem> T getFirst();
+  public ItemT getFirst();
   
   /** @returns the INavigatorItem which comes last in the enumeration
    *  @param doc the INavigatorItem of interest
    */
-  public <T extends INavigatorItem> T getLast();
+  public ItemT getLast();
   
   /** Returns all the <code>IDocuments</code> in the collection in enumeration order.
    *  @return an <code>INavigatorItem<code> enumeration of this navigator's contents.
    */
-  public <T extends INavigatorItem> Enumeration<T> getDocuments();
+  public Enumeration<ItemT> getDocuments();
   
   /** Tests to see if a given document is contained in this navigator.
    *  @param doc the document to test for containment.
    *  @return <code>true</code> if this contains a document "equal" (<code>.equals(...)</code> method)
    *          to the passed document, else <code>false</code>.
    */
-  public boolean contains(INavigatorItem doc);
+  public boolean contains(ItemT doc);
   
   /** Returns the number of <code>INavigatorItem</code>s contained by this <code>IDocumentNavigator</code>
    *  @return the number of documents within this navigator.
@@ -132,19 +132,19 @@ public interface IDocumentNavigator extends IAWTContainerNavigatorActor{
    *  (<code>==</code>), no action is taken.
    *  @param listener the listener to be added to this navigator.
    */
-  public void addNavigationListener(INavigationListener listener);
+  public void addNavigationListener(INavigationListener<? super ItemT> listener);
   
   /** Removes the given listener from observing this navigator. After invoking this method, all observers watching
    *  this navigator "equal" (<code>==</code>) will no longer receive observable dispatches.
    *
    * @param listener the listener to be removed from this navigator
    */
-  public void removeNavigationListener(INavigationListener listener);
+  public void removeNavigationListener(INavigationListener<? super ItemT> listener);
   
   /** Returns a collection of all listeners registered with this navigator.
    *  @return the collection of nav listeners listening to this navigator.
    */
-  public Collection<INavigationListener> getNavigatorListeners();
+  public Collection<INavigationListener<? super ItemT>> getNavigatorListeners();
   
   /** Selects the document at the x,y coordinates of the navigator pane and makes it the active document.
    *  @param x the x coordinate of the navigator pane
@@ -156,16 +156,16 @@ public interface IDocumentNavigator extends IAWTContainerNavigatorActor{
    *  @param algo the algorithm to run on this navigator
    *  @param input the input to the algorithm
    */
-  public <InType, ReturnType> ReturnType execute(IDocumentNavigatorAlgo<InType, ReturnType> algo, InType input);
+  public <InType, ReturnType> ReturnType execute(IDocumentNavigatorAlgo<ItemT, InType, ReturnType> algo, InType input);
   
   /** @return true if a group if INavigatorItems selected. */
   public boolean isGroupSelected();
   
   /** @return true if the INavigatorItem is in the selected group, if a group is selected. */
-  public boolean isSelectedInGroup(INavigatorItem i);
+  public boolean isSelectedInGroup(ItemT i);
   
   /** Adds the top level group with the specified name and filter. */
-  public void addTopLevelGroup(String name, INavigatorItemFilter f);
+  public void addTopLevelGroup(String name, INavigatorItemFilter<? super ItemT> f);
   
   /** Returns true if a top level group is selected, false otherwise. */
   public boolean isTopLevelGroupSelected();
@@ -183,7 +183,7 @@ public interface IDocumentNavigator extends IAWTContainerNavigatorActor{
    *  @param ini The suggested current INavigatorItem.
    */
   
-   public void requestSelectionUpdate(INavigatorItem i);
+   public void requestSelectionUpdate(ItemT i);
    
    /** The standard swing repaint() method. */
    public void repaint();

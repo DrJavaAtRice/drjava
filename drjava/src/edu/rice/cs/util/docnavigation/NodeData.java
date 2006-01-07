@@ -45,13 +45,11 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.util.docnavigation;
 
-import javax.swing.tree.TreeNode;
-
 /** Since the various nodes hold different types of data, this type extends TreeNodes to support 
  *  the visitor pattern.
  */
-public interface NodeData {
+public interface NodeData<ItemT extends INavigatorItem> {
   
-  <T> T execute(NodeDataVisitor<T> v);
+  <Ret> Ret execute(NodeDataVisitor<? super ItemT, Ret> v);
   
 }

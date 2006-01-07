@@ -45,24 +45,13 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.util.docnavigation;
 
-import javax.swing.*;
-import javax.swing.event.TreeModelListener;
-import javax.swing.event.TreeSelectionListener;
-import javax.swing.event.TreeSelectionEvent;
-import javax.swing.tree.*;
-import java.awt.*;
-import java.net.URL;
-import java.net.MalformedURLException;
-import java.util.*;
-import edu.rice.cs.util.*;
-
-public class GroupNode extends StringNode {
-  private INavigatorItemFilter _filter;
-  public GroupNode(String name, INavigatorItemFilter filter) {
+public class GroupNode<ItemT extends INavigatorItem> extends StringNode<ItemT> {
+  private INavigatorItemFilter<? super ItemT> _filter;
+  public GroupNode(String name, INavigatorItemFilter<? super ItemT> filter) {
     super(name);
     if (filter == null) throw new IllegalArgumentException("parameter 'filter' must not be null");
     _filter = filter;
   }
   
-  public INavigatorItemFilter getFilter(){ return _filter; }
+  public INavigatorItemFilter<? super ItemT> getFilter(){ return _filter; }
 }

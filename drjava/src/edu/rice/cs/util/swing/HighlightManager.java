@@ -49,13 +49,11 @@ import java.util.Stack;
 import java.util.Vector;
 
 import javax.swing.text.JTextComponent;
-import javax.swing.text.Document;
 import javax.swing.text.Highlighter;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Position;
 
 import edu.rice.cs.util.UnexpectedException;
-import edu.rice.cs.util.swing.Utilities;
 
 public class HighlightManager {
 

@@ -98,12 +98,14 @@ public final class DefinitionsPaneTest extends TestCase {
                                              KeyEvent.KEY_PRESSED,
                                              (new Date()).getTime(),
                                              InputEvent.SHIFT_MASK,
-                                             shiftBackspaceCode));
+                                             shiftBackspaceCode,
+                                             KeyEvent.CHAR_UNDEFINED));
     definitions.processKeyEvent(new KeyEvent(definitions,
                                              KeyEvent.KEY_RELEASED,
                                              (new Date()).getTime(),
                                              InputEvent.SHIFT_MASK,
-                                             shiftBackspaceCode));
+                                             shiftBackspaceCode,
+                                             KeyEvent.CHAR_UNDEFINED));
     _assertDocumentContents(doc, "tes", "Did not delete on shift+backspace");
     
     
@@ -115,12 +117,14 @@ public final class DefinitionsPaneTest extends TestCase {
                                              KeyEvent.KEY_PRESSED,
                                              (new Date()).getTime(),
                                              InputEvent.SHIFT_MASK,
-                                             shiftDeleteCode));
+                                             shiftDeleteCode,
+                                             KeyEvent.CHAR_UNDEFINED));
     definitions.processKeyEvent(new KeyEvent(definitions,
                                              KeyEvent.KEY_RELEASED,
                                              (new Date()).getTime(),
                                              InputEvent.SHIFT_MASK,
-                                             shiftDeleteCode));
+                                             shiftDeleteCode,
+                                             KeyEvent.CHAR_UNDEFINED));
     _assertDocumentContents(doc, "ts", "Did not delete on shift+delete");
   }
 
@@ -189,19 +193,19 @@ public final class DefinitionsPaneTest extends TestCase {
     _assertDocumentEmpty(doc, "point 0");
     // The following is the sequence of key events that happen when the user presses Meta-a
     definitions.processKeyEvent(new KeyEvent(definitions, KeyEvent.KEY_PRESSED, (new Date()).getTime(),
-                                             InputEvent.META_MASK, KeyEvent.VK_META));
+                                             InputEvent.META_MASK, KeyEvent.VK_META, KeyEvent.CHAR_UNDEFINED));
     _assertDocumentEmpty(doc, "point 1");
     definitions.processKeyEvent(new KeyEvent(definitions, KeyEvent.KEY_PRESSED, (new Date()).getTime(),
-                                             InputEvent.META_MASK, KeyEvent.VK_W));
+                                             InputEvent.META_MASK, KeyEvent.VK_W, KeyEvent.CHAR_UNDEFINED));
     _assertDocumentEmpty(doc, "point 2");
     definitions.processKeyEvent(new KeyEvent(definitions, KeyEvent.KEY_TYPED, (new Date()).getTime(),
                                              InputEvent.META_MASK, KeyEvent.VK_UNDEFINED, 'w'));
     _assertDocumentEmpty(doc, "point 3");
     definitions.processKeyEvent(new KeyEvent(definitions, KeyEvent.KEY_RELEASED, (new Date()).getTime(),
-                                             InputEvent.META_MASK, KeyEvent.VK_W));
+                                             InputEvent.META_MASK, KeyEvent.VK_W, KeyEvent.CHAR_UNDEFINED));
     _assertDocumentEmpty(doc, "point 4");
     definitions.processKeyEvent(new KeyEvent(definitions, KeyEvent.KEY_RELEASED, (new Date()).getTime(),
-                                             0, KeyEvent.VK_META));
+                                             0, KeyEvent.VK_META, KeyEvent.CHAR_UNDEFINED));
     _assertDocumentEmpty(doc, "point 5");
   }
   
@@ -610,12 +614,14 @@ public final class DefinitionsPaneTest extends TestCase {
                                               KeyEvent.KEY_PRESSED,
                                               (new Date()).getTime(),
                                               0,
-                                              backspaceCode));
+                                              backspaceCode,
+                                              KeyEvent.CHAR_UNDEFINED));
      definitions.processKeyEvent(new KeyEvent(definitions,
                                               KeyEvent.KEY_RELEASED,
                                               (new Date()).getTime(),
                                               0,
-                                              backspaceCode));
+                                              backspaceCode,
+                                              KeyEvent.CHAR_UNDEFINED));
      definitions.processKeyEvent(new KeyEvent(definitions,
                                               KeyEvent.KEY_TYPED,
                                               (new Date()).getTime(),

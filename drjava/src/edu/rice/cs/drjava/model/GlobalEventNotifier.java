@@ -34,11 +34,9 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.model;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.List;
 
-import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.classloader.ClassFileError;
 
 /** Keeps track of all listeners to the model, and has the ability to notify them of some event.
@@ -121,6 +119,7 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
    * agree, false if some disagree
    * @deprecated Use listener methods directly instead.
    */
+  @Deprecated
   public boolean pollListeners(Poller p) {
     _lock.startRead();
     try {
@@ -134,6 +133,7 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
    * Class model for notifying listeners of an event.
    * @deprecated Use listener methods directly instead.
    */
+  @Deprecated
   public abstract static class Notifier {
     public abstract void notifyListener(GlobalModelListener l);
   }
@@ -142,6 +142,7 @@ public class GlobalEventNotifier extends EventNotifier<GlobalModelListener>
    * Class model for asking listeners a yes/no question.
    * @deprecated Use listener methods directly instead.
    */
+  @Deprecated
   public abstract static class Poller {
     public abstract boolean poll(GlobalModelListener l);
   }

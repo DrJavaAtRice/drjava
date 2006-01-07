@@ -84,16 +84,12 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.definitions.indent;
 
-import junit.framework.*;
-import edu.rice.cs.drjava.model.AbstractDJDocument;
-
 /**
  * Tests ActionStartPrevLinePlus(String)
  *
  * @version $Id$
  */
 public class ActionStartPrevLinePlusTest extends IndentRulesTestCase {
-  private String _suffix;
   
   /**
    * This is a clever (IMHO) factory trick to reuse these methods in TestCases

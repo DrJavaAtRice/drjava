@@ -46,7 +46,6 @@ import edu.rice.cs.util.*;
 import edu.rice.cs.util.text.EditDocumentInterface;
 import edu.rice.cs.util.text.ConsoleDocument;
 import edu.rice.cs.util.text.EditDocumentException;
-import edu.rice.cs.util.swing.Utilities;
 
 /** A model which can serve as the glue between an InteractionsDocument and any JavaInterpreter.  This 
  *  abstract class provides common functionality for all such models.
