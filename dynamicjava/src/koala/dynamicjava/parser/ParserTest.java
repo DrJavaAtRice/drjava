@@ -77,6 +77,7 @@ import junit.framework.TestCase;
 
 import java.util.*;
 import java.io.*;
+import koala.dynamicjava.parser.impl.*;
 import koala.dynamicjava.tree.*;
 
 public class ParserTest extends TestCase {

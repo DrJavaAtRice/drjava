@@ -1,7 +1,7 @@
 package koala.dynamicjava.interpreter;
 
 import junit.framework.TestCase;
-import koala.dynamicjava.parser.*;
+import koala.dynamicjava.parser.impl.*;
 
 
 import java.io.*;

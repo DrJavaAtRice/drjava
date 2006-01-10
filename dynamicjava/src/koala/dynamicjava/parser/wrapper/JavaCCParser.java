@@ -31,7 +31,7 @@ package koala.dynamicjava.parser.wrapper;
 import java.io.*;
 import java.util.*;
 
-import koala.dynamicjava.parser.*;
+import koala.dynamicjava.parser.impl.*;
 import koala.dynamicjava.tree.*;
 
 /**

@@ -28,7 +28,7 @@
 
 package koala.dynamicjava.parser.wrapper;
 
-import koala.dynamicjava.parser.Token;
+import koala.dynamicjava.parser.impl.Token;
 import koala.dynamicjava.tree.IdentifierToken;
 
 /**

@@ -2,7 +2,7 @@ package koala.dynamicjava.parser.wrapper;
 
 import junit.framework.*;
 
-import koala.dynamicjava.parser.*;
+import koala.dynamicjava.parser.impl.*;
 import koala.dynamicjava.tree.*;
 
 import java.io.StringReader;
@@ -45,10 +45,11 @@ public class ParserTest extends TestCase {
                                   int startLine, int startColumn, 
                                   int endLine, int endColumn)
   {
-    assertEquals("Wrong begin line of error", startLine, ex.getBeginLine());
-    assertEquals("Wrong begin column of error", startColumn, ex.getBeginColumn());
-    assertEquals("Wrong end line of error", endLine, ex.getEndLine());
-    assertEquals("Wrong end column of error", endColumn, ex.getEndColumn());
+    CustomParseException custom = CustomParseException.makeCustom(ex);
+    assertEquals("Wrong begin line of error", startLine, custom.getBeginLine());
+    assertEquals("Wrong begin column of error", startColumn, custom.getBeginColumn());
+    assertEquals("Wrong end line of error", endLine, custom.getEndLine());
+    assertEquals("Wrong end column of error", endColumn, custom.getEndColumn());
   }
 
   protected void setUp(){

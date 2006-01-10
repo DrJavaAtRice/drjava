@@ -27,7 +27,7 @@
  */
 
 package koala.dynamicjava.tree;
-import koala.dynamicjava.parser.Token;
+import koala.dynamicjava.parser.impl.Token;
 
 /**
  * This class implements a tree token

@@ -27,7 +27,7 @@
  */
 
 package koala.dynamicjava.tree;
-import koala.dynamicjava.parser.Token;
+import koala.dynamicjava.parser.impl.Token;
 
 /**
  * This interface represents an identifier token, ie

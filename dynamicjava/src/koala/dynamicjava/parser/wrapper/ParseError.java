@@ -29,7 +29,7 @@
 package koala.dynamicjava.parser.wrapper;
 
 
-import koala.dynamicjava.parser.ParseException;
+import koala.dynamicjava.parser.impl.ParseException;
   
 /**
  * This error is thrown when an unexpected error append while
@@ -65,6 +65,7 @@ public class ParseError extends Error {
      */
     private int column;
 
+    
     /**
      * Constructs a ParseError with no detail message. 
      */
@@ -87,7 +88,7 @@ public class ParseError extends Error {
      * @param e the ParseException.
      */
     public ParseError(ParseException e) {
-        this(e.getShortMessage(), "", -1, -1);
+        this(CustomParseException.makeCustom(e).getShortMessage(), "", -1, -1);
         pe = e;
     }
     

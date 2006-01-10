@@ -59,41 +59,42 @@ public class FileFinderTest extends TestCase
   public FileFinderTest(){}
   
   public void testFindFile() {
-    File thisFile;
-    File noFile;
+
+    assertNotFound("Empty1.java");
+    assertNotFound("Empty2.java");
+    assertNotFound("file.doesnotexist");
     
-    //When running the ant script for testing this is the relative path to the directory that contains this file
-    ff.addPath("dynamicjava/util/");
+    ff.addPath("testFiles/someDir1/");
     
-    //Try to find a file that does exist, namely this current file
+    assertFound("Empty1.java");
+    assertNotFound("Empty2.java");
+    assertNotFound("file.doesnotexist");
+    
+    ff.addPath("testFiles/someDir2");
+
+    assertFound("Empty1.java");
+    assertFound("Empty2.java");
+    assertNotFound("file.doesnotexist");
+
+  }
+  
+  
+  private void assertFound(String filename) {
     try {
-      thisFile = ff.findFile("FileFinderTest.java");
-      assertTrue("Found This File", thisFile != null);
+      File f = ff.findFile(filename);
+      assertTrue("Found file: " + filename, f != null);
     }
-    catch(IOException ioe) {
+    catch (IOException ioe) { fail(); }
+  }
+
+  private void assertNotFound(String filename) {
+    try {
+      ff.findFile(filename);
       fail();
     }
-    
-    //When running the ant script for testing this is the relative path to the directory that contains this file
-    ff.addPath("dynamicjava/interpreter");
-    
-    //Try to find a file that does exist, namely this current file
-    try {
-      thisFile = ff.findFile("Interpreter.java");
-      assertTrue("Found This File", thisFile != null);
-    }
-    catch(IOException ioe) {
-      fail();
-    }
-    
-    
-    //Try to find a file that does not exist
-    try {
-      noFile = ff.findFile("file.doesnotexist");
-      fail();
-    }
-    catch(IOException fnf) {
-      assertEquals("File Not Found", "File Not Found: file.doesnotexist", fnf.getMessage());
+    catch (IOException ioe) {
+      assertEquals("Error message is correct", "File Not Found: " + filename, ioe.getMessage());
     }
   }
+
 }

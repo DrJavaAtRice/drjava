@@ -1,24 +1,14 @@
-/*IMPORTANT!! Due to the lack of support for Java1.5 in Javacc, generic tags has been surrounded by
- * the general comment notation, which is later removed by our script. To remove these comments,
- * from this file later, we can simply run the script on this file.
- * AVOID SPANNING LINES!! ONLY put 1 comment around nested generic tags
- */
-
-
-
 /* -*- Java -*- */
 // Parser options
 //
 options {
   JAVA_UNICODE_ESCAPE    = true;
-  OPTIMIZE_TOKEN_MANAGER = true;
   STATIC                 = false;
 }
 
 PARSER_BEGIN(Parser)
-  package koala.dynamicjava.parser;
+  package koala.dynamicjava.parser.impl;
 
-//import java.lang.reflect.*;
 import java.lang.reflect.Modifier;
 import java.util.*;
 import java.io.File;
@@ -33,12 +23,6 @@ import koala.dynamicjava.tree.tiger.generic.*;
 /**
  * This class represents a (interpreted) Java 1.1 language parser
  * adapted for 1.5 language extensions.
- * Note that for the current version of JavaCC it is needed to
- * run the "fixparser" script after generating the parser so that
- * the parser code has proper generic code. Current version of
- * JavaCC does not support generics. Hopefully the next version
- * would recognize them and the need to run the fix script, and
- * to include generic code in comments is not needed.
  */
 
 public class Parser {
@@ -55,10 +39,10 @@ public class Parser {
    * a class/interface/method declaration), and popped after
    * parsing whole scope (class, interface, or method).
    */
-  private Environment/*<String, TypeParameter>*/ GenericTypesEnv =
-    new EmptyEnv/*<String, TypeParameter>*/();
+  private Environment<String, TypeParameter> GenericTypesEnv =
+    new EmptyEnv<String, TypeParameter>();
   
-  private Map/*<String, TypeParameter>*/ TypeParamsMap = new HashMap/*<String, TypeParameter>*/();
+  private Map<String, TypeParameter> TypeParamsMap = new HashMap<String, TypeParameter>();
   // contains the latest defined type parameters list whose
   // full declaration has not finished yet. That is to take
   // care of the fact that the scope of a type parameter
@@ -109,7 +93,7 @@ public class Parser {
     }
     // If a certain token or sequence of tokens is expected, display it.
     ParseException pe = generateParseException();
-    throw new ParseException(message, t, pe.expectedTokenSequences, tokenImage);
+    throw new CustomParseException(message, t, pe.expectedTokenSequences, tokenImage);
   }
   
   /**
@@ -121,7 +105,7 @@ public class Parser {
    */
   private void _throwParseException(ParseException pe, String message) throws ParseException {
     // Use the embedded error message if thrown from our code, or if ends in EOF
-    if (pe.customConstructor) {
+    if (pe instanceof CustomParseException) {
       message = pe.getMessage();
     }
     if(pe.getMessage().indexOf("<EOF>\"") != -1) {
@@ -135,8 +119,8 @@ public class Parser {
    * @param prefix   the prefix expression
    * @param suffixes the suffix list built in reverse order
    */
-  private static Expression createPrimaryExpression(Expression prefix, List/*<ExpressionSuffix>*/ suffixes) {
-    Iterator/*<ExpressionSuffix>*/ it = suffixes.iterator();
+  private static Expression createPrimaryExpression(Expression prefix, List<ExpressionSuffix> suffixes) {
+    Iterator<ExpressionSuffix> it = suffixes.iterator();
     if (it.hasNext()) {
       return it.next().createExpression(prefix, it);
     } else {
@@ -267,7 +251,7 @@ public class Parser {
      * @param prefix the prefix expression
      * @param it     an iterator over the suffixes
      */
-    public abstract Expression createExpression(Expression prefix, Iterator/*<ExpressionSuffix>*/ it);
+    public abstract Expression createExpression(Expression prefix, Iterator<ExpressionSuffix> it);
   }
   
   class DotAllocationSuffix extends ExpressionSuffix {
@@ -289,7 +273,7 @@ public class Parser {
      * @param prefix the prefix expression
      * @param it     an iterator over the suffixes
      */
-    public Expression createExpression(Expression prefix, Iterator/*<ExpressionSuffix>*/ it) {
+    public Expression createExpression(Expression prefix, Iterator<ExpressionSuffix> it) {
       Expression exp = prefix;
       if (it.hasNext()) {
         exp = (it.next()).createExpression(prefix, it);
@@ -353,7 +337,7 @@ public class Parser {
      * @param prefix the prefix expression
      * @param it     an iterator over the suffixes
      */
-    public Expression createExpression(Expression prefix, Iterator/*<ExpressionSuffix>*/ it) {
+    public Expression createExpression(Expression prefix, Iterator<ExpressionSuffix> it) {
       Expression exp = prefix;
       if (it.hasNext()) {
         exp = it.next().createExpression(prefix, it);
@@ -403,7 +387,7 @@ public class Parser {
      * @param prefix the prefix expression
      * @param it     an iterator over the suffixes
      */
-    public Expression createExpression(Expression prefix, Iterator/*<ExpressionSuffix>*/ it) {
+    public Expression createExpression(Expression prefix, Iterator<ExpressionSuffix> it) {
       Expression exp = prefix;
       if (it.hasNext()) {
         exp = it.next().createExpression(prefix, it);
@@ -447,7 +431,7 @@ public class Parser {
      * @param prefix the prefix expression
      * @param it     an iterator over the suffixes
      */
-    public Expression createExpression(Expression prefix, Iterator/*<ExpressionSuffix>*/ it) {
+    public Expression createExpression(Expression prefix, Iterator<ExpressionSuffix> it) {
       Expression exp = prefix;
       if (it.hasNext()) {
         exp = (it.next()).createExpression(prefix, it);
@@ -474,12 +458,12 @@ public class Parser {
     /**
      * The arguments
      */
-    public List/*<Expression>*/ arguments;
+    public List<Expression> arguments;
     
     /**
      * The type arguments
      */
-    public List/*<Type>*/ typeArgs;
+    public List<Type> typeArgs;
     
     /**
      * The end line
@@ -497,7 +481,7 @@ public class Parser {
      * @param el    the end line
      * @param ec    the end column
      */
-    public ArgumentsSuffix(List/*<Expression>*/ args, List/*<Type>*/ tArgs, int el, int ec) {
+    public ArgumentsSuffix(List<Expression> args, List<Type> tArgs, int el, int ec) {
       arguments = args;
       typeArgs = tArgs;
       endLine   = el;
@@ -509,7 +493,7 @@ public class Parser {
      * @param prefix the prefix expression
      * @param it     an iterator over the suffixes
      */
-    public Expression createExpression(Expression prefix, Iterator/*<ExpressionSuffix>*/ it) {
+    public Expression createExpression(Expression prefix, Iterator<ExpressionSuffix> it) {
       if (it.hasNext()) {
         ExpressionSuffix es = it.next();
         if (es instanceof DotIdentifierSuffix) {
@@ -540,7 +524,7 @@ public class Parser {
       } else {
         if (prefix instanceof CompileTimeQualifiedName) {
           // Remove the last identifier from the qualified name
-          List/*<IdentifierToken>*/  l = ((CompileTimeQualifiedName)prefix).identifiers;
+          List<IdentifierToken>  l = ((CompileTimeQualifiedName)prefix).identifiers;
           Token f = (l.get(0)).getToken();
           Token t = (l.remove(l.size()-1)).getToken();
           Expression exp = null;
@@ -623,7 +607,7 @@ public class Parser {
     /**
      * Not used
      */
-    public /*<T>*/ T acceptVisitor(Visitor/*<T>*/ visitor) {
+    public <T> T acceptVisitor(Visitor<T> visitor) {
       return null;
     }
   }
@@ -632,13 +616,13 @@ public class Parser {
     /**
      * The identifiers (tokens)
      */
-    public List/*<IdentifierToken>*/ identifiers;
+    public List<IdentifierToken> identifiers;
     
     /**
      * Initializes the expression
      * @param ids a list of token
      */
-    public CompileTimeQualifiedName(List/*<IdentifierToken>*/ ids) {
+    public CompileTimeQualifiedName(List<IdentifierToken> ids) {
       super("", 0, 0, 0, 0);
       identifiers = ids;
     }
@@ -683,7 +667,7 @@ public class Parser {
     /**
      * Not used
      */
-    public /*<T>*/ T acceptVisitor(Visitor/*<T>*/ visitor) {
+    public <T> T acceptVisitor(Visitor<T> visitor) {
       return null;
     }
   }
@@ -707,11 +691,11 @@ public class Parser {
    * To store a class body
    */
   static class ClassBody {
-    List/*<Node>*/ list;
+    List<Node> list;
     int  endLine;
     int  endColumn;
     
-    ClassBody(List/*<Node>*/ l, int el, int ec) {
+    ClassBody(List<Node> l, int el, int ec) {
       list      = l;
       endLine   = el;
       endColumn = ec;
@@ -1079,10 +1063,10 @@ PARSER_END(Parser)
    * @return a list of nodes (possibly empty)
    * @see koala.dynamicjava.tree.Node
    */
-  List/*<Node>*/ parseStream() :
+  List<Node> parseStream() :
   {
-    List/*<Node>*/ list = new LinkedList/*<Node>*/();
-    List/*<Node>*/ l = new LinkedList/*<Node>*/();
+    List<Node> list = new LinkedList<Node>();
+    List<Node> l = new LinkedList<Node>();
     Node root = null;
   }
   {
@@ -1104,10 +1088,10 @@ PARSER_END(Parser)
    * @return a list of nodes (possibly empty)
    * @see koala.dynamicjava.tree.Node
    */
-  List/*<Node>*/ topLevelStatement() :
+  List<Node> topLevelStatement() :
   {
     Node root = null;
-    List/*<Node>*/ l = new LinkedList/*<Node>*/();
+    List<Node> l = new LinkedList<Node>();
   }
   {
     try {
@@ -1184,9 +1168,9 @@ PARSER_END(Parser)
    * @return a list of nodes (possibly empty)
    * @see koala.dynamicjava.tree.Node
    */
-  List/*<Node>*/ parseCompilationUnit() :
+  List<Node> parseCompilationUnit() :
   {
-    List/*<Node>*/ list = new LinkedList/*<Node>*/();
+    List<Node> list = new LinkedList<Node>();
     Node node;
   }
   {
@@ -1310,10 +1294,10 @@ PARSER_END(Parser)
    * @return a list of tree token
    * @see koala.dynamicjava.parser.wrapper.TreeToken
    */
-  List/*<IdentifierToken>*/ name() :
+  List<IdentifierToken> name() :
   {
     Token id;
-    List/*<IdentifierToken>*/  list = new LinkedList/*<IdentifierToken>*/();
+    List<IdentifierToken>  list = new LinkedList<IdentifierToken>();
   }
   {
     id=<IDENTIFIER>
@@ -1335,9 +1319,9 @@ PARSER_END(Parser)
   ReferenceType ReferenceTypeName() :
   {
     Token id = null;
-    List/*<IdentifierToken>*/ list = new LinkedList/*<IdentifierToken>*/();
-    List/*<Type>*/ typeArgs = new LinkedList/*<Type>*/();
-    List/*<List<? extends Type>>*/ allTypeArgs = new LinkedList/*<List<? extends Type>>*/();
+    List<IdentifierToken> list = new LinkedList<IdentifierToken>();
+    List<Type> typeArgs = new LinkedList<Type>();
+    List<List<? extends Type>> allTypeArgs = new LinkedList<List<? extends Type>>();
   }
   {
     try{
@@ -1345,13 +1329,13 @@ PARSER_END(Parser)
       {
         list.add(new TreeToken(id));
         allTypeArgs.add( typeArgs );
-        typeArgs = new LinkedList/*<Type>*/();
+        typeArgs = new LinkedList<Type>();
       }
       ( LOOKAHEAD("." <IDENTIFIER>) "." id=<IDENTIFIER>  [LOOKAHEAD(TypeArguments()) typeArgs = TypeArguments() ]
          {
         list.add(new TreeToken(id));
         allTypeArgs.add( typeArgs );
-        typeArgs = new LinkedList/*<Type>*/();
+        typeArgs = new LinkedList<Type>();
       }
       )*
         
@@ -1360,7 +1344,7 @@ PARSER_END(Parser)
         IdentifierToken l  = list.get(list.size()-1);
         boolean Parameterized = false;
         for( int i = 0; i < allTypeArgs.size(); i++ ){
-          List/*<? extends Type>*/ targs = allTypeArgs.get(i);
+          List<? extends Type> targs = allTypeArgs.get(i);
           if(targs.size() > 0) {
             Parameterized = true;
             break;
@@ -1396,9 +1380,9 @@ PARSER_END(Parser)
    * @return a list of ReferenceType
    * @see koala.dynamicjava.tree.ReferenceType
    */
-  List/*<? extends ReferenceType>*/ ReferenceTypeNameList() :
+  List<? extends ReferenceType> ReferenceTypeNameList() :
   {
-    List/*<ReferenceType>*/ list = new LinkedList/*<ReferenceType>*/();
+    List<ReferenceType> list = new LinkedList<ReferenceType>();
     ReferenceType obj;
   }
   {
@@ -1613,7 +1597,7 @@ PARSER_END(Parser)
     Token id;
     TypeParameter[] typeParameters = null;
     ReferenceType  ext  = null;
-    List/*<? extends ReferenceType>*/ impl = null;
+    List<? extends ReferenceType> impl = null;
     ClassBody body;
   }
   {
@@ -1658,8 +1642,8 @@ PARSER_END(Parser)
   ClassBody classBody() :
   {
     Token t;
-    List/*<Node>*/ list = new LinkedList/*<Node>*/();
-    List/*<Node>*/ decl;
+    List<Node> list = new LinkedList<Node>();
+    List<Node> decl;
   }
   {
     try {
@@ -1686,10 +1670,10 @@ PARSER_END(Parser)
    *         contain multiple declarations.
    * @see koala.dynamicjava.tree.Node
    */
-  List/*<Node>*/ classBodyDeclaration() :
+  List<Node> classBodyDeclaration() :
   {
     Node node = null;
-    List/*<Node>*/ list = new LinkedList/*<Node>*/();
+    List<Node> list = new LinkedList<Node>();
   }
   {
     try {
@@ -1736,14 +1720,14 @@ PARSER_END(Parser)
    *         contain multiple declarations.
    * @see koala.dynamicjava.tree.FieldDeclaration
    */
-  List/*<Node>*/ fieldDeclaration() :
+  List<Node> fieldDeclaration() :
   {
     ModifierFlags mf;
     Type          typ;
     Token         id;
     int           dim  = 0;
     Expression    exp  = null;
-    List/*<Node>*/    list = new LinkedList/*<Node>*/();
+    List<Node>    list = new LinkedList<Node>();
   }
   {
     try
@@ -1792,8 +1776,8 @@ PARSER_END(Parser)
     Type              typ;
     Token             id;
     int               dim = 0;
-    List/*<FormalParameter>*/ params;
-    List/*<? extends ReferenceType>*/ exceptions = new LinkedList/*<ReferenceType>*/();
+    List<FormalParameter> params;
+    List<? extends ReferenceType> exceptions = new LinkedList<ReferenceType>();
     Node              body = null;
   }
   {
@@ -1852,9 +1836,9 @@ PARSER_END(Parser)
    * Parses formal parameters of the form '(param, param, ...)'
    * @see koala.dynamicjava.tree.FormalParameter
    */
-  List/*<FormalParameter>*/ formalParameters() :
+  List<FormalParameter> formalParameters() :
   {
-    List/*<FormalParameter>*/ list = new LinkedList/*<FormalParameter>*/();
+    List<FormalParameter> list = new LinkedList<FormalParameter>();
     FormalParameter node;
     FormalParameter lastParam = null;
   }
@@ -1993,11 +1977,11 @@ PARSER_END(Parser)
     int                   flag = 0;
     Token                 id;
     TypeParameter[]   typeParameters = null;
-    List/*<FormalParameter>*/ params;
-    List/*<? extends ReferenceType>*/ exceptions = new LinkedList/*<ReferenceType>*/();
+    List<FormalParameter> params;
+    List<? extends ReferenceType> exceptions = new LinkedList<ReferenceType>();
     ConstructorInvocation ci = null;
-    List/*<Node>*/            stmt;
-    List/*<Node>*/            stmts = new LinkedList/*<Node>*/();
+    List<Node>            stmt;
+    List<Node>            stmts = new LinkedList<Node>();
     int                   bl, bc;
     Token                 e;
   }
@@ -2055,7 +2039,7 @@ PARSER_END(Parser)
     Token           b, e;
     ArgumentsSuffix args;
     Expression      exp = null;
-    List/*<Type>*/ typeArgs = new LinkedList/*<Type>*/();
+    List<Type> typeArgs = new LinkedList<Type>();
   }
   {
     try
@@ -2111,9 +2095,9 @@ PARSER_END(Parser)
     Token id;
     Token e;
     TypeParameter[] typeParameters = null;
-    List/*<? extends ReferenceType>*/ impl = null;
-    List/*<Node>*/ list = new LinkedList/*<Node>*/();
-    List/*<Node>*/  decl;
+    List<? extends ReferenceType> impl = null;
+    List<Node> list = new LinkedList<Node>();
+    List<Node>  decl;
     int   m = 0;
   }
   {
@@ -2160,10 +2144,10 @@ PARSER_END(Parser)
    *         contain multiple declarations.
    * @see koala.dynamicjava.tree.Node
    */
-  List/*<Node>*/ interfaceMemberDeclaration() :
+  List<Node> interfaceMemberDeclaration() :
   {
     Node node = null;
-    List/*<Node>*/ list = new LinkedList/*<Node>*/();
+    List<Node> list = new LinkedList<Node>();
   }
   {
     try
@@ -2219,7 +2203,7 @@ PARSER_END(Parser)
   {
     Token            t, e;
     Token            id;
-    List/*<? extends ReferenceType>*/ impl = null;
+    List<? extends ReferenceType> impl = null;
     EnumDeclaration.EnumBody   body;
     int   m = 0;
   }
@@ -2245,21 +2229,21 @@ PARSER_END(Parser)
    */
   EnumDeclaration.EnumBody enumBody() :
   {
-    List/*<EnumDeclaration.EnumConstant>*/ consts = new LinkedList/*<EnumDeclaration.EnumConstant>*/();
-    List/*<Node>*/         decl = null;
+    List<EnumDeclaration.EnumConstant> consts = new LinkedList<EnumDeclaration.EnumConstant>();
+    List<Node>         decl = null;
   }
   {
     [ consts = enumConstants() ]
       [","]
       [ decl = enumBodyDeclarations() ]
     {
-      return new EnumDeclaration.EnumBody(consts, ((decl==null)? new LinkedList/*<Node>*/() : decl));
+      return new EnumDeclaration.EnumBody(consts, ((decl==null)? new LinkedList<Node>() : decl));
     }
   }
   
-  List/*<EnumDeclaration.EnumConstant>*/ enumConstants() :
+  List<EnumDeclaration.EnumConstant> enumConstants() :
   {
-    List/*<EnumDeclaration.EnumConstant>*/ list = new LinkedList/*<EnumDeclaration.EnumConstant>*/();
+    List<EnumDeclaration.EnumConstant> list = new LinkedList<EnumDeclaration.EnumConstant>();
     EnumDeclaration.EnumConstant individual = null;
   }
   {
@@ -2278,7 +2262,7 @@ PARSER_END(Parser)
   
   EnumDeclaration.EnumConstant enumConstant() :
   {
-    List/*<Node>*/       body = new LinkedList/*<Node>*/();
+    List<Node>       body = new LinkedList<Node>();
     ArgumentsSuffix args = null;
     Token                id;
     ClassBody            _classBody = null;
@@ -2293,10 +2277,10 @@ PARSER_END(Parser)
     }
   }
   
-  List/*<Node>*/ enumBodyDeclarations() :
+  List<Node> enumBodyDeclarations() :
   {
-    List/*<Node>*/ body = new LinkedList/*<Node>*/();
-    List/*<Node>*/ decl = null;
+    List<Node> body = new LinkedList<Node>();
+    List<Node> decl = null;
   }
   {
     ";"
@@ -2321,7 +2305,7 @@ PARSER_END(Parser)
   {
     Expression init;
     Token      t = null, b, e;
-    List/*<Expression>*/ list = new LinkedList/*<Expression>*/();
+    List<Expression> list = new LinkedList<Expression>();
   }
   {
     b="{" [ init=variableInitializer()
@@ -2369,8 +2353,8 @@ PARSER_END(Parser)
   {
     Token p1;
     Token p2;
-    List/*<Node>*/ nodes;
-    List/*<Node>*/ list = new LinkedList/*<Node>*/();
+    List<Node> nodes;
+    List<Node> list = new LinkedList<Node>();
   }
   {
     try {
@@ -2399,10 +2383,10 @@ PARSER_END(Parser)
    *         contain multiple declarations.
    * @see koala.dynamicjava.tree.Node
    */
-  List/*<Node>*/ blockStatement() :
+  List<Node> blockStatement() :
   {
     Node node = null;
-    List/*<Node>*/ list = new LinkedList/*<Node>*/();
+    List<Node> list = new LinkedList<Node>();
   }
   {
     try {
@@ -2440,14 +2424,14 @@ PARSER_END(Parser)
    *         contain multiple declarations.
    * @see koala.dynamicjava.tree.VariableDeclaration
    */
-  List/*<Node>*/ localVariableDeclaration() :
+  List<Node> localVariableDeclaration() :
   {
     Token      t    = null;
     Expression init = null;
     Type       typ;
     Token      id;
     int        dim  = 0;
-    List/*<Node>*/       list = new LinkedList/*<Node>*/();
+    List<Node>       list = new LinkedList<Node>();
   }
   {
     [ t="final" ]
@@ -2666,9 +2650,9 @@ PARSER_END(Parser)
     Token      b, e;
     Expression sel;
     Expression val         = null;
-    List/*<Node>*/        stat        = null;
-    List/*<SwitchBlock>*/ cases       = new LinkedList/*<SwitchBlock>*/();
-    List/*<Node>*/       list        = new LinkedList/*<Node>*/();
+    List<Node>        stat        = null;
+    List<SwitchBlock> cases       = new LinkedList<SwitchBlock>();
+    List<Node>       list        = new LinkedList<Node>();
     Token      t           = null;
   }
   {
@@ -2709,7 +2693,7 @@ PARSER_END(Parser)
         val = null;
         t   = null;
         if (list.size() != 0) {
-          list = new LinkedList/*<Node>*/();
+          list = new LinkedList<Node>();
         }
       }
       )*
@@ -2738,9 +2722,9 @@ PARSER_END(Parser)
   {
     Token      t;
     FormalParameter forEachInit = null;
-    List/*<Node>*/       init   = null;
+    List<Node>       init   = null;
     Expression exp    = null;
-    List/*<Node>*/       update = null;
+    List<Node>       update = null;
     Node       stmt;
     Token      colon  = null;
   }
@@ -2779,9 +2763,9 @@ PARSER_END(Parser)
   /**
    * Used internally to parse a 'for' statement
    */
-  List/*<Node>*/ forInit() :
+  List<Node> forInit() :
   {
-    List/*<Node>*/ list;
+    List<Node> list;
   }
   {
     ( LOOKAHEAD( [ "final" ] typeLookahead() <IDENTIFIER> )
@@ -2797,9 +2781,9 @@ PARSER_END(Parser)
   /**
    * Parses a comma separated list of expression
    */
-  List/*<Node>*/ statementExpressionList() :
+  List<Node> statementExpressionList() :
   {
-    List/*<Node>*/ list = new LinkedList/*<Node>*/();
+    List<Node> list = new LinkedList<Node>();
     Node node;
   }
   {
@@ -2948,7 +2932,7 @@ PARSER_END(Parser)
     Token           t, u;
     Node            tryBlock;
     Node            catchBlock;
-    List/*<CatchStatement>*/      catches = new LinkedList/*<CatchStatement>*/();
+    List<CatchStatement>      catches = new LinkedList<CatchStatement>();
     FormalParameter formal;
     Node            finallyBlock = null;
     int             el = 0, ec = 0;
@@ -3670,8 +3654,8 @@ PARSER_END(Parser)
   {
     Expression       pp;
     ExpressionSuffix es;
-    List/*<ExpressionSuffix>*/ list = new LinkedList/*<ExpressionSuffix>*/();
-    List/*<Type>*/ typeArgs = new LinkedList/*<Type>*/();
+    List<ExpressionSuffix> list = new LinkedList<ExpressionSuffix>();
+    List<Type> typeArgs = new LinkedList<Type>();
   }
   {
     [LOOKAHEAD(TypeArguments()) typeArgs = TypeArguments()]
@@ -3711,7 +3695,7 @@ PARSER_END(Parser)
   /**
    * Used internally to parse an expression
    */
-  ExpressionSuffix primarySuffix(List/*<Type>*/ typeArgs) :
+  ExpressionSuffix primarySuffix(List<Type> typeArgs) :
   {
     ExpressionSuffix es;
   }
@@ -3764,7 +3748,7 @@ PARSER_END(Parser)
     ReferenceType   rt;
     ArgumentsSuffix as;
     ClassBody       cb = null;
-    List/*<Type>*/ typeArgs = new LinkedList/*<Type>*/();
+    List<Type> typeArgs = new LinkedList<Type>();
   }
   {
     
@@ -3836,9 +3820,9 @@ PARSER_END(Parser)
   /**
    * Used internally to parse an expression
    */
-  ArgumentsSuffix arguments(List/*<Type>*/ typeArgs) :
+  ArgumentsSuffix arguments(List<Type> typeArgs) :
   {
-    List/*<Expression>*/ list = null;
+    List<Expression> list = null;
     Token t;
   }
   {
@@ -3851,9 +3835,9 @@ PARSER_END(Parser)
   /**
    * Used internally to parse an expression
    */
-  List/*<Expression>*/ argumentList() :
+  List<Expression> argumentList() :
   {
-    List/*<Expression>*/ list = new LinkedList/*<Expression>*/();
+    List<Expression> list = new LinkedList<Expression>();
     Expression exp;
   }
   {
@@ -3968,7 +3952,7 @@ PARSER_END(Parser)
   {
     t="this"
     {
-      return new ThisExpression(new LinkedList/*<IdentifierToken>*/(),
+      return new ThisExpression(new LinkedList<IdentifierToken>(),
                                 filename,
                                 t.beginLine, t.beginColumn,
                                 t.endLine,   t.endColumn);
@@ -3997,7 +3981,7 @@ PARSER_END(Parser)
    */
   Expression qualifiedName() :
   {
-    List/*<IdentifierToken>*/ list;
+    List<IdentifierToken> list;
   }
   {
     list=name()
@@ -4034,7 +4018,7 @@ PARSER_END(Parser)
     Type            pt;
     ArgumentsSuffix as;
     ClassBody       cb = null;
-    List/*<Type>*/ typeArgs = new LinkedList/*<Type>*/();
+    List<Type> typeArgs = new LinkedList<Type>();
   }
   {
     ( LOOKAHEAD(2)
@@ -4079,7 +4063,7 @@ PARSER_END(Parser)
    */
   ArrayAllocation.TypeDescriptor arrayDimsAndInits() :
   {
-    List/*<Expression>*/  dims = new LinkedList/*<Expression>*/();
+    List<Expression>  dims = new LinkedList<Expression>();
     int   dim  = 0;
     Token t;
     Expression exp;
@@ -4802,7 +4786,7 @@ PARSER_END(Parser)
   
   TypeParameter[] TypeParameters() :
   {
-    List/*<TypeParameter>*/ list = new LinkedList/*<TypeParameter>*/();
+    List<TypeParameter> list = new LinkedList<TypeParameter>();
     TypeParameter temp;
   }
   {
@@ -4815,7 +4799,7 @@ PARSER_END(Parser)
       RightAngledBracket()
     {
       GenericTypesEnv = GenericTypesEnv.extend(TypeParamsMap); // push the map of typename/typeparam to the generic types env
-      TypeParamsMap = new HashMap/*<String, TypeParameter>*/(); // flush old map
+      TypeParamsMap = new HashMap<String, TypeParameter>(); // flush old map
       return (TypeParameter[]) list.toArray(new TypeParameter[0]);
     }
   }
@@ -4823,7 +4807,7 @@ PARSER_END(Parser)
   // Does not add the peeked type params to the type environment
   TypeParameter[] TypeParametersLookahead() :
   {
-    List/*<TypeParameter>*/ list = new LinkedList/*<TypeParameter>*/();
+    List<TypeParameter> list = new LinkedList<TypeParameter>();
     TypeParameter temp;
   }
   {
@@ -4841,10 +4825,10 @@ PARSER_END(Parser)
   
   TypeParameter TypeParameter() :
   {
-    List/*<IdentifierToken>*/ name;
+    List<IdentifierToken> name;
     Type bound = new ReferenceType("Object");
     Token first = getToken(1);
-    List/*<ReferenceType>*/ interfaceBoundsList = new LinkedList/*<ReferenceType>*/();
+    List<ReferenceType> interfaceBoundsList = new LinkedList<ReferenceType>();
     ReferenceType interf;
   }
   {
@@ -4869,9 +4853,9 @@ PARSER_END(Parser)
     }
   }
   
-  List/*<Type>*/ TypeArguments() :
+  List<Type> TypeArguments() :
   {
-    List/*<Type>*/ typeArgs = new LinkedList/*<Type>*/();
+    List<Type> typeArgs = new LinkedList<Type>();
     ReferenceType hookedType = new ReferenceType("java.lang.Object");
     Type temp = new HookType(hookedType, false);
     Token hook = null;
