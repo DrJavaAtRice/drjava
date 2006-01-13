@@ -53,7 +53,7 @@ import edu.rice.cs.drjava.model.FileMovedException;
  * a compile has ended.
  * @version $Id$
  */
-public class CompilerErrorModel<T extends CompilerError> {
+public class CompilerErrorModel {
   private static final String newLine = System.getProperty("line.separator");
   /** An array of errors to be displayed in the CompilerErrorPanel associated with this model.  After model
    *  construction, this array should be sorted in this order:
@@ -64,7 +64,7 @@ public class CompilerErrorModel<T extends CompilerError> {
    *       errors with line numbers, in order
    * In all cases, where all else is equal, warnings are sorted below errors.
    */
-  private final T[] _errors;
+  private final CompilerError[] _errors;
 
   /** An array of file offsets, parallel to the _errors array. NOTE: If there is no position associated with an error,
    *  its entry here should be set to null.
@@ -100,7 +100,7 @@ public class CompilerErrorModel<T extends CompilerError> {
   /** Constructs an empty CompilerErrorModel.
    *  @param empty the empty array of T
    */
-  public CompilerErrorModel(T[] empty) {
+  public CompilerErrorModel() {
     _model = new IGetDocuments() {
       public OpenDefinitionsDocument getDocumentForFile(File file) {
         throw new IllegalStateException("No documents to get!");
@@ -113,7 +113,7 @@ public class CompilerErrorModel<T extends CompilerError> {
       public boolean hasUntitledDocuments() { return false; }
       public FileGroupingState getFileGroupingState() { throw new IllegalStateException("No state to get!"); }
     };
-    _errors = empty;
+    _errors = new CompilerError[0];
     _numErrors = 0;
     _numWarnings = 0;
     _numCompilerErrors = 0;
@@ -124,7 +124,7 @@ public class CompilerErrorModel<T extends CompilerError> {
    *  @param errors the list of CompilerError's (or a subclass).
    *  @param model is the model to find documents from
    */
-  public CompilerErrorModel(T[] errors, IGetDocuments model) {
+  public CompilerErrorModel(CompilerError[] errors, IGetDocuments model) {
     _model = model;
 
     // TODO: If we move to NextGen-style generics, ensure _errors is non-null.
@@ -155,10 +155,10 @@ public class CompilerErrorModel<T extends CompilerError> {
    * @throws NullPointerException if this object was improperly initialized
    * @throws ArrayIndexOutOfBoundsException if !(0 <= idx < this.getNumErrors())
    */
-  public T getError(int idx) { return _errors[idx]; }
+  public CompilerError getError(int idx) { return _errors[idx]; }
 
   /** Returns the position of the given error in the document representing its file. */
-  public Position getPosition(T error) {
+  public Position getPosition(CompilerError error) {
     int spot = Arrays.binarySearch(_errors, error);
     return _positions[spot];
   }
@@ -189,7 +189,7 @@ public class CompilerErrorModel<T extends CompilerError> {
    * @param offset the offset into the document
    * @return the CompilerError at the given offset, null if no error corresponds to this location
    */
-  public T getErrorAtOffset(OpenDefinitionsDocument odd, int offset) {
+  public CompilerError getErrorAtOffset(OpenDefinitionsDocument odd, int offset) {
     File file;
     try { file = odd.getFile(); }
     catch (IllegalStateException e) { return null; }

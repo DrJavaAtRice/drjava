@@ -67,14 +67,14 @@ public final class CompilerErrorModelTest extends TestCase {
   private String[] texts;
   private TestDocGetter getter;
   private CompilerError[] errors;
-  private CompilerErrorModel<CompilerError> model;
+  private CompilerErrorModel model;
   
   /**
    * Tests CompilerErrorModel setup code with no compiler errors.
    */
   public void testConstructNoErrors() {
     getter = new TestDocGetter();
-    model = new CompilerErrorModel<CompilerError>(new CompilerError[0], getter);
+    model = new CompilerErrorModel(new CompilerError[0], getter);
     
     // We successfully built the model, now test the basics.
     assertEquals("Should have no compiler errors.", 0, model.getNumErrors());
@@ -92,7 +92,7 @@ public final class CompilerErrorModelTest extends TestCase {
     errors = new CompilerError[]
     { new CompilerError("Test warning without File", true),
       new CompilerError("Test warning without File", true) };
-    model = new CompilerErrorModel<CompilerError>(errors, getter);
+    model = new CompilerErrorModel(errors, getter);
     
     // We successfully built the model, now test the basics.
     assertEquals("Should have 2 errors.", 2, model.getNumErrors());
@@ -115,7 +115,7 @@ public final class CompilerErrorModelTest extends TestCase {
     for (int i = 0; i < errors.length; i++) {
       copy[i] = errors[i];
     }
-    model = new CompilerErrorModel<CompilerError>(copy, getter);
+    model = new CompilerErrorModel(copy, getter);
     
     // We successfully built the model, now test the basics.
     assertEquals("Should have 3 compiler errors.", 3, model.getNumErrors());
@@ -141,7 +141,7 @@ public final class CompilerErrorModelTest extends TestCase {
     for (int i = 0; i < errors.length; i++) {
       copy[i] = errors[i];
     }
-    model = new CompilerErrorModel<CompilerError>(copy, getter);
+    model = new CompilerErrorModel(copy, getter);
     
     // We successfully built the model, now test the basics.
     assertEquals("Should have 3 compiler errors.", 3, model.getNumErrors());
@@ -167,7 +167,7 @@ public final class CompilerErrorModelTest extends TestCase {
     for (int i = 0; i < errors.length; i++) {
       copy[i] = errors[i];
     }
-    model = new CompilerErrorModel<CompilerError>(copy, getter);
+    model = new CompilerErrorModel(copy, getter);
     
     // We successfully built the model, now test the basics.
     assertEquals("Should have 4 compiler errors.", 4, model.getNumErrors());
@@ -199,7 +199,7 @@ public final class CompilerErrorModelTest extends TestCase {
     for (int i = 0; i < errors.length; i++) {
       copy[i] = errors[i];
     }
-    model = new CompilerErrorModel<CompilerError>(copy, getter);
+    model = new CompilerErrorModel(copy, getter);
     
     // We successfully built the model, now test the basics.
     assertEquals("Should have 7 compiler errors.", 7, model.getNumErrors());
@@ -235,7 +235,7 @@ public final class CompilerErrorModelTest extends TestCase {
     for (int i = 0; i < errors.length; i++) {
       copy[i] = errors[i];
     }
-    model = new CompilerErrorModel<CompilerError>(copy, getter);
+    model = new CompilerErrorModel(copy, getter);
     
     // We successfully built the model, now test the basics.
     assertEquals("Should have 8 compiler errors.", 8, model.getNumErrors());
@@ -272,7 +272,7 @@ public final class CompilerErrorModelTest extends TestCase {
     for (int i = 0; i < errors.length; i++) {
       copy[i] = errors[i];
     }
-    model = new CompilerErrorModel<CompilerError>(copy, getter);
+    model = new CompilerErrorModel(copy, getter);
     
     // We successfully built the model, now test the basics.
     assertEquals("Should have 8 compiler errors.", 8, model.getNumErrors());
@@ -378,7 +378,7 @@ public final class CompilerErrorModelTest extends TestCase {
     errors = new CompilerError[]
     { new CompilerError(files[1], 0, 0, "Test error with File", false),
       new CompilerError(files[0], 0, 0, "Test error with File", false) };
-    model = new CompilerErrorModel<CompilerError>(errors, getter);
+    model = new CompilerErrorModel(errors, getter);
     model.getErrorAtOffset(getter.getDocumentForFile(files[0]), 25);
     String temp = texts[0];
     texts[0] = texts[1];
@@ -387,7 +387,7 @@ public final class CompilerErrorModelTest extends TestCase {
     errors = new CompilerError[]
     { new CompilerError(files[0], 0, 0, "Test error with File", false),
       new CompilerError(files[1], 2, 0, "Test error with File", false)};
-    model = new CompilerErrorModel<CompilerError>(errors, getter);
+    model = new CompilerErrorModel(errors, getter);
     model.getErrorAtOffset(getter.getDocumentForFile(files[0]), 10);
   }
   
@@ -458,6 +458,6 @@ public final class CompilerErrorModelTest extends TestCase {
     for (int i = 0; i < errors.length; i++) {
       copy[i] = errors[i];
     }
-    model = new CompilerErrorModel<CompilerError>(copy, getter);
+    model = new CompilerErrorModel(copy, getter);
   }
 }

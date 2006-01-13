@@ -66,14 +66,14 @@ public class DefaultJavadocModel implements JavadocModel {
   private final JavadocEventNotifier _notifier = new JavadocEventNotifier();
 
   /** The error model containing all current Javadoc errors. */
-  private CompilerErrorModel<CompilerError> _javadocErrorModel;
+  private CompilerErrorModel _javadocErrorModel;
 
   /** Main constructor.
    *  @param getter Source of documents for this JavadocModel
    */
   public DefaultJavadocModel(IGetDocuments model) {
     _model = model;
-    _javadocErrorModel = new CompilerErrorModel<CompilerError>(new CompilerError[0]);
+    _javadocErrorModel = new CompilerErrorModel();
   }
 
   //-------------------------- Listener Management --------------------------//
@@ -101,7 +101,7 @@ public class DefaultJavadocModel implements JavadocModel {
 
   /** Clears all current Javadoc errors. */
   public void resetJavadocErrors() {
-    _javadocErrorModel = new CompilerErrorModel<CompilerError>(new CompilerError[0]);
+    _javadocErrorModel = new CompilerErrorModel();
   }
 
   // -------------------- Javadoc All Documents --------------------
@@ -440,7 +440,7 @@ public class DefaultJavadocModel implements JavadocModel {
   private void _showCompilerError(String msg, File f) {
     CompilerError[] errors = new CompilerError[1];
     errors[0] = new CompilerError(f, -1, -1, msg, false);
-    _javadocErrorModel = new CompilerErrorModel<CompilerError>(errors, _model);
+    _javadocErrorModel = new CompilerErrorModel(errors, _model);
     _notifier.javadocEnded(false, null, false);
   }
 
@@ -542,7 +542,7 @@ public class DefaultJavadocModel implements JavadocModel {
     ArrayList<CompilerError> errors = _extractErrors(outLines);
     errors.addAll(_extractErrors(errLines));
 
-    _javadocErrorModel = new CompilerErrorModel<CompilerError>
+    _javadocErrorModel = new CompilerErrorModel
       (errors.toArray(new CompilerError[errors.size()]), _model);
 //    System.out.println("built Javadoc error model");
 

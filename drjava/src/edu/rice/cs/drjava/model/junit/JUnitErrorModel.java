@@ -53,7 +53,7 @@ import edu.rice.cs.drjava.model.compiler.CompilerErrorModel;
  * a test has ended.
  * @version $Id$
  */
-public class JUnitErrorModel extends CompilerErrorModel<JUnitError>{
+public class JUnitErrorModel extends CompilerErrorModel {
   private boolean _testsHaveRun = false;
 
   /**

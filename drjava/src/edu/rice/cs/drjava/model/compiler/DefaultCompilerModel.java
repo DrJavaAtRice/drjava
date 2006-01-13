@@ -74,7 +74,7 @@ public class DefaultCompilerModel implements CompilerModel {
   private final IGetDocuments _model;
 
   /** The error model containing all current compiler errors. */
-  private CompilerErrorModel<? extends CompilerError> _compilerErrorModel;
+  private CompilerErrorModel _compilerErrorModel;
   
   /** The lock for using the slaveJVM to perform compilation and run unit tests */
   private Object _slaveJVMLock = new Object();
@@ -84,7 +84,7 @@ public class DefaultCompilerModel implements CompilerModel {
    */
   public DefaultCompilerModel(IGetDocuments getter) {
     _model = getter;
-    _compilerErrorModel = new CompilerErrorModel<CompilerError>(new CompilerError[0], _model);
+    _compilerErrorModel = new CompilerErrorModel(new CompilerError[0], _model);
   }
   
   //--------------------------------- Locking -------------------------------//
@@ -388,7 +388,7 @@ public class DefaultCompilerModel implements CompilerModel {
    */
   private void _distributeErrors(CompilerError[] errors) throws IOException {
     resetCompilerErrors();  // Why is this done?
-    _compilerErrorModel = new CompilerErrorModel<CompilerError>(errors, _model);
+    _compilerErrorModel = new CompilerErrorModel(errors, _model);
   }
 
   /**
@@ -448,7 +448,7 @@ public class DefaultCompilerModel implements CompilerModel {
   //----------------------------- Error Results -----------------------------//
 
   /** Gets the CompilerErrorModel representing the last compile. */
-  public CompilerErrorModel<? extends CompilerError> getCompilerErrorModel() { return _compilerErrorModel; }
+  public CompilerErrorModel getCompilerErrorModel() { return _compilerErrorModel; }
 
   /** Gets the total number of current errors. */
   public int getNumErrors() { return getCompilerErrorModel().getNumErrors(); }
@@ -462,7 +462,7 @@ public class DefaultCompilerModel implements CompilerModel {
   /** Resets the compiler error state to have no errors. */
   public void resetCompilerErrors() {
     // TODO: see if we can get by without this function
-    _compilerErrorModel = new CompilerErrorModel<CompilerError>(new CompilerError[0], _model);
+    _compilerErrorModel = new CompilerErrorModel(new CompilerError[0], _model);
   }
 
   //-------------------------- Compiler Management --------------------------//

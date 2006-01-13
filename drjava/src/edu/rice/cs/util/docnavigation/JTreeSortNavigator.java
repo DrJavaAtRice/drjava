@@ -99,7 +99,7 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
    */
   public void setForeground(Color c) {
     super.setForeground(c);
-    _renderer.setTextNonSelectionColor(c);
+    if (_renderer != null) _renderer.setTextNonSelectionColor(c);
   }
   
   /** Sets the background color of this tree
