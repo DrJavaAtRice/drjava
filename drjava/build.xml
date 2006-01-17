@@ -473,12 +473,12 @@
        Testing Target
        ************** -->
   
-  <target name="test" depends="test-15" description="Shortcut for 'test-15'">
+  <target name="test" depends="test-14-in-15" description="Shortcut for 'test-14-in-15'">
   </target>
   
   <target name="test-15" depends="compile, assert-15, resolve-java15-tools"
-          description="Run all tests under Java 5.0 (after compiling); use -Dtest-spec=... to filter the tests">
-    <echo message="Running all tests matching '${test-spec}' under Java 5.0" />
+          description="Run all 5.0 tests under Java 5.0 (after compiling); use -Dtest-spec=... to filter">
+    <echo message="Running all 5.0 tests matching '${test-spec}' under Java 5.0" />
     <!-- TODO: Experiment with performance under different forkmodes -->
     <junit printsummary="on" haltonerror="on" haltonfailure="on" fork="on" 
            maxmemory="256M" dir="${basedir}">
@@ -497,8 +497,8 @@
   </target>
 
   <target name="test-14" depends="compile, resolve-java14-exec, resolve-java14-tools"
-          description="Run all tests under Java 1.4 (after compiling); use -Dtest-spec=... to filter the tests">
-    <echo message="Running all tests matching '${test-spec}' under Java 1.4" />
+          description="Run all 1.4 tests under Java 1.4 (after compiling); use -Dtest-spec=... to filter">
+    <echo message="Running all 1.4 tests matching '${test-spec}' under Java 1.4" />
     <!-- TODO: Experiment with performance under different forkmodes -->
     <junit printsummary="on" haltonerror="on" haltonfailure="on" fork="on" 
            maxmemory="256M" jvm="${java14-exec}" dir="${basedir}">
@@ -516,6 +516,66 @@
     </junit>
   </target>
 
+  <target name="test-14-in-15" depends="compile, assert-15, resolve-java15-tools"
+          description="Run all 1.4 tests under Java 5.0 (after compiling); use -Dtest-spec=... to filter">
+    <echo message="Running all 1.4 tests matching '${test-spec}' under Java 5.0" />
+    <!-- TODO: Experiment with performance under different forkmodes -->
+    <junit printsummary="on" haltonerror="on" haltonfailure="on" fork="on" 
+           maxmemory="256M" dir="${basedir}">
+      <classpath>
+        <pathelement location="${java15-tools}" />
+        <pathelement location="lib/buildlib/junit.jar" />
+        <pathelement location="classes/test-14" />
+        <pathelement location="classes/base-14" />
+        <pathelement location="classes/lib-14" />
+      </classpath>
+      <formatter type="plain" usefile="false" />
+      <batchtest>
+        <fileset dir="classes/test" includes="**/*${test-spec}*Test.class" />
+      </batchtest>
+    </junit>
+  </target>
+
+
+  <target name="run" depends="run-14-in-15" description="Shortcut for 'run-14-in-15'">
+  </target>
+  
+  <target name="run-15" depends="compile, assert-15, resolve-java15-tools"
+          description="Run the DrJava 5.0 classes under Java 5.0 (after compiling)">
+    <echo message="Running the DrJava application (5.0 classes in Java 5.0)" />
+    <java classname="${jar-main-class}" fork="yes" spawn="yes">
+      <classpath>
+        <pathelement location="${java15-tools}" />
+        <pathelement location="classes/base" />
+        <pathelement location="classes/lib" />
+      </classpath>
+    </java>
+  </target>
+        
+  <target name="run-14" depends="compile, resolve-java14-exec, resolve-java14-tools"
+          description="Run the DrJava 1.4 classes under Java 1.4 (after compiling)">
+    <echo message="Running the DrJava application (1.4 classses in Java 1.4)" />
+    <java classname="${jar-main-class}" jvm="${java14-exec}" fork="yes" spawn="yes">
+      <classpath>
+        <pathelement location="${java14-tools}" />
+        <pathelement location="classes/base-14" />
+        <pathelement location="classes/lib-14" />
+      </classpath>
+    </java>
+  </target>
+        
+  <target name="run-14-in-15" depends="compile, assert-15, resolve-java15-tools"
+          description="Run the DrJava 1.4 classes under Java 5.0 (after compiling)">
+    <echo message="Running the DrJava application (1.4 classses in Java 5.0)" />
+    <java classname="${jar-main-class}" fork="yes" spawn="yes">
+      <classpath>
+        <pathelement location="${java15-tools}" />
+        <pathelement location="classes/base-14" />
+        <pathelement location="classes/lib-14" />
+      </classpath>
+    </java>
+  </target>
+        
 
   <!-- ***********
        Jar Targets
