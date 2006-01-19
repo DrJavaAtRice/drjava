@@ -66,8 +66,8 @@ import edu.rice.cs.drjava.model.*;
  */
 public class DefinitionsDocument extends AbstractDJDocument implements Finalizable<DefinitionsDocument> {
   
-  private final int NO_COMMENT_OFFSET = 0;
-  private final int WING_COMMENT_OFFSET = 2;
+  private final static int NO_COMMENT_OFFSET = 0;
+  private final static int WING_COMMENT_OFFSET = 2;
   
   List<DocumentClosedListener> _closedListeners = new LinkedList<DocumentClosedListener>();
   

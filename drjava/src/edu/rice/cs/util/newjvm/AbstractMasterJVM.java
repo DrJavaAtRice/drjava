@@ -202,7 +202,7 @@ public abstract class AbstractMasterJVM/*<SlaveType extends SlaveRemote>*/
           }
         }
       };
-      synchronized(lock){
+      synchronized(lock) {
         t.start();
         while (_classLoaderStub == null) {
           try { lock.wait(); }

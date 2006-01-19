@@ -45,7 +45,7 @@ public class Utilities {
   
   /** Runs the task synchronously if the current thread is the event thread; otherwise passes it to the
    *  event thread to be run asynchronously after all events already on the queue have been processed.
-   * */
+   */
   public static void invokeLater(Runnable task) {
     if (EventQueue.isDispatchThread()) {
       task.run(); 

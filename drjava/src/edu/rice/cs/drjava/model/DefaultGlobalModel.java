@@ -100,11 +100,6 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
   /** Interface between the InteractionsDocument and the JavaInterpreter, which runs in a separate JVM. */
   protected DefaultInteractionsModel _interactionsModel;
   
-  /** Indicates whether the model is currently trying to close all documents, and thus that a new one should not be 
-   *  created, and whether or not to update the navigator
-   */
-  protected boolean _isClosingAllDocs;
-  
   protected InteractionsListener _interactionsListener = new InteractionsListener() {
     public void interactionStarted() { }
     

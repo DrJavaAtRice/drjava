@@ -52,6 +52,7 @@ import edu.rice.cs.drjava.config.OptionEvent;
 import edu.rice.cs.drjava.model.DefaultGlobalModel;
 import edu.rice.cs.drjava.model.repl.newjvm.MainJVM;
 import edu.rice.cs.util.StringOps;
+import edu.rice.cs.util.text.ConsoleDocument;
 import edu.rice.cs.util.text.*;
 import edu.rice.cs.util.swing.Utilities;
 

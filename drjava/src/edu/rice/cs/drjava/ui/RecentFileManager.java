@@ -61,46 +61,31 @@ import edu.rice.cs.drjava.config.*;
  * @version $Id$
  */
 public class RecentFileManager implements OptionConstants {
-  /**
-   * position in the file menu for the next insert
-   */
+  /** Position in the file menu for the next insert. */
   protected int _pos;
 
-  /**
-   * All of the recently used files in the list, in order.
-   */
+  /** All of the recently used files in the list, in order. */
   protected Vector<File> _recentFiles;
 
-  /**
-   * Menu items corresponding to each file in _recentFiles.
-   */
+  /** Menu items corresponding to each file in _recentFiles. */
   protected Vector<JMenuItem> _recentMenuItems;
 
-  /**
-   * The maximum number of files to display in the list.
-   */
+  /** The maximum number of files to display in the list. */
   protected int MAX = DrJava.getConfig().getSetting(RECENT_FILES_MAX_SIZE).intValue();
 
-  /**
-   * The File menu containing the entries.
-   */
+  /** The File menu containing the entries. */
   protected JMenu _fileMenu;
 
-  /**
-   * true if the file manager manages recent project files
-   */
+  /** true if the file manager manages recent project files. */
   protected boolean _isProject;
 
-  /**
-   * The MainFrame containing the file menu.
-   */
+  /** The MainFrame containing the file menu. */
   MainFrame _frame;
 
-  /**
-   * Creates a new RecentFileManager.
-   * @param pos Position in the file menu
-   * @param fileMenu File menu to add the entry to
-   * @param frame MainFrame containing the File menu
+  /** Creates a new RecentFileManager.
+   *  @param pos Position in the file menu
+   *  @param fileMenu File menu to add the entry to
+   *  @param frame MainFrame containing the File menu
    */
   public RecentFileManager(int pos, JMenu fileMenu, MainFrame frame, boolean isProject) {
     _pos = pos;
@@ -112,43 +97,27 @@ public class RecentFileManager implements OptionConstants {
 
     // Add each of the files stored in the config
     Vector<File> files;
-    if (! _isProject)
-      files = DrJava.getConfig().getSetting(RECENT_FILES);
-    else
-      files = DrJava.getConfig().getSetting(RECENT_PROJECTS);
-    for (int i = files.size() - 1; i >= 0; i--) {
-      updateOpenFiles(files.get(i));
-    }
+    if (! _isProject) files = DrJava.getConfig().getSetting(RECENT_FILES);
+    else files = DrJava.getConfig().getSetting(RECENT_PROJECTS);
+    
+    for (int i = files.size() - 1; i >= 0; i--) { updateOpenFiles(files.get(i)); }
   }
 
-  /**
-   * Returns the list of recently used files, in order.
-   */
-  public Vector<File> getFileVector() {
-    return _recentFiles;
-  }
+  /** Returns the list of recently used files, in order. */
+  public Vector<File> getFileVector() { return _recentFiles; }
 
-  /**
-   * Changes the maximum number of files to display in the list.
-   * @param newMax The new maximum number of files to display
+  /** Changes the maximum number of files to display in the list.
+   *  @param newMax The new maximum number of files to display
    */
-  public void updateMax(int newMax) {
-    MAX = newMax;
-  }
+  public void updateMax(int newMax) { MAX = newMax; }
 
-  /**
-   * Saves the current list of files to the config object.
-   */
+  /** Saves the current list of files to the config object. */
   public void saveRecentFiles() {
-    if (! _isProject)
-      DrJava.getConfig().setSetting(RECENT_FILES,_recentFiles);
-    else
-      DrJava.getConfig().setSetting(RECENT_PROJECTS,_recentFiles);
+    if (! _isProject) DrJava.getConfig().setSetting(RECENT_FILES,_recentFiles);
+    else DrJava.getConfig().setSetting(RECENT_PROJECTS,_recentFiles);
   }
 
-  /**
-   * Updates the list after the given file has been opened.
-   */
+  /** Updates the list after the given file has been opened. */
   public void updateOpenFiles(final File file) {
 
     if (_recentMenuItems.size() == 0) {
@@ -158,18 +127,14 @@ public class RecentFileManager implements OptionConstants {
 
 
     final FileOpenSelector _recentSelector = new FileOpenSelector() {
-      public File[] getFiles() {
-        return new File[] { file };
-      }
+      public File[] getFiles() { return new File[] { file }; }
     };
 
     JMenuItem newItem = new JMenuItem("");
     newItem.addActionListener(new AbstractAction("Open " + file.getName()) {
       public void actionPerformed(ActionEvent ae) {
-        if (file.getName().endsWith(".pjt"))
-          _frame.openProject(_recentSelector);
-        else
-          _frame.open(_recentSelector);
+        if (file.getName().endsWith(".pjt")) _frame.openProject(_recentSelector);
+        else _frame.open(_recentSelector);
         // These two lines fix the problem in 1.3 where clicking on a file
         // in the recent file list will not show the caret, but they cause
         // 1.4.1 to show a phantom caret that won't do anything.
@@ -177,9 +142,7 @@ public class RecentFileManager implements OptionConstants {
 //        _frame.getCurrentDefPane().getCaret().setVisible(true);
       }
     });
-    try {
-      newItem.setToolTipText(file.getCanonicalPath());
-    }
+    try { newItem.setToolTipText(file.getCanonicalPath()); }
     catch(IOException e) {
       // don't worry about it at this point
     }
@@ -188,20 +151,16 @@ public class RecentFileManager implements OptionConstants {
     _recentFiles.add(0,file);
     numberItems();
     _fileMenu.insert(newItem,_pos);
-
   }
 
-  /**
-   * Removes the given file from the list if it is already there.
-   * Only removes the first occurrence of the file, since each
-   * entry should be unique (based on canonical path).
+  /** Removes the given file from the list if it is already there.
+   *  Only removes the first occurrence of the file, since each
+   *  entry should be unique (based on canonical path).
    */
   public void removeIfInList(File file) {
     // Use canonical path if possible
     File canonical = null;
-    try {
-      canonical = file.getCanonicalFile();
-    }
+    try { canonical = file.getCanonicalFile(); }
     catch (IOException ioe) {
       // Oh well, compare against the file as is
     }
@@ -210,9 +169,7 @@ public class RecentFileManager implements OptionConstants {
       File currFile = _recentFiles.get(i);
       boolean match;
       if (canonical != null) {
-        try {
-          match = currFile.getCanonicalFile().equals(canonical);
-        }
+        try { match = currFile.getCanonicalFile().equals(canonical); }
         catch (IOException ioe) {
           // Oh well, compare the files themselves
           match = currFile.equals(file);
@@ -254,8 +211,6 @@ public class RecentFileManager implements OptionConstants {
       currItem.setText((i+1) + ". " + _recentFiles.get(i).getName());
     }
     // remove the separator
-    if (MAX == 0 && !wasEmpty) {
-      _fileMenu.remove(--_pos);
-    }
+    if (MAX == 0 && !wasEmpty) { _fileMenu.remove(--_pos); }
   }
 }

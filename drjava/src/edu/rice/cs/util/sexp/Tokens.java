@@ -45,32 +45,24 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.util.sexp;
 
-/**
- * These tokens are designed to be compared using
- * the == operator for (, ), ", and \.  Otherwise,
- * the tokens may be compared using the .equals()
- * method.
+/** These tokens are designed to be compared using the == operator for (, ), ", and \.  Otherwise,
+ *  the tokens may be compared using the .equals() method.  This class is concrete only for testing
+ *  purposes.
  */
-abstract class SExpToken {
+/* abstract */ class SExpToken {
   protected String _rep;
   
-  /**
-   * @param rep The string representation of this token
-   */
-  public SExpToken(String rep) {
-    _rep = rep;
-  }
-  /**
-   * @return the string representation of this token
-   */
-  public String getText(){
-    return _rep;
-  }
+  /** @param rep The string representation of this token */
+  public SExpToken(String rep) { _rep = rep; }
+  
+  /** @return the string representation of this token */
+  public String getText() { return _rep; }
   
   public boolean equals(Object o) {
-    return ((o instanceof SExpToken) || 
-            ((SExpToken)o)._rep.equals(this._rep));
+    return (o.getClass() == getClass() && ((SExpToken)o)._rep.equals(_rep));
   }
+  
+  public int hashCode() { return _rep.hashCode(); }
   
   public String toString() { return _rep; }
 }
@@ -94,24 +86,15 @@ class BackSlashToken extends SExpToken {
 
 ////////////// General Tokens //////////////////
 
-/**
- * Words include any text (including symbols) that
- * is not a number, a backslash, or a quote character
- */
-class WordToken extends SExpToken {
-  public WordToken(String word){ super(word); }
-}
+/** Words include any text (including symbols) that is not a number, a backslash, or a quote character. */
+class WordToken extends SExpToken { public WordToken(String word) { super(word); } }
 
-/**
- * This token is handled as a unit by the lexer.
- * Any text between the pair of quotes is given
- * in this QuotedTextToken.
+/** This token is handled as a unit by the lexer. Any text between the pair of quotes is given
+ *  in this QuotedTextToken.
  */
 class QuotedTextToken extends SExpToken {
 //  private String _txt;
-  public QuotedTextToken(String txt){ 
-    super(txt);
-  }
+  public QuotedTextToken(String txt) { super(txt); }
   public String getFullText() { return "\"" + _rep + "\""; }
 }
 
@@ -139,7 +122,7 @@ class NumberToken extends SExpToken {
   public NumberToken(double num){
     // If it is a whole number, don't include
     // the decimal in the string representation
-    super((num % 1 == 0) ? ""+(int)num : ""+num);
+    super((num % 1 == 0) ? "" + (int)num : "" + num);
     _num = num;
   }
   public double getValue() { return _num; }

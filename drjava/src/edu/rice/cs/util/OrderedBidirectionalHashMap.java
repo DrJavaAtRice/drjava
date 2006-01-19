@@ -81,7 +81,7 @@ public class OrderedBidirectionalHashMap<Type1, Type2> extends BidirectionalHash
   class OBHMIterator implements Iterator<Type2> {
     
     Iterator<Type2> it = order.iterator();
-    OrderedBidirectionalHashMap<Type1,Type2> OBHMthis = OrderedBidirectionalHashMap.this;
+//    OrderedBidirectionalHashMap<Type1,Type2> OBHMthis = OrderedBidirectionalHashMap.this;
     
     /** Cached values of last key and value visited */
     Type1 lastKey = null;

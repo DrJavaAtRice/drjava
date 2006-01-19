@@ -347,7 +347,7 @@ class JListNavigator<ItemT extends INavigatorItem> extends JList implements IDoc
   public String toString() { synchronized (_model) { return _model.toString(); } }
   
   /** The cell renderer for this list. */
-  private class CustomListCellRenderer extends DefaultListCellRenderer {
+  private static class CustomListCellRenderer extends DefaultListCellRenderer {
     
     /** Rreturns the renderer component for a cell
      *  @param list

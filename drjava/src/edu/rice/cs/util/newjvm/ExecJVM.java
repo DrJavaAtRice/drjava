@@ -169,6 +169,7 @@ public final class ExecJVM {
         else output = null;
       }
     }
+    outBuf.close();
 
     if (errBuf.ready()) {
       output = errBuf.readLine();
@@ -183,6 +184,7 @@ public final class ExecJVM {
         }
       }
     }
+    errBuf.close();
   }
 
   /**

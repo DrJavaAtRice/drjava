@@ -67,35 +67,22 @@ public class FileSelectionEvent extends EventObject {
     _oldLead = oldLead;
   }
   
-  public File getOldLeadSelectionFile() {
-    return _oldLead;
-  }
+  public File getOldLeadSelectionFile() { return _oldLead; }
   
-  public File getNewLeadSelectionFile() {
-    return _newLead;
-  }
+  public File getNewLeadSelectionFile() { return _newLead; }
   
-  public File getFile() {
-    return _changed[0];
-  }
+  public File getFile() { return _changed[0]; }
   
-  public File[] getFiles() {
-    return _changed;
-  }
+  public File[] getFiles() { return _changed; }
   
-  public boolean isAddedFile() {
-    return _areNew[0];
-  }
+  public boolean isAddedFile() { return _areNew[0]; }
   
-  public boolean isAddedFile(int i) {
-    return _areNew[i];
-  }
+  public boolean isAddedFile(int i) { return _areNew[i]; }
   
   public boolean isAddedFile(File f) {
     for (int i = 0; i < _changed.length; i++) {
       if (f.equals(_changed[i])) return _areNew[i];
     }
     throw new IllegalArgumentException("File, " + f + ", not found in changed files");
-  }
-  
+  }  
 }

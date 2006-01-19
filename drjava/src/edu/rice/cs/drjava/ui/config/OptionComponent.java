@@ -47,6 +47,9 @@ package edu.rice.cs.drjava.ui.config;
 
 import javax.swing.*;
 import java.awt.*;
+
+import java.io.Serializable;
+
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.DrJava;
 
@@ -55,7 +58,7 @@ import edu.rice.cs.drjava.DrJava;
  * while running DrJava and perform live updating of Options.
  * @version $Id$
  */
-public abstract class OptionComponent<T> {
+public abstract class OptionComponent<T> implements Serializable {
   protected Option<T> _option;
   protected JLabel _label;
   protected Frame _parent;

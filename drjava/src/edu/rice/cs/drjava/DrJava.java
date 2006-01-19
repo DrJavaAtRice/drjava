@@ -136,7 +136,7 @@ public class DrJava implements OptionConstants {
         
         // Install L&F upgrades for windows XP from winlaf-0.5.1.jar
         // For more information see: https://winlaf.dev.java.net/release_0.5.html
-       net.java.plaf.LookAndFeelPatchManager.initialize();  
+//       net.java.plaf.LookAndFeelPatchManager.initialize();  
                 
         // Don't use JSR14v20 if running with Java 1.5 because putting it on the bootclasspath causes DrJava to
         // hang on startup.

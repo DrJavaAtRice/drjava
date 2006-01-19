@@ -61,13 +61,9 @@ import java.util.ArrayList;
  * @version $Id$
  */
 public class ToolsJarClassLoader extends URLClassLoader {
-  public ToolsJarClassLoader() {
-    super(getToolsJarURLs());
-  }
+  public ToolsJarClassLoader() { super(getToolsJarURLs()); }
 
-  /**
-   * Returns an array of possible Files for the tools.jar file.
-   */
+  /** Returns an array of possible Files for the tools.jar file. */
   public static File[] getToolsJarFiles() {
     String javaHome = System.getProperty("java.home");
     File home = new File(javaHome);
@@ -76,23 +72,17 @@ public class ToolsJarClassLoader extends URLClassLoader {
     // Check $JAVA_HOME/lib/tools.jar
     File libDir = new File(home, "lib");
     File jar = new File(libDir, "tools.jar");
-    if (jar.exists()) {
-      files.add(jar);
-    }
+    if (jar.exists()) files.add(jar);
 
     // Check $JAVA_HOME/../lib/tools.jar
     File libDir2 = new File(home.getParentFile(), "lib");
     File jar2 = new File(libDir2, "tools.jar");
-    if (jar2.exists()) {
-      files.add(jar2);
-    }
+    if (jar2.exists()) files.add(jar2);
 
     if (javaHome.toLowerCase().indexOf("program files") != -1) {
       // Windows: JavaHome is JRE; guess where SDK is
       File jar3 = new File(getWindowsToolsJar(javaHome));
-      if (jar3.exists()) {
-        files.add(jar3);
-      }
+      if (jar3.exists()) files.add(jar3);
     }
 
     File[] fileArray = new File[files.size()];
@@ -100,9 +90,7 @@ public class ToolsJarClassLoader extends URLClassLoader {
     return fileArray;
   }
 
-  /**
-   * Returns an array of possible URLs for the tools.jar file.
-   */
+  /** Returns an array of possible URLs for the tools.jar file. */
   public static URL[] getToolsJarURLs() {
     File[] files = getToolsJarFiles();
     try {
@@ -133,13 +121,12 @@ public class ToolsJarClassLoader extends URLClassLoader {
     return classpath.toString();
   }
 
-  /**
-   * Returns a guess for the location of tools.jar based on the default
-   * installation directory for the Windows Java SDK.  In Windows,
-   * JAVA_HOME is set to the JRE directory in "Program Files", but tools.jar
-   * is located in the SDK directory.  Guess is simplistic: only looks on C:.
+  /** Returns a guess for the location of tools.jar based on the default
+   *  installation directory for the Windows Java SDK.  In Windows,
+   *  JAVA_HOME is set to the JRE directory in "Program Files", but tools.jar
+   *  is located in the SDK directory.  Guess is simplistic: only looks on C:.
    *
-   * PRECONDITION: javaHome contains "Program Files"
+   *  PRECONDITION: javaHome contains "Program Files"
    *
    * @param javaHome The current JAVA_HOME System property
    */
@@ -156,18 +143,13 @@ public class ToolsJarClassLoader extends URLClassLoader {
       prefix = "C:\\jdk";
       versionIndex = javaHome.indexOf("JRE\\") + 4;
     }
-    else {
-      versionIndex = javaHome.indexOf("j2re") + 4;
-    }
+    else { versionIndex = javaHome.indexOf("j2re") + 4; }
+    
     String version = javaHome.substring(versionIndex);
 
     return prefix + version + suffix;
   }
 
-  /**
-   * Gets the requested resource, bypassing the parent classloader.
-   */
-  public URL getResource(String name) {
-    return findResource(name);
-  }
+  /** Gets the requested resource, bypassing the parent classloader. */
+  public URL getResource(String name) { return findResource(name); }
 }

@@ -92,7 +92,7 @@ public class InteractionsController extends AbstractConsoleController {
 
   PopupConsole _popupConsole;
   
-  /** Listens for input requests from ,System.in displaying an input box as needed. */
+  /** Listens for input requests from System.in displaying an input box as needed. */
   private InputListener _inputListener = new InputListener() {
     public String getConsoleInput() { return _popupConsole.getConsoleInput(); }
   };
@@ -116,8 +116,7 @@ public class InteractionsController extends AbstractConsoleController {
     public void interpreterResetFailed(Throwable t) { }  
     public void interpreterExited(int status) { }  
     public void interpreterChanged(boolean inProgress) { }
-    public void interactionIncomplete() {
-    }
+    public void interactionIncomplete() { }
   };
 
   /** Glue together the given model and a new view.

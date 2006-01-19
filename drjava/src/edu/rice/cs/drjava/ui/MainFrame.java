@@ -1455,8 +1455,8 @@ public class MainFrame extends JFrame implements OptionConstants {
    */
   private static class OddDisplayManager implements DisplayManager<OpenDefinitionsDocument> {
     private Icon _star;
-    private Icon _juPass;
-    private Icon _juFail;
+//    private Icon _juPass;
+//    private Icon _juFail;
     private FileDisplayManager _default;
     
     /** Standard constructor.
@@ -1466,8 +1466,8 @@ public class MainFrame extends JFrame implements OptionConstants {
      */
     public OddDisplayManager(FileDisplayManager fdm, Icon star, Icon junitPass, Icon junitFail) {
       _star = star;
-      _juPass = junitPass;
-      _juFail = junitFail;
+//      _juPass = junitPass;
+//      _juFail = junitFail;
       _default = fdm;
     }
     public Icon getIcon(OpenDefinitionsDocument odd) {
@@ -2977,10 +2977,8 @@ public class MainFrame extends JFrame implements OptionConstants {
     _cleanUpForCompile();
 //    new Thread("Compile All") {
 //      public void run() {
-        try {
-          hourglassOn();
-          _model.getCompilerModel().compileAll();
-        }
+    hourglassOn();
+        try { _model.getCompilerModel().compileAll(); }
         catch (FileMovedException fme) { _showFileMovedError(fme); }
         catch (IOException ioe) { _showIOError(ioe); }
         finally { hourglassOff();}
@@ -4551,9 +4549,9 @@ public class MainFrame extends JFrame implements OptionConstants {
           else {
             try {
               String groupName = _model.getDocumentNavigator().getNameOfSelectedTopLevelGroup();
-              if (groupName == _model.getSourceBinTitle())
+              if (groupName.equals(_model.getSourceBinTitle()))
                 _navPanePopupMenu.show(e.getComponent(), e.getX(), e.getY());
-              else if (groupName == _model.getExternalBinTitle()) {
+              else if (groupName.equals(_model.getExternalBinTitle())) {
                 INavigatorItem n = _model.getDocumentNavigator().getCurrent();
                 if (n != null) {
                   OpenDefinitionsDocument d = (OpenDefinitionsDocument) n;
@@ -4561,7 +4559,7 @@ public class MainFrame extends JFrame implements OptionConstants {
                   else _navPanePopupMenuForExternal.show(e.getComponent(), e.getX(), e.getY());
                 }
               }
-              else if (groupName == _model.getAuxiliaryBinTitle())
+              else if (groupName.equals(_model.getAuxiliaryBinTitle()))
                 _navPanePopupMenuForAuxiliary.show(e.getComponent(), e.getX(), e.getY());
             }
             catch(GroupNotSelectedException ex) {
@@ -5564,6 +5562,7 @@ public class MainFrame extends JFrame implements OptionConstants {
             _compilerErrorPanel.reset();
             if (inDebugMode()) {
               _model.getActiveDocument().checkIfClassFileInSync();
+              _model.refreshActiveDocument();
               _updateDebugStatus();
             }
 //          }
@@ -5639,6 +5638,7 @@ public class MainFrame extends JFrame implements OptionConstants {
           _junitErrorPanel.getErrorListPane().
             testEnded(name, succeeded, causedError); // this does nothing!
           _junitErrorPanel.progressStep(succeeded);
+          _model.refreshActiveDocument();
         }
       });
     }
@@ -5651,6 +5651,7 @@ public class MainFrame extends JFrame implements OptionConstants {
           try {
             _restoreJUnitActionsEnabled();
             _junitErrorPanel.reset();
+            _model.refreshActiveDocument();
           }
           finally { 
 //            new ScrollableDialog(null, "MainFrame.junitEnded() ready to return", "", "").show();
@@ -5688,6 +5689,7 @@ public class MainFrame extends JFrame implements OptionConstants {
             _javadocAllAction.setEnabled(true);
             _javadocCurrentAction.setEnabled(true);
             _javadocErrorPanel.reset();
+            _model.refreshActiveDocument();
           }
           finally { hourglassOff(); }
           

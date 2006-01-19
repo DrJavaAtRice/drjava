@@ -184,8 +184,11 @@ public class DocumentCache {
      */
     public DefinitionsDocument getDocument() throws IOException, FileMovedException {
 //      Utilities.showDebug("getDocument called on " + this + " with _stat = " + _stat);
-      DefinitionsDocument doc = _doc;
-      if (doc != null) return doc;
+      
+//      The following line is commented out because the double-check can be broken by multi-processor caching or
+//      compiler optimization.  Under Java 5.0, the line is safe provided that _doc is declared volatile.     
+
+//      if (_doc != null) return _doc;  
       synchronized(_cacheLock) { // lock the cache so that this DocManager's state can be updated
         if (_doc != null) return _doc;  // _doc may have changed since test outside of _cacheLock
         try { // _doc is not in memory

@@ -59,9 +59,7 @@ import java.util.Vector;
  * Uses a file chooser for each String element.
  * @version $Id$
  */
-public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>>
-  implements OptionConstants
-{
+public abstract class VectorOptionComponent<T> extends OptionComponent<Vector<T>> implements OptionConstants {
   protected JScrollPane _listScrollPane;
   protected JPanel _panel;
   protected JList _list;

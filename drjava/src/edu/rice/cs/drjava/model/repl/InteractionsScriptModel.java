@@ -45,6 +45,8 @@ END_COPYRIGHT_BLOCK*/
 
 package edu.rice.cs.drjava.model.repl;
 
+import java.io.Serializable;
+
 import java.util.List;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.text.EditDocumentException;
@@ -54,7 +56,7 @@ import edu.rice.cs.util.text.EditDocumentException;
  * individual commands.  Useful for presentations.
  * @version $Id$
  */
-public class InteractionsScriptModel {
+public class InteractionsScriptModel implements Serializable {
   /** The interactions model associated with the script. */
   private InteractionsModel _model;
   /** The interactions document. */

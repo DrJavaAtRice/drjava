@@ -73,8 +73,10 @@ import edu.rice.cs.util.ClasspathVector;
 import edu.rice.cs.util.FileOps;
 import edu.rice.cs.util.OrderedHashSet;
 import edu.rice.cs.util.Pair;
+import edu.rice.cs.util.SRunnable;
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.UnexpectedException;
+
 import edu.rice.cs.util.docnavigation.INavigationListener;
 import edu.rice.cs.util.docnavigation.NodeData;
 import edu.rice.cs.util.docnavigation.NodeDataVisitor;
@@ -1192,7 +1194,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     // project may become project files in the new project and must be closed while external files in the 
     // previous project that are still external to the new project should be kept open (except for a new file).
     
-    Utilities.invokeAndWait(new Runnable() {
+    Utilities.invokeAndWait(new SRunnable() {
       public void run() {
         for (OpenDefinitionsDocument d: projDocs) {
           if (oldState.inProject(d.file())) closeFile(d);
@@ -1335,7 +1337,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     if (! found) return false;
     
-    Utilities.invokeLater(new Runnable() { 
+    Utilities.invokeLater(new SRunnable() { 
       public void run() { _documentNavigator.removeDocument(doc); }   // this operation must run in event thread
     });
     _notifier.fileClosed(doc);
@@ -1374,7 +1376,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     
     _notifier.removeAllListeners();
     synchronized(_documentsRepos) { _documentsRepos.clear(); }
-    Utilities.invokeAndWait(new Runnable() { 
+    Utilities.invokeAndWait(new SRunnable() { 
       public void run() { _documentNavigator.clear(); }  // this operation must run in event thread
     });
   }
@@ -1978,7 +1980,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
         try {
           _notifier.documentNotFound(this, _file);
           final String path = fixPathForNavigator(getFile().getCanonicalFile().getCanonicalPath());
-          Utilities.invokeAndWait(new Runnable() {
+          Utilities.invokeAndWait(new SRunnable() {
             public void run() { _documentNavigator.refreshDocument(ConcreteOpenDefDoc.this, path); }
           });
           return _cacheAdapter.getDocument(); 
@@ -2983,7 +2985,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
    *  @param doc the document to add to the navigator
    */
   protected void addDocToNavigator(final OpenDefinitionsDocument doc) {
-    Utilities.invokeLater(new Runnable() {
+    Utilities.invokeLater(new SRunnable() {
       public void run() {
         try {
           if (doc.isUntitled()) _documentNavigator.addDocument(doc);
@@ -3038,7 +3040,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
 //    Utilities.showDebug("DEBUG: Called setActiveDocument()");
     
     try {
-      Utilities.invokeAndWait(new Runnable() {  
+      Utilities.invokeAndWait(new SRunnable() {  
         public void run() { _documentNavigator.setActiveDoc(doc); }
       }); // might be relaxed to invokeLater
     }

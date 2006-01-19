@@ -49,10 +49,8 @@ import junit.framework.TestCase;
 import java.io.*;
 import java.util.*;
 
-/**
- * A JUnit test case class.
- * Every method starting with the word "test" will be called when running
- * the test with JUnit.
+/** A JUnit test case class. Every method starting with the word "test" will be called when running
+ *  the test with JUnit.
  */
 public class SExpParserTest extends TestCase {
   

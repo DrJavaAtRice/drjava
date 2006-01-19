@@ -116,8 +116,8 @@ public final class JavaInterpreterTest extends TestCase {
       Pair.make("true == true", Boolean.TRUE), Pair.make("false == true", Boolean.FALSE),
           Pair.make("false == false", Boolean.TRUE),
       // xor
-      Pair.make("false ^ false", new Boolean(false ^ false)), Pair.make("false ^ true ",
-          new Boolean(false ^ true))
+      Pair.make("false ^ false", Boolean.valueOf(false ^ false)), Pair.make("false ^ true ",
+          Boolean.valueOf(false ^ true))
     };
     tester(cases);
   }
@@ -165,19 +165,18 @@ public final class JavaInterpreterTest extends TestCase {
       // unsigned right shift
       Pair.make("400 >>> 5", new Integer(400 >>> 5)),
 //      // less than
-//      Pair.make("5 < 4", new Boolean(5 < 4)),
+//      Pair.make("5 < 4", Boolean.valueOf(5 < 4)),
 //      // less than or equal to
-//      Pair.make("4 <= 4", new Boolean(4 <= 4)), Pair.make("4 <= 5", new Boolean(4 <= 5)),
+//      Pair.make("4 <= 4", Boolean.valueOf(4 <= 4)), Pair.make("4 <= 5", Boolean.valueOf(4 <= 5)),
 //          // greater than
-//      Pair.make("5 > 4", new Boolean(5 > 4)), Pair.make("5 > 5", new Boolean(5 > 5)),
+//      Pair.make("5 > 4", Boolean.valueOf(5 > 4)), Pair.make("5 > 5", Boolean.valueOf(5 > 5)),
 //          // greater than or equal to
-//      Pair.make("5 >= 4", new Boolean(5 >= 4)), Pair.make("5 >= 5", new Boolean(5 >= 5)),
+//      Pair.make("5 >= 4", Boolean.valueOf(5 >= 4)), Pair.make("5 >= 5", Boolean.valueOf(5 >= 5)),
 //          // equal to
-//      Pair.make("5 == 5", new Boolean(5 == 5)), Pair.make("5 == 6", new Boolean(
+//      Pair.make("5 == 5", Boolean.valueOf(5 == 5)), Pair.make("5 == 6", Boolean.valueOf(
 //          5 == 6)),
 //      // not equal to
-      Pair.make("5 != 6", new Boolean(5 != 6)), Pair.make("5 != 5", new Boolean(
-                                                                                5 != 5))
+      Pair.make("5 != 6", Boolean.valueOf(5 != 6)), Pair.make("5 != 5", Boolean.valueOf(5 != 5))
     };
     tester(cases);
   }
@@ -188,17 +187,17 @@ public final class JavaInterpreterTest extends TestCase {
   public void testDoubleOps() throws ExceptionReturnedException {
     Pair[] cases = new Pair[] {
       // less than
-      Pair.make("5.6 < 6.7", new Boolean(5.6 < 6.7)),
+      Pair.make("5.6 < 6.7", Boolean.valueOf(5.6 < 6.7)),
       // less than or equal to
-      Pair.make("5.6 <= 5.6", new Boolean(5.6 <= 5.6)),
+      Pair.make("5.6 <= 5.6", Boolean.valueOf(5.6 <= 5.6)),
       // greater than
-      Pair.make("5.6 > 4.5", new Boolean(5.6 > 4.5)),
+      Pair.make("5.6 > 4.5", Boolean.valueOf(5.6 > 4.5)),
       // greater than or equal to
-      Pair.make("5.6 >= 56.4", new Boolean(5.6 >= 56.4)),
+      Pair.make("5.6 >= 56.4", Boolean.valueOf(5.6 >= 56.4)),
       // equal to
-      Pair.make("5.4 == 5.4", new Boolean(5 == 5)),
+      Pair.make("5.4 == 5.4", Boolean.valueOf(5 == 5)),
       // not equal to
-      Pair.make("5.5 != 5.5", new Boolean(5 != 5)),
+      Pair.make("5.5 != 5.5", Boolean.valueOf(5 != 5)),
       // unary plus
       Pair.make("+5.6", new Double(+5.6)),
       // unary minus
@@ -225,7 +224,7 @@ public final class JavaInterpreterTest extends TestCase {
       // concatenation
       Pair.make("\"yeah\" + \"and\"", new String("\"yeah" + "and\"")),
       // equals
-      Pair.make("\"yeah\".equals(\"yeah\")", new Boolean("yeah".equals("yeah"))),
+      Pair.make("\"yeah\".equals(\"yeah\")", Boolean.valueOf("yeah".equals("yeah"))),
 
     };
     tester(cases);
@@ -237,7 +236,7 @@ public final class JavaInterpreterTest extends TestCase {
   public void testCharacterOps()  throws ExceptionReturnedException{
     Pair[] cases = new Pair[] {
       // equals
-      Pair.make("'c' == 'c'", new Boolean('c' == 'c'))
+      Pair.make("'c' == 'c'", Boolean.valueOf('c' == 'c'))
     };
     tester(cases);
   }
@@ -248,7 +247,7 @@ public final class JavaInterpreterTest extends TestCase {
    */
   public void testSemicolon() throws ExceptionReturnedException {
     Pair[] cases = new Pair[] {
-      Pair.make("'c' == 'c'", new Boolean('c' == 'c')),
+      Pair.make("'c' == 'c'", Boolean.valueOf('c' == 'c')),
       Pair.make("'c' == 'c';", JavaInterpreter.NO_RESULT),
       Pair.make("String s = \"hello\"", JavaInterpreter.NO_RESULT),
       Pair.make("String x = \"hello\";", JavaInterpreter.NO_RESULT),
@@ -266,8 +265,8 @@ public final class JavaInterpreterTest extends TestCase {
    */
   public void testNullInstanceOf() throws ExceptionReturnedException {
     Pair[] cases = new Pair[] {
-      Pair.make("null instanceof Object", new Boolean(null instanceof Object)),
-      Pair.make("null instanceof String", new Boolean(null instanceof String))
+      Pair.make("null instanceof Object", Boolean.valueOf(null instanceof Object)),
+      Pair.make("null instanceof String", Boolean.valueOf(null instanceof String))
     };
     tester(cases);
   }
@@ -304,7 +303,7 @@ public final class JavaInterpreterTest extends TestCase {
       Pair.make("f", new Float(0.0f)),
       Pair.make("d", new Double(0.0d)),
       Pair.make("c", "'" + new Character('\u0000') + "'"), // quotes are added around chars
-      Pair.make("bool", new Boolean(false)),
+      Pair.make("bool", Boolean.valueOf(false)),
       Pair.make("str", null)
     };
     tester(cases);
@@ -494,7 +493,7 @@ public final class JavaInterpreterTest extends TestCase {
         _interpreter.setPrivateAccessible(oce.value.booleanValue());
       }
     });
-    DrJava.getConfig().setSetting(OptionConstants.ALLOW_PRIVATE_ACCESS, new Boolean(false));
+    DrJava.getConfig().setSetting(OptionConstants.ALLOW_PRIVATE_ACCESS, Boolean.valueOf(false));
     try {
       _interpreter.interpret("class A { private int i = 0; }");
       _interpreter.interpret("new A().i");
@@ -503,7 +502,7 @@ public final class JavaInterpreterTest extends TestCase {
     catch (ExceptionReturnedException ere) {
       assertTrue(ere.getContainedException() instanceof IllegalAccessException);
     }
-    DrJava.getConfig().setSetting(OptionConstants.ALLOW_PRIVATE_ACCESS, new Boolean(true));
+    DrJava.getConfig().setSetting(OptionConstants.ALLOW_PRIVATE_ACCESS, Boolean.valueOf(true));
     Utilities.clearEventQueue();
     assertEquals("Should be able to access private field i whose value should be 0",
                  new Integer(0),
@@ -515,12 +514,8 @@ public final class JavaInterpreterTest extends TestCase {
    * exception. Tests bug #915906 "Methods in Interactions no longer work".
    */
   public void testDeclareVoidMethod() {
-    try {
-      _interpreter.interpret("void method() {}");
-    }
-    catch (ExceptionReturnedException ere) {
-      fail("Should be able to declare void methods.");
-    }
+    try { _interpreter.interpret("void method() {}"); }
+    catch (ExceptionReturnedException ere) { fail("Should be able to declare void methods."); }
   }
 
   /**
@@ -543,9 +538,7 @@ class Pair extends edu.rice.cs.util.Pair<String, Object> {
    * @param f the first item in the pair
    * @param s the second in the pair
    */
-  public Pair(String f, Object s) {
-    super(f, s);
-  }
+  public Pair(String f, Object s) { super(f, s); }
 
   /**
    * Makes a new pair.
@@ -553,23 +546,17 @@ class Pair extends edu.rice.cs.util.Pair<String, Object> {
    * @param second the second in the pair
    * @return the new Pair
    */
-  public static Pair make(String first, Object second) {
-    return new Pair(first, second);
-  }
+  public static Pair make(String first, Object second) { return new Pair(first, second); }
 
   /**
    * Gets the first of this pair.
    * @return getFirst()
    */
-  public String first() {
-    return getFirst();
-  }
+  public String first() { return getFirst(); }
 
   /**
    * Gets the second of this pair.
    * @return getSecond()
    */
-  public Object second() {
-    return getSecond();
-  }
+  public Object second() { return getSecond(); }
 }

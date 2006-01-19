@@ -38,6 +38,8 @@ import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.border.Border;
 
+import java.io.Serializable;
+
 import edu.rice.cs.util.Lambda;
 import edu.rice.cs.util.text.ConsoleDocument;
 import edu.rice.cs.util.text.EditDocumentInterface;
@@ -60,7 +62,7 @@ import edu.rice.cs.util.text.EditDocumentInterface;
  *  <code>inputConsoleText</code> method cannot be used unless the console is currently receiving input. 
  *  The <code>interruptConsole</code> method does nothing when the console is not open for input. 
  */
-public class PopupConsole {
+public class PopupConsole implements Serializable {
   
   protected static final String INPUT_ENTERED_NAME = "Input Entered";
   protected static final String INSERT_NEWLINE_NAME = "Insert Newline";
@@ -92,7 +94,7 @@ public class PopupConsole {
   
   /** Flag that signals input via System.in has been aborted.  Without this feature, an executing program that is 
    *  waiting for input cannot be aborted. */
-  private boolean inputAborted = false;
+  private volatile boolean inputAborted = false;
   
 //  /** Creates a generic PopupConsole that belongs to the given component.
 //   *  @param owner The component that owns the dialogs created by the PopupConsole
@@ -135,11 +137,9 @@ public class PopupConsole {
     synchronized (commandLock) { if (_interruptCommand != null) _interruptCommand.run(); }
   }
   
-  /**
-   * Inserts the given text into the console at the current cursor location
-   * @param txt The text to insert into the console
-   * @throws IllegalStateException when the console is not currently receiving 
-   * input from the user
+  /** Inserts the given text into the console at the current cursor location
+   *  @param txt The text to insert into the console
+   *  @throws IllegalStateException when the console is not currently receiving input from the user
    */
   public void insertConsoleText(String txt) {
     synchronized (commandLock) {
@@ -154,7 +154,7 @@ public class PopupConsole {
    *  calling these methods before the console starts receiving any input.
    */
   public void waitForConsoleReady() throws InterruptedException {
-    synchronized (commandLock) { if (_interruptCommand == null) commandLock.wait(); }
+    synchronized (commandLock) { while (_interruptCommand == null) commandLock.wait(); }
   }
   
   public boolean isConsoleReady() {
@@ -201,7 +201,7 @@ public class PopupConsole {
           return null;
         }
       };
-      commandLock.notifyAll();
+      commandLock.notifyAll();  // signal that console is ready to accept input
     }
     
     dialog.setVisible(true);
@@ -223,7 +223,7 @@ public class PopupConsole {
   }
   
   /** Sets up the swing dialog box and its GUI items.  The input 
-   *  text box is not included so that the calle of this method may
+   *  text box is not included so that the caller of this method may
    *  add any desired listeners etc. to the TextArea.
    *  @param inputBox The text area that receives input.
    *  @param parentFrame The frame to set as the dialog's parent
@@ -247,7 +247,7 @@ public class PopupConsole {
     };    
     
     JButton doneButton = new JButton(inputEnteredAction);
-    doneButton.setMargin(new Insets(1,5,1,5));
+    doneButton.setMargin(new Insets(1, 5, 1, 5));
     buttonPanel.add(doneButton);
     dialog.getRootPane().setDefaultButton(doneButton);
     
@@ -259,7 +259,7 @@ public class PopupConsole {
     };
     
     JButton abortButton = new JButton(inputAbortedAction);
-    abortButton.setMargin(new Insets(1,5,1,5));
+    abortButton.setMargin(new Insets(1, 5, 1, 5));
     buttonPanel.add(abortButton);
     
     cp.add(buttonPanel, BorderLayout.SOUTH);
@@ -267,7 +267,7 @@ public class PopupConsole {
     inputBox.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER,0), INPUT_ENTERED_NAME);
     inputBox.getActionMap().put(INPUT_ENTERED_NAME, inputEnteredAction);
     
-    dialog.setSize(400,115);
+    dialog.setSize(400, 115);
     dialog.setLocationRelativeTo(parentFrame);
     return dialog;
   }
@@ -280,37 +280,38 @@ public class PopupConsole {
   // TODO: Have a table of previous edits that can be made visible w/ button
   //       from which you can double click to copy in the text.
   
-  /**
-   * Waits for the program to input text using the <code>insertConsoleText</code>
-   * method. Returns any inputted text only when <code>interruptConsole</code>
-   * is called.
-   * @return Any text received
+  /** Waits for the program to input text using the <code>insertConsoleText</code>
+   *  method. Returns any inputted text only when <code>interruptConsole</code> is called.
+   *  @return Any text received
    */
   protected String silentInput() {
     final Object monitor = new Object();
     final StringBuffer input = new StringBuffer();
-    synchronized (monitor) {
-      synchronized (commandLock) {
-        _insertTextCommand = new Lambda<Object,String>() {
-          public Object apply(String s) {
-            input.append(s);
-            return null;
-          }
-        };
-        
-        _interruptCommand = new Runnable() {
-          public void run() {
-            _insertTextCommand = null;
-            _interruptCommand = null;
-            synchronized (monitor) { monitor.notifyAll(); }
-          }
-        };
-        commandLock.notifyAll();
-      }
-      try { monitor.wait(); } 
+    
+    synchronized (commandLock) {
+      _insertTextCommand = new Lambda<Object,String>() {
+        public Object apply(String s) {
+          input.append(s);
+          return null;
+        }
+      };
+      
+      _interruptCommand = new Runnable() {
+        public void run() {
+          /* Runs inside synchronized(commandLock) */
+          _insertTextCommand = null;
+          _interruptCommand = null;
+//          System.err.println("Ready to notify monitor");
+          synchronized (monitor) { monitor.notify(); }  // wake-up the enclosing thread waiting on monitor
+        }
+      };
+      commandLock.notifyAll();  // signal that console is ready to accept input
+    }
+    synchronized (monitor) { 
+      try { while (_interruptCommand != null) monitor.wait(); }   // wait until input is finished
       catch (InterruptedException e) { }
     }
-    return input.toString();
+    synchronized (commandLock) { return input.toString(); }
   }
   
   /** A box that can be inserted into the console box if no external JTextArea is spceified. */

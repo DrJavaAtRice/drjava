@@ -55,10 +55,8 @@ import edu.rice.cs.util.swing.Utilities;
 import junit.framework.*;
 
 
-/**
- * Test functions of InteractionsPane.
- *
- * @version $Id$
+/** Test functions of InteractionsPane.
+ *  @version $Id$
  */
 public final class InteractionsPaneTest extends TestCase {
 
@@ -68,9 +66,7 @@ public final class InteractionsPaneTest extends TestCase {
   protected InteractionsPane _pane;
   protected InteractionsController _controller;
 
-  /**
-   * Setup method for each JUnit test case.
-   */
+  /** Setup method for each JUnit test case. */
   public void setUp() throws Exception {
     super.setUp();
     _adapter = new InteractionsDJDocument();
@@ -83,9 +79,8 @@ public final class InteractionsPaneTest extends TestCase {
     };
     // Make tests silent
     _pane.setBeep(new TestBeep());
-
     _controller = new InteractionsController(_model, _adapter, _pane);
-    
+//    System.err.println("_controller = " + _controller);
   }
 
   public void tearDown() throws Exception {
@@ -97,19 +92,12 @@ public final class InteractionsPaneTest extends TestCase {
     super.tearDown();
   }
 
-  /**
-   * Tests that this.setUp() puts the caret in the correct position.
-   */
+  /** Tests that this.setUp() puts the caret in the correct position. */
   public void testInitialPosition() {
-    assertEquals("Initial caret not in the correct position.",
-                 _pane.getCaretPosition(),
-                 _doc.getPromptPos());
+    assertEquals("Initial caret not in the correct position.", _pane.getCaretPosition(), _doc.getPromptPos());
   }
 
-  /**
-   * Tests that moving the caret left when it's already at the prompt will
-   * cycle it to the end of the line.
-   */
+  /** Tests that moving the caret left when it's already at the prompt will cycle it to the end of the line. */
   public void testCaretMovementCyclesWhenAtPrompt() throws EditDocumentException {
     _doc.insertText(_doc.getLength(), "test text", InteractionsDocument.DEFAULT_STYLE);
     Utilities.invokeAndWait(new Runnable() {
@@ -118,15 +106,10 @@ public final class InteractionsPaneTest extends TestCase {
         _controller.moveLeftAction.actionPerformed(null);
       }
     });
-    assertEquals("Caret was not cycled when moved left at the prompt.",
-                 _doc.getLength(),
-                 _pane.getCaretPosition());
+    assertEquals("Caret was not cycled when moved left at the prompt.", _doc.getLength(), _pane.getCaretPosition());
   }
 
-  /**
-   * Tests that moving the caret right when it's already at the end will
-   * cycle it to the prompt.
-   */
+  /** Tests that moving the caret right when it's already at the end will cycle it to the prompt. */
   public void testCaretMovementCyclesWhenAtEnd() throws EditDocumentException {
     _doc.insertText(_doc.getLength(), "test text", InteractionsDocument.DEFAULT_STYLE);
     Utilities.invokeAndWait(new Runnable() { 
@@ -135,15 +118,10 @@ public final class InteractionsPaneTest extends TestCase {
         _controller.moveRightAction.actionPerformed(null);
       }
     });
-    assertEquals("Caret was not cycled when moved right at the end.",
-                 _doc.getPromptPos(),
-                 _pane.getCaretPosition());
+    assertEquals("Caret was not cycled when moved right at the end.", _doc.getPromptPos(), _pane.getCaretPosition());
   }
 
-  /**
-   * Tests that moving the caret left when it's before the prompt will
-   * cycle it to the prompt.
-   */
+  /** Tests that moving the caret left when it's before the prompt will cycle it to the prompt. */
   public void testLeftBeforePromptMovesToPrompt() {
     Utilities.invokeAndWait(new Runnable() { 
       public void run() {
@@ -156,10 +134,7 @@ public final class InteractionsPaneTest extends TestCase {
                  _pane.getCaretPosition());
   }
 
-  /**
-   * Tests that moving the caret right when it's before the prompt will
-   * cycle it to the end of the document.
-   */
+  /** Tests that moving the caret right when it's before the prompt will cycle it to the end of the document. */
   public void testRightBeforePromptMovesToEnd() {
     Utilities.invokeAndWait(new Runnable() { 
       public void run() {
@@ -172,9 +147,8 @@ public final class InteractionsPaneTest extends TestCase {
                  _pane.getCaretPosition());
   }
 
-  /**
-   * Tests that moving the caret up (recalling the previous command in the History)
-   * will move the caret to the end of the document.
+  /** Tests that moving the caret up (recalling the previous command from history) will move the caret to the end
+   *  of the document.
    */
   public void testHistoryRecallPrevMovesToEnd() {
     Utilities.invokeAndWait(new Runnable() {  
@@ -183,14 +157,11 @@ public final class InteractionsPaneTest extends TestCase {
       _controller.historyPrevAction.actionPerformed(null);
       }
     });
-    assertEquals("Caret not moved to end on up arrow.",
-                 _doc.getLength(),
-                 _pane.getCaretPosition());
+    assertEquals("Caret not moved to end on up arrow.", _doc.getLength(), _pane.getCaretPosition());
   }
 
-  /**
-   * Tests that moving the caret down (recalling the next command in the History)
-   * will move the caret to the end of the document.
+  /** Tests that moving the caret down (recalling the next command from history) will move the caret to the end of
+   *  the document.
    */
   public void testHistoryRecallNextMovesToEnd() {
     Utilities.invokeAndWait(new Runnable() { 
@@ -199,15 +170,13 @@ public final class InteractionsPaneTest extends TestCase {
         _controller.historyNextAction.actionPerformed(null);
       }
     });
-    assertEquals("Caret not moved to end on down arrow.",
-                 _doc.getLength(),
-                 _pane.getCaretPosition());
+    assertEquals("Caret not moved to end on down arrow.", _doc.getLength(), _pane.getCaretPosition());
   }
 
   public void testCaretStaysAtEndDuringInteraction() throws EditDocumentException {
     
     _doc.setInProgress(true);
-    _doc.insertText(_doc.getLength(), "simulated output", InteractionsDocument.DEFAULT_STYLE);
+    _doc.append("simulated output", InteractionsDocument.DEFAULT_STYLE);
     _doc.setInProgress(false);
     Utilities.clearEventQueue();
     assertEquals("Caret is at the end after output while in progress.",
@@ -241,7 +210,7 @@ public final class InteractionsPaneTest extends TestCase {
    * is cleared.
    */
   public void testClearCurrentInteraction() throws EditDocumentException {
-    _doc.insertText(_doc.getLength(), "typed text", InteractionsDocument.DEFAULT_STYLE);
+    _doc.append("typed text", InteractionsDocument.DEFAULT_STYLE);
     Utilities.invokeAndWait(new Runnable() { public void run() { _controller.moveToEnd(); } });
 
     _doc.clearCurrentInteraction();
@@ -254,21 +223,22 @@ public final class InteractionsPaneTest extends TestCase {
                  _doc.getPromptPos());
   }
 
-  /**
-   * Tests that the InteractionsPane cannot be edited before the prompt.
-   */
+  /** Tests that the InteractionsPane cannot be edited before the prompt. */
   public void testCannotEditBeforePrompt() throws EditDocumentException {
-    int origLength = _doc.getLength();
-    _doc.insertText(1, "typed text", InteractionsDocument.DEFAULT_STYLE);
-    Utilities.clearEventQueue();
-    assertEquals("Document should not have changed.",
-                 origLength,
-                 _doc.getLength());
+    _doc.acquireWriteLock();
+    int origLength = 0;
+    try {
+      origLength = _doc.getLength();
+      _doc.insertText(1, "typed text", InteractionsDocument.DEFAULT_STYLE);
+      Utilities.clearEventQueue();
+    }
+    finally { _doc.releaseWriteLock(); }
+    assertEquals("Document should not have changed.", origLength, _doc.getLength());
   }
 
   /** Tests that the caret is put in the correct position after an insert. */
   public void testCaretUpdatedOnInsert() throws EditDocumentException {
-    _doc.insertText(_doc.getLength(), "typed text", InteractionsDocument.DEFAULT_STYLE);
+    _doc.append("typed text", InteractionsDocument.DEFAULT_STYLE);
     final int pos = _doc.getLength() - 5;
     Utilities.invokeAndWait(new Runnable() { public void run() { _pane.setCaretPosition(pos); } });
 
@@ -332,21 +302,31 @@ public final class InteractionsPaneTest extends TestCase {
   
   /* This test does not appear to be properly synchronized. */
   public void testSystemIn() {
-    final Object lock = new Object();
+    final Object bufLock = new Object();
     final StringBuffer buf = new StringBuffer();
+//    System.err.println("_controller = " + _controller);
     
     new Thread("Testing System.in") {
       public void run() {
-        synchronized(lock) { buf.append(_controller.getInputListener().getConsoleInput()); }
+//        System.err.println("System.in thread running");
+        synchronized(bufLock) { 
+          String s = _controller._popupConsole.getConsoleInput();
+//          System.err.println("s = " + s);
+          buf.append(s); 
+        }
       }
     }.start();
+    
+//    System.err.println("Waiting For ConsoleReady");
     
     try { _controller._popupConsole.waitForConsoleReady(); }
     catch (InterruptedException ie) { }
     
+    assertTrue("Console should be ready", _controller._popupConsole.isConsoleReady());
+    
     _controller._popupConsole.insertConsoleText("test-text");
     _controller._popupConsole.interruptConsole();
-    synchronized(lock) {
+    synchronized(bufLock) {
       assertEquals("Should have returned the correct text.", "test-text\n", buf.toString());
     }
   }
@@ -368,8 +348,9 @@ public final class InteractionsPaneTest extends TestCase {
 //    System.err.println(_pane.getPromptList());
     assertEquals("PromptList before insert should contain 0 elements", 0, _pane.getPromptList().size());
         
-    // Insert some text                   
-    _doc.insertText(_doc.getLength(), "5", InteractionsDocument.NUMBER_RETURN_STYLE);
+    // Insert some text 
+    
+    _doc.append("5", InteractionsDocument.NUMBER_RETURN_STYLE);
     _pane.setCaretPosition(_doc.getLength());
     
     Utilities.clearEventQueue();

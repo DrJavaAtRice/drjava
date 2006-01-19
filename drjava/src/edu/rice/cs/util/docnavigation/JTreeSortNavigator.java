@@ -603,7 +603,7 @@ public class JTreeSortNavigator<ItemT extends INavigatorItem> extends JTree
   }
   
   /** Returns a renderer for this object. */
-  public Component getRenderer(){ return _renderer; }
+  public Component getRenderer() { return _renderer; }
   
   /** The cell renderer for this tree. */
   private class CustomTreeCellRenderer extends DefaultTreeCellRenderer {

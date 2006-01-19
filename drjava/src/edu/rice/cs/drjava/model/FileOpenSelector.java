@@ -46,13 +46,14 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.model;
 
 import java.io.File;
+import java.io.Serializable;
 
 /**
  * An interface to give GlobalModel a file to open from.
  *
  * @version $Id$
  */
-public interface FileOpenSelector {
+public interface FileOpenSelector extends Serializable {
 
   public File[] getFiles() throws OperationCanceledException;
   
