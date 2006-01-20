@@ -103,6 +103,9 @@
   <!-- By default, delete jar files when cleaning -->
   <property name="delete-jars" value="yes" />
   
+  <!-- By default, clean can fail -->
+  <property name="clean-can-fail" value="yes" />
+  
   <!-- By default, don't append anything extra to the tag -->
   <property name="tag-append" value="" />
   
@@ -676,10 +679,10 @@
        
   <target name="clean" description="Remove all build products; the result should match the intended CVS contents">
     <echo message="Deleting all build products" />
-    <delete dir="classes" />
-    <delete dir="docs" />
+    <delete dir="classes" failonerror="${clean-can-fail}" />
+    <delete dir="docs" failonerror="${clean-can-fail}" />
     
-    <delete>
+    <delete failonerror="${clean-can-fail}">
       <fileset dir="testFiles">
         <patternset refid="test-products" />
       </fileset>
@@ -688,7 +691,7 @@
     <condition property="do-delete-jars">
       <istrue value="${delete-jars}" />
     </condition>
-    <delete includeemptydirs="true">
+    <delete includeemptydirs="true" failonerror="${clean-can-fail}">
       <fileset dir="${basedir}" defaultexcludes="no">
         <include name="*.jar" if="do-delete-jars" />
         <include name="*.zip" if="do-delete-jars" />
@@ -725,6 +728,7 @@
   <target name="do-commit">
     <antcall target="clean" inheritall="false"> <!-- Clean up after the latest build -->
       <param name="delete-jars" value="no" />
+      <param name="clean-can-fail" value="no" />
     </antcall>
     <input message="Please enter a log message for the commit: "
            addproperty="cvs.commit.message" />
