@@ -99,7 +99,7 @@ public final class InteractionsPaneTest extends TestCase {
 
   /** Tests that moving the caret left when it's already at the prompt will cycle it to the end of the line. */
   public void testCaretMovementCyclesWhenAtPrompt() throws EditDocumentException {
-    _doc.insertText(_doc.getLength(), "test text", InteractionsDocument.DEFAULT_STYLE);
+    _doc.append("test text", InteractionsDocument.DEFAULT_STYLE);
     Utilities.invokeAndWait(new Runnable() {
       public void run() {
         _controller.moveToPrompt();
@@ -111,7 +111,7 @@ public final class InteractionsPaneTest extends TestCase {
 
   /** Tests that moving the caret right when it's already at the end will cycle it to the prompt. */
   public void testCaretMovementCyclesWhenAtEnd() throws EditDocumentException {
-    _doc.insertText(_doc.getLength(), "test text", InteractionsDocument.DEFAULT_STYLE);
+    _doc.append("test text", InteractionsDocument.DEFAULT_STYLE);
     Utilities.invokeAndWait(new Runnable() { 
       public void run() {
         _controller.moveToEnd();
@@ -176,17 +176,19 @@ public final class InteractionsPaneTest extends TestCase {
   public void testCaretStaysAtEndDuringInteraction() throws EditDocumentException {
     
     _doc.setInProgress(true);
+//    System.err.println(_pane.getCaretPosition());
     _doc.append("simulated output", InteractionsDocument.DEFAULT_STYLE);
-    _doc.setInProgress(false);
     Utilities.clearEventQueue();
+    _doc.setInProgress(false);
+//    System.err.println(_pane.getCaretPosition());
+//    System.err.println("Document = |" + _doc.getDocText(0, _doc.getLength()) + "|");
     assertEquals("Caret is at the end after output while in progress.",
                  _doc.getLength(),
                  _pane.getCaretPosition());
   }
 
-  /**
-   * Tests that the caret catches up to the prompt if it is before it and
-   * output is displayed.
+  /** Tests that the caret catches up to the prompt if it is before it and
+   *  output is displayed.
    */
   public void testCaretMovesUpToPromptAfterInsert() throws EditDocumentException {
     _doc.append("typed text", InteractionsDocument.DEFAULT_STYLE);
@@ -215,12 +217,8 @@ public final class InteractionsPaneTest extends TestCase {
 
     _doc.clearCurrentInteraction();
     Utilities.clearEventQueue();
-    assertEquals("Caret is at the prompt after output cleared.",
-                 _doc.getPromptPos(),
-                 _pane.getCaretPosition());
-    assertEquals("Prompt is at the end after output cleared.",
-                 _doc.getLength(),
-                 _doc.getPromptPos());
+    assertEquals("Caret is at the prompt after output cleared.", _doc.getPromptPos(), _pane.getCaretPosition());
+    assertEquals("Prompt is at the end after output cleared.", _doc.getLength(), _doc.getPromptPos());
   }
 
   /** Tests that the InteractionsPane cannot be edited before the prompt. */
@@ -230,7 +228,6 @@ public final class InteractionsPaneTest extends TestCase {
     try {
       origLength = _doc.getLength();
       _doc.insertText(1, "typed text", InteractionsDocument.DEFAULT_STYLE);
-      Utilities.clearEventQueue();
     }
     finally { _doc.releaseWriteLock(); }
     assertEquals("Document should not have changed.", origLength, _doc.getLength());
@@ -300,7 +297,6 @@ public final class InteractionsPaneTest extends TestCase {
 //     }
 //   }
   
-  /* This test does not appear to be properly synchronized. */
   public void testSystemIn() {
     final Object bufLock = new Object();
     final StringBuffer buf = new StringBuffer();

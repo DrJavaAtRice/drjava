@@ -377,9 +377,7 @@ public class InteractionsController extends AbstractConsoleController {
     }
   };
 
-  /**
-   * Forward searches in the history.
-   */
+  /** Forward searches in the history. */
   AbstractAction historyForwardSearchAction = new AbstractAction() {
     public void actionPerformed(ActionEvent e) {
       if (!_busy()) {
@@ -389,9 +387,7 @@ public class InteractionsController extends AbstractConsoleController {
     }
   };
 
-  /**
-   * Moves the caret left or wraps around.
-   */
+  /** Moves the caret left or wraps around. */
   AbstractAction moveLeftAction = new AbstractAction() {
     public void actionPerformed(ActionEvent e) {
       if (!_busy()) {
@@ -410,9 +406,7 @@ public class InteractionsController extends AbstractConsoleController {
     }
   };
 
-  /**
-   * Moves the caret right or wraps around.
-   */
+  /** Moves the caret right or wraps around. */
   AbstractAction moveRightAction = new AbstractAction() {
     public void actionPerformed(ActionEvent e) {
       int position = _pane.getCaretPosition();

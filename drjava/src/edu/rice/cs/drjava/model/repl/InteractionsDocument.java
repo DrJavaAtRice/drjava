@@ -364,7 +364,7 @@ public class InteractionsDocument extends ConsoleDocument {
     
     acquireWriteLock();
     try {
-      insertText(getLength(), c + ": " + message + "\n", styleName);
+      append(c + ": " + message + "\n", styleName);
       
       // An example stack trace:
       //
@@ -402,10 +402,10 @@ public class InteractionsDocument extends ConsoleDocument {
             }
           }
           
-          insertText(getLength(), line, styleName);
+          append(line, styleName);
           
           //JOptionPane.showMessageDialog(null, "\\n");
-          insertText(getLength(), "\n", styleName);
+          append("\n", styleName);
           
         } // end the while
       }

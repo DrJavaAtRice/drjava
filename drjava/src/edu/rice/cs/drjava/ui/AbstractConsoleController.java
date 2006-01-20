@@ -214,10 +214,13 @@ public abstract class AbstractConsoleController implements Serializable {
     public void insertUpdate(final DocumentEvent e) {
       Utilities.invokeLater(new Runnable() {
         public void run() {
+          
           ConsoleDocument doc = getConsoleDoc();
           int caretPos = _pane.getCaretPosition();
           int promptPos = doc.getPromptPos();
           int length = doc.getLength();
+          
+//          System.err.println("insertUpdate called; caretPos = " + caretPos + " docLength = " + length);
           
           // Figure out where the prompt was before the update
           int prevPromptPos = promptPos;
@@ -227,9 +230,9 @@ public abstract class AbstractConsoleController implements Serializable {
             prevPromptPos = promptPos - e.getLength();
           }
           
-          if (!doc.hasPrompt()) {
-            // Scroll to the end of the document, since output has been
-            // inserted after the prompt.
+          if (! doc.hasPrompt()) {
+//            System.err.println("Scrolling to end of document");
+            // Scroll to the end of the document, since output has been inserted after the prompt.
             moveToEnd();
           }
           // (Be careful not to move caret during a reset, when the

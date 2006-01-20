@@ -217,8 +217,8 @@ public class PopupConsole implements Serializable {
       inputAborted = true;
       throw new IllegalStateException("System.in aborted");
     }
-    _doc.append(input + '\n', _doc.getDefaultStyle());
-    _console.append(input + '\n', _console.getDefaultStyle());
+    _doc.append(input, _doc.getDefaultStyle());
+    _console.append(input, _console.getDefaultStyle());
     return input;
   }
   
