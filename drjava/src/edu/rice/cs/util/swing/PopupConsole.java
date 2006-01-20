@@ -64,10 +64,10 @@ import edu.rice.cs.util.text.EditDocumentInterface;
  */
 public class PopupConsole implements Serializable {
   
-  protected static final String INPUT_ENTERED_NAME = "Input Entered";
-  protected static final String INSERT_NEWLINE_NAME = "Insert Newline";
+  private static final String INPUT_ENTERED_NAME = "Input Entered";
+  private static final String INSERT_NEWLINE_NAME = "Insert Newline";
     
-  protected JTextArea _inputBox;
+  private JTextArea _inputBox;
   
   /** Shift-Enter action in a System.in box.  Inserts a newline. */
   private Action _insertNewlineAction = new AbstractAction() {
@@ -77,20 +77,23 @@ public class PopupConsole implements Serializable {
     }
   };
   
-  protected String _title;
-  protected Component _parentComponent;
+  private String _title;
+  private Component _parentComponent;
   
   /** Associated InteractionsDocument */
-  protected EditDocumentInterface _doc;
+  private EditDocumentInterface _doc;
   
   /** Associated console tab document */
-  protected ConsoleDocument _console;
+  private ConsoleDocument _console;
   
-  protected Runnable _interruptCommand;
-  protected Lambda<Object,String> _insertTextCommand;
+  private Runnable _interruptCommand;
+  private Lambda<Object,String> _insertTextCommand;
   
   // used to ensure thread safety when using insertConsoleText and interruptConsole
-  protected final Object commandLock = new Object();
+  private final Object commandLock = new Object();
+  
+  /* flag used to record the fact that the monitor (in silentInput) has been notified */
+  private boolean monitorNotified = false; 
   
   /** Flag that signals input via System.in has been aborted.  Without this feature, an executing program that is 
    *  waiting for input cannot be aborted. */
@@ -189,7 +192,7 @@ public class PopupConsole implements Serializable {
    *  @param parentFrame the frame to set as the dialog's parent
    *  @return The text inputted by the user through the dialog box.
    */
-  protected String showDialog(Frame parentFrame) {
+  private String showDialog(Frame parentFrame) {
     final JDialog dialog = createDialog(_inputBox, parentFrame);
     synchronized (commandLock) {
       _interruptCommand = new Runnable() {
@@ -230,7 +233,7 @@ public class PopupConsole implements Serializable {
    *  @return A fully decorated and functional dialog to receive input
    */
   
-  protected JDialog createDialog(JTextArea inputBox, Frame parentFrame) {
+  private JDialog createDialog(JTextArea inputBox, Frame parentFrame) {
     
     final JDialog dialog = new JDialog(parentFrame, _title, true);
     
@@ -286,9 +289,10 @@ public class PopupConsole implements Serializable {
    *  method. Returns any inputted text only when <code>interruptConsole</code> is called.
    *  @return Any text received
    */
-  protected String silentInput() {
+  private String silentInput() {
     final Object monitor = new Object();
-    final StringBuffer input = new StringBuffer();
+    monitorNotified = false;
+    final StringBuffer input = new StringBuffer();  /* shared variable guarded by commandLock */ 
     
     synchronized (commandLock) {
       _insertTextCommand = new Lambda<Object,String>() {
@@ -300,24 +304,27 @@ public class PopupConsole implements Serializable {
       
       _interruptCommand = new Runnable() {
         public void run() {
-          /* Runs inside synchronized(commandLock) */
+          /* This Runnable only runs inside synchronized(commandLock) */
           _insertTextCommand = null;
           _interruptCommand = null;
 //          System.err.println("Ready to notify monitor");
-          synchronized (monitor) { monitor.notify(); }  // wake-up the enclosing thread waiting on monitor
+          synchronized (monitor) { 
+            monitorNotified = true;
+            monitor.notify();   // wake-up the enclosing thread waiting on monitor
+          }
         }
       };
       commandLock.notifyAll();  // signal that console is ready to accept input
     }
     synchronized (monitor) { 
-      try { while (_interruptCommand != null) monitor.wait(); }   // wait until input is finished
+      try { while (! monitorNotified) monitor.wait(); }   // wait until input is finished
       catch (InterruptedException e) { }
     }
     synchronized (commandLock) { return input.toString(); }
   }
   
   /** A box that can be inserted into the console box if no external JTextArea is spceified. */
-  protected static class InputBox extends JTextArea {
+  private static class InputBox extends JTextArea {
     private static final int BORDER_WIDTH = 1;
     private static final int INNER_BUFFER_WIDTH = 3;
     private static final int OUTER_BUFFER_WIDTH = 2;
