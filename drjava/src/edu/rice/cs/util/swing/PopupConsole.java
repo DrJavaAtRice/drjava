@@ -214,11 +214,11 @@ public class PopupConsole implements Serializable {
     
     String input = _inputBox.getText();
     if (inputAborted) {
-      inputAborted = true;
+      inputAborted = false;
       throw new IllegalStateException("System.in aborted");
     }
-    _doc.append(input, _doc.getDefaultStyle());
-    _console.append(input, _console.getDefaultStyle());
+//    _doc.append(input + "\n", _doc.getDefaultStyle());
+    _console.append(input + "\n", _console.getDefaultStyle());
     return input;
   }
   
@@ -235,11 +235,12 @@ public class PopupConsole implements Serializable {
     final JDialog dialog = new JDialog(parentFrame, _title, true);
     
     inputBox.setText("");
+
     Container cp = dialog.getContentPane();
     cp.add(new JScrollPane(inputBox), BorderLayout.CENTER);
     
     JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-    JLabel label = new JLabel("Hit SHIFT+<Enter> For New Line  ");
+    JLabel label = new JLabel("Enter a full line of input. Hit SHIFT+<Enter> for an embedded newline character ");
     buttonPanel.add(label);
     
     Action inputEnteredAction = new AbstractAction("Done") {
@@ -247,7 +248,7 @@ public class PopupConsole implements Serializable {
     };    
     
     JButton doneButton = new JButton(inputEnteredAction);
-    doneButton.setMargin(new Insets(1, 5, 1, 5));
+//    doneButton.setMargin(new Insets(1, 5, 1, 5));
     buttonPanel.add(doneButton);
     dialog.getRootPane().setDefaultButton(doneButton);
     
@@ -259,7 +260,7 @@ public class PopupConsole implements Serializable {
     };
     
     JButton abortButton = new JButton(inputAbortedAction);
-    abortButton.setMargin(new Insets(1, 5, 1, 5));
+//    abortButton.setMargin(new Insets(1, 5, 1, 5));
     buttonPanel.add(abortButton);
     
     cp.add(buttonPanel, BorderLayout.SOUTH);
@@ -267,7 +268,8 @@ public class PopupConsole implements Serializable {
     inputBox.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER,0), INPUT_ENTERED_NAME);
     inputBox.getActionMap().put(INPUT_ENTERED_NAME, inputEnteredAction);
     
-    dialog.setSize(400, 115);
+    buttonPanel.setSize(600, 80);
+    dialog.setSize(600, 200);
     dialog.setLocationRelativeTo(parentFrame);
     return dialog;
   }
