@@ -55,6 +55,9 @@ import edu.rice.cs.drjava.model.repl.newjvm.MainJVM;
 import edu.rice.cs.util.text.SWTDocumentAdapter;
 import edu.rice.cs.util.UnexpectedException;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+
 /**
  * Interactions model which can notify GlobalModelListeners on events.
  * @version $Id$
@@ -353,7 +356,8 @@ public class EclipseInteractionsModel extends RMIInteractionsModel {
           }
 
           //System.out.println("Adding source: " + path.toOSString());
-          addToClassPath(path.toOSString());
+          //addToClassPath(path.toOSString());
+          addBuildDirectoryClassPath(path.toOSString());
           break;
         case IClasspathEntry.CPE_PROJECT:
           // In this case, just the project name is given.
@@ -404,6 +408,35 @@ public class EclipseInteractionsModel extends RMIInteractionsModel {
       }
     });
   }
+    public URL toURL(String path) {
+	try {	
+	    return new File(path).toURL();
+	} catch (MalformedURLException e) {
+	    _document.insertBeforeLastPrompt("Malformed URL " + path +"\n",
+	    				     InteractionsDocument.ERROR_STYLE);
+	}
+	throw new RuntimeException("Trying to add an invalid file:" + path);
+    }
+
+    public void addBuildDirectoryClassPath(String path) {    
+	// _document.insertBeforeLastPrompt("cp: " + path +"\n",
+	//   				     InteractionsDocument.ERROR_STYLE);
+	//System.out.println("addBuildDirectoryToClassPath:" + path);
+	super.addBuildDirectoryClassPath(toURL(path));
+	//new URL("file://"+path+"/"));
+    }
+    public void addProjectFilesClassPath(String path) {    
+	//_document.insertBeforeLastPrompt("cp: " + path +"\n",
+	//				 InteractionsDocument.ERROR_STYLE);
+	super.addProjectFilesClassPath(toURL(path));
+    }
+    
+    public void addToClassPath(String path) {
+	//_document.insertBeforeLastPrompt("cp: " + path +"\n",
+	//				 InteractionsDocument.ERROR_STYLE);
+	//System.out.println("addToClassPath:" + path);
+	super.addProjectClassPath(toURL(path));
+    }
 
   /**
    * Walks the tree of deltas, looking for changes to the classpath or

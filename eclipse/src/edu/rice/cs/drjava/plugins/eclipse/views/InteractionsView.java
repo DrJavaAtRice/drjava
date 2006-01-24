@@ -52,6 +52,7 @@ import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionListener;
 
 import edu.rice.cs.drjava.plugins.eclipse.DrJavaConstants;
 import edu.rice.cs.drjava.plugins.eclipse.repl.EclipseInteractionsModel;
@@ -100,6 +101,7 @@ public class InteractionsView extends ViewPart {
    */
   protected MenuManager _contextMenu;
 
+  protected IActionBars _bars;
 
   /**
    * Constructor.
@@ -155,6 +157,7 @@ public class InteractionsView extends ViewPart {
     _styledText.setFont(font);
   }
 
+
   /**
    * Callback method that creates and initializes the view.
    */
@@ -163,8 +166,15 @@ public class InteractionsView extends ViewPart {
     setTextPane(new StyledText(parent, SWT.WRAP | SWT.V_SCROLL));
 
     // Get menus
-    IActionBars bars = getViewSite().getActionBars();
-    _toolbarMenu = bars.getMenuManager();
+
+    _bars = getViewSite().getActionBars();
+    /*
+    bars.setGlobalActionHandler(
+         IWorkbenchActionConstants.CUT, 
+	 new CutAction(_styledText, _clipboard));
+    */
+
+    _toolbarMenu = _bars.getMenuManager();
     _contextMenu = new MenuManager("#PopupMenu");
     Menu menu = _contextMenu.createContextMenu(_styledText);
     _styledText.setMenu(menu);
@@ -272,13 +282,21 @@ public class InteractionsView extends ViewPart {
     addToolbarMenuItem(action);
     addContextMenuItem(action);
   }
-
+    public void addAction(String op, Action action) {
+	_bars.setGlobalActionHandler(op, action); 
+	addToolbarMenuItem(action);
+	addContextMenuItem(action);
+    }
   /**
    * Add a menu item to the toolbar.
    * @param action Menu item to add
    */
   public void addToolbarMenuItem(Action action) {
     _toolbarMenu.add(action);
+  }
+
+  public void addSelectionListener(SelectionListener listener) { 
+    _styledText.addSelectionListener(listener);
   }
 
   /**
@@ -288,4 +306,5 @@ public class InteractionsView extends ViewPart {
   public void addContextMenuItem(Action action) {
     _contextMenu.add(action);
   }
+    	    
 }

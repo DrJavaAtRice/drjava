@@ -49,8 +49,8 @@ import org.eclipse.swt.SWT;
 import edu.rice.cs.drjava.plugins.eclipse.repl.EclipseInteractionsModel;
 
 import edu.rice.cs.drjava.model.repl.*;
-import edu.rice.cs.drjava.model.repl.InteractionsDocumentTest.TestBeep;
-import edu.rice.cs.drjava.model.repl.InteractionsModelTest.TestInteractionsModel;
+//import edu.rice.cs.drjava.model.repl.InteractionsDocumentTest.TestBeep;
+//import edu.rice.cs.drjava.model.repl.InteractionsModelTest.TestInteractionsModel;
 import edu.rice.cs.util.text.SWTDocumentAdapter;
 import edu.rice.cs.util.text.DocumentAdapterException;
 
@@ -110,7 +110,7 @@ public class InteractionsViewTest extends TestCase {
     _view = new InteractionsView();
     _view.setTextPane(_text);
     // Make tests silent
-    _view.setBeep(new TestBeep());
+    //_view.setBeep(new TestBeep());
 
     _model = new EclipseInteractionsModel(_adapter);
     _controller = new InteractionsController(_model, _adapter, _view);
@@ -148,12 +148,12 @@ public class InteractionsViewTest extends TestCase {
    * cycle it to the end of the line.
    */
   public void testCaretMovementCyclesWhenAtPrompt() throws DocumentAdapterException {
-    _doc.insertText(_doc.getDocLength(), "test text", InteractionsDocument.DEFAULT_STYLE);
+    _doc.insertText(_doc.getLength(), "test text", InteractionsDocument.DEFAULT_STYLE);
     _controller.moveToPrompt();
     
     _controller.moveLeftAction();
     assertEquals("Caret was not cycled when moved left at the prompt.",
-                 _doc.getDocLength(),
+                 _doc.getLength(),
                  _text.getCaretOffset());
   }
   
@@ -162,7 +162,7 @@ public class InteractionsViewTest extends TestCase {
    * cycle it to the prompt.
    */
   public void testCaretMovementCyclesWhenAtEnd() throws DocumentAdapterException {
-    _doc.insertText(_doc.getDocLength(), "test text", InteractionsDocument.DEFAULT_STYLE);
+    _doc.insertText(_doc.getLength(), "test text", InteractionsDocument.DEFAULT_STYLE);
     _controller.moveToEnd();
     
     _controller.moveRightAction();
@@ -191,7 +191,7 @@ public class InteractionsViewTest extends TestCase {
     _text.setCaretOffset(1);
     _controller.moveRightAction();
     assertEquals("Right arrow doesn't move to end when caret is before prompt.",
-                 _doc.getDocLength(),
+                 _doc.getLength(),
                  _text.getCaretOffset());
   }
   
@@ -203,7 +203,7 @@ public class InteractionsViewTest extends TestCase {
     _text.setCaretOffset(1);
     _controller.historyPrevAction();
     assertEquals("Caret not moved to end on up arrow.",
-                 _doc.getDocLength(),
+                 _doc.getLength(),
                  _text.getCaretOffset());
   }
   
@@ -215,16 +215,16 @@ public class InteractionsViewTest extends TestCase {
     _text.setCaretOffset(1);
     _controller.historyNextAction();
     assertEquals("Caret not moved to end on down arrow.",
-                 _doc.getDocLength(),
+                 _doc.getLength(),
                  _text.getCaretOffset());
   }
   
   public void testCaretStaysAtEndDuringInteraction() throws DocumentAdapterException {
     _doc.setInProgress(true);
-    _doc.insertText(_doc.getDocLength(), "simulated output", InteractionsDocument.DEFAULT_STYLE);
+    _doc.insertText(_doc.getLength(), "simulated output", InteractionsDocument.DEFAULT_STYLE);
     _doc.setInProgress(false);
     assertEquals("Caret is at the end after output while in progress.",
-                 _doc.getDocLength(),
+                 _doc.getLength(),
                  _text.getCaretOffset());
   }
   
@@ -233,7 +233,7 @@ public class InteractionsViewTest extends TestCase {
    * output is displayed.
    */
   public void testCaretMovesUpToPromptAfterInsert() throws DocumentAdapterException {
-    _doc.insertText(_doc.getDocLength(), "typed text", InteractionsDocument.DEFAULT_STYLE);
+    _doc.insertText(_doc.getLength(), "typed text", InteractionsDocument.DEFAULT_STYLE);
     _text.setCaretOffset(1);
     _doc.insertBeforeLastPrompt("simulated output", InteractionsDocument.DEFAULT_STYLE);
     assertEquals("Caret is at the prompt after output inserted.",
@@ -253,7 +253,7 @@ public class InteractionsViewTest extends TestCase {
    * is cleared.
    */
   public void testClearCurrentInteraction() throws DocumentAdapterException {
-    _doc.insertText(_doc.getDocLength(), "typed text", InteractionsDocument.DEFAULT_STYLE);
+    _doc.insertText(_doc.getLength(), "typed text", InteractionsDocument.DEFAULT_STYLE);
     _controller.moveToEnd();
     
     _doc.clearCurrentInteraction();
@@ -261,7 +261,7 @@ public class InteractionsViewTest extends TestCase {
                  _doc.getPromptPos(),
                  _text.getCaretOffset());
     assertEquals("Prompt is at the end after output cleared.",
-                 _doc.getDocLength(),
+                 _doc.getLength(),
                  _doc.getPromptPos());
   }
   
@@ -269,20 +269,20 @@ public class InteractionsViewTest extends TestCase {
    * Tests that the InteractionsPane cannot be edited before the prompt.
    */
   public void testCannotEditBeforePrompt() throws DocumentAdapterException {
-    int origLength = _doc.getDocLength();
+    int origLength = _doc.getLength();
     _doc.insertText(1, "typed text", InteractionsDocument.DEFAULT_STYLE);
     assertEquals("Document should not have changed.",
                  origLength,
-                 _doc.getDocLength());
+                 _doc.getLength());
   }
   
   /**
    * Tests that the caret is put in the correct position after an insert.
    */
   public void testCaretUpdatedOnInsert() throws DocumentAdapterException {
-    _doc.insertText(_doc.getDocLength(), "typed text",
+    _doc.insertText(_doc.getLength(), "typed text",
                     InteractionsDocument.DEFAULT_STYLE);
-    int pos = _doc.getDocLength() - 5;
+    int pos = _doc.getLength() - 5;
     _text.setCaretOffset(pos);
     
     // Insert text before the prompt

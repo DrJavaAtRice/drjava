@@ -57,7 +57,7 @@ import org.eclipse.swt.events.*;
  *
  * @version $Id$
  */
-public class SWTDocumentAdapter implements DocumentAdapter {
+public class SWTDocumentAdapter implements ConsoleInterface {
 
   // TO DO:
   //  - Test multithreaded support
@@ -171,7 +171,7 @@ public class SWTDocumentAdapter implements DocumentAdapter {
   public void insertText(int offs, String str, String style)
     throws DocumentAdapterException
   {
-    if (_condition.canInsertText(offs, str, style)) {
+    if (_condition.canInsertText(offs)) { //, str, style)) {
       forceInsertText(offs, str, style);
     }
   }
@@ -232,7 +232,7 @@ public class SWTDocumentAdapter implements DocumentAdapter {
    * @throws DocumentAdapterException if the offset or length are illegal
    */
   public void removeText(int offs, int len) throws DocumentAdapterException {
-    if (_condition.canRemoveText(offs, len)) {
+      if (_condition.canRemoveText(offs)) { //, len)) {
       forceRemoveText(offs, len);
     }
   }
@@ -269,7 +269,7 @@ public class SWTDocumentAdapter implements DocumentAdapter {
   /**
    * Returns the length of the document.
    */
-  public int getDocLength() {
+  public int getLength() {
     return _text.getCharCount();
   }
 
@@ -323,12 +323,12 @@ public class SWTDocumentAdapter implements DocumentAdapter {
     /** Returns whether the event should be allowed to insert. */
     protected boolean _canInsert(VerifyEvent e) {
       return _forceInsert ||
-        _condition.canInsertText(e.start, e.text, null);
+	  _condition.canInsertText(e.start); //, e.text, null);
     }
     /** Returns whether the event should be allowed to remove. */
     protected boolean _canRemove(VerifyEvent e) {
       return _forceRemove ||
-        _condition.canRemoveText(e.start, e.end - e.start);
+	  _condition.canRemoveText(e.start); //, e.end - e.start);
     }
   }
 
@@ -353,4 +353,19 @@ public class SWTDocumentAdapter implements DocumentAdapter {
     public Color getColor() { return _color; }
     public int getFontStyle() { return _fontStyle; }
   }
+
+    /* Locking operations */
+
+   /** Swing-style readLock(). */
+   public void acquireReadLock() { }
+
+    /** Swing-style readUnlock(). */
+   public void releaseReadLock() { }
+
+     /** Swing-style writeLock(). */
+   public void acquireWriteLock() { }
+
+    /** Swing-style writeUnlock(). */
+   public void releaseWriteLock(){ }
+
 }

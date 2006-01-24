@@ -96,11 +96,11 @@ public class SWTDocumentAdapterTest extends TestCase {
   public void testBasicDocOps() throws DocumentAdapterException {
     _doc.insertText(0, "one", null);
     assertEquals("first doc contents", "one",
-                 _doc.getDocText(0, _doc.getDocLength()));
+                 _doc.getDocText(0, _doc.getLength()));
     
-    _doc.insertText(_doc.getDocLength(), " three", null);
+    _doc.insertText(_doc.getLength(), " three", null);
     assertEquals("second doc contents", "one three",
-                 _doc.getDocText(0, _doc.getDocLength()));
+                 _doc.getDocText(0, _doc.getLength()));
     
     _doc.removeText(0, 3);
     _doc.insertText(0, "two", null);
@@ -137,34 +137,34 @@ public class SWTDocumentAdapterTest extends TestCase {
     };
     _doc.insertText(0, "initial", null);
     assertEquals("first doc contents", "initial",
-                 _doc.getDocText(0, _doc.getDocLength()));
+                 _doc.getDocText(0, _doc.getLength()));
     
     _doc.setEditCondition(c);
     _doc.insertText(4, "1", null);
     assertEquals("insertText should be rejected", "initial",
-                 _doc.getDocText(0, _doc.getDocLength()));
+                 _doc.getDocText(0, _doc.getLength()));
     _pane.replaceTextRange(2, 0, "1");
     assertEquals("replaceTextRange should be rejected", "initial",
-                 _doc.getDocText(0, _doc.getDocLength()));
+                 _doc.getDocText(0, _doc.getLength()));
     _doc.insertText(6, "2", null);
     assertEquals("insertText should be accepted", "initia2l",
-                 _doc.getDocText(0, _doc.getDocLength()));
+                 _doc.getDocText(0, _doc.getLength()));
     _doc.forceInsertText(2, "3", null);
     assertEquals("forceInsertText should be accepted", "in3itia2l",
-                 _doc.getDocText(0, _doc.getDocLength()));
+                 _doc.getDocText(0, _doc.getLength()));
     
     _doc.removeText(1, 1);
     assertEquals("removeText should be rejected", "in3itia2l",
-                 _doc.getDocText(0, _doc.getDocLength()));
+                 _doc.getDocText(0, _doc.getLength()));
     _pane.replaceTextRange(6, 1, "");
     assertEquals("replaceTextRange should be rejected", "in3itia2l",
-                 _doc.getDocText(0, _doc.getDocLength()));
+                 _doc.getDocText(0, _doc.getLength()));
     _doc.removeText(1, 2);
     assertEquals("removeText should be accepted", "iitia2l",
-                 _doc.getDocText(0, _doc.getDocLength()));
+                 _doc.getDocText(0, _doc.getLength()));
     _doc.forceRemoveText(6, 1);
     assertEquals("forceRemove should be accepted", "iitia2",
-                 _doc.getDocText(0, _doc.getDocLength()));
+                 _doc.getDocText(0, _doc.getLength()));
     
   }
   

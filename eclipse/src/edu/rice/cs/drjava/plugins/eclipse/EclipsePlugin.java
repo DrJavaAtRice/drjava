@@ -71,8 +71,8 @@ public class EclipsePlugin extends AbstractUIPlugin {
    * Constructs a new EclipsePlugin.
    * @param descriptor PluginDescriptor used by Eclipse
    */
-  public EclipsePlugin(IPluginDescriptor descriptor) {
-    super(descriptor);
+  public EclipsePlugin() {
+    super();
     _plugin = this;
     try {
       _resourceBundle = ResourceBundle.getBundle("edu.rice.cs.drjava.plugins.eclipse.EclipsePluginResources");

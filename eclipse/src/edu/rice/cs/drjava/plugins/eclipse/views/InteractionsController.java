@@ -40,9 +40,13 @@ END_COPYRIGHT_BLOCK*/
 package edu.rice.cs.drjava.plugins.eclipse.views;
 
 import org.eclipse.jface.action.Action;
-import org.eclipse.jface.preference.*;
+//import org.eclipse.jface.preference.*;
+import org.eclipse.core.runtime.Preferences;
+//import org.eclipse.core.runtime.Preferences.*;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.resource.JFaceResources;
-import org.eclipse.jface.util.*;
+//import org.eclipse.jface.util.*;
 import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.swt.graphics.Color;
@@ -62,11 +66,19 @@ import edu.rice.cs.drjava.model.repl.InputListener;
 import edu.rice.cs.drjava.model.repl.ConsoleDocument;
 import edu.rice.cs.util.text.SWTDocumentAdapter;
 import edu.rice.cs.util.text.SWTDocumentAdapter.SWTStyle;
-import edu.rice.cs.util.text.DocumentAdapter;
+import edu.rice.cs.util.text.SwingDocument;
 import edu.rice.cs.util.StringOps;
 
-import java.util.Vector;
+import org.eclipse.ui.IWorkbenchActionConstants;
+import org.eclipse.swt.dnd.Clipboard;
+import org.eclipse.swt.dnd.TextTransfer;
+import org.eclipse.swt.dnd.Transfer;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 
+
+import java.util.Vector;
+import java.net.URL;
 /**
  * This class installs listeners and actions between an InteractionsDocument
  * in the model and an InteractionsPane in the view.
@@ -149,7 +161,8 @@ public class InteractionsController {
   // ---- Preferences ----
 
   /** Listens to changes to preferences. */
-  protected IPropertyChangeListener _preferenceListener;
+  protected Preferences.IPropertyChangeListener _preferenceListener;
+  protected IPropertyChangeListener _jfacePreferenceListener;
 
   /** Whether to prompt before resetting Interactions. */
   protected boolean _promptToReset;
@@ -173,14 +186,18 @@ public class InteractionsController {
     _enabled = true;
 
     // Initialize preferences
-    IPreferenceStore store = EclipsePlugin.getDefault().getPreferenceStore();
+    Preferences prefs = EclipsePlugin.getDefault().getPluginPreferences();
+    //IPreferenceStore store = EclipsePlugin.getDefault().getPreferenceStore();
     _preferenceListener = new PrefChangeListener();
-    store.addPropertyChangeListener(_preferenceListener);
-    JFaceResources.getFontRegistry().addListener(_preferenceListener);
+    _jfacePreferenceListener = new JFacePrefChangeListener();
+    prefs.addPropertyChangeListener(_preferenceListener);
+    //store.addPropertyChangeListener(_preferenceListener);
+    JFaceResources.getFontRegistry().addListener(_jfacePreferenceListener);
+    _updateJFacePreferences();
     _updatePreferences();
 
     // Put the caret at the end
-    _view.getTextPane().setCaretOffset(_doc.getDocLength());
+    _view.getTextPane().setCaretOffset(_doc.getLength());
 
     _addDocumentStyles();
     _setupModel();
@@ -197,19 +214,27 @@ public class InteractionsController {
     _colorDarkGreen.dispose();
     _colorDarkBlue.dispose();
     _colorYellow.dispose();
+    _clipboard.dispose();
 
     // Remove preference listener
-    IPreferenceStore store = EclipsePlugin.getDefault().getPreferenceStore();
+    Preferences store = EclipsePlugin.getDefault().getPluginPreferences();
+    //IPreferenceStore store = EclipsePlugin.getDefault().getPreferenceStore();
     store.removePropertyChangeListener(_preferenceListener);
-    JFaceResources.getFontRegistry().removeListener(_preferenceListener);
+    JFaceResources.getFontRegistry().removeListener(_jfacePreferenceListener);
   }
 
   /**
    * Reads user-defined preferences and sets up a PropertyChangeListener
    * to react to changes.
    */
+  private void _updateJFacePreferences() {
+    // Update the font
+    _view.updateFont();
+  }
+
   private void _updatePreferences() {
-    IPreferenceStore store = EclipsePlugin.getDefault().getPreferenceStore();
+    Preferences store = EclipsePlugin.getDefault().getPluginPreferences();
+    //IPreferenceStore store = EclipsePlugin.getDefault().getPreferenceStore();
 
     // Notifications
     _promptToReset = store.getBoolean(DrJavaConstants.INTERACTIONS_RESET_PROMPT);
@@ -219,10 +244,7 @@ public class InteractionsController {
     _model.setPrivateAccessible(store.getBoolean(DrJavaConstants.ALLOW_PRIVATE_ACCESS));
 
     // History size
-    _doc.getHistory().setMaxSize(store.getInt(DrJavaConstants.HISTORY_MAX_SIZE));
-
-    // Update the font
-    _view.updateFont();
+    //_doc.getHistory().setMaxSize(store.getInt(DrJavaConstants.HISTORY_MAX_SIZE));
 
     // Set the new interpreter JVM arguments
     String jvmArgs = store.getString(DrJavaConstants.JVM_ARGS);
@@ -256,7 +278,7 @@ public class InteractionsController {
   /**
    * Accessor method for the DocumentAdapter.
    */
-  public DocumentAdapter getDocumentAdapter() {
+  public SWTDocumentAdapter getDocumentAdapter() {
     return _adapter;
   }
 
@@ -327,7 +349,7 @@ public class InteractionsController {
       StyledText pane = _view.getTextPane();
       int caretPos = pane.getCaretOffset();
       int promptPos = _doc.getPromptPos();
-      int docLength = _doc.getDocLength();
+      int docLength = _doc.getLength();
 
       if (_doc.inProgress()) {
         // Scroll to the end of the document, since output has been
@@ -446,14 +468,33 @@ public class InteractionsController {
     _view.getTextPane().addVerifyKeyListener(new KeyUpdateListener());
 //    _view.getTextPane().setKeyBinding(((int) '\t') | SWT.SHIFT, SWT.NULL);
 
+    _clipboard = new Clipboard(_view.getSite().getShell().getDisplay());
+    
     // Set up menu
     _setupMenu();
   }
 
+    Clipboard _clipboard;
   /**
    * Adds actions to the toolbar menu.
    */
   protected void _setupMenu() {
+      final Action copyAction = new CopyAction(_view.getTextPane(), _clipboard);
+      copyAction.setEnabled(false);
+
+      _view.addAction(IWorkbenchActionConstants.COPY, copyAction);
+      
+    _view.addAction(IWorkbenchActionConstants.PASTE, 
+		   new PasteAction(_view.getTextPane(), _clipboard));
+    _view.addSelectionListener(new SelectionAdapter() { 
+	    public void widgetSelected(SelectionEvent e) {
+		//System.out.println("About to Show:" + 
+		//		   _view.getTextPane().getSelectionCount());
+		copyAction.setEnabled(
+				      (_view.getTextPane().getSelectionCount() > 0));
+	    }
+	});
+			 
     Action resetInteractionsAction = new Action() {
       public void run() {
         String title = "Confirm Reset Interactions";
@@ -471,9 +512,9 @@ public class InteractionsController {
       public void run() {
         String title = "Interpreter Classpath";
         StringBuffer cpBuf = new StringBuffer();
-        Vector<String> classpathElements = _model.getClasspath();
+        Vector<URL> classpathElements = _model.getClasspath();
         for(int i = 0; i < classpathElements.size(); i++) {
-          cpBuf.append(classpathElements.get(i));
+          cpBuf.append(classpathElements.get(i).toString());
           if (i + 1 < classpathElements.size()) {
             cpBuf.append("\n");
           }
@@ -642,7 +683,7 @@ public class InteractionsController {
       moveToEnd();
       return false;
     }
-    else if (position >= _doc.getDocLength()) {
+    else if (position >= _doc.getLength()) {
       // Wrap around to the start
       moveToPrompt();
       return false;
@@ -658,7 +699,7 @@ public class InteractionsController {
     final StyledText pane = _view.getTextPane();
     pane.getDisplay().syncExec(new Runnable() {
       public void run() {
-        pane.setCaretOffset(_doc.getDocLength());
+        pane.setCaretOffset(_doc.getLength());
         pane.showSelection();
       }
     });
@@ -679,9 +720,66 @@ public class InteractionsController {
    * Class to listen to preference changes and update the
    * controller accordingly.
    */
-  class PrefChangeListener implements IPropertyChangeListener {
+  class JFacePrefChangeListener implements IPropertyChangeListener {
     public void propertyChange(PropertyChangeEvent event) {
+      _updateJFacePreferences();
+    }
+  }
+  class PrefChangeListener implements Preferences.IPropertyChangeListener {
+    public void propertyChange(Preferences.PropertyChangeEvent event) {
       _updatePreferences();
     }
   }
+
+
+    public class CopyAction extends Action {
+	protected StyledText _text;
+	protected Clipboard _clipboard;
+	public CopyAction(StyledText text, Clipboard cp) { 
+	    _text = text;
+	    _clipboard = cp;
+	    setText("Copy");
+	    setAccelerator(SWT.CTRL | 'C');
+	}
+	
+	
+	public void run() { 
+	    //get selection
+	    //TODO: need to disable Copy if selection is empty
+	    if (_text.getSelectionCount() > 0) {
+		String selection = _text.getSelectionText();
+		
+		_clipboard.setContents(
+				       new Object[] { selection },
+				       new Transfer[] {TextTransfer.getInstance() }
+				       );
+	    }
+	}
+    }
+
+    public class PasteAction extends Action {
+	protected StyledText _text;
+	protected Clipboard _clipboard;
+	public PasteAction(StyledText text, Clipboard cp) { 
+	    _text = text;
+	    _clipboard = cp;
+	    setText("Paste");
+	    setAccelerator(SWT.CTRL | 'V');
+	}
+	
+	
+	public void run() { 
+	    //get selection
+	    Object selection = _clipboard.getContents(TextTransfer.getInstance());
+	    if (selection != null) {
+		_text.insert(selection.toString());
+	    }
+	    //if (selection instanceof String) {
+	    //_text.insert( (String)selection);
+	    //}
+		
+	}
+    }
+
+	
 }
