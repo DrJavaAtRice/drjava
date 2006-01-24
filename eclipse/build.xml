@@ -1,0 +1,718 @@
+<?xml version="1.0"?>
+
+<!DOCTYPE project [
+  <!ENTITY build-common SYSTEM "file:build-common.xml">
+]>
+
+<!--
+  $Id$
+-->
+<project name="drjava" default="test">
+  <!-- srcroot is the base directory of the source -->
+  <property name="srcroot" value="${basedir}/src" />
+
+  <!-- built is where the compiled classes go -->
+  <property name="built" value="${basedir}/../built" />
+
+  <!-- dist is where the packaged jars go -->
+  <property name="dist" value="${basedir}/dist" />
+
+  <!--
+    TODO: this needs to be abstracted to deal with drjava vs util 
+    projpath is the path from srcroot to the root directory of this project
+  -->
+  <property name="projpath" value="edu/rice/cs/${ant.project.name}" />
+
+  <!-- put javadoc in this directory --><!-- TODO: project name... -->
+  <property name="javadoc_dir" value="${basedir}/javadoc/${ant.project.name}" />
+
+  <!-- put documentation html in this directory -->
+  <property name="doc_dir" value="${built}/edu/rice/cs/drjava/docs" />
+
+  <!-- DrJava plugin code for other IDEs is in this directory -->
+  <property name="plugins_dir" value="${basedir}/plugins" />
+
+  <!-- Tag and directory for OS X packages -->
+  <property name="osxtag" value="drjava-osx" />
+  <property name="osxdir" value="${basedir}/" />
+
+  <property name="jarfile" value="${basedir}/drjava.jar" />
+  <property name="manifest" value="${basedir}/manifest" />
+
+
+  <!-- Sets a flag indicating that code dealing with new features since the 
+    last stable release should be enabled and testable.
+    Takes effect only after a clean compile -->
+  <target name="development">
+    <filter token="DEVELOPMENT" value = "true" />
+    <copy file="${srcroot}/${projpath}/CodeStatus.orig"
+          tofile="${srcroot}/${projpath}/CodeStatus.java"
+          overwrite="yes"
+          filtering="yes" />
+  </target>
+
+  <!-- Sets a flag indicating that code dealing with new features since the 
+    last stable release should not be enabled or testable.
+    Takes effect only after a clean compile -->
+  <target name="stable">
+    <filter token="DEVELOPMENT" value = "false" />
+    <copy file="${srcroot}/${projpath}/CodeStatus.orig"
+          tofile="${srcroot}/${projpath}/CodeStatus.java"
+          overwrite="yes"
+          filtering="yes" />
+  </target>
+
+
+  <!-- include standard build file parts -->
+  &build-common;
+
+  <!-- generate jar and javadoc
+       Requires version-tag to be set (via command line -Dversion-tag=)
+       For example, to release drjava-20020101-0000, you'd type:
+
+       ant -Dversion-tag=drjava-20020101-0000 release
+  -->
+  <target name="release" if="version-tag" depends="clean,update,compile">
+    <delete dir="${dist}/${version-tag}" />
+    <mkdir dir="${dist}/${version-tag}" />
+
+    <!-- generate javadoc for the committed version! -->
+    <antcall target="generate_javadoc">
+      <param name="javadoc_dir" value="${dist}/${version-tag}/javadoc" />
+      <param name="javadoc_title" value="${version-tag}" />
+    </antcall>
+
+    <zip zipfile="${dist}/${version-tag}-javadoc.zip">
+      <fileset dir="${dist}">
+        <include name="${version-tag}/javadoc/**" />
+      </fileset>
+    </zip>
+
+    <delete dir="${dist}/${version-tag}/javadoc" />
+
+    <cvs dest="${dist}/${version-tag}"
+         tag="HEAD"
+         quiet="yes"
+         package="src/edu/rice/cs/drjava src/edu/rice/cs/util src/edu/rice/cs/lib src/edu/rice/cs/LICENSE src/edu/rice/cs/README src/edu/rice/cs/build-common.xml src/src-jsr14v1_0 src/src-jsr14v1_2"
+         command="export -N" />
+
+    <zip zipfile="${dist}/${version-tag}-src.zip">
+      <fileset dir="${dist}">
+        <include name="${version-tag}/src/**" />
+      </fileset>
+    </zip>
+
+    <delete dir="${dist}/${version-tag}" />
+
+    <antcall target="docs" />
+
+    <antcall target="osxapp">
+      <param name="osxdir" value="${dist}" />
+      <param name="osxtag" value="${version-tag}-osx" />
+    </antcall>
+
+    <antcall target="jar">
+      <param name="jarfile" value="${dist}/${version-tag}.jar" />
+    </antcall>
+  </target>
+
+  <target name="compile" depends="do-compile">
+    <rmic base="${built}"
+          classpath="${classpath_text}"
+          classname="edu.rice.cs.drjava.model.repl.newjvm.InterpreterJVM" />
+
+    <rmic base="${built}"
+          classpath="${classpath_text}"
+          classname="edu.rice.cs.drjava.model.repl.newjvm.MainJVM" />
+
+    <copy todir="${built}">
+      <fileset dir="${srcroot}">
+        <!-- include the GPL -->
+        <include name="edu/rice/cs/LICENSE" />
+
+        <!-- include graphics -->
+        <include name="${projpath}/**/LICENSE" />
+        <include name="${projpath}/**/README" />
+        <include name="${projpath}/**/*.gif" />
+        <include name="${projpath}/**/*.png" />
+      </fileset>
+    </copy>
+
+  </target>
+
+  <!-- Initializes properties used in all Eclipse tasks -->
+  <target name="eclipse">
+    <property name="eclipse_plugin_version" value="0.9.6" />
+    <property name="eclipse_dir" value="${basedir}"/>
+    <property name="eclipse_srcroot" value="${basedir}/src" />
+    <property name="eclipse_built" value="${basedir}/classes" />
+    <property name="eclipse_package" value="edu.rice.cs.drjava_${eclipse_plugin_version}" />
+    <property name="eclipse_package_dir" value="${eclipse_dir}/package/${eclipse_package}" />
+  </target>
+
+  <target name="clean-eclipse" depends="eclipse">
+    <delete dir="${eclipse_built}" />
+    <delete dir="${eclipse_package_dir}" />
+  </target>
+
+  <!-- Compiles the Eclipse specific classes. -->
+  <target name="compile-eclipse" depends="eclipse">
+    <!-- Build the classes -->
+    <mkdir dir="${eclipse_built}" />
+    <antcall target="do-compile">
+      <param name="srcroot" value="${eclipse_srcroot}" />
+      <param name="projpath" value="edu/rice/cs" />
+      <param name="built" value="${eclipse_built}" />
+    </antcall>
+  </target>
+
+  <!-- Creates a distributable package for the Eclipse plugin -->
+  <target name="package-eclipse" depends="compile-eclipse">
+
+    <mkdir dir="${eclipse_package_dir}" />
+    <!-- Make a jar to include DrJava classes -->
+    <antcall target="jar">
+      <param name="jarfile" value="${eclipse_package_dir}/drjava-eclipse.jar"/>
+    </antcall>
+    <!-- Add the plugin classes -->
+    <jar jarfile="${eclipse_package_dir}/drjava-eclipse.jar" update="yes">
+      <fileset dir="${eclipse_built}">
+        <exclude name="**/*Test.class" />
+        <exclude name="**/*Test$*.class" />
+        <include name="**" />
+      </fileset>
+    </jar>
+    <!-- Copy the plugin.xml -->
+    <copy file="${eclipse_dir}/plugin.xml" todir="${eclipse_package_dir}" />
+    <!-- Copy the icons -->
+    <copy todir="${eclipse_package_dir}">
+      <fileset dir="${eclipse_dir}">
+        <include name="plugin.xml" />
+        <include name="icons/**" />
+        <include name="README" />
+        <include name="LICENSE" />
+        <include name="META-INF/**" />
+      </fileset>
+    </copy>
+    <!-- Zip the files for a release -->
+    <zip zipfile="${eclipse_dir}/package/drjava-eclipse-${eclipse_plugin_version}.zip">
+      <fileset dir="${eclipse_dir}/package">
+        <exclude name="drjava-eclipse-${eclipse_plugin_version}.zip" />
+        <include name="${eclipse_package}/**" />
+      </fileset>
+    </zip>
+  </target>
+    
+  <target name="eclipse-src-zip" depends="eclipse">
+    <property name="eclipse_src_zip_dir" value="${eclipse_package_dir}/src/drjava-eclipse-${eclipse_plugin_version}" />
+    <delete dir="${eclipse_src_zip_dir}" />
+    <mkdir dir="${eclipse_src_zip_dir}" />
+
+    <cvs dest="${eclipse_src_zip_dir}"
+         tag="HEAD"
+         quiet="yes"
+         package="src/edu/rice/cs/drjava src/edu/rice/cs/util src/edu/rice/cs/lib src/edu/rice/cs/LICENSE src/edu/rice/cs/README src/edu/rice/cs/build-common.xml src/src-jsr14v1_0 src/src-jsr14v1_2 src/src-jsr14v2_0 src/src-mac13 src/src-mac14 src/src-windows drjava/"
+         command="export -N" />
+
+    <zip zipfile="${eclipse_dir}/package/drjava-eclipse-${eclipse_plugin_version}-src.zip">
+      <fileset dir="${eclipse_package_dir}/src">
+        <include name="drjava-eclipse-${eclipse_plugin_version}/**" />
+      </fileset>
+    </zip>
+    <delete dir="${eclipse_src_zip_dir}" />
+  </target>
+
+  <!-- Initializes properties used in all jEdit tasks -->
+  <target name="jedit">
+    <property name="jedit_dir" value="${plugins_dir}/jedit" />
+    <property name="jedit_srcroot" value="${jedit_dir}/src" />
+    <property name="jedit_built" value="${jedit_dir}/built" />
+  </target>
+
+  <target name="clean-jedit" depends="jedit">
+    <delete dir="${jedit_built}" />
+    <delete file="${jedit_dir}/drjava-jedit.jar" />
+  </target>
+
+  <!-- Compiles the jEdit specific classes. -->
+  <target name="compile-jedit" depends="jedit">
+    <!-- Build the classes -->
+    <mkdir dir="${jedit_built}" />
+    <antcall target="do-compile">
+      <param name="srcroot" value="${jedit_srcroot}" />
+      <param name="projpath" value="edu/rice/cs" />
+      <param name="built" value="${jedit_built}" />
+    </antcall>
+  </target>
+
+  <!-- Creates a distributable jar for the jEdit plugin -->
+  <target name="jar-jedit" depends="compile-jedit">
+
+    <!-- Make a jar to include DrJava classes -->
+    <antcall target="jar">
+      <param name="jarfile" value="${jedit_dir}/drjava-jedit.jar"/>
+    </antcall>
+    <!-- Add the plugin classes -->
+    <jar jarfile="${jedit_dir}/drjava-jedit.jar" update="yes">
+      <fileset dir="${jedit_built}">
+        <exclude name="**/*Test.class" />
+        <exclude name="**/*Test$*.class" />
+        <include name="**/*.class" />
+      </fileset>
+    </jar>
+    <!-- Add the plugin xml and properties data -->
+    <jar jarfile="${jedit_dir}/drjava-jedit.jar" update="yes">
+      <fileset dir="${jedit_dir}">
+        <include name="drjava-jedit.props" />
+	<include name="actions.xml" />
+	<include name="dockables.xml" />
+      </fileset>
+    </jar>
+  </target>
+
+
+  <!-- Compiles only the JSR-14 v1.0 specific classes, and adds
+       them to compilers.jar in the lib directory.
+       Deletes the compiled classes when finished.
+    -->
+  <target name="compile-jsr14v1_0">
+    <property name="projpath_jsr14v1_0" 
+              value="src-jsr14v1_0/edu/rice/cs/${ant.project.name}" />
+    <property name="built_jsr14v1_0"
+              value="${srcroot}/../built-jsr14v1_0/" />
+
+    <!-- Build the classes -->
+    <mkdir dir="${built_jsr14v1_0}" />
+    <antcall target="do-compile">
+      <param name="projpath" value="${projpath_jsr14v1_0}" />
+      <param name="built" value="${built_jsr14v1_0}" />
+    </antcall>
+
+    <!-- Make a jar in the lib directory. No tests are included. -->
+    <jar jarfile="${lib_dir}/compilers.jar" update="yes">
+      <fileset dir="${built_jsr14v1_0}">
+        <exclude name="**/*Test.class" />
+        <exclude name="**/*Test$*.class" />
+        <include name="${projpath}/**" />
+
+        <!-- include the GPL -->
+        <include name="edu/rice/cs/LICENSE" />
+      </fileset>
+    </jar>
+
+    <!-- Delete the compiled classes -->
+    <delete dir="${built_jsr14v1_0}" />
+  </target>
+
+  <!-- Compiles only the JSR-14 v1.2 specific classes, and adds
+       them to compilers.jar in the lib directory.
+       Deletes the compiled classes when finished.
+    -->
+  <target name="compile-jsr14v1_2">
+    <property name="projpath_jsr14v1_2" 
+              value="src-jsr14v1_2/edu/rice/cs/${ant.project.name}" />
+    <property name="built_jsr14v1_2"
+              value="${srcroot}/../built-jsr14v1_2/" />
+
+    <!-- Build the classes -->
+    <mkdir dir="${built_jsr14v1_2}" />
+    <antcall target="do-compile">
+      <param name="projpath" value="${projpath_jsr14v1_2}" />
+      <param name="built" value="${built_jsr14v1_2}" />
+    </antcall>
+
+    <!-- Make a jar in the lib directory. No tests are included. -->
+    <jar jarfile="${lib_dir}/compilers.jar" update="yes">
+      <fileset dir="${built_jsr14v1_2}">
+        <exclude name="**/*Test.class" />
+        <exclude name="**/*Test$*.class" />
+        <include name="${projpath}/**" />
+
+        <!-- include the GPL -->
+        <include name="edu/rice/cs/LICENSE" />
+      </fileset>
+    </jar>
+
+    <!-- Delete the compiled classes -->
+    <delete dir="${built_jsr14v1_2}" />
+  </target>
+    
+  <!-- Compiles only the Mac OS X JDK 1.3 specific classes, and adds
+       them to platform.jar in the lib directory.
+       Deletes the compiled classes when finished.
+    -->
+  <target name="compile-mac13">
+    <property name="projpath_mac13" 
+              value="src-mac13/edu/rice/cs/${ant.project.name}" />
+    <property name="built_mac13"
+              value="${srcroot}/../built-mac13/" />
+
+    <!-- Build the classes -->
+    <mkdir dir="${built_mac13}" />
+    <antcall target="do-compile">
+      <param name="projpath" value="${projpath_mac13}" />
+      <param name="built" value="${built_mac13}" />
+    </antcall>
+
+    <!-- Make a jar in the lib directory. No tests are included. -->
+    <jar jarfile="${lib_dir}/platform.jar" update="yes">
+      <fileset dir="${built_mac13}">
+        <exclude name="**/*Test.class" />
+        <exclude name="**/*Test$*.class" />
+        <include name="${projpath}/**" />
+
+        <!-- include the GPL -->
+        <include name="edu/rice/cs/LICENSE" />
+      </fileset>
+    </jar>
+
+    <!-- Delete the compiled classes -->
+    <delete dir="${built_mac13}" />
+  </target>
+    
+  <!-- Compiles only the Mac OS X JDK 1.3 specific classes and runs
+       all JUnit tests included with the platform support class.
+       Deletes the compiled classes when finished.
+    -->
+  <target name="test-mac13">
+    <property name="projpath_mac13" 
+              value="src-mac13/edu/rice/cs/${ant.project.name}" />
+    <property name="built_mac13"
+              value="${srcroot}/../built-mac13/" />
+
+    <!-- Build the classes -->
+    <mkdir dir="${built_mac13}" />
+    <antcall target="do-compile">
+      <param name="projpath" value="${projpath_mac13}" />
+      <param name="built" value="${built_mac13}" />
+    </antcall>
+
+    <!-- Run all platform-specific JUnit tests. -->
+    <junit printsummary="yes" haltonerror="yes" haltonfailure="yes" fork="yes">
+      <classpath>
+        <path refid="classpath" />
+        <pathelement path="${built_mac13}" />
+      </classpath>
+
+      <!-- This makes JUnit display info about each test to console -->
+      <formatter type="plain" usefile="no" />
+
+      <!-- This makes JUnit run all test classes. It figures out which ones
+           automatically, without needing AllTests classes.
+      -->
+      <batchtest>
+        <!-- The root of the fileset must be where edu/ is. -->
+        <fileset dir="${srcroot}/src-mac13">
+          <!-- Include only from projpath to only get classes in this project!
+          -->
+          <include name="${projpath}/**/*${test-spec}*Test.java" />
+          <exclude name="**/AllTests.java" />
+          <exclude name="**/Test.java" />
+        </fileset>
+      </batchtest>
+    </junit>
+
+    <!-- Delete the compiled classes -->
+    <delete dir="${built_mac13}" />
+  </target>
+    
+  <!-- Compiles only the Mac OS X JDK 1.4 specific classes, and adds
+       them to platform.jar in the lib directory.
+       Deletes the compiled classes when finished.
+    -->
+  <target name="compile-mac14">
+    <property name="projpath_mac14" 
+              value="src-mac14/edu/rice/cs/${ant.project.name}" />
+    <property name="built_mac14"
+              value="${srcroot}/../built-mac14/" />
+
+    <!-- Build the classes -->
+    <mkdir dir="${built_mac14}" />
+    <antcall target="do-compile">
+      <param name="projpath" value="${projpath_mac14}" />
+      <param name="built" value="${built_mac14}" />
+    </antcall>
+
+    <!-- Make a jar in the lib directory. No tests are included. -->
+    <jar jarfile="${lib_dir}/platform.jar" update="yes">
+      <fileset dir="${built_mac14}">
+        <exclude name="**/*Test.class" />
+        <exclude name="**/*Test$*.class" />
+        <include name="${projpath}/**" />
+
+        <!-- include the GPL -->
+        <include name="edu/rice/cs/LICENSE" />
+      </fileset>
+    </jar>
+
+    <!-- Delete the compiled classes -->
+    <delete dir="${built_mac14}" />
+  </target>
+    
+  <!-- Compiles only the Mac OS X JDK 1.4 specific classes and runs
+       all JUnit tests included with the platform support class.
+       Deletes the compiled classes when finished.
+    -->
+  <target name="test-mac14">
+    <property name="projpath_mac14" 
+              value="src-mac14/edu/rice/cs/${ant.project.name}" />
+    <property name="built_mac14"
+              value="${srcroot}/../built-mac14/" />
+
+    <!-- Build the classes -->
+    <mkdir dir="${built_mac14}" />
+    <antcall target="do-compile">
+      <param name="projpath" value="${projpath_mac14}" />
+      <param name="built" value="${built_mac14}" />
+    </antcall>
+
+    <!-- Run all platform-specific JUnit tests. -->
+    <junit printsummary="yes" haltonerror="yes" haltonfailure="yes" fork="yes">
+      <classpath>
+        <path refid="classpath" />
+        <pathelement path="${built_mac14}" />
+      </classpath>
+
+      <!-- This makes JUnit display info about each test to console -->
+      <formatter type="plain" usefile="no" />
+
+      <!-- This makes JUnit run all test classes. It figures out which ones
+           automatically, without needing AllTests classes.
+      -->
+      <batchtest>
+        <!-- The root of the fileset must be where edu/ is. -->
+        <fileset dir="${srcroot}/src-mac14">
+          <!-- Include only from projpath to only get classes in this project!
+          -->
+          <include name="${projpath}/**/*${test-spec}*Test.java" />
+          <exclude name="**/AllTests.java" />
+          <exclude name="**/Test.java" />
+        </fileset>
+      </batchtest>
+    </junit>
+
+    <!-- Delete the compiled classes -->
+    <delete dir="${built_mac14}" />
+  </target>
+    
+  <!-- Compiles only the Windows specific classes, and adds
+       them to platform.jar in the lib directory.
+       Deletes the compiled classes when finished.
+    -->
+  <target name="compile-windows">
+    <property name="projpath_windows" 
+              value="src-windows/edu/rice/cs/${ant.project.name}" />
+    <property name="built_windows"
+              value="${srcroot}/../built-windows/" />
+
+    <!-- Build the classes -->
+    <mkdir dir="${built_windows}" />
+    <antcall target="do-compile">
+      <param name="projpath" value="${projpath_windows}" />
+      <param name="built" value="${built_windows}" />
+    </antcall>
+
+    <!-- Make a jar in the lib directory. No tests are included. -->
+    <jar jarfile="${lib_dir}/platform.jar" update="yes">
+      <fileset dir="${built_windows}">
+        <exclude name="**/*Test.class" />
+        <exclude name="**/*Test$*.class" />
+        <include name="${projpath}/**" />
+
+        <!-- include the GPL -->
+        <include name="edu/rice/cs/LICENSE" />
+      </fileset>
+    </jar>
+
+    <!-- Delete the compiled classes -->
+    <delete dir="${built_windows}" />
+  </target>
+
+  <!-- Compiles only the Windows specific classes and runs
+       all JUnit tests included with the platform support class.
+       Deletes the compiled classes when finished.
+    -->
+  <target name="test-windows">
+    <property name="projpath_windows" 
+              value="src-mac14/edu/rice/cs/${ant.project.name}" />
+    <property name="built_windows"
+              value="${srcroot}/../built-windows/" />
+
+    <!-- Build the classes -->
+    <mkdir dir="${built_windows}" />
+    <antcall target="do-compile">
+      <param name="projpath" value="${projpath_windows}" />
+      <param name="built" value="${built_windows}" />
+    </antcall>
+
+    <!-- Run all platform-specific JUnit tests. -->
+    <junit printsummary="yes" haltonerror="yes" haltonfailure="yes" fork="yes">
+      <classpath>
+        <path refid="classpath" />
+        <pathelement path="${built_windows}" />
+      </classpath>
+
+      <!-- This makes JUnit display info about each test to console -->
+      <formatter type="plain" usefile="no" />
+
+      <!-- This makes JUnit run all test classes. It figures out which ones
+           automatically, without needing AllTests classes.
+      -->
+      <batchtest>
+        <!-- The root of the fileset must be where edu/ is. -->
+        <fileset dir="${srcroot}/src-windows">
+          <!-- Include only from projpath to only get classes in this project!
+          -->
+          <include name="${projpath}/**/*${test-spec}*Test.java" />
+          <exclude name="**/AllTests.java" />
+          <exclude name="**/Test.java" />
+        </fileset>
+      </batchtest>
+    </junit>
+
+    <!-- Delete the compiled classes -->
+    <delete dir="${built_windows}" />
+  </target>
+
+  <target name="osxapp" depends="jar">
+    <mkdir dir="${osxdir}/${osxtag}/DrJava.app" />
+    <copy todir="${osxdir}/${osxtag}/DrJava.app/">
+      <fileset dir="${basedir}/packaging/DrJava.app" 
+        excludes="Contents/Resources/Java/DrJava.jar-goes-here" />
+    </copy>
+
+    <copy file="${jarfile}" tofile="${osxdir}/${osxtag}/DrJava.app/Contents/Resources/Java/DrJava.jar" />
+    
+    <tar tarfile="${osxdir}/${osxtag}.tar">
+      <tarfileset dir="${osxdir}/">
+        <include name="${osxtag}/**/*" />
+        <exclude name="${osxtag}/DrJava.app/Contents/MacOS/DrJava" />
+      </tarfileset>
+      <tarfileset dir="${osxdir}/" mode="755">
+        <include name="${osxtag}/DrJava.app/Contents/MacOS/DrJava" />
+      </tarfileset>
+    </tar>
+    <gzip src="${osxdir}/${osxtag}.tar"
+      zipfile="${osxdir}/${osxtag}.tar.gz" />
+
+    <delete dir="${osxdir}/${osxtag}" />
+    <delete file="${osxdir}/${osxtag}.tar" />
+  </target>
+
+  <!-- Makes a jar with dependencies. No tests are included. -->
+  <target name="jar">
+    <delete file="${jarfile}" />
+<!--
+    <zip zipfile="${jarfile}">
+      <zipfileset src="${srcroot}/edu/rice/cs/LICENSE" />
+    </zip>
+-->
+    <echo message="built: ${built} "/>
+    <jar jarfile="${jarfile}" manifest="${manifest}" update="true" >
+      <!-- Include dependencies -->
+<!--      <zipfileset src="${lib_dir}/gj-util.jar"
+                  excludes="META-INF/MANIFEST.MF" e
+/>-->
+      <zipfileset src="${lib_dir}/dynamicjava.jar"
+                  excludes="META-INF/MANIFEST.MF" />
+      <zipfileset src="${lib_dir}/junit.jar"
+                  excludes="META-INF/MANIFEST.MF" />
+      <zipfileset src="${lib_dir}/compilers.jar"
+                  excludes="META-INF/MANIFEST.MF" />
+      <zipfileset src="${lib_dir}/platform.jar"
+                  excludes="META-INF/MANIFEST.MF" />
+      <zipfileset src="${lib_dir}/winlaf-0.5.1.jar"
+                  excludes="META-INF/MANIFEST.MF" />
+      <zipfileset src="${lib_dir}/javalanglevels.jar"
+                  excludes="META-INF/MANIFEST.MF" />
+      <zipfileset src="drjava.jar"
+                  excludes="META-INF/MANIFEST.MF" />
+      <!-- Include DrJava classes -->
+<!--
+      <fileset dir="${built}">
+        <include name="${projpath}/**" />
+        <exclude name="**/*Test.class" />
+        <exclude name="**/*Test$*.class" />
+        <exclude name="${projpath}/docs/developer/**" />
+        <include name="edu/rice/cs/util/**" />
+        <!- - include the GPL - ->
+        <include name="edu/rice/cs/LICENSE" />
+      </fileset>
+-->
+    </jar>
+  </target>
+
+  <!-- Run the program! -->
+  <target name="run" depends="compile">
+    <java fork="true" classname="edu.rice.cs.drjava.DrJava">
+      <classpath refid="classpath" />
+    </java>
+  </target>
+
+
+  <!-- Check if docbook2html is available -->
+  <target name="docbook-present">
+    <property environment="env"/>
+    <available file="docbook2html" property="docbook.present">
+      <filepath>
+        <pathelement path="${env.PATH}" />
+      </filepath>
+    </available>
+  </target>
+
+  <!-- Create documentation html -->
+  <target name="docs" depends="userdocs,devdocs" unless="docbook.present">
+    <echo message="Could not find docbook2html.  Not generating docs." />
+  </target>
+
+  <!-- Create the user documentation -->
+  <target name="userdocs" depends="docbook-present" if="docbook.present">
+    <delete dir="${doc_dir}/user/" />
+    <mkdir dir="${doc_dir}/user/" />
+    <echo message="Creating documentation HTML..." />
+    <apply executable="docbook2html" failonerror="yes" type="file">
+      <arg value="-o"/>
+      <arg value="${doc_dir}/user/"/>
+      <fileset dir="${srcroot}/${projpath}/docs/user">
+        <include name="userdoc.docbook" />
+      </fileset>
+    </apply>
+  </target>
+
+  <!-- Create the developer documentation -->
+  <target name="devdocs" depends="docbook-present" if="docbook.present">
+    <delete dir="${doc_dir}/developer/" />
+    <mkdir dir="${doc_dir}/developer/" />
+    <echo message="Creating documentation HTML..." />
+    <apply executable="docbook2html" failonerror="yes" type="file">
+      <arg value="-o"/>
+      <arg value="${doc_dir}/developer/"/>
+      <fileset dir="${srcroot}/${projpath}/docs/developer">
+        <include name="devdoc.docbook" />
+      </fileset>
+    </apply>
+  </target>
+
+  <!-- Allow a commit of just the docs, without testing -->
+  <target name="commit-docs">
+    <echo message="Committing the documentation." />
+    
+    <tempfile property="commit-comments-filename" 
+            destdir="${java.io.tmpdir}"
+            prefix="commit-comments" />
+    <antcall target="create-commit-comments">
+      <param name="commit-comments-filename" value="${commit-comments-filename}"/>
+    </antcall>
+    <cvs>
+      <commandline>
+        <argument value="commit" />
+        <argument value="-F" />
+        <argument value="${commit-comments-filename}" />
+        <argument value="${srcroot}/${projpath}/docs" />
+      </commandline>
+    </cvs>
+    <delete file="${commit-comments-filename}"/>
+    
+  </target>
+
+</project>
