@@ -182,7 +182,7 @@ public final class SlaveJVMRunner {
       new ScrollableDialog(null, "Error", "Error details:", msg).show();
     }
     else {
-      System.err.println(msg);
+      System.out.println(msg);
     }
   }
 }

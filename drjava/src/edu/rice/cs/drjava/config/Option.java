@@ -114,7 +114,7 @@ public abstract class Option<T> extends OptionParser<T> implements FormatStrateg
   void notifyListeners(Configuration config, T val) {
     final Vector<OptionListener<T>> v = listeners.get(config);
     if (v == null) return; // no listeners
-    final OptionEvent<T> e = new OptionEvent<T>(this,val);
+    final OptionEvent<T> e = new OptionEvent<T>(this, val);
     final int size = v.size();
     Utilities.invokeLater(new Runnable() { 
       public void run() {
@@ -126,7 +126,7 @@ public abstract class Option<T> extends OptionParser<T> implements FormatStrateg
   /** magic listener-bag adder */
   void addListener(Configuration c, OptionListener<T> l) {
     Vector<OptionListener<T>> v = listeners.get(c);
-    if (v==null) {
+    if (v == null) {
       v = new Vector<OptionListener<T>>();
       listeners.put(c,v);
     }

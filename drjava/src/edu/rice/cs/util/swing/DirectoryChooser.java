@@ -1694,13 +1694,13 @@ public class DirectoryChooser extends JPanel {
   }
   
   /////////////////////////////////////////////////////////////////
-  
-  public static void main(String[] args) {
+  /* A funky test method not used in unit testing? */
+  public static void main(String[] args) { 
     try {
       String lafName = "com.sun.java.swing.plaf.windows.WindowsLookAndFeel";
       LookAndFeel laf = (LookAndFeel)Class.forName(lafName).newInstance();
       UIManager.setLookAndFeel(laf);
-    }catch (Exception e) { System.err.println("unable to set windows laf"); }
+    }catch (Exception e) { System.out.println("unable to set windows laf"); }
     
     File dir = null;
     if (args.length > 0) {
@@ -1742,7 +1742,7 @@ public class DirectoryChooser extends JPanel {
       }
       public String getDescription() { return "Only allow java files"; };
     });
-    d.setSelectedDirectory(new File("/home/jlugo/junk/elechw6/newfolder2"));
+    d.setSelectedDirectory(new File("/home/jlugo/junk/elechw6/newfolder2"));  // This must go!
     
     d.addFileSelectionListener(new FileSelectionListener() {
       public void valueChanged(FileSelectionEvent e) {

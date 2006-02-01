@@ -51,10 +51,8 @@ package edu.rice.cs.drjava.config;
  */
 public class StringOption extends Option<String>
 {
-  /**
-   * @param key The name of this Option.
-   */
-  public StringOption(String key, String def) { super(key,def); }
+  /** @param key The name of this Option. */
+  public StringOption(String key, String def) { super(key, def); }
 
 
   // The following 2 methods are NOP's. The method

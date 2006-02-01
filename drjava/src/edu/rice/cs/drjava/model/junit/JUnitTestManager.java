@@ -56,6 +56,8 @@ import java.util.ArrayList;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.StringOps;
 import edu.rice.cs.util.classloader.ClassFileError;
+import edu.rice.cs.util.swing.Utilities;
+
 import java.lang.reflect.Modifier;
 
 /**
@@ -92,6 +94,8 @@ public class JUnitTestManager {
    * @param files the files corresponding to classNames
    */
   public List<String> findTestClasses(final List<String> classNames, final List<File> files) {
+    
+//    Utilities.showDebug("InterpreterJVM.findTestClasses(" + classNames + ", " + files + ") called");
     
     if (_testClassNames != null && ! _testClassNames.isEmpty()) 
       throw new IllegalStateException("Test suite is still pending!");

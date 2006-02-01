@@ -88,9 +88,8 @@ public class ColoringView extends PlainView implements OptionConstants {
   public static Color ERROR_COLOR = DrJava.getConfig().getSetting(INTERACTIONS_ERROR_COLOR);
   public static Color DEBUGGER_COLOR = DrJava.getConfig().getSetting(DEBUG_MESSAGE_COLOR);
   
-  /**
-   * Constructs a new coloring view.
-   * @param elem the element
+  /** Constructs a new coloring view.
+   *  @param elem the element
    */
   public ColoringView(Element elem) {
     super(elem);

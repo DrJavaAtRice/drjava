@@ -53,10 +53,9 @@ import java.io.Serializable;
 import edu.rice.cs.drjava.config.*;
 import edu.rice.cs.drjava.DrJava;
 
-/**
- * The graphical form of an Option. Provides a way to see the values of Option
- * while running DrJava and perform live updating of Options.
- * @version $Id$
+/** The graphical form of an Option. Provides a way to see the values of Option
+ *  while running DrJava and perform live updating of Options.
+ *  @version $Id$
  */
 public abstract class OptionComponent<T> implements Serializable {
   protected Option<T> _option;
@@ -77,11 +76,9 @@ public abstract class OptionComponent<T> implements Serializable {
     }
   }
   
-  /**
-   * Special constructor for degenerate option components does not take
-   * an option.
-   * @param labelText Text for descriptive label of this option.
-   * @param parent The parent frame.
+  /** Special constructor for degenerate option components does not take an option.
+   *  @param labelText Text for descriptive label of this option.
+   *  @param parent The parent frame.
    */
   public OptionComponent (String labelText, Frame parent) {
     this(null, labelText, parent);
@@ -118,9 +115,7 @@ public abstract class OptionComponent<T> implements Serializable {
    */ 
   public abstract boolean updateConfig();
 
-  /**
-   * Resets the entry field to reflect the actual stored value for the option.
-   */
+  /** Resets the entry field to reflect the actual stored value for the option. */
   public void resetToCurrent() {
     if (_option != null) {
       setValue(DrJava.getConfig().getSetting(_option));
@@ -136,9 +131,7 @@ public abstract class OptionComponent<T> implements Serializable {
     }
   }
   
-  /**
-   * Sets the value that is currently displayed by this component.
-   */
+  /** Sets the value that is currently displayed by this component. */
   public abstract void setValue(T value);
   
   public void showErrorMessage(String title, OptionParseException e) {

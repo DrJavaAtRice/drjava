@@ -2121,7 +2121,7 @@ public class JPDADebugger implements Debugger, DebugModelCallback {
   private void _copyBack(ThreadReference threadRef) throws IncompatibleThreadStateException, AbsentInformationException,
       InvocationException, DebugException {
     if (printMessages) System.out.println("Getting debug interpreter");
-    if (printMessages) System.err.println("Getting variables");
+    if (printMessages) System.out.println("Getting variables");
     StackFrame frame = threadRef.frame(0);
     List<LocalVariable> vars = frame.visibleVariables();  // Added <LocalVariable> type argument; warning will go away in JDK 1.5
     Iterator<LocalVariable> varsIterator = vars.iterator();

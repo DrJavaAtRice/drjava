@@ -236,8 +236,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
    *  setting the active document.  It is used by the newFile method to place new files into the active directory.
    */
   private File _activeDirectory;
-  
-  
+   
   /** The abstract container which contains views of open documents and allows user to navigate document focus among
    *  this collection of open documents
    */
@@ -510,7 +509,6 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
      *  No synchronization is required because only immutable data is accessed.
      */
     public boolean isInProjectPath(OpenDefinitionsDocument doc) {
-      File projectRoot = projectFile.getParentFile();
       if (doc.isUntitled()) return false;
       
       // If the file does not exist, we still want to tell if it's in the correct
@@ -761,6 +759,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     _notifier.newFileCreated(doc);
     return doc;
   }
+
   
   /** Creates a new document, adds it to the list of open documents, and sets it to be active.
    *  @return The new open document
@@ -1293,15 +1292,14 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     if (docList.size() == 0) return true;
     
     /* Force the user to save or discard all modified files in docList */
-    for (OpenDefinitionsDocument doc : docList) { if (!doc.canAbandonFile()) return false; }
+    for (OpenDefinitionsDocument doc : docList) { if (! doc.canAbandonFile()) return false; }
     
     // If all files are being closed, create a new file before starTing in order to have 
-    // an active file that is not in the list of closing files.
-    OpenDefinitionsDocument newDoc = null;
-    if (docList.size() == getOpenDefinitionsDocumentsSize()) newDoc = newFile();
+    // a potentially active file that is not in the list of closing files.
+    if (docList.size() == getOpenDefinitionsDocumentsSize()) newFile();
     
     // Set the active document to the document just after the last document or the document just before the 
-    // first document in docList.
+    // first document in docList.  A new file does not appear in docList.
     _ensureNotActive(docList);
         
     // Close the files in docList. 
@@ -1487,7 +1485,15 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   }
   
   /** @return the size of the collection of OpenDefinitionsDocuments */
-  public int getOpenDefinitionsDocumentsSize() { return _documentsRepos.size(); }
+  public int getOpenDefinitionsDocumentsSize() { synchronized(_documentsRepos) { return _documentsRepos.size(); } }
+  
+  /** @return true if all open documents are in sync with their primary class files. */
+  public boolean hasOutOfSyncDocuments() {
+    synchronized(_documentsRepos) {      
+      for (OpenDefinitionsDocument doc: _documentsRepos) { if (doc.checkIfClassFileInSync()) return false; }
+      return true;
+    }
+  }
   
 //  public OpenDefinitionsDocument getODDGivenIDoc(INavigatorItem idoc) {
 //    synchronized(_documentsRepos) { return _documentsRepos.getValue(idoc); }
@@ -1654,14 +1660,14 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
    * TODO: Fix out of date comment, possibly remove this here?
    */
   public File[] getSourceRootSet() {
-    LinkedList<File> roots = new LinkedList<File>();
+    HashSet<File> roots = new HashSet<File>();
     OpenDefinitionsDocument[] docs;
     
     synchronized(_documentsRepos) { docs =  _documentsRepos.toArray(new OpenDefinitionsDocument[0]); }
     for (OpenDefinitionsDocument doc: docs) {
       try {
         File root = doc.getSourceRoot();
-        if (!roots.contains(root)) { roots.add(root); } // Don't add duplicate Files, based on path
+        roots.add(root); // Can't create duplicate entries in a HashSet
       }
       catch (InvalidPackageException e) { /* file has invalid package statement; ignore it */ }
     }
@@ -1739,12 +1745,9 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
     return false;
   }
 
-  /**
-   * 
-   * Searches for a file with the given name on the current source roots and the
-   * augmented classpath.
-   * @param filename Name of the source file to look for
-   * @return the file corresponding to the given name, or null if it cannot be found
+  /** Searches for a file with the given name on the current source roots and the augmented classpath.
+   *  @param filename Name of the source file to look for
+   *  @return the file corresponding to the given name, or null if it cannot be found
    */
   public File getSourceFile(String filename) {
     File[] sourceRoots = getSourceRootSet();
@@ -2252,7 +2255,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
       return ret;
     }
     
-    /** If this document is unmodified, this method examines the class file corresponding to this document
+    /** If this document is unmodified, this method examines the primary class file corresponding to this document
      *  and compares the timestamps of the class file to that of the source file.
      */
     public boolean checkIfClassFileInSync() {
@@ -3006,7 +3009,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
    *  @param file File to read document from
    *  @return openened document
    */
-  private OpenDefinitionsDocument _openFile(File file) throws IOException, AlreadyOpenException {
+  public OpenDefinitionsDocument _openFile(File file) throws IOException, AlreadyOpenException {
     
     OpenDefinitionsDocument doc = _rawOpenFile(file);
     addDocToNavigator(doc);

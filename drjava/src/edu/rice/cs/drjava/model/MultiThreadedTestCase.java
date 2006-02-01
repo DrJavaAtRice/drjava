@@ -64,12 +64,12 @@ public abstract class MultiThreadedTestCase extends TestCase {
     if ( _testFailed ) fail("test failed in another thread");
   }
 
-  /** This method prints the failure message to System.err and kills the JVM.  Just calling fail() doesn't always cause
+  /** This method prints the failure message to System.out and kills the JVM.  Just calling fail() doesn't always cause
    *  the test to fail, because the listener is often called from another thread.
    */
   protected static void listenerFail(String s) {
-    System.err.println("TEST FAILED: " + s);
-    new AssertionFailedError(s).printStackTrace(System.err);
+    System.out.println("TEST FAILED: " + s);
+    new AssertionFailedError(s).printStackTrace(System.out);
     _testFailed = true;
     fail(s);
   }

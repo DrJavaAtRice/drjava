@@ -59,7 +59,7 @@ package edu.rice.cs.util.sexp;
   public String getText() { return _rep; }
   
   public boolean equals(Object o) {
-    return (o.getClass() == getClass() && ((SExpToken)o)._rep.equals(_rep));
+    return (o!=null && o.getClass() == getClass() && ((SExpToken)o)._rep.equals(_rep));
   }
   
   public int hashCode() { return _rep.hashCode(); }

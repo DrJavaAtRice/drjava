@@ -39,7 +39,10 @@ import java.io.IOException;
 import java.util.List;
 import java.util.LinkedList;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 import edu.rice.cs.util.classloader.ClassFileError;
 import edu.rice.cs.drjava.model.GlobalModel;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
@@ -50,6 +53,8 @@ import edu.rice.cs.util.ExitingNotAllowedException;
 import edu.rice.cs.util.ClasspathVector;
 import edu.rice.cs.util.UnexpectedException;
 import edu.rice.cs.util.text.SwingDocument;
+import edu.rice.cs.util.swing.Utilities;
+
 import org.apache.bcel.classfile.*;
 
 /** Manages unit testing via JUnit.
@@ -87,8 +92,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   
   /** Main constructor.
    *  @param jvm RMI interface to a secondary JVM for running tests
-   *  @param compilerModel the CompilerModel, used only as a lock to prevent
-   *                       simultaneous test and compile
+   *  @param compilerModel the CompilerModel, used only as a lock to prevent simultaneous test and compile
    *  @param model used only for getSourceFile
    */
   public DefaultJUnitModel(MainJVM jvm, CompilerModel compilerModel, GlobalModel model) {
@@ -101,16 +105,14 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   
   //-------------------------- Listener Management --------------------------//
   
-  /**
-   * Add a JUnitListener to the model.
-   * @param listener a listener that reacts to JUnit events
+  /** Add a JUnitListener to the model.
+   *  @param listener a listener that reacts to JUnit events
    */
   public void addListener(JUnitListener listener) { _notifier.addListener(listener); }
   
-  /**
-   * Remove a JUnitListener from the model.  If the listener is not currently
-   * listening to this model, this method has no effect.
-   * @param listener a listener that reacts to JUnit events
+  /** Remove a JUnitListener from the model.  If the listener is not currently listening to this model, this method 
+   *  has no effect.
+   *  @param listener a listener that reacts to JUnit events
    */
   public void removeListener(JUnitListener listener) { _notifier.removeListener(listener); }
   
@@ -123,14 +125,13 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   public SwingDocument getJUnitDocument() { return _junitDoc; }
   
   /** Creates a JUnit test suite over all currently open documents and runs it.  If the class file 
-   *  associated with a file is not a test case, it is ignored.  Synchronized against the compiler
-   *  model to prevent testing and compiling at the same time, which would create invalid results.
+   *  associated with a file is not a test case, it is ignored.  
    */
   public void junitAll() { junitDocs(_model.getOpenDefinitionsDocuments()); }
   
-  /** Creates a JUnit test suite over all currently open documents and runs it.  If the class file 
-   *  associated with a file is not a test case, it will be ignored.  Synchronized against the compiler
-   *  model to prevent testing and compiling at the same time, which would create invalid results.
+  /** Creates a JUnit test suite over all currently open documents and runs it.  If a class file associated with a 
+   *  source file is not a test case, it will be ignored.  Synchronized against the compiler model to prevent 
+   *  testing and compiling at the same time, which would create invalid results.
    */
   public void junitProject() {
     LinkedList<OpenDefinitionsDocument> lod = new LinkedList<OpenDefinitionsDocument>();
@@ -147,6 +148,7 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
    *  @param files a list of their source files in the same order as qualified class names.
    */
   public void junitClasses(List<String> qualifiedClassnames, List<File> files) {
+//    Utilities.showDebug("junitClasses(" + qualifiedClassnames + ", " + files);
     synchronized(_compilerModel.getSlaveJVMLock()) {
       synchronized(_testLock) {
         if (_testInProgress) return;
@@ -156,6 +158,8 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
       try { testClasses = _jvm.findTestClasses(qualifiedClassnames, files); }
       catch(IOException e) { throw new UnexpectedException(e); }
       
+//      System.err.println("Found test classes: " + testClasses);
+      
       if (testClasses.isEmpty()) {
         nonTestCase(true);
         return;
@@ -163,9 +167,10 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
       _notifier.junitClassesStarted(); 
       try { _jvm.runTestSuite(); } 
       catch(Throwable t) {
+//        System.err.println("Threw exception " + t);
         _notifier.junitEnded();
         synchronized(_testLock) { _testInProgress = false;}
-       throw new UnexpectedException(t); 
+        throw new UnexpectedException(t); 
       }
     }
   }
@@ -203,11 +208,31 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     }
   }
   
-  /* Determines which class files in the built directories are test cases and correspond to open source
-   * files.  At this point (if no fatal errors are encountered) it informs listeners that junit has started
-   * (JUnitStarted) and performs the tests. */
+//  /** Splits a classpath string into an array of filepath strings */
+//  public static LinkedList<String> separateClasspath(String cpString) {  
+//    LinkedList<String> classpaths = new LinkedList<String>();
+//
+//    while (cpString.length() > 0) {
+//      int cpIndex = cpString.indexOf(File.pathSeparatorChar);
+//      if (cpIndex == -1) {  // cpString is a single filepath
+//        classpaths.add(cpString);
+//        return classpaths;  // we could break or set cpString to "" instead
+//      }
+//      else {
+//        if (cpIndex != 0) classpaths.add(cpString.substring(0, cpIndex));  // don't include empty string in classpaths 
+//        cpString = cpString.substring(cpIndex+1);  // removes substring [0:cpIndex)
+//      }
+//    }
+//    return classpaths;
+//  }
+  
+  /** Determines which class files in the built directories are test cases and correspond to open source
+   *  files.  At this point (if no fatal errors are encountered) it informs listeners that junit has started
+   *  (JUnitStarted) and performs the tests. */
   private void junitOpenDefDocs(List<OpenDefinitionsDocument> lod, boolean allTests) {
     // If a test is running, don't start another one.
+    
+//    System.err.println("junitOpenDefDocs(" + lod + "," + allTests + ")");
     
     // Set _testInProgress flag
     synchronized(_testLock) { 
@@ -218,148 +243,173 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     //reset the JUnitErrorModel, fixes bug #907211 "Test Failures Not Cleared Properly".
     _junitErrorModel = new JUnitErrorModel(new JUnitError[0], null, false);
     
-    File builtDir = _model.getBuildDirectory();
-    LinkedList<File> classDirs = new LinkedList<File>();
-    LinkedList<File> sourceFiles = new LinkedList<File>();
+    File buildDir = _model.getBuildDirectory();
+//    System.err.println("Build directory is " + buildDir);
     
-    //Gets system classpaths from the main JVM so that junit tests can find every class file.
-    //Given as one long String, this separates the paths into a list of strings. 3/12/05
-    LinkedList<String> classpaths = new LinkedList<String>();
-    String cpString = getClasspath().toString();
-    int cpLength = cpString.length();
-    if (cpString.indexOf(File.pathSeparatorChar) == -1 && cpLength > 0) classpaths.add(cpString);
-    else {
-      int cpIndex;
-      while ((cpIndex = cpString.indexOf(File.pathSeparatorChar)) != -1 && cpLength != 1) {
-        if (cpIndex == 0) cpString = cpString.substring(1, cpLength);
-        else {
-          classpaths.add(cpString.substring(0, cpIndex));
-          cpString = cpString.substring(cpIndex, cpLength-1);
-          cpLength = cpString.length();
-        }
-      }
-    }
+    /** open java source files */
+    HashSet<String> openDocFiles = new HashSet<String>();
+    /** A map whose keys are directories containing class files corresponding to open java source files.
+     *  Their values are the corresponding source roots. 
+     */
+    HashMap<File, File> classDirsAndRoots = new HashMap<File, File>();
+
+    // Gets system classpaths from the main JVM so that junit tests can find every class file.
+    // Given as one long String, this separates the paths into a list of strings. 3/12/05
+
+//    LinkedList<String> classpaths = separateClasspath(getClasspath().toString());
     
     // new ScrollableDialog(null, "classpaths assembled in junitOpenDefDocs: " + classpaths, "", "").show();
-    //First adds the default document build directory to the class directories.
-    for (OpenDefinitionsDocument doc: lod) {
-      try {
-        String packageName;
+    
+    if (_model.hasOutOfSyncDocuments()) {
+//      System.err.println("Calling compileBeforeJunit");
+      _notifier.compileBeforeJUnit();
+      if (_model.hasOutOfSyncDocuments()) {
+        nonTestCase(true);
+        return;
+      }
+      // We should probably display some form of dialog box saying that testing is being abandoned
+    }
+
+    // Initialize openDocFiles and classDirsAndRoots  
+    
+    for (OpenDefinitionsDocument doc: lod) /* for all nonEmpty documents in lod */ {
+      if (! doc.isUntitled())
+        try {
+        String canonPathName = doc.getFile().getCanonicalPath();
+        // Convert .dji extension to .java
+        if (canonPathName.endsWith(".dj0") || canonPathName.endsWith(".dj1") || canonPathName.endsWith(".dj2")) 
+          canonPathName = canonPathName.substring(0, canonPathName.length() - 4) + ".java";
+        else if (! canonPathName.endsWith(".java")) continue;
+//        System.err.println("Adding " + canonPathName + " to openDocFiles");
+        
+        String packageName = null;
         try { packageName = doc.getPackageName(); }
-        catch(InvalidPackageException e) { packageName = ""; }
+        catch(InvalidPackageException e) { 
+//          System.out.println(doc + " has illegal package name");
+          continue; 
+        }
+        
+        // doc has valid package name; add it to list of open java source doc files
+        openDocFiles.add(canonPathName);
+        
         packageName = packageName.replace('.', File.separatorChar);
         
-        // Keep a record of unique built directories
-        if (builtDir == null) builtDir = doc.getSourceRoot();
-        File temp = new File(builtDir.getCanonicalPath() + File.separator + packageName);
-        if (!classDirs.contains(temp)) classDirs.add(temp);
+        // Add (canonical path name for) build directory for doc to classDirs
+        
+        File sourceRoot = doc.getSourceRoot();
+        File buildRoot = (buildDir == null) ? sourceRoot: buildDir;
+        
+        File classFileDir = new File(buildRoot.getCanonicalPath() + File.separator + packageName);
+        
+        File sourceDir = (buildDir == null) ? classFileDir : new File(sourceRoot.getCanonicalPath() + File.separator + packageName);
+        
+        if (! classDirsAndRoots.containsKey(classFileDir)) {
+          classDirsAndRoots.put(classFileDir, sourceDir);
+//          System.err.println("Adding " + classFileDir + " with source root " + sourceRoot + " to list of class directories");
+        }
       }
       
       catch(IOException e) { /* do nothing b/c the directory doesn't exist */ }
       catch(InvalidPackageException e) { /* do nothing, b/c it's package is bogus */ }
     }
     
+//    System.err.println("classDirs = " + classDirsAndRoots.keySet());
+    
+   
     // new ScrollableDialog(null, "builtDir " + builtDir + " added to classpath", "", "").show();
     // Next, add the JVM class paths to the class directories.
     // Junit will look here if the default build directories don't have the desired classes.
     // TODO: fuse this loop with the preceding one
-    for (OpenDefinitionsDocument doc: lod) {
-      try {
-        String packageName;
-        try { packageName = doc.getPackageName(); }
-        catch(InvalidPackageException e) { packageName = "";}
-        packageName = packageName.replace('.', File.separatorChar);
-        
-        //Add unique classpaths to the list of class directories that junit tests look through. 3/12/05
-        for (String classpath: classpaths) {
-          File temp = new File(new File(classpath).getCanonicalPath());
-          if (temp.isDirectory()) {
-            temp = new File(temp.getCanonicalPath() + File.separator + packageName);
-            if (! classDirs.contains(temp)) classDirs.addLast(temp);
-          }
-        }
-      }
-      catch(IOException e) { /* do nothing b/c the directory doesn't exist */ }
-    }
+    // THIS LOOKS LIKE ABSURD OVERKILL; we already added a build directory for every open document which can either be a build file tree
+    // or in the source directory.  We don't need to look in every Interactions class path root as well!
+
+//    for (OpenDefinitionsDocument doc: lod) {
+//      try {
+//        String packageName;
+//        try { packageName = doc.getPackageName(); }
+//        catch(InvalidPackageException e) { packageName = "";}
+//        packageName = packageName.replace('.', File.separatorChar);
+//        
+//        //Add unique classpaths to the list of class directories that junit tests look through. 3/12/05
+//        for (String classpath: classpaths) {
+//          File temp = new File(new File(classpath).getCanonicalPath());
+//          if (temp.isDirectory()) {
+//            temp = new File(temp.getCanonicalPath() + File.separator + packageName);
+//            classDirs.add(temp);
+//          }
+//        }
+//      }
+//      catch(IOException e) { /* do nothing b/c the directory doesn't exist */ }
+//    }
     
     // new ScrollableDialog(null, "classDirs assembled", "", classDirs.toString()).show();
     
-    ArrayList<File> files = new ArrayList<File>();
-    ArrayList<String> classNames = new ArrayList<String>();
-    HashMap<String, OpenDefinitionsDocument> classNamesToODDs =
-      new HashMap<String, OpenDefinitionsDocument>();
+    /** set of dirs potentially containing test classes */
+    Set<File> classDirs = classDirsAndRoots.keySet();
     
+//    System.err.println("openDocFiles = " + openDocFiles);
+        
+    /* Names of test classes. */
+    ArrayList<String> classNames = new ArrayList<String>();
+    
+    /* Source files corresonding to potential test class files */
+    ArrayList<File> files = new ArrayList<File>();
+    
+    /* Flag indicating if project is open */
+    boolean isProject = _model.isProjectActive();
+
     try {
-      for (File dir: classDirs) { // foreach built directory
+      for (File dir: classDirs) { // foreach class file directory
+//        System.err.println("Examining directory " + dir);
+        
         File[] listing = dir.listFiles();
+        
+//        System.err.println("Directory contains the files: " + Arrays.asList(listing));
         
         if (listing != null) {
           for (File entry : listing) {
-            // for each class file in the built directory
-            if (entry.isFile() && entry.getPath().endsWith(".class")) {
-              try {
-                JavaClass clazz = new ClassParser(entry.getCanonicalPath()).parse();
-                String classname = clazz.getClassName(); // get classname
-                //                System.out.println("looking for file for: " + classname);
-                int indexOfDot = classname.lastIndexOf('.');
-                
-                /** The prefix preceding the unqualified name of the class (either empty or ends with dot). */
-                String prefixString = classname.substring(0, indexOfDot + 1);  
-                /** The prefix as a file system path name. */
-                String prefixPath = prefixString.replace('.', File.separatorChar);
-                /** The pathname (from a classpath root) for the file (including the file name) */
-                String filePath = prefixPath + clazz.getSourceFileName();
-                //                System.out.println("Class file is:  " + filePath);
-                /** The index in filePath of the dot preceding the class extension "class". */
-                int indexOfExtDot = filePath.lastIndexOf('.');
-                if (indexOfExtDot == -1) break;  // RMI stub class files return source file names without extensions
-                /** The (relative) path name for the class. */
-                String pathName = filePath.substring(0, indexOfExtDot);
-                
-                for (OpenDefinitionsDocument doc: lod) {  
-                // Why are searching through all documents here?  We know the path name.
-                  try {
-                    
-                    /** The file for the next document in lod. */
-                    File f = doc.getFile();
-                    
-                    /** The full path name for the class file (without extension) for entr--assuming it has same root as doc. */
-                    String fullPathName = doc.getSourceRoot().getCanonicalPath() + File.separator + pathName;
-                    
-                    /** The full path name for file f (including extension) */
-                    String pathForF = f.getCanonicalPath();
-                    
-                    /** The index of the last dot in the full path name for f (the file for doc). */
-                    int index = pathForF.lastIndexOf('.');
-                    if (index == -1) break; // the file for doc does not have an extension
-                    
-                    String fullPathNameFromDoc = pathForF.substring(0, index);
-                    String ext = pathForF.substring(index, pathForF.length());
-                    // filenameFromDoc now contains the filename minus the extension
-                    
-                    if (fullPathNameFromDoc.equals(fullPathName) && 
-                        (ext.equals(".java") || ext.equals(".dj0") || ext.equals(".dj1")  || ext.equals(".dj2"))) {
-                      if (classNamesToODDs.containsKey(classname)) break;  // class already added to classNames
-                      classNames.add(classname);
-                      files.add(f);
-                      classNamesToODDs.put(classname, doc);
-                      // new ScrollableDialog(null, "Ready to break", classname, f.toString()).show();
-                      break;
-                    }
-                  }
-                  catch(InvalidPackageException e) { /* do nothing */ }
-                  catch(IOException e) { /* do nothing */ }
-                  catch(IllegalStateException e) { /* do nothing; doc is untitled */ }
-                }
-              }
-              catch(IOException e) { 
-           
-              /* can't read class file */ }
-              catch(ClassFormatException e) { 
-              /* class file is bad */ }
-              // match source file to odd (if possible)
-              // if match, add classname to test suite
+            
+            /* for each class file in the build directory */
+//            System.err.println("Examining file " + entry);
+            
+            /* ignore non-class files */
+            String name = entry.getName();
+            if (! name.endsWith(".class")) continue;
+            
+            /* In projects, ignore class names that do not end in "Test") */
+            String noExtName = name.substring(0, name.length() - 6);  // remove ".class" from name
+            int indexOfLastDot = noExtName.lastIndexOf('.');
+            String simpleClassName = noExtName.substring(indexOfLastDot + 1);
+//            System.err.println("Simple class name is " + simpleClassName);
+            if (isProject && ! simpleClassName.endsWith("Test")) continue;
+            
+//            System.err.println("Found test class: " + simpleClassName);
+            
+            /* ignore entries that do not correspond to files?  Can this happen? */
+            if (! entry.isFile()) continue;
+            
+            try {
+              JavaClass clazz = new ClassParser(entry.getCanonicalPath()).parse();
+              String className = clazz.getClassName(); // get classfile name
+//              System.err.println("looking for source file for: " + className);
+              int indexOfDot = className.lastIndexOf('.');
+              
+              /** The absolute pathname for the file (including the file name) */
+              File rootDir = classDirsAndRoots.get(dir);
+              String sourceFileName = rootDir.getCanonicalPath() + File.separator + clazz.getSourceFileName();
+//              System.err.println("Full source fileName = " + sourceFileName);
+              /* The index in fileName of the dot preceding the extension ".java". */
+              int indexOfExtDot = sourceFileName.lastIndexOf('.');
+//              System.err.println("indexOfExtDot = " + indexOfExtDot);
+              if (indexOfExtDot == -1) continue;  // RMI stub class files return source file names without extensions
+//              System.err.println("File found in openDocFiles = "  + openDocFiles.contains(sourceFileName));
+              if (! openDocFiles.contains(sourceFileName)) continue;
+              classNames.add(className);
+              files.add(new File(sourceFileName));
+//              System.err.println("Class " + className + "added to classNames.   File " + sourceFileName + " added to files.");
             }
+            catch(IOException e) { /* ignore it; can't read class file */ }
+            catch(ClassFormatException e) { /* ignore it; class file is bad */ }
           }
         }
       }
@@ -373,6 +423,8 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     }
     
     // synchronized over _compilerModel to ensure that compilation and junit testing are mutually exclusive.
+    // This is the WRONG way to ensure mutually exclusive compilation and testing because it invites deadlock.
+    // Simply disable compile commands while testing.
    
     synchronized(_compilerModel.getSlaveJVMLock()) {
       /** Set up junit test suite on slave JVM; get TestCase classes forming that suite */
@@ -385,12 +437,9 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
         return;
       }
       
-      ArrayList<OpenDefinitionsDocument> odds = new ArrayList<OpenDefinitionsDocument>();
-      for (String name: tests) { odds.add(classNamesToODDs.get(name)); }
-      
       try {
         /** Run the junit test suite that has already been set up on the slave JVM */
-        _notifier.junitStarted(odds); // notify listeners that JUnit testing has finally started!
+        _notifier.junitStarted(); // notify listeners that JUnit testing has finally started!
         //          new ScrollableDialog(null, "junitStarted executed in DefaultJunitModel", "", "").show();
         _jvm.runTestSuite();
         
@@ -419,9 +468,8 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
   
   //---------------------------- Model Callbacks ----------------------------//
   
-  /**
-   * Called from the JUnitTestManager if its given className is not a test case.
-   * @param isTestAll whether or not it was a use of the test all button
+  /** Called from the JUnitTestManager if its given className is not a test case.
+   *  @param isTestAll whether or not it was a use of the test all button
    */
   public void nonTestCase(final boolean isTestAll) {
     // NOTE: junitStarted is called in a different thread from the testing thread.  The _testInProgress flag

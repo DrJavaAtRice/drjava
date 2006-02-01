@@ -153,7 +153,7 @@ public final class KeyStrokeOptionTest extends TestCase
     String[] args = new String[0];
 
     Process process = ExecJVM.
-      runJVMPropogateClassPath(className, args);
+      runJVMPropagateClassPath(className, args);
     int status = process.waitFor();
     assertEquals("Local specific keystroke test failed!",
                  0, status);

@@ -886,91 +886,87 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
    *             package does not match or exist.
    */
   public String getPackageName() throws InvalidPackageException {
-    // throwErrorHuh();
-    // Where we'll build up the package name we find
+    /* Buffer for constructing the package name. */
     StringBuffer buf = new StringBuffer();
     int oldLocation = 0;  // javac requires this bogus initialization
     
     readLock();
     try {
       final String text = getText();
+      final int docLength = text.length();
+      if (docLength == 0) return "";
+      
       // perturbing reduced model, which is reset in finally clause
       synchronized(_reduced) {
         oldLocation = _currentLocation;
-        int firstNormalLocation;
-        
-        setCurrentLocation(0);
-        
-        final int docLength = text.length();
-        // The location of the first non-whitespace character that is not inside a string or comment.
-        firstNormalLocation = 0;
-        while (firstNormalLocation < docLength) {
-          setCurrentLocation(firstNormalLocation);
+        try {
+          setCurrentLocation(0);
           
-          if (_reduced.currentToken().getHighlightState() == HighlightStatus.NORMAL) {
-            // OK, it's normal -- so if it's not whitespace, we found the spot
-            char curChar = text.charAt(firstNormalLocation);
-            if (! Character.isWhitespace(curChar)) break;
+          /* The location of the first non-whitespace character that is not inside a string or comment. */
+          int firstNormalLocation = 0;
+          while (firstNormalLocation < docLength) {
+            setCurrentLocation(firstNormalLocation);
+            
+            if (_reduced.currentToken().getHighlightState() == HighlightStatus.NORMAL) {
+              // OK, it's normal -- so if it's not whitespace, we found the spot
+              char curChar = text.charAt(firstNormalLocation);
+              if (! Character.isWhitespace(curChar)) break;
+            }
+            firstNormalLocation++;
           }
           
-          firstNormalLocation++;
-        }
-        
-        // Now there are two possibilities: firstNormalLocation is at
-        // the first spot of a non-whitespace character that's NORMAL,
-        // or it's at the end of the document.
-        if (firstNormalLocation == docLength) return "";
-        
-        final int strlen = "package".length();
-        
-        final int endLocation = firstNormalLocation + strlen;
-        
-        if ((firstNormalLocation + strlen > docLength) ||
-            ! text.substring(firstNormalLocation, endLocation).equals("package")) {
-          // The first normal text is not "package" or there is not enough text for there to be a package statement.
-          // Thus, there is no valid package statement.
-          return "";
-        }
-        
-        // OK, we must have found a package statement.
-        // Now let's find the semicolon. Again, the semicolon must be free.
-        int afterPackage = firstNormalLocation + strlen;
-        
-        int semicolonLocation = afterPackage;
-        do {
-          semicolonLocation = text.indexOf(";", semicolonLocation + 1);
-          if (semicolonLocation == -1)
+          // Now there are two possibilities: firstNormalLocation is at the first spot of a non-whitespace character 
+          // that's NORMAL, or it's at the end of the document.
+          
+          if (firstNormalLocation == docLength) return "";
+          
+          final int strlen = "package".length();
+          
+          final int endLocation = firstNormalLocation + strlen;
+          
+          if ((firstNormalLocation + strlen > docLength) ||
+              ! text.substring(firstNormalLocation, endLocation).equals("package")) {
+            // The first normal text is not "package" or there is not enough text for there to be a package statement.
+            // Thus, there is no valid package statement.
+            return "";
+          }
+          
+          // OK, we must have found a package statement.
+          // Now let's find the semicolon. Again, the semicolon must be free.
+          int afterPackage = firstNormalLocation + strlen;
+          
+          int semicolonLocation = afterPackage;
+          do {
+            semicolonLocation = text.indexOf(";", semicolonLocation + 1);
+            if (semicolonLocation == -1)
+              throw new InvalidPackageException(firstNormalLocation,
+                                                "No semicolon found to terminate package statement!");
+            setCurrentLocation(semicolonLocation);
+          }
+          while (_reduced.currentToken().getHighlightState() != HighlightStatus.NORMAL);
+          
+          // Now we have semicolon location. We'll gather text in between one character at a time for simplicity. 
+          for (int walk = afterPackage + 1; walk < semicolonLocation; walk++) {
+            setCurrentLocation(walk);
+            if (_reduced.currentToken().getHighlightState() == HighlightStatus.NORMAL) {
+              char curChar = text.charAt(walk);
+              if (! Character.isWhitespace(curChar)) buf.append(curChar);
+            }
+          }
+          
+          String toReturn = buf.toString();
+          if (toReturn.equals(""))
             throw new InvalidPackageException(firstNormalLocation,
-                                              "No semicolon found to terminate package statement!");
-          setCurrentLocation(semicolonLocation);
+                                              "Package name was not specified after the package keyword!");
+          return toReturn;
         }
-        while (_reduced.currentToken().getHighlightState() != HighlightStatus.NORMAL);
-        
-        // Now we have semicolon location. We'll gather text in between one
-        // character at a time for simplicity. It's inefficient (I think?)
-        // but it's easy, and there shouldn't be much text between
-        // "package" and ";" anyhow.
-        for (int walk = afterPackage + 1; walk < semicolonLocation; walk++) {
-          setCurrentLocation(walk);
-          
-          if (_reduced.currentToken().getHighlightState() == HighlightStatus.NORMAL) {
-            char curChar = text.charAt(walk);
-            if (! Character.isWhitespace(curChar)) buf.append(curChar);
-          }
+        finally { // reset oldLocation
+          setCurrentLocation(0);  // Why?
+          setCurrentLocation(oldLocation);
         }
-        
-        String toReturn = buf.toString();
-        if (toReturn.equals(""))
-          throw new InvalidPackageException(firstNormalLocation,
-                                            "Package name was not specified after the package keyword!");
-        return toReturn;
       }
     }
-    finally {
-      setCurrentLocation(0);  // Why?
-      setCurrentLocation(oldLocation);
-      readUnlock();
-    }
+    finally { readUnlock(); }
   }
 
   /** Returns the name of the class or interface enclosing the caret position at the top level.
@@ -1033,11 +1029,11 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
 
   // note: need to update this to work with pos
   public String getNextTopLevelClassName(int startPos, int endPos) throws ClassNameNotFoundException {
-    // Where we'll build up the package name we find
-    int oldLocation = _currentLocation;
-    
+
     readLock();
     synchronized(_reduced) {
+      int oldLocation = _currentLocation;
+      
       try {
         setCurrentLocation(startPos);
         final int textLength = endPos - startPos;
@@ -1084,8 +1080,6 @@ public class DefinitionsDocument extends AbstractDJDocument implements Finalizab
             break;
           }
         }
-        
-        setCurrentLocation(oldLocation);
         return text.substring(index,endIndex);
       }
       catch (BadLocationException ble) { throw new UnexpectedException(ble); }

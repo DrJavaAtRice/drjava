@@ -52,8 +52,7 @@ import junit.framework.*;
  * the proper functionality of the class StringOption.
  * @version $Id$
  */
-public final class StringOptionTest extends TestCase
-{
+public final class StringOptionTest extends TestCase {
   /**
    * @param name The name of this test case.
    */
@@ -61,23 +60,20 @@ public final class StringOptionTest extends TestCase
   
   public void setUp() { }
   
-  public void testGetName()
-  {
+  public void testGetName() {
     StringOption so = new StringOption("classpath",null);
     
     assertEquals("classpath", so.getName());
   }
   
-  public void testParse()
-  {
+  public void testParse() {
     StringOption so = new StringOption("classpath",null);
     
     assertEquals("3", so.parse("3"));
     assertEquals(".:..", so.parse(".:.."));
   }
   
-  public void testFormat()
-  {
+  public void testFormat() {
     StringOption so = new StringOption("classpath",null);
     
     assertEquals("3", so.format("3"));

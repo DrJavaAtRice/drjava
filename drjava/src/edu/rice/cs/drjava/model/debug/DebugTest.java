@@ -407,7 +407,7 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
     InterpretListener interpretListener = new InterpretListener();
     _model.addListener(interpretListener);
     synchronized(_notifierLock) {
-      if ( printMessages ) System.err.println("-------- Resuming --------");
+      if ( printMessages ) System.out.println("-------- Resuming --------");
       _asyncResume();
       _setPendingNotifies(3);  // interactionEnded, interpreterChanged, currThreadDied
                             // here, we get a currThreadDied since it's the last thread
@@ -472,7 +472,7 @@ public final class DebugTest extends DebugTestCase implements OptionConstants {
     InterpretListener interpretListener = new InterpretListener();
     _model.addListener(interpretListener);
     synchronized(_notifierLock) {
-      if ( printMessages ) System.err.println("-------- Resuming --------");
+      if ( printMessages ) System.out.println("-------- Resuming --------");
       _asyncResume();
       _setPendingNotifies(3);  // interactionEnded, interpreterChanged, currThreadDied
                             // here, we get a currThreadDied since it's the last thread

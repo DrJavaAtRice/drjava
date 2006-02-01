@@ -765,11 +765,11 @@ public class MainFrame extends JFrame implements OptionConstants {
       Component c = MainFrame.this.getFocusOwner();
       if (_currentDefPane.hasFocus()) {
         _currentDefPane.endCompoundEdit();
-        CompoundUndoManager undoMan = _model.getActiveDocument().getUndoManager();
-//        int key = undoMan.startCompoundEdit(); //commented out for french keyboard fix
+//        CompoundUndoManager undoMan = _model.getActiveDocument().getUndoManager(); // French keyboard fix
+//        int key = undoMan.startCompoundEdit();                                     // French keyboard fix
         super.actionPerformed(e);
-        _currentDefPane.endCompoundEdit(); // replaced line below for french keyboard fix
-        // undoMan.endCompoundEdit(key); //commented out for french keyboard fix
+        _currentDefPane.endCompoundEdit(); // replaced line below for French keyboard fix
+//        undoMan.endCompoundEdit(key);                                              // French keyboard fix
       }
       else super.actionPerformed(e);
       
@@ -1476,7 +1476,6 @@ public class MainFrame extends JFrame implements OptionConstants {
       catch(IllegalStateException ise) { /* do nothing */ }
       catch(FileMovedException fme) { /* do nothing */ }
       
-      Icon base = _djFileDisplayManager20.getIcon(f);
       if (odd.isModifiedSinceSave()) return makeLayeredIcon(_default.getIcon(f), _star);
       return _default.getIcon(f);
     }
@@ -1746,10 +1745,8 @@ public class MainFrame extends JFrame implements OptionConstants {
     _updateBackgroundColor();
     
     // Add OptionListeners for the colors.
-    config.addOptionListener
-      (DEFINITIONS_NORMAL_COLOR, new NormalColorOptionListener());
-    config.addOptionListener
-      (DEFINITIONS_BACKGROUND_COLOR, new BackgroundColorOptionListener());
+    config.addOptionListener(DEFINITIONS_NORMAL_COLOR, new NormalColorOptionListener());
+    config.addOptionListener(DEFINITIONS_BACKGROUND_COLOR, new BackgroundColorOptionListener());
     
     // Add option listeners for changes to config options
     //  NOTE: We should only add listeners to view-related (or view-dependent)
@@ -1840,6 +1837,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       }
     });
     
+   
     config.addOptionListener(JVM_ARGS, new OptionListener<String>() {
       public void optionChanged(OptionEvent<String> oe) {
         if (!oe.value.equals("")) {
@@ -2299,7 +2297,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     catch(OperationCanceledException oce) {
       /* do nothing, we just won't open anything */
     }
-    catch(Exception e) { e.printStackTrace(System.err); }
+    catch(Exception e) { e.printStackTrace(System.out); }
     finally { hourglassOff(); }    
   }
   
@@ -4897,17 +4895,16 @@ public class MainFrame extends JFrame implements OptionConstants {
   
   /** Sets the current directory to be that of the given file. */
   private void _setCurrentDirectory(File file) {
-    // We want to use absolute paths whenever possible, since canonical paths
-    //  resolve symbolic links and can be quite long and unintuitive.
-    // However, Windows blows up if you set the current directory of a
-    //  JFileChooser to an absolute path with ".." in it.
-    // In that case, we'll use the canonical path for the file chooser.
-    // (Fix for bug 707734)
-    // Extended this to fix "./" and ".\" also (bug 774896)
+    /* We want to use absolute paths whenever possible, since canonical paths resolve symbolic links and can be quite
+     * long and unintuitive.  However, Windows blows up if you set the current directory of a JFileChooser to an 
+     * absolute path with ".." in it.  In that case, we'll use the canonical path for the file chooser. (Fix for 
+     * bug 707734)  Extended this to fix "./" and ".\" also (bug 774896)
+     */
     try {
       file = _getFullFile(file);
       _openChooser.setCurrentDirectory(file);
       _saveChooser.setCurrentDirectory(file);
+//      System.setProperty("user.dir", file.getAbsolutePath());  // Changed system property is ignored by JVM
     }
     catch (IOException ioe) {
       // If getCanonicalFile throws an IOException, we can't set the directory of the file chooser.  Oh well.
@@ -5581,7 +5578,7 @@ public class MainFrame extends JFrame implements OptionConstants {
       });
     }
     
-    public void junitStarted(final List<OpenDefinitionsDocument> docs) {
+    public void junitStarted() {
       /* Note: hourglassOn() is done by various junit commands (other than junitClasses); hourglass must be off for 
        * actual testing; the balancing hourglassOff() is located here and in nonTestCase */
       // Only change GUI from event-dispatching thread
@@ -5591,7 +5588,7 @@ public class MainFrame extends JFrame implements OptionConstants {
           // new ScrollableDialog(null, "Ready for hourglassOn in junitStarted", "", "").show();
           
           try { showTab(_junitErrorPanel);
-            _junitErrorPanel.setJUnitInProgress(docs);
+            _junitErrorPanel.setJUnitInProgress();
             _junitAction.setEnabled(false);
             _junitAllAction.setEnabled(false);
           }
@@ -5823,6 +5820,47 @@ public class MainFrame extends JFrame implements OptionConstants {
       });
     }
     
+    public void compileBeforeJUnit() {
+      Frame parentFrame = JOptionPane.getFrameForComponent(MainFrame.this);  
+      if (parentFrame.isVisible()) { /* invisible when running junit test of this functionality */
+        final BooleanOption option = ALWAYS_COMPILE_BEFORE_JUNIT;
+        Utilities.invokeLater(new Runnable() {  
+          public void run() {
+            if (!DrJava.getConfig().getSetting(option).booleanValue()) {
+              ConfirmCheckBoxDialog dialog =
+                new ConfirmCheckBoxDialog(MainFrame.this,
+                                          "Must Compile All Files to Continue",
+                                          "To unit test all documents, you must first compile all out of sync files.\n" + 
+                                          "Would you like to compile and then test?",
+                                          "Always compile before testing all files");
+              int rc = dialog.show();
+              
+              switch (rc) {
+                case JOptionPane.YES_OPTION:
+                  _compileAll();
+                  // Only remember checkbox if they say yes
+                  if (dialog.getCheckBoxValue())  DrJava.getConfig().setSetting(option, Boolean.TRUE);
+                  break;
+                case JOptionPane.NO_OPTION:
+                case JOptionPane.CANCEL_OPTION:
+                case JOptionPane.CLOSED_OPTION:
+                  // do nothing
+                  break;
+                default:
+                  throw new RuntimeException("Invalid rc from showConfirmDialog: " + rc);
+              }
+            }
+            else {
+//              Utilities.showDebug("calling _compileAll");
+              _compileAll();
+//              Utilities.showDebug("returned from _compileAll");
+            }
+          }
+        });
+      }
+      else _compileAll();  /* automatically compile if running junit test */
+    }
+    
     public void saveBeforeJavadoc() {
       Utilities.invokeLater(new Runnable() {
         public void run() {
@@ -5900,13 +5938,15 @@ public class MainFrame extends JFrame implements OptionConstants {
     
     /** Event that is fired with there is nothing to test.  JUnit is never started. */ 
     public void nonTestCase(boolean isTestAll) {
+//      Utilities.showStackTrace(new UnexpectedException("We should not have called nonTestCase"));
       
       final String message = isTestAll ?
         "There are no open JUnit test cases.  Please make sure that:\n" +
         "  - The documents containing tests have been compiled.\n" +
         "  - They are subclasses of junit.framework.TestCase.\n" +
         "For more information on writing JUnit TestCases, view the\n" +
-        "JUnit chapter in the User Documentation." :
+        "JUnit chapter in the User Documentation."
+        :
         "The current document is not a valid JUnit test case.\n" +
         "Please make sure that:\n" +
         "  - This document has been compiled.\n" +
@@ -5972,9 +6012,7 @@ public class MainFrame extends JFrame implements OptionConstants {
           _junitErrorPanel.reset();
         }});
     }
-    public void currentDirectoryChanged(File dir) {
-      _setCurrentDirectory(dir);
-    }
+    public void currentDirectoryChanged(File dir) { _setCurrentDirectory(dir); }
     
     /** Check if the specified document has been modified. If it has, ask the user if he would like to save it 
      *  and save the document if yes. Also give the user a "cancel" option to cancel doing the operation 
@@ -6016,9 +6054,8 @@ public class MainFrame extends JFrame implements OptionConstants {
           else saved = _save();
           if (doc != lastActive) _model.setActiveDocument(lastActive);  // breaks when "if" clause omitted
           if (! saved) return false;
-          if (doc.isAuxiliaryFile() || (_model.isProjectActive() && doc.isInProjectPath())) {
-            String savedFilename = null;
-            try { savedFilename = doc.getFile().getName(); }
+          if (doc.isAuxiliaryFile() || (_model.isProjectActive() && doc.isInProjectPath())) { // what is this test for?
+            try { doc.getFile().getName(); }
             catch(IllegalStateException ise) { throw new UnexpectedException(ise); }
             catch(FileMovedException fme) { throw new UnexpectedException(fme); }
           }
@@ -6385,9 +6422,7 @@ public class MainFrame extends JFrame implements OptionConstants {
     }
   }
   
-  /**
-   *  The OptionListener for TOOLBAR options
-   */
+  /** The OptionListener for TOOLBAR options */
   private class ToolbarOptionListener implements OptionListener<Boolean> {
     public void optionChanged(OptionEvent<Boolean> oce) {
       _updateToolbarButtons();

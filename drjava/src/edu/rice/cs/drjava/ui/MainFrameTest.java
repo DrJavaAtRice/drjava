@@ -499,7 +499,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
      }
      
      if (! FileOps.deleteDirectory(_tempDir))
-       System.err.println("Couldn't fully delete directory " + _tempDir.getAbsolutePath() + "\nDo it by hand.\n");
+       System.out.println("Couldn't fully delete directory " + _tempDir.getAbsolutePath() + "\nDo it by hand.\n");
    
 //     _log.log("testDancingUIFileOpened completed");
   }
@@ -571,7 +571,7 @@ public final class MainFrameTest extends MultiThreadedTestCase {
     }
     
     if (! FileOps.deleteDirectory(_tempDir)) {
-      System.err.println("Couldn't fully delete directory " + _tempDir.getAbsolutePath() +
+      System.out.println("Couldn't fully delete directory " + _tempDir.getAbsolutePath() +
                          "\nDo it by hand.\n");
     }
 //    _log.log("testDancingUIClosed completed");

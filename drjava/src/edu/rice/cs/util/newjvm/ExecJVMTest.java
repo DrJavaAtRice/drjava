@@ -63,7 +63,7 @@ public class ExecJVMTest extends TestCase {
     // Run new JVM to create the file
     String className = getClass().getName() + "$FileCreator";
     String tempName = tempFile.getAbsolutePath();
-    Process jvm = ExecJVM.runJVMPropogateClassPath(className,
+    Process jvm = ExecJVM.runJVMPropagateClassPath(className,
                                                    new String[] { tempName });
 
     int result = jvm.waitFor();

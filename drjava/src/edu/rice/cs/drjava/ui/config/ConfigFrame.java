@@ -137,8 +137,7 @@ public class ConfigFrame extends JFrame {
     JScrollPane treeScroll = new JScrollPane(_tree);
     JPanel treePanel = new JPanel();
     treePanel.setLayout(new BorderLayout());
-    treeScroll.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(),
-                                                         "Categories"));
+    treeScroll.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Categories"));
     treePanel.add(treeScroll, BorderLayout.CENTER);
     cp.add(treePanel, BorderLayout.WEST);
     cp.add(_mainPanel, BorderLayout.CENTER);
@@ -159,9 +158,7 @@ public class ConfigFrame extends JFrame {
         catch (IOException ioe) {
           // oh well...
         }
-        if (successful) {
-          ConfigFrame.this.setVisible(false);
-        }
+        if (successful) ConfigFrame.this.setVisible(false);
       }
     };
     _okButton = new JButton(okAction);
@@ -169,9 +166,7 @@ public class ConfigFrame extends JFrame {
     Action applyAction = new AbstractAction("Apply") {
       public void actionPerformed(ActionEvent e) {
         // Always save settings
-        try {
-          saveSettings();
-        }
+        try { saveSettings(); }
         catch (IOException ioe) {
         }
       }
@@ -217,16 +212,11 @@ public class ConfigFrame extends JFrame {
     Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
     Dimension frameSize = this.getSize();
 
-    if (frameSize.height > screenSize.height) {
-      frameSize.height = screenSize.height;
-    }
-    if (frameSize.width > screenSize.width) {
-      frameSize.width = screenSize.width;
-    }
+    if (frameSize.height > screenSize.height) frameSize.height = screenSize.height;
+    if (frameSize.width > screenSize.width) frameSize.width = screenSize.width;
 
     this.setSize(frameSize);
-    this.setLocation((screenSize.width - frameSize.width) / 2,
-                     (screenSize.height - frameSize.height) / 2);
+    this.setLocation((screenSize.width - frameSize.width) / 2, (screenSize.height - frameSize.height) / 2);
 //    int width = getWidth() / 4;
 //    System.out.println("width: " + getWidth());
 //    System.out.println("width for divider: " + width);
@@ -234,9 +224,7 @@ public class ConfigFrame extends JFrame {
 //    _mainPanel.setPreferredSize(new Dimension(getWidth() - width,
 //                                              _splitPane.getHeight()));
     addWindowListener(new WindowAdapter() {
-      public void windowClosing(java.awt.event.WindowEvent e) {
-        cancel();
-      }
+      public void windowClosing(java.awt.event.WindowEvent e) { cancel(); }
     });
 
     // Make sure each row is expanded (this is harder than it seems...)
@@ -245,9 +233,8 @@ public class ConfigFrame extends JFrame {
     _tree.expandRow(2);
   }
 
-  /**
-   * Returns the current working directory, or the user's current directory
-   * if none is set. 20040213 Changed default value to user's current directory.
+  /** Returns the current working directory, or the user's current directory
+   *  if none is set. 20040213 Changed default value to user's current directory.
    */
   private File _getWorkDir() {
     File workDir = DrJava.getConfig().getSetting(OptionConstants.WORKING_DIRECTORY);
@@ -260,19 +247,13 @@ public class ConfigFrame extends JFrame {
     return workDir;
   }
 
-  /**
-   * Call the update method to propagate down the tree, parsing input values
-   * into their config options.
-   */
+  /** Call the update method to propagate down the tree, parsing input values into their config options. */
   public boolean apply() {
     // returns false if the update did not succeed
     return _rootNode.update();
   }
 
-  /**
-   * Resets the field of each option in the Preferences window to its actual
-   * stored value.
-   */
+  /** Resets the field of each option in the Preferences window to its actual stored value. */
   public void resetToCurrent() {
     _rootNode.resetToCurrent();
   }
@@ -691,9 +672,7 @@ public class ConfigFrame extends JFrame {
     panel.displayComponents();
   }
 
-  /**
-   *  Adds all of the components for the Prompts panel of the preferences window.
-   */
+  /** Adds all of the components for the Prompts panel of the preferences window. */
   private void _setupNotificationsPanel(ConfigPanel panel) {
     // Quit
     panel.addComponent(new BooleanOptionComponent(OptionConstants.QUIT_PROMPT, "Prompt Before Quit", this,
@@ -728,21 +707,25 @@ public class ConfigFrame extends JFrame {
                                                   "Automatically Save Before Compiling", this,
                                                   "<html>Whether DrJava should automatically save before<br>" +
                                                   "recompiling or ask the user each time.</html>"));
+    
+    panel.addComponent(new BooleanOptionComponent(OptionConstants.ALWAYS_COMPILE_BEFORE_JUNIT, "Automatically Compile Before Testing", this,
+                                                  "<html>Whether DrJava should automatically compile before<br>" +
+                                                  "testing with JUnit or ask the user each time.</html>")); 
+    
+    panel.addComponent(new BooleanOptionComponent(OptionConstants.ALWAYS_SAVE_BEFORE_JAVADOC,
+                                                  "Automatically Save Before Generating Javadoc", this,
+                                                  "<html>Whether DrJava should automatically save before<br>" +
+                                                  "generating Javadoc or ask the user each time.</html>"));
+
 
     // These are very problematic features, and so are disabled for the forseeable future.
 //    panel.addComponent(new BooleanOptionComponent(OptionConstants.ALWAYS_SAVE_BEFORE_RUN, "Automatically Save and Compile Before Running Main Method", this,
 //                                                    "<html>Whether DrJava should automatically save and compile before running<br>" +
 //                                                    "a document's main method, or instead should ask the user each time.</html>"));
-//    panel.addComponent(new BooleanOptionComponent(OptionConstants.ALWAYS_SAVE_BEFORE_JUNIT, "Automatically Save and Compile Before Testing", this,
-//                                                  "<html>Whether DrJava should automatically save and compile before<br>" +
-//                                                  "testing with JUnit or ask the user each time.</html>"));
 //    panel.addComponent(new BooleanOptionComponent(OptionConstants.ALWAYS_SAVE_BEFORE_DEBUG, "Automatically Save and Compile Before Debugging", this,
 //                                                  "<html>Whether DrJava should automatically save and compile before<br>" +
 //                                                  "debugging or ask the user each time.</html>"));
-    panel.addComponent(new BooleanOptionComponent(OptionConstants.ALWAYS_SAVE_BEFORE_JAVADOC,
-                                                  "Automatically Save Before Generating Javadoc", this,
-                                                  "<html>Whether DrJava should automatically save before<br>" +
-                                                  "generating Javadoc or ask the user each time.</html>"));
+    
 
     // Warnings
     panel.addComponent(new BooleanOptionComponent(OptionConstants.WARN_BREAKPOINT_OUT_OF_SYNC,
@@ -851,9 +834,8 @@ public class ConfigFrame extends JFrame {
     }
     private ConfigPanel getPanel() { return _panel; }
 
-    /**
-     * Tells its panel to update, and tells all of its child nodes to update their panels.
-     * @return whether the update succeeded.
+    /** Tells its panel to update, and tells all of its child nodes to update their panels.
+     *  @return whether the update succeeded.
      */
     private boolean update() {
       

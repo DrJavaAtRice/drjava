@@ -45,6 +45,7 @@ import edu.rice.cs.util.text.EditDocumentInterface;
 import edu.rice.cs.util.text.EditDocumentException;
 import edu.rice.cs.util.classloader.ClassFileError;
 import edu.rice.cs.util.UnexpectedException;
+import edu.rice.cs.util.swing.Utilities;
 
 import edu.rice.cs.drjava.DrJava;
 import edu.rice.cs.drjava.model.repl.*;
@@ -74,6 +75,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     InterruptedException {
     //    new ScrollableDialog(null, "Starting JUnit", "", "").show();
     _logJUnitStart();
+//    System.err.println("Starting JUnit");
     doc.startJUnit();
 //    new ScrollableDialog(null, "JUnit Started", "", "").show();
     _waitJUnitDone();
@@ -81,13 +83,17 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
   
   protected void _runJUnit() throws IOException, ClassNotFoundException, InterruptedException {  
     _logJUnitStart();
+//    System.err.println("Starting JUnit");
     _model.getJUnitModel().junitAll();
     _waitJUnitDone();
   }
    
   protected void _waitJUnitDone() throws InterruptedException {
     synchronized(_junitLock) {
-      while (!_junitDone) _junitLock.wait();
+      while (!_junitDone) {
+//        System.err.println("Waiting for JUnit to complete");
+        _junitLock.wait();
+      }
     }
   }
   
@@ -508,7 +514,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     protected int consoleResetCount;
     protected int saveBeforeCompileCount;
     //protected int saveBeforeRunCount;
-    //protected int saveBeforeJUnitCount;
+    protected int compileBeforeJUnitCount;
     protected int saveBeforeJavadocCount;
     //protected int saveBeforeDebugCount;
     protected int nonTestCaseCount;
@@ -553,7 +559,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       interpreterResetFailedCount = 0;
       saveBeforeCompileCount = 0;
       //saveBeforeRunCount = 0;
-      //saveBeforeJUnitCount = 0;
+      compileBeforeJUnitCount = 0;
       saveBeforeJavadocCount = 0;
       //saveBeforeDebugCount = 0;
       nonTestCaseCount = 0;
@@ -760,8 +766,12 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     public void undoableEditHappened() {
       listenerFail("undoableEditHappened fired unexpectedly");
     }
+    
+    public void saveBeforeCompile() {
+      listenerFail("saveBeforeCompile fired unexpectedly");
+    }
 
-    public void junitStarted(List<OpenDefinitionsDocument> doc) {
+    public void junitStarted() {
       listenerFail("junitStarted fired unexpectedly");
     }
 
@@ -846,12 +856,12 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       listenerFail("consoleReset fired unexpectedly");
     }
 
-    public void saveBeforeCompile() {
-      listenerFail("saveBeforeCompile fired unexpectedly");
-    }
-
     public void saveUntitled() {
       listenerFail("saveUntitled fired unexpectedly");
+    }
+    
+    public void compileBeforeJUnit() {
+      compileBeforeJUnitCount++;
     }
 
     public void saveBeforeJavadoc() {
@@ -911,6 +921,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     public CompileShouldSucceedListener(boolean expectReset) { _expectReset = expectReset; }
 
     public void compileStarted() {
+//      Utilities.showDebug("compileStarted called in CSSListener");
       assertCompileStartCount(0);
       assertCompileEndCount(0);
       assertInterpreterResettingCount(0);
@@ -920,6 +931,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     }
 
     public void compileEnded() {
+//      Utilities.showDebug("compileEnded called in CSSListener");
       assertCompileEndCount(0);
       assertCompileStartCount(1);
       assertInterpreterResettingCount(0);
@@ -1004,9 +1016,9 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     }
     public void nonTestCase(boolean isTestAll) {
       nonTestCaseCount++;
-      assertEquals("Non test case heard the wrong value for test current/test all",
-                   _shouldBeTestAll, isTestAll);
+      assertEquals("Non test case heard the wrong value for test current/test all", _shouldBeTestAll, isTestAll);
       synchronized(_junitLock) {
+//        System.err.println("JUnit aborted as nonTestCase");
         _junitDone = true;
         _junitLock.notify();
       }
@@ -1015,35 +1027,33 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
 
   public class JUnitTestListener extends CompileShouldSucceedListener {
     // handle System.out's separately but default to outter class's printMessage value
-    protected boolean printMessages = GlobalModelJUnitTest.printMessages; 
-    public JUnitTestListener() {
-      this(false,false);  // don't reset interactions after compile by default
-    }
-    public JUnitTestListener(boolean shouldResetAfterCompile) { 
-      this(shouldResetAfterCompile,false); 
-    }
+    protected boolean printMessages = true /* GlobalModelJUnitTest.printMessages */;
+    /** Construct JUnitTestListener without resetting interactions */
+    public JUnitTestListener() { this(false,false);  }
+    public JUnitTestListener(boolean shouldResetAfterCompile) {  this(shouldResetAfterCompile, false); }
     public JUnitTestListener(boolean shouldResetAfterCompile, boolean printListenerMessages) {
       super(shouldResetAfterCompile);
       this.printMessages = printListenerMessages;
     }
-    public void junitStarted(List<OpenDefinitionsDocument> odds) {
+    public void junitStarted() {
       if (printMessages) System.out.println("listener.junitStarted");
       junitStartCount++;
     }
     public void junitSuiteStarted(int numTests) {
-      if (printMessages) System.out.println("listener.junitSuiteStarted, numTests="+numTests);
+      if (printMessages) System.out.println("listener.junitSuiteStarted, numTests = "+numTests);
       assertJUnitStartCount(1);
       junitSuiteStartedCount++;
     }
     public void junitTestStarted(String name) {
-      if (printMessages) System.out.println("  listener.junitTestStarted, "+name);
+      if (printMessages) System.out.println("  listener.junitTestStarted, " + name);
       junitTestStartedCount++;
     }
     public void junitTestEnded(String name, boolean wasSuccessful, boolean causedError) {
-      if (printMessages) System.out.println("  listener.junitTestEnded, name="+name+" succ="+wasSuccessful+" err="+causedError);
+      if (printMessages) System.out.println("  listener.junitTestEnded, name = " + name + " succ = " + wasSuccessful + 
+                                            " err = " + causedError);
       junitTestEndedCount++;
-      assertEquals("junitTestEndedCount should be same as junitTestStartedCount",
-                   junitTestEndedCount, junitTestStartedCount);
+      assertEquals("junitTestEndedCount should be same as junitTestStartedCount", junitTestEndedCount, 
+                   junitTestStartedCount);
     }
     public void nonTestCase(boolean isTestAll) {
       if (printMessages) System.out.println("listener.nonTestCase, isTestAll="+isTestAll);
@@ -1066,6 +1076,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
       if (printMessages) System.out.println("junitEnded event!");
       junitEndCount++;
       synchronized(_junitLock) {
+//        System.err.println("JUnit successfully completed");
         _junitDone = true;
         _junitLock.notify();
       }

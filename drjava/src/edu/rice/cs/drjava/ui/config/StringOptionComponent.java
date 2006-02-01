@@ -51,9 +51,8 @@ import edu.rice.cs.drjava.*;
 import java.awt.*;
 
 
-/**
- * Graphical form of a StringOption.
- * @version $Id$
+/** Graphical form of a StringOption.
+ *  @version $Id$
  */
 public class StringOptionComponent extends OptionComponent<String> {
   private JTextField _jtf;
@@ -64,27 +63,22 @@ public class StringOptionComponent extends OptionComponent<String> {
     _jtf.setText(_option.format(DrJava.getConfig().getSetting(_option)));
   }
 
-  /**
-   * Constructor that allows for a tooltip description.
-   */
-  public StringOptionComponent (StringOption opt, String text,
-                                Frame parent, String description) {
+  /** Constructor that allows for a tooltip description. */
+  public StringOptionComponent (StringOption opt, String text, Frame parent, String description) {
     this(opt, text, parent);
     setDescription(description);
   }
 
-  /**
-   * Sets the tooltip description text for this option.
-   * @param description the tooltip text
+  /** Sets the tooltip description text for this option.
+   *  @param description the tooltip text
    */
   public void setDescription(String description) {
     _jtf.setToolTipText(description);
     _label.setToolTipText(description);
   }
 
-  /**
-   * Updates the config object with the new setting.
-   * @return true if the new value is set successfully
+  /** Updates the config object with the new setting.
+   *  @return true if the new value is set successfully
    */
   public boolean updateConfig() {
     String oldValue = DrJava.getConfig().getSetting(_option);
@@ -96,9 +90,7 @@ public class StringOptionComponent extends OptionComponent<String> {
     return true;
   }
 
-  /**
-   * Displays the given value.
-   */
+  /** Displays the given value. */
   public void setValue(String value) {
     _jtf.setText(value);
   }

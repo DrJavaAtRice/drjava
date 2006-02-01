@@ -724,7 +724,6 @@ class FindReplaceDialog extends TabbedPanel {
   private void _updateMachine() {
     if (_caretChanged) {
       OpenDefinitionsDocument doc = _model.getActiveDocument();
-      OpenDefinitionsDocument currentDoc = _defPane.getOpenDefDocument();
       _machine.setDocument(doc);
       if (_machine.getFirstDoc() == null) _machine.setFirstDoc(doc);
       _machine.setStart(_defPane.getCaretPosition());

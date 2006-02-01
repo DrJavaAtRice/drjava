@@ -51,9 +51,8 @@ import java.util.Hashtable;
  */
 public abstract class OptionParser<T> implements ParseStrategy<T> {
     
-    /** 
-     * The logical name of this configurable option (i.e. "indent.size")
-     * public because it's final, and a String is immutable.
+    /** The logical name of this configurable option (i.e. "indent.size") public because it's final, 
+     *  and a String is immutable.
      */
     public final String name;
     private final T defaultValue;
@@ -62,8 +61,7 @@ public abstract class OptionParser<T> implements ParseStrategy<T> {
      * an inner hashtable that maps DefaultOptionMaps to value T's.
      * part of the magic inner workings of this package.
      */
-    final Hashtable<DefaultOptionMap,T> map =
- new Hashtable<DefaultOptionMap,T>();
+    final Hashtable<DefaultOptionMap,T> map = new Hashtable<DefaultOptionMap,T>();
 
     /** 
      * constructor that takes in a name
@@ -106,9 +104,7 @@ public abstract class OptionParser<T> implements ParseStrategy<T> {
      * uses parse() and setOption() so that any changes in parsing will automatically
      * be applied to setString().
      */
-    T setString(DefaultOptionMap om, String val) { 
-      return setOption(om,parse(val));
-    }
+    T setString(DefaultOptionMap om, String val) { return setOption(om,parse(val)); }
     
     /** the accessor for the magic-typed hashtable stunt. */
     T getOption(DefaultOptionMap om) { return map.get(om); }

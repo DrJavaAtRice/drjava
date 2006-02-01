@@ -193,10 +193,7 @@ public class HTMLFrame extends JFrame {
     _mainDocPane.setEditable(false);
     _mainScroll = new BorderlessScrollPane(_mainDocPane);
 
-    _splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
-                                true,
-                                contentsScroll,
-                                _mainScroll);
+    _splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, true, contentsScroll, _mainScroll);
     _splitPane.setDividerLocation(LEFT_PANEL_WIDTH);
     _splitPaneHolder = new JPanel(new GridLayout(1,1));
     _splitPaneHolder.setBorder(new EmptyBorder(0,5,0,5));
@@ -223,8 +220,7 @@ public class HTMLFrame extends JFrame {
     _navPane.add(Box.createHorizontalStrut(3));
     _navPane.setBorder(new EmptyBorder(0,0,0,5));
     JPanel navContainer = new JPanel(new GridLayout(1,1));
-    navContainer.setBorder(new CompoundBorder(new EmptyBorder(5,5,5,5),
-                                              new EtchedBorder()));
+    navContainer.setBorder(new CompoundBorder(new EmptyBorder(5,5,5,5), new EtchedBorder()));
                                               //new BevelBorder(BevelBorder.LOWERED)));
     navContainer.add(_navPane);
     Container cp = getContentPane();
@@ -238,42 +234,30 @@ public class HTMLFrame extends JFrame {
     _hyperlinkListeners.add(_resetListener);
     _mainDocPane.addHyperlinkListener(_resetListener);
 
-    if (baseDir != null) {
-      try {
-        _baseURL = baseDir.toURL();
-      }
+    if (baseDir == null) _baseURL = null;
+    else
+      try { _baseURL = baseDir.toURL(); }
       catch(MalformedURLException ex) {
         throw new UnexpectedException(ex);
       }
-    }
-    else {
-      _baseURL = null;
-    }
 
     // Load contents page
-    if (indexUrl != null) {
+    if (indexUrl == null) _displayContentsError(null);
+    else
       try {
         _contentsDocPane.setPage(indexUrl);
-        if (_baseURL != null) {
-          ((HTMLDocument)_contentsDocPane.getDocument()).setBase(_baseURL);
-        }
+        if (_baseURL != null) ((HTMLDocument)_contentsDocPane.getDocument()).setBase(_baseURL);
       }
       catch (IOException ioe) {
         // Show some error page?
         _displayContentsError(indexUrl, ioe);
       }
-    }
+      
+    if (introUrl == null) _displayMainError(null);
     else {
-      _displayContentsError(indexUrl);
-    }
-
-    if (introUrl != null) {
       _history = new HistoryList(introUrl);
       _displayPage(introUrl);
       _displayPage(introUrl);
-    }
-    else {
-      _displayMainError(introUrl);
     }
 
     // Set all dimensions ----
@@ -282,21 +266,15 @@ public class HTMLFrame extends JFrame {
     Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
     Dimension frameSize = this.getSize();
 
-    if (frameSize.height > screenSize.height) {
-      frameSize.height = screenSize.height;
-    }
-    if (frameSize.width > screenSize.width) {
-      frameSize.width = screenSize.width;
-    }
+    if (frameSize.height > screenSize.height) frameSize.height = screenSize.height;
+    
+    if (frameSize.width > screenSize.width) frameSize.width = screenSize.width;
 
-    this.setSize(frameSize);
-    this.setLocation((screenSize.width - frameSize.width) / 2,
-                     (screenSize.height - frameSize.height) / 2);
+    setSize(frameSize);
+    setLocation((screenSize.width - frameSize.width) / 2, (screenSize.height - frameSize.height) / 2);
   }
 
-  /**
-   * Hides the navigation panel on the left.  Cannot currently be undone.
-   */
+  /** Hides the navigation panel on the left.  Cannot currently be undone. */
   protected void _hideNavigationPane() {
     _splitPaneHolder.remove(_splitPane);
     _splitPaneHolder.add(_mainScroll);
@@ -316,10 +294,8 @@ public class HTMLFrame extends JFrame {
     _splitPane.setDividerLocation(LEFT_PANEL_WIDTH);
   }
 
-  /**
-   * Displays the given URL in the main pane.
-   * changed to private, because of history system.
-   * @param url URL to display
+  /** Displays the given URL in the main pane. Changed to private, because of history system.
+   *  @param url URL to display
    */
   private void _displayPage(URL url) {
     try {
@@ -347,32 +323,23 @@ public class HTMLFrame extends JFrame {
     }
   }
 
-  /**
-   * Prints an error indicating that the HTML file to load in the main pane
-   * could not be found
-   */
+  /** Prints an error indicating that the HTML file to load in the main pane could not be found. */
   private void _displayMainError(URL url) {
     if (!_linkError) {
       _linkError = true;
       _mainDocPane.setText(getErrorText(url));
     }
-    else {
-      _resetMainPane();
-    }
+    else _resetMainPane();
   }
 
-  /**
-   * Prints an error indicating that the HTML file to load in the main pane
-   * could not be found
+  /** Prints an error indicating that the HTML file to load in the main pane could not be found
    */
   private void _displayMainError(URL url, Exception ex) {
     if (!_linkError) {
       _linkError = true;
       _mainDocPane.setText(getErrorText(url) + "\n" + ex);
     }
-    else {
-      _resetMainPane();
-    }
+    else _resetMainPane();
   }
 
   /**
@@ -383,17 +350,12 @@ public class HTMLFrame extends JFrame {
    _contentsDocPane.setText(getErrorText(url));
   }
 
-  /**
-   * Prints an error indicating that the HTML file to load in the contentes pane
-   * could not be found
-   */
+  /** Prints an error indicating that the HTML file to load in the contentes pane could not be found. */
   private void _displayContentsError(URL url, Exception ex) {
     _contentsDocPane.setText(getErrorText(url) + "\n" + ex);
   }
 
-  /**
-   * This method returns the error text to display when something goes wrong
-   */
+  /** This method returns the error text to display when something goes wrong. */
   protected String getErrorText(URL url) {
     return "Could not load the specified URL: " + url;
   }

@@ -38,6 +38,7 @@ import java.io.IOException;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Iterator;
@@ -50,6 +51,7 @@ import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.drjava.model.definitions.InvalidPackageException;
 
 import edu.rice.cs.util.ClasspathVector;
+import edu.rice.cs.util.swing.Utilities;
 
 import edu.rice.cs.javalanglevels.*;
 import edu.rice.cs.javalanglevels.parser.*;
@@ -310,6 +312,8 @@ public class DefaultCompilerModel implements CompilerModel {
   private void _compileFiles(File[] sourceRoots, File[] files, File buildDir) throws IOException {
 
 //    CompilerError[] errors = new CompilerError[0];
+    
+//    Utilities.showDebug("Compiling files: " + Arrays.toString(files) + " to " + buildDir);
       
     Pair<LinkedList<JExprParseException>, LinkedList<Pair<String, JExpressionIF>>> errors;
     LinkedList<JExprParseException> parseExceptions;
@@ -322,18 +326,22 @@ public class DefaultCompilerModel implements CompilerModel {
     ClasspathVector extraClasspath = new ClasspathVector();
     if (_model.getFileGroupingState().isProjectActive()) 
       extraClasspath.addAll(_model.getFileGroupingState().getExtraClasspath());
+//    Utilities.showDebug("extra class path is: " + extraClasspath);
     for (File f : DrJava.getConfig().getSetting(OptionConstants.EXTRA_CLASSPATH)) extraClasspath.add(f);
     
-//    System.out.println("Extra classpath passed to compiler: " + extraClasspath.toString());
+//    Utilities.showDebug("Extra classpath passed to compiler: " + extraClasspath.toString());
     compiler.setExtraClassPath(extraClasspath);
     if (files.length > 0) {
 //      if (DrJava.getConfig().getSetting(OptionConstants.LANGUAGE_LEVEL) == DrJava.ELEMENTARY_LEVEL) {
       LanguageLevelConverter llc = new LanguageLevelConverter(getActiveCompiler().getName());
+//      System.err.println(getActiveCompiler().getName());
       /* Language level files are moved to another file, copied back in augmented form to be compiled.  This
        * compiled version is also copied to another file with the same path with the ".augmented" suffix on the 
        * end.  We have to copy the original back to its original spot so the user doesn't have to do anything funny.
        */
-      errors = llc.convert(files);//, filesToRestore);
+//      Utilities.showDebug("Getting ready to call LL converter on " + Arrays.toString(files));
+      errors = llc.convert(files);
+//      Utilities.showDebug("Conversion complete");
       
       compiler.setWarningsEnabled(true);
       

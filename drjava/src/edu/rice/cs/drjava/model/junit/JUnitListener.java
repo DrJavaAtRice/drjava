@@ -62,20 +62,19 @@ public interface JUnitListener {
   public void nonTestCase(boolean isTestAll);
   
   /** Called when JUnit encounters an illegal class file.
-   *  @param s the canonical path for the offending path\
+   *  @param s the canonical path for the offending path.
    *  @param e the error or exception thrown by loading and resolving f.
    */
   public void classFileError(ClassFileError e);
 
-//  /** Called to demand that all files be saved before running JUnit tests.
-//   *  It is up to the caller of this method to check if the documents have been
-//   *  saved, using IGetDocuments.hasModifiedDocuments().
-//   *
-//   * This is never called currently, but it is commented out in case it is  needed later.*/
-//  public void saveBeforeJUnit();
+  /** Called to demand that all files be in sync before running JUnit tests.
+   *  It is up to the caller of this method to check if the documents are in sync
+   *  using OpenDefinitionsDocument.checkIfClassFileInSync().
+   */
+  public void compileBeforeJUnit();
 
   /** Called after JUnit is started by the GlobalModel. */
-  public void junitStarted(List<OpenDefinitionsDocument> docs);
+  public void junitStarted();
 
   /** Called when testing a specific list of classes given their source files. */
   public void junitClassesStarted();

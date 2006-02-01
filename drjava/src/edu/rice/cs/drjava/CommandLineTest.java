@@ -181,7 +181,7 @@ public final class CommandLineTest extends TestCase {
       nof5.delete();
     }
     catch (IOException e) {
-      System.err.print("createTempFile failed.  This should not happen.");
+      System.out.print("createTempFile failed.  This should not happen.");
       throw new RuntimeException(e.toString());
     }
   }
@@ -377,7 +377,7 @@ public final class CommandLineTest extends TestCase {
     FileOps.writeStringToFile(relativeFile, "package " + funnyName + "; class X { }");
     assertTrue("file exists", relativeFile.exists());
 
-    String path = relativeFile.getPath();
+    String path = relativeFile.getCanonicalPath();
     DrJava.openCommandLineFiles(_mf, new String[] { path });
 
     List<OpenDefinitionsDocument> docs = _mf.getModel().getOpenDefinitionsDocuments();
@@ -387,8 +387,7 @@ public final class CommandLineTest extends TestCase {
 
     assertEquals("OpenDefDoc file is the right one and is canonical", relativeFile.getCanonicalFile(), doc.getFile());
 
-    // The source root should be the current directory (as
-    // a canonical path, of course).
+    // The source root should be the current directory (as a canonical path, of course).
     Utilities.clearEventQueue();
     File root = doc.getSourceRoot();
     Utilities.clearEventQueue();

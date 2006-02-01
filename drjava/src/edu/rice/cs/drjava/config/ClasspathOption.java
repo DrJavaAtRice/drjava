@@ -61,9 +61,8 @@ class ClasspathOption {
     String ps = System.getProperty("path.separator");
     if (ps.length() > 1) {
       // spit out warning if it's more than one character.
-      System.err.println(warning);
-      System.err.println("using '"+ps.charAt(0)+
-                         "' for delimiter.");
+      System.out.println(warning);
+      System.out.println("using '" + ps.charAt(0) + "' for delimiter.");
     }
     FileOption fop = new FileOption("",FileOption.NULL_FILE);
     //String name = "extra.classpath";

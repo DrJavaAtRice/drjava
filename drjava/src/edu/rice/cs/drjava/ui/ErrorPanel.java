@@ -592,7 +592,6 @@ public abstract class ErrorPanel extends TabbedPanel implements OptionConstants 
     /** Selects the given error inside the error list pane. */
     public void selectItem(CompilerError error) {
 //      Utilities.showDebug("selectItem(" + error + ") called");
-      CompilerErrorModel cem = getErrorModel();
       try {
         // Find corresponding index
         int i = _getIndexForError(error);

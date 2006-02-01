@@ -544,9 +544,7 @@ public class FindReplaceMachine {
   private boolean wholeWordFoundAtCurrent(AbstractDocumentInterface doc, int foundOffset) {    
     String docText;
     doc.acquireReadLock();
-    try {
-      docText = doc.getText();
-    }
+    try { docText = doc.getText(); }
     finally {doc.releaseReadLock();}      
     
     Character leftOfMatch = null;
@@ -586,19 +584,7 @@ public class FindReplaceMachine {
    *  @return true if the location should be ignored, false otherwise
    */
   private boolean _shouldIgnore(int foundOffset, AbstractDocumentInterface doc) {
-    try{
-      doc.acquireReadLock();
-      String docText;
-      try{
-        docText = doc.getText(0, foundOffset);
-      }
-      finally{doc.releaseReadLock();}
-    
-      return ((_matchWholeWord && !wholeWordFoundAtCurrent(doc, foundOffset)) || 
-              (_ignoreCommentsAndStrings && 
-               _model.getODDForDocument(doc).getStateAtCurrent() 
-                 != ReducedModelStates.FREE));
-    }
-    catch(BadLocationException e) { throw new UnexpectedException(e); }
+    return (_matchWholeWord && !wholeWordFoundAtCurrent(doc, foundOffset)) || 
+      (_ignoreCommentsAndStrings && _model.getODDForDocument(doc).getStateAtCurrent() != ReducedModelStates.FREE);
   }
 }

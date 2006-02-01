@@ -55,10 +55,9 @@ public final class ExecJVM {
    *
    * @return {@link Process} object corresponding to the executed JVM
    */
-  public static Process runJVM(String mainClass,
-                               String[] classParams,
-                               String[] classPath,
-                               String[] jvmParams) throws IOException {
+  public static Process runJVM(String mainClass, String[] classParams, String[] classPath, String[] jvmParams) 
+    throws IOException {
+    
     StringBuffer buf = new StringBuffer();
     for (int i = 0; i < classPath.length; i++) {
       if (i != 0) buf.append(PATH_SEPARATOR);
@@ -69,8 +68,19 @@ public final class ExecJVM {
     return runJVM(mainClass, classParams, buf.toString(), jvmParams);
   }
 
-  /**
-   * Runs a new JVM.
+  /* REPAIRING working directory behavior for File I/O.
+   * 1.  We need to restart the JVM if path for working directory does not equal system property "user.dir" (which version of getPath ?)
+   * 2.  We need to add a File argument to some or all our calls to runJVM and to invokeSlave.  The corresponding actual parameter is
+   *     DrJava.getConfig().getSetting(OptionConstants.WORKING_DIRECTORY).
+   * 3.  Questions:
+   *     a.  Is running javadoc effected?  What directory should we run this command within?
+   *     b.  What working directory should we use with projects?  (I think it should be a project property that overrides the corresponding 
+   *         IDE property.  If so what should the default value be?  The project root?  I think this means that closing a project resets 
+   *         the working directory.  Hence, we need to reset interactions when we close a project.)  We can punt on what to do for projects 
+   *         in our first cut.
+   */
+  
+  /** Runs a new JVM.
    *
    * @param mainClass Class to run
    * @param classParams Parameters to pass to the main class
@@ -79,10 +89,9 @@ public final class ExecJVM {
    *
    * @return {@link Process} object corresponding to the executed JVM
    */
-  public static Process runJVM(String mainClass,
-                               String[] classParams,
-                               String classPath,
-                               String[] jvmParams) throws IOException {
+  public static Process runJVM(String mainClass, String[] classParams, String classPath, String[] jvmParams) 
+    throws IOException {
+    
     LinkedList<String> args = new LinkedList<String>();
     args.add("-classpath");
     args.add(classPath);
@@ -101,26 +110,21 @@ public final class ExecJVM {
    *
    * @return {@link Process} object corresponding to the executed JVM
    */
-  public static Process runJVMPropogateClassPath(String mainClass,
-                                                 String[] classParams,
-                                                 String[] jvmParams)
+  public static Process runJVMPropagateClassPath(String mainClass, String[] classParams, String[] jvmParams)
     throws IOException {
     String cp = System.getProperty("java.class.path");
     return runJVM(mainClass, classParams, cp, jvmParams);
   }
 
-  /**
-   * Runs a new JVM, propogating the present classpath.
+  /** Runs a new JVM, propogating the present classpath.
    *
-   * @param mainClass Class to run
-   * @param classParams Parameters to pass to the main class
-   *
-   * @return {@link Process} object corresponding to the executed JVM
+   *  @param mainClass Class to run
+   *  @param classParams Parameters to pass to the main class
+   *  @return {@link Process} object corresponding to the executed JVM
    */
-  public static Process runJVMPropogateClassPath(String mainClass,
-                                                 String[] classParams)
+  public static Process runJVMPropagateClassPath(String mainClass, String[] classParams)
     throws IOException {
-    return runJVMPropogateClassPath(mainClass, classParams, new String[0]);
+    return runJVMPropagateClassPath(mainClass, classParams, new String[0]);
   }
 
   /** Creates and runs a new JVM.
@@ -131,9 +135,7 @@ public final class ExecJVM {
    *
    * @return {@link Process} object corresponding to the executed JVM
    */
-  public static Process runJVM(String mainClass,
-                               String[] classParams,
-                               String[] jvmParams) throws IOException {
+  public static Process runJVM(String mainClass, String[] classParams, String[] jvmParams) throws IOException {
     LinkedList<String> args = new LinkedList<String>();
     args.add(_getExecutable());
     _addArray(args, jvmParams);
@@ -200,7 +202,7 @@ public final class ExecJVM {
   public static void printOutput(Process theProc, String msg, String sourceName)
     throws IOException {
     // First, write out our opening message.
-    System.err.println(msg);
+    System.out.println(msg);
 
     LinkedList<String> outLines = new LinkedList<String>();
     LinkedList<String> errLines = new LinkedList<String>();
@@ -211,13 +213,13 @@ public final class ExecJVM {
     String output;
     while (it.hasNext()) {
       output = it.next();
-      System.err.println("    [" +sourceName + " stdout]: " + output);
+      System.out.println("    [" +sourceName + " stdout]: " + output);
     }
 
     it = errLines.iterator();
     while (it.hasNext()) {
       output = it.next();
-      System.err.println("    [" +sourceName + " stderr]: " + output);
+      System.out.println("    [" +sourceName + " stderr]: " + output);
     }
   }
 
@@ -244,19 +246,13 @@ public final class ExecJVM {
    */
   private static String _getExecutable() {
     // this netware thing is based on comments from ant's code
-    if (_isNetware()) {
-      return "java";
-    }
+    if (_isNetware()) return "java";
 
     File executable;
 
     String java_home = System.getProperty("java.home") + "/";
 
-    String[] candidates = {
-      java_home + "../bin/java",
-        java_home + "bin/java",
-        java_home + "java",
-    };
+    String[] candidates = { java_home + "../bin/java", java_home + "bin/java", java_home + "java", };
 
     // search all the candidates to find java
     for (int i = 0; i < candidates.length; i++) {
@@ -265,13 +261,9 @@ public final class ExecJVM {
       // try javaw.exe first for dos, otherwise try java.exe for dos
       if (_isDOS()) {
         executable = new File(current + "w.exe");
-        if (! executable.exists()) {
-          executable = new File(current + ".exe");
-        }
+        if (! executable.exists())  executable = new File(current + ".exe");
       }
-      else {
-        executable = new File(current);
-      }
+      else executable = new File(current);
 
       //System.err.println("checking: " + executable);
 

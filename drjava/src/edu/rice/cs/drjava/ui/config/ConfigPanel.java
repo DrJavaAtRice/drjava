@@ -166,18 +166,14 @@ public class ConfigPanel extends JPanel {
     return true;
   }
 
-  /**
-   * Tells each component to reset its display field to the current value.
-   */
+  /** Tells each component to reset its display field to the current value. */
   public void resetToCurrent() {
     for (int i=0; i < _components.size(); i++) {
       _components.get(i).resetToCurrent();
     }
   }
 
-  /**
-   * Tells each component to reset its value to the component's default.
-   */
+  /** Tells each component to reset its value to the component's default. */
   public void resetToDefault() {
     for (int i=0; i < _components.size(); i++) {
       _components.get(i).resetToDefault();

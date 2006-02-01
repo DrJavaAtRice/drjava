@@ -101,9 +101,14 @@ public class DummyGlobalModelListener implements GlobalModelListener {
   
   /** Called when saving a file whose path contains a '#' symbol. */
   public void filePathContainsPound() { }
+  
+  /** Called to demand that all class file must be in sync before running unit tests. It is up to the caller of this 
+   *  method to check if the documents are out of sync, using OpenDefinitionsDocument.checkIfClassFileInSync().
+   */
+  public void compileBeforeJUnit() { }
 
   /** Called after JUnit is started by the GlobalModel. */
-  public void junitStarted(List<OpenDefinitionsDocument> docs) { }
+  public void junitStarted() { }
   
   /** Called when testing all files. */
   public void junitClassesStarted() {  }

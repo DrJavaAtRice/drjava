@@ -1138,7 +1138,7 @@ public class DefaultGlobalModel extends AbstractGlobalModel {
       for (File f : cp) {
         try { _interactionsModel.addExtraClassPath(f.toURL()); }
         catch(MalformedURLException murle) {
-          System.err.println("File " + f + " in your extra classpath could not be parsed to a URL, maybe it contains un-URL-encodable characters?");
+          System.out.println("File " + f + " in your extra classpath could not be parsed to a URL, maybe it contains un-URL-encodable characters?");
         }
       }
     }

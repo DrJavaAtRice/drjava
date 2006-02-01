@@ -81,9 +81,8 @@ public class DefaultInteractionsModel extends RMIInteractionsModel {
     Boolean allow = DrJava.getConfig().getSetting(OptionConstants.JAVAC_ALLOW_ASSERT);
     _interpreterControl.setAllowAssertions(allow.booleanValue());
     
-    // Add option listeners
-    DrJava.getConfig().addOptionListener(OptionConstants.HISTORY_MAX_SIZE,
-                                         _document.getHistoryOptionListener());
+    // Add option listeners  // WHEN ARE THESE EVER REMOVED?
+    DrJava.getConfig().addOptionListener(OptionConstants.HISTORY_MAX_SIZE, _document.getHistoryOptionListener());
     DrJava.getConfig().addOptionListener(OptionConstants.JAVAC_ALLOW_ASSERT,
                                          new OptionListener<Boolean>() {
       public void optionChanged(OptionEvent<Boolean> oce) {

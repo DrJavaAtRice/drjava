@@ -33,7 +33,7 @@
 
 package edu.rice.cs.drjava.ui;
 import javax.swing.JFrame;
-/** This class is called everytime an uncaught exception propogates to an awt action.
+/** This class is called everytime an uncaught exception propagates to an awt action.
  *  @version $Id$
  */
 public class AWTExceptionHandler {

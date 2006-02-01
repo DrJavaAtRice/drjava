@@ -260,16 +260,13 @@ public interface OptionConstants {
      */
     public static String getDefaultLookAndFeel() {
       if (PlatformFactory.ONLY.isMacPlatform()) return UIManager.getSystemLookAndFeelClassName();
-      else {
-        return UIManager.getCrossPlatformLookAndFeelClassName();
-      }
+      else return UIManager.getCrossPlatformLookAndFeelClassName();
     }
-    /**
-     * Need to ensure that a look-and-feel can be instantiated and is valid.
-     * TODO:  store the LookAndFeel object rather than its classname.
-     *        This would be much nicer, as we could display a useful name,
-     *        and wouldn't have to reinstantiate it when it's installed.
-     * @return the list of availabe look-and-feel classnames
+    /** Need to ensure that a look-and-feel can be instantiated and is valid.
+     *  TODO:  store the LookAndFeel object rather than its classname.
+     *         This would be much nicer, as we could display a useful name,
+     *         and wouldn't have to reinstantiate it when it's installed.
+     *  @return the list of availabe look-and-feel classnames
      */
     public static ArrayList<String> getLookAndFeels() {
       ArrayList<String> lookAndFeels = new ArrayList<String>();
@@ -937,41 +934,29 @@ public interface OptionConstants {
 
   /* ---------- Notifications Options ---------- */
 
-  /**
-   * Whether to prompt when the interactions pane is unexpectedly reset.
-   */
+  /** Whether to prompt when the interactions pane is unexpectedly reset. */
   public static final BooleanOption INTERACTIONS_EXIT_PROMPT =
     new BooleanOption("interactions.exit.prompt", Boolean.TRUE);
 
-  /**
-   * Whether to prompt before quitting DrJava.
-   */
+  /** Whether to prompt before quitting DrJava. */
   public static final BooleanOption QUIT_PROMPT =
     new BooleanOption("quit.prompt", Boolean.TRUE);
 
-  /**
-   * Whether to prompt before resetting the interactions pane.
-   */
+  /** Whether to prompt before resetting the interactions pane. */
   public static final BooleanOption INTERACTIONS_RESET_PROMPT =
     new BooleanOption("interactions.reset.prompt", Boolean.TRUE);
 
-  /**
-   * Whether to prompt to save before compiling.
-   */
+  /** Whether to prompt to save before compiling. */
   public static final BooleanOption ALWAYS_SAVE_BEFORE_COMPILE =
     new BooleanOption("save.before.compile", Boolean.FALSE);
-
-  /**
-   * Whether to prompt to save before running.
-   */
+  
+  /** Whether to prompt to save before running. */
   public static final BooleanOption ALWAYS_SAVE_BEFORE_RUN =
     new BooleanOption("save.before.run", Boolean.FALSE);
 
-  /**
-   * Whether to prompt to save before testing.
-   */
-  public static final BooleanOption ALWAYS_SAVE_BEFORE_JUNIT =
-    new BooleanOption("save.before.junit", Boolean.FALSE);
+  /** Whether to prompt to save before testing. */
+  public static final BooleanOption ALWAYS_COMPILE_BEFORE_JUNIT =
+    new BooleanOption("compile.before.junit", Boolean.FALSE);
 
   /**
    * Whether to prompt to save before compiling.

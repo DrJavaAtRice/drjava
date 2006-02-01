@@ -49,6 +49,7 @@ import java.util.List;
 import edu.rice.cs.drjava.model.EventNotifier;
 import edu.rice.cs.drjava.model.OpenDefinitionsDocument;
 import edu.rice.cs.util.classloader.ClassFileError;
+import edu.rice.cs.util.swing.Utilities;
 
 /**
  * Keeps track of all listeners to a JUnitModel, and has the ability
@@ -84,9 +85,8 @@ import edu.rice.cs.util.classloader.ClassFileError;
  */
 class JUnitEventNotifier extends EventNotifier<JUnitListener> implements JUnitListener {
 
-  /**
-   * Called when trying to test a non-TestCase class.
-   * @param isTestAll whether or not it was a use of the test all button
+  /** Called when trying to test a non-TestCase class.
+   *  @param isTestAll whether or not it was a use of the test all button
    */
   public void nonTestCase(boolean isTestAll) {
     _lock.startRead();
@@ -99,13 +99,19 @@ class JUnitEventNotifier extends EventNotifier<JUnitListener> implements JUnitLi
     try { for (JUnitListener jul : _listeners) { jul.classFileError(e); } }
     finally { _lock.endRead(); }
   }
-
-  /**
-   * Called after junit/junitAll is started by the GlobalModel.
-   */
-  public void junitStarted(List<OpenDefinitionsDocument> docs) {
+  
+ /** Called before junit?? is started by the DefaultJUnitModel. */
+  public void compileBeforeJUnit() {
+//    Utilities.showDebug("compileBeforeJUnit called in JUnitEventNotifier");
     _lock.startRead();
-    try { for (JUnitListener jul : _listeners) { jul.junitStarted(docs); } }
+    try { for (JUnitListener jul : _listeners) { jul.compileBeforeJUnit(); } }
+    finally { _lock.endRead(); }
+  }
+  
+  /** Called after junit/junitAll is started by the GlobalModel. */
+  public void junitStarted() {
+    _lock.startRead();
+    try { for (JUnitListener jul : _listeners) { jul.junitStarted(); } }
     finally { _lock.endRead(); }
   }
 
@@ -116,9 +122,8 @@ class JUnitEventNotifier extends EventNotifier<JUnitListener> implements JUnitLi
     finally { _lock.endRead(); }
   }
 
-  /**
-   * Called to indicate that a suite of tests has started running.
-   * @param numTests The number of tests in the suite to be run.
+  /** Called to indicate that a suite of tests has started running.
+   *  @param numTests The number of tests in the suite to be run.
    */
   public void junitSuiteStarted(int numTests) {
     _lock.startRead();

@@ -148,7 +148,6 @@ public class JUnitPanel extends ErrorPanel {
 
     _errorListPane = new JUnitErrorListPane();
     setErrorListPane(_errorListPane);
-
   }
 
   /** Returns the JUnitErrorListPane that this panel manages. */
@@ -170,12 +169,6 @@ public class JUnitPanel extends ErrorPanel {
     TEST_FAIL_ATTRIBUTES.addAttributes(newSet);
   }
 
-  /** Called when work begins. */
-  public void setJUnitInProgress(List<OpenDefinitionsDocument> odds) {
-    _odds = odds;  // _odds is updated atomically; no interference with _checkSync
-    setJUnitInProgress();
-  }
-  
   /** called when work begins */
   public void setJUnitInProgress() {
     _errorListPane.setJUnitInProgress();
@@ -360,7 +353,7 @@ public class JUnitPanel extends ErrorPanel {
       _warnedOutOfSync = false;
 
       SwingDocument doc = new SwingDocument();
-      _checkSync(doc);
+//      _checkSync(doc);
 
       doc.append(START_JUNIT_MSG, BOLD_ATTRIBUTES);
       setDocument(doc);
@@ -371,7 +364,7 @@ public class JUnitPanel extends ErrorPanel {
     protected void _updateWithErrors() throws BadLocationException {
       //DefaultStyledDocument doc = new DefaultStyledDocument();
       SwingDocument doc = (SwingDocument) getDocument();
-      _checkSync(doc);
+//      _checkSync(doc);
       _updateWithErrors("test", "failed", doc);
     }
 
@@ -458,33 +451,32 @@ public class JUnitPanel extends ErrorPanel {
     /** Updates the list pane with no errors. */
     protected void _updateNoErrors(boolean haveTestsRun) throws BadLocationException {
       //DefaultStyledDocument doc = new DefaultStyledDocument();
-      _checkSync(getDocument());
+//      _checkSync(getDocument());
       _replaceInProgressText(haveTestsRun ? JUNIT_FINISHED_MSG : NO_TESTS_MSG);
 
       selectNothing();
       setCaretPosition(0);
     }
 
-    /**
-     * Checks the document being tested to see if it's in sync. If not,
-     * displays a message in the document in the test output pane.
-     */
-    private void _checkSync(Document doc) {
-      if (_warnedOutOfSync) return;
-      List<OpenDefinitionsDocument> odds = _odds;  // grab current _odds
-      for (OpenDefinitionsDocument odoc: odds) {
-        if (! odoc.checkIfClassFileInSync()) {
-          try {
-            doc.insertString(0, TEST_OUT_OF_SYNC, OUT_OF_SYNC_ATTRIBUTES);
-            _warnedOutOfSync = true;
-            return;
-          }
-          catch (BadLocationException ble) {
-            throw new UnexpectedException(ble);
-          }
-        }
-      }
-    }
+//    /** Checks the document being tested to see if it's in sync. If not,
+//     *  displays a message in the document in the test output pane.
+//     */
+//    private void _checkSync(Document doc) {
+//      if (_warnedOutOfSync) return;
+//      List<OpenDefinitionsDocument> odds = _odds;  // grab current _odds
+//      for (OpenDefinitionsDocument odoc: odds) {
+//        if (! odoc.checkIfClassFileInSync()) {
+//          try {
+//            doc.insertString(0, TEST_OUT_OF_SYNC, OUT_OF_SYNC_ATTRIBUTES);
+//            _warnedOutOfSync = true;
+//            return;
+//          }
+//          catch (BadLocationException ble) {
+//            throw new UnexpectedException(ble);
+//          }
+//        }
+//      }
+//    }
 
     private void _setupStackTraceFrame() {
       //DrJava.consoleOut().println("Stack Trace for Error: \n"+ e.stackTrace());
@@ -524,13 +516,12 @@ public class JUnitPanel extends ErrorPanel {
       _dialog.setLocationRelativeTo(_frame);
     }
 
-    /**
-     * Overrides selectItem in ErrorListPane to update the current _error selected
-     * and enabling the _showStackTraceButton.
+    /** Overrides selectItem in ErrorListPane to update the current _error selected
+     *  and enabling the _showStackTraceButton.
      */
     public void selectItem(CompilerError error) {
       super.selectItem(error);
-      _error = (JUnitError)error;
+      _error = (JUnitError) error;
       _showStackTraceButton.setEnabled(true);
     }
 

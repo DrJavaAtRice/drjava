@@ -471,7 +471,7 @@ public class InterpreterJVM extends AbstractSlaveJVM implements InterpreterJVMRe
    *          interpreter
    */
   public JavaInterpreter getJavaInterpreter(String name) {
-    if (printMessages) System.err.println("Getting interpreter data");
+    if (printMessages) System.out.println("Getting interpreter data");
     InterpreterData interpreterData = getInterpreter(name);
     if (printMessages) System.out.println("Getting interpreter instance");
     Interpreter interpreter = interpreterData.getInterpreter();

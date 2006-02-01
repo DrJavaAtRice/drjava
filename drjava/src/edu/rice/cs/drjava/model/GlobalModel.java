@@ -466,19 +466,13 @@ public interface GlobalModel extends IGetDocuments, ILoadDocuments {
   /** @return the file that points to the current project file. Null if not currently in project view */
   public File getProjectFile();
   
-  /**
-   * Sets the current built directory
-   */
+  /** Sets the current built directory. */
   public void setBuildDirectory(File f);
   
-  /**
-   * @return the directory that the class files should be stored after compilation
-   */
+  /** @return the directory that the class files should be stored after compilation. */
   public File[] getProjectFiles();
 
-  /**
-   * @return the directory that the class files should be stored after compilation
-   */
+  /** @return the directory that the class files should be stored after compilation. */
   public File getBuildDirectory();
 
   /** Sets the main file of the project. */
@@ -495,18 +489,15 @@ public interface GlobalModel extends IGetDocuments, ILoadDocuments {
    */
   public boolean isInProjectPath(OpenDefinitionsDocument doc);
   
-  /**
-   * Notifies the project state that the project has been changed
-   */
+  /** Notifies the project state that the project has been changed. */
   public void setProjectChanged(boolean changed);
   
-  /**
-   * Returns true if the project state has been changed
-   */
+  /** Returns true if the project state has been changed */
   public boolean isProjectChanged();
   
-  /**
-   * cleans the build directory
-   */
+  /** @return true iff no open document is out of sync with its primary class file. */
+  public boolean hasOutOfSyncDocuments();
+  
+  /** Cleans the build directory. */
   public void cleanBuildDirectory() throws FileMovedException, IOException;
 }
