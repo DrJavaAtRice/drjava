@@ -35,6 +35,7 @@ package edu.rice.cs.util.newjvm;
 
 import java.io.*;
 import java.util.*;
+import edu.rice.cs.drjava.config.*;
 
 /** A utility class to allow executing another JVM.
  *  @version $Id$
@@ -94,15 +95,16 @@ public final class ExecJVM {
     
     LinkedList<String> args = new LinkedList<String>();
     args.add("-classpath");
-    args.add(classPath);
+    args.add(edu.rice.cs.util.FileOps.convertToAbsolutePathEntries(classPath));
     _addArray(args, jvmParams);
     String[] jvmWithCP = args.toArray(new String[args.size()]);
 
-    return runJVM(mainClass, classParams, jvmWithCP);
+    return _runJVM(mainClass, classParams, jvmWithCP);
   }
 
   /**
    * Runs a new JVM, propogating the present classpath.
+   * It does change the entries of the current class path to global paths, though.
    *
    * @param mainClass Class to run
    * @param classParams Parameters to pass to the main class
@@ -128,6 +130,8 @@ public final class ExecJVM {
   }
 
   /** Creates and runs a new JVM.
+   * This method is private now because it cannot change the classpath entries to absolute paths,
+   * so it should not be used.
    *
    * @param mainClass Class to run
    * @param classParams Parameters to pass to the main class
@@ -135,7 +139,7 @@ public final class ExecJVM {
    *
    * @return {@link Process} object corresponding to the executed JVM
    */
-  public static Process runJVM(String mainClass, String[] classParams, String[] jvmParams) throws IOException {
+  private static Process _runJVM(String mainClass, String[] classParams, String[] jvmParams) throws IOException {
     LinkedList<String> args = new LinkedList<String>();
     args.add(_getExecutable());
     _addArray(args, jvmParams);
@@ -143,8 +147,17 @@ public final class ExecJVM {
     _addArray(args, classParams);
 
     String[] argArray = args.toArray(new String[args.size()]);
-
-    return Runtime.getRuntime().exec(argArray);
+    
+    // get the working directory setting
+    File workDir = edu.rice.cs.drjava.DrJava.getConfig().getSetting(OptionConstants.WORKING_DIRECTORY);
+    if (workDir != FileOption.NULL_FILE) {
+      // execute in the working directory
+      return Runtime.getRuntime().exec(argArray, null, workDir);
+    }
+    else {
+      // execute without caring about working directory
+      return Runtime.getRuntime().exec(argArray);
+    }
   }
 
   /** Empties BufferedReaders by copying lines into LinkedLists.

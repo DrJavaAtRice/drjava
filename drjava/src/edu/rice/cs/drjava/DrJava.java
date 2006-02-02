@@ -49,6 +49,7 @@ import java.io.*;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.net.MalformedURLException;
+import java.util.StringTokenizer;
 import java.util.jar.JarFile;
 import javax.swing.UIManager;
 import javax.swing.*;
@@ -529,8 +530,9 @@ public class DrJava implements OptionConstants {
 
     //System.out.println("restarting with debugger...");
 
+    // get the path separator and the class path this instance of Drjava was started with
     String pathSep = System.getProperty("path.separator");
-    String classpath = System.getProperty("java.class.path");
+    String classpath = edu.rice.cs.util.FileOps.convertToAbsolutePathEntries(System.getProperty("java.class.path"));
 
     // Class arguments
     String[] classArgs = new String[args.length + 1];

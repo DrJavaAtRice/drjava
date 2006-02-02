@@ -559,4 +559,47 @@ public abstract class FileOps {
       return outputFile;
     }
   }
+  
+  /**
+   * Convert all path entries in a path string to absolute paths.
+   * The delimiter in the path string is the "path.separator" property.
+   * Empty entries are equivalent to "." and will thus get converted to
+   * to the "user.dir" (current directory).
+   * Example:
+   * ".:drjava::/home/foo/junit.jar" with "user.dir" set to "/home/foo/bar" will
+   * get converted to "/home/foo/bar:/home/foo/bar/drjava:/home/foo/bar:/home/foo/junit.jar".
+   * 
+   * @param path path string with entries to convert
+   * @return path string with all entries as absolute paths
+   */
+  public static String convertToAbsolutePathEntries(String path) {
+    String pathSep = System.getProperty("path.separator");
+    
+    // split leaves off trailing empty strings
+    // (see API javadocs: "Trailing empty strings are therefore not included in the resulting array.")
+    // we therefore append one element at the end and later remove it
+    path += pathSep + "x";
+    
+    // now path ends with ":x", so we'll have an additional "x" element in the pathEntries array
+    
+    // split up the path into individual entries, turn all of the entries
+    // into absolute paths, and put the path back together
+    // EXCEPT for the last item in the array, because that's the "x" we added
+    String[] pathEntries = path.split(pathSep);
+    StringBuilder sb = new StringBuilder();
+    for(int i=0; i<pathEntries.length-1; ++i) { // length-1 to ignore the last element
+      File f = new File(pathEntries[i]);
+      sb.append(f.getAbsolutePath());
+      sb.append(pathSep);
+    }
+    String reconstructedPath = sb.toString();
+    
+    // if the reconstructed path is non-empty, then it will have an extra
+    // path separator at the end; take it off
+    if (reconstructedPath.length()!=0) {
+      reconstructedPath = reconstructedPath.substring(0, reconstructedPath.length()-1);
+    }
+    
+    return reconstructedPath;
+  }
 }

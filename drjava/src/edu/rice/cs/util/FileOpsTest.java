@@ -51,6 +51,7 @@ import java.io.*;
 import java.util.LinkedList;
 
 import edu.rice.cs.util.newjvm.ExecJVM;
+import edu.rice.cs.util.FileOps;
 
 /**
  * Test cases for {@link FileOps}.
@@ -365,6 +366,39 @@ public class FileOpsTest extends TestCase {
     // Ok, exit cleanly
     System.exit(0);
   }
-
-
+  
+  public void testConvertToAbsolutePathEntries() {
+    String ud = System.getProperty("user.dir");
+    String f = System.getProperty("file.separator");
+    String p = System.getProperty("path.separator");
+    String expected, actual, input;
+    
+    input = "."+p+"drjava"+p+p+f+"home"+f+"foo"+f+"junit.jar";
+    expected = ud+f+"."+p+ud+f+"drjava"+p+ud+p+(new File(f+"home"+f+"foo"+f+"junit.jar")).getAbsolutePath();
+    actual = FileOps.convertToAbsolutePathEntries(input);
+    assertEquals("testConvertToAbsolutePathEntries for several paths failed, input='"+input+"', expected='"+expected+"', actual='"+actual+"'",
+                 expected,
+                 actual);
+    
+    input = "";
+    expected = ud;
+    actual = FileOps.convertToAbsolutePathEntries(input);
+    assertEquals("testConvertToAbsolutePathEntries for empty path failed, input='"+input+"', expected='"+expected+"', actual='"+actual+"'",
+                 expected,
+                 actual);
+    
+    input = p+p+p+".";
+    expected = ud+p+ud+p+ud+p+ud+f+".";
+    actual = FileOps.convertToAbsolutePathEntries(input);
+    assertEquals("testConvertToAbsolutePathEntries for several empty paths failed, input='"+input+"', expected='"+expected+"', actual='"+actual+"'",
+                 expected,
+                 actual);
+    
+    input = p+p;
+    expected = ud+p+ud+p+ud;
+    actual = FileOps.convertToAbsolutePathEntries(input);
+    assertEquals("testConvertToAbsolutePathEntries for trailing empty paths failed, input='"+input+"', expected='"+expected+"', actual='"+actual+"'",
+                 expected,
+                 actual);
+  }
 }
