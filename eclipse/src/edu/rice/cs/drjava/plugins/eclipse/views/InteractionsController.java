@@ -63,7 +63,7 @@ import edu.rice.cs.drjava.plugins.eclipse.repl.EclipseInteractionsModel;
 import edu.rice.cs.drjava.model.repl.InteractionsListener;
 import edu.rice.cs.drjava.model.repl.InteractionsDocument;
 import edu.rice.cs.drjava.model.repl.InputListener;
-import edu.rice.cs.drjava.model.repl.ConsoleDocument;
+import edu.rice.cs.util.text.ConsoleDocument;
 import edu.rice.cs.util.text.SWTDocumentAdapter;
 import edu.rice.cs.util.text.SWTDocumentAdapter.SWTStyle;
 import edu.rice.cs.util.text.SwingDocument;

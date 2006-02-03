@@ -47,6 +47,8 @@ import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.graphics.Color;
 
 import org.eclipse.swt.events.*;
+import java.awt.print.Pageable;
+import java.awt.print.PrinterException;
 
 /**
  * Provides a toolkit-independent way to interact with an
@@ -57,7 +59,7 @@ import org.eclipse.swt.events.*;
  *
  * @version $Id$
  */
-public class SWTDocumentAdapter implements ConsoleInterface {
+public class SWTDocumentAdapter implements EditDocumentInterface {
 
   // TO DO:
   //  - Test multithreaded support
@@ -81,7 +83,7 @@ public class SWTDocumentAdapter implements ConsoleInterface {
   protected boolean _forceRemove;
 
   /** Any exception that occurred in the most recent (asynchronous) edit. */
-  protected DocumentAdapterException _editException;
+  protected EditDocumentException _editException;
 
   /**
    * Creates a new document adapter for an SWT StyledText.
@@ -166,10 +168,10 @@ public class SWTDocumentAdapter implements ConsoleInterface {
    * @param str String to be inserted
    * @param style Name of the style to use.  Must have been
    * added using addStyle.
-   * @throws DocumentAdapterException if the offset is illegal
+   * @throws EditDocumentException if the offset is illegal
    */
   public void insertText(int offs, String str, String style)
-    throws DocumentAdapterException
+    throws EditDocumentException
   {
     if (_condition.canInsertText(offs)) { //, str, style)) {
       forceInsertText(offs, str, style);
@@ -183,11 +185,11 @@ public class SWTDocumentAdapter implements ConsoleInterface {
    * @param str String to be inserted
    * @param style Name of the style to use.  Must have been
    * added using addStyle.
-   * @throws DocumentAdapterException if the offset is illegal
+   * @throws EditDocumentException if the offset is illegal
    */
   public synchronized void forceInsertText(final int offs, final String str,
                                            final String style)
-    throws DocumentAdapterException
+    throws EditDocumentException
   {
     SWTStyle s = null;
     if (style != null) {
@@ -215,7 +217,7 @@ public class SWTDocumentAdapter implements ConsoleInterface {
           }
         }
         catch (IllegalArgumentException e) {
-          _editException = new DocumentAdapterException(e);
+          _editException = new EditDocumentException(e);
         }
       }
     });
@@ -229,9 +231,9 @@ public class SWTDocumentAdapter implements ConsoleInterface {
    * Removes a portion of the document, if the edit condition allows it.
    * @param offs Offset to start deleting from
    * @param len Number of characters to remove
-   * @throws DocumentAdapterException if the offset or length are illegal
+   * @throws EditDocumentException if the offset or length are illegal
    */
-  public void removeText(int offs, int len) throws DocumentAdapterException {
+  public void removeText(int offs, int len) throws EditDocumentException {
       if (_condition.canRemoveText(offs)) { //, len)) {
       forceRemoveText(offs, len);
     }
@@ -241,10 +243,10 @@ public class SWTDocumentAdapter implements ConsoleInterface {
    * Removes a portion of the document, regardless of the edit condition.
    * @param offs Offset to start deleting from
    * @param len Number of characters to remove
-   * @throws DocumentAdapterException if the offset or length are illegal
+   * @throws EditDocumentException if the offset or length are illegal
    */
   public synchronized void forceRemoveText(final int offs, final int len)
-    throws DocumentAdapterException
+    throws EditDocumentException
   {
     _editException = null;
     _forceRemove = true;
@@ -256,7 +258,7 @@ public class SWTDocumentAdapter implements ConsoleInterface {
           _pane.replaceTextRange(offs, len, "");
         }
         catch (IllegalArgumentException e) {
-          _editException = new DocumentAdapterException(e);
+          _editException = new EditDocumentException(e);
         }
       }
     });
@@ -277,17 +279,29 @@ public class SWTDocumentAdapter implements ConsoleInterface {
    * Returns a portion of the document.
    * @param offs First offset of the desired text
    * @param len Number of characters to return
-   * @throws DocumentAdapterException if the offset or length are illegal
+   * @throws EditDocumentException if the offset or length are illegal
    */
-  public String getDocText(int offs, int len) throws DocumentAdapterException {
+  public String getDocText(int offs, int len) throws EditDocumentException {
     try {
       return _text.getTextRange(offs, len);
     }
     catch (IllegalArgumentException e) {
-      throw new DocumentAdapterException(e);
+      throw new EditDocumentException(e);
     }
   }
+  /** Appends a string to this in the given named style, if the edit condition allows it.
+   *  @param str String to be inserted
+   *  @param style Name of the style to use.  Must have been added using addStyle.
+   *  @throws EditDocumentException if the offset is illegal
+   */
+  public void append(String str, String style) {
+	  	
+	  	int offs = getLength();
+	    forceInsertText(offs, str, style);
+  }
+                                                                                                                        
 
+  
   /**
    * Highlights the given range in the given color.
    * @param offset Offset of first character to highlight
@@ -367,5 +381,24 @@ public class SWTDocumentAdapter implements ConsoleInterface {
 
     /** Swing-style writeUnlock(). */
    public void releaseWriteLock(){ }
+
+   /** Gets the String identifying the default style for this document if one exists; null otherwise. */
+   public String getDefaultStyle() {
+	   	return "NONE";
+   }
+    
+
+   /** Returns the Pageable object for printing.
+    *  @return A Pageable representing this document.
+    */
+   public Pageable getPageable() throws IllegalStateException {
+	   return null;
+   }
+    
+   
+   /** Prints the given console document */
+   public void print() throws PrinterException {
+	   
+   }
 
 }

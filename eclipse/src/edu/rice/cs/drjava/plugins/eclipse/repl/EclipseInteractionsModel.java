@@ -58,6 +58,8 @@ import edu.rice.cs.util.UnexpectedException;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import edu.rice.cs.util.text.ConsoleDocument;
+
 /**
  * Interactions model which can notify GlobalModelListeners on events.
  * @version $Id$
@@ -583,4 +585,11 @@ public class EclipseInteractionsModel extends RMIInteractionsModel {
   public void setOptionArgs(String optionArgString) {
     _interpreterControl.setOptionArgs(optionArgString);
   }
+  
+  /** Gets the console tab document for this interactions model */
+  public ConsoleDocument getConsoleDocument() {
+	  return null;
+  }
+
+  
 }

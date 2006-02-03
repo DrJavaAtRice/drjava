@@ -93,7 +93,7 @@ public class SWTDocumentAdapterTest extends TestCase {
   /**
    * Tests basic interactions with a DocumentAdapter.
    */
-  public void testBasicDocOps() throws DocumentAdapterException {
+  public void testBasicDocOps() throws EditDocumentException {
     _doc.insertText(0, "one", null);
     assertEquals("first doc contents", "one",
                  _doc.getDocText(0, _doc.getLength()));
@@ -108,14 +108,14 @@ public class SWTDocumentAdapterTest extends TestCase {
   }
   
   /**
-   * Tests that a DocumentAdapterException is thrown when it should be.
+   * Tests that a EditDocumentException is thrown when it should be.
    */
   public void testException() {
     try {
       _doc.insertText(5, "test", null);
       fail("should have thrown an exception");
     }
-    catch (DocumentAdapterException e) {
+    catch (EditDocumentException e) {
       // That's what we expect.
     }
   }
@@ -125,7 +125,7 @@ public class SWTDocumentAdapterTest extends TestCase {
    * determines whether certain edits are legal.
    */
   public void testEditCondition() 
-    throws DocumentAdapterException
+    throws EditDocumentException
   {
     DocumentEditCondition c = new DocumentEditCondition() {
       public boolean canInsertText(int offs, String str, String style) {
