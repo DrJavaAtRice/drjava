@@ -237,7 +237,7 @@ public final class JUnitErrorModelTest extends GlobalModelTestCase {
    *  Necessitated by the added code in the .java file associated with the .dj0 file (the import statement added by the
    *  language level compiler)
    */
-  public void xtestLanguageLevelJUnitErrorLine() throws Exception {
+  public void testLanguageLevelJUnitErrorLine() throws Exception {
     
     // ADAM LOOK HERE
     

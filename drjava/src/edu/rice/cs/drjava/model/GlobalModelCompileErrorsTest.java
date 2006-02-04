@@ -139,7 +139,6 @@ public final class GlobalModelCompileErrorsTest extends GlobalModelTestCase {
     doc.saveFile(new FileSelector(file));
     OpenDefinitionsDocument doc2 = setupDocument(BAR_MISSING_SEMI_TEXT);
     final File file2 = new File(bDir, "DrJavaTestBar.java");
-    
     doc2.saveFile(new FileSelector(file2));
 
     _compileDone = false;

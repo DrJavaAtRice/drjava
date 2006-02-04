@@ -133,6 +133,8 @@ public class DefaultCompilerModel implements CompilerModel {
     
     List<OpenDefinitionsDocument> defDocs = _model.getOpenDefinitionsDocuments();
     
+//    System.err.println("Docs to compile: " + defDocs);
+    
     if (isProjActive) {
       // If we're in project mode, filter out only the documents that are in the project and leave 
       // out the external files.
@@ -157,11 +159,12 @@ public class DefaultCompilerModel implements CompilerModel {
   public void compileAll(List<File> sourceRootSet, List<File> filesToCompile) throws IOException {
     
     File buildDir = null;
-    if (_model.getFileGroupingState().isProjectActive()) 
-      buildDir = _model.getFileGroupingState().getBuildDirectory();
+    if (_model.getFileGroupingState().isProjectActive()) buildDir = _model.getFileGroupingState().getBuildDirectory();
     List<OpenDefinitionsDocument> defDocs;
     
     defDocs = _model.getOpenDefinitionsDocuments(); 
+    
+//    System.err.println("Docs to compile: " + defDocs);
     
     // Only compile if all are saved
     if (_hasModifiedFiles(defDocs)) _notifier.saveBeforeCompile();
@@ -175,6 +178,10 @@ public class DefaultCompilerModel implements CompilerModel {
   }
   
   private void _rawCompile(File[] sourceRoots, File[] files, File buildDir) throws IOException {
+    
+//    System.err.println("sourceRoots are: " + Arrays.toString(sourceRoots));
+//    System.err.println("sourceFiles are: " + Arrays.toString(files));
+//    System.err.println("BuildDir is: " + buildDir);
     
     _notifier.compileStarted();
     try {
@@ -321,6 +328,9 @@ public class DefaultCompilerModel implements CompilerModel {
     LinkedList<Pair<String, JExpressionIF>> visitorErrors;
     LinkedList<CompilerError> compilerErrors = new LinkedList<CompilerError>();
     CompilerInterface compiler = CompilerRegistry.ONLY.getActiveCompiler();
+    
+    /* Canonicalize buildDir */
+    if (buildDir != null) buildDir = buildDir.getCanonicalFile();
 
     compiler.setBuildDirectory(buildDir);
     ClasspathVector extraClasspath = new ClasspathVector();

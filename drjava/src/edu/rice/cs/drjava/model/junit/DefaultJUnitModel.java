@@ -102,7 +102,6 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     _junitErrorModel = new JUnitErrorModel(new JUnitError[0], _model, false);
   }
   
-  
   //-------------------------- Listener Management --------------------------//
   
   /** Add a JUnitListener to the model.
@@ -208,24 +207,6 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     }
   }
   
-//  /** Splits a classpath string into an array of filepath strings */
-//  public static LinkedList<String> separateClasspath(String cpString) {  
-//    LinkedList<String> classpaths = new LinkedList<String>();
-//
-//    while (cpString.length() > 0) {
-//      int cpIndex = cpString.indexOf(File.pathSeparatorChar);
-//      if (cpIndex == -1) {  // cpString is a single filepath
-//        classpaths.add(cpString);
-//        return classpaths;  // we could break or set cpString to "" instead
-//      }
-//      else {
-//        if (cpIndex != 0) classpaths.add(cpString.substring(0, cpIndex));  // don't include empty string in classpaths 
-//        cpString = cpString.substring(cpIndex+1);  // removes substring [0:cpIndex)
-//      }
-//    }
-//    return classpaths;
-//  }
-  
   /** Determines which class files in the built directories are test cases and correspond to open source
    *  files.  At this point (if no fatal errors are encountered) it informs listeners that junit has started
    *  (JUnitStarted) and performs the tests. */
@@ -246,8 +227,9 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     File buildDir = _model.getBuildDirectory();
 //    System.err.println("Build directory is " + buildDir);
     
-    /** open java source files */
+    /** Open java source files */
     HashSet<String> openDocFiles = new HashSet<String>();
+    
     /** A map whose keys are directories containing class files corresponding to open java source files.
      *  Their values are the corresponding source roots. 
      */
@@ -276,10 +258,10 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
       if (! doc.isUntitled())
         try {
         String canonPathName = doc.getFile().getCanonicalPath();
-        // Convert .dji extension to .java
-        if (canonPathName.endsWith(".dj0") || canonPathName.endsWith(".dj1") || canonPathName.endsWith(".dj2")) 
-          canonPathName = canonPathName.substring(0, canonPathName.length() - 4) + ".java";
-        else if (! canonPathName.endsWith(".java")) continue;
+        // Ensure that file name ends with ".java" or ".dji" extension to .java
+        if (! (canonPathName.endsWith(".java") || canonPathName.endsWith(".dj0") || canonPathName.endsWith(".dj1") || 
+               canonPathName.endsWith(".dj2"))) 
+              continue;
 //        System.err.println("Adding " + canonPathName + " to openDocFiles");
         
         String packageName = null;
@@ -315,35 +297,6 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
     
 //    System.err.println("classDirs = " + classDirsAndRoots.keySet());
     
-   
-    // new ScrollableDialog(null, "builtDir " + builtDir + " added to classpath", "", "").show();
-    // Next, add the JVM class paths to the class directories.
-    // Junit will look here if the default build directories don't have the desired classes.
-    // TODO: fuse this loop with the preceding one
-    // THIS LOOKS LIKE ABSURD OVERKILL; we already added a build directory for every open document which can either be a build file tree
-    // or in the source directory.  We don't need to look in every Interactions class path root as well!
-
-//    for (OpenDefinitionsDocument doc: lod) {
-//      try {
-//        String packageName;
-//        try { packageName = doc.getPackageName(); }
-//        catch(InvalidPackageException e) { packageName = "";}
-//        packageName = packageName.replace('.', File.separatorChar);
-//        
-//        //Add unique classpaths to the list of class directories that junit tests look through. 3/12/05
-//        for (String classpath: classpaths) {
-//          File temp = new File(new File(classpath).getCanonicalPath());
-//          if (temp.isDirectory()) {
-//            temp = new File(temp.getCanonicalPath() + File.separator + packageName);
-//            classDirs.add(temp);
-//          }
-//        }
-//      }
-//      catch(IOException e) { /* do nothing b/c the directory doesn't exist */ }
-//    }
-    
-    // new ScrollableDialog(null, "classDirs assembled", "", classDirs.toString()).show();
-    
     /** set of dirs potentially containing test classes */
     Set<File> classDirs = classDirsAndRoots.keySet();
     
@@ -367,9 +320,8 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
 //        System.err.println("Directory contains the files: " + Arrays.asList(listing));
         
         if (listing != null) {
-          for (File entry : listing) {
+          for (File entry : listing) { /* for each class file in the build directory */        
             
-            /* for each class file in the build directory */
 //            System.err.println("Examining file " + entry);
             
             /* ignore non-class files */
@@ -396,14 +348,27 @@ public class DefaultJUnitModel implements JUnitModel, JUnitModelCallback {
               
               /** The absolute pathname for the file (including the file name) */
               File rootDir = classDirsAndRoots.get(dir);
-              String sourceFileName = rootDir.getCanonicalPath() + File.separator + clazz.getSourceFileName();
-//              System.err.println("Full source fileName = " + sourceFileName);
-              /* The index in fileName of the dot preceding the extension ".java". */
-              int indexOfExtDot = sourceFileName.lastIndexOf('.');
+              String javaSourceFileName = rootDir.getCanonicalPath() + File.separator + clazz.getSourceFileName();
+//              System.err.println("Full java source fileName = " + javaSourceFileName);
+              
+              /* The index in fileName of the dot preceding the extension ".java", ".dj0*, ".dj1", or ".dj2" */
+              int indexOfExtDot = javaSourceFileName.lastIndexOf('.');
 //              System.err.println("indexOfExtDot = " + indexOfExtDot);
               if (indexOfExtDot == -1) continue;  // RMI stub class files return source file names without extensions
 //              System.err.println("File found in openDocFiles = "  + openDocFiles.contains(sourceFileName));
-              if (! openDocFiles.contains(sourceFileName)) continue;
+              
+              /* Determine if this java source file was generated from a language levels file. */
+              String strippedName = javaSourceFileName.substring(0, indexOfExtDot);
+//              System.err.println("Stripped name = " + strippedName);
+              
+              String sourceFileName;
+              
+              if (openDocFiles.contains(javaSourceFileName)) sourceFileName = javaSourceFileName;
+              else if (openDocFiles.contains(strippedName + ".dj0")) sourceFileName = strippedName + ".dj0";
+              else if (openDocFiles.contains(strippedName + ".dj1")) sourceFileName = strippedName + ".dj1";
+              else if (openDocFiles.contains(strippedName + ".dj2")) sourceFileName = strippedName + ".dj2";
+              else continue; // no matching source file is open
+              
               classNames.add(className);
               files.add(new File(sourceFileName));
 //              System.err.println("Class " + className + "added to classNames.   File " + sourceFileName + " added to files.");

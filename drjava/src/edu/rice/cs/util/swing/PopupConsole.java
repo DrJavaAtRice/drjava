@@ -220,7 +220,7 @@ public class PopupConsole implements Serializable {
       inputAborted = false;
       throw new IllegalStateException("System.in aborted");
     }
-//    _doc.append(input + "\n", _doc.getDefaultStyle());
+    _doc.append("Console Input: " + input + "\n", _doc.getDefaultStyle());
     _console.append(input + "\n", _console.getDefaultStyle());
     return input;
   }

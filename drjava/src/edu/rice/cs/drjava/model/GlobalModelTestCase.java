@@ -748,7 +748,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
     }
     
     public void fileOpened(OpenDefinitionsDocument doc) {
-      listenerFail("fileOpened fired unexpectedly");
+       listenerFail("fileOpened fired unexpectedly");  
     }
 
     public void fileClosed(OpenDefinitionsDocument doc) {

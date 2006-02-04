@@ -1382,8 +1382,7 @@ public class AbstractGlobalModel implements SingleDisplayModel, OptionConstants,
   
   //----------------------- Specified by IGetDocuments -----------------------//
 
-  public OpenDefinitionsDocument getDocumentForFile(File file)
-    throws IOException {
+  public OpenDefinitionsDocument getDocumentForFile(File file) throws IOException {
     // Check if this file is already open
     OpenDefinitionsDocument doc = _getOpenDocument(file);
     if (doc == null) {
