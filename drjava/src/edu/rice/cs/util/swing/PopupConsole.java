@@ -99,17 +99,7 @@ public class PopupConsole implements Serializable {
    *  waiting for input cannot be aborted. */
   private volatile boolean inputAborted = false;
   
-//  /** Creates a generic PopupConsole that belongs to the given component.
-//   *  @param owner The component that owns the dialogs created by the PopupConsole
-//   */
-//  public PopupConsole(Component owner) { this(owner, null, null, null); }
-//  
-//  /** Creates a PopupConsole that belongs to the given component.
-//   *  @param owner The component to which all popup dialogs should belong.
-//   *  @param title The title of the dialog box that pops up
-//   */
-//  public PopupConsole(Component owner, String title) { this(owner, null, null, title); }
-  
+
   /** Creates a PopupConsole that belongs to the given component (typically the interactions pane). The given
    *  text component will be placed in the console dialog box to receive text.
    *  @param owner The component that owns the dialogs created by the PopupConsole
@@ -220,8 +210,8 @@ public class PopupConsole implements Serializable {
       inputAborted = false;
       throw new IllegalStateException("System.in aborted");
     }
-    _doc.append("Console Input: " + input + "\n", _doc.getDefaultStyle());
-    _console.append(input + "\n", _console.getDefaultStyle());
+    _doc.append(input + "\n", _console.SYSTEM_IN_STYLE);
+    _console.append(input + "\n", _console.SYSTEM_IN_STYLE);
     return input;
   }
   

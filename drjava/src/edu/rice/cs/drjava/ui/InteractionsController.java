@@ -230,7 +230,6 @@ public class InteractionsController extends AbstractConsoleController {
     _doc.setBeep(_pane.getBeep());
   }
 
-
   /** Adds actions to the view. */
   protected void _setupView() {
     super._setupView();

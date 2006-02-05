@@ -52,8 +52,6 @@ import static edu.rice.cs.drjava.model.definitions.ColoringView.*;
 
 /** Represents the Interactions Document Adapter. Extends from the Abstract DrJava Document, 
  *  which contains shared code between the interactions and definitions documents.
- * 
- *  TODO: rename this class as InteractionsDJDocument; it is not an adapter!
  */
 public class InteractionsDJDocument extends AbstractDJDocument {
   

@@ -1027,7 +1027,7 @@ public abstract class GlobalModelTestCase extends MultiThreadedTestCase {
 
   public class JUnitTestListener extends CompileShouldSucceedListener {
     // handle System.out's separately but default to outter class's printMessage value
-    protected boolean printMessages = true /* GlobalModelJUnitTest.printMessages */;
+    protected boolean printMessages = GlobalModelJUnitTest.printMessages;
     /** Construct JUnitTestListener without resetting interactions */
     public JUnitTestListener() { this(false,false);  }
     public JUnitTestListener(boolean shouldResetAfterCompile) {  this(shouldResetAfterCompile, false); }

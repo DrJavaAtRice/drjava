@@ -51,9 +51,8 @@ import edu.rice.cs.drjava.*;
 import java.awt.*;
 import java.awt.event.*;
 
-/**
- * Graphical form of a ColorOption.
- * @version $Id$
+/** Graphical form of a ColorOption.
+ *  @version $Id$
  */
 public class ColorOptionComponent extends OptionComponent<Color> {
   private JButton _button;
@@ -63,36 +62,30 @@ public class ColorOptionComponent extends OptionComponent<Color> {
   private boolean _isBackgroundColor;
   private boolean _isBoldText;
   
-  /**
-   * Main constructor for ColorOptionComponent.
-   * @param opt The ColorOption to display
-   * @param text The text to display in the label of the component
-   * @param parent The Frame displaying this component
+  /** Main constructor for ColorOptionComponent.
+   *  @param opt The ColorOption to display
+   *  @param text The text to display in the label of the component
+   *  @param parent The Frame displaying this component
    */
   public ColorOptionComponent (ColorOption opt, String text, Frame parent) {
     this(opt, text, parent, false);
   }
   
-  /**
-   * An alternate constructor, allowing the caller to specify whether
-   * this color is a background color.  If so, the button will display
-   * the color as its background.
+  /** An alternate constructor, allowing the caller to specify whether this color is a background color.  If so, 
+   *  the button will display the color as its background.
    */
-  public ColorOptionComponent(ColorOption opt, String text, Frame parent,
-                              boolean isBackgroundColor) {
+  public ColorOptionComponent(ColorOption opt, String text, Frame parent, boolean isBackgroundColor) {
     this(opt, text, parent, isBackgroundColor, false);
   }
   
-  public ColorOptionComponent(ColorOption opt, String text, Frame parent,
-                              boolean isBackgroundColor, boolean isBoldText) {
+  public ColorOptionComponent(ColorOption opt, String text, Frame parent, boolean isBackgroundColor, boolean isBoldText)
+  {
     super(opt, text, parent);
     _isBackgroundColor = isBackgroundColor;
     _isBoldText = isBoldText;
     _button = new JButton();
     _button.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-        chooseColor();
-      }
+      public void actionPerformed(ActionEvent e) { chooseColor(); }
     });
     _button.setText("...");
     _button.setMaximumSize(new Dimension(10,10));
@@ -131,38 +124,28 @@ public class ColorOptionComponent extends OptionComponent<Color> {
     _updateField(_color);
   }
   
-  /**
-   * Constructor that allows for a tooltip description.
-   */
+  /** Constructor that allows for a tooltip description. */
   public ColorOptionComponent(ColorOption opt, String text,
                               Frame parent, String description) {
     this(opt, text, parent, description, false);
   }
 
-  /**
-   * Constructor that allows for a tooltip description as well as whether
-   * or not this is a background color.
-   */
-  public ColorOptionComponent(ColorOption opt, String text, Frame parent,
-                              String description, boolean isBackgroundColor)
+  /** Constructor that allows for a tooltip description as well as whether or not this is a background color. */
+  public ColorOptionComponent(ColorOption opt, String text, Frame parent, String description, boolean isBackgroundColor)
   {
     this(opt, text, parent, isBackgroundColor);
     setDescription(description);
   }
 
-  /**
-   * Constructor that allows for a tooltip description as well as whether
-   * or not this is a background color.
-   */
-  public ColorOptionComponent(ColorOption opt, String text, Frame parent, String description,
-                              boolean isBackgroundColor, boolean isBoldText) {
+  /** Constructor that allows for a tooltip description as well as whether or not this is a background color.*/
+  public ColorOptionComponent(ColorOption opt, String text, Frame parent, String description, boolean isBackgroundColor, 
+                              boolean isBoldText) {
     this(opt, text, parent, isBackgroundColor, isBoldText);
     setDescription(description);
   }
 
-  /**
-   * Sets the tooltip description text for this option.
-   * @param description the tooltip text
+  /** Sets the tooltip description text for this option.
+   *  @param description the tooltip text
    */
   public void setDescription(String description) {
     _panel.setToolTipText(description);
@@ -171,9 +154,8 @@ public class ColorOptionComponent extends OptionComponent<Color> {
     _label.setToolTipText(description);
   }
     
-  /**
-   * Updates the config object with the new setting.
-   * @return true if the new value is set successfully
+  /** Updates the config object with the new setting.
+   *  @return true if the new value is set successfully
    */
   public boolean updateConfig() {
     if (!_color.equals(DrJava.getConfig().getSetting(_option))) {
@@ -184,17 +166,13 @@ public class ColorOptionComponent extends OptionComponent<Color> {
   }
   
    
-  /**
-   * Displays the given value.
-   */
+  /** Displays the given value. */
   public void setValue(Color value) {
     _color = value;
     _updateField(value);
   }
   
-  /**
-   * Updates the component's field to display the given color.
-   */
+  /** Updates the component's field to display the given color. */
   private void _updateField(Color c) {
     if (_isBackgroundColor) {
       _colorField.setBackground(c);
@@ -210,13 +188,9 @@ public class ColorOptionComponent extends OptionComponent<Color> {
    */
   public JComponent getComponent() { return _panel; }
   
-  /**
-   * Shows a color chooser dialog for picking a new color.
-   */
+  /** Shows a color chooser dialog for picking a new color. */
   public void chooseColor() {
-    Color c = JColorChooser.showDialog(_parent,
-                                       "Choose '" + getLabelText() + "'",
-                                       _color);
+    Color c = JColorChooser.showDialog(_parent, "Choose '" + getLabelText() + "'", _color);
     if (c != null) {
       _color = c;
       _updateField(_color);

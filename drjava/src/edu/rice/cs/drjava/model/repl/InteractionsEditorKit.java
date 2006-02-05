@@ -51,10 +51,8 @@ import javax.swing.text.*;
 
 
 /**
- * This is an editor kit for editing Java source files.
- * It functions as the controller in the MVC arrangement.
- * It implements a factory for new documents, and it also
- * has a factory for Views (the things that render the document).
+ * This is an editor kit for editing Java source files. It functions as the controller in the MVC arrangement.
+ * It implements a factory for new documents, and it also has a factory for Views (the things that render the document).
  * @version $Id$
  */
 public class InteractionsEditorKit extends StyledEditorKit {
@@ -74,21 +72,13 @@ public class InteractionsEditorKit extends StyledEditorKit {
     }
   };
 
-  /**
-   * Get the MIME content type of the document.
-   * @return "text/java"
+  /** Get the MIME content type of the document.
+   *  @return "text/java"
    */
-  public String getContentType() {
-    return "text/java";
-  }
+  public String getContentType() { return "text/java"; }
 
-  /**
-   * We want to use our ColoringView to render text, so here we return
-   * a factory that creates ColoringViews.
-   */
-  public final ViewFactory getViewFactory() {
-    return _factory;
-  }
+  /** We want to use our ColoringView to render text, so here we return a factory that creates ColoringViews. */
+  public final ViewFactory getViewFactory() { return _factory; }
 }
 
 

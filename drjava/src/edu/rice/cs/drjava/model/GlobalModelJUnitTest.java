@@ -63,7 +63,7 @@ import edu.rice.cs.drjava.model.junit.*;
  */
 public final class GlobalModelJUnitTest extends GlobalModelTestCase {
   /** Whether or not to print debugging output. */
-  static final boolean printMessages = true;
+  static final boolean printMessages = false;
   
   private static final String ELSPETH_ERROR_TEXT = 
     "import junit.framework.TestCase;" +

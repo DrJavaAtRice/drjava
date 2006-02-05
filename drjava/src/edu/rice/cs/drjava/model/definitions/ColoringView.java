@@ -140,36 +140,32 @@ public class ColoringView extends PlainView implements OptionConstants {
       });
     }
   }
-  
 
-  /**
-   * Renders the given range in the model as normal unselected
-   * text.
-   * Note that this is text that's all on one line. The superclass deals
-   * with breaking lines and such. So all we have to do here is draw the
-   * text on [p0,p1) in the model. We have to start drawing at (x,y), and
-   * the function returns the x coordinate when we're done.
+  /** Renders the given range in the model as normal unselected text.
+   *  Note that this is text that's all on one line. The superclass deals
+   *  with breaking lines and such. So all we have to do here is draw the
+   *  text on [p0,p1) in the model. We have to start drawing at (x,y), and
+   *  the function returns the x coordinate when we're done.
    *
-   * @param g the graphics context
-   * @param x the starting X coordinate
-   * @param y the starting Y coordinate
-   * @param p0 the beginning position in the model
-   * @param p1 the ending position in the model
-   * @return the x coordinate at the end of the range
-   * @throws BadLocationException if the range is invalid
+   *  @param g the graphics context
+   *  @param x the starting X coordinate
+   *  @param y the starting Y coordinate
+   *  @param p0 the beginning position in the model
+   *  @param p1 the ending position in the model
+   *  @return the x coordinate at the end of the range
+   *  @throws BadLocationException if the range is invalid
    */
   protected int drawUnselectedText(Graphics g, int x, int y, int p0, int p1) throws BadLocationException {
         
-    // Might be a PlainDocument (when DefPane is first constructed).
+    // Might be a PlainDocument (when AbstractDJPane is first constructed).
     //   See comments for DefinitionsEditorKit.createNewDocument() for details.
     Document doc = getDocument();
     AbstractDJDocument _doc = null;
     if (doc instanceof AbstractDJDocument) _doc = (AbstractDJDocument) doc;
-    else return x; // return if there is no definitions document
+    else return x; // return if there is no AbstracDJDocument
     
     // If there's nothing to show, don't do anything!
-    // For some reason I don't understand we tend to get called sometimes
-    // to render a zero-length area.
+    // For some reason I don't understand we tend to get called sometimes to render a zero-length area.
     if (p0 == p1) return  x;
 
     Vector<HighlightStatus> stats = _doc.getHighlightStatus(p0, p1);
@@ -180,9 +176,8 @@ public class ColoringView extends PlainView implements OptionConstants {
       int length = stat.getLength();
       int location = stat.getLocation();
       // If this highlight status extends past p1, end at p1
-      if (location + length > p1) {
-        length = p1 - stat.getLocation();
-      }
+      if (location + length > p1) length = p1 - stat.getLocation();
+      
       Segment text = getLineBuffer();
       
       if (!(_doc instanceof InteractionsDJDocument) || !((InteractionsDJDocument)_doc).setColoring((p0+p1)/2,g))      
@@ -211,23 +206,20 @@ public class ColoringView extends PlainView implements OptionConstants {
    * @return the location of the end of the image (range)
    * @exception BadLocationException
    */
-  protected int drawSelectedText(Graphics g, int x, int y, int p0, int p1)
-    throws BadLocationException {
+  protected int drawSelectedText(Graphics g, int x, int y, int p0, int p1) throws BadLocationException {
     /*
      DrJava.consoleErr().println("drawSelected: " + p0 + "-" + p1 +
      " doclen=" + _doc.getLength() +" x="+x+" y="+y);
      */
     Document doc = getDocument();
-    if (doc instanceof InteractionsDJDocument)
-      ((InteractionsDJDocument)doc).setBoldFonts(p1,g);
+    if (doc instanceof InteractionsDJDocument) ((InteractionsDJDocument)doc).setBoldFonts(p1,g);
     
     return  super.drawSelectedText(g, x, y, p0, p1);
   }
 
-  /**
-   * Given a particular state, assign it a color.
-   * @param g Graphics object
-   * @param state a given state
+  /** Given a particular state, assign it a color.
+   *  @param g Graphics object
+   *  @param state a given state
    */
   private void setFormattingForState(Graphics g, int state) {
     switch (state) {
@@ -258,11 +250,10 @@ public class ColoringView extends PlainView implements OptionConstants {
     g.setFont(MAIN_FONT);
   }
 
-  /**
-   * Called when a change occurs.
-   * @param changes document changes
-   * @param a a Shape
-   * @param f a ViewFactory
+  /** Called when a change occurs.
+   *  @param changes document changes
+   *  @param a a Shape
+   *  @param f a ViewFactory
    */
   public void changedUpdate(DocumentEvent changes, Shape a, ViewFactory f) {
     super.changedUpdate(changes, a, f);
@@ -271,9 +262,7 @@ public class ColoringView extends PlainView implements OptionConstants {
     if (c != null) c.repaint();
   }
 
-  /**
-   * Called when an OptionListener perceives a change in any of the colors
-   */
+  /** Called when an OptionListener perceives a change in any of the colors */
   public void updateColors() {
 
     COMMENTED_COLOR = DrJava.getConfig().getSetting(DEFINITIONS_COMMENT_COLOR);
@@ -290,28 +279,18 @@ public class ColoringView extends PlainView implements OptionConstants {
     ERROR_COLOR = DrJava.getConfig().getSetting(INTERACTIONS_ERROR_COLOR);
     DEBUGGER_COLOR = DrJava.getConfig().getSetting(DEBUG_MESSAGE_COLOR);
 
-    //Avoid the ColoringView that does not have a container.
-    if ( getContainer() != null) {
-      getContainer().repaint();
-    }
-
+    // Avoid the ColoringView that does not have a container.
+    if ( getContainer() != null) getContainer().repaint();
   }
 
-  /**
-   * The OptionListeners for DEFINITIONS COLORs
-   */
+  /** The OptionListeners for DEFINITIONS COLORs */
   private class ColorOptionListener implements OptionListener<Color> {
-
-    public void optionChanged(OptionEvent<Color> oce) {
-      updateColors();
-    }
+    public void optionChanged(OptionEvent<Color> oce) { updateColors(); }
   }
   
   private static class FontOptionListener implements OptionListener<Font> {
-    
     public void optionChanged(OptionEvent<Font> oce) {
       MAIN_FONT = DrJava.getConfig().getSetting(FONT_MAIN);
     }
   }
-
 }
